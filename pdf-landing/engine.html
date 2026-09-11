@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem('kpdf-theme');if(t)d.setAttribute('data-theme',t);if(t&&{dark:1,light:1,hc:1}[t]){var v=localStorage.getItem('kpdf-av');if(v){var s=v.split('|');d.style.setProperty('--accent',s[0]);d.style.setProperty('--btn',s[1]);}}}catch(e){}})();</script>
+<link rel="preload" href="killerfont.woff2" as="font" type="font/woff2" crossorigin>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="darkreader-lock">
+<title>The KillerPDF.Engine | PDF 2.0 library and developer guide</title>
+<link rel="canonical" href="https://killerpdf.net/engine.html">
+<meta name="description" content="The KillerPDF.Engine is an independent .NET library for reading, authoring, editing, validating, signing, encrypting and writing PDF 2.0 files.">
+<link rel="icon" type="image/x-icon" href="kp-icon.ico">
+<script defer src="https://koya.thekiller.net/script.js" data-website-id="4036b11d-f6c0-4254-b448-933d3e38b0cb"></script>
+<link rel="stylesheet" href="kp.css?v=22">
+<style>
+.page-hero{padding:42px 26px 20px}.engine-brand{display:flex;align-items:center;gap:clamp(14px,2.2vw,24px)}.engine-mark{display:block;width:clamp(82px,11vw,116px);height:auto;flex:0 0 auto;filter:drop-shadow(0 4px 7px rgba(0,0,0,.45))}.engine-title{display:flex;align-items:center;flex-wrap:wrap;gap:clamp(7px,1.3vw,15px);font-family:'TypewriterHead','Courier New',monospace;font-size:clamp(34px,5.3vw,58px);line-height:1;color:var(--text);text-shadow:0 2px 2px rgba(0,0,0,.4),0 5px 12px rgba(0,0,0,.3)}.engine-title img{display:block;width:clamp(220px,34vw,395px);height:auto;filter:drop-shadow(0 3px 5px rgba(0,0,0,.45))}.engine-title .suffix{margin-left:clamp(-8px,-.5vw,-3px)}.nuget-install{display:flex;align-items:center;gap:10px;margin:12px 0 8px}.nuget-install a{font-weight:700}
+.page-hero .eyebrow{font-family:'TypewriterHead','Courier New',monospace;font-size:13px;letter-spacing:1.4px;text-transform:uppercase;color:var(--accent);margin-bottom:12px}.page-hero p{max-width:760px;color:var(--text2);font-size:16px;line-height:1.65}.content-inner{max-width:980px;margin:0 auto;padding:0 30px 22px}.engine-sec{scroll-margin-top:82px;margin:0 0 34px}.engine-sec:last-child{margin-bottom:0}.engine-sec h2{font-family:'TypewriterHead','Courier New',monospace;font-size:27px;font-weight:normal;letter-spacing:.4px;margin:6px 0 10px;text-shadow:0 2px 6px rgba(0,0,0,.38)}.engine-sec h3,.cap h3,.boundary strong{font-family:'TypewriterHead','Courier New',monospace;font-weight:normal;letter-spacing:.35px}.engine-sec h3{font-size:17px;color:var(--accent);margin-top:22px}.lede{font-size:17px;color:var(--text2)}
+.metric-grid,.cap-grid{display:grid;gap:10px;margin:18px 0}.metric-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.cap-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.metric,.cap{background:var(--modal);border:1px solid var(--pane-border);border-radius:9px;padding:14px 16px;box-shadow:0 5px 12px rgba(0,0,0,.18)}.cap{transition:transform .12s,box-shadow .12s,border-color .12s}.cap:hover{transform:translateY(-3px);box-shadow:0 14px 28px rgba(0,0,0,.4);border-right-color:var(--dragline);border-bottom-color:var(--dragline);border-left-color:var(--dragline);border-top-color:var(--accent)}.metric b{display:block;color:var(--accent);font:700 25px "Courier New",monospace}.metric span{font-size:12px;color:var(--muted)}.cap h3{margin:0 0 6px;font-size:15px}.cap p{margin:0;font-size:13px;color:var(--text2);line-height:1.55}
+.callout{border:1px solid color-mix(in srgb,var(--accent) 48%,var(--pane-border));background:color-mix(in srgb,var(--accent) 7%,var(--modal));border-radius:9px;padding:14px 16px;margin:16px 0}.callout strong{color:var(--accent)}
+.boundary{display:grid;grid-template-columns:1fr auto 1fr;align-items:stretch;gap:10px;margin:18px 0}.boundary>div{background:var(--modal);border:1px solid var(--pane-border);border-radius:9px;padding:15px}.boundary .arrow{display:flex;align-items:center;color:var(--accent);font-size:24px;background:none;border:0;padding:0}.boundary ul{margin:8px 0 0;padding-left:18px}.boundary li{margin:5px 0;font-size:13px;color:var(--text2)}
+.workflow{list-style:none;counter-reset:workflow;margin:16px 0 14px;padding:0;display:grid;gap:7px}.workflow li{counter-increment:workflow;display:grid;grid-template-columns:28px 1fr;align-items:start;gap:10px;padding:9px 12px;background:color-mix(in srgb,var(--modal) 72%,transparent);border:1px solid var(--pane-border);border-radius:7px;line-height:1.5}.workflow li::before{content:counter(workflow);display:flex;align-items:center;justify-content:center;width:24px;height:24px;border:1px solid var(--accent);border-radius:50%;color:var(--accent);font:12px 'TypewriterHead','Courier New',monospace}.source-links{list-style:none;margin:12px 0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.source-links li{margin:0}.source-links a{display:block;padding:8px 11px;border:1px solid var(--pane-border);border-radius:7px;background:color-mix(in srgb,var(--modal) 65%,transparent)}
+.outline{padding:8px 0;overflow-y:auto;flex:1;min-height:0}.outline a{display:block;padding:8px 16px 8px 18px;font-size:13px;color:var(--text2);border-left:2px solid transparent}.outline a:hover{color:var(--text);background:color-mix(in srgb,var(--accent) 8%,transparent);filter:none}.outline a.on{color:var(--accent-text);border-left-color:var(--accent);background:var(--accent)}.outline a.sub{padding-left:31px;font-size:12px;opacity:.84}.sb-tabs .on{border-bottom:0}.ol-head{display:flex;align-items:stretch}.ol-head>a{flex:1 1 auto;min-width:0}.ol-chev{flex:0 0 27px;padding:0;margin:0;border:0;background:none;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center}.ol-chev:hover{color:var(--accent)}.ol-chev svg{transition:transform .15s ease}.ol-group.open .ol-chev svg{transform:rotate(90deg)}.ol-subs{display:none}.ol-group.open .ol-subs{display:block}
+@media(min-width:901px){.shell{grid-template-columns:250px 1fr}.content{margin:8px 8px 0 2px}}@media(max-width:900px){.outline{display:flex;flex-wrap:wrap;gap:4px;padding:8px}.outline a,.outline a.sub{border-left:0;border-radius:5px;padding:6px 10px}.ol-subs,.ol-chev{display:none}.ol-head{display:block}.metric-grid{grid-template-columns:repeat(2,1fr)}.boundary{grid-template-columns:1fr}.boundary .arrow{display:none}}@media(max-width:600px){.engine-brand{align-items:flex-start}.engine-mark{width:72px}.cap-grid,.metric-grid,.source-links{grid-template-columns:1fr}.content-inner{padding:0 18px 16px}}
+</style>
+</head>
+<body>
+<div class="topbar">
+<a href="index.html" class="tb-home" title="KillerPDF home"><img class="tb-icon" src="kp-icon.png" alt="KillerPDF" width="44" height="44"><img class="wm-logo tb-wm" src="brand/killerpdf-logo-dark-green.svg" alt="KillerPDF"></a>
+<a class="tb-dl" href="https://github.com/SteveTheKiller/KillerPDF/releases/latest/download/KillerPDF.exe"><svg viewBox="0 0 24 24"><path d="M11 4h2v7h3l-4 5-4-5h3V4zM5 18h14v2H5z"/></svg><span>Download</span></a>
+<span class="tb-spacer"></span>
+<nav class="tb-nav"><a href="help.html">Help</a><a href="technical.html">Technical</a><a href="engine.html" class="on">Engine</a><a href="corpus.html">Corpus</a><a href="about.html">About</a></nav>
+<div class="tgrp" role="group" aria-label="Theme">
+<button class="swatch sw-dark" data-theme="dark" title="Dark"></button>
+<button class="swatch sw-light" data-theme="light" title="Light"></button>
+<button class="swatch sw-hc" data-theme="hc" title="High Contrast"></button>
+<button class="swatch sw-blood" data-theme="blood" title="Blood"></button>
+<button class="swatch sw-greed" data-theme="greed" title="Greed"></button>
+<button class="swatch sw-cyanotic" data-theme="cyanotic" title="Cyanotic"></button>
+<button class="swatch sw-ectoplasm" data-theme="ectoplasm" title="Ectoplasm"></button>
+<button class="swatch sw-decay" data-theme="decay" title="Decay"></button>
+<button class="swatch sw-malaise" data-theme="malaise" title="Malaise"></button>
+<button class="swatch sw-sepulchre" data-theme="sepulchre" title="Sepulchre"></button>
+<button class="swatch sw-delirium" data-theme="delirium" title="Delirium"></button>
+<button class="swatch sw-mourning" data-theme="mourning" title="Mourning"></button>
+</div>
+<div class="acc-fly accent-switch" id="accentSwitch">
+<button class="acc-toggle" id="accentToggle" aria-haspopup="true" aria-expanded="false" title="Accent color"></button>
+<div class="acc-pop" id="accentPop" hidden role="group" aria-label="Accent color">
+<span class="acc-pop-label" data-i18n="accent_label">accent:</span>
+<button class="acc" data-accent="red" style="background:#DD504B;color:#DD504B" title="Red"></button>
+<button class="acc" data-accent="orange" style="background:#E8962C;color:#E8962C" title="Orange"></button>
+<button class="acc" data-accent="green" style="background:#1EA54C;color:#1EA54C" title="Green"></button>
+<button class="acc" data-accent="teal" style="background:#1FB8A8;color:#1FB8A8" title="Teal"></button>
+<button class="acc" data-accent="blue" style="background:#50AEE8;color:#50AEE8" title="Blue"></button>
+<button class="acc" data-accent="purple" style="background:#B982E3;color:#B982E3" title="Purple"></button>
+</div>
+</div>
+<div class="lang-switch" role="group" aria-label="Language">
+<button class="lang-toggle" id="langToggle" aria-haspopup="true" aria-expanded="false" title="Language" aria-label="Language">&#127760;</button>
+<div class="lang-menu" id="langMenu" hidden>
+<button class="lang-item" data-lang="en">English</button>
+<button class="lang-item" data-lang="bn">&#2476;&#2494;&#2434;&#2482;&#2494;</button>
+<button class="lang-item" data-lang="cs">Cestina</button>
+<button class="lang-item" data-lang="de">Deutsch</button>
+<button class="lang-item" data-lang="es">Espanol</button>
+<button class="lang-item" data-lang="fr">Francais</button>
+<button class="lang-item" data-lang="it">Italiano</button>
+<button class="lang-item" data-lang="ja">&#26085;&#26412;&#35486;</button>
+<button class="lang-item" data-lang="kk">&#1178;&#1072;&#1079;&#1072;&#1179;&#1096;&#1072;</button>
+<button class="lang-item" data-lang="pl">Polski</button>
+<button class="lang-item" data-lang="hu">Magyar</button>
+<button class="lang-item" data-lang="ru">&#1056;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081;</button>
+<button class="lang-item" data-lang="tr">Turkce</button>
+<button class="lang-item" data-lang="zh-cn">&#20013;&#25991; (&#31616;&#20307;)</button>
+<button class="lang-item" data-lang="zh">&#20013;&#25991; (&#32321;&#39636;)</button>
+</div>
+</div>
+</div>
+
+<div class="shell">
+<aside class="sidebar">
+<div class="sb-tabs"><span class="on">Engine</span></div>
+<nav class="outline">
+<div class="ol-group open"><div class="ol-head"><a href="#overview" class="on">Overview</a><button class="ol-chev" type="button" aria-label="Toggle subsections" aria-expanded="false"><svg width="11" height="11" viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button></div><div class="ol-subs"><a href="#project-scale" class="sub">Project scale</a></div></div>
+<div class="ol-group"><div class="ol-head"><a href="#boundary">Library boundary</a><button class="ol-chev" type="button" aria-label="Toggle subsections" aria-expanded="false"><svg width="11" height="11" viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button></div><div class="ol-subs"><a href="#boundary-map" class="sub">Desktop and engine</a><a href="#boundary-policy" class="sub">Monorepo boundary</a></div></div>
+<div class="ol-group"><div class="ol-head"><a href="#capabilities">Capabilities</a><button class="ol-chev" type="button" aria-label="Toggle subsections" aria-expanded="false"><svg width="11" height="11" viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button></div><div class="ol-subs"><a href="#cap-parse" class="sub">Parsing</a><a href="#cap-preserve" class="sub">Preservation</a><a href="#cap-author" class="sub">Authoring</a><a href="#cap-edit" class="sub">Structural editing</a><a href="#cap-interactive" class="sub">Interactive PDFs</a><a href="#cap-security" class="sub">Security and signing</a><a href="#cap-standards" class="sub">Modern standards</a><a href="#cap-diagnostics" class="sub">Diagnostics</a></div></div>
+<div class="ol-group"><div class="ol-head"><a href="#architecture">Architecture</a><button class="ol-chev" type="button" aria-label="Toggle subsections" aria-expanded="false"><svg width="11" height="11" viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button></div><div class="ol-subs"><a href="#layer-syntax" class="sub">Syntax and objects</a><a href="#layer-documents" class="sub">Document loading</a><a href="#layer-authoring" class="sub">Authoring and editing</a><a href="#layer-writing" class="sub">Writing</a><a href="#layer-security" class="sub">Security and signing</a><a href="#layer-validation" class="sub">Diagnostics</a></div></div>
+<div class="ol-group"><div class="ol-head"><a href="#quickstart">Developer quick start</a><button class="ol-chev" type="button" aria-label="Toggle subsections" aria-expanded="false"><svg width="11" height="11" viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button></div><div class="ol-subs"><a href="#author" class="sub">Author a document</a><a href="#inspect" class="sub">Inspect and rewrite</a><a href="#edit" class="sub">Edit incrementally</a></div></div>
+<div class="ol-group"><div class="ol-head"><a href="#validation">Validation model</a><button class="ol-chev" type="button" aria-label="Toggle subsections" aria-expanded="false"><svg width="11" height="11" viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button></div><div class="ol-subs"><a href="#gate-tests" class="sub">Regression tests</a><a href="#gate-incremental" class="sub">Incremental corpus</a><a href="#gate-import" class="sub">Import corpus</a><a href="#gate-validators" class="sub">Independent validators</a></div></div>
+<div class="ol-group"><div class="ol-head"><a href="#integration">Use it in an application</a><button class="ol-chev" type="button" aria-label="Toggle subsections" aria-expanded="false"><svg width="11" height="11" viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button></div><div class="ol-subs"><a href="#integration-workflow" class="sub">Recommended workflow</a><a href="#integration-docs" class="sub">API documentation</a></div></div>
+<div class="ol-group"><div class="ol-head"><a href="#limits">Scope and limits</a><button class="ol-chev" type="button" aria-label="Toggle subsections" aria-expanded="false"><svg width="11" height="11" viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button></div><div class="ol-subs"><a href="#not-a-renderer" class="sub">What it is not</a><a href="#fail-closed" class="sub">Fail-closed boundaries</a></div></div>
+<div class="ol-group"><div class="ol-head"><a href="#source">Source and licensing</a><button class="ol-chev" type="button" aria-label="Toggle subsections" aria-expanded="false"><svg width="11" height="11" viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button></div><div class="ol-subs"><a href="#source-links" class="sub">Repository documents</a><a href="#license" class="sub">GPLv3</a></div></div>
+</nav>
+</aside>
+
+<main class="content"><div class="content-scroll"><div class="content-inner">
+<section class="page-hero" id="overview">
+<div class="eyebrow">Independent .NET document library</div>
+<div class="engine-brand"><img class="engine-mark" src="killerpdf-engine-icon.png" alt=""><div class="engine-title"><span>The</span><img class="wm-logo" src="brand/killerpdf-logo-dark-green.svg" alt="KillerPDF"><span class="suffix">.Engine</span></div></div>
+<p>The KillerPDF.Engine reads, validates, authors, structurally edits, signs, encrypts and writes PDF files. It was built from scratch as KillerPDF's PDF 2.0 foundation, with a public API intended for other applications as well as the KillerPDF desktop editor.</p>
+</section>
+
+<div class="metric-grid" id="project-scale">
+<div class="metric"><b>151</b><span>engine source files</span></div>
+<div class="metric"><b>47,792</b><span>physical C# lines</span></div>
+<div class="metric"><b>1,437</b><span>engine tests</span></div>
+<div class="metric"><b>47,024</b><span>corpus PDFs</span></div>
+</div>
+
+<section class="engine-sec" id="boundary">
+<h2>A real library boundary</h2>
+<p class="lede">The engine is not a renamed collection of desktop helpers. It is a UI-free .NET 10 library with no dependency on WPF, KillerPDF application code, PDFium, PdfPig, PdfSharpCore or PDFsharp.</p>
+<div class="boundary" id="boundary-map">
+<div><strong>KillerPDF desktop application</strong><ul><li>WPF interface and workflows</li><li>PDFium page rendering</li><li>PdfPig text extraction</li><li>OCR, printing and desktop integration</li></ul></div>
+<div class="arrow">&#8594;</div>
+<div><strong>The KillerPDF.Engine</strong><ul><li>PDF syntax and object graphs</li><li>Authoring and structural editing</li><li>Forms, annotations and navigation</li><li>Encryption, signatures and standards</li></ul></div>
+</div>
+<p id="boundary-policy">The monorepo keeps the application, library, tests and corpus gates in one reviewable change while the project reference enforces the reusable boundary. The formal display name is <b>The KillerPDF.Engine</b>; the assembly, package identifier and namespaces use <code>KillerPdf.Engine</code>.</p>
+</section>
+
+<section class="engine-sec" id="capabilities">
+<h2>Major capabilities</h2>
+<div class="cap-grid">
+<div class="cap" id="cap-parse"><h3>Parse real-world PDF structure</h3><p>Headers, tokens, objects, streams, classic xref tables, xref streams, object streams, trailers, incremental revisions, page trees, name trees and number trees, with bounded parsing and source-aware diagnostics.</p></div>
+<div class="cap" id="cap-preserve"><h3>Preserve or rewrite deliberately</h3><p>Byte-preserving incremental updates retain the original file prefix. Deterministic full rewrites produce reproducible output and can use classic xref tables or compressed object and xref streams.</p></div>
+<div class="cap" id="cap-author"><h3>Author complete documents</h3><p>Pages, content streams, graphics state, paths, text, embedded fonts, images, color spaces, shadings, patterns, transparency, metadata, output intents and viewer behavior.</p></div>
+<div class="cap" id="cap-edit"><h3>Edit document structure</h3><p>Insert, import, remove, reorder, rotate, crop, resize and trim pages while preserving dependent resources and rejecting unsafe partial graph imports.</p></div>
+<div class="cap" id="cap-interactive"><h3>Build interactive PDFs</h3><p>Bookmarks, named destinations, links, attachments, annotations, replies, popups, optional content and AcroForm text, button, choice and signature fields.</p></div>
+<div class="cap" id="cap-security"><h3>Protect and sign</h3><p>RC4, AES-128 and AES-256 Standard Security, crypt filters, permission enforcement, detached CMS signing, certification permissions, field locks and signed-revision analysis.</p></div>
+<div class="cap" id="cap-standards"><h3>Author for modern standards</h3><p>PDF 2.0, tagged PDF, PDF/UA-2, PDF/A-4, PDF/A-4e and PDF/A-4f safeguards coordinate metadata, structure, fonts, annotations, forms and associated files.</p></div>
+<div class="cap" id="cap-diagnostics"><h3>Diagnose before writing</h3><p>Structural inspection distinguishes credentials, recoverable damage and unsafe structure. Round-trip checks and fail-closed preflight prevent ambiguous documents from being silently rewritten.</p></div>
+</div>
+</section>
+
+<section class="engine-sec" id="architecture">
+<h2>Architecture</h2>
+<table class="spec-table"><tr><th>Layer</th><th>Responsibility</th></tr>
+<tr id="layer-syntax"><td><code>Syntax</code> and <code>Objects</code></td><td>Binary-safe tokens and the typed PDF object model.</td></tr>
+<tr id="layer-documents"><td><code>CrossReference</code>, <code>Filters</code>, <code>Documents</code></td><td>Revision discovery, stream decoding, lazy object resolution and authenticated document access.</td></tr>
+<tr id="layer-authoring"><td><code>Authoring</code></td><td>Typed construction of pages, content, resources, metadata, interactive features and conformance structures.</td></tr>
+<tr><td><code>Editing</code></td><td>High-level, byte-preserving changes to existing documents and safe cross-document imports.</td></tr>
+<tr id="layer-writing"><td><code>Writing</code></td><td>Incremental revisions, deterministic full rewrites, metadata policy and output sanitization.</td></tr>
+<tr id="layer-security"><td><code>Security</code> and <code>Signing</code></td><td>Password authentication, permissions, encryption, digital signatures and revision verification.</td></tr>
+<tr id="layer-validation"><td><code>Diagnostics</code> and <code>Validation</code></td><td>Bounded inspection, implementation limits, structural reports and round-trip validation.</td></tr>
+</table>
+<div class="callout"><strong>Design rule:</strong> preserve existing bytes when the change can be expressed as an incremental revision; fail closed when the structure required for a safe edit cannot be interpreted or preserved.</div>
+</section>
+
+<section class="engine-sec" id="quickstart">
+<h2>Developer quick start</h2>
+<div class="nuget-install"><a href="https://www.nuget.org/packages/KillerPdf.Engine" target="_blank" rel="noopener">KillerPdf.Engine on NuGet.org</a></div>
+<div class="code-block">dotnet add package KillerPdf.Engine</div>
+<p>The engine targets .NET 10. Reference the project directly from a checkout of the KillerPDF repository:</p>
+<div class="code-block"><span class="tok-punct">&lt;</span><span class="tok-xml">ProjectReference</span> <span class="tok-attr">Include</span><span class="tok-punct">=</span><span class="tok-string">"path\to\KillerPDF\engine\KillerPdf.Engine\KillerPdf.Engine.csproj"</span> <span class="tok-punct">/&gt;</span></div>
+
+<h3 id="author">Author a PDF 2.0 document</h3>
+<div class="code-block"><span class="tok-keyword">using</span> KillerPdf.Engine.Authoring;
+
+<span class="tok-keyword">byte</span>[] pdf = <span class="tok-keyword">new</span> <span class="tok-type">PdfDocumentBuilder</span>()
+    .<span class="tok-method">SetMetadata</span>(<span class="tok-keyword">new</span> <span class="tok-type">PdfDocumentMetadata</span>
+    {
+        Title = <span class="tok-string">"Engine quick start"</span>,
+        Author = <span class="tok-string">"Example application"</span>,
+        Language = <span class="tok-string">"en-US"</span>
+    })
+    .<span class="tok-method">AddBlankPage</span>(<span class="tok-number">612</span>, <span class="tok-number">792</span>)
+    .<span class="tok-method">Build</span>();
+
+<span class="tok-type">File</span>.<span class="tok-method">WriteAllBytes</span>(<span class="tok-string">"hello.pdf"</span>, pdf);</div>
+
+<h3 id="inspect">Inspect and deterministically rewrite</h3>
+<div class="code-block"><span class="tok-keyword">using</span> KillerPdf.Engine.Diagnostics;
+<span class="tok-keyword">using</span> KillerPdf.Engine.Documents;
+<span class="tok-keyword">using</span> KillerPdf.Engine.Writing;
+
+<span class="tok-keyword">byte</span>[] source = <span class="tok-type">File</span>.<span class="tok-method">ReadAllBytes</span>(<span class="tok-string">"input.pdf"</span>);
+<span class="tok-type">PdfInspectionReport</span> report = <span class="tok-type">PdfDocumentInspector</span>.<span class="tok-method">Inspect</span>(source);
+
+<span class="tok-keyword">if</span> (!report.IsStructurallyValid)
+    <span class="tok-keyword">throw new</span> <span class="tok-type">InvalidOperationException</span>(<span class="tok-string">"The document is not safe to rewrite."</span>);
+
+<span class="tok-type">PdfDocument</span> document = <span class="tok-type">PdfDocument</span>.<span class="tok-method">Open</span>(source);
+<span class="tok-keyword">byte</span>[] rewritten = <span class="tok-type">PdfDocumentWriter</span>.<span class="tok-method">Write</span>(document);
+<span class="tok-type">File</span>.<span class="tok-method">WriteAllBytes</span>(<span class="tok-string">"output.pdf"</span>, rewritten);</div>
+
+<h3 id="edit">Edit an existing document incrementally</h3>
+<div class="code-block"><span class="tok-keyword">using</span> KillerPdf.Engine.Documents;
+<span class="tok-keyword">using</span> KillerPdf.Engine.Editing;
+
+<span class="tok-type">PdfDocument</span> document = <span class="tok-type">PdfDocument</span>.<span class="tok-method">Open</span>(<span class="tok-type">File</span>.<span class="tok-method">ReadAllBytes</span>(<span class="tok-string">"input.pdf"</span>));
+
+<span class="tok-keyword">byte</span>[] updated = <span class="tok-keyword">new</span> <span class="tok-type">PdfIncrementalPageEditor</span>(document)
+    .<span class="tok-method">RotateClockwise</span>(<span class="tok-number">0</span>)
+    .<span class="tok-method">AddBlankPage</span>(<span class="tok-number">612</span>, <span class="tok-number">792</span>)
+    .<span class="tok-method">Build</span>();
+
+<span class="tok-type">File</span>.<span class="tok-method">WriteAllBytes</span>(<span class="tok-string">"updated.pdf"</span>, updated);</div>
+<p>The high-level editor also exposes typed operations for page boxes, imports, metadata, output intents, bookmarks, destinations, attachments, forms and page content. Use <code>PdfIncrementalUpdateBuilder</code> only when you deliberately need the lower-level PDF object boundary.</p>
+</section>
+
+<section class="engine-sec" id="validation">
+<h2>Validation is part of the design</h2>
+<p>Format support is not inferred from a header or from whether one generated file opens in one viewer. The release gate combines 1,437 engine tests, strict zero-warning Release builds, two 2,907-file public corpus gates, the reproducible 47,024-file full corpus baseline, qpdf structural checks, veraPDF PDF/A-4 and PDF/UA-2 validation, and OpenSSL verification of detached CMS signatures.</p>
+<table class="spec-table"><tr><th>Gate</th><th>What it catches</th></tr>
+<tr id="gate-tests"><td>Unit and regression tests</td><td>Syntax, graph, writer, editor and public API behavior.</td></tr>
+<tr id="gate-incremental"><td>Incremental corpus</td><td>Unexpected failures or structural damage across deliberately hostile inputs.</td></tr>
+<tr id="gate-import"><td>Selected-page import corpus</td><td>Unsafe graph transfer, stale references and unsupported global dependencies.</td></tr>
+<tr id="gate-validators"><td>qpdf and veraPDF</td><td>Independent structural and standards failures.</td></tr>
+<tr><td>OpenSSL fixtures</td><td>Real detached CMS signature interoperability.</td></tr>
+</table>
+</section>
+
+<section class="engine-sec" id="integration">
+<h2>Using the engine in another application</h2>
+<ol class="workflow" id="integration-workflow">
+<li>Keep rendering and UI outside the library. The engine operates on PDF bytes and typed document concepts.</li>
+<li>Inspect unfamiliar input before selecting an editing or rewrite path.</li>
+<li>Use high-level authoring and editing APIs wherever possible. They enforce graph and standards invariants together.</li>
+<li>Prefer incremental output for preservation-sensitive edits and signed-document analysis.</li>
+<li>Use deterministic rewrites when canonical output, object-stream packing or metadata policy matters.</li>
+<li>Run an independent validator appropriate to the profile your application claims.</li>
+</ol>
+<p id="integration-docs">Public XML documentation is generated during normal builds. The engine README, changelog and architecture decisions remain the source-level reference while the API approaches its first standalone package.</p>
+</section>
+
+<section class="engine-sec" id="limits">
+<h2>Scope and explicit limits</h2>
+<p id="not-a-renderer">The KillerPDF.Engine is a document engine, not a renderer or desktop framework. It does not draw pages to the screen, provide UI controls, perform OCR or extract page text. KillerPDF currently uses PDFium for rendering, PdfPig for text extraction and Tesseract for OCR.</p>
+<p id="fail-closed">Some operations intentionally refuse incomplete global structures. Examples include unsafe partial imports from tagged documents, ambiguous shared object graphs, unsupported XFA merges, missing credentials and edits forbidden by authenticated user permissions. A refusal is safer than producing a file that opens but has silently damaged navigation, forms, accessibility or signatures.</p>
+</section>
+
+<section class="engine-sec" id="source">
+<h2>Source, documentation and license</h2>
+<ul class="source-links" id="source-links">
+<li><a class="nuget-package" href="https://www.nuget.org/packages/KillerPdf.Engine" target="_blank" rel="noopener">KillerPdf.Engine on NuGet.org</a></li>
+<li><a href="https://github.com/SteveTheKiller/KillerPDF/tree/main/engine" target="_blank" rel="noopener">Engine source and README</a></li>
+<li><a href="https://github.com/SteveTheKiller/KillerPDF/blob/main/engine/CHANGELOG.md" target="_blank" rel="noopener">Engine changelog</a></li>
+<li><a href="https://github.com/SteveTheKiller/KillerPDF/tree/main/engine/docs/architecture" target="_blank" rel="noopener">Architecture decision records</a></li>
+<li><a href="technical.html">KillerPDF desktop technical guide</a></li>
+</ul>
+<p id="license">The KillerPDF.Engine is licensed under GPLv3 as part of the KillerPDF repository.</p>
+</section>
+</div></div></main>
+</div>
+
+<footer class="statusbar"><span class="left"><a href="https://github.com/SteveTheKiller/KillerPDF" target="_blank" rel="noopener">Source on GitHub</a> &middot; GPLv3 &middot; Part of <a href="https://killertools.net" target="_blank" rel="noopener">killertools.net</a></span><span class="right"><span id="verEgg">v1.8.4</span> &middot; &copy; 2026 <b><a href="https://thekiller.net" target="_blank" rel="noopener">Steve the Killer</a></b></span></footer>
+<script src="kp-i18n.js?v=11"></script>
+<script src="engine-i18n.js?v=2"></script>
+<script src="kp.js?v=14"></script>
+<script>
+(function(){
+var links=[].slice.call(document.querySelectorAll('.outline a')),scroller=document.querySelector('.content-scroll'),groups=[].slice.call(document.querySelectorAll('.ol-group'));
+groups.forEach(function(group){var button=group.querySelector('.ol-chev');if(!button)return;button.setAttribute('aria-expanded',group.classList.contains('open')?'true':'false');button.addEventListener('click',function(){var open=group.classList.toggle('open');button.setAttribute('aria-expanded',open?'true':'false');});});
+function sync(){var y=90,best=links[0];links.forEach(function(a){var el=document.querySelector(a.getAttribute('href'));if(el&&el.getBoundingClientRect().top<=y)best=a;});links.forEach(function(a){a.classList.toggle('on',a===best);});var activeGroup=best&&best.closest('.ol-group');if(activeGroup&&!activeGroup.classList.contains('open')){activeGroup.classList.add('open');var button=activeGroup.querySelector('.ol-chev');if(button)button.setAttribute('aria-expanded','true');}}
+if(scroller)scroller.addEventListener('scroll',sync,{passive:true});links.forEach(function(a){a.addEventListener('click',function(){links.forEach(function(x){x.classList.remove('on');});a.classList.add('on');var group=a.closest('.ol-group');if(group){group.classList.add('open');var button=group.querySelector('.ol-chev');if(button)button.setAttribute('aria-expanded','true');}});});sync();
+})();
+</script>
+</body>
+</html>
