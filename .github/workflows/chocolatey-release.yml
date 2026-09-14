@@ -15,6 +15,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check Chocolatey secret
+        shell: pwsh
+        env:
+          CHOCO_API_KEY: ${{ secrets.CHOCOLATEY_API_KEY }}
+        run: |
+          if (-not $env:CHOCO_API_KEY) {
+            Write-Error "CHOCOLATEY_API_KEY secret is missing. Add it at https://github.com/Rafie-kun/KillerPDF/settings/secrets/actions (from https://community.chocolatey.org/account -> API Keys)"
+            exit 1
+          }
       - name: Build and push Chocolatey package
         shell: pwsh
         env:

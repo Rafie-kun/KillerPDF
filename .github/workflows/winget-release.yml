@@ -47,6 +47,15 @@ jobs:
       # which reads like a token problem and is not. The fork was 7,877 commits behind when
       # this was tracked down on 2026-08-26, and every app shares the one fork, so all five
       # repos started failing together.
+      - name: Check WINGET_TOKEN
+        shell: pwsh
+        env:
+          WINGET_TOKEN: ${{ secrets.WINGET_TOKEN }}
+        run: |
+          if (-not $env:WINGET_TOKEN) {
+            Write-Error "WINGET_TOKEN secret is missing. Add a classic PAT (public_repo scope) at https://github.com/Rafie-kun/KillerPDF/settings/secrets/actions -> New repository secret -> Name: WINGET_TOKEN"
+            exit 1
+          }
       - name: Sync the winget-pkgs fork
         run: |
           $delays = @(30, 90, 180)
