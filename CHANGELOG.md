@@ -27,7 +27,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 ### Added
 
-- Added an About toggle for startup update checks, enabled by default, with confirmation before updating.
+- Added startup update checks, enabled by default, with confirmation before updating and a shared toggle in About and the update dialog.
 - Added a keyboard shortcut toggle with an always-available Ctrl+Shift+K recovery chord (#405).
 - Added page size selection with current-page, Letter, A4, Legal, and custom dimensions when inserting blank pages (#400).
 - Added Open Containing Folder to document tab menus (#399).

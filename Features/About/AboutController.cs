@@ -127,8 +127,13 @@ namespace KillerPDF.Features
         {
             if (_startupCheckStarted) return;
             _startupCheckStarted = true;
+#if DEBUG
+            // Temporary visual preview. Neither choice starts an update.
+            ConfirmUpdate("v1.8.5", startup: true);
+#else
             CheckForUpdateAsync(System.Reflection.Assembly.GetExecutingAssembly().GetName().Version,
                 startup: true);
+#endif
         }
 
         // ---- Self-update ---------------------------------------------------------------------
@@ -139,6 +144,20 @@ namespace KillerPDF.Features
         /// copies replace their original launcher after both launcher and inner app have exited.
         /// </summary>
         internal void Update() => UpdateCore(startup: false);
+
+        private MessageBoxResult ConfirmUpdate(string tag, bool startup)
+        {
+            var (result, checkOnStartup) = KillerDialog.ShowWithCheckbox(_host.Window,
+                string.Format(_host.Loc(startup ? "Str_StartupUpdatePrompt" : "Str_UpdatePrompt"), tag),
+                _host.Loc("Str_AlwaysCheckOnStartup"),
+                "KillerPDF", startup ? MessageBoxButton.YesNo : MessageBoxButton.OKCancel,
+                checkboxInitial: Services.ReleaseUpdateCheck.IsEnabled(
+                    App.GetSetting(Services.ReleaseUpdateCheck.Setting)));
+            App.SetSetting(Services.ReleaseUpdateCheck.Setting, checkOnStartup ? "1" : "0");
+            if (_host.Window.FindName("StartupUpdateCheck") is System.Windows.Controls.CheckBox aboutCheck)
+                aboutCheck.IsChecked = checkOnStartup;
+            return result;
+        }
 
         private async void UpdateCore(bool startup)
         {
@@ -157,10 +176,7 @@ namespace KillerPDF.Features
                     return;
                 }
 
-                var confirm = KillerDialog.Show(_host.Window,
-                    string.Format(_host.Loc(startup ? "Str_StartupUpdatePrompt" : "Str_UpdatePrompt"), tag),
-                    "KillerPDF", startup ? MessageBoxButton.YesNo : MessageBoxButton.OKCancel,
-                    MessageBoxImage.Question);
+                var confirm = ConfirmUpdate(tag, startup);
                 if (confirm != (startup ? MessageBoxResult.Yes : MessageBoxResult.OK)) return;
 
                 _host.UpdateEnabled = false;
