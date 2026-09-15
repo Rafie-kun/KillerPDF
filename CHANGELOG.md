@@ -10,15 +10,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 ### Fixed
 
+- Completed remaining dialog and installer translations and refreshed the website guides.
 - Moved the keyboard shortcut toggle to the footer beside the online guide.
-
 - Evenly spaced About options, moved startup update checks to the bottom, and aligned Clear all Data with the top row.
-
 - Corrected WinGet release manifests to run the installer and include the required desktop runtime (#386).
 - Kept scroll and manual zoom settings independent between document tabs and restored them when reopening files (#399).
 - Kept selected-page transforms when retained pages contain inconsistent font-width metadata.
 - Standalone uninstall dialogs use the default Dark/Green theme, and installation errors use themed dialogs.
-
 - Localized the document page count and Italian certificate label, and included the add-bookmark row when sizing the sidebar (#394).
 - Used the destination monitor when calculating maximized client bounds during a cross-monitor move (#363).
 - Refreshed legacy PDF file associations to open the installed app instead of the installer (#393).
