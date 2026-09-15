@@ -10,6 +10,7 @@ The 1.8.5 engine package matches the engine source shipped with KillerPDF 1.8.5.
 
 ### Fixed
 
+- Preserved source cross-reference format when signing and supported visible appearances on existing signature widgets (#381).
 - Kept normalized page sizes within supported limits for extreme page coordinates (#401). (Thanks @Matthew-Selvam)
 - Added described overlays that extend existing PDF structure trees when saving markup.
 
