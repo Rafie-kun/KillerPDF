@@ -6,7 +6,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 ## [1.8.5] - Unreleased
 
-1.8.5 restores saving edits to tagged PDFs and adds a headless page-render benchmark command.
+1.8.5 improves saving, signatures, installation, and keyboard controls, and adds optional startup update checks.
 
 ### Fixed
 
@@ -22,6 +22,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 ### Added
 
+- Added an About toggle for startup update checks, enabled by default, with confirmation before updating.
 - Added a keyboard shortcut toggle with an always-available Ctrl+Shift+K recovery chord (#405).
 - Added page size selection with current-page, Letter, A4, Legal, and custom dimensions when inserting blank pages (#400).
 - Added Open Containing Folder to document tab menus (#399).
