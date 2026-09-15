@@ -127,13 +127,8 @@ namespace KillerPDF.Features
         {
             if (_startupCheckStarted) return;
             _startupCheckStarted = true;
-#if DEBUG
-            // Temporary visual preview. Neither choice starts an update.
-            ConfirmUpdate("v1.8.5", startup: true);
-#else
             CheckForUpdateAsync(System.Reflection.Assembly.GetExecutingAssembly().GetName().Version,
                 startup: true);
-#endif
         }
 
         // ---- Self-update ---------------------------------------------------------------------
