@@ -539,7 +539,7 @@ $lines.Add("KillerPDF-Portable.exe  $portableHash")
 if ($pdfiumPath) { $lines.Add("pdfium.dll              $pdfiumHash") }
 if ($srcZip) {
     $srcHash = (Get-FileHash $srcZip.FullName -Algorithm SHA256).Hash
-    $lines.Add("$($srcZip.Name.PadRight(24))$srcHash")
+    $lines.Add("$($srcZip.Name.PadRight(23)) $srcHash")
 }
 [System.IO.File]::WriteAllLines($sumsPath, $lines, [System.Text.UTF8Encoding]::new($false))
 Write-Host "`n==> SHA256SUMS.txt written to: $sumsPath" -ForegroundColor Green
