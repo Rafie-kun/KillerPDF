@@ -13,7 +13,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Fixed picker and dialog frame corners and kept the close X white over its red hover background.
 
 - Kept update helpers and setup from locking the installation folder through their working directory (#434).
-- Linked both shortcut views directly to the online shortcut guide.
+- Aligned the shortcut title, view toggle, and online guide link, preserving the original help wording in every language.
 
 ## [1.8.80] - 2026-10-05
 
