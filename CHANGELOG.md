@@ -9,6 +9,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 1.8.81 improves the update handoff.
 
 ### Fixed
+- Ctrl+wheel changes picker views and icon sizes.
 - Fixed picker and dialog frame corners and kept the close X white over its red hover background.
 
 - Kept update helpers and setup from locking the installation folder through their working directory (#434).
