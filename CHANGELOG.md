@@ -14,6 +14,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 - Kept update helpers and setup from locking the installation folder through their working directory (#434).
 - Aligned the shortcut title, view toggle, and online guide link, preserving the original help wording in every language.
+- Softened material-theme footers and 98SE footer text.
 
 ## [1.8.80] - 2026-10-05
 
