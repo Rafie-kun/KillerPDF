@@ -66,6 +66,33 @@ namespace KillerPDF
                 (popupSize, targetSize, __) => PaneCorner(popupSize, targetSize, _alignRight);
         }
 
+        internal static void AttachAtButtonHeight(ContextMenu menu, FrameworkElement button)
+        {
+            Attach(menu, button);
+            var pane = _pane;
+            bool alignRight = _alignRight;
+            menu.CustomPopupPlacementCallback = (popupSize, targetSize, _) =>
+            {
+                var placement = PaneCorner(popupSize, targetSize, alignRight);
+                if (pane is null || PresentationSource.FromVisual(pane)?.CompositionTarget is not { } target)
+                    return placement;
+
+                var halo = pane.TryFindResource("FlyoutCard") is Style style
+                    ? new Border { Style = style }.Margin : new Thickness(22, 18, 22, 26);
+                var buttonCenter = button.PointToScreen(new Point(0, button.ActualHeight / 2));
+                var paneOrigin = pane.PointToScreen(new Point());
+                double centerY = target.TransformFromDevice.Transform(buttonCenter - paneOrigin).Y;
+                double cardHeight = popupSize.Height - halo.Top - halo.Bottom;
+                double cardTop = System.Math.Max(8,
+                    System.Math.Min(centerY - cardHeight / 2, targetSize.Height - cardHeight - 8));
+                double x = alignRight
+                    ? targetSize.Width - popupSize.Width + halo.Right - 8 : 8 - halo.Left;
+                placement[0] = new CustomPopupPlacement(
+                    new Point(x, cardTop - halo.Top), PopupPrimaryAxis.None);
+                return placement;
+            };
+        }
+
         /// <summary>
         /// Coordinates are relative to the pane's top-left. The horizontal coordinate mirrors
         /// between pane edges, while y puts the flyout's bottom above the footer.
