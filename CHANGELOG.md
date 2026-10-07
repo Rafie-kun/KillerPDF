@@ -105,6 +105,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Preserved original JPEG payloads for safe full-page flattening and JPEG compression when repairing or importing image-based pages (#366).
 - Preserved visible pixels when pasted clipboard images contain an empty alpha channel (#389).
 - Prevented crashes from stale or repeated tab-close requests (#353).
+- Prevented the color picker from crashing when changing stamp or annotation colors with gradient themes (#442).
 - Preserved detected text sizes, identified unavailable font substitutions, and fixed Save Flattened crashes on edited tagged PDFs (#356).
 - Prevented the app window from going black when minimizing and restoring (#415).
 - Restored the document display after minimizing or switching back from another window (#415).

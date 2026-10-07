@@ -46,7 +46,7 @@ namespace KillerPDF
         private const string SavedKey = "UserSwatches";
         // First-run / Reset palette: 9 fixed slots, last one white.
         private static readonly Color[] DefaultSwatches = UiKit.DefaultSwatches;
-        private static SolidColorBrush R(string key) => (SolidColorBrush)Application.Current.Resources[key];
+        private static Brush R(string key) => (Brush)Application.Current.Resources[key];
         private static string L(string key) => Application.Current.TryFindResource(key) as string ?? key;
         public ColorPickerDialog(Window? owner, Color initial)
         {
