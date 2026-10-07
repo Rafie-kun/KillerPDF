@@ -12,18 +12,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Hovered outline buttons and accent picker pills use gradients outside 98SE, and accent swatches lift on hover.
 
 ### Fixed
-- Light/Yellow uses true yellow for the wordmark, accent lines and radio buttons, with neutral dark text instead of olive brown.
-- 98SE Red is a true maroon again, so it no longer looks like Magenta.
-- Delirium, Ectoplasm and Sepulchre footers match the window background again.
-- Shared theme colors, control states, title styling and shadows match the family palette, including cream Blood, Greed and Cyanotic wordmarks.
-- Moved the shortcuts guide link away from the close button.
-- Added a faint divider with fading ends between the language menu columns.
-- Ctrl+wheel changes picker views and icon sizes.
-- Fixed picker and dialog frame corners and kept the close X white over its red hover background.
-
 - Kept update helpers and setup from locking the installation folder through their working directory (#434).
-- Aligned the shortcut title, view toggle, and online guide link, preserving the original help wording in every language.
-- Softened material-theme footers and 98SE footer text.
+- Ctrl+wheel changes picker views and icon sizes.
+- Aligned the shortcuts panel and language menu.
+- Corrected theme colors, wordmarks, footers and dialog controls, including Light/Yellow, 98SE Red and cream Blood, Greed and Cyanotic accents.
 
 ## [1.8.80] - 2026-10-05
 
