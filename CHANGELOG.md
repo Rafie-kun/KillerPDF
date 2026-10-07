@@ -192,6 +192,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Evenly spaced About options, moved startup update checks to the bottom, and aligned Clear all Data with the top row.
 - Marked 1.9 development builds as unreleased in the About card.
 - Aligned website footer versions with the published release across all languages.
+- Rail right-click menus align 8 pixels from the side and bottom content edges.
 
 ## [1.8.5] - 2026-09-14
 
