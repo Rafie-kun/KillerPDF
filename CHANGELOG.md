@@ -17,6 +17,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Ctrl+wheel changes picker views and icon sizes.
 - Aligned the shortcuts panel and language menu.
 - Corrected theme colors, wordmarks, footers and dialog controls, including Light/Yellow, 98SE Red and cream Blood, Greed and Cyanotic accents.
+- Rail right-click menus align 8 pixels from the side and bottom content edges.
 
 ## [1.8.80] - 2026-10-05
 

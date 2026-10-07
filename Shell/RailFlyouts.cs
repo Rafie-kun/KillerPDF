@@ -18,6 +18,12 @@ namespace KillerPDF
         // The shortcuts ? is the strip's ORIGINAL button (ShortcutHelp_Click) - it just moved
         // into the family slot above language; no second implementation was added.
 
+        private void RailMenu_Opening(object sender, ContextMenuEventArgs e)
+        {
+            e.Handled = true;
+            ToggleRailFlyout(sender == RailLangBtn ? LangFlyout : ThemeFlyout);
+        }
+
         private void RailLang_Click(object sender, RoutedEventArgs e) => ToggleRailFlyout(LangFlyout);
 
         private void RailTheme_Click(object sender, RoutedEventArgs e) => ToggleRailFlyout(ThemeFlyout);

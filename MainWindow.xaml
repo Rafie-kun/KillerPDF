@@ -2046,7 +2046,7 @@
                                     </ControlTemplate>
                                 </Button.Template>
                             </Button>
-                            <Button x:Name="RailLangBtn" Click="RailLang_Click"
+                            <Button x:Name="RailLangBtn" Click="RailLang_Click" ContextMenuOpening="RailMenu_Opening"
                                     Cursor="Hand" FocusVisualStyle="{x:Null}"
                                     ToolTip="{DynamicResource Str_Language}"
                                     Width="24" Height="24" Padding="0" Margin="0,0,0,6">
@@ -2358,7 +2358,7 @@
                                     </ContextMenu>
                                 </Button.ContextMenu>
                             </Button>
-                            <Button x:Name="RailThemeBtn" Click="RailTheme_Click"
+                            <Button x:Name="RailThemeBtn" Click="RailTheme_Click" ContextMenuOpening="RailMenu_Opening"
                                     Cursor="Hand" FocusVisualStyle="{x:Null}"
                                     ToolTip="{DynamicResource Str_Theme}"
                                     Width="24" Height="24" Padding="0">
