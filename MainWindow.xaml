@@ -609,7 +609,6 @@
         </Style>
 
         <Style TargetType="ContextMenu">
-            <Setter Property="ctrl:MenuAnimation.OpenImmediately" Value="True"/>
             <Setter Property="Background" Value="{DynamicResource MenuBackgroundBrush}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource MenuBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
@@ -626,7 +625,6 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ContextMenu">
-                        <!-- Paint the menu surface immediately. -->
                         <!-- Radius 6 = the family flyout card (FlyoutCard above); the grain overlay
                              takes 5, the card's 6 minus its 1px border, so the texture stops exactly
                              inside the frame. -->
@@ -634,7 +632,7 @@
                              render bounds by the FULL BlurRadius, so 22 each way, less the 4px lift
                              off the top and plus it on the bottom. The offsets on the style above
                              hold the card in place against the wider halo. -->
-                        <Grid x:Name="MenuRoot" Opacity="1" Margin="22,18,22,26">
+                        <Grid x:Name="MenuRoot" Opacity="0" Margin="22,18,22,26">
                             <!-- Shadow-only layer behind, so the menu text stays crisp. -->
                             <Border Background="{TemplateBinding Background}" CornerRadius="{DynamicResource PanelCornerRadius}" IsHitTestVisible="False">
                                 <Border.Effect>
@@ -661,6 +659,18 @@
                             <Border IsHitTestVisible="False" BorderBrush="{DynamicResource MenuBevel2LightBrush}" BorderThickness="{DynamicResource MenuBevel2LightThickness}"/>
                             <Border IsHitTestVisible="False" BorderBrush="{DynamicResource MenuBevel2DarkBrush}" BorderThickness="{DynamicResource MenuBevel2DarkThickness}"/>
                         </Grid>
+                    <ControlTemplate.Triggers>
+                            <EventTrigger RoutedEvent="ContextMenu.Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="MenuRoot" Storyboard.TargetProperty="Opacity"
+                                                         From="0" To="1" Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction><QuadraticEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -707,7 +717,7 @@
                                            VerticalAlignment="Center" Margin="12,0,0,0"
                                            Visibility="Collapsed"/>
                                 <Popup x:Name="SubPopup" AllowsTransparency="True" Placement="Right"
-                                       HorizontalOffset="-21" VerticalOffset="-13" Focusable="False" PopupAnimation="Fade" ctrl:MenuAnimation.OpenImmediately="True"
+                                       HorizontalOffset="-21" VerticalOffset="-13" Focusable="False" PopupAnimation="Fade"
                                        IsOpen="{TemplateBinding IsSubmenuOpen}">
                                     <!-- Mirrors the ContextMenu template surface so submenus match the parent menu.
                                          Halo sized to the 22/4 shadow; the offsets above carry the
