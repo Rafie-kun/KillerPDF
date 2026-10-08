@@ -9,6 +9,7 @@ public sealed partial class PdfPageRenderer
         // Bound retained geometry independently of document complexity. Larger paths use
         // ordinary painting, and only one rented coverage mask can be pending at a time.
         private const int MaximumPoints = 4096;
+        private const int MaximumLocalClipPoints = 64;
         private CoverageMask? _mask;
         private Point[][]? _path;
         private Color _color;
@@ -49,8 +50,8 @@ public sealed partial class PdfPageRenderer
             {
                 if (clip.Mask.Coverage is not null)
                 {
-                    // The clip must outlive pending paint, including after Q.
-                    if (ClipScratchScope.Current?.CanRetainUntilStreamEnds(clip.Mask) != true)
+                    if (points > MaximumLocalClipPoints
+                        && ClipScratchScope.Current?.CanRetainUntilStreamEnds(clip.Mask) != true)
                         return false;
                     fractionalClips = true;
                 }
@@ -68,7 +69,10 @@ public sealed partial class PdfPageRenderer
                 && (!fractionalClips || SameClips(state.Clips))
                 && _blendMode == state.BlendMode && _intent == state.RenderingIntent
                 && ReferenceEquals(_inputProfile, pixels.InputProfile)
-                && (_color.OverprintComponents & ~15) == (color.OverprintComponents & ~15)
+                && ((_color.OverprintComponents & ~15) == (color.OverprintComponents & ~15)
+                    || ((_color.OverprintComponents ^ color.OverprintComponents)
+                            & ~(15 | 16 | PreserveNamedSpots)) == 0
+                        && !pixels.HasSpotPlates && !pixels.HasRgbSpotShadow)
                 && SamePath(path))
             {
                 int previousPreserve = PreservedChannels(_color), preserve = PreservedChannels(color);
@@ -143,6 +147,19 @@ public sealed partial class PdfPageRenderer
                     if (saved[index] != current[index]) return false;
             }
             return true;
+        }
+
+        internal void FlushBeforeClipRelease(CoverageMask? released)
+        {
+            if (_mask is null || !_fractionalClips || released?.Coverage is not { } coverage)
+                return;
+            // Shared-array views have the same lifetime as their owning mask.
+            foreach (ClipRegion clip in _clips)
+                if (ReferenceEquals(clip.Mask.Coverage, coverage))
+                {
+                    Flush();
+                    return;
+                }
         }
 
         internal void Flush()

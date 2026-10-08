@@ -297,6 +297,7 @@ public sealed partial class PdfPageRenderer
             if (depth > 32) throw new FormatException("Form XObject nesting limit exceeded.");
             using var clipScratch = new ClipScratchScope();
             using var opaqueFills = new OpaqueFillSequence(pixels, frame, cancellationToken);
+            clipScratch.PendingFills = opaqueFills;
             GraphicsState state = RebindNamedColors(initial, pixels);
             ImageColorSpace? deviceGray = null, deviceRgb = null, deviceCmyk = null;
             ImageColorSpace DeviceSpace(int components)

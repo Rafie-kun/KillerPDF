@@ -361,6 +361,179 @@ public sealed class PdfRepeatedOpaqueFillTests
             RenderContent(Background + first + second, 1, singleFractionalForm: true));
     }
 
+    [Theory]
+    [InlineData(-1, false, false)]
+    [InlineData(0, false, false)]
+    [InlineData(1, false, false)]
+    [InlineData(-1, true, false)]
+    [InlineData(0, true, false)]
+    [InlineData(1, true, false)]
+    [InlineData(-1, false, true)]
+    [InlineData(0, false, true)]
+    [InlineData(1, false, true)]
+    [InlineData(-1, true, true)]
+    [InlineData(0, true, true)]
+    [InlineData(1, true, true)]
+    public void TemporaryFractionalClip_IdenticalProcessFillsMatchFinalOnly(
+        int mode, bool withSpot, bool larger)
+    {
+        string prefix = "q .1 .1 31.8 31.8 re W n " + Background + (withSpot
+            ? "q /SpotOn gs /Spot cs .5 scn 0 0 32 32 re f Q " : "");
+        string final = "q /Paint gs " + Final + "Q Q ";
+        AssertSame(RenderContent(prefix + final, mode, singleFractionalForm: larger),
+            RenderContent(prefix + "q /Paint gs " + Red + "Q " + final, mode,
+                singleFractionalForm: larger));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void TemporaryFractionalClip_NativeZeroReplacementIsWhiteAfterRestore(bool larger)
+    {
+        string content = "q .1 .1 31.8 31.8 re W n q /Paint gs .8 .8 .8 .8 k "
+            + Shape + "Q q /Paint gs /Process cs 0 0 0 0 scn " + Shape + "Q Q ";
+        PdfRenderedPage actual = RenderContent(content, 1, singleFractionalForm: larger);
+        Assert.Empty(actual.Diagnostics);
+        foreach (byte channel in actual.Pixels.Span) Assert.Equal(255, channel);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void TemporaryFractionalClip_PendingPaintFinishesBeforeReturnedBufferReuse(bool larger)
+    {
+        string first = "q 8.1 8.1 15.8 15.8 re W n /Paint gs " + Red;
+        string second = "Q q 8.8 8.8 14.4 14.4 re W n /Paint gs .3 .2 .1 0 k "
+            + ShiftedShape + "Q ";
+        AssertSame(RenderContent(Background + first + Barrier + second, 1,
+                singleFractionalForm: larger),
+            RenderContent(Background + first + second, 1, singleFractionalForm: larger));
+    }
+
+    [Fact]
+    public void TemporaryLargeClip_IdenticalProcessFillsMatchFinalOnly()
+    {
+        string prefix = "q .25 .25 m 31.5 .25 l 16 31.5 l h W n " + Background;
+        string first = "q /Paint gs " + Red + "Q ";
+        string final = "q /Paint gs " + Final + "Q Q ";
+        AssertSame(RenderContent(prefix + final, 1, singleFractionalForm: true),
+            RenderContent(prefix + first + final, 1, singleFractionalForm: true));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void TemporaryFractionalClip_PendingPaintFinishesBeforeClipReplacement(bool larger)
+    {
+        string first = "q 8.1 8.1 15.8 15.8 re W n /Paint gs " + Red;
+        string second = "8.8 8.8 14.4 14.4 re W n .3 .2 .1 0 k " + ShiftedShape + "Q ";
+        AssertSame(RenderContent(Background + first + Barrier + second, 1,
+                singleFractionalForm: larger),
+            RenderContent(Background + first + second, 1, singleFractionalForm: larger));
+    }
+
+    [Theory]
+    [InlineData(false, 0, false, false)]
+    [InlineData(false, 1, false, false)]
+    [InlineData(true, 0, false, false)]
+    [InlineData(true, 1, false, false)]
+    [InlineData(false, 0, true, false)]
+    [InlineData(false, 1, true, false)]
+    [InlineData(true, 0, true, false)]
+    [InlineData(true, 1, true, false)]
+    [InlineData(false, 0, false, true)]
+    [InlineData(false, 1, false, true)]
+    [InlineData(true, 0, false, true)]
+    [InlineData(true, 1, false, true)]
+    [InlineData(false, 0, true, true)]
+    [InlineData(false, 1, true, true)]
+    [InlineData(true, 0, true, true)]
+    [InlineData(true, 1, true, true)]
+    public void PureProcessPolicyChange_MatchesExplicitCombinedPaint(
+        bool firstOverprint, int mode, bool native, bool clipped)
+    {
+        string prefix = (clipped ? "q .1 .1 31.8 31.8 re W n " : "") + Background;
+        string suffix = clipped ? "Q " : "";
+        string first = "q " + (firstOverprint ? "/Paint" : "/Off")
+            + " gs .5 .8 .5 .1 k " + Shape + "Q ";
+        string final = "q " + (firstOverprint ? "/Off" : "/Paint") + " gs "
+            + (native ? "/Magenta cs .3 scn " : "0 .3 0 0 k ") + Shape + "Q ";
+        string values = !firstOverprint && (native || mode == 1)
+            ? ".5 .3 .5 .1" : "0 .3 0 0";
+        string combined = "q /Off gs " + values + " k " + Shape + "Q ";
+        AssertSame(RenderContent(prefix + combined + suffix, mode, singleFractionalForm: clipped),
+            RenderContent(prefix + first + final + suffix, mode, singleFractionalForm: clipped));
+    }
+
+    [Theory]
+    [InlineData(false, 0, false)]
+    [InlineData(false, 1, false)]
+    [InlineData(true, 0, false)]
+    [InlineData(true, 1, false)]
+    [InlineData(false, 0, true)]
+    [InlineData(false, 1, true)]
+    [InlineData(true, 0, true)]
+    [InlineData(true, 1, true)]
+    public void ProcessPolicyChange_WithSpotRetainsSequentialPainting(
+        bool firstOverprint, int mode, bool native)
+    {
+        string prefix = "q .1 .1 31.8 31.8 re W n " + Background
+            + "q /SpotOn gs /Spot cs .5 scn 0 0 32 32 re f Q ";
+        string first = "q " + (firstOverprint ? "/Paint" : "/Off")
+            + " gs .5 .8 .5 .1 k " + Shape + "Q ";
+        string final = "q " + (firstOverprint ? "/Off" : "/Paint") + " gs "
+            + (native ? "/Magenta cs .3 scn " : "0 .3 0 0 k ") + Shape + "Q Q ";
+        AssertSame(RenderContent(prefix + first + Barrier + final, mode, singleFractionalForm: true),
+            RenderContent(prefix + first + final, mode, singleFractionalForm: true));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void PureProcessPolicyChange_NativeZeroReplacementLeavesEveryChannelWhite(bool clipped)
+    {
+        string prefix = clipped ? "q .1 .1 31.8 31.8 re W n " : "";
+        string suffix = clipped ? "Q " : "";
+        string content = prefix + "q /Off gs .8 .8 .8 .8 k " + Shape
+            + "Q q /Paint gs /Process cs 0 0 0 0 scn " + Shape + "Q " + suffix;
+        PdfRenderedPage actual = RenderContent(content, 1, singleFractionalForm: clipped);
+        Assert.Empty(actual.Diagnostics);
+        foreach (byte channel in actual.Pixels.Span) Assert.Equal(255, channel);
+    }
+
+    [Theory]
+    [InlineData(63, true)]
+    [InlineData(64, true)]
+    [InlineData(256, true)]
+    [InlineData(64, false)]
+    [InlineData(256, false)]
+    public void LocalClipPointBoundary_PreservesComplexFallbackAndStableClipJoining(
+        int vertices, bool localClip)
+    {
+        string polygon = string.Join(" ", Enumerable.Range(0, vertices).Select(index =>
+        {
+            double angle = index * 2 * Math.PI / vertices;
+            string x = (16 + 11 * Math.Cos(angle)).ToString("R", System.Globalization.CultureInfo.InvariantCulture);
+            string y = (16 + 11 * Math.Sin(angle)).ToString("R", System.Globalization.CultureInfo.InvariantCulture);
+            return x + " " + y + (index == 0 ? " m" : " l");
+        })) + " h f ";
+        string prefix = (localClip ? "q .1 .1 31.8 31.8 re W n " : "") + Background;
+        string suffix = localClip ? "Q " : "";
+        string first = "q /Paint gs .8 .6 .4 .2 k " + polygon + "Q ";
+        string final = "q /Paint gs .2 .3 .4 .5 k " + polygon + "Q ";
+        PdfRenderedPage actual = RenderContent(prefix + first + final + suffix, 1,
+            singleFractionalForm: true);
+        PdfRenderedPage single = RenderContent(prefix + final + suffix, 1,
+            singleFractionalForm: true);
+        if (localClip && vertices >= 64)
+        {
+            AssertSame(RenderContent(prefix + first + Barrier + final + suffix, 1,
+                singleFractionalForm: true), actual);
+            Assert.False(actual.Pixels.Span.SequenceEqual(single.Pixels.Span));
+        }
+        else AssertSame(single, actual);
+    }
+
     private static PdfRenderedPage Render(int overprintMode, bool zeroTintSpot, bool firstPaint)
     {
         string content = Background

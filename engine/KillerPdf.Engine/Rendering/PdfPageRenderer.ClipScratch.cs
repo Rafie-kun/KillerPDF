@@ -12,6 +12,7 @@ public sealed partial class PdfPageRenderer
 
         internal ClipScratchScope() => _current = this;
         internal static ClipScratchScope? Current => _current;
+        internal OpaqueFillSequence? PendingFills { get; set; }
         internal int Save()
         {
             _saved.Push(_masks.Count);
@@ -28,8 +29,6 @@ public sealed partial class PdfPageRenderer
 
         internal bool CanRetainUntilStreamEnds(CoverageMask mask)
         {
-            // Parent scopes outlive this stream. Unpooled form bounds are never
-            // returned, but locally owned clips may be released by Q or a new clip.
             foreach (CoverageMask? owned in _masks)
                 if (owned is not null && ReferenceEquals(owned.Coverage, mask.Coverage))
                     return false;
@@ -41,13 +40,18 @@ public sealed partial class PdfPageRenderer
             int start = _saved.Count == 0 ? 0 : _saved.Peek();
             int index = _masks.IndexOf(mask, start);
             if (index < 0) return;
+            PendingFills?.FlushBeforeClipRelease(mask);
             _masks[index] = null;
             mask.Return();
         }
 
         internal void ReturnFrom(int index)
         {
-            for (int i = _masks.Count - 1; i >= index; i--) _masks[i]?.Return();
+            for (int i = _masks.Count - 1; i >= index; i--)
+            {
+                PendingFills?.FlushBeforeClipRelease(_masks[i]);
+                _masks[i]?.Return();
+            }
             _masks.RemoveRange(index, _masks.Count - index);
         }
 
