@@ -126,6 +126,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Restored valid font-code decoding and missing page text, corrected pattern placement, and repaired missing or corrupt JPEG 2000 image tiles.
 - Preserved native black-and-white scan pixels when page bounds clip a source column.
 - Preserved process overprint colors on RGB pages with named spot images.
+- Removed stray edges when native process inks replace coincident opaque CMYK fills.
 - Native CMYK rendering now repaints named spots through single-colorant images, fixes their color-conversion failure, and preserves other spots under mixed Black and spot images.
 - Corrected ColorDodge and ColorBurn blending in PDF 1.x files.
 - Kept PDF comparison colors consistent with the viewer for large Adobe YCCK JPEGs.

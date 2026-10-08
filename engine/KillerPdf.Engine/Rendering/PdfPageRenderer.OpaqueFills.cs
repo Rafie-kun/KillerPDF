@@ -27,9 +27,14 @@ public sealed partial class PdfPageRenderer
                 || state.FillAlpha != 1 || state.GraphicsSoftMask is not null || state.Knockout is not null
                 || state.FillPattern is not null || state.AlphaIsShape
                 || state.BlendMode is not (RendererBlendMode.Normal or RendererBlendMode.Compatible)
-                || state.FillColorSpace is not { IsDeviceCmyk: true, Components: 4, IsIccBased: false, Palette: null,
-                    Converter: null, MultiConverter: null }
                 || color.SpotName is not null || (color.OverprintComponents & (32 | 64)) != 0)
+                return false;
+
+            bool nativeProcess = state.FillColorSpace is not { IsDeviceCmyk: true, Components: 4,
+                IsIccBased: false, Palette: null, Converter: null, MultiConverter: null };
+            if (nativeProcess && (_mask is null
+                || state.FillColorSpace is not { NativeProcessMask: > 0, ProcessChannels: not null,
+                    Palette: null, HasSpotColorants: false }))
                 return false;
 
             int points = 0;
@@ -78,6 +83,10 @@ public sealed partial class PdfPageRenderer
                 };
                 return true;
             }
+
+            // Native process paints only join an existing coincident fill. Unrelated
+            // paints retain ordinary rendering without extra geometry or mask retention.
+            if (nativeProcess) return false;
 
             Flush();
             CoverageMask mask = RasterizeFill(path, evenOdd, frame, rent: true);

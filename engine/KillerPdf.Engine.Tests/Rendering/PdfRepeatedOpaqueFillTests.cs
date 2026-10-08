@@ -18,6 +18,92 @@ public sealed class PdfRepeatedOpaqueFillTests
     private const string Barrier = "q 0 0 m 0 0 l S Q ";
 
     [Theory]
+    [InlineData(false, false)]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    public void NativeMagentaSeparation_CoincidentFillMatchesCombinedProcessPaint(
+        bool withSpot, bool nestedFractionalForms)
+    {
+        string prefix = Background + (withSpot
+            ? "q /SpotOn gs /Spot cs .5 scn 0 0 32 32 re f Q " : "");
+        string first = "q /Paint gs .5 .8 .5 .1 k " + Shape + "Q ";
+        string second = "q /Paint gs /Magenta cs .3 scn " + Shape + "Q ";
+        string combined = "q /Paint gs .5 .3 .5 .1 k " + Shape + "Q ";
+        PdfRenderedPage expected = RenderContent(prefix + combined, 1,
+            nestedFractionalForms: nestedFractionalForms);
+        PdfRenderedPage actual = RenderContent(prefix + first + second, 1,
+            nestedFractionalForms: nestedFractionalForms);
+
+        AssertSame(expected, actual);
+    }
+
+    [Theory]
+    [InlineData("Cyan", "0 .8 .8 .8", "0")]
+    [InlineData("Magenta", ".8 0 .8 .8", "0")]
+    [InlineData("Yellow", ".8 .8 0 .8", "0")]
+    [InlineData("Black", ".8 .8 .8 0", "0")]
+    [InlineData("Cyan", ".3 .8 .8 .8", ".3")]
+    [InlineData("Magenta", ".8 .3 .8 .8", ".3")]
+    [InlineData("Yellow", ".8 .8 .3 .8", ".3")]
+    [InlineData("Black", ".8 .8 .8 .3", ".3")]
+    [InlineData("Cyan", "1 .8 .8 .8", "1")]
+    [InlineData("Magenta", ".8 1 .8 .8", "1")]
+    [InlineData("Yellow", ".8 .8 1 .8", "1")]
+    [InlineData("Black", ".8 .8 .8 1", "1")]
+    public void NativeProcessSeparation_ReplacementMatchesExplicitCombinedDeviceN(
+        string colorant, string combinedValues, string tint)
+    {
+        string prefix = Background + "q /SpotOn gs /Spot cs .5 scn 0 0 32 32 re f Q ";
+        string first = "q /Paint gs .8 .8 .8 .8 k " + Shape + "Q ";
+        string second = "q /Paint gs /" + colorant + " cs " + tint + " scn " + Shape + "Q ";
+        string combined = "q /Paint gs /Process cs " + combinedValues + " scn " + Shape + "Q ";
+        AssertSame(RenderContent(prefix + combined, 1), RenderContent(prefix + first + second, 1));
+    }
+
+    [Fact]
+    public void NativeProcessDeviceN_ZeroChannelsReplaceEarlierCoincidentPaint()
+    {
+        string prefix = Background + "q /SpotOn gs /Spot cs .5 scn 0 0 32 32 re f Q ";
+        string first = "q /Paint gs .8 .8 .8 .8 k " + Shape + "Q ";
+        string final = "q /Paint gs /Process cs .5 0 .3 0 scn " + Shape + "Q ";
+        AssertSame(RenderContent(prefix + final, 1), RenderContent(prefix + first + final, 1));
+    }
+
+    [Theory]
+    [InlineData("path")]
+    [InlineData("clip")]
+    [InlineData("intent")]
+    [InlineData("alpha")]
+    [InlineData("policy")]
+    public void NativeProcessSeparation_DifferentEffectivePaintKeepsSequentialBehavior(string difference)
+    {
+        string prefix = Background + "q /SpotOn gs /Spot cs .5 scn 0 0 32 32 re f Q ";
+        string first = "q /Paint gs " + (difference == "intent" ? "/RelativeColorimetric ri " : "")
+            + ".5 .8 .5 .1 k " + Shape + "Q ";
+        string second = "q /Paint gs " + (difference switch
+        {
+            "clip" => "0 0 18 32 re W n ",
+            "intent" => "/Perceptual ri ",
+            "alpha" => "/Half gs ",
+            "policy" => "/Off gs ",
+            _ => ""
+        }) + "/Magenta cs .3 scn " + (difference == "path" ? ShiftedShape : Shape) + "Q ";
+        AssertSame(RenderContent(prefix + first + Barrier + second, 1),
+            RenderContent(prefix + first + second, 1));
+    }
+
+    [Fact]
+    public void NativeProcessDeviceN_ZeroInkOverWhiteLeavesEveryChannelWhite()
+    {
+        string first = "q /Paint gs .8 .8 .8 .8 k " + Shape + "Q ";
+        string clear = "q /Paint gs /Process cs 0 0 0 0 scn " + Shape + "Q ";
+        PdfRenderedPage actual = RenderContent(first + clear, 1);
+        Assert.Empty(actual.Diagnostics);
+        foreach (byte channel in actual.Pixels.Span) Assert.Equal(255, channel);
+    }
+
+    [Theory]
     [InlineData(-1, false)]
     [InlineData(0, false)]
     [InlineData(1, false)]
@@ -262,8 +348,24 @@ public sealed class PdfRepeatedOpaqueFillTests
         {
             Entry("Spot", new PdfArray([
                 Name("Separation"), Name("ProbeSpot"), Name("DeviceCMYK"), tint
+            ])),
+            Entry("Magenta", new PdfArray([
+                Name("Separation"), Name("Magenta"), Name("DeviceCMYK"), tint
             ]))
         };
+        foreach (string colorant in new[] { "Cyan", "Yellow", "Black" })
+            colorSpaces.Add(Entry(colorant, new PdfArray([
+                Name("Separation"), Name(colorant), Name("DeviceCMYK"), tint
+            ])));
+        PdfStream processTint = new(new PdfDictionary([
+            Entry("FunctionType", new PdfInteger(4)),
+            Entry("Domain", Numbers(0, 1, 0, 1, 0, 1, 0, 1)),
+            Entry("Range", Numbers(0, 1, 0, 1, 0, 1, 0, 1))
+        ]), Encoding.ASCII.GetBytes("{ }"));
+        colorSpaces.Add(Entry("Process", new PdfArray([
+            Name("DeviceN"), new PdfArray([Name("Cyan"), Name("Magenta"), Name("Yellow"), Name("Black")]),
+            Name("DeviceCMYK"), update.AddObject(processTint)
+        ])));
         if (defaultCmykReplacement)
             colorSpaces.Add(Entry("DefaultCMYK", Name("DeviceCMYK")));
         PdfDictionary resources = new([

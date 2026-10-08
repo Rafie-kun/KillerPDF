@@ -112,7 +112,7 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 - Kept existing CMYK channels and antialiased process overprint edges on RGB spot pages.
 - Preserved process ink beneath supported named spot images on RGB pages and fixed single-colorant spot-image conversion failures.
 - Preserved antialiased named-spot overprints, including clipped paths on RGB pages.
-- Removed pale edges from repeated opaque CMYK fills inside nested clipped Forms.
+- Removed pale edges from repeated opaque CMYK fills inside nested clipped Forms and native process ink replacements.
 - Applied sampled shading colors through their DeviceN tint transforms instead of interpreting tint values as CMYK channels.
 - Recovered cross-reference tables whose trailer size omits valid objects (#406).
 - Preserved descriptor font names when a PDF omits the font resource's top-level name (#431).
