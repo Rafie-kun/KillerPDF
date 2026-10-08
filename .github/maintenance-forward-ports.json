@@ -673,6 +673,11 @@
       "maintenanceCommit": "b184fa796a060f0c632a72885aabb6a4be2d3ec7",
       "developmentCommit": "8aa8c139723737f479d508a6f6e65a26bfc655f8",
       "reason": "Theme and accent contrast corrections have identical functional patches on both lines, including all palette values, resource ownership, and control bindings."
+    },
+    {
+      "maintenanceCommit": "00e1651b7d18fd7ff28011a484cb2313b5a13311",
+      "developmentCommit": "1f43775ec56c559add95ecdcd57ba559c745d1a7",
+      "reason": "Both #442 commits replace the color picker's SolidColorBrush resource cast with Brush and add an identical isolated regression script. Both active lines passed all 45 theme/accent states and solid, linear-gradient, and radial-gradient brush checks."
     }
   ]
 }

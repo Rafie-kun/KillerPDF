@@ -1,15 +1,18 @@
-# Run after a Debug build with PowerShell 7 on the matching .NET runtime:
-# pwsh -NoProfile -Sta -File build/Test-ColorPickerDialog.ps1
+# Run after the chosen build with PowerShell 7 on the matching .NET runtime:
+# pwsh -NoProfile -Sta -File build/Test-ColorPickerDialog.ps1 -Configuration Release
 # Loads the compiled dialog without starting the app or saving preferences.
 [CmdletBinding()]
-param([string]$RepositoryRoot = (Split-Path -Parent $PSScriptRoot))
+param(
+    [string]$RepositoryRoot = (Split-Path -Parent $PSScriptRoot),
+    [ValidateSet('Debug', 'Release')][string]$Configuration = 'Debug'
+)
 
 $ErrorActionPreference = 'Stop'
 if ([Threading.Thread]::CurrentThread.GetApartmentState() -ne 'STA') {
     throw 'Run this test with pwsh -Sta.'
 }
 $project = Join-Path $RepositoryRoot 'KillerPDF.csproj'
-$properties = & dotnet msbuild $project -nologo -getProperty:TargetPath,TargetFramework | ConvertFrom-Json
+$properties = & dotnet msbuild $project -nologo "-p:Configuration=$Configuration" -getProperty:TargetPath,TargetFramework | ConvertFrom-Json
 if ($LASTEXITCODE -ne 0) { throw 'Could not evaluate the app project.' }
 $assemblyPath = $properties.Properties.TargetPath
 $framework = $properties.Properties.TargetFramework
@@ -19,7 +22,7 @@ if ($framework -notmatch '^net(?<major>\d+)\.(?<minor>\d+)-windows') {
 $major = [int]$Matches.major
 $minor = [int]$Matches.minor
 if ([Environment]::Version.Major -ne $major) { throw "Use a PowerShell host running .NET $major." }
-if (!(Test-Path -LiteralPath $assemblyPath)) { throw 'Build the Debug app before running this test.' }
+if (!(Test-Path -LiteralPath $assemblyPath)) { throw "Build the $Configuration app before running this test." }
 $runtimes = @(& dotnet --list-runtimes | ForEach-Object {
     if ($_ -match '^Microsoft\.WindowsDesktop\.App (?<version>\d+\.\d+\.\d+) \[(?<root>.+)\]$') {
         $version = [version]$Matches.version
