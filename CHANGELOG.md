@@ -198,6 +198,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Marked 1.9 development builds as unreleased in the About card.
 - Aligned website footer versions with the published release across all languages.
 - Rail right-click menus align 8 pixels from the content edges; the night-mode menu aligns with its icon.
+- Submenus attach consistently to their opening rows, with native direction and screen-edge placement.
 
 ## [1.8.5] - 2026-09-14
 
