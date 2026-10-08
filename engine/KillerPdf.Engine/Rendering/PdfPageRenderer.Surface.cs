@@ -19,6 +19,7 @@ public sealed partial class PdfPageRenderer
         internal bool HasProfile => InkProfile is not null || RgbProfile is not null;
         internal PdfColorTransform? InputProfile => _inputProfile ?? BlendProfile;
         private PdfColorTransform? _compositeProfile;
+        private PdfBlackPointCompensation? _compositeCompensation;
         private PdfColorTransform? _inputProfile;
         private Color _lastInkColor;
         private uint _lastInk;
@@ -196,10 +197,14 @@ public sealed partial class PdfPageRenderer
             Array.Clear(GroupShape, 0, Length / 4);
         }
 
-        internal InputProfileScope PrepareComposite(RasterSurface destination, int intent, HashSet<string> diagnostics)
+        internal InputProfileScope PrepareComposite(RasterSurface destination, int intent,
+            HashSet<string> diagnostics, bool blackPointCompensation = false)
         {
             // The group's internal blend space stays fixed. Only conversion of its completed
             // result uses the rendering intent captured at the invoking Do operator.
+            _compositeProfile = null;
+            _compositeCompensation = null;
+            _hasReadInk = false;
             if (ReferenceEquals(BlendProfile, destination.BlendProfile)) return default;
             if (BlendProfile is PdfIccProfileTransform profile)
             {
@@ -207,19 +212,38 @@ public sealed partial class PdfPageRenderer
                 if (_compositeProfile is null)
                     diagnostics.Add("The group rendering intent could not be used; its blend-profile conversion was used.");
             }
-            _hasReadInk = false;
-            if (destination.BlendProfile is not PdfIccProfileTransform targetProfile) return default;
+            if (destination.BlendProfile is not PdfIccProfileTransform targetProfile)
+            {
+                ConfigureCompensation();
+                return default;
+            }
             PdfIccProfileTransform? mapped = targetProfile.ForIntent(intent);
-            if (ReferenceEquals(mapped, targetProfile)) return default;
+            if (ReferenceEquals(mapped, targetProfile))
+            {
+                ConfigureCompensation();
+                return default;
+            }
             if (mapped is not { CanConvertFromXyz: true })
             {
                 diagnostics.Add("The destination group rendering intent could not be used; its blend-profile conversion was used.");
+                ConfigureCompensation();
                 return default;
             }
             var scope = new InputProfileScope(destination, destination._inputProfile);
             destination._inputProfile = mapped;
             destination._hasInkColor = false;
+            ConfigureCompensation();
             return scope;
+
+            void ConfigureCompensation()
+            {
+                if (!blackPointCompensation) return;
+                if (Ink is not null && InkProfile is null
+                    || !PdfBlackPointCompensation.TryCreate(_compositeProfile ?? BlendProfile,
+                        destination.InputProfile, intent, out var compensation))
+                    diagnostics.Add("Black-point compensation could not be applied to this group conversion.");
+                else if (!compensation.IsIdentity) _compositeCompensation = compensation;
+            }
         }
 
         internal readonly struct InputProfileScope(RasterSurface? surface, PdfColorTransform? previous) : IDisposable
@@ -255,10 +279,13 @@ public sealed partial class PdfPageRenderer
 
         internal Color ColorFromRgb(Color samples)
         {
-            if (RgbProfile is null) return samples;
+            if (RgbProfile is null) return _compositeCompensation is { } mapping
+                ? CompensateColor(samples, mapping) : samples;
             uint key = (uint)(samples.Red << 16 | samples.Green << 8 | samples.Blue);
             if (_hasReadInk && key == _lastReadInk) return _lastReadColor;
             _lastReadColor = ProfileRgbToDisplay(samples, _compositeProfile ?? RgbProfile);
+            if (_compositeCompensation is { } compensation)
+                _lastReadColor = CompensateColor(_lastReadColor, compensation);
             _lastReadInk = key;
             _hasReadInk = true;
             return _lastReadColor;
@@ -287,6 +314,8 @@ public sealed partial class PdfPageRenderer
                 && ReferenceEquals(InkProfile, destination.InkProfile)) return InkColor(ink);
             if (_hasReadInk && ink == _lastReadInk) return _lastReadColor;
             _lastReadColor = InkColor(ink, _compositeProfile ?? InkProfile);
+            if (_compositeCompensation is { } compensation)
+                _lastReadColor = CompensateColor(_lastReadColor, compensation);
             _lastReadInk = ink;
             _hasReadInk = true;
             return _lastReadColor;

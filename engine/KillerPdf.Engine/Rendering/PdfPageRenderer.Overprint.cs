@@ -8,9 +8,9 @@ public sealed partial class PdfPageRenderer
 
     private GraphicsState RebindNamedColors(GraphicsState state, RasterSurface destination)
     {
-        if (state.FillColorSpace is { } fill && (fill.HasProcessColorants || fill.HasIccSource))
+        if (state.FillColorSpace is { } fill && (fill.HasProcessColorants || fill.HasIccSource || state.BlackPointCompensation))
         {
-            ImageColorSpace space = fill.ForDestination(destination);
+            ImageColorSpace space = fill.ForDestination(destination, state.BlackPointCompensation);
             if (!ReferenceEquals(space, fill)) state = state with
             {
                 FillColorSpace = space,
@@ -18,9 +18,9 @@ public sealed partial class PdfPageRenderer
                     : state.FillComponents is { } values ? space.Convert(values) : space.InitialPaint(out _)
             };
         }
-        if (state.StrokeColorSpace is { } stroke && (stroke.HasProcessColorants || stroke.HasIccSource))
+        if (state.StrokeColorSpace is { } stroke && (stroke.HasProcessColorants || stroke.HasIccSource || state.BlackPointCompensation))
         {
-            ImageColorSpace space = stroke.ForDestination(destination);
+            ImageColorSpace space = stroke.ForDestination(destination, state.BlackPointCompensation);
             if (!ReferenceEquals(space, stroke)) state = state with
             {
                 StrokeColorSpace = space,

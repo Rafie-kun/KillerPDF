@@ -303,9 +303,11 @@ public sealed partial class PdfPageRenderer
             ImageColorSpace DeviceSpace(int components)
             {
                 ImageColorSpace? space = components switch { 1 => deviceGray, 3 => deviceRgb, _ => deviceCmyk };
-                if (space is not null && (!space.HasIccSource || space.Intent == state.RenderingIntent)) return space;
+                if (space is not null && space.BlackPointCompensationEnabled == state.BlackPointCompensation
+                    && (!(space.HasIccSource || state.BlackPointCompensation) || space.Intent == state.RenderingIntent)) return space;
                 string name = components switch { 1 => "DeviceGray", 3 => "DeviceRGB", _ => "DeviceCMYK" };
-                space = ReadColorSpace(Name(name), resources, 0, diagnostics: diagnostics, intent: state.RenderingIntent).ForDestination(pixels);
+                space = ReadColorSpace(Name(name), resources, 0, diagnostics: diagnostics, intent: state.RenderingIntent)
+                    .ForDestination(pixels, state.BlackPointCompensation, diagnostics);
                 if (components == 1) deviceGray = space;
                 else if (components == 3) deviceRgb = space;
                 else deviceCmyk = space;
@@ -389,7 +391,7 @@ public sealed partial class PdfPageRenderer
                         Fill = ReadDevicePaint(deviceFill, values, out double[]? deviceFillComponents),
                         FillColorSpace = deviceFill,
                         FillComponents = deviceFillComponents,
-                        FillOperands = deviceFill.HasIccSource ? values : null,
+                        FillOperands = values,
                         FillPatternSpace = false,
                         FillPatternBase = null,
                         FillPattern = null
@@ -415,7 +417,7 @@ public sealed partial class PdfPageRenderer
                     state = state with
                     {
                         FillPattern = fillPattern with { BaseColor = baseColor },
-                        FillOperands = state.FillPatternBase?.HasIccSource == true ? values : null
+                        FillOperands = state.FillPatternBase is not null ? values : null
                     };
                     break;
                 case "cs" when values.Count == 1:
@@ -429,13 +431,14 @@ public sealed partial class PdfPageRenderer
                             FillComponents = null,
                             FillOperands = null,
                             FillColorSpace = null,
-                            FillPatternBase = fillPatternBase,
+                            FillPatternBase = fillPatternBase?.ForDestination(pixels, state.BlackPointCompensation, diagnostics),
                             FillPattern = null
                         };
                     }
                     else
                     {
-                        ImageColorSpace fillSpace = ReadColorSpace(values[0], resources, 0, diagnostics: diagnostics, intent: state.RenderingIntent).ForDestination(pixels);
+                        ImageColorSpace fillSpace = ReadColorSpace(values[0], resources, 0, diagnostics: diagnostics, intent: state.RenderingIntent)
+                            .ForDestination(pixels, state.BlackPointCompensation, diagnostics);
                         state = state with
                         {
                             FillColorSpace = fillSpace,
@@ -455,7 +458,7 @@ public sealed partial class PdfPageRenderer
                         Fill = ReadPaintColor(state.FillColorSpace, values, state.Fill, diagnostics,
                             state.FillComponents, out double[]? fillComponents),
                         FillComponents = fillComponents,
-                        FillOperands = state.FillColorSpace.HasIccSource && values.Count >= state.FillColorSpace.Components ? values : state.FillOperands
+                        FillOperands = values.Count >= state.FillColorSpace.Components ? values : state.FillOperands
                     };
                     break;
                 case "G" when values.Count == 1:
@@ -467,7 +470,7 @@ public sealed partial class PdfPageRenderer
                         Stroke = ReadDevicePaint(deviceStroke, values, out double[]? deviceStrokeComponents),
                         StrokeColorSpace = deviceStroke,
                         StrokeComponents = deviceStrokeComponents,
-                        StrokeOperands = deviceStroke.HasIccSource ? values : null,
+                        StrokeOperands = values,
                         StrokePatternSpace = false,
                         StrokePatternBase = null,
                         StrokePattern = null
@@ -484,13 +487,14 @@ public sealed partial class PdfPageRenderer
                             StrokeComponents = null,
                             StrokeOperands = null,
                             StrokeColorSpace = null,
-                            StrokePatternBase = strokePatternBase,
+                            StrokePatternBase = strokePatternBase?.ForDestination(pixels, state.BlackPointCompensation, diagnostics),
                             StrokePattern = null
                         };
                     }
                     else
                     {
-                        ImageColorSpace strokeSpace = ReadColorSpace(values[0], resources, 0, diagnostics: diagnostics, intent: state.RenderingIntent).ForDestination(pixels);
+                        ImageColorSpace strokeSpace = ReadColorSpace(values[0], resources, 0, diagnostics: diagnostics, intent: state.RenderingIntent)
+                            .ForDestination(pixels, state.BlackPointCompensation, diagnostics);
                         state = state with
                         {
                             StrokeColorSpace = strokeSpace,
@@ -510,7 +514,7 @@ public sealed partial class PdfPageRenderer
                         Stroke = ReadPaintColor(state.StrokeColorSpace, values, state.Stroke, diagnostics,
                             state.StrokeComponents, out double[]? strokeComponents),
                         StrokeComponents = strokeComponents,
-                        StrokeOperands = state.StrokeColorSpace.HasIccSource && values.Count >= state.StrokeColorSpace.Components ? values : state.StrokeOperands
+                        StrokeOperands = values.Count >= state.StrokeColorSpace.Components ? values : state.StrokeOperands
                     };
                     break;
                 case "SCN" when state.StrokePatternSpace && values.Count > 0
@@ -535,7 +539,7 @@ public sealed partial class PdfPageRenderer
                     state = state with
                     {
                         StrokePattern = strokePattern with { BaseColor = strokeBaseColor },
-                        StrokeOperands = state.StrokePatternBase?.HasIccSource == true ? values : null
+                        StrokeOperands = state.StrokePatternBase is not null ? values : null
                     };
                     break;
                 case "w" when values.Count == 1:
@@ -596,6 +600,12 @@ public sealed partial class PdfPageRenderer
                         state = ApplyOverprintSettings(state, strokeSettings!);
                         if (strokeSettings!.TryGetValue(Name("RI"), out PdfObject? intentValue) && Resolve(intentValue) is PdfName graphicsIntent)
                             state = ApplyRenderingIntent(state, ReadRenderingIntent(graphicsIntent), pixels, diagnostics);
+                        if (strokeSettings.TryGetValue(Name("UseBlackPtComp"), out PdfObject? blackPointValue))
+                        {
+                            bool compensate = ReadBlackPointPolicy(Resolve(blackPointValue), diagnostics);
+                            if (compensate != state.BlackPointCompensation) opaqueFills.Flush();
+                            state = ApplyRenderingIntent(state, state.RenderingIntent, pixels, diagnostics, compensate);
+                        }
                         state = state with
                         {
                             FillAlpha = fillAlpha ?? state.FillAlpha,
@@ -825,7 +835,7 @@ public sealed partial class PdfPageRenderer
                             state.Knockout, pixels, options.Width,
                             options.Height, scaleX, scaleY,
                             out string? imageDiagnostic, state.FillOverprint, diagnostics, state.RenderingIntent, state.AlphaIsShape,
-                            cancellationToken: cancellationToken))
+                            cancellationToken: cancellationToken, blackPointCompensation: state.BlackPointCompensation))
                             diagnostics.Add(imageDiagnostic
                                 ?? "Image rendering is not implemented.");
                     }
@@ -841,7 +851,8 @@ public sealed partial class PdfPageRenderer
                         state.Knockout, pixels, options.Width,
                         options.Height, scaleX, scaleY,
                         out string? inlineDiagnostic, state.FillOverprint, diagnostics, state.RenderingIntent,
-                        state.AlphaIsShape, ownedInlineImage: true, cancellationToken: cancellationToken))
+                        state.AlphaIsShape, ownedInlineImage: true, cancellationToken: cancellationToken,
+                        blackPointCompensation: state.BlackPointCompensation))
                         diagnostics.Add(inlineDiagnostic
                             ?? "Inline-image rendering is not implemented.");
                     break;
@@ -1087,7 +1098,8 @@ public sealed partial class PdfPageRenderer
                         if (!shading.TryGetValue(Name("ColorSpace"), out PdfObject? colorSpaceValue))
                             throw new FormatException("A shading background color space is missing.");
                         ImageColorSpace colorSpace = ReadColorSpace(colorSpaceValue, parentResources, 0,
-                            diagnostics: diagnostics, intent: shadingState.RenderingIntent).ForDestination(pixels);
+                            diagnostics: diagnostics, intent: shadingState.RenderingIntent)
+                            .ForDestination(pixels, shadingState.BlackPointCompensation, diagnostics);
                         double[] components = [.. ResolveArray(paint.Background, colorSpace.Components, "Shading background").Select(value => Number(Resolve(value)))];
                         if (components.Any(value => !double.IsFinite(value)))
                             throw new FormatException("A shading background component is invalid.");
@@ -2066,7 +2078,7 @@ public sealed partial class PdfPageRenderer
                         Process(instructions, formResources, isolatedState, depth + 1);
                         pixels = pagePixels;
                         using var compositeProfile = groupPixels.PrepareComposite(
-                            pagePixels, parentState.RenderingIntent, diagnostics);
+                            pagePixels, parentState.RenderingIntent, diagnostics, parentState.BlackPointCompensation);
                     bool plainComposite = pagePixels.Ink is null && pagePixels.RgbProfile is null
                         && pagePixels.GroupShape is null
                         && pagePixels.GroupAlpha is null && groupPixels.Ink is null
@@ -2721,7 +2733,7 @@ public sealed partial class PdfPageRenderer
         RasterSurface target, int targetWidth, int targetHeight, double scaleX, double scaleY,
         out string? diagnostic, bool overprint = false, HashSet<string>? diagnostics = null, int renderingIntent = 1,
         bool alphaIsShape = false, bool ownedInlineImage = false,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default, bool blackPointCompensation = false)
     {
         diagnostic = null;
         cancellationToken.ThrowIfCancellationRequested();
@@ -2786,6 +2798,7 @@ public sealed partial class PdfPageRenderer
             diagnostic = "The image color space or sample depth is not implemented.";
             return false;
         }
+        if (!imageMask && blackPointCompensation) colorSpace = colorSpace.ForDestination(target, true, diagnostics);
         int components = colorSpace.Components;
         if (bits is not (1 or 2 or 4 or 8 or 16))
         {
@@ -3124,7 +3137,8 @@ public sealed partial class PdfPageRenderer
     {
         ImageColorSpace space = ReadColorSpaceCore(value, resources, depth, useDefaults, diagnostics, intent);
         return space.HasIccSource || space.Profile is PdfIccProfileTransform || space.PaletteBase?.HasIccSource == true
-            ? space with { HasIccSource = true, Definition = value, SourceResources = resources, Intent = intent } : space;
+            ? space with { HasIccSource = true, Definition = value, SourceResources = resources, Intent = intent }
+            : space.Intent == intent ? space : space with { Intent = intent };
     }
 
     private ImageColorSpace ReadColorSpaceCore(PdfObject value, PdfDictionary resources, int depth,
@@ -3321,7 +3335,7 @@ public sealed partial class PdfPageRenderer
                     : tintTransform(tint),
                 ProcessChannels: channel >= 0 ? [channel] : null, SuppressPainting: channel == -1,
                 Initial: InitialColor.FullTint, HasIccSource: alternate.HasIccSource,
-                HasSpotColorants: channel == -2);
+                HasSpotColorants: channel == -2, BlackPointAlternate: alternate);
         }
         if (kind.ValueAsLatin1() == "DeviceN")
         {
@@ -3421,7 +3435,8 @@ public sealed partial class PdfPageRenderer
                     { SpotName = singleSpot, SpotTint = values[0] },
                 ProcessChannels: supported ? channels : null, SuppressPainting: channels.All(channel => channel == -1),
                 Initial: InitialColor.FullTint, HasIccSource: alternate.HasIccSource,
-                HasSpotColorants: channels is [-2] || mixedSpot || twoSpots);
+                HasSpotColorants: channels is [-2] || mixedSpot || twoSpots,
+                BlackPointAlternate: mixedSpot || twoSpots ? null : alternate);
         }
         if (kind.ValueAsLatin1() != "Indexed" || array.Count != 4
             || Resolve(array[2]) is not PdfInteger highValue
@@ -4066,7 +4081,8 @@ public sealed partial class PdfPageRenderer
             if (shadingType.Value != 2) throw new NotSupportedException();
             if (!shading.TryGetValue(Name("ColorSpace"), out PdfObject? colorSpaceValue))
                 throw new FormatException("An axial shading color space is missing.");
-            ImageColorSpace colorSpace = ReadColorSpace(colorSpaceValue, resources, 0, diagnostics: diagnostics, intent: state.RenderingIntent).ForDestination(target);
+            ImageColorSpace colorSpace = ReadColorSpace(colorSpaceValue, resources, 0, diagnostics: diagnostics, intent: state.RenderingIntent)
+                .ForDestination(target, state.BlackPointCompensation, diagnostics);
             if (!shading.TryGetValue(Name("Coords"), out PdfObject? coordinatesValue))
                 throw new FormatException("An axial shading coordinate array is missing.");
             PdfArray coordinates = ResolveArray(coordinatesValue, 4,
@@ -4184,7 +4200,8 @@ public sealed partial class PdfPageRenderer
     {
         if (!shading.TryGetValue(Name("ColorSpace"), out PdfObject? colorSpaceValue))
             throw new FormatException("A function shading color space is missing.");
-        ImageColorSpace colorSpace = ReadColorSpace(colorSpaceValue, resources, 0, diagnostics: diagnostics, intent: state.RenderingIntent).ForDestination(target);
+        ImageColorSpace colorSpace = ReadColorSpace(colorSpaceValue, resources, 0, diagnostics: diagnostics, intent: state.RenderingIntent)
+            .ForDestination(target, state.BlackPointCompensation, diagnostics);
         if (!shading.TryGetValue(Name("Function"), out PdfObject? functionValue))
             throw new FormatException("A function shading function is missing.");
         Func<double[], Color> function = ReadMultidimensionalColorFunction(
@@ -4242,7 +4259,7 @@ public sealed partial class PdfPageRenderer
         double scaleX, double scaleY, HashSet<string>? diagnostics, CancellationToken cancellationToken)
     {
         MeshDecoder mesh = ReadMeshDecoder(
-            stream, resources, hasFlags: true, state.Transform, target, diagnostics, state.RenderingIntent);
+            stream, resources, hasFlags: true, state.Transform, target, diagnostics, state.RenderingIntent, state.BlackPointCompensation);
         var previous = new MeshVertex[3];
         bool rendered = false;
         while (mesh.HasData)
@@ -4283,7 +4300,7 @@ public sealed partial class PdfPageRenderer
         if (verticesPerRow is < 2 or > MaximumMeshVerticesPerRow)
             throw new FormatException("A lattice mesh shading has an invalid row width.");
         MeshDecoder mesh = ReadMeshDecoder(
-            stream, resources, hasFlags: false, state.Transform, target, diagnostics, state.RenderingIntent);
+            stream, resources, hasFlags: false, state.Transform, target, diagnostics, state.RenderingIntent, state.BlackPointCompensation);
         MeshVertex[]? previous = null;
         int rowCount = 0;
         while (mesh.HasData)
@@ -4315,12 +4332,13 @@ public sealed partial class PdfPageRenderer
 
     private MeshDecoder ReadMeshDecoder(
         PdfStream stream, PdfDictionary resources, bool hasFlags, Matrix transform, RasterSurface target,
-        HashSet<string>? diagnostics, int intent)
+        HashSet<string>? diagnostics, int intent, bool blackPointCompensation)
     {
         PdfDictionary shading = stream.Dictionary;
         if (!shading.TryGetValue(Name("ColorSpace"), out PdfObject? colorSpaceValue))
             throw new FormatException("A mesh shading color space is missing.");
-        ImageColorSpace colorSpace = ReadColorSpace(colorSpaceValue, resources, 0, diagnostics: diagnostics, intent: intent).ForDestination(target);
+        ImageColorSpace colorSpace = ReadColorSpace(colorSpaceValue, resources, 0, diagnostics: diagnostics, intent: intent)
+            .ForDestination(target, blackPointCompensation, diagnostics);
         int coordinateBits = PositiveInteger(shading, "BitsPerCoordinate");
         int componentBits = PositiveInteger(shading, "BitsPerComponent");
         int flagBits = hasFlags ? PositiveInteger(shading, "BitsPerFlag") : 0;
@@ -4397,7 +4415,8 @@ public sealed partial class PdfPageRenderer
         PdfDictionary shading = stream.Dictionary;
         if (!shading.TryGetValue(Name("ColorSpace"), out PdfObject? colorSpaceValue))
             throw new FormatException("A patch mesh shading color space is missing.");
-        ImageColorSpace colorSpace = ReadColorSpace(colorSpaceValue, resources, 0, diagnostics: diagnostics, intent: state.RenderingIntent).ForDestination(target);
+        ImageColorSpace colorSpace = ReadColorSpace(colorSpaceValue, resources, 0, diagnostics: diagnostics, intent: state.RenderingIntent)
+            .ForDestination(target, state.BlackPointCompensation, diagnostics);
         int coordinateBits = PositiveInteger(shading, "BitsPerCoordinate");
         int componentBits = PositiveInteger(shading, "BitsPerComponent");
         int flagBits = PositiveInteger(shading, "BitsPerFlag");
@@ -4620,7 +4639,8 @@ public sealed partial class PdfPageRenderer
     {
         if (!shading.TryGetValue(Name("ColorSpace"), out PdfObject? colorSpaceValue))
             throw new FormatException("A radial shading color space is missing.");
-        ImageColorSpace colorSpace = ReadColorSpace(colorSpaceValue, resources, 0, diagnostics: diagnostics, intent: state.RenderingIntent).ForDestination(target);
+        ImageColorSpace colorSpace = ReadColorSpace(colorSpaceValue, resources, 0, diagnostics: diagnostics, intent: state.RenderingIntent)
+            .ForDestination(target, state.BlackPointCompensation, diagnostics);
         if (!shading.TryGetValue(Name("Coords"), out PdfObject? coordinatesValue))
             throw new FormatException("A radial shading coordinate array is missing.");
         PdfArray coordinates = ResolveArray(coordinatesValue, 6,
@@ -5874,7 +5894,8 @@ public sealed partial class PdfPageRenderer
             bool plainSpace = targetProfile is null && !colorSpace.DoesNotPaint
                 && colorSpace.Palette is null && colorSpace.Converter is null
                 && colorSpace.MultiConverter is null && colorSpace.Profile is null
-                && colorSpace.ComponentRange is null && bits == 8 && colorSpace.Components == components;
+                && colorSpace.ComponentRange is null
+                && bits == 8 && colorSpace.Components == components;
             bool plainRgb = plainSpace && components == 3 && decode is [0, 1, 0, 1, 0, 1];
             _directRgb = plainRgb && !targetInk;
             _directRgbInk = plainRgb && targetInk;
@@ -7232,7 +7253,7 @@ public sealed partial class PdfPageRenderer
         KnockoutState? Knockout, bool FillOverprint = false, bool StrokeOverprint = false,
         int OverprintMode = 0, double[]? FillComponents = null, double[]? StrokeComponents = null,
         int RenderingIntent = 1, IReadOnlyList<PdfObject>? FillOperands = null, IReadOnlyList<PdfObject>? StrokeOperands = null,
-        bool AlphaIsShape = false, bool StrokeAdjust = false)
+        bool AlphaIsShape = false, bool StrokeAdjust = false, bool BlackPointCompensation = false)
     {
         internal Color PaintFill => OverprintColor(Fill, FillColorSpace, FillOverprint, OverprintMode);
         internal Color PaintStroke => OverprintColor(Stroke, StrokeColorSpace, StrokeOverprint, OverprintMode);
@@ -7748,6 +7769,9 @@ public sealed partial class PdfPageRenderer
     }
     private enum InitialColor { Zero, BlackInk, FullTint }
 
+    private sealed record BlackPointBinding(ImageColorSpace Source,
+        PdfColorTransform? Destination, PdfBlackPointCompensation? Compensation);
+
     private sealed record ImageColorSpace(int Components, Color[]? Palette,
         Func<double, double, double, double, Color>? Converter = null,
         double[]? DefaultDecode = null, Func<double[], Color>? MultiConverter = null,
@@ -7757,8 +7781,13 @@ public sealed partial class PdfPageRenderer
         bool SuppressPainting = false, bool RegistrationColor = false, InitialColor Initial = InitialColor.Zero,
         bool IsLab = false, bool IsDefault = false, bool HasIccSource = false, bool HasSpotColorants = false,
         PdfObject? Definition = null, PdfDictionary? SourceResources = null, int Intent = 1,
-        bool IsDeviceCmyk = false)
+        bool IsDeviceCmyk = false, BlackPointBinding? BlackPointControl = null,
+        ImageColorSpace? BlackPointAlternate = null)
     {
+        internal bool BlackPointCompensationEnabled => BlackPointControl is not null;
+        internal ImageColorSpace? BlackPointSource => BlackPointControl?.Source;
+        internal PdfColorTransform? BlackPointDestination => BlackPointControl?.Destination;
+        internal PdfBlackPointCompensation? Compensation => BlackPointControl?.Compensation;
         internal bool DoesNotPaint => SuppressPainting || PaletteBase?.SuppressPainting == true;
         internal bool HasProcessColorants => RegistrationColor || ProcessChannels is not null
             || PaletteBase?.HasProcessColorants == true;
@@ -7779,11 +7808,22 @@ public sealed partial class PdfPageRenderer
             return Convert(tint, tint, tint, Initial == InitialColor.BlackInk ? 1 : tint);
         }
 
-        internal ImageColorSpace ForDestination(RasterSurface destination) =>
+        internal ImageColorSpace ForDestination(RasterSurface destination, bool? compensate = null,
+            HashSet<string>? diagnostics = null)
+        {
+            bool enabled = compensate ?? BlackPointCompensationEnabled;
+            if (enabled && BlackPointSource is not null
+                && ReferenceEquals(BlackPointDestination, destination.InputProfile)) return this;
+            ImageColorSpace source = BlackPointSource ?? this;
+            ImageColorSpace bound = source.ForNativeDestination(destination);
+            return enabled ? BindBlackPointCompensation(source, bound, destination, diagnostics) : bound;
+        }
+
+        private ImageColorSpace ForNativeDestination(RasterSurface destination) =>
             NativeProcessMask.HasValue && (destination.Ink is not null || destination.HasRgbSpotShadow) ? this
             : Profile is null && SourceSpace is { Components: 4, Profile: not null } original
                 && destination.Ink is not null && ReferenceEquals(original.Profile, destination.InkProfile) ? this
-            : SourceSpace is not null ? SourceSpace.ForDestination(destination)
+            : SourceSpace is not null ? SourceSpace.ForNativeDestination(destination)
             : PaletteBase is { HasProcessColorants: true }
                 && (destination.Ink is not null || destination.HasRgbSpotShadow)
                 ? BindProcessPalette(destination)

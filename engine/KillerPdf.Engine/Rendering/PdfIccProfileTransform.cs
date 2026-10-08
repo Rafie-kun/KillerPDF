@@ -24,6 +24,9 @@ internal sealed class PdfIccProfileTransform : PdfColorTransform
     private int _intent;
     private readonly bool _lab;
     internal bool IsLabInput { get; }
+    internal bool IsLutBased => _forward is not null;
+    internal int RenderingIntent => _intent;
+    internal bool SupportsBlackPointCompensation { get; }
     internal override int Components { get; }
     internal override bool SupportsBlending => !IsLabInput;
     internal override double ClampComponent(int component, double value) => IsLabInput
@@ -41,6 +44,8 @@ internal sealed class PdfIccProfileTransform : PdfColorTransform
         ReadOnlySpan<byte> bytes = data.Span;
         if (bytes.Length < 132 || !bytes.Slice(36, 4).SequenceEqual("acsp"u8))
             throw new FormatException("An ICC profile header is invalid.");
+        SupportsBlackPointCompensation = Encoding.ASCII.GetString(bytes.Slice(12, 4))
+            is "scnr" or "mntr" or "prtr" or "spac";
         uint length = BinaryPrimitives.ReadUInt32BigEndian(bytes);
         uint count = BinaryPrimitives.ReadUInt32BigEndian(bytes[128..]);
         long tableEnd = 132L + 12L * count;
