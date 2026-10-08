@@ -72,32 +72,48 @@ public sealed partial class PdfPageRenderer
                 && ((_color.OverprintComponents & ~15) == (color.OverprintComponents & ~15)
                     || ((_color.OverprintComponents ^ color.OverprintComponents)
                             & ~(15 | 16 | PreserveNamedSpots)) == 0
-                        && !pixels.HasSpotPlates && !pixels.HasRgbSpotShadow)
-                && SamePath(path))
+                        && !pixels.HasSpotPlates && !pixels.HasRgbSpotShadow))
             {
-                int previousPreserve = PreservedChannels(_color), preserve = PreservedChannels(color);
-                uint byteMask = 0;
-                for (int channel = 0; channel < 4; channel++)
-                    if ((preserve & (1 << channel)) != 0) byteMask |= 255u << (channel * 8);
-                _color = color with
+                if (SamePath(path))
                 {
-                    Ink = (color.Ink!.Value & ~byteMask) | (_color.Ink!.Value & byteMask),
-                    OverprintComponents = (byte)((color.OverprintComponents & ~15)
-                        | (previousPreserve & preserve))
-                };
-                return true;
+                    int previousPreserve = PreservedChannels(_color), preserve = PreservedChannels(color);
+                    uint byteMask = 0;
+                    for (int channel = 0; channel < 4; channel++)
+                        if ((preserve & (1 << channel)) != 0) byteMask |= 255u << (channel * 8);
+                    _color = color with
+                    {
+                        Ink = (color.Ink!.Value & ~byteMask) | (_color.Ink!.Value & byteMask),
+                        OverprintComponents = (byte)((color.OverprintComponents & ~15)
+                            | (previousPreserve & preserve))
+                    };
+                    return true;
+                }
+                int replaced = 15 & ~PreservedChannels(color);
+                if ((replaced & ~PreservedChannels(_color)) != 0
+                    && !pixels.HasSpotPlates && !pixels.HasRgbSpotShadow && EnclosesPendingPath(path))
+                {
+                    // The later opaque rectangle replaces these channels throughout the
+                    // pending region. Resolve its remaining channels against the original
+                    // backdrop so overlapping edge coverage is not applied twice.
+                    _color = _color with
+                    {
+                        OverprintComponents = (byte)((_color.OverprintComponents & ~15)
+                            | 16 | PreservedChannels(_color) | replaced)
+                    };
+                }
             }
 
-            // Native process paints only join an existing coincident fill. Unrelated
-            // paints retain ordinary rendering without extra geometry or mask retention.
+            // Native process paints retain ordinary rendering after pending channels
+            // have been resolved, without retaining additional geometry or masks.
             if (nativeProcess) return false;
 
             Flush();
             CoverageMask mask = RasterizeFill(path, evenOdd, frame, rent: true);
             try
             {
-                // Integer rectangles already have exact coverage and need no pending state.
-                if (mask.Coverage is null)
+                // Integer rectangles need pending state only when a fractional clip
+                // introduces shared edge coverage for subsequent process paints.
+                if (mask.Coverage is null && !fractionalClips)
                 {
                     PaintCoverage(pixels, frame.Width, mask, color, 1, state.BlendMode,
                         state.Clips, null, null, cancellationToken);
@@ -126,6 +142,43 @@ public sealed partial class PdfPageRenderer
 
         private static int PreservedChannels(Color color) =>
             (color.OverprintComponents & 16) != 0 ? color.OverprintComponents & 15 : 0;
+
+        private bool EnclosesPendingPath(IReadOnlyList<List<Point>> path)
+        {
+            if (path.Count != 1 || path[0].Count is not (4 or 5)) return false;
+            List<Point> rectangle = path[0];
+            if (rectangle.Count == 5 && rectangle[4] != rectangle[0]) return false;
+            double left = double.PositiveInfinity, top = double.PositiveInfinity;
+            double right = double.NegativeInfinity, bottom = double.NegativeInfinity;
+            for (int index = 0; index < 4; index++)
+            {
+                Point point = rectangle[index], next = rectangle[(index + 1) % 4];
+                if (!double.IsFinite(point.X) || !double.IsFinite(point.Y)
+                    || point == next || point.X != next.X && point.Y != next.Y) return false;
+                left = Math.Min(left, point.X);
+                top = Math.Min(top, point.Y);
+                right = Math.Max(right, point.X);
+                bottom = Math.Max(bottom, point.Y);
+            }
+            if (right <= left || bottom <= top) return false;
+            int corners = 0;
+            for (int index = 0; index < 4; index++)
+            {
+                Point point = rectangle[index];
+                if (point.X != left && point.X != right || point.Y != top && point.Y != bottom)
+                    return false;
+                int corner = (point.X == right ? 1 : 0) | (point.Y == bottom ? 2 : 0);
+                int bit = 1 << corner;
+                if ((corners & bit) != 0) return false;
+                corners |= bit;
+            }
+            foreach (Point[] saved in _path!)
+                foreach (Point point in saved)
+                    if (!double.IsFinite(point.X) || !double.IsFinite(point.Y)
+                        || point.X < left || point.X > right || point.Y < top || point.Y > bottom)
+                        return false;
+            return true;
+        }
 
         private bool SameClips(IReadOnlyList<ClipRegion> clips)
         {
@@ -170,12 +223,21 @@ public sealed partial class PdfPageRenderer
             _path = null;
             try
             {
+                // With uniform opaque native alpha, a paint preserving every process
+                // channel has no effect unless a named plate or RGB shadow is present.
+                if (PreservedChannels(_color) == 15 && !pixels.HasSpotPlates
+                    && !pixels.HasRgbSpotShadow && pixels.InkAlpha is null && pixels.Alpha(0) == 255)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    return;
+                }
                 PaintCoverage(pixels, frame.Width, mask, _color, 1, _blendMode,
                     _clips, null, null, cancellationToken);
             }
             finally
             {
                 mask.Return();
+                _color = default;
                 _clips = [];
                 _fractionalClips = false;
                 _inputProfile = null;
