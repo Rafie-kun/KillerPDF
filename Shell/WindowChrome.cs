@@ -427,16 +427,54 @@ namespace KillerPDF
         {
             if (PagePreviewPanel?.Parent is not Grid area) return;
             foreach (var bar in new[] { _drawSettingsBar, _textSettingsBar })
-                if (bar is not null && bar.Visibility == Visibility.Visible)
-                    PositionAnnotationBar(bar, area);
+                if (bar is not null)
+                {
+                    if (WindowState == WindowState.Minimized || !bar.IsVisible)
+                        CancelAnnotationBarLayout(bar);
+                    else
+                        PositionAnnotationBar(bar, area);
+                }
+        }
+
+        private readonly Dictionary<Border, System.Windows.Threading.DispatcherOperation> _annotationBarLayout = new();
+
+        private void CancelAnnotationBarLayout(Border bar)
+        {
+            if (_annotationBarLayout.Remove(bar, out var pending)) pending.Abort();
+        }
+
+        private void AnnotBarLoaded(object sender, RoutedEventArgs e)
+        {
+            if (sender is Border bar && bar.Parent is Grid area) PositionAnnotationBar(bar, area);
+        }
+
+        private void AnnotBarUnloaded(object sender, RoutedEventArgs e)
+        {
+            if (sender is Border bar) CancelAnnotationBarLayout(bar);
+        }
+
+        private void AnnotBarVisibilityChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (sender is not Border bar) return;
+            if (!bar.IsVisible) CancelAnnotationBarLayout(bar);
+            else if (bar.Parent is Grid area) PositionAnnotationBar(bar, area);
         }
 
         // Anchors a bar to whichever edge it sits nearer and clamps it fully inside the document area:
         // the gap from the anchored edge is honored when there's room, otherwise reduced so the bar
         // never crosses the opposite edge. No-op until the bar has a measured width (PlaceAnnotationBar's
         // deferred pass positions it once laid out).
-        private void PositionAnnotationBar(Border bar, Grid area)
+        private void PositionAnnotationBar(Border bar, Grid area, bool deferUntilMeasured = true)
         {
+            bar.Loaded -= AnnotBarLoaded;
+            bar.Loaded += AnnotBarLoaded;
+            bar.Unloaded -= AnnotBarUnloaded;
+            bar.Unloaded += AnnotBarUnloaded;
+            bar.IsVisibleChanged -= AnnotBarVisibilityChanged;
+            bar.IsVisibleChanged += AnnotBarVisibilityChanged;
+            bool canDeferLayout = WindowState != WindowState.Minimized && bar.IsVisible && bar.IsLoaded;
+            if (!canDeferLayout || bar.ActualHeight > 0 || ThemeManager.Current != Theme.SE98)
+                CancelAnnotationBarLayout(bar);
             // 98SE: classic toolbar band - flush, truly full width, no floating gaps and no slide
             // parking. The document scroller is inset by the band's height (SyncSe98BarInset), so
             // the vertical scrollbar starts BELOW the band instead of poking up beside its right
@@ -451,11 +489,17 @@ namespace KillerPDF
                 bar.SetResourceReference(Border.BorderThicknessProperty, "BarEdgeThickness");
                 bar.SetResourceReference(Border.PaddingProperty, "BarPadding");
                 bar.SetResourceReference(Border.CornerRadiusProperty, "AnnotationBarCornerRadius");
-                // First pass runs before layout has measured the band; re-run once it has a height
-                // so the scroller inset below lands on the real value.
-                if (bar.ActualHeight <= 0)
-                    Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded,
-                        (Action)(() => { if (bar.Parent is Grid a) PositionAnnotationBar(bar, a); }));
+                // Allow one deferred layout pass, never a self-requeueing Loaded loop that
+                // starves input while the band has no height. Size/load/visibility events and
+                // window restore resume positioning when layout becomes possible again.
+                if (bar.ActualHeight <= 0 && canDeferLayout && deferUntilMeasured && !_annotationBarLayout.ContainsKey(bar))
+                    _annotationBarLayout[bar] = Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded,
+                        (Action)(() =>
+                        {
+                            _annotationBarLayout.Remove(bar);
+                            if (bar.IsLoaded && bar.IsVisible && WindowState != WindowState.Minimized && bar.Parent is Grid a)
+                                PositionAnnotationBar(bar, a, deferUntilMeasured: false);
+                        }));
                 SyncSe98BarInset(bar, area);
                 return;
             }

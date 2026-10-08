@@ -90,6 +90,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Updated menu, button, slider and selection states with accent colors, subtle gradients and hover lift outside 98SE.
 
 ### Fixed
+- Prevented zero-height 98SE annotation bars from continuously retrying layout and blocking input; positioning resumes after load, visibility changes and restore.
 - Hardened native library loading and release artifact verification.
 - Kept update helpers and setup from locking the installation folder through their working directory (#434).
 - Restored saving markup to tagged PDFs while preserving their structure, and finished markup processing before overwriting the destination.
