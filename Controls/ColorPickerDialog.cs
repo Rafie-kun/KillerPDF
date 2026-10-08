@@ -51,6 +51,7 @@ namespace KillerPDF
         public ColorPickerDialog(Window? owner, Color initial)
         {
             Title = "KillerPDF - " + L("Str_Color_Name");
+            System.Windows.Automation.AutomationProperties.SetAutomationId(this, "ColorPickerDialog");
             Width = 300;
             SizeToContent = SizeToContent.Height;
             DialogChrome.Configure(this, owner);
@@ -174,6 +175,8 @@ namespace KillerPDF
             hexRow.Children.Add(new TextBlock { Text = L("Str_Color_Hex"), Foreground = R("MutedTextBrush"), FontSize = 11,
                 VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 6, 0) });
             _hexBox = MakeTextBox(96);
+            System.Windows.Automation.AutomationProperties.SetAutomationId(_hexBox, "PickerHex");
+            System.Windows.Automation.AutomationProperties.SetName(_hexBox, L("Str_Color_Hex"));
             _hexBox.MaxLength = 7;
             _hexBox.LostFocus += (_, _) => CommitHex();
             _hexBox.KeyDown += (_, e) => { if (e.Key == Key.Enter) CommitHex(); };
@@ -198,6 +201,8 @@ namespace KillerPDF
             var btnRow = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(0, 14, 0, 0) };
             var cancel = MakeButton(L("Str_Btn_CancelDlg"), false); cancel.Click += (_, _) => { DialogResult = false; Close(); }; cancel.IsCancel = true;
             var ok = MakeButton(L("Str_Btn_OK"), true); ok.Margin = new Thickness(8, 0, 0, 0); ok.Click += (_, _) => Accept(); ok.IsDefault = true;
+            System.Windows.Automation.AutomationProperties.SetAutomationId(cancel, "PickerCancel");
+            System.Windows.Automation.AutomationProperties.SetAutomationId(ok, "PickerOK");
             btnRow.Children.Add(cancel); btnRow.Children.Add(ok);
             panel.Children.Add(btnRow);
         }

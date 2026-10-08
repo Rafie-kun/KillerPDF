@@ -95,6 +95,7 @@ namespace KillerPDF
             Result = _spec;
 
             Title = "KillerPDF - " + S("Str_Stamp_Suffix");
+            System.Windows.Automation.AutomationProperties.SetAutomationId(this, "StampDialog");
             Width = 980;
             Height = 720;
             MinWidth = 680;
@@ -147,6 +148,7 @@ namespace KillerPDF
             cancelBtn.Margin = new Thickness(0, 0, 8, 0);
             actionRow.Children.Add(cancelBtn);
             _applyBtn = UiKit.Make(S("Str_Tf_Apply"), true);
+            System.Windows.Automation.AutomationProperties.SetAutomationId(_applyBtn, "StampApply");
             _applyBtn.Click += (_, _2) => CommitAndClose();
             _applyBtn.IsDefault = true;   // Enter
             actionRow.Children.Add(_applyBtn);
@@ -258,7 +260,7 @@ namespace KillerPDF
 
             _numBody.Children.Add(SliderBoxRow(S("Str_Stamp_FontSize"), 6, 96, _spec.NumFontPt, out _, out _numSize));
 
-            _numBody.Children.Add(ColorRow(S("Str_Stamp_Color"), _numColor, out _numSwatch, c => { _numColor = c; Schedule(); }));
+            _numBody.Children.Add(ColorRow(S("Str_Stamp_Color"), _numColor, out _numSwatch, c => { _numColor = c; Schedule(); }, "StampPageNumberColor"));
 
             _numBody.Children.Add(UiKit.GroupLabel(S("Str_Stamp_Pages")));
             _numRange = UiKit.Field();
@@ -326,7 +328,7 @@ namespace KillerPDF
             wmFontRow.Children.Add(_wmFont);
             _wmTextPanel.Children.Add(wmFontRow);
             _wmTextPanel.Children.Add(SliderBoxRow(S("Str_Stamp_FontSize"), 12, 200, _spec.WmFontPt, out _, out _wmSize));
-            _wmTextPanel.Children.Add(ColorRow(S("Str_Stamp_Color"), _wmColor, out _wmSwatch, c => { _wmColor = c; Schedule(); }));
+            _wmTextPanel.Children.Add(ColorRow(S("Str_Stamp_Color"), _wmColor, out _wmSwatch, c => { _wmColor = c; Schedule(); }, "StampWatermarkColor"));
             _wmBody.Children.Add(_wmTextPanel);
 
             // Image sub-panel: filename fills the left, the Choose button sits right-aligned across from it.
@@ -441,7 +443,7 @@ namespace KillerPDF
             return rb;
         }
 
-        private StackPanel ColorRow(string label, Color initial, out Border swatch, Action<Color> onPick)
+        private StackPanel ColorRow(string label, Color initial, out Border swatch, Action<Color> onPick, string automationId)
         {
             var row = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 8), VerticalAlignment = VerticalAlignment.Center };
             row.Children.Add(new TextBlock { Text = label, Foreground = R("MutedTextBrush"), FontFamily = UiKit.UiFont, FontSize = 11, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 8, 0) });
@@ -462,6 +464,8 @@ namespace KillerPDF
                 Background = Brushes.Transparent, BorderThickness = new Thickness(0), Padding = new Thickness(0),
                 Template = new ControlTemplate(typeof(Button)) { VisualTree = cp }
             };
+            System.Windows.Automation.AutomationProperties.SetAutomationId(btn, automationId);
+            System.Windows.Automation.AutomationProperties.SetName(btn, label);
             btn.Click += (_, _2) =>
             {
                 var current = sw.Background is SolidColorBrush b ? b.Color : initial;
