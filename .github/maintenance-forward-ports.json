@@ -678,6 +678,11 @@
       "maintenanceCommit": "00e1651b7d18fd7ff28011a484cb2313b5a13311",
       "developmentCommit": "1f43775ec56c559add95ecdcd57ba559c745d1a7",
       "reason": "Both #442 commits replace the color picker's SolidColorBrush resource cast with Brush and add an identical isolated regression script. Both active lines passed all 45 theme/accent states and solid, linear-gradient, and radial-gradient brush checks."
+    },
+    {
+      "maintenanceCommit": "41b6c6b40d207f640bfc210c2b29be94720ea5e6",
+      "developmentCommit": "2dd41a61e318a64db9b8c73406466ab9a4aadb6d",
+      "reason": "Both commits add identical Debug/Release selection to the picker regression script and the same verified #442 correspondence. Their coverage maps retain different prior branch histories, so the combined Git patches differ. Both picker checks passed all 45 theme/accent states and three brush shapes."
     }
   ]
 }
