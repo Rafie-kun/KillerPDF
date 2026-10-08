@@ -12,6 +12,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Hovered outline buttons and accent picker pills use gradients outside 98SE, and accent swatches lift on hover.
 
 ### Fixed
+- Prevented zero-height 98SE annotation bars from continuously retrying layout and blocking input; positioning resumes after load, visibility changes and restore.
 - Prevented the color picker from crashing when changing stamp or annotation colors with gradient themes (#442).
 - Kept update helpers and setup from locking the installation folder through their working directory (#434).
 - Ctrl+wheel changes picker views and icon sizes.
