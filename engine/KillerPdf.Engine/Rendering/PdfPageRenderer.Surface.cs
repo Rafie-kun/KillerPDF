@@ -205,7 +205,7 @@ public sealed partial class PdfPageRenderer
             _compositeProfile = null;
             _compositeCompensation = null;
             _hasReadInk = false;
-            if (ReferenceEquals(BlendProfile, destination.BlendProfile)) return default;
+            if (SameProfile(BlendProfile, destination.BlendProfile)) return default;
             if (BlendProfile is PdfIccProfileTransform profile)
             {
                 _compositeProfile = profile.ForIntent(intent);
@@ -218,7 +218,7 @@ public sealed partial class PdfPageRenderer
                 return default;
             }
             PdfIccProfileTransform? mapped = targetProfile.ForIntent(intent);
-            if (ReferenceEquals(mapped, targetProfile))
+            if (SameProfile(mapped, targetProfile))
             {
                 ConfigureCompensation();
                 return default;
@@ -266,7 +266,7 @@ public sealed partial class PdfPageRenderer
                 // Native component paints can use a forward-only blend profile.
                 mapped = profile;
             }
-            if (ReferenceEquals(mapped, InputProfile)) return default;
+            if (SameProfile(mapped, InputProfile)) return default;
             var scope = new InputProfileScope(this, _inputProfile);
             _inputProfile = mapped;
             _hasInkColor = false;
@@ -311,7 +311,7 @@ public sealed partial class PdfPageRenderer
         {
             // A matching native destination consumes the ink directly; display conversion is unnecessary.
             if (InkProfile is null || destination?.Ink is not null
-                && ReferenceEquals(InkProfile, destination.InkProfile)) return InkColor(ink);
+                && SameProfile(InkProfile, destination.InkProfile)) return InkColor(ink);
             if (_hasReadInk && ink == _lastReadInk) return _lastReadColor;
             _lastReadColor = InkColor(ink, _compositeProfile ?? InkProfile);
             if (_compositeCompensation is { } compensation)
@@ -325,7 +325,7 @@ public sealed partial class PdfPageRenderer
         {
             if (InkProfile is null) return ColorInk(color);
             if (color.Ink is uint ink && (color.InkProfile is null
-                || ReferenceEquals(color.InkProfile, InkProfile))) return ink;
+                || SameProfile(color.InkProfile, InkProfile))) return ink;
             if (_hasInkColor && color == _lastInkColor) return _lastInk;
             _lastInk = ColorInk(color, _inputProfile ?? InkProfile);
             _lastInkColor = color;
@@ -937,7 +937,7 @@ public sealed partial class PdfPageRenderer
             }
             for (int y = Top; y < Bottom; y++)
             {
-                if ((Ink is null) == (source.Ink is null) && ReferenceEquals(BlendProfile, source.BlendProfile))
+                if ((Ink is null) == (source.Ink is null) && SameProfile(BlendProfile, source.BlendProfile))
                 {
                     source.Data.AsSpan(source.Offset(Left, y), Width * 4)
                         .CopyTo(Data.AsSpan(Offset(Left, y), Width * 4));
@@ -962,7 +962,7 @@ public sealed partial class PdfPageRenderer
                     }
             }
             if (Ink is not null && source.Ink is not null
-                && ReferenceEquals(BlendProfile, source.BlendProfile)
+                && SameProfile(BlendProfile, source.BlendProfile)
                 && source._spotBaseInk is not null)
             {
                 _spotBaseInk = RasterBuffers.Rent(Length);

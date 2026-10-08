@@ -6,6 +6,9 @@ namespace KillerPdf.Engine.Rendering;
 
 public sealed partial class PdfPageRenderer
 {
+    private static bool SameProfile(PdfColorTransform? first, PdfColorTransform? second) =>
+        ReferenceEquals(first, second) || first?.HasSameIdentity(second) == true;
+
     private readonly Lazy<(PdfColorTransform? Transform, bool Unavailable)>[] _outputProfiles;
     private readonly BoundedCache<PdfObject, (PdfColorTransform? Transform, int Bytes)> _colorProfiles =
         new(8, ReferenceEqualityComparer.Instance, 4 * 1024 * 1024, entry => entry.Bytes);

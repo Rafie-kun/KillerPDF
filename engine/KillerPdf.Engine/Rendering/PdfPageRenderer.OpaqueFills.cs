@@ -68,7 +68,7 @@ public sealed partial class PdfPageRenderer
                 && _fractionalClips == fractionalClips
                 && (!fractionalClips || SameClips(state.Clips))
                 && _blendMode == state.BlendMode && _intent == state.RenderingIntent
-                && ReferenceEquals(_inputProfile, pixels.InputProfile)
+                && SameProfile(_inputProfile, pixels.InputProfile)
                 && ((_color.OverprintComponents & ~15) == (color.OverprintComponents & ~15)
                     || ((_color.OverprintComponents ^ color.OverprintComponents)
                             & ~(15 | 16 | PreserveNamedSpots)) == 0

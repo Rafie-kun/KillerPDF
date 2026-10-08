@@ -2118,7 +2118,7 @@ public sealed partial class PdfPageRenderer
                         && !pagePixels.HasSpotPlates && !groupPixels.HasSpotPlates
                         && pagePixels.GroupShape is null
                         && (groupPixels.InkProfile is null
-                            || ReferenceEquals(groupPixels.InkProfile, pagePixels.InkProfile))
+                            || SameProfile(groupPixels.InkProfile, pagePixels.InkProfile))
                         && parentState.GraphicsSoftMask is null && parentState.Knockout is null
                         && parentState.BlendMode is RendererBlendMode.Normal or RendererBlendMode.Compatible;
                         for (int y = top; y < bottom; y++)
@@ -5341,7 +5341,7 @@ public sealed partial class PdfPageRenderer
             && colorKeyMask is null && bits == 8 && components == 4 && colorSpace.Components == 4
             && !colorSpace.DoesNotPaint && colorSpace.Palette is null && colorSpace.Converter is null
             && colorSpace.MultiConverter is null && colorSpace.ComponentRange is null
-            && (colorSpace.Profile is null || ReferenceEquals(colorSpace.Profile, target.BlendProfile))
+            && (colorSpace.Profile is null || SameProfile(colorSpace.Profile, target.BlendProfile))
             && decode is [0, 1, 0, 1, 0, 1, 0, 1];
         bool directDeviceSamples = !averagePlane && target.Ink is null && target.RgbProfile is null
             && !imageMask && preblendMatte is null && colorKeyMask is null && bits == 8
@@ -5965,7 +5965,7 @@ public sealed partial class PdfPageRenderer
             // Matching source/destination profiles already preserve native CMYK channels
             // in ConvertDecoded. Retain their encoded bytes directly, including reduction.
             bool matchingInkProfile = targetProfile is not null
-                && ReferenceEquals(colorSpace.Profile, targetProfile)
+                && SameProfile(colorSpace.Profile, targetProfile)
                 && !colorSpace.DoesNotPaint && !colorSpace.ContainsSpotColorants && colorSpace.Palette is null
                 && colorSpace.Converter is null && colorSpace.MultiConverter is null
                 && colorSpace.ComponentRange is null && bits == 8 && colorSpace.Components == 4;
@@ -6353,7 +6353,7 @@ public sealed partial class PdfPageRenderer
         private uint ConvertDecoded(ImageColorSpace space)
         {
             if (_targetInk && space.Components == 4 && space.Profile is not null
-                && space.ComponentRange is null && ReferenceEquals(space.Profile, _targetProfile))
+                && space.ComponentRange is null && SameProfile(space.Profile, _targetProfile))
                 return Color.Cmyk(_values[0], _values[1], _values[2], _values[3]).Ink!.Value;
             if (_targetInk && space.Components == 3 && space.Profile is not null
                 && space.Palette is null && space.Converter is null && space.MultiConverter is null
@@ -7778,8 +7778,8 @@ public sealed partial class PdfPageRenderer
                 return;
             }
             if ((target.Ink is null) == (_backdropInk is null)
-                && ReferenceEquals(target.InkProfile, _backdropInkProfile)
-                && ReferenceEquals(target.RgbProfile, _backdropRgbProfile))
+                && SameProfile(target.InkProfile, _backdropInkProfile)
+                && SameProfile(target.RgbProfile, _backdropRgbProfile))
             {
                 _backdrop.AsSpan(pixel * 4, 4).CopyTo(target.Data.AsSpan(offset, 4));
                 if (_backdropAlpha is not null) target.SetAlpha(offset, _backdropAlpha[pixel]);
@@ -7894,7 +7894,7 @@ public sealed partial class PdfPageRenderer
         {
             bool enabled = compensate ?? BlackPointCompensationEnabled;
             if (enabled && BlackPointSource is not null
-                && ReferenceEquals(BlackPointDestination, destination.InputProfile)) return this;
+                && SameProfile(BlackPointDestination, destination.InputProfile)) return this;
             ImageColorSpace source = BlackPointSource ?? this;
             ImageColorSpace bound = source.ForNativeDestination(destination);
             return enabled ? BindBlackPointCompensation(source, bound, destination, diagnostics) : bound;
@@ -7903,7 +7903,7 @@ public sealed partial class PdfPageRenderer
         private ImageColorSpace ForNativeDestination(RasterSurface destination) =>
             NativeProcessMask.HasValue && (destination.Ink is not null || destination.HasRgbSpotShadow) ? this
             : Profile is null && SourceSpace is { Components: 4, Profile: not null } original
-                && destination.Ink is not null && ReferenceEquals(original.Profile, destination.InkProfile) ? this
+                && destination.Ink is not null && SameProfile(original.Profile, destination.InkProfile) ? this
             : SourceSpace is not null ? SourceSpace.ForNativeDestination(destination)
             : PaletteBase is { HasProcessColorants: true }
                 && (destination.Ink is not null || destination.HasRgbSpotShadow)
@@ -7927,7 +7927,7 @@ public sealed partial class PdfPageRenderer
                         (mask, channel) => channel >= 0 ? mask | (1 << channel) : mask)
                 }
             : Components == 4 && Profile is not null && destination.Ink is not null
-                && ReferenceEquals(Profile, destination.InkProfile)
+                && SameProfile(Profile, destination.InkProfile)
                 ? this with { Profile = null, SourceSpace = this, IsIccBased = false, IsDeviceCmyk = true } : this;
 
         private ImageColorSpace BindProcessPalette(RasterSurface destination)
@@ -8190,7 +8190,7 @@ public sealed partial class PdfPageRenderer
             bool same = _compareConnection ? below == above
                 : below.Red == above.Red && below.Green == above.Green && below.Blue == above.Blue
                     && below.Ink == above.Ink && below.OverprintComponents == above.OverprintComponents
-                    && ReferenceEquals(below.InkProfile, above.InkProfile);
+                    && SameProfile(below.InkProfile, above.InkProfile);
             if (same && (below.SpotName is not null || above.SpotName is not null))
                 same = below.SpotName == above.SpotName && below.SpotTint == above.SpotTint
                     && below.SpotInk == above.SpotInk && below.ProcessInk == above.ProcessInk

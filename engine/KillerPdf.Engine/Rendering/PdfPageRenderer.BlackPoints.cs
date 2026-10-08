@@ -39,7 +39,7 @@ public sealed partial class PdfPageRenderer
         }
         // Native same-profile CMYK binding intentionally removes Profile.
         if (bound.Profile is null && bound.SourceSpace is { Profile: not null } native
-            && ReferenceEquals(native.Profile, destination.InkProfile)) return result;
+            && SameProfile(native.Profile, destination.InkProfile)) return result;
         ImageColorSpace connection = bound;
         while (connection.BlackPointAlternate is { } alternate) connection = alternate;
         bool unprofiledBlack = connection.IsLab || connection.RegistrationColor

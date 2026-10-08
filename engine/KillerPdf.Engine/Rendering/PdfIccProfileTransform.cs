@@ -1,5 +1,6 @@
 using System.Buffers.Binary;
 using System.Text;
+using System.Security.Cryptography;
 
 namespace KillerPdf.Engine.Rendering;
 
@@ -23,12 +24,16 @@ internal sealed class PdfIccProfileTransform : PdfColorTransform
     private byte _attemptedIntents;
     private int _intent;
     private readonly bool _lab;
+    private readonly byte[] _profileFingerprint;
     internal bool IsLabInput { get; }
     internal bool IsLutBased => _forward is not null;
     internal int RenderingIntent => _intent;
     internal bool SupportsBlackPointCompensation { get; }
     internal override int Components { get; }
     internal override bool SupportsBlending => !IsLabInput;
+    internal override bool HasSameIdentity(PdfColorTransform? other) => ReferenceEquals(this, other)
+        || other is PdfIccProfileTransform profile && _intent == profile._intent
+            && _profileFingerprint.AsSpan().SequenceEqual(profile._profileFingerprint);
     internal override double ClampComponent(int component, double value) => IsLabInput
         ? Math.Clamp(value, component == 0 ? 0 : -128, component == 0 ? 100 : 127)
         : Math.Clamp(value, 0, 1);
@@ -51,6 +56,9 @@ internal sealed class PdfIccProfileTransform : PdfColorTransform
         long tableEnd = 132L + 12L * count;
         if (length > bytes.Length || tableEnd > length)
             throw new FormatException("An ICC profile tag table is truncated.");
+        // PDF stream objects and compression do not define color-space identity.
+        // Include the complete declared ICC data and keep rendering intent separate.
+        _profileFingerprint = SHA256.HashData(bytes[..(int)length]);
         string deviceSpace = Encoding.ASCII.GetString(bytes.Slice(16, 4));
         IsLabInput = deviceSpace == "Lab ";
         Components = deviceSpace switch

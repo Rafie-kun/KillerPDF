@@ -1,4 +1,5 @@
 using System.Buffers.Binary;
+using System.IO.Compression;
 using System.Text;
 using KillerPdf.Engine.Rendering;
 using KillerPdf.Engine.Authoring;
@@ -11,6 +12,75 @@ namespace KillerPdf.Engine.Tests.Rendering;
 
 public sealed class PdfIccProfileTransformTests
 {
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    public void RepeatedProfilesCopyNativeComponentsWithoutPcsRoundTrip(int intent)
+    {
+        byte[] bytes = Profile("CMYK", "Lab ", ("A2B0", Lut(true, true, false, 4)),
+            ("B2A0", NeutralReverseLut()));
+        var source = new PdfIccProfileTransform(bytes, intent);
+        var destination = new PdfIccProfileTransform(bytes.ToArray(), intent);
+        double[] input = [.123456789, .875, .5, .25], output = new double[4];
+        source.ConvertTo(destination, input, output);
+        Assert.Equal(input, output);
+        Assert.False(source.HasSameIdentity(new PdfIccProfileTransform(bytes, (intent + 1) % 4)));
+        Assert.Throws<ArgumentException>(() => source.ConvertTo(destination,
+            [double.NaN, 0, 0, 0], output));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void RepeatedProfileStreamsPreserveNativeInkDuringOverprint(bool compressed)
+    {
+        Assert.Equal(Render(false), Render(true));
+
+        byte[] Render(bool separateProfile)
+        {
+            PdfName Name(string value) => new(Encoding.ASCII.GetBytes(value));
+            KeyValuePair<PdfName, PdfObject> Entry(string key, PdfObject value) => new(Name(key), value);
+            var source = PdfDocument.Open(new PdfDocumentBuilder().AddPage(1, 1,
+                Encoding.ASCII.GetBytes("/S cs .5 0 0 .25 scn 0 0 1 1 re f "
+                    + "/OP gs .1 0 0 0 k 0 0 1 1 re f")).Build());
+            var root = (PdfIndirectReference)source.Trailer[Name("Root")];
+            var catalog = (PdfDictionary)source.Resolve(root);
+            var page = PdfPageTree.Read(source).Pages[0];
+            var update = new PdfIncrementalUpdateBuilder(source);
+            byte[] forward = Lut(true, true, false, 4);
+            for (int cell = 0; cell < 16; cell++)
+                BinaryPrimitives.WriteUInt16BigEndian(forward.AsSpan(68 + cell * 6),
+                    (ushort)((cell & 9) == 0 ? 65280 : 0));
+            byte[] bytes = Profile("CMYK", "Lab ", ("A2B0", forward), ("B2A0", NeutralReverseLut()));
+            var target = update.AddObject(new PdfStream(new PdfDictionary([
+                Entry("N", new PdfInteger(4))]), bytes));
+            PdfIndirectReference input = target;
+            if (separateProfile)
+            {
+                using var encoded = new MemoryStream();
+                if (compressed)
+                    using (var zlib = new ZLibStream(encoded, CompressionLevel.Fastest, true))
+                        zlib.Write(bytes);
+                input = update.AddObject(new PdfStream(new PdfDictionary(compressed
+                    ? [Entry("N", new PdfInteger(4)), Entry("Filter", Name("FlateDecode"))]
+                    : [Entry("N", new PdfInteger(4))]), compressed ? encoded.ToArray() : bytes.ToArray()));
+            }
+            update.ReplaceObject(root.ObjectNumber, new PdfDictionary(catalog.Append(Entry("OutputIntents",
+                new PdfArray([new PdfDictionary([Entry("S", Name("GTS_PDFX")), Entry("DestOutputProfile", target)])])))));
+            var resources = new PdfDictionary([
+                Entry("ColorSpace", new PdfDictionary([Entry("S", new PdfArray([Name("ICCBased"), input]))])),
+                Entry("ExtGState", new PdfDictionary([Entry("OP", new PdfDictionary([
+                    Entry("op", new PdfBoolean(true)), Entry("OPM", new PdfInteger(1))]))]))]);
+            update.ReplaceObject(page.Reference.ObjectNumber, new PdfDictionary(page.Dictionary
+                .Where(pair => !pair.Key.Equals(Name("Resources"))).Append(Entry("Resources", resources))));
+            var rendered = new PdfPageRenderer(PdfDocument.Open(update.Build())).Render(0, new PdfRenderOptions(1, 1));
+            Assert.Empty(rendered.Diagnostics);
+            return rendered.Pixels.ToArray();
+        }
+    }
+
     [Theory]
     [InlineData(false, false, true, true)]
     [InlineData(true, false, true, true)]

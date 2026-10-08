@@ -30,7 +30,7 @@ public sealed partial class PdfPageRenderer
     {
         if (color.Ink is uint ink)
         {
-            if (color.InkProfile is null || ReferenceEquals(color.InkProfile, profile)) return ink;
+            if (color.InkProfile is null || color.InkProfile.HasSameIdentity(profile)) return ink;
             if (profile is { CanConvertFromXyz: true })
             {
                 Span<double> source = stackalloc double[4];
