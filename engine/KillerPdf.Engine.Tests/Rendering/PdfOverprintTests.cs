@@ -210,14 +210,20 @@ public sealed class PdfOverprintTests
     }
 
     [Fact]
-    public void DefaultRgbSurface_ProcessOverprintAfterSpotFallsBackWithoutResurrectingInk()
+    public void DefaultRgbSurface_ProcessOverprintAfterSpotPreservesNativeSpotAndBlackInk()
     {
         PdfRenderedPage rendered = RenderRgbSpotShadow(withSpots: true,
             pureImageOverProcess: true, processOverprintAfterSpot: true);
+        PdfRenderedPage nativeCmyk = RenderRgbSpotShadow(withSpots: true,
+            pureImageOverProcess: true, processOverprintAfterSpot: true, nativeCmyk: true);
         int center = (4 * 8 + 4) * 4;
 
         Assert.Empty(rendered.Diagnostics);
-        Assert.Equal(PdfDeviceCmykTests.RenderInk(255, 0, 0, 0),
+        Assert.Empty(nativeCmyk.Diagnostics);
+        for (int y = 0; y < 8; y++)
+            Assert.Equal(nativeCmyk.Pixels.Span[((y * 8 + 2) * 4)..((y + 1) * 8 * 4)].ToArray(),
+                rendered.Pixels.Span[((y * 8 + 2) * 4)..((y + 1) * 8 * 4)].ToArray());
+        Assert.Equal(PdfDeviceCmykTests.RenderInk(255, 0, 128, 128),
             rendered.Pixels.Span[center..(center + 4)].ToArray());
     }
 
@@ -240,15 +246,22 @@ public sealed class PdfOverprintTests
     }
 
     [Fact]
-    public void DefaultRgbSurface_SpotAfterInvalidProcessShadowDoesNotReviveOldInk()
+    public void DefaultRgbSurface_SpotAfterProcessOverprintPreservesNativeBlackInk()
     {
         PdfRenderedPage rendered = RenderRgbSpotShadow(withSpots: true,
             pureImageOverProcess: true, processOverprintAfterSpot: true,
             spotAfterInvalidProcess: true);
+        PdfRenderedPage nativeCmyk = RenderRgbSpotShadow(withSpots: true,
+            pureImageOverProcess: true, processOverprintAfterSpot: true,
+            spotAfterInvalidProcess: true, nativeCmyk: true);
         int center = (4 * 8 + 4) * 4;
 
         Assert.Empty(rendered.Diagnostics);
-        Assert.Equal(PdfDeviceCmykTests.RenderInk(255, 0, 255, 0),
+        Assert.Empty(nativeCmyk.Diagnostics);
+        for (int y = 0; y < 8; y++)
+            Assert.Equal(nativeCmyk.Pixels.Span[((y * 8 + 2) * 4)..((y + 1) * 8 * 4)].ToArray(),
+                rendered.Pixels.Span[((y * 8 + 2) * 4)..((y + 1) * 8 * 4)].ToArray());
+        Assert.Equal(PdfDeviceCmykTests.RenderInk(255, 0, 255, 128),
             rendered.Pixels.Span[center..(center + 4)].ToArray());
     }
 
@@ -889,7 +902,8 @@ public sealed class PdfOverprintTests
         bool addRgbImage = false, bool rgbImageAfterSpot = false,
         bool addTransparencyForm = false, bool processOverprintAfterSpot = false,
         bool unbalancedState = false, string? unsupportedDeviceN = null,
-        bool defaultCmykOverride = false, bool spotAfterInvalidProcess = false)
+        bool defaultCmykOverride = false, bool spotAfterInvalidProcess = false,
+        bool nativeCmyk = false)
     {
         PdfName Name(string name) => new(Encoding.ASCII.GetBytes(name));
         KeyValuePair<PdfName, PdfObject> Entry(string key, PdfObject value) => new(Name(key), value);
@@ -1015,9 +1029,12 @@ public sealed class PdfOverprintTests
                 Entry("OPM", new PdfInteger(0)), Entry("ca", new PdfInteger(1)),
                 Entry("CA", new PdfInteger(1)), Entry("BM", Name("Normal"))]))])),
             Entry("XObject", new PdfDictionary(xObjects))]);
-        update.ReplaceObject(reference.ObjectNumber,
-            new PdfDictionary(page.Where(pair => !pair.Key.Equals(Name("Resources")))
-                .Append(Entry("Resources", resources))));
+        var pageEntries = page.Where(pair => !pair.Key.Equals(Name("Resources"))
+            && !pair.Key.Equals(Name("Group"))).Append(Entry("Resources", resources));
+        if (nativeCmyk)
+            pageEntries = pageEntries.Append(Entry("Group", new PdfDictionary([
+                Entry("S", Name("Transparency")), Entry("CS", Name("DeviceCMYK"))])));
+        update.ReplaceObject(reference.ObjectNumber, new PdfDictionary(pageEntries));
         return new PdfPageRenderer(PdfDocument.Open(update.Build())).Render(0, new PdfRenderOptions(8, 8));
     }
 

@@ -350,7 +350,8 @@ public sealed partial class PdfPageRenderer
             lock (_spotSync)
             {
                 uint? sourceInk = resolvedInk ?? color.Ink;
-                if (sourceInk is not uint ink || (color.OverprintComponents & ~15) != 0)
+                if (sourceInk is not uint ink || (color.OverprintComponents & ~15) != 0
+                    || !RgbMatchesInk(color, ink))
                 {
                     _rgbSpotValid![offset / 4] = 0;
                     return;
@@ -361,11 +362,23 @@ public sealed partial class PdfPageRenderer
             }
         }
 
-        internal void TrackRgbProcessRun(int offset, int count, uint ink)
+        private static bool RgbMatchesInk(in Color color, uint ink)
+        {
+            uint rgb = PdfDeviceCmyk.ToRgb(ink);
+            return color.Red == (byte)(rgb >> 16) && color.Green == (byte)(rgb >> 8)
+                && color.Blue == (byte)rgb;
+        }
+
+        internal void TrackRgbProcessRun(int offset, int count, uint ink, in Color color)
         {
             if (!_rgbSpotShadow) return;
             lock (_spotSync)
             {
+                if (!RgbMatchesInk(color, ink))
+                {
+                    _rgbSpotValid!.AsSpan(offset / 4, count).Clear();
+                    return;
+                }
                 System.Runtime.InteropServices.MemoryMarshal.Cast<byte, uint>(
                     _spotBaseInk!.AsSpan(offset, count * 4)).Fill(ink);
                 foreach (byte[] plate in _spotPlateValues)
@@ -389,8 +402,6 @@ public sealed partial class PdfPageRenderer
             lock (_spotSync)
             {
                 if (_rgbSpotValid![offset / 4] == 0) return false;
-                foreach (byte[] plate in _spotPlateValues)
-                    if (ReadInk(plate, offset) != 0) return false;
                 int channels = (components & 16) != 0 ? components & 15 : 0;
                 uint preserve = (channels & 1) != 0 ? 0x000000ffu : 0;
                 if ((channels & 2) != 0) preserve |= 0x0000ff00u;
@@ -405,11 +416,56 @@ public sealed partial class PdfPageRenderer
             }
         }
 
+        internal bool TryBlendRgbProcessKnockout(int offset, in Color color, uint? resolvedInk,
+            double opacity, int? coverage = null)
+        {
+            uint? sourceInk = resolvedInk ?? color.Ink;
+            if (!_rgbSpotShadow || color.Ink is null
+                || (color.OverprintComponents & ~15) != 0 || sourceInk is not uint ink
+                || !RgbMatchesInk(color, ink))
+                return false;
+            lock (_spotSync)
+            {
+                if (_rgbSpotValid![offset / 4] == 0) return false;
+                uint combined = ComposedSpotInk(offset);
+                WriteInk(_spotBaseInk!, offset, coverage is int cover
+                    ? BlendCoverageInk(ink, combined, cover)
+                    : BlendOpaqueInk(ink, combined, opacity, 1));
+                foreach (byte[] plate in _spotPlateValues) WriteInk(plate, offset, 0);
+                ComposeSpotPixel(offset);
+                return true;
+            }
+        }
+
         internal bool TryPaintRgbSpot(int offset, in Color color, bool overprint, uint sourceInk)
         {
             if (!_rgbSpotShadow || _rgbSpotValid![offset / 4] == 0) return false;
             PaintSpot(offset, color, overprint, sourceInk);
             return true;
+        }
+
+        internal bool TryBlendRgbSpotPixel(int offset, in Color color, uint sourceInk, double opacity)
+        {
+            if (!_rgbSpotShadow || (color.OverprintComponents & ~(16 | 64)) != 0) return false;
+            lock (_spotSync)
+            {
+                if (_rgbSpotValid![offset / 4] == 0) return false;
+                uint backdrop = ComposedSpotInk(offset);
+                uint output = 0;
+                bool overprint = (color.OverprintComponents & (16 | 64)) == (16 | 64);
+                for (int channel = 0; channel < 4; channel++)
+                {
+                    double s = (byte)(sourceInk >> (channel * 8)) / 255d;
+                    double b = (byte)(backdrop >> (channel * 8)) / 255d;
+                    double mixed = overprint ? s + b - s * b : s;
+                    double value = (1 - opacity) * b + opacity * mixed;
+                    output |= (uint)(byte)Math.Round(Math.Clamp(value, 0, 1) * 255) << (channel * 8);
+                }
+                WriteInk(_spotBaseInk!, offset, output);
+                foreach (byte[] plate in _spotPlateValues) WriteInk(plate, offset, 0);
+                ComposeSpotPixel(offset);
+                return true;
+            }
         }
 
         internal bool CanPaintSpot(int offset) => Ink is not null
@@ -668,6 +724,20 @@ public sealed partial class PdfPageRenderer
 
         private void ComposeSpotPixel(int offset)
         {
+            uint combined = ComposedSpotInk(offset);
+            if (_rgbSpotShadow)
+            {
+                uint rgb = PdfDeviceCmyk.ToRgb(combined);
+                Data[offset] = (byte)rgb;
+                Data[offset + 1] = (byte)(rgb >> 8);
+                Data[offset + 2] = (byte)(rgb >> 16);
+            }
+            else WriteInk(Data, offset, combined);
+            SetAlpha(offset, 255);
+        }
+
+        private uint ComposedSpotInk(int offset)
+        {
             uint combined = ReadInk(_spotBaseInk!, offset);
             foreach (byte[] current in _spotPlateValues)
             {
@@ -680,15 +750,7 @@ public sealed partial class PdfPageRenderer
                 }
                 combined = CombineSpotInk(combined, spot);
             }
-            if (_rgbSpotShadow)
-            {
-                uint rgb = PdfDeviceCmyk.ToRgb(combined);
-                Data[offset] = (byte)rgb;
-                Data[offset + 1] = (byte)(rgb >> 8);
-                Data[offset + 2] = (byte)(rgb >> 16);
-            }
-            else WriteInk(Data, offset, combined);
-            SetAlpha(offset, 255);
+            return combined;
         }
 
         private static uint CombineSpotInk(uint combined, uint spot)

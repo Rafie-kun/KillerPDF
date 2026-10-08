@@ -5279,13 +5279,22 @@ public sealed partial class PdfPageRenderer
             && Math.Clamp(stencilAlpha, 0, 1) == 1
             && blendMode is RendererBlendMode.Normal or RendererBlendMode.Compatible;
         bool preserveRgbSpots = target.HasRgbSpotShadow && colorSpace.ContainsSpotColorants;
+        bool opaqueRgbSpotImage = preserveRgbSpots && !imageMask && target.GroupAlpha is null
+            && target.GroupShape is null && knockout is null && graphicsSoftMask is null
+            && softMask is null && colorKeyMask is null && preblendMatte is null
+            && Math.Clamp(stencilAlpha, 0, 1) == 1
+            && blendMode is RendererBlendMode.Normal or RendererBlendMode.Compatible;
+        bool preserveRgbProcessImageSpots = !imageMask && overprint && deviceCmykImage
+            && target.HasRgbSpotShadow && target.HasSpotPlates;
+        bool nativeImageSamples = target.Ink is not null || preserveRgbSpots
+            || target.HasRgbSpotShadow && (deviceCmykImage || colorSpace.NativeProcessMask.HasValue);
         Color[]? spotPalette = (target.Ink is not null || preserveRgbSpots)
             && colorSpace.PaletteBase?.HasSpotColorants == true ? colorSpace.Palette : null;
         string? reducedPaletteSpotName = spotPalette is { Length: > 0 }
             && spotPalette[0].ProcessInk is null ? spotPalette[0].SpotName : null;
         // The array overload supports the named-spot converter; the span overload rejects it.
         string? imageSpotName = (target.Ink is not null || preserveRgbSpots)
-            && (factor == 1 || opaqueInkImage) && !imageMask
+            && (factor == 1 || opaqueInkImage || opaqueRgbSpotImage) && !imageMask
             && colorSpace.HasSpotColorants && colorSpace.Components == 1 && colorSpace.Palette is null
             ? colorSpace.Convert(new double[] { 1 }).SpotName : null;
         // Below twofold reduction, bounds describe source-axis footprints only without
@@ -5297,11 +5306,11 @@ public sealed partial class PdfPageRenderer
             && samplingWidth > destinationWidth && samplingHeight > destinationHeight;
         bool averagePlane = reducedPlane && !imageMask && preblendMatte is null
             && colorKeyMask is null && softMask is null;
-        bool preserveReducedSpot = averagePlane && opaqueInkImage
+        bool preserveReducedSpot = averagePlane && (opaqueInkImage || opaqueRgbSpotImage)
             && (imageSpotName is not null || reducedPaletteSpotName is not null);
         bool pixelAlignedPlane = averagePlane && factor == 1;
         bool averageStencil = factor > 1 && imageMask;
-        bool directInkSamples = !averagePlane && target.Ink is not null && !imageMask && preblendMatte is null
+        bool directInkSamples = !averagePlane && nativeImageSamples && !imageMask && preblendMatte is null
             && colorKeyMask is null && bits == 8 && components == 4 && colorSpace.Components == 4
             && !colorSpace.DoesNotPaint && colorSpace.Palette is null && colorSpace.Converter is null
             && colorSpace.MultiConverter is null && colorSpace.ComponentRange is null
@@ -5380,11 +5389,11 @@ public sealed partial class PdfPageRenderer
             }
             if (plane is not null)
             {
-                if (target.Ink is not null && colorKeyMask is not null)
+                if (nativeImageSamples && colorKeyMask is not null)
                     alphaPlane = RasterBuffers.Rent(checked(planeWidth * planeHeight));
                 byte[] planeData = plane;
                 byte[]? alphaPlaneData = alphaPlane;
-                bool targetInk = target.Ink is not null;
+                bool targetInk = nativeImageSamples;
                 PdfColorTransform? blendProfile = target.InputProfile;
                 // Every plane sample is a pure function of its source sample, so row ranges can
                 // convert independently. Each range owns its converter because the converter
@@ -5467,7 +5476,7 @@ public sealed partial class PdfPageRenderer
             // Antialiased clips only change pixels with partial clip coverage; fully covered
             // pixels take the same direct write, and partially covered ones use the compositor
             // with the same clip factor as the general loop.
-            bool direct = target.Ink is null && target.RgbProfile is null && !preserveRgbSpots
+            bool direct = target.Ink is null && target.RgbProfile is null && !nativeImageSamples
                 && imageOpacity == 1 && graphicsSoftMask is null && knockout is null
                 && target.GroupShape is null
                 && blendMode is RendererBlendMode.Normal or RendererBlendMode.Compatible;
@@ -5696,10 +5705,10 @@ public sealed partial class PdfPageRenderer
                         else
                         {
                             int planeOffset = (py * planeWidth + px) * 4;
-                            alpha = target.Ink is not null
+                            alpha = nativeImageSamples
                                 ? alphaPlane is not null ? alphaPlane[planeOffset / 4] : 255
                                 : plane[planeOffset + 3];
-                            color = target.Ink is not null ? InkColor(ReadInk(plane, planeOffset))
+                            color = nativeImageSamples ? InkColor(ReadInk(plane, planeOffset))
                                 : target.ColorFromRgb(new(plane[planeOffset + 2], plane[planeOffset + 1], plane[planeOffset]));
                         }
                         if (alpha == 0) continue;
@@ -5761,12 +5770,12 @@ public sealed partial class PdfPageRenderer
                         }
                         double clipAlpha = rectangularClips ? 1 : clipCoverage / 255d;
                         if (clipAlpha <= 0) continue;
-                        if (opaqueInkImage && imageSpotName is not null && color.SpotName is not null
+                        if ((opaqueInkImage || opaqueRgbSpotImage) && imageSpotName is not null && color.SpotName is not null
                             && color.ProcessInk is null && clipCoverage < 255 && alpha == 255
                             && target.Contains(x, y))
                         {
                             int offset = target.Offset(x, y);
-                            if (target.Alpha(offset) == 255)
+                            if (target.Alpha(offset) == 255 && target.CanPaintSpot(offset))
                             {
                                 target.PaintSpotCoverage(offset, color, color.Ink ?? target.GetInk(color),
                                     (byte)clipCoverage, overprint);
@@ -5785,6 +5794,8 @@ public sealed partial class PdfPageRenderer
                             }
                             color = color with { OverprintComponents = (byte)(color.OverprintComponents | PreserveNamedSpots) };
                         }
+                        else if (preserveRgbProcessImageSpots)
+                            color = color with { OverprintComponents = PreserveNamedSpots };
                         else if (!imageMask && (preserveProcessColorImageSpots
                             || colorSpace.NativeProcessMask.HasValue || colorSpace.ContainsSpotColorants))
                             color = OverprintColor(color, colorSpace, overprint, 0);
@@ -6885,12 +6896,21 @@ public sealed partial class PdfPageRenderer
                     resolvedInk ?? pixels.GetInk(color))) return;
             if (sourceAlpha > 0 && opaqueBackdrop
                 && (sourceAlpha == 1 || pixels.GroupAlpha is null)
+                && (color.SpotName is not null && sourceAlpha < 1
+                    || color.SpotName is null && (color.OverprintComponents & 64) != 0)
+                && pixels.TryBlendRgbSpotPixel(offset, color,
+                    resolvedInk ?? pixels.GetInk(color), sourceAlpha)) return;
+            if (sourceAlpha > 0 && opaqueBackdrop
+                && (sourceAlpha == 1 || pixels.GroupAlpha is null)
                 && color.SpotName is null
                 && (color.OverprintComponents & (16 | PreserveNamedSpots)) != 0
                 && pixels.TryPaintRgbProcessOverprint(offset, color,
                     resolvedInk ?? pixels.GetInk(color), sourceAlpha)) return;
             if (supported && color.SpotName is null)
                 pixels.TrackRgbProcessPixel(offset, color, resolvedInk);
+            else if (sourceAlpha > 0 && sourceAlpha < 1 && opaqueBackdrop
+                && pixels.GroupAlpha is null && color.SpotName is null
+                && pixels.TryBlendRgbProcessKnockout(offset, color, resolvedInk, sourceAlpha)) return;
             else pixels.InvalidateRgbSpotPixel(offset);
         }
         if (pixels.RgbProfile is not null)

@@ -1543,7 +1543,7 @@ public sealed partial class PdfPageRenderer
                         System.Runtime.InteropServices.MemoryMarshal.Cast<byte, uint>(
                             data.AsSpan(rowOffset, (right - left) * 4)).Fill(packed);
                         if (rgbShadowInk is uint rowInk)
-                            pixels.TrackRgbProcessRun(rowOffset, right - left, rowInk);
+                            pixels.TrackRgbProcessRun(rowOffset, right - left, rowInk, fillColor);
                         groupAlpha?.AsSpan(rowOffset / 4, right - left).Fill(255);
                         continue;
                     }
@@ -1557,12 +1557,16 @@ public sealed partial class PdfPageRenderer
                         {
                             Unsafe.WriteUnaligned(ref data[offset], packed);
                             if (rgbShadowInk is uint pixelInk)
-                                pixels.TrackRgbProcessRun(offset, 1, pixelInk);
+                                pixels.TrackRgbProcessRun(offset, 1, pixelInk, fillColor);
                             groupAlpha?[offset / 4] = 255;
                             continue;
                         }
                         if (data[offset + 3] == 255)
                         {
+                            if (pixels.HasRgbSpotShadow && fillColor.Ink is not null && groupAlpha is null
+                                && pixels.TryBlendRgbProcessKnockout(offset, fillColor,
+                                    rgbShadowInk, 1, cover))
+                                continue;
                             pixels.InvalidateRgbSpotPixel(offset);
                             int inverse = 255 - cover;
                             data[offset] = (byte)((fillColor.Blue * cover + data[offset] * inverse + 127) / 255);
@@ -1660,6 +1664,9 @@ public sealed partial class PdfPageRenderer
                     }
                     if (pixels.RgbProfile is null && pixels[offset + 3] == 255)
                     {
+                        if (pixels.HasRgbSpotShadow && paint.Ink is not null && groupAlpha is null
+                            && pixels.TryBlendRgbProcessKnockout(offset, paint, ink, 1, cover))
+                            continue;
                         pixels.InvalidateRgbSpotPixel(offset);
                         int inverse = 255 - cover;
                         pixels[offset] = (byte)((directColor.Blue * cover + pixels[offset] * inverse + 127) / 255);
