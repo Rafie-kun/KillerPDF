@@ -23,7 +23,7 @@ The probe checks dispatcher response while raster work is pending, superseded na
 & .\tools\RenderRegionCorpus\bin\Release\net10.0-windows\RenderRegionCorpus.exe APP_DLL INPUT_DIRECTORY OUTPUT_DIRECTORY SIZE PAGES
 ```
 
-The manifest records input and app hashes, full and region pixel hashes, differences, and failures. Region errors fail the check. Inputs that cannot produce a full raster are listed separately; compare that set against the reference run before accepting the result.
+The manifest records the input count, input and app hashes, full and region pixel hashes, differences, and failures. Region errors and unrenderable inputs fail the check. Empty documents are explicit failures. Preserve the entire denominator and resolve each failing input; a stable failure set does not pass the corpus gate.
 
 ## Separate backend comparison
 
@@ -36,3 +36,28 @@ The comparison script invokes two existing batch-render executables in separate 
 Accuracy mode repeats each backend and requires stable pixels, page statuses, and diagnostics. The output preserves component hashes, CSV logs, PNGs, and cross-backend differences. Different output remains subject to source and visual review. It never selects or installs a backend automatically.
 
 Use `-Measure` only with verified versions, matched publication settings, paused heavy activity, and no simultaneous build or corpus work. It performs warmups followed by balanced alternating runs and records process wall time and peak working set. Batch timing does not measure viewer interaction latency or establish visual parity.
+
+## Classify engine differences
+
+Build `tools/EngineCorpusComparison/EngineCorpusComparison.csproj` in Release. This
+tool loads only the supplied custom-engine application. An optional directory of
+previously rendered baseline PNGs provides comparison data without loading another
+PDF renderer into the application.
+
+```powershell
+& .\tools\EngineCorpusComparison\bin\Release\net10.0-windows\EngineCorpusComparison.exe APP_DLL INPUT_DIRECTORY OUTPUT_DIRECTORY SIZE PAGES BASELINE_PNGS regions
+```
+
+Omit `BASELINE_PNGS` for region-only checks and omit `regions` for full-page checks.
+The manifest records source hashes, full pixel hashes, diagnostics, dimensions,
+different-pixel counts, maximum and mean RGB differences, and exact crop differences.
+Missing or differently sized baseline images are explicit comparison statuses.
+Amplified difference images help locate discrepancies; they do not judge correctness.
+Use each PDF's content, resources, and printed test criteria to distinguish engine
+defects from baseline defects or rendering-policy differences.
+
+The application renders visible crops into caller-owned storage, avoiding a second
+region-sized pixel array and copy. This tool's allocation total includes full and
+region rendering, file hashing, comparison arrays, and PNG encoding. Comparing
+matched runs can verify an allocation reduction; it does not measure peak live
+memory or prove the 1.8 speed and memory gates.

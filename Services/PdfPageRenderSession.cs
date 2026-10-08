@@ -7,9 +7,8 @@ using EngineRenderer = KillerPdf.Engine.Rendering.PdfPageRenderer;
 namespace KillerPDF.Services;
 
 /// <summary>
-/// Owns one document render session so application features do not depend directly on the
-/// current rendering backend. The engine renderer can replace this backend behind the same
-/// boundary as its page coverage expands.
+/// Owns one engine render session and its output buffers so application features share the
+/// engine boundary without depending on rasterizer implementation details.
 /// </summary>
 internal sealed class PdfPageRenderSession : IDisposable
 {
@@ -215,9 +214,15 @@ internal sealed class PdfPageRenderSession : IDisposable
         int left, int top, int width, int height, CancellationToken cancellationToken = default)
     {
         var options = CreateRenderOptions(pageIndex, false, true, false, maximumWidth, maximumHeight);
-        var region = Renderer.RenderRegion(pageIndex, options, left, top, width, height, cancellationToken);
-        return new PdfRenderedPage(region.Width, region.Height, region.Pixels.ToArray(),
-            PdfRenderBackend.Engine, Diagnostics(region.Diagnostics));
+        if (left < 0 || top < 0 || width <= 0 || height <= 0
+            || (long)left + width > options.Width || (long)top + height > options.Height)
+            throw new ArgumentOutOfRangeException(nameof(width));
+        cancellationToken.ThrowIfCancellationRequested();
+        byte[] pixels = GC.AllocateUninitializedArray<byte>(checked(width * height * 4));
+        var diagnostics = Renderer.RenderRegionInto(pageIndex, options, left, top, width, height,
+            pixels, cancellationToken);
+        return new PdfRenderedPage(width, height, pixels,
+            PdfRenderBackend.Engine, Diagnostics(diagnostics));
     }
 
     private EngineRenderOptions CreateRenderOptions(int pageIndex, bool transparentBackground,

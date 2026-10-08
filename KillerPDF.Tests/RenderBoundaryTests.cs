@@ -16,7 +16,8 @@ public sealed class RenderBoundaryTests
             "using Docnet.",
             "DocLib.Instance.GetDocReader",
             "DocnetRenderFallback",
-            "PdfiumInterop"
+            "PdfiumInterop",
+            "FPDF_"
         ];
 
         foreach (string file in Directory.EnumerateFiles(root, "*.cs", SearchOption.AllDirectories))
@@ -40,6 +41,12 @@ public sealed class RenderBoundaryTests
         Assert.DoesNotContain("PdfiumInterop", boundarySource, StringComparison.Ordinal);
         Assert.DoesNotContain("PdfPageRenderSession Open(", boundarySource,
             StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TheEngineIsTheOnlyApplicationPdfRenderBackend()
+    {
+        Assert.Equal(new[] { Services.PdfRenderBackend.Engine }, Enum.GetValues<Services.PdfRenderBackend>());
     }
 
     [Fact]

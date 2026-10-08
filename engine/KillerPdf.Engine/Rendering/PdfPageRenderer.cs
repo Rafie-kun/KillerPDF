@@ -199,6 +199,30 @@ public sealed partial class PdfPageRenderer
             region: (left, top, left + width, top + height));
     }
 
+    /// <summary>Renders a pixel region into caller-owned, tightly packed BGRA32 storage.</summary>
+    /// <remarks>
+    /// Geometry and sampling use the full page's pixel grid. The destination must hold
+    /// width * height * 4 bytes. Extra bytes are untouched. Pixels are never cached, and
+    /// cancellation can leave partial pixels in the caller's buffer.
+    /// </remarks>
+    public IReadOnlyList<string> RenderRegionInto(int pageIndex, PdfRenderOptions options,
+        int left, int top, int width, int height, byte[] destination,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        ArgumentNullException.ThrowIfNull(destination);
+        if (pageIndex < 0 || pageIndex >= _pages.Count)
+            throw new ArgumentOutOfRangeException(nameof(pageIndex));
+        if (left < 0 || top < 0 || width <= 0 || height <= 0
+            || (long)left + width > options.Width || (long)top + height > options.Height)
+            throw new ArgumentOutOfRangeException(nameof(width), "The region must fit inside the page raster.");
+        if (destination.Length < checked(width * height * 4))
+            throw new ArgumentException("The destination is too small for the rendered region.", nameof(destination));
+        cancellationToken.ThrowIfCancellationRequested();
+        return RenderUncached(pageIndex, options, cancellationToken, destination,
+            (left, top, left + width, top + height)).Diagnostics;
+    }
+
     private PdfRenderedPage RenderUncached(int pageIndex, PdfRenderOptions options,
         CancellationToken cancellationToken, byte[]? destination = null,
         (int Left, int Top, int Right, int Bottom)? region = null)

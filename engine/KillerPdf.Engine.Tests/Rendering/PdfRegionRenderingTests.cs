@@ -53,4 +53,58 @@ public sealed class PdfRegionRenderingTests
 
     private static PdfPageRenderer CreateRenderer(string content) => new(PdfDocument.Open(
         new PdfDocumentBuilder().AddPage(64, 64, Encoding.ASCII.GetBytes(content)).Build()));
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void CallerOwnedRegionMatchesFullRasterAndPreservesExtraStorage(bool transparent)
+    {
+        var renderer = CreateRenderer("0.2 0.7 0.4 RG 5.25 w 1 J 1 j -8 20 m 10 100 90 -40 75 40 c S /Unknown Do");
+        var options = new PdfRenderOptions(127, 129, transparentBackground: transparent) { CacheResult = true };
+        var full = renderer.Render(0, options);
+        byte[] destination = Enumerable.Repeat((byte)73, 37 * 41 * 4 + 19).ToArray();
+        var diagnostics = renderer.RenderRegionInto(0, options, 19, 57, 37, 41, destination);
+        Assert.Equal(full.Diagnostics, diagnostics);
+        for (int row = 0; row < 41; row++)
+            Assert.Equal(full.Pixels.Slice(((57 + row) * 127 + 19) * 4, 37 * 4).ToArray(),
+                destination.AsSpan(row * 37 * 4, 37 * 4).ToArray());
+        Assert.All(destination.Skip(37 * 41 * 4), value => Assert.Equal((byte)73, value));
+        Array.Fill(destination, (byte)91);
+        Assert.Equal(full.Pixels.ToArray(), renderer.Render(0, options).Pixels.ToArray());
+    }
+
+    [Fact]
+    public void CallerOwnedRegionRejectsBoundsAndCancellationBeforeTouchingStorage()
+    {
+        var renderer = CreateRenderer("0 0 m 64 64 l S");
+        var options = new PdfRenderOptions(128, 128);
+        byte[] destination = Enumerable.Repeat((byte)73, 32 * 32 * 4).ToArray();
+        Assert.Throws<ArgumentOutOfRangeException>(() => renderer.RenderRegionInto(1, options, 0, 0, 32, 32, destination));
+        Assert.Throws<ArgumentOutOfRangeException>(() => renderer.RenderRegionInto(0, options, -1, 0, 32, 32, destination));
+        Assert.Throws<ArgumentOutOfRangeException>(() => renderer.RenderRegionInto(0, options, 0, 0, 0, 32, destination));
+        Assert.Throws<ArgumentOutOfRangeException>(() => renderer.RenderRegionInto(0, options, int.MaxValue, 0, 32, 32, destination));
+        Assert.Throws<ArgumentException>(() => renderer.RenderRegionInto(0, options, 0, 0, 33, 32, destination));
+        Assert.Throws<OperationCanceledException>(() => renderer.RenderRegionInto(0, options, 0, 0, 32, 32,
+            destination, new CancellationToken(canceled: true)));
+        Assert.All(destination, value => Assert.Equal((byte)73, value));
+    }
+
+    [Fact]
+    public void CallerOwnedRegionAvoidsAllocatingAnotherPixelBuffer()
+    {
+        var renderer = CreateRenderer("");
+        var options = new PdfRenderOptions(1024, 1024) { MaximumParallelism = 1 };
+        byte[] destination = new byte[512 * 512 * 4];
+        renderer.RenderRegion(0, options, 111, 137, 512, 512);
+        renderer.RenderRegionInto(0, options, 111, 137, 512, 512, destination);
+        long before = GC.GetAllocatedBytesForCurrentThread();
+        var owned = renderer.RenderRegion(0, options, 111, 137, 512, 512);
+        long allocatedRegion = GC.GetAllocatedBytesForCurrentThread() - before;
+        before = GC.GetAllocatedBytesForCurrentThread();
+        renderer.RenderRegionInto(0, options, 111, 137, 512, 512, destination);
+        long allocatedInto = GC.GetAllocatedBytesForCurrentThread() - before;
+        Assert.True(owned.Pixels.Span.SequenceEqual(destination));
+        Assert.True(allocatedRegion - allocatedInto >= destination.Length,
+            $"Saved {allocatedRegion - allocatedInto} bytes; expected at least {destination.Length}.");
+    }
 }

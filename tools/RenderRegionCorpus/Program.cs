@@ -31,9 +31,10 @@ internal static class Program
         var render = type.GetMethod("RenderFittedPage", Flags)!;
         var regionRender = type.GetMethod("RenderFittedRegion", Flags)!;
         var records = new List<object>();
-        int compared = 0, regions = 0, failures = 0, skips = 0;
+        int inputFiles = 0, compared = 0, regions = 0, failures = 0, skips = 0;
         foreach (string file in Directory.EnumerateFiles(input, "*.pdf", SearchOption.AllDirectories).Order(StringComparer.Ordinal))
         {
+            inputFiles++;
             string relative = Path.GetRelativePath(input, file);
             string hash = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(file)));
             bool fullRendered = false;
@@ -41,6 +42,7 @@ internal static class Program
             {
                 using var session = (IDisposable)open.Invoke(null, [file, size, size])!;
                 int count = Math.Min(pages, (int)Value(session, "PageCount"));
+                if (count == 0) throw new InvalidOperationException("The document has no renderable pages.");
                 for (int p = 0; p < count; p++)
                 {
                     object full = render.Invoke(session, [p, size, size, false, CancellationToken.None])!;
@@ -79,19 +81,19 @@ internal static class Program
                     compared++;
                 }
             }
-            catch (TargetInvocationException ex)
+            catch (Exception ex)
             {
                 if (fullRendered) failures++;
                 else skips++;
-                records.Add(new { file = relative, hash, status = fullRendered ? "region-error" : "unrenderable", error = ex.InnerException?.ToString() });
+                records.Add(new { file = relative, hash, status = fullRendered ? "region-error" : "unrenderable", error = (ex.InnerException ?? ex).ToString() });
             }
             string manifest = Path.Combine(output, "regions.json");
             if (File.Exists(manifest)) File.ReadAllText(manifest);
-            File.WriteAllText(manifest, JsonSerializer.Serialize(new { appSha256 = appHash,
-                size, compared, regions, failures, skips, records }, new JsonSerializerOptions { WriteIndented = true }));
+            File.WriteAllText(manifest, JsonSerializer.Serialize(new { appPath = app, inputPath = input, appSha256 = appHash,
+                size, inputFiles, compared, regions, failures, skips, records }, new JsonSerializerOptions { WriteIndented = true }));
         }
         Console.WriteLine($"Pages {compared}, regions {regions}, differing regions {failures}, unrenderable files {skips}");
-        return failures == 0 && compared > 0 ? 0 : 1;
+        return failures == 0 && skips == 0 && compared > 0 ? 0 : 1;
     }
 
     private static void Save(string path, int width, int height, byte[] pixels)

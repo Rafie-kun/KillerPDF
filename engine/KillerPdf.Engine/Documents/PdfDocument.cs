@@ -13,6 +13,7 @@ namespace KillerPdf.Engine.Documents;
 /// <summary>
 /// A parsed PDF file whose indirect objects are loaded lazily through its merged cross-reference
 /// table. Compressed objects are decoded and cached by object stream.
+/// Concurrent readers share synchronized lazy object loading and cached object identities.
 /// </summary>
 public sealed class PdfDocument
 {
@@ -26,6 +27,9 @@ public sealed class PdfDocument
 
     private readonly ReadOnlyMemory<byte> _source;
     private readonly bool _compatibilityRecovery;
+    // Sibling renderers share this document. Keep lazy caches and the recursion set under
+    // one reentrant lock so concurrent loads cannot be mistaken for reference cycles.
+    private readonly Lock _objectResolutionSync = new();
     private readonly Dictionary<int, PdfObject> _objects = [];
     private readonly Dictionary<int, ObjectStreamContents> _objectStreams = [];
     private readonly HashSet<int> _resolving = [];
@@ -102,6 +106,7 @@ public sealed class PdfDocument
     {
         get
         {
+            using var scope = _objectResolutionSync.EnterScope();
             if (IsDecrypted) return true;
             if (!_checkedPageEncryption)
             {
@@ -438,6 +443,7 @@ public sealed class PdfDocument
 
     private PdfObject ResolveEntry(PdfCrossReferenceEntry entry)
     {
+        using var scope = _objectResolutionSync.EnterScope();
         if (entry.Type is PdfCrossReferenceEntryType.Free or PdfCrossReferenceEntryType.Null)
             return PdfNull.Instance;
         if (_objects.TryGetValue(entry.ObjectNumber, out PdfObject? cached))

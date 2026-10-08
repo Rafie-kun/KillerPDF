@@ -199,6 +199,21 @@ bytes. The method returns diagnostics and never caches that buffer. Encode or
 consume its pixels before reusing it. Cancellation can leave partial output.
 Ordinary `Render` results retain their immutable bitmap ownership.
 
+Sibling renderer instances can read the same document. Lazy indirect-object and
+object-stream loads share a reentrant document lock, preserving cached object
+identity and separating concurrent readers from true recursive-reference cycles.
+This synchronizes document loading; it does not make one renderer instance safe
+for concurrent raster calls or enable band-parallel rendering.
+
+For a visible crop, call `RenderRegionInto(pageIndex, options, left, top, width,
+height, destination)`. The options describe the full page pixel grid; the destination
+holds only `width * height * 4` BGRA bytes. Coordinates and sampling remain in full
+page space. The region must fit inside that grid. The caller owns the destination,
+extra storage is untouched, and the method returns diagnostics without retaining
+the buffer. Cancellation before rendering leaves storage untouched; cancellation
+during rendering can leave partial output. `RenderRegion` allocates and owns its
+result for callers that do not provide storage.
+
 Fractional axis-aligned rectangles retain three coverage rows instead of a full
 mask. The existing rasterizer calculates the edge rows, and the interior row is
 reused without changing coverage rounding. Transparency-group working pixels,
