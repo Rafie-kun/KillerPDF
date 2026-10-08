@@ -4973,7 +4973,9 @@ public sealed partial class PdfPageRenderer
         bool deviceCmykImage = colorSpace.IsDeviceCmyk || colorSpace.PaletteBase?.IsDeviceCmyk == true;
         bool preserveProcessColorImageSpots = !imageMask && overprint && target.Ink is not null
             && target.HasSpotPlates && (colorSpace is { Components: 1 or 3, Palette: null, RegistrationColor: false }
-                || colorSpace.PaletteBase is { Components: 3, RegistrationColor: false })
+                || colorSpace is { Components: 4, IsIccBased: true, Palette: null }
+                || colorSpace.PaletteBase is { Components: 3, RegistrationColor: false }
+                || colorSpace.PaletteBase is { Components: 4, IsIccBased: true })
             && !colorSpace.HasProcessColorants && !colorSpace.ContainsSpotColorants;
         colorSpace = colorSpace.ForDestination(target);
         Point[] corners =
@@ -7852,7 +7854,7 @@ public sealed partial class PdfPageRenderer
                 }
             : Components == 4 && Profile is not null && destination.Ink is not null
                 && ReferenceEquals(Profile, destination.InkProfile)
-                ? this with { Profile = null, SourceSpace = this } : this;
+                ? this with { Profile = null, SourceSpace = this, IsIccBased = false, IsDeviceCmyk = true } : this;
 
         private ImageColorSpace BindProcessPalette(RasterSurface destination)
         {
