@@ -5385,6 +5385,22 @@ public sealed partial class PdfPageRenderer
                     center, footprintHeight, sourceHeight);
             }
         }
+        if (averagePlane && !binaryAverage && !nativeImageSamples && target.Ink is null
+            && target.RgbProfile is null && !target.HasRgbSpotShadow
+            && target.GroupShape is null && !colorSpace.DoesNotPaint
+            && !colorSpace.ContainsSpotColorants && !colorSpace.NativeProcessMask.HasValue
+            && inverse.B == 0 && inverse.C == 0 && graphicsSoftMask is null
+            && knockout is null && Math.Clamp(stencilAlpha, 0, 1) == 1
+            && blendMode is RendererBlendMode.Normal or RendererBlendMode.Compatible)
+        {
+            PaintReducedRgbRows(target, targetWidth, targetHeight, scaleX, scaleY,
+                inverse, samples, rowBytes, sourceWidth, sourceHeight, components,
+                bits, decode, colorSpace, converterAreaColumns, converterAreaRows,
+                binaryColumns, planeWidth, planeHeight, pixelAlignedPlane,
+                clips, rectangularClips, left, top, paintLeft, paintTop, paintRight,
+                paintBottom, cancellationToken);
+            return;
+        }
         var matteConverter = preblendMatte is not null && !imageMask
             ? new ImageSampleConverter(samples, rowBytes, components,
                 bits, decode, colorSpace, target.Ink is not null, target.InputProfile, matte: true) : null;
@@ -5946,7 +5962,14 @@ public sealed partial class PdfPageRenderer
             _directRgbInk = plainRgb && targetInk;
             _directGray = plainSpace && !targetInk && components == 1 && decode is [0, 1];
             _directCmyk = plainSpace && !targetInk && components == 4 && decode is [0, 1, 0, 1, 0, 1, 0, 1];
-            _directCmykInk = plainSpace && targetInk && components == 4
+            // Matching source/destination profiles already preserve native CMYK channels
+            // in ConvertDecoded. Retain their encoded bytes directly, including reduction.
+            bool matchingInkProfile = targetProfile is not null
+                && ReferenceEquals(colorSpace.Profile, targetProfile)
+                && !colorSpace.DoesNotPaint && !colorSpace.ContainsSpotColorants && colorSpace.Palette is null
+                && colorSpace.Converter is null && colorSpace.MultiConverter is null
+                && colorSpace.ComponentRange is null && bits == 8 && colorSpace.Components == 4;
+            _directCmykInk = (plainSpace || matchingInkProfile) && targetInk && components == 4
                 && decode is [0, 1, 0, 1, 0, 1, 0, 1];
             if (components == 1 && bits <= 16)
             {
@@ -5954,7 +5977,7 @@ public sealed partial class PdfPageRenderer
                 _lookupSet = new bool[1 << bits];
                 if (matte) _matteAlpha = new byte[1 << bits];
             }
-            else if (bits <= 8 && components <= 4)
+            else if (bits <= 8 && components <= 4 && !(_directCmykInk && !matte))
             {
                 _cacheShift = samples.Length >= 1024 * 1024 ? 18 : 20;
                 int cacheSize = 1 << (32 - _cacheShift);

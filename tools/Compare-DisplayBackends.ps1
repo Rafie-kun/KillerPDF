@@ -6,6 +6,7 @@ param(
     [Parameter(Mandatory)][string]$OutputDirectory,
     [ValidateRange(16,8192)][int]$Size = 2048,
     [ValidateRange(1,1000)][int]$Pages = 3,
+    [ValidateRange(0,64)][int]$ComparisonParallelism = 0,
     [switch]$Measure
 )
 $ErrorActionPreference = 'Stop'
@@ -45,6 +46,7 @@ for ($index = 0; $index -lt $sequence.Count; $index++) {
     $log = Join-Path $outputRoot ($label + '.csv')
     $arguments = @('--batch-render', $inputRoot, $folder, '--size', "$Size", '--pages', "$Pages", '--quiet', '--log', $log)
     if ($backend -eq 'reference') { $arguments += @('--parallel', '1') }
+    elseif ($ComparisonParallelism -gt 0) { $arguments += @('--parallel', "$ComparisonParallelism") }
     $info = New-Object Diagnostics.ProcessStartInfo
     $info.FileName = $exe
     $info.Arguments = ($arguments | ForEach-Object { Quote-Argument $_ }) -join ' '
@@ -90,7 +92,8 @@ foreach ($key in @(@($seen['reference'].Keys) + @($seen['comparison'].Keys) | So
 $manifest = [ordered]@{
     Reference=$referenceIdentity
     Comparison=$comparisonIdentity
-    Inputs=$inputs; Size=$Size; Pages=$Pages; Parallel=1; Measured=[bool]$Measure; Runs=$results;
+    Inputs=$inputs; Size=$Size; Pages=$Pages; Parallel=1; ComparisonParallelism=$ComparisonParallelism;
+    Measured=[bool]$Measure; Runs=$results;
     TimingScope='Process launch through exit. PNG hashing and evidence collection are measured separately. This does not measure viewer interaction latency.';
     DifferentImages=$differences; VisualReviewComplete=($differences.Count -eq 0 -and $seen['reference'].Count -gt 0 -and
         $seen['comparison'].Count -gt 0 -and @($results | Where-Object { $_.ExitCode -ne 0 }).Count -eq 0); AutomaticBackendSwitch=$false
