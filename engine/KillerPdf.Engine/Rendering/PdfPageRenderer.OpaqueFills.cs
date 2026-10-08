@@ -49,8 +49,8 @@ public sealed partial class PdfPageRenderer
             {
                 if (clip.Mask.Coverage is not null)
                 {
-                    // A parent render cannot release its clip until this stream finishes.
-                    if (ClipScratchScope.Current?.IsTrackedByAncestor(clip.Mask) != true)
+                    // The clip must outlive pending paint, including after Q.
+                    if (ClipScratchScope.Current?.CanRetainUntilStreamEnds(clip.Mask) != true)
                         return false;
                     fractionalClips = true;
                 }

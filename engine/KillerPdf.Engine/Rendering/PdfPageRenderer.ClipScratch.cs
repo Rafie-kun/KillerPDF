@@ -26,11 +26,14 @@ public sealed partial class PdfPageRenderer
 
         internal void Track(CoverageMask mask) => _masks.Add(mask);
 
-        internal bool IsTrackedByAncestor(CoverageMask mask)
+        internal bool CanRetainUntilStreamEnds(CoverageMask mask)
         {
-            for (ClipScratchScope? scope = _parent; scope is not null; scope = scope._parent)
-                if (scope._masks.Contains(mask)) return true;
-            return false;
+            // Parent scopes outlive this stream. Unpooled form bounds are never
+            // returned, but locally owned clips may be released by Q or a new clip.
+            foreach (CoverageMask? owned in _masks)
+                if (owned is not null && ReferenceEquals(owned.Coverage, mask.Coverage))
+                    return false;
+            return true;
         }
 
         internal void ReleaseTemporary(CoverageMask mask)
