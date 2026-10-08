@@ -683,6 +683,16 @@
       "maintenanceCommit": "41b6c6b40d207f640bfc210c2b29be94720ea5e6",
       "developmentCommit": "2dd41a61e318a64db9b8c73406466ab9a4aadb6d",
       "reason": "Both commits add identical Debug/Release selection to the picker regression script and the same verified #442 correspondence. Their coverage maps retain different prior branch histories, so the combined Git patches differ. Both picker checks passed all 45 theme/accent states and three brush shapes."
+    },
+    {
+      "maintenanceCommit": "424b23d927372f65f021e73f1ae705d3567455e4",
+      "developmentCommit": "1ff6e00bacc59c6c1440dfe968a64389f08b2e46",
+      "reason": "Both commits add the same stamp/picker AutomationIds and isolated color acceptance/cancellation and save/reopen assertions. The fixture keeps maintenance's PDFium renderer and development's Overkill renderer, producing different patches. Final interactive Dark, Light and SE98 cases and the windowless fixture passed on both lines; exact expectations and owned-process cleanup remain intact."
+    },
+    {
+      "maintenanceCommit": "5187174d7681fa22d938033590434a976f5309a5",
+      "developmentCommit": "80331a1b0fbcfc15397c00cea06f5d1090f7c0c6",
+      "reason": "Both commits add identical hosted pull-request build/test workflows and CI documentation, including the windowless PDF fixture and development-only commit-coverage check. Maintenance documentation has an additional publication/status-requirement sentence and different prior context, so patch IDs differ. All six workflow YAML files and their PowerShell commands validate; the exact fixture command passed on both lines. Interactive UI coverage remains a separate desktop check."
     }
   ]
 }
