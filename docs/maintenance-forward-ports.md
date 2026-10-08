@@ -2,7 +2,7 @@
 
 Every commit added to `main` after the reviewed 1.8.4 baseline must also be accounted for in `dev/1.9-overkill`. This includes code, tests, translations, documentation, and release metadata.
 
-Run `build/Check-MaintenanceForwardPorts.ps1` locally to check coverage. An identical cherry-picked patch passes, even when the commit has a different version prefix. Commits already merged into Overkill also pass. No GitHub workflow runs this check automatically.
+Run `build/Check-MaintenanceForwardPorts.ps1` locally to check coverage. An identical cherry-picked patch passes, even when the commit has a different version prefix. Commits already merged into Overkill also pass. The local `pr-build-test.yml` definition adds a coverage job for PRs targeting `dev/1.9-overkill`, using full history, `origin/main`, and the proposed development merge tree. It takes effect only after publication. Maintenance PRs use build and tests; new maintenance commits still need a deliberate port and local coverage check.
 
 If Overkill needs a different implementation, port and test the fix, commit it with the `v1.9.0:` prefix, then add a record to `.github/maintenance-forward-ports.json`:
 
