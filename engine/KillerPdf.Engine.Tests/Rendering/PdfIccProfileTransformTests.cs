@@ -13,6 +13,65 @@ namespace KillerPdf.Engine.Tests.Rendering;
 public sealed class PdfIccProfileTransformTests
 {
     [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void SiblingRenderSessionsReuseParsedIccStorage(bool compressed)
+    {
+        var document = SharedProfileDocument(compressed);
+        var shared = new PdfPageRenderer.SharedCache();
+        var options = new PdfRenderOptions(6, 7) { CacheResult = false, MaximumParallelism = 1 };
+        var firstRenderer = new PdfPageRenderer(document, null, shared);
+        var first = firstRenderer.Render(0, options);
+        Assert.Empty(first.Diagnostics);
+        for (int sibling = 0; sibling < 6; sibling++)
+        {
+            long before = GC.GetAllocatedBytesForCurrentThread();
+            var renderer = new PdfPageRenderer(document, null, shared);
+            var page = renderer.Render(0, options);
+            long allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+            Assert.True(first.Pixels.Span.SequenceEqual(page.Pixels.Span));
+            Assert.Empty(page.Diagnostics);
+            Assert.True(allocated < 128 * 1024, $"Sibling ICC render allocated {allocated} bytes.");
+        }
+        GC.KeepAlive(firstRenderer);
+    }
+
+    [Fact]
+    public void SiblingRenderSessionsShareIccTransformsDuringConcurrentInitialization()
+    {
+        var document = SharedProfileDocument(true);
+        byte[] expected = new PdfPageRenderer(document).Render(0, new PdfRenderOptions(6, 7)).Pixels.ToArray();
+        var shared = new PdfPageRenderer.SharedCache();
+        Parallel.For(0, 16, _ =>
+        {
+            var page = new PdfPageRenderer(document, null, shared).Render(0,
+                new PdfRenderOptions(6, 7) { CacheResult = false, MaximumParallelism = 1 });
+            Assert.Equal(expected, page.Pixels.ToArray());
+            Assert.Empty(page.Diagnostics);
+        });
+    }
+
+    private static PdfDocument SharedProfileDocument(bool compressed)
+    {
+        PdfName Name(string value) => new(Encoding.ASCII.GetBytes(value));
+        KeyValuePair<PdfName, PdfObject> Entry(string key, PdfObject value) => new(Name(key), value);
+        var source = PdfDocument.Open(new PdfDocumentBuilder().AddPage(6, 7,
+            ".1 .2 .3 .4 k 0 0 6 7 re f"u8.ToArray()).Build());
+        var root = (PdfIndirectReference)source.Trailer[Name("Root")];
+        var catalog = (PdfDictionary)source.Resolve(root);
+        var update = new PdfIncrementalUpdateBuilder(source);
+        byte[] bytes = Profile("CMYK", "Lab ", ("A2B0", Lut(true, true, false, 4, grid: 17)));
+        using var encoded = new MemoryStream();
+        if (compressed)
+            using (var zlib = new ZLibStream(encoded, CompressionLevel.Fastest, true)) zlib.Write(bytes);
+        var profile = update.AddObject(new PdfStream(new PdfDictionary(compressed
+            ? [Entry("Filter", Name("FlateDecode"))] : []), compressed ? encoded.ToArray() : bytes));
+        update.ReplaceObject(root.ObjectNumber, new PdfDictionary(catalog.Append(Entry("OutputIntents",
+            new PdfArray([new PdfDictionary([Entry("S", Name("GTS_PDFX")), Entry("DestOutputProfile", profile)])])))));
+        return PdfDocument.Open(update.Build());
+    }
+
+    [Theory]
     [InlineData(0)]
     [InlineData(1)]
     [InlineData(2)]
@@ -1534,15 +1593,16 @@ public sealed class PdfIccProfileTransformTests
         return bytes;
     }
 
-    private static byte[] Lut(bool sixteen, bool lab, bool identity, int inputs = 3)
+    private static byte[] Lut(bool sixteen, bool lab, bool identity, int inputs = 3, int grid = 2)
     {
         int entries = sixteen ? 2 : 256, sample = sixteen ? 2 : 1, header = sixteen ? 52 : 48;
-        int cells = 1 << inputs;
+        int cells = 1;
+        for (int channel = 0; channel < inputs; channel++) cells *= grid;
         byte[] bytes = new byte[header + sample * ((inputs + 3) * entries + cells * 3)];
         (sixteen ? "mft2"u8 : "mft1"u8).CopyTo(bytes);
         bytes[8] = (byte)inputs;
         bytes[9] = 3;
-        bytes[10] = 2;
+        bytes[10] = (byte)grid;
         for (int row = 0; row < 3; row++) BinaryPrimitives.WriteInt32BigEndian(bytes.AsSpan(12 + row * 16), 65536);
         if (sixteen)
         {

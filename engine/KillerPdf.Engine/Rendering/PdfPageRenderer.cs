@@ -69,8 +69,9 @@ public sealed partial class PdfPageRenderer
     /// Caches that can be reused across several <see cref="PdfPageRenderer"/> instances that
     /// open the same immutable document. Sharing lets sibling renderers (viewer, sidebar
     /// thumbnails, print preview, export) skip parsing the same content, decoding the same
-    /// image, and rasterizing the same glyph mask on every renderer. The cached entries remain
-    /// bounded, so total memory does not grow with the number of renderers.
+    /// image, reading the same color profile, and rasterizing the same glyph mask on every
+    /// renderer. The cached entries remain bounded, so total memory does not grow with the
+    /// number of renderers.
     /// </summary>
     public sealed class SharedCache
     {
@@ -81,6 +82,7 @@ public sealed partial class PdfPageRenderer
         internal readonly BoundedCache<PdfGlyphOutline, IReadOnlyList<Point[]>> GlyphPathCache;
         internal readonly BoundedCache<ImageCacheKey, DecodedImage> ImageCache;
         internal readonly BoundedCache<GlyphMaskKey, GlyphMask?> GlyphMaskCache;
+        internal readonly BoundedCache<PdfObject, (PdfColorTransform? Transform, int Bytes)> ColorProfileCache;
 
         /// <summary>Creates a fresh shared cache with the engine's default per-cache limits.</summary>
         public SharedCache()
@@ -91,6 +93,7 @@ public sealed partial class PdfPageRenderer
             GlyphPathCache = CreateGlyphPathCache();
             ImageCache = CreateImageCache();
             GlyphMaskCache = CreateGlyphMaskCache();
+            ColorProfileCache = CreateColorProfileCache();
         }
     }
 
@@ -100,8 +103,8 @@ public sealed partial class PdfPageRenderer
 
     /// <summary>
     /// Creates a renderer for an immutable document, optionally reusing parsed-content,
-    /// decoded-image, and glyph caches held by <paramref name="sharedCache"/>. Passing the
-    /// same instance to multiple renderers for the same document avoids repeated setup work.
+    /// decoded-image, color-profile, and glyph caches held by <paramref name="sharedCache"/>.
+    /// Passing the same instance to multiple renderers for the same document avoids repeated setup work.
     /// </summary>
     public PdfPageRenderer(PdfDocument document, IPdfFontResolver? fontResolver,
         SharedCache? sharedCache)
@@ -139,6 +142,7 @@ public sealed partial class PdfPageRenderer
         _glyphPathCache = sharedCache?.GlyphPathCache ?? CreateGlyphPathCache();
         _imageCache = sharedCache?.ImageCache ?? CreateImageCache();
         _glyphMaskCache = sharedCache?.GlyphMaskCache ?? CreateGlyphMaskCache();
+        _colorProfiles = sharedCache?.ColorProfileCache ?? CreateColorProfileCache();
     }
 
     private static bool UsesPdf20BlendEndpoints(PdfDocument document)

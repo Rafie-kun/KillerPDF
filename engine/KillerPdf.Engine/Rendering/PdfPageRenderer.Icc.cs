@@ -10,7 +10,8 @@ public sealed partial class PdfPageRenderer
         ReferenceEquals(first, second) || first?.HasSameIdentity(second) == true;
 
     private readonly Lazy<(PdfColorTransform? Transform, bool Unavailable)>[] _outputProfiles;
-    private readonly BoundedCache<PdfObject, (PdfColorTransform? Transform, int Bytes)> _colorProfiles =
+    private readonly BoundedCache<PdfObject, (PdfColorTransform? Transform, int Bytes)> _colorProfiles;
+    private static BoundedCache<PdfObject, (PdfColorTransform? Transform, int Bytes)> CreateColorProfileCache() =>
         new(8, ReferenceEqualityComparer.Instance, 4 * 1024 * 1024, entry => entry.Bytes);
     private static readonly BoundedCache<string, (byte[] Encoded, byte[] Decoded)> SharedIccBytes =
         new(8, maximumWeight: 16 * 1024 * 1024,
