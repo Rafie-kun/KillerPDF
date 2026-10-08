@@ -145,6 +145,38 @@ public sealed class PdfCrossReferenceTable : IReadOnlyDictionary<int, PdfCrossRe
         }
     }
 
+    internal static PdfCrossReferenceTable RecoverPageStructure(
+        ReadOnlyMemory<byte> source, PdfCrossReferenceTable current)
+    {
+        var table = ReconstructFromScan(source,
+            new InvalidOperationException("The document page structure is invalid."));
+        // Physical scans must not resurrect objects explicitly freed by a later revision.
+        foreach (var pair in current)
+            if (pair.Value.Type is PdfCrossReferenceEntryType.Free or PdfCrossReferenceEntryType.Null
+                && (pair.Value.Field2 != 65_535 || current.AllSections.Any(section => section.ContainsKey(0))))
+                table._entries[pair.Key] = pair.Value;
+        return table;
+    }
+
+    internal PdfCrossReferenceTable WithRecoveredPageObjects(
+        IReadOnlyDictionary<int, PdfObject> replacements, PdfIndirectReference catalog)
+    {
+        var entries = new Dictionary<int, PdfCrossReferenceEntry>(_entries);
+        foreach (int number in replacements.Keys)
+            if (!entries.TryGetValue(number, out PdfCrossReferenceEntry entry)
+                || entry.Type is PdfCrossReferenceEntryType.Free or PdfCrossReferenceEntryType.Null)
+                entries[number] = new(number, PdfCrossReferenceEntryType.InUse, 0, 0);
+        var trailer = MergedTrailer.ToDictionary(pair => pair.Key, pair => pair.Value);
+        trailer[RootName] = catalog;
+        trailer[SizeName] = new PdfInteger(checked(entries.Keys.Max() + 1));
+        var section = new PdfCrossReferenceSection(StartXref.Offset, entries.Values,
+            new PdfDictionary(trailer), isStream: false, compatibilityRecovery: true);
+        var table = new PdfCrossReferenceTable(Header, StartXref, [new Revision(section, null)], entries);
+        foreach (var pair in _recoveredHeaders)
+            table._recoveredHeaders.Add(pair.Key, [.. pair.Value]);
+        return table;
+    }
+
     private static PdfCrossReferenceTable ReconstructFromScan(
         ReadOnlyMemory<byte> source, Exception original)
     {

@@ -15,7 +15,7 @@ namespace KillerPdf.Engine.Documents;
 /// table. Compressed objects are decoded and cached by object stream.
 /// Concurrent readers share synchronized lazy object loading and cached object identities.
 /// </summary>
-public sealed class PdfDocument
+public sealed partial class PdfDocument
 {
     /// <summary>Maximum number of compressed members accepted in one object stream.</summary>
     public const int MaximumObjectsPerObjectStream = 1_000_000;
@@ -48,7 +48,7 @@ public sealed class PdfDocument
     }
 
     /// <summary>Gets the merged cross-reference revision table.</summary>
-    public PdfCrossReferenceTable CrossReferences { get; }
+    public PdfCrossReferenceTable CrossReferences { get; private set; }
     /// <summary>Gets the parsed PDF header.</summary>
     public PdfHeader Header => CrossReferences.Header;
     /// <summary>Gets the newest revision trailer dictionary.</summary>
@@ -133,6 +133,8 @@ public sealed class PdfDocument
     /// </summary>
     public PdfPasswordAuthenticationRole PasswordAuthenticationRole =>
         _security?.AuthenticationRole ?? PdfPasswordAuthenticationRole.None;
+    /// <summary>Gets whether compatibility opening authenticated an unnormalized Unicode password.</summary>
+    public bool RecoveredUnnormalizedPassword => _security?.RecoveredUnnormalizedPassword ?? false;
     /// <summary>
     /// The authenticated Standard Security permission flags, or <see langword="null"/> when the
     /// document is unencrypted or has not been authenticated.
@@ -387,7 +389,11 @@ public sealed class PdfDocument
             return ResolveMissingReference(reference);
         if (_compatibilityRecovery
             && entry.Type is PdfCrossReferenceEntryType.Free or PdfCrossReferenceEntryType.Null)
-            return ResolveMissingReference(reference);
+            // A higher free generation records deletion. An object-zero sentinel under
+            // another number in a table without object zero is a known malformed layout.
+            return entry.Type == PdfCrossReferenceEntryType.Free && entry.Field2 > reference.Generation
+                && (entry.Field2 != 65_535 || CrossReferences.AllSections.Any(section => section.ContainsKey(0)))
+                ? PdfNull.Instance : ResolveMissingReference(reference);
 
         int currentGeneration = entry.Type == PdfCrossReferenceEntryType.InUse ? entry.Field2 : 0;
         if (entry.Type is PdfCrossReferenceEntryType.InUse or PdfCrossReferenceEntryType.Compressed

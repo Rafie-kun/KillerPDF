@@ -163,7 +163,7 @@ public sealed class PdfDocumentTests
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public void RecoveryUsesOnlyAnUnambiguousCatalogWithoutChangingWriterRoot(bool ambiguous)
+    public void RecoveryPersistsOnlyAnUnambiguousCatalogForWriting(bool ambiguous)
     {
         string[] objects =
         [
@@ -188,11 +188,18 @@ public sealed class PdfDocumentTests
         Assert.Throws<InvalidOperationException>(() => PdfPageInformation.Read(PdfDocument.Open(bytes)));
         PdfDocument recovered = PdfDocument.OpenWithCompatibilityRecovery(bytes);
         if (ambiguous)
+        {
             Assert.Throws<InvalidOperationException>(() => PdfPageInformation.Read(recovered));
+            Assert.Equal(1, Assert.IsType<PdfIndirectReference>(recovered.Trailer[Name("Root")]).ObjectNumber);
+            Assert.Throws<InvalidOperationException>(() => PdfDocumentWriter.Write(recovered));
+        }
         else
+        {
             Assert.Equal(30, Assert.Single(PdfPageInformation.Read(recovered)).Width);
-        Assert.Equal(1, Assert.IsType<PdfIndirectReference>(recovered.Trailer[Name("Root")]).ObjectNumber);
-        Assert.Throws<InvalidOperationException>(() => PdfDocumentWriter.Write(recovered));
+            Assert.Equal(2, Assert.IsType<PdfIndirectReference>(recovered.Trailer[Name("Root")]).ObjectNumber);
+            Assert.Equal(30, Assert.Single(PdfPageInformation.Read(
+                PdfDocument.Open(PdfDocumentWriter.Write(recovered)))).Width);
+        }
     }
 
     [Fact]

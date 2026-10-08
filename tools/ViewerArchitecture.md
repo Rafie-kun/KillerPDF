@@ -36,6 +36,8 @@ The comparison script invokes two existing batch-render executables in separate 
 Accuracy mode repeats each backend and requires stable pixels, page statuses, and diagnostics. The output preserves component hashes, CSV logs, PNGs, and cross-backend differences. Different output remains subject to source and visual review. It never selects or installs a backend automatically.
 
 Use `-Measure` only with verified versions, matched publication settings, paused heavy activity, and no simultaneous build or corpus work. It performs warmups followed by balanced alternating runs and records process wall time and peak working set. Batch timing does not measure viewer interaction latency or establish visual parity.
+Process timing stops at exit; PNG hashing and evidence collection are recorded
+separately. Unrenderable CSV rows and represented-file counts remain in each run.
 
 ## Classify engine differences
 
@@ -61,3 +63,19 @@ region-sized pixel array and copy. This tool's allocation total includes full an
 region rendering, file hashing, comparison arrays, and PNG encoding. Comparing
 matched runs can verify an allocation reduction; it does not measure peak live
 memory or prove the 1.8 speed and memory gates.
+
+For encrypted test fixtures, append `--passwords MANIFEST_JSON`. The JSON maps
+exact relative paths with forward slashes to arrays of published test password
+candidates. The tool passes candidates in process through the authenticated
+engine boundary and records the manifest path and SHA-256. Password values are
+not command-line arguments or result fields. Retain the upstream credential
+documentation alongside the evidence. Files without usable credentials remain
+explicit failures in the original denominator.
+
+`tools/EngineRecoveryRoundTrip` validates recovered inputs listed in an
+`EngineCorpusComparison` recovery summary. Run it with the corpus directory,
+summary JSON and a new output JSON path. It checks intact geometry, source text,
+nonblank pixels, strict reopening after a full rewrite, incremental source-byte
+preservation, page editing and exact pixels after reopening. It never modifies
+the original fixtures. The headless app batch renderer also returns a failure
+exit code for unrenderable files and empty input sets.

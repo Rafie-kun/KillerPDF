@@ -59,6 +59,8 @@ for ($index = 0; $index -lt $sequence.Count; $index++) {
     }
     $process.Refresh()
     $peak = [Math]::Max($peak, $process.PeakWorkingSet64)
+    $watch.Stop()
+    $evidenceWatch = [Diagnostics.Stopwatch]::StartNew()
     if ($process.ExitCode -gt 1) { throw "Backend $backend exited with $($process.ExitCode). Retained output: $folder" }
     $pngs = @{}
     Get-ChildItem -LiteralPath $folder -Filter '*.png' -Recurse -File | ForEach-Object {
@@ -66,6 +68,7 @@ for ($index = 0; $index -lt $sequence.Count; $index++) {
     }
     $rows = @(Import-Csv -LiteralPath $log)
     $failedPages = @($rows | Where-Object { $_.Status -eq 'FAIL' })
+    $unrenderableRows = @($rows | Where-Object { $_.Status -ne 'OK' })
     $status = @($rows | Select-Object File,Page,Width,Height,Status,Detail) | ConvertTo-Json -Depth 5 -Compress
     if ($statuses.ContainsKey($backend) -and $statuses[$backend] -ne $status) { throw "Backend $backend changed page statuses or diagnostics." }
     $statuses[$backend] = $status
@@ -76,7 +79,9 @@ for ($index = 0; $index -lt $sequence.Count; $index++) {
         foreach ($key in $pngs.Keys) { if ($old[$key] -ne $pngs[$key]) { throw "Backend $backend changed pixels: $key" } }
     } else { $seen[$backend] = $pngs }
     $results += [pscustomobject]@{ Backend=$backend; Warmup=($Measure -and $index -lt 2); PngCount=$pngs.Count; FailedPages=$failedPages; ExitCode=$process.ExitCode;
-        PeakWorkingSetBytes=$peak; WallMilliseconds=$watch.Elapsed.TotalMilliseconds; Csv=$log; Output=$folder }
+        UnrenderableRows=$unrenderableRows; RepresentedFiles=@($rows.File | Sort-Object -Unique).Count;
+        PeakWorkingSetBytes=$peak; WallMilliseconds=$watch.Elapsed.TotalMilliseconds;
+        EvidenceMilliseconds=$evidenceWatch.Elapsed.TotalMilliseconds; Csv=$log; Output=$folder }
 }
 $differences = @()
 foreach ($key in @(@($seen['reference'].Keys) + @($seen['comparison'].Keys) | Sort-Object -Unique)) {
@@ -86,7 +91,7 @@ $manifest = [ordered]@{
     Reference=$referenceIdentity
     Comparison=$comparisonIdentity
     Inputs=$inputs; Size=$Size; Pages=$Pages; Parallel=1; Measured=[bool]$Measure; Runs=$results;
-    TimingScope='Separate batch-render processes. This does not measure viewer interaction latency.';
+    TimingScope='Process launch through exit. PNG hashing and evidence collection are measured separately. This does not measure viewer interaction latency.';
     DifferentImages=$differences; VisualReviewComplete=($differences.Count -eq 0 -and $seen['reference'].Count -gt 0 -and
         $seen['comparison'].Count -gt 0 -and @($results | Where-Object { $_.ExitCode -ne 0 }).Count -eq 0); AutomaticBackendSwitch=$false
 }

@@ -261,7 +261,9 @@ public sealed partial class PdfPageRenderer
                 ? [new ClipRegion(CoverageMask.Rectangle(Left, Top, Right, Bottom), storageBounds: true)] : [],
             false, null, null, false, null, null,
             new ImageColorSpace(1, null), new ImageColorSpace(1, null), null, null);
-        var diagnostics = new HashSet<string>();
+        var diagnostics = new HashSet<string>(_document.RecoveryDiagnostics);
+        if (_document.RecoveredUnnormalizedPassword)
+            diagnostics.Add("The supplied password authenticated a legacy unnormalized Unicode password hash.");
         if (_tree.RecoveredCycle) diagnostics.Add("A cyclic page-tree reference was omitted.");
         if (_recoveredPageResources.Contains(pageIndex))
             diagnostics.Add("Invalid page resources were treated as empty.");

@@ -15,13 +15,17 @@ internal static class Program
     [STAThread]
     private static int Main(string[] args)
     {
-        if (args.Length < 5) { Console.Error.WriteLine("Usage: EngineCorpusComparison APP_DLL INPUT OUTPUT SIZE PAGES [BASELINE_PNGS] [regions]"); return 2; }
+        if (args.Length < 5) { Console.Error.WriteLine("Usage: EngineCorpusComparison APP_DLL INPUT OUTPUT SIZE PAGES [BASELINE_PNGS] [regions] [--passwords MANIFEST_JSON]"); return 2; }
         string app = Path.GetFullPath(args[0]), input = Path.GetFullPath(args[1]), output = Path.GetFullPath(args[2]);
         if (Directory.Exists(output)) throw new IOException("Use a new output directory.");
         Directory.CreateDirectory(output);
         int size = int.Parse(args[3]), pages = int.Parse(args[4]);
         bool regions = args.Contains("regions");
-        string? baseline = args.Length > 5 && args[5] != "regions" ? args[5] : null;
+        string? baseline = args.Length > 5 && args[5] != "regions" && args[5] != "--passwords" ? args[5] : null;
+        int passwordIndex = Array.IndexOf(args, "--passwords");
+        string? passwordManifest = passwordIndex >= 0 ? Path.GetFullPath(args[passwordIndex + 1]) : null;
+        var passwords = passwordManifest is null ? new Dictionary<string, string[]>()
+            : JsonSerializer.Deserialize<Dictionary<string, string[]>>(File.ReadAllText(passwordManifest))!;
         AssemblyLoadContext.Default.Resolving += (_, name) =>
         {
             string dll = Path.Combine(Path.GetDirectoryName(app)!, name.Name + ".dll");
@@ -30,6 +34,8 @@ internal static class Program
         Assembly assembly = Assembly.LoadFrom(app);
         Type type = assembly.GetType("KillerPDF.Services.PdfPageRenderSession", true)!;
         var open = type.GetMethod("OpenEngineFirst", Flags, [typeof(string), typeof(int), typeof(int)])!;
+        var authenticatedOpen = type.GetMethod("OpenEngineFirst", Flags,
+            [typeof(string), typeof(int), typeof(int), typeof(string)]);
         var render = type.GetMethod("RenderFittedPage", Flags)!;
         var regionRender = type.GetMethod("RenderFittedRegion", Flags)!;
         var records = new List<object>();
@@ -44,7 +50,7 @@ internal static class Program
             try
             {
                 var timer = Stopwatch.StartNew();
-                using var session = (IDisposable)open.Invoke(null, [file, size, size])!;
+                using var session = Open();
                 parseMs += timer.Elapsed.TotalMilliseconds;
                 int count = Math.Min(pages, (int)Value(session, "PageCount"));
                 if (count == 0) throw new InvalidOperationException("The document has no renderable pages.");
@@ -129,6 +135,20 @@ internal static class Program
                         comparison, cropDifferences, cropMaximumDelta, cropSamples });
                     rendered++;
                 }
+
+                IDisposable Open()
+                {
+                    if (!passwords.TryGetValue(relative.Replace('\\', '/'), out string[]? candidates))
+                        return (IDisposable)open.Invoke(null, [file, size, size])!;
+                    if (authenticatedOpen is null) throw new NotSupportedException("The app has no authenticated engine boundary.");
+                    Exception? last = null;
+                    foreach (string password in candidates)
+                    {
+                        try { return (IDisposable)authenticatedOpen.Invoke(null, [file, size, size, password])!; }
+                        catch (TargetInvocationException error) { last = error.InnerException ?? error; }
+                    }
+                    throw new InvalidOperationException("Published fixture credentials did not open the document.", last);
+                }
             }
             catch (Exception ex)
             {
@@ -137,6 +157,8 @@ internal static class Program
         }
         var manifest = new { appPath = app, inputPath = input, baselinePath = baseline,
             appSha256 = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(app))),
+            passwordManifest, passwordManifestSha256 = passwordManifest is null ? null
+                : Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(passwordManifest))),
             size, inputFiles, rendered, failures,
             regions, regionFailures, parseMs, rasterMs, managedAllocatedBytes = GC.GetTotalAllocatedBytes(true) - allocated, records };
         File.WriteAllText(Path.Combine(output, "corpus.json"), JsonSerializer.Serialize(manifest, new JsonSerializerOptions { WriteIndented = true }));

@@ -59,7 +59,16 @@ public sealed class PdfIncrementalUpdateBuilder
         if (document.IsEncrypted && !document.IsDecrypted)
             throw new InvalidOperationException(
                 "An encrypted PDF must be opened with a password before it can be updated.");
+        document.PreparePageStructureForWriting();
         _nextObjectNumber = InitialSize(document);
+        // Repairs belong to the document model and must survive an incremental save,
+        // including virtual catalog/page-tree objects that do not exist in the source bytes.
+        foreach (var pair in document.RecoveredPageObjects)
+        {
+            PdfCrossReferenceEntry entry = document.CrossReferences[pair.Key];
+            int generation = entry.Type == PdfCrossReferenceEntryType.InUse ? entry.Field2 : 0;
+            _objects[pair.Key] = new PendingObject(pair.Key, generation, pair.Value);
+        }
     }
 
     /// <summary>Reserves a generation-zero object number for a value supplied later.</summary>

@@ -52,8 +52,23 @@ internal sealed class PdfPageRenderSession : IDisposable
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maximumWidth);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maximumHeight);
         EngineDocument document = OpenDocument(path);
+        if (!document.CanReadPageContent)
+            throw new InvalidOperationException("Authenticate the document before rendering page content.");
         IReadOnlyList<EnginePageInformation> pages = EnginePageInformation.Read(document);
         return new PdfPageRenderSession(document, pages, maximumWidth, maximumHeight, 0);
+    }
+
+    internal static PdfPageRenderSession OpenEngineFirst(
+        string path, int maximumWidth, int maximumHeight, string password)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maximumWidth);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maximumHeight);
+        ArgumentNullException.ThrowIfNull(password);
+        using FileStream source = File.OpenRead(path);
+        EngineDocument document = EngineDocument.OpenWithCompatibilityRecovery(source, password);
+        return new PdfPageRenderSession(document, EnginePageInformation.Read(document),
+            maximumWidth, maximumHeight, 0);
     }
 
     // In-process cache of parsed PdfDocument instances keyed by absolute path plus its

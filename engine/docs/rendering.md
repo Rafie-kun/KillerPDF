@@ -252,6 +252,26 @@ decoding reads encoded memory directly and returns independent writable output.
 inputs, explicitly choose `PdfDocument.OpenWithCompatibilityRecovery`. Recovery
 is bounded and does not change the strict default or authorize unsafe writing.
 
+When catalog or page-tree traversal fails, compatibility recovery can scan files
+up to 16 MiB with at most 4,096 indirect objects for intact explicit page objects.
+Only an unambiguous catalog and root are selected. Broken kid links are rebuilt
+only when one intact leaf and a declared count of one establish the association.
+An intentionally empty tree, ambiguous roots, missing leaf pages and encrypted
+documents are not reconstructed by this structural recovery. A diagnostic records
+the repair. The engine retains original object references and owned replacement
+objects; both full rewrites and incremental saves serialize the repaired model.
+The original source bytes are preserved by incremental saving.
+Writers prepare bounded recovery before reserving new object numbers, so saving
+before the first render cannot collide with a recovered catalog or page-tree root.
+
+Revision 6 and later password preparation retains the five Unicode 3.2 CJK
+canonical mappings changed by Unicode 4.0. Compatibility opening can also try
+the exact supplied UTF-8 password when a legacy producer hashed an unnormalized
+sequence. It still requires a matching password hash and authenticated permission
+block, and reports `RecoveredUnnormalizedPassword`. Strict opening and authoring
+retain normalized password rules. Rendering reports any password recovery in its
+diagnostics. Passwords remain caller input; the engine never searches for them.
+
 Recovery skips an image whose declared width or height is missing or is not a
 positive supported integer, and reports a diagnostic. Surrounding page content
 continues. Extraction records zero for a nonnumeric pixel dimension with its own

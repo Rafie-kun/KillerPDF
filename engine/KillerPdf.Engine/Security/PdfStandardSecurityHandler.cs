@@ -39,6 +39,7 @@ internal sealed class PdfStandardSecurityHandler
     private readonly bool _recoverIvOnlyStreams;
 
     internal PdfPasswordAuthenticationRole AuthenticationRole { get; }
+    internal bool RecoveredUnnormalizedPassword { get; private init; }
     internal PdfDocumentPermissions Permissions { get; }
 
     private PdfStandardSecurityHandler(
@@ -122,6 +123,22 @@ internal sealed class PdfStandardSecurityHandler
             ? PdfPasswordAuthenticationRole.User
             : PdfPasswordAuthenticationRole.Owner;
         fileKey ??= TryUserPassword(passwordBytes, user, userEncryptedKey, revision);
+        bool recoveredUnnormalizedPassword = false;
+        if (fileKey is null && compatibilityRecovery && revision >= 6)
+        {
+            // Some legacy producers stored a hash of unnormalized Unicode. Try only
+            // the caller's exact UTF-8 bytes, after the normal SASLprep validation above.
+            // A matching password hash and authenticated Perms block remain mandatory.
+            byte[] originalBytes = PasswordBytes(password, normalize: false);
+            if (!originalBytes.AsSpan().SequenceEqual(passwordBytes))
+            {
+                fileKey = TryOwnerPassword(originalBytes, owner, user, ownerEncryptedKey, revision);
+                authenticationRole = fileKey is null
+                    ? PdfPasswordAuthenticationRole.User : PdfPasswordAuthenticationRole.Owner;
+                fileKey ??= TryUserPassword(originalBytes, user, userEncryptedKey, revision);
+                recoveredUnnormalizedPassword = fileKey is not null;
+            }
+        }
         if (fileKey is null)
             throw new PdfPasswordAuthenticationException("The PDF password is incorrect.");
         byte[] permissions = DecryptEcb(fileKey, RequireBytes(encryption, "Perms", 16));
@@ -146,7 +163,8 @@ internal sealed class PdfStandardSecurityHandler
         return new PdfStandardSecurityHandler(
             fileKey, stringMethod, streamMethod, embeddedFileMethod, encryptMetadata,
             declaredPermissions, revision, authenticationRole,
-            ReadCryptFilters(encryption, requiredMethod), compatibilityRecovery);
+            ReadCryptFilters(encryption, requiredMethod), compatibilityRecovery)
+        { RecoveredUnnormalizedPassword = recoveredUnnormalizedPassword };
     }
 
     internal static PdfStandardSecurityHandler CreateCertificate(
@@ -793,10 +811,19 @@ internal sealed class PdfStandardSecurityHandler
         string value;
         if (normalize)
         {
-            string mapped = MapSaslPrep(password);
+                string mapped = MapSaslPrep(password);
             PdfSaslPrepTables.ValidateAssigned(mapped);
             try
             {
+                    // PDF's SASLprep uses Unicode 3.2, before the five canonical CJK
+                    // corrections in Unicode 4.0. Preserve those original mappings before
+                    // delegating the rest of NFKC to the platform normalizer.
+                    // https://www.unicode.org/versions/corrigendum4.html
+                    mapped = mapped.Replace("\U0002F868", "\U0002136A", StringComparison.Ordinal)
+                        .Replace("\U0002F874", "\u5F33", StringComparison.Ordinal)
+                        .Replace("\U0002F91F", "\u43AB", StringComparison.Ordinal)
+                        .Replace("\U0002F95F", "\u7AAE", StringComparison.Ordinal)
+                        .Replace("\U0002F9BF", "\u4D57", StringComparison.Ordinal);
                 value = mapped.Normalize(NormalizationForm.FormKC);
             }
             catch (ArgumentException exception)

@@ -22,8 +22,8 @@ namespace KillerPDF.Features
     // writes one PNG per page mirroring the input tree. The CSV log records
     // milliseconds per page so two builds can be compared on the same input.
     //
-    // Exit codes: 0 = every page rendered or the file was skipped with a
-    // reason, 1 = at least one render failed, 2 = bad usage or bad paths.
+    // Exit codes: 0 = every selected file rendered, 1 = a file could not render
+    // or the input contained no PDFs, 2 = bad usage or bad paths.
     internal static class BatchRenderRunner
     {
         private const int DefaultSize = 1024;
@@ -188,7 +188,7 @@ namespace KillerPDF.Features
                     con.WriteLine("Could not write log: " + BatchRunner.FlattenBatchDetail(ex.Message));
                 }
             }
-            return fail > 0 ? 1 : 0;
+            return work.Count == 0 || fail > 0 || skip > 0 ? 1 : 0;
         }
 
         private struct RenderRow

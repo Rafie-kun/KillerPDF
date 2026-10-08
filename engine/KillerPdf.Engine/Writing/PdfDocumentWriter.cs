@@ -56,6 +56,7 @@ public static class PdfDocumentWriter
     public static byte[] Write(PdfDocument document, PdfDocumentWriteOptions? options = null)
     {
         ArgumentNullException.ThrowIfNull(document);
+        document.PreparePageStructureForWriting();
         options ??= new PdfDocumentWriteOptions();
         if (!Enum.IsDefined(options.MetadataPolicy))
             throw new ArgumentOutOfRangeException(nameof(options),
