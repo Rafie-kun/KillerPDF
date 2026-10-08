@@ -126,7 +126,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Restored valid font-code decoding and missing page text, corrected pattern placement, and repaired missing or corrupt JPEG 2000 image tiles.
 - Preserved native black-and-white scan pixels when page bounds clip a source column.
 - Honored explicit black-point compensation for supported color conversions across paint, images, shadings, and transparency groups.
-- Preserved named spot inks under overprinting grayscale images.
+- Preserved named spot inks under overprinting RGB and Lab paint and grayscale images.
 - Preserved process overprint colors on RGB pages with named spot images.
 - Removed stray edges from coincident CMYK fills and native process replacements across temporary clips and process overprint policies.
 - Native CMYK rendering now repaints named spots through single-colorant images, fixes their color-conversion failure, and preserves other spots under mixed Black and spot images.

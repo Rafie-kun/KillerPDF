@@ -4971,8 +4971,9 @@ public sealed partial class PdfPageRenderer
         if (stencilAlpha <= 0 && knockout is null && target.GroupShape is null
             && target.Ink is null && target.RgbProfile is null) return;
         bool deviceCmykImage = colorSpace.IsDeviceCmyk || colorSpace.PaletteBase?.IsDeviceCmyk == true;
-        bool preserveGrayImageSpots = !imageMask && overprint && target.Ink is not null
-            && target.HasSpotPlates && colorSpace is { Components: 1, Palette: null, RegistrationColor: false }
+        bool preserveProcessColorImageSpots = !imageMask && overprint && target.Ink is not null
+            && target.HasSpotPlates && (colorSpace is { Components: 1 or 3, Palette: null, RegistrationColor: false }
+                || colorSpace.PaletteBase is { Components: 3, RegistrationColor: false })
             && !colorSpace.HasProcessColorants && !colorSpace.ContainsSpotColorants;
         colorSpace = colorSpace.ForDestination(target);
         Point[] corners =
@@ -5071,7 +5072,7 @@ public sealed partial class PdfPageRenderer
                 }, null, cancellationToken);
             return;
         }
-        bool directRgb = target.RgbProfile is null && !imageMask && bits == 8 && components == 3
+        bool directRgb = !preserveProcessColorImageSpots && target.RgbProfile is null && !imageMask && bits == 8 && components == 3
             && target.GroupShape is null
             && softMask is null && colorKeyMask is null && rectangularClips
             && graphicsSoftMask is null && knockout is null
@@ -5079,7 +5080,7 @@ public sealed partial class PdfPageRenderer
             && colorSpace.MultiConverter is null
             && decode is [0, 1, 0, 1, 0, 1]
             && blendMode is RendererBlendMode.Normal or RendererBlendMode.Compatible;
-        bool directGray = !preserveGrayImageSpots && target.RgbProfile is null && !imageMask && bits == 8 && components == 1
+        bool directGray = !preserveProcessColorImageSpots && target.RgbProfile is null && !imageMask && bits == 8 && components == 1
             && target.GroupShape is null
             && softMask is null && colorKeyMask is null && rectangularClips
             && graphicsSoftMask is null && knockout is null
@@ -5456,8 +5457,8 @@ public sealed partial class PdfPageRenderer
             // nonstroking opacity after their image mask, without another byte rounding.
             double imageOpacity = imageMask ? separateStencilShape ? stencilAlphaByte / 255d : 1
                 : Math.Clamp(stencilAlpha, 0, 1);
-            // Sampled CMYK and gray replace process channels in either OPM mode, retaining spot ink.
-            bool preserveProcessImageSpots = (deviceCmykImage || preserveGrayImageSpots) && overprint && opaqueInkImage
+            // Sampled process colors replace process channels in either OPM mode, retaining spot ink.
+            bool preserveProcessImageSpots = (deviceCmykImage || preserveProcessColorImageSpots) && overprint && opaqueInkImage
                 && target.HasSpotPlates;
             // Group alpha is compatible with the direct writes: an opaque pixel sets it to
             // 255, which is what the compositor computes for full opacity.
@@ -5782,7 +5783,7 @@ public sealed partial class PdfPageRenderer
                             }
                             color = color with { OverprintComponents = (byte)(color.OverprintComponents | PreserveNamedSpots) };
                         }
-                        else if (!imageMask && (preserveGrayImageSpots
+                        else if (!imageMask && (preserveProcessColorImageSpots
                             || colorSpace.NativeProcessMask.HasValue || colorSpace.ContainsSpotColorants))
                             color = OverprintColor(color, colorSpace, overprint, 0);
                         SetPixel(target, targetWidth, x, y,

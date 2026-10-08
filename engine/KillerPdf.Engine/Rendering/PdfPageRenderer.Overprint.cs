@@ -73,7 +73,9 @@ public sealed partial class PdfPageRenderer
             ? color with { OverprintComponents = (byte)((~mask & 15) | 16) }
         : enabled && space?.ContainsSpotColorants == true
             ? color with { OverprintComponents = (byte)(color.OverprintComponents | 16 | 64) }
-        : enabled && space is { Components: 1, RegistrationColor: false, Palette: null }
+        : enabled && (space is { Components: 1, RegistrationColor: false, Palette: null }
+            || space is { Components: 3, Palette: null, HasProcessColorants: false }
+            || space?.PaletteBase is { Components: 3, HasProcessColorants: false, ContainsSpotColorants: false })
             ? color with { OverprintComponents = PreserveNamedSpots }
         : enabled && mode == 0 && space is { Components: 4, IsIccBased: false, Palette: null,
             Converter: null, MultiConverter: null }

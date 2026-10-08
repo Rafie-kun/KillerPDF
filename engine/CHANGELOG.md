@@ -110,7 +110,7 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 - Honored static layer View rules in rendering and layer controls, preserving explicit visibility edits and alternate configurations.
 - Preserved image detail during reductions and page crops, including fractional placement, masks, and flipped axes, and honored requested smoothing for enlarged grayscale and RGB images.
 - Honored explicit black-point compensation for supported color conversions across paint, images, shadings, and transparency groups.
-- Preserved named spot inks under overprinting grayscale images.
+- Preserved named spot inks under overprinting RGB and Lab paint and grayscale images.
 - Kept existing CMYK channels and antialiased process overprint edges on RGB spot pages.
 - Preserved process ink beneath supported named spot images on RGB pages and fixed single-colorant spot-image conversion failures.
 - Preserved antialiased named-spot overprints, including clipped paths on RGB pages.
