@@ -61,6 +61,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Added yellow and magenta accents to the neutral and 98SE themes.
 
 ### Changed
+- Moved primary rendering off the UI thread, prioritized bounded viewport work with cancellation, and added visible-region zoom refinement and separate display-backend comparison tools.
 - Replaced PDFium and Docnet.Core with engine-owned rendering, improved damaged cross-reference and missing-catalog recovery and JPEG image rendering speed, and removed native file-repair and link-extraction fallbacks.
 
 - Replaced PdfPig with engine-owned extraction for search, selection, region copy, text editing, and dark-mode image preservation. Removed PdfPig from the app, tests, and packaged builds.

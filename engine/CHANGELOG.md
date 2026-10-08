@@ -48,6 +48,7 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 - Added integration guides for reading, rendering, fonts, authoring, editing, OCR, forms, XFA, annotations and review comments, accessibility, structured export, macros, imposition, page furniture, data merge, structural comparison, permanent redaction, calibrated measurement, separation preview planning, print-production reports, RFC 3161 timestamping, navigation, layers, attachments, optimization, preflight, encryption, and signature inspection.
 
 ### Changed
+- Exposed page-region rendering with preserved clip coverage and order-independent spot-ink composition.
 
 - Reused JPEG Huffman lookahead for long codes, sped up buffered bit reads, and flattened transform lookups, preserving decoded samples, markers, and restart handling.
 - Reused exact 16-bit image colors in a bounded cache, preserving full sample keys and decode ranges.

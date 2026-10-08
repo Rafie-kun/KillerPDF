@@ -72,9 +72,8 @@ namespace KillerPDF.Controls
             int[] targets = [forward, backward];
             var rotations = new Dictionary<int, int>(_pageRotations);
             var renderRequest = _backgroundRenderCache.Capture(currentFile, revision);
-            _ = System.Threading.Tasks.Task.Run(() =>
+            _ = System.Threading.Tasks.Task.Run(async () =>
             {
-                PdfBackgroundRenderCache.Lease? lease = null;
                 ContentDoc? contentDoc = null;
                 try
                 {
@@ -85,8 +84,12 @@ namespace KillerPDF.Controls
                         int rot = rotations.TryGetValue(target, out int r) ? r : pgRot;
                         var cached = TryGetCachedRender(session, target, scaledMax, rot);
                         if (cached is not null) continue;
-                        lease ??= renderRequest.Rent(cancellationToken);
-                        PdfRenderedPage rendered = lease.Render(target, scaledMax, scaledMax, cancellationToken);
+                        PdfRenderedPage rendered = await _viewportRenderQueue.Enqueue(
+                            (renderRequest, "prefetch", target), 1000, 8L * scaledMax * scaledMax, token =>
+                            {
+                                using var lease = renderRequest.Rent(token);
+                                return lease.Render(target, scaledMax, scaledMax, token);
+                            }, cancellationToken);
                         int w = rendered.Width, h = rendered.Height;
                         byte[] raw = rendered.Pixels;
                         if (w <= 0 || h <= 0 || raw is null) continue;
@@ -104,7 +107,7 @@ namespace KillerPDF.Controls
                         wb.WritePixels(new Int32Rect(0, 0, w, h), raw, w * 4, 0);
                         wb.Freeze();
                         int localTarget = target, localRot = rot;
-                        Dispatcher.BeginInvoke(new Action(() =>
+                        _ = Dispatcher.BeginInvoke(new Action(() =>
                         {
                             if (cancellationToken.IsCancellationRequested) return;
                             CacheRender(session, localTarget, scaledMax, localRot, wb);
@@ -114,7 +117,6 @@ namespace KillerPDF.Controls
                 catch { /* prefetch is best-effort */ }
                 finally
                 {
-                    lease?.Dispose();
                     contentDoc?.Dispose();
                     cts.Dispose();
                 }
@@ -240,6 +242,11 @@ namespace KillerPDF.Controls
             // ScrollChanged bubbles from nested form controls. Only movement of the document
             // viewport is page navigation or a reason to rebuild document chrome.
             if (!ReferenceEquals(e.OriginalSource, PagePreviewPanel)) return;
+            if (e.HorizontalChange != 0 || e.VerticalChange != 0)
+            {
+                CancelVisibleRefinement();
+                StartRerenderTimer();
+            }
 
             if (_active is not null)
             {
@@ -630,9 +637,9 @@ namespace KillerPDF.Controls
 
             var session = _active;
             var renderRequest = _backgroundRenderCache.Capture(currentFile, session?.RenderRevision ?? 0);
-            var renderTask = System.Threading.Tasks.Task.Run(() =>
+            var renderToken = cts.Token;
+            var renderTask = System.Threading.Tasks.Task.Run(async () =>
             {
-                PdfBackgroundRenderCache.Lease? renderSession = null;
                 ContentDoc? contentDoc = null;   // opened lazily by ImageRectsFor on the first uncached page
                 try
                 {
@@ -654,8 +661,12 @@ namespace KillerPDF.Controls
                             continue;
                         }
 
-                        renderSession ??= renderRequest.Rent(cts.Token);
-                        PdfRenderedPage rendered = renderSession.Render(i, renderW, renderW * 2, cts.Token);
+                        PdfRenderedPage rendered = await _viewportRenderQueue.Enqueue(
+                            (renderRequest, "continuous", i), 10 + Math.Abs(i - centerPage), 16L * renderW * renderW, token =>
+                            {
+                                using var lease = renderRequest.Rent(token);
+                                return lease.Render(i, renderW, renderW * 2, token);
+                            }, renderToken);
                         int w = rendered.Width;
                         int h = rendered.Height;
                         byte[] raw = rendered.Pixels;
@@ -688,8 +699,8 @@ namespace KillerPDF.Controls
                     }
                 }
                 catch { /* render canceled or doc closed */ }
-                finally { renderSession?.Dispose(); contentDoc?.Dispose(); }
-            }, cts.Token);
+                finally { contentDoc?.Dispose(); }
+            }, renderToken);
             _continuousRenderTask = renderTask;
             _continuousRenderCenterPage = centerPage;
             await renderTask;
@@ -707,6 +718,7 @@ namespace KillerPDF.Controls
             if (slot.Child is not Grid slotGrid || slotGrid.Children.Count == 0 || slotGrid.Children[0] is not Image pageImg)
                 return;
 
+            RemoveVisibleDetail(pageImg);
             pageImg.Source  = bmp;
             pageImg.Width   = dipW;
             pageImg.Height  = dipH;
@@ -815,129 +827,38 @@ namespace KillerPDF.Controls
         }
 
         // ── Continuous zoom re-sharpen (#85) ─────────────────────────────────────────────────────────
-        // The continuous base pass renders every page at a fixed fit-width budget, so on high-DPI
-        // displays or deep zoom the upscaled bitmap goes soft (and, unlike Single mode, nothing ever
-        // re-rendered it - RenderPage is guarded off in Continuous). This re-renders ONLY the pages
-        // near the viewport at a DPI- and zoom-aware budget and swaps them into their slots. Slots that
-        // scroll away are restored to the cached base render, so hi-res bitmaps never accumulate beyond
-        // the visible window; the hi-res bitmaps are deliberately NOT put in the render cache for the
-        // same reason. Debounced via _rerenderTimer (zoom settle + scroll settle).
-        private void ResharpenContinuousVisible()
-        {
-            if (_viewMode != ViewMode.Continuous || _doc is null || _currentFile is null) return;
-            if (_continuousTops.Count == 0 || _continuousPanel.Children.Count == 0) return;
-
-            double targetW = _continuousPageW;
-            int baseW = Math.Max(800, Math.Min(2048, (int)(targetW * 2)));
-            var dpiInfo = VisualTreeHelper.GetDpi(this);
-            double dpiScale = Math.Max(dpiInfo.DpiScaleX, dpiInfo.DpiScaleY);
-            // #189: targetW * zoom * dpiScale already IS the page's on-screen size in device pixels,
-            // so the extra * 2 here was a 2x linear supersample on top of an already-correct budget -
-            // 4x the pixels and 4x the bytes for detail the display cannot resolve. Render at the
-            // size we actually draw at.
-            int hiW = (int)Math.Min(4096, targetW * dpiScale * Math.Max(1.0, _zoomLevel));
-
-            // Visible slot range. Slot space is zoom-independent (the LayoutTransform supplies the
-            // zoom), so divide the scroll offsets back down - same mapping ScrollChanged uses.
-            double viewTop = PagePreviewPanel.VerticalOffset / Math.Max(0.01, _zoomLevel);
-            double viewBot = (PagePreviewPanel.VerticalOffset + PagePreviewPanel.ViewportHeight) / Math.Max(0.01, _zoomLevel);
-            var visible = new List<int>();
-            for (int i = 0; i < _continuousTops.Count && i < _continuousPanel.Children.Count; i++)
-            {
-                double top = _continuousTops[i];
-                double bot = top + ((FrameworkElement)_continuousPanel.Children[i]).Height;
-                if (bot >= viewTop && top <= viewBot) visible.Add(i);
-            }
-            if (visible.Count > 0)
-            {
-                // One page of margin either side so a small scroll stays sharp.
-                if (visible[0] > 0) visible.Insert(0, visible[0] - 1);
-                if (visible[^1] < _continuousTops.Count - 1) visible.Add(visible[^1] + 1);
-            }
-
-            // hiW is now a true device-pixel width, so the trigger is simply "has the base render
-            // run out of pixels for the size we are drawing it at". The old 1.25x margin was
-            // calibrated against a hiW that was inflated 2x; without moving it the pass would stop
-            // firing where it is still needed and pages would be upscaled from the base render.
-            // 1.05 is hysteresis only, so a page sitting on the boundary doesn't re-raster on a nudge.
-            bool wantHi = hiW >= (int)(baseW * 1.05);
-
-            CancelAndRelease(_continuousSharpenCts);
-            _continuousSharpenCts = new System.Threading.CancellationTokenSource();
-            var cts = _continuousSharpenCts;
-
-            // Pages sharpened earlier that scrolled away (or aren't wanted at this zoom): swap the
-            // cached base render back in so their hi-res bitmaps get collected. Cache miss = leave it.
-            var session = _active;
-            foreach (int p in _continuousSharpPages.ToList())
-            {
-                if (wantHi && visible.Contains(p)) continue;
-                int rot = _pageRotations.TryGetValue(p, out int rr) ? rr : 0;
-                var baseBmp = TryGetCachedRender(session, p, baseW, rot);
-                if (baseBmp != null) SetContinuousSlot(p, baseBmp);
-                _continuousSharpPages.Remove(p);
-            }
-            if (!wantHi) return;
-
-            // Zoom changed since the last pass: every sharpened slot is at the wrong budget, redo them.
-            bool budgetChanged = hiW != _continuousSharpW;
-            _continuousSharpW = hiW;
-            var work = visible.Where(p => budgetChanged || !_continuousSharpPages.Contains(p)).ToList();
-            if (work.Count == 0) return;
-
-            string currentFile = _currentFile;
-            var rotations = new Dictionary<int, int>(_pageRotations);
-            var renderRequest = _backgroundRenderCache.Capture(currentFile, session?.RenderRevision ?? 0);
-            _ = System.Threading.Tasks.Task.Run(() =>
-            {
-                PdfBackgroundRenderCache.Lease? renderSession = null;
-                ContentDoc? contentDoc = null;   // opened lazily by ImageRectsFor on the first uncached page
-                try
-                {
-                    foreach (int p in work)
-                    {
-                        if (cts.IsCancellationRequested) return;
-                        renderSession ??= renderRequest.Rent(cts.Token);
-                        PdfRenderedPage rendered = renderSession.Render(p, hiW, hiW * 2, cts.Token);
-                        int w = rendered.Width, h = rendered.Height;
-                        byte[] raw = rendered.Pixels;
-                        if (w <= 0 || h <= 0 || raw is null) continue;
-                        int rot = rotations.TryGetValue(p, out int rr) ? rr : 0;
-                        // #135: dark mode with pictures excluded; invert before the rotation so
-                        // the carve-out rects stay in unrotated page space.
-                        if (DocInvert)
-                            BitmapHelpers.InvertBgraInPlaceExcept(raw, w, h, ImageRectsFor(currentFile, p, ref contentDoc));
-                        if (rot != 0) (raw, w, h) = BitmapHelpers.RotateBitmap(raw, w, h, rot);
-
-                        int fp = p, fw = w, fh = h;
-                        byte[] bytes = raw;
-                        if (cts.IsCancellationRequested) return;
-                        Dispatcher.Invoke(() =>
-                        {
-                            if (cts.IsCancellationRequested || _viewMode != ViewMode.Continuous) return;
-                            int ddw = Math.Max(1, (int)Math.Round(targetW));
-                            int ddh = Math.Max(1, (int)Math.Round(targetW * fh / (double)fw));
-                            SetContinuousSlot(fp, BitmapHelpers.BuildScaledBitmap(fw, fh, bytes, ddw, ddh));
-                            _continuousSharpPages.Add(fp);
-                        });
-                    }
-                }
-                catch { /* canceled or doc closed */ }
-                finally { renderSession?.Dispose(); contentDoc?.Dispose(); }
-            }, cts.Token);
-        }
+        // The settle timer refines visible regions above the fixed base budget.
 
         // keepTiles: leave the existing secondary tiles in place instead of clearing them first.
         // For a pixels-only repaint (invert toggle) the tile set is unchanged, and clearing it
         // made the whole grid flash empty and re-stream - RenderAdditionalPages swaps bitmaps
         // into existing tiles in place, so keeping them repaints without any layout jitter.
         // Navigation keeps the default (clear first) since the tile set actually changes.
-        internal void RenderPage(int pageIndex, bool keepTiles = false)
+        private readonly ViewportRenderQueue _viewportRenderQueue = new();
+        private CancellationTokenSource? _primaryRenderCts;
+        private long _primaryRenderGeneration;
+        internal Task PrimaryRenderTask { get; private set; } = Task.CompletedTask;
+
+        private void CancelPrimaryRender()
         {
+            CancelVisibleRefinement();
+            ++_primaryRenderGeneration;
+            CancelAndRelease(_primaryRenderCts);
+            _primaryRenderCts = null;
+        }
+
+        internal void RenderPage(int pageIndex, bool keepTiles = false)
+            => PrimaryRenderTask = RenderPrimaryAsync(pageIndex, keepTiles);
+
+        private async Task RenderPrimaryAsync(int pageIndex, bool keepTiles)
+        {
+            CancelPrimaryRender();
             if (_currentFile is null || _doc is null) return;
             // Cancel any adjacent-page prefetch from the previous page; a new prefetch is
             // scheduled at the tail of this render.
             CancelAdjacentPrefetch();
+            CancelAndRelease(_secondaryRenderCts);
+            _secondaryRenderCts = null;
             // Continuous has its own pipeline (SetupContinuousView + RenderContinuousPages into
             // _continuousPanel) and owns the _pages map for every page. RenderPage targets the hidden
             // single/grid primary (_annotationCanvas in the collapsed _pageContentPanel) and calls
@@ -951,16 +872,33 @@ namespace KillerPDF.Controls
             // Two-page spreads pair (0,1),(2,3),...; render the pair's left (even) page as primary so
             // selecting the right page of a pair still shows the whole spread, not a lone page.
             if (_viewMode == ViewMode.TwoPage) pageIndex = SpreadStart(pageIndex);   // #193: book-aware
+            var primaryCts = _primaryRenderCts = new CancellationTokenSource();
+            var primaryToken = primaryCts.Token;
+            long generation = _primaryRenderGeneration;
+            var primarySession = _active;
+            string primaryFile = _currentFile;
+            long primaryRevision = primarySession?.RenderRevision ?? 0;
+            var primaryMode = _viewMode;
+            bool primaryInvert = DocInvert;
+            if (_annotationCanvas.Tag is not int displayedPage || displayedPage != pageIndex)
+            {
+                PageImage.Source = null;
+                _annotationCanvas.Children.Clear();
+                _annotationCanvas.IsHitTestVisible = false;
+                ClearSecondaryPages();
+            }
+            bool Current() => !primaryToken.IsCancellationRequested && generation == _primaryRenderGeneration
+                && ReferenceEquals(primarySession, _active) && primaryFile == _currentFile
+                && primaryRevision == (_active?.RenderRevision ?? 0) && primaryMode == _viewMode
+                && primaryInvert == DocInvert;
             try
             {
-                // Scale render resolution to match display DPI AND current zoom so the
-                // bitmap stays sharp when zoomed in.  Base 2048 means Fit Width on a
-                // wide monitor stays crisp; zoom factor ensures 1:1 pixels at 2× zoom.
-                // Capped at 6144 to keep memory manageable.
+                // Present a bounded base raster first. Settled visible regions receive
+                // the additional pixels needed by display DPI and zoom.
                 var dpiInfo = VisualTreeHelper.GetDpi(this);
                 double dpiScaleX = dpiInfo.DpiScaleX;
                 double dpiScaleY = dpiInfo.DpiScaleY;
-                int scaledMax = ViewerRenderResolution.Primary(dpiScaleX, dpiScaleY, _zoomLevel);
+                int scaledMax = Math.Min(2048, ViewerRenderResolution.Primary(dpiScaleX, dpiScaleY, _zoomLevel));
                 _lastRenderZoom = _zoomLevel;
 
                 int pgRot = _pageRotations.TryGetValue(pageIndex, out int pr0) ? pr0 : 0;
@@ -975,50 +913,24 @@ namespace KillerPDF.Controls
                 var cached = TryGetCachedRender(_active, pageIndex, scaledMax, pgRot);
                 if (cached != null)
                 {
+                    LastPrimaryRenderMeasurement = null;
                     bitmap = cached;
                     width  = cached.PixelWidth;
                     height = cached.PixelHeight;
                 }
                 else
                 {
-                    PdfRenderedPage rendered = _primaryRenderSession.Render(
-                        _currentFile, _active?.RenderRevision ?? 0, pageIndex, scaledMax);
-                    width = rendered.Width;
-                    height = rendered.Height;
-                    byte[] rawBytes = rendered.Pixels;
-                    // Bail on an unusable render BEFORE touching the buffer. This check used to sit
-                    // after the rotate; moving the invert ahead of the rotate (#135) meant the
-                    // buffer was read while still only maybe-non-null, so validate first instead.
-                    if (width <= 0 || height <= 0 || rawBytes == null || rawBytes.Length == 0)
-                    {
-                        PageImage.Source = null;
-                        SetStatus(string.Format(Loc("Str_PageRenderError"), pageIndex + 1));
-                        return;
-                    }
-                    // #135: display-only dark mode, pictures excluded. Before the rotation so the
-                    // carve-out rects stay in unrotated page space; the one-shot engine open is
-                    // paid only on this page's first inverted render (the rects cache after).
-                    if (DocInvert)
-                    {
-                        ContentDoc? contentDoc = null;
-                        try { BitmapHelpers.InvertBgraInPlaceExcept(rawBytes, width, height, ImageRectsFor(_currentFile, pageIndex, ref contentDoc)); }
-                        finally { contentDoc?.Dispose(); }
-                    }
-                    // The temp file has /Rotate stripped so the engine renders unrotated content; rotate
-                    // the pixel buffer to match the visual.
-                    if (pgRot != 0)
-                        (rawBytes, width, height) = BitmapHelpers.RotateBitmap(rawBytes, width, height, pgRot);
-                    // Bake the bitmap DPI from the canonical render-dim size (longest side -> 2048 DIP, the
-                    // SAME zoom-independent basis continuous and the secondary tiles use) so the extra pixels
-                    // display within a fixed DIP area regardless of zoom. LayoutTransform supplies the zoom.
-                    double bLongest = Math.Max(1, Math.Max(width, height));
-                    int bw = Math.Max(1, (int)Math.Round(2048.0 * width  / bLongest));
-                    int bh = Math.Max(1, (int)Math.Round(2048.0 * height / bLongest));
-                    var wb = new WriteableBitmap(width, height, 96.0 * width / bw, 96.0 * height / bh, PixelFormats.Bgra32, null);
-                    wb.WritePixels(new Int32Rect(0, 0, width, height), rawBytes, width * 4, 0);
-                    wb.Freeze();
-                    bitmap = wb;
-                    CacheRender(_active, pageIndex, scaledMax, pgRot, bitmap);
+                    var request = _backgroundRenderCache.Capture(primaryFile, primaryRevision);
+                    var prepared = await _viewportRenderQueue.Enqueue(("primary", primarySession), 0,
+                        8L * scaledMax * scaledMax,
+                        token => PreparePrimaryBitmap(request, pageIndex, scaledMax, pgRot, primaryInvert, token),
+                        primaryToken);
+                    if (!Current()) return;
+                    bitmap = prepared.Bitmap;
+                    LastPrimaryRenderMeasurement = prepared.Measurement;
+                    width = bitmap.PixelWidth;
+                    height = bitmap.PixelHeight;
+                    CacheRender(primarySession, pageIndex, scaledMax, pgRot, bitmap);
                 }
 
                 // Canonical render-dim space: longest side -> 2048 DIP, identical to the continuous and
@@ -1030,7 +942,9 @@ namespace KillerPDF.Controls
                 int dipH = Math.Max(1, (int)Math.Round(2048.0 * height / longest));
                 _renderDims[pageIndex] = (dipW, dipH);
 
+                var presentationTimer = Stopwatch.StartNew();
                 PageImage.Source = bitmap;
+                _annotationCanvas.IsHitTestVisible = true;
                 _annotationCanvas.Width  = dipW;
                 _annotationCanvas.Height = dipH;
                 _annotationCanvas.Tag    = pageIndex;   // so clicks on the primary page resolve to the
@@ -1045,8 +959,9 @@ namespace KillerPDF.Controls
                 // Defer additional pages until layout has settled so ActualWidth is valid.
                 // RenderPageLinks runs AFTER RenderAdditionalPages so ClearSecondaryPages
                 // inside RenderAdditionalPages doesn't wipe the overlays we just added.
-                Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background, () =>
+                _ = Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background, () =>
                 {
+                    if (!Current()) return;
                     // Only Grid/Two-Page lay out neighbor tiles. In Single mode RenderAdditionalPages would
                     // snap the panel width to pageW + 12 (the inter-tile gap), nudging the lone page ~6px left
                     // of center - the shift seen a beat after a zoom-in, when the re-sharpen timer re-renders.
@@ -1061,13 +976,18 @@ namespace KillerPDF.Controls
                     RenderPageLinks(pageIndex, dipW, dipH);
                 });
                 _renderedPrimaryPage = pageIndex;
+                StartRerenderTimer();
+                if (LastPrimaryRenderMeasurement is { } measurement)
+                    LastPrimaryRenderMeasurement = measurement with { PresentationMilliseconds = presentationTimer.Elapsed.TotalMilliseconds };
                 // Fire background renders for the pages the user is most likely to reach next.
                 // Cached bitmaps land in the same per-tab render cache TryGetCachedRender reads,
                 // so the next PageDown/Left/Right skips the engine entirely.
                 KickOffAdjacentPrefetch(pageIndex, scaledMax, pgRot);
             }
+            catch (OperationCanceledException) { }
             catch (Exception ex)
             {
+                if (!Current()) return;
                 PageImage.Source = null;
                 SetStatus(string.Format(Loc("Str_RenderError"), ex.Message));
             }
@@ -1214,11 +1134,11 @@ namespace KillerPDF.Controls
             // enlarged the right page from fewer pixels, making it visibly softer than the left.
             // Grid retains its smaller capped budget because it may keep many pages on screen.
             var secondaryDpi = VisualTreeHelper.GetDpi(this);
-            int secondaryMax = ViewerRenderResolution.Secondary(
+            int secondaryMax = Math.Min(2048, ViewerRenderResolution.Secondary(
                 _viewMode == ViewMode.TwoPage,
                 secondaryDpi.DpiScaleX,
                 secondaryDpi.DpiScaleY,
-                _zoomLevel);
+                _zoomLevel));
             // Grid shows the whole document; Two-Page shows one secondary; other modes peek ahead.
             int limit = _viewMode == ViewMode.Grid
                 ? _doc.PageCount
@@ -1261,9 +1181,9 @@ namespace KillerPDF.Controls
                 // with a primary bitmap rendered at the same pixel budget.
                 int tileBucket = -secondaryMax;
                 var renderRequest = _backgroundRenderCache.Capture(currentFile, session?.RenderRevision ?? 0);
-                await System.Threading.Tasks.Task.Run(() =>
+                var secondaryToken = cts.Token;
+                await System.Threading.Tasks.Task.Run(async () =>
                 {
-                    PdfBackgroundRenderCache.Lease? renderSession = null;
                     ContentDoc? contentDoc = null;   // opened lazily by ImageRectsFor on the first uncached page
                     try
                     {
@@ -1296,8 +1216,13 @@ namespace KillerPDF.Controls
                             // tile, which read as "the grid's last column never refreshed".
                             try
                             {
-                                renderSession ??= renderRequest.Rent(cts.Token);
-                                PdfRenderedPage rendered = renderSession.Render(i, secondaryMax, secondaryMax, cts.Token);
+                                PdfRenderedPage rendered = await _viewportRenderQueue.Enqueue(
+                                    (renderRequest, "secondary", i), 10 + i - primaryPageIdx,
+                                    8L * secondaryMax * secondaryMax, token =>
+                                    {
+                                        using var lease = renderRequest.Rent(token);
+                                        return lease.Render(i, secondaryMax, secondaryMax, token);
+                                    }, secondaryToken);
                                 int w = rendered.Width;
                                 int h = rendered.Height;
                                 byte[] rawBytes = rendered.Pixels;
@@ -1329,8 +1254,8 @@ namespace KillerPDF.Controls
                             catch { continue; }   // skip this page, keep streaming the rest
                         }
                     }
-                    finally { renderSession?.Dispose(); contentDoc?.Dispose(); }
-                }, cts.Token);
+                    finally { contentDoc?.Dispose(); }
+                }, secondaryToken);
             }
             catch (OperationCanceledException) { return; }   // superseded - the newer render owns the tiles now
             catch
@@ -1484,13 +1409,19 @@ namespace KillerPDF.Controls
                 // previous tab's page stays on screen in Single, Two-Page and Grid.
                 else
                     RenderPage(_viewMode == ViewMode.Grid ? 0 : page);
-                // Fit / zoom once the first page has rendered and layout has settled.
-                // DispatcherPriority.Background is lower than Loaded, so this fires after
-                // all pending RenderPage / RefreshPageView callbacks have completed.
+                var initialRender = isContinuous ? Task.CompletedTask : PrimaryRenderTask;
+                long initialGeneration = _primaryRenderGeneration;
+                var initialMode = _viewMode;
+                bool InitialCurrent() => ReferenceEquals(_active, expectedSession)
+                    && initialMode == _viewMode && initialGeneration == _primaryRenderGeneration;
+                // Raster completion is asynchronous; dispatcher priority alone cannot order fit after it.
                 Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background,
-                    (Action)(() =>
+                    (Action)(async () =>
                     {
-                        if (expectedSession is not null && !ReferenceEquals(_active, expectedSession)) return;
+                        await initialRender;
+                        if (!InitialCurrent()) return;
+                        await Dispatcher.InvokeAsync(UpdateLayout, System.Windows.Threading.DispatcherPriority.ContextIdle);
+                        if (!InitialCurrent()) return;
                         if (autoFit)
                         {
                             // Grid opens to its 3-across default; other modes fit to width.
@@ -1534,17 +1465,16 @@ namespace KillerPDF.Controls
                         // nothing until a click. Focus the scroll panel unless the user is typing.
                         if (System.Windows.Input.Keyboard.FocusedElement is not TextBox { IsReadOnly: false })
                             PagePreviewPanel.Focus();
-                    }));
-                if (restoreHorizontalOffset.HasValue || restoreVerticalOffset.HasValue)
-                    Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.ContextIdle,
-                        (Action)(() =>
+                        if (restoreHorizontalOffset.HasValue || restoreVerticalOffset.HasValue)
                         {
-                            if (expectedSession is not null && !ReferenceEquals(_active, expectedSession)) return;
+                            await Dispatcher.InvokeAsync(UpdateLayout, System.Windows.Threading.DispatcherPriority.ContextIdle);
+                            if (!InitialCurrent()) return;
                             if (restoreHorizontalOffset.HasValue)
                                 PagePreviewPanel.ScrollToHorizontalOffset(restoreHorizontalOffset.Value);
                             if (restoreVerticalOffset.HasValue)
                                 PagePreviewPanel.ScrollToVerticalOffset(restoreVerticalOffset.Value);
-                        }));
+                        }
+                    }));
             }
         }
 
@@ -1673,13 +1603,13 @@ namespace KillerPDF.Controls
                     if (Host != null && !Host.IsViewerFocused(this)) return;
                     if (_viewMode == ViewMode.Continuous)
                     {
-                        ResharpenContinuousVisible();
+                        RefineVisibleRegions();
                         return;
                     }
                     // Never re-render the primary in Grid (it would shift page 0's width basis and
                     // desync the column math); guards a timer started just before a switch into grid.
                     if (_viewMode != ViewMode.Grid && State.CurrentPage >= 0)
-                        RenderPage(State.CurrentPage);
+                        RefineVisibleRegions();
                 };
             }
             _rerenderTimer.Stop();
@@ -2229,7 +2159,7 @@ namespace KillerPDF.Controls
         internal void ApplyViewMode(ViewMode mode, bool force = false)
         {
             if (_viewMode == mode && !force) return;
-            CancelAdjacentPrefetch();
+            CancelRenderWork();
             _primaryRenderSession.Clear();
             _backgroundRenderCache.Clear();
             _viewMode = mode;
@@ -2253,10 +2183,12 @@ namespace KillerPDF.Controls
 
             if (_doc is null) return;
             int idx = _currentPage;
+            var modeSession = _active;
+            bool ModeCurrent() => _viewMode == mode && ReferenceEquals(_active, modeSession);
             if (mode == ViewMode.Continuous)
             {
                 Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded,
-                    () => SetupContinuousView(idx));
+                    () => { if (ModeCurrent()) SetupContinuousView(idx); });
             }
             else
             {
@@ -2268,9 +2200,15 @@ namespace KillerPDF.Controls
                 // whose large vertical offset would otherwise land the grid mid-document).
                 PagePreviewPanel.ScrollToVerticalOffset(0);
                 PagePreviewPanel.ScrollToHorizontalOffset(0);
-                Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded, () =>
+                Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded, (Action)(async () =>
                 {
+                    if (!ModeCurrent()) return;
                     RenderPage(mode == ViewMode.Grid ? 0 : idx);
+                    long modeGeneration = _primaryRenderGeneration;
+                    await PrimaryRenderTask;
+                    if (!ModeCurrent() || modeGeneration != _primaryRenderGeneration) return;
+                    await Dispatcher.InvokeAsync(UpdateLayout, System.Windows.Threading.DispatcherPriority.ContextIdle);
+                    if (!ModeCurrent() || modeGeneration != _primaryRenderGeneration) return;
                     // Grid: apply a clean column-fit zoom (continuous's zoom is far too large for a
                     // grid, and a non-column zoom leaves a gap). SetZoom -> ApplyZoom defers the
                     // single tile render, so return here instead of calling RefreshPageView again
@@ -2282,9 +2220,10 @@ namespace KillerPDF.Controls
                         // The first fit can run before the viewport width has settled (leaving the
                         // grid off-center / at the wrong zoom); re-fit once more after layout settles,
                         // and pin to the top so nothing carries over from the previous mode.
-                        Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background,
+                        _ = Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background,
                             (Action)(() =>
                             {
+                                if (!ModeCurrent() || modeGeneration != _primaryRenderGeneration) return;
                                 ReapplyGridOrFit();
                                 // Selection is preserved across the switch; scroll to that page once
                                 // its tile streams in (grid tiles render async). Page 0 stays at top.
@@ -2304,7 +2243,7 @@ namespace KillerPDF.Controls
                     else if (_fitMode == FitMode.Page)  FitToPage();
                     else                                ApplyZoom();
                     RefreshPageView(idx);
-                });
+                }));
             }
         }
     }

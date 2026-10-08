@@ -1341,7 +1341,8 @@ public sealed partial class PdfPageRenderer
         bool perPixelClip = clips.Count > 0 && !rectangularClips;
         // Applying an identical geometric clip is idempotent. Multiplying two separately
         // rasterized copies would square their antialiased edge coverage and lighten it.
-        if (perPixelClip && clips.Count == 1 && mask.HasSameCoverage(clips[0].Mask))
+        if (perPixelClip && clips.Count(clip => !clip.StorageBounds) == 1
+            && mask.HasSameCoverage(clips.First(clip => !clip.StorageBounds).Mask))
             perPixelClip = false;
         // Group alpha is maintained alongside the direct RGB paths with the compositor's own
         // formula, so tracked groups take the same fast paths as plain pages.

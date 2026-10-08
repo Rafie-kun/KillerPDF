@@ -205,6 +205,21 @@ internal sealed class PdfPageRenderSession : IDisposable
             CreateRenderOptions(pageIndex, false, true, includeFormFields, maximumWidth, maximumHeight), cancellationToken);
     }
 
+    internal (int Width, int Height) FittedDimensions(int pageIndex, int maximumWidth, int maximumHeight)
+    {
+        var options = CreateRenderOptions(pageIndex, false, true, false, maximumWidth, maximumHeight);
+        return (options.Width, options.Height);
+    }
+
+    internal PdfRenderedPage RenderFittedRegion(int pageIndex, int maximumWidth, int maximumHeight,
+        int left, int top, int width, int height, CancellationToken cancellationToken = default)
+    {
+        var options = CreateRenderOptions(pageIndex, false, true, false, maximumWidth, maximumHeight);
+        var region = Renderer.RenderRegion(pageIndex, options, left, top, width, height, cancellationToken);
+        return new PdfRenderedPage(region.Width, region.Height, region.Pixels.ToArray(),
+            PdfRenderBackend.Engine, Diagnostics(region.Diagnostics));
+    }
+
     private EngineRenderOptions CreateRenderOptions(int pageIndex, bool transparentBackground,
         bool includeAnnotations, bool includeFormFields, int maximumWidth = 0, int maximumHeight = 0)
     {
@@ -425,6 +440,14 @@ internal sealed class PdfBackgroundRenderCache
             }
             released.Dispose();
         }
+
+        internal (int Width, int Height) Dimensions(int pageIndex, int maximumWidth, int maximumHeight) =>
+            (_session ?? throw new ObjectDisposedException(nameof(Lease))).FittedDimensions(pageIndex, maximumWidth, maximumHeight);
+
+        internal PdfRenderedPage RenderRegion(int pageIndex, int maximumWidth, int maximumHeight,
+            int left, int top, int width, int height, CancellationToken cancellationToken = default) =>
+            (_session ?? throw new ObjectDisposedException(nameof(Lease))).RenderFittedRegion(
+                pageIndex, maximumWidth, maximumHeight, left, top, width, height, cancellationToken);
     }
 }
 

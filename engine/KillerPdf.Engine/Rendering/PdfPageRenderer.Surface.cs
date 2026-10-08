@@ -738,19 +738,27 @@ public sealed partial class PdfPageRenderer
 
         private uint ComposedSpotInk(int offset)
         {
-            uint combined = ReadInk(_spotBaseInk!, offset);
+            uint process = ReadInk(_spotBaseInk!, offset);
+            Span<uint> inks = stackalloc uint[16];
+            int count = 0;
             foreach (byte[] current in _spotPlateValues)
             {
                 uint spot = ReadInk(current, offset);
                 if (spot == 0) continue;
-                if (combined == 0)
-                {
-                    combined = spot;
-                    continue;
-                }
-                combined = CombineSpotInk(combined, spot);
+                if (count == inks.Length) return ComposeManySpotInks(process, _spotPlateValues, offset);
+                inks[count++] = spot;
             }
-            return combined;
+            if (count == 1) return process == 0 ? inks[0] : CombineSpotInk(process, inks[0]);
+            if (count == 2 && process == 0) return CombineSpotInk(inks[0], inks[1]);
+            return ComposeSpotInks(process, inks[..count]);
+        }
+
+        private static uint ComposeManySpotInks(uint process, byte[][] plates, int offset)
+        {
+            var inks = new List<uint>();
+            foreach (byte[] plate in plates)
+                if (ReadInk(plate, offset) is uint ink && ink != 0) inks.Add(ink);
+            return ComposeSpotInks(process, System.Runtime.InteropServices.CollectionsMarshal.AsSpan(inks));
         }
 
         private static uint CombineSpotInk(uint combined, uint spot)
@@ -989,5 +997,40 @@ public sealed partial class PdfPageRenderer
             ReleaseInk();
             RasterBuffers.Return(Data);
         }
+    }
+
+    // Round once after multiplying complement coverages. Intermediate byte rounding
+    // made spot composition depend on plate allocation order outside the viewport.
+    internal static uint ComposeSpotInks(uint process, ReadOnlySpan<uint> spots)
+    {
+        if (spots.Length == 0) return process;
+        uint result = 0;
+        for (int channel = 0; channel < 4; channel++)
+        {
+            int shift = channel * 8;
+            if (spots.Length <= 15)
+            {
+                UInt128 complement = (uint)(255 - (byte)(process >> shift));
+                UInt128 denominator = 1;
+                foreach (uint spot in spots)
+                {
+                    complement *= (uint)(255 - (byte)(spot >> shift));
+                    denominator *= 255;
+                }
+                result |= (uint)((255 * denominator - complement + denominator / 2) / denominator) << shift;
+            }
+            else
+            {
+                System.Numerics.BigInteger complement = 255 - (byte)(process >> shift);
+                System.Numerics.BigInteger denominator = 1;
+                foreach (uint spot in spots)
+                {
+                    complement *= 255 - (byte)(spot >> shift);
+                    denominator *= 255;
+                }
+                result |= (uint)((255 * denominator - complement + denominator / 2) / denominator) << shift;
+            }
+        }
+        return result;
     }
 }

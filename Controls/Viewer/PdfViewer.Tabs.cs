@@ -354,10 +354,9 @@ namespace KillerPDF.Controls
 
         // #189: the count cap alone was not enough - an entry's size scales with the page and the
         // base render budget, so 48 cached Letter pages held ~630 MB in one tab. Budget the cache
-        // in BYTES too, with a floor of nearby pages so the moving window around the viewport
-        // still serves instantly. Frozen BitmapSources are safe to measure from any thread.
+        // in BYTES too, retaining the current page and evicting distant or obsolete entries.
+        // Frozen BitmapSources are safe to measure from any thread.
         private const long RenderCacheByteBudget = 160L << 20;   // ~160 MB per tab
-        private const int  RenderCacheMinPages   = 6;
 
         private static long RenderCacheBytes(DocumentSession s)
         {
@@ -380,13 +379,14 @@ namespace KillerPDF.Controls
             {
                 int count = s.RenderCache.Count;
                 bool overCount = count > RenderCachePageCap;
-                bool overBytes = count > RenderCacheMinPages && RenderCacheBytes(s) > RenderCacheByteBudget;
+                bool overBytes = count > 1 && RenderCacheBytes(s) > RenderCacheByteBudget;
                 if (!overCount && !overBytes) break;
                 var farthest = default((int page, int bucket, int rot));
                 int bestDist = -1;
                 foreach (var key in s.RenderCache.Keys)
                 {
                     int d = Math.Abs(key.page - page);
+                    if (key.page == page && key != (page, bucket, rot)) d = 1;
                     if (d > bestDist) { bestDist = d; farthest = key; }
                 }
                 if (bestDist <= 0) break;   // only current-page entries left; nothing sane to evict
@@ -400,6 +400,7 @@ namespace KillerPDF.Controls
         // cache (the carve-out that keeps pictures uninverted) goes with it; it re-fills lazily.
         private void FlushAllRenderCaches()
         {
+            CancelRenderWork();
             _primaryRenderSession.Clear();
             _backgroundRenderCache.Clear();
             foreach (var s in _renderLru) { s.RenderCache.Clear(); s.RenderCacheSize.Clear(); }
@@ -482,6 +483,9 @@ namespace KillerPDF.Controls
         // prevents pixels and thumbnails from the departing document reaching the incoming view.
         private void CancelRenderWork()
         {
+            CancelPrimaryRender();
+            CancelVisibleRefinement();
+            _viewportRenderQueue.CancelAll();
             _tabViewportRestoreGate.Cancel();
             _rerenderTimer?.Stop();
             CancelAdjacentPrefetch();

@@ -304,10 +304,8 @@ public sealed class RenderBoundaryTests
             Path.Combine(root, "Services", "PdfPageRenderSession.cs"));
 
         Assert.DoesNotContain("PdfPageRenderSession.OpenEngineFirst(", viewer, StringComparison.Ordinal);
-        Assert.Equal(3, Count(viewer, "renderRequest.Rent(cts.Token)"));
-        Assert.Contains("renderRequest.Rent(cancellationToken)", viewer,
-            StringComparison.Ordinal);
-        Assert.Equal(1, Count(viewer, "_primaryRenderSession.Render("));
+        Assert.DoesNotContain("_primaryRenderSession.Render(", viewer, StringComparison.Ordinal);
+        Assert.Contains("await _viewportRenderQueue.Enqueue(", viewer, StringComparison.Ordinal);
         Assert.DoesNotContain("PdfPageRenderSession.Open(", viewer,
             StringComparison.Ordinal);
         Assert.DoesNotContain("NativeFallback", boundary, StringComparison.Ordinal);
@@ -338,13 +336,11 @@ public sealed class RenderBoundaryTests
         Assert.Contains("RenderBasePage(pages[i], ct)", ocr, StringComparison.Ordinal);
         Assert.Contains("RenderBasePage(pageIdx, ct)", ocr, StringComparison.Ordinal);
         Assert.Equal(2, Count(ocr, "RenderBasePage(i, ct)"));
-        Assert.Equal(3, Count(viewer, "renderRequest.Rent(cts.Token)"));
-        Assert.Contains("renderRequest.Rent(cancellationToken)", viewer,
-            StringComparison.Ordinal);
-        Assert.Contains("renderSession.Render(i, renderW, renderW * 2, cts.Token)", viewer);
-        Assert.Contains("renderSession.Render(p, hiW, hiW * 2, cts.Token)", viewer);
-        Assert.Contains("renderSession.Render(i, secondaryMax, secondaryMax, cts.Token)", viewer);
-        Assert.Contains("lease.Render(target, scaledMax, scaledMax, cancellationToken)", viewer);
+        Assert.Contains("lease.Render(i, renderW, renderW * 2, token)", viewer);
+        Assert.Contains("lease.Render(i, secondaryMax, secondaryMax, token)", viewer);
+        Assert.Contains("lease.Render(target, scaledMax, scaledMax, token)", viewer);
+        string refinement = File.ReadAllText(Path.Combine(root, "Controls", "Viewer", "PdfViewer.Refinement.cs"));
+        Assert.Contains("region.Left, region.Top, region.Width, region.Height, workToken)", refinement);
     }
 
     [Fact]

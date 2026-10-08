@@ -184,7 +184,8 @@ public sealed partial class PdfPageRenderer
         return RenderUncached(pageIndex, options, cancellationToken, destination).Diagnostics;
     }
 
-    internal PdfRenderedPage RenderRegion(int pageIndex, PdfRenderOptions options,
+    /// <summary>Renders a pixel region using the full page's pixel grid and geometry.</summary>
+    public PdfRenderedPage RenderRegion(int pageIndex, PdfRenderOptions options,
         int left, int top, int width, int height, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(options);
@@ -233,7 +234,7 @@ public sealed partial class PdfPageRenderer
         var initialState = new GraphicsState(normalize.Then(rotate), Color.Black, Color.Black,
             1, 1, 1, RendererLineCap.Butt, RendererLineJoin.Miter, 10,
             Array.AsReadOnly(Array.Empty<double>()), 0, RendererBlendMode.Normal, region.HasValue
-                ? [new ClipRegion(CoverageMask.Rectangle(Left, Top, Right, Bottom))] : [],
+                ? [new ClipRegion(CoverageMask.Rectangle(Left, Top, Right, Bottom), storageBounds: true)] : [],
             false, null, null, false, null, null,
             new ImageColorSpace(1, null), new ImageColorSpace(1, null), null, null);
         var diagnostics = new HashSet<string>();
@@ -4041,7 +4042,7 @@ public sealed partial class PdfPageRenderer
                 throw new NotSupportedException();
             if (shadingType.Value is >= 4 and <= 7
                 && (state.FillAlpha < 1 || state.GraphicsSoftMask is not null
-                    || state.Knockout is not null || state.Clips.Count != 0 || state.FillOverprint
+                    || state.Knockout is not null || state.Clips.Any(clip => !clip.StorageBounds) || state.FillOverprint
                     || state.BlendMode is not (RendererBlendMode.Normal or RendererBlendMode.Compatible)))
             {
                 var meshBounds = GetRasterBounds(state.Clips, null,
@@ -4443,7 +4444,7 @@ public sealed partial class PdfPageRenderer
         var values = new double[4][];
         (int clipLeft, int clipTop, int clipRight, int clipBottom) = GetRasterBounds(
             state.Clips, null, targetWidth, targetHeight, scaleX, scaleY);
-        bool[]? clipMask = state.Clips.Count == 0 ? null : BuildClipMask();
+        bool[]? clipMask = state.Clips.Any(clip => !clip.StorageBounds) ? BuildClipMask() : null;
         while (bytes.Length * 8 - bitOffset >= minimumRecordBits)
         {
             uint flag = Read(flagBits);
@@ -7297,12 +7298,14 @@ public sealed partial class PdfPageRenderer
     /// <summary>A device-space clip held as an anti-aliased coverage mask.</summary>
     private sealed class ClipRegion
     {
-        internal ClipRegion(CoverageMask mask)
+        internal ClipRegion(CoverageMask mask, bool storageBounds = false)
         {
             Mask = mask;
+            StorageBounds = storageBounds;
         }
 
         internal CoverageMask Mask { get; }
+        internal bool StorageBounds { get; }
     }
 
     /// <summary>Intersects a new clip mask with the active clips into one region.</summary>
@@ -7311,8 +7314,10 @@ public sealed partial class PdfPageRenderer
     {
         CoverageMask combined = mask;
         foreach (ClipRegion clip in clips)
-            combined = CoverageMask.Intersect(combined, clip.Mask);
-        return [new ClipRegion(combined)];
+            if (!clip.StorageBounds) combined = CoverageMask.Intersect(combined, clip.Mask);
+        // Keep storage limits separate from document coverage. Trimming a fractional
+        // document mask changes correlated-edge paint decisions inside the crop.
+        return [new ClipRegion(combined), .. clips.Where(clip => clip.StorageBounds)];
     }
     private sealed record SoftMask(byte[] Samples, int Width, int Height,
         int Bits = 8, double DecodeStart = 0, double DecodeEnd = 1)
