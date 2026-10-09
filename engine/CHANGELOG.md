@@ -120,6 +120,7 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 - Preserved image detail during reductions and page crops, including fractional placement, masks, and flipped axes, and honored requested smoothing for enlarged grayscale and RGB images.
 - Honored explicit black-point compensation for supported color conversions across paint, images, shadings, and transparency groups.
 - Corrected CMYK overprinting across profiles and overlapping fills, and preserved spot inks under process-color paint and images, including RGB pages.
+- Matched legacy unprofiled CMYK display colors and reduced color shifts when RGB artwork enters CMYK transparency groups, including false contrast from legacy ICC conversion.
 - Kept existing CMYK channels and antialiased process overprint edges on RGB spot pages.
 - Preserved process ink beneath supported named spot images on RGB pages and fixed single-colorant spot-image conversion failures.
 - Preserved antialiased named-spot overprints, including clipped paths on RGB pages.
@@ -149,7 +150,6 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 - Fixed broken Type 1 letter outlines when a contour continues after a flex curve.
 - Honored font descriptor traits and declared glyph widths when using bundled fallback fonts, preserving known sans-serif families with misleading flags.
 - Included the vendored JPEG 2000 decoder in the engine NuGet package.
-- Matched legacy unprofiled CMYK display colors and reduced color shifts when RGB artwork enters CMYK transparency groups.
 - Clipped oversized page crops to the physical page bounds while preserving the declared box metadata.
 - Skipped decoding invisible images and masks, and stopped retaining full-resolution soft masks used only for reduced rendering.
 - Added described overlays that extend existing PDF structure trees when saving markup.

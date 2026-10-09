@@ -321,7 +321,11 @@ internal sealed class PdfIccProfileTransform : PdfColorTransform
             encoded[2] = (200 * (y - z) + 128) / 255 * encoding;
         }
         else for (int channel = 0; channel < 3; channel++) encoded[channel] = xyz[channel] / _reverse.XyzEncodingScale;
-        _reverse.Transform(encoded, device, applyXyzMatrix: !_lab);
+        // Keep the legacy PCS encoding and forward tables unchanged. For a
+        // Lab-to-CMYK reverse cube, preserve its piecewise linear diagonals.
+        if (_lab && Components == 4 && _reverse is PdfIccLut { UsesLegacyLabEncoding: true } lut)
+            lut.TransformTetrahedral(encoded, device);
+        else _reverse.Transform(encoded, device, applyXyzMatrix: !_lab);
         if (IsLabInput)
         {
             if (_lab && _reverse.UsesLegacyLabEncoding)

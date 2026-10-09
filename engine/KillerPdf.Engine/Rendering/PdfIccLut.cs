@@ -80,6 +80,16 @@ internal sealed class PdfIccLut : PdfIccTable
     }
 
     internal override void Transform(ReadOnlySpan<double> input, Span<double> output, bool applyXyzMatrix = false)
+        => TransformCore(input, output, applyXyzMatrix, tetrahedral: false);
+
+    internal void TransformTetrahedral(ReadOnlySpan<double> input, Span<double> output)
+    {
+        if (InputChannels != 3)
+            throw new ArgumentException("Tetrahedral ICC interpolation requires three input channels.");
+        TransformCore(input, output, applyXyzMatrix: false, tetrahedral: true);
+    }
+
+    private void TransformCore(ReadOnlySpan<double> input, Span<double> output, bool applyXyzMatrix, bool tetrahedral)
     {
         if (input.Length != InputChannels || output.Length != OutputChannels)
             throw new ArgumentException("ICC lookup-table channel counts do not match.");
@@ -139,19 +149,43 @@ internal sealed class PdfIccLut : PdfIccTable
             cmykWeights[14] = low0 * high1 * high2 * high3;
             cmykWeights[15] = high0 * high1 * high2 * high3;
         }
-        for (int corner = 0; corner < corners; corner++)
+        if (tetrahedral)
         {
-            double weight = InputChannels == 4 ? cmykWeights[corner] : 1;
-            if (InputChannels != 4)
-                for (int channel = 0; channel < InputChannels; channel++)
+            Span<int> order = [0, 1, 2];
+            if (fraction[order[0]] < fraction[order[1]]) (order[0], order[1]) = (order[1], order[0]);
+            if (fraction[order[1]] < fraction[order[2]]) (order[1], order[2]) = (order[2], order[1]);
+            if (fraction[order[0]] < fraction[order[1]]) (order[0], order[1]) = (order[1], order[0]);
+            double high = fraction[order[0]], middle = fraction[order[1]], low = fraction[order[2]];
+            Span<double> weights = [1 - high, high - middle, middle - low, low];
+            int corner = 0;
+            for (int vertex = 0; vertex < 4; vertex++)
+            {
+                if (vertex > 0) corner |= 1 << order[vertex - 1];
+                double weight = weights[vertex];
+                if (weight == 0) continue;
+                int offset = baseOffset + _cornerOffsets[corner];
+                for (int channel = 0; channel < outputs; channel++)
+                    output[channel] += weight * normalized[samples[offset + channel]];
+            }
+        }
+        else
+        {
+            for (int corner = 0; corner < corners; corner++)
+            {
+                double weight = InputChannels == 4 ? cmykWeights[corner] : 1;
+                if (InputChannels != 4)
+                    for (int channel = 0; channel < InputChannels; channel++)
+                    {
+                        bool upper = (corner & (1 << channel)) != 0;
+                        weight *= upper ? fraction[channel] : 1 - fraction[channel];
+                    }
+                if (weight == 0) continue;
+                int offset = baseOffset + _cornerOffsets[corner];
+                for (int channel = 0; channel < outputs; channel++)
                 {
-                    bool upper = (corner & (1 << channel)) != 0;
-                    weight *= upper ? fraction[channel] : 1 - fraction[channel];
+                    output[channel] += weight * normalized[samples[offset + channel]];
                 }
-            if (weight == 0) continue;
-            int offset = baseOffset + _cornerOffsets[corner];
-            for (int channel = 0; channel < outputs; channel++)
-                output[channel] += weight * normalized[samples[offset + channel]];
+            }
         }
         for (int channel = 0; channel < outputs; channel++)
             output[channel] = Curve(_outputOffset + channel * _outputEntries,
