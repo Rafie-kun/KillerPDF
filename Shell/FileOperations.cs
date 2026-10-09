@@ -1341,43 +1341,72 @@ namespace KillerPDF
             string srcFile = _currentFile;
 
             bool hasAnnotations = _annotations.Values.Any(list => list.Count > 0);
+            var formSnap = ActiveViewer.SnapshotFormValuesForPrint();
             string printPath;
             string? tempFlattened = null;
-            if (hasAnnotations || _docStampSpec is not null)
+            if (hasAnnotations || _docStampSpec is not null || PdfPrintSource.HasValues(formSnap))
             {
                 var tempClean = App.MakeTempFile("clean");
-                _doc.Save(tempClean);   // UI-thread snapshot of the current doc (just serialization)
                 // Snapshot the data the burn needs so the background thread reads no live UI state.
                 var annotsSnap = _annotations.ToDictionary(kv => kv.Key, kv => new List<PageAnnotation>(kv.Value));
                 var dimsSnap   = new Dictionary<int, (int w, int h)>(_renderDims);
                 var stampSnap  = _docStampSpec?.Clone();
                 var rotSnap    = new Dictionary<int, int>(_pageRotations);   // #169: the burn needs the visual frame
-                var burnPath   = App.MakeTempFile("print");
-
-                // Flatten the annotations onto a throwaway COPY on a background thread. The live _doc is never
-                // touched (no close/reopen), so the UI stays responsive and the editing session keeps its
-                // overlay annotations. The engine burn service is static, so it cannot reach UI state.
-                bool burned = await Task.Run(() =>
+                var formPath   = App.MakeTempFile("print");
+                string? burnPath = null;
+                try
                 {
-                    try
+                    _doc.Save(tempClean);   // UI-thread serialization, without changing the editing session.
+                    await Task.Run(() => PdfPrintSource.Create(tempClean, formPath, formSnap));
+                    printPath = formPath;
+                    tempFlattened = formPath;
+                    if (hasAnnotations || stampSnap is not null)
                     {
-                        System.IO.File.Copy(tempClean, burnPath, true);
-                        PdfEngineBurn.Burn(burnPath, annotsSnap, dimsSnap, stampSnap, null, rotSnap);
-                        return true;
+                        burnPath = App.MakeTempFile("print");
+                        // Keep the form copy intact if annotation flattening fails.
+                        bool burned = await Task.Run(() =>
+                        {
+                            try
+                            {
+                                System.IO.File.Copy(formPath, burnPath, true);
+                                PdfEngineBurn.Burn(burnPath, annotsSnap, dimsSnap, stampSnap, null, rotSnap);
+                                return true;
+                            }
+                            catch { return false; }
+                        });
+                        if (burned)
+                        {
+                            printPath = burnPath;
+                            tempFlattened = burnPath;
+                            DeletePrintTemp(formPath);
+                        }
+                        else
+                        {
+                            DeletePrintTemp(burnPath);
+                            SetStatus(Loc("Str_St_FlattenPrintFailed"));
+                        }
                     }
-                    catch { return false; }
-                });
-
-                if (!burned) SetStatus(Loc("Str_St_FlattenPrintFailed"));
-                printPath     = burned ? burnPath : srcFile;
-                tempFlattened = burned ? burnPath : null;
+                }
+                catch (Exception ex)
+                {
+                    DeletePrintTemp(formPath);
+                    DeletePrintTemp(burnPath);
+                    KillerDialog.Show(this, Loc("Str_Err_PrintFailed") + "\n" + ex.Message,
+                        "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+                finally { DeletePrintTemp(tempClean); }
             }
             else
             {
                 printPath = srcFile;
             }
 
-            if (_doc is null) return;   // re-check after the await (the doc was untouched, this satisfies flow analysis)
+            if (_doc is null)
+            {
+                DeletePrintTemp(tempFlattened);
+                return;
+            }
             PdfEngineDocumentSession engineSession = EnsureEngineDocumentSession();
             int pageCount = engineSession.PageCount;
 
@@ -1447,6 +1476,12 @@ namespace KillerPDF
             {
                 try { KillerDialog.Show(this, Loc("Str_Err_PrintFailed") + "\n" + ex.GetType().Name + ": " + ex.Message, "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error); }
                 catch { }
+            }
+
+            static void DeletePrintTemp(string? path)
+            {
+                if (path is null) return;
+                try { System.IO.File.Delete(path); } catch { }
             }
         }
     }

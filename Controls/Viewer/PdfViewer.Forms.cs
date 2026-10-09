@@ -755,6 +755,11 @@ namespace KillerPDF.Controls
                 _formRadioValues, _formFontSizes));
         }
 
+        internal PdfEngineIntegration.FormEdits SnapshotFormValuesForPrint() =>
+            PdfPrintSource.Snapshot(new PdfEngineIntegration.FormEdits(
+                _formTextValues, _formChoiceValues, _formMultiChoiceValues, _formCheckValues,
+                _formRadioValues, _formFontSizes));
+
 
         // Form-field font-size stepper
         // A small "Font size: - N +" bar shown while a form text field is focused, so the user can

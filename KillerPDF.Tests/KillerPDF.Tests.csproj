@@ -41,6 +41,8 @@
     <Compile Include="..\Services\CmapCoverage.cs" Link="Services\CmapCoverage.cs" />
     <Compile Include="..\Services\PdfFonts.cs" Link="Services\PdfFonts.cs" />
     <Compile Include="..\Services\PdfEngineIntegration.cs" Link="Services\PdfEngineIntegration.cs" />
+    <Compile Include="..\Services\PdfPrintSource.cs" Link="Services\PdfPrintSource.cs" />
+    <Compile Include="..\Services\PdfWorkingDocument.cs" Link="Services\PdfWorkingDocument.cs" />
     <Compile Include="..\Services\PdfEngineBurn.cs" Link="Services\PdfEngineBurn.cs" />
     <Compile Include="..\Services\PdfEngineDocumentSession.cs" Link="Services\PdfEngineDocumentSession.cs" />
     <Compile Include="..\Services\RuntimeEncodingBootstrap.cs" Link="Services\RuntimeEncodingBootstrap.cs" />
