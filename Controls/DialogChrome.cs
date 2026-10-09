@@ -33,9 +33,9 @@ namespace KillerPDF
                 Width = Value(owner, "TitleIconSize", 25.0),
                 Height = Value(owner, "TitleIconSize", 25.0),
                 Margin = Value(owner, "TitleIconMargin", new Thickness(0, 0, 7, 0)),
-                VerticalAlignment = VerticalAlignment.Center
+                VerticalAlignment = VerticalAlignment.Center,
+                Source = frames[0]
             };
-            icon.Source = frames[0];
             RenderOptions.SetBitmapScalingMode(icon, BitmapScalingMode.NearestNeighbor);
             return icon;
         }
