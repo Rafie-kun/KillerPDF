@@ -6006,6 +6006,9 @@ public sealed partial class PdfPageRenderer
                 && colorSpace.ComponentRange is null && bits == 8 && colorSpace.Components == 4;
             _directCmykInk = (plainSpace || matchingInkProfile) && targetInk && components == 4
                 && decode is [0, 1, 0, 1, 0, 1, 0, 1];
+            // Direct sample paths never consume a color lookup. Matte correction
+            // still converts unblended values and needs its separate cache.
+            if (!matte && (_directRgb || _directGray || _directCmykInk)) return;
             if (components == 1 && bits <= 16)
             {
                 _lookup = new uint[1 << bits];
