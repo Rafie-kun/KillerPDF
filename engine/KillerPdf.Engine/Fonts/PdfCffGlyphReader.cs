@@ -97,8 +97,9 @@ public sealed class PdfCffGlyphReader
             }
             if (!found) throw Bad();
         }
+        // TrueType programs are also probed here; reject their header before copying font bytes.
+        if (source.Length < 4 || source.Span[0] != 1 || source.Span[2] < 4) throw Bad();
         _data = source.ToArray();
-        if (_data.Length < 4 || _data[0] != 1 || _data[2] < 4) throw Bad();
         int position = _data[2];
         var names = Index(ref position);
         var top = Index(ref position);

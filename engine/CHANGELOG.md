@@ -61,6 +61,7 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 - Vectorized named-spot ink blending with unchanged arithmetic and rounding, retaining scalar blending on unsupported CPUs.
 - Repeated renders and sibling renderers retain more parsed form and glyph streams and remember when oversized page content requires streaming, reducing temporary work without changing pixels.
 - Large Flate images and eligible embedded fonts inflate into their final buffer when the decoded length matches, with unchanged recovery for damaged streams.
+- Rejected non-CFF font headers before copying their programs, reducing temporary memory during font loading.
 
 - Reused exact axial shading colors across eligible device columns.
 - Prepared spot plates once for large opaque images and antialiased paths to reduce pixel synchronization.
