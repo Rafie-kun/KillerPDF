@@ -6,12 +6,14 @@ namespace KillerPdf.Engine.Documents;
 
 public sealed partial class PdfDocument
 {
+    private static readonly string[] PageRecoveryDiagnostics =
+        ["Invalid catalog or page-tree links were recovered from intact indirect page objects."];
     private bool _pageRecoveryAttempted;
     private volatile bool _pageStructureRead;
     private IReadOnlyDictionary<int, PdfObject> _recoveredPageObjects = new Dictionary<int, PdfObject>();
 
     /// <summary>Gets structural repairs applied by bounded compatibility recovery.</summary>
-    public IReadOnlyList<string> RecoveryDiagnostics { get; private set; } = Array.Empty<string>();
+    public IReadOnlyList<string> RecoveryDiagnostics { get; private set; } = [];
     internal IReadOnlyDictionary<int, PdfObject> RecoveredPageObjects => _recoveredPageObjects;
 
     internal void MarkPageStructureRead() => _pageStructureRead = true;
@@ -115,8 +117,7 @@ public sealed partial class PdfDocument
             _objectStreams.Clear();
             foreach (var pair in candidate._objectStreams) _objectStreams.Add(pair.Key, pair.Value);
             _recoveredPageObjects = replacements;
-            RecoveryDiagnostics = Array.AsReadOnly(new[] {
-                "Invalid catalog or page-tree links were recovered from intact indirect page objects." });
+            RecoveryDiagnostics = Array.AsReadOnly(PageRecoveryDiagnostics);
             return true;
 
             void Apply()

@@ -11,8 +11,9 @@ namespace KillerPdf.Engine.Tests.Rendering;
 
 public sealed class PdfBlendExtensionTests
 {
-    public static IEnumerable<object?[]> Cases()
+    public static TheoryData<bool, string?, string, string, int, bool, bool, PdfBlendMode, bool, bool> Cases()
     {
+        var data = new TheoryData<bool, string?, string, string, int, bool, bool, PdfBlendMode, bool, bool>();
         var declarations = new (bool Header17, string? Version, string Vendor,
             string BaseVersion, int Level, bool IntegerLevel, bool Modern)[]
         {
@@ -31,9 +32,10 @@ public sealed class PdfBlendExtensionTests
         foreach (PdfBlendMode mode in new[] { PdfBlendMode.ColorDodge, PdfBlendMode.ColorBurn })
         foreach (bool cmyk in new[] { false, true })
         foreach (bool indirect in new[] { false, true })
-            yield return [declaration.Header17, declaration.Version, declaration.Vendor,
+            data.Add(declaration.Header17, declaration.Version, declaration.Vendor,
                 declaration.BaseVersion, declaration.Level, declaration.IntegerLevel,
-                declaration.Modern, mode, cmyk, indirect];
+                declaration.Modern, mode, cmyk, indirect);
+        return data;
     }
 
     [Theory]

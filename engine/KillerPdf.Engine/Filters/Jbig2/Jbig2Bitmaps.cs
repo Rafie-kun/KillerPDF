@@ -173,8 +173,8 @@ namespace KillerPdf.Engine.Filters.Jbig2
             if (Vector.IsHardwareAccelerated)
                 for (; index <= source.Length - Vector<byte>.Count; index += Vector<byte>.Count)
                 {
-                    var incoming = new Vector<byte>(source.Slice(index));
-                    var previous = new Vector<byte>(destination.Slice(index));
+                    var incoming = new Vector<byte>(source[index..]);
+                    var previous = new Vector<byte>(destination[index..]);
                     var combined = op switch
                     {
                         CombinationOperator.OR => previous | incoming,
@@ -182,7 +182,7 @@ namespace KillerPdf.Engine.Filters.Jbig2
                         CombinationOperator.XOR => previous ^ incoming,
                         _ => ~(previous ^ incoming)
                     };
-                    combined.CopyTo(destination.Slice(index));
+                    combined.CopyTo(destination[index..]);
                 }
             for (; index < source.Length; index++)
                 destination[index] = CombineBytes(destination[index], source[index], op);
@@ -195,9 +195,9 @@ namespace KillerPdf.Engine.Filters.Jbig2
             if (Vector.IsHardwareAccelerated)
                 for (; index <= destination.Length - Vector<byte>.Count; index += Vector<byte>.Count)
                 {
-                    var incoming = (new Vector<byte>(source.Slice(index)) << shift)
-                        | (new Vector<byte>(source.Slice(index + 1)) >> downShift);
-                    var previous = new Vector<byte>(destination.Slice(index));
+                    var incoming = (new Vector<byte>(source[index..]) << shift)
+                        | (new Vector<byte>(source[(index + 1)..]) >> downShift);
+                    var previous = new Vector<byte>(destination[index..]);
                     var combined = op switch
                     {
                         CombinationOperator.OR => previous | incoming,
@@ -206,7 +206,7 @@ namespace KillerPdf.Engine.Filters.Jbig2
                         CombinationOperator.XNOR => ~(previous ^ incoming),
                         _ => incoming
                     };
-                    combined.CopyTo(destination.Slice(index));
+                    combined.CopyTo(destination[index..]);
                 }
             for (; index < destination.Length; index++)
             {

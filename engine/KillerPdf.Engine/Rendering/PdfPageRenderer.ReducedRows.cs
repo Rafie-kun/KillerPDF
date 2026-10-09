@@ -95,7 +95,7 @@ public sealed partial class PdfPageRenderer
                                 data[offset + 2] = row[sourceOffset + 2];
                                 data[offset + 3] = 255;
                             }
-                            if (groupAlpha is not null) groupAlpha[offset / 4] = 255;
+                            groupAlpha?[offset / 4] = 255;
                         }
                         else
                         {

@@ -39,8 +39,9 @@ public sealed class PdfFillRegionStorageTests
         }
     }
 
-    public static IEnumerable<object[]> Cases()
+    public static TheoryData<bool, int, string> Cases()
     {
+        var data = new TheoryData<bool, int, string>();
         foreach (bool transparent in new[] { false, true })
         foreach (int parallelism in new[] { 1, 4 })
         foreach (string path in new[]
@@ -54,7 +55,8 @@ public sealed class PdfFillRegionStorageTests
             "3.2 4.1 m 58.7 17.6 l 18.4 61.3 l h W n 3.2 4.1 m 58.7 17.6 l 18.4 61.3 l h f",
             "-8 20 m 10 100 90 -40 75 40 c 12 3 l h W n -8 20 m 10 100 90 -40 75 40 c 12 3 l h f"
         })
-            yield return [transparent, parallelism, path];
+            data.Add(transparent, parallelism, path);
+        return data;
     }
 
     [Theory]

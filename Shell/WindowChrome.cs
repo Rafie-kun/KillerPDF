@@ -436,7 +436,7 @@ namespace KillerPDF
                 }
         }
 
-        private readonly Dictionary<Border, System.Windows.Threading.DispatcherOperation> _annotationBarLayout = new();
+        private readonly Dictionary<Border, System.Windows.Threading.DispatcherOperation> _annotationBarLayout = [];
 
         private void CancelAnnotationBarLayout(Border bar)
         {

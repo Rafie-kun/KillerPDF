@@ -6,6 +6,27 @@ namespace KillerPDF.Tests;
 public sealed class ViewportRenderQueueTests
 {
     [Fact]
+    public async Task CancelingOneRequestDoesNotCancelTheSharedPump()
+    {
+        var queue = new ViewportRenderQueue();
+        using var source = new CancellationTokenSource();
+        using var entered = new ManualResetEventSlim();
+        var first = queue.Enqueue("first", 0, 16, token =>
+        {
+            entered.Set();
+            Assert.True(token.WaitHandle.WaitOne(TimeSpan.FromSeconds(10)));
+            token.ThrowIfCancellationRequested();
+            return 0;
+        }, source.Token);
+        Assert.True(entered.Wait(TimeSpan.FromSeconds(10)));
+        var next = queue.Enqueue("next", 0, 16, _ => 7);
+        source.Cancel();
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => first);
+        Assert.Equal(7, await next.WaitAsync(TimeSpan.FromSeconds(10)));
+        Assert.Equal(8, await queue.Enqueue("later", 0, 16, _ => 8).WaitAsync(TimeSpan.FromSeconds(10)));
+    }
+
+    [Fact]
     public async Task NavigationRunsBeforePrefetchWithoutConcurrentRasterization()
     {
         var queue = new ViewportRenderQueue();

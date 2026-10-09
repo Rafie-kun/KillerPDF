@@ -11,12 +11,14 @@ namespace KillerPdf.Engine.Tests.Rendering;
 
 public sealed class PdfStrokeAdjustmentTests
 {
-    public static IEnumerable<object[]> AxisWidths()
+    public static TheoryData<bool, double, double> AxisWidths()
     {
+        var data = new TheoryData<bool, double, double>();
         foreach (bool vertical in new[] { false, true })
         foreach (double width in new[] { 0.25, 0.75, 1.25, 1.75, 2.25, 2.75 })
         foreach (double position in new[] { 20.1, 20.6 })
-            yield return [vertical, width, position];
+            data.Add(vertical, width, position);
+        return data;
     }
 
     [Theory]

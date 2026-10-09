@@ -35,12 +35,12 @@ public sealed class Jbig2BlitTests
         Segment(encoded, 1, 48, page);
         Segment(encoded, 2, 39, region);
         Segment(encoded, 3, 49, []);
-        PdfName Name(string name) => new(Encoding.ASCII.GetBytes(name));
+        static PdfName Name(string name) => new(Encoding.ASCII.GetBytes(name));
         var stream = new PdfStream(new PdfDictionary([
             new(Name("Filter"), Name("JBIG2Decode")),
             new(Name("Width"), new PdfInteger(width)), new(Name("Height"), new PdfInteger(height))]),
             encoded.ToArray());
-        byte[] expected = Enumerable.Repeat((byte)255, ((width + 7) / 8) * height).ToArray();
+        byte[] expected = [.. Enumerable.Repeat((byte)255, ((width + 7) / 8) * height)];
         for (int row = 0; row < sourceHeight; row++)
         for (int column = 0; column < sourceWidth; column++)
         {

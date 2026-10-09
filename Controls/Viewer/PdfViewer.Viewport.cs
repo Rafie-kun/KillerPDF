@@ -921,13 +921,13 @@ namespace KillerPDF.Controls
                 else
                 {
                     var request = _backgroundRenderCache.Capture(primaryFile, primaryRevision);
-                    var prepared = await _viewportRenderQueue.Enqueue(("primary", primarySession), 0,
+                    var (preparedBitmap, preparedMeasurement) = await _viewportRenderQueue.Enqueue(("primary", primarySession), 0,
                         8L * scaledMax * scaledMax,
                         token => PreparePrimaryBitmap(request, pageIndex, scaledMax, pgRot, primaryInvert, token),
                         primaryToken);
                     if (!Current()) return;
-                    bitmap = prepared.Bitmap;
-                    LastPrimaryRenderMeasurement = prepared.Measurement;
+                    bitmap = preparedBitmap;
+                    LastPrimaryRenderMeasurement = preparedMeasurement;
                     width = bitmap.PixelWidth;
                     height = bitmap.PixelHeight;
                     CacheRender(primarySession, pageIndex, scaledMax, pgRot, bitmap);

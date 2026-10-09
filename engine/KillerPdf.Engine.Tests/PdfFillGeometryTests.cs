@@ -80,8 +80,8 @@ public sealed class PdfFillGeometryTests
                     (64.125 - radius, 32.375 + radius)];
                 for (int index = 0; index < count; index++)
                 {
-                    var corner = corners[index % 4];
-                    polygon.Add(Activator.CreateInstance(pointType, corner.X, corner.Y)!);
+                    var (cornerX, cornerY) = corners[index % 4];
+                    polygon.Add(Activator.CreateInstance(pointType, cornerX, cornerY)!);
                 }
                 return polygon;
             }

@@ -10,13 +10,15 @@ namespace KillerPdf.Engine.Tests.Rendering;
 
 public sealed class PdfOpaquePaintRegionTests
 {
-    public static IEnumerable<object[]> Cases()
+    public static TheoryData<int, bool, bool, bool> Cases()
     {
+        var data = new TheoryData<int, bool, bool, bool>();
         foreach (int size in new[] { 16, 64, 128 })
         foreach (bool nativeMagenta in new[] { false, true })
         foreach (bool narrowMargin in new[] { false, true })
         foreach (bool clipped in new[] { false, true })
-            yield return [size, nativeMagenta, narrowMargin, clipped];
+            data.Add(size, nativeMagenta, narrowMargin, clipped);
+        return data;
     }
 
     [Theory]
@@ -44,12 +46,14 @@ public sealed class PdfOpaquePaintRegionTests
             Assert.Equal(physical, actual.Pixels.Span.Slice(offset, 4).ToArray());
     }
 
-    public static IEnumerable<object[]> KnockoutCases()
+    public static TheoryData<int, bool, bool> KnockoutCases()
     {
+        var data = new TheoryData<int, bool, bool>();
         foreach (int size in new[] { 16, 64, 128 })
         foreach (bool narrowMargin in new[] { false, true })
         foreach (bool clipped in new[] { false, true })
-            yield return [size, narrowMargin, clipped];
+            data.Add(size, narrowMargin, clipped);
+        return data;
     }
 
     [Theory]

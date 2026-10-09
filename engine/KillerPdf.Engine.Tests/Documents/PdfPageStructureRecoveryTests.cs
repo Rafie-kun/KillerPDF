@@ -10,7 +10,7 @@ using Xunit;
 
 namespace KillerPdf.Engine.Tests.Documents;
 
-public sealed class PdfPageStructureRecoveryTests
+public sealed partial class PdfPageStructureRecoveryTests
 {
     [Theory]
     [InlineData("missing-catalog")]
@@ -35,13 +35,13 @@ public sealed class PdfPageStructureRecoveryTests
         {
             "missing-catalog" => DeleteObject(catalog),
             "wrong-catalog-number" => source.Replace($"{catalog} 0 obj", "99 0 obj"),
-            "missing-pages-link" => ChangeObject(catalog, value => Regex.Replace(value, @"/Pages\s+\d+\s+0\s+R", "")),
-            "wrong-pages-link" => ChangeObject(catalog, value => Regex.Replace(value, @"/Pages\s+\d+\s+0\s+R", "/Pages 999 0 R")),
+            "missing-pages-link" => ChangeObject(catalog, value => PagesLinkRegex().Replace(value, "")),
+            "wrong-pages-link" => ChangeObject(catalog, value => PagesLinkRegex().Replace(value, "/Pages 999 0 R")),
             "missing-pages-root" => DeleteObject(root),
-            "root-not-reference" => Regex.Replace(source, @"/Root\s+\d+\s+0\s+R", "/Root 1"),
-            "root-wrong-object" => Regex.Replace(source, @"/Root\s+\d+\s+0\s+R", $"/Root {page} 0 R"),
-            "recursive-kid" => ChangeObject(root, value => Regex.Replace(value, @"/Kids\s*\[[^\]]*\]", $"/Kids [{root} 0 R]")),
-            "nonexistent-kid" => ChangeObject(root, value => Regex.Replace(value, @"/Kids\s*\[[^\]]*\]", "/Kids [999 0 R]")),
+            "root-not-reference" => RootLinkRegex().Replace(source, "/Root 1"),
+            "root-wrong-object" => RootLinkRegex().Replace(source, $"/Root {page} 0 R"),
+            "recursive-kid" => ChangeObject(root, value => KidsRegex().Replace(value, $"/Kids [{root} 0 R]")),
+            "nonexistent-kid" => ChangeObject(root, value => KidsRegex().Replace(value, "/Kids [999 0 R]")),
             _ => throw new ArgumentException(damage)
         };
         byte[] damaged = Encoding.Latin1.GetBytes(source);
@@ -145,4 +145,13 @@ public sealed class PdfPageStructureRecoveryTests
     private static PdfName Name(string value) => new(Encoding.ASCII.GetBytes(value));
     private static PdfDictionary Dictionary(params (string Key, PdfObject Value)[] pairs) =>
         new(pairs.Select(pair => new KeyValuePair<PdfName, PdfObject>(Name(pair.Key), pair.Value)));
+
+    [GeneratedRegex(@"/Pages\s+\d+\s+0\s+R")]
+    private static partial Regex PagesLinkRegex();
+
+    [GeneratedRegex(@"/Root\s+\d+\s+0\s+R")]
+    private static partial Regex RootLinkRegex();
+
+    [GeneratedRegex(@"/Kids\s*\[[^\]]*\]")]
+    private static partial Regex KidsRegex();
 }

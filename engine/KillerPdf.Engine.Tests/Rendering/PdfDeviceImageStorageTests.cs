@@ -11,6 +11,8 @@ namespace KillerPdf.Engine.Tests.Rendering;
 [Collection(nameof(SoftMaskAllocationCollection))]
 public sealed class PdfDeviceImageStorageTests
 {
+    private static readonly double[] ForwardDecode = [0d, 1d];
+    private static readonly double[] ReverseDecode = [1d, 0d];
     [Theory]
     [InlineData(3, false, false)]
     [InlineData(3, false, true)]
@@ -25,13 +27,13 @@ public sealed class PdfDeviceImageStorageTests
         const int width = 128, height = 96;
         byte[] samples = new byte[width * height * components * 2];
         new Random(17331).NextBytes(samples);
-        double[] decode = Enumerable.Range(0, components)
-            .SelectMany(_ => reverse ? new[] { 1d, 0d } : new[] { 0d, 1d }).ToArray();
+        double[] decode = [.. Enumerable.Range(0, components)
+            .SelectMany(_ => reverse ? ReverseDecode : ForwardDecode)];
         const System.Reflection.BindingFlags nested = System.Reflection.BindingFlags.NonPublic;
         var spaceType = typeof(PdfPageRenderer).GetNestedType("ImageColorSpace", nested)!;
         var spaceConstructor = spaceType.GetConstructors().Single();
-        object?[] spaceArguments = spaceConstructor.GetParameters()
-            .Select(parameter => parameter.HasDefaultValue ? parameter.DefaultValue : null).ToArray();
+        object?[] spaceArguments = [.. spaceConstructor.GetParameters()
+            .Select(parameter => parameter.HasDefaultValue ? parameter.DefaultValue : null)];
         spaceArguments[0] = components;
         object space = spaceConstructor.Invoke(spaceArguments);
         var converterType = typeof(PdfPageRenderer).GetNestedType("ImageSampleConverter", nested)!;
@@ -39,8 +41,8 @@ public sealed class PdfDeviceImageStorageTests
             | System.Reflection.BindingFlags.NonPublic).Single();
         Func<int, int, uint> Create(bool matte)
         {
-            object?[] arguments = constructor.GetParameters()
-                .Select(parameter => parameter.HasDefaultValue ? parameter.DefaultValue : null).ToArray();
+            object?[] arguments = [.. constructor.GetParameters()
+                .Select(parameter => parameter.HasDefaultValue ? parameter.DefaultValue : null)];
             object?[] supplied = [samples, width * components * 2, components, 16, decode, space,
                 targetInk, null, matte];
             supplied.CopyTo(arguments, 0);

@@ -11,6 +11,7 @@ namespace KillerPdf.Engine.Tests.Rendering;
 
 public sealed class PdfBlackPointControlTests
 {
+    private static readonly double[] IdentityValues = [0.0123, 0.4567, 0.8910];
     [Theory]
     [InlineData(false, 0)]
     [InlineData(false, 1)]
@@ -60,7 +61,7 @@ public sealed class PdfBlackPointControlTests
             Assert.True(mapping.IsIdentity);
             Span<double> values = [0.0123, 0.4567, 0.8910];
             mapping.Apply(values);
-            Assert.Equal(new double[] { 0.0123, 0.4567, 0.8910 }, values.ToArray());
+            Assert.Equal(IdentityValues, values.ToArray());
         }
         Assert.True(PdfBlackPointCompensation.TryCreate(profile, null, 3, out var absolute));
         Assert.True(absolute.IsIdentity);
@@ -137,17 +138,19 @@ public sealed class PdfBlackPointControlTests
         }
     }
 
-    public static IEnumerable<object[]> ObjectPolicies
+    public static TheoryData<bool, bool, string, string, bool, string> ObjectPolicies
     {
         get
         {
+            var data = new TheoryData<bool, bool, string, string, bool, string>();
             foreach (bool image in new[] { false, true })
             foreach (bool gray in new[] { false, true })
             foreach (string intent in new[] { "Perceptual", "RelativeColorimetric", "Saturation", "AbsoluteColorimetric" })
             foreach (string disabled in new[] { "OFF", "Default" })
             foreach (bool indirect in new[] { false, true })
             foreach (string kind in new[] { "ICC", "Indexed", "Separation", "DeviceN" })
-                yield return [image, gray, intent, disabled, indirect, kind];
+                data.Add(image, gray, intent, disabled, indirect, kind);
+            return data;
         }
     }
 
@@ -212,7 +215,7 @@ public sealed class PdfBlackPointControlTests
             Encoding.ASCII.GetBytes("/F Do")).Build());
         var page = PdfPageTree.Read(source).Pages[0];
         var update = new PdfIncrementalUpdateBuilder(source);
-        PdfArray Reals(params double[] values) => new(values.Select(value => (PdfObject)new PdfReal(value)));
+        static PdfArray Reals(params double[] values) => new(values.Select(value => (PdfObject)new PdfReal(value)));
         var parameters = new List<KeyValuePair<PdfName, PdfObject>>
         {
             Entry("WhitePoint", Reals(0.9642, 1, 0.8249))

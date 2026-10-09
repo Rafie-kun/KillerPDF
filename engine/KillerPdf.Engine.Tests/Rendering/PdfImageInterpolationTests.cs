@@ -10,13 +10,15 @@ namespace KillerPdf.Engine.Tests.Rendering;
 
 public sealed class PdfImageInterpolationTests
 {
-    public static IEnumerable<object[]> Orientations()
+    public static TheoryData<int, bool, int, bool> Orientations()
     {
+        var data = new TheoryData<int, bool, int, bool>();
         foreach (int components in new[] { 1, 3 })
         foreach (bool masked in new[] { false, true })
         foreach (int rotation in new[] { 0, 90, 180, 270 })
         foreach (bool flip in new[] { false, true })
-            yield return [components, masked, rotation, flip];
+            data.Add(components, masked, rotation, flip);
+        return data;
     }
 
     [Theory]

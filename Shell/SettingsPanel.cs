@@ -423,7 +423,7 @@ namespace KillerPDF
 
         // Each pill shows its accent the way a selection does: the palette's own SelectionBg
         // gradient, read from that accent's theme file. 98SE keeps its flat Win98 swatches.
-        private static readonly Dictionary<(Theme, DarkAccent), System.Windows.Media.Brush> AccentStripBrushes = new();
+        private static readonly Dictionary<(Theme, DarkAccent), System.Windows.Media.Brush> AccentStripBrushes = [];
 
         private static System.Windows.Media.Brush AccentStripBrush(Theme family, DarkAccent accent, string flatHex)
         {

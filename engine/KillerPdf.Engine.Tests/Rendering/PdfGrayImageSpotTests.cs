@@ -11,14 +11,16 @@ namespace KillerPdf.Engine.Tests.Rendering;
 
 public sealed class PdfGrayImageSpotTests
 {
-    public static IEnumerable<object[]> Cases()
+    public static TheoryData<string, int, int, bool, byte, int> Cases()
     {
+        var data = new TheoryData<string, int, int, bool, byte, int>();
         foreach (int mode in new[] { 0, 1 })
         foreach (int bits in new[] { 1, 8 })
         foreach (bool interpolate in new[] { false, true })
-        foreach (byte gray in bits == 1 ? new byte[] { 0, 255 } : new byte[] { 0, 64, 128, 254, 255 })
+        foreach (byte gray in bits == 1 ? (byte[])[0, 255] : [0, 64, 128, 254, 255])
         foreach (int sourceSize in new[] { 1, 64 })
-            yield return ["DeviceCMYK", mode, bits, interpolate, gray, sourceSize];
+            data.Add("DeviceCMYK", mode, bits, interpolate, gray, sourceSize);
+        return data;
     }
 
     [Theory]
@@ -32,7 +34,7 @@ public sealed class PdfGrayImageSpotTests
         var knockout = Render(destination, mode, bits, interpolate, false, "image", gray, sourceSize);
         const int spot = (32 * 128 + 32) * 4;
         const int process = (32 * 128 + 96) * 4;
-        byte[] Pixel(PdfRenderedPage page, int offset) => page.Pixels.Span[offset..(offset + 4)].ToArray();
+        static byte[] Pixel(PdfRenderedPage page, int offset) => page.Pixels.Span[offset..(offset + 4)].ToArray();
         if (gray == 255)
         {
             Assert.Equal(Pixel(background, spot), Pixel(vector, spot));
@@ -47,12 +49,14 @@ public sealed class PdfGrayImageSpotTests
         Assert.Empty(knockout.Diagnostics);
     }
 
-    public static IEnumerable<object[]> ManagedCases()
+    public static TheoryData<string, int, byte> ManagedCases()
     {
+        var data = new TheoryData<string, int, byte>();
         foreach (string space in new[] { "CalGray", "ICCBased" })
         foreach (int mode in new[] { 0, 1 })
         foreach (byte gray in new byte[] { 0, 128, 255 })
-            yield return [space, mode, gray];
+            data.Add(space, mode, gray);
+        return data;
     }
 
     [Theory]

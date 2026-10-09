@@ -29,7 +29,7 @@ public sealed class PdfUnicodePasswordNormalizationTests
         PdfDocument document = PdfDocument.Open(bytes, "Password" + compatibilityCharacter + "!");
         Assert.True(document.IsDecrypted);
         var rendered = new PdfPageRenderer(document).Render(0, new PdfRenderOptions(16, 16));
-        Assert.Equal(new byte[] {0, 0, 255, 255}, rendered.Pixels.Slice(0, 4).ToArray());
+        Assert.Equal(new byte[] {0, 0, 255, 255}, rendered.Pixels[..4].ToArray());
         Assert.ThrowsAny<CryptographicException>(() => PdfDocument.Open(bytes, "Password" + laterMapping + "!"));
     }
     [Fact]

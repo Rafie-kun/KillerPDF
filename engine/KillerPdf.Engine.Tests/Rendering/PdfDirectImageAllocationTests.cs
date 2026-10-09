@@ -38,7 +38,7 @@ public sealed class PdfDirectImageAllocationTests
         for (int x = 0; x < page; x += tile)
             content.DrawImage(image, x, y, tile, tile);
         var document = PdfDocument.Open(new PdfDocumentBuilder().AddPage(page, page, content).Build());
-        PdfName Name(string value) => new(Encoding.ASCII.GetBytes(value));
+        static PdfName Name(string value) => new(Encoding.ASCII.GetBytes(value));
         var catalog = (PdfDictionary)document.Resolve((PdfIndirectReference)document.Trailer[Name("Root")]);
         var pages = (PdfDictionary)document.Resolve((PdfIndirectReference)catalog[Name("Pages")]);
         var pageObject = (PdfDictionary)document.Resolve((PdfIndirectReference)((PdfArray)pages[Name("Kids")])[0]);

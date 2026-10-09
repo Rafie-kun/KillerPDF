@@ -13,19 +13,23 @@ public sealed class PdfIccProcessSpotTests
 {
     private static readonly string[] Spaces = ["ICCBased", "IndexedICC"];
 
-    public static IEnumerable<object[]> Cases()
+    public static TheoryData<string, string, int> Cases()
     {
+        var data = new TheoryData<string, string, int>();
         foreach (string space in Spaces)
         foreach (string foreground in new[] { "path", "stroke", "image", "mask" })
         foreach (int mode in new[] { 0, 1 })
-            yield return [space, foreground, mode];
+            data.Add(space, foreground, mode);
+        return data;
     }
 
-    public static IEnumerable<object[]> TextCases()
+    public static TheoryData<string, int> TextCases()
     {
+        var data = new TheoryData<string, int>();
         foreach (string space in Spaces)
         foreach (int mode in new[] { 0, 1 })
-            yield return [space, mode];
+            data.Add(space, mode);
+        return data;
     }
 
     [Theory]
@@ -51,12 +55,14 @@ public sealed class PdfIccProcessSpotTests
         Assert.Empty(knockout.Diagnostics);
     }
 
-    public static IEnumerable<object[]> StencilCases()
+    public static TheoryData<string, int, bool> StencilCases()
     {
+        var data = new TheoryData<string, int, bool>();
         foreach (string space in Spaces)
         foreach (int mode in new[] { 0, 1 })
         foreach (bool clipped in new[] { false, true })
-            yield return [space, mode, clipped];
+            data.Add(space, mode, clipped);
+        return data;
     }
 
     [Theory]
@@ -94,7 +100,7 @@ public sealed class PdfIccProcessSpotTests
         Assert.Empty(knockout.Diagnostics);
         const int spot = (32 * 128 + 32) * 4;
         const int process = (32 * 128 + 96) * 4;
-        byte[] Pixel(PdfRenderedPage page, int offset) => page.Pixels.Span[offset..(offset + 4)].ToArray();
+        static byte[] Pixel(PdfRenderedPage page, int offset) => page.Pixels.Span[offset..(offset + 4)].ToArray();
         Assert.Equal(Pixel(background, spot), Pixel(overprint, spot));
         Assert.Equal(new byte[] { 255, 255, 255, 255 }, Pixel(overprint, process));
         Assert.Equal(new byte[] { 255, 255, 255, 255 }, Pixel(knockout, spot));
@@ -103,8 +109,9 @@ public sealed class PdfIccProcessSpotTests
         Assert.Empty(knockout.Diagnostics);
     }
 
-    public static IEnumerable<object[]> ImageCases()
+    public static TheoryData<string, int, int, bool, int, bool, double> ImageCases()
     {
+        var data = new TheoryData<string, int, int, bool, int, bool, double>();
         foreach (string space in Spaces)
         foreach (int mode in new[] { 0, 1 })
         foreach (int bits in new[] { 8, 16 })
@@ -112,7 +119,8 @@ public sealed class PdfIccProcessSpotTests
         foreach (int sourceSize in new[] { 1, 64 })
         foreach (bool clipped in new[] { false, true })
         foreach (double alpha in new[] { 1d, .5d })
-            yield return [space, mode, bits, interpolate, sourceSize, clipped, alpha];
+            data.Add(space, mode, bits, interpolate, sourceSize, clipped, alpha);
+        return data;
     }
 
     [Theory]
@@ -138,12 +146,14 @@ public sealed class PdfIccProcessSpotTests
         }
     }
 
-    public static IEnumerable<object[]> NativeCases()
+    public static TheoryData<string, int, bool> NativeCases()
     {
+        var data = new TheoryData<string, int, bool>();
         foreach (string foreground in new[] { "path", "stroke", "mask", "image", "text" })
         foreach (int mode in new[] { 0, 1 })
         foreach (bool compensate in new[] { false, true })
-            yield return [foreground, mode, compensate];
+            data.Add(foreground, mode, compensate);
+        return data;
     }
 
     [Theory]
@@ -178,7 +188,7 @@ public sealed class PdfIccProcessSpotTests
         PdfArray Numbers(params int[] values) => new(values.Select(value => (PdfObject)new PdfInteger(value)));
         bool indexed = space.StartsWith("Indexed", StringComparison.Ordinal);
         byte[] pixel = whitePaint ? [0,0,0,0] : [0,51,102,0];
-        double[] values = pixel.Select(value => value / 255d).ToArray();
+        double[] values = [.. pixel.Select(value => value / 255d)];
         string operands = indexed ? "0" : string.Join(" ", values.Select(value => value.ToString("R",
             System.Globalization.CultureInfo.InvariantCulture)));
         string paint = foreground switch

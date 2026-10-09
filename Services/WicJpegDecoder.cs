@@ -26,9 +26,8 @@ internal sealed class WicJpegDecoder : IPdfJpegDecoder
 
         try
         {
-            byte[] samples;
             bool decoded = components == 4
-                ? NativeWicJpegDecoder.TryDecode(encoded, reducedWidth, reducedHeight, out samples)
+                ? NativeWicJpegDecoder.TryDecode(encoded, reducedWidth, reducedHeight, out byte[] samples)
                 : NativeWicJpegDecoder.TryDecodeRgb(encoded, reducedWidth, reducedHeight, out samples);
             if (!decoded) return false;
             if (components == 4)

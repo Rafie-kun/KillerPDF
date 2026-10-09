@@ -17,7 +17,7 @@ public sealed class PdfCompactedGraphicsStateTests
     {
         // CompactedPDFSyntaxTest uses an empty ExtGState name with ca=0.33 and CA=0.66.
         // The expected channels follow those source values, independently of a legacy renderer.
-        PdfName Name(string value) => new(Encoding.ASCII.GetBytes(value));
+        static PdfName Name(string value) => new(Encoding.ASCII.GetBytes(value));
         var source = PdfDocument.Open(new PdfDocumentBuilder().AddPage(20, 10,
             Encoding.ASCII.GetBytes($"/{resourceName} gs 1 0. .0 rg 0 0 10 10 re f 2 w 0 0 0 RG 15 0 m 15 10 l S")).Build());
         var pageEntry = PdfPageTree.Read(source).Pages[0];

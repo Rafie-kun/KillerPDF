@@ -21,7 +21,7 @@ public sealed class PdfBlackPointDeviceIntentTests
         var page = PdfPageTree.Read(source).Pages[0];
         var original = (PdfDictionary)source.Resolve(page.Reference);
         var update = new PdfIncrementalUpdateBuilder(source);
-        PdfArray Numbers(params int[] values) => new(values.Select(value => (PdfObject)new PdfInteger(value)));
+        static PdfArray Numbers(params int[] values) => new(values.Select(value => (PdfObject)new PdfInteger(value)));
         string paint = rgb ? "0.25 0.25 0.25 rg" : "0.25 g";
         string content = "/On gs " + paint + " 0 0 1 1 re f /AbsoluteColorimetric ri "
             + paint + " 1 0 1 1 re f /RelativeColorimetric ri " + paint + " 2 0 1 1 re f";

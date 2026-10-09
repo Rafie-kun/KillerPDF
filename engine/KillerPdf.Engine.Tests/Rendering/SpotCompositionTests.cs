@@ -17,7 +17,7 @@ public sealed class SpotCompositionTests
         for (int example = 0; example < 200; example++)
         {
             uint process = (uint)random.NextInt64(1L << 32);
-            uint[] spots = Enumerable.Range(0, count).Select(_ => (uint)random.NextInt64(1L << 32)).ToArray();
+            uint[] spots = [.. Enumerable.Range(0, count).Select(_ => (uint)random.NextInt64(1L << 32))];
             uint expected = 0;
             for (int channel = 0; channel < 4; channel++)
             {

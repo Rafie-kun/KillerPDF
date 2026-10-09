@@ -62,7 +62,7 @@ public sealed class PdfRegionRenderingTests
         var renderer = CreateRenderer("0.2 0.7 0.4 RG 5.25 w 1 J 1 j -8 20 m 10 100 90 -40 75 40 c S /Unknown Do");
         var options = new PdfRenderOptions(127, 129, transparentBackground: transparent) { CacheResult = true };
         var full = renderer.Render(0, options);
-        byte[] destination = Enumerable.Repeat((byte)73, 37 * 41 * 4 + 19).ToArray();
+        byte[] destination = [.. Enumerable.Repeat((byte)73, 37 * 41 * 4 + 19)];
         var diagnostics = renderer.RenderRegionInto(0, options, 19, 57, 37, 41, destination);
         Assert.Equal(full.Diagnostics, diagnostics);
         for (int row = 0; row < 41; row++)
@@ -78,7 +78,7 @@ public sealed class PdfRegionRenderingTests
     {
         var renderer = CreateRenderer("0 0 m 64 64 l S");
         var options = new PdfRenderOptions(128, 128);
-        byte[] destination = Enumerable.Repeat((byte)73, 32 * 32 * 4).ToArray();
+        byte[] destination = [.. Enumerable.Repeat((byte)73, 32 * 32 * 4)];
         Assert.Throws<ArgumentOutOfRangeException>(() => renderer.RenderRegionInto(1, options, 0, 0, 32, 32, destination));
         Assert.Throws<ArgumentOutOfRangeException>(() => renderer.RenderRegionInto(0, options, -1, 0, 32, 32, destination));
         Assert.Throws<ArgumentOutOfRangeException>(() => renderer.RenderRegionInto(0, options, 0, 0, 0, 32, destination));

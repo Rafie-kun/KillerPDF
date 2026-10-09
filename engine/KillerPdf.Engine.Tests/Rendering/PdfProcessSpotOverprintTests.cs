@@ -14,19 +14,23 @@ public sealed class PdfProcessSpotOverprintTests
     private static readonly string[] Spaces = ["DeviceRGB", "CalRGB", "Lab", "ICCBased",
         "IndexedRGB", "IndexedCalRGB", "IndexedLab", "IndexedICC"];
 
-    public static IEnumerable<object[]> Cases()
+    public static TheoryData<string, string, int> Cases()
     {
+        var data = new TheoryData<string, string, int>();
         foreach (string space in Spaces)
         foreach (string foreground in new[] { "path", "stroke", "image", "mask" })
         foreach (int mode in new[] { 0, 1 })
-            yield return [space, foreground, mode];
+            data.Add(space, foreground, mode);
+        return data;
     }
 
-    public static IEnumerable<object[]> TextCases()
+    public static TheoryData<string, int> TextCases()
     {
+        var data = new TheoryData<string, int>();
         foreach (string space in Spaces)
         foreach (int mode in new[] { 0, 1 })
-            yield return [space, mode];
+            data.Add(space, mode);
+        return data;
     }
 
     [Theory]
@@ -52,12 +56,14 @@ public sealed class PdfProcessSpotOverprintTests
         Assert.Empty(knockout.Diagnostics);
     }
 
-    public static IEnumerable<object[]> StencilCases()
+    public static TheoryData<string, int, bool> StencilCases()
     {
+        var data = new TheoryData<string, int, bool>();
         foreach (string space in Spaces)
         foreach (int mode in new[] { 0, 1 })
         foreach (bool clipped in new[] { false, true })
-            yield return [space, mode, clipped];
+            data.Add(space, mode, clipped);
+        return data;
     }
 
     [Theory]
@@ -80,7 +86,7 @@ public sealed class PdfProcessSpotOverprintTests
         var knockout = Render(space, foreground, mode, false);
         const int spot = (32 * 128 + 32) * 4;
         const int process = (32 * 128 + 96) * 4;
-        byte[] Pixel(PdfRenderedPage page, int offset) => page.Pixels.Span[offset..(offset + 4)].ToArray();
+        static byte[] Pixel(PdfRenderedPage page, int offset) => page.Pixels.Span[offset..(offset + 4)].ToArray();
         Assert.Equal(Pixel(background, spot), Pixel(overprint, spot));
         Assert.Equal(new byte[] { 255, 255, 255, 255 }, Pixel(overprint, process));
         Assert.Equal(new byte[] { 255, 255, 255, 255 }, Pixel(knockout, spot));
@@ -89,15 +95,17 @@ public sealed class PdfProcessSpotOverprintTests
         Assert.Empty(knockout.Diagnostics);
     }
 
-    public static IEnumerable<object[]> ImageCases()
+    public static TheoryData<string, int, int, bool, int, bool> ImageCases()
     {
+        var data = new TheoryData<string, int, int, bool, int, bool>();
         foreach (string space in Spaces)
         foreach (int mode in new[] { 0, 1 })
         foreach (int bits in new[] { 8, 16 })
         foreach (bool interpolate in new[] { false, true })
         foreach (int sourceSize in new[] { 1, 64 })
         foreach (bool clipped in new[] { false, true })
-            yield return [space, mode, bits, interpolate, sourceSize, clipped];
+            data.Add(space, mode, bits, interpolate, sourceSize, clipped);
+        return data;
     }
 
     [Theory]
@@ -139,7 +147,7 @@ public sealed class PdfProcessSpotOverprintTests
         byte[] pixel = baseSpace == "Lab" ? whitePaint ? [255,128,128] : [204,150,150]
             : whitePaint ? [255,255,255] : [217,217,128];
         double[] values = baseSpace == "Lab" ? [pixel[0] / 255d * 100, pixel[1] - 128, pixel[2] - 128]
-            : pixel.Select(value => value / 255d).ToArray();
+            : [.. pixel.Select(value => value / 255d)];
         string operands = indexed ? "0" : string.Join(" ", values.Select(value => value.ToString("R",
             System.Globalization.CultureInfo.InvariantCulture)));
         string paint = foreground switch
@@ -211,7 +219,7 @@ public sealed class PdfProcessSpotOverprintTests
 
     private static byte[] RgbProfile()
     {
-        byte[] Xyz(params double[] values)
+        static byte[] Xyz(params double[] values)
         {
             byte[] tag = new byte[20];
             "XYZ "u8.CopyTo(tag);

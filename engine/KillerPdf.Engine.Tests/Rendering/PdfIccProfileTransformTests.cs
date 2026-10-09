@@ -140,7 +140,7 @@ public sealed class PdfIccProfileTransformTests
                         zlib.Write(bytes);
                 input = update.AddObject(new PdfStream(new PdfDictionary(compressed
                     ? [Entry("N", new PdfInteger(4)), Entry("Filter", Name("FlateDecode"))]
-                    : [Entry("N", new PdfInteger(4))]), compressed ? encoded.ToArray() : bytes.ToArray()));
+                    : [Entry("N", new PdfInteger(4))]), compressed ? encoded.ToArray() : [.. bytes]));
             }
             update.ReplaceObject(root.ObjectNumber, new PdfDictionary(catalog.Append(Entry("OutputIntents",
                 new PdfArray([new PdfDictionary([Entry("S", Name("GTS_PDFX")), Entry("DestOutputProfile", target)])])))));

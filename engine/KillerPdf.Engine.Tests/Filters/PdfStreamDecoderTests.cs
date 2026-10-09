@@ -31,13 +31,13 @@ public sealed class PdfStreamDecoderTests
                 Pair("DecodeParms", new PdfDictionary([
                     Pair("Predictor", new PdfInteger(predictor)),
                     Pair("Columns", new PdfInteger(1024))])));
-            var ordinary = Capture(() => recovery
+            var (ordinaryBytes, ordinaryError) = Capture(() => recovery
                 ? PdfStreamDecoder.DecodeWithCompatibilityRecovery(stream, value => value, limit)
                 : PdfStreamDecoder.Decode(stream, value => value, limit));
-            var direct = Capture(() => PdfStreamDecoder.DecodeKnownLengthStream(stream,
+            var (directBytes, directError) = Capture(() => PdfStreamDecoder.DecodeKnownLengthStream(stream,
                 value => value, limit, expected, recovery, 16384));
-            Assert.Equal(ordinary.Error, direct.Error);
-            Assert.True(ordinary.Bytes.AsSpan().SequenceEqual(direct.Bytes));
+            Assert.Equal(ordinaryError, directError);
+            Assert.True(ordinaryBytes.AsSpan().SequenceEqual(directBytes));
         }
 
         static (byte[] Bytes, Type? Error) Capture(Func<byte[]> action)
@@ -70,13 +70,13 @@ public sealed class PdfStreamDecoderTests
                 Pair("DecodeParms", new PdfDictionary([
                     Pair("Predictor", new PdfInteger(predictor)),
                     Pair("Columns", new PdfInteger(1024))])));
-            var ordinary = Capture(() => recovery
+            var (ordinaryBytes, ordinaryError) = Capture(() => recovery
                 ? PdfStreamDecoder.DecodeWithCompatibilityRecovery(stream, value => value, limit)
                 : PdfStreamDecoder.Decode(stream, value => value, limit));
-            var direct = Capture(() => PdfStreamDecoder.DecodeImageSamples(stream,
+            var (directBytes, directError) = Capture(() => PdfStreamDecoder.DecodeImageSamples(stream,
                 value => value, limit, expected, recovery));
-            Assert.Equal(ordinary.Error, direct.Error);
-            Assert.True(ordinary.Bytes.AsSpan().SequenceEqual(direct.Bytes));
+            Assert.Equal(ordinaryError, directError);
+            Assert.True(ordinaryBytes.AsSpan().SequenceEqual(directBytes));
         }
 
         static (byte[] Bytes, Type? Error) Capture(Func<byte[]> action)

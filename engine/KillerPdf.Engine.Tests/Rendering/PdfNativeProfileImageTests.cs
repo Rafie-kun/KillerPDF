@@ -6,6 +6,8 @@ namespace KillerPdf.Engine.Tests.Rendering;
 
 public sealed class PdfNativeProfileImageTests
 {
+    private static readonly double[] ForwardDecode = [0d, 1d];
+    private static readonly double[] ReverseDecode = [1d, 0d];
     [Theory]
     [InlineData(false, false)]
     [InlineData(false, true)]
@@ -23,19 +25,19 @@ public sealed class PdfNativeProfileImageTests
         const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic;
         Type spaceType = typeof(PdfPageRenderer).GetNestedType("ImageColorSpace", BindingFlags.NonPublic)!;
         ConstructorInfo spaceConstructor = spaceType.GetConstructors().Single();
-        object?[] spaceArguments = spaceConstructor.GetParameters()
-            .Select(parameter => parameter.HasDefaultValue ? parameter.DefaultValue : null).ToArray();
+        object?[] spaceArguments = [.. spaceConstructor.GetParameters()
+            .Select(parameter => parameter.HasDefaultValue ? parameter.DefaultValue : null)];
         spaceArguments[0] = 4;
         spaceArguments[Array.FindIndex(spaceConstructor.GetParameters(), p => p.Name == "Profile")] = profile;
         object space = spaceConstructor.Invoke(spaceArguments);
         Type converterType = typeof(PdfPageRenderer).GetNestedType("ImageSampleConverter", BindingFlags.NonPublic)!;
         ConstructorInfo constructor = converterType.GetConstructors(flags).Single();
-        double[] decode = Enumerable.Range(0, 4)
-            .SelectMany(_ => reverse ? new[] { 1d, 0d } : new[] { 0d, 1d }).ToArray();
+        double[] decode = [.. Enumerable.Range(0, 4)
+            .SelectMany(_ => reverse ? ReverseDecode : ForwardDecode)];
         object Converter(byte[] bytes, int bits)
         {
-            object?[] arguments = constructor.GetParameters()
-                .Select(parameter => parameter.HasDefaultValue ? parameter.DefaultValue : null).ToArray();
+            object?[] arguments = [.. constructor.GetParameters()
+                .Select(parameter => parameter.HasDefaultValue ? parameter.DefaultValue : null)];
             object?[] supplied = [bytes, width * 4 * bits / 8, 4, bits, decode, space, true, profile, matte];
             supplied.CopyTo(arguments, 0);
             return constructor.Invoke(arguments);

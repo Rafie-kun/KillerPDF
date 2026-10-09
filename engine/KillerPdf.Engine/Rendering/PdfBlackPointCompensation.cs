@@ -6,7 +6,7 @@ namespace KillerPdf.Engine.Rendering;
 // The sampled black points belong to the profile and intent, never to an image.
 internal readonly record struct PdfBlackPointCompensation(double Scale)
 {
-    private static readonly ConditionalWeakTable<PdfIccProfileTransform, BlackPoints> Points = new();
+    private static readonly ConditionalWeakTable<PdfIccProfileTransform, BlackPoints> Points = [];
     internal bool IsIdentity => Scale == 1;
 
     internal static bool TryCreate(PdfColorTransform? source, PdfColorTransform? destination,

@@ -5,13 +5,15 @@ namespace KillerPdf.Engine.Tests.Filters;
 
 public sealed class PdfJpegHuffmanTests
 {
-    public static IEnumerable<object[]> CodeLengths()
+    public static TheoryData<int, bool> CodeLengths()
     {
+        var data = new TheoryData<int, bool>();
         for (int length = 1; length <= 16; length++)
         {
-            yield return [length, false];
-            yield return [length, true];
+            data.Add(length, false);
+            data.Add(length, true);
         }
+        return data;
     }
 
     [Theory]

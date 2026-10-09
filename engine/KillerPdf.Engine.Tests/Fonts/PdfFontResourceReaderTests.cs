@@ -42,7 +42,7 @@ public sealed class PdfFontResourceReaderTests
         };
         PdfDictionary metadata = hint is null ? D(("Filter", N("FlateDecode")))
             : D(("Filter", N("FlateDecode")), ("Length1", hint));
-        PdfExtractionFont ReadEmbedded(PdfStream stream) => Read(D(
+        static PdfExtractionFont ReadEmbedded(PdfStream stream) => Read(D(
             ("Subtype", N("TrueType")), ("BaseFont", N("UninstalledFamily")),
             ("FontDescriptor", D(("FontFile2", stream)))));
         PdfExtractionFont expected = ReadEmbedded(new PdfStream(D(), bytes));

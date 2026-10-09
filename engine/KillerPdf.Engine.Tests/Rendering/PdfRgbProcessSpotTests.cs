@@ -21,14 +21,16 @@ public sealed class PdfRgbProcessSpotTests
         Assert.Equal(PdfDeviceCmykTests.RenderInk(255,255,0,0),actual.Pixels.Span[..4].ToArray());
     }
 
-    public static IEnumerable<object[]> Cases()
+    public static TheoryData<string, int, bool, bool, bool> Cases()
     {
+        var data = new TheoryData<string, int, bool, bool, bool>();
         foreach (string foreground in new[] { "path", "stroke", "image" })
         foreach (int mode in new[] { 0, 1 })
         foreach (bool white in new[] { false, true })
         foreach (bool clipped in new[] { false, true })
         foreach (bool followingSpot in new[] { false, true })
-            yield return [foreground, mode, white, clipped, followingSpot];
+            data.Add(foreground, mode, white, clipped, followingSpot);
+        return data;
     }
 
     [Theory]
@@ -75,16 +77,18 @@ public sealed class PdfRgbProcessSpotTests
             page.Pixels.Span[offset..(offset + 4)].ToArray());
     }
 
-    public static IEnumerable<object[]> ImageCases()
+    public static TheoryData<string, int, int, bool, int, bool, bool> ImageCases()
     {
+        var data = new TheoryData<string, int, int, bool, int, bool, bool>();
         foreach (string space in new[] { "DeviceCMYK", "IndexedCMYK", "Cyan", "IndexedCyan" })
-        foreach (int bits in space.StartsWith("Indexed", StringComparison.Ordinal) ? new[] { 8 } : new[] { 8, 16 })
+        foreach (int bits in space.StartsWith("Indexed", StringComparison.Ordinal) ? (int[])[8] : [8, 16])
         foreach (int side in new[] { 1, 64 })
         foreach (bool interpolate in new[] { false, true })
         foreach (int mode in new[] { 0, 1 })
         foreach (bool clipped in new[] { false, true })
         foreach (bool overprint in new[] { false, true })
-            yield return [space, bits, side, interpolate, mode, clipped, overprint];
+            data.Add(space, bits, side, interpolate, mode, clipped, overprint);
+        return data;
     }
 
     [Theory]
@@ -145,17 +149,19 @@ public sealed class PdfRgbProcessSpotTests
         const int offset = (32 * 128 + 32) * 4;
         Assert.Empty(actual.Diagnostics);
         Assert.Equal(followingSpot ? PdfDeviceCmykTests.RenderInk(0,0,255,0)
-            : new byte[] {255,255,255,255}, actual.Pixels.Span[offset..(offset + 4)].ToArray());
+            : [255,255,255,255], actual.Pixels.Span[offset..(offset + 4)].ToArray());
     }
 
-    public static IEnumerable<object[]> MixedImageCases()
+    public static TheoryData<int, int, bool, int, bool> MixedImageCases()
     {
+        var data = new TheoryData<int, int, bool, int, bool>();
         foreach (int bits in new[] { 8, 16 })
         foreach (int side in new[] { 1, 64 })
         foreach (bool interpolate in new[] { false, true })
         foreach (int mode in new[] { 0, 1 })
         foreach (bool clipped in new[] { false, true })
-            yield return [bits, side, interpolate, mode, clipped];
+            data.Add(bits, side, interpolate, mode, clipped);
+        return data;
     }
 
     [Theory]

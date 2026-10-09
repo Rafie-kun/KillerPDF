@@ -36,7 +36,8 @@ internal sealed class ViewportRenderQueue(int capacity = 32, long byteBudget = 5
             if (!_running)
             {
                 _running = true;
-                _ = Task.Run(Pump);
+                // The pump serves every queued request; cancel each Work through its own token.
+                _ = Task.Run(Pump, CancellationToken.None);
             }
         }
         return job.Completion.Task;
