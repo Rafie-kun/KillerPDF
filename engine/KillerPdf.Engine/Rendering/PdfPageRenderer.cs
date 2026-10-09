@@ -116,7 +116,7 @@ public sealed partial class PdfPageRenderer
     {
         _document = document ?? throw new ArgumentNullException(nameof(document));
         _jpegDecoder = jpegDecoder;
-        _pdf20BlendEndpoints = UsesPdf20BlendEndpoints(document);
+        _pdf20BlendEndpoints = UsesCorrectedBlendEndpoints(document);
         _outputProfiles = new Lazy<(PdfColorTransform? Transform, bool Unavailable)>[4];
         for (int intent = 0; intent < _outputProfiles.Length; intent++)
         {
@@ -145,16 +145,45 @@ public sealed partial class PdfPageRenderer
         _colorProfiles = sharedCache?.ColorProfileCache ?? CreateColorProfileCache();
     }
 
-    private static bool UsesPdf20BlendEndpoints(PdfDocument document)
+    private static bool UsesCorrectedBlendEndpoints(PdfDocument document)
     {
         if (document.Header.Version.CompareTo(PdfVersion.Pdf20) >= 0) return true;
         if (!document.Trailer.TryGetValue(new PdfName("Root"u8), out PdfObject root)) return false;
         if (root is PdfIndirectReference rootReference) root = document.Resolve(rootReference);
-        if (root is not PdfDictionary catalog
-            || !catalog.TryGetValue(new PdfName("Version"u8), out PdfObject version)) return false;
-        if (version is PdfIndirectReference versionReference) version = document.Resolve(versionReference);
-        return version is PdfName name && name.ValueAsLatin1() is "2.0" or "2.1" or "2.2"
-            or "2.3" or "2.4" or "2.5" or "2.6" or "2.7" or "2.8" or "2.9";
+        if (root is not PdfDictionary catalog) return false;
+        bool pdf17 = document.Header.Version.CompareTo(PdfVersion.Pdf17) >= 0;
+        if (catalog.TryGetValue(new PdfName("Version"u8), out PdfObject version))
+        {
+            if (version is PdfIndirectReference versionReference) version = document.Resolve(versionReference);
+            if (version is PdfName name)
+            {
+                string declared = name.ValueAsLatin1();
+                if (declared is "2.0" or "2.1" or "2.2" or "2.3" or "2.4"
+                    or "2.5" or "2.6" or "2.7" or "2.8" or "2.9") return true;
+                pdf17 |= declared == "1.7";
+            }
+        }
+        if (!pdf17 || !catalog.TryGetValue(new PdfName("Extensions"u8), out PdfObject extensions))
+            return false;
+        try
+        {
+            PdfObject ResolveValue(PdfObject value) => value is PdfIndirectReference reference
+                ? document.Resolve(reference) : value;
+            // Adobe's cumulative PDF 1.7 extension level 5 introduced the same
+            // ColorDodge and ColorBurn endpoint correction later adopted by PDF 2.0.
+            return ResolveValue(extensions) is PdfDictionary dictionary
+                && dictionary.TryGetValue(new PdfName("ADBE"u8), out PdfObject adobe)
+                && ResolveValue(adobe) is PdfDictionary extension
+                && extension.TryGetValue(new PdfName("BaseVersion"u8), out PdfObject baseVersion)
+                && ResolveValue(baseVersion) is PdfName { } baseName && baseName.ValueAsLatin1() == "1.7"
+                && extension.TryGetValue(new PdfName("ExtensionLevel"u8), out PdfObject level)
+                && ResolveValue(level) is PdfInteger { Value: >= 5 };
+        }
+        catch (Exception exception) when (exception is FormatException or InvalidDataException
+            or PdfFilterException or NotSupportedException)
+        {
+            return false;
+        }
     }
 
     /// <summary>Renders the currently supported page operators into BGRA32 pixels.</summary>
