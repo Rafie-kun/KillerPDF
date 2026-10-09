@@ -199,8 +199,13 @@ internal static class Program
         Type workingType = assembly.GetType("KillerPDF.Services.PdfWorkingDocument", true)!;
         object working = workingType.GetMethod("Open", Static)!.Invoke(null, [source, false])!;
         // Maintenance retains the app's native PDFium path; it has no Overkill engine renderer.
-        string native = Path.Combine(Path.GetDirectoryName(appPath)!, "runtimes", "win-x64", "native", "pdfium.dll");
-        NativeLibrary.Load(native);
+        string appDirectory = Path.GetDirectoryName(appPath)!;
+        string native = Path.Combine(appDirectory, "pdfium.dll");
+        if (!File.Exists(native))
+            native = Path.Combine(appDirectory, "runtimes", "win-x64", "native", "pdfium.dll");
+        // Woven builds preload their embedded native through Costura; payloads keep it loose.
+        if (File.Exists(native))
+            NativeLibrary.Load(native);
         Assembly docnet = Assembly.Load("Docnet.Core");
         _ = docnet.GetType("Docnet.Core.DocLib", true)!.GetProperty("Instance", Static)!.GetValue(null);
         Type rendererType = assembly.GetType("KillerPDF.Services.PdfiumInterop", true)!;

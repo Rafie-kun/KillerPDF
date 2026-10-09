@@ -42,3 +42,5 @@ build/Test-ColorPickerDialog.ps1 covers all 45 theme/accent resource states and 
 compatible PowerShell runtime. Pass `-Configuration Release` for the same assemblies used above.
 Keep that check as separate evidence. Maintenance uses its actual app PDFium renderer;
 development uses the Overkill engine renderer. This tooling preserves that architecture difference.
+Maintenance fixture checks support both the ordinary woven app with embedded PDFium and release
+payload assemblies with PDFium beside the app. A loose runtimes/win-x64/native layout also works.
