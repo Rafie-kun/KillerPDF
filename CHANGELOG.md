@@ -201,6 +201,26 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Rail right-click menus align 8 pixels from the content edges; the night-mode menu aligns with its icon.
 - Submenus attach consistently to their opening rows, with native direction and screen-edge placement.
 
+## [1.8.81] - Unreleased
+
+1.8.81 improves responsiveness, color selection, updates, and interface consistency.
+
+### Added
+- Added Ctrl+wheel sizing in the file picker and links from the shortcuts panel to the online guide.
+
+### Changed
+- Hovered outline buttons and accent picker pills use gradients outside 98SE, and accent swatches lift on hover.
+
+### Fixed
+- Prevented zero-height 98SE annotation bars from repeatedly retrying layout and blocking input.
+- Prevented the color picker from crashing when changing stamp or annotation colors with gradient themes (#442, #443).
+- Kept update helpers and setup from locking the installation folder through their working directory (#434).
+- Kept app icons sharp at fractional display DPI and app zoom.
+- Corrected Vietnamese website translations and theme look counts.
+- Restored menu fades and aligned rail menus and submenus with their opening controls and screen edges.
+- Aligned the shortcuts panel and language menu, and kept rail flyouts beside their opening buttons with an 8-unit inset from the content edge.
+- Corrected theme colors, wordmarks, footers and dialog controls, including Light/Yellow, 98SE Red and cream Blood, Greed and Cyanotic accents. Added a shadow to the PDF accent in the Light/Yellow wordmark.
+
 ## [1.8.5] - 2026-09-14
 
 1.8.5 improves saving, signatures, installation, and keyboard controls, and adds optional startup update checks.
