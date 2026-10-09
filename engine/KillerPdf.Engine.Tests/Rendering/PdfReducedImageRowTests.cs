@@ -12,6 +12,34 @@ namespace KillerPdf.Engine.Tests.Rendering;
 public sealed class PdfReducedImageRowTests
 {
     [Theory]
+    [InlineData(false, false, 89, 67)]
+    [InlineData(false, true, 89, 67)]
+    [InlineData(true, false, 89, 67)]
+    [InlineData(true, true, 89, 67)]
+    [InlineData(false, false, 37, 31)]
+    [InlineData(false, true, 37, 31)]
+    [InlineData(true, false, 37, 31)]
+    [InlineData(true, true, 37, 31)]
+    public void NarrowRegionsPreserveFractionalSamplingAndReflection(bool flipX,
+        bool flipY, int width, int height)
+    {
+        var renderer = new PdfPageRenderer(CreateWideRgb(129, 99, Samples(129, 99), flipX, flipY));
+        var options = new PdfRenderOptions(width, height, transparentBackground: true)
+            { CacheResult = false, MaximumParallelism = 4 };
+        var full = renderer.Render(0, options);
+        Assert.Empty(full.Diagnostics);
+        foreach (int left in new[] { 0, width / 2, width - 7 })
+        foreach (int top in new[] { 0, height / 2, height - 9 })
+        {
+            byte[] pixels = new byte[7 * 9 * 4];
+            Assert.Empty(renderer.RenderRegionInto(0, options, left, top, 7, 9, pixels));
+            for (int row = 0; row < 9; row++)
+                Assert.True(full.Pixels.Span.Slice(((top + row) * width + left) * 4, 7 * 4)
+                    .SequenceEqual(pixels.AsSpan(row * 7 * 4, 7 * 4)));
+        }
+    }
+
+    [Theory]
     [InlineData(false, false, 1)]
     [InlineData(false, true, 1)]
     [InlineData(true, false, 1)]

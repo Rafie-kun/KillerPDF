@@ -16,12 +16,34 @@ public sealed partial class PdfPageRenderer
         CancellationToken cancellationToken)
     {
         double unitStepX = inverse.A * (1 / scaleX);
+        int firstColumn = planeWidth, endColumn = 0;
+        if (pixelAlignedPlane)
+        {
+            firstColumn = Math.Max(0, paintLeft - left);
+            endColumn = Math.Min(planeWidth, paintRight - left);
+        }
+        else
+        {
+            // The axis-aligned mapping is the same for every row. Repeat the original
+            // additions once to retain exact column selection at fractional boundaries.
+            double unitX = inverse.Apply((left + .5) / scaleX,
+                (targetHeight - paintTop - .5) / scaleY).X;
+            for (int x = left; x < paintRight; x++, unitX += unitStepX)
+            {
+                if ((x & 4095) == 0) cancellationToken.ThrowIfCancellationRequested();
+                if (x < paintLeft || unitX < 0 || unitX >= 1) continue;
+                int px = Math.Min((int)(unitX * planeWidth), planeWidth - 1);
+                firstColumn = Math.Min(firstColumn, px);
+                endColumn = Math.Max(endColumn, px + 1);
+            }
+        }
+        if (firstColumn >= endColumn) return;
         byte[] data = target.Data;
         byte[]? groupAlpha = target.GroupAlpha;
         ForEachRow(paintTop, paintBottom,
             (long)(paintRight - paintLeft) * (paintBottom - paintTop), (rowStart, rowEnd) =>
         {
-            byte[] row = RasterBuffers.Rent(checked(planeWidth * 4));
+            byte[] row = RasterBuffers.Rent(checked((endColumn - firstColumn) * 4));
             try
             {
                 var converter = new ImageSampleConverter(samples, rowBytes, components,
@@ -38,11 +60,11 @@ public sealed partial class PdfPageRenderer
                         : Math.Min((int)((1 - first.Y) * planeHeight), planeHeight - 1);
                     if (convertedRow != py)
                     {
-                        for (int px = 0; px < planeWidth; px++)
+                        for (int px = firstColumn; px < endColumn; px++)
                         {
                             uint color = converter.ConvertArea(px, py, planeWidth,
                                 planeHeight, sourceWidth, sourceHeight, cancellationToken);
-                            WriteInk(row, px * 4, color);
+                            WriteInk(row, (px - firstColumn) * 4, color);
                         }
                         convertedRow = py;
                     }
@@ -53,7 +75,7 @@ public sealed partial class PdfPageRenderer
                         if (x < paintLeft || unitX < 0 || unitX >= 1) continue;
                         int px = pixelAlignedPlane ? x - left
                             : Math.Min((int)(unitX * planeWidth), planeWidth - 1);
-                        int sourceOffset = px * 4;
+                        int sourceOffset = (px - firstColumn) * 4;
                         int coverage = rectangularClips ? 255 : ClipCoverage(clips, x, y);
                         if (coverage == 0) continue;
                         if (coverage == 255)
