@@ -59,6 +59,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Added drag ordering for pinned places in the file picker.
 - Added a `--batch-render` command that renders pages of a file or tree to PNG with a per-page render and open timing log, and a per-file comparison in the benchmark script. Recorded shared-input timing, memory, and multipage rendering validation.
 - Added yellow and magenta accents to the neutral and 98SE themes.
+- Added a Film Grain switch to the theme menu. It is on by default, and turning it off removes the grain texture from every surface.
 
 ### Changed
 - Moved primary rendering off the UI thread, prioritized bounded viewport work with cancellation, and added visible-region zoom refinement and separate display-backend comparison tools.

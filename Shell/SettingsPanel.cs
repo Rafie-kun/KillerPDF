@@ -41,6 +41,7 @@ namespace KillerPDF
             ThemeSepulchreRadio.IsChecked = cur == Theme.Sepulchre;
             ThemeDeliriumRadio.IsChecked = cur == Theme.Delirium;
             ThemeMalaiseRadio.IsChecked = cur == Theme.Malaise;
+            FilmGrainCheck.IsChecked = FilmGrain.Enabled;
             UpdateAccentStrip(animate: false);
             // Sync language picker
             var curLoc = KillerPDF.Services.LocaleManager.Current;
@@ -360,6 +361,17 @@ namespace KillerPDF
         private void ThemeSepulchreRadio_Checked(object sender, RoutedEventArgs e) => SelectTheme(Theme.Sepulchre);
         private void ThemeDeliriumRadio_Checked(object sender, RoutedEventArgs e)  => SelectTheme(Theme.Delirium);
         private void ThemeMalaiseRadio_Checked(object sender, RoutedEventArgs e)   => SelectTheme(Theme.Malaise);
+
+        // Film Grain on or off for every surface (Services/FilmGrain.cs). The flyout stays open,
+        // the same as a theme pick, so the change can be compared straight away.
+        private void FilmGrainCheck_Click(object sender, RoutedEventArgs e)
+        {
+            bool wasOpen = ThemeFlyout is not null && ThemeFlyout.IsOpen;
+            FilmGrain.Set(FilmGrainCheck.IsChecked == true);
+            if (wasOpen)
+                Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background,
+                    (Action)(() => { if (ThemeFlyout is not null && !ThemeFlyout.IsOpen) ThemeFlyout.IsOpen = true; }));
+        }
 
         private void SelectTheme(Theme theme)
         {
