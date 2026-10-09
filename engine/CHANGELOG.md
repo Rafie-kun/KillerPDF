@@ -111,7 +111,7 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 ### Fixed
 
 - Improved fractional text placement with finer glyph-mask origins and bounded reuse of glyph geometry.
-- Preserved partially covered spot inks beneath later process and spot overprints, including mixed process and named DeviceN edges.
+- Preserved partially covered spot inks beneath later process and spot overprints, including mixed process and named DeviceN edges and clipped indexed spot images.
 - Corrected clipped JBIG2 region and symbol placement, preserving pixels outside partial bytes for all composition operators and handling disjoint coordinates without overflow.
 - Accepted empty and grayscale form colors when saving edited fields.
 - Restored green checks in Ghent DeviceN gradients by painting both named inks.

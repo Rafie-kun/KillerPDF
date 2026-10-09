@@ -5915,8 +5915,8 @@ public sealed partial class PdfPageRenderer
                         }
                         double clipAlpha = rectangularClips ? 1 : clipCoverage / 255d;
                         if (clipAlpha <= 0) continue;
-                        if ((opaqueInkImage || opaqueRgbSpotImage) && imageSpotName is not null && color.SpotName is not null
-                            && color.ProcessInk is null && clipCoverage < 255 && alpha == 255
+                        if ((opaqueInkImage || opaqueRgbSpotImage) && color.SpotName is not null
+                            && clipCoverage < 255 && alpha == 255
                             && target.Contains(x, y))
                         {
                             int offset = target.Offset(x, y);
