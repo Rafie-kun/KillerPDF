@@ -10,6 +10,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 ### Added
 - Added Ctrl+wheel sizing in the file picker and links from the shortcuts panel to the online guide.
+- Added a Film Grain switch to the theme menu. It is on by default, and turning it off removes the grain texture from every surface.
 
 ### Changed
 - Hovered outline buttons and accent picker pills use gradients outside 98SE, and accent swatches lift on hover.

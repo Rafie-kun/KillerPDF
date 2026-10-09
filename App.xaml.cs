@@ -212,6 +212,7 @@ namespace KillerPDF
             CleanupStaleTemps();
             StartupTrace.Mark("Stale temporary-file cleanup complete");
             ThemeManager.Initialize();
+            FilmGrain.Initialize();   // Services/FilmGrain.cs - after the theme, before any window
             StartupTrace.Mark("Theme initialized");
             // #211: translator test mode - load an external translation file as the language
             // override and re-apply it on every save (see LocaleManager). Documented in
