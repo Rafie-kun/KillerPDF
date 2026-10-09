@@ -13,11 +13,32 @@ public sealed partial class PdfPageRenderer
     private readonly BoundedCache<PdfObject, (PdfColorTransform? Transform, int Bytes)> _colorProfiles;
     private static BoundedCache<PdfObject, (PdfColorTransform? Transform, int Bytes)> CreateColorProfileCache() =>
         new(8, ReferenceEqualityComparer.Instance, 4 * 1024 * 1024, entry => entry.Bytes);
-    private static readonly BoundedCache<string, (byte[] Encoded, byte[] Decoded)> SharedIccBytes =
+    private static readonly BoundedCache<string, SharedIccEntry> SharedIccBytes =
         new(8, maximumWeight: 16 * 1024 * 1024,
             weight: entry => (long)entry.Encoded.Length + entry.Decoded.Length);
     private static readonly Func<double, double, double, Color> IccXyzToDisplay =
         CreateXyzConverter([0.9642, 1, 0.8249]);
+
+    private sealed class SharedIccEntry(byte[] encoded, byte[] decoded)
+    {
+        internal byte[] Encoded { get; } = encoded;
+        internal byte[] Decoded { get; } = decoded;
+        private readonly Lock _sync = new();
+        private WeakReference<PdfIccProfileTransform>? _transform;
+
+        internal PdfIccProfileTransform GetTransform()
+        {
+            lock (_sync)
+            {
+                if (_transform is not null && _transform.TryGetTarget(out var live)) return live;
+                var transform = PdfIccProfileTransform.ReadAvailable(Decoded);
+                // The existing byte budget does not retain parsed tables after their
+                // document/render caches release them. Concurrent live owners can reuse them.
+                _transform = new(transform);
+                return transform;
+            }
+        }
+    }
 
     private (PdfColorTransform? Transform, bool Unavailable) ReadOutputProfile(int renderingIntent)
     {
@@ -132,11 +153,14 @@ public sealed partial class PdfPageRenderer
                         + Convert.ToHexString(SHA256.HashData(stream.EncodedData.Span));
                     if (SharedIccBytes.TryGet(key, out var cached)
                         && stream.EncodedData.Span.SequenceEqual(cached.Encoded))
-                        bytes = cached.Decoded;
+                        return (cached.GetTransform(), cached.Decoded.Length);
                     else
                     {
                         bytes = _document.DecodeStream(stream, 16 * 1024 * 1024);
-                        SharedIccBytes.GetOrAdd(key, _ => (stream.EncodedData.ToArray(), bytes));
+                        cached = SharedIccBytes.GetOrAdd(key,
+                            _ => new(stream.EncodedData.ToArray(), bytes));
+                        if (stream.EncodedData.Span.SequenceEqual(cached.Encoded))
+                            return (cached.GetTransform(), cached.Decoded.Length);
                     }
                 }
                 else bytes = _document.DecodeStream(stream, 16 * 1024 * 1024);

@@ -12,6 +12,43 @@ namespace KillerPdf.Engine.Tests.Rendering;
 
 public sealed class PdfIccProfileTransformTests
 {
+    [Fact]
+    public void SeparateDocumentsReuseLiveCompressedIccTransforms()
+    {
+        var options = new PdfRenderOptions(6, 7) { CacheResult = false, MaximumParallelism = 1 };
+        var firstRenderer = new PdfPageRenderer(SharedProfileDocument(true));
+        var first = firstRenderer.Render(0, options);
+        Assert.Empty(first.Diagnostics);
+        for (int documentIndex = 0; documentIndex < 6; documentIndex++)
+        {
+            var document = SharedProfileDocument(true);
+            long before = GC.GetAllocatedBytesForCurrentThread();
+            var page = new PdfPageRenderer(document).Render(0, options);
+            long allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+            Assert.True(first.Pixels.Span.SequenceEqual(page.Pixels.Span));
+            Assert.Empty(page.Diagnostics);
+            Assert.True(allocated < 128 * 1024,
+                $"Separate document ICC render allocated {allocated} bytes.");
+        }
+        GC.KeepAlive(firstRenderer);
+    }
+
+    [Fact]
+    public void SeparateDocumentsReuseCompressedIccTransformsConcurrently()
+    {
+        var documents = Enumerable.Range(0, 16).Select(_ => SharedProfileDocument(true)).ToArray();
+        var firstRenderer = new PdfPageRenderer(documents[0]);
+        byte[] expected = firstRenderer.Render(0, new PdfRenderOptions(6, 7)).Pixels.ToArray();
+        Parallel.For(0, documents.Length, index =>
+        {
+            var page = new PdfPageRenderer(documents[index]).Render(0,
+                new PdfRenderOptions(6, 7) { CacheResult = false, MaximumParallelism = 1 });
+            Assert.Equal(expected, page.Pixels.ToArray());
+            Assert.Empty(page.Diagnostics);
+        });
+        GC.KeepAlive(firstRenderer);
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
