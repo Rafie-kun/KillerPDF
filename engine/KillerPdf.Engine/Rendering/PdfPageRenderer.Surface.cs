@@ -642,13 +642,25 @@ public sealed partial class PdfPageRenderer
         {
             byte[] baseInk = _spotBaseInk!;
             uint spotInk = color.SpotTint <= 0 ? 0 : color.SpotInk ?? sourceInk;
+            uint processMask = 0;
+            if (color.ProcessInk is not null)
+                for (int channel = 0; channel < 4; channel++)
+                    if ((color.SpotProcessMask & (1 << channel)) != 0)
+                        processMask |= 0xffu << (channel * 8);
+            uint processInk = (color.ProcessInk ?? 0) & processMask;
             if (!overprint)
             {
-                WriteInk(baseInk, offset, BlendCoverageInk(0, ReadInk(baseInk, offset), coverage));
+                WriteInk(baseInk, offset, BlendCoverageInk(processInk, ReadInk(baseInk, offset), coverage));
                 foreach (byte[] existing in _spotPlateValues)
                     if (!ReferenceEquals(existing, plate)
                         && !ReferenceEquals(existing, additionalPlate))
                         WriteInk(existing, offset, BlendCoverageInk(0, ReadInk(existing, offset), coverage));
+            }
+            else if (processMask != 0)
+            {
+                uint backdrop = ReadInk(baseInk, offset);
+                uint blended = BlendCoverageInk(processInk, backdrop, coverage);
+                WriteInk(baseInk, offset, backdrop & ~processMask | blended & processMask);
             }
             WriteInk(plate, offset, BlendCoverageInk(spotInk, ReadInk(plate, offset), coverage));
             if (additionalPlate is not null)

@@ -1592,8 +1592,7 @@ public sealed partial class PdfPageRenderer
                 }
                 if (cover != 0)
                 {
-                    if (paint.ProcessInk is null && pixels.Alpha(offset) == 255
-                        && pixels.CanPaintSpot(offset))
+                    if (pixels.Alpha(offset) == 255 && pixels.CanPaintSpot(offset))
                     {
                         if (prepared is null)
                         {
