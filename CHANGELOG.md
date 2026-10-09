@@ -101,6 +101,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Preserved annotations during normal saves when cached page dimensions are unavailable.
 - Prevented parallel PNG exports from intermittently losing pages when the system encoder lookup raced.
 - Saved completed forms in PDFs with empty creation dates and unlisted fields.
+- Included current form field edits in print previews and output without requiring a save and reopen.
 - Preserved annotation position and orientation when saving PDFs whose page content leaves a transform active.
 - Kept drawings and signatures aligned when saving or printing cropped pages (#418).
 - Preserved Hebrew letter order when saving text placed on a PDF (#435).
@@ -204,7 +205,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 ## [1.8.81] - Unreleased
 
-1.8.81 improves responsiveness, color selection, updates, and interface consistency.
+1.8.81 improves responsiveness, form printing, color selection, updates, and interface consistency.
 
 ### Added
 - Added Ctrl+wheel sizing in the file picker and links from the shortcuts panel to the online guide.
@@ -215,6 +216,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 ### Fixed
 - Prevented zero-height 98SE annotation bars from repeatedly retrying layout and blocking input.
 - Prevented the color picker from crashing when changing stamp or annotation colors with gradient themes (#442, #443).
+- Included current form field edits in print previews and output without requiring a save and reopen.
 - Kept update helpers and setup from locking the installation folder through their working directory (#434).
 - Kept app icons sharp at fractional display DPI and app zoom.
 - Corrected Vietnamese website translations and theme look counts.
