@@ -82,6 +82,7 @@ public sealed partial class PdfPageRenderer
         internal readonly BoundedCache<PdfGlyphOutline, IReadOnlyList<Point[]>> GlyphPathCache;
         internal readonly BoundedCache<ImageCacheKey, DecodedImage> ImageCache;
         internal readonly BoundedCache<GlyphMaskKey, GlyphMask?> GlyphMaskCache;
+        internal readonly BoundedCache<GlyphMaskKey, GlyphGeometry?> GlyphGeometryCache;
         internal readonly BoundedCache<PdfObject, (PdfColorTransform? Transform, int Bytes)> ColorProfileCache;
 
         /// <summary>Creates a fresh shared cache with the engine's default per-cache limits.</summary>
@@ -93,6 +94,7 @@ public sealed partial class PdfPageRenderer
             GlyphPathCache = CreateGlyphPathCache();
             ImageCache = CreateImageCache();
             GlyphMaskCache = CreateGlyphMaskCache();
+            GlyphGeometryCache = CreateGlyphGeometryCache();
             ColorProfileCache = CreateColorProfileCache();
         }
     }
@@ -142,6 +144,7 @@ public sealed partial class PdfPageRenderer
         _glyphPathCache = sharedCache?.GlyphPathCache ?? CreateGlyphPathCache();
         _imageCache = sharedCache?.ImageCache ?? CreateImageCache();
         _glyphMaskCache = sharedCache?.GlyphMaskCache ?? CreateGlyphMaskCache();
+        _glyphGeometryCache = sharedCache?.GlyphGeometryCache ?? CreateGlyphGeometryCache();
         _colorProfiles = sharedCache?.ColorProfileCache ?? CreateColorProfileCache();
     }
 
@@ -8081,6 +8084,11 @@ public sealed partial class PdfPageRenderer
         internal int Count
         {
             get { lock (_sync) return _entries.Count; }
+        }
+
+        internal long Weight
+        {
+            get { lock (_sync) return _currentWeight; }
         }
 
         internal void RemoveAboveWeight(long maximumWeight)
