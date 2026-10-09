@@ -182,7 +182,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Corrected Italian translations (#395). (Thanks @bovirus)
 - Kept the footer page number current during Continuous navigation and scaled footer controls with the interface (#354, #355).
 - Ctrl+wheel changes picker views and icon sizes.
-- Aligned the shortcuts panel and language menu.
+- Aligned the shortcuts panel and language menu, and kept rail flyouts beside their opening buttons with an 8-unit inset from the content edge.
 - Aligned the sidebar divider with the thumbnail edge and restored arrow cursors on window caption controls.
 - Annotation bars now show an aligned hand cursor only over draggable areas.
 - Kept the KillerPDF icon visible on Windows 11 taskbar buttons throughout slower portable launches.
@@ -190,7 +190,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Added installer file details and the installed size in Windows' program list (#361).
 - The portable package reports a start failure in a KillerPDF-styled dialog instead of a plain Windows message box.
 - The Document Info text menu now follows the active theme.
-- Corrected theme colors, wordmarks, footers and dialog controls, including Light/Yellow, 98SE Red and cream Blood, Greed and Cyanotic accents.
+- Corrected theme colors, wordmarks, footers and dialog controls, including Light/Yellow, 98SE Red and cream Blood, Greed and Cyanotic accents. Added a shadow to the PDF accent in the Light/Yellow wordmark.
 - Standalone uninstall dialogs use the default Dark/Green theme, and installation errors use themed dialogs.
 - Main window, dialog, and launcher title bar icons now use sharp size-matched images.
 - Install and uninstall windows now show the film grain and the app icon in the title bar.

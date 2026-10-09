@@ -1398,6 +1398,7 @@
                             <StackPanel.Effect><BlurEffect Radius="2"/></StackPanel.Effect>
                             <TextBlock><Run Text="Killer" FontFamily="{DynamicResource WordmarkFont}" FontSize="{DynamicResource TitleWordmarkSize}" Foreground="#D8000000"/><Run Text="PDF" FontFamily="{DynamicResource WordmarkFontPdf}" FontWeight="Bold" FontSize="{DynamicResource TitleWordmarkBoldSize}" Foreground="#D8000000"/></TextBlock>
                         </StackPanel>
+                        <TextBlock Margin="1,2,0,0" Opacity="{DynamicResource WordmarkAccentShadowOpacity}" IsHitTestVisible="False"><TextBlock.Effect><BlurEffect Radius="3"/></TextBlock.Effect><Run Text="Killer" FontFamily="{DynamicResource WordmarkFont}" FontSize="{DynamicResource TitleWordmarkSize}" Foreground="Transparent"/><Run Text="PDF" FontFamily="{DynamicResource WordmarkFontPdf}" FontWeight="Bold" FontSize="{DynamicResource TitleWordmarkBoldSize}" Foreground="#D8000000"/></TextBlock>
                         <StackPanel Orientation="Horizontal">
                             <TextBlock><Run Text="Killer" FontFamily="{DynamicResource WordmarkFont}" FontSize="{DynamicResource TitleWordmarkSize}" Foreground="{DynamicResource TextBrush}"/><Run Text="PDF" FontFamily="{DynamicResource WordmarkFontPdf}" FontWeight="Bold" FontSize="{DynamicResource TitleWordmarkBoldSize}" Foreground="{DynamicResource AccentLogo}"/></TextBlock>
                         </StackPanel>
@@ -2021,7 +2022,7 @@
                                  ? / language / theme - the three universal buttons, theme bottom-most, so
                                  muscle memory carries across the apps. Flyouts follow the family standard:
                                  ContextMenus with FlyoutCard/FlyoutGrain chrome, opened against the content
-                                 pane's bottom-left corner by FlyoutPlacement (Shell/RailFlyouts.cs). -->
+                                 pane's rail-adjacent edge at the opening button's height (Shell/RailFlyouts.cs). -->
                             <Button Click="ShortcutHelp_Click"
                                     Cursor="Hand" FocusVisualStyle="{x:Null}"
                                     ToolTip="{DynamicResource Str_TT_KeyboardShortcuts}"
@@ -3216,6 +3217,7 @@
                                            Opacity="{DynamicResource WordmarkShadowOpacity}">
                                     <TextBlock.Effect><BlurEffect Radius="2"/></TextBlock.Effect>
                                 </TextBlock>
+                                <TextBlock FontFamily="{DynamicResource WordmarkFont}" FontSize="22" FontWeight="Bold" Margin="1,2,0,0" IsHitTestVisible="False" Opacity="{DynamicResource WordmarkAccentShadowOpacity}"><TextBlock.Effect><BlurEffect Radius="3"/></TextBlock.Effect><Run Text="Killer" FontFamily="{DynamicResource WordmarkFont}" FontSize="21" FontWeight="Normal" Foreground="Transparent"/><Run Text="PDF" FontFamily="{DynamicResource WordmarkFontPdf}" FontSize="27.3" Foreground="#D8000000"/></TextBlock>
                                 <TextBlock x:Name="AboutLogoBlock"
                                            FontFamily="{DynamicResource WordmarkFont}" FontSize="22" FontWeight="Bold" Cursor="Hand"/>
                             </Grid>

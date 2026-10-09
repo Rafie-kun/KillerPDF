@@ -10,7 +10,7 @@ namespace KillerPDF
     /// ? / language / theme, theme bottom-most) and their flyouts. The theme and language
     /// pickers live here as
     /// family-standard flyouts: ContextMenus with FlyoutCard/FlyoutGrain chrome, opened against
-    /// the content pane's bottom-left corner via FlyoutPlacement so they never cover the rail,
+    /// the content pane's rail-adjacent edge at the opening button's height so they never cover the rail,
     /// the footer, or the desktop. Their radio/dot sync is SyncPickerState (SettingsPanel.cs).
     /// </summary>
     public partial class MainWindow
@@ -42,12 +42,12 @@ namespace KillerPDF
             SyncPickerState();
 
             // SplitHost is the full document region between the rail and the window edge. Its
-            // rail-adjacent bottom corner is left when the sidebar is left and right when the
+            // rail-adjacent edge is left when the sidebar is left and right when the
             // sidebar is right. Using one viewer pane here stranded the flyouts on the left after
             // the sidebar moved right, and could place them in the middle of a split document.
             if (SplitHost is FrameworkElement pane)
                 FlyoutPlacement.UsePane(pane, _sidebarRight);
-            FlyoutPlacement.Attach(menu, this);
+            FlyoutPlacement.AttachAtButtonHeight(menu, menu == LangFlyout ? RailLangBtn : RailThemeBtn);
 
             menu.IsOpen = true;
             // 150ms ease-out, the family fade (the flyout template replaces the implicit
