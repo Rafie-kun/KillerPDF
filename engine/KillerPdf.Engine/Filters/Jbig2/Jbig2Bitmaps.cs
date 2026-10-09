@@ -5,6 +5,7 @@
 namespace KillerPdf.Engine.Filters.Jbig2
 {
     using System;
+    using System.Numerics;
 
     internal static class Jbig2Bitmaps
     {
@@ -99,60 +100,118 @@ namespace KillerPdf.Engine.Filters.Jbig2
         /// <param name="combinationOperator">The combination operator for combining two pixels.</param>
         public static void Blit(Jbig2Bitmap src, Jbig2Bitmap dst, int x, int y, CombinationOperator combinationOperator)
         {
-            int startLine = 0;
-            int srcStartIdx = 0;
-            int srcEndIdx = src.RowStride - 1;
+            int left = (int)Math.Max(0L, x), top = (int)Math.Max(0L, y);
+            int right = (int)Math.Min(dst.Width, (long)x + src.Width);
+            int bottom = (int)Math.Min(dst.Height, (long)y + src.Height);
+            if (right <= left || bottom <= top) return;
 
-            // Ignore those parts of the source bitmap which would be placed outside the target bitmap.
-            if (x < 0)
+            int firstByte = left >> 3, lastByte = (right - 1) >> 3;
+            byte[] source = src.ByteArray, destination = dst.ByteArray;
+            int sourceRow = (int)((long)top - y) * src.RowStride;
+            int targetRow = top * dst.RowStride;
+            if ((x & 7) == 0)
             {
-                srcStartIdx = -x;
-                x = 0;
+                int sourceStart = (int)(((long)left - x) >> 3);
+                int count = (right - left) >> 3;
+                int tailMask = 0xff << (8 - (right & 7));
+                for (int row = top; row < bottom; row++, sourceRow += src.RowStride,
+                    targetRow += dst.RowStride)
+                {
+                    CombineAligned(source.AsSpan(sourceRow + sourceStart, count),
+                        destination.AsSpan(targetRow + firstByte, count), combinationOperator);
+                    if ((right & 7) == 0) continue;
+                    int offset = targetRow + firstByte + count;
+                    byte oldValue = destination[offset];
+                    byte combined = CombineBytes(oldValue,
+                        source[sourceRow + sourceStart + count], combinationOperator);
+                    destination[offset] = (byte)((oldValue & ~tailMask) | (combined & tailMask));
+                }
+                return;
             }
-            else if (x + src.Width > dst.Width)
+            int interiorCount = Math.Max(0, lastByte - firstByte - 1);
+            int interiorSource = (int)((((long)firstByte + 1) * 8 - x) >> 3);
+            int interiorShift = 8 - (x & 7);
+            for (int row = top; row < bottom; row++, sourceRow += src.RowStride,
+                targetRow += dst.RowStride)
             {
-                srcEndIdx -= src.Width + x - dst.Width;
+                if (interiorCount > 0)
+                    CombineShifted(source.AsSpan(sourceRow + interiorSource, interiorCount + 1),
+                        destination.AsSpan(targetRow + firstByte + 1, interiorCount),
+                        interiorShift, combinationOperator);
+                for (int boundary = 0; boundary < (firstByte == lastByte ? 1 : 2); boundary++)
+                {
+                    int column = boundary == 0 ? firstByte : lastByte;
+                    int start = Math.Max(left, column * 8);
+                    int end = (int)Math.Min(right, ((long)column + 1) * 8);
+                    int sourceX = (int)((long)start - x);
+                    int sourceByte = sourceX >> 3, sourceShift = sourceX & 7;
+                    byte value = (byte)(source[sourceRow + sourceByte] << sourceShift);
+                    if (sourceShift != 0 && sourceByte + 1 < src.RowStride)
+                        value |= (byte)(source[sourceRow + sourceByte + 1] >> (8 - sourceShift));
+                    int targetShift = start & 7;
+                    int mask = (0xff >> targetShift) & (0xff << (8 - targetShift - (end - start)));
+                    int offset = targetRow + column;
+                    byte oldValue = destination[offset];
+                    byte combined = CombineBytes(oldValue, (byte)(value >> targetShift), combinationOperator);
+                    // Only declared source pixels participate. Keep destination pixels and
+                    // row padding outside the clipped rectangle for every logical operator.
+                    destination[offset] = (byte)((oldValue & ~mask) | (combined & mask));
+                }
             }
+        }
 
-            if (y < 0)
+        private static void CombineAligned(ReadOnlySpan<byte> source, Span<byte> destination,
+            CombinationOperator op)
+        {
+            if (op is not (CombinationOperator.OR or CombinationOperator.AND
+                or CombinationOperator.XOR or CombinationOperator.XNOR))
             {
-                startLine = -y;
-                y = 0;
-                srcStartIdx += src.RowStride;
-                srcEndIdx += src.RowStride;
+                source.CopyTo(destination);
+                return;
             }
-            else if (y + src.Height > dst.Height)
+            int index = 0;
+            if (Vector.IsHardwareAccelerated)
+                for (; index <= source.Length - Vector<byte>.Count; index += Vector<byte>.Count)
+                {
+                    var incoming = new Vector<byte>(source.Slice(index));
+                    var previous = new Vector<byte>(destination.Slice(index));
+                    var combined = op switch
+                    {
+                        CombinationOperator.OR => previous | incoming,
+                        CombinationOperator.AND => previous & incoming,
+                        CombinationOperator.XOR => previous ^ incoming,
+                        _ => ~(previous ^ incoming)
+                    };
+                    combined.CopyTo(destination.Slice(index));
+                }
+            for (; index < source.Length; index++)
+                destination[index] = CombineBytes(destination[index], source[index], op);
+        }
+
+        private static void CombineShifted(ReadOnlySpan<byte> source, Span<byte> destination,
+            int shift, CombinationOperator op)
+        {
+            int index = 0, downShift = 8 - shift;
+            if (Vector.IsHardwareAccelerated)
+                for (; index <= destination.Length - Vector<byte>.Count; index += Vector<byte>.Count)
+                {
+                    var incoming = (new Vector<byte>(source.Slice(index)) << shift)
+                        | (new Vector<byte>(source.Slice(index + 1)) >> downShift);
+                    var previous = new Vector<byte>(destination.Slice(index));
+                    var combined = op switch
+                    {
+                        CombinationOperator.OR => previous | incoming,
+                        CombinationOperator.AND => previous & incoming,
+                        CombinationOperator.XOR => previous ^ incoming,
+                        CombinationOperator.XNOR => ~(previous ^ incoming),
+                        _ => incoming
+                    };
+                    combined.CopyTo(destination.Slice(index));
+                }
+            for (; index < destination.Length; index++)
             {
-                startLine = src.Height + y - dst.Height;
-            }
-
-            int shiftVal1 = x & 0x07;
-            int shiftVal2 = 8 - shiftVal1;
-
-            int padding = src.Width & 0x07;
-            int toShift = shiftVal2 - padding;
-
-            bool useShift = (shiftVal2 & 0x07) != 0;
-            bool specialCase = src.Width <= (srcEndIdx - srcStartIdx << 3) + shiftVal2;
-
-            int dstStartIdx = dst.GetByteIndex(x, y);
-
-            int lastLine = Math.Min(src.Height, startLine + dst.Height);
-
-            if (!useShift)
-            {
-                BlitUnshifted(src, dst, startLine, lastLine, dstStartIdx, srcStartIdx, srcEndIdx,
-                        combinationOperator);
-            }
-            else if (specialCase)
-            {
-                BlitSpecialShifted(src, dst, startLine, lastLine, dstStartIdx, srcStartIdx, srcEndIdx,
-                        toShift, shiftVal1, shiftVal2, combinationOperator);
-            }
-            else
-            {
-                BlitShifted(src, dst, startLine, lastLine, dstStartIdx, srcStartIdx, srcEndIdx, toShift,
-                        shiftVal1, shiftVal2, combinationOperator, padding);
+                byte incoming = (byte)((source[index] << shift) | (source[index + 1] >> downShift));
+                destination[index] = CombineBytes(destination[index], incoming, op);
             }
         }
 
@@ -200,87 +259,5 @@ namespace KillerPdf.Engine.Filters.Jbig2
             return (byte)(value >> padding << padding);
         }
 
-        private static void BlitUnshifted(Jbig2Bitmap src, Jbig2Bitmap dst, int startLine, int lastLine,
-                int dstStartIdx, int srcStartIdx, int srcEndIdx, CombinationOperator op)
-        {
-            for (int dstLine = startLine; dstLine < lastLine; dstLine++, dstStartIdx += dst
-                    .RowStride, srcStartIdx += src.RowStride, srcEndIdx += src.RowStride)
-            {
-                int dstIdx = dstStartIdx;
-
-                // Go through the bytes in a line of the Symbol
-                for (int srcIdx = srcStartIdx; srcIdx <= srcEndIdx; srcIdx++)
-                {
-                    byte oldByte = dst.GetByte(dstIdx);
-                    byte newByte = src.GetByte(srcIdx);
-                    dst.SetByte(dstIdx++, CombineBytes(oldByte, newByte, op));
-                }
-            }
-        }
-
-        private static void BlitSpecialShifted(Jbig2Bitmap src, Jbig2Bitmap dst, int startLine, int lastLine,
-                int dstStartIdx, int srcStartIdx, int srcEndIdx, int toShift, int shiftVal1,
-                int shiftVal2, CombinationOperator op)
-        {
-            for (int dstLine = startLine; dstLine < lastLine; dstLine++, dstStartIdx += dst.RowStride,
-                 srcStartIdx += src.RowStride, srcEndIdx += src.RowStride)
-            {
-                short register = 0;
-                int dstIdx = dstStartIdx;
-
-                // Go through the bytes in a line of the Symbol
-                for (int srcIdx = srcStartIdx; srcIdx <= srcEndIdx; srcIdx++)
-                {
-                    byte oldByte = dst.GetByte(dstIdx);
-                    register = (short)(((int)register | src.GetByteAsInteger(srcIdx)) << shiftVal2);
-                    byte newByte = (byte)(register >> 8);
-
-                    if (srcIdx == srcEndIdx)
-                    {
-                        newByte = Unpad(toShift, newByte);
-                    }
-
-                    dst.SetByte(dstIdx++, CombineBytes(oldByte, newByte, op));
-                    register <<= shiftVal1;
-                }
-            }
-        }
-
-        private static void BlitShifted(Jbig2Bitmap src, Jbig2Bitmap dst, int startLine, int lastLine,
-                int dstStartIdx, int srcStartIdx, int srcEndIdx, int toShift, int shiftVal1,
-                int shiftVal2, CombinationOperator op, int padding)
-        {
-            for (int dstLine = startLine; dstLine < lastLine; dstLine++, dstStartIdx += dst.RowStride,
-                 srcStartIdx += src.RowStride, srcEndIdx += src.RowStride)
-            {
-                short register = 0;
-                int dstIdx = dstStartIdx;
-
-                // Go through the bytes in a line of the symbol
-                for (int srcIdx = srcStartIdx; srcIdx <= srcEndIdx; srcIdx++)
-                {
-                    byte oldByte = dst.GetByte(dstIdx);
-                    register = (short)(((int)register | src.GetByteAsInteger(srcIdx)) << shiftVal2);
-
-                    byte newByte = (byte)(register >> 8);
-                    dst.SetByte(dstIdx++, CombineBytes(oldByte, newByte, op));
-
-                    register <<= shiftVal1;
-
-                    if (srcIdx == srcEndIdx)
-                    {
-                        newByte = (byte)(register >> 8 - shiftVal2);
-
-                        if (padding != 0)
-                        {
-                            newByte = Unpad(8 + toShift, newByte);
-                        }
-
-                        oldByte = dst.GetByte(dstIdx);
-                        dst.SetByte(dstIdx, CombineBytes(oldByte, newByte, op));
-                    }
-                }
-            }
-        }
     }
 }
