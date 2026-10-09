@@ -1975,6 +1975,7 @@ public sealed partial class PdfPageRenderer
                             bool maskIntersects = softMask is not null && left < softMask.FullRight
                                 && right > softMask.FullLeft && top < softMask.FullBottom && bottom > softMask.FullTop;
                             byte[]? maskSamples = maskIntersects ? softMask!.Samples : null;
+                            int[]? maskRowOffsets = maskIntersects ? softMask!.RowOffsets : null;
                             int maskLeft = maskIntersects ? softMask!.Left : 0, maskTop = maskIntersects ? softMask!.Top : 0;
                             int maskWidth = maskIntersects ? softMask!.Width : 0, maskHeight = maskIntersects ? softMask!.Height : 0;
                             byte maskConstant = maskIntersects ? softMask!.Constant : (byte)0, maskOutside = softMask?.Outside ?? 0;
@@ -1986,7 +1987,9 @@ public sealed partial class PdfPageRenderer
                                 int groupRow = maskedGroupPixels.Offset(left, y);
                                 bool maskRowInside = softMask is not null
                                     && (uint)(y - maskTop) < (uint)maskHeight;
-                                int maskRow = maskRowInside ? (y - maskTop) * maskWidth - maskLeft : 0;
+                                int maskRow = maskRowInside
+                                    ? (maskRowOffsets is null ? (y - maskTop) * maskWidth : maskRowOffsets[y - maskTop]) - maskLeft
+                                    : 0;
                                 for (int x = left; x < right; x++)
                                 {
                                     int maskSample = softMask is null ? 255
@@ -7594,8 +7597,9 @@ public sealed partial class PdfPageRenderer
         // Replaced as a whole so concurrent readers always see one consistent region.
         private volatile Region? _region;
 
-        private sealed record Region(byte[]? Samples, int Left, int Top, int Width, int Height, byte Constant)
+        private sealed record Region(byte[]? Samples, int[]? RowOffsets, int Left, int Top, int Width, int Height, byte Constant)
         {
+            internal int RowOffset(int row) => RowOffsets is null ? row * Width : RowOffsets[row];
             internal bool Covers(int left, int top, int right, int bottom) =>
                 left >= Left && top >= Top && right <= Left + Width && bottom <= Top + Height;
         }
@@ -7617,8 +7621,9 @@ public sealed partial class PdfPageRenderer
         internal int FullBottom { get; }
         /// <summary>The value of every pixel outside the full bounds.</summary>
         internal byte Outside { get; }
-        /// <summary>Materialized samples, or null when the region is uniformly <see cref="Constant"/>.</summary>
+        /// <summary>Stored sample rows, or null when the region is uniformly <see cref="Constant"/>.</summary>
         internal byte[]? Samples => Materialized.Samples;
+        internal int[]? RowOffsets => Materialized.RowOffsets;
         internal int Left => Materialized.Left;
         internal int Top => Materialized.Top;
         internal int Width => Materialized.Width;
@@ -7634,7 +7639,7 @@ public sealed partial class PdfPageRenderer
             if ((uint)(x - region.Left) >= (uint)region.Width || (uint)(y - region.Top) >= (uint)region.Height)
                 region = Materialize(FullLeft, FullTop, FullRight, FullBottom);
             return region.Samples is null ? region.Constant
-                : region.Samples[(y - region.Top) * region.Width + x - region.Left];
+                : region.Samples[region.RowOffset(y - region.Top) + x - region.Left];
         }
 
         /// <summary>
@@ -7673,7 +7678,7 @@ public sealed partial class PdfPageRenderer
             for (int y = top; y < bottom; y++)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                int row = (y - region.Top) * region.Width - region.Left;
+                int row = region.RowOffset(y - region.Top) - region.Left;
                 ReadOnlySpan<byte> values = samples.AsSpan(row + left, right - left);
                 int first = values.IndexOfAnyExcept((byte)0);
                 if (first < 0) continue;
@@ -7697,20 +7702,24 @@ public sealed partial class PdfPageRenderer
                     if (existing.Covers(left, top, right, bottom)) return existing;
                     (left, top, right, bottom) = (FullLeft, FullTop, FullRight, FullBottom);
                 }
-                (byte[]? samples, byte constant) = RenderBounded(left, top, right, bottom);
-                var region = new Region(samples, left, top, right - left, bottom - top, constant);
+                Region region = RenderBounded(left, top, right, bottom);
                 _region = region;
                 return region;
             }
         }
 
-        private (byte[]? Samples, byte Constant) RenderBounded(
+        private Region RenderBounded(
             int left, int top, int right, int bottom)
         {
             int width = right - left;
             int height = bottom - top;
             if ((long)width * height <= MaximumRenderTilePixels)
-                return _render(left, top, right, bottom);
+            {
+                (byte[]? samples, byte constant) = _render(left, top, right, bottom);
+                return new Region(samples, null, left, top, width, height, constant);
+            }
+            if (width <= MaximumTransparencyTileWidth)
+                return RenderRowTiles(left, top, right, bottom);
 
             int tileWidth = Math.Min(width, MaximumTransparencyTileWidth);
             int tileHeight = Math.Max(1, MaximumRenderTilePixels / tileWidth);
@@ -7750,7 +7759,83 @@ public sealed partial class PdfPageRenderer
                     }
                 }
             }
-            return (combined, first);
+            return new Region(combined, null, left, top, width, height, first);
+        }
+
+        private Region RenderRowTiles(int left, int top, int right, int bottom)
+        {
+            int width = right - left, height = bottom - top;
+            int tileHeight = Math.Max(1, MaximumRenderTilePixels / width);
+            // Limit stored row runs to one sixteenth of the height before falling back.
+            int maximumRuns = Math.Max(1, height / 16);
+            byte[]? compact = null, flat = null;
+            int[]? rowOffsets = null;
+            int runs = 0;
+            byte first = 0;
+            for (int tileTop = top; tileTop < bottom; tileTop += tileHeight)
+            {
+                int tileBottom = Math.Min(bottom, tileTop + tileHeight);
+                (byte[]? samples, byte constant) = _render(left, tileTop, right, tileBottom);
+                if (tileTop == top) first = samples is null ? constant : samples[0];
+                for (int row = 0; row < tileBottom - tileTop; row++)
+                {
+                    int logicalRow = tileTop - top + row;
+                    ReadOnlySpan<byte> values = samples is null ? [] : samples.AsSpan(row * width, width);
+                    if (flat is not null)
+                    {
+                        Span<byte> target = flat.AsSpan(logicalRow * width, width);
+                        if (samples is null) target.Fill(constant);
+                        else values.CopyTo(target);
+                        continue;
+                    }
+                    if (compact is null)
+                    {
+                        if (samples is null ? constant == first : values.IndexOfAnyExcept(first) < 0) continue;
+                        compact = GC.AllocateUninitializedArray<byte>(checked(Math.Min(4, maximumRuns) * width));
+                        rowOffsets = new int[height];
+                        if (logicalRow > 0)
+                        {
+                            compact.AsSpan(0, width).Fill(first);
+                            runs = 1;
+                        }
+                    }
+                    if (runs > 0)
+                    {
+                        int previous = (runs - 1) * width;
+                        ReadOnlySpan<byte> stored = compact.AsSpan(previous, width);
+                        if (samples is null ? stored.IndexOfAnyExcept(constant) < 0 : stored.SequenceEqual(values))
+                        {
+                            rowOffsets![logicalRow] = previous;
+                            continue;
+                        }
+                    }
+                    if (runs == maximumRuns)
+                    {
+                        flat = GC.AllocateUninitializedArray<byte>(checked(width * height));
+                        for (int previousRow = 0; previousRow < logicalRow; previousRow++)
+                            compact.AsSpan(rowOffsets![previousRow], width).CopyTo(flat.AsSpan(previousRow * width, width));
+                        Span<byte> target = flat.AsSpan(logicalRow * width, width);
+                        if (samples is null) target.Fill(constant);
+                        else values.CopyTo(target);
+                        compact = null;
+                        rowOffsets = null;
+                        continue;
+                    }
+                    if ((runs + 1) * width > compact.Length)
+                    {
+                        byte[] grown = GC.AllocateUninitializedArray<byte>(checked(Math.Min(maximumRuns, compact.Length / width * 2) * width));
+                        compact.AsSpan(0, runs * width).CopyTo(grown);
+                        compact = grown;
+                    }
+                    int offset = runs * width;
+                    Span<byte> next = compact.AsSpan(offset, width);
+                    if (samples is null) next.Fill(constant);
+                    else values.CopyTo(next);
+                    rowOffsets![logicalRow] = offset;
+                    runs++;
+                }
+            }
+            return new Region(flat ?? compact, rowOffsets, left, top, width, height, first);
         }
     }
     private sealed class KnockoutState
