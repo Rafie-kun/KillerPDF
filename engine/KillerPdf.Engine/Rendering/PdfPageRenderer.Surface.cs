@@ -427,14 +427,55 @@ public sealed partial class PdfPageRenderer
             lock (_spotSync)
             {
                 if (_rgbSpotValid![offset / 4] == 0) return false;
-                uint combined = ComposedSpotInk(offset);
-                WriteInk(_spotBaseInk!, offset, coverage is int cover
-                    ? BlendCoverageInk(ink, combined, cover)
-                    : BlendOpaqueInk(ink, combined, opacity, 1));
-                foreach (byte[] plate in _spotPlateValues) WriteInk(plate, offset, 0);
-                ComposeSpotPixel(offset);
+                bool namedInk = false;
+                foreach (byte[] plate in _spotPlateValues)
+                    namedInk |= ReadInk(plate, offset) != 0;
+                BlendProcessKnockoutKeepingSpotIdentity(offset, ink, opacity, coverage, namedInk);
+                if (!namedInk)
+                {
+                    // Keep RGB edge arithmetic where no named ink is being knocked
+                    // out, while retaining process state for a later spot paint.
+                    if (coverage is int cover)
+                    {
+                        int inverse = 255 - cover;
+                        Data[offset] = (byte)((color.Blue * cover + Data[offset] * inverse + 127) / 255);
+                        Data[offset + 1] = (byte)((color.Green * cover + Data[offset + 1] * inverse + 127) / 255);
+                        Data[offset + 2] = (byte)((color.Red * cover + Data[offset + 2] * inverse + 127) / 255);
+                    }
+                    else SetRgbPixel(this, offset, color, opacity, RendererBlendMode.Normal);
+                }
                 return true;
             }
+        }
+
+        internal bool TryBlendProcessKnockoutKeepingSpots(int offset, uint sourceInk, double opacity)
+        {
+            if (_spotBaseInk is null) return false;
+            lock (_spotSync)
+            {
+                if (_spotBaseInk is null) return false;
+                BlendProcessKnockoutKeepingSpotIdentity(offset, sourceInk, opacity);
+                return true;
+            }
+        }
+
+        private void BlendProcessKnockoutKeepingSpotIdentity(int offset, uint sourceInk,
+            double opacity, int? coverage = null, bool compose = true)
+        {
+            // Knock out only the covered part of each named plate. Flattening its
+            // remaining ink into process channels loses it on the next overprint.
+            uint process = ReadInk(_spotBaseInk!, offset);
+            WriteInk(_spotBaseInk!, offset, coverage is int cover
+                ? BlendCoverageInk(sourceInk, process, cover)
+                : BlendOpaqueInk(sourceInk, process, opacity, 1));
+            foreach (byte[] plate in _spotPlateValues)
+            {
+                uint previous = ReadInk(plate, offset);
+                WriteInk(plate, offset, coverage is int plateCover
+                    ? BlendCoverageInk(0, previous, plateCover)
+                    : BlendOpaqueInk(0, previous, opacity, 1));
+            }
+            if (compose) ComposeSpotPixel(offset);
         }
 
         internal bool TryPaintRgbSpot(int offset, in Color color, bool overprint, uint sourceInk)

@@ -111,14 +111,16 @@ public sealed class PdfOverprintTests
     }
 
     [Fact]
-    public void DefaultRgbSurface_VectorOnlySpotPageKeepsPriorRendering()
+    public void DefaultRgbSurface_VectorSpotRepaintPreservesDeclaredProcessInk()
     {
         PdfRenderedPage rendered = RenderRgbSpotShadow(withSpots: true);
+        PdfRenderedPage native = RenderRgbSpotShadow(withSpots: true, nativeCmyk: true);
         PdfRenderedPage control = RenderRgbSpotShadow(withSpots: false);
         int firstSpot = (4 * 8 + 3) * 4;
         int repaintedSpot = (4 * 8 + 4) * 4;
 
         Assert.Empty(rendered.Diagnostics);
+        Assert.Empty(native.Diagnostics);
         Assert.Empty(control.Diagnostics);
         for (int y = 0; y < 8; y++)
             for (int x = 0; x < 2; x++)
@@ -131,7 +133,11 @@ public sealed class PdfOverprintTests
             }
         Assert.Equal(PdfDeviceCmykTests.RenderInk(255, 0, 255, 64),
             rendered.Pixels.Span[firstSpot..(firstSpot + 4)].ToArray());
-        Assert.Equal(new byte[] { 156, 202, 128, 255 },
+        // The second green tint replaces the same named plate, while the declared
+        // quarter-strength process black remains just as it does for spot images.
+        Assert.Equal(PdfDeviceCmykTests.RenderInk(128, 0, 128, 64),
+            rendered.Pixels.Span[repaintedSpot..(repaintedSpot + 4)].ToArray());
+        Assert.Equal(native.Pixels.Span[repaintedSpot..(repaintedSpot + 4)].ToArray(),
             rendered.Pixels.Span[repaintedSpot..(repaintedSpot + 4)].ToArray());
     }
 

@@ -2379,25 +2379,29 @@ public sealed partial class PdfPageRenderer
             || (resources.TryGetValue(Name("ColorSpace"), out PdfObject? colorSpaceValue)
                 && Resolve(colorSpaceValue) is PdfDictionary colorSpaces
                 && colorSpaces.TryGetValue(Name("DefaultCMYK"), out _))
-            || !resources.TryGetValue(Name("XObject"), out PdfObject? xObjectValue)
-            || Resolve(xObjectValue) is not PdfDictionary xObjects
             || !resources.TryGetValue(Name("ExtGState"), out PdfObject? stateValue)
             || Resolve(stateValue) is not PdfDictionary states) return false;
 
         var namedImages = new HashSet<PdfName>();
-        foreach (KeyValuePair<PdfName, PdfObject> entry in xObjects)
+        PdfDictionary? xObjects = null;
+        if (resources.TryGetValue(Name("XObject"), out PdfObject? xObjectValue))
         {
-            if (Resolve(entry.Value) is not PdfStream image
-                || !IsName(image.Dictionary, "Subtype", "Image")
-                || image.Dictionary.TryGetValue(Name("ImageMask"), out _)
-                || image.Dictionary.TryGetValue(Name("Mask"), out _)
-                || image.Dictionary.TryGetValue(Name("SMask"), out _)
-                || !image.Dictionary.TryGetValue(Name("ColorSpace"), out PdfObject? space)
-                || !TryRgbSpotImageColorSpace(space, resources, 0, out bool named)) return false;
-            if (named) namedImages.Add(entry.Key);
+            if (Resolve(xObjectValue) is not PdfDictionary images) return false;
+            xObjects = images;
+            foreach (KeyValuePair<PdfName, PdfObject> entry in images)
+            {
+                if (Resolve(entry.Value) is not PdfStream image
+                    || !IsName(image.Dictionary, "Subtype", "Image")
+                    || image.Dictionary.TryGetValue(Name("ImageMask"), out _)
+                    || image.Dictionary.TryGetValue(Name("Mask"), out _)
+                    || image.Dictionary.TryGetValue(Name("SMask"), out _)
+                    || !image.Dictionary.TryGetValue(Name("ColorSpace"), out PdfObject? space)
+                    || !TryRgbSpotImageColorSpace(space, resources, 0, out bool named)) return false;
+                if (named) namedImages.Add(entry.Key);
+            }
         }
-        if (namedImages.Count == 0) return false;
 
+        bool imageCompatible = true, vectorCompatible = true;
         foreach (KeyValuePair<PdfName, PdfObject> entry in states)
         {
             if (Resolve(entry.Value) is not PdfDictionary settings) return false;
@@ -2413,7 +2417,10 @@ public sealed partial class PdfPageRenderer
             {
                 if (!settings.TryGetValue(Name(key), out PdfObject? alpha)) continue;
                 PdfObject resolved = Resolve(alpha);
-                if (resolved is not PdfInteger and not PdfReal || Number(resolved) != 1) return false;
+                double value = Number(resolved);
+                if (resolved is not PdfInteger and not PdfReal || !double.IsFinite(value)
+                    || value < 0 || value > 1) return false;
+                imageCompatible &= value == 1;
             }
         }
 
@@ -2421,17 +2428,25 @@ public sealed partial class PdfPageRenderer
             cancellationToken);
         if (instructions is not IReadOnlyList<PdfContentInstruction>) return false;
 
-        bool fillOverprint = false, namedImageOverprint = false;
-        var savedOverprint = new Stack<bool>();
+        bool fillOverprint = false, strokeOverprint = false, namedImageOverprint = false;
+        bool namedFill = false, namedStroke = false, namedPaint = false, overprintedPaint = false;
+        bool fillInk = false, strokeInk = false;
+        double fillAlpha = 1, strokeAlpha = 1;
+        var saved = new Stack<(bool FillOverprint, bool StrokeOverprint,
+            bool NamedFill, bool NamedStroke, bool FillInk, bool StrokeInk,
+            double FillAlpha, double StrokeAlpha)>();
         foreach (PdfContentInstruction instruction in instructions)
         {
             switch (instruction.Operator)
             {
                 case "q":
-                    savedOverprint.Push(fillOverprint);
+                    saved.Push((fillOverprint, strokeOverprint, namedFill, namedStroke,
+                        fillInk, strokeInk, fillAlpha, strokeAlpha));
                     break;
                 case "Q":
-                    if (!savedOverprint.TryPop(out fillOverprint)) return false;
+                    if (!saved.TryPop(out var previous)) return false;
+                    (fillOverprint, strokeOverprint, namedFill, namedStroke,
+                        fillInk, strokeInk, fillAlpha, strokeAlpha) = previous;
                     break;
                 case "gs":
                     if (instruction.Operands.Count != 1 || instruction.Operands[0] is not PdfName stateName
@@ -2440,24 +2455,73 @@ public sealed partial class PdfPageRenderer
                     if (settings.TryGetValue(Name("OP"), out PdfObject? strokeValue))
                     {
                         if (Resolve(strokeValue) is not PdfBoolean stroke) return false;
-                        fillOverprint = stroke.Value;
+                        fillOverprint = strokeOverprint = stroke.Value;
                     }
                     if (settings.TryGetValue(Name("op"), out PdfObject? fillValue))
                     {
                         if (Resolve(fillValue) is not PdfBoolean fill) return false;
                         fillOverprint = fill.Value;
                     }
+                    if (settings.TryGetValue(Name("ca"), out PdfObject? fillOpacity))
+                        fillAlpha = Number(Resolve(fillOpacity));
+                    if (settings.TryGetValue(Name("CA"), out PdfObject? strokeOpacity))
+                        strokeAlpha = Number(Resolve(strokeOpacity));
+                    break;
+                case "cs":
+                case "CS":
+                    if (instruction.Operands.Count != 1 || instruction.Operands[0] is not PdfName paintSpace)
+                    {
+                        vectorCompatible = false;
+                        break;
+                    }
+                    bool namedColor = false;
+                    bool inkColor = paintSpace.ValueAsLatin1() == "DeviceCMYK"
+                        || TryRgbSpotImageColorSpace(paintSpace, resources, 0, out namedColor);
+                    if (!inkColor && paintSpace.ValueAsLatin1() is not ("DeviceGray" or "DeviceRGB"))
+                        vectorCompatible = false;
+                    if (instruction.Operator == "cs") (namedFill, fillInk) = (namedColor, inkColor);
+                    else (namedStroke, strokeInk) = (namedColor, inkColor);
+                    break;
+                case "g":
+                case "rg":
+                case "k":
+                    namedFill = false;
+                    fillInk = instruction.Operator == "k";
+                    break;
+                case "G":
+                case "RG":
+                case "K":
+                    namedStroke = false;
+                    strokeInk = instruction.Operator == "K";
                     break;
                 case "Do":
                     if (instruction.Operands.Count != 1 || instruction.Operands[0] is not PdfName imageName
-                        || !xObjects.TryGetValue(imageName, out _)) return false;
+                        || xObjects is null || !xObjects.TryGetValue(imageName, out _)) return false;
+                    if (namedImages.Contains(imageName) && fillAlpha != 1) return false;
                     namedImageOverprint |= fillOverprint && namedImages.Contains(imageName);
                     break;
                 case "BI":
                     return false;
             }
+            bool fillPaint = instruction.Operator is "f" or "F" or "f*" or "B" or "B*"
+                or "b" or "b*" or "Tj" or "TJ" or "'" or "\"";
+            bool strokePaint = instruction.Operator is "S" or "s" or "B" or "B*" or "b" or "b*";
+            bool textPaint = instruction.Operator is "Tj" or "TJ" or "'" or "\"";
+            // Partial process paints retain named plates. Partial named paints need
+            // their own tint-aware path and remain outside this preflight's scope.
+            if (fillPaint && namedFill && fillAlpha != 1
+                || (strokePaint || textPaint) && namedStroke && strokeAlpha != 1)
+                vectorCompatible = false;
+            // The vector extension models CMYK process and supported named inks.
+            // Other process overprints keep their established RGB rendering path.
+            if (fillPaint && fillOverprint && !fillInk
+                || (strokePaint || textPaint) && strokeOverprint && !strokeInk)
+                vectorCompatible = false;
+            namedPaint |= fillPaint && namedFill || strokePaint && namedStroke;
+            overprintedPaint |= fillPaint && fillOverprint || strokePaint && strokeOverprint;
         }
-        return savedOverprint.Count == 0 && namedImageOverprint;
+        return saved.Count == 0 && (imageCompatible && namedImageOverprint
+            || vectorCompatible && namedPaint && overprintedPaint);
     }
 
     private bool TryRgbSpotImageColorSpace(PdfObject value, PdfDictionary resources, int depth,
@@ -6983,6 +7047,14 @@ public sealed partial class PdfPageRenderer
                 && blendMode is RendererBlendMode.Normal or RendererBlendMode.Compatible
                 && pixels.TryBlendProcessInkKeepingSpots(offset, resolvedInk ?? pixels.GetInk(color), sourceAlpha,
                     (color.OverprintComponents & 16) != 0 ? color.OverprintComponents & 15 : 0))
+                return;
+            if (color.SpotName is null && sourceAlpha > 0 && sourceAlpha < 1
+                && (color.OverprintComponents & ~15) == 0 && pixels.HasSpotPlates
+                && pixels.Alpha(offset) == 255 && knockout is null && graphicsSoftMask is null
+                && pixels.GroupAlpha is null && pixels.GroupShape is null
+                && blendMode is RendererBlendMode.Normal or RendererBlendMode.Compatible
+                && pixels.TryBlendProcessKnockoutKeepingSpots(offset,
+                    resolvedInk ?? pixels.GetInk(color), sourceAlpha))
                 return;
             if (resolvedInk is uint ink)
                 SetInkPixel(pixels, offset, ink, color.OverprintComponents, sourceAlpha, blendMode);
