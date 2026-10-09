@@ -32,7 +32,7 @@ public sealed class PdfFillGeometryTests
         MethodInfo convert = frameType.GetMethod("ToPixels", members, null,
             [pathsInterface, typeof(int)], null)!;
         MethodInfo fill = renderer.GetMethod("RasterizeFill", members, null,
-            [pathsInterface, typeof(bool), frameType, typeof(bool)], null)!;
+            [pathsInterface, typeof(bool), frameType, typeof(bool), typeof((int, int, int, int)?)], null)!;
         MethodInfo reference = renderer.GetMethod("RasterizePolygons", members)!;
         object frame = Activator.CreateInstance(frameType, 96, 80, 0.75, 1.25)!;
 
@@ -58,7 +58,7 @@ public sealed class PdfFillGeometryTests
             var expected = (PdfPageRenderer.CoverageMask)reference.Invoke(null,
                 [pixelPolygons, evenOdd, 96, 80, false, null])!;
             var actual = (PdfPageRenderer.CoverageMask)fill.Invoke(null,
-                [paths, evenOdd, frame, false])!;
+                [paths, evenOdd, frame, false, null])!;
             byte[] expectedPixels = new byte[96 * 80], actualPixels = new byte[96 * 80];
             for (int y = 0; y < 80; y++)
             for (int x = 0; x < 96; x++)

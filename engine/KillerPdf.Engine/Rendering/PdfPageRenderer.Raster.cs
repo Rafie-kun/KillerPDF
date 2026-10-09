@@ -1053,7 +1053,8 @@ public sealed partial class PdfPageRenderer
 
     /// <summary>Rasterizes page-space paths into a coverage mask.</summary>
     private static CoverageMask RasterizeFill(IReadOnlyList<List<Point>> paths, bool evenOdd,
-        RasterFrame frame, bool rent = false)
+        RasterFrame frame, bool rent = false,
+        (int Left, int Top, int Right, int Bottom)? bounds = null)
     {
         List<Point>? single = null;
         int count = 0;
@@ -1071,7 +1072,7 @@ public sealed partial class PdfPageRenderer
             _sharedRasterizer = rasterizer = new CellRasterizer(frame.Width, frame.Height);
         rasterizer.Reset();
         rasterizer.AddPagePolygons(paths, frame);
-        return rasterizer.Sweep(evenOdd, rent);
+        return rasterizer.Sweep(evenOdd, rent, bounds);
     }
 
     private static CoverageMask RasterizeFill(IReadOnlyList<Point[]> polygons, bool evenOdd,

@@ -6700,7 +6700,21 @@ public sealed partial class PdfPageRenderer
     {
         if (color.DoesNotPaint) return;
         var frame = new RasterFrame(width, height, scaleX, scaleY);
-        CoverageMask mask = RasterizeFill(paths, evenOdd, frame, rent: true);
+        (int Left, int Top, int Right, int Bottom)? bounds =
+            (pixels.Left, pixels.Top, pixels.Right, pixels.Bottom);
+        int geometricClips = 0;
+        bool antialiasedClip = false;
+        foreach (ClipRegion clip in clips)
+        {
+            if (clip.StorageBounds) continue;
+            geometricClips++;
+            antialiasedClip |= clip.Mask.Coverage is not null;
+        }
+        // Identical geometric clips are recognized by whole-mask coverage. Retain
+        // that comparison when a single antialiased clip may be idempotent.
+        if (geometricClips == 1 && antialiasedClip) bounds = null;
+        CoverageMask mask = RasterizeFill(paths, evenOdd, frame, rent: true,
+            bounds: bounds);
         try
         {
             PaintCoverage(pixels, width, mask, color, alpha, blendMode, clips,
