@@ -10,8 +10,6 @@ internal sealed class InstalledPdfFontResolver : IPdfFontResolver
     private readonly Dictionary<PdfFontRequest, byte[]?> _cache = [];
     private readonly Dictionary<(string Family, bool Bold, bool Italic), byte[]?>
         _familyCache = [];
-    private readonly Dictionary<(string Family, bool Bold, bool Italic), byte[]>
-        _standardFaceCache = [];
     private readonly Lock _gate = new();
 
     public byte[]? Resolve(PdfFontRequest request)
@@ -34,10 +32,8 @@ internal sealed class InstalledPdfFontResolver : IPdfFontResolver
         }
     }
 
-    private byte[]? StandardWindowsFace(string family, bool bold, bool italic)
+    private static byte[]? StandardWindowsFace(string family, bool bold, bool italic)
     {
-        var key = (family, bold, italic);
-        if (_standardFaceCache.TryGetValue(key, out byte[]? cached)) return cached;
         string? fileName = (family, bold, italic) switch
         {
             ("Arial", false, false) => "arial.ttf",
@@ -58,15 +54,7 @@ internal sealed class InstalledPdfFontResolver : IPdfFontResolver
         string windows = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
         if (windows.Length == 0) return null;
         string path = Path.Combine(windows, "Fonts", fileName);
-        try
-        {
-            if (!File.Exists(path)) return null;
-            byte[] bytes = File.ReadAllBytes(path);
-            // Only these twelve Windows faces can enter this cache. Failed reads retain
-            // the existing fallback behavior; aliases share successful immutable data.
-            _standardFaceCache.Add(key, bytes);
-            return bytes;
-        }
+        try { return File.Exists(path) ? File.ReadAllBytes(path) : null; }
         catch (IOException) { return null; }
         catch (UnauthorizedAccessException) { return null; }
     }

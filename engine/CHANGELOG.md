@@ -13,7 +13,7 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 - Added build-time AOT and trimming compatibility enforcement.
 - Added caller-owned region rendering with bounded fill and stroke coverage to avoid duplicate visible-detail buffers and synchronized shared-document object loading for concurrent render sessions.
 - Shared bounded ICC and calibrated color-profile storage across sibling render sessions.
-- Added bounded row storage and visible-column conversion for reduced opaque RGB and CMYK images and direct native CMYK image conversion when the source and destination profiles match, retaining the original sampling grid and channel values. Direct sample painting avoids unused color caches.
+- Added bounded row storage and visible-column conversion for reduced opaque RGB and CMYK images and direct native CMYK image conversion when the source and destination profiles match, retaining the original sampling grid and channel values.
 - Corrected native color-space identity for repeated ICC profiles in different PDF streams, including different compression, while keeping rendering intents distinct. Prevents unwanted ink conversion before overprinting and transparency-group compositing.
 - Recognized corrected ColorDodge and ColorBurn endpoints declared through Adobe PDF 1.7 extensions.
 - Added bounded recovery of damaged catalog and page-tree links from intact page objects, with retained references and repairs in full and incremental saves. Corrected Unicode 3.2 password mappings and added authenticated compatibility recovery for legacy unnormalized password hashes.
@@ -61,8 +61,6 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 - Vectorized named-spot ink blending with unchanged arithmetic and rounding, retaining scalar blending on unsupported CPUs.
 - Repeated renders and sibling renderers retain more parsed form and glyph streams and remember when oversized page content requires streaming, reducing temporary work without changing pixels.
 - Large Flate images and eligible embedded fonts inflate into their final buffer when the decoded length matches, with unchanged recovery for damaged streams.
-- Avoided full-plane assembly for large graphics soft masks with repeated rows, retaining bounded fallback for dense masks and unchanged pixels.
-- Rejected non-CFF font headers before copying their programs, reducing temporary memory during font loading.
 
 - Reused exact axial shading colors across eligible device columns.
 - Prepared spot plates once for large opaque images and antialiased paths to reduce pixel synchronization.

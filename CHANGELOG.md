@@ -137,7 +137,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Corrected ColorDodge and ColorBurn blending in PDF 1.x files.
 - Kept PDF comparison colors consistent with the viewer for large Adobe YCCK JPEGs.
 - Matched installed Arial and Times New Roman fonts for unembedded Helvetica and Times text, preserving bold and italic styles.
-- Reused installed standard font data across PDF aliases to reduce retained memory when opening multiple documents.
 - Preserved the previous renderer's scaled page dimensions for viewing and image export.
 - Preserved landscape page orientation and proportions when flattening rotated PDFs (#362).
 - Kept text editing, selection feedback, and touchpad zoom reliable, including font changes, multiline entry, and region selection (#428).
