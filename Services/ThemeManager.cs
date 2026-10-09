@@ -451,6 +451,7 @@ namespace KillerPDF.Services
             if (!d.Contains("BgOverlay")) d["BgOverlay"] = new SolidColorBrush(Color.FromArgb(0xbb, 0, 0, 0));
             if (!d.Contains("HeaderShadowOpacity")) d["HeaderShadowOpacity"] = 0.5;
             if (!d.Contains("WordmarkShadowOpacity")) d["WordmarkShadowOpacity"] = 0.45;
+            if (!d.Contains("WordmarkAccentShadowOpacity")) d["WordmarkAccentShadowOpacity"] = 0.0;
             if (!d.Contains("AboutShadowOpacity")) d["AboutShadowOpacity"] = d.Contains("FlyoutShadowOpacity") ? d["FlyoutShadowOpacity"] : 0.6;
             if (!d.Contains("AboutIconShadowOpacity")) d["AboutIconShadowOpacity"] = 0.6;
             if (!d.Contains("AboutCaptionVisibility")) d["AboutCaptionVisibility"] = Visibility.Collapsed;

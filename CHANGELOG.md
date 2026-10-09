@@ -21,8 +21,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Kept app icons sharp at fractional display DPI and app zoom.
 - Corrected Vietnamese website translations and theme look counts.
 - Restored menu fades and aligned rail menus and submenus with their opening controls and screen edges.
-- Aligned the shortcuts panel and language menu.
-- Corrected theme colors, wordmarks, footers and dialog controls, including Light/Yellow, 98SE Red and cream Blood, Greed and Cyanotic accents.
+- Aligned the shortcuts panel and language menu, and kept rail flyouts beside their opening buttons with an 8-unit inset from the content edge.
+- Corrected theme colors, wordmarks, footers and dialog controls, including Light/Yellow, 98SE Red and cream Blood, Greed and Cyanotic accents. Added a shadow to the PDF accent in the Light/Yellow wordmark.
 
 ## [1.8.80] - 2026-10-05
 
