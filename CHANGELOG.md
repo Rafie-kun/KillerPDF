@@ -6,21 +6,23 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 ## [1.8.81] - Unreleased
 
-1.8.81 improves the update handoff.
+1.8.81 improves responsiveness, color selection, updates, and interface consistency.
+
+### Added
+- Added Ctrl+wheel sizing in the file picker and links from the shortcuts panel to the online guide.
 
 ### Changed
 - Hovered outline buttons and accent picker pills use gradients outside 98SE, and accent swatches lift on hover.
 
 ### Fixed
-- Kept app icons sharp at fractional display DPI and app zoom by caching exact pixel sizes from a covering source and aligning the final draw to device pixels.
-- Prevented zero-height 98SE annotation bars from continuously retrying layout and blocking input; positioning resumes after load, visibility changes and restore.
-- Prevented the color picker from crashing when changing stamp or annotation colors with gradient themes (#442).
+- Prevented zero-height 98SE annotation bars from repeatedly retrying layout and blocking input.
+- Prevented the color picker from crashing when changing stamp or annotation colors with gradient themes (#442, #443).
 - Kept update helpers and setup from locking the installation folder through their working directory (#434).
-- Ctrl+wheel changes picker views and icon sizes.
+- Kept app icons sharp at fractional display DPI and app zoom.
+- Corrected Vietnamese website translations and theme look counts.
+- Restored menu fades and aligned rail menus and submenus with their opening controls and screen edges.
 - Aligned the shortcuts panel and language menu.
 - Corrected theme colors, wordmarks, footers and dialog controls, including Light/Yellow, 98SE Red and cream Blood, Greed and Cyanotic accents.
-- Rail right-click menus align 8 pixels from the content edges; the night-mode menu aligns with its icon.
-- Submenus attach consistently to their opening rows, with native direction and screen-edge placement.
 
 ## [1.8.80] - 2026-10-05
 
