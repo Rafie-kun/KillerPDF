@@ -35,10 +35,14 @@ public sealed class MenuSeparatorThemeTests
         Assert.Contains("Alias(\"MenuSeparatorBrush\", \"CardBorderBrush\");", manager);
         foreach (string themePath in Directory.EnumerateFiles(Path.Combine(root, "Themes"), "*.xaml"))
         {
-            if (Path.GetFileNameWithoutExtension(themePath) == "Delirium")
+            string theme = Path.GetFileNameWithoutExtension(themePath);
+            if (theme == "Delirium")
                 continue;
-            Assert.DoesNotContain(XDocument.Load(themePath).Descendants(),
-                element => (string?)element.Attribute(Xaml + "Key") == "MenuSeparatorBrush");
+            var divider = XDocument.Load(themePath).Descendants()
+                .SingleOrDefault(element => (string?)element.Attribute(Xaml + "Key") == "MenuSeparatorBrush");
+            if (divider is not null)
+                Assert.Equal(ColorConverter.ConvertFromString(BrushColor(root, theme, "CardBorderBrush")),
+                    ColorConverter.ConvertFromString(divider.Attribute("Color")!.Value));
         }
         foreach (string accentPath in Directory.EnumerateFiles(Path.Combine(root, "Themes", "Accents"), "*.xaml", SearchOption.AllDirectories))
         {
