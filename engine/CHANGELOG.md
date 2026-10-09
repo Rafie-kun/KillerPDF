@@ -12,7 +12,7 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 
 - Added build-time AOT and trimming compatibility enforcement.
 - Added caller-owned region rendering to avoid duplicate visible-detail pixel buffers and synchronized shared-document object loading for concurrent render sessions.
-- Shared bounded ICC and calibrated color-profile storage across sibling render sessions, with weak reuse of live compressed ICC tables between documents to avoid rebuilding them without extending their lifetime.
+- Shared bounded ICC and calibrated color-profile storage across sibling render sessions.
 - Added bounded row storage and visible-column conversion for reduced opaque RGB and CMYK images and direct native CMYK image conversion when the source and destination profiles match, retaining the original sampling grid and channel values.
 - Corrected native color-space identity for repeated ICC profiles in different PDF streams, including different compression, while keeping rendering intents distinct. Prevents unwanted ink conversion before overprinting and transparency-group compositing.
 - Recognized corrected ColorDodge and ColorBurn endpoints declared through Adobe PDF 1.7 extensions.
