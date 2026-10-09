@@ -91,6 +91,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Updated menu, button, slider and selection states with accent colors, subtle gradients and hover lift outside 98SE.
 
 ### Fixed
+- Kept app icons sharp at fractional display DPI and app zoom by caching exact pixel sizes from a covering source and aligning the final draw to device pixels.
 - Prevented zero-height 98SE annotation bars from continuously retrying layout and blocking input; positioning resumes after load, visibility changes and restore.
 - Hardened native library loading and release artifact verification.
 - Kept update helpers and setup from locking the installation folder through their working directory (#434).

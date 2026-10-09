@@ -28,18 +28,15 @@ namespace KillerPDF
         {
             var frames = BitmapDecoder.Create(new Uri("pack://application:,,,/Resources/kp-icon.ico"),
                 BitmapCreateOptions.None, BitmapCacheOption.OnLoad).Frames;
-            var icon = new Image
+            var icon = new KillerPDF.Controls.AppIcon
             {
                 Width = Value(owner, "TitleIconSize", 25.0),
                 Height = Value(owner, "TitleIconSize", 25.0),
                 Margin = Value(owner, "TitleIconMargin", new Thickness(0, 0, 7, 0)),
                 VerticalAlignment = VerticalAlignment.Center
             };
-            void Refresh() => icon.Source = frames.OrderBy(frame =>
-                Math.Abs(frame.PixelWidth - icon.ActualWidth * VisualTreeHelper.GetDpi(icon).DpiScaleX)).First();
-            icon.Loaded += (_, _) => Refresh();
-            icon.SizeChanged += (_, _) => Refresh();
-            RenderOptions.SetBitmapScalingMode(icon, BitmapScalingMode.HighQuality);
+            icon.Source = frames[0];
+            RenderOptions.SetBitmapScalingMode(icon, BitmapScalingMode.NearestNeighbor);
             return icon;
         }
 
