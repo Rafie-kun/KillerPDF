@@ -2,10 +2,10 @@ namespace KillerPdf.Engine.Rendering;
 
 public sealed partial class PdfPageRenderer
 {
-    // Axis-aligned opaque RGB output consumes one converted source row at a time.
+    // Axis-aligned opaque RGB or process-ink output consumes one source row at a time.
     // Keep the original plane grid and accumulation order; only its storage lifetime
     // changes. Each row worker owns its converter/cache and returns its scratch row.
-    private static void PaintReducedRgbRows(RasterSurface target, int targetWidth,
+    private static void PaintReducedImageRows(RasterSurface target, int targetWidth,
         int targetHeight, double scaleX, double scaleY, Matrix inverse, byte[] samples,
         int rowBytes, int sourceWidth, int sourceHeight, int components, int bits,
         double[] decode, ImageColorSpace colorSpace,
@@ -39,6 +39,8 @@ public sealed partial class PdfPageRenderer
         }
         if (firstColumn >= endColumn) return;
         byte[] data = target.Data;
+        bool targetInk = target.Ink is not null;
+        PdfColorTransform? profile = target.InputProfile;
         byte[]? groupAlpha = target.GroupAlpha;
         ForEachRow(paintTop, paintBottom,
             (long)(paintRight - paintLeft) * (paintBottom - paintTop), (rowStart, rowEnd) =>
@@ -47,7 +49,7 @@ public sealed partial class PdfPageRenderer
             try
             {
                 var converter = new ImageSampleConverter(samples, rowBytes, components,
-                    bits, decode, colorSpace, targetInk: false, targetProfile: null,
+                    bits, decode, colorSpace, targetInk, profile,
                     areaColumns: columns, areaRows: rows, binaryColumns: binaryColumns);
                 int convertedRow = -1;
                 for (int y = rowStart; y < rowEnd; y++)
@@ -81,16 +83,24 @@ public sealed partial class PdfPageRenderer
                         if (coverage == 255)
                         {
                             int offset = rowOffset + (x - left) * 4;
-                            data[offset] = row[sourceOffset];
-                            data[offset + 1] = row[sourceOffset + 1];
-                            data[offset + 2] = row[sourceOffset + 2];
-                            data[offset + 3] = 255;
+                            if (targetInk)
+                            {
+                                WriteInk(target.Ink!, offset, ReadInk(row, sourceOffset));
+                                target.SetAlpha(offset, 255);
+                            }
+                            else
+                            {
+                                data[offset] = row[sourceOffset];
+                                data[offset + 1] = row[sourceOffset + 1];
+                                data[offset + 2] = row[sourceOffset + 2];
+                                data[offset + 3] = 255;
+                            }
                             if (groupAlpha is not null) groupAlpha[offset / 4] = 255;
                         }
                         else
                         {
-                            Color color = new(row[sourceOffset + 2], row[sourceOffset + 1],
-                                row[sourceOffset]);
+                            Color color = targetInk ? InkColor(ReadInk(row, sourceOffset))
+                                : new(row[sourceOffset + 2], row[sourceOffset + 1], row[sourceOffset]);
                             SetPixel(target, targetWidth, x, y, color, coverage / 255d,
                                 RendererBlendMode.Normal);
                         }

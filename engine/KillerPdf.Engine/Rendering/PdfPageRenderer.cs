@@ -5389,7 +5389,9 @@ public sealed partial class PdfPageRenderer
                     center, footprintHeight, sourceHeight);
             }
         }
-        if (averagePlane && !binaryAverage && !nativeImageSamples && target.Ink is null
+        if (averagePlane && !binaryAverage
+            && (!nativeImageSamples && target.Ink is null
+                || opaqueInkImage && !overprint && !target.HasSpotPlates)
             && target.RgbProfile is null && !target.HasRgbSpotShadow
             && target.GroupShape is null && !colorSpace.DoesNotPaint
             && !colorSpace.ContainsSpotColorants && !colorSpace.NativeProcessMask.HasValue
@@ -5397,7 +5399,7 @@ public sealed partial class PdfPageRenderer
             && knockout is null && Math.Clamp(stencilAlpha, 0, 1) == 1
             && blendMode is RendererBlendMode.Normal or RendererBlendMode.Compatible)
         {
-            PaintReducedRgbRows(target, targetWidth, targetHeight, scaleX, scaleY,
+            PaintReducedImageRows(target, targetWidth, targetHeight, scaleX, scaleY,
                 inverse, samples, rowBytes, sourceWidth, sourceHeight, components,
                 bits, decode, colorSpace, converterAreaColumns, converterAreaRows,
                 binaryColumns, planeWidth, planeHeight, pixelAlignedPlane,
