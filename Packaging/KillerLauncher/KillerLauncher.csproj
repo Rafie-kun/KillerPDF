@@ -42,6 +42,7 @@
     <Resource Include="..\..\Fonts\Typewriter-A602.ttf" Link="Fonts\Typewriter-A602.ttf" />
     <Resource Include="..\..\Resources\kp-icon.ico" Link="Resources\kp-icon.ico" />
     <Resource Include="..\..\Resources\kp-icon.png" Link="Resources\kp-icon.png" />
+    <Resource Include="..\..\Resources\app-icon-master.png" Link="Resources\app-icon-master.png" />
   </ItemGroup>
 
   <ItemGroup>
