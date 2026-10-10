@@ -715,6 +715,15 @@ public sealed class PdfFontResourceReaderTests
     }
 
     [Fact]
+    public void NotdefDifferenceKeepsTheBaseEncodingStandardWidth()
+    {
+        PdfExtractionFont font = Read(D(("Subtype", N("Type1")), ("BaseFont", N("Times-Roman")),
+            ("Encoding", D(("Differences", new PdfArray([new PdfInteger(32), N(".notdef")]))))));
+
+        Assert.Equal(250, font.GetWidth(32));
+    }
+
+    [Fact]
     public void ToUnicodeOverridesEncodingWhileMissingMappingsUseEncoding()
     {
         var font = Read(D(("Subtype", N("Type1")), ("BaseFont", N("Helvetica")),

@@ -146,6 +146,8 @@ public static class PdfFontResourceReader
                 glyphNames = builtInEncoding ?? PdfFontTables.EncodingNames(encodingName)
                     ?? (Get(font, "ToUnicode") is PdfStream ? Enumerable.Repeat(string.Empty, 256).ToArray()
                         : throw new NotSupportedException($"Font encoding /{encodingName} is not supported."));
+                // Differences that rename a code to .notdef keep the base encoding's width.
+                string[] baseGlyphNames = [.. glyphNames];
                 if (encodingDictionary is not null && Get(encodingDictionary, "Differences") is PdfArray differences)
                 {
                     int index = -1;
@@ -162,7 +164,8 @@ public static class PdfFontResourceReader
                     string? text = PdfFontTables.GlyphText(glyphNames[code]);
                     if (text is null && Name(Get(font, "Subtype")) == "Type3") text = ((char)code).ToString();
                     if (text is not null) simpleText[code] = text;
-                    double? standardWidth = PdfStandardGlyphBounds.Width(standardMetricsName, glyphNames[code]);
+                    double? standardWidth = PdfStandardGlyphBounds.Width(standardMetricsName,
+                        glyphNames[code] == ".notdef" ? baseGlyphNames[code] : glyphNames[code]);
                     if (standardWidth is double width) widths[code] = width;
                 }
                 if (Get(font, "Widths") is PdfArray values)
