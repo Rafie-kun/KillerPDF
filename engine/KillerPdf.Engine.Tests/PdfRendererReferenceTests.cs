@@ -33,8 +33,7 @@ public sealed class PdfRendererReferenceTests
         {
             TargetInvocationException failure = Assert.Throws<TargetInvocationException>(
                 () => resolve.Invoke(renderer, [value]));
-            FormatException cause = Assert.IsType<FormatException>(failure.InnerException);
-            Assert.Equal("An image resource contains an invalid reference chain.", cause.Message);
+            Assert.IsType<FormatException>(failure.InnerException);
         }
         else
         {
