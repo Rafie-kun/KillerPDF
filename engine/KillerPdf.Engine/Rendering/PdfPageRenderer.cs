@@ -2261,6 +2261,10 @@ public sealed partial class PdfPageRenderer
                         hiddenOptionalContentGroups, 0)) continue;
                 bool widget = IsName(annotation, "Subtype", "Widget");
                 if (widget ? !options.IncludeFormFields : !options.IncludeAnnotations) continue;
+                // ISO 32000-2 12.5.3: a Hidden annotation is neither displayed nor printed,
+                // whatever its other flags say.
+                if (annotation.TryGetValue(Name("F"), out PdfObject? flagsValue)
+                    && Resolve(flagsValue) is PdfInteger flags && (flags.Value & 2) != 0) continue;
                 TryGetAppearance(annotation, out PdfStream? appearance);
                 if (widget)
                 {

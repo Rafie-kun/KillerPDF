@@ -1049,6 +1049,20 @@ public sealed class PdfPageRendererTests
         Assert.Equal([255, 255, 255, 255], Pixel(hidden, 0, 0));
     }
 
+    [Theory]
+    [InlineData("Square", 4, true)]
+    [InlineData("Square", 6, false)]
+    [InlineData("Square", 2, false)]
+    [InlineData("Widget", 4, true)]
+    [InlineData("Widget", 2, false)]
+    public void Render_SkipsAnnotationsFlaggedHidden(string subtype, int flags, bool painted)
+    {
+        PdfRenderedPage page = new PdfPageRenderer(FlaggedAnnotationDocument(subtype, flags)).Render(
+            0, new PdfRenderOptions(2, 1, includeAnnotations: true, includeFormFields: true));
+
+        Assert.Equal(painted ? [0, 0, 0, 255] : [255, 255, 255, 255], Pixel(page, 0, 0));
+    }
+
     [Fact]
     public void Render_FillsWithColoredTilingPatterns()
     {
@@ -5786,6 +5800,32 @@ public sealed class PdfPageRendererTests
             "<< >>",
             "<< /Type /OCG /Name (Hidden) >>",
             $"<< /Type /Annot /Subtype /Square /Rect [0 0 2 1] /AP << /N 7 0 R >>{optionalContent} >>",
+            $"<< /Type /XObject /Subtype /Form /BBox [0 0 2 1] /Length {Encoding.ASCII.GetByteCount(appearanceContent)} >>\nstream\n{appearanceContent}\nendstream"
+        ];
+        var pdf = new StringBuilder("%PDF-1.7\n");
+        var offsets = new List<int>();
+        for (int index = 0; index < objects.Length; index++)
+        {
+            offsets.Add(Encoding.Latin1.GetByteCount(pdf.ToString()));
+            pdf.Append($"{index + 1} 0 obj\n{objects[index]}\nendobj\n");
+        }
+        int xref = Encoding.Latin1.GetByteCount(pdf.ToString());
+        pdf.Append($"xref\n0 {objects.Length + 1}\n0000000000 65535 f \n");
+        foreach (int offset in offsets) pdf.Append($"{offset:0000000000} 00000 n \n");
+        pdf.Append($"trailer << /Size {objects.Length + 1} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n");
+        return PdfDocument.Open(Encoding.Latin1.GetBytes(pdf.ToString()));
+    }
+
+    private static PdfDocument FlaggedAnnotationDocument(string subtype, int flags)
+    {
+        const string appearanceContent = "0 0 2 1 re f";
+        string field = subtype == "Widget" ? " /FT /Btn /T (f)" : string.Empty;
+        string[] objects =
+        [
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 /MediaBox [0 0 2 1] >>",
+            "<< /Type /Page /Parent 2 0 R /Annots [4 0 R] >>",
+            $"<< /Type /Annot /Subtype /{subtype}{field} /F {flags} /Rect [0 0 2 1] /AP << /N 5 0 R >> >>",
             $"<< /Type /XObject /Subtype /Form /BBox [0 0 2 1] /Length {Encoding.ASCII.GetByteCount(appearanceContent)} >>\nstream\n{appearanceContent}\nendstream"
         ];
         var pdf = new StringBuilder("%PDF-1.7\n");
