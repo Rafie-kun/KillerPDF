@@ -186,6 +186,7 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 - Decoded three-component JPEGs whose component identifiers are R, G and B as untransformed RGB when no Adobe marker is present.
 - Painted stencil masks whose fill color is a pattern by rendering the pattern through the rasterized stencil.
 - Computed luminosity soft masks in gray and RGB ICC groups from the group's encoded samples instead of CIE luminance.
+- Decoded typically predicted lines in template 1 JBIG2 refinement regions per pixel, honoring the reference offset.
 
 ## [1.8.5] - Unreleased
 

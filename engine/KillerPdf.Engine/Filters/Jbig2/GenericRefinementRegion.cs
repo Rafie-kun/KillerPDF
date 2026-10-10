@@ -672,134 +672,41 @@ namespace KillerPdf.Engine.Filters.Jbig2
             }
         }
 
+        // T.88 6.3.5.6 3 d), template 1: a pixel whose 3x3 reference neighborhood is uniform
+        // takes that value; any other pixel decodes with the Figure 13 context, in the bit order
+        // Template1.Form uses. Reference coordinates follow the region by GRREFERENCEDX/DY.
         private void DecodeTypicalPredictedLineTemplate1(int lineNumber, int width,
                 int rowStride, int refRowStride, int paddedWidth,
                 int deltaRefStride, int byteIndex, int currentLine, int refByteIndex)
         {
-            int context;
-            int grReferenceValue;
-
-            int previousLine;
-            int previousReferenceLine;
-            int currentReferenceLine;
-            int nextReferenceLine;
-
-            if (lineNumber > 0)
+            int ry = lineNumber - referenceDY;
+            for (int x = 0; x < width; x++)
             {
-                previousLine = regionBitmap.GetByteAsInteger(byteIndex - rowStride);
-            }
-            else
-            {
-                previousLine = 0;
-            }
-
-            if (currentLine > 0 && currentLine <= referenceBitmap.Height)
-            {
-                previousReferenceLine = referenceBitmap
-                        .GetByteAsInteger(byteIndex - refRowStride + deltaRefStride) << 2;
-            }
-            else
-            {
-                previousReferenceLine = 0;
-            }
-
-            if (currentLine >= 0 && currentLine < referenceBitmap.Height)
-            {
-                currentReferenceLine = referenceBitmap.GetByteAsInteger(byteIndex + deltaRefStride);
-            }
-            else
-            {
-                currentReferenceLine = 0;
-            }
-
-            if (currentLine > -2 && currentLine < referenceBitmap.Height - 1)
-            {
-                nextReferenceLine = referenceBitmap
-                        .GetByteAsInteger(byteIndex + refRowStride + deltaRefStride);
-            }
-            else
-            {
-                nextReferenceLine = 0;
-            }
-
-            context = previousLine >> 5 & 0x6 | nextReferenceLine >> 2 & 0x30
-                    | currentReferenceLine & 0xc0 | previousReferenceLine & 0x200;
-
-            grReferenceValue = nextReferenceLine >> 2 & 0x70 | currentReferenceLine & 0xc0
-                    | previousReferenceLine & 0x700;
-
-            int nextByte;
-            for (int x = 0; x < paddedWidth; x = nextByte)
-            {
-                byte result = 0;
-                nextByte = x + 8;
-                int minorWidth = width - x > 8 ? 8 : width - x;
-                bool readNextByte = nextByte < width;
-                bool refReadNextByte = nextByte < referenceBitmap.Width;
-
-                int yOffset = deltaRefStride + 1;
-
-                if (lineNumber > 0)
+                int rx = x - referenceDX;
+                byte center = GetPixel(referenceBitmap, rx, ry);
+                bool uniform = true;
+                for (int dy = -1; dy <= 1 && uniform; dy++)
+                    for (int dx = -1; dx <= 1; dx++)
+                        if (GetPixel(referenceBitmap, rx + dx, ry + dy) != center)
+                        {
+                            uniform = false;
+                            break;
+                        }
+                int bit = center;
+                if (!uniform)
                 {
-                    previousLine = previousLine << 8 | (readNextByte
-                            ? regionBitmap.GetByteAsInteger(byteIndex - rowStride + 1) : 0);
+                    cx.Index = GetPixel(referenceBitmap, rx, ry - 1) << 9
+                        | GetPixel(referenceBitmap, rx - 1, ry) << 8 | center << 7
+                        | GetPixel(referenceBitmap, rx + 1, ry) << 6
+                        | GetPixel(referenceBitmap, rx, ry + 1) << 5
+                        | GetPixel(referenceBitmap, rx + 1, ry + 1) << 4
+                        | GetPixel(regionBitmap, x - 1, lineNumber - 1) << 3
+                        | GetPixel(regionBitmap, x, lineNumber - 1) << 2
+                        | GetPixel(regionBitmap, x + 1, lineNumber - 1) << 1
+                        | GetPixel(regionBitmap, x - 1, lineNumber);
+                    bit = arithDecoder.Decode(cx);
                 }
-
-                if (currentLine > 0 && currentLine <= referenceBitmap.Height)
-                {
-                    previousReferenceLine = previousReferenceLine << 8
-                            | (refReadNextByte ? referenceBitmap
-                                    .GetByteAsInteger(refByteIndex - refRowStride + yOffset) << 2 : 0);
-                }
-
-                if (currentLine >= 0 && currentLine < referenceBitmap.Height)
-                {
-                    currentReferenceLine = currentReferenceLine << 8 | (refReadNextByte
-                            ? referenceBitmap.GetByteAsInteger(refByteIndex + yOffset) : 0);
-                }
-
-                if (currentLine > -2 && currentLine < referenceBitmap.Height - 1)
-                {
-                    nextReferenceLine = nextReferenceLine << 8 | (refReadNextByte
-                            ? referenceBitmap.GetByteAsInteger(refByteIndex + refRowStride + yOffset)
-                            : 0);
-                }
-
-                for (int minorX = 0; minorX < minorWidth; minorX++)
-                {
-                    // i)
-                    int bitmapValue = grReferenceValue >> 4 & 0x1ff;
-
-                    int bit;
-                    if (bitmapValue == 0x1ff)
-                    {
-                        bit = 1;
-                    }
-                    else if (bitmapValue == 0x00)
-                    {
-                        bit = 0;
-                    }
-                    else
-                    {
-                        cx.Index = context;
-                        bit = arithDecoder.Decode(cx);
-                    }
-
-                    int toShift = 7 - minorX;
-                    result = (byte)(result | bit << toShift);
-
-                    context = (context & 0x0d6) << 1 | bit | previousLine >> toShift + 5 & 0x002
-                            | nextReferenceLine >> toShift + 2 & 0x010
-                            | currentReferenceLine >> toShift & 0x040
-                            | previousReferenceLine >> toShift & 0x200;
-
-                    grReferenceValue = (grReferenceValue & 0x0db) << 1
-                            | nextReferenceLine >> toShift + 2 & 0x010
-                            | currentReferenceLine >> toShift & 0x080
-                            | previousReferenceLine >> toShift & 0x400;
-                }
-                regionBitmap.SetByte(byteIndex++, result);
-                refByteIndex++;
+                if (bit != 0) regionBitmap.SetPixel(x, lineNumber, 1);
             }
         }
 
