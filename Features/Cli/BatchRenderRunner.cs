@@ -158,6 +158,9 @@ namespace KillerPDF.Features
                 string dstBase = Path.Combine(outRoot, rel);
                 foreach (var row in RenderFile(src, dstBase, size, pageLimit))
                     perFile[index].Rows.Add(row);
+                // A finished document's source bytes and decoded images stay in the large-object
+                // heap until a full collection; collect now so they do not add to the next file's peak.
+                GC.Collect();
             });
 
             foreach (var (rel, _, rows) in perFile)

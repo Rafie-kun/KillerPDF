@@ -93,6 +93,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Updated menu, button, slider and selection states with accent colors, subtle gradients and hover lift outside 98SE.
 - Saved the installed-font catalog between launches and built it in the background, so the first page that uses a non-standard font no longer waits for a scan of every installed font.
 - Installed fonts that no open document uses are released instead of kept for the whole session.
+- Batch rendering releases each finished document's memory before the next file starts.
 
 ### Fixed
 - Kept app icons sharp at fractional display DPI and app zoom by caching exact pixel sizes from a covering source and aligning the final draw to device pixels.
