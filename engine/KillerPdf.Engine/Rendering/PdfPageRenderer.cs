@@ -1089,8 +1089,8 @@ public sealed partial class PdfPageRenderer
                     return;
                 }
                 RasterSurface backdrop = pixels;
-                var bounds = GetRasterBounds(AddClip(parentState.Clips, paintClip.Mask), null,
-                    options.Width, options.Height, scaleX, scaleY);
+                var bounds = Within(GetRasterBounds(AddClip(parentState.Clips, paintClip.Mask), null,
+                    options.Width, options.Height, scaleX, scaleY), backdrop);
                 if (bounds.Right <= bounds.Left || bounds.Bottom <= bounds.Top) return;
                 RasterSurface group = RasterSurface.Rent(bounds, backdrop.Ink is not null,
                     backdrop.BlendProfile, backdrop.Pdf20BlendEndpoints);
@@ -1797,8 +1797,8 @@ public sealed partial class PdfPageRenderer
                     || (transparencyGroup && !isolated
                         && (parentState.Knockout is not null || pixels.GroupShape is not null)))
                 {
-                    (int Left, int Top, int Right, int Bottom) groupBounds = GetRasterBounds(
-                        formState.Clips, formBounds, options.Width, options.Height, scaleX, scaleY);
+                    (int Left, int Top, int Right, int Bottom) groupBounds = Within(GetRasterBounds(
+                        formState.Clips, formBounds, options.Width, options.Height, scaleX, scaleY), pixels);
                     if (knockout && parentState.FillAlpha == 1 && parentState.GraphicsSoftMask is null
                         && parentState.Knockout is null
                         && parentState.BlendMode is RendererBlendMode.Normal or RendererBlendMode.Compatible)
@@ -1898,8 +1898,8 @@ public sealed partial class PdfPageRenderer
                             && (parentState.FillAlpha != 1 || parentState.GraphicsSoftMask is not null))))
                 {
                     RasterSurface backdropPixels = pixels;
-                    RasterSurface blendedGroupPixels = RasterSurface.Rent(GetRasterBounds(
-                        formState.Clips, formBounds, options.Width, options.Height, scaleX, scaleY),
+                    RasterSurface blendedGroupPixels = RasterSurface.Rent(Within(GetRasterBounds(
+                        formState.Clips, formBounds, options.Width, options.Height, scaleX, scaleY), pixels),
                         pixels.Ink is not null, pixels.BlendProfile, pixels.Pdf20BlendEndpoints);
                     try
                     {
@@ -1957,8 +1957,8 @@ public sealed partial class PdfPageRenderer
                     // Keep the backdrop for internal blends, then interpolate premultiplied
                     // results once. This also preserves partially transparent backdrops.
                     RasterSurface backdropPixels = pixels;
-                    (int Left, int Top, int Right, int Bottom) groupBounds = GetRasterBounds(
-                        formState.Clips, formBounds, options.Width, options.Height, scaleX, scaleY);
+                    (int Left, int Top, int Right, int Bottom) groupBounds = Within(GetRasterBounds(
+                        formState.Clips, formBounds, options.Width, options.Height, scaleX, scaleY), pixels);
                     if (parentState.GraphicsSoftMask is { } mask
                         && !mask.TryNonzeroBounds(ref groupBounds, cancellationToken)) return;
                     RasterSurface maskedGroupPixels = RasterSurface.Rent(groupBounds,
@@ -6798,6 +6798,17 @@ public sealed partial class PdfPageRenderer
     }
 
     private static PdfName Name(string value) => new(System.Text.Encoding.ASCII.GetBytes(value));
+
+    // A group surface copies its backdrop and composites back into it, so it never needs to
+    // extend past the surface it is drawn on, which can itself be a smaller group surface.
+    private static (int Left, int Top, int Right, int Bottom) Within(
+        (int Left, int Top, int Right, int Bottom) bounds, RasterSurface surface)
+    {
+        int left = Math.Clamp(bounds.Left, surface.Left, surface.Right);
+        int top = Math.Clamp(bounds.Top, surface.Top, surface.Bottom);
+        return (left, top, Math.Clamp(bounds.Right, left, surface.Right),
+            Math.Clamp(bounds.Bottom, top, surface.Bottom));
+    }
 
     private static (int Left, int Top, int Right, int Bottom) GetRasterBounds(
         IReadOnlyList<ClipRegion> clips, Point[]? explicitBounds,

@@ -177,6 +177,7 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 - Read CFF dictionary reals without mantissa digits as zero and reserved bytes 31 and 255 the way FreeType does, instead of rejecting the font.
 - Read a bare CFF program stored as FontFile during compatibility recovery instead of falling back to a substitute.
 - Kept the base encoding's standard width for codes that Differences renames to .notdef.
+- Clipped transparency group surfaces to the surface they composite into, which can itself be a smaller group surface.
 
 ## [1.8.5] - Unreleased
 

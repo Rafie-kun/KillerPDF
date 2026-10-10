@@ -2875,6 +2875,44 @@ public sealed class PdfPageRendererTests
         Assert.Empty(rendered.Diagnostics);
     }
 
+    [Fact]
+    public void Render_BlendedGroupInsideSoftMaskedGroupStaysWithinItsBackdrop()
+    {
+        PdfDocument source = PdfDocument.Open(new PdfDocumentBuilder()
+            .AddPage(10, 10, "/Masked gs /Outer Do"u8.ToArray()).Build());
+        var catalog = ResolveDictionary(source, source.Trailer[Name("Root")]);
+        var pages = ResolveDictionary(source, catalog[Name("Pages")]);
+        var pageReference = Assert.IsType<PdfIndirectReference>(Assert.IsType<PdfArray>(pages[Name("Kids")])[0]);
+        var page = ResolveDictionary(source, pageReference);
+        var update = new PdfIncrementalUpdateBuilder(source);
+        PdfIndirectReference Form(string content, PdfDictionary resources, PdfDictionary group) =>
+            update.AddObject(new PdfStream(new PdfDictionary([
+                new(Name("Type"), Name("XObject")), new(Name("Subtype"), Name("Form")),
+                new(Name("BBox"), Reals(0, 0, 10, 10)), new(Name("Resources"), resources),
+                new(Name("Group"), group)]), Encoding.ASCII.GetBytes(content)));
+        var transparency = new PdfDictionary([new(Name("S"), Name("Transparency"))]);
+        var mask = Form("1 g 5 0 5 10 re f", new PdfDictionary([]), new PdfDictionary([
+            new(Name("S"), Name("Transparency")), new(Name("CS"), Name("DeviceGray"))]));
+        var inner = Form("1 0 0 rg 0 0 5 10 re f 5 0 5 10 re f", new PdfDictionary([]), transparency);
+        var outer = Form("/Multiply gs /Inner Do", new PdfDictionary([
+            new(Name("XObject"), new PdfDictionary([new(Name("Inner"), inner)])),
+            new(Name("ExtGState"), new PdfDictionary([new(Name("Multiply"),
+                new PdfDictionary([new(Name("BM"), Name("Multiply"))]))]))]), transparency);
+        var softMask = new PdfDictionary([new(Name("S"), Name("Luminosity")), new(Name("G"), mask)]);
+        var resources = new PdfDictionary([
+            new(Name("XObject"), new PdfDictionary([new(Name("Outer"), outer)])),
+            new(Name("ExtGState"), new PdfDictionary([new(Name("Masked"),
+                new PdfDictionary([new(Name("SMask"), softMask)]))]))]);
+        var updatedPage = new PdfDictionary(page.Where(pair => !pair.Key.Equals(Name("Resources")))
+            .Append(new KeyValuePair<PdfName, PdfObject>(Name("Resources"), resources)));
+        PdfDocument document = PdfDocument.Open(update.ReplaceObject(pageReference.ObjectNumber, updatedPage).Build());
+
+        PdfRenderedPage rendered = new PdfPageRenderer(document).Render(0, new PdfRenderOptions(10, 10));
+
+        Assert.Equal(new byte[] { 255, 255, 255, 255 }, Pixel(rendered, 2, 5));
+        Assert.Equal(new byte[] { 0, 0, 255, 255 }, Pixel(rendered, 7, 5));
+    }
+
     private static PdfDocument WrapPageInKnockout(PdfDocument source, bool nestedNonisolated = false,
         bool nestedKnockout = false)
     {
