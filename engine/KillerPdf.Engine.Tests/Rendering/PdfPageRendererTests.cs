@@ -5816,6 +5816,25 @@ public sealed class PdfPageRendererTests
         return PdfDocument.Open(Encoding.Latin1.GetBytes(pdf.ToString()));
     }
 
+    [Fact]
+    public void BoundedCache_RemoveAboveWeightTrimsTheTotalToTheBudget()
+    {
+        var cache = new PdfPageRenderer.BoundedCache<int, long>(16, maximumWeight: 100, weight: value => value);
+        cache.GetOrAdd(1, _ => 40);
+        cache.GetOrAdd(2, _ => 40);
+        cache.GetOrAdd(3, _ => 15);
+        cache.GetOrAdd(4, _ => 5);
+        Assert.True(cache.TryGet(1, out _));
+
+        cache.RemoveAboveWeight(60);
+
+        Assert.Equal(60, cache.Weight);
+        Assert.False(cache.TryGet(2, out _));
+        Assert.True(cache.TryGet(1, out _));
+        Assert.True(cache.TryGet(3, out _));
+        Assert.True(cache.TryGet(4, out _));
+    }
+
     [Theory]
     [InlineData("", 0, 255)]
     [InlineData(" /Decode [1 0]", 255, 0)]

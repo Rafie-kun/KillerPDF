@@ -169,6 +169,7 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 - Skipped out-of-file table records and clamped excess horizontal metric counts in embedded TrueType fonts.
 - Inferred the loca format from the table size when head.indexToLocFormat is invalid.
 - Loaded embedded TrueType collections by choosing the face whose PostScript name matches the PDF font.
+- Trimmed the decoded image cache back to its total budget after each page instead of only dropping oversized entries.
 
 ## [1.8.5] - Unreleased
 
