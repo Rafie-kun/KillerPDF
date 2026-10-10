@@ -906,7 +906,9 @@ public sealed partial class PdfPageRenderer
                         break;
                     else if (IsName(xObject.Dictionary, "Subtype", "Image"))
                     {
-                        if (!TryRenderImage(xObject, resources, state.Transform, state.Clips,
+                        if (state.FillPattern is not null && IsImageMask(xObject))
+                            PaintPatternStencil(xObject, ownedInlineImage: false);
+                        else if (!TryRenderImage(xObject, resources, state.Transform, state.Clips,
                             state.PaintFill, state.FillAlpha, state.BlendMode, state.GraphicsSoftMask,
                             state.Knockout, pixels, options.Width,
                             options.Height, scaleX, scaleY,
@@ -922,7 +924,9 @@ public sealed partial class PdfPageRenderer
                     && instruction.InlineImageData.HasValue:
                     var inlineImage = PdfStream.FromOwnedData(inlineDictionary,
                         instruction.InlineImageData.Value);
-                    if (!TryRenderImage(inlineImage, resources, state.Transform, state.Clips,
+                    if (state.FillPattern is not null && IsImageMask(inlineImage))
+                        PaintPatternStencil(inlineImage, ownedInlineImage: true);
+                    else if (!TryRenderImage(inlineImage, resources, state.Transform, state.Clips,
                         state.PaintFill, state.FillAlpha, state.BlendMode, state.GraphicsSoftMask,
                         state.Knockout, pixels, options.Width,
                         options.Height, scaleX, scaleY,
@@ -1013,6 +1017,51 @@ public sealed partial class PdfPageRenderer
                 }
                 var fillClip = new ClipRegion(RasterizeFill(fillPath, evenOdd, frame));
                 RenderPattern(state.FillPattern, fillPath, fillClip, resources, state, depth, state.FillAlpha);
+            }
+
+            bool IsImageMask(PdfStream image) =>
+                image.Dictionary.TryGetValue(Name("ImageMask"), out PdfObject? maskValue)
+                && Resolve(maskValue) is PdfBoolean { Value: true };
+
+            // A stencil mask paints the fill color through its marked samples. When that color is
+            // a pattern, the rasterized stencil becomes the clip the pattern is painted through.
+            void PaintPatternStencil(PdfStream image, bool ownedInlineImage)
+            {
+                Point[] corners =
+                [
+                    state.Transform.Apply(0, 0), state.Transform.Apply(1, 0),
+                    state.Transform.Apply(1, 1), state.Transform.Apply(0, 1)
+                ];
+                var bounds = GetRasterBounds(state.Clips, corners, options.Width, options.Height, scaleX, scaleY);
+                int width = bounds.Right - bounds.Left, height = bounds.Bottom - bounds.Top;
+                if (width <= 0 || height <= 0) return;
+                RasterSurface stencil = RasterSurface.Rent(bounds);
+                try
+                {
+                    stencil.Data.AsSpan(0, width * height * 4).Clear();
+                    IReadOnlyList<ClipRegion> stencilClips = [.. state.Clips, new ClipRegion(
+                        CoverageMask.Rectangle(bounds.Left, bounds.Top, bounds.Right, bounds.Bottom), storageBounds: true)];
+                    if (!TryRenderImage(image, resources, state.Transform, stencilClips, Color.Black, 1,
+                        RendererBlendMode.Normal, null, null, stencil, options.Width, options.Height,
+                        scaleX, scaleY, out string? stencilDiagnostic, diagnostics: diagnostics,
+                        ownedInlineImage: ownedInlineImage, cancellationToken: cancellationToken))
+                    {
+                        diagnostics.Add(stencilDiagnostic ?? "Image rendering is not implemented.");
+                        return;
+                    }
+                    var coverage = new byte[width * height];
+                    for (int y = bounds.Top; y < bounds.Bottom; y++)
+                        for (int x = bounds.Left; x < bounds.Right; x++)
+                            coverage[(y - bounds.Top) * width + x - bounds.Left] = stencil.Alpha(stencil.Offset(x, y));
+                    var stencilClip = new ClipRegion(new CoverageMask(
+                        bounds.Left, bounds.Top, bounds.Right, bounds.Bottom, coverage));
+                    RenderPattern(state.FillPattern!, [new List<Point>([.. corners, corners[0]])],
+                        stencilClip, resources, state, depth, state.FillAlpha);
+                }
+                finally
+                {
+                    stencil.Return();
+                }
             }
 
             void PaintStroke(IReadOnlyList<List<Point>> strokePath)

@@ -228,6 +228,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Fixed function-based gradients that disappeared when they declared a bounding box.
 - Fixed lines drawn too thick or with squared-off ends when a page stretches them more in one direction than the other.
 - Fixed wrong colors in JPEG images stored as plain RGB without a color marker.
+- Fixed blank pages where a black-and-white mask image is filled with a gradient or pattern.
 
 ## [1.8.81] - Unreleased
 

@@ -184,6 +184,7 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 - Read function shading /BBox in the shading's target space instead of transforming it by /Matrix.
 - Outlined strokes in user space under non-uniform transforms, so the pen width and caps follow the CTM.
 - Decoded three-component JPEGs whose component identifiers are R, G and B as untransformed RGB when no Adobe marker is present.
+- Painted stencil masks whose fill color is a pattern by rendering the pattern through the rasterized stencil.
 
 ## [1.8.5] - Unreleased
 

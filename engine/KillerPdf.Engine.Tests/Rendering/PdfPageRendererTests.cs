@@ -2553,6 +2553,28 @@ public sealed class PdfPageRendererTests
     }
 
     [Fact]
+    public void Render_StencilMaskPaintsAShadingPatternFill()
+    {
+        PdfDocument source = PdfDocument.Open(new PdfDocumentBuilder().AddPage(10, 10,
+            Encoding.Latin1.GetBytes("/Pattern cs /P1 scn q 10 0 0 10 0 0 cm BI /W 2 /H 1 /IM true /BPC 1 ID \u0080 EI Q")).Build());
+        var function = new PdfDictionary([
+            new(Name("FunctionType"), new PdfInteger(2)), new(Name("Domain"), Reals(0, 1)),
+            new(Name("C0"), Reals(1, 0, 0)), new(Name("C1"), Reals(1, 0, 0)),
+            new(Name("N"), new PdfInteger(1))]);
+        var shading = new PdfDictionary([
+            new(Name("ShadingType"), new PdfInteger(2)), new(Name("ColorSpace"), Name("DeviceRGB")),
+            new(Name("Coords"), Reals(0, 0, 10, 0)), new(Name("Function"), function)]);
+        PdfDocument document = AddShadingPatternResource(source, shading, Reals(1, 0, 0, 1, 0, 0));
+
+        PdfRenderedPage rendered = new PdfPageRenderer(document).Render(
+            0, new PdfRenderOptions(10, 10, includeAnnotations: false, includeFormFields: false));
+
+        // A stencil paints its 0 samples: the left sample is 1 and stays blank, the right one paints.
+        Assert.Equal([255, 255, 255, 255], Pixel(rendered, 2, 5));
+        Assert.Equal([0, 0, 255, 255], Pixel(rendered, 7, 5));
+    }
+
+    [Fact]
     public void Render_PaintsFunctionShadingsWithTheirMatrixAndDomain()
     {
         PdfDocument source = PdfDocument.Open(new PdfDocumentBuilder()
