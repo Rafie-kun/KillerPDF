@@ -72,7 +72,7 @@ namespace KillerPDF
         private static readonly FontFamily _wordmarkFallback = new("Iceland, Consolas");
         private static readonly FontFamily _wordmarkPdfFallback = new("Freckle Face, Consolas");
 
-        public static CornerRadius RadControl => Rad("RadControl", 3);
+        public static CornerRadius RadControl => Rad("RadControl", 4);
         public static CornerRadius RadCard    => Rad("RadCard", 6);
         public static CornerRadius RadWindow  => Rad("RadWindow", 7);
 
@@ -549,29 +549,50 @@ namespace KillerPDF
                 FontFamily = UiFont,
                 FontSize = 12,
                 FocusVisualStyle = null,
-                Template = ButtonTemplate(),
+                Template = ButtonTemplate(outlined: border != null),
             };
             btn.MouseEnter += (_, _) => { btn.Background = hoverBg; btn.Foreground = hoverFg; };
             btn.MouseLeave += (_, _) => { btn.Background = normalBg; btn.Foreground = normalFg; };
             return btn;
         }
 
-        internal static ControlTemplate ButtonTemplate()
+        // outlined: the edge is drawn as an outer fill with the face inset by BorderThickness, not as a
+        // Border stroke. A 1px stroke on a small radius lets the antialiased face show through at
+        // each corner, which reads as a nick in the outline.
+        internal static ControlTemplate ButtonTemplate(bool outlined = false)
         {
             var bf = new FrameworkElementFactory(typeof(Border)) { Name = "bd" };
             bf.SetBinding(Border.BackgroundProperty, new Binding("Background") { RelativeSource = new RelativeSource(RelativeSourceMode.TemplatedParent) });
-            bf.SetBinding(Border.BorderBrushProperty, new Binding("BorderBrush") { RelativeSource = new RelativeSource(RelativeSourceMode.TemplatedParent) });
-            bf.SetBinding(Border.BorderThicknessProperty, new Binding("BorderThickness") { RelativeSource = new RelativeSource(RelativeSourceMode.TemplatedParent) });
             bf.SetBinding(Border.PaddingProperty, new Binding("Padding") { RelativeSource = new RelativeSource(RelativeSourceMode.TemplatedParent) });
-            bf.SetValue(Border.CornerRadiusProperty, RadControl);
 
             var cp = new FrameworkElementFactory(typeof(ContentPresenter));
             cp.SetValue(ContentPresenter.HorizontalAlignmentProperty, HorizontalAlignment.Center);
             cp.SetValue(ContentPresenter.VerticalAlignmentProperty, VerticalAlignment.Center);
             bf.AppendChild(cp);
-            var ct = new ControlTemplate(typeof(Button)) { VisualTree = bf };
+
+            FrameworkElementFactory root = bf;
+            if (outlined)
+            {
+                CornerRadius r = RadControl;
+                bf.SetValue(Border.CornerRadiusProperty, new CornerRadius(
+                    Math.Max(0, r.TopLeft - 1), Math.Max(0, r.TopRight - 1),
+                    Math.Max(0, r.BottomRight - 1), Math.Max(0, r.BottomLeft - 1)));
+                root = new FrameworkElementFactory(typeof(Border)) { Name = "edge" };
+                root.SetBinding(Border.BackgroundProperty, new Binding("BorderBrush") { RelativeSource = new RelativeSource(RelativeSourceMode.TemplatedParent) });
+                root.SetBinding(Border.PaddingProperty, new Binding("BorderThickness") { RelativeSource = new RelativeSource(RelativeSourceMode.TemplatedParent) });
+                root.SetValue(Border.CornerRadiusProperty, r);
+                root.AppendChild(bf);
+            }
+            else
+            {
+                bf.SetBinding(Border.BorderBrushProperty, new Binding("BorderBrush") { RelativeSource = new RelativeSource(RelativeSourceMode.TemplatedParent) });
+                bf.SetBinding(Border.BorderThicknessProperty, new Binding("BorderThickness") { RelativeSource = new RelativeSource(RelativeSourceMode.TemplatedParent) });
+                bf.SetValue(Border.CornerRadiusProperty, RadControl);
+            }
+
+            var ct = new ControlTemplate(typeof(Button)) { VisualTree = root };
             var dis = new Trigger { Property = UIElement.IsEnabledProperty, Value = false };
-            dis.Setters.Add(new Setter(UIElement.OpacityProperty, 0.45) { TargetName = "bd" });
+            dis.Setters.Add(new Setter(UIElement.OpacityProperty, 0.45) { TargetName = outlined ? "edge" : "bd" });
             ct.Triggers.Add(dis);
             return ct;
         }

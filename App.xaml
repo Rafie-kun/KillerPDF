@@ -114,7 +114,7 @@
             <FontFamily x:Key="IconFont">Segoe MDL2 Assets</FontFamily>
 
             <!-- Corner radii (one rounding scale for the whole app) -->
-            <CornerRadius x:Key="RadControl">3</CornerRadius>
+            <CornerRadius x:Key="RadControl">4</CornerRadius>
             <CornerRadius x:Key="RadCard">6</CornerRadius>
             <CornerRadius x:Key="RadWindow">7</CornerRadius>
 
