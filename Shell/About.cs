@@ -116,14 +116,15 @@ namespace KillerPDF
             hl.Inlines.Add(new Run("Killer")
             {
                 FontFamily = UiKit.WordmarkFont,
-                FontSize   = 21,
+                FontSize   = 23.1,
                 FontWeight = FontWeights.Normal,
                 Foreground = Res("TextBrush")
             });
             hl.Inlines.Add(new Run("PDF")
             {
                 FontFamily = UiKit.WordmarkFontPdf,
-                FontSize   = 27.3,
+                FontSize   = 32.55,
+                FontWeight = FontWeights.Normal,
                 Foreground = Res("AccentLogo")
             });
             hl.Click += (_, _) => AboutController.OpenUrl("https://killerpdf.net");
@@ -139,14 +140,15 @@ namespace KillerPDF
             AboutLogoShadowBlock.Inlines.Add(new Run("Killer")
             {
                 FontFamily = UiKit.WordmarkFont,
-                FontSize   = 21,
+                FontSize   = 23.1,
                 FontWeight = FontWeights.Normal,
                 Foreground = shadowBrush
             });
             AboutLogoShadowBlock.Inlines.Add(new Run("PDF")
             {
                 FontFamily = UiKit.WordmarkFontPdf,
-                FontSize   = 27.3,
+                FontSize   = 32.55,
+                FontWeight = FontWeights.Normal,
                 Foreground = shadowBrush
             });
         }

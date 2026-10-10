@@ -89,14 +89,14 @@ namespace KillerPDF
                 var wm = new StackPanel { Orientation = Orientation.Horizontal };
                 wm.Children.Add(TitleIcon());
                 var wmTb = new TextBlock { VerticalAlignment = VerticalAlignment.Center };
-                wmTb.Inlines.Add(new System.Windows.Documents.Run("Killer") { FontFamily = UiKit.WordmarkFont, FontWeight = FontWeights.Normal, FontSize = 15, Foreground = R("TextBrush") });
-                wmTb.Inlines.Add(new System.Windows.Documents.Run("PDF") { FontFamily = UiKit.WordmarkFontPdf, FontWeight = FontWeights.Bold, FontSize = 19.5, Foreground = R("AccentLogo") });
+                wmTb.Inlines.Add(new System.Windows.Documents.Run("Killer") { FontFamily = UiKit.WordmarkFont, FontWeight = FontWeights.Normal, FontSize = 16.5, Foreground = R("TextBrush") });
+                wmTb.Inlines.Add(new System.Windows.Documents.Run("PDF") { FontFamily = UiKit.WordmarkFontPdf, FontWeight = FontWeights.Normal, FontSize = 23.25, Foreground = R("AccentLogo") });
                 if (title.Length > "KillerPDF".Length)
                     wmTb.Inlines.Add(new System.Windows.Documents.Run("  " + title["KillerPDF".Length..].TrimStart())
                     {
                         FontFamily = UiKit.WordmarkFont,
                         FontWeight = FontWeights.Normal,
-                        FontSize = 14,
+                        FontSize = 15.4,
                         Foreground = R("TextBrush")
                     });
                 wm.Children.Add(wmTb);
@@ -257,8 +257,8 @@ namespace KillerPDF
             if (title == "KillerPDF")
             {
                 var wmTb = new TextBlock { VerticalAlignment = VerticalAlignment.Center };
-                wmTb.Inlines.Add(new System.Windows.Documents.Run("Killer") { FontFamily = UiKit.WordmarkFont, FontWeight = FontWeights.Normal, FontSize = 15, Foreground = R("TextBrush") });
-                wmTb.Inlines.Add(new System.Windows.Documents.Run("PDF") { FontFamily = UiKit.WordmarkFontPdf, FontWeight = FontWeights.Bold, FontSize = 19.5, Foreground = R("AccentLogo") });
+                wmTb.Inlines.Add(new System.Windows.Documents.Run("Killer") { FontFamily = UiKit.WordmarkFont, FontWeight = FontWeights.Normal, FontSize = 16.5, Foreground = R("TextBrush") });
+                wmTb.Inlines.Add(new System.Windows.Documents.Run("PDF") { FontFamily = UiKit.WordmarkFontPdf, FontWeight = FontWeights.Normal, FontSize = 23.25, Foreground = R("AccentLogo") });
                 var wm = new StackPanel { Orientation = Orientation.Horizontal };
                 wm.Children.Add(TitleIcon());
                 wm.Children.Add(wmTb);
@@ -408,8 +408,8 @@ namespace KillerPDF
             var wm = new StackPanel { Orientation = Orientation.Horizontal };
             wm.Children.Add(TitleIcon());
             var wmTb = new TextBlock { VerticalAlignment = VerticalAlignment.Center };
-            wmTb.Inlines.Add(new System.Windows.Documents.Run("Killer") { FontFamily = UiKit.WordmarkFont, FontWeight = FontWeights.Normal, FontSize = 15, Foreground = R("TextBrush") });
-            wmTb.Inlines.Add(new System.Windows.Documents.Run("PDF") { FontFamily = UiKit.WordmarkFontPdf, FontWeight = FontWeights.Bold, FontSize = 18, Foreground = R("AccentLogo") });
+            wmTb.Inlines.Add(new System.Windows.Documents.Run("Killer") { FontFamily = UiKit.WordmarkFont, FontWeight = FontWeights.Normal, FontSize = 16.5, Foreground = R("TextBrush") });
+            wmTb.Inlines.Add(new System.Windows.Documents.Run("PDF") { FontFamily = UiKit.WordmarkFontPdf, FontWeight = FontWeights.Normal, FontSize = 23.25, Foreground = R("AccentLogo") });
             wm.Children.Add(wmTb);
             titleBar.Child = wm;
             if (Application.Current.TryFindResource("UseDialogCaption") is true)

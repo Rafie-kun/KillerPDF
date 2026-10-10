@@ -1396,11 +1396,11 @@
                         <!-- Soft drop shadow: a blurred, offset copy behind the crisp wordmark -->
                         <StackPanel Orientation="Horizontal" Margin="1,1,0,0" Opacity="{DynamicResource WordmarkShadowOpacity}">
                             <StackPanel.Effect><BlurEffect Radius="2"/></StackPanel.Effect>
-                            <TextBlock><Run Text="Killer" FontFamily="{DynamicResource WordmarkFont}" FontSize="{DynamicResource TitleWordmarkSize}" Foreground="#D8000000"/><Run Text="PDF" FontFamily="{DynamicResource WordmarkFontPdf}" FontWeight="Bold" FontSize="{DynamicResource TitleWordmarkBoldSize}" Foreground="#D8000000"/></TextBlock>
+                            <TextBlock><Run Text="Killer" FontFamily="{DynamicResource WordmarkFont}" FontSize="{DynamicResource TitleWordmarkSize}" Foreground="#D8000000"/><Run Text="PDF" FontFamily="{DynamicResource WordmarkFontPdf}" FontSize="{DynamicResource TitleWordmarkBoldSize}" Foreground="#D8000000"/></TextBlock>
                         </StackPanel>
-                        <TextBlock Margin="1,2,0,0" Opacity="{DynamicResource WordmarkAccentShadowOpacity}" IsHitTestVisible="False"><TextBlock.Effect><BlurEffect Radius="3"/></TextBlock.Effect><Run Text="Killer" FontFamily="{DynamicResource WordmarkFont}" FontSize="{DynamicResource TitleWordmarkSize}" Foreground="Transparent"/><Run Text="PDF" FontFamily="{DynamicResource WordmarkFontPdf}" FontWeight="Bold" FontSize="{DynamicResource TitleWordmarkBoldSize}" Foreground="#D8000000"/></TextBlock>
+                        <TextBlock Margin="1,2,0,0" Opacity="{DynamicResource WordmarkAccentShadowOpacity}" IsHitTestVisible="False"><TextBlock.Effect><BlurEffect Radius="3"/></TextBlock.Effect><Run Text="Killer" FontFamily="{DynamicResource WordmarkFont}" FontSize="{DynamicResource TitleWordmarkSize}" Foreground="Transparent"/><Run Text="PDF" FontFamily="{DynamicResource WordmarkFontPdf}" FontSize="{DynamicResource TitleWordmarkBoldSize}" Foreground="#D8000000"/></TextBlock>
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock><Run Text="Killer" FontFamily="{DynamicResource WordmarkFont}" FontSize="{DynamicResource TitleWordmarkSize}" Foreground="{DynamicResource TextBrush}"/><Run Text="PDF" FontFamily="{DynamicResource WordmarkFontPdf}" FontWeight="Bold" FontSize="{DynamicResource TitleWordmarkBoldSize}" Foreground="{DynamicResource AccentLogo}"/></TextBlock>
+                            <TextBlock><Run Text="Killer" FontFamily="{DynamicResource WordmarkFont}" FontSize="{DynamicResource TitleWordmarkSize}" Foreground="{DynamicResource TextBrush}"/><Run Text="PDF" FontFamily="{DynamicResource WordmarkFontPdf}" FontSize="{DynamicResource TitleWordmarkBoldSize}" Foreground="{DynamicResource AccentLogo}"/></TextBlock>
                         </StackPanel>
                     </Grid>
                 </StackPanel>
@@ -3235,14 +3235,14 @@
                                      at different metrics than the two-run logo and read as a long smear
                                      floating above the word instead of a shadow behind it. -->
                                 <TextBlock x:Name="AboutLogoShadowBlock"
-                                           FontFamily="{DynamicResource WordmarkFont}" FontSize="22" FontWeight="Bold"
+                                           FontFamily="{DynamicResource WordmarkFont}" FontSize="23.1"
                                            Margin="1,1,0,0" IsHitTestVisible="False"
                                            Opacity="{DynamicResource WordmarkShadowOpacity}">
                                     <TextBlock.Effect><BlurEffect Radius="2"/></TextBlock.Effect>
                                 </TextBlock>
-                                <TextBlock FontFamily="{DynamicResource WordmarkFont}" FontSize="22" FontWeight="Bold" Margin="1,2,0,0" IsHitTestVisible="False" Opacity="{DynamicResource WordmarkAccentShadowOpacity}"><TextBlock.Effect><BlurEffect Radius="3"/></TextBlock.Effect><Run Text="Killer" FontFamily="{DynamicResource WordmarkFont}" FontSize="21" FontWeight="Normal" Foreground="Transparent"/><Run Text="PDF" FontFamily="{DynamicResource WordmarkFontPdf}" FontSize="27.3" Foreground="#D8000000"/></TextBlock>
+                                <TextBlock FontFamily="{DynamicResource WordmarkFont}" FontSize="23.1" Margin="1,2,0,0" IsHitTestVisible="False" Opacity="{DynamicResource WordmarkAccentShadowOpacity}"><TextBlock.Effect><BlurEffect Radius="3"/></TextBlock.Effect><Run Text="Killer" FontFamily="{DynamicResource WordmarkFont}" FontSize="23.1" Foreground="Transparent"/><Run Text="PDF" FontFamily="{DynamicResource WordmarkFontPdf}" FontSize="32.55" Foreground="#D8000000"/></TextBlock>
                                 <TextBlock x:Name="AboutLogoBlock"
-                                           FontFamily="{DynamicResource WordmarkFont}" FontSize="22" FontWeight="Bold" Cursor="Hand"/>
+                                           FontFamily="{DynamicResource WordmarkFont}" FontSize="23.1" Cursor="Hand"/>
                             </Grid>
                             <!-- Tagline (populated in code-behind with hyperlinks) -->
                             <TextBlock x:Name="AboutTaglineBlock"

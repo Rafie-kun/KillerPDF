@@ -105,8 +105,12 @@
             <!-- Assembly-relative: release payloads run as KillerPDF.App.exe while legacy and
                  IDE builds run as KillerPDF.exe. Hard-coding either assembly name makes the
                  embedded typewriter face silently fall back in the other build. -->
-            <FontFamily x:Key="WordmarkFont">./Fonts/#Typewriter - a602 (dead postman 2004)</FontFamily>
-            <FontFamily x:Key="WordmarkFontPdf">./Fonts/#Typewriter - a602 (dead postman 2004)</FontFamily>
+            <!-- Family wordmark faces, both OFL (licenses in Fonts/): Iceland for "Killer", Freckle Face
+                 for the app name. The app-name half is set at 1.55x the old "Killer" size and
+                 "Killer" at 1.1x, which puts its capitals at 2x the height of Killer's, the same as
+                 the websites. -->
+            <FontFamily x:Key="WordmarkFont">./Fonts/#Iceland</FontFamily>
+            <FontFamily x:Key="WordmarkFontPdf">./Fonts/#Freckle Face</FontFamily>
             <FontFamily x:Key="MonoFont">Consolas</FontFamily>
             <FontFamily x:Key="IconFont">Segoe MDL2 Assets</FontFamily>
 

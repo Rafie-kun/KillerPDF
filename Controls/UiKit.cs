@@ -69,8 +69,8 @@ namespace KillerPDF
         private static readonly FontFamily _uiFallback   = new("Segoe UI, Microsoft JhengHei UI, Nirmala UI");
         private static readonly FontFamily _monoFallback = new("Consolas");
         private static readonly FontFamily _iconFallback = new("Segoe MDL2 Assets");
-        private static readonly FontFamily _wordmarkFallback = new("Typewriter - a602 (dead postman 2004), Consolas");
-        private static readonly FontFamily _wordmarkPdfFallback = new("Typewriter - a602 (dead postman 2004), Consolas");
+        private static readonly FontFamily _wordmarkFallback = new("Iceland, Consolas");
+        private static readonly FontFamily _wordmarkPdfFallback = new("Freckle Face, Consolas");
 
         public static CornerRadius RadControl => Rad("RadControl", 3);
         public static CornerRadius RadCard    => Rad("RadCard", 6);
