@@ -4906,9 +4906,8 @@ public sealed partial class PdfPageRenderer
             bool paintable = candidate is >= 0 and <= 1
                 || candidate < 0 && extendStart || candidate > 1 && extendEnd;
             if (!paintable) continue;
-            if (double.IsNaN(parameter)
-                || candidate is >= 0 and <= 1 && parameter is not (>= 0 and <= 1)
-                || Math.Abs(candidate - 0.5) < Math.Abs(parameter - 0.5))
+            // ISO 32000-2 8.7.4.5.4: circles paint in increasing s, so the larger s is on top.
+            if (double.IsNaN(parameter) || candidate > parameter)
                 parameter = candidate;
         }
         return !double.IsNaN(parameter);

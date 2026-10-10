@@ -2487,6 +2487,32 @@ public sealed class PdfPageRendererTests
     }
 
     [Fact]
+    public void Render_RadialShadingUsesTheLargerParameterWhereCirclesOverlap()
+    {
+        PdfDocument source = PdfDocument.Open(new PdfDocumentBuilder()
+            .AddPage(10, 10, Encoding.ASCII.GetBytes("/Sh1 sh")).Build());
+        var function = new PdfDictionary([
+            new KeyValuePair<PdfName, PdfObject>(Name("FunctionType"), new PdfInteger(2)),
+            new KeyValuePair<PdfName, PdfObject>(Name("Domain"), Reals(0, 1)),
+            new KeyValuePair<PdfName, PdfObject>(Name("C0"), Reals(1, 0, 0)),
+            new KeyValuePair<PdfName, PdfObject>(Name("C1"), Reals(0, 0, 1)),
+            new KeyValuePair<PdfName, PdfObject>(Name("N"), new PdfInteger(1))]);
+        var shading = new PdfDictionary([
+            new KeyValuePair<PdfName, PdfObject>(Name("ShadingType"), new PdfInteger(3)),
+            new KeyValuePair<PdfName, PdfObject>(Name("ColorSpace"), Name("DeviceRGB")),
+            new KeyValuePair<PdfName, PdfObject>(Name("Coords"), Reals(2, 5, 1, 8, 5, 3)),
+            new KeyValuePair<PdfName, PdfObject>(Name("Function"), function)]);
+        PdfDocument document = AddShadingResource(source, shading);
+
+        PdfRenderedPage rendered = new PdfPageRenderer(document).Render(
+            0, new PdfRenderOptions(10, 10, includeAnnotations: false, includeFormFields: false));
+
+        // At (4.5, 5.5) s is 0.20 or 0.86; the circle for 0.86 is painted last, so it is mostly blue.
+        byte[] pixel = Pixel(rendered, 4, 4);
+        Assert.True(pixel[0] > 180 && pixel[2] < 80, $"Expected mostly blue, got {string.Join(',', pixel)}");
+    }
+
+    [Fact]
     public void Render_PaintsFunctionShadingsWithTheirMatrixAndDomain()
     {
         PdfDocument source = PdfDocument.Open(new PdfDocumentBuilder()
