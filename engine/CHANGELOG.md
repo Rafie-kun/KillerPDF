@@ -168,6 +168,7 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 - Accepted embedded TrueType fonts whose hmtx table omits trailing left side bearings.
 - Skipped out-of-file table records and clamped excess horizontal metric counts in embedded TrueType fonts.
 - Inferred the loca format from the table size when head.indexToLocFormat is invalid.
+- Loaded embedded TrueType collections by choosing the face whose PostScript name matches the PDF font.
 
 ## [1.8.5] - Unreleased
 

@@ -9,6 +9,7 @@ public sealed class TrueTypeFont
 {
     private const int MaximumTableCount = 4_096;
     private readonly byte[] _data;
+    private readonly int _directoryOffset;
     private readonly Dictionary<uint, Table> _tables;
     private readonly ICmap _cmap;
     private readonly VariationCmap? _variationCmap;
@@ -16,9 +17,11 @@ public sealed class TrueTypeFont
 
     internal bool HasUnicodeCharacterMap { get; private set; }
 
-    private TrueTypeFont(byte[] data, Dictionary<uint, Table> tables, bool hasCffOutlines, bool extraction = false)
+    private TrueTypeFont(byte[] data, Dictionary<uint, Table> tables, bool hasCffOutlines, bool extraction = false,
+        int directoryOffset = 0)
     {
         _data = data;
+        _directoryOffset = directoryOffset;
         _tables = tables;
         HasCffOutlines = hasCffOutlines;
         Table head = Required("head");
@@ -82,28 +85,71 @@ public sealed class TrueTypeFont
     public static TrueTypeFont Load(ReadOnlyMemory<byte> source)
         => LoadCore(source.ToArray(), false);
 
-    internal static TrueTypeFont LoadForExtraction(ReadOnlyMemory<byte> source)
-        => LoadCore(source.ToArray(), true);
+    internal static TrueTypeFont LoadForExtraction(ReadOnlyMemory<byte> source, string? preferredName = null)
+        => LoadCore(source.ToArray(), true, preferredName);
 
     internal static TrueTypeFont LoadOwnedForExtraction(byte[] source)
         => LoadCore(source, true);
 
-    private static TrueTypeFont LoadCore(byte[] data, bool extraction)
+    private static TrueTypeFont LoadCore(byte[] data, bool extraction, string? preferredName = null)
     {
         if (data.Length < 12)
             throw Error("The font is shorter than an sfnt header");
-        uint scaler = ReadU32(data, 0);
+        if (extraction && ReadU32(data, 0) == Tag("ttcf"))
+            return LoadCollectionFace(data, preferredName);
+        return LoadFace(data, 0, extraction);
+    }
+
+    // A TrueType collection embedded as one font program holds several faces whose table offsets
+    // are relative to the whole file. Use the face whose PostScript name matches the PDF font,
+    // otherwise the first face that loads.
+    private static TrueTypeFont LoadCollectionFace(byte[] data, string? preferredName)
+    {
+        uint count = ReadU32(data, 8);
+        if (count is 0 or > 1024 || 12L + count * 4L > data.Length)
+            throw Error("The font collection header is invalid");
+        string? wanted = FaceKey(preferredName);
+        TrueTypeFont? first = null;
+        FormatException? failure = null;
+        for (int index = 0; index < (int)count; index++)
+        {
+            uint directory = ReadU32(data, 12 + index * 4);
+            if (directory > data.Length - 12) continue;
+            try
+            {
+                TrueTypeFont face = LoadFace(data, (int)directory, true);
+                if (wanted is null || FaceKey(face.PostScriptName) == wanted) return face;
+                first ??= face;
+            }
+            catch (FormatException exception) { failure ??= exception; }
+        }
+        return first ?? throw (failure ?? Error("The font collection has no readable face"));
+    }
+
+    private static string? FaceKey(string? name)
+    {
+        if (string.IsNullOrEmpty(name)) return null;
+        if (name.Length > 7 && name[6] == '+') name = name[7..];
+        var key = new StringBuilder(name.Length);
+        foreach (char c in name)
+            if (char.IsAsciiLetterOrDigit(c)) key.Append(char.ToUpperInvariant(c));
+        return key.Length == 0 ? null : key.ToString();
+    }
+
+    private static TrueTypeFont LoadFace(byte[] data, int directory, bool extraction)
+    {
+        uint scaler = ReadU32(data, directory);
         bool hasCffOutlines = scaler == Tag("OTTO");
         if (!hasCffOutlines && scaler is not 0x00010000 && scaler != Tag("true"))
             throw Error("The file is not a supported OpenType font");
 
-        int tableCount = ReadU16(data, 4);
-        if (tableCount is < 1 or > MaximumTableCount || 12L + tableCount * 16L > data.Length)
+        int tableCount = ReadU16(data, directory + 4);
+        if (tableCount is < 1 or > MaximumTableCount || directory + 12L + tableCount * 16L > data.Length)
             throw Error("The sfnt table directory is invalid");
         var tables = new Dictionary<uint, Table>();
         for (int index = 0; index < tableCount; index++)
         {
-            int record = 12 + index * 16;
+            int record = directory + 12 + index * 16;
             uint tag = ReadU32(data, record);
             uint offset = ReadU32(data, record + 8);
             uint length = ReadU32(data, record + 12);
@@ -120,7 +166,7 @@ public sealed class TrueTypeFont
         if (hasCffOutlines && !tables.ContainsKey(Tag("CFF "))
             && !tables.ContainsKey(Tag("CFF2")))
             throw Error("An OTTO font has no CFF or CFF2 outline table");
-        return new TrueTypeFont(data, tables, hasCffOutlines, extraction);
+        return new TrueTypeFont(data, tables, hasCffOutlines, extraction, directory);
     }
 
     /// <summary>Maps a valid Unicode scalar to a glyph identifier, or zero when unmapped.</summary>
@@ -272,6 +318,8 @@ public sealed class TrueTypeFont
                 "CFF OpenType fonts are embedded in full because CFF subsetting is not yet available.");
         if (!SubsettingAllowed)
             throw new InvalidOperationException($"The embedding permissions in {PostScriptName} prohibit subsetting.");
+        if (_directoryOffset != 0)
+            throw new NotSupportedException("Faces read from a font collection are not subset.");
         return TrueTypeSubsetter.Create(_data, GlyphCount, glyphIds);
     }
 
@@ -685,6 +733,14 @@ public sealed class TrueTypeFont
     private Table Required(string tag) =>
         TryTable(tag, out Table table) ? table : throw Error($"Required font table {tag} is missing");
     private bool TryTable(string tag, out Table table) => _tables.TryGetValue(Tag(tag), out table);
+
+    /// <summary>Gets the absolute byte range of a table in <see cref="FontData"/>.</summary>
+    internal bool TryGetTableRange(string tag, out int offset, out int length)
+    {
+        bool found = TryTable(tag, out Table table);
+        (offset, length) = (table.Offset, table.Length);
+        return found;
+    }
     private ushort U16(Table table, int offset) =>
         offset >= 0 && offset + 2 <= table.Length ? ReadU16(_data, table.Offset + offset) : throw Error("A font table is truncated");
     private short S16(Table table, int offset) => unchecked((short)U16(table, offset));

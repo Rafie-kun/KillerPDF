@@ -620,6 +620,20 @@ public sealed class PdfFontResourceReaderTests
     }
 
     [Fact]
+    public void EmbeddedTrueTypeCollectionUsesTheNamedFaceOutlines()
+    {
+        byte[] second = TrueTypeFontTests.BuildTestFont(false, includeOutlines: true);
+        TrueTypeFontTests.RenameFace(second, "KillerMath");
+        byte[] collection = TrueTypeFontTests.BuildCollection(
+            TrueTypeFontTests.BuildTestFont(false, includeOutlines: true), second);
+        PdfExtractionFont font = Read(D(("Subtype", N("TrueType")), ("BaseFont", N("ABCDEF+KillerMath")),
+            ("Encoding", N("WinAnsiEncoding")),
+            ("FontDescriptor", D(("FontFile2", new PdfStream(D(), collection))))));
+
+        Assert.Single(Assert.IsType<PdfGlyphOutline>(font.GetGlyphOutline(65)).Contours);
+    }
+
+    [Fact]
     public void EmbeddedTrueTypeInfersLocaFormatWhenHeadValueIsInvalid()
     {
         byte[] bytes = TrueTypeFontTests.BuildTestFont(false, includeOutlines: true);

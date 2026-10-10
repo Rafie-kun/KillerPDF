@@ -306,6 +306,23 @@ public sealed class TrueTypeFontTests
         Assert.Equal(600, font.GetPdfAdvanceWidth(1));
     }
 
+    [Theory]
+    [InlineData(null, "KillerTest")]
+    [InlineData("ABCDEF+Killer-Math", "KillerMath")]
+    [InlineData("Missing", "KillerTest")]
+    public void LoadForExtraction_SelectsCollectionFaceByPostScriptName(string? requested, string expected)
+    {
+        byte[] second = BuildTestFont(format12: false, includeOutlines: true);
+        RenameFace(second, "KillerMath");
+        byte[] collection = BuildCollection(BuildTestFont(format12: false, includeOutlines: true), second);
+
+        Assert.Throws<FormatException>(() => TrueTypeFont.Load(collection));
+        TrueTypeFont font = TrueTypeFont.LoadForExtraction(collection, requested);
+        Assert.Equal(expected, font.PostScriptName);
+        Assert.Equal((ushort)1, font.GetGlyphId('A'));
+        Assert.Throws<NotSupportedException>(() => font.CreateSubset([1]));
+    }
+
     [Fact]
     public void GetGlyphIdByName_ReadsPostFormat2CustomNames()
     {
@@ -334,6 +351,37 @@ public sealed class TrueTypeFontTests
         TrueTypeFont font = TrueTypeFont.Load(BuildTestFont(format12: false));
 
         Assert.Equal((ushort)0, font.GetGlyphIdByName("A"));
+    }
+
+    internal static void RenameFace(byte[] font, string name)
+    {
+        byte[] current = Encoding.BigEndianUnicode.GetBytes("KillerTest");
+        byte[] replacement = Encoding.BigEndianUnicode.GetBytes(name);
+        Assert.Equal(current.Length, replacement.Length);
+        replacement.CopyTo(font, font.AsSpan().IndexOf(current.AsSpan()));
+    }
+
+    internal static byte[] BuildCollection(params byte[][] faces)
+    {
+        int header = 12 + faces.Length * 4;
+        byte[] result = new byte[header + faces.Sum(face => Align4(face.Length))];
+        Encoding.ASCII.GetBytes("ttcf").CopyTo(result, 0);
+        U32(result, 4, 0x00010000);
+        U32(result, 8, faces.Length);
+        int position = header;
+        for (int index = 0; index < faces.Length; index++)
+        {
+            faces[index].CopyTo(result, position);
+            U32(result, 12 + index * 4, position);
+            int tables = BinaryPrimitives.ReadUInt16BigEndian(faces[index].AsSpan(4));
+            for (int record = 0; record < tables; record++)
+            {
+                int field = position + 12 + record * 16 + 8;
+                U32(result, field, BinaryPrimitives.ReadUInt32BigEndian(result.AsSpan(field)) + (uint)position);
+            }
+            position += Align4(faces[index].Length);
+        }
+        return result;
     }
 
     private static void PatchTables(byte[] font, Action<string, int, int> patch)

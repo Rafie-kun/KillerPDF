@@ -79,7 +79,7 @@ public static class PdfFontResourceReader
                 : null;
             byte[]? outlineData = embeddedData ?? resolvedData;
             TrueTypeFont? embedded = embeddedData is not null
-                ? ReadEmbedded(embeddedData) : ReadResolved(resolvedData);
+                ? ReadEmbedded(embeddedData, fontName) : ReadResolved(resolvedData);
             PdfCffGlyphReader? cff = outlineData is null ? standardSymbols : PdfCffGlyphReader.TryRead(outlineData);
             PdfType1GlyphReader? type1 = type1Stream is not null
                 ? ReadType1(type1Stream) : null;
@@ -478,16 +478,13 @@ public static class PdfFontResourceReader
             return PdfType1GlyphReader.TryRead(data, checked((int)length1), checked((int)length2));
         }
 
-        private static TrueTypeFont? ReadEmbedded(byte[]? data)
+        private static TrueTypeFont? ReadEmbedded(byte[]? data, string fontName)
         {
             if (data is null) return null;
-            try { return TrueTypeFont.LoadForExtraction(data); }
+            try { return TrueTypeFont.LoadForExtraction(data, fontName); }
             catch (FormatException) { return null; } // CFF-only programs do not contain sfnt tables.
         }
 
-        // The host resolver owns these bytes and hands the same array to every font resource that
-        // maps to one installed face. TrueTypeFont never writes to its data, so loading the shared
-        // array directly keeps one copy per face instead of one per page that references it.
         // Writers that name subset glyphs by identifier use either zero-padded four-digit hex
         // ("g0024", "g003a") or plain decimal ("g24", "g1009"). Decide once per font from all of
         // its names so a four-digit decimal name is not misread as hex.
@@ -513,6 +510,9 @@ public static class PdfFontResourceReader
             return hex;
         }
 
+        // The host resolver owns these bytes and hands the same array to every font resource that
+        // maps to one installed face. TrueTypeFont never writes to its data, so loading the shared
+        // array directly keeps one copy per face instead of one per page that references it.
         private static TrueTypeFont? ReadResolved(byte[]? data)
         {
             if (data is null) return null;
@@ -781,17 +781,12 @@ public static class PdfFontResourceReader
         {
             _font = font;
             var data = font.FontData.Span;
-            int head = 0;
-            for (int i = 0; i < BinaryPrimitives.ReadUInt16BigEndian(data[4..]); i++)
-            {
-                int record = 12 + 16 * i;
-                uint tag = BinaryPrimitives.ReadUInt32BigEndian(data[record..]);
-                int offset = checked((int)BinaryPrimitives.ReadUInt32BigEndian(data[(record + 8)..]));
-                int size = checked((int)BinaryPrimitives.ReadUInt32BigEndian(data[(record + 12)..]));
-                if (tag == 0x6c6f6361) { _loca = offset; _locaLength = size; }
-                if (tag == 0x676c7966) { _glyf = offset; _glyfLength = size; }
-                if (tag == 0x68656164 && size >= 54) head = offset;
-            }
+            // Take table locations from the loaded face: a collection face's directory is not at
+            // the start of the data, and damaged directories may hold records the face skipped.
+            if (font.TryGetTableRange("loca", out int loca, out int locaLength)) { _loca = loca; _locaLength = locaLength; }
+            if (font.TryGetTableRange("glyf", out int glyf, out int glyfLength)) { _glyf = glyf; _glyfLength = glyfLength; }
+            int head = font.TryGetTableRange("head", out int headOffset, out int headLength) && headLength >= 54
+                ? headOffset : 0;
             int locationFormat = head != 0 ? BinaryPrimitives.ReadInt16BigEndian(data[(head + 50)..]) : 0;
             // Some writers leave head.indexToLocFormat invalid; the loca size then shows the format.
             _longLocations = locationFormat is 0 or 1 ? locationFormat == 1
