@@ -185,6 +185,7 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 - Outlined strokes in user space under non-uniform transforms, so the pen width and caps follow the CTM.
 - Decoded three-component JPEGs whose component identifiers are R, G and B as untransformed RGB when no Adobe marker is present.
 - Painted stencil masks whose fill color is a pattern by rendering the pattern through the rasterized stencil.
+- Computed luminosity soft masks in gray and RGB ICC groups from the group's encoded samples instead of CIE luminance.
 
 ## [1.8.5] - Unreleased
 

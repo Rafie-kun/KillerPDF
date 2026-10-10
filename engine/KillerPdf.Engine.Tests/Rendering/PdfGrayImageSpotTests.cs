@@ -142,7 +142,7 @@ public sealed class PdfGrayImageSpotTests
         return new PdfPageRenderer(PdfDocument.Open(update.Build())).Render(0, new PdfRenderOptions(128, 64));
     }
 
-    private static byte[] GrayProfile()
+    internal static byte[] GrayProfile()
     {
         byte[] profile = new byte[192];
         BinaryPrimitives.WriteUInt32BigEndian(profile, (uint)profile.Length);

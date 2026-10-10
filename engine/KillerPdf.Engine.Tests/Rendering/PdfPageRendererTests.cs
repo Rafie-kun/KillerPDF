@@ -6027,6 +6027,47 @@ public sealed class PdfPageRendererTests
         Assert.Equal(new byte[] { 255, 255, 255, 255 }, Pixel(page, 10, 5));
     }
 
+    [Fact]
+    public void Render_LuminositySoftMaskInAGrayIccGroupUsesTheGrayValue()
+    {
+        byte[] profile = PdfGrayImageSpotTests.GrayProfile();
+        const string maskContent = "/Q gs /G0 cs 1 scn 0 0 10 10 re f";
+        const string pageContent = "/M gs 0 0 1 rg 0 0 10 10 re f";
+        byte[] profileObject = [.. Encoding.ASCII.GetBytes($"<< /N 1 /Length {profile.Length} >>\nstream\n"),
+            .. profile, .. Encoding.ASCII.GetBytes("\nendstream")];
+        var objects = new List<byte[]>
+        {
+            Encoding.ASCII.GetBytes("<< /Type /Catalog /Pages 2 0 R >>"),
+            Encoding.ASCII.GetBytes("<< /Type /Pages /Kids [3 0 R] /Count 1 /MediaBox [0 0 10 10] >>"),
+            Encoding.ASCII.GetBytes("<< /Type /Page /Parent 2 0 R /Contents 4 0 R /Resources << /ExtGState << /M << /SMask << /S /Luminosity /G 5 0 R >> >> >> >> >>"),
+            Encoding.ASCII.GetBytes($"<< /Length {pageContent.Length} >>\nstream\n{pageContent}\nendstream"),
+            Encoding.ASCII.GetBytes($"<< /Type /XObject /Subtype /Form /BBox [0 0 10 10] /Group << /S /Transparency /CS [/ICCBased 6 0 R] >> /Resources << /ExtGState << /Q << /ca 0.25 >> >> /ColorSpace << /G0 [/ICCBased 6 0 R] >> >> /Length {maskContent.Length} >>\nstream\n{maskContent}\nendstream"),
+            profileObject
+        };
+        var pdf = new List<byte>(Encoding.ASCII.GetBytes("%PDF-1.7\n"));
+        var offsets = new List<int>();
+        for (int index = 0; index < objects.Count; index++)
+        {
+            offsets.Add(pdf.Count);
+            pdf.AddRange(Encoding.ASCII.GetBytes($"{index + 1} 0 obj\n"));
+            pdf.AddRange(objects[index]);
+            pdf.AddRange(Encoding.ASCII.GetBytes("\nendobj\n"));
+        }
+        int xref = pdf.Count;
+        var tail = new StringBuilder($"xref\n0 {objects.Count + 1}\n0000000000 65535 f \n");
+        foreach (int offset in offsets) tail.Append($"{offset:0000000000} 00000 n \n");
+        tail.Append($"trailer << /Size {objects.Count + 1} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n");
+        pdf.AddRange(Encoding.ASCII.GetBytes(tail.ToString()));
+
+        PdfRenderedPage page = new PdfPageRenderer(PdfDocument.Open(pdf.ToArray()))
+            .Render(0, new PdfRenderOptions(10, 10, includeAnnotations: false, includeFormFields: false));
+
+        // White at 25% over the black backdrop is gray 0.25, so blue covers a quarter of the page
+        // color. Linear CIE luminance would give about 5% and leave the page nearly white.
+        byte red = Pixel(page, 5, 5)[2];
+        Assert.InRange(red, (byte)180, (byte)200);
+    }
+
     private static PdfDocument AnnotationWithoutAppearanceDocument(string entries)
     {
         string[] objects =

@@ -1643,6 +1643,11 @@ public sealed partial class PdfPageRenderer
                         bool plainInkMask = maskPixels.Ink is not null && maskPixels.InkProfile is null
                             && deviceLuminosity;
                         bool directMask = (plainRgbMask || plainInkMask) && transfer is null;
+                        // A gray- or RGB-profiled mask stores samples in its group's space. Their
+                        // weighted sum is the luminosity other renderers use; CIE luminance would
+                        // darken gamma-encoded samples.
+                        bool profileSampleMask = luminosity && maskPixels.Ink is null
+                            && maskPixels.RgbProfile is { Components: 1 or 3 };
                         byte[] maskData = maskPixels.Data;
                         byte ConvertAt(int offset)
                         {
@@ -1670,7 +1675,10 @@ public sealed partial class PdfPageRenderer
                             Color color = luminosity ? deviceLuminosity && maskPixels.Ink is not null
                                 ? InkLuminosityColor(ReadInk(maskPixels.Ink, offset)) : maskPixels.ReadColor(offset) : default;
                             double sample = luminosity
-                                ? Luminosity(color)
+                                ? profileSampleMask
+                                    ? (0.3 * maskData[offset + 2] + 0.59 * maskData[offset + 1]
+                                        + 0.11 * maskData[offset]) / 255d
+                                    : Luminosity(color)
                                 : maskPixels.Alpha(offset) / 255d;
                             return ConvertSample(sample);
                         }
