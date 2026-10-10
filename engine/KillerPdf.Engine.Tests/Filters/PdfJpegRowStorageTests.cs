@@ -52,12 +52,27 @@ public sealed class PdfJpegRowStorageTests
         Assert.Equal(1025 * 1025 * 3, image.Samples.Length);
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void ComponentsNamedRgbWithoutAnAdobeMarkerAreNotYCbCr(bool rgbNames)
+    {
+        byte[] jpeg = Encode(8, 8, 3, 1, 1, identifiers: rgbNames ? "RGB"u8.ToArray() : null);
+
+        var untransformed = PdfJpegDecoder.DecodeImage(jpeg, 10000, 1, colorTransform: 0);
+        var automatic = PdfJpegDecoder.DecodeImage(jpeg, 10000, 1);
+
+        if (rgbNames) Assert.Equal(untransformed.Samples, automatic.Samples);
+        else Assert.NotEqual(untransformed.Samples, automatic.Samples);
+    }
+
     private static byte Level(int row, int column, int vertical, int horizontal, int component) =>
         (byte)(64 + (row * 3 + column * 5 + vertical * 7 + horizontal * 11 + component * 13) % 128);
 
     // A DC-only encoder with fixed Huffman codes makes the expected component
     // samples independent of the decoder, including rows that reuse scratch storage.
-    private static byte[] Encode(int width, int height, int components, int horizontal, int vertical, bool progressive = false)
+    private static byte[] Encode(int width, int height, int components, int horizontal, int vertical, bool progressive = false,
+        byte[]? identifiers = null)
     {
         var bytes = new List<byte> { 0xff, 0xd8 };
         void Segment(byte marker, byte[] payload)
@@ -68,14 +83,14 @@ public sealed class PdfJpegRowStorageTests
         Segment(0xdb, [0, .. Enumerable.Repeat((byte)1, 64)]);
         var frame = new List<byte> { 8, (byte)(height >> 8), (byte)height, (byte)(width >> 8), (byte)width, (byte)components };
         for (int c = 0; c < components; c++)
-            frame.AddRange([(byte)(c + 1), c == 0 ? (byte)(horizontal * 16 + vertical) : (byte)0x11, 0]);
+            frame.AddRange([identifiers?[c] ?? (byte)(c + 1), c == 0 ? (byte)(horizontal * 16 + vertical) : (byte)0x11, 0]);
         Segment(progressive ? (byte)0xc2 : (byte)0xc0, [.. frame]);
         byte[] dcCounts = new byte[16];
         dcCounts[3] = 12;
         Segment(0xc4, [0, .. dcCounts, .. Enumerable.Range(0, 12).Select(i => (byte)i),
             0x10, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
         var scan = new List<byte> { (byte)components };
-        for (int c = 0; c < components; c++) scan.AddRange([(byte)(c + 1), 0]);
+        for (int c = 0; c < components; c++) scan.AddRange([identifiers?[c] ?? (byte)(c + 1), 0]);
         scan.AddRange([0, progressive ? (byte)0 : (byte)63, 0]);
         Segment(0xda, [.. scan]);
         int pending = 0, bits = 0;

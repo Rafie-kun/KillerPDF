@@ -232,6 +232,12 @@ internal static class PdfJpegDecoder
             }
         }
 
+        // Without an Adobe marker, three components are YCbCr unless their identifiers spell
+        // R, G, B, which libjpeg and other readers take as untransformed RGB.
+        private int DefaultTransform() =>
+            _components.Count == 3 && !(_components[0].Identifier == (byte)'R'
+                && _components[1].Identifier == (byte)'G' && _components[2].Identifier == (byte)'B') ? 1 : 0;
+
         private void ReadAdobeSegment(int end)
         {
             if (end - _position >= 12
@@ -393,11 +399,11 @@ internal static class PdfJpegDecoder
             int outputWidth, int outputHeight)
         {
             int components = _components.Count;
-            int transform = colorTransform ?? _adobeTransform ?? (components == 3 ? 1 : 0);
+            int transform = colorTransform ?? _adobeTransform ?? DefaultTransform();
             if (compatibilityRecovery && colorTransform is not null
                 && (components == 1 && transform != 0
                     || components == 3 && transform == 2))
-                transform = _adobeTransform ?? (components == 3 ? 1 : 0);
+                transform = _adobeTransform ?? DefaultTransform();
             if (transform is < 0 or > 2 || components == 1 && transform != 0
                 || components == 3 && transform == 2)
                 throw Error("The JPEG color transform is not supported.");
