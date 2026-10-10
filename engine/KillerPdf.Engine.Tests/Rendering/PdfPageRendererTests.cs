@@ -5912,6 +5912,56 @@ public sealed class PdfPageRendererTests
         Assert.Equal([second, second, second, 255], Pixel(page, 1, 0));
     }
 
+    [Theory]
+    [InlineData("/Subtype /Highlight /Rect [2 2 18 8] /QuadPoints [2 8 18 8 2 2 18 2] /C [1 1 0]", 10, 15, 0, 255, 255, 10, 5)]
+    [InlineData("/Subtype /Square /Rect [2 2 18 18] /C [1 0 0] /BS << /W 2 >>", 3, 10, 0, 0, 255, 10, 10)]
+    [InlineData("/Subtype /Circle /Rect [2 2 18 18] /C [0 0 1] /IC [0 1 0] /BS << /W 2 >>", 10, 10, 0, 255, 0, 3, 3)]
+    public void Render_SynthesizesAppearancesForAnnotationsWithoutOne(string entries,
+        int x, int y, byte blue, byte green, byte red, int blankX, int blankY)
+    {
+        PdfRenderedPage page = new PdfPageRenderer(AnnotationWithoutAppearanceDocument(entries))
+            .Render(0, new PdfRenderOptions(20, 20));
+
+        Assert.Equal(new byte[] { blue, green, red, 255 }, Pixel(page, x, y));
+        Assert.Equal(new byte[] { 255, 255, 255, 255 }, Pixel(page, blankX, blankY));
+    }
+
+    [Theory]
+    [InlineData("/Subtype /Underline /Rect [2 2 18 12] /QuadPoints [2 12 18 12 2 2 18 2] /C [0 0 0]", 16)]
+    [InlineData("/Subtype /StrikeOut /Rect [2 2 18 12] /QuadPoints [2 12 18 12 2 2 18 2] /C [0 0 0]", 13)]
+    [InlineData("/Subtype /Squiggly /Rect [2 2 18 12] /QuadPoints [2 12 18 12 2 2 18 2] /C [0 0 0]", 16)]
+    public void Render_SynthesizesTextMarkupLinesForAnnotationsWithoutAppearance(string entries, int row)
+    {
+        PdfRenderedPage page = new PdfPageRenderer(AnnotationWithoutAppearanceDocument(entries))
+            .Render(0, new PdfRenderOptions(20, 20));
+
+        Assert.Contains(Enumerable.Range(3, 14), x => Pixel(page, x, row)[0] < 160);
+        Assert.Equal(new byte[] { 255, 255, 255, 255 }, Pixel(page, 10, 5));
+    }
+
+    private static PdfDocument AnnotationWithoutAppearanceDocument(string entries)
+    {
+        string[] objects =
+        [
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 /MediaBox [0 0 20 20] >>",
+            "<< /Type /Page /Parent 2 0 R /Annots [4 0 R] >>",
+            $"<< /Type /Annot {entries} /F 4 >>"
+        ];
+        var pdf = new StringBuilder("%PDF-1.7\n");
+        var offsets = new List<int>();
+        for (int index = 0; index < objects.Length; index++)
+        {
+            offsets.Add(Encoding.Latin1.GetByteCount(pdf.ToString()));
+            pdf.Append($"{index + 1} 0 obj\n{objects[index]}\nendobj\n");
+        }
+        int xref = Encoding.Latin1.GetByteCount(pdf.ToString());
+        pdf.Append($"xref\n0 {objects.Length + 1}\n0000000000 65535 f \n");
+        foreach (int offset in offsets) pdf.Append($"{offset:0000000000} 00000 n \n");
+        pdf.Append($"trailer << /Size {objects.Length + 1} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n");
+        return PdfDocument.Open(Encoding.Latin1.GetBytes(pdf.ToString()));
+    }
+
     private static PdfDocument FlaggedAnnotationDocument(string subtype, int flags)
     {
         const string appearanceContent = "0 0 2 1 re f";
