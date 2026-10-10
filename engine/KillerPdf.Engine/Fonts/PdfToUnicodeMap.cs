@@ -175,9 +175,12 @@ public sealed class PdfToUnicodeMap
             map._spaces.Clear();
             map._spaces.Add((0, 255, 1));
         }
-        else if (compatibilityRecovery && identityFont && map._characters.Count > 0
-            && map._characters.Keys.All(key => key.Length == 2))
+        else if (compatibilityRecovery && identityFont && (map._characters.Count > 0
+                ? map._characters.Keys.All(key => key.Length == 2)
+                : map._spaces.Count > 0 && map._spaces.All(space => space.Length == 1)))
         {
+            // Identity-H and Identity-V codes are two bytes. Two-byte mappings, or an empty map
+            // that only declares a one-byte code space, cannot change that.
             map._spaces.Clear();
             map._spaces.Add((0, 65535, 2));
         }

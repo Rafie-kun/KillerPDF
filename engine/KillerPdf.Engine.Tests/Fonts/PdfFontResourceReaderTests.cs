@@ -759,6 +759,22 @@ public sealed class PdfFontResourceReaderTests
     }
 
     [Fact]
+    public void RecoveryKeepsTwoByteIdentityCodesWhenAnEmptyUnicodeMapDeclaresOneByte()
+    {
+        var unicode = new PdfStream(D(), Encoding.ASCII.GetBytes(
+            "1 begincodespacerange <00> <FF> endcodespacerange"));
+        PdfDocument document = PdfDocument.OpenWithCompatibilityRecovery(
+            new PdfDocumentBuilder().AddBlankPage().Build());
+
+        PdfExtractionFont font = PdfFontResourceReader.Read(document, Type0(D(), N("Identity-H"), unicode));
+
+        PdfDecodedCharacter character = Assert.Single(
+            font.DecodeWithCompatibilityRecovery(new byte[] { 0x0B, 0x70 }));
+        Assert.Equal(0x0B70u, character.Code);
+        Assert.Equal(2, character.ByteLength);
+    }
+
+    [Fact]
     public void ToUnicodeStreamRejectsUnknownNamedDictionaryInheritance()
     {
         var derived = new PdfStream(D(("UseCMap", N("Unknown-UCS2"))),

@@ -82,7 +82,7 @@ namespace KillerPDF
             };
             titleBar.MouseLeftButtonDown += (_, e) => { if (e.ButtonState == MouseButtonState.Pressed) win.DragMove(); };
             // KillerPDF-prefixed titles keep the real wordmark. A qualifier such as "Uninstall"
-            // follows in Iceland, the "Killer" face, instead of flattening the whole title into
+            // follows in Killer Sans, the "Killer" face, instead of flattening the whole title into
             // generic monospace text.
             if (title == "KillerPDF" || title.StartsWith("KillerPDF ", System.StringComparison.Ordinal))
             {
