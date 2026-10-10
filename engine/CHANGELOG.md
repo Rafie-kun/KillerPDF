@@ -178,6 +178,7 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 - Read a bare CFF program stored as FontFile during compatibility recovery instead of falling back to a substitute.
 - Kept the base encoding's standard width for codes that Differences renames to .notdef.
 - Clipped transparency group surfaces to the surface they composite into, which can itself be a smaller group surface.
+- Renumbered classic xref subsections that start at 1 but begin with object 0's free entry during compatibility recovery.
 
 ## [1.8.5] - Unreleased
 

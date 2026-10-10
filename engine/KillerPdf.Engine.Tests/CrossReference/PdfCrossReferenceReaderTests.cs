@@ -273,6 +273,22 @@ public sealed class PdfCrossReferenceReaderTests
     }
 
     [Fact]
+    public void ReadSection_CompatibilityRecoveryRenumbersSubsectionThatStartsWithObjectZeroAtOne()
+    {
+        string padding = new('x', 200);
+        byte[] source = Encoding.ASCII.GetBytes(
+            "xref\n1 3\n0000000000 65535 f \n0000000009 00000 n \n0000000040 00000 n \n" +
+            "trailer\n<< /Size 3 >>\n" + padding);
+
+        PdfCrossReferenceSection section = PdfCrossReferenceReader.ReadSection(
+            source, 0, compatibilityRecovery: true);
+
+        Assert.Equal([0, 1, 2], [.. section.Keys.Order()]);
+        Assert.Equal(9, section[1].Field1);
+        Assert.Equal(40, section[2].Field1);
+    }
+
+    [Fact]
     public void ReadSection_CompatibilityRecoveryIgnoresRetiredInUsePlaceholder()
     {
         byte[] source = Encoding.ASCII.GetBytes(

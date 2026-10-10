@@ -222,6 +222,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Fixed overly wide word gaps in standard fonts whose encoding renames the space character to .notdef.
 - Fixed Arial Narrow, Arial Black and similar fonts drawn with plain Arial when the named face is installed.
 - Fixed pages that failed to render when a blended group sat inside a soft-masked group.
+- Fixed blank pages in files whose cross-reference table numbers its first entries one too high.
 
 ## [1.8.81] - Unreleased
 

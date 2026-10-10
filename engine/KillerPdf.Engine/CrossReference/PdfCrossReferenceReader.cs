@@ -230,14 +230,23 @@ public static class PdfCrossReferenceReader
                     $"A cross-reference section cannot contain more than {MaximumEntriesPerSection:N0} entries",
                     first.Offset);
 
+            long start = firstObject;
             for (long index = 0; index < count; index++)
             {
-                int objectNumber = (int)(firstObject + index);
+                int objectNumber = (int)(start + index);
                 PdfToken field1Token = tokenizer.Read();
                 PdfToken field2Token = tokenizer.Read();
                 PdfToken statusToken = tokenizer.Read();
                 long field1 = ParseInteger(field1Token, "An xref entry must begin with a numeric field");
                 long field2 = ParseInteger(field2Token, "An xref entry must include a generation field");
+                // Some writers number a subsection from 1 but begin it with object 0's free entry,
+                // which shifts every following offset onto the wrong object.
+                if (compatibilityRecovery && index == 0 && start == 1 && field1 == 0
+                    && field2 == 65_535 && IsKeyword(statusToken, "f"))
+                {
+                    start = 0;
+                    objectNumber = 0;
+                }
                 PdfCrossReferenceEntry entry = ParseClassicEntry(
                     source.Length, objectNumber, field1, field2, statusToken,
                     compatibilityRecovery);
