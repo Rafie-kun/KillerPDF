@@ -173,6 +173,7 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 - Resolved predefined parents named by usecmap inside ToUnicode programs, and ignored unknown parents during recovery.
 - Ignored color operators inside d1 Type 3 glyph programs, which paint in the current text color.
 - Kept two-byte Identity codes when an empty ToUnicode map declares a one-byte code space.
+- Selected simple-font glyphs through the encoding before ToUnicode text, except in symbolic fonts without an Encoding entry.
 
 ## [1.8.5] - Unreleased
 

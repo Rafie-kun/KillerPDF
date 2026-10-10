@@ -806,6 +806,31 @@ public sealed class PdfFontResourceReaderTests
         Assert.Equal(["\u03A9", "B"], font.Decode("AB"u8.ToArray()).Select(c => c.Text));
     }
 
+    [Theory]
+    [InlineData(65, 100)]
+    [InlineData(66, 0)]
+    public void EmbeddedSimpleGlyphsFollowTheEncodingBeforeToUnicode(int code, int expectedLeft)
+    {
+        var cmap = new byte[274];
+        BinaryPrimitives.WriteUInt16BigEndian(cmap.AsSpan(2), 1);
+        BinaryPrimitives.WriteUInt16BigEndian(cmap.AsSpan(6), 3);
+        BinaryPrimitives.WriteUInt32BigEndian(cmap.AsSpan(8), 12);
+        BinaryPrimitives.WriteUInt16BigEndian(cmap.AsSpan(14), 262);
+        cmap[18 + 'A'] = 1;
+        cmap[18 + 'a'] = 2;
+        byte[] bytes = TrueTypeFontTests.BuildTestFont(false, includeOutlines: true,
+            includeCompound: true, cmap: cmap);
+        PdfExtractionFont font = Read(D(("Subtype", N("TrueType")), ("BaseFont", N("SubsetCaps")),
+            ("Encoding", N("WinAnsiEncoding")),
+            ("FontDescriptor", D(("Flags", new PdfInteger(32)),
+                ("FontFile2", new PdfStream(D(), bytes)))),
+            ("ToUnicode", Stream("1 begincodespacerange <00> <FF> endcodespacerange "
+                + "2 beginbfchar <41> <0061> <42> <0061> endbfchar"))));
+
+        Assert.Equal("a", Assert.Single(font.Decode(new byte[] { (byte)code })).Text);
+        Assert.Equal(expectedLeft, font.GetGlyphBounds((uint)code)!.Value.Left);
+    }
+
     [Fact]
     public void ToUnicodeMetadataAcceptsPostScriptDefinitionsWithoutChangingMappings()
     {

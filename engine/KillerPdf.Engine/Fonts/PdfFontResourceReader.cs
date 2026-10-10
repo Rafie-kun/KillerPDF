@@ -199,6 +199,9 @@ public static class PdfFontResourceReader
                 && embedded is { HasUnicodeCharacterMap: false }
                 && Get(font, "Encoding") is null
                 && Get(descriptor, "Flags") is PdfInteger flags && (flags.Value & 4) != 0;
+            // A symbolic font without an Encoding entry has no meaningful character names.
+            bool encodingNamesGlyphs = Get(font, "Encoding") is not null
+                || Get(descriptor, "Flags") is not PdfInteger symbolFlags || (symbolFlags.Value & 4) == 0;
             ushort Glyph(uint code)
             {
                 if (composite)
@@ -223,8 +226,14 @@ public static class PdfFontResourceReader
                     if (encodedGlyph == 0) encodedGlyph = embedded.GetGlyphId((int)code + 0xF000);
                     if (encodedGlyph != 0) return encodedGlyph;
                 }
-                ushort glyph = string.IsNullOrEmpty(text)
-                    ? (ushort)0 : embedded.GetGlyphId(char.ConvertToUtf32(text, 0));
+                // The encoding selects the glyph. ToUnicode describes extracted text and can
+                // differ from what is drawn (a caps style over lowercase text), so its text is
+                // only consulted when the encoding's character is not in the font.
+                string? encodedText = encodingNamesGlyphs ? simpleText.GetValueOrDefault(code) : null;
+                ushort glyph = string.IsNullOrEmpty(encodedText)
+                    ? (ushort)0 : embedded.GetGlyphId(char.ConvertToUtf32(encodedText, 0));
+                if (glyph == 0 && !string.IsNullOrEmpty(text) && text != encodedText)
+                    glyph = embedded.GetGlyphId(char.ConvertToUtf32(text, 0));
                 if (glyph == 0 && code < 256) glyph = embedded.GetGlyphId((int)code);
                 if (glyph == 0 && code < 256) glyph = embedded.GetGlyphId((int)code + 0xF000);
                 if (glyph == 0 && resolvedData is null && code < glyphNames.Length

@@ -216,6 +216,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Fixed invisible text from Type 3 fonts whose glyphs set their own color.
 - Reduced memory when several PDF font names map to the same installed Windows font.
 - Fixed blank text from CJK fonts whose text map declares one-byte codes.
+- Fixed lowercase letters drawn in place of capitals when a PDF's text map disagrees with its encoding.
 
 ## [1.8.81] - Unreleased
 
