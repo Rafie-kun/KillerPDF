@@ -8226,8 +8226,6 @@ public sealed partial class PdfPageRenderer
         {
             lock (_sync)
             {
-                // Drop entries that alone exceed the budget, then evict the least recently used
-                // entries until the total fits it again.
                 for (LinkedListNode<(TKey Key, TValue Value, long Weight)>? node = _usage.Last;
                     node is not null;)
                 {
@@ -8239,12 +8237,6 @@ public sealed partial class PdfPageRenderer
                         _currentWeight -= node.Value.Weight;
                     }
                     node = previous;
-                }
-                while (_currentWeight > maximumWeight && _usage.Last is { } oldest)
-                {
-                    _usage.RemoveLast();
-                    _entries.Remove(oldest.Value.Key);
-                    _currentWeight -= oldest.Value.Weight;
                 }
             }
         }
