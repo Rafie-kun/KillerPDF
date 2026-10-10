@@ -3492,6 +3492,28 @@ public sealed class PdfPageRendererTests
             rendered.Diagnostics);
     }
 
+    [Theory]
+    [InlineData("1000 0 0 0 1000 1000 d1 1 1 1 rg 0 0 m 1000 0 l 500 1000 l h f", 0, 0, 255)]
+    [InlineData("1000 0 d0 0 1 0 rg 0 0 m 1000 0 l 500 1000 l h f", 0, 255, 0)]
+    public void Render_Type3UncoloredGlyphsIgnoreTheirColorOperators(string program, byte blue, byte green, byte red)
+    {
+        var content = new PdfContentStreamBuilder()
+            .SetFillRgb(1, 0, 0)
+            .BeginText()
+            .SetFont(PdfStandardFont.Helvetica, 10)
+            .SetTextMatrix(1, 0, 0, 1, 0, 0)
+            .ShowLatin1Text("AA")
+            .EndText();
+        PdfDocument document = AddType3TriangleFont(PdfDocument.Open(new PdfDocumentBuilder()
+            .AddPage(20, 10, content).Build()), program);
+
+        PdfRenderedPage rendered = new PdfPageRenderer(document).Render(0, new PdfRenderOptions(20, 10,
+            includeAnnotations: false, includeFormFields: false));
+
+        Assert.Equal([blue, green, red, 255], Pixel(rendered, 5, 5));
+        Assert.Equal([blue, green, red, 255], Pixel(rendered, 15, 5));
+    }
+
     [Fact]
     public void Render_ExecutesType3GlyphProgramsAndAdvancesText()
     {
@@ -5634,7 +5656,8 @@ public sealed class PdfPageRendererTests
         return PdfDocument.Open(update.ReplaceObject(pageReference.ObjectNumber, updatedPage).Build());
     }
 
-    private static PdfDocument AddType3TriangleFont(PdfDocument source)
+    private static PdfDocument AddType3TriangleFont(PdfDocument source,
+        string program = "0 0 m 1000 0 l 500 1000 l h f")
     {
         PdfDictionary catalog = ResolveDictionary(source, source.Trailer[Name("Root")]);
         PdfDictionary pages = ResolveDictionary(source, catalog[Name("Pages")]);
@@ -5646,7 +5669,7 @@ public sealed class PdfPageRendererTests
         PdfIndirectReference fontReference = Assert.IsType<PdfIndirectReference>(fontEntry.Value);
         var update = new PdfIncrementalUpdateBuilder(source);
         PdfIndirectReference glyphReference = update.AddObject(new PdfStream(
-            new PdfDictionary([]), "0 0 m 1000 0 l 500 1000 l h f"u8));
+            new PdfDictionary([]), Encoding.ASCII.GetBytes(program)));
         var font = new PdfDictionary([
             new KeyValuePair<PdfName, PdfObject>(Name("Type"), Name("Font")),
             new KeyValuePair<PdfName, PdfObject>(Name("Subtype"), Name("Type3")),

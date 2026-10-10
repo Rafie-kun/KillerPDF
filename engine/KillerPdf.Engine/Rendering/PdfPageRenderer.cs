@@ -49,6 +49,19 @@ public sealed partial class PdfPageRenderer
     private readonly BoundedCache<PdfDictionary, PdfExtractionFont> _fontCache;
     private readonly BoundedCache<PdfGlyphOutline, IReadOnlyList<Point[]>> _glyphPathCache;
     private readonly BoundedCache<ImageCacheKey, DecodedImage> _imageCache;
+    // A d1 glyph is a shape painted in the text's current color, so ISO 32000-2 9.6.4 has the
+    // color operators inside it ignored. The filtered program is kept per glyph stream.
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<PdfStream,
+        IReadOnlyList<PdfContentInstruction>> _uncoloredGlyphs = new(ReferenceEqualityComparer.Instance);
+    private static readonly HashSet<string> GlyphColorOperators =
+        ["g", "G", "rg", "RG", "k", "K", "cs", "CS", "sc", "SC", "scn", "SCN"];
+
+    private IReadOnlyList<PdfContentInstruction> UncoloredGlyph(PdfStream glyph,
+        IReadOnlyList<PdfContentInstruction> instructions) =>
+        instructions.Count > 0 && instructions[0].Operator == "d1"
+            ? _uncoloredGlyphs.GetOrAdd(glyph, _ =>
+                [.. instructions.Where(instruction => !GlyphColorOperators.Contains(instruction.Operator))])
+            : instructions;
 
     private static BoundedCache<PdfDictionary, PdfExtractionFont> CreateFontCache() =>
         new(256, ReferenceEqualityComparer.Instance);
@@ -1339,6 +1352,7 @@ public sealed partial class PdfPageRenderer
                             diagnostics.Add("An undecodable Type 3 glyph was omitted.");
                             glyphInstructions = [];
                         }
+                        glyphInstructions = UncoloredGlyph(glyph, glyphInstructions);
                         if (paintsType3)
                             Process(glyphInstructions, fontResources, glyphState, depth + 1,
                                 beginKnockoutObjects: false);

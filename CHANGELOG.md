@@ -213,6 +213,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Fixed missing text from fonts embedded as TrueType collections.
 - Fixed boxes in place of text from embedded TrueType fonts whose character map uses an uncommon layout.
 - Fixed missing text in fonts whose text-extraction map builds on a standard character collection.
+- Fixed invisible text from Type 3 fonts whose glyphs set their own color.
 - Reduced memory when several PDF font names map to the same installed Windows font.
 
 ## [1.8.81] - Unreleased
