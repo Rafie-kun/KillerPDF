@@ -1466,6 +1466,37 @@ public sealed partial class PdfPageRenderer
         return coverage;
     }
 
+    /// <summary>
+    /// Fills the combined coverage of every active clip for pixels left to right of one row,
+    /// with the same per-pixel arithmetic as <see cref="ClipCoverage"/>.
+    /// </summary>
+    private static void FillClipRow(IReadOnlyList<ClipRegion> clips, int y, int left, int right,
+        byte[] buffer)
+    {
+        Span<byte> row = buffer.AsSpan(0, right - left);
+        row.Fill(255);
+        for (int index = 0; index < clips.Count; index++)
+        {
+            CoverageMask mask = clips[index].Mask;
+            if (y < mask.Top || y >= mask.Bottom || mask.Right <= left || mask.Left >= right)
+            {
+                row.Clear();
+                return;
+            }
+            int start = Math.Max(left, mask.Left), end = Math.Min(right, mask.Right);
+            row[..(start - left)].Clear();
+            row[(end - left)..].Clear();
+            if (mask.Coverage is null) continue;
+            ReadOnlySpan<byte> source = mask.Coverage.AsSpan(mask.RowOffset(y) + start - mask.Left, end - start);
+            Span<byte> target = row.Slice(start - left, end - start);
+            for (int i = 0; i < target.Length; i++)
+            {
+                int coverage = target[i], clip = source[i];
+                target[i] = (byte)(clip == 255 ? coverage : coverage == 255 ? clip : (coverage * clip + 127) / 255);
+            }
+        }
+    }
+
     /// <summary>Returns the combined clip coverage at one pixel as an opacity factor.</summary>
     private static double ClipAlpha(IReadOnlyList<ClipRegion> clips, int x, int y) =>
         clips.Count == 0 ? 1 : ClipCoverage(clips, x, y) / 255d;
@@ -1778,17 +1809,21 @@ public sealed partial class PdfPageRenderer
             ? paint.OverprintComponents & 15 : 0;
         uint directPacked = directColor.Blue | (uint)directColor.Green << 8
             | (uint)directColor.Red << 16 | 0xFF000000u;
+        // Combined clip coverage for the current row, filled once per row instead of looking up
+        // every clip mask for every pixel.
+        byte[]? clipRow = perPixelClip ? RasterBuffers.Rent(right - left) : null;
         for (int y = firstRow; y < lastRow; y++)
         {
             cancellationToken.ThrowIfCancellationRequested();
             int maskRow = mask.RowOffset(y) - mask.Left;
+            if (clipRow is not null) FillClipRow(clips, y, left, right, clipRow);
             for (int x = left; x < right; x++)
             {
                 int cover = coverage is null ? 255 : coverage[maskRow + x];
                 if (cover == 0) continue;
                 if (perPixelClip)
                 {
-                    int clipCover = ClipCoverage(clips, x, y);
+                    int clipCover = clipRow![x - left];
                     if (clipCover == 0) continue;
                     cover = clipCover == 255 ? cover : (cover * clipCover + 127) / 255;
                 }
@@ -1852,6 +1887,7 @@ public sealed partial class PdfPageRenderer
                     resolvedInk: pixels.Ink is not null || pixels.HasRgbSpotShadow ? ink : null);
             }
         }
+        if (clipRow is not null) RasterBuffers.Return(clipRow);
     }
 
     private static void TrackGroupAlpha(byte[] groupAlpha, int offset, double opacity)

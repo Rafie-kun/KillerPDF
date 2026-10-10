@@ -108,6 +108,7 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 - Reduced cancellation-check overhead during exact one-bit image reduction.
 - Reduced JBIG2 probability-context storage and arithmetic decoding overhead with unchanged decoded pixels.
 - Decoded ICC profiles are shared within a document instead of across the process, keeping only decoded bytes within half the previous budget.
+- Faster fills under soft clips: combined clip coverage is computed once per row instead of per pixel, with unchanged output.
 
 ### Fixed
 
