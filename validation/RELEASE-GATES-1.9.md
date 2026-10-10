@@ -78,18 +78,23 @@ Current gate values are tracked in
 `C:/Users/steve/kp-bench-render/release-19-baseline/BASELINE.md` and summarized
 here only at release checkpoints.
 
-| Gate | Status |
+| Gate | Status at 096a2cf versus v1.8.80 (2026-10-10) |
 | --- | --- |
-| A1 | Baseline accepted at 096a2cf (639 of 649 exact, ten expected failures). PDF.js baseline pending. |
+| A1 | Baseline accepted (639 of 649 exact, ten expected failures). PDF.js baseline pending. |
 | A2 | Not yet run. |
 | A3 | Partially dispositioned; list pending. |
 | A4 | Not yet run. |
-| S1 to S3 | Harness not yet built. |
-| S4 | Prior measurement +10.6% at 512, +8.5% at 2048 against unreleased 1.8.80-era payload; to be re-measured against v1.8.80. |
-| S5 | Prior measurement +105% at 512, +94% at 2048 against 1.8.81. |
-| M1 | Prior measurement 1.9 lower (479 vs 619 MiB at 512). |
-| M2 | Prior measurement +45% at 512, +5% at 2048. |
-| M3 | Not yet measured. |
+| S1 | Fails on four of five documents: painted +10% to +30% (article 2276 vs 1747 ms). Scan is 9% faster. First paint only +3% to +10%; the gap is the final-quality pass. |
+| S2 | Passes on all five (within 1% on three, +7.5% on 210260, 23% faster on the scan). |
+| S3 | Fails on four of five: 1.9 needs 580 to 730 ms after the last key, 1.8 about 360 ms. Altona 10% faster on 1.9. |
+| S4 | Fails narrowly: shared-file raster sum +12.7% at 512, +15.9% at 2048. 1.9 renders 634 files to PDFium's 600. |
+| S5 | Informational: +98% at 512, +85% at 2048. |
+| M1 | Passes: 25% below 1.8 at both sizes. |
+| M2 | Fails: +61% at 512 (246 vs 153 MiB), +18% at 2048 (322 vs 274 MiB). |
+| M3 | Fails on the JBIG2 scan (+87%, 1208 vs 646 MiB) and altona (+21%); +5% to +8% on the other three. |
+
+Measurement detail, noise floor and per-file contributors:
+`C:/Users/steve/kp-bench-render/release-19-baseline/BASELINE.md`.
 
 The gate log kept in this file through 2026-10-05 is preserved verbatim in
 `validation/records/RELEASE-GATES-1.9-history-2026-10-05.md`.

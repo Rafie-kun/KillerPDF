@@ -20,9 +20,10 @@ dotnet run --project tests/KillerPDF.LatencySmoke/KillerPDF.LatencySmoke.csproj 
   --runs 5 --warmup 1 --out $env:USERPROFILE\kp-bench-render\latency-<date>
 ```
 
-Each version gets its own settings folder under the output directory through
-`KILLERPDF_LAUNCHER_PATH`, so the user's real settings are untouched and every version
-starts from the same state. Order alternates between versions on every run. Warmup runs are
+Each launch gets its own settings folder under the output directory through
+`KILLERPDF_LAUNCHER_PATH`, so the user's real settings are untouched. The first launch of a
+version seeds that folder with a plain open and close; every measured run then starts from a
+copy of the seed, so the saved zoom or window state of one run never leaks into the next. Order alternates between versions on every run. Warmup runs are
 recorded and flagged in results.csv, never discarded.
 
 How events are detected: the window client area is captured every 33 ms and reduced to a
