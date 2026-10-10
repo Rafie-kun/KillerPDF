@@ -97,6 +97,7 @@ public sealed partial class PdfPageRenderer
         internal readonly BoundedCache<GlyphMaskKey, GlyphMask?> GlyphMaskCache;
         internal readonly BoundedCache<GlyphMaskKey, GlyphGeometry?> GlyphGeometryCache;
         internal readonly BoundedCache<PdfObject, (PdfColorTransform? Transform, int Bytes)> ColorProfileCache;
+        internal readonly BoundedCache<string, byte[]> IccBytesCache;
 
         /// <summary>Creates a fresh shared cache with the engine's default per-cache limits.</summary>
         public SharedCache()
@@ -109,6 +110,7 @@ public sealed partial class PdfPageRenderer
             GlyphMaskCache = CreateGlyphMaskCache();
             GlyphGeometryCache = CreateGlyphGeometryCache();
             ColorProfileCache = CreateColorProfileCache();
+            IccBytesCache = CreateIccBytesCache();
         }
     }
 
@@ -159,6 +161,7 @@ public sealed partial class PdfPageRenderer
         _glyphMaskCache = sharedCache?.GlyphMaskCache ?? CreateGlyphMaskCache();
         _glyphGeometryCache = sharedCache?.GlyphGeometryCache ?? CreateGlyphGeometryCache();
         _colorProfiles = sharedCache?.ColorProfileCache ?? CreateColorProfileCache();
+        _iccBytes = sharedCache?.IccBytesCache ?? CreateIccBytesCache();
     }
 
     private static bool UsesCorrectedBlendEndpoints(PdfDocument document)

@@ -13,9 +13,11 @@ public sealed partial class PdfPageRenderer
     private readonly BoundedCache<PdfObject, (PdfColorTransform? Transform, int Bytes)> _colorProfiles;
     private static BoundedCache<PdfObject, (PdfColorTransform? Transform, int Bytes)> CreateColorProfileCache() =>
         new(8, ReferenceEqualityComparer.Instance, 4 * 1024 * 1024, entry => entry.Bytes);
-    // Decoded profiles shared across renderers and documents, keyed by length and SHA-256 of the
-    // encoded stream. Only the decoded bytes are kept so a batch does not carry both copies.
-    private static readonly BoundedCache<string, byte[]> SharedIccBytes =
+    // Decoded profiles keyed by length and SHA-256 of the encoded stream, so the same profile
+    // embedded as separate streams is decoded once. Held with the document's shared cache so it
+    // is released with the document.
+    private readonly BoundedCache<string, byte[]> _iccBytes;
+    private static BoundedCache<string, byte[]> CreateIccBytesCache() =>
         new(8, maximumWeight: 8 * 1024 * 1024, weight: decoded => decoded.Length);
     private static readonly Func<double, double, double, Color> IccXyzToDisplay =
         CreateXyzConverter([0.9642, 1, 0.8249]);
@@ -131,10 +133,10 @@ public sealed partial class PdfPageRenderer
                 {
                     string key = $"{stream.EncodedData.Length}:"
                         + Convert.ToHexString(SHA256.HashData(stream.EncodedData.Span));
-                    if (!SharedIccBytes.TryGet(key, out bytes))
+                    if (!_iccBytes.TryGet(key, out bytes))
                     {
                         byte[] decoded = _document.DecodeStream(stream, 16 * 1024 * 1024);
-                        bytes = SharedIccBytes.GetOrAdd(key, _ => decoded);
+                        bytes = _iccBytes.GetOrAdd(key, _ => decoded);
                     }
                 }
                 else bytes = _document.DecodeStream(stream, 16 * 1024 * 1024);
