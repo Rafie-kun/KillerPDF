@@ -3240,7 +3240,7 @@
                                            Opacity="{DynamicResource WordmarkShadowOpacity}">
                                     <TextBlock.Effect><BlurEffect Radius="2"/></TextBlock.Effect>
                                 </TextBlock>
-                                <TextBlock FontFamily="{DynamicResource WordmarkFont}" FontSize="23.1" Margin="1,2,0,0" IsHitTestVisible="False" Opacity="{DynamicResource WordmarkAccentShadowOpacity}"><TextBlock.Effect><BlurEffect Radius="3"/></TextBlock.Effect><Run Text="Killer" FontFamily="{DynamicResource WordmarkFont}" FontSize="23.1" Foreground="Transparent"/><Run Text="PDF" FontFamily="{DynamicResource WordmarkFontPdf}" FontSize="32.55" Foreground="#D8000000"/></TextBlock>
+                                <TextBlock FontFamily="{DynamicResource WordmarkFont}" FontSize="23.1" Margin="1,2,0,0" IsHitTestVisible="False" Opacity="{DynamicResource WordmarkAccentShadowOpacity}"><TextBlock.Effect><BlurEffect Radius="3"/></TextBlock.Effect><Run Text="Killer" FontFamily="{DynamicResource WordmarkFont}" FontSize="23.1" Foreground="Transparent"/><Run Text="PDF" FontFamily="{DynamicResource WordmarkFontPdf}" FontSize="25.23" Foreground="#D8000000"/></TextBlock>
                                 <TextBlock x:Name="AboutLogoBlock"
                                            FontFamily="{DynamicResource WordmarkFont}" FontSize="23.1" Cursor="Hand"/>
                             </Grid>

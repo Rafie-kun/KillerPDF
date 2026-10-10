@@ -15,7 +15,7 @@
     </shell:WindowChrome.WindowChrome>
     <Window.Resources>
         <!-- Family wordmark faces (OFL): Iceland for "Killer", Freckle Face for "PDF" at
-             capitals twice the height of Killer's, no gap. -->
+             capitals 1.55 times the height of Killer's, no gap. -->
         <FontFamily x:Key="Wordmark">./Fonts/#Iceland</FontFamily>
         <FontFamily x:Key="WordmarkAccent">./Fonts/#Freckle Face</FontFamily>
         <SolidColorBrush x:Key="Green" Color="#1ea54c"/>
@@ -116,7 +116,7 @@
                         <icons:AppIcon.Effect><DropShadowEffect Color="Black" BlurRadius="4" ShadowDepth="1" Opacity="0.9"/></icons:AppIcon.Effect>
                     </icons:AppIcon>
                     <StackPanel Grid.Row="1" Margin="0,14,0,0">
-                        <TextBlock><TextBlock.Effect><DropShadowEffect Color="Black" BlurRadius="3" ShadowDepth="1" Direction="270" Opacity="0.65"/></TextBlock.Effect><Run Text="Killer" FontFamily="{StaticResource Wordmark}" FontSize="28.6"/><Run Text="PDF" FontFamily="{StaticResource WordmarkAccent}" FontSize="40.3" Foreground="{StaticResource Green}"/></TextBlock>
+                        <TextBlock><TextBlock.Effect><DropShadowEffect Color="Black" BlurRadius="3" ShadowDepth="1" Direction="270" Opacity="0.65"/></TextBlock.Effect><Run Text="Killer" FontFamily="{StaticResource Wordmark}" FontSize="28.6"/><Run Text="PDF" FontFamily="{StaticResource WordmarkAccent}" FontSize="31.23" Foreground="{StaticResource Green}"/></TextBlock>
                         <TextBlock x:Name="SetupVersionLabel" FontFamily="Consolas" FontSize="9.5" Foreground="#a0a0a0" Margin="1,2,0,0"/>
                     </StackPanel>
                     <TextBlock Grid.Row="2" Margin="1,24,5,0" TextWrapping="Wrap" Foreground="#d0d0d0" LineHeight="17"

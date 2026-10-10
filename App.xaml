@@ -105,8 +105,8 @@
                  # must match the font's name table; an approximate name makes WPF substitute the
                  system font. -->
             <!-- Family wordmark faces, both OFL (licenses in Fonts/): Iceland for "Killer", Freckle Face
-                 for the app name. The app-name half is set at 1.55x the old "Killer" size and
-                 "Killer" at 1.1x, which puts its capitals at 2x the height of Killer's, the same as
+                 for the app name. The app-name half is set at 1.201x the old "Killer" size and
+                 "Killer" at 1.1x, which puts its capitals at 1.55x the height of Killer's, the same as
                  the websites. -->
             <FontFamily x:Key="WordmarkFont">./Fonts/#Iceland</FontFamily>
             <FontFamily x:Key="WordmarkFontPdf">./Fonts/#Freckle Face</FontFamily>
