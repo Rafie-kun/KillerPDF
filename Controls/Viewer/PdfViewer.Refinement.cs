@@ -84,7 +84,9 @@ public partial class PdfViewer
                 double deviceWidth = transform.TransformBounds(new Rect(0, 0, image.ActualWidth, image.ActualHeight)).Width * dpi.DpiScaleX;
                 double deviceHeight = transform.TransformBounds(new Rect(0, 0, image.ActualWidth, image.ActualHeight)).Height * dpi.DpiScaleY;
                 int maximum = Math.Clamp((int)Math.Ceiling(Math.Max(deviceWidth, deviceHeight)), 1, 6144);
-                if (maximum <= Math.Max(source.PixelWidth, source.PixelHeight)) continue;
+                // Same 5% hysteresis as the 1.8 re-sharpen: a base render within 5% of the drawn
+                // size shows no visible softness, and re-rendering it only delays the settled view.
+                if (maximum <= Math.Max(source.PixelWidth, source.PixelHeight) * 1.05) continue;
                 double l = visible.Left / image.ActualWidth, t = visible.Top / image.ActualHeight;
                 double r = visible.Right / image.ActualWidth, b = visible.Bottom / image.ActualHeight;
                 // Reserve at most one bounded region result; its raster is never cached as a full page.
