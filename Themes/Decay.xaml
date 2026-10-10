@@ -111,8 +111,8 @@
     <SolidColorBrush x:Key="MenuSeparatorBrush" Color="#FF6B705C" po:Freeze="True"/>
     <sys:Double x:Key="TitleBarHeight" xmlns:sys="clr-namespace:System;assembly=mscorlib">36</sys:Double>
     <!-- Modern wordmark sizes preserve the existing title typography. -->
-    <sys:Double x:Key="TitleWordmarkSize" xmlns:sys="clr-namespace:System;assembly=mscorlib">18.15</sys:Double>
-    <sys:Double x:Key="TitleWordmarkBoldSize" xmlns:sys="clr-namespace:System;assembly=mscorlib">19.82</sys:Double>
+    <sys:Double x:Key="TitleWordmarkSize" xmlns:sys="clr-namespace:System;assembly=mscorlib">12.91</sys:Double>
+    <sys:Double x:Key="TitleWordmarkBoldSize" xmlns:sys="clr-namespace:System;assembly=mscorlib">19.38</sys:Double>
     <sys:Double x:Key="WordmarkShadowOpacity" xmlns:sys="clr-namespace:System;assembly=mscorlib">0.45</sys:Double>
     <sys:Double x:Key="PaneShadowOpacity" xmlns:sys="clr-namespace:System;assembly=mscorlib">0.6</sys:Double>
     <sys:Double x:Key="BarShadowOpacity" xmlns:sys="clr-namespace:System;assembly=mscorlib">0.38</sys:Double>
