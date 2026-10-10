@@ -170,6 +170,7 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 - Inferred the loca format from the table size when head.indexToLocFormat is invalid.
 - Loaded embedded TrueType collections by choosing the face whose PostScript name matches the PDF font.
 - Read format 12 cmap subtables filed under the Windows Unicode BMP record in embedded fonts.
+- Resolved predefined parents named by usecmap inside ToUnicode programs, and ignored unknown parents during recovery.
 
 ## [1.8.5] - Unreleased
 

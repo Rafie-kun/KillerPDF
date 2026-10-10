@@ -732,6 +732,33 @@ public sealed class PdfFontResourceReaderTests
     }
 
     [Fact]
+    public void ToUnicodeStreamInheritsAdobeCollectionNamedOnlyInTheProgram()
+    {
+        var derived = new PdfStream(D(), Encoding.ASCII.GetBytes(
+            "/Adobe-Japan1-UCS2 usecmap 1 beginbfchar <0001> <03A9> endbfchar"));
+        PdfExtractionFont font = Read(Type0(D(), N("Identity-H"), derived));
+
+        Assert.Equal(["\u03A9", "!"], font.Decode(new byte[] { 0, 1, 0, 2 })
+            .Select(character => character.Text));
+    }
+
+    [Fact]
+    public void RecoveryIgnoresUnknownParentNamedOnlyInTheProgram()
+    {
+        var derived = new PdfStream(D(), Encoding.ASCII.GetBytes(
+            "/Unknown-UCS2 usecmap 1 begincodespacerange <0000> <FFFF> endcodespacerange "
+            + "1 beginbfchar <0001> <03A9> endbfchar"));
+        PdfDictionary dictionary = Type0(D(), N("Identity-H"), derived);
+        Assert.Throws<NotSupportedException>(() => Read(dictionary));
+        PdfDocument document = PdfDocument.OpenWithCompatibilityRecovery(
+            new PdfDocumentBuilder().AddBlankPage().Build());
+
+        PdfExtractionFont font = PdfFontResourceReader.Read(document, dictionary);
+
+        Assert.Equal("\u03A9", Assert.Single(font.Decode(new byte[] { 0, 1 })).Text);
+    }
+
+    [Fact]
     public void ToUnicodeStreamRejectsUnknownNamedDictionaryInheritance()
     {
         var derived = new PdfStream(D(("UseCMap", N("Unknown-UCS2"))),

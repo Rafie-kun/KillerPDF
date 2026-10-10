@@ -77,7 +77,21 @@ public sealed class PdfToUnicodeMap
             if (op == "usecmap")
             {
                 if (inherited is null)
-                    throw new NotSupportedException("Named inherited ToUnicode maps are not supported.");
+                {
+                    // A map can name its parent only inside the program. A predefined parent is
+                    // merged under any mappings already read; recovery ignores an unknown one.
+                    PdfToUnicodeMap? parent = operands is [PdfName parentName]
+                        ? PdfPredefinedCMaps.FindUnicodeMap(parentName.ValueAsLatin1()) : null;
+                    if (parent is null)
+                    {
+                        if (compatibilityRecovery && operands is [PdfName]) continue;
+                        throw new NotSupportedException("Named inherited ToUnicode maps are not supported.");
+                    }
+                    foreach (var pair in parent._characters) map._characters.TryAdd(pair.Key, pair.Value);
+                    foreach (var space in parent._spaces)
+                        if (!map._spaces.Contains(space)) map._spaces.Add(space);
+                    continue;
+                }
                 if (operands.Count != 1 || operands[0] is not PdfName)
                     throw new FormatException("Invalid inherited ToUnicode map reference.");
                 continue;
