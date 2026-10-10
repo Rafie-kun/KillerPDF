@@ -10,6 +10,7 @@ internal sealed class InstalledPdfFontResolver : IPdfFontResolver
     private readonly Dictionary<PdfFontRequest, byte[]?> _cache = [];
     private readonly Dictionary<(string Family, bool Bold, bool Italic), byte[]?>
         _familyCache = [];
+    private readonly Dictionary<string, byte[]?> _standardFaceCache = new(StringComparer.OrdinalIgnoreCase);
     private readonly Lock _gate = new();
 
     public byte[]? Resolve(PdfFontRequest request)
@@ -32,7 +33,9 @@ internal sealed class InstalledPdfFontResolver : IPdfFontResolver
         }
     }
 
-    private static byte[]? StandardWindowsFace(string family, bool bold, bool italic)
+    // Every request that maps to one standard face shares a single array, so the several PDF
+    // names for a face hold one copy of its file instead of one copy per name.
+    private byte[]? StandardWindowsFace(string family, bool bold, bool italic)
     {
         string? fileName = (family, bold, italic) switch
         {
@@ -51,12 +54,18 @@ internal sealed class InstalledPdfFontResolver : IPdfFontResolver
             _ => null
         };
         if (fileName is null) return null;
+        if (_standardFaceCache.TryGetValue(fileName, out byte[]? cached)) return cached;
+        byte[]? bytes = null;
         string windows = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
-        if (windows.Length == 0) return null;
-        string path = Path.Combine(windows, "Fonts", fileName);
-        try { return File.Exists(path) ? File.ReadAllBytes(path) : null; }
-        catch (IOException) { return null; }
-        catch (UnauthorizedAccessException) { return null; }
+        if (windows.Length > 0)
+        {
+            string path = Path.Combine(windows, "Fonts", fileName);
+            try { bytes = File.Exists(path) ? File.ReadAllBytes(path) : null; }
+            catch (IOException) { bytes = null; }
+            catch (UnauthorizedAccessException) { bytes = null; }
+        }
+        _standardFaceCache[fileName] = bytes;
+        return bytes;
     }
 
     private byte[]? FaceBytes(string family, bool bold, bool italic)

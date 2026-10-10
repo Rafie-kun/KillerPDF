@@ -211,6 +211,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Fixed text from embedded TrueType fonts with a damaged table directory or metric count.
 - Fixed scrambled glyphs from embedded TrueType fonts that mislabel their glyph location format.
 - Fixed missing text from fonts embedded as TrueType collections.
+- Reduced memory when several PDF font names map to the same installed Windows font.
 
 ## [1.8.81] - Unreleased
 
