@@ -619,6 +619,26 @@ public sealed class PdfFontResourceReaderTests
         Assert.Equal("\u20AC", Assert.Single(font.Decode(new byte[] { 128 })).Text);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void RecoveryReadsABareCffProgramStoredAsFontFile(bool recovery)
+    {
+        byte[] program = [.. PdfCffGlyphReaderTests.Numbers(10, 20), 21,
+            .. PdfCffGlyphReaderTests.Numbers(100, 0, 0, 200, -100, 0), 5, 14];
+        PdfDictionary dictionary = D(("Subtype", N("Type1")), ("BaseFont", N("Subset")),
+            ("FontDescriptor", D(("Flags", new PdfInteger(32)),
+                ("FontFile", new PdfStream(D(), PdfCffGlyphReaderTests.Build(program))))));
+        PdfDocument document = recovery
+            ? PdfDocument.OpenWithCompatibilityRecovery(new PdfDocumentBuilder().AddBlankPage().Build())
+            : Document;
+
+        PdfGlyphBounds? bounds = PdfFontResourceReader.Read(document, dictionary).GetGlyphBounds(65);
+
+        if (recovery) Assert.Equal(new PdfGlyphBounds(10, 20, 110, 220), bounds);
+        else Assert.NotEqual(new PdfGlyphBounds(10, 20, 110, 220), bounds);
+    }
+
     [Fact]
     public void EmbeddedTrueTypeCollectionUsesTheNamedFaceOutlines()
     {

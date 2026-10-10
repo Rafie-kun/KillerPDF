@@ -66,6 +66,15 @@ public static class PdfFontResourceReader
             byte[]? embeddedData = (Get(descriptor, "FontFile2") ?? Get(descriptor, "FontFile3")) is PdfStream embeddedStream
                 ? DecodeEmbeddedFont(embeddedStream) : null;
             PdfStream? type1Stream = Get(descriptor, "FontFile") as PdfStream;
+            byte[]? type1Data = type1Stream is null ? null : Decode(type1Stream);
+            // Some writers put a bare CFF program in FontFile instead of FontFile3.
+            if (document.UsesCompatibilityRecovery && embeddedData is null && type1Data is
+                { Length: >= 4 } candidate && candidate[0] == 1 && candidate[1] == 0
+                && candidate[2] >= 4 && candidate[3] is >= 1 and <= 4)
+            {
+                embeddedData = type1Data;
+                type1Stream = null;
+            }
             PdfCffGlyphReader? standardSymbols = !composite && subtype != "Type3"
                 && embeddedData is null && type1Stream is null
                 ? PdfStandardSymbolFonts.Create(standardMetricsName) : null;
@@ -82,7 +91,7 @@ public static class PdfFontResourceReader
                 ? ReadEmbedded(embeddedData, fontName) : ReadResolved(resolvedData);
             PdfCffGlyphReader? cff = outlineData is null ? standardSymbols : PdfCffGlyphReader.TryRead(outlineData);
             PdfType1GlyphReader? type1 = type1Stream is not null
-                ? ReadType1(type1Stream) : null;
+                ? ReadType1(type1Stream, type1Data!) : null;
             TrueTypeFont? substitute = subtype is not null and not "Type3"
                 ? PdfStandardFontSubstitutes.Find(metricsName,
                     Get(descriptor, "Flags") is PdfInteger fallbackFlags ? fallbackFlags.Value : 0) : null;
@@ -471,9 +480,8 @@ public static class PdfFontResourceReader
             return result;
         }
 
-        private PdfType1GlyphReader? ReadType1(PdfStream stream)
+        private PdfType1GlyphReader? ReadType1(PdfStream stream, byte[] data)
         {
-            byte[] data = Decode(stream);
             double length1 = Number(Get(stream.Dictionary, "Length1"), 0);
             double length2 = Number(Get(stream.Dictionary, "Length2"), 0);
             if (document.UsesCompatibilityRecovery

@@ -175,6 +175,7 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 - Kept two-byte Identity codes when an empty ToUnicode map declares a one-byte code space.
 - Selected simple-font glyphs through the encoding before ToUnicode text, except in symbolic fonts without an Encoding entry.
 - Read CFF dictionary reals without mantissa digits as zero and reserved bytes 31 and 255 the way FreeType does, instead of rejecting the font.
+- Read a bare CFF program stored as FontFile during compatibility recovery instead of falling back to a substitute.
 
 ## [1.8.5] - Unreleased
 

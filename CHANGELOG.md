@@ -218,6 +218,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Fixed blank text from CJK fonts whose text map declares one-byte codes.
 - Fixed lowercase letters drawn in place of capitals when a PDF's text map disagrees with its encoding.
 - Fixed embedded fonts replaced by a substitute when their settings contain malformed numbers.
+- Fixed oversized, crowded text from fonts that store a CFF program where a Type 1 program belongs.
 
 ## [1.8.81] - Unreleased
 
