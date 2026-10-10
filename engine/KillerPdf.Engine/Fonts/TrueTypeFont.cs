@@ -370,6 +370,8 @@ public sealed class TrueTypeFont
                 (0, _, 10) => 430,
                 (0, _, 8) => 420,
                 (3, 1, 4) => 400,
+                // Some embedded subsets file a format 12 table under the BMP record instead of 3,10.
+                (3, 1, 12) when extraction => 395,
                 (0, _, 4) => 350,
                 (3, 1, 6) => 340,
                 (0, _, 6) => 330,

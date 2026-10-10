@@ -324,6 +324,19 @@ public sealed class TrueTypeFontTests
     }
 
     [Fact]
+    public void LoadForExtraction_ReadsFormat12UnderTheWindowsBmpRecord()
+    {
+        byte[] cmap = Cmap12();
+        U16(cmap, 6, 1);
+        byte[] bytes = BuildTestFont(format12: false, cmap: cmap);
+
+        Assert.Throws<NotSupportedException>(() => TrueTypeFont.Load(bytes));
+        TrueTypeFont font = TrueTypeFont.LoadForExtraction(bytes);
+        Assert.Equal((ushort)1, font.GetGlyphId(0x1F600));
+        Assert.Equal((ushort)0, font.GetGlyphId('A'));
+    }
+
+    [Fact]
     public void GetGlyphIdByName_ReadsPostFormat2CustomNames()
     {
         TrueTypeFont font = TrueTypeFont.Load(BuildTestFont(format12: false, post: Post2("A.swash")));
