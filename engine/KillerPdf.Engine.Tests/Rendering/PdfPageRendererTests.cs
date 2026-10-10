@@ -2538,6 +2538,21 @@ public sealed class PdfPageRendererTests
     }
 
     [Fact]
+    public void Render_StrokeWidthFollowsANonUniformTransform()
+    {
+        PdfDocument document = PdfDocument.Open(new PdfDocumentBuilder()
+            .AddPage(100, 100, Encoding.ASCII.GetBytes("1 0 0 0.2 0 0 cm 50 w 0 G 10 250 m 90 250 l S")).Build());
+
+        PdfRenderedPage rendered = new PdfPageRenderer(document).Render(
+            0, new PdfRenderOptions(100, 100, includeAnnotations: false, includeFormFields: false));
+
+        // The 50-unit width becomes 10 units on the page (y 45 to 55), not a scale-averaged 22.
+        Assert.Equal([0, 0, 0, 255], Pixel(rendered, 50, 50));
+        Assert.Equal([255, 255, 255, 255], Pixel(rendered, 50, 59));
+        Assert.Equal([255, 255, 255, 255], Pixel(rendered, 50, 40));
+    }
+
+    [Fact]
     public void Render_PaintsFunctionShadingsWithTheirMatrixAndDomain()
     {
         PdfDocument source = PdfDocument.Open(new PdfDocumentBuilder()

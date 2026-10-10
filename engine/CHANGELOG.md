@@ -182,6 +182,7 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 - Synthesized appearances for Highlight, Underline, StrikeOut, Squiggly, Square and Circle annotations without /AP from their geometry, colors, opacity and border.
 - Chose the larger radial shading parameter where two circles cover a point, as ISO 32000 specifies.
 - Read function shading /BBox in the shading's target space instead of transforming it by /Matrix.
+- Outlined strokes in user space under non-uniform transforms, so the pen width and caps follow the CTM.
 
 ## [1.8.5] - Unreleased
 

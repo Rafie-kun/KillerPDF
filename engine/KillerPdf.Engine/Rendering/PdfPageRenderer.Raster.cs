@@ -1179,14 +1179,22 @@ public sealed partial class PdfPageRenderer
     private static CoverageMask RasterizeStroke(IReadOnlyList<List<Point>> paths,
         double pageLineWidth, RendererLineCap lineCap, RendererLineJoin lineJoin,
         double miterLimit, RasterFrame frame, bool rent = false,
-        (int Left, int Top, int Right, int Bottom)? bounds = null, bool strokeAdjust = false)
+        (int Left, int Top, int Right, int Bottom)? bounds = null, bool strokeAdjust = false,
+        Matrix? userTransform = null)
     {
         double radius = Math.Max(pageLineWidth * frame.StrokeScale / 2, 0.5);
         var polygons = new List<Point[]>();
+        UserSpacePen? pen = userTransform is Matrix user && !strokeAdjust
+            ? UserSpacePen.Create(user, frame, pageLineWidth) : null;
         foreach (List<Point> path in paths)
         {
             if (path.Count == 0) continue;
             Point[] pixels = frame.ToPixels(path);
+            if (pen is UserSpacePen userPen && path is not ZeroLengthDash)
+            {
+                userPen.Stroke(pixels, lineCap, lineJoin, miterLimit, polygons);
+                continue;
+            }
             if (path is ZeroLengthDash dash && lineCap == RendererLineCap.ProjectingSquare)
             {
                 Point origin = path[0];
@@ -1209,6 +1217,59 @@ public sealed partial class PdfPageRenderer
             StrokeOutline(pixels, pathRadius, lineCap, lineJoin, miterLimit, polygons);
         }
         return RasterizePolygons(polygons, false, frame.Width, frame.Height, rent, bounds);
+    }
+
+    // Line width is a user-space length. Under a transform that scales x and y differently the
+    // pen is an ellipse and caps stay perpendicular in user space, so such strokes are outlined
+    // in a scaled copy of user space and mapped back to pixels.
+    private readonly struct UserSpacePen
+    {
+        private readonly double _m11, _m12, _m21, _m22, _i11, _i12, _i21, _i22, _radius;
+
+        private UserSpacePen(double m11, double m12, double m21, double m22, double scale, double radius)
+        {
+            double determinant = m11 * m22 - m12 * m21;
+            // Forward maps the scaled user space to pixels; inverse maps pixels back.
+            (_m11, _m12, _m21, _m22) = (m11 / scale, m12 / scale, m21 / scale, m22 / scale);
+            (_i11, _i12, _i21, _i22) = (m22 / determinant * scale, -m12 / determinant * scale,
+                -m21 / determinant * scale, m11 / determinant * scale);
+            _radius = radius;
+        }
+
+        internal static UserSpacePen? Create(Matrix user, RasterFrame frame, double pageLineWidth)
+        {
+            double userScale = user.StrokeScale;
+            if (!(userScale > 0) || !(pageLineWidth > 0)) return null;
+            double m11 = frame.ScaleX * user.A, m12 = frame.ScaleX * user.C;
+            double m21 = -frame.ScaleY * user.B, m22 = -frame.ScaleY * user.D;
+            double determinant = m11 * m22 - m12 * m21;
+            if (!double.IsFinite(determinant) || Math.Abs(determinant) < 1e-12) return null;
+            double sum = m11 * m11 + m12 * m12 + m21 * m21 + m22 * m22;
+            double spread = Math.Sqrt(Math.Max(0, sum * sum - 4 * determinant * determinant));
+            double largest = Math.Sqrt((sum + spread) / 2), smallest = Math.Sqrt(Math.Max(0, (sum - spread) / 2));
+            double userRadius = pageLineWidth / userScale / 2;
+            // Near-uniform scaling and strokes thinner than a pixel keep the device-space path.
+            if (!(smallest > 0) || largest / smallest < 1.02 || userRadius * smallest < 0.5) return null;
+            return new UserSpacePen(m11, m12, m21, m22, largest, userRadius * largest);
+        }
+
+        internal void Stroke(Point[] pixels, RendererLineCap lineCap, RendererLineJoin lineJoin,
+            double miterLimit, List<Point[]> output)
+        {
+            var user = new Point[pixels.Length];
+            for (int index = 0; index < pixels.Length; index++)
+                user[index] = new Point(_i11 * pixels[index].X + _i12 * pixels[index].Y,
+                    _i21 * pixels[index].X + _i22 * pixels[index].Y);
+            var outline = new List<Point[]>();
+            StrokeOutline(user, _radius, lineCap, lineJoin, miterLimit, outline);
+            foreach (Point[] polygon in outline)
+            {
+                for (int index = 0; index < polygon.Length; index++)
+                    polygon[index] = new Point(_m11 * polygon[index].X + _m12 * polygon[index].Y,
+                        _m21 * polygon[index].X + _m22 * polygon[index].Y);
+                output.Add(Oriented(polygon));
+            }
+        }
     }
 
     // Snap only the normal coordinates of orthogonal segments. Tangential

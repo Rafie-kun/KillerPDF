@@ -1028,11 +1028,12 @@ public sealed partial class PdfPageRenderer
                         paintedPath, state.PaintStroke, state.StrokeAlpha, lineWidth,
                         state.LineCap, state.LineJoin, state.MiterLimit,
                         state.BlendMode, state.Clips, state.GraphicsSoftMask, state.Knockout,
-                        cancellationToken, state.AlphaIsShape, state.StrokeAdjust);
+                        cancellationToken, state.AlphaIsShape, state.StrokeAdjust, state.Transform);
                     return;
                 }
                 var strokeClip = new ClipRegion(RasterizeStroke(paintedPath, lineWidth,
-                    state.LineCap, state.LineJoin, state.MiterLimit, frame, strokeAdjust: state.StrokeAdjust));
+                    state.LineCap, state.LineJoin, state.MiterLimit, frame, strokeAdjust: state.StrokeAdjust,
+                    userTransform: state.Transform));
                 RenderPattern(state.StrokePattern, paintedPath, strokeClip,
                     resources, state, depth, state.StrokeAlpha);
             }
@@ -6883,12 +6884,14 @@ public sealed partial class PdfPageRenderer
         double miterLimit, RendererBlendMode blendMode,
         IReadOnlyList<ClipRegion> clips, GraphicsSoftMask? graphicsSoftMask,
         KnockoutState? knockout,
-        CancellationToken cancellationToken, bool alphaIsShape = false, bool strokeAdjust = false)
+        CancellationToken cancellationToken, bool alphaIsShape = false, bool strokeAdjust = false,
+        Matrix? userTransform = null)
     {
         if (color.DoesNotPaint) return;
         var frame = new RasterFrame(width, height, scaleX, scaleY);
         CoverageMask mask = RasterizeStroke(paths, lineWidth, lineCap, lineJoin, miterLimit, frame,
-            rent: true, bounds: (pixels.Left, pixels.Top, pixels.Right, pixels.Bottom), strokeAdjust: strokeAdjust);
+            rent: true, bounds: (pixels.Left, pixels.Top, pixels.Right, pixels.Bottom), strokeAdjust: strokeAdjust,
+            userTransform: userTransform);
         try
         {
             PaintCoverage(pixels, width, mask, color, alpha, blendMode, clips,

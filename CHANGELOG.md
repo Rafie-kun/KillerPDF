@@ -226,6 +226,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Fixed highlight, underline, strikeout, squiggly, square and circle annotations that were invisible when the file stored no appearance for them.
 - Fixed extra rings and seams in radial gradients whose circles are disjoint or intersect.
 - Fixed function-based gradients that disappeared when they declared a bounding box.
+- Fixed lines drawn too thick or with squared-off ends when a page stretches them more in one direction than the other.
 
 ## [1.8.81] - Unreleased
 
