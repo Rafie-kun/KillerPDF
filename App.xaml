@@ -99,12 +99,11 @@
 
             <!-- Type families -->
             <FontFamily x:Key="UiFont">Segoe UI, Microsoft JhengHei UI, Nirmala UI</FontFamily>
-            <!-- The full embedded Typewriter a602 face used by the KillerPDF wordmark. Keep the
-                 internal family name in sync with the font's name table; an approximate name makes
-                 WPF silently substitute the system font. -->
             <!-- Assembly-relative: release payloads run as KillerPDF.App.exe while legacy and
                  IDE builds run as KillerPDF.exe. Hard-coding either assembly name makes the
-                 embedded typewriter face silently fall back in the other build. -->
+                 embedded wordmark faces silently fall back in the other build. The name after
+                 # must match the font's name table; an approximate name makes WPF substitute the
+                 system font. -->
             <!-- Family wordmark faces, both OFL (licenses in Fonts/): Iceland for "Killer", Freckle Face
                  for the app name. The app-name half is set at 1.55x the old "Killer" size and
                  "Killer" at 1.1x, which puts its capitals at 2x the height of Killer's, the same as
