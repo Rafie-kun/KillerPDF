@@ -12,10 +12,10 @@
 .engine-doc-wrap{max-width:980px;margin:0 auto;padding:34px 34px 46px}
 .engine-doc-hero{display:flex;align-items:center;gap:18px;margin:0 0 26px;padding:8px 0 4px}
 .engine-doc-mark{width:88px;height:auto;filter:drop-shadow(0 4px 7px rgba(0,0,0,.45))}
-.engine-doc-brand{margin:0;font-family:'TypewriterHead','Courier New',monospace;font-size:clamp(31px,5vw,52px);font-weight:normal;line-height:1;color:var(--text);text-shadow:0 2px 2px rgba(0,0,0,.4),0 5px 12px rgba(0,0,0,.3)}
+.engine-doc-brand{margin:0;font-family:var(--kt-font-card-title);font-size:clamp(31px,5vw,52px);font-weight:normal;line-height:1;color:var(--text);text-shadow:0 2px 2px rgba(0,0,0,.4),0 5px 12px rgba(0,0,0,.3)}
 .engine-doc-brand .accent{color:var(--accent)}
 .engine-doc{color:var(--text2);font-size:15px;line-height:1.68}
-.engine-doc h1,.engine-doc h2,.engine-doc h3{font-family:'TypewriterHead','Courier New',monospace;font-weight:normal;color:var(--text);scroll-margin-top:28px;text-shadow:0 2px 6px rgba(0,0,0,.34)}
+.engine-doc h1,.engine-doc h2,.engine-doc h3{font-family:var(--kt-font-card-title);font-weight:normal;color:var(--text);scroll-margin-top:28px;text-shadow:0 2px 6px rgba(0,0,0,.34)}
 .engine-doc h1{font-size:clamp(31px,4vw,42px);line-height:1.15;margin:0 0 12px}
 .engine-doc h2{font-size:25px;margin:34px 0 11px;padding-top:3px}
 .engine-doc h3{font-size:18px;color:var(--accent);margin:25px 0 9px}
