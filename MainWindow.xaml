@@ -111,7 +111,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
+                        <Grid><Border x:Name="nickFace3Ring" IsHitTestVisible="False" CornerRadius="{Binding CornerRadius, ElementName=nickFace3}" BorderThickness="{Binding BorderThickness, ElementName=nickFace3}" BorderBrush="{Binding Background, ElementName=nickFace3}" Margin="{Binding Margin, ElementName=nickFace3}" Visibility="{Binding Visibility, ElementName=nickFace3}" Opacity="{Binding Opacity, ElementName=nickFace3}"/><Border x:Name="nickFace3" Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 CornerRadius="{DynamicResource ControlCornerRadius}"
@@ -124,7 +124,7 @@
                                     <DropShadowEffect Color="Black" BlurRadius="4" ShadowDepth="2" Direction="270" Opacity="{DynamicResource IconShadowOpacity}"/>
                                 </ContentPresenter.Effect>
                             </ContentPresenter>
-                        </Border>
+                        </Border></Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter Property="Background" Value="{DynamicResource RowHoverBrush}"/>
@@ -145,14 +145,14 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
+                        <Grid><Border x:Name="nickFace4Ring" IsHitTestVisible="False" CornerRadius="{Binding CornerRadius, ElementName=nickFace4}" BorderThickness="{Binding BorderThickness, ElementName=nickFace4}" BorderBrush="{Binding Background, ElementName=nickFace4}" Margin="{Binding Margin, ElementName=nickFace4}" Visibility="{Binding Visibility, ElementName=nickFace4}" Opacity="{Binding Opacity, ElementName=nickFace4}"/><Border x:Name="nickFace4" Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 CornerRadius="{DynamicResource ControlCornerRadius}"
                                 Padding="{TemplateBinding Padding}"
                                 ToolTip="{TemplateBinding ToolTip}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
+                        </Border></Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter Property="Background" Value="{DynamicResource ComparisonBarHoverBrush}"/>
@@ -175,7 +175,7 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Grid>
-                            <Border x:Name="bg" Background="{TemplateBinding Background}"
+                            <Border x:Name="bgRing" IsHitTestVisible="False" CornerRadius="{Binding CornerRadius, ElementName=bg}" BorderThickness="{Binding BorderThickness, ElementName=bg}" BorderBrush="{Binding Background, ElementName=bg}" Margin="{Binding Margin, ElementName=bg}" Visibility="{Binding Visibility, ElementName=bg}" Opacity="{Binding Opacity, ElementName=bg}"/><Border x:Name="bg" Background="{TemplateBinding Background}"
                                     BorderBrush="{TemplateBinding BorderBrush}"
                                     BorderThickness="{TemplateBinding BorderThickness}"
                                     CornerRadius="{DynamicResource ControlCornerRadius}" Margin="0,0,7,0"/>
@@ -218,7 +218,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ToggleButton">
-                        <Border x:Name="Bd"
+                        <Grid><Border x:Name="BdRing" IsHitTestVisible="False" CornerRadius="{Binding CornerRadius, ElementName=Bd}" BorderThickness="{Binding BorderThickness, ElementName=Bd}" BorderBrush="{Binding Background, ElementName=Bd}" Margin="{Binding Margin, ElementName=Bd}" Visibility="{Binding Visibility, ElementName=Bd}" Opacity="{Binding Opacity, ElementName=Bd}"/><Border x:Name="Bd"
                                 Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
@@ -230,7 +230,7 @@
                                     <DropShadowEffect Color="Black" BlurRadius="4" ShadowDepth="2" Direction="270" Opacity="{DynamicResource IconShadowOpacity}"/>
                                 </ContentPresenter.Effect>
                             </ContentPresenter>
-                        </Border>
+                        </Border></Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsChecked" Value="True">
                                 <Setter TargetName="Bd" Property="Background" Value="{DynamicResource SelectionBg}"/>
@@ -973,14 +973,14 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="Bd"
+                        <Grid><Border x:Name="BdRing" IsHitTestVisible="False" CornerRadius="{Binding CornerRadius, ElementName=Bd}" BorderThickness="{Binding BorderThickness, ElementName=Bd}" BorderBrush="{Binding Background, ElementName=Bd}" Margin="{Binding Margin, ElementName=Bd}" Visibility="{Binding Visibility, ElementName=Bd}" Opacity="{Binding Opacity, ElementName=Bd}"/><Border x:Name="Bd"
                                 Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 CornerRadius="3"
                                 Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
+                        </Border></Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="Bd" Property="Opacity" Value="0.75"/>
