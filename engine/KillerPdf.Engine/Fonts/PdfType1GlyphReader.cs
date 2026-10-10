@@ -251,7 +251,9 @@ internal sealed class PdfType1GlyphReader
                 {
                     int index = int.Parse(beforePrevious.ValueAsLatin1(), CultureInfo.InvariantCulture);
                     if (index is < 0 or > 65535) throw new FormatException("Invalid Type1 subroutine index.");
-                    _subrs[index] = program;
+                    // Some fonts define Subrs twice behind a PostScript resolution test; the
+                    // first set is the high-resolution outline that printers and viewers use.
+                    _subrs.TryAdd(index, program);
                 }
                 tokens.SetRawPosition(start + length);
             }

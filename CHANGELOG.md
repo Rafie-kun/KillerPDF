@@ -231,6 +231,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Fixed blank pages where a black-and-white mask image is filled with a gradient or pattern.
 - Fixed content that nearly vanished behind semi-transparent masks drawn in a color-managed group.
 - Fixed noise in some refined black-and-white JBIG2 images.
+- Fixed embedded Type 1 fonts drawn with a substitute when they define their subroutines twice.
 
 ## [1.8.81] - Unreleased
 

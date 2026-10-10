@@ -55,6 +55,15 @@ public sealed class PdfType1GlyphReaderTests
     }
 
     [Fact]
+    public void KeepsTheFirstDefinitionOfARepeatedSubroutine()
+    {
+        byte[] main = [.. Number(0), .. Number(600), 13, .. Number(0), 10, 14];
+        byte[] drawing = [.. Number(10), .. Number(20), 21, .. Number(100), .. Number(200), 5, 11];
+        Assert.Equal(new PdfGlyphBounds(10, 20, 110, 220),
+            Font(main, subroutine: [11], firstSubroutine: drawing).GetGlyphBounds(65));
+    }
+
+    [Fact]
     public void ClosePathPreservesCurrentPointForTheNextContour()
     {
         byte[] program = [.. Number(0), .. Number(600), 13, .. Number(0), .. Number(0), 21,
@@ -170,12 +179,21 @@ public sealed class PdfType1GlyphReaderTests
         byte[]? subroutine = null, string reader = "RD", string encoding = "",
         string glyphName = "A",
         IReadOnlyList<(string Name, byte[] Program)>? additionalGlyphs = null,
-        string privatePrefix = "", long? length1 = null, long? length2 = null, bool recovery = false)
+        string privatePrefix = "", long? length1 = null, long? length2 = null, bool recovery = false,
+        byte[]? firstSubroutine = null)
     {
         byte[] header = Encoding.ASCII.GetBytes($"%!PS\n/FontMatrix [0.001 0 0 0.001 0 0] def {encoding} currentfile eexec\n");
         using var plain = new MemoryStream();
         plain.Write(new byte[4]);
-        plain.Write(Encoding.ASCII.GetBytes($"{privatePrefix}/lenIV {lenIv} def /Subrs 1 array "));
+        plain.Write(Encoding.ASCII.GetBytes($"{privatePrefix}/lenIV {lenIv} def "));
+        if (firstSubroutine is not null)
+        {
+            byte[] encoded = lenIv == -1 ? firstSubroutine : Encrypt([.. new byte[lenIv], .. firstSubroutine], 4330);
+            plain.Write(Encoding.ASCII.GetBytes($"/Subrs 1 array dup 0 {encoded.Length} {reader} "));
+            plain.Write(encoded);
+            plain.Write(" NP noaccess put "u8);
+        }
+        plain.Write("/Subrs 1 array "u8);
         if (subroutine is not null)
         {
             byte[] encoded = lenIv == -1 ? subroutine : Encrypt([.. new byte[lenIv], .. subroutine], 4330);
