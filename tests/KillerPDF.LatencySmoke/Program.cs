@@ -74,21 +74,75 @@ internal static class Program
         }
     }
 
-    private static RunResult Measure(VersionSpec version, string document, int run, bool warm, Options options)
+    /// <summary>
+    /// AppDataPaths treats the directory of KILLERPDF_LAUNCHER_PATH as the portable root, so each
+    /// launch gets its own KillerPDF-Data folder and the user's real settings are never touched.
+    /// The first launch of a version seeds a settings folder with a plain open and close so every
+    /// measured run starts from the same default view instead of whatever zoom the previous run
+    /// left behind.
+    /// </summary>
+    private static string PrepareSettings(VersionSpec version, string document, int run, Options options)
     {
-        string dataRoot = Path.Combine(options.OutputDirectory, "settings", version.Label);
-        Directory.CreateDirectory(dataRoot);
-        // AppDataPaths treats the directory of KILLERPDF_LAUNCHER_PATH as the portable root, so each
-        // version keeps its own KillerPDF-Data folder and the user's real settings are never touched.
-        string launcherMarker = Path.Combine(dataRoot, "launcher.marker");
-        if (!File.Exists(launcherMarker)) File.WriteAllText(launcherMarker, string.Empty);
+        string root = Path.Combine(options.OutputDirectory, "settings", version.Label);
+        string seed = Path.Combine(root, "seed");
+        string seedData = Path.Combine(seed, "KillerPDF-Data");
+        if (!Directory.Exists(seedData))
+        {
+            Directory.CreateDirectory(seed);
+            string seedMarker = Path.Combine(seed, "launcher.marker");
+            File.WriteAllText(seedMarker, string.Empty);
+            var start = StartInfo(version, document, seedMarker);
+            var clock = Stopwatch.StartNew();
+            using var process = Process.Start(start) ?? throw new InvalidOperationException("Seed process did not start.");
+            try
+            {
+                IntPtr hwnd = WaitForMainWindow(process, clock);
+                Native.MoveWindow(hwnd, 0, 0, WindowWidth, WindowHeight, true);
+                new FrameCapture(hwnd).WaitForContentThenStable(clock, ScenarioTimeoutMs);
+            }
+            finally
+            {
+                if (!process.HasExited)
+                {
+                    process.CloseMainWindow();
+                    if (!process.WaitForExit(10_000)) process.Kill(true);
+                }
+            }
+            if (!Directory.Exists(seedData)) Directory.CreateDirectory(seedData);
+        }
 
+        string runDir = Path.Combine(root, $"run-{run}");
+        if (Directory.Exists(runDir)) Directory.Delete(runDir, true);
+        CopyTree(seedData, Path.Combine(runDir, "KillerPDF-Data"));
+        string marker = Path.Combine(runDir, "launcher.marker");
+        File.WriteAllText(marker, string.Empty);
+        return marker;
+    }
+
+    private static void CopyTree(string source, string target)
+    {
+        Directory.CreateDirectory(target);
+        foreach (string dir in Directory.GetDirectories(source, "*", SearchOption.AllDirectories))
+            Directory.CreateDirectory(Path.Combine(target, Path.GetRelativePath(source, dir)));
+        foreach (string file in Directory.GetFiles(source, "*", SearchOption.AllDirectories))
+            File.Copy(file, Path.Combine(target, Path.GetRelativePath(source, file)), true);
+    }
+
+    private static ProcessStartInfo StartInfo(VersionSpec version, string document, string launcherMarker)
+    {
         var start = new ProcessStartInfo(version.ExePath, Quote(document))
         {
             UseShellExecute = false,
             WorkingDirectory = Path.GetDirectoryName(version.ExePath)!,
         };
         start.Environment["KILLERPDF_LAUNCHER_PATH"] = launcherMarker;
+        return start;
+    }
+
+    private static RunResult Measure(VersionSpec version, string document, int run, bool warm, Options options)
+    {
+        string launcherMarker = PrepareSettings(version, document, run, options);
+        var start = StartInfo(version, document, launcherMarker);
 
         var result = new RunResult(version.Label, Path.GetFileName(document), run, warm);
         var clock = Stopwatch.StartNew();
