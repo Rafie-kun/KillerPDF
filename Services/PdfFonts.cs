@@ -1,4 +1,5 @@
 using System.IO;
+using System.Text;
 using SixLabors.Fonts;
 
 namespace KillerPDF.Services
@@ -34,11 +35,17 @@ namespace KillerPDF.Services
         private static readonly Dictionary<string, Dictionary<FaceStyle, string>> Families = new(StringComparer.OrdinalIgnoreCase);
         private static readonly Lock Gate = new();
         private static bool _indexed;
+        // Faces in registration order, so the persisted index replays the same first-wins choices.
+        private static readonly List<(string Family, FaceStyle Style, string Path, int FaceIndex)> Order = [];
+        private const string IndexFormat = "killerpdf-font-index-1";
 
         private readonly record struct FaceFile(string Path, int FaceIndex);
         private enum FaceStyle { Regular, Bold, Italic, BoldItalic }
 
         // ── Index ─────────────────────────────────────────────────────────────────────────────
+
+        /// <summary>Builds or loads the catalog ahead of the first lookup so no render waits on it.</summary>
+        internal static void Warm() => EnsureIndexed();
 
         private static void EnsureIndexed()
         {
@@ -46,7 +53,10 @@ namespace KillerPDF.Services
             {
                 if (_indexed) return;
                 _indexed = true;   // set first: a failed scan must not retry on every glyph
-                foreach (var dir in FontDirectories())
+                List<string> dirs = FontDirectories();
+                string signature = Signature(dirs);
+                if (TryLoadIndex(signature)) return;
+                foreach (var dir in dirs)
                 {
                     // .ttf first, then .ttc, then .otf - AddFace keeps the first face registered
                     // for a (family, style), so this order is the preference order. .otf is last
@@ -59,7 +69,81 @@ namespace KillerPDF.Services
                         foreach (var file in files) IndexFile(file);
                     }
                 }
+                SaveIndex(signature);
             }
+        }
+
+        // ── Persisted index ───────────────────────────────────────────────────────────────────
+        // Scanning every installed font with the description reader costs hundreds of milliseconds
+        // and used to land on the render thread of the first page that needed a non-standard
+        // face. The catalog is saved next to the settings, keyed by a fingerprint of the font
+        // folders; any added, removed or changed font file changes the fingerprint and triggers a
+        // fresh scan.
+
+        private static string IndexPath => Path.Combine(AppDataPaths.UserRoot, "font-index.txt");
+
+        private static string Signature(List<string> dirs)
+        {
+            var sb = new StringBuilder(IndexFormat);
+            foreach (string dir in dirs)
+            {
+                long count = 0, bytes = 0, newest = 0;
+                try
+                {
+                    foreach (var info in new DirectoryInfo(dir).EnumerateFiles("*", SearchOption.AllDirectories))
+                    {
+                        count++;
+                        bytes += info.Length;
+                        long ticks = info.LastWriteTimeUtc.Ticks;
+                        if (ticks > newest) newest = ticks;
+                    }
+                }
+                catch { count = -1; }
+                sb.Append('|').Append(dir).Append(':').Append(count).Append(':').Append(bytes).Append(':').Append(newest);
+            }
+            return sb.ToString();
+        }
+
+        private static bool TryLoadIndex(string signature)
+        {
+            try
+            {
+                string path = IndexPath;
+                if (!File.Exists(path)) return false;
+                string[] lines = File.ReadAllLines(path);
+                if (lines.Length == 0 || lines[0] != signature) return false;
+                for (int i = 1; i < lines.Length; i++)
+                {
+                    string[] parts = lines[i].Split('\t');
+                    if (parts.Length != 4 || !Enum.TryParse(parts[1], out FaceStyle style)
+                        || !int.TryParse(parts[2], out int faceIndex) || !File.Exists(parts[3]))
+                        throw new InvalidDataException("Stale font index.");
+                    AddFace(parts[0], style, parts[3], faceIndex);
+                }
+                return true;
+            }
+            catch
+            {
+                Faces.Clear();
+                Families.Clear();
+                Order.Clear();
+                return false;
+            }
+        }
+
+        private static void SaveIndex(string signature)
+        {
+            try
+            {
+                if (Order.Any(face => face.Family.Contains('\t') || face.Family.Contains('\n') || face.Family.Contains('\r')))
+                    return;
+                Directory.CreateDirectory(Path.GetDirectoryName(IndexPath)!);
+                var lines = new List<string>(Order.Count + 1) { signature };
+                foreach (var (family, style, path, faceIndex) in Order)
+                    lines.Add(family + "\t" + style + "\t" + faceIndex + "\t" + path);
+                File.WriteAllLines(IndexPath, lines);
+            }
+            catch { /* best effort: the next launch simply scans again */ }
         }
 
         private static List<string> FontDirectories()
@@ -105,12 +189,21 @@ namespace KillerPDF.Services
                 _                                    => FaceStyle.Regular,
             };
 
+            AddFace(family, style, path, faceIndex);
+        }
+
+        private static void AddFace(string family, FaceStyle style, string path, int faceIndex)
+        {
             string faceKey = family + "#" + style + "#" + faceIndex + "#" + Path.GetFileName(path);
             if (!Faces.ContainsKey(faceKey)) Faces[faceKey] = new FaceFile(path, faceIndex);
 
             if (!Families.TryGetValue(family, out var byStyle))
                 Families[family] = byStyle = [];
-            if (!byStyle.ContainsKey(style)) byStyle[style] = faceKey;   // first wins = pattern order
+            if (!byStyle.ContainsKey(style))
+            {
+                byStyle[style] = faceKey;   // first wins = pattern order
+                Order.Add((family, style, path, faceIndex));
+            }
         }
 
         /// <summary>The regular face of a family as standalone font bytes, or null when the family

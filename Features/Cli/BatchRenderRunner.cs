@@ -144,6 +144,10 @@ namespace KillerPDF.Features
             for (int i = 0; i < work.Count; i++)
                 perFile[i] = (work[i].Rel, work[i].Src, new List<RenderRow>());
 
+            // Build the installed-font catalog while the first documents open instead of on the
+            // render thread of the first page that needs a non-standard face.
+            _ = Task.Run(InstalledFontCatalog.Warm);
+
             Parallel.For(0, perFile.Length, new ParallelOptions
             {
                 MaxDegreeOfParallelism = parallelism

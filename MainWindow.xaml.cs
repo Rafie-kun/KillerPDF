@@ -434,6 +434,9 @@ namespace KillerPDF
             ContentRendered += (_, _) =>
             {
                 Services.StartupTrace.Mark("MainWindow first ContentRendered");
+                // Warm the installed-font catalog off the UI and render threads so the first page
+                // that needs a non-standard face does not pay for the scan.
+                _ = System.Threading.Tasks.Task.Run(Services.InstalledFontCatalog.Warm);
                 Services.ThemeManager.RefreshIcons();
                 // Startup can restore pane B, process a relaunch/open-file handoff, and change
                 // ActiveViewer several times before the first frame. Each transition is valid on
