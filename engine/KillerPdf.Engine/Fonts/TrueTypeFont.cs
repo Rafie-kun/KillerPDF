@@ -35,7 +35,7 @@ public sealed class TrueTypeFont
         int horizontalMetricCount = U16(hhea, 34);
         if (GlyphCount == 0 || horizontalMetricCount is < 1 || horizontalMetricCount > GlyphCount)
             throw Error("The horizontal metric count is invalid");
-        _advanceWidths = ReadWidths(hmtx, GlyphCount, horizontalMetricCount);
+        _advanceWidths = ReadWidths(hmtx, GlyphCount, horizontalMetricCount, extraction);
         if (extraction && !TryTable("cmap", out _)) _cmap = new EmptyCmap();
         else
         {
@@ -269,9 +269,12 @@ public sealed class TrueTypeFont
         return TrueTypeSubsetter.Create(_data, GlyphCount, glyphIds);
     }
 
-    private ushort[] ReadWidths(Table table, int glyphCount, int metricCount)
+    private ushort[] ReadWidths(Table table, int glyphCount, int metricCount, bool extraction)
     {
-        int required = checked(metricCount * 4 + (glyphCount - metricCount) * 2);
+        // Only the advances are read. Embedded subsets often cut the trailing side-bearing
+        // array short, which viewers accept, so extraction requires just the full metrics.
+        int required = extraction ? checked(metricCount * 4)
+            : checked(metricCount * 4 + (glyphCount - metricCount) * 2);
         if (table.Length < required)
             throw Error("The hmtx table is truncated");
         var widths = new ushort[glyphCount];

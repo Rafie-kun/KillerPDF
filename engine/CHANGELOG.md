@@ -165,6 +165,7 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 - Honored the Hidden annotation flag for annotation and widget appearances.
 - Applied image Decode arrays to Indexed palette lookups.
 - Resolved embedded TrueType glyphs by post table names and generated gNNNN names, and ignored unknown simple font encoding names during recovery.
+- Accepted embedded TrueType fonts whose hmtx table omits trailing left side bearings.
 
 ## [1.8.5] - Unreleased
 

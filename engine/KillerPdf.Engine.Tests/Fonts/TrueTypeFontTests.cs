@@ -259,6 +259,25 @@ public sealed class TrueTypeFontTests
     }
 
     [Fact]
+    public void LoadForExtraction_AcceptsTruncatedLeftSideBearings()
+    {
+        byte[] bytes = BuildTestFont(format12: false);
+        int tables = BinaryPrimitives.ReadUInt16BigEndian(bytes.AsSpan(4));
+        for (int record = 12; record < 12 + tables * 16; record += 16)
+        {
+            string tag = Encoding.ASCII.GetString(bytes, record, 4);
+            int offset = (int)BinaryPrimitives.ReadUInt32BigEndian(bytes.AsSpan(record + 8));
+            if (tag == "hhea") U16(bytes, offset + 34, 1);
+            if (tag == "hmtx") U32(bytes, record + 12, 4);
+        }
+
+        Assert.Throws<FormatException>(() => TrueTypeFont.Load(bytes));
+        TrueTypeFont font = TrueTypeFont.LoadForExtraction(bytes);
+        Assert.Equal((ushort)1, font.GetGlyphId('A'));
+        Assert.Equal(500, font.GetPdfAdvanceWidth(1));
+    }
+
+    [Fact]
     public void GetGlyphIdByName_ReadsPostFormat2CustomNames()
     {
         TrueTypeFont font = TrueTypeFont.Load(BuildTestFont(format12: false, post: Post2("A.swash")));
