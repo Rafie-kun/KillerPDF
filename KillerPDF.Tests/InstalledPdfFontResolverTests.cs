@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using KillerPdf.Engine.Fonts;
 using KillerPDF.Services;
 using Xunit;
@@ -18,6 +20,19 @@ namespace KillerPDF.Tests
 
             Assert.NotNull(a);
             Assert.Same(a, b);
+        }
+
+        [Theory]
+        [InlineData("ArialNarrow", "arialn.ttf")]
+        [InlineData("Arial-Black", "ariblk.ttf")]
+        public void WidthAndWeightFamiliesResolveToTheirOwnInstalledFace(string name, string file)
+        {
+            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Fonts", file);
+            if (!File.Exists(path)) return;
+
+            byte[]? resolved = new InstalledPdfFontResolver().Resolve(new PdfFontRequest(name, "Adobe", "Standard", false));
+
+            Assert.Equal(File.ReadAllBytes(path), resolved);
         }
     }
 }

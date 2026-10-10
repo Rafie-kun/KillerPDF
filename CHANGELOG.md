@@ -220,6 +220,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Fixed embedded fonts replaced by a substitute when their settings contain malformed numbers.
 - Fixed oversized, crowded text from fonts that store a CFF program where a Type 1 program belongs.
 - Fixed overly wide word gaps in standard fonts whose encoding renames the space character to .notdef.
+- Fixed Arial Narrow, Arial Black and similar fonts drawn with plain Arial when the named face is installed.
 
 ## [1.8.81] - Unreleased
 

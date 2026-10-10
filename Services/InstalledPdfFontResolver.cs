@@ -12,6 +12,10 @@ internal sealed class InstalledPdfFontResolver : IPdfFontResolver
         _familyCache = [];
     private readonly Dictionary<string, byte[]?> _standardFaceCache = new(StringComparer.OrdinalIgnoreCase);
     private readonly Lock _gate = new();
+    private static readonly HashSet<string> StyleWords = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Bold", "Italic", "BoldItalic", "Oblique", "BoldOblique", "Regular", "Roman"
+    };
 
     public byte[]? Resolve(PdfFontRequest request)
     {
@@ -24,8 +28,18 @@ internal sealed class InstalledPdfFontResolver : IPdfFontResolver
                 || style.Family.Equals("Times New Roman", StringComparison.OrdinalIgnoreCase);
             bool bold = standardAlias ? style.Bold : IsBold(request.PostScriptName);
             bool italic = standardAlias ? style.Italic : IsItalic(request.PostScriptName);
-            byte[]? resolved = standardAlias ? StandardWindowsFace(style.Family, bold, italic) : null;
-            resolved ??= Candidates(request, standardAlias ? style.Family : null)
+            byte[]? resolved = null;
+            if (standardAlias)
+            {
+                // A width or weight family built on a standard one ("Arial Black", "Arial
+                // Narrow") is a face of its own; use it when installed.
+                string specific = NormalizeFamily(request.PostScriptName);
+                if (specific.StartsWith(style.Family + " ", StringComparison.OrdinalIgnoreCase)
+                    && !StyleWords.Contains(specific[(style.Family.Length + 1)..]))
+                    resolved = FaceBytes(specific, bold, italic);
+                resolved ??= StandardWindowsFace(style.Family, bold, italic);
+            }
+            resolved ??= Candidates(request, style.Family)
                 .Select(family => FaceBytes(family, bold, italic))
                 .FirstOrDefault(bytes => bytes is not null);
             _cache[request] = resolved;
@@ -79,12 +93,13 @@ internal sealed class InstalledPdfFontResolver : IPdfFontResolver
         return bytes;
     }
 
-    private static IEnumerable<string> Candidates(PdfFontRequest request, string? standardFamily)
+    private static IEnumerable<string> Candidates(PdfFontRequest request, string styleFamily)
     {
         string name = NormalizeFamily(request.PostScriptName);
         if (name.Length > 0) yield return name;
-        if (standardFamily is not null && !name.Equals(standardFamily, StringComparison.OrdinalIgnoreCase))
-            yield return standardFamily;
+        // The style parser splits CamelCase names ("ArialNarrow" -> "Arial Narrow").
+        if (name.Length > 0 && !name.Equals(styleFamily, StringComparison.OrdinalIgnoreCase))
+            yield return styleFamily;
         if (Contains(name, "emoji") && !name.Equals("Segoe UI Emoji", StringComparison.OrdinalIgnoreCase))
             yield return "Segoe UI Emoji";
 
