@@ -253,7 +253,8 @@ public sealed class PdfCffGlyphReader
         while (position < bytes.Length)
         {
             int value = bytes[position++];
-            if (value >= 28)
+            // 31 is a reserved operator, not an operand.
+            if (value >= 28 && value != 31)
             {
                 stack.Add(Number(bytes, ref position, value, false));
                 if (stack.Count > 48) throw Bad();
@@ -270,7 +271,10 @@ public sealed class PdfCffGlyphReader
     {
         if (value is >= 32 and <= 246) return value - 139;
         if (value is >= 247 and <= 250) return (value - 247) * 256 + Take(bytes, ref position) + 108;
-        if (value is >= 251 and <= 254) return -(value - 251) * 256 - Take(bytes, ref position) - 108;
+        // Byte 255 is reserved in dictionaries. FreeType reads it as the two-byte negative form,
+        // so a stray one does not reject the whole font.
+        if (value is >= 251 and <= 254 || (!charstring && value == 255))
+            return -(value - 251) * 256 - Take(bytes, ref position) - 108;
         if (value == 28) return (short)((Take(bytes, ref position) << 8) | Take(bytes, ref position));
         if ((!charstring && value == 29) || (charstring && value == 255))
         {
@@ -288,7 +292,11 @@ public sealed class PdfCffGlyphReader
                 {
                     if (nibble == 15)
                     {
-                        if (!double.TryParse(text.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out double number)
+                        // A real with no mantissa digits (empty, or only an exponent) reads as zero.
+                        string real = text.ToString();
+                        int exponent = real.IndexOf('E');
+                        if (!real.AsSpan(0, exponent < 0 ? real.Length : exponent).ContainsAnyInRange('0', '9')) return 0;
+                        if (!double.TryParse(real, NumberStyles.Float, CultureInfo.InvariantCulture, out double number)
                             || !double.IsFinite(number)) throw Bad();
                         return number;
                     }

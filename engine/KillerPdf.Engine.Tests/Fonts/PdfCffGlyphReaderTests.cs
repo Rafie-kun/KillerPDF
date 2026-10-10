@@ -93,6 +93,27 @@ public sealed class PdfCffGlyphReaderTests
         Assert.Equal(new PdfGlyphBounds(10, 20, 110, 20), font.GetBounds(1));
     }
 
+    [Fact]
+    public void ReservedDictionaryBytesDoNotRejectTheFont()
+    {
+        var font = Assert.IsType<PdfCffGlyphReader>(PdfCffGlyphReader.TryRead(
+            Build([14], privatePrefix: [255, 30, 31])));
+
+        Assert.Empty(Assert.IsType<PdfGlyphOutline>(font.GetOutline(1)).Contours);
+    }
+
+    [Theory]
+    [InlineData(new byte[] { 0xFF })]
+    [InlineData(new byte[] { 0xC5, 0x7F })]
+    [InlineData(new byte[] { 0xEA, 0xC1, 0xFF })]
+    public void RealNumbersWithoutMantissaDigitsReadAsZero(byte[] nibbles)
+    {
+        var font = Assert.IsType<PdfCffGlyphReader>(PdfCffGlyphReader.TryRead(
+            Build([14], privatePrefix: [30, .. nibbles, 12, 9])));
+
+        Assert.Empty(Assert.IsType<PdfGlyphOutline>(font.GetOutline(1)).Contours);
+    }
+
     [Theory]
     [InlineData(false, 1000)]
     [InlineData(true, 1)]
@@ -198,7 +219,7 @@ public sealed class PdfCffGlyphReaderTests
     }
 
     internal static byte[] Build(byte[] program, byte[]? subr = null,
-        int? initialRandomSeed = null)
+        int? initialRandomSeed = null, byte[]? privatePrefix = null)
     {
         byte[] name = Index("Example"u8.ToArray());
         byte[] charstrings = Index([14], program);
@@ -207,6 +228,7 @@ public sealed class PdfCffGlyphReaderTests
         int privateOffset = charstringsOffset + charstrings.Length;
         byte[] seed = initialRandomSeed is null
             ? [] : [.. Numbers(initialRandomSeed.Value), 12, 19];
+        if (privatePrefix is not null) seed = [.. privatePrefix, .. seed];
         int subrsOffset = seed.Length + 2;
         byte[] privateDictionary = [.. seed, .. Numbers(subrsOffset), 19];
         byte[] dict = [.. Offset(charsetOffset), 15, .. Offset(charstringsOffset), 17,
