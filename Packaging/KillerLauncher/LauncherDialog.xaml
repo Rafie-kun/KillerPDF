@@ -14,9 +14,9 @@
                             GlassFrameThickness="0" UseAeroCaptionButtons="False"/>
     </shell:WindowChrome.WindowChrome>
     <Window.Resources>
-        <!-- Family wordmark faces (OFL): Iceland for "Killer", Freckle Face for "PDF" at
+        <!-- Family wordmark faces (OFL): Killer Sans for "Killer", Freckle Face for "PDF" at
              capitals 1.55 times the height of Killer's, no gap. -->
-        <FontFamily x:Key="Wordmark">./Fonts/#Iceland</FontFamily>
+        <FontFamily x:Key="Wordmark">./Fonts/#Killer Sans</FontFamily>
         <FontFamily x:Key="WordmarkAccent">./Fonts/#Freckle Face</FontFamily>
         <SolidColorBrush x:Key="Green" Color="#1ea54c"/>
         <Style x:Key="PrimaryButton" TargetType="Button">

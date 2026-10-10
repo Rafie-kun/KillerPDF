@@ -132,7 +132,7 @@
     <Resource Include="Resources\kp-icon.ico" />
     <Resource Include="Resources\app-icon-master.png" />
     <Resource Include="Resources\kp-icon.png" />
-    <Resource Include="Fonts\Iceland-Regular.ttf" />
+    <Resource Include="Fonts\KillerSans-Regular.ttf" />
     <Resource Include="Fonts\FreckleFace-Regular.ttf" />
 	<Resource Include="Resources\open_hand.cur" />
 	<Resource Include="Resources\closed_hand.cur" />
