@@ -172,6 +172,7 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 - Read format 12 cmap subtables filed under the Windows Unicode BMP record in embedded fonts.
 - Resolved predefined parents named by usecmap inside ToUnicode programs, and ignored unknown parents during recovery.
 - Ignored color operators inside d1 Type 3 glyph programs, which paint in the current text color.
+- Kept two-byte Identity codes when an empty ToUnicode map declares a one-byte code space.
 
 ## [1.8.5] - Unreleased
 
