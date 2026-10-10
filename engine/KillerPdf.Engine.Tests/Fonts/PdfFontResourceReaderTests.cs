@@ -620,6 +620,18 @@ public sealed class PdfFontResourceReaderTests
     }
 
     [Fact]
+    public void EmbeddedTrueTypeInfersLocaFormatWhenHeadValueIsInvalid()
+    {
+        byte[] bytes = TrueTypeFontTests.BuildTestFont(false, includeOutlines: true);
+        BinaryPrimitives.WriteInt16BigEndian(bytes.AsSpan(FindTable(bytes, "head") + 50), 256);
+        PdfExtractionFont font = Read(D(("Subtype", N("TrueType")), ("BaseFont", N("Courier")),
+            ("Encoding", N("WinAnsiEncoding")),
+            ("FontDescriptor", D(("FontFile2", new PdfStream(D(), bytes))))));
+
+        Assert.Single(Assert.IsType<PdfGlyphOutline>(font.GetGlyphOutline(65)).Contours);
+    }
+
+    [Fact]
     public void CompatibilityRecoveryIgnoresUnknownEncodingName()
     {
         PdfDictionary dictionary = D(("Subtype", N("Type1")),

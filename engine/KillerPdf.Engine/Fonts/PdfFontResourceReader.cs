@@ -792,7 +792,10 @@ public static class PdfFontResourceReader
                 if (tag == 0x676c7966) { _glyf = offset; _glyfLength = size; }
                 if (tag == 0x68656164 && size >= 54) head = offset;
             }
-            _longLocations = head != 0 && BinaryPrimitives.ReadInt16BigEndian(data[(head + 50)..]) == 1;
+            int locationFormat = head != 0 ? BinaryPrimitives.ReadInt16BigEndian(data[(head + 50)..]) : 0;
+            // Some writers leave head.indexToLocFormat invalid; the loca size then shows the format.
+            _longLocations = locationFormat is 0 or 1 ? locationFormat == 1
+                : _locaLength >= (font.GlyphCount + 1) * 4;
         }
 
         internal PdfGlyphBounds? Bounds(ushort glyph)

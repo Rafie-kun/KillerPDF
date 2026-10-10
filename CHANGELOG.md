@@ -209,6 +209,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Fixed missing or wrong characters in embedded TrueType fonts that name their glyphs instead of mapping them.
 - Fixed blank text from embedded TrueType fonts whose metrics table is cut short.
 - Fixed text from embedded TrueType fonts with a damaged table directory or metric count.
+- Fixed scrambled glyphs from embedded TrueType fonts that mislabel their glyph location format.
 
 ## [1.8.81] - Unreleased
 
