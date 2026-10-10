@@ -619,6 +619,35 @@ public sealed class PdfFontResourceReaderTests
         Assert.Equal("\u20AC", Assert.Single(font.Decode(new byte[] { 128 })).Text);
     }
 
+    [Fact]
+    public void CompatibilityRecoveryIgnoresUnknownEncodingName()
+    {
+        PdfDictionary dictionary = D(("Subtype", N("Type1")),
+            ("BaseFont", N("Helvetica")), ("Encoding", N("NULL")));
+        Assert.Throws<NotSupportedException>(() => Read(dictionary));
+        PdfDocument document = PdfDocument.OpenWithCompatibilityRecovery(
+            new PdfDocumentBuilder().AddBlankPage().Build());
+
+        PdfExtractionFont font = PdfFontResourceReader.Read(document, dictionary);
+
+        Assert.Equal("A", Assert.Single(font.Decode(new byte[] { 65 })).Text);
+    }
+
+    [Theory]
+    [InlineData("g1", null)]
+    [InlineData("g0001", null)]
+    [InlineData("B.swash", "B.swash")]
+    public void EmbeddedTrueTypeResolvesGlyphsNamedOnlyByTheEncoding(string glyphName, string? postName)
+    {
+        byte[] bytes = TrueTypeFontTests.BuildTestFont(false, includeOutlines: true,
+            post: postName is null ? null : TrueTypeFontTests.Post2(postName));
+        PdfExtractionFont font = Read(D(("Subtype", N("TrueType")), ("BaseFont", N("Subset")),
+            ("Encoding", D(("Differences", new PdfArray([new PdfInteger(66), N(glyphName)])))),
+            ("FontDescriptor", D(("FontFile2", new PdfStream(D(), bytes))))));
+
+        Assert.Single(Assert.IsType<PdfGlyphOutline>(font.GetGlyphOutline(66)).Contours);
+    }
+
     [Theory]
     [InlineData("Symbol", 65, "\u0391")]
     [InlineData("ZapfDingbats", 33, "\u2701")]

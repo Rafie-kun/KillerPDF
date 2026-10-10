@@ -1,4 +1,5 @@
 using System.Buffers.Binary;
+using System.Globalization;
 using System.Text;
 using KillerPdf.Engine.Documents;
 using KillerPdf.Engine.Filters;
@@ -125,6 +126,11 @@ public static class PdfFontResourceReader
                 encodingName ??= encodingDictionary is null ? null : Name(Get(encodingDictionary, "BaseEncoding"));
                 if (document.UsesCompatibilityRecovery && encodingName == "WinAnsiEcoding")
                     encodingName = "WinAnsiEncoding";
+                // An unrecognized encoding name (such as /NULL) carries no mapping; recover it as
+                // an absent encoding so the font's built-in or the standard encoding applies.
+                if (document.UsesCompatibilityRecovery && encodingName is not null
+                    && PdfFontTables.EncodingNames(encodingName) is null)
+                    encodingName = null;
                 string[]? builtInEncoding = encodingName is null ? type1?.EncodingNames?.ToArray() : null;
                 encodingName ??= standardMetricsName is "Symbol" ? "SymbolEncoding"
                     : standardMetricsName is "ZapfDingbats" ? "ZapfDingbatsEncoding" : "StandardEncoding";
@@ -221,7 +227,28 @@ public static class PdfFontResourceReader
                     ? (ushort)0 : embedded.GetGlyphId(char.ConvertToUtf32(text, 0));
                 if (glyph == 0 && code < 256) glyph = embedded.GetGlyphId((int)code);
                 if (glyph == 0 && code < 256) glyph = embedded.GetGlyphId((int)code + 0xF000);
+                if (glyph == 0 && resolvedData is null && code < glyphNames.Length
+                    && glyphNames[code] is { Length: > 0 } glyphName)
+                    glyph = NamedGlyph(glyphName);
                 return glyph;
+            }
+            // Embedded TrueType glyphs can be named by the encoding instead of reachable through
+            // the cmap: first through the font's own 'post' names, then through generated names
+            // ("g24", "g0024") that writers emit for subsets whose glyphs have no standard name.
+            bool? generatedNamesAreHex = null;
+            ushort NamedGlyph(string glyphName)
+            {
+                ushort named = embedded!.GetGlyphIdByName(glyphName);
+                if (named != 0) return named;
+                if (glyphName.Length < 2 || glyphName[0] != 'g') return 0;
+                generatedNamesAreHex ??= GeneratedGlyphNamesAreHex(glyphNames);
+                ReadOnlySpan<char> digits = glyphName.AsSpan(1);
+                int value = 0;
+                bool parsed = generatedNamesAreHex.Value
+                    ? digits.Length == 4 && int.TryParse(digits, NumberStyles.AllowHexSpecifier,
+                        CultureInfo.InvariantCulture, out value)
+                    : int.TryParse(digits, NumberStyles.None, CultureInfo.InvariantCulture, out value);
+                return parsed && value > 0 && value < embedded.GlyphCount ? (ushort)value : (ushort)0;
             }
             ushort SubstituteGlyph(uint code)
             {
@@ -461,6 +488,31 @@ public static class PdfFontResourceReader
         // The host resolver owns these bytes and hands the same array to every font resource that
         // maps to one installed face. TrueTypeFont never writes to its data, so loading the shared
         // array directly keeps one copy per face instead of one per page that references it.
+        // Writers that name subset glyphs by identifier use either zero-padded four-digit hex
+        // ("g0024", "g003a") or plain decimal ("g24", "g1009"). Decide once per font from all of
+        // its names so a four-digit decimal name is not misread as hex.
+        private static bool GeneratedGlyphNamesAreHex(string[] names)
+        {
+            bool hex = false;
+            foreach (string name in names)
+            {
+                if (name.Length < 2 || name[0] != 'g') continue;
+                ReadOnlySpan<char> digits = name.AsSpan(1);
+                bool allHex = true, hasLetter = false;
+                foreach (char c in digits)
+                {
+                    if (char.IsAsciiDigit(c)) continue;
+                    if (char.IsAsciiHexDigit(c)) { hasLetter = true; continue; }
+                    allHex = false;
+                    break;
+                }
+                if (!allHex) continue;
+                if (digits.Length != 4) return false;
+                if (hasLetter || digits[0] == '0') hex = true;
+            }
+            return hex;
+        }
+
         private static TrueTypeFont? ReadResolved(byte[]? data)
         {
             if (data is null) return null;

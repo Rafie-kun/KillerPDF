@@ -164,6 +164,7 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 - Honored rendering intents in painted colors, images, and shadings, including absolute media-white conversion and usable source or output-profile tables when another intent is unavailable, while sharing encoded ICC profile data and decoded tables across intents.
 - Honored the Hidden annotation flag for annotation and widget appearances.
 - Applied image Decode arrays to Indexed palette lookups.
+- Resolved embedded TrueType glyphs by post table names and generated gNNNN names, and ignored unknown simple font encoding names during recovery.
 
 ## [1.8.5] - Unreleased
 

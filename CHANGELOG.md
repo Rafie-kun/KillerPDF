@@ -206,6 +206,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Submenus attach consistently to their opening rows, with native direction and screen-edge placement.
 - Stopped drawing annotations and form fields that the document marks Hidden.
 - Corrected colors in indexed images that invert or remap their palette with a Decode array.
+- Fixed missing or wrong characters in embedded TrueType fonts that name their glyphs instead of mapping them.
 
 ## [1.8.81] - Unreleased
 

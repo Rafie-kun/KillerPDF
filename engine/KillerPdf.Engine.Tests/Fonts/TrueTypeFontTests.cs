@@ -258,6 +258,36 @@ public sealed class TrueTypeFontTests
             new PdfGlyphPoint(600, 1000, true)], contour.Points);
     }
 
+    [Fact]
+    public void GetGlyphIdByName_ReadsPostFormat2CustomNames()
+    {
+        TrueTypeFont font = TrueTypeFont.Load(BuildTestFont(format12: false, post: Post2("A.swash")));
+
+        Assert.Equal((ushort)1, font.GetGlyphIdByName("A.swash"));
+        Assert.Equal((ushort)0, font.GetGlyphIdByName(".notdef"));
+        Assert.Equal((ushort)0, font.GetGlyphIdByName("A"));
+        Assert.Equal((ushort)0, font.GetGlyphIdByName(""));
+    }
+
+    [Fact]
+    public void GetGlyphIdByName_ReadsPostFormat1StandardOrderWithinGlyphCount()
+    {
+        byte[] post = new byte[32];
+        U32(post, 0, 0x00010000);
+        TrueTypeFont font = TrueTypeFont.Load(BuildTestFont(format12: false, post: post));
+
+        Assert.Equal((ushort)1, font.GetGlyphIdByName(".null"));
+        Assert.Equal((ushort)0, font.GetGlyphIdByName("space"));
+    }
+
+    [Fact]
+    public void GetGlyphIdByName_ReturnsNotdefWithoutPostTable()
+    {
+        TrueTypeFont font = TrueTypeFont.Load(BuildTestFont(format12: false));
+
+        Assert.Equal((ushort)0, font.GetGlyphIdByName("A"));
+    }
+
     private static PdfDictionary ResolveDictionary(PdfDocument document, PdfObject value) =>
         Assert.IsType<PdfDictionary>(value is PdfIndirectReference reference
             ? document.Resolve(reference) : value);
@@ -265,7 +295,7 @@ public sealed class TrueTypeFontTests
     internal static byte[] BuildTestFont(
         bool format12, ushort embeddingFlags = 0, bool includeOutlines = false,
         bool cffOutlines = false, byte[]? cmap = null, bool includeCompound = false,
-        bool symbolCmap = false)
+        bool symbolCmap = false, byte[]? post = null)
     {
         int glyphCount = includeCompound ? 3 : 2;
         var tables = new Dictionary<string, byte[]>
@@ -296,6 +326,8 @@ public sealed class TrueTypeFontTests
         };
         if (cffOutlines)
             tables["CFF "] = [1, 0, 4, 1];
+        if (post is not null)
+            tables["post"] = post;
         if (embeddingFlags != 0)
             tables["OS/2"] = Bytes(10, bytes => U16(bytes, 8, embeddingFlags));
         if (includeOutlines)
@@ -512,6 +544,18 @@ public sealed class TrueTypeFontTests
         U32(result, variationOffset + 29, 1);
         U24(result, variationOffset + 33, 0x0042);
         U16(result, variationOffset + 36, 1);
+        return result;
+    }
+
+    internal static byte[] Post2(string customName)
+    {
+        byte[] name = Encoding.ASCII.GetBytes(customName);
+        byte[] result = new byte[39 + name.Length];
+        U32(result, 0, 0x00020000);
+        U16(result, 32, 2);
+        U16(result, 36, 258);
+        result[38] = (byte)name.Length;
+        name.CopyTo(result, 39);
         return result;
     }
 
