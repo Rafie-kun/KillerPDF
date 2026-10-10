@@ -5816,6 +5816,41 @@ public sealed class PdfPageRendererTests
         return PdfDocument.Open(Encoding.Latin1.GetBytes(pdf.ToString()));
     }
 
+    [Theory]
+    [InlineData("", 0, 255)]
+    [InlineData(" /Decode [1 0]", 255, 0)]
+    [InlineData(" /Decode [0 1]", 0, 255)]
+    public void Render_AppliesDecodeToIndexedImageSamples(string decode, byte first, byte second)
+    {
+        // One-bit samples 0 then 1 ('@' = 0b01000000) against a black-then-white palette.
+        const string content = "q 2 0 0 1 0 0 cm /Im Do Q";
+        string[] objects =
+        [
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 /MediaBox [0 0 2 1] >>",
+            "<< /Type /Page /Parent 2 0 R /Resources << /XObject << /Im 5 0 R >> >> /Contents 4 0 R >>",
+            $"<< /Length {content.Length} >>\nstream\n{content}\nendstream",
+            $"<< /Type /XObject /Subtype /Image /Width 2 /Height 1 /BitsPerComponent 1 /ColorSpace [/Indexed /DeviceGray 1 <00FF>]{decode} /Length 1 >>\nstream\n@\nendstream"
+        ];
+        var pdf = new StringBuilder("%PDF-1.7\n");
+        var offsets = new List<int>();
+        for (int index = 0; index < objects.Length; index++)
+        {
+            offsets.Add(Encoding.Latin1.GetByteCount(pdf.ToString()));
+            pdf.Append($"{index + 1} 0 obj\n{objects[index]}\nendobj\n");
+        }
+        int xref = Encoding.Latin1.GetByteCount(pdf.ToString());
+        pdf.Append($"xref\n0 {objects.Length + 1}\n0000000000 65535 f \n");
+        foreach (int offset in offsets) pdf.Append($"{offset:0000000000} 00000 n \n");
+        pdf.Append($"trailer << /Size {objects.Length + 1} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n");
+
+        PdfRenderedPage page = new PdfPageRenderer(PdfDocument.Open(Encoding.Latin1.GetBytes(pdf.ToString())))
+            .Render(0, new PdfRenderOptions(2, 1));
+
+        Assert.Equal([first, first, first, 255], Pixel(page, 0, 0));
+        Assert.Equal([second, second, second, 255], Pixel(page, 1, 0));
+    }
+
     private static PdfDocument FlaggedAnnotationDocument(string subtype, int flags)
     {
         const string appearanceContent = "0 0 2 1 re f";

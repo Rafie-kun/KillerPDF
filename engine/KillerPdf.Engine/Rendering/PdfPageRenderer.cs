@@ -3064,6 +3064,16 @@ public sealed partial class PdfPageRenderer
             if (softMask is null && explicitMask is not null)
                 softMask = ReadExplicitImageMask(explicitMask);
             decode = ReadImageDecode(stream.Dictionary, colorSpace, imageMask);
+            // Every Indexed paint path reads raw samples as palette indices, so apply a
+            // non-default Decode once here. Color-key masks compare raw samples and keep them.
+            if (!imageMask && colorKeyMask is null && colorSpace.Palette is { } palette
+                && components == 1 && bits <= 8 && stream.Dictionary.ContainsKey(Name("Decode"))
+                && RemapIndexedSamples(samples, sampleWidth, sampleHeight, bits, decode,
+                    palette.Length) is { } remapped)
+            {
+                samples = remapped;
+                decode = colorSpace.DefaultDecode ?? [.. element];
+            }
             if (embeddedMaskMode == 2)
                 preblendMatte = ReadPreblendMatte(stream.Dictionary, colorSpace);
             else if (softMask is not null && stream.Dictionary.TryGetValue(Name("SMask"), out PdfObject? matteMaskValue)
@@ -5063,6 +5073,54 @@ public sealed partial class PdfPageRenderer
                 colorSpace.Components).SelectMany(pair => pair)];
         PdfArray array = ResolveArray(value, colorSpace.Components * 2, "Image decode array");
         return [.. array.Select(item => Number(Resolve(item)))];
+    }
+
+    /// <summary>
+    /// Returns a copy of packed Indexed samples with the image Decode array applied, so each
+    /// sample is the palette index ISO 32000-2 8.9.5.2 specifies: Dmin + raw * (Dmax - Dmin) /
+    /// (2^bits - 1), rounded and clamped to the palette. Returns null for the identity mapping.
+    /// The source array may be shared with the decoded-image cache and is never modified.
+    /// </summary>
+    internal static byte[]? RemapIndexedSamples(byte[] samples, int width, int height, int bits,
+        double[] decode, int paletteLength)
+    {
+        if (decode.Length < 2 || paletteLength < 1) return null;
+        int maximum = (1 << bits) - 1;
+        var lookup = new byte[maximum + 1];
+        bool identity = true;
+        for (int raw = 0; raw <= maximum; raw++)
+        {
+            double mapped = decode[0] + raw * (decode[1] - decode[0]) / maximum;
+            int index = double.IsFinite(mapped)
+                ? Math.Clamp((int)Math.Round(mapped, MidpointRounding.AwayFromZero), 0,
+                    Math.Min(paletteLength - 1, maximum))
+                : 0;
+            lookup[raw] = (byte)index;
+            identity &= index == raw;
+        }
+        if (identity) return null;
+        var result = new byte[samples.Length];
+        if (bits == 8)
+        {
+            for (int index = 0; index < samples.Length; index++)
+                result[index] = lookup[samples[index]];
+            return result;
+        }
+        int rowBytes = (width * bits + 7) / 8;
+        int perByte = 8 / bits;
+        for (int row = 0; row < height; row++)
+        {
+            int rowStart = row * rowBytes;
+            if (rowStart + rowBytes > samples.Length) break;
+            for (int column = 0; column < width; column++)
+            {
+                int byteIndex = rowStart + column / perByte;
+                int shift = 8 - bits * (column % perByte + 1);
+                int raw = (samples[byteIndex] >> shift) & maximum;
+                result[byteIndex] |= (byte)(lookup[raw] << shift);
+            }
+        }
+        return result;
     }
 
     private static bool ImageMayReachTarget(Matrix transform, IReadOnlyList<ClipRegion> clips,

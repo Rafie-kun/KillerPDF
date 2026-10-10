@@ -163,6 +163,7 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 - Reported source and output ICC profile fallbacks in page-rendering diagnostics and skipped unused output profiles when default color spaces replace them.
 - Honored rendering intents in painted colors, images, and shadings, including absolute media-white conversion and usable source or output-profile tables when another intent is unavailable, while sharing encoded ICC profile data and decoded tables across intents.
 - Honored the Hidden annotation flag for annotation and widget appearances.
+- Applied image Decode arrays to Indexed palette lookups.
 
 ## [1.8.5] - Unreleased
 
