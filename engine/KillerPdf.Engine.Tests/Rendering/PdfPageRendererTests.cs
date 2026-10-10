@@ -2513,6 +2513,31 @@ public sealed class PdfPageRendererTests
     }
 
     [Fact]
+    public void Render_FunctionShadingBoundingBoxIsInTargetSpace()
+    {
+        PdfDocument source = PdfDocument.Open(new PdfDocumentBuilder()
+            .AddPage(10, 10, Encoding.ASCII.GetBytes("/Sh1 sh")).Build());
+        var function = new PdfStream(new PdfDictionary([
+            new KeyValuePair<PdfName, PdfObject>(Name("FunctionType"), new PdfInteger(4)),
+            new KeyValuePair<PdfName, PdfObject>(Name("Domain"), Reals(0, 1, 0, 1)),
+            new KeyValuePair<PdfName, PdfObject>(Name("Range"), Reals(0, 1))]),
+            Encoding.ASCII.GetBytes("{ pop pop 0 }"));
+        var shading = new PdfDictionary([
+            new KeyValuePair<PdfName, PdfObject>(Name("ShadingType"), new PdfInteger(1)),
+            new KeyValuePair<PdfName, PdfObject>(Name("ColorSpace"), Name("DeviceGray")),
+            new KeyValuePair<PdfName, PdfObject>(Name("Matrix"), Reals(10, 0, 0, 10, 0, 0)),
+            new KeyValuePair<PdfName, PdfObject>(Name("BBox"), Reals(0, 0, 5, 10)),
+            new KeyValuePair<PdfName, PdfObject>(Name("Function"), function)]);
+        PdfDocument document = AddShadingResource(source, shading);
+
+        PdfRenderedPage rendered = new PdfPageRenderer(document).Render(
+            0, new PdfRenderOptions(10, 10, includeAnnotations: false, includeFormFields: false));
+
+        Assert.Equal([0, 0, 0, 255], Pixel(rendered, 2, 5));
+        Assert.Equal([255, 255, 255, 255], Pixel(rendered, 7, 5));
+    }
+
+    [Fact]
     public void Render_PaintsFunctionShadingsWithTheirMatrixAndDomain()
     {
         PdfDocument source = PdfDocument.Open(new PdfDocumentBuilder()

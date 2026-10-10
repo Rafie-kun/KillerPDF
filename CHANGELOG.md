@@ -225,6 +225,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Fixed blank pages in files whose cross-reference table numbers its first entries one too high.
 - Fixed highlight, underline, strikeout, squiggly, square and circle annotations that were invisible when the file stored no appearance for them.
 - Fixed extra rings and seams in radial gradients whose circles are disjoint or intersect.
+- Fixed function-based gradients that disappeared when they declared a bounding box.
 
 ## [1.8.81] - Unreleased
 

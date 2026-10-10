@@ -4373,8 +4373,8 @@ public sealed partial class PdfPageRenderer
             : Matrix.Identity;
         Matrix shadingToPage = matrix.Then(state.Transform);
         if (!shadingToPage.TryInverse(out Matrix pageToShading)) return true;
-        Point[]? bounds = ReadShadingBounds(shading,
-            state with { Transform = shadingToPage }, "Function");
+        // BBox is in the shading's target space, which /Matrix maps the domain into.
+        Point[]? bounds = ReadShadingBounds(shading, state, "Function");
         (int left, int top, int right, int bottom) = GetRasterBounds(
             state.Clips, bounds, targetWidth, targetHeight, scaleX, scaleY);
         state = state with { GraphicsSoftMask = state.GraphicsSoftMask?.ForBounds(left, top, right, bottom) };
