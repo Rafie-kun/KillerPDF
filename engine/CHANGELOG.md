@@ -110,6 +110,7 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 
 ### Fixed
 
+- Shared host font programs across every font resource that resolves to the same installed face and stopped copying programs the CFF probe rejects, cutting live memory by about a third on long OCR'd scans.
 - Improved fractional text placement with finer glyph-mask origins and bounded reuse of glyph geometry.
 - Preserved partially covered spot inks beneath later process and spot overprints, including mixed process and named DeviceN edges and clipped indexed spot images.
 - Corrected clipped JBIG2 region and symbol placement, preserving pixels outside partial bytes for all composition operators and handling disjoint coordinates without overflow.

@@ -77,7 +77,8 @@ public static class PdfFontResourceReader
                     composite ? ordering : "Standard", requestedVertical))
                 : null;
             byte[]? outlineData = embeddedData ?? resolvedData;
-            TrueTypeFont? embedded = ReadEmbedded(outlineData);
+            TrueTypeFont? embedded = embeddedData is not null
+                ? ReadEmbedded(embeddedData) : ReadResolved(resolvedData);
             PdfCffGlyphReader? cff = outlineData is null ? standardSymbols : PdfCffGlyphReader.TryRead(outlineData);
             PdfType1GlyphReader? type1 = type1Stream is not null
                 ? ReadType1(type1Stream) : null;
@@ -455,6 +456,16 @@ public static class PdfFontResourceReader
             if (data is null) return null;
             try { return TrueTypeFont.LoadForExtraction(data); }
             catch (FormatException) { return null; } // CFF-only programs do not contain sfnt tables.
+        }
+
+        // The host resolver owns these bytes and hands the same array to every font resource that
+        // maps to one installed face. TrueTypeFont never writes to its data, so loading the shared
+        // array directly keeps one copy per face instead of one per page that references it.
+        private static TrueTypeFont? ReadResolved(byte[]? data)
+        {
+            if (data is null) return null;
+            try { return TrueTypeFont.LoadOwnedForExtraction(data); }
+            catch (FormatException) { return null; }
         }
 
         private PdfToUnicodeMap ReadToUnicode(PdfStream stream, bool simpleFont, bool allowUnreadableMap,

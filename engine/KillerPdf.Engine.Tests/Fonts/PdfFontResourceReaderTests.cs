@@ -1164,6 +1164,27 @@ public sealed class PdfFontResourceReaderTests
         Assert.Equal(-257, font.Descent);
     }
 
+    [Fact]
+    public void HostResolvedFontProgramsAreSharedNotCopied()
+    {
+        // A document with one unembedded font per page resolves the same installed face for every
+        // page. The resolver hands out one shared array; reading a resource must not copy it.
+        byte[] bytes = TrueTypeFontTests.BuildTestFont(false, includeOutlines: true);
+        Array.Resize(ref bytes, 4 * 1024 * 1024);   // trailing padding is outside every table
+        var resolver = new TestFontResolver(bytes);
+        PdfDictionary Resource() => D(("Subtype", N("TrueType")), ("BaseFont", N("UninstalledFamily")),
+            ("FontDescriptor", D()), ("FirstChar", new PdfInteger(65)),
+            ("Widths", new PdfArray([new PdfInteger(500)])));
+        var warm = PdfFontResourceReader.Read(Document, Resource(), resolver);
+        Assert.NotNull(warm.GetGlyphOutline(65));
+        long before = GC.GetAllocatedBytesForCurrentThread();
+        var second = PdfFontResourceReader.Read(Document, Resource(), resolver);
+        long allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+        Assert.NotNull(second.GetGlyphOutline(65));
+        Assert.Equal(2, resolver.Requests.Count);
+        Assert.InRange(allocated, 0, bytes.Length / 4);
+    }
+
     private static int FindTable(byte[] bytes, string name)
     {
         for (int i = 0; i < BinaryPrimitives.ReadUInt16BigEndian(bytes.AsSpan(4)); i++)
