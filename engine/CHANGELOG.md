@@ -107,6 +107,7 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 - Faster reduction of large one-bit images by processing each output row together with exact coverage.
 - Reduced cancellation-check overhead during exact one-bit image reduction.
 - Reduced JBIG2 probability-context storage and arithmetic decoding overhead with unchanged decoded pixels.
+- The shared ICC profile cache keeps only decoded profiles, within half the previous budget.
 
 ### Fixed
 

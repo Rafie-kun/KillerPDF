@@ -7,10 +7,13 @@ internal sealed class InstalledPdfFontResolver : IPdfFontResolver
 {
     internal static InstalledPdfFontResolver Instance { get; } = new();
 
-    private readonly Dictionary<PdfFontRequest, byte[]?> _cache = [];
-    private readonly Dictionary<(string Family, bool Bold, bool Italic), byte[]?>
+    // Face bytes are held weakly. The fonts a renderer parsed keep their bytes alive while a
+    // document is open, and faces no open document uses can be collected instead of staying
+    // for the life of the process. A null entry records that nothing is installed.
+    private readonly Dictionary<PdfFontRequest, WeakReference<byte[]>?> _cache = [];
+    private readonly Dictionary<(string Family, bool Bold, bool Italic), WeakReference<byte[]>?>
         _familyCache = [];
-    private readonly Dictionary<string, byte[]?> _standardFaceCache = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, WeakReference<byte[]>?> _standardFaceCache = new(StringComparer.OrdinalIgnoreCase);
     private readonly Lock _gate = new();
     private static readonly HashSet<string> StyleWords = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -21,7 +24,7 @@ internal sealed class InstalledPdfFontResolver : IPdfFontResolver
     {
         lock (_gate)
         {
-            if (_cache.TryGetValue(request, out byte[]? cached)) return cached;
+            if (TryCached(_cache, request, out byte[]? cached)) return cached;
             DetectedPdfFontStyle style = PdfFontStyle.FromPdfName(request.PostScriptName);
             bool standardAlias = style.Family.Equals("Courier New", StringComparison.OrdinalIgnoreCase)
                 || style.Family.Equals("Arial", StringComparison.OrdinalIgnoreCase)
@@ -42,8 +45,7 @@ internal sealed class InstalledPdfFontResolver : IPdfFontResolver
             resolved ??= Candidates(request, style.Family)
                 .Select(family => FaceBytes(family, bold, italic))
                 .FirstOrDefault(bytes => bytes is not null);
-            _cache[request] = resolved;
-            return resolved;
+            return Remember(_cache, request, resolved);
         }
     }
 
@@ -68,7 +70,7 @@ internal sealed class InstalledPdfFontResolver : IPdfFontResolver
             _ => null
         };
         if (fileName is null) return null;
-        if (_standardFaceCache.TryGetValue(fileName, out byte[]? cached)) return cached;
+        if (TryCached(_standardFaceCache, fileName, out byte[]? cached)) return cached;
         byte[]? bytes = null;
         string windows = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
         if (windows.Length > 0)
@@ -78,18 +80,28 @@ internal sealed class InstalledPdfFontResolver : IPdfFontResolver
             catch (IOException) { bytes = null; }
             catch (UnauthorizedAccessException) { bytes = null; }
         }
-        _standardFaceCache[fileName] = bytes;
-        return bytes;
+        return Remember(_standardFaceCache, fileName, bytes);
     }
 
     private byte[]? FaceBytes(string family, bool bold, bool italic)
     {
         var key = (family, bold, italic);
-        if (!_familyCache.TryGetValue(key, out byte[]? bytes))
-        {
-            bytes = InstalledFontCatalog.FaceBytes(family, bold, italic);
-            _familyCache[key] = bytes;
-        }
+        return TryCached(_familyCache, key, out byte[]? bytes) ? bytes
+            : Remember(_familyCache, key, InstalledFontCatalog.FaceBytes(family, bold, italic));
+    }
+
+    private static bool TryCached<TKey>(Dictionary<TKey, WeakReference<byte[]>?> cache, TKey key,
+        out byte[]? bytes) where TKey : notnull
+    {
+        bytes = null;
+        if (!cache.TryGetValue(key, out WeakReference<byte[]>? entry)) return false;
+        return entry is null || entry.TryGetTarget(out bytes);
+    }
+
+    private static byte[]? Remember<TKey>(Dictionary<TKey, WeakReference<byte[]>?> cache, TKey key,
+        byte[]? bytes) where TKey : notnull
+    {
+        cache[key] = bytes is null ? null : new WeakReference<byte[]>(bytes);
         return bytes;
     }
 
