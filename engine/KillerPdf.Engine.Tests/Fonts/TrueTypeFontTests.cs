@@ -278,6 +278,35 @@ public sealed class TrueTypeFontTests
     }
 
     [Fact]
+    public void LoadForExtraction_SkipsDirectoryRecordOutsideTheFile()
+    {
+        byte[] bytes = BuildTestFont(format12: false);
+        PatchTables(bytes, (tag, record, _) =>
+        {
+            if (tag == "name") U32(bytes, record + 8, 0x7FFF_0000);
+        });
+
+        Assert.Throws<FormatException>(() => TrueTypeFont.Load(bytes));
+        TrueTypeFont font = TrueTypeFont.LoadForExtraction(bytes);
+        Assert.Equal("EmbeddedFont", font.PostScriptName);
+        Assert.Equal((ushort)1, font.GetGlyphId('A'));
+    }
+
+    [Fact]
+    public void LoadForExtraction_ClampsHorizontalMetricCountToGlyphCount()
+    {
+        byte[] bytes = BuildTestFont(format12: false);
+        PatchTables(bytes, (tag, _, offset) =>
+        {
+            if (tag == "hhea") U16(bytes, offset + 34, 5);
+        });
+
+        Assert.Throws<FormatException>(() => TrueTypeFont.Load(bytes));
+        TrueTypeFont font = TrueTypeFont.LoadForExtraction(bytes);
+        Assert.Equal(600, font.GetPdfAdvanceWidth(1));
+    }
+
+    [Fact]
     public void GetGlyphIdByName_ReadsPostFormat2CustomNames()
     {
         TrueTypeFont font = TrueTypeFont.Load(BuildTestFont(format12: false, post: Post2("A.swash")));
@@ -305,6 +334,14 @@ public sealed class TrueTypeFontTests
         TrueTypeFont font = TrueTypeFont.Load(BuildTestFont(format12: false));
 
         Assert.Equal((ushort)0, font.GetGlyphIdByName("A"));
+    }
+
+    private static void PatchTables(byte[] font, Action<string, int, int> patch)
+    {
+        int tables = BinaryPrimitives.ReadUInt16BigEndian(font.AsSpan(4));
+        for (int record = 12; record < 12 + tables * 16; record += 16)
+            patch(Encoding.ASCII.GetString(font, record, 4), record,
+                (int)BinaryPrimitives.ReadUInt32BigEndian(font.AsSpan(record + 8)));
     }
 
     private static PdfDictionary ResolveDictionary(PdfDocument document, PdfObject value) =>

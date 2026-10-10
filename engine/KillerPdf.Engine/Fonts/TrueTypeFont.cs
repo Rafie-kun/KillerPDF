@@ -33,6 +33,7 @@ public sealed class TrueTypeFont
         Descender = S16(hhea, 6);
         GlyphCount = U16(maxp, 4);
         int horizontalMetricCount = U16(hhea, 34);
+        if (extraction && horizontalMetricCount > GlyphCount) horizontalMetricCount = GlyphCount;
         if (GlyphCount == 0 || horizontalMetricCount is < 1 || horizontalMetricCount > GlyphCount)
             throw Error("The horizontal metric count is invalid");
         _advanceWidths = ReadWidths(hmtx, GlyphCount, horizontalMetricCount, extraction);
@@ -107,7 +108,12 @@ public sealed class TrueTypeFont
             uint offset = ReadU32(data, record + 8);
             uint length = ReadU32(data, record + 12);
             if (offset > data.Length || length > data.Length - offset)
+            {
+                // Damaged embedded directories can end in a garbage record. Skip it; a required
+                // table that is really missing still fails when the face reads it.
+                if (extraction) continue;
                 throw Error($"Font table {TagText(tag)} points outside the file");
+            }
             if (!tables.TryAdd(tag, new Table((int)offset, (int)length)))
                 throw Error($"Font table {TagText(tag)} is duplicated");
         }
