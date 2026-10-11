@@ -3483,9 +3483,10 @@ public sealed partial class PdfPageRenderer
             if (!double.IsFinite(gamma) || gamma <= 0)
                 throw new FormatException("A CalGray image gamma value is invalid.");
             Func<double, double, double, Color> convertXyz = CreateXyzConverter(whitePoint);
+            var gammaTable = new SampleGamma(gamma);
             return new ImageColorSpace(1, null, (gray, _, _, _) =>
             {
-                double adjusted = Math.Pow(gray, gamma);
+                double adjusted = gammaTable.Apply(gray);
                 return convertXyz(whitePoint[0] * adjusted,
                     whitePoint[1] * adjusted, whitePoint[2] * adjusted);
             }, Profile: ReadCalibratedProfile(array, whitePoint, [gamma]));
@@ -3507,11 +3508,12 @@ public sealed partial class PdfPageRenderer
             if (matrix.Any(value => !double.IsFinite(value)))
                 throw new FormatException("A CalRGB image matrix is invalid.");
             Func<double, double, double, Color> convertXyz = CreateXyzConverter(whitePoint);
+            SampleGamma[] gammaTables = [new(gamma[0]), new(gamma[1]), new(gamma[2])];
             return new ImageColorSpace(3, null, (red, green, blue, _) =>
             {
-                double a = Math.Pow(red, gamma[0]);
-                double b = Math.Pow(green, gamma[1]);
-                double c = Math.Pow(blue, gamma[2]);
+                double a = gammaTables[0].Apply(red);
+                double b = gammaTables[1].Apply(green);
+                double c = gammaTables[2].Apply(blue);
                 return convertXyz(matrix[0] * a + matrix[3] * b + matrix[6] * c,
                     matrix[1] * a + matrix[4] * b + matrix[7] * c,
                     matrix[2] * a + matrix[5] * b + matrix[8] * c);
@@ -3746,6 +3748,38 @@ public sealed partial class PdfPageRenderer
             0.8951 * x + 0.2664 * y - 0.1614 * z,
             -0.7502 * x + 1.7135 * y + 0.0367 * z,
             0.0389 * x - 0.0685 * y + 1.0296 * z);
+    }
+
+    /// <summary>
+    /// A calibrated gamma whose 8-bit sample inputs, the whole steps of 1/255, read their power
+    /// from a table of the same results; any other input computes it directly.
+    /// </summary>
+    private sealed class SampleGamma
+    {
+        private readonly double[] _inputs = new double[256];
+        private readonly double[] _outputs = new double[256];
+        private readonly double _gamma;
+
+        internal SampleGamma(double gamma)
+        {
+            _gamma = gamma;
+            for (int index = 0; index < 256; index++)
+            {
+                _inputs[index] = index / 255d;
+                _outputs[index] = Math.Pow(_inputs[index], gamma);
+            }
+        }
+
+        internal double Apply(double value)
+        {
+            double scaled = value * 255 + 0.5;
+            if (scaled >= 0 && scaled < 256)
+            {
+                int index = (int)scaled;
+                if (_inputs[index] == value) return _outputs[index];
+            }
+            return Math.Pow(value, _gamma);
+        }
     }
 
     private static double LabInverse(double value)
@@ -8529,7 +8563,7 @@ public sealed partial class PdfPageRenderer
         internal static Color Rgb(double red, double green, double blue) =>
             new(Channel(red), Channel(green), Channel(blue));
         internal static Color LinearRgb(double red, double green, double blue) =>
-            Rgb(Compand(red), Compand(green), Compand(blue));
+            new(SrgbEncoding.Encode(red), SrgbEncoding.Encode(green), SrgbEncoding.Encode(blue));
         internal static Color Cmyk(double cyan, double magenta, double yellow, double black)
         {
             uint ink = (uint)(Channel(cyan) | Channel(magenta) << 8
@@ -8546,5 +8580,60 @@ public sealed partial class PdfPageRenderer
             (byte)Math.Round(Math.Clamp(value, 0, 1) * 255, MidpointRounding.AwayFromZero);
         private static double Compand(double value) => value <= 0.0031308
             ? 12.92 * value : 1.055 * Math.Pow(value, 1 / 2.4) - 0.055;
+
+        /// <summary>
+        /// Encodes a linear value to its sRGB byte, the same byte as companding and rounding it.
+        /// That byte is a step function of the value. Its steps above the linear segment are
+        /// found once by bisection on the same arithmetic, so a lookup replaces the power;
+        /// values very close to a step, or outside the stepped range, are computed directly.
+        /// </summary>
+        private static class SrgbEncoding
+        {
+            private const double Knee = 0.0031308;
+            private const int Cells = 4096;
+            private const double Margin = 1e-9;
+            private static readonly double[] Steps = new double[257];
+            private static readonly byte[] CellStart = new byte[Cells];
+
+            static SrgbEncoding()
+            {
+                int lowest = Encoded(Math.BitIncrement(Knee));
+                Steps[lowest] = Knee;
+                for (int value = lowest + 1; value <= 255; value++)
+                {
+                    double low = Steps[value - 1], high = 1.5;
+                    while (Math.BitIncrement(low) < high)
+                    {
+                        double middle = low + (high - low) / 2;
+                        if (middle <= low || middle >= high) break;
+                        if (Encoded(middle) >= value) high = middle;
+                        else low = middle;
+                    }
+                    Steps[value] = high;
+                }
+                Steps[256] = double.PositiveInfinity;
+                for (int cell = 0; cell < Cells; cell++)
+                {
+                    double start = cell / (double)Cells;
+                    int value = lowest;
+                    while (value < 255 && Steps[value + 1] <= start) value++;
+                    CellStart[cell] = (byte)value;
+                }
+            }
+
+            private static byte Encoded(double value) => Channel(Compand(value));
+
+            internal static byte Encode(double value)
+            {
+                if (value >= Steps[255] && value - Steps[255] >= value * Margin) return 255;
+                if (!(value > Knee) || !(value < 1)) return Encoded(value);
+                int encoded = CellStart[(int)(value * Cells)];
+                while (value >= Steps[encoded + 1]) encoded++;
+                if (value - Steps[encoded] < value * Margin
+                    || Steps[encoded + 1] - value < value * Margin)
+                    return Encoded(value);
+                return (byte)encoded;
+            }
+        }
     }
 }
