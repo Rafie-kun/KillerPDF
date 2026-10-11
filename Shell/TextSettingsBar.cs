@@ -21,6 +21,17 @@ namespace KillerPDF
         // Text tool settings bar
         // ============================================================
 
+        // Page points per canvas unit for a rendered page, following its on-screen turn. Text sizes
+        // are shown in points and stored in canvas units, and the export converts back the same way.
+        private double PointsPerCanvasUnit(int pageIndex, double renderHeight)
+        {
+            var session = EnsureEngineDocumentSession();
+            if (pageIndex < 0 || pageIndex >= session.PageCount) return 0;
+            var info = session.Pages[pageIndex];
+            int rotation = _pageRotations.TryGetValue(pageIndex, out int stored) ? stored : info.Rotation;
+            return RedactionGeometry.PointsPerCanvasUnit(info.Width, info.Height, renderHeight, rotation);
+        }
+
         // Underline and/or strikethrough as one decoration collection (either, both, or none).
         private static TextDecorationCollection? BuildDecorations(bool underline, bool strike)
         {
@@ -56,7 +67,7 @@ namespace KillerPDF
             double spacing = _textLetterSpacing;
             if (_doc is not null && pageIndex >= 0 && _renderDims.TryGetValue(pageIndex, out var rd) && rd.h > 0)
             {
-                double sy = EnsureEngineDocumentSession().Pages[pageIndex].Height / rd.h;
+                double sy = PointsPerCanvasUnit(pageIndex, rd.h);
                 if (sy > 0) spacing /= sy;
             }
             return spacing;
@@ -96,7 +107,7 @@ namespace KillerPDF
             double fontCanvas = _textFontSize;
             if (_doc is not null && pg >= 0 && _renderDims.TryGetValue(pg, out var rd) && rd.h > 0)
             {
-                double sy = EnsureEngineDocumentSession().Pages[pg].Height / rd.h;
+                double sy = PointsPerCanvasUnit(pg, rd.h);
                 if (sy > 0) fontCanvas = _textFontSize / sy;
             }
             _activeTextBox.FontSize = fontCanvas;
@@ -152,7 +163,7 @@ namespace KillerPDF
                 ta.LetterSpacing = CanvasLetterSpacing(ta.PageIndex);
                 double sy = 1.0;
                 if (_doc is not null && _renderDims.TryGetValue(ta.PageIndex, out var rd) && rd.h > 0)
-                    sy = EnsureEngineDocumentSession().Pages[ta.PageIndex].Height / rd.h;
+                    sy = PointsPerCanvasUnit(ta.PageIndex, rd.h);
                 if (sy > 0 && _textFontSize > 0) ta.FontSize = _textFontSize / sy;
                 touched.Add(ta.PageIndex);
             }
@@ -805,7 +816,7 @@ namespace KillerPDF
 
                     // Convert the point size to the page's canvas units (see PlaceTextBox).
                     double fontCanvas = _textFontSize;
-                    double sy = EnsureEngineDocumentSession().Pages[pageIdx].Height / Math.Max(1.0, ph);
+                    double sy = PointsPerCanvasUnit(pageIdx, Math.Max(1.0, ph));
                     if (sy > 0) fontCanvas = _textFontSize / sy;
 
                     var ta = new TextAnnotation

@@ -752,6 +752,7 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_St_AlreadyEditHere">Ya hay una edición aquí - haga clic en su texto para volver a editarla, o arrastre la cubierta</sys:String>
     <sys:String x:Key="Str_St_NoTextLine">No se encontró ninguna línea de texto en esta posición</sys:String>
     <sys:String x:Key="Str_St_LineAlreadyEdited">Esta línea ya está editada - haga clic en su texto para cambiarla</sys:String>
+    <sys:String x:Key="Str_St_TurnedTextEdit">El texto de lado o al revés aún no se puede editar en su sitio. Gira la página para que se lea recto y luego edítalo.</sys:String>
     <sys:String x:Key="Str_St_ImagePlaced">Imagen colocada - arrastre para reposicionarla, use el controlador de esquina para cambiar el tamaño</sys:String>
     <sys:String x:Key="Str_St_ClipImageUnreadable">No se pudo leer la imagen del portapapeles</sys:String>
     <sys:String x:Key="Str_St_PastedImage">Imagen pegada - arrastre para reposicionarla, use el controlador de esquina para cambiar el tamaño</sys:String>

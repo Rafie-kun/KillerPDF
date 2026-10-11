@@ -25,7 +25,7 @@ namespace KillerPDF.Controls
             double spacing = _textLetterSpacing;
             if (_doc is not null && pageIndex >= 0 && _renderDims.TryGetValue(pageIndex, out var rd) && rd.h > 0)
             {
-                double sy = EnsureEngineDocumentSession().Pages[pageIndex].Height / rd.h;
+                double sy = PointsPerCanvasUnit(pageIndex, rd.h);
                 if (sy > 0) spacing /= sy;
             }
             return spacing;
@@ -684,7 +684,7 @@ namespace KillerPDF.Controls
                 _textFillColor = tsel.GetFill();
                 double sy = 1.0;
                 if (_doc is not null && _renderDims.TryGetValue(tsel.PageIndex, out var rd) && rd.h > 0)
-                    sy = EnsureEngineDocumentSession().Pages[tsel.PageIndex].Height / rd.h;
+                    sy = PointsPerCanvasUnit(tsel.PageIndex, rd.h);
                 _textFontSize = Math.Max(1, Math.Round(tsel.FontSize * sy));
                 _textLetterSpacing = tsel.LetterSpacing * sy;
                 ShowTextSettings();

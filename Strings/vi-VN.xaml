@@ -835,6 +835,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_St_AlreadyEditHere">Đã có một chỉnh sửa ở đây - nhấp vào văn bản để chỉnh sửa lại, hoặc kéo lớp phủ che</sys:String>
     <sys:String x:Key="Str_St_NoTextLine">Không tìm thấy dòng văn bản nào tại vị trí này</sys:String>
     <sys:String x:Key="Str_St_LineAlreadyEdited">Dòng này đã được chỉnh sửa - nhấp vào văn bản để thay đổi</sys:String>
+    <sys:String x:Key="Str_St_TurnedTextEdit">Chưa thể sửa trực tiếp văn bản nằm nghiêng hoặc lộn ngược. Hãy xoay trang để chữ thẳng rồi sửa.</sys:String>
     <sys:String x:Key="Str_St_ImagePlaced">Đã đặt hình ảnh - kéo để định vị lại, sử dụng tay nắm góc để thay đổi kích thước</sys:String>
     <sys:String x:Key="Str_St_ClipImageUnreadable">Không thể đọc hình ảnh từ khay nhớ tạm</sys:String>
     <sys:String x:Key="Str_St_PastedImage">Đã dán hình ảnh - kéo để định vị lại, sử dụng tay nắm góc để thay đổi kích thước</sys:String>

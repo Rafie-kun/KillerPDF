@@ -93,6 +93,19 @@ public sealed class RedactionGeometryTests
         Assert.Equal(page.Words.Single(w => w.Text == "here").BoundingBox.Left, phrase[1].Left, 6);
     }
 
+    [Theory]
+    [InlineData(0)]
+    [InlineData(90)]
+    [InlineData(180)]
+    [InlineData(270)]
+    public void PointsPerCanvasUnitIsTheSameOnEveryTurn(int rotation)
+    {
+        // A 300 by 200 point page shown at twice its size is 600 by 400 level and 400 by 600 turned.
+        double canvasHeight = rotation is 90 or 270 ? 600 : 400;
+
+        Assert.Equal(0.5, RedactionGeometry.PointsPerCanvasUnit(300, 200, canvasHeight, rotation), 9);
+    }
+
     [Fact]
     public void CanvasRectanglesAreClampedToThePage()
     {

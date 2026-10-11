@@ -835,6 +835,7 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_St_AlreadyEditHere">Тут уже є редагування - натисніть на його текст, щоб редагувати знову, або перетягніть накладку</sys:String>
     <sys:String x:Key="Str_St_NoTextLine">У цій позиції рядок тексту не знайдено</sys:String>
     <sys:String x:Key="Str_St_LineAlreadyEdited">Цей рядок уже відредаговано - натисніть на його текст, щоб змінити</sys:String>
+    <sys:String x:Key="Str_St_TurnedTextEdit">Текст, що йде боком або догори дриґом, поки що не можна редагувати на місці. Поверніть сторінку, щоб він читався рівно, і потім відредагуйте його.</sys:String>
     <sys:String x:Key="Str_St_ImagePlaced">Зображення розміщено - перетягніть для переміщення, кутовий маркер змінює розмір</sys:String>
     <sys:String x:Key="Str_St_ClipImageUnreadable">Не вдалося прочитати зображення з буфера обміну</sys:String>
     <sys:String x:Key="Str_St_PastedImage">Зображення вставлено - перетягніть для переміщення, кутовий маркер змінює розмір</sys:String>

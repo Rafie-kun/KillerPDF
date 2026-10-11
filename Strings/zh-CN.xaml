@@ -756,6 +756,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_St_AlreadyEditHere">此处已有编辑，点击其文本可重新编辑，或拖动遮盖层</sys:String>
     <sys:String x:Key="Str_St_NoTextLine">此位置未找到文本行</sys:String>
     <sys:String x:Key="Str_St_LineAlreadyEdited">此行已编辑，点击其文本可更改</sys:String>
+    <sys:String x:Key="Str_St_TurnedTextEdit">暂时无法直接编辑侧向或倒置的文字。请旋转页面使文字摆正后再编辑。</sys:String>
     <sys:String x:Key="Str_St_ImagePlaced">已放置图像，拖动可重新定位，使用角部手柄调整大小</sys:String>
     <sys:String x:Key="Str_St_ClipImageUnreadable">无法读取剪贴板图像</sys:String>
     <sys:String x:Key="Str_St_PastedImage">已粘贴图像，拖动可重新定位，使用角部手柄调整大小</sys:String>

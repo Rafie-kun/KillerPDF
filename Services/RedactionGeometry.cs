@@ -61,6 +61,11 @@ internal static class RedactionGeometry
         };
     }
 
+    /// <summary>Page points per canvas unit. The canvas shows the page turned, so a quarter turn puts
+    /// the page's width along the canvas height.</summary>
+    internal static double PointsPerCanvasUnit(double pageWidth, double pageHeight, double canvasHeight, int rotation) =>
+        canvasHeight <= 0 ? 0 : (NormalizeRotation(rotation) is 90 or 270 ? pageWidth : pageHeight) / canvasHeight;
+
     /// <summary>True when two canvas rectangles share interior area.</summary>
     internal static bool Overlaps(Rect a, Rect b) =>
         !a.IsEmpty && !b.IsEmpty && a.Right > b.Left && a.Left < b.Right && a.Bottom > b.Top && a.Top < b.Bottom;

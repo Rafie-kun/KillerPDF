@@ -835,6 +835,7 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_St_AlreadyEditHere">C'è già una modifica: fai clic sul testo per modificarlo nuovamente o trascina la copertina</sys:String>
     <sys:String x:Key="Str_St_NoTextLine">Nessuna riga testo trovata in questa posizione</sys:String>
     <sys:String x:Key="Str_St_LineAlreadyEdited">Questa riga è già stata modificata: fai clic sul testo per modificarlo</sys:String>
+    <sys:String x:Key="Str_St_TurnedTextEdit">Il testo di lato o capovolto non si può ancora modificare sul posto. Ruota la pagina perché si legga dritto, poi modificalo.</sys:String>
     <sys:String x:Key="Str_St_ImagePlaced">Immagine posizionata: trascina per riposizionare, usa l'angolo della maniglia per ridimensionare</sys:String>
     <sys:String x:Key="Str_St_ClipImageUnreadable">Impossibile leggere l'immagine negli appunti</sys:String>
     <sys:String x:Key="Str_St_PastedImage">Immagine incollata: trascina per riposizionare, usa l'angolo della maniglia per ridimensionare</sys:String>

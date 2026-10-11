@@ -835,6 +835,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_St_AlreadyEditHere">Itt már van szerkesztés - kattintson a szövegére az újraszerkesztéshez, vagy húzza a fedőréteget</sys:String>
     <sys:String x:Key="Str_St_NoTextLine">Ezen a helyen nem található szövegsor</sys:String>
     <sys:String x:Key="Str_St_LineAlreadyEdited">Ez a sor már szerkesztve van - kattintson a szövegére a módosításához</sys:String>
+    <sys:String x:Key="Str_St_TurnedTextEdit">Az oldalra fordított vagy fejjel lefelé álló szöveg még nem szerkeszthető helyben. Forgassa el az oldalt, hogy egyenesen olvasható legyen, majd szerkessze.</sys:String>
     <sys:String x:Key="Str_St_ImagePlaced">Kép elhelyezve - húzással áthelyezheti, a sarokfogantyúval átméretezheti</sys:String>
     <sys:String x:Key="Str_St_ClipImageUnreadable">A vágólap képe nem olvasható be</sys:String>
     <sys:String x:Key="Str_St_PastedImage">Kép beillesztve - húzással áthelyezheti, a sarokfogantyúval átméretezheti</sys:String>

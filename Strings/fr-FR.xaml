@@ -835,6 +835,7 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_St_AlreadyEditHere">Une modification existe déjà ici - cliquez sur son texte pour la modifier, ou faites glisser le cache</sys:String>
     <sys:String x:Key="Str_St_NoTextLine">Aucune ligne de texte trouvée à cette position</sys:String>
     <sys:String x:Key="Str_St_LineAlreadyEdited">Cette ligne est déjà modifiée - cliquez sur son texte pour la changer</sys:String>
+    <sys:String x:Key="Str_St_TurnedTextEdit">Le texte orienté de côté ou à l'envers ne peut pas encore être modifié sur place. Faites pivoter la page pour qu'il se lise droit, puis modifiez-le.</sys:String>
     <sys:String x:Key="Str_St_ImagePlaced">Image placée - faites glisser pour repositionner, utilisez la poignée d'angle pour redimensionner</sys:String>
     <sys:String x:Key="Str_St_ClipImageUnreadable">Impossible de lire l'image du presse-papiers</sys:String>
     <sys:String x:Key="Str_St_PastedImage">Image collée - faites glisser pour repositionner, utilisez la poignée d'angle pour redimensionner</sys:String>

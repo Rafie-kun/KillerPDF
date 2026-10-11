@@ -814,6 +814,7 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_St_AlreadyEditHere">Zde už úprava je - kliknutím na její text ji upravíte znovu, nebo přetáhněte překrytí</sys:String>
     <sys:String x:Key="Str_St_NoTextLine">Na této pozici nebyl nalezen žádný řádek textu</sys:String>
     <sys:String x:Key="Str_St_LineAlreadyEdited">Tento řádek je již upraven - kliknutím na jeho text jej změníte</sys:String>
+    <sys:String x:Key="Str_St_TurnedTextEdit">Text otočený na stranu nebo vzhůru nohama zatím nelze upravit na místě. Otočte stránku tak, aby se četl rovně, a pak ho upravte.</sys:String>
     <sys:String x:Key="Str_St_ImagePlaced">Obrázek umístěn - tažením jej přemístíte, rohovým úchytem změníte velikost</sys:String>
     <sys:String x:Key="Str_St_ClipImageUnreadable">Obrázek ze schránky se nepodařilo načíst</sys:String>
     <sys:String x:Key="Str_St_PastedImage">Obrázek vložen - tažením jej přemístíte, rohovým úchytem změníte velikost</sys:String>

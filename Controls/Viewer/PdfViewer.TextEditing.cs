@@ -96,6 +96,16 @@ namespace KillerPDF.Controls
             _activeCanvas.Children.Add(_reeditCoverOutline);
         }
 
+        // Page points per canvas unit for a rendered page, following its on-screen turn. Text sizes
+        // are shown in points and stored in canvas units, and the export converts back the same way.
+        private double PointsPerCanvasUnit(int pageIndex, double renderHeight)
+        {
+            var session = EnsureEngineDocumentSession();
+            if (pageIndex < 0 || pageIndex >= session.PageCount) return 0;
+            var info = session.Pages[pageIndex];
+            return RedactionGeometry.PointsPerCanvasUnit(info.Width, info.Height, renderHeight, EffectiveRotation(pageIndex));
+        }
+
         private void RemoveReeditCoverOutline()
         {
             if (_reeditCoverOutline is not null)
@@ -152,7 +162,7 @@ namespace KillerPDF.Controls
                     _textFillColor = placed.GetFill();   // and the fill swatches in sync with the box
                     double syp = 1.0;
                     if (_doc is not null && _renderDims.TryGetValue(pageIdx, out var prd) && prd.h > 0)
-                        syp = EnsureEngineDocumentSession().Pages[pageIdx].Height / prd.h;
+                        syp = PointsPerCanvasUnit(pageIdx, prd.h);
                     _textFontSize = Math.Max(1, placed.FontSize * syp);
                     _textLetterSpacing = placed.LetterSpacing * syp;
                     // Sync the bar's typeface + B/I/S to the box being re-edited.
@@ -220,18 +230,49 @@ namespace KillerPDF.Controls
 
                 double pdfW = page.Width;
                 double pdfH = page.Height;
-                double sxInv = (double)renderW / pdfW; // pdf->canvas
-                double syInv = (double)renderH / pdfH;
+                // The canvas shows the page turned by its rotation while extracted text stays in the
+                // unrotated page frame, so every box and baseline goes through the turn. Canvas units
+                // per point are the same on both axes.
+                int rotation = EffectiveRotation(pageIdx);
+                double syInv = 1.0 / RedactionGeometry.PointsPerCanvasUnit(pdfW, pdfH, renderH, rotation);
+                Point ToCanvas(double x, double y) =>
+                    RedactionGeometry.PageToCanvas(x, y, x, y, pdfW, pdfH, renderW, renderH, rotation).TopLeft;
 
-                // Convert all words to canvas coordinates upfront
+                // Convert all words to canvas coordinates upfront. A word reads level on screen when
+                // its first letter advances left to right across the canvas.
                 var canvasWords = page.GetWords().Select(w =>
                 {
-                    double cx = w.BoundingBox.Left * sxInv;
-                    double cy = renderH - (w.BoundingBox.Top * syInv);
-                    double cw = (w.BoundingBox.Right - w.BoundingBox.Left) * sxInv;
-                    double ch = (w.BoundingBox.Top - w.BoundingBox.Bottom) * syInv;
-                    return new { Word = w, Rect = new Rect(cx, cy, cw, ch) };
+                    var b = w.BoundingBox;
+                    Rect rect = RedactionGeometry.PageToCanvas(b.Left, b.Bottom, b.Right, b.Top,
+                        pdfW, pdfH, renderW, renderH, rotation);
+                    bool level = true;
+                    if (w.Letters.Count > 0)
+                    {
+                        var first = w.Letters[0];
+                        Point start = ToCanvas(first.StartBaseLine.X, first.StartBaseLine.Y);
+                        Point end = ToCanvas(first.EndBaseLine.X, first.EndBaseLine.Y);
+                        double dx = end.X - start.X, dy = end.Y - start.Y;
+                        level = (dx > 0 && dx >= Math.Abs(dy)) || (dx == 0 && dy == 0);
+                    }
+                    return new { Word = w, Rect = rect, Level = level };
                 }).ToList();
+
+                // The replacement text box is always level, so it cannot stand in for text that runs
+                // sideways or upside down on screen. Say so instead of covering that text with a box
+                // turned the wrong way, and leave such words out of the line search below.
+                var clickedWord = canvasWords.FirstOrDefault(cw =>
+                {
+                    Rect hit = cw.Rect;
+                    hit.Inflate(3, 3);
+                    return hit.Contains(canvasPos);
+                });
+                if ((clickedWord is not null && !clickedWord.Level)
+                    || (canvasWords.Count > 0 && canvasWords.All(cw => !cw.Level)))
+                {
+                    SetStatus(Loc("Str_St_TurnedTextEdit"));
+                    return;
+                }
+                canvasWords = [.. canvasWords.Where(cw => cw.Level)];
 
                 // Flattened forms commonly represent an entry area as a run of dots or underscores.
                 // Treat a click on that run as an empty text field instead of folding the placeholder
@@ -346,11 +387,11 @@ namespace KillerPDF.Controls
                         if (pdfFontPts > 0)
                             canvasFontSize = pdfFontPts * syInv;
 
-                        if (letter.WritingDirection == KillerPdf.Engine.Documents.PdfWritingDirection.LeftToRight)
-                        {
-                            sourceLeft = letter.StartBaseLine.X * sxInv;
-                            sourceBaseline = renderH - letter.StartBaseLine.Y * syInv;
-                        }
+                        // Only level words reach this point, so the letter's origin maps straight
+                        // to the left edge and baseline of the replacement on the canvas.
+                        Point baselineStart = ToCanvas(letter.StartBaseLine.X, letter.StartBaseLine.Y);
+                        sourceLeft = baselineStart.X;
+                        sourceBaseline = baselineStart.Y;
 
                         // Font family from the LETTER, never the word (#166, thanks Ryokoxx):
                         // Word.FontName joins its letters' names ("Helvetica Helvetica Helvetica
@@ -521,11 +562,11 @@ namespace KillerPDF.Controls
         {
             // _textFontSize is a point size; convert to the page's canvas (render-dim) units so
             // it renders and exports as real points. DrawAnnotationsOnDocument multiplies by
-            // sy = page.Height.Point / renderH, so dividing by sy here makes "14" export as 14pt.
+            // sy = page points per canvas unit, so dividing by sy here makes "14" export as 14pt.
             double fontCanvas = _textFontSize;
             if (_doc is not null && _renderDims.TryGetValue(pageIdx, out var rdims) && rdims.h > 0)
             {
-                double sy = EnsureEngineDocumentSession().Pages[pageIdx].Height / rdims.h;
+                double sy = PointsPerCanvasUnit(pageIdx, rdims.h);
                 if (sy > 0) fontCanvas = _textFontSize / sy;
             }
             // Center the first line on the I-beam hotspot. The TextBox top edge previously started at

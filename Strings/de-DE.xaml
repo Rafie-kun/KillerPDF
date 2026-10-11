@@ -756,6 +756,7 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_St_AlreadyEditHere">Hier ist bereits eine Bearbeitung - Text anklicken zum erneuten Bearbeiten oder Abdeckung ziehen</sys:String>
     <sys:String x:Key="Str_St_NoTextLine">Keine Textzeile an dieser Position gefunden</sys:String>
     <sys:String x:Key="Str_St_LineAlreadyEdited">Diese Zeile wurde bereits bearbeitet - Text anklicken zum Ändern</sys:String>
+    <sys:String x:Key="Str_St_TurnedTextEdit">Seitlich oder kopfüber laufender Text kann noch nicht direkt bearbeitet werden. Drehen Sie die Seite, bis er gerade steht, und bearbeiten Sie ihn dann.</sys:String>
     <sys:String x:Key="Str_St_ImagePlaced">Bild platziert - zum Verschieben ziehen, Größe über den Eckpunkt ändern</sys:String>
     <sys:String x:Key="Str_St_ClipImageUnreadable">Bild aus der Zwischenablage konnte nicht gelesen werden</sys:String>
     <sys:String x:Key="Str_St_PastedImage">Bild eingefügt - zum Verschieben ziehen, Größe über den Eckpunkt ändern</sys:String>

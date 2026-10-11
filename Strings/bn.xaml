@@ -752,6 +752,7 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_St_AlreadyEditHere">এখানে ইতিমধ্যে একটি সম্পাদনা আছে - পুনরায় সম্পাদনা করতে এর টেক্সটে ক্লিক করুন, অথবা কভারটি টেনে আনুন</sys:String>
     <sys:String x:Key="Str_St_NoTextLine">এই অবস্থানে কোনো টেক্সট লাইন পাওয়া যায়নি</sys:String>
     <sys:String x:Key="Str_St_LineAlreadyEdited">এই লাইনটি ইতিমধ্যে সম্পাদিত হয়েছে - এটি পরিবর্তন করতে এর টেক্সটে ক্লিক করুন</sys:String>
+    <sys:String x:Key="Str_St_TurnedTextEdit">পাশে বা উল্টো দিকে চলা টেক্সট এখনও সরাসরি সম্পাদনা করা যায় না। পাতাটি ঘুরিয়ে লেখা সোজা করুন, তারপর সম্পাদনা করুন।</sys:String>
     <sys:String x:Key="Str_St_ImagePlaced">ছবি স্থাপন করা হয়েছে - পুনরায় স্থাপন করতে টেনে আনুন, আকার পরিবর্তন করতে কোণার হ্যান্ডেল ব্যবহার করুন</sys:String>
     <sys:String x:Key="Str_St_ClipImageUnreadable">ক্লিপবোর্ডের ছবি পড়া যায়নি</sys:String>
     <sys:String x:Key="Str_St_PastedImage">ছবি পেস্ট করা হয়েছে - পুনরায় স্থাপন করতে টেনে আনুন, আকার পরিবর্তন করতে কোণার হ্যান্ডেল ব্যবহার করুন</sys:String>
