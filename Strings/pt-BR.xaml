@@ -204,6 +204,9 @@
     <sys:String x:Key="Str_RotateFailed">Falha ao girar: {0}</sys:String>
 
     <!-- ── Dialog strings ───────────────────────────────────────────── -->
+    <sys:String x:Key="Str_Dlg_SaveRemovesSignature" xml:space="preserve">“{0}” está assinado digitalmente.
+
+Salvar substitui o arquivo e remove a assinatura. Para manter o arquivo assinado, cancele e use Salvar como com outro nome.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveOtherPaneDirty" xml:space="preserve">O outro painel também tem “{0}” aberto, com alterações próprias não salvas.
 
 Salvar agora sobrescreve o arquivo e essas alterações serão perdidas. Salve o outro painel primeiro se quiser mantê-las.</sys:String>

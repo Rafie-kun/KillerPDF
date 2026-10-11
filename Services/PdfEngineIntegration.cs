@@ -387,6 +387,14 @@ internal static class PdfEngineIntegration
         ReplaceWithBuiltResult(path, result);
     }
 
+    /// <summary>Reports whether a file carries a signed signature field, which saving clears.</summary>
+    internal static bool HasSignedSignatures(string path)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        PdfDocument document = PdfDocument.Open(File.ReadAllBytes(path));
+        return PdfSignatureReader.Read(document).Any(signature => signature.IsSigned);
+    }
+
     /// <summary>Repairs empty outlines and invalid direct crop boxes after serialization.</summary>
     internal static void RepairHarmlessSaveArtifacts(string path)
     {

@@ -876,6 +876,27 @@ namespace KillerPDF
                     path, pages, PdfImport.MinAdobePageDim, PdfImport.MaxAdobePageDim));
         }
 
+        // A save rewrites the file, which invalidates any digital signature it carries, so the
+        // save clears the dead signature values. Ask before that happens to a signed file on disk.
+        private bool ConfirmSignatureRemoval(string destinationPath)
+        {
+            bool signed;
+            try
+            {
+                signed = System.IO.File.Exists(destinationPath)
+                    && PdfEngineIntegration.HasSignedSignatures(destinationPath);
+            }
+            catch
+            {
+                signed = false;   // an unreadable destination is reported by the save itself
+            }
+            if (!signed) return true;
+            return KillerDialog.Show(this,
+                string.Format(Loc("Str_Dlg_SaveRemovesSignature"), System.IO.Path.GetFileName(destinationPath)),
+                Loc("Str_Dlg_AppTitle"), MessageBoxButton.OKCancel, MessageBoxImage.Warning,
+                defaultResult: MessageBoxResult.Cancel) == MessageBoxResult.OK;
+        }
+
         private void SaveInPlace()
         {
             if (_doc is null) { KillerDialog.Show(this, Loc("Str_Msg_OpenFirst")); return; }
@@ -883,6 +904,7 @@ namespace KillerPDF
             // temp working copy, so the real path is kept in _originalFile. If there is no real path
             // (e.g. a repaired temp-backed open), fall back to Save As.
             if (string.IsNullOrEmpty(_originalFile)) { SaveAs_Click(this, new RoutedEventArgs()); return; }
+            if (!ConfirmSignatureRemoval(_originalFile!)) return;
             CommitActiveTextBox();
             OfferRescaleOutOfRangePages();   // Adobe page-size guard
             string saveTarget = _originalFile!;
@@ -1005,6 +1027,7 @@ namespace KillerPDF
             }
             catch { /* malformed seed path - just open the dialog with its defaults */ }
             if (dlg.ShowDialog(this) != true) return;
+            if (!ConfirmSignatureRemoval(dlg.FileName)) return;
             CloseEngineDocumentSession();
             OfferRescaleOutOfRangePages();   // Adobe page-size guard
             try

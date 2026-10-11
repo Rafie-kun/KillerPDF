@@ -204,6 +204,9 @@
     <sys:String x:Key="Str_RotateFailed">A forgatás sikertelen: {0}</sys:String>
 
     <!-- ── Dialog strings ───────────────────────────────────────────── -->
+    <sys:String x:Key="Str_Dlg_SaveRemovesSignature" xml:space="preserve">A(z) „{0}" digitálisan alá van írva.
+
+A mentés lecseréli a fájlt, és eltávolítja az aláírását. Az aláírt fájl megőrzéséhez szakítsa meg a műveletet, és használja a Mentés másként parancsot más néven.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveOtherPaneDirty" xml:space="preserve">A másik ablaktáblában is meg van nyitva a(z) „{0}", saját, nem mentett módosításokkal.
 
 A mentés most felülírja a fájlt, és azok a módosítások elvesznek. Előbb mentse a másik ablaktáblát, ha meg szeretné őrizni őket.</sys:String>

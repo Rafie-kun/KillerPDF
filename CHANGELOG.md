@@ -13,6 +13,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Added a Film Grain switch to the theme menu. It is on by default, and turning it off removes the grain texture from every surface.
 
 ### Changed
+- Saving over a digitally signed PDF now asks first, because saving removes the signature.
 - The wordmarks and headings in the app and on the website use Killer Sans and Freckle Face in place of the typewriter font.
 - Hovered outline buttons and accent picker pills use gradients outside 98SE, and accent swatches lift on hover.
 

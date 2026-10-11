@@ -204,6 +204,9 @@
     <sys:String x:Key="Str_RotateFailed">回転に失敗しました : {0}</sys:String>
 
     <!-- ── ダイアログ文字列 ───────────────────────────────────────── -->
+    <sys:String x:Key="Str_Dlg_SaveRemovesSignature" xml:space="preserve">「{0}」にはデジタル署名があります。
+
+保存するとファイルが置き換えられ、署名が削除されます。署名済みのファイルを残すには、キャンセルして「名前を付けて保存」で別の名前を付けて保存してください。</sys:String>
     <sys:String x:Key="Str_Dlg_SaveOtherPaneDirty" xml:space="preserve">もう一方のペインでも「{0}」が開かれており、そちらにも未保存の変更があります。
 
 ここで保存するとファイルが上書きされ、その変更は失われます。残したい場合は先にもう一方のペインを保存してください。</sys:String>

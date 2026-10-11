@@ -204,6 +204,9 @@
     <sys:String x:Key="Str_RotateFailed">Otočení selhalo: {0}</sys:String>
 
     <!-- ── Dialog strings ───────────────────────────────────────────── -->
+    <sys:String x:Key="Str_Dlg_SaveRemovesSignature" xml:space="preserve">Soubor „{0}“ je digitálně podepsaný.
+
+Uložením se soubor nahradí a jeho podpis se odstraní. Pokud chcete podepsaný soubor zachovat, zrušte akci a použijte příkaz Uložit jako s jiným názvem.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveOtherPaneDirty" xml:space="preserve">Druhý panel má soubor „{0}“ rovněž otevřený a obsahuje vlastní neuložené změny.
 
 Uložením se soubor přepíše a tyto změny budou ztraceny. Pokud si je chcete ponechat, uložte nejprve druhý panel.</sys:String>

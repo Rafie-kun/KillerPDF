@@ -151,6 +151,9 @@
     <sys:String x:Key="Str_RotateFailed">旋轉失敗：{0}</sys:String>
 
     <!-- ── Dialog strings ───────────────────────────────────────────── -->
+    <sys:String x:Key="Str_Dlg_SaveRemovesSignature" xml:space="preserve">「{0}」含有數位簽章。
+
+儲存會取代該檔案並移除其簽章。若要保留已簽署的檔案，請取消並使用「另存新檔」以其他名稱儲存。</sys:String>
     <sys:String x:Key="Str_Dlg_SaveOtherPaneDirty" xml:space="preserve">另一個窗格中也開啟了「{0}」，並且有自己未儲存的變更。
 
 現在儲存會覆寫該檔案，那些變更將會遺失。若要保留，請先儲存另一個窗格。</sys:String>

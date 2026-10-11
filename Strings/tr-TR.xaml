@@ -149,6 +149,9 @@
     <sys:String x:Key="Str_RotateFailed">Döndürme başarısız: {0}</sys:String>
 
     <!-- ── İletişim kutusu metinleri ────────────────────────────────── -->
+    <sys:String x:Key="Str_Dlg_SaveRemovesSignature" xml:space="preserve">"{0}" dijital olarak imzalanmış.
+
+Kaydetmek dosyayı değiştirir ve imzasını kaldırır. İmzalı dosyayı korumak için iptal edin ve Farklı Kaydet ile başka bir ad kullanın.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveOtherPaneDirty" xml:space="preserve">Diğer bölmede de "{0}" açık ve kendi kaydedilmemiş değişiklikleri var.
 
 Şimdi kaydetmek dosyanın üzerine yazar ve bu değişiklikler kaybolur. Korumak istiyorsanız önce diğer bölmeyi kaydedin.</sys:String>

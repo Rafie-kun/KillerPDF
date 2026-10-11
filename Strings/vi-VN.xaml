@@ -204,6 +204,9 @@
     <sys:String x:Key="Str_RotateFailed">Xoay thất bại: {0}</sys:String>
 
     <!-- ── Chuỗi hộp thoại ───────────────────────────────────────────── -->
+    <sys:String x:Key="Str_Dlg_SaveRemovesSignature" xml:space="preserve">"{0}" đã được ký số.
+
+Lưu sẽ thay thế tệp và xóa chữ ký của tệp. Để giữ lại tệp đã ký, hãy hủy và dùng Lưu thành với một tên khác.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveOtherPaneDirty" xml:space="preserve">Khung bên kia cũng đang mở "{0}" và có các thay đổi chưa được lưu.
 
 Lưu ngay bây giờ sẽ ghi đè lên tệp và các thay đổi đó sẽ bị mất. Hãy lưu khung bên kia trước nếu bạn muốn giữ lại chúng.</sys:String>

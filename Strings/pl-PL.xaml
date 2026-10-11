@@ -204,6 +204,9 @@
     <sys:String x:Key="Str_RotateFailed">Obrót nie powiódł się: {0}</sys:String>
 
     <!-- ── Dialog strings ───────────────────────────────────────────── -->
+    <sys:String x:Key="Str_Dlg_SaveRemovesSignature" xml:space="preserve">Plik "{0}" jest podpisany cyfrowo.
+
+Zapisanie zastąpi plik i usunie jego podpis. Aby zachować podpisany plik, anuluj i użyj polecenia Zapisz jako z inną nazwą.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveOtherPaneDirty" xml:space="preserve">Drugie okienko również otwarte "{0}" z własnymi niezapisanymi zmianami.
 
 Zapisanie teraz nadpisuje plik, a zmiany zostaną utracone. Jeśli chcesz je zachować, zachowaj najpierw drugie okienko.</sys:String>
