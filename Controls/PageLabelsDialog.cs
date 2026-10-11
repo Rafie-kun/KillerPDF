@@ -17,8 +17,10 @@ internal sealed class PageLabelsDialog : Window
     internal PageLabelsDialog(Window owner, int pageCount)
     {
         Title = "KillerPDF - " + L("Str_DocumentTools_PageLabels");
+        // As tall as the ranges need, up to most of the screen, where they start scrolling.
         Width = 720;
-        Height = 520;
+        SizeToContent = SizeToContent.Height;
+        MaxHeight = Math.Max(360, SystemParameters.WorkArea.Height * 0.85);
         UseLayoutRounding = true;
         DialogChrome.Configure(this, owner);
         _pageCount = pageCount;
@@ -44,6 +46,7 @@ internal sealed class PageLabelsDialog : Window
         content.Children.Add(new TextBlock
         {
             Text = L("Str_PageLabels_Help"),
+            Foreground = UiKit.Brush("MutedTextBrush"),
             TextWrapping = TextWrapping.Wrap,
             Margin = new Thickness(0, 0, 0, 10)
         });
@@ -165,7 +168,7 @@ internal sealed class PageLabelsDialog : Window
     {
         Height = 28,
         Margin = new Thickness(0, 2, 8, 2),
-        Style = Application.Current?.TryFindResource("DarkComboBox") as Style
+        Style = UiKit.DarkComboStyle
     };
 
     private static void Add(Grid grid, UIElement element, int column)

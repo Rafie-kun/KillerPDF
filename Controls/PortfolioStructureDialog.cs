@@ -32,8 +32,10 @@ internal sealed class PortfolioStructureDialog : Window
         IReadOnlyList<PdfEngineIntegration.PortfolioAttachmentItem> attachments)
     {
         Title = "KillerPDF - " + L("Str_DocumentTools_EditPortfolioStructure");
+        // As tall as the sections need, up to most of the screen, where they start scrolling.
         Width = 1040;
-        Height = 720;
+        SizeToContent = SizeToContent.Height;
+        MaxHeight = Math.Max(360, SystemParameters.WorkArea.Height * 0.85);
         UseLayoutRounding = true;
         DialogChrome.Configure(this, owner);
         _attachmentNames = [.. attachments.Select(item => item.FileName)];
@@ -304,7 +306,7 @@ internal sealed class PortfolioStructureDialog : Window
         Height = 28,
         Margin = new Thickness(0, 2, 8, 2),
         ItemsSource = values,
-        Style = Application.Current?.TryFindResource("DarkComboBox") as Style
+        Style = UiKit.DarkComboStyle
     };
 
     private static CheckBox Check(bool value) => new()

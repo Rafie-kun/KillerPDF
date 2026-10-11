@@ -88,7 +88,7 @@ internal sealed class PortfolioEditorDialog : Window
         Height = 28,
         Margin = new Thickness(0, 0, 0, 10),
         ItemsSource = items,
-        Style = Application.Current?.TryFindResource("DarkComboBox") as Style
+        Style = UiKit.DarkComboStyle
     };
 
     private sealed record Choice(string Label, PdfCollectionView Value)

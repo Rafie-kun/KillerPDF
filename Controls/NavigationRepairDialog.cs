@@ -16,10 +16,11 @@ internal sealed class NavigationRepairDialog : Window
         Window owner, string report, bool hasUnsafeLinks, bool hasUnresolvedLinks)
     {
         Title = "KillerPDF - " + L("Str_DocumentTools_NavigationAudit");
+        // As tall as the report needs, up to most of the screen, where it starts scrolling.
         Width = 760;
-        Height = 660;
+        SizeToContent = SizeToContent.Height;
+        MaxHeight = Math.Max(360, SystemParameters.WorkArea.Height * 0.85);
         MinWidth = 520;
-        MinHeight = 440;
         UseLayoutRounding = true;
         DialogChrome.Configure(this, owner);
 

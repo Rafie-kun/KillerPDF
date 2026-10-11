@@ -47,6 +47,12 @@ internal sealed class MacroDialog : Window
 
         _saved.SelectionChanged += (_, _) => LoadSelected();
         _steps.SelectionChanged += (_, _) => UpdateButtons();
+        foreach (ListBox list in new[] { _saved, _steps })
+        {
+            list.SetResourceReference(Control.BackgroundProperty, "PaneBrush");
+            list.SetResourceReference(Control.ForegroundProperty, "TextBrush");
+            list.SetResourceReference(Control.BorderBrushProperty, "CardBorderBrush");
+        }
         _name.TextChanged += (_, _) => UpdateButtons();
 
         Button create = Button("Str_Lbl_New", (_, _) => CreateStarter());
@@ -376,7 +382,7 @@ internal sealed class MacroDialog : Window
     private static ComboBox Combo() => new()
     {
         Height = 30,
-        Style = Application.Current?.TryFindResource("DarkComboBox") as Style
+        Style = UiKit.DarkComboStyle
     };
 
     private static Button Button(string key, RoutedEventHandler click, bool accent = false)

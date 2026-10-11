@@ -210,6 +210,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - The portable package reports a start failure in a KillerPDF-styled dialog instead of a plain Windows message box.
 - The Document Info text menu now follows the active theme.
 - Corrected theme colors, wordmarks, footers and dialog controls, including Light/Yellow, 98SE Red and cream Blood, Greed and Cyanotic accents. Added a shadow to the PDF accent in the Light/Yellow wordmark.
+- The page label, initial view, macro, navigation audit, portfolio and attachment dialogs use theme colors for their help text, lists and drop-downs, and the longer ones size to their contents instead of leaving empty space.
 - Standalone uninstall dialogs use the default Dark/Green theme, and installation errors use themed dialogs.
 - Main window, dialog, and launcher title bar icons now use sharp size-matched images.
 - Install and uninstall windows now show the film grain and the app icon in the title bar.

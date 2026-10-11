@@ -90,6 +90,25 @@ namespace KillerPDF
         public static Brush Brush(string key, Brush? fallback = null)
             => Application.Current?.TryFindResource(key) as Brush ?? fallback ?? Brushes.Gray;
 
+        // The themed combo box style lives in PickerStyles.xaml, which only the main window and
+        // the file picker merge, so dialogs built in code load it from here instead.
+        private static Style? _darkComboStyle;
+        public static Style? DarkComboStyle => _darkComboStyle ??= PickerStyle("DarkComboBox");
+
+        private static Style? PickerStyle(string key)
+        {
+            try
+            {
+                var styles = new ResourceDictionary
+                {
+                    Source = new Uri("pack://application:,,,/Controls/PickerStyles.xaml")
+                };
+                return styles[key] as Style;
+            }
+            catch (System.IO.IOException) { return null; }
+            catch (System.Windows.Markup.XamlParseException) { return null; }
+        }
+
         // ---- inline flyout -----------------------------------------------------------------------
         // The style for small helpers that float ON the document itself (the form font-size
         // stepper; future on-page controls): a translucent dark pill that reads over any page

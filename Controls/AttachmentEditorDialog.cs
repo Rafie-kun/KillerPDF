@@ -126,7 +126,7 @@ internal sealed class AttachmentEditorDialog : Window
     private static ComboBox Combo() => new()
     {
         Height = 28,
-        Style = Application.Current?.TryFindResource("DarkComboBox") as Style
+        Style = UiKit.DarkComboStyle
     };
 
     private static Grid CreateGrid()

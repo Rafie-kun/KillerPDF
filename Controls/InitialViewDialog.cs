@@ -159,7 +159,7 @@ internal sealed class InitialViewDialog : Window
             ItemsSource = choices,
             SelectedItem = choices.FirstOrDefault(selected) ?? choices[0]
         };
-        if (Application.Current?.TryFindResource("DarkComboBox") is Style style)
+        if (UiKit.DarkComboStyle is Style style)
             combo.Style = style;
         host.Children.Add(combo);
         return combo;
