@@ -326,6 +326,7 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_TT_Ocr">OCR беті (мәтінді көшіру) (Ctrl+Shift+O)</sys:String>
     <sys:String x:Key="Str_Ocr_Region">OCR аймағы...</sys:String>
     <sys:String x:Key="Str_Ocr_SearchablePdf">Ізделетін PDF жасау...</sys:String>
+    <sys:String x:Key="Str_Ocr_ScanToText">Сканды мәтінге түрлендіру...</sys:String>
     <sys:String x:Key="Str_Ocr_ExtractText">Барлық мәтінді шығару...</sys:String>
     <sys:String x:Key="Str_Ocr_Language">Тіл</sys:String>
     <sys:String x:Key="Str_Ocr_NoDoc">Алдымен PDF ашыңыз</sys:String>
@@ -776,6 +777,7 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_St_OcrRegionTooSmall">OCR аймағы тым кішкентай</sys:String>
     <sys:String x:Key="Str_St_OcrNoText">OCR: таңдалған аймақта мәтін табылмады</sys:String>
     <sys:String x:Key="Str_St_SearchablePdfCanceled">Ізделетін PDF болдырылмады (файл жазылмады)</sys:String>
+    <sys:String x:Key="Str_St_ScanTextCanceled">Сканды түрлендіру болдырылмады (файл жазылмады)</sys:String>
     <sys:String x:Key="Str_St_TextExtractCanceled">Мәтін шығару болдырылмады (файл жазылмады)</sys:String>
     <sys:String x:Key="Str_St_NoTextOnPage">Осы бетте мәтін табылмады</sys:String>
     <sys:String x:Key="Str_St_NoTextSelected">Мәтін таңдалмаған - таңдау үшін сүйреңіз</sys:String>
@@ -935,6 +937,7 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Print_Sending">Принтерге жіберілуде...</sys:String>
     <sys:String x:Key="Str_Forms_FontSize">Қаріп өлшемі:</sys:String>
     <sys:String x:Key="Str_Ocr_SaveSearchable">Ізделетін PDF сақтау</sys:String>
+    <sys:String x:Key="Str_Ocr_SaveScanText">Түрлендірілген PDF сақтау</sys:String>
     <sys:String x:Key="Str_Ocr_ExtractAllText">Барлық мәтінді шығару</sys:String>
     <sys:String x:Key="Str_Ocr_HighQuality">Жоғары сапалы үлгілерді пайдалану</sys:String>
     <sys:String x:Key="Str_Dlg_OpenPdf">PDF ашу</sys:String>
@@ -960,6 +963,7 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Err_OcrFailed">OCR сәтсіз:</sys:String>
     <sys:String x:Key="Str_Err_PrepareDoc">Құжатты дайындау мүмкін болмады:</sys:String>
     <sys:String x:Key="Str_Err_SearchableFailed">Ізделетін PDF сәтсіз:</sys:String>
+    <sys:String x:Key="Str_Err_ScanTextFailed">Сканды түрлендіру сәтсіз:</sys:String>
     <sys:String x:Key="Str_Err_ExtractFailed">Мәтін шығару сәтсіз:</sys:String>
     <sys:String x:Key="Str_Err_DuplicateFailed">Көшірме жасау сәтсіз:</sys:String>
     <sys:String x:Key="Str_Err_RepairFailed">Жөндеу сәтсіз:</sys:String>
@@ -997,6 +1001,7 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Busy_Ocr">OCR орындалуда...</sys:String>
     <sys:String x:Key="Str_Busy_Region">Аймақ танылуда...</sys:String>
     <sys:String x:Key="Str_Busy_Searchable">Ізделетін PDF жасалуда...</sys:String>
+    <sys:String x:Key="Str_Busy_ScanText">Сканерленген мәтін түрлендірілуде...</sys:String>
     <sys:String x:Key="Str_Busy_Extracting">Мәтін шығарылуда...</sys:String>
     <sys:String x:Key="Str_Busy_Repairing">PDF жөнделуде...</sys:String>
     <sys:String x:Key="Str_Busy_HqModels">Жоғары сапалы тіл үлгілері жүктелуде...</sys:String>
@@ -1027,6 +1032,7 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_St_OcrCopiedPages">OCR: {1} беттен {0} таңба көшірілді ({2} сенімділік)</sys:String>
     <sys:String x:Key="Str_St_OcrCopiedRegion">OCR: аймақтан {0} таңба көшірілді ({1} сенімділік)</sys:String>
     <sys:String x:Key="Str_St_SearchableSaved">Ізделетін PDF сақталды: {0} бет, {1} сөз танылды</sys:String>
+    <sys:String x:Key="Str_St_ScanTextSaved">Түрлендірілген PDF сақталды: {0} сканерленген бет, {1} сөз мәтінге айналды</sys:String>
     <sys:String x:Key="Str_St_TextExtracted">{0} беттен мәтін шығарылды -> {1}</sys:String>
     <sys:String x:Key="Str_St_DuplicatedPage">{0} беттің көшірмесі жасалды</sys:String>
     <sys:String x:Key="Str_St_Merged">{0} файл біріктірілді - барлығы {1} бет</sys:String>
@@ -1054,6 +1060,7 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Annot_Drawing">Сызба</sys:String>
     <sys:String x:Key="Str_Annot_Item">Элемент</sys:String>
     <sys:String x:Key="Str_Busy_SearchablePage">Ізделетін PDF жасалуда... {0} / {1} бет  (болдырмау үшін Esc)</sys:String>
+    <sys:String x:Key="Str_Busy_ScanTextPage">Сканерленген мәтін түрлендірілуде... {0} / {1} бет  (болдырмау үшін Esc)</sys:String>
     <sys:String x:Key="Str_Busy_ExtractingPage">Мәтін шығарылуда... {0} / {1} бет  (болдырмау үшін Esc)</sys:String>
     <sys:String x:Key="Str_Busy_LangData">{0} тіл деректері жүктелуде...</sys:String>
     <sys:String x:Key="Str_Busy_Downloading">{0} жүктелуде...</sys:String>
@@ -1065,6 +1072,8 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Ocr_SuffixDownload">(жүктеу)</sys:String>
     <sys:String x:Key="Str_Ocr_SuffixDownloadHq">(HQ жүктеу)</sys:String>
     <sys:String x:Key="Str_Dlg_SearchableSaved" xml:space="preserve">Ізделетін PDF сақталды:&#10;{0}&#10;&#10;{1} бет өңделді, {2} сөз танылды.</sys:String>
+    <sys:String x:Key="Str_Dlg_ScanTextSaved" xml:space="preserve">Түрлендірілген PDF сақталды:&#10;{0}&#10;&#10;{1} сканерленген бет түрлендірілді, {2} сөз енді мәтін. Сканмен дәл сәйкес келмеген {3} сөз сканерленген күйінде қалады және оларды іздеуге болады.</sys:String>
+    <sys:String x:Key="Str_Dlg_ScanTextNone">Бұл құжатта түрлендіретін сканерленген бет жоқ, сондықтан ештеңе сақталмады. Мәтіні немесе суреттері бар беттер өзгеріссіз қалады.</sys:String>
     <sys:String x:Key="Str_Dlg_Repaired" xml:space="preserve">"{0}" сәтті жөнделді.&#10;&#10;Бетбелгілер, пішіндер және басқа интерактивті мүмкіндіктер жоғалуы мүмкін. Жөнделген файлды жаңа орынға жазу үшін Басқаша сақтауды пайдаланыңыз.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairedRaster" xml:space="preserve">"{0}" PDFium арқылы растрлеу жолымен жөнделді.&#10;&#10;Жөнделген көшірмеде мәтін таңдалмайды. Оны жаңа орынға жазу үшін Басқаша сақтауды пайдаланыңыз.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairAsk" xml:space="preserve">"{0}" құрылымы зақымдалған және қосылмады.&#10;&#10;KillerPDF жөндеуді көшсін бе? Жөнделген көшірме жасалады - түпнұсқа файл өзгертілмейді.&#10;&#10;Ескерту: жөнделген файлдарда бетбелгілер, пішіндер және басқа интерактивті мүмкіндіктер болмауы мүмкін.</sys:String>

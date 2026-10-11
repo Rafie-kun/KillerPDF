@@ -352,6 +352,7 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_TT_Ocr">OCR stránky (kopírovat text) (Ctrl+Shift+O)</sys:String>
     <sys:String x:Key="Str_Ocr_Region">Oblast OCR...</sys:String>
     <sys:String x:Key="Str_Ocr_SearchablePdf">Vytvořit prohledávatelné PDF...</sys:String>
+    <sys:String x:Key="Str_Ocr_ScanToText">Převést sken na text...</sys:String>
     <sys:String x:Key="Str_Ocr_ExtractText">Extrahovat veškerý text...</sys:String>
     <sys:String x:Key="Str_Ocr_Language">Jazyk</sys:String>
     <sys:String x:Key="Str_Ocr_FormAware">OCR s podporou formulářů</sys:String>
@@ -805,6 +806,7 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_St_OcrRegionTooSmall">Oblast OCR je příliš malá</sys:String>
     <sys:String x:Key="Str_St_OcrNoText">OCR: ve vybrané oblasti nebyl nalezen žádný text</sys:String>
     <sys:String x:Key="Str_St_SearchablePdfCanceled">Prohledávatelné PDF zrušeno (žádný soubor nebyl zapsán)</sys:String>
+    <sys:String x:Key="Str_St_ScanTextCanceled">Převod skenu zrušen (žádný soubor nebyl zapsán)</sys:String>
     <sys:String x:Key="Str_St_TextExtractCanceled">Extrakce textu zrušena (žádný soubor nebyl zapsán)</sys:String>
     <sys:String x:Key="Str_St_NoTextOnPage">Na této stránce nebyl nalezen žádný text</sys:String>
     <sys:String x:Key="Str_St_NoTextSelected">Není vybrán žádný text - text vyberete tažením</sys:String>
@@ -979,6 +981,7 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Print_Sending">Odesílání do tiskárny…</sys:String>
     <sys:String x:Key="Str_Forms_FontSize">Velikost písma:</sys:String>
     <sys:String x:Key="Str_Ocr_SaveSearchable">Uložit prohledávatelné PDF</sys:String>
+    <sys:String x:Key="Str_Ocr_SaveScanText">Uložit převedené PDF</sys:String>
     <sys:String x:Key="Str_Ocr_ExtractAllText">Extrahovat všechen text</sys:String>
     <sys:String x:Key="Str_Ocr_HighQuality">Používat modely vysoké kvality</sys:String>
     <sys:String x:Key="Str_Dlg_OpenPdf">Otevřít PDF</sys:String>
@@ -1002,6 +1005,7 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Err_OcrFailed">OCR se nezdařilo:</sys:String>
     <sys:String x:Key="Str_Err_PrepareDoc">Dokument se nepodařilo připravit:</sys:String>
     <sys:String x:Key="Str_Err_SearchableFailed">Prohledávatelné PDF se nezdařilo:</sys:String>
+    <sys:String x:Key="Str_Err_ScanTextFailed">Převod skenu se nezdařil:</sys:String>
     <sys:String x:Key="Str_Err_ExtractFailed">Extrakce textu se nezdařila:</sys:String>
     <sys:String x:Key="Str_Err_DuplicateFailed">Duplikace se nezdařila:</sys:String>
     <sys:String x:Key="Str_Err_RepairFailed">Oprava se nezdařila:</sys:String>
@@ -1037,6 +1041,7 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Busy_Ocr">Probíhá OCR...</sys:String>
     <sys:String x:Key="Str_Busy_Region">Rozpoznávání oblasti...</sys:String>
     <sys:String x:Key="Str_Busy_Searchable">Vytváření prohledávatelného PDF...</sys:String>
+    <sys:String x:Key="Str_Busy_ScanText">Převádění naskenovaného textu...</sys:String>
     <sys:String x:Key="Str_Busy_Extracting">Extrakce textu...</sys:String>
     <sys:String x:Key="Str_Busy_Repairing">Oprava PDF...</sys:String>
     <sys:String x:Key="Str_Busy_HqModels">Stahování jazykových modelů vysoké kvality...</sys:String>
@@ -1065,6 +1070,7 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_St_OcrCopiedPages">OCR: zkopírováno {0} znaků z {1} stránek (spolehlivost {2})</sys:String>
     <sys:String x:Key="Str_St_OcrCopiedRegion">OCR: zkopírováno {0} znaků z oblasti (spolehlivost {1})</sys:String>
     <sys:String x:Key="Str_St_SearchableSaved">Prohledávatelné PDF uloženo: {0} stránek, {1} rozpoznaných slov</sys:String>
+    <sys:String x:Key="Str_St_ScanTextSaved">Převedené PDF uloženo: {0} naskenovaných stránek, {1} slov je nyní text</sys:String>
     <sys:String x:Key="Str_St_TextExtracted">Text extrahován z {0} stránek -> {1}</sys:String>
     <sys:String x:Key="Str_St_DuplicatedPage">Stránka {0} duplikována</sys:String>
     <sys:String x:Key="Str_St_Merged">Sloučeno souborů: {0} - celkem {1} stránek</sys:String>
@@ -1090,6 +1096,7 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Annot_Drawing">Kresba</sys:String>
     <sys:String x:Key="Str_Annot_Item">Položka</sys:String>
     <sys:String x:Key="Str_Busy_SearchablePage">Vytváření prohledávatelného PDF... stránka {0} z {1}  (Esc zruší)</sys:String>
+    <sys:String x:Key="Str_Busy_ScanTextPage">Převádění naskenovaného textu... stránka {0} z {1}  (Esc zruší)</sys:String>
     <sys:String x:Key="Str_Busy_ExtractingPage">Extrakce textu... stránka {0} z {1}  (Esc zruší)</sys:String>
     <sys:String x:Key="Str_Busy_LangData">Stahování jazykových dat {0}...</sys:String>
     <sys:String x:Key="Str_Busy_Downloading">Stahování {0}...</sys:String>
@@ -1101,6 +1108,8 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Ocr_SuffixDownload">(stáhnout)</sys:String>
     <sys:String x:Key="Str_Ocr_SuffixDownloadHq">(stáhnout HQ)</sys:String>
     <sys:String x:Key="Str_Dlg_SearchableSaved" xml:space="preserve">Prohledávatelné PDF uloženo:&#10;{0}&#10;&#10;{1} stránek zpracováno, {2} slov rozpoznáno.</sys:String>
+    <sys:String x:Key="Str_Dlg_ScanTextSaved" xml:space="preserve">Převedené PDF uloženo:&#10;{0}&#10;&#10;Převedeno naskenovaných stránek: {1}, slov převedených na text: {2}. Slova, která přesně neodpovídala skenu ({3}), zůstávají naskenovaná a lze je prohledávat.</sys:String>
+    <sys:String x:Key="Str_Dlg_ScanTextNone">Tento dokument nemá žádné naskenované stránky k převodu, proto nebylo nic uloženo. Stránky, které už obsahují text nebo kresby, zůstávají beze změny.</sys:String>
     <sys:String x:Key="Str_Dlg_Repaired" xml:space="preserve">„{0}" byl úspěšně opraven.&#10;&#10;Záložky, formuláře a další interaktivní funkce mohly být ztraceny. Použijte Uložit jako a zapište opravený soubor na nové místo.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairedRaster" xml:space="preserve">„{0}" byl opraven rastrováním přes PDFium.&#10;&#10;Text v opravené kopii nelze vybírat. Použijte Uložit jako a zapište ji na nové místo.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairAsk" xml:space="preserve">„{0}" má poškozenou strukturu a nepodařilo se jej přidat.&#10;&#10;Má se KillerPDF pokusit o opravu? Vytvoří se opravená kopie - původní soubor se nezmění.&#10;&#10;Poznámka: opraveným souborům mohou chybět záložky, formuláře a další interaktivní funkce.</sys:String>

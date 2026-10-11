@@ -352,6 +352,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_TT_Ocr">Oldal OCR (szöveg másolása) (Ctrl+Shift+O)</sys:String>
     <sys:String x:Key="Str_Ocr_Region">OCR terület...</sys:String>
     <sys:String x:Key="Str_Ocr_SearchablePdf">Kereshető PDF készítése...</sys:String>
+    <sys:String x:Key="Str_Ocr_ScanToText">Szkennelés átalakítása szöveggé...</sys:String>
     <sys:String x:Key="Str_Ocr_ExtractText">Összes szöveg kinyerése...</sys:String>
     <sys:String x:Key="Str_Ocr_Language">Nyelv</sys:String>
     <sys:String x:Key="Str_Ocr_FormAware">Űrlapérzékeny OCR</sys:String>
@@ -826,6 +827,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_St_OcrRegionTooSmall">Az OCR terület túl kicsi</sys:String>
     <sys:String x:Key="Str_St_OcrNoText">OCR: nem található szöveg a kijelölt területen</sys:String>
     <sys:String x:Key="Str_St_SearchablePdfCanceled">Kereshető PDF megszakítva (nem íródott fájl)</sys:String>
+    <sys:String x:Key="Str_St_ScanTextCanceled">Szkennelés átalakítása megszakítva (nem íródott fájl)</sys:String>
     <sys:String x:Key="Str_St_TextExtractCanceled">Szövegkinyerés megszakítva (nem íródott fájl)</sys:String>
     <sys:String x:Key="Str_St_NoTextOnPage">Nem található szöveg ezen az oldalon</sys:String>
     <sys:String x:Key="Str_St_NoTextSelected">Nincs kijelölt szöveg - húzással jelöljön ki szöveget</sys:String>
@@ -981,6 +983,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Print_Sending">Küldés a nyomtatóra…</sys:String>
     <sys:String x:Key="Str_Forms_FontSize">Betűméret:</sys:String>
     <sys:String x:Key="Str_Ocr_SaveSearchable">Kereshető PDF mentése</sys:String>
+    <sys:String x:Key="Str_Ocr_SaveScanText">Átalakított PDF mentése</sys:String>
     <sys:String x:Key="Str_Ocr_ExtractAllText">Összes szöveg kinyerése</sys:String>
     <sys:String x:Key="Str_Ocr_HighQuality">Kiváló minőségű modellek használata</sys:String>
     <sys:String x:Key="Str_Dlg_OpenPdf">PDF megnyitása</sys:String>
@@ -1004,6 +1007,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Err_OcrFailed">Az OCR nem sikerült:</sys:String>
     <sys:String x:Key="Str_Err_PrepareDoc">A dokumentum előkészítése nem sikerült:</sys:String>
     <sys:String x:Key="Str_Err_SearchableFailed">A kereshető PDF nem sikerült:</sys:String>
+    <sys:String x:Key="Str_Err_ScanTextFailed">A szkennelés átalakítása nem sikerült:</sys:String>
     <sys:String x:Key="Str_Err_ExtractFailed">A szöveg kinyerése nem sikerült:</sys:String>
     <sys:String x:Key="Str_Err_DuplicateFailed">A duplikálás nem sikerült:</sys:String>
     <sys:String x:Key="Str_Err_RepairFailed">A javítás nem sikerült:</sys:String>
@@ -1039,6 +1043,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Busy_Ocr">OCR fut...</sys:String>
     <sys:String x:Key="Str_Busy_Region">Terület felismerése...</sys:String>
     <sys:String x:Key="Str_Busy_Searchable">Kereshető PDF készítése...</sys:String>
+    <sys:String x:Key="Str_Busy_ScanText">Szkennelt szöveg átalakítása...</sys:String>
     <sys:String x:Key="Str_Busy_Extracting">Szöveg kinyerése...</sys:String>
     <sys:String x:Key="Str_Busy_Repairing">PDF javítása...</sys:String>
     <sys:String x:Key="Str_Busy_HqModels">Kiváló minőségű nyelvi modellek letöltése...</sys:String>
@@ -1067,6 +1072,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_St_OcrCopiedPages">OCR: {0} karakter másolva {1} oldalról ({2} megbízhatóság)</sys:String>
     <sys:String x:Key="Str_St_OcrCopiedRegion">OCR: {0} karakter másolva a területről ({1} megbízhatóság)</sys:String>
     <sys:String x:Key="Str_St_SearchableSaved">Kereshető PDF mentve: {0} oldal, {1} felismert szó</sys:String>
+    <sys:String x:Key="Str_St_ScanTextSaved">Átalakított PDF mentve: {0} szkennelt oldal, {1} szó lett szöveg</sys:String>
     <sys:String x:Key="Str_St_TextExtracted">Szöveg kinyerve {0} oldalról -> {1}</sys:String>
     <sys:String x:Key="Str_St_DuplicatedPage">{0}. oldal duplikálva</sys:String>
     <sys:String x:Key="Str_St_Merged">{0} fájl egyesítve - összesen {1} oldal</sys:String>
@@ -1092,6 +1098,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Annot_Drawing">Rajz</sys:String>
     <sys:String x:Key="Str_Annot_Item">Elem</sys:String>
     <sys:String x:Key="Str_Busy_SearchablePage">Kereshető PDF készítése... oldal: {0} / {1}  (Esc megszakítja)</sys:String>
+    <sys:String x:Key="Str_Busy_ScanTextPage">Szkennelt szöveg átalakítása... oldal: {0} / {1}  (Esc megszakítja)</sys:String>
     <sys:String x:Key="Str_Busy_ExtractingPage">Szöveg kinyerése... oldal: {0} / {1}  (Esc megszakítja)</sys:String>
     <sys:String x:Key="Str_Busy_LangData">{0} nyelvi adatok letöltése...</sys:String>
     <sys:String x:Key="Str_Busy_Downloading">{0} letöltése...</sys:String>
@@ -1103,6 +1110,8 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Ocr_SuffixDownload">(letöltés)</sys:String>
     <sys:String x:Key="Str_Ocr_SuffixDownloadHq">(HQ letöltés)</sys:String>
     <sys:String x:Key="Str_Dlg_SearchableSaved" xml:space="preserve">Kereshető PDF mentve:&#10;{0}&#10;&#10;{1} oldal feldolgozva, {2} szó felismerve.</sys:String>
+    <sys:String x:Key="Str_Dlg_ScanTextSaved" xml:space="preserve">Átalakított PDF mentve:&#10;{0}&#10;&#10;{1} szkennelt oldal átalakítva, {2} szó lett szöveg. {3} szó, amely nem egyezett pontosan a szkenneléssel, szkennelt marad és kereshető.</sys:String>
+    <sys:String x:Key="Str_Dlg_ScanTextNone">Ebben a dokumentumban nincs átalakítható szkennelt oldal, ezért semmi sem lett mentve. A már szöveget vagy rajzot tartalmazó oldalak változatlanok maradnak.</sys:String>
     <sys:String x:Key="Str_Dlg_Repaired" xml:space="preserve">A(z) "{0}" sikeresen megjavítva.&#10;&#10;A könyvjelzők, űrlapok és más interaktív funkciók elveszhettek. A Mentés másként paranccsal írja a javított fájlt új helyre.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairedRaster" xml:space="preserve">A(z) "{0}" a PDFium általi raszterizálással lett megjavítva.&#10;&#10;A javított másolatban a szöveg nem jelölhető ki. A Mentés másként paranccsal írja új helyre.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairAsk" xml:space="preserve">A(z) "{0}" szerkezete sérült, ezért nem adható hozzá.&#10;&#10;Megpróbálja a KillerPDF megjavítani? Javított másolat készül - az eredeti fájl nem változik.&#10;&#10;Megjegyzés: a javított fájlokból hiányozhatnak a könyvjelzők, űrlapok és más interaktív funkciók.</sys:String>

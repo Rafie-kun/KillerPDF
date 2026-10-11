@@ -10,6 +10,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 ### Added
 - Added engine-first rendering and OCR across the viewer, thumbnails, print, export, transforms, and OCR, with lower-memory document opening, paths, shadings, font outlines, installed Courier aliases and emoji fallback, JPEG, JPEG 2000, JBIG2, fax, transparency, forms, attachment-only encrypted documents, preprocessing, layout analysis, recognition, and normalized fallback confidence.
+- Added Convert Scan to Text, which replaces the words on scanned pages with real text in the closest matching typeface, sharp at any zoom and searchable, and keeps any word that does not match the scan closely as scanned. Also available as `--scan-to-text`.
 - Added complete AcroForm authoring, reviewable field recognition, editing, flattening, and reports (#342).
 - Added calculated form fields that recalculate while filling, covering the built-in number, percent, date, time, special, calculation, and range functions plus a bounded arithmetic field-script subset, without executing document JavaScript.
 - Added safe XFA inspection, editing, rendering, calculation, conversion, and compatibility reports (#330).

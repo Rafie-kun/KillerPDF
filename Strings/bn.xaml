@@ -658,6 +658,7 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <!-- ── OCR + Transform + Crop (v1.5.x এ যোগ করা হয়েছে) ──────────────── -->
     <sys:String x:Key="Str_Ocr_Region">OCR অঞ্চল...</sys:String>
     <sys:String x:Key="Str_Ocr_SearchablePdf">অনুসন্ধানযোগ্য PDF তৈরি করুন...</sys:String>
+    <sys:String x:Key="Str_Ocr_ScanToText">স্ক্যানকে লেখায় রূপান্তর করুন...</sys:String>
     <sys:String x:Key="Str_Ocr_ExtractText">সমস্ত টেক্সট বের করুন...</sys:String>
     <sys:String x:Key="Str_Ocr_Language">ভাষা</sys:String>
     <sys:String x:Key="Str_Ocr_FormAware">ফর্ম-সচেতন OCR</sys:String>
@@ -743,6 +744,7 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_St_OcrRegionTooSmall">OCR অঞ্চল খুব ছোট</sys:String>
     <sys:String x:Key="Str_St_OcrNoText">OCR: নির্বাচিত অঞ্চলে কোনো টেক্সট পাওয়া যায়নি</sys:String>
     <sys:String x:Key="Str_St_SearchablePdfCanceled">অনুসন্ধানযোগ্য PDF বাতিল করা হয়েছে (কোনো ফাইল লেখা হয়নি)</sys:String>
+    <sys:String x:Key="Str_St_ScanTextCanceled">স্ক্যান রূপান্তর বাতিল করা হয়েছে (কোনো ফাইল লেখা হয়নি)</sys:String>
     <sys:String x:Key="Str_St_TextExtractCanceled">টেক্সট নিষ্কাশন বাতিল করা হয়েছে (কোনো ফাইল লেখা হয়নি)</sys:String>
     <sys:String x:Key="Str_St_NoTextOnPage">এই পৃষ্ঠায় কোনো টেক্সট পাওয়া যায়নি</sys:String>
     <sys:String x:Key="Str_St_NoTextSelected">কোনো টেক্সট নির্বাচন করা হয়নি - টেক্সট নির্বাচন করতে টেনে আনুন</sys:String>
@@ -974,6 +976,7 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Print_Sending">প্রিন্টারে পাঠানো হচ্ছে…</sys:String>
     <sys:String x:Key="Str_Forms_FontSize">ফন্টের আকার:</sys:String>
     <sys:String x:Key="Str_Ocr_SaveSearchable">অনুসন্ধানযোগ্য PDF সংরক্ষণ করুন</sys:String>
+    <sys:String x:Key="Str_Ocr_SaveScanText">রূপান্তরিত PDF সংরক্ষণ করুন</sys:String>
     <sys:String x:Key="Str_Ocr_ExtractAllText">সব টেক্সট বের করুন</sys:String>
     <sys:String x:Key="Str_Ocr_HighQuality">উচ্চমানের মডেল ব্যবহার করুন</sys:String>
     <sys:String x:Key="Str_Dlg_OpenPdf">PDF খুলুন</sys:String>
@@ -997,6 +1000,7 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Err_OcrFailed">OCR ব্যর্থ হয়েছে:</sys:String>
     <sys:String x:Key="Str_Err_PrepareDoc">নথি প্রস্তুত করা যায়নি:</sys:String>
     <sys:String x:Key="Str_Err_SearchableFailed">অনুসন্ধানযোগ্য PDF ব্যর্থ হয়েছে:</sys:String>
+    <sys:String x:Key="Str_Err_ScanTextFailed">স্ক্যান রূপান্তর ব্যর্থ হয়েছে:</sys:String>
     <sys:String x:Key="Str_Err_ExtractFailed">টেক্সট বের করা ব্যর্থ হয়েছে:</sys:String>
     <sys:String x:Key="Str_Err_DuplicateFailed">অনুলিপি ব্যর্থ হয়েছে:</sys:String>
     <sys:String x:Key="Str_Err_RepairFailed">মেরামত ব্যর্থ হয়েছে:</sys:String>
@@ -1032,6 +1036,7 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Busy_Ocr">OCR চলছে...</sys:String>
     <sys:String x:Key="Str_Busy_Region">অঞ্চল শনাক্ত করা হচ্ছে...</sys:String>
     <sys:String x:Key="Str_Busy_Searchable">অনুসন্ধানযোগ্য PDF তৈরি হচ্ছে...</sys:String>
+    <sys:String x:Key="Str_Busy_ScanText">স্ক্যান করা লেখা রূপান্তর হচ্ছে...</sys:String>
     <sys:String x:Key="Str_Busy_Extracting">টেক্সট বের করা হচ্ছে...</sys:String>
     <sys:String x:Key="Str_Busy_Repairing">PDF মেরামত হচ্ছে...</sys:String>
     <sys:String x:Key="Str_Busy_HqModels">উচ্চমানের ভাষার মডেল ডাউনলোড হচ্ছে...</sys:String>
@@ -1060,6 +1065,7 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_St_OcrCopiedPages">OCR: {1}টি পৃষ্ঠা থেকে {0}টি অক্ষর কপি হয়েছে ({2} আস্থা)</sys:String>
     <sys:String x:Key="Str_St_OcrCopiedRegion">OCR: অঞ্চল থেকে {0}টি অক্ষর কপি হয়েছে ({1} আস্থা)</sys:String>
     <sys:String x:Key="Str_St_SearchableSaved">অনুসন্ধানযোগ্য PDF সংরক্ষিত: {0} পাতা, {1}টি শব্দ শনাক্ত</sys:String>
+    <sys:String x:Key="Str_St_ScanTextSaved">রূপান্তরিত PDF সংরক্ষিত: {0}টি স্ক্যান করা পাতা, {1}টি শব্দ এখন লেখা</sys:String>
     <sys:String x:Key="Str_St_TextExtracted">{0} পাতা থেকে টেক্সট বের হয়েছে -> {1}</sys:String>
     <sys:String x:Key="Str_St_DuplicatedPage">পাতা {0} অনুলিপি হয়েছে</sys:String>
     <sys:String x:Key="Str_St_Merged">{0}টি ফাইল একত্রিত - মোট {1} পাতা</sys:String>
@@ -1085,6 +1091,7 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Annot_Drawing">অঙ্কন</sys:String>
     <sys:String x:Key="Str_Annot_Item">আইটেম</sys:String>
     <sys:String x:Key="Str_Busy_SearchablePage">অনুসন্ধানযোগ্য PDF তৈরি হচ্ছে... পাতা {0} / {1}  (Esc বাতিল করে)</sys:String>
+    <sys:String x:Key="Str_Busy_ScanTextPage">স্ক্যান করা লেখা রূপান্তর হচ্ছে... পাতা {0} / {1}  (Esc বাতিল করে)</sys:String>
     <sys:String x:Key="Str_Busy_ExtractingPage">টেক্সট বের করা হচ্ছে... পাতা {0} / {1}  (Esc বাতিল করে)</sys:String>
     <sys:String x:Key="Str_Busy_LangData">{0} ভাষার ডেটা ডাউনলোড হচ্ছে...</sys:String>
     <sys:String x:Key="Str_Busy_Downloading">{0} ডাউনলোড হচ্ছে...</sys:String>
@@ -1096,6 +1103,8 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Ocr_SuffixDownload">(ডাউনলোড)</sys:String>
     <sys:String x:Key="Str_Ocr_SuffixDownloadHq">(HQ ডাউনলোড)</sys:String>
     <sys:String x:Key="Str_Dlg_SearchableSaved" xml:space="preserve">অনুসন্ধানযোগ্য PDF সংরক্ষিত:&#10;{0}&#10;&#10;{1} পাতা প্রক্রিয়া হয়েছে, {2}টি শব্দ শনাক্ত।</sys:String>
+    <sys:String x:Key="Str_Dlg_ScanTextSaved" xml:space="preserve">রূপান্তরিত PDF সংরক্ষিত:&#10;{0}&#10;&#10;{1}টি স্ক্যান করা পাতা রূপান্তরিত হয়েছে, {2}টি শব্দ এখন লেখা। স্ক্যানের সাথে ঠিকমতো না মেলা {3}টি শব্দ স্ক্যান করা অবস্থায় থাকে এবং অনুসন্ধানযোগ্য থাকে।</sys:String>
+    <sys:String x:Key="Str_Dlg_ScanTextNone">এই নথিতে রূপান্তর করার মতো কোনো স্ক্যান করা পাতা নেই, তাই কিছু সংরক্ষণ করা হয়নি। যেসব পাতায় আগে থেকেই লেখা বা আঁকা আছে সেগুলো যেমন আছে তেমন থাকে।</sys:String>
     <sys:String x:Key="Str_Dlg_Repaired" xml:space="preserve">"{0}" সফলভাবে মেরামত হয়েছে।&#10;&#10;বুকমার্ক, ফর্ম ও অন্যান্য ইন্টারঅ্যাক্টিভ বৈশিষ্ট্য হারিয়ে যেতে পারে। মেরামত করা ফাইলটি নতুন জায়গায় লিখতে Save As ব্যবহার করুন।</sys:String>
     <sys:String x:Key="Str_Dlg_RepairedRaster" xml:space="preserve">"{0}" PDFium দিয়ে রাস্টারাইজ করে মেরামত হয়েছে।&#10;&#10;মেরামত করা কপিতে টেক্সট নির্বাচন করা যায় না। নতুন জায়গায় লিখতে Save As ব্যবহার করুন।</sys:String>
     <sys:String x:Key="Str_Dlg_RepairAsk" xml:space="preserve">"{0}"-এর কাঠামো ক্ষতিগ্রস্ত, তাই যোগ করা যায়নি।&#10;&#10;KillerPDF কি মেরামতের চেষ্টা করবে? একটি মেরামত করা কপি তৈরি হবে - মূল ফাইল বদলাবে না।&#10;&#10;দ্রষ্টব্য: মেরামত করা ফাইলে বুকমার্ক, ফর্ম ও অন্যান্য ইন্টারঅ্যাক্টিভ বৈশিষ্ট্য নাও থাকতে পারে।</sys:String>

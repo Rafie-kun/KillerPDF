@@ -352,6 +352,7 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_TT_Ocr">OCR сторінки (копіювати текст) (Ctrl+Shift+O)</sys:String>
     <sys:String x:Key="Str_Ocr_Region">OCR області...</sys:String>
     <sys:String x:Key="Str_Ocr_SearchablePdf">Створити PDF з пошуком...</sys:String>
+    <sys:String x:Key="Str_Ocr_ScanToText">Перетворити скан на текст...</sys:String>
     <sys:String x:Key="Str_Ocr_ExtractText">Видобути весь текст...</sys:String>
     <sys:String x:Key="Str_Ocr_Language">Мова</sys:String>
     <sys:String x:Key="Str_Ocr_FormAware">OCR з урахуванням форм</sys:String>
@@ -826,6 +827,7 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_St_OcrRegionTooSmall">Область OCR замала</sys:String>
     <sys:String x:Key="Str_St_OcrNoText">OCR: у вибраній області текст не знайдено</sys:String>
     <sys:String x:Key="Str_St_SearchablePdfCanceled">Створення PDF з пошуком скасовано (файл не записано)</sys:String>
+    <sys:String x:Key="Str_St_ScanTextCanceled">Перетворення скану скасовано (файл не записано)</sys:String>
     <sys:String x:Key="Str_St_TextExtractCanceled">Видобування тексту скасовано (файл не записано)</sys:String>
     <sys:String x:Key="Str_St_NoTextOnPage">На цій сторінці текст не знайдено</sys:String>
     <sys:String x:Key="Str_St_NoTextSelected">Текст не виділено - перетягніть, щоб виділити текст</sys:String>
@@ -985,6 +987,7 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Print_Sending">Надсилання на принтер…</sys:String>
     <sys:String x:Key="Str_Forms_FontSize">Розмір шрифту:</sys:String>
     <sys:String x:Key="Str_Ocr_SaveSearchable">Зберегти PDF з пошуком</sys:String>
+    <sys:String x:Key="Str_Ocr_SaveScanText">Зберегти перетворений PDF</sys:String>
     <sys:String x:Key="Str_Ocr_ExtractAllText">Видобути весь текст</sys:String>
     <sys:String x:Key="Str_Ocr_HighQuality">Використовувати моделі високої якості</sys:String>
     <sys:String x:Key="Str_Dlg_OpenPdf">Відкрити PDF</sys:String>
@@ -1010,6 +1013,7 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Err_OcrFailed">Помилка OCR:</sys:String>
     <sys:String x:Key="Str_Err_PrepareDoc">Не вдалося підготувати документ:</sys:String>
     <sys:String x:Key="Str_Err_SearchableFailed">Не вдалося створити PDF з пошуком:</sys:String>
+    <sys:String x:Key="Str_Err_ScanTextFailed">Не вдалося перетворити скан:</sys:String>
     <sys:String x:Key="Str_Err_ExtractFailed">Не вдалося видобути текст:</sys:String>
     <sys:String x:Key="Str_Err_DuplicateFailed">Не вдалося дублювати:</sys:String>
     <sys:String x:Key="Str_Err_RepairFailed">Не вдалося відновити:</sys:String>
@@ -1047,6 +1051,7 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Busy_Ocr">Виконується OCR...</sys:String>
     <sys:String x:Key="Str_Busy_Region">Розпізнавання області...</sys:String>
     <sys:String x:Key="Str_Busy_Searchable">Створення PDF з пошуком...</sys:String>
+    <sys:String x:Key="Str_Busy_ScanText">Перетворення відсканованого тексту...</sys:String>
     <sys:String x:Key="Str_Busy_Extracting">Видобування тексту...</sys:String>
     <sys:String x:Key="Str_Busy_Repairing">Відновлення PDF...</sys:String>
     <sys:String x:Key="Str_Busy_HqModels">Завантаження мовних моделей високої якості...</sys:String>
@@ -1077,6 +1082,7 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_St_OcrCopiedPages">OCR: скопійовано символів: {0} зі сторінок: {1} (достовірність {2})</sys:String>
     <sys:String x:Key="Str_St_OcrCopiedRegion">OCR: скопійовано символів: {0} з області (достовірність {1})</sys:String>
     <sys:String x:Key="Str_St_SearchableSaved">PDF з пошуком збережено: сторінок {0}, розпізнано слів {1}</sys:String>
+    <sys:String x:Key="Str_St_ScanTextSaved">Перетворений PDF збережено: відсканованих сторінок: {0}, слів стало текстом: {1}</sys:String>
     <sys:String x:Key="Str_St_TextExtracted">Текст видобуто зі сторінок: {0} -> {1}</sys:String>
     <sys:String x:Key="Str_St_DuplicatedPage">Сторінку {0} продубльовано</sys:String>
     <sys:String x:Key="Str_St_Merged">Об'єднано файлів: {0} - усього сторінок: {1}</sys:String>
@@ -1104,6 +1110,7 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Annot_Drawing">Малюнок</sys:String>
     <sys:String x:Key="Str_Annot_Item">Елемент</sys:String>
     <sys:String x:Key="Str_Busy_SearchablePage">Створення PDF з пошуком... сторінка {0} з {1}  (Esc для скасування)</sys:String>
+    <sys:String x:Key="Str_Busy_ScanTextPage">Перетворення відсканованого тексту... сторінка {0} з {1}  (Esc для скасування)</sys:String>
     <sys:String x:Key="Str_Busy_ExtractingPage">Видобування тексту... сторінка {0} з {1}  (Esc для скасування)</sys:String>
     <sys:String x:Key="Str_Busy_LangData">Завантаження мовних даних {0}...</sys:String>
     <sys:String x:Key="Str_Busy_Downloading">Завантаження {0}...</sys:String>
@@ -1115,6 +1122,8 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Ocr_SuffixDownload">(завантажити)</sys:String>
     <sys:String x:Key="Str_Ocr_SuffixDownloadHq">(завантажити HQ)</sys:String>
     <sys:String x:Key="Str_Dlg_SearchableSaved" xml:space="preserve">PDF з пошуком збережено:&#10;{0}&#10;&#10;Оброблено сторінок: {1}, розпізнано слів: {2}.</sys:String>
+    <sys:String x:Key="Str_Dlg_ScanTextSaved" xml:space="preserve">Перетворений PDF збережено:&#10;{0}&#10;&#10;Перетворено відсканованих сторінок: {1}, слів стало текстом: {2}. Слова, що недостатньо точно збіглися зі сканом ({3}), залишаються відсканованими, і за ними можна шукати.</sys:String>
+    <sys:String x:Key="Str_Dlg_ScanTextNone">У цьому документі немає відсканованих сторінок для перетворення, тому нічого не збережено. Сторінки, на яких уже є текст або малюнки, залишаються без змін.</sys:String>
     <sys:String x:Key="Str_Dlg_Repaired" xml:space="preserve">«{0}» успішно відновлено.&#10;&#10;Закладки, форми та інші інтерактивні функції могли бути втрачені. Скористайтеся «Зберегти як», щоб записати відновлений файл в інше місце.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairedRaster" xml:space="preserve">«{0}» відновлено растеризацією через PDFium.&#10;&#10;У відновленій копії текст не виділяється. Скористайтеся «Зберегти як», щоб записати її в інше місце.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairAsk" xml:space="preserve">«{0}» має пошкоджену структуру й не може бути доданий.&#10;&#10;Спробувати відновити його в KillerPDF? Буде створено відновлену копію - оригінальний файл не зміниться.&#10;&#10;Примітка: у відновлених файлах можуть бути відсутні закладки, форми та інші інтерактивні функції.</sys:String>

@@ -354,6 +354,7 @@ namespace KillerPDF
         }
         private void OcrRegion(int pageIdx, Rect canvasBounds) => Ocr.OcrRegion(pageIdx, canvasBounds);
         private void MakeSearchablePdf() => Ocr.MakeSearchablePdf();
+        private void ConvertScanToText() => Ocr.ConvertScanToText();
         private void ExtractAllText() => Ocr.ExtractAllText();
 
         // ---- IOcrHost ------------------------------------------------------------------------
@@ -436,6 +437,7 @@ namespace KillerPDF
                 menu.Items.Add(MakeMenuItem(Loc("Str_Ocr_Region"), (_, _) => BeginOcrRegion(), "Ctrl+Shift+I", ""));
                 menu.Items.Add(new Separator());
                 menu.Items.Add(MakeMenuItem(Loc("Str_Ocr_SearchablePdf"), (_, _) => MakeSearchablePdf(), null, ""));
+                menu.Items.Add(MakeMenuItem(Loc("Str_Ocr_ScanToText"), (_, _) => ConvertScanToText(), null, ""));
                 menu.Items.Add(MakeMenuItem(Loc("Str_Ocr_ExtractText"), (_, _) => ExtractAllText(), null, ""));
                 menu.Items.Add(new Separator());
                 menu.Items.Add(BuildLanguageMenu());

@@ -91,7 +91,7 @@ namespace KillerPDF.Features
                 Eq(a, "--preflight") || Eq(a, "--accessibility") || Eq(a, "--attachments") ||
                 Eq(a, "--booklet") || Eq(a, "--nup") || Eq(a, "--auto-bookmarks") ||
                 Eq(a, "--decrypt") || Eq(a, "--to-image") || Eq(a, "--flatten") ||
-                Eq(a, "--print") || Eq(a, "--ocr") || Eq(a, "--rotate-pages") ||
+                Eq(a, "--print") || Eq(a, "--ocr") || Eq(a, "--scan-to-text") || Eq(a, "--rotate-pages") ||
                 Eq(a, "--delete-pages") || Eq(a, "--move-pages") || Eq(a, "--insert-blank") ||
                 Eq(a, "--duplicate-page") || Eq(a, "--document-info") || Eq(a, "--search-text"));
             if (command is null) return false;
@@ -166,6 +166,9 @@ namespace KillerPDF.Features
                         break;
                     case "--ocr":
                         exitCode = CliOcr(positionals, options, con);
+                        break;
+                    case "--scan-to-text":
+                        exitCode = CliScanToText(positionals, options, con);
                         break;
                     case "--rotate-pages":
                         exitCode = CliRotatePages(positionals, con);
@@ -261,6 +264,8 @@ namespace KillerPDF.Features
             "                                           print silently (default printer if none named)",
             "  --ocr <in.pdf> <out.pdf> [--lang <code>] add an invisible searchable text layer (default eng;",
             "                                           other languages download on first use)",
+            "  --scan-to-text <in.pdf> <out.pdf> [--lang <code>]",
+            "                                           turn scanned pages into real text in a matching typeface",
             "  --rotate-pages <in.pdf> <pages> <degrees> <out.pdf>",
             "                                           rotate selected pages by 90, 180, or 270 degrees",
             "  --delete-pages <in.pdf> <pages> <out.pdf> remove selected pages",
@@ -1646,6 +1651,51 @@ namespace KillerPDF.Features
             }
 
             con.WriteLine($"OCR complete: {pages} pages, {words} words -> {outPath}");
+            return 0;
+        }
+
+        // ============================================================
+        // --scan-to-text <in.pdf> <out.pdf> [--lang code]
+        // ============================================================
+        // Reuses the GUI's core (OcrController.BuildScanTextPdf): scanned pages become real
+        // text in the best-matching installed typeface, drawn over the page image with the
+        // replaced words erased. Pages with existing text or drawings are left as they are.
+        private static int CliScanToText(List<string> pos, Dictionary<string, string> options, TextWriter con)
+        {
+            if (pos.Count != 2)
+            {
+                con.WriteLine("Usage: KillerPDF.exe --scan-to-text <in.pdf> <out.pdf> [--lang <code>]   (default eng)");
+                return 2;
+            }
+            string inPath = Path.GetFullPath(pos[0]), outPath = Path.GetFullPath(pos[1]);
+            if (!File.Exists(inPath)) { con.WriteLine($"Input not found: {inPath}"); return 2; }
+            options.TryGetValue("--lang", out var langRaw);
+            string lang = string.IsNullOrWhiteSpace(langRaw) ? "eng" : langRaw!.Trim().ToLowerInvariant();
+
+            if (!CliEnsureOcrLanguage(lang, con)) return 1;
+
+            options.TryGetValue("--password", out var password);
+            var (source, rotations, _) = CliPrepareRenderSource(inPath, password, con);
+            // Conversion reads each page the way it is displayed and writes the text in that
+            // orientation, so the rotation the render copy dropped goes back on that copy first.
+            if (rotations != null && rotations.Any(r => r != 0))
+                PdfEngineIntegration.ApplyPageRotations(source, rotations
+                    .Select((rotation, pageIndex) => (pageIndex, rotation))
+                    .Where(item => item.rotation != 0)
+                    .ToDictionary(item => item.pageIndex, item => item.rotation));
+
+            CliEnsureParentDir(outPath);
+            var summary = OcrController.BuildScanTextPdf(source, outPath,
+                (i, n) => { if (i == 0 || i + 1 == n || (i + 1) % 10 == 0) con.WriteLine($"Page {i + 1}/{n}"); },
+                lang, CancellationToken.None);
+            if (summary.ScannedPages == 0)
+            {
+                con.WriteLine("No scanned pages to convert; nothing was written.");
+                return 1;
+            }
+
+            con.WriteLine($"Converted {summary.ScannedPages} scanned pages: {summary.ConvertedWords} words are now text, "
+                + $"{summary.KeptWords} kept as scanned -> {outPath}");
             return 0;
         }
 

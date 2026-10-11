@@ -984,8 +984,17 @@ internal static class PdfEngineIntegration
         ArgumentException.ThrowIfNullOrWhiteSpace(destinationPath);
         ArgumentNullException.ThrowIfNull(pages);
         PdfDocument document = PdfDocument.Open(File.ReadAllBytes(sourcePath));
+        PdfOcrSearchableTextResult result = PdfOcrSearchableTextWriter.Write(
+            document, pages, SearchableFontResolver());
+        ReplaceWithBuiltResult(destinationPath, result.Document);
+        return result.WrittenWords;
+    }
+
+    // Picks an installed face that covers a recognized word, for invisible searchable text.
+    private static Func<string, TrueTypeFont?> SearchableFontResolver()
+    {
         var fonts = new Dictionary<string, TrueTypeFont>(StringComparer.OrdinalIgnoreCase);
-        TrueTypeFont? ResolveFont(string text)
+        return text =>
         {
             string family = FontCoverage.PickFamily("Segoe UI", text);
             if (!fonts.TryGetValue(family, out TrueTypeFont? font))
@@ -997,11 +1006,66 @@ internal static class PdfEngineIntegration
                 fonts.Add(family, font);
             }
             return CanMap(font, text) ? font : null;
+        };
+    }
+
+    /// <summary>Which pages are image scans that can be converted to text.</summary>
+    internal static IReadOnlyList<bool> ReadScannedPages(string path)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        return PdfScanTextAnalyzer.ReadScannedPages(PdfDocument.Open(File.ReadAllBytes(path)));
+    }
+
+    // Families tried when matching a scan's printed typeface, serif, sans serif and typewriter.
+    private static readonly string[] ScanTextFamilies =
+    [
+        "Times New Roman", "Georgia", "Palatino Linotype", "Garamond", "Bookman Old Style",
+        "Century Schoolbook", "Cambria", "Arial", "Calibri", "Verdana", "Tahoma", "Segoe UI",
+        "Courier New", "Consolas", "Lucida Console"
+    ];
+
+    /// <summary>
+    /// The installed faces a scan's text can be set in, keeping only those that allow
+    /// embedding, followed by the engine's bundled faces.
+    /// </summary>
+    internal static IReadOnlyList<PdfScanTextFace> ScanTextFaces()
+    {
+        static TrueTypeFont? Load(byte[]? bytes)
+        {
+            if (bytes is null) return null;
+            try
+            {
+                TrueTypeFont font = TrueTypeFont.Load(bytes);
+                return font.EmbeddingAllowed ? font : null;
+            }
+            catch { return null; }
         }
-        PdfOcrSearchableTextResult result = PdfOcrSearchableTextWriter.Write(
-            document, pages, ResolveFont);
+        var faces = new List<PdfScanTextFace>();
+        foreach (string family in ScanTextFamilies)
+        {
+            byte[]? regularBytes = InstalledFontCatalog.FaceBytes(family, false, false);
+            if (regularBytes is null || Load(regularBytes) is not TrueTypeFont regular) continue;
+            byte[]? boldBytes = InstalledFontCatalog.FaceBytes(family, true, false);
+            // A family without a bold face falls back to its regular face; that is no bold.
+            TrueTypeFont? bold = boldBytes is not null && !boldBytes.AsSpan().SequenceEqual(regularBytes)
+                ? Load(boldBytes) : null;
+            faces.Add(new PdfScanTextFace(family, regular, bold));
+        }
+        faces.AddRange(PdfScanTextWriter.BundledFaces());
+        return faces;
+    }
+
+    /// <summary>Rewrites the scanned pages as text over their erased images.</summary>
+    internal static PdfScanTextResult WriteScanText(
+        string sourcePath, string destinationPath, IReadOnlyList<PdfScanTextPage> pages)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(sourcePath);
+        ArgumentException.ThrowIfNullOrWhiteSpace(destinationPath);
+        ArgumentNullException.ThrowIfNull(pages);
+        PdfDocument document = PdfDocument.Open(File.ReadAllBytes(sourcePath));
+        PdfScanTextResult result = PdfScanTextWriter.Write(document, pages, SearchableFontResolver());
         ReplaceWithBuiltResult(destinationPath, result.Document);
-        return result.WrittenWords;
+        return result;
     }
 
     private static bool CanMap(TrueTypeFont font, string text) =>

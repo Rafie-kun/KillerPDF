@@ -352,6 +352,7 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_TT_Ocr">OCR av side (kopier tekst) (Ctrl+Shift+O)</sys:String>
     <sys:String x:Key="Str_Ocr_Region">OCR av område...</sys:String>
     <sys:String x:Key="Str_Ocr_SearchablePdf">Lag søkbar PDF...</sys:String>
+    <sys:String x:Key="Str_Ocr_ScanToText">Konverter skanning til tekst...</sys:String>
     <sys:String x:Key="Str_Ocr_ExtractText">Trekk ut all tekst...</sys:String>
     <sys:String x:Key="Str_Ocr_Language">Språk</sys:String>
     <sys:String x:Key="Str_Ocr_FormAware">Skjemabevisst OCR</sys:String>
@@ -826,6 +827,7 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_St_OcrRegionTooSmall">OCR-området er for lite</sys:String>
     <sys:String x:Key="Str_St_OcrNoText">OCR: fant ingen tekst i det valgte området</sys:String>
     <sys:String x:Key="Str_St_SearchablePdfCanceled">Søkbar PDF er avbrutt (ingen fil skrevet)</sys:String>
+    <sys:String x:Key="Str_St_ScanTextCanceled">Konvertering av skanning avbrutt (ingen fil skrevet)</sys:String>
     <sys:String x:Key="Str_St_TextExtractCanceled">Tekstuttrekkingen er avbrutt (ingen fil skrevet)</sys:String>
     <sys:String x:Key="Str_St_NoTextOnPage">Fant ingen tekst på denne siden</sys:String>
     <sys:String x:Key="Str_St_NoTextSelected">Ingen tekst er valgt. Dra for å markere tekst</sys:String>
@@ -985,6 +987,7 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Print_Sending">Sender til skriveren…</sys:String>
     <sys:String x:Key="Str_Forms_FontSize">Skriftstørrelse:</sys:String>
     <sys:String x:Key="Str_Ocr_SaveSearchable">Lagre søkbar PDF</sys:String>
+    <sys:String x:Key="Str_Ocr_SaveScanText">Lagre konvertert PDF</sys:String>
     <sys:String x:Key="Str_Ocr_ExtractAllText">Trekk ut all tekst</sys:String>
     <sys:String x:Key="Str_Ocr_HighQuality">Bruk modeller med høy kvalitet</sys:String>
     <sys:String x:Key="Str_Dlg_OpenPdf">Åpne PDF</sys:String>
@@ -1010,6 +1013,7 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Err_OcrFailed">OCR mislyktes:</sys:String>
     <sys:String x:Key="Str_Err_PrepareDoc">Kunne ikke klargjøre dokumentet:</sys:String>
     <sys:String x:Key="Str_Err_SearchableFailed">Søkbar PDF mislyktes:</sys:String>
+    <sys:String x:Key="Str_Err_ScanTextFailed">Konvertering av skanning mislyktes:</sys:String>
     <sys:String x:Key="Str_Err_ExtractFailed">Tekstuttrekkingen mislyktes:</sys:String>
     <sys:String x:Key="Str_Err_DuplicateFailed">Duplisering mislyktes:</sys:String>
     <sys:String x:Key="Str_Err_RepairFailed">Reparasjonen mislyktes:</sys:String>
@@ -1047,6 +1051,7 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Busy_Ocr">Kjører OCR...</sys:String>
     <sys:String x:Key="Str_Busy_Region">Gjenkjenner område...</sys:String>
     <sys:String x:Key="Str_Busy_Searchable">Lager søkbar PDF...</sys:String>
+    <sys:String x:Key="Str_Busy_ScanText">Konverterer skannet tekst...</sys:String>
     <sys:String x:Key="Str_Busy_Extracting">Trekker ut tekst...</sys:String>
     <sys:String x:Key="Str_Busy_Repairing">Reparerer PDF...</sys:String>
     <sys:String x:Key="Str_Busy_HqModels">Laster ned språkmodeller med høy kvalitet...</sys:String>
@@ -1077,6 +1082,7 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_St_OcrCopiedPages">OCR: kopierte {0} tegn fra {1} sider ({2} sikkerhet)</sys:String>
     <sys:String x:Key="Str_St_OcrCopiedRegion">OCR: kopierte {0} tegn fra området ({1} sikkerhet)</sys:String>
     <sys:String x:Key="Str_St_SearchableSaved">Søkbar PDF lagret: {0} sider, {1} ord gjenkjent</sys:String>
+    <sys:String x:Key="Str_St_ScanTextSaved">Konvertert PDF lagret: {0} skannede sider, {1} ord er nå tekst</sys:String>
     <sys:String x:Key="Str_St_TextExtracted">Trakk ut tekst fra {0} sider -> {1}</sys:String>
     <sys:String x:Key="Str_St_DuplicatedPage">Duplisert side {0}</sys:String>
     <sys:String x:Key="Str_St_Merged">Slo sammen {0} fil(er) - {1} sider totalt</sys:String>
@@ -1104,6 +1110,7 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Annot_Drawing">Tegning</sys:String>
     <sys:String x:Key="Str_Annot_Item">Element</sys:String>
     <sys:String x:Key="Str_Busy_SearchablePage">Lager søkbar PDF... side {0} av {1}  (Esc for å avbryte)</sys:String>
+    <sys:String x:Key="Str_Busy_ScanTextPage">Konverterer skannet tekst... side {0} av {1}  (Esc for å avbryte)</sys:String>
     <sys:String x:Key="Str_Busy_ExtractingPage">Trekker ut tekst... side {0} av {1}  (Esc for å avbryte)</sys:String>
     <sys:String x:Key="Str_Busy_LangData">Laster ned språkdata for {0}...</sys:String>
     <sys:String x:Key="Str_Busy_Downloading">Laster ned {0}...</sys:String>
@@ -1115,6 +1122,8 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Ocr_SuffixDownload">(last ned)</sys:String>
     <sys:String x:Key="Str_Ocr_SuffixDownloadHq">(last ned, høy kvalitet)</sys:String>
     <sys:String x:Key="Str_Dlg_SearchableSaved" xml:space="preserve">Lagret søkbar PDF:&#10;{0}&#10;&#10;{1} sider behandlet, {2} ord gjenkjent.</sys:String>
+    <sys:String x:Key="Str_Dlg_ScanTextSaved" xml:space="preserve">Lagret konvertert PDF:&#10;{0}&#10;&#10;{1} skannede sider konvertert, {2} ord er nå tekst. {3} ord som ikke passet godt nok til skanningen, forblir skannet og er fortsatt søkbare.</sys:String>
+    <sys:String x:Key="Str_Dlg_ScanTextNone">Dette dokumentet har ingen skannede sider å konvertere, så ingenting ble lagret. Sider som allerede har tekst eller tegninger, blir latt være som de er.</sys:String>
     <sys:String x:Key="Str_Dlg_Repaired" xml:space="preserve">«{0}» ble reparert.&#10;&#10;Bokmerker, skjemaer og andre interaktive funksjoner kan ha gått tapt. Bruk Lagre som for å skrive den reparerte filen til et nytt sted.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairedRaster" xml:space="preserve">«{0}» ble reparert ved å rasterisere gjennom PDFium.&#10;&#10;Tekst kan ikke markeres i den reparerte kopien. Bruk Lagre som for å skrive den til et nytt sted.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairAsk" xml:space="preserve">«{0}» har en skadet struktur og kunne ikke legges til.&#10;&#10;Vil du at KillerPDF skal prøve å reparere den? Det opprettes en reparert kopi, og originalfilen endres ikke.&#10;&#10;Merk: reparerte filer kan mangle bokmerker, skjemaer og andre interaktive funksjoner.</sys:String>

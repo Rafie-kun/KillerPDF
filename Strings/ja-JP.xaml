@@ -352,6 +352,7 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_TT_Ocr">OCR 実行 (テキストをコピー) (Ctrl+Shift+O)</sys:String>
     <sys:String x:Key="Str_Ocr_Region">OCR 領域...</sys:String>
     <sys:String x:Key="Str_Ocr_SearchablePdf">検索可能な PDF を作成...</sys:String>
+    <sys:String x:Key="Str_Ocr_ScanToText">スキャンをテキストに変換...</sys:String>
     <sys:String x:Key="Str_Ocr_ExtractText">すべてのテキストを抽出...</sys:String>
     <sys:String x:Key="Str_Ocr_Language">言語</sys:String>
     <sys:String x:Key="Str_Ocr_FormAware">フォーム対応 OCR</sys:String>
@@ -826,6 +827,7 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_St_OcrRegionTooSmall">OCR 領域が小さすぎます</sys:String>
     <sys:String x:Key="Str_St_OcrNoText">OCR：選択した領域にテキストが見つかりませんでした</sys:String>
     <sys:String x:Key="Str_St_SearchablePdfCanceled">検索可能な PDF の作成をキャンセルしました (ファイルは書き込まれていません)</sys:String>
+    <sys:String x:Key="Str_St_ScanTextCanceled">スキャンの変換をキャンセルしました (ファイルは書き込まれていません)</sys:String>
     <sys:String x:Key="Str_St_TextExtractCanceled">テキスト抽出をキャンセルしました (ファイルは書き込まれていません)</sys:String>
     <sys:String x:Key="Str_St_NoTextOnPage">このページにテキストが見つかりませんでした</sys:String>
     <sys:String x:Key="Str_St_NoTextSelected">テキストが選択されていません。ドラッグしてテキストを選択してください</sys:String>
@@ -985,6 +987,7 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Print_Sending">プリンターに送信中…</sys:String>
     <sys:String x:Key="Str_Forms_FontSize">フォントサイズ：</sys:String>
     <sys:String x:Key="Str_Ocr_SaveSearchable">検索可能な PDF を保存</sys:String>
+    <sys:String x:Key="Str_Ocr_SaveScanText">変換した PDF を保存</sys:String>
     <sys:String x:Key="Str_Ocr_ExtractAllText">すべてのテキストを抽出</sys:String>
     <sys:String x:Key="Str_Ocr_HighQuality">高品質モデルを使用</sys:String>
     <sys:String x:Key="Str_Dlg_OpenPdf">PDF を開く</sys:String>
@@ -1010,6 +1013,7 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Err_OcrFailed">OCR に失敗しました：</sys:String>
     <sys:String x:Key="Str_Err_PrepareDoc">文書を準備できませんでした：</sys:String>
     <sys:String x:Key="Str_Err_SearchableFailed">検索可能な PDF の作成に失敗しました：</sys:String>
+    <sys:String x:Key="Str_Err_ScanTextFailed">スキャンの変換に失敗しました：</sys:String>
     <sys:String x:Key="Str_Err_ExtractFailed">テキスト抽出に失敗しました：</sys:String>
     <sys:String x:Key="Str_Err_DuplicateFailed">複製に失敗しました：</sys:String>
     <sys:String x:Key="Str_Err_RepairFailed">修復に失敗しました：</sys:String>
@@ -1047,6 +1051,7 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Busy_Ocr">OCR を実行中...</sys:String>
     <sys:String x:Key="Str_Busy_Region">領域を認識中...</sys:String>
     <sys:String x:Key="Str_Busy_Searchable">検索可能な PDF を作成中...</sys:String>
+    <sys:String x:Key="Str_Busy_ScanText">スキャンしたテキストを変換中...</sys:String>
     <sys:String x:Key="Str_Busy_Extracting">テキストを抽出中...</sys:String>
     <sys:String x:Key="Str_Busy_Repairing">PDF を修復中...</sys:String>
     <sys:String x:Key="Str_Busy_HqModels">高品質言語モデルをダウンロード中...</sys:String>
@@ -1077,6 +1082,7 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_St_OcrCopiedPages">OCR : {1} ページから {0} 文字をコピーしました (信頼度 {2})</sys:String>
     <sys:String x:Key="Str_St_OcrCopiedRegion">OCR : 領域から {0} 文字をコピーしました (信頼度 {1})</sys:String>
     <sys:String x:Key="Str_St_SearchableSaved">検索可能な PDF を保存しました : {0} ページ、{1} 語を認識</sys:String>
+    <sys:String x:Key="Str_St_ScanTextSaved">変換した PDF を保存しました：スキャンページ {0} 件、テキスト化した語 {1} 件</sys:String>
     <sys:String x:Key="Str_St_TextExtracted">{0} ページからテキストを抽出 -> {1}</sys:String>
     <sys:String x:Key="Str_St_DuplicatedPage">ページ {0} を複製しました</sys:String>
     <sys:String x:Key="Str_St_Merged">{0} 個のファイルを結合 - 合計 {1} ページ</sys:String>
@@ -1104,6 +1110,7 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Annot_Drawing">描画</sys:String>
     <sys:String x:Key="Str_Annot_Item">項目</sys:String>
     <sys:String x:Key="Str_Busy_SearchablePage">検索可能な PDF を作成中... ページ {0} / {1}  (Esc でキャンセル)</sys:String>
+    <sys:String x:Key="Str_Busy_ScanTextPage">スキャンしたテキストを変換中... ページ {0} / {1}  (Esc でキャンセル)</sys:String>
     <sys:String x:Key="Str_Busy_ExtractingPage">テキストを抽出中... ページ {0} / {1}  (Esc でキャンセル)</sys:String>
     <sys:String x:Key="Str_Busy_LangData">{0} の言語データをダウンロード中...</sys:String>
     <sys:String x:Key="Str_Busy_Downloading">{0} をダウンロード中...</sys:String>
@@ -1115,6 +1122,8 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Ocr_SuffixDownload">(ダウンロード)</sys:String>
     <sys:String x:Key="Str_Ocr_SuffixDownloadHq">(HQ ダウンロード)</sys:String>
     <sys:String x:Key="Str_Dlg_SearchableSaved" xml:space="preserve">検索可能な PDF を保存しました：&#10;{0}&#10;&#10;{1} ページを処理、{2} 語を認識。</sys:String>
+    <sys:String x:Key="Str_Dlg_ScanTextSaved" xml:space="preserve">変換した PDF を保存しました：&#10;{0}&#10;&#10;{1} ページのスキャンを変換し、{2} 語をテキストにしました。スキャンと十分に一致しなかった {3} 語はスキャンのまま残り、検索できます。</sys:String>
+    <sys:String x:Key="Str_Dlg_ScanTextNone">この文書には変換できるスキャンページがないため、何も保存されませんでした。テキストや図形がすでにあるページはそのまま残ります。</sys:String>
     <sys:String x:Key="Str_Dlg_Repaired" xml:space="preserve">「{0}」の修復に成功しました。&#10;&#10;しおり、フォーム、その他のインタラクティブ機能は失われている可能性があります。名前を付けて保存で修復済みファイルを新しい場所に書き出してください。</sys:String>
     <sys:String x:Key="Str_Dlg_RepairedRaster" xml:space="preserve">「{0}」は PDFium によるラスタライズで修復されました。&#10;&#10;修復済みコピーではテキストを選択できません。名前を付けて保存で新しい場所に書き出してください。</sys:String>
     <sys:String x:Key="Str_Dlg_RepairAsk" xml:space="preserve">「{0}」は構造が破損しているため追加できませんでした。&#10;&#10;KillerPDF で修復を試みますか？修復済みコピーが作成されます - 元のファイルは変更されません。&#10;&#10;注意 : 修復済みファイルでは、しおり、フォーム、その他のインタラクティブ機能が失われる場合があります。</sys:String>

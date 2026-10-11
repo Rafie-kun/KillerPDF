@@ -343,6 +343,7 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_TT_Ocr">OCR strona (kopiuj tekst) (Ctrl+Shift+O)</sys:String>
     <sys:String x:Key="Str_Ocr_Region">OCR Region...</sys:String>
     <sys:String x:Key="Str_Ocr_SearchablePdf">Utwórz przeszukiwalny PDF...</sys:String>
+    <sys:String x:Key="Str_Ocr_ScanToText">Konwertuj skan na tekst...</sys:String>
     <sys:String x:Key="Str_Ocr_ExtractText">Wyodrębnij wszystki tekst...</sys:String>
     <sys:String x:Key="Str_Ocr_Language">Język</sys:String>
     <sys:String x:Key="Str_Ocr_FormAware">OCR uwzględniające formularze</sys:String>
@@ -797,6 +798,7 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_St_OcrRegionTooSmall">OCR region jest zbyt mały</sys:String>
     <sys:String x:Key="Str_St_OcrNoText">OCR: w zaznaczonym obszarze nie znaleziono tekstu</sys:String>
     <sys:String x:Key="Str_St_SearchablePdfCanceled">PDF z możliwością wyszukiwania anulowany (nie zapisano pliku)</sys:String>
+    <sys:String x:Key="Str_St_ScanTextCanceled">Konwersja skanu anulowana (nie zapisano pliku)</sys:String>
     <sys:String x:Key="Str_St_TextExtractCanceled">Wyodrębnianie tekstu zostało anulowane (nie zapisano pliku)</sys:String>
     <sys:String x:Key="Str_St_NoTextOnPage">Na tej stronie nie znaleziono tekstu</sys:String>
     <sys:String x:Key="Str_St_NoTextSelected">Nie zaznaczono tekstu - przeciągnij do zaznaczenia tekstu</sys:String>
@@ -982,6 +984,7 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Print_Sending">Wysyłanie do drukarki…</sys:String>
     <sys:String x:Key="Str_Forms_FontSize">Rozmiar czcionki:</sys:String>
     <sys:String x:Key="Str_Ocr_SaveSearchable">Zapisz przeszukiwalny PDF</sys:String>
+    <sys:String x:Key="Str_Ocr_SaveScanText">Zapisz przekonwertowany PDF</sys:String>
     <sys:String x:Key="Str_Ocr_ExtractAllText">Wyodrębnij cały tekst</sys:String>
     <sys:String x:Key="Str_Ocr_HighQuality">Używaj modeli wysokiej jakości</sys:String>
     <sys:String x:Key="Str_Dlg_OpenPdf">Otwórz PDF</sys:String>
@@ -1005,6 +1008,7 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Err_OcrFailed">OCR nie powiodło się:</sys:String>
     <sys:String x:Key="Str_Err_PrepareDoc">Nie można przygotować dokumentu:</sys:String>
     <sys:String x:Key="Str_Err_SearchableFailed">Przeszukiwalny PDF nie powiódł się:</sys:String>
+    <sys:String x:Key="Str_Err_ScanTextFailed">Konwersja skanu nie powiodła się:</sys:String>
     <sys:String x:Key="Str_Err_ExtractFailed">Wyodrębnianie tekstu nie powiodło się:</sys:String>
     <sys:String x:Key="Str_Err_DuplicateFailed">Duplikowanie nie powiodło się:</sys:String>
     <sys:String x:Key="Str_Err_RepairFailed">Naprawa nie powiodła się:</sys:String>
@@ -1040,6 +1044,7 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Busy_Ocr">Trwa OCR...</sys:String>
     <sys:String x:Key="Str_Busy_Region">Rozpoznawanie regionu...</sys:String>
     <sys:String x:Key="Str_Busy_Searchable">Tworzenie przeszukiwalnego PDF...</sys:String>
+    <sys:String x:Key="Str_Busy_ScanText">Konwertowanie zeskanowanego tekstu...</sys:String>
     <sys:String x:Key="Str_Busy_Extracting">Wyodrębnianie tekstu...</sys:String>
     <sys:String x:Key="Str_Busy_Repairing">Naprawianie PDF...</sys:String>
     <sys:String x:Key="Str_Busy_HqModels">Pobieranie modeli języka wysokiej jakości...</sys:String>
@@ -1068,6 +1073,7 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_St_OcrCopiedPages">OCR: skopiowano {0} znaków z {1} stron (pewność {2})</sys:String>
     <sys:String x:Key="Str_St_OcrCopiedRegion">OCR: skopiowano {0} znaków z regionu (pewność {1})</sys:String>
     <sys:String x:Key="Str_St_SearchableSaved">Zapisano przeszukiwalny PDF: {0} stron, {1} rozpoznanych słów</sys:String>
+    <sys:String x:Key="Str_St_ScanTextSaved">Zapisano przekonwertowany PDF: zeskanowane strony: {0}, słowa zamienione na tekst: {1}</sys:String>
     <sys:String x:Key="Str_St_TextExtracted">Wyodrębniono tekst z {0} stron -> {1}</sys:String>
     <sys:String x:Key="Str_St_DuplicatedPage">Zduplikowano stronę {0}</sys:String>
     <sys:String x:Key="Str_St_Merged">Scalono plików: {0} - łącznie {1} stron</sys:String>
@@ -1093,6 +1099,7 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Annot_Drawing">Rysunek</sys:String>
     <sys:String x:Key="Str_Annot_Item">Element</sys:String>
     <sys:String x:Key="Str_Busy_SearchablePage">Tworzenie przeszukiwalnego PDF... strona {0} z {1}  (Esc anuluje)</sys:String>
+    <sys:String x:Key="Str_Busy_ScanTextPage">Konwertowanie zeskanowanego tekstu... strona {0} z {1}  (Esc anuluje)</sys:String>
     <sys:String x:Key="Str_Busy_ExtractingPage">Wyodrębnianie tekstu... strona {0} z {1}  (Esc anuluje)</sys:String>
     <sys:String x:Key="Str_Busy_LangData">Pobieranie danych języka {0}...</sys:String>
     <sys:String x:Key="Str_Busy_Downloading">Pobieranie {0}...</sys:String>
@@ -1104,6 +1111,8 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Ocr_SuffixDownload">(pobierz)</sys:String>
     <sys:String x:Key="Str_Ocr_SuffixDownloadHq">(pobierz HQ)</sys:String>
     <sys:String x:Key="Str_Dlg_SearchableSaved" xml:space="preserve">Zapisano przeszukiwalny PDF:&#10;{0}&#10;&#10;Przetworzono stron: {1}, rozpoznano słów: {2}.</sys:String>
+    <sys:String x:Key="Str_Dlg_ScanTextSaved" xml:space="preserve">Zapisano przekonwertowany PDF:&#10;{0}&#10;&#10;Przekonwertowane zeskanowane strony: {1}, słowa zamienione na tekst: {2}. Słowa, które nie pasowały dokładnie do skanu ({3}), pozostają zeskanowane i można je wyszukiwać.</sys:String>
+    <sys:String x:Key="Str_Dlg_ScanTextNone">Ten dokument nie ma zeskanowanych stron do konwersji, więc nic nie zapisano. Strony, które mają już tekst lub rysunki, pozostają bez zmian.</sys:String>
     <sys:String x:Key="Str_Dlg_Repaired" xml:space="preserve">„{0}" naprawiono pomyślnie.&#10;&#10;Zakładki, formularze i inne funkcje interaktywne mogły zostać utracone. Użyj Zapisz jako, aby zapisać naprawiony plik w nowej lokalizacji.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairedRaster" xml:space="preserve">„{0}" naprawiono przez rasteryzację w PDFium.&#10;&#10;Tekst w naprawionej kopii nie jest zaznaczalny. Użyj Zapisz jako, aby zapisać ją w nowej lokalizacji.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairAsk" xml:space="preserve">„{0}" ma uszkodzoną strukturę i nie można go dodać.&#10;&#10;Czy KillerPDF ma spróbować naprawy? Zostanie utworzona naprawiona kopia - oryginalny plik nie zostanie zmieniony.&#10;&#10;Uwaga: naprawionym plikom mogą brakować zakładki, formularze i inne funkcje interaktywne.</sys:String>

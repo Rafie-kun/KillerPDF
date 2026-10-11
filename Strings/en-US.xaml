@@ -352,6 +352,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_TT_Ocr">OCR page (copy text) (Ctrl+Shift+O)</sys:String>
     <sys:String x:Key="Str_Ocr_Region">OCR Region...</sys:String>
     <sys:String x:Key="Str_Ocr_SearchablePdf">Make Searchable PDF...</sys:String>
+    <sys:String x:Key="Str_Ocr_ScanToText">Convert Scan to Text...</sys:String>
     <sys:String x:Key="Str_Ocr_ExtractText">Extract All Text...</sys:String>
     <sys:String x:Key="Str_Ocr_Language">Language</sys:String>
     <sys:String x:Key="Str_Ocr_FormAware">Form-aware OCR</sys:String>
@@ -826,6 +827,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_St_OcrRegionTooSmall">OCR region too small</sys:String>
     <sys:String x:Key="Str_St_OcrNoText">OCR: no text found in the selected region</sys:String>
     <sys:String x:Key="Str_St_SearchablePdfCanceled">Searchable PDF canceled (no file written)</sys:String>
+    <sys:String x:Key="Str_St_ScanTextCanceled">Scan conversion canceled (no file written)</sys:String>
     <sys:String x:Key="Str_St_TextExtractCanceled">Text extraction canceled (no file written)</sys:String>
     <sys:String x:Key="Str_St_NoTextOnPage">No text found on this page</sys:String>
     <sys:String x:Key="Str_St_NoTextSelected">No text selected - drag to select text</sys:String>
@@ -985,6 +987,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Print_Sending">Sending to printer…</sys:String>
     <sys:String x:Key="Str_Forms_FontSize">Font size:</sys:String>
     <sys:String x:Key="Str_Ocr_SaveSearchable">Save Searchable PDF</sys:String>
+    <sys:String x:Key="Str_Ocr_SaveScanText">Save Converted PDF</sys:String>
     <sys:String x:Key="Str_Ocr_ExtractAllText">Extract All Text</sys:String>
     <sys:String x:Key="Str_Ocr_HighQuality">Use High Quality Models</sys:String>
     <sys:String x:Key="Str_Dlg_OpenPdf">Open PDF</sys:String>
@@ -1010,6 +1013,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Err_OcrFailed">OCR failed:</sys:String>
     <sys:String x:Key="Str_Err_PrepareDoc">Could not prepare the document:</sys:String>
     <sys:String x:Key="Str_Err_SearchableFailed">Searchable PDF failed:</sys:String>
+    <sys:String x:Key="Str_Err_ScanTextFailed">Scan conversion failed:</sys:String>
     <sys:String x:Key="Str_Err_ExtractFailed">Text extraction failed:</sys:String>
     <sys:String x:Key="Str_Err_DuplicateFailed">Duplicate failed:</sys:String>
     <sys:String x:Key="Str_Err_RepairFailed">Repair failed:</sys:String>
@@ -1047,6 +1051,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Busy_Ocr">Running OCR...</sys:String>
     <sys:String x:Key="Str_Busy_Region">Recognizing region...</sys:String>
     <sys:String x:Key="Str_Busy_Searchable">Making searchable PDF...</sys:String>
+    <sys:String x:Key="Str_Busy_ScanText">Converting scanned text...</sys:String>
     <sys:String x:Key="Str_Busy_Extracting">Extracting text...</sys:String>
     <sys:String x:Key="Str_Busy_Repairing">Repairing PDF...</sys:String>
     <sys:String x:Key="Str_Busy_HqModels">Downloading high quality language models...</sys:String>
@@ -1077,6 +1082,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_St_OcrCopiedPages">OCR: copied {0} chars from {1} pages ({2} confidence)</sys:String>
     <sys:String x:Key="Str_St_OcrCopiedRegion">OCR: copied {0} chars from the region ({1} confidence)</sys:String>
     <sys:String x:Key="Str_St_SearchableSaved">Searchable PDF saved: {0} pages, {1} words recognized</sys:String>
+    <sys:String x:Key="Str_St_ScanTextSaved">Converted PDF saved: {0} scanned pages, {1} words now text</sys:String>
     <sys:String x:Key="Str_St_TextExtracted">Text extracted from {0} pages -> {1}</sys:String>
     <sys:String x:Key="Str_St_DuplicatedPage">Duplicated page {0}</sys:String>
     <sys:String x:Key="Str_St_Merged">Merged {0} file(s) - {1} total pages</sys:String>
@@ -1104,6 +1110,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Annot_Drawing">Drawing</sys:String>
     <sys:String x:Key="Str_Annot_Item">Item</sys:String>
     <sys:String x:Key="Str_Busy_SearchablePage">Making searchable PDF... page {0} of {1}  (Esc to cancel)</sys:String>
+    <sys:String x:Key="Str_Busy_ScanTextPage">Converting scanned text... page {0} of {1}  (Esc to cancel)</sys:String>
     <sys:String x:Key="Str_Busy_ExtractingPage">Extracting text... page {0} of {1}  (Esc to cancel)</sys:String>
     <sys:String x:Key="Str_Busy_LangData">Downloading {0} language data...</sys:String>
     <sys:String x:Key="Str_Busy_Downloading">Downloading {0}...</sys:String>
@@ -1115,6 +1122,8 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Ocr_SuffixDownload">(download)</sys:String>
     <sys:String x:Key="Str_Ocr_SuffixDownloadHq">(download HQ)</sys:String>
     <sys:String x:Key="Str_Dlg_SearchableSaved" xml:space="preserve">Saved searchable PDF:&#10;{0}&#10;&#10;{1} pages processed, {2} words recognized.</sys:String>
+    <sys:String x:Key="Str_Dlg_ScanTextSaved" xml:space="preserve">Saved converted PDF:&#10;{0}&#10;&#10;{1} scanned pages converted, {2} words are now text. {3} words that did not closely match the scan stay as scanned and remain searchable.</sys:String>
+    <sys:String x:Key="Str_Dlg_ScanTextNone">This document has no scanned pages to convert, so nothing was saved. Pages that already have text or drawings are left as they are.</sys:String>
     <sys:String x:Key="Str_Dlg_Repaired" xml:space="preserve">"{0}" was repaired successfully.&#10;&#10;Bookmarks, forms, and other interactive features may have been lost. Use Save As to write the repaired file to a new location.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairedRaster" xml:space="preserve">"{0}" was repaired by rasterizing through PDFium.&#10;&#10;Text is not selectable in the repaired copy. Use Save As to write it to a new location.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairAsk" xml:space="preserve">"{0}" has a damaged structure and couldn't be added.&#10;&#10;Would you like KillerPDF to attempt a repair? A repaired copy will be created - the original file will not be changed.&#10;&#10;Note: repaired files may be missing bookmarks, forms, and other interactive features.</sys:String>

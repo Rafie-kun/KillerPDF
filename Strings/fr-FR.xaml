@@ -352,6 +352,7 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_TT_Ocr">OCR de la page (copier le texte) (Ctrl+Maj+O)</sys:String>
     <sys:String x:Key="Str_Ocr_Region">Zone OCR...</sys:String>
     <sys:String x:Key="Str_Ocr_SearchablePdf">Créer un PDF interrogeable...</sys:String>
+    <sys:String x:Key="Str_Ocr_ScanToText">Convertir le scan en texte...</sys:String>
     <sys:String x:Key="Str_Ocr_ExtractText">Extraire tout le texte...</sys:String>
     <sys:String x:Key="Str_Ocr_Language">Langue</sys:String>
     <sys:String x:Key="Str_Ocr_FormAware">OCR adaptée aux formulaires</sys:String>
@@ -826,6 +827,7 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_St_OcrRegionTooSmall">Région OCR trop petite</sys:String>
     <sys:String x:Key="Str_St_OcrNoText">OCR : aucun texte trouvé dans la région sélectionnée</sys:String>
     <sys:String x:Key="Str_St_SearchablePdfCanceled">PDF interrogeable annulé (aucun fichier écrit)</sys:String>
+    <sys:String x:Key="Str_St_ScanTextCanceled">Conversion du scan annulée (aucun fichier écrit)</sys:String>
     <sys:String x:Key="Str_St_TextExtractCanceled">Extraction de texte annulée (aucun fichier écrit)</sys:String>
     <sys:String x:Key="Str_St_NoTextOnPage">Aucun texte trouvé sur cette page</sys:String>
     <sys:String x:Key="Str_St_NoTextSelected">Aucun texte sélectionné - faites glisser pour sélectionner du texte</sys:String>
@@ -985,6 +987,7 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Print_Sending">Envoi à l'imprimante…</sys:String>
     <sys:String x:Key="Str_Forms_FontSize">Taille de police :</sys:String>
     <sys:String x:Key="Str_Ocr_SaveSearchable">Enregistrer le PDF interrogeable</sys:String>
+    <sys:String x:Key="Str_Ocr_SaveScanText">Enregistrer le PDF converti</sys:String>
     <sys:String x:Key="Str_Ocr_ExtractAllText">Extraire tout le texte</sys:String>
     <sys:String x:Key="Str_Ocr_HighQuality">Utiliser des modèles de haute qualité</sys:String>
     <sys:String x:Key="Str_Dlg_OpenPdf">Ouvrir un PDF</sys:String>
@@ -1010,6 +1013,7 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Err_OcrFailed">Échec de l'OCR :</sys:String>
     <sys:String x:Key="Str_Err_PrepareDoc">Impossible de préparer le document :</sys:String>
     <sys:String x:Key="Str_Err_SearchableFailed">Échec du PDF interrogeable :</sys:String>
+    <sys:String x:Key="Str_Err_ScanTextFailed">Échec de la conversion du scan :</sys:String>
     <sys:String x:Key="Str_Err_ExtractFailed">Échec de l'extraction du texte :</sys:String>
     <sys:String x:Key="Str_Err_DuplicateFailed">Échec de la duplication :</sys:String>
     <sys:String x:Key="Str_Err_RepairFailed">Échec de la réparation :</sys:String>
@@ -1047,6 +1051,7 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Busy_Ocr">OCR en cours...</sys:String>
     <sys:String x:Key="Str_Busy_Region">Reconnaissance de la région...</sys:String>
     <sys:String x:Key="Str_Busy_Searchable">Création du PDF interrogeable...</sys:String>
+    <sys:String x:Key="Str_Busy_ScanText">Conversion du texte numérisé...</sys:String>
     <sys:String x:Key="Str_Busy_Extracting">Extraction du texte...</sys:String>
     <sys:String x:Key="Str_Busy_Repairing">Réparation du PDF...</sys:String>
     <sys:String x:Key="Str_Busy_HqModels">Téléchargement des modèles de langue de haute qualité...</sys:String>
@@ -1077,6 +1082,7 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_St_OcrCopiedPages">OCR : {0} caractères copiés depuis {1} pages (confidance : {2})</sys:String>
     <sys:String x:Key="Str_St_OcrCopiedRegion">OCR : {0} caractères copiés de la région (confiance {1})</sys:String>
     <sys:String x:Key="Str_St_SearchableSaved">PDF interrogeable enregistré : {0} pages, {1} mots reconnus</sys:String>
+    <sys:String x:Key="Str_St_ScanTextSaved">PDF converti enregistré : {0} pages numérisées, {1} mots devenus du texte</sys:String>
     <sys:String x:Key="Str_St_TextExtracted">Texte extrait de {0} pages -> {1}</sys:String>
     <sys:String x:Key="Str_St_DuplicatedPage">Page {0} dupliquée</sys:String>
     <sys:String x:Key="Str_St_Merged">{0} fichier(s) fusionnés - {1} pages au total</sys:String>
@@ -1104,6 +1110,7 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Annot_Drawing">Dessin</sys:String>
     <sys:String x:Key="Str_Annot_Item">Élément</sys:String>
     <sys:String x:Key="Str_Busy_SearchablePage">Création du PDF interrogeable... page {0} sur {1}  (Échap annule)</sys:String>
+    <sys:String x:Key="Str_Busy_ScanTextPage">Conversion du texte numérisé... page {0} sur {1}  (Échap annule)</sys:String>
     <sys:String x:Key="Str_Busy_ExtractingPage">Extraction du texte... page {0} sur {1}  (Échap annule)</sys:String>
     <sys:String x:Key="Str_Busy_LangData">Téléchargement des données de langue {0}...</sys:String>
     <sys:String x:Key="Str_Busy_Downloading">Téléchargement de {0}...</sys:String>
@@ -1115,6 +1122,8 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Ocr_SuffixDownload">(télécharger)</sys:String>
     <sys:String x:Key="Str_Ocr_SuffixDownloadHq">(télécharger HQ)</sys:String>
     <sys:String x:Key="Str_Dlg_SearchableSaved" xml:space="preserve">PDF interrogeable enregistré :&#10;{0}&#10;&#10;{1} pages traitées, {2} mots reconnus.</sys:String>
+    <sys:String x:Key="Str_Dlg_ScanTextSaved" xml:space="preserve">PDF converti enregistré :&#10;{0}&#10;&#10;{1} pages numérisées converties, {2} mots sont maintenant du texte. {3} mots qui ne correspondaient pas assez au scan restent numérisés et interrogeables.</sys:String>
+    <sys:String x:Key="Str_Dlg_ScanTextNone">Ce document n'a aucune page numérisée à convertir, rien n'a donc été enregistré. Les pages qui contiennent déjà du texte ou des dessins restent telles quelles.</sys:String>
     <sys:String x:Key="Str_Dlg_Repaired" xml:space="preserve">« {0} » a été réparé avec succès.&#10;&#10;Les signets, formulaires et autres fonctions interactives ont pu être perdus. Utilisez Enregistrer sous pour écrire le fichier réparé dans un nouvel emplacement.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairedRaster" xml:space="preserve">« {0} » a été réparé par pixellisation via PDFium.&#10;&#10;Le texte n'est pas sélectionnable dans la copie réparée. Utilisez Enregistrer sous pour l'écrire dans un nouvel emplacement.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairAsk" xml:space="preserve">« {0} » a une structure endommagée et n'a pas pu être ajouté.&#10;&#10;Voulez-vous que KillerPDF tente une réparation ? Une copie réparée sera créée - le fichier original ne sera pas modifié.&#10;&#10;Remarque : les fichiers réparés peuvent manquer de signets, de formulaires et d'autres fonctions interactives.</sys:String>

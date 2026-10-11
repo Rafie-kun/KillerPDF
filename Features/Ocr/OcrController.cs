@@ -2,6 +2,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using KillerPdf.Engine.Authoring;
 using KillerPdf.Engine.Documents;
 using Microsoft.Win32;
 using KillerPDF.Services;
@@ -311,6 +312,176 @@ namespace KillerPDF.Features
             int totalWords = PdfEngineIntegration.AddSearchableTextLayers(
                 src, outPath, layers);
             return (pages, totalWords);
+        }
+
+        // ============================================================
+        // Convert Scan to Text - the recognized words of scanned pages become real text.
+        // ============================================================
+
+        internal async void ConvertScanToText()
+        {
+            if (!_host.HasDocument) { KillerDialog.Show(_host.Window, _host.Loc("Str_Ocr_NoDoc")); return; }
+            if (!await _host.EnsureOcrModelsReadyAsync()) return;
+            _host.CommitActiveTextBox();
+
+            var dlg = new KillerPDF.Controls.FileDialog(KillerPDF.Controls.FileDialogMode.Save)
+            {
+                Filter = _host.Loc("Str_Filter_Pdf") + "|*.pdf",
+                Title = _host.Loc("Str_Ocr_SaveScanText"),
+                FileName = Path.GetFileNameWithoutExtension(_host.OriginalFile ?? _host.CurrentFile ?? "document") + "-text.pdf",
+                CheckFileExists = false,
+                CheckPathExists = true
+            };
+            if (dlg.ShowDialog(_host.Window) != true) return;
+            string outPath = dlg.FileName;
+
+            string src = App.MakeTempFile("scantext");
+            try { _host.SaveDocumentTo(src); }
+            catch (Exception ex)
+            {
+                KillerDialog.Show(_host.Window, _host.Loc("Str_Err_PrepareDoc") + "\n" + ex.Message, "KillerPDF",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            var ct = _host.BeginOp(_host.Loc("Str_Op_Ocr"), _host.Loc("Str_Busy_ScanText"));
+            void report(int i, int n) => _host.Window.Dispatcher.Invoke(() =>
+                _host.SetBusyMessage(string.Format(_host.Loc("Str_Busy_ScanTextPage"), i + 1, n)));
+            string lang = _host.OcrLanguageString;
+
+            try
+            {
+                ScanTextSummary summary = await Task.Run(() => BuildScanTextPdf(src, outPath, report, lang, ct));
+                _host.HideBusy();
+                if (ct.IsCancellationRequested) { _host.SetStatus(_host.Loc("Str_St_ScanTextCanceled")); return; }
+                if (summary.ScannedPages == 0)
+                {
+                    KillerDialog.Show(_host.Window, _host.Loc("Str_Dlg_ScanTextNone"), "KillerPDF",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+                _host.SetStatus(string.Format(_host.Loc("Str_St_ScanTextSaved"),
+                    summary.ScannedPages, summary.ConvertedWords));
+                KillerDialog.Show(_host.Window,
+                    string.Format(_host.Loc("Str_Dlg_ScanTextSaved"), outPath,
+                        summary.ScannedPages, summary.ConvertedWords, summary.KeptWords),
+                    "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
+            {
+                _host.HideBusy();
+                _host.SetStatus(_host.Loc("Str_St_ScanTextCanceled"));
+            }
+            catch (Exception ex)
+            {
+                _host.HideBusy();
+                KillerDialog.Show(_host.Window, _host.Loc("Str_Err_ScanTextFailed") + "\n" + ex.Message, "KillerPDF",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                _host.EndOp();
+            }
+        }
+
+        internal sealed record ScanTextSummary(int ScannedPages, int ConvertedWords, int KeptWords);
+
+        // Turns the recognized words of every scanned page into real text, set in the installed
+        // face that best matches the print and drawn over the page image with those words erased.
+        // Words that do not match their ink closely stay in the image under invisible text. Pages
+        // that already have visible text or drawings are left as they are. Runs off the UI
+        // thread; also the core of the CLI's --scan-to-text command.
+        internal static ScanTextSummary BuildScanTextPdf(string src, string outPath,
+            Action<int, int> report, string language, CancellationToken ct)
+        {
+            IReadOnlyList<bool> scanned = PdfEngineIntegration.ReadScannedPages(src);
+            if (!scanned.Contains(true)) return new ScanTextSummary(0, 0, 0);
+            using var renderSession = PdfPageRenderSession.OpenEngineFirst(src, OcrRenderMax, OcrRenderMax);
+            using var ocr = new OcrService(language: language);
+            IReadOnlyList<PdfScanTextFace> candidates = PdfEngineIntegration.ScanTextFaces();
+            bool narrowed = false;
+            var pages = new List<PdfScanTextPage>();
+            for (int i = 0; i < scanned.Count; i++)
+            {
+                // Cooperative cancel: nothing is written until every page is done.
+                if (ct.IsCancellationRequested) return new ScanTextSummary(pages.Count, 0, 0);
+                report(i, scanned.Count);
+                if (!scanned[i]) continue;
+
+                PdfRenderedPage page = renderSession.RenderBasePage(i, ct);
+                int w = page.Width, h = page.Height;
+                byte[] bgra = page.Pixels;
+                if (bgra is null || bgra.Length == 0 || w <= 0 || h <= 0) continue;
+
+                PdfOcrResult result = ocr.RecognizeBgra(bgra, w, h, cancellationToken: ct);
+                PdfScanTextPageAnalysis analysis = PdfScanTextAnalyzer.Analyze(bgra, w, h, result.Words);
+                IReadOnlyList<(PdfScanTextFace Face, double Score)> ranked =
+                    PdfScanTextWriter.RankFaces(analysis, candidates, cancellationToken: ct);
+                PdfScanTextFace face = ranked.Count > 0 ? ranked[0].Face : candidates[0];
+                // The first page with enough words settles the likely faces; later pages choose
+                // among the closest few.
+                if (!narrowed && ranked.Count > 0)
+                {
+                    candidates = [.. ranked.Take(4).Select(item => item.Face)];
+                    narrowed = true;
+                }
+                PdfScanTextWriter.Verify(analysis, face, cancellationToken: ct);
+                PdfScanTextAnalyzer.Erase(bgra, w, h, analysis.Words
+                    .Where(word => word.Replaceable && PdfScanTextWriter.CanSet(face, word)));
+                PdfScanTextAnalyzer.ReleaseMasks(analysis);
+                pages.Add(new PdfScanTextPage(i, analysis, EncodeScanBackground(bgra, w, h), face));
+            }
+            if (ct.IsCancellationRequested || pages.Count == 0) return new ScanTextSummary(pages.Count, 0, 0);
+            PdfScanTextResult written = PdfEngineIntegration.WriteScanText(src, outPath, pages);
+            return new ScanTextSummary(pages.Count, written.ReplacedWords, written.SearchableWords);
+        }
+
+        // A black-and-white scan stays one bit deep; anything else is stored as JPEG, in gray
+        // when the page has no color.
+        private static PdfImage EncodeScanBackground(byte[] bgra, int width, int height)
+        {
+            long middle = 0;
+            bool gray = true;
+            for (int i = 0; i < bgra.Length; i += 4)
+            {
+                int blue = bgra[i], green = bgra[i + 1], red = bgra[i + 2];
+                if (green is > 48 and < 208) middle++;
+                if (gray && (Math.Abs(red - green) > 12 || Math.Abs(blue - green) > 12)) gray = false;
+            }
+            if (middle * 100 < (long)width * height)
+            {
+                byte[] samples = new byte[width * height];
+                for (int i = 0; i < samples.Length; i++)
+                    samples[i] = bgra[i * 4 + 1] < 128 ? (byte)0 : (byte)255;
+                return PdfImage.FromBitonal(width, height, samples);
+            }
+            // With the text now drawn as text, the remaining paper and pictures keep their look at
+            // half the scan resolution, which keeps the file close to the original's size.
+            (byte[] half, int halfWidth, int halfHeight) = Halve(bgra, width, height);
+            return PdfImage.FromJpeg(BitmapHelpers.EncodeJpeg(half, halfWidth, halfHeight,
+                quality: 80, grayscale: gray));
+        }
+
+        private static (byte[] Pixels, int Width, int Height) Halve(byte[] bgra, int width, int height)
+        {
+            int halfWidth = Math.Max(1, width / 2), halfHeight = Math.Max(1, height / 2);
+            byte[] half = new byte[halfWidth * halfHeight * 4];
+            for (int y = 0; y < halfHeight; y++)
+            {
+                int top = Math.Min(height - 1, y * 2), bottom = Math.Min(height - 1, y * 2 + 1);
+                for (int x = 0; x < halfWidth; x++)
+                {
+                    int left = Math.Min(width - 1, x * 2), right = Math.Min(width - 1, x * 2 + 1);
+                    int a = (top * width + left) * 4, b = (top * width + right) * 4;
+                    int c = (bottom * width + left) * 4, d = (bottom * width + right) * 4;
+                    int o = (y * halfWidth + x) * 4;
+                    for (int channel = 0; channel < 3; channel++)
+                        half[o + channel] = (byte)((bgra[a + channel] + bgra[b + channel]
+                            + bgra[c + channel] + bgra[d + channel] + 2) / 4);
+                    half[o + 3] = 255;
+                }
+            }
+            return (half, halfWidth, halfHeight);
         }
 
         // ============================================================

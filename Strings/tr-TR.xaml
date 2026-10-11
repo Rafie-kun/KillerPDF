@@ -658,6 +658,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <!-- ── OCR + Dönüştürme + Kırpma (v1.x eklendi) ──────────────────── -->
     <sys:String x:Key="Str_Ocr_Region">OCR Bölgesi...</sys:String>
     <sys:String x:Key="Str_Ocr_SearchablePdf">Aranabilir PDF Oluştur...</sys:String>
+    <sys:String x:Key="Str_Ocr_ScanToText">Taramayı Metne Dönüştür...</sys:String>
     <sys:String x:Key="Str_Ocr_ExtractText">Tüm Metni Çıkart...</sys:String>
     <sys:String x:Key="Str_Ocr_Language">Dil</sys:String>
     <sys:String x:Key="Str_Ocr_FormAware">Form duyarlı OCR</sys:String>
@@ -743,6 +744,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_St_OcrRegionTooSmall">OCR bölgesi çok küçük</sys:String>
     <sys:String x:Key="Str_St_OcrNoText">OCR: seçilen bölgede metin bulunamadı</sys:String>
     <sys:String x:Key="Str_St_SearchablePdfCanceled">Aranabilir PDF iptal edildi (dosya yazılmadı)</sys:String>
+    <sys:String x:Key="Str_St_ScanTextCanceled">Tarama dönüştürme iptal edildi (dosya yazılmadı)</sys:String>
     <sys:String x:Key="Str_St_TextExtractCanceled">Metin çıkarma iptal edildi (dosya yazılmadı)</sys:String>
     <sys:String x:Key="Str_St_NoTextOnPage">Bu sayfada metin bulunamadı</sys:String>
     <sys:String x:Key="Str_St_NoTextSelected">Metin seçilmedi - metin seçmek için sürükleyin</sys:String>
@@ -974,6 +976,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Print_Sending">Yazıcıya gönderiliyor…</sys:String>
     <sys:String x:Key="Str_Forms_FontSize">Yazı tipi boyutu:</sys:String>
     <sys:String x:Key="Str_Ocr_SaveSearchable">Aranabilir PDF'yi kaydet</sys:String>
+    <sys:String x:Key="Str_Ocr_SaveScanText">Dönüştürülen PDF'yi Kaydet</sys:String>
     <sys:String x:Key="Str_Ocr_ExtractAllText">Tüm metni çıkar</sys:String>
     <sys:String x:Key="Str_Ocr_HighQuality">Yüksek kaliteli modelleri kullan</sys:String>
     <sys:String x:Key="Str_Dlg_OpenPdf">PDF aç</sys:String>
@@ -997,6 +1000,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Err_OcrFailed">OCR başarısız oldu:</sys:String>
     <sys:String x:Key="Str_Err_PrepareDoc">Belge hazırlanamadı:</sys:String>
     <sys:String x:Key="Str_Err_SearchableFailed">Aranabilir PDF başarısız oldu:</sys:String>
+    <sys:String x:Key="Str_Err_ScanTextFailed">Tarama dönüştürme başarısız oldu:</sys:String>
     <sys:String x:Key="Str_Err_ExtractFailed">Metin çıkarma başarısız oldu:</sys:String>
     <sys:String x:Key="Str_Err_DuplicateFailed">Çoğaltma başarısız oldu:</sys:String>
     <sys:String x:Key="Str_Err_RepairFailed">Onarım başarısız oldu:</sys:String>
@@ -1032,6 +1036,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Busy_Ocr">OCR çalışıyor...</sys:String>
     <sys:String x:Key="Str_Busy_Region">Bölge tanınıyor...</sys:String>
     <sys:String x:Key="Str_Busy_Searchable">Aranabilir PDF oluşturuluyor...</sys:String>
+    <sys:String x:Key="Str_Busy_ScanText">Taranmış metin dönüştürülüyor...</sys:String>
     <sys:String x:Key="Str_Busy_Extracting">Metin çıkarılıyor...</sys:String>
     <sys:String x:Key="Str_Busy_Repairing">PDF onarılıyor...</sys:String>
     <sys:String x:Key="Str_Busy_HqModels">Yüksek kaliteli dil modelleri indiriliyor...</sys:String>
@@ -1060,6 +1065,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_St_OcrCopiedPages">OCR: {1} sayfadan {0} karakter kopyalandı ({2} güven)</sys:String>
     <sys:String x:Key="Str_St_OcrCopiedRegion">OCR: bölgeden {0} karakter kopyalandı ({1} güven)</sys:String>
     <sys:String x:Key="Str_St_SearchableSaved">Aranabilir PDF kaydedildi: {0} sayfa, {1} tanınan sözcük</sys:String>
+    <sys:String x:Key="Str_St_ScanTextSaved">Dönüştürülen PDF kaydedildi: {0} taranmış sayfa, {1} sözcük artık metin</sys:String>
     <sys:String x:Key="Str_St_TextExtracted">{0} sayfadan metin çıkarıldı -> {1}</sys:String>
     <sys:String x:Key="Str_St_DuplicatedPage">{0}. sayfa çoğaltıldı</sys:String>
     <sys:String x:Key="Str_St_Merged">{0} dosya birleştirildi - toplam {1} sayfa</sys:String>
@@ -1085,6 +1091,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Annot_Drawing">Çizim</sys:String>
     <sys:String x:Key="Str_Annot_Item">Öğe</sys:String>
     <sys:String x:Key="Str_Busy_SearchablePage">Aranabilir PDF oluşturuluyor... sayfa {0} / {1}  (Esc iptal eder)</sys:String>
+    <sys:String x:Key="Str_Busy_ScanTextPage">Taranmış metin dönüştürülüyor... sayfa {0} / {1}  (Esc iptal eder)</sys:String>
     <sys:String x:Key="Str_Busy_ExtractingPage">Metin çıkarılıyor... sayfa {0} / {1}  (Esc iptal eder)</sys:String>
     <sys:String x:Key="Str_Busy_LangData">{0} dil verileri indiriliyor...</sys:String>
     <sys:String x:Key="Str_Busy_Downloading">{0} indiriliyor...</sys:String>
@@ -1096,6 +1103,8 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Ocr_SuffixDownload">(indir)</sys:String>
     <sys:String x:Key="Str_Ocr_SuffixDownloadHq">(HQ indir)</sys:String>
     <sys:String x:Key="Str_Dlg_SearchableSaved" xml:space="preserve">Aranabilir PDF kaydedildi:&#10;{0}&#10;&#10;{1} sayfa işlendi, {2} sözcük tanındı.</sys:String>
+    <sys:String x:Key="Str_Dlg_ScanTextSaved" xml:space="preserve">Dönüştürülen PDF kaydedildi:&#10;{0}&#10;&#10;{1} taranmış sayfa dönüştürüldü, {2} sözcük artık metin. Taramayla yeterince eşleşmeyen {3} sözcük taranmış hâliyle kalır ve aranabilir.</sys:String>
+    <sys:String x:Key="Str_Dlg_ScanTextNone">Bu belgede dönüştürülecek taranmış sayfa yok, bu yüzden hiçbir şey kaydedilmedi. Zaten metin veya çizim içeren sayfalar olduğu gibi bırakılır.</sys:String>
     <sys:String x:Key="Str_Dlg_Repaired" xml:space="preserve">"{0}" başarıyla onarıldı.&#10;&#10;Yer imleri, formlar ve diğer etkileşimli özellikler kaybolmuş olabilir. Onarılan dosyayı yeni bir konuma yazmak için Farklı Kaydet'i kullanın.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairedRaster" xml:space="preserve">"{0}" PDFium ile rasterleştirilerek onarıldı.&#10;&#10;Onarılan kopyada metin seçilemez. Yeni bir konuma yazmak için Farklı Kaydet'i kullanın.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairAsk" xml:space="preserve">"{0}" hasarlı bir yapıya sahip ve eklenemedi.&#10;&#10;KillerPDF onarmayı denesin mi? Onarılmış bir kopya oluşturulacak - özgün dosya değiştirilmeyecek.&#10;&#10;Not: onarılan dosyalarda yer imleri, formlar ve diğer etkileşimli özellikler eksik olabilir.</sys:String>

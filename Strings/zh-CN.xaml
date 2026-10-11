@@ -658,6 +658,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <!-- ── OCR ────────────────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Ocr_Region">OCR 区域...</sys:String>
     <sys:String x:Key="Str_Ocr_SearchablePdf">制作可搜索 PDF...</sys:String>
+    <sys:String x:Key="Str_Ocr_ScanToText">将扫描转换为文本...</sys:String>
     <sys:String x:Key="Str_Ocr_ExtractText">提取全部文本...</sys:String>
     <sys:String x:Key="Str_Ocr_Language">语言</sys:String>
     <sys:String x:Key="Str_Ocr_FormAware">表单感知 OCR</sys:String>
@@ -747,6 +748,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_St_OcrRegionTooSmall">OCR 区域过小</sys:String>
     <sys:String x:Key="Str_St_OcrNoText">OCR：在所选区域中未找到文本</sys:String>
     <sys:String x:Key="Str_St_SearchablePdfCanceled">已取消可搜索 PDF（未写入文件）</sys:String>
+    <sys:String x:Key="Str_St_ScanTextCanceled">已取消扫描转换（未写入文件）</sys:String>
     <sys:String x:Key="Str_St_TextExtractCanceled">已取消文本提取（未写入文件）</sys:String>
     <sys:String x:Key="Str_St_NoTextOnPage">本页未找到文本</sys:String>
     <sys:String x:Key="Str_St_NoTextSelected">未选择文本，拖动以选择文本</sys:String>
@@ -978,6 +980,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Print_Sending">正在发送到打印机…</sys:String>
     <sys:String x:Key="Str_Forms_FontSize">字体大小：</sys:String>
     <sys:String x:Key="Str_Ocr_SaveSearchable">保存可搜索 PDF</sys:String>
+    <sys:String x:Key="Str_Ocr_SaveScanText">保存转换后的 PDF</sys:String>
     <sys:String x:Key="Str_Ocr_ExtractAllText">提取所有文本</sys:String>
     <sys:String x:Key="Str_Ocr_HighQuality">使用高质量模型</sys:String>
     <sys:String x:Key="Str_Dlg_OpenPdf">打开 PDF</sys:String>
@@ -1001,6 +1004,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Err_OcrFailed">OCR 失败：</sys:String>
     <sys:String x:Key="Str_Err_PrepareDoc">无法准备文档：</sys:String>
     <sys:String x:Key="Str_Err_SearchableFailed">可搜索 PDF 失败：</sys:String>
+    <sys:String x:Key="Str_Err_ScanTextFailed">扫描转换失败：</sys:String>
     <sys:String x:Key="Str_Err_ExtractFailed">文本提取失败：</sys:String>
     <sys:String x:Key="Str_Err_DuplicateFailed">复制页面失败：</sys:String>
     <sys:String x:Key="Str_Err_RepairFailed">修复失败：</sys:String>
@@ -1036,6 +1040,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Busy_Ocr">正在运行 OCR...</sys:String>
     <sys:String x:Key="Str_Busy_Region">正在识别区域...</sys:String>
     <sys:String x:Key="Str_Busy_Searchable">正在制作可搜索 PDF...</sys:String>
+    <sys:String x:Key="Str_Busy_ScanText">正在转换扫描文本...</sys:String>
     <sys:String x:Key="Str_Busy_Extracting">正在提取文本...</sys:String>
     <sys:String x:Key="Str_Busy_Repairing">正在修复 PDF...</sys:String>
     <sys:String x:Key="Str_Busy_HqModels">正在下载高质量语言模型...</sys:String>
@@ -1064,6 +1069,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_St_OcrCopiedPages">OCR：已从 {1} 页复制 {0} 个字符（置信度 {2}）</sys:String>
     <sys:String x:Key="Str_St_OcrCopiedRegion">OCR：已从区域复制 {0} 个字符（置信度 {1}）</sys:String>
     <sys:String x:Key="Str_St_SearchableSaved">可搜索 PDF 已保存：{0} 页，识别 {1} 个单词</sys:String>
+    <sys:String x:Key="Str_St_ScanTextSaved">转换后的 PDF 已保存：{0} 个扫描页，{1} 个单词已转为文本</sys:String>
     <sys:String x:Key="Str_St_TextExtracted">已从 {0} 页提取文本 -> {1}</sys:String>
     <sys:String x:Key="Str_St_DuplicatedPage">已复制第 {0} 页</sys:String>
     <sys:String x:Key="Str_St_Merged">已合并 {0} 个文件 - 共 {1} 页</sys:String>
@@ -1089,6 +1095,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Annot_Drawing">绘图</sys:String>
     <sys:String x:Key="Str_Annot_Item">项目</sys:String>
     <sys:String x:Key="Str_Busy_SearchablePage">正在制作可搜索 PDF... 第 {0} 页，共 {1} 页  (Esc 取消)</sys:String>
+    <sys:String x:Key="Str_Busy_ScanTextPage">正在转换扫描文本... 第 {0} 页，共 {1} 页  (Esc 取消)</sys:String>
     <sys:String x:Key="Str_Busy_ExtractingPage">正在提取文本... 第 {0} 页，共 {1} 页  (Esc 取消)</sys:String>
     <sys:String x:Key="Str_Busy_LangData">正在下载 {0} 语言数据...</sys:String>
     <sys:String x:Key="Str_Busy_Downloading">正在下载 {0}...</sys:String>
@@ -1100,6 +1107,8 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Ocr_SuffixDownload">(下载)</sys:String>
     <sys:String x:Key="Str_Ocr_SuffixDownloadHq">(下载 HQ)</sys:String>
     <sys:String x:Key="Str_Dlg_SearchableSaved" xml:space="preserve">可搜索 PDF 已保存：&#10;{0}&#10;&#10;已处理 {1} 页，识别 {2} 个单词。</sys:String>
+    <sys:String x:Key="Str_Dlg_ScanTextSaved" xml:space="preserve">转换后的 PDF 已保存：&#10;{0}&#10;&#10;已转换 {1} 个扫描页，{2} 个单词已成为文本。与扫描不够吻合的 {3} 个单词保持扫描原样，仍可搜索。</sys:String>
+    <sys:String x:Key="Str_Dlg_ScanTextNone">此文档没有可转换的扫描页，因此未保存任何内容。已有文本或图形的页面保持不变。</sys:String>
     <sys:String x:Key="Str_Dlg_Repaired" xml:space="preserve">"{0}" 已成功修复。&#10;&#10;书签、表单和其他交互功能可能已丢失。请使用另存为将修复后的文件写入新位置。</sys:String>
     <sys:String x:Key="Str_Dlg_RepairedRaster" xml:space="preserve">"{0}" 已通过 PDFium 栅格化修复。&#10;&#10;修复副本中的文本不可选择。请使用另存为将其写入新位置。</sys:String>
     <sys:String x:Key="Str_Dlg_RepairAsk" xml:space="preserve">"{0}" 的结构已损坏，无法添加。&#10;&#10;要让 KillerPDF 尝试修复吗？将创建一个修复副本 - 原文件不会被更改。&#10;&#10;注意：修复后的文件可能缺少书签、表单和其他交互功能。</sys:String>

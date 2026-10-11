@@ -352,6 +352,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_TT_Ocr">OCR trang (sao chép văn bản) (Ctrl+Shift+O)</sys:String>
     <sys:String x:Key="Str_Ocr_Region">OCR vùng...</sys:String>
     <sys:String x:Key="Str_Ocr_SearchablePdf">Tạo PDF có thể tìm kiếm...</sys:String>
+    <sys:String x:Key="Str_Ocr_ScanToText">Chuyển bản quét thành văn bản...</sys:String>
     <sys:String x:Key="Str_Ocr_ExtractText">Trích xuất toàn bộ văn bản...</sys:String>
     <sys:String x:Key="Str_Ocr_Language">Ngôn ngữ</sys:String>
     <sys:String x:Key="Str_Ocr_FormAware">OCR nhận biết biểu mẫu</sys:String>
@@ -826,6 +827,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_St_OcrRegionTooSmall">Vùng OCR quá nhỏ</sys:String>
     <sys:String x:Key="Str_St_OcrNoText">OCR: không tìm thấy văn bản trong vùng đã chọn</sys:String>
     <sys:String x:Key="Str_St_SearchablePdfCanceled">Đã hủy tạo PDF có thể tìm kiếm (không có tệp nào được ghi)</sys:String>
+    <sys:String x:Key="Str_St_ScanTextCanceled">Đã hủy chuyển đổi bản quét (không có tệp nào được ghi)</sys:String>
     <sys:String x:Key="Str_St_TextExtractCanceled">Đã hủy trích xuất văn bản (không có tệp nào được ghi)</sys:String>
     <sys:String x:Key="Str_St_NoTextOnPage">Không tìm thấy văn bản trên trang này</sys:String>
     <sys:String x:Key="Str_St_NoTextSelected">Chưa chọn văn bản - kéo để chọn văn bản</sys:String>
@@ -985,6 +987,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Print_Sending">Đang gửi đến máy in…</sys:String>
     <sys:String x:Key="Str_Forms_FontSize">Cỡ chữ:</sys:String>
     <sys:String x:Key="Str_Ocr_SaveSearchable">Lưu PDF có thể tìm kiếm</sys:String>
+    <sys:String x:Key="Str_Ocr_SaveScanText">Lưu PDF đã chuyển đổi</sys:String>
     <sys:String x:Key="Str_Ocr_ExtractAllText">Trích xuất tất cả văn bản</sys:String>
     <sys:String x:Key="Str_Ocr_HighQuality">Sử dụng mô hình chất lượng cao</sys:String>
     <sys:String x:Key="Str_Dlg_OpenPdf">Mở PDF</sys:String>
@@ -1010,6 +1013,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Err_OcrFailed">OCR thất bại:</sys:String>
     <sys:String x:Key="Str_Err_PrepareDoc">Không thể chuẩn bị tài liệu:</sys:String>
     <sys:String x:Key="Str_Err_SearchableFailed">Tạo PDF có thể tìm kiếm thất bại:</sys:String>
+    <sys:String x:Key="Str_Err_ScanTextFailed">Chuyển đổi bản quét thất bại:</sys:String>
     <sys:String x:Key="Str_Err_ExtractFailed">Trích xuất văn bản thất bại:</sys:String>
     <sys:String x:Key="Str_Err_DuplicateFailed">Nhân bản thất bại:</sys:String>
     <sys:String x:Key="Str_Err_RepairFailed">Sửa chữa thất bại:</sys:String>
@@ -1047,6 +1051,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Busy_Ocr">Đang chạy OCR...</sys:String>
     <sys:String x:Key="Str_Busy_Region">Đang nhận dạng vùng...</sys:String>
     <sys:String x:Key="Str_Busy_Searchable">Đang tạo PDF có thể tìm kiếm...</sys:String>
+    <sys:String x:Key="Str_Busy_ScanText">Đang chuyển văn bản quét...</sys:String>
     <sys:String x:Key="Str_Busy_Extracting">Đang trích xuất văn bản...</sys:String>
     <sys:String x:Key="Str_Busy_Repairing">Đang sửa chữa PDF...</sys:String>
     <sys:String x:Key="Str_Busy_HqModels">Đang tải xuống các mô hình ngôn ngữ chất lượng cao...</sys:String>
@@ -1077,6 +1082,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_St_OcrCopiedPages">OCR: đã sao chép {0} ký tự từ {1} trang (độ tin cậy {2})</sys:String>
     <sys:String x:Key="Str_St_OcrCopiedRegion">OCR: đã sao chép {0} ký tự từ vùng đã chọn (độ tin cậy {1})</sys:String>
     <sys:String x:Key="Str_St_SearchableSaved">Đã lưu PDF có thể tìm kiếm: {0} trang, nhận dạng được {1} từ</sys:String>
+    <sys:String x:Key="Str_St_ScanTextSaved">Đã lưu PDF đã chuyển đổi: {0} trang quét, {1} từ đã thành văn bản</sys:String>
     <sys:String x:Key="Str_St_TextExtracted">Đã trích xuất văn bản từ {0} trang -> {1}</sys:String>
     <sys:String x:Key="Str_St_DuplicatedPage">Đã nhân bản trang {0}</sys:String>
     <sys:String x:Key="Str_St_Merged">Đã hợp nhất {0} tệp - tổng cộng {1} trang</sys:String>
@@ -1104,6 +1110,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Annot_Drawing">Bản vẽ (&amp;D)</sys:String>
     <sys:String x:Key="Str_Annot_Item">Mục (&amp;M)</sys:String>
     <sys:String x:Key="Str_Busy_SearchablePage">Đang tạo PDF có thể tìm kiếm... trang {0} của {1} (Nhấn Esc để hủy)</sys:String>
+    <sys:String x:Key="Str_Busy_ScanTextPage">Đang chuyển văn bản quét... trang {0} của {1} (Nhấn Esc để hủy)</sys:String>
     <sys:String x:Key="Str_Busy_ExtractingPage">Đang trích xuất văn bản... trang {0} của {1} (Nhấn Esc để hủy)</sys:String>
     <sys:String x:Key="Str_Busy_LangData">Đang tải xuống dữ liệu ngôn ngữ {0}...</sys:String>
     <sys:String x:Key="Str_Busy_Downloading">Đang tải xuống {0}...</sys:String>
@@ -1115,6 +1122,8 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Ocr_SuffixDownload">(tải xuống)</sys:String>
     <sys:String x:Key="Str_Ocr_SuffixDownloadHq">(tải xuống chất lượng cao)</sys:String>
     <sys:String x:Key="Str_Dlg_SearchableSaved" xml:space="preserve">Đã lưu PDF có thể tìm kiếm:&#10;{0}&#10;&#10;Đã xử lý {1} trang, nhận dạng được {2} từ.</sys:String>
+    <sys:String x:Key="Str_Dlg_ScanTextSaved" xml:space="preserve">Đã lưu PDF đã chuyển đổi:&#10;{0}&#10;&#10;Đã chuyển {1} trang quét, {2} từ giờ là văn bản. {3} từ không khớp sát với bản quét vẫn giữ dạng quét và vẫn tìm kiếm được.</sys:String>
+    <sys:String x:Key="Str_Dlg_ScanTextNone">Tài liệu này không có trang quét nào để chuyển đổi nên không có gì được lưu. Các trang đã có văn bản hoặc hình vẽ được giữ nguyên.</sys:String>
     <sys:String x:Key="Str_Dlg_Repaired" xml:space="preserve">"{0}" đã được sửa chữa thành công.&#10;&#10;Dấu trang, biểu mẫu và các tính năng tương tác khác có thể đã bị mất. Sử dụng Lưu thành để ghi tệp đã sửa chữa vào một vị trí mới.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairedRaster" xml:space="preserve">"{0}" đã được sửa chữa bằng cách chuyển thành dạng mẻ qua PDFium.&#10;&#10;Không thể chọn văn bản trong bản sao đã sửa chữa. Sử dụng Lưu thành để ghi tệp vào một vị trí mới.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairAsk" xml:space="preserve">"{0}" có cấu trúc bị hỏng và không thể thêm được.&#10;&#10;Bạn có muốn KillerPDF thử sửa chữa không? Một bản sao đã sửa chữa sẽ được tạo - tệp gốc sẽ không bị thay đổi.&#10;&#10;Lưu ý: các tệp được sửa chữa có thể bị mất dấu trang, biểu mẫu và các tính năng tương tác khác.</sys:String>
