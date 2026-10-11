@@ -390,6 +390,8 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Print_PaperAuto">Tilpass dokumentet</sys:String>
     <sys:String x:Key="Str_Print_Source">Papirkilde</sys:String>
     <sys:String x:Key="Str_Print_SourceAuto">Skriverens standard</sys:String>
+    <sys:String x:Key="Str_Print_Properties">Skriveregenskaper...</sys:String>
+    <sys:String x:Key="Str_Err_PrinterProperties">Kunne ikke åpne skriveregenskapene:</sys:String>
     <sys:String x:Key="Str_Print_SecPrinter">SKRIVER</sys:String>
     <sys:String x:Key="Str_Print_SecLayout">OPPSETT</sys:String>
     <sys:String x:Key="Str_Print_SecOutput">UTDATA</sys:String>

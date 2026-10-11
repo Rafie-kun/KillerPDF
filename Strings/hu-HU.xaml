@@ -390,6 +390,8 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Print_PaperAuto">Dokumentumhoz igazítás</sys:String>
     <sys:String x:Key="Str_Print_Source">Papírforrás</sys:String>
     <sys:String x:Key="Str_Print_SourceAuto">Nyomtató alapértelmezése</sys:String>
+    <sys:String x:Key="Str_Print_Properties">Nyomtató tulajdonságai...</sys:String>
+    <sys:String x:Key="Str_Err_PrinterProperties">Nem sikerült megnyitni a nyomtató tulajdonságait:</sys:String>
     <sys:String x:Key="Str_Print_SecPrinter">NYOMTATÓ</sys:String>
     <sys:String x:Key="Str_Print_SecLayout">ELRENDEZÉS</sys:String>
     <sys:String x:Key="Str_Print_SecOutput">KIMENET</sys:String>

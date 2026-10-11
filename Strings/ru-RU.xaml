@@ -390,6 +390,8 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Print_PaperAuto">В соответствии с документом</sys:String>
     <sys:String x:Key="Str_Print_Source">Источник бумаги</sys:String>
     <sys:String x:Key="Str_Print_SourceAuto">Принтер по умолчанию</sys:String>
+    <sys:String x:Key="Str_Print_Properties">Свойства принтера...</sys:String>
+    <sys:String x:Key="Str_Err_PrinterProperties">Не удалось открыть свойства принтера:</sys:String>
     <sys:String x:Key="Str_Print_SecPrinter">ПРИНТЕР</sys:String>
     <sys:String x:Key="Str_Print_SecLayout">РАСПОЛОЖЕНИЕ</sys:String>
     <sys:String x:Key="Str_Print_SecOutput">ВЫВОД</sys:String>

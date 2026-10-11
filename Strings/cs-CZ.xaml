@@ -912,6 +912,8 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Print_PaperAuto">Podle dokumentu</sys:String>
     <sys:String x:Key="Str_Print_Source">Zdroj papíru</sys:String>
     <sys:String x:Key="Str_Print_SourceAuto">Výchozí nastavení tiskárny</sys:String>
+    <sys:String x:Key="Str_Print_Properties">Vlastnosti tiskárny...</sys:String>
+    <sys:String x:Key="Str_Err_PrinterProperties">Vlastnosti tiskárny se nepodařilo otevřít:</sys:String>
     <sys:String x:Key="Str_Print_SecPrinter">TISKÁRNA</sys:String>
     <sys:String x:Key="Str_Print_SecLayout">ROZVRŽENÍ</sys:String>
     <sys:String x:Key="Str_Print_SecOutput">VÝSTUP</sys:String>

@@ -907,6 +907,8 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Print_PaperAuto">Belgeyle eşleştir</sys:String>
     <sys:String x:Key="Str_Print_Source">Kağıt kaynağı</sys:String>
     <sys:String x:Key="Str_Print_SourceAuto">Yazıcı varsayılanı</sys:String>
+    <sys:String x:Key="Str_Print_Properties">Yazıcı özellikleri...</sys:String>
+    <sys:String x:Key="Str_Err_PrinterProperties">Yazıcı özellikleri açılamadı:</sys:String>
     <sys:String x:Key="Str_Print_SecPrinter">YAZICI</sys:String>
     <sys:String x:Key="Str_Print_SecLayout">DÜZEN</sys:String>
     <sys:String x:Key="Str_Print_SecOutput">ÇIKTI</sys:String>

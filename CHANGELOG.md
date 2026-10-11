@@ -41,6 +41,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Added command-line page numbering and Bates stamping, with header or footer placement, alignment, font size, page selection, number formats, prefix and suffix, and one continuous sequence across several files.
 - Added command-line booklet and n-up imposition with sheet sizes, margins, gutters, creep, binding edge, and printer marks, and an outline built from detected headings.
 - Added DPI, color mode, threshold, and JPEG compression controls to GUI and command-line PDF flattening (#366).
+- Added a Printer properties button to the print window that opens the printer driver's own settings and applies them to the job.
 - Added desktop navigation auditing with selective cleanup of unsafe and broken links.
 - Added desktop layer editing for names, saved visibility, and lock state.
 - Added desktop portfolio controls for presentation, schema, sorting, folders, attachment values, and safe metadata removal.

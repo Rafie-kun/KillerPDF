@@ -390,6 +390,8 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Print_PaperAuto">Igual ao documento</sys:String>
     <sys:String x:Key="Str_Print_Source">Origem do papel</sys:String>
     <sys:String x:Key="Str_Print_SourceAuto">Padrão da impressora</sys:String>
+    <sys:String x:Key="Str_Print_Properties">Propriedades da impressora...</sys:String>
+    <sys:String x:Key="Str_Err_PrinterProperties">Não foi possível abrir as propriedades da impressora:</sys:String>
     <sys:String x:Key="Str_Print_SecPrinter">IMPRESSORA</sys:String>
     <sys:String x:Key="Str_Print_SecLayout">LAYOUT</sys:String>
     <sys:String x:Key="Str_Print_SecOutput">SAÍDA</sys:String>

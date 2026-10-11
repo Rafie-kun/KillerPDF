@@ -904,6 +904,8 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Print_PaperAuto">Dopasuj do dokumentu</sys:String>
     <sys:String x:Key="Str_Print_Source">Źródło papieru</sys:String>
     <sys:String x:Key="Str_Print_SourceAuto">Domyślne drukarki</sys:String>
+    <sys:String x:Key="Str_Print_Properties">Właściwości drukarki...</sys:String>
+    <sys:String x:Key="Str_Err_PrinterProperties">Nie można otworzyć właściwości drukarki:</sys:String>
     <sys:String x:Key="Str_Print_SecPrinter">DRUKARKA</sys:String>
     <sys:String x:Key="Str_Print_SecLayout">UKŁAD</sys:String>
     <sys:String x:Key="Str_Print_SecOutput">WYJŚCIE</sys:String>

@@ -387,6 +387,8 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Print_PaperAuto">Құжатқа сәйкес</sys:String>
     <sys:String x:Key="Str_Print_Source">Қағаз көзі</sys:String>
     <sys:String x:Key="Str_Print_SourceAuto">Принтер әдепі</sys:String>
+    <sys:String x:Key="Str_Print_Properties">Принтер сипаттары...</sys:String>
+    <sys:String x:Key="Str_Err_PrinterProperties">Принтер сипаттарын ашу мүмкін болмады:</sys:String>
     <sys:String x:Key="Str_Print_SecPrinter">ПРИНТЕР</sys:String>
     <sys:String x:Key="Str_Print_SecLayout">ОРНАЛАСУ</sys:String>
     <sys:String x:Key="Str_Print_SecOutput">ШЫҒАРЫЛЫМ</sys:String>

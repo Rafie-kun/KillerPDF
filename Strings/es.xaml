@@ -907,6 +907,8 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Print_PaperAuto">Igual que el documento</sys:String>
     <sys:String x:Key="Str_Print_Source">Origen del papel</sys:String>
     <sys:String x:Key="Str_Print_SourceAuto">Predeterminado de la impresora</sys:String>
+    <sys:String x:Key="Str_Print_Properties">Propiedades de la impresora...</sys:String>
+    <sys:String x:Key="Str_Err_PrinterProperties">No se pudieron abrir las propiedades de la impresora:</sys:String>
     <sys:String x:Key="Str_Print_SecPrinter">IMPRESORA</sys:String>
     <sys:String x:Key="Str_Print_SecLayout">DISEÑO</sys:String>
     <sys:String x:Key="Str_Print_SecOutput">SALIDA</sys:String>

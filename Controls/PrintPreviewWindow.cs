@@ -92,6 +92,12 @@ namespace KillerPDF
         private ComboBox _sourceCombo = null!;
         private readonly System.Collections.Generic.List<InputBin> _sourceBins = [];
         private InputBin? _sourceOverride;
+        // Settings chosen in the printer driver's own dialog (finishing, named trays, secure
+        // print and the rest). When set, a job starts from this ticket instead of the printer's
+        // defaults. Cleared when the printer changes.
+        private PrintTicket? _driverTicket;
+        private ComboBox _orientCombo = null!;
+        private ComboBox _colorCombo = null!;
         private TextBox _copiesBox = null!;
         private TextBox _pagesBox = null!;
         private Grid _rootGrid = null!;   // body host; the print-progress scrim is layered here
@@ -481,7 +487,7 @@ namespace KillerPDF
             int secPrinter = panel.Children.Count;
 
             panel.Children.Add(Label(S("Str_Print_Printer")));
-            var printerCombo = new ComboBox { Margin = new Thickness(0, 4, 0, 12), Height = 26 };
+            var printerCombo = new ComboBox { Margin = new Thickness(0, 4, 0, 6), Height = 26 };
             ApplyComboStyle(printerCombo);
             printerCombo.SelectionChanged += (s, _) =>
             {
@@ -489,6 +495,7 @@ namespace KillerPDF
                 if (i >= 0 && i < _queues.Count)
                 {
                     _queue = _queues[i];
+                    _driverTicket = null;                              // and its own settings dialog
                     if (_paperCombo != null) PopulatePaperSizes();     // new driver, new paper list
                     if (_sourceCombo != null) PopulatePaperSources();  // and new input bins
                     RefreshArea(); UpdateDuplexAvailability(); UpdatePreview();
@@ -496,6 +503,13 @@ namespace KillerPDF
             };
             _printerCombo = printerCombo;
             panel.Children.Add(printerCombo);
+
+            // The driver's own dialog reaches what this window has no control for: finishing,
+            // named trays, secure print, and quality panels.
+            var properties = MakeButton(S("Str_Print_Properties"), false);
+            properties.Margin = new Thickness(0, 0, 0, 12);
+            properties.Click += (_, _) => ShowPrinterProperties();
+            panel.Children.Add(properties);
 
             // #186: paper size. "Match document" keeps the automatic pick; anything else
             // overrides both the preview sheet and the spooled ticket.
@@ -540,6 +554,7 @@ namespace KillerPDF
                 RefreshArea();
                 UpdatePreview();
             };
+            _orientCombo = orient;
             panel.Children.Add(orient);
 
             panel.Children.Add(Label(S("Str_Stamp_Position")));
@@ -690,6 +705,7 @@ namespace KillerPDF
                 _grayscale = ((ComboBox)s).SelectedIndex == 1;
                 UpdatePreview();
             };
+            _colorCombo = colorMode;
             panel.Children.Add(colorMode);
 
             panel.Children.Add(Label(S("Str_Print_Copies")));
@@ -1031,6 +1047,7 @@ namespace KillerPDF
                 if (_queue != null)
                 {
                     var pd = new PrintDialog { PrintQueue = _queue };
+                    if (_driverTicket is not null) pd.PrintTicket = _driverTicket.Clone();
                     // Paper follows the document page size when the printer supports it,
                     // so the preview sheet (and the print) has no letterbox margins.
                     // A manual pick from the paper combo overrides the automatic match (#186).
@@ -1224,6 +1241,99 @@ namespace KillerPDF
             catch { /* settings are best-effort */ }
         }
 
+        private PrintJobTicket.Settings JobSettings() => new(
+            _landscape, _duplex, _grayscale, _paperOverride ?? MediaSizeForDocument(), _sourceOverride);
+
+        // Opens the printer driver's own preferences dialog, seeded with the current job
+        // settings, then carries what was chosen there into the job and back into this window.
+        private void ShowPrinterProperties()
+        {
+            if (_queue is null)
+            {
+                KillerDialog.Show(this, S("Str_Dlg_NoPrinter"), "KillerPDF",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            if (_printing) return;
+
+            PrintTicket? chosen;
+            IntPtr window = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+            // This window is layered for its transparent chrome, and a driver dialog that opens
+            // further dialogs of its own does not survive a layered owner. Hand the driver an
+            // ordinary hidden window to own its dialog, and block this one while it is up.
+            var dialogOwner = new Window
+            {
+                Owner = this,
+                WindowStyle = WindowStyle.None,
+                ShowInTaskbar = false,
+                ShowActivated = false,
+                WindowStartupLocation = WindowStartupLocation.Manual,
+                Left = Left, Top = Top, Width = ActualWidth, Height = ActualHeight
+            };
+            try
+            {
+                var seed = _driverTicket?.Clone() ?? new PrintDialog { PrintQueue = _queue }.PrintTicket;
+                if (!int.TryParse(_copiesBox.Text?.Trim(), out int copies) || copies < 1) copies = 1;
+                PrintJobTicket.Apply(seed, JobSettings(), copies,
+                    fromDriverDialog: _driverTicket is not null);
+                IntPtr ownerHandle = new System.Windows.Interop.WindowInteropHelper(dialogOwner).EnsureHandle();
+                EnableWindow(window, false);
+                try
+                {
+                    chosen = PrinterDriverProperties.Show(ownerHandle, _queue, seed);
+                }
+                finally
+                {
+                    EnableWindow(window, true);
+                    Activate();
+                }
+            }
+            catch (Exception ex)
+            {
+                KillerDialog.Show(this, S("Str_Err_PrinterProperties") + "\n" + ex.Message,
+                    "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            finally
+            {
+                dialogOwner.Close();
+            }
+            if (chosen is null) return;   // canceled: everything stays as it was
+
+            _driverTicket = chosen;
+            PrintJobTicket.DriverChoices choices = PrintJobTicket.Read(chosen);
+            if (choices.Landscape is { } landscape) _orientCombo.SelectedIndex = landscape ? 1 : 0;
+            if (choices.Grayscale is { } grayscale) _colorCombo.SelectedIndex = grayscale ? 1 : 0;
+            if (choices.TwoSided is { } twoSided && _duplexCheck.IsEnabled) _duplexCheck.IsChecked = twoSided;
+            if (choices.Copies is { } chosenCopies)
+                _copiesBox.Text = chosenCopies.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            SelectPaper(choices.Media);
+            RefreshArea();
+            UpdatePreview();
+        }
+
+        // Shows a paper size chosen in the driver dialog in the paper list, so the preview sheet
+        // and the job use it instead of the automatic document match.
+        private void SelectPaper(PageMediaSize? media)
+        {
+            if (media is null || !media.Width.HasValue || !media.Height.HasValue) return;
+            PageMediaSize? automatic = MediaSizeForDocument();
+            if (_paperOverride is null && automatic is not null && SamePaper(automatic, media)) return;
+            int match = _paperSizes.FindIndex(size => SamePaper(size, media));
+            if (match >= 0) _paperCombo.SelectedIndex = match + 1;
+            else _paperOverride = media;
+        }
+
+        private static bool SamePaper(PageMediaSize a, PageMediaSize b) =>
+            a.Width.HasValue && a.Height.HasValue && b.Width.HasValue && b.Height.HasValue
+            && Math.Abs(a.Width.Value - b.Width.Value) <= 1
+            && Math.Abs(a.Height.Value - b.Height.Value) <= 1;
+
+        [System.Runtime.InteropServices.LibraryImport("user32.dll")]
+        [return: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
+        private static partial bool EnableWindow(IntPtr window,
+            [System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)] bool enable);
+
         private async void DoPrint()
         {
             if (_queue == null)
@@ -1266,19 +1376,15 @@ namespace KillerPDF
                 SavePrintPrefs();   // remember printer / orientation / color / two-sided for next time
 
                 var pd = new PrintDialog { PrintQueue = _queue };
-                var ticket = pd.PrintTicket;
+                // Start from the settings chosen in the printer driver's dialog when there are any.
+                var ticket = _driverTicket?.Clone() ?? pd.PrintTicket;
                 // Copies are produced by replicating the page sequence in the FixedDocument below
                 // (see the outer copy loop), so the ticket itself only ever requests a single copy.
                 // Relying on PrintTicket.CopyCount produced an extra copy on some printers (issue #83).
-                ticket.CopyCount      = 1;
-                ticket.PageOrientation = _landscape ? PageOrientation.Landscape : PageOrientation.Portrait;
-                ticket.Duplexing = _duplex ? Duplexing.TwoSidedLongEdge : Duplexing.OneSided;
-                ticket.OutputColor = _grayscale ? OutputColor.Grayscale : OutputColor.Color;
-                // Same paper pick the preview used: the manual combo choice when one is set,
-                // otherwise the automatic document-size match (see MediaSizeForDocument, #186).
-                var docMedia = _paperOverride ?? MediaSizeForDocument();
-                if (docMedia != null) ticket.PageMediaSize = docMedia;
-                if (_sourceOverride is { } bin) ticket.InputBin = bin;   // paper source (#186)
+                // The paper is the same pick the preview used: the manual combo choice when one is
+                // set, otherwise the automatic document-size match (see MediaSizeForDocument, #186).
+                PrintJobTicket.Apply(ticket, JobSettings(), copies: 1,
+                    fromDriverDialog: _driverTicket is not null);
                 pd.PrintTicket = ticket;
 
                 double aw = pd.PrintableAreaWidth, ah = pd.PrintableAreaHeight;

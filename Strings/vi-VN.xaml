@@ -390,6 +390,8 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Print_PaperAuto">Khớp với tài liệu</sys:String>
     <sys:String x:Key="Str_Print_Source">Nguồn giấy</sys:String>
     <sys:String x:Key="Str_Print_SourceAuto">Mặc định của máy in</sys:String>
+    <sys:String x:Key="Str_Print_Properties">Thuộc tính máy in...</sys:String>
+    <sys:String x:Key="Str_Err_PrinterProperties">Không thể mở thuộc tính máy in:</sys:String>
     <sys:String x:Key="Str_Print_SecPrinter">MÁY IN</sys:String>
     <sys:String x:Key="Str_Print_SecLayout">BỐ CỤC</sys:String>
     <sys:String x:Key="Str_Print_SecOutput">ĐẦU RA</sys:String>

@@ -909,6 +909,8 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_Print_PaperAuto">與文件一致</sys:String>
     <sys:String x:Key="Str_Print_Source">紙張來源</sys:String>
     <sys:String x:Key="Str_Print_SourceAuto">印表機預設</sys:String>
+    <sys:String x:Key="Str_Print_Properties">印表機內容...</sys:String>
+    <sys:String x:Key="Str_Err_PrinterProperties">無法開啟印表機內容：</sys:String>
     <sys:String x:Key="Str_Print_SecPrinter">印表機</sys:String>
     <sys:String x:Key="Str_Print_SecLayout">版面配置</sys:String>
     <sys:String x:Key="Str_Print_SecOutput">輸出</sys:String>

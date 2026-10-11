@@ -390,6 +390,8 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_Print_PaperAuto">Corrispondente documento</sys:String>
     <sys:String x:Key="Str_Print_Source">Alimentazione carta</sys:String>
     <sys:String x:Key="Str_Print_SourceAuto">Predefinita stampante</sys:String>
+    <sys:String x:Key="Str_Print_Properties">Proprietà stampante...</sys:String>
+    <sys:String x:Key="Str_Err_PrinterProperties">Impossibile aprire le proprietà della stampante:</sys:String>
     <sys:String x:Key="Str_Print_SecPrinter">STAMPANTE</sys:String>
     <sys:String x:Key="Str_Print_SecLayout">LAYOUT</sys:String>
     <sys:String x:Key="Str_Print_SecOutput">DESTINAZIONE</sys:String>

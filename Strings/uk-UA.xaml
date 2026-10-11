@@ -390,6 +390,8 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Print_PaperAuto">Як у документі</sys:String>
     <sys:String x:Key="Str_Print_Source">Джерело паперу</sys:String>
     <sys:String x:Key="Str_Print_SourceAuto">Типове для принтера</sys:String>
+    <sys:String x:Key="Str_Print_Properties">Властивості принтера...</sys:String>
+    <sys:String x:Key="Str_Err_PrinterProperties">Не вдалося відкрити властивості принтера:</sys:String>
     <sys:String x:Key="Str_Print_SecPrinter">ПРИНТЕР</sys:String>
     <sys:String x:Key="Str_Print_SecLayout">РОЗМІТКА</sys:String>
     <sys:String x:Key="Str_Print_SecOutput">ВИВЕДЕННЯ</sys:String>

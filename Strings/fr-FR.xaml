@@ -390,6 +390,8 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Print_PaperAuto">Identique au document</sys:String>
     <sys:String x:Key="Str_Print_Source">Source du papier</sys:String>
     <sys:String x:Key="Str_Print_SourceAuto">Défaut de l'imprimante</sys:String>
+    <sys:String x:Key="Str_Print_Properties">Propriétés de l'imprimante...</sys:String>
+    <sys:String x:Key="Str_Err_PrinterProperties">Impossible d'ouvrir les propriétés de l'imprimante :</sys:String>
     <sys:String x:Key="Str_Print_SecPrinter">IMPRIMANTE</sys:String>
     <sys:String x:Key="Str_Print_SecLayout">MISE EN PAGE</sys:String>
     <sys:String x:Key="Str_Print_SecOutput">SORTIE</sys:String>

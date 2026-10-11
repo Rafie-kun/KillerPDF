@@ -913,6 +913,8 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Print_PaperAuto">Wie Dokument</sys:String>
     <sys:String x:Key="Str_Print_Source">Papierquelle</sys:String>
     <sys:String x:Key="Str_Print_SourceAuto">Druckerstandard</sys:String>
+    <sys:String x:Key="Str_Print_Properties">Druckereigenschaften...</sys:String>
+    <sys:String x:Key="Str_Err_PrinterProperties">Die Druckereigenschaften konnten nicht geöffnet werden:</sys:String>
     <sys:String x:Key="Str_Print_SecPrinter">DRUCKER</sys:String>
     <sys:String x:Key="Str_Print_SecLayout">LAYOUT</sys:String>
     <sys:String x:Key="Str_Print_SecOutput">AUSGABE</sys:String>

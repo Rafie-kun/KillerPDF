@@ -390,6 +390,8 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Print_PaperAuto">文書に合わせる</sys:String>
     <sys:String x:Key="Str_Print_Source">給紙方法</sys:String>
     <sys:String x:Key="Str_Print_SourceAuto">プリンターの既定</sys:String>
+    <sys:String x:Key="Str_Print_Properties">プリンターのプロパティ...</sys:String>
+    <sys:String x:Key="Str_Err_PrinterProperties">プリンターのプロパティを開けませんでした：</sys:String>
     <sys:String x:Key="Str_Print_SecPrinter">プリンター</sys:String>
     <sys:String x:Key="Str_Print_SecLayout">レイアウト</sys:String>
     <sys:String x:Key="Str_Print_SecOutput">出力</sys:String>
