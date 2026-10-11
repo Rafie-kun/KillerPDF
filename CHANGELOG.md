@@ -73,7 +73,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Faster resource resolution, path clipping, soft masks, masked forms, black-and-white, CMYK, and ICC image reduction, color conversion, profile loading, compositing, scanned pages, and shadings without changing pixels. Large fills, image paints, function and axial shadings, and soft-mask reductions split across a few threads.
 - Reuse decoded page data and more parsed form and glyph streams during zooming and background page rendering, and avoid repeated buffering attempts for oversized pages, with invalidation after document changes and cache flushes.
 - Prioritize the visible page and its nearest neighbors in Continuous view without restarting an active render for the same viewport.
-- Precompiled the packaged engine to reduce first-page rendering delay.
+- Precompiled the packaged app and engine to reduce startup and first-page rendering delay.
 - Faster JPEG thumbnails, transform lookups, Huffman and bitstream decoding, and large RGB and CMYK JPEG pages, with lower memory use for large Flate images, embedded fonts, and native JPEG buffers.
 - Sped up DeviceN gradients and repeated 16-bit image colors on eligible print-production pages.
 - Sped up named-spot images, antialiased paths, process overprint, and repeated spot-color painting and compositing.

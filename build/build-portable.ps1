@@ -49,6 +49,7 @@ if (-not $RepackOnly) {
     & dotnet publish $appProject -c $Configuration `
         -r win-x64 `
         --self-contained $(!$isInstaller) `
+        -p:PublishReadyToRun=true `
         -p:KillerPayloadBuild=true `
         -p:PublishDir="$payloadDir\"
     if ($LASTEXITCODE -ne 0) { throw 'Payload build failed.' }
