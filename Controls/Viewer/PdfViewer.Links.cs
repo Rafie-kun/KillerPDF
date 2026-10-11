@@ -323,7 +323,7 @@ namespace KillerPDF.Controls
             try
             {
                 MarkDirty();
-                SaveTempAndReload(finalizeSavedFile: path =>
+                SaveTempAndReload(keepAnnotations: true, finalizeSavedFile: path =>
                     PdfEngineIntegration.RemoveAnnotation(path, pageIndex, annotIndex));
                 // Refresh the current page view so the overlay disappears.
                 int sel = _currentPage;

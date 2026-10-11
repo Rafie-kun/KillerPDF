@@ -53,6 +53,48 @@ public sealed class PageAnnotationInsertionTests
     }
 
     [Fact]
+    public void Reorder_MovesAnnotationsWithTheirPages()
+    {
+        var first = new TextAnnotation { PageIndex = 0, Content = "first" };
+        var third = new TextAnnotation { PageIndex = 2, Content = "third" };
+        var annotations = new Dictionary<int, List<PageAnnotation>>
+        {
+            [0] = [first],
+            [2] = [third]
+        };
+
+        // Pages 0 1 2 3 become 2 0 1 3: the third page was dragged to the front.
+        PageAnnotationInsertion.Reorder(annotations, [2, 0, 1, 3]);
+
+        Assert.Equal(2, annotations.Count);
+        Assert.Same(third, Assert.Single(annotations[0]));
+        Assert.Same(first, Assert.Single(annotations[1]));
+        Assert.Equal(0, third.PageIndex);
+        Assert.Equal(1, first.PageIndex);
+    }
+
+    [Fact]
+    public void Reorder_WithUnchangedOrder_LeavesAnnotationsUntouched()
+    {
+        var annotation = new TextAnnotation { PageIndex = 1, Content = "same" };
+        var annotations = new Dictionary<int, List<PageAnnotation>> { [1] = [annotation] };
+
+        PageAnnotationInsertion.Reorder(annotations, [0, 1, 2]);
+
+        Assert.Same(annotation, Assert.Single(annotations[1]));
+        Assert.Equal(1, annotation.PageIndex);
+    }
+
+    [Fact]
+    public void Reorder_RejectsAnOrderThatIsNotAPermutation()
+    {
+        var annotations = new Dictionary<int, List<PageAnnotation>>();
+
+        Assert.Throws<ArgumentException>(() => PageAnnotationInsertion.Reorder(annotations, [0, 0, 2]));
+        Assert.Throws<ArgumentException>(() => PageAnnotationInsertion.Reorder(annotations, [0, 3, 1]));
+    }
+
+    [Fact]
     public void RemovePages_DropsDeletedPagesAndRemapsRetainedAnnotations()
     {
         var before = new TextAnnotation { PageIndex = 0, Content = "before" };

@@ -211,10 +211,16 @@ namespace KillerPDF
         {
             if (_doc is null || PageList.SelectedIndex <= 0) return;
             int idx = PageList.SelectedIndex;
-            SaveTempAndReload(
-                finalizeSavedFile: path => PdfEngineIntegration.MovePage(path, idx, idx - 1),
-                remapRotations: rotations =>
-                    PdfEngineIntegration.RemapRotationsAfterPageMove(rotations, idx, idx - 1));
+            IReadOnlyList<int> order = PdfEngineIntegration.PageOrderAfterMove(
+                _doc.PageCount, [idx], idx - 1);
+            ReloadWithRemappedAnnotations(
+                annotations => PageAnnotationInsertion.Reorder(annotations, order),
+                documentUndo => SaveTempAndReload(
+                    keepAnnotations: true,
+                    finalizeSavedFile: path => PdfEngineIntegration.MovePage(path, idx, idx - 1),
+                    remapRotations: rotations =>
+                        PdfEngineIntegration.RemapRotationsAfterPageMove(rotations, idx, idx - 1),
+                    documentUndo: documentUndo));
             PageList.SelectedIndex = idx - 1;
         }
 
@@ -222,11 +228,46 @@ namespace KillerPDF
         {
             if (_doc is null || PageList.SelectedIndex < 0 || PageList.SelectedIndex >= _doc.PageCount - 1) return;
             int idx = PageList.SelectedIndex;
-            SaveTempAndReload(
-                finalizeSavedFile: path => PdfEngineIntegration.MovePage(path, idx, idx + 1),
-                remapRotations: rotations =>
-                    PdfEngineIntegration.RemapRotationsAfterPageMove(rotations, idx, idx + 1));
+            IReadOnlyList<int> order = PdfEngineIntegration.PageOrderAfterMove(
+                _doc.PageCount, [idx], idx + 2);
+            ReloadWithRemappedAnnotations(
+                annotations => PageAnnotationInsertion.Reorder(annotations, order),
+                documentUndo => SaveTempAndReload(
+                    keepAnnotations: true,
+                    finalizeSavedFile: path => PdfEngineIntegration.MovePage(path, idx, idx + 1),
+                    remapRotations: rotations =>
+                        PdfEngineIntegration.RemapRotationsAfterPageMove(rotations, idx, idx + 1),
+                    documentUndo: documentUndo));
             PageList.SelectedIndex = idx + 1;
+        }
+
+        // Page operations that renumber pages without changing their content keep the unsaved
+        // overlay annotations. The undo entry is captured before the remap so Undo returns the
+        // annotations to their original pages, and a failed rewrite puts them back.
+        private void ReloadWithRemappedAnnotations(
+            Action<Dictionary<int, List<PageAnnotation>>> remapAnnotations,
+            Action<UndoEntry?> reload)
+        {
+            if (_doc is null || _currentFile is null) return;
+            UndoEntry? documentUndo = ActiveViewer.CaptureSerializedDocumentUndoExt(_currentFile);
+            var annotationBackup = _annotations.ToDictionary(
+                pair => pair.Key, pair => pair.Value);
+            try
+            {
+                remapAnnotations(_annotations);
+                reload(documentUndo);
+            }
+            catch
+            {
+                _annotations.Clear();
+                foreach (var pair in annotationBackup)
+                {
+                    foreach (PageAnnotation annotation in pair.Value)
+                        annotation.PageIndex = pair.Key;
+                    _annotations[pair.Key] = pair.Value;
+                }
+                throw;
+            }
         }
 
         // Cancels the previous thumbnail background load when the file changes.

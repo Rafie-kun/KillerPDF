@@ -17,6 +17,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Hovered outline buttons and accent picker pills use gradients outside 98SE, and accent swatches lift on hover.
 
 ### Fixed
+- Preserved unsaved annotations when moving, reordering, duplicating, or merging pages and when removing a link.
 - Prevented zero-height 98SE annotation bars from repeatedly retrying layout and blocking input.
 - Prevented the color picker from crashing when changing stamp or annotation colors with gradient themes (#442, #443).
 - Included current form field edits in print previews and output without requiring a save and reopen.
