@@ -77,6 +77,23 @@ public sealed class PdfFontResourceReaderTests
             outline.Contours.SelectMany(contour => contour.Points));
     }
 
+    [Fact]
+    public void RepeatedOutlineRequestsReturnTheSameOutline()
+    {
+        PdfExtractionFont fitted = Read(D(("Subtype", N("Type1")), ("BaseFont", N("UninstalledFamily")),
+            ("FontDescriptor", D(("Flags", new PdfInteger(2)))),
+            ("FirstChar", new PdfInteger(65)),
+            ("Widths", new PdfArray([new PdfInteger(400)]))));
+        PdfExtractionFont embedded = Read(D(("Subtype", N("TrueType")), ("BaseFont", N("UninstalledFamily")),
+            ("FontDescriptor", D(("FontFile2", new PdfStream(D(),
+                TrueTypeFontTests.BuildTestFont(false, includeOutlines: true)))))));
+        foreach (PdfExtractionFont font in new[] { fitted, embedded })
+        {
+            var first = Assert.IsType<PdfGlyphOutline>(font.GetGlyphOutline(65));
+            Assert.Same(first, font.GetGlyphOutline(65));
+        }
+    }
+
     [Theory]
     [InlineData(400)]
     [InlineData(900)]

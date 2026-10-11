@@ -6,6 +6,9 @@ public sealed class PdfExtractionFont
 {
     private readonly Dictionary<uint, double> _widths;
     private readonly double _defaultWidth;
+    // Every glyph paint asks for its outline, so the resolved outline is kept per code. Reads take
+    // no lock, and the stable instance lets glyph mask caches match repeated characters.
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<uint, PdfGlyphOutline?> _outlines = new();
 
     /// <summary>Creates an extraction font using a Unicode map and resolved character widths.</summary>
     public PdfExtractionFont(PdfToUnicodeMap unicode, IReadOnlyDictionary<uint, double> widths, double defaultWidth = 0)
@@ -60,7 +63,8 @@ public sealed class PdfExtractionFont
     public PdfGlyphBounds? GetGlyphBounds(uint code) => BoundsReader?.Invoke(code);
 
     /// <summary>Returns available embedded, bundled, or host-resolved contours for a source character code.</summary>
-    public PdfGlyphOutline? GetGlyphOutline(uint code) => OutlineReader?.Invoke(code);
+    public PdfGlyphOutline? GetGlyphOutline(uint code) =>
+        OutlineReader is { } reader ? _outlines.GetOrAdd(code, reader) : null;
 
     /// <summary>Returns a resolved width, or the font's configured missing width.</summary>
     public double GetWidth(uint code) => _widths.GetValueOrDefault(CidSelector?.Invoke(code) ?? code, _defaultWidth);
