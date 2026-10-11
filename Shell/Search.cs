@@ -344,8 +344,8 @@ namespace KillerPDF
             double pdfW = pageInfo.Width;
             double pdfH = pageInfo.Height;
             if (pdfW <= 0 || pdfH <= 0) return;
-            double sx = renderW / pdfW;
-            double sy = renderH / pdfH;
+            // Match rects are unrotated page points; the canvas shows the page turned by its rotation.
+            int rotation = _pageRotations.TryGetValue(page, out int stored) ? stored : pageInfo.Rotation;
 
             var cur = Search.CurrentMatch;
 
@@ -353,7 +353,8 @@ namespace KillerPDF
             {
                 bool isCurrent = cur is { } c && c.page == page
                     && c.left == left && c.bottom == bottom && c.right == right && c.top == top;
-                AddSearchHighlight(canvas, left, bottom, right, top, sx, sy, renderH, isCurrent);
+                AddSearchHighlight(canvas, PageCanvasGeometry.PageToCanvas(left, bottom, right, top,
+                    pdfW, pdfH, renderW, renderH, rotation), isCurrent);
             }
         }
 
@@ -369,17 +370,17 @@ namespace KillerPDF
             }
         }
 
-        private static void AddSearchHighlight(Canvas canvas, double left, double bottom, double right, double top,
-            double sx, double sy, double renderH, bool isCurrent)
+        private static void AddSearchHighlight(Canvas canvas, Rect match, bool isCurrent)
         {
-            double cw = (right - left) * sx;
-            double ch = (top - bottom) * sy;
+            double cw = match.Width;
+            double ch = match.Height;
             // A little breathing room so the box (and the current-match outline) wraps the whole word -
             // PdfPig's glyph bounds sit tight against the letters. Scales with text height so it looks
             // consistent across font sizes.
-            double pad = ch * 0.30;
-            double cx = left * sx - pad;
-            double cy = renderH - (top * sy) - pad;
+            // On a turned page the text height is the shorter side of the match.
+            double pad = Math.Min(cw, ch) * 0.30;
+            double cx = match.X - pad;
+            double cy = match.Y - pad;
             var rect = new Rectangle
             {
                 // The current match (search cursor) gets a brighter, more opaque fill; the others are dim.

@@ -27,6 +27,7 @@
     <Compile Include="..\Services\AppDataPaths.cs" Link="Services\AppDataPaths.cs" />
     <Compile Include="..\Services\SignatureStore.cs" Link="Services\SignatureStore.cs" />
     <Compile Include="..\Services\SearchService.cs" Link="Services\SearchService.cs" />
+    <Compile Include="..\Services\PageCanvasGeometry.cs" Link="Services\PageCanvasGeometry.cs" />
     <Compile Include="..\Services\TextRunService.cs" Link="Services\TextRunService.cs" />
     <Compile Include="..\Services\TextEntryPlaceholder.cs" Link="Services\TextEntryPlaceholder.cs" />
     <Compile Include="..\Services\ProtocolRegistrar.cs" Link="Services\ProtocolRegistrar.cs" />
