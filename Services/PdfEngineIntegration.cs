@@ -1312,6 +1312,48 @@ internal static class PdfEngineIntegration
         }
     }
 
+    /// <summary>Replaces a destination with a finished file in one step. The finished bytes are
+    /// first copied beside the destination so the final swap stays on one volume, which leaves
+    /// the previous destination intact when the write fails partway.</summary>
+    internal static void ReplaceFileAtomically(string finishedPath, string destinationPath)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(finishedPath);
+        ArgumentException.ThrowIfNullOrWhiteSpace(destinationPath);
+        string directory = Path.GetDirectoryName(Path.GetFullPath(destinationPath))!;
+        string temporaryPath = Path.Combine(directory,
+            $".{Path.GetFileName(destinationPath)}.{Guid.NewGuid():N}.tmp");
+        try
+        {
+            try
+            {
+                File.Copy(finishedPath, temporaryPath, overwrite: false);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // The folder allows changing the existing file but not creating one beside it.
+                File.Copy(finishedPath, destinationPath, overwrite: true);
+                return;
+            }
+            if (File.Exists(destinationPath))
+            {
+                // Replace keeps the destination's permissions, creation time, and streams. Some
+                // file systems and network shares do not support it, so fall back to a rename.
+                try
+                {
+                    File.Replace(temporaryPath, destinationPath, null, ignoreMetadataErrors: true);
+                    return;
+                }
+                catch (IOException) { }
+                catch (PlatformNotSupportedException) { }
+            }
+            File.Move(temporaryPath, destinationPath, overwrite: true);
+        }
+        finally
+        {
+            if (File.Exists(temporaryPath)) File.Delete(temporaryPath);
+        }
+    }
+
     private static void ReplaceWithBuiltResult(string path, byte[] result)
     {
         string directory = Path.GetDirectoryName(Path.GetFullPath(path))!;
