@@ -108,6 +108,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Prevented a failed Save or Save As from damaging the existing file by finishing the new copy before replacing it.
 - Saving an Edit Text change now removes the replaced words from the file, so they can no longer be found or copied and no longer reappear when the line is edited again.
 - Preserved unsaved annotations when moving, reordering, duplicating, or merging pages and when removing a link. A duplicated page carries a copy of them.
+- Copied and pasted annotations, and those on a duplicated page, now keep a text box's letter spacing, a shape's fill, and the erased parts of a cover.
 - Dragging one page of a multi-page selection in the sidebar now moves the whole selection instead of only the pressed page.
 - Search highlights and text selection now land on the right text on rotated pages, and Crop no longer flips the box vertically on upside-down pages.
 - Edit Text now opens over the clicked line on rotated pages, and text sizes on sideways pages match the saved points.

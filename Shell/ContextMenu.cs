@@ -387,7 +387,8 @@ namespace KillerPDF
                 ColorR = c.ColorR,
                 ColorG = c.ColorG,
                 ColorB = c.ColorB,
-                ColorA = c.ColorA
+                ColorA = c.ColorA,
+                Erases = c.Erases?.Select(e => new HighlightErase { Points = [.. e.Points], Radius = e.Radius }).ToList()
             },
             HighlightAnnotation h => new HighlightAnnotation
             {
@@ -410,6 +411,7 @@ namespace KillerPDF
                 Position = t.Position,
                 Content = t.Content,
                 FontSize = t.FontSize,
+                LetterSpacing = t.LetterSpacing,
                 FontName = t.FontName,
                 Bold = t.Bold,
                 Italic = t.Italic,
@@ -437,7 +439,11 @@ namespace KillerPDF
                 ColorR = ink.ColorR,
                 ColorG = ink.ColorG,
                 ColorB = ink.ColorB,
-                ColorA = ink.ColorA
+                ColorA = ink.ColorA,
+                FillR = ink.FillR,
+                FillG = ink.FillG,
+                FillB = ink.FillB,
+                FillA = ink.FillA
             },
             SignatureAnnotation s => new SignatureAnnotation
             {
