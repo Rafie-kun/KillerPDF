@@ -17,8 +17,10 @@ internal sealed class BookmarkReviewDialog : Window
         Window owner, IReadOnlyList<PdfBookmarkProposal> proposals)
     {
         Title = "KillerPDF - " + L("Str_AutoBookmarks_Review");
-        Width = 820;
-        Height = 650;
+        // As tall as the list needs, up to most of the screen, where the list starts scrolling.
+        Width = 680;
+        SizeToContent = SizeToContent.Height;
+        MaxHeight = Math.Max(360, SystemParameters.WorkArea.Height * 0.85);
         UseLayoutRounding = true;
         DialogChrome.Configure(this, owner);
 
