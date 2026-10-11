@@ -693,6 +693,11 @@
       "maintenanceCommit": "5187174d7681fa22d938033590434a976f5309a5",
       "developmentCommit": "80331a1b0fbcfc15397c00cea06f5d1090f7c0c6",
       "reason": "Both commits add identical hosted pull-request build/test workflows and CI documentation, including the windowless PDF fixture and development-only commit-coverage check. Maintenance documentation has an additional publication/status-requirement sentence and different prior context, so patch IDs differ. All six workflow YAML files and their PowerShell commands validate; the exact fixture command passed on both lines. Interactive UI coverage remains a separate desktop check."
+    },
+    {
+      "maintenanceCommit": "72044297916d2c2058e37ebb48ae453634327385",
+      "developmentCommit": "e8e7f102e52e67c1d26f80fe751c84480ca6c10c",
+      "reason": "The #441 blocked-PdfPig text-hover crash applies only to 1.8. The existing 1.9 commit removed PdfPig from the project and replaced TextRunService extraction with the custom engine. Current tracked references and the text-service call path confirm the blocked dependency is absent, so no product forward-port is needed. Maintenance's isolated blocked-load regression failed before the fix; all 431 app tests and the Release build pass afterward."
     }
   ]
 }
