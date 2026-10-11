@@ -4,10 +4,10 @@
 param(
     [string]$MaintenanceRef = 'origin/main',
     [string]$DevelopmentRef = 'origin/dev/1.9-overkill',
-    [string]$PolicyPath
+    [string]$PolicyPath,
+    [string]$PolicyRef
 )
 $ErrorActionPreference = 'Stop'
-if (!$PolicyPath) { $PolicyPath = Join-Path $PSScriptRoot '../.github/maintenance-forward-ports.json' }
 function Read-Git([string[]]$Arguments) {
     $output = @(& git @Arguments 2>&1)
     if ($LASTEXITCODE -ne 0) { throw "Git failed: $($output -join ' ')" }
@@ -22,10 +22,18 @@ function Test-Ancestor([string]$Older, [string]$Newer) {
     return $LASTEXITCODE -eq 0
 }
 try {
-    $policy = Get-Content -LiteralPath $PolicyPath -Raw | ConvertFrom-Json
-    if ($policy.schemaVersion -ne 1) { throw 'Unsupported forward-port policy version.' }
     $maintenance = Resolve-Commit $MaintenanceRef
     $development = Resolve-Commit $DevelopmentRef
+    if ($PolicyPath -and $PolicyRef) { throw 'Use PolicyPath or PolicyRef, not both.' }
+    if ($PolicyPath) {
+        $policy = Get-Content -LiteralPath $PolicyPath -Raw | ConvertFrom-Json
+    } else {
+        if (!$PolicyRef) { $PolicyRef = $development }
+        $policyCommit = Resolve-Commit $PolicyRef
+        if ($policyCommit -ne $development) { throw 'PolicyRef must be the exact checked development commit.' }
+        $policy = (Read-Git @('show', "${policyCommit}:.github/maintenance-forward-ports.json")) -join "`n" | ConvertFrom-Json
+    }
+    if ($policy.schemaVersion -ne 1) { throw 'Unsupported forward-port policy version.' }
     $baseline = Resolve-Commit $policy.maintenanceBaseline
     $devBaseline = Resolve-Commit $policy.developmentBaseline
     if (!(Test-Ancestor $baseline $maintenance) -or !(Test-Ancestor $devBaseline $development)) {

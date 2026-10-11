@@ -31,4 +31,6 @@ To check local work before pushing both branches:
 
 Missing ports fail with the commit hashes and subjects. Port the change and rerun the local check after recording it. Pushes and merges require separate authorization.
 
-This checks commit coverage, not semantic correctness. Adapted ports still require review and tests. Reverts must be carried deliberately too. The local check does not change branch protection or block remote pushes and merges. A published workflow reports failures; requiring its status is a separate server configuration decision.
+This checks commit coverage, not semantic correctness. Adapted ports still require review and tests. Reverts must be carried deliberately too. The checker reads the policy from the exact checked development commit by default; PolicyPath is an explicit fixture/diagnostic input and is not used by the completion gate.
+
+The [local completion gate](completion-evidence.md) adds pinned source review and passing tests on both lines. The existing shared pre-push guard and both release scripts invoke that gate. It preserves paired local commits and does not change branch protection or block GitHub web/API actions.

@@ -40,11 +40,22 @@ param(
     [switch]$DryRun,
     # Skip build + sign and publish the artifacts already in the publish folder
     # (use after a completed normal run, so the signed exe is not rebuilt).
-    [switch]$PublishOnly
+    [switch]$PublishOnly,
+    # Read-only source/test/forward-port validation, before all release side effects.
+    [switch]$PreflightOnly
 )
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
+
+# This gate runs before metadata, network, build, signing, or publishing work.
+# DryRun still builds and signs; PreflightOnly is the read-only entry.
+$completionGate = Join-Path $PSScriptRoot 'build\Test-PdfCompletion.ps1'
+if (!(Test-Path -LiteralPath $completionGate -PathType Leaf)) { throw 'Missing PDF completion preflight.' }
+$completionHost = (Get-Process -Id $PID).Path
+& $completionHost -NoProfile -File $completionGate
+if ($LASTEXITCODE -ne 0) { throw 'Release blocked by PDF completion preflight.' }
+if ($PreflightOnly) { return }
 
 if ($SkipSign -and -not $DryRun) {
     throw "-SkipSign is only allowed with -DryRun. Unsigned artifacts cannot be published."
