@@ -1,6 +1,7 @@
 using KillerPdf.Engine.Authoring;
 using KillerPdf.Engine.Documents;
 using KillerPdf.Engine.Fonts;
+using KillerPdf.Engine.Objects;
 using KillerPdf.Engine.Rendering;
 using Xunit;
 
@@ -83,6 +84,89 @@ public sealed class PdfScanTextTests
         Assert.All(analysis.Words.Where(word => word.Word.Text != "Fach"),
             word => Assert.True(word.Replaceable, word.Word.Text));
     }
+
+    [Fact]
+    public void ABracketPressedAgainstALetterStaysInTheImage()
+    {
+        Scan scan = Render(PdfStandardFontSubstitutes.Find("Times-Roman"),
+            "TIMING CORRECTION works", "during playback");
+        List<PdfOcrPixelWord> words = [.. scan.Words.Select(word =>
+            word.Text == "CORRECTION" ? word with { Text = "CORRECT[ON" } : word)];
+
+        PdfScanTextPageAnalysis analysis = PdfScanTextAnalyzer.Analyze(
+            scan.Pixels, scan.Width, scan.Height, words);
+
+        Assert.False(analysis.Words.Single(word => word.Word.Text == "CORRECT[ON").Replaceable);
+        Assert.True(analysis.Words.Single(word => word.Word.Text == "TIMING").Replaceable);
+    }
+
+    [Fact]
+    public void AMisreadFractionStaysInTheImage()
+    {
+        Scan scan = Render(PdfStandardFontSubstitutes.Find("Times-Roman"),
+            "an ultra fast 3\u00BD inch disk drive", "stores complex songs in seconds");
+        List<PdfOcrPixelWord> words = [.. scan.Words.Select(word =>
+            word.Text == "3\u00BD" ? word with { Text = "314" } : word)];
+        PdfScanTextPageAnalysis analysis = PdfScanTextAnalyzer.Analyze(
+            scan.Pixels, scan.Width, scan.Height, words);
+
+        PdfScanTextWriter.Verify(analysis, PdfScanTextWriter.BundledFaces()[0]);
+
+        Assert.False(analysis.Words.Single(word => word.Word.Text == "314").Replaceable);
+        Assert.All(analysis.Words.Where(word => word.Word.Text != "314"), word => Assert.True(word.Replaceable,
+            $"{word.Word.Text} match {word.Match:0.000} shape {word.ShapeMatch:0.000} rival {word.Lookalike} {word.LookalikeMatch:0.000}"));
+    }
+
+    [Fact]
+    public void ConvertedPagesShareOneFontAndDropTheScannedImages()
+    {
+        TrueTypeFont font = PdfStandardFontSubstitutes.Find("Times-Roman");
+        Scan first = Render(font, "the first scanned page of text", "with a second line");
+        Scan second = Render(font, "another page that was scanned", "and its closing words");
+        PdfDocument document = PdfDocument.Open(new PdfDocumentBuilder()
+            .AddPage(PageWidth, first.PageHeight, new PdfContentStreamBuilder().DrawImage(
+                PdfImage.FromRgb(first.Width, first.Height, Rgb(first.Pixels)), 0, 0, PageWidth, first.PageHeight))
+            .AddPage(PageWidth, second.PageHeight, new PdfContentStreamBuilder().DrawImage(
+                PdfImage.FromRgb(second.Width, second.Height, Rgb(second.Pixels)), 0, 0, PageWidth, second.PageHeight))
+            .Build());
+        PdfScanTextFace face = PdfScanTextWriter.BundledFaces()[0];
+        var pages = new List<PdfScanTextPage>();
+        foreach ((Scan scan, int index) in new[] { (first, 0), (second, 1) })
+        {
+            PdfScanTextPageAnalysis analysis = Analyze(scan);
+            PdfScanTextWriter.Verify(analysis, face);
+            byte[] background = (byte[])scan.Pixels.Clone();
+            PdfScanTextAnalyzer.Erase(background, scan.Width, scan.Height,
+                analysis.Words.Where(word => word.Replaceable));
+            PdfScanTextAnalyzer.ReleaseMasks(analysis);
+            pages.Add(new PdfScanTextPage(index, analysis,
+                PdfImage.FromRgb(scan.Width, scan.Height, Rgb(background)), face));
+        }
+
+        PdfScanTextResult result = PdfScanTextWriter.Write(document, pages, _ => font);
+
+        PdfDocument written = PdfDocument.Open(result.Document);
+        Assert.Equal(1, CountObjects(written, value => value is PdfDictionary dictionary
+            && dictionary.TryGetValue(new PdfName("Type"u8), out PdfObject? type)
+            && type is PdfName name && name.ValueAsLatin1() == "FontDescriptor"));
+        Assert.Equal(2, CountObjects(written, value => value is PdfStream stream
+            && stream.Dictionary.TryGetValue(new PdfName("Subtype"u8), out PdfObject? subtype)
+            && subtype is PdfName name && name.ValueAsLatin1() == "Image"));
+        var reader = new PdfPageContentReader(written);
+        Assert.Contains("the first scanned page of text", reader.Read(0).Text);
+        Assert.Contains("another page that was scanned", reader.Read(1).Text);
+    }
+
+    private static int CountObjects(PdfDocument document, Func<PdfObject, bool> predicate) =>
+        document.CrossReferences.Keys.Count(number =>
+        {
+            try { return predicate(document.Resolve(number)); }
+            catch (Exception exception) when (exception is FormatException or InvalidOperationException
+                or KeyNotFoundException)
+            {
+                return false;
+            }
+        });
 
     [Fact]
     public void ErasingRemovesTheWordsInk()

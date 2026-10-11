@@ -68,6 +68,12 @@ public sealed class PdfScanTextWord
     /// once the page has been checked.
     /// </summary>
     public double Match { get; internal set; } = double.NaN;
+    /// <summary>Gets how closely the recognized letters' shapes fit the ink, once the page has been checked.</summary>
+    public double ShapeMatch { get; internal set; } = double.NaN;
+    /// <summary>Gets the lookalike reading that fit the ink best, if any was tried.</summary>
+    public string? Lookalike { get; internal set; }
+    /// <summary>Gets how closely the best lookalike reading's shapes fit the ink.</summary>
+    public double LookalikeMatch { get; internal set; } = double.NaN;
 
     // Box-local ink mask over [MaskLeft, MaskLeft + MaskWidth) x [MaskTop, MaskTop + MaskHeight).
     internal int MaskLeft { get; set; }
@@ -151,7 +157,8 @@ public static class PdfScanTextAnalyzer
             word.Replaceable = word.HasClearInk
                 && word.Word.Confidence >= options.MinimumConfidence
                 && word.XHeight >= options.MinimumXHeight
-                && !string.IsNullOrWhiteSpace(word.Word.Text);
+                && !string.IsNullOrWhiteSpace(word.Word.Text)
+                && !HasStrayMark(word.Word.Text);
         }
         return new PdfScanTextPageAnalysis(width, height, bitonal, measured);
     }
@@ -222,6 +229,20 @@ public static class PdfScanTextAnalyzer
         // Text that reaches the page only through a nested form was not checked above, so such
         // a page is left alone.
         return content.Letters.Count == 0 || shown > 0;
+    }
+
+    // A bracket, bar or brace pressed against a letter, as in "CORRECT[ON", is nearly always a
+    // recognizer's reading of a broken or faint letter, not something printed.
+    private static bool HasStrayMark(string text)
+    {
+        for (int i = 0; i < text.Length; i++)
+        {
+            if (text[i] is not ('[' or ']' or '{' or '}' or '|' or '\\' or '<' or '>' or '~' or '^' or '`'))
+                continue;
+            if (i > 0 && char.IsLetter(text[i - 1]) || i + 1 < text.Length && char.IsLetter(text[i + 1]))
+                return true;
+        }
+        return false;
     }
 
     /// <summary>Paints the background color over the ink of the given words.</summary>

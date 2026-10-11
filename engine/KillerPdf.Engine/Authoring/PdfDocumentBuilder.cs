@@ -1985,27 +1985,39 @@ public sealed partial class PdfDocumentBuilder
             requestedStandardFonts = requestedStandardFonts.Append(PdfStandardFont.Helvetica);
         foreach (PdfStandardFont font in requestedStandardFonts.Distinct().Order())
             fontNumbers.Add(font, nextObjectNumber++);
+        // Every use of a font whose character codes agree shares one embedded subset holding
+        // the union of their glyphs, so a font used on many pages is embedded once.
         var embeddedFontUsageGroups = new List<List<EmbeddedFontUsage>>();
+        var embeddedFontMappings = new List<SortedDictionary<ushort, EmbeddedCharacterMapping>>();
         foreach (EmbeddedFontUsage usage in
             _pages.SelectMany(page => page.EmbeddedFonts)
                 .Concat(forms.SelectMany(form => form.EmbeddedFonts))
                 .Concat(patterns.SelectMany(pattern => pattern.EmbeddedFonts))
                 .Concat(formFontUsages))
         {
-            List<EmbeddedFontUsage>? compatible = embeddedFontUsageGroups.FirstOrDefault(group =>
+            int compatible = embeddedFontUsageGroups.FindIndex(group =>
                 ReferenceEquals(group[0].Font, usage.Font)
-                && EmbeddedMappingsEqual(group[0].Mappings, usage.Mappings));
-            if (compatible is null)
+                && EmbeddedMappingsCompatible(
+                    embeddedFontMappings[embeddedFontUsageGroups.IndexOf(group)], usage.Mappings));
+            if (compatible < 0)
+            {
                 embeddedFontUsageGroups.Add([usage]);
+                embeddedFontMappings.Add(new SortedDictionary<ushort, EmbeddedCharacterMapping>(
+                    usage.Mappings.ToDictionary(entry => entry.Key, entry => entry.Value)));
+            }
             else
-                compatible.Add(usage);
+            {
+                embeddedFontUsageGroups[compatible].Add(usage);
+                foreach ((ushort code, EmbeddedCharacterMapping mapping) in usage.Mappings)
+                    embeddedFontMappings[compatible][code] = mapping;
+            }
         }
         var embeddedFonts = new List<AllocatedEmbeddedFont>();
-        foreach (List<EmbeddedFontUsage> usages in embeddedFontUsageGroups)
+        for (int group = 0; group < embeddedFontUsageGroups.Count; group++)
         {
-            EmbeddedFontUsage usage = usages[0];
+            List<EmbeddedFontUsage> usages = embeddedFontUsageGroups[group];
             embeddedFonts.Add(new AllocatedEmbeddedFont(
-                usages, usage.Mappings,
+                usages, embeddedFontMappings[group],
                 nextObjectNumber++, nextObjectNumber++, nextObjectNumber++,
                 nextObjectNumber++, nextObjectNumber++, nextObjectNumber++));
         }
@@ -4737,12 +4749,13 @@ public sealed partial class PdfDocumentBuilder
         return (formFontResources[embeddedFont], allocated.Type0Number, usage);
     }
 
-    private static bool EmbeddedMappingsEqual(
+    // Two uses can share a subset when no character code means a different glyph or text in
+    // one than in the other.
+    private static bool EmbeddedMappingsCompatible(
         IReadOnlyDictionary<ushort, EmbeddedCharacterMapping> left,
         IReadOnlyDictionary<ushort, EmbeddedCharacterMapping> right) =>
-        left.Count == right.Count && left.All(entry =>
-            right.TryGetValue(entry.Key, out EmbeddedCharacterMapping? value)
-            && value == entry.Value);
+        right.All(entry => !left.TryGetValue(entry.Key, out EmbeddedCharacterMapping? value)
+            || value == entry.Value);
 
     private void ValidateUniqueFieldName(string name)
     {

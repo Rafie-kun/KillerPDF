@@ -1016,6 +1016,13 @@ internal static class PdfEngineIntegration
         return PdfScanTextAnalyzer.ReadScannedPages(PdfDocument.Open(File.ReadAllBytes(path)));
     }
 
+    /// <summary>Which pages are drawn only from one-bit black-and-white images.</summary>
+    internal static IReadOnlyList<bool> ReadBitonalPages(string path)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        return PdfPageRasterInformation.ReadBitonalImagePageHints(PdfDocument.Open(File.ReadAllBytes(path)));
+    }
+
     // Families tried when matching a scan's printed typeface, serif, sans serif and typewriter.
     private static readonly string[] ScanTextFamilies =
     [

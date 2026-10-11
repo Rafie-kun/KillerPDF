@@ -396,6 +396,7 @@ namespace KillerPDF.Features
         {
             IReadOnlyList<bool> scanned = PdfEngineIntegration.ReadScannedPages(src);
             if (!scanned.Contains(true)) return new ScanTextSummary(0, 0, 0);
+            IReadOnlyList<bool> bitonal = PdfEngineIntegration.ReadBitonalPages(src);
             using var renderSession = PdfPageRenderSession.OpenEngineFirst(src, OcrRenderMax, OcrRenderMax);
             using var ocr = new OcrService(language: language);
             IReadOnlyList<PdfScanTextFace> candidates = PdfEngineIntegration.ScanTextFaces();
@@ -429,16 +430,17 @@ namespace KillerPDF.Features
                 PdfScanTextAnalyzer.Erase(bgra, w, h, analysis.Words
                     .Where(word => word.Replaceable && PdfScanTextWriter.CanSet(face, word)));
                 PdfScanTextAnalyzer.ReleaseMasks(analysis);
-                pages.Add(new PdfScanTextPage(i, analysis, EncodeScanBackground(bgra, w, h), face));
+                pages.Add(new PdfScanTextPage(i, analysis, EncodeScanBackground(bgra, w, h, bitonal[i]), face));
             }
             if (ct.IsCancellationRequested || pages.Count == 0) return new ScanTextSummary(pages.Count, 0, 0);
             PdfScanTextResult written = PdfEngineIntegration.WriteScanText(src, outPath, pages);
             return new ScanTextSummary(pages.Count, written.ReplacedWords, written.SearchableWords);
         }
 
-        // A black-and-white scan stays one bit deep; anything else is stored as JPEG, in gray
-        // when the page has no color.
-        private static PdfImage EncodeScanBackground(byte[] bgra, int width, int height)
+        // A black-and-white scan, one bit deep in the source or with next to no middle tones once
+        // rendered, stays one bit deep; anything else is stored as JPEG, in gray when the page has
+        // no color.
+        private static PdfImage EncodeScanBackground(byte[] bgra, int width, int height, bool bitonal)
         {
             long middle = 0;
             bool gray = true;
@@ -448,7 +450,7 @@ namespace KillerPDF.Features
                 if (green is > 48 and < 208) middle++;
                 if (gray && (Math.Abs(red - green) > 12 || Math.Abs(blue - green) > 12)) gray = false;
             }
-            if (middle * 100 < (long)width * height)
+            if (bitonal || middle * 100 < (long)width * height)
             {
                 byte[] samples = new byte[width * height];
                 for (int i = 0; i < samples.Length; i++)

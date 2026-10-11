@@ -4570,6 +4570,10 @@ public sealed class PdfIncrementalPageEditor
         replacements[ContentsName] = new PdfArray(items);
     }
 
+    private PdfIncrementalUpdateBuilder? _overlayImportUpdate;
+    private readonly Dictionary<PdfDocument, PdfObjectGraphImporter> _overlayImporters =
+        new(ReferenceEqualityComparer.Instance);
+
     private void ApplyTypedOverlays(
         PdfIncrementalUpdateBuilder update, PageState state, PdfDictionary page,
         Dictionary<PdfName, PdfObject> replacements)
@@ -4621,7 +4625,15 @@ public sealed class PdfIncrementalPageEditor
                     : OverlayBox(overlayPage, pendingOverlay.SourceBox)),
                 ("Resources", overlayResources)),
                 overlayContent);
-            var importer = new PdfObjectGraphImporter(overlay, update, []);
+            // Overlays cut from the same document share one importer, so the fonts and images
+            // they have in common are written once rather than once per page.
+            if (!ReferenceEquals(_overlayImportUpdate, update))
+            {
+                _overlayImportUpdate = update;
+                _overlayImporters.Clear();
+            }
+            if (!_overlayImporters.TryGetValue(overlay, out PdfObjectGraphImporter? importer))
+                _overlayImporters.Add(overlay, importer = new PdfObjectGraphImporter(overlay, update, []));
             PdfIndirectReference formReference = update.AddObject(importer.Import(form));
             if (tagged)
                 _taggedOverlays.Add((formReference, state.Entry!.Reference, pendingOverlay.Description!));

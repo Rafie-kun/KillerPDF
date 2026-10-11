@@ -43,6 +43,14 @@ internal static class TrueTypeSubsetter
             if (RetainedTables.Contains(tag))
                 tables[tag] = source.AsSpan(table.Offset, table.Length).ToArray();
         }
+        // A PDF reaches an embedded font's glyphs by number, never by name, so the subset keeps
+        // only the post table's header (version 3) and drops the glyph names.
+        if (tables.TryGetValue("post", out byte[]? post) && post.Length >= 32)
+        {
+            byte[] header = post.AsSpan(0, 32).ToArray();
+            BinaryPrimitives.WriteUInt32BigEndian(header, 0x00030000);
+            tables["post"] = header;
+        }
         tables["glyf"] = subsetGlyf;
         tables["loca"] = subsetLoca;
         BinaryPrimitives.WriteInt16BigEndian(tables["head"].AsSpan(50, 2), 1);

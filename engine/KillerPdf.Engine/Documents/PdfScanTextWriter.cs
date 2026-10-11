@@ -4,6 +4,7 @@ using KillerPdf.Engine.Authoring;
 using KillerPdf.Engine.Editing;
 using KillerPdf.Engine.Fonts;
 using KillerPdf.Engine.Rendering;
+using KillerPdf.Engine.Writing;
 
 namespace KillerPdf.Engine.Documents;
 
@@ -53,7 +54,12 @@ public static class PdfScanTextWriter
         return Covers(FaceFor(face, word), word.Word.Text);
     }
 
-    /// <summary>Replaces the content of each listed page with its background image and text.</summary>
+    /// <summary>
+    /// Replaces the content of each listed page with its background image and text. The result
+    /// is a compact rewrite of the document: the replaced page images are dropped, and a typeface
+    /// used on many pages is embedded once. A document that cannot be rewritten, such as a
+    /// signed one, keeps the replaced content as an incremental update instead.
+    /// </summary>
     public static PdfScanTextResult Write(PdfDocument document, IReadOnlyList<PdfScanTextPage> pages,
         Func<string, TrueTypeFont?> searchableFont)
     {
@@ -61,8 +67,11 @@ public static class PdfScanTextWriter
         ArgumentNullException.ThrowIfNull(pages);
         ArgumentNullException.ThrowIfNull(searchableFont);
         IReadOnlyList<PdfPageInformation> information = PdfPageInformation.Read(document);
-        var editor = new PdfIncrementalPageEditor(document);
         int replaced = 0, searchable = 0;
+
+        // All the new page content is authored as one document so its fonts are shared, then
+        // each page's content replaces the scanned page's own.
+        var authored = new PdfDocumentBuilder();
         foreach (PdfScanTextPage page in pages)
         {
             if (page.PageIndex < 0 || page.PageIndex >= information.Count)
@@ -79,6 +88,7 @@ public static class PdfScanTextWriter
             content.DrawImage(page.Background, 0, displayHeight, displayWidth, -displayHeight);
             content.BeginText();
             PdfTextRenderingMode? mode = null;
+            var state = new TextState();
             List<PdfScanTextWord> set = [.. page.Analysis.Words
                 .Where(word => word.Replaceable && CanSet(page.Face, word))];
             Dictionary<int, double> lineScales = LineScales(page.Face, set);
@@ -90,24 +100,46 @@ public static class PdfScanTextWriter
                 {
                     SetMode(content, ref mode, page.Face.Weight > 0
                         ? PdfTextRenderingMode.FillAndStroke : PdfTextRenderingMode.Fill);
-                    SetWord(content, page.Face, word, scaleX, scaleY, lineScales[word.Line], space: true);
+                    SetWord(content, state, page.Face, word, scaleX, scaleY, lineScales[word.Line], space: true);
                     replaced++;
                 }
-                else if (searchableFont(word.Word.Text) is TrueTypeFont font)
+                // Words kept as scanned are searchable in the page's own face when it has their
+                // letters, so no other font is embedded for them.
+                else if ((Covers(page.Face.Regular, word.Word.Text) ? page.Face.Regular
+                    : searchableFont(word.Word.Text)) is TrueTypeFont font)
                 {
                     SetMode(content, ref mode, PdfTextRenderingMode.Invisible);
-                    SetInvisibleWord(content, font, word.Word, scaleX, scaleY);
+                    SetInvisibleWord(content, state, font, word.Word, scaleX, scaleY);
                     searchable++;
                 }
             }
             content.EndText().RestoreState();
-
-            editor.SetPageContentAndPruneResources(page.PageIndex, []);
-            editor.AppendPageContent(page.PageIndex, new PdfContentBounds(
-                geometry.Left, geometry.Bottom,
-                geometry.Left + geometry.Width, geometry.Bottom + geometry.Height), content);
+            authored.AddPage(geometry.Width, geometry.Height, content);
         }
-        return new PdfScanTextResult(editor.Build(), replaced, searchable);
+        PdfDocument overlay = PdfDocument.Open(authored.Build());
+
+        var editor = new PdfIncrementalPageEditor(document);
+        for (int index = 0; index < pages.Count; index++)
+        {
+            PdfPageInformation geometry = information[pages[index].PageIndex];
+            editor.SetPageContentAndPruneResources(pages[index].PageIndex, []);
+            editor.AppendImportedPageContent(pages[index].PageIndex, overlay, index,
+                1, 0, 0, 1, geometry.Left, geometry.Bottom);
+        }
+        byte[] result = editor.Build();
+        try
+        {
+            PdfDocument updated = PdfDocument.Open(result);
+            ReadOnlyMemory<byte> compact = PdfOptimizer.CreatePlan(updated,
+                PdfOptimizationOptions.ForDocument(updated)).Apply().Data;
+            if (compact.Length < result.Length) result = compact.ToArray();
+        }
+        catch (Exception exception) when (exception is InvalidOperationException
+            or NotSupportedException or FormatException)
+        {
+            // The incremental update stays as written.
+        }
+        return new PdfScanTextResult(result, replaced, searchable);
     }
 
     /// <summary>
@@ -167,61 +199,98 @@ public static class PdfScanTextWriter
         double typical = matches.Order().ElementAt(matches.Length / 2);
 
         // Each reading is also set with single swaps of letters a recognizer often confuses.
-        // When a swap fits the ink better than what was recognized, the recognized text is
-        // probably wrong, and the word stays as it was scanned.
+        // When a swap fits the ink clearly better than what was recognized, the recognized text
+        // is probably wrong, and the word stays as it was scanned. Near-identical pairs such as
+        // l and I differ by less than the margin, so they do not reject a correct reading. A swap
+        // between letters that look plainly different, such as T and l, that fits the ink as well
+        // as a reading the recognizer itself was unsure of means neither reading is supported, and
+        // the word stays as scanned too. One letter counts for less in a longer word, so that tie
+        // margin shrinks with the word's length.
         var probes = new List<PdfScanTextWord>(words.Count * 2);
         var owners = new List<int>(words.Count * 2);
+        var distinct = new List<bool>(words.Count * 2);
         for (int i = 0; i < words.Count; i++)
         {
             probes.Add(words[i]);
             owners.Add(i);
-            foreach (string variant in Variants(words[i].Word.Text).Take(6))
+            distinct.Add(false);
+            foreach ((string variant, bool plain) in Variants(words[i].Word.Text).Take(6))
             {
                 PdfScanTextWord probe = words[i].WithText(variant);
                 if (!CanSet(face, probe)) continue;
                 probes.Add(probe);
                 owners.Add(i);
+                distinct.Add(plain);
             }
         }
         cancellationToken.ThrowIfCancellationRequested();
         double[] shapes = MatchWords(analysis, face, probes, out _, out _, strict: true);
         double[] own = new double[words.Count], rival = new double[words.Count];
+        double[] distinctRival = new double[words.Count];
+        string?[] distinctText = new string?[words.Count];
         for (int k = 0; k < probes.Count; k++)
         {
-            if (ReferenceEquals(probes[k], words[owners[k]])) own[owners[k]] = shapes[k];
-            else rival[owners[k]] = Math.Max(rival[owners[k]], shapes[k]);
+            PdfScanTextWord owner = words[owners[k]];
+            if (ReferenceEquals(probes[k], owner)) { own[owners[k]] = shapes[k]; continue; }
+            if (distinct[k] && shapes[k] > distinctRival[owners[k]])
+            {
+                distinctRival[owners[k]] = shapes[k];
+                distinctText[owners[k]] = probes[k].Word.Text;
+            }
+            if (shapes[k] > rival[owners[k]])
+            {
+                rival[owners[k]] = shapes[k];
+                owner.Lookalike = probes[k].Word.Text;
+                owner.LookalikeMatch = shapes[k];
+            }
         }
+        for (int i = 0; i < words.Count; i++) words[i].ShapeMatch = own[i];
+        // Letter shapes that fit clearly worse than the page's usual words point to a misread
+        // even when no single lookalike swap explains it.
+        double typicalShape = own.Order().ElementAt(own.Length / 2);
+        float typicalConfidence = words.Select(word => word.Word.Confidence).Order().ElementAt(words.Count / 2);
 
         int rejected = 0;
         for (int i = 0; i < words.Count; i++)
         {
             words[i].Match = matches[i];
+            bool tied = words[i].Word.Confidence < typicalConfidence - 0.05
+                && distinctRival[i] >= own[i] - 0.01 / Math.Max(1, words[i].Word.Text.Count(char.IsLetterOrDigit));
             if (matches[i] >= minimumMatch && matches[i] >= typical - 0.15
-                && rival[i] <= own[i] + 0.02) continue;
+                && own[i] >= typicalShape - 0.12 && rival[i] <= own[i] + 0.05 && !tied)
+                continue;
+            if (tied && rival[i] <= own[i] + 0.05)
+            {
+                words[i].Lookalike = distinctText[i];
+                words[i].LookalikeMatch = distinctRival[i];
+            }
             words[i].Replaceable = false;
             rejected++;
         }
         return rejected;
     }
 
-    // Letters and pairs a recognizer commonly takes for one another, most telling first.
-    private static readonly (string A, string B)[] Confusions =
+    // Letters and pairs a recognizer commonly takes for one another, most telling first, and
+    // whether the two look plainly different in print rather than nearly the same.
+    private static readonly (string A, string B, bool Distinct)[] Confusions =
     [
-        ("E", "F"), ("I", "l"), ("I", "1"), ("l", "1"), ("I", "["), ("l", "T"), ("I", "T"),
-        ("O", "0"), ("m", "rn"), ("d", "cl"), ("h", "li"), ("w", "vv"), ("S", "5"), ("B", "8"),
-        ("c", "e"), ("n", "h"), ("i", "l"), ("f", "t"), ("C", "G"), ("p", "v"), ("u", "n")
+        ("E", "F", true), ("I", "l", false), ("I", "1", false), ("l", "1", false), ("I", "[", false),
+        ("l", "T", true), ("I", "T", true), ("O", "0", false), ("m", "rn", true), ("d", "cl", true),
+        ("h", "li", true), ("w", "vv", true), ("S", "5", true), ("B", "8", true), ("c", "e", true),
+        ("n", "h", true), ("i", "l", false), ("f", "t", false), ("C", "G", true), ("p", "v", true),
+        ("u", "n", true)
     ];
 
-    private static IEnumerable<string> Variants(string text)
+    private static IEnumerable<(string Text, bool Distinct)> Variants(string text)
     {
         var seen = new HashSet<string>(StringComparer.Ordinal) { text };
-        foreach ((string a, string b) in Confusions)
+        foreach ((string a, string b, bool plain) in Confusions)
             foreach ((string from, string to) in new[] { (a, b), (b, a) })
                 for (int at = text.IndexOf(from, StringComparison.Ordinal); at >= 0;
                      at = text.IndexOf(from, at + 1, StringComparison.Ordinal))
                 {
                     string variant = string.Concat(text.AsSpan(0, at), to, text.AsSpan(at + from.Length));
-                    if (seen.Add(variant)) yield return variant;
+                    if (seen.Add(variant)) yield return (variant, plain);
                 }
     }
 
@@ -281,10 +350,11 @@ public static class PdfScanTextWriter
         lineScales = LineScales(face, words);
         var content = new PdfContentStreamBuilder().Transform(1, 0, 0, -1, 0, height).BeginText();
         if (face.Weight > 0) content.SetTextRenderingMode(PdfTextRenderingMode.FillAndStroke);
+        var state = new TextState();
         for (int i = 0; i < words.Count; i++)
         {
             PdfScanTextWord word = words[i];
-            SetWord(content, face, word, 1, 1, lineScales[word.Line], space: false,
+            SetWord(content, state, face, word, 1, 1, lineScales[word.Line], space: false,
                 offsetX: word.MaskLeft - places[i].X, offsetY: word.MaskTop - places[i].Y,
                 inkColor: false);
         }
@@ -402,7 +472,7 @@ public static class PdfScanTextWriter
         return scales;
     }
 
-    private static void SetWord(PdfContentStreamBuilder content, PdfScanTextFace face,
+    private static void SetWord(PdfContentStreamBuilder content, TextState state, PdfScanTextFace face,
         PdfScanTextWord word, double scaleX, double scaleY, double lineScale, bool space,
         double offsetX = 0, double offsetY = 0, bool inkColor = true)
     {
@@ -418,27 +488,72 @@ public static class PdfScanTextWriter
         // A slightly skewed scan keeps its lines' slant; the text runs along each line.
         double angle = Math.Atan(word.Slope * scaleY / scaleX);
         double cos = Math.Cos(angle), sin = Math.Sin(angle);
-        content.SetFillRgb(red / 255.0, green / 255.0, blue / 255.0);
+        int color = red << 16 | green << 8 | blue;
+        if (state.Fill != color)
+        {
+            content.SetFillRgb(red / 255.0, green / 255.0, blue / 255.0);
+            state.Fill = color;
+        }
         if (face.Weight > 0)
-            content.SetStrokeRgb(red / 255.0, green / 255.0, blue / 255.0)
-                .SetLineWidth(face.Weight * word.XHeight * scaleY);
-        content.SetFont(font, size)
-            .SetHorizontalTextScale(scale)
-            .SetTextMatrix(cos, sin, sin, -cos, (word.Left - offsetX) * scaleX, (word.Baseline - offsetY) * scaleY)
+        {
+            if (state.Stroke != color)
+            {
+                content.SetStrokeRgb(red / 255.0, green / 255.0, blue / 255.0);
+                state.Stroke = color;
+            }
+            double lineWidth = Round(face.Weight * word.XHeight * scaleY, 2);
+            if (lineWidth != state.LineWidth)
+            {
+                content.SetLineWidth(lineWidth);
+                state.LineWidth = lineWidth;
+            }
+        }
+        SetFontAndScale(content, state, font, size, scale);
+        content.SetTextMatrix(Round(cos, 5), Round(sin, 5), Round(sin, 5), Round(-cos, 5),
+                Round((word.Left - offsetX) * scaleX, 3), Round((word.Baseline - offsetY) * scaleY, 3))
             .ShowUnicodeText(space ? word.Word.Text + " " : word.Word.Text);
     }
 
-    private static void SetInvisibleWord(PdfContentStreamBuilder content, TrueTypeFont font,
+    private static void SetInvisibleWord(PdfContentStreamBuilder content, TextState state, TrueTypeFont font,
         PdfOcrPixelWord word, double scaleX, double scaleY)
     {
         double height = (word.Bottom - (double)word.Top) * scaleY;
         double width = (word.Right - (double)word.Left) * scaleX;
         double natural = Advance(font, word.Text) * height / 1000;
         double scale = natural > 0 ? Math.Clamp(width / natural * 100, 10, 1000) : 100;
-        content.SetFont(font, height).SetHorizontalTextScale(scale)
-            .SetTextMatrix(1, 0, 0, -1, word.Left * scaleX, word.Top * scaleY + height * 0.8)
+        SetFontAndScale(content, state, font, height, scale);
+        content.SetTextMatrix(1, 0, 0, -1, Round(word.Left * scaleX, 3), Round(word.Top * scaleY + height * 0.8, 3))
             .ShowUnicodeText(word.Text + " ");
     }
+
+    // The text state last written to a page's content, so each word writes only what changes.
+    private sealed class TextState
+    {
+        public int Fill = -1, Stroke = -1;
+        public double LineWidth = double.NaN, Size = double.NaN, Scale = double.NaN;
+        public TrueTypeFont? Font;
+    }
+
+    private static void SetFontAndScale(PdfContentStreamBuilder content, TextState state,
+        TrueTypeFont font, double size, double scale)
+    {
+        size = Round(size, 3);
+        scale = Round(scale, 2);
+        if (!ReferenceEquals(font, state.Font) || size != state.Size)
+        {
+            content.SetFont(font, size);
+            state.Font = font;
+            state.Size = size;
+        }
+        if (scale != state.Scale)
+        {
+            content.SetHorizontalTextScale(scale);
+            state.Scale = scale;
+        }
+    }
+
+    // Rounds a content value to the precision a page needs, without a negative zero.
+    private static double Round(double value, int digits) => Math.Round(value, digits) + 0.0;
 
     private static void SetMode(PdfContentStreamBuilder content, ref PdfTextRenderingMode? current,
         PdfTextRenderingMode mode)
