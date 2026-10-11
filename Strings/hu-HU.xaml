@@ -39,10 +39,10 @@
     <sys:String x:Key="Str_TT_RedactTool">Kitakarás: a megjelölt területek alatti szöveg és képek végleges eltávolítása</sys:String>
     <sys:String x:Key="Str_Lbl_Redact">Kitakarás</sys:String>
     <sys:String x:Key="Str_Redact_NoMarks">Húzza végig az oldalon a területek megjelöléséhez</sys:String>
-    <sys:String x:Key="Str_Redact_Count">Megjelölve: {0} terület {1} oldalon</sys:String>
+    <sys:String x:Key="Str_Redact_Count">Megjelölt területek: {0}, {1} oldalon</sys:String>
     <sys:String x:Key="Str_Redact_MarkSearch">Keresési találatok megjelölése</sys:String>
     <sys:String x:Key="Str_Redact_MarkSearchTip">Az aktuális keresés összes találatának megjelölése</sys:String>
-    <sys:String x:Key="Str_Redact_MarkedSearch">{0} keresési találat megjelölve</sys:String>
+    <sys:String x:Key="Str_Redact_MarkedSearch">Megjelölt keresési találatok: {0}</sys:String>
     <sys:String x:Key="Str_Redact_NoSearch">Először keressen rá a szövegre, majd jelölje meg a találatokat</sys:String>
     <sys:String x:Key="Str_Redact_Clear">Törlés</sys:String>
     <sys:String x:Key="Str_Redact_ClearTip">Összes jelölés eltávolítása</sys:String>
@@ -55,8 +55,8 @@ Az oldal lecserélhető a saját képére, amelyen a megjelölt területek feket
     <sys:String x:Key="Str_Redact_ConvertAll">Az összes ilyen oldal cseréje</sys:String>
     <sys:String x:Key="Str_Redact_SkipPage">Oldal kihagyása</sys:String>
     <sys:String x:Key="Str_Redact_NothingApplied">Semmi sem lett kitakarva</sys:String>
-    <sys:String x:Key="Str_Redacted">{0} terület kitakarva {1} oldalon</sys:String>
-    <sys:String x:Key="Str_RedactedRaster">{0} terület kitakarva {1} oldalon; {2} oldal képre cserélve</sys:String>
+    <sys:String x:Key="Str_Redacted">Kitakart területek: {0}, {1} oldalon</sys:String>
+    <sys:String x:Key="Str_RedactedRaster">Kitakart területek: {0}, {1} oldalon. Képre cserélt oldalak: {2}</sys:String>
     <sys:String x:Key="Str_Redact_SkippedPages">Kihagyott oldalak: {0}</sys:String>
     <sys:String x:Key="Str_Redact_Failed">A kitakarás sikertelen: {0}</sys:String>
     <sys:String x:Key="Str_Redact_VerifyFailed">az eredmény még mutatott megjelölt tartalmat, ezért semmi sem változott</sys:String>

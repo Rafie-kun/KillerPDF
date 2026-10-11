@@ -87,5 +87,57 @@ namespace KillerPDF.Services
             }
             return result;
         }
+
+        /// <summary>
+        /// Finds every case-insensitive occurrence of <paramref name="query"/> on every page and
+        /// returns the bounds of only the matched characters, one rectangle per word a match touches.
+        /// </summary>
+        internal static Dictionary<int, List<(double Left, double Bottom, double Right, double Top)>> FindExactMatches(
+            string filePath, string query)
+        {
+            var result = new Dictionary<int, List<(double, double, double, double)>>();
+            if (string.IsNullOrWhiteSpace(query) || string.IsNullOrWhiteSpace(filePath)) return result;
+            using var doc = PdfDocument.Open(filePath);
+            for (int pi = 0; pi < doc.NumberOfPages; pi++)
+            {
+                var hits = FindExactMatchesOnPage(doc.GetPage(pi + 1), query);
+                if (hits.Count > 0) result[pi] = hits;
+            }
+            return result;
+        }
+
+        internal static List<(double Left, double Bottom, double Right, double Top)> FindExactMatchesOnPage(
+            KillerPdf.Engine.Documents.PdfPageContent page, string query)
+        {
+            var result = new List<(double, double, double, double)>();
+            string needle = query.Trim();
+            if (needle.Length == 0) return result;
+            var words = page.GetWords().ToList();
+
+            // Page text with one space between words, and each character mapped to its word and letter.
+            var text = new System.Text.StringBuilder();
+            var map = new List<(int Word, int Letter)>();
+            for (int w = 0; w < words.Count; w++)
+            {
+                if (w > 0) { text.Append(' '); map.Add((-1, -1)); }
+                var letters = words[w].Letters;
+                for (int l = 0; l < letters.Count; l++)
+                    foreach (char c in letters[l].Value) { text.Append(c); map.Add((w, l)); }
+            }
+
+            string haystack = text.ToString();
+            for (int start = haystack.IndexOf(needle, System.StringComparison.OrdinalIgnoreCase); start >= 0;
+                 start = haystack.IndexOf(needle, start + needle.Length, System.StringComparison.OrdinalIgnoreCase))
+            {
+                foreach (var word in map.Skip(start).Take(needle.Length).Where(m => m.Word >= 0).GroupBy(m => m.Word))
+                {
+                    var boxes = word.Select(m => m.Letter).Distinct()
+                        .Select(letter => words[word.Key].Letters[letter].BoundingBox).ToList();
+                    result.Add((boxes.Min(b => b.Left), boxes.Min(b => b.Bottom),
+                        boxes.Max(b => b.Right), boxes.Max(b => b.Top)));
+                }
+            }
+            return result;
+        }
     }
 }

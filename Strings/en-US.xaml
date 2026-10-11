@@ -39,10 +39,10 @@
     <sys:String x:Key="Str_TT_RedactTool">Redact: permanently remove text and images under marked areas</sys:String>
     <sys:String x:Key="Str_Lbl_Redact">Redact</sys:String>
     <sys:String x:Key="Str_Redact_NoMarks">Drag over the page to mark areas</sys:String>
-    <sys:String x:Key="Str_Redact_Count">Marked: {0} areas on {1} page(s)</sys:String>
+    <sys:String x:Key="Str_Redact_Count">Marked areas: {0}, on {1} page(s)</sys:String>
     <sys:String x:Key="Str_Redact_MarkSearch">Mark search results</sys:String>
     <sys:String x:Key="Str_Redact_MarkSearchTip">Mark every match from the current search</sys:String>
-    <sys:String x:Key="Str_Redact_MarkedSearch">Marked {0} search results</sys:String>
+    <sys:String x:Key="Str_Redact_MarkedSearch">Search results marked: {0}</sys:String>
     <sys:String x:Key="Str_Redact_NoSearch">Search for the text first, then mark the results</sys:String>
     <sys:String x:Key="Str_Redact_Clear">Clear</sys:String>
     <sys:String x:Key="Str_Redact_ClearTip">Remove all marks</sys:String>
@@ -55,8 +55,8 @@ The page can be replaced with an image of itself with the marked areas blacked o
     <sys:String x:Key="Str_Redact_ConvertAll">Replace all such pages</sys:String>
     <sys:String x:Key="Str_Redact_SkipPage">Skip this page</sys:String>
     <sys:String x:Key="Str_Redact_NothingApplied">Nothing was redacted</sys:String>
-    <sys:String x:Key="Str_Redacted">Redacted {0} areas on {1} page(s)</sys:String>
-    <sys:String x:Key="Str_RedactedRaster">Redacted {0} areas on {1} page(s); {2} page(s) replaced with images</sys:String>
+    <sys:String x:Key="Str_Redacted">Redacted areas: {0}, on {1} page(s)</sys:String>
+    <sys:String x:Key="Str_RedactedRaster">Redacted areas: {0}, on {1} page(s). Pages replaced with images: {2}</sys:String>
     <sys:String x:Key="Str_Redact_SkippedPages">Skipped page(s): {0}</sys:String>
     <sys:String x:Key="Str_Redact_Failed">Redaction failed: {0}</sys:String>
     <sys:String x:Key="Str_Redact_VerifyFailed">the result still exposed marked content, so nothing was changed</sys:String>

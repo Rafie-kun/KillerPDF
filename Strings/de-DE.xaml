@@ -39,10 +39,10 @@
     <sys:String x:Key="Str_TT_RedactTool">Schwärzen: Text und Bilder unter markierten Bereichen dauerhaft entfernen</sys:String>
     <sys:String x:Key="Str_Lbl_Redact">Schwärzen</sys:String>
     <sys:String x:Key="Str_Redact_NoMarks">Ziehen Sie über die Seite, um Bereiche zu markieren</sys:String>
-    <sys:String x:Key="Str_Redact_Count">Markiert: {0} Bereiche auf {1} Seite(n)</sys:String>
+    <sys:String x:Key="Str_Redact_Count">Markierte Bereiche: {0}, auf {1} Seite(n)</sys:String>
     <sys:String x:Key="Str_Redact_MarkSearch">Suchergebnisse markieren</sys:String>
     <sys:String x:Key="Str_Redact_MarkSearchTip">Alle Treffer der aktuellen Suche markieren</sys:String>
-    <sys:String x:Key="Str_Redact_MarkedSearch">{0} Suchergebnisse markiert</sys:String>
+    <sys:String x:Key="Str_Redact_MarkedSearch">Markierte Suchergebnisse: {0}</sys:String>
     <sys:String x:Key="Str_Redact_NoSearch">Suchen Sie zuerst nach dem Text und markieren Sie dann die Ergebnisse</sys:String>
     <sys:String x:Key="Str_Redact_Clear">Leeren</sys:String>
     <sys:String x:Key="Str_Redact_ClearTip">Alle Markierungen entfernen</sys:String>
@@ -55,8 +55,8 @@ Die Seite kann durch ein Bild ihrer selbst ersetzt werden, in dem die markierten
     <sys:String x:Key="Str_Redact_ConvertAll">Alle solchen Seiten ersetzen</sys:String>
     <sys:String x:Key="Str_Redact_SkipPage">Diese Seite überspringen</sys:String>
     <sys:String x:Key="Str_Redact_NothingApplied">Es wurde nichts geschwärzt</sys:String>
-    <sys:String x:Key="Str_Redacted">{0} Bereiche auf {1} Seite(n) geschwärzt</sys:String>
-    <sys:String x:Key="Str_RedactedRaster">{0} Bereiche auf {1} Seite(n) geschwärzt; {2} Seite(n) durch Bilder ersetzt</sys:String>
+    <sys:String x:Key="Str_Redacted">Geschwärzte Bereiche: {0}, auf {1} Seite(n)</sys:String>
+    <sys:String x:Key="Str_RedactedRaster">Geschwärzte Bereiche: {0}, auf {1} Seite(n). Durch Bilder ersetzte Seiten: {2}</sys:String>
     <sys:String x:Key="Str_Redact_SkippedPages">Übersprungene Seite(n): {0}</sys:String>
     <sys:String x:Key="Str_Redact_Failed">Schwärzen fehlgeschlagen: {0}</sys:String>
     <sys:String x:Key="Str_Redact_VerifyFailed">das Ergebnis zeigte noch markierte Inhalte, daher wurde nichts geändert</sys:String>

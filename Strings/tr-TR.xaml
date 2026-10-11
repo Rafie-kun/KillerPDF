@@ -39,10 +39,10 @@
     <sys:String x:Key="Str_TT_RedactTool">Karart: işaretli alanların altındaki metni ve görüntüleri kalıcı olarak kaldır</sys:String>
     <sys:String x:Key="Str_Lbl_Redact">Karart</sys:String>
     <sys:String x:Key="Str_Redact_NoMarks">Alan işaretlemek için sayfa üzerinde sürükleyin</sys:String>
-    <sys:String x:Key="Str_Redact_Count">İşaretli: {1} sayfada {0} alan</sys:String>
+    <sys:String x:Key="Str_Redact_Count">İşaretli alanlar: {0}, sayfa sayısı: {1}</sys:String>
     <sys:String x:Key="Str_Redact_MarkSearch">Arama sonuçlarını işaretle</sys:String>
     <sys:String x:Key="Str_Redact_MarkSearchTip">Geçerli aramanın tüm eşleşmelerini işaretle</sys:String>
-    <sys:String x:Key="Str_Redact_MarkedSearch">{0} arama sonucu işaretlendi</sys:String>
+    <sys:String x:Key="Str_Redact_MarkedSearch">İşaretlenen arama sonuçları: {0}</sys:String>
     <sys:String x:Key="Str_Redact_NoSearch">Önce metni arayın, ardından sonuçları işaretleyin</sys:String>
     <sys:String x:Key="Str_Redact_Clear">Temizle</sys:String>
     <sys:String x:Key="Str_Redact_ClearTip">Tüm işaretleri kaldır</sys:String>
@@ -55,8 +55,8 @@ Sayfa, işaretli alanları karartılmış kendi görüntüsüyle değiştirilebi
     <sys:String x:Key="Str_Redact_ConvertAll">Tüm bu sayfaları değiştir</sys:String>
     <sys:String x:Key="Str_Redact_SkipPage">Bu sayfayı atla</sys:String>
     <sys:String x:Key="Str_Redact_NothingApplied">Hiçbir şey karartılmadı</sys:String>
-    <sys:String x:Key="Str_Redacted">{1} sayfada {0} alan karartıldı</sys:String>
-    <sys:String x:Key="Str_RedactedRaster">{1} sayfada {0} alan karartıldı; {2} sayfa görüntüyle değiştirildi</sys:String>
+    <sys:String x:Key="Str_Redacted">Karartılan alanlar: {0}, sayfa sayısı: {1}</sys:String>
+    <sys:String x:Key="Str_RedactedRaster">Karartılan alanlar: {0}, sayfa sayısı: {1}. Görüntüyle değiştirilen sayfalar: {2}</sys:String>
     <sys:String x:Key="Str_Redact_SkippedPages">Atlanan sayfalar: {0}</sys:String>
     <sys:String x:Key="Str_Redact_Failed">Karartma başarısız: {0}</sys:String>
     <sys:String x:Key="Str_Redact_VerifyFailed">sonuç hâlâ işaretli içeriği gösteriyordu, bu yüzden hiçbir şey değiştirilmedi</sys:String>

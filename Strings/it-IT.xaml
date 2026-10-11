@@ -39,10 +39,10 @@
     <sys:String x:Key="Str_TT_RedactTool">Oscura: rimuovi definitivamente testo e immagini sotto le aree contrassegnate</sys:String>
     <sys:String x:Key="Str_Lbl_Redact">Oscura</sys:String>
     <sys:String x:Key="Str_Redact_NoMarks">Trascina sulla pagina per contrassegnare le aree</sys:String>
-    <sys:String x:Key="Str_Redact_Count">Contrassegnate: {0} aree su {1} pagina/e</sys:String>
+    <sys:String x:Key="Str_Redact_Count">Aree contrassegnate: {0}, su {1} pagina/e</sys:String>
     <sys:String x:Key="Str_Redact_MarkSearch">Contrassegna risultati di ricerca</sys:String>
     <sys:String x:Key="Str_Redact_MarkSearchTip">Contrassegna tutte le corrispondenze della ricerca corrente</sys:String>
-    <sys:String x:Key="Str_Redact_MarkedSearch">{0} risultati di ricerca contrassegnati</sys:String>
+    <sys:String x:Key="Str_Redact_MarkedSearch">Risultati di ricerca contrassegnati: {0}</sys:String>
     <sys:String x:Key="Str_Redact_NoSearch">Cerca prima il testo, poi contrassegna i risultati</sys:String>
     <sys:String x:Key="Str_Redact_Clear">Cancella</sys:String>
     <sys:String x:Key="Str_Redact_ClearTip">Rimuovi tutti i contrassegni</sys:String>
@@ -55,8 +55,8 @@ La pagina può essere sostituita da un'immagine di sé stessa con le aree contra
     <sys:String x:Key="Str_Redact_ConvertAll">Sostituisci tutte queste pagine</sys:String>
     <sys:String x:Key="Str_Redact_SkipPage">Salta questa pagina</sys:String>
     <sys:String x:Key="Str_Redact_NothingApplied">Non è stato oscurato nulla</sys:String>
-    <sys:String x:Key="Str_Redacted">Oscurate {0} aree su {1} pagina/e</sys:String>
-    <sys:String x:Key="Str_RedactedRaster">Oscurate {0} aree su {1} pagina/e; {2} pagina/e sostituite da immagini</sys:String>
+    <sys:String x:Key="Str_Redacted">Aree oscurate: {0}, su {1} pagina/e</sys:String>
+    <sys:String x:Key="Str_RedactedRaster">Aree oscurate: {0}, su {1} pagina/e. Pagine sostituite da immagini: {2}</sys:String>
     <sys:String x:Key="Str_Redact_SkippedPages">Pagine saltate: {0}</sys:String>
     <sys:String x:Key="Str_Redact_Failed">Oscuramento non riuscito: {0}</sys:String>
     <sys:String x:Key="Str_Redact_VerifyFailed">il risultato mostrava ancora contenuto contrassegnato, quindi non è stato modificato nulla</sys:String>

@@ -56,6 +56,43 @@ public sealed class RedactionGeometryTests
         Assert.False(Dark(page, box.X + box.Width / 2, box.Bottom + 4));
     }
 
+    [Theory]
+    [InlineData(0)]
+    [InlineData(90)]
+    [InlineData(180)]
+    [InlineData(270)]
+    public void CanvasPointsMapLikeTheCornersOfARectangle(int rotation)
+    {
+        bool quarter = rotation is 90 or 270;
+        double canvasWidth = quarter ? 400 : 600, canvasHeight = quarter ? 600 : 400;
+        Rect page = RedactionGeometry.PageToCanvas(50, 40, 90, 70, 300, 200, canvasWidth, canvasHeight, rotation);
+
+        var (x, y) = RedactionGeometry.CanvasPointToPage(
+            new Point(page.X + page.Width / 2, page.Y + page.Height / 2), 300, 200, canvasWidth, canvasHeight, rotation);
+
+        Assert.Equal(70, x, 6);
+        Assert.Equal(55, y, 6);
+    }
+
+    [Fact]
+    public void ExactSearchMatchesCoverOnlyTheMatchedCharacters()
+    {
+        PdfDocument document = PdfDocument.Open(Pdf(0, "BT /F1 12 Tf 20 100 Td (Keep ROTSECRET here) Tj ET",
+            "/Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> >> >>"));
+        PdfPageContent page = new PdfPageContentReader(document).Read(0);
+        var word = page.Words.Single(w => w.Text == "ROTSECRET");
+
+        var single = SearchService.FindExactMatchesOnPage(page, "secret");
+        var phrase = SearchService.FindExactMatchesOnPage(page, "SECRET here");
+
+        var match = Assert.Single(single);
+        Assert.Equal(word.Letters[3].BoundingBox.Left, match.Left, 6);
+        Assert.Equal(word.BoundingBox.Right, match.Right, 6);
+        Assert.Equal(2, phrase.Count);
+        Assert.Equal(match, phrase[0]);
+        Assert.Equal(page.Words.Single(w => w.Text == "here").BoundingBox.Left, phrase[1].Left, 6);
+    }
+
     [Fact]
     public void CanvasRectanglesAreClampedToThePage()
     {

@@ -39,10 +39,10 @@
     <sys:String x:Key="Str_TT_RedactTool">Censurar: eliminar de forma permanente el texto y las imágenes de las áreas marcadas</sys:String>
     <sys:String x:Key="Str_Lbl_Redact">Censurar</sys:String>
     <sys:String x:Key="Str_Redact_NoMarks">Arrastre sobre la página para marcar áreas</sys:String>
-    <sys:String x:Key="Str_Redact_Count">Marcado: {0} áreas en {1} página(s)</sys:String>
+    <sys:String x:Key="Str_Redact_Count">Áreas marcadas: {0}, en {1} página(s)</sys:String>
     <sys:String x:Key="Str_Redact_MarkSearch">Marcar resultados de búsqueda</sys:String>
     <sys:String x:Key="Str_Redact_MarkSearchTip">Marcar todas las coincidencias de la búsqueda actual</sys:String>
-    <sys:String x:Key="Str_Redact_MarkedSearch">{0} resultados de búsqueda marcados</sys:String>
+    <sys:String x:Key="Str_Redact_MarkedSearch">Resultados de búsqueda marcados: {0}</sys:String>
     <sys:String x:Key="Str_Redact_NoSearch">Busque primero el texto y luego marque los resultados</sys:String>
     <sys:String x:Key="Str_Redact_Clear">Borrar</sys:String>
     <sys:String x:Key="Str_Redact_ClearTip">Quitar todas las marcas</sys:String>
@@ -55,8 +55,8 @@ La página se puede sustituir por una imagen de sí misma con las áreas marcada
     <sys:String x:Key="Str_Redact_ConvertAll">Sustituir todas esas páginas</sys:String>
     <sys:String x:Key="Str_Redact_SkipPage">Omitir esta página</sys:String>
     <sys:String x:Key="Str_Redact_NothingApplied">No se censuró nada</sys:String>
-    <sys:String x:Key="Str_Redacted">Se censuraron {0} áreas en {1} página(s)</sys:String>
-    <sys:String x:Key="Str_RedactedRaster">Se censuraron {0} áreas en {1} página(s); {2} página(s) sustituidas por imágenes</sys:String>
+    <sys:String x:Key="Str_Redacted">Áreas censuradas: {0}, en {1} página(s)</sys:String>
+    <sys:String x:Key="Str_RedactedRaster">Áreas censuradas: {0}, en {1} página(s). Páginas sustituidas por imágenes: {2}</sys:String>
     <sys:String x:Key="Str_Redact_SkippedPages">Página(s) omitida(s): {0}</sys:String>
     <sys:String x:Key="Str_Redact_Failed">Error al censurar: {0}</sys:String>
     <sys:String x:Key="Str_Redact_VerifyFailed">el resultado seguía mostrando contenido marcado, así que no se cambió nada</sys:String>

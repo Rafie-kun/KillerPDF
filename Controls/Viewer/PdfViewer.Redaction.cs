@@ -142,8 +142,17 @@ namespace KillerPDF.Controls
             pageHeight = session.Pages[pageIndex].Height;
             canvasWidth = dims.w;
             canvasHeight = dims.h;
-            rotation = _pageRotations.TryGetValue(pageIndex, out int stored) ? stored : session.Pages[pageIndex].Rotation;
+            rotation = EffectiveRotation(pageIndex);
             return pageWidth > 0 && pageHeight > 0;
+        }
+
+        /// <summary>The page's on-screen rotation, falling back to the file's /Rotate before rotations are captured.</summary>
+        private int EffectiveRotation(int pageIndex)
+        {
+            if (_pageRotations.TryGetValue(pageIndex, out int stored)) return stored;
+            if (_doc is null) return 0;
+            PdfEngineDocumentSession session = EnsureEngineDocumentSession();
+            return pageIndex >= 0 && pageIndex < session.PageCount ? session.Pages[pageIndex].Rotation : 0;
         }
 
         private Rect? MarkCanvasRect(RedactionMark mark)
@@ -282,10 +291,17 @@ namespace KillerPDF.Controls
                 return;
             }
             _redactSession = _active;
+            // Mark only the matched characters, not the whole words the search highlights.
+            Dictionary<int, List<(double Left, double Bottom, double Right, double Top)>> matches;
+            try { matches = SearchService.FindExactMatches(_currentFile!, Search.LastQuery); }
+            catch (Exception) { matches = []; }
+            if (matches.Count == 0)
+                matches = Search.PagesWithResults.ToDictionary(page => page,
+                    page => Search.TryGetPageRects(page, out var found)
+                        ? found.Select(r => (r.left, r.bottom, r.right, r.top)).ToList() : []);
             int added = 0;
-            foreach (int page in Search.PagesWithResults.ToList())
+            foreach (var (page, rects) in matches)
             {
-                if (!Search.TryGetPageRects(page, out var rects)) continue;
                 foreach (var (left, bottom, right, top) in rects)
                 {
                     if (_redactMarks.Any(mark => mark.PageIndex == page && mark.Left == left
@@ -367,6 +383,7 @@ namespace KillerPDF.Controls
             PdfContentRedactionResult? result = null;
             HideRedactionBar();
             SetTool(EditTool.Select);
+            Mouse.OverrideCursor = Cursors.Wait;
             try
             {
                 SaveTempAndReload(keepAnnotations: true, preserveZoom: true, finalizeSavedFile: path =>
@@ -376,6 +393,7 @@ namespace KillerPDF.Controls
                 });
             }
             catch (Exception ex) { failure ??= ex; }
+            finally { Mouse.OverrideCursor = null; }
 
             if (failure is not null || result is null)
             {

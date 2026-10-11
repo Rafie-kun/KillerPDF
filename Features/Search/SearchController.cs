@@ -33,6 +33,9 @@ namespace KillerPDF.Features
         /// <summary>True while any page has result rects - the F3 and repaint-on-page-change gate.</summary>
         internal bool HasResults => AllSearchRects.Count > 0;
 
+        /// <summary>The text of the most recent search, for features that act on its exact matches.</summary>
+        internal string LastQuery { get; private set; } = string.Empty;
+
         /// <summary>The emphasized match, or null when the cursor is not on one.</summary>
         internal (int page, double left, double bottom, double right, double top)? CurrentMatch =>
             _matchCursor >= 0 && _matchCursor < _matches.Count ? _matches[_matchCursor] : null;
@@ -64,6 +67,7 @@ namespace KillerPDF.Features
 
         internal void Run(string query)
         {
+            LastQuery = query ?? string.Empty;
             _host.ClearHighlights();
             AllSearchRects.Clear();
             ResultPages.Clear();

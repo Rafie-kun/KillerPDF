@@ -39,10 +39,10 @@
     <sys:String x:Key="Str_TT_RedactTool">Začernit: trvale odstranit text a obrázky pod označenými oblastmi</sys:String>
     <sys:String x:Key="Str_Lbl_Redact">Začernit</sys:String>
     <sys:String x:Key="Str_Redact_NoMarks">Tažením po stránce označte oblasti</sys:String>
-    <sys:String x:Key="Str_Redact_Count">Označeno: {0} oblastí na {1} str.</sys:String>
+    <sys:String x:Key="Str_Redact_Count">Označené oblasti: {0}, na {1} str.</sys:String>
     <sys:String x:Key="Str_Redact_MarkSearch">Označit výsledky hledání</sys:String>
     <sys:String x:Key="Str_Redact_MarkSearchTip">Označit všechny shody aktuálního hledání</sys:String>
-    <sys:String x:Key="Str_Redact_MarkedSearch">Označeno {0} výsledků hledání</sys:String>
+    <sys:String x:Key="Str_Redact_MarkedSearch">Označené výsledky hledání: {0}</sys:String>
     <sys:String x:Key="Str_Redact_NoSearch">Nejprve vyhledejte text a potom označte výsledky</sys:String>
     <sys:String x:Key="Str_Redact_Clear">Vymazat</sys:String>
     <sys:String x:Key="Str_Redact_ClearTip">Odebrat všechna označení</sys:String>
@@ -55,8 +55,8 @@ Stránku lze nahradit jejím obrázkem se začerněnými označenými oblastmi. 
     <sys:String x:Key="Str_Redact_ConvertAll">Nahradit všechny takové stránky</sys:String>
     <sys:String x:Key="Str_Redact_SkipPage">Přeskočit tuto stránku</sys:String>
     <sys:String x:Key="Str_Redact_NothingApplied">Nic nebylo začerněno</sys:String>
-    <sys:String x:Key="Str_Redacted">Začerněno {0} oblastí na {1} str.</sys:String>
-    <sys:String x:Key="Str_RedactedRaster">Začerněno {0} oblastí na {1} str.; {2} str. nahrazeno obrázky</sys:String>
+    <sys:String x:Key="Str_Redacted">Začerněné oblasti: {0}, na {1} str.</sys:String>
+    <sys:String x:Key="Str_RedactedRaster">Začerněné oblasti: {0}, na {1} str. Stránky nahrazené obrázky: {2}</sys:String>
     <sys:String x:Key="Str_Redact_SkippedPages">Přeskočené stránky: {0}</sys:String>
     <sys:String x:Key="Str_Redact_Failed">Začernění se nezdařilo: {0}</sys:String>
     <sys:String x:Key="Str_Redact_VerifyFailed">výsledek stále odhaloval označený obsah, proto se nic nezměnilo</sys:String>

@@ -39,10 +39,10 @@
     <sys:String x:Key="Str_TT_RedactTool">Tarjar: remover permanentemente texto e imagens sob as áreas marcadas</sys:String>
     <sys:String x:Key="Str_Lbl_Redact">Tarjar</sys:String>
     <sys:String x:Key="Str_Redact_NoMarks">Arraste sobre a página para marcar áreas</sys:String>
-    <sys:String x:Key="Str_Redact_Count">Marcado: {0} áreas em {1} página(s)</sys:String>
+    <sys:String x:Key="Str_Redact_Count">Áreas marcadas: {0}, em {1} página(s)</sys:String>
     <sys:String x:Key="Str_Redact_MarkSearch">Marcar resultados da pesquisa</sys:String>
     <sys:String x:Key="Str_Redact_MarkSearchTip">Marcar todas as ocorrências da pesquisa atual</sys:String>
-    <sys:String x:Key="Str_Redact_MarkedSearch">{0} resultados da pesquisa marcados</sys:String>
+    <sys:String x:Key="Str_Redact_MarkedSearch">Resultados da pesquisa marcados: {0}</sys:String>
     <sys:String x:Key="Str_Redact_NoSearch">Pesquise o texto primeiro e depois marque os resultados</sys:String>
     <sys:String x:Key="Str_Redact_Clear">Limpar</sys:String>
     <sys:String x:Key="Str_Redact_ClearTip">Remover todas as marcas</sys:String>
@@ -55,8 +55,8 @@ A página pode ser substituída por uma imagem dela mesma com as áreas marcadas
     <sys:String x:Key="Str_Redact_ConvertAll">Substituir todas essas páginas</sys:String>
     <sys:String x:Key="Str_Redact_SkipPage">Pular esta página</sys:String>
     <sys:String x:Key="Str_Redact_NothingApplied">Nada foi tarjado</sys:String>
-    <sys:String x:Key="Str_Redacted">{0} áreas tarjadas em {1} página(s)</sys:String>
-    <sys:String x:Key="Str_RedactedRaster">{0} áreas tarjadas em {1} página(s); {2} página(s) substituída(s) por imagens</sys:String>
+    <sys:String x:Key="Str_Redacted">Áreas tarjadas: {0}, em {1} página(s)</sys:String>
+    <sys:String x:Key="Str_RedactedRaster">Áreas tarjadas: {0}, em {1} página(s). Páginas substituídas por imagens: {2}</sys:String>
     <sys:String x:Key="Str_Redact_SkippedPages">Página(s) pulada(s): {0}</sys:String>
     <sys:String x:Key="Str_Redact_Failed">Falha ao tarjar: {0}</sys:String>
     <sys:String x:Key="Str_Redact_VerifyFailed">o resultado ainda expunha conteúdo marcado, então nada foi alterado</sys:String>

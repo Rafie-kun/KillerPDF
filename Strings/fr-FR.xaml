@@ -39,10 +39,10 @@
     <sys:String x:Key="Str_TT_RedactTool">Caviarder : supprimer définitivement le texte et les images sous les zones marquées</sys:String>
     <sys:String x:Key="Str_Lbl_Redact">Caviarder</sys:String>
     <sys:String x:Key="Str_Redact_NoMarks">Faites glisser sur la page pour marquer des zones</sys:String>
-    <sys:String x:Key="Str_Redact_Count">Marqué : {0} zones sur {1} page(s)</sys:String>
+    <sys:String x:Key="Str_Redact_Count">Zones marquées : {0}, sur {1} page(s)</sys:String>
     <sys:String x:Key="Str_Redact_MarkSearch">Marquer les résultats de recherche</sys:String>
     <sys:String x:Key="Str_Redact_MarkSearchTip">Marquer toutes les occurrences de la recherche en cours</sys:String>
-    <sys:String x:Key="Str_Redact_MarkedSearch">{0} résultats de recherche marqués</sys:String>
+    <sys:String x:Key="Str_Redact_MarkedSearch">Résultats de recherche marqués : {0}</sys:String>
     <sys:String x:Key="Str_Redact_NoSearch">Recherchez d'abord le texte, puis marquez les résultats</sys:String>
     <sys:String x:Key="Str_Redact_Clear">Effacer</sys:String>
     <sys:String x:Key="Str_Redact_ClearTip">Supprimer toutes les marques</sys:String>
@@ -55,8 +55,8 @@ La page peut être remplacée par une image d'elle-même avec les zones marquée
     <sys:String x:Key="Str_Redact_ConvertAll">Remplacer toutes ces pages</sys:String>
     <sys:String x:Key="Str_Redact_SkipPage">Ignorer cette page</sys:String>
     <sys:String x:Key="Str_Redact_NothingApplied">Rien n'a été caviardé</sys:String>
-    <sys:String x:Key="Str_Redacted">{0} zones caviardées sur {1} page(s)</sys:String>
-    <sys:String x:Key="Str_RedactedRaster">{0} zones caviardées sur {1} page(s) ; {2} page(s) remplacée(s) par des images</sys:String>
+    <sys:String x:Key="Str_Redacted">Zones caviardées : {0}, sur {1} page(s)</sys:String>
+    <sys:String x:Key="Str_RedactedRaster">Zones caviardées : {0}, sur {1} page(s). Pages remplacées par des images : {2}</sys:String>
     <sys:String x:Key="Str_Redact_SkippedPages">Page(s) ignorée(s) : {0}</sys:String>
     <sys:String x:Key="Str_Redact_Failed">Échec du caviardage : {0}</sys:String>
     <sys:String x:Key="Str_Redact_VerifyFailed">le résultat montrait encore du contenu marqué, rien n'a donc été modifié</sys:String>

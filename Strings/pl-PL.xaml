@@ -39,10 +39,10 @@
     <sys:String x:Key="Str_TT_RedactTool">Zaczernij: trwale usuń tekst i obrazy spod zaznaczonych obszarów</sys:String>
     <sys:String x:Key="Str_Lbl_Redact">Zaczernij</sys:String>
     <sys:String x:Key="Str_Redact_NoMarks">Przeciągnij po stronie, aby zaznaczyć obszary</sys:String>
-    <sys:String x:Key="Str_Redact_Count">Zaznaczono: {0} obszarów na {1} str.</sys:String>
+    <sys:String x:Key="Str_Redact_Count">Zaznaczone obszary: {0}, na {1} str.</sys:String>
     <sys:String x:Key="Str_Redact_MarkSearch">Zaznacz wyniki wyszukiwania</sys:String>
     <sys:String x:Key="Str_Redact_MarkSearchTip">Zaznacz wszystkie trafienia bieżącego wyszukiwania</sys:String>
-    <sys:String x:Key="Str_Redact_MarkedSearch">Zaznaczono {0} wyników wyszukiwania</sys:String>
+    <sys:String x:Key="Str_Redact_MarkedSearch">Zaznaczone wyniki wyszukiwania: {0}</sys:String>
     <sys:String x:Key="Str_Redact_NoSearch">Najpierw wyszukaj tekst, a potem zaznacz wyniki</sys:String>
     <sys:String x:Key="Str_Redact_Clear">Wyczyść</sys:String>
     <sys:String x:Key="Str_Redact_ClearTip">Usuń wszystkie zaznaczenia</sys:String>
@@ -55,8 +55,8 @@ Stronę można zastąpić jej obrazem z zaczernionymi zaznaczonymi obszarami. Te
     <sys:String x:Key="Str_Redact_ConvertAll">Zastąp wszystkie takie strony</sys:String>
     <sys:String x:Key="Str_Redact_SkipPage">Pomiń tę stronę</sys:String>
     <sys:String x:Key="Str_Redact_NothingApplied">Niczego nie zaczerniono</sys:String>
-    <sys:String x:Key="Str_Redacted">Zaczerniono {0} obszarów na {1} str.</sys:String>
-    <sys:String x:Key="Str_RedactedRaster">Zaczerniono {0} obszarów na {1} str.; zastąpiono obrazami {2} str.</sys:String>
+    <sys:String x:Key="Str_Redacted">Zaczernione obszary: {0}, na {1} str.</sys:String>
+    <sys:String x:Key="Str_RedactedRaster">Zaczernione obszary: {0}, na {1} str. Strony zastąpione obrazami: {2}</sys:String>
     <sys:String x:Key="Str_Redact_SkippedPages">Pominięte strony: {0}</sys:String>
     <sys:String x:Key="Str_Redact_Failed">Zaczernianie nie powiodło się: {0}</sys:String>
     <sys:String x:Key="Str_Redact_VerifyFailed">wynik nadal ujawniał zaznaczoną treść, więc niczego nie zmieniono</sys:String>
