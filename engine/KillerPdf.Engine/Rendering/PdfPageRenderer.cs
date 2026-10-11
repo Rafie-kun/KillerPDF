@@ -1466,7 +1466,8 @@ public sealed partial class PdfPageRenderer
                             ? -vertical.OriginY / 1000 * textSize : 0;
                         Matrix textScale = new(textSize * horizontalScale / 1000, 0, 0,
                             textSize / 1000, originX, originY + textRise);
-                        Matrix glyphTransform = textScale.Then(textMatrix).Then(state.Transform);
+                        Matrix glyphTransform = QuantizeGlyphOrigin(
+                            textScale.Then(textMatrix).Then(state.Transform), frame);
                         PdfGlyphOutline? outline;
                         try { outline = extractionFont.GetGlyphOutline(character.Code); }
                         catch (PdfFontResourceReader.GlyphRecursionException)

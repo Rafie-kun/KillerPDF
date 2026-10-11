@@ -915,7 +915,24 @@ public sealed partial class PdfPageRenderer
     // cached per outline, device matrix, and fractional origin offset. Retain positions
     // to one sixty-fourth of a pixel so caching does not visibly move text edges.
     // The entry and byte budgets still bound storage; large glyphs bypass the cache.
-    private const int GlyphSubpixelSteps = 64;
+    private const int GlyphSubpixelSteps = 4;
+
+    /// <summary>
+    /// Moves a glyph's device origin onto the quarter-pixel grid the glyph cache uses, so filled,
+    /// stroked, pattern-filled and clipping text place a glyph identically whether or not its
+    /// mask is cached.
+    /// </summary>
+    private static Matrix QuantizeGlyphOrigin(Matrix transform, RasterFrame frame)
+    {
+        double x = transform.E * frame.ScaleX;
+        double y = frame.Height - transform.F * frame.ScaleY;
+        if (!double.IsFinite(x) || !double.IsFinite(y) || frame.ScaleX == 0 || frame.ScaleY == 0
+            || Math.Abs(x) > int.MaxValue / 2 || Math.Abs(y) > int.MaxValue / 2)
+            return transform;
+        double gridX = Math.Round(x * GlyphSubpixelSteps) / GlyphSubpixelSteps;
+        double gridY = Math.Round(y * GlyphSubpixelSteps) / GlyphSubpixelSteps;
+        return transform with { E = gridX / frame.ScaleX, F = (frame.Height - gridY) / frame.ScaleY };
+    }
     private const int MaximumCachedGlyphPixels = 128 * 128;
     private const long MaximumGlyphMaskCacheBytes = 8L * 1024 * 1024;
     private const long MaximumGlyphGeometryCacheBytes = 512L * 1024;
@@ -1025,8 +1042,8 @@ public sealed partial class PdfPageRenderer
         if (!double.IsFinite(a) || !double.IsFinite(b) || !double.IsFinite(c)
             || !double.IsFinite(d) || !double.IsFinite(originX) || !double.IsFinite(originY))
             return null;
-        // Whole-pixel and grid positions remain exact; other origins move at most
-        // one one-hundred-twenty-eighth of a pixel before fixed-point rasterization.
+        // Whole-pixel and quarter-pixel positions remain exact; other origins move at most
+        // one eighth of a pixel, so repeated glyphs share a small set of cached phases.
         double stepsX = Math.Round(originX * GlyphSubpixelSteps);
         double stepsY = Math.Round(originY * GlyphSubpixelSteps);
         double pixelX = Math.Floor(stepsX / GlyphSubpixelSteps);
