@@ -785,7 +785,6 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_St_AlreadyEditHere">Мұнда әлдеқашан өңдеу бар - қайта өңдеу үшін мәтінін басыңыз немесе жабынды сүйреңіз</sys:String>
     <sys:String x:Key="Str_St_NoTextLine">Осы орында мәтін жолы табылмады</sys:String>
     <sys:String x:Key="Str_St_LineAlreadyEdited">Бұл жол әлдеқашан өңделген - өзгерту үшін мәтінін басыңыз</sys:String>
-    <sys:String x:Key="Str_St_TurnedTextEdit">Бүйірге не төңкеріле жазылған мәтінді әзірге орнында өңдеу мүмкін емес. Мәтін тік оқылатындай бетті бұрып, содан кейін өңдеңіз.</sys:String>
     <sys:String x:Key="Str_St_ImagePlaced">Сурет қойылды - жылжыту үшін сүйреңіз, өлшемін өзгерту үшін бұрыш тұтқасын пайдаланыңыз</sys:String>
     <sys:String x:Key="Str_St_ClipImageUnreadable">Алмасу буферіндегі сурет оқылмады</sys:String>
     <sys:String x:Key="Str_St_PastedImage">Сурет қойылды - жылжыту үшін сүйреңіз, өлшемін өзгерту үшін бұрыш тұтқасын пайдаланыңыз</sys:String>

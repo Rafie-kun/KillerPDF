@@ -806,7 +806,6 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_St_AlreadyEditHere">Tutaj dokonano już edycji - kliknij jej tekst, aby dokonać ponownej edycji, lub przeciągnij okładkę</sys:String>
     <sys:String x:Key="Str_St_NoTextLine">Nie znaleziono wiersza tekstu w tej pozycji</sys:String>
     <sys:String x:Key="Str_St_LineAlreadyEdited">Ta linia jest już edytowana - kliknij jej tekst, aby go zmienić</sys:String>
-    <sys:String x:Key="Str_St_TurnedTextEdit">Tekstu biegnącego bokiem lub do góry nogami nie można jeszcze edytować w miejscu. Obróć stronę, aby czytał się prosto, a potem go edytuj.</sys:String>
     <sys:String x:Key="Str_St_ImagePlaced">Obraz umieszczony - przeciągnij, aby zmienić położenie, użyj uchwytu narożnego, aby zmienić rozmiar</sys:String>
     <sys:String x:Key="Str_St_ClipImageUnreadable">Nie można odczytać obrazu ze schowka</sys:String>
     <sys:String x:Key="Str_St_PastedImage">Wklejony obraz - przeciągnij, aby zmienić położenie, użyj uchwytu narożnego, aby zmienić rozmiar</sys:String>

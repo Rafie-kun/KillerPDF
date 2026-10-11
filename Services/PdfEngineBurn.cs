@@ -115,8 +115,26 @@ internal static class PdfEngineBurn
     private static void DrawText(PdfContentStreamBuilder content, TextAnnotation text,
         double sx, double sy, Dictionary<string, TrueTypeFont> fonts)
     {
-        double x = text.Position.X * sx, y = text.Position.Y * sy;
-        double width = Math.Max(1, text.Width * sx), height = Math.Max(1, text.Height * sy);
+        int turn = TextTurn.Normalize(text.Rotation);
+        if (turn == 0)
+        {
+            DrawTextBox(content, text, text.Position.X * sx, text.Position.Y * sy,
+                Math.Max(1, text.Width * sx), Math.Max(1, text.Height * sy), sx, sy, fonts);
+            return;
+        }
+        // Turned text draws in its own frame, turned about the canvas point where its first line
+        // starts, the same way the canvas lays it out.
+        WpfPoint origin = text.Position + TextTurn.OriginOffset(turn, text.Width, text.Height);
+        var (a, b, c, d) = TextTurn.Matrix(turn);
+        content.SaveState().Transform(a, b, c, d, origin.X * sx, origin.Y * sy);
+        DrawTextBox(content, text, 0, 0, Math.Max(1, text.Width * sy), Math.Max(1, text.Height * sy), sy, sy, fonts);
+        content.RestoreState();
+    }
+
+    private static void DrawTextBox(PdfContentStreamBuilder content, TextAnnotation text,
+        double x, double y, double width, double height, double sx, double sy,
+        Dictionary<string, TrueTypeFont> fonts)
+    {
         if (text.HasFill) FillRect(content, x, y, width, height,
             text.BgR, text.BgG, text.BgB, text.BgA);
         if (string.IsNullOrEmpty(text.Content)) return;

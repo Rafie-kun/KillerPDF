@@ -754,7 +754,6 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_St_AlreadyEditHere">此處已有編輯-按一下其文字可重新編輯，或拖曳遮蓋層</sys:String>
     <sys:String x:Key="Str_St_NoTextLine">在此位置找不到文字行</sys:String>
     <sys:String x:Key="Str_St_LineAlreadyEdited">此行已編輯-按一下其文字即可變更</sys:String>
-    <sys:String x:Key="Str_St_TurnedTextEdit">暫時無法直接編輯側向或倒置的文字。請旋轉頁面使文字擺正後再編輯。</sys:String>
     <sys:String x:Key="Str_St_ImagePlaced">已放置影像-拖曳以重新定位，使用角落控點調整大小</sys:String>
     <sys:String x:Key="Str_St_ClipImageUnreadable">無法讀取剪貼簿影像</sys:String>
     <sys:String x:Key="Str_St_PastedImage">已貼上影像-拖曳以重新定位，使用角落控點調整大小</sys:String>

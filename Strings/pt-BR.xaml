@@ -835,7 +835,6 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_St_AlreadyEditHere">Já existe uma edição aqui - clique no texto para editar de novo ou arraste a cobertura</sys:String>
     <sys:String x:Key="Str_St_NoTextLine">Nenhuma linha de texto encontrada nesta posição</sys:String>
     <sys:String x:Key="Str_St_LineAlreadyEdited">Esta linha já foi editada - clique no texto para alterá-la</sys:String>
-    <sys:String x:Key="Str_St_TurnedTextEdit">Texto de lado ou de cabeça para baixo ainda não pode ser editado no lugar. Gire a página para que fique reto e depois edite.</sys:String>
     <sys:String x:Key="Str_St_ImagePlaced">Imagem posicionada - arraste para reposicionar, use a alça do canto para redimensionar</sys:String>
     <sys:String x:Key="Str_St_ClipImageUnreadable">Não foi possível ler a imagem da área de transferência</sys:String>
     <sys:String x:Key="Str_St_PastedImage">Imagem colada - arraste para reposicionar, use a alça do canto para redimensionar</sys:String>

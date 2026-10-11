@@ -102,6 +102,10 @@ namespace KillerPDF.Controls
                 IsHitTestVisible = false,
                 Child = tb
             };
+            // An edit of turned text reads the same way as the text it replaced. The layout transform
+            // turns the box about its own frame, so Position stays the top-left of what is shown.
+            if (TextTurn.Normalize(ta.Rotation) != 0)
+                box.LayoutTransform = new RotateTransform(TextTurn.Normalize(ta.Rotation));
             Canvas.SetLeft(box, ta.Position.X);
             Canvas.SetTop(box, ta.Position.Y);
             _activeCanvas.Children.Add(box);
@@ -491,8 +495,8 @@ namespace KillerPDF.Controls
                     return bounds.Contains(pos);
 
                 case TextAnnotation ta:
-                    bounds = new Rect(ta.Position.X, ta.Position.Y,
-                                      Math.Max(8, ta.Width), Math.Max(8, ta.Height));
+                    bounds = new Rect(ta.Position, TextTurn.Footprint(ta.Rotation,
+                                      Math.Max(8, ta.Width), Math.Max(8, ta.Height)));
                     // Forgiving grab area: clicking anywhere in the box - plus a small margin around it,
                     // since a one-line box is a thin band - selects and drags the text, so you don't have
                     // to land on a glyph. The selection loop still checks topmost-first, so any annotation
@@ -911,8 +915,8 @@ namespace KillerPDF.Controls
                 {
                     _tehCorner = corner;
                     double bx = Canvas.GetLeft(_tehBox), by = Canvas.GetTop(_tehBox);
-                    double bw = _tehBox.ActualWidth  > 0 ? _tehBox.ActualWidth  : _tehBox.Width;
-                    double bh = _tehBox.ActualHeight > 0 ? _tehBox.ActualHeight : Math.Max(_tehBox.MinHeight, 24);
+                    Size footprint = EditBoxFootprint(_tehBox);
+                    double bw = footprint.Width, bh = footprint.Height;
                     _tehAnchor = _tehCorner switch
                     {
                         "NW" => new Point(bx + bw, by + bh),
@@ -1052,7 +1056,7 @@ namespace KillerPDF.Controls
                             _isResizingSig = true;          // shared "resize in progress" flag + capture
                             _resizeTextAnnot = rta;
                             double ax = rta.Position.X, ay = rta.Position.Y;
-                            double w0 = rta.Width, h0 = rta.Height;
+                            double w0 = rta.FootprintSize.Width, h0 = rta.FootprintSize.Height;
                             _resizeAnchor = _resizeCorner switch
                             {
                                 "NW" => new Point(ax + w0, ay + h0),
@@ -1519,14 +1523,18 @@ namespace KillerPDF.Controls
             // Live text-edit box resize (mid-edit corner handles): free-form, opposite corner held fixed.
             if (_draggingTextEditHandle && _tehBox is not null)
             {
-                double newW = Math.Max(40, Math.Abs(pos.X - _tehAnchor.X));
-                double newH = Math.Max(24, Math.Abs(pos.Y - _tehAnchor.Y));
+                // The drag sizes the box as it sits on the canvas; a quarter-turned box takes the
+                // canvas width as its height and the reverse.
+                bool quarter = EditBoxTurn(_tehBox) is 90 or 270;
+                double newW = Math.Max(quarter ? 24 : 40, Math.Abs(pos.X - _tehAnchor.X));
+                double newH = Math.Max(quarter ? 40 : 24, Math.Abs(pos.Y - _tehAnchor.Y));
                 double nx = (_tehCorner is "NW" or "SW") ? _tehAnchor.X - newW : _tehAnchor.X;
                 double ny = (_tehCorner is "NW" or "NE") ? _tehAnchor.Y - newH : _tehAnchor.Y;
                 Canvas.SetLeft(_tehBox, nx);
                 Canvas.SetTop(_tehBox, ny);
-                _tehBox.Width  = newW;
-                _tehBox.Height = newH;
+                _tehBox.Width  = quarter ? newH : newW;
+                _tehBox.Height = quarter ? newW : newH;
+                UpdateTurnedEditOrigin(_tehBox, new Point(nx, ny), new Size(_tehBox.Width, _tehBox.Height));
                 LayoutTextEditHandles();
                 return;
             }
@@ -1539,12 +1547,14 @@ namespace KillerPDF.Controls
                 // exactly like resizing an image or crop rectangle. Text wraps to the width and is clipped
                 // to the height. The corner is clamped to the page so it can't leave it.
                 var cp = ClampPointToPage(rta.PageIndex, pos);
-                double newW = Math.Max(40, Math.Abs(cp.X - _resizeAnchor.X));
-                double newH = Math.Max(20, Math.Abs(cp.Y - _resizeAnchor.Y));
+                // A quarter-turned box runs its width down the canvas, so its minimums swap too.
+                bool quarter = TextTurn.Normalize(rta.Rotation) is 90 or 270;
+                double newW = Math.Max(quarter ? 20 : 40, Math.Abs(cp.X - _resizeAnchor.X));
+                double newH = Math.Max(quarter ? 40 : 20, Math.Abs(cp.Y - _resizeAnchor.Y));
                 double nx = (_resizeCorner is "NW" or "SW") ? _resizeAnchor.X - newW : _resizeAnchor.X;
                 double ny = (_resizeCorner is "NW" or "NE") ? _resizeAnchor.Y - newH : _resizeAnchor.Y;
-                rta.Width = newW;
-                rta.Height = newH;
+                rta.Width = quarter ? newH : newW;
+                rta.Height = quarter ? newW : newH;
                 rta.Position = new Point(nx, ny);
                 if (_selectionBorder is not null)
                 {
@@ -1914,7 +1924,7 @@ namespace KillerPDF.Controls
                 var rta = _resizeTextAnnot;
                 _resizeTextAnnot = null;
                 RenderAllAnnotations(rta.PageIndex);
-                SelectAnnotation(rta, new Rect(rta.Position.X, rta.Position.Y, rta.Width, rta.Height));
+                SelectAnnotation(rta, new Rect(rta.Position, rta.FootprintSize));
                 MarkDirty();
                 return;
             }

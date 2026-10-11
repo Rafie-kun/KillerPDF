@@ -194,8 +194,14 @@ namespace KillerPDF.Controls
                         TextWrapping = TextWrapping.Wrap,
                         Tag = pageIdx
                     };
-                    Canvas.SetLeft(ptb, placed.Position.X);
-                    Canvas.SetTop(ptb, placed.Position.Y);
+                    int placedTurn = TextTurn.Normalize(placed.Rotation);
+                    if (placedTurn == 0)
+                    {
+                        Canvas.SetLeft(ptb, placed.Position.X);
+                        Canvas.SetTop(ptb, placed.Position.Y);
+                    }
+                    else PlaceTurnedEditBox(ptb, placed.Position
+                        + TextTurn.OriginOffset(placedTurn, placed.Width, placed.Height), placedTurn);
                     TextEditorLayerFor(_activeCanvas).Children.Add(ptb);
                     _activeTextBox = ptb;
                     StyleEditBox(ptb);   // restore the box's typeface + B/I/S
@@ -238,41 +244,39 @@ namespace KillerPDF.Controls
                 Point ToCanvas(double x, double y) =>
                     RedactionGeometry.PageToCanvas(x, y, x, y, pdfW, pdfH, renderW, renderH, rotation).TopLeft;
 
-                // Convert all words to canvas coordinates upfront. A word reads level on screen when
-                // its first letter advances left to right across the canvas.
-                var canvasWords = page.GetWords().Select(w =>
+                // Convert all words to canvas coordinates upfront, with the turn each one reads at on
+                // screen: the direction its first letter advances across the canvas.
+                var allWords = page.GetWords().Select(w =>
                 {
                     var b = w.BoundingBox;
                     Rect rect = RedactionGeometry.PageToCanvas(b.Left, b.Bottom, b.Right, b.Top,
                         pdfW, pdfH, renderW, renderH, rotation);
-                    bool level = true;
+                    int wordTurn = 0;
                     if (w.Letters.Count > 0)
                     {
                         var first = w.Letters[0];
-                        Point start = ToCanvas(first.StartBaseLine.X, first.StartBaseLine.Y);
-                        Point end = ToCanvas(first.EndBaseLine.X, first.EndBaseLine.Y);
-                        double dx = end.X - start.X, dy = end.Y - start.Y;
-                        level = (dx > 0 && dx >= Math.Abs(dy)) || (dx == 0 && dy == 0);
+                        wordTurn = TextTurn.FromBaseline(ToCanvas(first.StartBaseLine.X, first.StartBaseLine.Y),
+                            ToCanvas(first.EndBaseLine.X, first.EndBaseLine.Y));
                     }
-                    return new { Word = w, Rect = rect, Level = level };
+                    return new { Word = w, Rect = rect, Turn = wordTurn };
                 }).ToList();
 
-                // The replacement text box is always level, so it cannot stand in for text that runs
-                // sideways or upside down on screen. Say so instead of covering that text with a box
-                // turned the wrong way, and leave such words out of the line search below.
-                var clickedWord = canvasWords.FirstOrDefault(cw =>
+                // An edit follows one reading direction: the clicked word's, or the nearest word's when
+                // the click lands between words. Text reading another way is left out of the search.
+                // Everything below works in that direction's reading frame, where the text reads left
+                // to right, and maps back to the canvas for the cover and the box; for level text the
+                // frame is the canvas itself.
+                var clickedWord = allWords.FirstOrDefault(cw =>
                 {
                     Rect hit = cw.Rect;
                     hit.Inflate(3, 3);
                     return hit.Contains(canvasPos);
-                });
-                if ((clickedWord is not null && !clickedWord.Level)
-                    || (canvasWords.Count > 0 && canvasWords.All(cw => !cw.Level)))
-                {
-                    SetStatus(Loc("Str_St_TurnedTextEdit"));
-                    return;
-                }
-                canvasWords = [.. canvasWords.Where(cw => cw.Level)];
+                }) ?? allWords.OrderBy(cw => DistanceToRect(cw.Rect, canvasPos)).FirstOrDefault();
+                int turn = clickedWord?.Turn ?? 0;
+                var canvasWords = allWords.Where(cw => cw.Turn == turn)
+                    .Select(cw => new { cw.Word, Rect = TextTurn.ToReading(cw.Rect, turn) })
+                    .ToList();
+                Point readingPos = TextTurn.ToReading(canvasPos, turn);
 
                 // Flattened forms commonly represent an entry area as a run of dots or underscores.
                 // Treat a click on that run as an empty text field instead of folding the placeholder
@@ -280,11 +284,11 @@ namespace KillerPDF.Controls
                 // and the replacement box inherits their exact position and width.
                 Rect? placeholder = TextEntryPlaceholder.FindNearest(
                     canvasWords.Select(w => new TextEntryPlaceholder.Candidate(w.Word.Text, w.Rect)),
-                    canvasPos);
+                    readingPos);
                 if (placeholder is Rect blank)
                 {
                     double blankFont = Math.Max(blank.Height * .75, 8);
-                    StartCoverTextEdit(pageIdx, blank, "", blankFont, "Segoe UI", syInv);
+                    StartCoverTextEdit(pageIdx, blank, "", blankFont, "Segoe UI", syInv, turn: turn);
                     return;
                 }
 
@@ -299,7 +303,7 @@ namespace KillerPDF.Controls
                 }
 
                 // Find words on the same line as the click (Y overlap with tolerance)
-                var clickY = canvasPos.Y;
+                var clickY = readingPos.Y;
                 var lineWords = canvasWords
                     .Where(cw => clickY >= cw.Rect.Top - 3 && clickY <= cw.Rect.Bottom + 3)
                     .OrderBy(cw => cw.Rect.Left)  // strictly left-to-right
@@ -332,8 +336,8 @@ namespace KillerPDF.Controls
                     for (int i = 0; i < lineWords.Count; i++)
                     {
                         var r = lineWords[i].Rect;
-                        double dx = canvasPos.X < r.Left ? r.Left - canvasPos.X
-                                  : canvasPos.X > r.Right ? canvasPos.X - r.Right : 0;
+                        double dx = readingPos.X < r.Left ? r.Left - readingPos.X
+                                  : readingPos.X > r.Right ? readingPos.X - r.Right : 0;
                         if (dx < bestDx) { bestDx = dx; ci = i; }
                     }
                     double gapMax = Math.Max(lineWords[ci].Rect.Height * 1.5, 24);   // word spacing is small; a column gap is large
@@ -343,7 +347,7 @@ namespace KillerPDF.Controls
                     lineWords = lineWords.GetRange(lo, hi - lo + 1);
                 }
 
-                // Compute bounding box in canvas space
+                // Compute the line's bounding box in the reading frame
                 double cLeft = lineWords.Min(w => w.Rect.Left);
                 double cTop = lineWords.Min(w => w.Rect.Top);
                 double cRight = lineWords.Max(w => w.Rect.Right);
@@ -356,7 +360,8 @@ namespace KillerPDF.Controls
                 // If this line is already covered by an edit, don't detect it again - that just stacks a
                 // duplicate cover+text on top of the existing one. The original PDF text under a cover is
                 // "consumed": re-edit by clicking the replacement text instead.
-                var lineRect = new Rect(cLeft, cTop, Math.Max(1, cWidth), Math.Max(1, cHeight));
+                var lineRect = TextTurn.FromReading(
+                    new Rect(cLeft, cTop, Math.Max(1, cWidth), Math.Max(1, cHeight)), turn);
                 if (_annotations.TryGetValue(pageIdx, out var coveredPage)
                     && coveredPage.OfType<CoverAnnotation>().Any(c => c.Bounds.IntersectsWith(lineRect)))
                 {
@@ -387,9 +392,10 @@ namespace KillerPDF.Controls
                         if (pdfFontPts > 0)
                             canvasFontSize = pdfFontPts * syInv;
 
-                        // Only level words reach this point, so the letter's origin maps straight
-                        // to the left edge and baseline of the replacement on the canvas.
-                        Point baselineStart = ToCanvas(letter.StartBaseLine.X, letter.StartBaseLine.Y);
+                        // In the reading frame the letter's origin is the left edge and baseline of
+                        // the replacement, whichever way the text runs on the canvas.
+                        Point baselineStart = TextTurn.ToReading(
+                            ToCanvas(letter.StartBaseLine.X, letter.StartBaseLine.Y), turn);
                         sourceLeft = baselineStart.X;
                         sourceBaseline = baselineStart.Y;
 
@@ -435,7 +441,7 @@ namespace KillerPDF.Controls
                 catch { /* retain the extracted glyph top */ }
                 StartCoverTextEdit(pageIdx, new Rect(cLeft, cTop, cWidth, cHeight), prefill,
                     boxFontCanvas, fontName, syInv,
-                    fontBold, fontItalic, editorLeft, editorTop);
+                    fontBold, fontItalic, editorLeft, editorTop, turn);
                 SetStatus(string.Equals(requestedFamily, fontName, StringComparison.OrdinalIgnoreCase)
                     ? string.Format(Loc("Str_St_TextEditDetectedFont"), fontName, _textFontSize.ToString("0.##"))
                     : string.Format(Loc("Str_St_TextEditFontSubstituted"), requestedFamily, fontName, _textFontSize.ToString("0.##")));
@@ -450,19 +456,22 @@ namespace KillerPDF.Controls
         // halves of an in-place edit. Used for a detected PDF-text line and, on a scanned page with no
         // text layer, for a manual edit at the click point. boxFontCanvas is the on-canvas font size;
         // the cover fill and text ink are sampled from the page so the edit blends in.
+        // lineRect and the editor origin are in the reading frame of 'turn' (the canvas itself for level
+        // text); the cover is placed over the line on the canvas and the box opens turned to match.
         private void StartCoverTextEdit(int pageIdx, Rect lineRect, string text, double boxFontCanvas,
                                         string fontName, double syInv, bool bold = false, bool italic = false,
-                                        double? editorLeft = null, double? editorTop = null)
+                                        double? editorLeft = null, double? editorTop = null, int turn = 0)
         {
-            double cLeft = lineRect.X, cTop = lineRect.Y, cWidth = lineRect.Width, cHeight = lineRect.Height;
+            double cLeft = lineRect.X, cTop = lineRect.Y, cWidth = lineRect.Width;
+            Rect canvasLine = TextTurn.FromReading(lineRect, turn);
             // Pair id shared with the replacement text - the cover renders dashed while paired.
             var cover = new CoverAnnotation
             {
                 PageIndex = pageIdx,
                 PairId = Guid.NewGuid().ToString("N"),
-                Bounds = new Rect(cLeft - 3, cTop - 3, cWidth + 6, cHeight + 6)
+                Bounds = new Rect(canvasLine.X - 3, canvasLine.Y - 3, canvasLine.Width + 6, canvasLine.Height + 6)
             };
-            var sampleRect = new Rect(cLeft, cTop, cWidth, cHeight);
+            var sampleRect = canvasLine;
             Color coverBg = SampleCoverColor(pageIdx, sampleRect);
             Color inkColor = SampleTextColor(pageIdx, sampleRect, coverBg);
             cover.SetColor(coverBg);
@@ -502,8 +511,12 @@ namespace KillerPDF.Controls
                 TextWrapping = TextWrapping.Wrap,
                 Tag = pageIdx
             };
-            Canvas.SetLeft(tb, editorLeft ?? cLeft);
-            Canvas.SetTop(tb, editorTop ?? cTop);
+            if (TextTurn.Normalize(turn) == 0)
+            {
+                Canvas.SetLeft(tb, editorLeft ?? cLeft);
+                Canvas.SetTop(tb, editorTop ?? cTop);
+            }
+            else PlaceTurnedEditBox(tb, TextTurn.FromReading(new Point(editorLeft ?? cLeft, editorTop ?? cTop), turn), turn);
             TextEditorLayerFor(_activeCanvas).Children.Add(tb);
             _activeTextBox = tb;
             StyleEditBox(tb);
@@ -553,9 +566,62 @@ namespace KillerPDF.Controls
                 || !ReferenceEquals(_activeTextBox.Parent, TextEditorLayerFor(_activeCanvas))) return false;
             double x = Canvas.GetLeft(_activeTextBox), y = Canvas.GetTop(_activeTextBox);
             if (double.IsNaN(x) || double.IsNaN(y)) return false;
-            double w = _activeTextBox.ActualWidth > 0 ? _activeTextBox.ActualWidth : _activeTextBox.Width;
-            double h = _activeTextBox.ActualHeight > 0 ? _activeTextBox.ActualHeight : Math.Max(_activeTextBox.MinHeight, 24);
-            return pos.X >= x && pos.X <= x + w && pos.Y >= y && pos.Y <= y + h;
+            Size footprint = EditBoxFootprint(_activeTextBox);
+            return pos.X >= x && pos.X <= x + footprint.Width && pos.Y >= y && pos.Y <= y + footprint.Height;
+        }
+
+        // The turn of an edit box, from the layout transform that turned it (0 for a level box).
+        private static int EditBoxTurn(TextBox tb) =>
+            tb.LayoutTransform is RotateTransform turned ? TextTurn.Normalize((int)Math.Round(turned.Angle)) : 0;
+
+        // The edit box's own size: width along its lines, height across them.
+        private static Size EditBoxSize(TextBox tb) => new(
+            tb.ActualWidth > 0 ? tb.ActualWidth : tb.Width,
+            tb.ActualHeight > 0 ? tb.ActualHeight : Math.Max(tb.MinHeight, 24));
+
+        // The space the edit box takes on the canvas.
+        private static Size EditBoxFootprint(TextBox tb)
+        {
+            Size size = EditBoxSize(tb);
+            return TextTurn.Footprint(EditBoxTurn(tb), size.Width, size.Height);
+        }
+
+        // Frame origins of turned edit boxes: the canvas point where the first line starts.
+        private readonly ConditionalWeakTable<TextBox, StrongBox<Point>> _turnedEditOrigins = [];
+
+        // Opens an edit box turned to read like the text it edits. A turned box grows across its
+        // lines toward a different canvas side than a level one, so it is re-placed from its frame
+        // origin whenever its size changes, keeping the first line where it started.
+        private void PlaceTurnedEditBox(TextBox tb, Point origin, int turn)
+        {
+            tb.LayoutTransform = new RotateTransform(TextTurn.Normalize(turn));
+            _turnedEditOrigins.AddOrUpdate(tb, new StrongBox<Point>(origin));
+            tb.SizeChanged += (_, _) => PlaceTurnedEditBoxFromOrigin(tb);
+            PlaceTurnedEditBoxFromOrigin(tb);
+        }
+
+        private void PlaceTurnedEditBoxFromOrigin(TextBox tb)
+        {
+            if (!_turnedEditOrigins.TryGetValue(tb, out var origin)) return;
+            Size size = EditBoxSize(tb);
+            Point topLeft = origin.Value - TextTurn.OriginOffset(EditBoxTurn(tb), size.Width, size.Height);
+            Canvas.SetLeft(tb, topLeft.X);
+            Canvas.SetTop(tb, topLeft.Y);
+            if (ReferenceEquals(_tehBox, tb)) LayoutTextEditHandles();
+        }
+
+        // Records where a turned edit box's first line starts after its corner was dragged.
+        private void UpdateTurnedEditOrigin(TextBox tb, Point topLeft, Size size)
+        {
+            if (_turnedEditOrigins.TryGetValue(tb, out var origin))
+                origin.Value = topLeft + TextTurn.OriginOffset(EditBoxTurn(tb), size.Width, size.Height);
+        }
+
+        private static double DistanceToRect(Rect rect, Point point)
+        {
+            double dx = Math.Max(0, Math.Max(rect.Left - point.X, point.X - rect.Right));
+            double dy = Math.Max(0, Math.Max(rect.Top - point.Y, point.Y - rect.Bottom));
+            return Math.Sqrt(dx * dx + dy * dy);
         }
 
         private void PlaceTextBox(Point pos, int pageIdx)
@@ -645,6 +711,7 @@ namespace KillerPDF.Controls
             double x = Canvas.GetLeft(_tehBox), y = Canvas.GetTop(_tehBox);
             double w = _tehBox.ActualWidth > 0 ? _tehBox.ActualWidth : _tehBox.Width;
             double h = _tehBox.ActualHeight;
+            if (EditBoxTurn(_tehBox) is 90 or 270) (w, h) = (h, w);
             foreach (var hd in _textEditHandles)
             {
                 double hsz = hd.Width;
@@ -803,6 +870,11 @@ namespace KillerPDF.Controls
             int pageIdx = tb.Tag is int idx ? idx : _currentPage;
             double x = Canvas.GetLeft(tb);
             double y = Canvas.GetTop(tb);
+            int turn = EditBoxTurn(tb);
+            // A turned box keeps its first line where the editor showed it, even when the committed
+            // height differs from the editor's.
+            Size editSize = EditBoxSize(tb);
+            Point turnedOrigin = new Point(x, y) + TextTurn.OriginOffset(turn, editSize.Width, editSize.Height);
 
             // Remove the editing box from whatever canvas actually parents it. _activeCanvas may have
             // moved to another page when the user clicked away to commit (continuous/grid), and a
@@ -827,7 +899,8 @@ namespace KillerPDF.Controls
                     Italic = _textItalic,
                     Strike = _textStrike,
                     Underline = _textUnderline,
-                    Width = boxW
+                    Width = boxW,
+                    Rotation = turn
                 };
                 ta.SetColor(tb.Foreground is SolidColorBrush scb ? scb.Color : Colors.Black);
                 // A cover-paired edit gets no fill of its own - the opaque cover behind it is the backdrop.
@@ -836,8 +909,9 @@ namespace KillerPDF.Controls
                 ta.Height = (!double.IsNaN(tb.Height) && tb.Height > 0)
                     ? tb.Height
                     : MeasureTextBoxHeight(content, boxW, tb.FontSize);
+                if (turn != 0) ta.Position = turnedOrigin - TextTurn.OriginOffset(turn, ta.Width, ta.Height);
                 // Keep the placed box fully on-page so its corners (and resize handles) stay reachable.
-                ta.Position = ClampRectToPage(pageIdx, new Rect(ta.Position, new Size(ta.Width, ta.Height))).Location;
+                ta.Position = ClampRectToPage(pageIdx, new Rect(ta.Position, ta.FootprintSize)).Location;
                 // Carry the pairing so the cover knows its partner text exists (renders dashed).
                 ta.PairId = _pendingCover is not null ? _pendingCover.PairId : reeditPair;
                 if (_pendingCover is not null)

@@ -835,7 +835,6 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_St_AlreadyEditHere">ここには既に編集があります。テキストをクリックして再編集するか、カバーをドラッグしてください</sys:String>
     <sys:String x:Key="Str_St_NoTextLine">この位置にテキスト行が見つかりませんでした</sys:String>
     <sys:String x:Key="Str_St_LineAlreadyEdited">この行は既に編集済みです。テキストをクリックして変更してください</sys:String>
-    <sys:String x:Key="Str_St_TurnedTextEdit">横向きや逆さまのテキストはまだその場で編集できません。ページを回転してまっすぐ読めるようにしてから編集してください。</sys:String>
     <sys:String x:Key="Str_St_ImagePlaced">画像を配置しました。ドラッグで位置を変更し、角のハンドルでサイズを変更できます</sys:String>
     <sys:String x:Key="Str_St_ClipImageUnreadable">クリップボードの画像を読み取れませんでした</sys:String>
     <sys:String x:Key="Str_St_PastedImage">画像を貼り付けました。ドラッグで位置を変更し、角のハンドルでサイズを変更できます</sys:String>

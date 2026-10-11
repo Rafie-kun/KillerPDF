@@ -13,9 +13,10 @@ namespace KillerPDF.Services
         /// <summary>Remaps one page's annotations for an in-app rotation by <paramref name="delta"/>
         /// degrees (clockwise positive, matching the render path), where <paramref name="oldW"/> and
         /// <paramref name="oldH"/> are the page's render dims BEFORE the turn. Region-shaped
-        /// annotations (highlights, covers, ink, shapes) turn with the content they mark; text boxes
+        /// annotations (highlights, covers, ink, shapes) turn with the content they mark, and so does
+        /// the replacement text of an in-place edit, which must stay on its cover. Free text boxes
         /// and placed items (signatures, images) keep their own size and orientation and follow
-        /// their center to the same page spot - their content renders upright either way.</summary>
+        /// their center to the same page spot.</summary>
         public static void Remap(IEnumerable<PageAnnotation> annots, int delta, double oldW, double oldH)
         {
             int d = ((delta % 360) + 360) % 360;
@@ -51,10 +52,21 @@ namespace KillerPDF.Services
                     Math.Max(0, Math.Min(py, Math.Max(0, newH - h))));
             }
 
-            foreach (var annot in annots)
+            // The replacement text of an in-place edit sits on a cover that turns with the page, so it
+            // turns too and stays aligned with what it replaced. Free text keeps its own orientation.
+            var list = annots as IList<PageAnnotation> ?? [.. annots];
+            var coverPairs = new HashSet<string>(list.OfType<CoverAnnotation>()
+                .Where(c => c.PairId.Length > 0).Select(c => c.PairId));
+
+            foreach (var annot in list)
             {
                 switch (annot)
                 {
+                    case TextAnnotation edit when edit.PairId.Length > 0 && coverPairs.Contains(edit.PairId):
+                        edit.Position = MapRect(new Rect(edit.Position, edit.FootprintSize)).Location;
+                        edit.Rotation = TextTurn.Normalize(edit.Rotation + d);
+                        break;
+
                     case HighlightAnnotation ha:   // includes CoverAnnotation
                         ha.Bounds = MapRect(ha.Bounds);
                         if (ha.Erases != null)

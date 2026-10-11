@@ -79,6 +79,15 @@ namespace KillerPDF
         public Color GetFill() => Color.FromArgb(BgA, BgR, BgG, BgB);
         public void SetFill(Color c) { BgR = c.R; BgG = c.G; BgB = c.B; BgA = c.A; }
         public bool HasFill => BgA > 0;
+
+        // Clockwise turn on screen (0, 90, 180 or 270) from left-to-right reading, so an edit of
+        // sideways or upside-down text reads the same way as the text it replaces. Width runs along
+        // the reading direction and Height across the lines. Text placed before turns existed has 0.
+        public int Rotation { get; set; }
+
+        // Position is the top-left of the box as it sits on the canvas; a quarter turn swaps the
+        // box's width and height there.
+        public Size FootprintSize => Rotation is 90 or 270 ? new Size(Height, Width) : new Size(Width, Height);
     }
 
     public class InkAnnotation : PageAnnotation

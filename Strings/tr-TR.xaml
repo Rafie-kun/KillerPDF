@@ -752,7 +752,6 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_St_AlreadyEditHere">Burada zaten bir düzenleme var - yeniden düzenlemek için metnine tıklayın veya örtüyü sürükleyin</sys:String>
     <sys:String x:Key="Str_St_NoTextLine">Bu konumda metin satırı bulunamadı</sys:String>
     <sys:String x:Key="Str_St_LineAlreadyEdited">Bu satır zaten düzenlendi - değiştirmek için metnine tıklayın</sys:String>
-    <sys:String x:Key="Str_St_TurnedTextEdit">Yan veya ters duran metin henüz yerinde düzenlenemiyor. Sayfayı metin düz okunacak şekilde döndürün, sonra düzenleyin.</sys:String>
     <sys:String x:Key="Str_St_ImagePlaced">Resim yerleştirildi - yeniden konumlandırmak için sürükleyin, boyutlandırmak için köşe tutamacını kullanın</sys:String>
     <sys:String x:Key="Str_St_ClipImageUnreadable">Pano resmi okunamadı</sys:String>
     <sys:String x:Key="Str_St_PastedImage">Resim yapıştırıldı - yeniden konumlandırmak için sürükleyin, boyutlandırmak için köşe tutamacını kullanın</sys:String>

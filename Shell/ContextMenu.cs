@@ -417,6 +417,7 @@ namespace KillerPDF
                 Underline = t.Underline,
                 Width = t.Width,
                 Height = t.Height,
+                Rotation = t.Rotation,
                 ColorR = t.ColorR,
                 ColorG = t.ColorG,
                 ColorB = t.ColorB,
@@ -549,8 +550,9 @@ namespace KillerPDF
         {
             if (hit is TextAnnotation ta)
             {
-                var p = new Point(ta.Position.X + Math.Min(Math.Max(ta.Width, 8) / 2, 10),
-                                  ta.Position.Y + Math.Min(Math.Max(ta.Height, 8) / 2, 8));
+                Size footprint = ta.FootprintSize;
+                var p = new Point(ta.Position.X + Math.Min(Math.Max(footprint.Width, 8) / 2, 10),
+                                  ta.Position.Y + Math.Min(Math.Max(footprint.Height, 8) / 2, 8));
                 EditTextAtPosition(p, ta.PageIndex);
             }
         }
