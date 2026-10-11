@@ -827,8 +827,21 @@ internal static class PdfJpegDecoder
             component.DcPredictor += Receive(bits, category);
             coefficients[0] = component.DcPredictor;
             bool hasAc = false;
+            short[] fastAc = ac.FastAc;
             for (int index = 1; index < 64;)
             {
+                // A short code whose value bits also fit the lookahead decodes in one step,
+                // with the same run, value and bounds as the general path below.
+                if (bits.TryPeekBits(HuffmanTable.FastBits, out int peek) && fastAc[peek] != 0)
+                {
+                    int entry = fastAc[peek];
+                    bits.SkipBits(entry & 15);
+                    index += (entry >> 4) & 15;
+                    if (index >= 64) throw Error("A JPEG AC coefficient is invalid.");
+                    coefficients[ZigZag[index++]] = entry >> 8;
+                    hasAc = true;
+                    continue;
+                }
                 int value = ac.Decode(bits);
                 int run = value >> 4;
                 int size = value & 15;
@@ -1191,7 +1204,14 @@ internal static class PdfJpegDecoder
 
     private sealed class HuffmanTable
     {
+        internal const int FastBits = 9;
         private readonly ushort[] _lookahead = new ushort[256];
+
+        /// <summary>
+        /// For AC tables: by the next nine bits, the coefficient value, zero run and total bit
+        /// count of a code whose value bits also fit those nine bits, or zero otherwise.
+        /// </summary>
+        internal short[] FastAc { get; } = new short[1 << FastBits];
         private readonly int[] _firstCode = new int[17];
         private readonly int[] _counts = new int[17];
         private readonly int[] _firstSymbol = new int[17];
@@ -1218,6 +1238,28 @@ internal static class PdfJpegDecoder
                 }
                 code <<= 1;
             }
+            BuildFastAc();
+        }
+
+        private void BuildFastAc()
+        {
+            for (int length = 1; length <= FastBits; length++)
+                for (int index = 0; index < _counts[length]; index++)
+                {
+                    int code = _firstCode[length] + index;
+                    int symbol = _symbols[_firstSymbol[length] + index];
+                    int run = symbol >> 4, size = symbol & 15;
+                    if (size == 0 || length + size > FastBits) continue;
+                    int span = 1 << (FastBits - length);
+                    for (int fill = 0; fill < span; fill++)
+                    {
+                        int window = code << (FastBits - length) | fill;
+                        int raw = window >> (FastBits - length - size) & ((1 << size) - 1);
+                        int value = raw >= 1 << (size - 1) ? raw : raw - (1 << size) + 1;
+                        if (value is < -128 or > 127) continue;
+                        FastAc[window] = (short)(value << 8 | run << 4 | (length + size));
+                    }
+                }
         }
 
         internal int Decode(BitReader bits)
@@ -1237,6 +1279,30 @@ internal static class PdfJpegDecoder
                 bits.SkipBits(8);
                 firstLength = 9;
             }
+            else
+                return DecodeBitwise(bits, 0, 1);
+            // A long code resolves from one peek when sixteen bits are buffered; nearer the
+            // end of the scan it is read bit by bit as before.
+            if (bits.TryPeekBits(8, out int rest))
+            {
+                int window = prefix << 8 | rest;
+                for (int length = 9; length <= 16; length++)
+                {
+                    int candidate = window >> (16 - length);
+                    int index = candidate - _firstCode[length];
+                    if ((uint)index < (uint)_counts[length])
+                    {
+                        bits.SkipBits(length - 8);
+                        return _symbols[_firstSymbol[length] + index];
+                    }
+                }
+                throw new PdfFilterException("The JPEG scan contains an invalid Huffman code.");
+            }
+            return DecodeBitwise(bits, code, firstLength);
+        }
+
+        private int DecodeBitwise(BitReader bits, int code, int firstLength)
+        {
             for (int length = firstLength; length <= 16; length++)
             {
                 code = code << 1 | bits.ReadBits(1);
@@ -1252,7 +1318,7 @@ internal static class PdfJpegDecoder
     {
         private int _position = position;
         private int _bits;
-        private int _buffer;
+        private ulong _buffer;
 
         internal int Position => _position;
 
@@ -1276,7 +1342,7 @@ internal static class PdfJpegDecoder
                 result = 0;
                 return false;
             }
-            result = _buffer >> (_bits - count) & ((1 << count) - 1);
+            result = (int)(_buffer >> (_bits - count)) & ((1 << count) - 1);
             return true;
         }
 
@@ -1284,9 +1350,12 @@ internal static class PdfJpegDecoder
         private bool TryFillBits(int count)
         {
             ReadOnlySpan<byte> bytes = source.Span;
-            while (_bits < count)
+            // Bytes are buffered ahead, up to the next marker, so most reads need no refill.
+            // A marker stops the buffering where it stood before, and only a read needing
+            // more bits than remain ahead of it fails.
+            while (_bits <= 56)
             {
-                if (_position >= bytes.Length) return false;
+                if (_position >= bytes.Length) return _bits >= count;
                 int value = bytes[_position++];
                 if (value == 0xFF)
                 {
@@ -1295,10 +1364,10 @@ internal static class PdfJpegDecoder
                     if (_position >= bytes.Length || bytes[_position++] != 0)
                     {
                         _position = markerPosition;
-                        return false;
+                        return _bits >= count;
                     }
                 }
-                _buffer = _buffer << 8 | value;
+                _buffer = _buffer << 8 | (uint)value;
                 _bits += 8;
             }
             return true;
