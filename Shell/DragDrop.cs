@@ -537,14 +537,18 @@ namespace KillerPDF
                 PageList.Items.Count, fromIndices, insertionIndex);
             if (order.SequenceEqual(Enumerable.Range(0, PageList.Items.Count))) return;
             IReadOnlyList<int> selectedAfter = [];
-            SaveTempAndReload(
-                finalizeSavedFile: path =>
-                    selectedAfter = PdfEngineIntegration.MovePages(path, fromIndices, insertionIndex),
-                remapRotations: rotations =>
-                    PdfEngineIntegration.RemapRotationsAfterPageMoves(
-                        rotations, fromIndices, insertionIndex),
-                selectedPageAfterReload: Enumerable.Range(0, order.Count)
-                    .First(index => order[index] == fromIndices[0]));
+            ReloadWithRemappedAnnotations(
+                annotations => PageAnnotationInsertion.Reorder(annotations, order),
+                documentUndo => SaveTempAndReload(
+                    keepAnnotations: true,
+                    finalizeSavedFile: path =>
+                        selectedAfter = PdfEngineIntegration.MovePages(path, fromIndices, insertionIndex),
+                    remapRotations: rotations =>
+                        PdfEngineIntegration.RemapRotationsAfterPageMoves(
+                            rotations, fromIndices, insertionIndex),
+                    selectedPageAfterReload: Enumerable.Range(0, order.Count)
+                        .First(index => order[index] == fromIndices[0]),
+                    documentUndo: documentUndo));
             Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded, (Action)(() =>
             {
                 PageList.SelectedItems.Clear();

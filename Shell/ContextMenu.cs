@@ -300,13 +300,17 @@ namespace KillerPDF
             if (_doc is null || pageIdx < 0 || pageIdx >= _doc.PageCount) return;
             try
             {
-                SaveTempAndReload(
-                    finalizeSavedFile: path =>
-                        PdfEngineIntegration.DuplicatePage(path, pageIdx),
-                    remapRotations: rotations =>
-                        PdfEngineIntegration.RemapRotationsAfterPageDuplication(
-                            rotations, pageIdx),
-                    selectedPageAfterReload: pageIdx + 1);
+                ReloadWithRemappedAnnotations(
+                    annotations => PageAnnotationInsertion.Shift(annotations, pageIdx + 1, 1),
+                    documentUndo => SaveTempAndReload(
+                        keepAnnotations: true,
+                        finalizeSavedFile: path =>
+                            PdfEngineIntegration.DuplicatePage(path, pageIdx),
+                        remapRotations: rotations =>
+                            PdfEngineIntegration.RemapRotationsAfterPageDuplication(
+                                rotations, pageIdx),
+                        selectedPageAfterReload: pageIdx + 1,
+                        documentUndo: documentUndo));
                 SetStatus(string.Format(Loc("Str_St_DuplicatedPage"), pageIdx + 1));
             }
             catch (Exception ex)

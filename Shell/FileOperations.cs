@@ -818,13 +818,18 @@ namespace KillerPDF
                         [.. pages.Select(page => page.Rotation)]));
                 }
                 int insertAt = insertionIndex ?? _doc.PageCount;
-                SaveTempAndReload(
-                    finalizeSavedFile: path =>
-                        PdfEngineIntegration.InsertDocuments(path, imports, insertAt),
-                    remapRotations: rotations =>
-                        PdfEngineIntegration.RemapRotationsAfterDocumentInsertion(
-                            rotations, imports, insertAt),
-                    selectedPageAfterReload: insertionIndex);
+                int importedPages = imports.Sum(import => import.PageRotations.Count);
+                ReloadWithRemappedAnnotations(
+                    annotations => PageAnnotationInsertion.Shift(annotations, insertAt, importedPages),
+                    documentUndo => SaveTempAndReload(
+                        keepAnnotations: true,
+                        finalizeSavedFile: path =>
+                            PdfEngineIntegration.InsertDocuments(path, imports, insertAt),
+                        remapRotations: rotations =>
+                            PdfEngineIntegration.RemapRotationsAfterDocumentInsertion(
+                                rotations, imports, insertAt),
+                        selectedPageAfterReload: insertionIndex,
+                        documentUndo: documentUndo));
                 SetStatus(string.Format(Loc("Str_St_Merged"), dlg.FileNames.Length, _doc?.PageCount));
             }
             catch (Exception ex)
