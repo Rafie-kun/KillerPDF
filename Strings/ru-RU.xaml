@@ -573,7 +573,7 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_AutoBookmarks_Invalid">Введите положительный размер в пунктах и длину заголовка, а также глубину от 1 до 256.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_InvalidPattern">Шаблон заголовка недопустим.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Review">Просмотр предлагаемых закладок</sys:String>
-    <sys:String x:Key="Str_AutoBookmarks_ReviewHelp">Выбранные заголовки будут добавлены к существующим закладкам. Перед сохранением измените название или снимите флажок.</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_ReviewHelp">Выбранные заголовки будут добавлены к существующим закладкам. Перед сохранением измените название или уровень либо снимите флажок.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Include">Добавить</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Title">Название</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Page">Страница</sys:String>
@@ -585,6 +585,11 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_AutoBookmarks_NoneFound">Нет заголовков, подходящих под эти параметры.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Added">Добавлено закладок: {0}</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Failed">Не удалось создать закладки:</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_UseTags">Использовать теги заголовков документа, если они есть</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_StyledHeadings">Находить также жирные и нумерованные заголовки размера основного текста</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_SkipRunning">Пропускать колонтитулы и номера страниц</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_NoText">В этом документе нет текста, в котором можно найти заголовки. Сначала выполните OCR, а затем снова создайте закладки.</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_InvalidLevel">Каждый уровень должен быть целым числом от 1 до 256.</sys:String>
     <sys:String x:Key="Str_Navigation_RemoveUnsafe">Удалить ссылки с небезопасными или недопустимыми веб-адресами</sys:String>
     <sys:String x:Key="Str_Navigation_RemoveUnresolved">Удалить ссылки на назначения, которые не найдены</sys:String>
     <sys:String x:Key="Str_Navigation_Repair">Исправить выбранные</sys:String>

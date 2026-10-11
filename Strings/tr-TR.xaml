@@ -491,7 +491,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_AutoBookmarks_Invalid">Pozitif bir punto boyutu ve başlık uzunluğu ile 1 ile 256 arasında bir derinlik girin.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_InvalidPattern">Başlık deseni geçerli değil.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Review">Yer imi önerilerini gözden geçir</sys:String>
-    <sys:String x:Key="Str_AutoBookmarks_ReviewHelp">Seçilen başlıklar mevcut yer imlerine eklenecek. Kaydetmeden önce bir başlığı düzenleyin veya onay kutusunu temizleyin.</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_ReviewHelp">Seçilen başlıklar mevcut yer imlerine eklenecek. Kaydetmeden önce bir başlığı veya düzeyi düzenleyin ya da onay kutusunu temizleyin.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Include">Ekle</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Title">Başlık</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Page">Sayfa</sys:String>
@@ -503,6 +503,11 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_AutoBookmarks_NoneFound">Bu ayarlarla eşleşen başlık adayı bulunamadı.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Added">{0} yer imi eklendi</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Failed">Yer imleri oluşturulamadı:</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_UseTags">Belgede varsa başlık etiketlerini kullan</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_StyledHeadings">Gövde metni boyutundaki kalın ve numaralı başlıkları da bul</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_SkipRunning">Yinelenen üst bilgileri, alt bilgileri ve sayfa numaralarını dışarıda bırak</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_NoText">Bu belgede başlık aranacak metin yok. Önce OCR çalıştırın, ardından yer imlerini yeniden oluşturun.</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_InvalidLevel">Her düzey 1 ile 256 arasında bir tam sayı olmalıdır.</sys:String>
     <sys:String x:Key="Str_Navigation_RemoveUnsafe">Güvenli olmayan veya geçersiz web adresleri içeren bağlantıları kaldır</sys:String>
     <sys:String x:Key="Str_Navigation_RemoveUnresolved">Hedefi bulunamayan bağlantıları kaldır</sys:String>
     <sys:String x:Key="Str_Navigation_Repair">Seçilenleri onar</sys:String>

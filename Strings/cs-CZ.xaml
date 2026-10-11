@@ -564,7 +564,7 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_AutoBookmarks_Invalid">Zadejte kladnou velikost v bodech a délku názvu a hloubku od 1 do 256.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_InvalidPattern">Vzor názvu není platný.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Review">Kontrola navržených záložek</sys:String>
-    <sys:String x:Key="Str_AutoBookmarks_ReviewHelp">Vybrané nadpisy budou přidány k existujícím záložkám. Před uložením upravte název nebo zrušte zaškrtnutí.</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_ReviewHelp">Vybrané nadpisy budou přidány k existujícím záložkám. Před uložením upravte název nebo úroveň, případně zrušte zaškrtnutí.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Include">Přidat</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Title">Název</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Page">Stránka</sys:String>
@@ -576,6 +576,11 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_AutoBookmarks_NoneFound">Těmto nastavením neodpovídají žádné nadpisy.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Added">Počet přidaných záložek: {0}</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Failed">Záložky se nepodařilo vytvořit:</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_UseTags">Použít značky nadpisů dokumentu, pokud je obsahuje</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_StyledHeadings">Hledat také tučné a číslované nadpisy ve velikosti běžného textu</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_SkipRunning">Vynechat průběžná záhlaví, zápatí a čísla stránek</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_NoText">Tento dokument neobsahuje text, ve kterém by bylo možné hledat nadpisy. Nejprve spusťte OCR a pak znovu vytvořte záložky.</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_InvalidLevel">Každá úroveň musí být celé číslo od 1 do 256.</sys:String>
     <sys:String x:Key="Str_Navigation_RemoveUnsafe">Odebrat odkazy s nebezpečnými nebo neplatnými webovými adresami</sys:String>
     <sys:String x:Key="Str_Navigation_RemoveUnresolved">Odebrat odkazy s cíli, které nelze najít</sys:String>
     <sys:String x:Key="Str_Navigation_Repair">Opravit vybrané</sys:String>

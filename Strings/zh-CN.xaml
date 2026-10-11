@@ -491,7 +491,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Invalid">请输入正数的字号和标题长度，以及 1 至 256 之间的深度。</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_InvalidPattern">标题模式无效。</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Review">查看书签建议</sys:String>
-    <sys:String x:Key="Str_AutoBookmarks_ReviewHelp">所选标题将添加到现有书签中。保存前可编辑标题或取消勾选复选框。</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_ReviewHelp">所选标题将添加到现有书签中。保存前可编辑标题或级别，或取消勾选复选框。</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Include">添加</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Title">标题</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Page">页</sys:String>
@@ -503,6 +503,11 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_NoneFound">没有符合这些设置的标题候选项。</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Added">已添加 {0} 个书签</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Failed">无法创建书签:</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_UseTags">文档包含标题标记时使用这些标记</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_StyledHeadings">同时查找正文字号的粗体和编号标题</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_SkipRunning">排除重复的页眉、页脚和页码</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_NoText">此文档没有可用于查找标题的文本。请先运行 OCR，然后重新创建书签。</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_InvalidLevel">每个级别必须是 1 至 256 之间的整数。</sys:String>
     <sys:String x:Key="Str_Navigation_RemoveUnsafe">移除网址不安全或无效的链接</sys:String>
     <sys:String x:Key="Str_Navigation_RemoveUnresolved">移除找不到目标的链接</sys:String>
     <sys:String x:Key="Str_Navigation_Repair">修复所选项</sys:String>

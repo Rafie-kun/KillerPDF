@@ -204,7 +204,8 @@ public sealed class PdfPageContentReader
         var text = PdfTextContentReader.ReadInstructions(instructions, fonts, cancellationToken: cancellationToken);
         return new PdfPageContent(box.Width, box.Height,
             text.Select(t => new PdfExtractedLetter(t.Text, t.Bounds, t.FontName, t.FontSize,
-                t.PointSize, t.Origin, t.AdvanceEnd)), images, interpretedInstructions,
+                t.PointSize, t.Origin, t.AdvanceEnd) { MarkedContentId = t.MarkedContentId }),
+            images, interpretedInstructions,
             paths, shadings, diagnostics);
 
         string Font(PdfObject value)

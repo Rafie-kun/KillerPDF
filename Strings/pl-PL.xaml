@@ -555,7 +555,7 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_AutoBookmarks_Invalid">Wpisz dodatni rozmiar w punktach i długość tytułu oraz głębokość od 1 do 256.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_InvalidPattern">Wzorzec tytułu jest nieprawidłowy.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Review">Przegląd proponowanych zakładek</sys:String>
-    <sys:String x:Key="Str_AutoBookmarks_ReviewHelp">Wybrane nagłówki zostaną dodane do istniejących zakładek. Przed zapisaniem zmień tytuł lub wyczyść jego pole wyboru.</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_ReviewHelp">Wybrane nagłówki zostaną dodane do istniejących zakładek. Przed zapisaniem zmień tytuł lub poziom albo wyczyść pole wyboru.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Include">Dodaj</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Title">Tytuł</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Page">Strona</sys:String>
@@ -567,6 +567,11 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_AutoBookmarks_NoneFound">Żaden nagłówek nie pasuje do tych ustawień.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Added">Dodano zakładek: {0}</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Failed">Nie można utworzyć zakładek:</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_UseTags">Użyj znaczników nagłówków dokumentu, jeśli je zawiera</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_StyledHeadings">Znajdź też pogrubione i numerowane nagłówki w rozmiarze tekstu</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_SkipRunning">Pomiń powtarzające się nagłówki i stopki stron oraz numery stron</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_NoText">Ten dokument nie zawiera tekstu, w którym można szukać nagłówków. Najpierw uruchom OCR, a następnie ponownie utwórz zakładki.</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_InvalidLevel">Każdy poziom musi być liczbą całkowitą od 1 do 256.</sys:String>
     <sys:String x:Key="Str_Navigation_RemoveUnsafe">Usuń linki z niebezpiecznymi lub nieprawidłowymi adresami internetowymi</sys:String>
     <sys:String x:Key="Str_Navigation_RemoveUnresolved">Usuń linki do miejsc docelowych, których nie można znaleźć</sys:String>
     <sys:String x:Key="Str_Navigation_Repair">Napraw wybrane</sys:String>

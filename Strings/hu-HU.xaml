@@ -573,7 +573,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_AutoBookmarks_Invalid">Adjon meg pozitív pontméretet és címhosszt, valamint 1 és 256 közötti mélységet.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_InvalidPattern">A címminta érvénytelen.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Review">Könyvjelzőjavaslatok áttekintése</sys:String>
-    <sys:String x:Key="Str_AutoBookmarks_ReviewHelp">A kijelölt címsorok hozzáadódnak a meglévő könyvjelzőkhöz. Mentés előtt szerkessze a címet, vagy törölje a jelölőnégyzetet.</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_ReviewHelp">A kijelölt címsorok hozzáadódnak a meglévő könyvjelzőkhöz. Mentés előtt szerkessze a címet vagy a szintet, vagy törölje a jelölőnégyzetet.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Include">Hozzáadás</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Title">Cím</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Page">Oldal</sys:String>
@@ -585,6 +585,11 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_AutoBookmarks_NoneFound">Egy címsor sem felel meg ezeknek a beállításoknak.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Added">{0} könyvjelző hozzáadva</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Failed">A könyvjelzők létrehozása nem sikerült:</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_UseTags">A dokumentum címsorcímkéinek használata, ha vannak</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_StyledHeadings">Félkövér és számozott címsorok keresése szövegméretben is</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_SkipRunning">Élőfejek, élőlábak és oldalszámok kihagyása</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_NoText">Ebben a dokumentumban nincs szöveg, amelyben címsorokat lehetne keresni. Először futtassa az OCR-t, majd hozza létre újra a könyvjelzőket.</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_InvalidLevel">Minden szintnek 1 és 256 közötti egész számnak kell lennie.</sys:String>
     <sys:String x:Key="Str_Navigation_RemoveUnsafe">Nem biztonságos vagy érvénytelen webcímet tartalmazó hivatkozások eltávolítása</sys:String>
     <sys:String x:Key="Str_Navigation_RemoveUnresolved">Nem található célú hivatkozások eltávolítása</sys:String>
     <sys:String x:Key="Str_Navigation_Repair">Kijelöltek javítása</sys:String>

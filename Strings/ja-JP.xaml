@@ -573,7 +573,7 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Invalid">正のポイントサイズとタイトル文字数、および 1 から 256 までの深さを入力してください。</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_InvalidPattern">タイトルパターンが無効です。</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Review">ブックマーク候補を確認</sys:String>
-    <sys:String x:Key="Str_AutoBookmarks_ReviewHelp">選択した見出しが既存のブックマークに追加されます。保存する前に、タイトルを編集するかチェックボックスをオフにしてください。</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_ReviewHelp">選択した見出しが既存のブックマークに追加されます。保存する前に、タイトルやレベルを編集するか、チェックボックスをオフにしてください。</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Include">追加</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Title">タイトル</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Page">ページ</sys:String>
@@ -585,6 +585,11 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_NoneFound">これらの設定に一致する見出し候補はありませんでした。</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Added">{0} 件のブックマークを追加しました</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Failed">ブックマークを作成できませんでした :</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_UseTags">文書に見出しタグがある場合はそれを使用する</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_StyledHeadings">本文と同じサイズの太字や番号付きの見出しも検出する</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_SkipRunning">繰り返されるヘッダー、フッター、ページ番号を除外する</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_NoText">この文書には見出しを検出できるテキストがありません。先に OCR を実行してから、もう一度ブックマークを作成してください。</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_InvalidLevel">各レベルは 1 から 256 までの整数で指定してください。</sys:String>
     <sys:String x:Key="Str_Navigation_RemoveUnsafe">安全でない、または無効な Web アドレスのリンクを削除</sys:String>
     <sys:String x:Key="Str_Navigation_RemoveUnresolved">リンク先が見つからないリンクを削除</sys:String>
     <sys:String x:Key="Str_Navigation_Repair">選択項目を修復</sys:String>

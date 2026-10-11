@@ -491,7 +491,7 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_AutoBookmarks_Invalid">একটি ধনাত্মক পয়েন্ট আকার ও শিরোনামের দৈর্ঘ্য, এবং ১ থেকে ২৫৬ এর মধ্যে একটি গভীরতা লিখুন।</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_InvalidPattern">শিরোনামের প্যাটার্নটি বৈধ নয়।</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Review">বুকমার্কের প্রস্তাব পর্যালোচনা করুন</sys:String>
-    <sys:String x:Key="Str_AutoBookmarks_ReviewHelp">নির্বাচিত শিরোনামগুলো বিদ্যমান বুকমার্কে যোগ করা হবে। সংরক্ষণের আগে একটি শিরোনাম সম্পাদনা করুন বা তার চেক বক্স অচিহ্নিত করুন।</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_ReviewHelp">নির্বাচিত শিরোনামগুলো বিদ্যমান বুকমার্কে যোগ করা হবে। সংরক্ষণের আগে একটি শিরোনাম বা স্তর সম্পাদনা করুন, অথবা তার চেক বক্স অচিহ্নিত করুন।</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Include">যোগ করুন</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Title">শিরোনাম</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Page">পৃষ্ঠা</sys:String>
@@ -503,6 +503,11 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_AutoBookmarks_NoneFound">এই সেটিংসের সাথে কোনো শিরোনাম মেলেনি।</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Added">{0}টি বুকমার্ক যোগ করা হয়েছে</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Failed">বুকমার্ক তৈরি করা যায়নি:</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_UseTags">নথিতে শিরোনাম ট্যাগ থাকলে সেগুলো ব্যবহার করুন</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_StyledHeadings">মূল লেখার আকারে বোল্ড ও সংখ্যাযুক্ত শিরোনামও খুঁজুন</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_SkipRunning">চলমান হেডার, ফুটার ও পৃষ্ঠা নম্বর বাদ দিন</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_NoText">এই নথিতে শিরোনাম খোঁজার মতো কোনো লেখা নেই। আগে OCR চালান, তারপর আবার বুকমার্ক তৈরি করুন।</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_InvalidLevel">প্রতিটি স্তর ১ থেকে ২৫৬ এর মধ্যে একটি পূর্ণসংখ্যা হতে হবে।</sys:String>
     <sys:String x:Key="Str_Navigation_RemoveUnsafe">অনিরাপদ বা অবৈধ ওয়েব ঠিকানাযুক্ত লিংক সরান</sys:String>
     <sys:String x:Key="Str_Navigation_RemoveUnresolved">গন্তব্য খুঁজে পাওয়া যায় না এমন লিংক সরান</sys:String>
     <sys:String x:Key="Str_Navigation_Repair">নির্বাচিতগুলো মেরামত করুন</sys:String>

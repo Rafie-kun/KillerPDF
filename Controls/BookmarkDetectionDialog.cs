@@ -11,6 +11,9 @@ internal sealed class BookmarkDetectionDialog : Window
     private readonly TextBox _maximumLength;
     private readonly TextBox _maximumDepth;
     private readonly TextBox _titlePattern;
+    private readonly CheckBox _useTags;
+    private readonly CheckBox _styledHeadings;
+    private readonly CheckBox _skipRunning;
 
     internal PdfBookmarkDetectionOptions? Options { get; private set; }
 
@@ -27,6 +30,9 @@ internal sealed class BookmarkDetectionDialog : Window
         _maximumLength = AddField(body, "Str_AutoBookmarks_MaximumLength", "160");
         _maximumDepth = AddField(body, "Str_AutoBookmarks_MaximumDepth", "6");
         _titlePattern = AddField(body, "Str_AutoBookmarks_TitlePattern", string.Empty);
+        _useTags = AddOption(body, "Str_AutoBookmarks_UseTags");
+        _styledHeadings = AddOption(body, "Str_AutoBookmarks_StyledHeadings");
+        _skipRunning = AddOption(body, "Str_AutoBookmarks_SkipRunning");
 
         var cancel = UiKit.Make(L("Str_Btn_Cancel"), accent: false);
         cancel.IsCancel = true;
@@ -65,7 +71,10 @@ internal sealed class BookmarkDetectionDialog : Window
             MinimumPointSize = minimumSize,
             MaximumTitleLength = maximumLength,
             MaximumDepth = maximumDepth,
-            TitlePattern = pattern.Length == 0 ? null : pattern
+            TitlePattern = pattern.Length == 0 ? null : pattern,
+            UseDocumentTags = _useTags.IsChecked == true,
+            DetectStyledHeadings = _styledHeadings.IsChecked == true,
+            ExcludeRunningText = _skipRunning.IsChecked == true
         };
         try
         {
@@ -92,6 +101,15 @@ internal sealed class BookmarkDetectionDialog : Window
         field.Margin = new Thickness(0, 0, 0, 10);
         body.Children.Add(field);
         return field;
+    }
+
+    private static CheckBox AddOption(StackPanel body, string labelKey)
+    {
+        CheckBox option = UiKit.CheckBox(L(labelKey));
+        option.IsChecked = true;
+        option.Margin = new Thickness(0, 2, 0, 6);
+        body.Children.Add(option);
+        return option;
     }
 
     private static string L(string key) =>

@@ -573,7 +573,7 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_AutoBookmarks_Invalid">Digite um tamanho em pontos e um comprimento de título positivos, e uma profundidade de 1 a 256.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_InvalidPattern">O padrão de título não é válido.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Review">Revisar propostas de marcadores</sys:String>
-    <sys:String x:Key="Str_AutoBookmarks_ReviewHelp">Os títulos selecionados serão adicionados aos marcadores existentes. Edite um título ou desmarque sua caixa de seleção antes de salvar.</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_ReviewHelp">Os títulos selecionados serão adicionados aos marcadores existentes. Edite um título ou nível, ou desmarque sua caixa de seleção, antes de salvar.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Include">Adicionar</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Title">Título</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Page">Página</sys:String>
@@ -585,6 +585,11 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_AutoBookmarks_NoneFound">Nenhum candidato a título correspondeu a essas configurações.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Added">{0} marcador(es) adicionado(s)</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Failed">Não foi possível criar os marcadores:</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_UseTags">Usar as marcas de título do documento quando ele as tiver</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_StyledHeadings">Encontrar também títulos em negrito e numerados no tamanho do texto</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_SkipRunning">Ignorar cabeçalhos e rodapés repetidos e números de página</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_NoText">Este documento não tem texto para procurar títulos. Execute o OCR primeiro e depois crie os marcadores novamente.</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_InvalidLevel">Cada nível deve ser um número inteiro de 1 a 256.</sys:String>
     <sys:String x:Key="Str_Navigation_RemoveUnsafe">Remover links com endereços da web inseguros ou inválidos</sys:String>
     <sys:String x:Key="Str_Navigation_RemoveUnresolved">Remover links com destinos que não podem ser encontrados</sys:String>
     <sys:String x:Key="Str_Navigation_Repair">Reparar selecionados</sys:String>

@@ -493,7 +493,7 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Invalid">請輸入正數的字級和標題長度，以及 1 至 256 之間的深度。</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_InvalidPattern">標題模式無效。</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Review">檢視書籤建議</sys:String>
-    <sys:String x:Key="Str_AutoBookmarks_ReviewHelp">所選標題將新增到現有書籤中。儲存前可編輯標題或取消勾選核取方塊。</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_ReviewHelp">所選標題將新增到現有書籤中。儲存前可編輯標題或層級，或取消勾選核取方塊。</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Include">新增</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Title">標題</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Page">頁</sys:String>
@@ -505,6 +505,11 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_NoneFound">沒有符合這些設定的標題候選項目。</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Added">已新增 {0} 個書籤</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Failed">無法建立書籤:</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_UseTags">文件含有標題標記時使用這些標記</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_StyledHeadings">同時尋找內文字級的粗體和編號標題</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_SkipRunning">排除重複的頁首、頁尾和頁碼</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_NoText">此文件沒有可用來尋找標題的文字。請先執行 OCR，再重新建立書籤。</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_InvalidLevel">每個層級必須是 1 至 256 之間的整數。</sys:String>
     <sys:String x:Key="Str_Navigation_RemoveUnsafe">移除網址不安全或無效的連結</sys:String>
     <sys:String x:Key="Str_Navigation_RemoveUnresolved">移除找不到目標的連結</sys:String>
     <sys:String x:Key="Str_Navigation_Repair">修復所選項目</sys:String>

@@ -546,7 +546,7 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_AutoBookmarks_Invalid">Оң пункт өлшемін және атау ұзындығын, сондай-ақ 1-ден 256-ға дейінгі тереңдікті енгізіңіз.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_InvalidPattern">Атау үлгісі жарамсыз.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Review">Ұсынылған бетбелгілерді қарап шығу</sys:String>
-    <sys:String x:Key="Str_AutoBookmarks_ReviewHelp">Таңдалған тақырыптар бар бетбелгілерге қосылады. Сақтау алдында атауды өңдеңіз немесе құсбелгіні алып тастаңыз.</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_ReviewHelp">Таңдалған тақырыптар бар бетбелгілерге қосылады. Сақтау алдында атауды не деңгейді өңдеңіз немесе құсбелгіні алып тастаңыз.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Include">Қосу</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Title">Атауы</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Page">Бет</sys:String>
@@ -558,6 +558,11 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_AutoBookmarks_NoneFound">Бұл параметрлерге сәйкес келетін тақырыптар табылмады.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Added">{0} бетбелгі қосылды</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Failed">Бетбелгілерді жасау мүмкін болмады:</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_UseTags">Құжатта тақырып тегтері болса, соларды пайдалану</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_StyledHeadings">Мәтін өлшеміндегі жуан және нөмірленген тақырыптарды да табу</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_SkipRunning">Қайталанатын жоғарғы және төменгі колонтитулдарды және бет нөмірлерін қоспау</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_NoText">Бұл құжатта тақырып іздейтін мәтін жоқ. Алдымен OCR іске қосып, содан кейін бетбелгілерді қайта жасаңыз.</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_InvalidLevel">Әр деңгей 1-ден 256-ға дейінгі бүтін сан болуы керек.</sys:String>
     <sys:String x:Key="Str_Navigation_RemoveUnsafe">Қауіпті немесе жарамсыз веб-мекенжайлары бар сілтемелерді жою</sys:String>
     <sys:String x:Key="Str_Navigation_RemoveUnresolved">Межелі орны табылмаған сілтемелерді жою</sys:String>
     <sys:String x:Key="Str_Navigation_Repair">Таңдалғандарды жөндеу</sys:String>

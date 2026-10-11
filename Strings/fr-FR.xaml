@@ -573,7 +573,7 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_AutoBookmarks_Invalid">Saisissez une taille en points et une longueur de titre positives, ainsi qu'une profondeur de 1 à 256.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_InvalidPattern">Le modèle de titre n'est pas valide.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Review">Vérifier les signets proposés</sys:String>
-    <sys:String x:Key="Str_AutoBookmarks_ReviewHelp">Les titres sélectionnés seront ajoutés aux signets existants. Modifiez un titre ou décochez sa case avant d'enregistrer.</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_ReviewHelp">Les titres sélectionnés seront ajoutés aux signets existants. Modifiez un titre ou un niveau, ou décochez sa case, avant d'enregistrer.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Include">Ajouter</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Title">Titre</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Page">Page</sys:String>
@@ -585,6 +585,11 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_AutoBookmarks_NoneFound">Aucun titre candidat ne correspond à ces paramètres.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Added">{0} signet(s) ajouté(s)</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Failed">Impossible de créer les signets :</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_UseTags">Utiliser les balises de titre du document s'il en contient</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_StyledHeadings">Rechercher aussi les titres en gras et numérotés à la taille du texte</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_SkipRunning">Exclure les en-têtes et pieds de page courants et les numéros de page</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_NoText">Ce document ne contient aucun texte dans lequel rechercher des titres. Lancez d'abord l'OCR, puis créez de nouveau les signets.</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_InvalidLevel">Chaque niveau doit être un nombre entier de 1 à 256.</sys:String>
     <sys:String x:Key="Str_Navigation_RemoveUnsafe">Supprimer les liens dont l'adresse web est dangereuse ou non valide</sys:String>
     <sys:String x:Key="Str_Navigation_RemoveUnresolved">Supprimer les liens dont la destination est introuvable</sys:String>
     <sys:String x:Key="Str_Navigation_Repair">Réparer la sélection</sys:String>

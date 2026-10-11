@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -27,6 +28,7 @@ internal sealed class BookmarkReviewDialog : Window
         buttonsPanel.Children.Add(new TextBlock
         {
             Text = L("Str_AutoBookmarks_ReviewHelp"),
+            Foreground = UiKit.Brush("MutedTextBrush"),
             TextWrapping = TextWrapping.Wrap,
             Margin = new Thickness(0, 10, 0, 4)
         });
@@ -53,14 +55,22 @@ internal sealed class BookmarkReviewDialog : Window
             include.HorizontalAlignment = HorizontalAlignment.Center;
             TextBox title = UiKit.Field();
             title.Text = proposal.Title;
-            title.Margin = new Thickness(0, 0, 8, 0);
+            TextBox level = UiKit.Field();
+            level.Text = (proposal.Level + 1).ToString(CultureInfo.CurrentCulture);
+            level.HorizontalContentAlignment = HorizontalAlignment.Center;
+            level.Margin = new Thickness(8, 0, 8, 0);
+            // The title steps in with its level so the hierarchy reads at a glance.
+            void Indent() => title.Margin = new Thickness(
+                TryLevel(level.Text, out int value) ? Math.Min(value - 1, 8) * 16 : 0, 0, 8, 0);
+            level.TextChanged += (_, _) => Indent();
+            Indent();
             Add(grid, include, 0);
             Add(grid, title, 1);
             Add(grid, Value((proposal.PageIndex + 1).ToString()), 2);
             Add(grid, Value(proposal.PointSize.ToString("0.##")), 3);
-            Add(grid, Value((proposal.Level + 1).ToString()), 4);
+            Add(grid, level, 4);
             list.Children.Add(grid);
-            _rows.Add(new ProposalRow(proposal, include, title));
+            _rows.Add(new ProposalRow(proposal, include, title, level));
         }
 
         var header = new Grid();
@@ -99,6 +109,13 @@ internal sealed class BookmarkReviewDialog : Window
                 "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
+        if (_rows.Where(row => row.Include.IsChecked == true)
+            .Any(row => !TryLevel(row.Level.Text, out _)))
+        {
+            KillerDialog.Show(this, L("Str_AutoBookmarks_InvalidLevel"),
+                "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
         if (_rows.All(row => row.Include.IsChecked != true))
         {
             KillerDialog.Show(this, L("Str_AutoBookmarks_NoneSelected"),
@@ -109,6 +126,7 @@ internal sealed class BookmarkReviewDialog : Window
         Proposals = [.. _rows.Select(row => row.Proposal with
         {
             Title = row.Title.Text.Trim(),
+            Level = TryLevel(row.Level.Text, out int level) ? level - 1 : row.Proposal.Level,
             Decision = row.Include.IsChecked == true
                 ? PdfBookmarkProposalDecision.Accepted
                 : PdfBookmarkProposalDecision.Rejected
@@ -117,9 +135,14 @@ internal sealed class BookmarkReviewDialog : Window
         Close();
     }
 
+    private static bool TryLevel(string text, out int level) =>
+        int.TryParse(text.Trim(), NumberStyles.Integer, CultureInfo.CurrentCulture, out level)
+        && level is >= 1 and <= 256;
+
     private static TextBlock Value(string text) => new()
     {
         Text = text,
+        Foreground = UiKit.Brush("TextBrush"),
         VerticalAlignment = VerticalAlignment.Center,
         HorizontalAlignment = HorizontalAlignment.Center
     };
@@ -131,7 +154,7 @@ internal sealed class BookmarkReviewDialog : Window
     }
 
     private sealed record ProposalRow(
-        PdfBookmarkProposal Proposal, CheckBox Include, TextBox Title);
+        PdfBookmarkProposal Proposal, CheckBox Include, TextBox Title, TextBox Level);
 
     private static string L(string key) =>
         Application.Current?.TryFindResource(key) as string ?? key;

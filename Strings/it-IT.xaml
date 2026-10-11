@@ -573,7 +573,7 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_AutoBookmarks_Invalid">Immettere una dimensione in punti e una lunghezza del titolo positive e una profondità da 1 a 256.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_InvalidPattern">Il modello del titolo non è valido.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Review">Rivedi i segnalibri proposti</sys:String>
-    <sys:String x:Key="Str_AutoBookmarks_ReviewHelp">I titoli selezionati verranno aggiunti ai segnalibri esistenti. Modificare un titolo o deselezionarne la casella prima di salvare.</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_ReviewHelp">I titoli selezionati verranno aggiunti ai segnalibri esistenti. Modificare un titolo o un livello, oppure deselezionarne la casella, prima di salvare.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Include">Aggiungi</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Title">Titolo</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Page">Pagina</sys:String>
@@ -585,6 +585,11 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_AutoBookmarks_NoneFound">Nessun titolo candidato corrisponde a queste impostazioni.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Added">Aggiunti {0} segnalibro/i</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Failed">Impossibile creare i segnalibri:</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_UseTags">Usa i tag di titolo del documento, se presenti</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_StyledHeadings">Trova anche i titoli in grassetto e numerati alla dimensione del testo</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_SkipRunning">Escludi intestazioni e piè di pagina ricorrenti e numeri di pagina</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_NoText">Questo documento non contiene testo in cui cercare i titoli. Eseguire prima l'OCR, quindi creare di nuovo i segnalibri.</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_InvalidLevel">Ogni livello deve essere un numero intero da 1 a 256.</sys:String>
     <sys:String x:Key="Str_Navigation_RemoveUnsafe">Rimuovi i collegamenti con indirizzi web non sicuri o non validi</sys:String>
     <sys:String x:Key="Str_Navigation_RemoveUnresolved">Rimuovi i collegamenti con destinazioni non trovate</sys:String>
     <sys:String x:Key="Str_Navigation_Repair">Ripara selezionati</sys:String>

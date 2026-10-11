@@ -496,7 +496,8 @@ public partial class MainWindow
                 PdfEngineIntegration.DetectBookmarkHeadings(_currentFile, detection.Options);
             if (proposals.Count == 0)
             {
-                KillerDialog.Show(this, Loc("Str_AutoBookmarks_NoneFound"),
+                KillerDialog.Show(this, Loc(PdfEngineIntegration.HasTextLayer(_currentFile)
+                        ? "Str_AutoBookmarks_NoneFound" : "Str_AutoBookmarks_NoText"),
                     "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }

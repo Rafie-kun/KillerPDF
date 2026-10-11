@@ -491,7 +491,7 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_AutoBookmarks_Invalid">Geben Sie eine positive Punktgröße und Titellänge sowie eine Tiefe von 1 bis 256 ein.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_InvalidPattern">Das Titelmuster ist ungültig.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Review">Lesezeichenvorschläge prüfen</sys:String>
-    <sys:String x:Key="Str_AutoBookmarks_ReviewHelp">Die ausgewählten Überschriften werden zu den vorhandenen Lesezeichen hinzugefügt. Bearbeiten Sie einen Titel oder deaktivieren Sie sein Kontrollkästchen, bevor Sie speichern.</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_ReviewHelp">Die ausgewählten Überschriften werden zu den vorhandenen Lesezeichen hinzugefügt. Bearbeiten Sie einen Titel oder eine Ebene oder deaktivieren Sie das Kontrollkästchen, bevor Sie speichern.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Include">Hinzufügen</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Title">Titel</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Page">Seite</sys:String>
@@ -503,6 +503,11 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_AutoBookmarks_NoneFound">Mit diesen Einstellungen wurden keine Überschriftenkandidaten gefunden.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Added">{0} Lesezeichen hinzugefügt</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Failed">Die Lesezeichen konnten nicht erstellt werden:</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_UseTags">Überschriften-Tags des Dokuments verwenden, sofern vorhanden</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_StyledHeadings">Auch fette und nummerierte Überschriften in Textgröße finden</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_SkipRunning">Kopf- und Fußzeilen sowie Seitenzahlen auslassen</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_NoText">Dieses Dokument enthält keinen Text, in dem Überschriften gefunden werden können. Führen Sie zuerst OCR aus und erstellen Sie dann die Lesezeichen erneut.</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_InvalidLevel">Jede Ebene muss eine ganze Zahl von 1 bis 256 sein.</sys:String>
     <sys:String x:Key="Str_Navigation_RemoveUnsafe">Links mit unsicheren oder ungültigen Webadressen entfernen</sys:String>
     <sys:String x:Key="Str_Navigation_RemoveUnresolved">Links mit nicht auffindbaren Zielen entfernen</sys:String>
     <sys:String x:Key="Str_Navigation_Repair">Auswahl reparieren</sys:String>

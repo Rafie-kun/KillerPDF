@@ -573,7 +573,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_AutoBookmarks_Invalid">Nhập cỡ điểm và độ dài tiêu đề là số dương, cùng độ sâu từ 1 đến 256.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_InvalidPattern">Mẫu tiêu đề không hợp lệ.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Review">Xem lại các dấu trang đề xuất</sys:String>
-    <sys:String x:Key="Str_AutoBookmarks_ReviewHelp">Các tiêu đề đã chọn sẽ được thêm vào các dấu trang hiện có. Hãy chỉnh sửa tiêu đề hoặc bỏ chọn hộp kiểm trước khi lưu.</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_ReviewHelp">Các tiêu đề đã chọn sẽ được thêm vào các dấu trang hiện có. Hãy chỉnh sửa tiêu đề hoặc cấp, hoặc bỏ chọn hộp kiểm trước khi lưu.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Include">Thêm</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Title">Tiêu đề</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Page">Trang</sys:String>
@@ -585,6 +585,11 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_AutoBookmarks_NoneFound">Không có tiêu đề nào phù hợp với các cài đặt này.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Added">Đã thêm {0} dấu trang</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Failed">Không thể tạo dấu trang:</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_UseTags">Dùng thẻ tiêu đề của tài liệu nếu có</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_StyledHeadings">Tìm cả tiêu đề in đậm và có đánh số ở cỡ chữ văn bản</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_SkipRunning">Bỏ qua đầu trang, chân trang lặp lại và số trang</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_NoText">Tài liệu này không có văn bản để tìm tiêu đề. Hãy chạy OCR trước, rồi tạo lại dấu trang.</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_InvalidLevel">Mỗi cấp phải là số nguyên từ 1 đến 256.</sys:String>
     <sys:String x:Key="Str_Navigation_RemoveUnsafe">Xóa các liên kết có địa chỉ web không an toàn hoặc không hợp lệ</sys:String>
     <sys:String x:Key="Str_Navigation_RemoveUnresolved">Xóa các liên kết có đích không tìm thấy</sys:String>
     <sys:String x:Key="Str_Navigation_Repair">Sửa mục đã chọn</sys:String>

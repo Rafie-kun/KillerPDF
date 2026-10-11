@@ -19,4 +19,6 @@ public sealed record PdfTextPlacement(
     public double PointSize { get; init; } = Math.Abs(FontSize);
     /// <summary>Gets the transformed glyph bounds.</summary>
     public PdfContentBounds Bounds { get; init; }
+    /// <summary>Gets the marked-content identifier of the innermost sequence that has one.</summary>
+    public int? MarkedContentId { get; init; }
 }

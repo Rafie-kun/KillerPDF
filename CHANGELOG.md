@@ -48,7 +48,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Added desktop portfolio controls for presentation, schema, sorting, folders, attachment values, and safe metadata removal.
 - Added desktop attachment management for names, descriptions, MIME types, relationships, and removal.
 - Added desktop table-of-contents authoring from document bookmarks, with clickable destinations and undo support.
-- Added reviewed desktop bookmark generation from detected document headings.
+- Added reviewed desktop bookmark generation from a tagged document's headings or from detected headings, including bold and numbered ones, leaving out running headers and page numbers, with editable levels.
 - Added desktop page-label range editing with decimal, Roman numeral, letter, and prefix-only styles.
 - Added desktop initial-view controls for opening page, zoom, layout, navigation panel, and viewer chrome.
 - Added startup update checks, enabled by default, with confirmation before updating and a shared toggle in About and the update dialog.

@@ -328,6 +328,16 @@ internal static class PdfEngineIntegration
             PdfDocument.Open(File.ReadAllBytes(path)), options);
     }
 
+    /// <summary>Whether any page has extractable text; a scan without OCR has none.</summary>
+    internal static bool HasTextLayer(string path)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        var reader = new PdfPageContentReader(PdfDocument.Open(File.ReadAllBytes(path)));
+        for (int page = 0; page < reader.PageCount; page++)
+            if (reader.Read(page).Letters.Count > 0) return true;
+        return false;
+    }
+
     internal static void ApplyBookmarkProposals(
         string path, IReadOnlyList<PdfBookmarkProposal> proposals)
     {

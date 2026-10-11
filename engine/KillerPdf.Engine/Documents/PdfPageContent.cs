@@ -25,6 +25,8 @@ public sealed record PdfExtractedLetter(string Value, PdfContentBounds BoundingB
 {
     /// <summary>Gets the glyph bounds in PDF points.</summary>
     public PdfContentBounds GlyphRectangle => BoundingBox;
+    /// <summary>Gets the marked-content identifier that tags this character, when it has one.</summary>
+    public int? MarkedContentId { get; init; }
     /// <summary>Gets the dominant direction of the transformed text advance.</summary>
     public PdfWritingDirection WritingDirection
     {

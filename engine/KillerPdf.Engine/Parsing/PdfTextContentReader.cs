@@ -53,7 +53,8 @@ public static class PdfTextContentReader
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maximumCharacters);
         var result = new List<PdfTextPlacement>();
         var stack = new Stack<State>();
-        var marked = new Stack<(int Start, PdfString? Replacement)>();
+        var marked = new Stack<(int Start, PdfString? Replacement, int? Mcid)>();
+        int? markedContentId = null;
         var state = new State(Matrix.Identity);
         Matrix text = Matrix.Identity, line = Matrix.Identity;
         bool insideText = false;
@@ -108,6 +109,7 @@ public static class PdfTextContentReader
                 {
                     FontName = font.FontName,
                     PointSize = pointSize,
+                    MarkedContentId = markedContentId,
                     Bounds = new PdfContentBounds(corners.Min(p => p.X), corners.Min(p => p.Y), corners.Max(p => p.X), corners.Max(p => p.Y))
                 });
                 double spacing = state.CharacterSpacing;
@@ -200,14 +202,23 @@ public static class PdfTextContentReader
                     Arity(instruction.Operator == "BMC" ? 1 : 2);
                     if (marked.Count >= 256) throw new FormatException("Marked content nesting limit exceeded.");
                     PdfString? replacement = null;
-                    if (args.Count == 2 && args[1] is PdfDictionary properties &&
-                        properties.TryGetValue(new PdfName("ActualText"u8), out var actual) && actual is PdfString actualText)
-                        replacement = actualText;
-                    marked.Push((result.Count, replacement));
+                    int? mcid = null;
+                    if (args.Count == 2 && args[1] is PdfDictionary properties)
+                    {
+                        if (properties.TryGetValue(new PdfName("ActualText"u8), out var actual) && actual is PdfString actualText)
+                            replacement = actualText;
+                        if (properties.TryGetValue(new PdfName("MCID"u8), out var id)
+                            && id is PdfInteger integer && integer.Value is >= 0 and <= int.MaxValue)
+                            mcid = (int)integer.Value;
+                    }
+                    marked.Push((result.Count, replacement, mcid));
+                    if (mcid is not null) markedContentId = mcid;
                     break;
                 case "EMC":
                     Arity(0);
                     if (!marked.TryPop(out var section)) throw new FormatException("Unbalanced marked content.");
+                    if (section.Mcid is not null)
+                        markedContentId = marked.FirstOrDefault(item => item.Mcid is not null).Mcid;
                     if (section.Replacement is not null && !marked.Any(m => m.Replacement is not null) && result.Count > section.Start)
                     {
                         if (section.Replacement.Bytes.Length > 4L * (maximumCharacters - emittedCharacters) + 3)

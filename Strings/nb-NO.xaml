@@ -573,7 +573,7 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_AutoBookmarks_Invalid">Angi en positiv punktstørrelse og tittellengde, og et dyp fra 1 til 256.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_InvalidPattern">Tittelmønsteret er ugyldig.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Review">Gjennomgå bokmerkeforslag</sys:String>
-    <sys:String x:Key="Str_AutoBookmarks_ReviewHelp">Valgte overskrifter legges til i de eksisterende bokmerkene. Rediger en tittel eller fjern avmerkingen før du lagrer.</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_ReviewHelp">Valgte overskrifter legges til i de eksisterende bokmerkene. Rediger en tittel eller et nivå, eller fjern avmerkingen, før du lagrer.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Include">Legg til</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Title">Tittel</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Page">Side</sys:String>
@@ -585,6 +585,11 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_AutoBookmarks_NoneFound">Ingen overskriftskandidater samsvarte med disse innstillingene.</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Added">La til {0} bokmerke(r)</sys:String>
     <sys:String x:Key="Str_AutoBookmarks_Failed">Kunne ikke opprette bokmerker:</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_UseTags">Bruk dokumentets overskriftskoder når det har dem</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_StyledHeadings">Finn også fete og nummererte overskrifter i brødtekststørrelse</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_SkipRunning">Utelat gjentatte topptekster, bunntekster og sidetall</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_NoText">Dette dokumentet har ingen tekst å finne overskrifter i. Kjør OCR først, og opprett deretter bokmerkene på nytt.</sys:String>
+    <sys:String x:Key="Str_AutoBookmarks_InvalidLevel">Hvert nivå må være et heltall fra 1 til 256.</sys:String>
     <sys:String x:Key="Str_Navigation_RemoveUnsafe">Fjern lenker med utrygge eller ugyldige nettadresser</sys:String>
     <sys:String x:Key="Str_Navigation_RemoveUnresolved">Fjern lenker med mål som ikke finnes</sys:String>
     <sys:String x:Key="Str_Navigation_Repair">Reparer valgte</sys:String>
