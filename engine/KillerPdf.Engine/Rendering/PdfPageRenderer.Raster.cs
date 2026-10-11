@@ -882,9 +882,26 @@ public sealed partial class PdfPageRenderer
                         continue;
                     }
                 }
-                if (length > 1)
-                    sorted.AsSpan(start, length).Sort(CompareCellX);
-                sorted.AsSpan(start, length).CopyTo(_cells.AsSpan(start, length));
+                Span<Cell> rowCells = _cells.AsSpan(start, length);
+                sorted.AsSpan(start, length).CopyTo(rowCells);
+                if (length >= 16)
+                {
+                    rowCells.Sort(CompareCellX);
+                    continue;
+                }
+                // Short rows, nearly every glyph row, sort in place. Cells sharing an X are
+                // summed by the sweep, so their order does not change the mask.
+                for (int index = 1; index < rowCells.Length; index++)
+                {
+                    Cell cell = rowCells[index];
+                    int target = index - 1;
+                    while (target >= 0 && rowCells[target].X > cell.X)
+                    {
+                        rowCells[target + 1] = rowCells[target];
+                        target--;
+                    }
+                    rowCells[target + 1] = cell;
+                }
             }
         }
 
