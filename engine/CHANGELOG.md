@@ -111,7 +111,7 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 - Decoded ICC profiles are shared within a document instead of across the process, keeping only decoded bytes within half the previous budget.
 - Faster fills under soft clips: combined clip coverage is computed once per row instead of per pixel, with unchanged output.
 - Faster text: glyph origins are placed on a quarter-pixel grid (at most one eighth of a pixel from the exact position) so repeated glyphs reuse cached masks, roughly halving render time on text-heavy pages.
-- Faster text: each font keeps the resolved outline for every character code it has drawn, so repeated characters skip the outline lookup.
+- Faster text: each font keeps the resolved outline for every character code it has drawn, each page render answers repeated glyphs from its own map, and small glyph paints skip the row scheduling and per-pixel bookkeeping that large fills need.
 
 ### Fixed
 

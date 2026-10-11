@@ -279,6 +279,7 @@ public sealed partial class PdfPageRenderer
         CancellationToken cancellationToken, byte[]? destination = null,
         (int Left, int Top, int Right, int Bottom)? region = null)
     {
+        using PageGlyphMaskScope pageGlyphMasks = EnterPageGlyphMasks();
         byte background = options.TransparentBackground ? (byte)0 : (byte)255;
         var (Left, Top, Right, Bottom) = region ?? (Left: 0, Top: 0, Right: options.Width, Bottom: options.Height);
         int rasterWidth = Right - Left, rasterHeight = Bottom - Top;

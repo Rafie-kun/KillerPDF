@@ -1056,12 +1056,52 @@ public sealed partial class PdfPageRenderer
         var key = new GlyphMaskKey(outline, BitConverter.DoubleToInt64Bits(a),
             BitConverter.DoubleToInt64Bits(b), BitConverter.DoubleToInt64Bits(c),
             BitConverter.DoubleToInt64Bits(d), subX, subY);
-        GlyphMask? glyph = _glyphMaskCache.GetOrAdd(key, RasterizeGlyphMask);
+        Dictionary<GlyphMaskKey, GlyphMask?>? pageMasks =
+            ReferenceEquals(_pageGlyphMaskOwner, this) ? _pageGlyphMasks : null;
+        if (pageMasks is null || !pageMasks.TryGetValue(key, out GlyphMask? glyph))
+        {
+            glyph = _glyphMaskCache.GetOrAdd(key, RasterizeGlyphMask);
+            if (pageMasks is not null && pageMasks.Count < MaximumPageGlyphMasks)
+                pageMasks[key] = glyph;
+        }
         if (glyph is null) return null;
         if (glyph.Mask.IsEmpty) return CoverageMask.Empty;
         CoverageMask placed = glyph.Mask.Translate((int)pixelX, (int)pixelY);
+        // A glyph inside the page needs no clipping to the page rectangle.
+        if (placed.Left >= 0 && placed.Top >= 0
+            && placed.Right <= frame.Width && placed.Bottom <= frame.Height)
+            return placed;
         return CoverageMask.Intersect(
             CoverageMask.Rectangle(0, 0, frame.Width, frame.Height), placed);
+    }
+
+    // Glyphs repeat many times on one page. A map owned by the page render answers those repeats
+    // without the shared cache's lock and usage bookkeeping, and is emptied when the render ends.
+    private const int MaximumPageGlyphMasks = 4096;
+
+    [ThreadStatic]
+    private static Dictionary<GlyphMaskKey, GlyphMask?>? _pageGlyphMasks;
+
+    [ThreadStatic]
+    private static PdfPageRenderer? _pageGlyphMaskOwner;
+
+    /// <summary>Starts the page glyph map for this thread unless an outer render already owns it.</summary>
+    private PageGlyphMaskScope EnterPageGlyphMasks()
+    {
+        if (_pageGlyphMaskOwner is not null) return default;
+        _pageGlyphMaskOwner = this;
+        _pageGlyphMasks ??= new Dictionary<GlyphMaskKey, GlyphMask?>(GlyphMaskKeyComparer.Instance);
+        return new PageGlyphMaskScope(true);
+    }
+
+    private readonly struct PageGlyphMaskScope(bool owner) : IDisposable
+    {
+        public void Dispose()
+        {
+            if (!owner) return;
+            _pageGlyphMaskOwner = null;
+            _pageGlyphMasks?.Clear();
+        }
     }
 
     /// <summary>Rasterizes one glyph relative to its origin pixel, or returns null when too large.</summary>
@@ -1534,8 +1574,10 @@ public sealed partial class PdfPageRenderer
         // Rectangular clips are fully applied by these bounds, so only antialiased clip
         // masks need the per-pixel coverage lookup.
         bool rectangularClips = true;
-        foreach (ClipRegion clip in clips)
+        // Indexing avoids an enumerator allocation for every glyph paint.
+        for (int index = 0; index < clips.Count; index++)
         {
+            ClipRegion clip = clips[index];
             left = Math.Max(left, clip.Mask.Left);
             top = Math.Max(top, clip.Mask.Top);
             right = Math.Min(right, clip.Mask.Right);
@@ -1734,59 +1776,124 @@ public sealed partial class PdfPageRenderer
         // Opaque normal-blend fills on a plain RGB surface: full rows of a rectangular
         // mask are one span fill, and antialiased edges blend against opaque pixels in
         // place. Pixels with a transparent destination still use the compositor.
+        // Small paints such as glyphs run inline, so they allocate no row closure; the
+        // condition matches ForEachRow's sequential case.
+        if (_rowParallelism <= 1 || (long)(right - left) * (bottom - top) < ParallelPaintThreshold
+            || bottom - top < 2)
+        {
+            PaintDirectCoverageRowRange(pixels, width, mask, fillColor, alpha, blendMode,
+                graphicsSoftMask, knockout, left, right, groupAlpha, coverage, rgbShadowInk,
+                top, bottom, cancellationToken);
+            return;
+        }
+        PaintDirectCoverageRowsParallel(pixels, width, mask, fillColor, alpha, blendMode,
+            graphicsSoftMask, knockout, left, top, right, bottom, groupAlpha, coverage,
+            rgbShadowInk, cancellationToken);
+    }
+
+    private static void PaintDirectCoverageRowsParallel(RasterSurface pixels, int width,
+        CoverageMask mask, Color fillColor, double alpha, RendererBlendMode blendMode,
+        GraphicsSoftMask? graphicsSoftMask, KnockoutState? knockout,
+        int left, int top, int right, int bottom,
+        byte[]? groupAlpha, byte[]? coverage, uint? rgbShadowInk,
+        CancellationToken cancellationToken) =>
+        ForEachRow(top, bottom, (long)(right - left) * (bottom - top),
+            (rowStart, rowEnd) => PaintDirectCoverageRowRange(pixels, width, mask, fillColor,
+                alpha, blendMode, graphicsSoftMask, knockout, left, right, groupAlpha,
+                coverage, rgbShadowInk, rowStart, rowEnd, cancellationToken),
+            null, cancellationToken);
+
+    private static void PaintDirectCoverageRowRange(RasterSurface pixels, int width,
+        CoverageMask mask, in Color fillColor, double alpha, RendererBlendMode blendMode,
+        GraphicsSoftMask? graphicsSoftMask, KnockoutState? knockout, int left, int right,
+        byte[]? groupAlpha, byte[]? coverage, uint? rgbShadowInk,
+        int rowStart, int rowEnd, CancellationToken cancellationToken)
+    {
         byte[] data = pixels.Data;
         uint packed = fillColor.Blue | (uint)fillColor.Green << 8
             | (uint)fillColor.Red << 16 | 0xFF000000u;
-        ForEachRow(top, bottom, (long)(right - left) * (bottom - top),
-            (rowStart, rowEnd) =>
+        if (coverage is not null && groupAlpha is null && rgbShadowInk is null
+            && !pixels.HasRgbSpotShadow)
+        {
+            // Without group alpha or spot shadows, each pixel is a write or an in-place
+            // blend with the same arithmetic as the general loop below.
+            int blue = fillColor.Blue, green = fillColor.Green, red = fillColor.Red;
+            int count = right - left;
+            for (int y = rowStart; y < rowEnd; y++)
             {
-                for (int y = rowStart; y < rowEnd; y++)
+                cancellationToken.ThrowIfCancellationRequested();
+                ReadOnlySpan<byte> cover = coverage.AsSpan(mask.RowOffset(y) + left - mask.Left, count);
+                Span<byte> row = data.AsSpan(pixels.Offset(left, y), count * 4);
+                for (int index = 0; index < cover.Length; index++)
                 {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    int rowOffset = pixels.Offset(left, y);
-                    if (coverage is null)
+                    int amount = cover[index];
+                    if (amount == 0) continue;
+                    int offset = index * 4;
+                    if (amount == 255)
                     {
-                        System.Runtime.InteropServices.MemoryMarshal.Cast<byte, uint>(
-                            data.AsSpan(rowOffset, (right - left) * 4)).Fill(packed);
-                        if (rgbShadowInk is uint rowInk)
-                            pixels.TrackRgbProcessRun(rowOffset, right - left, rowInk, fillColor);
-                        groupAlpha?.AsSpan(rowOffset / 4, right - left).Fill(255);
+                        Unsafe.WriteUnaligned(ref row[offset], packed);
                         continue;
                     }
-                    int maskRow = mask.RowOffset(y) - mask.Left;
-                    for (int x = left; x < right; x++)
+                    if (row[offset + 3] == 255)
                     {
-                        int cover = coverage[maskRow + x];
-                        if (cover == 0) continue;
-                        int offset = rowOffset + (x - left) * 4;
-                        if (cover == 255)
-                        {
-                            Unsafe.WriteUnaligned(ref data[offset], packed);
-                            if (rgbShadowInk is uint pixelInk)
-                                pixels.TrackRgbProcessRun(offset, 1, pixelInk, fillColor);
-                            groupAlpha?[offset / 4] = 255;
-                            continue;
-                        }
-                        if (data[offset + 3] == 255)
-                        {
-                            if (pixels.HasRgbSpotShadow && fillColor.Ink is not null && groupAlpha is null
-                                && pixels.TryBlendRgbProcessKnockout(offset, fillColor,
-                                    rgbShadowInk, 1, cover))
-                                continue;
-                            pixels.InvalidateRgbSpotPixel(offset);
-                            int inverse = 255 - cover;
-                            data[offset] = (byte)((fillColor.Blue * cover + data[offset] * inverse + 127) / 255);
-                            data[offset + 1] = (byte)((fillColor.Green * cover + data[offset + 1] * inverse + 127) / 255);
-                            data[offset + 2] = (byte)((fillColor.Red * cover + data[offset + 2] * inverse + 127) / 255);
-                            if (groupAlpha is not null)
-                                TrackGroupAlpha(groupAlpha, offset, alpha * cover / 255d);
-                            continue;
-                        }
-                        SetPixel(pixels, width, x, y, fillColor, alpha * cover / 255d,
-                            blendMode, graphicsSoftMask, knockout);
+                        int inverse = 255 - amount;
+                        row[offset] = (byte)((blue * amount + row[offset] * inverse + 127) / 255);
+                        row[offset + 1] = (byte)((green * amount + row[offset + 1] * inverse + 127) / 255);
+                        row[offset + 2] = (byte)((red * amount + row[offset + 2] * inverse + 127) / 255);
+                        continue;
                     }
+                    SetPixel(pixels, width, left + index, y, fillColor, alpha * amount / 255d,
+                        blendMode, graphicsSoftMask, knockout);
                 }
-            }, null, cancellationToken);
+            }
+            return;
+        }
+        for (int y = rowStart; y < rowEnd; y++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            int rowOffset = pixels.Offset(left, y);
+            if (coverage is null)
+            {
+                System.Runtime.InteropServices.MemoryMarshal.Cast<byte, uint>(
+                    data.AsSpan(rowOffset, (right - left) * 4)).Fill(packed);
+                if (rgbShadowInk is uint rowInk)
+                    pixels.TrackRgbProcessRun(rowOffset, right - left, rowInk, fillColor);
+                groupAlpha?.AsSpan(rowOffset / 4, right - left).Fill(255);
+                continue;
+            }
+            int maskRow = mask.RowOffset(y) - mask.Left;
+            for (int x = left; x < right; x++)
+            {
+                int cover = coverage[maskRow + x];
+                if (cover == 0) continue;
+                int offset = rowOffset + (x - left) * 4;
+                if (cover == 255)
+                {
+                    Unsafe.WriteUnaligned(ref data[offset], packed);
+                    if (rgbShadowInk is uint pixelInk)
+                        pixels.TrackRgbProcessRun(offset, 1, pixelInk, fillColor);
+                    groupAlpha?[offset / 4] = 255;
+                    continue;
+                }
+                if (data[offset + 3] == 255)
+                {
+                    if (pixels.HasRgbSpotShadow && fillColor.Ink is not null && groupAlpha is null
+                        && pixels.TryBlendRgbProcessKnockout(offset, fillColor,
+                            rgbShadowInk, 1, cover))
+                        continue;
+                    pixels.InvalidateRgbSpotPixel(offset);
+                    int inverse = 255 - cover;
+                    data[offset] = (byte)((fillColor.Blue * cover + data[offset] * inverse + 127) / 255);
+                    data[offset + 1] = (byte)((fillColor.Green * cover + data[offset + 1] * inverse + 127) / 255);
+                    data[offset + 2] = (byte)((fillColor.Red * cover + data[offset + 2] * inverse + 127) / 255);
+                    if (groupAlpha is not null)
+                        TrackGroupAlpha(groupAlpha, offset, alpha * cover / 255d);
+                    continue;
+                }
+                SetPixel(pixels, width, x, y, fillColor, alpha * cover / 255d,
+                    blendMode, graphicsSoftMask, knockout);
+            }
+        }
     }
 
     private static void PaintCoverageRowsParallel(RasterSurface pixels, int width,
