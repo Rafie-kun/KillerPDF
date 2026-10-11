@@ -1402,8 +1402,8 @@
                         <!-- Lacquer's drips give the line a deep descent, so the centered wordmark sits low; lift it so "PDF" reaches up toward the top edge. -->
                         <Grid.RenderTransform><TranslateTransform Y="-5"/></Grid.RenderTransform>
                         <!-- Soft drop shadow: a blurred, offset copy behind the crisp wordmark -->
-                        <StackPanel Orientation="Horizontal" Margin="1,1,0,0" Opacity="{DynamicResource WordmarkShadowOpacity}">
-                            <StackPanel.Effect><BlurEffect Radius="2"/></StackPanel.Effect>
+                        <StackPanel Orientation="Horizontal" Margin="1,2,0,0" Opacity="{DynamicResource WordmarkShadowOpacity}">
+                            <StackPanel.Effect><BlurEffect Radius="3"/></StackPanel.Effect>
                             <TextBlock><Run Text="Killer" FontFamily="{DynamicResource WordmarkFont}" FontSize="{DynamicResource TitleWordmarkSize}" Foreground="#D8000000"/><Run Text="PDF" FontFamily="{DynamicResource WordmarkFontPdf}" FontSize="{DynamicResource TitleWordmarkBoldSize}" Foreground="#D8000000"/></TextBlock>
                         </StackPanel>
                         <TextBlock Margin="1,2,0,0" Opacity="{DynamicResource WordmarkAccentShadowOpacity}" IsHitTestVisible="False"><TextBlock.Effect><BlurEffect Radius="3"/></TextBlock.Effect><Run Text="Killer" FontFamily="{DynamicResource WordmarkFont}" FontSize="{DynamicResource TitleWordmarkSize}" Foreground="Transparent"/><Run Text="PDF" FontFamily="{DynamicResource WordmarkFontPdf}" FontSize="{DynamicResource TitleWordmarkBoldSize}" Foreground="#D8000000"/></TextBlock>
