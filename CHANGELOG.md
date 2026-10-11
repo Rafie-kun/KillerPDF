@@ -241,6 +241,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Fixed noise in some refined black-and-white JBIG2 images.
 - Fixed embedded Type 1 fonts drawn with a substitute when they define their subroutines twice.
 - Fixed colors on pages that adjust them with graphics-state transfer functions.
+- Fixed encrypted files whose encryption dictionary is slightly damaged opening as blank pages.
 
 ## [1.8.81] - Unreleased
 

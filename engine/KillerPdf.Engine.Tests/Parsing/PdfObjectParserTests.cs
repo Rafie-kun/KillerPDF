@@ -150,6 +150,20 @@ public sealed class PdfObjectParserTests
     }
 
     [Fact]
+    public void ParseIndirectObject_CompatibilityRecoveryReadsDictionaryWithDamagedOpening()
+    {
+        // PDFBOX-4352-0 stores its encryption dictionary as "E< /CF ... >>".
+        const string source = "6 0 obj\nE< /A 1 /B (x) >>\nendobj";
+        var parser = new PdfObjectParser(Encoding.Latin1.GetBytes(source), allowDuplicateDictionaryKeys: true);
+
+        PdfDictionary dictionary = Assert.IsType<PdfDictionary>(parser.ParseIndirectObject().Value);
+
+        Assert.Equal(1, Assert.IsType<PdfInteger>(dictionary[Name("A")]).Value);
+        Assert.Equal("x", Text(Assert.IsType<PdfString>(dictionary[Name("B")])));
+        Assert.Throws<PdfSyntaxException>(() => Parser(source).ParseIndirectObject());
+    }
+
+    [Fact]
     public void ParseObject_EnforcesNestingLimit()
     {
         string source = new string('[', PdfObjectParser.MaximumNestingDepth + 1)

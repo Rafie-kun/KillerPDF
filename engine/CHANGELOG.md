@@ -192,6 +192,7 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 - Decoded typically predicted lines in template 1 JBIG2 refinement regions per pixel, honoring the reference offset.
 - Kept the first definition of each Type 1 subroutine when a font defines Subrs more than once.
 - Applied graphics-state transfer functions (TR and TR2) to fill, stroke, text and image colors on RGB output.
+- Compatibility recovery reads a dictionary whose opening delimiter was overwritten by a single letter, such as an encryption dictionary written as E< ... >>.
 
 ## [1.8.5] - Unreleased
 

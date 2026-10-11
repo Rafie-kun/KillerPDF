@@ -97,7 +97,10 @@ public sealed class PdfObjectParser(
         RequireKeyword(objToken, "obj", "An indirect object header must end with the obj keyword");
         ValidateReference(objectNumber, generation, objectNumberToken.Offset);
 
-        PdfObject value = ParseObject(0);
+        PdfObject value = _allowDuplicateDictionaryKeys
+            && TryFindDamagedDictionaryOpening(objToken.Offset + objToken.Length, out int dictionaryBody)
+                ? ParseDamagedDictionary(dictionaryBody)
+                : ParseObject(0);
         valueEndOffset = _tokenizer.Position;
         PdfToken endToken = Take();
         if (IsKeyword(endToken, "stream"))
@@ -126,6 +129,33 @@ public sealed class PdfObjectParser(
 
         return new PdfIndirectObject((int)objectNumber, (int)generation, value, objectNumberToken.Offset);
     }
+
+    // A dictionary whose first delimiter byte was overwritten by a letter ("E< /Key ...>>", as in
+    // PDFBOX-4352-0). Common viewers still read the dictionary; recovery accepts exactly one
+    // letter followed by '<' and then whitespace and a name.
+    private bool TryFindDamagedDictionaryOpening(int position, out int body)
+    {
+        body = -1;
+        ReadOnlySpan<byte> source = _source.Span;
+        while (position < source.Length && IsWhitespace(source[position])) position++;
+        if (position + 3 >= source.Length || !char.IsAsciiLetter((char)source[position])
+            || source[position + 1] != (byte)'<') return false;
+        int next = position + 2;
+        while (next < source.Length && IsWhitespace(source[next])) next++;
+        if (next == position + 2 || next >= source.Length || source[next] != (byte)'/') return false;
+        body = position + 2;
+        return true;
+    }
+
+    private PdfDictionary ParseDamagedDictionary(int body)
+    {
+        _lookahead.Clear();
+        _tokenizer.SetRawPosition(body);
+        return ParseDictionary(1, body - 2);
+    }
+
+    private static bool IsWhitespace(byte value) =>
+        value is 0 or 9 or 10 or 12 or 13 or 32;
 
     private PdfToken SkipToEndObject(PdfToken current)
     {
