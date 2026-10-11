@@ -35,6 +35,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Accent-colored toolbar icons keep a dark halo on the Light theme's Yellow accent, so they no longer fade into the bar.
 - The wordmark has a soft shadow on the Light theme, the same lift it has on the dark themes, so it no longer looks thin on the light title bar.
 - The title bar wordmark's shadow sits a little lower and softer, matching the rest of the family.
+- The title bar icon is 27px and has its own 27px image, so it is a little larger and sharper.
 
 ## [1.8.80] - 2026-10-05
 

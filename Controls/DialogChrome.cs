@@ -30,8 +30,8 @@ namespace KillerPDF
                 BitmapCreateOptions.None, BitmapCacheOption.OnLoad).Frames;
             var icon = new KillerPDF.Controls.AppIcon
             {
-                Width = Value(owner, "TitleIconSize", 25.0),
-                Height = Value(owner, "TitleIconSize", 25.0),
+                Width = Value(owner, "TitleIconSize", 27.0),
+                Height = Value(owner, "TitleIconSize", 27.0),
                 Margin = Value(owner, "TitleIconMargin", new Thickness(0, 0, 7, 0)),
                 VerticalAlignment = VerticalAlignment.Center,
                 Source = frames[0]

@@ -591,7 +591,7 @@ namespace KillerPDF.Services
             d["CaptionFontGlyphVisibility"] = classicCaption ? Visibility.Collapsed : Visibility.Visible;
             d["CaptionDrawnGlyphVisibility"] = classicCaption ? Visibility.Visible : Visibility.Collapsed;
             if (!d.Contains("ChromeFontFamily")) d["ChromeFontFamily"] = KillerPDF.UiKit.KillerSansUiStack;
-            if (!d.Contains("TitleIconSize")) d["TitleIconSize"] = 25.0;
+            if (!d.Contains("TitleIconSize")) d["TitleIconSize"] = 27.0;
             if (!d.Contains("TitleIconMargin")) d["TitleIconMargin"] = new Thickness(0, 0, 7, 0);
             if (!d.Contains("TitleBarPadding")) d["TitleBarPadding"] = new Thickness(12, 0, 0, 0);
             // The main window logo (icon + wordmark) sits 5px off the top-left corner. The centred row
