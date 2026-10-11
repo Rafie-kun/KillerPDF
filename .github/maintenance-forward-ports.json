@@ -5,6 +5,11 @@
   "baselineReason": "Issues #227 and #353 through #356 were verified on both branches before this check was introduced.",
   "ports": [
     {
+      "maintenanceCommit": "360c8c24321ad97293b30d7f4be64f4dc554f684",
+      "developmentCommit": "c2a17f4e7bbad2c15361f2d39c5fa95f36fe2d3a",
+      "reason": "Both lines have identical committed completion/checker/wrapper/test/guide blobs and the same early release-preflight call. The prior maintenance guide had an extra server-status sentence, so patch IDs differ. All 16 completion fixtures pass on both lines, including actual local-bare pre-push denial/acceptance, stale evidence, linked worktrees, source assertions, and TRX validation. The 13 coverage fixtures pass in PowerShell 7 and Windows PowerShell 5.1; the 10 existing identity tests and both installation audits pass. No production parity receipt is claimed."
+    },
+    {
       "maintenanceCommit": "378d7d1ad97bfb71a908ecfc06ad21f6348f9610",
       "developmentCommit": "161b71e2779d8a908420296123653a8948566234",
       "reason": "Footer pixel labels extend the unit toggle already present in 1.9; current formatter, transform dialog, and footer behavior were compared with maintenance."
