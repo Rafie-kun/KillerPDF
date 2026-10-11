@@ -598,13 +598,13 @@ namespace KillerPDF.Services
             // takes a 4px top margin to land 2px lower. 98SE keeps its classic caption inset.
             if (!d.Contains("TitleLogoMargin"))
                 d["TitleLogoMargin"] = d["UseDialogCaption"] is true ? d["TitleBarPadding"] : new Thickness(3, 4, 0, 0);
-            // The titlebar filename sits on the wordmark baseline: Killer Sans, dropped 7px to meet the
+            // The titlebar filename sits on the wordmark baseline: Killer Sans, dropped 3px to meet the
             // bottom of "Killer". A classic caption keeps the caption font beside its plain title.
             if (!d.Contains("FileNameFont")) d["FileNameFont"] = classicCaption ? d["ChromeFontFamily"] : KillerPDF.UiKit.BrandSansFont;
             if (!d.Contains("FileNameFontSize")) d["FileNameFontSize"] = classicCaption ? 11.0 : 18.0;
             if (!d.Contains("FileNameTransform"))
             {
-                var fileNameShift = new TranslateTransform(0, classicCaption ? 0 : 7);
+                var fileNameShift = new TranslateTransform(0, classicCaption ? 0 : 3);
                 fileNameShift.Freeze();
                 d["FileNameTransform"] = fileNameShift;
             }

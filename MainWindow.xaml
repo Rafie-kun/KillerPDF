@@ -1394,7 +1394,7 @@
                                Margin="{DynamicResource TitleTextMargin}"/>
                     <Grid VerticalAlignment="Center" Margin="0,-18,0,-22" Visibility="{DynamicResource WordmarkVisibility}">
                         <!-- Lacquer's drips give the line a deep descent, so the centered wordmark sits low; lift it so "PDF" reaches up toward the top edge. -->
-                        <Grid.RenderTransform><TranslateTransform Y="-2"/></Grid.RenderTransform>
+                        <Grid.RenderTransform><TranslateTransform Y="-5"/></Grid.RenderTransform>
                         <!-- Soft drop shadow: a blurred, offset copy behind the crisp wordmark -->
                         <StackPanel Orientation="Horizontal" Margin="1,1,0,0" Opacity="{DynamicResource WordmarkShadowOpacity}">
                             <StackPanel.Effect><BlurEffect Radius="2"/></StackPanel.Effect>

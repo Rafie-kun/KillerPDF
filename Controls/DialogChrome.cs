@@ -97,8 +97,8 @@ namespace KillerPDF
                 {
                     // Killer + PDF in one TextBlock so the two sizes share a baseline (cohesive wordmark).
                     var logoTb = new TextBlock { VerticalAlignment = VerticalAlignment.Center };
-                    logoTb.Inlines.Add(new System.Windows.Documents.Run("Killer") { FontFamily = wordmark, FontWeight = FontWeights.Normal, FontSize = 17, Foreground = primary });
-                    logoTb.Inlines.Add(new System.Windows.Documents.Run("PDF") { FontFamily = wordmarkPdf, FontWeight = FontWeights.Normal, FontSize = 25.52, Foreground = logo });
+                    logoTb.Inlines.Add(new System.Windows.Documents.Run("Killer") { FontFamily = wordmark, FontWeight = FontWeights.Normal, FontSize = Value(owner, "TitleWordmarkSize", 15.0), Foreground = primary });
+                    logoTb.Inlines.Add(new System.Windows.Documents.Run("PDF") { FontFamily = wordmarkPdf, FontWeight = FontWeights.Normal, FontSize = Value(owner, "TitleWordmarkBoldSize", 22.52), Foreground = logo });
                     // The qualifier ("- Transform") rides in the same TextBlock so it shares the
                     // wordmark's baseline instead of centring on its own and floating high.
                     string after = fullTitle![(kp + "KillerPDF".Length)..];
@@ -108,7 +108,8 @@ namespace KillerPDF
                 }
                 else
                 {
-                    sp.Children.Add(new TextBlock { Text = fullTitle ?? "", FontFamily = UiKit.MonoFont, FontSize = 14, Foreground = primary, VerticalAlignment = VerticalAlignment.Center });
+                    // A title without the wordmark reads as the qualifier does: Killer Sans at 18.
+                    sp.Children.Add(new TextBlock { Text = fullTitle ?? "", FontFamily = UiKit.BrandSansFont, FontSize = 18, Foreground = primary, VerticalAlignment = VerticalAlignment.Center });
                 }
                 return sp;
             }
@@ -126,14 +127,15 @@ namespace KillerPDF
             else
             {
                 var shadowLayer = BuildWordmark(true);
-                shadowLayer.Opacity = 0.5;
+                // The theme's wordmark shadow strength, so a light caption (0) stays clean as the main title bar does.
+                shadowLayer.Opacity = Value(owner, "WordmarkShadowOpacity", 0.5);
                 shadowLayer.Effect = new BlurEffect { Radius = 2 };
                 shadowLayer.RenderTransform = new TranslateTransform(0.7, 1.2);
                 title.Children.Add(shadowLayer);
                 title.Children.Add(BuildWordmark(false));
                 // Same lift as the main title bar: Lacquer's deep descent makes the centred line sit low.
                 if (fullTitle?.Contains("KillerPDF", StringComparison.Ordinal) == true)
-                    title.RenderTransform = new TranslateTransform(0, -2);
+                    title.RenderTransform = new TranslateTransform(0, -5);
             }
             // The app icon leads the caption, at the main title bar's size and spacing.
             var titleRow = new StackPanel
@@ -142,7 +144,10 @@ namespace KillerPDF
                 VerticalAlignment = VerticalAlignment.Center,
                 Margin = title.Margin
             };
-            title.Margin = new Thickness(0);
+            // Negative margins keep the wordmark's deep Lacquer descent out of the layout so the bar
+            // never clips its drips (2px imbalance as in the main title bar); the bar sits above the
+            // dialog body so the drips can hang over it.
+            title.Margin = caption ? new Thickness(0) : new Thickness(0, -18, 0, -22);
             titleRow.Children.Add(TitleIcon(owner));
             titleRow.Children.Add(title);
             Grid.SetColumn(titleRow, 0);
@@ -198,6 +203,7 @@ namespace KillerPDF
             grid.Children.Add(close);
 
             bar.Child = grid;
+            Panel.SetZIndex(bar, 1);
             return bar;
         }
 
