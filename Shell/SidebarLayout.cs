@@ -209,32 +209,43 @@ namespace KillerPDF
             UpdateFooterFade();
         }
 
-        // Center Portable while there is a clear gap before the right-side controls. At narrower
-        // widths it returns to its compact slot immediately before those controls.
+        // Portable follows the document area: centred under the pane in single view, centred on
+        // the pane divider in split view. When that spot would run into the page-size readout it
+        // anchors immediately left of it instead. The status text trims before the badge.
         private void UpdateFooterFade()
         {
             if (StatusText is null || PortableBadge is null || FooterBorder is null
                 || FooterDocumentControls is null || FooterVersionCell is null) return;
+            if (Viewer is null || PortableBadge.Parent is not FrameworkElement host || host.ActualWidth <= 0) return;
 
-            double footerWidth = FooterBorder.ActualWidth;
+            Grid.SetColumn(PortableBadge, 0);
+            Grid.SetColumnSpan(PortableBadge, 4);
+            PortableBadge.HorizontalAlignment = HorizontalAlignment.Left;
+
             double badgeWidth = PortableBadge.ActualWidth;
-            double rightWidth = FooterDocumentControls.ActualWidth * _appScale + FooterVersionCell.ActualWidth;
-            bool centerBadge = PortableBadge.Visibility == Visibility.Visible
-                && footerWidth > 0 && badgeWidth > 0
-                && footerWidth / 2 + badgeWidth / 2 + 16 <= footerWidth - rightWidth;
+            if (PortableBadge.Visibility != Visibility.Visible || badgeWidth <= 0)
+            {
+                PortableBadge.Margin = new Thickness(0);
+                StatusText.MaxWidth = double.PositiveInfinity;
+                return;
+            }
 
-            Grid.SetColumn(PortableBadge, centerBadge ? 0 : 1);
-            Grid.SetColumnSpan(PortableBadge, centerBadge ? 4 : 1);
-            PortableBadge.HorizontalAlignment = centerBadge
-                ? HorizontalAlignment.Center
-                : HorizontalAlignment.Right;
-            PortableBadge.Margin = centerBadge
-                ? new Thickness(0)
-                : new Thickness(6, 0, 8, 0);
-            StatusText.MaxWidth = centerBadge
-                ? Math.Max(0, footerWidth / 2 - badgeWidth / 2 - 24)
-                : double.PositiveInfinity;
+            double X(UIElement e, double x) => e.TranslatePoint(new Point(x, 0), host).X;
+            bool split = ViewerB is not null && ViewerB.Visibility == Visibility.Visible && ViewerB.ActualWidth > 0;
+            double target = split
+                ? (X(Viewer, Viewer.ActualWidth) + X(ViewerB, 0)) / 2   // the divider between the panes
+                : X(Viewer, Viewer.ActualWidth / 2);                     // the middle of the pane
+
+            double anchoredLeft = X(FooterDocumentControls, 0) - 8 - badgeWidth;   // just left of the page size
+            double left = Math.Min(target - badgeWidth / 2, anchoredLeft);
+            double statusLeft = X(StatusText, 0);
+            left = Math.Max(left, statusLeft);
+
+            PortableBadge.Margin = new Thickness(left, 0, 0, 0);
+            StatusText.MaxWidth = Math.Max(0, left - statusLeft - 16);
         }
+
+        private void FooterAnchor_SizeChanged(object sender, SizeChangedEventArgs e) => UpdateFooterFade();
 
         // The collapse arrow points toward where the page-list content goes when toggled, which
         // depends on both the side and the collapsed state.

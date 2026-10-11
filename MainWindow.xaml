@@ -49,7 +49,7 @@
         <!-- Settings section subheaders: white with a faint depth shadow (the "Settings" title carries the
              accent color instead). Margin stays inline per row. -->
         <Style x:Key="SettingsSubheader" TargetType="TextBlock">
-            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontFamily" Value="{DynamicResource UiFont}"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
@@ -63,7 +63,7 @@
         <!-- Settings current-value labels (English, Dark, ...): accent-colored, with a depth shadow so the
              accent stays legible on every theme background. -->
         <Style x:Key="SettingsAccentValue" TargetType="TextBlock">
-            <Setter Property="FontFamily" Value="Segoe UI, Microsoft JhengHei UI, Nirmala UI"/>
+            <Setter Property="FontFamily" Value="{DynamicResource UiFont}"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="Foreground" Value="{DynamicResource HeaderLineBrush}"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
@@ -792,7 +792,7 @@
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}"/>
             <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
-            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontFamily" Value="{DynamicResource UiFont}"/>
             <Setter Property="FontSize" Value="13"/>
             <!-- Set on the ItemsControl so the ListBoxItem default FindAncestor binding resolves; silences the benign "Data Error 4 ... HorizontalContentAlignment" spam during virtualization. -->
             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
@@ -832,9 +832,9 @@
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}"/>
-            <Setter Property="FontFamily" Value="Segoe UI"/>
-            <Setter Property="FontSize" Value="10"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontFamily" Value="{DynamicResource BrandSansFont}"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Normal"/>
             <Setter Property="Padding" Value="2,2,8,2"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
@@ -859,7 +859,7 @@
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
-            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontFamily" Value="{DynamicResource UiFont}"/>
             <Setter Property="FontSize" Value="12"/>
         </Style>
         <!-- Outline tree expander triangle: themed (muted at rest, accent on hover), rotates on expand.
@@ -899,7 +899,7 @@
         <!-- Outline tree row: website-style accent left-bar + tinted selection, themed hover, no WPF blue. -->
         <Style x:Key="OutlineItemStyle" TargetType="TreeViewItem">
             <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
-            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontFamily" Value="{DynamicResource UiFont}"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="IsExpanded" Value="False"/>
             <Setter Property="Padding" Value="6,5"/>
@@ -1065,7 +1065,7 @@
             <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource MenuBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontFamily" Value="{DynamicResource UiFont}"/>
             <Setter Property="FontSize" Value="10"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="ItemContainerStyle" Value="{StaticResource FooterZoomComboItem}"/>
@@ -1089,7 +1089,7 @@
                                                       HorizontalAlignment="Left" IsHitTestVisible="False"/>
                                     <TextBox x:Name="PART_EditableTextBox" Grid.Column="0" Margin="5,0,0,0"
                                              Background="Transparent" BorderThickness="0"
-                                             Foreground="{DynamicResource TextBrush}" FontFamily="Consolas"
+                                             Foreground="{DynamicResource TextBrush}" FontFamily="{DynamicResource UiFont}"
                                              FontSize="10" VerticalAlignment="Center"
                                              IsReadOnly="{TemplateBinding IsReadOnly}" Visibility="Hidden"
                                              Focusable="True" SelectionBrush="Transparent"/>
@@ -1156,7 +1156,7 @@
 
         <Style x:Key="ThemeRadio" TargetType="RadioButton">
             <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
-            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontFamily" Value="{DynamicResource UiFont}"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="Margin" Value="0,0,0,8"/>
             <Setter Property="Cursor" Value="Hand"/>
@@ -1187,7 +1187,7 @@
                             <Trigger Property="IsChecked" Value="True">
                                 <Setter TargetName="dot" Property="Visibility" Value="Visible"/>
                                 <Setter TargetName="ring" Property="Stroke" Value="{DynamicResource RadioAccent}"/>
-                                <Setter Property="Foreground" Value="{DynamicResource RadioAccent}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource RadioAccentText}"/>
                                 <Setter TargetName="bd" Property="Effect">
                                     <Setter.Value>
                                         <DropShadowEffect Color="Black" BlurRadius="3" ShadowDepth="1" Direction="270"
@@ -1225,7 +1225,7 @@
              checkmark, for independent on/off switches rather than exclusive picks. -->
         <Style x:Key="ThemeCheck" TargetType="CheckBox">
             <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
-            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontFamily" Value="{DynamicResource UiFont}"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="Margin" Value="0,0,0,8"/>
             <Setter Property="Cursor" Value="Hand"/>
@@ -1262,7 +1262,7 @@
                             <Trigger Property="IsChecked" Value="True">
                                 <Setter TargetName="tick" Property="Visibility" Value="Visible"/>
                                 <Setter TargetName="box" Property="BorderBrush" Value="{DynamicResource RadioAccent}"/>
-                                <Setter Property="Foreground" Value="{DynamicResource RadioAccent}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource RadioAccentText}"/>
                             </Trigger>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="box" Property="BorderBrush" Value="{DynamicResource RadioAccent}"/>
@@ -1362,7 +1362,7 @@
 
         <!-- Title bar -->
         <!-- Native caption via WM_NCHITTEST, so no drag handler is wired. -->
-        <Border Grid.Row="0" x:Name="TitleBarBorder" Height="{DynamicResource TitleBarHeight}"
+        <Border Grid.Row="0" x:Name="TitleBarBorder" Height="{DynamicResource TitleBarHeight}" Panel.ZIndex="1"
                 Background="{DynamicResource TitleBarBrush}" BorderThickness="0"
                 CornerRadius="{DynamicResource TitleBarCornerRadius}">
             <Grid>
@@ -1380,7 +1380,7 @@
                         ToolTip="{DynamicResource Str_TT_AppSize}"
                         MouseWheel="LogoBar_MouseWheel"
                         MouseLeftButtonDown="LogoBar_MouseLeftButtonDown">
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="{DynamicResource TitleBarPadding}">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="{DynamicResource TitleLogoMargin}">
                     <icons:AppIcon x:Name="TitleIcon"
                            Width="{DynamicResource TitleIconSize}" Height="{DynamicResource TitleIconSize}" Margin="{DynamicResource TitleIconMargin}" VerticalAlignment="Center"
                            RenderOptions.BitmapScalingMode="NearestNeighbor">
@@ -1392,7 +1392,9 @@
                                FontFamily="{DynamicResource ChromeFontFamily}" FontSize="11" FontWeight="Bold"
                                Foreground="{DynamicResource ChromeTextBrush}" VerticalAlignment="Center"
                                Margin="{DynamicResource TitleTextMargin}"/>
-                    <Grid VerticalAlignment="Center" Visibility="{DynamicResource WordmarkVisibility}">
+                    <Grid VerticalAlignment="Center" Margin="0,-18,0,-22" Visibility="{DynamicResource WordmarkVisibility}">
+                        <!-- Lacquer's drips give the line a deep descent, so the centered wordmark sits low; lift it so "PDF" reaches up toward the top edge. -->
+                        <Grid.RenderTransform><TranslateTransform Y="-2"/></Grid.RenderTransform>
                         <!-- Soft drop shadow: a blurred, offset copy behind the crisp wordmark -->
                         <StackPanel Orientation="Horizontal" Margin="1,1,0,0" Opacity="{DynamicResource WordmarkShadowOpacity}">
                             <StackPanel.Effect><BlurEffect Radius="2"/></StackPanel.Effect>
@@ -1408,7 +1410,8 @@
                 <!-- File name: takes the middle space and truncates before the window buttons -->
                 <TextBlock Grid.Column="1" Text="" x:Name="FileNameLabel" VerticalAlignment="Center"
                            Margin="16,0,12,0" TextTrimming="CharacterEllipsis"
-                           Foreground="{DynamicResource FilenameBrush}" FontFamily="Consolas" FontSize="11"/>
+                           Foreground="{DynamicResource FilenameBrush}" FontFamily="{DynamicResource FileNameFont}" FontSize="{DynamicResource FileNameFontSize}"
+                           RenderTransform="{DynamicResource FileNameTransform}" TextOptions.TextFormattingMode="Ideal"/>
                 <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="{DynamicResource CaptionButtonsMargin}">
                     <Button Click="MinimizeBtn_Click" Style="{StaticResource ChromeButton}" ToolTip="{DynamicResource Str_Sys_Minimize}"
                             Foreground="{DynamicResource CaptionGlyphBrush}">
@@ -1842,8 +1845,8 @@
                                                    RenderOptions.BitmapScalingMode="HighQuality"/>
                                         </Border>
                                         <TextBlock Text="{Binding Label}"
-                                                   FontFamily="Segoe UI, Microsoft JhengHei UI, Nirmala UI"
-                                                   FontSize="10"
+                                                   FontFamily="{DynamicResource BrandSansFont}"
+                                                   FontSize="14"
                                                    HorizontalAlignment="Center"
                                                    Margin="0,2,0,0">
                                             <TextBlock.Style>
@@ -2034,7 +2037,7 @@
                                         <Border Background="Transparent">
                                             <TextBlock Text="?"
                                                        Foreground="{DynamicResource TextBrush}"
-                                                       FontFamily="Consolas" FontSize="18"
+                                                       FontFamily="{DynamicResource UiFont}" FontSize="18"
                                                        HorizontalAlignment="Center"
                                                        VerticalAlignment="Center">
                                                 <TextBlock.Effect>
@@ -2109,7 +2112,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="English" VerticalAlignment="Center"
-                                                       FontFamily="Segoe UI, Microsoft JhengHei UI, Nirmala UI"/>
+                                                       FontFamily="{DynamicResource UiFont}"/>
                                             <TextBlock Grid.Column="1" Text="en-US" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
                                                        Foreground="{DynamicResource MutedTextBrush}"/>
                                         </Grid>
@@ -2122,7 +2125,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="বাংলা" VerticalAlignment="Center"
-                                                       FontFamily="Segoe UI, Microsoft JhengHei UI, Nirmala UI"/>
+                                                       FontFamily="{DynamicResource UiFont}"/>
                                             <TextBlock Grid.Column="1" Text="bn" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
                                                        Foreground="{DynamicResource MutedTextBrush}"/>
                                         </Grid>
@@ -2135,7 +2138,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="Čeština" VerticalAlignment="Center"
-                                                       FontFamily="Segoe UI, Microsoft JhengHei UI, Nirmala UI"/>
+                                                       FontFamily="{DynamicResource UiFont}"/>
                                             <TextBlock Grid.Column="1" Text="cs-CZ" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
                                                        Foreground="{DynamicResource MutedTextBrush}"/>
                                         </Grid>
@@ -2148,7 +2151,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="Deutsch" VerticalAlignment="Center"
-                                                       FontFamily="Segoe UI, Microsoft JhengHei UI, Nirmala UI"/>
+                                                       FontFamily="{DynamicResource UiFont}"/>
                                             <TextBlock Grid.Column="1" Text="de-DE" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
                                                        Foreground="{DynamicResource MutedTextBrush}"/>
                                         </Grid>
@@ -2161,7 +2164,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="Español" VerticalAlignment="Center"
-                                                       FontFamily="Segoe UI, Microsoft JhengHei UI, Nirmala UI"/>
+                                                       FontFamily="{DynamicResource UiFont}"/>
                                             <TextBlock Grid.Column="1" Text="es" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
                                                        Foreground="{DynamicResource MutedTextBrush}"/>
                                         </Grid>
@@ -2174,7 +2177,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="Français" VerticalAlignment="Center"
-                                                       FontFamily="Segoe UI, Microsoft JhengHei UI, Nirmala UI"/>
+                                                       FontFamily="{DynamicResource UiFont}"/>
                                             <TextBlock Grid.Column="1" Text="fr-FR" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
                                                        Foreground="{DynamicResource MutedTextBrush}"/>
                                         </Grid>
@@ -2187,7 +2190,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="Magyar" VerticalAlignment="Center"
-                                                       FontFamily="Segoe UI, Microsoft JhengHei UI, Nirmala UI"/>
+                                                       FontFamily="{DynamicResource UiFont}"/>
                                             <TextBlock Grid.Column="1" Text="hu-HU" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
                                                        Foreground="{DynamicResource MutedTextBrush}"/>
                                         </Grid>
@@ -2200,7 +2203,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="Italiano" VerticalAlignment="Center"
-                                                       FontFamily="Segoe UI, Microsoft JhengHei UI, Nirmala UI"/>
+                                                       FontFamily="{DynamicResource UiFont}"/>
                                             <TextBlock Grid.Column="1" Text="it-IT" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
                                                        Foreground="{DynamicResource MutedTextBrush}"/>
                                         </Grid>
@@ -2213,7 +2216,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="日本語" VerticalAlignment="Center"
-                                                       FontFamily="Segoe UI, Yu Gothic UI, Microsoft JhengHei UI, Nirmala UI"/>
+                                                       FontFamily="{DynamicResource UiFont}"/>
                                             <TextBlock Grid.Column="1" Text="ja-JP" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
                                                        Foreground="{DynamicResource MutedTextBrush}"/>
                                         </Grid>
@@ -2226,7 +2229,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="Қазақша" VerticalAlignment="Center"
-                                                       FontFamily="Segoe UI, Microsoft JhengHei UI, Nirmala UI"/>
+                                                       FontFamily="{DynamicResource UiFont}"/>
                                             <TextBlock Grid.Column="1" Text="kk-KZ" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
                                                        Foreground="{DynamicResource MutedTextBrush}"/>
                                         </Grid>
@@ -2252,7 +2255,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="Norsk bokmål" VerticalAlignment="Center"
-                                                       FontFamily="Segoe UI, Microsoft JhengHei UI, Nirmala UI"/>
+                                                       FontFamily="{DynamicResource UiFont}"/>
                                             <TextBlock Grid.Column="1" Text="nb-NO" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
                                                        Foreground="{DynamicResource MutedTextBrush}"/>
                                         </Grid>
@@ -2265,7 +2268,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="Polski" VerticalAlignment="Center"
-                                                       FontFamily="Segoe UI, Microsoft JhengHei UI, Nirmala UI"/>
+                                                       FontFamily="{DynamicResource UiFont}"/>
                                             <TextBlock Grid.Column="1" Text="pl-PL" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
                                                        Foreground="{DynamicResource MutedTextBrush}"/>
                                         </Grid>
@@ -2278,7 +2281,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="Português (Brasil)" VerticalAlignment="Center"
-                                                       FontFamily="Segoe UI, Microsoft JhengHei UI, Nirmala UI"/>
+                                                       FontFamily="{DynamicResource UiFont}"/>
                                             <TextBlock Grid.Column="1" Text="pt-BR" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
                                                        Foreground="{DynamicResource MutedTextBrush}"/>
                                         </Grid>
@@ -2291,7 +2294,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="Русский" VerticalAlignment="Center"
-                                                       FontFamily="Segoe UI, Microsoft JhengHei UI, Nirmala UI"/>
+                                                       FontFamily="{DynamicResource UiFont}"/>
                                             <TextBlock Grid.Column="1" Text="ru-RU" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
                                                        Foreground="{DynamicResource MutedTextBrush}"/>
                                         </Grid>
@@ -2304,7 +2307,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="Türkçe" VerticalAlignment="Center"
-                                                       FontFamily="Segoe UI, Microsoft JhengHei UI, Nirmala UI"/>
+                                                       FontFamily="{DynamicResource UiFont}"/>
                                             <TextBlock Grid.Column="1" Text="tr-TR" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
                                                        Foreground="{DynamicResource MutedTextBrush}"/>
                                         </Grid>
@@ -2317,7 +2320,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="Українська" VerticalAlignment="Center"
-                                                       FontFamily="Segoe UI, Microsoft JhengHei UI, Nirmala UI"/>
+                                                       FontFamily="{DynamicResource UiFont}"/>
                                             <TextBlock Grid.Column="1" Text="uk-UA" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
                                                        Foreground="{DynamicResource MutedTextBrush}"/>
                                         </Grid>
@@ -2330,7 +2333,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="Tiếng Việt" VerticalAlignment="Center"
-                                                       FontFamily="Segoe UI, Microsoft JhengHei UI, Nirmala UI"/>
+                                                       FontFamily="{DynamicResource UiFont}"/>
                                             <TextBlock Grid.Column="1" Text="vi-VN" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
                                                        Foreground="{DynamicResource MutedTextBrush}"/>
                                         </Grid>
@@ -2343,7 +2346,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="中文 (简体)" VerticalAlignment="Center"
-                                                       FontFamily="Segoe UI, Microsoft JhengHei UI, Nirmala UI"/>
+                                                       FontFamily="{DynamicResource UiFont}"/>
                                             <TextBlock Grid.Column="1" Text="zh-CN" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
                                                        Foreground="{DynamicResource MutedTextBrush}"/>
                                         </Grid>
@@ -2356,7 +2359,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="中文 (繁體)" VerticalAlignment="Center"
-                                                       FontFamily="Segoe UI, Microsoft JhengHei UI, Nirmala UI"/>
+                                                       FontFamily="{DynamicResource UiFont}"/>
                                             <TextBlock Grid.Column="1" Text="zh-TW" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
                                                        Foreground="{DynamicResource MutedTextBrush}"/>
                                         </Grid>
@@ -2648,7 +2651,7 @@
                     <ColumnDefinition x:Name="PaneBCol" Width="0"/>
                 </Grid.ColumnDefinitions>
 
-                <ctrl:PdfViewer x:Name="Viewer" Grid.Column="0"/>
+                <ctrl:PdfViewer x:Name="Viewer" Grid.Column="0" SizeChanged="FooterAnchor_SizeChanged"/>
 
                 <!-- Both handles live in the gutter column, hugging opposite edges, so the grab
                      targets are exactly on each pane's inner edge. Transparent: the gutter shows
@@ -2666,7 +2669,7 @@
                         MouseLeftButtonUp="SplitHandle_MouseUp"
                         LostMouseCapture="SplitHandle_LostMouseCapture"/>
 
-                <ctrl:PdfViewer x:Name="ViewerB" Grid.Column="2" Visibility="Collapsed"/>
+                <ctrl:PdfViewer x:Name="ViewerB" Grid.Column="2" Visibility="Collapsed" SizeChanged="FooterAnchor_SizeChanged"/>
 
                 <Border x:Name="ComparisonBar" Grid.Row="1" Grid.ColumnSpan="3" Panel.ZIndex="100"
                         Visibility="Collapsed" HorizontalAlignment="Stretch"
@@ -2832,7 +2835,8 @@
                          status before it reaches the Install action (stretch + MaxWidth would center). -->
                     <TextBlock x:Name="StatusText" Text="{DynamicResource Str_Ready}"
                                Foreground="{DynamicResource TextBrush}"
-                               FontFamily="Consolas" FontSize="11.5" Cursor="Hand"
+                               FontFamily="{DynamicResource BrandSansFont}" FontSize="16" Cursor="Hand"
+                               TextOptions.TextFormattingMode="Ideal"
                                ToolTip="{DynamicResource Str_KS_FileSize}"
                                MouseLeftButtonUp="StatusText_Click"
                                HorizontalAlignment="Left" TextTrimming="CharacterEllipsis"
@@ -2866,7 +2870,7 @@
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
                                 VerticalAlignment="Center" Margin="{DynamicResource FooterCellPadding}">
                     <Button x:Name="PageSizeLabel" Margin="4,0,5,0" MinWidth="90" Width="Auto"
-                            Style="{StaticResource FooterNavButton}" Click="PageSizeLabel_Click"
+                            Style="{StaticResource FooterNavButton}" Click="PageSizeLabel_Click" Height="Auto"
                             FontFamily="{DynamicResource BrandSansFont}" FontSize="16"
                             TextOptions.TextFormattingMode="Ideal" VerticalAlignment="Center"/>
                     <Border Width="1" Height="14" Background="{DynamicResource CardBorderBrush}" Margin="2,0,5,0"/>
@@ -3111,7 +3115,7 @@
                              SemiBold in PrimaryBrush. HeaderLineBrush was the rule color, dark on
                              dark and unreadable, and the shadow rasterized the text. -->
                         <TextBlock Text="{DynamicResource Str_KS_Title}"
-                                   FontFamily="Consolas" FontSize="13" FontWeight="SemiBold"
+                                   FontFamily="{DynamicResource UiFont}" FontSize="13" FontWeight="SemiBold"
                                    Foreground="{DynamicResource PrimaryBrush}"
                                    HorizontalAlignment="Left" VerticalAlignment="Center"
                                    Visibility="{DynamicResource ShortcutModernHeaderVisibility}"/>
@@ -3123,7 +3127,7 @@
                             <Button x:Name="KsViewKeyboardBtn" Style="{StaticResource SidebarTabBtn}"
                                     Content="{DynamicResource Str_KS_ViewKeyboard}" Click="KsViewKeyboard_Click"/>
                         </StackPanel>
-                        <TextBlock Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" MaxWidth="210" TextAlignment="Right" FontFamily="Consolas" FontSize="11" TextWrapping="Wrap" Margin="0,0,24,0">
+                        <TextBlock Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" MaxWidth="210" TextAlignment="Right" FontFamily="{DynamicResource UiFont}" FontSize="11" TextWrapping="Wrap" Margin="0,0,24,0">
                             <Hyperlink Click="OnlineHelp_Click" Foreground="{DynamicResource PrimaryBrush}"
                                        Focusable="True" ToolTip="https://killerpdf.net/help.html#shortcuts"><Run Text="{DynamicResource Str_KS_OnlineHelp}"/></Hyperlink>
                         </TextBlock>
@@ -3270,19 +3274,19 @@
                         <StackPanel Margin="14,12,14,4">
                             <StackPanel Margin="0,0,0,10">
                                 <TextBlock Text="{DynamicResource Str_About_Version}" Foreground="{DynamicResource MutedTextBrush}"
-                                           FontFamily="Segoe UI, Microsoft JhengHei UI, Nirmala UI" FontSize="11" Margin="0,0,0,2"/>
+                                           FontFamily="{DynamicResource UiFont}" FontSize="11" Margin="0,0,0,2"/>
                                 <!-- One row, two ends: version accent left, release date dim and
                                      italic hard right, so a user can tell how old their build is.
                                      Bottom-aligned so the two sizes share a baseline. Family
                                      standard, see code/CLAUDE.md. -->
                                 <Grid>
                                     <TextBlock x:Name="AboutVersionBlock"
-                                               FontFamily="Segoe UI, Microsoft JhengHei UI, Nirmala UI" FontSize="12"
+                                               FontFamily="{DynamicResource UiFont}" FontSize="12"
                                                Foreground="{DynamicResource PrimaryBrush}"
                                                HorizontalAlignment="Left" VerticalAlignment="Bottom"
                                                Cursor="Hand"/>
                                     <TextBlock x:Name="AboutReleaseDateBlock"
-                                               FontFamily="Segoe UI, Microsoft JhengHei UI, Nirmala UI" FontSize="11"
+                                               FontFamily="{DynamicResource UiFont}" FontSize="11"
                                                FontStyle="Italic"
                                                Foreground="{DynamicResource MutedTextBrush}"
                                                HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
@@ -3290,30 +3294,30 @@
                             </StackPanel>
                             <StackPanel Margin="0,0,0,10">
                                 <TextBlock Text="{DynamicResource Str_About_Publisher}" Foreground="{DynamicResource MutedTextBrush}"
-                                           FontFamily="Segoe UI, Microsoft JhengHei UI, Nirmala UI" FontSize="11" Margin="0,0,0,2"/>
+                                           FontFamily="{DynamicResource UiFont}" FontSize="11" Margin="0,0,0,2"/>
                                 <TextBlock x:Name="AboutPublisherBlock"
-                                           FontFamily="Segoe UI, Microsoft JhengHei UI, Nirmala UI" FontSize="12"
+                                           FontFamily="{DynamicResource UiFont}" FontSize="12"
                                            Foreground="{DynamicResource TextBrush}"/>
                                 <!-- Shown only on an exe signed by Steve; the certificate subject is
                                      the legal name, this ties it back to the name people know.
                                      Inlines are built in About.cs like the tagline and version. -->
                                 <TextBlock x:Name="AboutAkaBlock" Visibility="Collapsed"
-                                           FontFamily="Segoe UI, Microsoft JhengHei UI, Nirmala UI" FontSize="11"
+                                           FontFamily="{DynamicResource UiFont}" FontSize="11"
                                            Foreground="{DynamicResource MutedTextBrush}" Margin="0,3,0,0"/>
                             </StackPanel>
                             <StackPanel Margin="0,0,0,10">
                                 <TextBlock Text="{DynamicResource Str_About_Thumbprint}" Foreground="{DynamicResource MutedTextBrush}"
-                                           FontFamily="Segoe UI, Microsoft JhengHei UI, Nirmala UI" FontSize="11" Margin="0,0,0,2"/>
+                                           FontFamily="{DynamicResource UiFont}" FontSize="11" Margin="0,0,0,2"/>
                                 <TextBlock x:Name="AboutThumbprintBlock"
-                                           FontFamily="Consolas" FontSize="11"
+                                           FontFamily="{DynamicResource UiFont}" FontSize="11"
                                            Foreground="{DynamicResource TextBrush}"
                                            TextWrapping="Wrap"/>
                             </StackPanel>
                             <StackPanel Margin="0,0,0,10">
                                 <TextBlock Text="{DynamicResource Str_About_ExeSha}" Foreground="{DynamicResource MutedTextBrush}"
-                                           FontFamily="Segoe UI, Microsoft JhengHei UI, Nirmala UI" FontSize="11" Margin="0,0,0,2"/>
+                                           FontFamily="{DynamicResource UiFont}" FontSize="11" Margin="0,0,0,2"/>
                                 <TextBlock x:Name="AboutSha256Block"
-                                           FontFamily="Consolas" FontSize="11"
+                                           FontFamily="{DynamicResource UiFont}" FontSize="11"
                                            Foreground="{DynamicResource TextBrush}"
                                            TextWrapping="NoWrap"/>
                             </StackPanel>
@@ -3328,7 +3332,7 @@
                             Style="{StaticResource OutlineButton}" Padding="14,7"
                             Click="AboutUpdateButton_Click">
                         <TextBlock x:Name="AboutUpdateText" Text="{DynamicResource Str_Btn_DoUpdate}"
-                                   FontFamily="Segoe UI, Microsoft JhengHei UI, Nirmala UI" FontSize="12" FontWeight="SemiBold"
+                                   FontFamily="{DynamicResource UiFont}" FontSize="12" FontWeight="SemiBold"
                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}"/>
                     </Button>
                     <!-- Footer row: the recent-files privacy toggle (#146) sits left, the tiny
@@ -3357,7 +3361,7 @@
                             <TextBlock Text="{DynamicResource Str_StartupUpdateCheck}" TextWrapping="Wrap"/>
                         </CheckBox>
                     </StackPanel>
-                    <TextBlock DockPanel.Dock="Right" FontFamily="Consolas" FontSize="10"
+                    <TextBlock DockPanel.Dock="Right" FontFamily="{DynamicResource UiFont}" FontSize="10"
                                VerticalAlignment="Top" Margin="0,6,0,0">
                         <Hyperlink TextDecorations="None" Cursor="Hand" Click="AboutClearData_Click">
                             <Hyperlink.Style>

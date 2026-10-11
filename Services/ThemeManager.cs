@@ -384,6 +384,8 @@ namespace KillerPDF.Services
             }
 
             Alias("FooterBackgroundBrush", "BackgroundBrush");
+            // The checked label in the theme menu. Matches RadioAccent unless an accent is too pale to read as text.
+            Alias("RadioAccentText", "RadioAccent");
             Alias("BgRecentPanel", "SurfaceBrush");
             Alias("BgFlyout", "MenuBackgroundBrush");
             Alias("MenuSeparatorBrush", "CardBorderBrush");
@@ -425,9 +427,9 @@ namespace KillerPDF.Services
             // App.xaml owns a local UiFont fallback, and local application resources outrank
             // merged theme dictionaries. Materialize this key in every palette so LoadDict can
             // copy the active value into that higher-precedence slot (98SE supplies Microsoft
-            // Sans Serif; the other themes deliberately return to the family Segoe stack).
+            // Sans Serif; the other themes use Killer Sans UI over the Segoe stack).
             if (!d.Contains("UiFont"))
-                d["UiFont"] = new FontFamily("Segoe UI, Microsoft JhengHei UI, Nirmala UI");
+                d["UiFont"] = KillerPDF.UiKit.KillerSansUiStack;
             Alias("ComboFieldBrush", "PaneBrush");
             Alias("ComboFieldHoverBrush", "RowHoverBrush");
             Alias("ComboPopupBrush", "PaneBrush");
@@ -537,13 +539,13 @@ namespace KillerPDF.Services
             // values must exist in every completed palette because the live dictionary is updated
             // in place; otherwise its caption geometry survives after selecting another theme.
             if (!d.Contains("UseDialogCaption")) d["UseDialogCaption"] = false;
-            if (!d.Contains("DialogTitleBarHeight")) d["DialogTitleBarHeight"] = 40.0;
+            if (!d.Contains("DialogTitleBarHeight")) d["DialogTitleBarHeight"] = 32.0;
             if (!d.Contains("DialogHaloMargin")) d["DialogHaloMargin"] = new Thickness(12);
-            if (!d.Contains("TitleBarHeight")) d["TitleBarHeight"] = 36.0;
+            if (!d.Contains("TitleBarHeight")) d["TitleBarHeight"] = 32.0;
             if (!d.Contains("FooterHeight")) d["FooterHeight"] = 24.0;
             if (!d.Contains("FooterStatusPadding")) d["FooterStatusPadding"] = new Thickness(16, 0, 16, 0);
-            if (!d.Contains("FooterStatusFont")) d["FooterStatusFont"] = new FontFamily("Segoe UI");
-            if (!d.Contains("FooterMetaFont")) d["FooterMetaFont"] = new FontFamily("Consolas");
+            if (!d.Contains("FooterStatusFont")) d["FooterStatusFont"] = KillerPDF.UiKit.KillerSansUiStack;
+            if (!d.Contains("FooterMetaFont")) d["FooterMetaFont"] = KillerPDF.UiKit.KillerSansUiStack;
             if (!d.Contains("FooterPadding")) d["FooterPadding"] = new Thickness(16, 0, 16, 0);
             if (!d.Contains("FooterCellMargin")) d["FooterCellMargin"] = new Thickness(0);
             if (!d.Contains("FooterCellPadding")) d["FooterCellPadding"] = new Thickness(0);
@@ -561,7 +563,7 @@ namespace KillerPDF.Services
             if (!d.Contains("RetroActiveTabOutlineVisibility")) d["RetroActiveTabOutlineVisibility"] = Visibility.Collapsed;
             if (!d.Contains("TabBandHeight")) d["TabBandHeight"] = double.NaN;
             if (!d.Contains("CaptionButtonWidth")) d["CaptionButtonWidth"] = 46.0;
-            if (!d.Contains("CaptionButtonHeight")) d["CaptionButtonHeight"] = 36.0;
+            if (!d.Contains("CaptionButtonHeight")) d["CaptionButtonHeight"] = 32.0;
             if (!d.Contains("CaptionButtonMargin")) d["CaptionButtonMargin"] = new Thickness(0);
             if (!d.Contains("CaptionCloseGap")) d["CaptionCloseGap"] = new Thickness(0);
             if (!d.Contains("CaptionButtonsMargin")) d["CaptionButtonsMargin"] = new Thickness(0);
@@ -588,10 +590,24 @@ namespace KillerPDF.Services
             d["CaptionGlyphWeight"] = classicCaption ? FontWeights.Bold : FontWeights.Normal;
             d["CaptionFontGlyphVisibility"] = classicCaption ? Visibility.Collapsed : Visibility.Visible;
             d["CaptionDrawnGlyphVisibility"] = classicCaption ? Visibility.Visible : Visibility.Collapsed;
-            if (!d.Contains("ChromeFontFamily")) d["ChromeFontFamily"] = new FontFamily("Tahoma");
+            if (!d.Contains("ChromeFontFamily")) d["ChromeFontFamily"] = KillerPDF.UiKit.KillerSansUiStack;
             if (!d.Contains("TitleIconSize")) d["TitleIconSize"] = 25.0;
             if (!d.Contains("TitleIconMargin")) d["TitleIconMargin"] = new Thickness(0, 0, 7, 0);
             if (!d.Contains("TitleBarPadding")) d["TitleBarPadding"] = new Thickness(12, 0, 0, 0);
+            // The main window logo (icon + wordmark) sits 5px off the top-left corner. The centred row
+            // takes a 4px top margin to land 2px lower. 98SE keeps its classic caption inset.
+            if (!d.Contains("TitleLogoMargin"))
+                d["TitleLogoMargin"] = d["UseDialogCaption"] is true ? d["TitleBarPadding"] : new Thickness(3, 4, 0, 0);
+            // The titlebar filename sits on the wordmark baseline: Killer Sans, dropped 7px to meet the
+            // bottom of "Killer". A classic caption keeps the caption font beside its plain title.
+            if (!d.Contains("FileNameFont")) d["FileNameFont"] = classicCaption ? d["ChromeFontFamily"] : KillerPDF.UiKit.BrandSansFont;
+            if (!d.Contains("FileNameFontSize")) d["FileNameFontSize"] = classicCaption ? 11.0 : 18.0;
+            if (!d.Contains("FileNameTransform"))
+            {
+                var fileNameShift = new TranslateTransform(0, classicCaption ? 0 : 7);
+                fileNameShift.Freeze();
+                d["FileNameTransform"] = fileNameShift;
+            }
             if (!d.Contains("FooterBevelDarkBrush")) d["FooterBevelDarkBrush"] = Brushes.Transparent;
             if (!d.Contains("FooterBevelLightBrush")) d["FooterBevelLightBrush"] = Brushes.Transparent;
             if (!d.Contains("FooterCellLightThickness")) d["FooterCellLightThickness"] = new Thickness(0);
@@ -676,7 +692,7 @@ namespace KillerPDF.Services
             var flyoutRadius = d["FlyoutCornerRadius"] is CornerRadius fr ? fr : new CornerRadius(6);
             d["AnnotationBarCornerRadius"] = new CornerRadius(
                 0, 0, flyoutRadius.BottomRight, flyoutRadius.BottomLeft);
-            if (!d.Contains("MenuFontFamily")) d["MenuFontFamily"] = new FontFamily("Segoe UI");
+            if (!d.Contains("MenuFontFamily")) d["MenuFontFamily"] = KillerPDF.UiKit.KillerSansUiStack;
             if (!d.Contains("MenuFontSize")) d["MenuFontSize"] = 12.0;
             if (!d.Contains("MenuItemPadding")) d["MenuItemPadding"] = new Thickness(8, 6, 10, 6);
             if (!d.Contains("ComboButtonMinWidth")) d["ComboButtonMinWidth"] = 22.0;

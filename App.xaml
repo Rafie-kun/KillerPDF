@@ -98,7 +98,7 @@
                  ============================================================================ -->
 
             <!-- Type families -->
-            <FontFamily x:Key="UiFont">Segoe UI, Microsoft JhengHei UI, Nirmala UI</FontFamily>
+            <FontFamily x:Key="UiFont">./Fonts/#Killer Sans UI, Segoe UI, Microsoft JhengHei UI, Nirmala UI</FontFamily>
             <!-- Assembly-relative: release payloads run as KillerPDF.App.exe while legacy and
                  IDE builds run as KillerPDF.exe. Hard-coding either assembly name makes the
                  embedded wordmark faces silently fall back in the other build. The name after
@@ -111,7 +111,7 @@
             <FontFamily x:Key="WordmarkFont">./Fonts/#Punktype</FontFamily>
             <FontFamily x:Key="WordmarkFontPdf">./Fonts/#Lacquer</FontFamily>
             <FontFamily x:Key="BrandSansFont">./Fonts/#Killer Sans</FontFamily>
-            <FontFamily x:Key="MonoFont">Consolas</FontFamily>
+            <FontFamily x:Key="MonoFont">./Fonts/#Killer Sans UI, Segoe UI, Microsoft JhengHei UI, Nirmala UI</FontFamily>
             <FontFamily x:Key="IconFont">Segoe MDL2 Assets</FontFamily>
 
             <!-- Corner radii (one rounding scale for the whole app) -->
@@ -205,7 +205,7 @@
                 <Setter Property="BorderBrush" Value="{DynamicResource MenuBorderBrush}"/>
                 <Setter Property="BorderThickness" Value="1"/>
                 <Setter Property="Padding" Value="8,4"/>
-                <Setter Property="FontFamily" Value="Segoe UI, Microsoft JhengHei UI, Nirmala UI"/>
+                <Setter Property="FontFamily" Value="{DynamicResource UiFont}"/>
                 <Setter Property="FontSize" Value="12"/>
                 <Setter Property="HasDropShadow" Value="False"/>
                 <Setter Property="Template">

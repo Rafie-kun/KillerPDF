@@ -67,6 +67,8 @@ namespace KillerPDF
         public static FontFamily WordmarkFont => Res("WordmarkFont", _wordmarkFallback);
         public static FontFamily WordmarkFontPdf => Res("WordmarkFontPdf", _wordmarkPdfFallback);
         public static FontFamily BrandSansFont => Res("BrandSansFont", _brandSansFallback);
+        /// <summary>Killer Sans UI (Killer Sans scaled to Segoe UI proportions) with the Segoe fallback stack.</summary>
+        public static readonly FontFamily KillerSansUiStack = new(new Uri("pack://application:,,,/"), "./Fonts/#Killer Sans UI, Segoe UI, Microsoft JhengHei UI, Nirmala UI");
         private static readonly FontFamily _uiFallback   = new("Segoe UI, Microsoft JhengHei UI, Nirmala UI");
         private static readonly FontFamily _monoFallback = new("Consolas");
         private static readonly FontFamily _iconFallback = new("Segoe MDL2 Assets");

@@ -873,12 +873,23 @@ namespace KillerPDF
                     RelativeSource = new System.Windows.Data.RelativeSource(System.Windows.Data.RelativeSourceMode.FindAncestor, typeof(Button), 1)
                 });
                 field.Children.Add(border);
-                field.Children.Add(new TextBlock
+                // The T is drawn, not typeset, so it stays centred in the box whatever the UI font is.
+                var tee = new System.Windows.Shapes.Path
                 {
-                    Text = "T", FontFamily = UiKit.UiFont, FontWeight = FontWeights.SemiBold,
-                    FontSize = 10 * scale, HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, scale, 0, 0)
+                    // Drawn on half-pixel centres at 1x so both strokes land on whole pixels.
+                    Data = Geometry.Parse("M0,0.5 L7,0.5 M3.5,0.5 L3.5,7"),
+                    Width = 7, Height = 7, Stretch = Stretch.None, StrokeThickness = 1,
+                    LayoutTransform = new ScaleTransform(scale, scale),
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Margin = new Thickness(0, scale, 0, 0),
+                    SnapsToDevicePixels = true
+                };
+                tee.SetBinding(Shape.StrokeProperty, new System.Windows.Data.Binding(nameof(Button.Foreground))
+                {
+                    RelativeSource = new System.Windows.Data.RelativeSource(System.Windows.Data.RelativeSourceMode.FindAncestor, typeof(Button), 1)
                 });
+                field.Children.Add(tee);
                 return field;
             }
             if (glyph == CompareGlyph)
@@ -932,14 +943,29 @@ namespace KillerPDF
                 RelativeSource = new System.Windows.Data.RelativeSource(System.Windows.Data.RelativeSourceMode.FindAncestor, typeof(Button), 1)
             });
             icon.Children.Add(box);
-            icon.Children.Add(new TextBlock
+            // Four arrows drawn as vector strokes. The Segoe MDL2 move glyph shrunk to fit the box
+            // rendered its bottom arrowhead as a single pixel, so it read as cut off.
+            var arrows = new System.Windows.Shapes.Path
             {
-                Text = "\uE7C2",
-                FontFamily = UiKit.IconFont,
-                FontSize = glyphSize * 0.65,
+                Data = Geometry.Parse("M8,2.5 L8,6 M8,10 L8,13.5 M2.5,8 L6,8 M10,8 L13.5,8 " +
+                                      "M6,4.5 L8,2.5 L10,4.5 M6,11.5 L8,13.5 L10,11.5 " +
+                                      "M4.5,6 L2.5,8 L4.5,10 M11.5,6 L13.5,8 L11.5,10"),
+                Width = glyphSize * 0.7,
+                Height = glyphSize * 0.7,
+                Stretch = Stretch.Uniform,
+                StrokeThickness = 1,
+                StrokeStartLineCap = PenLineCap.Square,
+                StrokeEndLineCap = PenLineCap.Square,
+                StrokeLineJoin = PenLineJoin.Miter,
                 HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center
+                VerticalAlignment = VerticalAlignment.Center,
+                SnapsToDevicePixels = true
+            };
+            arrows.SetBinding(Shape.StrokeProperty, new System.Windows.Data.Binding(nameof(Button.Foreground))
+            {
+                RelativeSource = new System.Windows.Data.RelativeSource(System.Windows.Data.RelativeSourceMode.FindAncestor, typeof(Button), 1)
             });
+            icon.Children.Add(arrows);
             return icon;
         }
 
@@ -966,8 +992,8 @@ namespace KillerPDF
                 btn.Content = new TextBlock
                 {
                     Text = Loc(key),
-                    FontFamily = UiKit.UiFont,
-                    FontSize = 12,
+                    FontFamily = UiKit.BrandSansFont,
+                    FontSize = 16,
                     VerticalAlignment = VerticalAlignment.Center
                 };
                 return;
@@ -982,8 +1008,8 @@ namespace KillerPDF
                 row.Children.Add(new TextBlock
                 {
                     Text = Loc(key),
-                    FontFamily = UiKit.UiFont,
-                    FontSize = 12,
+                    FontFamily = UiKit.BrandSansFont,
+                    FontSize = 16,
                     Margin = new Thickness(7, 0, 0, 0),
                     VerticalAlignment = VerticalAlignment.Center
                 });
@@ -1001,8 +1027,8 @@ namespace KillerPDF
                 col.Children.Add(new TextBlock
                 {
                     Text = Loc(key),
-                    FontFamily = UiKit.UiFont,
-                    FontSize = 10,
+                    FontFamily = UiKit.BrandSansFont,
+                    FontSize = 14,
                     Margin = new Thickness(0, 2, 0, 0),
                     MaxWidth = 96,
                     HorizontalAlignment = HorizontalAlignment.Center,

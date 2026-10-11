@@ -16,6 +16,7 @@
     <SolidColorBrush x:Key="ScrollThumbBrush"      Color="#88707070" po:Freeze="True"/>
     <SolidColorBrush x:Key="ScrollThumbHoverBrush" Color="#262626" po:Freeze="True"/>
     <SolidColorBrush x:Key="RadioAccent"     Color="#F2C500" po:Freeze="True"/>
+    <SolidColorBrush x:Key="RadioAccentText" Color="#1a1a1a" po:Freeze="True"/>
 
     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"                      Color="#FFF5A3" po:Freeze="True"/>
     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}"                  Color="#24231C" po:Freeze="True"/>

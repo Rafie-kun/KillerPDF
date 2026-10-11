@@ -97,12 +97,14 @@ namespace KillerPDF
                 {
                     // Killer + PDF in one TextBlock so the two sizes share a baseline (cohesive wordmark).
                     var logoTb = new TextBlock { VerticalAlignment = VerticalAlignment.Center };
-                    logoTb.Inlines.Add(new System.Windows.Documents.Run("Killer") { FontFamily = wordmark, FontWeight = FontWeights.Normal, FontSize = 12.52, Foreground = primary });
-                    logoTb.Inlines.Add(new System.Windows.Documents.Run("PDF") { FontFamily = wordmarkPdf, FontWeight = FontWeights.Normal, FontSize = 24.25, Foreground = logo });
-                    sp.Children.Add(logoTb);
+                    logoTb.Inlines.Add(new System.Windows.Documents.Run("Killer") { FontFamily = wordmark, FontWeight = FontWeights.Normal, FontSize = 17, Foreground = primary });
+                    logoTb.Inlines.Add(new System.Windows.Documents.Run("PDF") { FontFamily = wordmarkPdf, FontWeight = FontWeights.Normal, FontSize = 25.52, Foreground = logo });
+                    // The qualifier ("- Transform") rides in the same TextBlock so it shares the
+                    // wordmark's baseline instead of centring on its own and floating high.
                     string after = fullTitle![(kp + "KillerPDF".Length)..];
                     if (!string.IsNullOrEmpty(after))
-                        sp.Children.Add(new TextBlock { Text = after, FontFamily = UiKit.MonoFont, FontSize = 14, Foreground = secondary, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(4, 1, 0, 0) });
+                        logoTb.Inlines.Add(new System.Windows.Documents.Run("  " + after.TrimStart()) { FontFamily = UiKit.BrandSansFont, FontWeight = FontWeights.Normal, FontSize = 18, Foreground = secondary });
+                    sp.Children.Add(logoTb);
                 }
                 else
                 {
@@ -111,12 +113,12 @@ namespace KillerPDF
                 return sp;
             }
 
-            var title = new Grid { Margin = caption ? new Thickness(0) : new Thickness(16, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
+            var title = new Grid { Margin = caption ? new Thickness(0) : new Thickness(6, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
             if (caption)
             {
                 title.Children.Add(new TextBlock
                 {
-                    Text = fullTitle ?? "KillerPDF", FontFamily = Value(owner, "ChromeFontFamily", new FontFamily("Tahoma")),
+                    Text = fullTitle ?? "KillerPDF", FontFamily = Value(owner, "ChromeFontFamily", UiKit.UiFont),
                     FontSize = 11, FontWeight = FontWeights.Bold,
                     Foreground = Brush(owner, "ChromeTextBrush", Brushes.White), VerticalAlignment = VerticalAlignment.Center
                 });
@@ -129,6 +131,9 @@ namespace KillerPDF
                 shadowLayer.RenderTransform = new TranslateTransform(0.7, 1.2);
                 title.Children.Add(shadowLayer);
                 title.Children.Add(BuildWordmark(false));
+                // Same lift as the main title bar: Lacquer's deep descent makes the centred line sit low.
+                if (fullTitle?.Contains("KillerPDF", StringComparison.Ordinal) == true)
+                    title.RenderTransform = new TranslateTransform(0, -2);
             }
             // The app icon leads the caption, at the main title bar's size and spacing.
             var titleRow = new StackPanel
@@ -158,7 +163,15 @@ namespace KillerPDF
                 SnapsToDevicePixels = true,
                 UseLayoutRounding = true
             };
-            if (owner?.TryFindResource("ChromeCloseButton") is Style chromeClose)
+            // Dialogs use the family close (a bare X that turns red on hover, as on the About card);
+            // only the classic caption themes keep the raised caption-style close.
+            if (!caption && owner?.TryFindResource("OverlayCloseButton") is Style overlayClose)
+            {
+                close.Style = overlayClose;
+                close.SetResourceReference(ContentControl.ContentProperty, "AboutCloseGlyph");
+                close.VerticalAlignment = VerticalAlignment.Center;
+            }
+            else if (owner?.TryFindResource("ChromeCloseButton") is Style chromeClose)
             {
                 close.Style = chromeClose;
             }

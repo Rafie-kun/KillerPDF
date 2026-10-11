@@ -71,51 +71,9 @@ namespace KillerPDF
 
             var root = new StackPanel();
 
-            // Title bar
-            var titleBar = new Border
-            {
-                // Transparent so the dialog-wide film grain shows through the title bar too (it sits
-                // over the same BgModal surface, so it still reads as one continuous surface).
-                Background = Application.Current.TryFindResource("UseDialogCaption") is true ? UiKit.Brush("TitleBarBrush") : Brushes.Transparent,
-                Padding = new Thickness(16, 10, 16, 10),
-                CornerRadius = new CornerRadius(5, 5, 0, 0)
-            };
-            titleBar.MouseLeftButtonDown += (_, e) => { if (e.ButtonState == MouseButtonState.Pressed) win.DragMove(); };
-            // KillerPDF-prefixed titles keep the real wordmark. A qualifier such as "Uninstall"
-            // follows in Killer Sans, the heading face, instead of flattening the whole title into
-            // generic monospace text.
-            if (title == "KillerPDF" || title.StartsWith("KillerPDF ", System.StringComparison.Ordinal))
-            {
-                var wm = new StackPanel { Orientation = Orientation.Horizontal };
-                wm.Children.Add(TitleIcon());
-                var wmTb = new TextBlock { VerticalAlignment = VerticalAlignment.Center };
-                wmTb.Inlines.Add(new System.Windows.Documents.Run("Killer") { FontFamily = UiKit.WordmarkFont, FontWeight = FontWeights.Normal, FontSize = 11.73, Foreground = R("TextBrush") });
-                wmTb.Inlines.Add(new System.Windows.Documents.Run("PDF") { FontFamily = UiKit.WordmarkFontPdf, FontWeight = FontWeights.Normal, FontSize = 17.62, Foreground = R("AccentLogo") });
-                if (title.Length > "KillerPDF".Length)
-                    wmTb.Inlines.Add(new System.Windows.Documents.Run("  " + title["KillerPDF".Length..].TrimStart())
-                    {
-                        FontFamily = UiKit.BrandSansFont,
-                        FontWeight = FontWeights.Normal,
-                        FontSize = 15.4,
-                        Foreground = R("TextBrush")
-                    });
-                wm.Children.Add(wmTb);
-                // No DropShadowEffect on the text - it rasterizes and blurs the wordmark. Kept crisp.
-                titleBar.Child = wm;
-            }
-            else
-            {
-                titleBar.Child = new TextBlock
-                {
-                    Text = title,
-                    Foreground = R("PrimaryBrush"),
-                    FontWeight = FontWeights.Bold,   // blue title -> bold
-                    FontSize = 14,
-                    FontFamily = UiKit.MonoFont
-                };
-            }
-            if (Application.Current.TryFindResource("UseDialogCaption") is true)
-                titleBar = DialogChrome.BuildTitleBar(win, owner, title, () => { result = MessageBoxResult.Cancel; win.Close(); });
+            // Every dialog title bar is the shared family chrome: wordmark, qualifier on its baseline,
+            // the same lift as the main window, and the family close X.
+            var titleBar = DialogChrome.BuildTitleBar(win, owner, title, () => { result = MessageBoxResult.Cancel; win.Close(); });
             titleBar.Height = Application.Current.TryFindResource("DialogTitleBarHeight") is double titleHeight ? titleHeight : double.NaN;
             root.Children.Add(titleBar);
 
@@ -252,24 +210,9 @@ namespace KillerPDF
 
             var root = new StackPanel();
 
-            var titleBar = new Border { Background = Application.Current.TryFindResource("UseDialogCaption") is true ? UiKit.Brush("TitleBarBrush") : Brushes.Transparent, Padding = new Thickness(16, 10, 16, 10) };
-            titleBar.MouseLeftButtonDown += (_, e) => { if (e.ButtonState == MouseButtonState.Pressed) win.DragMove(); };
-            if (title == "KillerPDF")
-            {
-                var wmTb = new TextBlock { VerticalAlignment = VerticalAlignment.Center };
-                wmTb.Inlines.Add(new System.Windows.Documents.Run("Killer") { FontFamily = UiKit.WordmarkFont, FontWeight = FontWeights.Normal, FontSize = 11.73, Foreground = R("TextBrush") });
-                wmTb.Inlines.Add(new System.Windows.Documents.Run("PDF") { FontFamily = UiKit.WordmarkFontPdf, FontWeight = FontWeights.Normal, FontSize = 17.62, Foreground = R("AccentLogo") });
-                var wm = new StackPanel { Orientation = Orientation.Horizontal };
-                wm.Children.Add(TitleIcon());
-                wm.Children.Add(wmTb);
-                titleBar.Child = wm;
-            }
-            else
-            {
-                titleBar.Child = new TextBlock { Text = title, Foreground = R("PrimaryBrush"), FontWeight = FontWeights.Bold, FontSize = 14, FontFamily = UiKit.MonoFont };
-            }
-            if (Application.Current.TryFindResource("UseDialogCaption") is true)
-                titleBar = DialogChrome.BuildTitleBar(win, owner, title, () => win.Close());
+            // Every dialog title bar is the shared family chrome: wordmark, qualifier on its baseline,
+            // the same lift as the main window, and the family close X.
+            var titleBar = DialogChrome.BuildTitleBar(win, owner, title, () => win.Close());
             titleBar.Height = Application.Current.TryFindResource("DialogTitleBarHeight") is double titleHeight ? titleHeight : double.NaN;
             root.Children.Add(titleBar);
 
@@ -397,23 +340,9 @@ namespace KillerPDF
 
             var root = new StackPanel();
 
-            // Title bar: the wordmark, exactly like Show()'s "KillerPDF" branch.
-            var titleBar = new Border
-            {
-                Background = Application.Current.TryFindResource("UseDialogCaption") is true ? UiKit.Brush("TitleBarBrush") : Brushes.Transparent,
-                Padding = new Thickness(16, 10, 16, 10),
-                CornerRadius = new CornerRadius(5, 5, 0, 0)
-            };
-            titleBar.MouseLeftButtonDown += (_, e) => { if (e.ButtonState == MouseButtonState.Pressed) win.DragMove(); };
-            var wm = new StackPanel { Orientation = Orientation.Horizontal };
-            wm.Children.Add(TitleIcon());
-            var wmTb = new TextBlock { VerticalAlignment = VerticalAlignment.Center };
-            wmTb.Inlines.Add(new System.Windows.Documents.Run("Killer") { FontFamily = UiKit.WordmarkFont, FontWeight = FontWeights.Normal, FontSize = 11.73, Foreground = R("TextBrush") });
-            wmTb.Inlines.Add(new System.Windows.Documents.Run("PDF") { FontFamily = UiKit.WordmarkFontPdf, FontWeight = FontWeights.Normal, FontSize = 17.62, Foreground = R("AccentLogo") });
-            wm.Children.Add(wmTb);
-            titleBar.Child = wm;
-            if (Application.Current.TryFindResource("UseDialogCaption") is true)
-                titleBar = DialogChrome.BuildTitleBar(win, owner, "KillerPDF", () => win.Close());
+            // Every dialog title bar is the shared family chrome: wordmark, qualifier on its baseline,
+            // the same lift as the main window, and the family close X.
+            var titleBar = DialogChrome.BuildTitleBar(win, owner, "KillerPDF", () => win.Close());
             titleBar.Height = Application.Current.TryFindResource("DialogTitleBarHeight") is double titleHeight ? titleHeight : double.NaN;
             root.Children.Add(titleBar);
 
