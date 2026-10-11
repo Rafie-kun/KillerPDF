@@ -558,7 +558,8 @@ namespace KillerPDF.Controls
             {
                 // Convert canvas rect to PDF CropBox coords using the rotation-aware helper.
                 // This is the correct inversion of how the engine renders the rotated bitmap.
-                _pageRotations.TryGetValue(currentPage, out int rot);
+                // Before rotations are captured the page still shows its file /Rotate.
+                int rot = EffectiveRotation(currentPage);
                 var refPage = engineSession.Pages[currentPage];
                 double refPdfW = refPage.Width;
                 double refPdfH = refPage.Height;
