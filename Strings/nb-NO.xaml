@@ -209,6 +209,9 @@
     <sys:String x:Key="Str_RotateFailed">Rotering mislyktes: {0}</sys:String>
 
     <!-- ── Dialog strings ───────────────────────────────────────────── -->
+    <sys:String x:Key="Str_Dlg_SaveRemovesSignature" xml:space="preserve">«{0}» er digitalt signert.
+
+Hvis du lagrer, erstattes filen, og signaturen fjernes. Avbryt og bruk Lagre som med et annet navn hvis du vil beholde den signerte filen.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveOtherPaneDirty" xml:space="preserve">Det andre panelet har også «{0}» åpen, med egne ulagrede endringer.
 
 Hvis du lagrer nå, overskrives filen, og disse endringene går tapt. Lagre det andre panelet først hvis du vil beholde dem.</sys:String>

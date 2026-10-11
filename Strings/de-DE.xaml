@@ -149,6 +149,9 @@
     <sys:String x:Key="Str_RotateFailed">Drehen fehlgeschlagen: {0}</sys:String>
 
     <!-- ── Dialog strings ───────────────────────────────────────────── -->
+    <sys:String x:Key="Str_Dlg_SaveRemovesSignature" xml:space="preserve">„{0}“ ist digital signiert.
+
+Beim Speichern wird die Datei ersetzt und ihre Signatur entfernt. Um die signierte Datei zu behalten, brechen Sie ab und verwenden Sie „Speichern unter“ mit einem anderen Namen.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveOtherPaneDirty" xml:space="preserve">Im anderen Bereich ist „{0}“ ebenfalls geöffnet, mit eigenen ungespeicherten Änderungen.
 
 Beim Speichern wird die Datei überschrieben und diese Änderungen gehen verloren. Speichern Sie zuerst den anderen Bereich, wenn Sie sie behalten möchten.</sys:String>

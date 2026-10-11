@@ -149,6 +149,9 @@
     <sys:String x:Key="Str_RotateFailed">Error al rotar: {0}</sys:String>
 
     <!-- ── Dialog strings ───────────────────────────────────────────── -->
+    <sys:String x:Key="Str_Dlg_SaveRemovesSignature" xml:space="preserve">«{0}» tiene una firma digital.
+
+Al guardar se reemplaza el archivo y se elimina su firma. Para conservar el archivo firmado, cancele y use Guardar como con otro nombre.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveOtherPaneDirty" xml:space="preserve">El otro panel también tiene «{0}» abierto, con cambios sin guardar propios.
 
 Al guardar ahora se sobrescribe el archivo y esos cambios se perderán. Guarde primero el otro panel si desea conservarlos.</sys:String>

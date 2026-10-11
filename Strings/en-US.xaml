@@ -209,6 +209,9 @@
     <sys:String x:Key="Str_RotateFailed">Rotate failed: {0}</sys:String>
 
     <!-- ── Dialog strings ───────────────────────────────────────────── -->
+    <sys:String x:Key="Str_Dlg_SaveRemovesSignature" xml:space="preserve">"{0}" is digitally signed.
+
+Saving replaces the file and removes its signature. To keep the signed file, cancel and use Save As with a different name.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveOtherPaneDirty" xml:space="preserve">The other pane also has "{0}" open, with unsaved changes of its own.
 
 Saving now overwrites the file and those changes will be lost. Save the other pane first if you want to keep them.</sys:String>

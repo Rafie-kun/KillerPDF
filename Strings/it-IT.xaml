@@ -209,6 +209,9 @@
     <sys:String x:Key="Str_RotateFailed">Rotazione fallita: {0}</sys:String>
 
     <!-- ── Dialog strings ───────────────────────────────────────────── -->
+    <sys:String x:Key="Str_Dlg_SaveRemovesSignature" xml:space="preserve">"{0}" è firmato digitalmente.
+
+Il salvataggio sostituisce il file e ne rimuove la firma. Per conservare il file firmato, annulla e usa Salva come con un altro nome.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveOtherPaneDirty" xml:space="preserve">Anche l'altro riquadro ha "{0}" aperto, con le proprie modifiche non salvate.
 
 Il salvataggio sovrascrive il file e le modifiche andranno perse. se desideri mantenerli salva prima l'altro riquadro.</sys:String>

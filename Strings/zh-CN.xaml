@@ -149,6 +149,9 @@
     <sys:String x:Key="Str_RotateFailed">旋转失败：{0}</sys:String>
 
     <!-- ── Dialog strings ───────────────────────────────────────────── -->
+    <sys:String x:Key="Str_Dlg_SaveRemovesSignature" xml:space="preserve">“{0}”带有数字签名。
+
+保存会替换该文件并移除其签名。如需保留已签名的文件，请取消并使用“另存为”以其他名称保存。</sys:String>
     <sys:String x:Key="Str_Dlg_SaveOtherPaneDirty" xml:space="preserve">另一个窗格中也打开了“{0}”，并且有自己未保存的更改。
 
 现在保存会覆盖该文件，那些更改将会丢失。如果想保留，请先保存另一个窗格。</sys:String>

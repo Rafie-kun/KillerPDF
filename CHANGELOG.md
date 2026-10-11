@@ -81,6 +81,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Built the JPEG 2000 decoder from vendored CoreJ2K sources instead of a package reference.
 - Match legacy bitmap dimensions for fractional page boxes without changing engine numeric precision.
 - Document tabs now use complete 98SE geometry and themed drag previews, and can be moved into a new window without losing their live editing state.
+- Saving over a digitally signed PDF now asks first, because saving removes the signature.
 - Kept Select mode non-editing and moved existing PDF text changes behind the explicit Text tool (#411).
 - Routed desktop OCR provider selection through the engine's explicit or automatic provider contract, including complete installed-language checks for engine and Tesseract model sets.
 - Split Transform and Color Correction into separate tools with the same live preview and page controls.

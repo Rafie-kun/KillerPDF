@@ -209,6 +209,9 @@
     <sys:String x:Key="Str_RotateFailed">Échec de la rotation : {0}</sys:String>
 
     <!-- ── Dialog strings ───────────────────────────────────────────── -->
+    <sys:String x:Key="Str_Dlg_SaveRemovesSignature" xml:space="preserve">« {0} » est signé numériquement.
+
+L'enregistrement remplace le fichier et supprime sa signature. Pour conserver le fichier signé, annulez et utilisez Enregistrer sous avec un autre nom.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveOtherPaneDirty" xml:space="preserve">L'autre volet a également « {0} » ouvert, avec ses propres modifications non enregistrées.
 
 L'enregistrement va écraser le fichier et ces modifications seront perdues. Enregistrez d'abord l'autre volet si vous souhaitez les conserver.</sys:String>
