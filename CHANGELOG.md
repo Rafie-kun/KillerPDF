@@ -32,6 +32,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Restored menu fades and aligned rail menus and submenus with their opening controls and screen edges.
 - Aligned the shortcuts panel and language menu, and kept rail flyouts beside their opening buttons with an 8-unit inset from the content edge.
 - Corrected theme colors, wordmarks, footers and dialog controls, including Light/Yellow, 98SE Red and cream Blood, Greed and Cyanotic accents. Added a shadow to the PDF accent in the Light/Yellow wordmark.
+- Accent-colored toolbar icons keep a dark halo on the Light theme's Yellow accent, so they no longer fade into the bar.
 
 ## [1.8.80] - 2026-10-05
 

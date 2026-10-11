@@ -167,6 +167,9 @@
         </Style>
         <Style x:Key="ToolbarButtonAccent" TargetType="Button" BasedOn="{StaticResource ToolbarButton}">
             <Setter Property="Foreground" Value="{DynamicResource AccentLogo}"/>
+            <!-- Light/Yellow draws these glyphs yellow on a light bar; the wordmark's dark halo keeps
+                 them legible. WordmarkAccentShadowOpacity is 0 on every other theme. -->
+            <Setter Property="Effect"><Setter.Value><DropShadowEffect Color="Black" BlurRadius="4" ShadowDepth="2" Direction="297" Opacity="{DynamicResource WordmarkAccentShadowOpacity}"/></Setter.Value></Setter>
         </Style>
         <!-- Main half of an Open/Save split button: its hover fill is inset on the right so it
              stops just short of the overlapping dropdown chevron instead of running under it. -->
@@ -200,6 +203,9 @@
         </Style>
         <Style x:Key="ToolbarSplitMainAccent" TargetType="Button" BasedOn="{StaticResource ToolbarSplitMain}">
             <Setter Property="Foreground" Value="{DynamicResource AccentLogo}"/>
+            <!-- Light/Yellow draws these glyphs yellow on a light bar; the wordmark's dark halo keeps
+                 them legible. WordmarkAccentShadowOpacity is 0 on every other theme. -->
+            <Setter Property="Effect"><Setter.Value><DropShadowEffect Color="Black" BlurRadius="4" ShadowDepth="2" Direction="297" Opacity="{DynamicResource WordmarkAccentShadowOpacity}"/></Setter.Value></Setter>
         </Style>
         <Style x:Key="ToolbarButtonDanger" TargetType="Button" BasedOn="{StaticResource ToolbarButton}">
             <Setter Property="Foreground" Value="{DynamicResource DangerRed}"/>
