@@ -305,8 +305,9 @@ namespace KillerPDF
         /// <summary>
         /// The family two-checkbox confirm: a short question, two checkboxes stacked between the
         /// message and the buttons, and Cancel / confirm buttons where confirm is the accent +
-        /// Enter default and Esc cancels. Used by the quit prompt and by the install prompt
-        /// (desktop shortcut + install for all users).
+        /// Enter default and Esc cancels. Used by the quit prompt, the unsaved-changes quit
+        /// prompt and the install prompt (desktop shortcut + install for all users).
+        /// cancelIsDefault moves Enter to Cancel, for a confirm that discards work.
         /// </summary>
         public static (bool confirmed, bool check1, bool check2) ShowTwoCheckPrompt(
             Window? owner,
@@ -316,7 +317,8 @@ namespace KillerPDF
             string check2Text,
             bool check2Initial,
             string confirmLabel,
-            string cancelLabel)
+            string cancelLabel,
+            bool cancelIsDefault = false)
         {
             bool confirmed = false;
             bool closeTabs = check1Initial;
@@ -383,7 +385,8 @@ namespace KillerPDF
             cancelBtn.Click   += (_, _2) => win.Close();
             var quitBtn = UiKit.Make(confirmLabel, true);
             quitBtn.Margin    = new Thickness(8, 0, 0, 0);
-            quitBtn.IsDefault = true;
+            quitBtn.IsDefault = !cancelIsDefault;
+            cancelBtn.IsDefault = cancelIsDefault;
             quitBtn.Click    += (_, _2) => { confirmed = true; win.Close(); };
             btnPanel.Children.Add(cancelBtn);
             btnPanel.Children.Add(quitBtn);

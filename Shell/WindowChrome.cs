@@ -751,7 +751,28 @@ namespace KillerPDF
             Viewer.CaptureActiveIfAny();
             ViewerB.CaptureActiveIfAny();
             bool anyDirty = _isDirty || AllSessions().Any(s => s.IsDirty);
-            if (anyDirty)
+            bool anyOpenDoc = AllSessions().Any(s =>
+                s.Doc != null || !string.IsNullOrEmpty(s.CurrentFile) || !string.IsNullOrEmpty(s.DeferredPath));
+            bool askOpenTabs = anyOpenDoc && App.GetSetting("RememberChoiceLocked") != "1";
+            if (anyDirty && askOpenTabs)
+            {
+                // The unsaved-changes prompt carries the quit prompt's two checkboxes, so closing with
+                // unsaved work still asks about the open tabs in the same single dialog. Enter stays
+                // on Cancel so a stray keypress can't silently discard unsaved work.
+                var (confirmed, closeTabs, remember) = KillerDialog.ShowTwoCheckPrompt(this,
+                    Loc("Str_Dlg_UnsavedExit"),
+                    Loc("Str_Chk_CloseTabs"), App.GetSetting("RememberOpenFiles") == "0",
+                    Loc("Str_Dlg_RememberChoice"), false,
+                    Loc("Str_Btn_Quit"), Loc("Str_Btn_CancelDlg"), cancelIsDefault: true);
+                if (!confirmed)
+                {
+                    e.Cancel = true;
+                    return;
+                }
+                App.SetSetting("RememberOpenFiles", closeTabs ? "0" : "1");
+                if (remember) App.SetSetting("RememberChoiceLocked", "1");
+            }
+            else if (anyDirty)
             {
                 // fadeClose:false so the prompt closes instantly instead of adding its own 150ms fade
                 // before the app's fade-out starts - otherwise the two run back-to-back (300ms of waiting).
@@ -773,12 +794,9 @@ namespace KillerPDF
             // Only asked when a document is actually open (loaded, or a lazy not-yet-loaded
             // restored tab) - with nothing open there are no tabs to close or reopen, so the
             // empty window just quits.
-            bool anyOpenDoc = AllSessions().Any(s =>
-                s.Doc != null || !string.IsNullOrEmpty(s.CurrentFile) || !string.IsNullOrEmpty(s.DeferredPath));
             // A confirmed "close without saving" already IS the quit confirmation - never stack
-            // the quit prompt on top of it (one dialog max per close). The open-tabs / remember
-            // preference just keeps its saved value for that close.
-            if (!anyDirty && anyOpenDoc && App.GetSetting("RememberChoiceLocked") != "1")
+            // the quit prompt on top of it (one dialog max per close).
+            if (!anyDirty && askOpenTabs)
             {
                 var (confirmed, closeTabs, remember) = KillerDialog.ShowQuitPrompt(this,
                     Loc("Str_Dlg_QuitMsg"),
