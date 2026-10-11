@@ -68,8 +68,8 @@ namespace KillerPDF.Controls
 
         /// <summary>Canvas point to PDF space (points, bottom-left origin) - the inverse of the
         /// mapping AddSearchHighlight paints with, same as ExtractTextFromRegion.</summary>
-        private static (double X, double Y) CanvasToPdf(Point pos, double renderW, double renderH, PageTextRuns runs)
-            => (pos.X * runs.PdfWidth / renderW, runs.PdfHeight - pos.Y * runs.PdfHeight / renderH);
+        private (double X, double Y) CanvasToPdf(int page, Point pos, double renderW, double renderH, PageTextRuns runs)
+            => RedactionGeometry.CanvasPointToPage(pos, runs.PdfWidth, runs.PdfHeight, renderW, renderH, EffectiveRotation(page));
 
         /// <summary>Returns an I-beam only when the Select tool is over actual selectable text.
         /// Empty page remains an arrow so the cursor also explains which drag behavior will begin.</summary>
@@ -80,7 +80,7 @@ namespace KillerPDF.Controls
                 return Cursors.Arrow;
             var runs = _textRuns.GetPage(_currentFile, pageIdx);
             if (runs is null || runs.Chars.Count == 0) return Cursors.Arrow;
-            var (px, py) = CanvasToPdf(pos, rd.w, rd.h, runs);
+            var (px, py) = CanvasToPdf(pageIdx, pos, rd.w, rd.h, runs);
             return TextRunService.IsOverText(runs, px, py) ? Cursors.IBeam : Cursors.Arrow;
         }
 
@@ -93,7 +93,7 @@ namespace KillerPDF.Controls
             var runs = _textRuns.GetPage(_currentFile, pageIdx);
             if (runs is null || runs.Chars.Count == 0) return false;
 
-            var (px, py) = CanvasToPdf(pos, rd.w, rd.h, runs);
+            var (px, py) = CanvasToPdf(pageIdx, pos, rd.w, rd.h, runs);
             if (!TextRunService.IsOverText(runs, px, py)) return false;
 
             ClearTextSelection();
@@ -110,7 +110,7 @@ namespace KillerPDF.Controls
             if (_currentFile is null || !_renderDims.TryGetValue(pageIdx, out var rd)) return false;
             var runs = _textRuns.GetPage(_currentFile, pageIdx);
             if (runs is null || runs.Chars.Count == 0) return false;
-            var (px, py) = CanvasToPdf(pos, rd.w, rd.h, runs);
+            var (px, py) = CanvasToPdf(pageIdx, pos, rd.w, rd.h, runs);
             return TextRunService.IsOverText(runs, px, py);
         }
 
@@ -119,7 +119,7 @@ namespace KillerPDF.Controls
             if (_currentFile is null || !_renderDims.TryGetValue(pageIdx, out var rd)) return false;
             var runs = _textRuns.GetPage(_currentFile, pageIdx);
             if (runs is null || runs.Chars.Count == 0) return false;
-            var (px, py) = CanvasToPdf(pos, rd.w, rd.h, runs);
+            var (px, py) = CanvasToPdf(pageIdx, pos, rd.w, rd.h, runs);
             var range = TextRunService.WordRangeFromPoint(runs, px, py);
             if (range is null) return false;
 
@@ -178,7 +178,7 @@ namespace KillerPDF.Controls
             var runs = _textRuns.GetPage(_currentFile, page);
             if (runs is null) return;
 
-            var (px, py) = CanvasToPdf(pos, rd.w, rd.h, runs);
+            var (px, py) = CanvasToPdf(page, pos, rd.w, rd.h, runs);
             var focus = (page, TextRunService.CaretFromPoint(runs, px, py));
             if (focus == _txtSelFocus) return;
             _txtSelFocus = focus;
@@ -277,8 +277,7 @@ namespace KillerPDF.Controls
             var (start, end) = SelectionSliceForPage(page, runs.Chars.Count);
             if (start >= end) return result;
 
-            double sx = rd.w / runs.PdfWidth;
-            double sy = rd.h / runs.PdfHeight;
+            int rotation = EffectiveRotation(page);
 
             int i = start;
             while (i < end)
@@ -290,11 +289,11 @@ namespace KillerPDF.Controls
                 // Use its physical extremes rather than assuming the first glyph is on the left.
                 double left = runs.Chars.Skip(i).Take(segEnd - i).Min(c => c.Left);
                 double right = runs.Chars.Skip(i).Take(segEnd - i).Max(c => c.Right);
-                double h = (line.Top - line.Bottom) * sy;
-                double pad = h * 0.12;   // a touch of breathing room; tighter than search's 0.30
+                double pad = (line.Top - line.Bottom) * 0.12;   // a touch of breathing room; tighter than search's 0.30
 
-                result.Add(new Rect(left * sx, rd.h - line.Top * sy - pad,
-                                    Math.Max((right - left) * sx, 2), Math.Max(h + pad * 2, 2)));
+                Rect quad = RedactionGeometry.PageToCanvas(left, line.Bottom - pad, right, line.Top + pad,
+                    runs.PdfWidth, runs.PdfHeight, rd.w, rd.h, rotation);
+                result.Add(new Rect(quad.X, quad.Y, Math.Max(quad.Width, 2), Math.Max(quad.Height, 2)));
                 i = segEnd;
             }
             return result;
@@ -484,19 +483,9 @@ namespace KillerPDF.Controls
                 }
                 var page = contentDoc.GetPage(pageIdx + 1); // The app facade is 1-based
 
-                double pdfW = page.Width;
-                double pdfH = page.Height;
-                double sx = pdfW / renderW;
-                double sy = pdfH / renderH;
-
-                // Convert canvas rect to PDF coordinates (flip Y - PDF origin is bottom-left)
-                double pdfLeft = canvasBounds.Left * sx;
-                double pdfRight = canvasBounds.Right * sx;
-                double pdfTop = pdfH - (canvasBounds.Top * sy);
-                double pdfBottom = pdfH - (canvasBounds.Bottom * sy);
-                // pdfTop > pdfBottom because of Y flip
-                double pdfMinY = Math.Min(pdfTop, pdfBottom);
-                double pdfMaxY = Math.Max(pdfTop, pdfBottom);
+                // Convert the canvas rect to page points through the page's effective rotation.
+                var (pdfLeft, pdfMinY, pdfRight, pdfMaxY) = RedactionGeometry.CanvasToPage(
+                    canvasBounds, page.Width, page.Height, renderW, renderH, EffectiveRotation(pageIdx));
 
                 var words = page.GetWords()
                     .Where(w =>

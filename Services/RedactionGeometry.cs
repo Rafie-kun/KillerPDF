@@ -3,9 +3,10 @@ using System.Windows;
 namespace KillerPDF.Services;
 
 /// <summary>
-/// Maps rectangles between a rendered page canvas and unrotated, crop-relative page points, the
-/// coordinates the engine's text extraction and redaction use. The canvas shows the page turned by
-/// its effective rotation, so a 90 or 270 degree page swaps width and height on screen.
+/// Maps points and rectangles between a rendered page canvas and unrotated, crop-relative page
+/// points, the coordinates the engine's text extraction uses. The canvas shows the page turned by
+/// its effective rotation, so a 90 or 270 degree page swaps width and height on screen. Redaction,
+/// search highlights, text selection and Crop all map through here.
 /// </summary>
 internal static class RedactionGeometry
 {
@@ -28,6 +29,20 @@ internal static class RedactionGeometry
         };
         return (Math.Clamp(x1, 0, pageWidth), Math.Clamp(y1, 0, pageHeight),
             Math.Clamp(x2, 0, pageWidth), Math.Clamp(y2, 0, pageHeight));
+    }
+
+    /// <summary>Maps one canvas point to page points without clamping it to the page.</summary>
+    internal static (double X, double Y) CanvasPointToPage(Point point, double pageWidth, double pageHeight,
+        double canvasWidth, double canvasHeight, int rotation)
+    {
+        double cx = point.X, cy = point.Y;
+        return NormalizeRotation(rotation) switch
+        {
+            90 => (cy * pageWidth / canvasHeight, cx * pageHeight / canvasWidth),
+            180 => (pageWidth - cx * pageWidth / canvasWidth, cy * pageHeight / canvasHeight),
+            270 => (pageWidth - cy * pageWidth / canvasHeight, pageHeight - cx * pageHeight / canvasWidth),
+            _ => (cx * pageWidth / canvasWidth, pageHeight - cy * pageHeight / canvasHeight)
+        };
     }
 
     internal static Rect PageToCanvas(double left, double bottom, double right, double top,

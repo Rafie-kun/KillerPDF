@@ -108,6 +108,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Prevented a failed Save or Save As from damaging the existing file by finishing the new copy before replacing it.
 - Preserved unsaved annotations when moving, reordering, duplicating, or merging pages and when removing a link. A duplicated page carries a copy of them.
 - Dragging one page of a multi-page selection in the sidebar now moves the whole selection instead of only the pressed page.
+- Search highlights and text selection now land on the right text on rotated pages, and Crop no longer flips the box vertically on upside-down pages.
 - Preserved pasted images and other unsaved annotations when inserting blank pages (#388).
 - Preserved shapes and other annotations on retained pages when deleting PDF pages (#429).
 - Preserved annotations during normal saves when cached page dimensions are unavailable.
