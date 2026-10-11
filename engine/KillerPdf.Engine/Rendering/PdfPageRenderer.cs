@@ -5719,13 +5719,18 @@ public sealed partial class PdfPageRenderer
                 PdfColorTransform? blendProfile = target.InputProfile;
                 // Every plane sample is a pure function of its source sample, so row ranges can
                 // convert independently. Each range owns its converter because the converter
-                // keeps a small color cache.
+                // keeps a small color cache. Eight-bit RGB ranges share one larger cache of
+                // converted colors instead, so a color converted in one band is not converted
+                // again in the next.
+                ulong[]? sharedColors = components == 3 && bits == 8 && !averagePlane
+                    ? new ulong[ImageSampleConverter.SharedColorSlots((long)planeWidth * planeHeight)] : null;
                 ForEachRow(0, planeHeight, (long)planeWidth * planeHeight, (rowStart, rowEnd) =>
                 {
                     var converter = new ImageSampleConverter(samples, rowBytes, components,
                         bits, decode, colorSpace, targetInk, blendProfile,
                         areaColumns: converterAreaColumns, areaRows: converterAreaRows,
-                        binaryColumns: binaryColumns, preserveSpotZero: preserveReducedSpot);
+                        binaryColumns: binaryColumns, preserveSpotZero: preserveReducedSpot,
+                        sharedColors: sharedColors);
                     long[]? binaryCoverage = binaryRowAverage ? new long[planeWidth] : null;
                     uint[]? binaryColors = binaryRowAverage ? new uint[planeWidth] : null;
                     for (int py = rowStart; py < rowEnd; py++)
@@ -6253,6 +6258,8 @@ public sealed partial class PdfPageRenderer
         private readonly bool _directCmyk;
         private readonly bool _directCmykInk;
         private readonly bool _preserveSpotZero;
+        private readonly ulong[]? _sharedColors;
+        private readonly int _sharedShift;
         private int _binaryRowIndex = -1;
         private PdfBinaryAreaSampler.Row _binaryRow;
 
@@ -6261,7 +6268,8 @@ public sealed partial class PdfPageRenderer
             int components, int bits, double[] decode, ImageColorSpace colorSpace,
             bool targetInk, PdfColorTransform? targetProfile, bool matte = false,
             AreaSpan[]? areaColumns = null, AreaSpan[]? areaRows = null,
-            PdfBinaryAreaSampler.Column[]? binaryColumns = null, bool preserveSpotZero = false)
+            PdfBinaryAreaSampler.Column[]? binaryColumns = null, bool preserveSpotZero = false,
+            ulong[]? sharedColors = null)
         {
             _samples = samples;
             _rowBytes = rowBytes;
@@ -6303,6 +6311,12 @@ public sealed partial class PdfPageRenderer
                 _lookup = new uint[1 << bits];
                 _lookupSet = new bool[1 << bits];
                 if (matte) _matteAlpha = new byte[1 << bits];
+            }
+            else if (sharedColors is not null && bits == 8 && components == 3 && !matte
+                && System.Numerics.BitOperations.IsPow2(sharedColors.Length))
+            {
+                _sharedColors = sharedColors;
+                _sharedShift = 32 - System.Numerics.BitOperations.Log2((uint)sharedColors.Length);
             }
             else if (bits <= 8 && components <= 4 && !(_directCmykInk && !matte))
             {
@@ -6396,7 +6410,7 @@ public sealed partial class PdfPageRenderer
                 }
                 return _lookup[sample];
             }
-            if (_cacheKeys is not null)
+            if (_cacheKeys is not null || _sharedColors is not null)
                 return ConvertCacheKey(ReadCacheKey(x, y));
             if (_colorSpace.Palette is not null)
                 return Pack(_colorSpace.Palette[Math.Min(Raw(x, y, 0), _colorSpace.Palette.Length - 1)]);
@@ -6429,9 +6443,27 @@ public sealed partial class PdfPageRenderer
             return color;
         }
 
+        /// <summary>Slots for a shared color cache serving an image of the given size.</summary>
+        internal static int SharedColorSlots(long pixels) =>
+            1 << Math.Clamp(System.Numerics.BitOperations.Log2((ulong)Math.Max(1, pixels)) - 1, 12, 17);
+
         private uint ConvertCacheKey(uint key)
         {
             if (_bits == 16) return ConvertWideCacheKey(checked((int)key));
+            if (_sharedColors is not null)
+            {
+                // Each slot holds a 24-bit color with a presence bit and its converted value in
+                // one 64-bit word, so converters on other rows read whole entries; two
+                // converting the same color store the same value.
+                int shared = (int)((key * 2654435761u) >> _sharedShift);
+                ulong tag = (ulong)(key | 0x01000000u) << 32;
+                ulong entry = _sharedColors[shared];
+                if ((entry & 0xFFFFFFFF00000000ul) == tag) return (uint)entry;
+                uint converted = ConvertRaw((int)(key >> 16) & 255, (int)(key >> 8) & 255,
+                    (int)key & 255, 0);
+                _sharedColors[shared] = tag | converted;
+                return converted;
+            }
             int slot = (int)((key * 2654435761u) >> _cacheShift);
             if (_cacheValid![slot] && _cacheKeys![slot] == key) return _cacheValues![slot];
             uint color = ConvertRaw((int)(key >> (8 * (_components - 1))) & 255,
