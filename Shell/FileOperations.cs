@@ -900,7 +900,7 @@ namespace KillerPDF
                     PdfEngineIntegration.StripLinkAppearances(tempEdited);
                     WriteFormValuesToDocument(tempEdited);
                     PdfEngineIntegration.ApplyPageRotations(tempEdited, finalRotations);
-                    System.IO.File.Copy(tempEdited, saveTarget, true);
+                    PdfEngineIntegration.ReplaceFileAtomically(tempEdited, saveTarget);
                     _doc.Close();
                     try
                     {
@@ -920,12 +920,15 @@ namespace KillerPDF
                 }
                 else
                 {
-                    _doc.Save(saveTarget);
-                    PdfEngineIntegration.RepairHarmlessSaveArtifacts(saveTarget);
-                    PdfEngineIntegration.ClearInvalidatedSignatures(saveTarget);
-                    PdfEngineIntegration.StripLinkAppearances(saveTarget);
-                    WriteFormValuesToDocument(saveTarget);
-                    PdfEngineIntegration.ApplyPageRotations(saveTarget, finalRotations);
+                    // Finish the saved copy before touching the destination.
+                    var tempSaved = App.MakeTempFile("saved");
+                    _doc.Save(tempSaved);
+                    PdfEngineIntegration.RepairHarmlessSaveArtifacts(tempSaved);
+                    PdfEngineIntegration.ClearInvalidatedSignatures(tempSaved);
+                    PdfEngineIntegration.StripLinkAppearances(tempSaved);
+                    WriteFormValuesToDocument(tempSaved);
+                    PdfEngineIntegration.ApplyPageRotations(tempSaved, finalRotations);
+                    PdfEngineIntegration.ReplaceFileAtomically(tempSaved, saveTarget);
                 }
 
                 MarkDirty(false);
@@ -1014,7 +1017,7 @@ namespace KillerPDF
                     PdfEngineIntegration.StripLinkAppearances(tempEdited);
                     WriteFormValuesToDocument(tempEdited);
                     PdfEngineIntegration.ApplyPageRotations(tempEdited, finalRotations);
-                    System.IO.File.Copy(tempEdited, dlg.FileName, true);
+                    PdfEngineIntegration.ReplaceFileAtomically(tempEdited, dlg.FileName);
                     _doc.Close();
                     try
                     {
@@ -1045,12 +1048,15 @@ namespace KillerPDF
                 }
                 else
                 {
-                    _doc.Save(dlg.FileName);
-                    PdfEngineIntegration.RepairHarmlessSaveArtifacts(dlg.FileName);
-                    PdfEngineIntegration.ClearInvalidatedSignatures(dlg.FileName);
-                    PdfEngineIntegration.StripLinkAppearances(dlg.FileName);
-                    WriteFormValuesToDocument(dlg.FileName);
-                    PdfEngineIntegration.ApplyPageRotations(dlg.FileName, finalRotations);
+                    // Finish the saved copy before touching the destination.
+                    var tempSaved = App.MakeTempFile("saved");
+                    _doc.Save(tempSaved);
+                    PdfEngineIntegration.RepairHarmlessSaveArtifacts(tempSaved);
+                    PdfEngineIntegration.ClearInvalidatedSignatures(tempSaved);
+                    PdfEngineIntegration.StripLinkAppearances(tempSaved);
+                    WriteFormValuesToDocument(tempSaved);
+                    PdfEngineIntegration.ApplyPageRotations(tempSaved, finalRotations);
+                    PdfEngineIntegration.ReplaceFileAtomically(tempSaved, dlg.FileName);
                     _originalFile = dlg.FileName;
                     FileNameLabel.Text = System.IO.Path.GetFileName(dlg.FileName);
                     MarkDirty(false);
