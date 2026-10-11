@@ -52,6 +52,7 @@
     <Compile Include="..\Models\StampModels.cs" Link="Models\StampModels.cs" />
     <Compile Include="..\Controls\FlyoutPlacement.cs" Link="Controls\FlyoutPlacement.cs" />
     <Compile Include="..\Controls\SidebarPageBinding.cs" Link="Controls\SidebarPageBinding.cs" />
+    <Compile Include="..\Controls\WindowFx.cs" Link="Controls\WindowFx.cs" />
     <!-- Data only, by design: OcrLanguages.cs itself reaches App and OcrNativeBootstrap, which a
          catalog check has no business dragging in. See OcrCatalogTests. -->
     <Compile Include="..\Services\OcrCatalog.cs" Link="Services\OcrCatalog.cs" />
