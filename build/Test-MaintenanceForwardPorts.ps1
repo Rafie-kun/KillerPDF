@@ -55,5 +55,25 @@ try {
     $tree = & git rev-parse "$source^{tree}"
     $merge = & git commit-tree $tree -p $source -p $adapted -m 'merge fixture'
     Check 'unported merge is not silently skipped' $merge $equivalent $false
+    # The default policy must come from the exact development commit, not disk.
+    $policy.ports = @()
+    New-Item -ItemType Directory -Path (Join-Path $fixture '.github') | Out-Null
+    $committedPolicy = Join-Path $fixture '.github/maintenance-forward-ports.json'
+    $policy | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $committedPolicy -Encoding UTF8
+    & git add -- .github/maintenance-forward-ports.json
+    $tree = & git write-tree
+    $pinned = & git commit-tree $tree -p $baseline -m 'policy fixture'
+    $ErrorActionPreference = 'Continue'
+    $output = & $hostExe -NoProfile -File $checker -MaintenanceRef $baseline -DevelopmentRef $pinned 2>&1
+    $passed = $LASTEXITCODE -eq 0
+    $ErrorActionPreference = 'Stop'
+    if (!$passed) { throw "Committed policy did not pass: $output" }
+    Write-Host 'PASS: exact committed development policy'
+    $ErrorActionPreference = 'Continue'
+    $output = & $hostExe -NoProfile -File $checker -MaintenanceRef $baseline -DevelopmentRef $pinned -PolicyRef $baseline 2>&1
+    $rejected = $LASTEXITCODE -ne 0
+    $ErrorActionPreference = 'Stop'
+    if (!$rejected) { throw 'Stale PolicyRef was accepted.' }
+    Write-Host 'PASS: stale policy ref fails'
     Write-Host "Fixtures retained at $fixture"
 } finally { Pop-Location }
