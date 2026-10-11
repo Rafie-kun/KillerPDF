@@ -1,0 +1,332 @@
+using KillerPdf.Engine.Authoring;
+using KillerPdf.Engine.CrossReference;
+using KillerPdf.Engine.Documents;
+using KillerPdf.Engine.Objects;
+using KillerPdf.Engine.Rendering;
+using System.Text;
+using Xunit;
+
+namespace KillerPdf.Engine.Tests.Documents;
+
+public sealed class PdfContentRedactionTests
+{
+    private const string Helvetica = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>";
+
+    [Fact]
+    public void RemovesOnlyTheGlyphsUnderTheRegionAndKeepsTheRestInPlace()
+    {
+        PdfDocument document = PdfDocument.Open(SinglePage(
+            "BT /F1 12 Tf 72 700 Td (Account SECRET42 closed) Tj ET"));
+        PdfRedactionRegion region = Region(document, 0, "SECRET42");
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, [region],
+            new PdfContentRedactionOptions { ProhibitedText = ["SECRET42"] });
+
+        PdfDocument output = PdfDocument.Open(result.Document);
+        Assert.Single(output.CrossReferences.Sections);
+        Assert.True(result.Verification.Succeeded);
+        PdfRedactionPageAnalysis page = Assert.Single(result.Plan.Pages);
+        Assert.Equal(PdfRedactionPageMethod.Content, page.Method);
+        Assert.Equal(8, page.RemovedGlyphs);
+        string text = Letters(output, 0);
+        Assert.Contains("Account", text);
+        Assert.Contains("closed", text);
+        Assert.DoesNotContain("SECRET", text);
+        AssertKeptLettersUnmoved(document, output, 0, [region]);
+        Assert.False(PdfContentRedaction.Verify(document.Source, [region], []).Succeeded);
+    }
+
+    [Fact]
+    public void KeepsSpacingForKerningCharacterAndWordSpacingAndQuoteOperators()
+    {
+        PdfDocument document = PdfDocument.Open(SinglePage(
+            "BT /F1 10 Tf 2 Tc 3 Tw 14 TL 50 600 Td [(Name: ) -120 (HIDDEN) 40 ( value)] TJ " +
+            "(second HIDDEN line) ' 1 0.5 (third HIDDEN row) \" ET"));
+        PdfRedactionRegion[] regions = [Region(document, 0, "HIDDEN", 0),
+            Region(document, 0, "HIDDEN", 1), Region(document, 0, "HIDDEN", 2)];
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, regions,
+            new PdfContentRedactionOptions { ProhibitedText = ["HIDDEN"] });
+
+        PdfDocument output = PdfDocument.Open(result.Document);
+        Assert.DoesNotContain("HIDDEN", Letters(output, 0));
+        Assert.Contains("value", Letters(output, 0));
+        Assert.Contains("row", Letters(output, 0));
+        AssertKeptLettersUnmoved(document, output, 0, regions);
+    }
+
+    [Fact]
+    public void HandlesCroppedRotatedPagesInReaderCoordinates()
+    {
+        PdfDocument document = PdfDocument.Open(SinglePage(
+            "BT /F1 14 Tf 150 400 Td (TOP SECRET DATA) Tj ET",
+            "/MediaBox [0 0 612 792] /CropBox [100 50 500 700] /Rotate 90"));
+        PdfRedactionRegion region = Region(document, 0, "SECRET");
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, [region]);
+
+        PdfDocument output = PdfDocument.Open(result.Document);
+        string text = Letters(output, 0);
+        Assert.Contains("TOP", text);
+        Assert.Contains("DATA", text);
+        Assert.DoesNotContain("SECRET", text);
+        AssertKeptLettersUnmoved(document, output, 0, [region]);
+
+        // The crop box is 400 by 650 points; a quarter turn shows it 650 wide and 400 tall.
+        PdfRenderedPage rendered = new PdfPageRenderer(output).Render(0, new PdfRenderOptions(650, 400));
+        double cx = (region.Bounds.Left + region.Bounds.Right) / 2;
+        double cy = (region.Bounds.Bottom + region.Bounds.Top) / 2;
+        Assert.True(IsBlack(rendered, (int)cy, (int)cx));
+        Assert.False(IsBlack(rendered, 10, 10));
+    }
+
+    [Fact]
+    public void RewritesSharedFormsOnlyForTheRedactedPage()
+    {
+        var objects = new List<string>
+        {
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R 4 0 R] /Count 2 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /XObject << /Fm1 6 0 R >> >> /Contents 5 0 R >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /XObject << /Fm1 6 0 R >> >> /Contents 5 0 R >>",
+            Stream("q 1 0 0 1 100 500 cm /Fm1 Do Q"),
+            Stream("BT /F1 12 Tf 10 10 Td (Shared FORMSECRET text) Tj ET",
+                "/Type /XObject /Subtype /Form /BBox [0 0 400 100] /Resources << /Font << /F1 7 0 R >> >>"),
+            Helvetica
+        };
+        PdfDocument document = PdfDocument.Open(CreatePdf(objects));
+        PdfRedactionRegion region = Region(document, 0, "FORMSECRET");
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, [region]);
+
+        PdfDocument output = PdfDocument.Open(result.Document);
+        Assert.DoesNotContain("FORMSECRET", Letters(output, 0));
+        Assert.Contains("Shared", Letters(output, 0));
+        Assert.Contains("FORMSECRET", Letters(output, 1));
+        AssertKeptLettersUnmoved(document, output, 0, [region]);
+    }
+
+    [Fact]
+    public void ImageFullyInsideARegionIsRemovedAndThePageStaysEditable()
+    {
+        PdfDocument document = PdfDocument.Open(ImagePage(
+            "BT /F1 12 Tf 72 700 Td (Caption) Tj ET q 20 0 0 20 100 100 cm /Im1 Do Q", rotate: 0));
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document,
+            [new PdfRedactionRegion(0, new PdfContentBounds(90, 90, 130, 130))]);
+
+        PdfRedactionPageAnalysis page = Assert.Single(result.Plan.Pages);
+        Assert.Equal(PdfRedactionPageMethod.Content, page.Method);
+        Assert.Equal(1, page.RemovedImages);
+        PdfDocument output = PdfDocument.Open(result.Document);
+        Assert.Empty(new PdfPageContentReader(output).Read(0).Images);
+        Assert.False(HasSourceImage(output));
+        Assert.Contains("Caption", Letters(output, 0));
+    }
+
+    [Fact]
+    public void PartlyCoveredScanNeedsApprovalAndKeepsItsSearchableTextOutsideTheRegion()
+    {
+        PdfDocument document = PdfDocument.Open(ImagePage(
+            "q 300 0 0 300 50 50 cm /Im1 Do Q BT 3 Tr /F1 12 Tf 230 100 Td (SCANNED SSN 123) Tj ET",
+            rotate: 90));
+        PdfRedactionRegion region = Region(document, 0, "123");
+
+        PdfContentRedactionPlan plan = PdfContentRedaction.Analyze(document, [region]);
+        Assert.Equal([0], plan.RasterPages);
+        Assert.Contains("Image", Assert.Single(plan.Pages).RasterReasons);
+        Assert.Throws<InvalidOperationException>(() => PdfContentRedaction.Apply(document, [region]));
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, [region],
+            new PdfContentRedactionOptions { ApprovedRasterPages = [0], RasterDpi = 72, ProhibitedText = ["123"] });
+
+        PdfDocument output = PdfDocument.Open(result.Document);
+        PdfPageContent content = new PdfPageContentReader(output).Read(0);
+        Assert.Equal(PdfContentRedaction.RedactionImageName, Assert.Single(content.Images).ResourceName);
+        Assert.Contains("SCANNED", Letters(output, 0));
+        Assert.DoesNotContain("123", Letters(output, 0));
+        Assert.False(HasSourceImage(output));
+        AssertKeptLettersUnmoved(document, output, 0, [region]);
+
+        // Quarter turn: unrotated (x, y) shows at pixel (y, x) on this 400 by 400 page.
+        PdfRenderedPage rendered = new PdfPageRenderer(output).Render(0, new PdfRenderOptions(400, 400));
+        double cx = (region.Bounds.Left + region.Bounds.Right) / 2;
+        double cy = (region.Bounds.Bottom + region.Bounds.Top) / 2;
+        Assert.True(IsBlack(rendered, (int)cy, (int)cx));
+        (byte red, byte green, byte blue) = Pixel(rendered, 275, 125);
+        Assert.True(red > 200 && green < 60 && blue < 60, $"Expected red, got {red},{green},{blue}.");
+    }
+
+    [Fact]
+    public void RemovesIntersectingAnnotationsMarkedReplacementTextAndMetadata()
+    {
+        var objects = new List<string>
+        {
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R /Annots [6 0 R 7 0 R] >>",
+            Helvetica,
+            Stream("BT /F1 12 Tf 72 700 Td /Span << /ActualText (SECRETWORD) >> BDC (SECRETWORD) Tj EMC ( visible) Tj ET"),
+            "<< /Type /Annot /Subtype /Link /Rect [70 690 160 715] /A << /S /URI /URI (https://secretlink.example) >> >>",
+            "<< /Type /Annot /Subtype /Link /Rect [300 100 350 120] /A << /S /URI /URI (https://kept.example) >> >>",
+            "<< /Title (Confidential title) >>"
+        };
+        PdfDocument document = PdfDocument.Open(CreatePdf(objects, info: 8));
+        PdfRedactionRegion region = Region(document, 0, "SECRETWORD");
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, [region],
+            new PdfContentRedactionOptions { ProhibitedText = ["SECRETWORD", "secretlink", "Confidential title"] });
+
+        PdfDocument output = PdfDocument.Open(result.Document);
+        Assert.Equal(1, Assert.Single(result.Plan.Pages).RemovedAnnotations);
+        Assert.Contains("visible", Letters(output, 0));
+        Assert.Single(PdfLinkReader.ReadPage(output, 0));
+        Assert.False(output.Trailer.ContainsKey(new PdfName("Info"u8)));
+    }
+
+    [Fact]
+    public void StripsAlternateTextFromTaggedContentAndRemovesCoveredFormFields()
+    {
+        var objects = new List<string>
+        {
+            "<< /Type /Catalog /Pages 2 0 R /StructTreeRoot 6 0 R /AcroForm << /Fields [8 0 R 9 0 R] >> >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R /Annots [8 0 R 9 0 R] >>",
+            Helvetica,
+            Stream("/P << /MCID 0 >> BDC BT /F1 12 Tf 72 700 Td (Patient TAGSECRET) Tj ET EMC " +
+                "/P << /MCID 1 >> BDC BT /F1 12 Tf 72 600 Td (Public line) Tj ET EMC"),
+            "<< /Type /StructTreeRoot /K [7 0 R 10 0 R] >>",
+            "<< /Type /StructElem /S /P /P 6 0 R /Pg 3 0 R /Alt (Alt mentions TAGSECRET) /K 0 >>",
+            "<< /Type /Annot /Subtype /Widget /FT /Tx /T (ssn) /V (FIELDVALUE99) /Rect [140 690 260 712] >>",
+            "<< /Type /Annot /Subtype /Widget /FT /Tx /T (other) /V (keep) /Rect [300 100 400 120] >>",
+            "<< /Type /StructElem /S /P /P 6 0 R /Pg 3 0 R /Alt (Kept description) /K 1 >>"
+        };
+        PdfDocument document = PdfDocument.Open(CreatePdf(objects));
+        PdfRedactionRegion region = Region(document, 0, "TAGSECRET");
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, [region],
+            new PdfContentRedactionOptions { ProhibitedText = ["TAGSECRET", "FIELDVALUE99"] });
+
+        PdfDocument output = PdfDocument.Open(result.Document);
+        Assert.Contains("Patient", Letters(output, 0));
+        string raw = Encoding.Latin1.GetString(PdfDocumentWriterRaw(output));
+        Assert.Contains("Kept description", raw);
+        Assert.Contains("(keep)", raw);
+    }
+
+    private static byte[] PdfDocumentWriterRaw(PdfDocument document) =>
+        KillerPdf.Engine.Writing.PdfDocumentWriter.Write(document, new KillerPdf.Engine.Writing.PdfDocumentWriteOptions());
+
+    [Fact]
+    public void RejectsRegionsOutsideTheDocument()
+    {
+        PdfDocument document = PdfDocument.Open(SinglePage("BT /F1 12 Tf 72 700 Td (x) Tj ET"));
+        Assert.Throws<ArgumentOutOfRangeException>(() => PdfContentRedaction.Analyze(document,
+            [new PdfRedactionRegion(1, new PdfContentBounds(0, 0, 10, 10))]));
+        Assert.Throws<ArgumentOutOfRangeException>(() => PdfContentRedaction.Analyze(document,
+            [new PdfRedactionRegion(0, new PdfContentBounds(10, 10, 10, 20))]));
+    }
+
+    private static void AssertKeptLettersUnmoved(PdfDocument before, PdfDocument after, int pageIndex,
+        IReadOnlyList<PdfRedactionRegion> regions)
+    {
+        var expected = new PdfPageContentReader(before).Read(pageIndex).Letters
+            .Where(letter => !regions.Any(region => PdfContentRedaction.Overlaps(letter.BoundingBox, region.Bounds)))
+            .Select(letter => (letter.Value, Math.Round(letter.StartBaseLine.X, 3), Math.Round(letter.StartBaseLine.Y, 3)))
+            .ToArray();
+        var actual = new PdfPageContentReader(after).Read(pageIndex).Letters
+            .Select(letter => (letter.Value, Math.Round(letter.StartBaseLine.X, 3), Math.Round(letter.StartBaseLine.Y, 3)))
+            .ToArray();
+        Assert.Equal(expected, actual);
+    }
+
+    private static PdfRedactionRegion Region(PdfDocument document, int pageIndex, string word, int occurrence = 0)
+    {
+        IReadOnlyList<PdfExtractedLetter> letters = new PdfPageContentReader(document).Read(pageIndex).Letters;
+        string text = string.Concat(letters.Select(letter => letter.Value));
+        int start = -1;
+        for (int index = 0; index <= occurrence; index++)
+            start = text.IndexOf(word, start + 1, StringComparison.Ordinal);
+        Assert.True(start >= 0, $"'{word}' was not found.");
+        var selected = new List<PdfExtractedLetter>();
+        int position = 0;
+        foreach (PdfExtractedLetter letter in letters)
+        {
+            if (position < start + word.Length && position + letter.Value.Length > start) selected.Add(letter);
+            position += letter.Value.Length;
+        }
+        return new PdfRedactionRegion(pageIndex, new PdfContentBounds(
+            selected.Min(letter => letter.BoundingBox.Left), selected.Min(letter => letter.BoundingBox.Bottom),
+            selected.Max(letter => letter.BoundingBox.Right), selected.Max(letter => letter.BoundingBox.Top)));
+    }
+
+    private static string Letters(PdfDocument document, int pageIndex) =>
+        string.Concat(new PdfPageContentReader(document).Read(pageIndex).Letters.Select(letter => letter.Value));
+
+    private static bool HasSourceImage(PdfDocument document)
+    {
+        foreach (var entry in document.CrossReferences.Values)
+        {
+            if (entry.Type is not (PdfCrossReferenceEntryType.InUse
+                or PdfCrossReferenceEntryType.Compressed)) continue;
+            if (document.Resolve(entry.ObjectNumber) is PdfStream stream
+                && stream.Dictionary.TryGetValue(new PdfName("Width"u8), out PdfObject? width)
+                && width is PdfInteger { Value: 2 }) return true;
+        }
+        return false;
+    }
+
+    private static (byte Red, byte Green, byte Blue) Pixel(PdfRenderedPage page, int x, int y)
+    {
+        int offset = (y * page.Width + x) * 4;
+        ReadOnlySpan<byte> pixels = page.Pixels.Span;
+        return (pixels[offset + 2], pixels[offset + 1], pixels[offset]);
+    }
+
+    private static bool IsBlack(PdfRenderedPage page, int x, int y)
+    {
+        (byte red, byte green, byte blue) = Pixel(page, x, y);
+        return red < 40 && green < 40 && blue < 40;
+    }
+
+    private static byte[] SinglePage(string content, string pageEntries = "/MediaBox [0 0 612 792]") =>
+        CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            $"<< /Type /Page /Parent 2 0 R {pageEntries} /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
+            Helvetica,
+            Stream(content)
+        ]);
+
+    private static byte[] ImagePage(string content, int rotate) =>
+        CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            $"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 400 400] /Rotate {rotate} /Resources << /Font << /F1 4 0 R >> /XObject << /Im1 6 0 R >> >> /Contents 5 0 R >>",
+            Helvetica,
+            Stream(content),
+            "<< /Type /XObject /Subtype /Image /Width 2 /Height 2 /ColorSpace /DeviceRGB /BitsPerComponent 8 /Length 12 >>\nstream\n"
+                + Encoding.Latin1.GetString([255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255]) + "\nendstream"
+        ]);
+
+    private static string Stream(string content, string entries = "") =>
+        $"<< {entries} /Length {Encoding.Latin1.GetByteCount(content)} >>\nstream\n{content}\nendstream";
+
+    private static byte[] CreatePdf(IReadOnlyList<string> objects, int? info = null)
+    {
+        var pdf = new StringBuilder("%PDF-1.7\n");
+        var offsets = new List<int>();
+        for (int index = 0; index < objects.Count; index++)
+        {
+            offsets.Add(Encoding.Latin1.GetByteCount(pdf.ToString()));
+            pdf.Append($"{index + 1} 0 obj\n{objects[index]}\nendobj\n");
+        }
+        int xref = Encoding.Latin1.GetByteCount(pdf.ToString());
+        pdf.Append($"xref\n0 {objects.Count + 1}\n0000000000 65535 f \n");
+        foreach (int offset in offsets) pdf.Append($"{offset:0000000000} 00000 n \n");
+        string infoEntry = info is int number ? $" /Info {number} 0 R" : string.Empty;
+        pdf.Append($"trailer\n<< /Size {objects.Count + 1} /Root 1 0 R{infoEntry} >>\n")
+            .Append($"startxref\n{xref}\n%%EOF\n");
+        return Encoding.Latin1.GetBytes(pdf.ToString());
+    }
+}
