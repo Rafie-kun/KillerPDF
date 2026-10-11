@@ -14,7 +14,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 ### Changed
 - Saving over a digitally signed PDF now asks first, because saving removes the signature.
-- The wordmarks and headings in the app and on the website use Killer Sans and Freckle Face in place of the typewriter font.
+- The wordmarks use Punktype and Lacquer, and the interface text, headings and footers use Killer Sans, in place of the typewriter font in the app and on the website.
 - Hovered outline buttons and accent picker pills use gradients outside 98SE, and accent swatches lift on hover.
 
 ### Fixed
