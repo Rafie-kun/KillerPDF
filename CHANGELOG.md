@@ -252,6 +252,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Fixed colors on pages that adjust them with graphics-state transfer functions.
 - Fixed encrypted files whose encryption dictionary is slightly damaged opening as blank pages.
 - Accent-colored toolbar icons keep a dark halo on the Light theme's Yellow accent, so they no longer fade into the bar.
+- The wordmark has a soft shadow on the Light theme, the same lift it has on the dark themes, so it no longer looks thin on the light title bar.
 
 ## [1.8.81] - Unreleased
 
