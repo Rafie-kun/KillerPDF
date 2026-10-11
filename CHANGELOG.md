@@ -19,7 +19,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 ### Fixed
 - Prevented a failed Save or Save As from damaging the existing file by finishing the new copy before replacing it.
-- Preserved unsaved annotations when moving, reordering, duplicating, or merging pages and when removing a link.
+- Preserved unsaved annotations when moving, reordering, duplicating, or merging pages and when removing a link. A duplicated page carries a copy of them.
 - Prevented zero-height 98SE annotation bars from repeatedly retrying layout and blocking input.
 - Prevented the color picker from crashing when changing stamp or annotation colors with gradient themes (#442, #443).
 - Included current form field edits in print previews and output without requiring a save and reopen.
