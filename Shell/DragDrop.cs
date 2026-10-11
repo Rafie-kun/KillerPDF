@@ -101,8 +101,29 @@ namespace KillerPDF
         private ScrollViewer? _pageDragScrollViewer;
         private double _pageDragScrollVelocity;
         private Point _pageDragPointer;
+        // A plain press on one page of a multi-page selection collapses the selection to that
+        // page before a drag can start, so a block of pages could never be dragged. Hold the
+        // selection through the press and collapse it on release instead, as File Explorer does.
+        private ListBoxItem? _pagePressPendingCollapse;
+        private bool _pageListReleaseHooked;
+
+        private void PageList_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            ListBoxItem? pending = _pagePressPendingCollapse;
+            _pagePressPendingCollapse = null;
+            if (pending is null || !pending.IsSelected) return;
+            object item = PageList.ItemContainerGenerator.ItemFromContainer(pending);
+            if (item == DependencyProperty.UnsetValue) return;
+            // Deselect the others one at a time: assigning SelectedItem is a no-op when the
+            // pressed page is already the first selected one.
+            foreach (object other in PageList.SelectedItems.Cast<object>()
+                         .Where(selected => !ReferenceEquals(selected, item)).ToList())
+                PageList.SelectedItems.Remove(other);
+        }
+
         private void PageList_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            _pagePressPendingCollapse = null;
             _dragStartPoint = e.GetPosition(null);
             // Only arm a page-reorder drag when the press lands on a page thumbnail, not the
             // scrollbar - otherwise grabbing the scrollbar starts a page-move drag (the "insert"
@@ -111,7 +132,23 @@ namespace KillerPDF
             for (var d = e.OriginalSource as DependencyObject; d != null; d = VisualTreeHelper.GetParent(d))
             {
                 if (d is System.Windows.Controls.Primitives.ScrollBar) break;
-                if (d is ListBoxItem) { _pageDragArmed = true; break; }
+                if (d is ListBoxItem pressed)
+                {
+                    _pageDragArmed = true;
+                    if (pressed.IsSelected && PageList.SelectedItems.Count > 1
+                        && (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) == ModifierKeys.None)
+                    {
+                        _pagePressPendingCollapse = pressed;
+                        if (!_pageListReleaseHooked)
+                        {
+                            PageList.PreviewMouseLeftButtonUp += PageList_PreviewMouseLeftButtonUp;
+                            _pageListReleaseHooked = true;
+                        }
+                        pressed.Focus();
+                        e.Handled = true;
+                    }
+                    break;
+                }
             }
         }
 
@@ -124,6 +161,7 @@ namespace KillerPDF
             {
                 if (PageList.SelectedIndex >= 0)
                 {
+                    _pagePressPendingCollapse = null;   // the press became a drag
                     int[] selected = [.. PageList.SelectedItems.Cast<PageThumbnailVm>()
                         .Select(page => page.PageIndex).OrderBy(index => index)];
                     CommitActiveTextBox();
