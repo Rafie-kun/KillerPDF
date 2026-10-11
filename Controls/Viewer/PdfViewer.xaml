@@ -412,9 +412,9 @@
                                 HorizontalAlignment="Center" VerticalAlignment="Center"
                                 Background="Transparent" Style="{x:Null}">
                             <StackPanel HorizontalAlignment="Center">
-                                <TextBlock Text="{DynamicResource Str_Drop_Title}" FontFamily="Segoe UI, Microsoft JhengHei UI, Nirmala UI" FontSize="20"
+                                <TextBlock Text="{DynamicResource Str_Drop_Title}" FontFamily="{DynamicResource UiFont}" FontSize="20"
                                            Foreground="{DynamicResource MutedTextBrush}" HorizontalAlignment="Center"/>
-                                <TextBlock Text="{DynamicResource Str_Drop_Sub}" FontFamily="Segoe UI, Microsoft JhengHei UI, Nirmala UI" FontSize="13"
+                                <TextBlock Text="{DynamicResource Str_Drop_Sub}" FontFamily="{DynamicResource UiFont}" FontSize="13"
                                            Foreground="{DynamicResource MutedTextBrush}" HorizontalAlignment="Center" Margin="0,8,0,0"/>
                             </StackPanel>
                         </Border>
@@ -435,7 +435,7 @@
                                              dropdown's Clear list item. Foreground lives in the style so the
                                              hover trigger can override it (a local value would win over it). -->
                                         <TextBlock DockPanel.Dock="Right" Text="{DynamicResource Str_Menu_ClearList}"
-                                                   FontFamily="Segoe UI, Microsoft JhengHei UI, Nirmala UI"
+                                                   FontFamily="{DynamicResource UiFont}"
                                                    FontSize="11" Cursor="Hand" Margin="8,0,6,0"
                                                    MouseLeftButtonDown="RecentClearAll_Click">
                                             <TextBlock.Style>
@@ -450,7 +450,7 @@
                                                 </Style>
                                             </TextBlock.Style>
                                         </TextBlock>
-                                        <TextBlock Text="{DynamicResource Str_RecentHeading}" FontFamily="Segoe UI, Microsoft JhengHei UI, Nirmala UI"
+                                        <TextBlock Text="{DynamicResource Str_RecentHeading}" FontFamily="{DynamicResource UiFont}"
                                                    FontSize="11" FontWeight="SemiBold"
                                                    Foreground="{DynamicResource PrimaryBrush}"/>
                                     </DockPanel>
@@ -570,7 +570,7 @@
                             BorderBrush="{DynamicResource MenuBorderBrush}" BorderThickness="1"
                             CornerRadius="{DynamicResource ControlCornerRadius}" Padding="9,3">
                         <Grid>
-                            <TextBlock x:Name="PageBadgeText" FontFamily="Consolas" FontSize="12"
+                            <TextBlock x:Name="PageBadgeText" FontFamily="{DynamicResource UiFont}" FontSize="12"
                                        Foreground="{DynamicResource TextBrush}"/>
                             <!-- Grain OVER the content, family rule -->
                             <Border IsHitTestVisible="False" Margin="-9,-3"

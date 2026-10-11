@@ -633,9 +633,11 @@ namespace KillerPDF
                 else
                     RootBorder.SetResourceReference(Border.BorderBrushProperty, "AppBorderBrush");
                 RootBorder.Margin         = new Thickness(0);
-                // Only a maximized window drops the 1px frame (it's flush to every screen edge); a
+                // Windows 11 draws the 1px outline itself, so the frame is zero there; a transparent 1px
+                // frame left a strip of the window background showing on three sides. Otherwise only a
+                // maximized window drops the 1px frame (it's flush to every screen edge); a
                 // snapped window keeps it so it still reads against the window beside it.
-                RootBorder.BorderThickness = new Thickness(max || ThemeManager.Current == Theme.SE98 ? 0 : 1);
+                RootBorder.BorderThickness = new Thickness(max || nativeCorners || ThemeManager.Current == Theme.SE98 ? 0 : 1);
             }
             TitleBarBorder?.CornerRadius = new CornerRadius(0);
             FooterBorder?.CornerRadius = new CornerRadius(0);

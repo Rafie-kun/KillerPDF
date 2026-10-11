@@ -133,6 +133,7 @@
     <Resource Include="Resources\app-icon-master.png" />
     <Resource Include="Resources\kp-icon.png" />
     <Resource Include="Fonts\KillerSans-Regular.ttf" />
+    <Resource Include="Fonts\KillerSansUI-Regular.ttf" />
     <Resource Include="Fonts\Punktype.ttf" />
     <Resource Include="Fonts\Lacquer-Regular.ttf" />
 	<Resource Include="Resources\open_hand.cur" />
