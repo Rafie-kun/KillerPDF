@@ -695,7 +695,8 @@ public sealed partial class PdfPageRenderer
                                     ? alphaShape.Value : state.AlphaIsShape,
                             GraphicsSoftMask = softMaskValue is null
                                 ? state.GraphicsSoftMask
-                                : ReadGraphicsSoftMask(softMaskValue, resources, state, depth)
+                                : ReadGraphicsSoftMask(softMaskValue, resources, state, depth),
+                            Transfer = ReadTransfer(strokeSettings, state.Transfer, pixels, diagnostics)
                         };
                         if (graphicsFontValue is not null)
                         {
@@ -916,7 +917,8 @@ public sealed partial class PdfPageRenderer
                             state.Knockout, pixels, options.Width,
                             options.Height, scaleX, scaleY,
                             out string? imageDiagnostic, state.FillOverprint, diagnostics, state.RenderingIntent, state.AlphaIsShape,
-                            cancellationToken: cancellationToken, blackPointCompensation: state.BlackPointCompensation))
+                            cancellationToken: cancellationToken, blackPointCompensation: state.BlackPointCompensation,
+                            transfer: state.Transfer))
                             diagnostics.Add(imageDiagnostic
                                 ?? "Image rendering is not implemented.");
                     }
@@ -935,7 +937,7 @@ public sealed partial class PdfPageRenderer
                         options.Height, scaleX, scaleY,
                         out string? inlineDiagnostic, state.FillOverprint, diagnostics, state.RenderingIntent,
                         state.AlphaIsShape, ownedInlineImage: true, cancellationToken: cancellationToken,
-                        blackPointCompensation: state.BlackPointCompensation))
+                        blackPointCompensation: state.BlackPointCompensation, transfer: state.Transfer))
                         diagnostics.Add(inlineDiagnostic
                             ?? "Inline-image rendering is not implemented.");
                     break;
@@ -2941,7 +2943,8 @@ public sealed partial class PdfPageRenderer
         RasterSurface target, int targetWidth, int targetHeight, double scaleX, double scaleY,
         out string? diagnostic, bool overprint = false, HashSet<string>? diagnostics = null, int renderingIntent = 1,
         bool alphaIsShape = false, bool ownedInlineImage = false,
-        bool blackPointCompensation = false, CancellationToken cancellationToken = default)
+        bool blackPointCompensation = false, CancellationToken cancellationToken = default,
+        byte[]? transfer = null)
     {
         diagnostic = null;
         cancellationToken.ThrowIfCancellationRequested();
@@ -3007,6 +3010,7 @@ public sealed partial class PdfPageRenderer
             return false;
         }
         if (!imageMask && blackPointCompensation) colorSpace = colorSpace.ForDestination(target, true, diagnostics);
+        if (!imageMask && transfer is not null) colorSpace = WithTransfer(colorSpace, transfer);
         int components = colorSpace.Components;
         if (bits is not (1 or 2 or 4 or 8 or 16))
         {
@@ -7605,10 +7609,13 @@ public sealed partial class PdfPageRenderer
         KnockoutState? Knockout, bool FillOverprint = false, bool StrokeOverprint = false,
         int OverprintMode = 0, double[]? FillComponents = null, double[]? StrokeComponents = null,
         int RenderingIntent = 1, IReadOnlyList<PdfObject>? FillOperands = null, IReadOnlyList<PdfObject>? StrokeOperands = null,
-        bool AlphaIsShape = false, bool StrokeAdjust = false, bool BlackPointCompensation = false)
+        bool AlphaIsShape = false, bool StrokeAdjust = false, bool BlackPointCompensation = false,
+        byte[]? Transfer = null)
     {
-        internal Color PaintFill => OverprintColor(Fill, FillColorSpace, FillOverprint, OverprintMode);
-        internal Color PaintStroke => OverprintColor(Stroke, StrokeColorSpace, StrokeOverprint, OverprintMode);
+        internal Color PaintFill => ApplyTransfer(
+            OverprintColor(Fill, FillColorSpace, FillOverprint, OverprintMode), Transfer);
+        internal Color PaintStroke => ApplyTransfer(
+            OverprintColor(Stroke, StrokeColorSpace, StrokeOverprint, OverprintMode), Transfer);
     }
     private enum RendererLineCap { Butt, Round, ProjectingSquare }
     private enum RendererLineJoin { Miter, Round, Bevel }
