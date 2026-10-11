@@ -36,6 +36,30 @@
     <sys:String x:Key="Str_TT_ImageTool">画像ツール - クリックしてページに画像を挿入 (I)</sys:String>
     <sys:String x:Key="Str_TT_CropTool">トリミングツール - ドラッグしてトリミング範囲を設定し、ページに適用 (C)</sys:String>
     <sys:String x:Key="Str_TT_MeasureTool">距離を測定し、ページサイズを表示</sys:String>
+    <sys:String x:Key="Str_TT_RedactTool">墨消し: マークした範囲の下にあるテキストと画像を完全に削除</sys:String>
+    <sys:String x:Key="Str_Lbl_Redact">墨消し</sys:String>
+    <sys:String x:Key="Str_Redact_NoMarks">ページ上をドラッグして範囲をマーク</sys:String>
+    <sys:String x:Key="Str_Redact_Count">マーク済み: {1} ページ上の {0} 範囲</sys:String>
+    <sys:String x:Key="Str_Redact_MarkSearch">検索結果をマーク</sys:String>
+    <sys:String x:Key="Str_Redact_MarkSearchTip">現在の検索で見つかったすべての一致をマーク</sys:String>
+    <sys:String x:Key="Str_Redact_MarkedSearch">{0} 件の検索結果をマークしました</sys:String>
+    <sys:String x:Key="Str_Redact_NoSearch">先にテキストを検索してから結果をマークしてください</sys:String>
+    <sys:String x:Key="Str_Redact_Clear">クリア</sys:String>
+    <sys:String x:Key="Str_Redact_ClearTip">すべてのマークを削除</sys:String>
+    <sys:String x:Key="Str_Redact_Apply">墨消し</sys:String>
+    <sys:String x:Key="Str_Redact_ApplyTip">マークした範囲の下にあるものをすべて完全に削除</sys:String>
+    <sys:String x:Key="Str_Redact_RasterPrompt" xml:space="preserve">{0} ページのマークした範囲の下に、単独では削除できないスキャン画像、グラデーション、またはアートワークがあります。
+
+このページを、マークした範囲を黒く塗りつぶしたページ自身の画像に置き換えることができます。マーク範囲外のテキストは検索できるままですが、そのページのそれ以外の部分は以後編集できなくなります。</sys:String>
+    <sys:String x:Key="Str_Redact_ConvertPage">ページを画像に置き換える</sys:String>
+    <sys:String x:Key="Str_Redact_ConvertAll">該当するページをすべて置き換える</sys:String>
+    <sys:String x:Key="Str_Redact_SkipPage">このページをスキップ</sys:String>
+    <sys:String x:Key="Str_Redact_NothingApplied">墨消しは行われませんでした</sys:String>
+    <sys:String x:Key="Str_Redacted">{1} ページ上の {0} 範囲を墨消ししました</sys:String>
+    <sys:String x:Key="Str_RedactedRaster">{1} ページ上の {0} 範囲を墨消ししました。{2} ページを画像に置き換えました</sys:String>
+    <sys:String x:Key="Str_Redact_SkippedPages">スキップしたページ: {0}</sys:String>
+    <sys:String x:Key="Str_Redact_Failed">墨消しに失敗しました: {0}</sys:String>
+    <sys:String x:Key="Str_Redact_VerifyFailed">結果にマークした内容がまだ残っていたため、何も変更していません</sys:String>
     <sys:String x:Key="Str_TT_RotateTool">ページ変換 - 回転 / 傾き補正 (拡大縮小は近日対応) (R)</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">すべての注釈をクリア</sys:String>
     <sys:String x:Key="Str_TT_Search">検索 (Ctrl+F)</sys:String>

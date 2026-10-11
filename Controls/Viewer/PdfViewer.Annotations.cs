@@ -267,6 +267,7 @@ namespace KillerPDF.Controls
             // Search highlights live on this same canvas and were wiped by the clear above; repaint
             // them last so they sit on top and survive every re-render and continuous scroll.
             ApplySearchHighlights(pageIndex, _activeCanvas);
+            ApplyRedactionMarks(pageIndex, _activeCanvas);
             // Flowing text selection quads (#127) live here too - same deal, repaint last.
             ApplyTextSelectionQuads(pageIndex, _activeCanvas);
         }
@@ -936,6 +937,7 @@ namespace KillerPDF.Controls
             if (_cropConfirmBar is not null && e.OriginalSource is DependencyObject cropSrc &&
                 IsDescendantOf(cropSrc, _cropConfirmBar))
                 return;
+            if (IsInRedactionBar(e.OriginalSource)) return;
             // Don't intercept clicks on form field overlay controls (TextBox, CheckBox, etc.)
             // - WPF must handle those natively so focus, toggling, and text entry work.
             if (e.OriginalSource is DependencyObject formSrc && IsFormFieldElement(formSrc))
@@ -1004,6 +1006,13 @@ namespace KillerPDF.Controls
             // can't redirect the in-progress draw/select to another page. See _gestureCanvas.
             _gestureCanvas = _activeCanvas;
             _gesturePage   = pageIdx;
+
+            if (_currentTool == EditTool.Redact)
+            {
+                RedactionMouseDown(pageIdx, pos);
+                e.Handled = true;
+                return;
+            }
 
             // Crop corner handles live in the outer panel and have direct MouseLeftButtonDown
             // handlers attached in AddCropHandles() - no detection needed here.
@@ -1447,6 +1456,7 @@ namespace KillerPDF.Controls
             // Don't interfere with mouse interaction inside form field overlays.
             if (e.OriginalSource is DependencyObject moveSrc && IsFormFieldElement(moveSrc))
                 return;
+            if (_currentTool == EditTool.Redact && RedactionMouseMove(e)) return;
 
             // #221: the Select tool has two behaviors, flowing selection on text and a marquee on
             // empty page. Reflect the behavior under the pointer instead of leaving an arrow over
@@ -1812,6 +1822,7 @@ namespace KillerPDF.Controls
             if (_cropConfirmBar is not null && e.OriginalSource is DependencyObject cropSrc &&
                 IsDescendantOf(cropSrc, _cropConfirmBar))
                 return;
+            if (IsInRedactionBar(e.OriginalSource)) return;
 
             // The gesture may have re-pointed _activeCanvas via RenderAllAnnotations since mouse-down
             // (in Grid view, async tile streaming does this), so restore it to the surface the
@@ -1826,6 +1837,12 @@ namespace KillerPDF.Controls
             int pageIdx = _gesturePage >= 0
                 ? _gesturePage
                 : (_activeCanvas?.Tag is int tagPage ? tagPage : _currentPage);
+
+            if (_currentTool == EditTool.Redact && RedactionMouseUp(pageIdx, e))
+            {
+                e.Handled = true;
+                return;
+            }
 
             // Finish a live text-edit box resize and hand focus back so typing continues.
             if (_draggingTextEditHandle)

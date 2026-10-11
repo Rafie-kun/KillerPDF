@@ -1221,6 +1221,32 @@ internal static class PdfEngineIntegration
         ReplaceWithBuiltResult(path, editor.Build());
     }
 
+    /// <summary>Decides, without changing anything, which marked pages can be redacted in place.</summary>
+    internal static PdfContentRedactionPlan AnalyzeRedaction(
+        PdfDocument document, IReadOnlyList<PdfRedactionRegion> regions)
+        => PdfContentRedaction.Analyze(document, regions);
+
+    /// <summary>
+    /// Permanently removes everything under the marked regions, replacing only the approved pages
+    /// with sanitized images, and swaps in the verified single-revision result.
+    /// </summary>
+    internal static PdfContentRedactionResult ApplyRedaction(string path,
+        IReadOnlyList<PdfRedactionRegion> regions, IReadOnlyCollection<int> approvedRasterPages)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        ArgumentNullException.ThrowIfNull(regions);
+        PdfDocument document = PdfDocument.Open(File.ReadAllBytes(path));
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, regions,
+            new PdfContentRedactionOptions
+            {
+                ApprovedRasterPages = approvedRasterPages,
+                AllowSignatureInvalidation = true,
+                FontResolver = InstalledPdfFontResolver.Instance
+            });
+        ReplaceWithBuiltResult(path, result.Document.ToArray());
+        return result;
+    }
+
     /// <summary>Removes pages as one byte-preserving incremental revision.</summary>
     internal static void RemovePages(string path, IReadOnlyCollection<int> pageIndices)
     {

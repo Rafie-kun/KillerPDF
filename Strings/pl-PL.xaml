@@ -36,6 +36,30 @@
     <sys:String x:Key="Str_TT_ImageTool">Narzędzie Obrazu - kliknij, aby wstawić obraz na stronę (I)</sys:String>
     <sys:String x:Key="Str_TT_CropTool">Narzędzie Przycinania - przeciągnij, aby ustawić obszar przycięcia, a następnie zastosuj do strony (C)</sys:String>
     <sys:String x:Key="Str_TT_MeasureTool">Zmierz odległość i wyświetl rozmiar strony</sys:String>
+    <sys:String x:Key="Str_TT_RedactTool">Zaczernij: trwale usuń tekst i obrazy spod zaznaczonych obszarów</sys:String>
+    <sys:String x:Key="Str_Lbl_Redact">Zaczernij</sys:String>
+    <sys:String x:Key="Str_Redact_NoMarks">Przeciągnij po stronie, aby zaznaczyć obszary</sys:String>
+    <sys:String x:Key="Str_Redact_Count">Zaznaczono: {0} obszarów na {1} str.</sys:String>
+    <sys:String x:Key="Str_Redact_MarkSearch">Zaznacz wyniki wyszukiwania</sys:String>
+    <sys:String x:Key="Str_Redact_MarkSearchTip">Zaznacz wszystkie trafienia bieżącego wyszukiwania</sys:String>
+    <sys:String x:Key="Str_Redact_MarkedSearch">Zaznaczono {0} wyników wyszukiwania</sys:String>
+    <sys:String x:Key="Str_Redact_NoSearch">Najpierw wyszukaj tekst, a potem zaznacz wyniki</sys:String>
+    <sys:String x:Key="Str_Redact_Clear">Wyczyść</sys:String>
+    <sys:String x:Key="Str_Redact_ClearTip">Usuń wszystkie zaznaczenia</sys:String>
+    <sys:String x:Key="Str_Redact_Apply">Zaczernij</sys:String>
+    <sys:String x:Key="Str_Redact_ApplyTip">Trwale usuń wszystko spod zaznaczonych obszarów</sys:String>
+    <sys:String x:Key="Str_Redact_RasterPrompt" xml:space="preserve">Strona {0} zawiera pod zaznaczonym obszarem zeskanowany obraz, gradient lub grafikę, których nie da się usunąć osobno.
+
+Stronę można zastąpić jej obrazem z zaczernionymi zaznaczonymi obszarami. Tekst poza zaznaczonymi obszarami pozostanie możliwy do wyszukania, ale niczego innego na tej stronie nie będzie można później edytować.</sys:String>
+    <sys:String x:Key="Str_Redact_ConvertPage">Zastąp stronę obrazem</sys:String>
+    <sys:String x:Key="Str_Redact_ConvertAll">Zastąp wszystkie takie strony</sys:String>
+    <sys:String x:Key="Str_Redact_SkipPage">Pomiń tę stronę</sys:String>
+    <sys:String x:Key="Str_Redact_NothingApplied">Niczego nie zaczerniono</sys:String>
+    <sys:String x:Key="Str_Redacted">Zaczerniono {0} obszarów na {1} str.</sys:String>
+    <sys:String x:Key="Str_RedactedRaster">Zaczerniono {0} obszarów na {1} str.; zastąpiono obrazami {2} str.</sys:String>
+    <sys:String x:Key="Str_Redact_SkippedPages">Pominięte strony: {0}</sys:String>
+    <sys:String x:Key="Str_Redact_Failed">Zaczernianie nie powiodło się: {0}</sys:String>
+    <sys:String x:Key="Str_Redact_VerifyFailed">wynik nadal ujawniał zaznaczoną treść, więc niczego nie zmieniono</sys:String>
     <sys:String x:Key="Str_TT_RotateTool">Przekształć stronę - obrót / korekcja zniekształceń (skala już wkrótce) (R)</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">Wyczyść wszystkie adnotacje</sys:String>
     <sys:String x:Key="Str_TT_Search">Szukaj (Ctrl+F)</sys:String>

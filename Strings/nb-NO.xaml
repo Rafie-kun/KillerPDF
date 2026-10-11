@@ -36,6 +36,30 @@
     <sys:String x:Key="Str_TT_ImageTool">Bildeverktøy: klikk for å sette inn et bilde på siden (I)</sys:String>
     <sys:String x:Key="Str_TT_CropTool">Beskjæringsverktøy: dra for å angi beskjæringsområde, og bruk det på siden eller sidene (C)</sys:String>
     <sys:String x:Key="Str_TT_MeasureTool">Mål avstand og undersøk sidestørrelse</sys:String>
+    <sys:String x:Key="Str_TT_RedactTool">Sladd: fjern tekst og bilder under markerte områder permanent</sys:String>
+    <sys:String x:Key="Str_Lbl_Redact">Sladd</sys:String>
+    <sys:String x:Key="Str_Redact_NoMarks">Dra over siden for å markere områder</sys:String>
+    <sys:String x:Key="Str_Redact_Count">Markert: {0} områder på {1} side(r)</sys:String>
+    <sys:String x:Key="Str_Redact_MarkSearch">Merk søkeresultater</sys:String>
+    <sys:String x:Key="Str_Redact_MarkSearchTip">Merk alle treff fra gjeldende søk</sys:String>
+    <sys:String x:Key="Str_Redact_MarkedSearch">Merket {0} søkeresultater</sys:String>
+    <sys:String x:Key="Str_Redact_NoSearch">Søk etter teksten først, og merk deretter resultatene</sys:String>
+    <sys:String x:Key="Str_Redact_Clear">Tøm</sys:String>
+    <sys:String x:Key="Str_Redact_ClearTip">Fjern alle markeringer</sys:String>
+    <sys:String x:Key="Str_Redact_Apply">Sladd</sys:String>
+    <sys:String x:Key="Str_Redact_ApplyTip">Fjern alt under de markerte områdene permanent</sys:String>
+    <sys:String x:Key="Str_Redact_RasterPrompt" xml:space="preserve">Side {0} har et skannet bilde, en fargeovergang eller en illustrasjon under et markert område som ikke kan fjernes for seg.
+
+Siden kan erstattes med et bilde av seg selv der de markerte områdene er svertet. Tekst utenfor de markerte områdene forblir søkbar, men ingenting annet på siden kan redigeres etterpå.</sys:String>
+    <sys:String x:Key="Str_Redact_ConvertPage">Erstatt siden med bilde</sys:String>
+    <sys:String x:Key="Str_Redact_ConvertAll">Erstatt alle slike sider</sys:String>
+    <sys:String x:Key="Str_Redact_SkipPage">Hopp over denne siden</sys:String>
+    <sys:String x:Key="Str_Redact_NothingApplied">Ingenting ble sladdet</sys:String>
+    <sys:String x:Key="Str_Redacted">Sladdet {0} områder på {1} side(r)</sys:String>
+    <sys:String x:Key="Str_RedactedRaster">Sladdet {0} områder på {1} side(r); {2} side(r) erstattet med bilder</sys:String>
+    <sys:String x:Key="Str_Redact_SkippedPages">Hoppet over side(r): {0}</sys:String>
+    <sys:String x:Key="Str_Redact_Failed">Sladding mislyktes: {0}</sys:String>
+    <sys:String x:Key="Str_Redact_VerifyFailed">resultatet viste fortsatt markert innhold, så ingenting ble endret</sys:String>
     <sys:String x:Key="Str_TT_RotateTool">Transformer side: roter, skaler, speilvend, rett opp skjevhet eller korriger perspektiv (R)</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">Fjern alle merknader</sys:String>
     <sys:String x:Key="Str_TT_Search">Søk (Ctrl+F)</sys:String>

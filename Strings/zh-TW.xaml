@@ -38,6 +38,30 @@
     <sys:String x:Key="Str_TT_ImageTool">圖片工具 - 點選以插入圖片至頁面 (I)</sys:String>
     <sys:String x:Key="Str_TT_CropTool">裁切工具 - 拖曳設定裁切區域，然後套用至頁面 (C)</sys:String>
     <sys:String x:Key="Str_TT_MeasureTool">測量距離並檢視頁面大小</sys:String>
+    <sys:String x:Key="Str_TT_RedactTool">塗黑: 永久刪除標記區域下的文字和影像</sys:String>
+    <sys:String x:Key="Str_Lbl_Redact">塗黑</sys:String>
+    <sys:String x:Key="Str_Redact_NoMarks">在頁面上拖曳以標記區域</sys:String>
+    <sys:String x:Key="Str_Redact_Count">已標記: {1} 頁上的 {0} 個區域</sys:String>
+    <sys:String x:Key="Str_Redact_MarkSearch">標記搜尋結果</sys:String>
+    <sys:String x:Key="Str_Redact_MarkSearchTip">標記目前搜尋的所有相符項目</sys:String>
+    <sys:String x:Key="Str_Redact_MarkedSearch">已標記 {0} 個搜尋結果</sys:String>
+    <sys:String x:Key="Str_Redact_NoSearch">請先搜尋文字，再標記結果</sys:String>
+    <sys:String x:Key="Str_Redact_Clear">清除</sys:String>
+    <sys:String x:Key="Str_Redact_ClearTip">移除所有標記</sys:String>
+    <sys:String x:Key="Str_Redact_Apply">塗黑</sys:String>
+    <sys:String x:Key="Str_Redact_ApplyTip">永久刪除標記區域下的所有內容</sys:String>
+    <sys:String x:Key="Str_Redact_RasterPrompt" xml:space="preserve">第 {0} 頁的標記區域下有無法單獨刪除的掃描影像、漸層或圖形。
+
+可以將該頁替換為其本身的影像，並將標記區域塗黑。標記區域外的文字仍可搜尋，但該頁上的其他內容之後將無法編輯。</sys:String>
+    <sys:String x:Key="Str_Redact_ConvertPage">以影像取代此頁</sys:String>
+    <sys:String x:Key="Str_Redact_ConvertAll">取代所有此類頁面</sys:String>
+    <sys:String x:Key="Str_Redact_SkipPage">略過此頁</sys:String>
+    <sys:String x:Key="Str_Redact_NothingApplied">未塗黑任何內容</sys:String>
+    <sys:String x:Key="Str_Redacted">已塗黑 {1} 頁上的 {0} 個區域</sys:String>
+    <sys:String x:Key="Str_RedactedRaster">已塗黑 {1} 頁上的 {0} 個區域；{2} 頁已替換為影像</sys:String>
+    <sys:String x:Key="Str_Redact_SkippedPages">已略過的頁面: {0}</sys:String>
+    <sys:String x:Key="Str_Redact_Failed">塗黑失敗: {0}</sys:String>
+    <sys:String x:Key="Str_Redact_VerifyFailed">結果中仍顯示標記的內容，因此未做任何變更</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">清除所有注釋</sys:String>
     <sys:String x:Key="Str_TT_UndoLast">復原上一步 (Ctrl+Z)</sys:String>
     <sys:String x:Key="Str_TT_MultiPageGrid">多頁格檢視 (F8)</sys:String>

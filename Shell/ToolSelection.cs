@@ -38,6 +38,7 @@ namespace KillerPDF
             EditTool.Crop => Cursors.Cross,
             EditTool.Rotate => Cursors.Cross,
             EditTool.Measure => Cursors.Cross,
+            EditTool.Redact => Cursors.Cross,
             _ => Cursors.Arrow
         };
 
@@ -75,7 +76,8 @@ namespace KillerPDF
                 (_toolImageBtn, EditTool.Image),
                 (_toolCropBtn, EditTool.Crop),
                 (_toolRotateBtn, EditTool.Rotate),
-                (_toolMeasureBtn, EditTool.Measure)
+                (_toolMeasureBtn, EditTool.Measure),
+                (ToolRedactBtn, EditTool.Redact)
             };
             foreach (var (btn, t) in map)
             {
@@ -129,6 +131,10 @@ namespace KillerPDF
             else if (_cropConfirmBar is null)
                 ShowDefaultCropBox();
 
+            // The Redact bar lives only while the Redact tool is active; leaving it drops the marks.
+            if (tool == EditTool.Redact) ActiveViewer.ShowRedactionBar();
+            else ActiveViewer.HideRedactionBar();
+
             // NOTE: deliberately NOT reflowing the toolbar here. Reflowing on every tool switch at a narrow
             // width visibly thrashes the whole bar. The active-tool protection still runs on resize (the
             // next time the window changes width the active tool is pulled back onto the bar), which the
@@ -147,6 +153,7 @@ namespace KillerPDF
                 (MiUnderline, EditTool.Line), (MiHighlight, EditTool.Highlight),
                 (MiDraw, EditTool.Draw), (MiImage, EditTool.Image), (MiCrop, EditTool.Crop),
                 (MiSignature, EditTool.Signature), (MiMeasure, EditTool.Measure),
+                (MiRedact, EditTool.Redact),
             };
             foreach (var (mi, t) in map)
             {

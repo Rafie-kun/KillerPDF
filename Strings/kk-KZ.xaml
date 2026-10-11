@@ -1116,6 +1116,30 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Busy_CancelHint">(болдырмау үшін Esc)</sys:String>
     <sys:String x:Key="Str_Busy_DownloadingMany">{0} жүктелуде - {1} / {2} -</sys:String>
     <sys:String x:Key="Str_TT_MeasureTool">Қашықтықты өлшеу және бет өлшемін қарау</sys:String>
+    <sys:String x:Key="Str_TT_RedactTool">Жасыру: белгіленген аймақтардың астындағы мәтін мен суреттерді біржола жою</sys:String>
+    <sys:String x:Key="Str_Lbl_Redact">Жасыру</sys:String>
+    <sys:String x:Key="Str_Redact_NoMarks">Аймақтарды белгілеу үшін бетті бойлай сүйреңіз</sys:String>
+    <sys:String x:Key="Str_Redact_Count">Белгіленді: {1} беттегі {0} аймақ</sys:String>
+    <sys:String x:Key="Str_Redact_MarkSearch">Іздеу нәтижелерін белгілеу</sys:String>
+    <sys:String x:Key="Str_Redact_MarkSearchTip">Ағымдағы іздеудің барлық сәйкестіктерін белгілеу</sys:String>
+    <sys:String x:Key="Str_Redact_MarkedSearch">{0} іздеу нәтижесі белгіленді</sys:String>
+    <sys:String x:Key="Str_Redact_NoSearch">Алдымен мәтінді іздеңіз, содан кейін нәтижелерді белгілеңіз</sys:String>
+    <sys:String x:Key="Str_Redact_Clear">Тазалау</sys:String>
+    <sys:String x:Key="Str_Redact_ClearTip">Барлық белгілерді алып тастау</sys:String>
+    <sys:String x:Key="Str_Redact_Apply">Жасыру</sys:String>
+    <sys:String x:Key="Str_Redact_ApplyTip">Белгіленген аймақтардың астындағының бәрін біржола жою</sys:String>
+    <sys:String x:Key="Str_Redact_RasterPrompt" xml:space="preserve">{0}-беттегі белгіленген аймақтың астында бөлек жоюға болмайтын сканерленген сурет, градиент немесе графика бар.
+
+Бетті белгіленген аймақтары қараланған өз суретімен ауыстыруға болады. Белгіленген аймақтардан тыс мәтін іздеуге қолжетімді болып қалады, бірақ осы беттегі басқа ештеңені кейін өңдеу мүмкін болмайды.</sys:String>
+    <sys:String x:Key="Str_Redact_ConvertPage">Бетті суретпен ауыстыру</sys:String>
+    <sys:String x:Key="Str_Redact_ConvertAll">Осындай беттердің бәрін ауыстыру</sys:String>
+    <sys:String x:Key="Str_Redact_SkipPage">Бұл бетті өткізіп жіберу</sys:String>
+    <sys:String x:Key="Str_Redact_NothingApplied">Ештеңе жасырылмады</sys:String>
+    <sys:String x:Key="Str_Redacted">{1} бетте {0} аймақ жасырылды</sys:String>
+    <sys:String x:Key="Str_RedactedRaster">{1} бетте {0} аймақ жасырылды; {2} бет суретпен ауыстырылды</sys:String>
+    <sys:String x:Key="Str_Redact_SkippedPages">Өткізілген беттер: {0}</sys:String>
+    <sys:String x:Key="Str_Redact_Failed">Жасыру сәтсіз аяқталды: {0}</sys:String>
+    <sys:String x:Key="Str_Redact_VerifyFailed">нәтижеде белгіленген мазмұн әлі көрініп тұрды, сондықтан ештеңе өзгертілмеді</sys:String>
     <sys:String x:Key="Str_Lbl_Measure">Өлшеу</sys:String>
     <sys:String x:Key="Str_Ocr_FormAware">Пішінді ескеретін OCR</sys:String>
     <sys:String x:Key="Str_Bar_LetterSpacing">Әріп аралығы:</sys:String>

@@ -36,6 +36,30 @@
     <sys:String x:Key="Str_TT_ImageTool">图片工具 - 点击以插入图片至页面 (I)</sys:String>
     <sys:String x:Key="Str_TT_CropTool">裁切工具 - 拖曳设置裁切区域，然后套用至页面 (C)</sys:String>
     <sys:String x:Key="Str_TT_MeasureTool">测量距离并查看页面大小</sys:String>
+    <sys:String x:Key="Str_TT_RedactTool">涂黑: 永久删除标记区域下的文本和图像</sys:String>
+    <sys:String x:Key="Str_Lbl_Redact">涂黑</sys:String>
+    <sys:String x:Key="Str_Redact_NoMarks">在页面上拖动以标记区域</sys:String>
+    <sys:String x:Key="Str_Redact_Count">已标记: {1} 页上的 {0} 个区域</sys:String>
+    <sys:String x:Key="Str_Redact_MarkSearch">标记搜索结果</sys:String>
+    <sys:String x:Key="Str_Redact_MarkSearchTip">标记当前搜索的所有匹配项</sys:String>
+    <sys:String x:Key="Str_Redact_MarkedSearch">已标记 {0} 个搜索结果</sys:String>
+    <sys:String x:Key="Str_Redact_NoSearch">请先搜索文本，然后标记结果</sys:String>
+    <sys:String x:Key="Str_Redact_Clear">清除</sys:String>
+    <sys:String x:Key="Str_Redact_ClearTip">移除所有标记</sys:String>
+    <sys:String x:Key="Str_Redact_Apply">涂黑</sys:String>
+    <sys:String x:Key="Str_Redact_ApplyTip">永久删除标记区域下的所有内容</sys:String>
+    <sys:String x:Key="Str_Redact_RasterPrompt" xml:space="preserve">第 {0} 页的标记区域下有无法单独删除的扫描图像、渐变或图形。
+
+可以将该页替换为其自身的图像，并将标记区域涂黑。标记区域外的文本仍可搜索，但该页上的其他内容之后将无法编辑。</sys:String>
+    <sys:String x:Key="Str_Redact_ConvertPage">用图像替换该页</sys:String>
+    <sys:String x:Key="Str_Redact_ConvertAll">替换所有此类页面</sys:String>
+    <sys:String x:Key="Str_Redact_SkipPage">跳过此页</sys:String>
+    <sys:String x:Key="Str_Redact_NothingApplied">未涂黑任何内容</sys:String>
+    <sys:String x:Key="Str_Redacted">已涂黑 {1} 页上的 {0} 个区域</sys:String>
+    <sys:String x:Key="Str_RedactedRaster">已涂黑 {1} 页上的 {0} 个区域；{2} 页已替换为图像</sys:String>
+    <sys:String x:Key="Str_Redact_SkippedPages">已跳过的页: {0}</sys:String>
+    <sys:String x:Key="Str_Redact_Failed">涂黑失败: {0}</sys:String>
+    <sys:String x:Key="Str_Redact_VerifyFailed">结果中仍显示标记的内容，因此未做任何更改</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">清除所有注释</sys:String>
     <sys:String x:Key="Str_TT_UndoLast">复原上一步 (Ctrl+Z)</sys:String>
     <sys:String x:Key="Str_TT_MultiPageGrid">多页网格视图 (F8)</sys:String>

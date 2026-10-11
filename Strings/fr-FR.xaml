@@ -36,6 +36,30 @@
     <sys:String x:Key="Str_TT_ImageTool">Outil Image - cliquer pour insérer une image (I)</sys:String>
     <sys:String x:Key="Str_TT_CropTool">Outil Recadrage - sélectionner une zone et l'appliquer aux pages (C)</sys:String>
     <sys:String x:Key="Str_TT_MeasureTool">Mesurer une distance et afficher la taille de la page</sys:String>
+    <sys:String x:Key="Str_TT_RedactTool">Caviarder : supprimer définitivement le texte et les images sous les zones marquées</sys:String>
+    <sys:String x:Key="Str_Lbl_Redact">Caviarder</sys:String>
+    <sys:String x:Key="Str_Redact_NoMarks">Faites glisser sur la page pour marquer des zones</sys:String>
+    <sys:String x:Key="Str_Redact_Count">Marqué : {0} zones sur {1} page(s)</sys:String>
+    <sys:String x:Key="Str_Redact_MarkSearch">Marquer les résultats de recherche</sys:String>
+    <sys:String x:Key="Str_Redact_MarkSearchTip">Marquer toutes les occurrences de la recherche en cours</sys:String>
+    <sys:String x:Key="Str_Redact_MarkedSearch">{0} résultats de recherche marqués</sys:String>
+    <sys:String x:Key="Str_Redact_NoSearch">Recherchez d'abord le texte, puis marquez les résultats</sys:String>
+    <sys:String x:Key="Str_Redact_Clear">Effacer</sys:String>
+    <sys:String x:Key="Str_Redact_ClearTip">Supprimer toutes les marques</sys:String>
+    <sys:String x:Key="Str_Redact_Apply">Caviarder</sys:String>
+    <sys:String x:Key="Str_Redact_ApplyTip">Supprimer définitivement tout ce qui se trouve sous les zones marquées</sys:String>
+    <sys:String x:Key="Str_Redact_RasterPrompt" xml:space="preserve">La page {0} contient, sous une zone marquée, une image numérisée, un dégradé ou une illustration qui ne peut pas être supprimé séparément.
+
+La page peut être remplacée par une image d'elle-même avec les zones marquées noircies. Le texte en dehors des zones marquées reste consultable par recherche, mais rien d'autre sur cette page ne pourra plus être modifié.</sys:String>
+    <sys:String x:Key="Str_Redact_ConvertPage">Remplacer la page par une image</sys:String>
+    <sys:String x:Key="Str_Redact_ConvertAll">Remplacer toutes ces pages</sys:String>
+    <sys:String x:Key="Str_Redact_SkipPage">Ignorer cette page</sys:String>
+    <sys:String x:Key="Str_Redact_NothingApplied">Rien n'a été caviardé</sys:String>
+    <sys:String x:Key="Str_Redacted">{0} zones caviardées sur {1} page(s)</sys:String>
+    <sys:String x:Key="Str_RedactedRaster">{0} zones caviardées sur {1} page(s) ; {2} page(s) remplacée(s) par des images</sys:String>
+    <sys:String x:Key="Str_Redact_SkippedPages">Page(s) ignorée(s) : {0}</sys:String>
+    <sys:String x:Key="Str_Redact_Failed">Échec du caviardage : {0}</sys:String>
+    <sys:String x:Key="Str_Redact_VerifyFailed">le résultat montrait encore du contenu marqué, rien n'a donc été modifié</sys:String>
     <sys:String x:Key="Str_TT_RotateTool">Transformer la page - pivoter / redresser (mise à l'échelle bientôt disponible) (R)</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">Supprimer toutes les annotations</sys:String>
     <sys:String x:Key="Str_TT_Search">Rechercher (Ctrl+F)</sys:String>

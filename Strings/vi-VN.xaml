@@ -36,6 +36,30 @@
     <sys:String x:Key="Str_TT_ImageTool">Công cụ hình ảnh - nhấp để chèn hình ảnh vào trang (I)</sys:String>
     <sys:String x:Key="Str_TT_CropTool">Công cụ cắt - kéo để đặt vùng cắt, sau đó áp dụng cho (các) trang (C)</sys:String>
     <sys:String x:Key="Str_TT_MeasureTool">Đo khoảng cách và kiểm tra kích thước trang</sys:String>
+    <sys:String x:Key="Str_TT_RedactTool">Che: xóa vĩnh viễn văn bản và hình ảnh bên dưới các vùng đã đánh dấu</sys:String>
+    <sys:String x:Key="Str_Lbl_Redact">Che</sys:String>
+    <sys:String x:Key="Str_Redact_NoMarks">Kéo trên trang để đánh dấu vùng</sys:String>
+    <sys:String x:Key="Str_Redact_Count">Đã đánh dấu: {0} vùng trên {1} trang</sys:String>
+    <sys:String x:Key="Str_Redact_MarkSearch">Đánh dấu kết quả tìm kiếm</sys:String>
+    <sys:String x:Key="Str_Redact_MarkSearchTip">Đánh dấu mọi kết quả của lần tìm kiếm hiện tại</sys:String>
+    <sys:String x:Key="Str_Redact_MarkedSearch">Đã đánh dấu {0} kết quả tìm kiếm</sys:String>
+    <sys:String x:Key="Str_Redact_NoSearch">Hãy tìm văn bản trước, rồi đánh dấu kết quả</sys:String>
+    <sys:String x:Key="Str_Redact_Clear">Xóa</sys:String>
+    <sys:String x:Key="Str_Redact_ClearTip">Bỏ tất cả dấu</sys:String>
+    <sys:String x:Key="Str_Redact_Apply">Che</sys:String>
+    <sys:String x:Key="Str_Redact_ApplyTip">Xóa vĩnh viễn mọi thứ bên dưới các vùng đã đánh dấu</sys:String>
+    <sys:String x:Key="Str_Redact_RasterPrompt" xml:space="preserve">Trang {0} có hình quét, dải chuyển màu hoặc hình vẽ bên dưới một vùng đã đánh dấu mà không thể xóa riêng.
+
+Có thể thay trang bằng hình ảnh của chính nó với các vùng đã đánh dấu được tô đen. Văn bản ngoài các vùng đã đánh dấu vẫn tìm kiếm được, nhưng sau đó không thể chỉnh sửa gì khác trên trang đó.</sys:String>
+    <sys:String x:Key="Str_Redact_ConvertPage">Thay trang bằng hình ảnh</sys:String>
+    <sys:String x:Key="Str_Redact_ConvertAll">Thay tất cả các trang như vậy</sys:String>
+    <sys:String x:Key="Str_Redact_SkipPage">Bỏ qua trang này</sys:String>
+    <sys:String x:Key="Str_Redact_NothingApplied">Không có gì được che</sys:String>
+    <sys:String x:Key="Str_Redacted">Đã che {0} vùng trên {1} trang</sys:String>
+    <sys:String x:Key="Str_RedactedRaster">Đã che {0} vùng trên {1} trang; {2} trang được thay bằng hình ảnh</sys:String>
+    <sys:String x:Key="Str_Redact_SkippedPages">Các trang đã bỏ qua: {0}</sys:String>
+    <sys:String x:Key="Str_Redact_Failed">Che thất bại: {0}</sys:String>
+    <sys:String x:Key="Str_Redact_VerifyFailed">kết quả vẫn để lộ nội dung đã đánh dấu nên không có gì thay đổi</sys:String>
     <sys:String x:Key="Str_TT_RotateTool">Chuyển đổi trang - xoay / làm thẳng (tính năng thu phóng sắp ra mắt) (R)</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">Xóa tất cả chú thích</sys:String>
     <sys:String x:Key="Str_TT_Search">Tìm kiếm (Ctrl+F)</sys:String>

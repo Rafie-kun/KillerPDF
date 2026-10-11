@@ -36,6 +36,30 @@
     <sys:String x:Key="Str_TT_ImageTool">Зображення - натисніть, щоб вставити зображення на сторінку (I)</sys:String>
     <sys:String x:Key="Str_TT_CropTool">Обрізання - перетягніть, щоб задати область, потім застосуйте до сторінок (C)</sys:String>
     <sys:String x:Key="Str_TT_MeasureTool">Виміряти відстань і переглянути розмір сторінки</sys:String>
+    <sys:String x:Key="Str_TT_RedactTool">Приховати: остаточно видалити текст і зображення під позначеними областями</sys:String>
+    <sys:String x:Key="Str_Lbl_Redact">Приховати</sys:String>
+    <sys:String x:Key="Str_Redact_NoMarks">Проведіть по сторінці, щоб позначити області</sys:String>
+    <sys:String x:Key="Str_Redact_Count">Позначено: {0} обл. на {1} стор.</sys:String>
+    <sys:String x:Key="Str_Redact_MarkSearch">Позначити результати пошуку</sys:String>
+    <sys:String x:Key="Str_Redact_MarkSearchTip">Позначити всі збіги поточного пошуку</sys:String>
+    <sys:String x:Key="Str_Redact_MarkedSearch">Позначено результатів пошуку: {0}</sys:String>
+    <sys:String x:Key="Str_Redact_NoSearch">Спочатку знайдіть текст, потім позначте результати</sys:String>
+    <sys:String x:Key="Str_Redact_Clear">Очистити</sys:String>
+    <sys:String x:Key="Str_Redact_ClearTip">Видалити всі позначки</sys:String>
+    <sys:String x:Key="Str_Redact_Apply">Приховати</sys:String>
+    <sys:String x:Key="Str_Redact_ApplyTip">Остаточно видалити все під позначеними областями</sys:String>
+    <sys:String x:Key="Str_Redact_RasterPrompt" xml:space="preserve">На сторінці {0} під позначеною областю є відскановане зображення, градієнт або графіка, які не можна видалити окремо.
+
+Сторінку можна замінити її зображенням із зафарбованими позначеними областями. Текст поза позначеними областями залишиться доступним для пошуку, але нічого іншого на цій сторінці редагувати вже не можна буде.</sys:String>
+    <sys:String x:Key="Str_Redact_ConvertPage">Замінити сторінку зображенням</sys:String>
+    <sys:String x:Key="Str_Redact_ConvertAll">Замінити всі такі сторінки</sys:String>
+    <sys:String x:Key="Str_Redact_SkipPage">Пропустити цю сторінку</sys:String>
+    <sys:String x:Key="Str_Redact_NothingApplied">Нічого не приховано</sys:String>
+    <sys:String x:Key="Str_Redacted">Приховано областей: {0} на {1} стор.</sys:String>
+    <sys:String x:Key="Str_RedactedRaster">Приховано областей: {0} на {1} стор.; замінено зображеннями: {2} стор.</sys:String>
+    <sys:String x:Key="Str_Redact_SkippedPages">Пропущені сторінки: {0}</sys:String>
+    <sys:String x:Key="Str_Redact_Failed">Не вдалося приховати: {0}</sys:String>
+    <sys:String x:Key="Str_Redact_VerifyFailed">у результаті ще був видимий позначений вміст, тому нічого не змінено</sys:String>
     <sys:String x:Key="Str_TT_RotateTool">Перетворити сторінку - повернути, змінити масштаб, віддзеркалити, вирівняти нахил або виправити перспективу (R)</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">Очистити всі анотації</sys:String>
     <sys:String x:Key="Str_TT_Search">Пошук (Ctrl+F)</sys:String>

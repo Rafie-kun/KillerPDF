@@ -19,6 +19,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Added editable document exports, OCR integration, page selection, batches, and loss reports (#346).
 - Added reviewable OCR correction, searchable output, batches, accuracy checks, and reports (#345).
 - Added reviewable permanent redaction searches, removals, verification, batches, and reports (#341).
+- Added a Redact tool that permanently removes text, images, drawings, and comments under marked areas or search results, keeps the rest of each page searchable, and turns a page into an image only after you approve it.
 - Added signature trust, validation evidence, timestamps, and certificate-recipient encryption (#336).
 - Added reviewable PDF repair, optimization, sanitization, and duplicate resource cleanup (#333).
 - Added accessibility inspection, reviewable repairs, tagging proposals, and reading-order reports (#335).

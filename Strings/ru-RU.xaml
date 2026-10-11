@@ -36,6 +36,30 @@
     <sys:String x:Key="Str_TT_ImageTool">Инструмент "Изображение" - нажмите, чтобы вставить изображение на страницу (I)</sys:String>
     <sys:String x:Key="Str_TT_CropTool">Инструмент обрезки - перетащите, чтобы задать область обрезки, затем примените к странице(ам) (C)</sys:String>
     <sys:String x:Key="Str_TT_MeasureTool">Измерьте расстояние и проверьте размер страницы</sys:String>
+    <sys:String x:Key="Str_TT_RedactTool">Скрыть: безвозвратно удалить текст и изображения под отмеченными областями</sys:String>
+    <sys:String x:Key="Str_Lbl_Redact">Скрыть</sys:String>
+    <sys:String x:Key="Str_Redact_NoMarks">Проведите по странице, чтобы отметить области</sys:String>
+    <sys:String x:Key="Str_Redact_Count">Отмечено: {0} обл. на {1} стр.</sys:String>
+    <sys:String x:Key="Str_Redact_MarkSearch">Отметить результаты поиска</sys:String>
+    <sys:String x:Key="Str_Redact_MarkSearchTip">Отметить все совпадения текущего поиска</sys:String>
+    <sys:String x:Key="Str_Redact_MarkedSearch">Отмечено результатов поиска: {0}</sys:String>
+    <sys:String x:Key="Str_Redact_NoSearch">Сначала найдите текст, затем отметьте результаты</sys:String>
+    <sys:String x:Key="Str_Redact_Clear">Очистить</sys:String>
+    <sys:String x:Key="Str_Redact_ClearTip">Удалить все отметки</sys:String>
+    <sys:String x:Key="Str_Redact_Apply">Скрыть</sys:String>
+    <sys:String x:Key="Str_Redact_ApplyTip">Безвозвратно удалить всё под отмеченными областями</sys:String>
+    <sys:String x:Key="Str_Redact_RasterPrompt" xml:space="preserve">На странице {0} под отмеченной областью находится отсканированное изображение, градиент или графика, которые нельзя удалить отдельно.
+
+Страницу можно заменить её изображением с закрашенными отмеченными областями. Текст вне отмеченных областей останется доступным для поиска, но больше ничего на этой странице редактировать будет нельзя.</sys:String>
+    <sys:String x:Key="Str_Redact_ConvertPage">Заменить страницу изображением</sys:String>
+    <sys:String x:Key="Str_Redact_ConvertAll">Заменить все такие страницы</sys:String>
+    <sys:String x:Key="Str_Redact_SkipPage">Пропустить эту страницу</sys:String>
+    <sys:String x:Key="Str_Redact_NothingApplied">Ничего не скрыто</sys:String>
+    <sys:String x:Key="Str_Redacted">Скрыто областей: {0} на {1} стр.</sys:String>
+    <sys:String x:Key="Str_RedactedRaster">Скрыто областей: {0} на {1} стр.; заменено изображениями: {2} стр.</sys:String>
+    <sys:String x:Key="Str_Redact_SkippedPages">Пропущенные страницы: {0}</sys:String>
+    <sys:String x:Key="Str_Redact_Failed">Не удалось скрыть: {0}</sys:String>
+    <sys:String x:Key="Str_Redact_VerifyFailed">в результате всё ещё был виден отмеченный контент, поэтому ничего не изменено</sys:String>
     <sys:String x:Key="Str_TT_RotateTool">Трансформация страницы - поворот / выравнивание по ширине (скоро появится масштаб) (R)</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">Очистите все аннотации</sys:String>
     <sys:String x:Key="Str_TT_Search">Поиск (Ctrl+F)</sys:String>

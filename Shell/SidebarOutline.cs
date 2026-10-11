@@ -882,6 +882,7 @@ namespace KillerPDF
         private void ToolImage_Click(object sender, RoutedEventArgs e) => SetTool(EditTool.Image);
         private void ToolCrop_Click(object sender, RoutedEventArgs e) => SetTool(EditTool.Crop);
         private void ToolMeasure_Click(object sender, RoutedEventArgs e) => SetTool(EditTool.Measure);
+        private void ToolRedact_Click(object sender, RoutedEventArgs e) => SetTool(EditTool.Redact);
         private void ToolSignature_Click(object sender, RoutedEventArgs e)
         {
             if (_signaturePopup is not null)

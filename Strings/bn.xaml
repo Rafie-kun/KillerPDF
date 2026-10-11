@@ -36,6 +36,30 @@
     <sys:String x:Key="Str_TT_ImageTool">ছবি টুল - পৃষ্ঠায় ছবি সন্নিবেশ করতে ক্লিক করুন (I)</sys:String>
     <sys:String x:Key="Str_TT_CropTool">ক্রপ টুল - ক্রপ এলাকা নির্ধারণে টেনে আনুন, তারপর পৃষ্ঠায় প্রয়োগ করুন (C)</sys:String>
     <sys:String x:Key="Str_TT_MeasureTool">দূরত্ব মাপুন এবং পৃষ্ঠার আকার দেখুন</sys:String>
+    <sys:String x:Key="Str_TT_RedactTool">রিড্যাক্ট: চিহ্নিত এলাকার নিচের লেখা ও ছবি স্থায়ীভাবে মুছে ফেলুন</sys:String>
+    <sys:String x:Key="Str_Lbl_Redact">রিড্যাক্ট</sys:String>
+    <sys:String x:Key="Str_Redact_NoMarks">এলাকা চিহ্নিত করতে পৃষ্ঠার ওপর টেনে আনুন</sys:String>
+    <sys:String x:Key="Str_Redact_Count">চিহ্নিত: {1}টি পৃষ্ঠায় {0}টি এলাকা</sys:String>
+    <sys:String x:Key="Str_Redact_MarkSearch">অনুসন্ধানের ফল চিহ্নিত করুন</sys:String>
+    <sys:String x:Key="Str_Redact_MarkSearchTip">বর্তমান অনুসন্ধানের সব মিল চিহ্নিত করুন</sys:String>
+    <sys:String x:Key="Str_Redact_MarkedSearch">{0}টি অনুসন্ধানের ফল চিহ্নিত হয়েছে</sys:String>
+    <sys:String x:Key="Str_Redact_NoSearch">আগে লেখাটি অনুসন্ধান করুন, তারপর ফলগুলো চিহ্নিত করুন</sys:String>
+    <sys:String x:Key="Str_Redact_Clear">মুছুন</sys:String>
+    <sys:String x:Key="Str_Redact_ClearTip">সব চিহ্ন সরান</sys:String>
+    <sys:String x:Key="Str_Redact_Apply">রিড্যাক্ট</sys:String>
+    <sys:String x:Key="Str_Redact_ApplyTip">চিহ্নিত এলাকার নিচের সবকিছু স্থায়ীভাবে মুছে ফেলুন</sys:String>
+    <sys:String x:Key="Str_Redact_RasterPrompt" xml:space="preserve">{0} নম্বর পৃষ্ঠায় একটি চিহ্নিত এলাকার নিচে স্ক্যান করা ছবি, গ্রেডিয়েন্ট বা চিত্র আছে যা আলাদাভাবে মোছা যায় না।
+
+পৃষ্ঠাটিকে তার নিজের একটি ছবি দিয়ে বদলানো যায়, যেখানে চিহ্নিত এলাকাগুলো কালো করা থাকবে। চিহ্নিত এলাকার বাইরের লেখা অনুসন্ধানযোগ্য থাকবে, কিন্তু সেই পৃষ্ঠার আর কিছু পরে সম্পাদনা করা যাবে না।</sys:String>
+    <sys:String x:Key="Str_Redact_ConvertPage">পৃষ্ঠাটি ছবি দিয়ে বদলান</sys:String>
+    <sys:String x:Key="Str_Redact_ConvertAll">এমন সব পৃষ্ঠা বদলান</sys:String>
+    <sys:String x:Key="Str_Redact_SkipPage">এই পৃষ্ঠা বাদ দিন</sys:String>
+    <sys:String x:Key="Str_Redact_NothingApplied">কিছুই রিড্যাক্ট করা হয়নি</sys:String>
+    <sys:String x:Key="Str_Redacted">{1}টি পৃষ্ঠায় {0}টি এলাকা রিড্যাক্ট করা হয়েছে</sys:String>
+    <sys:String x:Key="Str_RedactedRaster">{1}টি পৃষ্ঠায় {0}টি এলাকা রিড্যাক্ট করা হয়েছে; {2}টি পৃষ্ঠা ছবি দিয়ে বদলানো হয়েছে</sys:String>
+    <sys:String x:Key="Str_Redact_SkippedPages">বাদ দেওয়া পৃষ্ঠা: {0}</sys:String>
+    <sys:String x:Key="Str_Redact_Failed">রিড্যাক্ট ব্যর্থ হয়েছে: {0}</sys:String>
+    <sys:String x:Key="Str_Redact_VerifyFailed">ফলাফলে তখনও চিহ্নিত বিষয়বস্তু দেখা যাচ্ছিল, তাই কিছুই বদলানো হয়নি</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">সব অ্যানোটেশন মুছুন</sys:String>
     <sys:String x:Key="Str_TT_UndoLast">শেষ কাজ পূর্বাবস্থায় ফেরান (Ctrl+Z)</sys:String>
     <sys:String x:Key="Str_TT_MultiPageGrid">বহু-পৃষ্ঠা গ্রিড ভিউ (F8)</sys:String>

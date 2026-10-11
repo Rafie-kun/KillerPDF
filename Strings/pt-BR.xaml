@@ -36,6 +36,30 @@
     <sys:String x:Key="Str_TT_ImageTool">Ferramenta de imagem - clique para inserir uma imagem na página (I)</sys:String>
     <sys:String x:Key="Str_TT_CropTool">Ferramenta de corte - arraste para definir a área de corte e aplique à(s) página(s) (C)</sys:String>
     <sys:String x:Key="Str_TT_MeasureTool">Medir distância e inspecionar o tamanho da página</sys:String>
+    <sys:String x:Key="Str_TT_RedactTool">Tarjar: remover permanentemente texto e imagens sob as áreas marcadas</sys:String>
+    <sys:String x:Key="Str_Lbl_Redact">Tarjar</sys:String>
+    <sys:String x:Key="Str_Redact_NoMarks">Arraste sobre a página para marcar áreas</sys:String>
+    <sys:String x:Key="Str_Redact_Count">Marcado: {0} áreas em {1} página(s)</sys:String>
+    <sys:String x:Key="Str_Redact_MarkSearch">Marcar resultados da pesquisa</sys:String>
+    <sys:String x:Key="Str_Redact_MarkSearchTip">Marcar todas as ocorrências da pesquisa atual</sys:String>
+    <sys:String x:Key="Str_Redact_MarkedSearch">{0} resultados da pesquisa marcados</sys:String>
+    <sys:String x:Key="Str_Redact_NoSearch">Pesquise o texto primeiro e depois marque os resultados</sys:String>
+    <sys:String x:Key="Str_Redact_Clear">Limpar</sys:String>
+    <sys:String x:Key="Str_Redact_ClearTip">Remover todas as marcas</sys:String>
+    <sys:String x:Key="Str_Redact_Apply">Tarjar</sys:String>
+    <sys:String x:Key="Str_Redact_ApplyTip">Remover permanentemente tudo o que estiver sob as áreas marcadas</sys:String>
+    <sys:String x:Key="Str_Redact_RasterPrompt" xml:space="preserve">A página {0} tem uma imagem digitalizada, um degradê ou uma ilustração sob uma área marcada que não pode ser removida sozinha.
+
+A página pode ser substituída por uma imagem dela mesma com as áreas marcadas em preto. O texto fora das áreas marcadas continua pesquisável, mas nada mais nessa página poderá ser editado depois.</sys:String>
+    <sys:String x:Key="Str_Redact_ConvertPage">Substituir a página por imagem</sys:String>
+    <sys:String x:Key="Str_Redact_ConvertAll">Substituir todas essas páginas</sys:String>
+    <sys:String x:Key="Str_Redact_SkipPage">Pular esta página</sys:String>
+    <sys:String x:Key="Str_Redact_NothingApplied">Nada foi tarjado</sys:String>
+    <sys:String x:Key="Str_Redacted">{0} áreas tarjadas em {1} página(s)</sys:String>
+    <sys:String x:Key="Str_RedactedRaster">{0} áreas tarjadas em {1} página(s); {2} página(s) substituída(s) por imagens</sys:String>
+    <sys:String x:Key="Str_Redact_SkippedPages">Página(s) pulada(s): {0}</sys:String>
+    <sys:String x:Key="Str_Redact_Failed">Falha ao tarjar: {0}</sys:String>
+    <sys:String x:Key="Str_Redact_VerifyFailed">o resultado ainda expunha conteúdo marcado, então nada foi alterado</sys:String>
     <sys:String x:Key="Str_TT_RotateTool">Transformar página - girar, dimensionar, espelhar, corrigir inclinação ou perspectiva (R)</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">Limpar todas as anotações</sys:String>
     <sys:String x:Key="Str_TT_Search">Pesquisar (Ctrl+F)</sys:String>

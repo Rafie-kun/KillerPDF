@@ -825,6 +825,7 @@ namespace KillerPDF
             [""] = "Str_Lbl_Stamp",     // page-number / watermark stamp tool
             [""] = "Str_Lbl_Shape",   // Shapes tool (rect / ellipse / polygon)
             ["\uED5E"] = "Str_Lbl_Measure",
+            ["\uED1A"] = "Str_Lbl_Redact",
             ["\uE790"] = "Str_ColorCorrection",
         };
 
@@ -1301,6 +1302,7 @@ namespace KillerPDF
                     (ToolCropBtn,       new UIElement[] { MiCrop }),
                     (ToolColorCorrectionBtn, new UIElement[] { MiColorCorrection }),
                     (ToolMeasureBtn,    new UIElement[] { MiMeasure }),
+                    (ToolRedactBtn,     new UIElement[] { MiRedact }),
                     (GrpUndo,           new UIElement[] { MiUndo, MiClear }),
                     (ToolShapeBtn,      new UIElement[] { MiShape }),
                     (ToolDrawBtn,       new UIElement[] { MiDraw }),
@@ -1342,6 +1344,7 @@ namespace KillerPDF
                     EditTool.Shape     => ToolShapeBtn,
                     EditTool.Image     => ToolImageBtn,
                     EditTool.Crop      => ToolCropBtn,
+                    EditTool.Redact    => ToolRedactBtn,
                     EditTool.Signature => GrpSignature,
                     _ => null
                 };
