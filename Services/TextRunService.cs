@@ -1,4 +1,5 @@
 using System.IO;
+using System.Runtime.CompilerServices;
 using UglyToad.PdfPig;
 
 namespace KillerPDF.Services
@@ -69,14 +70,21 @@ namespace KillerPDF.Services
             PageTextRuns? runs = null;
             try
             {
-                using var doc = PdfDocument.Open(path);
-                if (pageIdx < doc.NumberOfPages)
-                    runs = Build(doc.GetPage(pageIdx + 1));   // PdfPig is 1-based
+                runs = ReadPage(path, pageIdx);
             }
-            catch { /* encrypted/broken: selection just is not offered on this page */ }
+            catch { /* unavailable dependency or unreadable page: selection is not offered */ }
 
             _cache[key] = runs;
             return runs;
+        }
+
+        // Keep PdfPig references outside GetPage's JIT boundary so a blocked assembly load
+        // reaches its catch before any text-selection or hover event can fail.
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static PageTextRuns? ReadPage(string path, int pageIdx)
+        {
+            using var doc = PdfDocument.Open(path);
+            return pageIdx < doc.NumberOfPages ? Build(doc.GetPage(pageIdx + 1)) : null;
         }
 
         // #185 helper: see the call site comment. Bands arrive top-to-bottom; the result is the

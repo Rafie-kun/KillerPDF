@@ -20,6 +20,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 ### Fixed
 - Prevented a failed Save or Save As from damaging the existing file by finishing the new copy before replacing it.
 - Preserved unsaved annotations when moving, reordering, duplicating, or merging pages and when removing a link. A duplicated page carries a copy of them.
+- Prevented a crash when hovering over text if Windows blocks the text extraction library (#441).
 - Inserting a blank page works again. OK in its page size dialog was treated as Cancel.
 - Dragging one page of a multi-page selection in the sidebar now moves the whole selection instead of only the pressed page.
 - Search highlights and text selection now land on the right text on rotated pages, and Crop no longer crops the wrong area of a turned page.
