@@ -668,6 +668,10 @@ namespace KillerPDF.Controls
         private void Places_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (_navigating) return;
+            // While a pinned place is held, the list's own drag-select moves the selection onto
+            // every row the pointer crosses before the reorder drag takes over. Only the pressed
+            // place itself may navigate; EndPinDrag puts the marker back afterward.
+            if (_pinDragPlace != null && !ReferenceEquals(PlacesList.SelectedItem, _pinDragPlace)) return;
             if (PlacesList.SelectedItem is PickerPlace p) NavigateTo(p.Path);
         }
 

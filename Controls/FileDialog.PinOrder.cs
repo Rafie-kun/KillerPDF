@@ -61,14 +61,19 @@ namespace KillerPDF.Controls
 
         private void EndPinDrag()
         {
+            bool pressed = _pinDragPlace != null;
             bool captured = _pinDragging;
             _pinDragPlace = null;
             _pinDragging = false;
-            if (!captured) return;
-            if (PlacesList.IsMouseCaptured) PlacesList.ReleaseMouseCapture();
-            _navigating = _pinNavigatingWas;
-            SyncPlacesSelection();
-            DragCursors.EndDrag();
+            if (captured)
+            {
+                if (PlacesList.IsMouseCaptured) PlacesList.ReleaseMouseCapture();
+                _navigating = _pinNavigatingWas;
+            }
+            // Places_SelectionChanged ignored the rows crossed while the place was held, so mark
+            // the folder actually shown again.
+            if (pressed) SyncPlacesSelection();
+            if (captured) DragCursors.EndDrag();
         }
 
         private void SavePinOrder()
