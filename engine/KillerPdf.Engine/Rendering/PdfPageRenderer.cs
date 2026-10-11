@@ -5818,6 +5818,24 @@ public sealed partial class PdfPageRenderer
                 int redIndex = directDeviceSamples ? 0 : 2;
                 int greenIndex = directDeviceSamples && components == 1 ? 0 : 1;
                 int blueIndex = directDeviceSamples && components == 3 ? 2 : 0;
+                // Without rotation or skew, a destination column reads the same plane column on
+                // every row. Those columns are found once, with the same stepping as the loop
+                // below, and each opaque pixel copies its plane pixel whole.
+                int[]? planeColumns = null;
+                if (!directDeviceSamples && softMask is null && !perPixelClip
+                    && inverse.B == 0 && inverse.C == 0 && BitConverter.IsLittleEndian)
+                {
+                    planeColumns = new int[paintRight - paintLeft];
+                    Point first = inverse.Apply((left + 0.5) / scaleX, (targetHeight - paintTop - 0.5) / scaleY);
+                    double unitX = first.X;
+                    for (int x = left; x < paintRight; x++, unitX += unitStepX)
+                    {
+                        if (x < paintLeft) continue;
+                        planeColumns[x - paintLeft] = unitX < 0 || unitX >= 1 ? -1
+                            : pixelAlignedPlane ? x - left
+                            : Math.Min((int)(unitX * planeWidth), planeWidth - 1);
+                    }
+                }
                 ForEachRow(paintTop, paintBottom, (long)(paintRight - paintLeft) * (paintBottom - paintTop),
                     (rowStart, rowEnd) =>
                 {
@@ -5827,6 +5845,36 @@ public sealed partial class PdfPageRenderer
                         Point first = inverse.Apply((left + 0.5) / scaleX, (targetHeight - y - 0.5) / scaleY);
                         double unitX = first.X, unitY = first.Y;
                         int rowOffset = target.Offset(left, y);
+                        if (planeColumns is not null)
+                        {
+                            if (unitY < 0 || unitY >= 1) continue;
+                            int planeRow = (pixelAlignedPlane ? y - top
+                                : Math.Min((int)((1 - unitY) * planeHeight), planeHeight - 1)) * planeWidth;
+                            ReadOnlySpan<uint> planePixels = System.Runtime.InteropServices.MemoryMarshal
+                                .Cast<byte, uint>(planeData.AsSpan(0, planeWidth * planeHeight * 4));
+                            Span<uint> targetPixels = System.Runtime.InteropServices.MemoryMarshal
+                                .Cast<byte, uint>(data.AsSpan());
+                            int targetPixel = (rowOffset >> 2) + (paintLeft - left);
+                            for (int column = 0; column < planeColumns.Length; column++)
+                            {
+                                int px = planeColumns[column];
+                                if (px < 0) continue;
+                                uint pixel = planePixels[planeRow + px];
+                                uint pixelAlpha = pixel >> 24;
+                                if (pixelAlpha == 0) continue;
+                                if (pixelAlpha == 255)
+                                {
+                                    targetPixels[targetPixel + column] = pixel;
+                                    target.InvalidateRgbSpotPixel((targetPixel + column) * 4);
+                                    directGroupAlpha?[targetPixel + column] = 255;
+                                    continue;
+                                }
+                                SetPixel(target, targetWidth, paintLeft + column, y,
+                                    new Color((byte)(pixel >> 16), (byte)(pixel >> 8), (byte)pixel),
+                                    pixelAlpha / 255d, blendMode, graphicsSoftMask, knockout);
+                            }
+                            continue;
+                        }
                         for (int x = left; x < paintRight; x++, unitX += unitStepX, unitY += unitStepY)
                         {
                             if (x < paintLeft) continue;
