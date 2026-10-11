@@ -1,3 +1,4 @@
+using System.IO.Compression;
 using System.Text;
 using KillerPdf.Engine.Authoring;
 using KillerPdf.Engine.CrossReference;
@@ -176,6 +177,56 @@ public static class PdfContentRedaction
             options.ProhibitedText, options.ClearDocumentMetadata, cancellationToken);
         if (!verification.Succeeded) throw new PdfRedactionVerificationException(verification);
         return new PdfContentRedactionResult(output, plan, verification);
+    }
+
+    /// <summary>
+    /// Removes the text drawn under opaque covers, such as the cover of an in-place text edit, and
+    /// returns the document with an incremental update, or null when no text lies under them.
+    /// </summary>
+    /// <remarks>
+    /// A glyph goes when its center lies inside a region. Images, drawings, annotations and every
+    /// page resource stay, and text in a font that cannot be decoded is kept. Regions use unrotated
+    /// PDF points relative to the corner given by <see cref="PdfPageInformation.Left"/> and
+    /// <see cref="PdfPageInformation.Bottom"/>.
+    /// </remarks>
+    public static byte[]? RemoveCoveredText(PdfDocument document, IEnumerable<PdfRedactionRegion> regions,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        ArgumentNullException.ThrowIfNull(regions);
+        PdfPageTree tree = PdfPageTree.Read(document);
+        Dictionary<int, PdfContentBounds[]> byPage = GroupRegions(regions, tree.Pages.Count);
+        if (byPage.Count == 0) return null;
+        IReadOnlyList<PdfPageInformation> boxes = PdfPageInformation.Read(document);
+        var update = new PdfIncrementalUpdateBuilder(document);
+        var fonts = new Dictionary<PdfDictionary, PdfExtractionFont?>(ReferenceEqualityComparer.Instance);
+        bool changed = false;
+        foreach ((int pageIndex, PdfContentBounds[] pageRegions) in byPage.OrderBy(item => item.Key))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            PdfPageTreeEntry page = tree.Pages[pageIndex];
+            PdfPageInformation box = boxes[pageIndex];
+            var rewriter = new ContentRewriter(document, update, pageRegions, textOnly: false, fonts,
+                cancellationToken, glyphsOnly: true);
+            List<PdfContentInstruction> content = rewriter.RewritePage(page,
+                new PageGeometry(box.Left, box.Bottom, box.Width, box.Height, box.Rotation));
+            if (rewriter.RemovedGlyphs == 0) continue;
+            var instructions = new List<PdfContentInstruction>(content.Count + 2) { Op("q") };
+            instructions.AddRange(content);
+            instructions.Add(Op("Q"));
+            using var compressed = new MemoryStream();
+            using (var zlib = new ZLibStream(compressed, CompressionLevel.Optimal, leaveOpen: true))
+                zlib.Write(PdfContentStreamWriter.Write(instructions));
+            PdfIndirectReference contentReference = update.AddObject(new PdfStream(
+                new PdfDictionary(new Dictionary<PdfName, PdfObject> { [Name("Filter")] = Name("FlateDecode") }),
+                compressed.ToArray()));
+            var entries = page.Dictionary.ToDictionary(entry => entry.Key, entry => entry.Value);
+            entries[ContentsName] = contentReference;
+            entries[ResourcesName] = rewriter.PageScope!.Build();
+            update.ReplaceObject(page.Reference.ObjectNumber, new PdfDictionary(entries));
+            changed = true;
+        }
+        return changed ? update.Build() : null;
     }
 
     private static byte[] Rewrite(PdfDocument document, PdfPageTree tree,
@@ -747,6 +798,12 @@ public static class PdfContentRedaction
         content.Right >= region.Left && content.Left <= region.Right
         && content.Top >= region.Bottom && content.Bottom <= region.Top;
 
+    private static bool ContainsCenter(PdfContentBounds content, PdfContentBounds region)
+    {
+        double x = (content.Left + content.Right) / 2, y = (content.Bottom + content.Top) / 2;
+        return x >= region.Left && x <= region.Right && y >= region.Bottom && y <= region.Top;
+    }
+
     private static bool Inside(PdfContentBounds content, PdfContentBounds region) =>
         content.Left >= region.Left && content.Right <= region.Right
         && content.Bottom >= region.Bottom && content.Top <= region.Top;
@@ -840,9 +897,11 @@ public static class PdfContentRedaction
         double Scale = 1, double Leading = 0, double Rise = 0);
 
     /// <summary>Rewrites page and form content so nothing drawn inside a region survives.</summary>
+    /// <remarks>With <paramref name="glyphsOnly"/> only text goes: a glyph whose center lies in a
+    /// region is removed, while images, drawings and every resource stay as they were.</remarks>
     private sealed class ContentRewriter(PdfDocument document, PdfIncrementalUpdateBuilder? update,
         PdfContentBounds[] regions, bool textOnly, Dictionary<PdfDictionary, PdfExtractionFont?> fonts,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, bool glyphsOnly = false)
     {
         private static readonly PdfName FontCategory = Name("Font");
         private static readonly PdfName XObjectCategory = Name("XObject");
@@ -866,7 +925,7 @@ public static class PdfContentRedaction
         {
             PdfDictionary resources = page.InheritedValues.TryGetValue(ResourcesName, out PdfObject? value)
                 && Resolve(document, value) is PdfDictionary dictionary ? dictionary : new PdfDictionary([]);
-            PageScope = new ResourceScope(document, resources);
+            PageScope = new ResourceScope(document, resources) { KeepEverything = glyphsOnly };
             byte[] bytes = page.Dictionary.TryGetValue(ContentsName, out PdfObject? contents) ? PageBytes(contents) : [];
             var initial = new TextState(new Matrix(1, 0, 0, 1, -geometry.CropLeft, -geometry.CropBottom),
                 new PdfContentBounds(0, 0, geometry.Width, geometry.Height));
@@ -988,7 +1047,7 @@ public static class PdfContentRedaction
                         if (args.Count == 1 && args[0] is PdfName shadingName)
                         {
                             if (textOnly) { localChanged = true; break; }
-                            if (regions.Any(region => Overlaps(state.Clip, region)))
+                            if (!glyphsOnly && regions.Any(region => Overlaps(state.Clip, region)))
                             {
                                 if (regions.Any(region => Inside(state.Clip, region))) { localChanged = true; RemovedPaths++; break; }
                                 Reasons.Add("Shading");
@@ -1179,7 +1238,10 @@ public static class PdfContentRedaction
                         corners.Max(p => p.X), corners.Max(p => p.Y));
                     double spacing = state.CharacterSpacing;
                     if (character.ByteLength == 1 && character.Code == 32) spacing += state.WordSpacing;
-                    if (regions.Any(region => Overlaps(bounds, region)))
+                    bool covered = glyphsOnly
+                        ? regions.Any(region => ContainsCenter(bounds, region))
+                        : regions.Any(region => Overlaps(bounds, region));
+                    if (covered)
                     {
                         if (state.Size == 0) Reasons.Add("ZeroSizeText");
                         Flush();
@@ -1263,7 +1325,8 @@ public static class PdfContentRedaction
                 {
                     PdfContentBounds bounds = Visible(Transform(new PdfContentBounds(0, 0, 1, 1), state.Ctm));
                     if (textOnly) { localChanged = true; return; }
-                    if (bounds.Width > 0 && bounds.Height > 0 && regions.Any(region => Overlaps(bounds, region)))
+                    if (!glyphsOnly && bounds.Width > 0 && bounds.Height > 0
+                        && regions.Any(region => Overlaps(bounds, region)))
                     {
                         if (regions.Any(region => Inside(bounds, region)))
                         {
@@ -1310,7 +1373,11 @@ public static class PdfContentRedaction
                     bool ownResources = xobject.Dictionary.TryGetValue(ResourcesName, out PdfObject? resourcesValue)
                         && Resolve(document, resourcesValue) is PdfDictionary;
                     ResourceScope formScope = ownResources
-                        ? new ResourceScope(document, (PdfDictionary)Resolve(document, resourcesValue!)) : scope;
+                        ? new ResourceScope(document, (PdfDictionary)Resolve(document, resourcesValue!))
+                        {
+                            KeepEverything = glyphsOnly
+                        }
+                        : scope;
                     byte[] formBytes = document.DecodeStream(xobject, PdfContentStreamReader.MaximumSourceBytes);
                     List<PdfContentInstruction> rewritten = Rewrite(formBytes, formScope,
                         state with { Ctm = formCtm, Clip = formClip }, depth + 1, out bool formChanged);
@@ -1338,7 +1405,8 @@ public static class PdfContentRedaction
             {
                 if (textOnly) { localChanged = true; return; }
                 PdfContentBounds bounds = Visible(Transform(new PdfContentBounds(0, 0, 1, 1), state.Ctm));
-                if (bounds.Width > 0 && bounds.Height > 0 && regions.Any(region => Overlaps(bounds, region)))
+                if (!glyphsOnly && bounds.Width > 0 && bounds.Height > 0
+                    && regions.Any(region => Overlaps(bounds, region)))
                 {
                     if (regions.Any(region => Inside(bounds, region)))
                     {
@@ -1384,7 +1452,7 @@ public static class PdfContentRedaction
                 {
                     if (paint.Operator != "n" || pendingPath.Count > 0) localChanged = true;
                 }
-                else if (paint.Operator != "n" && pathPoints.Count > 0
+                else if (!glyphsOnly && paint.Operator != "n" && pathPoints.Count > 0
                     && regions.Any(region => Overlaps(bounds, region)))
                 {
                     if (regions.Any(region => Inside(bounds, region)))

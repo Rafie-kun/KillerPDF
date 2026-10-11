@@ -30,6 +30,12 @@ internal static class PdfEngineBurn
             PdfEngineIntegration.StripLinkAppearances(path);
         var document = PdfDocument.Open(File.ReadAllBytes(path));
         var pages = PdfPageInformation.Read(document);
+        if (!forRasterization
+            && RemoveReplacedText(document, pages, annotations, renderDims, onlyPage, rotations) is { } cleaned)
+        {
+            document = PdfDocument.Open(cleaned);
+            pages = PdfPageInformation.Read(document);
+        }
         var editor = new PdfIncrementalPageEditor(document);
         var fonts = new Dictionary<string, TrueTypeFont>(StringComparer.OrdinalIgnoreCase);
         var watermark = stamps is { WmEnabled: true, WmIsImage: true }
@@ -89,6 +95,50 @@ internal static class PdfEngineBurn
         }
 
         Replace(path, editor.Build());
+    }
+
+    // An in-place edit replaces a line of the page's own text: its cover hides the old glyphs and its
+    // text draws the new ones. Saving removes the hidden glyphs as well, so the old words cannot be
+    // found or copied and are not read back by the next Edit Text on that line. A cover that lets the
+    // page show through (partly erased or translucent) keeps the text under it.
+    private static byte[]? RemoveReplacedText(PdfDocument document, IReadOnlyList<PdfPageInformation> pages,
+        IReadOnlyDictionary<int, List<PageAnnotation>> annotations,
+        IReadOnlyDictionary<int, (int w, int h)> renderDims, int? onlyPage, IReadOnlyDictionary<int, int>? rotations)
+    {
+        var regions = new List<PdfRedactionRegion>();
+        foreach ((int pageIndex, List<PageAnnotation> items) in annotations)
+        {
+            if (pageIndex < 0 || pageIndex >= pages.Count || onlyPage.HasValue && pageIndex != onlyPage.Value)
+                continue;
+            var edits = new HashSet<string>(items.OfType<TextAnnotation>()
+                .Where(text => text.PairId.Length > 0).Select(text => text.PairId));
+            if (edits.Count == 0) continue;
+            PdfPageInformation page = pages[pageIndex];
+            int rotation = rotations?.TryGetValue(pageIndex, out int overrideRotation) == true
+                ? NormalizeRotation(overrideRotation) : page.Rotation;
+            double visualWidth = rotation is 90 or 270 ? page.Height : page.Width;
+            double visualHeight = rotation is 90 or 270 ? page.Width : page.Height;
+            var (renderWidth, renderHeight) = renderDims.TryGetValue(pageIndex, out var storedDims)
+                && storedDims.w > 0 && storedDims.h > 0
+                ? storedDims : CanonicalRenderDimensions(visualWidth, visualHeight);
+            foreach (CoverAnnotation cover in items.OfType<CoverAnnotation>())
+            {
+                if (!edits.Contains(cover.PairId) || cover.GetColor().A < 255 || cover.Erases is { Count: > 0 })
+                    continue;
+                var (left, bottom, right, top) = RedactionGeometry.CanvasToPage(cover.DrawRect(),
+                    page.Width, page.Height, renderWidth, renderHeight, rotation);
+                if (right > left && top > bottom)
+                    regions.Add(new PdfRedactionRegion(pageIndex, new PdfContentBounds(left, bottom, right, top)));
+            }
+        }
+        if (regions.Count == 0) return null;
+        try { return PdfContentRedaction.RemoveCoveredText(document, regions); }
+        catch (Exception error) when (error is FormatException or InvalidOperationException
+            or NotSupportedException or ArgumentException)
+        {
+            // The cover still hides the old line, so the save goes ahead without the cleanup.
+            return null;
+        }
     }
 
     private static (int Width, int Height) CanonicalRenderDimensions(double width, double height)

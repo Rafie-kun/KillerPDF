@@ -6,6 +6,7 @@ using KillerPdf.Engine.Authoring;
 using KillerPdf.Engine.Documents;
 using KillerPdf.Engine.Rendering;
 using PdfRenderedPage = KillerPdf.Engine.Rendering.PdfRenderedPage;
+using Colors = System.Windows.Media.Colors;
 using Xunit;
 
 namespace KillerPDF.Tests;
@@ -186,6 +187,66 @@ public sealed class TextTurnTests
         Assert.Equal(90, edit.Rotation);
         Assert.Equal(110, edit.Position.X, 6);
         Assert.Equal(60, edit.Position.Y, 6);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(90)]
+    public void SavedEditsLeaveOnlyTheirReplacementText(int rotation)
+    {
+        string path = Path.Combine(Path.GetTempPath(), $"kp-replaced-text-{Guid.NewGuid():N}.pdf");
+        bool quarter = rotation is 90 or 270;
+        int canvasWidth = quarter ? 400 : 600, canvasHeight = quarter ? 600 : 400;
+        try
+        {
+            File.WriteAllBytes(path, Pdf(rotation,
+                "BT /F1 24 Tf 40 80 Td (Turned) Tj ET BT /F1 12 Tf 40 30 Td (Footer) Tj ET",
+                "/Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> >> >>"));
+
+            // The first save replaces page text; the second replaces the first edit's own text, which
+            // the first save drew inside an overlay form.
+            Edit("Turned", "Fresh");
+            string first = Letters();
+            Assert.DoesNotContain("Turned", first);
+            Assert.Contains("Fresh", first);
+            Assert.Contains("Footer", first);
+
+            Edit("Fresh", "Again");
+            string second = Letters();
+            Assert.DoesNotContain("Fresh", second);
+            Assert.Contains("Again", second);
+            Assert.Contains("Footer", second);
+        }
+        finally { File.Delete(path); }
+
+        string Letters() => string.Concat(new PdfPageContentReader(PdfDocument.Open(File.ReadAllBytes(path)))
+            .Read(0).Letters.Select(letter => letter.Value));
+
+        void Edit(string word, string replacement)
+        {
+            var b = new PdfPageContentReader(PdfDocument.Open(File.ReadAllBytes(path))).Read(0).Words
+                .Single(w => w.Text == word).BoundingBox;
+            Rect line = RedactionGeometry.PageToCanvas(b.Left, b.Bottom, b.Right, b.Top,
+                300, 200, canvasWidth, canvasHeight, rotation);
+            // Level text on a turned page reads turned by the page's rotation.
+            int turn = rotation;
+            var cover = new CoverAnnotation
+            {
+                PageIndex = 0, PairId = word, Bounds = new Rect(line.X - 3, line.Y - 3, line.Width + 6, line.Height + 6)
+            };
+            cover.SetColor(Colors.White);
+            Rect reading = TextTurn.ToReading(line, turn);
+            var text = new TextAnnotation
+            {
+                PageIndex = 0, PairId = word, Rotation = turn, Width = reading.Width + 40,
+                Height = Math.Max(reading.Height, 48),
+                Content = replacement, FontName = "Segoe UI", FontSize = 20
+            };
+            text.Position = TextTurn.FromReading(reading.TopLeft, turn)
+                - TextTurn.OriginOffset(turn, text.Width, text.Height);
+            PdfEngineBurn.Burn(path, new Dictionary<int, List<PageAnnotation>> { [0] = [cover, text] },
+                new Dictionary<int, (int w, int h)> { [0] = (canvasWidth, canvasHeight) });
+        }
     }
 
     private static Rect InkBounds(PdfRenderedPage page)

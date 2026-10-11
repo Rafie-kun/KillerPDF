@@ -227,6 +227,62 @@ public sealed class PdfContentRedactionTests
             [new PdfRedactionRegion(0, new PdfContentBounds(10, 10, 10, 20))]));
     }
 
+    [Fact]
+    public void CoveredTextGoesWhileDrawingsImagesAndNeighborsStay()
+    {
+        PdfDocument document = PdfDocument.Open(ImagePage(
+            "BT /F1 12 Tf 72 300 Td (OLDTEXT) Tj ET BT /F1 12 Tf 72 200 Td (Keep) Tj ET " +
+            "q 0 0 1 rg 60 290 120 30 re f Q q 20 0 0 20 100 295 cm /Im1 Do Q", rotate: 0));
+        PdfRedactionRegion region = Region(document, 0, "OLD");
+
+        byte[]? updated = PdfContentRedaction.RemoveCoveredText(document, [region]);
+
+        Assert.NotNull(updated);
+        PdfDocument output = PdfDocument.Open(updated);
+        Assert.True(output.CrossReferences.Sections.Count > 1, "the change is an incremental update");
+        // Only glyphs centered under the cover go; the rest of the word keeps its place.
+        Assert.Equal("TEXTKeep", Letters(output, 0));
+        AssertKeptLettersUnmoved(document, output, 0, [region]);
+        Assert.Single(new PdfPageContentReader(output).Read(0).Images);
+        PdfRenderedPage rendered = new PdfPageRenderer(output).Render(0, new PdfRenderOptions(400, 400));
+        (byte red, byte green, byte blue) = Pixel(rendered, 65, 105);
+        Assert.True(blue > 200 && red < 60 && green < 60, $"Expected the blue fill, got {red},{green},{blue}.");
+    }
+
+    [Fact]
+    public void CoveredTextInsideAFormIsRemovedOnlyForThatPage()
+    {
+        var objects = new List<string>
+        {
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R 4 0 R] /Count 2 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /XObject << /Fm1 6 0 R >> >> /Contents 5 0 R >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /XObject << /Fm1 6 0 R >> >> /Contents 5 0 R >>",
+            Stream("q 1 0 0 1 100 500 cm /Fm1 Do Q"),
+            Stream("BT /F1 12 Tf 10 10 Td (Shared EARLIEREDIT text) Tj ET",
+                "/Type /XObject /Subtype /Form /BBox [0 0 400 100] /Resources << /Font << /F1 7 0 R >> >>"),
+            Helvetica
+        };
+        PdfDocument document = PdfDocument.Open(CreatePdf(objects));
+        PdfRedactionRegion region = Region(document, 0, "EARLIEREDIT");
+
+        PdfDocument output = PdfDocument.Open(PdfContentRedaction.RemoveCoveredText(document, [region])!);
+
+        Assert.DoesNotContain("EARLIEREDIT", Letters(output, 0));
+        Assert.Contains("Shared", Letters(output, 0));
+        Assert.Contains("EARLIEREDIT", Letters(output, 1));
+        AssertKeptLettersUnmoved(document, output, 0, [region]);
+    }
+
+    [Fact]
+    public void NothingUnderTheCoverLeavesTheDocumentAlone()
+    {
+        PdfDocument document = PdfDocument.Open(SinglePage("BT /F1 12 Tf 72 700 Td (Untouched) Tj ET"));
+
+        Assert.Null(PdfContentRedaction.RemoveCoveredText(document,
+            [new PdfRedactionRegion(0, new PdfContentBounds(300, 100, 400, 150))]));
+    }
+
     private static void AssertKeptLettersUnmoved(PdfDocument before, PdfDocument after, int pageIndex,
         IReadOnlyList<PdfRedactionRegion> regions)
     {

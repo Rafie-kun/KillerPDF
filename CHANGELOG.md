@@ -106,6 +106,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Kept update helpers and setup from locking the installation folder through their working directory (#434).
 - Restored saving markup to tagged PDFs while preserving their structure, and finished markup processing before overwriting the destination.
 - Prevented a failed Save or Save As from damaging the existing file by finishing the new copy before replacing it.
+- Saving an Edit Text change now removes the replaced words from the file, so they can no longer be found or copied and no longer reappear when the line is edited again.
 - Preserved unsaved annotations when moving, reordering, duplicating, or merging pages and when removing a link. A duplicated page carries a copy of them.
 - Dragging one page of a multi-page selection in the sidebar now moves the whole selection instead of only the pressed page.
 - Search highlights and text selection now land on the right text on rotated pages, and Crop no longer flips the box vertically on upside-down pages.
