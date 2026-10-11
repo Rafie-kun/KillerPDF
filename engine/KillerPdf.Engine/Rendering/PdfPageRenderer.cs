@@ -14,7 +14,7 @@ namespace KillerPdf.Engine.Rendering;
 public sealed partial class PdfPageRenderer
 {
     private const long MaximumDecodedImageCacheBytes = 64L * 1024 * 1024;
-    private const long MaximumInRenderImageCacheBytes = 128L * 1024 * 1024;
+    private const long MaximumInRenderImageCacheBytes = 96L * 1024 * 1024;
     private const long MaximumFlattenedGlyphCacheBytes = 16L * 1024 * 1024;
     private const long MaximumRenderedPageCacheBytes = 64L * 1024 * 1024;
     private const int MaximumMeshVerticesPerRow = 65_536;
