@@ -301,7 +301,20 @@ namespace KillerPDF
             try
             {
                 ReloadWithRemappedAnnotations(
-                    annotations => PageAnnotationInsertion.Shift(annotations, pageIdx + 1, 1),
+                    annotations =>
+                    {
+                        PageAnnotationInsertion.Shift(annotations, pageIdx + 1, 1);
+                        // The copy carries the page's unsaved annotations, as pages dragged
+                        // between panes do, so it matches the page it was made from.
+                        if (!annotations.TryGetValue(pageIdx, out var source)) return;
+                        var copies = source.Select(CloneAnnotation)
+                            .Where(annotation => annotation is not null)
+                            .Cast<PageAnnotation>()
+                            .ToList();
+                        foreach (PageAnnotation annotation in copies)
+                            annotation.PageIndex = pageIdx + 1;
+                        if (copies.Count > 0) annotations[pageIdx + 1] = copies;
+                    },
                     documentUndo => SaveTempAndReload(
                         keepAnnotations: true,
                         finalizeSavedFile: path =>
