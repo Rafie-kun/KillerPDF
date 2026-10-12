@@ -16,6 +16,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Saving over a digitally signed PDF now asks first, because saving removes the signature.
 - The wordmarks use Punktype and Lacquer with a soft shadow on every theme, and the app, installer and website use Killer Sans in place of the typewriter font. The installer also matches the new family setup layout.
 - Hovered outline buttons and accent picker pills use gradients outside 98SE, and accent swatches lift on hover.
+- Message, confirm, install and uninstall dialogs use the family setup dialog layout, with a notice icon, a larger Killer Sans heading, evenly sized buttons and the action button last.
 
 ### Fixed
 - A failed Save or Save As no longer damages the existing file, because the new copy is finished before it replaces the file.
