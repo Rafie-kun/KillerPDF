@@ -15,12 +15,11 @@ namespace KillerLauncher
         private LauncherDialog(string message)
         {
             InitializeComponent();
-            var titleFrames = BitmapDecoder.Create(new System.Uri("pack://application:,,,/Resources/kp-icon.ico"),
-                BitmapCreateOptions.None, BitmapCacheOption.OnLoad).Frames;
-            TitleIcon.Source = titleFrames[0];
+            VersionLabel.Text = System.Diagnostics.FileVersionInfo.GetVersionInfo(System.Reflection.Assembly.GetExecutingAssembly().Location).ProductVersion?.Split('+')[0] ?? "";
             TaskbarIdentity.Track(this);
             MessageText.Text = message;
             GrainLayer.Background = InstallerWizard.CreateGrain();
+            PaneGrain.Background = GrainLayer.Background;
         }
 
         /// <summary>Shows an error with a single OK button and waits for it to close.</summary>
