@@ -428,6 +428,10 @@ namespace KillerPDF.Controls
             var others = MakeMenuItem(Loc("Str_Ctx_CloseOthers"), (_, _) => CloseOtherTabs(s), "Ctrl+Shift+W", "");
             others.IsEnabled = _sessions.Count(z => z.Doc != null || z.DeferredPath != null) > 1;
             menu.Items.Add(others);
+            // Ctrl+Shift+N moves the active tab the same way; dragging a tab out of the window does too.
+            var newWindow = MakeMenuItem(Loc("Str_Ctx_MoveToNewWindow"), (_, _) => Host?.TearOutTab(this, s), "Ctrl+Shift+N", "\uE8A7");
+            newWindow.IsEnabled = s.Doc != null || s.DeferredPath != null;
+            menu.Items.Add(newWindow);
             menu.PlacementTarget = fe;
             menu.IsOpen = true;
             e.Handled = true;

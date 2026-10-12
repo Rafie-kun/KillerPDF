@@ -351,6 +351,33 @@ namespace KillerPDF
                 BeginOcrRegion();
                 e.Handled = true;
             }
+            // 1.9 commands. Each matches its menu gesture text and its ShortcutTable row; key repeat
+            // is ignored so holding the chord opens one dialog, not a queue of them.
+            else if (e.Key == Key.T && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
+            {
+                if (!e.IsRepeat) ConvertScanToText();
+                e.Handled = true;
+            }
+            else if (e.Key == Key.E && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
+            {
+                if (!e.IsRepeat) ExportDocument_Click(this, e);
+                e.Handled = true;
+            }
+            else if (e.Key == Key.D && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
+            {
+                if (!e.IsRepeat) OpenDocumentToolsMenu();   // DocumentTools.cs; the next letter picks the tool
+                e.Handled = true;
+            }
+            else if (e.Key == Key.G && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
+            {
+                if (!e.IsRepeat) ToggleFilmGrain();
+                e.Handled = true;
+            }
+            else if (e.Key == Key.N && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
+            {
+                if (!e.IsRepeat) MoveActiveTabToNewWindow();
+                e.Handled = true;
+            }
             else if (e.Key == Key.B && Keyboard.Modifiers == ModifierKeys.None && _doc is not null
                      && _viewMode == ViewMode.TwoPage
                      && ShortcutOverlay.Visibility != Visibility.Visible
@@ -725,6 +752,11 @@ namespace KillerPDF
                 case Key.C: case Key.D8: case Key.NumPad8: SetTool(EditTool.Crop); return true;
                 case Key.R: case Key.D9: case Key.NumPad9: ToolRotate_Click(this, new RoutedEventArgs()); return true;
                 case Key.S: case Key.D0: case Key.NumPad0: ToolStamp_Click(this, new RoutedEventArgs()); return true;
+                // The tools past the numbered ten get letters only: E for Color Correction, M for
+                // Measure and X for Redact, each through its toolbar handler.
+                case Key.E: ToolColorCorrection_Click(this, new RoutedEventArgs()); return true;
+                case Key.M: ToolMeasure_Click(this, new RoutedEventArgs()); return true;
+                case Key.X: ToolRedact_Click(this, new RoutedEventArgs()); return true;
                 default: return false;
             }
         }
@@ -754,6 +786,25 @@ namespace KillerPDF
             Set(ToolCropBtn, "Str_TT_CropTool", "8");
             Set(_toolRotateBtn, "Str_TT_RotateTool", "9");
             Set(ToolStampBtn, "Str_TT_StampTool", "0");
+            Set(ToolColorCorrectionBtn, "Str_ColorCorrection", "E");
+            Set(ToolMeasureBtn, "Str_TT_MeasureTool", "M");
+            Set(ToolRedactBtn, "Str_TT_RedactTool", "X");
+            if (TryFindResource("Str_Theme_FilmGrain") is string grain)
+                FilmGrainCheck.ToolTip = $"{grain} (Ctrl+Shift+G)";
+        }
+
+        // Ctrl+Shift+G: Film Grain on or off, kept in step with the theme menu's check box.
+        private void ToggleFilmGrain()
+        {
+            FilmGrain.Set(!FilmGrain.Enabled);
+            FilmGrainCheck.IsChecked = FilmGrain.Enabled;
+        }
+
+        // Ctrl+Shift+N: the keyboard twin of dragging the active tab out of the window.
+        private void MoveActiveTabToNewWindow()
+        {
+            if (_doc is null || _active is null) { SetStatus(Loc("Str_Msg_OpenFirst")); return; }
+            TearOutTab(ActiveViewer, _active);
         }
 
         // Opens the online help / how-to page in the user's default browser.

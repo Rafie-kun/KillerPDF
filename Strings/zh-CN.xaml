@@ -137,6 +137,7 @@
     <sys:String x:Key="Str_KS_DocInfo">文档信息</sys:String>
     <sys:String x:Key="Str_KS_OnlineHelp">完整指南和在线教程</sys:String>
     <sys:String x:Key="Str_KS_Tools">工具</sys:String>
+    <sys:String x:Key="Str_KS_DocumentTools">文档工具</sys:String>
     <sys:String x:Key="Str_KS_Paste">粘贴图片／文本</sys:String>
     <sys:String x:Key="Str_KS_TextStyle">粗体／斜体／下划线（文本框）</sys:String>
     <sys:String x:Key="Str_KS_MultiSelect">加入选取</sys:String>
@@ -654,6 +655,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Ctx_CloseTab">关闭标签页</sys:String>
     <sys:String x:Key="Str_Ctx_OpenContainingFolder">打开文件所在文件夹</sys:String>
     <sys:String x:Key="Str_Ctx_CloseOthers">关闭其他标签页</sys:String>
+    <sys:String x:Key="Str_Ctx_MoveToNewWindow">移至新窗口</sys:String>
 
     <!-- ── OCR ────────────────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Ocr_Region">OCR 区域...</sys:String>

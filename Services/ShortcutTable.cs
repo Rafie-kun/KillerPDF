@@ -88,6 +88,45 @@ namespace KillerPDF
         private static KsBinding B(string keys, string labelKey, string cat, params KsCap[] caps)
             => new(keys, labelKey, cat, caps);
 
+        // ── Document tools chord ───────────────────────────────────────────────────────────────
+        // Ctrl+Shift+D opens the Document tools menu at the Save button, and the letter beside each
+        // tool runs it, so "Ctrl+Shift+D, P" is the preflight report. One letter per tool, shared by
+        // the menu (gesture text and the letter handler in Shell/DocumentTools.cs) and the overlay
+        // rows below. The second key is a menu letter rather than a modifier layer, so these rows
+        // light no cap on the keyboard map; the map shows the Ctrl+Shift+D cap that opens the menu.
+        // Declared above KsAll on purpose: static initializers run in textual order.
+        internal const string DocumentToolsChord = "Ctrl+Shift+D";
+
+        internal static readonly (char Key, string LabelKey)[] DocumentToolKeys =
+        [
+            ('P', "Str_DocumentTools_Preflight"),
+            ('R', "Str_DocumentTools_PrintProduction"),
+            ('S', "Str_DocumentTools_Separations"),
+            ('A', "Str_DocumentTools_Accessibility"),
+            ('L', "Str_DocumentTools_Layers"),
+            ('E', "Str_DocumentTools_EditLayers"),
+            ('F', "Str_DocumentTools_Portfolio"),
+            ('O', "Str_DocumentTools_EditPortfolio"),
+            ('U', "Str_DocumentTools_EditPortfolioStructure"),
+            ('T', "Str_DocumentTools_EditAttachments"),
+            ('N', "Str_DocumentTools_NavigationAudit"),
+            ('B', "Str_DocumentTools_AutoBookmarks"),
+            ('G', "Str_DocumentTools_PageLabels"),
+            ('V', "Str_DocumentTools_InitialView"),
+            ('C', "Str_DocumentTools_StructuralComparison"),
+            ('M', "Str_DocumentTools_Macros"),
+            ('D', "Str_DocumentTools_DataMerge"),
+            ('I', "Str_DocumentTools_InsertToc"),
+        ];
+
+        /// <summary>The letter that runs a document tool from the open Document tools menu.</summary>
+        internal static char DocumentToolKey(string labelKey)
+            => DocumentToolKeys.First(t => t.LabelKey == labelKey).Key;
+
+        /// <summary>Menu gesture text for a document tool, e.g. "Ctrl+Shift+D, P".</summary>
+        internal static string DocumentToolGesture(string labelKey)
+            => DocumentToolsChord + ", " + DocumentToolKey(labelKey);
+
         // Declaration order is display order. Column and section title come from KsGroups below.
         // A binding with no caps is a mouse gesture and correctly lights nothing on the board.
         internal static readonly KsBinding[] KsAll =
@@ -102,6 +141,7 @@ namespace KillerPDF
             B("%ctrl%+P",             "Str_KS_Print",       "File", Cap("Ctrl:P")),
             B("%ctrl%+D / F4",        "Str_KS_DocInfo",     "File", Cap("Ctrl:D"), Cap("F4")),
             B("%shift%+F4",           "Str_KS_FileSize",    "File", Cap("Shift:F4")),
+            B("%ctrl%+%shift%+E",     "Str_Menu_ExportDocument", "File", Cap("CtrlShift:E")),
 
             B("V",               "Str_Lbl_Select",    "Tools", Cap("V")),
             B("1 (%or% T)",      "Str_Lbl_Text",      "Tools", Cap("D1"), Cap("T")),
@@ -117,6 +157,9 @@ namespace KillerPDF
             B("%ctrl%+%shift%+R", "Str_Ctx_RotateCCW", "Tools", Cap("CtrlShift:R")),
             B("0 (%or% S)",      "Str_Ctx_StampPages","Tools", Cap("D0"), Cap("S")),
             B("F",               "Str_KS_FormField",  "Tools", Cap("F")),
+            B("E",               "Str_ColorCorrection", "Tools", Cap("E")),
+            B("M",               "Str_Lbl_Measure",   "Tools", Cap("M")),
+            B("X",               "Str_Lbl_Redact",    "Tools", Cap("X")),
 
             B("%ctrl%+Z",         "Str_KS_Undo",        "Edit", Cap("Ctrl:Z")),
             B("%ctrl%+Y",         "Str_Ctx_Redo",       "Edit", Cap("Ctrl:Y")),
@@ -160,6 +203,7 @@ namespace KillerPDF
             B("%shift%+F9",    "Str_KS_SidebarSide", "Nav", Cap("Shift:F9")),
             B("%ctrl%+%tab%",  "Str_KS_NextTab",     "Nav", Cap("Ctrl:Tab")),
             B("%ctrl%+%shift%+%tab%", "Str_KS_PrevTab", "Nav", Cap("CtrlShift:Tab")),
+            B("%ctrl%+%shift%+N", "Str_Ctx_MoveToNewWindow", "Nav", Cap("CtrlShift:N")),
 
             B("F5",            "Str_View_Continuous", "View", Cap("F5")),
             B("F6",            "Str_View_Single",     "View", Cap("F6")),
@@ -176,6 +220,7 @@ namespace KillerPDF
                                                                              Cap("CtrlShift:Minus"),
                                                                              Cap("CtrlShift:D0")),
             B("%wheellogo%",   "Str_KS_AppSize",      "View"),
+            B("%ctrl%+%shift%+G", "Str_Theme_FilmGrain", "View", Cap("CtrlShift:G")),
             // The toolbar appearance six, mirroring the bar's right-click menu top to bottom.
             B("%ctrl%+%shift%+1-6", "Str_KS_ToolbarStyle", "View", Cap("CtrlShift:D1", "Str_Toolbar_SmallIcons"),
                                                                 Cap("CtrlShift:D2", "Str_Toolbar_LargeIcons"),
@@ -186,6 +231,7 @@ namespace KillerPDF
 
             B("%ctrl%+%shift%+O", "Str_Ctx_OcrPage", "Ocr", Cap("CtrlShift:O")),
             B("%ctrl%+%shift%+I", "Str_Ocr_Region",  "Ocr", Cap("CtrlShift:I")),
+            B("%ctrl%+%shift%+T", "Str_Ocr_ScanToText", "Ocr", Cap("CtrlShift:T")),
 
             B("%ctrl%+F",                  "Str_KS_Find",           "Search", Cap("Ctrl:F")),
             B("F3 / %shift%+F3",           "Str_KS_NextPrevResult", "Search", Cap("F3",       "Str_Kb_NextResult"),
@@ -193,6 +239,9 @@ namespace KillerPDF
             B("%enter% / %shift%+%enter%", "Str_KS_NextPrevResult", "Search", Cap("Shift:Enter", "Str_Kb_PrevResult")),
             B("%ctrl%+A",                  "Str_KS_SelectAll",      "Search", Cap("Ctrl:A")),
             B("%shift%+%click%",           "Str_KS_MultiSelect",    "Search"),
+
+            B("%ctrl%+%shift%+D",          "Str_DocumentTools",     "Docs", Cap("CtrlShift:D")),
+            .. DocumentToolKeys.Select(t => B("%ctrl%+%shift%+D, " + t.Key, t.LabelKey, "Docs")),
         ];
 
         // Section title and column for each category. Order here is the order sections appear.
@@ -206,6 +255,7 @@ namespace KillerPDF
             ("View",   "Str_KS_View",         true),
             ("Ocr",    "Str_KS_Ocr",          true),
             ("Search", "Str_KS_SearchSelect", true),
+            ("Docs",   "Str_KS_DocumentTools", true),
         ];
 
         /// <summary>The map's view of the table: layer -> cap id -> (category, label key). A cap's

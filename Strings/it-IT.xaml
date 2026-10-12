@@ -154,6 +154,7 @@ La pagina può essere sostituita da un'immagine di sé stessa con le aree contra
     <sys:String x:Key="Str_KS_DocInfo">Info documento</sys:String>
     <sys:String x:Key="Str_KS_OnlineHelp">Guida online completa e come-fare</sys:String>
     <sys:String x:Key="Str_KS_Tools">STRUMENTI</sys:String>
+    <sys:String x:Key="Str_KS_DocumentTools">STRUMENTI DOCUMENTO</sys:String>
     <sys:String x:Key="Str_KS_Paste">Incolla immagine/testo</sys:String>
     <sys:String x:Key="Str_KS_TextStyle">Grassetto/corsivo/sottolineato (casella testo)</sys:String>
     <sys:String x:Key="Str_KS_MultiSelect">Aggiungi alla selezione</sys:String>
@@ -736,6 +737,7 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_Ctx_CloseTab">Chiudi scheda</sys:String>
     <sys:String x:Key="Str_Ctx_OpenContainingFolder">Apri cartella contenitore</sys:String>
     <sys:String x:Key="Str_Ctx_CloseOthers">Chiudi altre schede</sys:String>
+    <sys:String x:Key="Str_Ctx_MoveToNewWindow">Sposta in una nuova finestra</sys:String>
 
     <!-- Transform tool -->
     <sys:String x:Key="Str_ColorCorrection">Correzione colore</sys:String>

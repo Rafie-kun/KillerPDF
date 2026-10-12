@@ -4,6 +4,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Threading.Tasks;
 using KillerPdf.Engine.Documents;
 using KillerPdf.Engine.Parsing;
@@ -13,11 +14,65 @@ namespace KillerPDF;
 
 public partial class MainWindow
 {
+    // The Document tools menu, built for both the Save menu's submenu and the Ctrl+Shift+D menu that
+    // opens at the Save button. Each tool shows its chord in the gesture column, and pressing the
+    // tool's letter while either menu is open runs it. The letters live in ShortcutTable, which the
+    // shortcuts overlay reads too, so the three cannot disagree.
+    private List<Control> BuildDocumentToolsItems()
+    {
+        var comparison = DocumentToolItem("Str_DocumentTools_StructuralComparison",
+            ShowStructuralComparison, "\uE8AB");
+        comparison.IsEnabled = IsSplit
+            && !string.IsNullOrWhiteSpace(Viewer.CurrentFilePathExt)
+            && !string.IsNullOrWhiteSpace(ViewerB.CurrentFilePathExt);
+        return
+        [
+            DocumentToolItem("Str_DocumentTools_Preflight", () => ShowDocumentReport(Loc("Str_DocumentTools_Preflight"),
+                path => PdfEngineIntegration.InspectPreflight(path).ToText()), "\uE9D9"),
+            DocumentToolItem("Str_DocumentTools_PrintProduction", () => ShowDocumentReport(Loc("Str_DocumentTools_PrintProduction"),
+                path => PdfEngineIntegration.InspectPrintProduction(path).ToText()), "\uE7C3"),
+            DocumentToolItem("Str_DocumentTools_Separations", () => ShowDocumentReport(Loc("Str_DocumentTools_Separations"), path =>
+            {
+                var production = PdfEngineIntegration.InspectPrintProduction(path);
+                return PdfEngineIntegration.CreateSeparationPreview(path,
+                    production.Colorants.Select(colorant => colorant.Name)).ToText();
+            }), "\uE790"),
+            DocumentToolItem("Str_DocumentTools_Accessibility", () => ShowDocumentReport(Loc("Str_DocumentTools_Accessibility"),
+                path => PdfEngineIntegration.InspectAccessibility(path).ToText()), "\uE776"),
+            DocumentToolItem("Str_DocumentTools_Layers", () => ShowDocumentReport(Loc("Str_DocumentTools_Layers"),
+                path => PdfEngineIntegration.InspectLayers(path).ToText()), "\uE8A1"),
+            DocumentToolItem("Str_DocumentTools_EditLayers", EditLayers, "\uE70F"),
+            DocumentToolItem("Str_DocumentTools_Portfolio", () => ShowDocumentReport(Loc("Str_DocumentTools_Portfolio"),
+                PdfEngineIntegration.InspectPortfolio), "\uE8B7"),
+            DocumentToolItem("Str_DocumentTools_EditPortfolio", EditPortfolio, "\uE70F"),
+            DocumentToolItem("Str_DocumentTools_EditPortfolioStructure", EditPortfolioStructure, "\uE70F"),
+            DocumentToolItem("Str_DocumentTools_EditAttachments", EditAttachments, "\uE8B7"),
+            DocumentToolItem("Str_DocumentTools_NavigationAudit", AuditNavigation, "\uE9D9"),
+            DocumentToolItem("Str_DocumentTools_AutoBookmarks", GenerateBookmarks, "\uE8FD"),
+            DocumentToolItem("Str_DocumentTools_PageLabels", EditPageLabels, "\uE70F"),
+            DocumentToolItem("Str_DocumentTools_InitialView", EditInitialView, "\uE7B3"),
+            comparison,
+            new Separator(),
+            DocumentToolItem("Str_DocumentTools_Macros", OpenMacroDialog, "\uE945"),
+            DocumentToolItem("Str_DocumentTools_DataMerge", RunDataMerge, "\uE8F1"),
+            DocumentToolItem("Str_DocumentTools_InsertToc", InsertTableOfContents, "\uE8FD"),
+        ];
+    }
+
+    private MenuItem DocumentToolItem(string labelKey, Action run, string glyph)
+    {
+        var item = MakeMenuItem(Loc(labelKey), (_, _) => run(),
+            ShortcutTable.DocumentToolGesture(labelKey), glyph);
+        item.Tag = ShortcutTable.DocumentToolKey(labelKey);
+        return item;
+    }
+
     private MenuItem BuildDocumentToolsMenu()
     {
         var menu = new MenuItem
         {
             Header = Loc("Str_DocumentTools"),
+            InputGestureText = ShortcutTable.DocumentToolsChord,
             Icon = new TextBlock
             {
                 Text = "\uE9D2",
@@ -26,58 +81,53 @@ public partial class MainWindow
                 VerticalAlignment = VerticalAlignment.Center
             }
         };
-        menu.Items.Add(MakeMenuItem(Loc("Str_DocumentTools_Preflight"),
-            (_, _) => ShowDocumentReport(Loc("Str_DocumentTools_Preflight"),
-                path => PdfEngineIntegration.InspectPreflight(path).ToText()), glyph: "\uE9D9"));
-        menu.Items.Add(MakeMenuItem(Loc("Str_DocumentTools_PrintProduction"),
-            (_, _) => ShowDocumentReport(Loc("Str_DocumentTools_PrintProduction"),
-                path => PdfEngineIntegration.InspectPrintProduction(path).ToText()), glyph: "\uE7C3"));
-        menu.Items.Add(MakeMenuItem(Loc("Str_DocumentTools_Separations"),
-            (_, _) => ShowDocumentReport(Loc("Str_DocumentTools_Separations"), path =>
-            {
-                var production = PdfEngineIntegration.InspectPrintProduction(path);
-                return PdfEngineIntegration.CreateSeparationPreview(path,
-                    production.Colorants.Select(colorant => colorant.Name)).ToText();
-            }), glyph: "\uE790"));
-        menu.Items.Add(MakeMenuItem(Loc("Str_DocumentTools_Accessibility"),
-            (_, _) => ShowDocumentReport(Loc("Str_DocumentTools_Accessibility"),
-                path => PdfEngineIntegration.InspectAccessibility(path).ToText()), glyph: "\uE776"));
-        menu.Items.Add(MakeMenuItem(Loc("Str_DocumentTools_Layers"),
-            (_, _) => ShowDocumentReport(Loc("Str_DocumentTools_Layers"),
-                path => PdfEngineIntegration.InspectLayers(path).ToText()), glyph: "\uE8A1"));
-        menu.Items.Add(MakeMenuItem(Loc("Str_DocumentTools_EditLayers"),
-            (_, _) => EditLayers(), glyph: "\uE70F"));
-        menu.Items.Add(MakeMenuItem(Loc("Str_DocumentTools_Portfolio"),
-            (_, _) => ShowDocumentReport(Loc("Str_DocumentTools_Portfolio"),
-                PdfEngineIntegration.InspectPortfolio), glyph: "\uE8B7"));
-        menu.Items.Add(MakeMenuItem(Loc("Str_DocumentTools_EditPortfolio"),
-            (_, _) => EditPortfolio(), glyph: "\uE70F"));
-        menu.Items.Add(MakeMenuItem(Loc("Str_DocumentTools_EditPortfolioStructure"),
-            (_, _) => EditPortfolioStructure(), glyph: "\uE70F"));
-        menu.Items.Add(MakeMenuItem(Loc("Str_DocumentTools_EditAttachments"),
-            (_, _) => EditAttachments(), glyph: "\uE8B7"));
-        menu.Items.Add(MakeMenuItem(Loc("Str_DocumentTools_NavigationAudit"),
-            (_, _) => AuditNavigation(), glyph: "\uE9D9"));
-        menu.Items.Add(MakeMenuItem(Loc("Str_DocumentTools_AutoBookmarks"),
-            (_, _) => GenerateBookmarks(), glyph: "\uE8FD"));
-        menu.Items.Add(MakeMenuItem(Loc("Str_DocumentTools_PageLabels"),
-            (_, _) => EditPageLabels(), glyph: "\uE70F"));
-        menu.Items.Add(MakeMenuItem(Loc("Str_DocumentTools_InitialView"),
-            (_, _) => EditInitialView(), glyph: "\uE7B3"));
-        var comparison = MakeMenuItem(Loc("Str_DocumentTools_StructuralComparison"),
-            (_, _) => ShowStructuralComparison(), glyph: "\uE8AB");
-        comparison.IsEnabled = IsSplit
-            && !string.IsNullOrWhiteSpace(Viewer.CurrentFilePathExt)
-            && !string.IsNullOrWhiteSpace(ViewerB.CurrentFilePathExt);
-        menu.Items.Add(comparison);
-        menu.Items.Add(new Separator());
-        menu.Items.Add(MakeMenuItem(Loc("Str_DocumentTools_Macros"),
-            (_, _) => OpenMacroDialog(), glyph: "\uE945"));
-        menu.Items.Add(MakeMenuItem(Loc("Str_DocumentTools_DataMerge"),
-            (_, _) => RunDataMerge(), glyph: "\uE8F1"));
-        menu.Items.Add(MakeMenuItem(Loc("Str_DocumentTools_InsertToc"),
-            (_, _) => InsertTableOfContents(), glyph: "\uE8FD"));
+        foreach (Control item in BuildDocumentToolsItems())
+            menu.Items.Add(item);
+        menu.PreviewKeyDown += DocumentToolsMenu_PreviewKeyDown;
         return menu;
+    }
+
+    // Ctrl+Shift+D: the Document tools as their own menu, anchored to the Save menu button they
+    // normally sit under. With that button folded away, the menu centers on the window instead.
+    private void OpenDocumentToolsMenu()
+    {
+        if (_doc is null) { SetStatus(Loc("Str_Msg_OpenFirst")); return; }
+        var menu = MakeThemedMenu();
+        foreach (Control item in BuildDocumentToolsItems())
+            menu.Items.Add(item);
+        menu.PreviewKeyDown += DocumentToolsMenu_PreviewKeyDown;
+        if (SaveMenuBtn.IsVisible)
+        {
+            menu.PlacementTarget = SaveMenuBtn;
+            menu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+        }
+        else
+        {
+            menu.PlacementTarget = this;
+            menu.Placement = System.Windows.Controls.Primitives.PlacementMode.Center;
+        }
+        menu.Opened += (_, _) => menu.Items.OfType<MenuItem>().FirstOrDefault(i => i.IsEnabled)?.Focus();
+        menu.IsOpen = true;
+    }
+
+    // A letter key while a Document tools menu is open runs the tool with that letter. Shift and
+    // Ctrl may still be held from the chord; Alt is left to the menu's own handling.
+    private static void DocumentToolsMenu_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (sender is not ItemsControl owner || e.Key < Key.A || e.Key > Key.Z
+            || Keyboard.Modifiers.HasFlag(ModifierKeys.Alt))
+            return;
+        char letter = (char)('A' + (e.Key - Key.A));
+        MenuItem? match = owner.Items.OfType<MenuItem>().FirstOrDefault(i => i.Tag is char c && c == letter);
+        if (match is null) return;
+        e.Handled = true;
+        if (!match.IsEnabled) return;
+        // Close the whole menu first, the way a click does, then run the tool.
+        DependencyObject? node = owner;
+        while (node is not null and not System.Windows.Controls.ContextMenu)
+            node = LogicalTreeHelper.GetParent(node);
+        if (node is System.Windows.Controls.ContextMenu root) root.IsOpen = false;
+        match.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent, match));
     }
 
     private async void RunDataMerge()

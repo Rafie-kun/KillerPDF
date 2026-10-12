@@ -137,6 +137,7 @@ Sayfa, işaretli alanları karartılmış kendi görüntüsüyle değiştirilebi
     <sys:String x:Key="Str_KS_DocInfo">Belge bilgisi</sys:String>
     <sys:String x:Key="Str_KS_OnlineHelp">Tam kılavuz ve çevrimiçi rehber</sys:String>
     <sys:String x:Key="Str_KS_Tools">ARAÇLAR</sys:String>
+    <sys:String x:Key="Str_KS_DocumentTools">BELGE ARAÇLARI</sys:String>
     <sys:String x:Key="Str_KS_Paste">Görsel / metin yapıştır</sys:String>
     <sys:String x:Key="Str_KS_TextStyle">Kalın / italik / altı çizili (metin kutusu)</sys:String>
     <sys:String x:Key="Str_KS_MultiSelect">Seçime ekle</sys:String>
@@ -654,6 +655,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Ctx_CloseTab">Sekmeyi kapat</sys:String>
     <sys:String x:Key="Str_Ctx_OpenContainingFolder">Dosyanın bulunduğu klasörü aç</sys:String>
     <sys:String x:Key="Str_Ctx_CloseOthers">Diğer sekmeleri kapat</sys:String>
+    <sys:String x:Key="Str_Ctx_MoveToNewWindow">Yeni pencereye taşı</sys:String>
 
     <!-- ── OCR + Dönüştürme + Kırpma (v1.x eklendi) ──────────────────── -->
     <sys:String x:Key="Str_Ocr_Region">OCR Bölgesi...</sys:String>

@@ -192,16 +192,56 @@ namespace KillerPDF.Tests
             Assert.Equal("Str_Ctx_StampPages", map["S"].Label);
         }
 
+        [Fact]
+        public void NewToolsAndCommandsAreOnTheMap()
+        {
+            var map = ShortcutTable.BuildMap();
+
+            Assert.Equal("Str_ColorCorrection", map[KbLayer.Base]["E"].Label);
+            Assert.Equal("Str_Lbl_Measure", map[KbLayer.Base]["M"].Label);
+            Assert.Equal("Str_Lbl_Redact", map[KbLayer.Base]["X"].Label);
+            Assert.Equal("Str_Menu_ExportDocument", map[KbLayer.CtrlShift]["E"].Label);
+            Assert.Equal("Str_Ocr_ScanToText", map[KbLayer.CtrlShift]["T"].Label);
+            Assert.Equal("Str_Theme_FilmGrain", map[KbLayer.CtrlShift]["G"].Label);
+            Assert.Equal("Str_Ctx_MoveToNewWindow", map[KbLayer.CtrlShift]["N"].Label);
+            Assert.Equal("Str_DocumentTools", map[KbLayer.CtrlShift]["D"].Label);
+        }
+
+        /// <summary>One letter per document tool, or the open menu could not tell two tools apart.</summary>
+        [Fact]
+        public void DocumentToolLettersAreUniqueLettersWithRows()
+        {
+            var letters = ShortcutTable.DocumentToolKeys.Select(t => t.Key).ToList();
+            Assert.Equal(letters.Count, letters.Distinct().Count());
+            Assert.All(letters, c => Assert.True(c is >= 'A' and <= 'Z', $"{c} is not an A-Z letter"));
+            Assert.Equal(ShortcutTable.DocumentToolKeys.Length,
+                ShortcutTable.KsAll.Count(b => b.Cat == "Docs" && b.Caps.Length == 0));
+            Assert.Equal("Ctrl+Shift+D, P", ShortcutTable.DocumentToolGesture("Str_DocumentTools_Preflight"));
+        }
+
+        /// <summary>Every tool in the Document tools menu takes its letter from the table, so the
+        /// gesture text shown in the menu, the letter handler and the overlay agree.</summary>
+        [Fact]
+        public void EveryDocumentToolMenuItemUsesItsTableLetter()
+        {
+            string source = File.ReadAllText(Path.Combine(RepoRoot(), "Shell", "DocumentTools.cs"));
+            foreach (var (_, labelKey) in ShortcutTable.DocumentToolKeys)
+                Assert.Contains($"DocumentToolItem(\"{labelKey}\"", source, StringComparison.Ordinal);
+        }
+
         /// <summary>Gesture-only rows (Ctrl+Scroll, Shift+Click, Middle drag) have
-        /// no keycap by design. Anything else with no caps is likely an oversight, so the count is
-        /// pinned rather than left to drift.</summary>
+        /// no keycap by design, and so do the document tool letters, which are the second key of
+        /// the Ctrl+Shift+D chord rather than a modifier layer. Anything else with no caps is likely
+        /// an oversight, so the count is pinned rather than left to drift.</summary>
         [Fact]
         public void OnlyMouseGesturesHaveNoCaps()
         {
             // Asserted by label key, not by the Keys text: the key column is tokenized, so pinning
             // its literal spelling here would just break every time a token is renamed.
+            var documentTools = ShortcutTable.DocumentToolKeys.Select(t => t.LabelKey).ToHashSet();
             var capless = ShortcutTable.KsAll.Where(b => b.Caps.Length == 0)
-                                             .Select(b => b.LabelKey).ToList();
+                                             .Select(b => b.LabelKey)
+                                             .Where(k => !documentTools.Contains(k)).ToList();
 
             Assert.Equal(
                 new[] { "Str_KS_ZoomCursor", "Str_KS_PanView",

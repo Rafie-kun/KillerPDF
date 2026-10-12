@@ -154,6 +154,7 @@ Stránku lze nahradit jejím obrázkem se začerněnými označenými oblastmi. 
     <sys:String x:Key="Str_KS_DocInfo">Informace o dokumentu</sys:String>
     <sys:String x:Key="Str_KS_OnlineHelp">Kompletní příručka &amp; návody online</sys:String>
     <sys:String x:Key="Str_KS_Tools">NÁSTROJE</sys:String>
+    <sys:String x:Key="Str_KS_DocumentTools">NÁSTROJE DOKUMENTU</sys:String>
     <sys:String x:Key="Str_KS_Paste">Vložit obrázek / text</sys:String>
     <sys:String x:Key="Str_KS_TextStyle">Tučné / kurzíva / podtržení (textové pole)</sys:String>
     <sys:String x:Key="Str_KS_MultiSelect">Přidat do výběru</sys:String>
@@ -726,6 +727,7 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Ctx_CloseTab">Zavřít kartu</sys:String>
     <sys:String x:Key="Str_Ctx_OpenContainingFolder">Otevřít složku se souborem</sys:String>
     <sys:String x:Key="Str_Ctx_CloseOthers">Zavřít ostatní karty</sys:String>
+    <sys:String x:Key="Str_Ctx_MoveToNewWindow">Přesunout do nového okna</sys:String>
 
     <!-- Transform tool -->
     <sys:String x:Key="Str_ColorCorrection">Korekce barev</sys:String>

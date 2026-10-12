@@ -154,6 +154,7 @@ La page peut être remplacée par une image d'elle-même avec les zones marquée
     <sys:String x:Key="Str_KS_DocInfo">Informations du document</sys:String>
     <sys:String x:Key="Str_KS_OnlineHelp">Guide complet et tutoriels en ligne</sys:String>
     <sys:String x:Key="Str_KS_Tools">OUTILS</sys:String>
+    <sys:String x:Key="Str_KS_DocumentTools">OUTILS DU DOCUMENT</sys:String>
     <sys:String x:Key="Str_KS_Paste">Coller image / texte</sys:String>
     <sys:String x:Key="Str_KS_TextStyle">Gras / italique / souligné (zone de texte)</sys:String>
     <sys:String x:Key="Str_KS_MultiSelect">Ajouter à la sélection</sys:String>
@@ -736,6 +737,7 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Ctx_CloseTab">Fermer l'onglet</sys:String>
     <sys:String x:Key="Str_Ctx_OpenContainingFolder">Ouvrir le dossier contenant</sys:String>
     <sys:String x:Key="Str_Ctx_CloseOthers">Fermer les autres onglets</sys:String>
+    <sys:String x:Key="Str_Ctx_MoveToNewWindow">Déplacer vers une nouvelle fenêtre</sys:String>
 
     <!-- Transform tool -->
     <sys:String x:Key="Str_ColorCorrection">Correction des couleurs</sys:String>

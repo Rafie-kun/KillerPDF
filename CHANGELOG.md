@@ -59,6 +59,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Added Brazilian Portuguese localization.
 - Added Ctrl+R and Ctrl+Shift+R to rotate selected pages clockwise and counterclockwise.
 - Added a keyboard shortcut toggle with an always-available Ctrl+Shift+K recovery chord (#405).
+- Added keyboard shortcuts for the 1.9 tools and commands: E for Color Correction, M for Measure, X for Redact, Ctrl+Shift+E to export a document, Ctrl+Shift+T to convert a scan to text, Ctrl+Shift+G for Film Grain, Ctrl+Shift+N to move a tab to a new window, and Ctrl+Shift+D followed by the letter shown beside each document tool. A tab's right-click menu can also move it to a new window.
 - Added drag ordering for pinned places in the file picker.
 - Added a `--batch-render` command that renders pages of a file or tree to PNG with a per-page render and open timing log, and a per-file comparison in the benchmark script. Recorded shared-input timing, memory, and multipage rendering validation.
 - Added yellow and magenta accents to the neutral and 98SE themes.

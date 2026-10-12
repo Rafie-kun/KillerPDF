@@ -154,6 +154,7 @@ Siden kan erstattes med et bilde av seg selv der de markerte områdene er sverte
     <sys:String x:Key="Str_KS_DocInfo">Dokumentinfo</sys:String>
     <sys:String x:Key="Str_KS_OnlineHelp">Full veiledning &amp; fremgangsmåter på nett</sys:String>
     <sys:String x:Key="Str_KS_Tools">VERKTØY</sys:String>
+    <sys:String x:Key="Str_KS_DocumentTools">DOKUMENTVERKTØY</sys:String>
     <sys:String x:Key="Str_KS_Paste">Lim inn bilde / tekst</sys:String>
     <sys:String x:Key="Str_KS_TextStyle">Fet / kursiv / understreket (tekstboks)</sys:String>
     <sys:String x:Key="Str_KS_MultiSelect">Legg til i markeringen</sys:String>
@@ -736,6 +737,7 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Ctx_CloseTab">Lukk fane</sys:String>
     <sys:String x:Key="Str_Ctx_OpenContainingFolder">Åpne inneholdende mappe</sys:String>
     <sys:String x:Key="Str_Ctx_CloseOthers">Lukk andre faner</sys:String>
+    <sys:String x:Key="Str_Ctx_MoveToNewWindow">Flytt til nytt vindu</sys:String>
 
     <!-- Transform tool -->
     <sys:String x:Key="Str_ColorCorrection">Fargekorrigering</sys:String>

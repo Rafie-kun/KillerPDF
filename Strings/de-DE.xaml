@@ -137,6 +137,7 @@ Die Seite kann durch ein Bild ihrer selbst ersetzt werden, in dem die markierten
     <sys:String x:Key="Str_KS_DocInfo">Dokumentinfo</sys:String>
     <sys:String x:Key="Str_KS_OnlineHelp">Vollständige Anleitung &amp; Tutorials online</sys:String>
     <sys:String x:Key="Str_KS_Tools">WERKZEUGE</sys:String>
+    <sys:String x:Key="Str_KS_DocumentTools">DOKUMENTWERKZEUGE</sys:String>
     <sys:String x:Key="Str_KS_Paste">Bild / Text einfügen</sys:String>
     <sys:String x:Key="Str_KS_TextStyle">Fett / kursiv / unterstrichen (Textfeld)</sys:String>
     <sys:String x:Key="Str_KS_MultiSelect">Zur Auswahl hinzufügen</sys:String>
@@ -654,6 +655,7 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Ctx_CloseTab">Tab schließen</sys:String>
     <sys:String x:Key="Str_Ctx_OpenContainingFolder">Dateipfad öffnen</sys:String>
     <sys:String x:Key="Str_Ctx_CloseOthers">Andere Tabs schließen</sys:String>
+    <sys:String x:Key="Str_Ctx_MoveToNewWindow">In neues Fenster verschieben</sys:String>
 
     <!-- ── OCR ─────────────────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Ocr_Region">OCR-Bereich...</sys:String>

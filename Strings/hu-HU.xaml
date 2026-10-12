@@ -154,6 +154,7 @@ Az oldal lecserélhető a saját képére, amelyen a megjelölt területek feket
     <sys:String x:Key="Str_KS_DocInfo">Dokumentum adatai</sys:String>
     <sys:String x:Key="Str_KS_OnlineHelp">Teljes útmutató és leírás online</sys:String>
     <sys:String x:Key="Str_KS_Tools">ESZKÖZÖK</sys:String>
+    <sys:String x:Key="Str_KS_DocumentTools">DOKUMENTUMESZKÖZÖK</sys:String>
     <sys:String x:Key="Str_KS_Paste">Kép / szöveg beillesztése</sys:String>
     <sys:String x:Key="Str_KS_TextStyle">Félkövér / dőlt / aláhúzott (szövegmező)</sys:String>
     <sys:String x:Key="Str_KS_MultiSelect">Hozzáadás a kijelöléshez</sys:String>
@@ -736,6 +737,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Ctx_CloseTab">Lap bezárása</sys:String>
     <sys:String x:Key="Str_Ctx_OpenContainingFolder">Tartalmazó mappa megnyitása</sys:String>
     <sys:String x:Key="Str_Ctx_CloseOthers">Többi lap bezárása</sys:String>
+    <sys:String x:Key="Str_Ctx_MoveToNewWindow">Áthelyezés új ablakba</sys:String>
 
     <!-- Transform tool -->
     <sys:String x:Key="Str_ColorCorrection">Színkorrekció</sys:String>

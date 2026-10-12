@@ -137,6 +137,7 @@ La página se puede sustituir por una imagen de sí misma con las áreas marcada
     <sys:String x:Key="Str_KS_DocInfo">Información del documento</sys:String>
     <sys:String x:Key="Str_KS_OnlineHelp">Guía completa y tutoriales en línea</sys:String>
     <sys:String x:Key="Str_KS_Tools">HERRAMIENTAS</sys:String>
+    <sys:String x:Key="Str_KS_DocumentTools">HERRAMIENTAS DE DOCUMENTO</sys:String>
     <sys:String x:Key="Str_KS_Paste">Pegar imagen / texto</sys:String>
     <sys:String x:Key="Str_KS_TextStyle">Negrita / cursiva / subrayado (cuadro de texto)</sys:String>
     <sys:String x:Key="Str_KS_MultiSelect">Añadir a la selección</sys:String>
@@ -654,6 +655,7 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Ctx_CloseTab">Cerrar pestaña</sys:String>
     <sys:String x:Key="Str_Ctx_OpenContainingFolder">Abrir carpeta contenedora</sys:String>
     <sys:String x:Key="Str_Ctx_CloseOthers">Cerrar otras pestañas</sys:String>
+    <sys:String x:Key="Str_Ctx_MoveToNewWindow">Mover a una ventana nueva</sys:String>
 
     <!-- ── OCR + Transform + Crop (añadido) ──────────────────────────── -->
     <sys:String x:Key="Str_Ocr_Region">Región OCR...</sys:String>

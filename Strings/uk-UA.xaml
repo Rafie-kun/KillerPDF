@@ -154,6 +154,7 @@
     <sys:String x:Key="Str_KS_DocInfo">Відомості про документ</sys:String>
     <sys:String x:Key="Str_KS_OnlineHelp">Повний посібник &amp; настанови онлайн</sys:String>
     <sys:String x:Key="Str_KS_Tools">ІНСТРУМЕНТИ</sys:String>
+    <sys:String x:Key="Str_KS_DocumentTools">ІНСТРУМЕНТИ ДОКУМЕНТА</sys:String>
     <sys:String x:Key="Str_KS_Paste">Вставити зображення / текст</sys:String>
     <sys:String x:Key="Str_KS_TextStyle">Напівжирний / курсив / підкреслений (текстове поле)</sys:String>
     <sys:String x:Key="Str_KS_MultiSelect">Додати до виділення</sys:String>
@@ -736,6 +737,7 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Ctx_CloseTab">Закрити вкладку</sys:String>
     <sys:String x:Key="Str_Ctx_OpenContainingFolder">Відкрити папку розташування</sys:String>
     <sys:String x:Key="Str_Ctx_CloseOthers">Закрити інші вкладки</sys:String>
+    <sys:String x:Key="Str_Ctx_MoveToNewWindow">Перемістити в нове вікно</sys:String>
 
     <!-- Transform tool -->
     <sys:String x:Key="Str_ColorCorrection">Корекція кольору</sys:String>

@@ -154,6 +154,7 @@ Stronę można zastąpić jej obrazem z zaczernionymi zaznaczonymi obszarami. Te
     <sys:String x:Key="Str_KS_DocInfo">Dokument info</sys:String>
     <sys:String x:Key="Str_KS_OnlineHelp">Pełny przewodnik &amp; poradniki online</sys:String>
     <sys:String x:Key="Str_KS_Tools">NARZĘDZIA</sys:String>
+    <sys:String x:Key="Str_KS_DocumentTools">NARZĘDZIA DOKUMENTU</sys:String>
     <sys:String x:Key="Str_KS_Paste">Wklej obraz / tekst</sys:String>
     <sys:String x:Key="Str_KS_TextStyle">Pogrubienie / kursywa / podkreślenie (pole tekstowe)</sys:String>
     <sys:String x:Key="Str_KS_MultiSelect">Dodaj do wyboru</sys:String>
@@ -718,6 +719,7 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Ctx_CloseTab">Zamknij stronę</sys:String>
     <sys:String x:Key="Str_Ctx_OpenContainingFolder">Otwórz folder zawierający</sys:String>
     <sys:String x:Key="Str_Ctx_CloseOthers">Zamknij pozostałe strony</sys:String>
+    <sys:String x:Key="Str_Ctx_MoveToNewWindow">Przenieś do nowego okna</sys:String>
 
     <!-- Transform tool -->
     <sys:String x:Key="Str_ColorCorrection">Korekcja kolorów</sys:String>

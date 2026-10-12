@@ -154,6 +154,7 @@ Có thể thay trang bằng hình ảnh của chính nó với các vùng đã �
     <sys:String x:Key="Str_KS_DocInfo">Thông tin tài liệu</sys:String>
     <sys:String x:Key="Str_KS_OnlineHelp">Hướng dẫn đầy đủ &amp; cách sử dụng trực tuyến</sys:String>
     <sys:String x:Key="Str_KS_Tools">CÔNG CỤ</sys:String>
+    <sys:String x:Key="Str_KS_DocumentTools">CÔNG CỤ TÀI LIỆU</sys:String>
     <sys:String x:Key="Str_KS_Paste">Dán hình ảnh / văn bản</sys:String>
     <sys:String x:Key="Str_KS_TextStyle">Đậm / nghiêng / gạch chân (hộp văn bản)</sys:String>
     <sys:String x:Key="Str_KS_MultiSelect">Thêm vào vùng chọn</sys:String>
@@ -736,6 +737,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Ctx_CloseTab">Đóng tab</sys:String>
     <sys:String x:Key="Str_Ctx_OpenContainingFolder">Mở thư mục chứa</sys:String>
     <sys:String x:Key="Str_Ctx_CloseOthers">Đóng các tab khác</sys:String>
+    <sys:String x:Key="Str_Ctx_MoveToNewWindow">Chuyển sang cửa sổ mới</sys:String>
 
     <!-- Công cụ chuyển đổi -->
     <sys:String x:Key="Str_ColorCorrection">Chỉnh màu</sys:String>
