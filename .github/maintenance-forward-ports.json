@@ -1678,6 +1678,31 @@
       "maintenanceCommit": "61a1fa423d294d088085fce77c92c2af430e6014",
       "developmentCommit": "52301a1c028938cc44d23b9c31ab12e19ec2cae0",
       "reason": "Both sites use the same fourteen 1.8.90 screenshots (identical PNG bytes), the same SHOTS list in index.html and the same appended shot_1890 caption translations for all eighteen site languages. The README screenshot table exists only on maintenance; the development README has no screenshot section."
+    },
+    {
+      "maintenanceCommit": "779ed0375416353b9b89a48a559d0b9ae05f7b37",
+      "developmentCommit": "10f5eac22c43bffc754821fa4a282ad2d5538396",
+      "reason": "Both lines give message and confirm dialogs the same family setup dialog layout with identical changed lines in KillerDialog.cs, App.xaml.cs and the changelog. Only the surrounding context differs between the branches."
+    },
+    {
+      "maintenanceCommit": "0f3001d828958987141eb35cf60271b4ffccf73d",
+      "developmentCommit": "bcb1b7522209d06564d283bf2b428ee827f6dac8",
+      "reason": "Identical UiKit.cs change on both lines: the primary dialog button rests hollow in the accent with a stroke edge and fills on hover. The changelog line is the same; only its surrounding context differs."
+    },
+    {
+      "maintenanceCommit": "f427cc4d600adb8d143c12bc8e7170c44d203843",
+      "developmentCommit": "b69cf0b805a6c8dac85571d5f2fb5890ded4dfaa",
+      "reason": "Identical InstallerWizard.xaml and LauncherDialog.xaml hover gradient on both lines. The changelog line is the same; only its surrounding context differs."
+    },
+    {
+      "maintenanceCommit": "f66f1694d85048edc5fa4e3a344a11b6d4e96559",
+      "developmentCommit": "8d76c70a573bda24a98eb98cd6effe3d064555ff",
+      "reason": "Identical ThemeManager.cs gradient start and PickerStyles.xaml hover border on both lines. The changelog line is the same; only its surrounding context differs."
+    },
+    {
+      "maintenanceCommit": "b694e5487c051fe5ce84a5911fd114b89eb9370b",
+      "developmentCommit": "46dc69563679182069e43acc8064aabbf539c482",
+      "reason": "Both lines reword the same repair prompts with identical changed lines in FileOperations.cs, all eighteen string files and the changelog. Only the surrounding context differs between the branches."
     }
   ]
 }
