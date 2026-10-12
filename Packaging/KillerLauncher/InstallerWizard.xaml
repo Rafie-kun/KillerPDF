@@ -21,6 +21,7 @@
         <FontFamily x:Key="BrandSans">./Fonts/#Killer Sans</FontFamily>
         <FontFamily x:Key="UiFont">./Fonts/#Killer Sans UI, Segoe UI</FontFamily>
         <SolidColorBrush x:Key="Green" Color="#1ea54c"/>
+        <LinearGradientBrush x:Key="AccentFill" StartPoint="0,0" EndPoint="0,1"><GradientStop Color="#1ea54c" Offset="0"/><GradientStop Color="#198b40" Offset="1"/></LinearGradientBrush>
         <Style x:Key="FooterLink" TargetType="Hyperlink">
             <Setter Property="Foreground" Value="#6a6a6a"/><Setter Property="TextDecorations" Value="None"/>
             <Style.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter Property="Foreground" Value="#1ea54c"/></Trigger></Style.Triggers>
@@ -53,7 +54,8 @@
                 </Border></Grid>
                 <ControlTemplate.Triggers>
                     <Trigger Property="IsMouseOver" Value="True">
-                        <Setter TargetName="Face" Property="Background" Value="#1ea54c"/>
+                        <Setter TargetName="Face" Property="Background" Value="{StaticResource AccentFill}"/>
+                        <Setter TargetName="Face" Property="BorderBrush" Value="{StaticResource AccentFill}"/>
                         <Setter Property="Foreground" Value="#0a0a0a"/>
                     </Trigger>
                     <Trigger Property="IsPressed" Value="True">
