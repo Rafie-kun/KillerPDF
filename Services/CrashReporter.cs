@@ -19,7 +19,7 @@ namespace KillerPDF
 
         // ── Public properties ────────────────────────────────────────────────
 
-        internal static string LogDir { get; } = Path.Combine(
+        internal static string LogDir { get; } = App.IsStartupSmoke ? Path.Combine(App.SmokeDataRoot, "Logs") : Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "KillerPDF", "Logs");
 

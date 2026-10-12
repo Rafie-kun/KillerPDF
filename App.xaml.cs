@@ -73,6 +73,11 @@ namespace KillerPDF
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            if (IsStartupSmoke)
+            {
+                RunStartupSmoke(e);
+                return;
+            }
             StartupTrace.Mark("App.OnStartup entered");
             DispatcherUnhandledException                    += OnDispatcherException;
             AppDomain.CurrentDomain.UnhandledException      += OnDomainException;
@@ -1112,9 +1117,10 @@ namespace KillerPDF
         /// User-private temp directory for session working files (encrypted PDFs, etc.).
         /// %LOCALAPPDATA% is user-private and not indexed by Windows Search.
         /// </summary>
-        internal static readonly string TempDir = Path.Combine(
+        private static readonly string UserTempDir = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "KillerPDF", "Temp");
+        internal static string TempDir => IsStartupSmoke ? Path.Combine(SmokeDataRoot, "Temp") : UserTempDir;
 
         private static readonly List<string> _sessionTemps = [];
 
@@ -1169,6 +1175,7 @@ namespace KillerPDF
 
         internal static string? GetSetting(string name)
         {
+            if (IsStartupSmoke) return SmokeSettings.GetValueOrDefault(name);
             if (Services.AppDataPaths.PortableRoot is not null)
                 return Services.AppDataPaths.GetPortableSetting(name);
             try
@@ -1181,6 +1188,7 @@ namespace KillerPDF
 
         internal static void SetSetting(string name, string value)
         {
+            if (IsStartupSmoke) { SmokeSettings[name] = value; return; }
             if (Services.AppDataPaths.PortableRoot is not null)
             {
                 try { Services.AppDataPaths.SetPortableSetting(name, value); } catch { }
@@ -1196,6 +1204,7 @@ namespace KillerPDF
 
         internal static void RemoveSetting(string name)
         {
+            if (IsStartupSmoke) { SmokeSettings.Remove(name); return; }
             if (Services.AppDataPaths.PortableRoot is not null)
             {
                 try { Services.AppDataPaths.RemovePortableSetting(name); } catch { }

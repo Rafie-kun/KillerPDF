@@ -9,13 +9,16 @@ internal static class AppDataPaths
     private static readonly Lock SettingsGate = new();
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
 
-    internal static string LocalRoot { get; } = Path.Combine(
+    private static readonly string DefaultLocalRoot = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "KillerPDF");
+    internal static string? StartupSmokeRoot { get; set; }
+    internal static string LocalRoot => StartupSmokeRoot ?? DefaultLocalRoot;
 
     internal static string? PortableRoot
     {
         get
         {
+            if (StartupSmokeRoot is not null) return StartupSmokeRoot;
             try
             {
                 string? launcher = Environment.GetEnvironmentVariable(LauncherPathVariable);

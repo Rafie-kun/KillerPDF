@@ -10,6 +10,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
+. (Join-Path $PSScriptRoot 'payload-security.ps1')
 
 $projectDir = Split-Path -Parent $PSScriptRoot
 $appProject = Join-Path $projectDir 'KillerPDF.csproj'
@@ -103,10 +104,11 @@ if ($actualAssemblyVersion -ne $fileVersion) {
 }
 
 $payloadApp = Join-Path $payloadDir 'KillerPDF.App.exe'
-$payloadSmoke = Start-Process -FilePath $payloadApp -ArgumentList '--version' -Wait -PassThru
-if ($payloadSmoke.ExitCode -ne 0) {
-    throw "Payload startup smoke test failed with exit code $($payloadSmoke.ExitCode)."
-}
+# Publish (including ReadyToRun) must finish before signing. A signed repack refuses
+# unsigned/invalid first-party bytes before generating a manifest or launcher.
+$null = @(Get-FirstPartyPayloadFiles $payloadDir)
+if ($RepackOnly -and $RequireSignature) { Assert-FirstPartyPayloadSignatures $payloadDir }
+& (Join-Path $PSScriptRoot 'Test-GuiStartup.ps1') -ExePath $payloadApp
 
 $manifestPath = Join-Path $payloadDir 'payload.manifest'
 $payloadFiles = @([IO.Directory]::GetFiles($payloadDir, '*', [IO.SearchOption]::AllDirectories) |
@@ -130,13 +132,7 @@ foreach ($required in $requiredFiles) {
         throw "Required loose payload file is missing ($required). Costura/Fody may have run accidentally."
     }
 }
-$manifestLines = foreach ($file in $payloadFiles) {
-    $relative = $file.Substring($payloadDir.Length + 1).Replace('\', '/')
-    $hash = (Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash
-    $size = ([IO.FileInfo]$file).Length
-    "$hash`t$size`t$relative"
-}
-[IO.File]::WriteAllLines($manifestPath, $manifestLines, [Text.UTF8Encoding]::new($false))
+Write-PayloadManifest $manifestPath $payloadDir $payloadFiles
 
 Write-Host "==> Compressing one verified payload..." -ForegroundColor Cyan
 Add-Type -AssemblyName System.IO.Compression
