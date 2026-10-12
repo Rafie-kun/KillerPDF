@@ -306,7 +306,9 @@ namespace KillerPDF
             root.Children.Add(choiceBody);
 
             var btnPanel = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
-            for (int i = 0; i < labels.Length; i++)
+            // Callers list the main choice first. Lay the row out in reverse so the main choice sits
+            // last at the right edge, the family order, while the returned indices stay the same.
+            for (int i = labels.Length - 1; i >= 0; i--)
             {
                 int idx = i;
                 var btn = Sized(UiKit.Make(labels[i], accent: i == accentIndex));
