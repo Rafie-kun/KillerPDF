@@ -181,13 +181,14 @@
 <div class="tech-sec" id="stack">
 <h2 data-i18n="pt_16">Tech stack</h2>
 <p data-i18n="pt_217">KillerPDF is a native Windows application built on modern .NET. There is no Electron and no browser engine. The installed edition uses the .NET 10 Desktop Runtime; the portable edition carries its own runtime. Each major subsystem has a deliberately narrow job:</p>
+<p data-i18n="tech_19_pipeline">The 1.9 development branch uses The KillerPDF.Engine for rendering and text extraction. Tesseract remains available as an OCR fallback. See the developer guide for current engine APIs.</p>
 <table class="spec-table"><tr><th data-i18n="pt_18">Component</th><th data-i18n="pt_19">Library</th></tr>
 <tr><td>UI</td><td data-i18n="tech_ui_stack">WPF on .NET 10 for Windows, x64, with custom window chrome</td></tr>
-<tr><td data-i18n="pt_22">Rendering</td><td data-i18n="pt_23">PDFium via Docnet.Core 2.6 - every page bitmap and thumbnail</td></tr>
-<tr><td data-i18n="pt_24">Text</td><td data-i18n="pt_25">PdfPig 0.1.15 - search, selection, font sniffing</td></tr>
+<tr><td data-i18n="pt_22">Rendering</td><td data-i18n="pt_23">The KillerPDF.Engine</td></tr>
+<tr><td data-i18n="pt_24">Text</td><td data-i18n="pt_25">The KillerPDF.Engine</td></tr>
 <tr><td data-i18n="tech_document_engine">Document engine</td><td data-i18n="tech_document_stack"><a href="./engine/index.html">The KillerPDF.Engine</a>: parsing, authoring, preservation, page operations, forms, annotations, encryption, signatures, PDF 2.0, PDF/A and PDF/UA</td></tr>
 <tr><td data-i18n="tech_signing">Signing</td><td data-i18n="tech_signing_stack">The KillerPDF.Engine: byte-preserving detached CMS signatures, certification permissions, field locks and verification</td></tr>
-<tr><td data-i18n="pt_30">OCR</td><td data-i18n="pt_31">Tesseract 5.2 - native libs embedded, language packs on demand</td></tr>
+<tr><td data-i18n="pt_30">OCR</td><td data-i18n="pt_31">The KillerPDF.Engine; Tesseract 5.2</td></tr>
 <tr><td data-i18n="pt_32">Packaging</td><td data-i18n="pt_33">A compact framework-dependent installer and a self-contained portable launcher, each carrying a compressed, SHA-256-verified payload</td></tr>
 </table>
 </div>
@@ -388,7 +389,6 @@
 <h2 data-i18n="pt_104">Saving &amp; the temp-reload dance</h2>
 <p data-i18n="pt_105">Saving never changes the document you are looking at. KillerPDF writes a clean copy with no annotations, then permanently bakes in <b>stamps first, then annotations</b>, and reopens that fresh copy. Starting from a clean base every time means it can never accidentally bake the same thing in twice.</p>
 <h3 id="why-structural-edits-reload" data-i18n="pt_106">Why structural edits reload</h3>
-<p data-i18n="pt_107">Rotation, page operations and decryption route through <b>SaveTempAndReload</b>. It zeroes every page's <code>/Rotate</code> entry before writing, because Docnet (PDFium) sizes the page bitmap from the <i>unrotated</i> MediaBox - leave the rotation in and the rendered content clips. The file is written flat, reopened in Modify mode, and the rotations are re-applied in memory so the page still reads right.</p>
 </div>
 
 <div class="tech-sec" id="robust">
@@ -398,17 +398,14 @@
 <p data-i18n="pt_111">The open path is a chain of typed exception handlers, each rung catching one class of failure:</p>
 <table class="spec-table"><tr><th data-i18n="pt_112">Failure</th><th data-i18n="pt_113">Recovery</th></tr>
 <tr><td data-i18n="pt_114">Owner / permission lock, no open password</td><td data-i18n="pt_115">Reopen read-only so it can still be viewed and printed</td></tr>
-<tr><td data-i18n="pt_116">Open password</td><td data-i18n="pt_117">Prompt for it, then save a decrypted temp copy so PDFium can render</td></tr>
+<tr><td data-i18n="pt_116">Open password</td><td data-i18n="pt_117">The KillerPDF.Engine</td></tr>
 <tr><td data-i18n="pt_118">Malformed xref</td><td data-i18n="pt_119">Drop to read-only with a warning; if that also fails, offer a repair</td></tr>
-<tr><td data-i18n="pt_120">"Unexpected EOF" on a valid file</td><td data-i18n="pt_121">Re-save losslessly through PDFium; opens clean, no save nag</td></tr>
-<tr><td data-i18n="pt_122">Anything unclassified</td><td data-i18n="pt_123">Offer a PDFium repair, which recovers most damaged files</td></tr>
 </table>
 <h3 id="encryption-is-stripped-at-open" data-i18n="pt_221">Encryption and permissions</h3>
 <p data-i18n="pt_222">The KillerPDF.Engine authenticates Standard Security revisions 2 through 6, including RC4, AES-128, AES-256 and crypt filters. It distinguishes user and owner authentication, exposes the document's operation permissions, and enforces those permissions at the high-level editing APIs. Authenticated documents can be updated incrementally or rewritten while preserving encryption; decryption is an explicit workflow rather than a prerequisite for every edit.</p>
 <h3 id="network-and-partial-reads" data-i18n="pt_126">Network and partial reads</h3>
 <p data-i18n="pt_127">UNC shares and the WSL <code>\\wsl$</code> 9P filesystem sometimes hand back partial reads, which the parser sees as a truncated file. Before opening anything on a network path, KillerPDF copies it to a local temp with a single read-to-EOF, then opens the complete copy - while keeping your original path for display and Save.</p>
 <h3 id="repair-works-on-a-copy" data-i18n="pt_128">Repair works on a copy</h3>
-<p data-i18n="pt_129">When recovery falls through to a repair, the file is piped through PDFium, which has aggressive error recovery and rewrites a correct cross-reference table into a brand-new file. The original on disk is never touched. Repaired copies can lose bookmarks, forms and other interactive features, and the dialog says so before proceeding.</p>
 </div>
 
 <div class="tech-sec" id="conformance">
@@ -469,7 +466,6 @@
 <tr><td data-i18n="pt_166">Cover / cover-pair</td><td data-i18n="pt_167">A Cover is an opaque box that hides the original words on a page. To edit existing PDF text, KillerPDF lays a Cover over the old text and a Text box on top holding your replacement; the two are locked together as a cover-pair.</td></tr>
 <tr><td data-i18n="pt_168">Cross-reference table (xref)</td><td data-i18n="pt_169">The index near the end of a PDF that records where every internal object is stored. If it is damaged, many readers fail to open the file, so KillerPDF has recovery paths that rebuild it.</td></tr>
 <tr><td data-i18n="pt_170">Device-independent pixel (DIP)</td><td data-i18n="pt_171">The unit KillerPDF's drawing surface uses. One DIP is a fixed physical size regardless of how dense the screen is, so layouts look the same across monitors.</td></tr>
-<tr><td data-i18n="pt_172">Docnet (Docnet.Core)</td><td data-i18n="pt_173">The library that lets KillerPDF call PDFium from .NET to turn pages into bitmaps.</td></tr>
 <tr><td data-i18n="pt_174">DPI (dots per inch)</td><td data-i18n="pt_175">How many pixels a screen packs into an inch, i.e. its density. Windows reports it as a scale: 1.0 at 96 DPI (100%), 1.5 at 150%. Higher DPI means more pixels are drawn for the same physical size.</td></tr>
 <tr><td data-i18n="pt_176">Flatten (flattening)</td><td data-i18n="pt_177">Burning annotations permanently into the page when you save, so they become part of the PDF's own content instead of separate, editable marks.</td></tr>
 <tr><td data-i18n="pt_178">Form field</td><td data-i18n="pt_179">An interactive field built into a PDF, such as a text box, checkbox, or dropdown, that a person fills in.</td></tr>
@@ -477,11 +473,9 @@
 <tr><td data-i18n="pt_182">Linearized PDF</td><td data-i18n="pt_183">A PDF arranged so a viewer can start showing the first page before the whole file has loaded (sometimes called "fast web view"). These files often keep their structure in object streams.</td></tr>
 <tr><td data-i18n="pt_184">LRU cache (least recently used)</td><td data-i18n="pt_185_172">A memory-saving rule that keeps the most recently used items and drops the oldest. KillerPDF retains drawn-page caches for only the three most recent tabs, with an approximately 160 MB per-tab budget and 48-entry hard cap.</td></tr>
 <tr><td>.NET 10</td><td data-i18n="tech_runtime_desc">The modern .NET runtime used by both the Windows application and The KillerPDF.Engine. The installer detects or installs the Desktop Runtime; the portable package carries it.</td></tr>
-<tr><td data-i18n="pt_188">Object stream</td><td data-i18n="pt_189">A compressed container inside modern PDFs (version 1.5 and later) that bundles many of the file's internal objects together. Some libraries cannot read them, which is why KillerPDF falls back to PDFium for certain jobs.</td></tr>
-<tr><td data-i18n="pt_190">OCR (optical character recognition)</td><td data-i18n="pt_191">Reading the actual text out of a scanned image so it can be searched, selected, or copied. KillerPDF uses Tesseract.</td></tr>
+<tr><td data-i18n="pt_188">Object stream</td><td data-i18n="pt_189">A compressed container inside modern PDFs (version 1.5 and later) that bundles many of the file's internal objects together.</td></tr>
+<tr><td data-i18n="pt_190">OCR (optical character recognition)</td><td data-i18n="pt_191">Reading the actual text out of a scanned image so it can be searched, selected, or copied.</td></tr>
 <tr><td data-i18n="pt_192">Overlay</td><td data-i18n="pt_193">The transparent sheet drawn directly on top of a page image, where your annotations are painted. The page image underneath is never changed.</td></tr>
-<tr><td data-i18n="pt_194">PDFium</td><td data-i18n="pt_195">Google's PDF engine (the same one inside Chrome). KillerPDF uses it to render pages to images and to read structures other libraries cannot.</td></tr>
-<tr><td data-i18n="pt_196">PdfPig</td><td data-i18n="pt_197">A .NET library KillerPDF uses to read text from a PDF: search, selection, and detecting each letter's font and size.</td></tr>
 <tr><td>The KillerPDF.Engine</td><td data-i18n="tech_engine_glossary">KillerPDF's independent, UI-free .NET document library for reading, validating, authoring, editing, signing, encrypting and writing PDF files.</td></tr>
 <tr><td data-i18n="pt_200">Point</td><td data-i18n="pt_201">The PDF's own unit of length. One point is 1/72 of an inch.</td></tr>
 <tr><td data-i18n="pt_202">Rasterize</td><td data-i18n="pt_203">To convert a page's text and shapes into a grid of pixels (a bitmap) for display.</td></tr>
