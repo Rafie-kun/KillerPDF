@@ -733,6 +733,741 @@
       "maintenanceCommit": "0880f1da3de797bd207a2a314e69a36e3156867e",
       "developmentCommit": "f2846eeb097c8bed5a9b5e5fa064b03029d772f6",
       "reason": "Both commits apply the same translateY(4px) rule to the top bar wordmark. Functional CSS patch correspondence is exact."
+    },
+    {
+      "maintenanceCommit": "b244ee3a3966727ba2abdd768ecf5ffc75b543f0",
+      "developmentCommit": "de073ca226e9c8bfb8159ecb4c231a2b26bd564e",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: check maintenance fixes reach overkill."
+    },
+    {
+      "maintenanceCommit": "beb3a50934be9abad01514aaefd2d78ba8e3317d",
+      "developmentCommit": "cadfd662dc16ea250410daacd64b0d35ad6925c4",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: preserve landscape orientation when flattening (#362)."
+    },
+    {
+      "maintenanceCommit": "4ef6d390305bc6f54764cc37b0e0804ec44bdddf",
+      "developmentCommit": "074bc7886adc840a71a872bc3dd800926acfd5b5",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: populate installer details and installed size (#361)."
+    },
+    {
+      "maintenanceCommit": "11558725b44f52043b65fa8aa62c9aa3e3f851dd",
+      "developmentCommit": "66f701a126e76e2546a09d6858352e8a4f24ecb4",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: preserve desktop sizing limits across monitors (#363)."
+    },
+    {
+      "maintenanceCommit": "c1d152f35150dee5c44876a5d29f616a99ca0c1b",
+      "developmentCommit": "65a837005ccc509e31cb81b37c46c05246cb4261",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: restore comparison captions and overflow choices (#360)."
+    },
+    {
+      "maintenanceCommit": "863ac96468cbd446960381eea10a5beedfcc35ab",
+      "developmentCommit": "f28fd8d9432c9a36013076c8e04afa2f4e5cfc06",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: equalize comparison pane widths (#359)."
+    },
+    {
+      "maintenanceCommit": "5aa6ce0c12650b5a911a81678575255d7c281270",
+      "developmentCommit": "0588e0882dff89e2cf79702b5abe9bd5ede7fd12",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: restore form field and measure toolbar captions."
+    },
+    {
+      "maintenanceCommit": "8c2face780754f112b49cf11eb9807fef98f38cb",
+      "developmentCommit": "50fce97628bc8c426c9aa3dd10505b315dfb8db2",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: return success when maintenance coverage passes."
+    },
+    {
+      "maintenanceCommit": "354acd2ec9746d6fcca5fb00a1c189fe3d9ad88a",
+      "developmentCommit": "78ff3777e8a82338bea8f9fb185fa133e291766e",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: remove unrequested maintenance workflow."
+    },
+    {
+      "maintenanceCommit": "0fdf4794374d4f5d6be5ae2ab410b1f36081d03b",
+      "developmentCommit": "0729129377e7af3da6a8edcb600239eaf0e55d6d",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: show output scale in dpi previews (#365)."
+    },
+    {
+      "maintenanceCommit": "4827666c47b4ceaa94abf618426ee0de9f5d0ec6",
+      "developmentCommit": "a149a39bbfca7a9ed7696bb9796fc341a6133898",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: ignore generated artifact folders."
+    },
+    {
+      "maintenanceCommit": "805cffbc14017f4b78c4628286bd9b441809ab50",
+      "developmentCommit": "3cdf7388a4fb718f0dd24d385aa37ce5ba31c5f0",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: keep native resize borders and custom caption (#372)."
+    },
+    {
+      "maintenanceCommit": "53b508759c999587ea7d6083e8bbed535dcaa6b7",
+      "developmentCommit": "baa8c3ccc8288d7214dc314898f1dcdc84568c40",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: preserve continuous scroll position during resize (#373)."
+    },
+    {
+      "maintenanceCommit": "ffaf83bfa7d48cee957cb86549f468ec000d1a97",
+      "developmentCommit": "00ea0d4195cc78c77a9f69cc9ec907b8e8251191",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: fix comparison chip contrast (#371)."
+    },
+    {
+      "maintenanceCommit": "0271c88ca271e4c8506e15612ab0994c37748554",
+      "developmentCommit": "14eda0d02042455c3c8ab73452a2e94eda1276f8",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: preserve underscores in comparison menu (#376)."
+    },
+    {
+      "maintenanceCommit": "756633dec651e8ac4603fcefdbb163d357b7ce6f",
+      "developmentCommit": "0a03268d91620427d408327b5dce7bc73bfc0c8a",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: unwrap comparison document values."
+    },
+    {
+      "maintenanceCommit": "9ff06772cc8c9c676a660a5fead02ed8ac3cfd52",
+      "developmentCommit": "f2271fef154420cfcb0c2e18bae21940e319c12c",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: save metadata with invalid document language (#384)."
+    },
+    {
+      "maintenanceCommit": "2b2c88a7da351493bf95f92baf8e7607f4983f9e",
+      "developmentCommit": "13ff36c293f923c4163ad6ced6b6c92793411d32",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: correct malaise selection colors."
+    },
+    {
+      "maintenanceCommit": "7b62b8ca41db917fad863a6ad1064c580d169d4b",
+      "developmentCommit": "e2fd01128648c1319acd084d59bee63605d19b30",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: add render mode to version benchmark script."
+    },
+    {
+      "maintenanceCommit": "749c9834bb37ce7b3e0aef2bf28bbd0717d34b3b",
+      "developmentCommit": "c29f8b49bde3917d3b43e2643f3be313581cfd38",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: use proposed monitor for maximized client bounds (#363)."
+    },
+    {
+      "maintenanceCommit": "19357d2851afa809f9339fe2409445e664b514a9",
+      "developmentCommit": "28ebdec90203616cf0568fea9717a6be8837415a",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: fix localized labels and bookmark row sizing (#394)."
+    },
+    {
+      "maintenanceCommit": "9a9fbdbd2c5b0bd4e7312e3818ad63d4b0158f1c",
+      "developmentCommit": "c2a247ec020f81d251136e4bf2708551f4afa113",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: use default themed standalone uninstall dialogs."
+    },
+    {
+      "maintenanceCommit": "2ab9aa6fae51cc18a25c11d0663d9c253b603e2d",
+      "developmentCommit": "421fb6a2f513f768b4704adb0fc66462575ebe2e",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: add open containing folder (#399)."
+    },
+    {
+      "maintenanceCommit": "ff62341544d3660e79f08167dc1ecf9b0421c2bf",
+      "developmentCommit": "e4d768e43865ef025922a4de7cef464d92f6175e",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: add blank page size options (#400)."
+    },
+    {
+      "maintenanceCommit": "f24b6c80d3a879eb8f89095e50aba78080b616da",
+      "developmentCommit": "6cb7524ccb09cdd4b98a68cf746add7be4e9f315",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: cover sequential existing-field signatures (#381)."
+    },
+    {
+      "maintenanceCommit": "bf8906168b391bc70c8f72cb3aac44274ed12691",
+      "developmentCommit": "b51df81eeb2512d7e797ae057ec9d76057a7ccc6",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: align about options and move update toggle to bottom."
+    },
+    {
+      "maintenanceCommit": "5c26497ad01faf802c656a3c6ef036b0965cdc57",
+      "developmentCommit": "bd7e043896ef2792b7c5f22eea58534065eeb9c9",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: move keyboard shortcut toggle beside online guide."
+    },
+    {
+      "maintenanceCommit": "648662a0f5a25bfd81de87638981772c789a8522",
+      "developmentCommit": "e8e890a8e21eab0e9c066067a8161ae1f180b1fe",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: complete dialog and launcher text localization."
+    },
+    {
+      "maintenanceCommit": "cd06386202dbffc15a7b39d27f2deb903edda3e5",
+      "developmentCommit": "1b998638153f055adf957d1b4d0887c40fe109cc",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: update portable runtime payload inventory."
+    },
+    {
+      "maintenanceCommit": "d371ceb6324241460b1c90ebc570f605a1ac88bf",
+      "developmentCommit": "c089d3848334865eebec7878df07e9ac59ed149d",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: sync winget fork through the upstream merge api."
+    },
+    {
+      "maintenanceCommit": "7458c91332fc7e847b754bd93ad3f3d715af1ea8",
+      "developmentCommit": "c5f0f55f1a4645388cf8f016a0ec9d363bcb0456",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: check winget sync before release and correct manifest headers."
+    },
+    {
+      "maintenanceCommit": "7bd49d585114ab0b894f802871892594ddafe4f2",
+      "developmentCommit": "3249df27eb0c83608395243bbd14009965aef816",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: normalize generated winget manifest line endings."
+    },
+    {
+      "maintenanceCommit": "4695b3ab1efb43ba05744f38779d8bd80a1a7741",
+      "developmentCommit": "a08fb082ee8fb51ff1fa1db09d6bb00f9b50ef2a",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: use runner-compatible winget manifest schema."
+    },
+    {
+      "maintenanceCommit": "a53bf5e832885c032876af13f0a4e84da1b6a6f5",
+      "developmentCommit": "c71f840d9446958644b88e526c8ce0f9a9f18c65",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: keep winget schema consistent and update the validator."
+    },
+    {
+      "maintenanceCommit": "7fd1bbed91097a74a091ecf499f2d1e25be31766",
+      "developmentCommit": "dd1228e7cd8fbc46c2de23a9e4c3501cd51b73bb",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: preserve winget package metadata and release notes."
+    },
+    {
+      "maintenanceCommit": "f4bdb82cbeda8b98a6b388f3c72d086db03cabf8",
+      "developmentCommit": "0f0db31763e01c430ec4b28a5aeba29b72d05222",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: describe the about page app card as built for clients instead of field techs."
+    },
+    {
+      "maintenanceCommit": "28ccdc862bc85cc959574a43c2186e53d2b3d733",
+      "developmentCommit": "fa12aecc5cdb83f9ce4d2ce669b302f11e283d6d",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: remove the scrollbar arrow buttons from the landing pages again."
+    },
+    {
+      "maintenanceCommit": "e2b3bd5c7181ee599f2a45bdcd3a4281e7c03756",
+      "developmentCommit": "5d5cd51f2e3412dc2a0ca75a599fb3ed831092c0",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: advance the landing stylesheet cache version so the scrollbar fix reaches cached browsers."
+    },
+    {
+      "maintenanceCommit": "689e9f6b65410c9e306e1536d02fb1e20e1dfaf2",
+      "developmentCommit": "32fc2938277fdd2aa90a961d4bdfa7e5f2bc6a9c",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: preserve annotations when page dimensions are missing."
+    },
+    {
+      "maintenanceCommit": "2f2487ba646533a550baed1b46e4b81bbfd3d93d",
+      "developmentCommit": "b234f1e1efedbac6022cdc55b553c191e517448e",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: restore repaint after taskbar switching (#415)."
+    },
+    {
+      "maintenanceCommit": "37e08085b1a90dc1b695780a9074c80fd6305f9b",
+      "developmentCommit": "24a84a334024ef542c5325ed56977c48769f3ea9",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: restore the windows 11 taskbar icon."
+    },
+    {
+      "maintenanceCommit": "f8f1a87231af5840f43ca10037c9bc6347d65f2d",
+      "developmentCommit": "d4be4ebfc17a6685a911c73c6ba0ed7c6ca5135d",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: complete maintenance forward-port records."
+    },
+    {
+      "maintenanceCommit": "17a3c8b8796d70d86e66021d1aac7dbf57a69f26",
+      "developmentCommit": "fd70f6f35170a6641b8c7fda27727855705b157e",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: correct landing locale count."
+    },
+    {
+      "maintenanceCommit": "03d7392fb899d847ef3e786d37396100794926ab",
+      "developmentCommit": "96a21a768293884e0185fb2203a4f074dd4a3c6b",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: clean up 98se tab and scrollbar pixels."
+    },
+    {
+      "maintenanceCommit": "259c5f8608e68b593edf747bd193752066cbb76c",
+      "developmentCommit": "7fcf5fb8e55ad7ab802e63f857972b727e3d52dc",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: preserve split-pane fit state."
+    },
+    {
+      "maintenanceCommit": "dcda794993e47c5b7517440ec8f18a9d16ea334c",
+      "developmentCommit": "f4217332c584f89df98024f6ad8dcb8719fe861a",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: keep text editing active in font menu (#428)."
+    },
+    {
+      "maintenanceCommit": "2bcad067c80efba14383d97471ee216c7ce20faf",
+      "developmentCommit": "233ec422c34326f8d24de5ef582a67949f23e116",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: preserve annotations when deleting pages (#429)."
+    },
+    {
+      "maintenanceCommit": "85566f356062eb4ccb499aa0a3f24b1bf726d5b4",
+      "developmentCommit": "149604a11b81de0f8cac3a605703f23f6aca7d45",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: correct 98se document tabs."
+    },
+    {
+      "maintenanceCommit": "9f103c88d0f2315b5b167395f7c0275f4209990d",
+      "developmentCommit": "69eb5ebd67a3c2937fd81b5a5f960609cb2949d8",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: harden native library loading."
+    },
+    {
+      "maintenanceCommit": "7b9e7830e310646dd5ec26e143d44530f95c1754",
+      "developmentCommit": "8f701c2f3ef6035e1d6e4f237e3406490355ec88",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: round modern flyout corners."
+    },
+    {
+      "maintenanceCommit": "ab4cda62b5873edc66015230081e97784a356333",
+      "developmentCommit": "f47844b28240c1af027ff91b0d5bb1221ced5763",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: color shortcut list categories."
+    },
+    {
+      "maintenanceCommit": "119696d05a73e1cff300d15572815dfe3053d4b2",
+      "developmentCommit": "37eaf6ae2d8d71e147546ea1f95770a7052d1cab",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: feather comparison dock on all sides."
+    },
+    {
+      "maintenanceCommit": "e5893b9820aaae8744ca8256d5b9981beb6c393c",
+      "developmentCommit": "40ade0b7e87b5de23e2521b3bd37f0a8327a02c6",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: align document tabs and remove stray lines."
+    },
+    {
+      "maintenanceCommit": "2f418578d24b0fd13a8c37c5a213672ed8c4178c",
+      "developmentCommit": "5524eb8253ee3f49f7eea3c65f015f18d9e0225a",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: use accent color for comparison bar."
+    },
+    {
+      "maintenanceCommit": "9d4dab5e875ef62477e04b24a0c52d012f647fbb",
+      "developmentCommit": "e7056099d316598f6a5661857fa27858dc11d79b",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: remove comparison text shadows and simplify close hover."
+    },
+    {
+      "maintenanceCommit": "16114911f7d18f02dd997f082167eae59e4422df",
+      "developmentCommit": "19caa1a43491134228df358268ddb09afa49f5d5",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: tune comparison bar palettes by theme."
+    },
+    {
+      "maintenanceCommit": "851817517fb5bb42a8a25c94e97f3c91b5bd8bd6",
+      "developmentCommit": "cd9e420a85904054aafaedef26209e0ee3c617de",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: align sidebar rail footer spacing."
+    },
+    {
+      "maintenanceCommit": "fc3c634e284da322fa40aee9e4204ad6e893cbbf",
+      "developmentCommit": "aaf265a1fdb8746cda0df6aa8e6217c3eb6a17f8",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: restore neutral comparison text contrast."
+    },
+    {
+      "maintenanceCommit": "a9aee977642e9307e36f05a2fe48b7e4bbd6a5ff",
+      "developmentCommit": "5eac1ebb99a3d560f2fc78c6e2bf0bd763491958",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: restore footer control contrast."
+    },
+    {
+      "maintenanceCommit": "e3ce72354bda4534e5abafe2e3bd1b6bc40a9dda",
+      "developmentCommit": "f4d359a9b78a2c10248f436b1bef2bdad560c66a",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: tune comparison bar contrast by theme."
+    },
+    {
+      "maintenanceCommit": "6743b4c4bd5da5f3ce4920837619c69dce4aa1e4",
+      "developmentCommit": "e993bee70a401df1be941c79c2d8bfce4fb5845e",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: use decay selection color for comparison."
+    },
+    {
+      "maintenanceCommit": "58edd851ac43c475a4f0bd9009754368a6edfd38",
+      "developmentCommit": "43ebe31de755cfdc56e48c1dd03dbf0eaea2f0c3",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: keep 98se comparison edges solid."
+    },
+    {
+      "maintenanceCommit": "c2b76fe532ff7044edaac9ab942c8d88b2cfb3db",
+      "developmentCommit": "c4603c7018e10402d3ba981e0a810236805c6672",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: remove comparison divider stem."
+    },
+    {
+      "maintenanceCommit": "a52c38055a62e451bff3d5c933033758bb3d64d1",
+      "developmentCommit": "2cffe03df16883688bf03cf263f4efd39b2c4321",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: restore 98se document pane borders."
+    },
+    {
+      "maintenanceCommit": "14c4346f35a83f4a6cd24f300350ef2db1441411",
+      "developmentCommit": "5cb93884b4648463e3b18c244d6ded54495e1d4d",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: correct 98se active tab styling."
+    },
+    {
+      "maintenanceCommit": "7b558b7b523a8b05023ac302d1c772dc2bdee41a",
+      "developmentCommit": "261161dea778059d7d7b5dbeec862183fdd90497",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: connect 98se active tab outline."
+    },
+    {
+      "maintenanceCommit": "2b52f5c61541a2e41e28e9db2a2dd3eb5dfe3530",
+      "developmentCommit": "f4360e754a1971bda6069c8e527d33bac77925dd",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: align 98se app title."
+    },
+    {
+      "maintenanceCommit": "adabc98516eff1e2ef20ab5a4c2610d92c34e5ef",
+      "developmentCommit": "f56956b85bfb3bbf7f9ff2522daab31c6645d77a",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: connect 98se tab perimeter."
+    },
+    {
+      "maintenanceCommit": "c57ec1c55f0e566cf45b122bade3c320c6a22cda",
+      "developmentCommit": "4ce7fe34d0f8da5e6dfbb9e6085042c171f12ea9",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: connect 98se tab inner bevel."
+    },
+    {
+      "maintenanceCommit": "4169612ffc3e09811c77ac028eb1604ad1b8c2be",
+      "developmentCommit": "29b683669428e67fd6dd9f15de22cae021e3e7a3",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: restore focused pane top border."
+    },
+    {
+      "maintenanceCommit": "1896a9618124cb2bbb66d5b2d99300d3f8aba5a6",
+      "developmentCommit": "8b134cb1f3dc7279f4c90c5f7edec57835aee39e",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: improve picker and window control accessibility."
+    },
+    {
+      "maintenanceCommit": "b0a9c0c3ec019739e837392543b1c4d2f7313b38",
+      "developmentCommit": "87446329666a5fde112ec68739b4327fea261f42",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: darken menus on greed, blood and cyanotic and use the pane color for the about panel."
+    },
+    {
+      "maintenanceCommit": "e4c405b9e6409419695deb41301f42a90b1a7b25",
+      "developmentCommit": "ed8cd0b77fdecc9116c0b3e8d0068d8372460f47",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: list ukrainian, norwegian and portuguese ocr models on the website."
+    },
+    {
+      "maintenanceCommit": "b728102d5bb30a2296a0fbac2d8f252289df42c8",
+      "developmentCommit": "0b2edd7f18138b93dc046f749fae2717f406788e",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: texture install dialogs and show the app icon in dialog title bars."
+    },
+    {
+      "maintenanceCommit": "9bc7a3ab3dd9882e470574640bf81a04d1995315",
+      "developmentCommit": "2d2cd0e4cf68c53b6e07e214e42bb607d70feece",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: label the installer and uninstaller taskbar buttons and show the app icon."
+    },
+    {
+      "maintenanceCommit": "7ec4e257435d812952cbe62025ce2db4fc76027d",
+      "developmentCommit": "7504369bf6de989f65419e73c4495e0dba978b7e",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: show portable start failures in a themed dialog."
+    },
+    {
+      "maintenanceCommit": "0ad7f8a85c2c1d046ac9422d56885e5291502eb9",
+      "developmentCommit": "5766b078f0a349950fb95a35c0138ed2833a1ee5",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: drag pinned picker places into a saved order."
+    },
+    {
+      "maintenanceCommit": "bdfb11d0e00d7bc305e0240535579cca46f22f91",
+      "developmentCommit": "95d9a5e2879fb0da6d8006d09caea05efd7975b4",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: use contrast text on menu hover."
+    },
+    {
+      "maintenanceCommit": "250d13555c18b3582e3e211f8551fe6a9cbb7a4b",
+      "developmentCommit": "4a02c74897fe9621f081be8e6fc69e3dffabcfec",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: match the family readme banner height."
+    },
+    {
+      "maintenanceCommit": "f200b593dc94a95e852599f62e3cab39eb78a885",
+      "developmentCommit": "3f2fbfe84b45a2cee8a82829360579fd2d4b1130",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: refine selection gradients and light theme borders."
+    },
+    {
+      "maintenanceCommit": "2e5358f5eb2e30de1cd8f7c6485c1ee225621dfe",
+      "developmentCommit": "0b9545ef18e18a5ffa4e5b4d2ffb9196a7b4b2eb",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: keep transform preview page shadow visible."
+    },
+    {
+      "maintenanceCommit": "34a206bbf621f93271240e70a397725ceca66d17",
+      "developmentCommit": "2be4edb464dd4d06168d5af051537f99054586c1",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: accent slider handles."
+    },
+    {
+      "maintenanceCommit": "919d3a8abe08fd6424860d051e0c67e989c75d9a",
+      "developmentCommit": "c4f6d7329a519096e1d322aea27f234d8f29ffa9",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: keep selected picker hover on active accent."
+    },
+    {
+      "maintenanceCommit": "845176e9b0635edd1917f951568b671284d12853",
+      "developmentCommit": "d7534148f93c366bcbffec6318a491f428745009",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: strengthen selection gradients across themes."
+    },
+    {
+      "maintenanceCommit": "c1ec810b21db80c2df141038b4b5f2229191649e",
+      "developmentCommit": "698f6734301e957e7e3df1f54b83be708078c5ed",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: let windows draw the rounded app border."
+    },
+    {
+      "maintenanceCommit": "97a53db05f64fb8276ba8b89f5292bbb6545a00f",
+      "developmentCommit": "daae2d744abd934a65271449be4de3b4f8e8b7f7",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: keep the window visible after minimize and restore (#415)."
+    },
+    {
+      "maintenanceCommit": "81466bf14629b561cfb6cd045502b9cb12093c51",
+      "developmentCommit": "4b8385424366d00e3c033dd146089e93258a1f5e",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: lighten black selection gradient."
+    },
+    {
+      "maintenanceCommit": "8d80c630088c6cf1e7a6ca1be6edcbe7e9a7b90d",
+      "developmentCommit": "72e76c2be09d634b259f4d5906a7707b9bb0d98d",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: strengthen yellow and magenta selection gradients."
+    },
+    {
+      "maintenanceCommit": "f70261991899a809cfe333716bd9c103ae9780a9",
+      "developmentCommit": "37aabc5eb4e875d6f11900a2dbd169fd67716942",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: theme document info text menus."
+    },
+    {
+      "maintenanceCommit": "0c51db51b7139772a182dc9fd6dc7afddbc603a0",
+      "developmentCommit": "b322dc03d7bcc0e0d05e41d992e1018ce6fa515d",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: soften ectoplasm menu and annotation borders."
+    },
+    {
+      "maintenanceCommit": "aae5fd68b48ca8752f8a9c829edc09add53ec274",
+      "developmentCommit": "dad2cb9c4f915baebf3387ab7fa866bd0c55b6e7",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: sharpen the title bar icon."
+    },
+    {
+      "maintenanceCommit": "3a1c7de20dc78952bdfb8679e183d9f8229fd1f2",
+      "developmentCommit": "7926c74fc7ee7d6996ccddcfa26574d086ec60f7",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: align annotation bar drag cursor."
+    },
+    {
+      "maintenanceCommit": "a3f18871d4f9bbaa6ab694d3f2cba9b28fadee97",
+      "developmentCommit": "551bd7955923d5ac062d22fdaf6eda8a99bac2f1",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: sharpen dialog title bar icons."
+    },
+    {
+      "maintenanceCommit": "641225b1d56d9513ef402fe05539ce63dfec9965",
+      "developmentCommit": "539e811e75286822b172bd50b88fac75c9ea2576",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: add 1.8.71 results and centralize benchmark links."
+    },
+    {
+      "maintenanceCommit": "9cefd9db0300479141185c6990b80867a5099cb8",
+      "developmentCommit": "a0e440d700702ae54527da6eb98ad80e6fb41560",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: keep comparison hover text readable."
+    },
+    {
+      "maintenanceCommit": "464e5ee121c0cd063547f67ea2ccbcb8480c2c8d",
+      "developmentCommit": "5d485293b1086aa67de5d0c9cebb6526713499ae",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: align comparison contrast checks."
+    },
+    {
+      "maintenanceCommit": "08f007e3b1999d15eadc7a2bbbbb0bf2dc9643cb",
+      "developmentCommit": "04469e313f2e67c648baa42c8b352ea2caa259a8",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: fix picker corners and close-button hover."
+    },
+    {
+      "maintenanceCommit": "56ce7610b95c15e73736cd773c3f0e1418252ecd",
+      "developmentCommit": "7ca050af75d4b54391d6818c1ac6f7ee87030b25",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: preserve picker and dialog frame curves."
+    },
+    {
+      "maintenanceCommit": "4ba1e6a84ba56e9ec93637cbe75b63680062ccc7",
+      "developmentCommit": "0ccc3f10b932b64f5a2bcc5ea8151294e6c3f3b2",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: add ctrl wheel picker view sizing."
+    },
+    {
+      "maintenanceCommit": "3ea51db1ecf699b1336d8f3ee92fa5891cb8fe9d",
+      "developmentCommit": "ae78d802cc648a3b1daad4bfb0e6e046b2718900",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: simplify picker icon size initialization."
+    },
+    {
+      "maintenanceCommit": "01089197497a034adf0cc97e969564b2a1515dd7",
+      "developmentCommit": "a205c1d0305c704f22bb39c4e4f897c57c5901fd",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: link shortcut views to the online guide."
+    },
+    {
+      "maintenanceCommit": "ca62d015de1e841284ba94093368afc385370b52",
+      "developmentCommit": "b33751e0b2f2672984cbd0d6cf585a12ee929a01",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: restore online help wording and align shortcut header."
+    },
+    {
+      "maintenanceCommit": "c6118426946eb9c233c413bd4f74969db95eec86",
+      "developmentCommit": "b209c09f2ef9976ce0fbb7f5b22ef89bb6ab2066",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: soften material theme footers and 98se footer text."
+    },
+    {
+      "maintenanceCommit": "522c223301c2b87348d018cb01ee7f9b08d80908",
+      "developmentCommit": "5e2f9e1222dc728b53f474b37a98e02706a52962",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: add the fading language column divider."
+    },
+    {
+      "maintenanceCommit": "c222f4e729532f6f71e9bdd7d476aded9ec702c2",
+      "developmentCommit": "549f76c1cc9377a2733b6c922d82c6cdc2d42e38",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: space the shortcuts guide link away from close."
+    },
+    {
+      "maintenanceCommit": "22205e9cad0b5fb0e7ba4dba37ad97bc6ae4fbb2",
+      "developmentCommit": "a4fa45df26f3795cdb13faac4bde50d42ec6775b",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: allow the shortcuts help url tooltip in the localization check."
+    },
+    {
+      "maintenanceCommit": "2f004c08b917bdde5b8ba7018f81614a53562831",
+      "developmentCommit": "7f6d65fbb4efa9eb27b351daaa50a168fd0ba62e",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: make 98se red a true maroon so it no longer looks like magenta."
+    },
+    {
+      "maintenanceCommit": "3babdb439c0f37b985cf902e28e3ce217332bed9",
+      "developmentCommit": "875f74115fdaaf5378a534579c81b89eec9e4e3b",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: match the delirium, ectoplasm and sepulchre footers to the window background."
+    },
+    {
+      "maintenanceCommit": "f47c9d6855c0bed986175e53b2bc04d068f27e50",
+      "developmentCommit": "daa943a9f5296a3a7350251e4aa9c57193890342",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: make light/yellow truly yellow and fix yellow and purple dropdown highlight colors."
+    },
+    {
+      "maintenanceCommit": "8dcb0e8484d6964ad33f6869941a8e53850f9f15",
+      "developmentCommit": "c2bf3cd73c0beebb3cc905237ab2d9520710ad8c",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: give filled buttons, outline hover and accent picker pills the family gradient."
+    },
+    {
+      "maintenanceCommit": "c74e8c762e0e810821dcb414b5d95c5e4a7c7b41",
+      "developmentCommit": "60b4c64efae5015bdc48154d4ba972e3d34f597a",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: restore cream greed and cyanotic wordmarks."
+    },
+    {
+      "maintenanceCommit": "eb6a8311ded79ace635fb674ec9e1fe03759e990",
+      "developmentCommit": "a5de6c0ffcbfe74fdc3a0f8abe73b80bff2f110f",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: align family theme resources and wordmarks."
+    },
+    {
+      "maintenanceCommit": "2a6998a79fc971a583c5b06d8f1a09c17e5419d7",
+      "developmentCommit": "7b79de535641c551a8f3c2cdd88d2092a7b70096",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: match the family light wordmark shadow settings."
+    },
+    {
+      "maintenanceCommit": "27b6621ed12a92075f57e6cae52340d0b82bc5a0",
+      "developmentCommit": "bfd57325d101b009e89a80a754b73a0277b69537",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: open menus immediately and preserve closing fades."
+    },
+    {
+      "maintenanceCommit": "b2091a8014375e8671d14e979cb43081fba8f404",
+      "developmentCommit": "d7cee8175927f3f14d8a2b65548d6d044525030a",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: restore context menu fades."
+    },
+    {
+      "maintenanceCommit": "f8acec6363f7376bfd3cd419fdd38eea9c190e86",
+      "developmentCommit": "8a2b5d30206121120e99a7b85f1917038b1d50cb",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: align rail right-click menus with flyouts."
+    },
+    {
+      "maintenanceCommit": "86f2745c8cf0ef2e07696ce5cd9b84374b043cc0",
+      "developmentCommit": "dd1b01e013432db5e2dabcbbd63ddf60982123a8",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: align the night-mode menu with its icon."
+    },
+    {
+      "maintenanceCommit": "314aafedba93d91b9d4df024f2e81458309ffac7",
+      "developmentCommit": "a123850d41256905ff2412163b09f1148d296b84",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: bound annotation bar layout retries."
+    },
+    {
+      "maintenanceCommit": "1819a20cb32dd6a150252eef2730894ae2f4fb94",
+      "developmentCommit": "a104518a5661fab069cf4991308b8074fb15c907",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: normalize native submenu placement."
+    },
+    {
+      "maintenanceCommit": "53be6f33ee8ab4a890ae5d91ff8850cedcc1f2f0",
+      "developmentCommit": "1d210f7e8b00097e7b7f97ef7e0c791033ec174d",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: finish button-aligned rail flyouts and yellow wordmark shadow."
+    },
+    {
+      "maintenanceCommit": "82b864a444cf51004045ee33365b15140cbf1869",
+      "developmentCommit": "7ab2cd22c5293c1dfad0166e1f6baf3f8f2e8023",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: keep website navigation on one row when it fits."
+    },
+    {
+      "maintenanceCommit": "224deac0a915964d25824acb8f1583d3b636568a",
+      "developmentCommit": "d7889065e4d6e810eff38ea2f9a374a9b5620a7c",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: add a film grain switch to the theme menu."
+    },
+    {
+      "maintenanceCommit": "ebd1c4d4bcd0f3fe1d218bce63e50695e558de1b",
+      "developmentCommit": "ce04c7d25b4839d035676651ba2d17e2d5443f47",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: move the app wordmarks to iceland and freckle face."
+    },
+    {
+      "maintenanceCommit": "0b5f643c189b4057575cb36afdb7876c8369bd00",
+      "developmentCommit": "2dd2c77d246edb1f6c490f2eff28dc5e636b0f9d",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: set the wordmark app name to 1.55x the killer capitals."
+    },
+    {
+      "maintenanceCommit": "4fa06b1db2bc3d4e1cda0413a7fc8f1c6abb0412",
+      "developmentCommit": "712a58d454f38c7d29b9cd80b2923df94873296d",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: set the footer version, copyright, page counter and page size in iceland."
+    },
+    {
+      "maintenanceCommit": "c0efcf9ee85b71181868dbfdad0b4a486c6bd1d3",
+      "developmentCommit": "33d42765fb429ad419fe554d4734781abb0d30c8",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: regenerate wordmark art at the 1.55x app name ratio."
+    },
+    {
+      "maintenanceCommit": "4c0a2c89752fd01a8f7a723547a76d763c20e40a",
+      "developmentCommit": "df285040fb6b0fb8e77d56f45a8b01a668116ee6",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: draw code-built button outlines without corner nicks at the family 4px radius."
+    },
+    {
+      "maintenanceCommit": "57452daa75fba34ddb7097991a7dbb4042cb4011",
+      "developmentCommit": "48f2056186fbbf0ca244d3fb955eadb4d3b43d00",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: regenerate wordmark art in killer sans."
+    },
+    {
+      "maintenanceCommit": "5fd65b63231ba949bbfd4b9de08666c28f09e128",
+      "developmentCommit": "c83b4915c647832c639e6bb3c3e5faeb014b28c2",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: restore the gradient social preview image."
+    },
+    {
+      "maintenanceCommit": "c8a1635e60dfbcb05c03b5f4db9944847c98a7bb",
+      "developmentCommit": "457ff861f63cc7a021728701d10dbfa48c673c29",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: set the readme banner tagline in lacquer."
+    },
+    {
+      "maintenanceCommit": "2f74ffb4ee05070f5d0997d761f82aae5dff4438",
+      "developmentCommit": "c0dbbee8df7fb28a544e542ef085fc1732275fb7",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: remove the freckle face font files."
+    },
+    {
+      "maintenanceCommit": "23e24dbc7c2763398db1ae9ad107a1520af63a02",
+      "developmentCommit": "4b5d532b9baa19053830ecf15ac47673e1ccbde1",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: preserve unsaved annotations when moving, reordering, duplicating, or merging pages and removing links."
+    },
+    {
+      "maintenanceCommit": "d22d3a018d5d570e0cd4e44e9805113c8747db5e",
+      "developmentCommit": "ac0c4507cc18338f2f81b416ddc930bb4f1b3fd8",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: finish save and save as output before replacing the destination file."
+    },
+    {
+      "maintenanceCommit": "64251bfdd9f3e26d0f3fefa872a5ad5445edf9da",
+      "developmentCommit": "eddc57dab7025ba15431d013dcf7e1171ceb96c1",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: ask before a save removes the signature from a digitally signed pdf."
+    },
+    {
+      "maintenanceCommit": "fdc4b1b1e0ba257bd181162df61225f845dd926f",
+      "developmentCommit": "f07ab562812dfbfb1fd1440268e379d5285598a8",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: copy unsaved annotations onto a duplicated page."
+    },
+    {
+      "maintenanceCommit": "3f149fa6a092ae8b0191d3540eb11536cc7b606a",
+      "developmentCommit": "3b350b39b00043ebd75a9bafca022cfe7539c6c3",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: keep a multi-page sidebar selection when one of its pages is dragged."
+    },
+    {
+      "maintenanceCommit": "453a1c436f0b0f917e60be2e987392a5dacce1a2",
+      "developmentCommit": "63c2b1f311d5f6ac40e77d3cf4e7a841320fda59",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: keep the file picker in place while a pinned place is dragged instead of opening each place the pointer crosses."
+    },
+    {
+      "maintenanceCommit": "975c8da40a0b04f03bedd45b2af0d7efc2685f25",
+      "developmentCommit": "3c5cdf6dd85051c604e10c5ae2c06b1e0a0555c0",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: give the accent toolbar icons the wordmark's dark halo on light yellow."
+    },
+    {
+      "maintenanceCommit": "d3bde524136454ab4e7cb8b0430b91551e71105b",
+      "developmentCommit": "d59f880654c551e69bf51d10333ef1003531db4a",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: give the wordmark a soft shadow on the light theme."
+    },
+    {
+      "maintenanceCommit": "292f2b5e1e4767f7ff6ddd3a366afff85879e1e0",
+      "developmentCommit": "f317f4bf35aad9342a7f44bf2a5a0b5040d5007c",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: match the title bar wordmark shadow to the rest of the family."
+    },
+    {
+      "maintenanceCommit": "b29526b37dde9deccc06cf3a93dbb3f43854316e",
+      "developmentCommit": "6ac3337d848d33633baa96d0caa9a83d8cc008e9",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: bump the title bar icon to 27px with its own 27px icon image."
+    },
+    {
+      "maintenanceCommit": "ec0b4927f632e64869e9080dcc9b830576651836",
+      "developmentCommit": "e5497652424d9dbd32cdfab5b179c419d6797b7f",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: regenerate the landing logos, social preview and readme art in the family style, with lacquer page titles."
+    },
+    {
+      "maintenanceCommit": "084ebcf318bf76eed80291c43fcd31c8b419b56f",
+      "developmentCommit": "e05f4d0c1e01de7cfe97d4b33365082986f911ee",
+      "reason": "Functional patch correspondence is exact after excluding only the branch-specific changelog: record verified completion guard correspondence."
+    },
+    {
+      "maintenanceCommit": "8046b87d2ae16f6c8b40ee71789f6cf207a542ae",
+      "developmentCommit": "8765e0389d6d6c2033bb8b25b7bc32ddbf1935d0",
+      "reason": "Both committed ledgers have the same 146 records, baseline references, reasons and target IDs after merging the prior 71-record maintenance and 140-record development maps. Their commit patches differ because the original maps differed. Every recorded source and target exists on the corresponding local branch."
+    },
+    {
+      "maintenanceCommit": "100693e4602df562db3035c02435cc040915140d",
+      "developmentCommit": "60389697b1025689222d2691d9a1c14d03190f69",
+      "reason": "Maintenance removes five unused legacy logo and font paths. Development removes four matching paths in 6038969; typewriter-headers.woff2 was already removed earlier. None of the five paths remains tracked at the current development tip. The deleted path sets and prior logo bytes differ, so the full patches differ."
+    },
+    {
+      "maintenanceCommit": "22819fa353e513421213137dfddba4a70d9bedc4",
+      "developmentCommit": "9fb0b5251ff9e27954c9c6a87fc0e914f7aa6c1e",
+      "reason": "Both commits enlarge the MCP button gap to 7, height to 35, padding to 0 12px 0 8px, text to 19 and icon to 30, and set the MCP install wordmark family. The complete current declarations and title markup match; prior surrounding page CSS differs. The hero padding difference predates this maintenance commit and is not attributed to it."
+    },
+    {
+      "maintenanceCommit": "b27c4c7768d2c00202736c010a2078552d726afd",
+      "developmentCommit": "d0353121a5ca57f98d7611be3bc3387706484532",
+      "reason": "Both commits remove the retired website Freckle Face font and license paths. Development also updates its changelog font names in d035312, so the complete patches differ. Neither website path remains tracked at the current tips. The earlier c0dbbee commit removed desktop font copies instead."
     }
   ]
 }
