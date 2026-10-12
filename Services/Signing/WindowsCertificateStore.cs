@@ -23,6 +23,23 @@ namespace KillerPDF.Services.Signing
             return result;
         }
 
+        /// <summary>
+        /// Lists personal certificates with an RSA private key that may encrypt document keys, which
+        /// are the certificates able to open a PDF protected for certificate recipients.
+        /// </summary>
+        public static IReadOnlyList<X509Certificate2> ListEncryptionCertificates()
+        {
+            var result = new List<X509Certificate2>();
+            using var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+            store.Open(OpenFlags.ReadOnly | OpenFlags.OpenExistingOnly);
+            foreach (var cert in store.Certificates)
+            {
+                if (cert.HasPrivateKey && PdfEngineIntegration.CanEncryptForRecipient(cert))
+                    result.Add(cert);
+            }
+            return result;
+        }
+
         // Accept a cert whose Key Usage permits digital signatures, or that declares no Key Usage
         // restriction at all (which is permissive per the X.509 spec).
         private static bool CanSign(X509Certificate2 cert)

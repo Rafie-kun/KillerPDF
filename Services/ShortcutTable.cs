@@ -142,6 +142,7 @@ namespace KillerPDF
             B("%ctrl%+D / F4",        "Str_KS_DocInfo",     "File", Cap("Ctrl:D"), Cap("F4")),
             B("%shift%+F4",           "Str_KS_FileSize",    "File", Cap("Shift:F4")),
             B("%ctrl%+%shift%+E",     "Str_Menu_ExportDocument", "File", Cap("CtrlShift:E")),
+            B("%ctrl%+%shift%+P",     "Str_Protect_Name",   "File", Cap("CtrlShift:P")),
 
             B("V",               "Str_Lbl_Select",    "Tools", Cap("V")),
             B("1 (%or% T)",      "Str_Lbl_Text",      "Tools", Cap("D1"), Cap("T")),

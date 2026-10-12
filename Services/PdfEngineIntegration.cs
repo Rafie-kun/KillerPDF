@@ -708,6 +708,93 @@ internal static class PdfEngineIntegration
         }
     }
 
+    /// <summary>Writes a copy of an unencrypted PDF protected with Standard Security passwords.</summary>
+    internal static void ProtectWithPasswords(string sourcePath, string destinationPath,
+        KillerPdf.Engine.Security.PdfPasswordEncryptionOptions options, bool allowSignatureInvalidation)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(sourcePath);
+        ArgumentException.ThrowIfNullOrWhiteSpace(destinationPath);
+        PdfDocument document = PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(sourcePath));
+        ReplaceWithBuiltResult(destinationPath, PdfDocumentEncryptionWriter.EncryptWithPasswords(
+            document, options, allowSignatureInvalidation));
+    }
+
+    /// <summary>Writes a copy of an unencrypted PDF that only the listed certificate holders can open.</summary>
+    internal static void ProtectForRecipients(string sourcePath, string destinationPath,
+        KillerPdf.Engine.Security.PdfCertificateEncryptionOptions options, bool allowSignatureInvalidation)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(sourcePath);
+        ArgumentException.ThrowIfNullOrWhiteSpace(destinationPath);
+        PdfDocument document = PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(sourcePath));
+        ReplaceWithBuiltResult(destinationPath, PdfDocumentEncryptionWriter.EncryptForRecipients(
+            document, options, allowSignatureInvalidation));
+    }
+
+    /// <summary>
+    /// Accepts a recipient certificate with an RSA key whose Key Usage, if any, permits key
+    /// encipherment, which is what certificate-recipient encryption needs.
+    /// </summary>
+    internal static bool CanEncryptForRecipient(
+        System.Security.Cryptography.X509Certificates.X509Certificate2 certificate)
+    {
+        ArgumentNullException.ThrowIfNull(certificate);
+        using (var key = System.Security.Cryptography.X509Certificates.RSACertificateExtensions.GetRSAPublicKey(certificate))
+            if (key is null) return false;
+        foreach (var extension in certificate.Extensions)
+            if (extension is System.Security.Cryptography.X509Certificates.X509KeyUsageExtension usage)
+                return (usage.KeyUsages
+                    & System.Security.Cryptography.X509Certificates.X509KeyUsageFlags.KeyEncipherment) != 0;
+        return true;
+    }
+
+    /// <summary>Reports whether a PDF is encrypted for certificate recipients rather than passwords.</summary>
+    internal static bool IsCertificateEncrypted(string path)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        try
+        {
+            PdfDocument document = PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(path));
+            if (!document.CrossReferences.TryGetTrailerValue(new PdfName("Encrypt"u8), out PdfObject value))
+                return false;
+            if (value is PdfIndirectReference reference) value = document.Resolve(reference);
+            return value is PdfDictionary encryption
+                && encryption.TryGetValue(new PdfName("Filter"u8), out PdfObject filter)
+                && filter is PdfName name && name.Equals(new PdfName("Adobe.PubSec"u8));
+        }
+        catch (Exception exception) when (exception is not OutOfMemoryException)
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Opens a certificate-encrypted PDF with the first certificate whose private key unlocks it and
+    /// writes a decrypted working copy. Returns false when none of the certificates can open it.
+    /// </summary>
+    internal static bool TryRemoveCertificateEncryption(string sourcePath, string destinationPath,
+        IEnumerable<System.Security.Cryptography.X509Certificates.X509Certificate2> certificates)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(sourcePath);
+        ArgumentException.ThrowIfNullOrWhiteSpace(destinationPath);
+        ArgumentNullException.ThrowIfNull(certificates);
+        byte[] source = File.ReadAllBytes(sourcePath);
+        foreach (var certificate in certificates)
+        {
+            if (!certificate.HasPrivateKey) continue;
+            PdfDocument document;
+            try { document = PdfDocument.OpenWithCompatibilityRecovery(source, certificate); }
+            catch (Exception exception) when (exception is System.Security.Cryptography.CryptographicException
+                or ArgumentException or InvalidOperationException or NotSupportedException)
+            {
+                continue;   // not a recipient, or a key that cannot decrypt; try the next one
+            }
+            ReplaceWithBuiltResult(destinationPath, PdfDocumentWriter.Write(document,
+                new PdfDocumentWriteOptions { RemoveEncryption = true }));
+            return true;
+        }
+        return false;
+    }
+
     /// <summary>Attempts a zero-rotation copy through the engine.</summary>
     internal static bool TryCreateZeroRotationCopy(
         string sourcePath, string destinationPath)

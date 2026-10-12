@@ -363,6 +363,11 @@ namespace KillerPDF
                 if (!e.IsRepeat) ExportDocument_Click(this, e);
                 e.Handled = true;
             }
+            else if (e.Key == Key.P && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
+            {
+                if (!e.IsRepeat) OpenProtectDialog();
+                e.Handled = true;
+            }
             else if (e.Key == Key.D && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
             {
                 if (!e.IsRepeat) OpenDocumentToolsMenu();   // DocumentTools.cs; the next letter picks the tool

@@ -53,6 +53,14 @@ namespace KillerPDF
                 catch { srcPath = path; }
             }
 
+            // Certificate-recipient encryption has no password to ask for: it opens with a personal
+            // certificate whose private key belongs to one of the recipients.
+            if (PdfImport.PdfFileHasEncryption(srcPath) && PdfEngineIntegration.IsCertificateEncrypted(srcPath))
+            {
+                OpenCertificateProtected(srcPath, path);
+                return;
+            }
+
             try
             {
                 _doc?.Close();
@@ -297,6 +305,55 @@ namespace KillerPDF
             {
                 EndCancellableOp();
             }
+        }
+
+        // Opens a PDF encrypted for certificate recipients with the first personal certificate that
+        // unlocks it. The decrypted working copy lives in temp, like a password-protected open.
+        private void OpenCertificateProtected(string srcPath, string displayPath)
+        {
+            try
+            {
+                IReadOnlyList<System.Security.Cryptography.X509Certificates.X509Certificate2> certificates;
+                try { certificates = Services.Signing.WindowsCertificateStore.ListEncryptionCertificates(); }
+                catch (System.Security.Cryptography.CryptographicException) { certificates = []; }
+                var tempDec = App.MakeTempFile("dec");
+                if (!PdfEngineIntegration.TryRemoveCertificateEncryption(srcPath, tempDec, certificates))
+                {
+                    KillerDialog.Show(this, Loc("Str_Dlg_NoRecipientCertificate"), Loc("Str_Dlg_AppTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                _doc?.Close();
+                _doc = null;
+                _doc = PdfWorkingDocument.Open(tempDec);
+                _currentFile = tempDec;
+                FinishOpenFile(displayPath, tempDec);
+                _openedFromProtected = true;
+            }
+            catch (Exception ex)
+            {
+                KillerDialog.Show(this, string.Format(Loc("Str_Dlg_FailedOpen"), ex.Message), Loc("Str_Dlg_AppTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // Writes an encrypted copy of the saved document. Unsaved edits are saved first so the copy
+        // matches the screen; the open file itself stays as it is.
+        private void OpenProtectDialog()
+        {
+            if (_doc is null) { KillerDialog.Show(this, Loc("Str_Msg_OpenFirst")); return; }
+            CommitActiveTextBox();
+            if (_isDirty || string.IsNullOrEmpty(_originalFile) || !File.Exists(_originalFile))
+            {
+                var ask = KillerDialog.Show(this, Loc("Str_Dlg_SaveBeforeProtect"),
+                    "KillerPDF", MessageBoxButton.OKCancel);
+                if (ask != MessageBoxResult.OK) return;
+                SaveInPlace();
+                if (_isDirty || string.IsNullOrEmpty(_originalFile) || !File.Exists(_originalFile))
+                    return;   // save was canceled or failed
+            }
+            // A document still opened from a protected file reads from its decrypted working copy.
+            string source = _openedFromProtected && !string.IsNullOrEmpty(_currentFile) && File.Exists(_currentFile)
+                ? _currentFile : _originalFile!;
+            new ProtectDocumentDialog(this, source, _originalFile!).ShowDialog();
         }
 
         // Strips a PDF's encryption on a background thread (so the window doesn't freeze), then opens the
@@ -745,6 +802,7 @@ namespace KillerPDF
                 var removePw = MakeMenuItem(Loc("Str_Menu_RemovePassword"), (_, _) => SaveInPlace(), null, "");
                 removePw.IsEnabled = _openedFromProtected;
                 menu.Items.Add(removePw);
+                menu.Items.Add(MakeMenuItem(Loc("Str_Menu_ProtectDocument"), (_, _) => OpenProtectDialog(), "Ctrl+Shift+P", ""));
                 menu.Items.Add(new Separator());
                 menu.Items.Add(BuildDocumentToolsMenu());
             }

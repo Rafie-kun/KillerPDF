@@ -403,6 +403,7 @@
 </table>
 <h3 id="encryption-is-stripped-at-open" data-i18n="pt_221">Encryption and permissions</h3>
 <p data-i18n="pt_222">The KillerPDF.Engine authenticates Standard Security revisions 2 through 6, including RC4, AES-128, AES-256 and crypt filters. It distinguishes user and owner authentication, exposes the document's operation permissions, and enforces those permissions at the high-level editing APIs. Authenticated documents can be updated incrementally or rewritten while preserving encryption; decryption is an explicit workflow rather than a prerequisite for every edit.</p>
+<p data-i18n="pt_244">The engine also encrypts a whole document as a rewrite, either with AES-256 passwords and permissions or for certificate recipients, and the desktop app opens certificate-encrypted files with a matching certificate from the Windows store.</p>
 <h3 id="network-and-partial-reads" data-i18n="pt_126">Network and partial reads</h3>
 <p data-i18n="pt_127">UNC shares and the WSL <code>\\wsl$</code> 9P filesystem sometimes hand back partial reads, which the parser sees as a truncated file. Before opening anything on a network path, KillerPDF copies it to a local temp with a single read-to-EOF, then opens the complete copy - while keeping your original path for display and Save.</p>
 <h3 id="repair-works-on-a-copy" data-i18n="pt_128">Repair works on a copy</h3>
