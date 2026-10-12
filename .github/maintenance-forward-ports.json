@@ -1663,6 +1663,11 @@
       "maintenanceCommit": "f69d4a894365f78b6214750ff5a099a5267c1863",
       "developmentCommit": "8c700b65eedfdae10ad7a197e6ed59b5281378fa",
       "reason": "Both lines record the same verified #444 packaging pair and release note. Each current Fixed section is reordered by impact while preserving every original bullet, credit and issue reference. The sections contain different branch-specific histories, so their complete changelog patches differ."
+    },
+    {
+      "maintenanceCommit": "f21fc7ecb246b2b0299154514ac39a2a479460fe",
+      "developmentCommit": "b5255ce3a8250eb27943adb9c4f64db156de4438",
+      "reason": "Maintenance adopts the reviewed development 98SE outline correction: active and inactive outline right margins are now -7 on both lines, and both tab layout tests assert those values. The development commit also corrected vertical drag detection, which is not part of this port. The maintenance changelog line is branch-specific."
     }
   ]
 }
