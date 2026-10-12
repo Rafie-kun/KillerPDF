@@ -68,7 +68,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Added a Film Grain switch to the theme menu. It is on by default, and turning it off removes the grain texture from every surface.
 
 ### Changed
-- The wordmarks use Punktype and Lacquer, and the interface text, headings and footers use Killer Sans, in place of the typewriter font in the app and on the website.
+- The wordmarks use Punktype and Lacquer with a soft shadow on every theme, and the app, installer and website use Killer Sans in place of the typewriter font. The installer also matches the new family setup layout.
 - Moved primary rendering off the UI thread, prioritized bounded viewport work with cancellation, and added visible-region zoom refinement and separate display-backend comparison tools.
 - Replaced PDFium and Docnet.Core with engine-owned rendering, improved damaged cross-reference and missing-catalog recovery and JPEG image rendering speed, and removed native file-repair and link-extraction fallbacks.
 
@@ -105,9 +105,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 ### Fixed
 - Restored saving markup to tagged PDFs while preserving their structure, and finished markup processing before overwriting the destination.
-- Prevented a failed Save or Save As from damaging the existing file by finishing the new copy before replacing it.
+- A failed Save or Save As no longer damages the existing file, because the new copy is finished before it replaces the file.
 - Saving an Edit Text change now removes the replaced words from the file, so they can no longer be found or copied and no longer reappear when the line is edited again.
-- Preserved unsaved annotations when moving, reordering, duplicating, or merging pages and when removing a link. A duplicated page carries a copy of them.
+- Unsaved annotations survive moving, reordering, duplicating and merging pages and removing a link.
 - Copied and pasted annotations, and those on a duplicated page, now keep a text box's letter spacing, a shape's fill, and the erased parts of a cover.
 - Preserved pasted images and other unsaved annotations when inserting blank pages (#388).
 - Preserved shapes and other annotations on retained pages when deleting PDF pages (#429).
@@ -121,12 +121,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Hardened native library loading and release artifact verification.
 - Kept drawings and signatures aligned when saving or printing cropped pages (#418).
 - Fixed encrypted files whose encryption dictionary is slightly damaged opening as blank pages.
-- Release packaging now signs the application and engine DLLs and checks real window startup (#444).
-- Prevented zero-height 98SE annotation bars from continuously retrying layout and blocking input; positioning resumes after load, visibility changes and restore.
+- Release packaging signs the application and engine DLLs and checks real window startup (#444), and updates no longer lock the installation folder or fail while Windows briefly keeps the previous version's files open (#434).
+- 98SE annotation bars no longer block input at zero height, and 98SE document tabs line up with the tab strip.
 - Prevented parallel PNG exports from intermittently losing pages when the system encoder lookup raced.
 - Prevented crashes from stale or repeated tab-close requests (#353).
-- Prevented the color picker from crashing when changing stamp or annotation colors with gradient themes (#442).
-- Prevented the app window from going black when minimizing and restoring (#415).
+- Fixed color picker crashes with gradient themes (#442, #443).
+- The window no longer goes black after minimizing, restoring or switching back from another window (#415).
 - Restored document rewriting, optimization, and resource pruning for documents whose page resources include image, shading, or pattern streams.
 - Recovered undeclared CCITT scan-line markers and one-bit grayscale image masks in malformed PDFs.
 - Restored valid font-code decoding and missing page text, corrected pattern placement, and repaired missing or corrupt JPEG 2000 image tiles.
@@ -137,7 +137,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Fixed blank pages where a black-and-white mask image is filled with a gradient or pattern.
 - Fixed content that nearly vanished behind semi-transparent masks drawn in a color-managed group.
 - Fixed colors on pages that adjust them with graphics-state transfer functions.
-- Kept update helpers and setup from locking the installation folder through their working directory (#434).
 - OK in dialogs that fade out on close is no longer treated as Cancel, so bookmark generation, table of contents, page label, initial view, layer, macro, navigation repair, portfolio, attachment, image and blank page dialogs apply their changes.
 - Dragging one page of a multi-page selection in the sidebar now moves the whole selection instead of only the pressed page.
 - Search highlights and text selection now land on the right text on rotated pages, and Crop no longer flips the box vertically on upside-down pages.
@@ -145,9 +144,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Edit Text now edits text that runs sideways or upside down in place, and an edit stays on its cover when the page is rotated afterward.
 - Included current form field edits in print previews and output without requiring a save and reopen.
 - Preserved visible pixels when pasted clipboard images contain an empty alpha channel (#389).
-- Restored the document display after minimizing or switching back from another window (#415).
 - Prevented packaged application metadata from drifting from compiled resources.
-- Retried installation when Windows briefly keeps the previous version's files open (#434).
 - Corrected WinGet release manifests to run the installer and include the required desktop runtime (#386).
 - WinGet now requests elevation for its machine-wide installation (#439).
 - Refreshed legacy PDF file associations to open the installed app instead of the installer (#393).
@@ -179,11 +176,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Restored title-bar controls, including the close button and logo zoom control.
 - Restored reliable title-bar dragging and double-clicking from maximized windows (#380).
 - Kept native window resize borders, preserved the visible Continuous position during resizing, and retained the custom caption (#372, #373, thanks @Ryokoxx).
-- Used the destination monitor for the first maximize after a cross-monitor drag (#363).
-- Used the destination monitor when calculating maximized client bounds during a cross-monitor move (#363).
-- Removed a size limit that could prevent maximizing correctly after moving to a larger monitor (#363).
-- Kept scroll and manual zoom settings independent between document tabs and restored them when reopening files (#399).
-- Preserved each document tab's saved scroll position while rebuilding its viewport (#399).
+- Maximizing after moving to another monitor uses that monitor's size and bounds (#363).
+- Each document tab keeps its own scroll position and zoom, including when its viewport is rebuilt or the file is reopened (#399).
 - Kept comparison labels readable, preserved underscores in file names, and separated display, save, and working-copy paths (#370, #371, #376, thanks @Ryokoxx).
 - Restored the Compare PDFs toolbar caption and kept its choices open when launched from the overflow menu (#360).
 - Opened PDF comparison with equal document pane widths, excluding the sidebar (#359).
@@ -229,28 +223,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Fixed wrong colors in JPEG images stored as plain RGB without a color marker.
 - Fixed noise in some refined black-and-white JBIG2 images.
 - Fixed embedded Type 1 fonts drawn with a substitute when they define their subroutines twice.
-- Kept app icons sharp at fractional display DPI and app zoom by caching exact pixel sizes from a covering source and aligning the final draw to device pixels.
+- App and title bar icons stay sharp at fractional DPI and app zoom, and the title bar icon is slightly larger.
 - Preserved descriptor font names and source baselines when editing existing PDF text (#431).
 - Restored split-view state and polished document tabs, flyouts, shortcut colors, footer and sidebar controls, and 98SE chrome.
 - Kept localized toolbar captions and website Help key names complete and visible (#230).
 - Completed remaining dialog and installer translations and refreshed the website guides.
 - Kept the footer page number current during Continuous navigation and scaled footer controls with the interface (#354, #355).
-- Aligned the shortcuts panel and language menu, and kept rail flyouts beside their opening buttons with an 8-unit inset from the content edge.
+- Menus fade again, and menus, submenus, flyouts, the shortcuts panel and the language menu line up with their controls and screen edges.
 - Kept the KillerPDF icon visible on Windows 11 taskbar buttons throughout slower portable launches.
 - The installer and uninstaller have their own taskbar buttons, labeled "KillerPDF Installer" and "Uninstall KillerPDF", with the app icon.
-- Corrected theme colors, wordmarks, footers and dialog controls, including Light/Yellow, 98SE Red and cream Blood, Greed and Cyanotic accents. Added a shadow to the PDF accent in the Light/Yellow wordmark.
+- Corrected theme colors, wordmarks, footers and dialog controls, including Light/Yellow, 98SE Red and the cream Blood, Greed and Cyanotic accents. Accent-colored toolbar icons keep a dark halo on Light/Yellow.
 - The page label, initial view, macro, navigation audit, portfolio and attachment dialogs use theme colors for their help text, lists and drop-downs, and the longer ones size to their contents instead of leaving empty space.
-- Main window, dialog, and launcher title bar icons now use sharp size-matched images.
 - Kept the Transform preview page shadow visible at the top and bottom.
 - Evenly spaced About options, moved startup update checks to the bottom, and aligned Clear all Data with the top row.
 - Aligned website footer versions with the published release across all languages.
-- Rail right-click menus align 8 pixels from the content edges; the night-mode menu aligns with its icon.
-- Submenus attach consistently to their opening rows, with native direction and screen-edge placement.
 - Reduced memory when several PDF font names map to the same installed Windows font.
-- Accent-colored toolbar icons keep a dark halo on the Light theme's Yellow accent, so they no longer fade into the bar.
-- The wordmark has a soft shadow on the Light theme, the same lift it has on the dark themes, so it no longer looks thin on the light title bar.
-- The title bar wordmark's shadow sits a little lower and softer, matching the rest of the family.
-- The title bar icon is 27px and has its own 27px image, so it is a little larger and sharper.
 
 ## [1.8.81] - Unreleased
 
