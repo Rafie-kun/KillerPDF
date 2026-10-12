@@ -31,6 +31,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Corrected theme colors, wordmarks, footers and dialog controls, including Light/Yellow, 98SE Red and the cream Blood, Greed and Cyanotic accents. Accent-colored toolbar icons keep a dark halo on Light/Yellow.
 - App and title bar icons stay sharp at fractional DPI and app zoom, and the title bar icon is slightly larger.
 - Corrected Vietnamese website translations and theme look counts.
+- Dialog action buttons are hollow in the accent color and fill with the button gradient on hover, like the rest of the Killer Tools family, instead of showing a solid block with hidden text.
 
 ## [1.8.80] - 2026-10-05
 

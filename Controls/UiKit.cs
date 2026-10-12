@@ -467,7 +467,8 @@ namespace KillerPDF
             return link;
         }
 
-        // Dialog/popup buttons. accent==true is the primary (fills solid accent on hover); false is secondary.
+        // Dialog/popup buttons. accent==true is the primary: hollow in the accent at rest, filled with the
+        // family button gradient on hover, the same as OutlineButton. false is secondary.
         public static Button Make(object content, bool accent)
         {
             if (KillerPDF.Services.ThemeManager.Current == KillerPDF.Services.Theme.SE98)
@@ -483,8 +484,11 @@ namespace KillerPDF
                 return button;
             }
             var themed = accent
-                ? Make(content, Brush("SelectionBg"), Brush("PrimaryBrush"), Brush("SelectionFg"), Brush("OnPrimaryBrush"), Brush("SelectionButtonBorderBrush"))
+                ? Make(content, Brush("OutlineFaceBrush"), Brush("OutlineHoverBrush"), Brush("OutlineTextBrush"), Brush("OutlineHoverTextBrush"), Brush("OutlineRestBrush"))
                 : Make(content, Brush("PaneBrush"), Brush("SurfaceHoverBrush"), Brush("TextBrush"), Brush("TextBrush"), Brush("CardBorderBrush"));
+            // The accent face is transparent, so its edge is a stroke. The inset-fill outline would
+            // show through the hollow face as a solid block.
+            if (accent) themed.Template = ButtonTemplate();
 
             // Make(object,bool) is used by long-lived annotation bars and modeless tool windows.
             // A local brush value would preserve the palette that happened to be active when the
@@ -492,15 +496,15 @@ namespace KillerPDF
             // changes repaint the existing button instead of leaving an old-colored island.
             void ApplyRest()
             {
-                themed.SetResourceReference(Control.BackgroundProperty, accent ? "SelectionBg" : "PaneBrush");
-                themed.SetResourceReference(Control.ForegroundProperty, accent ? "SelectionFg" : "TextBrush");
-                themed.SetResourceReference(Control.BorderBrushProperty, accent ? "SelectionButtonBorderBrush" : "CardBorderBrush");
+                themed.SetResourceReference(Control.BackgroundProperty, accent ? "OutlineFaceBrush" : "PaneBrush");
+                themed.SetResourceReference(Control.ForegroundProperty, accent ? "OutlineTextBrush" : "TextBrush");
+                themed.SetResourceReference(Control.BorderBrushProperty, accent ? "OutlineRestBrush" : "CardBorderBrush");
             }
             void ApplyHover()
             {
-                themed.SetResourceReference(Control.BackgroundProperty, accent ? "PrimaryBrush" : "SurfaceHoverBrush");
-                themed.SetResourceReference(Control.ForegroundProperty, accent ? "OnPrimaryBrush" : "TextBrush");
-                themed.SetResourceReference(Control.BorderBrushProperty, accent ? "SelectionButtonBorderBrush" : "CardBorderBrush");
+                themed.SetResourceReference(Control.BackgroundProperty, accent ? "OutlineHoverBrush" : "SurfaceHoverBrush");
+                themed.SetResourceReference(Control.ForegroundProperty, accent ? "OutlineHoverTextBrush" : "TextBrush");
+                themed.SetResourceReference(Control.BorderBrushProperty, accent ? "OutlineHoverBrush" : "CardBorderBrush");
             }
 
             // These handlers are registered after the explicit-color factory's handlers, so the
