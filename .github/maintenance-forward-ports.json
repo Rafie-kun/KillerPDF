@@ -1673,6 +1673,11 @@
       "maintenanceCommit": "2835d6fc4c507a1e622ae705bb11ca132709106c",
       "developmentCommit": "de2b63c4932c0aac2791f0393236814bf8a8d2a5",
       "reason": "Both lines consolidate the same 1.8.90 changelog entries with identical wording for save safety, annotations, #441 to #444 and #434 packaging, rotated pages, 98SE bars and tabs, menus, theme colors and icons. Development also merges its own duplicate #363, #399 and #415 lines and omits the 1.8-only #441 text extraction fix and Vietnamese website line. Changelog-only, no source change."
+    },
+    {
+      "maintenanceCommit": "61a1fa4b5c227f1e8e7cdd8bbb41d24dda5c2f7c",
+      "developmentCommit": "52301a19c1e95e2de0e6b4bc7d2d7d45e4f47eaa",
+      "reason": "Both sites use the same fourteen 1.8.90 screenshots (identical PNG bytes), the same SHOTS list in index.html and the same appended shot_1890 caption translations for all eighteen site languages. The README screenshot table exists only on maintenance; the development README has no screenshot section."
     }
   ]
 }
