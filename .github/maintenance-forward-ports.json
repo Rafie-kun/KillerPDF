@@ -522,7 +522,7 @@
     {
       "maintenanceCommit": "8a038fa8cd5db4e3fddfac2cedba92daf3586aca",
       "developmentCommit": "b5255ce3a8250eb27943adb9c4f64db156de4438",
-      "reason": "The tab-drag behavior and layout tests were ported in edba8f0. Development then intentionally corrected vertical drag detection and the right outline edge in b5255ce, changing the active and inactive 98SE outline right margin from -6 to -7. Current source preserves that explicit development correction. A rendered tab comparison has not been completed in this task."
+      "reason": "The tab-drag behavior and layout tests were ported in edba8f0. Development intentionally corrected vertical drag detection and the right outline edge in b5255ce, changing active/inactive 98SE outline right margins from -6 to -7. Twelve isolated renders of current tab templates and theme resources cover both active positions at 100%, 125% and 150% pixel scale; the difference remains at the reviewed right edges and preserves continuity. Both lines pass five tab-layout tests. Complete app-window rendering is not certified by the isolated fixture."
     },
     {
       "maintenanceCommit": "d7bb36ad62a3493896c51fb02210664e3ecb9b0c",
@@ -1473,6 +1473,196 @@
       "maintenanceCommit": "ca5491e55535d0ebe5d320d3a812fdfa22b1f0cd",
       "developmentCommit": "698b512a32b5d81314666950a2e3b62be0dc89fd",
       "reason": "All 32 committed file hashes match the packaging supporting-task handoff. The 16 functional patches match after accounting for the overview comment step number. Both lines select the App EXE and App/Engine DLLs, validate final signatures before repacking, regenerate final-byte manifests, and exercise isolated MainWindow startup. Existing development Engine ReadyToRun replacement finishes before target selection. Missing-engine and unsigned-repack negative checks and unsigned GUI startup were verified by the supporting task. Signed release verification and the reporter machine policy remain unverified."
+    },
+    {
+      "maintenanceCommit": "c9c97aa7b38144afc2e02b8a3af7d780256c770b",
+      "developmentCommit": "6f90fa4f0a07702ad44491ed870c0d6ad8e4a9f4",
+      "reason": "WindowFx implementation, linked test input and regression test changes match. Current code retains the DialogResult across the deferred close, avoids closing twice and handles modeless windows. All four existing acceptance, cancellation and modeless cases pass on both committed snapshots."
+    },
+    {
+      "maintenanceCommit": "b6c233a3514429a5823b399e875239379fdfc49f",
+      "developmentCommit": "21a0c7e0e70a5c27daf64ab535650d4a431a0ab0",
+      "reason": "Development uses its existing RedactionGeometry helper where maintenance introduced PageCanvasGeometry. The five common point/rectangle/overlap functions use the same formulas for 0, 90, 180 and 270 degrees, including clamping. Current search, selection and Crop callers pass effective rotation. Thirteen maintenance geometry cases and twenty-one development geometry/redaction cases pass; development retains its extra measurement helper."
+    },
+    {
+      "maintenanceCommit": "7236d339a72c20871da22268f332198045266268",
+      "developmentCommit": "2e65082f7057942c22607116c76f38479f1d178b",
+      "reason": "The form snapshot, disposable print-source implementation and print call-path patches match. Development already linked PdfWorkingDocument into tests and uses collection expressions in three equivalent test values. Four print-source cases pass on both snapshots, including saved/unsaved form values, copied dictionaries and rejection of a source-as-destination path."
+    },
+    {
+      "maintenanceCommit": "69e2210e2d303a01d516f730e4c12b8ec8436ffa",
+      "developmentCommit": "9885a194f9b275addd7451d0487176612fd8b226",
+      "reason": "The About updater WorkingDirectory and launcher SetCurrentDirectory patches match. Current code uses the temp directory for both helpers. Maintenance also opened its next patch and engine package version; development intentionally remains 1.9.0 with an Unreleased heading and does not inherit maintenance version numbers."
+    },
+    {
+      "maintenanceCommit": "0449f73e9cba5a19c2175f912428afe4e1db285f",
+      "developmentCommit": "9b23b92c157e73b142487c91b1d7cb76cf326a9f",
+      "reason": "All changed form integration, widget grayscale handling, incremental form color handling, selected-outline text, signature pen brush and Yellow palette patches match. MainWindow selection foreground and the 66-case maintenance integration tests are retained; current development integration has additional cases. Focused runs pass 66 maintenance and 76 development integration cases. Version/changelog metadata and the development README remain branch-specific."
+    },
+    {
+      "maintenanceCommit": "39c75096781ce259f5dacfdabc779d75f43d7055",
+      "developmentCommit": "a6fb2fa3132cf36a4e6c3bcc1e39cfcb1d01a8d5",
+      "reason": "Both TaskbarIdentity and WindowChrome functional patches match: target-typed property keys, the PropertyKey primary constructor and null-conditional chrome radius assignments. Development combines this cleanup with additional analyzer repairs; current taskbar code remains shared."
+    },
+    {
+      "maintenanceCommit": "e88023e99c19e6df85fb1315e253885f70d6b46a",
+      "developmentCommit": "214cb32102c860e30e6d6971f9b03c1777298675",
+      "reason": "The complete TaskbarIdentity interop patch matches: generated COM interface, LibraryImport declaration, StrategyBasedComWrappers conversion and release of the native pointer. Development also repairs engine/interop diagnostics in its broader commit. No native taskbar interaction is claimed by this source review."
+    },
+    {
+      "maintenanceCommit": "31d61de7fee8c22c699ed92e188b915cbf9f4924",
+      "developmentCommit": "735f289bbad444194ccbce7b8ce1e00e512eceb0",
+      "reason": "The SHGetPropertyStoreForWindow declaration parameter cleanup is identical. Development additionally renames unused WIC interop parameters; those development-only edits do not replace or omit the taskbar fix."
+    },
+    {
+      "maintenanceCommit": "5a313a8865579209d73affb0d8a3f04132c84c02",
+      "developmentCommit": "75b17ea268f967840ae321e1fc3edaad68d84393",
+      "reason": "All maintenance changes to AppIcon, DialogChrome, SettingsPanel and WindowChrome have exact functional patch correspondence. Development includes further style/analyzer cleanup. No additional code port is needed."
+    },
+    {
+      "maintenanceCommit": "6f5860d0f11831ea5669fac81229ae048439236c",
+      "developmentCommit": "070417d12543d58f750f890f6e3b8336e9f1423c",
+      "reason": "Both menu-divider tests permit an explicit MenuSeparatorBrush when it matches CardBorderBrush instead of requiring it to be absent. Development additionally asserts the 98SE gray divider and excludes that reviewed explicit case. Current maintenance 98SE CardBorderBrush and MenuSeparatorBrush both resolve to gray. All five separator tests pass on each snapshot."
+    },
+    {
+      "maintenanceCommit": "bae58eea1e7a2ed1d0b8668a73b3e2d7e2f1c6ea",
+      "developmentCommit": "efb11c451c1b0e3b83f7b0faf9ea8da4f9325be8",
+      "reason": "The AppIcon classes, DPI and app-zoom hook changes, dialog and installer icon markup, project embedded-resource declarations and master icon addition all match. Current AppIcon files and the decoded 670 by 670 master PNG are byte-identical between lines. Development has no missing part of this twelve-file change."
+    },
+    {
+      "maintenanceCommit": "3a31b6a3e0b4316e7a55ea014a86b084738bcfbe",
+      "developmentCommit": "1ff6e00bacc59c6c1440dfe968a64389f08b2e46",
+      "reason": "Maintenance supports loose root, runtimes/win-x64/native and woven PDFium payloads in its existing fixture runner. Development already uses PdfPageRenderer through KillerPdf.Engine and has no PDFium preload requirement. Its actual fixture path still parses, renders, saves and reopens the synthetic working document; the different renderer architecture is preserved."
+    },
+    {
+      "maintenanceCommit": "3e236f581f34e564a2db47b3e9f2dd3c6049ff4a",
+      "developmentCommit": "7ce04393f2f9a837276dbfc0b9c17ede395b28ab",
+      "reason": "The current public guide has fifty pages on both lines, with identical extracted text and pixel-identical Poppler renders on all fifty pages at 80 DPI. Current README wordmark and banner PNG bytes and dimensions also match. PDF byte IDs/metadata differ, so binary Git patch IDs are not used as the visual-content proof."
+    },
+    {
+      "maintenanceCommit": "c45a3c9fde1b3ec0bd3b439324a73ab07fa83b82",
+      "developmentCommit": "fdff9e90919bcacd36c2d9ac8cadc6547b95a813",
+      "reason": "Both commits replace the brochure and retire the same Iceland font/license copies. The current public guides have fifty pixel-identical rendered pages and identical extracted text. Subsequent Punktype/Lacquer branding supersedes the temporary Iceland/Freckle Face style; retired typewriter-headers.woff2 is absent from development."
+    },
+    {
+      "maintenanceCommit": "b2e6f0853332c1957893208a355d2e65e40b6d99",
+      "developmentCommit": "7ce04393f2f9a837276dbfc0b9c17ede395b28ab",
+      "reason": "The current fifty-page guide is present and renders identically on both lines; the obsolete fifteen-page generator is absent. Development technical.html contains the fifty-page guide description, and approved effective Vietnamese guide wording was restored in 8ae7813. Later branding updated the same preserved guide instead of resurrecting the removed generator."
+    },
+    {
+      "maintenanceCommit": "94916743a85646ac5fcc6f1027a61e8f9b32ee28",
+      "developmentCommit": "a34b45b1ef3fdbcf105b2cac6f3667f031537338",
+      "reason": "The .gitattributes PDF binary rule, maintenance keyboard/help corrections, approved guide/OCR translation values and Light Yellow swatch behavior were restored in 8ae7813. The fifty-page guide and current branding assets are retained; unsupported source/test totals were replaced with report links. This later development commit also removes stale maintenance PDFium/PdfPig technical claims and adds eighteen localized current-engine notes. Maintenance keeps its applicable renderer architecture."
+    },
+    {
+      "maintenanceCommit": "4d1db699b580b10db38a912dafea6b2b48f1e28b",
+      "developmentCommit": "1e8156444793793fdecfffd1d73ab1972dc58d1b",
+      "reason": "All eight publication-file patches match, including the 1.8.80 corpus report and run/summary CSVs. Current archived report/CSV bytes match maintenance; public site data differs only in later shared cache/branding presentation. No new benchmark run or development corpus pass is claimed."
+    },
+    {
+      "maintenanceCommit": "e21c8349b3e342c161b902867e7b753947e3a772",
+      "developmentCommit": "539e811e75286822b172bd50b88fac75c9ea2576",
+      "reason": "Current corpus and corpus-results pages retain the same stable 1.8.80 and 1.8.71 result data and central benchmark links as maintenance; their only current text difference is the shared kp.js cache number. The benchmark README and archived 1.8.80 report/run/summary CSV bytes match. Mutable development validation notes remain branch-specific. No new benchmark result is invented."
+    },
+    {
+      "maintenanceCommit": "9b542e827cbaf477548c35d20a9af268986ea74d",
+      "developmentCommit": "539e811e75286822b172bd50b88fac75c9ea2576",
+      "reason": "This maintenance merge reconciles the corpus publication commits. Both underlying publication changes are verified through 1e81564 and 539e811, and the current central links and archived 1.8.80 results match maintenance. The merge itself requires deliberate coverage because git cherry omits merges."
+    },
+    {
+      "maintenanceCommit": "75582aad884c173c1d11a72db40d53f4c80e5535",
+      "developmentCommit": "98e13c29dcd56721f3c0d1ae905ebe2019ed9fbf",
+      "reason": "The stable 1.8.80 October 5 date is preserved in the restored historical changelog section and development website download metadata. The 1.9 project, assembly and engine version metadata intentionally retain the separate 1.9.0 development state; no maintenance release date is applied to an unreleased development binary."
+    },
+    {
+      "maintenanceCommit": "4add1c52c9f6f8eaa97bb24f4b90312f316bb811",
+      "developmentCommit": "51831c4707868c5c0f1b7919f4623dcd889824fc",
+      "reason": "Maintenance renamed its open patch from 1.8.81 to 1.8.90 in application and engine metadata/changelogs. Development remains the separately authorized 1.9.0 line with matching assembly/file versions and its existing Unreleased heading. This maintenance-only patch number is not applied to development."
+    },
+    {
+      "maintenanceCommit": "1241143567a83b7926ac26e9ee1bb446f37038c5",
+      "developmentCommit": "98e13c29dcd56721f3c0d1ae905ebe2019ed9fbf",
+      "reason": "The current development release notes contain the picker guide/sizing, icon sharpness, blocked annotation-bar retry, color picker, Vietnamese site, menu/flyout and palette fixes with their issue references. Maintenance and development retain their own release summaries and grouping; the five missing dated maintenance sections are restored verbatim. The maintenance-only consolidation does not replace the larger 1.9 release section."
+    },
+    {
+      "maintenanceCommit": "d0c2e999a5e0e5db3ee94c6b09bf75b17707aaac",
+      "developmentCommit": "9ab797358a347a35b6a141b0919b5262d4ec0407",
+      "reason": "Both lines consolidate current theme release notes while retaining Light/Yellow, 98SE, cream wordmarks, footer, shortcuts, language-menu and picker behavior. Development has additional current release items, so its grouping and historical positions differ. Existing issue references and credits are preserved."
+    },
+    {
+      "maintenanceCommit": "b89d5592aa8a37f90694862ee7f4cde20ebaafb3",
+      "developmentCommit": "c04163ac551880a4d09be41df509b7273aaa3563",
+      "reason": "The Vietnamese rewrite is carried in development. Current effective maintenance Vietnamese values match development except seven deliberate technical/report values: six describe the 1.9 engine/OCR path and one removes unsupported summary counts. Refreshed screenshot captions and guide wording were subsequently reconciled. The legacy engine translation test-count difference is inactive after both old engine pages redirect; the current developer guide loads its Vietnamese documentation."
+    },
+    {
+      "maintenanceCommit": "a80634e1cbb218d14d9d538e9355e3f0ea23f9f5",
+      "developmentCommit": "099a0391700ec5b0ca65a1a022ba1bf30958aade",
+      "reason": "Current effective Vietnamese theme descriptions preserve the English theme proper names, and localized footer HTML retains Steve the Killer. The approved maintenance values match current development; different prior translation text explains the differing commit patches."
+    },
+    {
+      "maintenanceCommit": "de9379e3f0234ae921694c16e46407d41b06cdec",
+      "developmentCommit": "25a0eab52bfee012c65d0fe876b360699c4b2f56",
+      "reason": "Current shared website descriptions correctly state thirteen themes, eight accents for four neutral/98SE themes, forty-one looks and nineteen application languages. Effective Vietnamese descriptions match maintenance. The development README is intentionally a development-status document and does not contain the maintenance feature/look catalog."
+    },
+    {
+      "maintenanceCommit": "713c97a811e339bf0a56206c7e071e5e3737757c",
+      "developmentCommit": "698b512a32b5d81314666950a2e3b62be0dc89fd",
+      "reason": "Both current release scripts use PadRight(23) followed by an explicit space before the source archive digest, so names wider than the padding still separate from SHA-256. The source change is verified statically without executing either release script."
+    },
+    {
+      "maintenanceCommit": "4b04d7e391bbdaa1e17dba57dd6cfdd683892847",
+      "developmentCommit": "698b512a32b5d81314666950a2e3b62be0dc89fd",
+      "reason": "Both current release scripts apply Object.assign translation patches after reading the base landing dictionary. The same locale/key/string regex and Add-Member overwrite logic are present before used-key coverage. Effective website dictionaries were separately executed and checked. No release-script execution is claimed."
+    },
+    {
+      "maintenanceCommit": "3e7dbfefb5f5038adcaf2dbc14f7c06c158828d4",
+      "developmentCommit": "5ce2fa1196fc614282ad0c6c1949bae51293168b",
+      "reason": "Current website Punktype, Lacquer and Killer Sans font assets match maintenance byte for byte; the font role declarations and page preloads carry the same typography change. Development additionally sizes its hero information box to its actual rows and has different prior cache numbers. Current desktop/mobile pages render without horizontal overflow; the old engine entry point now routes to the matching developer guide."
+    },
+    {
+      "maintenanceCommit": "706fd425cdcb11722b5898619a3c1e6ba16ec25d",
+      "developmentCommit": "f2eefe3ddc1356e0086f2bb1f0f04856ae8baacc",
+      "reason": "Shared fonts, picker/control templates, settings/shortcut/sidebar/chrome edits and neutral palette changes have exact source correspondence. Later development edits restore current DialogChrome to byte-identical maintenance code and its filename translation to the same 3-DIP value. Current base theme differences are limited to the separately reviewed 98SE tab outline correction. Development-only controls and the unstaged KsCatDocs fallback remain outside this port."
+    },
+    {
+      "maintenanceCommit": "69f5407b8abbcba1844a3666671ba2cc0d3c3aaa",
+      "developmentCommit": "c1674adeae6743b18443e80c748181ff2434fcbe",
+      "reason": "The Punktype/Lacquer app and installer font resources, wordmark bindings, theme type declarations and title markup patches match maintenance. The KillerDialog patch differs only in the old comment text being replaced; its resulting wording and font behavior match. Current font asset bytes are identical."
+    },
+    {
+      "maintenanceCommit": "6300c5da66892cddf797bb96c760c48225dd05db",
+      "developmentCommit": "04d5ab0e1b6aa1d7bf9883ddf3d0f5571f63f1bf",
+      "reason": "Picker and launcher outline-underlay patches match. MainWindow uses different nickFace element numbers because development has more button templates, but each added ring binds the same corner radius, thickness, brush, margin, visibility and opacity to its own face. The geometry and binding mechanism are preserved rather than renaming unrelated template elements."
+    },
+    {
+      "maintenanceCommit": "47a619c5fb978785c4d685be08a0c22b54e44e85",
+      "developmentCommit": "1b1fc73e4d20adc68d2c53d921362a70501e3d88",
+      "reason": "All maintenance font/resource/markup and landing-page patches are present in development, including Killer Sans font bytes and shared CSS role declarations. Development carries additional changed files in the same commit, so complete patch IDs differ. Current shared font files are byte-identical."
+    },
+    {
+      "maintenanceCommit": "8d0555a6da62cb59721f73efb1d9850325484b09",
+      "developmentCommit": "dc32d87612b8ec208368122607bb5f493581a98c",
+      "reason": "All maintenance App resource/project and installer/launcher font-markup patches match their development counterparts. Development combines that launcher work with additional wordmark updates. Later Punktype/Lacquer resources supersede both temporary Iceland/Freckle Face copies consistently."
+    },
+    {
+      "maintenanceCommit": "5db45c4b08b097713846835b28c728cdfc30b5e5",
+      "developmentCommit": "043628465414eaf2bb1e0577fd1400327341af56",
+      "reason": "All maintenance website font, logo, stylesheet and page changes have source correspondence in development. MCP differs in pre-existing hero spacing and branch-specific card density, while current logo/icon assets, font roles and linked functionality match. Later Punktype/Lacquer branding supersedes the temporary fonts in both lines."
+    },
+    {
+      "maintenanceCommit": "9ac335c78ac3ec72a869c8d02070a05a28f2828e",
+      "developmentCommit": "36b7d6048c04e9528932180914ccb204ab1e4a87",
+      "reason": "Both current MCP pages use the same 206 by 183 icon-pair box, 170-pixel family icon, 90-pixel app icon and the same positioning/filter declarations. Desktop/mobile renders confirm those assets fit. Development has different surrounding hero/card typography from before this change; those unrelated values are not forced to maintenance."
+    },
+    {
+      "maintenanceCommit": "1fc3a0f557a635152003105bef703c0f57ea08bd",
+      "developmentCommit": "c38f66a5bf074130d5946ebf2d60a9d2eb0d9840",
+      "reason": "Both current MCP pages retain the installer download link/metadata update, shared tool/privacy content, limits source/list structure and sentence-list rendering. Current icon geometry is verified separately, and desktop/mobile navigation renders without script errors. Development has extra presentation rules and pre-existing hero padding; the cited maintenance change did not introduce that padding difference."
+    },
+    {
+      "maintenanceCommit": "f69d4a894365f78b6214750ff5a099a5267c1863",
+      "developmentCommit": "8c700b65eedfdae10ad7a197e6ed59b5281378fa",
+      "reason": "Both lines record the same verified #444 packaging pair and release note. Each current Fixed section is reordered by impact while preserving every original bullet, credit and issue reference. The sections contain different branch-specific histories, so their complete changelog patches differ."
     }
   ]
 }
