@@ -233,7 +233,7 @@ namespace KillerPDF
             double X(UIElement e, double x) => e.TranslatePoint(new Point(x, 0), host).X;
             bool split = ViewerB is not null && ViewerB.Visibility == Visibility.Visible && ViewerB.ActualWidth > 0;
             double target = split
-                ? (X(Viewer, Viewer.ActualWidth) + X(ViewerB, 0)) / 2   // the divider between the panes
+                ? (X(Viewer, Viewer.ActualWidth) + X(ViewerB!, 0)) / 2   // the divider between the panes
                 : X(Viewer, Viewer.ActualWidth / 2);                     // the middle of the pane
 
             double anchoredLeft = X(FooterDocumentControls, 0) - 8 - badgeWidth;   // just left of the page size
