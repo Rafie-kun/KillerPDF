@@ -473,6 +473,8 @@ namespace KillerPDF.Services
             if (!d.Contains("FooterVersionDividerVisibility")) d["FooterVersionDividerVisibility"] = Visibility.Visible;
             if (!d.Contains("KsCatTools")) d["KsCatTools"] = new SolidColorBrush(Color.FromRgb(0xff, 0xd3, 0x19));
             if (!d.Contains("KsCatOcr")) d["KsCatOcr"] = new SolidColorBrush(Color.FromRgb(0xff, 0x90, 0x1f));
+            // Document tools share the File color until a theme gives them their own.
+            if (!d.Contains("KsCatDocs") && d.Contains("KsCatFile")) d["KsCatDocs"] = d["KsCatFile"];
             if (!d.Contains("WindowFramePadding")) d["WindowFramePadding"] = new Thickness(0);
             if (!d.Contains("FrameOuterLightThickness")) d["FrameOuterLightThickness"] = new Thickness(0);
             if (!d.Contains("FrameOuterDarkThickness")) d["FrameOuterDarkThickness"] = new Thickness(0);
