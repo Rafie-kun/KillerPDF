@@ -521,8 +521,8 @@
     },
     {
       "maintenanceCommit": "8a038fa8cd5db4e3fddfac2cedba92daf3586aca",
-      "developmentCommit": "edba8f0fe1eb80ef66a87d3ac82b15c1b74468ff",
-      "reason": "The tab drag implementation and layout test patches match maintenance across all ten functional files."
+      "developmentCommit": "b5255ce3a8250eb27943adb9c4f64db156de4438",
+      "reason": "The tab-drag behavior and layout tests were ported in edba8f0. Development then intentionally corrected vertical drag detection and the right outline edge in b5255ce, changing the active and inactive 98SE outline right margin from -6 to -7. Current source preserves that explicit development correction. A rendered tab comparison has not been completed in this task."
     },
     {
       "maintenanceCommit": "d7bb36ad62a3493896c51fb02210664e3ecb9b0c",
@@ -703,6 +703,36 @@
       "maintenanceCommit": "72044297916d2c2058e37ebb48ae453634327385",
       "developmentCommit": "e8e7f102e52e67c1d26f80fe751c84480ca6c10c",
       "reason": "The #441 blocked-PdfPig text-hover crash applies only to 1.8. The existing 1.9 commit removed PdfPig from the project and replaced TextRunService extraction with the custom engine. Current tracked references and the text-service call path confirm the blocked dependency is absent, so no product forward-port is needed. Maintenance's isolated blocked-load regression failed before the fix; all 431 app tests and the Release build pass afterward."
+    },
+    {
+      "maintenanceCommit": "4d38e01bbf24918136bb97dd95872df2cfad7500",
+      "developmentCommit": "3489d16b24f3e78d881d2231a951ebe62a993006",
+      "reason": "The localized comparison close shortcut and its regression assertion match maintenance."
+    },
+    {
+      "maintenanceCommit": "60d03cb8c81c5972df3ef697746b18763e0d33af",
+      "developmentCommit": "f97db5449eeb500659923497d45433929b02ad07",
+      "reason": "The installer smoke test isolation and regression assertion match maintenance."
+    },
+    {
+      "maintenanceCommit": "d9b30c2d78f4c753ce8a51afc7c9c426f9e514d7",
+      "developmentCommit": "334948403024c560ae819817eff3444c492e31e2",
+      "reason": "Current maintenance screenshots 01 through 08 are decoded and copied byte for byte into development. PNG CRCs, SHA-256 values and dimensions match before and after copying. Eight English descriptions and all 144 effective localized captions match maintenance. Binary assets landed in 98e13c2 and caption repairs in this commit. The earlier correspondence omitted the refreshed assets and captions."
+    },
+    {
+      "maintenanceCommit": "3e090fa4d87eca13c2889b67b3eeb1481eec1b72",
+      "developmentCommit": "98e13c29dcd56721f3c0d1ae905ebe2019ed9fbf",
+      "reason": "The development site now shows the stable 1.8.80 download date, size and installer SHA-256 from the verified official release, with all eight footer versions and all eighteen translated footer values updated. Unreleased 1.9 app version metadata stays separate. Missing dated maintenance changelog sections are restored verbatim."
+    },
+    {
+      "maintenanceCommit": "ecf128abdf4b1737bb6287a7beb8cf0b6514ac0a",
+      "developmentCommit": "05e5bdbcf4301872911dbbf97164168c69c23f20",
+      "reason": "Both legacy engine.html pages now route to the existing current developer guide, including twenty section and fallback routes. Each destination exists; both scripts parse and execute in an isolated route check. This removes the obsolete engine architecture and static count claims from that legacy entry point without copying maintenance architecture into development."
+    },
+    {
+      "maintenanceCommit": "0880f1da3de797bd207a2a314e69a36e3156867e",
+      "developmentCommit": "f2846eeb097c8bed5a9b5e5fa064b03029d772f6",
+      "reason": "Both commits apply the same translateY(4px) rule to the top bar wordmark. Functional CSS patch correspondence is exact."
     }
   ]
 }
