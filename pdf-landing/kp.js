@@ -128,10 +128,14 @@
     }
     accDots.forEach(function (d) {
       var p = ACCENTS[fam][d.dataset.accent];
-      if (p) { d.style.background = p[0]; d.style.color = p[0]; }
+      if (p) {
+        var previewColor = fam === 'light' && d.dataset.accent === 'yellow' ? '#EAD900' : p[0];
+        d.style.background = previewColor;
+        d.style.color = previewColor;
+      }
       d.setAttribute('aria-pressed', d.dataset.accent === name ? 'true' : 'false');
     });
-    if (accToggle) { accToggle.style.background = pair[0]; accToggle.title = 'Accent color'; }
+    if (accToggle) { accToggle.style.background = fam === 'light' && name === 'yellow' ? '#EAD900' : pair[0]; accToggle.title = 'Accent color'; }
     try { localStorage.setItem('kpdf-accent', name); } catch (e) {}
     updateLogos();
     syncLocalPreviewLinks();

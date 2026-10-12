@@ -233,7 +233,7 @@ base: { F1:['help','This shortcut list'], F2:['edit','Rename bookmark'], F3:['se
   D1:['tools','Text'], D2:['tools','Highlight'], D3:['tools','Line'], D4:['tools','Shapes'], D5:['tools','Draw'],
   D6:['tools','Add Image'], D7:['tools','Signature'], D8:['tools','Crop'], D9:['tools','Transform'], D0:['tools','Stamp Pages'],
   V:['tools','Select'], T:['tools','Text'], L:['tools','Line'], U:['tools','Line'], H:['tools','Highlight'], D:['tools','Draw'],
-  I:['tools','Add Image'], G:['tools','Signature'], C:['tools','Crop'], R:['tools','Transform'], S:['tools','Stamp Pages'],
+  I:['tools','Add Image'], G:['tools','Signature'], C:['tools','Crop'], R:['tools','Transform'], S:['tools','Stamp Pages'], F:['tools','Fillable text field'],
   N:['view','Invert document colors'],
   Home:['nav','First page'], End:['nav','Last page'], PgUp:['nav','Previous page'], PgDn:['nav','Next page'],
   Left:['nav','Previous page'], Right:['nav','Next page'], Up:['nav','Scroll (flips page at the edges)'], Down:['nav','Scroll (flips page at the edges)'],
@@ -241,7 +241,7 @@ base: { F1:['help','This shortcut list'], F2:['edit','Rename bookmark'], F3:['se
   Space:['nav','Pan view'], Menu:['edit','Context menu at selection'] },
 ctrl: { R:['tools','Rotate Page CW'], O:['file','Open'], S:['file','Save'], W:['file','Close file'], Q:['file','Close all'], N:['file','New blank document'], P:['file','Print'],
   D:['file','Document info'], F:['search','Find / search'], Z:['edit','Undo'], Y:['edit','Redo'],
-  C:['edit','Copy selected text'], V:['edit','Paste image / text'], A:['search','Select all text on page'], B:['nav','Toggle sidebar'],
+  C:['edit','Copy selected text'], V:['edit','Paste image / text'], A:['search','Select all text on page'], B:['edit','Bold'],
   Tab:['nav','Next tab'], Slash:['help','This shortcut list'], D0:['view','Reset zoom to 100%'], D1:['view','Actual size'],
   D2:['view','Fit Width'], D3:['view','Fit Page'], Equals:['view','Zoom In'], Minus:['view','Zoom Out'], I:['edit','Italic (text box)'], U:['edit','Underline (text box)'] },
 ctrlshift: { R:['tools','Rotate Page CCW'], K:['help','Toggle keyboard shortcuts'], S:['file','Save As'], O:['ocr','OCR Page (Copy Text)'], I:['ocr','OCR Region...'], Z:['edit','Redo'], W:['file','Close other tabs'],
@@ -249,7 +249,7 @@ ctrlshift: { R:['tools','Rotate Page CCW'], K:['help','Toggle keyboard shortcuts
   Equals:['view','App size bigger'], Minus:['view','App size smaller'], D0:['view','App size reset'],
   D1:['view','Small icons'], D2:['view','Large icons'], D3:['view','No text'], D4:['view','Text beside icons'], D5:['view','Text under icons'], D6:['view','Text only'] },
 shift: { F9:['nav','Move sidebar left / right'], F3:['search','Previous result'], F4:['file','Show current file size'], F10:['edit','Context menu at selection'], Enter:['search','Previous result'], N:['view','Invert images too'] },
-alt: { Left:['nav','Back (jump history)'], Right:['nav','Forward (jump history)'] } };
+alt: { Left:['nav','Back (jump history)'], Right:['nav','Forward (jump history)'], M:['view','Hide toolbar'] } };
 var CATNAME = { file:['FILE','ph_147'], tools:['TOOLS','ph_155'], edit:['EDITING','ph_167'], nav:['NAVIGATION','ph_177'], view:['VIEW','ph_186'], search:['SEARCH & SELECT','ph_195'], help:['HELP','ph_173'], ocr:['OCR','ph_192'] };
 var KBT = {
   'Rotate Page CW':'kb_rotate_cw', 'Rotate Page CCW':'kb_rotate_ccw',
@@ -259,6 +259,7 @@ var KBT = {
   'Single Page':'ph_188', 'Two Page':'ph_189', 'Grid':'ph_190',
   'Split pane':'ph_244', 'Full screen':'ph_191', 'About dialog':'ph_175', 'Text':'ph_157',
   'Highlight':'ph_159', 'Line':'ph_158', 'Shapes':'ph_239', 'Draw':'ph_160', 'Add Image':'ph_161',
+  'Fillable text field':'kb_form_field', 'Bold':'kb_bold', 'Hide toolbar':'ph_289',
   'Signature':'ph_162', 'Crop':'ph_163', 'Transform':'ph_164', 'Stamp Pages':'ph_165',
   'Select':'ph_156', 'Invert document colors':'ph_233', 'First page':'kb_first_page',
   'Last page':'kb_last_page', 'Previous page':'kb_previous_page', 'Next page':'kb_next_page',
