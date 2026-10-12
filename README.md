@@ -51,8 +51,9 @@ Full reference on the [help page](https://killerpdf.net/help.html).
 
 | | |
 | --- | --- |
-| ![KillerPDF in Grid view showing the brochure and view and zoom controls along the footer](pdf-landing/screenshots/01.png)<br>**Grid view.** Browse many pages at once and switch layouts or zoom from the footer. | ![KillerPDF comparing two PDFs side by side with highlighted changes and a page-difference summary](pdf-landing/screenshots/03.png)<br>**PDF comparison.** Review highlighted differences and a summary of changed and missing pages. |
-| ![KillerPDF Stamp Pages dialog previewing a DRAFT text watermark and page number controls](pdf-landing/screenshots/06.png)<br>**Watermarks and page numbers.** Preview a text watermark and set page numbers before applying. | ![KillerPDF OCR menu with a list of downloadable languages in the Portuguese interface and 98SE theme](pdf-landing/screenshots/08.png)<br>**OCR languages.** Select an OCR language from the list, with extra languages available to download. |
+| ![KillerPDF page with highlighted lines, a pen circle around a link, and a text box](pdf-landing/screenshots/02.png)<br>**Annotations.** Highlight text, draw with the pen, and add text boxes. | ![KillerPDF comparing two versions of its brochure side by side with the changed wordmark highlighted](pdf-landing/screenshots/03.png)<br>**PDF comparison.** Review highlighted differences and a summary of changed pages. |
+| ![KillerPDF showing two documents side by side in dual pane view with the Blood theme](pdf-landing/screenshots/04.png)<br>**Dual pane.** Work in two documents at once, each with its own tabs. | ![KillerPDF OCR menu listing downloadable recognition languages](pdf-landing/screenshots/06.png)<br>**OCR languages.** Pick a recognition language, with more available to download. |
+| ![KillerPDF Stamp Pages dialog with watermark and page number controls](pdf-landing/screenshots/07.png)<br>**Watermarks and page numbers.** Preview a watermark and set page numbers before applying. | ![KillerPDF Transform dialog with rotation, scaling, flip, and skew controls](pdf-landing/screenshots/08.png)<br>**Transform.** Rotate, scale, flip, and skew pages with a live preview. |
 
 ## Requirements
 
