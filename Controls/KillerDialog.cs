@@ -34,7 +34,100 @@ namespace KillerPDF
         // modal and UI-thread only, so a shared field is safe and avoids a duplicate dialog body.
         private static bool _lastCheckboxChecked;
 
-#pragma warning disable IDE0060 // image intentionally kept for API parity with MessageBox; not yet rendered
+        // The family setup dialog body: a notice ring beside a Killer Sans heading with muted
+        // detail under it. The message's first line is the heading and the rest is detail. A
+        // first line longer than a heading should be stays body-sized instead of shouting.
+        private static Grid NoticeBody(string message, MessageBoxImage image, bool confirmation, out StackPanel textStack)
+        {
+            string heading = message, detail = "";
+            int lineBreak = message.IndexOf('\n');
+            if (lineBreak >= 0) { heading = message[..lineBreak].TrimEnd('\r'); detail = message[(lineBreak + 1)..].Trim(); }
+            bool large = heading.Length <= 90;
+
+            var grid = new Grid { Margin = new Thickness(24, 18, 24, 18) };
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(38) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition());
+
+            var (glyph, brush) = Notice(image, confirmation);
+            grid.Children.Add(new Border
+            {
+                Width = 28,
+                Height = 28,
+                CornerRadius = new CornerRadius(14),
+                BorderThickness = new Thickness(2),
+                BorderBrush = brush,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Top,
+                Child = new TextBlock
+                {
+                    Text = glyph,
+                    Foreground = brush,
+                    FontSize = 17,
+                    FontWeight = FontWeights.SemiBold,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center
+                }
+            });
+
+            textStack = new StackPanel();
+            Grid.SetColumn(textStack, 1);
+            var head = new TextBlock
+            {
+                Text = large ? heading : message,
+                Foreground = R("TextBrush"),
+                FontSize = large ? 18 : 13,
+                TextWrapping = TextWrapping.Wrap
+            };
+            if (large)
+            {
+                head.FontFamily = UiKit.BrandSansFont;
+                TextOptions.SetTextFormattingMode(head, TextFormattingMode.Ideal);
+            }
+            else
+            {
+                head.Margin = new Thickness(0, 5, 0, 0);
+            }
+            textStack.Children.Add(head);
+            if (large && detail.Length > 0)
+            {
+                textStack.Children.Add(new TextBlock
+                {
+                    Text = detail,
+                    Foreground = UiKit.Brush("MutedTextBrush"),
+                    FontSize = 12,
+                    LineHeight = 19,
+                    TextWrapping = TextWrapping.Wrap,
+                    Margin = new Thickness(0, 10, 0, 0)
+                });
+            }
+            grid.Children.Add(textStack);
+            return grid;
+        }
+
+        // Amber "!" for a question or warning, red for an error and the accent "i" for information.
+        // Amber darkens on a light card so it keeps its contrast.
+        private static (string glyph, Brush brush) Notice(MessageBoxImage image, bool confirmation)
+        {
+            if (image == MessageBoxImage.Error)
+                return ("×", new SolidColorBrush(Color.FromRgb(227, 93, 106)));
+            bool warn = image == MessageBoxImage.Warning || image == MessageBoxImage.Question
+                        || (image == MessageBoxImage.None && confirmation);
+            if (!warn)
+                return ("i", UiKit.Brush("PrimaryBrush", Brushes.Gray));
+            var card = UiKit.Brush("MenuBackgroundBrush") as SolidColorBrush;
+            bool light = card != null && card.Color.R * 0.299 + card.Color.G * 0.587 + card.Color.B * 0.114 > 140;
+            return ("!", new SolidColorBrush(light ? Color.FromRgb(176, 112, 0) : Color.FromRgb(255, 190, 80)));
+        }
+
+        // Family dialog button size: 28px tall, at least 80 wide.
+        private static Button Sized(Button button)
+        {
+            button.Height = 28;
+            button.MinWidth = 80;
+            button.Padding = new Thickness(12, 2, 12, 2);
+            return button;
+        }
+
         public static MessageBoxResult Show(
             Window? owner,
             string message,
@@ -44,8 +137,9 @@ namespace KillerPDF
             bool fadeClose = true,
             string? checkboxText = null,
             MessageBoxResult? defaultResult = null,
-            bool checkboxInitial = false)
-#pragma warning restore IDE0060
+            bool checkboxInitial = false,
+            string? confirmLabel = null,
+            string? cancelLabel = null)
         {
             var result = MessageBoxResult.OK;
             bool boxChecked = checkboxInitial;
@@ -53,7 +147,7 @@ namespace KillerPDF
             var win = new Window
             {
                 Title = title,
-                Width = 380,
+                Width = 390,
                 SizeToContent = SizeToContent.Height
             };
             DialogChrome.Configure(win, owner, fade: fadeClose);
@@ -78,28 +172,17 @@ namespace KillerPDF
             root.Children.Add(titleBar);
 
             // Message
-            var msgBorder = new Border
-            {
-                Padding = new Thickness(20, 16, 20, 8),
-                Child = new TextBlock
-                {
-                    Text = message,
-                    Foreground = R("TextBrush"),
-                    FontSize = 13,
-                    TextWrapping = TextWrapping.Wrap
-                }
-            };
-            root.Children.Add(msgBorder);
+            root.Children.Add(NoticeBody(message, image, buttons != MessageBoxButton.OK, out var textStack));
 
             // Optional checkbox (e.g. "Remember my choice"). Extra top padding sets it apart from the message.
             if (checkboxText is not null)
             {
                 var chk = UiKit.CheckBox(checkboxText);
                 chk.IsChecked = checkboxInitial;
-                chk.Margin = new Thickness(20, 10, 20, 4);
+                chk.Margin = new Thickness(0, 12, 0, 0);
                 chk.Checked += (_, _2) => boxChecked = true;
                 chk.Unchecked += (_, _2) => boxChecked = false;
-                root.Children.Add(chk);
+                textStack.Children.Add(chk);
             }
 
             // Buttons
@@ -118,7 +201,7 @@ namespace KillerPDF
                 // default), and the accent highlight follows so the Enter target is obvious.
                 bool isDefault = defaultResult is MessageBoxResult dr ? res == dr : accent;
                 // Shared themed button (UiKit.Make) so this dialog matches the print dialog et al.
-                var btn = UiKit.Make(label, isDefault);
+                var btn = Sized(UiKit.Make(label, isDefault));
                 btn.Margin = new Thickness(8, 0, 0, 0);
                 btn.IsDefault = isDefault;
                 btn.IsCancel  = res == MessageBoxResult.Cancel;   // Esc triggers Cancel where there is one
@@ -126,29 +209,30 @@ namespace KillerPDF
                 return btn;
             }
 
+            // The family order: the way out first and the action last, at the right edge.
             switch (buttons)
             {
                 case MessageBoxButton.OK:
-                    btnPanel.Children.Add(MakeBtn(L("Str_Btn_OK", "OK"), MessageBoxResult.OK, accent: true));
+                    btnPanel.Children.Add(MakeBtn(confirmLabel ?? L("Str_Btn_OK", "OK"), MessageBoxResult.OK, accent: true));
                     break;
                 case MessageBoxButton.OKCancel:
-                    btnPanel.Children.Add(MakeBtn(L("Str_Btn_OK", "OK"), MessageBoxResult.OK, accent: true));
-                    btnPanel.Children.Add(MakeBtn(L("Str_Btn_Cancel", "Cancel"), MessageBoxResult.Cancel));
+                    btnPanel.Children.Add(MakeBtn(cancelLabel ?? L("Str_Btn_Cancel", "Cancel"), MessageBoxResult.Cancel));
+                    btnPanel.Children.Add(MakeBtn(confirmLabel ?? L("Str_Btn_OK", "OK"), MessageBoxResult.OK, accent: true));
                     break;
                 case MessageBoxButton.YesNo:
-                    btnPanel.Children.Add(MakeBtn(L("Str_Btn_Yes", "Yes"), MessageBoxResult.Yes, accent: true));
-                    btnPanel.Children.Add(MakeBtn(L("Str_Btn_No", "No"), MessageBoxResult.No));
+                    btnPanel.Children.Add(MakeBtn(cancelLabel ?? L("Str_Btn_No", "No"), MessageBoxResult.No));
+                    btnPanel.Children.Add(MakeBtn(confirmLabel ?? L("Str_Btn_Yes", "Yes"), MessageBoxResult.Yes, accent: true));
                     break;
                 case MessageBoxButton.YesNoCancel:
-                    btnPanel.Children.Add(MakeBtn(L("Str_Btn_Yes", "Yes"), MessageBoxResult.Yes, accent: true));
-                    btnPanel.Children.Add(MakeBtn(L("Str_Btn_No", "No"), MessageBoxResult.No));
                     btnPanel.Children.Add(MakeBtn(L("Str_Btn_Cancel", "Cancel"), MessageBoxResult.Cancel));
+                    btnPanel.Children.Add(MakeBtn(cancelLabel ?? L("Str_Btn_No", "No"), MessageBoxResult.No));
+                    btnPanel.Children.Add(MakeBtn(confirmLabel ?? L("Str_Btn_Yes", "Yes"), MessageBoxResult.Yes, accent: true));
                     break;
             }
 
             root.Children.Add(new Border
             {
-                Padding = new Thickness(16, 8, 16, 16),
+                Padding = new Thickness(16, 0, 24, 20),
                 Child = btnPanel
             });
 
@@ -216,24 +300,21 @@ namespace KillerPDF
             titleBar.Height = Application.Current.TryFindResource("DialogTitleBarHeight") is double titleHeight ? titleHeight : double.NaN;
             root.Children.Add(titleBar);
 
-            root.Children.Add(new Border
-            {
-                Padding = new Thickness(20, 16, 20, 8),
-                Child = new TextBlock { Text = message, Foreground = R("TextBrush"), FontSize = 13, TextWrapping = TextWrapping.Wrap, MaxWidth = 560 }
-            });
+            var choiceBody = NoticeBody(message, MessageBoxImage.None, labels.Length > 1, out _);
+            choiceBody.MaxWidth = 620;
+            choiceBody.HorizontalAlignment = HorizontalAlignment.Left;
+            root.Children.Add(choiceBody);
 
             var btnPanel = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
             for (int i = 0; i < labels.Length; i++)
             {
                 int idx = i;
-                var btn = UiKit.Make(labels[i], accent: i == accentIndex);
-                btn.Padding = new Thickness(22, 8, 22, 8);
-                btn.MinWidth = 96;
+                var btn = Sized(UiKit.Make(labels[i], accent: i == accentIndex));
                 btn.Margin = new Thickness(8, 0, 0, 0);
                 btn.Click += (_, _2) => { result = idx; win.Close(); };
                 btnPanel.Children.Add(btn);
             }
-            root.Children.Add(new Border { Padding = new Thickness(16, 8, 16, 16), Child = btnPanel });
+            root.Children.Add(new Border { Padding = new Thickness(16, 0, 24, 20), Child = btnPanel });
 
             var contentGrid = new Grid();
             var grain = DialogChrome.GrainTexture(owner);
@@ -324,7 +405,7 @@ namespace KillerPDF
             bool closeTabs = check1Initial;
             bool remember  = check2Initial;
 
-            var win = new Window { Title = "KillerPDF", Width = 380, SizeToContent = SizeToContent.Height };
+            var win = new Window { Title = "KillerPDF", Width = 390, SizeToContent = SizeToContent.Height };
             // fade:false - the app's own fade-out follows immediately on confirm; two fades
             // back-to-back read as lag (same reasoning as the unsaved-changes prompt).
             DialogChrome.Configure(win, owner, fade: false);
@@ -348,42 +429,32 @@ namespace KillerPDF
             titleBar.Height = Application.Current.TryFindResource("DialogTitleBarHeight") is double titleHeight ? titleHeight : double.NaN;
             root.Children.Add(titleBar);
 
-            root.Children.Add(new Border
-            {
-                Padding = new Thickness(20, 16, 20, 8),
-                Child = new TextBlock
-                {
-                    Text = message,
-                    Foreground = R("TextBrush"),
-                    FontSize = 13,
-                    TextWrapping = TextWrapping.Wrap
-                }
-            });
+            root.Children.Add(NoticeBody(message, MessageBoxImage.None, true, out var textStack));
 
             var chk1 = UiKit.CheckBox(check1Text);
-            chk1.Margin = new Thickness(20, 10, 20, 0);
+            chk1.Margin = new Thickness(0, 12, 0, 0);
             chk1.IsChecked = check1Initial;
             chk1.Checked   += (_, _2) => closeTabs = true;
             chk1.Unchecked += (_, _2) => closeTabs = false;
-            root.Children.Add(chk1);
+            textStack.Children.Add(chk1);
 
             var chk2 = UiKit.CheckBox(check2Text);
-            chk2.Margin = new Thickness(20, 8, 20, 4);
+            chk2.Margin = new Thickness(0, 8, 0, 0);
             chk2.IsChecked = check2Initial;
             chk2.Checked   += (_, _2) => remember = true;
             chk2.Unchecked += (_, _2) => remember = false;
-            root.Children.Add(chk2);
+            textStack.Children.Add(chk2);
 
             var btnPanel = new StackPanel
             {
                 Orientation = Orientation.Horizontal,
                 HorizontalAlignment = HorizontalAlignment.Right
             };
-            var cancelBtn = UiKit.Make(cancelLabel, false);
+            var cancelBtn = Sized(UiKit.Make(cancelLabel, false));
             cancelBtn.Margin   = new Thickness(8, 0, 0, 0);
             cancelBtn.IsCancel = true;
             cancelBtn.Click   += (_, _2) => win.Close();
-            var quitBtn = UiKit.Make(confirmLabel, true);
+            var quitBtn = Sized(UiKit.Make(confirmLabel, true));
             quitBtn.Margin    = new Thickness(8, 0, 0, 0);
             quitBtn.IsDefault = !cancelIsDefault;
             cancelBtn.IsDefault = cancelIsDefault;
@@ -392,7 +463,7 @@ namespace KillerPDF
             btnPanel.Children.Add(quitBtn);
             root.Children.Add(new Border
             {
-                Padding = new Thickness(16, 12, 16, 16),
+                Padding = new Thickness(16, 0, 24, 20),
                 Child = btnPanel
             });
 

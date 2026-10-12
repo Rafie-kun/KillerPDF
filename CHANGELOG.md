@@ -36,6 +36,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - The packaged app and engine are precompiled, and the installed-font catalog is saved between launches and built in the background, so startup and the first page are faster. Batch rendering and unused fonts release their memory as soon as they are done.
 - Select mode no longer edits, and existing PDF text changes use the Text tool (#411). Arrow keys move selected objects one step instead of scrolling (#368).
 - Split Transform and Color Correction into separate tools, and routed OCR provider selection through the engine with complete installed-language checks.
+- Message, confirm, install and uninstall dialogs use the family setup dialog layout, with a notice icon, a larger Killer Sans heading, evenly sized buttons and the action button last.
 
 ### Fixed
 - Saving an Edit Text change removes the replaced words from the file, so they can no longer be found, copied or brought back by editing the line again.

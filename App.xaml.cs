@@ -2101,10 +2101,11 @@ namespace KillerPDF
                 var res = KillerDialog.Show(
                     null,
                     "Uninstall KillerPDF from this computer?",
-                    $"{AppName} Uninstall",
+                    AppName,
                     MessageBoxButton.YesNo,
                     MessageBoxImage.Question,
-                    defaultResult: MessageBoxResult.No);
+                    confirmLabel: Application.Current.TryFindResource("Str_Btn_Uninstall") as string ?? "Uninstall",
+                    cancelLabel: Application.Current.TryFindResource("Str_Btn_Cancel") as string ?? "Cancel");
                 if (res != MessageBoxResult.Yes) return;
             }
 
@@ -2112,8 +2113,8 @@ namespace KillerPDF
             {
                 if (!silent)
                     KillerDialog.Show(null,
-                        "KillerPDF is still running. Close it, then try uninstalling again.",
-                        $"{AppName} Uninstall", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        "KillerPDF is still running.\nClose it, then try uninstalling again.",
+                        AppName, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
