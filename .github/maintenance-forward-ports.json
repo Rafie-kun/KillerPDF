@@ -1668,6 +1668,11 @@
       "maintenanceCommit": "f21fc7ecb246b2b0299154514ac39a2a479460fe",
       "developmentCommit": "b5255ce3a8250eb27943adb9c4f64db156de4438",
       "reason": "Maintenance adopts the reviewed development 98SE outline correction: active and inactive outline right margins are now -7 on both lines, and both tab layout tests assert those values. The development commit also corrected vertical drag detection, which is not part of this port. The maintenance changelog line is branch-specific."
+    },
+    {
+      "maintenanceCommit": "2835d6fc4c507a1e622ae705bb11ca132709106c",
+      "developmentCommit": "de2b63c4932c0aac2791f0393236814bf8a8d2a5",
+      "reason": "Both lines consolidate the same 1.8.90 changelog entries with identical wording for save safety, annotations, #441 to #444 and #434 packaging, rotated pages, 98SE bars and tabs, menus, theme colors and icons. Development also merges its own duplicate #363, #399 and #415 lines and omits the 1.8-only #441 text extraction fix and Vietnamese website line. Changelog-only, no source change."
     }
   ]
 }
