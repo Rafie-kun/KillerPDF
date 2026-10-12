@@ -84,8 +84,8 @@ public sealed class DocumentTabLayoutTests
         string ThicknessValue(string key) => theme.Descendants()
             .Single(element => element.Name.LocalName == "Thickness" &&
                 (string?)element.Attribute(x + "Key") == key).Value;
-        Assert.Equal("-13,-5,-6,-2", ThicknessValue("TabActiveOuterOutlineMargin"));
-        Assert.Equal("-13,-5,-6,-3", ThicknessValue("TabInactiveOuterOutlineMargin"));
+        Assert.Equal("-13,-5,-7,-2", ThicknessValue("TabActiveOuterOutlineMargin"));
+        Assert.Equal("-13,-5,-7,-3", ThicknessValue("TabInactiveOuterOutlineMargin"));
         Assert.Equal("12,6,5,2", ThicknessValue("TabPadding"));
         Assert.Equal("0,3,0,-3", ThicknessValue("TabActiveMargin"));
         Assert.Equal("-1,3,0,-3", ThicknessValue("TabActiveFirstMargin"));

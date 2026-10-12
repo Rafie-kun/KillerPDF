@@ -23,6 +23,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Release packaging now signs the application and engine DLLs and checks real window startup (#444).
 - Prevented a crash when hovering over text if Windows blocks the text extraction library (#441).
 - Prevented zero-height 98SE annotation bars from repeatedly retrying layout and blocking input.
+- Aligned the right edge of 98SE document tabs with the edge of the tab strip.
 - Prevented the color picker from crashing when changing stamp or annotation colors with gradient themes (#442, #443).
 - Inserting a blank page works again. OK in its page size dialog was treated as Cancel.
 - Dragging one page of a multi-page selection in the sidebar now moves the whole selection instead of only the pressed page.
