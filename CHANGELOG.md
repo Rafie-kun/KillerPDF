@@ -6,259 +6,77 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 ## [1.9.0] - Unreleased
 
-1.9.0 (Overkill) moves rendering, text, and image extraction into The KillerPDF.Engine, adds advanced PDF workflows, and carries forward the latest 1.8 reliability and interface fixes.
+1.9.0 "Overkill" runs on KillerPDF's own PDF engine instead of PDFium and adds Convert Scan to Text, permanent redaction, form authoring and calculated fields, export to Word, Excel and PowerPoint, document protection, trusted signature timestamps, preflight and accessibility reports, macros, and data merge.
 
 ### Added
-- Added engine-first rendering and OCR across the viewer, thumbnails, print, export, transforms, and OCR, with lower-memory document opening, paths, shadings, font outlines, installed Courier aliases and emoji fallback, JPEG, JPEG 2000, JBIG2, fax, transparency, forms, attachment-only encrypted documents, preprocessing, layout analysis, recognition, and normalized fallback confidence.
+- Added The KillerPDF.Engine for rendering, text and image extraction, and OCR across the viewer, thumbnails, printing, export and transforms, with lower-memory opening and support for JPEG 2000, JBIG2, fax, transparency, forms, encrypted documents, layout analysis and recognition.
 - Added Convert Scan to Text, which replaces the words on scanned pages with real text in the closest matching typeface, sharp at any zoom and searchable, and keeps any word that does not match the scan closely as scanned. Also available as `--scan-to-text`.
-- Added complete AcroForm authoring, reviewable field recognition, editing, flattening, and reports (#342).
-- Added calculated form fields that recalculate while filling, covering the built-in number, percent, date, time, special, calculation, and range functions plus a bounded arithmetic field-script subset, without executing document JavaScript.
-- Added safe XFA inspection, editing, rendering, calculation, conversion, and compatibility reports (#330).
-- Added complete FDF and XFDF form-data and review-annotation interchange with safe previews and reports (#329).
-
-- Added structured document export from the Save menu to Word, Excel, PowerPoint, HTML, Markdown, plain text, and JSON, with page selection and loss warnings.
-- Added editable document exports, OCR integration, page selection, batches, and loss reports (#346).
-- Added reviewable OCR correction, searchable output, batches, accuracy checks, and reports (#345).
-- Added reviewable permanent redaction searches, removals, verification, batches, and reports (#341).
-- Added a Redact tool that permanently removes text, images, drawings, and comments under marked areas or search results, keeps the rest of each page searchable, and turns a page into an image only after you approve it.
-- Added signature trust, validation evidence, timestamps, and certificate-recipient encryption (#336).
-- Added reviewable PDF repair, optimization, sanitization, and duplicate resource cleanup (#333).
-- Added accessibility inspection, reviewable repairs, tagging proposals, and reading-order reports (#335).
-- Added reusable PDF preflight profiles, reports, corrections, and conformance checks (#334).
-- Added reusable data-driven PDF generation, validation, conditional records, macros, and reports (#352).
-- Added a desktop macro library with starter workflows, ordered step editing, import and export, exact current-document previews, safe output, and readable results (#343).
-- Added desktop data merge from CSV, JSON, and XLSX into matching PDF form fields, with isolated output and batch results.
-- Added safe attachment and PDF portfolio inspection, editing, extraction, comparison, macros, and reports (#347).
-- Added complete PDF layer inspection, editing, assignment, flattening, comparison, macros, and reports (#350).
-- Added advanced bookmark, link, destination, page-label, TOC, audit, repair, and macro workflows (#351).
-- Added reusable imposition layouts, production marks, vector export, macros, and previews (#349).
-- Added reusable headers, footers, page numbering, Bates batches, and reports (#344).
-- Added calibrated measurement profiles, editable annotations, snapping, preflight checks, and reports (#348).
-- Added a shared reusable image library for the Image tool, image watermarks, and imported signatures, with import, preview, rename, and delete controls (#326).
-- Added localized desktop reports for preflight, accessibility, print production, separations, layers, portfolios, and structural comparisons.
-- Added command-line page rotation, deletion, movement, blank insertion, duplication, document information, and text search for KillerMCP.
-- Added command-line document splitting by page count, equal parts, page ranges, bookmark level, or maximum file size, with a part name template. Each part drops the objects the removed pages leave behind.
-- Added command-line file size reduction, with unreachable-object and unused-resource pruning, stream recompression, and optional removal of metadata, attachments, document JavaScript, comments, thumbnails, bookmarks, form fields, XFA data, the open action, and layers.
-- Added command-line preflight, accessibility, and embedded-file reports, with the general, attachment safety, print production, and saved custom profiles, readable or JSON output, and embedded-file extraction.
-- Added command-line page numbering and Bates stamping, with header or footer placement, alignment, font size, page selection, number formats, prefix and suffix, and one continuous sequence across several files.
-- Added command-line booklet and n-up imposition with sheet sizes, margins, gutters, creep, binding edge, and printer marks, and an outline built from detected headings.
-- Added DPI, color mode, threshold, and JPEG compression controls to GUI and command-line PDF flattening (#366).
-- Added a Printer properties button to the print window that opens the printer driver's own settings and applies them to the job.
-- Added desktop navigation auditing with selective cleanup of unsafe and broken links.
-- Added desktop layer editing for names, saved visibility, and lock state.
-- Added desktop portfolio controls for presentation, schema, sorting, folders, attachment values, and safe metadata removal.
-- Added desktop attachment management for names, descriptions, MIME types, relationships, and removal.
-- Added desktop table-of-contents authoring from document bookmarks, with clickable destinations and undo support.
-- Added reviewed desktop bookmark generation from a tagged document's headings or from detected headings, including bold and numbered ones, leaving out running headers and page numbers, with editable levels.
-- Added desktop page-label range editing with decimal, Roman numeral, letter, and prefix-only styles.
-- Added desktop initial-view controls for opening page, zoom, layout, navigation panel, and viewer chrome.
-- Added startup update checks, enabled by default, with confirmation before updating and a shared toggle in About and the update dialog.
-- Added Vietnamese application, installer, OCR, website, and engine documentation support. (Thanks @vuanhvu11982)
-- Added Ukrainian localization.
-- Added Norwegian (Bokmål) localization.
-- Added Brazilian Portuguese localization.
-- Added Ctrl+R and Ctrl+Shift+R to rotate selected pages clockwise and counterclockwise.
-- Added a keyboard shortcut toggle with an always-available Ctrl+Shift+K recovery chord (#405).
-- Added keyboard shortcuts for the 1.9 tools and commands: E for Color Correction, M for Measure, X for Redact, Ctrl+Shift+E to export a document, Ctrl+Shift+T to convert a scan to text, Ctrl+Shift+G for Film Grain, Ctrl+Shift+N to move a tab to a new window, and Ctrl+Shift+D followed by the letter shown beside each document tool. A tab's right-click menu can also move it to a new window.
-- Added trusted timestamps to digital signing. The signing dialog can request an RFC 3161 timestamp from a chosen server, and a failed timestamp is reported separately from certificate problems.
-- Added Protect Document (Ctrl+Shift+P) to the Save menu. It writes an AES-256 encrypted copy protected by passwords with print, copy and edit permissions, or for certificate recipients. PDFs encrypted for certificate recipients now open with a matching certificate from the Windows certificate store.
-- Added drag ordering for pinned places in the file picker.
-- Added a `--batch-render` command that renders pages of a file or tree to PNG with a per-page render and open timing log, and a per-file comparison in the benchmark script. Recorded shared-input timing, memory, and multipage rendering validation.
-- Added yellow and magenta accents to the neutral and 98SE themes.
-- Added a Film Grain switch to the theme menu. It is on by default, and turning it off removes the grain texture from every surface.
+- Added a Redact tool that permanently removes text, images, drawings and comments under marked areas or search results, with verification, batches and reports. The rest of each page stays searchable, and a page becomes an image only after you approve it (#341).
+- Added complete form authoring, field recognition, editing and flattening (#342), calculated fields that recalculate while filling without running document JavaScript, safe XFA support (#330), and FDF and XFDF form-data and comment interchange (#329).
+- Added data merge from CSV, JSON and XLSX into form fields, and reusable data-driven PDF generation with conditional records (#352).
+- Added export from the Save menu to Word, Excel, PowerPoint, HTML, Markdown, plain text and JSON, with page selection, OCR, batches and loss warnings (#346), and reviewable OCR correction with searchable output and accuracy checks (#345).
+- Added Protect Document (Ctrl+Shift+P) to the Save menu. It writes an AES-256 encrypted copy protected by passwords with print, copy and edit permissions, or for certificate recipients, and PDFs encrypted for certificate recipients open with a matching certificate from the Windows certificate store.
+- Added signature trust and validation evidence (#336), and trusted RFC 3161 timestamps in the signing dialog. A failed timestamp is reported separately from certificate problems.
+- Added reviewable repair, optimization, sanitization and duplicate resource cleanup (#333). The command line can also remove metadata, attachments, JavaScript, comments, thumbnails, bookmarks, form fields, XFA data, the open action and layers.
+- Added preflight profiles and corrections (#334), accessibility inspection, repairs and reading-order reports (#335), and print-production, separation, layer, portfolio and structural comparison reports, localized in the app and available from the command line.
+- Added a macro library with starter workflows, step editing, import and export, and exact previews of the current document (#343).
+- Added attachment and portfolio inspection and editing, including presentation, schema, sorting, folders, names, descriptions, MIME types and relationships (#347).
+- Added layer inspection and editing for names, saved visibility, lock state, assignment and flattening (#350).
+- Added bookmark, link and destination tools (#351): navigation audits with cleanup of unsafe and broken links, table-of-contents authoring, bookmark generation from tagged or detected headings, page-label ranges, and initial-view settings.
+- Added headers, footers, page numbering and Bates stamping (#344), imposition layouts with production marks (#349), and calibrated measurement profiles, annotations, snapping and reports (#348), each also available from the command line.
+- Added a shared image library for the Image tool, image watermarks and imported signatures (#326).
+- Added DPI, color mode, threshold and JPEG compression controls to flattening (#366), and a Printer properties button that applies the driver's own settings to the job.
+- Added command-line splitting by page count, equal parts, page ranges, bookmark level or file size, and a `--batch-render` command with per-page timing.
+- Added keyboard shortcuts for every new tool and command, including Ctrl+Shift+D followed by a letter for each document tool.
 
 ### Changed
-- The wordmarks use Punktype and Lacquer with a soft shadow on every theme, and the app, installer and website use Killer Sans in place of the typewriter font. The installer also matches the new family setup layout.
-- Moved primary rendering off the UI thread, prioritized bounded viewport work with cancellation, and added visible-region zoom refinement and separate display-backend comparison tools.
-- Replaced PDFium and Docnet.Core with engine-owned rendering, improved damaged cross-reference and missing-catalog recovery and JPEG image rendering speed, and removed native file-repair and link-extraction fallbacks.
-
-- Replaced PdfPig with engine-owned extraction for search, selection, region copy, text editing, and dark-mode image preservation. Removed PdfPig from the app, tests, and packaged builds.
-- Reduced rendering memory use with shared page data, released sessions, smaller scratch and ICC buffers, bounded reusable fill-path buffers, direct PNG output, fewer JBIG2 page buffers and bundled font copies, and runtime memory conservation.
-- Reduced peak rendering memory for pages with large inline images and repeated image paints, and reduced font-map decoding allocations.
-- Faster resource resolution, path clipping, soft masks, masked forms, black-and-white, CMYK, and ICC image reduction, color conversion, profile loading, compositing, scanned pages, and shadings without changing pixels. Large fills, image paints, function and axial shadings, and soft-mask reductions split across a few threads.
-- Reuse decoded page data and more parsed form and glyph streams during zooming and background page rendering, and avoid repeated buffering attempts for oversized pages, with invalidation after document changes and cache flushes.
-- Prioritize the visible page and its nearest neighbors in Continuous view without restarting an active render for the same viewport.
-- Precompiled the packaged app and engine to reduce startup and first-page rendering delay.
-- Faster JPEG thumbnails, transform lookups, Huffman and bitstream decoding, and large RGB and CMYK JPEG pages, with lower memory use for large Flate images, embedded fonts, and native JPEG buffers.
-- Sped up DeviceN gradients and repeated 16-bit image colors on eligible print-production pages.
-- Sped up named-spot images, antialiased paths, process overprint, and repeated spot-color painting and compositing.
-- Reduced first-page font setup for standard Windows font aliases.
-- Avoided a redundant rendering pass for pages whose overprint needs the document output profile.
-- Built the JPEG 2000 decoder from vendored CoreJ2K sources instead of a package reference.
-- Match legacy bitmap dimensions for fractional page boxes without changing engine numeric precision.
-- Document tabs now use complete 98SE geometry and themed drag previews, and can be moved into a new window without losing their live editing state.
-- Saving over a digitally signed PDF now asks first, because saving removes the signature.
-- Kept Select mode non-editing and moved existing PDF text changes behind the explicit Text tool (#411).
-- Routed desktop OCR provider selection through the engine's explicit or automatic provider contract, including complete installed-language checks for engine and Tesseract model sets.
-- Split Transform and Color Correction into separate tools with the same live preview and page controls.
-- The installer now offers upgrade, reinstall, uninstall, or cancel when KillerPDF is already installed.
-- Arrow keys move selected editable objects one precise step instead of scrolling the page (#368).
-- Docked the comparison bar below the documents, connected it to the split divider, polished its accent-colored controls, and kept selected toolbar tools crisp.
-- Transform and image export DPI previews show the output scale (#365).
-- Click the footer page dimensions to cycle through pixel, inch, millimeter, and point dimensions (#364).
-- Split the language picker into two columns for 19 locales.
-- Updated menu, button, slider and selection states with accent colors, subtle gradients and hover lift outside 98SE.
-- Saved the installed-font catalog between launches and built it in the background, so the first page that uses a non-standard font no longer waits for a scan of every installed font.
-- Installed fonts that no open document uses are released instead of kept for the whole session.
-- Batch rendering releases each finished document's memory before the next file starts.
-- After a zoom, pages whose current render is within 5% of the displayed size are no longer re-rendered, so the view settles about 250 ms sooner.
+- Replaced PDFium, Docnet.Core and PdfPig with the engine for rendering, search, selection, copying and text editing, and built the JPEG 2000 decoder from vendored CoreJ2K sources. The engine keeps the previous renderer's page dimensions for viewing and image export.
+- Rendering runs off the UI thread with viewport priority, cancellation and visible-region zoom refinement, and the view settles about 250 ms sooner after a zoom.
+- Rendering is faster and uses less memory across images, fonts, color management, shadings, transparency and print-production pages, without changing pixels.
+- The packaged app and engine are precompiled, and the installed-font catalog is saved between launches and built in the background, so startup and the first page are faster. Batch rendering and unused fonts release their memory as soon as they are done.
+- Select mode no longer edits, and existing PDF text changes use the Text tool (#411). Arrow keys move selected objects one step instead of scrolling (#368).
+- Split Transform and Color Correction into separate tools, and routed OCR provider selection through the engine with complete installed-language checks.
 
 ### Fixed
-- Restored saving markup to tagged PDFs while preserving their structure, and finished markup processing before overwriting the destination.
-- A failed Save or Save As no longer damages the existing file, because the new copy is finished before it replaces the file.
-- Saving an Edit Text change now removes the replaced words from the file, so they can no longer be found or copied and no longer reappear when the line is edited again.
-- Unsaved annotations survive moving, reordering, duplicating and merging pages and removing a link.
-- Copied and pasted annotations, and those on a duplicated page, now keep a text box's letter spacing, a shape's fill, and the erased parts of a cover.
-- Preserved pasted images and other unsaved annotations when inserting blank pages (#388).
-- Preserved shapes and other annotations on retained pages when deleting PDF pages (#429).
-- Preserved annotations during normal saves when cached page dimensions are unavailable.
-- Saved completed forms in PDFs with empty creation dates and unlisted fields.
-- Preserved annotation position and orientation when saving PDFs whose page content leaves a transform active.
-- Preserved Hebrew letter order when saving text placed on a PDF (#435).
-- Kept selected-page transforms when retained pages contain inconsistent font-width metadata.
-- Preserved original JPEG payloads for safe full-page flattening and JPEG compression when repairing or importing image-based pages (#366).
-- Preserved detected text sizes, identified unavailable font substitutions, and fixed Save Flattened crashes on edited tagged PDFs (#356).
-- Hardened native library loading and release artifact verification.
-- Kept drawings and signatures aligned when saving or printing cropped pages (#418).
-- Fixed encrypted files whose encryption dictionary is slightly damaged opening as blank pages.
-- Release packaging signs the application and engine DLLs and checks real window startup (#444), and updates no longer lock the installation folder or fail while Windows briefly keeps the previous version's files open (#434).
-- 98SE annotation bars no longer block input at zero height, and 98SE document tabs line up with the tab strip.
-- Prevented parallel PNG exports from intermittently losing pages when the system encoder lookup raced.
-- Prevented crashes from stale or repeated tab-close requests (#353).
-- Fixed color picker crashes with gradient themes (#442, #443).
-- The window no longer goes black after minimizing, restoring or switching back from another window (#415).
-- Restored document rewriting, optimization, and resource pruning for documents whose page resources include image, shading, or pattern streams.
-- Recovered undeclared CCITT scan-line markers and one-bit grayscale image masks in malformed PDFs.
-- Restored valid font-code decoding and missing page text, corrected pattern placement, and repaired missing or corrupt JPEG 2000 image tiles.
-- Honored explicit black-point compensation for supported color conversions across paint, images, shadings, and transparency groups.
-- Native CMYK rendering now repaints named spots through single-colorant images, fixes their color-conversion failure, and preserves other spots under mixed Black and spot images.
-- Corrected colors in indexed images that invert or remap their palette with a Decode array.
-- Fixed blank pages in files whose cross-reference table numbers its first entries one too high.
-- Fixed blank pages where a black-and-white mask image is filled with a gradient or pattern.
-- Fixed content that nearly vanished behind semi-transparent masks drawn in a color-managed group.
-- Fixed colors on pages that adjust them with graphics-state transfer functions.
-- OK in dialogs that fade out on close is no longer treated as Cancel, so bookmark generation, table of contents, page label, initial view, layer, macro, navigation repair, portfolio, attachment, image and blank page dialogs apply their changes.
-- Dragging one page of a multi-page selection in the sidebar now moves the whole selection instead of only the pressed page.
-- Search highlights and text selection now land on the right text on rotated pages, and Crop no longer flips the box vertically on upside-down pages.
-- Edit Text now opens over the clicked line on rotated pages, and text sizes on sideways pages match the saved points.
-- Edit Text now edits text that runs sideways or upside down in place, and an edit stays on its cover when the page is rotated afterward.
-- Included current form field edits in print previews and output without requiring a save and reopen.
-- Preserved visible pixels when pasted clipboard images contain an empty alpha channel (#389).
-- Prevented packaged application metadata from drifting from compiled resources.
-- Corrected WinGet release manifests to run the installer and include the required desktop runtime (#386).
-- WinGet now requests elevation for its machine-wide installation (#439).
-- Refreshed legacy PDF file associations to open the installed app instead of the installer (#393).
-- Registered the PDF handler as KillerPDF instead of the internal KillerPDF.App executable name.
-- Opened PDFs whose cross-reference table contains valid objects beyond an incorrect trailer size (#406).
-- Read documents whose information dictionary carries a null /Trapped entry, which had blocked page extraction, page numbering, and document information.
-- Allowed valid recursive Form XObject resource graphs to be imported during page merges (#421).
-- Allowed page extraction to ignore malformed optional thumbnail images (#423).
-- Recovered malformed JPEG filter chains and used a valid media box when a crop box is unusable.
-- Preserved native black-and-white scan pixels when page bounds clip a source column.
-- Corrected CMYK overprinting across profiles and overlapping fills, and preserved spot inks under process-color paint and images, including RGB pages.
-- Preserved process overprint colors on RGB pages with named spot images.
-- Removed stray edges from coincident CMYK fills and native process replacements across temporary clips and process overprint policies.
-- Corrected ColorDodge and ColorBurn blending in PDF 1.x files.
-- Kept PDF comparison colors consistent with the viewer for large Adobe YCCK JPEGs.
-- Matched installed Arial and Times New Roman fonts for unembedded Helvetica and Times text, preserving bold and italic styles.
-- Preserved the previous renderer's scaled page dimensions for viewing and image export.
-- Preserved landscape page orientation and proportions when flattening rotated PDFs (#362).
-- Kept text editing, selection feedback, and touchpad zoom reliable, including font changes, multiline entry, and region selection (#428).
-- Pasted multi-selected annotations now move together, and a pen click places a dot.
-- Chose the print dialog's initial orientation from the active page while preserving manual overrides (#432).
-- Ignored invalid engine OCR models and kept the Tesseract migration fallback available.
-- Allowed Transform to rasterize selected pages in tagged PDFs (#383).
-- Allowed Document Info changes when PDFs contain malformed language metadata (#384).
-- Rendered the correct first page after opening or switching documents in Single, Two-Page, and Grid views (#378, #379, thanks @Ryokoxx).
-- Restored the full page display when switching to Continuous view or applying a fit command.
-- Kept prefetched pages correctly inverted in night mode and stopped obsolete prefetch after tab or view changes.
-- Reduced page-link loading work for large PDFs (#438).
-- Restored title-bar controls, including the close button and logo zoom control.
-- Restored reliable title-bar dragging and double-clicking from maximized windows (#380).
-- Kept native window resize borders, preserved the visible Continuous position during resizing, and retained the custom caption (#372, #373, thanks @Ryokoxx).
-- Maximizing after moving to another monitor uses that monitor's size and bounds (#363).
-- Each document tab keeps its own scroll position and zoom, including when its viewport is rebuilt or the file is reopened (#399).
-- Kept comparison labels readable, preserved underscores in file names, and separated display, save, and working-copy paths (#370, #371, #376, thanks @Ryokoxx).
-- Restored the Compare PDFs toolbar caption and kept its choices open when launched from the overflow menu (#360).
-- Opened PDF comparison with equal document pane widths, excluding the sidebar (#359).
-- Restored toolbar captions for fillable text fields and the measuring tool.
-- Kept comparison controls visible in narrower windows and restored the Close button's full click area.
-- Closing inactive tabs now preserves the active document and sidebar.
-- Tool option checkboxes now change without flashing the annotation bar.
-- Localized the remaining validation messages and audited interface text across all 15 languages. The localization gate now rejects hardcoded UI labels and tooltips (#227).
-- Kept localized Fit Page and Fit Width choices fully visible (#419).
-- Localized Document Info metadata and keyboard map layer labels (#407).
-- Localized the document page count and Italian certificate label, and included the add-bookmark row when sizing the sidebar (#394).
-- Refined Italian application and installer translations. (Thanks @bovirus)
-- Corrected Italian translations (#395). (Thanks @bovirus)
-- Ctrl+wheel changes picker views and icon sizes.
-- Aligned the sidebar divider with the thumbnail edge and restored arrow cursors on window caption controls.
-- Annotation bars now show an aligned hand cursor only over draggable areas.
-- Added installer file details and the installed size in Windows' program list (#361).
-- The portable package reports a start failure in a KillerPDF-styled dialog instead of a plain Windows message box.
-- The Document Info text menu now follows the active theme.
-- Standalone uninstall dialogs use the default Dark/Green theme, and installation errors use themed dialogs.
-- Install and uninstall windows now show the film grain and the app icon in the title bar.
-- Marked 1.9 development builds as unreleased in the About card.
-- Stopped drawing annotations and form fields that the document marks Hidden.
-- Fixed missing or wrong characters in embedded TrueType fonts that name their glyphs instead of mapping them.
-- Fixed blank text from embedded TrueType fonts whose metrics table is cut short.
-- Fixed text from embedded TrueType fonts with a damaged table directory or metric count.
-- Fixed scrambled glyphs from embedded TrueType fonts that mislabel their glyph location format.
-- Fixed missing text from fonts embedded as TrueType collections.
-- Fixed boxes in place of text from embedded TrueType fonts whose character map uses an uncommon layout.
-- Fixed missing text in fonts whose text-extraction map builds on a standard character collection.
-- Fixed invisible text from Type 3 fonts whose glyphs set their own color.
-- Fixed blank text from CJK fonts whose text map declares one-byte codes.
-- Fixed lowercase letters drawn in place of capitals when a PDF's text map disagrees with its encoding.
-- Fixed embedded fonts replaced by a substitute when their settings contain malformed numbers.
-- Fixed oversized, crowded text from fonts that store a CFF program where a Type 1 program belongs.
-- Fixed overly wide word gaps in standard fonts whose encoding renames the space character to .notdef.
-- Fixed Arial Narrow, Arial Black and similar fonts drawn with plain Arial when the named face is installed.
-- Fixed pages that failed to render when a blended group sat inside a soft-masked group.
-- Fixed highlight, underline, strikeout, squiggly, square and circle annotations that were invisible when the file stored no appearance for them.
-- Fixed extra rings and seams in radial gradients whose circles are disjoint or intersect.
-- Fixed function-based gradients that disappeared when they declared a bounding box.
-- Fixed lines drawn too thick or with squared-off ends when a page stretches them more in one direction than the other.
-- Fixed wrong colors in JPEG images stored as plain RGB without a color marker.
-- Fixed noise in some refined black-and-white JBIG2 images.
-- Fixed embedded Type 1 fonts drawn with a substitute when they define their subroutines twice.
-- App and title bar icons stay sharp at fractional DPI and app zoom, and the title bar icon is slightly larger.
-- Preserved descriptor font names and source baselines when editing existing PDF text (#431).
-- Restored split-view state and polished document tabs, flyouts, shortcut colors, footer and sidebar controls, and 98SE chrome.
-- Kept localized toolbar captions and website Help key names complete and visible (#230).
-- Completed remaining dialog and installer translations and refreshed the website guides.
-- Kept the footer page number current during Continuous navigation and scaled footer controls with the interface (#354, #355).
-- Menus fade again, and menus, submenus, flyouts, the shortcuts panel and the language menu line up with their controls and screen edges.
-- Kept the KillerPDF icon visible on Windows 11 taskbar buttons throughout slower portable launches.
-- The installer and uninstaller have their own taskbar buttons, labeled "KillerPDF Installer" and "Uninstall KillerPDF", with the app icon.
-- Corrected theme colors, wordmarks, footers and dialog controls, including Light/Yellow, 98SE Red and the cream Blood, Greed and Cyanotic accents. Accent-colored toolbar icons keep a dark halo on Light/Yellow.
-- The page label, initial view, macro, navigation audit, portfolio and attachment dialogs use theme colors for their help text, lists and drop-downs, and the longer ones size to their contents instead of leaving empty space.
-- Kept the Transform preview page shadow visible at the top and bottom.
-- Evenly spaced About options, moved startup update checks to the bottom, and aligned Clear all Data with the top row.
-- Aligned website footer versions with the published release across all languages.
-- Reduced memory when several PDF font names map to the same installed Windows font.
+- Saving an Edit Text change removes the replaced words from the file, so they can no longer be found, copied or brought back by editing the line again.
+- Fixed blank or broken pages in damaged files, including misnumbered cross-reference tables, slightly damaged encryption dictionaries, a null /Trapped entry, undeclared CCITT markers, malformed JPEG filters, unusable crop boxes and corrupt JPEG 2000 tiles. Document rewriting and optimization work again for pages with image, shading or pattern streams.
+- Fixed missing, wrong, invisible or badly spaced text from unusual or damaged TrueType, Type 1, Type 3, CFF and CJK fonts, and installed Arial, Arial Narrow, Arial Black and Times New Roman faces now stand in for unembedded text.
+- Fixed colors from black-point compensation, indexed images with a Decode array, transfer functions, ColorDodge and ColorBurn, CMYK overprint and spot inks, and JPEG images without a color marker, and comparison colors now match the viewer for YCCK JPEGs.
+- Fixed pages broken by gradient-filled masks, semi-transparent masks in color-managed groups, blended groups inside soft masks, disjoint radial gradients, bounded function gradients, unevenly stretched lines, noisy JBIG2 refinement, misplaced patterns and clipped black-and-white scan columns.
+- Annotations without a stored appearance now draw, and annotations and form fields marked Hidden no longer do.
+- Edit Text opens over the clicked line on rotated pages, edits sideways and upside-down text in place, keeps descriptor font names and baselines (#431), and stays on its cover when the page is rotated afterward.
+- Copied and pasted annotations, and those on a duplicated page, keep a text box's letter spacing, a shape's fill and the erased parts of a cover.
+- OK in the bookmark, table of contents, page label, initial view, layer, macro, navigation, portfolio, attachment and image dialogs is no longer treated as Cancel.
+- Fixed lost pages in parallel PNG exports, and invalid OCR models are ignored with the Tesseract fallback kept.
+- The page label, initial view, macro, navigation audit, portfolio and attachment dialogs follow the theme, and the longer ones size to their contents.
+- The About card marks 1.9 development builds as unreleased.
 
-## [1.8.81] - Unreleased
+## [1.8.90] - Unreleased
 
-1.8.81 improves responsiveness, form printing, color selection, updates, and interface consistency.
+1.8.90 improves saving, form printing, color selection, updates, and the family look.
 
 ### Added
+- Added a Film Grain switch to the theme menu. It is on by default, and turning it off removes the grain texture from every surface.
 - Added Ctrl+wheel sizing in the file picker and links from the shortcuts panel to the online guide.
 
 ### Changed
+- Saving over a digitally signed PDF now asks first, because saving removes the signature.
+- The wordmarks use Punktype and Lacquer with a soft shadow on every theme, and the app, installer and website use Killer Sans in place of the typewriter font. The installer also matches the new family setup layout.
 - Hovered outline buttons and accent picker pills use gradients outside 98SE, and accent swatches lift on hover.
 
 ### Fixed
-- Prevented zero-height 98SE annotation bars from repeatedly retrying layout and blocking input.
-- Prevented the color picker from crashing when changing stamp or annotation colors with gradient themes (#442, #443).
-- Included current form field edits in print previews and output without requiring a save and reopen.
-- Kept update helpers and setup from locking the installation folder through their working directory (#434).
-- Kept app icons sharp at fractional display DPI and app zoom.
+- A failed Save or Save As no longer damages the existing file, because the new copy is finished before it replaces the file.
+- Unsaved annotations survive moving, reordering, duplicating and merging pages and removing a link.
+- Fixed color picker crashes with gradient themes (#442, #443) and a crash when Windows blocks the text extraction library (#441).
+- Release packaging signs the application and engine DLLs and checks real window startup (#444), and updates no longer lock the installation folder (#434).
+- Inserting a blank page works again, and dragging one page of a multi-page selection moves the whole selection.
+- Search highlights, text selection and Crop land in the right place on rotated pages.
+- Print previews and output include current form field edits without a save and reopen.
+- 98SE annotation bars no longer block input at zero height, and 98SE document tabs line up with the tab strip.
+- Menus fade again, and menus, submenus, flyouts, the shortcuts panel and the language menu line up with their controls and screen edges.
+- Corrected theme colors, wordmarks, footers and dialog controls, including Light/Yellow, 98SE Red and the cream Blood, Greed and Cyanotic accents. Accent-colored toolbar icons keep a dark halo on Light/Yellow.
+- App and title bar icons stay sharp at fractional DPI and app zoom, and the title bar icon is slightly larger.
 - Corrected Vietnamese website translations and theme look counts.
-- Restored menu fades and aligned rail menus and submenus with their opening controls and screen edges.
-- Aligned the shortcuts panel and language menu, and kept rail flyouts beside their opening buttons with an 8-unit inset from the content edge.
-- Corrected theme colors, wordmarks, footers and dialog controls, including Light/Yellow, 98SE Red and cream Blood, Greed and Cyanotic accents. Added a shadow to the PDF accent in the Light/Yellow wordmark.
 
 ## [1.8.80] - 2026-10-05
 
