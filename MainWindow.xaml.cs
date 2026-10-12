@@ -482,6 +482,14 @@ namespace KillerPDF
                 // is Large/Under, so a first run needs the apply pass too.
                 ApplyToolbarAppearance();
 
+                // The release startup check initializes the real empty window without restoring
+                // documents, accepting handoffs, or starting update UI/network work.
+                if (App.IsStartupSmoke)
+                {
+                    SyncSidebarToDocState(hasDoc: false, startup: true);
+                    return;
+                }
+
                 FlushPendingExternalOpen();   // a forward that landed before the panes were wired
 
                 var args = Environment.GetCommandLineArgs();

@@ -18,8 +18,11 @@ public sealed class ReleaseScriptSafetyTests
         Assert.Contains("Assert-ReleaseArtifactVersion", script, StringComparison.Ordinal);
         Assert.Contains("Get-AuthenticodeSignature", script, StringComparison.Ordinal);
         Assert.Contains("KILLERPDF_TEST_INSTALL_ROOT", script, StringComparison.Ordinal);
-        Assert.Contains("Installed application startup smoke test failed", script,
+        Assert.Contains("'build\\Test-GuiStartup.ps1') -ExePath $installedExe", script,
             StringComparison.Ordinal);
+        Assert.Contains("Assert-FirstPartyPayloadSignatures $installRoot", script, StringComparison.Ordinal);
+        Assert.Contains("Assert-EmbeddedFirstPartySignatures $artifact", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("ArgumentList '--version'", script, StringComparison.Ordinal);
         Assert.Contains("KillerPDF-$Version-src.zip", script, StringComparison.Ordinal);
         Assert.Contains("SHA256SUMS.txt does not match", script, StringComparison.Ordinal);
         Assert.Contains("DryRun: skipping WinGet fork synchronization", script,

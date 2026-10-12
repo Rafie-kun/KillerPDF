@@ -87,6 +87,11 @@ namespace KillerLauncher
                 Application.SetCompatibleTextRenderingDefault(false);
                 return InstallerWizard.ShowFailure(ex.Message);
 #else
+                if (args.Any(a => string.Equals(a, "--startup-smoke", StringComparison.OrdinalIgnoreCase)))
+                {
+                    Console.Error.WriteLine(ProductName + " startup check failed: " + ex);
+                    return 1;
+                }
                 LauncherDialog.ShowError(LauncherStrings.Format("StartFailed", ex.Message));
                 return 1;
 #endif
@@ -95,11 +100,13 @@ namespace KillerLauncher
 
         private static int RunPortable(string[] args)
         {
-            SweepAbandonedPortableDirectories();
-            Directory.CreateDirectory(PortableRoot);
+            bool smoke = args.Any(a => string.Equals(a, "--startup-smoke", StringComparison.OrdinalIgnoreCase));
+            if (!smoke) SweepAbandonedPortableDirectories();
+            string root = smoke ? Path.GetTempPath() : PortableRoot;
+            Directory.CreateDirectory(root);
 
             string version = Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "unknown";
-            string directory = Path.Combine(PortableRoot,
+            string directory = Path.Combine(root,
                 version + "-" + Process.GetCurrentProcess().Id.ToString(CultureInfo.InvariantCulture) + "-" + Guid.NewGuid().ToString("N"));
 
             try

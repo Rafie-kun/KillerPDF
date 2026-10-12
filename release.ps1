@@ -5,7 +5,7 @@
 .DESCRIPTION
     1. Locates and hashes pdfium.dll for the published checksum summary.
     2. Builds the ordinary multi-file KillerPDF.App payload without Costura/Fody weaving.
-    3. Signs KillerPDF.App.exe, regenerates its hash manifest, compresses that payload once,
+    3. Signs the first-party App EXE and App/Engine DLLs, regenerates their hash manifest, compresses that payload once,
        and embeds it in the public portable and installer executables.
     4. Signs both public executables. Prefers CertThumbprint (exact match) over CertName (CN match)
        and retries the timestamp across three TSA endpoints.
@@ -68,10 +68,7 @@ $installerExe  = Join-Path $publishDir "KillerPDF.exe"
 $packageBuild  = Join-Path $PSScriptRoot "build\build-packages.ps1"
 $portablePayloadDir  = Join-Path $PSScriptRoot "bin\Release\net10.0-windows\portable-package\payload"
 $installerPayloadDir = Join-Path $PSScriptRoot "bin\Release\net10.0-windows\installer-package\payload"
-$innerExes = @(
-    (Join-Path $portablePayloadDir "KillerPDF.App.exe"),
-    (Join-Path $installerPayloadDir "KillerPDF.App.exe")
-)
+. (Join-Path $PSScriptRoot 'build\payload-security.ps1')
 
 # TSA endpoints - tried in order; first success wins.
 $tsaList = @(
@@ -123,13 +120,11 @@ function Test-ReleaseArtifacts(
             if ($signature.Status -ne [System.Management.Automation.SignatureStatus]::Valid) {
                 throw "Authenticode validation failed for $artifact with status $($signature.Status)."
             }
+            Assert-EmbeddedFirstPartySignatures $artifact
         }
     }
 
-    $portableProcess = Start-Process -FilePath $PortablePath -ArgumentList '--version' -Wait -PassThru
-    if ($portableProcess.ExitCode -ne 0) {
-        throw "Portable startup smoke test failed with exit code $($portableProcess.ExitCode)."
-    }
+    & (Join-Path $PSScriptRoot 'build\Test-GuiStartup.ps1') -ExePath $PortablePath
 
     $installRoot = Join-Path $env:TEMP ('KillerPDF-release-install-' + [Guid]::NewGuid().ToString('N'))
     $previousTestRoot = [Environment]::GetEnvironmentVariable('KILLERPDF_TEST_INSTALL_ROOT')
@@ -148,10 +143,8 @@ function Test-ReleaseArtifacts(
         if (-not [IO.File]::Exists($installedExe)) {
             throw "Signed installer smoke test did not install KillerPDF.App.exe."
         }
-        $installedProcess = Start-Process -FilePath $installedExe -ArgumentList '--version' -Wait -PassThru
-        if ($installedProcess.ExitCode -ne 0) {
-            throw "Installed application startup smoke test failed with exit code $($installedProcess.ExitCode)."
-        }
+        if ($RequireValidSignature) { Assert-FirstPartyPayloadSignatures $installRoot }
+        & (Join-Path $PSScriptRoot 'build\Test-GuiStartup.ps1') -ExePath $installedExe
     }
     finally {
         [Environment]::SetEnvironmentVariable('KILLERPDF_TEST_INSTALL_ROOT', $previousTestRoot)
@@ -383,7 +376,11 @@ $packageBuildArguments = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 
 if (-not $SkipSign) { $packageBuildArguments += '-RequireSignature' }
 & powershell @packageBuildArguments
 if ($LASTEXITCODE -ne 0) { throw "Package build failed." }
-foreach ($artifact in @($portableExe, $installerExe) + $innerExes) {
+$innerFiles = @(
+    Get-FirstPartyPayloadFiles $portablePayloadDir
+    Get-FirstPartyPayloadFiles $installerPayloadDir
+)
+foreach ($artifact in @($portableExe, $installerExe) + $innerFiles) {
     if (-not (Test-Path $artifact)) { throw "Release artifact not found at: $artifact" }
 }
 Write-Host "    Portable : $portableExe" -ForegroundColor Green
@@ -413,7 +410,7 @@ if (-not $SkipSign) {
     # Sign the real installed application before it is compressed into the public launcher.
     # Third-party binaries retain their publishers' signatures; only Killer-owned binaries are signed here.
     Write-Host "`n==> Signing inner applications before payload packaging..." -ForegroundColor Cyan
-    foreach ($innerExe in $innerExes) {
+    foreach ($innerExe in $innerFiles) {
         $innerSigned = $false
         foreach ($tsa in $tsaList) {
             & $signtool sign /fd sha256 /tr $tsa /td sha256 @certArgs `
@@ -426,7 +423,7 @@ if (-not $SkipSign) {
         if ($LASTEXITCODE -ne 0) { throw "Inner application signature verification failed: $innerExe" }
     }
 
-    # Signing changes the inner EXE hash. Rebuild the manifest, compressed payload, and outer
+    # Signing changes EXE and DLL hashes. Rebuild the manifest, compressed payload, and outer
     # launcher so the payload contains the signed bytes and verifies them after extraction.
     Write-Host "`n==> Repacking signed payload..." -ForegroundColor Cyan
     & powershell -NoProfile -ExecutionPolicy Bypass -File $packageBuild -RepackOnly -RequireSignature

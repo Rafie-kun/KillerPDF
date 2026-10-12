@@ -9,6 +9,37 @@ namespace KillerPDF.Tests;
 public sealed class AppDataPathsTests
 {
     [Fact]
+    public void StartupSmokeDataDoesNotUseInheritedPortableSettings()
+    {
+        string root = Path.Combine(Path.GetTempPath(), $"killerpdf-smoke-isolation-{Guid.NewGuid():N}");
+        string launcher = Path.Combine(root, "KillerPDF-Portable.exe");
+        string isolated = Path.Combine(root, "isolated");
+        string? previousLauncher = Environment.GetEnvironmentVariable("KILLERPDF_LAUNCHER_PATH");
+        string? previousSmokeRoot = AppDataPaths.StartupSmokeRoot;
+        try
+        {
+            Directory.CreateDirectory(root);
+            File.WriteAllBytes(launcher, []);
+            Environment.SetEnvironmentVariable("KILLERPDF_LAUNCHER_PATH", launcher);
+            AppDataPaths.StartupSmokeRoot = isolated;
+
+            Assert.Null(AppDataPaths.GetPortableSetting("LastFile"));
+            Assert.Equal(isolated, AppDataPaths.LocalRoot);
+            Assert.Equal(isolated, AppDataPaths.UserRoot);
+            Assert.Equal(Path.Combine(isolated, "signatures.json"), AppDataPaths.SignaturesFile);
+            AppDataPaths.SetPortableSetting("Locale", "en-US");
+            Assert.True(File.Exists(Path.Combine(isolated, "settings.json")));
+            Assert.False(Directory.Exists(Path.Combine(root, "KillerPDF-Data")));
+        }
+        finally
+        {
+            AppDataPaths.StartupSmokeRoot = previousSmokeRoot;
+            Environment.SetEnvironmentVariable("KILLERPDF_LAUNCHER_PATH", previousLauncher);
+            if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
     public void PortableSettingsAreStoredBesideTheLauncher()
     {
         string root = Path.Combine(Path.GetTempPath(), $"killerpdf-portable-data-{Guid.NewGuid():N}");
