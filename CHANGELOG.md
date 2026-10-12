@@ -52,6 +52,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - The page label, initial view, macro, navigation audit, portfolio and attachment dialogs follow the theme, and the longer ones size to their contents.
 - The About card marks 1.9 development builds as unreleased.
 - Dialog action buttons are hollow in the accent color and fill with the button gradient on hover, like the rest of the Killer Tools family, instead of showing a solid block with hidden text.
+- Installer action buttons fill with the accent gradient on hover.
 
 ## [1.8.90] - Unreleased
 
