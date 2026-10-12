@@ -1468,6 +1468,11 @@
       "maintenanceCommit": "b27c4c7768d2c00202736c010a2078552d726afd",
       "developmentCommit": "d0353121a5ca57f98d7611be3bc3387706484532",
       "reason": "Both commits remove the retired website Freckle Face font and license paths. Development also updates its changelog font names in d035312, so the complete patches differ. Neither website path remains tracked at the current tips. The earlier c0dbbee commit removed desktop font copies instead."
+    },
+    {
+      "maintenanceCommit": "ca5491e55535d0ebe5d320d3a812fdfa22b1f0cd",
+      "developmentCommit": "698b512a32b5d81314666950a2e3b62be0dc89fd",
+      "reason": "All 32 committed file hashes match the packaging supporting-task handoff. The 16 functional patches match after accounting for the overview comment step number. Both lines select the App EXE and App/Engine DLLs, validate final signatures before repacking, regenerate final-byte manifests, and exercise isolated MainWindow startup. Existing development Engine ReadyToRun replacement finishes before target selection. Missing-engine and unsigned-repack negative checks and unsigned GUI startup were verified by the supporting task. Signed release verification and the reporter machine policy remain unverified."
     }
   ]
 }

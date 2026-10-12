@@ -60,6 +60,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Added Ctrl+R and Ctrl+Shift+R to rotate selected pages clockwise and counterclockwise.
 - Added a keyboard shortcut toggle with an always-available Ctrl+Shift+K recovery chord (#405).
 - Added keyboard shortcuts for the 1.9 tools and commands: E for Color Correction, M for Measure, X for Redact, Ctrl+Shift+E to export a document, Ctrl+Shift+T to convert a scan to text, Ctrl+Shift+G for Film Grain, Ctrl+Shift+N to move a tab to a new window, and Ctrl+Shift+D followed by the letter shown beside each document tool. A tab's right-click menu can also move it to a new window.
+- Added trusted timestamps to digital signing. The signing dialog can request an RFC 3161 timestamp from a chosen server, and a failed timestamp is reported separately from certificate problems.
+- Added Protect Document (Ctrl+Shift+P) to the Save menu. It writes an AES-256 encrypted copy protected by passwords with print, copy and edit permissions, or for certificate recipients. PDFs encrypted for certificate recipients now open with a matching certificate from the Windows certificate store.
 - Added drag ordering for pinned places in the file picker.
 - Added a `--batch-render` command that renders pages of a file or tree to PNG with a per-page render and open timing log, and a per-file comparison in the benchmark script. Recorded shared-input timing, memory, and multipage rendering validation.
 - Added yellow and magenta accents to the neutral and 98SE themes.
@@ -102,83 +104,80 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - After a zoom, pages whose current render is within 5% of the displayed size are no longer re-rendered, so the view settles about 250 ms sooner.
 
 ### Fixed
-- Kept app icons sharp at fractional display DPI and app zoom by caching exact pixel sizes from a covering source and aligning the final draw to device pixels.
-- Prevented zero-height 98SE annotation bars from continuously retrying layout and blocking input; positioning resumes after load, visibility changes and restore.
-- Hardened native library loading and release artifact verification.
-- Kept update helpers and setup from locking the installation folder through their working directory (#434).
 - Restored saving markup to tagged PDFs while preserving their structure, and finished markup processing before overwriting the destination.
 - Prevented a failed Save or Save As from damaging the existing file by finishing the new copy before replacing it.
 - Saving an Edit Text change now removes the replaced words from the file, so they can no longer be found or copied and no longer reappear when the line is edited again.
-- OK in dialogs that fade out on close is no longer treated as Cancel, so bookmark generation, table of contents, page label, initial view, layer, macro, navigation repair, portfolio, attachment, image and blank page dialogs apply their changes.
 - Preserved unsaved annotations when moving, reordering, duplicating, or merging pages and when removing a link. A duplicated page carries a copy of them.
 - Copied and pasted annotations, and those on a duplicated page, now keep a text box's letter spacing, a shape's fill, and the erased parts of a cover.
+- Preserved pasted images and other unsaved annotations when inserting blank pages (#388).
+- Preserved shapes and other annotations on retained pages when deleting PDF pages (#429).
+- Preserved annotations during normal saves when cached page dimensions are unavailable.
+- Saved completed forms in PDFs with empty creation dates and unlisted fields.
+- Preserved annotation position and orientation when saving PDFs whose page content leaves a transform active.
+- Preserved Hebrew letter order when saving text placed on a PDF (#435).
+- Kept selected-page transforms when retained pages contain inconsistent font-width metadata.
+- Preserved original JPEG payloads for safe full-page flattening and JPEG compression when repairing or importing image-based pages (#366).
+- Preserved detected text sizes, identified unavailable font substitutions, and fixed Save Flattened crashes on edited tagged PDFs (#356).
+- Hardened native library loading and release artifact verification.
+- Kept drawings and signatures aligned when saving or printing cropped pages (#418).
+- Fixed encrypted files whose encryption dictionary is slightly damaged opening as blank pages.
+- Release packaging now signs the application and engine DLLs and checks real window startup (#444).
+- Prevented zero-height 98SE annotation bars from continuously retrying layout and blocking input; positioning resumes after load, visibility changes and restore.
+- Prevented parallel PNG exports from intermittently losing pages when the system encoder lookup raced.
+- Prevented crashes from stale or repeated tab-close requests (#353).
+- Prevented the color picker from crashing when changing stamp or annotation colors with gradient themes (#442).
+- Prevented the app window from going black when minimizing and restoring (#415).
+- Restored document rewriting, optimization, and resource pruning for documents whose page resources include image, shading, or pattern streams.
+- Recovered undeclared CCITT scan-line markers and one-bit grayscale image masks in malformed PDFs.
+- Restored valid font-code decoding and missing page text, corrected pattern placement, and repaired missing or corrupt JPEG 2000 image tiles.
+- Honored explicit black-point compensation for supported color conversions across paint, images, shadings, and transparency groups.
+- Native CMYK rendering now repaints named spots through single-colorant images, fixes their color-conversion failure, and preserves other spots under mixed Black and spot images.
+- Corrected colors in indexed images that invert or remap their palette with a Decode array.
+- Fixed blank pages in files whose cross-reference table numbers its first entries one too high.
+- Fixed blank pages where a black-and-white mask image is filled with a gradient or pattern.
+- Fixed content that nearly vanished behind semi-transparent masks drawn in a color-managed group.
+- Fixed colors on pages that adjust them with graphics-state transfer functions.
+- Kept update helpers and setup from locking the installation folder through their working directory (#434).
+- OK in dialogs that fade out on close is no longer treated as Cancel, so bookmark generation, table of contents, page label, initial view, layer, macro, navigation repair, portfolio, attachment, image and blank page dialogs apply their changes.
 - Dragging one page of a multi-page selection in the sidebar now moves the whole selection instead of only the pressed page.
 - Search highlights and text selection now land on the right text on rotated pages, and Crop no longer flips the box vertically on upside-down pages.
 - Edit Text now opens over the clicked line on rotated pages, and text sizes on sideways pages match the saved points.
 - Edit Text now edits text that runs sideways or upside down in place, and an edit stays on its cover when the page is rotated afterward.
-- Preserved pasted images and other unsaved annotations when inserting blank pages (#388).
-- Preserved shapes and other annotations on retained pages when deleting PDF pages (#429).
-- Preserved annotations during normal saves when cached page dimensions are unavailable.
-- Prevented parallel PNG exports from intermittently losing pages when the system encoder lookup raced.
-- Saved completed forms in PDFs with empty creation dates and unlisted fields.
 - Included current form field edits in print previews and output without requiring a save and reopen.
-- Preserved annotation position and orientation when saving PDFs whose page content leaves a transform active.
-- Kept drawings and signatures aligned when saving or printing cropped pages (#418).
-- Preserved Hebrew letter order when saving text placed on a PDF (#435).
-- Kept selected-page transforms when retained pages contain inconsistent font-width metadata.
-- Preserved original JPEG payloads for safe full-page flattening and JPEG compression when repairing or importing image-based pages (#366).
 - Preserved visible pixels when pasted clipboard images contain an empty alpha channel (#389).
-- Prevented crashes from stale or repeated tab-close requests (#353).
-- Prevented the color picker from crashing when changing stamp or annotation colors with gradient themes (#442).
-- Preserved detected text sizes, identified unavailable font substitutions, and fixed Save Flattened crashes on edited tagged PDFs (#356).
-- Prevented the app window from going black when minimizing and restoring (#415).
 - Restored the document display after minimizing or switching back from another window (#415).
 - Prevented packaged application metadata from drifting from compiled resources.
-
 - Retried installation when Windows briefly keeps the previous version's files open (#434).
 - Corrected WinGet release manifests to run the installer and include the required desktop runtime (#386).
 - WinGet now requests elevation for its machine-wide installation (#439).
 - Refreshed legacy PDF file associations to open the installed app instead of the installer (#393).
 - Registered the PDF handler as KillerPDF instead of the internal KillerPDF.App executable name.
 - Opened PDFs whose cross-reference table contains valid objects beyond an incorrect trailer size (#406).
-- Restored document rewriting, optimization, and resource pruning for documents whose page resources include image, shading, or pattern streams.
 - Read documents whose information dictionary carries a null /Trapped entry, which had blocked page extraction, page numbering, and document information.
 - Allowed valid recursive Form XObject resource graphs to be imported during page merges (#421).
 - Allowed page extraction to ignore malformed optional thumbnail images (#423).
 - Recovered malformed JPEG filter chains and used a valid media box when a crop box is unusable.
-- Recovered undeclared CCITT scan-line markers and one-bit grayscale image masks in malformed PDFs.
-- Restored valid font-code decoding and missing page text, corrected pattern placement, and repaired missing or corrupt JPEG 2000 image tiles.
 - Preserved native black-and-white scan pixels when page bounds clip a source column.
-- Honored explicit black-point compensation for supported color conversions across paint, images, shadings, and transparency groups.
 - Corrected CMYK overprinting across profiles and overlapping fills, and preserved spot inks under process-color paint and images, including RGB pages.
 - Preserved process overprint colors on RGB pages with named spot images.
 - Removed stray edges from coincident CMYK fills and native process replacements across temporary clips and process overprint policies.
-- Native CMYK rendering now repaints named spots through single-colorant images, fixes their color-conversion failure, and preserves other spots under mixed Black and spot images.
 - Corrected ColorDodge and ColorBurn blending in PDF 1.x files.
 - Kept PDF comparison colors consistent with the viewer for large Adobe YCCK JPEGs.
 - Matched installed Arial and Times New Roman fonts for unembedded Helvetica and Times text, preserving bold and italic styles.
 - Preserved the previous renderer's scaled page dimensions for viewing and image export.
 - Preserved landscape page orientation and proportions when flattening rotated PDFs (#362).
 - Kept text editing, selection feedback, and touchpad zoom reliable, including font changes, multiline entry, and region selection (#428).
-- Preserved descriptor font names and source baselines when editing existing PDF text (#431).
-
 - Pasted multi-selected annotations now move together, and a pen click places a dot.
-
 - Chose the print dialog's initial orientation from the active page while preserving manual overrides (#432).
-
 - Ignored invalid engine OCR models and kept the Tesseract migration fallback available.
-
 - Allowed Transform to rasterize selected pages in tagged PDFs (#383).
-
 - Allowed Document Info changes when PDFs contain malformed language metadata (#384).
-
 - Rendered the correct first page after opening or switching documents in Single, Two-Page, and Grid views (#378, #379, thanks @Ryokoxx).
 - Restored the full page display when switching to Continuous view or applying a fit command.
 - Kept prefetched pages correctly inverted in night mode and stopped obsolete prefetch after tab or view changes.
 - Reduced page-link loading work for large PDFs (#438).
 - Restored title-bar controls, including the close button and logo zoom control.
 - Restored reliable title-bar dragging and double-clicking from maximized windows (#380).
-
 - Kept native window resize borders, preserved the visible Continuous position during resizing, and retained the custom caption (#372, #373, thanks @Ryokoxx).
 - Used the destination monitor for the first maximize after a cross-monitor drag (#363).
 - Used the destination monitor when calculating maximized client bounds during a cross-monitor move (#363).
@@ -186,7 +185,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Kept scroll and manual zoom settings independent between document tabs and restored them when reopening files (#399).
 - Preserved each document tab's saved scroll position while rebuilding its viewport (#399).
 - Kept comparison labels readable, preserved underscores in file names, and separated display, save, and working-copy paths (#370, #371, #376, thanks @Ryokoxx).
-- Restored split-view state and polished document tabs, flyouts, shortcut colors, footer and sidebar controls, and 98SE chrome.
 - Restored the Compare PDFs toolbar caption and kept its choices open when launched from the overflow menu (#360).
 - Opened PDF comparison with equal document pane widths, excluding the sidebar (#359).
 - Restored toolbar captions for fillable text fields and the measuring tool.
@@ -194,36 +192,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Closing inactive tabs now preserves the active document and sidebar.
 - Tool option checkboxes now change without flashing the annotation bar.
 - Localized the remaining validation messages and audited interface text across all 15 languages. The localization gate now rejects hardcoded UI labels and tooltips (#227).
-- Kept localized toolbar captions and website Help key names complete and visible (#230).
 - Kept localized Fit Page and Fit Width choices fully visible (#419).
 - Localized Document Info metadata and keyboard map layer labels (#407).
 - Localized the document page count and Italian certificate label, and included the add-bookmark row when sizing the sidebar (#394).
-- Completed remaining dialog and installer translations and refreshed the website guides.
 - Refined Italian application and installer translations. (Thanks @bovirus)
 - Corrected Italian translations (#395). (Thanks @bovirus)
-- Kept the footer page number current during Continuous navigation and scaled footer controls with the interface (#354, #355).
 - Ctrl+wheel changes picker views and icon sizes.
-- Aligned the shortcuts panel and language menu, and kept rail flyouts beside their opening buttons with an 8-unit inset from the content edge.
 - Aligned the sidebar divider with the thumbnail edge and restored arrow cursors on window caption controls.
 - Annotation bars now show an aligned hand cursor only over draggable areas.
-- Kept the KillerPDF icon visible on Windows 11 taskbar buttons throughout slower portable launches.
-- The installer and uninstaller have their own taskbar buttons, labeled "KillerPDF Installer" and "Uninstall KillerPDF", with the app icon.
 - Added installer file details and the installed size in Windows' program list (#361).
 - The portable package reports a start failure in a KillerPDF-styled dialog instead of a plain Windows message box.
 - The Document Info text menu now follows the active theme.
-- Corrected theme colors, wordmarks, footers and dialog controls, including Light/Yellow, 98SE Red and cream Blood, Greed and Cyanotic accents. Added a shadow to the PDF accent in the Light/Yellow wordmark.
-- The page label, initial view, macro, navigation audit, portfolio and attachment dialogs use theme colors for their help text, lists and drop-downs, and the longer ones size to their contents instead of leaving empty space.
 - Standalone uninstall dialogs use the default Dark/Green theme, and installation errors use themed dialogs.
-- Main window, dialog, and launcher title bar icons now use sharp size-matched images.
 - Install and uninstall windows now show the film grain and the app icon in the title bar.
-- Kept the Transform preview page shadow visible at the top and bottom.
-- Evenly spaced About options, moved startup update checks to the bottom, and aligned Clear all Data with the top row.
 - Marked 1.9 development builds as unreleased in the About card.
-- Aligned website footer versions with the published release across all languages.
-- Rail right-click menus align 8 pixels from the content edges; the night-mode menu aligns with its icon.
-- Submenus attach consistently to their opening rows, with native direction and screen-edge placement.
 - Stopped drawing annotations and form fields that the document marks Hidden.
-- Corrected colors in indexed images that invert or remap their palette with a Decode array.
 - Fixed missing or wrong characters in embedded TrueType fonts that name their glyphs instead of mapping them.
 - Fixed blank text from embedded TrueType fonts whose metrics table is cut short.
 - Fixed text from embedded TrueType fonts with a damaged table directory or metric count.
@@ -232,7 +215,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Fixed boxes in place of text from embedded TrueType fonts whose character map uses an uncommon layout.
 - Fixed missing text in fonts whose text-extraction map builds on a standard character collection.
 - Fixed invisible text from Type 3 fonts whose glyphs set their own color.
-- Reduced memory when several PDF font names map to the same installed Windows font.
 - Fixed blank text from CJK fonts whose text map declares one-byte codes.
 - Fixed lowercase letters drawn in place of capitals when a PDF's text map disagrees with its encoding.
 - Fixed embedded fonts replaced by a substitute when their settings contain malformed numbers.
@@ -240,18 +222,31 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Fixed overly wide word gaps in standard fonts whose encoding renames the space character to .notdef.
 - Fixed Arial Narrow, Arial Black and similar fonts drawn with plain Arial when the named face is installed.
 - Fixed pages that failed to render when a blended group sat inside a soft-masked group.
-- Fixed blank pages in files whose cross-reference table numbers its first entries one too high.
 - Fixed highlight, underline, strikeout, squiggly, square and circle annotations that were invisible when the file stored no appearance for them.
 - Fixed extra rings and seams in radial gradients whose circles are disjoint or intersect.
 - Fixed function-based gradients that disappeared when they declared a bounding box.
 - Fixed lines drawn too thick or with squared-off ends when a page stretches them more in one direction than the other.
 - Fixed wrong colors in JPEG images stored as plain RGB without a color marker.
-- Fixed blank pages where a black-and-white mask image is filled with a gradient or pattern.
-- Fixed content that nearly vanished behind semi-transparent masks drawn in a color-managed group.
 - Fixed noise in some refined black-and-white JBIG2 images.
 - Fixed embedded Type 1 fonts drawn with a substitute when they define their subroutines twice.
-- Fixed colors on pages that adjust them with graphics-state transfer functions.
-- Fixed encrypted files whose encryption dictionary is slightly damaged opening as blank pages.
+- Kept app icons sharp at fractional display DPI and app zoom by caching exact pixel sizes from a covering source and aligning the final draw to device pixels.
+- Preserved descriptor font names and source baselines when editing existing PDF text (#431).
+- Restored split-view state and polished document tabs, flyouts, shortcut colors, footer and sidebar controls, and 98SE chrome.
+- Kept localized toolbar captions and website Help key names complete and visible (#230).
+- Completed remaining dialog and installer translations and refreshed the website guides.
+- Kept the footer page number current during Continuous navigation and scaled footer controls with the interface (#354, #355).
+- Aligned the shortcuts panel and language menu, and kept rail flyouts beside their opening buttons with an 8-unit inset from the content edge.
+- Kept the KillerPDF icon visible on Windows 11 taskbar buttons throughout slower portable launches.
+- The installer and uninstaller have their own taskbar buttons, labeled "KillerPDF Installer" and "Uninstall KillerPDF", with the app icon.
+- Corrected theme colors, wordmarks, footers and dialog controls, including Light/Yellow, 98SE Red and cream Blood, Greed and Cyanotic accents. Added a shadow to the PDF accent in the Light/Yellow wordmark.
+- The page label, initial view, macro, navigation audit, portfolio and attachment dialogs use theme colors for their help text, lists and drop-downs, and the longer ones size to their contents instead of leaving empty space.
+- Main window, dialog, and launcher title bar icons now use sharp size-matched images.
+- Kept the Transform preview page shadow visible at the top and bottom.
+- Evenly spaced About options, moved startup update checks to the bottom, and aligned Clear all Data with the top row.
+- Aligned website footer versions with the published release across all languages.
+- Rail right-click menus align 8 pixels from the content edges; the night-mode menu aligns with its icon.
+- Submenus attach consistently to their opening rows, with native direction and screen-edge placement.
+- Reduced memory when several PDF font names map to the same installed Windows font.
 - Accent-colored toolbar icons keep a dark halo on the Light theme's Yellow accent, so they no longer fade into the bar.
 - The wordmark has a soft shadow on the Light theme, the same lift it has on the dark themes, so it no longer looks thin on the light title bar.
 - The title bar wordmark's shadow sits a little lower and softer, matching the rest of the family.
