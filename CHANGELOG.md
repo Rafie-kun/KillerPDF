@@ -278,6 +278,108 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Aligned the shortcuts panel and language menu, and kept rail flyouts beside their opening buttons with an 8-unit inset from the content edge.
 - Corrected theme colors, wordmarks, footers and dialog controls, including Light/Yellow, 98SE Red and cream Blood, Greed and Cyanotic accents. Added a shadow to the PDF accent in the Light/Yellow wordmark.
 
+## [1.8.80] - 2026-10-05
+
+1.8.80 adds Ukrainian, Norwegian (Bokmål), and Brazilian Portuguese support, makes document tabs detachable, and improves large PDF handling and installation.
+
+### Added
+- Added Ukrainian localization.
+- Added Norwegian (Bokmål) localization.
+- Added Brazilian Portuguese localization.
+- Added drag ordering for pinned places in the file picker.
+- Added yellow and magenta accents to the neutral and 98SE themes.
+
+### Fixed
+
+- Prevented the app window from going black when minimizing and restoring (#415).
+- Saved completed forms in PDFs with empty creation dates and unlisted fields.
+- Opened PDFs whose cross-reference table contains valid objects beyond an incorrect trailer size (#406).
+- Preserved Hebrew letter order when saving text placed on a PDF (#435).
+- WinGet now requests elevation for its machine-wide installation (#439).
+- Reduced page-link loading work for large PDFs (#438).
+- Pasted multi-selected annotations now move together, and a pen click places a dot.
+- Kept comparison controls visible in narrower windows and restored the Close button's full click area.
+- Closing inactive tabs now preserves the active document and sidebar.
+- Tool option checkboxes now change without flashing the annotation bar.
+- Aligned the sidebar divider with the thumbnail edge and restored arrow cursors on window caption controls.
+- Annotation bars now show an aligned hand cursor only over draggable areas.
+- The installer and uninstaller have their own taskbar buttons, labeled "KillerPDF Installer" and "Uninstall KillerPDF", with the app icon.
+- The portable package reports a start failure in a KillerPDF-styled dialog instead of a plain Windows message box.
+- The Document Info text menu now follows the active theme.
+- Improved text contrast across themes and accents, and replaced Delirium's red menu dividers with gray.
+- Main window, dialog, and launcher title bar icons now use sharp size-matched images.
+- Install and uninstall windows now show the film grain and the app icon in the title bar.
+
+### Changed
+- Document tabs now use complete 98SE geometry and themed drag previews, and can be moved into a new window without losing their live editing state.
+- Reduced memory use when opening large PDFs.
+- The installer now offers upgrade, reinstall, uninstall, or cancel when KillerPDF is already installed.
+- Split the language picker into two columns for 19 locales.
+- Menu rows now show accent text and icons on the theme's hover color.
+- Selected states now use subtle gradients outside 98SE, Light buttons have softer gray borders, and yellow wordmarks match their accent.
+- Ectoplasm menus and annotation bars now have softer borders.
+
+## [1.8.71] - 2026-09-26
+
+1.8.71 expands automation, improves printing, and makes installation more reliable.
+
+### Added
+
+- Added CLI commands for page rotation, deletion, reordering, blank-page insertion, duplication, document details, and text search. KillerMCP can also use every headless app operation.
+
+### Fixed
+
+- Chose the print dialog's initial orientation from the PDF while keeping the manual override (#432).
+- Retried installation when Windows briefly keeps the previous version's files open (#434).
+
+## [1.8.70] - 2026-09-24
+
+1.8.70 introduces KillerPDF's four-digit version numbering, hardens releases, repairs difficult PDF editing and saving cases, and polishes comparison, tabs, localization, and other interface behavior.
+
+### Changed
+
+- Docked the comparison bar below the documents, connected it to the split divider, polished its accent-colored controls, and kept selected toolbar tools crisp.
+
+### Fixed
+
+- Hardened native library loading and release artifact verification.
+- Preserved shapes and other annotations on retained pages when deleting PDF pages (#429).
+- Preserved annotation position and orientation when saving PDFs whose page content leaves a transform active.
+- Allowed PDFs with recursive Form XObject resources to be combined (#421).
+- Kept text editing, selection feedback, and touchpad zoom reliable, including font changes, multiline entry, and region selection (#428).
+- Restored split-view state and polished document tabs, flyouts, shortcut colors, footer and sidebar controls, and 98SE chrome.
+- Kept localized toolbar captions and website Help key names complete and visible (#230).
+
+## [1.8.61] - 2026-09-22
+
+1.8.61 restores installation and automatic updates.
+
+### Fixed
+
+- Restored installable packages after application metadata drifted from compiled resources.
+
+## [1.8.6] - 2026-09-22
+
+1.8.6 restores reliable document viewing across display modes.
+
+### Added
+
+- Added Vietnamese application, installer, OCR, website, and engine documentation support. (Thanks @vuanhvu11982)
+
+### Fixed
+
+- Kept the KillerPDF icon visible on Windows 11 taskbar buttons throughout slower portable launches.
+- Restored the document display after minimizing or switching back from another window (#415).
+- Allowed page extraction to ignore malformed optional thumbnail images (#423).
+- Preserved annotations during normal saves when cached page dimensions are unavailable.
+- Refined Italian application and installer translations. (Thanks @bovirus)
+- Localized Document Info metadata and keyboard map layer labels (#407).
+- Kept localized Fit Page and Fit Width choices fully visible (#419).
+- Preserved each document tab's saved scroll position while rebuilding its viewport (#399).
+- Kept drawings and signatures aligned when saving or printing cropped pages (#418).
+- Used the destination monitor for the first maximize after a cross-monitor drag (#363).
+- Restored the full page display when switching to Continuous view or applying a fit command.
+
 ## [1.8.5] - 2026-09-14
 
 1.8.5 improves saving, signatures, installation, and keyboard controls, and adds optional startup update checks.
