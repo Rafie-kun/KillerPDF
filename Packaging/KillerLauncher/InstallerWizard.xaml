@@ -4,9 +4,9 @@
         xmlns:icons="clr-namespace:KillerLauncher"
         xmlns:local="clr-namespace:KillerLauncher"
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
-        Title="{local:Loc SetupTitle}" Width="650" MinHeight="350" SizeToContent="Height"
+        Title="{local:Loc SetupTitle}" Width="650" MinHeight="390" SizeToContent="Height"
         WindowStartupLocation="CenterScreen" WindowStyle="None" ResizeMode="NoResize"
-        AllowsTransparency="True" Background="Transparent" FontFamily="Segoe UI" Foreground="#e0e0e0"
+        AllowsTransparency="True" Background="Transparent" FontFamily="./Fonts/#Killer Sans UI, Segoe UI" Foreground="#e0e0e0"
         TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="ClearType"
         UseLayoutRounding="True" SnapsToDevicePixels="True">
     <shell:WindowChrome.WindowChrome>
@@ -18,6 +18,8 @@
              capitals keep the family wordmark proportions, no gap. -->
         <FontFamily x:Key="Wordmark">./Fonts/#Punktype</FontFamily>
         <FontFamily x:Key="WordmarkAccent">./Fonts/#Lacquer</FontFamily>
+        <FontFamily x:Key="BrandSans">./Fonts/#Killer Sans</FontFamily>
+        <FontFamily x:Key="UiFont">./Fonts/#Killer Sans UI, Segoe UI</FontFamily>
         <SolidColorBrush x:Key="Green" Color="#1ea54c"/>
         <Style x:Key="FooterLink" TargetType="Hyperlink">
             <Setter Property="Foreground" Value="#6a6a6a"/><Setter Property="TextDecorations" Value="None"/>
@@ -104,24 +106,24 @@
             CornerRadius="7" ClipToBounds="False" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
         <Border.Effect><DropShadowEffect Color="Black" BlurRadius="18" ShadowDepth="4" Direction="270" Opacity="0.72" RenderingBias="Quality"/></Border.Effect>
         <Grid ClipToBounds="True">
-            <Grid.ColumnDefinitions><ColumnDefinition Width="190"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-            <Border x:Name="FrameGrain" Grid.ColumnSpan="2" CornerRadius="7" IsHitTestVisible="False" Opacity="0.40"/>
+            <Grid.ColumnDefinitions><ColumnDefinition Width="152"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+            <Border x:Name="FrameGrain" Grid.ColumnSpan="2" CornerRadius="7" IsHitTestVisible="False" Opacity="0.24"/>
 
             <Border Grid.Column="0" Background="#1c1c1c" CornerRadius="7,0,0,7">
                 <Grid>
-                    <Border x:Name="SidebarGrain" CornerRadius="7,0,0,7" IsHitTestVisible="False" Opacity="0.40"/>
-                    <Grid Margin="22,20,18,16">
+                    <Border x:Name="SidebarGrain" CornerRadius="7,0,0,7" IsHitTestVisible="False" Opacity="0.24"/>
+                    <Grid Margin="22,16,14,16">
                     <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
-                    <icons:AppIcon Source="Resources/kp-icon.ico" Width="52" Height="52" HorizontalAlignment="Left" RenderOptions.BitmapScalingMode="NearestNeighbor">
+                    <icons:AppIcon Source="Resources/kp-icon.ico" Width="96" Height="96" Margin="6,0,0,0" HorizontalAlignment="Center" RenderOptions.BitmapScalingMode="NearestNeighbor">
                         <icons:AppIcon.Effect><DropShadowEffect Color="Black" BlurRadius="4" ShadowDepth="1" Opacity="0.9"/></icons:AppIcon.Effect>
                     </icons:AppIcon>
-                    <StackPanel Grid.Row="1" Margin="0,14,0,0">
-                        <TextBlock><TextBlock.Effect><DropShadowEffect Color="Black" BlurRadius="3" ShadowDepth="1" Direction="270" Opacity="0.65"/></TextBlock.Effect><Run Text="Killer" FontFamily="{StaticResource Wordmark}" FontSize="20.34"/><Run Text="PDF" FontFamily="{StaticResource WordmarkAccent}" FontSize="30.54" Foreground="{StaticResource Green}"/></TextBlock>
-                        <TextBlock x:Name="SetupVersionLabel" FontFamily="Consolas" FontSize="9.5" Foreground="#a0a0a0" Margin="1,2,0,0"/>
+                    <StackPanel Grid.Row="1" Margin="0,8,0,0">
+                        <Grid HorizontalAlignment="Left"><TextBlock Foreground="#D8000000" Opacity="0.45" Margin="1,2,-1,-2" IsHitTestVisible="False"><TextBlock.Effect><BlurEffect Radius="3"/></TextBlock.Effect><Run Text="Killer" FontFamily="{StaticResource Wordmark}" FontSize="19.56"/><Run Text="PDF" FontFamily="{StaticResource WordmarkAccent}" FontSize="29.37"/></TextBlock><TextBlock><Run Text="Killer" FontFamily="{StaticResource Wordmark}" FontSize="19.56"/><Run Text="PDF" FontFamily="{StaticResource WordmarkAccent}" FontSize="29.37" Foreground="{StaticResource Green}"/></TextBlock></Grid>
+                        <TextBlock x:Name="SetupVersionLabel" FontFamily="{StaticResource UiFont}" FontSize="10.5" Foreground="#a0a0a0" Margin="1,2,0,0"/>
                     </StackPanel>
-                    <TextBlock Grid.Row="2" Margin="1,24,5,0" TextWrapping="Wrap" Foreground="#d0d0d0" LineHeight="17"
+                    <TextBlock Grid.Row="2" Margin="1,14,0,0" TextWrapping="Wrap" Foreground="#d0d0d0" LineHeight="17"
                                Text="{local:Loc Tagline}"/>
-                    <TextBlock Grid.Row="3" FontFamily="Consolas" FontSize="10" Foreground="#a0a0a0">
+                    <TextBlock Grid.Row="3" FontFamily="{StaticResource BrandSans}" FontSize="14" TextOptions.TextFormattingMode="Ideal" Foreground="#a0a0a0">
                         <Run Text="&#x00A9; 2026 "/><Hyperlink NavigateUri="https://thekiller.net" Click="Website_Click" Style="{StaticResource FooterLink}"><Run Text="Steve the Killer"/></Hyperlink>
                     </TextBlock>
                     </Grid>
@@ -134,7 +136,7 @@
                 </Border>
                 <Border x:Name="ContentCard" Background="#3a3a3a" BorderBrush="#2e2e2e" BorderThickness="1" CornerRadius="6">
                     <Grid>
-                        <Border x:Name="GrainLayer" CornerRadius="6" IsHitTestVisible="False" Opacity="0.52"/>
+                        <Border x:Name="GrainLayer" CornerRadius="6" IsHitTestVisible="False" Opacity="0.24"/>
                         <Button x:Name="CloseButton" Width="26" Height="26" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,5,5,0"
                                 Background="Transparent" BorderThickness="0" Foreground="#b8b8b8" Cursor="Hand" Click="Cancel_Click" Panel.ZIndex="3">
                             <Button.Template><ControlTemplate TargetType="Button"><Border Background="Transparent"><Path x:Name="CloseGlyph" Data="M 5,5 L 13,13 M 13,5 L 5,13" Stroke="#b8b8b8" StrokeThickness="1.2" HorizontalAlignment="Center" VerticalAlignment="Center" Width="18" Height="18"/></Border><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="CloseGlyph" Property="Stroke" Value="#e35d6a"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Button.Template>

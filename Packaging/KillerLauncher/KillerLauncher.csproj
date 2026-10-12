@@ -41,6 +41,8 @@
   <ItemGroup>
     <Resource Include="..\..\Fonts\Punktype.ttf" Link="Fonts\Punktype.ttf" />
     <Resource Include="..\..\Fonts\Lacquer-Regular.ttf" Link="Fonts\Lacquer-Regular.ttf" />
+    <Resource Include="..\..\Fonts\KillerSans-Regular.ttf" Link="Fonts\KillerSans-Regular.ttf" />
+    <Resource Include="..\..\Fonts\KillerSansUI-Regular.ttf" Link="Fonts\KillerSansUI-Regular.ttf" />
     <Resource Include="..\..\Resources\kp-icon.ico" Link="Resources\kp-icon.ico" />
     <Resource Include="..\..\Resources\kp-icon.png" Link="Resources\kp-icon.png" />
     <Resource Include="..\..\Resources\app-icon-master.png" Link="Resources\app-icon-master.png" />
