@@ -146,7 +146,7 @@ namespace KillerPDF
                 // we can't classify the damage, but the PDFium-based repair often recovers it anyway, so
                 // offer the repair rather than just failing outright.
                 var result = KillerDialog.Show(this,
-                    "This PDF couldn't be opened - its structure may be damaged.\n\nWould you like KillerPDF to attempt a repair? A repaired copy will be created - the original file will not be changed.\n\nNote: repaired files may be missing bookmarks, forms, and other interactive features.",
+                    "This PDF couldn't be opened because its structure may be damaged.\n\nWould you like KillerPDF to attempt a repair? A repaired copy will be created, and the original file will not be changed.\n\nNote: repaired files may be missing bookmarks, forms, and other interactive features.",
                     "KillerPDF", MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (result == MessageBoxResult.Yes)
                     TryRepairAndOpen(srcPath);   // sets _asyncOpenPending and finalizes the tab itself

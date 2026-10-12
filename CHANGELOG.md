@@ -34,6 +34,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Dialog action buttons are hollow in the accent color and fill with the button gradient on hover, like the rest of the Killer Tools family, instead of showing a solid block with hidden text.
 - Button gradients start at the outline color and darken toward the bottom, so a hovered button no longer looks darker than its border.
 - Installer action buttons fill with the accent gradient on hover.
+- Reworded the repair prompt so it reads as plain sentences in every language.
 
 ## [1.8.80] - 2026-10-05
 

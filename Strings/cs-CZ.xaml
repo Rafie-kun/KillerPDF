@@ -908,7 +908,7 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Dlg_SearchableSaved" xml:space="preserve">Prohledávatelné PDF uloženo:&#10;{0}&#10;&#10;{1} stránek zpracováno, {2} slov rozpoznáno.</sys:String>
     <sys:String x:Key="Str_Dlg_Repaired" xml:space="preserve">„{0}" byl úspěšně opraven.&#10;&#10;Záložky, formuláře a další interaktivní funkce mohly být ztraceny. Použijte Uložit jako a zapište opravený soubor na nové místo.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairedRaster" xml:space="preserve">„{0}" byl opraven rastrováním přes PDFium.&#10;&#10;Text v opravené kopii nelze vybírat. Použijte Uložit jako a zapište ji na nové místo.</sys:String>
-    <sys:String x:Key="Str_Dlg_RepairAsk" xml:space="preserve">„{0}" má poškozenou strukturu a nepodařilo se jej přidat.&#10;&#10;Má se KillerPDF pokusit o opravu? Vytvoří se opravená kopie - původní soubor se nezmění.&#10;&#10;Poznámka: opraveným souborům mohou chybět záložky, formuláře a další interaktivní funkce.</sys:String>
+    <sys:String x:Key="Str_Dlg_RepairAsk" xml:space="preserve">„{0}" má poškozenou strukturu a nepodařilo se jej přidat.&#10;&#10;Má se KillerPDF pokusit o opravu? Vytvoří se opravená kopie. Původní soubor se nezmění.&#10;&#10;Poznámka: opraveným souborům mohou chybět záložky, formuláře a další interaktivní funkce.</sys:String>
     <sys:String x:Key="Str_Dlg_LangDownloadAsk" xml:space="preserve">Nyní se stáhne jazykový model ({0}), aby OCR mohlo běžet.&#10;&#10;Další jazyky nebo modely vyšší kvality můžete kdykoli přidat v nabídce OCR.</sys:String>
     <sys:String x:Key="Str_Bar_More">Další možnosti</sys:String>
     <sys:String x:Key="Str_Bar_TT_Level">Udrží čáru na nejbližší ose (vodorovné nebo svislé)</sys:String>
