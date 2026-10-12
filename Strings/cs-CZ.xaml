@@ -690,6 +690,11 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Sign_Reason">Důvod (nepovinné)</sys:String>
     <sys:String x:Key="Str_Sign_Location">Místo (nepovinné)</sys:String>
     <sys:String x:Key="Str_Sign_Contact">Kontakt (nepovinné)</sys:String>
+    <sys:String x:Key="Str_Sign_Timestamp">Přidat důvěryhodné časové razítko</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampHint">Server časových razítek zaznamená, kdy jste podepsali, takže podpis lze ověřit i po vypršení platnosti certifikátu. Vyžaduje připojení k internetu.</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampServer">Server časových razítek</sys:String>
+    <sys:String x:Key="Str_Sign_BadTimestampServer">Zadejte adresu serveru časových razítek začínající http nebo https.</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampFailed">Server časových razítek nemohl přidat časové razítko. Zkontrolujte adresu a připojení k internetu, nebo podepište bez časového razítka.</sys:String>
     <sys:String x:Key="Str_Sign_VisibleAppearance">Zobrazit viditelný podpis</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceText">Text podpisu</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceDefault">Digitálně podepsal {name}&#10;Datum: {date}&#10;Důvod: {reason}&#10;Místo: {location}</sys:String>

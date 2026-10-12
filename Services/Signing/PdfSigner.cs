@@ -10,7 +10,7 @@ namespace KillerPDF.Services.Signing
     internal sealed class PdfSigner
     {
         public sealed record SignInfo(string Reason, string Location, string Contact,
-            VisibleSignatureInfo? VisibleAppearance = null);
+            VisibleSignatureInfo? VisibleAppearance = null, string? TimestampServer = null);
 
         public sealed record VisibleSignatureInfo(
             int PageIndex, double Left, double Bottom, double Width, double Height,
@@ -38,6 +38,10 @@ namespace KillerPDF.Services.Signing
                 Reason = NullIfWhiteSpace(info.Reason),
                 Location = NullIfWhiteSpace(info.Location),
                 ContactInformation = NullIfWhiteSpace(info.Contact),
+                // A trusted RFC 3161 timestamp proves when the document was signed, which keeps the
+                // signature checkable after the certificate itself expires.
+                TimestampServerUrl = NullIfWhiteSpace(info.TimestampServer),
+                RequestTimestamp = !string.IsNullOrWhiteSpace(info.TimestampServer),
                 SignerCertificate = cert.RawDataMemory,
                 PageIndex = info.VisibleAppearance?.PageIndex ?? 0,
                 VisibleAppearance = info.VisibleAppearance is { } appearance

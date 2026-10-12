@@ -700,6 +700,11 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Sign_Reason">Motif (facultatif)</sys:String>
     <sys:String x:Key="Str_Sign_Location">Lieu (facultatif)</sys:String>
     <sys:String x:Key="Str_Sign_Contact">Contact (facultatif)</sys:String>
+    <sys:String x:Key="Str_Sign_Timestamp">Ajouter un horodatage de confiance</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampHint">Le serveur d'horodatage enregistre le moment de la signature, afin que celle-ci reste vérifiable après l'expiration de votre certificat. Une connexion Internet est nécessaire.</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampServer">Serveur d'horodatage</sys:String>
+    <sys:String x:Key="Str_Sign_BadTimestampServer">Saisissez une adresse http ou https pour le serveur d'horodatage.</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampFailed">Le serveur d'horodatage n'a pas pu ajouter d'horodatage. Vérifiez l'adresse et votre connexion Internet, ou signez sans horodatage.</sys:String>
     <sys:String x:Key="Str_Sign_VisibleAppearance">Afficher une signature visible</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceText">Texte de la signature</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceDefault">Signé numériquement par {name}&#10;Date : {date}&#10;Motif : {reason}&#10;Lieu : {location}</sys:String>

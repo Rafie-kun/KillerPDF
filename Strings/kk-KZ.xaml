@@ -672,6 +672,11 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Sign_Reason">Себеп (міндетті емес)</sys:String>
     <sys:String x:Key="Str_Sign_Location">Орын (міндетті емес)</sys:String>
     <sys:String x:Key="Str_Sign_Contact">Байланыс (міндетті емес)</sys:String>
+    <sys:String x:Key="Str_Sign_Timestamp">Сенімді уақыт белгісін қосу</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampHint">Уақыт белгісі сервері қол қойған уақытты тіркейді, сондықтан сертификаттың мерзімі біткеннен кейін де қолтаңбаны тексеруге болады. Интернет байланысы қажет.</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampServer">Уақыт белгісі сервері</sys:String>
+    <sys:String x:Key="Str_Sign_BadTimestampServer">Уақыт белгісі серверінің http немесе https мекенжайын енгізіңіз.</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampFailed">Уақыт белгісі сервері белгі қоса алмады. Мекенжайды және интернет байланысын тексеріңіз немесе уақыт белгісінсіз қол қойыңыз.</sys:String>
     <sys:String x:Key="Str_Sign_SaveAs">Қол қойылған көшірмені сақтау</sys:String>
     <sys:String x:Key="Str_Sign_Sign">Қол қою</sys:String>
     <sys:String x:Key="Str_Sign_Cancel">Болдырмау</sys:String>

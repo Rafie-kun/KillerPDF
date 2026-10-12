@@ -700,6 +700,11 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Sign_Reason">Årsak (valgfritt)</sys:String>
     <sys:String x:Key="Str_Sign_Location">Sted (valgfritt)</sys:String>
     <sys:String x:Key="Str_Sign_Contact">Kontakt (valgfritt)</sys:String>
+    <sys:String x:Key="Str_Sign_Timestamp">Legg til et klarert tidsstempel</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampHint">Tidsstempelserveren registrerer når du signerte, slik at signaturen fortsatt kan kontrolleres etter at sertifikatet ditt utløper. Krever internettilkobling.</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampServer">Tidsstempelserver</sys:String>
+    <sys:String x:Key="Str_Sign_BadTimestampServer">Skriv inn en http- eller https-adresse for tidsstempelserveren.</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampFailed">Tidsstempelserveren kunne ikke legge til et tidsstempel. Kontroller adressen og internettilkoblingen, eller signer uten tidsstempel.</sys:String>
     <sys:String x:Key="Str_Sign_VisibleAppearance">Vis en synlig signatur</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceText">Signaturtekst</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceDefault">Digitalt signert av {name}&#10;Dato: {date}&#10;Årsak: {reason}&#10;Sted: {location}</sys:String>

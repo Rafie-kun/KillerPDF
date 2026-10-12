@@ -700,6 +700,11 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Sign_Reason">Lý do (tùy chọn)</sys:String>
     <sys:String x:Key="Str_Sign_Location">Địa điểm (tùy chọn)</sys:String>
     <sys:String x:Key="Str_Sign_Contact">Liên hệ (tùy chọn)</sys:String>
+    <sys:String x:Key="Str_Sign_Timestamp">Thêm dấu thời gian đáng tin cậy</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampHint">Máy chủ dấu thời gian ghi lại thời điểm bạn ký, nhờ đó chữ ký vẫn kiểm tra được sau khi chứng chỉ hết hạn. Cần có kết nối Internet.</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampServer">Máy chủ dấu thời gian</sys:String>
+    <sys:String x:Key="Str_Sign_BadTimestampServer">Nhập địa chỉ http hoặc https của máy chủ dấu thời gian.</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampFailed">Máy chủ dấu thời gian không thể thêm dấu thời gian. Hãy kiểm tra địa chỉ và kết nối Internet, hoặc ký mà không có dấu thời gian.</sys:String>
     <sys:String x:Key="Str_Sign_VisibleAppearance">Hiển thị chữ ký trực quan</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceText">Văn bản chữ ký</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceDefault">Được ký kỹ thuật số bởi {name}&#10;Ngày: {date}&#10;Lý do: {reason}&#10;Địa điểm: {location}</sys:String>

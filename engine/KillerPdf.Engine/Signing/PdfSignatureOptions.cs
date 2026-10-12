@@ -43,6 +43,17 @@ public sealed record PdfSignatureOptions
     public string? CertificateAcquisitionUrl { get; init; }
     /// <summary>Gets the RFC 3161 timestamp-server URL.</summary>
     public string? TimestampServerUrl { get; init; }
+    /// <summary>
+    /// Whether to request an RFC 3161 timestamp over the signature value and embed it in the CMS.
+    /// The request goes to <see cref="TimestampTransport"/> when set, otherwise it is posted to
+    /// <see cref="TimestampServerUrl"/> over HTTP.
+    /// </summary>
+    public bool RequestTimestamp { get; init; }
+    /// <summary>
+    /// Optional transport that sends an encoded TimeStampReq and returns the encoded TimeStampResp,
+    /// for a caller-managed connection or an offline authority.
+    /// </summary>
+    public Func<ReadOnlyMemory<byte>, byte[]>? TimestampTransport { get; init; }
     /// <summary>Gets the certification change level, or null for an approval signature.</summary>
     public PdfSignatureCertificationPermission? CertificationPermission { get; init; }
     /// <summary>

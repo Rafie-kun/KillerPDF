@@ -33,6 +33,8 @@ namespace KillerPDF
         private TextBox _reasonBox = null!;
         private TextBox _locationBox = null!;
         private TextBox _contactBox = null!;
+        private CheckBox _timestamp = null!;
+        private TextBox _timestampServer = null!;
         private CheckBox _visibleAppearance = null!;
         private TextBox _appearanceText = null!;
         private TextBox _pageBox = null!;
@@ -43,6 +45,7 @@ namespace KillerPDF
         private TextBlock _appearancePreview = null!;
         private TextBox _outputBox = null!;
         private readonly List<X509Certificate2> _storeCerts = [];
+        private const string DefaultTimestampServer = "http://timestamp.digicert.com";
 
         // Segoe MDL2 Assets close glyph, matching the main window + print dialog chrome.
         private const string CloseGlyph = "";
@@ -129,6 +132,31 @@ namespace KillerPDF
             _locationBox = Field(""); body.Children.Add(_locationBox);
             body.Children.Add(Label(L("Str_Sign_Contact")));
             _contactBox = Field(""); body.Children.Add(_contactBox);
+
+            // --- Trusted timestamp --------------------------------------------------------------
+            _timestamp = new CheckBox
+            {
+                Content = L("Str_Sign_Timestamp"),
+                IsChecked = App.GetSetting("SignTimestamp") == "1",
+                Foreground = R("TextBrush"),
+                FontWeight = FontWeights.SemiBold,
+                Margin = new Thickness(0, 10, 0, 2)
+            };
+            if (FindOwnerStyle("ThemeCheckBox") is Style timestampStyle)
+                _timestamp.Style = timestampStyle;
+            body.Children.Add(_timestamp);
+            body.Children.Add(new TextBlock
+            {
+                Text = L("Str_Sign_TimestampHint"), Foreground = R("MutedTextBrush"), FontSize = 11,
+                TextWrapping = TextWrapping.Wrap, Margin = new Thickness(20, 0, 0, 4)
+            });
+            body.Children.Add(new TextBlock { Text = L("Str_Sign_TimestampServer"), Foreground = R("MutedTextBrush"), FontSize = 11, Margin = new Thickness(20, 2, 0, 2) });
+            _timestampServer = Field(App.GetSetting("SignTimestampServer") is { Length: > 0 } savedServer
+                ? savedServer : DefaultTimestampServer);
+            _timestampServer.Margin = new Thickness(20, 0, 0, 4);
+            body.Children.Add(_timestampServer);
+            _timestamp.Checked += (_, _) => SyncTimestamp();
+            _timestamp.Unchecked += (_, _) => SyncTimestamp();
 
             // --- Visible appearance -------------------------------------------------------------
             _visibleAppearance = new CheckBox
@@ -231,6 +259,7 @@ namespace KillerPDF
             body.Children.Add(btnRow);
 
             SyncSource();
+            SyncTimestamp();
             SyncAppearance();
 
             var scroll = new ScrollViewer
@@ -249,6 +278,8 @@ namespace KillerPDF
             string name = Path.GetFileNameWithoutExtension(_sourcePdf);
             return Path.Combine(dir, name + "-signed.pdf");
         }
+
+        private void SyncTimestamp() => _timestampServer.IsEnabled = _timestamp.IsChecked == true;
 
         // Enable only the inputs for the selected certificate source.
         private void SyncSource()
@@ -302,6 +333,18 @@ namespace KillerPDF
             }
             catch (Exception ex) { Warn(L("Str_Sign_CertLoadFailed") + "\n\n" + ex.Message); return; }
 
+            string? timestampServer = null;
+            if (_timestamp.IsChecked == true)
+            {
+                string server = _timestampServer.Text?.Trim() ?? "";
+                if (!Uri.TryCreate(server, UriKind.Absolute, out Uri? serverUri)
+                    || (serverUri.Scheme != Uri.UriSchemeHttp && serverUri.Scheme != Uri.UriSchemeHttps))
+                { Warn(L("Str_Sign_BadTimestampServer")); return; }
+                timestampServer = server;
+            }
+            App.SetSetting("SignTimestamp", _timestamp.IsChecked == true ? "1" : "0");
+            if (timestampServer is not null) App.SetSetting("SignTimestampServer", timestampServer);
+
             PdfSigner.VisibleSignatureInfo? appearance;
             try
             {
@@ -312,22 +355,35 @@ namespace KillerPDF
                 Warn(L("Str_Sign_BadAppearance") + "\n\n" + ex.Message);
                 return;
             }
+            // A timestamp waits on the server for up to 30 seconds, so show that work is underway.
+            Mouse.OverrideCursor = Cursors.Wait;
             try
             {
                 new PdfSigner().Sign(_sourcePdf, output, cert,
                     new PdfSigner.SignInfo(_reasonBox.Text ?? "", _locationBox.Text ?? "",
-                        _contactBox.Text ?? "", appearance));
+                        _contactBox.Text ?? "", appearance, timestampServer));
             }
             catch (Exception ex)
             {
-                Warn(L("Str_Sign_Failed") + "\n\n" + ex.GetType().Name + ": " + ex.Message);
+                Mouse.OverrideCursor = null;
+                Warn(L(timestampServer is not null && IsTimestampFailure(ex) ? "Str_Sign_TimestampFailed" : "Str_Sign_Failed")
+                    + "\n\n" + ex.GetType().Name + ": " + ex.Message);
                 return;
+            }
+            finally
+            {
+                Mouse.OverrideCursor = null;
             }
 
             KillerDialog.Show(this, L("Str_Dlg_SignedSavedTo") + "\n" + output, L("Str_Sign_Name"), MessageBoxButton.OK, MessageBoxImage.Information);
             DialogResult = true;
             Close();
         }
+
+        // The engine reports every network, reply and verification failure of the timestamp step
+        // with its own exception, so it is not mistaken for a certificate problem.
+        private static bool IsTimestampFailure(Exception ex) =>
+            ex is KillerPdf.Engine.Signing.PdfTimestampException;
 
         private void Warn(string msg) => KillerDialog.Show(this, msg, L("Str_Sign_Name"), MessageBoxButton.OK, MessageBoxImage.Warning);
 

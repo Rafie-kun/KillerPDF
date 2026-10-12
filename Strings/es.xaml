@@ -616,6 +616,11 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Sign_Reason">Motivo (opcional)</sys:String>
     <sys:String x:Key="Str_Sign_Location">Ubicación (opcional)</sys:String>
     <sys:String x:Key="Str_Sign_Contact">Contacto (opcional)</sys:String>
+    <sys:String x:Key="Str_Sign_Timestamp">Añadir una marca de tiempo de confianza</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampHint">El servidor de marcas de tiempo registra cuándo firmó, para que la firma siga siendo verificable después de que caduque su certificado. Requiere conexión a Internet.</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampServer">Servidor de marcas de tiempo</sys:String>
+    <sys:String x:Key="Str_Sign_BadTimestampServer">Introduzca una dirección http o https para el servidor de marcas de tiempo.</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampFailed">El servidor de marcas de tiempo no pudo añadir una marca de tiempo. Compruebe la dirección y su conexión a Internet, o firme sin marca de tiempo.</sys:String>
     <sys:String x:Key="Str_Sign_VisibleAppearance">Mostrar una firma visible</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceText">Texto de la firma</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceDefault">Firmado digitalmente por {name}&#10;Fecha: {date}&#10;Motivo: {reason}&#10;Ubicación: {location}</sys:String>

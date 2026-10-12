@@ -616,6 +616,11 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Sign_Reason">কারণ (ঐচ্ছিক)</sys:String>
     <sys:String x:Key="Str_Sign_Location">অবস্থান (ঐচ্ছিক)</sys:String>
     <sys:String x:Key="Str_Sign_Contact">যোগাযোগ (ঐচ্ছিক)</sys:String>
+    <sys:String x:Key="Str_Sign_Timestamp">বিশ্বস্ত টাইমস্ট্যাম্প যোগ করুন</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampHint">টাইমস্ট্যাম্প সার্ভার আপনি কখন স্বাক্ষর করেছেন তা রেকর্ড করে, তাই আপনার সার্টিফিকেটের মেয়াদ শেষ হওয়ার পরেও স্বাক্ষরটি যাচাই করা যায়। এর জন্য ইন্টারনেট সংযোগ প্রয়োজন।</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampServer">টাইমস্ট্যাম্প সার্ভার</sys:String>
+    <sys:String x:Key="Str_Sign_BadTimestampServer">টাইমস্ট্যাম্প সার্ভারের জন্য একটি http বা https ঠিকানা লিখুন।</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampFailed">টাইমস্ট্যাম্প সার্ভার টাইমস্ট্যাম্প যোগ করতে পারেনি। ঠিকানা এবং ইন্টারনেট সংযোগ পরীক্ষা করুন, অথবা টাইমস্ট্যাম্প ছাড়াই স্বাক্ষর করুন।</sys:String>
     <sys:String x:Key="Str_Sign_VisibleAppearance">দৃশ্যমান স্বাক্ষর দেখান</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceText">স্বাক্ষরের টেক্সট</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceDefault">ডিজিটালি স্বাক্ষর করেছেন {name}&#10;তারিখ: {date}&#10;কারণ: {reason}&#10;অবস্থান: {location}</sys:String>

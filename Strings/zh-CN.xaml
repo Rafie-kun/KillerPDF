@@ -616,6 +616,11 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Sign_Reason">原因（可选）</sys:String>
     <sys:String x:Key="Str_Sign_Location">位置（可选）</sys:String>
     <sys:String x:Key="Str_Sign_Contact">联系方式（可选）</sys:String>
+    <sys:String x:Key="Str_Sign_Timestamp">添加可信时间戳</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampHint">时间戳服务器会记录您的签名时间，因此证书过期后签名仍可验证。需要连接互联网。</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampServer">时间戳服务器</sys:String>
+    <sys:String x:Key="Str_Sign_BadTimestampServer">请输入以 http 或 https 开头的时间戳服务器地址。</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampFailed">时间戳服务器无法添加时间戳。请检查地址和网络连接，或不使用时间戳进行签名。</sys:String>
     <sys:String x:Key="Str_Sign_VisibleAppearance">显示可见签名</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceText">签名文本</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceDefault">数字签名者：{name}&#10;日期：{date}&#10;原因：{reason}&#10;位置：{location}</sys:String>

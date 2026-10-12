@@ -700,6 +700,11 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Sign_Reason">Reason (optional)</sys:String>
     <sys:String x:Key="Str_Sign_Location">Location (optional)</sys:String>
     <sys:String x:Key="Str_Sign_Contact">Contact (optional)</sys:String>
+    <sys:String x:Key="Str_Sign_Timestamp">Add a trusted timestamp</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampHint">The timestamp server records when you signed, so the signature still checks out after your certificate expires. It needs an internet connection.</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampServer">Timestamp server</sys:String>
+    <sys:String x:Key="Str_Sign_BadTimestampServer">Enter an http or https timestamp server address.</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampFailed">The timestamp server could not add a timestamp. Check the address and your internet connection, or sign without a timestamp.</sys:String>
     <sys:String x:Key="Str_Sign_VisibleAppearance">Show a visible signature</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceText">Signature text</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceDefault">Digitally signed by {name}&#10;Date: {date}&#10;Reason: {reason}&#10;Location: {location}</sys:String>

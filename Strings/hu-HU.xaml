@@ -700,6 +700,11 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Sign_Reason">Indok (nem kötelező)</sys:String>
     <sys:String x:Key="Str_Sign_Location">Hely (nem kötelező)</sys:String>
     <sys:String x:Key="Str_Sign_Contact">Kapcsolattartó (nem kötelező)</sys:String>
+    <sys:String x:Key="Str_Sign_Timestamp">Megbízható időbélyeg hozzáadása</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampHint">Az időbélyeg-kiszolgáló rögzíti az aláírás időpontját, így az aláírás a tanúsítvány lejárta után is ellenőrizhető marad. Internetkapcsolat szükséges.</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampServer">Időbélyeg-kiszolgáló</sys:String>
+    <sys:String x:Key="Str_Sign_BadTimestampServer">Adjon meg egy http vagy https címet az időbélyeg-kiszolgálóhoz.</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampFailed">Az időbélyeg-kiszolgáló nem tudott időbélyeget hozzáadni. Ellenőrizze a címet és az internetkapcsolatot, vagy írja alá időbélyeg nélkül.</sys:String>
     <sys:String x:Key="Str_Sign_VisibleAppearance">Látható aláírás megjelenítése</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceText">Aláírás szövege</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceDefault">Digitálisan aláírta: {name}&#10;Dátum: {date}&#10;Indok: {reason}&#10;Hely: {location}</sys:String>

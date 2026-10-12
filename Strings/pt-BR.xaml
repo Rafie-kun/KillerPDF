@@ -700,6 +700,11 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Sign_Reason">Motivo (opcional)</sys:String>
     <sys:String x:Key="Str_Sign_Location">Local (opcional)</sys:String>
     <sys:String x:Key="Str_Sign_Contact">Contato (opcional)</sys:String>
+    <sys:String x:Key="Str_Sign_Timestamp">Adicionar um carimbo de data/hora confiável</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampHint">O servidor de carimbo de data/hora registra quando você assinou, para que a assinatura continue verificável depois que o certificado expirar. É necessária uma conexão com a internet.</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampServer">Servidor de carimbo de data/hora</sys:String>
+    <sys:String x:Key="Str_Sign_BadTimestampServer">Digite um endereço http ou https para o servidor de carimbo de data/hora.</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampFailed">O servidor de carimbo de data/hora não conseguiu adicionar o carimbo. Verifique o endereço e sua conexão com a internet, ou assine sem carimbo de data/hora.</sys:String>
     <sys:String x:Key="Str_Sign_VisibleAppearance">Mostrar uma assinatura visível</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceText">Texto da assinatura</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceDefault">Assinado digitalmente por {name}&#10;Data: {date}&#10;Motivo: {reason}&#10;Local: {location}</sys:String>

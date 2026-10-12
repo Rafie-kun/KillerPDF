@@ -43,6 +43,16 @@ public static class PdfDetachedSignatureWriter
         ArgumentNullException.ThrowIfNull(createDetachedCms);
         options ??= new PdfSignatureOptions();
         ValidateOptions(options);
+        if (options.RequestTimestamp)
+        {
+            // The token covers the finished signature value, so it is requested after the CMS
+            // callback returns and before the reserved placeholder is filled.
+            Func<ReadOnlyMemory<byte>, byte[]> sendRequest = options.TimestampTransport
+                ?? PdfTimestampAuthority.HttpTransport(new Uri(options.TimestampServerUrl!));
+            Func<ReadOnlyMemory<byte>, byte[]> signWithoutTimestamp = createDetachedCms;
+            createDetachedCms = data => PdfTimestampAuthority.AddTimestamp(
+                signWithoutTimestamp(data), sendRequest);
+        }
 
         PdfPageTree tree = PdfPageTree.Read(document);
         ExistingFormField? existingField = FindField(document, tree, options.FieldName);
@@ -1646,6 +1656,14 @@ public static class PdfDetachedSignatureWriter
     {
         if (string.IsNullOrWhiteSpace(options.FieldName))
             throw new ArgumentException("A signature field name must be non-empty.", nameof(options));
+        if (options.RequestTimestamp && options.TimestampTransport is null)
+        {
+            if (!Uri.TryCreate(options.TimestampServerUrl, UriKind.Absolute, out Uri? server))
+                throw new ArgumentException(
+                    "A requested timestamp needs an absolute timestamp-server URL or a transport.",
+                    nameof(options));
+            PdfTimestampAuthority.ValidateServer(server);
+        }
         if (options.ReservedSignatureSize is <= 0 or > MaximumReservedSignatureSize)
             throw new ArgumentOutOfRangeException(nameof(options),
                 $"The reserved signature size must be between 1 and {MaximumReservedSignatureSize} bytes.");

@@ -700,6 +700,11 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Sign_Reason">Причина (необязательно)</sys:String>
     <sys:String x:Key="Str_Sign_Location">Местоположение (необязательно)</sys:String>
     <sys:String x:Key="Str_Sign_Contact">Контакт (необязательно)</sys:String>
+    <sys:String x:Key="Str_Sign_Timestamp">Добавить доверенную метку времени</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampHint">Сервер меток времени фиксирует момент подписания, поэтому подпись можно проверить и после истечения срока действия сертификата. Требуется подключение к интернету.</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampServer">Сервер меток времени</sys:String>
+    <sys:String x:Key="Str_Sign_BadTimestampServer">Введите адрес сервера меток времени, начинающийся с http или https.</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampFailed">Серверу меток времени не удалось добавить метку. Проверьте адрес и подключение к интернету или подпишите без метки времени.</sys:String>
     <sys:String x:Key="Str_Sign_VisibleAppearance">Показать видимую подпись</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceText">Текст подписи</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceDefault">Подписано цифровой подписью {name}&#10;Дата: {date}&#10;Причина: {reason}&#10;Местоположение: {location}</sys:String>

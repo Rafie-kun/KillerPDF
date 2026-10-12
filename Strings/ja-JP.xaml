@@ -700,6 +700,11 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Sign_Reason">理由 (省略可)</sys:String>
     <sys:String x:Key="Str_Sign_Location">場所 (省略可)</sys:String>
     <sys:String x:Key="Str_Sign_Contact">連絡先 (省略可)</sys:String>
+    <sys:String x:Key="Str_Sign_Timestamp">信頼できるタイムスタンプを追加</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampHint">タイムスタンプ サーバーが署名した日時を記録するため、証明書の有効期限が切れた後も署名を検証できます。インターネット接続が必要です。</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampServer">タイムスタンプ サーバー</sys:String>
+    <sys:String x:Key="Str_Sign_BadTimestampServer">タイムスタンプ サーバーの http または https アドレスを入力してください。</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampFailed">タイムスタンプ サーバーがタイムスタンプを追加できませんでした。アドレスとインターネット接続を確認するか、タイムスタンプなしで署名してください。</sys:String>
     <sys:String x:Key="Str_Sign_VisibleAppearance">可視署名を表示する</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceText">署名テキスト</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceDefault">デジタル署名者：{name}&#10;日付：{date}&#10;理由：{reason}&#10;場所：{location}</sys:String>

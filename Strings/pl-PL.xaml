@@ -682,6 +682,11 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Sign_Reason">Argument (opcjonalnie)</sys:String>
     <sys:String x:Key="Str_Sign_Location">Lokalizacja (opcjonalnie)</sys:String>
     <sys:String x:Key="Str_Sign_Contact">Kontakt (opcjonalnie)</sys:String>
+    <sys:String x:Key="Str_Sign_Timestamp">Dodaj zaufany znacznik czasu</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampHint">Serwer znaczników czasu zapisuje, kiedy podpisano dokument, dzięki czemu podpis można sprawdzić także po wygaśnięciu certyfikatu. Wymaga połączenia z internetem.</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampServer">Serwer znaczników czasu</sys:String>
+    <sys:String x:Key="Str_Sign_BadTimestampServer">Wpisz adres http lub https serwera znaczników czasu.</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampFailed">Serwer znaczników czasu nie mógł dodać znacznika. Sprawdź adres i połączenie z internetem albo podpisz bez znacznika czasu.</sys:String>
     <sys:String x:Key="Str_Sign_VisibleAppearance">Pokaż widoczny podpis</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceText">Tekst podpisu</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceDefault">Podpisano cyfrowo przez {name}&#10;Data: {date}&#10;Powód: {reason}&#10;Lokalizacja: {location}</sys:String>

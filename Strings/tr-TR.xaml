@@ -616,6 +616,11 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Sign_Reason">Neden (isteğe bağlı)</sys:String>
     <sys:String x:Key="Str_Sign_Location">Konum (isteğe bağlı)</sys:String>
     <sys:String x:Key="Str_Sign_Contact">İletişim (isteğe bağlı)</sys:String>
+    <sys:String x:Key="Str_Sign_Timestamp">Güvenilir zaman damgası ekle</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampHint">Zaman damgası sunucusu imzaladığınız anı kaydeder, böylece sertifikanızın süresi dolduktan sonra da imza doğrulanabilir. İnternet bağlantısı gerekir.</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampServer">Zaman damgası sunucusu</sys:String>
+    <sys:String x:Key="Str_Sign_BadTimestampServer">Zaman damgası sunucusu için http veya https ile başlayan bir adres girin.</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampFailed">Zaman damgası sunucusu zaman damgası ekleyemedi. Adresi ve internet bağlantınızı kontrol edin ya da zaman damgası olmadan imzalayın.</sys:String>
     <sys:String x:Key="Str_Sign_VisibleAppearance">Görünür imza göster</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceText">İmza metni</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceDefault">Dijital olarak imzalayan: {name}&#10;Tarih: {date}&#10;Neden: {reason}&#10;Konum: {location}</sys:String>

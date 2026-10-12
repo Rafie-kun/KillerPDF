@@ -618,6 +618,11 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_Sign_Reason">原因（選填）</sys:String>
     <sys:String x:Key="Str_Sign_Location">位置（選填）</sys:String>
     <sys:String x:Key="Str_Sign_Contact">聯絡方式（選填）</sys:String>
+    <sys:String x:Key="Str_Sign_Timestamp">加入可信任的時間戳記</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampHint">時間戳記伺服器會記錄您的簽署時間，因此憑證到期後仍可驗證簽章。需要網際網路連線。</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampServer">時間戳記伺服器</sys:String>
+    <sys:String x:Key="Str_Sign_BadTimestampServer">請輸入以 http 或 https 開頭的時間戳記伺服器位址。</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampFailed">時間戳記伺服器無法加入時間戳記。請檢查位址與網路連線，或在不使用時間戳記的情況下簽署。</sys:String>
     <sys:String x:Key="Str_Sign_VisibleAppearance">顯示可見簽名</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceText">簽名文字</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceDefault">數位簽署者：{name}&#10;日期：{date}&#10;原因：{reason}&#10;位置：{location}</sys:String>

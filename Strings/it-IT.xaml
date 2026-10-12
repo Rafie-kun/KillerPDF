@@ -700,6 +700,11 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_Sign_Reason">Motivo (opzionale)</sys:String>
     <sys:String x:Key="Str_Sign_Location">Luogo (opzionale)</sys:String>
     <sys:String x:Key="Str_Sign_Contact">Contatto (opzionale)</sys:String>
+    <sys:String x:Key="Str_Sign_Timestamp">Aggiungi una marca temporale attendibile</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampHint">Il server di marca temporale registra quando hai firmato, così la firma resta verificabile anche dopo la scadenza del certificato. Serve una connessione a Internet.</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampServer">Server di marca temporale</sys:String>
+    <sys:String x:Key="Str_Sign_BadTimestampServer">Inserisci un indirizzo http o https per il server di marca temporale.</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampFailed">Il server di marca temporale non è riuscito ad aggiungere la marca temporale. Controlla l'indirizzo e la connessione a Internet, oppure firma senza marca temporale.</sys:String>
     <sys:String x:Key="Str_Sign_VisibleAppearance">Visualizza firma visibile</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceText">Testo firma</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceDefault">Firmato digitalmente da {name}&#10;Data: {date}&#10;Motivo: {reason}&#10;Luogo: {location}</sys:String>

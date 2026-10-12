@@ -700,6 +700,11 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Sign_Reason">Причина (необов'язково)</sys:String>
     <sys:String x:Key="Str_Sign_Location">Місце (необов'язково)</sys:String>
     <sys:String x:Key="Str_Sign_Contact">Контакт (необов'язково)</sys:String>
+    <sys:String x:Key="Str_Sign_Timestamp">Додати довірену позначку часу</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampHint">Сервер позначок часу фіксує момент підписання, тож підпис можна перевірити й після закінчення строку дії сертифіката. Потрібне підключення до інтернету.</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampServer">Сервер позначок часу</sys:String>
+    <sys:String x:Key="Str_Sign_BadTimestampServer">Введіть адресу сервера позначок часу, що починається з http або https.</sys:String>
+    <sys:String x:Key="Str_Sign_TimestampFailed">Серверу позначок часу не вдалося додати позначку. Перевірте адресу та підключення до інтернету або підпишіть без позначки часу.</sys:String>
     <sys:String x:Key="Str_Sign_VisibleAppearance">Показувати видимий підпис</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceText">Текст підпису</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceDefault">Цифровий підпис: {name}&#10;Дата: {date}&#10;Причина: {reason}&#10;Місце: {location}</sys:String>
