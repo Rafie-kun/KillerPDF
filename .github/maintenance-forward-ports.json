@@ -335,9 +335,374 @@
       "reason": "The 1.8.6 benchmark report, measured runs, performance record, landing results, and localized claims are preserved in 1.9."
     },
     {
+      "maintenanceCommit": "8289b8148e6f881a4e927ee6e79ee6021b5690d0",
+      "developmentCommit": "0ee5e5d10a4529cb86ee04522d8a7f2998e8a57d",
+      "reason": "Vietnamese website localization and contributor credit match the maintenance implementation."
+    },
+    {
+      "maintenanceCommit": "378606fac57efaf7af7bf924f784ecba0c262f1e",
+      "developmentCommit": "cba7ff3594007668593a836db1795147209236f8",
+      "reason": "The development README remains branch-specific while the landing pages now carry the 1.8.70 stable release metadata."
+    },
+    {
+      "maintenanceCommit": "c7eafbf72fc72abc7ffe4e3084c99293713e35c2",
+      "developmentCommit": "cba7ff3594007668593a836db1795147209236f8",
+      "reason": "The current stable release metadata supersedes the earlier 1.8.6 landing values."
+    },
+    {
+      "maintenanceCommit": "3bb4d25c3332926d97f5632c87799969a6004983",
+      "developmentCommit": "79c04db5a81849fa3112fe26d476563f0e5c8038",
+      "reason": "The final 1.9 release workflow retains complete app and engine publication with strict version parity; the temporary maintenance exception is not applicable."
+    },
+    {
+      "maintenanceCommit": "3efe6a69e93051e32a5ae62970be05cd066d9e1f",
+      "developmentCommit": "cba7ff3594007668593a836db1795147209236f8",
+      "reason": "The development README remains branch-specific while the landing pages now carry the 1.8.70 stable release metadata."
+    },
+    {
+      "maintenanceCommit": "2676767c916875af7647f7fecca3c3c7f10f1f54",
+      "developmentCommit": "cba7ff3594007668593a836db1795147209236f8",
+      "reason": "The current stable release metadata supersedes the earlier 1.8.61 landing values."
+    },
+    {
+      "maintenanceCommit": "f701f1e43956e6fb99232a93e32fbf41c58680be",
+      "developmentCommit": "79c04db5a81849fa3112fe26d476563f0e5c8038",
+      "reason": "The 1.9 workflow publishes complete app and engine releases and enforces application, engine, and release version parity."
+    },
+    {
+      "maintenanceCommit": "314c91aff3322ac18a77806b72550220db9c222e",
+      "developmentCommit": "bff410185c3d2a7d80faa7a087e82bce240e077a",
+      "reason": "Vietnamese application and OCR support are present in 1.9. The 1.8 series brochure remains maintenance material and is not copied over the separate 1.9 brochure."
+    },
+    {
+      "maintenanceCommit": "b65b974d9bf728351126ff721d62cdfebb2a261a",
+      "developmentCommit": "49e759d14ab8b0b7cca6c783ddb0c2dae802ae17",
+      "reason": "Recursive XObject import handling and its regression coverage match the maintenance fix."
+    },
+    {
+      "maintenanceCommit": "03d1c18fadeb69e417bcdfaabb92e0971f5dc08b",
+      "developmentCommit": "f97cdffb2aa2d8e89d74562a81283c730f7d7c1c",
+      "reason": "Saved annotation overlay isolation and its regression coverage match the maintenance fix."
+    },
+    {
+      "maintenanceCommit": "df7c74ec5a170b5085d842405c3c0a990bc56d59",
+      "developmentCommit": "4a21fed4e41f058d2ae789b0a81703272ffed361",
+      "reason": "Text box placement, editing behavior, shortcut policy, and tests match maintenance."
+    },
+    {
+      "maintenanceCommit": "bad4d96afe6c66e10f445145e1d9912074e36cf9",
+      "developmentCommit": "0ad9ea7c8bff6f9eecf829341cf6ccdecd0a6aef",
+      "reason": "Precision touchpad zoom stabilization and its math tests match maintenance."
+    },
+    {
+      "maintenanceCommit": "7b06225a58a6d905f44c6a1d2e898f36bc8d475d",
+      "developmentCommit": "697a1c9285b1beb2a812329f2841f1800e922e81",
+      "reason": "Localized toolbar caption sizing and localization coverage match maintenance."
+    },
+    {
+      "maintenanceCommit": "41b5c142746104b042fac717453c51d88e293460",
+      "developmentCommit": "88e65a4aace9dfdb7561a95cc69a267c8d06b2ae",
+      "reason": "Region-copy selection visibility matches the maintenance fix."
+    },
+    {
+      "maintenanceCommit": "22e2d2d38a52e15d46cfa93ecdb1db1e3edd56ad",
+      "developmentCommit": "ac5e701c9009b4d803c4672447d52449ece21aca",
+      "reason": "Website keyboard labels and the release localization gate match maintenance."
+    },
+    {
+      "maintenanceCommit": "7be7c078987ed2995abae27877acd9835785be18",
+      "developmentCommit": "cba7ff3594007668593a836db1795147209236f8",
+      "reason": "The 1.8.70 release date and stable landing metadata are preserved while active 1.9 project metadata correctly remains Unreleased."
+    },
+    {
+      "maintenanceCommit": "032f8e8cf1dc11a1b4425659dacb4872115cf93e",
+      "developmentCommit": "659c41b9acc58b54787b782b950e3b3c10a4050c",
+      "reason": "Release artifact gates, regression tests, package metadata, and source-bundle checks match maintenance."
+    },
+    {
+      "maintenanceCommit": "818adca65fdd2ba36c6587f893a2dc67937e3fb6",
+      "developmentCommit": "ff64778dbeb6de090d4333800aa31f481891b5e2",
+      "reason": "Comparison controls use the same docked layout and regression coverage as maintenance."
+    },
+    {
+      "maintenanceCommit": "536859fd0c3a7ff510e1ea70c3d0f3400fd2b9dd",
+      "developmentCommit": "e580bf8f33c61086ce03d103699b1fdfaa86ef3b",
+      "reason": "Startup taskbar icon handling and native import coverage match maintenance."
+    },
+    {
+      "maintenanceCommit": "54e2a0d25a56e7e68bd52a48d1f0a681d2f6f277",
+      "developmentCommit": "4ffd5c923b944cd7eda852f5b87629fd82bc0fdd",
+      "reason": "The 1.9 changelog keeps the same consolidated priority ordering while retaining development-specific history."
+    },
+    {
+      "maintenanceCommit": "d61f24197f95e3ae5d013fd97c608184194e63ba",
+      "developmentCommit": "c80d7ce8f088047ccea4a67a3aa8d5c39d993ee4",
+      "reason": "Comparison hover behavior, control spacing, and layout tests match maintenance."
+    },
+    {
+      "maintenanceCommit": "048a40c2e6371e17b3a8d854c64c2f4446cf8054",
+      "developmentCommit": "87d232fffc918e5f817f31561dc7568bdaac8d9e",
+      "reason": "Comparison contrast, selected toolbar visuals, and their regression tests match maintenance."
+    },
+    {
+      "maintenanceCommit": "5d03166375c204c3782db00cce70da2d9d11e16a",
+      "developmentCommit": "712c9c73c98ea54ab34d8ed8a5d392d7807edae2",
+      "reason": "The comparison dock and split divider geometry match maintenance."
+    },
+    {
+      "maintenanceCommit": "535aa499a785120c02466b222419d91821cdaf43",
+      "developmentCommit": "4ffd5c923b944cd7eda852f5b87629fd82bc0fdd",
+      "reason": "The 1.9 changelog keeps the same consolidated priority ordering while retaining development-specific history."
+    },
+    {
       "maintenanceCommit": "d52213eb3c319affcaa3b47152a4c7713ea11a6b",
       "developmentCommit": "9ac015e24aa0cd4f519471d9db178edbbcdd837a",
       "reason": "The 1.8.70 benchmark report, measured runs, performance record, landing results, and localized claims are preserved in 1.9."
+    },
+    {
+      "maintenanceCommit": "b2dcd0c136eef9fbf4d63fdaa6b2bcbca2989b75",
+      "developmentCommit": "e8fe5fe792a86df5f4d5adde395aebd450fcc3e0",
+      "reason": "Release package switch forwarding matches maintenance."
+    },
+    {
+      "maintenanceCommit": "95a0feba634a51646607e3f126ff2bf47a3186a2",
+      "developmentCommit": "cba7ff3594007668593a836db1795147209236f8",
+      "reason": "The development README remains branch-specific while the landing pages now carry the 1.8.70 stable release metadata."
+    },
+    {
+      "maintenanceCommit": "895cc87e2a033a0f870c326461f3c5dd3a79dcea",
+      "developmentCommit": "cba7ff3594007668593a836db1795147209236f8",
+      "reason": "All stable landing-page version, date, size, digest, footer, and localized footer values match the 1.8.70 release."
+    },
+    {
+      "maintenanceCommit": "97c736fe0497acc010648229b0612acb6e59429b",
+      "developmentCommit": "66f72f1418a960bded8c3097fd820c9d042329a3",
+      "reason": "The 1.9 policy now records every reviewed functional and release-specific 1.8.70 disposition."
+    },
+    {
+      "maintenanceCommit": "bb39e217cb923acd5ba16467cfd94c40041eb2e6",
+      "developmentCommit": "66f72f1418a960bded8c3097fd820c9d042329a3",
+      "reason": "The 1.9 policy records the matching release switch repair and its verified development commit."
+    },
+    {
+      "maintenanceCommit": "a4675620bc2fce88aedf39ec0b5144f005103ac3",
+      "developmentCommit": "66f72f1418a960bded8c3097fd820c9d042329a3",
+      "reason": "The 1.9 policy records the matching installer smoke staging repair and its verified development commit."
+    },
+    {
+      "maintenanceCommit": "e9a92e947bbd9fc73e3869761086912452a8b287",
+      "developmentCommit": "427624ee866a32aaac918c3c6da93a14786f2881",
+      "reason": "The launcher folder-swap repair has the same functional patch; project version metadata remains 1.9.0."
+    },
+    {
+      "maintenanceCommit": "a9a3abd8d26948fdb82ecf42b2d4acde07cf7322",
+      "developmentCommit": "1e8efc4289c552cc0685fa115b22d92a6feac97c",
+      "reason": "The 1.9 print preview derives orientation from the active page, with broader invalid-dimension and mixed-page tests."
+    },
+    {
+      "maintenanceCommit": "bd93a1e7f5bf7bd336eb8ac02e801c1141284d9b",
+      "developmentCommit": "f6ddf1c028764dd4b5f8d79a0d74930219cec5ed",
+      "reason": "The Hebrew text save patch and regression test match maintenance."
+    },
+    {
+      "maintenanceCommit": "d875555cd2f15ab7530ca0f3559a400fedbaac2d",
+      "developmentCommit": "23b96badb031116dc1ffc8340bff8b898aee8f4d",
+      "reason": "The pasted-stroke and pen-dot behavior matches maintenance; 1.9 verifies the dot with an engine render."
+    },
+    {
+      "maintenanceCommit": "a17fb61180708bb294b875a6ab6503ff041280ce",
+      "developmentCommit": "e271eaa5d46d980bbd855e5a7f266a948017e470",
+      "reason": "Installer maintenance options have identical launcher, wizard, and string patches; version metadata remains 1.9.0."
+    },
+    {
+      "maintenanceCommit": "8b7708dabae6cf48c96d2edfa8a58dee09936bfa",
+      "developmentCommit": "517e2bd628217caf04ec79f451b6a0a9cac848de",
+      "reason": "The 98SE tab emphasis implementation and layout test match maintenance."
+    },
+    {
+      "maintenanceCommit": "8a038fa8cd5db4e3fddfac2cedba92daf3586aca",
+      "developmentCommit": "b5255ce3a8250eb27943adb9c4f64db156de4438",
+      "reason": "The tab-drag behavior and layout tests were ported in edba8f0. Development then intentionally corrected vertical drag detection and the right outline edge in b5255ce, changing the active and inactive 98SE outline right margin from -6 to -7. Current source preserves that explicit development correction. A rendered tab comparison has not been completed in this task."
+    },
+    {
+      "maintenanceCommit": "d7bb36ad62a3493896c51fb02210664e3ecb9b0c",
+      "developmentCommit": "a2c1df92f8bfebbedb1350cf688a377e2abb580a",
+      "reason": "MCP theme and locale scripts and styles match maintenance; the page markup adds the same controls around 1.9-specific content."
+    },
+    {
+      "maintenanceCommit": "d158706b82d8510067adfc8212d1b1b8d1651326",
+      "developmentCommit": "c4244d2bd6aac98d9bfdd2711168f4e8b5094109",
+      "reason": "The 1.9 engine already tolerates undersized trailers in compatibility mode; the desktop working-document path now uses it and opens the reporter PDF, with a focused regression test."
+    },
+    {
+      "maintenanceCommit": "963b1cd3ec9f9c1a83ae98e725810766fdb5f997",
+      "developmentCommit": "8b92e94704f4943a80363c451e598d4278a08666",
+      "reason": "The 98SE recent-panel brush and its layout assertion match maintenance."
+    },
+    {
+      "maintenanceCommit": "52b87e258fe3cb532bb8c8edb3a35e25fff296ed",
+      "developmentCommit": "9610c33a5b6b34560f3babe82c186729b928f27b",
+      "reason": "The analyzer cleanups match the 1.9 implementation; missing round-trip messages already raise InvalidOperationException with the failure code."
+    },
+    {
+      "maintenanceCommit": "1b242420b8bb61c82e8a8d4c67b062e0ebdd15be",
+      "developmentCommit": "c53d97e13c73b2b5cdd37985fa58ac4e30545b16",
+      "reason": "The original MCP landing page was carried into 1.9; the finalized page blob matches the maintenance refinement."
+    },
+    {
+      "maintenanceCommit": "a41be4f29f6482a81b5d6720d002853bc912b179",
+      "developmentCommit": "c53d97e13c73b2b5cdd37985fa58ac4e30545b16",
+      "reason": "The refined MCP page and sitemap blobs match the 1.9 landing commit exactly."
+    },
+    {
+      "maintenanceCommit": "43fbb6deeda34029729fc739bd7401cfcb9b502a",
+      "developmentCommit": "8d24d65eab36dad9c47316ff63715350d4f27714",
+      "reason": "The MCP release-facts behavior matches maintenance; the 1.9 script differs only in formatting."
+    },
+    {
+      "maintenanceCommit": "821d8cab49252ee06b116b54ae379098eb307364",
+      "developmentCommit": "5a0008b7cac6936552842a5e29d463c4b5af62ad",
+      "reason": "The shared site layout and localization changes were ported across all maintenance files, with additional 1.9 pages and page-specific content."
+    },
+    {
+      "maintenanceCommit": "d444b96c7b269b6a738437924060275b3ca19a2d",
+      "developmentCommit": "c38f66a5bf074130d5946ebf2d60a9d2eb0d9840",
+      "reason": "The seven KillerMCP CLI operations were adapted to the 1.9 engine in bfb3cf6, and the later MCP page describes the full installed PDF tool set."
+    },
+    {
+      "maintenanceCommit": "2d58e1257f631153be23e97400948022ea2cd85b",
+      "developmentCommit": "5d6815abcc60bfe830cdb0bbfcb96b98523b85d0",
+      "reason": "The stable 1.8.71 release date appears with its download on the 1.9 site. The active 1.9 application, assembly, engine, and changelog remain Unreleased."
+    },
+    {
+      "maintenanceCommit": "4515ee60a8a13d8b74bd4364008f4ee91d0e76e8",
+      "developmentCommit": "a16e65272f31aa009ea230cfba48ffe0ea0f4956",
+      "reason": "The 1.9 README identifies an unreleased development branch and does not present a stable release source archive as its own source."
+    },
+    {
+      "maintenanceCommit": "25244f0ed8300caefd63b0af68416855bf8ca93e",
+      "developmentCommit": "5d6815abcc60bfe830cdb0bbfcb96b98523b85d0",
+      "reason": "All five site footers and 15 localized footers show stable 1.8.71, and the index date and installer digest match the published release. The historical 1.8.70 corpus result remains labeled correctly."
+    },
+    {
+      "maintenanceCommit": "7cff804bf5af124c8610bcb3596073b968a300c0",
+      "developmentCommit": "78ff3777e8a82338bea8f9fb185fa133e291766e",
+      "reason": "The release synchronization workflow is intentionally not carried into 1.9. This branch previously removed an unrequested maintenance workflow, and no new release automation is authorized."
+    },
+    {
+      "maintenanceCommit": "665adc3785c169369f0d65e5b8834f5b9b4ac844",
+      "developmentCommit": "91582ee62e75fe7360a7d4ae60c1107f4b78912b",
+      "reason": "Yellow and magenta accents were adapted to the 1.9 themes and landing pages."
+    },
+    {
+      "maintenanceCommit": "711f0d309f908172d9e86cd900af477868a3844a",
+      "developmentCommit": "51831c4707868c5c0f1b7919f4623dcd889824fc",
+      "reason": "The 1.8.80 maintenance version does not apply to the separate 1.9.0 development line."
+    },
+    {
+      "maintenanceCommit": "54b57cb94c63ef2dcef130db9f6c12ddecdab369",
+      "developmentCommit": "9742ad46ecd3f9e37a50123f57bcb6606510c900",
+      "reason": "Ukrainian was added in 04c0966 and Norwegian and Brazilian Portuguese in this commit. All maintenance resource keys are present; the transform tooltip reflects the expanded 1.9 tool."
+    },
+    {
+      "maintenanceCommit": "ec3a0593f5132255f533dbd4c40a16d706ee689d",
+      "developmentCommit": "8989861b4a99018f3a9d4bee6dd6d7b1d2e0c6d1",
+      "reason": "Ukrainian website strings were added in d801c69 and Norwegian and Brazilian Portuguese in this commit. Every maintenance website translation key is present in 1.9."
+    },
+    {
+      "maintenanceCommit": "6faf8bdc9b835c28bb632bb1478f03cfddc3a4c4",
+      "developmentCommit": "475980ddba111f9d4b325c64e399e9ac7f880d30",
+      "reason": "The 1.9 package and website state nineteen languages. Its development README does not list application features."
+    },
+    {
+      "maintenanceCommit": "9ebe9ef7262f93284ce71e87fd927686aacf400c",
+      "developmentCommit": "2790caa60d54eaf2902be73c0ff2040591ee3c26",
+      "reason": "The 1.9 changelog already separates Ukrainian, Norwegian, and Brazilian Portuguese into individual entries."
+    },
+    {
+      "maintenanceCommit": "2a1c3384c176635b3824d402a8fc1cc740a376f8",
+      "developmentCommit": "806507ba055a61297920afa8307a2ffb61e3d6ed",
+      "reason": "Both viewer sessions keep one document-owned file copy. The 1.8 engine gained the stream overload already present in 1.9; snapshot tests and isolated large-file opening probes pass on both lines."
+    },
+    {
+      "maintenanceCommit": "2880454e398a24c2d6c4c7863f1763bac31e2ee3",
+      "developmentCommit": "7b928e89af50fa76cf7d4565c8505a82171d5cde",
+      "reason": "Both WinGet manifest generators request elevation for the machine-wide silent installer and describe its install scope accurately. Each generated manifest passes winget validate."
+    },
+    {
+      "maintenanceCommit": "33fac4b155e435b35666b2f7a4a9087dd2e6f115",
+      "developmentCommit": "11b3991aff925bf603a820a1605b303fcac46749",
+      "reason": "Both viewers reuse one parsed page tree and lazy destination lookup for page links in each document session. The static page-link API remains available."
+    },
+    {
+      "maintenanceCommit": "2427c7ad5f7be8ced06d0d61fe7878f793154ac0",
+      "developmentCommit": "b107ac8f7d0d2b6c00ba624e5a4f1a772d613496",
+      "reason": "Both language pickers show the same 19 locales in two columns with ten choices on the left and nine on the right."
+    },
+    {
+      "maintenanceCommit": "34470c859ab0889104da33a98ac78c4275120ccf",
+      "developmentCommit": "2e7525a2a4608f7d8edabf5cabb8dc625f43fe39",
+      "reason": "Comparison control layout, close-button hit testing, and regression tests match exactly; changelog entries remain in their respective version sections."
+    },
+    {
+      "maintenanceCommit": "30467b132b4e51f6970723f9a4781bc53e2aae24",
+      "developmentCommit": "d1364757f6f20f06846c7fc5b0d515ff7f61cb76",
+      "reason": "Inactive-tab closing and its regression check match exactly; changelog entries remain in their respective version sections."
+    },
+    {
+      "maintenanceCommit": "aa467e52792b41fe8bb76e9d0c42b6efc635f39b",
+      "developmentCommit": "9b7a550e049723fcd1469683b4264798d44c354f",
+      "reason": "Tool option checkbox updates have identical functional patches on both lines."
+    },
+    {
+      "maintenanceCommit": "245338cece7d3898c7960562ff3f92bc4b0efc1d",
+      "developmentCommit": "fbeb0cd23ddd41d1039431c85fd9757bc12761f0",
+      "reason": "Window caption arrow cursors have identical functional patches on both lines."
+    },
+    {
+      "maintenanceCommit": "021b7428203cad49a4a590ad6472b2d40069882a",
+      "developmentCommit": "011b3988dddc4a6404be73c4e1f5ead9e1cef6f8",
+      "reason": "Sidebar divider alignment has identical functional patches on both lines."
+    },
+    {
+      "maintenanceCommit": "c478be33578f6d50ca35722ba7f45402853f068d",
+      "developmentCommit": "6bb42fddebe5d405f29356799d487c71093d6a47",
+      "reason": "Each branch orders its current changelog by importance while preserving its own version-specific entries."
+    },
+    {
+      "maintenanceCommit": "48a088c5b5fde229905899126ed94a52a4e7aaf3",
+      "developmentCommit": "f07c32d201104c07f419ce817d066a883066d6c1",
+      "reason": "Delirium menu divider colors and regression checks have identical functional patches on both lines."
+    },
+    {
+      "maintenanceCommit": "b184fa796a060f0c632a72885aabb6a4be2d3ec7",
+      "developmentCommit": "8aa8c139723737f479d508a6f6e65a26bfc655f8",
+      "reason": "Theme and accent contrast corrections have identical functional patches on both lines, including all palette values, resource ownership, and control bindings."
+    },
+    {
+      "maintenanceCommit": "00e1651b7d18fd7ff28011a484cb2313b5a13311",
+      "developmentCommit": "1f43775ec56c559add95ecdcd57ba559c745d1a7",
+      "reason": "Both #442 commits replace the color picker's SolidColorBrush resource cast with Brush and add an identical isolated regression script. Both active lines passed all 45 theme/accent states and solid, linear-gradient, and radial-gradient brush checks."
+    },
+    {
+      "maintenanceCommit": "41b6c6b40d207f640bfc210c2b29be94720ea5e6",
+      "developmentCommit": "2dd41a61e318a64db9b8c73406466ab9a4aadb6d",
+      "reason": "Both commits add identical Debug/Release selection to the picker regression script and the same verified #442 correspondence. Their coverage maps retain different prior branch histories, so the combined Git patches differ. Both picker checks passed all 45 theme/accent states and three brush shapes."
+    },
+    {
+      "maintenanceCommit": "424b23d927372f65f021e73f1ae705d3567455e4",
+      "developmentCommit": "1ff6e00bacc59c6c1440dfe968a64389f08b2e46",
+      "reason": "Both commits add the same stamp/picker AutomationIds and isolated color acceptance/cancellation and save/reopen assertions. The fixture keeps maintenance's PDFium renderer and development's Overkill renderer, producing different patches. Final interactive Dark, Light and SE98 cases and the windowless fixture passed on both lines; exact expectations and owned-process cleanup remain intact."
+    },
+    {
+      "maintenanceCommit": "5187174d7681fa22d938033590434a976f5309a5",
+      "developmentCommit": "80331a1b0fbcfc15397c00cea06f5d1090f7c0c6",
+      "reason": "Both commits add identical hosted pull-request build/test workflows and CI documentation, including the windowless PDF fixture and development-only commit-coverage check. Maintenance documentation has an additional publication/status-requirement sentence and different prior context, so patch IDs differ. All six workflow YAML files and their PowerShell commands validate; the exact fixture command passed on both lines. Interactive UI coverage remains a separate desktop check."
+    },
+    {
+      "maintenanceCommit": "72044297916d2c2058e37ebb48ae453634327385",
+      "developmentCommit": "e8e7f102e52e67c1d26f80fe751c84480ca6c10c",
+      "reason": "The #441 blocked-PdfPig text-hover crash applies only to 1.8. The existing 1.9 commit removed PdfPig from the project and replaced TextRunService extraction with the custom engine. Current tracked references and the text-service call path confirm the blocked dependency is absent, so no product forward-port is needed. Maintenance's isolated blocked-load regression failed before the fix; all 431 app tests and the Release build pass afterward."
     },
     {
       "maintenanceCommit": "4d38e01bbf24918136bb97dd95872df2cfad7500",
@@ -345,19 +710,29 @@
       "reason": "The localized comparison close shortcut and its regression assertion match maintenance."
     },
     {
-      "maintenanceCommit": "b2dcd0c136eef9fbf4d63fdaa6b2bcbca2989b75",
-      "developmentCommit": "e8fe5fe792a86df5f4d5adde395aebd450fcc3e0",
-      "reason": "The release package switch forwarding fix matches maintenance."
-    },
-    {
       "maintenanceCommit": "60d03cb8c81c5972df3ef697746b18763e0d33af",
       "developmentCommit": "f97db5449eeb500659923497d45433929b02ad07",
       "reason": "The installer smoke test isolation and regression assertion match maintenance."
     },
     {
-      "maintenanceCommit": "00e1651b7d18fd7ff28011a484cb2313b5a13311",
-      "developmentCommit": "1f43775ec56c559add95ecdcd57ba559c745d1a7",
-      "reason": "Both #442 commits replace the color picker's SolidColorBrush resource cast with Brush and add an identical isolated regression script. Both active lines passed all 45 theme/accent states and solid, linear-gradient, and radial-gradient brush checks."
+      "maintenanceCommit": "d9b30c2d78f4c753ce8a51afc7c9c426f9e514d7",
+      "developmentCommit": "334948403024c560ae819817eff3444c492e31e2",
+      "reason": "Current maintenance screenshots 01 through 08 are decoded and copied byte for byte into development. PNG CRCs, SHA-256 values and dimensions match before and after copying. Eight English descriptions and all 144 effective localized captions match maintenance. Binary assets landed in 98e13c2 and caption repairs in this commit. The earlier correspondence omitted the refreshed assets and captions."
+    },
+    {
+      "maintenanceCommit": "3e090fa4d87eca13c2889b67b3eeb1481eec1b72",
+      "developmentCommit": "98e13c29dcd56721f3c0d1ae905ebe2019ed9fbf",
+      "reason": "The development site now shows the stable 1.8.80 download date, size and installer SHA-256 from the verified official release, with all eight footer versions and all eighteen translated footer values updated. Unreleased 1.9 app version metadata stays separate. Missing dated maintenance changelog sections are restored verbatim."
+    },
+    {
+      "maintenanceCommit": "ecf128abdf4b1737bb6287a7beb8cf0b6514ac0a",
+      "developmentCommit": "05e5bdbcf4301872911dbbf97164168c69c23f20",
+      "reason": "Both legacy engine.html pages now route to the existing current developer guide, including twenty section and fallback routes. Each destination exists; both scripts parse and execute in an isolated route check. This removes the obsolete engine architecture and static count claims from that legacy entry point without copying maintenance architecture into development."
+    },
+    {
+      "maintenanceCommit": "0880f1da3de797bd207a2a314e69a36e3156867e",
+      "developmentCommit": "f2846eeb097c8bed5a9b5e5fa064b03029d772f6",
+      "reason": "Both commits apply the same translateY(4px) rule to the top bar wordmark. Functional CSS patch correspondence is exact."
     }
   ]
 }
