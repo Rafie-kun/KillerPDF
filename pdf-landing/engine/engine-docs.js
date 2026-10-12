@@ -264,7 +264,7 @@
     if (sbTab && ui.devguide) sbTab.textContent = ui.devguide;
     if (ui.nav) {
       var navLinks = document.querySelectorAll('.tb-nav a');
-      var navKeys = ['help', 'technical', 'engine', 'about'];
+      var navKeys = ['help', 'technical', 'engine', 'corpus', 'about'];
       [].forEach.call(navLinks, function (link, index) {
         if (ui.nav[navKeys[index]]) link.textContent = ui.nav[navKeys[index]];
       });
