@@ -6,39 +6,30 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 ## [1.8.90] - Unreleased
 
-1.8.90 improves responsiveness, form printing, color selection, updates, and interface consistency.
+1.8.90 improves saving, form printing, color selection, updates, and the family look.
 
 ### Added
-- Added Ctrl+wheel sizing in the file picker and links from the shortcuts panel to the online guide.
 - Added a Film Grain switch to the theme menu. It is on by default, and turning it off removes the grain texture from every surface.
+- Added Ctrl+wheel sizing in the file picker and links from the shortcuts panel to the online guide.
 
 ### Changed
 - Saving over a digitally signed PDF now asks first, because saving removes the signature.
-- The wordmarks use Punktype and Lacquer, and the interface text, headings and footers use Killer Sans, in place of the typewriter font in the app and on the website.
+- The wordmarks use Punktype and Lacquer with a soft shadow on every theme, and the app, installer and website use Killer Sans in place of the typewriter font. The installer also matches the new family setup layout.
 - Hovered outline buttons and accent picker pills use gradients outside 98SE, and accent swatches lift on hover.
 
 ### Fixed
-- Prevented a failed Save or Save As from damaging the existing file by finishing the new copy before replacing it.
-- Preserved unsaved annotations when moving, reordering, duplicating, or merging pages and when removing a link. A duplicated page carries a copy of them.
-- Release packaging now signs the application and engine DLLs and checks real window startup (#444).
-- Prevented a crash when hovering over text if Windows blocks the text extraction library (#441).
-- Prevented zero-height 98SE annotation bars from repeatedly retrying layout and blocking input.
-- Aligned the right edge of 98SE document tabs with the edge of the tab strip.
-- Prevented the color picker from crashing when changing stamp or annotation colors with gradient themes (#442, #443).
-- Inserting a blank page works again. OK in its page size dialog was treated as Cancel.
-- Dragging one page of a multi-page selection in the sidebar now moves the whole selection instead of only the pressed page.
-- Search highlights and text selection now land on the right text on rotated pages, and Crop no longer crops the wrong area of a turned page.
-- Included current form field edits in print previews and output without requiring a save and reopen.
-- Kept update helpers and setup from locking the installation folder through their working directory (#434).
-- Kept app icons sharp at fractional display DPI and app zoom.
+- A failed Save or Save As no longer damages the existing file, because the new copy is finished before it replaces the file.
+- Unsaved annotations survive moving, reordering, duplicating and merging pages and removing a link.
+- Fixed color picker crashes with gradient themes (#442, #443) and a crash when Windows blocks the text extraction library (#441).
+- Release packaging signs the application and engine DLLs and checks real window startup (#444), and updates no longer lock the installation folder (#434).
+- Inserting a blank page works again, and dragging one page of a multi-page selection moves the whole selection.
+- Search highlights, text selection and Crop land in the right place on rotated pages.
+- Print previews and output include current form field edits without a save and reopen.
+- 98SE annotation bars no longer block input at zero height, and 98SE document tabs line up with the tab strip.
+- Menus fade again, and menus, submenus, flyouts, the shortcuts panel and the language menu line up with their controls and screen edges.
+- Corrected theme colors, wordmarks, footers and dialog controls, including Light/Yellow, 98SE Red and the cream Blood, Greed and Cyanotic accents. Accent-colored toolbar icons keep a dark halo on Light/Yellow.
+- App and title bar icons stay sharp at fractional DPI and app zoom, and the title bar icon is slightly larger.
 - Corrected Vietnamese website translations and theme look counts.
-- Restored menu fades and aligned rail menus and submenus with their opening controls and screen edges.
-- Aligned the shortcuts panel and language menu, and kept rail flyouts beside their opening buttons with an 8-unit inset from the content edge.
-- Corrected theme colors, wordmarks, footers and dialog controls, including Light/Yellow, 98SE Red and cream Blood, Greed and Cyanotic accents. Added a shadow to the PDF accent in the Light/Yellow wordmark.
-- Accent-colored toolbar icons keep a dark halo on the Light theme's Yellow accent, so they no longer fade into the bar.
-- The wordmark has a soft shadow on the Light theme, the same lift it has on the dark themes, so it no longer looks thin on the light title bar.
-- The title bar wordmark's shadow sits a little lower and softer, matching the rest of the family.
-- The title bar icon is 27px and has its own 27px image, so it is a little larger and sharper.
 
 ## [1.8.80] - 2026-10-05
 
