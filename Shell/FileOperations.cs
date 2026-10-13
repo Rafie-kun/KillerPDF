@@ -1059,7 +1059,7 @@ namespace KillerPDF
             CommitActiveTextBox();
             var dlg = new Controls.FileDialog(Controls.FileDialogMode.Save)
                           { Filter = Loc("Str_Filter_Pdf") + "|*.pdf", Title = Loc("Str_Dlg_SavePdfAs"),
-                            CheckFileExists = false, CheckPathExists = true };
+                            CheckFileExists = false, CheckPathExists = true, RequireFilterExtension = true };
             // Seed the dialog from the last real save location. Guard every path call: on .NET Framework
             // Path.GetDirectoryName("") throws ArgumentException ("path is not of a legal form"), so a merged
             // or imported doc (where _originalFile is null) would crash Save before the dialog opened (#112).

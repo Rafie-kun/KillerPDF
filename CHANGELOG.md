@@ -47,6 +47,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Annotations without a stored appearance now draw, and annotations and form fields marked Hidden no longer do.
 - Edit Text opens over the clicked line on rotated pages, edits sideways and upside-down text in place, keeps descriptor font names and baselines (#431), and stays on its cover when the page is rotated afterward.
 - Copied and pasted annotations, and those on a duplicated page, keep a text box's letter spacing, a shape's fill and the erased parts of a cover.
+- Save As and Extract Pages append .pdf when a different filename extension is typed (#450).
 - OK in the bookmark, table of contents, page label, initial view, layer, macro, navigation, portfolio, attachment and image dialogs is no longer treated as Cancel.
 - Fixed lost pages in parallel PNG exports, and invalid OCR models are ignored with the Tesseract fallback kept.
 - The page label, initial view, macro, navigation audit, portfolio and attachment dialogs follow the theme, and the longer ones size to their contents.
@@ -77,6 +78,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Unsaved annotations survive moving, reordering, duplicating and merging pages and removing a link.
 - Fixed color picker crashes with gradient themes (#442, #443) and a crash when Windows blocks the text extraction library (#441).
 - Release packaging signs the application and engine DLLs and checks real window startup (#444), and updates no longer lock the installation folder (#434).
+- Save As and Extract Pages append .pdf when a different filename extension is typed (#450).
 - Inserting a blank page works again, and dragging one page of a multi-page selection moves the whole selection.
 - Search highlights, text selection and Crop land in the right place on rotated pages.
 - Print previews and output include current form field edits without a save and reopen.
