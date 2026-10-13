@@ -69,7 +69,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Saving over a digitally signed PDF now asks first, because saving removes the signature.
 - Tooltips and status messages read as plain sentences, and the Transform tooltip lists scaling, flipping and perspective correction instead of saying scaling is coming soon.
 - The wordmarks use Punktype and Lacquer with a soft shadow on every theme, and the app, installer and website use Killer Sans in place of the typewriter font. The installer also matches the new family setup layout.
-- Hovered outline buttons and accent picker pills use gradients outside 98SE, and accent swatches lift on hover.
+- Message, confirm, install and uninstall dialogs use the family setup dialog layout, with a notice icon, a larger Killer Sans heading, evenly sized buttons and the action button last. Dialog and installer action buttons are hollow in the accent color and fill with the button gradient on hover, instead of showing a solid block with hidden text.
+- Hovered outline buttons and accent picker pills use gradients outside 98SE that start at the outline color and darken toward the bottom, and accent swatches lift on hover.
 
 ### Fixed
 - A failed Save or Save As no longer damages the existing file, because the new copy is finished before it replaces the file.
@@ -80,9 +81,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Search highlights, text selection and Crop land in the right place on rotated pages.
 - Print previews and output include current form field edits without a save and reopen.
 - 98SE annotation bars no longer block input at zero height, and 98SE document tabs line up with the tab strip.
+- Opening the split pane keeps the window on its own monitor, sliding it left when needed, instead of widening it past the edge of a secondary monitor.
+- Closing the split pane returns the window to the width it had before it opened, and a window snapped to half the screen stays snapped and splits in place.
+- Toolbar buttons return to their normal height after switching away from Text under icons.
 - Menus fade again, and menus, submenus, flyouts, the shortcuts panel and the language menu line up with their controls and screen edges.
 - Corrected theme colors, wordmarks, footers and dialog controls, including Light/Yellow, 98SE Red and the cream Blood, Greed and Cyanotic accents. Accent-colored toolbar icons keep a dark halo on Light/Yellow.
 - App and title bar icons stay sharp at fractional DPI and app zoom, and the title bar icon is slightly larger.
+- The repair prompt reads as plain sentences in every language.
 - Corrected Vietnamese website translations and theme look counts.
 
 ## [1.8.80] - 2026-10-05

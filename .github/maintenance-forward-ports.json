@@ -1703,6 +1703,41 @@
       "maintenanceCommit": "b694e5487c051fe5ce84a5911fd114b89eb9370b",
       "developmentCommit": "46dc69563679182069e43acc8064aabbf539c482",
       "reason": "Both lines reword the same repair prompts with identical changed lines in FileOperations.cs, all eighteen string files and the changelog. Only the surrounding context differs between the branches."
+    },
+    {
+      "maintenanceCommit": "cd727482ba48bd368ebc8ce88933f83e302deead",
+      "developmentCommit": "a9a5b43ccffdeada18787c0abd9b26ff4ba95719",
+      "reason": "Both changelogs consolidate the family dialog/button entries and repair wording. The development commit edits its 1.9 section while maintenance edits 1.8.90; the retained maintenance section is reconciled separately. This commit changes documentation only."
+    },
+    {
+      "maintenanceCommit": "d08bc4d32e0be16dcef53f2b19df7fa7c9524655",
+      "developmentCommit": "f542fba46352f1a0136bf6d3f305ae886d961357",
+      "reason": "New-WinGetManifest.ps1 has identical committed bytes on both lines. Both Chocolatey descriptions carry the same expanded capabilities, runtime/install choices, theme count and locale count. Development retains its existing engine rendering description and omits the inaccurate veraPDF claim introduced by the maintenance commit."
+    },
+    {
+      "maintenanceCommit": "9701382601cec524a8d5f79fd20d5e50afd4216d",
+      "developmentCommit": "f542fba46352f1a0136bf6d3f305ae886d961357",
+      "reason": "The removed veraPDF zero-regressions sentence is absent from the development Chocolatey description already. No additional development product change is needed; its rendering description remains specific to the independent engine."
+    },
+    {
+      "maintenanceCommit": "9d64e90280628055e4bb49a53dba14819c655e5a",
+      "developmentCommit": "1b17c1cbe86e43224fb17973439b0685775408d5",
+      "reason": "The SettingsPanel.cs changes have identical stable scoped patch IDs after excluding branch-specific changelogs. Both restore the normal toolbar height when leaving Text under icons. Unrelated development tools and removed legacy imports account for whole-file differences."
+    },
+    {
+      "maintenanceCommit": "d2a79d8ff33f54bbd3bd57143ce57e4aa3b605fa",
+      "developmentCommit": "1a56cad2ec705092f40e19fe54753bed663623d1",
+      "reason": "The SplitPane.cs changes have identical stable scoped patch IDs and the current committed SplitPane.cs blobs are identical. Both constrain the split expansion to its monitor and slide the floating window when necessary. Changelog context differs."
+    },
+    {
+      "maintenanceCommit": "3d28cd17cc6e8b02afd04f29e19b3589e8729105",
+      "developmentCommit": "1a8bf3bd96d0b85b59976c7fbf95301950911c28",
+      "reason": "The SplitPane.cs and WindowChrome.cs changes have identical stable scoped patch IDs after excluding branch-specific changelogs. Both track actual split growth for closing and recognize snapped bounds before allowing window movement. Development retains unrelated legacy-import removal and quit-dialog behavior."
+    },
+    {
+      "maintenanceCommit": "860646ee6336e29274a18cfb89740992a2cdec09",
+      "developmentCommit": "b50f1edf4157b9ee1941d673f9a57990d96a51b9",
+      "reason": "Both lines reword the tooltips/status messages, describe certificate signing, and remove the unused OCR placeholder. The Norwegian Transform wording was already present on development. Maintenance alone updates its feature-list README; the development README uses a separate engine-focused structure. Shared landing copy and locale changes are carried into the development commit without replacing development-only features."
     }
   ]
 }
