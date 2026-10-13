@@ -15,8 +15,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 ### Changed
 - Saving over a digitally signed PDF now asks first, because saving removes the signature.
 - The wordmarks use Punktype and Lacquer with a soft shadow on every theme, and the app, installer and website use Killer Sans in place of the typewriter font. The installer also matches the new family setup layout.
-- Hovered outline buttons and accent picker pills use gradients outside 98SE, and accent swatches lift on hover.
-- Message, confirm, install and uninstall dialogs use the family setup dialog layout, with a notice icon, a larger Killer Sans heading, evenly sized buttons and the action button last.
+- Message, confirm, install and uninstall dialogs use the family setup dialog layout, with a notice icon, a larger Killer Sans heading, evenly sized buttons and the action button last. Dialog and installer action buttons are hollow in the accent color and fill with the button gradient on hover, instead of showing a solid block with hidden text.
+- Hovered outline buttons and accent picker pills use gradients outside 98SE that start at the outline color and darken toward the bottom, and accent swatches lift on hover.
 
 ### Fixed
 - A failed Save or Save As no longer damages the existing file, because the new copy is finished before it replaces the file.
@@ -30,11 +30,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Menus fade again, and menus, submenus, flyouts, the shortcuts panel and the language menu line up with their controls and screen edges.
 - Corrected theme colors, wordmarks, footers and dialog controls, including Light/Yellow, 98SE Red and the cream Blood, Greed and Cyanotic accents. Accent-colored toolbar icons keep a dark halo on Light/Yellow.
 - App and title bar icons stay sharp at fractional DPI and app zoom, and the title bar icon is slightly larger.
+- The repair prompt reads as plain sentences in every language.
 - Corrected Vietnamese website translations and theme look counts.
-- Dialog action buttons are hollow in the accent color and fill with the button gradient on hover, like the rest of the Killer Tools family, instead of showing a solid block with hidden text.
-- Button gradients start at the outline color and darken toward the bottom, so a hovered button no longer looks darker than its border.
-- Installer action buttons fill with the accent gradient on hover.
-- Reworded the repair prompt so it reads as plain sentences in every language.
 
 ## [1.8.80] - 2026-10-05
 
