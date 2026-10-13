@@ -2,6 +2,10 @@
 
 ## Release records
 
+- **1.9.0:** [Corpus benchmark and alternating 1.8.90 comparison](benchmarks/1.9.0/CORPUS.md),
+  including five measured passes per version and collection.
+- **1.8.90:** [Corpus benchmark and 1.8.80 outcome comparison](benchmarks/1.8.90/CORPUS.md),
+  including five measured passes per collection.
 - **1.8.80:** [Corpus benchmark and alternating 1.8.71 comparison](https://github.com/SteveTheKiller/KillerPDF-Corpus/blob/main/benchmarks/killerpdf-v1.8.80.md),
   including five measured passes per version and collection.
 - **1.8.71:** [Corpus baseline from the alternating 1.8.80 comparison](https://github.com/SteveTheKiller/KillerPDF-Corpus/blob/main/benchmarks/killerpdf-v1.8.71.md),
@@ -18,7 +22,11 @@
   including complete per-file logs and five measured passes.
 - **1.8.1:** The standards-conformance run is preserved below.
 
-The 1.8.80 benchmark reproduced every 1.8.71 file outcome and diagnostic detail
+The 1.9.0 benchmark saved 108 more files than 1.8.90 across 46,944 normal inputs
+(109 newly saved, one newly failed), with identical outcomes on all 80 damaged inputs.
+The newly failed input is unresolved. The 1.8.90 benchmark reproduced every 1.8.80 file
+outcome and diagnostic detail across the same inputs, with one warmup and five measured
+passes per collection. The 1.8.80 benchmark reproduced every 1.8.71 file outcome and diagnostic detail
 across 46,944 normal inputs and 80 damaged inputs. Each version received one warmup
 and five measured passes in alternating order, and every paired pass agreed on each
 path, status, diagnostic, and exit code. These open/save benchmarks
