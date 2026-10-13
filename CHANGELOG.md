@@ -36,7 +36,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - The packaged app and engine are precompiled, and the installed-font catalog is saved between launches and built in the background, so startup and the first page are faster. Batch rendering and unused fonts release their memory as soon as they are done.
 - Select mode no longer edits, and existing PDF text changes use the Text tool (#411). Arrow keys move selected objects one step instead of scrolling (#368).
 - Split Transform and Color Correction into separate tools, and routed OCR provider selection through the engine with complete installed-language checks.
-- Message, confirm, install and uninstall dialogs use the family setup dialog layout, with a notice icon, a larger Killer Sans heading, evenly sized buttons and the action button last.
+- Message, confirm, install and uninstall dialogs use the family setup dialog layout, with a notice icon, a larger Killer Sans heading, evenly sized buttons and the action button last. Dialog and installer action buttons are hollow in the accent color and fill with the button gradient on hover, instead of showing a solid block with hidden text.
 
 ### Fixed
 - Saving an Edit Text change removes the replaced words from the file, so they can no longer be found, copied or brought back by editing the line again.
@@ -50,11 +50,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - OK in the bookmark, table of contents, page label, initial view, layer, macro, navigation, portfolio, attachment and image dialogs is no longer treated as Cancel.
 - Fixed lost pages in parallel PNG exports, and invalid OCR models are ignored with the Tesseract fallback kept.
 - The page label, initial view, macro, navigation audit, portfolio and attachment dialogs follow the theme, and the longer ones size to their contents.
-- The About card marks 1.9 development builds as unreleased.
-- Dialog action buttons are hollow in the accent color and fill with the button gradient on hover, like the rest of the Killer Tools family, instead of showing a solid block with hidden text.
 - Button gradients start at the outline color and darken toward the bottom, so a hovered button no longer looks darker than its border.
-- Installer action buttons fill with the accent gradient on hover.
-- Reworded the repair prompt so it reads as plain sentences in every language.
+- The About card marks 1.9 development builds as unreleased.
+- The repair prompt reads as plain sentences in every language.
 
 ## [1.8.90] - Unreleased
 
