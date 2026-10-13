@@ -28,6 +28,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Print previews and output include current form field edits without a save and reopen.
 - 98SE annotation bars no longer block input at zero height, and 98SE document tabs line up with the tab strip.
 - Opening the split pane keeps the window on its own monitor, sliding it left when needed, instead of widening it past the edge of a secondary monitor.
+- Closing the split pane returns the window to the width it had before it opened, and a window snapped to half the screen stays snapped and splits in place.
 - Toolbar buttons return to their normal height after switching away from Text under icons.
 - Menus fade again, and menus, submenus, flyouts, the shortcuts panel and the language menu line up with their controls and screen edges.
 - Corrected theme colors, wordmarks, footers and dialog controls, including Light/Yellow, 98SE Red and the cream Blood, Greed and Cyanotic accents. Accent-colored toolbar icons keep a dark halo on Light/Yellow.

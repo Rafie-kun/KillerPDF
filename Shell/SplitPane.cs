@@ -34,6 +34,7 @@ namespace KillerPDF
         /// <summary>How far OpenSplit slid the window left to fit pane B on its monitor, so CloseSplit
         /// can slide it back. Zero when the split opened in place.</summary>
         private double _splitShiftLeft;
+        private double _splitEvenGrow = -1;
 
         /// <summary>Read by each pane's RebuildTabStrip: while split, both panes show their tab band
         /// even with one document, or their card tops sit at different heights.</summary>
@@ -226,6 +227,9 @@ namespace KillerPDF
             // During the startup restore, pane A's width was already seeded from the saved setting
             // by RestorePaneBCore, above, before this ran - Viewer.ActualWidth is not usable there,
             // see the comment on that seed. Everywhere else, pane A keeps the width it already has.
+            // A ratio left over from an earlier split must not resize pane A while this one
+            // opens; ApplyPaneWidths records this split's own ratio once it lands.
+            if (!_restoringSplit) _paneARatio = 0;
             double aNow = _restoringSplit && _paneAWidth > 0
                 ? _paneAWidth
                 : Viewer.ActualWidth > 0 ? Viewer.ActualWidth : MinPaneWidth;
@@ -243,7 +247,8 @@ namespace KillerPDF
                 // the split slides it back by the same amount.
                 double want = aNow + SplitGutter;
                 double right = RoomToGrowRight();
-                double shift = right < want ? Math.Min(want - right, RoomToGrowLeft()) : 0;
+                // A snapped window stays where Windows put it and splits what it already has.
+                double shift = right < want && !_chromeSquared ? Math.Min(want - right, RoomToGrowLeft()) : 0;
                 if (shift > 0.5) ShiftAndResizeWindow(-shift, 0);
                 _splitShiftLeft = shift > 0.5 ? shift : 0;
                 grow = Math.Min(want, right + _splitShiftLeft);
@@ -263,6 +268,8 @@ namespace KillerPDF
                 _paneAWidth = Math.Max(MinPaneWidth, (aNow - SplitGutter) / 2);
                 bTarget     = Math.Max(MinPaneWidth, aNow - SplitGutter - _paneAWidth);
             }
+            // Remembered so closing an even split gives back only what the window grew.
+            _splitEvenGrow = evenSplit ? grow : -1;
 
             // Start closed and slide open. During the restore there is nothing to slide - the panes
             // are simply there when the window paints - so the columns go straight to their places.
@@ -461,7 +468,15 @@ namespace KillerPDF
             // The widthDelta is 0 in the squared case so AnimateSplitWidth cannot shrink a snapped
             // window (it skips only MAXIMIZED ones on its own, since they are not Normal).
             bool fillA = _chromeSquared;
-            double aTarget = fillA ? aStart + bStart + SplitGutter : aStart;
+            // An even split that could not grow the window by pane A's width gave part of pane
+            // A's own space to pane B. Closing it shrinks the window by only what it grew and
+            // hands the rest back to pane A, so the window ends at the width it opened from.
+            double giveBack = bStart + SplitGutter;
+            bool evenClose = !fillA && _splitEvenGrow >= 0;
+            if (evenClose) giveBack = Math.Min(giveBack, _splitEvenGrow);
+            _splitEvenGrow = -1;
+            bool tweenA = fillA || evenClose;
+            double aTarget = tweenA ? aStart + bStart + SplitGutter - (fillA ? 0 : giveBack) : aStart;
             _paneAWidth = aTarget;
 
             // Put back the slide OpenSplit made to fit pane B, after the window has shrunk so it
@@ -470,8 +485,8 @@ namespace KillerPDF
             double slideBack = !fillA && WindowState == WindowState.Normal ? _splitShiftLeft : 0;
             _splitShiftLeft = 0;
 
-            AnimateSplitWidth(opening: false, 0, fillA ? 0 : bStart + SplitGutter, FinishCloseSplit,
-                aFrom: fillA ? aStart : (double?)null, aTo: fillA ? aTarget : (double?)null);
+            AnimateSplitWidth(opening: false, 0, fillA ? 0 : giveBack, FinishCloseSplit,
+                aFrom: tweenA ? aStart : (double?)null, aTo: tweenA ? aTarget : (double?)null);
             if (slideBack > 0.5) ShiftAndResizeWindow(slideBack, 0);
         }
 
