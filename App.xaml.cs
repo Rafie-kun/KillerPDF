@@ -73,6 +73,7 @@ namespace KillerPDF
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            KillerFamily.Accessibility.AccessibleControls.Initialize();
             if (IsStartupSmoke)
             {
                 RunStartupSmoke(e);
@@ -106,7 +107,7 @@ namespace KillerPDF
                 catch (Exception ex)
                 {
                     Console.Error.WriteLine("Install registration failed: " + ex.Message);
-                    Shutdown(1);
+                    Shutdown(KillerFamily.Deployment.InstallerExitCodes.FromException(ex));
                 }
                 return;
             }
@@ -133,8 +134,7 @@ namespace KillerPDF
             if (e.Args.Length > 0 &&
                 string.Equals(e.Args[0], "/silent", StringComparison.OrdinalIgnoreCase))
             {
-                DoSilentInstall();
-                Shutdown(0);
+                Shutdown(DoSilentInstall());
                 return;
             }
 
@@ -1072,10 +1072,11 @@ namespace KillerPDF
         /// File associations are registered in HKLM so every account sees KillerPDF in Open With
         /// and Default apps. Windows still leaves the actual default choice to each user.
         /// </summary>
-        private static void DoSilentInstall()
+        private static int DoSilentInstall()
         {
             try
             {
+                using var installLease = KillerFamily.Deployment.InstallerExitCodes.Acquire(AppName);
                 string src = Environment.ProcessPath
                     ?? throw new InvalidOperationException("The current executable path is unavailable.");
 
@@ -1085,8 +1086,7 @@ namespace KillerPDF
                 if (!valid)
                 {
                     Console.Error.WriteLine("Silent install refused: EXE has no valid Authenticode signature.");
-                    Environment.Exit(1);
-                    return;
+                    return KillerFamily.Deployment.InstallerExitCodes.SecurityRejected;
                 }
 
                 Directory.CreateDirectory(MachineInstallDir);
@@ -1097,11 +1097,12 @@ namespace KillerPDF
                 File.Copy(src, MachineInstallExe, overwrite: true);
                 try { File.SetAttributes(MachineInstallExe, FileAttributes.Normal); } catch { }
                 RegisterInstalledCopy(machine: true, desktop: false);
+                return KillerFamily.Deployment.InstallerExitCodes.Success;
             }
             catch (Exception ex)
             {
                 Console.Error.WriteLine("Silent install failed: " + ex.Message);
-                Environment.Exit(1);
+                return KillerFamily.Deployment.InstallerExitCodes.FromException(ex);
             }
         }
 
