@@ -39,7 +39,6 @@
 - Opens password-protected PDFs and repairs damaged ones
 - Thirteen themes, live accent colors, and toolbar styles provide 41 looks; localized in nineteen languages
 - Keyboard shortcut overlay (F1) with list and keyboard views, plus a shortcut toggle and an always-available Ctrl+Shift+K recovery chord
-- Every release is tested against a 2,900-file veraPDF conformance corpus with a zero-regressions requirement
 - Optional startup update checks, enabled by default, with confirmation before downloading or installing
 - Separate compact installer and self-contained portable downloads; the installer supports per-user or machine-wide installation and uses the .NET 10 Desktop Runtime
 - GPLv3, local-only, no account, no telemetry
