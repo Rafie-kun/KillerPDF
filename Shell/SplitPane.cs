@@ -244,7 +244,7 @@ namespace KillerPDF
                 double want = aNow + SplitGutter;
                 double right = RoomToGrowRight();
                 double shift = right < want ? Math.Min(want - right, RoomToGrowLeft()) : 0;
-                if (shift > 0.5) Left -= shift;
+                if (shift > 0.5) ShiftAndResizeWindow(-shift, 0);
                 _splitShiftLeft = shift > 0.5 ? shift : 0;
                 grow = Math.Min(want, right + _splitShiftLeft);
             }
@@ -378,10 +378,7 @@ namespace KillerPDF
             // with the drag handles still live over the pane, the mouse captured and the window
             // unresizable. Only the columns slide.
             if (WindowState == WindowState.Normal && Math.Abs(widthDelta) > 0.5)
-            {
-                double w = Width + (opening ? widthDelta : -widthDelta);
-                Width = Math.Max(MinWidth, w);
-            }
+                ShiftAndResizeWindow(0, opening ? widthDelta : -widthDelta);
 
             double bStart = opening ? 0 : ViewerB.ActualWidth;
             double bEnd   = opening ? bTarget : 0;
@@ -467,13 +464,15 @@ namespace KillerPDF
             double aTarget = fillA ? aStart + bStart + SplitGutter : aStart;
             _paneAWidth = aTarget;
 
-            // Put back the slide OpenSplit made to fit pane B. A squared window did not shrink, so
-            // it does not move either.
-            if (!fillA && _splitShiftLeft > 0.5 && WindowState == WindowState.Normal) Left += _splitShiftLeft;
+            // Put back the slide OpenSplit made to fit pane B, after the window has shrunk so it
+            // never reaches past its monitor on the way. A squared window did not shrink, so it
+            // does not move either.
+            double slideBack = !fillA && WindowState == WindowState.Normal ? _splitShiftLeft : 0;
             _splitShiftLeft = 0;
 
             AnimateSplitWidth(opening: false, 0, fillA ? 0 : bStart + SplitGutter, FinishCloseSplit,
                 aFrom: fillA ? aStart : (double?)null, aTo: fillA ? aTarget : (double?)null);
+            if (slideBack > 0.5) ShiftAndResizeWindow(slideBack, 0);
         }
 
         /// <summary>Tail of CloseSplit: everything that must be true once the slide has finished.
@@ -629,6 +628,26 @@ namespace KillerPDF
             var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
             if (hwnd == IntPtr.Zero || !TryGetWorkArea(hwnd, out RECT work)) return double.PositiveInfinity;
             return (work.right - work.left) / VisualTreeHelper.GetDpi(this).DpiScaleX;
+        }
+
+        /// <summary>Moves the window's left edge and changes its width, both in WPF units, on the
+        /// native window rectangle. After a move between monitors with different scaling, WPF's
+        /// Left and Width can still hold the previous monitor's values, so adding to them flung
+        /// the window off its monitor or grew it far past pane A's width.</summary>
+        private void ShiftAndResizeWindow(double leftDelta, double widthDelta)
+        {
+            var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+            if (hwnd == IntPtr.Zero || !GetWindowRect(hwnd, out RECT win))
+            {
+                Left += leftDelta;
+                Width = Math.Max(MinWidth, Width + widthDelta);
+                return;
+            }
+            double scale = VisualTreeHelper.GetDpi(this).DpiScaleX;
+            int x = win.left + (int)Math.Round(leftDelta * scale);
+            int w = (int)Math.Round(Math.Max(MinWidth * scale, (win.right - win.left) + widthDelta * scale));
+            SetWindowPos(hwnd, IntPtr.Zero, x, win.top, w, win.bottom - win.top,
+                         SWP_NOZORDER | SWP_NOACTIVATE);
         }
 
         private static bool TryGetWorkArea(IntPtr hwnd, out RECT work)
