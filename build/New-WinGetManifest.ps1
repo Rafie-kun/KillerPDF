@@ -93,7 +93,7 @@ License: GPL-3.0
 LicenseUrl: https://github.com/SteveTheKiller/KillerPDF/blob/HEAD/LICENSE
 Copyright: Copyright (c) 2026 Steve the Killer
 ShortDescription: PDF editor for Windows. No account, no subscription, no telemetry.
-Description: KillerPDF is a lightweight PDF viewer and toolkit for Windows. View, merge, split, and manage PDF files. WinGet installs machine-wide; the downloadable installer also supports per-user installation, and a separate portable build is available. No account, no subscription, no telemetry. Open source under GPLv3.
+Description: KillerPDF is a free, open-source PDF editor for Windows. View, annotate, OCR, merge, split, edit text, draw, sign, fill forms, print, flatten, and open password-protected PDFs without an Adobe subscription. WinGet installs machine-wide; the downloadable installer also supports per-user installation, and a separate portable build is available. Document processing stays on your computer, with no account, no subscription, and no telemetry. Open source under GPLv3.
 Moniker: killerpdf
 Tags:
 - dotnet
