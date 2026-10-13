@@ -50,6 +50,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Save As and Extract Pages append .pdf when a different filename extension is typed (#450).
 - OK in the bookmark, table of contents, page label, initial view, layer, macro, navigation, portfolio, attachment and image dialogs is no longer treated as Cancel.
 - Fixed lost pages in parallel PNG exports, and invalid OCR models are ignored with the Tesseract fallback kept.
+- Silent installs return specific Windows error codes and reject a second concurrent install instead of reporting a general failure.
+- Icon-only buttons give screen readers the name from their tooltip, and controls reached with the keyboard show a dotted focus outline.
 - The page label, initial view, macro, navigation audit, portfolio and attachment dialogs follow the theme, and the longer ones size to their contents.
 - Opening the split pane keeps the window on its own monitor, sliding it left when needed, instead of widening it past the edge of a secondary monitor.
 - Closing the split pane returns the window to the width it had before it opened, and a window snapped to half the screen stays snapped and splits in place.

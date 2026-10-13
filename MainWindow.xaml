@@ -1094,6 +1094,7 @@
                                                       Margin="6,0,0,0" VerticalAlignment="Center"
                                                       HorizontalAlignment="Left" IsHitTestVisible="False"/>
                                     <TextBox x:Name="PART_EditableTextBox" Grid.Column="0" Margin="5,0,0,0"
+                                             AutomationProperties.Name="{DynamicResource Str_TT_ZoomLevel}"
                                              Background="Transparent" BorderThickness="0"
                                              Foreground="{DynamicResource TextBrush}" FontFamily="{DynamicResource UiFont}"
                                              FontSize="10" VerticalAlignment="Center"
@@ -1104,6 +1105,7 @@
                                                VerticalAlignment="Center" HorizontalAlignment="Center"
                                                IsHitTestVisible="False"/>
                                     <ToggleButton Grid.ColumnSpan="2" Style="{StaticResource DarkComboToggle}"
+                                                  AutomationProperties.Name="{DynamicResource Str_TT_ZoomLevel}"
                                                   IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"/>
                                 </Grid>
                             </Border>
@@ -1547,7 +1549,8 @@
                     </StackPanel>
                     <!-- Overflow chevron: shown only when the bar is too narrow -->
                     <ToggleButton x:Name="OverflowChevron" Visibility="Collapsed" Width="26"
-                                  VerticalAlignment="Center" Cursor="Hand" Focusable="False"
+                                  VerticalAlignment="Center" Cursor="Hand" Focusable="True"
+                                  ToolTip="{DynamicResource Str_Bar_More}"
                                   IsChecked="{Binding IsOpen, ElementName=OverflowPopup, Mode=TwoWay}">
                         <ToggleButton.Template>
                             <ControlTemplate TargetType="ToggleButton">
@@ -2880,6 +2883,7 @@
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
                                 VerticalAlignment="Center" Margin="{DynamicResource FooterCellPadding}">
                     <Button x:Name="PageSizeLabel" Margin="4,0,5,0" MinWidth="90" Width="Auto"
+                            ToolTip="{DynamicResource Str_Crop_Size}"
                             Style="{StaticResource FooterNavButton}" Click="PageSizeLabel_Click" Height="Auto"
                             FontFamily="{DynamicResource BrandSansFont}" FontSize="16"
                             TextOptions.TextFormattingMode="Ideal" VerticalAlignment="Center"/>
