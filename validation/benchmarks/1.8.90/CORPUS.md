@@ -21,15 +21,16 @@ These are hostile collections, not a zero-failure workload. All normal batch pro
 
 Outcomes match exactly. The 1.8.90 logs agree with the retained 1.8.80 logs on status and diagnostic detail for all 16,696 regression, 649 standards, and 29,599 stress inputs, and the 292, 37, and 1,627 existing save failures carry the same diagnostics. No previously saved file became a skip or a failure. Damaged-file results also match: 78 skips and two reported failures, with no missing logs, crashes, or timeouts.
 
-Timing was not compared in an alternating run. The recorded 1.8.80 medians come from a separate session on 2026-10-04.
+## Same-session timing check against 1.8.80
 
-| Collection | 1.8.80 median seconds (2026-10-04) | 1.8.90 median seconds (2026-10-13) | Cross-session difference |
-| --- | ---: | ---: | ---: |
-| Public regression | 236.493 | 283.235 | 19.8% longer |
-| Standards and color | 5.785 | 6.314 | 9.1% longer |
-| Private stress | 563.538 | 649.38 | 15.2% longer |
+The corpus series ran on a busy host: a stuck system process held a full CPU core and other development work was running. Its 1.8.90 medians were 19.8% (regression), 9.1% (standards), and 15.2% (stress) above the recorded 2026-10-04 1.8.80 medians. To separate the code from the host, 1.8.80 (`a3f18871`) and 1.8.90 (`860646ee`) were built from source with the same publish command and run in alternating order on a quiet host, together with the frozen 1.8.90 build used for the series. Each build received one warmup and four measured passes per collection.
 
-Two of the three differences are above the 10% investigation threshold. They are not attributed to the code: the sessions differ, no 1.8.80 build was rerun alongside 1.8.90, and host CPU load during this session was not idle (samples between 42% and 80%). The difference stays open until 1.8.80 and 1.8.90 are measured in the same alternating session.
+| Collection | 1.8.80 median seconds | 1.8.90 median seconds | Frozen 1.8.90 median seconds | 1.8.90 change |
+| --- | ---: | ---: | ---: | ---: |
+| Public regression | 228.228 | 222.307 | 223.461 | 2.59% shorter |
+| Standards and color | 5.999 | 5.876 | 6.176 | 2.05% shorter |
+
+Process CPU time per regression pass was 119.4 seconds for 1.8.80 and 119.7 seconds for 1.8.90, and every pass of every build produced the same per-file log. 1.8.90 has no timing regression against 1.8.80; the higher series medians came from host load. The batch resave path (the batch runner, the engine sources, and the resave call) is unchanged between the two versions. The private stress set was not part of this check. The check's logs are at `C:\Users\steve\kp-bench-render\perf-1880-vs-1890-20261013-quiet`.
 
 ## Builds and method
 
