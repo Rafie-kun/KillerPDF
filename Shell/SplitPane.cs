@@ -31,6 +31,10 @@ namespace KillerPDF
 
         private bool _isSplit;
 
+        /// <summary>How far OpenSplit slid the window left to fit pane B on its monitor, so CloseSplit
+        /// can slide it back. Zero when the split opened in place.</summary>
+        private double _splitShiftLeft;
+
         /// <summary>Read by each pane's RebuildTabStrip: while split, both panes show their tab band
         /// even with one document, or their card tops sit at different heights.</summary>
         internal bool IsSplit => _isSplit;
@@ -234,8 +238,15 @@ namespace KillerPDF
             double grow = 0;
             if (WindowState == WindowState.Normal && !_restoringSplit)
             {
-                double room = SystemParameters.WorkArea.Right - Left;
-                grow = Math.Min(aNow + SplitGutter, Math.Max(0, room - Width));
+                // Not enough room to the right of the window for pane B: slide the window left
+                // first, as far as its own monitor allows, so pane A can keep its width. Closing
+                // the split slides it back by the same amount.
+                double want = aNow + SplitGutter;
+                double right = RoomToGrowRight();
+                double shift = right < want ? Math.Min(want - right, RoomToGrowLeft()) : 0;
+                if (shift > 0.5) Left -= shift;
+                _splitShiftLeft = shift > 0.5 ? shift : 0;
+                grow = Math.Min(want, right + _splitShiftLeft);
             }
             // Pane B's final width is whatever the window could actually give it.
             double bTarget = Math.Max(MinPaneWidth, grow - SplitGutter);
@@ -456,6 +467,11 @@ namespace KillerPDF
             double aTarget = fillA ? aStart + bStart + SplitGutter : aStart;
             _paneAWidth = aTarget;
 
+            // Put back the slide OpenSplit made to fit pane B. A squared window did not shrink, so
+            // it does not move either.
+            if (!fillA && _splitShiftLeft > 0.5 && WindowState == WindowState.Normal) Left += _splitShiftLeft;
+            _splitShiftLeft = 0;
+
             AnimateSplitWidth(opening: false, 0, fillA ? 0 : bStart + SplitGutter, FinishCloseSplit,
                 aFrom: fillA ? aStart : (double?)null, aTo: fillA ? aTarget : (double?)null);
         }
@@ -584,6 +600,47 @@ namespace KillerPDF
             _paneARatio = aW / avail;
         }
 
+        /// <summary>How far the window can grow to the right before it passes the work area of the
+        /// monitor it is on, in WPF units. SystemParameters.WorkArea is the primary monitor only, so
+        /// on a secondary monitor it let F10 widen the window past that monitor's edge. Measured in
+        /// native pixels against the window's own rectangle and converted once with the window's
+        /// DPI, so monitors with different scaling never mix coordinate systems.</summary>
+        private double RoomToGrowRight()
+        {
+            var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+            if (hwnd == IntPtr.Zero || !GetWindowRect(hwnd, out RECT win)) return 0;
+            if (!TryGetWorkArea(hwnd, out RECT work)) return 0;
+            return Math.Max(0, (work.right - win.right) / VisualTreeHelper.GetDpi(this).DpiScaleX);
+        }
+
+        /// <summary>How far the window can move left before its left edge passes the work area of
+        /// the monitor it is on, in WPF units. Measured the same way as RoomToGrowRight.</summary>
+        private double RoomToGrowLeft()
+        {
+            var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+            if (hwnd == IntPtr.Zero || !GetWindowRect(hwnd, out RECT win)) return 0;
+            if (!TryGetWorkArea(hwnd, out RECT work)) return 0;
+            return Math.Max(0, (win.left - work.left) / VisualTreeHelper.GetDpi(this).DpiScaleX);
+        }
+
+        /// <summary>Width of the work area of the monitor the window is on, in WPF units.</summary>
+        private double CurrentWorkAreaWidth()
+        {
+            var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+            if (hwnd == IntPtr.Zero || !TryGetWorkArea(hwnd, out RECT work)) return double.PositiveInfinity;
+            return (work.right - work.left) / VisualTreeHelper.GetDpi(this).DpiScaleX;
+        }
+
+        private static bool TryGetWorkArea(IntPtr hwnd, out RECT work)
+        {
+            work = default;
+            IntPtr monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+            var info = new MONITORINFO { cbSize = System.Runtime.InteropServices.Marshal.SizeOf<MONITORINFO>() };
+            if (monitor == IntPtr.Zero || !GetMonitorInfo(monitor, ref info)) return false;
+            work = info.rcWork;
+            return true;
+        }
+
         /// <summary>The window has no minimum of its own. The only floor is the PANE minimum, which
         /// is the same number in both modes - one pane's worth unsplit, two plus the gutter when
         /// split. Everything outside the panes (the sidebar, the margins) is MEASURED rather than
@@ -597,6 +654,9 @@ namespace KillerPDF
                 : chrome + MinPaneWidth;
             // Only when it actually moves. An unconditional assignment can resize the window, and
             // anything that re-enters this from a layout event then has a loop to run round.
+            // Never above the monitor the window is on, or the floor itself pushes the window
+            // off that monitor and then holds it there.
+            floor = Math.Min(floor, CurrentWorkAreaWidth());
             if (Math.Abs(MinWidth - floor) > 0.5) MinWidth = floor;
         }
 
@@ -635,8 +695,7 @@ namespace KillerPDF
             // window's edge. Stops at the edge of the work area, and does nothing while maximized.
             if (aimA > maxA && WindowState == WindowState.Normal)
             {
-                double room = SystemParameters.WorkArea.Right - Left;
-                double grow = Math.Min(aimA - maxA, Math.Max(0, room - Width));
+                double grow = Math.Min(aimA - maxA, RoomToGrowRight());
                 if (grow > 0)
                 {
                     Width += grow;
