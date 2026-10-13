@@ -3,32 +3,41 @@
 Results are listed newest first. Earlier release benchmarks remain here so changes
 between releases can be compared against their original measurements.
 
-## KillerPDF 1.8.2 through 1.8.80 release benchmarks
+## KillerPDF 1.8.2 through 1.8.90 release benchmarks
 
 KillerPDF 1.8.71 and 1.8.80 received one warmup and five measured open/save passes
 per collection in the same session, with run order alternated. Earlier releases were
-measured in separate release sessions.
+measured in separate release sessions. KillerPDF 1.8.90 received one warmup and five
+measured passes per collection on 2026-10-13, also in a separate session.
 
-| Collection | Inputs | 1.8.2 median seconds | 1.8.3 median seconds | 1.8.4 median seconds | 1.8.6 median seconds | 1.8.70 median seconds | 1.8.71 median seconds | 1.8.80 median seconds |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Public regression | 16,696 | 167.891 | 182.093 | 207.099 | 169.360 | 172.706 | 234.392 | 236.493 |
-| Standards and color | 649 | 5.695 | 5.666 | 5.635 | 5.527 | 5.583 | 5.765 | 5.785 |
-| Private stress | 29,599 | 512.967 | 523.400 | 556.740 | 538.026 | 516.800 | 566.869 | 563.538 |
+| Collection | Inputs | 1.8.2 median seconds | 1.8.3 median seconds | 1.8.4 median seconds | 1.8.6 median seconds | 1.8.70 median seconds | 1.8.71 median seconds | 1.8.80 median seconds | 1.8.90 median seconds |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Public regression | 16,696 | 167.891 | 182.093 | 207.099 | 169.360 | 172.706 | 234.392 | 236.493 | 283.235 |
+| Standards and color | 649 | 5.695 | 5.666 | 5.635 | 5.527 | 5.583 | 5.765 | 5.785 | 6.314 |
+| Private stress | 29,599 | 512.967 | 523.400 | 556.740 | 538.026 | 516.800 | 566.869 | 563.538 | 649.380 |
 
 Version 1.8.3 saved 1,485 additional files without losing any previously successful
 input. Versions 1.8.4 and 1.8.6 reproduced every prior outcome and diagnostic detail.
 Version 1.8.70 reproduced every 1.8.6 file outcome and diagnostic detail. Version
 1.8.80 reproduced every 1.8.71 outcome and diagnostic detail across the paired
-warmups and measured passes. All recorded releases had zero crashes and timeouts in the separate damaged-file safety
+warmups and measured passes. Version 1.8.90 reproduced every 1.8.80 outcome and
+diagnostic detail across all passes. All recorded releases had zero crashes and timeouts in the separate damaged-file safety
 collection. See the
 [1.8.2 release record](https://github.com/SteveTheKiller/KillerPDF-Corpus/blob/main/benchmarks/killerpdf-v1.8.2.md)
 and the reports and measured runs for [1.8.3](https://github.com/SteveTheKiller/KillerPDF-Corpus/blob/main/benchmarks/killerpdf-v1.8.3.md) and
 [1.8.4](https://github.com/SteveTheKiller/KillerPDF-Corpus/blob/main/benchmarks/killerpdf-v1.8.4.md), [1.8.6](https://github.com/SteveTheKiller/KillerPDF-Corpus/blob/main/benchmarks/killerpdf-v1.8.6.md),
-[1.8.70](https://github.com/SteveTheKiller/KillerPDF-Corpus/blob/main/benchmarks/killerpdf-v1.8.70.md), and [1.8.80](https://github.com/SteveTheKiller/KillerPDF-Corpus/blob/main/benchmarks/killerpdf-v1.8.80.md).
+[1.8.70](https://github.com/SteveTheKiller/KillerPDF-Corpus/blob/main/benchmarks/killerpdf-v1.8.70.md), [1.8.80](https://github.com/SteveTheKiller/KillerPDF-Corpus/blob/main/benchmarks/killerpdf-v1.8.80.md), and [1.8.90](benchmarks/1.8.90/CORPUS.md).
 
 Compared directly with 1.8.71 in the alternating session, the 1.8.80 medians were
 0.90% longer for regression, 0.35% longer for standards, and 0.59% shorter for
 stress. All changes remain below the 10% investigation threshold.
+
+KillerPDF 1.8.90 was not measured against 1.8.80 in one session. Its medians are 19.8%
+longer for regression, 9.1% longer for standards, and 15.2% longer for stress than the
+recorded 1.8.80 medians. The sessions differ and host CPU load was not idle (42% to 80%
+in the samples taken), so the difference is not attributed to the application. It stays
+open until 1.8.80 and 1.8.90 are measured together in one alternating session. See the
+[1.8.90 report](benchmarks/1.8.90/CORPUS.md).
 
 ## KillerPDF 1.8.1 compared with 1.8.0
 
