@@ -692,6 +692,11 @@ namespace KillerPDF
         [LibraryImport("dwmapi.dll", EntryPoint = "DwmSetWindowAttribute")]
         private static partial int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int value, int size);
 
+        private const int DWMWA_EXTENDED_FRAME_BOUNDS = 9;
+
+        [LibraryImport("dwmapi.dll", EntryPoint = "DwmGetWindowAttribute")]
+        private static partial int DwmGetWindowAttribute(IntPtr hwnd, int attr, out RECT value, int size);
+
         private const double ShadowMargin = 10;
         private bool _chromeSquared;   // true when maximized/snapped
 
@@ -711,7 +716,12 @@ namespace KillerPDF
         {
             if (WindowState != WindowState.Normal) return false;
             var hwnd = new WindowInteropHelper(this).Handle;
-            if (hwnd == IntPtr.Zero || !GetWindowRect(hwnd, out RECT w)) return false;
+            if (hwnd == IntPtr.Zero) return false;
+            // The visible frame, not GetWindowRect: the window rect includes Windows' invisible
+            // resize borders, which put a snapped window several pixels past the work area and
+            // outside the tolerance below.
+            if (DwmGetWindowAttribute(hwnd, DWMWA_EXTENDED_FRAME_BOUNDS, out RECT w, Marshal.SizeOf<RECT>()) != 0
+                && !GetWindowRect(hwnd, out w)) return false;
             IntPtr mon = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
             if (mon == IntPtr.Zero) return false;
             var info = new MONITORINFO { cbSize = Marshal.SizeOf<MONITORINFO>() };
