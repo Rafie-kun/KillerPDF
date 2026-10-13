@@ -989,7 +989,7 @@ namespace KillerPDF
             // Text only: caption, no icon (nothing to shed - there'd be nothing left).
             if (textOnly)
             {
-                btn.Width = double.NaN; btn.MinWidth = 0; btn.Height = 34; btn.Padding = new Thickness(8, 5, 8, 5);
+                btn.Width = double.NaN; btn.MinWidth = 0; btn.Height = 34; btn.MinHeight = 0; btn.Padding = new Thickness(8, 5, 8, 5);
                 btn.Content = new TextBlock
                 {
                     Text = Loc(key),
@@ -1003,7 +1003,7 @@ namespace KillerPDF
             // Text beside the icon, while it still fits.
             if (beside && withLabel)
             {
-                btn.Width = double.NaN; btn.MinWidth = 0; btn.Height = 34; btn.Padding = new Thickness(8, 5, 8, 5);
+                btn.Width = double.NaN; btn.MinWidth = 0; btn.Height = 34; btn.MinHeight = 0; btn.Padding = new Thickness(8, 5, 8, 5);
                 var row = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
                 row.Children.Add(MakeToolbarGlyph(glyph, glyphSize));
                 row.Children.Add(new TextBlock
@@ -1044,7 +1044,7 @@ namespace KillerPDF
             // size axis's alone (family numbers).
             btn.Width = large ? 46 : 36;
             btn.MinWidth = 0;
-            btn.Height = large ? 42 : 32;
+            btn.Height = large ? 42 : 32; btn.MinHeight = 0;
             btn.Padding = new Thickness(10, 6, 10, 6);
             btn.Content = MakeToolbarGlyph(glyph, glyphSize);
         }
