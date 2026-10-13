@@ -36,7 +36,7 @@
     <sys:String x:Key="Str_TT_ImageTool">Bildeverktøy: klikk for å sette inn et bilde på siden (I)</sys:String>
     <sys:String x:Key="Str_TT_CropTool">Beskjæringsverktøy: dra for å angi beskjæringsområde, og bruk det på siden eller sidene (C)</sys:String>
     <sys:String x:Key="Str_TT_MeasureTool">Mål avstand og undersøk sidestørrelse</sys:String>
-    <sys:String x:Key="Str_TT_RotateTool">Transformer side - roter / rett opp skjevhet (skalering kommer snart) (R)</sys:String>
+    <sys:String x:Key="Str_TT_RotateTool">Transformer side: roter, skaler, speilvend, rett opp skjevhet eller korriger perspektiv (R)</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">Fjern alle merknader</sys:String>
     <sys:String x:Key="Str_TT_Search">Søk (Ctrl+F)</sys:String>
     <sys:String x:Key="Str_TT_UndoLast">Angre siste (Ctrl+Z)</sys:String>
@@ -327,7 +327,6 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Ocr_Language">Språk</sys:String>
     <sys:String x:Key="Str_Ocr_FormAware">Skjemabevisst OCR</sys:String>
     <sys:String x:Key="Str_Ocr_NoDoc">Åpne en PDF først</sys:String>
-    <sys:String x:Key="Str_Ocr_ComingSoon">{0} - kommer snart</sys:String>
     <sys:String x:Key="Str_Ctx_SelectTool">Markeringsverktøy</sys:String>
     <sys:String x:Key="Str_Ctx_TextTool">Tekstverktøy</sys:String>
     <sys:String x:Key="Str_Ctx_HighlightTool">Uthevingsverktøy</sys:String>

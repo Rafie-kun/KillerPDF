@@ -36,7 +36,7 @@
     <sys:String x:Key="Str_TT_ImageTool">Инструмент "Изображение" - нажмите, чтобы вставить изображение на страницу (I)</sys:String>
     <sys:String x:Key="Str_TT_CropTool">Инструмент обрезки - перетащите, чтобы задать область обрезки, затем примените к странице(ам) (C)</sys:String>
     <sys:String x:Key="Str_TT_MeasureTool">Измерьте расстояние и проверьте размер страницы</sys:String>
-    <sys:String x:Key="Str_TT_RotateTool">Трансформация страницы - поворот / выравнивание по ширине (скоро появится масштаб) (R)</sys:String>
+    <sys:String x:Key="Str_TT_RotateTool">Трансформация страницы: поворот, масштабирование, отражение, выравнивание или коррекция перспективы (R)</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">Очистите все аннотации</sys:String>
     <sys:String x:Key="Str_TT_Search">Поиск (Ctrl+F)</sys:String>
     <sys:String x:Key="Str_TT_UndoLast">Отменить последнее изменение (Ctrl+Z)</sys:String>
@@ -327,7 +327,6 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Ocr_Language">Язык</sys:String>
     <sys:String x:Key="Str_Ocr_FormAware">Распознавание с учетом формы</sys:String>
     <sys:String x:Key="Str_Ocr_NoDoc">Сначала откройте PDF-файл</sys:String>
-    <sys:String x:Key="Str_Ocr_ComingSoon">{0} - скоро будет</sys:String>
     <sys:String x:Key="Str_Ctx_SelectTool">Инструмент выделения</sys:String>
     <sys:String x:Key="Str_Ctx_TextTool">Текстовый инструмент</sys:String>
     <sys:String x:Key="Str_Ctx_HighlightTool">Инструмент подсветки</sys:String>

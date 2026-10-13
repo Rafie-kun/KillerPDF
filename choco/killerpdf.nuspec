@@ -27,7 +27,7 @@
 - Built-in OCR, no cloud: OCR a page or dragged region to the clipboard, make a searchable PDF, or extract all text; extra languages download on demand
 - Full command line: merge, extract, split, decrypt, flatten, render to images, print, and OCR run headlessly with scripting-friendly exit codes
 - PDF form filling: text, checkbox, radio, and comb fields render as live controls
-- Digital signatures with a cloud certificate (Certum SimplySign); draw and reuse signatures and initials or import a PNG/JPG/BMP image
+- Digital signatures with a certificate from Windows or a .pfx file; draw and reuse signatures and initials or import a PNG/JPG/BMP image
 - Merge multiple PDFs and split out selected pages, drag-and-drop page reordering; drop a folder or ZIP to merge its contents
 - Export one page or a multi-page selection as PNG or JPEG from the Pages panel
 - Rotate, scale, flip, straighten a crooked scan, correct the perspective of a photographed page, adjust levels for pale scans, and crop with corner handles

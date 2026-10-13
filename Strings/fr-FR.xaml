@@ -36,7 +36,7 @@
     <sys:String x:Key="Str_TT_ImageTool">Outil Image - cliquer pour insérer une image (I)</sys:String>
     <sys:String x:Key="Str_TT_CropTool">Outil Recadrage - sélectionner une zone et l'appliquer aux pages (C)</sys:String>
     <sys:String x:Key="Str_TT_MeasureTool">Mesurer une distance et afficher la taille de la page</sys:String>
-    <sys:String x:Key="Str_TT_RotateTool">Transformer la page - pivoter / redresser (mise à l'échelle bientôt disponible) (R)</sys:String>
+    <sys:String x:Key="Str_TT_RotateTool">Transformer la page : pivoter, mettre à l'échelle, retourner, redresser ou corriger la perspective (R)</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">Supprimer toutes les annotations</sys:String>
     <sys:String x:Key="Str_TT_Search">Rechercher (Ctrl+F)</sys:String>
     <sys:String x:Key="Str_TT_UndoLast">Annuler la dernière action (Ctrl+Z)</sys:String>
@@ -327,7 +327,6 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Ocr_Language">Langue</sys:String>
     <sys:String x:Key="Str_Ocr_FormAware">OCR adaptée aux formulaires</sys:String>
     <sys:String x:Key="Str_Ocr_NoDoc">Ouvrez d'abord un PDF</sys:String>
-    <sys:String x:Key="Str_Ocr_ComingSoon">{0} - bientôt disponible</sys:String>
     <sys:String x:Key="Str_Ctx_SelectTool">Outil Sélection</sys:String>
     <sys:String x:Key="Str_Ctx_TextTool">Outil Texte</sys:String>
     <sys:String x:Key="Str_Ctx_HighlightTool">Outil Surlignage</sys:String>

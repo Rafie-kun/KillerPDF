@@ -476,7 +476,6 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Ocr_Language">语言</sys:String>
     <sys:String x:Key="Str_Ocr_FormAware">表单感知 OCR</sys:String>
     <sys:String x:Key="Str_Ocr_NoDoc">请先打开一个 PDF</sys:String>
-    <sys:String x:Key="Str_Ocr_ComingSoon">{0} - 即将推出</sys:String>
     <sys:String x:Key="Str_TT_Ocr">对页面执行 OCR（复制文本） (Ctrl+Shift+O)</sys:String>
     <sys:String x:Key="Str_Lbl_Ocr">OCR</sys:String>
     <sys:String x:Key="Str_Ctx_OcrPage">对页面执行 OCR（复制文本）</sys:String>
@@ -484,7 +483,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <!-- ── Transform（旋转 / 缩放 / 翻转 / 倾斜） ──────────────────────────── -->
     <sys:String x:Key="Str_Lbl_Rotate">变换</sys:String>
     <sys:String x:Key="Str_Lbl_Stamp">盖章</sys:String>
-    <sys:String x:Key="Str_TT_RotateTool">变换页面 - 旋转 / 校正倾斜（缩放即将推出）(R)</sys:String>
+    <sys:String x:Key="Str_TT_RotateTool">变换页面：旋转、缩放、翻转、校正倾斜或校正透视 (R)</sys:String>
     <sys:String x:Key="Str_Tf_Suffix">变换</sys:String>
     <sys:String x:Key="Str_Tf_Rotate">旋转</sys:String>
     <sys:String x:Key="Str_Tf_Scale">缩放</sys:String>

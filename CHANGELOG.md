@@ -14,6 +14,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 ### Changed
 - Saving over a digitally signed PDF now asks first, because saving removes the signature.
+- Tooltips and status messages read as plain sentences, and the Transform tooltip lists scaling, flipping and perspective correction instead of saying scaling is coming soon.
 - The wordmarks use Punktype and Lacquer with a soft shadow on every theme, and the app, installer and website use Killer Sans in place of the typewriter font. The installer also matches the new family setup layout.
 - Message, confirm, install and uninstall dialogs use the family setup dialog layout, with a notice icon, a larger Killer Sans heading, evenly sized buttons and the action button last. Dialog and installer action buttons are hollow in the accent color and fill with the button gradient on hover, instead of showing a solid block with hidden text.
 - Hovered outline buttons and accent picker pills use gradients outside 98SE that start at the outline color and darken toward the bottom, and accent swatches lift on hover.

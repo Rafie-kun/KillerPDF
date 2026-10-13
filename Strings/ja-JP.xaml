@@ -36,7 +36,7 @@
     <sys:String x:Key="Str_TT_ImageTool">画像ツール - クリックしてページに画像を挿入 (I)</sys:String>
     <sys:String x:Key="Str_TT_CropTool">トリミングツール - ドラッグしてトリミング範囲を設定し、ページに適用 (C)</sys:String>
     <sys:String x:Key="Str_TT_MeasureTool">距離を測定し、ページサイズを表示</sys:String>
-    <sys:String x:Key="Str_TT_RotateTool">ページ変換 - 回転 / 傾き補正 (拡大縮小は近日対応) (R)</sys:String>
+    <sys:String x:Key="Str_TT_RotateTool">ページ変換: 回転、拡大縮小、反転、傾き補正、遠近補正 (R)</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">すべての注釈をクリア</sys:String>
     <sys:String x:Key="Str_TT_Search">検索 (Ctrl+F)</sys:String>
     <sys:String x:Key="Str_TT_UndoLast">元に戻す (Ctrl+Z)</sys:String>
@@ -327,7 +327,6 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Ocr_Language">言語</sys:String>
     <sys:String x:Key="Str_Ocr_FormAware">フォーム対応 OCR</sys:String>
     <sys:String x:Key="Str_Ocr_NoDoc">先に PDF を開いてください</sys:String>
-    <sys:String x:Key="Str_Ocr_ComingSoon">{0} - 近日対応</sys:String>
     <sys:String x:Key="Str_Ctx_SelectTool">選択ツール</sys:String>
     <sys:String x:Key="Str_Ctx_TextTool">テキストツール</sys:String>
     <sys:String x:Key="Str_Ctx_HighlightTool">ハイライトツール</sys:String>

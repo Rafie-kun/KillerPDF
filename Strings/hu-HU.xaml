@@ -36,7 +36,7 @@
     <sys:String x:Key="Str_TT_ImageTool">Kép eszköz - kattintson kép beszúrásához az oldalra (I)</sys:String>
     <sys:String x:Key="Str_TT_CropTool">Vágóeszköz - húzással állítsa be a vágási területet, majd alkalmazza az oldal(ak)ra (C)</sys:String>
     <sys:String x:Key="Str_TT_MeasureTool">Távolság mérése és oldalméret megtekintése</sys:String>
-    <sys:String x:Key="Str_TT_RotateTool">Oldal átalakítása - forgatás / kiegyenesítés (méretezés hamarosan) (R)</sys:String>
+    <sys:String x:Key="Str_TT_RotateTool">Oldal átalakítása: forgatás, méretezés, tükrözés, kiegyenesítés vagy perspektíva javítása (R)</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">Összes jegyzet törlése</sys:String>
     <sys:String x:Key="Str_TT_Search">Keresés (Ctrl+F)</sys:String>
     <sys:String x:Key="Str_TT_UndoLast">Utolsó visszavonása (Ctrl+Z)</sys:String>
@@ -327,7 +327,6 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Ocr_Language">Nyelv</sys:String>
     <sys:String x:Key="Str_Ocr_FormAware">Űrlapérzékeny OCR</sys:String>
     <sys:String x:Key="Str_Ocr_NoDoc">Először nyisson meg egy PDF-et</sys:String>
-    <sys:String x:Key="Str_Ocr_ComingSoon">{0} - hamarosan</sys:String>
     <sys:String x:Key="Str_Ctx_SelectTool">Kijelölő eszköz</sys:String>
     <sys:String x:Key="Str_Ctx_TextTool">Szöveg eszköz</sys:String>
     <sys:String x:Key="Str_Ctx_HighlightTool">Kiemelő eszköz</sys:String>

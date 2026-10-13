@@ -476,13 +476,12 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Ocr_Language">Dil</sys:String>
     <sys:String x:Key="Str_Ocr_FormAware">Form duyarlı OCR</sys:String>
     <sys:String x:Key="Str_Ocr_NoDoc">Önce bir PDF açın</sys:String>
-    <sys:String x:Key="Str_Ocr_ComingSoon">{0} - yakında</sys:String>
     <sys:String x:Key="Str_TT_Ocr">Sayfada OCR uygula (metni kopyala) (Ctrl+Shift+O)</sys:String>
     <sys:String x:Key="Str_Lbl_Ocr">OCR</sys:String>
     <sys:String x:Key="Str_Ctx_OcrPage">Sayfada OCR Uygula (Metni Kopyala)</sys:String>
     <sys:String x:Key="Str_Lbl_Rotate">Dönüştür</sys:String>
     <sys:String x:Key="Str_Lbl_Stamp">Damga</sys:String>
-    <sys:String x:Key="Str_TT_RotateTool">Sayfayı dönüştür - döndür / düzelt (ölçekleme yakında) (R)</sys:String>
+    <sys:String x:Key="Str_TT_RotateTool">Sayfayı dönüştür: döndür, ölçekle, çevir, düzelt veya perspektifi düzelt (R)</sys:String>
     <sys:String x:Key="Str_Tf_Suffix">Dönüştür</sys:String>
     <sys:String x:Key="Str_Tf_Rotate">DÖNDÜR</sys:String>
     <sys:String x:Key="Str_Tf_Scale">ÖLÇEKLE</sys:String>

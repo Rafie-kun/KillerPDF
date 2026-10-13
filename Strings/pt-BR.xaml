@@ -36,7 +36,7 @@
     <sys:String x:Key="Str_TT_ImageTool">Ferramenta de imagem - clique para inserir uma imagem na página (I)</sys:String>
     <sys:String x:Key="Str_TT_CropTool">Ferramenta de corte - arraste para definir a área de corte e aplique à(s) página(s) (C)</sys:String>
     <sys:String x:Key="Str_TT_MeasureTool">Medir distância e inspecionar o tamanho da página</sys:String>
-    <sys:String x:Key="Str_TT_RotateTool">Transformar página - girar / corrigir inclinação (dimensionar em breve) (R)</sys:String>
+    <sys:String x:Key="Str_TT_RotateTool">Transformar página: girar, dimensionar, espelhar, corrigir inclinação ou perspectiva (R)</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">Limpar todas as anotações</sys:String>
     <sys:String x:Key="Str_TT_Search">Pesquisar (Ctrl+F)</sys:String>
     <sys:String x:Key="Str_TT_UndoLast">Desfazer último (Ctrl+Z)</sys:String>
@@ -327,7 +327,6 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Ocr_Language">Idioma</sys:String>
     <sys:String x:Key="Str_Ocr_FormAware">OCR com reconhecimento de formulário</sys:String>
     <sys:String x:Key="Str_Ocr_NoDoc">Abra um PDF primeiro</sys:String>
-    <sys:String x:Key="Str_Ocr_ComingSoon">{0} - em breve</sys:String>
     <sys:String x:Key="Str_Ctx_SelectTool">Ferramenta de seleção</sys:String>
     <sys:String x:Key="Str_Ctx_TextTool">Ferramenta de texto</sys:String>
     <sys:String x:Key="Str_Ctx_HighlightTool">Ferramenta de realce</sys:String>

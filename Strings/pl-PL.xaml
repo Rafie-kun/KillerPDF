@@ -36,7 +36,7 @@
     <sys:String x:Key="Str_TT_ImageTool">Narzędzie Obrazu - kliknij, aby wstawić obraz na stronę (I)</sys:String>
     <sys:String x:Key="Str_TT_CropTool">Narzędzie Przycinania - przeciągnij, aby ustawić obszar przycięcia, a następnie zastosuj do strony (C)</sys:String>
     <sys:String x:Key="Str_TT_MeasureTool">Zmierz odległość i wyświetl rozmiar strony</sys:String>
-    <sys:String x:Key="Str_TT_RotateTool">Przekształć stronę - obrót / korekcja zniekształceń (skala już wkrótce) (R)</sys:String>
+    <sys:String x:Key="Str_TT_RotateTool">Przekształć stronę: obrót, skalowanie, odbicie, korekcja zniekształceń lub perspektywy (R)</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">Wyczyść wszystkie adnotacje</sys:String>
     <sys:String x:Key="Str_TT_Search">Szukaj (Ctrl+F)</sys:String>
     <sys:String x:Key="Str_TT_UndoLast">Cofnij ostatnie (Ctrl+Z)</sys:String>
@@ -318,7 +318,6 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Ocr_Language">Język</sys:String>
     <sys:String x:Key="Str_Ocr_FormAware">OCR uwzględniające formularze</sys:String>
     <sys:String x:Key="Str_Ocr_NoDoc">Najpierw otwórz PDF</sys:String>
-    <sys:String x:Key="Str_Ocr_ComingSoon">{0} - już wkrótce</sys:String>
     <sys:String x:Key="Str_Ctx_SelectTool">Wybierz Narzędzie</sys:String>
     <sys:String x:Key="Str_Ctx_TextTool">Narzędzie Tekst</sys:String>
     <sys:String x:Key="Str_Ctx_HighlightTool">Narzędzie Podświetl</sys:String>

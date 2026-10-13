@@ -18,7 +18,7 @@ KillerPDF 1.8 introduces The KillerPDF.Engine, an independent and reusable .NET 
 - Organize pages: merge, split, insert, rotate, crop, extract, delete, drag-and-drop reordering; drop a folder or `.zip` onto the window to merge its contents
 - Export one page or a multi-page selection as PNG or JPEG directly from the Pages panel
 - Transform: rotate, scale, flip, deskew by drawing a level line, perspective correction for photographed pages, and a LEVELS section (black point, white point, midtones) for pale scans
-- Forms: fill text, checkbox, radio, and comb fields as live controls and save back; digital signatures with a cloud certificate (Certum SimplySign), plus drawn or imported signatures and initials
+- Forms: fill text, checkbox, radio, and comb fields as live controls and save back; digital signatures with a certificate from Windows or a .pfx file, plus drawn or imported signatures and initials
 - Print with a real in-app preview, paper size and source selection, scale / position / margins / pages-per-sheet options at 300 DPI; Save Flattened rasterizes to a fully uneditable PDF
 - Full-text search with highlighting, and column-aware text selection that copies multi-column pages in reading order
 - Night-mode inversion works independently in each split pane. Thirteen themes, live accent colors, and toolbar styles provide 41 looks, while the resizable sidebar can dock on either side.

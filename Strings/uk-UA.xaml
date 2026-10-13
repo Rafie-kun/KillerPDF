@@ -36,7 +36,7 @@
     <sys:String x:Key="Str_TT_ImageTool">Зображення - натисніть, щоб вставити зображення на сторінку (I)</sys:String>
     <sys:String x:Key="Str_TT_CropTool">Обрізання - перетягніть, щоб задати область, потім застосуйте до сторінок (C)</sys:String>
     <sys:String x:Key="Str_TT_MeasureTool">Виміряти відстань і переглянути розмір сторінки</sys:String>
-    <sys:String x:Key="Str_TT_RotateTool">Перетворити сторінку - повернути / вирівняти нахил (масштабування незабаром) (R)</sys:String>
+    <sys:String x:Key="Str_TT_RotateTool">Перетворити сторінку: повернути, змінити масштаб, віддзеркалити, вирівняти нахил або виправити перспективу (R)</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">Очистити всі анотації</sys:String>
     <sys:String x:Key="Str_TT_Search">Пошук (Ctrl+F)</sys:String>
     <sys:String x:Key="Str_TT_UndoLast">Скасувати останню дію (Ctrl+Z)</sys:String>
@@ -327,7 +327,6 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Ocr_Language">Мова</sys:String>
     <sys:String x:Key="Str_Ocr_FormAware">OCR з урахуванням форм</sys:String>
     <sys:String x:Key="Str_Ocr_NoDoc">Спершу відкрийте PDF</sys:String>
-    <sys:String x:Key="Str_Ocr_ComingSoon">{0} - незабаром</sys:String>
     <sys:String x:Key="Str_Ctx_SelectTool">Інструмент вибору</sys:String>
     <sys:String x:Key="Str_Ctx_TextTool">Інструмент тексту</sys:String>
     <sys:String x:Key="Str_Ctx_HighlightTool">Інструмент виділення</sys:String>

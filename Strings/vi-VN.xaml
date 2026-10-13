@@ -36,7 +36,7 @@
     <sys:String x:Key="Str_TT_ImageTool">Công cụ hình ảnh - nhấp để chèn hình ảnh vào trang (I)</sys:String>
     <sys:String x:Key="Str_TT_CropTool">Công cụ cắt - kéo để đặt vùng cắt, sau đó áp dụng cho (các) trang (C)</sys:String>
     <sys:String x:Key="Str_TT_MeasureTool">Đo khoảng cách và kiểm tra kích thước trang</sys:String>
-    <sys:String x:Key="Str_TT_RotateTool">Chuyển đổi trang - xoay / làm thẳng (tính năng thu phóng sắp ra mắt) (R)</sys:String>
+    <sys:String x:Key="Str_TT_RotateTool">Chuyển đổi trang: xoay, thu phóng, lật, làm thẳng hoặc chỉnh phối cảnh (R)</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">Xóa tất cả chú thích</sys:String>
     <sys:String x:Key="Str_TT_Search">Tìm kiếm (Ctrl+F)</sys:String>
     <sys:String x:Key="Str_TT_UndoLast">Hoàn tác thao tác cuối (Ctrl+Z)</sys:String>
@@ -327,7 +327,6 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Ocr_Language">Ngôn ngữ</sys:String>
     <sys:String x:Key="Str_Ocr_FormAware">OCR nhận biết biểu mẫu</sys:String>
     <sys:String x:Key="Str_Ocr_NoDoc">Hãy mở tệp PDF trước</sys:String>
-    <sys:String x:Key="Str_Ocr_ComingSoon">{0} - sắp ra mắt</sys:String>
     <sys:String x:Key="Str_Ctx_SelectTool">Công cụ chọn</sys:String>
     <sys:String x:Key="Str_Ctx_TextTool">Công cụ văn bản</sys:String>
     <sys:String x:Key="Str_Ctx_HighlightTool">Công cụ đánh dấu</sys:String>

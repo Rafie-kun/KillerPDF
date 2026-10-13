@@ -478,13 +478,12 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_Ocr_Language">語言</sys:String>
     <sys:String x:Key="Str_Ocr_FormAware">表單感知 OCR</sys:String>
     <sys:String x:Key="Str_Ocr_NoDoc">請先開啟一個 PDF</sys:String>
-    <sys:String x:Key="Str_Ocr_ComingSoon">{0} - 即將推出</sys:String>
     <sys:String x:Key="Str_TT_Ocr">OCR 頁面（複製文字） (Ctrl+Shift+O)</sys:String>
     <sys:String x:Key="Str_Lbl_Ocr">OCR</sys:String>
     <sys:String x:Key="Str_Ctx_OcrPage">OCR 頁面（複製文字）</sys:String>
     <sys:String x:Key="Str_Lbl_Rotate">變形</sys:String>
     <sys:String x:Key="Str_Lbl_Stamp">蓋章</sys:String>
-    <sys:String x:Key="Str_TT_RotateTool">變形頁面 - 旋轉／校正傾斜（縮放即將推出）(R)</sys:String>
+    <sys:String x:Key="Str_TT_RotateTool">變形頁面：旋轉、縮放、翻轉、校正傾斜或校正透視 (R)</sys:String>
     <sys:String x:Key="Str_Tf_Suffix">變形</sys:String>
     <sys:String x:Key="Str_Tf_Rotate">旋轉</sys:String>
     <sys:String x:Key="Str_Tf_Scale">縮放</sys:String>

@@ -36,7 +36,7 @@
     <sys:String x:Key="Str_TT_ImageTool">Strumento immagine: clic per inserire un'immagine nella pagina (I)</sys:String>
     <sys:String x:Key="Str_TT_CropTool">Strumento ritaglio: trascina per impostare l'area di ritaglio, quindi applica alle pagine (C)</sys:String>
     <sys:String x:Key="Str_TT_MeasureTool">Misura distanza e visualizza dimensioni pagina</sys:String>
-    <sys:String x:Key="Str_TT_RotateTool">Trasforma pagina: ruota/raddrizza (scala disponibile a breve) (R)</sys:String>
+    <sys:String x:Key="Str_TT_RotateTool">Trasforma pagina: ruota, ridimensiona, capovolgi, raddrizza o correggi la prospettiva (R)</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">Cancella tutte le annotazioni</sys:String>
     <sys:String x:Key="Str_TT_Search">Cerca (Ctrl+F)</sys:String>
     <sys:String x:Key="Str_TT_UndoLast">Annulla ultima operazione (Ctrl+Z)</sys:String>
@@ -327,7 +327,6 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_Ocr_Language">Lingua</sys:String>
     <sys:String x:Key="Str_Ocr_FormAware">OCR sensibile ai moduli</sys:String>
     <sys:String x:Key="Str_Ocr_NoDoc">Prima apri un PDF</sys:String>
-    <sys:String x:Key="Str_Ocr_ComingSoon">{0} - prossimamente</sys:String>
     <sys:String x:Key="Str_Ctx_SelectTool">Strumento selezione</sys:String>
     <sys:String x:Key="Str_Ctx_TextTool">Strumento testo</sys:String>
     <sys:String x:Key="Str_Ctx_HighlightTool">Strumento evidenziazione</sys:String>
