@@ -32,12 +32,12 @@ Compared directly with 1.8.71 in the alternating session, the 1.8.80 medians wer
 0.90% longer for regression, 0.35% longer for standards, and 0.59% shorter for
 stress. All changes remain below the 10% investigation threshold.
 
-KillerPDF 1.8.90 was not measured against 1.8.80 in one session. Its medians are 19.8%
-longer for regression, 9.1% longer for standards, and 15.2% longer for stress than the
-recorded 1.8.80 medians. The sessions differ and host CPU load was not idle (42% to 80%
-in the samples taken), so the difference is not attributed to the application. It stays
-open until 1.8.80 and 1.8.90 are measured together in one alternating session. See the
-[1.8.90 report](benchmarks/1.8.90/CORPUS.md).
+The 1.8.90 corpus medians above were measured on a busy host and are 19.8% (regression),
+9.1% (standards), and 15.2% (stress) above the recorded 1.8.80 medians. A same-session
+check on a quiet host, with 1.8.80 and 1.8.90 built the same way and alternating, measured
+1.8.90 at 222.307 seconds against 228.228 for regression (2.59% shorter) and 5.876 against
+5.999 for standards (2.05% shorter), with equal CPU time and identical per-file logs.
+1.8.90 has no timing regression. See the [1.8.90 report](benchmarks/1.8.90/CORPUS.md).
 
 ## KillerPDF 1.8.1 compared with 1.8.0
 
