@@ -461,9 +461,6 @@ namespace KillerPDF
             menu.IsOpen = true;
         }
 
-        // Placeholder for OCR commands that are designed but not yet built; keeps the menu complete.
-        private void OcrComingSoon(string name) => SetStatus(string.Format(Loc("Str_Ocr_ComingSoon"), name));
-
         // Updates the busy overlay's message line (its TextBlock) for per-page progress. UI thread only.
         private static void SetBusyMessage(Border overlay, string msg)
         {

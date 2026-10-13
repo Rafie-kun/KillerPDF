@@ -35,7 +35,7 @@
     <sys:String x:Key="Str_TT_SignatureTool">Қолтаңба - қолтаңба жасау және қою (G)</sys:String>
     <sys:String x:Key="Str_TT_ImageTool">Сурет құралы - бетке сурет кірістіру үшін басыңыз (I)</sys:String>
     <sys:String x:Key="Str_TT_CropTool">Қию құралы - қию аумағын белгілеу үшін сүйреңіз, содан кейін бет(тер)ге қолданыңыз (C)</sys:String>
-    <sys:String x:Key="Str_TT_RotateTool">Бетті түрлендіру - бұру / қисықтықты түзету (масштаб жақында) (R)</sys:String>
+    <sys:String x:Key="Str_TT_RotateTool">Бетті түрлендіру: бұру, масштабтау, айналдыру, қисықтықты түзету немесе перспективаны түзету (R)</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">Барлық ескертпелерді тазалау</sys:String>
     <sys:String x:Key="Str_TT_Search">Іздеу (Ctrl+F)</sys:String>
     <sys:String x:Key="Str_TT_UndoLast">Соңғы әрекетті кері қайтару (Ctrl+Z)</sys:String>
@@ -331,7 +331,6 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Ocr_ExtractText">Барлық мәтінді шығару...</sys:String>
     <sys:String x:Key="Str_Ocr_Language">Тіл</sys:String>
     <sys:String x:Key="Str_Ocr_NoDoc">Алдымен PDF ашыңыз</sys:String>
-    <sys:String x:Key="Str_Ocr_ComingSoon">{0} - жақында</sys:String>
     <sys:String x:Key="Str_Ctx_SelectTool">Таңдау құралы</sys:String>
     <sys:String x:Key="Str_Ctx_TextTool">Мәтін құралы</sys:String>
     <sys:String x:Key="Str_Ctx_HighlightTool">Бояп белгілеу құралы</sys:String>

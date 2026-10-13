@@ -60,7 +60,7 @@ La page peut être remplacée par une image d'elle-même avec les zones marquée
     <sys:String x:Key="Str_Redact_SkippedPages">Page(s) ignorée(s) : {0}</sys:String>
     <sys:String x:Key="Str_Redact_Failed">Échec du caviardage : {0}</sys:String>
     <sys:String x:Key="Str_Redact_VerifyFailed">le résultat montrait encore du contenu marqué, rien n'a donc été modifié</sys:String>
-    <sys:String x:Key="Str_TT_RotateTool">Transformer la page - pivoter / redresser (mise à l'échelle bientôt disponible) (R)</sys:String>
+    <sys:String x:Key="Str_TT_RotateTool">Transformer la page : pivoter, mettre à l'échelle, retourner, redresser ou corriger la perspective (R)</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">Supprimer toutes les annotations</sys:String>
     <sys:String x:Key="Str_TT_Search">Rechercher (Ctrl+F)</sys:String>
     <sys:String x:Key="Str_TT_UndoLast">Annuler la dernière action (Ctrl+Z)</sys:String>
@@ -358,7 +358,6 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Ocr_Language">Langue</sys:String>
     <sys:String x:Key="Str_Ocr_FormAware">OCR adaptée aux formulaires</sys:String>
     <sys:String x:Key="Str_Ocr_NoDoc">Ouvrez d'abord un PDF</sys:String>
-    <sys:String x:Key="Str_Ocr_ComingSoon">{0} - bientôt disponible</sys:String>
     <sys:String x:Key="Str_Ctx_SelectTool">Outil Sélection</sys:String>
     <sys:String x:Key="Str_Ctx_TextTool">Outil Texte</sys:String>
     <sys:String x:Key="Str_Ctx_HighlightTool">Outil Surlignage</sys:String>

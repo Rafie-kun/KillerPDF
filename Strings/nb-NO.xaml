@@ -358,7 +358,6 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Ocr_Language">Språk</sys:String>
     <sys:String x:Key="Str_Ocr_FormAware">Skjemabevisst OCR</sys:String>
     <sys:String x:Key="Str_Ocr_NoDoc">Åpne en PDF først</sys:String>
-    <sys:String x:Key="Str_Ocr_ComingSoon">{0} - kommer snart</sys:String>
     <sys:String x:Key="Str_Ctx_SelectTool">Markeringsverktøy</sys:String>
     <sys:String x:Key="Str_Ctx_TextTool">Tekstverktøy</sys:String>
     <sys:String x:Key="Str_Ctx_HighlightTool">Uthevingsverktøy</sys:String>

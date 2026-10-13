@@ -60,7 +60,7 @@
     <sys:String x:Key="Str_Redact_SkippedPages">Пропущенные страницы: {0}</sys:String>
     <sys:String x:Key="Str_Redact_Failed">Не удалось скрыть: {0}</sys:String>
     <sys:String x:Key="Str_Redact_VerifyFailed">в результате всё ещё был виден отмеченный контент, поэтому ничего не изменено</sys:String>
-    <sys:String x:Key="Str_TT_RotateTool">Трансформация страницы - поворот / выравнивание по ширине (скоро появится масштаб) (R)</sys:String>
+    <sys:String x:Key="Str_TT_RotateTool">Трансформация страницы: поворот, масштабирование, отражение, выравнивание или коррекция перспективы (R)</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">Очистите все аннотации</sys:String>
     <sys:String x:Key="Str_TT_Search">Поиск (Ctrl+F)</sys:String>
     <sys:String x:Key="Str_TT_UndoLast">Отменить последнее изменение (Ctrl+Z)</sys:String>
@@ -358,7 +358,6 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Ocr_Language">Язык</sys:String>
     <sys:String x:Key="Str_Ocr_FormAware">Распознавание с учетом формы</sys:String>
     <sys:String x:Key="Str_Ocr_NoDoc">Сначала откройте PDF-файл</sys:String>
-    <sys:String x:Key="Str_Ocr_ComingSoon">{0} - скоро будет</sys:String>
     <sys:String x:Key="Str_Ctx_SelectTool">Инструмент выделения</sys:String>
     <sys:String x:Key="Str_Ctx_TextTool">Текстовый инструмент</sys:String>
     <sys:String x:Key="Str_Ctx_HighlightTool">Инструмент подсветки</sys:String>

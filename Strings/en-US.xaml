@@ -17,24 +17,24 @@
     <sys:String x:Key="Str_Drop_Sub">or click to browse</sys:String>
     <sys:Double x:Key="ZoomBoxWidth">96</sys:Double>
     <sys:String x:Key="Str_TT_SaveAs">Save As (Ctrl+Shift+S)</sys:String>
-    <sys:String x:Key="Str_TT_SaveFlattened">Save Flattened PDF (rasterize all pages - fully uneditable)</sys:String>
+    <sys:String x:Key="Str_TT_SaveFlattened">Save Flattened PDF (rasterize all pages so they are fully uneditable)</sys:String>
     <sys:String x:Key="Str_TT_Print">Print (Ctrl+P)</sys:String>
     <sys:String x:Key="Str_TT_MergePDFs">Merge PDFs (combine additional PDFs into this one)</sys:String>
     <sys:String x:Key="Str_TT_ExtractPages">Extract Pages (save selected pages to a new PDF)</sys:String>
     <sys:String x:Key="Str_TT_DeletePages">Delete Selected Pages</sys:String>
     <sys:String x:Key="Str_TT_MovePageUp">Move Page Up (reorder)</sys:String>
     <sys:String x:Key="Str_TT_MovePageDown">Move Page Down (reorder)</sys:String>
-    <sys:String x:Key="Str_TT_SelectTool">Select Tool - click annotations, drag to select text, double-click to edit (V)</sys:String>
-    <sys:String x:Key="Str_TT_TextTool">Text Tool - click to add text (T)</sys:String>
-    <sys:String x:Key="Str_TT_FormFieldTool">Fillable text field - create, select, move, resize, or delete fields; right-click to change fill color (F)</sys:String>
-    <sys:String x:Key="Str_TT_HighlightTool">Highlight Tool - drag to highlight (H)</sys:String>
-    <sys:String x:Key="Str_TT_StrikeTool">Strikethrough - drag across text</sys:String>
-    <sys:String x:Key="Str_TT_UnderlineTool">Underline - drag across text</sys:String>
-    <sys:String x:Key="Str_TT_DrawTool">Draw Tool - freehand ink (D)</sys:String>
-    <sys:String x:Key="Str_TT_ShapeTool">Shapes - rectangle, ellipse, or free-form polygon</sys:String>
-    <sys:String x:Key="Str_TT_SignatureTool">Signature - create and place signatures (G)</sys:String>
-    <sys:String x:Key="Str_TT_ImageTool">Image Tool - click to insert an image onto the page (I)</sys:String>
-    <sys:String x:Key="Str_TT_CropTool">Crop Tool - drag to set crop area, then apply to page(s) (C)</sys:String>
+    <sys:String x:Key="Str_TT_SelectTool">Select Tool: click annotations, drag to select text, double-click to edit (V)</sys:String>
+    <sys:String x:Key="Str_TT_TextTool">Text Tool: click to add text (T)</sys:String>
+    <sys:String x:Key="Str_TT_FormFieldTool">Fillable text field: create, select, move, resize, or delete fields; right-click to change fill color (F)</sys:String>
+    <sys:String x:Key="Str_TT_HighlightTool">Highlight Tool: drag to highlight (H)</sys:String>
+    <sys:String x:Key="Str_TT_StrikeTool">Strikethrough: drag across text</sys:String>
+    <sys:String x:Key="Str_TT_UnderlineTool">Underline: drag across text</sys:String>
+    <sys:String x:Key="Str_TT_DrawTool">Draw Tool: freehand ink (D)</sys:String>
+    <sys:String x:Key="Str_TT_ShapeTool">Shapes: rectangle, ellipse, or free-form polygon</sys:String>
+    <sys:String x:Key="Str_TT_SignatureTool">Signature: create and place signatures (G)</sys:String>
+    <sys:String x:Key="Str_TT_ImageTool">Image Tool: click to insert an image onto the page (I)</sys:String>
+    <sys:String x:Key="Str_TT_CropTool">Crop Tool: drag to set the crop area, then apply it to the page(s) (C)</sys:String>
     <sys:String x:Key="Str_TT_MeasureTool">Measure distance and inspect page size</sys:String>
     <sys:String x:Key="Str_TT_RedactTool">Redact: permanently remove text and images under marked areas</sys:String>
     <sys:String x:Key="Str_Lbl_Redact">Redact</sys:String>
@@ -60,7 +60,7 @@ The page can be replaced with an image of itself with the marked areas blacked o
     <sys:String x:Key="Str_Redact_SkippedPages">Skipped page(s): {0}</sys:String>
     <sys:String x:Key="Str_Redact_Failed">Redaction failed: {0}</sys:String>
     <sys:String x:Key="Str_Redact_VerifyFailed">the result still exposed marked content, so nothing was changed</sys:String>
-    <sys:String x:Key="Str_TT_RotateTool">Transform page - rotate, scale, flip, deskew, or correct perspective (R)</sys:String>
+    <sys:String x:Key="Str_TT_RotateTool">Transform page: rotate, scale, flip, deskew, or correct perspective (R)</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">Clear All Annotations</sys:String>
     <sys:String x:Key="Str_TT_Search">Search (Ctrl+F)</sys:String>
     <sys:String x:Key="Str_TT_UndoLast">Undo Last (Ctrl+Z)</sys:String>
@@ -102,7 +102,7 @@ The page can be replaced with an image of itself with the marked areas blacked o
     <sys:String x:Key="Str_Toolbar_TextUnder">Text under icons</sys:String>
     <sys:String x:Key="Str_Toolbar_TextOnly">Text only</sys:String>
     <sys:String x:Key="Str_Toolbar_Hide">Hide toolbar</sys:String>
-    <sys:String x:Key="Str_St_ToolbarHidden">Toolbar hidden - Alt+M shows it again</sys:String>
+    <sys:String x:Key="Str_St_ToolbarHidden">Toolbar hidden. Press Alt+M to show it again</sys:String>
     <sys:String x:Key="Str_St_ToolbarShown">Toolbar shown</sys:String>
     <sys:String x:Key="Str_Lang_English">English</sys:String>
     <sys:String x:Key="Str_Lang_Spanish">Español</sys:String>
@@ -165,15 +165,15 @@ The page can be replaced with an image of itself with the marked areas blacked o
     <sys:String x:Key="Str_InstallBtn">Install KillerPDF</sys:String>
 
     <!-- ── Status messages (format strings - use string.Format) ─────── -->
-    <sys:String x:Key="Str_Opened">Opened {0} - {1} page(s)</sys:String>
-    <sys:String x:Key="Str_OpenedReadOnly">Opened {0} (read-only - owner restrictions) - {1} page(s)</sys:String>
-    <sys:String x:Key="Str_OpenedReadOnlyXRef">Opened {0} (read-only - non-standard XRef table) - {1} page(s)</sys:String>
-    <sys:String x:Key="Str_OpenedRepaired">Opened {0} (repaired copy - save to keep changes) - {1} page(s)</sys:String>
-    <sys:String x:Key="Str_OpenedRasterRepair">Opened {0} (rasterized repair - save to keep changes) - {1} page(s)</sys:String>
+    <sys:String x:Key="Str_Opened">Opened {0} ({1} page(s))</sys:String>
+    <sys:String x:Key="Str_OpenedReadOnly">Opened {0} read-only because of owner restrictions ({1} page(s))</sys:String>
+    <sys:String x:Key="Str_OpenedReadOnlyXRef">Opened {0} read-only because of a non-standard XRef table ({1} page(s))</sys:String>
+    <sys:String x:Key="Str_OpenedRepaired">Opened a repaired copy of {0}; save to keep changes ({1} page(s))</sys:String>
+    <sys:String x:Key="Str_OpenedRasterRepair">Opened a rasterized repair of {0}; save to keep changes ({1} page(s))</sys:String>
     <sys:String x:Key="Str_PageOf">Page {0} of {1}</sys:String>
     <sys:String x:Key="Str_PageOfLinks">Page {0} of {1}  ({2} link(s))</sys:String>
-    <sys:String x:Key="Str_PageFormFields">Page {0} of {1} - this page contains fillable form fields</sys:String>
-    <sys:String x:Key="Str_PageRenderError">Page {0} - could not render</sys:String>
+    <sys:String x:Key="Str_PageFormFields">Page {0} of {1} contains fillable form fields</sys:String>
+    <sys:String x:Key="Str_PageRenderError">Page {0} could not be rendered</sys:String>
     <sys:String x:Key="Str_RenderError">Render error: {0}</sys:String>
     <sys:String x:Key="Str_Rotated">Rotated {0} page(s)</sys:String>
     <sys:String x:Key="Str_Cropped">Cropped {0} page(s)</sys:String>
@@ -181,7 +181,7 @@ The page can be replaced with an image of itself with the marked areas blacked o
     <sys:String x:Key="Str_RemovedCrop">Removed CropBox from {0} page(s)</sys:String>
     <sys:String x:Key="Str_RemoveCropFailed">Remove crop failed: {0}</sys:String>
     <sys:String x:Key="Str_Extracted">Extracted {0} page(s) to {1}</sys:String>
-    <sys:String x:Key="Str_Deleted">Deleted {0} page(s) - {1} remaining</sys:String>
+    <sys:String x:Key="Str_Deleted">Deleted {0} page(s), {1} remaining</sys:String>
     <sys:String x:Key="Str_Printed">Sent {0} page(s) to printer</sys:String>
     <sys:String x:Key="Str_LinkRemoved">Link removed.</sys:String>
     <sys:String x:Key="Str_LinkRemoveFailed">Remove link failed:</sys:String>
@@ -204,7 +204,7 @@ The page can be replaced with an image of itself with the marked areas blacked o
     <sys:String x:Key="Str_ExportDoc_LossWarning">This format cannot represent {0} item(s) from the selected pages. Continue with the export?</sys:String>
     <sys:String x:Key="Str_ExportDoc_Done">Exported document to {0}</sys:String>
     <sys:String x:Key="Str_Menu_RemovePassword">Remove Password</sys:String>
-    <sys:String x:Key="Str_St_SavedNoPassword">Saved without password protection - {0}</sys:String>
+    <sys:String x:Key="Str_St_SavedNoPassword">Saved {0} without password protection</sys:String>
     <sys:String x:Key="Str_ExportImg_Suffix">Export Pages as Images</sys:String>
     <sys:String x:Key="Str_ExportImg_Format">Format</sys:String>
     <sys:String x:Key="Str_ExportImg_Dpi">Resolution (DPI)</sys:String>
@@ -216,7 +216,7 @@ The page can be replaced with an image of itself with the marked areas blacked o
     <sys:String x:Key="Str_Print_EvenOnly">Even pages only</sys:String>
     <sys:String x:Key="Str_DocInvertSetting">Invert document colors</sys:String>
     <sys:String x:Key="Str_TT_DocInvert">Invert document colors (N)</sys:String>
-    <sys:String x:Key="Str_TT_SplitPane">Split pane - two documents side by side (F10)</sys:String>
+    <sys:String x:Key="Str_TT_SplitPane">Split pane: two documents side by side (F10)</sys:String>
     <sys:String x:Key="Str_TT_CloseTab">Close tab</sys:String>
     <sys:String x:Key="Str_TT_TabOverflow">All open tabs</sys:String>
     <sys:String x:Key="Str_InvertImagesToo">Invert images too</sys:String>
@@ -225,9 +225,9 @@ The page can be replaced with an image of itself with the marked areas blacked o
     <sys:String x:Key="Str_St_AppSize">App size {0}%</sys:String>
     <sys:String x:Key="Str_KS_AppSize">Zoom the whole app (accessibility)</sys:String>
     <sys:String x:Key="Str_KS_FileSize">Show current file size</sys:String>
-    <sys:String x:Key="Str_KS_SplitPane">Split pane - two documents side by side</sys:String>
+    <sys:String x:Key="Str_KS_SplitPane">Split pane: two documents side by side</sys:String>
     <sys:String x:Key="Str_LinkConfirmSetting">Confirm before opening links</sys:String>
-    <sys:String x:Key="Str_InvalidRange">Invalid range - use e.g. 1-3,5,7</sys:String>
+    <sys:String x:Key="Str_InvalidRange">Invalid range. Use something like 1-3,5,7</sys:String>
     <sys:String x:Key="Str_CropNoDoc">Crop: no document open</sys:String>
     <sys:String x:Key="Str_CropNoPage">Crop: no page selected</sys:String>
     <sys:String x:Key="Str_CropNoDims">Crop: page dimensions unavailable</sys:String>
@@ -240,7 +240,7 @@ Saving replaces the file and removes its signature. To keep the signed file, can
     <sys:String x:Key="Str_Dlg_SaveOtherPaneDirty" xml:space="preserve">The other pane also has "{0}" open, with unsaved changes of its own.
 
 Saving now overwrites the file and those changes will be lost. Save the other pane first if you want to keep them.</sys:String>
-    <sys:String x:Key="Str_St_SplitOn">Split pane on - F10 to close</sys:String>
+    <sys:String x:Key="Str_St_SplitOn">Split pane on. Press F10 to close it</sys:String>
     <sys:String x:Key="Str_St_SplitOff">Split pane off</sys:String>
     <sys:String x:Key="Str_Dlg_InstallTitle">Install KillerPDF</sys:String>
     <sys:String x:Key="Str_Dlg_InstallMsg" xml:space="preserve">Install KillerPDF on this computer?
@@ -259,13 +259,13 @@ KillerPDF will not create two installed copies.</sys:String>
     <sys:String x:Key="Str_Btn_DoUpdate">Update</sys:String>
     <sys:String x:Key="Str_Chk_Desktop">Add a desktop shortcut</sys:String>
     <sys:String x:Key="Str_Chk_AllUsers">Install for everyone on this computer (needs admin)</sys:String>
-    <sys:String x:Key="Str_Status_InstallFailed">Install did not complete - KillerPDF is still running portable.</sys:String>
+    <sys:String x:Key="Str_Status_InstallFailed">Install did not complete. KillerPDF is still running portable.</sys:String>
     <sys:String x:Key="Str_Dlg_SetDefaultPdfMsg" xml:space="preserve">Would you like to set KillerPDF as your default PDF viewer?
 
-Opens Windows Settings - Default Apps.</sys:String>
+This opens Default Apps in Windows Settings.</sys:String>
     <sys:String x:Key="Str_Dlg_UnsavedClose">You have unsaved changes. Close this file without saving?</sys:String>
     <sys:String x:Key="Str_Dlg_UnsavedExit">You have unsaved changes. Close KillerPDF without saving?</sys:String>
-    <sys:String x:Key="Str_Dlg_PageOutOfRange" xml:space="preserve">This document has {0} page(s) sized outside what Adobe Reader supports (3 to 14,400 points per side) - Adobe shows these as blank pages.
+    <sys:String x:Key="Str_Dlg_PageOutOfRange" xml:space="preserve">This document has {0} page(s) sized outside what Adobe Reader supports (3 to 14,400 points per side), and Adobe shows these as blank pages.
 
 Scale them to a supported size? The pages keep their look and proportions.</sys:String>
     <sys:String x:Key="Str_Dlg_FailedOpen" xml:space="preserve">Failed to open PDF:
@@ -295,8 +295,8 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <!-- ── Zoom dropdown ──────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Zoom_FitWidth">Fit Width</sys:String>
     <sys:String x:Key="Str_Zoom_FitPage">Fit Page</sys:String>
-    <sys:String x:Key="Str_FitWidth">Page {0} of {1} - Fit Width ({2}%)</sys:String>
-    <sys:String x:Key="Str_FitPage">Page {0} of {1} - Fit Page ({2}%)</sys:String>
+    <sys:String x:Key="Str_FitWidth">Page {0} of {1}, Fit Width ({2}%)</sys:String>
+    <sys:String x:Key="Str_FitPage">Page {0} of {1}, Fit Page ({2}%)</sys:String>
 
     <!-- ── KS overlay font size (sys:Double) ──────────────────────────── -->
     <sys:Double x:Key="Str_KS_FontSize">11</sys:Double>
@@ -358,7 +358,6 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Ocr_Language">Language</sys:String>
     <sys:String x:Key="Str_Ocr_FormAware">Form-aware OCR</sys:String>
     <sys:String x:Key="Str_Ocr_NoDoc">Open a PDF first</sys:String>
-    <sys:String x:Key="Str_Ocr_ComingSoon">{0} - coming soon</sys:String>
     <sys:String x:Key="Str_Ctx_SelectTool">Select Tool</sys:String>
     <sys:String x:Key="Str_Ctx_TextTool">Text Tool</sys:String>
     <sys:String x:Key="Str_Ctx_HighlightTool">Highlight Tool</sys:String>
@@ -410,7 +409,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Pos_TopLeft">Top Left</sys:String>
 
     <!-- ── Print dialog ───────────────────────────────────────────────── -->
-    <sys:String x:Key="Str_Print_Title">KillerPDF - Print</sys:String>
+    <sys:String x:Key="Str_Print_Title">KillerPDF: Print</sys:String>
     <sys:String x:Key="Str_Print_Printer">Printer</sys:String>
     <sys:String x:Key="Str_Print_Paper">Paper size</sys:String>
     <sys:String x:Key="Str_Print_PaperAuto">Match document</sys:String>
@@ -625,7 +624,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Filter_Images">Images</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">All files</sys:String>
     <sys:String x:Key="Str_Filter_Zip">ZIP archive</sys:String>
-    <sys:String x:Key="Str_Status_Imported">Imported {0} image(s) - not yet saved</sys:String>
+    <sys:String x:Key="Str_Status_Imported">Imported {0} image(s), not yet saved</sys:String>
     <sys:String x:Key="Str_Err_ImportFailed">Import failed:</sys:String>
     <sys:String x:Key="Str_Err_NoImages">No images could be read.</sys:String>
     <sys:String x:Key="Str_Drop_Prompt">You dropped {0} files. How would you like to open them?</sys:String>
@@ -634,13 +633,13 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Drop_NothingOpenable">No PDFs or images were found to open.</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">This will open {0} separate tabs. Continue?</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">This folder or archive has {0} files. KillerPDF will open only the first {1}. Continue?</sys:String>
-    <sys:String x:Key="Str_Status_Merged">Merged {0} files - not yet saved</sys:String>
+    <sys:String x:Key="Str_Status_Merged">Merged {0} files, not yet saved</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Merging files...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">Merge canceled</sys:String>
     <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Close all documents? Unsaved changes will be lost.</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">Open a PDF first.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">Save changes before compressing to ZIP?</sys:String>
-    <sys:String x:Key="Str_Status_Zipped">Zipped to {0} - {1} (was {2})</sys:String>
+    <sys:String x:Key="Str_Status_Zipped">Zipped to {0}: {1} (was {2})</sys:String>
     <sys:String x:Key="Str_Err_ZipFailed">Compress to ZIP failed:</sys:String>
     <sys:String x:Key="Str_Sig_Title">Signatures</sys:String>
     <sys:String x:Key="Str_Sig_None">No saved signatures</sys:String>
@@ -659,7 +658,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
 
     <!-- ── Line tool, layer / group menu (added v1.5.x) ───────────────── -->
     <sys:String x:Key="Str_Lbl_Line">Line</sys:String>
-    <sys:String x:Key="Str_TT_LineTool">Line - drag to draw a straight line (L)</sys:String>
+    <sys:String x:Key="Str_TT_LineTool">Line: drag to draw a straight line (L)</sys:String>
     <sys:String x:Key="Str_Ctx_Edit">Edit</sys:String>
     <sys:String x:Key="Str_Ctx_Raise">Raise</sys:String>
     <sys:String x:Key="Str_Ctx_Lower">Lower</sys:String>
@@ -816,7 +815,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Tf_DontWarn">Don't warn me again</sys:String>
     <sys:String x:Key="Str_Tf_Done">Transformed page {0}</sys:String>
     <sys:String x:Key="Str_Tf_DoneBatch">Transformed {0} pages</sys:String>
-    <sys:String x:Key="Str_Tf_NoRender">Could not render the page - try again in a moment.</sys:String>
+    <sys:String x:Key="Str_Tf_NoRender">Could not render the page. Try again in a moment.</sys:String>
     <sys:String x:Key="Str_Tf_Failed">Transform failed: {0}</sys:String>
 
     <!-- Crop bar -->
@@ -856,7 +855,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_St_NoAnnotationsToClear">No annotations to clear</sys:String>
     <sys:String x:Key="Str_St_RepairCanceled">Repair canceled</sys:String>
     <sys:String x:Key="Str_St_Canceled">Canceled</sys:String>
-    <sys:String x:Key="Str_St_DocInfoUpdated">Document info updated - save the file to keep the changes</sys:String>
+    <sys:String x:Key="Str_St_DocInfoUpdated">Document info updated. Save the file to keep the changes</sys:String>
     <sys:String x:Key="Str_St_FlattenCanceled">Flatten canceled (no file written)</sys:String>
     <sys:String x:Key="Str_St_FlattenPrintFailed">Could not flatten annotations for printing; printing without them.</sys:String>
     <sys:String x:Key="Str_St_HqDownloadCanceled">High quality download canceled</sys:String>
@@ -869,23 +868,23 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_St_ScanTextCanceled">Scan conversion canceled (no file written)</sys:String>
     <sys:String x:Key="Str_St_TextExtractCanceled">Text extraction canceled (no file written)</sys:String>
     <sys:String x:Key="Str_St_NoTextOnPage">No text found on this page</sys:String>
-    <sys:String x:Key="Str_St_NoTextSelected">No text selected - drag to select text</sys:String>
+    <sys:String x:Key="Str_St_NoTextSelected">No text selected. Drag to select text</sys:String>
     <sys:String x:Key="Str_St_NoTextInSelection">No text found in selection</sys:String>
-    <sys:String x:Key="Str_St_NoTextUseShapes">No text here - Shapes is on 4</sys:String>
-    <sys:String x:Key="Str_St_SignaturePlaced">Signature placed - drag to reposition, use the corner handle to resize</sys:String>
+    <sys:String x:Key="Str_St_NoTextUseShapes">No text here. Shapes is on 4</sys:String>
+    <sys:String x:Key="Str_St_SignaturePlaced">Signature placed. Drag to reposition, or use the corner handle to resize</sys:String>
     <sys:String x:Key="Str_St_FieldCleared">Field cleared</sys:String>
     <sys:String x:Key="Str_St_FieldSigned">Field signed</sys:String>
-    <sys:String x:Key="Str_St_SignatureSaved">Signature saved - click on the page to place it</sys:String>
-    <sys:String x:Key="Str_St_ImageLoaded">Image loaded - click on the page to place it</sys:String>
-    <sys:String x:Key="Str_St_EditingText">Editing text - change size/color above, Enter to save</sys:String>
-    <sys:String x:Key="Str_St_AlreadyEditHere">Already an edit here - click its text to re-edit, or drag the cover</sys:String>
+    <sys:String x:Key="Str_St_SignatureSaved">Signature saved. Click on the page to place it</sys:String>
+    <sys:String x:Key="Str_St_ImageLoaded">Image loaded. Click on the page to place it</sys:String>
+    <sys:String x:Key="Str_St_EditingText">Editing text. Change size/color above, Enter to save</sys:String>
+    <sys:String x:Key="Str_St_AlreadyEditHere">There is already an edit here. Click its text to re-edit, or drag the cover</sys:String>
     <sys:String x:Key="Str_St_NoTextLine">No text line found at this position</sys:String>
-    <sys:String x:Key="Str_St_LineAlreadyEdited">This line is already edited - click its text to change it</sys:String>
-    <sys:String x:Key="Str_St_ImagePlaced">Image placed - drag to reposition, use the corner handle to resize</sys:String>
+    <sys:String x:Key="Str_St_LineAlreadyEdited">This line is already edited. Click its text to change it</sys:String>
+    <sys:String x:Key="Str_St_ImagePlaced">Image placed. Drag to reposition, or use the corner handle to resize</sys:String>
     <sys:String x:Key="Str_St_ClipImageUnreadable">Clipboard image could not be read</sys:String>
-    <sys:String x:Key="Str_St_PastedImage">Pasted image - drag to reposition, use the corner handle to resize</sys:String>
+    <sys:String x:Key="Str_St_PastedImage">Pasted image. Drag to reposition, or use the corner handle to resize</sys:String>
     <sys:String x:Key="Str_St_ClipNoText">Clipboard has no text to paste</sys:String>
-    <sys:String x:Key="Str_St_PastedText">Pasted text - drag to reposition, Delete to remove</sys:String>
+    <sys:String x:Key="Str_St_PastedText">Pasted text. Drag to reposition, Delete to remove</sys:String>
     <sys:String x:Key="Str_St_ClipEmpty">Clipboard has nothing to paste</sys:String>
 
     <!-- Dialog / message-box strings (extracted from code) -->
@@ -923,7 +922,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
 
     <sys:String x:Key="Str_KS_ViewList">LIST</sys:String>
     <sys:String x:Key="Str_KS_ViewKeyboard">KEYBOARD</sys:String>
-    <sys:String x:Key="Str_KS_HoldHint">Hold Ctrl, Shift or Alt to preview that layer - hover a lit key for its action</sys:String>
+    <sys:String x:Key="Str_KS_HoldHint">Hold Ctrl, Shift or Alt to preview that layer, and hover a lit key for its action</sys:String>
     <sys:String x:Key="Str_Zoom_ActualSize">Actual size</sys:String>
     <sys:String x:Key="Str_KS_PrevTab">Previous tab</sys:String>
 
@@ -1044,7 +1043,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Sign_BadCert" xml:space="preserve">Could not open the certificate.&#10;&#10;The password may be incorrect, or the file is not a valid .pfx / .p12 certificate.</sys:String>
     <sys:String x:Key="Str_Sign_CertLoadFailed">Could not load the certificate:</sys:String>
     <sys:String x:Key="Str_Sign_Failed">Signing failed:</sys:String>
-    <sys:String x:Key="Str_St_ShapeHint">Click to add points - click the first point or double-click to close, Esc cancels, Backspace removes the last point</sys:String>
+    <sys:String x:Key="Str_St_ShapeHint">Click to add points. Click the first point or double-click to close, Esc cancels, Backspace removes the last point</sys:String>
     <sys:String x:Key="Str_St_ShapeCanceled">Shape canceled</sys:String>
 
     <!-- Error-dialog prefixes (code appends the exception detail after a newline) -->
@@ -1098,19 +1097,19 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
 
     <!-- Status-line messages ({0}/{1}/{2} filled by string.Format) -->
     <sys:String x:Key="Str_Print_Preparing">Preparing page {0} of {1}…</sys:String>
-    <sys:String x:Key="Str_St_AnnotSelected">{0} selected - {1}</sys:String>
+    <sys:String x:Key="Str_St_AnnotSelected">{0} selected: {1}</sys:String>
     <sys:String x:Key="Str_St_AnnotHowText">drag a side corner to set width, double-click to edit, Delete to remove</sys:String>
     <sys:String x:Key="Str_St_AnnotHowGeneric">drag any corner to resize, Delete to remove</sys:String>
-    <sys:String x:Key="Str_St_AnnotSelectedSimple">Selected {0} annotation - press Delete to remove</sys:String>
+    <sys:String x:Key="Str_St_AnnotSelectedSimple">Selected {0} annotation. Press Delete to remove it</sys:String>
     <sys:String x:Key="Str_St_SelectedOne">Selected 1 annotation</sys:String>
     <sys:String x:Key="Str_St_SelectedMany">Selected {0} annotations</sys:String>
-    <sys:String x:Key="Str_St_Grouped">Grouped {0} annotations - they now move together</sys:String>
+    <sys:String x:Key="Str_St_Grouped">Grouped {0} annotations. They now move together</sys:String>
     <sys:String x:Key="Str_St_ClearedAll">Cleared all annotations ({0})</sys:String>
     <sys:String x:Key="Str_St_CopiedWords">Copied {0} word(s) to clipboard</sys:String>
     <sys:String x:Key="Str_St_HighlightedLines">Highlighted {0} line(s)</sys:String>
     <sys:String x:Key="Str_St_StruckLines">Struck through {0} line(s)</sys:String>
     <sys:String x:Key="Str_St_UnderlinedLines">Underlined {0} line(s)</sys:String>
-    <sys:String x:Key="Str_St_SelectAllCopied">Selected all text - copied to clipboard</sys:String>
+    <sys:String x:Key="Str_St_SelectAllCopied">Selected all text and copied it to the clipboard</sys:String>
     <sys:String x:Key="Str_St_SelectAllError">Select all error: {0}</sys:String>
     <sys:String x:Key="Str_St_Copied">Copied to clipboard</sys:String>
     <sys:String x:Key="Str_St_ExtractError">Text extraction error: {0}</sys:String>
@@ -1124,13 +1123,13 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_St_ScanTextSaved">Converted PDF saved: {0} scanned pages, {1} words now text</sys:String>
     <sys:String x:Key="Str_St_TextExtracted">Text extracted from {0} pages -> {1}</sys:String>
     <sys:String x:Key="Str_St_DuplicatedPage">Duplicated page {0}</sys:String>
-    <sys:String x:Key="Str_St_Merged">Merged {0} file(s) - {1} total pages</sys:String>
-    <sys:String x:Key="Str_St_Saved">Saved - {0}</sys:String>
+    <sys:String x:Key="Str_St_Merged">Merged {0} file(s), {1} total pages</sys:String>
+    <sys:String x:Key="Str_St_Saved">Saved {0}</sys:String>
     <sys:String x:Key="Str_St_SavedWithAnnots">Saved with annotations to {0}</sys:String>
     <sys:String x:Key="Str_St_SavedTo">Saved to {0}</sys:String>
     <sys:String x:Key="Str_St_FlattenedSaved">Flattened PDF saved to {0}</sys:String>
     <sys:String x:Key="Str_St_OcrLanguage">OCR language: {0}</sys:String>
-    <sys:String x:Key="Str_St_LangInstalled">{0} installed - OCR language: {1}</sys:String>
+    <sys:String x:Key="Str_St_LangInstalled">{0} installed. OCR language: {1}</sys:String>
     <sys:String x:Key="Str_St_LangCanceled">{0} download canceled</sys:String>
     <sys:String x:Key="Str_St_HqFailed">High quality models installed; failed: {0}</sys:String>
     <sys:String x:Key="Str_St_HqInstalled">High quality models installed for: {0}</sys:String>
@@ -1153,7 +1152,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Busy_ExtractingPage">Extracting text... page {0} of {1}  (Esc to cancel)</sys:String>
     <sys:String x:Key="Str_Busy_LangData">Downloading {0} language data...</sys:String>
     <sys:String x:Key="Str_Busy_Downloading">Downloading {0}...</sys:String>
-    <sys:String x:Key="Str_Busy_DownloadingHq">Downloading {0} (HQ) - {1} of {2} -</sys:String>
+    <sys:String x:Key="Str_Busy_DownloadingHq">Downloading {0} (HQ), {1} of {2}:</sys:String>
     <sys:String x:Key="Str_Busy_Opening">Opening PDF...</sys:String>
     <sys:String x:Key="Str_Busy_OpeningProtected">Opening protected PDF...</sys:String>
     <sys:String x:Key="Str_St_HqAlready">All selected languages are already high quality</sys:String>
@@ -1171,22 +1170,22 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Bar_TT_Level">Keep the line on the nearest axis (horizontal or vertical)</sys:String>
     <sys:String x:Key="Str_Bar_TT_EraserBox">Drag a box to delete every annotation inside it</sys:String>
     <sys:String x:Key="Str_Bar_TT_EraserBrush">Brush over annotations to delete them</sys:String>
-    <sys:String x:Key="Str_Bar_TT_ShapeBox">Box - drag a rectangle</sys:String>
-    <sys:String x:Key="Str_Bar_TT_ShapeEllipse">Ellipse - drag an oval</sys:String>
-    <sys:String x:Key="Str_Bar_TT_ShapeFreeform">Freeform - click points; click the first point or double-click to close, Esc cancels, Backspace removes the last point</sys:String>
+    <sys:String x:Key="Str_Bar_TT_ShapeBox">Box: drag a rectangle</sys:String>
+    <sys:String x:Key="Str_Bar_TT_ShapeEllipse">Ellipse: drag an oval</sys:String>
+    <sys:String x:Key="Str_Bar_TT_ShapeFreeform">Freeform: click points; click the first point or double-click to close, Esc cancels, Backspace removes the last point</sys:String>
     <sys:String x:Key="Str_Bar_TT_ShapeFill">Fill the inside of the shape</sys:String>
     <sys:String x:Key="Str_TT_RecentFiles">Recent files</sys:String>
     <sys:String x:Key="Str_TT_SaveOptions">Save options</sys:String>
     <sys:String x:Key="Str_TT_OcrOptions">OCR options</sys:String>
     <sys:String x:Key="Str_RecentHeading">RECENT</sys:String>
-    <sys:String x:Key="Str_KS_WindowTitle">KillerPDF - Keyboard Shortcuts</sys:String>
+    <sys:String x:Key="Str_KS_WindowTitle">KillerPDF: Keyboard Shortcuts</sys:String>
     <sys:String x:Key="Str_UpdateAvailable">Update available: {0}</sys:String>
     <sys:String x:Key="Str_UpdatePrompt" xml:space="preserve">Download and install KillerPDF {0}?&#10;&#10;The app will close and reopen automatically.</sys:String>
     <sys:String x:Key="Str_UpdateDownloading">Downloading...</sys:String>
     <sys:String x:Key="Str_ClearAllData">Clear all Data</sys:String>
     <sys:String x:Key="Str_ClearDataConfirm" xml:space="preserve">This will delete all saved settings, downloaded OCR language packs, and temporary files.&#10;&#10;Your PDF files are not affected. Continue?</sys:String>
     <sys:String x:Key="Str_ClearDataDone" xml:space="preserve">Settings, language packs, and temp files were cleared.&#10;&#10;Restart KillerPDF to finish clearing any files still in use this session.</sys:String>
-    <sys:String x:Key="Str_Crash_Title">KillerPDF - Unexpected Error</sys:String>
+    <sys:String x:Key="Str_Crash_Title">KillerPDF: Unexpected Error</sys:String>
     <sys:String x:Key="Str_Crash_Log">Log: {0}</sys:String>
     <sys:String x:Key="Str_Crash_Copy">Copy Report</sys:String>
     <sys:String x:Key="Str_Crash_OpenLogs">Open Logs</sys:String>
@@ -1201,7 +1200,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_St_PlaceSignature">Click on the page to place your signature</sys:String>
     <sys:String x:Key="Str_St_PlaceInitials">Click on the page to place your initials</sys:String>
     <sys:String x:Key="Str_St_SelectionCleared">Selection cleared</sys:String>
-    <sys:String x:Key="Str_St_AnnotationsSelected">{0} annotations selected - press Delete to remove</sys:String>
+    <sys:String x:Key="Str_St_AnnotationsSelected">{0} annotations selected. Press Delete to remove them</sys:String>
     <sys:String x:Key="Str_St_CopiedAnnotationOne">Copied 1 annotation</sys:String>
     <sys:String x:Key="Str_St_CopiedAnnotationMany">Copied {0} annotations</sys:String>
     <sys:String x:Key="Str_St_PastedAnnotationOne">Pasted 1 annotation</sys:String>
@@ -1217,7 +1216,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Busy_FlattenPage">Flattening page {0} of {1}...</sys:String>
     <sys:String x:Key="Str_Busy_ExportPage">Exporting page {0} of {1}...</sys:String>
     <sys:String x:Key="Str_Busy_CancelHint">(Esc to cancel)</sys:String>
-    <sys:String x:Key="Str_Busy_DownloadingMany">Downloading {0} - {1} of {2} -</sys:String>
+    <sys:String x:Key="Str_Busy_DownloadingMany">Downloading {0}, {1} of {2}:</sys:String>
     <!-- PDF comparison (#160) -->
     <sys:String x:Key="Str_TT_ComparePDFs">Compare PDFs</sys:String>
     <sys:String x:Key="Str_TT_ExitComparison">Exit comparison</sys:String>
@@ -1279,12 +1278,12 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Form_Initial">Initial</sys:String>
     <sys:String x:Key="Str_Compare_PreviousRegion">Previous changed region</sys:String>
     <sys:String x:Key="Str_Compare_NextRegion">Next changed region</sys:String>
-    <sys:String x:Key="Str_Portable_InstallTip">Portable mode - get the installed version</sys:String>
+    <sys:String x:Key="Str_Portable_InstallTip">Portable mode: get the installed version</sys:String>
     <sys:String x:Key="Str_Print_PreviewFailed">Could not render preview:&#10;{0}</sys:String>
     <sys:String x:Key="Str_Print_PreparingToPrint">Preparing to print...</sys:String>
     <sys:String x:Key="Str_Link_GoToPage">Go to page {0}</sys:String>
     <sys:String x:Key="Str_Measurement_Unavailable">Measurement unavailable</sys:String>
-    <sys:String x:Key="Str_Repair_Unrecoverable" xml:space="preserve">Repair failed - the file is too severely damaged to recover.&#10;&#10;Try opening the original in a different application (Adobe Acrobat or a browser), which may have additional recovery options.</sys:String>
+    <sys:String x:Key="Str_Repair_Unrecoverable" xml:space="preserve">Repair failed because the file is too severely damaged to recover.&#10;&#10;Try opening the original in a different application (Adobe Acrobat or a browser), which may have additional recovery options.</sys:String>
     <sys:String x:Key="Str_KS_Enabled">Enable keyboard shortcuts</sys:String>
     <sys:String x:Key="Str_KS_Toggle">Toggle keyboard shortcuts</sys:String>
     <sys:String x:Key="Str_KS_ToggleTip">Turn all app shortcuts on or off. Ctrl+Shift+K always works.</sys:String>

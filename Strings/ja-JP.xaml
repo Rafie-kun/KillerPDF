@@ -60,7 +60,7 @@
     <sys:String x:Key="Str_Redact_SkippedPages">スキップしたページ: {0}</sys:String>
     <sys:String x:Key="Str_Redact_Failed">墨消しに失敗しました: {0}</sys:String>
     <sys:String x:Key="Str_Redact_VerifyFailed">結果にマークした内容がまだ残っていたため、何も変更していません</sys:String>
-    <sys:String x:Key="Str_TT_RotateTool">ページ変換 - 回転 / 傾き補正 (拡大縮小は近日対応) (R)</sys:String>
+    <sys:String x:Key="Str_TT_RotateTool">ページ変換: 回転、拡大縮小、反転、傾き補正、遠近補正 (R)</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">すべての注釈をクリア</sys:String>
     <sys:String x:Key="Str_TT_Search">検索 (Ctrl+F)</sys:String>
     <sys:String x:Key="Str_TT_UndoLast">元に戻す (Ctrl+Z)</sys:String>
@@ -358,7 +358,6 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Ocr_Language">言語</sys:String>
     <sys:String x:Key="Str_Ocr_FormAware">フォーム対応 OCR</sys:String>
     <sys:String x:Key="Str_Ocr_NoDoc">先に PDF を開いてください</sys:String>
-    <sys:String x:Key="Str_Ocr_ComingSoon">{0} - 近日対応</sys:String>
     <sys:String x:Key="Str_Ctx_SelectTool">選択ツール</sys:String>
     <sys:String x:Key="Str_Ctx_TextTool">テキストツール</sys:String>
     <sys:String x:Key="Str_Ctx_HighlightTool">ハイライトツール</sys:String>

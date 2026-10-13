@@ -702,13 +702,12 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Ocr_Language">ভাষা</sys:String>
     <sys:String x:Key="Str_Ocr_FormAware">ফর্ম-সচেতন OCR</sys:String>
     <sys:String x:Key="Str_Ocr_NoDoc">প্রথমে একটি PDF খুলুন</sys:String>
-    <sys:String x:Key="Str_Ocr_ComingSoon">{0} - শীঘ্রই আসছে</sys:String>
     <sys:String x:Key="Str_TT_Ocr">পৃষ্ঠায় OCR করুন (টেক্সট কপি করুন) (Ctrl+Shift+O)</sys:String>
     <sys:String x:Key="Str_Lbl_Ocr">OCR</sys:String>
     <sys:String x:Key="Str_Ctx_OcrPage">পৃষ্ঠায় OCR করুন (টেক্সট কপি করুন)</sys:String>
     <sys:String x:Key="Str_Lbl_Rotate">রূপান্তর</sys:String>
     <sys:String x:Key="Str_Lbl_Stamp">স্ট্যাম্প</sys:String>
-    <sys:String x:Key="Str_TT_RotateTool">পৃষ্ঠা রূপান্তর - ঘোরান / সোজা করুন (স্কেল শীঘ্রই আসছে) (R)</sys:String>
+    <sys:String x:Key="Str_TT_RotateTool">পৃষ্ঠা রূপান্তর: ঘোরান, স্কেল করুন, উল্টান, সোজা করুন বা পরিপ্রেক্ষিত ঠিক করুন (R)</sys:String>
     <sys:String x:Key="Str_ColorCorrection">রঙ সংশোধন</sys:String>
     <sys:String x:Key="Str_Tf_Suffix">রূপান্তর</sys:String>
     <sys:String x:Key="Str_Tf_Rotate">ঘোরান</sys:String>

@@ -702,13 +702,12 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Ocr_Language">Idioma</sys:String>
     <sys:String x:Key="Str_Ocr_FormAware">OCR compatible con formularios</sys:String>
     <sys:String x:Key="Str_Ocr_NoDoc">Primero abre un PDF</sys:String>
-    <sys:String x:Key="Str_Ocr_ComingSoon">{0} - próximamente</sys:String>
     <sys:String x:Key="Str_TT_Ocr">OCR de la página (copiar texto) (Ctrl+Shift+O)</sys:String>
     <sys:String x:Key="Str_Lbl_Ocr">OCR</sys:String>
     <sys:String x:Key="Str_Ctx_OcrPage">OCR de la página (copiar texto)</sys:String>
     <sys:String x:Key="Str_Lbl_Rotate">Transformar</sys:String>
     <sys:String x:Key="Str_Lbl_Stamp">Sello</sys:String>
-    <sys:String x:Key="Str_TT_RotateTool">Transformar página - rotar / enderezar (escala próximamente) (R)</sys:String>
+    <sys:String x:Key="Str_TT_RotateTool">Transformar página: rotar, escalar, voltear, enderezar o corregir la perspectiva (R)</sys:String>
     <sys:String x:Key="Str_ColorCorrection">Corrección de color</sys:String>
     <sys:String x:Key="Str_Tf_Suffix">Transformar</sys:String>
     <sys:String x:Key="Str_Tf_Rotate">ROTAR</sys:String>

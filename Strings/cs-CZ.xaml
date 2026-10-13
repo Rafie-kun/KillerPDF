@@ -60,7 +60,7 @@ Stránku lze nahradit jejím obrázkem se začerněnými označenými oblastmi. 
     <sys:String x:Key="Str_Redact_SkippedPages">Přeskočené stránky: {0}</sys:String>
     <sys:String x:Key="Str_Redact_Failed">Začernění se nezdařilo: {0}</sys:String>
     <sys:String x:Key="Str_Redact_VerifyFailed">výsledek stále odhaloval označený obsah, proto se nic nezměnilo</sys:String>
-    <sys:String x:Key="Str_TT_RotateTool">Transformace stránky - otočení / narovnání (změna měřítka již brzy) (R)</sys:String>
+    <sys:String x:Key="Str_TT_RotateTool">Transformace stránky: otočení, změna měřítka, převrácení, narovnání nebo oprava perspektivy (R)</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">Odstranit všechny anotace</sys:String>
     <sys:String x:Key="Str_TT_Search">Hledat (Ctrl+F)</sys:String>
     <sys:String x:Key="Str_TT_UndoLast">Zpět (Ctrl+Z)</sys:String>
@@ -358,7 +358,6 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Ocr_Language">Jazyk</sys:String>
     <sys:String x:Key="Str_Ocr_FormAware">OCR s podporou formulářů</sys:String>
     <sys:String x:Key="Str_Ocr_NoDoc">Nejprve otevřete PDF</sys:String>
-    <sys:String x:Key="Str_Ocr_ComingSoon">{0} - již brzy</sys:String>
     <sys:String x:Key="Str_Ctx_SelectTool">Nástroj výběru</sys:String>
     <sys:String x:Key="Str_Ctx_TextTool">Textový nástroj</sys:String>
     <sys:String x:Key="Str_Ctx_HighlightTool">Zvýrazňovač</sys:String>
