@@ -27,6 +27,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Search highlights, text selection and Crop land in the right place on rotated pages.
 - Print previews and output include current form field edits without a save and reopen.
 - 98SE annotation bars no longer block input at zero height, and 98SE document tabs line up with the tab strip.
+- Toolbar buttons return to their normal height after switching away from Text under icons.
 - Menus fade again, and menus, submenus, flyouts, the shortcuts panel and the language menu line up with their controls and screen edges.
 - Corrected theme colors, wordmarks, footers and dialog controls, including Light/Yellow, 98SE Red and the cream Blood, Greed and Cyanotic accents. Accent-colored toolbar icons keep a dark halo on Light/Yellow.
 - App and title bar icons stay sharp at fractional DPI and app zoom, and the title bar icon is slightly larger.
