@@ -67,7 +67,7 @@ namespace KillerPDF
             if (selected.Count == 0) { KillerDialog.Show(this, Loc("Str_Dlg_SelectExtract")); return; }
             var dlg = new Controls.FileDialog(Controls.FileDialogMode.Save)
                           { Filter = Loc("Str_Filter_Pdf") + "|*.pdf", Title = Loc("Str_Dlg_SaveExtractedAs"),
-                            CheckFileExists = false, CheckPathExists = true };
+                            CheckFileExists = false, CheckPathExists = true, RequireFilterExtension = true };
             if (dlg.ShowDialog(this) != true) return;
             try
             {

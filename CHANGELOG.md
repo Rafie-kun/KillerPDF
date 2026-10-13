@@ -24,6 +24,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Unsaved annotations survive moving, reordering, duplicating and merging pages and removing a link.
 - Fixed color picker crashes with gradient themes (#442, #443) and a crash when Windows blocks the text extraction library (#441).
 - Release packaging signs the application and engine DLLs and checks real window startup (#444), and updates no longer lock the installation folder (#434).
+- Save As and Extract Pages append .pdf when a different filename extension is typed (#450).
 - Inserting a blank page works again, and dragging one page of a multi-page selection moves the whole selection.
 - Search highlights, text selection and Crop land in the right place on rotated pages.
 - Print previews and output include current form field edits without a save and reopen.
