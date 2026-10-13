@@ -155,7 +155,7 @@ namespace KillerPDF
                 _sidebarCol.MinWidth = _fsSidebarMin;
                 _sidebarCol.Width = _fsSidebarCol;
                 MainContentGrid.ColumnDefinitions[1].Width = _fsSplitterCol;
-                DocPaneBorder.SetResourceReference(Border.BackgroundProperty, "BgCanvas");
+                DocPaneBorder.SetResourceReference(Border.BackgroundProperty, "ContentPaneBrush");
                 SetResourceReference(BackgroundProperty, "SurfaceBrush");   // undo the black grow-backdrop
 
                 // Drop topmost and restore the pre-full-screen window placement. Restore the normal bounds

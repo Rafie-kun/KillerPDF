@@ -368,11 +368,11 @@
              the old app-level StaticResource effect froze with its startup opacity and 98SE's
              zero never applied. -->
         <Border x:Name="PaneShadow" IsHitTestVisible="False" Margin="0,1,0,0"
-                Background="{DynamicResource BgCanvas}"
+                Background="{DynamicResource ContentPaneBrush}"
                 CornerRadius="{DynamicResource RadCard}"
                 Effect="{DynamicResource PaneShadowEffect}"/>
         <Border x:Name="PaneBorder" Panel.ZIndex="6"
-                Background="{DynamicResource BgCanvas}"
+                Background="{DynamicResource ContentPaneBrush}"
                 BorderBrush="{DynamicResource PaneBorderBrush}" BorderThickness="1"
                 CornerRadius="{DynamicResource RadCard}">
             <!-- Clipped to the card's own corners (DocPane_SizeChanged). A Border with a

@@ -403,6 +403,7 @@ namespace KillerPDF.Services
             Alias("SliderTrack", "InputBorderBrush");
             Alias("RadioAccent", "PrimaryBrush");
             Alias("BgCanvas", "PaneBrush");
+            Alias("ContentPaneBrush", "BgCanvas");
             Alias("FocusedPaneBrush", "BgCanvas");
             Alias("TabActiveBrush", "BgCanvas");
             // Keep a solid fallback for controls that cannot use the full-window gradient.
