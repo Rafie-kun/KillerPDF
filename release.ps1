@@ -209,7 +209,8 @@ try {
     $remoteHead = git rev-parse "refs/remotes/origin/$defaultBranch"
     if ($LASTEXITCODE -ne 0) { throw "Could not read origin/$defaultBranch" }
     if ($localHead.Trim() -ne $remoteHead.Trim()) {
-        throw "Local $defaultBranch and origin/$defaultBranch differ. Push or pull first."
+        if ($DryRun) { Write-Warning "Local $defaultBranch and origin/$defaultBranch differ. A real release requires pushing or pulling first." }
+        else { throw "Local $defaultBranch and origin/$defaultBranch differ. Push or pull first." }
     }
 } finally {
     Pop-Location
