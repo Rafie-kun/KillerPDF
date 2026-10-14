@@ -19,7 +19,9 @@ public static class Fixture {
         if (mode == "fail") { Console.Error.WriteLine("fixture failure"); return 1; }
         if (mode == "empty") return 0;
         string report = Environment.GetEnvironmentVariable("KILLERPDF_SMOKE_REPORT");
-        File.WriteAllText(report, "MainWindow constructed\nMainWindow Loaded\nMainWindow ContentRendered\nPASS MainWindow startup\n");
+        string proof = "MainWindow constructed\nMainWindow Loaded\nMainWindow ContentRendered\nTheme picker opened\nPASS MainWindow startup\n";
+        if (mode == "startup-only") proof = proof.Replace("Theme picker opened\n", "");
+        File.WriteAllText(report, proof);
         if (mode == "contradiction") File.AppendAllText(report, "FAIL fixture\n");
         return 0;
     }
@@ -27,7 +29,7 @@ public static class Fixture {
 '@
 $previousMode = [Environment]::GetEnvironmentVariable('KILLERPDF_RUNNER_FIXTURE')
 try {
-    foreach ($mode in @('pass', 'fail', 'empty', 'contradiction', 'hang')) {
+    foreach ($mode in @('pass', 'fail', 'empty', 'startup-only', 'contradiction', 'hang')) {
         [Environment]::SetEnvironmentVariable('KILLERPDF_RUNNER_FIXTURE', $mode)
         $rejected = $false
         try {

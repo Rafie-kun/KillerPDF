@@ -9,7 +9,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 1.8.91 fixes a crash when opening the theme picker in the packaged app and updates a vulnerable cryptography dependency.
 
 ### Fixed
-- Opening the theme picker and switching themes or accents no longer crashes the installed or portable app.
+- Opening the theme picker and switching themes or accents no longer crashes the installed or portable app (#452).
+- The bug report window uses the family text field and scrollbars, with grain clipped to the cards and a transparent scrollbar corner.
 
 ### Security
 - Updated System.Security.Cryptography.Pkcs to 9.0.21 for GHSA-846f-f764-76mx and GHSA-2fmv-rv2c-59x7.
