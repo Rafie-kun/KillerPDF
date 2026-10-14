@@ -485,7 +485,7 @@ Kezdjük a beállítást.</string>
   </locale>
   <locale name="it-IT">
     <string key="SetupTitle">Installazione di KillerPDF</string>
-    <string key="SetupVersion">INSTALLAZIONE  •  {0}</string>
+    <string key="SetupVersion">{0}  •  INSTALLAZIONE</string>
     <string key="Tagline">Un editor PDF gratuito e moderno, creato da zero per la privacy e la velocità.</string>
     <string key="CurrentAccount">Installa per l'utente attuale</string>
     <string key="Everyone">Installa per tutti gli utenti</string>
