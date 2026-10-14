@@ -11,6 +11,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Microsoft.Win32;
+using KillerFamily.Windowing;
 using KillerPDF.Services;
 
 namespace KillerPDF
@@ -570,6 +571,10 @@ namespace KillerPDF
         {
             var hwnd = new WindowInteropHelper(this).Handle;
             HwndSource.FromHwnd(hwnd)?.AddHook(WndProc);
+            // Windows 11 snap layouts on the maximize button. Added after WndProc, so it answers
+            // WM_NCHITTEST over the button first, ahead of the top resize grip like the other
+            // caption controls.
+            SnapLayouts.Attach(this, MaximizeBtn);
             InitializeTaskbarIcons(hwnd);
             ThemeManager.ApplyDwm(hwnd);
             // Snapping moves the window without changing WindowState, so re-evaluate the rounded vs

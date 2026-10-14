@@ -6,6 +6,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:KillerPDF"
         xmlns:ctrl="clr-namespace:KillerPDF.Controls"
+        xmlns:snap="clr-namespace:KillerFamily.Windowing"
         mc:Ignorable="d"
         Title="KillerPDF" Height="700" Width="1000" MinHeight="480" MinWidth="620"
         WindowStartupLocation="CenterScreen"
@@ -295,7 +296,18 @@
                                 <Setter TargetName="Bd" Property="Background" Value="{DynamicResource CaptionHoverBrush}"/>
                                 <Setter TargetName="capGrain" Property="Visibility" Value="Visible"/>
                             </Trigger>
+                            <!-- Snap layouts put the maximize button in the non-client area, where WPF
+                                 sees no mouse, so SnapLayouts reports hover and press itself. -->
+                            <Trigger Property="snap:SnapLayouts.IsHovered" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource CaptionHoverBrush}"/>
+                                <Setter TargetName="capGrain" Property="Visibility" Value="Visible"/>
+                            </Trigger>
                             <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource RowSelectedBrush}"/>
+                                <Setter TargetName="capLight" Property="BorderBrush" Value="{DynamicResource BevelDarkBrush}"/>
+                                <Setter TargetName="capDark" Property="BorderBrush" Value="{DynamicResource BevelLightBrush}"/>
+                            </Trigger>
+                            <Trigger Property="snap:SnapLayouts.IsPressed" Value="True">
                                 <Setter TargetName="Bd" Property="Background" Value="{DynamicResource RowSelectedBrush}"/>
                                 <Setter TargetName="capLight" Property="BorderBrush" Value="{DynamicResource BevelDarkBrush}"/>
                                 <Setter TargetName="capDark" Property="BorderBrush" Value="{DynamicResource BevelLightBrush}"/>
@@ -1434,7 +1446,7 @@
                                        Visibility="{DynamicResource CaptionDrawnGlyphVisibility}"/>
                         </Grid>
                     </Button>
-                    <Button Click="MaximizeBtn_Click" Style="{StaticResource ChromeButton}" ToolTip="{DynamicResource Str_Sys_Maximize}"
+                    <Button x:Name="MaximizeBtn" Click="MaximizeBtn_Click" Style="{StaticResource ChromeButton}" ToolTip="{DynamicResource Str_Sys_Maximize}"
                             Foreground="{DynamicResource CaptionGlyphBrush}">
                         <Grid>
                             <TextBlock Text="&#xE922;" FontFamily="Segoe MDL2 Assets" FontSize="10"

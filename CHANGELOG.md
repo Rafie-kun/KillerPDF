@@ -28,6 +28,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Added DPI, color mode, threshold and JPEG compression controls to flattening (#366), and a Printer properties button that applies the driver's own settings to the job.
 - Added command-line splitting by page count, equal parts, page ranges, bookmark level or file size, and a `--batch-render` command with per-page timing.
 - Added keyboard shortcuts for every new tool and command, including Ctrl+Shift+D followed by a letter for each document tool.
+- Added the Windows 11 snap layouts menu to the maximize button (#374).
 
 ### Changed
 - Replaced PDFium, Docnet.Core and PdfPig with the engine for rendering, search, selection, copying and text editing, and built the JPEG 2000 decoder from vendored CoreJ2K sources. The engine keeps the previous renderer's page dimensions for viewing and image export.
