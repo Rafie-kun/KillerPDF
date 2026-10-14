@@ -40,6 +40,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 ### Fixed
 - Saving an Edit Text change removes the replaced words from the file, so they can no longer be found, copied or brought back by editing the line again.
+- Restoring a maximized window after Win+D, a taskbar click or a touchpad gesture no longer leaves it black and unresponsive (#437).
 - Opening the theme picker and switching themes or accents no longer crashes the installed or portable app (#452).
 - PDFs with a slightly wrong cross-reference size open normally instead of asking for a repair and showing a crash report (#406).
 - PDFs whose owner restrictions block editing open read-only with their real text, bookmarks and document details, instead of a slow, blurry rasterized repair, and command-line image export and document info work on them (#424).

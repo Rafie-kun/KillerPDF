@@ -129,7 +129,11 @@ namespace KillerPDF
             if (wParam == IntPtr.Zero) return false;
             var p    = Marshal.PtrToStructure<NCCALCSIZE_PARAMS>(lParam);
             var orig = p.rgrc0;                                  // proposed window rect
-            if (WindowState == WindowState.Maximized || _fullScreen)
+            // A shell minimize (Win+D, the taskbar or a touchpad gesture) arrives before WPF updates
+            // WindowState, so read the native state. Clamping a minimized window's off-screen rect
+            // to the monitor gave a negative client size that broke the render thread (#437).
+            if (IsIconic(hwnd)) return false;
+            if (IsZoomed(hwnd) || _fullScreen)
             {
                 // Use the proposed destination rectangle. The HWND can still belong to the
                 // source monitor while Windows calculates a cross-monitor maximize.
@@ -142,6 +146,7 @@ namespace KillerPDF
                 p.rgrc0.top    = Math.Max(orig.top,    b.top);
                 p.rgrc0.right  = Math.Min(orig.right,  b.right);
                 p.rgrc0.bottom = Math.Min(orig.bottom, b.bottom);
+                if (p.rgrc0.right <= p.rgrc0.left || p.rgrc0.bottom <= p.rgrc0.top) return false;
                 Marshal.StructureToPtr(p, lParam, false);
                 return true;
             }
@@ -314,6 +319,14 @@ namespace KillerPDF
         [LibraryImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static partial bool GetWindowRect(IntPtr hwnd, out RECT rect);
+
+        [LibraryImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool IsIconic(IntPtr hwnd);
+
+        [LibraryImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool IsZoomed(IntPtr hwnd);
 
         [LibraryImport("user32.dll", EntryPoint = "DefWindowProcW")]
         private static partial IntPtr DefWindowProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam);
