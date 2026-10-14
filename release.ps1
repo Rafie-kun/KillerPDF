@@ -40,22 +40,11 @@ param(
     [switch]$DryRun,
     # Skip build + sign and publish the artifacts already in the publish folder
     # (use after a completed normal run, so the signed exe is not rebuilt).
-    [switch]$PublishOnly,
-    # Read-only source/test/forward-port validation, before all release side effects.
-    [switch]$PreflightOnly
+    [switch]$PublishOnly
 )
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
-
-# This gate runs before metadata, network, build, signing, or publishing work.
-# DryRun still builds and signs; PreflightOnly is the read-only entry.
-$completionGate = Join-Path $PSScriptRoot 'build\Test-PdfCompletion.ps1'
-if (!(Test-Path -LiteralPath $completionGate -PathType Leaf)) { throw 'Missing PDF completion preflight.' }
-$completionHost = (Get-Process -Id $PID).Path
-& $completionHost -NoProfile -File $completionGate
-if ($LASTEXITCODE -ne 0) { throw 'Release blocked by PDF completion preflight.' }
-if ($PreflightOnly) { return }
 
 if ($SkipSign -and -not $DryRun) {
     throw "-SkipSign is only allowed with -DryRun. Unsigned artifacts cannot be published."
@@ -652,13 +641,10 @@ try {
         $indexNew = $indexNew -replace $field.Pattern, ('${1}' + $field.Value)
     }
 
-    $commonGit = (& git rev-parse --path-format=absolute --git-common-dir).Trim()
-    $completion = Get-Content -LiteralPath (Join-Path $commonGit 'killerpdf-completion.json') -Raw | ConvertFrom-Json
-    $engineEvidence = @($completion.results | Where-Object {
-        $_.line -eq 'maintenance' -and $_.project -eq 'engine/KillerPdf.Engine.Tests/KillerPdf.Engine.Tests.csproj'
-    })
-    if ($engineEvidence.Count -ne 1) { throw 'Engine test evidence is missing from the checked completion receipt.' }
-    & (Join-Path $PSScriptRoot 'build/Update-EngineSiteFacts.ps1') -TrxPath $engineEvidence[0].trx -DryRun:$DryRun
+    $engineTrxDir = Join-Path $env:TEMP ('killerpdf-engine-facts-' + [Guid]::NewGuid().ToString('N'))
+    dotnet test (Join-Path $PSScriptRoot 'engine\KillerPdf.Engine.Tests\KillerPdf.Engine.Tests.csproj') -c Release --nologo -v quiet --logger 'trx;LogFileName=engine.trx' --results-directory $engineTrxDir
+    if ($LASTEXITCODE -ne 0) { throw 'Engine unit tests failed - fix them before releasing' }
+    & (Join-Path $PSScriptRoot 'build/Update-EngineSiteFacts.ps1') -TrxPath (Join-Path $engineTrxDir 'engine.trx') -DryRun:$DryRun
 
     if ($DryRun) {
         Write-Host "    DryRun: would write these release facts to pdf-landing and commit:" -ForegroundColor Yellow

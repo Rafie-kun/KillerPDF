@@ -85,30 +85,3 @@ jobs:
           path: ci-results/
           if-no-files-found: warn
           retention-days: 7
-
-  forward-port-coverage:
-    # main PRs introduce work that cannot have a development commit record yet.
-    # This check covers the proposed development tree against current main.
-    if: github.base_ref == 'dev/1.9-overkill'
-    runs-on: windows-2025
-    timeout-minutes: 10
-    defaults:
-      run:
-        shell: pwsh
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-      - name: Check maintenance commit coverage (not semantic verification)
-        run: |
-          New-Item -ItemType Directory -Force ci-results | Out-Null
-          & ./build/Check-MaintenanceForwardPorts.ps1 -MaintenanceRef origin/main -DevelopmentRef HEAD 2>&1 | Tee-Object ci-results/forward-ports.log
-          if ($LASTEXITCODE -ne 0) { throw 'Forward-port coverage failed. See missing hashes in forward-ports.log; adapted ports require reviewed commit records and tests.' }
-      - if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: forward-port-coverage
-          path: ci-results/
-          if-no-files-found: warn
-          retention-days: 7

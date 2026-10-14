@@ -13,7 +13,4 @@ keyboard, screen reader, or hardware.
 The application and engine xUnit projects each have a separate job. The isolated FlaUI project
 is compiled and runs its windowless synthetic PDF parse/render/save/reopen assertion.
 Its FlaUI desktop tests are not run. The SDK follows global.json.
-Development PRs also check maintenance commit coverage against origin/main with full history.
-That job checks coverage only. It cannot verify adapted ports semantically. Maintenance PRs do
-not promise a future development commit; carry fixes deliberately and run the local checker.
-See ../docs/maintenance-forward-ports.md and ../tests/KillerPDF.UiSmoke/README.md.
+See ../tests/KillerPDF.UiSmoke/README.md.
