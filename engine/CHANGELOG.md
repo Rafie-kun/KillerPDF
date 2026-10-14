@@ -198,9 +198,38 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 - Applied graphics-state transfer functions (TR and TR2) to fill, stroke, text and image colors on RGB output.
 - Compatibility recovery reads a dictionary whose opening delimiter was overwritten by a single letter, such as an encryption dictionary written as E< ... >>.
 
-## [1.8.5] - Unreleased
+## [1.8.90] - 2026-10-14
 
-The 1.8.5 engine package matches the engine source shipped with KillerPDF 1.8.5.
+The 1.8.90 engine package follows the application maintenance release with no engine changes.
+
+## [1.8.80] - 2026-10-04
+
+The 1.8.80 engine package improves compatibility with malformed PDFs.
+
+### Fixed
+
+- Accepted empty and grayscale form colors when saving edited fields.
+- Recovered cross-reference tables whose trailer size omits valid objects (#406).
+
+## [1.8.71] - 2026-09-26
+
+The 1.8.71 engine package includes document compatibility fixes shipped with KillerPDF 1.8.71.
+
+### Fixed
+
+- Allowed valid recursive Form XObject resources when importing or combining pages (#421).
+- Isolated appended page overlays from inherited source graphics transforms.
+
+## [1.8.6] - 2026-09-22
+
+The 1.8.6 engine package matches the engine source shipped with KillerPDF 1.8.6.
+
+### Fixed
+
+- Preserved effective page-box origins when adding content to cropped pages (#418).
+- Preserved source cross-reference format when signing and supported visible appearances on existing signature widgets (#381).
+- Kept normalized page sizes within supported limits for extreme page coordinates (#401). (Thanks @Matthew-Selvam)
+- Added described overlays that extend existing PDF structure trees when saving markup.
 
 ## [1.8.4] - 2026-09-06
 
