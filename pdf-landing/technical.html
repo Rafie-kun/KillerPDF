@@ -11,7 +11,7 @@
 <meta name="description" content="A deep technical explanation of how KillerPDF renders, zooms, and stays robust.">
 <link rel="icon" type="image/x-icon" href="kp-icon.ico">
 <script defer src="https://koya.thekiller.net/script.js" data-website-id="4036b11d-f6c0-4254-b448-933d3e38b0cb"></script>
-<link rel="stylesheet" href="kp.css?v=27">
+<link rel="stylesheet" href="kp.css?v=28">
 <style>
 .page-hero { text-align: center; padding: 44px 16px 8px; }
 .page-hero .wm-logo { height: clamp(55px, 9.5vw, 91px); width: auto; margin: 0 auto 8px; display: block; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.55)); }
@@ -209,13 +209,13 @@
 <tr><td><code>%LOCALAPPDATA%\KillerPDF\Logs\</code></td><td data-i18n="pt_45">crash logs</td></tr>
 <tr><td><code>HKCU\Software\KillerPDF\Settings</code></td><td data-i18n="pt_46">your settings - in the registry, not a file</td></tr>
 </table>
-<p data-i18n="pt_47">Everything sits under <code>%LOCALAPPDATA%</code> on purpose: it is per-user (no admin), user-private, and not indexed by Windows Search - so temporary copies of your documents never surface in search or another account.</p>
+<p data-i18n="pt_47">Portable copies store settings, saved signatures and OCR models in <code>KillerPDF-Data</code> beside the launcher. Native OCR libraries and temporary working files still use <code>%LOCALAPPDATA%\KillerPDF</code>.</p>
 <h3 id="where-ocr-files-go" data-i18n="pt_48">Where OCR files go</h3>
-<p data-i18n="pt_49">OCR is bundled in the exe but unpacks on first use. The Tesseract <b>native libraries</b> extract to a per-version cache at <code>%LOCALAPPDATA%\KillerPDF\ocr\&lt;version&gt;\x64\</code> (version-stamped, so an update gets fresh binaries). The <b>language data</b> lives in <code>%LOCALAPPDATA%\KillerPDF\tessdata\</code>: English ships inside the exe and is written there the first time you OCR, and any extra languages you pick are downloaded into that same folder. It is version-independent, so downloaded languages survive app updates. Both are read from these locations on every OCR run.</p>
+<p data-i18n="pt_49">All OCR language models, including English, download on first use and remain cached. Native Tesseract libraries extract to the versioned OCR cache.</p>
 <h3 id="temp-files" data-i18n="pt_50">Temp files</h3>
 <p data-i18n="pt_51">Working files are written as <code>killerpdf_&lt;tag&gt;_&lt;guid&gt;.pdf</code> and tracked for the session. They are deleted when you close the app; anything a crash leaves behind is swept on the next launch (both the current Temp folder and the legacy <code>%TEMP%</code> location). Files still open in another instance are skipped and cleared later.</p>
 <h3 id="clear-all-data" data-i18n="pt_52">Clear all data</h3>
-<p data-i18n="pt_53">The <b>Clear all Data</b> link in the About window wipes everything KillerPDF has stored: the registry settings, the downloaded OCR languages and native cache, and the temp folder. It is best-effort - anything locked by the running session (a loaded native DLL, say) is skipped and clears on the next restart. Your actual PDFs are never touched.</p>
+<p data-i18n="pt_53">Clear all Data removes saved settings, OCR models and temporary files where possible. Locked files may remain. Installed copies keep saved signatures and logs; portable copies also remove the <code>KillerPDF-Data</code> folder. Your source PDFs are not deleted.</p>
 </div>
 
 <div class="tech-sec" id="arch">
@@ -321,7 +321,7 @@
 <text x="550" y="52" text-anchor="middle" fill="var(--accent)" font-size="10" font-family="monospace">left&middot;sx</text>
 <text x="478" y="138" fill="var(--accent)" font-size="10" font-family="monospace">renderH - top&middot;sy</text>
 </svg>
-<figcaption data-i18n="pt_74">A mark is stored once in render-dim units (measured from the bottom-left) and flipped onto the drawing surface (measured from the top-left) every time it is painted, using <code>canvasY = renderH - top &times; sy</code>. The drawing surface is measured in <b>device-independent pixels</b> (DIP), a unit that stays constant no matter the screen's density. Because the same stored point feeds all four view modes, it lands on the same spot in each.</figcaption>
+<figcaption data-i18n="pt_74">Annotation positions use zoom-stable render-dim units measured from the top-left. PDF coordinates are converted when content is read or written; the same positions feed every view mode.</figcaption>
 </figure>
 <p data-i18n="pt_75">Because <code>rdW</code> and <code>rdH</code> are worked out once and then reused everywhere, the same measurements feed all four view modes, so a mark placed in one mode lands on the exact same spot in every other.</p>
 </div>
@@ -387,7 +387,7 @@
 <h2 data-i18n="pt_104">Saving &amp; the temp-reload dance</h2>
 <p data-i18n="pt_105">Saving never changes the document you are looking at. KillerPDF writes a clean copy with no annotations, then permanently bakes in <b>stamps first, then annotations</b>, and reopens that fresh copy. Starting from a clean base every time means it can never accidentally bake the same thing in twice.</p>
 <h3 id="why-structural-edits-reload" data-i18n="pt_106">Why structural edits reload</h3>
-<p data-i18n="pt_107">Rotation, page operations and decryption route through <b>SaveTempAndReload</b>. It zeroes every page's <code>/Rotate</code> entry before writing, because Docnet (PDFium) sizes the page bitmap from the <i>unrotated</i> MediaBox - leave the rotation in and the rendered content clips. The file is written flat, reopened in Modify mode, and the rotations are re-applied in memory so the page still reads right.</p>
+<p data-i18n="pt_107">Structural edits write and reopen a temporary PDF through The KillerPDF.Engine. Page rotations and pending annotations are restored as needed. Your original file changes only when you save.</p>
 </div>
 
 <div class="tech-sec" id="robust">
@@ -412,11 +412,10 @@
 
 <div class="tech-sec" id="conformance">
 <h2 data-i18n="pt_conf_1">Standards conformance</h2>
-<p data-i18n="pt_conf_7">A PDF editor has one obligation above all others: saving your file must not damage it. Starting with 1.6.4, that claim is tested rather than assumed. Every release is validated against <a href="https://verapdf.org/" target="_blank" rel="noopener">veraPDF</a>, the industry reference validator for PDF/A and PDF/UA, across a 2,907-file public conformance corpus (the veraPDF test corpus, the Isartor PDF/A-1b suite, and the TWG test files). These are deliberately hostile files, most built to violate exactly one clause of a standard, so any structural damage a save introduces shows up immediately as a newly failed rule.</p>
 <h3 id="how-the-test-works" data-i18n="pt_conf_2">How the test works</h3>
 <p data-i18n="pt_conf_8">Every corpus file is validated pristine, resaved through KillerPDF's normal open/save pipeline (headlessly, via <code>--batch-resave</code>), and validated again. A comparison script then flags any file that fails a rule after the resave that it did not fail before. The bar for release is zero regressions. A second pass runs <code>qpdf --check</code> on every original/resave pair and flags any file whose structural health worsened.</p>
-<h3 id="the-numbers" data-i18n="pt_223">The 1.8 validation gates</h3>
-<p>Documented 1.8.1 standards run, August 29, 2026. See <a href="https://github.com/SteveTheKiller/KillerPDF/blob/main/validation/RESULTS.md" target="_blank" rel="noopener">the validation report</a> for the method and full results.</p>
+<h3 id="the-numbers" data-i18n="pt_223">Historical standards validation</h3>
+<p>Documented 1.8.1 standards run, August 29, 2026. See <a href="https://github.com/SteveTheKiller/KillerPDF/blob/v1.8.1/validation/RESULTS.md" target="_blank" rel="noopener">the validation report</a> for the method and full results.</p>
 <table class="spec-table"><tr><th data-i18n="pt_conf_9">Outcome</th><th data-i18n="pt_conf_10">Files</th></tr>
 <tr><td data-i18n="pt_conf_11">Corpus total</td><td>2,907</td></tr>
 <tr><td data-i18n="pt_228">Full rewrite corpus</td><td data-i18n="pt_229">2,898 saved, 9 safe skips, zero veraPDF regressions</td></tr>
@@ -448,10 +447,10 @@
 <tr><td data-i18n="pt_137">Render-dim longest side</td><td data-i18n="pt_138">2048 DIP (zoom-stable)</td></tr>
 <tr><td data-i18n="pt_139">Bitmap resolution cap</td><td data-i18n="pt_140">6144 px</td></tr>
 <tr><td data-i18n="pt_141">Print / OCR render</td><td data-i18n="pt_142">300 DPI / 2600 px (~300 DPI on Letter)</td></tr>
-<tr><td data-i18n="pt_143">Zoom range / step</td><td data-i18n="pt_144">5% to 500%, 15% steps</td></tr>
+<tr><td data-i18n="pt_143">Zoom range / step</td><td data-i18n="pt_144"><code>Ctrl+</code> / <code>Ctrl-</code>: 5% to 500%, 15% steps</td></tr>
 <tr><td data-i18n="pt_145">Render-cache tabs (LRU)</td><td data-i18n="pt_146_172">3 most-recently-used; ~160 MB per tab; 48-entry hard cap</td></tr>
 <tr><td data-i18n="pt_147">Folder / zip import cap</td><td data-i18n="pt_148">50 files</td></tr>
-<tr><td data-i18n="pt_149">Signature reservation</td><td data-i18n="pt_150">16,384 bytes, SHA-256, whole chain</td></tr>
+<tr><td data-i18n="pt_149">Signature reservation</td><td data-i18n="pt_150">32,768 bytes, SHA-256, whole chain</td></tr>
 <tr><td data-i18n="tech_languages_themes">Languages / themes</td><td data-i18n="tech_languages_themes_value">19 locales / 13 themes + accent variants</td></tr>
 </table>
 <p style="margin-top:14px" data-i18n="pt_153_172">The 50-page guide includes the current shortcuts, all themes and languages, and an interactive sample form. It ships in the repo as <a href="https://github.com/SteveTheKiller/KillerPDF/blob/main/KillerPDF.pdf" target="_blank" rel="noopener"><code style="color:inherit">KillerPDF.pdf</code></a>. Open it in KillerPDF itself.</p>
@@ -467,7 +466,6 @@
 <tr><td>Costura (Costura.Fody)</td><td data-i18n="tech_costura_desc">A build-time bundler retained for ordinary development builds. Release packaging produces explicit framework-dependent and self-contained payloads for the installer and portable launcher.</td></tr>
 <tr><td data-i18n="pt_166">Cover / cover-pair</td><td data-i18n="pt_167">A Cover is an opaque box that hides the original words on a page. To edit existing PDF text, KillerPDF lays a Cover over the old text and a Text box on top holding your replacement; the two are locked together as a cover-pair.</td></tr>
 <tr><td data-i18n="pt_168">Cross-reference table (xref)</td><td data-i18n="pt_169">The index near the end of a PDF that records where every internal object is stored. If it is damaged, many readers fail to open the file, so KillerPDF has recovery paths that rebuild it.</td></tr>
-<tr><td data-i18n="pt_170">Device-independent pixel (DIP)</td><td data-i18n="pt_171">The unit KillerPDF's drawing surface uses. One DIP is a fixed physical size regardless of how dense the screen is, so layouts look the same across monitors.</td></tr>
 <tr><td data-i18n="pt_172">Docnet (Docnet.Core)</td><td data-i18n="pt_173">The library that lets KillerPDF call PDFium from .NET to turn pages into bitmaps.</td></tr>
 <tr><td data-i18n="pt_174">DPI (dots per inch)</td><td data-i18n="pt_175">How many pixels a screen packs into an inch, i.e. its density. Windows reports it as a scale: 1.0 at 96 DPI (100%), 1.5 at 150%. Higher DPI means more pixels are drawn for the same physical size.</td></tr>
 <tr><td data-i18n="pt_176">Flatten (flattening)</td><td data-i18n="pt_177">Burning annotations permanently into the page when you save, so they become part of the PDF's own content instead of separate, editable marks.</td></tr>
@@ -475,7 +473,7 @@
 <tr><td data-i18n="pt_180">Ink</td><td data-i18n="pt_181">A freehand drawn stroke. The Line tool is stored as ink as well.</td></tr>
 <tr><td data-i18n="pt_182">Linearized PDF</td><td data-i18n="pt_183">A PDF arranged so a viewer can start showing the first page before the whole file has loaded (sometimes called "fast web view"). These files often keep their structure in object streams.</td></tr>
 <tr><td data-i18n="pt_184">LRU cache (least recently used)</td><td data-i18n="pt_185_172">A memory-saving rule that keeps the most recently used items and drops the oldest. KillerPDF retains drawn-page caches for only the three most recent tabs, with an approximately 160 MB per-tab budget and 48-entry hard cap.</td></tr>
-<tr><td>.NET 10</td><td data-i18n="tech_runtime_desc">The modern .NET runtime used by both the Windows application and The KillerPDF.Engine. The installer detects or installs the Desktop Runtime; the portable package carries it.</td></tr>
+<tr><td>.NET 10</td><td data-i18n="tech_runtime_desc">The compact installer requires the .NET 10 Desktop Runtime and opens Microsoft's download page when it is missing. The portable package includes its runtime.</td></tr>
 <tr><td data-i18n="pt_188">Object stream</td><td data-i18n="pt_189">A compressed container inside modern PDFs (version 1.5 and later) that bundles many of the file's internal objects together. Some libraries cannot read them, which is why KillerPDF falls back to PDFium for certain jobs.</td></tr>
 <tr><td data-i18n="pt_190">OCR (optical character recognition)</td><td data-i18n="pt_191">Reading the actual text out of a scanned image so it can be searched, selected, or copied. KillerPDF uses Tesseract.</td></tr>
 <tr><td data-i18n="pt_192">Overlay</td><td data-i18n="pt_193">The transparent sheet drawn directly on top of a page image, where your annotations are painted. The page image underneath is never changed.</td></tr>
@@ -505,8 +503,10 @@
 <span class="right"><span id="verEgg" title="Click">v1.8.80</span> &middot; &copy; 2026 <b><a href="https://thekiller.net" target="_blank" rel="noopener">Steve the Killer</a></b></span>
 </footer>
 <div class="egg-toast" id="eggToast"></div>
-<script src="kp-i18n.js?v=15"></script>
-<script src="kp.js?v=16"></script>
+<script src="kp-i18n.js?v=20"></script>
+<script src="engine/engine-site-facts.js?v=1.8.90"></script>
+<script src="kp-site-info.js?v=1"></script>
+<script src="kp.js?v=17"></script>
 <script>
 // COLLAPSIBLE OUTLINE. The page has thirteen sections and twenty-four subsections, and listing
 // all thirty-seven flat made the sidebar a wall you had to read to navigate.

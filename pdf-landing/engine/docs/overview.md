@@ -27,11 +27,11 @@ Use the task guides in the sidebar when you already know what you need to do.
 
 ## Project scale
 
-| Measure | Current 1.8.2 development tree |
+| Measure | Current 1.8.90 development tree |
 | --- | --- |
-| Engine source files | 151 |
-| Physical C# lines | 47,792 |
-| Engine tests | 1,437 |
+| Engine source files | 153 |
+| Physical C# lines | 48,388 |
+| Engine tests | 1,492 |
 | Corpus PDFs | 47,024 |
 
 ## A real library boundary

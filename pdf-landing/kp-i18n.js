@@ -15101,3 +15101,23 @@ Object.keys(I18N).forEach(function (language) {
   strings.f_compare_t = strings.ph_291.replace(/<span class="chev">.*?<\/span>/, "");
   strings.f_compare_d = strings.ph_293 + " " + strings.ph_294;
 });
+
+// Text editing commits with Ctrl+Enter.
+Object.assign(I18N["es"], {"kb_commit_text": "Confirmar texto"});
+Object.assign(I18N["de"], {"kb_commit_text": "Text übernehmen"});
+Object.assign(I18N["fr"], {"kb_commit_text": "Valider le texte"});
+Object.assign(I18N["it"], {"kb_commit_text": "Conferma testo"});
+Object.assign(I18N["pt"], {"kb_commit_text": "Confirmar texto"});
+Object.assign(I18N["nb"], {"kb_commit_text": "Bekreft tekst"});
+Object.assign(I18N["pl"], {"kb_commit_text": "Zatwierdź tekst"});
+Object.assign(I18N["cs"], {"kb_commit_text": "Potvrdit text"});
+Object.assign(I18N["hu"], {"kb_commit_text": "Szöveg véglegesítése"});
+Object.assign(I18N["tr"], {"kb_commit_text": "Metni onayla"});
+Object.assign(I18N["ru"], {"kb_commit_text": "Подтвердить текст"});
+Object.assign(I18N["uk"], {"kb_commit_text": "Підтвердити текст"});
+Object.assign(I18N["kk"], {"kb_commit_text": "Мәтінді бекіту"});
+Object.assign(I18N["vi"], {"kb_commit_text": "Xác nhận văn bản"});
+Object.assign(I18N["ja"], {"kb_commit_text": "テキストを確定"});
+Object.assign(I18N["zh"], {"kb_commit_text": "確認文字"});
+Object.assign(I18N["zh-cn"], {"kb_commit_text": "确认文本"});
+Object.assign(I18N["bn"], {"kb_commit_text": "লেখা নিশ্চিত করুন"});

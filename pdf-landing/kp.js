@@ -227,17 +227,17 @@
   document.querySelectorAll('[data-i18n]').forEach(function (n) { EN[n.getAttribute('data-i18n')] = n.innerHTML; });
 
   function normalizeCurrentFacts(key, value) {
-    if (key === 'pa_31') return value.replace(/v1\.8\.1/g, 'v1.8.2');
-    if (key !== 'pt_220') return value;
-    return value
-      .replace(/1\.8\.0/g, '1.8.2')
-      .replace(/138([\s.,\u00A0]?)691/g, function (_, sep) { return '139' + sep + '519'; })
-      .replace(/100([\s.,\u00A0]?)012/g, function (_, sep) { return '100' + sep + '609'; })
-      .replace(/49([\s.,\u00A0]?)271/g, function (_, sep) { return '49' + sep + '711'; })
-      .replace(/47([\s.,\u00A0]?)725/g, function (_, sep) { return '47' + sep + '792'; })
-      .replace(/\b816\b/g, '906')
-      .replace(/38([\s.,\u00A0]?)679/g, function (_, sep) { return '38' + sep + '910'; });
+    if (key === 'pa_31') {
+      var version = (EN.pa_31 || '').match(/v\d+\.\d+\.\d+/);
+      if (version) return value.replace(/v\d+\.\d+\.\d+/g, version[0]);
+    }
+    return value;
   }
+  document.querySelectorAll('[data-engine-fact]').forEach(function (node) {
+    var facts = window.KPDF_ENGINE_FACTS;
+    var value = facts && facts[node.getAttribute('data-engine-fact')];
+    if (typeof value === 'number') node.textContent = value.toLocaleString('en-US');
+  });
   var LANGS = ['en','es','de','fr','ja','kk','ru','uk','nb','pt','tr','vi','zh','zh-cn','bn','cs','pl','hu','it'];
   var FLAGS = {
     en: '<svg viewBox="0 0 24 24"><rect width="24" height="24" fill="#fff"/><g fill="#b22234"><rect width="24" height="1.85"/><rect y="3.7" width="24" height="1.85"/><rect y="7.4" width="24" height="1.85"/><rect y="11.1" width="24" height="1.85"/><rect y="14.8" width="24" height="1.85"/><rect y="18.5" width="24" height="1.85"/><rect y="22.2" width="24" height="1.8"/></g><rect width="11" height="12.95" fill="#3c3b6e"/></svg>',

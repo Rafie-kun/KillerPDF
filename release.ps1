@@ -673,7 +673,7 @@ try {
         # Footer version on every page, plus the translated footer strings in kp-i18n.js
         # (their verEgg span is spelled with escaped quotes there, hence the \\? in the
         # pattern matching both id="verEgg" and id=\"verEgg\").
-        foreach ($page in 'index.html', 'help.html', 'technical.html', 'engine.html', 'about.html', 'kp-i18n.js') {
+        foreach ($page in @((Get-ChildItem $siteDir -Filter '*.html').Name) + @('kp-i18n.js')) {
             $p = Join-Path $siteDir $page
             if (-not (Test-Path $p)) { continue }
             $raw = [System.IO.File]::ReadAllText($p)

@@ -208,8 +208,8 @@
     var facts = window.KPDF_ENGINE_FACTS;
     if (!facts) throw new Error('Engine release facts are missing.');
     function number(value) { return Number(value).toLocaleString('en-US'); }
-    if (docId === 'overview' || docId === 'getting-started') {
-      markdown = markdown.replace(/\b1\.8\.(?:0|2)\b/g, facts.version);
+    if (docId === 'overview') {
+      markdown = markdown.replace(/\b\d+\.\d+\.\d+\b/g, facts.version);
     }
     if (docId === 'overview') {
       var rowIndex = 0;
@@ -289,7 +289,7 @@
     if (lang === 'en' || !/^[a-z]{2}(-[a-z]{2})?$/.test(lang)) return;
     var script = document.createElement('script');
     script.async = false;
-    script.src = './docs-i18n/' + lang + '.js?v=1';
+    script.src = './docs-i18n/' + lang + '.js?v=2';
     script.onload = applyDocsL10n;
     document.body.appendChild(script);
   }
@@ -308,6 +308,6 @@
       });
   }
   loadDocsL10n();
-  loadSharedScript('../kp-i18n.js?v=9');
-  loadSharedScript('../kp.js?v=12');
+  loadSharedScript('../kp-i18n.js?v=20');
+  loadSharedScript('../kp.js?v=17');
 })(window);
