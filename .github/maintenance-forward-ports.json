@@ -1738,6 +1738,26 @@
       "maintenanceCommit": "860646ee6336e29274a18cfb89740992a2cdec09",
       "developmentCommit": "b50f1edf4157b9ee1941d673f9a57990d96a51b9",
       "reason": "Both lines reword the tooltips/status messages, describe certificate signing, and remove the unused OCR placeholder. The Norwegian Transform wording was already present on development. Maintenance alone updates its feature-list README; the development README uses a separate engine-focused structure. Shared landing copy and locale changes are carried into the development commit without replacing development-only features."
+    },
+    {
+      "maintenanceCommit": "c054bf0dbf704790dd9a1b84fe659233eb60db2f",
+      "developmentCommit": "17cc20fde1e9c17dd407e96707a249f3113f14af",
+      "reason": "Both lines publish the same 1.8.90 measured-run and summary CSV data and benchmark findings. Development adds a separate 1.9.0 report and a link from the retained 1.8.90 report. Its landing results include both versions, and its corpus page presents the development results."
+    },
+    {
+      "maintenanceCommit": "fbfce8f2ee63c29e516ce141ef1c9c1fc7c3df53",
+      "developmentCommit": "ac08540352b1aad1f23d0f0b116628b7f3a6a19e",
+      "reason": "Both lines replace the cross-session 1.8.90 timing claim with the same-session 1.8.80 comparison in PERFORMANCE.md, the 1.8.90 benchmark report and landing results. The current reports differ only by development's additional 1.9.0 report link. Maintenance updates its 1.8.90 corpus landing page; development's corpus page presents its separate 1.9.0 comparison."
+    },
+    {
+      "maintenanceCommit": "31215f47f57449f6e73b8fd4e4fe31841da0dac0",
+      "developmentCommit": "a587bca94a9aab1e9438b04dab639c79bbbd6876",
+      "reason": "Both lines append .pdf when Save As or Extract Pages receives a filename without an extension. Stable scoped patch IDs match after excluding the branch-specific changelog."
+    },
+    {
+      "maintenanceCommit": "5c9c4b9de10f5967782696f0fb1cdce02f95e735",
+      "developmentCommit": "898920aa8959ea58213562423edd26ceb579292e",
+      "reason": "Both lines add the same accessibility labels, keyboard focus behavior and installer error handling. Stable scoped patch IDs match after excluding the branch-specific changelog."
     }
   ]
 }
