@@ -150,15 +150,7 @@ if ($LASTEXITCODE -ne 0) { throw 'Launcher build failed.' }
 
 $builtLauncher = Join-Path $launcherOutput 'KillerPDF.exe'
 if (-not [IO.File]::Exists($builtLauncher)) { throw "Launcher output is missing: $builtLauncher" }
-# Antivirus or SmartScreen can briefly hold the previous public EXE after it was run or written,
-# so retry a sharing violation for a short while instead of failing the whole build on it.
-for ($attempt = 1; ; $attempt++) {
-    try { [IO.File]::Copy($builtLauncher, $publicExe, $true); break }
-    catch [System.IO.IOException] {
-        if ($attempt -ge 30) { throw "Could not replace $publicExe after 15 seconds because another process is using it. Close anything that has it open and run the build again." }
-        Start-Sleep -Milliseconds 500
-    }
-}
+[IO.File]::Copy($builtLauncher, $publicExe, $true)
 
 # Regression gate for #238: installer commands must install exactly once and exit. They must not
 # fall through to the portable launch path or start the installed UI. A disposable install root
