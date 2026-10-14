@@ -1783,6 +1783,11 @@
       "maintenanceCommit": "56bfea483d01b795e66cce2fa9302a5acca24385",
       "developmentCommit": "3d29a61da93b17d8f36f13679b9d36763de0ec3e",
       "reason": "Both commits append the same website alignment and documentation mapping to the existing forward-port records. Their surrounding policy histories are preserved."
+    },
+    {
+      "maintenanceCommit": "7072060cab3c3bc8bf457845e05d3ac4793a6e1e",
+      "developmentCommit": "ddf4dcdae8aa9d39df980d37f8c0e71232bc471d",
+      "reason": "Both lines give landing logos 28 pixels of space above and below while preserving their size and horizontal centering. Stylesheet cache versions are refreshed on all pages, and desktop and phone layout checks pass on both lines."
     }
   ]
 }
