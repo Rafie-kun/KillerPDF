@@ -1788,6 +1788,11 @@
       "maintenanceCommit": "7072060cab3c3bc8bf457845e05d3ac4793a6e1e",
       "developmentCommit": "ddf4dcdae8aa9d39df980d37f8c0e71232bc471d",
       "reason": "Both lines give landing logos 28 pixels of space above and below while preserving their size and horizontal centering. Stylesheet cache versions are refreshed on all pages, and desktop and phone layout checks pass on both lines."
+    },
+    {
+      "maintenanceCommit": "acdcd8e4f229c96d59bd7f757ea2ab447202e317",
+      "developmentCommit": "07d1bce740effb7a1df59e24fa1285f3a4ff916d",
+      "reason": "Both commits append the same website spacing mapping to their existing forward-port records while preserving the branch-specific policy history."
     }
   ]
 }
