@@ -4,6 +4,16 @@ All notable changes to KillerPDF are documented here.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.91] - Unreleased
+
+1.8.91 fixes a crash when opening the theme picker in the packaged app and updates a vulnerable cryptography dependency.
+
+### Fixed
+- Opening the theme picker and switching themes or accents no longer crashes the installed or portable app.
+
+### Security
+- Updated System.Security.Cryptography.Pkcs to 9.0.21 for GHSA-846f-f764-76mx and GHSA-2fmv-rv2c-59x7.
+
 ## [1.8.90] - 2026-10-14
 
 1.8.90 improves saving, form printing, color selection, updates, and the family look.
