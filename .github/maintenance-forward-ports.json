@@ -1758,6 +1758,11 @@
       "maintenanceCommit": "5c9c4b9de10f5967782696f0fb1cdce02f95e735",
       "developmentCommit": "898920aa8959ea58213562423edd26ceb579292e",
       "reason": "Both lines add the same accessibility labels, keyboard focus behavior and installer error handling. Stable scoped patch IDs match after excluding the branch-specific changelog."
+    },
+    {
+      "maintenanceCommit": "3ca8373f477350753f76ee510a5ef42bd2e4fa23",
+      "developmentCommit": "3bc3b3dadc4a76bc6c30c5a759e1715722a08930",
+      "reason": "Both lines date the 1.8.90 changelog entry for October 14, 2026. Maintenance sets its 1.8.90 project ReleaseDate to the same date. Development retains its 1.9.0 project ReleaseDate and active changelog heading as Unreleased."
     }
   ]
 }
