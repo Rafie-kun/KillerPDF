@@ -1663,6 +1663,11 @@
       "maintenanceCommit": "f69d4a894365f78b6214750ff5a099a5267c1863",
       "developmentCommit": "8c700b65eedfdae10ad7a197e6ed59b5281378fa",
       "reason": "Both lines record the same verified #444 packaging pair and release note. Each current Fixed section is reordered by impact while preserving every original bullet, credit and issue reference. The sections contain different branch-specific histories, so their complete changelog patches differ."
+    },
+    {
+      "maintenanceCommit": "9bf1a54b293a5bdb41723f27a75ae3a3ffc747a5",
+      "developmentCommit": "c46c6abb1124459ceb02b379c766cec5369f5297",
+      "reason": "Both lines center visible website branding within the download controls, correct Help and Technical instructions and localized Engine guides, and refresh current facts on release. Development preserves its Engine rendering and text extraction boundary and its own source and test counts. Page rendering, local references, locale checks and the quick-start example pass on both lines."
     }
   ]
 }
