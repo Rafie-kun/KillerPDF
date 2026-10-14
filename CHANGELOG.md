@@ -39,7 +39,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - App and title bar icons stay sharp at fractional DPI and app zoom, and the title bar icon is slightly larger.
 - The repair prompt reads as plain sentences in every language.
 - Corrected Vietnamese website translations and theme look counts.
-- Centered website logos, standardized fonts and spacing, refreshed Engine branding, and added a two-column Corpus layout.
+- Centered website logos with space above and below, standardized fonts and spacing, refreshed Engine branding, and added a two-column Corpus layout.
 - Corrected Help and Technical instructions, documentation navigation, current feature descriptions, and automatic Engine release facts.
 
 ## [1.8.80] - 2026-10-05
