@@ -374,6 +374,14 @@ namespace KillerPDF
                 if (!ok)
                 {
                     HideBusyOverlay(busy);
+                    // A protected PDF the engine can read keeps its real text read-only.
+                    // Rasterizing repair is only for files that cannot be read at all.
+                    if (TryOpenProtectedReadOnly(srcPath, displayPath))
+                    {
+                        FinalizeAsyncOpen();
+                        EndCancellableOp();
+                        return;
+                    }
                     TryRepairAndOpen(srcPath);   // re-registers the cancellable op; repair finalizes the tab
                     return;
                 }
@@ -393,6 +401,27 @@ namespace KillerPDF
                 KillerDialog.Show(this, Loc("Str_Err_OpenProtected") + "\n" + ex.Message,
                     "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
                 EndCancellableOp();
+            }
+        }
+
+        // Opens an encrypted PDF whose restrictions block a rewrite as a read-only working document.
+        private bool TryOpenProtectedReadOnly(string srcPath, string displayPath)
+        {
+            try
+            {
+                _doc = PdfWorkingDocument.Open(srcPath, isReadOnly: true);
+                _currentFile = srcPath;
+                FinishOpenFile(displayPath, srcPath);
+                _openedFromProtected = true;
+                SetStatus(string.Format(Loc("Str_OpenedReadOnly"),
+                    System.IO.Path.GetFileName(displayPath), _doc.PageCount));
+                return true;
+            }
+            catch (Exception error) when (error is not OutOfMemoryException)
+            {
+                _doc?.Close();
+                _doc = null;
+                return false;
             }
         }
 

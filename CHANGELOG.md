@@ -42,6 +42,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Saving an Edit Text change removes the replaced words from the file, so they can no longer be found, copied or brought back by editing the line again.
 - Opening the theme picker and switching themes or accents no longer crashes the installed or portable app (#452).
 - PDFs with a slightly wrong cross-reference size open normally instead of asking for a repair and showing a crash report (#406).
+- PDFs whose owner restrictions block editing open read-only with their real text, instead of a slow, blurry rasterized repair without selectable text (#424).
 - The bug report window uses the family text field and scrollbars, with grain clipped to the cards and a transparent scrollbar corner.
 - Fixed blank or broken pages in damaged files, including misnumbered cross-reference tables, slightly damaged encryption dictionaries, a null /Trapped entry, undeclared CCITT markers, malformed JPEG filters, unusable crop boxes and corrupt JPEG 2000 tiles. Document rewriting and optimization work again for pages with image, shading or pattern streams.
 - Fixed missing, wrong, invisible or badly spaced text from unusual or damaged TrueType, Type 1, Type 3, CFF and CJK fonts, and installed Arial, Arial Narrow, Arial Black and Times New Roman faces now stand in for unembedded text.
