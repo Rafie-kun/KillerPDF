@@ -198,7 +198,7 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 - Applied graphics-state transfer functions (TR and TR2) to fill, stroke, text and image colors on RGB output.
 - Compatibility recovery reads a dictionary whose opening delimiter was overwritten by a single letter, such as an encryption dictionary written as E< ... >>.
 
-## [1.8.91] - Unreleased
+## [1.8.91] - 2026-10-14
 
 The 1.8.91 engine package matches the KillerPDF theme-picker hotfix release.
 

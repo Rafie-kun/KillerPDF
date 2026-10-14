@@ -65,7 +65,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Centered website logos with space above and below, standardized fonts and spacing, refreshed Engine branding, and added a two-column Corpus layout.
 - Corrected Help and Technical instructions, documentation navigation, current feature descriptions, and automatic Engine release facts.
 
-## [1.8.91] - Unreleased
+## [1.8.91] - 2026-10-14
 
 1.8.91 fixes a crash when opening the theme picker in the packaged app and updates a vulnerable cryptography dependency.
 
