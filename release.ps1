@@ -614,6 +614,14 @@ try {
         $indexNew = $indexNew -replace $field.Pattern, ('${1}' + $field.Value)
     }
 
+    $commonGit = (& git rev-parse --path-format=absolute --git-common-dir).Trim()
+    $completion = Get-Content -LiteralPath (Join-Path $commonGit 'killerpdf-completion.json') -Raw | ConvertFrom-Json
+    $engineEvidence = @($completion.results | Where-Object {
+        $_.line -eq 'development' -and $_.project -eq 'engine/KillerPdf.Engine.Tests/KillerPdf.Engine.Tests.csproj'
+    })
+    if ($engineEvidence.Count -ne 1) { throw 'Engine test evidence is missing from the checked completion receipt.' }
+    & (Join-Path $PSScriptRoot 'build/Update-EngineSiteFacts.ps1') -TrxPath $engineEvidence[0].trx -DryRun:$DryRun
+
     if ($DryRun) {
         Write-Host "    DryRun: would write these release facts to pdf-landing and commit:" -ForegroundColor Yellow
         Write-Host "      version  : KillerPDF v$Version"

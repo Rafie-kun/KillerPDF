@@ -11,7 +11,7 @@
 <meta name="description" content="A deep technical explanation of how KillerPDF renders, zooms, and stays robust.">
 <link rel="icon" type="image/x-icon" href="kp-icon.ico">
 <script defer src="https://koya.thekiller.net/script.js" data-website-id="4036b11d-f6c0-4254-b448-933d3e38b0cb"></script>
-<link rel="stylesheet" href="kp.css?v=26">
+<link rel="stylesheet" href="kp.css?v=27">
 <style>
 .page-hero { text-align: center; padding: 44px 16px 8px; }
 .page-hero .wm-logo { height: clamp(55px, 9.5vw, 91px); width: auto; margin: 0 auto 8px; display: block; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.55)); }
@@ -558,16 +558,7 @@
 })();
 </script>
 <script>
-(function(){
-  var links=[].slice.call(document.querySelectorAll('.outline a'));
-  var secs=links.map(function(a){return document.querySelector(a.getAttribute('href'));}).filter(Boolean);
-  var sc=document.querySelector('.content-scroll');
-  function onScroll(){ var y=(sc?sc.scrollTop:window.scrollY)+100, cur=secs[0]; secs.forEach(function(s){ if(s&&s.offsetTop<=y) cur=s; });
-    var active=null;
-    links.forEach(function(a){ var on=cur && a.getAttribute('href')==='#'+cur.id; a.classList.toggle('on', on); if(on) active=a; });
-    if(active && window.knOutlineReveal) window.knOutlineReveal(active); }
-  (sc||window).addEventListener('scroll',onScroll,{passive:true}); onScroll();
-})();
+window.setupOutlineNavigation();
 </script>
 </body>
 </html>
