@@ -1763,6 +1763,11 @@
       "maintenanceCommit": "3ca8373f477350753f76ee510a5ef42bd2e4fa23",
       "developmentCommit": "3bc3b3dadc4a76bc6c30c5a759e1715722a08930",
       "reason": "Both lines date the 1.8.90 changelog entry for October 14, 2026. Maintenance sets its 1.8.90 project ReleaseDate to the same date. Development retains its 1.9.0 project ReleaseDate and active changelog heading as Unreleased."
+    },
+    {
+      "maintenanceCommit": "c9258f335442475bcc3de1742ddaee5492dccebf",
+      "developmentCommit": "d8b2517c9f57656ddf804cc5eae6e43df1417e89",
+      "reason": "Both lines restore website wordmark sizes, Lacquer headers and compact documentation spacing, share identical Engine branding and release-facts collection, and add the same navigation helper and two-column Corpus layout. Development retains its own Corpus results and generated 1.9.0 source/test counts, and the release hook selects its development Engine test receipt. Existing branch-specific website features are preserved."
     }
   ]
 }
