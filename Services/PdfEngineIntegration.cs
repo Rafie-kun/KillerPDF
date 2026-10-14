@@ -47,14 +47,14 @@ internal static class PdfEngineIntegration
     internal static IReadOnlyList<PdfBookmarkInfo> ReadBookmarks(byte[] source)
     {
         ArgumentNullException.ThrowIfNull(source);
-        return PdfBookmarkReader.Read(PdfDocument.Open(source));
+        return PdfBookmarkReader.Read(PdfDocument.OpenWithCompatibilityRecovery(source));
     }
 
     /// <summary>Reads native links from one page for viewer hit testing.</summary>
     internal static IReadOnlyList<PdfLinkInfo> ReadPageLinks(string path, int pageIndex)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
-        return PdfLinkReader.ReadPage(PdfDocument.Open(File.ReadAllBytes(path)), pageIndex);
+        return PdfLinkReader.ReadPage(PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(path)), pageIndex);
     }
 
     /// <summary>Reads native links from an already parsed engine document.</summary>
@@ -76,14 +76,14 @@ internal static class PdfEngineIntegration
         string path, int pageIndex)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
-        return ReadPageFormWidgets(PdfDocument.Open(File.ReadAllBytes(path)), pageIndex);
+        return ReadPageFormWidgets(PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(path)), pageIndex);
     }
 
     internal static IReadOnlyList<IReadOnlyList<PdfFormWidgetInfo>> ReadAllPageFormWidgets(
         string path)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
-        PdfDocument document = PdfDocument.Open(File.ReadAllBytes(path));
+        PdfDocument document = PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(path));
         int pageCount = PdfPageInformation.Read(document).Count;
         return
         [
@@ -96,7 +96,7 @@ internal static class PdfEngineIntegration
     internal static PdfPrintProductionReport InspectPrintProduction(string path)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
-        return PdfPrintProductionReport.Inspect(PdfDocument.Open(File.ReadAllBytes(path)));
+        return PdfPrintProductionReport.Inspect(PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(path)));
     }
 
     /// <summary>Runs the complete built-in print-production preflight profile.</summary>
@@ -110,14 +110,14 @@ internal static class PdfEngineIntegration
     internal static PdfAccessibilityReport InspectAccessibility(string path)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
-        return PdfAccessibilityInspector.Inspect(PdfDocument.Open(File.ReadAllBytes(path)));
+        return PdfAccessibilityInspector.Inspect(PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(path)));
     }
 
     /// <summary>Reads the document's optional-content layer definitions and state.</summary>
     internal static PdfOptionalContentInfo InspectLayers(string path)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
-        return PdfOptionalContentReader.Read(PdfDocument.Open(File.ReadAllBytes(path)));
+        return PdfOptionalContentReader.Read(PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(path)));
     }
 
     /// <summary>Applies reviewed layer names, saved visibility, and lock state.</summary>
@@ -160,13 +160,13 @@ internal static class PdfEngineIntegration
     internal static string InspectPortfolio(string path)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
-        return PdfCollectionReader.ToText(PdfDocument.Open(File.ReadAllBytes(path)));
+        return PdfCollectionReader.ToText(PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(path)));
     }
 
     internal static PortfolioEditorState ReadPortfolioEditorState(string path)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
-        PdfDocument document = PdfDocument.Open(File.ReadAllBytes(path));
+        PdfDocument document = PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(path));
         return new PortfolioEditorState(
             PdfCollectionReader.Read(document),
             [.. PdfAttachmentReader.Read(document)

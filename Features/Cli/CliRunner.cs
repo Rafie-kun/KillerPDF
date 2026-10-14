@@ -414,7 +414,7 @@ namespace KillerPDF.Features
 
             byte[] source = File.ReadAllBytes(inPath);
             int pageCount = KillerPdf.Engine.Documents.PdfDocumentInformation
-                .Read(KillerPdf.Engine.Documents.PdfDocument.Open(source)).PageCount;
+                .Read(KillerPdf.Engine.Documents.PdfDocument.OpenWithCompatibilityRecovery(source)).PageCount;
             var indices = CliParsePageRange(spec, pageCount, out string err);
             if (indices is null) { con.WriteLine(err); return 2; }
 
@@ -463,7 +463,7 @@ namespace KillerPDF.Features
             IReadOnlyList<PdfSplitOutput> parts;
             try
             {
-                parts = PdfDocumentSplitter.Split(PdfDocument.Open(source), rule, baseName);
+                parts = PdfDocumentSplitter.Split(PdfDocument.OpenWithCompatibilityRecovery(source), rule, baseName);
             }
             catch (Exception ex) when (ex is ArgumentException or InvalidOperationException)
             {
@@ -584,7 +584,7 @@ namespace KillerPDF.Features
             PdfDocument document;
             try
             {
-                document = PdfDocument.Open(File.ReadAllBytes(inPath));
+                document = PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(inPath));
             }
             catch (Exception ex) when (ex is InvalidOperationException
                 or NotSupportedException or ArgumentException or FormatException)
@@ -769,7 +769,7 @@ namespace KillerPDF.Features
 
             try
             {
-                PdfDocument document = PdfDocument.Open(File.ReadAllBytes(inPath));
+                PdfDocument document = PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(inPath));
                 IReadOnlyList<PdfBookmarkProposal> proposals =
                     PdfBookmarkGeneration.DetectHeadings(document, detection);
                 if (proposals.Count == 0)
@@ -926,7 +926,7 @@ namespace KillerPDF.Features
             try
             {
                 report = PdfAccessibilityInspector.Inspect(
-                    PdfDocument.Open(File.ReadAllBytes(inPath)));
+                    PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(inPath)));
             }
             catch (Exception ex) when (ex is InvalidOperationException
                 or NotSupportedException or ArgumentException or FormatException)
@@ -956,7 +956,7 @@ namespace KillerPDF.Features
             IReadOnlyList<PdfAttachmentInfo> attachments;
             try
             {
-                document = PdfDocument.Open(File.ReadAllBytes(inPath));
+                document = PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(inPath));
                 attachments = PdfAttachmentReader.Read(document);
             }
             catch (Exception ex) when (ex is InvalidOperationException
@@ -1042,7 +1042,7 @@ namespace KillerPDF.Features
                 int pageCount;
                 try
                 {
-                    pageCount = PdfPageInformation.Read(PdfDocument.Open(source)).Count;
+                    pageCount = PdfPageInformation.Read(PdfDocument.OpenWithCompatibilityRecovery(source)).Count;
                 }
                 catch (Exception ex) when (ex is InvalidOperationException
                     or NotSupportedException or ArgumentException or FormatException)
@@ -1413,7 +1413,7 @@ namespace KillerPDF.Features
             using var renderSession =
                 PdfPageRenderSession.OpenEngineFirst(renderPath, dpi / 72.0);
             int pageCount = renderSession.PageCount;
-            PdfDocument renderDocument = PdfDocument.Open(File.ReadAllBytes(renderPath));
+            PdfDocument renderDocument = PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(renderPath));
             IReadOnlyList<bool> bitonalHints =
                 PdfPageRasterInformation.ReadBitonalImagePageHints(renderDocument);
             IReadOnlyList<bool> jpegHints =
@@ -1800,7 +1800,7 @@ namespace KillerPDF.Features
                 return 2;
             }
             string path = Path.GetFullPath(pos[0]);
-            PdfDocumentInformation info = PdfDocumentInformation.Read(PdfDocument.Open(File.ReadAllBytes(path)));
+            PdfDocumentInformation info = PdfDocumentInformation.Read(PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(path)));
             con.WriteLine(JsonSerializer.Serialize(new
             {
                 path, info.PageCount, version = info.Version.ToString(), info.Title, info.Author,
@@ -1836,7 +1836,7 @@ namespace KillerPDF.Features
             if (!File.Exists(source)) { con.WriteLine($"Input not found: {source}"); return false; }
             if (string.Equals(source, output, StringComparison.OrdinalIgnoreCase))
             { con.WriteLine("Output file cannot also be the input."); return false; }
-            pageCount = PdfDocumentInformation.Read(PdfDocument.Open(File.ReadAllBytes(source))).PageCount;
+            pageCount = PdfDocumentInformation.Read(PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(source))).PageCount;
             return true;
         }
 

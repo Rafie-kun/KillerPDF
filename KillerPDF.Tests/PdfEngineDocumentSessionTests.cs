@@ -128,4 +128,44 @@ public sealed class PdfEngineDocumentSessionTests
             if (File.Exists(landscapePath)) File.Delete(landscapePath);
         }
     }
+
+    [Fact]
+    public void Open_AcceptsTrailerSizeOneShortOfTheCrossReferenceTable()
+    {
+        // #406: the table lists objects 0 through 4 but the trailer says /Size 4.
+        string path = Path.Combine(Path.GetTempPath(), $"killerpdf-short-size-{Guid.NewGuid():N}.pdf");
+        try
+        {
+            File.WriteAllBytes(path, ShortTrailerSizePdf());
+            PdfEngineDocumentSession session = PdfEngineDocumentSession.Open(path);
+
+            var page = Assert.Single(session.Pages);
+            Assert.Equal(200, page.Width);
+            Assert.Equal(300, page.Height);
+        }
+        finally { if (File.Exists(path)) File.Delete(path); }
+    }
+
+    private static byte[] ShortTrailerSizePdf()
+    {
+        string[] objects =
+        [
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [4 0 R] /Count 1 >>",
+            "<< /Length 0 >>\nstream\n\nendstream",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 300] /Contents 3 0 R /Resources << >> >>",
+        ];
+        var text = new System.Text.StringBuilder("%PDF-1.4\n");
+        var offsets = new List<int>();
+        for (int index = 0; index < objects.Length; index++)
+        {
+            offsets.Add(text.Length);
+            text.Append($"{index + 1} 0 obj\n{objects[index]}\nendobj\n");
+        }
+        int xref = text.Length;
+        text.Append($"xref\n0 {objects.Length + 1}\n0000000000 65535 f \n");
+        foreach (int offset in offsets) text.Append($"{offset:D10} 00000 n \n");
+        text.Append($"trailer\n<< /Size {objects.Length} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n");
+        return System.Text.Encoding.ASCII.GetBytes(text.ToString());
+    }
 }
