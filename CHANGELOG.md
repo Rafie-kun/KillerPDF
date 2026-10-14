@@ -59,7 +59,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Button gradients start at the outline color and darken toward the bottom, so a hovered button no longer looks darker than its border.
 - The About card marks 1.9 development builds as unreleased.
 - The repair prompt reads as plain sentences in every language.
-- Centered website logos, standardized fonts and spacing, refreshed Engine branding, and added a two-column Corpus layout.
+- Centered website logos with space above and below, standardized fonts and spacing, refreshed Engine branding, and added a two-column Corpus layout.
 - Corrected Help and Technical instructions, documentation navigation, current feature descriptions, and automatic Engine release facts.
 
 ## [1.8.90] - 2026-10-14
