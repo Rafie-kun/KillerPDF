@@ -1668,6 +1668,11 @@
       "maintenanceCommit": "9bf1a54b293a5bdb41723f27a75ae3a3ffc747a5",
       "developmentCommit": "c46c6abb1124459ceb02b379c766cec5369f5297",
       "reason": "Both lines center visible website branding within the download controls, correct Help and Technical instructions and localized Engine guides, and refresh current facts on release. Development preserves its Engine rendering and text extraction boundary and its own source and test counts. Page rendering, local references, locale checks and the quick-start example pass on both lines."
+    },
+    {
+      "maintenanceCommit": "7072060cab3c3bc8bf457845e05d3ac4793a6e1e",
+      "developmentCommit": "ddf4dcdae8aa9d39df980d37f8c0e71232bc471d",
+      "reason": "Both lines give landing logos 28 pixels of space above and below while preserving their size and horizontal centering. Stylesheet cache versions are refreshed on all pages, and desktop and phone layout checks pass on both lines."
     }
   ]
 }
