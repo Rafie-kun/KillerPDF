@@ -719,7 +719,8 @@ try {
 
     git fetch origin $defaultBranch --quiet
     if ((git rev-parse HEAD).Trim() -ne (git rev-parse "origin/$defaultBranch").Trim()) {
-        throw "Local $defaultBranch and origin/$defaultBranch differ. Push or pull first."
+        if ($DryRun) { Write-Warning "Local $defaultBranch and origin/$defaultBranch differ. A real release requires pushing or pulling first." }
+        else { throw "Local $defaultBranch and origin/$defaultBranch differ. Push or pull first." }
     }
     if (git tag --list $Tag) { throw "Tag $Tag already exists" }
     if (git ls-remote --tags origin $Tag) { throw "Tag $Tag already exists on origin" }
