@@ -1773,6 +1773,11 @@
       "maintenanceCommit": "854353f8c84adda7314fd4b9a793b37a980f6a6c",
       "developmentCommit": "031e6295787ff890ab4ef66c1820cf1a01ff5d83",
       "reason": "Both lines remove old feature release labels from the landing page, Technical and Help, use the same current-tense translations in all eighteen locales, and prioritize the same sixteen feature cards including PDF comparison. Existing branch-specific HTML and changelog context are preserved."
+    },
+    {
+      "maintenanceCommit": "9bf1a54b293a5bdb41723f27a75ae3a3ffc747a5",
+      "developmentCommit": "c46c6abb1124459ceb02b379c766cec5369f5297",
+      "reason": "Both lines center visible website branding within the download controls, correct Help and Technical instructions and localized Engine guides, and refresh current facts on release. Development preserves its Engine rendering and text extraction boundary and its own source and test counts. Page rendering, local references, locale checks and the quick-start example pass on both lines."
     }
   ]
 }
