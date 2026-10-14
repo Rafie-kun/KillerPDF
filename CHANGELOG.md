@@ -60,7 +60,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - The About card marks 1.9 development builds as unreleased.
 - The repair prompt reads as plain sentences in every language.
 - Restored website wordmark sizes and consistent fonts and spacing, refreshed Engine branding, and added a two-column Corpus layout.
-- Corrected documentation navigation and updated Engine release facts automatically.
+- Corrected documentation navigation, prioritized current features without old release labels, and updated Engine release facts automatically.
 
 ## [1.8.90] - 2026-10-14
 
@@ -96,7 +96,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - The repair prompt reads as plain sentences in every language.
 - Corrected Vietnamese website translations and theme look counts.
 - Restored website wordmark sizes and consistent fonts and spacing, refreshed Engine branding, and added a two-column Corpus layout.
-- Corrected documentation navigation and updated Engine release facts automatically.
+- Corrected documentation navigation, prioritized current features without old release labels, and updated Engine release facts automatically.
 
 ## [1.8.80] - 2026-10-05
 
