@@ -60,7 +60,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - The About card marks 1.9 development builds as unreleased.
 - The repair prompt reads as plain sentences in every language.
 
-## [1.8.90] - Unreleased
+## [1.8.90] - 2026-10-14
 
 1.8.90 improves saving, form printing, color selection, updates, and the family look.
 
