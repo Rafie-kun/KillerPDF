@@ -1768,6 +1768,11 @@
       "maintenanceCommit": "c9258f335442475bcc3de1742ddaee5492dccebf",
       "developmentCommit": "d8b2517c9f57656ddf804cc5eae6e43df1417e89",
       "reason": "Both lines restore website wordmark sizes, Lacquer headers and compact documentation spacing, share identical Engine branding and release-facts collection, and add the same navigation helper and two-column Corpus layout. Development retains its own Corpus results and generated 1.9.0 source/test counts, and the release hook selects its development Engine test receipt. Existing branch-specific website features are preserved."
+    },
+    {
+      "maintenanceCommit": "854353f8c84adda7314fd4b9a793b37a980f6a6c",
+      "developmentCommit": "031e6295787ff890ab4ef66c1820cf1a01ff5d83",
+      "reason": "Both lines remove old feature release labels from the landing page, Technical and Help, use the same current-tense translations in all eighteen locales, and prioritize the same sixteen feature cards including PDF comparison. Existing branch-specific HTML and changelog context are preserved."
     }
   ]
 }
