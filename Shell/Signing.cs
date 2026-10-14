@@ -301,12 +301,15 @@ namespace KillerPDF
             {
                 Text = Loc("Str_Sig_Title"),
                 Foreground = (Brush)FindResource(classicCaption ? "ChromeTextBrush" : "PrimaryBrush"),
+                // Lacquer, the "PDF" wordmark face, on the flat themes. It has no bold cut, and its
+                // deep drips hang below the line, so the bottom margin is pulled in to keep the
+                // header row the same height.
                 FontFamily = classicCaption
                     ? (FontFamily)FindResource("ChromeFontFamily")
-                    : UiKit.MonoFont,
-                FontWeight = FontWeights.Bold,
-                FontSize = classicCaption ? 11 : 14,
-                Margin = classicCaption ? new Thickness(0) : new Thickness(4, 2, 4, 2),
+                    : UiKit.WordmarkFontPdf,
+                FontWeight = classicCaption ? FontWeights.Bold : FontWeights.Normal,
+                FontSize = classicCaption ? 11 : 18,
+                Margin = classicCaption ? new Thickness(0) : new Thickness(4, 0, 4, -4),
                 VerticalAlignment = VerticalAlignment.Center,
                 Effect = classicCaption ? null : new System.Windows.Media.Effects.DropShadowEffect { Color = Colors.Black, BlurRadius = 2, ShadowDepth = 1, Direction = 270, Opacity = 0.7 }
             };
@@ -832,7 +835,7 @@ namespace KillerPDF
 
         private void ImportImageSignature(SignatureKind kind = SignatureKind.Signature)
         {
-            var dlg = new Controls.ImageAssetPickerDialog(this);
+            var dlg = new Controls.ImageAssetPickerDialog(this, Loc("Str_Sign_ImportImage"));
             if (dlg.ShowDialog() != true || string.IsNullOrEmpty(dlg.SelectedPath)) return;
 
             try

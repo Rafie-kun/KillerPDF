@@ -13,17 +13,20 @@ internal sealed class ImageAssetPickerDialog : Window
     private readonly ImageAssetStore _store = new();
     private readonly ListBox _assets = new();
     private readonly Image _preview = new() { Stretch = Stretch.Uniform };
+    private readonly TextBlock _emptyHint;
     private readonly TextBox _name = UiKit.Field();
-    private readonly Button _rename;
     private readonly Button _delete;
     private readonly Button _use;
+    // The row whose name the Name box is editing, so a rename lands on the right image even when
+    // the box loses focus because another row was clicked.
+    private ListBoxItem? _editingItem;
 
     internal string? SelectedPath { get; private set; }
     internal string? SelectedName { get; private set; }
 
-    internal ImageAssetPickerDialog(Window owner)
+    internal ImageAssetPickerDialog(Window owner, string? title = null)
     {
-        Title = "KillerPDF - " + L("Str_Dlg_InsertImage");
+        Title = "KillerPDF - " + (title ?? L("Str_Dlg_InsertImage"));
         Width = 680;
         Height = 480;
         MinWidth = 560;
@@ -42,26 +45,37 @@ internal sealed class ImageAssetPickerDialog : Window
 
         var import = UiKit.Make(L("Str_Sig_Import"), accent: false);
         import.Click += (_, _) => Import();
-        _rename = UiKit.Make(L("Str_Ctx_BmRename"), accent: false);
-        _rename.Click += (_, _) => Rename();
         _delete = UiKit.Make(L("Str_Ctx_BmDelete"), accent: false);
         _delete.Click += (_, _) => Delete();
 
-        var libraryButtons = new StackPanel
-        {
-            Orientation = Orientation.Horizontal,
-            Margin = new Thickness(0, 10, 0, 0)
-        };
+        // Wraps instead of clipping when a translated label makes the buttons wider than the
+        // library column. Each button carries its own top gap so a wrapped row keeps it too.
+        var libraryButtons = new WrapPanel { Margin = new Thickness(0, 2, 0, 0) };
+        import.Margin = new Thickness(0, 8, 8, 0);
         libraryButtons.Children.Add(import);
-        _rename.Margin = new Thickness(8, 0, 0, 0);
-        libraryButtons.Children.Add(_rename);
-        _delete.Margin = new Thickness(8, 0, 0, 0);
+        _delete.Margin = new Thickness(0, 8, 8, 0);
         libraryButtons.Children.Add(_delete);
+
+        // An empty library says what it is for, rather than showing a blank box.
+        _emptyHint = new TextBlock
+        {
+            Text = L("Str_ImageAsset_Empty"),
+            TextWrapping = TextWrapping.Wrap,
+            TextAlignment = TextAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(16),
+            IsHitTestVisible = false
+        };
+        _emptyHint.SetResourceReference(TextBlock.ForegroundProperty, "MutedTextBrush");
+        var library = new Grid();
+        library.Children.Add(_assets);
+        library.Children.Add(_emptyHint);
 
         var left = new DockPanel { Margin = new Thickness(0, 0, 14, 0) };
         DockPanel.SetDock(libraryButtons, Dock.Bottom);
         left.Children.Add(libraryButtons);
-        left.Children.Add(_assets);
+        left.Children.Add(library);
 
         var previewFrame = new Border
         {
@@ -74,8 +88,17 @@ internal sealed class ImageAssetPickerDialog : Window
 
         var right = new DockPanel();
         var namePanel = new StackPanel { Margin = new Thickness(0, 10, 0, 0) };
-        namePanel.Children.Add(UiKit.GroupLabel(L("Str_DocInfo_Title")));
+        namePanel.Children.Add(UiKit.GroupLabel(L("Str_Attachment_Name")));
         namePanel.Children.Add(_name);
+        // The name saves on Enter or when the box loses focus; Enter here renames rather than
+        // pressing Open.
+        _name.PreviewKeyDown += (_, e) =>
+        {
+            if (e.Key != Key.Enter) return;
+            CommitName();
+            e.Handled = true;
+        };
+        _name.LostKeyboardFocus += (_, _) => CommitName();
         DockPanel.SetDock(namePanel, Dock.Bottom);
         right.Children.Add(namePanel);
         right.Children.Add(UiKit.PaneWithShadow(previewFrame));
@@ -143,14 +166,16 @@ internal sealed class ImageAssetPickerDialog : Window
         }
         if (_assets.SelectedIndex < 0 && _assets.Items.Count > 0)
             _assets.SelectedIndex = 0;
+        _emptyHint.Visibility = _assets.Items.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         SelectionChanged();
     }
 
     private void SelectionChanged()
     {
+        CommitName();
+        _editingItem = _assets.SelectedItem as ListBoxItem;
         ImageAsset? asset = SelectedAsset;
         BitmapImage? bitmap = asset is null ? null : LoadBitmap(_store.GetPath(asset));
-        _rename.IsEnabled = asset is not null;
         _delete.IsEnabled = asset is not null;
         _use.IsEnabled = bitmap is not null;
         _name.IsEnabled = asset is not null;
@@ -189,15 +214,24 @@ internal sealed class ImageAssetPickerDialog : Window
         }
     }
 
-    private void Rename()
+    // Saves the Name box onto the row it was editing. The row is updated in place instead of
+    // reloading the list, so a click on another row is never lost to a rebuilt list.
+    private void CommitName()
     {
-        ImageAsset? asset = SelectedAsset;
+        if (_editingItem?.Tag is not ImageAsset asset) return;
         string name = _name.Text.Trim();
-        if (asset is null || name.Length == 0) return;
+        if (name.Length == 0)
+        {
+            if (ReferenceEquals(_editingItem, _assets.SelectedItem)) _name.Text = asset.Name;
+            return;
+        }
+        if (string.Equals(name, asset.Name, StringComparison.Ordinal)) return;
         try
         {
             _store.Rename(asset.Id, name);
-            Reload(asset.Id);
+            _editingItem.Tag = asset with { Name = name };
+            if (_editingItem.Content is StackPanel row && row.Children.OfType<TextBlock>().FirstOrDefault() is { } label)
+                label.Text = name;
         }
         catch (Exception ex)
         {
@@ -228,6 +262,7 @@ internal sealed class ImageAssetPickerDialog : Window
 
     private void UseSelected()
     {
+        CommitName();
         ImageAsset? asset = SelectedAsset;
         if (asset is null) return;
         SelectedPath = _store.GetPath(asset);

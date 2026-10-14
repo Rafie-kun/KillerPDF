@@ -1039,6 +1039,7 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Dlg_SaveExtractedAs">Зберегти видобуті сторінки як</sys:String>
     <sys:String x:Key="Str_Dlg_InsertImage">Вставити зображення</sys:String>
     <sys:String x:Key="Str_ImageAsset_DeleteConfirm">Видалити зображення «{0}»?</sys:String>
+    <sys:String x:Key="Str_ImageAsset_Empty">Збережених зображень поки немає. Натисніть «Імпортувати зображення», щоб додати.</sys:String>
     <sys:String x:Key="Str_Dlg_InstallShortcut">Створити ярлик на робочому столі</sys:String>
     <sys:String x:Key="Str_Stamp_DefaultText">ЧЕРНЕТКА</sys:String>
     <sys:String x:Key="Str_Sign_NeedCertFile">Спершу виберіть файл сертифіката (.pfx / .p12).</sys:String>

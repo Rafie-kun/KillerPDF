@@ -1039,6 +1039,7 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Dlg_SaveExtractedAs">Salvar páginas extraídas como</sys:String>
     <sys:String x:Key="Str_Dlg_InsertImage">Inserir imagem</sys:String>
     <sys:String x:Key="Str_ImageAsset_DeleteConfirm">Excluir a imagem “{0}”?</sys:String>
+    <sys:String x:Key="Str_ImageAsset_Empty">Ainda não há imagens salvas. Clique em Importar imagem para adicionar uma.</sys:String>
     <sys:String x:Key="Str_Dlg_InstallShortcut">Criar atalho na área de trabalho</sys:String>
     <sys:String x:Key="Str_Stamp_DefaultText">RASCUNHO</sys:String>
     <sys:String x:Key="Str_Sign_NeedCertFile">Escolha primeiro um arquivo de certificado (.pfx / .p12).</sys:String>
