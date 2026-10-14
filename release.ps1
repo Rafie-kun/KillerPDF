@@ -181,13 +181,17 @@ if ($releaseDate -ne $changelogDate) {
 Write-Host "    Release date: $releaseDate"
 
 Write-Host "`n==> Auditing package vulnerabilities..." -ForegroundColor Cyan
-$auditOutput = @(dotnet list $proj package --vulnerable --include-transitive 2>&1)
-$auditExitCode = $LASTEXITCODE
-$auditText = ($auditOutput | Out-String).TrimEnd()
-if ($auditText) { Write-Host $auditText }
-if ($auditExitCode -ne 0) { throw "Package vulnerability audit failed to run." }
-if ($auditText -match '(?i)has the following vulnerable packages') {
-    throw "Vulnerable packages were found. Update them before releasing."
+# The app audit does not surface the engine's own package references, and the NuGet engine
+# workflow fails on any engine advisory after the release is already published, so audit both.
+foreach ($auditProject in @($proj, $engineProject)) {
+    $auditOutput = @(dotnet list $auditProject package --vulnerable --include-transitive 2>&1)
+    $auditExitCode = $LASTEXITCODE
+    $auditText = ($auditOutput | Out-String).TrimEnd()
+    if ($auditText) { Write-Host $auditText }
+    if ($auditExitCode -ne 0) { throw "Package vulnerability audit failed to run for $auditProject." }
+    if ($auditText -match '(?i)has the following vulnerable packages') {
+        throw "Vulnerable packages were found in $auditProject. Update them before releasing."
+    }
 }
 
 Write-Host "`n==> Git preflight..." -ForegroundColor Cyan
