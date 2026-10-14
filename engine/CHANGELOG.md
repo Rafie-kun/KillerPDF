@@ -4,9 +4,13 @@ All notable changes to The KillerPDF.Engine are documented here. Application cha
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.8.90] - Unreleased
+## [1.8.90] - 2026-10-14
 
-The 1.8.90 engine package follows the application maintenance release with no engine changes.
+The 1.8.90 engine package updates a vulnerable cryptography dependency.
+
+### Security
+
+- Updated System.Security.Cryptography.Pkcs to 9.0.21 for GHSA-846f-f764-76mx and GHSA-2fmv-rv2c-59x7.
 
 ## [1.8.80] - 2026-10-04
 
