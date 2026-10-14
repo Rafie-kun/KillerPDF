@@ -43,19 +43,11 @@ The round-trip validator inspects the source, rewrites it, reopens the result, w
 
 > A successful engine round trip does not replace veraPDF, qpdf, a signature verifier, or application-specific acceptance tests.
 
-## Independent release gates
+## Validation
 
-The engine release process combines:
+For exact source and test counts, see the Overview. Corpus results identify the tested build and inputs. qpdf, veraPDF and OpenSSL provide separate structural, standards and signature checks.
 
-- 1,437 unit and regression tests
-- Strict Release builds with zero warnings
-- A 2,907-file incremental structural corpus gate
-- A 2,907-file selected-page import corpus gate
-- qpdf structural checks
-- veraPDF PDF/A-4 and PDF/UA-2 validation
-- OpenSSL verification of real detached CMS signature fixtures
-
-Many corpus files are malformed, encrypted, or intentionally nonconforming. A documented refusal is expected when the source cannot be edited safely. The release gate distinguishes those boundaries from unexpected failures.
+[Overview](index.html) | [Corpus](../corpus.html)
 
 ## Validate the profile you claim
 

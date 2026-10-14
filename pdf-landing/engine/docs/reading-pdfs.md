@@ -94,4 +94,4 @@ An empty page returns an empty list. Page indexes are zero-based.
 
 ## Know the boundary
 
-The engine reads document structure. It does not render pages, extract page text, extract embedded images, or run OCR. Pair it with the renderer and extraction tools appropriate for your application.
+The 1.9 development branch uses The KillerPDF.Engine for rendering and text extraction. Tesseract remains available as an OCR fallback. See the developer guide for current engine APIs.

@@ -52,7 +52,7 @@ if ($DryRun) { Write-Host $content; return }
 $destination = Join-Path $site 'engine-site-facts.js'
 $previous = if (Test-Path $destination) { [IO.File]::ReadAllText($destination) } else { '' }
 if ($content -ne $previous) { [IO.File]::WriteAllText($destination, $content) }
-foreach ($html in Get-ChildItem $site -Filter '*.html') {
+foreach ($html in Get-ChildItem (Split-Path $site -Parent) -Filter '*.html' -Recurse) {
     $previous = [IO.File]::ReadAllText($html.FullName)
     $updated = $previous -replace '(engine-site-facts\.js\?v=)[^"]+', ('${1}' + $version)
     if ($updated -ne $previous) { [IO.File]::WriteAllText($html.FullName, $updated) }

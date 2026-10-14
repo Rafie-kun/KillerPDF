@@ -11,7 +11,7 @@
 <meta name="description" content="About KillerPDF and its maker, Steve the Killer - a field tech who got tired of Adobe.">
 <link rel="icon" type="image/x-icon" href="kp-icon.ico">
 <script defer src="https://koya.thekiller.net/script.js" data-website-id="4036b11d-f6c0-4254-b448-933d3e38b0cb"></script>
-<link rel="stylesheet" href="kp.css?v=27">
+<link rel="stylesheet" href="kp.css?v=28">
 <style>
 .page-hero { text-align: center; padding: 44px 16px 8px; }
 .page-hero .wm-logo { height: clamp(55px, 9.5vw, 91px); width: auto; margin: 0 auto 8px; display: block; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.55)); }
@@ -129,7 +129,7 @@ html[data-theme="light"] .also-wm.light { display: block; }
 <div class="about-card" id="app">
 <h2 data-i18n="pa_8">The app</h2>
 <p data-i18n="pa_9"><b>KillerPDF</b> is a native Windows PDF viewer, annotator and light editor available as a compact installer or a self-contained portable edition. No account, no subscription, and no license server to babysit.</p>
-<p data-i18n="pa_10">It's deliberately overbuilt for what my clients run into: it opens the encrypted, broken-xref, and rotated-and-clipped PDFs that make other viewers give up, because those are exactly the files that generate tickets. It renders with PDFium, OCRs with Tesseract, fills and signs forms, and prints at 300 DPI - all locally, with no telemetry and no ads.</p>
+<p data-i18n="pa_10">It's deliberately overbuilt for what my clients run into: it opens the encrypted, broken-xref, and rotated-and-clipped PDFs that make other viewers give up, because those are exactly the files that generate tickets. It renders with The KillerPDF.Engine, OCRs with Tesseract, fills and signs forms, and prints at 300 DPI - all locally, with no telemetry and no ads.</p>
 <p data-i18n="pa_11">Much of what it does was requested by the people who use it. The <a href="https://github.com/SteveTheKiller/KillerPDF/issues" target="_blank" rel="noopener">GitHub issues</a> page stays open to anyone, and your suggestions genuinely shape where it goes next. KillerPDF is free software under the <b>GPL-3.0</b> license. For the deep technical details, see the <a href="technical.html">Technical</a> page.</p>
 </div>
 
@@ -207,8 +207,10 @@ html[data-theme="light"] .also-wm.light { display: block; }
 <span class="right" data-i18n="pa_31"><span id="verEgg" title="click me">v1.8.80</span> &middot; &copy; 2026 <b><a href="https://thekiller.net" target="_blank" rel="noopener">Steve the Killer</a></b></span>
 </footer>
 <div class="egg-toast" id="eggToast"></div>
-<script src="kp-i18n.js?v=14"></script>
-<script src="kp.js?v=16"></script>
+<script src="kp-i18n.js?v=20"></script>
+<script src="engine/engine-site-facts.js?v=1.9.0"></script>
+<script src="kp-site-info.js?v=1"></script>
+<script src="kp.js?v=17"></script>
 <script>
 (function(){
   var links=[].slice.call(document.querySelectorAll('.outline a'));

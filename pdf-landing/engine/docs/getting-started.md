@@ -18,12 +18,6 @@ Run this in your project directory:
 dotnet add package KillerPdf.Engine
 ```
 
-Or add the package reference directly:
-
-```xml
-<PackageReference Include="KillerPdf.Engine" Version="1.8.2" />
-```
-
 When working from a KillerPDF repository checkout, use a project reference instead:
 
 ```xml

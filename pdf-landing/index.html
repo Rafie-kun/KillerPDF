@@ -23,7 +23,7 @@
 <meta name="twitter:description" content="Compact installer or self-contained portable edition. No account, subscription, or telemetry. Local PDF editor. GPLv3.">
 <meta name="twitter:image" content="https://killerpdf.net/og-image.png">
 <script defer src="https://koya.thekiller.net/script.js" data-website-id="4036b11d-f6c0-4254-b448-933d3e38b0cb"></script>
-<link rel="stylesheet" href="kp.css?v=27">
+<link rel="stylesheet" href="kp.css?v=28">
 <style>
 /* ---- Page-specific (landing) ---- */
 .content-inner { max-width: 1100px; margin: 0 auto; padding: 0 28px 50px; }
@@ -250,8 +250,8 @@ html[data-theme="light"] .engine-lockup { text-shadow: none; }
 
 <section class="hero">
 <div class="hero-lockup">
-<img class="hero-icon" src="kp-icon.png" alt="" aria-hidden="true" width="230" height="230">
-<img class="wm-logo" src="brand/killerpdf-logo-dark-green.svg" alt="KillerPDF">
+<span class="hero-icon-frame"><img class="hero-icon" src="kp-icon.png" alt="" aria-hidden="true" width="230" height="230"></span>
+<span class="hero-wordmark-frame"><img class="wm-logo" src="brand/killerpdf-logo-dark-green.svg" alt="KillerPDF"></span>
 </div>
 <p class="tagline" data-i18n="tagline">View, edit, OCR, organize, compare, fill, sign, and batch process PDFs<br>locally, privately, and without an account.</p>
 <div class="hero-grid">
@@ -280,7 +280,7 @@ html[data-theme="light"] .engine-lockup { text-shadow: none; }
 <div class="blurb"><h3 data-i18n="b3_t">The people's editor</h3><p data-i18n="b3_d">Much of what KillerPDF does was requested by the people who use it. The <a href="https://github.com/SteveTheKiller/KillerPDF/issues" target="_blank" rel="noopener">GitHub issues</a> page is open to anyone, so anybody can request a feature or report a bug.<br><br>Your suggestions genuinely shape where this goes next. Read the story behind the app on the <a href="about.html">About</a> page.</p>
 <a href="https://github.com/SteveTheKiller/KillerPDF/raw/main/KillerPDF.pdf" class="brochure-link" target="_blank" rel="noopener"><img src="brand/brochure-doc.png" alt=""><span data-i18n="brochure_btn">Informational Brochure (PDF)</span></a>
 </div>
-<div class="blurb"><h3 data-i18n="b2_t">Built from scratch</h3><p data-i18n="b2_d">KillerPDF is written in C# and WPF on .NET. It renders through PDFium and runs OCR on Tesseract, with extra language models downloaded only on demand so the base download stays small.<br><br>PDF creation, editing, validation, encryption, and writing are powered by <a href="./engine/index.html">The KillerPDF.Engine</a>, an independent .NET library built from scratch for PDF 2.0 and modern PDF/A. The <a href="technical.html">Technical</a> page shows how it all fits together.</p></div>
+<div class="blurb"><h3 data-i18n="b2_t">Built from scratch</h3><p data-i18n="b2_d">KillerPDF is written in C# and WPF on .NET. It renders through The KillerPDF.Engine and runs OCR on Tesseract, with language models downloaded on demand so the base download stays small.<br><br>PDF creation, editing, validation, encryption, and writing are powered by <a href="./engine/index.html">The KillerPDF.Engine</a>, an independent .NET library built from scratch for PDF 2.0 and modern PDF/A. The <a href="technical.html">Technical</a> page shows how it all fits together.</p></div>
 <div class="blurb"><h3 data-i18n="b1_t">Fully featured</h3><ul class="blurb-list" data-i18n="b1_d">
 <li>Four view modes across unlimited tabs</li>
 <li>Split panes show two documents side by side</li>
@@ -308,9 +308,9 @@ html[data-theme="light"] .engine-lockup { text-shadow: none; }
 <div class="feature-stage" aria-live="polite">
 <div class="feature-card"><h3 data-i18n="f_annot_t">Annotate &amp; edit</h3><p data-i18n="f_annot_d">Inline text editing with font matching, plus text boxes, freehand drawing, lines, shapes with optional fill, and text-hugging highlights - each with its own color, opacity, and width. A full RGB color picker on every swatch.</p></div>
 <div class="feature-card"><h3 data-i18n="f_sign_t">Forms &amp; signing</h3><p data-i18n="f_sign_d">Fill PDF forms and save them back. Draw reusable signatures, or sign with a certificate from Windows or a .pfx file and click-to-sign form fields.</p></div>
-<div class="feature-card"><h3 data-i18n="f_ocr_t">OCR built in</h3><p data-i18n="f_ocr_d">OCR a page or a dragged region to the clipboard, make a scanned PDF searchable, or extract all text to a file. Tesseract ships in the exe; extra languages download on demand.</p></div>
+<div class="feature-card"><h3 data-i18n="f_ocr_t">OCR built in</h3><p data-i18n="f_ocr_d">OCR a page or a dragged region to the clipboard, make a scanned PDF searchable, or extract all text to a file. All OCR language models, including English, download on first use and remain cached. Native Tesseract libraries extract to the versioned OCR cache.</p></div>
 <div class="feature-card"><h3 data-i18n="f_compare_t">Compare PDFs</h3><p data-i18n="f_compare_d">Page navigation, zoom and scrolling stay synchronized. Difference regions are marked directly over the pages, with a changed percentage for each pair. The results also identify different page dimensions and pages that exist in only one document. You can export the comparison report without changing either source PDF.</p></div>
-<div class="feature-card"><h3 data-i18n="f_view_t">View &amp; navigate</h3><p data-i18n="f_view_d_172">PDFium rendering with four view modes - single page, continuous scroll, two-page with optional book layout, and a grid of every page. Open several PDFs in tabs, with search, outlines, and clickable links.</p></div>
+<div class="feature-card"><h3 data-i18n="f_view_t">View &amp; navigate</h3><p data-i18n="f_view_d_172">The KillerPDF.Engine rendering with four view modes - single page, continuous scroll, two-page with optional book layout, and a grid of every page. Open several PDFs in tabs, with search, outlines, and clickable links.</p></div>
 <div class="feature-card"><h3 data-i18n="f_org_t">Organize pages</h3><p data-i18n="f_org_d">Merge PDFs and split out pages, drag to reorder, rotate, extract, and stamp page numbers. Drop a folder or .zip to merge everything inside into one PDF or open each separately.</p></div>
 <div class="feature-card"><h3 data-i18n="f_search_t">Search &amp; select text</h3><p data-i18n="f_search_d">Search the whole document with every result highlighted as you scroll. Text selection follows columns and reading order, so copying one column no longer pulls in the next.</p></div>
 <div class="feature-card"><h3 data-i18n="f_transform_t">Transform</h3><p data-i18n="f_transform_d_172">Rotate, scale, flip, straighten with a level line, correct perspective, and tune levels - all with a live preview, while annotations follow the page.</p></div>
@@ -318,7 +318,7 @@ html[data-theme="light"] .engine-lockup { text-shadow: none; }
 <div class="feature-card"><h3 data-i18n="f_split_t">Split pane</h3><p data-i18n="f_split_d_172">F10 shows two documents side by side in one window, sharing the same toolbar and sidebar while keeping independent view and invert settings. Drag a tab from one pane to the other, and F10 again closes the split.</p></div>
 <div class="feature-card"><h3 data-i18n="f_cli_t">Automation &amp; command line</h3><p data-i18n="f_cli_d">Merge, split, decrypt, resize, flatten, print, OCR, or batch-resave files from PowerShell or cmd without opening a window. Every command returns a script-friendly exit code.</p></div>
 <div class="feature-card"><h3 data-i18n="f_stamp_t">Stamps &amp; watermarks</h3><p data-i18n="f_stamp_d">Stamp page numbers or a text watermark across any page range - positioned, sized, and styled - applied as a single undo.</p></div>
-<div class="feature-card"><h3 data-i18n="f_open_t">Opens anything</h3><p data-i18n="f_open_d">Opens password-protected PDFs by prompting instead of erroring, and repairs damaged or broken-xref files so they open and print.</p></div>
+<div class="feature-card"><h3 data-i18n="f_open_t">Open &amp; repair PDFs</h3><p data-i18n="f_open_d">Opens password-protected PDFs by prompting instead of erroring, and repairs damaged or broken-xref files so they open and print.</p></div>
 <div class="feature-card"><h3 data-i18n="f_docinfo_t">Document info</h3><p data-i18n="f_docinfo_d">View and edit a PDF's title, author, subject, keywords, and creator metadata, saved back into the file.</p></div>
 <div class="feature-card"><h3 data-i18n="f_install_t">Install or run portable</h3><p data-i18n="f_install_d">Drop the exe anywhere and run it, or use the built-in installer - per-user with no admin rights, or for everyone on the computer (needs an administrator). You can also grab it from the command line:<br><code>winget install killerpdf</code></p></div>
 <div class="feature-card"><h3 data-i18n="f_themes_t">Themes &amp; languages</h3><p data-i18n="f_themes_d_172">Thirteen themes - Dark, Light, Black, 98SE, Blood, Greed, Cyanotic, Ectoplasm, Decay, Malaise, Sepulchre, Delirium and Mourning - all switchable live. Four of them - Dark, Light, Black and 98SE - each take one of eight accent colors, so 41 looks in all. UI localized in nineteen languages, including Vietnamese, Kazakh, Polish, Hungarian and Russian.</p></div>
@@ -336,10 +336,10 @@ html[data-theme="light"] .engine-lockup { text-shadow: none; }
 <a class="engine-link" href="./engine/index.html"><span data-i18n="engine_link">Explore the engine and developer guide</span> <span aria-hidden="true">&#8594;</span></a>
 </div>
 <div class="engine-stats" aria-label="The KillerPDF.Engine">
-<div class="engine-stat"><b>151</b><span data-i18n="engine_stat_files">engine source files</span></div>
-<div class="engine-stat"><b>47,792</b><span data-i18n="engine_stat_lines">physical C# lines</span></div>
-<div class="engine-stat"><b>1,437</b><span data-i18n="engine_stat_tests">engine tests</span></div>
-<div class="engine-stat"><b>47,024</b><span data-i18n="engine_stat_pdfs">corpus PDFs</span></div>
+<div class="engine-stat"><b data-engine-fact="sourceFiles">386</b><span data-i18n="engine_stat_files">engine source files</span></div>
+<div class="engine-stat"><b data-engine-fact="sourceLines">130,218</b><span data-i18n="engine_stat_lines">physical C# lines</span></div>
+<div class="engine-stat"><b data-engine-fact="engineTests">6,427</b><span data-i18n="engine_stat_tests">engine tests</span></div>
+<div class="engine-stat"><b data-engine-fact="corpusPdfs">47,024</b><span data-i18n="engine_stat_pdfs">corpus PDFs</span></div>
 </div>
 </div>
 </section>
@@ -350,11 +350,10 @@ html[data-theme="light"] .engine-lockup { text-shadow: none; }
 <div class="engine-kicker" data-i18n="corpus_kicker">Tested against</div>
 <h2 class="engine-lockup" id="corpus-intro-title"><img class="engine-icon" src="brand/corpus_icon.png" alt=""><span>The</span><img class="wm-logo" src="brand/killerpdf-logo-dark-green.svg" alt="KillerPDF"><span>Corpus</span></h2>
 <p data-i18n="corpus_desc">The KillerPDF Corpus is an open, versioned collection of real-world, standards, malformed, and deliberately stressful PDFs. It makes reliability measurable and gives KillerPDF, qpdf, and other PDF tools the same repeatable test inputs.</p>
-<p data-i18n="corpus_results">KillerPDF 1.8.80 saved 40,563 PDFs across the same 47,024 inputs as 1.8.71, with identical outcomes and no crashes or timeouts.</p>
 <a class="engine-link" href="corpus.html"><span data-i18n="corpus_link">Explore the latest results and benchmark guide</span> <span aria-hidden="true">&#8594;</span></a>
 </div>
 <div class="engine-stats" aria-label="Corpus figures">
-<div class="engine-stat"><b>17,328</b><span data-i18n="corpus_stat_public">public PDFs in v1.8.1</span></div>
+<div class="engine-stat"><b>17,328</b><span data-i18n="corpus_stat_public">downloadable PDFs</span></div>
 <div class="engine-stat"><b>47,024</b><span data-i18n="corpus_stat_local">PDFs in the full local gate</span></div>
 <div class="engine-stat"><b>5</b><span data-i18n="corpus_stat_runs">measured runs per collection</span></div>
 <div class="engine-stat"><b>0</b><span data-i18n="corpus_stat_crashes">application crashes or timeouts</span></div>
@@ -386,8 +385,11 @@ html[data-theme="light"] .engine-lockup { text-shadow: none; }
 </div>
 <div class="egg-toast" id="eggToast"></div>
 
-<script src="kp-i18n.js?v=16"></script>
-<script src="kp.js?v=16"></script>
+<script src="kp-i18n.js?v=20"></script>
+<script src="brand-layout.js?v=1"></script>
+<script src="engine/engine-site-facts.js?v=1.9.0"></script>
+<script src="kp-site-info.js?v=1"></script>
+<script src="kp.js?v=17"></script>
 <script>
 (function () {
   // Feature carousel. The original translated headings and descriptions remain in the document,

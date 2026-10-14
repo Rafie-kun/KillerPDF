@@ -4,23 +4,7 @@ The KillerPDF.Engine is a reusable document library inside the KillerPDF monorep
 
 ## Library boundary
 
-The engine owns:
-
-- PDF syntax and object graphs
-- Document loading and lazy object resolution
-- Authoring and structural editing
-- Forms, annotations, navigation, and attachments
-- Encryption, signatures, and signed revision analysis
-- PDF 2.0, PDF/A, PDF/UA, diagnostics, and validation
-
-The host application owns:
-
-- Rendering and display surfaces
-- OCR and page text extraction
-- User interface and workflows
-- Printing, file pickers, settings, and operating system integration
-
-The engine does not reference WPF, KillerPDF application code, PDFium, PdfPig, PdfSharpCore, or PDFsharp.
+The 1.9 development branch uses The KillerPDF.Engine for rendering and text extraction. Tesseract remains available as an OCR fallback. See the developer guide for current engine APIs.
 
 ## Internal layers
 

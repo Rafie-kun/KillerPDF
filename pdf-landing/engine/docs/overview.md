@@ -27,16 +27,16 @@ Use the task guides in the sidebar when you already know what you need to do.
 
 ## Project scale
 
-| Measure | Current 1.8.2 development tree |
+| Measure | Current 1.9.0 development tree |
 | --- | --- |
-| Engine source files | 151 |
-| Physical C# lines | 47,792 |
-| Engine tests | 1,437 |
+| Engine source files | 386 |
+| Physical C# lines | 130,218 |
+| Engine tests | 6,427 |
 | Corpus PDFs | 47,024 |
 
 ## A real library boundary
 
-The engine has no dependency on WPF, KillerPDF application code, PDFium, PdfPig, PdfSharpCore, or PDFsharp. It operates on PDF bytes and typed document concepts. Rendering, OCR, text extraction, UI controls, and desktop workflows stay in the host application.
+The 1.9 development branch uses The KillerPDF.Engine for rendering and text extraction. Tesseract remains available as an OCR fallback. See the developer guide for current engine APIs.
 
 The monorepo keeps the engine, application integration, tests, and corpus gates in one reviewable change. The project boundary still enforces a reusable library that other .NET applications can reference through NuGet.
 
