@@ -450,7 +450,8 @@ namespace KillerPDF
                     : $"Themes/Accents/{family}/{accent}.xaml";
                 var palette = new ResourceDictionary
                 {
-                    Source = new Uri($"/KillerPDF;component/{path}", UriKind.Relative)
+                    // Release payloads use KillerPDF.App; normal builds use KillerPDF.
+                    Source = new Uri($"/{typeof(MainWindow).Assembly.GetName().Name};component/{path}", UriKind.Relative)
                 };
                 brush = ((System.Windows.Media.Brush)palette["SelectionBg"]).CloneCurrentValue();
             }

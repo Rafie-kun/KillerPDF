@@ -13,7 +13,13 @@ public sealed class ReleaseScriptSafetyTests
         string packageScript = File.ReadAllText(Path.Combine(root, "build", "build-portable.ps1"));
 
         Assert.Contains("$SkipSign -and -not $DryRun", script, StringComparison.Ordinal);
-        Assert.Contains("dotnet list $proj package --vulnerable --include-transitive", script,
+        Assert.Contains("foreach ($auditProject in @($proj, $engineProject))", script,
+            StringComparison.Ordinal);
+        Assert.Contains("dotnet list $auditProject package --vulnerable --include-transitive", script,
+            StringComparison.Ordinal);
+        Assert.Contains("throw \"Package vulnerability audit failed to run for $auditProject.\"", script,
+            StringComparison.Ordinal);
+        Assert.Contains("throw \"Vulnerable packages were found in $auditProject. Update them before releasing.\"", script,
             StringComparison.Ordinal);
         Assert.Contains("Assert-ReleaseArtifactVersion", script, StringComparison.Ordinal);
         Assert.Contains("Get-AuthenticodeSignature", script, StringComparison.Ordinal);

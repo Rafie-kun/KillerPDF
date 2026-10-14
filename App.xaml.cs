@@ -493,6 +493,13 @@ namespace KillerPDF
         private static bool ShowCrashDialog(Exception ex, string logPath, bool isFatal)
         {
             bool shouldContinue = false;
+            var win = CreateCrashDialog(ex, logPath, isFatal, result => shouldContinue = result);
+            win.ShowDialog();
+            return shouldContinue;
+        }
+
+        private static Window CreateCrashDialog(Exception ex, string logPath, bool isFatal, Action<bool> complete)
+        {
             Window? owner = Current?.MainWindow is { IsVisible: true } main ? main : null;
             Brush pane = UiKit.Brush("PaneBrush", new SolidColorBrush(Color.FromRgb(0x2a, 0x2a, 0x2a)));
             Brush code = UiKit.Brush("MenuBackgroundBrush", new SolidColorBrush(Color.FromRgb(0x12, 0x12, 0x12)));
@@ -524,21 +531,26 @@ namespace KillerPDF
                 ShowInTaskbar = owner is null
             };
             DialogChrome.Configure(win, owner, resizable: true, fade: false);
+            win.Resources.MergedDictionaries.Add(new ResourceDictionary
+            {
+                Source = new Uri("pack://application:,,,/Controls/PickerStyles.xaml")
+            });
+            // Use the family scroll host, including its transparent scrollbar intersection.
+            win.Resources[typeof(ScrollViewer)] = win.FindResource("BareScrollViewer");
 
             var root = new Grid { Background = Brushes.Transparent };
             root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
             root.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
             root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
-            var summary = new Border
+            var summary = new Controls.PickerBorder
             {
                 Background = pane,
                 BorderBrush = border,
                 BorderThickness = new Thickness(1),
-                CornerRadius = UiKit.RadCard,
-                Padding = new Thickness(18, 16, 18, 15)
+                CornerRadius = UiKit.RadCard
             };
-            var summaryGrid = new Grid();
+            var summaryGrid = new Grid { Margin = new Thickness(18, 16, 18, 15) };
             summaryGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(42) });
             summaryGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             summaryGrid.Children.Add(new Border
@@ -612,20 +624,18 @@ namespace KillerPDF
             Grid.SetRow(summaryHost, 0);
             root.Children.Add(summaryHost);
 
-            var traceBox = new TextBox
-            {
-                Text = FormatExceptionChain(ex),
-                Background = Brushes.Transparent,
-                Foreground = muted,
-                FontFamily = UiKit.MonoFont,
-                FontSize = 10.5,
-                IsReadOnly = true,
-                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
-                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
-                TextWrapping = TextWrapping.NoWrap,
-                BorderThickness = new Thickness(0),
-                Padding = new Thickness(12, 10, 12, 10)
-            };
+            var traceBox = UiKit.Field();
+            traceBox.Text = FormatExceptionChain(ex);
+            traceBox.Background = Brushes.Transparent;
+            traceBox.Foreground = muted;
+            traceBox.FontFamily = UiKit.MonoFont;
+            traceBox.FontSize = 10.5;
+            traceBox.IsReadOnly = true;
+            traceBox.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+            traceBox.HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
+            traceBox.TextWrapping = TextWrapping.NoWrap;
+            traceBox.BorderThickness = new Thickness(0);
+            traceBox.Padding = new Thickness(12, 10, 12, 10);
             var traceLayers = new Grid();
             traceLayers.Children.Add(new Border
             {
@@ -635,7 +645,7 @@ namespace KillerPDF
                 IsHitTestVisible = false
             });
             traceLayers.Children.Add(traceBox);
-            var traceCard = new Border
+            var traceCard = new Controls.PickerBorder
             {
                 Background = code,
                 BorderBrush = border,
@@ -721,10 +731,10 @@ namespace KillerPDF
             contBtn.IsEnabled = !isFatal;
             contBtn.FontWeight = isFatal ? FontWeights.Normal : FontWeights.SemiBold;
             contBtn.Margin = new Thickness(0, 0, 8, 0);
-            contBtn.Click += (_, _) => { shouldContinue = true; win.Close(); };
+            contBtn.Click += (_, _) => { complete(true); win.Close(); };
             var quitBtnCtrl = MakeCrashButton(CrashText("Str_Crash_Quit", "Quit"), quitNormal, quitHover, Brushes.White, 72);
             quitBtnCtrl.FontWeight = isFatal ? FontWeights.SemiBold : FontWeights.Normal;
-            quitBtnCtrl.Click += (_, _) => { shouldContinue = false; win.Close(); };
+            quitBtnCtrl.Click += (_, _) => { complete(false); win.Close(); };
             rightBtns.Children.Add(contBtn);
             rightBtns.Children.Add(quitBtnCtrl);
             DockPanel.SetDock(rightBtns, Dock.Right);
@@ -734,10 +744,9 @@ namespace KillerPDF
             root.Children.Add(footer);
 
             win.Content = DialogChrome.Frame(win, owner, title,
-                () => { shouldContinue = false; win.Close(); }, root,
+                () => { complete(false); win.Close(); }, root,
                 new Thickness(20, 20, 20, 24));
-            win.ShowDialog();
-            return shouldContinue;
+            return win;
         }
 
         private static Button MakeTitleBarCloseButton(SolidColorBrush fg, SolidColorBrush hoverBg)

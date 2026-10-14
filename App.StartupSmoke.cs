@@ -111,7 +111,19 @@ public partial class App
                 phase = "dispatcher idle after ContentRendered";
                 Record("MainWindow ContentRendered");
                 Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, new Action(() =>
-                    Finish(loaded ? null : new InvalidOperationException("Loaded was not observed."))));
+                {
+                    if (!loaded) { Finish(new InvalidOperationException("Loaded was not observed.")); return; }
+                    phase = "theme picker first open";
+                    // Opening the picker synchronizes its radio buttons and loads the accent swatches.
+                    // Exercise this on the actual payload, whose assembly name differs from an IDE build.
+                    var button = (System.Windows.Controls.Button)window.FindName("RailThemeBtn");
+                    button.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Button.ClickEvent));
+                    var picker = (System.Windows.Controls.ContextMenu)window.FindName("ThemeFlyout");
+                    if (!picker.IsOpen) { Finish(new InvalidOperationException("Theme picker did not open.")); return; }
+                    picker.IsOpen = false;
+                    Record("Theme picker opened");
+                    Finish(null);
+                }));
             };
             phase = "MainWindow Show and Loaded";
             window.Show();

@@ -42,7 +42,7 @@ try {
         throw "GUI startup failed with exit code $($process.ExitCode). Evidence: $EvidenceDirectory"
     }
     $proof = if ([IO.File]::Exists($report)) { [IO.File]::ReadAllText($report) } else { '' }
-    foreach ($marker in @('MainWindow constructed', 'MainWindow Loaded', 'MainWindow ContentRendered', 'PASS MainWindow startup')) {
+    foreach ($marker in @('MainWindow constructed', 'MainWindow Loaded', 'MainWindow ContentRendered', 'Theme picker opened', 'PASS MainWindow startup')) {
         if (-not ($proof -split '\r?\n' -contains $marker)) {
             throw "GUI startup evidence lacks '$marker'. Evidence: $EvidenceDirectory"
         }
