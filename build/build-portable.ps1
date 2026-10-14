@@ -114,8 +114,11 @@ $manifestPath = Join-Path $payloadDir 'payload.manifest'
 $payloadFiles = @([IO.Directory]::GetFiles($payloadDir, '*', [IO.SearchOption]::AllDirectories) |
     Where-Object { -not [string]::Equals($_, $manifestPath, [StringComparison]::OrdinalIgnoreCase) } |
     Sort-Object { $_.Substring($payloadDir.Length + 1) })
+# The runtime's DAC file carries the .NET servicing version in its name, so it changes with
+# every runtime patch. Compare it by shape instead of by exact version.
+$runtimeVersionedName = '^mscordaccore_amd64_amd64_[0-9]+(\.[0-9]+)+\.dll$'
 $actualPayloadNames = @($payloadFiles | ForEach-Object {
-    $_.Substring($payloadDir.Length + 1).Replace('\', '/')
+    $_.Substring($payloadDir.Length + 1).Replace('\', '/') -replace $runtimeVersionedName, 'mscordaccore_amd64_amd64_<runtime>.dll'
 })
 $payloadList = if ($isInstaller) { 'installed-payload-files.txt' } else { 'payload-files.txt' }
 $expectedPayloadNames = @(Get-Content -LiteralPath (Join-Path $PSScriptRoot $payloadList) |
