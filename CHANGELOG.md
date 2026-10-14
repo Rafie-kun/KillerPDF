@@ -40,6 +40,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 ### Fixed
 - Saving an Edit Text change removes the replaced words from the file, so they can no longer be found, copied or brought back by editing the line again.
+- Opening the theme picker and switching themes or accents no longer crashes the installed or portable app.
 - Fixed blank or broken pages in damaged files, including misnumbered cross-reference tables, slightly damaged encryption dictionaries, a null /Trapped entry, undeclared CCITT markers, malformed JPEG filters, unusable crop boxes and corrupt JPEG 2000 tiles. Document rewriting and optimization work again for pages with image, shading or pattern streams.
 - Fixed missing, wrong, invisible or badly spaced text from unusual or damaged TrueType, Type 1, Type 3, CFF and CJK fonts, and installed Arial, Arial Narrow, Arial Black and Times New Roman faces now stand in for unembedded text.
 - Fixed colors from black-point compensation, indexed images with a Decode array, transfer functions, ColorDodge and ColorBurn, CMYK overprint and spot inks, and JPEG images without a color marker, and comparison colors now match the viewer for YCCK JPEGs.
@@ -58,9 +59,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Toolbar buttons return to their normal height after switching away from Text under icons.
 - Button gradients start at the outline color and darken toward the bottom, so a hovered button no longer looks darker than its border.
 - The About card marks 1.9 development builds as unreleased.
+- The installer centers the complete version number on its own line (#440).
 - The repair prompt reads as plain sentences in every language.
 - Centered website logos with space above and below, standardized fonts and spacing, refreshed Engine branding, and added a two-column Corpus layout.
 - Corrected Help and Technical instructions, documentation navigation, current feature descriptions, and automatic Engine release facts.
+
+## [1.8.91] - Unreleased
+
+1.8.91 fixes a crash when opening the theme picker in the packaged app and updates a vulnerable cryptography dependency.
+
+### Fixed
+- Opening the theme picker and switching themes or accents no longer crashes the installed or portable app.
+
+### Security
+- Updated System.Security.Cryptography.Pkcs to 9.0.21 for GHSA-846f-f764-76mx and GHSA-2fmv-rv2c-59x7.
 
 ## [1.8.90] - 2026-10-14
 
