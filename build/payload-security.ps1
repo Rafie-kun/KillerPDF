@@ -37,7 +37,8 @@ function Assert-EmbeddedFirstPartySignatures([string]$PackagePath) {
     $stream = $null
     $archive = $null
     try {
-        $assembly = [Reflection.Assembly]::LoadFile([IO.Path]::GetFullPath($PackagePath))
+        # Load from bytes so the package file is not locked by this PowerShell process afterward.
+        $assembly = [Reflection.Assembly]::Load([IO.File]::ReadAllBytes([IO.Path]::GetFullPath($PackagePath)))
         $stream = $assembly.GetManifestResourceStream('KillerLauncher.payload.zip')
         if (-not $stream) { throw "Missing embedded payload: $PackagePath" }
         $archive = [IO.Compression.ZipArchive]::new($stream, [IO.Compression.ZipArchiveMode]::Read)
