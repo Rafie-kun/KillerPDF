@@ -176,7 +176,7 @@ public sealed class PdfTimestampAuthorityTests : IDisposable
     {
         Assert.True(Rfc3161TimestampRequest.TryDecode(requestBytes, out Rfc3161TimestampRequest? request, out _));
         var info = new Rfc3161TimestampTokenInfo(new Oid("1.3.6.1.4.1.32473.1"),
-            request!.HashAlgorithmId, request.GetMessageHash(), new byte[] { 42 },
+            request!.HashAlgorithmId, request.GetMessageHash(), "*"u8.ToArray(),
             DateTimeOffset.UtcNow, nonce: request.GetNonce());
         var token = new SignedCms(new ContentInfo(new Oid("1.2.840.113549.1.9.16.1.4"), info.Encode()));
         var signer = new CmsSigner(SubjectIdentifierType.IssuerAndSerialNumber, _authority)

@@ -368,7 +368,7 @@ public sealed class PdfContentRedactionTests
     private static string Stream(string content, string entries = "") =>
         $"<< {entries} /Length {Encoding.Latin1.GetByteCount(content)} >>\nstream\n{content}\nendstream";
 
-    private static byte[] CreatePdf(IReadOnlyList<string> objects, int? info = null)
+    private static byte[] CreatePdf(List<string> objects, int? info = null)
     {
         var pdf = new StringBuilder("%PDF-1.7\n");
         var offsets = new List<int>();

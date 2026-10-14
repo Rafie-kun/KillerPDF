@@ -1013,7 +1013,7 @@ namespace KillerPDF.Controls
 
             if (_currentTool == EditTool.Redact)
             {
-                RedactionMouseDown(pageIdx, pos);
+                RedactionMouseDown(pos);
                 e.Handled = true;
                 return;
             }

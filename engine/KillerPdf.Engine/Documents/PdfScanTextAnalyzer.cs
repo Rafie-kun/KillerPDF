@@ -150,7 +150,7 @@ public static class PdfScanTextAnalyzer
         for (int index = 0; index < measured.Count; index++)
             MeasureInk(measured[index], gray, bgra, width, height, cores, index, options);
 
-        GroupLines(measured, options);
+        GroupLines(measured);
         MarkBold(measured);
         foreach (PdfScanTextWord word in measured)
         {
@@ -434,9 +434,9 @@ public static class PdfScanTextAnalyzer
         double baseline = Median(upright);
         for (int i = 0; i < components.Count; i++)
         {
-            var box = boxes[i];
-            bool flat = box.Width >= box.Height * 3 && box.Height <= Math.Max(4, h / 6);
-            if (flat && box.Top >= baseline - 2)
+            (_, int top, int width, int height) = boxes[i];
+            bool flat = width >= height * 3 && height <= Math.Max(4, h / 6);
+            if (flat && top >= baseline - 2)
                 foreach (int at in components[i]) mask[at] = false;
         }
     }
@@ -610,7 +610,7 @@ public static class PdfScanTextAnalyzer
     // Words whose bands overlap form a line; the line's baseline is fitted across its words
     // so a slightly skewed scan still gets one smooth baseline, and its x-height is the
     // median of the words that have lowercase letters without ascenders setting the band.
-    private static void GroupLines(List<PdfScanTextWord> words, PdfScanTextOptions options)
+    private static void GroupLines(List<PdfScanTextWord> words)
     {
         // Words are taken left to right and each joins the line whose last word sits on the
         // nearest baseline, so a line on a skewed scan is followed across the page.

@@ -59,7 +59,7 @@ public partial class MainWindow
         ];
     }
 
-    private MenuItem DocumentToolItem(string labelKey, Action run, string glyph)
+    private static MenuItem DocumentToolItem(string labelKey, Action run, string glyph)
     {
         var item = MakeMenuItem(Loc(labelKey), (_, _) => run(),
             ShortcutTable.DocumentToolGesture(labelKey), glyph);

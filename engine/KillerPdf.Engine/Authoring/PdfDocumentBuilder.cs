@@ -4752,7 +4752,7 @@ public sealed partial class PdfDocumentBuilder
     // Two uses can share a subset when no character code means a different glyph or text in
     // one than in the other.
     private static bool EmbeddedMappingsCompatible(
-        IReadOnlyDictionary<ushort, EmbeddedCharacterMapping> left,
+        SortedDictionary<ushort, EmbeddedCharacterMapping> left,
         IReadOnlyDictionary<ushort, EmbeddedCharacterMapping> right) =>
         right.All(entry => !left.TryGetValue(entry.Key, out EmbeddedCharacterMapping? value)
             || value == entry.Value);

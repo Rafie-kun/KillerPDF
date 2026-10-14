@@ -1264,8 +1264,8 @@ internal static class PdfJpegDecoder
 
         internal int Decode(BitReader bits)
         {
-            int code = 0;
-            int firstLength = 1;
+            int code;
+            int firstLength;
             // Lookahead must not consume a marker when a short code ends the scan.
             if (bits.TryPeekBits(8, out int prefix))
             {

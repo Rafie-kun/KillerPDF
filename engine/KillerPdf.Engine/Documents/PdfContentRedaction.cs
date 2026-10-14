@@ -69,15 +69,12 @@ public sealed record PdfContentRedactionResult(
     PdfRedactionVerificationReport Verification);
 
 /// <summary>Raised when a rewritten document still exposes redacted content.</summary>
-public sealed class PdfRedactionVerificationException : InvalidOperationException
+/// <param name="report">The failed verification report the exception is created from.</param>
+public sealed class PdfRedactionVerificationException(PdfRedactionVerificationReport report)
+    : InvalidOperationException("The redacted document failed verification." + Environment.NewLine + report.ToText())
 {
-    /// <summary>Creates the exception from a failed verification report.</summary>
-    public PdfRedactionVerificationException(PdfRedactionVerificationReport report)
-        : base("The redacted document failed verification." + Environment.NewLine + report.ToText())
-        => Report = report;
-
     /// <summary>Gets the failed verification report.</summary>
-    public PdfRedactionVerificationReport Report { get; }
+    public PdfRedactionVerificationReport Report { get; } = report;
 }
 
 /// <summary>
@@ -651,10 +648,10 @@ public static class PdfContentRedaction
         if (Resolve(document, rootValue) is not PdfDictionary root
             || !root.TryGetValue(Name("K"), out PdfObject? kids)) return false;
         var visited = new HashSet<int>();
-        (PdfObject Value, bool Changed, bool Touched) result = Clean(kids, null, 0);
-        if (!result.Changed) return false;
+        (PdfObject rootKids, bool rootChanged, _) = Clean(kids, null, 0);
+        if (!rootChanged) return false;
         var entries = root.ToDictionary(entry => entry.Key, entry => entry.Value);
-        entries[Name("K")] = result.Value;
+        entries[Name("K")] = rootKids;
         var replacement = new PdfDictionary(entries);
         if (rootValue is PdfIndirectReference rootReference)
         {
@@ -685,10 +682,10 @@ public static class PdfContentRedaction
                 foreach (PdfObject item in array)
                 {
                     if (IsRemovedObjectReference(item)) { changed = true; continue; }
-                    var cleaned = Clean(item, page, depth + 1);
-                    changed |= cleaned.Changed;
-                    hit |= cleaned.Touched;
-                    items.Add(cleaned.Value);
+                    (PdfObject cleanedItem, bool itemChanged, bool itemHit) = Clean(item, page, depth + 1);
+                    changed |= itemChanged;
+                    hit |= itemHit;
+                    items.Add(cleanedItem);
                 }
                 return (changed ? new PdfArray(items) : value, changed, hit);
             }
@@ -716,10 +713,7 @@ public static class PdfContentRedaction
                 }
                 else
                 {
-                    var cleaned = Clean(elementKids, ownPage, depth + 1);
-                    childChanged = cleaned.Changed;
-                    childHit = cleaned.Touched;
-                    newKids = cleaned.Value;
+                    (newKids, childChanged, childHit) = Clean(elementKids, ownPage, depth + 1);
                 }
             }
             bool strip = childHit && ReplacementTextKeys.Any(dictionary.ContainsKey);

@@ -40,7 +40,7 @@ public sealed class PdfTransferFunctionTests
             Entry("Type", Name("XObject")), Entry("Subtype", Name("Image")),
             Entry("Width", new PdfInteger(1)), Entry("Height", new PdfInteger(1)),
             Entry("ColorSpace", Name("DeviceRGB")), Entry("BitsPerComponent", new PdfInteger(8))]),
-            new byte[] { 255, 64, 0 });
+            [255, 64, 0]);
         byte[] pixel = RenderPixel("/T gs q 10 0 0 10 0 0 cm /Im Do Q", State("TR", Invert()), image);
         Assert.Equal(new byte[] { 255, 191, 0, 255 }, pixel);
     }

@@ -2944,8 +2944,8 @@ public sealed partial class PdfPageRenderer
         RasterSurface target, int targetWidth, int targetHeight, double scaleX, double scaleY,
         out string? diagnostic, bool overprint = false, HashSet<string>? diagnostics = null, int renderingIntent = 1,
         bool alphaIsShape = false, bool ownedInlineImage = false,
-        bool blackPointCompensation = false, CancellationToken cancellationToken = default,
-        byte[]? transfer = null)
+        bool blackPointCompensation = false, byte[]? transfer = null,
+        CancellationToken cancellationToken = default)
     {
         diagnostic = null;
         cancellationToken.ThrowIfCancellationRequested();

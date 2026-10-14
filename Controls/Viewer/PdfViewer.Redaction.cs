@@ -208,7 +208,7 @@ namespace KillerPDF.Controls
                     canvas.Children.Remove(old);
         }
 
-        internal void RedactionMouseDown(int pageIndex, Point position)
+        internal void RedactionMouseDown(Point position)
         {
             if (_activeCanvas is null) return;
             ClearSelection();

@@ -1,6 +1,7 @@
 using KillerPdf.Engine.Authoring;
 using KillerPdf.Engine.Editing;
 using KillerPdf.Engine.Objects;
+using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
 
 namespace KillerPdf.Engine.Documents;
@@ -61,7 +62,7 @@ public static class PdfBookmarkGeneration
         return VisualHeadings(pages, options, Accepts, cancellationToken);
     }
 
-    private static IReadOnlyList<PdfBookmarkProposal>? TaggedHeadings(PdfDocument document,
+    private static List<PdfBookmarkProposal>? TaggedHeadings(PdfDocument document,
         PdfPageContent[] pages, PdfBookmarkDetectionOptions options,
         Func<int, string, PdfContentBounds, bool> accepts, CancellationToken cancellationToken)
     {
@@ -147,7 +148,7 @@ public static class PdfBookmarkGeneration
     private sealed record VisualLine(int Page, PdfContentBounds Bounds, string Title,
         double Size, bool Bold, int? NumberDepth);
 
-    private static IReadOnlyList<PdfBookmarkProposal> VisualHeadings(PdfPageContent[] pages,
+    private static ReadOnlyCollection<PdfBookmarkProposal> VisualHeadings(PdfPageContent[] pages,
         PdfBookmarkDetectionOptions options, Func<int, string, PdfContentBounds, bool> accepts,
         CancellationToken cancellationToken)
     {
@@ -193,9 +194,9 @@ public static class PdfBookmarkGeneration
         bool Running(string title)
         {
             if (pages.Length < 3 || !options.ExcludeRunningText) return false;
-            var seen = repeats[Digits.Replace(title, "#")];
-            return seen.Pages.Count >= 3 && seen.Pages.Count * 2 >= pages.Length
-                && seen.High - seen.Low <= 12;
+            (HashSet<int> seenPages, double low, double high) = repeats[Digits.Replace(title, "#")];
+            return seenPages.Count >= 3 && seenPages.Count * 2 >= pages.Length
+                && high - low <= 12;
         }
 
         var candidates = new List<VisualLine>();

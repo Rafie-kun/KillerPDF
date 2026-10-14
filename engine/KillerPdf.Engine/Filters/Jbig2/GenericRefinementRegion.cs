@@ -532,8 +532,7 @@ namespace KillerPdf.Engine.Filters.Jbig2
                             paddedWidth, deltaRefStride, byteIndex, currentLine, refByteIndex);
                     break;
                 case 1:
-                    DecodeTypicalPredictedLineTemplate1(lineNumber, width, rowStride, refRowStride,
-                            paddedWidth, deltaRefStride, byteIndex, currentLine, refByteIndex);
+                    DecodeTypicalPredictedLineTemplate1(lineNumber, width);
                     break;
             }
         }
@@ -675,9 +674,7 @@ namespace KillerPdf.Engine.Filters.Jbig2
         // T.88 6.3.5.6 3 d), template 1: a pixel whose 3x3 reference neighborhood is uniform
         // takes that value; any other pixel decodes with the Figure 13 context, in the bit order
         // Template1.Form uses. Reference coordinates follow the region by GRREFERENCEDX/DY.
-        private void DecodeTypicalPredictedLineTemplate1(int lineNumber, int width,
-                int rowStride, int refRowStride, int paddedWidth,
-                int deltaRefStride, int byteIndex, int currentLine, int refByteIndex)
+        private void DecodeTypicalPredictedLineTemplate1(int lineNumber, int width)
         {
             int ry = lineNumber - referenceDY;
             for (int x = 0; x < width; x++)

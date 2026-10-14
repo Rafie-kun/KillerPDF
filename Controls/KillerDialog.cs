@@ -114,8 +114,7 @@ namespace KillerPDF
                         || (image == MessageBoxImage.None && confirmation);
             if (!warn)
                 return ("i", UiKit.Brush("PrimaryBrush", Brushes.Gray));
-            var card = UiKit.Brush("MenuBackgroundBrush") as SolidColorBrush;
-            bool light = card != null && card.Color.R * 0.299 + card.Color.G * 0.587 + card.Color.B * 0.114 > 140;
+            bool light = UiKit.Brush("MenuBackgroundBrush") is SolidColorBrush card && card.Color.R * 0.299 + card.Color.G * 0.587 + card.Color.B * 0.114 > 140;
             return ("!", new SolidColorBrush(light ? Color.FromRgb(176, 112, 0) : Color.FromRgb(255, 190, 80)));
         }
 

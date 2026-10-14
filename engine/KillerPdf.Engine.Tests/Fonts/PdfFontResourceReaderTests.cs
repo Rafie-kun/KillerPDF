@@ -693,7 +693,7 @@ public sealed class PdfFontResourceReaderTests
 
         PdfExtractionFont font = PdfFontResourceReader.Read(document, dictionary);
 
-        Assert.Equal("A", Assert.Single(font.Decode(new byte[] { 65 })).Text);
+        Assert.Equal("A", Assert.Single(font.Decode("A"u8.ToArray())).Text);
     }
 
     [Theory]
@@ -1341,7 +1341,7 @@ public sealed class PdfFontResourceReaderTests
         byte[] bytes = TrueTypeFontTests.BuildTestFont(false, includeOutlines: true);
         Array.Resize(ref bytes, 4 * 1024 * 1024);   // trailing padding is outside every table
         var resolver = new TestFontResolver(bytes);
-        PdfDictionary Resource() => D(("Subtype", N("TrueType")), ("BaseFont", N("UninstalledFamily")),
+        static PdfDictionary Resource() => D(("Subtype", N("TrueType")), ("BaseFont", N("UninstalledFamily")),
             ("FontDescriptor", D()), ("FirstChar", new PdfInteger(65)),
             ("Widths", new PdfArray([new PdfInteger(500)])));
         var warm = PdfFontResourceReader.Read(Document, Resource(), resolver);

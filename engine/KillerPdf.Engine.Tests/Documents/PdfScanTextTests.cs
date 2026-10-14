@@ -12,6 +12,10 @@ public sealed class PdfScanTextTests
     private const double Scale = 3;
     private const double Size = 14;
     private const double PageWidth = 420;
+    private static readonly int[] TwoLines = [0, 1];
+    private static readonly bool[] ScanThenTyped = [true, false];
+    private static readonly bool[] NoScans = [false, false];
+    private static readonly bool[] OneScan = [true];
 
     [Theory]
     [InlineData("Times-Roman")]
@@ -32,7 +36,7 @@ public sealed class PdfScanTextTests
             Assert.InRange(word.XHeight, xHeight * 0.88, xHeight * 1.12);
             Assert.False(word.CapitalsOnly);
         });
-        Assert.Equal(new[] { 0, 1 }, analysis.Words.Select(word => word.Line).Distinct().Order().ToArray());
+        Assert.Equal(TwoLines, analysis.Words.Select(word => word.Line).Distinct().Order().ToArray());
     }
 
     [Theory]
@@ -195,7 +199,7 @@ public sealed class PdfScanTextTests
             .AddPage(PageWidth, 100, vector)
             .Build());
 
-        Assert.Equal(new[] { true, false }, PdfScanTextAnalyzer.ReadScannedPages(document).ToArray());
+        Assert.Equal(ScanThenTyped, PdfScanTextAnalyzer.ReadScannedPages(document).ToArray());
 
         PdfScanTextPageAnalysis analysis = Analyze(scan);
         PdfScanTextFace face = PdfScanTextWriter.ChooseFace(analysis, PdfScanTextWriter.BundledFaces());
@@ -217,7 +221,7 @@ public sealed class PdfScanTextTests
         Assert.Contains("that can be found and copied", page.Text);
         Assert.Single(page.Images);
         Assert.Contains("Typed page", reader.Read(1).Text);
-        Assert.Equal(new[] { false, false }, PdfScanTextAnalyzer.ReadScannedPages(written).ToArray());
+        Assert.Equal(NoScans, PdfScanTextAnalyzer.ReadScannedPages(written).ToArray());
 
         // The rewritten page still looks like the scan: the text lands where the ink was.
         byte[] rendered = new PdfPageRenderer(written)
@@ -229,14 +233,14 @@ public sealed class PdfScanTextTests
     public void ImagePagesWithAnInvisibleTextLayerAreStillScans()
     {
         TrueTypeFont font = PdfStandardFontSubstitutes.Find("Helvetica");
-        byte[] white = Enumerable.Repeat((byte)255, 30 * 30 * 3).ToArray();
+        byte[] white = [.. Enumerable.Repeat((byte)255, 30 * 30 * 3)];
         var content = new PdfContentStreamBuilder()
             .DrawImage(PdfImage.FromRgb(30, 30, white), 0, 0, 200, 200)
             .BeginText().SetTextRenderingMode(PdfTextRenderingMode.Invisible).SetFont(font, 10)
             .SetTextMatrix(1, 0, 0, 1, 10, 10).ShowUnicodeText("hidden").EndText();
         PdfDocument document = PdfDocument.Open(new PdfDocumentBuilder().AddPage(200, 200, content).Build());
 
-        Assert.Equal(new[] { true }, PdfScanTextAnalyzer.ReadScannedPages(document).ToArray());
+        Assert.Equal(OneScan, PdfScanTextAnalyzer.ReadScannedPages(document).ToArray());
     }
 
     private sealed record Scan(byte[] Pixels, int Width, int Height, double PageHeight,
