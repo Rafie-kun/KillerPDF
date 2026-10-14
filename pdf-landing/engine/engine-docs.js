@@ -172,12 +172,12 @@
       '<button class="acc" data-accent="red" style="background:#DD504B;color:#DD504B" title="Red"></button><button class="acc" data-accent="orange" style="background:#E8962C;color:#E8962C" title="Orange"></button><button class="acc" data-accent="yellow" style="background:#EAD900;color:#EAD900" title="Yellow"></button><button class="acc" data-accent="green" style="background:#1EA54C;color:#1EA54C" title="Green"></button><button class="acc" data-accent="teal" style="background:#1FB8A8;color:#1FB8A8" title="Teal"></button><button class="acc" data-accent="blue" style="background:#50AEE8;color:#50AEE8" title="Blue"></button><button class="acc" data-accent="purple" style="background:#B982E3;color:#B982E3" title="Purple"></button><button class="acc" data-accent="magenta" style="background:#FF52C9;color:#FF52C9" title="Magenta"></button></div></div></div>' +
       '<div class="shell engine-shell"><aside class="sidebar engine-sidebar"><div class="sb-tabs"><span class="on">Developer guide</span></div><nav class="docs-nav" aria-label="Engine documentation">' + navigation() + '</nav></aside>' +
       '<main class="content"><div class="content-scroll"><div class="engine-doc-wrap"><div id="engineHero"></div><article class="engine-doc" id="engineDoc"><p>Loading documentation...</p></article><nav class="doc-pager" id="docPager" aria-label="Documentation pages"></nav></div></div></main></div>' +
-      '<footer class="statusbar"><span class="left"><a href="https://github.com/SteveTheKiller/KillerPDF/tree/main/engine">Engine source</a> &middot; <a href="https://www.nuget.org/packages/KillerPdf.Engine">NuGet</a> &middot; GPLv3</span><span class="right"><span id="verEgg">v1.8.2</span> &middot; &copy; 2026 <b><a href="https://thekiller.net">Steve the Killer</a></b></span></footer>';
+      '<footer class="statusbar"><span class="left"><a href="https://github.com/SteveTheKiller/KillerPDF/tree/main/engine">Engine source</a> &middot; <a href="https://www.nuget.org/packages/KillerPdf.Engine">NuGet</a> &middot; GPLv3</span><span class="right"><span id="verEgg">v' + window.KPDF_ENGINE_FACTS.version + '</span> &middot; &copy; 2026 <b><a href="https://thekiller.net">Steve the Killer</a></b></span></footer>';
   }
 
   function hero() {
     if (docId !== 'overview') return;
-    document.getElementById('engineHero').innerHTML = '<div class="engine-doc-hero"><img class="engine-doc-mark" src="../killerpdf-engine-icon.png" alt=""><h1 class="engine-doc-brand">The KillerPDF<span class="accent">.Engine</span></h1></div>';
+    document.getElementById('engineHero').innerHTML = '<div class="engine-doc-hero"><img class="engine-doc-mark" src="../killerpdf-engine-icon.png?v=2" alt=""><h1 class="engine-doc-brand"><span>The</span><img class="wm-logo engine-doc-wordmark" src="../brand/killerpdf-logo-dark-green.svg" alt="KillerPDF"><span>Engine</span></h1></div>';
   }
 
   function pager() {
@@ -205,16 +205,26 @@
   }
 
   function normalizeCurrentFacts(markdown) {
-    if (docId === 'overview') {
-      return markdown
-        .replace(/1\.8\.0/g, '1.8.2')
-        .replace(/47([\s.,\u00A0]?)725/g, function (_, sep) { return '47' + sep + '792'; })
-        .replace(/\b1([\s.,\u00A0]?)436\b/g, function (_, sep) { return '1' + sep + '437'; })
-        .replace(/\b2([\s.,\u00A0]?)907\b/g, function (_, sep) { return '47' + sep + '024'; });
+    var facts = window.KPDF_ENGINE_FACTS;
+    if (!facts) throw new Error('Engine release facts are missing.');
+    function number(value) { return Number(value).toLocaleString('en-US'); }
+    if (docId === 'overview' || docId === 'getting-started') {
+      markdown = markdown.replace(/\b1\.8\.(?:0|2)\b/g, facts.version);
     }
-    if (docId === 'getting-started') return markdown.replace(/1\.8\.0/g, '1.8.2');
-    if (docId === 'validation') return markdown.replace(/\b1([\s.,\u00A0]?)436\b/g,
-      function (_, sep) { return '1' + sep + '437'; });
+    if (docId === 'overview') {
+      var rowIndex = 0;
+      var values = [facts.sourceFiles, facts.sourceLines, facts.engineTests, facts.corpusPdfs];
+      markdown = markdown.replace(/^\|[^\n]+\|$/gm, function (row) {
+        var cells = row.split('|');
+        if (cells.length !== 4) return row;
+        var index = rowIndex++ - 2;
+        if (index >= 0 && index < values.length) cells[2] = ' ' + number(values[index]) + ' ';
+        return cells.join('|');
+      });
+    }
+    if (docId === 'validation') {
+      markdown = markdown.replace(/\b1([\s.,\u00A0]?)43[67]\b/g, number(facts.engineTests));
+    }
     return markdown;
   }
 

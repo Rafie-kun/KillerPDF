@@ -410,6 +410,49 @@
     });
   }
 
+  window.setupOutlineNavigation = function () {
+    var nav = document.querySelector('.outline');
+    var scroller = document.querySelector('.content-scroll');
+    if (!nav || !scroller) return;
+    var entries = [].slice.call(nav.querySelectorAll('a[href^="#"]')).map(function (link) {
+      return { link: link, section: document.getElementById(link.getAttribute('href').slice(1)) };
+    }).filter(function (entry) { return entry.section; });
+    var pinned = null;
+    function select(entry) {
+      entries.forEach(function (item) { item.link.classList.toggle('on', item === entry); });
+      if (entry && window.knOutlineReveal) window.knOutlineReveal(entry.link);
+    }
+    function sync() {
+      if (pinned) { select(pinned); return; }
+      var readingTop = scroller.getBoundingClientRect().top + 100;
+      var best = entries[0], nearest = -Infinity;
+      entries.forEach(function (entry) {
+        var top = entry.section.getBoundingClientRect().top;
+        if (top <= readingTop && top > nearest) { best = entry; nearest = top; }
+      });
+      select(best);
+    }
+    entries.forEach(function (entry) {
+      entry.link.addEventListener('click', function () { pinned = entry; select(entry); });
+    });
+    function releasePin() { pinned = null; }
+    scroller.addEventListener('wheel', releasePin, { passive: true });
+    scroller.addEventListener('touchmove', releasePin, { passive: true });
+    scroller.addEventListener('pointerdown', function (event) {
+      if (event.clientX >= scroller.getBoundingClientRect().right - 18) releasePin();
+    });
+    window.addEventListener('keydown', function (event) {
+      if (/^(ArrowUp|ArrowDown|PageUp|PageDown|Home|End| )$/.test(event.key)) releasePin();
+    });
+    function hashSelection() {
+      pinned = entries.filter(function (entry) { return '#' + entry.section.id === location.hash; })[0] || null;
+      sync();
+    }
+    window.addEventListener('hashchange', hashSelection);
+    scroller.addEventListener('scroll', sync, { passive: true });
+    hashSelection();
+  };
+
   // ---- Init ----
   var savedTheme = localPreviewSetting('theme'), savedAccent = localPreviewSetting('accent'), savedLang = 'en';
   try { savedTheme = savedTheme || localStorage.getItem('kpdf-theme'); } catch (e) {}

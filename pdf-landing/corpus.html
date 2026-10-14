@@ -11,7 +11,7 @@
 <meta name="description" content="The KillerPDF Corpus is an open, reproducible collection for PDF reliability, conformance, malformed-input and performance testing.">
 <link rel="icon" type="image/x-icon" href="kp-icon.ico">
 <script defer src="https://koya.thekiller.net/script.js" data-website-id="4036b11d-f6c0-4254-b448-933d3e38b0cb"></script>
-<link rel="stylesheet" href="kp.css?v=26">
+<link rel="stylesheet" href="kp.css?v=27">
 <link rel="stylesheet" href="corpus-results.css?v=2">
 <style>
 .page-hero{padding:44px 26px 0}.page-hero .eyebrow{font-family:var(--kt-font-section);font-size:13px;letter-spacing:1.4px;text-transform:uppercase;color:var(--accent);margin-bottom:10px}.page-title{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:clamp(8px,1.4vw,16px);font-family:var(--kt-font-page-title);font-size:clamp(36px,6vw,62px);line-height:1.05;color:var(--text);text-shadow:0 2px 2px rgba(0,0,0,.4),0 5px 12px rgba(0,0,0,.3)}.page-title .wm-logo{display:block;width:clamp(220px,34vw,395px);height:auto;filter:drop-shadow(0 2px 2px rgba(0,0,0,.4)) drop-shadow(0 5px 12px rgba(0,0,0,.3))}.page-title .corpus-icon{display:block;width:clamp(58px,8vw,82px);height:auto;filter:drop-shadow(0 3px 6px rgba(0,0,0,.45))}.page-hero p{max-width:790px;color:var(--text2);font-size:17px;line-height:1.65}.hero-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;margin-top:18px}.corpus-dl{display:flex;width:max-content;margin:0 auto;align-items:center;justify-content:center;gap:8px;background:var(--btn);color:var(--btn-text);font-family:inherit;font-size:14px;font-weight:700;padding:9px 18px;border:1px solid transparent;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,.3);cursor:pointer}.hero-actions .corpus-dl{box-sizing:border-box;min-width:210px;width:auto;margin:0;white-space:nowrap}.corpus-dl:hover{filter:brightness(1.1);color:var(--btn-text)}.corpus-dl.secondary{background:transparent;color:var(--accent);border-color:var(--accent);box-shadow:none}.corpus-dl.secondary:hover{background:var(--accent);color:var(--accent-text);filter:none}.corpus-dl svg{width:14px;height:14px;fill:currentColor}.copy-labels{display:inline-grid}.copy-labels span{grid-area:1/1}.copy-labels .copied{visibility:hidden}.corpus-dl.is-copied .copy-labels .idle{visibility:hidden}.corpus-dl.is-copied .copy-labels .copied{visibility:visible}.content-inner{max-width:980px;margin:0 auto;padding:0 30px 30px}.corpus-sec{scroll-margin-top:82px;margin:0 0 34px}.corpus-sec h2{font-family:var(--kt-font-card-title);font-size:27px;font-weight:normal;letter-spacing:.4px;margin:6px 0 10px;text-shadow:0 2px 6px rgba(0,0,0,.38)}.corpus-sec h3{font-family:var(--kt-font-section);font-size:17px;font-weight:normal;color:var(--accent);margin:22px 0 7px}.corpus-sec>p,.corpus-sec>.method{font-size:16px;line-height:1.6;color:var(--text2)}.lede{font-size:inherit;color:var(--text2)}
@@ -19,6 +19,16 @@
 @media(min-width:901px){.shell{grid-template-columns:250px 1fr}.content{margin:8px 8px 0 2px}}@media(max-width:900px){.outline{display:flex;flex-wrap:wrap;gap:4px;padding:8px}.outline a{border-left:0;border-radius:5px;padding:6px 10px}.metric-grid{grid-template-columns:repeat(2,1fr)}.result-grid,.provenance{grid-template-columns:1fr}}@media(max-width:600px){.metric-grid,.source-links{grid-template-columns:1fr}.provenance-list{columns:1}.content-inner{padding:0 18px 18px}}
 #results{margin-bottom:18px}#results>.corpus-dl{margin-top:18px}
 .provenance-list:has(>li:only-child){columns:1}
+.content-inner { max-width: 1440px; padding: 0 28px 30px; }
+.corpus-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; align-items: start; }
+.corpus-column { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+.corpus-grid .corpus-sec { min-width: 0; margin: 0; padding: 20px 22px; border: 1px solid var(--pane-border); border-top: 2px solid var(--sel, var(--accent)); border-radius: 10px; background: var(--modal) url('grain.png?v=2') repeat; background-size: 256px 256px; }
+.corpus-grid .corpus-sec h2 { font-size: var(--kt-heading-size); }
+.corpus-grid .corpus-sec h3 { font-size: var(--kt-subheading-size); margin-top: 16px; }
+.corpus-grid .corpus-sec > p, .corpus-grid .method { font-size: var(--kt-body-size); line-height: var(--kt-body-leading); }
+.corpus-grid .provenance { grid-template-columns: 1fr; }
+.corpus-grid .provenance-list { columns: 1; }
+@media (max-width: 1050px) { .corpus-grid { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body class="compact-sidebar sidebar-first">
@@ -43,6 +53,7 @@
 <div class="metric"><b>47,024</b><span>PDFs tested in the latest full run</span></div><div class="metric"><b>5</b><span>measured runs of every main collection</span></div><div class="metric"><b>5/5</b><span>runs returned identical outcome totals</span></div><div class="metric"><b>0</b><span>application crashes or timeouts</span></div>
 </div>
 
+<div class="corpus-grid"><div class="corpus-column">
 <section class="corpus-sec" id="results"><h2>KillerPDF v1.8.90 results</h2><ul class="method"><li><strong>40,563 PDFs saved</strong> across the three main collections.</li><li><strong>Exact 1.8.80 outcome match:</strong> every file kept the same status and diagnostic detail.</li><li><strong>Five measured runs:</strong> one warmup and five measured passes per collection, all matching.</li><li><strong>No crashes or timeouts</strong> across 80 damaged inputs.</li></ul><p>Tested October 13, 2026.</p>
 <div class="result-grid">
 <div class="result"><h3>Downloadable regression set</h3><div class="result-lead"><b>90.9%</b><span>saved successfully</span></div><div class="outcome-bar" role="img" aria-label="90.9 percent saved, 7.4 percent skipped, 1.7 percent failed"><span class="saved" style="width:90.9%"></span><span class="skipped" style="width:7.4%"></span><span class="failed" style="width:1.7%"></span></div><dl><dt>PDFs tested</dt><dd>16,696</dd><dt class="legend-key saved-key">Saved</dt><dd>15,171</dd><dt class="legend-key skipped-key">Skipped</dt><dd>1,233</dd><dt class="legend-key failed-key">Save failed</dt><dd>292</dd><dt>Median full set time</dt><dd>4m 43s</dd></dl></div>
@@ -62,6 +73,7 @@
 <div class="provenance-group"><h3>Damaged-file safety test</h3><p><strong>80 downloadable files</strong> kept separate from normal documents so damaged inputs can be tested behind a timeout.</p><ul class="provenance-list"><li><span>qpdf fuzz corpus</span><b>77</b></li><li><span>iText 7</span><b>1</b></li><li><span>PDF Tools Kit</span><b>1</b></li><li><span>pikepdf</span><b>1</b></li></ul></div>
 </div>
 <p class="source-note">Every public file has its source path, pinned revision, byte count, and SHA-256 fingerprint in the release manifests. The <a href="https://github.com/SteveTheKiller/KillerPDF-Corpus/blob/main/SOURCES.md" target="_blank" rel="noopener">complete source record</a> links each upstream project and explains its license, accepted files, duplicates, and exclusions.</p></section>
+</div><div class="corpus-column">
 
 <section class="corpus-sec" id="method"><h2>Developer guide</h2><p class="lede">The guided runner turns the corpus into a repeatable open-and-save benchmark for KillerPDF, qpdf, or another command-line PDF tool.</p>
 <h3>1. Start the runner</h3><p>Use the <strong>Copy run command</strong> button above and paste the command into PowerShell. It downloads the current runner to your temporary folder and starts it. Windows PowerShell 5.1 and PowerShell 7 are supported.</p><p>Prefer to inspect or save it first? <a href="https://raw.githubusercontent.com/SteveTheKiller/KillerPDF-Corpus/main/scripts/benchmark_corpus.ps1" target="_blank" rel="noopener">View the PowerShell script</a>.</p>
@@ -85,11 +97,12 @@
 <section class="corpus-sec" id="status"><h2>What the results mean</h2><p>Each adapter preserves the outcomes its tool can report instead of pretending every PDF application behaves the same way.</p><h3>KillerPDF: OK, skipped, and failed</h3><p>OK means KillerPDF opened and saved the input through the tested batch path. Skipped means it intentionally refused the input or could not enter that path, such as an encrypted, unsupported, or unreadable file. Failed means the save began but did not complete.</p><h3>qpdf: saved, warning, failed, and timed out</h3><p>Saved means qpdf produced an output without warnings. Warning means it produced an output while reporting a recoverable problem. Failed means it produced no usable output. Timed out means the per-file safety limit stopped the process.</p><p>These results measure safe automated open and save behavior. They do not claim rendering, text extraction, layout reconstruction, or semantic table recovery.</p></section>
 
 <section class="corpus-sec" id="download"><h2>Download, inspect, and reproduce</h2><ul class="source-links"><li><a href="corpus-results.html">Past release results</a></li><li><a href="https://github.com/SteveTheKiller/KillerPDF-Corpus" target="_blank" rel="noopener">Corpus repository and manifests</a></li><li><a href="https://github.com/SteveTheKiller/KillerPDF/blob/main/validation/benchmarks/1.8.90/CORPUS.md" target="_blank" rel="noopener">Full v1.8.90 result record</a></li><li><a href="https://github.com/SteveTheKiller/KillerPDF-Corpus/tree/main/benchmarks" target="_blank" rel="noopener">Benchmark reports and CSVs</a></li></ul></section>
+</div></div>
 </div></div></main></div>
 
 <footer class="statusbar"><span class="left"><a href="https://github.com/SteveTheKiller/KillerPDF-Corpus" target="_blank" rel="noopener">Corpus on GitHub</a> &middot; Reproducible PDF testing &middot; Part of <a href="https://killertools.net" target="_blank" rel="noopener">killertools.net</a></span><span class="right"><span id="verEgg">v1.8.80</span> &middot; &copy; 2026 <b><a href="https://thekiller.net" target="_blank" rel="noopener">Steve the Killer</a></b></span></footer>
-<script src="kp.js?v=15"></script>
+<script src="kp.js?v=16"></script>
 <script>(function(){var button=document.getElementById('copyBenchmark');if(!button)return;var command='Set-ExecutionPolicy Bypass -Scope Process -Force; $f="$env:TEMP\\benchmark_corpus.ps1"; irm https://raw.githubusercontent.com/SteveTheKiller/KillerPDF-Corpus/main/scripts/benchmark_corpus.ps1 -OutFile $f; & $f';button.addEventListener('click',function(){navigator.clipboard.writeText(command).then(function(){button.classList.add('is-copied');setTimeout(function(){button.classList.remove('is-copied');},2000);});});})();</script>
-<script>(function(){var links=[].slice.call(document.querySelectorAll('.outline a')),scroller=document.querySelector('.content-scroll');function sync(){var y=90,best=links[0];links.forEach(function(a){var el=document.querySelector(a.getAttribute('href'));if(el&&el.getBoundingClientRect().top<=y)best=a;});links.forEach(function(a){a.classList.toggle('on',a===best);});}if(scroller)scroller.addEventListener('scroll',sync,{passive:true});sync();})();</script>
+<script>window.setupOutlineNavigation();</script>
 </body>
 </html>
