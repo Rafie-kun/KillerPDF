@@ -26,9 +26,8 @@ internal sealed class PdfEngineDocumentSession
     internal static PdfEngineDocumentSession Open(string path)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
-        using FileStream source = File.OpenRead(path);
         // Same recovery as the working document, so a file that opened is never rejected here.
-        PdfDocument document = PdfDocument.OpenWithCompatibilityRecovery(source);
+        PdfDocument document = PdfEngineIntegration.OpenForReading(File.ReadAllBytes(path));
         return new PdfEngineDocumentSession(path, document,
             PdfPageInformation.Read(document));
     }

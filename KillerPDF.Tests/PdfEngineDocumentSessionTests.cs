@@ -1,6 +1,7 @@
 using KillerPDF.Services;
 using KillerPdf.Engine.Authoring;
 using KillerPdf.Engine.Documents;
+using KillerPdf.Engine.Security;
 using System.IO;
 using Xunit;
 
@@ -167,5 +168,32 @@ public sealed class PdfEngineDocumentSessionTests
         foreach (int offset in offsets) text.Append($"{offset:D10} 00000 n \n");
         text.Append($"trailer\n<< /Size {objects.Length} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n");
         return System.Text.Encoding.ASCII.GetBytes(text.ToString());
+    }
+
+    [Fact]
+    public void Open_ReadsOwnerRestrictedDocumentInformationAsText()
+    {
+        // #424: an empty user password opens the file; its strings must not stay encrypted.
+        string path = Path.Combine(Path.GetTempPath(), $"killerpdf-owner-only-{Guid.NewGuid():N}.pdf");
+        try
+        {
+            File.WriteAllBytes(path, new PdfDocumentBuilder()
+                .SetMetadata(new PdfDocumentMetadata { Title = "Owner restricted" })
+                .SetPasswordEncryption(new PdfPasswordEncryptionOptions
+                {
+                    UserPassword = string.Empty,
+                    OwnerPassword = "owner",
+                    AllowDocumentModification = false
+                })
+                .AddBlankPage(320, 480)
+                .Build());
+
+            PdfEngineDocumentSession session = PdfEngineDocumentSession.Open(path);
+
+            Assert.True(session.Document.IsDecrypted);
+            Assert.Equal("Owner restricted", PdfDocumentInformation.Read(session.Document).Title);
+            Assert.True(PdfEngineIntegration.CanReadWithoutPassword(path));
+        }
+        finally { if (File.Exists(path)) File.Delete(path); }
     }
 }

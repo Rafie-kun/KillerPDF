@@ -43,18 +43,37 @@ internal static class PdfEngineIntegration
         IReadOnlyDictionary<string, string> RadioValues,
         IReadOnlyDictionary<string, double> TextFontSizes);
 
+    /// <summary>
+    /// Opens a user's PDF for reading. An owner-restricted file is decrypted with the empty
+    /// user password, so its strings and streams read as text instead of ciphertext.
+    /// </summary>
+    internal static PdfDocument OpenForReading(ReadOnlyMemory<byte> source)
+    {
+        PdfDocument document = PdfDocument.OpenWithCompatibilityRecovery(source);
+        if (!document.IsEncrypted) return document;
+        try { return PdfDocument.OpenWithCompatibilityRecovery(source, string.Empty); }
+        catch (Exception error) when (error is not OutOfMemoryException) { return document; }
+    }
+
+    /// <summary>True when the engine can read the file without asking for a password.</summary>
+    internal static bool CanReadWithoutPassword(string path)
+    {
+        try { return OpenForReading(File.ReadAllBytes(path)).IsDecrypted; }
+        catch (Exception error) when (error is not OutOfMemoryException) { return false; }
+    }
+
     /// <summary>Reads the complete bookmark hierarchy for the desktop sidebar.</summary>
     internal static IReadOnlyList<PdfBookmarkInfo> ReadBookmarks(byte[] source)
     {
         ArgumentNullException.ThrowIfNull(source);
-        return PdfBookmarkReader.Read(PdfDocument.OpenWithCompatibilityRecovery(source));
+        return PdfBookmarkReader.Read(OpenForReading(source));
     }
 
     /// <summary>Reads native links from one page for viewer hit testing.</summary>
     internal static IReadOnlyList<PdfLinkInfo> ReadPageLinks(string path, int pageIndex)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
-        return PdfLinkReader.ReadPage(PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(path)), pageIndex);
+        return PdfLinkReader.ReadPage(OpenForReading(File.ReadAllBytes(path)), pageIndex);
     }
 
     /// <summary>Reads native links from an already parsed engine document.</summary>
@@ -76,14 +95,14 @@ internal static class PdfEngineIntegration
         string path, int pageIndex)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
-        return ReadPageFormWidgets(PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(path)), pageIndex);
+        return ReadPageFormWidgets(OpenForReading(File.ReadAllBytes(path)), pageIndex);
     }
 
     internal static IReadOnlyList<IReadOnlyList<PdfFormWidgetInfo>> ReadAllPageFormWidgets(
         string path)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
-        PdfDocument document = PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(path));
+        PdfDocument document = OpenForReading(File.ReadAllBytes(path));
         int pageCount = PdfPageInformation.Read(document).Count;
         return
         [
@@ -96,7 +115,7 @@ internal static class PdfEngineIntegration
     internal static PdfPrintProductionReport InspectPrintProduction(string path)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
-        return PdfPrintProductionReport.Inspect(PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(path)));
+        return PdfPrintProductionReport.Inspect(OpenForReading(File.ReadAllBytes(path)));
     }
 
     /// <summary>Runs the complete built-in print-production preflight profile.</summary>
@@ -110,14 +129,14 @@ internal static class PdfEngineIntegration
     internal static PdfAccessibilityReport InspectAccessibility(string path)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
-        return PdfAccessibilityInspector.Inspect(PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(path)));
+        return PdfAccessibilityInspector.Inspect(OpenForReading(File.ReadAllBytes(path)));
     }
 
     /// <summary>Reads the document's optional-content layer definitions and state.</summary>
     internal static PdfOptionalContentInfo InspectLayers(string path)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
-        return PdfOptionalContentReader.Read(PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(path)));
+        return PdfOptionalContentReader.Read(OpenForReading(File.ReadAllBytes(path)));
     }
 
     /// <summary>Applies reviewed layer names, saved visibility, and lock state.</summary>
@@ -160,13 +179,13 @@ internal static class PdfEngineIntegration
     internal static string InspectPortfolio(string path)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
-        return PdfCollectionReader.ToText(PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(path)));
+        return PdfCollectionReader.ToText(OpenForReading(File.ReadAllBytes(path)));
     }
 
     internal static PortfolioEditorState ReadPortfolioEditorState(string path)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
-        PdfDocument document = PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(path));
+        PdfDocument document = OpenForReading(File.ReadAllBytes(path));
         return new PortfolioEditorState(
             PdfCollectionReader.Read(document),
             [.. PdfAttachmentReader.Read(document)

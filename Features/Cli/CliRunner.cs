@@ -414,7 +414,7 @@ namespace KillerPDF.Features
 
             byte[] source = File.ReadAllBytes(inPath);
             int pageCount = KillerPdf.Engine.Documents.PdfDocumentInformation
-                .Read(KillerPdf.Engine.Documents.PdfDocument.OpenWithCompatibilityRecovery(source)).PageCount;
+                .Read(PdfEngineIntegration.OpenForReading(source)).PageCount;
             var indices = CliParsePageRange(spec, pageCount, out string err);
             if (indices is null) { con.WriteLine(err); return 2; }
 
@@ -463,7 +463,7 @@ namespace KillerPDF.Features
             IReadOnlyList<PdfSplitOutput> parts;
             try
             {
-                parts = PdfDocumentSplitter.Split(PdfDocument.OpenWithCompatibilityRecovery(source), rule, baseName);
+                parts = PdfDocumentSplitter.Split(PdfEngineIntegration.OpenForReading(source), rule, baseName);
             }
             catch (Exception ex) when (ex is ArgumentException or InvalidOperationException)
             {
@@ -584,7 +584,7 @@ namespace KillerPDF.Features
             PdfDocument document;
             try
             {
-                document = PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(inPath));
+                document = PdfEngineIntegration.OpenForReading(File.ReadAllBytes(inPath));
             }
             catch (Exception ex) when (ex is InvalidOperationException
                 or NotSupportedException or ArgumentException or FormatException)
@@ -769,7 +769,7 @@ namespace KillerPDF.Features
 
             try
             {
-                PdfDocument document = PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(inPath));
+                PdfDocument document = PdfEngineIntegration.OpenForReading(File.ReadAllBytes(inPath));
                 IReadOnlyList<PdfBookmarkProposal> proposals =
                     PdfBookmarkGeneration.DetectHeadings(document, detection);
                 if (proposals.Count == 0)
@@ -926,7 +926,7 @@ namespace KillerPDF.Features
             try
             {
                 report = PdfAccessibilityInspector.Inspect(
-                    PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(inPath)));
+                    PdfEngineIntegration.OpenForReading(File.ReadAllBytes(inPath)));
             }
             catch (Exception ex) when (ex is InvalidOperationException
                 or NotSupportedException or ArgumentException or FormatException)
@@ -956,7 +956,7 @@ namespace KillerPDF.Features
             IReadOnlyList<PdfAttachmentInfo> attachments;
             try
             {
-                document = PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(inPath));
+                document = PdfEngineIntegration.OpenForReading(File.ReadAllBytes(inPath));
                 attachments = PdfAttachmentReader.Read(document);
             }
             catch (Exception ex) when (ex is InvalidOperationException
@@ -1042,7 +1042,7 @@ namespace KillerPDF.Features
                 int pageCount;
                 try
                 {
-                    pageCount = PdfPageInformation.Read(PdfDocument.OpenWithCompatibilityRecovery(source)).Count;
+                    pageCount = PdfPageInformation.Read(PdfEngineIntegration.OpenForReading(source)).Count;
                 }
                 catch (Exception ex) when (ex is InvalidOperationException
                     or NotSupportedException or ArgumentException or FormatException)
@@ -1252,8 +1252,12 @@ namespace KillerPDF.Features
                 else if (!PdfEngineIntegration.TryRemoveEncryptionWithoutPassword(inPath, dec)
                     && !PdfImport.TryImportRepairToPath(inPath, dec))
                 {
-                    throw new InvalidOperationException(
-                        "File is encrypted and could not be unlocked - pass --password if it needs one.");
+                    // Owner restrictions can block a rewrite while the file still reads without
+                    // a password; the engine renders that original directly.
+                    if (!PdfEngineIntegration.CanReadWithoutPassword(inPath))
+                        throw new InvalidOperationException(
+                            "File is encrypted and could not be unlocked - pass --password if it needs one.");
+                    dec = inPath;
                 }
                 workPath = dec;
             }
@@ -1413,7 +1417,7 @@ namespace KillerPDF.Features
             using var renderSession =
                 PdfPageRenderSession.OpenEngineFirst(renderPath, dpi / 72.0);
             int pageCount = renderSession.PageCount;
-            PdfDocument renderDocument = PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(renderPath));
+            PdfDocument renderDocument = PdfEngineIntegration.OpenForReading(File.ReadAllBytes(renderPath));
             IReadOnlyList<bool> bitonalHints =
                 PdfPageRasterInformation.ReadBitonalImagePageHints(renderDocument);
             IReadOnlyList<bool> jpegHints =
@@ -1800,7 +1804,7 @@ namespace KillerPDF.Features
                 return 2;
             }
             string path = Path.GetFullPath(pos[0]);
-            PdfDocumentInformation info = PdfDocumentInformation.Read(PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(path)));
+            PdfDocumentInformation info = PdfDocumentInformation.Read(PdfEngineIntegration.OpenForReading(File.ReadAllBytes(path)));
             con.WriteLine(JsonSerializer.Serialize(new
             {
                 path, info.PageCount, version = info.Version.ToString(), info.Title, info.Author,
@@ -1836,7 +1840,7 @@ namespace KillerPDF.Features
             if (!File.Exists(source)) { con.WriteLine($"Input not found: {source}"); return false; }
             if (string.Equals(source, output, StringComparison.OrdinalIgnoreCase))
             { con.WriteLine("Output file cannot also be the input."); return false; }
-            pageCount = PdfDocumentInformation.Read(PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(source))).PageCount;
+            pageCount = PdfDocumentInformation.Read(PdfEngineIntegration.OpenForReading(File.ReadAllBytes(source))).PageCount;
             return true;
         }
 
