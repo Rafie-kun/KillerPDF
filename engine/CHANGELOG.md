@@ -200,7 +200,11 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 
 ## [1.8.90] - 2026-10-14
 
-The 1.8.90 engine package follows the application maintenance release with no engine changes.
+The 1.8.90 engine package updates a vulnerable cryptography dependency.
+
+### Security
+
+- Updated System.Security.Cryptography.Pkcs to 9.0.21 for GHSA-846f-f764-76mx and GHSA-2fmv-rv2c-59x7.
 
 ## [1.8.80] - 2026-10-04
 
