@@ -566,6 +566,10 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Sig_DrawHere">এখানে আপনার স্বাক্ষর আঁকুন</sys:String>
     <sys:String x:Key="Str_Sig_Clear">সাফ করুন</sys:String>
     <sys:String x:Key="Str_Sig_SaveSig">স্বাক্ষর সংরক্ষণ করুন</sys:String>
+    <sys:String x:Key="Str_Sig_AdjustImage">স্বাক্ষর সমন্বয় করুন</sys:String>
+    <sys:String x:Key="Str_Sig_Sensitivity">সংবেদনশীলতা</sys:String>
+    <sys:String x:Key="Str_Sig_Lighter">হালকা</sys:String>
+    <sys:String x:Key="Str_Sig_Darker">গাঢ়</sys:String>
 
     <!-- Crop confirm bar tooltips -->
     <sys:String x:Key="Str_TT_CropThisPage">এই পৃষ্ঠা ক্রপ করুন (Enter)</sys:String>

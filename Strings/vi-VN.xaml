@@ -648,6 +648,10 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Sig_DrawHere">Vẽ chữ ký của bạn vào đây</sys:String>
     <sys:String x:Key="Str_Sig_Clear">Xóa</sys:String>
     <sys:String x:Key="Str_Sig_SaveSig">Lưu chữ ký</sys:String>
+    <sys:String x:Key="Str_Sig_AdjustImage">Điều chỉnh chữ ký</sys:String>
+    <sys:String x:Key="Str_Sig_Sensitivity">Độ nhạy</sys:String>
+    <sys:String x:Key="Str_Sig_Lighter">Nhạt hơn</sys:String>
+    <sys:String x:Key="Str_Sig_Darker">Đậm hơn</sys:String>
 
     <!-- Mẹo công cụ thanh xác nhận cắt -->
     <sys:String x:Key="Str_TT_CropThisPage">Cắt trang này (Enter)</sys:String>

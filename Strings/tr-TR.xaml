@@ -566,6 +566,10 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Sig_DrawHere">İmzanızı buraya çizin</sys:String>
     <sys:String x:Key="Str_Sig_Clear">Temizle</sys:String>
     <sys:String x:Key="Str_Sig_SaveSig">İmzayı Kaydet</sys:String>
+    <sys:String x:Key="Str_Sig_AdjustImage">İmzayı Ayarla</sys:String>
+    <sys:String x:Key="Str_Sig_Sensitivity">Hassasiyet</sys:String>
+    <sys:String x:Key="Str_Sig_Lighter">Daha açık</sys:String>
+    <sys:String x:Key="Str_Sig_Darker">Daha koyu</sys:String>
 
     <!-- Crop confirm bar tooltips -->
     <sys:String x:Key="Str_TT_CropThisPage">Bu sayfayı kırp (Enter)</sys:String>

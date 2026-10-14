@@ -621,6 +621,10 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Sig_DrawHere">Қолтаңбаңызды осында сызыңыз</sys:String>
     <sys:String x:Key="Str_Sig_Clear">Тазалау</sys:String>
     <sys:String x:Key="Str_Sig_SaveSig">Қолтаңбаны сақтау</sys:String>
+    <sys:String x:Key="Str_Sig_AdjustImage">Қолтаңбаны реттеу</sys:String>
+    <sys:String x:Key="Str_Sig_Sensitivity">Сезімталдық</sys:String>
+    <sys:String x:Key="Str_Sig_Lighter">Ашығырақ</sys:String>
+    <sys:String x:Key="Str_Sig_Darker">Қоюырақ</sys:String>
 
     <!-- Crop confirm bar tooltips -->
     <sys:String x:Key="Str_TT_CropThisPage">Осы бетті қию (Enter)</sys:String>

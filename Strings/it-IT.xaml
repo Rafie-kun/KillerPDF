@@ -648,6 +648,10 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_Sig_DrawHere">Disegna qui la firma</sys:String>
     <sys:String x:Key="Str_Sig_Clear">Azzera</sys:String>
     <sys:String x:Key="Str_Sig_SaveSig">Salva firma</sys:String>
+    <sys:String x:Key="Str_Sig_AdjustImage">Regola firma</sys:String>
+    <sys:String x:Key="Str_Sig_Sensitivity">Sensibilità</sys:String>
+    <sys:String x:Key="Str_Sig_Lighter">Più chiaro</sys:String>
+    <sys:String x:Key="Str_Sig_Darker">Più scuro</sys:String>
 
     <!-- Crop confirm bar tooltips -->
     <sys:String x:Key="Str_TT_CropThisPage">Ritaglia questa pagina (Invio)</sys:String>

@@ -648,6 +648,10 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Sig_DrawHere">Намалюйте свій підпис тут</sys:String>
     <sys:String x:Key="Str_Sig_Clear">Очистити</sys:String>
     <sys:String x:Key="Str_Sig_SaveSig">Зберегти підпис</sys:String>
+    <sys:String x:Key="Str_Sig_AdjustImage">Налаштування підпису</sys:String>
+    <sys:String x:Key="Str_Sig_Sensitivity">Чутливість</sys:String>
+    <sys:String x:Key="Str_Sig_Lighter">Світліше</sys:String>
+    <sys:String x:Key="Str_Sig_Darker">Темніше</sys:String>
 
     <!-- Crop confirm bar tooltips -->
     <sys:String x:Key="Str_TT_CropThisPage">Обрізати цю сторінку (Enter)</sys:String>

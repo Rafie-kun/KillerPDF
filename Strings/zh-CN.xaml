@@ -566,6 +566,10 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Sig_DrawHere">在此处绘制您的签名</sys:String>
     <sys:String x:Key="Str_Sig_Clear">清除</sys:String>
     <sys:String x:Key="Str_Sig_SaveSig">保存签名</sys:String>
+    <sys:String x:Key="Str_Sig_AdjustImage">调整签名</sys:String>
+    <sys:String x:Key="Str_Sig_Sensitivity">灵敏度</sys:String>
+    <sys:String x:Key="Str_Sig_Lighter">较浅</sys:String>
+    <sys:String x:Key="Str_Sig_Darker">较深</sys:String>
 
     <!-- Crop confirm bar tooltips -->
     <sys:String x:Key="Str_TT_CropThisPage">裁剪此页 (Enter)</sys:String>

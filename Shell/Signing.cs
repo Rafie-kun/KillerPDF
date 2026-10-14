@@ -838,14 +838,11 @@ namespace KillerPDF
             try
             {
                 var bmp = new System.Windows.Media.Imaging.BitmapImage(new Uri(dlg.SelectedPath));
-                byte[] pngBytes;
-                using (var ms = new System.IO.MemoryStream())
-                {
-                    var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
-                    encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(bmp));
-                    encoder.Save(ms);
-                    pngBytes = ms.ToArray();
-                }
+                // A scanned or photographed signature carries its paper with it. The sensitivity
+                // dialog drops the paper and lets the user lighten or darken the ink before saving.
+                var inked = ShowSignatureSensitivityDialog(bmp);
+                if (inked is null) return;
+                byte[] pngBytes = SignatureInk.EncodePng(inked);
 
                 var saved = new SavedSignature
                 {
@@ -867,6 +864,100 @@ namespace KillerPDF
                 KillerDialog.Show(this, Loc("Str_Err_ImportImageFailed") + "\n" + ex.Message, "KillerPDF",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        // Preview of an imported signature with a Sensitivity slider. Returns the full-size ink on a
+        // transparent background, or null when the user cancels.
+        private System.Windows.Media.Imaging.BitmapSource? ShowSignatureSensitivityDialog(
+            System.Windows.Media.Imaging.BitmapSource source)
+        {
+            var win = new Window
+            {
+                Title = Loc("Str_Sig_AdjustImage"),
+                Width = 460,
+                SizeToContent = SizeToContent.Height
+            };
+            DialogChrome.Configure(win, this);
+            win.Resources["ChromeCloseCorner"] = new CornerRadius(0, UiKit.RadWindow.TopRight, 0, 0);
+
+            var contentArea = new StackPanel();
+
+            // White like the page the signature lands on, so the preview shows the real result.
+            var previewBorder = new Border
+            {
+                Background = Brushes.White,
+                BorderBrush = new SolidColorBrush(Color.FromRgb(0xcc, 0xcc, 0xcc)),
+                BorderThickness = new Thickness(1),
+                Margin = new Thickness(12, 12, 12, 4),
+                CornerRadius = UiKit.RadControl,
+                Height = 170,
+                Padding = new Thickness(8)
+            };
+            var preview = new Image { Stretch = Stretch.Uniform };
+            RenderOptions.SetBitmapScalingMode(preview, BitmapScalingMode.HighQuality);
+            previewBorder.Child = preview;
+            contentArea.Children.Add(previewBorder);
+
+            // The slider re-inks a reduced copy so a large phone photo still follows the thumb.
+            var previewSource = SignatureInk.PreviewSource(source, 900);
+            byte[] previewPixels = SignatureInk.ReadPixels(previewSource, out int pw, out int ph);
+            void RefreshPreview(double sensitivity) =>
+                preview.Source = SignatureInk.ToBitmap(SignatureInk.Apply(previewPixels, sensitivity), pw, ph);
+
+            var sensitivityRow = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(14, 6, 12, 0), VerticalAlignment = VerticalAlignment.Center };
+            TextBlock MutedLabel(string text, Thickness margin)
+            {
+                var label = new TextBlock { Text = text, FontFamily = UiKit.UiFont, FontSize = 11, VerticalAlignment = VerticalAlignment.Center, Margin = margin };
+                label.SetResourceReference(TextBlock.ForegroundProperty, "MutedTextBrush");
+                return label;
+            }
+            sensitivityRow.Children.Add(MutedLabel(Loc("Str_Sig_Sensitivity"), new Thickness(0, 0, 10, 0)));
+            sensitivityRow.Children.Add(MutedLabel(Loc("Str_Sig_Lighter"), new Thickness(0, 0, 6, 0)));
+            var sensitivitySlider = new Slider
+            {
+                Minimum = SignatureInk.MinSensitivity,
+                Maximum = SignatureInk.MaxSensitivity,
+                Value = SignatureInk.DefaultSensitivity,
+                SmallChange = 1,
+                LargeChange = 10,
+                IsSnapToTickEnabled = true,
+                TickFrequency = 1,
+                Width = 160,
+                VerticalAlignment = VerticalAlignment.Center,
+                Style = (Style)FindResource("DarkSlider")
+            };
+            System.Windows.Automation.AutomationProperties.SetName(sensitivitySlider, Loc("Str_Sig_Sensitivity"));
+            sensitivityRow.Children.Add(sensitivitySlider);
+            sensitivityRow.Children.Add(MutedLabel(Loc("Str_Sig_Darker"), new Thickness(6, 0, 0, 0)));
+            sensitivitySlider.ValueChanged += (s, e) => RefreshPreview(e.NewValue);
+            contentArea.Children.Add(sensitivityRow);
+            RefreshPreview(sensitivitySlider.Value);
+
+            System.Windows.Media.Imaging.BitmapSource? result = null;
+            var btnPanel = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                HorizontalAlignment = HorizontalAlignment.Right,
+                Margin = new Thickness(12, 10, 12, 12)
+            };
+            var cancelBtn = UiKit.Make(Loc("Str_Btn_Cancel"), accent: false);
+            cancelBtn.Margin = new Thickness(0, 0, 8, 0);
+            cancelBtn.Click += (s, e) => win.Close();
+            var saveBtn = UiKit.Make(Loc("Str_Sig_SaveSig"), accent: true);
+            saveBtn.Click += (s, e) =>
+            {
+                byte[] pixels = SignatureInk.ReadPixels(source, out int w, out int h);
+                result = SignatureInk.ToBitmap(SignatureInk.Apply(pixels, sensitivitySlider.Value), w, h);
+                win.Close();
+            };
+            btnPanel.Children.Add(cancelBtn);
+            btnPanel.Children.Add(saveBtn);
+            contentArea.Children.Add(btnPanel);
+
+            win.Content = DialogChrome.Frame(win, this, "KillerPDF - " + Loc("Str_Sig_AdjustImage"), () => win.Close(), contentArea);
+            win.Loaded += (s, e) => sensitivitySlider.Focus();
+            win.ShowDialog();
+            return result;
         }
     }
 }

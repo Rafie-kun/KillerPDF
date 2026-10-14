@@ -648,6 +648,10 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Sig_DrawHere">Rajzolja ide az aláírását</sys:String>
     <sys:String x:Key="Str_Sig_Clear">Törlés</sys:String>
     <sys:String x:Key="Str_Sig_SaveSig">Aláírás mentése</sys:String>
+    <sys:String x:Key="Str_Sig_AdjustImage">Aláírás igazítása</sys:String>
+    <sys:String x:Key="Str_Sig_Sensitivity">Érzékenység</sys:String>
+    <sys:String x:Key="Str_Sig_Lighter">Világosabb</sys:String>
+    <sys:String x:Key="Str_Sig_Darker">Sötétebb</sys:String>
 
     <!-- Crop confirm bar tooltips -->
     <sys:String x:Key="Str_TT_CropThisPage">Ennek az oldalnak a levágása (Enter)</sys:String>

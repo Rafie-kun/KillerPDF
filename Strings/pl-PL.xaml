@@ -630,6 +630,10 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Sig_DrawHere">Narysuj tutaj swój podpis</sys:String>
     <sys:String x:Key="Str_Sig_Clear">Wyczyść</sys:String>
     <sys:String x:Key="Str_Sig_SaveSig">Zapisz podpis</sys:String>
+    <sys:String x:Key="Str_Sig_AdjustImage">Dostosuj podpis</sys:String>
+    <sys:String x:Key="Str_Sig_Sensitivity">Czułość</sys:String>
+    <sys:String x:Key="Str_Sig_Lighter">Jaśniej</sys:String>
+    <sys:String x:Key="Str_Sig_Darker">Ciemniej</sys:String>
 
     <!-- Crop confirm bar tooltips -->
     <sys:String x:Key="Str_TT_CropThisPage">Przytnij tę stronę (Enter)</sys:String>

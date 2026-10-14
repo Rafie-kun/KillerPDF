@@ -648,6 +648,10 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Sig_DrawHere">ここに署名を描画してください</sys:String>
     <sys:String x:Key="Str_Sig_Clear">クリア</sys:String>
     <sys:String x:Key="Str_Sig_SaveSig">署名を保存</sys:String>
+    <sys:String x:Key="Str_Sig_AdjustImage">署名を調整</sys:String>
+    <sys:String x:Key="Str_Sig_Sensitivity">感度</sys:String>
+    <sys:String x:Key="Str_Sig_Lighter">薄く</sys:String>
+    <sys:String x:Key="Str_Sig_Darker">濃く</sys:String>
 
     <!-- トリミング確認バーのツールチップ -->
     <sys:String x:Key="Str_TT_CropThisPage">このページをトリミング (Enter)</sys:String>
