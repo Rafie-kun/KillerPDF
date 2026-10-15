@@ -79,6 +79,25 @@ if (-not $RepackOnly) {
     if (-not [IO.File]::Exists($engineAssembly)) { throw "KillerPdf.Engine ReadyToRun assembly is missing: $engineAssembly" }
     [IO.File]::Copy($engineAssembly, (Join-Path $payloadDir 'KillerPdf.Engine.dll'), $true)
 
+    # The File Explorer and Outlook preview handler (#410) ships with the installed edition only.
+    # Its own files join the payload; the engine and fonts it needs are already there.
+    if ($isInstaller) {
+        $previewProject = Join-Path $projectDir 'PreviewHandler\KillerPDF.PreviewHandler.csproj'
+        $previewPublishDir = Join-Path $artifactRoot 'preview-handler'
+        & dotnet publish $previewProject -c $Configuration `
+            -r win-x64 `
+            --self-contained false `
+            -p:PublishReadyToRun=true `
+            -o $previewPublishDir
+        if ($LASTEXITCODE -ne 0) { throw 'Preview handler build failed.' }
+        foreach ($previewFile in 'KillerPDF.PreviewHandler.dll', 'KillerPDF.PreviewHandler.comhost.dll',
+                                 'KillerPDF.PreviewHandler.runtimeconfig.json', 'KillerPDF.PreviewHandler.deps.json') {
+            $previewPath = Join-Path $previewPublishDir $previewFile
+            if (-not [IO.File]::Exists($previewPath)) { throw "Preview handler output is missing: $previewPath" }
+            [IO.File]::Copy($previewPath, (Join-Path $payloadDir $previewFile), $true)
+        }
+    }
+
     if (-not $KeepSymbols) {
         foreach ($symbol in [IO.Directory]::GetFiles($payloadDir, '*.pdb', [IO.SearchOption]::AllDirectories)) {
             [IO.File]::Delete($symbol)

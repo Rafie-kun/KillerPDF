@@ -8,6 +8,7 @@
   <string key="InstallFolder">Install folder</string>
   <string key="Browse">Browse...</string>
   <string key="DesktopShortcut">Create a desktop shortcut</string>
+  <string key="PreviewHandler">Preview PDFs in File Explorer and Outlook</string>
   <string key="InstallingLabel">INSTALLING</string>
   <string key="Back">Back</string>
   <string key="Cancel">Cancel</string>
@@ -25,6 +26,7 @@
   <string key="CurrentUser">Current user</string>
   <string key="WithShortcut">Desktop shortcut</string>
   <string key="WithoutShortcut">No desktop shortcut</string>
+  <string key="WithPreview">PDF previews</string>
   <string key="Launch">Launch</string>
   <string key="Install">Install</string>
   <string key="AlreadyInstalledHeading">KillerPDF is already installed</string>

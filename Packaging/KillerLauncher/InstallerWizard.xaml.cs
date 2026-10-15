@@ -29,6 +29,7 @@ namespace KillerLauncher
                 CurrentUser.IsChecked = !_existing.Machine;
                 AllUsers.IsChecked = _existing.Machine;
                 DesktopShortcut.IsChecked = _existing.DesktopShortcut;
+                PreviewHandler.IsChecked = _existing.PreviewHandler;
             }
             ImageBrush grain = CreateGrain();
             GrainLayer.Background = grain;
@@ -103,7 +104,8 @@ namespace KillerLauncher
                 Heading.Text = _installed ? LauncherStrings.Get("CompleteHeading") : LauncherStrings.Get("ReadyHeading");
                 Copy.Text = _installed ? LauncherStrings.Get("CompleteCopy") :
                     (AllUsers.IsChecked == true ? LauncherStrings.Get("AllUsers") : LauncherStrings.Get("CurrentUser")) +
-                    (DesktopShortcut.IsChecked == true ? "  •  " + LauncherStrings.Get("WithShortcut") : "  •  " + LauncherStrings.Get("WithoutShortcut"));
+                    (DesktopShortcut.IsChecked == true ? "  •  " + LauncherStrings.Get("WithShortcut") : "  •  " + LauncherStrings.Get("WithoutShortcut")) +
+                    (PreviewHandler.IsChecked == true ? "  •  " + LauncherStrings.Get("WithPreview") : string.Empty);
                 SetRuntimeStatus();
                 NextButton.Content = _installed ? LauncherStrings.Get("Launch") : LauncherStrings.Get("Install");
             }
@@ -153,8 +155,9 @@ namespace KillerLauncher
                 InstallProgress.Visibility = Visibility.Visible;
                 bool machine = _existing?.Machine ?? AllUsers.IsChecked == true;
                 bool desktop = _existing?.DesktopShortcut ?? DesktopShortcut.IsChecked == true;
-                Task<int> install = Task.Run(() => machine ? InstallForEveryone(desktop, installDirectory)
-                    : Program.Install(false, desktop, installDirectory));
+                bool preview = _existing?.PreviewHandler ?? PreviewHandler.IsChecked == true;
+                Task<int> install = Task.Run(() => machine ? InstallForEveryone(desktop, preview, installDirectory)
+                    : Program.Install(false, desktop, installDirectory, preview));
                 await Task.WhenAll(install, Task.Delay(2000));
                 int result = install.Result;
                 if (result != 0) throw new InvalidOperationException(LauncherStrings.Format("SetupReturned", result));
@@ -194,9 +197,9 @@ namespace KillerLauncher
             NoticeOverlay.Visibility = Visibility.Collapsed;
         }
 
-        private static int InstallForEveryone(bool desktop, string installDirectory)
+        private static int InstallForEveryone(bool desktop, bool preview, string installDirectory)
         {
-            string arguments = "/silent " + (desktop ? "/desktop " : string.Empty) +
+            string arguments = "/silent " + (desktop ? "/desktop " : string.Empty) + (preview ? "/preview " : "/no-preview ") +
                 Program.EncodeInstallDirectoryArgument(installDirectory);
             var start = new ProcessStartInfo(Process.GetCurrentProcess().MainModule.FileName,
                 arguments) { UseShellExecute = true, Verb = "runas" };

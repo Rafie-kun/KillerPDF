@@ -8,6 +8,7 @@
   <string key="InstallFolder">Орнату қалтасы</string>
   <string key="Browse">Шолу...</string>
   <string key="DesktopShortcut">Жұмыс үстелінде төте жол жасау</string>
+  <string key="PreviewHandler">Файл зерттеушісі мен Outlook-та PDF-ті алдын ала қарау</string>
   <string key="InstallingLabel">ОРНАТЫЛУДА</string>
   <string key="Back">Артқа</string>
   <string key="Cancel">Болдырмау</string>
@@ -25,6 +26,7 @@
   <string key="CurrentUser">Ағымдағы пайдаланушы</string>
   <string key="WithShortcut">Жұмыс үстеліндегі төте жол</string>
   <string key="WithoutShortcut">Жұмыс үстелінде төте жол жоқ</string>
+  <string key="WithPreview">PDF алдын ала қарау</string>
   <string key="Launch">Іске қосу</string>
   <string key="Install">Орнату</string>
   <string key="AlreadyInstalledHeading">KillerPDF орнатылып қойған</string>

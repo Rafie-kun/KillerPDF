@@ -8,6 +8,7 @@
   <string key="InstallFolder">Папка установки</string>
   <string key="Browse">Обзор...</string>
   <string key="DesktopShortcut">Создать ярлык на рабочем столе</string>
+  <string key="PreviewHandler">Предпросмотр PDF в проводнике и Outlook</string>
   <string key="InstallingLabel">УСТАНОВКА</string>
   <string key="Back">Назад</string>
   <string key="Cancel">Отменить</string>
@@ -25,6 +26,7 @@
   <string key="CurrentUser">Текущий пользователь</string>
   <string key="WithShortcut">Ярлык на рабочем столе</string>
   <string key="WithoutShortcut">Без ярлыка на рабочем столе</string>
+  <string key="WithPreview">Предпросмотр PDF</string>
   <string key="Launch">Запустить</string>
   <string key="Install">Установить</string>
   <string key="AlreadyInstalledHeading">KillerPDF уже установлен</string>

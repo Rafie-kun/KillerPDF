@@ -53,7 +53,7 @@ namespace KillerLauncher
                         return InstallerWizard.Run(args);
                     }
                     return Install(machine: false, desktop: args.Any(a => string.Equals(a, "/desktop", StringComparison.OrdinalIgnoreCase)),
-                        destinationOverride: ReadInstallDirectory(args));
+                        destinationOverride: ReadInstallDirectory(args), preview: ReadPreview(args));
                 }
                 if (args.Any(a => string.Equals(a, "/silent", StringComparison.OrdinalIgnoreCase)))
                 {
@@ -66,7 +66,8 @@ namespace KillerLauncher
                     // them, as the Microsoft Store runs installers, it is the normal per-user
                     // install with no prompt. The app never needs admin rights.
                     return Install(machine: KillerFamily.Deployment.InstallerExitCodes.IsElevated(), desktop: args.Any(a =>
-                        string.Equals(a, "/desktop", StringComparison.OrdinalIgnoreCase)), destinationOverride: ReadInstallDirectory(args));
+                        string.Equals(a, "/desktop", StringComparison.OrdinalIgnoreCase)), destinationOverride: ReadInstallDirectory(args),
+                        preview: ReadPreview(args));
                 }
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
@@ -144,7 +145,7 @@ namespace KillerLauncher
             }
         }
 
-        internal static int Install(bool machine, bool desktop, string? destinationOverride = null)
+        internal static int Install(bool machine, bool desktop, string? destinationOverride = null, bool? preview = null)
         {
             using var installLease = KillerFamily.Deployment.InstallerExitCodes.Acquire(ProductName);
             if (!IsTrustedForInstall(CurrentExecutablePath()))
@@ -185,7 +186,7 @@ namespace KillerLauncher
                 int registrationExit = string.Equals(
                     Environment.GetEnvironmentVariable(SkipRegistrationEnvironmentVariable), "1", StringComparison.Ordinal)
                     ? 0
-                    : RunRegistration(destination, machine, desktop);
+                    : RunRegistration(destination, machine, desktop, preview);
                 if (registrationExit != 0)
                     throw new System.ComponentModel.Win32Exception(registrationExit,
                         LauncherStrings.Format("RegistrationFailed", registrationExit));
@@ -216,13 +217,15 @@ namespace KillerLauncher
 
         internal sealed class InstalledCopy
         {
-            internal InstalledCopy(string directory, string executable, string version, bool machine, bool desktopShortcut)
+            internal InstalledCopy(string directory, string executable, string version, bool machine, bool desktopShortcut,
+                bool previewHandler)
             {
                 Directory = directory;
                 Executable = executable;
                 Version = version;
                 Machine = machine;
                 DesktopShortcut = desktopShortcut;
+                PreviewHandler = previewHandler;
             }
 
             internal string Directory { get; }
@@ -230,6 +233,7 @@ namespace KillerLauncher
             internal string Version { get; }
             internal bool Machine { get; }
             internal bool DesktopShortcut { get; }
+            internal bool PreviewHandler { get; }
         }
 
         internal static InstalledCopy? FindInstalledCopy()
@@ -252,7 +256,32 @@ namespace KillerLauncher
             string desktop = Path.Combine(Environment.GetFolderPath(machine
                 ? Environment.SpecialFolder.CommonDesktopDirectory
                 : Environment.SpecialFolder.DesktopDirectory), "KillerPDF.lnk");
-            return new InstalledCopy(directory, executable, version, machine, File.Exists(desktop));
+            return new InstalledCopy(directory, executable, version, machine, File.Exists(desktop), HasPreviewHandler(machine));
+        }
+
+        // The File Explorer and Outlook preview handler (#410), registered by the app's /preview pass.
+        private const string PreviewHandlerServerKey =
+            @"Software\Classes\CLSID\{0EB8F20D-6E18-4B80-9CDF-FF663C52B5BD}\InprocServer32";
+
+        private static bool HasPreviewHandler(bool machine)
+        {
+            try
+            {
+                using (Microsoft.Win32.RegistryKey? key = (machine ? Microsoft.Win32.Registry.LocalMachine
+                    : Microsoft.Win32.Registry.CurrentUser).OpenSubKey(PreviewHandlerServerKey))
+                    return key?.GetValue("") is string path && path.Length > 0;
+            }
+            catch (Exception ex) when (ex is System.Security.SecurityException or UnauthorizedAccessException or IOException)
+            {
+                return false;
+            }
+        }
+
+        private static bool? ReadPreview(IEnumerable<string> args)
+        {
+            if (args.Any(a => string.Equals(a, "/preview", StringComparison.OrdinalIgnoreCase))) return true;
+            if (args.Any(a => string.Equals(a, "/no-preview", StringComparison.OrdinalIgnoreCase))) return false;
+            return null;
         }
 
         internal static string SetupVersion =>
@@ -272,6 +301,7 @@ namespace KillerLauncher
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToArray();
             if (roots.Length == 0) return;
+            StopPreviewHosts(roots);
 
             int currentProcessId;
             using (Process current = Process.GetCurrentProcess()) currentProcessId = current.Id;
@@ -318,6 +348,33 @@ namespace KillerLauncher
             }
         }
 
+        // A prevhost.exe surrogate that loaded the preview handler (#410) from a folder about to be
+        // replaced keeps its files open. It holds no user work, and the shell starts a new one.
+        private static void StopPreviewHosts(string[] roots)
+        {
+            foreach (Process process in Process.GetProcessesByName("prevhost"))
+            {
+                using (process)
+                {
+                    try
+                    {
+                        bool loaded = false;
+                        foreach (ProcessModule module in process.Modules)
+                        {
+                            string path = module.FileName ?? string.Empty;
+                            if (roots.Any(root => path.StartsWith(root, StringComparison.OrdinalIgnoreCase))) loaded = true;
+                            module.Dispose();
+                        }
+                        if (!loaded) continue;
+                        process.Kill();
+                        process.WaitForExit(5000);
+                    }
+                    catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException
+                        or NotSupportedException) { }
+                }
+            }
+        }
+
         internal static string ValidateInstallDirectory(string directory)
         {
             if (string.IsNullOrWhiteSpace(directory))
@@ -354,10 +411,11 @@ namespace KillerLauncher
             catch { return false; }
         }
 
-        private static int RunRegistration(string directory, bool machine, bool desktop)
+        private static int RunRegistration(string directory, bool machine, bool desktop, bool? preview)
         {
             var arguments = new List<string> { machine ? "/register-machine" : "/register-user" };
             if (desktop) arguments.Add("/desktop");
+            if (preview.HasValue) arguments.Add(preview.Value ? "/preview" : "/no-preview");
             var start = new ProcessStartInfo(Path.Combine(directory, InnerExeName), QuoteArguments(arguments.ToArray()))
             {
                 UseShellExecute = false,

@@ -8,6 +8,7 @@
   <string key="InstallFolder">Telepítési mappa</string>
   <string key="Browse">Tallózás...</string>
   <string key="DesktopShortcut">Asztali parancsikon létrehozása</string>
+  <string key="PreviewHandler">PDF-előnézet a Fájlkezelőben és az Outlookban</string>
   <string key="InstallingLabel">TELEPÍTÉS</string>
   <string key="Back">Vissza</string>
   <string key="Cancel">Mégse</string>
@@ -25,6 +26,7 @@
   <string key="CurrentUser">Jelenlegi felhasználó</string>
   <string key="WithShortcut">Asztali parancsikon</string>
   <string key="WithoutShortcut">Asztali parancsikon nélkül</string>
+  <string key="WithPreview">PDF-előnézet</string>
   <string key="Launch">Indítás</string>
   <string key="Install">Telepítés</string>
   <string key="AlreadyInstalledHeading">A KillerPDF már telepítve van</string>

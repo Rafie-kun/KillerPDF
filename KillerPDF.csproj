@@ -49,7 +49,7 @@
     </AssemblyAttribute>
   </ItemGroup>
 
-  <!-- The engine project builds independently; keep the app's implicit
+  <!-- The engine and preview handler projects build independently; keep the app's implicit
        source globs out of those trees or their files compile as part of the WPF application. -->
   <ItemGroup>
     <PackageReference Include="SixLabors.Fonts" Version="1.0.0-beta17" />
@@ -59,36 +59,42 @@
     <Compile Remove="src\**" />
     <Compile Remove="tests\**" />
     <Compile Remove="tools\**" />
+    <Compile Remove="PreviewHandler\**" />
     <EmbeddedResource Remove="engine\**" />
     <EmbeddedResource Remove="third_party\**" />
     <EmbeddedResource Remove="Packaging\**" />
     <EmbeddedResource Remove="src\**" />
     <EmbeddedResource Remove="tests\**" />
     <EmbeddedResource Remove="tools\**" />
+    <EmbeddedResource Remove="PreviewHandler\**" />
     <None Remove="engine\**" />
     <None Remove="third_party\**" />
     <None Remove="Packaging\**" />
     <None Remove="src\**" />
     <None Remove="tests\**" />
     <None Remove="tools\**" />
+    <None Remove="PreviewHandler\**" />
     <Content Remove="engine\**" />
     <Content Remove="third_party\**" />
     <Content Remove="Packaging\**" />
     <Content Remove="src\**" />
     <Content Remove="tests\**" />
     <Content Remove="tools\**" />
+    <Content Remove="PreviewHandler\**" />
     <Page Remove="engine\**" />
     <Page Remove="third_party\**" />
     <Page Remove="Packaging\**" />
     <Page Remove="src\**" />
     <Page Remove="tests\**" />
     <Page Remove="tools\**" />
+    <Page Remove="PreviewHandler\**" />
     <Resource Remove="engine\**" />
     <Resource Remove="third_party\**" />
     <Resource Remove="Packaging\**" />
     <Resource Remove="src\**" />
     <Resource Remove="tests\**" />
     <Resource Remove="tools\**" />
+    <Resource Remove="PreviewHandler\**" />
   </ItemGroup>
 
   <ItemGroup>

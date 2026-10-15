@@ -99,9 +99,12 @@ namespace KillerPDF
             {
                 bool machine = e.Args.Any(a => string.Equals(a, "/register-machine", StringComparison.OrdinalIgnoreCase));
                 bool desktop = e.Args.Any(a => string.Equals(a, "/desktop", StringComparison.OrdinalIgnoreCase));
+                // #410: setup passes /preview or /no-preview; without either the copy keeps its choice.
+                bool? preview = e.Args.Any(a => string.Equals(a, "/preview", StringComparison.OrdinalIgnoreCase)) ? true
+                    : e.Args.Any(a => string.Equals(a, "/no-preview", StringComparison.OrdinalIgnoreCase)) ? false : null;
                 try
                 {
-                    RegisterInstalledCopy(machine, desktop);
+                    RegisterInstalledCopy(machine, desktop, preview);
                     Shutdown(0);
                 }
                 catch (Exception ex)
@@ -916,10 +919,12 @@ namespace KillerPDF
             try { Directory.Delete(MachineStartMenuDir, recursive: false); } catch { }
             UnregisterFileHandler(Registry.LocalMachine);
             Services.ProtocolRegistrar.Unregister(Registry.LocalMachine);
+            Services.PreviewHandlerRegistration.Unregister(Registry.LocalMachine);
             try { Registry.LocalMachine.DeleteSubKeyTree(@"Software\KillerPDF"); } catch { }
             try { Registry.LocalMachine.DeleteSubKeyTree(
                 @"Software\Microsoft\Windows\CurrentVersion\Uninstall\KillerPDF"); } catch { }
             string directory = Path.GetDirectoryName(registeredExe ?? MachineInstallExe) ?? MachineInstallDir;
+            Services.PreviewHandlerRegistration.StopHosts(directory);
             try { if (Directory.Exists(directory)) Directory.Delete(directory, true); } catch { }
             SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, IntPtr.Zero, IntPtr.Zero);
         }
@@ -1054,6 +1059,8 @@ namespace KillerPDF
             try { if (Directory.Exists(StartMenuDir)) Directory.Delete(StartMenuDir, true); } catch { }
             try { if (File.Exists(DesktopLnk)) File.Delete(DesktopLnk); } catch { }
             string directory = Path.GetDirectoryName(registeredExe ?? InstallExe) ?? InstallDir;
+            Services.PreviewHandlerRegistration.Unregister(Registry.CurrentUser);
+            Services.PreviewHandlerRegistration.StopHosts(directory);
             try { if (Directory.Exists(directory)) Directory.Delete(directory, true); } catch { }
             try
             {
@@ -2045,7 +2052,7 @@ namespace KillerPDF
             return true;
         }
 
-        private static void RegisterInstalledCopy(bool machine, bool desktop)
+        private static void RegisterInstalledCopy(bool machine, bool desktop, bool? preview = null)
         {
             string exePath = Path.GetFullPath(Process.GetCurrentProcess().MainModule?.FileName
                 ?? throw new InvalidOperationException("The installed application path is unavailable."));
@@ -2066,6 +2073,14 @@ namespace KillerPDF
             if (!File.Exists(iconPath)) ExtractFileIcon(iconPath);
             RegisterFileHandler(registryRoot, exePath, iconPath);
             Services.ProtocolRegistrar.Register(registryRoot, exePath);
+
+            // #410: PDF previews in File Explorer and Outlook when setup asked for them. Without a
+            // choice, a copy that already had them keeps them, as long as the handler is present.
+            bool handlerPresent = File.Exists(Path.Combine(installDirectory, Services.PreviewHandlerRegistration.HostFileName));
+            if (preview ?? (handlerPresent && Services.PreviewHandlerRegistration.IsRegistered(registryRoot)))
+                Services.PreviewHandlerRegistration.Register(registryRoot, installDirectory);
+            else
+                Services.PreviewHandlerRegistration.Unregister(registryRoot);
 
             using (var key = registryRoot.CreateSubKey(@"Software\KillerPDF"))
             {
@@ -2142,6 +2157,7 @@ namespace KillerPDF
             try { File.Delete(DesktopLnk); } catch { }
 
             // Registry cleanup
+            Services.PreviewHandlerRegistration.Unregister(Registry.CurrentUser);
             try { Registry.CurrentUser.DeleteSubKeyTree(@"Software\KillerPDF"); } catch { }
             Services.ProtocolRegistrar.Unregister();
             try { Registry.CurrentUser.DeleteSubKeyTree(
@@ -2157,10 +2173,14 @@ namespace KillerPDF
                 try { Directory.Delete(MachineStartMenuDir, recursive: false); } catch { }
                 UnregisterFileHandler(Registry.LocalMachine);
                 Services.ProtocolRegistrar.Unregister(Registry.LocalMachine);   // #183
+                Services.PreviewHandlerRegistration.Unregister(Registry.LocalMachine);
                 try { Registry.LocalMachine.DeleteSubKeyTree(@"Software\KillerPDF"); } catch { }
                 try { Registry.LocalMachine.DeleteSubKeyTree(
                     @"Software\Microsoft\Windows\CurrentVersion\Uninstall\KillerPDF"); } catch { }
             }
+
+            // A preview surrogate holding the handler would keep the folder from being removed.
+            Services.PreviewHandlerRegistration.StopHosts(Path.GetDirectoryName(currentExe) ?? AppContext.BaseDirectory);
 
             // Self-delete: deferred via cmd batch so the EXE can exit first
             string bat = Path.Combine(Path.GetTempPath(), "killerpdf_uninstall.bat");

@@ -8,6 +8,7 @@
   <string key="InstallFolder">安装文件夹</string>
   <string key="Browse">浏览...</string>
   <string key="DesktopShortcut">创建桌面快捷方式</string>
+  <string key="PreviewHandler">在文件资源管理器和 Outlook 中预览 PDF</string>
   <string key="InstallingLabel">正在安装</string>
   <string key="Back">返回</string>
   <string key="Cancel">取消</string>
@@ -25,6 +26,7 @@
   <string key="CurrentUser">当前用户</string>
   <string key="WithShortcut">桌面快捷方式</string>
   <string key="WithoutShortcut">不创建桌面快捷方式</string>
+  <string key="WithPreview">PDF 预览</string>
   <string key="Launch">启动</string>
   <string key="Install">安装</string>
   <string key="AlreadyInstalledHeading">KillerPDF 已安装</string>

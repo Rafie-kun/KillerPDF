@@ -8,6 +8,7 @@
   <string key="InstallFolder">Thư mục cài đặt</string>
   <string key="Browse">Duyệt...</string>
   <string key="DesktopShortcut">Tạo lối tắt trên màn hình nền</string>
+  <string key="PreviewHandler">Xem trước PDF trong File Explorer và Outlook</string>
   <string key="InstallingLabel">ĐANG CÀI ĐẶT</string>
   <string key="Back">Quay lại</string>
   <string key="Cancel">Hủy</string>
@@ -25,6 +26,7 @@
   <string key="CurrentUser">Người dùng hiện tại</string>
   <string key="WithShortcut">Lối tắt trên màn hình nền</string>
   <string key="WithoutShortcut">Không có lối tắt trên màn hình nền</string>
+  <string key="WithPreview">Xem trước PDF</string>
   <string key="Launch">Khởi chạy</string>
   <string key="Install">Cài đặt</string>
   <string key="AlreadyInstalledHeading">KillerPDF đã được cài đặt</string>

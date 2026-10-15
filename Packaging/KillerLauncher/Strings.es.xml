@@ -8,6 +8,7 @@
   <string key="InstallFolder">Carpeta de instalación</string>
   <string key="Browse">Examinar...</string>
   <string key="DesktopShortcut">Crear un acceso directo en el escritorio</string>
+  <string key="PreviewHandler">Vista previa de PDF en el Explorador de archivos y Outlook</string>
   <string key="InstallingLabel">INSTALANDO</string>
   <string key="Back">Atrás</string>
   <string key="Cancel">Cancelar</string>
@@ -25,6 +26,7 @@
   <string key="CurrentUser">Usuario actual</string>
   <string key="WithShortcut">Acceso directo en el escritorio</string>
   <string key="WithoutShortcut">Sin acceso directo en el escritorio</string>
+  <string key="WithPreview">Vista previa de PDF</string>
   <string key="Launch">Iniciar</string>
   <string key="Install">Instalar</string>
   <string key="AlreadyInstalledHeading">KillerPDF ya está instalado</string>

@@ -4,6 +4,10 @@ KillerPDF.App.deps.json
 KillerPDF.App.dll
 KillerPDF.App.exe
 KillerPDF.App.runtimeconfig.json
+KillerPDF.PreviewHandler.comhost.dll
+KillerPDF.PreviewHandler.deps.json
+KillerPDF.PreviewHandler.dll
+KillerPDF.PreviewHandler.runtimeconfig.json
 KillerPdf.Engine.dll
 KillerPdf.Engine.xml
 LICENSE

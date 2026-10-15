@@ -8,6 +8,7 @@
   <string key="InstallFolder">インストール先フォルダー</string>
   <string key="Browse">参照...</string>
   <string key="DesktopShortcut">デスクトップにショートカットを作成</string>
+  <string key="PreviewHandler">エクスプローラーと Outlook で PDF をプレビュー</string>
   <string key="InstallingLabel">インストール中</string>
   <string key="Back">戻る</string>
   <string key="Cancel">キャンセル</string>
@@ -25,6 +26,7 @@
   <string key="CurrentUser">現在のユーザー</string>
   <string key="WithShortcut">デスクトップショートカット</string>
   <string key="WithoutShortcut">デスクトップショートカットなし</string>
+  <string key="WithPreview">PDF プレビュー</string>
   <string key="Launch">起動</string>
   <string key="Install">インストール</string>
   <string key="AlreadyInstalledHeading">KillerPDF は既にインストールされています</string>

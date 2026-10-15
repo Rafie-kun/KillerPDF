@@ -8,6 +8,7 @@
   <string key="InstallFolder">Installasjonsmappe</string>
   <string key="Browse">Bla gjennom...</string>
   <string key="DesktopShortcut">Opprett en snarvei på skrivebordet</string>
+  <string key="PreviewHandler">Forhåndsvis PDF-filer i Filutforsker og Outlook</string>
   <string key="InstallingLabel">INSTALLERER</string>
   <string key="Back">Tilbake</string>
   <string key="Cancel">Avbryt</string>
@@ -25,6 +26,7 @@
   <string key="CurrentUser">Gjeldende bruker</string>
   <string key="WithShortcut">Skrivebordssnarvei</string>
   <string key="WithoutShortcut">Ingen skrivebordssnarvei</string>
+  <string key="WithPreview">PDF-forhåndsvisning</string>
   <string key="Launch">Start</string>
   <string key="Install">Installer</string>
   <string key="AlreadyInstalledHeading">KillerPDF er allerede installert</string>

@@ -46,6 +46,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Added a visual separation preview to Separations in the Document tools. Each process and spot ink plate of a page can be viewed on its own as ink coverage, next to the page with all inks, and the text report is still a click away (#264).
 - Added Scan to PDF to the Open menu. It scans through the scanner's TWAIN driver, with or without the scanner's own settings window, and opens the pages as a new PDF (#73).
 - Added Convert Word or Excel file to the Open menu. KillerPDF lays out .docx and .xlsx files itself, with their fonts, lists, tables, pictures, headers, footers, cell formats and page setup, and opens the result as a new PDF. Older .doc and .xls files convert through Word or Excel when installed (#74).
+- Added optional PDF previews for File Explorer and Outlook to the installed edition. Setup offers them as a checkbox, the preview pages scroll with fit width, fit page and zoom, and Open in KillerPDF opens a read-only copy of the previewed file. The portable edition registers nothing (#410).
 
 ### Changed
 - Replaced PDFium, Docnet.Core and PdfPig with the engine for rendering, search, selection, copying and text editing, and built the JPEG 2000 decoder from vendored CoreJ2K sources. The engine keeps the previous renderer's page dimensions for viewing and image export.

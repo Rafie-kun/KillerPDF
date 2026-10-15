@@ -111,6 +111,7 @@
     <Compile Include="..\Services\DocxConverter.cs" Link="Services\DocxConverter.cs" />
     <Compile Include="..\Services\XlsxConverter.cs" Link="Services\XlsxConverter.cs" />
     <Compile Include="..\Services\OfficeConversion.cs" Link="Services\OfficeConversion.cs" />
+    <Compile Include="..\Services\PreviewHandlerRegistration.cs" Link="Services\PreviewHandlerRegistration.cs" />
     <Compile Include="..\Packaging\KillerLauncher\PortableProcessIdentity.cs" Link="Packaging\PortableProcessIdentity.cs" />
     <Compile Include="..\Packaging\KillerLauncher\InstallerPrerequisitePolicy.cs" Link="Packaging\InstallerPrerequisitePolicy.cs" />
     <Compile Include="..\Packaging\KillerLauncher\PortableLauncherPolicy.cs" Link="Packaging\PortableLauncherPolicy.cs" />

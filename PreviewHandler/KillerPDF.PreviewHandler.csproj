@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    PDF previews for File Explorer and Outlook (#410). A COM preview handler that the installed
+    edition registers when the user asks for it. The portable edition never ships or registers it.
+    build\build-portable.ps1 publishes it into the installed payload only.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <EnableComHosting>true</EnableComHosting>
+    <AssemblyName>KillerPDF.PreviewHandler</AssemblyName>
+    <RootNamespace>KillerPDF.PreviewHandler</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SixLabors.Fonts" Version="1.0.0-beta17" />
+    <ProjectReference Include="..\engine\KillerPdf.Engine\KillerPdf.Engine.csproj" />
+    <!-- The installed-font resolver the app renders with, so previews use the same fonts. -->
+    <Compile Include="..\Services\InstalledPdfFontResolver.cs" Link="Services\InstalledPdfFontResolver.cs" />
+    <Compile Include="..\Services\PdfFontStyle.cs" Link="Services\PdfFontStyle.cs" />
+    <Compile Include="..\Services\PdfFonts.cs" Link="Services\PdfFonts.cs" />
+    <Compile Include="..\Services\AppDataPaths.cs" Link="Services\AppDataPaths.cs" />
+  </ItemGroup>
+
+</Project>

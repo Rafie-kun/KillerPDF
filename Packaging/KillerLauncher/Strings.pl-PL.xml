@@ -8,6 +8,7 @@
   <string key="InstallFolder">Folder instalacji</string>
   <string key="Browse">Przeglądaj...</string>
   <string key="DesktopShortcut">Utwórz skrót na pulpicie</string>
+  <string key="PreviewHandler">Podgląd plików PDF w Eksploratorze plików i Outlooku</string>
   <string key="InstallingLabel">INSTALOWANIE</string>
   <string key="Back">Wstecz</string>
   <string key="Cancel">Anuluj</string>
@@ -25,6 +26,7 @@
   <string key="CurrentUser">Bieżący użytkownik</string>
   <string key="WithShortcut">Skrót na pulpicie</string>
   <string key="WithoutShortcut">Bez skrótu na pulpicie</string>
+  <string key="WithPreview">Podgląd PDF</string>
   <string key="Launch">Uruchom</string>
   <string key="Install">Zainstaluj</string>
   <string key="AlreadyInstalledHeading">KillerPDF jest już zainstalowany</string>

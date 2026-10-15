@@ -8,6 +8,7 @@
   <string key="InstallFolder">ইনস্টলেশনের ফোল্ডার</string>
   <string key="Browse">ব্রাউজ...</string>
   <string key="DesktopShortcut">ডেস্কটপ শর্টকাট তৈরি করুন</string>
+  <string key="PreviewHandler">File Explorer ও Outlook-এ PDF প্রিভিউ দেখান</string>
   <string key="InstallingLabel">ইনস্টল হচ্ছে</string>
   <string key="Back">পেছনে</string>
   <string key="Cancel">বাতিল</string>
@@ -25,6 +26,7 @@
   <string key="CurrentUser">বর্তমান ব্যবহারকারী</string>
   <string key="WithShortcut">ডেস্কটপ শর্টকাট</string>
   <string key="WithoutShortcut">ডেস্কটপ শর্টকাট নেই</string>
+  <string key="WithPreview">PDF প্রিভিউ</string>
   <string key="Launch">চালু করুন</string>
   <string key="Install">ইনস্টল করুন</string>
   <string key="AlreadyInstalledHeading">KillerPDF ইতিমধ্যেই ইনস্টল করা আছে</string>

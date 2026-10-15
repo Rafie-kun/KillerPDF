@@ -8,6 +8,7 @@
   <string key="InstallFolder">Dossier d'installation</string>
   <string key="Browse">Parcourir...</string>
   <string key="DesktopShortcut">Créer un raccourci sur le bureau</string>
+  <string key="PreviewHandler">Afficher l'aperçu des PDF dans l'Explorateur de fichiers et Outlook</string>
   <string key="InstallingLabel">INSTALLATION</string>
   <string key="Back">Retour</string>
   <string key="Cancel">Annuler</string>
@@ -25,6 +26,7 @@
   <string key="CurrentUser">Utilisateur actuel</string>
   <string key="WithShortcut">Raccourci sur le bureau</string>
   <string key="WithoutShortcut">Aucun raccourci sur le bureau</string>
+  <string key="WithPreview">Aperçu des PDF</string>
   <string key="Launch">Lancer</string>
   <string key="Install">Installer</string>
   <string key="AlreadyInstalledHeading">KillerPDF est déjà installé</string>

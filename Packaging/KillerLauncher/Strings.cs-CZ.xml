@@ -8,6 +8,7 @@
   <string key="InstallFolder">Instalační složka</string>
   <string key="Browse">Procházet...</string>
   <string key="DesktopShortcut">Vytvořit zástupce na ploše</string>
+  <string key="PreviewHandler">Náhled PDF v Průzkumníku souborů a Outlooku</string>
   <string key="InstallingLabel">INSTALACE</string>
   <string key="Back">Zpět</string>
   <string key="Cancel">Zrušit</string>
@@ -25,6 +26,7 @@
   <string key="CurrentUser">Aktuální uživatel</string>
   <string key="WithShortcut">Zástupce na ploše</string>
   <string key="WithoutShortcut">Bez zástupce na ploše</string>
+  <string key="WithPreview">Náhled PDF</string>
   <string key="Launch">Spustit</string>
   <string key="Install">Nainstalovat</string>
   <string key="AlreadyInstalledHeading">KillerPDF je již nainstalován</string>

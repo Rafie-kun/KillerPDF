@@ -8,6 +8,7 @@
   <string key="InstallFolder">Папка встановлення</string>
   <string key="Browse">Огляд...</string>
   <string key="DesktopShortcut">Створити ярлик на робочому столі</string>
+  <string key="PreviewHandler">Попередній перегляд PDF у Провіднику та Outlook</string>
   <string key="InstallingLabel">ВСТАНОВЛЕННЯ</string>
   <string key="Back">Назад</string>
   <string key="Cancel">Скасувати</string>
@@ -25,6 +26,7 @@
   <string key="CurrentUser">Поточний користувач</string>
   <string key="WithShortcut">Ярлик на робочому столі</string>
   <string key="WithoutShortcut">Без ярлика на робочому столі</string>
+  <string key="WithPreview">Попередній перегляд PDF</string>
   <string key="Launch">Запустити</string>
   <string key="Install">Встановити</string>
   <string key="AlreadyInstalledHeading">KillerPDF уже встановлено</string>

@@ -8,6 +8,7 @@
   <string key="InstallFolder">Kurulum klasörü</string>
   <string key="Browse">Gözat...</string>
   <string key="DesktopShortcut">Masaüstü kısayolu oluştur</string>
+  <string key="PreviewHandler">Dosya Gezgini ve Outlook'ta PDF önizleme</string>
   <string key="InstallingLabel">YÜKLENİYOR</string>
   <string key="Back">Geri</string>
   <string key="Cancel">İptal</string>
@@ -25,6 +26,7 @@
   <string key="CurrentUser">Geçerli kullanıcı</string>
   <string key="WithShortcut">Masaüstü kısayolu</string>
   <string key="WithoutShortcut">Masaüstü kısayolu yok</string>
+  <string key="WithPreview">PDF önizleme</string>
   <string key="Launch">Başlat</string>
   <string key="Install">Yükle</string>
   <string key="AlreadyInstalledHeading">KillerPDF zaten yüklü</string>
