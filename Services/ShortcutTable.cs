@@ -17,7 +17,7 @@ namespace KillerPDF
     // ============================================================
 
     /// <summary>Which modifier layer of the keyboard map a cap sits on.</summary>
-    internal enum KbLayer { Base, Ctrl, CtrlShift, Shift, Alt }
+    internal enum KbLayer { Base, Ctrl, CtrlShift, Shift, Alt, AltShift }
 
     /// <summary>
     /// One physical key the binding lights on the map. LabelKey overrides the row's description for
@@ -80,6 +80,7 @@ namespace KillerPDF
                     "CtrlShift" => KbLayer.CtrlShift,
                     "Shift" => KbLayer.Shift,
                     "Alt" => KbLayer.Alt,
+                    "AltShift" => KbLayer.AltShift,
                     _ => KbLayer.Base,
                 },
                 id[(colon + 1)..], labelKey);
@@ -222,7 +223,7 @@ namespace KillerPDF
                                                                              Cap("CtrlShift:Minus"),
                                                                              Cap("CtrlShift:D0")),
             B("%wheellogo%",   "Str_KS_AppSize",      "View"),
-            B("%ctrl%+%shift%+G", "Str_Theme_FilmGrain", "View", Cap("CtrlShift:G")),
+            B("%alt%+%shift%+G", "Str_Theme_FilmGrain", "View", Cap("AltShift:G")),
             // The toolbar appearance six, mirroring the bar's right-click menu top to bottom.
             B("%ctrl%+%shift%+1-6", "Str_KS_ToolbarStyle", "View", Cap("CtrlShift:D1", "Str_Toolbar_SmallIcons"),
                                                                 Cap("CtrlShift:D2", "Str_Toolbar_LargeIcons"),

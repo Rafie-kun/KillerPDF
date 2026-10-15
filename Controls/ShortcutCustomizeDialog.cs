@@ -190,8 +190,8 @@ internal sealed class ShortcutCustomizeDialog : Window
     {
         var parts = new List<string>();
         if (cap.Layer is KbLayer.Ctrl or KbLayer.CtrlShift) parts.Add(L("Str_Key_Ctrl"));
-        if (cap.Layer is KbLayer.Shift or KbLayer.CtrlShift) parts.Add(L("Str_Key_Shift"));
-        if (cap.Layer is KbLayer.Alt) parts.Add(L("Str_Key_Alt"));
+        if (cap.Layer is KbLayer.Alt or KbLayer.AltShift) parts.Add(L("Str_Key_Alt"));
+        if (cap.Layer is KbLayer.Shift or KbLayer.CtrlShift or KbLayer.AltShift) parts.Add(L("Str_Key_Shift"));
         parts.Add(cap.Id switch
         {
             "Del" => L("Str_Key_Delete"),

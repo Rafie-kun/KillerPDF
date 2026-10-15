@@ -390,7 +390,7 @@ namespace KillerPDF
                 if (!e.IsRepeat) OpenDocumentToolsMenu();   // DocumentTools.cs; the next letter picks the tool
                 e.Handled = true;
             }
-            else if (key == Key.G && mods == (ModifierKeys.Control | ModifierKeys.Shift))
+            else if (key == Key.System && systemKey == Key.G && mods == (ModifierKeys.Alt | ModifierKeys.Shift))
             {
                 if (!e.IsRepeat) ToggleFilmGrain();
                 e.Handled = true;
@@ -806,10 +806,10 @@ namespace KillerPDF
             Set(ToolMeasureBtn, "Str_TT_MeasureTool", "M");
             Set(ToolRedactBtn, "Str_TT_RedactTool", "X");
             if (TryFindResource("Str_Theme_FilmGrain") is string grain)
-                FilmGrainCheck.ToolTip = $"{grain} (Ctrl+Shift+G)";
+                FilmGrainCheck.ToolTip = $"{grain} (Alt+Shift+G)";
         }
 
-        // Ctrl+Shift+G: Film Grain on or off, kept in step with the theme menu's check box.
+        // Alt+Shift+G: Film Grain on or off, kept in step with the theme menu's check box.
         private void ToggleFilmGrain()
         {
             FilmGrain.Set(!FilmGrain.Enabled);

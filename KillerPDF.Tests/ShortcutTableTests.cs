@@ -141,6 +141,7 @@ namespace KillerPDF.Tests
         [InlineData("CtrlShift:D1", "CtrlShift", "D1")]
         [InlineData("Shift:F9", "Shift", "F9")]
         [InlineData("Alt:M", "Alt", "M")]
+        [InlineData("AltShift:G", "AltShift", "G")]
         public void CapParsesItsLayerPrefix(string id, string layerName, string bare)
         {
             var cap = ShortcutTable.Cap(id);
@@ -203,7 +204,7 @@ namespace KillerPDF.Tests
             Assert.Equal("Str_Menu_ExportDocument", map[KbLayer.CtrlShift]["E"].Label);
             Assert.Equal("Str_Protect_Name", map[KbLayer.CtrlShift]["P"].Label);
             Assert.Equal("Str_Ocr_ScanToText", map[KbLayer.CtrlShift]["T"].Label);
-            Assert.Equal("Str_Theme_FilmGrain", map[KbLayer.CtrlShift]["G"].Label);
+            Assert.Equal("Str_Theme_FilmGrain", map[KbLayer.AltShift]["G"].Label);
             Assert.Equal("Str_Ctx_MoveToNewWindow", map[KbLayer.CtrlShift]["N"].Label);
             Assert.Equal("Str_DocumentTools", map[KbLayer.CtrlShift]["D"].Label);
         }

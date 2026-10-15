@@ -63,7 +63,7 @@ namespace KillerPDF
 
         private static readonly KbLayer[] KbLayerButtons =
         [
-            KbLayer.Base, KbLayer.Ctrl, KbLayer.CtrlShift, KbLayer.Shift, KbLayer.Alt,
+            KbLayer.Base, KbLayer.Ctrl, KbLayer.CtrlShift, KbLayer.Shift, KbLayer.Alt, KbLayer.AltShift,
         ];
 
         private static string KbLayerCaption(KbLayer layer) => layer switch
@@ -72,6 +72,7 @@ namespace KillerPDF
             KbLayer.CtrlShift => $"{Loc("Str_Key_Ctrl").ToUpperInvariant()}+{Loc("Str_Key_Shift").ToUpperInvariant()}",
             KbLayer.Shift => Loc("Str_Key_Shift").ToUpperInvariant(),
             KbLayer.Alt => Loc("Str_Key_Alt").ToUpperInvariant(),
+            KbLayer.AltShift => $"{Loc("Str_Key_Alt").ToUpperInvariant()}+{Loc("Str_Key_Shift").ToUpperInvariant()}",
             _ => "BASE",
         };
 
@@ -98,6 +99,7 @@ namespace KillerPDF
             [KbLayer.Base] = [], [KbLayer.Ctrl] = ["Ctrl", "RCtrl"],
             [KbLayer.CtrlShift] = ["Ctrl", "RCtrl", "Shift", "RShift"],
             [KbLayer.Shift] = ["Shift", "RShift"], [KbLayer.Alt] = ["Alt", "RAlt"],
+            [KbLayer.AltShift] = ["Alt", "RAlt", "Shift", "RShift"],
         };
 
         private static string KbSectionKeyFor(string cat) => cat switch
@@ -384,6 +386,7 @@ namespace KillerPDF
             var m = Keyboard.Modifiers;
             var layer = m.HasFlag(ModifierKeys.Control) && m.HasFlag(ModifierKeys.Shift) ? KbLayer.CtrlShift
                       : m.HasFlag(ModifierKeys.Control) ? KbLayer.Ctrl
+                      : m.HasFlag(ModifierKeys.Alt) && m.HasFlag(ModifierKeys.Shift) ? KbLayer.AltShift
                       : m.HasFlag(ModifierKeys.Alt) ? KbLayer.Alt
                       : m.HasFlag(ModifierKeys.Shift) ? KbLayer.Shift
                       : KbLayer.Base;

@@ -55,7 +55,7 @@ namespace KillerPDF
         };
 
         /// <summary>The keyboard map layer for a modifier combination, or null for one the map has
-        /// no layer for (Ctrl+Alt, Shift+Alt and the like).</summary>
+        /// no layer for (Ctrl+Alt and the like).</summary>
         internal static KbLayer? LayerFor(ModifierKeys modifiers) => modifiers switch
         {
             ModifierKeys.None => KbLayer.Base,
@@ -63,6 +63,7 @@ namespace KillerPDF
             ModifierKeys.Control | ModifierKeys.Shift => KbLayer.CtrlShift,
             ModifierKeys.Shift => KbLayer.Shift,
             ModifierKeys.Alt => KbLayer.Alt,
+            ModifierKeys.Alt | ModifierKeys.Shift => KbLayer.AltShift,
             _ => null
         };
 
@@ -72,6 +73,7 @@ namespace KillerPDF
             KbLayer.CtrlShift => ModifierKeys.Control | ModifierKeys.Shift,
             KbLayer.Shift => ModifierKeys.Shift,
             KbLayer.Alt => ModifierKeys.Alt,
+            KbLayer.AltShift => ModifierKeys.Alt | ModifierKeys.Shift,
             _ => ModifierKeys.None
         };
 
@@ -92,6 +94,7 @@ namespace KillerPDF
                 KbLayer.CtrlShift => "%ctrl%+%shift%+",
                 KbLayer.Shift => "%shift%+",
                 KbLayer.Alt => "%alt%+",
+                KbLayer.AltShift => "%alt%+%shift%+",
                 _ => ""
             };
             string key = cap.Id switch
