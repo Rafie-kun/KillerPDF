@@ -6,8 +6,8 @@ user-facing speed gate (S1 to S3).
 
 Reference: the last published 1.8 release, currently v1.8.80 (3e090fa). The
 frozen reference and candidate payloads, their hashes, the third-party oracle,
-and every measured value live under `C:/Users/steve/kp-bench-render/release-19-baseline/`.
-Working material for experiments stays under `C:/Users/steve/kp-bench-render/`;
+and every measured value live under `C:/Users/steve/scratch/kp-bench-render/release-19-baseline/`.
+Working material for experiments stays under `C:/Users/steve/scratch/kp-bench-render/`;
 only finished public reports belong in `validation/benchmarks/<version>/`.
 
 1.8 renders with PDFium (native, via Docnet.Core). 1.9 renders with the managed
@@ -75,7 +75,7 @@ each version through UI Automation.
 ## Status
 
 Current gate values are tracked in
-`C:/Users/steve/kp-bench-render/release-19-baseline/BASELINE.md` and summarized
+`C:/Users/steve/scratch/kp-bench-render/release-19-baseline/BASELINE.md` and summarized
 here only at release checkpoints.
 
 | Gate | Status at 096a2cf versus v1.8.80 (2026-10-10) |
@@ -94,7 +94,7 @@ here only at release checkpoints.
 | M3 | Fails on the JBIG2 scan (+87%, 1208 vs 646 MiB) and altona (+21%); +5% to +8% on the other three. |
 
 Measurement detail, noise floor and per-file contributors:
-`C:/Users/steve/kp-bench-render/release-19-baseline/BASELINE.md`.
+`C:/Users/steve/scratch/kp-bench-render/release-19-baseline/BASELINE.md`.
 
 The gate log kept in this file through 2026-10-05 is preserved verbatim in
 `validation/records/RELEASE-GATES-1.9-history-2026-10-05.md`.

@@ -44,7 +44,7 @@ new 2048 PNG matches the controlled version of the PDF with the red fill
 removed. A nested-Form regression test passes, as do the full engine and app
 suites. Current normal-payload parity measurements, exact input hashes, and
 visual evidence are under
-`C:/Users/steve/kp-bench-render/gwg041-nested-20261004/`. General edge
+`C:/Users/steve/scratch/kp-bench-render/gwg041-nested-20261004/`. General edge
 conformance and the other fidelity checks remain open.
 
 The October 4 Ghent spot-image correction carries a single named ink through
@@ -62,7 +62,7 @@ changed by -0.04% and +0.15%. These within-1.9 comparisons do not close the
 still lacked its specified checks, and ReadMe fidelity remained open. Inputs,
 payload hashes,
 balanced runs, and PNGs are under
-`C:/Users/steve/kp-bench-render/ghent-current-20261004/`.
+`C:/Users/steve/scratch/kp-bench-render/ghent-current-20261004/`.
 
 The October 4 two-ink DeviceN correction paints both declared spot colorants
 in fills and gradients. The GWG080 patch now shows the specified green checks
@@ -78,15 +78,15 @@ This variation does not establish a stable difficult-set speed or memory gain.
 Fresh paired 1.8.80 comparisons on the same inputs still miss the 2% speed
 and difficult-set memory gates. Inputs, payload hashes, runs, PNGs, and visual
 captures are under
-`C:/Users/steve/kp-bench-render/ghent-current-20261004/`.
+`C:/Users/steve/scratch/kp-bench-render/ghent-current-20261004/`.
 
 The October 3 opaque-fill checkpoint used four balanced fresh-process runs
 per set, with no excluded warmups, one file worker, and 20 ms peak sampling.
 Its comparison evidence, repeatability checks, normal-app agreement, and
 reviews are under
-`C:/Users/steve/kp-bench-render/gwg041-opaque-fills-final-20261003/`.
+`C:/Users/steve/scratch/kp-bench-render/gwg041-opaque-fills-final-20261003/`.
 The initial reproduction, measured pixel trace, and first draft are retained
-under `C:/Users/steve/kp-bench-render/gwg041-white-overprint-20261003/`.
+under `C:/Users/steve/scratch/kp-bench-render/gwg041-white-overprint-20261003/`.
 
 The October 3 process-overprint correction retains named spot plates beneath
 supported full and partial CMYK vector, stencil, and shading paints. Preserved
@@ -107,9 +107,9 @@ Those prior results retain all four balanced fresh-process runs, with no
 excluded warmups, one file worker, and 20 ms peak sampling.
 
 Prior process-overprint comparison evidence is under
-`C:/Users/steve/kp-bench-render/gwg020-process-overprint-stable-20261003/`.
+`C:/Users/steve/scratch/kp-bench-render/gwg020-process-overprint-stable-20261003/`.
 Tests, normal-app captures, and contaminated timings remain under
-`C:/Users/steve/kp-bench-render/gwg020-process-overprint-final-20261003/`;
+`C:/Users/steve/scratch/kp-bench-render/gwg020-process-overprint-final-20261003/`;
 the rejected draft remains under `gwg020-process-overprint-20261003/`.
 
 The October 3 spot-image correction preserves named spots beneath supported
@@ -127,7 +127,7 @@ the same final pixels after the unrelated installer and launcher changes.
 Each timing set retains all four balanced fresh-process runs, without excluded
 warmups, with one file worker and 20 ms peak sampling. Raw results, hashes,
 visual comparisons, and regressions are retained outside repositories under
-`C:/Users/steve/kp-bench-render/gwg031-indexed-overprint-20261003/`.
+`C:/Users/steve/scratch/kp-bench-render/gwg031-indexed-overprint-20261003/`.
 
 The October 3 View-state correction applies supported static layer rules to
 rendering and the layer editor while preserving raw configuration reports,
@@ -144,7 +144,7 @@ release speed limit. The timing payload predates only the final editor alias
 correction. The final payload reproduces all 614 conformance and 74 difficult
 PNGs and metadata at both sizes; eight normal-app checks also match exactly.
 Raw runs, hashes, regressions, and final-payload checks are retained under
-`C:/Users/steve/kp-bench-render/optional-view-state-20261003/`.
+`C:/Users/steve/scratch/kp-bench-render/optional-view-state-20261003/`.
 
 The October 3 crop correction derives reduction from the full transformed image
 instead of its page-clipped bounds. This preserves visible native samples,
@@ -163,8 +163,8 @@ The 2048 shared sums range from 18,909 to 24,588 ms in 1.8 and from 21,473
 to 24,414 in 1.9. Such variation does not establish a stable speed improvement.
 The 4 million pixel plane cap and extreme-coordinate viewport handling remain
 separate limitations. Raw results, hashes, visual checks, and scripts are under
-`C:/Users/steve/kp-bench-render/cropped-image-scale-20261003/` and
-`C:/Users/steve/kp-bench-render/difficult-cropped-image-scale-20261003/`.
+`C:/Users/steve/scratch/kp-bench-render/cropped-image-scale-20261003/` and
+`C:/Users/steve/scratch/kp-bench-render/difficult-cropped-image-scale-20261003/`.
 
 The October 3 mild image-reduction correction uses the actual output-pixel
 footprint for eligible unmasked, axis-aligned images below twofold reduction.
@@ -187,8 +187,8 @@ At 2048 pixels, 1.9 shared sums range from 17,365 to 18,484 ms, versus
 2048; all changed outputs were visually reviewed without a newly identified
 defect. These results leave the rendering and performance
 gates open. Raw measurements, visual comparisons, identities, and scripts are
-under `C:/Users/steve/kp-bench-render/fractional-image-reduction-final-20261003/`
-and `C:/Users/steve/kp-bench-render/difficult-final-image-reduction-20261003/`.
+under `C:/Users/steve/scratch/kp-bench-render/fractional-image-reduction-final-20261003/`
+and `C:/Users/steve/scratch/kp-bench-render/difficult-final-image-reduction-20261003/`.
 
 The October 3 clipped spot correction preserves fractional path and clip
 coverage on the named spot plate instead of discarding valid RGB shadow ink.
@@ -220,7 +220,7 @@ own statuses, dimensions, diagnostics, and PNG hashes. The batch contains
 first pages only, and skips remain outside the visual pass. These results
 leave the rendering and performance release gates open. Reproduction scripts,
 raw runs, hashes, visual differences, and test reports are under
-`C:/Users/steve/kp-bench-render/visual-fidelity-20261003/`.
+`C:/Users/steve/scratch/kp-bench-render/visual-fidelity-20261003/`.
 
 The viewer session now opens a file through the engine's stream-opening path,
 so it does not retain both the original file read and the engine's copy. Four
@@ -232,7 +232,7 @@ found 17 pages. Four focused session tests and all 487 app tests pass, including
 a document snapshot check after the file changes on disk. The Release app
 build passes with zero warnings or errors. This measures opening only, not
 whole viewer rendering or visible interaction. Scratch evidence is under
-`C:/Users/steve/kp-bench-render/session-open-copy-probe-20261003/`.
+`C:/Users/steve/scratch/kp-bench-render/session-open-copy-probe-20261003/`.
 
 The same single-copy viewer opening path is now in the 1.8.80 checkout. Its
 engine gained the stream overload already present in 1.9. On the same Altona
@@ -243,7 +243,7 @@ and 84.703 ms after. Allocation and live managed memory each fell about
 within-branch opening probes, not a new direct 1.8-versus-1.9 viewer
 comparison. Earlier installed-layout memory comparisons predate both session
 changes. Scratch evidence is under
-`C:/Users/steve/kp-bench-render/session-open-copy-probe18-20261003/`.
+`C:/Users/steve/scratch/kp-bench-render/session-open-copy-probe18-20261003/`.
 
 A guarded RGB spot shadow partially restores the GWG080 ReadMe right image
 check. Matched 649-input comparisons at 512 and 2048 pixels rendered 614,
@@ -256,7 +256,7 @@ and 126.21 MiB after (+39.07 MiB); the eight-worker corpus peak was
 725.25/731.07 MiB (+5.82 MiB). Single-page times were 0.59/0.71 seconds
 and corpus times were 17.03/17.71 seconds before/after; RDP makes timing
 provisional. Scratch evidence is under
-`C:/Users/steve/kp-bench-render/rgb-spot-realcase-trace-20261003/`.
+`C:/Users/steve/scratch/kp-bench-render/rgb-spot-realcase-trace-20261003/`.
 
 An OPM1 process-overprint correction on the RGB spot shadow preserves earlier
 CMYK channels under the GWG080 and GWG081 ReadMe right-hand X examples.
@@ -271,7 +271,7 @@ sample is too small to establish a stable speed change. The 129 focused
 overprint tests, 4,215 engine tests, 487 app tests, and Release app build pass.
 The retained Poppler reference is 770 pixels wide, so exact reference parity
 is unverified. Scratch evidence is under
-`C:/Users/steve/kp-bench-render/gwg-readme-fidelity-20261003-live-fd92290/`.
+`C:/Users/steve/scratch/kp-bench-render/gwg-readme-fidelity-20261003-live-fd92290/`.
 
 A prepared native-ink spot plate reduces synchronization while painting large
 named-spot images. Matched ReadyToRun payloads based on the committed OPM1 fix
@@ -283,7 +283,7 @@ each page. At 512 and 2048 pixels, all 649 corpus statuses, dimensions, and
 diagnostics and all 614 successful PNG hashes match the OPM1 baseline. These
 fidelity passes do not establish whole-corpus speed or memory parity with 1.8.
 Evidence is under
-`C:/Users/steve/kp-bench-render/ghent081-combined-20261003-69263d7/`.
+`C:/Users/steve/scratch/kp-bench-render/ghent081-combined-20261003-69263d7/`.
 
 A serial axial-shading path now reuses a color within a device column only
 when the computed input matches the first eligible pixel bit for bit. A GWG081
@@ -296,7 +296,7 @@ controls. At 512 and 2048 pixels, all 649 corpus rows and all 614 successful
 PNG hashes matched the prior 1.9 build. The live checkout passes 4,215 engine
 tests, 487 app tests, and a Release build with zero warnings or errors. This
 focused gain does not establish whole-corpus parity with 1.8. Evidence is under
-`C:/Users/steve/kp-bench-render/ghent081-axial-column-trial-20261003-c563d61/`.
+`C:/Users/steve/scratch/kp-bench-render/ghent081-axial-column-trial-20261003-c563d61/`.
 
 The latest balanced 2048-pixel B-C-C-B corpus run used the same retained
 1.8.80 payload and 649-file input as the earlier comparison, paired with the
@@ -311,7 +311,7 @@ remain the largest positive page gaps. The earlier 13.45% corpus gap used a
 different 1.9 payload; variation outside the target page means the corpus
 change cannot be attributed entirely to the axial cache. These are headless
 page-render sums, not visible app latency. Raw runs and the per-file comparison
-are under `C:/Users/steve/kp-bench-render/ghent081-axial-column-trial-20261003-c563d61/parity-2048-v18-v19-axial/`.
+are under `C:/Users/steve/scratch/kp-bench-render/ghent081-axial-column-trial-20261003-c563d61/parity-2048-v18-v19-axial/`.
 
 Two balanced 2048-pixel corpus passes compared the same current 1.8.80 source
 and the combined 1.9 payload. On the 600 pages successful in all four runs,
@@ -322,7 +322,7 @@ Shared output dimensions matched. The 97 color pages added 4,203 ms to the
 gap, led by Altona x3 (+1,035 ms) and x4 (+929.5 ms). These are page render
 sums from headless CLI pipelines, not visible app latency. Earlier comparisons
 used different payload layouts and had different timings. Evidence is under
-`C:/Users/steve/kp-bench-render/ghent081-combined-20261003-69263d7/`.
+`C:/Users/steve/scratch/kp-bench-render/ghent081-combined-20261003-69263d7/`.
 
 An exact-hash scratch census of Altona x3 at 2048 pixels found 1,964,881
 general-path `SetPixel` calls per page. Active spot plates alone disqualified
@@ -332,7 +332,7 @@ the same spot/process interaction targeted by prior bulk-clear and tile trials
 that did not show a repeatable gain. Instrumentation increased render time, so
 its timings are attribution only. No further production shortcut follows from
 this census. Evidence is under
-`C:/Users/steve/kp-bench-render/altona-coverage-census-20261003/`.
+`C:/Users/steve/scratch/kp-bench-render/altona-coverage-census-20261003/`.
 
 A scratch Altona x4 trial streamed its 92 MB Flate image into a bounded
 destination area plane. The active path kept all 64 timed PNG hashes and
@@ -341,7 +341,7 @@ balanced pairs increased first-page render time by 31.8% and later-page time
 by 28.8%. This serial plane construction loses the current parallel area
 conversion benefit. The trial was not promoted, and malformed-image fallback
 controls were not run after the performance gate failed. Evidence is under
-`C:/Users/steve/kp-bench-render/x4-stream-plane-20261003-c563d61/`.
+`C:/Users/steve/scratch/kp-bench-render/x4-stream-plane-20261003-c563d61/`.
 
 An October 3 sampled DeviceN shading fix passes 4,194 engine tests, 487 app
 tests, and the Release app build. On the GWG081 ReadMe at 1024 pixels, mean
@@ -350,7 +350,7 @@ Poppler fell from 53.12 to 11.01. The checkmarks still show faint X outlines,
 so the Ghent fidelity gate remains open. A full 649-input rerun at 512 and
 2048 pixels kept 614 rendered, 35 skipped, and zero failed at each size. Only
 the GWG081 ReadMe PNG changed among the 614 outputs at either size. Evidence
-is under `C:/Users/steve/kp-bench-render/ghent-sampled-devicen-fix-20261003/`.
+is under `C:/Users/steve/scratch/kp-bench-render/ghent-sampled-devicen-fix-20261003/`.
 Matched ReadyToRun eight-copy runs of that page averaged 455.5 ms before and
 527.5 ms after at 1024 pixels, and 676.5 versus 758 ms at 2048 pixels. The
 correct color transform adds about 9-10 ms per page in this focused case;
@@ -367,7 +367,7 @@ error against Poppler fell from 32.55 to 18.27. Altona's changed pixels also
 moved closer to Poppler, but Poppler warned that a DeviceN colorant was
 unavailable, so that reference is limited. The RGB ReadMe pages still need
 separate spot preservation. Evidence is under
-`C:/Users/steve/kp-bench-render/ghent-spot-edge-20261003/`.
+`C:/Users/steve/scratch/kp-bench-render/ghent-spot-edge-20261003/`.
 
 A balanced serial installed-layout comparison after both spot fixes used
 1.8/1.9/1.9/1.8 at 512 pixels and 1.9/1.8/1.8/1.9 at 2048 pixels. On 600
@@ -379,7 +379,7 @@ peak working sets were 606.9 versus 508.5 MiB at 512 pixels and 634.7 versus
 489.3 MiB at 2048 pixels. Altona x4 and x3 added 976.5 and 926.5 ms at
 2048 pixels. Both versions took longer than in the earlier same-day pair, so
 these runs do not establish a speed gain from the spot fixes. Evidence is under
-`C:/Users/steve/kp-bench-render/parity-v1880-v19-spot-20261003/`.
+`C:/Users/steve/scratch/kp-bench-render/parity-v1880-v19-spot-20261003/`.
 
 A guarded RGB spot-shadow trial passed 111 focused overprint tests and exact
 synthetic image checks, but it did not improve the actual GWG081 ReadMe.
@@ -387,12 +387,12 @@ At 1024 pixels, full-page Poppler error stayed 5.6031 and the target crop
 worsened from 11.011 to 11.032. One spot plate would also add about 6.75 MiB
 at that size or 27.1 MiB at 2048 pixels, before per-pixel work. The trial
 remains scratch-only under
-`C:/Users/steve/kp-bench-render/rgb-spot-shadow-feasibility-20261003/`.
+`C:/Users/steve/scratch/kp-bench-render/rgb-spot-shadow-feasibility-20261003/`.
 
 A scratch lazy ICC table trial passed 184 profile tests and kept 64 focused
 Altona x3 and x4 PNGs byte-identical. Its alternating runs changed direction
 without a consistent speed or memory gain, so it was not promoted. Evidence
-is under `C:/Users/steve/kp-bench-render/icc-lut-lazy-20261003/`.
+is under `C:/Users/steve/scratch/kp-bench-render/icc-lut-lazy-20261003/`.
 
 A guarded direct CMYK area-sampling trial kept exact hashes on all 600 shared
 pages at both 512 and 2048 pixels. Instrumentation confirmed 2,097,152 uses
@@ -401,7 +401,7 @@ helper version cut the first x4 render by 364 ms on average, but its later
 seven renders averaged 30.4 ms slower with two large outliers. Corpus timing
 and 512-pixel memory peaks varied between alternating runs. The trial remains
 scratch-only until a stable no-regression result is measured. Evidence is under
-`C:/Users/steve/kp-bench-render/altona-x4-direct-cmyk-area-agent-20261003/`.
+`C:/Users/steve/scratch/kp-bench-render/altona-x4-direct-cmyk-area-agent-20261003/`.
 
 Focused Altona x4 trials showed a cold versus warm compilation tradeoff.
 Disabling tiered compilation reduced first-render time from 1,196/1,256 to
@@ -411,10 +411,10 @@ A method-level area-conversion optimization gained 25/36 ms cold but lost
 84/187 ms on the last four. A four-chunk color-conversion trial preserved all
 64 x3 and x4 PNGs but slowed later x3 renders by 18.29 ms and x4 renders by
 35.78 ms on average. All remain scratch-only. Evidence is under
-`C:/Users/steve/kp-bench-render/altona-x4-tiering-agent-20261003/`,
-`C:/Users/steve/kp-bench-render/altona-x4-pgo-agent-20261003/`,
-`C:/Users/steve/kp-bench-render/altona-x4-aggressive-area-agent-20261003/`,
-and `C:/Users/steve/kp-bench-render/altona-convert-chunks-20261003-x3/`.
+`C:/Users/steve/scratch/kp-bench-render/altona-x4-tiering-agent-20261003/`,
+`C:/Users/steve/scratch/kp-bench-render/altona-x4-pgo-agent-20261003/`,
+`C:/Users/steve/scratch/kp-bench-render/altona-x4-aggressive-area-agent-20261003/`,
+and `C:/Users/steve/scratch/kp-bench-render/altona-convert-chunks-20261003-x3/`.
 
 Two later scratch map parser trials were not promoted. Reusing instruction
 lists averaged 1,847.5 ms versus 1,815.5 ms for the same-HEAD baseline in
@@ -423,8 +423,8 @@ all 600 shared-corpus PNG hashes at 512 and 2048 pixels. Its 512-pixel mean
 render sum was 12,601 ms versus 12,598 ms for baseline; the map itself was
 slower at both sizes. Its 2048-pixel corpus mean improved by 410.5 ms, mostly
 from one variable Altona page, so a repeatable broad gain was not established.
-Evidence is under `C:/Users/steve/kp-bench-render/map-instruction-list-reuse-20261003/`
-and `C:/Users/steve/kp-bench-render/map-compact-number-20261003/`.
+Evidence is under `C:/Users/steve/scratch/kp-bench-render/map-instruction-list-reuse-20261003/`
+and `C:/Users/steve/scratch/kp-bench-render/map-compact-number-20261003/`.
 
 An October 3 comparison built both installer payloads from the current
 1.8.80 and 1.9.0 checkouts, at commits `9ebe9ef` and `2207e82`. Both are
@@ -439,7 +439,7 @@ on average, a 15.3% gap. Each 1.9 pass rendered 614 pages with no failures;
 each 1.8 pass rendered 600, skipped 41, and failed on eight. The paired mean
 gap for `447403.pdf` was 645.5 ms at 512 pixels. At 2048 pixels, the two
 Altona technical pages contributed 1,280 and 987.5 ms. Raw outputs are under
-`C:/Users/steve/kp-bench-render/packaged-parity-installer-20261003/`.
+`C:/Users/steve/scratch/kp-bench-render/packaged-parity-installer-20261003/`.
 
 Within each version, repeat PNG hashes and dimensions matched on all
 600 1.8.80 and 614 1.9 outputs at both sizes. Observed peak working sets,
@@ -455,7 +455,7 @@ so their means were 804 versus 816 ms, a 1.5% gap that changed direction
 between pairs. The earlier large warmed gap did not recur in this check.
 All eight page dimensions matched, and PNG hashes matched within each
 version across both repeats. The versions' pixels differ. Raw results are
-under `C:/Users/steve/kp-bench-render/cmyk-eight-current-20261003/`.
+under `C:/Users/steve/scratch/kp-bench-render/cmyk-eight-current-20261003/`.
 
 An October 3 eight-copy run of the ECI Altona technical PDF at 2048 pixels
 used those same current installer payloads. Its first render averaged 809 ms
@@ -466,7 +466,7 @@ The same 46-file prefix produced 1.9 render times of 1,121 and 1,848 ms for
 the large page in fresh processes, so the late-corpus slowdown is variable.
 Four slow traced prefix runs spent only 4.3 to 5.0 ms in GC pauses during that
 render. These results do not establish the cause of its cold speed or peak
-memory. Evidence is under `C:/Users/steve/kp-bench-render/altona-x4-current-eight-20261003/`,
+memory. Evidence is under `C:/Users/steve/scratch/kp-bench-render/altona-x4-current-eight-20261003/`,
 `altona-prefix-state-20261003-01/`, and `altona-prefix-gc-current-20261003-01/`.
 
 A scratch trial enlarged the final profiled CMYK display cache from 4,096 to
@@ -481,7 +481,7 @@ dimension rows matched. Sampled peaks showed no consistent increase. The
 actual edited Release output reproduced the Altona PNG hash, and 4,193
 engine and 487 app tests pass. This improves a measured hot path but does not
 close 1.8 performance parity or establish a repeatable whole-corpus gain.
-Scratch evidence is under `C:/Users/steve/kp-bench-render/altona-output-cache-trial-20261003/`.
+Scratch evidence is under `C:/Users/steve/scratch/kp-bench-render/altona-output-cache-trial-20261003/`.
 
 The committed 16,384-entry cache at `e67f161` was rebuilt in the installer
 layout and compared again with the same 1.8.80 payload in serial ABBA passes.
@@ -495,7 +495,7 @@ At 2048 pixels it still trails 1.8 by 1,101 ms; Altona x3 trails by 979 ms.
 The map trails by 640.5 ms at 512 pixels. Observed full-corpus peak working
 set was 489 to 523 MiB for 1.9 versus 602 to 638 MiB for 1.8. The focused
 Altona gain did not produce corpus-wide parity. Raw comparisons are under
-`C:/Users/steve/kp-bench-render/parity-e67f161-v1880-installer-20261003/`.
+`C:/Users/steve/scratch/kp-bench-render/parity-e67f161-v1880-installer-20261003/`.
 
 A focused 2048-pixel ABBA run of eight copies per Altona page separates first
 render from repeat costs. For x3, 1.9 averaged 895.0 versus 208.0 ms on the
@@ -508,14 +508,14 @@ conversion, spot painting, and image painting. A bounded shared ICC transform
 cache preserved all 32 trial PNGs but slowed both paired x3 runs and did not
 reduce peak memory, so it was rejected. These focused repeats do not replace
 the whole-corpus first-page comparison. Artifacts are under
-`C:/Users/steve/kp-bench-render/altona-hotpath-current-20261003/`.
+`C:/Users/steve/scratch/kp-bench-render/altona-hotpath-current-20261003/`.
 
 Three scratch changes to the x3 spot path preserved exact output and passed
 109 focused spot tests, but none had a repeatable speed gain. Bulk opaque
 coverage and deferred image spot clearing were slower in paired runs. Bulk
 non-overprint spot filling initially saved 12.6 ms per warm render, but its
 confirmation saved only 1.9 ms. All three were rejected. Evidence is under
-`C:/Users/steve/kp-bench-render/altona-spot-clear-trial-20261003-x3/`,
+`C:/Users/steve/scratch/kp-bench-render/altona-spot-clear-trial-20261003-x3/`,
 `altona-spot-image-clear-trial-20261003-x3/`, and
 `altona-spotrun-bulkfill-20261003-x3/` in the same scratch root.
 
@@ -528,7 +528,7 @@ exact-output scratch color trials passed focused tests but did not establish
 a repeatable no-regression gain. The packed RGB trial had mixed x3 timing and
 a clean x4 pair tied; the byte-input ICC trial slowed x3 and had mixed x4
 timing. Neither changed production. Raw CSVs are under
-`C:/Users/steve/kp-bench-render/altona-postspot-20261003/`,
+`C:/Users/steve/scratch/kp-bench-render/altona-postspot-20261003/`,
 `packed-ink-candidate-20261003/timing-gate/`, and
 `icc-byte-candidate-20261003/timing-gate/`.
 
@@ -538,7 +538,7 @@ respectively; the later 2048-pixel step averaged 224.385 and 56.372 ms.
 First-step peak working sets averaged 50.05 and 98.91 MiB. Within-version
 pixel hashes were stable. These headless results do not verify visible
 first-page display. Raw sequences are under
-`C:/Users/steve/kp-bench-render/scan-postspot-20261003/`.
+`C:/Users/steve/scratch/kp-bench-render/scan-postspot-20261003/`.
 
 A guarded process-image spot-clear trial removed per-pixel locking only while
 row workers owned disjoint pixels and the named-spot plate set stayed fixed.
@@ -548,7 +548,7 @@ the current 1.9 hash. Four alternating eight-copy runs per variant averaged
 928.25 ms baseline versus 922.75 ms trial on the first page, and 445.29
 versus 450.50 ms per later page. The warm path was slower, so the change
 remains scratch-only under
-`C:/Users/steve/kp-bench-render/x3-spot-clear-lock-trial-20261003/`.
+`C:/Users/steve/scratch/kp-bench-render/x3-spot-clear-lock-trial-20261003/`.
 
 A scratch Altona x3 probe found 746,002 of 903,465 eligible opaque process
 coverage pixels (82.6%) in 32-pixel tiles never touched by spot ink. A
@@ -556,7 +556,7 @@ guarded tile fill passed 127 spot tests and preserved all 80 paired x3 PNGs
 and both GWG080/081 PNGs. Its first-page and repeated-page timings varied
 across paired runs; one Ghent pair slowed on both pages. Peak memory was not
 captured. The prototype was not promoted. Evidence is under
-`C:/Users/steve/kp-bench-render/spot-occupancy-probe-20261003-6cd20b7/`.
+`C:/Users/steve/scratch/kp-bench-render/spot-occupancy-probe-20261003-6cd20b7/`.
 
 A per-surface shared ICC ink-to-RGB lookup improves the first 2048-pixel
 Altona x4 render in two balanced scratch checks. The first averaged 1,233.5
@@ -570,7 +570,7 @@ The paired corpus render sums varied in both directions, so no broader speed
 gain is established. The 2048-pixel corpus peak stayed near 491 to 493 MiB.
 This narrows one x4 cold outlier but does not close x3 or whole-pass parity.
 Scratch evidence is under
-`C:/Users/steve/kp-bench-render/x3-cross-chunk-rgb-cache-trial-20261003/`.
+`C:/Users/steve/scratch/kp-bench-render/x3-cross-chunk-rgb-cache-trial-20261003/`.
 
 An October 3 current-payload trace of the map's first 512-pixel render took
 2,243 ms. Its discarded 64 MiB decoded prefix finished about 45 ms after
@@ -582,8 +582,8 @@ additive wall time. A scratch trial pooled the growing parser buffer. All 35
 focused parser tests and eight map PNG hashes passed, but four paired
 fresh-process renders averaged 2,098 ms before and 2,099 ms after, with
 similar peak memory. The pool change was rejected. Trace and trial results
-are under `C:/Users/steve/kp-bench-render/map-current-first-trace-20261003/`
-and `C:/Users/steve/kp-bench-render/map-stream-buffer-pool-trial-20261003/`.
+are under `C:/Users/steve/scratch/kp-bench-render/map-current-first-trace-20261003/`
+and `C:/Users/steve/scratch/kp-bench-render/map-stream-buffer-pool-trial-20261003/`.
 
 A new trace from the exact current installer payload attributes 161 MB of
 sampled allocation to the map's inline-image instruction copies and 782 ms
@@ -595,14 +595,14 @@ for the internal streaming render path passed 38 focused tests and preserved
 all 12 map PNG hashes. Six paired fresh-process runs averaged 1,944.7 ms for
 baseline versus 1,896.8 ms for the candidate, but two pairs regressed and
 mean peak working set rose from 243.6 to 254.3 MiB. The trial was rejected.
-Evidence is under `C:/Users/steve/kp-bench-render/map-current-cold-alloc-jit-20261003-x3/`
-and `C:/Users/steve/kp-bench-render/map-inline-pool-trial-20261003-x3/`.
+Evidence is under `C:/Users/steve/scratch/kp-bench-render/map-current-cold-alloc-jit-20261003-x3/`
+and `C:/Users/steve/scratch/kp-bench-render/map-inline-pool-trial-20261003-x3/`.
 
 A later scratch raster cell-array swap passed 1,253 rendering tests and kept
 all eight 512-pixel map PNG hashes exact. Four fresh runs per variant averaged
 1,864.25 ms for the current payload and 1,951.0 ms for the candidate. The
 swap was rejected. Evidence is under
-`C:/Users/steve/kp-bench-render/map-cell-swap-trial-20261003/`.
+`C:/Users/steve/scratch/kp-bench-render/map-cell-swap-trial-20261003/`.
 
 Guarded row-local counting sort for dense raster cells passed 1,253 focused
 rendering tests and preserved the 512-pixel map PNG in every run. Four fresh
@@ -615,7 +615,7 @@ at 2048 pixels, within run variation; broad sampled peaks did not increase.
 The production engine has the measured guard, and 4,193 engine and 487 app
 tests plus the Release build pass. The direct updated comparison follows;
 the isolated gain does not establish parity with 1.8. Scratch evidence is under
-`C:/Users/steve/kp-bench-render/map-row-countsort-trial-20261003-x3/`.
+`C:/Users/steve/scratch/kp-bench-render/map-row-countsort-trial-20261003-x3/`.
 
 An October 3 direct comparison used the retained 1.8.80 installed payload and
 a 1.9 installed-layout payload with only the engine replaced by a ReadyToRun
@@ -629,7 +629,7 @@ dimensions, and PNG hashes exactly. Mean peak working sets were 605.18 versus
 518.52 MiB at 512 pixels and 634.04 versus 490.32 MiB at 2048, with 1.8.80
 listed first. The earlier 11.36% and 16.25% gaps show run variability; the
 new source has not reached whole-pass speed parity. Evidence is under
-`C:/Users/steve/kp-bench-render/parity-v1880-v19-countsort-20261003/`.
+`C:/Users/steve/scratch/kp-bench-render/parity-v1880-v19-countsort-20261003/`.
 
 Fresh installer-layout payloads built from exact commits `2427c7a` (1.8.80)
 and `6cd20b7` (1.9.0) were compared in two serial runs per version, in
@@ -642,19 +642,19 @@ and the GWG080/081 spot pages; other categories partly offset that gap. The
 eight. This measurement predates the exact-page JPEG decoder correction, which
 does not change the benchmark's normal render path. The benchmark did not
 sample memory or compare PNG hashes. CSVs and built payloads are under
-`C:/Users/steve/kp-bench-render/parity-head-20261003-1219/`.
+`C:/Users/steve/scratch/kp-bench-render/parity-head-20261003-1219/`.
 
 Parallelizing the direct ink row loop on Altona x3 reached one large masked
 paint per render. Its 27 focused tests and 64 paired PNG hashes passed, but
 four-process means worsened from 888.25 to 918.25 ms cold and from 444.68 to
 466.50 ms per repeated page. The scratch change was rejected. Evidence is
-under `C:/Users/steve/kp-bench-render/altona-directink-rowparallel-trial-20261003-x3/`.
+under `C:/Users/steve/scratch/kp-bench-render/altona-directink-rowparallel-trial-20261003-x3/`.
 
 A scratch RGB named-spot sidecar passed 110 overprint tests and corrected a
 synthetic indexed overlap. Both GWG080 and GWG081 ReadMe pages still lacked
 the checkmark on the colorized image and showed the unwanted X when compared
 with the retained Poppler overprint renders. The sidecar was not promoted;
-evidence is under `C:/Users/steve/kp-bench-render/rgb-spot-sidecar-trial-20261003/`.
+evidence is under `C:/Users/steve/scratch/kp-bench-render/rgb-spot-sidecar-trial-20261003/`.
 
 A corrected RGB spot-sidecar trial passed 110 overprint tests and restored
 141 green pixels in the GWG080 missing-check crop versus 148 in Poppler.
@@ -662,7 +662,7 @@ GWG081 remained wrong at 418 green pixels versus Poppler's 853, and the
 RGB-to-CMYK-to-RGB sidecar changed ordinary colors by one or two levels.
 The mixed Black plus spot image and two-name DeviceN gradient still need
 separate fixes. This scratch trial was not promoted; evidence is under
-`C:/Users/steve/kp-bench-render/rgb-true-sidecar-trial-20261003/`.
+`C:/Users/steve/scratch/kp-bench-render/rgb-true-sidecar-trial-20261003/`.
 
 A scratch terminal invisible-text shortcut passed eight focused tests and
 preserved the JBIG2 scan PNG hashes at 512 and 2048 pixels. A matched
@@ -670,7 +670,7 @@ ReadyToRun four-process comparison averaged 329.5 versus 310.5 ms on the
 first 512-pixel page, while later copies averaged 196.35 versus 194.65 ms.
 The small first-page signal needs confirmation, and bypassing font loading can
 suppress malformed-font diagnostics. The shortcut was not promoted. Evidence
-is under `C:/Users/steve/kp-bench-render/terminal-invisible-text-trial-20261003/`.
+is under `C:/Users/steve/scratch/kp-bench-render/terminal-invisible-text-trial-20261003/`.
 
 A focused Ghent probe found that the GWG080 and GWG081 ReadMe pages use RGB
 surfaces. Their indexed spot images take the direct RGB copy path, which
@@ -682,7 +682,7 @@ spot path's one-spot support. A scratch 65,536-byte lookup-table trial for
 CMYK spot composition preserved exact Patch PNG hashes at 2048 pixels but
 improved each page by only 0.36%, with a slight memory increase. It was
 rejected; the ReadMe fidelity issue remains open. Probe and timings are under
-`C:/Users/steve/kp-bench-render/ghent-rgb-fastpath-20261003/`.
+`C:/Users/steve/scratch/kp-bench-render/ghent-rgb-fastpath-20261003/`.
 
 The October 1 packaged 512-pixel comparison averages 11,689 ms for 1.8.80
 and 12,599 ms for 1.9 across the 600 shared pages, a 910 ms (7.8%) gap.
@@ -695,7 +695,7 @@ faster 1.9 pages offset other regressions. The large Altona technical page
 is 95.5 ms faster in that packaged 512-pixel run, despite its large gap in
 the separate loose serial comparison. These rankings come from the four
 `mask-bounds-final-parity-512-*.csv` files under
-`C:/Users/steve/kp-bench-render/release-payload-parity-20261001/`.
+`C:/Users/steve/scratch/kp-bench-render/release-payload-parity-20261001/`.
 
 On eight packaged map copies, 1.9 was slower on the first copy and faster
 on the next seven, so its single-page gap is concentrated in first use.
@@ -716,7 +716,7 @@ paths to isolate.
 The traced payload predates the October 2 inline-image change, so its image
 allocation path does not profile the current source.
 The trace and inspector are under
-`C:/Users/steve/kp-bench-render/map-cold-breakdown-20261002/`.
+`C:/Users/steve/scratch/kp-bench-render/map-cold-breakdown-20261002/`.
 
 An October 2 change avoids retaining decoded inline images whose fresh stream
 keys cannot be reused. Two balanced eight-copy map pairs at 512 pixels sampled
@@ -727,7 +727,7 @@ took 11,469 versus 11,150 ms. All eight map PNG hashes matched at both sizes.
 The 649-file conformance run rendered 614 pages, skipped 35, failed none, and
 matched all 614 saved 1.9 PNG hashes at 512 pixels. The Release build, all
 4,188 engine tests, and all 487 app tests pass. Raw results are under
-`C:/Users/steve/kp-bench-render/inline-cache-trial-20261002/`. The 1.8
+`C:/Users/steve/scratch/kp-bench-render/inline-cache-trial-20261002/`. The 1.8
 performance, difficult-set memory, and visible-interaction gates remain open.
 
 A fresh headless 1.8.80/1.9/1.9/1.8 comparison of the same 74 difficult pages
@@ -738,7 +738,7 @@ hashes matched the prior 1.9 build. The application DLL hashes begin
 `5FA47515A` and `B645A4B6`, respectively. Altona technical page 1 remains
 the largest gap at 215/212 versus 1,229/1,127 ms. This direct Release-DLL
 comparison does not establish packaged installer or visible-interaction parity.
-Raw outputs are under `C:/Users/steve/kp-bench-render/inline-cache-trial-20261002/`.
+Raw outputs are under `C:/Users/steve/scratch/kp-bench-render/inline-cache-trial-20261002/`.
 
 An October 2 same-DLL Altona probe measured direct first 2048-pixel renders at
 1,147/1,210/1,183 ms. Later fresh-document copies in those processes averaged
@@ -748,7 +748,7 @@ total work. Pre-reading 28,806 page instructions took 85/81 ms and left the
 next 2048-pixel render at 1,103/1,094 ms. A sampled trace found overlapping
 raster, image, color, text, and font work, without one dominant parser cost.
 All 2048-pixel raw output hashes matched. Evidence is under
-`C:/Users/steve/kp-bench-render/altona-sequence-20261002/`.
+`C:/Users/steve/scratch/kp-bench-render/altona-sequence-20261002/`.
 
 An opaque grayscale overprint correction now preserves named spot ink on CMYK
 surfaces. The 649-file 512-pixel run rendered 614 pages, skipped 35, and failed
@@ -760,7 +760,7 @@ there is no measured speed gain. The final Altona 2048-pixel first render took
 1,396 ms and its last eight averaged 365 ms. The Release build, 4,190 engine
 tests, and 487 app tests pass. Altona and Ghent overprint fidelity and the 1.8
 speed gate remain open. Results are under
-`C:/Users/steve/kp-bench-render/altona-sequence-20261002/`.
+`C:/Users/steve/scratch/kp-bench-render/altona-sequence-20261002/`.
 
 An October 2 large binary-image sampling change reduced the focused JBIG2
 scan's first 512-pixel page from 634/637 ms to 539/521 ms in balanced
@@ -771,7 +771,7 @@ unproven. A fresh direct 2048-pixel comparison of the 74 difficult pages took
 5,837/6,189 ms in 1.8.80 versus 10,822/10,759 ms in 1.9, with sampled peaks
 of 231.7 MiB versus 302.0/301.2 MiB. Both versions rendered all 74 pages.
 The Release build, 4,188 engine tests, and 487 app tests pass. Raw results are
-under `C:/Users/steve/kp-bench-render/binary-row-trial-20261002/`. Performance,
+under `C:/Users/steve/scratch/kp-bench-render/binary-row-trial-20261002/`. Performance,
 memory, and visible-interaction parity remain open.
 
 Single-colorant DeviceN spot images now carry their named colorant through
@@ -781,7 +781,7 @@ failed none; all 614 PNG hashes match the preceding 1.9 build at 512 pixels.
 The GWG080 and GWG081 ReadMe PNG hashes at 1024 pixels are unchanged. Their
 colorized image uses a mixed Black and named-spot DeviceN color space, so its
 visible X remains. Trial results are under
-`C:/Users/steve/kp-bench-render/spot-image-trial-20261002/`.
+`C:/Users/steve/scratch/kp-bench-render/spot-image-trial-20261002/`.
 
 Mixed Black and named-spot DeviceN images now retain separate process and spot
 values on native CMYK surfaces, including when indexed samples are reduced.
@@ -791,7 +791,7 @@ on the default RGB page surface, where the CMYK spot plates are unavailable.
 The 649-file engine sweep completed with 608 rendered pages, 17 encrypted
 files skipped, and 24 failures; this run is not directly
 comparable with the earlier app conformance PNG run. The scratch render is under
-`C:/Users/steve/kp-bench-render/spot-recheck-20261002/mixed-trial-96/`.
+`C:/Users/steve/scratch/kp-bench-render/spot-recheck-20261002/mixed-trial-96/`.
 
 Direct lookup of installed Arial, Times New Roman, and Courier New faces avoids
 the full font-catalog scan when a standard alias first appears. On the compacted
@@ -805,39 +805,39 @@ pages measured 13,688/14,698/13,652/12,735 ms. Both 1.9 runs completed 614
 pages with no failure and identical PNG hashes. The 487 app tests pass. The
 compacted PDF still renders faster in 1.8.80, and broad speed and
 visible-interaction parity remain open. Raw output
-is under `C:/Users/steve/kp-bench-render/standard-font-direct-20261002/`.
+is under `C:/Users/steve/scratch/kp-bench-render/standard-font-direct-20261002/`.
 
-A 1.9 binary-image reduction change reuses exact column coverage across output rows. Three alternating 16-copy JBIG2 scan pairs at 512 pixels measured later-15 render sums of 3,724/3,779/3,715 ms before and 3,637/3,513/3,386 ms after. The 2048-pixel pair was effectively tied at 3,518 versus 3,498 ms. All 16 focused PNG hashes matched at both sizes. Two reversed-order 649-file conformance pairs at 512 pixels completed 614 renders and 35 skips per run, with all 614 control and candidate PNG hashes matching. Their summed times were 37,884/37,285 ms before and 36,245/38,325 ms after, so whole-corpus speed is unproven. The Release build, all 4,180 engine tests, and all 487 app tests passed. Raw outputs and logs are under `C:/Users/steve/kp-bench-render/binary-columns-20261002/`; the 1.8 and visible-interaction gates remain open.
+A 1.9 binary-image reduction change reuses exact column coverage across output rows. Three alternating 16-copy JBIG2 scan pairs at 512 pixels measured later-15 render sums of 3,724/3,779/3,715 ms before and 3,637/3,513/3,386 ms after. The 2048-pixel pair was effectively tied at 3,518 versus 3,498 ms. All 16 focused PNG hashes matched at both sizes. Two reversed-order 649-file conformance pairs at 512 pixels completed 614 renders and 35 skips per run, with all 614 control and candidate PNG hashes matching. Their summed times were 37,884/37,285 ms before and 36,245/38,325 ms after, so whole-corpus speed is unproven. The Release build, all 4,180 engine tests, and all 487 app tests passed. Raw outputs and logs are under `C:/Users/steve/scratch/kp-bench-render/binary-columns-20261002/`; the 1.8 and visible-interaction gates remain open.
 
 Two current 1.8.80 runs on the same 16-copy scan took 207/213 ms for the first page and 2,968/2,939 ms for the later 15. The optimized 1.9 first pages ranged from 736 to 994 ms, and its later-15 sums ranged from 3,386 to 3,637 ms. This focused 1.9 gain leaves both cold and repeated scan rendering slower than 1.8.
 
-A second JBIG2 arithmetic context-state trial kept all eight scan PNG hashes identical in four alternating 512-pixel runs. After the first page, baseline render sums were 1,748/1,751 ms and trial sums were 1,617/1,779 ms. The mixed result did not justify retaining the change. Raw logs are under `C:/Users/steve/kp-bench-render/jbig2-context-state-20261002/`.
+A second JBIG2 arithmetic context-state trial kept all eight scan PNG hashes identical in four alternating 512-pixel runs. After the first page, baseline render sums were 1,748/1,751 ms and trial sums were 1,617/1,779 ms. The mixed result did not justify retaining the change. Raw logs are under `C:/Users/steve/scratch/kp-bench-render/jbig2-context-state-20261002/`.
 
-A fresh October 2 comparison of the current Release DLLs ran all 649 conformance PDFs at 512 pixels in 1.8/1.9/1.9/1.8 order. On the 600 pages both builds rendered, 1.8.80 summed 14,252/14,202 ms and 1.9 summed 15,063/14,667 ms, leaving a 3.3% to 5.7% gap. The 1.9 runs rendered 614 pages without failure and matched all 614 PNG hashes; 1.8 rendered 600 and still failed eight. The 1.9 and 1.8 application DLL SHA-256 values begin `55A360FC` and `5FA47515A`. Cold page gaps remain largest on compacted syntax, Altona, unknown-filter samples, and the JBIG2 scan. Raw logs and outputs are under `C:/Users/steve/kp-bench-render/current-parity-20261002/`.
+A fresh October 2 comparison of the current Release DLLs ran all 649 conformance PDFs at 512 pixels in 1.8/1.9/1.9/1.8 order. On the 600 pages both builds rendered, 1.8.80 summed 14,252/14,202 ms and 1.9 summed 15,063/14,667 ms, leaving a 3.3% to 5.7% gap. The 1.9 runs rendered 614 pages without failure and matched all 614 PNG hashes; 1.8 rendered 600 and still failed eight. The 1.9 and 1.8 application DLL SHA-256 values begin `55A360FC` and `5FA47515A`. Cold page gaps remain largest on compacted syntax, Altona, unknown-filter samples, and the JBIG2 scan. Raw logs and outputs are under `C:/Users/steve/scratch/kp-bench-render/current-parity-20261002/`.
 
-A scratch 1.9 payload matching the release script's loose ReadyToRun engine and JPEG 2000 codec was compared with 1.8.80 in another 1.8/1.9/1.9/1.8 sequence. On their 600 common pages at 512 pixels, 1.8 summed 13,603/11,909 ms and 1.9 summed 12,847/12,533 ms. One pair favored 1.9 by 5.6%; the other favored 1.8 by 5.2%, so broad speed parity remains unproven. Both 1.9 runs rendered 614 pages without failure, and all PNG hashes matched the loose 1.9 build. The codec's ReadyToRun image reduced the focused unknown-filter JPEG 2000 page's first render from 261 ms with the ordinary codec to 168 to 183 ms, still above 1.8's 8 ms. Its later seven renders summed 21 to 26 ms versus 1.8's 17 ms. The compacted syntax page also retains a cold gap. The scratch payload is not a signed installer; raw files are under `C:/Users/steve/kp-bench-render/current-parity-20261002/`.
+A scratch 1.9 payload matching the release script's loose ReadyToRun engine and JPEG 2000 codec was compared with 1.8.80 in another 1.8/1.9/1.9/1.8 sequence. On their 600 common pages at 512 pixels, 1.8 summed 13,603/11,909 ms and 1.9 summed 12,847/12,533 ms. One pair favored 1.9 by 5.6%; the other favored 1.8 by 5.2%, so broad speed parity remains unproven. Both 1.9 runs rendered 614 pages without failure, and all PNG hashes matched the loose 1.9 build. The codec's ReadyToRun image reduced the focused unknown-filter JPEG 2000 page's first render from 261 ms with the ordinary codec to 168 to 183 ms, still above 1.8's 8 ms. Its later seven renders summed 21 to 26 ms versus 1.8's 17 ms. The compacted syntax page also retains a cold gap. The scratch payload is not a signed installer; raw files are under `C:/Users/steve/scratch/kp-bench-render/current-parity-20261002/`.
 
-Deferring the bundled fallback font until an embedded font actually needs it passed 294 focused font tests and kept all 614 conformance PNG hashes unchanged. In two alternating 614-page comparisons against the source-matched ReadyToRun payload, the baseline took 14,228/13,151 ms and the trial took 13,296/13,598 ms. The pairs disagreed on speed, so the trial was removed. Scratch payloads, logs, and renders are under `C:/Users/steve/kp-bench-render/font-lazy-20261002/`.
+Deferring the bundled fallback font until an embedded font actually needs it passed 294 focused font tests and kept all 614 conformance PNG hashes unchanged. In two alternating 614-page comparisons against the source-matched ReadyToRun payload, the baseline took 14,228/13,151 ms and the trial took 13,296/13,598 ms. The pairs disagreed on speed, so the trial was removed. Scratch payloads, logs, and renders are under `C:/Users/steve/scratch/kp-bench-render/font-lazy-20261002/`.
 
-Poppler 26.07.0 rendered both Ghent patches at 1024 pixels with `pdftoppm -overprint`: checks appear on both images and throughout the gradient, with no visible X beneath them. Rendering the same files without overprint omits those marks. These reference PNGs are under `C:/Users/steve/kp-bench-render/spot-overprint-20261002/poppler-overprint/` and `poppler-default/`. GWG080 uses an indexed named spot image and an indexed DeviceN image combining Black, that spot, and inactive channels; the existing overprint unit tests do not cover that combination. This reference establishes the target behavior, not a 1.9 pass.
+Poppler 26.07.0 rendered both Ghent patches at 1024 pixels with `pdftoppm -overprint`: checks appear on both images and throughout the gradient, with no visible X beneath them. Rendering the same files without overprint omits those marks. These reference PNGs are under `C:/Users/steve/scratch/kp-bench-render/spot-overprint-20261002/poppler-overprint/` and `poppler-default/`. GWG080 uses an indexed named spot image and an indexed DeviceN image combining Black, that spot, and inactive channels; the existing overprint unit tests do not cover that combination. This reference establishes the target behavior, not a 1.9 pass.
 
 The GWG080 content streams paint the Pantone X before the indexed DeviceN image and paint the checks before the spot gradient. A trial that marked mixed DeviceN as spot and zeroed `/None` inputs displayed checks but flattened the left turtle image to cyan and left purple Xs. It was removed. The paint order and reference output point to spot-plate knockout and overprint handling, rather than a tint-transform-only change.
 
-A 120 by 100 pixel synthetic page isolates two different named spot colors painted with overprint. At pixel (45, 50), Poppler's overprint output is RGB (30, 103, 67), while the current 1.9 and 1.8.80 headless outputs are both (139, 198, 62). The second spot alone is also (139, 198, 62), so neither branch preserves the first spot in the overlap. The sample and reference are under `C:/Users/steve/kp-bench-render/spot-overprint-20261002/synthetic/`. In 1.9, `OverprintColor` marks a named spot for a four-channel ink blend without carrying its colorant name to `SetInkPixel`; this minimal mismatch gives a direct target for plate-aware compositing before retesting GWG080 and GWG081.
+A 120 by 100 pixel synthetic page isolates two different named spot colors painted with overprint. At pixel (45, 50), Poppler's overprint output is RGB (30, 103, 67), while the current 1.9 and 1.8.80 headless outputs are both (139, 198, 62). The second spot alone is also (139, 198, 62), so neither branch preserves the first spot in the overlap. The sample and reference are under `C:/Users/steve/scratch/kp-bench-render/spot-overprint-20261002/synthetic/`. In 1.9, `OverprintColor` marks a named spot for a four-channel ink blend without carrying its colorant name to `SetInkPixel`; this minimal mismatch gives a direct target for plate-aware compositing before retesting GWG080 and GWG081.
 
-A CMYK transparency-group variant separates same-colorant knockout from different-colorant overprint. At the overlap of two tints of the same spot, Poppler renders RGB (185, 170, 219), 1.8.80 renders (182, 176, 214), and 1.9 renders (105, 98, 171). With two different spots, Poppler renders (30, 103, 67), 1.8.80 renders (139, 198, 62), and 1.9 renders (89, 110, 64). The 1.9 four-channel union improves the different-spot approximation but darkens the same-spot overlap. The samples and PNGs are under `C:/Users/steve/kp-bench-render/spot-overprint-20261002/synthetic/group-trial/`; correcting one case requires identifying the colorant rather than changing the shared blend rule.
+A CMYK transparency-group variant separates same-colorant knockout from different-colorant overprint. At the overlap of two tints of the same spot, Poppler renders RGB (185, 170, 219), 1.8.80 renders (182, 176, 214), and 1.9 renders (105, 98, 171). With two different spots, Poppler renders (30, 103, 67), 1.8.80 renders (139, 198, 62), and 1.9 renders (89, 110, 64). The 1.9 four-channel union improves the different-spot approximation but darkens the same-spot overlap. The samples and PNGs are under `C:/Users/steve/scratch/kp-bench-render/spot-overprint-20261002/synthetic/group-trial/`; correcting one case requires identifying the colorant rather than changing the shared blend rule.
 
 Sampling the same page outside the overlap also exposes a separate conversion difference: Poppler renders the first spot as RGB (126, 107, 188) and the second as (127, 203, 40), while 1.9 renders (127, 118, 183) and (139, 198, 62). Its current DeviceCMYK conversion maps the two alternate ink values to those 1.9 colors. Separate named plates are necessary for overprint and same-spot knockout, but matching the reference RGB output also requires checking the final spot-color conversion. An additive four-channel blend alone cannot establish fidelity.
 
 MuPDF's [separation API](https://github.com/ArtifexSoftware/mupdf/blob/master/include/mupdf/fitz/separation.h) keeps spot colors in separate planes; its [draw device](https://github.com/ArtifexSoftware/mupdf/blob/master/source/fitz/draw-device.c) matches source and destination colorant names to decide which planes overprint, and carries separations into group surfaces. This supports a 1.9 design that retains names and tint values through indexed palettes and DeviceN paints, allocates spot planes only when used, and copies or blends them with transparency groups before final color conversion. The existing four-channel union cannot represent same-spot replacement and different-spot preservation at once.
 
-A trial selected CMYK storage for pages whose resources contain named spots and an enabled overprint state. It moved the synthetic overlap from RGB (139, 198, 62) to (89, 110, 64), still short of Poppler's (30, 103, 67), and left the GWG080 and GWG081 ReadMe images unchanged. Direct inspection now confirms that those ReadMe files have no CMYK output intent and render on the default RGB page surface. Against a fresh source-matched control, 31 of 614 conformance first-page PNGs changed at 512 pixels. Whole-page mean absolute RGB error against Poppler improved on 18, worsened on 11, and was effectively tied on two. The trial was removed; selecting a four-channel surface cannot replace separate named spot plates. Scratch renders and the comparison script are under `C:/Users/steve/kp-bench-render/spot-overprint-20261002/`.
+A trial selected CMYK storage for pages whose resources contain named spots and an enabled overprint state. It moved the synthetic overlap from RGB (139, 198, 62) to (89, 110, 64), still short of Poppler's (30, 103, 67), and left the GWG080 and GWG081 ReadMe images unchanged. Direct inspection now confirms that those ReadMe files have no CMYK output intent and render on the default RGB page surface. Against a fresh source-matched control, 31 of 614 conformance first-page PNGs changed at 512 pixels. Whole-page mean absolute RGB error against Poppler improved on 18, worsened on 11, and was effectively tied on two. The trial was removed; selecting a four-channel surface cannot replace separate named spot plates. Scratch renders and the comparison script are under `C:/Users/steve/scratch/kp-bench-render/spot-overprint-20261002/`.
 
-A separate calculator change precompiles constant `index` and `roll` operands while retaining stack-limit errors. Three alternating 12-page Ghent Patch pairs at 2048 pixels measured median render sums of 4,095 ms before and 3,607 ms after, with all PNG hashes unchanged. The 74-page difficult set also kept every PNG hash at 512 and 2048 pixels, but its alternating timings were mixed. This is a focused gradient gain, not a whole-corpus speed or spot-color fidelity pass. Raw logs and renders are under `C:/Users/steve/kp-bench-render/spot-overprint-20261002/`.
+A separate calculator change precompiles constant `index` and `roll` operands while retaining stack-limit errors. Three alternating 12-page Ghent Patch pairs at 2048 pixels measured median render sums of 4,095 ms before and 3,607 ms after, with all PNG hashes unchanged. The 74-page difficult set also kept every PNG hash at 512 and 2048 pixels, but its alternating timings were mixed. This is a focused gradient gain, not a whole-corpus speed or spot-color fidelity pass. Raw logs and renders are under `C:/Users/steve/scratch/kp-bench-render/spot-overprint-20261002/`.
 
 A fresh serial 2048-pixel comparison of 74 difficult pages against 1.8.80 rendered every page in both builds. Two warmed passes summed 5,015 ms for 1.8 and 8,556 ms for 1.9, with the JBIG2-heavy `42828.0001.001.pdf` contributing about 672 ms of the per-page gap. A sampled trace of eight copies identified JBIG2 region decoding and image area conversion as its main managed costs. Reusing the arithmetic context state in the JBIG2 decoder saved 59 to 214 ms on four of five repeated-scan pairs and lost 42 ms on one; two alternating 74-page pairs saved 244 and 72 ms. All 148 broad comparison PNGs matched by SHA-256. These measurements improve the difficult set but do not establish whole-corpus parity.
 
-Three alternating first-page pairs on `447403.pdf` measured 1.8.80 at 1,693 to 1,875 ms and 1.9 at 2,214 to 2,655 ms at 512 pixels. At 2048 pixels they measured 1,931 to 1,986 ms and 2,420 to 2,529 ms. Both builds produced matching dimensions and visibly similar map layouts. The page has about 172 MB of decoded content and 190 inline images. A sampled 1.9 trace includes content parsing and image area conversion among its larger managed costs. Raising the streaming reader's initial buffer from 64 to 256 KiB produced mixed timing across six balanced pairs, with no changed PNGs; the trial was removed. The gap persists across both output sizes, directing further investigation toward content and image processing. Raw results are under `C:/Users/steve/kp-bench-render/map-gap-20261002/`.
+Three alternating first-page pairs on `447403.pdf` measured 1.8.80 at 1,693 to 1,875 ms and 1.9 at 2,214 to 2,655 ms at 512 pixels. At 2048 pixels they measured 1,931 to 1,986 ms and 2,420 to 2,529 ms. Both builds produced matching dimensions and visibly similar map layouts. The page has about 172 MB of decoded content and 190 inline images. A sampled 1.9 trace includes content parsing and image area conversion among its larger managed costs. Raising the streaming reader's initial buffer from 64 to 256 KiB produced mixed timing across six balanced pairs, with no changed PNGs; the trial was removed. The gap persists across both output sizes, directing further investigation toward content and image processing. Raw results are under `C:/Users/steve/scratch/kp-bench-render/map-gap-20261002/`.
 
 The latest unprofiled CMYK conversion trial reduced the later renders of `064034.pdf` from 135 to 139 ms to 118 to 120 ms in three fresh process pairs. First-render results were mixed. All 74 difficult-page PNGs and all 614 successful 512-pixel conformance PNGs matched the saved 1.9 baseline. This is a focused gain; it does not close the whole-pass speed or fidelity gates.
 
@@ -847,43 +847,43 @@ A lower-level Windows JPEG path also supports native half, quarter, and eighth-s
 
 A fresh 512-pixel installed-layout comparison after native scaling used retained 1.8.80 and the new 1.9 candidate in 1.8/1.9/1.9/1.8 order. On the 600 pages both rendered, summed times were 11.229/12.257/12.201/11.405 seconds, leaving 1.9 about 7% to 9% slower in these runs. The 1.9 build rendered 614 pages without failure; 1.8 rendered 600, skipped 41, and failed on eight. The largest remaining 512-pixel timing gaps were the complete `447403.pdf` map, JBIG2 scan `42828.0001.001.pdf`, and Ghent ALL reference page. The large Altona page and `064034.pdf` were faster in 1.9 in both measured passes. This remains a headless first-page comparison, with no visible interaction result.
 
-An eight-copy focused map run separates first-render cost from repeated rendering. In two runs each at 512 pixels, 1.9 took 1,960 and 1,979 ms on the first copy, then averaged 1,031.7 and 1,093.0 ms over the next seven. Retained 1.8.80 took 1,538 and 1,533 ms first, then averaged 1,500.4 and 1,492.4 ms. All eight PNGs within each run had the same hash; the two 1.9 runs also matched each other. The 1.9 map deficit in the one-page corpus comparison is a cold-render issue, while its repeated map rendering is faster. These runs do not establish a general warm-page advantage. A separate first-render sampled trace logged 2,176 ms and placed 675 ms of exclusive intervals in GC polling, 302 ms in area conversion, and 191 ms in content parsing. These are profiler samples under overhead, not additive page-stage timings. Raw logs, PNGs, and the trace are under `C:/Users/steve/kp-bench-render/map-focused-20261002/`. The JBIG2 scan and Ghent page remain cold-render targets.
+An eight-copy focused map run separates first-render cost from repeated rendering. In two runs each at 512 pixels, 1.9 took 1,960 and 1,979 ms on the first copy, then averaged 1,031.7 and 1,093.0 ms over the next seven. Retained 1.8.80 took 1,538 and 1,533 ms first, then averaged 1,500.4 and 1,492.4 ms. All eight PNGs within each run had the same hash; the two 1.9 runs also matched each other. The 1.9 map deficit in the one-page corpus comparison is a cold-render issue, while its repeated map rendering is faster. These runs do not establish a general warm-page advantage. A separate first-render sampled trace logged 2,176 ms and placed 675 ms of exclusive intervals in GC polling, 302 ms in area conversion, and 191 ms in content parsing. These are profiler samples under overhead, not additive page-stage timings. Raw logs, PNGs, and the trace are under `C:/Users/steve/scratch/kp-bench-render/map-focused-20261002/`. The JBIG2 scan and Ghent page remain cold-render targets.
 
-Two area-weight trials reused first and last column weights for wider RGB footprints on the map. Six paired 512-pixel map batches and three paired 2048-pixel batches favored the first trial with identical PNG hashes. Its two 614-page 2048-pixel corpus pairs were slower by 272 and 81 ms. Restricting the shortcut to footprints wider than eight samples kept 24 paired map PNGs and 614 corpus PNGs identical, but a fresh 2048-pixel corpus pair was 476 ms slower. Both trials were removed. Focused tests and the full 4,180 engine and 487 app tests passed; raw runs remain under `C:/Users/steve/kp-bench-render/map-gap-20261002/`. Broad image-area shortcuts have not closed the first-page speed gap.
+Two area-weight trials reused first and last column weights for wider RGB footprints on the map. Six paired 512-pixel map batches and three paired 2048-pixel batches favored the first trial with identical PNG hashes. Its two 614-page 2048-pixel corpus pairs were slower by 272 and 81 ms. Restricting the shortcut to footprints wider than eight samples kept 24 paired map PNGs and 614 corpus PNGs identical, but a fresh 2048-pixel corpus pair was 476 ms slower. Both trials were removed. Focused tests and the full 4,180 engine and 487 app tests passed; raw runs remain under `C:/Users/steve/scratch/kp-bench-render/map-gap-20261002/`. Broad image-area shortcuts have not closed the first-page speed gap.
 
-The map's unfiltered inline images were copied once when parsed and again when decoded. Reusing the parser-owned bytes only inside image painting removes the second copy without changing public stream decoding. A broader borrowed-buffer trial removed the parser copy but made cold map renders slower, so it was removed. With the retained change, two balanced eight-copy map runs at 512 pixels sampled peaks of 465.5/444.3 MiB for the prior 1.9 payload and 331.7/321.1 MiB for the candidate. At 2048 pixels, peaks were 451.9/451.0 versus 387.3/386.9 MiB, and summed render times were 11,488/12,491 versus 11,040/10,914 ms. All eight map PNG hashes matched at each size. The full 649-file conformance tree rendered 614 pages, skipped 35, and failed none at both sizes; all 614 candidate PNG hashes matched the prior 1.9 payload at each size. A balanced full-tree 512-pixel check measured prior render sums of 11,728/11,413 ms and candidate sums of 11,600/11,627 ms, so a whole-tree speed gain is not established. Its sampled peaks were 498.8/515.9 MiB before and 455.9/502.0 MiB after. All 4,178 engine tests and 487 app tests passed, and the Release app build had zero warnings or errors. Raw trial logs, PNGs, and payloads are under `C:/Users/steve/kp-bench-render/map-borrowed-20261002/`. This reduces one map memory cost but does not close the 512-pixel speed or visible-interaction gates.
+The map's unfiltered inline images were copied once when parsed and again when decoded. Reusing the parser-owned bytes only inside image painting removes the second copy without changing public stream decoding. A broader borrowed-buffer trial removed the parser copy but made cold map renders slower, so it was removed. With the retained change, two balanced eight-copy map runs at 512 pixels sampled peaks of 465.5/444.3 MiB for the prior 1.9 payload and 331.7/321.1 MiB for the candidate. At 2048 pixels, peaks were 451.9/451.0 versus 387.3/386.9 MiB, and summed render times were 11,488/12,491 versus 11,040/10,914 ms. All eight map PNG hashes matched at each size. The full 649-file conformance tree rendered 614 pages, skipped 35, and failed none at both sizes; all 614 candidate PNG hashes matched the prior 1.9 payload at each size. A balanced full-tree 512-pixel check measured prior render sums of 11,728/11,413 ms and candidate sums of 11,600/11,627 ms, so a whole-tree speed gain is not established. Its sampled peaks were 498.8/515.9 MiB before and 455.9/502.0 MiB after. All 4,178 engine tests and 487 app tests passed, and the Release app build had zero warnings or errors. Raw trial logs, PNGs, and payloads are under `C:/Users/steve/scratch/kp-bench-render/map-borrowed-20261002/`. This reduces one map memory cost but does not close the 512-pixel speed or visible-interaction gates.
 
 The current 1.8.80 checkout was then published into a fresh installed-layout payload. In 1.8/1.9/1.9/1.8 order at 512 pixels, the 600 shared successful pages summed to 13,281/13,000/12,176/11,466 ms. The 1.8 spread is too large to claim speed parity from this comparison. The 1.9 build completed 614 pages with no failures; 1.8 completed 600 and failed on eight. A separate retained 1.8.80 executable comparison gave 12,731/12,954/12,939/12,754 ms on those same shared pages. In that steadier run, the largest 1.9 gaps were the JBIG2 scan, Ghent ALL reference, compacted syntax test, and JPEG 2000 balloon; the map was no longer a consistent top outlier. These are headless first-page measurements and do not verify visible use. The current-checkout and retained-executable CSVs are in the same scratch directory.
 
-Focused eight-copy 512-pixel runs separated two of those gaps. Compacted syntax took 152 to 162 ms on 1.9's first copy versus 10 ms on 1.8.80, then 3 to 7 ms versus 2 to 4 ms per copy. Ghent ALL page 1 stayed slower after first use: 1.9 took 82 to 108 ms per later copy versus 26 to 29 ms on 1.8.80. A sampled 1.9 Ghent trace concentrated renderer work in image conversion and soft-mask reduction. Precomputing horizontal mask-reduction bounds passed 22 focused tests and preserved all 614 successful 512-pixel conformance PNG hashes. Its two balanced full-tree timing pairs disagreed: baseline/trial sums were 18,197/16,783 ms and 14,023/14,562 ms. The trial was removed because it did not establish a repeatable whole-tree gain. Raw results and trial payloads are under `C:/Users/steve/kp-bench-render/ghent-first-20261002/`, `compacted-syntax-20261002/`, and `ghent-mask-bounds-20261002/`.
+Focused eight-copy 512-pixel runs separated two of those gaps. Compacted syntax took 152 to 162 ms on 1.9's first copy versus 10 ms on 1.8.80, then 3 to 7 ms versus 2 to 4 ms per copy. Ghent ALL page 1 stayed slower after first use: 1.9 took 82 to 108 ms per later copy versus 26 to 29 ms on 1.8.80. A sampled 1.9 Ghent trace concentrated renderer work in image conversion and soft-mask reduction. Precomputing horizontal mask-reduction bounds passed 22 focused tests and preserved all 614 successful 512-pixel conformance PNG hashes. Its two balanced full-tree timing pairs disagreed: baseline/trial sums were 18,197/16,783 ms and 14,023/14,562 ms. The trial was removed because it did not establish a repeatable whole-tree gain. Raw results and trial payloads are under `C:/Users/steve/scratch/kp-bench-render/ghent-first-20261002/`, `compacted-syntax-20261002/`, and `ghent-mask-bounds-20261002/`.
 
-Ghent ALL page 1 contains seven large 8-bit ICC RGB images with soft masks. A dedicated area-conversion loop for converted three-channel images keeps plain RGB on its existing fast path. In balanced 32-copy 512-pixel runs, the baseline's last 30 copies took 3,118/2,997 ms and the first trial took 2,093/1,870 ms; three guarded runs took 1,902/1,550/1,650 ms. All focused PNG hashes matched. Two balanced full-tree 512-pixel pairs measured baseline sums of 15,220/15,042 ms and guarded sums of 13,261/13,831 ms. Each run rendered 614 pages and skipped 35; all 614 guarded PNG hashes matched the baseline at both 512 and 2048 pixels. At 2048 pixels, guarded full-tree sums of 20,966/20,420 ms overlap the fresh baseline range of 21,882/20,333 ms, so no broad large-page speed gain is claimed. All 4,178 engine tests and 487 app tests passed, and the Release app build had zero warnings or errors. This is a verified 1.9 improvement, but the 1.8 speed, memory, and visible-interaction gates remain open. Raw inputs, outputs, and logs are under `C:/Users/steve/kp-bench-render/ghent-rgb-area-20261002/`.
+Ghent ALL page 1 contains seven large 8-bit ICC RGB images with soft masks. A dedicated area-conversion loop for converted three-channel images keeps plain RGB on its existing fast path. In balanced 32-copy 512-pixel runs, the baseline's last 30 copies took 3,118/2,997 ms and the first trial took 2,093/1,870 ms; three guarded runs took 1,902/1,550/1,650 ms. All focused PNG hashes matched. Two balanced full-tree 512-pixel pairs measured baseline sums of 15,220/15,042 ms and guarded sums of 13,261/13,831 ms. Each run rendered 614 pages and skipped 35; all 614 guarded PNG hashes matched the baseline at both 512 and 2048 pixels. At 2048 pixels, guarded full-tree sums of 20,966/20,420 ms overlap the fresh baseline range of 21,882/20,333 ms, so no broad large-page speed gain is claimed. All 4,178 engine tests and 487 app tests passed, and the Release app build had zero warnings or errors. This is a verified 1.9 improvement, but the 1.8 speed, memory, and visible-interaction gates remain open. Raw inputs, outputs, and logs are under `C:/Users/steve/scratch/kp-bench-render/ghent-rgb-area-20261002/`.
 
 A current 1.8.80 versus optimized 1.9 comparison on the 600 pages both rendered measured 13,376/13,868/13,237/12,515 ms in 1.8/1.9/1.9/1.8 order at 512 pixels. The two 1.8 runs varied by 861 ms, so these runs do not establish a precise remaining percentage. Version 1.9 is still slower in both neighboring comparisons. It rendered 614 pages without failure; 1.8 rendered 600, skipped 41, and failed on eight. The paired CSVs and PNGs are in the same scratch directory. The 512-pixel speed gate remains open.
 
-The current 1.8.80 and 1.9 payloads rendered eight copies of the JBIG2 scan at 512 pixels in 1.8/1.9/1.9/1.8 order. First-copy times were 249/624/483/212 ms. Later copies varied in both versions, so this supports a cold-render gap more clearly than a steady-render gap. A sampled 1.9 first-render trace placed 136 ms of exclusive sampled intervals in template-0 generic-region decoding, 44 ms in arithmetic decoding, and 27 ms in one-bit area sampling; profiler overhead prevents adding these to the page time. A direct bitmap-array and row-branch trial passed 15 focused JBIG2 tests and preserved all eight scan hashes. Its two first renders took 867 and 765 ms versus 735 and 717 ms for the same-build baseline, so the trial was removed. Results are under `C:/Users/steve/kp-bench-render/scan-current-20261002/` and `scan-generic-row-20261002/`.
+The current 1.8.80 and 1.9 payloads rendered eight copies of the JBIG2 scan at 512 pixels in 1.8/1.9/1.9/1.8 order. First-copy times were 249/624/483/212 ms. Later copies varied in both versions, so this supports a cold-render gap more clearly than a steady-render gap. A sampled 1.9 first-render trace placed 136 ms of exclusive sampled intervals in template-0 generic-region decoding, 44 ms in arithmetic decoding, and 27 ms in one-bit area sampling; profiler overhead prevents adding these to the page time. A direct bitmap-array and row-branch trial passed 15 focused JBIG2 tests and preserved all eight scan hashes. Its two first renders took 867 and 765 ms versus 735 and 717 ms for the same-build baseline, so the trial was removed. Results are under `C:/Users/steve/scratch/kp-bench-render/scan-current-20261002/` and `scan-generic-row-20261002/`.
 
-On the same eight-copy scan, an alternating ordinary/ReadyToRun/ReadyToRun/ordinary 1.9 comparison measured first renders of 1,098/495/439/725 ms. The application DLLs matched by SHA-256, and all 32 PNGs shared one hash. Later-seven sums were 1,747/1,530/1,729/1,652 ms, so the cold improvement does not prove a sustained gain. A separate trial replaced byte-by-byte compressed-input copying with one array copy. Fifteen JBIG2 tests passed and all 48 paired PNGs matched, but its later-seven sums were 1,629/1,721/1,811 ms versus 1,404/1,595/1,590 ms in the three neighboring controls. The copy trial was removed. Scratch evidence is under `C:/Users/steve/kp-bench-render/scan-r2r-20261002/` and `C:/Users/steve/kp-bench-render/jbig2-span-copy-20261002/`. ReadyToRun narrows the first-render gap; 1.8 speed parity remains open.
+On the same eight-copy scan, an alternating ordinary/ReadyToRun/ReadyToRun/ordinary 1.9 comparison measured first renders of 1,098/495/439/725 ms. The application DLLs matched by SHA-256, and all 32 PNGs shared one hash. Later-seven sums were 1,747/1,530/1,729/1,652 ms, so the cold improvement does not prove a sustained gain. A separate trial replaced byte-by-byte compressed-input copying with one array copy. Fifteen JBIG2 tests passed and all 48 paired PNGs matched, but its later-seven sums were 1,629/1,721/1,811 ms versus 1,404/1,595/1,590 ms in the three neighboring controls. The copy trial was removed. Scratch evidence is under `C:/Users/steve/scratch/kp-bench-render/scan-r2r-20261002/` and `C:/Users/steve/scratch/kp-bench-render/jbig2-span-copy-20261002/`. ReadyToRun narrows the first-render gap; 1.8 speed parity remains open.
 
-Skipping the arithmetic decoder's redundant byte reread on ordinary input passed 15 JBIG2 tests and preserved all 64 scan PNG hashes. Four paired eight-copy runs measured later-seven sums of 1,824/1,750/1,955/1,745 ms with the trial versus 1,694/1,794/1,615/1,626 ms in the controls. First-render ranges overlapped. The trial was removed because it did not improve the scan. Matched application and codec binaries, with only the engine changed, are under `C:/Users/steve/kp-bench-render/jbig2-bytein-20261002/`.
+Skipping the arithmetic decoder's redundant byte reread on ordinary input passed 15 JBIG2 tests and preserved all 64 scan PNG hashes. Four paired eight-copy runs measured later-seven sums of 1,824/1,750/1,955/1,745 ms with the trial versus 1,694/1,794/1,615/1,626 ms in the controls. First-render ranges overlapped. The trial was removed because it did not improve the scan. Matched application and codec binaries, with only the engine changed, are under `C:/Users/steve/scratch/kp-bench-render/jbig2-bytein-20261002/`.
 
-The 16-bit ICC RGB page `GWG180_16Bit_Images_ICCbasedRGB_x4.pdf` remains a separate sustained gap. In alternating eight-copy 512-pixel runs, the later seven copies totaled 89/83 ms in 1.8.80 and 672/573 ms in 1.9. A sampled 1.9 trace concentrated time in ICC lookup conversion. Three bounded 1.9 trials cached RGB values, cached source pixels, or precomputed RGB lookup weights. Each preserved all eight focused PNG hashes, but none improved both paired timing runs, so all three were removed. The lookup-weight trial passed 195 focused ICC tests. The raw runs and trace are under `C:/Users/steve/kp-bench-render/icc16-current-20261002/`, `icc16-cache-20261002/`, `icc16-pixel-cache-20261002/`, and `icc-rgb-weights-20261002/`.
+The 16-bit ICC RGB page `GWG180_16Bit_Images_ICCbasedRGB_x4.pdf` remains a separate sustained gap. In alternating eight-copy 512-pixel runs, the later seven copies totaled 89/83 ms in 1.8.80 and 672/573 ms in 1.9. A sampled 1.9 trace concentrated time in ICC lookup conversion. Three bounded 1.9 trials cached RGB values, cached source pixels, or precomputed RGB lookup weights. Each preserved all eight focused PNG hashes, but none improved both paired timing runs, so all three were removed. The lookup-weight trial passed 195 focused ICC tests. The raw runs and trace are under `C:/Users/steve/scratch/kp-bench-render/icc16-current-20261002/`, `icc16-cache-20261002/`, `icc16-pixel-cache-20261002/`, and `icc-rgb-weights-20261002/`.
 
-That page has one 16-bit and one 8-bit ICC RGB image placement, both using a small RGB matrix profile. Its CMYK output intent uses a reverse lookup table. The retained 1.9 change sends the source XYZ value directly to that output profile instead of calculating an unused display RGB color first. Two balanced 32-copy 512-pixel pairs measured last-30-copy baseline sums of 2,305/2,310 and 2,337/2,380 ms versus trial sums of 1,775/1,698 and 1,764/1,790 ms. At 2048 pixels, the corresponding focused sums were 3,115/3,221 versus 2,966/2,852 ms. All 32 focused PNG hashes matched in every comparison. The 649-file conformance tree rendered 614 pages and skipped 35 at both sizes, with no failures and all 614 trial PNG hashes matching the prior 1.9 build at each size. Balanced full-tree 512-pixel sums were 14,942/14,784 ms before and 16,191/14,442 ms after, so a broad speed gain is not established. All 4,178 engine tests and 487 app tests passed; the Release app build had zero warnings or errors. The current 1.8 speed and visible-interaction gates remain open. Raw evidence is under `C:/Users/steve/kp-bench-render/icc-direct-ink-20261002/`.
+That page has one 16-bit and one 8-bit ICC RGB image placement, both using a small RGB matrix profile. Its CMYK output intent uses a reverse lookup table. The retained 1.9 change sends the source XYZ value directly to that output profile instead of calculating an unused display RGB color first. Two balanced 32-copy 512-pixel pairs measured last-30-copy baseline sums of 2,305/2,310 and 2,337/2,380 ms versus trial sums of 1,775/1,698 and 1,764/1,790 ms. At 2048 pixels, the corresponding focused sums were 3,115/3,221 versus 2,966/2,852 ms. All 32 focused PNG hashes matched in every comparison. The 649-file conformance tree rendered 614 pages and skipped 35 at both sizes, with no failures and all 614 trial PNG hashes matching the prior 1.9 build at each size. Balanced full-tree 512-pixel sums were 14,942/14,784 ms before and 16,191/14,442 ms after, so a broad speed gain is not established. All 4,178 engine tests and 487 app tests passed; the Release app build had zero warnings or errors. The current 1.8 speed and visible-interaction gates remain open. Raw evidence is under `C:/Users/steve/scratch/kp-bench-render/icc-direct-ink-20261002/`.
 
-Further 32-copy trials tested vectorized four-channel output and four-corner interpolation in the ICC lookup. The vector trial preserved the page hash but its last-30-copy sums were 2,190/1,774 ms against neighboring scalar runs of 1,682/1,711 ms. Separating the vector loop made it slower at 2,533/2,056 ms against 1,778/1,781 ms. Four-corner interpolation changed pixels and measured 2,443/1,785 ms against 1,695/1,857 ms. Its mean RGB difference from PDFium improved only from 5.55106 to 5.54889 levels on this page. None was retained. Logs and outputs are under `C:/Users/steve/kp-bench-render/icc-vector-output-20261002/` and `icc-tetrahedral-20261002/`.
+Further 32-copy trials tested vectorized four-channel output and four-corner interpolation in the ICC lookup. The vector trial preserved the page hash but its last-30-copy sums were 2,190/1,774 ms against neighboring scalar runs of 1,682/1,711 ms. Separating the vector loop made it slower at 2,533/2,056 ms against 1,778/1,781 ms. Four-corner interpolation changed pixels and measured 2,443/1,785 ms against 1,695/1,857 ms. Its mean RGB difference from PDFium improved only from 5.55106 to 5.54889 levels on this page. None was retained. Logs and outputs are under `C:/Users/steve/scratch/kp-bench-render/icc-vector-output-20261002/` and `icc-tetrahedral-20261002/`.
 
-After that change, a fresh 512-pixel 1.8.80/1.9/1.9/1.8 comparison on 600 common successful pages measured render sums of 14,088/14,959/14,377/13,719 ms. Version 1.9 remains slower in both neighboring comparisons. It rendered 614 pages and skipped 35 with no failures; 1.8 rendered 600, skipped 41, and failed on eight. The largest consistent first-page gap is the JBIG2 scan `42828.0001.001.pdf` at 252/764/641/255 ms. The technical Altona page and the scanned-text `A Defence of the New Tenseless Theory of Time.pdf` are the next large gaps. The paired CSVs and PNGs are under `C:/Users/steve/kp-bench-render/icc-direct-ink-20261002/`.
+After that change, a fresh 512-pixel 1.8.80/1.9/1.9/1.8 comparison on 600 common successful pages measured render sums of 14,088/14,959/14,377/13,719 ms. Version 1.9 remains slower in both neighboring comparisons. It rendered 614 pages and skipped 35 with no failures; 1.8 rendered 600, skipped 41, and failed on eight. The largest consistent first-page gap is the JBIG2 scan `42828.0001.001.pdf` at 252/764/641/255 ms. The technical Altona page and the scanned-text `A Defence of the New Tenseless Theory of Time.pdf` are the next large gaps. The paired CSVs and PNGs are under `C:/Users/steve/scratch/kp-bench-render/icc-direct-ink-20261002/`.
 
-Longer 512-pixel runs separated those first-page gaps from repeated work. In two alternating runs per version, the last 16 Altona copies averaged 184.8/185.8 ms in 1.8.80 and 106.9/110.8 ms in 1.9. The last six scanned-text copies averaged 112.5/107.5 versus 108.2/111.0 ms. The last eight JBIG2 copies averaged 226.9/218.5 versus 235.4/227.0 ms. Sixteen copies of the simple UnknownFilter page took 244 to 255 ms on 1.9's first render and 2 to 3 ms on most later copies. Every repeated 1.9 page kept one PNG hash. These results move the priority for these pages to first-render cost; they do not close the whole-corpus or visible-interaction speed gates. The paired logs and PNGs are under `C:/Users/steve/kp-bench-render/altona-long-20261002/`, `tenseless-focused-20261002/`, `jbig2-long-20261002/`, and `simple-gap-20261002/`.
+Longer 512-pixel runs separated those first-page gaps from repeated work. In two alternating runs per version, the last 16 Altona copies averaged 184.8/185.8 ms in 1.8.80 and 106.9/110.8 ms in 1.9. The last six scanned-text copies averaged 112.5/107.5 versus 108.2/111.0 ms. The last eight JBIG2 copies averaged 226.9/218.5 versus 235.4/227.0 ms. Sixteen copies of the simple UnknownFilter page took 244 to 255 ms on 1.9's first render and 2 to 3 ms on most later copies. Every repeated 1.9 page kept one PNG hash. These results move the priority for these pages to first-render cost; they do not close the whole-corpus or visible-interaction speed gates. The paired logs and PNGs are under `C:/Users/steve/scratch/kp-bench-render/altona-long-20261002/`, `tenseless-focused-20261002/`, `jbig2-long-20261002/`, and `simple-gap-20261002/`.
 
-A new scratch 1.9 payload uses the same IL app and ReadyToRun engine and codec layout as the portable build. Four alternating fresh-process pairs on `064034.pdf` took 102 to 107 ms in 1.8.80 and 214 to 245 ms in 1.9 at 512 pixels. At 2048 pixels, 1.8.80 took 121 to 130 ms and 1.9 took 373 to 473 ms. The four 1.9 PNGs matched the saved baseline. A cold-only 1.9 sample trace places JPEG decoding ahead of image conversion; a twelve-render trace places image conversion first. One output-row span trial kept pixels identical but did not improve six paired cold renders, so it was removed. The paired logs, traces, and rejected trial are outside the repository under `C:/Users/steve/kp-bench-render/memory-stage-20261002/r2r-parity/`.
+A new scratch 1.9 payload uses the same IL app and ReadyToRun engine and codec layout as the portable build. Four alternating fresh-process pairs on `064034.pdf` took 102 to 107 ms in 1.8.80 and 214 to 245 ms in 1.9 at 512 pixels. At 2048 pixels, 1.8.80 took 121 to 130 ms and 1.9 took 373 to 473 ms. The four 1.9 PNGs matched the saved baseline. A cold-only 1.9 sample trace places JPEG decoding ahead of image conversion; a twelve-render trace places image conversion first. One output-row span trial kept pixels identical but did not improve six paired cold renders, so it was removed. The paired logs, traces, and rejected trial are outside the repository under `C:/Users/steve/scratch/kp-bench-render/memory-stage-20261002/r2r-parity/`.
 
-A sampled 512-pixel profile of all 649 conformance files completed 614 renders and 35 skips. It identified installed-font indexing as a first-use cost, though sampled thread time includes parallel workers and lock waits. A trial loaded font descriptions in parallel while registering faces in the original order. Eight alternating fresh-process Altona renders measured 625/636/620/617/614/628/617/622 ms in baseline/trial/trial/baseline/trial/baseline/baseline/trial order. All eight PNG hashes matched, but the timing ranges overlap, so the trial was removed. The profile and trial outputs are under `C:/Users/steve/kp-bench-render/corpus-cpu-20261002*` and `C:/Users/steve/kp-bench-render/font-index-parallel-20261002/`.
+A sampled 512-pixel profile of all 649 conformance files completed 614 renders and 35 skips. It identified installed-font indexing as a first-use cost, though sampled thread time includes parallel workers and lock waits. A trial loaded font descriptions in parallel while registering faces in the original order. Eight alternating fresh-process Altona renders measured 625/636/620/617/614/628/617/622 ms in baseline/trial/trial/baseline/trial/baseline/baseline/trial order. All eight PNG hashes matched, but the timing ranges overlap, so the trial was removed. The profile and trial outputs are under `C:/Users/steve/scratch/kp-bench-render/corpus-cpu-20261002*` and `C:/Users/steve/scratch/kp-bench-render/font-index-parallel-20261002/`.
 
-A bounded initial character-list capacity also kept all 614 conformance PNG hashes at 512 pixels. The four alternating whole-tree render sums were 67,371/65,019/63,183/63,130 ms in baseline/trial/trial/baseline order. The second trial and baseline were effectively equal, so the extra allocation was not retained. Outputs and CSVs are under `C:/Users/steve/kp-bench-render/unicode-capacity-20261002/`.
+A bounded initial character-list capacity also kept all 614 conformance PNG hashes at 512 pixels. The four alternating whole-tree render sums were 67,371/65,019/63,183/63,130 ms in baseline/trial/trial/baseline order. The second trial and baseline were effectively equal, so the extra allocation was not retained. Outputs and CSVs are under `C:/Users/steve/scratch/kp-bench-render/unicode-capacity-20261002/`.
 
-Moving the plain RGB and gray image-format checks outside the area sampler's pixel loop preserved all 20 Altona PNG hashes. Four alternating 512-pixel render sums were 1,526/1,578/1,614/1,649 ms in baseline/trial/trial/baseline order. The trial showed no speed gain and was removed. Outputs and CSVs are under `C:/Users/steve/kp-bench-render/direct-area-loops-20261002/`.
+Moving the plain RGB and gray image-format checks outside the area sampler's pixel loop preserved all 20 Altona PNG hashes. Four alternating 512-pixel render sums were 1,526/1,578/1,614/1,649 ms in baseline/trial/trial/baseline order. The trial showed no speed gain and was removed. Outputs and CSVs are under `C:/Users/steve/scratch/kp-bench-render/direct-area-loops-20261002/`.
 
 Instrumented scratch builds from the clean 1.8.72 and 1.9.0 trees opened the
 same PDF in separate hidden WPF processes with isolated Continuous-view settings.
@@ -896,7 +896,7 @@ times of 1,332.614 and 1,680.166 ms, with median peaks of 291.05 and
 343.40 MiB. All runs attached page one once and exited after the trace was
 captured. This measures an internal WPF bitmap assignment, not a displayed
 frame or scroll and zoom behavior. Traces, scratch sources, payloads, and the
-runner are under `C:/Users/steve/kp-bench-render/viewer-attach-20260930`.
+runner are under `C:/Users/steve/scratch/kp-bench-render/viewer-attach-20260930`.
 
 Additional stage marks on two launches per version locate the CMYK JPEG delay
 inside the first backend render: 151 to 164 ms in 1.8 versus 382 to 447 ms in
@@ -932,7 +932,7 @@ Median engine render times were 607.674 ms at 512 pixels and 640.497 ms at
 The scan's small resolution-dependent difference reinforces decoder and
 area-conversion work as the next targets. This standalone probe does not
 measure application startup or visible first-page presentation. Its source
-and payload reference are under `C:/Users/steve/kp-bench-render/stage-current-20260930`.
+and payload reference are under `C:/Users/steve/scratch/kp-bench-render/stage-current-20260930`.
 
 A packed-state arithmetic decoder trial kept the scan's 512-pixel hash and
 similar peak memory, and all 15 focused JBIG2 tests passed. Four alternating
@@ -942,7 +942,7 @@ Repeated renders of the same parsed document were slightly slower with the
 trial and mostly reused decoded data, so they cannot validate a decode gain.
 The change was removed; current source remains at the retained baseline.
 Scratch binaries and probe source are under
-`C:/Users/steve/kp-bench-render/jbig-packed-decode-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/jbig-packed-decode-20260930`.
 
 Precomputing exact binary-image column coverage also preserved the scan's
 512- and 2048-pixel hashes and similar peaks, with 25 focused image tests
@@ -950,7 +950,7 @@ passing. Four alternating fresh-process renders per build measured baseline
 and trial medians of 603.040 and 606.924 ms at 512 pixels, and 638.733 and
 646.794 ms at 2048 pixels. The trial was removed because neither size
 improved. Scratch payloads are under
-`C:/Users/steve/kp-bench-render/binary-column-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/binary-column-20260930`.
 
 Temporary tracing of scan `42828.0001.001.pdf` found 1,338 arithmetic
 generic regions totaling 23,231,936 source pixels. Every region uses
@@ -960,7 +960,7 @@ loop. Adding fast paths for other templates would not improve this scan.
 An ownership trace also found an existing shared context on all 1,338
 regions, ruling out a 65,536-entry allocation per symbol.
 The trace was removed from source after inspection; its scratch payload is
-under `C:/Users/steve/kp-bench-render/jbig-template-trace-20260930`.
+under `C:/Users/steve/scratch/kp-bench-render/jbig-template-trace-20260930`.
 
 A September 30 sampled-thread profile against the retained loose engine
 opened and rendered this scan 32 times at 512 pixels, with matching hashes.
@@ -969,7 +969,7 @@ generic-region line decoder, 982 ms to binary area conversion, and 434 ms
 to unshifted JBIG2 bitmap blitting. This points the next 512-pixel scan
 investigation at the template 0 decode loop. The profile is diagnostic and
 does not measure a visible first page or a 1.8 comparison. Trace and
-summarizer are under `C:/Users/steve/kp-bench-render/current-scan-cpu-20260930`.
+summarizer are under `C:/Users/steve/scratch/kp-bench-render/current-scan-cpu-20260930`.
 
 A separate sampled-thread profile of the current loose 1.9 Release payload
 completed all 74 difficult pages at 512 pixels, with 9,682 ms of logged
@@ -979,7 +979,7 @@ text display; these call stacks overlap and must not be added together.
 Unlike the single scan, the batch has no one decoder loop that dominates
 every page. The largest measured 1.8 gaps remain the scan, JPEG 2000
 balloon, CMYK JPEG, and Altona pages. Trace, page outputs, and the 74-row
-log are under `C:/Users/steve/kp-bench-render/difficult-cpu-20260930`.
+log are under `C:/Users/steve/scratch/kp-bench-render/difficult-cpu-20260930`.
 
 A direct full-resolution YCCK output loop for equal-sampled components kept
 the existing pixel conversion and added no image buffers. Four alternating
@@ -1005,7 +1005,7 @@ to a completed page was 956.160 versus 1,103.766 milliseconds, and median
 peak working set was 147.0 versus 158.0 MB. All twelve pixel hashes matched.
 This isolates restart cost; it does not measure WPF presentation or establish
 1.8 first-page parity. The scratch probe is under
-`C:/Users/steve/kp-bench-render/viewer-primary-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/viewer-primary-20260930`.
 
 Adjacent-page prefetch in Single and Two-Page modes omitted the display-only
 night-mode inversion that the direct and secondary render paths apply before
@@ -1031,7 +1031,7 @@ process peak was 131.3 to 131.5 versus 151.2 to 151.8 MiB. All page hashes
 matched. The full 4,163 engine and 487 app tests pass, as does the Release app
 build. This headless parse saving does not close the larger first-render or
 visible interaction gates. Probe code and raw output are under
-`C:/Users/steve/kp-bench-render/working-cache-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/working-cache-20260930`.
 
 The forward-port guard passes against local 1.8.72 commit `d158706b` and the
 current 1.9 checkout: 194 maintenance commits are covered. The seven 1.8.71
@@ -1056,7 +1056,7 @@ PNG hashes in the expected order. The accessibility report returned findings
 with its documented nonzero status. One malformed corpus PDF failed document
 info in both 1.8.72 and 1.9; tagged-to-untagged merge was refused by design.
 These checks do not exercise visible editing or establish full 1.8 parity.
-Artifacts are under `C:/Users/steve/kp-bench-render/cli-release-smoke-20260930`.
+Artifacts are under `C:/Users/steve/scratch/kp-bench-render/cli-release-smoke-20260930`.
 
 ### Difficult-set comparison after YCCK change (2026-09-30)
 
@@ -1072,7 +1072,7 @@ seconds for 1.9. Wall times were 11.392, 11.286, and 11.325 seconds versus
 page gaps were 723 ms on `42828.0001.001.pdf`, 446 ms on
 `balloon_a1b_jp2k.pdf`, 363 ms on `064034.pdf`, and 313 ms on
 `GWG061_Shading_x1a.pdf`. Raw runs, outputs, and the runner are under
-`C:/Users/steve/kp-bench-render/viewer-attach-20260930/current-v18-v19-difficult`.
+`C:/Users/steve/scratch/kp-bench-render/viewer-attach-20260930/current-v18-v19-difficult`.
 These absolute timings should not be compared directly with the earlier
 batch below, which ran under different conditions. Visible interactions
 remain unverified.
@@ -1090,7 +1090,7 @@ is still about three quarters of the 4.462-second gap at 2048 pixels. This
 points to substantial work that does not scale with output pixel count, but
 the batch timing alone cannot divide it among parsing, decoding, and setup.
 Raw output and analysis are under
-`C:/Users/steve/kp-bench-render/viewer-attach-20260930/current-v18-v19-difficult-512`.
+`C:/Users/steve/scratch/kp-bench-render/viewer-attach-20260930/current-v18-v19-difficult-512`.
 
 Separate-process 512-pixel probes of eight difficult files with the woven
 development app found 1.9 peak working sets 35 to 109 MiB above 1.8. Two
@@ -1102,11 +1102,11 @@ This explains why woven development builds exaggerate the release-layout
 memory gap. With the current 1.9 loose payload, the two small pages peaked
 at 79.2 versus 54.9 MiB and 83.4 versus 54.2 MiB for 1.9 and 1.8. These
 are single cold-process observations, not stable medians. Woven observations
-are under `C:/Users/steve/kp-bench-render/isolated-memory-512-20260930`;
+are under `C:/Users/steve/scratch/kp-bench-render/isolated-memory-512-20260930`;
 the GC trace and loose comparison are under
-`C:/Users/steve/kp-bench-render/first-render-gc-20260930` and
-`C:/Users/steve/kp-bench-render/loose-memory-512-20260930` and
-`C:/Users/steve/kp-bench-render/loose-current-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/first-render-gc-20260930` and
+`C:/Users/steve/scratch/kp-bench-render/loose-memory-512-20260930` and
+`C:/Users/steve/scratch/kp-bench-render/loose-current-20260930`.
 
 The current loose payload still spent about one fifth of sampled CPU time
 indexing installed fonts on the small syntax page. A shortcut for standard
@@ -1117,7 +1117,7 @@ On the 74-page difficult set, the two measured render totals were 6,294 and
 PNGs matched. The trial was removed because it would bypass the established
 precedence of a separately installed Helvetica or Courier family on other
 machines. The current source remains unchanged. Trial output is under
-`C:/Users/steve/kp-bench-render/font-fastpath-loose-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/font-fastpath-loose-20260930`.
 
 A fresh 512-pixel comparison used the current 1.9 loose payload and the
 1.8.72 loose payload, with one warmup each and six alternating measured
@@ -1130,14 +1130,14 @@ dimensions matched across versions. The largest median page gaps were
 `altona_measure_1v1a.pdf`, and 216 ms on `balloon_a1b_jp2k.pdf`.
 This release-layout run confirms that Costura accounts for part, but not
 all, of the woven 512-pixel memory gap. Raw logs and outputs are under
-`C:/Users/steve/kp-bench-render/loose-v18-v19-difficult-512-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/loose-v18-v19-difficult-512-20260930`.
 
 A verbose GC allocation trace of the loose 1.9 payload over this difficult
 set sampled about 420 MiB of byte arrays, 134 MiB of renderer Point arrays,
 and 75 MiB of double arrays. These are sampled allocation volumes, not live
 retention or peak working sets. The largest sampled double-array owner was
 `PdfIccLut` construction at about 50 MiB. Evidence is under
-`C:/Users/steve/kp-bench-render/loose-full-gc-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/loose-full-gc-20260930`.
 
 The retained half of that trace attributes its largest Point-array samples
 to cubic path growth (about 37.5 MiB across three leading stacks), pixel-space
@@ -1171,7 +1171,7 @@ Of the retained scan trace's 253 sampled CPU stacks, 67 pass through
 decoder already selects the optimized template-0 path for this scan, so
 adding that selection again would not address its gap. Symbol decoding still
 needs a measured comparison with 1.8. The trace is under
-`C:/Users/steve/kp-bench-render/viewer-primary-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/viewer-primary-20260930`.
 
 An isolated optimized-compilation hint on that template-0 loop passed all
 15 focused JBIG2 tests and preserved the scan's 512-pixel page hash. Four
@@ -1179,7 +1179,7 @@ alternating fresh-process renders per build measured 666.665 ms for baseline
 versus 672.476 ms for the hint at the median, with overlapping ranges and
 roughly 120 MB peaks in both modes. The hint was removed because it did not
 improve the target page. The scratch payload is under
-`C:/Users/steve/kp-bench-render/jbig2-template-opt-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/jbig2-template-opt-20260930`.
 
 A scratch JBIG2 arithmetic-decoder trial reused the previously read input
 byte in the common path. Two isolated Release engines built successfully.
@@ -1189,7 +1189,7 @@ Baseline render times were 787, 852, and 840 ms; trial times were 928,
 these runs, background CPU use measured 48 to 49 percent, so the timing
 is noisy. It provides no evidence of a speed gain, and the decoder change
 was not retained. Scratch sources, payloads, and logs are under
-`C:/Users/steve/kp-bench-render/jbig2-bytein-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/jbig2-bytein-20260930`.
 
 An isolated trial used a 32-bit register for the JBIG2 arithmetic decoder's
 bounded code value. It built and passed all 15 focused JBIG2 tests. Six
@@ -1199,7 +1199,7 @@ for baseline and 6.384 seconds for the trial; sampled peak medians were
 216.4 and 214.9 MiB. The scan page one medians were 572 and 564 ms, too
 small a gain to offset the slower full set. The change was not retained.
 Runs and scratch source are under
-`C:/Users/steve/kp-bench-render/jbig2-uint-register-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/jbig2-uint-register-20260930`.
 
 `altona_measure_1v1a.pdf` exposes a size-specific area-sampling cost: its
 three-run page median is 339 ms at 512 pixels but 144 ms at 2048 pixels in
@@ -1216,8 +1216,8 @@ to 6.568 seconds. All 74 PNGs matched across the measured runs. Diagnostics
 showed the narrower rule applied only to Altona Measure in this set; the
 other page timing changes remain unexplained variability or build effects.
 Neither trial established a whole-batch gain, so neither was retained.
-Sources and runs are under `C:/Users/steve/kp-bench-render/area-small-parallel-20260930`
-and `C:/Users/steve/kp-bench-render/area-cmyk-parallel-20260930`.
+Sources and runs are under `C:/Users/steve/scratch/kp-bench-render/area-small-parallel-20260930`
+and `C:/Users/steve/scratch/kp-bench-render/area-cmyk-parallel-20260930`.
 
 An alternating fresh-process balloon probe at the 1.9 page size of 1503 by
 2047 pixels measured first renders of 481.503 and 473.333 ms through 1.8.72
@@ -1233,7 +1233,7 @@ to 808.752 ms. The page hash matched the earlier probe in every run. The
 first-render stage is the larger target; these boundaries include runtime
 initialization and do not isolate JPEG 2000 decode time.
 Its raw output is under
-`C:/Users/steve/kp-bench-render/viewer-attach-20260930/balloon-current-2048`.
+`C:/Users/steve/scratch/kp-bench-render/viewer-attach-20260930/balloon-current-2048`.
 
 A sampled thread-time trace of 20 fresh-document engine renders at 1504 by
 2048 pixels used the current Release engine and kept one page hash with no
@@ -1244,7 +1244,7 @@ entropy decoding; these inclusive times overlap. Buffer copying and clearing
 appear prominently in the trace, but their stacks include other work and do
 not prove that removing any one copy improves whole-page speed. The trace,
 probe, and analysis are under
-`C:/Users/steve/kp-bench-render/balloon-trace-current-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/balloon-trace-current-20260930`.
 
 An isolated trial raised only JPEG 2000 decode workers from four to eight.
 Two reversed-order fresh-document balloon pairs kept the same pixel hash;
@@ -1256,7 +1256,7 @@ current-build render sums were 10.124 and 10.260 seconds versus 9.806 and
 ms versus 886 and 928 ms. All 74 output PNGs matched in all four runs.
 Neither a whole-batch gain nor a first-page gain is established, so the
 eight-worker setting was not retained. Scratch source, build, and runs are
-under `C:/Users/steve/kp-bench-render/j2k-eight-workers-20260930`.
+under `C:/Users/steve/scratch/kp-bench-render/j2k-eight-workers-20260930`.
 
 A separate scratch build replaced three reconstruction `Array.Copy` sites with
 typed span copies, preserving the copied sample ranges. Four alternating
@@ -1265,7 +1265,7 @@ Baseline render sums were 9.567 and 10.109 seconds; trial sums were 10.213
 and 10.165 seconds. The balloon first page measured 893 and 850 ms before
 versus 931 and 892 ms after. Sampled peaks overlapped, and the trial did not
 establish a speed gain. It was not retained. Its source, build, and runs are
-under `C:/Users/steve/kp-bench-render/j2k-copy-20260930`.
+under `C:/Users/steve/scratch/kp-bench-render/j2k-copy-20260930`.
 
 A scratch JPEG 2000 trial allocated fresh zeroed reconstruction frames instead
 of renting smaller frames from the sample pool. Three alternating 74-page
@@ -1273,7 +1273,7 @@ difficult-set runs per build at 2048 pixels kept all 74 PNG hashes unchanged.
 Median render sums rose from 9.191 to 9.779 seconds; sampled peak medians
 fell from 283.1 to 279.0 MiB. The balloon page medians were 839 and 939 ms.
 The speed regression rules out this pool policy for 1.9. Scratch source and
-raw runs are under `C:/Users/steve/kp-bench-render/j2k-no-frame-pool-20260930`.
+raw runs are under `C:/Users/steve/scratch/kp-bench-render/j2k-no-frame-pool-20260930`.
 
 A guarded contiguous-row loop in the JPEG 2000 float dequantizer avoided
 per-row index math when the source block had zero offset and a stride equal
@@ -1282,7 +1282,7 @@ all 74 PNG hashes unchanged. Median render sums were 9.137 seconds for the
 baseline and 9.227 seconds for the trial; sampled peak medians were 288.3
 and 286.1 MiB. Balloon page medians were 806 and 862 ms. The speed result
 does not support retaining the loop. Scratch source and runs are under
-`C:/Users/steve/kp-bench-render/j2k-contiguous-dequant-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/j2k-contiguous-dequant-20260930`.
 
 ### Earlier difficult-set comparison (2026-09-30)
 
@@ -1303,7 +1303,7 @@ on `064034.pdf`, 323 ms on the JPEG 2000 balloon, and 274 ms on
 `4AB13A69FD06146A5B963F4B5F5DBEC29761DC22940AF001700D0B0853CF05C8`
 and `EDF81CF3EB095559652A29986904CC06889269389B047AE9974308E964A3E038`.
 Raw logs, PNGs, runner, and analysis are under
-`C:/Users/steve/kp-bench-render/difficult-current-20260930`. This headless
+`C:/Users/steve/scratch/kp-bench-render/difficult-current-20260930`. This headless
 comparison does not measure WPF presentation or interaction.
 
 On `GWG061_Shading_x1a.pdf`, the declared CMYK output profile accounts for a
@@ -1316,7 +1316,7 @@ rows onto workers. Four alternating fresh processes per variant measured 611
 to 627 ms serial and 612 to 636 ms parallel, with identical PNG hashes and
 sampled peaks of 96.5 to 98.0 MiB. No profile or parallelism change was
 retained. Source and output are under
-`C:/Users/steve/kp-bench-render/gwg061-profile-probe-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/gwg061-profile-probe-20260930`.
 
 A fresh-process `42828` probe at 1447 by 2048 pixels measured a 626.674 ms
 median without warmup and 583.592 ms after rendering a different binary-image
@@ -1326,7 +1326,7 @@ and 512 pixels moved the final full render later: median combined times were
 full-size pixel hashes matched. A preview may appear sooner, but these checks
 do not establish visible first-page behavior and do not improve full-page
 latency. No preview or warmup change was retained. Raw probes are under
-`C:/Users/steve/kp-bench-render/cold-path-prewarm-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/cold-path-prewarm-20260930`.
 
 A separate headless probe invoked each application's primary viewer raster
 backend from its bundled development build for `42828.0001.001.pdf` at 1447
@@ -1347,7 +1347,7 @@ speed or memory parity. The measured application DLL hashes are
 for 1.8 and
 `C978281700C969853A09D39904EEE98505DC4AC68883D36FC2F49A0EE3739A13`
 for 1.9. Raw output and the probe are under
-`C:/Users/steve/kp-bench-render/viewer-primary-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/viewer-primary-20260930`.
 
 An eight-process repeat limited each process to one primary raster call. The
 four 1.8 calls took 287.973 to 307.303 ms and peaked at 69.9 to 70.1 MiB;
@@ -1377,7 +1377,7 @@ remain unmeasured. Payload DLL SHA-256 values are
 for 1.8 and
 `C70693BCAF415B67C42CE77DC0AB354B63DDD2072A863C96A328E9A02700ABC5`
 for 1.9. Builds and raw measurements are under
-`C:/Users/steve/kp-bench-render/viewer-primary-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/viewer-primary-20260930`.
 
 Two isolated JBIG2 decoder trials were measured against the current loose
 1.9 payload on the same first page. Reading and updating each arithmetic
@@ -1388,8 +1388,8 @@ bulk copy also passed 15 focused tests and preserved the hash. In two
 reversed-order four-run pairs, its medians were 814.357 versus 822.105 ms
 for baseline and 820.717 versus 813.803 ms for baseline. The mixed result
 does not establish a speed gain. Neither trial was retained. Scratch builds
-and raw runs are under `C:/Users/steve/kp-bench-render/jbig2-state-trial-20260930`
-and `C:/Users/steve/kp-bench-render/jbig2-input-copy-20260930`.
+and raw runs are under `C:/Users/steve/scratch/kp-bench-render/jbig2-state-trial-20260930`
+and `C:/Users/steve/scratch/kp-bench-render/jbig2-input-copy-20260930`.
 
 A direct-write trial for an opaque reduced binary image avoided the full
 intermediate color plane. Across two alternating first-page pairs, the
@@ -1404,7 +1404,7 @@ scan page also slowed from a median 824 to 852.5 ms in the batch. The
 local first-page memory saving did not hold across the full workload, and
 the target page did not get faster, so the path was not retained. Scratch
 source, payloads, logs, and PNGs are under
-`C:/Users/steve/kp-bench-render/binary-direct-plane-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/binary-direct-plane-20260930`.
 
 An alternating fresh-process sequence of five fitted sizes on `064034.pdf`
 used the current installed-layout application payloads. Four runs per version
@@ -1422,7 +1422,7 @@ opening took 70.627 to 73.661 ms, while rendering took 585.947 to
 597.690 ms. The measured delay is therefore mostly in first rendering,
 not opening the document. All four stage probes retained the same pixel hash.
 The probe and raw CSV are under
-`C:/Users/steve/kp-bench-render/viewer-primary-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/viewer-primary-20260930`.
 
 ### Reduced JPEG first-render improvement (2026-09-30)
 
@@ -1451,7 +1451,7 @@ verified gain is the cold small-page JPEG path. The full 4,163 engine and
 485 application tests pass, and the Release application build succeeds
 with 659 existing nullable warnings from vendored CoreJ2K. Raw traces,
 payloads, run logs, and PNGs are under
-`C:/Users/steve/kp-bench-render/jpeg-cold512-trial-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/jpeg-cold512-trial-20260930`.
 
 Sixteen fresh-process renders each of `42828` and `064034` compared one, two,
 four, and eight engine row workers in balanced order. All pixel hashes matched
@@ -1460,7 +1460,7 @@ within each document. On `42828`, four workers had the lowest median at
 On `064034`, eight workers measured 468.684 ms versus 474.553 ms for four,
 while median peak memory rose from 97.1 to 97.3 MiB. The scan regression and
 small JPEG gain do not support changing the worker policy. Raw results are
-under `C:/Users/steve/kp-bench-render/binary-worker-sweep-20260930`.
+under `C:/Users/steve/scratch/kp-bench-render/binary-worker-sweep-20260930`.
 
 A precomputed masked-column path for one-bit images passed seven focused
 sampler tests and preserved all 74 difficult-set PNG hashes. Three alternating
@@ -1469,14 +1469,14 @@ baseline and 8.544 seconds for the trial, wall times of 13.619 and 13.639
 seconds, and sampled peaks of 286.4 and 290.7 MiB. The isolated scan had a
 small warmed gain, but the complete batch did not improve and used more
 memory. The path was removed. Raw results are under
-`C:/Users/steve/kp-bench-render/binary-packed-columns-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/binary-packed-columns-20260930`.
 
 Precomputing vertical edge weights per output row passed the same seven tests
 and preserved all 74 difficult-set PNG hashes. Three alternating application
 runs per version gave median render sums of 8.617 seconds for the baseline and
 8.581 seconds for the trial; both median wall times were 13.7 seconds. The
 small, variable difference did not justify keeping the change. Raw results
-are under `C:/Users/steve/kp-bench-render/binary-row-weights-20260930`.
+are under `C:/Users/steve/scratch/kp-bench-render/binary-row-weights-20260930`.
 
 Four fresh-process engine probes of `42828` separated document open, first
 render, and repeat work at 1447 by 2048 pixels with four row workers. Median
@@ -1488,7 +1488,7 @@ first render, versus 1 ms during the second. Compilation contributes to the
 cold delay but does not account for the full first-render cost. The probe does
 not measure WPF presentation or establish a 1.8 comparison. Source, DLL hashes,
 and raw measurements are under
-`C:/Users/steve/kp-bench-render/cold-jit-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/cold-jit-20260930`.
 
 Temporary timing around the actual first-page JBIG2 image path measured four
 fresh processes. Median time inside decoded-image retrieval was 299.9 ms on
@@ -1500,8 +1500,8 @@ through painting. Every render retained the same pixel hash. A separate
 for baseline and 671.8 ms for trial in four alternating runs each; second
 renders were 49.9 and 50.1 ms. The timing ranges overlapped, so the hint and
 temporary probes were removed. Raw data and builds are under
-`C:/Users/steve/kp-bench-render/image-phase-timing-20260930` and
-`C:/Users/steve/kp-bench-render/paint-jit-trial-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/image-phase-timing-20260930` and
+`C:/Users/steve/scratch/kp-bench-render/paint-jit-trial-20260930`.
 
 An `AggressiveOptimization` hint on the JBIG2 arithmetic decoder shortened
 isolated first-image decode from a 332.7 ms median to 302.3 ms in four
@@ -1509,7 +1509,7 @@ alternating runs per version, but raised repeat decode from 149.1 to 156.8 ms.
 In the direct first-page path, first-render medians were 626.6 ms for baseline
 and 649.0 ms for trial. All decoded-image and rendered-page hashes matched.
 The hint was removed because the page did not improve. Raw runs are under
-`C:/Users/steve/kp-bench-render/jbig2-arith-jit-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/jbig2-arith-jit-20260930`.
 
 Skipping redundant byte-input seeks in the JBIG2 arithmetic decoder kept all
 74 difficult-set PNG hashes across four alternating runs per build. Median
@@ -1517,7 +1517,7 @@ render time fell from 9,425.5 to 9,233.5 milliseconds and wall time from
 14,910.5 to 14,579 milliseconds, but median peak working set rose from
 283.32 to 289.73 MiB. The trial was removed because the memory regression
 does not meet the release gate. Raw runs and payloads are under
-`C:/Users/steve/kp-bench-render/arith-bytein-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/arith-bytein-20260930`.
 
 A loose-payload recheck of that exact byte-input change used three alternating
 measured runs per build at each of 512 and 2048 pixels. All 74 PNG hashes
@@ -1527,7 +1527,7 @@ median peaks were about 189.3 and 188.3 MiB. At 2048 pixels, render sums
 were 9,250 and 9,115 ms, but median peaks rose from about 264.0 to 271.0 MiB.
 The second measurement again shows a roughly 7 MiB memory cost for a small,
 variable speed gain, so the source was restored. Raw runs and PNGs are under
-`C:/Users/steve/kp-bench-render/arith-bytein-recheck-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/arith-bytein-recheck-20260930`.
 
 A same-payload `DOTNET_TieredCompilation=0` trial used alternating hidden
 application runs after warmup. On the 74-page difficult set, baseline and
@@ -1540,7 +1540,7 @@ seconds and wall time from 29.431 to 31.474 seconds, while sampled peak fell
 from 525.5 to 505.7 MiB. All 74 difficult and 600 shared output dimensions
 and PNG hashes matched across all six runs in each set. The shared-set
 regression rules out a process-wide setting change. Raw runs, scripts, and
-analyses are under `C:/Users/steve/kp-bench-render/tiered-off-20260930`.
+analyses are under `C:/Users/steve/scratch/kp-bench-render/tiered-off-20260930`.
 
 The 1.8 and 1.9 primary viewer paths use the same resolution rule and the
 same `WriteableBitmap` construction, pixel copy, and freeze sequence after
@@ -1551,7 +1551,7 @@ BGRA pixels in four fresh processes. Its first bitmap creation took 117 to
 cost, not page layout, screen presentation, or an end-to-end viewer comparison.
 The measured multi-hundred-millisecond first-page gap still needs engine and
 visible interaction work. Probe source and raw runs are under
-`C:/Users/steve/kp-bench-render/viewer-bitmap-boundary-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/viewer-bitmap-boundary-20260930`.
 
 Moving the JPEG 2000 decoder's state clear below its empty-block return
 preserved the balloon page hash in 120 renders. Four fresh, hidden engine
@@ -1560,7 +1560,7 @@ for 30 renders. First-render times were 545.75 and 530.98 ms for baseline
 versus 542.76 and 540.19 ms for trial. The last-20 medians were 158.41 and
 160.69 ms versus 158.59 and 160.66 ms. The trial did not establish a speed
 gain, so the source change was removed. Probe source and raw runs are under
-`C:/Users/steve/kp-bench-render/j2k-empty-block-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/j2k-empty-block-20260930`.
 
 A fresh sampled-thread trace of the current headless difficult batch completed
 all 74 pages. Every PNG hash matched the retained 1.9 batch. Among 4,867
@@ -1571,7 +1571,7 @@ wall time; the trace also includes startup, encoding, and runtime work.
 Image decoding and painting now lead the sampled renderer work, so the older
 coverage-painting profile is no longer a sound basis for the next change.
 The trace, output log, and sample-count script are in
-`C:/Users/steve/kp-bench-render` with the `current-cpu-20260930` prefix.
+`C:/Users/steve/scratch/kp-bench-render` with the `current-cpu-20260930` prefix.
 
 Fresh whole-batch sampled-thread traces of the current Release payload at
 2048 and 512 pixels each completed all 74 difficult pages. Every output PNG
@@ -1585,8 +1585,8 @@ not paired wall-time or 1.8 comparisons. They show that output-size-independent
 text and image decoding still matter at 512 pixels; another shading-only
 microchange is not supported by the whole-batch profile. The traces, batch
 logs, PNGs, and analysis are under
-`C:/Users/steve/kp-bench-render/difficult-cpu-trace-20260930` and
-`C:/Users/steve/kp-bench-render/difficult-cpu-trace-512-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/difficult-cpu-trace-20260930` and
+`C:/Users/steve/scratch/kp-bench-render/difficult-cpu-trace-512-20260930`.
 
 Follow-up 512-pixel traces narrowed two different costs. The poster page
 `mipeng_poster_w24.pdf` spent about 314 ms of inclusive sampled CPU time
@@ -1600,8 +1600,8 @@ The 1.8 sampled profiler does not expose PDFium's native internals, so
 those samples cannot identify its corresponding font cost. The earlier
 ToUnicode replacement-string change reduced allocations but did not establish
 a meaningful speed gain. Trace artifacts are under
-`C:/Users/steve/kp-bench-render/mipeng-text-trace-20260930` and
-`C:/Users/steve/kp-bench-render/ghent-text-trace-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/mipeng-text-trace-20260930` and
+`C:/Users/steve/scratch/kp-bench-render/ghent-text-trace-20260930`.
 
 A fresh first-page trace of `42828.0001.001.pdf` again showed active work
 in JBIG2 generic-region decoding and exact one-bit image averaging. A
@@ -1611,8 +1611,8 @@ pairs kept one page hash, but first-render medians were 725.134 ms for the
 current build and 737.724 ms for the trial, with overlapping ranges and no
 consistent peak-memory reduction. The trial was not retained. Its source,
 payload, and raw timings are under
-`C:/Users/steve/kp-bench-render/binary-colors-once-20260930`; the trace is
-under `C:/Users/steve/kp-bench-render/viewer-primary-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/binary-colors-once-20260930`; the trace is
+under `C:/Users/steve/scratch/kp-bench-render/viewer-primary-20260930`.
 
 A headless scan-page zoom sequence compared installed-layout 1.8.72 and a
 pre-JPEG 1.9.0 payload in four alternating fresh processes per version. Each
@@ -1624,7 +1624,7 @@ each size, and each version produced stable hashes across its four runs.
 The final process peak was 85.0 to 85.1 MiB for 1.8 versus 160.0 to 160.2
 MiB for 1.9. These timings cover backend raster calls after document opening,
 not visible WPF zoom or page-display latency. The raw sequence is under
-`C:/Users/steve/kp-bench-render/viewer-primary-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/viewer-primary-20260930`.
 
 The same sequence was repeated with a freshly published loose 1.9.0 payload
 containing the retained reduced-JPEG change. Four alternating fresh processes
@@ -1636,7 +1636,7 @@ Later 1.9 steps were variable, including 43.557 to 220.583 ms at the first
 MiB for 1.9. Each size kept one hash per version across all four runs; the
 1.9 hashes also matched the earlier payload. This is backend raster timing,
 not visible zoom or page-display latency. Raw results are in
-`C:/Users/steve/kp-bench-render/viewer-primary-20260930/42828-zoom-afterjpeg.csv`.
+`C:/Users/steve/scratch/kp-bench-render/viewer-primary-20260930/42828-zoom-afterjpeg.csv`.
 
 The scan page's raw JBIG2 image stream contains an arithmetic-coded symbol
 dictionary with 1,338 new symbols and template 0, followed by a text region.
@@ -1653,14 +1653,14 @@ after a 512-pixel render and 16.1 MiB after a 2048-pixel render. After
 collection, managed heaps were 41.9 and 57.7 MB; the difference closely
 matches the pool. Releasing idle buffers would lower retention, but it would
 not remove their allocation from the peak. The probe is under
-`C:/Users/steve/kp-bench-render/scan-memory-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/scan-memory-20260930`.
 
 A fresh-process 512-pixel sample trace of the current loose payload confirms
 the cold path spends substantial sampled time in JBIG2 generic-region line
 decoding and arithmetic decoding. One-bit area sampling also appears, but at
 a smaller share than on the 2048-pixel trace. The trace includes startup and
 assembly loading, so its percentages are not render-only timings. It is at
-`C:/Users/steve/kp-bench-render/viewer-primary-20260930/42828-first512-current.nettrace`.
+`C:/Users/steve/scratch/kp-bench-render/viewer-primary-20260930/42828-first512-current.nettrace`.
 Counting its 253 sampled CPU stacks finds 85 through symbol-dictionary
 decoding and 28 through one-bit area sampling. These inclusive counts overlap
 and reinforce symbol decoding as the next cold-render target; they do not
@@ -1672,7 +1672,7 @@ four alternating fresh-process runs per build raised median first-image decode
 from 353 to 1,346 ms and the following page render from 643 to 2,098 ms. Process
 working set stayed near 135 to 137 MiB. The table was rejected; scratch
 source and raw runs are under
-`C:/Users/steve/kp-bench-render/jbig2-state-table-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/jbig2-state-table-20260930`.
 
 A PDFium-inspired scratch trial updated the arithmetic decoder's packed
 context byte directly inside the template-0 symbol loop. All 15 focused
@@ -1680,7 +1680,7 @@ JBIG2 tests and the scan pixel hash passed. Four alternating fresh-process
 512-pixel renders had medians of 634.848 ms for the current code and
 641.668 ms for the trial; two trial peaks were about 4 MiB higher. The
 trial was not retained. Its source and raw results are under
-`C:/Users/steve/kp-bench-render/arith-packed-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/arith-packed-20260930`.
 
 A scratch JBIG2 stream path read single bytes directly from the source buffer
 instead of through layered stream buffers. All 15 focused JBIG2 tests and the
@@ -1688,7 +1688,7 @@ scan hashes passed. Four alternating fresh-process zoom runs per build gave
 first 512-pixel medians of 640.36 ms before and 644.01 ms after the change;
 final process peaks were about 160.0 and 164.2 MiB. Direct bulk reads also
 failed two focused decoder tests. The stream path was not retained. Source and
-raw measurements are under `C:/Users/steve/kp-bench-render/jbig2-direct-stream-20260930`.
+raw measurements are under `C:/Users/steve/scratch/kp-bench-render/jbig2-direct-stream-20260930`.
 
 A source-size-aware row-worker trial parallelized one-bit reduction for large
 source images even when the output page was small. All 22 focused tests passed,
@@ -1697,7 +1697,7 @@ fresh-process runs per build measured the first 512-pixel render at 641.22 ms
 for baseline and 675.30 ms for trial; final process peaks were 160.3 and
 160.4 MiB. Later zoom steps varied in both directions. The trial was not
 retained. Source and raw timings are under
-`C:/Users/steve/kp-bench-render/binary-source-parallel-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/binary-source-parallel-20260930`.
 
 A one-byte fast path for counting interior bits in reduced binary images
 preserved scan pixels and improved repeated direct-engine renders by a few
@@ -1707,7 +1707,7 @@ difficult pages with identical PNG hashes. Their baseline render sums were
 and 9.570 seconds. The targeted `42828` first page took 813 to 846 ms on
 baseline and 842 to 911 ms on trial. The application result does not support
 the shortcut, so no source change was retained. Scratch builds and raw runs
-are under `C:/Users/steve/kp-bench-render/binary-count-trial-20260930`.
+are under `C:/Users/steve/scratch/kp-bench-render/binary-count-trial-20260930`.
 
 ### Current difficult-set refresh (2026-09-29)
 
@@ -1731,7 +1731,7 @@ does not isolate their causes. The 1.8 and 1.9 application DLL SHA-256 values
 are `4AB13A69FD06146A5B963F4B5F5DBEC29761DC22940AF001700D0B0853CF05C8`
 and `C4A2BFCC001F1AAA11D5D2729F91CE601B7222A7F5F745CDE6BB7ADC70F3EE9B`.
 Raw logs, PNGs, runner, and analysis are under
-`C:/Users/steve/kp-bench-render/difficult-refresh-after-ports-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/difficult-refresh-after-ports-20260929`.
 This headless comparison does not measure WPF presentation or interaction.
 
 After the parallel CMYK alpha fix, a fresh hidden, low-priority 1.8/1.9/1.9/1.8
@@ -1742,7 +1742,7 @@ Sampled peaks were 259.8 and 231.8 MiB versus 289.7 and 285.3 MiB. Every
 page succeeded and the two current 1.9 PNG sets match byte for byte. This
 confirms the large speed gap persists after the fidelity fix; two measured
 runs do not replace the earlier three-run comparison. Raw logs and PNGs are
-under `C:/Users/steve/kp-bench-render/post-alpha-parity-20260929`.
+under `C:/Users/steve/scratch/kp-bench-render/post-alpha-parity-20260929`.
 
 ### Current cold and repeated page costs (2026-09-29)
 
@@ -1762,9 +1762,9 @@ The CMYK JPEG page `064034.pdf` remains slower after warmup: first renders
 took 124 to 126 ms in 1.8 and 496 to 505 ms in 1.9; last-six medians were
 116 to 118 ms and 179.5 to 186 ms. Its sampled peaks were 143.4 to
 145.4 MiB and 184.6 to 184.8 MiB. Raw measurements and PNGs are under
-`C:/Users/steve/kp-bench-render/jbig2-cold-current-20260929`,
-`C:/Users/steve/kp-bench-render/balloon-cold-current-20260929`, and
-`C:/Users/steve/kp-bench-render/cmyk-cold-current-20260929`. These isolated
+`C:/Users/steve/scratch/kp-bench-render/jbig2-cold-current-20260929`,
+`C:/Users/steve/scratch/kp-bench-render/balloon-cold-current-20260929`, and
+`C:/Users/steve/scratch/kp-bench-render/cmyk-cold-current-20260929`. These isolated
 pages do not explain the entire 74-page difficult-set gap or measure visible
 interaction.
 
@@ -1778,20 +1778,20 @@ and 110.9 to 111.1 MiB versus 164.1 to 165.3 MiB for shading. All 64
 renders succeeded, dimensions matched across versions, and each version
 kept one PNG hash per page. The first and repeated costs both need work.
 Raw results are under
-`C:/Users/steve/kp-bench-render/risk-shading-cold-current-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/risk-shading-cold-current-20260929`.
 
 An unchecked-table-access trial for DeviceCMYK preserved one PNG hash across
 64 focused CMYK renders and passed 35 focused tests. In three alternating
 pairs, baseline last-six medians were 175 to 180 ms and the trial's were
 188.5 to 197 ms, without a memory reduction. The trial was removed; raw
-runs are under `C:/Users/steve/kp-bench-render/cmyk-table-ref-trial-20260929`.
+runs are under `C:/Users/steve/scratch/kp-bench-render/cmyk-table-ref-trial-20260929`.
 
 Inlining four calculator stack helpers passed 32 focused tests and preserved
 one PNG hash across 64 shading renders. The three alternating measured pairs
 gave baseline last-six medians of 107.5, 101, and 102.5 ms versus 105, 105,
 and 101.5 ms for the trial. The mixed result did not justify retaining the
 change. Raw runs are under
-`C:/Users/steve/kp-bench-render/calculator-inline-trial-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/calculator-inline-trial-20260929`.
 
 A one-dimensional cosine lookup in reduced JPEG block output passed 135
 focused JPEG tests and preserved one PNG hash across 64 renders of `363_Risk`.
@@ -1799,7 +1799,7 @@ Three alternating pairs gave baseline last-six medians of 209.5, 203.5,
 and 216 ms versus 204.5, 204, and 215 ms for the trial. The differences
 were not repeatable enough to retain it. The restored Release DLL matches
 the baseline hash. Raw runs are under
-`C:/Users/steve/kp-bench-render/jpeg-vertical-table-trial-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/jpeg-vertical-table-trial-20260929`.
 
 A 64-pass sampled-thread-time trace of the current 1.9 engine on `064034.pdf`
 at 2048 pixels reproduced one pixel hash with no render diagnostics. The
@@ -1810,7 +1810,7 @@ stack samples inclusively, while one `PaintImage` row worker accounts for
 these percentages are not a CPU-time split or a comparison with 1.8. This
 points to both decoding and painting for further work rather than another
 isolated color-table edit. The trace and scratch probe are under
-`C:/Users/steve/kp-bench-render/cmyk-profile-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/cmyk-profile-20260929`.
 
 An opaque-plane paint loop removed per-pixel alpha and mask checks for the
 plain CMYK image path. Eight alternating baseline/trial runs rendered eight
@@ -1819,7 +1819,7 @@ hash, and sampled peaks stayed between 182.1 and 185.2 MiB. The last-six
 medians were 188.2 to 195.7 ms for baseline and 186.5 to 191.6 ms for the
 trial. The small, inconsistent difference did not justify retaining the
 extra loop. The tracked source was restored; raw runs are under
-`C:/Users/steve/kp-bench-render/cmyk-opaque-plane-trial-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/cmyk-opaque-plane-trial-20260929`.
 
 Caching axis-aligned image x samples preserved hashes on the CMYK, JBIG2,
 JPEG 2000, and shading probes. Its small CMYK timing difference did not repeat
@@ -1841,8 +1841,8 @@ corpus pass peaked at 486.6 MiB before the fix and 516.4 MiB after it; two
 parallel fixed passes peaked at 507.2 and 519.5 MiB. These process peaks need
 repeat measurement before making a corpus memory claim. This correctness fix
 does not close the speed or memory parity gates. Raw checks are under
-`C:/Users/steve/kp-bench-render/risk-repeat-20260929` and
-`C:/Users/steve/kp-bench-render/ink-alpha-fix-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/risk-repeat-20260929` and
+`C:/Users/steve/scratch/kp-bench-render/ink-alpha-fix-20260929`.
 
 A 64-render thread sample on `363_Risk` attributed 18.34 percent exclusive
 thread time to its axial shading routine, alongside JPEG decoding and CMYK
@@ -1865,10 +1865,10 @@ hash, with an 8.563-second render sum, 14.210-second wall time, and a 295.6 MiB
 sampled peak in one headless pass. The focused shading gain does not close the
 whole-pass speed, memory, visual, or interactive release gates. Raw profiles,
 trials, and comparisons are under
-`C:/Users/steve/kp-bench-render/axial-parallel-trial-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/axial-parallel-trial-20260929`.
 
 Current paired evidence is archived locally under
-`C:/Users/steve/kp-bench-render/review-20260909/stencil-area-paired*`.
+`C:/Users/steve/scratch/kp-bench-render/review-20260909/stencil-area-paired*`.
 The measured engine payload includes rendering changes through `249072b`,
 including installed-font aliases, pattern text and transparency, zero-length
 dash caps, and reduced stencil coverage. Its engine SHA-256 is
@@ -1899,7 +1899,7 @@ on the broader corpus, not a whole-corpus speed claim. A separate comparison
 against 1.8.72 still measured the changed 1.9 difficult render median at
 10.032 versus 5.408 seconds. The full 4,160 engine and 484 application tests
 pass. Raw runs and retained payload are under
-`C:/Users/steve/kp-bench-render/cmyk-aggressive-trial`. Visible interaction
+`C:/Users/steve/scratch/kp-bench-render/cmyk-aggressive-trial`. Visible interaction
 and broader performance parity remain open.
 
 Applying the same first-compilation optimization to the JBIG2 generic-region
@@ -1907,7 +1907,7 @@ fast decoder did not help the repeated scan workload. Three alternating
 eight-copy pairs gave first-render baseline/trial times of 805/875, 801/831,
 and 769/794 ms, while warmed medians varied in both directions. The trial
 was removed. Logs and its payload are under
-`C:/Users/steve/kp-bench-render/jbig2-aggressive-trial`.
+`C:/Users/steve/scratch/kp-bench-render/jbig2-aggressive-trial`.
 
 The latest local 1.9 candidate and 1.8.72 were also compared on the 40-file,
 74-page difficult set at 2048 pixels with one file worker. After warmup,
@@ -1918,7 +1918,7 @@ run variability. Both versions completed all 74 pages without reported
 failures. Peak working sets were 266.4 and 252.1 MiB. The 1.9 output hashes
 matched across two measured runs. Large page gaps include `42828.0001.001.pdf`,
 `balloon_a1b_jp2k.pdf`, `064034.pdf`, and Altona technical. Raw logs and the
-headless runner are in `C:/Users/steve/kp-bench-render/current-parity-20260929`.
+headless runner are in `C:/Users/steve/scratch/kp-bench-render/current-parity-20260929`.
 This check does not establish visual or interactive parity.
 
 Eight separate hard links to each of two difficult files isolate first-use
@@ -1929,14 +1929,14 @@ on the next seven; 1.8 took 244 to 283 ms across all eight. For CMYK JPEG
 versus 131 ms first and a 126 ms last-six median for 1.8. Each build produced
 one stable PNG hash per file across its eight copies. This narrows the warm
 gap to the CMYK path while keeping first-use cost open for both files. Raw
-results are in `C:/Users/steve/kp-bench-render/session-cost-20260929`.
+results are in `C:/Users/steve/scratch/kp-bench-render/session-cost-20260929`.
 
 An explicit unrolling of `PdfDeviceCmyk.ToRgb` passed 168 focused color tests
 and preserved all 24 compared CMYK page hashes, but three alternating
 eight-copy pairs did not show a repeatable speed gain. Baseline/trial last-six
 medians were 192.5/195, 187.5/199, and 194.5/189 ms. The experiment was
 removed. Its payload and logs are in
-`C:/Users/steve/kp-bench-render/cmyk-inline-trial`.
+`C:/Users/steve/scratch/kp-bench-render/cmyk-inline-trial`.
 
 Changing the large-page row-worker cap from four to two slowed both focused
 image pages in two alternating pairs: CMYK last-six medians rose from
@@ -1945,8 +1945,8 @@ image pages in two alternating pairs: CMYK last-six medians rose from
 candidate PNGs matched the baseline. Raising the cap to six gave inconsistent
 CMYK results and slower or more variable scan and shading results in the same
 focused checks. Neither cap change was retained. Raw runs are under
-`C:/Users/steve/kp-bench-render/row-cap-two-trial` and
-`C:/Users/steve/kp-bench-render/row-cap-six-trial`.
+`C:/Users/steve/scratch/kp-bench-render/row-cap-two-trial` and
+`C:/Users/steve/scratch/kp-bench-render/row-cap-six-trial`.
 
 The benchmark runner now forces candidate parallelism to one when requested and
 compares the same per-file render timing field in both logs. On the 649-file
@@ -1958,7 +1958,7 @@ times were 11,303 and 13,305 milliseconds. Version 1.8 rendered 600 files,
 skipped 41, and failed eight; version 1.9 rendered 614, skipped 35, and failed
 none. These results establish a serial performance gap for this corpus, while
 the different successful file counts limit whole-pass comparison. The raw
-results are in `C:/Users/steve/kp-bench-render/serial-1.9-vs-1.8-20260929`.
+results are in `C:/Users/steve/scratch/kp-bench-render/serial-1.9-vs-1.8-20260929`.
 This run did not retain pixels and does not establish fidelity or memory parity.
 
 The earlier 1.9 payload, including the JPEG block change, was then
@@ -1969,7 +1969,7 @@ successful pages, sums of per-file median render times were 11,538 and 13,569
 milliseconds, a 1.176 ratio. Version 1.8 still rendered 600 files and failed
 eight; 1.9 rendered 614 and failed none. The payload's `KillerPDF.dll` SHA-256
 is `CC5E62281F368A061C49A6C7214A831C56FB823F099E08ABF0A47AD80080F0F1`.
-Raw results are in `C:/Users/steve/kp-bench-render/serial-post-jpeg-20260929`.
+Raw results are in `C:/Users/steve/scratch/kp-bench-render/serial-post-jpeg-20260929`.
 The focused JPEG gain has not closed the whole-corpus speed gap.
 
 ### Current shared comparison after large-image reuse (2026-09-29)
@@ -1992,14 +1992,14 @@ comparable. The current payload's `KillerPDF.App.dll` SHA-256 is
 and its engine SHA-256 is
 `1D68B610349DABF46AF087409F5692EBDBBDD63CE6B2B938803A47A0D2681954`.
 Raw logs and per-file comparison are under
-`C:/Users/steve/kp-bench-render/post-image-cache-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/post-image-cache-20260929`.
 
 A current one-worker engine probe of the largest Altona page kept one pixel
 hash across 12 renders. Its first render took 1,992.845 milliseconds; the
 last six had a 1,156.174 millisecond median. A sampled-thread-time trace
 attributes 31.56 percent exclusive time to area conversion and 13.52 percent
 to ICC lookup transformation, versus 0.94 percent to ink pixel compositing.
-The probe and trace are under `C:/Users/steve/kp-bench-render/altona-pages-20260929`.
+The probe and trace are under `C:/Users/steve/scratch/kp-bench-render/altona-pages-20260929`.
 
 At 1024 by 1024 pixels the application selects four render workers. Two
 fresh four-worker probes of the same page took 1,367.071 and 1,460.967
@@ -2015,14 +2015,14 @@ sample loop. In two reversed-order four-worker pairs, baseline/trial warmed
 medians were 702.890/693.754 and 681.920/700.532 milliseconds. All 48
 pixel hashes matched and allocation stayed near 156 MB per render. The pairs
 disagree on speed, so the trial was removed. Its binaries and raw timings are
-under `C:/Users/steve/kp-bench-render/altona-weight-20260929`.
+under `C:/Users/steve/scratch/kp-bench-render/altona-weight-20260929`.
 
 A temporary counter build then measured 57,781,871 color-cache hits and
 1,755,554 misses on one four-worker render of the same page, a 97.05 percent
 hit rate. Of the misses, 1,346,118 replaced an occupied slot. The pixel hash
 matched the production engine. The counters were removed and the engine was
 rebuilt. The probe is under
-`C:/Users/steve/kp-bench-render/altona-cache-metrics-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/altona-cache-metrics-20260929`.
 
 A headless output-profile preselection check removed a discarded first pass
 on the largest Altona page. Four alternating fresh-process probes measured
@@ -2034,7 +2034,7 @@ All 600 current PNG hashes matched the prior build, and sampled peaks were
 492.6 to 494.0 MiB versus 491.8 to 492.6 MiB. Most of the small whole-pass
 gain came from that Altona page. These paired runs do not establish parity
 with 1.8 or visible interaction speed. Raw logs are under
-`C:/Users/steve/kp-bench-render/altona-preselect-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/altona-preselect-20260929`.
 
 Prestarting four thread-pool workers before a fresh render also did not help.
 Four alternating baseline/warmed pairs gave baseline first-render times of
@@ -2046,7 +2046,7 @@ first-render latency. The decoder uses pooled one-megabyte blocks and then
 copies into an exact-size array. Its current cold trace ranks Flate decode
 well below area conversion, so removing that copy has no measured speed case
 yet. Raw results are under
-`C:/Users/steve/kp-bench-render/altona-thread-warm-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/altona-thread-warm-20260929`.
 
 ReadyToRun was tested against the loose release payload. On one fresh Altona
 technical-page process, normal rendering took 708 to 766 milliseconds versus
@@ -2058,7 +2058,7 @@ MiB versus 492.3 to 492.4 MiB. Composite ReadyToRun also rendered the 74-page
 difficult set more slowly at 10.184 versus 9.510 seconds and raised its sampled
 peak from 260.0 to 263.9 MiB. The loose payload grew by about 14.5 MB. Neither
 mode was adopted. Raw results are under
-`C:/Users/steve/kp-bench-render/r2r-payload-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/r2r-payload-20260929`.
 
 An engine-only ReadyToRun payload used the current source and kept every other
 published file byte-identical. Three alternating Altona pairs cut first-page
@@ -2074,7 +2074,7 @@ All 60 Altona, 1,842 conformance, and 222 difficult paired PNGs matched;
 conformance had the same 614 successes and 35 skips per run. The engine DLL
 grew by about 8.5 MB. The cold improvement does not justify the repeated and
 whole-pass costs, so the normal payload remains selected. Evidence is under
-`C:/Users/steve/kp-bench-render/engine-only-r2r-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/engine-only-r2r-20260929`.
 
 A September 30 codec-only trial replaced just `CoreJ2K.dll` in the loose
 payload with a win-x64 ReadyToRun build. Four alternating fresh-process
@@ -2093,8 +2093,8 @@ headless renders with matching PNG hashes. The installer also passes isolated
 installation. The public portable launcher, exact signed installer, and visible
 viewer still need verification. The remaining speed gap against 1.8 is open.
 Raw runs and payloads are under
-`C:/Users/steve/kp-bench-render/corej2k-r2r-only-20260930` and
-`C:/Users/steve/kp-bench-render/corej2k-r2r-package-20260930-pass2`.
+`C:/Users/steve/scratch/kp-bench-render/corej2k-r2r-only-20260930` and
+`C:/Users/steve/scratch/kp-bench-render/corej2k-r2r-package-20260930-pass2`.
 
 An alternating same-file check against the retained 1.8.72 loose payload
 shows the remaining gap on this page. After one warmup per version, four
@@ -2107,8 +2107,8 @@ measured about 204 to 226 ms of JIT compilation during the first render
 after renderer construction, so reducing cold compilation is a distinct
 opportunity from the remaining warm decoder cost. This probe does not
 measure visible first-page completion. Results are under
-`C:/Users/steve/kp-bench-render/r2r-v18-balloon-20260930-pass2` and
-`C:/Users/steve/kp-bench-render/r2r-balloon-jit-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/r2r-v18-balloon-20260930-pass2` and
+`C:/Users/steve/scratch/kp-bench-render/r2r-balloon-jit-20260930`.
 
 A JIT event trace of the codec-only package found 87.9 ms of compilation in
 seven CoreJ2K methods during a fresh scratch render. Three entropy passes
@@ -2119,8 +2119,8 @@ runs per mode, median first-page rendering fell from 310.5 to 231.5 ms, but
 median batch rendering rose from 1,954.5 to 2,096.5 ms; later-page averages
 also rose from a median 86.6 to 96.7 ms. The annotation change was rejected
 because it traded a cold gain for a larger repeated-render cost. The trace
-and trial are under `C:/Users/steve/kp-bench-render/r2r-balloon-jit-20260930`
-and `C:/Users/steve/kp-bench-render/j2k-annotations-r2r-20260930`.
+and trial are under `C:/Users/steve/scratch/kp-bench-render/r2r-balloon-jit-20260930`
+and `C:/Users/steve/scratch/kp-bench-render/j2k-annotations-r2r-20260930`.
 
 A speed-focused ReadyToRun build of the same annotation-free scratch codec
 nearly tied the baseline in its first two alternating 20-file pairs, but
@@ -2129,7 +2129,7 @@ regressed in the next two pairs. The four baseline render totals were 2,009,
 the trial. All 160 PNG hashes matched. A later system sample showed 38 to
 41 percent total CPU use, so these runs do not establish a stable gain or
 memory bound. The trial remains outside the product tree. Evidence is under
-`C:/Users/steve/kp-bench-render/j2k-r2r-optimize-time-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/j2k-r2r-optimize-time-20260930`.
 
 A September 30 hidden Continuous-view probe also compared ReadyToRun on the
 CMYK JPEG `064034.pdf`. Four alternating launches per mode attached page one
@@ -2141,7 +2141,7 @@ ReadyToRun for only the app or engine attached at medians of 1,645 and
 2,059 ms. These are internal bitmap attachment marks, not displayed frames.
 The cold gain does not change the earlier whole-pass and memory disposition.
 Traces and payloads are under
-`C:/Users/steve/kp-bench-render/viewer-attach-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/viewer-attach-20260930`.
 
 A separate scratch build precompiled only the current Release engine, leaving
 the application and JPEG 2000 codec unchanged. On the JBIG2 scan at 512 pixels,
@@ -2155,13 +2155,13 @@ at median render sums of 17,357 and 17,451 ms. All 74 difficult and 600 shared
 PNGs matched across each measured run. The first-scan gain repeated in these
 headless runs, but the larger difficult-set speed and memory results do not
 support precompiling the whole engine for 1.9. Scratch builds and raw runs
-are under `C:/Users/steve/kp-bench-render/scan-jit-20260930`.
+are under `C:/Users/steve/scratch/kp-bench-render/scan-jit-20260930`.
 
 A JBIG2 arithmetic-state trial reduced repeated context-array access while
 preserving all three tested scan-page hashes. Four alternating fresh-process
 runs measured median three-page rendering at about 823 milliseconds before
 and 840 milliseconds after the change, so the trial was removed. Raw results
-are under `C:/Users/steve/kp-bench-render/jbig2-state-20260929`.
+are under `C:/Users/steve/scratch/kp-bench-render/jbig2-state-20260929`.
 
 The current 1.9 payload was also compared with the retained 1.8.5 payload on
 the 40-file, 74-page difficult set at 2048 pixels, three pages per file, and
@@ -2173,7 +2173,7 @@ page gaps were 678.5 milliseconds on `42828.pdf`, 560 milliseconds on
 `064034.pdf`, 477.5 milliseconds on `363_Risk.pdf`, and 388.5 milliseconds on
 the JPEG 2000 balloon page. This confirms that difficult-page speed and memory
 remain open release gates. Raw results are under
-`C:/Users/steve/kp-bench-render/current-difficult-v18-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/current-difficult-v18-20260929`.
 
 The comparison was refreshed after the current caching and codec work, using
 the 1.8.72 and 1.9.0 Release builds, the same 40 inputs and 74 pages, 2048-pixel
@@ -2191,7 +2191,7 @@ The 1.9 application and engine SHA-256 values are
 `0918C18A6A89888FADD849290BCD5BE61BA35BCCB9E23FC43D4F8FDCEDA41B34`
 and `BD797E08A6770BD27ECB2639D974CDB106E59D3256AE5A0B67CBA7F6F9115018`.
 Raw logs and outputs are under
-`C:/Users/steve/kp-bench-render/current-difficult-refresh-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/current-difficult-refresh-20260929`.
 
 The difficult comparison was repeated after the UTF-8 number parser and
 eight-bit soft-mask improvements with four alternating measured runs per
@@ -2201,7 +2201,7 @@ version after warmup. Version 1.8.72 had a 5.233-second median render sum,
 and 266.3 MiB maximum sampled peak. Every run completed all 74 pages without
 failure. The four 1.9 runs reproduced all 74 PNG hashes, and those hashes also
 match the prior 1.9 baseline. Raw results are under
-`C:/Users/steve/kp-bench-render/latest-difficult-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/latest-difficult-20260929`.
 
 The same current 1.9 payload was measured across file-worker counts on the
 difficult set. One, two, four, six, eight, and twelve workers took 15.326,
@@ -2210,21 +2210,21 @@ of 260.8, 294.5, 394.6, 436.6, 545.2, and 631.3 MiB. Twelve workers saved only
 0.766 seconds over six while consuming about 194.7 MiB more. The default was
 not changed because this single sweep establishes the tradeoff but does not
 define the release memory boundary. The raw table is
-`C:/Users/steve/kp-bench-render/latest-difficult-20260929/worker-sweep.csv`.
+`C:/Users/steve/scratch/kp-bench-render/latest-difficult-20260929/worker-sweep.csv`.
 
 A shared CPU-budget trial reduced each file's row parallelism as file-worker
 count increased. It did not reduce oversubscription in practice. At twelve
 file workers, wall time increased from 5.216 to 5.510 seconds and sampled peak
 memory increased from 631.3 to 728.1 MiB. Four and six workers also slowed.
 The trial was removed. Raw results are under
-`C:/Users/steve/kp-bench-render/batch-shared-budget-trial`.
+`C:/Users/steve/scratch/kp-bench-render/batch-shared-budget-trial`.
 
 A direct-CMYK cache trial reused exact `PdfDeviceCmyk` results for repeated
 four-byte samples in large photographic images. Across three alternating
 48-page runs of `064034.pdf`, baseline render sums ranged from 3.625 to 3.945
 seconds and the candidate ranged from 3.800 to 4.022 seconds. Candidate peak
 memory rose from about 145 MiB to 187 MiB. The trial was removed. Raw results
-are under `C:/Users/steve/kp-bench-render/cmyk-cache-trial`.
+are under `C:/Users/steve/scratch/kp-bench-render/cmyk-cache-trial`.
 
 Several runtime compilation trials were rejected. Method-level aggressive
 optimization improved the technical Altona page inconsistently but slowed the
@@ -2234,15 +2234,15 @@ seconds and sampled peak memory rose from 260.6 to 265.2 MiB. Disabling tiered
 compilation and disabling quick JIT for loops both increased document-opening
 time and did not improve the largest page. No JIT policy or method attribute
 was retained. Raw results are under
-`C:/Users/steve/kp-bench-render/aggressive-opt-20260929`,
-`C:/Users/steve/kp-bench-render/tiering-20260929`, and
-`C:/Users/steve/kp-bench-render/quickjit-loops-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/aggressive-opt-20260929`,
+`C:/Users/steve/scratch/kp-bench-render/tiering-20260929`, and
+`C:/Users/steve/scratch/kp-bench-render/quickjit-loops-20260929`.
 
 A separate JBIG2 byte-input trial avoided the normal arithmetic decoder rewind
 while retaining its marker rewind. All 15 focused JBIG2 tests passed and all
 three `42828.pdf` page hashes matched, but paired median three-page rendering
 slowed from about 868 to 897 milliseconds. The trial was removed. Raw results
-are under `C:/Users/steve/kp-bench-render/jbig2-bytein-20260929`.
+are under `C:/Users/steve/scratch/kp-bench-render/jbig2-bytein-20260929`.
 
 A current sampled trace of `42828.0001.001.pdf` attributes its largest active
 costs to JBIG2 generic-region decoding and exact one-bit image area sampling.
@@ -2252,14 +2252,14 @@ to improve from 822 to 809 milliseconds, but a same-process engine probe
 reversed that result: warmed baseline and candidate medians were 209.15 and
 217.61 milliseconds across 22 renders each. Median allocation was effectively
 unchanged at about 25.9 MiB. The trial was removed. Raw traces and runs are
-under `C:/Users/steve/kp-bench-render/42828-profile-20260929` and
-`C:/Users/steve/kp-bench-render/jbig2-context-ref-trial`.
+under `C:/Users/steve/scratch/kp-bench-render/42828-profile-20260929` and
+`C:/Users/steve/scratch/kp-bench-render/jbig2-context-ref-trial`.
 Reading the fast generic-region template directly from its backing bitmap also
 passed the 15 focused tests and preserved all measured hashes. Across 144
 warmed renders, baseline and candidate medians were 193.94 and 191.76
 milliseconds, while means were 196.72 and 196.49 milliseconds. Reversed-order
 pairs disagreed, so the change was removed. Raw results are under
-`C:/Users/steve/kp-bench-render/jbig2-direct-bitmap-trial`.
+`C:/Users/steve/scratch/kp-bench-render/jbig2-direct-bitmap-trial`.
 
 Moving the binary area sampler's cancellation check outside its source-row
 loop retains cancellation before each destination sample and reduces repeated
@@ -2272,7 +2272,7 @@ difficult-set runs completed all 74 pages with byte-identical PNGs; baseline
 render totals were 9.676 and 9.716 seconds, while the candidate measured 9.585
 and 9.299 seconds. Sampled peak working sets ranged from 258.6 to 265.2 MiB
 without a candidate-specific increase. Raw results are under
-`C:/Users/steve/kp-bench-render/binary-cancellation-trial`.
+`C:/Users/steve/scratch/kp-bench-render/binary-cancellation-trial`.
 
 A sampled trace of the first page of the difficult file beginning `382252`
 attributes 12.01 percent of inclusive CPU time to exact one-bit area sampling,
@@ -2283,9 +2283,9 @@ slowed from 1.832 to 1.886 seconds into a 2.079 to 2.204 second range. Moving
 the PNG filter-zero copy and invalid-filter check outside the byte loop passed
 eight focused tests, but slowed the same workload from about 1.69 seconds to
 1.81 to 1.83 seconds. Both trials were removed. The trace and raw runs are
-under `C:/Users/steve/kp-bench-render/382252-profile-20260929`,
-`C:/Users/steve/kp-bench-render/binary-row-weight-trial`, and
-`C:/Users/steve/kp-bench-render/png-unfilter-trial`.
+under `C:/Users/steve/scratch/kp-bench-render/382252-profile-20260929`,
+`C:/Users/steve/scratch/kp-bench-render/binary-row-weight-trial`, and
+`C:/Users/steve/scratch/kp-bench-render/png-unfilter-trial`.
 
 Precomputing exact binary-image column bounds kept the `42828` and `382252`
 pixel hashes unchanged. Two alternating warmed `42828` pairs had baseline
@@ -2293,7 +2293,7 @@ medians of 163.802 and 162.416 ms versus 160.223 and 161.445 ms for the
 trial, with about 35 KiB more allocation per render. The `382252` pairs split:
 42.882/42.354 ms and 41.830/42.604 ms (baseline/trial). The mixed result and
 extra allocation did not justify retaining the column array. The trial was
-removed; raw runs are under `C:/Users/steve/kp-bench-render/binary-column-trial`.
+removed; raw runs are under `C:/Users/steve/scratch/kp-bench-render/binary-column-trial`.
 
 A single-source-row path in the same sampler passed all seven focused tests
 and kept both measured page hashes. In two alternating `42828` pairs, warmed
@@ -2302,7 +2302,7 @@ trial first renders were slower than their paired baselines. On `382252`,
 warmed medians were 42.660/44.249 and 42.591/43.035 ms. Allocation stayed
 effectively unchanged. The trial was removed because it did not improve cold
 rendering and slowed the second page. Raw runs are under
-`C:/Users/steve/kp-bench-render/binary-single-row-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/binary-single-row-20260930`.
 
 A packed-bit shortcut for spans of at most four source pixels passed the seven
 focused sampler tests and preserved both measured page hashes. The two `42828`
@@ -2310,8 +2310,8 @@ warmed pairs split at 163.166/162.197 and 163.657/164.296 ms
 (baseline/trial), while both trial first renders were slower. The `382252`
 pairs also disagreed at 41.896/42.916 and 43.984/43.773 ms. Allocation was
 similar. The shortcut was removed; raw runs and a cold sampled trace are under
-`C:/Users/steve/kp-bench-render/binary-short-span-20260930` and
-`C:/Users/steve/kp-bench-render/binary-worker-sweep-20260930`.
+`C:/Users/steve/scratch/kp-bench-render/binary-short-span-20260930` and
+`C:/Users/steve/scratch/kp-bench-render/binary-worker-sweep-20260930`.
 
 A sampled trace of the first two `495712.pdf` pages attributes the largest
 active renderer cost to vector stroke rasterization, including cell creation
@@ -2320,8 +2320,8 @@ already monotonic. All 1,223 rendering tests passed and all 32 measured PNGs
 matched the baseline. One baseline/candidate pair measured 3.541/3.753 seconds
 and the reversed pair measured 3.447/3.437 seconds, so the result was not
 repeatable and the trial was removed. Raw evidence is under
-`C:/Users/steve/kp-bench-render/495712-profile-20260929` and
-`C:/Users/steve/kp-bench-render/cell-sort-skip-trial`.
+`C:/Users/steve/scratch/kp-bench-render/495712-profile-20260929` and
+`C:/Users/steve/scratch/kp-bench-render/cell-sort-skip-trial`.
 
 A fresh-process profile of both `210260.pdf` pages showed a cold first copy at
 189 and 229 milliseconds, while later copies commonly rendered the first page
@@ -2334,8 +2334,8 @@ both pages together. The one-worker build had a 421 millisecond median and
 422.50 millisecond mean. Each page kept one identical hash across all 60
 renders. Forcing one worker has no repeatable cold-render benefit and was not
 retained. Raw traces, logs, binaries, and PNGs are under
-`C:/Users/steve/kp-bench-render/210260-profile-20260929` and
-`C:/Users/steve/kp-bench-render/210260-workers-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/210260-profile-20260929` and
+`C:/Users/steve/scratch/kp-bench-render/210260-workers-20260929`.
 
 A 16-copy profile of `GWG061_Shading_x1a.pdf` reduced from a 652 millisecond
 first render to 103 to 128 milliseconds after warmup. Its main active engine
@@ -2347,8 +2347,8 @@ focused shading tests passed and all 40 measured PNG hashes matched, but 20
 fresh processes per variant measured baseline and trial medians of 678 and
 678.5 milliseconds. The trial mean was also slower at 681.35 versus 674.90
 milliseconds, so the change was removed. Raw traces and runs are under
-`C:/Users/steve/kp-bench-render/gwg061-profile-20260929` and
-`C:/Users/steve/kp-bench-render/gwg061-connection-table-trial`.
+`C:/Users/steve/scratch/kp-bench-render/gwg061-profile-20260929` and
+`C:/Users/steve/scratch/kp-bench-render/gwg061-connection-table-trial`.
 
 The calculator compiler now omits `cvr` because every numeric stack value is
 already represented as a double. Direct operator coverage and all 4,154 engine
@@ -2365,12 +2365,12 @@ one-worker rendering; the earlier apparent variation came from treating its
 bracketed filename as a wildcard during hashing. The combined small-roll trial
 was rejected after its 16-copy median slowed from 2,551.5 to 2,633.5
 milliseconds. Raw results are under
-`C:/Users/steve/kp-bench-render/gwg061-cvr-trial`,
-`C:/Users/steve/kp-bench-render/gwg061-cvr-warm-trial`,
-`C:/Users/steve/kp-bench-render/cvr-difficult-trial`, and
-`C:/Users/steve/kp-bench-render/cvr-difficult-warmed-trial`. The supplemental
+`C:/Users/steve/scratch/kp-bench-render/gwg061-cvr-trial`,
+`C:/Users/steve/scratch/kp-bench-render/gwg061-cvr-warm-trial`,
+`C:/Users/steve/scratch/kp-bench-render/cvr-difficult-trial`, and
+`C:/Users/steve/scratch/kp-bench-render/cvr-difficult-warmed-trial`. The supplemental
 determinism check is under
-`C:/Users/steve/kp-bench-render/response-fiber-determinism-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/response-fiber-determinism-20260929`.
 
 A later radial-shading trial moved three geometry products outside the pixel
 loop. Three alternating 40-copy runs used identical installed-payload builds.
@@ -2378,7 +2378,7 @@ The baseline and trial render medians were 5,589 and 5,607 milliseconds, their
 wall medians were both 8,031 milliseconds, and peak working sets were 113.7
 and 113.5 MiB. All 240 output hashes matched. The change had no measured
 benefit and was removed. Raw results are under
-`C:/Users/steve/kp-bench-render/radial-invariant-trial/payload-comparison`.
+`C:/Users/steve/scratch/kp-bench-render/radial-invariant-trial/payload-comparison`.
 
 A numeric-only calculator stack trial removed type tags and repeated numeric
 checks from the exact operator subset used by `GWG061_Shading_x1a.pdf`. Seven
@@ -2389,7 +2389,7 @@ gain: only one of four pairs improved, while three were flat or slower. Median
 render totals were 10,962 and 10,904 milliseconds, sampled peak memory was
 266.4 MiB for both variants, and all 592 compared page hashes matched. The
 trial was removed. Raw results are under
-`C:/Users/steve/kp-bench-render/calculator-numeric-trial`.
+`C:/Users/steve/scratch/kp-bench-render/calculator-numeric-trial`.
 
 The generic image compositor now uses the existing bounded row workers when no
 knockout state or shared matte converter makes the paint state mutable across
@@ -2403,8 +2403,8 @@ difficult-set runs with one file worker improved average render time from
 slightly lower. At 12 file workers, average wall time improved from 5,317 to
 5,083.5 milliseconds and maximum peak working set fell from 676 to 660.6 MiB.
 All 4,160 engine tests and 484 app tests pass. Raw evidence is under
-`C:/Users/steve/kp-bench-render/gwg1610-profile-20260929` and
-`C:/Users/steve/kp-bench-render/gwg1610-row-parallel-trial`.
+`C:/Users/steve/scratch/kp-bench-render/gwg1610-profile-20260929` and
+`C:/Users/steve/scratch/kp-bench-render/gwg1610-row-parallel-trial`.
 
 The generic image loop now also hands its already converted destination ink to
 the compositor instead of resolving the same value again for every pixel.
@@ -2416,7 +2416,7 @@ matched. Two difficult-set pairs disagreed in direction, averaging 10,493 and
 10,414.5 milliseconds of rendering and 16,060.5 and 15,946 milliseconds wall
 time. The focused 281 tests, all 4,160 engine tests, and all 484 app tests pass.
 Raw evidence is under
-`C:/Users/steve/kp-bench-render/resolved-image-ink-trial`.
+`C:/Users/steve/scratch/kp-bench-render/resolved-image-ink-trial`.
 
 Fully opaque RGB blend paints now write the already calculated blended channels
 directly instead of running the general alpha compositor. Across seven
@@ -2429,7 +2429,7 @@ working sets of 265.5 and 267.5 MiB. All 148 paired page comparisons matched.
 The focused 1,225 rendering tests, all 4,160 engine tests, and all 484 app tests
 pass. The broader rendering-speed gate remains open.
 Raw evidence is under
-`C:/Users/steve/kp-bench-render/colorburn-opaque-trial`.
+`C:/Users/steve/scratch/kp-bench-render/colorburn-opaque-trial`.
 
 Large non-isolated transparency-group composites now use the existing bounded
 row workers because their destination rows are independent. Across seven
@@ -2441,7 +2441,7 @@ averaged 10,551.5 and 10,529.5 milliseconds of rendering and 16,183 and 16,096
 milliseconds wall time. Maximum peak working set was 265.2 MiB for both builds,
 and all 148 paired page comparisons matched. The focused 1,225 rendering tests,
 all 4,160 engine tests, and all 484 app tests pass. Raw evidence is under
-`C:/Users/steve/kp-bench-render/group-composite-row-trial`.
+`C:/Users/steve/scratch/kp-bench-render/group-composite-row-trial`.
 
 Parallel PNG output now resolves the system codec once before file workers use
 it. The previous image-format lookup lost three pages across 12 repeated
@@ -2450,7 +2450,7 @@ stress runs and seven alternating measured runs after the correction completed
 all 1,080 pages without a failure. A 40-page output comparison remained
 byte-identical. The three focused PNG tests and all 484 app tests pass. The fix
 does not serialize PNG encoding. Raw evidence is under
-`C:/Users/steve/kp-bench-render/png-encoder-race`.
+`C:/Users/steve/scratch/kp-bench-render/png-encoder-race`.
 
 A fresh three-run comparison against the installed-layout 1.8.72 payload puts
 the retained 1.9 build at a 10,499 millisecond difficult-set render median and
@@ -2459,7 +2459,7 @@ Peak working sets were 267.1 and 252.4 MiB. Both versions completed all 74
 pages without failures. This confirms that the row-parallel improvement reduces
 the current 1.9 cost without closing the overall rendering-speed gate. Raw
 results are under
-`C:/Users/steve/kp-bench-render/row-parallel-v18-v19-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/row-parallel-v18-v19-20260929`.
 
 Sixteen traced copies of the difficult file beginning `4387` fell from 490
 milliseconds on the first render to 48 to 69 milliseconds on the last six,
@@ -2468,7 +2468,7 @@ one-bit area sampling, content parsing, and font loading, but no sustained
 renderer cost explains the earlier threefold comparison gap. This file is
 therefore another cold runtime and cache case rather than evidence for a safe
 steady-state engine change. Raw logs and trace data are under
-`C:/Users/steve/kp-bench-render/4387-profile-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/4387-profile-20260929`.
 
 Eight traced copies of the three-page Ghent output test show a mixed result.
 After warmup, page one reaches 130 to 148 milliseconds and matches its 1.8
@@ -2477,7 +2477,7 @@ measured 1.8 ranges near 146 to 152 and 181 to 208 milliseconds. The combined
 trace spreads active time across text and font loading, image decoding and
 painting, ink conversion, soft masks, and patch mesh shading. It does not yet
 isolate one exact, bounded change. Raw logs and trace data are under
-`C:/Users/steve/kp-bench-render/ghent-profile-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/ghent-profile-20260929`.
 
 A page-specific engine probe then reused one Ghent document and renderer for
 40 uncached renders. After the first pass, page two had a 153.6 millisecond
@@ -2487,7 +2487,7 @@ reaches its measured 1.8 range and page three becomes faster after its own
 resources are loaded. The remaining Ghent gap is first-use page resource work,
 which remains relevant to initial scrolling but is not a sustained renderer
 regression. Probe code and raw results are under
-`C:/Users/steve/kp-bench-render/ghent-page-probe-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/ghent-page-probe-20260929`.
 
 Separate first-use traces after warming each preceding page narrow the Ghent
 work further. Page two spends most of its sampled engine time in JPEG decoding,
@@ -2499,8 +2499,8 @@ numbers. A bounded exact-content map cache preserved every pixel and passed 803
 focused tests, but two 20-copy runs did not improve timing, so it was removed.
 The first-use gap remains distributed work with no verified memory-safe source
 change. Raw traces, resource inventories, and cache-trial timings are under
-`C:/Users/steve/kp-bench-render/ghent-firstuse-probe-20260929` and
-`C:/Users/steve/kp-bench-render/ghent-font-resources-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/ghent-firstuse-probe-20260929` and
+`C:/Users/steve/scratch/kp-bench-render/ghent-font-resources-20260929`.
 
 Continuous view now schedules its visible center page first, followed by the
 nearest forward and backward pages. The previous ascending order could put up
@@ -2516,7 +2516,7 @@ percent reduction in time to that page. All 48 requested-page renders had the
 same SHA-256 pixel hash. This isolates the scheduling gain but does not measure
 WPF presentation, visible scrolling, zoom, memory, or parity with 1.8. Raw
 results are under
-`C:/Users/steve/kp-bench-render/continuous-visible-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/continuous-visible-20260929`.
 
 A sampled CPU trace of `064034.pdf` identifies the reduced JPEG decoder and
 DeviceCMYK display conversion as its main active costs. Reusing the converter's
@@ -2528,8 +2528,8 @@ page hash, but two reversed-order `064034.pdf` pairs did not show a repeatable
 gain. A separate trace attributed more time to that search on `363_Risk`, yet
 two reversed-order pairs slowed from 105.4 and 105.7 milliseconds to 111.9 and
 121.8 milliseconds. That trial was also removed. The traces and raw runs are
-under `C:/Users/steve/kp-bench-render/064034-profile-20260929` and
-`C:/Users/steve/kp-bench-render/363-risk-profile-20260929`.
+under `C:/Users/steve/scratch/kp-bench-render/064034-profile-20260929` and
+`C:/Users/steve/scratch/kp-bench-render/363-risk-profile-20260929`.
 
 A table-driven DeviceCMYK interpolation trial replaced the converter's nearest
 sample, neighbor direction, and interpolation-rate arithmetic with byte-indexed
@@ -2539,7 +2539,7 @@ baseline/candidate last-six medians were 119.786/117.758 and 125.906/121.685
 milliseconds. On `363_Risk`, they were 107.164/105.929 and 100.810/105.950
 milliseconds. The second document reversed the apparent result, so the lookup
 change was removed. Raw results are under
-`C:/Users/steve/kp-bench-render/cmyk-interpolation-trial-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/cmyk-interpolation-trial-20260929`.
 
 A reduced JPEG reconstruction trial stored the active coefficient rows once
 per block instead of testing all eight rows for every output vector. Across
@@ -2549,7 +2549,7 @@ baseline/candidate medians were 117.996/125.907 and 115.418/117.680
 milliseconds on `064034.pdf`, and 100.092/98.390 and 102.470/102.088
 milliseconds on `363_Risk`. The pairs do not show a repeatable improvement,
 so the trial was removed. Raw results are under
-`C:/Users/steve/kp-bench-render/jpeg-active-rows-trial-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/jpeg-active-rows-trial-20260929`.
 
 Before the image-cache change, the three Altona files accounted for 1,232
 milliseconds of the 2,031 millisecond summed median render gap on the 600
@@ -2564,7 +2564,7 @@ Every repeated render within each version produced the same PNG hash; the
 two versions produced different hashes. These earlier runs confirmed both a
 persistent speed gap and a large memory gap on this file, beyond the first
 render. The scratch inputs, logs, and PNGs are under
-`C:/Users/steve/kp-bench-render/eci-altona-repeat-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/eci-altona-repeat-20260929`.
 
 A separate engine probe opened that file from a stream and rendered its first
 page at 1024 by 1024. After opening and collecting garbage, the managed heap
@@ -2608,7 +2608,7 @@ difficult set, all PNG hashes matched, render sums were 8,340 and 8,229
 milliseconds, and peaks were 209.1 and 210.4 MiB. Full checks pass with
 4,150 engine tests, 482 app tests, and a Release build without warnings.
 Raw traces, probes, applications, logs, and images are under
-`C:/Users/steve/kp-bench-render/eci-altona-repeat-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/eci-altona-repeat-20260929`.
 
 ### JPEG worker comparison (2026-09-29)
 
@@ -2622,7 +2622,7 @@ diagnostics. Four workers improve this page's latency at a memory cost, so a
 worker-count reduction is not a speed fix for this workload. The current CPU
 trace identifies JPEG Huffman decoding, block output, and soft-mask reduction
 as the main active work. The probe and trace are under
-`C:/Users/steve/kp-bench-render/jpeg-profile-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/jpeg-profile-20260929`.
 
 A second 12-bit Huffman lookup was tested on the same page and removed. Two
 reversed-order, one-worker comparisons gave baseline/candidate warmed medians
@@ -2646,7 +2646,7 @@ shared and six difficult PNGs; those payloads include other intervening changes,
 so these differences are not attributable to this JPEG edit. All 4,150 engine
 tests, 482 app tests, and the Release build pass. This is a page-specific speed
 gain, not a whole-corpus fidelity or interactive parity result. Evidence is under
-`C:/Users/steve/kp-bench-render/jpeg-profile-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/jpeg-profile-20260929`.
 
 ### Large-image color-cache trial (2026-09-29)
 
@@ -2658,7 +2658,7 @@ rose from about 277.4 to 291.6 MB per render. A 32,768-entry cache gave
 716.870/710.354 and 718.712/710.039 milliseconds, with allocation rising to
 about 282.1 MB. All 320 page hashes matched. Neither small page gain justified
 the added allocation, so the 16,384-entry limit remains. Trial binaries and
-the probe are under `C:/Users/steve/kp-bench-render/altona-cache-20260929`.
+the probe are under `C:/Users/steve/scratch/kp-bench-render/altona-cache-20260929`.
 
 ### Current startup marker comparison (2026-09-29)
 
@@ -2671,7 +2671,7 @@ Main-window construction medians were 466.001 and 566.935 milliseconds,
 respectively. The current total ready marker is faster in this launch mode,
 while construction remains slower. Hidden launches and this marker do not
 establish visible startup, first-page, scrolling, or zoom parity. Raw traces
-and the launch script are under `C:/Users/steve/kp-bench-render` with
+and the launch script are under `C:/Users/steve/scratch/kp-bench-render` with
 `startup-*-20260929` names.
 
 ### ICC input-curve lookup trial (2026-09-29)
@@ -2683,7 +2683,7 @@ Per-render allocation stayed near 277.4 MB, and all 160 page pixel hashes
 matched. The gain was small on this page and did not establish a corpus-wide
 benefit, so the extra profile allocation and lookup logic were not retained.
 Trial binaries and raw timings are under
-`C:/Users/steve/kp-bench-render/icc-curve-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/icc-curve-20260929`.
 
 ### Area-loop branch trial (2026-09-29)
 
@@ -2694,7 +2694,7 @@ Per-render allocation remained near 277.4 MB and all 160 page hashes matched.
 The two pairs disagree on direction, so this does not show a reliable speed
 gain. These below-normal-priority runs occurred under a higher machine load
 than the earlier Altona trials. Raw timings and binaries are under
-`C:/Users/steve/kp-bench-render/area-branch-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/area-branch-20260929`.
 
 ### Two-entry color-cache trial (2026-09-29)
 
@@ -2704,7 +2704,7 @@ large Altona page and removed. Reversed-order warmed medians were
 Per-render allocation remained near 277.4 MB and all 160 page hashes matched.
 Both pairs show a substantial slowdown, so the direct-mapped cache remains.
 Raw timings and binaries are under
-`C:/Users/steve/kp-bench-render/two-way-cache-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/two-way-cache-20260929`.
 
 ### Altona warmup investigation (2026-09-29)
 
@@ -2723,7 +2723,7 @@ of 26.818/28.221 and 27.703/29.191 seconds, with summed render times of
 600 PNG hashes matched in the first pair. No-tier compilation improved the
 three early Altona outliers by about 700 milliseconds combined in each pair,
 but slowed the workload overall. The global runtime setting was not retained.
-Raw results are under `C:/Users/steve/kp-bench-render/tiered-pgo-20260929`.
+Raw results are under `C:/Users/steve/scratch/kp-bench-render/tiered-pgo-20260929`.
 
 Enabling quick JIT for loops made the repeated technical Altona batch slower:
 its first page took 850 milliseconds and its 20-page sum was 4,833
@@ -2734,8 +2734,8 @@ were 34.593/26.935 and 27.837/26.896 seconds; summed render times were
 17,586/14,779 and 15,629/14,738 milliseconds. The first no-PGO run was an
 outlier, but both pairs favored the default. All 600 PNG hashes matched in
 the first pair. Neither runtime setting was retained. Raw results are under
-`C:/Users/steve/kp-bench-render/altona-app-session-20260929` and
-`C:/Users/steve/kp-bench-render/pgo-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/altona-app-session-20260929` and
+`C:/Users/steve/scratch/kp-bench-render/pgo-20260929`.
 
 On 20 copies of the technical Altona page, the retained 1.8 application took
 170 milliseconds for the first page and averaged 168 milliseconds for the
@@ -2758,7 +2758,7 @@ payload placed about 165 milliseconds of its first render under text display,
 reading; these inclusive stack times overlap. The tenth render had much less
 text and image work. No single paint loop explains the cold gap. Headless
 timing and trace evidence is under
-`C:/Users/steve/kp-bench-render/altona-cold-current-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/altona-cold-current-20260929`.
 
 Separating Type 3 text handling from the ordinary text function did not
 reduce the cold Altona render consistently. Three alternating same-version
@@ -2766,7 +2766,7 @@ reduce the cold Altona render consistently. Three alternating same-version
 and 738/739 milliseconds. Median full-batch render totals were 4,149/4,608
 milliseconds. All 60 paired PNGs matched, and peak working sets stayed near
 149 MiB. The split was removed; trial evidence is under
-`C:/Users/steve/kp-bench-render/type3-cold-split-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/type3-cold-split-20260929`.
 
 Applying optimized-first compilation only to `ConvertArea` did not improve a
 direct one-worker probe of that page. Reversed-order baseline/trial first
@@ -2775,8 +2775,8 @@ renders 2 through 13 were 2,545.574/2,526.922 and 2,559.204/2,571.325
 milliseconds. Steady medians were 149.877/150.115 and 146.726/152.742
 milliseconds. All 160 pixel hashes matched and allocation stayed near 54 MB
 per render. The method hint was removed. The app-batch and probe results are
-under `C:/Users/steve/kp-bench-render/altona-app-session-20260929` and
-`C:/Users/steve/kp-bench-render/area-jit-20260929`.
+under `C:/Users/steve/scratch/kp-bench-render/altona-app-session-20260929` and
+`C:/Users/steve/scratch/kp-bench-render/area-jit-20260929`.
 
 ### Current balloon JPEG 2000 profile (2026-09-29)
 
@@ -2798,14 +2798,14 @@ and output ranges. PNG encoding is another 20.03 percent of sampled time but
 is outside the logged page-render interval. These sample shares are diagnostic
 attribution, not independent wall-clock timings. The decoder and reduction
 paths remain the main candidates for a verified speed fix. Raw logs and trace
-are under `C:/Users/steve/kp-bench-render/balloon-app-20260929`.
+are under `C:/Users/steve/scratch/kp-bench-render/balloon-app-20260929`.
 
 An `AggressiveOptimization` hint on `StdEntropyDecoder.GetCodeBlock` did not
 improve the same-version balloon batch. Across three reversed-order pairs of
 20 copies at 1024 pixels, retained/trial render medians were 4,462/4,461
 milliseconds, wall medians were 6,121/6,134 milliseconds, and maximum peak
 working sets were 120.4/120.2 MiB. All 60 paired PNGs matched. The hint was
-removed; evidence is under `C:/Users/steve/kp-bench-render/j2k-entry-opt-20260929`.
+removed; evidence is under `C:/Users/steve/scratch/kp-bench-render/j2k-entry-opt-20260929`.
 
 Large area-sampled JPEG 2000 image paints now use up to four bounded row
 workers even below the general page-size threshold. Three alternating
@@ -2822,7 +2822,7 @@ versus 11,281 milliseconds, and peak working set was 199.5 versus 204.1 MiB.
 All 222 difficult PNGs matched. This is a focused JPEG 2000 gain and a modest
 conformance gain, not difficult-set speed parity. The 4,160 engine and 484 app
 tests pass. Raw evidence is under
-`C:/Users/steve/kp-bench-render/j2k-paint-parallel-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/j2k-paint-parallel-20260929`.
 The final application-option version repeated the balloon gain in three more
 pairs: median render time was 4,318 versus 4,050 milliseconds, wall time was
 5,932 versus 5,688 milliseconds, and peak working set was 120.1 versus
@@ -2845,7 +2845,7 @@ with one worker, versus 158.770 and 159.760 milliseconds with four. All 80
 Altona renders had the same pixel hash. A general reduction in the worker
 threshold is therefore unsupported; concurrent viewer memory and a wider page
 set would still need checking before a narrower policy change. Probe output
-is under `C:/Users/steve/kp-bench-render/balloon-workers-20260929`.
+is under `C:/Users/steve/scratch/kp-bench-render/balloon-workers-20260929`.
 
 Skipping local-variable initialization in the three hot entropy-decoder passes
 preserved the balloon pixel hash and reduced three last-30 four-worker medians
@@ -2855,7 +2855,7 @@ gain: candidate render totals were 11.694 and 11.503 seconds versus baseline
 totals of 11.640 and 11.479 seconds in the same measurement session. All 74 PNG
 hashes matched, and 45 focused JPEG 2000 tests passed. The hint was removed.
 Raw results are under
-`C:/Users/steve/kp-bench-render/jp2-skip-locals-init-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/jp2-skip-locals-init-20260929`.
 
 Two ToUnicode cold-path trials on Ghent ALL page 3 were also removed. Forcing
 optimized compilation on the parser produced baseline/candidate first-render
@@ -2864,8 +2864,8 @@ Skipping the metadata-tokenizer pass when no removable metadata was present
 produced medians of 1,063.49 and 1,065.84 milliseconds in a second 24-pair
 comparison. Each trial retained one pixel hash, and neither established a
 meaningful first-render gain. Raw results are under
-`C:/Users/steve/kp-bench-render/tounicode-jit-20260929` and
-`C:/Users/steve/kp-bench-render/tounicode-fastpath-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/tounicode-jit-20260929` and
+`C:/Users/steve/scratch/kp-bench-render/tounicode-fastpath-20260929`.
 
 The 934,858-byte ToUnicode map on Ghent ALL page 3 contains 65,348 mappings
 to the same Unicode replacement character. Reusing that canonical string
@@ -2876,7 +2876,7 @@ All 48 focused renders retained one pixel hash. The current app then rendered
 all 74 difficult pages successfully, and every PNG matched the preceding
 current-app baseline. All 4,155 engine tests and 484 app tests pass, and the
 Release build completes without warnings or errors. Evidence is under
-`C:/Users/steve/kp-bench-render/tounicode-replacement-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/tounicode-replacement-20260929`.
 
 The current loose release payload was then compared with 1.8.72 on the same
 40 difficult files and 74 pages after one warmup per version. Two alternating
@@ -2887,7 +2887,7 @@ for 1.8 and 267.2 MiB for 1.9. Both 1.9 runs completed all pages with no
 diagnostics and reproduced all 74 PNG hashes. Two long-running recursive file
 searches were stopped before this retained comparison; the contaminated runs
 are preserved separately and excluded. Evidence is under
-`C:/Users/steve/kp-bench-render/current-payload-clean-paired-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/current-payload-clean-paired-20260929`.
 
 A sampled trace of `mipeng_poster_w24.pdf`, the next unprofiled contributor,
 attributes its largest active engine costs to repeated Form XObject rendering
@@ -2896,7 +2896,7 @@ kept its existing 64 MiB byte bound and preserved the output hash, but 12
 alternating fresh-process pairs measured a 1,556 millisecond baseline median
 and a slower 1,597 millisecond candidate median. The trial was removed. Raw
 results are under
-`C:/Users/steve/kp-bench-render/stream-cache-256-trial`.
+`C:/Users/steve/scratch/kp-bench-render/stream-cache-256-trial`.
 
 Parsing content-stream integers and real numbers directly from their UTF-8
 bytes reduced the same poster's median first-page render time from 1,610.5 to
@@ -2906,7 +2906,7 @@ renders produced one pixel hash with no failures, while sampled peak working
 sets remained 196.8 versus 196.6 MiB. The invariant parser remains as a
 compatibility fallback for syntax outside the direct parser. All 4,159 engine
 tests and 484 app tests pass. Evidence is under
-`C:/Users/steve/kp-bench-render/content-number-parser-trial`.
+`C:/Users/steve/scratch/kp-bench-render/content-number-parser-trial`.
 
 Caching each Form XObject's resolved matrix, bounds, resources, and transparency
 flags in a separate 128-entry renderer cache preserved the poster output and
@@ -2914,7 +2914,7 @@ reduced sampled peak working set from 199.9 to 197.9 MiB. It nevertheless made
 12 alternating fresh-process pairs slower: median render time increased from
 1,570 to 1,598 milliseconds and mean time increased from 1,571.33 to 1,614.58
 milliseconds. The cache was removed. Evidence is under
-`C:/Users/steve/kp-bench-render/form-metadata-trial`.
+`C:/Users/steve/scratch/kp-bench-render/form-metadata-trial`.
 
 A fresh sampled trace of the retained number parser put content parsing at
 3.85% inclusive, down from 4.90% in the preceding sampled trace, while Form
@@ -2923,8 +2923,8 @@ temporary diagnostic counted 84 Form calls but 56 unique Form-and-transform
 keys; the other 28 keys occurred only twice. This limited reuse, together with
 the slower metadata-cache result, does not support retaining rendered Form or
 bounding-mask surfaces. All diagnostic source was removed. Evidence is under
-`C:/Users/steve/kp-bench-render/mipeng-profile-parser-20260929` and
-`C:/Users/steve/kp-bench-render/form-key-diagnostic`.
+`C:/Users/steve/scratch/kp-bench-render/mipeng-profile-parser-20260929` and
+`C:/Users/steve/scratch/kp-bench-render/form-key-diagnostic`.
 
 Directly sampling ordinary eight-bit soft-mask bytes during bilinear
 interpolation reduced the poster's median first-page render time from 1,599.5
@@ -2934,7 +2934,7 @@ independently remained faster at medians of 1,575.5 versus 1,568 milliseconds.
 All 48 renders produced one pixel hash with no failures, and sampled peak
 working set remained 194.4 versus 194.2 MiB. All 4,159 engine tests and 484 app
 tests pass. Evidence is under
-`C:/Users/steve/kp-bench-render/softmask-bilinear-trial`.
+`C:/Users/steve/scratch/kp-bench-render/softmask-bilinear-trial`.
 
 Earlier checkpoints below document individual fixes and historical measurements.
 They do not supersede the current paired results above.
@@ -3622,7 +3622,7 @@ thirty per process, produced baseline/new medians of 227.496/224.481 and
 diagnostics. This is a small page-specific observation, not overall speed parity.
 The 74 difficult and 600 shared corpus pages all completed and matched the
 previous validated output pixel for pixel, including the complete large map.
-Evidence remains under `C:/Users/steve/kp-bench-render`: timing and test logs in
+Evidence remains under `C:/Users/steve/scratch/kp-bench-render`: timing and test logs in
 `parity-20260909-ghent/jpeg-direct*`, payload in `payload-jpeg-direct` beneath
 that directory, and corpus results in `review-20260909/jpeg-direct*`.
 The measured and published engine DLL hash is
@@ -3660,7 +3660,7 @@ gave baseline/new medians of 287.546/285.415 and 286.498/282.578 ms, a 0.7% to
 are higher than the earlier JPEG session, so cross-session comparisons are not
 valid. The standalone blend is roughly twice as fast; the much smaller measured
 page gain is the relevant rendering result and does not establish overall parity.
-Evidence under `C:/Users/steve/kp-bench-render/parity-20260909-ghent` includes
+Evidence under `C:/Users/steve/scratch/kp-bench-render/parity-20260909-ghent` includes
 `ink-blend-probe-ghent-result.txt`, `ink-vector-packed-check-results.json`,
 `ink-vector-timing.csv`, the test logs, and `payload-ink-vector`.
 Corpus evidence is in `review-20260909/ink-vector*` under the benchmark root.
@@ -3685,7 +3685,7 @@ with thirty warmups, produced baseline/new medians of 288.228/283.514 and
 288.504/286.234 ms (0.8% to 1.6% lower). All 240 hashes matched with zero
 diagnostics. Overall parity remains open.
 
-Evidence is under `C:/Users/steve/kp-bench-render`: numeric checks, timings, test
+Evidence is under `C:/Users/steve/scratch/kp-bench-render`: numeric checks, timings, test
 logs, and `payload-transparent-ink` in `parity-20260909-ghent`, and corpus output
 in `review-20260909/transparent-ink*`. The measured and published engine hash is
 `89AD727550B0CD6F12D2030D3DE20653B33D083286A5C4A33DC7F4432DBEA0D0`.
@@ -3745,7 +3745,7 @@ four processes. Current shared decoded-image caching makes later fresh sessions
 within a process nearly as fast as retained sessions on this document, without
 raising the sampled peak. This headless application-boundary result does not
 measure WPF presentation or visible scrolling. Evidence is under
-`C:/Users/steve/kp-bench-render/interactive-memory-20260929`.
+`C:/Users/steve/scratch/kp-bench-render/interactive-memory-20260929`.
 
 Continuous base rendering, continuous zoom sharpening, and secondary tiles now
 reuse sessions through exclusive task leases. Each pane retains at most one
@@ -3801,7 +3801,7 @@ PatternTextInsideText.pdf now paints its red text pattern inside the blue
 outlined glyphs. Across the 674 Broad and Shared pages, only this image changes;
 the other 673 remain pixel-identical and every output retains its dimensions.
 The published app renders all batch rows successfully. Local evidence is under
-`C:\Users\steve\kp-bench-render\review-20260909\pattern-text-*`, with the
+`C:\Users\steve\scratch\kp-bench-render\review-20260909\pattern-text-*`, with the
 payload under `parity-20260909-ghent/payload-pattern-text`.
 
 Both new pattern clipping tests pass. All 3,856 engine tests pass with test
@@ -4533,7 +4533,7 @@ US Letter fallback. Page two of `boundingBox_invalid.pdf` therefore uses its
 three targeted renders complete without diagnostics and were visually
 inspected. Validation passes with 4,139 engine tests, 431 app tests, and a
 Release application build with no warnings or errors. Evidence is retained in
-`C:/Users/steve/kp-bench-render/unsupported-recovery-20260924`.
+`C:/Users/steve/scratch/kp-bench-render/unsupported-recovery-20260924`.
 
 ### CCITT and explicit-mask recovery checkpoint (2026-09-24)
 
@@ -4557,8 +4557,8 @@ claims a 7300 by 7600 JPEG. Both renderers correctly skip that image. The first
 three engine pages are byte-identical to PDFium, so no decoder relaxation is
 warranted. Validation passes with 4,142 engine tests, 431 app tests, and a
 Release application build with no warnings or errors. Evidence is retained in
-`C:/Users/steve/kp-bench-render/ccitt-recovery-20260924` and
-`C:/Users/steve/kp-bench-render/mask-recovery-20260924`.
+`C:/Users/steve/scratch/kp-bench-render/ccitt-recovery-20260924` and
+`C:/Users/steve/scratch/kp-bench-render/mask-recovery-20260924`.
 
 ### CMYK mode 0 spot overprint and parity checkpoint (2026-10-02)
 
@@ -4572,7 +4572,7 @@ Exactly four PNGs changed, all in Altona and Ghent spot tests; the other 610
 are byte-identical. Each changed region moved closer to Poppler's overprint
 rendering. The Ghent OPM0 patches no longer show the incorrect solid X, though
 a thin X outline remains. Evidence is in
-`C:/Users/steve/kp-bench-render/cmyk-opm0-20261002`.
+`C:/Users/steve/scratch/kp-bench-render/cmyk-opm0-20261002`.
 
 An earlier matched pre-fix 512-pixel pair across 600 common pages measured
 14,252/14,202 ms for 1.8.80 and 15,063/14,667 ms for 1.9, leaving 1.9
@@ -4604,8 +4604,8 @@ established. Altona alone averaged 26.75 ms faster in those pairs. All 74 page
 hashes and statuses matched across the eight runs. The production branch
 passes 4,192 engine tests, 487 app tests, and a Release build with zero
 warnings and errors. Evidence is retained under
-`C:/Users/steve/kp-bench-render/spot-eligibility-20261002` and
-`C:/Users/steve/kp-bench-render/spot-run-74-controlled-reverse-20261002`.
+`C:/Users/steve/scratch/kp-bench-render/spot-eligibility-20261002` and
+`C:/Users/steve/scratch/kp-bench-render/spot-run-74-controlled-reverse-20261002`.
 
 The post-commit matched comparison used current 1.8.80 and 1.9 Release
 binaries. Across 600 common corpus pages at 512 pixels, 1.8 render sums were
@@ -4618,7 +4618,7 @@ not whole-app wall time or interaction. All 600 shared corpus pages and all 74
 difficult pages matched status and dimensions. Overall, 1.8 rendered 600 of
 649 corpus files, skipped 41, and failed eight malformed files; 1.9 rendered
 614, skipped 35, and failed none. Evidence is under
-`C:/Users/steve/kp-bench-render/parity-final-8b2027f-v1880-20261002`.
+`C:/Users/steve/scratch/kp-bench-render/parity-final-8b2027f-v1880-20261002`.
 
 A fresh headless comparison used the current Release binaries with one file
 worker explicitly set for 1.9 (`--parallel 1`); 1.8 renders files serially.
@@ -4634,8 +4634,8 @@ Altona Technical page 1 took 210/199 ms in 1.8 versus 1,258/1,166 ms in
 single stable percentage. An earlier attempt overlapped a background file
 search and is excluded. These are summed page render times, not application
 wall time. Scratch evidence is under
-`C:/Users/steve/kp-bench-render/parity-serial-corpus-idle-20261002` and
-`C:/Users/steve/kp-bench-render/parity-serial-difficult-idle-20261002`.
+`C:/Users/steve/scratch/kp-bench-render/parity-serial-corpus-idle-20261002` and
+`C:/Users/steve/scratch/kp-bench-render/parity-serial-difficult-idle-20261002`.
 
 An opaque process-color run trial batched spot-plate clearing after named spot
 paints. Sixteen repeated Altona pages at 2048 pixels took 6,432/6,508 ms in
@@ -4646,8 +4646,8 @@ runs, changing direction between pairs. All 16 Altona and 74 difficult PNGs
 matched their controls. The broad speed gain was not established, so the
 renderer trial was removed. A regression test now covers a process fill
 between two named spots, including its fractional edge. Scratch results are
-under `C:/Users/steve/kp-bench-render/spot-process-run-compare-20261002` and
-`C:/Users/steve/kp-bench-render/spot-process-run-difficult-20261002`.
+under `C:/Users/steve/scratch/kp-bench-render/spot-process-run-compare-20261002` and
+`C:/Users/steve/scratch/kp-bench-render/spot-process-run-difficult-20261002`.
 
 A 64 KiB lookup table reproduced the current named-spot mixing formula exactly
 on all 16 repeated Altona PNGs. At 2048 pixels, control render sums were
@@ -4655,7 +4655,7 @@ on all 16 repeated Altona PNGs. At 2048 pixels, control render sums were
 first trial render was slower in one pair and effectively tied in the other;
 the last 15 pages favored the trial by 179/36 ms. This did not establish a
 useful cold-render improvement, so the table was removed. Evidence is under
-`C:/Users/steve/kp-bench-render/spot-blend-table-compare-20261002`.
+`C:/Users/steve/scratch/kp-bench-render/spot-blend-table-compare-20261002`.
 
 A current cold trace of `42828.0001.001.pdf` page 1 at 2048 pixels took
 513 ms to render. Of the 511 ms sampled inside `RenderUncached`, stream decode
@@ -4663,7 +4663,7 @@ occupied 313 ms, including 307 ms in JBIG2 decode. Main-thread image painting
 occupied 60 ms and text handling 74 ms. These are inclusive intervals from one
 profiled run, so they are not an untraced parity result. The next focused target
 is JBIG2 symbol decoding. Trace and render CSV are under
-`C:/Users/steve/kp-bench-render/jbig2-current-cold-profile-20261002`.
+`C:/Users/steve/scratch/kp-bench-render/jbig2-current-cold-profile-20261002`.
 
 A template-0 JBIG2 trial accumulated each output byte as an integer and narrowed
 it only when stored. Fifteen focused JBIG2 tests passed, and all eight scan PNGs
@@ -4672,7 +4672,7 @@ later seven renders took 1,238/1,241 ms for control and 1,197/1,217 ms for the
 trial. At 2048 pixels they took 1,259/1,333 ms and 1,346/1,333 ms. First-render
 times overlapped at both sizes. The larger-page result did not establish a gain,
 so the code trial was removed. Scratch payloads and CSVs are under
-`C:/Users/steve/kp-bench-render/jbig2-intacc-trial-20261002`.
+`C:/Users/steve/scratch/kp-bench-render/jbig2-intacc-trial-20261002`.
 
 A separate template-0 full-byte and final-byte loop trial matched 15 focused
 tests, 14 edge-width decoder-state checks, and the target scan PNG hashes at
@@ -4680,7 +4680,7 @@ tests, 14 edge-width decoder-state checks, and the target scan PNG hashes at
 351/371 ms for the trial; warmed medians were 207/188 versus 181/201 ms.
 The paired direction changed, so the trial stayed scratch-only. An earlier
 overlapping timing attempt was excluded. Evidence is under
-`C:/Users/steve/kp-bench-render/jbig2-template-tail-20261003/`.
+`C:/Users/steve/scratch/kp-bench-render/jbig2-template-tail-20261003/`.
 
 Two exact-output Altona trials based on `635e708` remained scratch-only. A
 coverage-alpha lookup matched x3 and x4 PNGs at 512 and 2048 pixels, but
@@ -4688,8 +4688,8 @@ coverage-alpha lookup matched x3 and x4 PNGs at 512 and 2048 pixels, but
 An ink-run bulk fill matched all 64 timed x3/x4 PNGs; warmed x4 averaged
 737.5 ms before and 743.9 ms after, while warmed x3 rose from 430.8 to
 474.6 ms. Neither trial justified a renderer edit. The raw checks are under
-`C:/Users/steve/kp-bench-render/coverage-alpha-trial-20261003-635e708/`
-and `C:/Users/steve/kp-bench-render/ink-run-census-20261003-635e708/`.
+`C:/Users/steve/scratch/kp-bench-render/coverage-alpha-trial-20261003-635e708/`
+and `C:/Users/steve/scratch/kp-bench-render/ink-run-census-20261003-635e708/`.
 
 A current release-layout Altona x3 trace at 2048 pixels measured 945 and
 583 ms for first and second 1.9 renders of identical PDF bytes; a matched
@@ -4700,7 +4700,7 @@ stacks are not measured GC pauses, and fresh 1.9 run times varied. The trace
 does not support a JIT hint or a single safe renderer edit. The ordinary
 publish trace was excluded because it did not match the release layout.
 Evidence is under
-`C:/Users/steve/kp-bench-render/x3-first-phase-jit-20261003-8a3d6a7/`.
+`C:/Users/steve/scratch/kp-bench-render/x3-first-phase-jit-20261003-8a3d6a7/`.
 
 An x4 cached-area probe found identical adjacent raw color keys in 79.68% of
 within-row comparisons. Local key reuse preserved exact x3/x4 PNGs at 512
@@ -4710,8 +4710,8 @@ branch. Moving the branch into a no-inline helper kept exact output and
 improved warmed x4 from 671.00 to 632.57 ms, but x3 slowed from 400.36 to
 420.57 ms. Neither trial showed a cold x4 gain or passed the x3 regression
 gate, so both remained scratch-only. Evidence is under
-`C:/Users/steve/kp-bench-render/x4-area-adjacency-20261003-8a3d6a7/`
-and `C:/Users/steve/kp-bench-render/x4-area-adjacency-noinline-20261003-8a3d6a7/`.
+`C:/Users/steve/scratch/kp-bench-render/x4-area-adjacency-20261003-8a3d6a7/`
+and `C:/Users/steve/scratch/kp-bench-render/x4-area-adjacency-noinline-20261003-8a3d6a7/`.
 
 ### Fractional spot stroke correction (2026-10-04)
 
@@ -4741,7 +4741,7 @@ Mean render sums were 5,707.5/5,710.5 ms at 512 and 8,502/8,484 ms at
 and 289.1/290.4 MiB, respectively; first-run variation limits a memory
 claim. All 4,393 engine tests and 490 app tests pass, and the Release app
 build has no warnings or errors. Scratch comparisons are under
-`C:/Users/steve/kp-bench-render/altona-spot-stroke-fix-20261004/`. The
+`C:/Users/steve/scratch/kp-bench-render/altona-spot-stroke-fix-20261004/`. The
 2% parity target and full-page accuracy gate remain open.
 
 ### Isolated memory and Ghent 8.1 audit (2026-10-04)
@@ -4761,14 +4761,14 @@ PNG hash; the two versions produced different images. The much larger
 render-stage gap directs memory work to raster and spot-plate storage.
 Instrumentation changes timing, and these readings are not a full-batch
 parity result. Raw stages and payload hashes are under
-`C:/Users/steve/kp-bench-render/scan-memory-stage-20261004/`.
+`C:/Users/steve/scratch/kp-bench-render/scan-memory-stage-20261004/`.
 
 A GC allocation trace of Altona found three 16 MiB buffers allocated through
 spot-coverage painting. A scratch trial rented exact-size large byte buffers;
 its Altona PNG stayed identical, but paired peak memory was 189.3 MiB on both
 sides and render timing varied. The trial was not promoted. Evidence is under
-`C:/Users/steve/kp-bench-render/memory-pages-20261004/` and
-`C:/Users/steve/kp-bench-render/spot-exact-buffer-trial-20261004/`.
+`C:/Users/steve/scratch/kp-bench-render/memory-pages-20261004/` and
+`C:/Users/steve/scratch/kp-bench-render/spot-exact-buffer-trial-20261004/`.
 
 A scratch plate-occupancy probe on the same 1452 by 2048 raster found two
 named spot plates. MyRed had 625,917 nonzero pixels in 144 of 192 possible
@@ -4778,7 +4778,7 @@ hash exactly. Tile storage could avoid some empty area, but these plates
 occupy most tiles, and the unchanged process plate also consumes memory.
 This probe does not establish a speed or peak-memory gain. Its source,
 output, and counts are under
-`C:/Users/steve/kp-bench-render/scan-memory-stage-20261004/`.
+`C:/Users/steve/scratch/kp-bench-render/scan-memory-stage-20261004/`.
 The same lossless probe counted 132 and 204 distinct nonzero ink values in
 Altona's two plates. Four Ghent spot pages included plates with 276, 325,
 324, 382, and 383 values, above an 8-bit index. Each instrumented Ghent
@@ -4793,13 +4793,13 @@ spot plates became active. Of 1,411,449 eligible opaque full-coverage calls,
 non-overprint subset kept the 2048-pixel PNG identical, but two balanced
 Altona pairs averaged 1,224 ms versus 1,194.5 ms for the control, with peak
 memory at 188.9 versus 189.1 MiB. The slower shortcut was not promoted.
-Evidence is under `C:/Users/steve/kp-bench-render/empty-spot-fast-trial-20261004/`.
+Evidence is under `C:/Users/steve/scratch/kp-bench-render/empty-spot-fast-trial-20261004/`.
 
 At 2048 by 1137 pixels, the current GWG081 Patch render visibly has both
 turtle checks and all gradient checks without the failure X. Poppler with
 overprint enabled shows the same check shapes. The colors differ, so absolute
 color fidelity remains open. The paired images are under
-`C:/Users/steve/kp-bench-render/ghent081-2048-audit-20261004/`.
+`C:/Users/steve/scratch/kp-bench-render/ghent081-2048-audit-20261004/`.
 The current 1.8.80 build also rendered this page at the same dimensions but
 omitted the checks. Against that Poppler image, mean absolute RGB error was
 10.169 for 1.9 and 7.507 for 1.8 across the full page. On the left duotone
@@ -4813,7 +4813,7 @@ the final 1.9 RGB values exactly or within one channel level. This supports
 the final profile conversion at those pixels; source DeviceN ink formation
 and the renderer reference disagreement remain open. Probe output and an
 exact-matching page PNG are under
-`C:/Users/steve/kp-bench-render/ghent-color-ink-probe-20261004/`.
+`C:/Users/steve/scratch/kp-bench-render/ghent-color-ink-probe-20261004/`.
 An exact-size, lossless Poppler CMYK overprint render provides a comparison
 before display conversion. Mean absolute CMYK error against 1.9's native ink
 was 1.940 in the duotone image and 0.990 in the colorized image. Converting
@@ -4836,7 +4836,7 @@ combination near half tint. PDF Reference 1.7 section 4.5.5 permits NChannel
 consumers to use custom blending with the attributes dictionary, so the
 Poppler difference alone does not establish which preview is correct.
 The decoded PDF objects used for this check are under
-`C:/Users/steve/kp-bench-render/ghent-nchannel-audit-20261004/`.
+`C:/Users/steve/scratch/kp-bench-render/ghent-nchannel-audit-20261004/`.
 
 ### Direct CMYK ink sampling checkpoint (2026-10-04)
 
@@ -4854,7 +4854,7 @@ hashes and 35 skip statuses. All 4,393 engine tests and 490 app tests pass,
 and the Release app build has zero warnings or errors. The current 1.8 speed,
 memory, accuracy, and visible-interaction gates remain open. Profile, paired
 measurements, and image checks are under
-`C:/Users/steve/kp-bench-render/groundwater-row-cache-trial-20261004/`.
+`C:/Users/steve/scratch/kp-bench-render/groundwater-row-cache-trial-20261004/`.
 
 A fresh 1.8.80 versus updated 1.9 comparison on the same 74 pages used
 1.8/1.9/1.9/1.8 order and one file worker. At 512 pixels, mean render sums
@@ -4887,7 +4887,7 @@ case. All 614 conformance PNGs and 35 skips matched at 512 pixels. The 195
 focused ICC tests, all 4,393 engine tests, all 490 app tests, and the Release
 app build pass; the build reports zero warnings or errors. Cross-version
 rendering, speed, memory, and interaction parity remain open. Evidence is
-under `C:/Users/steve/kp-bench-render/icc-lut-compact-trial-20261004/`.
+under `C:/Users/steve/scratch/kp-bench-render/icc-lut-compact-trial-20261004/`.
 
 The post-change 1.8.80 comparison used 1.8/1.9/1.9/1.8 order and one file
 worker. On the 74 difficult pages, 1.8/1.9 mean render sums were
@@ -4934,8 +4934,8 @@ and 271.835 MiB, versus 415.25 ms and 246.182 MiB for 1.8.80. The native
 scan still misses the 2% speed and memory requirements by 19.63% and 10.42%.
 These single-page results do not replace whole-corpus or visible-interaction
 validation. Inputs, payload hashes, PNGs, scripts, and paired measurements
-are under `C:/Users/steve/kp-bench-render/binary-grid-trial-20261004/` and
-`C:/Users/steve/kp-bench-render/binary-grid-product-20261004/`.
+are under `C:/Users/steve/scratch/kp-bench-render/binary-grid-trial-20261004/` and
+`C:/Users/steve/scratch/kp-bench-render/binary-grid-product-20261004/`.
 
 Eight alternating fresh-process native scan runs traced open, render, and
 PNG encoding stages in scratch instrumented app payloads, four runs per
@@ -4951,7 +4951,7 @@ document opening as a major memory target, but do not establish that
 removing the source array alone would close the peak gap. Instrumentation
 changes timing and these runs do not replace the earlier parity benchmark.
 Payload identities, raw stage readings, and PNG hashes are under
-`C:/Users/steve/kp-bench-render/scan-memory-stage-20261004/`.
+`C:/Users/steve/scratch/kp-bench-render/scan-memory-stage-20261004/`.
 
 A sampled native-scan trace located sustained work in JBIG2 generic-region
 decoding. A scratch arithmetic-context rewrite kept the scan PNG identical
@@ -4963,7 +4963,7 @@ trial render means were 344.625 and 343.125 ms, and sampled peak working sets
 were 268.162 and 268.009 MiB. All 16 PNG hashes matched. The 0.44% render
 change did not justify the decoder rewrite, which remains scratch-only.
 Scripts, source snapshots, payload hashes, and results are under
-`C:/Users/steve/kp-bench-render/scan-memory-stage-20261004/`.
+`C:/Users/steve/scratch/kp-bench-render/scan-memory-stage-20261004/`.
 
 ### Difficult-page memory attribution (2026-10-04)
 
@@ -4982,7 +4982,7 @@ identifies page 1 as a major cost before later pages add memory. A sampled
 first-page trace includes startup work and does not yet isolate a safe buffer
 or rendering change. Per-file logs, payload hashes, page-prefix runs, and
 that trace are under
-`C:/Users/steve/kp-bench-render/binary-grid-trial-20261004/`.
+`C:/Users/steve/scratch/kp-bench-render/binary-grid-trial-20261004/`.
 
 A repeated 20-copy page-1 CPU trace places 452.5 ms of sampled time in
 rectangular-array creation under patch mesh subdivision during the retained
@@ -4991,9 +4991,9 @@ kept all 20 PNG hashes identical. In eight alternating fresh-process runs,
 however, mean 20-page render sums rose from 3,100.75 to 3,152 ms and sampled
 peak working set rose from 157.72 to 162.25 MiB. The array trial was not
 retained. The trace is under
-`C:/Users/steve/kp-bench-render/binary-grid-trial-20261004/`; the trial source,
+`C:/Users/steve/scratch/kp-bench-render/binary-grid-trial-20261004/`; the trial source,
 payload hashes, and paired results are under
-`C:/Users/steve/kp-bench-render/patch-grid-trial-20261004/`.
+`C:/Users/steve/scratch/kp-bench-render/patch-grid-trial-20261004/`.
 
 A separate scratch trial precomputed the five Bernstein weight sets once per
 shading instead of rebuilding them for every patch sample. All 20 repeated
@@ -5001,7 +5001,7 @@ Ghent page-1 PNG hashes matched the control. Eight alternating fresh-process
 runs averaged 3,042.75 ms for the control and 3,147.25 ms for the trial across
 20 pages, while sampled peak working set averaged 157.99 and 158.96 MiB.
 The trial was not retained. Source, payload hashes, and paired runs are under
-`C:/Users/steve/kp-bench-render/patch-weights-trial-20261004/`.
+`C:/Users/steve/scratch/kp-bench-render/patch-weights-trial-20261004/`.
 
 A third scratch trial reused patch grids, sampled values, and triangle
 components across sequential patches. All 20 Ghent page-1 PNG hashes stayed
@@ -5010,7 +5010,7 @@ the control and 3,094 ms for the trial across 20 pages, while sampled peak
 working set averaged 157.03 and 155.13 MiB. The small memory saving did
 not close Ghent's gap, and rendering was slightly slower overall, so the
 trial was not retained. Source, hashes, and measurements are under
-`C:/Users/steve/kp-bench-render/patch-buffers-trial-20261004/`.
+`C:/Users/steve/scratch/kp-bench-render/patch-buffers-trial-20261004/`.
 
 ### Difficult-page reference screening (2026-10-04)
 
@@ -5036,7 +5036,7 @@ retained PNG hashes for these two pages and GWG182. This screening narrows
 the reference disagreements but does not prove absolute color, fine-detail,
 or full-corpus fidelity. The source-matched PNGs, exact-size references,
 scores, and focused output checks are under
-`C:/Users/steve/kp-bench-render/scan-memory-stage-20261004/`.
+`C:/Users/steve/scratch/kp-bench-render/scan-memory-stage-20261004/`.
 
 ### Font-map decoding allocation checkpoint (2026-10-05)
 
@@ -5055,7 +5055,7 @@ The engine suite passed 4,390 of 4,394 tests. The four spot-image failures
 also reproduced with the unchanged engine in an isolated test payload.
 Parity and rendering-quality gates remain open. Scratch measurements,
 trial sources, and baseline test payload are under
-`C:/Users/steve/kp-bench-render/triangle-spans-20261005/`.
+`C:/Users/steve/scratch/kp-bench-render/triangle-spans-20261005/`.
 
 The four spot-image failures were subsequently traced to the once-per-image
 single-colorant metadata query selecting an unsupported span overload.
@@ -5083,4 +5083,4 @@ control check differed by -0.96% in time after warmups and eight balanced runs.
 The shared-pool, split-pool, integer-composition, and prepared-row experiments
 were not retained. Parity with 1.8 and full rendering-quality gates remain open.
 Scratch sources, hashes, and measurements are under
-`C:/Users/steve/kp-bench-render/decoder-capacity-20261005/`.
+`C:/Users/steve/scratch/kp-bench-render/decoder-capacity-20261005/`.

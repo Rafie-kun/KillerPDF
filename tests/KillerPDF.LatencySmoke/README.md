@@ -17,7 +17,7 @@ dotnet run --project tests/KillerPDF.LatencySmoke/KillerPDF.LatencySmoke.csproj 
   --version 1.8.80=C:\path\to\ref\KillerPDF.exe `
   --version 1.9=C:\path\to\candidate\KillerPDF.exe `
   --doc C:\corpus\article.pdf --doc C:\corpus\scan.pdf `
-  --runs 5 --warmup 1 --out $env:USERPROFILE\kp-bench-render\latency-<date>
+  --runs 5 --warmup 1 --out $env:USERPROFILE\scratch\kp-bench-render\latency-<date>
 ```
 
 Each launch gets its own settings folder under the output directory through

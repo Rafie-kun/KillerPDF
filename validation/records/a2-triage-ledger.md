@@ -1,6 +1,6 @@
 # A2 three-oracle triage ledger
 
-Started 2026-10-10 against 1.9 at 096a2cf plus 2c76ca2 and 6ab5428 (both pixel-neutral), v1.8.80 PDFium payload and poppler pdftoppm 26.09.0. Method and raw results: `C:/Users/steve/kp-bench-render/release-19-triage/` (`triage.py`, per-set `compare.csv`, `outliers.md`, `triptychs/`). Page 1 of every input. Threshold: 4x box-downsampled, more than 2% of cells with any channel delta over 32. "Outlier" means 1.9 disagrees with both oracles while they agree; "all-disagree" means all three differ and the vote cannot decide.
+Started 2026-10-10 against 1.9 at 096a2cf plus 2c76ca2 and 6ab5428 (both pixel-neutral), v1.8.80 PDFium payload and poppler pdftoppm 26.09.0. Method and raw results: `C:/Users/steve/scratch/kp-bench-render/release-19-triage/` (`triage.py`, per-set `compare.csv`, `outliers.md`, `triptychs/`). Page 1 of every input. Threshold: 4x box-downsampled, more than 2% of cells with any channel delta over 32. "Outlier" means 1.9 disagrees with both oracles while they agree; "all-disagree" means all three differ and the vote cannot decide.
 
 ## Counts
 

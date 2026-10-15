@@ -52,7 +52,7 @@ Damaged-file results match: both builds produced 78 skips and the same two repor
 - The damaged-file gate ran after the timed passes, with the two builds alternating per file and a 30-second timeout for each run. It covered all 80 files, 160 runs in total.
 - No cache flushing. Memory was not measured. Host load was not certified idle: CPU samples around the resumed work ranged from 42% to 80%.
 - Input identity: file counts and byte totals match the recorded corpus identity for all four collections. After the series every input was rehashed against the published manifests: 16,696 of 16,696 regression entries, 552 of 552 standards entries (97 local standards files are not in the manifest), and 80 of 80 damaged-file entries matched. The private stress set has no published manifest and was verified by file count and byte total.
-- Full per-file logs remain outside the application repository at `C:\Users\steve\kp-bench-render\release-1.8.90-vs-1.9-alternating-20261013`. The resumed work is in its `resume-20261013` folder.
+- Full per-file logs remain outside the application repository at `C:\Users\steve\scratch\kp-bench-render\release-1.8.90-vs-1.9-alternating-20261013`. The resumed work is in its `resume-20261013` folder.
 
 The committed [run data](benchmark-runs.csv) and [summary](benchmark-summary.csv) preserve the measurements for both builds. The 1.8.90 record is [KillerPDF 1.8.90](../1.8.90/CORPUS.md).
 

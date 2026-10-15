@@ -38,7 +38,7 @@ All timing changes are below the 10% investigation threshold. Every path, status
 - Runner: `validation/Benchmark-Versions.ps1`, using the existing local collections with downloads disabled.
 - One warmup and five measured passes per version and normal collection, with run order alternated.
 - All 80 damaged inputs tested individually with a 30-second timeout.
-- Full per-file logs remain outside the application repository at `C:\Users\steve\kp-bench-render\release-1.8.80-vs-1.8.71-alternating-20261004`.
+- Full per-file logs remain outside the application repository at `C:\Users\steve\scratch\kp-bench-render\release-1.8.80-vs-1.8.71-alternating-20261004`.
 
 The committed [run data](benchmark-runs.csv) and [summary](benchmark-summary.csv) preserve the release-level measurements. The previous published corpus record is [KillerPDF 1.8.70](../1.8.70/CORPUS.md).
 
