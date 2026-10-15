@@ -1335,6 +1335,15 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Repair_Unrecoverable" xml:space="preserve">Falha no reparo - o arquivo está danificado demais para ser recuperado.&#10;&#10;Tente abrir o original em outro aplicativo (Adobe Acrobat ou um navegador), que pode ter opções adicionais de recuperação.</sys:String>
     <sys:String x:Key="Str_KS_Enabled">Ativar atalhos de teclado</sys:String>
     <sys:String x:Key="Str_KS_Toggle">Alternar atalhos de teclado</sys:String>
+    <sys:String x:Key="Str_KS_Customize">Personalizar atalhos...</sys:String>
+    <sys:String x:Key="Str_KS_CustomizeTitle">Personalizar atalhos</sys:String>
+    <sys:String x:Key="Str_KS_CustomizeHint">Clique em uma tecla para alterá-la e pressione a nova. Esc cancela a alteração.</sys:String>
+    <sys:String x:Key="Str_KS_PressKey">Pressione uma tecla...</sys:String>
+    <sys:String x:Key="Str_KS_KeyNotAllowed">Os atalhos podem usar letras, números, F1 a F12, Delete e Insert, sozinhos ou com Ctrl, Ctrl+Shift, Shift ou Alt.</sys:String>
+    <sys:String x:Key="Str_KS_KeyTaken">Essa tecla já é usada por: {0}</sys:String>
+    <sys:String x:Key="Str_KS_Reset">Redefinir</sys:String>
+    <sys:String x:Key="Str_KS_ResetTT">Restaurar a tecla original</sys:String>
+    <sys:String x:Key="Str_KS_ResetAll">Redefinir tudo</sys:String>
     <sys:String x:Key="Str_KS_ToggleTip">Ativa ou desativa todos os atalhos do aplicativo. Ctrl+Shift+K sempre funciona.</sys:String>
     <sys:String x:Key="Str_KS_EnabledStatus">Atalhos de teclado ativados</sys:String>
     <sys:String x:Key="Str_KS_DisabledStatus">Atalhos de teclado desativados. Pressione Ctrl+Shift+K para ativá-los.</sys:String>

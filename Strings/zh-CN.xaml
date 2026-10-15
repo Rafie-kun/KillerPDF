@@ -1319,6 +1319,15 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Repair_Unrecoverable" xml:space="preserve">修复失败 - 文件损坏过于严重，无法恢复。&#10;&#10;请尝试使用其他应用程序 (Adobe Acrobat 或浏览器) 打开原始文件，这些应用程序可能提供其他恢复选项。</sys:String>
     <sys:String x:Key="Str_KS_Enabled">启用键盘快速键</sys:String>
     <sys:String x:Key="Str_KS_Toggle">启用或禁用键盘快速键</sys:String>
+    <sys:String x:Key="Str_KS_Customize">自定义快捷键...</sys:String>
+    <sys:String x:Key="Str_KS_CustomizeTitle">自定义快捷键</sys:String>
+    <sys:String x:Key="Str_KS_CustomizeHint">点击要更改的按键，然后按下新的按键。按 Esc 取消更改。</sys:String>
+    <sys:String x:Key="Str_KS_PressKey">请按一个键...</sys:String>
+    <sys:String x:Key="Str_KS_KeyNotAllowed">快捷键可以使用字母、数字、F1 到 F12、Delete 和 Insert，可单独使用或与 Ctrl、Ctrl+Shift、Shift 或 Alt 组合。</sys:String>
+    <sys:String x:Key="Str_KS_KeyTaken">该按键已被使用: {0}</sys:String>
+    <sys:String x:Key="Str_KS_Reset">重置</sys:String>
+    <sys:String x:Key="Str_KS_ResetTT">恢复原来的按键</sys:String>
+    <sys:String x:Key="Str_KS_ResetAll">全部重置</sys:String>
     <sys:String x:Key="Str_KS_ToggleTip">启用或禁用应用的所有快速键。Ctrl+Shift+K 始终有效。</sys:String>
     <sys:String x:Key="Str_KS_EnabledStatus">键盘快速键已启用</sys:String>
     <sys:String x:Key="Str_KS_DisabledStatus">键盘快速键已禁用。按 Ctrl+Shift+K 可启用。</sys:String>

@@ -1315,6 +1315,15 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Repair_Unrecoverable" xml:space="preserve">Onarım başarısız oldu - dosya kurtarılamayacak kadar hasarlı.&#10;&#10;Ek kurtarma seçenekleri sunabilecek başka bir uygulamada (Adobe Acrobat veya tarayıcı) özgün dosyayı açmayı deneyin.</sys:String>
     <sys:String x:Key="Str_KS_Enabled">Klavye kısayollarını etkinleştir</sys:String>
     <sys:String x:Key="Str_KS_Toggle">Klavye kısayollarını aç veya kapat</sys:String>
+    <sys:String x:Key="Str_KS_Customize">Kısayolları özelleştir...</sys:String>
+    <sys:String x:Key="Str_KS_CustomizeTitle">Kısayolları özelleştir</sys:String>
+    <sys:String x:Key="Str_KS_CustomizeHint">Değiştirmek için bir tuşa tıklayın, ardından yenisine basın. Esc değişikliği iptal eder.</sys:String>
+    <sys:String x:Key="Str_KS_PressKey">Bir tuşa basın...</sys:String>
+    <sys:String x:Key="Str_KS_KeyNotAllowed">Kısayollar harfleri, rakamları, F1 ile F12 arasındaki tuşları, Delete ve Insert'ü tek başına ya da Ctrl, Ctrl+Shift, Shift veya Alt ile kullanabilir.</sys:String>
+    <sys:String x:Key="Str_KS_KeyTaken">Bu tuşu zaten kullanan: {0}</sys:String>
+    <sys:String x:Key="Str_KS_Reset">Sıfırla</sys:String>
+    <sys:String x:Key="Str_KS_ResetTT">Özgün tuşu geri yükle</sys:String>
+    <sys:String x:Key="Str_KS_ResetAll">Tümünü sıfırla</sys:String>
     <sys:String x:Key="Str_KS_ToggleTip">Uygulamanın tüm kısayollarını açın veya kapatın. Ctrl+Shift+K her zaman çalışır.</sys:String>
     <sys:String x:Key="Str_KS_EnabledStatus">Klavye kısayolları etkin</sys:String>
     <sys:String x:Key="Str_KS_DisabledStatus">Klavye kısayolları devre dışı. Etkinleştirmek için Ctrl+Shift+K tuşlarına basın.</sys:String>

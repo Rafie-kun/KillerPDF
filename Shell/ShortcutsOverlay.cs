@@ -20,8 +20,9 @@ namespace KillerPDF
     // ============================================================
     public partial class MainWindow
     {
-        // One row: the literal key text and the resource key for its translated description.
-        private readonly record struct KsRow(string Keys, string LabelKey);
+        // One row: the literal key text, the resource key for its translated description, and the
+        // caps it binds, so a row whose keys the user moved (#190) can show them.
+        private readonly record struct KsRow(string Keys, string LabelKey, KsCap[] Caps);
 
         // A titled group of rows. TitleKey is a Str_* resource key rendered as the subheader,
         // colored by the section's KsCat* theme brush - the family neon set the keyboard map
@@ -41,11 +42,8 @@ namespace KillerPDF
                 {
                     TitleKey = g.TitleKey,
                     Cat = g.Cat,
-                    Rows = [.. ShortcutTable.KsAll.Where(b => b.Cat == g.Cat).Select(b => new KsRow(b.Keys, b.LabelKey))],
+                    Rows = [.. ShortcutTable.KsAll.Where(b => b.Cat == g.Cat).Select(b => new KsRow(b.Keys, b.LabelKey, b.Caps))],
                 })];
-
-        private static readonly KsSection[] KsLeftColumn  = KsColumn(right: false);
-        private static readonly KsSection[] KsRightColumn = KsColumn(right: true);
 
         // #153: the zoom keys are spelled differently per keyboard layout - "=" is a plain keypress
         // on US but needs Shift on German, where "+" is the unshifted one instead. The bindings
@@ -106,11 +104,13 @@ namespace KillerPDF
         {
             KeyboardShortcutsCheck.IsChecked = KeyboardShortcutsEnabled;
             FillKeyInlines(KeyboardShortcutsChordLabel, " (%ctrl%+%shift%+K)");
-            BuildShortcutsColumn(ShortcutLeftColumn,  KsLeftColumn);
-            BuildShortcutsColumn(ShortcutRightColumn, KsRightColumn);
+            KbMap = ShortcutTable.BuildMap(ShortcutRemaps.Effective);
+            BuildShortcutsColumn(ShortcutLeftColumn,  KsColumn(right: false));
+            BuildShortcutsColumn(ShortcutRightColumn, KsColumn(right: true));
+            AddShortcutCustomizeButton();
         }
 
-        private static void BuildShortcutsColumn(StackPanel host, KsSection[] sections)
+        private void BuildShortcutsColumn(StackPanel host, KsSection[] sections)
         {
             host.Children.Clear();
             // The key column sizes to its widest entry instead of a hardcoded width, and every row
@@ -158,7 +158,7 @@ namespace KillerPDF
                         Margin     = new Thickness(0, 0, 12, 0),
                         VerticalAlignment = VerticalAlignment.Center,
                     };
-                    FillKeyInlines(keys, row.Keys);
+                    FillKeyInlines(keys, ShortcutRowKeys(row));
                     keys.SetResourceReference(TextBlock.ForegroundProperty, "MutedTextBrush");
                     Grid.SetColumn(keys, 0);
                     rowGrid.Children.Add(keys);

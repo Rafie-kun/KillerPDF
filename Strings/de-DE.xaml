@@ -1321,6 +1321,15 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Repair_Unrecoverable" xml:space="preserve">Reparatur fehlgeschlagen - die Datei ist zu stark beschädigt.&#10;&#10;Versuchen Sie, das Original in einer anderen Anwendung (Adobe Acrobat oder einem Browser) zu öffnen, die möglicherweise weitere Wiederherstellungsoptionen bietet.</sys:String>
     <sys:String x:Key="Str_KS_Enabled">Tastenkürzel aktivieren</sys:String>
     <sys:String x:Key="Str_KS_Toggle">Tastenkürzel ein- oder ausschalten</sys:String>
+    <sys:String x:Key="Str_KS_Customize">Tastenkürzel anpassen...</sys:String>
+    <sys:String x:Key="Str_KS_CustomizeTitle">Tastenkürzel anpassen</sys:String>
+    <sys:String x:Key="Str_KS_CustomizeHint">Klicken Sie auf eine Taste, um sie zu ändern, und drücken Sie dann die neue. Esc bricht die Änderung ab.</sys:String>
+    <sys:String x:Key="Str_KS_PressKey">Taste drücken...</sys:String>
+    <sys:String x:Key="Str_KS_KeyNotAllowed">Tastenkürzel können Buchstaben, Ziffern, F1 bis F12, Entf und Einfg verwenden, allein oder mit Strg, Strg+Umschalt, Umschalt oder Alt.</sys:String>
+    <sys:String x:Key="Str_KS_KeyTaken">Diese Taste wird bereits verwendet von: {0}</sys:String>
+    <sys:String x:Key="Str_KS_Reset">Zurücksetzen</sys:String>
+    <sys:String x:Key="Str_KS_ResetTT">Ursprüngliche Taste wiederherstellen</sys:String>
+    <sys:String x:Key="Str_KS_ResetAll">Alle zurücksetzen</sys:String>
     <sys:String x:Key="Str_KS_ToggleTip">Alle Tastenkürzel der App ein- oder ausschalten. Ctrl+Shift+K funktioniert immer.</sys:String>
     <sys:String x:Key="Str_KS_EnabledStatus">Tastenkürzel aktiviert</sys:String>
     <sys:String x:Key="Str_KS_DisabledStatus">Tastenkürzel deaktiviert. Zum Aktivieren Ctrl+Shift+K drücken.</sys:String>

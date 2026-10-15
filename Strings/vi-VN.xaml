@@ -1335,6 +1335,15 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Repair_Unrecoverable" xml:space="preserve">Sửa chữa thất bại - tệp bị hỏng quá nặng và không thể khôi phục.&#10;&#10;Hãy thử mở tệp gốc bằng ứng dụng khác (Adobe Acrobat hoặc trình duyệt), các ứng dụng này có thể có thêm các tùy chọn khôi phục.</sys:String>
     <sys:String x:Key="Str_KS_Enabled">Bật phím tắt (&amp;E)</sys:String>
     <sys:String x:Key="Str_KS_Toggle">Bật/tắt phím tắt</sys:String>
+    <sys:String x:Key="Str_KS_Customize">Tùy chỉnh phím tắt...</sys:String>
+    <sys:String x:Key="Str_KS_CustomizeTitle">Tùy chỉnh phím tắt</sys:String>
+    <sys:String x:Key="Str_KS_CustomizeHint">Bấm vào một phím để đổi, rồi nhấn phím mới. Esc hủy thay đổi.</sys:String>
+    <sys:String x:Key="Str_KS_PressKey">Nhấn một phím...</sys:String>
+    <sys:String x:Key="Str_KS_KeyNotAllowed">Phím tắt có thể dùng chữ, số, F1 đến F12, Delete và Insert, riêng lẻ hoặc cùng Ctrl, Ctrl+Shift, Shift hay Alt.</sys:String>
+    <sys:String x:Key="Str_KS_KeyTaken">Phím này đã được dùng bởi: {0}</sys:String>
+    <sys:String x:Key="Str_KS_Reset">Đặt lại</sys:String>
+    <sys:String x:Key="Str_KS_ResetTT">Khôi phục phím gốc</sys:String>
+    <sys:String x:Key="Str_KS_ResetAll">Đặt lại tất cả</sys:String>
     <sys:String x:Key="Str_KS_ToggleTip">Bật hoặc tắt tất cả phím tắt của ứng dụng. Phím Ctrl+Shift+K luôn hoạt động.</sys:String>
     <sys:String x:Key="Str_KS_EnabledStatus">Đã bật phím tắt</sys:String>
     <sys:String x:Key="Str_KS_DisabledStatus">Đã tắt phím tắt. Nhấn Ctrl+Shift+K để bật lại.</sys:String>

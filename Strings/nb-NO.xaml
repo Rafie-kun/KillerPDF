@@ -1335,6 +1335,15 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Repair_Unrecoverable" xml:space="preserve">Reparasjonen mislyktes: filen er for alvorlig skadet til å kunne gjenopprettes.&#10;&#10;Prøv å åpne originalen i et annet program (Adobe Acrobat eller en nettleser), som kan ha flere gjenopprettingsvalg.</sys:String>
     <sys:String x:Key="Str_KS_Enabled">Slå på hurtigtaster</sys:String>
     <sys:String x:Key="Str_KS_Toggle">Slå hurtigtaster av eller på</sys:String>
+    <sys:String x:Key="Str_KS_Customize">Tilpass hurtigtaster...</sys:String>
+    <sys:String x:Key="Str_KS_CustomizeTitle">Tilpass hurtigtaster</sys:String>
+    <sys:String x:Key="Str_KS_CustomizeHint">Klikk på en tast for å endre den, og trykk deretter på den nye. Esc avbryter endringen.</sys:String>
+    <sys:String x:Key="Str_KS_PressKey">Trykk på en tast...</sys:String>
+    <sys:String x:Key="Str_KS_KeyNotAllowed">Hurtigtaster kan bruke bokstaver, tall, F1 til F12, Delete og Insert, alene eller med Ctrl, Ctrl+Shift, Shift eller Alt.</sys:String>
+    <sys:String x:Key="Str_KS_KeyTaken">Den tasten brukes allerede av: {0}</sys:String>
+    <sys:String x:Key="Str_KS_Reset">Tilbakestill</sys:String>
+    <sys:String x:Key="Str_KS_ResetTT">Gjenopprett den opprinnelige tasten</sys:String>
+    <sys:String x:Key="Str_KS_ResetAll">Tilbakestill alle</sys:String>
     <sys:String x:Key="Str_KS_ToggleTip">Slå alle apphurtigtaster på eller av. Ctrl+Shift+K fungerer alltid.</sys:String>
     <sys:String x:Key="Str_KS_EnabledStatus">Hurtigtaster er slått på</sys:String>
     <sys:String x:Key="Str_KS_DisabledStatus">Hurtigtaster er slått av. Trykk Ctrl+Shift+K for å slå dem på.</sys:String>

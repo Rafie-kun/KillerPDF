@@ -1335,6 +1335,15 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Repair_Unrecoverable" xml:space="preserve">修復に失敗しました - ファイルの損傷が激しく、復元できません。&#10;&#10;追加の復元機能がある別のアプリケーション (Adobe Acrobat またはブラウザー) で元のファイルを開いてみてください。</sys:String>
     <sys:String x:Key="Str_KS_Enabled">キーボードショートカットを有効にする</sys:String>
     <sys:String x:Key="Str_KS_Toggle">キーボードショートカットの有効・無効を切り替える</sys:String>
+    <sys:String x:Key="Str_KS_Customize">ショートカットのカスタマイズ...</sys:String>
+    <sys:String x:Key="Str_KS_CustomizeTitle">ショートカットのカスタマイズ</sys:String>
+    <sys:String x:Key="Str_KS_CustomizeHint">変更するキーをクリックし、新しいキーを押します。Esc で変更を取り消します。</sys:String>
+    <sys:String x:Key="Str_KS_PressKey">キーを押してください...</sys:String>
+    <sys:String x:Key="Str_KS_KeyNotAllowed">ショートカットには文字、数字、F1 から F12、Delete、Insert を単独で、または Ctrl、Ctrl+Shift、Shift、Alt と組み合わせて使えます。</sys:String>
+    <sys:String x:Key="Str_KS_KeyTaken">このキーは既に使用されています: {0}</sys:String>
+    <sys:String x:Key="Str_KS_Reset">リセット</sys:String>
+    <sys:String x:Key="Str_KS_ResetTT">元のキーに戻す</sys:String>
+    <sys:String x:Key="Str_KS_ResetAll">すべてリセット</sys:String>
     <sys:String x:Key="Str_KS_ToggleTip">アプリのすべてのショートカットの有効・無効を切り替えます。Ctrl+Shift+K は常に使えます。</sys:String>
     <sys:String x:Key="Str_KS_EnabledStatus">キーボードショートカットは有効です</sys:String>
     <sys:String x:Key="Str_KS_DisabledStatus">キーボードショートカットは無効です。Ctrl+Shift+K を押すと有効になります。</sys:String>

@@ -1334,6 +1334,15 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Repair_Unrecoverable" xml:space="preserve">Жөндеу сәтсіз аяқталды - файл қалпына келтіруге келмейтіндей қатты зақымдалған.&#10;&#10;Түпнұсқаны қосымша қалпына келтіру мүмкіндіктері бар басқа қолданбада (Adobe Acrobat немесе браузерде) ашып көріңіз.</sys:String>
     <sys:String x:Key="Str_KS_Enabled">Пернелер тіркесімін қосу</sys:String>
     <sys:String x:Key="Str_KS_Toggle">Пернелер тіркесімін қосу немесе өшіру</sys:String>
+    <sys:String x:Key="Str_KS_Customize">Пернелер тіркесімін баптау...</sys:String>
+    <sys:String x:Key="Str_KS_CustomizeTitle">Пернелер тіркесімін баптау</sys:String>
+    <sys:String x:Key="Str_KS_CustomizeHint">Өзгерту үшін пернені басыңыз, содан кейін жаңасын басыңыз. Esc өзгерісті болдырмайды.</sys:String>
+    <sys:String x:Key="Str_KS_PressKey">Пернені басыңыз...</sys:String>
+    <sys:String x:Key="Str_KS_KeyNotAllowed">Тіркесімдер әріптерді, сандарды, F1 мен F12 аралығындағы пернелерді, Delete және Insert пернелерін жалғыз немесе Ctrl, Ctrl+Shift, Shift не Alt пернесімен пайдалана алады.</sys:String>
+    <sys:String x:Key="Str_KS_KeyTaken">Бұл пернені қолданып тұр: {0}</sys:String>
+    <sys:String x:Key="Str_KS_Reset">Қалпына келтіру</sys:String>
+    <sys:String x:Key="Str_KS_ResetTT">Бастапқы пернені қайтару</sys:String>
+    <sys:String x:Key="Str_KS_ResetAll">Барлығын қалпына келтіру</sys:String>
     <sys:String x:Key="Str_KS_ToggleTip">Қолданбадағы барлық пернелер тіркесімін қосу немесе өшіру. Ctrl+Shift+K әрқашан жұмыс істейді.</sys:String>
     <sys:String x:Key="Str_KS_EnabledStatus">Пернелер тіркесімі қосулы</sys:String>
     <sys:String x:Key="Str_KS_DisabledStatus">Пернелер тіркесімі өшірулі. Қосу үшін Ctrl+Shift+K басыңыз.</sys:String>

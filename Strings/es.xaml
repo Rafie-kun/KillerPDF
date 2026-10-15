@@ -1315,6 +1315,15 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Repair_Unrecoverable" xml:space="preserve">La reparación falló - el archivo está demasiado dañado para recuperarlo.&#10;&#10;Intente abrir el original en otra aplicación (Adobe Acrobat o un navegador), que puede ofrecer opciones adicionales de recuperación.</sys:String>
     <sys:String x:Key="Str_KS_Enabled">Activar atajos de teclado</sys:String>
     <sys:String x:Key="Str_KS_Toggle">Activar o desactivar atajos de teclado</sys:String>
+    <sys:String x:Key="Str_KS_Customize">Personalizar atajos...</sys:String>
+    <sys:String x:Key="Str_KS_CustomizeTitle">Personalizar atajos</sys:String>
+    <sys:String x:Key="Str_KS_CustomizeHint">Haz clic en una tecla para cambiarla y pulsa la nueva. Esc cancela el cambio.</sys:String>
+    <sys:String x:Key="Str_KS_PressKey">Pulsa una tecla...</sys:String>
+    <sys:String x:Key="Str_KS_KeyNotAllowed">Los atajos pueden usar letras, números, F1 a F12, Supr e Insert, solos o con Ctrl, Ctrl+Mayús, Mayús o Alt.</sys:String>
+    <sys:String x:Key="Str_KS_KeyTaken">Esa tecla ya la usa: {0}</sys:String>
+    <sys:String x:Key="Str_KS_Reset">Restablecer</sys:String>
+    <sys:String x:Key="Str_KS_ResetTT">Restaurar la tecla original</sys:String>
+    <sys:String x:Key="Str_KS_ResetAll">Restablecer todo</sys:String>
     <sys:String x:Key="Str_KS_ToggleTip">Activa o desactiva todos los atajos de la aplicación. Ctrl+Shift+K siempre funciona.</sys:String>
     <sys:String x:Key="Str_KS_EnabledStatus">Atajos de teclado activados</sys:String>
     <sys:String x:Key="Str_KS_DisabledStatus">Atajos de teclado desactivados. Pulsa Ctrl+Shift+K para activarlos.</sys:String>

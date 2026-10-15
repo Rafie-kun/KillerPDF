@@ -1323,6 +1323,15 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Repair_Unrecoverable" xml:space="preserve">Naprawa nie powiodła się - plik jest zbyt poważnie uszkodzony.&#10;&#10;Spróbuj otworzyć oryginał w innej aplikacji (Adobe Acrobat lub przeglądarce), która może oferować dodatkowe opcje odzyskiwania.</sys:String>
     <sys:String x:Key="Str_KS_Enabled">Włącz skróty klawiaturowe</sys:String>
     <sys:String x:Key="Str_KS_Toggle">Włącz lub wyłącz skróty klawiaturowe</sys:String>
+    <sys:String x:Key="Str_KS_Customize">Dostosuj skróty...</sys:String>
+    <sys:String x:Key="Str_KS_CustomizeTitle">Dostosuj skróty</sys:String>
+    <sys:String x:Key="Str_KS_CustomizeHint">Kliknij klawisz, aby go zmienić, a potem naciśnij nowy. Esc anuluje zmianę.</sys:String>
+    <sys:String x:Key="Str_KS_PressKey">Naciśnij klawisz...</sys:String>
+    <sys:String x:Key="Str_KS_KeyNotAllowed">Skróty mogą używać liter, cyfr, F1 do F12, Delete i Insert, samodzielnie lub z Ctrl, Ctrl+Shift, Shift lub Alt.</sys:String>
+    <sys:String x:Key="Str_KS_KeyTaken">Ten klawisz jest już używany przez: {0}</sys:String>
+    <sys:String x:Key="Str_KS_Reset">Resetuj</sys:String>
+    <sys:String x:Key="Str_KS_ResetTT">Przywróć oryginalny klawisz</sys:String>
+    <sys:String x:Key="Str_KS_ResetAll">Resetuj wszystko</sys:String>
     <sys:String x:Key="Str_KS_ToggleTip">Włącz lub wyłącz wszystkie skróty aplikacji. Ctrl+Shift+K zawsze działa.</sys:String>
     <sys:String x:Key="Str_KS_EnabledStatus">Skróty klawiaturowe włączone</sys:String>
     <sys:String x:Key="Str_KS_DisabledStatus">Skróty klawiaturowe wyłączone. Naciśnij Ctrl+Shift+K, aby je włączyć.</sys:String>

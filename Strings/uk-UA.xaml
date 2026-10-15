@@ -1335,6 +1335,15 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Repair_Unrecoverable" xml:space="preserve">Не вдалося відновити - файл пошкоджено надто сильно.&#10;&#10;Спробуйте відкрити оригінал в іншій програмі (Adobe Acrobat або браузер), яка може мати додаткові можливості відновлення.</sys:String>
     <sys:String x:Key="Str_KS_Enabled">Увімкнути комбінації клавіш</sys:String>
     <sys:String x:Key="Str_KS_Toggle">Перемкнути комбінації клавіш</sys:String>
+    <sys:String x:Key="Str_KS_Customize">Налаштувати сполучення клавіш...</sys:String>
+    <sys:String x:Key="Str_KS_CustomizeTitle">Налаштувати сполучення клавіш</sys:String>
+    <sys:String x:Key="Str_KS_CustomizeHint">Клацніть клавішу, щоб змінити її, а потім натисніть нову. Esc скасовує зміну.</sys:String>
+    <sys:String x:Key="Str_KS_PressKey">Натисніть клавішу...</sys:String>
+    <sys:String x:Key="Str_KS_KeyNotAllowed">У сполученнях можна використовувати літери, цифри, клавіші від F1 до F12, Delete та Insert, окремо або з Ctrl, Ctrl+Shift, Shift чи Alt.</sys:String>
+    <sys:String x:Key="Str_KS_KeyTaken">Цю клавішу вже використовує: {0}</sys:String>
+    <sys:String x:Key="Str_KS_Reset">Скинути</sys:String>
+    <sys:String x:Key="Str_KS_ResetTT">Повернути початкову клавішу</sys:String>
+    <sys:String x:Key="Str_KS_ResetAll">Скинути все</sys:String>
     <sys:String x:Key="Str_KS_ToggleTip">Увімкнути або вимкнути всі комбінації клавіш програми. Ctrl+Shift+K працює завжди.</sys:String>
     <sys:String x:Key="Str_KS_EnabledStatus">Комбінації клавіш увімкнено</sys:String>
     <sys:String x:Key="Str_KS_DisabledStatus">Комбінації клавіш вимкнено. Натисніть Ctrl+Shift+K, щоб увімкнути їх.</sys:String>

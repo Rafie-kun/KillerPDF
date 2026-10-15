@@ -1335,6 +1335,15 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Repair_Unrecoverable" xml:space="preserve">Repair failed because the file is too severely damaged to recover.&#10;&#10;Try opening the original in a different application (Adobe Acrobat or a browser), which may have additional recovery options.</sys:String>
     <sys:String x:Key="Str_KS_Enabled">Enable keyboard shortcuts</sys:String>
     <sys:String x:Key="Str_KS_Toggle">Toggle keyboard shortcuts</sys:String>
+    <sys:String x:Key="Str_KS_Customize">Customize Shortcuts...</sys:String>
+    <sys:String x:Key="Str_KS_CustomizeTitle">Customize Shortcuts</sys:String>
+    <sys:String x:Key="Str_KS_CustomizeHint">Click a key to change it, then press the new one. Esc cancels the change.</sys:String>
+    <sys:String x:Key="Str_KS_PressKey">Press a key...</sys:String>
+    <sys:String x:Key="Str_KS_KeyNotAllowed">Shortcuts can use letters, numbers, F1 to F12, Delete and Insert, alone or with Ctrl, Ctrl+Shift, Shift or Alt.</sys:String>
+    <sys:String x:Key="Str_KS_KeyTaken">That key is already used by: {0}</sys:String>
+    <sys:String x:Key="Str_KS_Reset">Reset</sys:String>
+    <sys:String x:Key="Str_KS_ResetTT">Restore the original key</sys:String>
+    <sys:String x:Key="Str_KS_ResetAll">Reset All</sys:String>
     <sys:String x:Key="Str_KS_ToggleTip">Turn all app shortcuts on or off. Ctrl+Shift+K always works.</sys:String>
     <sys:String x:Key="Str_KS_EnabledStatus">Keyboard shortcuts enabled</sys:String>
     <sys:String x:Key="Str_KS_DisabledStatus">Keyboard shortcuts disabled. Press Ctrl+Shift+K to enable them.</sys:String>

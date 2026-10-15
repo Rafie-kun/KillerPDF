@@ -1320,6 +1320,15 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Repair_Unrecoverable" xml:space="preserve">Oprava se nezdařila - soubor je příliš poškozený.&#10;&#10;Zkuste otevřít originál v jiné aplikaci (Adobe Acrobat nebo prohlížeči), která může nabídnout další možnosti obnovení.</sys:String>
     <sys:String x:Key="Str_KS_Enabled">Povolit klávesové zkratky</sys:String>
     <sys:String x:Key="Str_KS_Toggle">Zapnout nebo vypnout klávesové zkratky</sys:String>
+    <sys:String x:Key="Str_KS_Customize">Přizpůsobit klávesové zkratky...</sys:String>
+    <sys:String x:Key="Str_KS_CustomizeTitle">Přizpůsobit klávesové zkratky</sys:String>
+    <sys:String x:Key="Str_KS_CustomizeHint">Klikněte na klávesu, kterou chcete změnit, a stiskněte novou. Esc změnu zruší.</sys:String>
+    <sys:String x:Key="Str_KS_PressKey">Stiskněte klávesu...</sys:String>
+    <sys:String x:Key="Str_KS_KeyNotAllowed">Zkratky mohou používat písmena, číslice, F1 až F12, Delete a Insert, samotné nebo s Ctrl, Ctrl+Shift, Shift nebo Alt.</sys:String>
+    <sys:String x:Key="Str_KS_KeyTaken">Tuto klávesu už používá: {0}</sys:String>
+    <sys:String x:Key="Str_KS_Reset">Obnovit</sys:String>
+    <sys:String x:Key="Str_KS_ResetTT">Obnovit původní klávesu</sys:String>
+    <sys:String x:Key="Str_KS_ResetAll">Obnovit vše</sys:String>
     <sys:String x:Key="Str_KS_ToggleTip">Zapnout nebo vypnout všechny zkratky aplikace. Ctrl+Shift+K funguje vždy.</sys:String>
     <sys:String x:Key="Str_KS_EnabledStatus">Klávesové zkratky jsou zapnuté</sys:String>
     <sys:String x:Key="Str_KS_DisabledStatus">Klávesové zkratky jsou vypnuté. Zapnete je stisknutím Ctrl+Shift+K.</sys:String>

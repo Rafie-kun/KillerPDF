@@ -1335,6 +1335,15 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_Repair_Unrecoverable" xml:space="preserve">Riparazione non riuscita - il file è troppo danneggiato per essere recuperato.&#10;&#10;Prova ad aprire l’originale in un’altra applicazione (Adobe Acrobat o un browser), che potrebbe offrire ulteriori opzioni di recupero.</sys:String>
     <sys:String x:Key="Str_KS_Enabled">Abilita scorciatoie tastiera</sys:String>
     <sys:String x:Key="Str_KS_Toggle">Attiva/disattiva scorciatoie tastiera</sys:String>
+    <sys:String x:Key="Str_KS_Customize">Personalizza scorciatoie...</sys:String>
+    <sys:String x:Key="Str_KS_CustomizeTitle">Personalizza scorciatoie</sys:String>
+    <sys:String x:Key="Str_KS_CustomizeHint">Fai clic su un tasto per cambiarlo, poi premi quello nuovo. Esc annulla la modifica.</sys:String>
+    <sys:String x:Key="Str_KS_PressKey">Premi un tasto...</sys:String>
+    <sys:String x:Key="Str_KS_KeyNotAllowed">Le scorciatoie possono usare lettere, numeri, da F1 a F12, Canc e Ins, da soli o con Ctrl, Ctrl+Maiusc, Maiusc o Alt.</sys:String>
+    <sys:String x:Key="Str_KS_KeyTaken">Questo tasto è già usato da: {0}</sys:String>
+    <sys:String x:Key="Str_KS_Reset">Ripristina</sys:String>
+    <sys:String x:Key="Str_KS_ResetTT">Ripristina il tasto originale</sys:String>
+    <sys:String x:Key="Str_KS_ResetAll">Ripristina tutto</sys:String>
     <sys:String x:Key="Str_KS_ToggleTip">Attiva/disattiva tutte le scorciatoie dell'app. Ctrl+Maiusc+K funziona sempre.</sys:String>
     <sys:String x:Key="Str_KS_EnabledStatus">Scorciatoie tastiera abilitate</sys:String>
     <sys:String x:Key="Str_KS_DisabledStatus">Scorciatoie tastiera disabilitate. Premi Ctrl+Maiusc+K per abilitarle.</sys:String>

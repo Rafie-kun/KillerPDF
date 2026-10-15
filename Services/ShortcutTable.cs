@@ -261,8 +261,10 @@ namespace KillerPDF
         ];
 
         /// <summary>The map's view of the table: layer -> cap id -> (category, label key). A cap's
-        /// own LabelKey wins over its row's, which is how one row serves two captions.</summary>
-        internal static Dictionary<KbLayer, Dictionary<string, (string Cat, string Label)>> BuildMap()
+        /// own LabelKey wins over its row's, which is how one row serves two captions.
+        /// <paramref name="place"/> moves a cap to the key the user chose for it (#190).</summary>
+        internal static Dictionary<KbLayer, Dictionary<string, (string Cat, string Label)>> BuildMap(
+            Func<KsCap, KsCap>? place = null)
         {
             var map = new Dictionary<KbLayer, Dictionary<string, (string, string)>>();
             foreach (KbLayer layer in Enum.GetValues<KbLayer>())
@@ -270,8 +272,11 @@ namespace KillerPDF
 
             foreach (var binding in KsAll)
                 foreach (var cap in binding.Caps)
-                    map[cap.Layer][cap.Id] =
+                {
+                    KsCap placed = place?.Invoke(cap) ?? cap;
+                    map[placed.Layer][placed.Id] =
                         (binding.Cat, cap.LabelKey.Length > 0 ? cap.LabelKey : binding.LabelKey);
+                }
             return map;
         }
 

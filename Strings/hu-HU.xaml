@@ -1322,6 +1322,15 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Repair_Unrecoverable" xml:space="preserve">A javítás nem sikerült - a fájl túl súlyosan sérült.&#10;&#10;Próbálja meg megnyitni az eredetit egy másik alkalmazásban (Adobe Acrobat vagy böngésző), amely további helyreállítási lehetőségeket kínálhat.</sys:String>
     <sys:String x:Key="Str_KS_Enabled">Billentyűparancsok engedélyezése</sys:String>
     <sys:String x:Key="Str_KS_Toggle">Billentyűparancsok be- és kikapcsolása</sys:String>
+    <sys:String x:Key="Str_KS_Customize">Billentyűparancsok testreszabása...</sys:String>
+    <sys:String x:Key="Str_KS_CustomizeTitle">Billentyűparancsok testreszabása</sys:String>
+    <sys:String x:Key="Str_KS_CustomizeHint">Kattintson egy billentyűre a módosításhoz, majd nyomja meg az újat. Az Esc megszakítja a módosítást.</sys:String>
+    <sys:String x:Key="Str_KS_PressKey">Nyomjon meg egy billentyűt...</sys:String>
+    <sys:String x:Key="Str_KS_KeyNotAllowed">A parancsok betűket, számokat, az F1-től F12-ig terjedő billentyűket, a Delete-et és Insertet használhatnak, önmagukban vagy Ctrl, Ctrl+Shift, Shift vagy Alt mellett.</sys:String>
+    <sys:String x:Key="Str_KS_KeyTaken">Ezt a billentyűt már használja: {0}</sys:String>
+    <sys:String x:Key="Str_KS_Reset">Visszaállítás</sys:String>
+    <sys:String x:Key="Str_KS_ResetTT">Az eredeti billentyű visszaállítása</sys:String>
+    <sys:String x:Key="Str_KS_ResetAll">Összes visszaállítása</sys:String>
     <sys:String x:Key="Str_KS_ToggleTip">Az alkalmazás összes billentyűparancsának be- és kikapcsolása. A Ctrl+Shift+K mindig működik.</sys:String>
     <sys:String x:Key="Str_KS_EnabledStatus">Billentyűparancsok bekapcsolva</sys:String>
     <sys:String x:Key="Str_KS_DisabledStatus">Billentyűparancsok kikapcsolva. A bekapcsolásukhoz nyomd meg a Ctrl+Shift+K billentyűkombinációt.</sys:String>

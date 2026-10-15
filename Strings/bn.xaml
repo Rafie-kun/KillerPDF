@@ -1315,6 +1315,15 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Repair_Unrecoverable" xml:space="preserve">মেরামত ব্যর্থ হয়েছে - ফাইলটি পুনরুদ্ধার করার জন্য অত্যন্ত ক্ষতিগ্রস্ত।&#10;&#10;মূল ফাইলটি অন্য কোনো অ্যাপ্লিকেশনে (Adobe Acrobat বা ব্রাউজার) খোলার চেষ্টা করুন, যেখানে অতিরিক্ত পুনরুদ্ধারের বিকল্প থাকতে পারে।</sys:String>
     <sys:String x:Key="Str_KS_Enabled">কীবোর্ড শর্টকাট চালু করুন</sys:String>
     <sys:String x:Key="Str_KS_Toggle">কীবোর্ড শর্টকাট চালু বা বন্ধ করুন</sys:String>
+    <sys:String x:Key="Str_KS_Customize">শর্টকাট কাস্টমাইজ করুন...</sys:String>
+    <sys:String x:Key="Str_KS_CustomizeTitle">শর্টকাট কাস্টমাইজ করুন</sys:String>
+    <sys:String x:Key="Str_KS_CustomizeHint">বদলাতে একটি কী-তে ক্লিক করুন, তারপর নতুনটি চাপুন। Esc পরিবর্তন বাতিল করে।</sys:String>
+    <sys:String x:Key="Str_KS_PressKey">একটি কী চাপুন...</sys:String>
+    <sys:String x:Key="Str_KS_KeyNotAllowed">শর্টকাটে অক্ষর, সংখ্যা, F1 থেকে F12, Delete ও Insert একা বা Ctrl, Ctrl+Shift, Shift বা Alt-এর সাথে ব্যবহার করা যায়।</sys:String>
+    <sys:String x:Key="Str_KS_KeyTaken">এই কী ইতিমধ্যে ব্যবহার করছে: {0}</sys:String>
+    <sys:String x:Key="Str_KS_Reset">রিসেট</sys:String>
+    <sys:String x:Key="Str_KS_ResetTT">মূল কী ফিরিয়ে আনুন</sys:String>
+    <sys:String x:Key="Str_KS_ResetAll">সব রিসেট করুন</sys:String>
     <sys:String x:Key="Str_KS_ToggleTip">অ্যাপের সব শর্টকাট চালু বা বন্ধ করুন। Ctrl+Shift+K সবসময় কাজ করে।</sys:String>
     <sys:String x:Key="Str_KS_EnabledStatus">কীবোর্ড শর্টকাট চালু আছে</sys:String>
     <sys:String x:Key="Str_KS_DisabledStatus">কীবোর্ড শর্টকাট বন্ধ আছে। চালু করতে Ctrl+Shift+K চাপুন।</sys:String>

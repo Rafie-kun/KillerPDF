@@ -41,7 +41,13 @@ namespace KillerPDF
             // Keyboard view of the shortcuts overlay: holding Ctrl / Shift / Alt previews that layer.
             KbSyncLayerFromModifiers();
 
-            if (_comparisonActive && e.Key == Key.Escape && Keyboard.Modifiers == ModifierKeys.None)
+            // #190: a custom shortcut stands in for the key its command shipped on. Everything
+            // below matches the translated key; a focused text box still gets the keys as typed.
+            Key rawKey = e.Key, rawSystemKey = e.SystemKey;
+            ModifierKeys rawMods = Keyboard.Modifiers;
+            var (key, mods, systemKey, swallow) = TranslateShortcut(rawKey, rawMods, rawSystemKey);
+
+            if (_comparisonActive && key == Key.Escape && mods == ModifierKeys.None)
             {
                 EndComparison(closeSplit: true);
                 e.Handled = true;
@@ -53,11 +59,11 @@ namespace KillerPDF
             // return is exactly why Ctrl+B never reached the text tool and collapsed the sidebar
             // instead. The two meanings of Ctrl+B cannot collide, because the sidebar binding is
             // only reachable when no edit box has focus and this one only when it does.
-            if (_activeTextBox is not null && _activeTextBox.IsFocused &&
-                Keyboard.Modifiers == ModifierKeys.Control &&
-                e.Key is Key.B or Key.I or Key.U)
+            if (!swallow && _activeTextBox is not null && _activeTextBox.IsFocused &&
+                mods == ModifierKeys.Control &&
+                key is Key.B or Key.I or Key.U)
             {
-                switch (e.Key)
+                switch (key)
                 {
                     case Key.B: _textBold      = !_textBold;      break;
                     case Key.I: _textItalic    = !_textItalic;    break;
@@ -75,8 +81,8 @@ namespace KillerPDF
             bool editableTextFocused =
                 e.OriginalSource is TextBox tbSrc && !tbSrc.IsReadOnly
                 || _activeTextBox is not null && _activeTextBox.IsFocused;
-            if (editableTextFocused && e.Key == Key.Escape
-                && Keyboard.Modifiers == ModifierKeys.None)
+            if (editableTextFocused && key == Key.Escape
+                && mods == ModifierKeys.None)
             {
                 Keyboard.ClearFocus();
                 Focus();
@@ -85,24 +91,30 @@ namespace KillerPDF
             }
             if (editableTextFocused
                 && EditableTextShortcutPolicy.KeepInTextBox(
-                    e.Key, Keyboard.Modifiers, e.SystemKey))
+                    rawKey, rawMods, rawSystemKey))
                 return;
+            // The key a command moved away from does nothing now.
+            if (swallow)
+            {
+                e.Handled = true;
+                return;
+            }
 
-            if (e.Key == Key.C && Keyboard.Modifiers == ModifierKeys.Control)
+            if (key == Key.C && mods == ModifierKeys.Control)
             {
                 // An annotation selection copies the annotation(s); otherwise copy page text.
                 if (_selectedAnnotation is not null || _selectedSet.Count > 0) CopySelectedAnnotations();
                 else CopySelectedText();
                 e.Handled = true;
             }
-            else if (e.Key == Key.V && Keyboard.Modifiers == ModifierKeys.Control)
+            else if (key == Key.V && mods == ModifierKeys.Control)
             {
                 // Internal annotation clipboard takes priority over an OS-clipboard image paste.
                 if (_annotationClipboard.Count > 0) PasteAnnotations(PageList.SelectedIndex);
                 else PasteFromClipboard();
                 e.Handled = true;
             }
-            else if (e.Key == Key.A && Keyboard.Modifiers == ModifierKeys.Control)
+            else if (key == Key.A && mods == ModifierKeys.Control)
             {
                 if (PageList.IsKeyboardFocusWithin)
                     PageList.SelectAll();
@@ -114,17 +126,17 @@ namespace KillerPDF
                 }
                 e.Handled = true;
             }
-            else if (e.Key == Key.F && Keyboard.Modifiers == ModifierKeys.Control)
+            else if (key == Key.F && mods == ModifierKeys.Control)
             {
                 ToggleSearchBar();
                 e.Handled = true;
             }
-            else if (e.Key == Key.H && Keyboard.Modifiers == ModifierKeys.Control)
+            else if (key == Key.H && mods == ModifierKeys.Control)
             {
                 ShowReplaceBar();
                 e.Handled = true;
             }
-            else if (e.Key == Key.F3 && (Keyboard.Modifiers == ModifierKeys.None || Keyboard.Modifiers == ModifierKeys.Shift))
+            else if (key == Key.F3 && (mods == ModifierKeys.None || mods == ModifierKeys.Shift))
             {
                 // F3 / Shift+F3 - next / previous search match, the Find Next convention (Acrobat and
                 // Sumatra do the same). With the search bar closed, F3 opens it like Ctrl+F.
@@ -132,55 +144,55 @@ namespace KillerPDF
                     ToggleSearchBar();
                 else if (Search.HasResults)
                 {
-                    if (Keyboard.Modifiers == ModifierKeys.Shift) SearchPrevResult();
+                    if (mods == ModifierKeys.Shift) SearchPrevResult();
                     else SearchNextResult();
                 }
                 e.Handled = true;
             }
-            else if (e.Key == Key.Escape && _shapePolyPoints.Count > 0)
+            else if (key == Key.Escape && _shapePolyPoints.Count > 0)
             {
                 // Shapes tool (#127 Phase 3): abandon the in-progress polygon.
                 CancelShapePolygon();
                 e.Handled = true;
             }
-            else if (e.Key == Key.Back && _shapePolyPoints.Count > 0)
+            else if (key == Key.Back && _shapePolyPoints.Count > 0)
             {
                 // Remove the last placed polygon vertex.
                 ShapePolyBackspace();
                 e.Handled = true;
             }
-            else if (e.Key == Key.Enter && _shapePolyPoints.Count >= 3)
+            else if (key == Key.Enter && _shapePolyPoints.Count >= 3)
             {
                 // Close the polygon from the keyboard.
                 CommitShapePolygon();
                 e.Handled = true;
             }
-            else if (e.Key == Key.Enter && _currentTool == EditTool.Crop && _cropConfirmBar is not null)
+            else if (key == Key.Enter && _currentTool == EditTool.Crop && _cropConfirmBar is not null)
             {
                 ApplyCrop([PageList.SelectedIndex]);
                 e.Handled = true;
             }
-            else if (e.Key == Key.Escape && _currentTool == EditTool.Crop && _cropConfirmBar is not null)
+            else if (key == Key.Escape && _currentTool == EditTool.Crop && _cropConfirmBar is not null)
             {
                 HideCropConfirmBar();
                 e.Handled = true;
             }
-            else if (e.Key == Key.Escape && ShortcutOverlay.Visibility == Visibility.Visible)
+            else if (key == Key.Escape && ShortcutOverlay.Visibility == Visibility.Visible)
             {
                 FadeOverlayOut(ShortcutOverlay);
                 e.Handled = true;
             }
-            else if (e.Key == Key.Escape && AboutOverlay.Visibility == Visibility.Visible)
+            else if (key == Key.Escape && AboutOverlay.Visibility == Visibility.Visible)
             {
                 CloseAboutOverlay();
                 e.Handled = true;
             }
-            else if (e.Key == Key.Escape && _searchBar is not null && _searchBar.Visibility == Visibility.Visible)
+            else if (key == Key.Escape && _searchBar is not null && _searchBar.Visibility == Visibility.Visible)
             {
                 CloseSearchBar();
                 e.Handled = true;
             }
-            else if (e.Key == Key.Escape && _busyCts is not null)
+            else if (key == Key.Escape && _busyCts is not null)
             {
                 // A cancellable long operation (OCR, repair) is running behind the busy overlay - offer to
                 // cancel it instead of letting Escape fall through to the app-exit handler below.
@@ -193,21 +205,21 @@ namespace KillerPDF
             // "?" is Shift+ss, so the US-positional OemQuestion check never fired (and the exact
             // modifier equality failed too, since typing "?" holds Shift). The VK test stays as a
             // fast path for layouts where it already worked.
-            else if (Services.KeyLayout.IsCtrlChar(e.Key, '?')
-                     || (e.Key == Key.OemQuestion && Keyboard.Modifiers == ModifierKeys.Control))
+            else if (Services.KeyLayout.IsCtrlChar(key, '?')
+                     || (key == Key.OemQuestion && mods == ModifierKeys.Control))
             {
                 if (ShortcutOverlay.Visibility == Visibility.Visible) FadeOverlayOut(ShortcutOverlay);
                 else ShowShortcutsOverlayExclusive();
                 e.Handled = true;
             }
-            else if (e.Key == Key.F1)
+            else if (key == Key.F1)
             {
                 // Toggle the shortcuts overlay (conventional Help key, alongside Ctrl+?).
                 if (ShortcutOverlay.Visibility == Visibility.Visible) FadeOverlayOut(ShortcutOverlay);
                 else ShowShortcutsOverlayExclusive();
                 e.Handled = true;
             }
-            else if (e.Key == Key.F12)
+            else if (key == Key.F12)
             {
                 // Toggle the About dialog. (Moved off F2, which now belongs to rename-bookmark in the
                 // outline panel, #133 - Windows convention. Document Info moved to F4 / Ctrl+D below.)
@@ -215,7 +227,7 @@ namespace KillerPDF
                 else ShowAboutOverlay();
                 e.Handled = true;
             }
-            else if (e.Key == Key.F4 && Keyboard.Modifiers == ModifierKeys.None)
+            else if (key == Key.F4 && mods == ModifierKeys.None)
             {
                 // Document Info - the advertised single-key shortcut (F1 help, F4 info, F5-F8 views,
                 // F11 full screen, F12 about). Looked it up on the shortcuts overlay and pressed it?
@@ -224,36 +236,36 @@ namespace KillerPDF
                 OpenDocumentInfo();
                 e.Handled = true;
             }
-            else if (e.Key == Key.D && Keyboard.Modifiers == ModifierKeys.Control)
+            else if (key == Key.D && mods == ModifierKeys.Control)
             {
                 // Compatibility alias: Ctrl+D is Document Properties in Acrobat, Foxit, and SumatraPDF.
                 if (ShortcutOverlay.Visibility == Visibility.Visible) FadeOverlayOut(ShortcutOverlay);
                 OpenDocumentInfo();
                 e.Handled = true;
             }
-            else if (e.Key == Key.F5) { SetViewMode(ViewMode.Continuous); e.Handled = true; }
-            else if (e.Key == Key.F6) { SetViewMode(ViewMode.Single);     e.Handled = true; }
-            else if (e.Key == Key.F7) { SetViewMode(ViewMode.TwoPage);    e.Handled = true; }
-            else if (e.Key == Key.F8) { SetViewMode(ViewMode.Grid);       e.Handled = true; }
+            else if (key == Key.F5) { SetViewMode(ViewMode.Continuous); e.Handled = true; }
+            else if (key == Key.F6) { SetViewMode(ViewMode.Single);     e.Handled = true; }
+            else if (key == Key.F7) { SetViewMode(ViewMode.TwoPage);    e.Handled = true; }
+            else if (key == Key.F8) { SetViewMode(ViewMode.Grid);       e.Handled = true; }
             // F10 = split pane. Matched as Key.System + SystemKey == Key.F10, NOT e.Key == Key.F10:
             // F10 is a system key in WPF (it activates the menu bar), so it never arrives as
             // Key.F10 and a plain check silently never fires. The Shift+F10 branch further down has
             // the same shape; F11 below does not need it, because F11 is not a system key.
             // Shift is excluded here because Shift+F10 is the context menu - without that guard the
             // two would both fire off one press.
-            else if (e.Key == Key.System && e.SystemKey == Key.F10
-                     && !Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
+            else if (key == Key.System && systemKey == Key.F10
+                     && !mods.HasFlag(ModifierKeys.Shift))
             {
                 ToggleSplit();
                 e.Handled = true;
             }
             // #215: reading view - toolbar off. Alt+M arrives as a system key (Alt+letter), same
             // shape as the F10 branches above.
-            else if (e.Key == Key.System && e.SystemKey == Key.M && Keyboard.Modifiers == ModifierKeys.Alt)
+            else if (key == Key.System && systemKey == Key.M && mods == ModifierKeys.Alt)
             { ToggleToolbarHidden(); e.Handled = true; }
-            else if (e.Key == Key.F11) { ToggleFullScreen(); e.Handled = true; }
-            else if (e.Key == Key.Escape && _fullScreen) { ToggleFullScreen(); e.Handled = true; }
-            else if (e.Key == Key.F4 && Keyboard.Modifiers == ModifierKeys.Shift && _doc is not null)
+            else if (key == Key.F11) { ToggleFullScreen(); e.Handled = true; }
+            else if (key == Key.Escape && _fullScreen) { ToggleFullScreen(); e.Handled = true; }
+            else if (key == Key.F4 && mods == ModifierKeys.Shift && _doc is not null)
             {
                 ShowCurrentFileSize();
                 e.Handled = true;
@@ -263,132 +275,132 @@ namespace KillerPDF
             // same whether the page canvas or a sidebar thumbnail has focus; without this, a focused
             // PageList (ListBox) would page its own selection instead. The TextBox guard at the top of this
             // handler already exempts typing in a form field / typewriter box.
-            else if (e.Key == Key.PageDown && Keyboard.Modifiers == ModifierKeys.None)
+            else if (key == Key.PageDown && mods == ModifierKeys.None)
             {
                 NavigatePageStep(1);   // one page; one SPREAD in Two-Page mode (#120)
                 e.Handled = true;
             }
-            else if (e.Key == Key.PageUp && Keyboard.Modifiers == ModifierKeys.None)
+            else if (key == Key.PageUp && mods == ModifierKeys.None)
             {
                 NavigatePageStep(-1);
                 e.Handled = true;
             }
-            else if (e.Key == Key.P && Keyboard.Modifiers == ModifierKeys.Control)
+            else if (key == Key.P && mods == ModifierKeys.Control)
             {
                 Print_Click(this, e);
                 e.Handled = true;
             }
-            else if (e.Key == Key.Delete && PageList.IsKeyboardFocusWithin && PageList.SelectedItems.Count > 0)
+            else if (key == Key.Delete && PageList.IsKeyboardFocusWithin && PageList.SelectedItems.Count > 0)
             {
                 Delete_Click(this, e);
                 e.Handled = true;
             }
-            else if (e.Key == Key.Delete && Viewer.HasSelectedFormFieldExt)
+            else if (key == Key.Delete && Viewer.HasSelectedFormFieldExt)
             {
                 Viewer.DeleteSelectedFormFieldExt();
                 e.Handled = true;
             }
-            else if (e.Key == Key.Delete && (_selectedAnnotation is not null || _selectedSet.Count > 0))
+            else if (key == Key.Delete && (_selectedAnnotation is not null || _selectedSet.Count > 0))
             {
                 DeleteSelected();
                 e.Handled = true;
             }
-            else if (e.Key == Key.R &&
-                     (Keyboard.Modifiers == ModifierKeys.Control ||
-                      Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift)))
+            else if (key == Key.R &&
+                     (mods == ModifierKeys.Control ||
+                      mods == (ModifierKeys.Control | ModifierKeys.Shift)))
             {
                 if (!e.IsRepeat)
-                    RotatePages_Click(Keyboard.Modifiers == ModifierKeys.Control ? 90 : -90);
+                    RotatePages_Click(mods == ModifierKeys.Control ? 90 : -90);
                 e.Handled = true;
             }
-            else if (e.Key == Key.Z && Keyboard.Modifiers == ModifierKeys.Control)
+            else if (key == Key.Z && mods == ModifierKeys.Control)
             {
                 if (!e.IsRepeat) Undo_Click(this, e);   // ignore key auto-repeat so one press = one undo
                 e.Handled = true;
             }
-            else if (e.Key == Key.S && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
+            else if (key == Key.S && mods == (ModifierKeys.Control | ModifierKeys.Shift))
             {
                 SaveAs_Click(this, e);
                 e.Handled = true;
             }
-            else if (e.Key == Key.S && Keyboard.Modifiers == ModifierKeys.Control)
+            else if (key == Key.S && mods == ModifierKeys.Control)
             {
                 SaveInPlace();
                 e.Handled = true;
             }
-            else if (e.Key == Key.W && Keyboard.Modifiers == ModifierKeys.Control)
+            else if (key == Key.W && mods == ModifierKeys.Control)
             {
                 CloseTab(_active);
                 e.Handled = true;
             }
-            else if (e.Key == Key.W && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
+            else if (key == Key.W && mods == (ModifierKeys.Control | ModifierKeys.Shift))
             {
                 CloseOtherTabs(_active);
                 e.Handled = true;
             }
-            else if (e.Key == Key.Q && Keyboard.Modifiers == ModifierKeys.Control)
+            else if (key == Key.Q && mods == ModifierKeys.Control)
             {
                 CloseAllTabs();
                 e.Handled = true;
             }
-            else if (e.Key == Key.Tab && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
+            else if (key == Key.Tab && mods == (ModifierKeys.Control | ModifierKeys.Shift))
             {
                 CycleTab(-1);
                 e.Handled = true;
             }
-            else if (e.Key == Key.Tab && Keyboard.Modifiers == ModifierKeys.Control)
+            else if (key == Key.Tab && mods == ModifierKeys.Control)
             {
                 CycleTab(1);
                 e.Handled = true;
             }
-            else if (e.Key == Key.O && Keyboard.Modifiers == ModifierKeys.Control)
+            else if (key == Key.O && mods == ModifierKeys.Control)
             {
                 Open_Click(this, e);
                 e.Handled = true;
             }
-            else if (e.Key == Key.O && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
+            else if (key == Key.O && mods == (ModifierKeys.Control | ModifierKeys.Shift))
             {
                 OcrSelectedPagesToClipboard();
                 e.Handled = true;
             }
-            else if (e.Key == Key.I && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
+            else if (key == Key.I && mods == (ModifierKeys.Control | ModifierKeys.Shift))
             {
                 BeginOcrRegion();
                 e.Handled = true;
             }
             // 1.9 commands. Each matches its menu gesture text and its ShortcutTable row; key repeat
             // is ignored so holding the chord opens one dialog, not a queue of them.
-            else if (e.Key == Key.T && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
+            else if (key == Key.T && mods == (ModifierKeys.Control | ModifierKeys.Shift))
             {
                 if (!e.IsRepeat) ConvertScanToText();
                 e.Handled = true;
             }
-            else if (e.Key == Key.E && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
+            else if (key == Key.E && mods == (ModifierKeys.Control | ModifierKeys.Shift))
             {
                 if (!e.IsRepeat) ExportDocument_Click(this, e);
                 e.Handled = true;
             }
-            else if (e.Key == Key.P && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
+            else if (key == Key.P && mods == (ModifierKeys.Control | ModifierKeys.Shift))
             {
                 if (!e.IsRepeat) OpenProtectDialog();
                 e.Handled = true;
             }
-            else if (e.Key == Key.D && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
+            else if (key == Key.D && mods == (ModifierKeys.Control | ModifierKeys.Shift))
             {
                 if (!e.IsRepeat) OpenDocumentToolsMenu();   // DocumentTools.cs; the next letter picks the tool
                 e.Handled = true;
             }
-            else if (e.Key == Key.G && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
+            else if (key == Key.G && mods == (ModifierKeys.Control | ModifierKeys.Shift))
             {
                 if (!e.IsRepeat) ToggleFilmGrain();
                 e.Handled = true;
             }
-            else if (e.Key == Key.N && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
+            else if (key == Key.N && mods == (ModifierKeys.Control | ModifierKeys.Shift))
             {
                 if (!e.IsRepeat) MoveActiveTabToNewWindow();
                 e.Handled = true;
             }
-            else if (e.Key == Key.B && Keyboard.Modifiers == ModifierKeys.None && _doc is not null
+            else if (key == Key.B && mods == ModifierKeys.None && _doc is not null
                      && _viewMode == ViewMode.TwoPage
                      && ShortcutOverlay.Visibility != Visibility.Visible
                      && AboutOverlay.Visibility != Visibility.Visible)
@@ -398,7 +410,7 @@ namespace KillerPDF
                 ToggleBookMode();
                 e.Handled = true;
             }
-            else if (e.Key == Key.N && Keyboard.Modifiers == ModifierKeys.None && _doc is not null
+            else if (key == Key.N && mods == ModifierKeys.None && _doc is not null
                      && ShortcutOverlay.Visibility != Visibility.Visible
                      && AboutOverlay.Visibility != Visibility.Visible)
             {
@@ -408,7 +420,7 @@ namespace KillerPDF
                 ToggleDocInvert(!ActiveViewer.DocInvert);   // per pane: flips the focused pane only
                 e.Handled = true;
             }
-            else if (e.Key == Key.N && Keyboard.Modifiers == ModifierKeys.Shift && _doc is not null
+            else if (key == Key.N && mods == ModifierKeys.Shift && _doc is not null
                      && ShortcutOverlay.Visibility != Visibility.Visible
                      && AboutOverlay.Visibility != Visibility.Visible)
             {
@@ -420,17 +432,17 @@ namespace KillerPDF
             // App-wide accessibility size (AppScale.cs), distinct from the Ctrl+wheel page zoom:
             // Ctrl+Shift +/- steps the whole-app size, Ctrl+Shift+0 resets it. Works with no
             // mouse; the wheel-over-logo gesture drives the same scale.
-            else if ((e.Key == Key.OemPlus || e.Key == Key.Add) && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
+            else if ((key == Key.OemPlus || key == Key.Add) && mods == (ModifierKeys.Control | ModifierKeys.Shift))
             {
                 ApplyAppScale(_appScale + AppScaleStep, persist: true);
                 e.Handled = true;
             }
-            else if ((e.Key == Key.OemMinus || e.Key == Key.Subtract) && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
+            else if ((key == Key.OemMinus || key == Key.Subtract) && mods == (ModifierKeys.Control | ModifierKeys.Shift))
             {
                 ApplyAppScale(_appScale - AppScaleStep, persist: true);
                 e.Handled = true;
             }
-            else if ((e.Key == Key.D0 || e.Key == Key.NumPad0) && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
+            else if ((key == Key.D0 || key == Key.NumPad0) && mods == (ModifierKeys.Control | ModifierKeys.Shift))
             {
                 ApplyAppScale(1.0, persist: true);
                 e.Handled = true;
@@ -438,9 +450,9 @@ namespace KillerPDF
             // Toolbar appearance, mirroring the bar's right-click menu top to bottom: Ctrl+Shift+1/2
             // pick the icon size, Ctrl+Shift+3..6 pick where the text goes. Number row only - the
             // numpad digits stay clear of the tool shortcuts' numpad mappings.
-            else if (e.Key is >= Key.D1 and <= Key.D6 && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
+            else if (key is >= Key.D1 and <= Key.D6 && mods == (ModifierKeys.Control | ModifierKeys.Shift))
             {
-                switch (e.Key)
+                switch (key)
                 {
                     case Key.D1: SetToolbarIconSize(ToolbarIconSize.Small);   break;
                     case Key.D2: SetToolbarIconSize(ToolbarIconSize.Large);   break;
@@ -451,17 +463,17 @@ namespace KillerPDF
                 }
                 e.Handled = true;
             }
-            else if (e.Key == Key.F9 && Keyboard.Modifiers == ModifierKeys.Shift)
+            else if (key == Key.F9 && mods == ModifierKeys.Shift)
             {
                 ToggleSidebarSide();   // left/right, pairing with F9's collapse toggle
                 e.Handled = true;
             }
-            else if (e.Key == Key.N && Keyboard.Modifiers == ModifierKeys.Control)
+            else if (key == Key.N && mods == ModifierKeys.Control)
             {
                 NewDocument();
                 e.Handled = true;
             }
-            else if (e.Key == Key.F9 && Keyboard.Modifiers == ModifierKeys.None)
+            else if (key == Key.F9 && mods == ModifierKeys.None)
             {
                 // The sidebar gets the single key, house style. F9 used to jog the view mode, which
                 // was the one redundant F-key: F5-F8 already jump straight to all four modes and the
@@ -470,59 +482,59 @@ namespace KillerPDF
                 SidebarToggle_Click(this, e);
                 e.Handled = true;
             }
-            else if (e.Key == Key.Home && Keyboard.Modifiers == ModifierKeys.None && _doc is not null)
+            else if (key == Key.Home && mods == ModifierKeys.None && _doc is not null)
             {
                 // First / last page (the Acrobat / Sumatra convention).
                 RecordNavJump();
                 PageList.SelectedIndex = 0;
                 e.Handled = true;
             }
-            else if (e.Key == Key.End && Keyboard.Modifiers == ModifierKeys.None && _doc is not null)
+            else if (key == Key.End && mods == ModifierKeys.None && _doc is not null)
             {
                 RecordNavJump();
                 PageList.SelectedIndex = _doc.PageCount - 1;
                 e.Handled = true;
             }
-            else if (e.Key == Key.D1 && Keyboard.Modifiers == ModifierKeys.Control && _doc is not null)
+            else if (key == Key.D1 && mods == ModifierKeys.Control && _doc is not null)
             {
                 _fitMode = FitMode.None;
                 SetTrueZoom(1.0);    // actual size (Acrobat Ctrl+1); Ctrl+0 stays the 100% reset
                 e.Handled = true;
             }
-            else if (e.Key == Key.D2 && Keyboard.Modifiers == ModifierKeys.Control && _doc is not null)
+            else if (key == Key.D2 && mods == ModifierKeys.Control && _doc is not null)
             {
                 App.SetSetting("DefaultFitMode", FitMode.Width.ToString());
                 FitToWidth();        // (Acrobat Ctrl+2)
                 e.Handled = true;
             }
-            else if (e.Key == Key.D3 && Keyboard.Modifiers == ModifierKeys.Control && _doc is not null)
+            else if (key == Key.D3 && mods == ModifierKeys.Control && _doc is not null)
             {
                 App.SetSetting("DefaultFitMode", FitMode.Page.ToString());
                 FitToPage();
                 e.Handled = true;
             }
-            else if (e.Key == Key.Y && Keyboard.Modifiers == ModifierKeys.Control)
+            else if (key == Key.Y && mods == ModifierKeys.Control)
             {
                 if (!e.IsRepeat) Redo_Click(this, e);
                 e.Handled = true;
             }
-            else if (e.Key == Key.Z && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
+            else if (key == Key.Z && mods == (ModifierKeys.Control | ModifierKeys.Shift))
             {
                 if (!e.IsRepeat) Redo_Click(this, e);   // Ctrl+Shift+Z, the editor-style redo
                 e.Handled = true;
             }
-            else if (e.Key == Key.System && e.SystemKey == Key.Left && Keyboard.Modifiers == ModifierKeys.Alt)
+            else if (key == Key.System && systemKey == Key.Left && mods == ModifierKeys.Alt)
             {
                 NavHistoryGo(back: true);    // retrace bookmark / link / jump-box jumps
                 e.Handled = true;
             }
-            else if (e.Key == Key.System && e.SystemKey == Key.Right && Keyboard.Modifiers == ModifierKeys.Alt)
+            else if (key == Key.System && systemKey == Key.Right && mods == ModifierKeys.Alt)
             {
                 NavHistoryGo(back: false);
                 e.Handled = true;
             }
-            else if ((e.Key == Key.Apps
-                      || (e.Key == Key.System && e.SystemKey == Key.F10 && Keyboard.Modifiers.HasFlag(ModifierKeys.Shift)))
+            else if ((key == Key.Apps
+                      || (key == Key.System && systemKey == Key.F10 && mods.HasFlag(ModifierKeys.Shift)))
                      && _doc is not null)
             {
                 // Windows accessibility convention: the Menu key / Shift+F10 opens the context menu
@@ -530,8 +542,8 @@ namespace KillerPDF
                 OpenContextMenuAtSelection();
                 e.Handled = true;
             }
-            else if (Keyboard.Modifiers == ModifierKeys.None && e.Key is Key.Left or Key.Right or Key.Up or Key.Down
-                     && NudgeSelection(e.Key switch
+            else if (mods == ModifierKeys.None && key is Key.Left or Key.Right or Key.Up or Key.Down
+                     && NudgeSelection(key switch
                      {
                          Key.Left  => new Vector(-1, 0),
                          Key.Right => new Vector(1, 0),
@@ -543,20 +555,20 @@ namespace KillerPDF
             }
             // Bare-key tool switches. Only when a document is open, no modifier is held, and no
             // overlay is up (and not while typing - guarded at the top of this handler).
-            else if (Keyboard.Modifiers == ModifierKeys.None && _doc is not null
+            else if (mods == ModifierKeys.None && _doc is not null
                      && ShortcutOverlay.Visibility != Visibility.Visible
                      && AboutOverlay.Visibility != Visibility.Visible
-                     && TryToolShortcut(e.Key))
+                     && TryToolShortcut(key))
             {
                 e.Handled = true;
             }
             // Left/Right move one page - one two-page SPREAD in Two-Page mode (#120), so a press
             // always changes what's on screen instead of stepping through both pages of a spread.
-            else if (e.Key == Key.Left && Keyboard.Modifiers == ModifierKeys.None)
+            else if (key == Key.Left && mods == ModifierKeys.None)
             {
                 if (NavigatePageStep(-1)) e.Handled = true;
             }
-            else if (e.Key == Key.Right && Keyboard.Modifiers == ModifierKeys.None)
+            else if (key == Key.Right && mods == ModifierKeys.None)
             {
                 if (NavigatePageStep(1)) e.Handled = true;
             }
@@ -566,35 +578,35 @@ namespace KillerPDF
             // like the old page navigation. Left/Right and PgUp/PgDn stay hard page jumps.
             // Handled at the window level so a focused sidebar thumbnail doesn't move its own
             // selection instead (same reasoning as PgUp/PgDn above).
-            else if ((e.Key == Key.Up || e.Key == Key.Down) && Keyboard.Modifiers == ModifierKeys.None)
+            else if ((key == Key.Up || key == Key.Down) && mods == ModifierKeys.None)
             {
                 if (_doc is not null)
                 {
-                    ScrollOrFlipByKey(up: e.Key == Key.Up);
+                    ScrollOrFlipByKey(up: key == Key.Up);
                     e.Handled = true;
                 }
             }
             // #153: "the key that types + or =", whatever position that is on this layout. The
             // Ctrl+Shift app-scale chords above are tested FIRST, so ignoring Shift here cannot
             // swallow them - which is why this ordering matters and must not be rearranged.
-            else if (Services.KeyLayout.IsCtrlChar(e.Key, '+', '=')
-                     || ((e.Key == Key.OemPlus || e.Key == Key.Add) && Keyboard.Modifiers == ModifierKeys.Control))
+            else if (Services.KeyLayout.IsCtrlChar(key, '+', '=')
+                     || ((key == Key.OemPlus || key == Key.Add) && mods == ModifierKeys.Control))
             {
                 if (_viewMode == ViewMode.Grid) GridZoomStep(false); else SetZoom(_zoomLevel + ZoomStep);
                 e.Handled = true;
             }
-            else if (Services.KeyLayout.IsCtrlChar(e.Key, '-')
-                     || ((e.Key == Key.OemMinus || e.Key == Key.Subtract) && Keyboard.Modifiers == ModifierKeys.Control))
+            else if (Services.KeyLayout.IsCtrlChar(key, '-')
+                     || ((key == Key.OemMinus || key == Key.Subtract) && mods == ModifierKeys.Control))
             {
                 if (_viewMode == ViewMode.Grid) GridZoomStep(true); else SetZoom(_zoomLevel - ZoomStep);
                 e.Handled = true;
             }
-            else if (e.Key == Key.D0 && Keyboard.Modifiers == ModifierKeys.Control)
+            else if (key == Key.D0 && mods == ModifierKeys.Control)
             {
                 SetTrueZoom(1.0);
                 e.Handled = true;
             }
-            else if (e.Key == Key.Escape && _doc is not null && _currentTool != EditTool.Select)
+            else if (key == Key.Escape && _doc is not null && _currentTool != EditTool.Select)
             {
                 // 1.6.6 (#127 Phase 3): Esc with nothing left to cancel drops back to the Select
                 // tool, Acrobat-style. With Select already active it keeps falling through to the
@@ -602,13 +614,13 @@ namespace KillerPDF
                 SetTool(EditTool.Select);
                 e.Handled = true;
             }
-            else if (e.Key == Key.Escape)
+            else if (key == Key.Escape)
             {
                 // No overlay active - ESC exits the app
                 Close();
                 e.Handled = true;
             }
-            else if (e.Key == Key.Space && !_spaceHeld)
+            else if (key == Key.Space && !_spaceHeld)
             {
                 _spaceHeld = true;
                 PagePreviewPanel.Cursor = DragCursors.Open;

@@ -35,7 +35,8 @@ namespace KillerPDF
         // cannot describe a binding differently. Adding a shortcut is a one-line edit there.
         // A double claim on one cap would silently let the last writer win, which is how Ctrl+B
         // meant two things for so long; ShortcutTableTests asserts that never happens.
-        private static readonly Dictionary<KbLayer, Dictionary<string, (string Cat, string Label)>> KbMap =
+        // Rebuilt through the user's custom keys (#190) when the overlay is built and after they change.
+        private Dictionary<KbLayer, Dictionary<string, (string Cat, string Label)>> KbMap =
             ShortcutTable.BuildMap();
 
         // ── Physical layout ────────────────────────────────────────────────────────────────────
