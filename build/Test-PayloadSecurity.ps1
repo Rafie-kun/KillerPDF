@@ -20,6 +20,12 @@ try {
     $targets = @(Get-FirstPartyPayloadFiles $root)
     Assert ($targets.Count -eq 3) 'Must select exactly three files.'
     Assert ((@($targets | ForEach-Object { [IO.Path]::GetFileName($_) }) -join ',') -eq ($names -join ',')) 'Wrong signing targets.'
+    # The installed payload also carries the preview handler (#410), which is signed with the rest.
+    $handlerNames = @('KillerPDF.PreviewHandler.dll', 'KillerPDF.PreviewHandler.comhost.dll')
+    foreach ($name in $handlerNames) { [IO.File]::WriteAllText((Join-Path $root $name), $name) }
+    $installedTargets = @(Get-FirstPartyPayloadFiles $root | ForEach-Object { [IO.Path]::GetFileName($_) })
+    Assert (($installedTargets -join ',') -eq (($names + $handlerNames) -join ',')) 'Installed payload must also sign the preview handler.'
+    foreach ($name in $handlerNames) { [IO.File]::Delete((Join-Path $root $name)) }
     Reject { Assert-FirstPartyPayloadSignatures $root } 'Authenticode validation failed'
     [IO.File]::Delete((Join-Path $root 'KillerPdf.Engine.dll'))
     Reject { Get-FirstPartyPayloadFiles $root } 'missing'
