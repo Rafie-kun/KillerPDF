@@ -118,6 +118,7 @@ mscorlib.dll
 mscorrc.dll
 msquic.dll
 netstandard.dll
+NTwain.dll
 onnxruntime.dll
 onnxruntime.lib
 onnxruntime_providers_shared.dll

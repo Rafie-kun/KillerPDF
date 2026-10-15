@@ -8,6 +8,7 @@ KillerPdf.Engine.dll
 KillerPdf.Engine.xml
 LICENSE
 Microsoft.ML.OnnxRuntime.dll
+NTwain.dll
 onnxruntime.dll
 onnxruntime.lib
 onnxruntime_providers_shared.dll

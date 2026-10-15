@@ -40,7 +40,11 @@ install it. It is LGPL and is not bundled; when it is missing, Scan to PDF says 
    signing key removed, since this builds as part of KillerPDF rather than as a package.
 3. The upstream version, author and copyright metadata are kept so the compiled assembly
    carries them.
+4. `UseWindowsForms` is off. KillerPDF uses the WPF message loop hook, and Windows Forms
+   would otherwise ship with the self-contained portable build.
 
 The library sources are unmodified apart from three documentation comments, two in
 `Data/TwainTypesExtended.cs` and one in `Triplets/DGImage/DGImage.ImageLayout.cs`, where a dash
-character was reworded because this repository does not use them. No code changed.
+character was reworded because this repository does not use them, and
+`MessageLoopHooks.cs`, where `WindowsFormsMessageLoopHook` is wrapped in `#if NTWAIN_WINFORMS`
+so the library builds without Windows Forms. No other code changed.

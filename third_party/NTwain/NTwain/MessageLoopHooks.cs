@@ -84,6 +84,7 @@ namespace NTwain
         internal virtual string InvalidMessage { get { return string.Empty; } }
     }
 
+#if NTWAIN_WINFORMS
     /// <summary>
     /// A <see cref="MessageLoopHook"/> for use in winform applications.
     /// </summary>
@@ -152,6 +153,7 @@ namespace NTwain
 
         #endregion
     }
+#endif
 
     /// <summary>
     /// A <see cref="MessageLoopHook"/> for use in WPF applications.

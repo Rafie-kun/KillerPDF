@@ -2,7 +2,7 @@
 
   <!--
     Vendored copy of NTwain 3.7.6. See ../VENDORING.md for the upstream revision and the
-    list of changes made to this project file. The library sources are unmodified apart from three reworded comments listed in VENDORING.md.
+    list of changes made to this project file. The library sources are unmodified apart from the changes listed in VENDORING.md.
   -->
 
   <PropertyGroup>
@@ -10,7 +10,6 @@
     <RootNamespace>NTwain</RootNamespace>
     <TargetFramework>net10.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
-    <UseWindowsForms>true</UseWindowsForms>
     <LangVersion>7.1</LangVersion>
     <IsPackable>false</IsPackable>
     <NeutralLanguage>en-US</NeutralLanguage>
