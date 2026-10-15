@@ -1074,8 +1074,19 @@ internal static class PdfEngineIntegration
         bool allowSignatureInvalidation = false)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(sourcePath);
+        ResaveDocument(PdfDocument.Open(File.ReadAllBytes(sourcePath)), destinationPath,
+            allowSignatureInvalidation);
+    }
+
+    /// <summary>Rewrites a document the caller has already opened, so a batch that opens each
+    /// file to classify it does not read and parse the same file twice.</summary>
+    internal static void ResaveDocument(
+        PdfDocument source,
+        string destinationPath,
+        bool allowSignatureInvalidation = false)
+    {
+        ArgumentNullException.ThrowIfNull(source);
         ArgumentException.ThrowIfNullOrWhiteSpace(destinationPath);
-        PdfDocument source = PdfDocument.Open(File.ReadAllBytes(sourcePath));
         ReplaceWithBuiltResult(destinationPath, PdfDocumentWriter.Write(source,
             new PdfDocumentWriteOptions
             {

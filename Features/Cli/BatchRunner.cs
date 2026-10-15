@@ -218,7 +218,7 @@ namespace KillerPDF.Features
             try
             {
                 PdfEngineIntegration.ResaveDocument(
-                    src, dst, allowSignatureInvalidation: true);
+                    document, dst, allowSignatureInvalidation: true);
                 return "OK";
             }
             catch (Exception ex)
