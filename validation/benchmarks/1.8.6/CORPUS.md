@@ -36,7 +36,7 @@ Every path, status, and diagnostic detail matches 1.8.4 across the warmup and fi
 - One warmup and five measured passes per normal collection, run sequentially.
 - All 80 damaged inputs tested individually with a 30-second timeout.
 - Backups were paused and no other builds or test jobs ran during measured passes.
-- Full per-file logs remain outside the application repository at `C:\Users\steve\kp-bench-render\release-1.8.6-preflight-clean-20260921-2333`.
+- Full per-file logs remain outside the application repository at `C:\Users\steve\scratch\kp-bench-render\release-1.8.6-preflight-clean-20260921-2333`.
 
 The committed [run data](benchmark-runs.csv) and [summary](benchmark-summary.csv) preserve the release-level measurements. The comparison baseline is [KillerPDF 1.8.4](../1.8.4/CORPUS.md).
 

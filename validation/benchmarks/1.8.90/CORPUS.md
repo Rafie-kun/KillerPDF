@@ -30,7 +30,7 @@ The corpus series ran on a busy host: a stuck system process held a full CPU cor
 | Public regression | 228.228 | 222.307 | 223.461 | 2.59% shorter |
 | Standards and color | 5.999 | 5.876 | 6.176 | 2.05% shorter |
 
-Process CPU time per regression pass was 119.4 seconds for 1.8.80 and 119.7 seconds for 1.8.90, and every pass of every build produced the same per-file log. 1.8.90 has no timing regression against 1.8.80; the higher series medians came from host load. The batch resave path (the batch runner, the engine sources, and the resave call) is unchanged between the two versions. The private stress set was not part of this check. The check's logs are at `C:\Users\steve\kp-bench-render\perf-1880-vs-1890-20261013-quiet`.
+Process CPU time per regression pass was 119.4 seconds for 1.8.80 and 119.7 seconds for 1.8.90, and every pass of every build produced the same per-file log. 1.8.90 has no timing regression against 1.8.80; the higher series medians came from host load. The batch resave path (the batch runner, the engine sources, and the resave call) is unchanged between the two versions. The private stress set was not part of this check. The check's logs are at `C:\Users\steve\scratch\kp-bench-render\perf-1880-vs-1890-20261013-quiet`.
 
 ## Builds and method
 
@@ -42,7 +42,7 @@ Process CPU time per regression pass was 119.4 seconds for 1.8.80 and 119.7 seco
 - No cache flushing. Memory was not measured. Host load was not certified idle.
 - All 80 damaged inputs were tested individually with a 30-second timeout.
 - Input identity: file counts and byte totals match the recorded corpus identity for all four collections. After the series every input was rehashed against the published manifests: 16,696 of 16,696 regression entries, 552 of 552 standards entries (97 local standards files are not in the manifest), and 80 of 80 damaged-file entries matched. The private stress set has no published manifest and was verified by file count and byte total.
-- Full per-file logs remain outside the application repository at `C:\Users\steve\kp-bench-render\release-1.8.90-vs-1.9-alternating-20261013`.
+- Full per-file logs remain outside the application repository at `C:\Users\steve\scratch\kp-bench-render\release-1.8.90-vs-1.9-alternating-20261013`.
 
 The committed [run data](benchmark-runs.csv) and [summary](benchmark-summary.csv) preserve the release-level measurements. The previous published corpus record is [KillerPDF 1.8.80](../1.8.80/CORPUS.md).
 
