@@ -1,16 +1,26 @@
 param([string]$AssemblyPath)
 $ErrorActionPreference = 'Stop'
-[xml]$document = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'Strings.xml') -Raw -Encoding UTF8
 $tables = @{}
-foreach ($locale in $document.translations.locale) {
+$order = @{}
+foreach ($file in Get-ChildItem -LiteralPath $PSScriptRoot -Filter 'Strings.*.xml') {
+    [xml]$document = Get-Content -LiteralPath $file.FullName -Raw -Encoding UTF8
+    $locale = $document.locale
+    if ($file.Name -cne "Strings.$($locale.name).xml") { throw "File name does not match its locale: $($file.Name)" }
     if ($tables.ContainsKey($locale.name)) { throw "Duplicate locale: $($locale.name)" }
     $table = @{}
+    $keys = @()
     foreach ($entry in $locale.string) {
         if ($table.ContainsKey($entry.key)) { throw "Duplicate key: $($locale.name)/$($entry.key)" }
         if ([string]::IsNullOrWhiteSpace($entry.InnerText)) { throw "Empty value: $($locale.name)/$($entry.key)" }
-        $table[$entry.key] = $entry.InnerText
+        if ($entry.InnerText -match "[\r\n]") { throw "Line break written into the file, use \n: $($locale.name)/$($entry.key)" }
+        $table[$entry.key] = $entry.InnerText.Replace('\n', "`n")
+        $keys += $entry.key
     }
     $tables[$locale.name] = $table
+    $order[$locale.name] = $keys -join '|'
+}
+foreach ($locale in $order.Keys) {
+    if ($order[$locale] -cne $order['en-US']) { throw "Keys are not in the en-US order: $locale" }
 }
 $expected = @(Get-ChildItem -LiteralPath (Join-Path $PSScriptRoot '../../Strings') -Filter '*.xaml' | ForEach-Object { $_.BaseName })
 if (@(Compare-Object @($tables.Keys | Sort-Object) @($expected | Sort-Object)).Count) { throw 'Installer languages differ from app languages.' }
@@ -76,7 +86,7 @@ if ($AssemblyPath) {
                 if ($get.Invoke($null, @($key)) -cne $tables[$locale][$key]) { throw "Embedded value mismatch: $locale/$key" }
             }
         }
-        $variants = @{ 'en-GB'='en-US'; 'de-AT'='de-DE'; 'fr-CA'='fr-FR'; 'es-MX'='es'; 'bn-BD'='bn'; 'zh-HK'='zh-TW'; 'zh-Hant'='zh-TW'; 'zh-SG'='zh-CN'; 'zh-Hans'='zh-CN'; 'pt-BR'='en-US' }
+        $variants = @{ 'en-GB'='en-US'; 'de-AT'='de-DE'; 'fr-CA'='fr-FR'; 'es-MX'='es'; 'bn-BD'='bn'; 'zh-HK'='zh-TW'; 'zh-Hant'='zh-TW'; 'zh-SG'='zh-CN'; 'zh-Hans'='zh-CN'; 'pt-PT'='pt-BR' }
         foreach ($culture in $variants.Keys) {
             if ($resolve.Invoke($null, @([Globalization.CultureInfo]::GetCultureInfo($culture))) -cne $variants[$culture]) { throw "Culture fallback mismatch: $culture" }
         }

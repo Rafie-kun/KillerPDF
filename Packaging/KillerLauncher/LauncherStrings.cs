@@ -43,23 +43,32 @@ namespace KillerLauncher
             return "en-US";
         }
 
+        // Each language is its own embedded Strings.<locale>.xml (#409), so a translation can be
+        // reviewed and compared on its own. A value writes \n where it breaks a line, which keeps
+        // every string on one line of the file and the files line up key for key.
         private static Dictionary<string, Dictionary<string, string>> Load()
         {
             var result = new Dictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
-            using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("KillerLauncher.Strings.xml"))
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            foreach (string resource in assembly.GetManifestResourceNames())
             {
-                var document = new XmlDocument { XmlResolver = null };
-                document.Load(stream!);
-                foreach (XmlElement locale in document.DocumentElement!.SelectNodes("locale")!)
+                if (!resource.StartsWith("KillerLauncher.Strings.", StringComparison.Ordinal)
+                    || !resource.EndsWith(".xml", StringComparison.Ordinal)) continue;
+                using (var stream = assembly.GetManifestResourceStream(resource))
                 {
+                    var document = new XmlDocument { XmlResolver = null };
+                    document.Load(stream!);
+                    XmlElement locale = document.DocumentElement!;
                     var strings = new Dictionary<string, string>(StringComparer.Ordinal);
                     foreach (XmlElement entry in locale.SelectNodes("string")!)
-                        strings.Add(entry.GetAttribute("key"), entry.InnerText);
+                        strings.Add(entry.GetAttribute("key"), Unescape(entry.InnerText));
                     result.Add(locale.GetAttribute("name"), strings);
                 }
             }
             return result;
         }
+
+        internal static string Unescape(string value) => value.Replace("\\n", "\n");
     }
 
     [MarkupExtensionReturnType(typeof(string))]

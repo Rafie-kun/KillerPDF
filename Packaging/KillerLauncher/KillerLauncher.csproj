@@ -27,7 +27,9 @@
   <ItemGroup>
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.Xml" />
-    <EmbeddedResource Include="Strings.xml" LogicalName="KillerLauncher.Strings.xml" />
+    <!-- One file per language (#409): Strings.en-US.xml embeds as KillerLauncher.Strings.en-US.xml.
+         WithCulture="false" keeps the culture in each name from moving it into a satellite assembly. -->
+    <EmbeddedResource Include="Strings.*.xml" LogicalName="KillerLauncher.%(Filename)%(Extension)" WithCulture="false" />
   </ItemGroup>
 
   <ItemGroup Condition="Exists('$(PayloadZip)')">
