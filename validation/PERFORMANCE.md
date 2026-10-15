@@ -152,7 +152,7 @@ PowerShell with two KillerPDF executables and one shared input tree:
     -BaselineExe 'C:\path\to\KillerPDF-previous.exe' `
     -CandidateExe 'C:\path\to\KillerPDF-current.exe' `
     -InputDirectory 'C:\path\to\shared-corpus' `
-    -OutputDirectory "$env:USERPROFILE\killerpdf-benchmark\measured" `
+    -OutputDirectory "$env:USERPROFILE\kp-bench-render\measured" `
     -Runs 5 `
     -BaselineLabel 'KillerPDF previous' `
     -CandidateLabel 'KillerPDF current'
