@@ -622,6 +622,7 @@ namespace KillerPDF
                 // the whole document.
                 menu.Items.Add(MakeMenuItem(Loc("Str_Pages_FixOrientation"), (s, ev) => FixPageOrientation(), glyph: "\uE7AD"));
                 menu.Items.Add(MakeMenuItem(Loc("Str_Pages_Straighten"), (s, ev) => StraightenScannedPages()));
+                menu.Items.Add(MakeMenuItem(Loc("Str_Pages_DivideSpreads"), (s, ev) => DivideSpreads()));
                 menu.Items.Add(new Separator());
                 menu.Items.Add(MakeMenuItem(Loc("Str_Lbl_MoveUp"), (s, ev) => MoveUp_Click(s!, ev), glyph: ""));
                 menu.Items.Add(MakeMenuItem(Loc("Str_Lbl_MoveDown"), (s, ev) => MoveDown_Click(s!, ev), glyph: ""));
@@ -705,6 +706,7 @@ namespace KillerPDF
             menu.Items.Add(MakeMenuItem(Loc("Str_Pages_Reverse"), (s, e) => ReversePageOrder(), glyph: "\uE8CB"));
             menu.Items.Add(MakeMenuItem(Loc("Str_Pages_FixOrientation"), (s, e) => FixPageOrientation(), glyph: "\uE7AD"));
             menu.Items.Add(MakeMenuItem(Loc("Str_Pages_Straighten"), (s, e) => StraightenScannedPages()));
+            menu.Items.Add(MakeMenuItem(Loc("Str_Pages_DivideSpreads"), (s, e) => DivideSpreads()));
             menu.Items.Add(new Separator());
             menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_Print"), (s, e) => Print_Click(s!, e), "Ctrl+P", ""));
             menu.Items.Add(BuildComparisonContextItem());
