@@ -125,7 +125,7 @@ All 74 match the preceding `icc-range-inspection-20260908` output exactly.
 Compared with `image-mask-precedence-final`, 18 pages have changed pixels.
 All 18 current pages were inspected visually. Selected pages were also compared
 with the retained `uniform-alpha-3-PDFium` output and the earlier engine output.
-The folders are under `C:/Users/steve/killerpdf-benchmark/cmyk-compositing-20260907`.
+The folders are under `C:/Users/steve/kp-bench-render/legacy-killerpdf-benchmark/cmyk-compositing-20260907`.
 
 The review uses embedded conformance reference images where available. A
 PDFium difference alone does not establish an engine error. In particular,

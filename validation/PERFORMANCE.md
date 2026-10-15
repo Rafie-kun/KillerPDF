@@ -197,7 +197,7 @@ the change; each now allocates less than 262,144 bytes. Coverage includes
 off-page, clipped, transparent, and singular placements, plus visible reuse.
 All 74 difficult-set app outputs at 2048 pixels remain byte-identical to the
 available-intent checkpoint. Raw outputs are in
-`C:\Users\steve\killerpdf-benchmark\cmyk-compositing-20260907\invisible-images-20260908`.
+`C:\Users\steve\kp-bench-render\legacy-killerpdf-benchmark\cmyk-compositing-20260907\invisible-images-20260908`.
 
 Reduced soft masks now retain only the needed resolution when the full mask
 was decoded solely for reduction. The 1024-pixel thumbnail regression reduces
@@ -565,7 +565,7 @@ PowerShell with two KillerPDF executables and one shared input tree:
     -BaselineExe 'C:\path\to\KillerPDF-previous.exe' `
     -CandidateExe 'C:\path\to\KillerPDF-current.exe' `
     -InputDirectory 'C:\path\to\shared-corpus' `
-    -OutputDirectory "$env:USERPROFILE\killerpdf-benchmark\measured" `
+    -OutputDirectory "$env:USERPROFILE\kp-bench-render\measured" `
     -Runs 5 `
     -BaselineLabel 'KillerPDF previous' `
     -CandidateLabel 'KillerPDF current'
