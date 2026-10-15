@@ -48,6 +48,10 @@ internal static class RedactionGeometry
     internal static Rect PageToCanvas(double left, double bottom, double right, double top,
         double pageWidth, double pageHeight, double canvasWidth, double canvasHeight, int rotation)
     {
+        // Upside-down or mirrored text can report a box whose top is below its bottom, and a Rect
+        // with a negative size throws (#453). Ordering the edges gives every caller a real rectangle.
+        if (left > right) (left, right) = (right, left);
+        if (bottom > top) (bottom, top) = (top, bottom);
         return NormalizeRotation(rotation) switch
         {
             90 => new Rect(bottom * canvasWidth / pageHeight, left * canvasHeight / pageWidth,
