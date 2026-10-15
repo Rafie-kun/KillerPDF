@@ -249,6 +249,12 @@ namespace KillerPDF
             // shape as the F10 branches above.
             else if (e.Key == Key.System && e.SystemKey == Key.M && Keyboard.Modifiers == ModifierKeys.Alt)
             { ToggleToolbarHidden(); e.Handled = true; }
+            else if (e.Key == Key.System && e.SystemKey == Key.G
+                     && Keyboard.Modifiers == (ModifierKeys.Alt | ModifierKeys.Shift))
+            {
+                if (!e.IsRepeat) ToggleFilmGrain();
+                e.Handled = true;
+            }
             else if (e.Key == Key.F11) { ToggleFullScreen(); e.Handled = true; }
             else if (e.Key == Key.Escape && _fullScreen) { ToggleFullScreen(); e.Handled = true; }
             else if (e.Key == Key.F4 && Keyboard.Modifiers == ModifierKeys.Shift && _doc is not null)
@@ -746,6 +752,15 @@ namespace KillerPDF
             Set(ToolCropBtn, "Str_TT_CropTool", "8");
             Set(_toolRotateBtn, "Str_TT_RotateTool", "9");
             Set(ToolStampBtn, "Str_TT_StampTool", "0");
+            if (TryFindResource("Str_Theme_FilmGrain") is string grain)
+                FilmGrainCheck.ToolTip = $"{grain} (Alt+Shift+G)";
+        }
+
+        // Alt+Shift+G: Film Grain on or off, kept in step with the theme menu's check box.
+        private void ToggleFilmGrain()
+        {
+            FilmGrain.Set(!FilmGrain.Enabled);
+            FilmGrainCheck.IsChecked = FilmGrain.Enabled;
         }
 
         // Opens the online help / how-to page in the user's default browser.

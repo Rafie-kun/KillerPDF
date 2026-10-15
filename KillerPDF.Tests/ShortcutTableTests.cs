@@ -141,6 +141,7 @@ namespace KillerPDF.Tests
         [InlineData("CtrlShift:D1", "CtrlShift", "D1")]
         [InlineData("Shift:F9", "Shift", "F9")]
         [InlineData("Alt:M", "Alt", "M")]
+        [InlineData("AltShift:G", "AltShift", "G")]
         public void CapParsesItsLayerPrefix(string id, string layerName, string bare)
         {
             var cap = ShortcutTable.Cap(id);
@@ -180,6 +181,12 @@ namespace KillerPDF.Tests
         public void AltMIsOnTheMap()
         {
             Assert.Equal("Str_Toolbar_Hide", ShortcutTable.BuildMap()[KbLayer.Alt]["M"].Label);
+        }
+
+        [Fact]
+        public void FilmGrainIsOnTheAltShiftLayer()
+        {
+            Assert.Equal("Str_Theme_FilmGrain", ShortcutTable.BuildMap()[KbLayer.AltShift]["G"].Label);
         }
 
         [Fact]
