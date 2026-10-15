@@ -436,6 +436,76 @@ internal static class PdfEngineIntegration
         ReplaceWithBuiltResult(path, PdfCommentEditor.SetContents(document, comment, contents));
     }
 
+    /// <summary>
+    /// Applies the Comments window's changes (#288) as three revisions: new text, then removals,
+    /// then new notes and replies. Each step reads the comments again and finds them by object
+    /// number, so a removal that shifts annotation positions cannot send an edit to the wrong one.
+    /// </summary>
+    internal static void ApplyCommentEdits(string path, IReadOnlyList<CommentEdit> edits, string? author)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        ArgumentNullException.ThrowIfNull(edits);
+        static (int, int, int) Key(PdfCommentInfo comment) =>
+            comment.ObjectNumber is int number ? (-1, -1, number) : (comment.PageIndex, comment.AnnotationIndex, 0);
+        static PdfCommentInfo Find(IReadOnlyList<PdfCommentInfo> current, PdfCommentInfo wanted) =>
+            current.FirstOrDefault(comment => Key(comment) == Key(wanted))
+            ?? throw new InvalidOperationException("A comment being changed is no longer in the document.");
+
+        var removed = edits.OfType<CommentRemoval>().Select(edit => Key(edit.Comment)).ToHashSet();
+        CommentTextEdit[] texts = [.. edits.OfType<CommentTextEdit>().Where(edit => !removed.Contains(Key(edit.Comment)))];
+        if (texts.Length > 0)
+        {
+            PdfDocument document = PdfDocument.Open(File.ReadAllBytes(path));
+            IReadOnlyList<PdfCommentInfo> current = PdfCommentReader.Read(document);
+            var editor = new PdfIncrementalAnnotationEditor(document);
+            foreach (CommentTextEdit edit in texts)
+            {
+                PdfCommentInfo comment = Find(current, edit.Comment);
+                editor.SetAnnotationContentsAt(comment.PageIndex, comment.AnnotationIndex,
+                    string.IsNullOrWhiteSpace(edit.Contents) ? null : edit.Contents);
+            }
+            ReplaceWithBuiltResult(path, editor.Build());
+        }
+
+        CommentRemoval[] removals = [.. edits.OfType<CommentRemoval>()];
+        if (removals.Length > 0)
+        {
+            PdfDocument document = PdfDocument.Open(File.ReadAllBytes(path));
+            IReadOnlyList<PdfCommentInfo> current = PdfCommentReader.Read(document);
+            var editor = new PdfIncrementalAnnotationEditor(document);
+            foreach (CommentRemoval removal in removals)
+            {
+                PdfCommentInfo comment = Find(current, removal.Comment);
+                editor.RemoveAnnotationAt(comment.PageIndex, comment.AnnotationIndex);
+            }
+            ReplaceWithBuiltResult(path, editor.Build());
+        }
+
+        CommentAddition[] additions = [.. edits.OfType<CommentAddition>()];
+        if (additions.Length > 0)
+        {
+            PdfDocument document = PdfDocument.Open(File.ReadAllBytes(path));
+            IReadOnlyList<PdfPageInformation> pages = PdfPageInformation.Read(document);
+            var editor = new PdfIncrementalAnnotationEditor(document);
+            DateTimeOffset now = DateTimeOffset.Now;
+            var metadata = new PdfAnnotationMetadata
+            {
+                Author = string.IsNullOrWhiteSpace(author) ? null : author,
+                CreationDate = now,
+                ModificationDate = now
+            };
+            foreach (CommentAddition addition in additions)
+            {
+                PdfPageInformation page = pages[addition.PageIndex];
+                double x = addition.X ?? 24;
+                double y = addition.Y ?? Math.Max(0, page.Height - 48);
+                editor.AddTextNote(addition.PageIndex, x, y, addition.Contents,
+                    annotationMetadata: metadata, name: addition.Name, inReplyTo: addition.ReplyTo);
+            }
+            ReplaceWithBuiltResult(path, editor.Build());
+        }
+    }
+
     /// <summary>Removes a comment selected from the current document.</summary>
     internal static void RemoveComment(string path, PdfCommentInfo comment)
     {

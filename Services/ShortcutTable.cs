@@ -109,6 +109,7 @@ namespace KillerPDF
             ('O', "Str_DocumentTools_EditPortfolio"),
             ('U', "Str_DocumentTools_EditPortfolioStructure"),
             ('T', "Str_DocumentTools_EditAttachments"),
+            ('K', "Str_DocumentTools_Comments"),
             ('N', "Str_DocumentTools_NavigationAudit"),
             ('B', "Str_DocumentTools_AutoBookmarks"),
             ('G', "Str_DocumentTools_PageLabels"),
