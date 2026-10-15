@@ -11,6 +11,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - The Light theme draws a softer shadow under the toolbars.
 
 ### Fixed
+- Selecting upside-down or mirrored text no longer crashes with a width and height error, and search highlights and Crop on that text get a real box (#453).
 - The website top bar no longer leaves extra space under the wordmark and buttons.
 
 ## [1.8.91] - 2026-10-14

@@ -27,6 +27,23 @@ public sealed class PageCanvasGeometryTests
     [InlineData(90)]
     [InlineData(180)]
     [InlineData(270)]
+    public void InvertedPageBoxesMapToTheSameRectangle(int rotation)
+    {
+        bool quarter = rotation is 90 or 270;
+        double canvasWidth = quarter ? 400 : 600, canvasHeight = quarter ? 600 : 400;
+
+        Rect ordered = PageCanvasGeometry.PageToCanvas(50, 40, 90, 70, 300, 200, canvasWidth, canvasHeight, rotation);
+        Rect inverted = PageCanvasGeometry.PageToCanvas(90, 70, 50, 40, 300, 200, canvasWidth, canvasHeight, rotation);
+
+        Assert.Equal(ordered, inverted);
+        Assert.True(inverted.Width > 0 && inverted.Height > 0);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(90)]
+    [InlineData(180)]
+    [InlineData(270)]
     [InlineData(-90)]
     public void CanvasAndPageRectanglesRoundTrip(int rotation)
     {
