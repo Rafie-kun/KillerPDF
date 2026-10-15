@@ -94,6 +94,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Centered website logos with space above and below, standardized fonts and spacing, refreshed Engine branding, and added a two-column Corpus layout.
 - Corrected Help and Technical instructions, documentation navigation, current feature descriptions, and automatic Engine release facts.
 - The website top bar no longer leaves extra space under the wordmark and buttons.
+- Theme and language radio buttons and the Film Grain checkbox line up with their labels again.
 
 ## [1.8.91] - 2026-10-14
 
