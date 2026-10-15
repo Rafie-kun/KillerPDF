@@ -33,7 +33,8 @@ try {
         foreach ($width in @(90, 115, 180, 115)) {
             $columns.ColumnDefinitions[0].Width = New-Object Windows.GridLength ($width + 37)
             foreach ($version in @('1.9.0', '1.9.100')) {
-                $setVersion.Invoke($versionLine, @($format, $version)) | Out-Null
+                # The optional link arguments stay null, so the version renders as plain text.
+                $setVersion.Invoke($versionLine, @($format, $version, $null, $null)) | Out-Null
                 $window.Content.Measure((New-Object Windows.Size 650,([double]::PositiveInfinity)))
                 $window.Content.Arrange((New-Object Windows.Rect 0,0,650,([Math]::Max(390,$window.Content.DesiredSize.Height))))
                 $window.Content.UpdateLayout()
