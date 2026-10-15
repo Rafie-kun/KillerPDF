@@ -167,7 +167,10 @@ public static class PdfDocumentWriter
         if (maximumObjectNumber == int.MaxValue)
             throw new NotSupportedException("The PDF object-number range is too large to rewrite.");
 
-        using var output = new MemoryStream();
+        // A rewrite is usually close to the source size, so start there instead of growing
+        // the buffer through repeated large copies.
+        using var output = new MemoryStream(
+            (int)Math.Min(document.Source.Length + 65_536L, Array.MaxLength));
         WriteAscii(output, $"%PDF-{outputVersion}\n");
         output.Write([(byte)'%', 0xE2, 0xE3, 0xCF, 0xD3, (byte)'\n']);
 
@@ -375,7 +378,7 @@ public static class PdfDocumentWriter
         for (int index = 0; index < objects.Count; index++)
             WriteAscii(header, $"{objects[index].ObjectNumber} {offsets[index]} ");
         int first = checked((int)header.Length);
-        header.Write(body.ToArray());
+        header.Write(body.GetBuffer(), 0, checked((int)body.Length));
         byte[] data = header.ToArray();
         var entries = new List<KeyValuePair<PdfName, PdfObject>>
         {

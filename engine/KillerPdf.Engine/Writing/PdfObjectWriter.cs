@@ -54,9 +54,9 @@ public static class PdfObjectWriter
             throw new InvalidOperationException(
                 "PDF generation 65,535 is retired and cannot be written as an indirect object.");
 
-        WriteAscii(destination, value.ObjectNumber.ToString(CultureInfo.InvariantCulture));
+        WriteInteger(destination, value.ObjectNumber);
         destination.WriteByte((byte)' ');
-        WriteAscii(destination, value.Generation.ToString(CultureInfo.InvariantCulture));
+        WriteInteger(destination, value.Generation);
         destination.Write(" obj\n"u8);
         if (value.Value is PdfStream stream)
             WriteStream(destination, stream, 1);
@@ -79,7 +79,7 @@ public static class PdfObjectWriter
                 output.Write(boolean.Value ? "true"u8 : "false"u8);
                 break;
             case PdfInteger integer:
-                WriteAscii(output, integer.Value.ToString(CultureInfo.InvariantCulture));
+                WriteInteger(output, integer.Value);
                 break;
             case PdfReal real:
                 WriteAscii(output, FormatReal(real.Value));
@@ -125,23 +125,26 @@ public static class PdfObjectWriter
         int depth,
         int? streamLength)
     {
-        IEnumerable<KeyValuePair<PdfName, PdfObject>> entries = dictionary;
-        if (streamLength.HasValue)
+        // Dictionary keys are unique, so an unstable sort still gives one deterministic order.
+        var entries = new KeyValuePair<PdfName, PdfObject>[dictionary.Count + (streamLength.HasValue ? 1 : 0)];
+        int count = 0;
+        foreach (KeyValuePair<PdfName, PdfObject> entry in dictionary)
         {
-            entries = dictionary
-                .Where(entry => !entry.Key.Equals(LengthName))
-                .Append(new KeyValuePair<PdfName, PdfObject>(LengthName, new PdfInteger(streamLength.Value)));
+            if (streamLength.HasValue && entry.Key.Equals(LengthName))
+                continue;
+            entries[count++] = entry;
         }
+        if (streamLength.HasValue)
+            entries[count++] = new KeyValuePair<PdfName, PdfObject>(LengthName, new PdfInteger(streamLength.Value));
+        Array.Sort(entries, 0, count, PdfEntryKeyComparer.Instance);
 
         output.Write("<<"u8);
-        foreach (KeyValuePair<PdfName, PdfObject> entry in entries.OrderBy(
-                     entry => entry.Key,
-                     PdfNameByteComparer.Instance))
+        for (int index = 0; index < count; index++)
         {
             output.WriteByte((byte)' ');
-            WriteName(output, entry.Key);
+            WriteName(output, entries[index].Key);
             output.WriteByte((byte)' ');
-            WriteObject(output, entry.Value, depth);
+            WriteObject(output, entries[index].Value, depth);
         }
         output.Write(" >>"u8);
     }
@@ -159,9 +162,9 @@ public static class PdfObjectWriter
         if (reference.ObjectNumber == 0)
             throw new InvalidOperationException(
                 "PDF object number zero is reserved and cannot be written as an indirect reference.");
-        WriteAscii(output, reference.ObjectNumber.ToString(CultureInfo.InvariantCulture));
+        WriteInteger(output, reference.ObjectNumber);
         output.WriteByte((byte)' ');
-        WriteAscii(output, reference.Generation.ToString(CultureInfo.InvariantCulture));
+        WriteInteger(output, reference.Generation);
         output.Write(" R"u8);
     }
 
@@ -284,6 +287,14 @@ public static class PdfObjectWriter
         && value is not (byte)'}'
         && value is not (byte)'/';
 
+    private static void WriteInteger(Stream output, long value)
+    {
+        Span<byte> digits = stackalloc byte[20];
+        if (!value.TryFormat(digits, out int written, default, CultureInfo.InvariantCulture))
+            throw new InvalidOperationException("The PDF integer could not be formatted.");
+        output.Write(digits[..written]);
+    }
+
     private static void WriteAscii(Stream output, string value)
     {
         foreach (char character in value)
@@ -294,19 +305,13 @@ public static class PdfObjectWriter
         }
     }
 
-    private sealed class PdfNameByteComparer : IComparer<PdfName>
+    private sealed class PdfEntryKeyComparer : IComparer<KeyValuePair<PdfName, PdfObject>>
     {
-        public static PdfNameByteComparer Instance { get; } = new();
+        public static PdfEntryKeyComparer Instance { get; } = new();
 
-        public int Compare(PdfName? left, PdfName? right)
-        {
-            if (ReferenceEquals(left, right))
-                return 0;
-            if (left is null)
-                return -1;
-            if (right is null)
-                return 1;
-            return left.Bytes.Span.SequenceCompareTo(right.Bytes.Span);
-        }
+        public int Compare(KeyValuePair<PdfName, PdfObject> left, KeyValuePair<PdfName, PdfObject> right) =>
+            ReferenceEquals(left.Key, right.Key)
+                ? 0
+                : left.Key.Bytes.Span.SequenceCompareTo(right.Key.Bytes.Span);
     }
 }

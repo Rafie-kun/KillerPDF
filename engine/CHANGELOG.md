@@ -78,6 +78,7 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 - Sampled ordinary eight-bit image soft masks directly during bilinear interpolation, reducing repeated mask work without changing pixels.
 - Parsed content-stream numbers directly from UTF-8 bytes, reducing repeated Form rendering time without changing output.
 - Reduced font-map parsing and text-decoding allocations.
+- Full rewrites allocate about a fifth less and use less processor time: the output buffer starts at the source size, parsed dictionaries are adopted instead of copied, and dictionary keys and integers are written without temporary sequences or strings. Output bytes are unchanged.
 - Preserved antialiased coverage for matching clipping paths and consecutive identical opaque CMYK fills.
 - Centered host-resolved Identity glyphs when their widths are omitted from the PDF.
 - Improved fine detail when reducing images with soft masks, including fully opaque masks.

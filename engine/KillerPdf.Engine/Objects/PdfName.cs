@@ -27,8 +27,7 @@ public sealed class PdfName : PdfObject, IEquatable<PdfName>
     public override int GetHashCode()
     {
         var hash = new HashCode();
-        foreach (byte value in _bytes)
-            hash.Add(value);
+        hash.AddBytes(_bytes);
         return hash.ToHashCode();
     }
 

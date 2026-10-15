@@ -274,7 +274,7 @@ public sealed class PdfObjectParser(
         }
 
         Take();
-        return new PdfDictionary(entries);
+        return PdfDictionary.Adopt(entries);
     }
 
     private PdfStream ParseStream(PdfDictionary dictionary, int streamKeywordOffset)

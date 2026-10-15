@@ -11,7 +11,7 @@ public sealed class PdfDictionary : PdfObject, IReadOnlyDictionary<PdfName, PdfO
     public PdfDictionary(IEnumerable<KeyValuePair<PdfName, PdfObject>> entries)
     {
         ArgumentNullException.ThrowIfNull(entries);
-        _entries = [];
+        _entries = entries.TryGetNonEnumeratedCount(out int count) ? new(count) : [];
         foreach ((PdfName key, PdfObject value) in entries)
         {
             if (key is null)
@@ -25,6 +25,11 @@ public sealed class PdfDictionary : PdfObject, IReadOnlyDictionary<PdfName, PdfO
                 throw new ArgumentException($"The dictionary contains the duplicate key {key}.", nameof(entries));
         }
     }
+
+    private PdfDictionary(Dictionary<PdfName, PdfObject> entries) => _entries = entries;
+
+    /// <summary>Takes ownership of a parser-built dictionary whose keys and values are already valid.</summary>
+    internal static PdfDictionary Adopt(Dictionary<PdfName, PdfObject> entries) => new(entries);
 
     /// <inheritdoc/>
     public int Count => _entries.Count;
