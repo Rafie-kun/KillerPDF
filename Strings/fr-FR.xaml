@@ -379,6 +379,17 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Ctx_InsertBlank">Insérer une page vierge après</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCWShort">Pivoter à droite</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCCWShort">Pivoter à gauche</sys:String>
+    <sys:String x:Key="Str_Pages_Reverse">Inverser l’ordre des pages</sys:String>
+    <sys:String x:Key="Str_Pages_FixOrientation">Corriger l’orientation des pages</sys:String>
+    <sys:String x:Key="Str_Pages_Straighten">Redresser les pages numérisées</sys:String>
+    <sys:String x:Key="Str_Pages_Reversed">Pages en ordre inverse : {0}</sys:String>
+    <sys:String x:Key="Str_Pages_Oriented">Pages remises à l’endroit : {0}</sys:String>
+    <sys:String x:Key="Str_Pages_OrientNone">Toutes les pages sont déjà à l’endroit.</sys:String>
+    <sys:String x:Key="Str_Pages_Unread">Pages laissées telles quelles, texte illisible : {0}</sys:String>
+    <sys:String x:Key="Str_Pages_Straightened">Pages redressées : {0}</sys:String>
+    <sys:String x:Key="Str_Pages_StraightenNone">Aucune page numérisée n’avait besoin d’être redressée.</sys:String>
+    <sys:String x:Key="Str_Pages_TextLayerSkipped">Numérisations laissées telles quelles car elles ont déjà une couche de texte : {0}. Redressez les numérisations avant l’OCR.</sys:String>
+    <sys:String x:Key="Str_Pages_Failed">Impossible de modifier les pages : {0}</sys:String>
     <sys:String x:Key="Str_Ctx_ExtractPages">Extraire la ou les pages</sys:String>
     <sys:String x:Key="Str_Ctx_ExportPageImage">Exporter la page en image</sys:String>
     <sys:String x:Key="Str_Ctx_DeletePages">Supprimer la ou les pages</sys:String>

@@ -379,6 +379,17 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_Ctx_InsertBlank">Inserisci pagina bianca dopo</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCWShort">Ruota in senso orario</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCCWShort">Ruota in senso anti orario</sys:String>
+    <sys:String x:Key="Str_Pages_Reverse">Inverti ordine pagine</sys:String>
+    <sys:String x:Key="Str_Pages_FixOrientation">Correggi orientamento pagine</sys:String>
+    <sys:String x:Key="Str_Pages_Straighten">Raddrizza pagine scansionate</sys:String>
+    <sys:String x:Key="Str_Pages_Reversed">Pagine in ordine inverso: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_Oriented">Pagine raddrizzate nel verso giusto: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_OrientNone">Tutte le pagine sono già nel verso giusto.</sys:String>
+    <sys:String x:Key="Str_Pages_Unread">Pagine lasciate invariate perché il testo non era leggibile: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_Straightened">Pagine raddrizzate: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_StraightenNone">Nessuna pagina scansionata doveva essere raddrizzata.</sys:String>
+    <sys:String x:Key="Str_Pages_TextLayerSkipped">Scansioni lasciate invariate perché hanno già un livello di testo: {0}. Raddrizza le scansioni prima dell’OCR.</sys:String>
+    <sys:String x:Key="Str_Pages_Failed">Impossibile modificare le pagine: {0}</sys:String>
     <sys:String x:Key="Str_Ctx_ExtractPages">Estrai pagine</sys:String>
     <sys:String x:Key="Str_Ctx_ExportPageImage">Esporta pagina come immagine</sys:String>
     <sys:String x:Key="Str_Ctx_DeletePages">Elimina pagine</sys:String>

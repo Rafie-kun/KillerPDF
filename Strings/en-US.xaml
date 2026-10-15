@@ -379,6 +379,17 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Ctx_InsertBlank">Insert Blank Page After</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCWShort">Rotate CW</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCCWShort">Rotate CCW</sys:String>
+    <sys:String x:Key="Str_Pages_Reverse">Reverse Page Order</sys:String>
+    <sys:String x:Key="Str_Pages_FixOrientation">Fix Page Orientation</sys:String>
+    <sys:String x:Key="Str_Pages_Straighten">Straighten Scanned Pages</sys:String>
+    <sys:String x:Key="Str_Pages_Reversed">Pages in reverse order: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_Oriented">Pages turned upright: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_OrientNone">Every page is already upright.</sys:String>
+    <sys:String x:Key="Str_Pages_Unread">Pages left as they were because their text could not be read: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_Straightened">Pages straightened: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_StraightenNone">No scanned page needed straightening.</sys:String>
+    <sys:String x:Key="Str_Pages_TextLayerSkipped">Scans left as they were because they already have a text layer: {0}. Straighten scans before running OCR.</sys:String>
+    <sys:String x:Key="Str_Pages_Failed">The pages could not be changed: {0}</sys:String>
     <sys:String x:Key="Str_Ctx_ExtractPages">Extract Page(s)</sys:String>
     <sys:String x:Key="Str_Ctx_ExportPageImage">Export page as image</sys:String>
     <sys:String x:Key="Str_Ctx_DeletePages">Delete Page(s)</sys:String>

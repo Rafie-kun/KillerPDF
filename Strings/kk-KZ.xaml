@@ -352,6 +352,17 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Ctx_InsertBlank">Кейін бос бет кірістіру</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCWShort">Сағат тілімен</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCCWShort">Сағат тіліне қарсы</sys:String>
+    <sys:String x:Key="Str_Pages_Reverse">Беттер ретін керісінше ету</sys:String>
+    <sys:String x:Key="Str_Pages_FixOrientation">Бет бағдарын түзету</sys:String>
+    <sys:String x:Key="Str_Pages_Straighten">Сканерленген беттерді түзулеу</sys:String>
+    <sys:String x:Key="Str_Pages_Reversed">Кері ретпен қойылған беттер: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_Oriented">Дұрыс бұрылған беттер: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_OrientNone">Барлық бет дұрыс тұр.</sys:String>
+    <sys:String x:Key="Str_Pages_Unread">Мәтіні оқылмағандықтан өзгертілмеген беттер: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_Straightened">Түзуленген беттер: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_StraightenNone">Түзулеуді қажет ететін сканерленген бет жоқ.</sys:String>
+    <sys:String x:Key="Str_Pages_TextLayerSkipped">Мәтін қабаты бар болғандықтан өзгертілмеген скандар: {0}. Скандарды мәтінді тану алдында түзулеңіз.</sys:String>
+    <sys:String x:Key="Str_Pages_Failed">Беттерді өзгерту мүмкін болмады: {0}</sys:String>
     <sys:String x:Key="Str_Ctx_ExtractPages">Бет(тер)ді шығару</sys:String>
     <sys:String x:Key="Str_Ctx_ExportPageImage">Бетті сурет ретінде экспорттау</sys:String>
     <sys:String x:Key="Str_Ctx_DeletePages">Бет(тер)ді жою</sys:String>

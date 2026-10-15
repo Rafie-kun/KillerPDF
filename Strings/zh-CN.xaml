@@ -306,6 +306,17 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Ctx_InsertBlank">在后方插入空白页</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCWShort">顺时针旋转</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCCWShort">逆时针旋转</sys:String>
+    <sys:String x:Key="Str_Pages_Reverse">反转页面顺序</sys:String>
+    <sys:String x:Key="Str_Pages_FixOrientation">修正页面方向</sys:String>
+    <sys:String x:Key="Str_Pages_Straighten">拉直扫描页面</sys:String>
+    <sys:String x:Key="Str_Pages_Reversed">已反转顺序的页面: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_Oriented">已转正的页面: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_OrientNone">所有页面都已是正向。</sys:String>
+    <sys:String x:Key="Str_Pages_Unread">因无法识别文字而保持原样的页面: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_Straightened">已拉直的页面: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_StraightenNone">没有需要拉直的扫描页面。</sys:String>
+    <sys:String x:Key="Str_Pages_TextLayerSkipped">因已有文本层而保持原样的扫描页: {0}。请在 OCR 之前拉直扫描页。</sys:String>
+    <sys:String x:Key="Str_Pages_Failed">无法更改页面: {0}</sys:String>
     <sys:String x:Key="Str_Ctx_ExtractPages">截取页面</sys:String>
     <sys:String x:Key="Str_Ctx_ExportPageImage">将页面导出为图片</sys:String>
     <sys:String x:Key="Str_Ctx_DeletePages">删除页面</sys:String>

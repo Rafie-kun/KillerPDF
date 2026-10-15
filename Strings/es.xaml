@@ -306,6 +306,17 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Ctx_InsertBlank">Insertar página en blanco después</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCWShort">Girar a la derecha</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCCWShort">Girar a la izquierda</sys:String>
+    <sys:String x:Key="Str_Pages_Reverse">Invertir orden de páginas</sys:String>
+    <sys:String x:Key="Str_Pages_FixOrientation">Corregir orientación de páginas</sys:String>
+    <sys:String x:Key="Str_Pages_Straighten">Enderezar páginas escaneadas</sys:String>
+    <sys:String x:Key="Str_Pages_Reversed">Páginas en orden inverso: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_Oriented">Páginas giradas a la posición correcta: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_OrientNone">Todas las páginas ya están en posición correcta.</sys:String>
+    <sys:String x:Key="Str_Pages_Unread">Páginas sin cambios porque su texto no se pudo leer: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_Straightened">Páginas enderezadas: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_StraightenNone">Ninguna página escaneada necesitaba enderezarse.</sys:String>
+    <sys:String x:Key="Str_Pages_TextLayerSkipped">Escaneos sin cambios porque ya tienen una capa de texto: {0}. Endereza los escaneos antes del OCR.</sys:String>
+    <sys:String x:Key="Str_Pages_Failed">No se pudieron cambiar las páginas: {0}</sys:String>
     <sys:String x:Key="Str_Ctx_ExtractPages">Extraer página(s)</sys:String>
     <sys:String x:Key="Str_Ctx_ExportPageImage">Exportar página como imagen</sys:String>
     <sys:String x:Key="Str_Ctx_DeletePages">Eliminar página(s)</sys:String>

@@ -379,6 +379,17 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Ctx_InsertBlank">Vložit prázdnou stránku za</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCWShort">Otočit doprava</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCCWShort">Otočit doleva</sys:String>
+    <sys:String x:Key="Str_Pages_Reverse">Obrátit pořadí stránek</sys:String>
+    <sys:String x:Key="Str_Pages_FixOrientation">Opravit orientaci stránek</sys:String>
+    <sys:String x:Key="Str_Pages_Straighten">Narovnat naskenované stránky</sys:String>
+    <sys:String x:Key="Str_Pages_Reversed">Stránky v obráceném pořadí: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_Oriented">Stránky otočené správně: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_OrientNone">Všechny stránky už jsou otočené správně.</sys:String>
+    <sys:String x:Key="Str_Pages_Unread">Stránky ponechané beze změny, protože text nešel přečíst: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_Straightened">Narovnané stránky: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_StraightenNone">Žádnou naskenovanou stránku nebylo třeba narovnat.</sys:String>
+    <sys:String x:Key="Str_Pages_TextLayerSkipped">Skeny ponechané beze změny, protože už mají textovou vrstvu: {0}. Skeny narovnejte před OCR.</sys:String>
+    <sys:String x:Key="Str_Pages_Failed">Stránky nelze změnit: {0}</sys:String>
     <sys:String x:Key="Str_Ctx_ExtractPages">Extrahovat stránky</sys:String>
     <sys:String x:Key="Str_Ctx_ExportPageImage">Exportovat stránku jako obrázek</sys:String>
     <sys:String x:Key="Str_Ctx_DeletePages">Smazat stránky</sys:String>

@@ -379,6 +379,17 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Ctx_InsertBlank">Üres oldal beszúrása utána</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCWShort">Forgatás jobbra</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCCWShort">Forgatás balra</sys:String>
+    <sys:String x:Key="Str_Pages_Reverse">Oldalsorrend megfordítása</sys:String>
+    <sys:String x:Key="Str_Pages_FixOrientation">Oldaltájolás javítása</sys:String>
+    <sys:String x:Key="Str_Pages_Straighten">Beolvasott oldalak kiegyenesítése</sys:String>
+    <sys:String x:Key="Str_Pages_Reversed">Fordított sorrendbe tett oldalak: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_Oriented">Helyes állásba fordított oldalak: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_OrientNone">Minden oldal már helyes állású.</sys:String>
+    <sys:String x:Key="Str_Pages_Unread">Változatlanul hagyott oldalak, mert a szövegük nem volt olvasható: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_Straightened">Kiegyenesített oldalak: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_StraightenNone">Egyik beolvasott oldalt sem kellett kiegyenesíteni.</sys:String>
+    <sys:String x:Key="Str_Pages_TextLayerSkipped">Változatlanul hagyott beolvasások, mert már van szövegrétegük: {0}. Az OCR előtt egyenesítse ki a beolvasásokat.</sys:String>
+    <sys:String x:Key="Str_Pages_Failed">Az oldalakat nem sikerült módosítani: {0}</sys:String>
     <sys:String x:Key="Str_Ctx_ExtractPages">Oldal(ak) kinyerése</sys:String>
     <sys:String x:Key="Str_Ctx_ExportPageImage">Oldal exportálása képként</sys:String>
     <sys:String x:Key="Str_Ctx_DeletePages">Oldal(ak) törlése</sys:String>

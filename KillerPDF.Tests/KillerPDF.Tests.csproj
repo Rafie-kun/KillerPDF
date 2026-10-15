@@ -93,6 +93,7 @@
     <Compile Include="..\Services\BitmapHelpers.cs" Link="Services\BitmapHelpers.cs" />
     <Compile Include="..\Services\PdfPageDifference.cs" Link="Services\PdfPageDifference.cs" />
     <Compile Include="..\Services\PageAnnotationInsertion.cs" Link="Services\PageAnnotationInsertion.cs" />
+    <Compile Include="..\Services\PageGeometry.cs" Link="Services\PageGeometry.cs" />
     <Compile Include="..\Services\FormOcrPolicy.cs" Link="Services\FormOcrPolicy.cs" />
     <Compile Include="..\Services\CombFieldLayout.cs" Link="Services\CombFieldLayout.cs" />
     <Compile Include="..\Services\ContinuousRenderOrder.cs" Link="Services\ContinuousRenderOrder.cs" />

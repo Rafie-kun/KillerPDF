@@ -306,6 +306,17 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Ctx_InsertBlank">পরে খালি পৃষ্ঠা যোগ করুন</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCWShort">ঘড়ির কাঁটার দিকে ঘোরান</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCCWShort">ঘড়ির কাঁটার বিপরীতে ঘোরান</sys:String>
+    <sys:String x:Key="Str_Pages_Reverse">পৃষ্ঠার ক্রম উল্টান</sys:String>
+    <sys:String x:Key="Str_Pages_FixOrientation">পৃষ্ঠার দিক ঠিক করুন</sys:String>
+    <sys:String x:Key="Str_Pages_Straighten">স্ক্যান করা পৃষ্ঠা সোজা করুন</sys:String>
+    <sys:String x:Key="Str_Pages_Reversed">উল্টো ক্রমে রাখা পৃষ্ঠা: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_Oriented">সোজা করে ঘোরানো পৃষ্ঠা: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_OrientNone">সব পৃষ্ঠা আগে থেকেই সোজা আছে।</sys:String>
+    <sys:String x:Key="Str_Pages_Unread">লেখা পড়া যায়নি বলে অপরিবর্তিত রাখা পৃষ্ঠা: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_Straightened">সোজা করা পৃষ্ঠা: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_StraightenNone">কোনো স্ক্যান করা পৃষ্ঠা সোজা করার দরকার ছিল না।</sys:String>
+    <sys:String x:Key="Str_Pages_TextLayerSkipped">আগে থেকেই টেক্সট স্তর থাকায় অপরিবর্তিত রাখা স্ক্যান: {0}। OCR চালানোর আগে স্ক্যান সোজা করুন।</sys:String>
+    <sys:String x:Key="Str_Pages_Failed">পৃষ্ঠাগুলো পরিবর্তন করা যায়নি: {0}</sys:String>
     <sys:String x:Key="Str_Ctx_ExtractPages">পৃষ্ঠা বের করুন</sys:String>
     <sys:String x:Key="Str_Ctx_ExportPageImage">পৃষ্ঠাটি ছবি হিসেবে রপ্তানি করুন</sys:String>
     <sys:String x:Key="Str_Ctx_DeletePages">পৃষ্ঠা মুছুন</sys:String>

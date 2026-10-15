@@ -379,6 +379,17 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Ctx_InsertBlank">Sett inn tom side etter</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCWShort">Roter med klokken</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCCWShort">Roter mot klokken</sys:String>
+    <sys:String x:Key="Str_Pages_Reverse">Snu siderekkefølgen</sys:String>
+    <sys:String x:Key="Str_Pages_FixOrientation">Rett opp sideretningen</sys:String>
+    <sys:String x:Key="Str_Pages_Straighten">Rett opp skannede sider</sys:String>
+    <sys:String x:Key="Str_Pages_Reversed">Sider i omvendt rekkefølge: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_Oriented">Sider snudd riktig vei: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_OrientNone">Alle sidene står allerede riktig vei.</sys:String>
+    <sys:String x:Key="Str_Pages_Unread">Sider som ble latt være fordi teksten ikke kunne leses: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_Straightened">Rettede sider: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_StraightenNone">Ingen skannede sider trengte å rettes opp.</sys:String>
+    <sys:String x:Key="Str_Pages_TextLayerSkipped">Skanninger som ble latt være fordi de allerede har et tekstlag: {0}. Rett opp skanninger før OCR.</sys:String>
+    <sys:String x:Key="Str_Pages_Failed">Sidene kunne ikke endres: {0}</sys:String>
     <sys:String x:Key="Str_Ctx_ExtractPages">Trekk ut side(r)</sys:String>
     <sys:String x:Key="Str_Ctx_ExportPageImage">Eksporter side som bilde</sys:String>
     <sys:String x:Key="Str_Ctx_DeletePages">Slett side(r)</sys:String>

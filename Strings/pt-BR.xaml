@@ -379,6 +379,17 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Ctx_InsertBlank">Inserir página em branco depois</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCWShort">Girar no sentido horário</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCCWShort">Girar no sentido anti-horário</sys:String>
+    <sys:String x:Key="Str_Pages_Reverse">Inverter ordem das páginas</sys:String>
+    <sys:String x:Key="Str_Pages_FixOrientation">Corrigir orientação das páginas</sys:String>
+    <sys:String x:Key="Str_Pages_Straighten">Endireitar páginas digitalizadas</sys:String>
+    <sys:String x:Key="Str_Pages_Reversed">Páginas em ordem inversa: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_Oriented">Páginas giradas para a posição correta: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_OrientNone">Todas as páginas já estão na posição correta.</sys:String>
+    <sys:String x:Key="Str_Pages_Unread">Páginas mantidas como estavam porque o texto não pôde ser lido: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_Straightened">Páginas endireitadas: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_StraightenNone">Nenhuma página digitalizada precisou ser endireitada.</sys:String>
+    <sys:String x:Key="Str_Pages_TextLayerSkipped">Digitalizações mantidas como estavam porque já têm uma camada de texto: {0}. Endireite as digitalizações antes do OCR.</sys:String>
+    <sys:String x:Key="Str_Pages_Failed">Não foi possível alterar as páginas: {0}</sys:String>
     <sys:String x:Key="Str_Ctx_ExtractPages">Extrair página(s)</sys:String>
     <sys:String x:Key="Str_Ctx_ExportPageImage">Exportar página como imagem</sys:String>
     <sys:String x:Key="Str_Ctx_DeletePages">Excluir página(s)</sys:String>

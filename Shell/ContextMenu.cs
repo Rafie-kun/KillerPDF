@@ -616,9 +616,14 @@ namespace KillerPDF
                 menu.Items.Add(MakeTransformMenuItem(Loc("Str_Tf_Suffix"), (s, ev) => OpenTransformWindow()));
                 menu.Items.Add(MakeMenuItem(Loc("Str_ColorCorrection"), (s, ev) =>
                     OpenTransformWindow(TransformWindowMode.ColorCorrection), gesture: "E", glyph: ""));
+                // #436: with two or more pages selected these act on the selection, otherwise on
+                // the whole document.
+                menu.Items.Add(MakeMenuItem(Loc("Str_Pages_FixOrientation"), (s, ev) => FixPageOrientation(), glyph: "\uE7AD"));
+                menu.Items.Add(MakeMenuItem(Loc("Str_Pages_Straighten"), (s, ev) => StraightenScannedPages()));
                 menu.Items.Add(new Separator());
                 menu.Items.Add(MakeMenuItem(Loc("Str_Lbl_MoveUp"), (s, ev) => MoveUp_Click(s!, ev), glyph: ""));
                 menu.Items.Add(MakeMenuItem(Loc("Str_Lbl_MoveDown"), (s, ev) => MoveDown_Click(s!, ev), glyph: ""));
+                menu.Items.Add(MakeMenuItem(Loc("Str_Pages_Reverse"), (s, ev) => ReversePageOrder(), glyph: "\uE8CB"));
                 menu.Items.Add(new Separator());
                 menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_ExtractPages"), (s, ev) => Split_Click(s!, ev), glyph: ""));
                 // #207: the shared export dialog, scoped to the clicked selection (still editable).
@@ -695,6 +700,9 @@ namespace KillerPDF
         private void FillPageAgnosticMenu(ContextMenu menu)
         {
             menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_AddBlankPage"), (s, e) => AddBlankPageAtEnd(), glyph: ""));
+            menu.Items.Add(MakeMenuItem(Loc("Str_Pages_Reverse"), (s, e) => ReversePageOrder(), glyph: "\uE8CB"));
+            menu.Items.Add(MakeMenuItem(Loc("Str_Pages_FixOrientation"), (s, e) => FixPageOrientation(), glyph: "\uE7AD"));
+            menu.Items.Add(MakeMenuItem(Loc("Str_Pages_Straighten"), (s, e) => StraightenScannedPages()));
             menu.Items.Add(new Separator());
             menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_Print"), (s, e) => Print_Click(s!, e), "Ctrl+P", ""));
             menu.Items.Add(BuildComparisonContextItem());

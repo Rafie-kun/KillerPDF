@@ -306,6 +306,17 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Ctx_InsertBlank">Leere Seite danach einfügen</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCWShort">Im Uhrzeigersinn drehen</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCCWShort">Gegen den Uhrzeigersinn drehen</sys:String>
+    <sys:String x:Key="Str_Pages_Reverse">Seitenreihenfolge umkehren</sys:String>
+    <sys:String x:Key="Str_Pages_FixOrientation">Seitenausrichtung korrigieren</sys:String>
+    <sys:String x:Key="Str_Pages_Straighten">Gescannte Seiten begradigen</sys:String>
+    <sys:String x:Key="Str_Pages_Reversed">Seiten in umgekehrter Reihenfolge: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_Oriented">Aufrecht gedrehte Seiten: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_OrientNone">Alle Seiten stehen bereits aufrecht.</sys:String>
+    <sys:String x:Key="Str_Pages_Unread">Unverändert gelassene Seiten, deren Text nicht lesbar war: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_Straightened">Begradigte Seiten: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_StraightenNone">Keine gescannte Seite musste begradigt werden.</sys:String>
+    <sys:String x:Key="Str_Pages_TextLayerSkipped">Unverändert gelassene Scans mit vorhandener Textebene: {0}. Begradigen Sie Scans vor der Texterkennung.</sys:String>
+    <sys:String x:Key="Str_Pages_Failed">Die Seiten konnten nicht geändert werden: {0}</sys:String>
     <sys:String x:Key="Str_Ctx_ExtractPages">Seite(n) extrahieren</sys:String>
     <sys:String x:Key="Str_Ctx_ExportPageImage">Seite als Bild exportieren</sys:String>
     <sys:String x:Key="Str_Ctx_DeletePages">Seite(n) löschen</sys:String>

@@ -370,6 +370,17 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Ctx_InsertBlank">Wstaw pustą stronę po</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCWShort">Obróć w prawo</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCCWShort">Obróć w lewo</sys:String>
+    <sys:String x:Key="Str_Pages_Reverse">Odwróć kolejność stron</sys:String>
+    <sys:String x:Key="Str_Pages_FixOrientation">Popraw orientację stron</sys:String>
+    <sys:String x:Key="Str_Pages_Straighten">Wyprostuj zeskanowane strony</sys:String>
+    <sys:String x:Key="Str_Pages_Reversed">Strony w odwrotnej kolejności: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_Oriented">Strony obrócone do właściwej pozycji: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_OrientNone">Wszystkie strony są już we właściwej pozycji.</sys:String>
+    <sys:String x:Key="Str_Pages_Unread">Strony pozostawione bez zmian, bo nie udało się odczytać tekstu: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_Straightened">Wyprostowane strony: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_StraightenNone">Żadna zeskanowana strona nie wymagała prostowania.</sys:String>
+    <sys:String x:Key="Str_Pages_TextLayerSkipped">Skany pozostawione bez zmian, bo mają już warstwę tekstu: {0}. Prostuj skany przed OCR.</sys:String>
+    <sys:String x:Key="Str_Pages_Failed">Nie można zmienić stron: {0}</sys:String>
     <sys:String x:Key="Str_Ctx_ExtractPages">Wyodrębnij stronę(y)</sys:String>
     <sys:String x:Key="Str_Ctx_ExportPageImage">Eksportuj stronę jako obraz</sys:String>
     <sys:String x:Key="Str_Ctx_DeletePages">Usuń stronę(y)</sys:String>

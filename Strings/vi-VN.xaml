@@ -379,6 +379,17 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Ctx_InsertBlank">Chèn trang trống vào sau</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCWShort">Xoay theo chiều kim đồng hồ</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCCWShort">Xoay ngược chiều kim đồng hồ</sys:String>
+    <sys:String x:Key="Str_Pages_Reverse">Đảo ngược thứ tự trang</sys:String>
+    <sys:String x:Key="Str_Pages_FixOrientation">Sửa hướng trang</sys:String>
+    <sys:String x:Key="Str_Pages_Straighten">Làm thẳng trang quét</sys:String>
+    <sys:String x:Key="Str_Pages_Reversed">Số trang đã đảo thứ tự: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_Oriented">Số trang đã xoay đúng chiều: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_OrientNone">Mọi trang đều đã đúng chiều.</sys:String>
+    <sys:String x:Key="Str_Pages_Unread">Số trang giữ nguyên vì không đọc được chữ: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_Straightened">Số trang đã làm thẳng: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_StraightenNone">Không có trang quét nào cần làm thẳng.</sys:String>
+    <sys:String x:Key="Str_Pages_TextLayerSkipped">Số bản quét giữ nguyên vì đã có lớp văn bản: {0}. Hãy làm thẳng bản quét trước khi chạy OCR.</sys:String>
+    <sys:String x:Key="Str_Pages_Failed">Không thể thay đổi các trang: {0}</sys:String>
     <sys:String x:Key="Str_Ctx_ExtractPages">Trích xuất (các) trang</sys:String>
     <sys:String x:Key="Str_Ctx_ExportPageImage">Xuất trang thành hình ảnh</sys:String>
     <sys:String x:Key="Str_Ctx_DeletePages">Xóa (các) trang</sys:String>

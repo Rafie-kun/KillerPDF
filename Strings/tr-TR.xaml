@@ -306,6 +306,17 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Ctx_InsertBlank">Sonrasına Boş Sayfa Ekle</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCWShort">Saat Yönünde Döndür</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCCWShort">Saatin Tersine Döndür</sys:String>
+    <sys:String x:Key="Str_Pages_Reverse">Sayfa sırasını ters çevir</sys:String>
+    <sys:String x:Key="Str_Pages_FixOrientation">Sayfa yönünü düzelt</sys:String>
+    <sys:String x:Key="Str_Pages_Straighten">Taranan sayfaları düzleştir</sys:String>
+    <sys:String x:Key="Str_Pages_Reversed">Ters sıraya alınan sayfalar: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_Oriented">Düz çevrilen sayfalar: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_OrientNone">Tüm sayfalar zaten düz.</sys:String>
+    <sys:String x:Key="Str_Pages_Unread">Metni okunamadığı için olduğu gibi bırakılan sayfalar: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_Straightened">Düzleştirilen sayfalar: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_StraightenNone">Düzleştirilmesi gereken taranmış sayfa yok.</sys:String>
+    <sys:String x:Key="Str_Pages_TextLayerSkipped">Zaten metin katmanı olduğu için olduğu gibi bırakılan taramalar: {0}. Taramaları OCR öncesinde düzleştirin.</sys:String>
+    <sys:String x:Key="Str_Pages_Failed">Sayfalar değiştirilemedi: {0}</sys:String>
     <sys:String x:Key="Str_Ctx_ExtractPages">Sayfa(ları) Çıkart</sys:String>
     <sys:String x:Key="Str_Ctx_ExportPageImage">Sayfayı görüntü olarak dışa aktar</sys:String>
     <sys:String x:Key="Str_Ctx_DeletePages">Sayfa(ları) Sil</sys:String>

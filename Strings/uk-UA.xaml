@@ -379,6 +379,17 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Ctx_InsertBlank">Вставити порожню сторінку після</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCWShort">Повернути за годинниковою</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCCWShort">Повернути проти годинникової</sys:String>
+    <sys:String x:Key="Str_Pages_Reverse">Зворотний порядок сторінок</sys:String>
+    <sys:String x:Key="Str_Pages_FixOrientation">Виправити орієнтацію сторінок</sys:String>
+    <sys:String x:Key="Str_Pages_Straighten">Вирівняти скановані сторінки</sys:String>
+    <sys:String x:Key="Str_Pages_Reversed">Сторінок у зворотному порядку: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_Oriented">Сторінок повернуто правильно: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_OrientNone">Усі сторінки вже розташовані правильно.</sys:String>
+    <sys:String x:Key="Str_Pages_Unread">Сторінок залишено без змін, бо текст не вдалося прочитати: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_Straightened">Вирівняно сторінок: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_StraightenNone">Жодну скановану сторінку не потрібно вирівнювати.</sys:String>
+    <sys:String x:Key="Str_Pages_TextLayerSkipped">Сканів залишено без змін, бо вони вже мають текстовий шар: {0}. Вирівнюйте скани до розпізнавання тексту.</sys:String>
+    <sys:String x:Key="Str_Pages_Failed">Не вдалося змінити сторінки: {0}</sys:String>
     <sys:String x:Key="Str_Ctx_ExtractPages">Видобути сторінки</sys:String>
     <sys:String x:Key="Str_Ctx_ExportPageImage">Експортувати сторінку як зображення</sys:String>
     <sys:String x:Key="Str_Ctx_DeletePages">Видалити сторінки</sys:String>

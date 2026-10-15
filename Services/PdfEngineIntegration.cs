@@ -1551,6 +1551,60 @@ internal static class PdfEngineIntegration
         for (int index = 0; index < order.Count; index++) rotations[index] = values[order[index]];
     }
 
+    /// <summary>Puts every page in a new order. <paramref name="order"/> lists, for each new
+    /// position, the page that moves there.</summary>
+    internal static void ReorderPages(string path, IReadOnlyList<int> order)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        ArgumentNullException.ThrowIfNull(order);
+        PdfDocument document = PdfDocument.Open(File.ReadAllBytes(path));
+        var editor = new PdfIncrementalPageEditor(document);
+        ValidatePageOrder(order, editor.PageCount);
+        var current = Enumerable.Range(0, editor.PageCount).ToList();
+        for (int destination = 0; destination < order.Count; destination++)
+        {
+            int source = current.IndexOf(order[destination]);
+            if (source == destination) continue;
+            editor.MovePage(source, destination);
+            int page = current[source];
+            current.RemoveAt(source);
+            current.Insert(destination, page);
+        }
+        ReplaceWithBuiltResult(path, editor.Build());
+    }
+
+    /// <summary>The order that reverses <paramref name="pages"/> in place: they trade positions
+    /// with each other and every other page stays where it is.</summary>
+    internal static IReadOnlyList<int> PageOrderAfterReverse(int pageCount, IReadOnlyList<int> pages)
+    {
+        ArgumentNullException.ThrowIfNull(pages);
+        int[] slots = [.. pages.Distinct().OrderBy(index => index)];
+        if (slots.Any(index => index < 0 || index >= pageCount))
+            throw new ArgumentOutOfRangeException(nameof(pages));
+        int[] order = [.. Enumerable.Range(0, pageCount)];
+        for (int index = 0; index < slots.Length; index++)
+            order[slots[index]] = slots[slots.Length - 1 - index];
+        return order;
+    }
+
+    /// <summary>Moves rotation state with the pages of a reorder.</summary>
+    internal static void RemapRotationsAfterReorder(Dictionary<int, int> rotations, IReadOnlyList<int> order)
+    {
+        ArgumentNullException.ThrowIfNull(rotations);
+        ArgumentNullException.ThrowIfNull(order);
+        ValidatePageOrder(order, rotations.Count);
+        int[] values = [.. Enumerable.Range(0, rotations.Count).Select(index => rotations[index])];
+        rotations.Clear();
+        for (int index = 0; index < order.Count; index++) rotations[index] = values[order[index]];
+    }
+
+    private static void ValidatePageOrder(IReadOnlyList<int> order, int pageCount)
+    {
+        if (order.Count != pageCount || order.Distinct().Count() != pageCount
+            || order.Any(index => index < 0 || index >= pageCount))
+            throw new ArgumentException("The page order must list every page exactly once.", nameof(order));
+    }
+
     /// <summary>Moves rotation state with a reordered page.</summary>
     internal static void RemapRotationsAfterPageMove(
         Dictionary<int, int> rotations, int sourceIndex, int destinationIndex)

@@ -379,6 +379,17 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Ctx_InsertBlank">後に空白ページを挿入</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCWShort">右回転</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCCWShort">左回転</sys:String>
+    <sys:String x:Key="Str_Pages_Reverse">ページの順序を逆にする</sys:String>
+    <sys:String x:Key="Str_Pages_FixOrientation">ページの向きを修正</sys:String>
+    <sys:String x:Key="Str_Pages_Straighten">スキャンしたページの傾きを補正</sys:String>
+    <sys:String x:Key="Str_Pages_Reversed">逆順にしたページ: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_Oriented">正しい向きにしたページ: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_OrientNone">すべてのページはすでに正しい向きです。</sys:String>
+    <sys:String x:Key="Str_Pages_Unread">文字を読み取れなかったため変更しなかったページ: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_Straightened">傾きを補正したページ: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_StraightenNone">傾きの補正が必要なスキャンページはありません。</sys:String>
+    <sys:String x:Key="Str_Pages_TextLayerSkipped">テキストレイヤーがあるため変更しなかったスキャン: {0}。OCR の前に傾きを補正してください。</sys:String>
+    <sys:String x:Key="Str_Pages_Failed">ページを変更できませんでした: {0}</sys:String>
     <sys:String x:Key="Str_Ctx_ExtractPages">ページを抽出</sys:String>
     <sys:String x:Key="Str_Ctx_ExportPageImage">ページを画像としてエクスポート</sys:String>
     <sys:String x:Key="Str_Ctx_DeletePages">ページを削除</sys:String>
