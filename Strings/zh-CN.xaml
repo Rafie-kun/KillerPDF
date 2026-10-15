@@ -1153,7 +1153,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Dlg_ScanTextSaved" xml:space="preserve">转换后的 PDF 已保存：&#10;{0}&#10;&#10;已转换 {1} 个扫描页，{2} 个单词已成为文本。与扫描不够吻合的 {3} 个单词保持扫描原样，仍可搜索。</sys:String>
     <sys:String x:Key="Str_Dlg_ScanTextNone">此文档没有可转换的扫描页，因此未保存任何内容。已有文本或图形的页面保持不变。</sys:String>
     <sys:String x:Key="Str_Dlg_Repaired" xml:space="preserve">"{0}" 已成功修复。&#10;&#10;书签、表单和其他交互功能可能已丢失。请使用另存为将修复后的文件写入新位置。</sys:String>
-    <sys:String x:Key="Str_Dlg_RepairedRaster" xml:space="preserve">"{0}" 已通过 PDFium 栅格化修复。&#10;&#10;修复副本中的文本不可选择。请使用另存为将其写入新位置。</sys:String>
+    <sys:String x:Key="Str_Dlg_RepairedRaster" xml:space="preserve">"{0}" 已通过栅格化页面修复。&#10;&#10;修复副本中的文本不可选择。请使用另存为将其写入新位置。</sys:String>
     <sys:String x:Key="Str_Dlg_RepairAsk" xml:space="preserve">"{0}" 的结构已损坏，无法添加。&#10;&#10;要让 KillerPDF 尝试修复吗？将创建一个修复副本，原文件不会被更改。&#10;&#10;注意：修复后的文件可能缺少书签、表单和其他交互功能。</sys:String>
     <sys:String x:Key="Str_Dlg_LangDownloadAsk" xml:space="preserve">现在将下载语言模型（{0}）以便运行 OCR。&#10;&#10;您可以随时在 OCR 菜单中添加更多语言或切换到更高质量的模型。</sys:String>
     <sys:String x:Key="Str_Bar_More">更多设置</sys:String>
