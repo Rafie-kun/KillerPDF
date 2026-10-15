@@ -157,6 +157,7 @@ namespace KillerPDF
 
         internal void LoadOutlines()
         {
+            WireOutlineDrag();
             _outlinesFitted = false;   // triggers auto-fit on next tab switch
             _bmExtraSel.Clear();       // outlines may be gone after a rebuild/undo - selection resets
             CaptureOutlineExpandState();   // remember the outgoing tree's expanded branches (per file)
