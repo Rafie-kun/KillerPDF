@@ -105,7 +105,7 @@
                  # must match the font's name table; an approximate name makes WPF substitute the
                  system font. -->
             <!-- Family brand faces (licenses in Fonts/): Punktype (commercial license) for "Killer",
-                 Lacquer (OFL) for the app name, and Killer Sans (OFL) for headings and the footer.
+                 Lacquer (OFL) for the app name and dialog headings, and Killer Sans (OFL) for the footer.
                  The wordmark sizes put the app name's capitals at 1.55x the height of Killer's, the
                  same as the websites. -->
             <FontFamily x:Key="WordmarkFont">./Fonts/#Punktype</FontFamily>
