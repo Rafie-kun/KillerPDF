@@ -51,4 +51,10 @@ public sealed record PdfRenderOptions
     public int MaximumParallelism { get; init; } = 1;
     /// <summary>Gets the separate row-worker cap for large reduced JPEG 2000 image paints.</summary>
     public int Jpeg2000PaintParallelism { get; init; } = 1;
+    /// <summary>
+    /// Gets one ink plate to render instead of the composite page: Cyan, Magenta, Yellow,
+    /// Black or a spot colorant name. The page is drawn in ink and the plate's coverage comes
+    /// out as gray, black for full ink and white for none. Plate renders are never cached.
+    /// </summary>
+    public string? SeparationPlate { get; init; }
 }

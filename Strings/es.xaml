@@ -1347,6 +1347,10 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Raster_Apply">Rasterizar</sys:String>
     <sys:String x:Key="Str_Raster_Done">Se rasterizó una región de la página {0}</sys:String>
     <sys:String x:Key="Str_Raster_Failed">No se pudo rasterizar la región: {0}</sys:String>
+    <sys:String x:Key="Str_Sep_Hint">Cada plancha muestra cuánta tinta de ese color deposita la página: negro para cobertura total y blanco para ninguna. Las planchas sin tinta en esta página aparecen atenuadas.</sys:String>
+    <sys:String x:Key="Str_Sep_AllInks">Todas las tintas</sys:String>
+    <sys:String x:Key="Str_Sep_Report">Informe...</sys:String>
+    <sys:String x:Key="Str_Sep_Failed">No se pudo mostrar la vista previa de separaciones: {0}</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">Se copió 1 página a este documento.</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">Se copiaron {0} páginas a este documento.</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">Error al copiar la página:&#10;{0}</sys:String>

@@ -1367,6 +1367,10 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Raster_Apply">Pixelliser</sys:String>
     <sys:String x:Key="Str_Raster_Done">Zone de la page {0} pixellisée</sys:String>
     <sys:String x:Key="Str_Raster_Failed">Impossible de pixelliser la zone : {0}</sys:String>
+    <sys:String x:Key="Str_Sep_Hint">Chaque plaque montre la quantité de cette encre déposée par la page : noir pour une couverture totale, blanc pour aucune. Les plaques sans encre sur cette page sont estompées.</sys:String>
+    <sys:String x:Key="Str_Sep_AllInks">Toutes les encres</sys:String>
+    <sys:String x:Key="Str_Sep_Report">Rapport...</sys:String>
+    <sys:String x:Key="Str_Sep_Failed">Impossible d'afficher l'aperçu des séparations : {0}</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">1 page copiée dans ce document.</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">{0} pages copiées dans ce document.</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">Échec de la copie de la page :&#10;{0}</sys:String>

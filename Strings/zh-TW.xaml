@@ -1349,6 +1349,10 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_Raster_Apply">點陣化</sys:String>
     <sys:String x:Key="Str_Raster_Done">已點陣化第 {0} 頁的一個區域</sys:String>
     <sys:String x:Key="Str_Raster_Failed">無法點陣化該區域：{0}</sys:String>
+    <sys:String x:Key="Str_Sep_Hint">每個印版顯示頁面上該油墨的用量，黑色為滿版，白色為無。此頁上沒有油墨的印版會以淡色顯示。</sys:String>
+    <sys:String x:Key="Str_Sep_AllInks">所有油墨</sys:String>
+    <sys:String x:Key="Str_Sep_Report">報告...</sys:String>
+    <sys:String x:Key="Str_Sep_Failed">無法顯示分色預覽：{0}</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">已將 1 頁複製到此文件。</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">已將 {0} 頁複製到此文件。</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">頁面複製失敗：&#10;{0}</sys:String>

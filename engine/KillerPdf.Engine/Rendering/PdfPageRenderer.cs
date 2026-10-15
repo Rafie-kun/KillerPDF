@@ -213,7 +213,8 @@ public sealed partial class PdfPageRenderer
         if (pageIndex < 0 || pageIndex >= _pages.Count)
             throw new ArgumentOutOfRangeException(nameof(pageIndex));
         cancellationToken.ThrowIfCancellationRequested();
-        if (!options.CacheResult) return RenderUncached(pageIndex, options, cancellationToken);
+        if (!options.CacheResult || options.SeparationPlate is not null)
+            return RenderUncached(pageIndex, options, cancellationToken);
         var key = new RenderCacheKey(pageIndex, options.Width, options.Height,
             options.TransparentBackground, options.IncludeAnnotations,
             options.IncludeFormFields);
@@ -328,7 +329,15 @@ public sealed partial class PdfPageRenderer
         PdfColorTransform? outputProfile = pageHasGroup ? null : OutputProfile(null);
         PdfColorTransform? pageProfile = ReadGroupProfile(_tree.Pages[pageIndex].Dictionary, pageResources, diagnostics);
         bool considerRgbSpotShadow = false;
-        if (outputProfile is not null)
+        if (options.SeparationPlate is not null)
+        {
+            // A plate preview draws everything as ink so each process channel and named
+            // colorant can be read back on its own.
+            pixels.EnableInk(Color.White, profile: outputProfile
+                ?? (CmykGroup(_tree.Pages[pageIndex].Dictionary, pageResources, false) ? pageProfile : null));
+            pixels.TrackSpotUnits = true;
+        }
+        else if (outputProfile is not null)
             pixels.EnableInk(Color.White, profile: outputProfile);
         else if (CmykGroup(_tree.Pages[pageIndex].Dictionary, pageResources, false))
             pixels.EnableInk(Color.White, profile: pageProfile);
@@ -359,7 +368,8 @@ public sealed partial class PdfPageRenderer
             Process(ReadInstructions(pageIndex, diagnostics, cancellationToken),
                 pageResources, initialState, 0);
             RenderAppearances();
-            pixels.ConvertToBgra(cancellationToken);
+            if (options.SeparationPlate is string plate) pixels.ExtractPlate(plate, cancellationToken);
+            else pixels.ConvertToBgra(cancellationToken);
             return new PdfRenderedPage(rasterWidth, rasterHeight, pixels.Data, diagnostics);
         }
         finally

@@ -1354,6 +1354,10 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Raster_Apply">Raszterizálás</sys:String>
     <sys:String x:Key="Str_Raster_Done">A(z) {0}. oldal egy területe raszterizálva</sys:String>
     <sys:String x:Key="Str_Raster_Failed">A területet nem sikerült raszterizálni: {0}</sys:String>
+    <sys:String x:Key="Str_Sep_Hint">Minden nyomólemez megmutatja, mennyi festéket visz fel az oldal: fekete a teljes fedés, fehér a semmi. Az oldalon festéket nem tartalmazó lemezek halványak.</sys:String>
+    <sys:String x:Key="Str_Sep_AllInks">Minden festék</sys:String>
+    <sys:String x:Key="Str_Sep_Report">Jelentés...</sys:String>
+    <sys:String x:Key="Str_Sep_Failed">A színbontás előnézete nem jeleníthető meg: {0}</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">1 oldal átmásolva ebbe a dokumentumba.</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">{0} oldal átmásolva ebbe a dokumentumba.</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">Az oldal másolása sikertelen:&#10;{0}</sys:String>

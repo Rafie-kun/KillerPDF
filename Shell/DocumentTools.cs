@@ -31,12 +31,7 @@ public partial class MainWindow
                 path => PdfEngineIntegration.InspectPreflight(path).ToText()), "\uE9D9"),
             DocumentToolItem("Str_DocumentTools_PrintProduction", () => ShowDocumentReport(Loc("Str_DocumentTools_PrintProduction"),
                 path => PdfEngineIntegration.InspectPrintProduction(path).ToText()), "\uE7C3"),
-            DocumentToolItem("Str_DocumentTools_Separations", () => ShowDocumentReport(Loc("Str_DocumentTools_Separations"), path =>
-            {
-                var production = PdfEngineIntegration.InspectPrintProduction(path);
-                return PdfEngineIntegration.CreateSeparationPreview(path,
-                    production.Colorants.Select(colorant => colorant.Name)).ToText();
-            }), "\uE790"),
+            DocumentToolItem("Str_DocumentTools_Separations", ShowSeparationPreview, "\uE790"),
             DocumentToolItem("Str_DocumentTools_Accessibility", () => ShowDocumentReport(Loc("Str_DocumentTools_Accessibility"),
                 path => PdfEngineIntegration.InspectAccessibility(path).ToText()), "\uE776"),
             DocumentToolItem("Str_DocumentTools_Layers", () => ShowDocumentReport(Loc("Str_DocumentTools_Layers"),

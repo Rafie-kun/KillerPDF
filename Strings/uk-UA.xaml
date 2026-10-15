@@ -1367,6 +1367,10 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Raster_Apply">Раструвати</sys:String>
     <sys:String x:Key="Str_Raster_Done">Область сторінки {0} растровано</sys:String>
     <sys:String x:Key="Str_Raster_Failed">Не вдалося раструвати область: {0}</sys:String>
+    <sys:String x:Key="Str_Sep_Hint">Кожна друкарська форма показує, скільки цієї фарби наносить сторінка: чорний означає повне покриття, білий відсутність. Форми без фарби на цій сторінці приглушені.</sys:String>
+    <sys:String x:Key="Str_Sep_AllInks">Усі фарби</sys:String>
+    <sys:String x:Key="Str_Sep_Report">Звіт...</sys:String>
+    <sys:String x:Key="Str_Sep_Failed">Не вдалося показати попередній перегляд кольороподілу: {0}</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">Скопійовано 1 сторінку до цього документа.</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">Скопійовано сторінок до цього документа: {0}.</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">Не вдалося скопіювати сторінку:&#10;{0}</sys:String>

@@ -1366,6 +1366,10 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Raster_Apply">Растрлау</sys:String>
     <sys:String x:Key="Str_Raster_Done">{0}-беттің аймағы растрланды</sys:String>
     <sys:String x:Key="Str_Raster_Failed">Аймақты растрлау мүмкін болмады: {0}</sys:String>
+    <sys:String x:Key="Str_Sep_Hint">Әр баспа пішіні беттің сол бояуды қаншалықты түсіретінін көрсетеді: толық жабу қара, мүлде жоқ болса ақ. Бұл бетте бояуы жоқ пішіндер күңгірт көрсетіледі.</sys:String>
+    <sys:String x:Key="Str_Sep_AllInks">Барлық бояулар</sys:String>
+    <sys:String x:Key="Str_Sep_Report">Есеп...</sys:String>
+    <sys:String x:Key="Str_Sep_Failed">Бөлу алдын ала қарауын көрсету мүмкін болмады: {0}</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">Осы құжатқа 1 бет көшірілді.</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">Осы құжатқа {0} бет көшірілді.</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">Бетті көшіру сәтсіз аяқталды:&#10;{0}</sys:String>

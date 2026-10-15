@@ -538,6 +538,7 @@ public sealed partial class PdfPageRenderer
         internal void PaintSpotPrepared(int offset, in Color color, bool overprint,
             uint sourceInk, PreparedSpotPaint prepared)
         {
+            NoteSpotUnits(color, sourceInk);
             if (!overprint)
             {
                 WriteInk(_spotBaseInk!, offset, 0);
@@ -559,6 +560,7 @@ public sealed partial class PdfPageRenderer
 
         internal void PaintSpot(int offset, in Color color, bool overprint, uint sourceInk)
         {
+            NoteSpotUnits(color, sourceInk);
             lock (_spotSync)
             {
                 if (_spotBaseInk is null)
@@ -640,6 +642,7 @@ public sealed partial class PdfPageRenderer
         internal void PaintSpotCoveragePrepared(int offset, in Color color, uint sourceInk,
             byte coverage, bool overprint, byte[] plate, byte[]? additionalPlate)
         {
+            NoteSpotUnits(color, sourceInk);
             byte[] baseInk = _spotBaseInk!;
             uint spotInk = color.SpotTint <= 0 ? 0 : color.SpotInk ?? sourceInk;
             uint processMask = 0;
@@ -675,6 +678,7 @@ public sealed partial class PdfPageRenderer
 
         internal void PaintSpotRun(int offset, int count, in Color color, bool overprint, uint sourceInk)
         {
+            NoteSpotUnits(color, sourceInk);
             lock (_spotSync)
             {
                 if (_spotBaseInk is null)
@@ -876,6 +880,72 @@ public sealed partial class PdfPageRenderer
             foreach (byte[] plate in _spotPlateValues) RasterBuffers.Return(plate);
             _spotPlates = null;
             _spotPlateValues = [];
+        }
+
+        /// <summary>Set for a plate preview, so named-colorant tints can be read back.</summary>
+        internal bool TrackSpotUnits { get; set; }
+        private readonly Lock _spotUnitSync = new();
+        private Dictionary<string, double>? _spotUnits;
+
+        // A spot plate holds the ink that stands in for the colorant at its tint. The largest
+        // channel of that ink at full tint is recorded per colorant, so a plate pixel's ink
+        // can be turned back into the tint that was painted.
+        private void NoteSpotUnits(in Color color, uint sourceInk)
+        {
+            if (!TrackSpotUnits) return;
+            NoteSpotUnit(color.SpotName, color.SpotTint, color.SpotInk ?? sourceInk);
+            if (color.AdditionalSpot is { } additional)
+                NoteSpotUnit(additional.Name, additional.Tint, additional.Ink);
+        }
+
+        private void NoteSpotUnit(string? name, double tint, uint ink)
+        {
+            if (name is null || !(tint > 0)) return;
+            double unit = MaxInkChannel(ink) / Math.Min(1, tint);
+            if (unit <= 0) return;
+            lock (_spotUnitSync)
+            {
+                _spotUnits ??= new Dictionary<string, double>(StringComparer.Ordinal);
+                if (!_spotUnits.TryGetValue(name, out double known) || unit > known) _spotUnits[name] = unit;
+            }
+        }
+
+        private static int MaxInkChannel(uint ink) => Math.Max(
+            Math.Max((int)(ink & 0xff), (int)(ink >> 8 & 0xff)),
+            Math.Max((int)(ink >> 16 & 0xff), (int)(ink >> 24)));
+
+        /// <summary>
+        /// Replaces the ink pixels with one plate's coverage as opaque-or-alpha gray BGRA:
+        /// a process channel from the process ink, or a named colorant's tint.
+        /// </summary>
+        internal void ExtractPlate(string plate, CancellationToken cancellationToken = default)
+        {
+            int channel = plate switch { "Cyan" => 0, "Magenta" => 1, "Yellow" => 2, "Black" => 3, _ => -1 };
+            byte[]? process = Ink is null ? null : _spotBaseInk ?? Ink;
+            byte[]? spot = null;
+            double unit = 255;
+            if (channel < 0 && _spotPlates is not null && _spotPlates.TryGetValue(plate, out byte[]? values))
+            {
+                spot = values;
+                if (_spotUnits is not null && _spotUnits.TryGetValue(plate, out double known) && known > 0)
+                    unit = known;
+            }
+            for (int offset = 0; offset < Length; offset += 4)
+            {
+                if ((offset & 4095) == 0) cancellationToken.ThrowIfCancellationRequested();
+                byte alpha = Alpha(offset);
+                int tint = channel >= 0
+                    ? process is null ? 0 : process[offset + channel]
+                    : spot is null ? 0
+                    : (int)Math.Round(Math.Min(1, MaxInkChannel(ReadInk(spot, offset)) / unit) * 255);
+                byte gray = (byte)(255 - tint);
+                Data[offset] = gray;
+                Data[offset + 1] = gray;
+                Data[offset + 2] = gray;
+                Data[offset + 3] = alpha;
+            }
+            ReleaseSpotPlates();
+            Ink = null;
         }
 
         internal void ReleaseInk()

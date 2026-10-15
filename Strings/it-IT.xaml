@@ -1367,6 +1367,10 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_Raster_Apply">Rasterizza</sys:String>
     <sys:String x:Key="Str_Raster_Done">Area della pagina {0} rasterizzata</sys:String>
     <sys:String x:Key="Str_Raster_Failed">Impossibile rasterizzare l'area: {0}</sys:String>
+    <sys:String x:Key="Str_Sep_Hint">Ogni lastra mostra quanto di quell'inchiostro deposita la pagina: nero per copertura piena, bianco per nessuna. Le lastre senza inchiostro in questa pagina sono attenuate.</sys:String>
+    <sys:String x:Key="Str_Sep_AllInks">Tutti gli inchiostri</sys:String>
+    <sys:String x:Key="Str_Sep_Report">Report...</sys:String>
+    <sys:String x:Key="Str_Sep_Failed">Impossibile mostrare l'anteprima delle separazioni: {0}</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">1 pagina copiata in questo documento.</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">{0} pagine copiate in questo documento.</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">Copia pagina non riuscita:&#10;{0}</sys:String>

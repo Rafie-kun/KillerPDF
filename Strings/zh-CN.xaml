@@ -1351,6 +1351,10 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Raster_Apply">栅格化</sys:String>
     <sys:String x:Key="Str_Raster_Done">已栅格化第 {0} 页的一个区域</sys:String>
     <sys:String x:Key="Str_Raster_Failed">无法栅格化该区域：{0}</sys:String>
+    <sys:String x:Key="Str_Sep_Hint">每个印版显示页面上该油墨的用量，黑色为满版，白色为无。此页上没有油墨的印版显示为灰色。</sys:String>
+    <sys:String x:Key="Str_Sep_AllInks">所有油墨</sys:String>
+    <sys:String x:Key="Str_Sep_Report">报告...</sys:String>
+    <sys:String x:Key="Str_Sep_Failed">无法显示分色预览：{0}</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">已将 1 页复制到此文档。</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">已将 {0} 页复制到此文档。</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">页面复制失败：&#10;{0}</sys:String>

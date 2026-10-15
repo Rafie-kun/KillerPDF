@@ -1355,6 +1355,10 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Raster_Apply">Rasteryzuj</sys:String>
     <sys:String x:Key="Str_Raster_Done">Zrasteryzowano obszar strony {0}</sys:String>
     <sys:String x:Key="Str_Raster_Failed">Nie udało się zrasteryzować obszaru: {0}</sys:String>
+    <sys:String x:Key="Str_Sep_Hint">Każda płyta pokazuje, ile danej farby nakłada strona: czarny to pełne krycie, biały brak. Płyty bez farby na tej stronie są przygaszone.</sys:String>
+    <sys:String x:Key="Str_Sep_AllInks">Wszystkie farby</sys:String>
+    <sys:String x:Key="Str_Sep_Report">Raport...</sys:String>
+    <sys:String x:Key="Str_Sep_Failed">Nie udało się pokazać podglądu separacji: {0}</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">Skopiowano 1 stronę do tego dokumentu.</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">Skopiowano {0} stron do tego dokumentu.</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">Kopiowanie strony nie powiodło się:&#10;{0}</sys:String>

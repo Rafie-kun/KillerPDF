@@ -183,6 +183,15 @@ internal sealed class PdfPageRenderSession : IDisposable
             cancellationToken);
     }
 
+    /// <summary>One ink plate of a page as gray coverage (#264), black for full ink. Not cached.</summary>
+    internal PdfRenderedPage RenderPlate(int pageIndex, string plate,
+        CancellationToken cancellationToken = default)
+    {
+        EngineRenderOptions options = CreateRenderOptions(pageIndex, false, true, true)
+            with { SeparationPlate = plate, CacheResult = false };
+        return RenderOwnedPage(Renderer, pageIndex, options, cancellationToken);
+    }
+
     // Pixels remain valid until the next encoding render or session disposal.
     internal PdfPageForEncoding RenderPageForEncoding(int pageIndex,
         CancellationToken cancellationToken = default)

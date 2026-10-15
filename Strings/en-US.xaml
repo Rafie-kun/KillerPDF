@@ -1367,6 +1367,10 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Raster_Apply">Rasterize</sys:String>
     <sys:String x:Key="Str_Raster_Done">Rasterized a region of page {0}</sys:String>
     <sys:String x:Key="Str_Raster_Failed">Could not rasterize the region: {0}</sys:String>
+    <sys:String x:Key="Str_Sep_Hint">Each ink plate shows how much of that ink the page puts down, black for full coverage and white for none. Plates with no ink on this page are dimmed.</sys:String>
+    <sys:String x:Key="Str_Sep_AllInks">All inks</sys:String>
+    <sys:String x:Key="Str_Sep_Report">Report...</sys:String>
+    <sys:String x:Key="Str_Sep_Failed">The separation preview could not be shown: {0}</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">Copied 1 page to this document.</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">Copied {0} pages to this document.</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">Page copy failed:&#10;{0}</sys:String>

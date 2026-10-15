@@ -1367,6 +1367,10 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Raster_Apply">Растрировать</sys:String>
     <sys:String x:Key="Str_Raster_Done">Область страницы {0} растрирована</sys:String>
     <sys:String x:Key="Str_Raster_Failed">Не удалось растрировать область: {0}</sys:String>
+    <sys:String x:Key="Str_Sep_Hint">Каждая печатная форма показывает, сколько этой краски наносит страница: чёрный означает полное покрытие, белый отсутствие. Формы без краски на этой странице приглушены.</sys:String>
+    <sys:String x:Key="Str_Sep_AllInks">Все краски</sys:String>
+    <sys:String x:Key="Str_Sep_Report">Отчёт...</sys:String>
+    <sys:String x:Key="Str_Sep_Failed">Не удалось показать предпросмотр цветоделения: {0}</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">В этот документ скопирована 1 страница.</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">В этот документ скопировано страниц: {0}.</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">Не удалось скопировать страницу:&#10;{0}</sys:String>

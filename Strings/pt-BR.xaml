@@ -1367,6 +1367,10 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Raster_Apply">Rasterizar</sys:String>
     <sys:String x:Key="Str_Raster_Done">Região da página {0} rasterizada</sys:String>
     <sys:String x:Key="Str_Raster_Failed">Não foi possível rasterizar a região: {0}</sys:String>
+    <sys:String x:Key="Str_Sep_Hint">Cada chapa mostra quanto daquela tinta a página aplica, preto para cobertura total e branco para nenhuma. Chapas sem tinta nesta página aparecem esmaecidas.</sys:String>
+    <sys:String x:Key="Str_Sep_AllInks">Todas as tintas</sys:String>
+    <sys:String x:Key="Str_Sep_Report">Relatório...</sys:String>
+    <sys:String x:Key="Str_Sep_Failed">Não foi possível mostrar a visualização de separações: {0}</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">1 página copiada para este documento.</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">{0} páginas copiadas para este documento.</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">Falha ao copiar a página:&#10;{0}</sys:String>

@@ -1347,6 +1347,10 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Raster_Apply">Rasterleştir</sys:String>
     <sys:String x:Key="Str_Raster_Done">Sayfa {0} üzerindeki bir bölge rasterleştirildi</sys:String>
     <sys:String x:Key="Str_Raster_Failed">Bölge rasterleştirilemedi: {0}</sys:String>
+    <sys:String x:Key="Str_Sep_Hint">Her kalıp, sayfanın o mürekkepten ne kadar bastığını gösterir: tam kaplama siyah, hiç yoksa beyaz. Bu sayfada mürekkebi olmayan kalıplar soluk görünür.</sys:String>
+    <sys:String x:Key="Str_Sep_AllInks">Tüm mürekkepler</sys:String>
+    <sys:String x:Key="Str_Sep_Report">Rapor...</sys:String>
+    <sys:String x:Key="Str_Sep_Failed">Renk ayrımı önizlemesi gösterilemedi: {0}</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">Bu belgeye 1 sayfa kopyalandı.</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">Bu belgeye {0} sayfa kopyalandı.</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">Sayfa kopyalanamadı:&#10;{0}</sys:String>

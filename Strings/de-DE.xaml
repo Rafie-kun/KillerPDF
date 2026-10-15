@@ -1353,6 +1353,10 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Raster_Apply">Rastern</sys:String>
     <sys:String x:Key="Str_Raster_Done">Bereich auf Seite {0} gerastert</sys:String>
     <sys:String x:Key="Str_Raster_Failed">Der Bereich konnte nicht gerastert werden: {0}</sys:String>
+    <sys:String x:Key="Str_Sep_Hint">Jeder Farbauszug zeigt, wie viel dieser Farbe die Seite aufträgt: Schwarz für volle Deckung, Weiß für keine. Auszüge ohne Farbe auf dieser Seite sind abgeblendet.</sys:String>
+    <sys:String x:Key="Str_Sep_AllInks">Alle Farben</sys:String>
+    <sys:String x:Key="Str_Sep_Report">Bericht...</sys:String>
+    <sys:String x:Key="Str_Sep_Failed">Die Separationsvorschau konnte nicht angezeigt werden: {0}</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">1 Seite in dieses Dokument kopiert.</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">{0} Seiten in dieses Dokument kopiert.</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">Kopieren der Seite fehlgeschlagen:&#10;{0}</sys:String>

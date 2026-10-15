@@ -1367,6 +1367,10 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Raster_Apply">Raster hóa</sys:String>
     <sys:String x:Key="Str_Raster_Done">Đã raster hóa một vùng của trang {0}</sys:String>
     <sys:String x:Key="Str_Raster_Failed">Không thể raster hóa vùng: {0}</sys:String>
+    <sys:String x:Key="Str_Sep_Hint">Mỗi bản in cho thấy trang phủ bao nhiêu mực màu đó, đen là phủ kín và trắng là không có. Các bản không có mực trên trang này được làm mờ.</sys:String>
+    <sys:String x:Key="Str_Sep_AllInks">Tất cả các mực</sys:String>
+    <sys:String x:Key="Str_Sep_Report">Báo cáo...</sys:String>
+    <sys:String x:Key="Str_Sep_Failed">Không thể hiển thị bản xem trước tách màu: {0}</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">Đã sao chép 1 trang vào tài liệu này.</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">Đã sao chép {0} trang vào tài liệu này.</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">Sao chép trang thất bại:&#10;{0}</sys:String>

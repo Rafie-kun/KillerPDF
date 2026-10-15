@@ -1367,6 +1367,10 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Raster_Apply">Rasteriser</sys:String>
     <sys:String x:Key="Str_Raster_Done">Rasteriserte et område på side {0}</sys:String>
     <sys:String x:Key="Str_Raster_Failed">Kunne ikke rasterisere området: {0}</sys:String>
+    <sys:String x:Key="Str_Sep_Hint">Hver trykkplate viser hvor mye av fargen siden legger på, svart for full dekning og hvitt for ingen. Plater uten farge på denne siden er nedtonet.</sys:String>
+    <sys:String x:Key="Str_Sep_AllInks">Alle farger</sys:String>
+    <sys:String x:Key="Str_Sep_Report">Rapport...</sys:String>
+    <sys:String x:Key="Str_Sep_Failed">Kunne ikke vise separasjonsforhåndsvisningen: {0}</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">Kopierte 1 side til dette dokumentet.</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">Kopierte {0} sider til dette dokumentet.</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">Kopiering av side mislyktes:&#10;{0}</sys:String>
