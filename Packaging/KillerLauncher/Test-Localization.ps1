@@ -61,6 +61,8 @@ foreach ($file in Get-ChildItem -LiteralPath $PSScriptRoot -Filter '*.cs') {
         if ($line.TrimStart().StartsWith('//')) { continue }
         # CLI diagnostics retain their existing text. OS exception details are not authored here.
         if ($line.Contains('Console.Error.WriteLine')) { continue }
+        # Argument guards name the parameter for developers. Their text never reaches the window.
+        if ($line -match 'new Argument[A-Za-z]*Exception\(.*nameof\(') { continue }
         if ($line -match '(?:\.Text|\.Content|Description)\s*=\s*"[A-Za-z]' -or
             $line -match '(?:ShowNotice|MessageBox\.Show|new [A-Za-z]+Exception)\(\s*"[A-Za-z]') {
             throw "Unlocalized UI assignment in $($file.Name): $($line.Trim())"
