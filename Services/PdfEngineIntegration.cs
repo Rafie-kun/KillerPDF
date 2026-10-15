@@ -1958,6 +1958,46 @@ internal static class PdfEngineIntegration
         }
     }
 
+    /// <summary>
+    /// Reduce File Size (#433): optionally resamples oversized images, then runs the lossless
+    /// optimizer, and writes the result to <paramref name="outputPath"/>. Returns the size before
+    /// and after and how many images were resampled.
+    /// </summary>
+    internal static (long Before, long After, int ImagesResampled) ReduceFileSize(string sourcePath,
+        string outputPath, PdfImageDownsampleOptions? images, System.Threading.CancellationToken cancellationToken)
+    {
+        byte[] original = File.ReadAllBytes(sourcePath);
+        PdfDocument document = OpenForReading(original);
+        int resampled = 0;
+        if (images is not null)
+        {
+            PdfImageDownsampleResult downsampled = PdfImageDownsampler.Downsample(document, images, cancellationToken);
+            if (downsampled.ImagesResampled > 0)
+            {
+                document = OpenForReading(downsampled.Data);
+                resampled = downsampled.ImagesResampled;
+            }
+        }
+        cancellationToken.ThrowIfCancellationRequested();
+        PdfOptimizationOptions settings = PdfOptimizationOptions.ForDocument(document) with
+        {
+            RepairHarmlessArtifacts = true
+        };
+        PdfOptimizationResult optimized = PdfOptimizer.CreatePlan(document, settings).Apply();
+        cancellationToken.ThrowIfCancellationRequested();
+        string finished = Path.Combine(Path.GetTempPath(), $"killerpdf-reduced-{Guid.NewGuid():N}.pdf");
+        try
+        {
+            File.WriteAllBytes(finished, optimized.Data.ToArray());
+            ReplaceFileAtomically(finished, outputPath);
+        }
+        finally
+        {
+            if (File.Exists(finished)) File.Delete(finished);
+        }
+        return (original.Length, optimized.OutputSize, resampled);
+    }
+
     /// <summary>Replaces a destination with a finished file in one step. The finished bytes are
     /// first copied beside the destination so the final swap stays on one volume, which leaves
     /// the previous destination intact when the write fails partway.</summary>

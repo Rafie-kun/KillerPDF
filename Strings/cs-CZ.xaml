@@ -631,6 +631,14 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <!-- Import images as PDF / Compress to ZIP -->
     <sys:String x:Key="Str_Menu_Import">Importovat obrázky jako PDF</sys:String>
     <sys:String x:Key="Str_Menu_CompressZip">Komprimovat do ZIP</sys:String>
+    <sys:String x:Key="Str_Menu_ReduceSize">Zmenšit velikost souboru...</sys:String>
+    <sys:String x:Key="Str_Reduce_Title">Zmenšit velikost souboru</sys:String>
+    <sys:String x:Key="Str_Reduce_Hint">Uloží menší kopii. Nepoužité objekty se odstraní a soubor se zkomprimuje v každém případě; otevřený dokument zůstane beze změny.</sys:String>
+    <sys:String x:Key="Str_Reduce_Downsample">Zmenšit obrázky nad 1,5násobek tohoto rozlišení</sys:String>
+    <sys:String x:Key="Str_Reduce_Quality">Kvalita obrázků</sys:String>
+    <sys:String x:Key="Str_Reduce_Working">Zmenšování velikosti souboru...</sys:String>
+    <sys:String x:Key="Str_Reduce_Done">Uloženo {0}: z {1} na {2}, převzorkované obrázky: {3}</sys:String>
+    <sys:String x:Key="Str_Reduce_Failed">Menší kopii nelze uložit.</sys:String>
     <sys:String x:Key="Str_Filter_Images">Obrázky</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">Všechny soubory</sys:String>
     <sys:String x:Key="Str_Filter_Zip">Archiv ZIP</sys:String>

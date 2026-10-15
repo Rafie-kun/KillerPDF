@@ -558,6 +558,14 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <!-- Bilder als PDF importieren / In ZIP komprimieren -->
     <sys:String x:Key="Str_Menu_Import">Bilder als PDF importieren</sys:String>
     <sys:String x:Key="Str_Menu_CompressZip">In ZIP komprimieren</sys:String>
+    <sys:String x:Key="Str_Menu_ReduceSize">Dateigröße reduzieren...</sys:String>
+    <sys:String x:Key="Str_Reduce_Title">Dateigröße reduzieren</sys:String>
+    <sys:String x:Key="Str_Reduce_Hint">Speichert eine kleinere Kopie. Nicht verwendete Objekte werden in jedem Fall entfernt und die Datei komprimiert; das geöffnete Dokument bleibt unverändert.</sys:String>
+    <sys:String x:Key="Str_Reduce_Downsample">Bilder verkleinern, die über dem 1,5-Fachen dieser Auflösung liegen</sys:String>
+    <sys:String x:Key="Str_Reduce_Quality">Bildqualität</sys:String>
+    <sys:String x:Key="Str_Reduce_Working">Dateigröße wird reduziert...</sys:String>
+    <sys:String x:Key="Str_Reduce_Done">{0} gespeichert: {1} auf {2}, neu berechnete Bilder: {3}</sys:String>
+    <sys:String x:Key="Str_Reduce_Failed">Die kleinere Kopie konnte nicht gespeichert werden.</sys:String>
     <sys:String x:Key="Str_Filter_Images">Bilder</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">Alle Dateien</sys:String>
     <sys:String x:Key="Str_Filter_Zip">ZIP-Archiv</sys:String>

@@ -640,6 +640,14 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <!-- 画像をPDFとして読み込み / ZIPに圧縮 -->
     <sys:String x:Key="Str_Menu_Import">画像を PDF として読み込み</sys:String>
     <sys:String x:Key="Str_Menu_CompressZip">ZIP に圧縮</sys:String>
+    <sys:String x:Key="Str_Menu_ReduceSize">ファイルサイズを縮小...</sys:String>
+    <sys:String x:Key="Str_Reduce_Title">ファイルサイズを縮小</sys:String>
+    <sys:String x:Key="Str_Reduce_Hint">小さいコピーを保存します。未使用のオブジェクトの削除とファイルの圧縮は常に行われ、開いている文書はそのままです。</sys:String>
+    <sys:String x:Key="Str_Reduce_Downsample">この解像度の 1.5 倍を超える画像を縮小する</sys:String>
+    <sys:String x:Key="Str_Reduce_Quality">画像の品質</sys:String>
+    <sys:String x:Key="Str_Reduce_Working">ファイルサイズを縮小中...</sys:String>
+    <sys:String x:Key="Str_Reduce_Done">{0} を保存しました: {1} から {2}、再サンプリングした画像: {3}</sys:String>
+    <sys:String x:Key="Str_Reduce_Failed">小さいコピーを保存できませんでした。</sys:String>
     <sys:String x:Key="Str_Filter_Images">画像</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">すべてのファイル</sys:String>
     <sys:String x:Key="Str_Filter_Zip">ZIP アーカイブ</sys:String>

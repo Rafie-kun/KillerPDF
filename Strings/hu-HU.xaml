@@ -640,6 +640,14 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <!-- Import images as PDF / Compress to ZIP -->
     <sys:String x:Key="Str_Menu_Import">Képek importálása PDF-ként</sys:String>
     <sys:String x:Key="Str_Menu_CompressZip">Tömörítés ZIP-be</sys:String>
+    <sys:String x:Key="Str_Menu_ReduceSize">Fájlméret csökkentése...</sys:String>
+    <sys:String x:Key="Str_Reduce_Title">Fájlméret csökkentése</sys:String>
+    <sys:String x:Key="Str_Reduce_Hint">Kisebb másolatot ment. A nem használt objektumok mindenképp törlődnek, és a fájl tömörül; a megnyitott dokumentum nem változik.</sys:String>
+    <sys:String x:Key="Str_Reduce_Downsample">A felbontás 1,5-szörösénél nagyobb képek kicsinyítése</sys:String>
+    <sys:String x:Key="Str_Reduce_Quality">Képminőség</sys:String>
+    <sys:String x:Key="Str_Reduce_Working">Fájlméret csökkentése...</sys:String>
+    <sys:String x:Key="Str_Reduce_Done">{0} mentve: {1} helyett {2}, újramintavételezett képek: {3}</sys:String>
+    <sys:String x:Key="Str_Reduce_Failed">A kisebb másolatot nem sikerült menteni.</sys:String>
     <sys:String x:Key="Str_Filter_Images">Képek</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">Minden fájl</sys:String>
     <sys:String x:Key="Str_Filter_Zip">ZIP archívum</sys:String>

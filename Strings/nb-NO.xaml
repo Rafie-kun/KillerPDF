@@ -640,6 +640,14 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <!-- Import images as PDF / Compress to ZIP -->
     <sys:String x:Key="Str_Menu_Import">Importer bilder som PDF</sys:String>
     <sys:String x:Key="Str_Menu_CompressZip">Komprimer til ZIP</sys:String>
+    <sys:String x:Key="Str_Menu_ReduceSize">Reduser filstørrelse...</sys:String>
+    <sys:String x:Key="Str_Reduce_Title">Reduser filstørrelse</sys:String>
+    <sys:String x:Key="Str_Reduce_Hint">Lagrer en mindre kopi. Ubrukte objekter fjernes og filen komprimeres uansett; det åpne dokumentet forblir uendret.</sys:String>
+    <sys:String x:Key="Str_Reduce_Downsample">Nedskaler bilder over 1,5 ganger denne oppløsningen</sys:String>
+    <sys:String x:Key="Str_Reduce_Quality">Bildekvalitet</sys:String>
+    <sys:String x:Key="Str_Reduce_Working">Reduserer filstørrelsen...</sys:String>
+    <sys:String x:Key="Str_Reduce_Done">Lagret {0}: fra {1} til {2}, nedskalerte bilder: {3}</sys:String>
+    <sys:String x:Key="Str_Reduce_Failed">Den mindre kopien kunne ikke lagres.</sys:String>
     <sys:String x:Key="Str_Filter_Images">Bilder</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">Alle filer</sys:String>
     <sys:String x:Key="Str_Filter_Zip">ZIP-arkiv</sys:String>

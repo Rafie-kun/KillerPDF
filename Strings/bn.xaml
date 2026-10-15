@@ -558,6 +558,14 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <!-- ছবিগুলি PDF হিসেবে আমদানি করুন / ZIP-এ সংকুচিত করুন -->
     <sys:String x:Key="Str_Menu_Import">ছবিগুলি PDF হিসেবে আমদানি করুন</sys:String>
     <sys:String x:Key="Str_Menu_CompressZip">ZIP-এ সংকুচিত করুন</sys:String>
+    <sys:String x:Key="Str_Menu_ReduceSize">ফাইলের আকার কমান...</sys:String>
+    <sys:String x:Key="Str_Reduce_Title">ফাইলের আকার কমান</sys:String>
+    <sys:String x:Key="Str_Reduce_Hint">একটি ছোট কপি সংরক্ষণ করে। অব্যবহৃত অবজেক্ট সব ক্ষেত্রেই সরানো হয় এবং ফাইল সংকুচিত হয়; খোলা ডকুমেন্ট যেমন আছে তেমনই থাকে।</sys:String>
+    <sys:String x:Key="Str_Reduce_Downsample">এই রেজোলিউশনের ১.৫ গুণের বেশি ছবি ছোট করুন</sys:String>
+    <sys:String x:Key="Str_Reduce_Quality">ছবির মান</sys:String>
+    <sys:String x:Key="Str_Reduce_Working">ফাইলের আকার কমানো হচ্ছে...</sys:String>
+    <sys:String x:Key="Str_Reduce_Done">{0} সংরক্ষিত: {1} থেকে {2}, পুনঃনমুনাকৃত ছবি: {3}</sys:String>
+    <sys:String x:Key="Str_Reduce_Failed">ছোট কপিটি সংরক্ষণ করা যায়নি।</sys:String>
     <sys:String x:Key="Str_Filter_Images">ছবি</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">সমস্ত ফাইল</sys:String>
     <sys:String x:Key="Str_Filter_Zip">ZIP আর্কাইভ</sys:String>

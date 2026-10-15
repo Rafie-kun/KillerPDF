@@ -640,6 +640,14 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <!-- ── Nhập hình ảnh dưới dạng PDF / Nén thành ZIP ──────────────────── -->
     <sys:String x:Key="Str_Menu_Import">Nhập hình ảnh dưới dạng PDF</sys:String>
     <sys:String x:Key="Str_Menu_CompressZip">Nén thành tệp ZIP</sys:String>
+    <sys:String x:Key="Str_Menu_ReduceSize">Giảm kích thước tệp...</sys:String>
+    <sys:String x:Key="Str_Reduce_Title">Giảm kích thước tệp</sys:String>
+    <sys:String x:Key="Str_Reduce_Hint">Lưu một bản sao nhỏ hơn. Các đối tượng không dùng luôn được xóa và tệp được nén; tài liệu đang mở giữ nguyên.</sys:String>
+    <sys:String x:Key="Str_Reduce_Downsample">Giảm ảnh có độ phân giải cao hơn 1,5 lần mức này</sys:String>
+    <sys:String x:Key="Str_Reduce_Quality">Chất lượng ảnh</sys:String>
+    <sys:String x:Key="Str_Reduce_Working">Đang giảm kích thước tệp...</sys:String>
+    <sys:String x:Key="Str_Reduce_Done">Đã lưu {0}: từ {1} xuống {2}, số ảnh đã lấy mẫu lại: {3}</sys:String>
+    <sys:String x:Key="Str_Reduce_Failed">Không thể lưu bản sao nhỏ hơn.</sys:String>
     <sys:String x:Key="Str_Filter_Images">Hình ảnh</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">Tất cả các tệp</sys:String>
     <sys:String x:Key="Str_Filter_Zip">Tệp lưu trữ ZIP</sys:String>

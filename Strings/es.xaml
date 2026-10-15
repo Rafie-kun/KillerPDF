@@ -558,6 +558,14 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <!-- Importar imágenes como PDF / Comprimir a ZIP -->
     <sys:String x:Key="Str_Menu_Import">Importar imágenes como PDF</sys:String>
     <sys:String x:Key="Str_Menu_CompressZip">Comprimir a ZIP</sys:String>
+    <sys:String x:Key="Str_Menu_ReduceSize">Reducir tamaño de archivo...</sys:String>
+    <sys:String x:Key="Str_Reduce_Title">Reducir tamaño de archivo</sys:String>
+    <sys:String x:Key="Str_Reduce_Hint">Guarda una copia más pequeña. En cualquier caso se quitan los objetos sin usar y se comprime el archivo; el documento abierto no cambia.</sys:String>
+    <sys:String x:Key="Str_Reduce_Downsample">Reducir las imágenes que superen 1,5 veces esta resolución</sys:String>
+    <sys:String x:Key="Str_Reduce_Quality">Calidad de imagen</sys:String>
+    <sys:String x:Key="Str_Reduce_Working">Reduciendo el tamaño del archivo...</sys:String>
+    <sys:String x:Key="Str_Reduce_Done">{0} guardado: de {1} a {2}, imágenes remuestreadas: {3}</sys:String>
+    <sys:String x:Key="Str_Reduce_Failed">No se pudo guardar la copia más pequeña.</sys:String>
     <sys:String x:Key="Str_Filter_Images">Imágenes</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">Todos los archivos</sys:String>
     <sys:String x:Key="Str_Filter_Zip">Archivo ZIP</sys:String>

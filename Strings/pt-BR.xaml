@@ -640,6 +640,14 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <!-- Import images as PDF / Compress to ZIP -->
     <sys:String x:Key="Str_Menu_Import">Importar imagens como PDF</sys:String>
     <sys:String x:Key="Str_Menu_CompressZip">Compactar em ZIP</sys:String>
+    <sys:String x:Key="Str_Menu_ReduceSize">Reduzir tamanho do arquivo...</sys:String>
+    <sys:String x:Key="Str_Reduce_Title">Reduzir tamanho do arquivo</sys:String>
+    <sys:String x:Key="Str_Reduce_Hint">Salva uma cópia menor. Objetos não usados são removidos e o arquivo é compactado de qualquer forma; o documento aberto não muda.</sys:String>
+    <sys:String x:Key="Str_Reduce_Downsample">Reduzir imagens acima de 1,5 vez esta resolução</sys:String>
+    <sys:String x:Key="Str_Reduce_Quality">Qualidade da imagem</sys:String>
+    <sys:String x:Key="Str_Reduce_Working">Reduzindo o tamanho do arquivo...</sys:String>
+    <sys:String x:Key="Str_Reduce_Done">{0} salvo: de {1} para {2}, imagens reamostradas: {3}</sys:String>
+    <sys:String x:Key="Str_Reduce_Failed">Não foi possível salvar a cópia menor.</sys:String>
     <sys:String x:Key="Str_Filter_Images">Imagens</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">Todos os arquivos</sys:String>
     <sys:String x:Key="Str_Filter_Zip">Arquivo ZIP</sys:String>

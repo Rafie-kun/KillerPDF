@@ -613,6 +613,14 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <!-- Import images as PDF / Compress to ZIP -->
     <sys:String x:Key="Str_Menu_Import">Суреттерді PDF ретінде импорттау</sys:String>
     <sys:String x:Key="Str_Menu_CompressZip">ZIP-ке сығу</sys:String>
+    <sys:String x:Key="Str_Menu_ReduceSize">Файл өлшемін азайту...</sys:String>
+    <sys:String x:Key="Str_Reduce_Title">Файл өлшемін азайту</sys:String>
+    <sys:String x:Key="Str_Reduce_Hint">Кішірек көшірмені сақтайды. Пайдаланылмаған нысандар кез келген жағдайда жойылып, файл сығылады; ашық құжат өзгермейді.</sys:String>
+    <sys:String x:Key="Str_Reduce_Downsample">Осы ажыратымдылықтан 1,5 есе жоғары суреттерді кішірейту</sys:String>
+    <sys:String x:Key="Str_Reduce_Quality">Сурет сапасы</sys:String>
+    <sys:String x:Key="Str_Reduce_Working">Файл өлшемі азайтылуда...</sys:String>
+    <sys:String x:Key="Str_Reduce_Done">{0} сақталды: {1} орнына {2}, қайта есептелген суреттер: {3}</sys:String>
+    <sys:String x:Key="Str_Reduce_Failed">Кішірек көшірмені сақтау мүмкін болмады.</sys:String>
     <sys:String x:Key="Str_Filter_Images">Суреттер</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">Барлық файлдар</sys:String>
     <sys:String x:Key="Str_Filter_Zip">ZIP мұрағаты</sys:String>

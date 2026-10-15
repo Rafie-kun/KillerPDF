@@ -558,6 +558,14 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <!-- 将图片导入为 PDF / 压缩为 ZIP -->
     <sys:String x:Key="Str_Menu_Import">将图片导入为 PDF</sys:String>
     <sys:String x:Key="Str_Menu_CompressZip">压缩为 ZIP</sys:String>
+    <sys:String x:Key="Str_Menu_ReduceSize">减小文件大小...</sys:String>
+    <sys:String x:Key="Str_Reduce_Title">减小文件大小</sys:String>
+    <sys:String x:Key="Str_Reduce_Hint">保存一个较小的副本。无论如何都会删除未使用的对象并压缩文件；打开的文档保持不变。</sys:String>
+    <sys:String x:Key="Str_Reduce_Downsample">缩小超过此分辨率 1.5 倍的图像</sys:String>
+    <sys:String x:Key="Str_Reduce_Quality">图像质量</sys:String>
+    <sys:String x:Key="Str_Reduce_Working">正在减小文件大小...</sys:String>
+    <sys:String x:Key="Str_Reduce_Done">已保存 {0}: 从 {1} 减至 {2}，重新采样的图像: {3}</sys:String>
+    <sys:String x:Key="Str_Reduce_Failed">无法保存较小的副本。</sys:String>
     <sys:String x:Key="Str_Filter_Images">图片</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">所有文件</sys:String>
     <sys:String x:Key="Str_Filter_Zip">ZIP 压缩包</sys:String>

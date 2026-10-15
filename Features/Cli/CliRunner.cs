@@ -63,7 +63,7 @@ namespace KillerPDF.Features
             "--template", "--edge", "--align", "--number-format", "--font-size",
             "--start", "--digits", "--prefix", "--suffix", "--profile",
             "--sheet", "--margin", "--gutter", "--creep", "--binding", "--grid",
-            "--min-size", "--depth", "--pattern", "--width", "--height",
+            "--min-size", "--depth", "--pattern", "--width", "--height", "--images",
         ];
 
         /// <summary>
@@ -226,8 +226,9 @@ namespace KillerPDF.Features
             "                                           [--bookmarks <level>] a part per bookmark at that level",
             "                                           [--max-size <n[KB|MB]>] grow parts up to a size budget",
             "                                           [--name <template>] {name} {index} {first} {last} {title}",
-            "  --optimize <in.pdf> <out.pdf> [--strip <list>] [--report]",
-            "                                           reduce file size; strip takes any of metadata,",
+            "  --optimize <in.pdf> <out.pdf> [--strip <list>] [--images <dpi>] [--jpeg-quality <n>] [--report]",
+            "                                           reduce file size; --images resamples images drawn",
+            "                                           above 1.5 times that resolution; strip takes any of metadata,",
             "                                           attachments, javascript, comments, thumbnails,",
             "                                           bookmarks, forms, xfa, openaction, layers",
             "  --number-pages <in.pdf> <out.pdf> [--template <text>] [--pages <range>]",
@@ -575,7 +576,7 @@ namespace KillerPDF.Features
             if (pos.Count != 2)
             {
                 con.WriteLine("Usage: KillerPDF.exe --optimize <in.pdf> <out.pdf> "
-                    + "[--strip <list>] [--report]");
+                    + "[--strip <list>] [--images <dpi>] [--jpeg-quality <n>] [--report]");
                 return 2;
             }
             string inPath = Path.GetFullPath(pos[0]), outPath = Path.GetFullPath(pos[1]);
@@ -591,6 +592,43 @@ namespace KillerPDF.Features
             {
                 con.WriteLine("Could not read the document: " + ex.Message);
                 return 1;
+            }
+
+            long originalBytes = new FileInfo(inPath).Length;
+            if (options.TryGetValue("--images", out string? imageDpiText))
+            {
+                if (!double.TryParse(imageDpiText, NumberStyles.Float, CultureInfo.InvariantCulture,
+                        out double imageDpi) || imageDpi < 36 || imageDpi > 1200)
+                {
+                    con.WriteLine("--images takes a resolution from 36 to 1200 dpi.");
+                    return 2;
+                }
+                int quality = options.TryGetValue("--jpeg-quality", out string? qualityText)
+                    && int.TryParse(qualityText, NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsedQuality)
+                    && parsedQuality is >= 1 and <= 100 ? parsedQuality : 80;
+                try
+                {
+                    PdfImageDownsampleResult images = PdfImageDownsampler.Downsample(document,
+                        new PdfImageDownsampleOptions
+                        {
+                            TargetDpi = imageDpi,
+                            ThresholdDpi = imageDpi * 1.5,
+                            JpegQuality = quality,
+                            JpegEncoder = PdfImageJpeg.Encode
+                        });
+                    if (images.ImagesResampled > 0)
+                    {
+                        document = PdfEngineIntegration.OpenForReading(images.Data);
+                        con.WriteLine($"Resampled {images.ImagesResampled} images from "
+                            + $"{images.ImageBytesBefore} to {images.ImageBytesAfter} bytes");
+                    }
+                }
+                catch (Exception ex) when (ex is InvalidOperationException
+                    or NotSupportedException or ArgumentException or FormatException)
+                {
+                    con.WriteLine("Could not resample the images: " + ex.Message);
+                    return 1;
+                }
             }
 
             PdfOptimizationOptions settings = PdfOptimizationOptions.ForDocument(document);
@@ -632,11 +670,11 @@ namespace KillerPDF.Features
             }
             File.WriteAllBytes(outPath, result.Data.ToArray());
             if (options.ContainsKey("--report")) con.WriteLine(result.ToJson(true));
-            long saved = result.OriginalSize - (long)result.OutputSize;
-            string percent = result.OriginalSize > 0
-                ? (saved * 100.0 / result.OriginalSize).ToString("0.0", CultureInfo.InvariantCulture)
+            long saved = originalBytes - result.OutputSize;
+            string percent = originalBytes > 0
+                ? (saved * 100.0 / originalBytes).ToString("0.0", CultureInfo.InvariantCulture)
                 : "0.0";
-            con.WriteLine($"Optimized {result.OriginalSize} to {result.OutputSize} bytes "
+            con.WriteLine($"Optimized {originalBytes} to {result.OutputSize} bytes "
                 + $"({percent}% smaller, {result.OriginalObjectCount} to {result.OutputObjectCount} objects)");
             return 0;
         }

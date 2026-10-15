@@ -640,6 +640,14 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <!-- Import images as PDF / Compress to ZIP -->
     <sys:String x:Key="Str_Menu_Import">Importa immagini come PDF</sys:String>
     <sys:String x:Key="Str_Menu_CompressZip">Comprimi in file ZIP</sys:String>
+    <sys:String x:Key="Str_Menu_ReduceSize">Riduci dimensione file...</sys:String>
+    <sys:String x:Key="Str_Reduce_Title">Riduci dimensione file</sys:String>
+    <sys:String x:Key="Str_Reduce_Hint">Salva una copia più piccola. In ogni caso gli oggetti inutilizzati vengono rimossi e il file compresso; il documento aperto non cambia.</sys:String>
+    <sys:String x:Key="Str_Reduce_Downsample">Ridimensiona le immagini oltre 1,5 volte questa risoluzione</sys:String>
+    <sys:String x:Key="Str_Reduce_Quality">Qualità immagine</sys:String>
+    <sys:String x:Key="Str_Reduce_Working">Riduzione della dimensione del file...</sys:String>
+    <sys:String x:Key="Str_Reduce_Done">{0} salvato: da {1} a {2}, immagini ricampionate: {3}</sys:String>
+    <sys:String x:Key="Str_Reduce_Failed">Impossibile salvare la copia più piccola.</sys:String>
     <sys:String x:Key="Str_Filter_Images">Immagini</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">Tutti i file</sys:String>
     <sys:String x:Key="Str_Filter_Zip">Archivio ZIP</sys:String>

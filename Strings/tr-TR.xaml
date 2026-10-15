@@ -558,6 +558,14 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <!-- Görüntüleri PDF olarak içe aktar / ZIP olarak sıkıştır -->
     <sys:String x:Key="Str_Menu_Import">Görüntüleri PDF olarak içe aktar</sys:String>
     <sys:String x:Key="Str_Menu_CompressZip">ZIP olarak sıkıştır</sys:String>
+    <sys:String x:Key="Str_Menu_ReduceSize">Dosya boyutunu küçült...</sys:String>
+    <sys:String x:Key="Str_Reduce_Title">Dosya boyutunu küçült</sys:String>
+    <sys:String x:Key="Str_Reduce_Hint">Daha küçük bir kopya kaydeder. Kullanılmayan nesneler her durumda kaldırılır ve dosya sıkıştırılır; açık belge olduğu gibi kalır.</sys:String>
+    <sys:String x:Key="Str_Reduce_Downsample">Bu çözünürlüğün 1,5 katını aşan görüntüleri küçült</sys:String>
+    <sys:String x:Key="Str_Reduce_Quality">Görüntü kalitesi</sys:String>
+    <sys:String x:Key="Str_Reduce_Working">Dosya boyutu küçültülüyor...</sys:String>
+    <sys:String x:Key="Str_Reduce_Done">{0} kaydedildi: {1} yerine {2}, yeniden örneklenen görüntüler: {3}</sys:String>
+    <sys:String x:Key="Str_Reduce_Failed">Daha küçük kopya kaydedilemedi.</sys:String>
     <sys:String x:Key="Str_Filter_Images">Görüntüler</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">Tüm dosyalar</sys:String>
     <sys:String x:Key="Str_Filter_Zip">ZIP arşivi</sys:String>

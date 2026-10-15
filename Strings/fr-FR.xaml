@@ -640,6 +640,14 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <!-- Import images as PDF / Compress to ZIP -->
     <sys:String x:Key="Str_Menu_Import">Importer des images en PDF</sys:String>
     <sys:String x:Key="Str_Menu_CompressZip">Compresser en ZIP</sys:String>
+    <sys:String x:Key="Str_Menu_ReduceSize">Réduire la taille du fichier...</sys:String>
+    <sys:String x:Key="Str_Reduce_Title">Réduire la taille du fichier</sys:String>
+    <sys:String x:Key="Str_Reduce_Hint">Enregistre une copie plus petite. Les objets inutilisés sont supprimés et le fichier compressé dans tous les cas ; le document ouvert reste inchangé.</sys:String>
+    <sys:String x:Key="Str_Reduce_Downsample">Réduire les images au-delà de 1,5 fois cette résolution</sys:String>
+    <sys:String x:Key="Str_Reduce_Quality">Qualité d’image</sys:String>
+    <sys:String x:Key="Str_Reduce_Working">Réduction de la taille du fichier...</sys:String>
+    <sys:String x:Key="Str_Reduce_Done">{0} enregistré : {1} à {2}, images rééchantillonnées : {3}</sys:String>
+    <sys:String x:Key="Str_Reduce_Failed">Impossible d’enregistrer la copie plus petite.</sys:String>
     <sys:String x:Key="Str_Filter_Images">Images</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">Tous les fichiers</sys:String>
     <sys:String x:Key="Str_Filter_Zip">Archive ZIP</sys:String>

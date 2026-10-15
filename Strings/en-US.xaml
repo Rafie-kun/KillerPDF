@@ -640,6 +640,14 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <!-- Import images as PDF / Compress to ZIP -->
     <sys:String x:Key="Str_Menu_Import">Import images as PDF</sys:String>
     <sys:String x:Key="Str_Menu_CompressZip">Compress to ZIP</sys:String>
+    <sys:String x:Key="Str_Menu_ReduceSize">Reduce File Size...</sys:String>
+    <sys:String x:Key="Str_Reduce_Title">Reduce File Size</sys:String>
+    <sys:String x:Key="Str_Reduce_Hint">Saves a smaller copy. Unused objects are removed and the file is compressed either way; the open document stays as it is.</sys:String>
+    <sys:String x:Key="Str_Reduce_Downsample">Downsample images drawn above 1.5 times this resolution</sys:String>
+    <sys:String x:Key="Str_Reduce_Quality">Image quality</sys:String>
+    <sys:String x:Key="Str_Reduce_Working">Reducing file size...</sys:String>
+    <sys:String x:Key="Str_Reduce_Done">Saved {0}: {1} to {2}, images resampled: {3}</sys:String>
+    <sys:String x:Key="Str_Reduce_Failed">The smaller copy could not be saved.</sys:String>
     <sys:String x:Key="Str_Filter_Images">Images</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">All files</sys:String>
     <sys:String x:Key="Str_Filter_Zip">ZIP archive</sys:String>

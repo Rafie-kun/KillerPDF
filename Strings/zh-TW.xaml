@@ -560,6 +560,14 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <!-- 將圖片匯入為 PDF / 壓縮為 ZIP -->
     <sys:String x:Key="Str_Menu_Import">將圖片匯入為 PDF</sys:String>
     <sys:String x:Key="Str_Menu_CompressZip">壓縮為 ZIP</sys:String>
+    <sys:String x:Key="Str_Menu_ReduceSize">縮減檔案大小...</sys:String>
+    <sys:String x:Key="Str_Reduce_Title">縮減檔案大小</sys:String>
+    <sys:String x:Key="Str_Reduce_Hint">儲存較小的副本。無論如何都會移除未使用的物件並壓縮檔案；開啟中的文件維持不變。</sys:String>
+    <sys:String x:Key="Str_Reduce_Downsample">縮小超過此解析度 1.5 倍的影像</sys:String>
+    <sys:String x:Key="Str_Reduce_Quality">影像品質</sys:String>
+    <sys:String x:Key="Str_Reduce_Working">正在縮減檔案大小...</sys:String>
+    <sys:String x:Key="Str_Reduce_Done">已儲存 {0}: 從 {1} 減為 {2}，重新取樣的影像: {3}</sys:String>
+    <sys:String x:Key="Str_Reduce_Failed">無法儲存較小的副本。</sys:String>
     <sys:String x:Key="Str_Filter_Images">圖片</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">所有檔案</sys:String>
     <sys:String x:Key="Str_Filter_Zip">ZIP 壓縮檔</sys:String>

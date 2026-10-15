@@ -640,6 +640,14 @@ KillerPDF не будет создавать две установленные �
     <!-- Import images as PDF / Compress to ZIP -->
     <sys:String x:Key="Str_Menu_Import">Импорт изображения в новую PDF вкладку</sys:String>
     <sys:String x:Key="Str_Menu_CompressZip">Сжать в ZIP</sys:String>
+    <sys:String x:Key="Str_Menu_ReduceSize">Уменьшить размер файла...</sys:String>
+    <sys:String x:Key="Str_Reduce_Title">Уменьшить размер файла</sys:String>
+    <sys:String x:Key="Str_Reduce_Hint">Сохраняет уменьшенную копию. Неиспользуемые объекты удаляются, а файл сжимается в любом случае; открытый документ не меняется.</sys:String>
+    <sys:String x:Key="Str_Reduce_Downsample">Уменьшать изображения с разрешением выше 1,5 от этого значения</sys:String>
+    <sys:String x:Key="Str_Reduce_Quality">Качество изображений</sys:String>
+    <sys:String x:Key="Str_Reduce_Working">Уменьшение размера файла...</sys:String>
+    <sys:String x:Key="Str_Reduce_Done">Сохранено {0}: с {1} до {2}, пересчитано изображений: {3}</sys:String>
+    <sys:String x:Key="Str_Reduce_Failed">Не удалось сохранить уменьшенную копию.</sys:String>
     <sys:String x:Key="Str_Filter_Images">Изображения</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">Все файлы</sys:String>
     <sys:String x:Key="Str_Filter_Zip">ZIP архив</sys:String>

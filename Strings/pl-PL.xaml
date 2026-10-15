@@ -622,6 +622,14 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <!-- Import images as PDF / Compress to ZIP -->
     <sys:String x:Key="Str_Menu_Import">Importuj obrazy jako PDF</sys:String>
     <sys:String x:Key="Str_Menu_CompressZip">Kompresuj do ZIP</sys:String>
+    <sys:String x:Key="Str_Menu_ReduceSize">Zmniejsz rozmiar pliku...</sys:String>
+    <sys:String x:Key="Str_Reduce_Title">Zmniejsz rozmiar pliku</sys:String>
+    <sys:String x:Key="Str_Reduce_Hint">Zapisuje mniejszą kopię. Nieużywane obiekty są usuwane, a plik kompresowany w każdym przypadku; otwarty dokument pozostaje bez zmian.</sys:String>
+    <sys:String x:Key="Str_Reduce_Downsample">Zmniejsz obrazy powyżej 1,5-krotności tej rozdzielczości</sys:String>
+    <sys:String x:Key="Str_Reduce_Quality">Jakość obrazów</sys:String>
+    <sys:String x:Key="Str_Reduce_Working">Zmniejszanie rozmiaru pliku...</sys:String>
+    <sys:String x:Key="Str_Reduce_Done">Zapisano {0}: z {1} do {2}, przeskalowane obrazy: {3}</sys:String>
+    <sys:String x:Key="Str_Reduce_Failed">Nie można zapisać mniejszej kopii.</sys:String>
     <sys:String x:Key="Str_Filter_Images">Obrazy</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">Wszystkie pliki</sys:String>
     <sys:String x:Key="Str_Filter_Zip">ZIP archiwum</sys:String>
