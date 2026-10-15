@@ -195,7 +195,7 @@ namespace KillerPDF
             else if (key == Key.Escape && _busyCts is not null)
             {
                 // A cancellable long operation (OCR, repair) is running behind the busy overlay - offer to
-                // cancel it instead of letting Escape fall through to the app-exit handler below.
+                // cancel it.
                 if (KillerDialog.Show(this, string.Format(Loc("Str_Dlg_CancelBusy"), _busyOpLabel), "KillerPDF",
                         MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                     _busyCts?.Cancel();
@@ -609,15 +609,9 @@ namespace KillerPDF
             else if (key == Key.Escape && _doc is not null && _currentTool != EditTool.Select)
             {
                 // 1.6.6 (#127 Phase 3): Esc with nothing left to cancel drops back to the Select
-                // tool, Acrobat-style. With Select already active it keeps falling through to the
-                // app-exit handler below, unchanged.
+                // tool, Acrobat-style. With Select already active it does nothing, as in other
+                // Windows apps.
                 SetTool(EditTool.Select);
-                e.Handled = true;
-            }
-            else if (key == Key.Escape)
-            {
-                // No overlay active - ESC exits the app
-                Close();
                 e.Handled = true;
             }
             else if (key == Key.Space && !_spaceHeld)
