@@ -95,6 +95,8 @@ internal sealed partial class PreviewPane : IDisposable
         var subtle = new SolidColorBrush(Color.FromArgb(0x26, textColor.R, textColor.G, textColor.B));
 
         var root = new Grid { Background = new SolidColorBrush(backColor) };
+        // Thin scroll bars in the pane's own colors, so a dark Explorer does not get light system ones.
+        root.Resources.Add(typeof(System.Windows.Controls.Primitives.ScrollBar), ScrollBarStyle(textColor));
         TextElement.SetForeground(root, foreground);
         TextElement.SetFontFamily(root, new FontFamily("Segoe UI"));
         TextElement.SetFontSize(root, 12);
@@ -480,6 +482,30 @@ internal sealed partial class PreviewPane : IDisposable
             "<Trigger Property='IsEnabled' Value='False'><Setter Property='Opacity' Value='0.4'/></Trigger>" +
             "</ControlTemplate.Triggers></ControlTemplate>";
         return (ControlTemplate)XamlReader.Parse(xaml);
+    }
+
+    private static Style ScrollBarStyle(Color text)
+    {
+        string thumb = Color.FromArgb(0x60, text.R, text.G, text.B).ToString(System.Globalization.CultureInfo.InvariantCulture);
+        string hover = Color.FromArgb(0xA0, text.R, text.G, text.B).ToString(System.Globalization.CultureInfo.InvariantCulture);
+        string Track(bool vertical) =>
+            "<ControlTemplate TargetType='ScrollBar'><Track x:Name='PART_Track' IsDirectionReversed='" + (vertical ? "True" : "False") + "'>" +
+            "<Track.DecreaseRepeatButton><RepeatButton Command='" + (vertical ? "ScrollBar.PageUpCommand" : "ScrollBar.PageLeftCommand") +
+            "' Focusable='False' IsTabStop='False'><RepeatButton.Template><ControlTemplate TargetType='RepeatButton'><Border Background='Transparent'/></ControlTemplate></RepeatButton.Template></RepeatButton></Track.DecreaseRepeatButton>" +
+            "<Track.IncreaseRepeatButton><RepeatButton Command='" + (vertical ? "ScrollBar.PageDownCommand" : "ScrollBar.PageRightCommand") +
+            "' Focusable='False' IsTabStop='False'><RepeatButton.Template><ControlTemplate TargetType='RepeatButton'><Border Background='Transparent'/></ControlTemplate></RepeatButton.Template></RepeatButton></Track.IncreaseRepeatButton>" +
+            "<Track.Thumb><Thumb><Thumb.Template><ControlTemplate TargetType='Thumb'><Border x:Name='Grip' Background='" + thumb + "' CornerRadius='3' Margin='2'/>" +
+            "<ControlTemplate.Triggers><Trigger Property='IsMouseOver' Value='True'><Setter TargetName='Grip' Property='Background' Value='" + hover + "'/></Trigger>" +
+            "<Trigger Property='IsDragging' Value='True'><Setter TargetName='Grip' Property='Background' Value='" + hover + "'/></Trigger></ControlTemplate.Triggers>" +
+            "</ControlTemplate></Thumb.Template></Thumb></Track.Thumb></Track></ControlTemplate>";
+        string xaml =
+            "<Style xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' TargetType='ScrollBar'>" +
+            "<Setter Property='Background' Value='Transparent'/><Setter Property='Width' Value='10'/><Setter Property='MinWidth' Value='10'/>" +
+            "<Setter Property='Template'><Setter.Value>" + Track(true) + "</Setter.Value></Setter>" +
+            "<Style.Triggers><Trigger Property='Orientation' Value='Horizontal'>" +
+            "<Setter Property='Width' Value='Auto'/><Setter Property='MinWidth' Value='0'/><Setter Property='Height' Value='10'/><Setter Property='MinHeight' Value='10'/>" +
+            "<Setter Property='Template'><Setter.Value>" + Track(false) + "</Setter.Value></Setter></Trigger></Style.Triggers></Style>";
+        return (Style)XamlReader.Parse(xaml);
     }
 
     private static Color FromColorRef(uint value) =>
