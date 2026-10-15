@@ -601,6 +601,10 @@ namespace KillerPDF.Services
             // The titlebar filename sits on the wordmark baseline: Killer Sans, dropped 3px to meet the
             // bottom of "Killer". A classic caption keeps the caption font beside its plain title.
             if (!d.Contains("FileNameFont")) d["FileNameFont"] = classicCaption ? d["ChromeFontFamily"] : KillerPDF.UiKit.BrandSansFont;
+            // Primary headings (dialog headings, page and period titles): Lacquer, the app-name face of
+            // the wordmark, falling back to Killer Sans UI for scripts Lacquer does not cover. 98SE keeps
+            // Killer Sans. Secondary headings, the footer and the interface stay Killer Sans.
+            if (!d.Contains("HeadingFont")) d["HeadingFont"] = classicCaption ? KillerPDF.UiKit.BrandSansFont : KillerPDF.UiKit.LacquerHeadingStack;
             if (!d.Contains("FileNameFontSize")) d["FileNameFontSize"] = classicCaption ? 11.0 : 18.0;
             if (!d.Contains("FileNameTransform"))
             {

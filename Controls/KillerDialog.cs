@@ -80,7 +80,7 @@ namespace KillerPDF
             };
             if (large)
             {
-                head.FontFamily = UiKit.BrandSansFont;
+                head.FontFamily = UiKit.HeadingFont;
                 TextOptions.SetTextFormattingMode(head, TextFormattingMode.Ideal);
             }
             else
