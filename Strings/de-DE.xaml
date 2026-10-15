@@ -1369,6 +1369,13 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Scan_Failed">Scannen fehlgeschlagen:</sys:String>
     <sys:String x:Key="Str_Scan_NoScanners">Es wurden keine TWAIN-Scanner gefunden. Schließen Sie den Scanner an, installieren Sie seinen TWAIN-Treiber und versuchen Sie es erneut.</sys:String>
     <sys:String x:Key="Str_Scan_NoManager">Zum Scannen wird der 64-Bit-TWAIN-Manager (TWAINDSM.dll) benötigt, den Scannertreiber mit TWAIN-Unterstützung installieren. Installieren Sie den TWAIN-Treiber Ihres Scanners und versuchen Sie es erneut.</sys:String>
+    <sys:String x:Key="Str_Menu_ConvertOffice">Word- oder Excel-Datei konvertieren...</sys:String>
+    <sys:String x:Key="Str_Convert_Title">Word- oder Excel-Datei konvertieren</sys:String>
+    <sys:String x:Key="Str_Filter_Office">Word- und Excel-Dateien</sys:String>
+    <sys:String x:Key="Str_Convert_Working">{0} wird konvertiert...</sys:String>
+    <sys:String x:Key="Str_Convert_Done">{0} wurde konvertiert. Speichern Sie die PDF, um sie zu behalten.</sys:String>
+    <sys:String x:Key="Str_Convert_Failed">Die Datei konnte nicht konvertiert werden.</sys:String>
+    <sys:String x:Key="Str_Convert_NeedsOffice">Ältere .doc- und .xls-Dateien werden über Microsoft {0} konvertiert, das nicht installiert ist. Speichern Sie die Datei als .docx oder .xlsx und konvertieren Sie diese.</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">1 Seite in dieses Dokument kopiert.</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">{0} Seiten in dieses Dokument kopiert.</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">Kopieren der Seite fehlgeschlagen:&#10;{0}</sys:String>

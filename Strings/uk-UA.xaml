@@ -1383,6 +1383,13 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Scan_Failed">Не вдалося виконати сканування:</sys:String>
     <sys:String x:Key="Str_Scan_NoScanners">Сканери TWAIN не знайдено. Підключіть сканер, установіть його драйвер TWAIN і спробуйте ще раз.</sys:String>
     <sys:String x:Key="Str_Scan_NoManager">Для сканування потрібен 64-розрядний диспетчер TWAIN (TWAINDSM.dll), який установлюють драйвери сканерів із підтримкою TWAIN. Установіть драйвер TWAIN свого сканера й спробуйте ще раз.</sys:String>
+    <sys:String x:Key="Str_Menu_ConvertOffice">Перетворити файл Word або Excel...</sys:String>
+    <sys:String x:Key="Str_Convert_Title">Перетворити файл Word або Excel</sys:String>
+    <sys:String x:Key="Str_Filter_Office">Файли Word і Excel</sys:String>
+    <sys:String x:Key="Str_Convert_Working">Перетворення {0}...</sys:String>
+    <sys:String x:Key="Str_Convert_Done">Файл {0} перетворено. Збережіть PDF, щоб не втратити його.</sys:String>
+    <sys:String x:Key="Str_Convert_Failed">Не вдалося перетворити файл.</sys:String>
+    <sys:String x:Key="Str_Convert_NeedsOffice">Старі файли .doc і .xls перетворюються через Microsoft {0}, який не встановлено. Збережіть файл у форматі .docx або .xlsx і перетворіть його.</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">Скопійовано 1 сторінку до цього документа.</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">Скопійовано сторінок до цього документа: {0}.</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">Не вдалося скопіювати сторінку:&#10;{0}</sys:String>

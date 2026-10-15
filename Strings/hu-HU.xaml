@@ -1370,6 +1370,13 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Scan_Failed">A beolvasás sikertelen:</sys:String>
     <sys:String x:Key="Str_Scan_NoScanners">Nem található TWAIN-lapolvasó. Csatlakoztassa a lapolvasót, telepítse a TWAIN-illesztőprogramját, és próbálja újra.</sys:String>
     <sys:String x:Key="Str_Scan_NoManager">A beolvasáshoz a 64 bites TWAIN-kezelő (TWAINDSM.dll) szükséges, amelyet a TWAIN-t támogató lapolvasó-illesztőprogramok telepítenek. Telepítse a lapolvasó TWAIN-illesztőprogramját, és próbálja újra.</sys:String>
+    <sys:String x:Key="Str_Menu_ConvertOffice">Word- vagy Excel-fájl konvertálása...</sys:String>
+    <sys:String x:Key="Str_Convert_Title">Word- vagy Excel-fájl konvertálása</sys:String>
+    <sys:String x:Key="Str_Filter_Office">Word- és Excel-fájlok</sys:String>
+    <sys:String x:Key="Str_Convert_Working">{0} konvertálása...</sys:String>
+    <sys:String x:Key="Str_Convert_Done">{0} konvertálva. Mentse a PDF-et a megtartásához.</sys:String>
+    <sys:String x:Key="Str_Convert_Failed">A fájlt nem sikerült konvertálni.</sys:String>
+    <sys:String x:Key="Str_Convert_NeedsOffice">A régebbi .doc és .xls fájlok konvertálása a Microsoft {0} programmal történik, amely nincs telepítve. Mentse a fájlt .docx vagy .xlsx formátumban, és azt konvertálja.</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">1 oldal átmásolva ebbe a dokumentumba.</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">{0} oldal átmásolva ebbe a dokumentumba.</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">Az oldal másolása sikertelen:&#10;{0}</sys:String>

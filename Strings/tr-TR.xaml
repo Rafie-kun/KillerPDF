@@ -1363,6 +1363,13 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Scan_Failed">Tarama başarısız oldu:</sys:String>
     <sys:String x:Key="Str_Scan_NoScanners">TWAIN tarayıcı bulunamadı. Tarayıcıyı bağlayın, TWAIN sürücüsünü yükleyin ve yeniden deneyin.</sys:String>
     <sys:String x:Key="Str_Scan_NoManager">Tarama için 64 bit TWAIN yöneticisi (TWAINDSM.dll) gerekir; bunu TWAIN destekli tarayıcı sürücüleri yükler. Tarayıcınızın TWAIN sürücüsünü yükleyip yeniden deneyin.</sys:String>
+    <sys:String x:Key="Str_Menu_ConvertOffice">Word veya Excel dosyasını dönüştür...</sys:String>
+    <sys:String x:Key="Str_Convert_Title">Word veya Excel dosyasını dönüştür</sys:String>
+    <sys:String x:Key="Str_Filter_Office">Word ve Excel dosyaları</sys:String>
+    <sys:String x:Key="Str_Convert_Working">{0} dönüştürülüyor...</sys:String>
+    <sys:String x:Key="Str_Convert_Done">{0} dönüştürüldü. Saklamak için PDF'yi kaydedin.</sys:String>
+    <sys:String x:Key="Str_Convert_Failed">Dosya dönüştürülemedi.</sys:String>
+    <sys:String x:Key="Str_Convert_NeedsOffice">Eski .doc ve .xls dosyaları Microsoft {0} ile dönüştürülür ve bu program yüklü değil. Dosyayı .docx veya .xlsx olarak kaydedip onu dönüştürün.</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">Bu belgeye 1 sayfa kopyalandı.</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">Bu belgeye {0} sayfa kopyalandı.</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">Sayfa kopyalanamadı:&#10;{0}</sys:String>

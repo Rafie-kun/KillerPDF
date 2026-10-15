@@ -1367,6 +1367,13 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Scan_Failed">扫描失败：</sys:String>
     <sys:String x:Key="Str_Scan_NoScanners">未找到 TWAIN 扫描仪。请连接扫描仪，安装其 TWAIN 驱动程序，然后重试。</sys:String>
     <sys:String x:Key="Str_Scan_NoManager">扫描需要 64 位 TWAIN 管理器 (TWAINDSM.dll)，支持 TWAIN 的扫描仪驱动程序会安装它。请安装扫描仪的 TWAIN 驱动程序，然后重试。</sys:String>
+    <sys:String x:Key="Str_Menu_ConvertOffice">转换 Word 或 Excel 文件...</sys:String>
+    <sys:String x:Key="Str_Convert_Title">转换 Word 或 Excel 文件</sys:String>
+    <sys:String x:Key="Str_Filter_Office">Word 和 Excel 文件</sys:String>
+    <sys:String x:Key="Str_Convert_Working">正在转换 {0}...</sys:String>
+    <sys:String x:Key="Str_Convert_Done">已转换 {0}。请保存 PDF 以保留它。</sys:String>
+    <sys:String x:Key="Str_Convert_Failed">无法转换该文件。</sys:String>
+    <sys:String x:Key="Str_Convert_NeedsOffice">旧版 .doc 和 .xls 文件需要通过 Microsoft {0} 转换，但未安装该程序。请将文件另存为 .docx 或 .xlsx 后再转换。</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">已将 1 页复制到此文档。</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">已将 {0} 页复制到此文档。</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">页面复制失败：&#10;{0}</sys:String>

@@ -1383,6 +1383,13 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_Scan_Failed">Scansione non riuscita:</sys:String>
     <sys:String x:Key="Str_Scan_NoScanners">Nessuno scanner TWAIN trovato. Collega lo scanner, installa il suo driver TWAIN e riprova.</sys:String>
     <sys:String x:Key="Str_Scan_NoManager">Per la scansione serve il gestore TWAIN a 64 bit (TWAINDSM.dll), installato dai driver di scanner compatibili TWAIN. Installa il driver TWAIN dello scanner e riprova.</sys:String>
+    <sys:String x:Key="Str_Menu_ConvertOffice">Converti file Word o Excel...</sys:String>
+    <sys:String x:Key="Str_Convert_Title">Converti file Word o Excel</sys:String>
+    <sys:String x:Key="Str_Filter_Office">File Word ed Excel</sys:String>
+    <sys:String x:Key="Str_Convert_Working">Conversione di {0}...</sys:String>
+    <sys:String x:Key="Str_Convert_Done">{0} convertito. Salva il PDF per conservarlo.</sys:String>
+    <sys:String x:Key="Str_Convert_Failed">Impossibile convertire il file.</sys:String>
+    <sys:String x:Key="Str_Convert_NeedsOffice">I vecchi file .doc e .xls vengono convertiti tramite Microsoft {0}, che non è installato. Salva il file come .docx o .xlsx e converti quello.</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">1 pagina copiata in questo documento.</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">{0} pagine copiate in questo documento.</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">Copia pagina non riuscita:&#10;{0}</sys:String>

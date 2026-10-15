@@ -655,6 +655,7 @@ namespace KillerPDF
 
             menu.Items.Add(MakeMenuItem(Loc("Str_Menu_Import") + "...", (s2, e2) => ImportImages_Click(s2, e2), null, ""));
             menu.Items.Add(MakeMenuItem(Loc("Str_Menu_Scan"), (s2, e2) => ScanToPdf(), null, "\uE8FE"));
+            menu.Items.Add(MakeMenuItem(Loc("Str_Menu_ConvertOffice"), (s2, e2) => ConvertOfficeDocument(), null, "\uE8A5"));
             menu.Items.Add(new Separator());
 
             var recents = App.GetRecentFiles();

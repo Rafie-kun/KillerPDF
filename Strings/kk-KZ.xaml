@@ -1382,6 +1382,13 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Scan_Failed">Сканерлеу сәтсіз аяқталды:</sys:String>
     <sys:String x:Key="Str_Scan_NoScanners">TWAIN сканерлері табылмады. Сканерді қосып, оның TWAIN драйверін орнатып, қайталап көріңіз.</sys:String>
     <sys:String x:Key="Str_Scan_NoManager">Сканерлеу үшін 64 биттік TWAIN менеджері (TWAINDSM.dll) керек, оны TWAIN қолдайтын сканер драйверлері орнатады. Сканеріңіздің TWAIN драйверін орнатып, қайталап көріңіз.</sys:String>
+    <sys:String x:Key="Str_Menu_ConvertOffice">Word немесе Excel файлын түрлендіру...</sys:String>
+    <sys:String x:Key="Str_Convert_Title">Word немесе Excel файлын түрлендіру</sys:String>
+    <sys:String x:Key="Str_Filter_Office">Word және Excel файлдары</sys:String>
+    <sys:String x:Key="Str_Convert_Working">{0} түрлендірілуде...</sys:String>
+    <sys:String x:Key="Str_Convert_Done">{0} түрлендірілді. Сақтап қалу үшін PDF файлын сақтаңыз.</sys:String>
+    <sys:String x:Key="Str_Convert_Failed">Файлды түрлендіру мүмкін болмады.</sys:String>
+    <sys:String x:Key="Str_Convert_NeedsOffice">Ескі .doc және .xls файлдары Microsoft {0} арқылы түрлендіріледі, ал ол орнатылмаған. Файлды .docx немесе .xlsx ретінде сақтап, соны түрлендіріңіз.</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">Осы құжатқа 1 бет көшірілді.</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">Осы құжатқа {0} бет көшірілді.</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">Бетті көшіру сәтсіз аяқталды:&#10;{0}</sys:String>

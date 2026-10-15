@@ -1363,6 +1363,13 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Scan_Failed">স্ক্যান ব্যর্থ হয়েছে:</sys:String>
     <sys:String x:Key="Str_Scan_NoScanners">কোনো TWAIN স্ক্যানার পাওয়া যায়নি। স্ক্যানার সংযুক্ত করুন, এর TWAIN ড্রাইভার ইনস্টল করুন এবং আবার চেষ্টা করুন।</sys:String>
     <sys:String x:Key="Str_Scan_NoManager">স্ক্যান করতে 64-বিট TWAIN ম্যানেজার (TWAINDSM.dll) লাগে, যা TWAIN সমর্থিত স্ক্যানার ড্রাইভার ইনস্টল করে। আপনার স্ক্যানারের TWAIN ড্রাইভার ইনস্টল করে আবার চেষ্টা করুন।</sys:String>
+    <sys:String x:Key="Str_Menu_ConvertOffice">Word বা Excel ফাইল রূপান্তর করুন...</sys:String>
+    <sys:String x:Key="Str_Convert_Title">Word বা Excel ফাইল রূপান্তর করুন</sys:String>
+    <sys:String x:Key="Str_Filter_Office">Word ও Excel ফাইল</sys:String>
+    <sys:String x:Key="Str_Convert_Working">{0} রূপান্তর করা হচ্ছে...</sys:String>
+    <sys:String x:Key="Str_Convert_Done">{0} রূপান্তরিত হয়েছে। রাখতে PDF টি সংরক্ষণ করুন।</sys:String>
+    <sys:String x:Key="Str_Convert_Failed">ফাইলটি রূপান্তর করা যায়নি।</sys:String>
+    <sys:String x:Key="Str_Convert_NeedsOffice">পুরোনো .doc ও .xls ফাইল Microsoft {0} দিয়ে রূপান্তরিত হয়, যা ইনস্টল করা নেই। ফাইলটি .docx বা .xlsx হিসেবে সংরক্ষণ করে সেটি রূপান্তর করুন।</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">এই নথিতে ১টি পৃষ্ঠা কপি করা হয়েছে।</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">এই নথিতে {0}টি পৃষ্ঠা কপি করা হয়েছে।</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">পৃষ্ঠা কপি ব্যর্থ হয়েছে:&#10;{0}</sys:String>

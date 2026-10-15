@@ -1383,6 +1383,13 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Scan_Failed">Skanningen mislyktes:</sys:String>
     <sys:String x:Key="Str_Scan_NoScanners">Fant ingen TWAIN-skannere. Koble til skanneren, installer TWAIN-driveren og prøv igjen.</sys:String>
     <sys:String x:Key="Str_Scan_NoManager">Skanning krever 64-biters TWAIN-behandleren (TWAINDSM.dll), som skannerdrivere med TWAIN-støtte installerer. Installer TWAIN-driveren til skanneren og prøv igjen.</sys:String>
+    <sys:String x:Key="Str_Menu_ConvertOffice">Konverter Word- eller Excel-fil...</sys:String>
+    <sys:String x:Key="Str_Convert_Title">Konverter Word- eller Excel-fil</sys:String>
+    <sys:String x:Key="Str_Filter_Office">Word- og Excel-filer</sys:String>
+    <sys:String x:Key="Str_Convert_Working">Konverterer {0}...</sys:String>
+    <sys:String x:Key="Str_Convert_Done">{0} er konvertert. Lagre PDF-filen for å beholde den.</sys:String>
+    <sys:String x:Key="Str_Convert_Failed">Filen kunne ikke konverteres.</sys:String>
+    <sys:String x:Key="Str_Convert_NeedsOffice">Eldre .doc- og .xls-filer konverteres gjennom Microsoft {0}, som ikke er installert. Lagre filen som .docx eller .xlsx og konverter den i stedet.</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">Kopierte 1 side til dette dokumentet.</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">Kopierte {0} sider til dette dokumentet.</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">Kopiering av side mislyktes:&#10;{0}</sys:String>

@@ -1363,6 +1363,13 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Scan_Failed">Error al escanear:</sys:String>
     <sys:String x:Key="Str_Scan_NoScanners">No se encontraron escáneres TWAIN. Conecte el escáner, instale su controlador TWAIN e inténtelo de nuevo.</sys:String>
     <sys:String x:Key="Str_Scan_NoManager">Para escanear se necesita el administrador TWAIN de 64 bits (TWAINDSM.dll), que instalan los controladores de escáner compatibles con TWAIN. Instale el controlador TWAIN de su escáner e inténtelo de nuevo.</sys:String>
+    <sys:String x:Key="Str_Menu_ConvertOffice">Convertir archivo de Word o Excel...</sys:String>
+    <sys:String x:Key="Str_Convert_Title">Convertir archivo de Word o Excel</sys:String>
+    <sys:String x:Key="Str_Filter_Office">Archivos de Word y Excel</sys:String>
+    <sys:String x:Key="Str_Convert_Working">Convirtiendo {0}...</sys:String>
+    <sys:String x:Key="Str_Convert_Done">Se convirtió {0}. Guarde el PDF para conservarlo.</sys:String>
+    <sys:String x:Key="Str_Convert_Failed">No se pudo convertir el archivo.</sys:String>
+    <sys:String x:Key="Str_Convert_NeedsOffice">Los archivos .doc y .xls antiguos se convierten con Microsoft {0}, que no está instalado. Guarde el archivo como .docx o .xlsx y convierta ese archivo.</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">Se copió 1 página a este documento.</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">Se copiaron {0} páginas a este documento.</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">Error al copiar la página:&#10;{0}</sys:String>

@@ -1383,6 +1383,13 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Scan_Failed">Falha ao digitalizar:</sys:String>
     <sys:String x:Key="Str_Scan_NoScanners">Nenhum scanner TWAIN foi encontrado. Conecte o scanner, instale o driver TWAIN dele e tente novamente.</sys:String>
     <sys:String x:Key="Str_Scan_NoManager">A digitalização precisa do gerenciador TWAIN de 64 bits (TWAINDSM.dll), que os drivers de scanner compatíveis com TWAIN instalam. Instale o driver TWAIN do seu scanner e tente novamente.</sys:String>
+    <sys:String x:Key="Str_Menu_ConvertOffice">Converter arquivo do Word ou Excel...</sys:String>
+    <sys:String x:Key="Str_Convert_Title">Converter arquivo do Word ou Excel</sys:String>
+    <sys:String x:Key="Str_Filter_Office">Arquivos do Word e Excel</sys:String>
+    <sys:String x:Key="Str_Convert_Working">Convertendo {0}...</sys:String>
+    <sys:String x:Key="Str_Convert_Done">{0} convertido. Salve o PDF para mantê-lo.</sys:String>
+    <sys:String x:Key="Str_Convert_Failed">Não foi possível converter o arquivo.</sys:String>
+    <sys:String x:Key="Str_Convert_NeedsOffice">Arquivos .doc e .xls antigos são convertidos pelo Microsoft {0}, que não está instalado. Salve o arquivo como .docx ou .xlsx e converta esse arquivo.</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">1 página copiada para este documento.</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">{0} páginas copiadas para este documento.</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">Falha ao copiar a página:&#10;{0}</sys:String>

@@ -1371,6 +1371,13 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Scan_Failed">Skanowanie nie powiodło się:</sys:String>
     <sys:String x:Key="Str_Scan_NoScanners">Nie znaleziono skanerów TWAIN. Podłącz skaner, zainstaluj jego sterownik TWAIN i spróbuj ponownie.</sys:String>
     <sys:String x:Key="Str_Scan_NoManager">Skanowanie wymaga 64-bitowego menedżera TWAIN (TWAINDSM.dll), który instalują sterowniki skanerów obsługujące TWAIN. Zainstaluj sterownik TWAIN skanera i spróbuj ponownie.</sys:String>
+    <sys:String x:Key="Str_Menu_ConvertOffice">Konwertuj plik Word lub Excel...</sys:String>
+    <sys:String x:Key="Str_Convert_Title">Konwertuj plik Word lub Excel</sys:String>
+    <sys:String x:Key="Str_Filter_Office">Pliki Word i Excel</sys:String>
+    <sys:String x:Key="Str_Convert_Working">Konwertowanie {0}...</sys:String>
+    <sys:String x:Key="Str_Convert_Done">Przekonwertowano {0}. Zapisz plik PDF, aby go zachować.</sys:String>
+    <sys:String x:Key="Str_Convert_Failed">Nie można przekonwertować pliku.</sys:String>
+    <sys:String x:Key="Str_Convert_NeedsOffice">Starsze pliki .doc i .xls są konwertowane przez program Microsoft {0}, który nie jest zainstalowany. Zapisz plik jako .docx lub .xlsx i przekonwertuj go.</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">Skopiowano 1 stronę do tego dokumentu.</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">Skopiowano {0} stron do tego dokumentu.</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">Kopiowanie strony nie powiodło się:&#10;{0}</sys:String>

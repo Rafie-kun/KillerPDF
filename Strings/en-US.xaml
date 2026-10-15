@@ -1383,6 +1383,13 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Scan_Failed">Scanning failed:</sys:String>
     <sys:String x:Key="Str_Scan_NoScanners">No TWAIN scanners were found. Connect the scanner, install its TWAIN driver and try again.</sys:String>
     <sys:String x:Key="Str_Scan_NoManager">Scanning needs the 64-bit TWAIN manager (TWAINDSM.dll), which scanner drivers with TWAIN support install. Install your scanner's TWAIN driver and try again.</sys:String>
+    <sys:String x:Key="Str_Menu_ConvertOffice">Convert Word or Excel file...</sys:String>
+    <sys:String x:Key="Str_Convert_Title">Convert Word or Excel file</sys:String>
+    <sys:String x:Key="Str_Filter_Office">Word and Excel files</sys:String>
+    <sys:String x:Key="Str_Convert_Working">Converting {0}...</sys:String>
+    <sys:String x:Key="Str_Convert_Done">Converted {0}. Save the PDF to keep it.</sys:String>
+    <sys:String x:Key="Str_Convert_Failed">The file could not be converted.</sys:String>
+    <sys:String x:Key="Str_Convert_NeedsOffice">Older .doc and .xls files convert through Microsoft {0}, which is not installed. Save the file as .docx or .xlsx and convert that instead.</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">Copied 1 page to this document.</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">Copied {0} pages to this document.</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">Page copy failed:&#10;{0}</sys:String>
