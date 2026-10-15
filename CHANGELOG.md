@@ -44,6 +44,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Added Divide Spreads to the page menu. Place the split line on the gutter of a scanned two-page spread, left and right or top and bottom, and the page becomes two pages in reading order, for one page, the selected pages or the whole document (#382).
 - Added Rasterize Region to the page menus. Drag a box on the page, see how much text, images and drawing it covers, and only that box becomes an image at the chosen resolution while the rest of the page keeps its text and vectors (#369).
 - Added a visual separation preview to Separations in the Document tools. Each process and spot ink plate of a page can be viewed on its own as ink coverage, next to the page with all inks, and the text report is still a click away (#264).
+- Added Scan to PDF to the Open menu. It scans through the scanner's TWAIN driver, with or without the scanner's own settings window, and opens the pages as a new PDF (#73).
 
 ### Changed
 - Replaced PDFium, Docnet.Core and PdfPig with the engine for rendering, search, selection, copying and text editing, and built the JPEG 2000 decoder from vendored CoreJ2K sources. The engine keeps the previous renderer's page dimensions for viewing and image export.

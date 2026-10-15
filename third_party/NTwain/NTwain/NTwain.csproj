@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Vendored copy of NTwain 3.7.6. See ../VENDORING.md for the upstream revision and the
+    list of changes made to this project file. The library sources are unmodified apart from three reworded comments listed in VENDORING.md.
+  -->
+
+  <PropertyGroup>
+    <AssemblyName>NTwain</AssemblyName>
+    <RootNamespace>NTwain</RootNamespace>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <LangVersion>7.1</LangVersion>
+    <IsPackable>false</IsPackable>
+    <NeutralLanguage>en-US</NeutralLanguage>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AssemblyVersion>3.0.0.0</AssemblyVersion>
+    <FileVersion>3.7.6</FileVersion>
+    <Version>3.7.6</Version>
+    <Product>NTwain</Product>
+    <Authors>Eugene Wang</Authors>
+    <Copyright>Copyright (c) 2012 Yin-Chun Wang</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>

@@ -100,6 +100,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <ProjectReference Include="engine\KillerPdf.Engine\KillerPdf.Engine.csproj" />
+    <!-- Vendored TWAIN library for Scan to PDF. See third_party/NTwain/VENDORING.md. -->
+    <ProjectReference Include="third_party\NTwain\NTwain\NTwain.csproj" />
     <Content Include="engine\THIRD-PARTY-NOTICES.txt" Link="THIRD-PARTY-NOTICES.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <!-- We embed the x64 natives as resources and self-extract them at runtime (OcrNativeBootstrap), so the
          package's loose x86/x64 native copies in the output are dead weight. ExcludeAssets stops that copy
