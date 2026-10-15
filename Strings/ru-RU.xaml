@@ -1055,6 +1055,12 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Dlg_SelectMerge">Выберите PDF-файл для объединения</sys:String>
     <sys:String x:Key="Str_Dlg_SavePdfAs">Сохранить PDF как</sys:String>
     <sys:String x:Key="Str_Dlg_SaveFlattened">Сохранить сжатый PDF-файл</sys:String>
+    <sys:String x:Key="Str_Flatten_ScanLook">Вид скана</sys:String>
+    <sys:String x:Key="Str_Flatten_Tilt">Слегка наклонить страницы</sys:String>
+    <sys:String x:Key="Str_Flatten_PaperTone">Тёплый тон бумаги</sys:String>
+    <sys:String x:Key="Str_Flatten_Grain">Шум сканера</sys:String>
+    <sys:String x:Key="Str_Flatten_SoftFocus">Лёгкая размытость</sys:String>
+    <sys:String x:Key="Str_Flatten_EdgeShadow">Тень вдоль края страницы</sys:String>
     <sys:String x:Key="Str_Dlg_SaveExtractedAs">Сохраните извлеченные страницы как</sys:String>
     <sys:String x:Key="Str_Dlg_InsertImage">Вставить изображение</sys:String>
     <sys:String x:Key="Str_ImageAsset_DeleteConfirm">Удалить изображение «{0}»?</sys:String>

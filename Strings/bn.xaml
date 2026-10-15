@@ -1044,6 +1044,12 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Dlg_SelectMerge">একত্রিত করার PDF বাছুন</sys:String>
     <sys:String x:Key="Str_Dlg_SavePdfAs">PDF এভাবে সংরক্ষণ করুন</sys:String>
     <sys:String x:Key="Str_Dlg_SaveFlattened">ফ্ল্যাট করা PDF সংরক্ষণ করুন</sys:String>
+    <sys:String x:Key="Str_Flatten_ScanLook">স্ক্যান করা চেহারা</sys:String>
+    <sys:String x:Key="Str_Flatten_Tilt">পৃষ্ঠাগুলো সামান্য কাত করুন</sys:String>
+    <sys:String x:Key="Str_Flatten_PaperTone">উষ্ণ কাগজের রং</sys:String>
+    <sys:String x:Key="Str_Flatten_Grain">স্ক্যানারের দানা</sys:String>
+    <sys:String x:Key="Str_Flatten_SoftFocus">নরম ফোকাস</sys:String>
+    <sys:String x:Key="Str_Flatten_EdgeShadow">পৃষ্ঠার কিনারায় ছায়া</sys:String>
     <sys:String x:Key="Str_Dlg_SaveExtractedAs">বের করা পাতাগুলি এভাবে সংরক্ষণ করুন</sys:String>
     <sys:String x:Key="Str_Dlg_InsertImage">ছবি ঢোকান</sys:String>
     <sys:String x:Key="Str_ImageAsset_DeleteConfirm">"{0}" ছবিটি মুছবেন?</sys:String>

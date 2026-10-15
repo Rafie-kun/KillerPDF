@@ -1055,6 +1055,12 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Dlg_SelectMerge">Sélectionnez le PDF à fusionner</sys:String>
     <sys:String x:Key="Str_Dlg_SavePdfAs">Enregistrer le PDF sous</sys:String>
     <sys:String x:Key="Str_Dlg_SaveFlattened">Enregistrer le PDF aplati</sys:String>
+    <sys:String x:Key="Str_Flatten_ScanLook">Aspect numérisé</sys:String>
+    <sys:String x:Key="Str_Flatten_Tilt">Incliner légèrement les pages</sys:String>
+    <sys:String x:Key="Str_Flatten_PaperTone">Ton papier chaud</sys:String>
+    <sys:String x:Key="Str_Flatten_Grain">Grain de scanner</sys:String>
+    <sys:String x:Key="Str_Flatten_SoftFocus">Léger flou</sys:String>
+    <sys:String x:Key="Str_Flatten_EdgeShadow">Ombre le long du bord de la page</sys:String>
     <sys:String x:Key="Str_Dlg_SaveExtractedAs">Enregistrer les pages extraites sous</sys:String>
     <sys:String x:Key="Str_Dlg_InsertImage">Insérer une image</sys:String>
     <sys:String x:Key="Str_ImageAsset_DeleteConfirm">Supprimer l’image « {0} » ?</sys:String>

@@ -1055,6 +1055,12 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Dlg_SelectMerge">Select PDF to merge</sys:String>
     <sys:String x:Key="Str_Dlg_SavePdfAs">Save PDF as</sys:String>
     <sys:String x:Key="Str_Dlg_SaveFlattened">Save Flattened PDF</sys:String>
+    <sys:String x:Key="Str_Flatten_ScanLook">Scanned look</sys:String>
+    <sys:String x:Key="Str_Flatten_Tilt">Tilt pages slightly</sys:String>
+    <sys:String x:Key="Str_Flatten_PaperTone">Warm paper tone</sys:String>
+    <sys:String x:Key="Str_Flatten_Grain">Scanner grain</sys:String>
+    <sys:String x:Key="Str_Flatten_SoftFocus">Soft focus</sys:String>
+    <sys:String x:Key="Str_Flatten_EdgeShadow">Shadow along the page edge</sys:String>
     <sys:String x:Key="Str_Dlg_SaveExtractedAs">Save extracted pages as</sys:String>
     <sys:String x:Key="Str_Dlg_InsertImage">Insert Image</sys:String>
     <sys:String x:Key="Str_ImageAsset_DeleteConfirm">Delete image "{0}"?</sys:String>

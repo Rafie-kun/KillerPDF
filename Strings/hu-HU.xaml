@@ -1051,6 +1051,12 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Dlg_SelectMerge">Válassza ki az egyesítendő PDF-et</sys:String>
     <sys:String x:Key="Str_Dlg_SavePdfAs">PDF mentése másként</sys:String>
     <sys:String x:Key="Str_Dlg_SaveFlattened">Egyesített PDF mentése</sys:String>
+    <sys:String x:Key="Str_Flatten_ScanLook">Beolvasott hatás</sys:String>
+    <sys:String x:Key="Str_Flatten_Tilt">Oldalak enyhe megdöntése</sys:String>
+    <sys:String x:Key="Str_Flatten_PaperTone">Meleg papírszín</sys:String>
+    <sys:String x:Key="Str_Flatten_Grain">Szkennerzaj</sys:String>
+    <sys:String x:Key="Str_Flatten_SoftFocus">Enyhe életlenség</sys:String>
+    <sys:String x:Key="Str_Flatten_EdgeShadow">Árnyék az oldal szélén</sys:String>
     <sys:String x:Key="Str_Dlg_SaveExtractedAs">Kinyert oldalak mentése másként</sys:String>
     <sys:String x:Key="Str_Dlg_InsertImage">Kép beszúrása</sys:String>
     <sys:String x:Key="Str_ImageAsset_DeleteConfirm">Törli ezt a képet: „{0}”?</sys:String>

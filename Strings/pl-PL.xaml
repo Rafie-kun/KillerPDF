@@ -1052,6 +1052,12 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Dlg_SelectMerge">Wybierz PDF do scalenia</sys:String>
     <sys:String x:Key="Str_Dlg_SavePdfAs">Zapisz PDF jako</sys:String>
     <sys:String x:Key="Str_Dlg_SaveFlattened">Zapisz spłaszczony PDF</sys:String>
+    <sys:String x:Key="Str_Flatten_ScanLook">Wygląd skanu</sys:String>
+    <sys:String x:Key="Str_Flatten_Tilt">Lekko przechyl strony</sys:String>
+    <sys:String x:Key="Str_Flatten_PaperTone">Ciepły odcień papieru</sys:String>
+    <sys:String x:Key="Str_Flatten_Grain">Ziarno skanera</sys:String>
+    <sys:String x:Key="Str_Flatten_SoftFocus">Lekkie rozmycie</sys:String>
+    <sys:String x:Key="Str_Flatten_EdgeShadow">Cień wzdłuż krawędzi strony</sys:String>
     <sys:String x:Key="Str_Dlg_SaveExtractedAs">Zapisz wyodrębnione strony jako</sys:String>
     <sys:String x:Key="Str_Dlg_InsertImage">Wstaw obraz</sys:String>
     <sys:String x:Key="Str_ImageAsset_DeleteConfirm">Usunąć obraz „{0}”?</sys:String>

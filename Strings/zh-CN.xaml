@@ -1048,6 +1048,12 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Dlg_SelectMerge">选择要合并的 PDF</sys:String>
     <sys:String x:Key="Str_Dlg_SavePdfAs">PDF 另存为</sys:String>
     <sys:String x:Key="Str_Dlg_SaveFlattened">保存展平的 PDF</sys:String>
+    <sys:String x:Key="Str_Flatten_ScanLook">扫描效果</sys:String>
+    <sys:String x:Key="Str_Flatten_Tilt">轻微倾斜页面</sys:String>
+    <sys:String x:Key="Str_Flatten_PaperTone">暖色纸张</sys:String>
+    <sys:String x:Key="Str_Flatten_Grain">扫描仪颗粒</sys:String>
+    <sys:String x:Key="Str_Flatten_SoftFocus">柔焦</sys:String>
+    <sys:String x:Key="Str_Flatten_EdgeShadow">页面边缘阴影</sys:String>
     <sys:String x:Key="Str_Dlg_SaveExtractedAs">提取的页面另存为</sys:String>
     <sys:String x:Key="Str_Dlg_InsertImage">插入图片</sys:String>
     <sys:String x:Key="Str_ImageAsset_DeleteConfirm">删除图像“{0}”？</sys:String>

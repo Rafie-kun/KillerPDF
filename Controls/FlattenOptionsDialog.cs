@@ -13,6 +13,11 @@ internal sealed class FlattenOptionsDialog : Window
     private readonly CheckBox _useJpeg;
     private readonly Slider _jpegQuality;
     private readonly TextBlock _jpegQualityValue;
+    private readonly CheckBox _tilt;
+    private readonly CheckBox _paperTone;
+    private readonly CheckBox _grain;
+    private readonly CheckBox _softFocus;
+    private readonly CheckBox _edgeShadow;
 
     internal bool Confirmed { get; private set; }
     internal PdfRasterize.FlattenOptions Options { get; private set; } = new();
@@ -88,6 +93,24 @@ internal sealed class FlattenOptionsDialog : Window
         body.Children.Add(_jpegQuality);
         body.Children.Add(_jpegQualityValue);
 
+        // #426: a copy that looks printed and scanned. Grayscale and JPEG compression above
+        // finish the look.
+        var lookLabel = UiKit.GroupLabel(L("Str_Flatten_ScanLook"));
+        lookLabel.Margin = new Thickness(0, 12, 0, 2);
+        body.Children.Add(lookLabel);
+        CheckBox LookOption(string key)
+        {
+            var option = UiKit.CheckBox(L(key));
+            option.Margin = new Thickness(0, 3, 0, 0);
+            body.Children.Add(option);
+            return option;
+        }
+        _tilt = LookOption("Str_Flatten_Tilt");
+        _paperTone = LookOption("Str_Flatten_PaperTone");
+        _grain = LookOption("Str_Flatten_Grain");
+        _softFocus = LookOption("Str_Flatten_SoftFocus");
+        _edgeShadow = LookOption("Str_Flatten_EdgeShadow");
+
         _colorMode.SelectionChanged += (_, _) => UpdateEnabledControls();
         _useJpeg.Checked += (_, _) => UpdateEnabledControls();
         _useJpeg.Unchecked += (_, _) => UpdateEnabledControls();
@@ -124,7 +147,13 @@ internal sealed class FlattenOptionsDialog : Window
             (PageColorMode)Math.Max(0, _colorMode.SelectedIndex),
             (int)Math.Round(_threshold.Value),
             _useJpeg.IsChecked == true,
-            (int)Math.Round(_jpegQuality.Value));
+            (int)Math.Round(_jpegQuality.Value),
+            new ScanLookOptions(
+                Tilt: _tilt.IsChecked == true,
+                PaperTone: _paperTone.IsChecked == true,
+                Grain: _grain.IsChecked == true,
+                SoftFocus: _softFocus.IsChecked == true,
+                EdgeShadow: _edgeShadow.IsChecked == true));
         Options.Validate();
         Confirmed = true;
         Close();

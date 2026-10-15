@@ -1055,6 +1055,12 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Dlg_SelectMerge">結合する PDF を選択</sys:String>
     <sys:String x:Key="Str_Dlg_SavePdfAs">PDF に名前を付けて保存</sys:String>
     <sys:String x:Key="Str_Dlg_SaveFlattened">統合された PDF を保存</sys:String>
+    <sys:String x:Key="Str_Flatten_ScanLook">スキャン風</sys:String>
+    <sys:String x:Key="Str_Flatten_Tilt">ページを少し傾ける</sys:String>
+    <sys:String x:Key="Str_Flatten_PaperTone">温かみのある紙の色</sys:String>
+    <sys:String x:Key="Str_Flatten_Grain">スキャナーの粒状ノイズ</sys:String>
+    <sys:String x:Key="Str_Flatten_SoftFocus">ソフトフォーカス</sys:String>
+    <sys:String x:Key="Str_Flatten_EdgeShadow">ページ端の影</sys:String>
     <sys:String x:Key="Str_Dlg_SaveExtractedAs">抽出したページを保存</sys:String>
     <sys:String x:Key="Str_Dlg_InsertImage">画像を挿入</sys:String>
     <sys:String x:Key="Str_ImageAsset_DeleteConfirm">画像「{0}」を削除しますか？</sys:String>

@@ -20,7 +20,8 @@ namespace KillerPDF.Services
             PageColorMode ColorMode = PageColorMode.Color,
             int BlackWhiteThreshold = 160,
             bool UseJpegCompression = false,
-            int JpegQuality = 85)
+            int JpegQuality = 85,
+            ScanLookOptions? Look = null)
         {
             internal void Validate()
             {
@@ -63,7 +64,8 @@ namespace KillerPDF.Services
             IReadOnlyList<bool> jpegHints =
                 PdfPageRasterInformation.ReadJpegImagePageHints(sourceDocument);
             var passthrough = new PdfImage?[pageCount];
-            if (options.ColorMode == PageColorMode.Color && !options.UseJpegCompression)
+            bool scanLook = options.Look?.Any == true;
+            if (options.ColorMode == PageColorMode.Color && !options.UseJpegCompression && !scanLook)
                 for (int i = 0; i < pageCount; i++)
                     if (PdfPageRasterInformation.TryReadFullPageJpeg(
                             sourceDocument, i, out PdfImage? candidate)
@@ -103,10 +105,13 @@ namespace KillerPDF.Services
                     rh = rendered.Height;
                     bgra = rendered.Pixels;
                 }
+                // The scanned look goes on before the color mode, so a grayscale copy grays the
+                // warm paper and grain along with the page.
+                if (scanLook) bgra = ScanLook.Apply(bgra, rw, rh, options.Dpi, options.Look!, i);
                 PageQualityConverter.ApplyColorModeToBgra(
                     bgra, options.ColorMode, options.BlackWhiteThreshold);
                 bool bitonal = options.ColorMode == PageColorMode.BlackAndWhite
-                    || options.ColorMode == PageColorMode.Color
+                    || options.ColorMode == PageColorMode.Color && !scanLook
                     && i < bitonalHints.Count && bitonalHints[i]
                     && BitonalPageDetector.IsOpaqueGrayscaleBgra(bgra, rw, rh);
                 bool grayscale = options.ColorMode == PageColorMode.Grayscale;

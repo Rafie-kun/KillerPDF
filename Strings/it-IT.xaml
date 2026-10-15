@@ -1055,6 +1055,12 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_Dlg_SelectMerge">Seleziona PDF da unire</sys:String>
     <sys:String x:Key="Str_Dlg_SavePdfAs">Salva PDF come</sys:String>
     <sys:String x:Key="Str_Dlg_SaveFlattened">Salva PDF appiattito</sys:String>
+    <sys:String x:Key="Str_Flatten_ScanLook">Aspetto scansionato</sys:String>
+    <sys:String x:Key="Str_Flatten_Tilt">Inclina leggermente le pagine</sys:String>
+    <sys:String x:Key="Str_Flatten_PaperTone">Tono carta caldo</sys:String>
+    <sys:String x:Key="Str_Flatten_Grain">Grana dello scanner</sys:String>
+    <sys:String x:Key="Str_Flatten_SoftFocus">Messa a fuoco morbida</sys:String>
+    <sys:String x:Key="Str_Flatten_EdgeShadow">Ombra lungo il bordo della pagina</sys:String>
     <sys:String x:Key="Str_Dlg_SaveExtractedAs">Salva pagine estratte con nome</sys:String>
     <sys:String x:Key="Str_Dlg_InsertImage">Inserisci immagine</sys:String>
     <sys:String x:Key="Str_ImageAsset_DeleteConfirm">Eliminare l'immagine "{0}"?</sys:String>

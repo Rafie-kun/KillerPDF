@@ -1049,6 +1049,12 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Dlg_SelectMerge">Vyberte PDF ke sloučení</sys:String>
     <sys:String x:Key="Str_Dlg_SavePdfAs">Uložit PDF jako</sys:String>
     <sys:String x:Key="Str_Dlg_SaveFlattened">Uložit sloučené PDF</sys:String>
+    <sys:String x:Key="Str_Flatten_ScanLook">Vzhled skenu</sys:String>
+    <sys:String x:Key="Str_Flatten_Tilt">Mírně naklonit stránky</sys:String>
+    <sys:String x:Key="Str_Flatten_PaperTone">Teplý tón papíru</sys:String>
+    <sys:String x:Key="Str_Flatten_Grain">Šum skeneru</sys:String>
+    <sys:String x:Key="Str_Flatten_SoftFocus">Jemné rozostření</sys:String>
+    <sys:String x:Key="Str_Flatten_EdgeShadow">Stín podél okraje stránky</sys:String>
     <sys:String x:Key="Str_Dlg_SaveExtractedAs">Uložit vyjmuté stránky jako</sys:String>
     <sys:String x:Key="Str_Dlg_InsertImage">Vložit obrázek</sys:String>
     <sys:String x:Key="Str_ImageAsset_DeleteConfirm">Odstranit obrázek „{0}“?</sys:String>

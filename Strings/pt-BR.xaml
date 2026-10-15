@@ -1055,6 +1055,12 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Dlg_SelectMerge">Selecionar PDF para mesclar</sys:String>
     <sys:String x:Key="Str_Dlg_SavePdfAs">Salvar PDF como</sys:String>
     <sys:String x:Key="Str_Dlg_SaveFlattened">Salvar PDF nivelado</sys:String>
+    <sys:String x:Key="Str_Flatten_ScanLook">Aparência digitalizada</sys:String>
+    <sys:String x:Key="Str_Flatten_Tilt">Inclinar levemente as páginas</sys:String>
+    <sys:String x:Key="Str_Flatten_PaperTone">Tom de papel quente</sys:String>
+    <sys:String x:Key="Str_Flatten_Grain">Granulação de scanner</sys:String>
+    <sys:String x:Key="Str_Flatten_SoftFocus">Foco suave</sys:String>
+    <sys:String x:Key="Str_Flatten_EdgeShadow">Sombra na borda da página</sys:String>
     <sys:String x:Key="Str_Dlg_SaveExtractedAs">Salvar páginas extraídas como</sys:String>
     <sys:String x:Key="Str_Dlg_InsertImage">Inserir imagem</sys:String>
     <sys:String x:Key="Str_ImageAsset_DeleteConfirm">Excluir a imagem “{0}”?</sys:String>

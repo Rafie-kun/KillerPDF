@@ -1055,6 +1055,12 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Dlg_SelectMerge">Velg PDF som skal slås sammen</sys:String>
     <sys:String x:Key="Str_Dlg_SavePdfAs">Lagre PDF som</sys:String>
     <sys:String x:Key="Str_Dlg_SaveFlattened">Lagre flatet PDF</sys:String>
+    <sys:String x:Key="Str_Flatten_ScanLook">Skannet utseende</sys:String>
+    <sys:String x:Key="Str_Flatten_Tilt">Vipp sidene litt</sys:String>
+    <sys:String x:Key="Str_Flatten_PaperTone">Varm papirtone</sys:String>
+    <sys:String x:Key="Str_Flatten_Grain">Skannerkorn</sys:String>
+    <sys:String x:Key="Str_Flatten_SoftFocus">Myk fokus</sys:String>
+    <sys:String x:Key="Str_Flatten_EdgeShadow">Skygge langs sidekanten</sys:String>
     <sys:String x:Key="Str_Dlg_SaveExtractedAs">Lagre uttrukne sider som</sys:String>
     <sys:String x:Key="Str_Dlg_InsertImage">Sett inn bilde</sys:String>
     <sys:String x:Key="Str_ImageAsset_DeleteConfirm">Slette bildet «{0}»?</sys:String>

@@ -1050,6 +1050,12 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Dlg_SelectMerge">PDF zum Zusammenführen wählen</sys:String>
     <sys:String x:Key="Str_Dlg_SavePdfAs">PDF speichern unter</sys:String>
     <sys:String x:Key="Str_Dlg_SaveFlattened">Reduzierte PDF speichern</sys:String>
+    <sys:String x:Key="Str_Flatten_ScanLook">Gescannter Look</sys:String>
+    <sys:String x:Key="Str_Flatten_Tilt">Seiten leicht schräg stellen</sys:String>
+    <sys:String x:Key="Str_Flatten_PaperTone">Warmer Papierton</sys:String>
+    <sys:String x:Key="Str_Flatten_Grain">Scannerrauschen</sys:String>
+    <sys:String x:Key="Str_Flatten_SoftFocus">Leichte Unschärfe</sys:String>
+    <sys:String x:Key="Str_Flatten_EdgeShadow">Schatten am Seitenrand</sys:String>
     <sys:String x:Key="Str_Dlg_SaveExtractedAs">Extrahierte Seiten speichern unter</sys:String>
     <sys:String x:Key="Str_Dlg_InsertImage">Bild einfügen</sys:String>
     <sys:String x:Key="Str_ImageAsset_DeleteConfirm">Bild „{0}“ löschen?</sys:String>

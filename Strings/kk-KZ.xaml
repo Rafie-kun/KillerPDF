@@ -1005,6 +1005,12 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Dlg_SelectMerge">Біріктіретін PDF таңдау</sys:String>
     <sys:String x:Key="Str_Dlg_SavePdfAs">PDF-ті басқаша сақтау</sys:String>
     <sys:String x:Key="Str_Dlg_SaveFlattened">Тегістелген PDF сақтау</sys:String>
+    <sys:String x:Key="Str_Flatten_ScanLook">Скан көрінісі</sys:String>
+    <sys:String x:Key="Str_Flatten_Tilt">Беттерді сәл қисайту</sys:String>
+    <sys:String x:Key="Str_Flatten_PaperTone">Жылы қағаз реңі</sys:String>
+    <sys:String x:Key="Str_Flatten_Grain">Сканер түйіршігі</sys:String>
+    <sys:String x:Key="Str_Flatten_SoftFocus">Жұмсақ бұлыңғырлық</sys:String>
+    <sys:String x:Key="Str_Flatten_EdgeShadow">Бет шетіндегі көлеңке</sys:String>
     <sys:String x:Key="Str_Dlg_SaveExtractedAs">Шығарылған беттерді сақтау</sys:String>
     <sys:String x:Key="Str_Dlg_InsertImage">Сурет кірістіру</sys:String>
     <sys:String x:Key="Str_ImageAsset_DeleteConfirm">«{0}» кескінін жою керек пе?</sys:String>

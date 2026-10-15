@@ -1044,6 +1044,12 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Dlg_SelectMerge">Seleccione el PDF a combinar</sys:String>
     <sys:String x:Key="Str_Dlg_SavePdfAs">Guardar PDF como</sys:String>
     <sys:String x:Key="Str_Dlg_SaveFlattened">Guardar PDF aplanado</sys:String>
+    <sys:String x:Key="Str_Flatten_ScanLook">Aspecto escaneado</sys:String>
+    <sys:String x:Key="Str_Flatten_Tilt">Inclinar ligeramente las páginas</sys:String>
+    <sys:String x:Key="Str_Flatten_PaperTone">Tono de papel cálido</sys:String>
+    <sys:String x:Key="Str_Flatten_Grain">Grano de escáner</sys:String>
+    <sys:String x:Key="Str_Flatten_SoftFocus">Desenfoque suave</sys:String>
+    <sys:String x:Key="Str_Flatten_EdgeShadow">Sombra en el borde de la página</sys:String>
     <sys:String x:Key="Str_Dlg_SaveExtractedAs">Guardar páginas extraídas como</sys:String>
     <sys:String x:Key="Str_Dlg_InsertImage">Insertar imagen</sys:String>
     <sys:String x:Key="Str_ImageAsset_DeleteConfirm">¿Eliminar la imagen «{0}»?</sys:String>
