@@ -304,6 +304,11 @@ internal static class PdfEngineBurn
                 signature.SourceWidth * signature.Scale, signature.SourceHeight * signature.Scale, sx, sy);
             return;
         }
+        if (signature.Vectors is { Count: > 0 } vectors)
+        {
+            DrawSignatureVectors(content, signature, vectors, sx, sy);
+            return;
+        }
         content.SaveState().SetStrokeRgb(0, 0, 0)
             .SetLineWidth(Math.Max(.01, signature.StrokeWidth * signature.Scale * sx))
             .SetLineCap(PdfLineCap.Round).SetLineJoin(PdfLineJoin.Round);
@@ -319,6 +324,59 @@ internal static class PdfEngineBurn
         }
         content.RestoreState();
     }
+
+    // An SVG signature (#398) goes into the page as vector outlines, in the signature's own
+    // units under one transform, so it stays sharp at any zoom.
+    private static void DrawSignatureVectors(PdfContentStreamBuilder content, SignatureAnnotation signature,
+        List<SignatureVector> vectors, double sx, double sy)
+    {
+        content.SaveState().Transform(signature.Scale * sx, 0, 0, signature.Scale * sy,
+            signature.Position.X * sx, signature.Position.Y * sy);
+        foreach (SignatureVector vector in vectors)
+        {
+            List<VectorSegment> segments;
+            try { segments = SvgPathData.Parse(vector.Data); }
+            catch (FormatException) { continue; }
+            bool fill = vector.Fill is uint fillColor && fillColor >> 24 > 0;
+            bool stroke = vector.Stroke is uint strokeColor && strokeColor >> 24 > 0 && vector.StrokeWidth > 0;
+            if (segments.Count == 0 || !fill && !stroke) continue;
+            content.SaveState();
+            uint fillArgb = vector.Fill ?? 0, strokeArgb = vector.Stroke ?? 0;
+            if (fill) content.SetFillRgb(Channel(fillArgb, 16), Channel(fillArgb, 8), Channel(fillArgb, 0));
+            if (stroke)
+            {
+                content.SetStrokeRgb(Channel(strokeArgb, 16), Channel(strokeArgb, 8), Channel(strokeArgb, 0))
+                    .SetLineWidth(vector.StrokeWidth)
+                    .SetLineCap(Enum.IsDefined((PdfLineCap)vector.LineCap) ? (PdfLineCap)vector.LineCap : PdfLineCap.Butt)
+                    .SetLineJoin(Enum.IsDefined((PdfLineJoin)vector.LineJoin) ? (PdfLineJoin)vector.LineJoin : PdfLineJoin.Miter);
+            }
+            double fillAlpha = fill ? Channel(fillArgb, 24) : 1, strokeAlpha = stroke ? Channel(strokeArgb, 24) : 1;
+            if (fillAlpha < 1 || strokeAlpha < 1) content.SetOpacity(fillAlpha, strokeAlpha);
+            foreach (VectorSegment segment in segments)
+                switch (segment.Verb)
+                {
+                    case VectorVerb.Move: content.MoveTo(segment.X, segment.Y); break;
+                    case VectorVerb.Line: content.LineTo(segment.X, segment.Y); break;
+                    case VectorVerb.Cubic:
+                        content.CurveTo(segment.X1, segment.Y1, segment.X2, segment.Y2, segment.X, segment.Y);
+                        break;
+                    default: content.ClosePath(); break;
+                }
+            if (fill && stroke)
+            {
+                if (vector.EvenOdd) content.FillAndStrokeEvenOdd(); else content.FillAndStroke();
+            }
+            else if (fill)
+            {
+                if (vector.EvenOdd) content.FillEvenOdd(); else content.Fill();
+            }
+            else content.Stroke();
+            content.RestoreState();
+        }
+        content.RestoreState();
+    }
+
+    private static double Channel(uint argb, int shift) => ((argb >> shift) & 0xFF) / 255d;
 
     private static void DrawImage(PdfContentStreamBuilder content, string data, WpfPoint position,
         double width, double height, double sx, double sy)

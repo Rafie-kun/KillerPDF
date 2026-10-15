@@ -222,6 +222,12 @@ namespace KillerPDF.Controls
                                 _activeCanvas.Children.Add(imgCtrl);
                             }
                         }
+                        else if (sa.Vectors is { Count: > 0 })
+                        {
+                            // SVG signature (#398): its own outlines, scaled like drawn strokes
+                            foreach (var shape in SignatureVectorGeometry.Shapes(sa.Vectors, sa.Position.X, sa.Position.Y, sa.Scale))
+                                _activeCanvas.Children.Add(shape);
+                        }
                         else
                         {
                             foreach (var stroke in sa.Strokes)

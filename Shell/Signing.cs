@@ -43,7 +43,8 @@ namespace KillerPDF
                 StrokeWidth = sig.StrokeWidth,
                 SourceWidth = sig.CanvasWidth,
                 SourceHeight = sig.CanvasHeight,
-                ImageData = sig.ImageData
+                ImageData = sig.ImageData,
+                Vectors = sig.Vectors is null ? null : [.. sig.Vectors]
             };
 
             // Drawn signature - convert serializable points to WPF points
@@ -139,6 +140,7 @@ namespace KillerPDF
                 SourceWidth  = sw,
                 SourceHeight = sh,
                 ImageData    = sig.ImageData,
+                Vectors      = sig.Vectors is null ? null : [.. sig.Vectors],
             };
             if (sig.ImageData is null)
                 foreach (var stroke in sig.Strokes)
@@ -262,6 +264,13 @@ namespace KillerPDF
 
             double offsetX = (targetW - sig.CanvasWidth * scale) / 2;
             double offsetY = (targetH - sig.CanvasHeight * scale) / 2;
+
+            if (sig.Vectors is { Count: > 0 })
+            {
+                foreach (var shape in SignatureVectorGeometry.Shapes(sig.Vectors, offsetX, offsetY, scale))
+                    canvas.Children.Add(shape);
+                return;
+            }
 
             foreach (var stroke in sig.Strokes)
             {
@@ -835,11 +844,16 @@ namespace KillerPDF
 
         private void ImportImageSignature(SignatureKind kind = SignatureKind.Signature)
         {
-            var dlg = new Controls.ImageAssetPickerDialog(this, Loc("Str_Sign_ImportImage"));
+            var dlg = new Controls.ImageAssetPickerDialog(this, Loc("Str_Sign_ImportImage"), allowVector: true);
             if (dlg.ShowDialog() != true || string.IsNullOrEmpty(dlg.SelectedPath)) return;
 
             try
             {
+                if (string.Equals(System.IO.Path.GetExtension(dlg.SelectedPath), ".svg", StringComparison.OrdinalIgnoreCase))
+                {
+                    ImportVectorSignature(dlg.SelectedPath, dlg.SelectedName, kind);
+                    return;
+                }
                 var bmp = new System.Windows.Media.Imaging.BitmapImage(new Uri(dlg.SelectedPath));
                 // A scanned or photographed signature carries its paper with it. The sensitivity
                 // dialog drops the paper and lets the user lighten or darken the ink before saving.
@@ -867,6 +881,28 @@ namespace KillerPDF
                 KillerDialog.Show(this, Loc("Str_Err_ImportImageFailed") + "\n" + ex.Message, "KillerPDF",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        // An SVG signature (#398) keeps its outlines, fitted to the drawing pad's 400 by 150 so it
+        // places at the same size a drawn signature does, and is saved and burned as vectors.
+        private void ImportVectorSignature(string path, string? name, SignatureKind kind)
+        {
+            SvgSignatureDocument svg = SvgSignatureImporter.Import(path);
+            var (vectors, width, height) = svg.Fit(400, 150);
+            var saved = new SavedSignature
+            {
+                Kind = kind,
+                Name = name ?? System.IO.Path.GetFileNameWithoutExtension(path),
+                CanvasWidth = width,
+                CanvasHeight = height,
+                Vectors = vectors
+            };
+            _signatureStore.Add(saved);
+            PersistSignatures();
+
+            _pendingSignature = saved;
+            _annotationCanvas.Cursor = Cursors.Cross;
+            SetStatus(Loc("Str_St_ImageLoaded"));
         }
 
         // Preview of an imported signature with a Sensitivity slider. Returns the full-size ink on a

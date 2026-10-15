@@ -11,6 +11,7 @@ namespace KillerPDF.Controls;
 internal sealed class ImageAssetPickerDialog : Window
 {
     private readonly ImageAssetStore _store = new();
+    private readonly bool _allowVector;
     private readonly ListBox _assets = new();
     private readonly Image _preview = new() { Stretch = Stretch.Uniform };
     private readonly TextBlock _emptyHint;
@@ -24,8 +25,11 @@ internal sealed class ImageAssetPickerDialog : Window
     internal string? SelectedPath { get; private set; }
     internal string? SelectedName { get; private set; }
 
-    internal ImageAssetPickerDialog(Window owner, string? title = null)
+    // allowVector lets the import also pick an SVG file (#398). An SVG is handed straight back
+    // rather than kept in the image library, which holds bitmaps.
+    internal ImageAssetPickerDialog(Window owner, string? title = null, bool allowVector = false)
     {
+        _allowVector = allowVector;
         Title = "KillerPDF - " + (title ?? L("Str_Dlg_InsertImage"));
         Width = 680;
         Height = 480;
@@ -189,11 +193,19 @@ internal sealed class ImageAssetPickerDialog : Window
         {
             Title = L("Str_Dlg_InsertImage"),
             Filter = L("Str_Filter_Images") +
-                "|*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.tiff;*.tif|" +
+                "|*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.tiff;*.tif" + (_allowVector ? ";*.svg|" : "|") +
                 L("Str_Filter_AllFiles") + "|*.*",
             ShowImagePreview = true
         };
         if (dialog.ShowDialog(this) != true) return;
+        if (_allowVector && string.Equals(Path.GetExtension(dialog.FileName), ".svg", StringComparison.OrdinalIgnoreCase))
+        {
+            SelectedPath = dialog.FileName;
+            SelectedName = Path.GetFileNameWithoutExtension(dialog.FileName);
+            DialogResult = true;
+            Close();
+            return;
+        }
 
         try
         {

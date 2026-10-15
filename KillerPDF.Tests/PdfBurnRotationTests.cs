@@ -243,6 +243,40 @@ public sealed class PdfBurnRotationTests
     }
 
     [Fact]
+    public void SignatureBurn_WritesSvgOutlinesAsVectorPaths()
+    {
+        string path = Path.Combine(Path.GetTempPath(), $"killerpdf-svg-sig-{Guid.NewGuid():N}.pdf");
+        try
+        {
+            File.WriteAllBytes(path, new PdfDocumentBuilder().AddBlankPage(612, 792).Build());
+            var annotations = new Dictionary<int, List<PageAnnotation>>
+            {
+                [0] =
+                [
+                    new SignatureAnnotation
+                    {
+                        PageIndex = 0, Position = new Point(50, 60), Scale = 0.5,
+                        SourceWidth = 400, SourceHeight = 150,
+                        Vectors =
+                        [
+                            new SignatureVector { Data = "M 0 0 C 10 20 30 40 50 60 Z", Fill = 0xFF0000FF },
+                            new SignatureVector { Data = "M 0 0 L 100 0", Stroke = 0xFF000000, StrokeWidth = 4, LineCap = 1 }
+                        ]
+                    }
+                ]
+            };
+            PdfEngineBurn.Burn(path, annotations, new Dictionary<int, (int w, int h)> { [0] = (612, 792) });
+
+            string streams = AllDecodedStreams(path);
+            Assert.Contains("0.5 0 0 0.5 50 60 cm", streams);
+            Assert.Contains("10 20 30 40 50 60 c", streams);
+            Assert.Contains("100 0 l", streams);
+            Assert.Contains("1 J", streams);
+        }
+        finally { if (File.Exists(path)) File.Delete(path); }
+    }
+
+    [Fact]
     public void EngineBurn_WritesTypedMarkupResourcesAndReopens()
     {
         string path = Path.Combine(Path.GetTempPath(), $"killerpdf-typed-burn-{Guid.NewGuid():N}.pdf");

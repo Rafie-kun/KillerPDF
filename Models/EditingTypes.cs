@@ -185,6 +185,9 @@ namespace KillerPDF
         public double StrokeWidth { get; set; } = 2.5;
         /// <summary>Base-64 encoded PNG. Non-null = image sig; null = drawn strokes.</summary>
         public string? ImageData { get; set; }
+        /// <summary>Outlines of an imported SVG signature, in source units. Null for drawn and
+        /// image signatures.</summary>
+        public List<SignatureVector>? Vectors { get; set; }
     }
 
     /// <summary>
@@ -226,5 +229,24 @@ namespace KillerPDF
         public double CanvasHeight { get; set; } = 150;
         /// <summary>Base-64 encoded PNG for imported image signatures. Null = drawn strokes.</summary>
         public string? ImageData { get; set; }
+        /// <summary>Outlines of a signature imported from SVG (#398), in CanvasWidth/Height units.
+        /// Null for drawn and image signatures.</summary>
+        public List<SignatureVector>? Vectors { get; set; }
+    }
+
+    /// <summary>
+    /// One outline of a vector signature (#398). Data is absolute SVG path data using only move,
+    /// line, cubic and close commands. Colors are ARGB; a null color is not painted. LineCap and
+    /// LineJoin use the PDF numbering: butt, round, square and miter, round, bevel.
+    /// </summary>
+    public class SignatureVector
+    {
+        public string Data { get; set; } = "";
+        public uint? Fill { get; set; }
+        public uint? Stroke { get; set; }
+        public double StrokeWidth { get; set; } = 1;
+        public bool EvenOdd { get; set; }
+        public int LineCap { get; set; }
+        public int LineJoin { get; set; }
     }
 }

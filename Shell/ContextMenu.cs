@@ -457,7 +457,8 @@ namespace KillerPDF
                 SourceHeight = s.SourceHeight,
                 Strokes = [.. s.Strokes.Select(st => new List<Point>(st))],
                 StrokeWidth = s.StrokeWidth,
-                ImageData = s.ImageData
+                ImageData = s.ImageData,
+                Vectors = s.Vectors is null ? null : [.. s.Vectors]
             },
             ImageAnnotation img => new ImageAnnotation
             {
