@@ -1344,6 +1344,14 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Divide_MarkupWarn">Poznámky na dělených stránkách se stanou jejich součástí a už je nepůjde upravit. Přesto rozdělit?</sys:String>
     <sys:String x:Key="Str_Divide_Done">Rozděleno {0} stran na {1}</sys:String>
     <sys:String x:Key="Str_Divide_Failed">Stránky nelze rozdělit: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_RasterizeRegion">Rastrovat oblast...</sys:String>
+    <sys:String x:Key="Str_Raster_Title">Rastrovat oblast</sys:String>
+    <sys:String x:Key="Str_Raster_Hint">Přetažením ohraničte část stránky, která se má převést na obrázek. Vše mimo rámeček zůstane beze změny.</sys:String>
+    <sys:String x:Key="Str_Raster_None">Přetáhněte na stránce rámeček.</sys:String>
+    <sys:String x:Key="Str_Raster_Affects">Rámeček zahrnuje {0} textových úseků, {1} obrázků a {2} kreseb. Stanou se jedním obrázkem a text v něm už nepůjde vybrat ani vyhledat.</sys:String>
+    <sys:String x:Key="Str_Raster_Apply">Rastrovat</sys:String>
+    <sys:String x:Key="Str_Raster_Done">Oblast stránky {0} byla rastrována</sys:String>
+    <sys:String x:Key="Str_Raster_Failed">Oblast nelze rastrovat: {0}</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">Do tohoto dokumentu byla zkopírována 1 stránka.</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">Do tohoto dokumentu bylo zkopírováno {0} stránek.</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">Kopírování stránky selhalo:&#10;{0}</sys:String>

@@ -1346,6 +1346,14 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Divide_MarkupWarn">A felosztott oldalakon lévő jelölések az oldalak részévé válnak, és többé nem szerkeszthetők. Mégis felosztja?</sys:String>
     <sys:String x:Key="Str_Divide_Done">{0} oldal felosztva {1} oldalra</sys:String>
     <sys:String x:Key="Str_Divide_Failed">Az oldalakat nem sikerült felosztani: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_RasterizeRegion">Terület raszterizálása...</sys:String>
+    <sys:String x:Key="Str_Raster_Title">Terület raszterizálása</sys:String>
+    <sys:String x:Key="Str_Raster_Hint">Húzzon keretet az oldal azon része köré, amelyből kép legyen. A kereten kívül minden változatlan marad.</sys:String>
+    <sys:String x:Key="Str_Raster_None">Húzzon keretet az oldalon.</sys:String>
+    <sys:String x:Key="Str_Raster_Affects">A keretben {0} szövegrész, {1} kép és {2} rajz van. Ezek egyetlen képpé válnak, és az ott lévő szöveg többé nem jelölhető ki és nem kereshető.</sys:String>
+    <sys:String x:Key="Str_Raster_Apply">Raszterizálás</sys:String>
+    <sys:String x:Key="Str_Raster_Done">A(z) {0}. oldal egy területe raszterizálva</sys:String>
+    <sys:String x:Key="Str_Raster_Failed">A területet nem sikerült raszterizálni: {0}</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">1 oldal átmásolva ebbe a dokumentumba.</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">{0} oldal átmásolva ebbe a dokumentumba.</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">Az oldal másolása sikertelen:&#10;{0}</sys:String>

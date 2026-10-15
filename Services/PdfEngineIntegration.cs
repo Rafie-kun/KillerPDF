@@ -539,6 +539,50 @@ internal static class PdfEngineIntegration
         return PdfPartialRasterization.Plan(page, region, dpi);
     }
 
+    /// <summary>
+    /// Turns one box on a page into an image at <paramref name="dpi"/> (#369). The page is drawn
+    /// without its annotations and form fields, which stay live above the new image, and only
+    /// the box is replaced; everything outside it keeps its text and vectors.
+    /// </summary>
+    internal static void RasterizeRegion(string path, int pageIndex, PdfContentBounds region, double dpi,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        PdfPartialRasterizationPlan plan = PlanPartialRasterization(path, pageIndex, region, dpi, cancellationToken);
+        PdfPageInformation page = PdfPageInformation.Read(PdfDocument.Open(File.ReadAllBytes(path)))[pageIndex];
+        byte[] pixels;
+        int width, height;
+        using (PdfPageRenderSession session = PdfPageRenderSession.OpenEngineFirst(path, dpi / 72.0))
+        {
+            PdfRenderedPage rendered = session.RenderBasePage(pageIndex, cancellationToken);
+            (pixels, width, height) = (rendered.Pixels, rendered.Width, rendered.Height);
+        }
+        // The renderer turns the page by its /Rotate; the region is in the unturned page.
+        int rotation = ((page.Rotation % 360) + 360) % 360;
+        if (rotation != 0) (pixels, width, height) = BitmapHelpers.RotateBitmap(pixels, width, height, 360 - rotation);
+
+        int outWidth = plan.PixelWidth, outHeight = plan.PixelHeight;
+        var rgb = new byte[checked(outWidth * outHeight * 3)];
+        for (int y = 0; y < outHeight; y++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            double pageY = region.Top - (y + 0.5) / outHeight * region.Height;
+            int sourceY = Math.Clamp((int)((page.Height - pageY) / page.Height * height), 0, height - 1);
+            for (int x = 0; x < outWidth; x++)
+            {
+                double pageX = region.Left + (x + 0.5) / outWidth * region.Width;
+                int sourceX = Math.Clamp((int)(pageX / page.Width * width), 0, width - 1);
+                int source = (sourceY * width + sourceX) * 4, target = (y * outWidth + x) * 3;
+                rgb[target] = pixels[source + 2];
+                rgb[target + 1] = pixels[source + 1];
+                rgb[target + 2] = pixels[source];
+            }
+        }
+        ApplyPartialRasterization(path,
+            [new PdfPartialRasterizationReplacement(pageIndex, plan, PdfImage.FromRgb(outWidth, outHeight, rgb))],
+            cancellationToken);
+    }
+
     /// <summary>Applies reviewed partial-rasterization replacements in one revision.</summary>
     internal static void ApplyPartialRasterization(string path,
         IEnumerable<PdfPartialRasterizationReplacement> replacements,

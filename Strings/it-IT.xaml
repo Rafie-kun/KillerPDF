@@ -1359,6 +1359,14 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_Divide_MarkupWarn">Le annotazioni sulle pagine divise diventeranno parte di quelle pagine e non saranno più modificabili. Dividere comunque?</sys:String>
     <sys:String x:Key="Str_Divide_Done">{0} pagine divise in {1}</sys:String>
     <sys:String x:Key="Str_Divide_Failed">Impossibile dividere le pagine: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_RasterizeRegion">Rasterizza area...</sys:String>
+    <sys:String x:Key="Str_Raster_Title">Rasterizza area</sys:String>
+    <sys:String x:Key="Str_Raster_Hint">Trascina un riquadro attorno alla parte della pagina da trasformare in immagine. Tutto ciò che è fuori dal riquadro resta invariato.</sys:String>
+    <sys:String x:Key="Str_Raster_None">Trascina un riquadro sulla pagina.</sys:String>
+    <sys:String x:Key="Str_Raster_Affects">Il riquadro comprende {0} porzioni di testo, {1} immagini e {2} disegni. Diventano un'unica immagine e il testo al suo interno non sarà più selezionabile né ricercabile.</sys:String>
+    <sys:String x:Key="Str_Raster_Apply">Rasterizza</sys:String>
+    <sys:String x:Key="Str_Raster_Done">Area della pagina {0} rasterizzata</sys:String>
+    <sys:String x:Key="Str_Raster_Failed">Impossibile rasterizzare l'area: {0}</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">1 pagina copiata in questo documento.</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">{0} pagine copiate in questo documento.</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">Copia pagina non riuscita:&#10;{0}</sys:String>

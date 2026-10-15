@@ -1359,6 +1359,14 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Divide_MarkupWarn">Markup on the pages being divided will become part of those pages and can no longer be edited. Divide anyway?</sys:String>
     <sys:String x:Key="Str_Divide_Done">Divided {0} page(s) into {1}</sys:String>
     <sys:String x:Key="Str_Divide_Failed">Could not divide the pages: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_RasterizeRegion">Rasterize Region...</sys:String>
+    <sys:String x:Key="Str_Raster_Title">Rasterize Region</sys:String>
+    <sys:String x:Key="Str_Raster_Hint">Drag a box around the part of the page to turn into an image. Everything outside the box stays as it is.</sys:String>
+    <sys:String x:Key="Str_Raster_None">Drag a box on the page.</sys:String>
+    <sys:String x:Key="Str_Raster_Affects">The box covers {0} text runs, {1} images and {2} drawings. They become one image, and text there can no longer be selected or searched.</sys:String>
+    <sys:String x:Key="Str_Raster_Apply">Rasterize</sys:String>
+    <sys:String x:Key="Str_Raster_Done">Rasterized a region of page {0}</sys:String>
+    <sys:String x:Key="Str_Raster_Failed">Could not rasterize the region: {0}</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">Copied 1 page to this document.</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">Copied {0} pages to this document.</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">Page copy failed:&#10;{0}</sys:String>

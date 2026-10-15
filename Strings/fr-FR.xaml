@@ -1359,6 +1359,14 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Divide_MarkupWarn">Les annotations des pages divisées feront partie de ces pages et ne pourront plus être modifiées. Diviser quand même ?</sys:String>
     <sys:String x:Key="Str_Divide_Done">{0} page(s) divisée(s) en {1}</sys:String>
     <sys:String x:Key="Str_Divide_Failed">Impossible de diviser les pages : {0}</sys:String>
+    <sys:String x:Key="Str_Pages_RasterizeRegion">Pixelliser une zone...</sys:String>
+    <sys:String x:Key="Str_Raster_Title">Pixelliser une zone</sys:String>
+    <sys:String x:Key="Str_Raster_Hint">Tracez un cadre autour de la partie de la page à transformer en image. Tout ce qui est hors du cadre reste inchangé.</sys:String>
+    <sys:String x:Key="Str_Raster_None">Tracez un cadre sur la page.</sys:String>
+    <sys:String x:Key="Str_Raster_Affects">Le cadre couvre {0} segments de texte, {1} images et {2} dessins. Ils deviennent une seule image et le texte qu'elle contient ne pourra plus être sélectionné ni recherché.</sys:String>
+    <sys:String x:Key="Str_Raster_Apply">Pixelliser</sys:String>
+    <sys:String x:Key="Str_Raster_Done">Zone de la page {0} pixellisée</sys:String>
+    <sys:String x:Key="Str_Raster_Failed">Impossible de pixelliser la zone : {0}</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">1 page copiée dans ce document.</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">{0} pages copiées dans ce document.</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">Échec de la copie de la page :&#10;{0}</sys:String>

@@ -1339,6 +1339,14 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Divide_MarkupWarn">Bölünen sayfalardaki işaretlemeler o sayfaların parçası olur ve artık düzenlenemez. Yine de bölünsün mü?</sys:String>
     <sys:String x:Key="Str_Divide_Done">{0} sayfa {1} sayfaya bölündü</sys:String>
     <sys:String x:Key="Str_Divide_Failed">Sayfalar bölünemedi: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_RasterizeRegion">Bölgeyi rasterleştir...</sys:String>
+    <sys:String x:Key="Str_Raster_Title">Bölgeyi rasterleştir</sys:String>
+    <sys:String x:Key="Str_Raster_Hint">Sayfanın görüntüye dönüşecek kısmının çevresine bir kutu sürükleyin. Kutunun dışındaki her şey olduğu gibi kalır.</sys:String>
+    <sys:String x:Key="Str_Raster_None">Sayfada bir kutu sürükleyin.</sys:String>
+    <sys:String x:Key="Str_Raster_Affects">Kutu {0} metin parçası, {1} görüntü ve {2} çizim içeriyor. Bunlar tek bir görüntü olur ve oradaki metin artık seçilemez ve aranamaz.</sys:String>
+    <sys:String x:Key="Str_Raster_Apply">Rasterleştir</sys:String>
+    <sys:String x:Key="Str_Raster_Done">Sayfa {0} üzerindeki bir bölge rasterleştirildi</sys:String>
+    <sys:String x:Key="Str_Raster_Failed">Bölge rasterleştirilemedi: {0}</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">Bu belgeye 1 sayfa kopyalandı.</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">Bu belgeye {0} sayfa kopyalandı.</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">Sayfa kopyalanamadı:&#10;{0}</sys:String>

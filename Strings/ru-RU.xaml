@@ -1359,6 +1359,14 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Divide_MarkupWarn">Пометки на разделяемых страницах станут частью этих страниц, и их больше нельзя будет изменить. Всё равно разделить?</sys:String>
     <sys:String x:Key="Str_Divide_Done">Разделено страниц: {0}, получено {1}</sys:String>
     <sys:String x:Key="Str_Divide_Failed">Не удалось разделить страницы: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_RasterizeRegion">Растрировать область...</sys:String>
+    <sys:String x:Key="Str_Raster_Title">Растрировать область</sys:String>
+    <sys:String x:Key="Str_Raster_Hint">Обведите рамкой часть страницы, которую нужно превратить в изображение. Всё за пределами рамки останется без изменений.</sys:String>
+    <sys:String x:Key="Str_Raster_None">Нарисуйте рамку на странице.</sys:String>
+    <sys:String x:Key="Str_Raster_Affects">В рамке фрагментов текста: {0}, изображений: {1}, рисунков: {2}. Они станут одним изображением, и текст в нём больше нельзя будет выделить или найти.</sys:String>
+    <sys:String x:Key="Str_Raster_Apply">Растрировать</sys:String>
+    <sys:String x:Key="Str_Raster_Done">Область страницы {0} растрирована</sys:String>
+    <sys:String x:Key="Str_Raster_Failed">Не удалось растрировать область: {0}</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">В этот документ скопирована 1 страница.</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">В этот документ скопировано страниц: {0}.</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">Не удалось скопировать страницу:&#10;{0}</sys:String>

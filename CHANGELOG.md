@@ -42,6 +42,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Added fillable text field presets. Right-click a text field with the Forms tool to save its size, font size, text color, background and border, then insert it from any page's right-click menu in any document. Presets can be renamed, reordered and deleted (#340).
 - Added Comments to the Document tools (Ctrl+Shift+D, K). It lists the PDF's review comments with their replies, and each can be edited, answered or deleted. New notes can be added to the current page, and the whole change is one undo (#288).
 - Added Divide Spreads to the page menu. Place the split line on the gutter of a scanned two-page spread, left and right or top and bottom, and the page becomes two pages in reading order, for one page, the selected pages or the whole document (#382).
+- Added Rasterize Region to the page menus. Drag a box on the page, see how much text, images and drawing it covers, and only that box becomes an image at the chosen resolution while the rest of the page keeps its text and vectors (#369).
 
 ### Changed
 - Replaced PDFium, Docnet.Core and PdfPig with the engine for rendering, search, selection, copying and text editing, and built the JPEG 2000 decoder from vendored CoreJ2K sources. The engine keeps the previous renderer's page dimensions for viewing and image export.

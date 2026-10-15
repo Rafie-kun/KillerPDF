@@ -1343,6 +1343,14 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Divide_MarkupWarn">要拆分页面上的标记将成为页面的一部分，之后无法再编辑。仍要拆分吗?</sys:String>
     <sys:String x:Key="Str_Divide_Done">已将 {0} 页拆分为 {1} 页</sys:String>
     <sys:String x:Key="Str_Divide_Failed">无法拆分页面：{0}</sys:String>
+    <sys:String x:Key="Str_Pages_RasterizeRegion">栅格化区域...</sys:String>
+    <sys:String x:Key="Str_Raster_Title">栅格化区域</sys:String>
+    <sys:String x:Key="Str_Raster_Hint">拖出一个框，圈住要变成图像的页面部分。框外的内容保持不变。</sys:String>
+    <sys:String x:Key="Str_Raster_None">请在页面上拖出一个框。</sys:String>
+    <sys:String x:Key="Str_Raster_Affects">框内有 {0} 段文字、{1} 张图像和 {2} 个绘图。它们会变成一张图像，其中的文字将无法再选择或搜索。</sys:String>
+    <sys:String x:Key="Str_Raster_Apply">栅格化</sys:String>
+    <sys:String x:Key="Str_Raster_Done">已栅格化第 {0} 页的一个区域</sys:String>
+    <sys:String x:Key="Str_Raster_Failed">无法栅格化该区域：{0}</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">已将 1 页复制到此文档。</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">已将 {0} 页复制到此文档。</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">页面复制失败：&#10;{0}</sys:String>

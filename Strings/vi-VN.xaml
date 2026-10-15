@@ -1359,6 +1359,14 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Divide_MarkupWarn">Chú thích trên các trang được chia sẽ trở thành một phần của trang và không thể chỉnh sửa nữa. Vẫn chia?</sys:String>
     <sys:String x:Key="Str_Divide_Done">Đã chia {0} trang thành {1}</sys:String>
     <sys:String x:Key="Str_Divide_Failed">Không thể chia các trang: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_RasterizeRegion">Raster hóa vùng...</sys:String>
+    <sys:String x:Key="Str_Raster_Title">Raster hóa vùng</sys:String>
+    <sys:String x:Key="Str_Raster_Hint">Kéo một khung quanh phần trang cần chuyển thành ảnh. Mọi thứ ngoài khung giữ nguyên.</sys:String>
+    <sys:String x:Key="Str_Raster_None">Kéo một khung trên trang.</sys:String>
+    <sys:String x:Key="Str_Raster_Affects">Khung chứa {0} đoạn văn bản, {1} ảnh và {2} hình vẽ. Chúng sẽ thành một ảnh và văn bản ở đó không thể chọn hay tìm kiếm nữa.</sys:String>
+    <sys:String x:Key="Str_Raster_Apply">Raster hóa</sys:String>
+    <sys:String x:Key="Str_Raster_Done">Đã raster hóa một vùng của trang {0}</sys:String>
+    <sys:String x:Key="Str_Raster_Failed">Không thể raster hóa vùng: {0}</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">Đã sao chép 1 trang vào tài liệu này.</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">Đã sao chép {0} trang vào tài liệu này.</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">Sao chép trang thất bại:&#10;{0}</sys:String>

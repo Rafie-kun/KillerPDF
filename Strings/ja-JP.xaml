@@ -1359,6 +1359,14 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Divide_MarkupWarn">分割するページのマークアップはページの一部になり、編集できなくなります。分割しますか?</sys:String>
     <sys:String x:Key="Str_Divide_Done">{0} ページを {1} ページに分割しました</sys:String>
     <sys:String x:Key="Str_Divide_Failed">ページを分割できませんでした: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_RasterizeRegion">領域をラスタライズ...</sys:String>
+    <sys:String x:Key="Str_Raster_Title">領域をラスタライズ</sys:String>
+    <sys:String x:Key="Str_Raster_Hint">画像にしたいページの部分をドラッグで囲みます。枠の外側はそのまま残ります。</sys:String>
+    <sys:String x:Key="Str_Raster_None">ページ上で枠をドラッグしてください。</sys:String>
+    <sys:String x:Key="Str_Raster_Affects">枠内にはテキスト {0} 個、画像 {1} 個、図形 {2} 個があります。これらは 1 枚の画像になり、そこにあるテキストは選択も検索もできなくなります。</sys:String>
+    <sys:String x:Key="Str_Raster_Apply">ラスタライズ</sys:String>
+    <sys:String x:Key="Str_Raster_Done">{0} ページの領域をラスタライズしました</sys:String>
+    <sys:String x:Key="Str_Raster_Failed">領域をラスタライズできませんでした: {0}</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">この文書に 1 ページをコピーしました。</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">この文書に {0} ページをコピーしました。</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">ページのコピーに失敗しました:&#10;{0}</sys:String>

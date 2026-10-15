@@ -1339,6 +1339,14 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Divide_MarkupWarn">Las marcas de las páginas que se dividen pasarán a formar parte de ellas y ya no se podrán editar. ¿Dividir de todos modos?</sys:String>
     <sys:String x:Key="Str_Divide_Done">{0} página(s) divididas en {1}</sys:String>
     <sys:String x:Key="Str_Divide_Failed">No se pudieron dividir las páginas: {0}</sys:String>
+    <sys:String x:Key="Str_Pages_RasterizeRegion">Rasterizar región...</sys:String>
+    <sys:String x:Key="Str_Raster_Title">Rasterizar región</sys:String>
+    <sys:String x:Key="Str_Raster_Hint">Arrastre un recuadro alrededor de la parte de la página que quiere convertir en imagen. Todo lo que queda fuera del recuadro no cambia.</sys:String>
+    <sys:String x:Key="Str_Raster_None">Arrastre un recuadro en la página.</sys:String>
+    <sys:String x:Key="Str_Raster_Affects">El recuadro abarca {0} fragmentos de texto, {1} imágenes y {2} dibujos. Se convierten en una sola imagen y su texto ya no se podrá seleccionar ni buscar.</sys:String>
+    <sys:String x:Key="Str_Raster_Apply">Rasterizar</sys:String>
+    <sys:String x:Key="Str_Raster_Done">Se rasterizó una región de la página {0}</sys:String>
+    <sys:String x:Key="Str_Raster_Failed">No se pudo rasterizar la región: {0}</sys:String>
     <sys:String x:Key="Str_St_PageCopiedHere">Se copió 1 página a este documento.</sys:String>
     <sys:String x:Key="Str_St_PagesCopiedHere">Se copiaron {0} páginas a este documento.</sys:String>
     <sys:String x:Key="Str_Err_PageCopyFailed">Error al copiar la página:&#10;{0}</sys:String>
