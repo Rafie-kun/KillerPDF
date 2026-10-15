@@ -500,6 +500,12 @@ namespace KillerPDF
         /// null if the user canceled / closed the dialog.
         /// </summary>
         public static string? PromptPassword(Window? owner, string filename)
+            => PromptPassword(owner, filename, L("Str_PasswordProtected", "“{0}” is password protected."),
+                L("Str_Btn_Open", "Open"));
+
+        /// <summary>The same prompt with its own message ("{0}" is the file name) and confirm
+        /// button, for the owner password that unlocks a restricted PDF.</summary>
+        public static string? PromptPassword(Window? owner, string filename, string template, string confirmText)
         {
             string? result = null;
 
@@ -512,7 +518,6 @@ namespace KillerPDF
 
             // Keep filename emphasis while allowing each language to place it naturally.
             var msg = new TextBlock { Foreground = R("TextBrush"), FontSize = 13, TextWrapping = TextWrapping.Wrap };
-            string template = L("Str_PasswordProtected", "“{0}” is password protected.");
             int filenamePosition = template.IndexOf("{0}", StringComparison.Ordinal);
             msg.Inlines.Add(new System.Windows.Documents.Run(template[..filenamePosition]));
             msg.Inlines.Add(new System.Windows.Documents.Run(System.IO.Path.GetFileName(filename)) { FontWeight = FontWeights.SemiBold });
@@ -522,7 +527,7 @@ namespace KillerPDF
             var pw = UiKit.PasswordField();
             body.Children.Add(new Border { Padding = new Thickness(20, 0, 20, 4), Child = pw });
 
-            var openBtn = UiKit.Make(L("Str_Btn_Open", "Open"), accent: true);
+            var openBtn = UiKit.Make(confirmText, accent: true);
             openBtn.IsDefault = true;
             openBtn.Click += (_, _2) => { result = pw.Password; win.Close(); };
             var cancelBtn = UiKit.Make(L("Str_Btn_Cancel", "Cancel"), accent: false);

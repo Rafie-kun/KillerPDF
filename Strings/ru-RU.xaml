@@ -167,6 +167,12 @@
     <!-- ── Status messages (format strings - use string.Format) ─────── -->
     <sys:String x:Key="Str_Opened">Открыто{0} - {1} страниц(ы)</sys:String>
     <sys:String x:Key="Str_OpenedReadOnly">Открыто {0} (только-для-чтения - ограничено собственником) - {1} страница(ы)</sys:String>
+    <sys:String x:Key="Str_Restricted_Notice">Владелец этого PDF ограничил редактирование, поэтому он открыт только для чтения.</sys:String>
+    <sys:String x:Key="Str_Restricted_EnterPassword">Ввести пароль владельца</sys:String>
+    <sys:String x:Key="Str_Restricted_Prompt">«{0}» ограничивает редактирование. Введите пароль владельца, чтобы редактировать его.</sys:String>
+    <sys:String x:Key="Str_Restricted_Unlock">Разблокировать</sys:String>
+    <sys:String x:Key="Str_Restricted_Unlocked">{0} разблокирован для редактирования</sys:String>
+    <sys:String x:Key="Str_Restricted_WrongPassword">Это не пароль владельца этого PDF, поэтому он остаётся только для чтения.</sys:String>
     <sys:String x:Key="Str_OpenedReadOnlyXRef">Открыто {0} (только-для-чтения - не-стандартная XRef таблица) - {1} страница(ы)</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">Открыто {0} (восстановленная копия - сохраните, чтобы сохранить изменения) - {1} страница(ы)</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">Открыто {0} (растрированный ремонт - сохранить, чтобы сохранить изменения) - {1} страница(ы)</sys:String>

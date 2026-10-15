@@ -26,6 +26,7 @@ namespace KillerPDF
         void IViewerHost.SyncSidebarToDocState(bool hasDoc, bool startup)
             => SyncSidebarToDocState(hasDoc, startup);
         void IViewerHost.OpenFile(string path) => OpenFile(path);
+        bool IViewerHost.UnlockOwnerRestrictions() => UnlockOwnerRestrictions();
         void IViewerHost.UpdateFooterFade() => UpdateFooterFade();
         void IViewerHost.UpdateTabStripFade() => UpdateTabStripFade();
         System.Windows.Controls.Border? IViewerHost.SearchBar => _searchBar;

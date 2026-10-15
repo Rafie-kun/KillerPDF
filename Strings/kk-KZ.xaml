@@ -142,6 +142,12 @@
     <!-- ── Status messages (format strings - use string.Format) ─────── -->
     <sys:String x:Key="Str_Opened">{0} ашылды - {1} бет</sys:String>
     <sys:String x:Key="Str_OpenedReadOnly">{0} ашылды (тек оқу - иесінің шектеулері) - {1} бет</sys:String>
+    <sys:String x:Key="Str_Restricted_Notice">Бұл PDF иесі өңдеуді шектеген, сондықтан ол тек оқу үшін ашылды.</sys:String>
+    <sys:String x:Key="Str_Restricted_EnterPassword">Иесінің құпиясөзін енгізу</sys:String>
+    <sys:String x:Key="Str_Restricted_Prompt">«{0}» өңдеуді шектейді. Өңдеу үшін иесінің құпиясөзін енгізіңіз.</sys:String>
+    <sys:String x:Key="Str_Restricted_Unlock">Құлпын ашу</sys:String>
+    <sys:String x:Key="Str_Restricted_Unlocked">{0} өңдеу үшін ашылды</sys:String>
+    <sys:String x:Key="Str_Restricted_WrongPassword">Бұл осы PDF иесінің құпиясөзі емес, сондықтан ол тек оқу күйінде қалады.</sys:String>
     <sys:String x:Key="Str_OpenedReadOnlyXRef">{0} ашылды (тек оқу - стандартты емес XRef кестесі) - {1} бет</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">{0} ашылды (жөнделген көшірме - өзгерістерді сақтаңыз) - {1} бет</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">{0} ашылды (растрленген жөндеу - өзгерістерді сақтаңыз) - {1} бет</sys:String>

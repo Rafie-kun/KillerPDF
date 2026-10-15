@@ -58,6 +58,9 @@ namespace KillerPDF.Features
         void SwitchSidebarToPagesTab();
         void SyncSidebarToDocState(bool hasDoc, bool startup);
         void OpenFile(string path);
+        /// <summary>Asks for the owner password of a read-only restricted PDF and reopens it
+        /// editable. Returns true when the document can now be edited.</summary>
+        bool UnlockOwnerRestrictions();
         void UpdateFooterFade();
         void UpdateTabStripFade();
         Border? SearchBar { get; }

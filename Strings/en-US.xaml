@@ -167,6 +167,12 @@ The page can be replaced with an image of itself with the marked areas blacked o
     <!-- ── Status messages (format strings - use string.Format) ─────── -->
     <sys:String x:Key="Str_Opened">Opened {0} ({1} page(s))</sys:String>
     <sys:String x:Key="Str_OpenedReadOnly">Opened {0} read-only because of owner restrictions ({1} page(s))</sys:String>
+    <sys:String x:Key="Str_Restricted_Notice">The owner of this PDF restricts editing, so it is open read-only.</sys:String>
+    <sys:String x:Key="Str_Restricted_EnterPassword">Enter Owner Password</sys:String>
+    <sys:String x:Key="Str_Restricted_Prompt">“{0}” restricts editing. Enter the owner password to edit it.</sys:String>
+    <sys:String x:Key="Str_Restricted_Unlock">Unlock</sys:String>
+    <sys:String x:Key="Str_Restricted_Unlocked">Unlocked {0} for editing</sys:String>
+    <sys:String x:Key="Str_Restricted_WrongPassword">That is not the owner password for this PDF, so it stays read-only.</sys:String>
     <sys:String x:Key="Str_OpenedReadOnlyXRef">Opened {0} read-only because of a non-standard XRef table ({1} page(s))</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">Opened a repaired copy of {0}; save to keep changes ({1} page(s))</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">Opened a rasterized repair of {0}; save to keep changes ({1} page(s))</sys:String>

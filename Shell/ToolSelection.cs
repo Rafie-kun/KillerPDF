@@ -54,6 +54,13 @@ namespace KillerPDF
                 return;
             }
 
+            // A PDF whose owner restricts editing is view-only until its owner password is entered.
+            // Choosing an editing tool asks for it; re-applying the tab's tool on open or a tab
+            // switch quietly falls back to Select instead of prompting.
+            if (tool != EditTool.Select && IsOwnerRestricted
+                && (restoringPane || tool == _currentTool || !UnlockOwnerRestrictions()))
+                tool = EditTool.Select;
+
             // Continuous view now supports annotation tools inline via per-page overlays.
             CommitActiveTextBox();
             ClearTextSelection();

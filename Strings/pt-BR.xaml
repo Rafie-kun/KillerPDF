@@ -167,6 +167,12 @@ A página pode ser substituída por uma imagem dela mesma com as áreas marcadas
     <!-- ── Status messages (format strings - use string.Format) ─────── -->
     <sys:String x:Key="Str_Opened">{0} aberto - {1} página(s)</sys:String>
     <sys:String x:Key="Str_OpenedReadOnly">{0} aberto (somente leitura - restrições do proprietário) - {1} página(s)</sys:String>
+    <sys:String x:Key="Str_Restricted_Notice">O proprietário deste PDF restringe a edição, então ele está aberto somente para leitura.</sys:String>
+    <sys:String x:Key="Str_Restricted_EnterPassword">Inserir senha do proprietário</sys:String>
+    <sys:String x:Key="Str_Restricted_Prompt">“{0}” restringe a edição. Insira a senha do proprietário para editá-lo.</sys:String>
+    <sys:String x:Key="Str_Restricted_Unlock">Desbloquear</sys:String>
+    <sys:String x:Key="Str_Restricted_Unlocked">{0} desbloqueado para edição</sys:String>
+    <sys:String x:Key="Str_Restricted_WrongPassword">Essa não é a senha do proprietário deste PDF, então ele continua somente para leitura.</sys:String>
     <sys:String x:Key="Str_OpenedReadOnlyXRef">{0} aberto (somente leitura - tabela XRef não padrão) - {1} página(s)</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">{0} aberto (cópia reparada - salve para manter as alterações) - {1} página(s)</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">{0} aberto (reparo rasterizado - salve para manter as alterações) - {1} página(s)</sys:String>

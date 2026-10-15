@@ -425,6 +425,61 @@ namespace KillerPDF
             }
         }
 
+        // A PDF whose owner password forbids editing stays read-only, the way Acrobat treats it,
+        // until the user supplies that owner password. The notice bar in the pane offers this.
+        private bool IsOwnerRestricted => ActiveViewer.IsOwnerRestricted;
+
+        // Gate for anything that edits or rewrites the document. Returns true when it may go
+        // ahead, asking for the owner password first on a restricted PDF.
+        private bool EnsureEditable() => !IsOwnerRestricted || UnlockOwnerRestrictions();
+
+        // Asks for the owner password and reopens the restricted PDF from an unrestricted working
+        // copy. A wrong password, or the empty user password, leaves the document read-only.
+        private bool UnlockOwnerRestrictions()
+        {
+            if (!IsOwnerRestricted) return true;
+            if (string.IsNullOrEmpty(_currentFile) || string.IsNullOrEmpty(_originalFile)) return false;
+            string sourcePath = _currentFile;
+            string displayPath = _originalFile;
+            string? password = KillerDialog.PromptPassword(this, displayPath,
+                Loc("Str_Restricted_Prompt"), Loc("Str_Restricted_Unlock"));
+            if (password is null) return false;
+
+            string unlockedPath = App.MakeTempFile("dec");
+            try
+            {
+                PdfEngineIntegration.RemoveEncryption(sourcePath, unlockedPath, password);
+            }
+            catch (Exception error) when (error is not OutOfMemoryException)
+            {
+                KillerDialog.Show(this, Loc("Str_Restricted_WrongPassword"), "KillerPDF",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+
+            try
+            {
+                _doc?.Close();
+                _doc = null;
+                _doc = PdfWorkingDocument.Open(unlockedPath);
+                _currentFile = unlockedPath;
+                FinishOpenFile(displayPath, unlockedPath);
+                _openedFromProtected = true;   // #149: the source still carries its encryption
+                FinalizeAsyncOpen();
+                SetStatus(string.Format(Loc("Str_Restricted_Unlocked"), System.IO.Path.GetFileName(displayPath)));
+                return true;
+            }
+            catch (Exception error) when (error is not OutOfMemoryException)
+            {
+                KillerDialog.Show(this, string.Format(Loc("Str_Dlg_FailedOpen"), error.Message),
+                    Loc("Str_Dlg_AppTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
+                // Put the read-only original back so the tab is not left empty.
+                TryOpenProtectedReadOnly(sourcePath, displayPath);
+                FinalizeAsyncOpen();
+                return false;
+            }
+        }
+
         // Finalizes a background open (encryption strip / repair) once the document is loaded on the UI
         // thread: stores it into the active tab session and refreshes the tool + tab strip. Mirrors the
         // tail of OpenInNewTab, which is skipped while _asyncOpenPending is set.
@@ -978,6 +1033,7 @@ namespace KillerPDF
         private void SaveInPlace()
         {
             if (_doc is null) { KillerDialog.Show(this, Loc("Str_Msg_OpenFirst")); return; }
+            if (!EnsureEditable()) return;
             // Save back to the user's real file. After a page edit (crop/rotate) _currentFile is a
             // temp working copy, so the real path is kept in _originalFile. If there is no real path
             // (e.g. a repaired temp-backed open), fall back to Save As.
@@ -1085,6 +1141,7 @@ namespace KillerPDF
         private void SaveAs_Click(object sender, RoutedEventArgs e)
         {
             if (_doc is null || _currentFile is null) { KillerDialog.Show(this, Loc("Str_Msg_OpenFirst")); return; }
+            if (!EnsureEditable()) return;
             CommitActiveTextBox();
             var dlg = new Controls.FileDialog(Controls.FileDialogMode.Save)
                           { Filter = Loc("Str_Filter_Pdf") + "|*.pdf", Title = Loc("Str_Dlg_SavePdfAs"),

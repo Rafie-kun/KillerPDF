@@ -44,6 +44,7 @@ namespace KillerPDF.Controls
             if (TabStrip == null || TabStripBorder == null) return;
 
             foreach (var t in _sessions) t.RefreshTabLabel();
+            UpdateRestrictionNotice();   // follows the active tab like the strip does
 
             int docTabs = _sessions.Count(t => t.Doc != null || t.DeferredPath != null);
             // Only show the strip once THIS pane has more than one document - a single open PDF
