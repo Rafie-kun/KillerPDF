@@ -128,6 +128,7 @@ Sayfa, işaretli alanları karartılmış kendi görüntüsüyle değiştirilebi
     <sys:String x:Key="Str_KS_ConfirmCancel">Metni veya kırpmayı onayla / iptal et</sys:String>
     <sys:String x:Key="Str_KS_SearchSelect">ARA &amp; SEÇ</sys:String>
     <sys:String x:Key="Str_KS_Find">Bul / ara</sys:String>
+    <sys:String x:Key="Str_KS_Replace">Bul ve değiştir</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Sonraki / önceki sonuç</sys:String>
     <sys:String x:Key="Str_KS_SelectAll">Sayfadaki tüm metni seç</sys:String>
     <sys:String x:Key="Str_KS_CopyText">Seçili metni kopyala</sys:String>
@@ -1205,6 +1206,17 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Search_PreviousTT">Önceki eşleşme (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Sonraki eşleşme (Enter)</sys:String>
     <sys:String x:Key="Str_Search_CloseTT">Kapat (Esc)</sys:String>
+    <sys:String x:Key="Str_Search_MatchCaseTT">Büyük/küçük harf eşleştir (Alt+C)</sys:String>
+    <sys:String x:Key="Str_Search_WholeWordTT">Tam sözcük (Alt+W)</sys:String>
+    <sys:String x:Key="Str_Replace_ToggleTT">Değiştirmeyi göster veya gizle (Ctrl+H)</sys:String>
+    <sys:String x:Key="Str_Replace_WithTT">Şununla değiştir</sys:String>
+    <sys:String x:Key="Str_Replace_One">Değiştir</sys:String>
+    <sys:String x:Key="Str_Replace_OneTT">Değiştir (Enter)</sys:String>
+    <sys:String x:Key="Str_Replace_All">Tümünü değiştir</sys:String>
+    <sys:String x:Key="Str_Replace_AllTT">Tümünü değiştir (Ctrl+Alt+Enter)</sys:String>
+    <sys:String x:Key="Str_Replace_Done">Değiştirilen eşleşmeler: {0}</sys:String>
+    <sys:String x:Key="Str_Replace_None">Değiştirilecek bir şey yok</sys:String>
+    <sys:String x:Key="Str_Replace_SkippedTurned">Döndürülmüş metin atlandı: {0}</sys:String>
     <sys:String x:Key="Str_Busy_FlattenPage">Sayfa {0} / {1} düzleştiriliyor...</sys:String>
     <sys:String x:Key="Str_Busy_ExportPage">Sayfa {0} / {1} dışa aktarılıyor...</sys:String>
     <sys:String x:Key="Str_Busy_CancelHint">(Esc iptal eder)</sys:String>

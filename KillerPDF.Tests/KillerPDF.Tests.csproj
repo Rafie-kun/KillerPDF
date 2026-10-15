@@ -33,6 +33,7 @@
     <Compile Include="..\Services\SvgSignatureImporter.cs" Link="Services\SvgSignatureImporter.cs" />
     <Compile Include="..\Services\SignatureInk.cs" Link="Services\SignatureInk.cs" />
     <Compile Include="..\Services\SearchService.cs" Link="Services\SearchService.cs" />
+    <Compile Include="..\Services\TextReplacePlanner.cs" Link="Services\TextReplacePlanner.cs" />
     <Compile Include="..\Services\PdfContentDocument.cs" Link="Services\PdfContentDocument.cs" />
     <Compile Include="..\Services\TextRunService.cs" Link="Services\TextRunService.cs" />
     <Compile Include="..\Services\TextEntryPlaceholder.cs" Link="Services\TextEntryPlaceholder.cs" />

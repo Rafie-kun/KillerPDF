@@ -33,6 +33,11 @@ namespace KillerPDF.Features
         /// <summary>True while any page has result rects - the F3 and repaint-on-page-change gate.</summary>
         internal bool HasResults => AllSearchRects.Count > 0;
 
+        /// <summary>Match case and Whole word, the search bar toggles. Find and Replace uses the same
+        /// options, so what it replaces is what the highlights showed.</summary>
+        internal bool MatchCase { get; set; }
+        internal bool WholeWord { get; set; }
+
         /// <summary>The text of the most recent search, for features that act on its exact matches.</summary>
         internal string LastQuery { get; private set; } = string.Empty;
 
@@ -83,11 +88,17 @@ namespace KillerPDF.Features
 
             try
             {
-                var sr = SearchService.Search(_host.CurrentFile, query);
+                var sr = SearchService.Search(_host.CurrentFile, query, MatchCase, WholeWord);
 
+                // Text hidden under an edit, such as a replaced line, no longer counts as a match.
                 foreach (var kvp in sr.PageRects)
-                    AllSearchRects[kvp.Key] = kvp.Value;
-                ResultPages.AddRange(sr.ResultPages);
+                {
+                    var visible = kvp.Value.Where(r => !_host.IsCovered(kvp.Key, r.Left, r.Bottom, r.Right, r.Top)).ToList();
+                    if (visible.Count == 0) continue;
+                    AllSearchRects[kvp.Key] = visible;
+                    ResultPages.Add(kvp.Key);
+                }
+                ResultPages.Sort();
 
                 // Flatten every match into one reading-ordered list (page asc, then top-to-bottom,
                 // then left-to-right) so navigation steps word-by-word across the whole document.
@@ -101,7 +112,7 @@ namespace KillerPDF.Features
                     return;
                 }
 
-                _totalHits = sr.TotalHits;
+                _totalHits = _matches.Count;
 
                 // Start at the first match on or after the current page.
                 int startPage = _host.CurrentPageIndex;

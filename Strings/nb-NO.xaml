@@ -145,6 +145,7 @@ Siden kan erstattes med et bilde av seg selv der de markerte områdene er sverte
     <sys:String x:Key="Str_DocInfo_Save">Lagre</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">Avbryt</sys:String>
     <sys:String x:Key="Str_KS_Find">Finn / søk</sys:String>
+    <sys:String x:Key="Str_KS_Replace">Finn og erstatt</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Neste / forrige treff</sys:String>
     <sys:String x:Key="Str_KS_SelectAll">Marker all tekst på siden</sys:String>
     <sys:String x:Key="Str_KS_CopyText">Kopier markert tekst</sys:String>
@@ -1225,6 +1226,17 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Search_PreviousTT">Forrige treff (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Neste treff (Enter)</sys:String>
     <sys:String x:Key="Str_Search_CloseTT">Lukk (Esc)</sys:String>
+    <sys:String x:Key="Str_Search_MatchCaseTT">Skill mellom store og små bokstaver (Alt+C)</sys:String>
+    <sys:String x:Key="Str_Search_WholeWordTT">Bare hele ord (Alt+W)</sys:String>
+    <sys:String x:Key="Str_Replace_ToggleTT">Vis eller skjul erstatning (Ctrl+H)</sys:String>
+    <sys:String x:Key="Str_Replace_WithTT">Erstatt med</sys:String>
+    <sys:String x:Key="Str_Replace_One">Erstatt</sys:String>
+    <sys:String x:Key="Str_Replace_OneTT">Erstatt (Enter)</sys:String>
+    <sys:String x:Key="Str_Replace_All">Erstatt alle</sys:String>
+    <sys:String x:Key="Str_Replace_AllTT">Erstatt alle (Ctrl+Alt+Enter)</sys:String>
+    <sys:String x:Key="Str_Replace_Done">Erstattede treff: {0}</sys:String>
+    <sys:String x:Key="Str_Replace_None">Ingenting å erstatte</sys:String>
+    <sys:String x:Key="Str_Replace_SkippedTurned">Rotert tekst hoppet over: {0}</sys:String>
     <sys:String x:Key="Str_Busy_FlattenPage">Flater ut side {0} av {1}...</sys:String>
     <sys:String x:Key="Str_Busy_ExportPage">Eksporterer side {0} av {1}...</sys:String>
     <sys:String x:Key="Str_Busy_CancelHint">(Esc for å avbryte)</sys:String>

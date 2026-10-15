@@ -128,6 +128,7 @@
     <sys:String x:Key="Str_KS_ConfirmCancel">确认 / 取消文本或裁切</sys:String>
     <sys:String x:Key="Str_KS_SearchSelect">搜索与选取</sys:String>
     <sys:String x:Key="Str_KS_Find">寻找 / 搜索</sys:String>
+    <sys:String x:Key="Str_KS_Replace">查找和替换</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">下一个 / 上一个结果</sys:String>
     <sys:String x:Key="Str_KS_SelectAll">选取页面上所有文本</sys:String>
     <sys:String x:Key="Str_KS_CopyText">复制选取的文本</sys:String>
@@ -1209,6 +1210,17 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Search_PreviousTT">上一个匹配项 (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">下一个匹配项 (Enter)</sys:String>
     <sys:String x:Key="Str_Search_CloseTT">关闭 (Esc)</sys:String>
+    <sys:String x:Key="Str_Search_MatchCaseTT">区分大小写 (Alt+C)</sys:String>
+    <sys:String x:Key="Str_Search_WholeWordTT">全字匹配 (Alt+W)</sys:String>
+    <sys:String x:Key="Str_Replace_ToggleTT">显示或隐藏替换 (Ctrl+H)</sys:String>
+    <sys:String x:Key="Str_Replace_WithTT">替换为</sys:String>
+    <sys:String x:Key="Str_Replace_One">替换</sys:String>
+    <sys:String x:Key="Str_Replace_OneTT">替换 (Enter)</sys:String>
+    <sys:String x:Key="Str_Replace_All">全部替换</sys:String>
+    <sys:String x:Key="Str_Replace_AllTT">全部替换 (Ctrl+Alt+Enter)</sys:String>
+    <sys:String x:Key="Str_Replace_Done">已替换的匹配项: {0}</sys:String>
+    <sys:String x:Key="Str_Replace_None">没有可替换的内容</sys:String>
+    <sys:String x:Key="Str_Replace_SkippedTurned">已跳过旋转的文本: {0}</sys:String>
     <sys:String x:Key="Str_Busy_FlattenPage">正在展平第 {0} 页，共 {1} 页...</sys:String>
     <sys:String x:Key="Str_Busy_ExportPage">正在导出第 {0} 页，共 {1} 页...</sys:String>
     <sys:String x:Key="Str_Busy_CancelHint">(Esc 取消)</sys:String>

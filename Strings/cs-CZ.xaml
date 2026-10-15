@@ -145,6 +145,7 @@ Stránku lze nahradit jejím obrázkem se začerněnými označenými oblastmi. 
     <sys:String x:Key="Str_DocInfo_Save">Uložit</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">Zrušit</sys:String>
     <sys:String x:Key="Str_KS_Find">Najít / hledat</sys:String>
+    <sys:String x:Key="Str_KS_Replace">Najít a nahradit</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Další / předchozí výsledek</sys:String>
     <sys:String x:Key="Str_KS_SelectAll">Vybrat veškerý text na stránce</sys:String>
     <sys:String x:Key="Str_KS_CopyText">Kopírovat vybraný text</sys:String>
@@ -1210,6 +1211,17 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Search_PreviousTT">Předchozí shoda (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Další shoda (Enter)</sys:String>
     <sys:String x:Key="Str_Search_CloseTT">Zavřít (Esc)</sys:String>
+    <sys:String x:Key="Str_Search_MatchCaseTT">Rozlišovat velikost písmen (Alt+C)</sys:String>
+    <sys:String x:Key="Str_Search_WholeWordTT">Celá slova (Alt+W)</sys:String>
+    <sys:String x:Key="Str_Replace_ToggleTT">Zobrazit nebo skrýt nahrazení (Ctrl+H)</sys:String>
+    <sys:String x:Key="Str_Replace_WithTT">Nahradit čím</sys:String>
+    <sys:String x:Key="Str_Replace_One">Nahradit</sys:String>
+    <sys:String x:Key="Str_Replace_OneTT">Nahradit (Enter)</sys:String>
+    <sys:String x:Key="Str_Replace_All">Nahradit vše</sys:String>
+    <sys:String x:Key="Str_Replace_AllTT">Nahradit vše (Ctrl+Alt+Enter)</sys:String>
+    <sys:String x:Key="Str_Replace_Done">Nahrazené shody: {0}</sys:String>
+    <sys:String x:Key="Str_Replace_None">Není co nahradit</sys:String>
+    <sys:String x:Key="Str_Replace_SkippedTurned">Otočený text přeskočen: {0}</sys:String>
     <sys:String x:Key="Str_Busy_FlattenPage">Slučování stránky {0} z {1}...</sys:String>
     <sys:String x:Key="Str_Busy_ExportPage">Export stránky {0} z {1}...</sys:String>
     <sys:String x:Key="Str_Busy_CancelHint">(Esc zruší)</sys:String>

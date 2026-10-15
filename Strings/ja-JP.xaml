@@ -145,6 +145,7 @@
     <sys:String x:Key="Str_DocInfo_Save">保存</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">キャンセル</sys:String>
     <sys:String x:Key="Str_KS_Find">検索</sys:String>
+    <sys:String x:Key="Str_KS_Replace">検索と置換</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">次の結果 / 前の結果</sys:String>
     <sys:String x:Key="Str_KS_SelectAll">ページ内のすべてのテキストを選択</sys:String>
     <sys:String x:Key="Str_KS_CopyText">選択テキストをコピー</sys:String>
@@ -1225,6 +1226,17 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Search_PreviousTT">前の一致 (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">次の一致 (Enter)</sys:String>
     <sys:String x:Key="Str_Search_CloseTT">閉じる (Esc)</sys:String>
+    <sys:String x:Key="Str_Search_MatchCaseTT">大文字と小文字を区別 (Alt+C)</sys:String>
+    <sys:String x:Key="Str_Search_WholeWordTT">単語単位 (Alt+W)</sys:String>
+    <sys:String x:Key="Str_Replace_ToggleTT">置換の表示切り替え (Ctrl+H)</sys:String>
+    <sys:String x:Key="Str_Replace_WithTT">置換後の文字列</sys:String>
+    <sys:String x:Key="Str_Replace_One">置換</sys:String>
+    <sys:String x:Key="Str_Replace_OneTT">置換 (Enter)</sys:String>
+    <sys:String x:Key="Str_Replace_All">すべて置換</sys:String>
+    <sys:String x:Key="Str_Replace_AllTT">すべて置換 (Ctrl+Alt+Enter)</sys:String>
+    <sys:String x:Key="Str_Replace_Done">置換した件数: {0}</sys:String>
+    <sys:String x:Key="Str_Replace_None">置換する対象がありません</sys:String>
+    <sys:String x:Key="Str_Replace_SkippedTurned">回転したテキストをスキップ: {0}</sys:String>
     <sys:String x:Key="Str_Busy_FlattenPage">ページ {0} / {1} を統合中...</sys:String>
     <sys:String x:Key="Str_Busy_ExportPage">ページ {0} / {1} をエクスポート中...</sys:String>
     <sys:String x:Key="Str_Busy_CancelHint">(Esc でキャンセル)</sys:String>

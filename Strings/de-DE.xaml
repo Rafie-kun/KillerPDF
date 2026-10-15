@@ -128,6 +128,7 @@ Die Seite kann durch ein Bild ihrer selbst ersetzt werden, in dem die markierten
     <sys:String x:Key="Str_KS_ConfirmCancel">Text oder Zuschnitt bestätigen / abbrechen</sys:String>
     <sys:String x:Key="Str_KS_SearchSelect">SUCHEN &amp; AUSWÄHLEN</sys:String>
     <sys:String x:Key="Str_KS_Find">Suchen</sys:String>
+    <sys:String x:Key="Str_KS_Replace">Suchen und ersetzen</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Nächstes / vorheriges Ergebnis</sys:String>
     <sys:String x:Key="Str_KS_SelectAll">Gesamten Text auf der Seite auswählen</sys:String>
     <sys:String x:Key="Str_KS_CopyText">Ausgewählten Text kopieren</sys:String>
@@ -1211,6 +1212,17 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Search_PreviousTT">Vorheriger Treffer (Umschalt+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Nächster Treffer (Enter)</sys:String>
     <sys:String x:Key="Str_Search_CloseTT">Schließen (Esc)</sys:String>
+    <sys:String x:Key="Str_Search_MatchCaseTT">Groß-/Kleinschreibung beachten (Alt+C)</sys:String>
+    <sys:String x:Key="Str_Search_WholeWordTT">Nur ganzes Wort (Alt+W)</sys:String>
+    <sys:String x:Key="Str_Replace_ToggleTT">Ersetzen ein-/ausblenden (Strg+H)</sys:String>
+    <sys:String x:Key="Str_Replace_WithTT">Ersetzen durch</sys:String>
+    <sys:String x:Key="Str_Replace_One">Ersetzen</sys:String>
+    <sys:String x:Key="Str_Replace_OneTT">Ersetzen (Enter)</sys:String>
+    <sys:String x:Key="Str_Replace_All">Alle ersetzen</sys:String>
+    <sys:String x:Key="Str_Replace_AllTT">Alle ersetzen (Strg+Alt+Enter)</sys:String>
+    <sys:String x:Key="Str_Replace_Done">Ersetzte Treffer: {0}</sys:String>
+    <sys:String x:Key="Str_Replace_None">Nichts zu ersetzen</sys:String>
+    <sys:String x:Key="Str_Replace_SkippedTurned">Gedrehter Text übersprungen: {0}</sys:String>
     <sys:String x:Key="Str_Busy_FlattenPage">Seite {0} von {1} wird reduziert...</sys:String>
     <sys:String x:Key="Str_Busy_ExportPage">Seite {0} von {1} wird exportiert...</sys:String>
     <sys:String x:Key="Str_Busy_CancelHint">(Esc zum Abbrechen)</sys:String>

@@ -145,6 +145,7 @@ The page can be replaced with an image of itself with the marked areas blacked o
     <sys:String x:Key="Str_DocInfo_Save">Save</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">Cancel</sys:String>
     <sys:String x:Key="Str_KS_Find">Find / search</sys:String>
+    <sys:String x:Key="Str_KS_Replace">Find and replace</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Next / previous result</sys:String>
     <sys:String x:Key="Str_KS_SelectAll">Select all text on page</sys:String>
     <sys:String x:Key="Str_KS_CopyText">Copy selected text</sys:String>
@@ -1225,6 +1226,17 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Search_PreviousTT">Previous Match (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Next Match (Enter)</sys:String>
     <sys:String x:Key="Str_Search_CloseTT">Close (Esc)</sys:String>
+    <sys:String x:Key="Str_Search_MatchCaseTT">Match Case (Alt+C)</sys:String>
+    <sys:String x:Key="Str_Search_WholeWordTT">Whole Word (Alt+W)</sys:String>
+    <sys:String x:Key="Str_Replace_ToggleTT">Toggle Replace (Ctrl+H)</sys:String>
+    <sys:String x:Key="Str_Replace_WithTT">Replace with</sys:String>
+    <sys:String x:Key="Str_Replace_One">Replace</sys:String>
+    <sys:String x:Key="Str_Replace_OneTT">Replace (Enter)</sys:String>
+    <sys:String x:Key="Str_Replace_All">Replace All</sys:String>
+    <sys:String x:Key="Str_Replace_AllTT">Replace All (Ctrl+Alt+Enter)</sys:String>
+    <sys:String x:Key="Str_Replace_Done">Matches replaced: {0}</sys:String>
+    <sys:String x:Key="Str_Replace_None">Nothing to replace</sys:String>
+    <sys:String x:Key="Str_Replace_SkippedTurned">Rotated text skipped: {0}</sys:String>
     <sys:String x:Key="Str_Busy_FlattenPage">Flattening page {0} of {1}...</sys:String>
     <sys:String x:Key="Str_Busy_ExportPage">Exporting page {0} of {1}...</sys:String>
     <sys:String x:Key="Str_Busy_CancelHint">(Esc to cancel)</sys:String>

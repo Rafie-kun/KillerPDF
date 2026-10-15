@@ -128,6 +128,7 @@ La página se puede sustituir por una imagen de sí misma con las áreas marcada
     <sys:String x:Key="Str_KS_ConfirmCancel">Confirmar / cancelar texto o recorte</sys:String>
     <sys:String x:Key="Str_KS_SearchSelect">BUSCAR Y SELECCIONAR</sys:String>
     <sys:String x:Key="Str_KS_Find">Buscar</sys:String>
+    <sys:String x:Key="Str_KS_Replace">Buscar y reemplazar</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Resultado siguiente / anterior</sys:String>
     <sys:String x:Key="Str_KS_SelectAll">Seleccionar todo el texto de la página</sys:String>
     <sys:String x:Key="Str_KS_CopyText">Copiar texto seleccionado</sys:String>
@@ -1205,6 +1206,17 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Search_PreviousTT">Coincidencia anterior (Mayús+Intro)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Siguiente coincidencia (Intro)</sys:String>
     <sys:String x:Key="Str_Search_CloseTT">Cerrar (Esc)</sys:String>
+    <sys:String x:Key="Str_Search_MatchCaseTT">Coincidir mayúsculas y minúsculas (Alt+C)</sys:String>
+    <sys:String x:Key="Str_Search_WholeWordTT">Solo palabras completas (Alt+W)</sys:String>
+    <sys:String x:Key="Str_Replace_ToggleTT">Mostrar u ocultar reemplazo (Ctrl+H)</sys:String>
+    <sys:String x:Key="Str_Replace_WithTT">Reemplazar con</sys:String>
+    <sys:String x:Key="Str_Replace_One">Reemplazar</sys:String>
+    <sys:String x:Key="Str_Replace_OneTT">Reemplazar (Intro)</sys:String>
+    <sys:String x:Key="Str_Replace_All">Reemplazar todo</sys:String>
+    <sys:String x:Key="Str_Replace_AllTT">Reemplazar todo (Ctrl+Alt+Intro)</sys:String>
+    <sys:String x:Key="Str_Replace_Done">Coincidencias reemplazadas: {0}</sys:String>
+    <sys:String x:Key="Str_Replace_None">Nada que reemplazar</sys:String>
+    <sys:String x:Key="Str_Replace_SkippedTurned">Texto girado omitido: {0}</sys:String>
     <sys:String x:Key="Str_Busy_FlattenPage">Aplanando página {0} de {1}...</sys:String>
     <sys:String x:Key="Str_Busy_ExportPage">Exportando página {0} de {1}...</sys:String>
     <sys:String x:Key="Str_Busy_CancelHint">(Esc para cancelar)</sys:String>

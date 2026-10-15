@@ -49,6 +49,8 @@ namespace KillerPDF
 
         void ISearchHost.ClearHighlights() => ClearSearchHighlights();
         void ISearchHost.RepaintHighlights() => HighlightSearchResultsOnCurrentPage();
+        bool ISearchHost.IsCovered(int pageIdx, double left, double bottom, double right, double top)
+            => ActiveViewer.IsPdfRectCovered(pageIdx, left, bottom, right, top);
 
         private void Search_Click(object sender, RoutedEventArgs e) => ToggleSearchBar();
 
@@ -62,46 +64,64 @@ namespace KillerPDF
             ShowSearchBar();
         }
 
+        // Ctrl+H: the find bar with its replace row open. An open bar keeps its search text.
+        private void ShowReplaceBar()
+        {
+            if (_searchBar is not { Visibility: Visibility.Visible }) ShowSearchBar();
+            SetReplaceRowVisible(true);
+            TextBox? target = string.IsNullOrEmpty(_searchBox?.Text) ? _searchBox : _replaceBox;
+            target?.Focus();
+            if (target is not null) Keyboard.Focus(target);
+        }
+
         private void ShowSearchBar()
         {
             if (_searchBar is null)
             {
-                // Build search bar programmatically and inject into the preview area grid
-                _searchBox = new TextBox
+                // Build search bar programmatically and inject into the preview area grid.
+                // The find and replace boxes share one look.
+                TextBox MakeFindTextBox()
                 {
-                    Width = 200,
-                    Height = 26,
-                    FontFamily = UiKit.UiFont,
-                    FontSize = 13,
-                    SelectionBrush = AccentBrush(),
-                    BorderThickness = new Thickness(1),
-                    Padding = new Thickness(6, 2, 6, 2),
-                    VerticalContentAlignment = VerticalAlignment.Center
-                };
-                // Live (DynamicResource-style) brushes so the box recolors on a theme switch while the
-                // bar is open, instead of baking colors in at build time. Background uses the dark
-                // toolbar/titlebar tone (BgSidebar).
-                _searchBox.SetResourceReference(Control.BackgroundProperty, "BackgroundBrush");
-                _searchBox.SetResourceReference(Control.ForegroundProperty, "TextBrush");
-                _searchBox.SetResourceReference(System.Windows.Controls.Primitives.TextBoxBase.CaretBrushProperty, "TextBrush");
-                _searchBox.SetResourceReference(Control.BorderBrushProperty, "CardBorderBrush");
+                    var box = new TextBox
+                    {
+                        Width = 200,
+                        Height = 26,
+                        FontFamily = UiKit.UiFont,
+                        FontSize = 13,
+                        SelectionBrush = AccentBrush(),
+                        BorderThickness = new Thickness(1),
+                        Padding = new Thickness(6, 2, 6, 2),
+                        VerticalContentAlignment = VerticalAlignment.Center
+                    };
+                    // Live (DynamicResource-style) brushes so the box recolors on a theme switch while the
+                    // bar is open, instead of baking colors in at build time. Background uses the dark
+                    // toolbar/titlebar tone (BgSidebar).
+                    box.SetResourceReference(Control.BackgroundProperty, "BackgroundBrush");
+                    box.SetResourceReference(Control.ForegroundProperty, "TextBrush");
+                    box.SetResourceReference(System.Windows.Controls.Primitives.TextBoxBase.CaretBrushProperty, "TextBrush");
+                    box.SetResourceReference(Control.BorderBrushProperty, "CardBorderBrush");
+
+                    // Custom template so the default WPF blue focus/hover border never shows; keep our themed border.
+                    var tbTemplate = new ControlTemplate(typeof(TextBox));
+                    var tbBorder = new FrameworkElementFactory(typeof(Border));
+                    tbBorder.SetValue(Border.BackgroundProperty, new System.Windows.TemplateBindingExtension(Control.BackgroundProperty));
+                    tbBorder.SetValue(Border.BorderBrushProperty, new System.Windows.TemplateBindingExtension(Control.BorderBrushProperty));
+                    tbBorder.SetValue(Border.BorderThicknessProperty, new System.Windows.TemplateBindingExtension(Control.BorderThicknessProperty));
+                    tbBorder.SetValue(Border.CornerRadiusProperty, new CornerRadius(3));
+                    var tbHost = new FrameworkElementFactory(typeof(ScrollViewer)) { Name = "PART_ContentHost" };
+                    tbHost.SetValue(ScrollViewer.PaddingProperty, new System.Windows.TemplateBindingExtension(Control.PaddingProperty));
+                    tbHost.SetValue(ScrollViewer.VerticalAlignmentProperty, VerticalAlignment.Center);
+                    tbBorder.AppendChild(tbHost);
+                    tbTemplate.VisualTree = tbBorder;
+                    box.Template = tbTemplate;
+                    box.FocusVisualStyle = null;
+                    return box;
+                }
+                _searchBox = MakeFindTextBox();
                 _searchBox.KeyDown += SearchBox_KeyDown;
                 _searchBox.TextChanged += SearchBox_TextChanged;
-
-                // Custom template so the default WPF blue focus/hover border never shows; keep our themed border.
-                var tbTemplate = new ControlTemplate(typeof(TextBox));
-                var tbBorder = new FrameworkElementFactory(typeof(Border));
-                tbBorder.SetValue(Border.BackgroundProperty, new System.Windows.TemplateBindingExtension(Control.BackgroundProperty));
-                tbBorder.SetValue(Border.BorderBrushProperty, new System.Windows.TemplateBindingExtension(Control.BorderBrushProperty));
-                tbBorder.SetValue(Border.BorderThicknessProperty, new System.Windows.TemplateBindingExtension(Control.BorderThicknessProperty));
-                tbBorder.SetValue(Border.CornerRadiusProperty, new CornerRadius(3));
-                var tbHost = new FrameworkElementFactory(typeof(ScrollViewer)) { Name = "PART_ContentHost" };
-                tbHost.SetValue(ScrollViewer.PaddingProperty, new System.Windows.TemplateBindingExtension(Control.PaddingProperty));
-                tbHost.SetValue(ScrollViewer.VerticalAlignmentProperty, VerticalAlignment.Center);
-                tbBorder.AppendChild(tbHost);
-                tbTemplate.VisualTree = tbBorder;
-                _searchBox.Template = tbTemplate;
-                _searchBox.FocusVisualStyle = null;
+                _replaceBox = MakeFindTextBox();
+                _replaceBox.KeyDown += ReplaceBox_KeyDown;
 
                 // Wide enough for translated empty/error states while keeping the count stable.
                 _searchStatus = new TextBlock
@@ -136,6 +156,39 @@ namespace KillerPDF
                 var prevBtn  = SearchNavBtn("", Loc("Str_Search_PreviousTT"), SearchPrevResult); // ChevronUp
                 var nextBtn  = SearchNavBtn("", Loc("Str_Search_NextTT"), SearchNextResult);     // ChevronDown
                 var closeBtn = SearchNavBtn("", Loc("Str_Search_CloseTT"), CloseSearchBar, danger: true); // Cancel
+
+                // Match case and Whole word, drawn the way the toolbar shows a selected tool.
+                _matchCaseBtn = SearchNavBtn("", Loc("Str_Search_MatchCaseTT"), () => ToggleSearchOption(matchCase: true));
+                _matchCaseBtn.Content = new TextBlock { Text = "Aa", FontFamily = UiKit.UiFont, FontSize = 12 };
+                _wholeWordBtn = SearchNavBtn("", Loc("Str_Search_WholeWordTT"), () => ToggleSearchOption(matchCase: false));
+                _wholeWordBtn.Content = new TextBlock { Text = "ab", FontFamily = UiKit.UiFont, FontSize = 12,
+                    TextDecorations = TextDecorations.Underline };
+
+                // The chevron at the left opens the replace row, as Ctrl+H does.
+                _replaceToggleBtn = SearchNavBtn("", Loc("Str_Replace_ToggleTT"),
+                    () => SetReplaceRowVisible(_replaceBox?.Visibility != Visibility.Visible)); // ChevronRight
+
+                Button ReplaceBtn(string label, string tip, Action onClick)
+                {
+                    var b = SearchNavBtn("", tip, onClick);
+                    b.Content = label;
+                    b.FontFamily = UiKit.UiFont;
+                    b.Width = double.NaN;
+                    b.Padding = new Thickness(8, 0, 8, 0);
+                    b.Margin = new Thickness(2, 0, 0, 0);
+                    return b;
+                }
+                _replaceActions = new StackPanel
+                {
+                    Orientation = Orientation.Horizontal,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Margin = new Thickness(0, 4, 0, 0)
+                };
+                _replaceActions.Children.Add(ReplaceBtn(Loc("Str_Replace_One"), Loc("Str_Replace_OneTT"), ReplaceCurrentMatch));
+                _replaceActions.Children.Add(ReplaceBtn(Loc("Str_Replace_All"), Loc("Str_Replace_AllTT"), ReplaceAllMatches));
+                _replaceBox.Margin = new Thickness(0, 4, 0, 0);
+                _replaceBox.ToolTip = Loc("Str_Replace_WithTT");
+                _replaceBox.SetValue(System.Windows.Automation.AutomationProperties.NameProperty, Loc("Str_Replace_WithTT"));
 
                 var searchIcon = new TextBlock
                 {
@@ -174,19 +227,38 @@ namespace KillerPDF
                     ToolTip = Loc("Str_Search_DragTT")
                 };
 
-                var panel = new StackPanel
+                // Find row on top, replace row under it with its box lined up under the find box.
+                // The grip spans both rows so the bar drags from either.
+                var panel = new Grid
                 {
-                    Orientation = Orientation.Horizontal,
                     VerticalAlignment = VerticalAlignment.Center,
                     Margin = new Thickness(8, 6, 8, 6)
                 };
-                panel.Children.Add(searchGrip);
-                panel.Children.Add(searchIcon);
-                panel.Children.Add(_searchBox);
-                panel.Children.Add(_searchStatus);
-                panel.Children.Add(prevBtn);
-                panel.Children.Add(nextBtn);
-                panel.Children.Add(closeBtn);
+                for (int c = 0; c < 5; c++) panel.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+                panel.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                panel.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                var findTail = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
+                findTail.Children.Add(_matchCaseBtn);
+                findTail.Children.Add(_wholeWordBtn);
+                findTail.Children.Add(_searchStatus);
+                findTail.Children.Add(prevBtn);
+                findTail.Children.Add(nextBtn);
+                findTail.Children.Add(closeBtn);
+                _replaceToggleBtn.Margin = new Thickness(0, 0, 4, 0);
+                void Place(UIElement element, int row, int column)
+                {
+                    Grid.SetRow(element, row);
+                    Grid.SetColumn(element, column);
+                    panel.Children.Add(element);
+                }
+                Place(searchGrip, 0, 0);
+                Grid.SetRowSpan(searchGrip, 2);
+                Place(_replaceToggleBtn, 0, 1);
+                Place(searchIcon, 0, 2);
+                Place(_searchBox, 0, 3);
+                Place(findTail, 0, 4);
+                Place(_replaceBox, 1, 3);
+                Place(_replaceActions, 1, 4);
 
                 _searchBar = new Border
                 {
@@ -240,6 +312,8 @@ namespace KillerPDF
             }
 
             _searchBar.Visibility = Visibility.Visible;
+            SetReplaceRowVisible(false);
+            UpdateSearchOptionButtons();
             _searchBox!.Text = "";
             _searchStatus?.Text = "";
             FitSearchBox();
@@ -253,8 +327,9 @@ namespace KillerPDF
         {
             if (_searchBar is null || _searchBox is null) return;
             double avail = (PagePreviewPanel.Parent as Grid)?.ActualWidth ?? 0;
-            const double reserved = 232;   // grip + icon + status + 3 buttons + paddings/margins
+            const double reserved = 314;   // grip + chevron + icon + 2 options + status + 3 buttons + paddings/margins
             _searchBox.Width = Math.Max(60, Math.Min(200, avail - reserved));
+            _replaceBox?.Width = _searchBox.Width;
         }
 
         private void CloseSearchBar()
@@ -278,6 +353,7 @@ namespace KillerPDF
 
         private void SearchBox_KeyDown(object sender, KeyEventArgs e)
         {
+            if (TrySearchOptionKey(e)) return;
             if (e.Key == Key.Escape)
             {
                 CloseSearchBar();
@@ -321,6 +397,135 @@ namespace KillerPDF
             }
             _searchDebounce.Stop();
             _searchDebounce.Start();
+        }
+
+        // ---- Find and Replace (#422) -----------------------------------------------------------
+
+        private TextBox? _replaceBox;
+        private StackPanel? _replaceActions;
+        private Button? _replaceToggleBtn;
+        private Button? _matchCaseBtn;
+        private Button? _wholeWordBtn;
+
+        private void SetReplaceRowVisible(bool visible)
+        {
+            var state = visible ? Visibility.Visible : Visibility.Collapsed;
+            _replaceBox?.Visibility = state;
+            _replaceActions?.Visibility = state;
+            _replaceToggleBtn?.Content = visible ? "\ue70d" : "\ue76c";   // ChevronDown / ChevronRight
+        }
+
+        // Alt+C and Alt+W flip Match case and Whole word from either box.
+        private bool TrySearchOptionKey(KeyEventArgs e)
+        {
+            if (Keyboard.Modifiers != ModifierKeys.Alt || e.Key != Key.System) return false;
+            if (e.SystemKey == Key.C) ToggleSearchOption(matchCase: true);
+            else if (e.SystemKey == Key.W) ToggleSearchOption(matchCase: false);
+            else return false;
+            e.Handled = true;
+            return true;
+        }
+
+        private void ToggleSearchOption(bool matchCase)
+        {
+            if (matchCase) Search.MatchCase = !Search.MatchCase;
+            else Search.WholeWord = !Search.WholeWord;
+            UpdateSearchOptionButtons();
+            string query = _searchBox?.Text ?? "";
+            if (query.Length >= 2)
+            {
+                _searchDebounce?.Stop();
+                Search.Run(query);
+            }
+        }
+
+        private void UpdateSearchOptionButtons()
+        {
+            foreach (var (button, on) in new[] { (_matchCaseBtn, Search.MatchCase), (_wholeWordBtn, Search.WholeWord) })
+            {
+                if (button is null) continue;
+                button.Tag = on ? "selected" : null;
+                if (on)
+                {
+                    button.SetResourceReference(Control.BackgroundProperty, "SelectionBg");
+                    button.SetResourceReference(Control.ForegroundProperty, "SelectionFg");
+                }
+                else
+                {
+                    button.ClearValue(Control.BackgroundProperty);
+                    button.ClearValue(Control.ForegroundProperty);
+                }
+            }
+        }
+
+        // Enter replaces the current match, Ctrl+Alt+Enter replaces them all.
+        private void ReplaceBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (TrySearchOptionKey(e)) return;
+            if (e.Key == Key.Escape)
+            {
+                CloseSearchBar();
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Enter || (e.Key == Key.System && e.SystemKey == Key.Enter))
+            {
+                if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Alt)) ReplaceAllMatches();
+                else ReplaceCurrentMatch();
+                e.Handled = true;
+            }
+        }
+
+        // Replaces the highlighted match. With no match highlighted yet, the first press finds it,
+        // so what gets replaced is always something the user has seen.
+        private void ReplaceCurrentMatch()
+        {
+            string find = _searchBox?.Text ?? "";
+            if (find.Length == 0 || _doc is null) return;
+            if (!EnsureEditable()) return;
+            if (Search.LastQuery != find || Search.CurrentMatch is null)
+            {
+                _searchDebounce?.Stop();
+                Search.Run(find);
+                return;
+            }
+            var (page, left, bottom, right, top) = Search.CurrentMatch.Value;
+            var result = ActiveViewer.ReplaceTextExt(find, _replaceBox?.Text ?? "", Search.MatchCase, Search.WholeWord,
+                (page, left, bottom, right, top));
+            if (result.Occurrences == 0)
+            {
+                // Nothing replaceable here (turned text, say): step past it rather than stall.
+                Search.Next();
+                SetStatus(ReplaceStatus(result));
+                return;
+            }
+            AfterReplace(find, result);
+        }
+
+        private void ReplaceAllMatches()
+        {
+            string find = _searchBox?.Text ?? "";
+            if (find.Length == 0 || _doc is null) return;
+            if (!EnsureEditable()) return;
+            AfterReplace(find, ActiveViewer.ReplaceTextExt(find, _replaceBox?.Text ?? "", Search.MatchCase, Search.WholeWord));
+        }
+
+        // Replaced text sits under a cover now, so the fresh search moves the cursor on to the
+        // next match still showing.
+        private void AfterReplace(string find, KillerPDF.Controls.TextReplaceResult result)
+        {
+            _searchDebounce?.Stop();
+            Search.Run(find);
+            SetStatus(ReplaceStatus(result));
+        }
+
+        private string ReplaceStatus(KillerPDF.Controls.TextReplaceResult result)
+        {
+            string message = result.Occurrences == 0
+                ? Loc("Str_Replace_None")
+                : string.Format(Loc("Str_Replace_Done"), result.Occurrences, result.Lines);
+            if (result.SkippedTurnedLines > 0)
+                message += " " + string.Format(Loc("Str_Replace_SkippedTurned"), result.SkippedTurnedLines);
+            return message;
         }
 
         // Paints match highlights onto EVERY page that's currently on screen and has results -

@@ -145,6 +145,7 @@ Az oldal lecserélhető a saját képére, amelyen a megjelölt területek feket
     <sys:String x:Key="Str_DocInfo_Save">Mentés</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">Mégse</sys:String>
     <sys:String x:Key="Str_KS_Find">Keresés</sys:String>
+    <sys:String x:Key="Str_KS_Replace">Keresés és csere</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Következő / előző találat</sys:String>
     <sys:String x:Key="Str_KS_SelectAll">Az oldal összes szövegének kijelölése</sys:String>
     <sys:String x:Key="Str_KS_CopyText">Kijelölt szöveg másolása</sys:String>
@@ -1212,6 +1213,17 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Search_PreviousTT">Előző találat (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Következő találat (Enter)</sys:String>
     <sys:String x:Key="Str_Search_CloseTT">Bezárás (Esc)</sys:String>
+    <sys:String x:Key="Str_Search_MatchCaseTT">Kis- és nagybetűk megkülönböztetése (Alt+C)</sys:String>
+    <sys:String x:Key="Str_Search_WholeWordTT">Csak teljes szó (Alt+W)</sys:String>
+    <sys:String x:Key="Str_Replace_ToggleTT">Csere megjelenítése vagy elrejtése (Ctrl+H)</sys:String>
+    <sys:String x:Key="Str_Replace_WithTT">Csere erre</sys:String>
+    <sys:String x:Key="Str_Replace_One">Csere</sys:String>
+    <sys:String x:Key="Str_Replace_OneTT">Csere (Enter)</sys:String>
+    <sys:String x:Key="Str_Replace_All">Összes cseréje</sys:String>
+    <sys:String x:Key="Str_Replace_AllTT">Összes cseréje (Ctrl+Alt+Enter)</sys:String>
+    <sys:String x:Key="Str_Replace_Done">Lecserélt találatok: {0}</sys:String>
+    <sys:String x:Key="Str_Replace_None">Nincs mit cserélni</sys:String>
+    <sys:String x:Key="Str_Replace_SkippedTurned">Kihagyott elforgatott szöveg: {0}</sys:String>
     <sys:String x:Key="Str_Busy_FlattenPage">{0}. / {1} oldal egyesítése...</sys:String>
     <sys:String x:Key="Str_Busy_ExportPage">{0}. / {1} oldal exportálása...</sys:String>
     <sys:String x:Key="Str_Busy_CancelHint">(Esc megszakítja)</sys:String>

@@ -145,6 +145,7 @@
     <sys:String x:Key="Str_DocInfo_Save">Зберегти</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">Скасувати</sys:String>
     <sys:String x:Key="Str_KS_Find">Знайти / пошук</sys:String>
+    <sys:String x:Key="Str_KS_Replace">Знайти й замінити</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Наступний / попередній результат</sys:String>
     <sys:String x:Key="Str_KS_SelectAll">Виділити весь текст на сторінці</sys:String>
     <sys:String x:Key="Str_KS_CopyText">Копіювати виділений текст</sys:String>
@@ -1225,6 +1226,17 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Search_PreviousTT">Попередній збіг (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Наступний збіг (Enter)</sys:String>
     <sys:String x:Key="Str_Search_CloseTT">Закрити (Esc)</sys:String>
+    <sys:String x:Key="Str_Search_MatchCaseTT">Враховувати регістр (Alt+C)</sys:String>
+    <sys:String x:Key="Str_Search_WholeWordTT">Лише ціле слово (Alt+W)</sys:String>
+    <sys:String x:Key="Str_Replace_ToggleTT">Показати або сховати заміну (Ctrl+H)</sys:String>
+    <sys:String x:Key="Str_Replace_WithTT">Замінити на</sys:String>
+    <sys:String x:Key="Str_Replace_One">Замінити</sys:String>
+    <sys:String x:Key="Str_Replace_OneTT">Замінити (Enter)</sys:String>
+    <sys:String x:Key="Str_Replace_All">Замінити все</sys:String>
+    <sys:String x:Key="Str_Replace_AllTT">Замінити все (Ctrl+Alt+Enter)</sys:String>
+    <sys:String x:Key="Str_Replace_Done">Замінено збігів: {0}</sys:String>
+    <sys:String x:Key="Str_Replace_None">Нічого замінювати</sys:String>
+    <sys:String x:Key="Str_Replace_SkippedTurned">Пропущено повернутий текст: {0}</sys:String>
     <sys:String x:Key="Str_Busy_FlattenPage">Зведення сторінки {0} з {1}...</sys:String>
     <sys:String x:Key="Str_Busy_ExportPage">Експорт сторінки {0} з {1}...</sys:String>
     <sys:String x:Key="Str_Busy_CancelHint">(Esc для скасування)</sys:String>

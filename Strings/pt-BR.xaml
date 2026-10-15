@@ -145,6 +145,7 @@ A página pode ser substituída por uma imagem dela mesma com as áreas marcadas
     <sys:String x:Key="Str_DocInfo_Save">Salvar</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">Cancelar</sys:String>
     <sys:String x:Key="Str_KS_Find">Localizar / pesquisar</sys:String>
+    <sys:String x:Key="Str_KS_Replace">Localizar e substituir</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Resultado seguinte / anterior</sys:String>
     <sys:String x:Key="Str_KS_SelectAll">Selecionar todo o texto da página</sys:String>
     <sys:String x:Key="Str_KS_CopyText">Copiar texto selecionado</sys:String>
@@ -1225,6 +1226,17 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Search_PreviousTT">Correspondência anterior (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Próxima correspondência (Enter)</sys:String>
     <sys:String x:Key="Str_Search_CloseTT">Fechar (Esc)</sys:String>
+    <sys:String x:Key="Str_Search_MatchCaseTT">Diferenciar maiúsculas e minúsculas (Alt+C)</sys:String>
+    <sys:String x:Key="Str_Search_WholeWordTT">Palavra inteira (Alt+W)</sys:String>
+    <sys:String x:Key="Str_Replace_ToggleTT">Mostrar ou ocultar substituição (Ctrl+H)</sys:String>
+    <sys:String x:Key="Str_Replace_WithTT">Substituir por</sys:String>
+    <sys:String x:Key="Str_Replace_One">Substituir</sys:String>
+    <sys:String x:Key="Str_Replace_OneTT">Substituir (Enter)</sys:String>
+    <sys:String x:Key="Str_Replace_All">Substituir tudo</sys:String>
+    <sys:String x:Key="Str_Replace_AllTT">Substituir tudo (Ctrl+Alt+Enter)</sys:String>
+    <sys:String x:Key="Str_Replace_Done">Correspondências substituídas: {0}</sys:String>
+    <sys:String x:Key="Str_Replace_None">Nada para substituir</sys:String>
+    <sys:String x:Key="Str_Replace_SkippedTurned">Texto girado ignorado: {0}</sys:String>
     <sys:String x:Key="Str_Busy_FlattenPage">Nivelando a página {0} de {1}...</sys:String>
     <sys:String x:Key="Str_Busy_ExportPage">Exportando a página {0} de {1}...</sys:String>
     <sys:String x:Key="Str_Busy_CancelHint">(Esc para cancelar)</sys:String>

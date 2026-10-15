@@ -128,6 +128,7 @@
     <sys:String x:Key="Str_KS_ConfirmCancel">টেক্সট বা ক্রপ নিশ্চিত / বাতিল করুন</sys:String>
     <sys:String x:Key="Str_KS_SearchSelect">অনুসন্ধান &amp; নির্বাচন</sys:String>
     <sys:String x:Key="Str_KS_Find">খুঁজুন / অনুসন্ধান করুন</sys:String>
+    <sys:String x:Key="Str_KS_Replace">খুঁজুন ও প্রতিস্থাপন করুন</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">পরবর্তী / আগের ফলাফল</sys:String>
     <sys:String x:Key="Str_KS_SelectAll">পৃষ্ঠার সব টেক্সট নির্বাচন করুন</sys:String>
     <sys:String x:Key="Str_KS_CopyText">নির্বাচিত টেক্সট কপি করুন</sys:String>
@@ -1205,6 +1206,17 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Search_PreviousTT">পূর্ববর্তী মিল (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">পরবর্তী মিল (Enter)</sys:String>
     <sys:String x:Key="Str_Search_CloseTT">বন্ধ করুন (Esc)</sys:String>
+    <sys:String x:Key="Str_Search_MatchCaseTT">বড় ও ছোট হাতের অক্ষর মেলান (Alt+C)</sys:String>
+    <sys:String x:Key="Str_Search_WholeWordTT">সম্পূর্ণ শব্দ (Alt+W)</sys:String>
+    <sys:String x:Key="Str_Replace_ToggleTT">প্রতিস্থাপন দেখান বা লুকান (Ctrl+H)</sys:String>
+    <sys:String x:Key="Str_Replace_WithTT">যা দিয়ে প্রতিস্থাপন</sys:String>
+    <sys:String x:Key="Str_Replace_One">প্রতিস্থাপন</sys:String>
+    <sys:String x:Key="Str_Replace_OneTT">প্রতিস্থাপন (Enter)</sys:String>
+    <sys:String x:Key="Str_Replace_All">সব প্রতিস্থাপন</sys:String>
+    <sys:String x:Key="Str_Replace_AllTT">সব প্রতিস্থাপন (Ctrl+Alt+Enter)</sys:String>
+    <sys:String x:Key="Str_Replace_Done">প্রতিস্থাপিত মিল: {0}</sys:String>
+    <sys:String x:Key="Str_Replace_None">প্রতিস্থাপনের কিছু নেই</sys:String>
+    <sys:String x:Key="Str_Replace_SkippedTurned">ঘোরানো লেখা বাদ দেওয়া হয়েছে: {0}</sys:String>
     <sys:String x:Key="Str_Busy_FlattenPage">পাতা {0} / {1} ফ্ল্যাট করা হচ্ছে...</sys:String>
     <sys:String x:Key="Str_Busy_ExportPage">পাতা {0} / {1} রপ্তানি হচ্ছে...</sys:String>
     <sys:String x:Key="Str_Busy_CancelHint">(Esc বাতিল করে)</sys:String>

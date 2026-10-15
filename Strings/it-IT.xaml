@@ -145,6 +145,7 @@ La pagina può essere sostituita da un'immagine di sé stessa con le aree contra
     <sys:String x:Key="Str_DocInfo_Save">Salva</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">Annulla</sys:String>
     <sys:String x:Key="Str_KS_Find">Trova/cerca</sys:String>
+    <sys:String x:Key="Str_KS_Replace">Trova e sostituisci</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Risultato precedente/successivo</sys:String>
     <sys:String x:Key="Str_KS_SelectAll">Seleziona tutto il testo sulla pagina</sys:String>
     <sys:String x:Key="Str_KS_CopyText">Copia testo selezionato</sys:String>
@@ -1225,6 +1226,17 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_Search_PreviousTT">Corrispondenza precedente (Maiusc+Invio)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Corrispondenza successiva (Invio)</sys:String>
     <sys:String x:Key="Str_Search_CloseTT">Chiudi (Esc)</sys:String>
+    <sys:String x:Key="Str_Search_MatchCaseTT">Maiuscole/minuscole (Alt+C)</sys:String>
+    <sys:String x:Key="Str_Search_WholeWordTT">Parola intera (Alt+W)</sys:String>
+    <sys:String x:Key="Str_Replace_ToggleTT">Mostra o nascondi sostituzione (Ctrl+H)</sys:String>
+    <sys:String x:Key="Str_Replace_WithTT">Sostituisci con</sys:String>
+    <sys:String x:Key="Str_Replace_One">Sostituisci</sys:String>
+    <sys:String x:Key="Str_Replace_OneTT">Sostituisci (Invio)</sys:String>
+    <sys:String x:Key="Str_Replace_All">Sostituisci tutto</sys:String>
+    <sys:String x:Key="Str_Replace_AllTT">Sostituisci tutto (Ctrl+Alt+Invio)</sys:String>
+    <sys:String x:Key="Str_Replace_Done">Corrispondenze sostituite: {0}</sys:String>
+    <sys:String x:Key="Str_Replace_None">Niente da sostituire</sys:String>
+    <sys:String x:Key="Str_Replace_SkippedTurned">Testo ruotato ignorato: {0}</sys:String>
     <sys:String x:Key="Str_Busy_FlattenPage">Semplificazione pagina {0} / {1}...</sys:String>
     <sys:String x:Key="Str_Busy_ExportPage">Esportazione pagina {0} / {1}...</sys:String>
     <sys:String x:Key="Str_Busy_CancelHint">(Esc per annullare)</sys:String>

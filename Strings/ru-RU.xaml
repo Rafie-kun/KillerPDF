@@ -145,6 +145,7 @@
     <sys:String x:Key="Str_DocInfo_Save">Сохранить</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">Отменить</sys:String>
     <sys:String x:Key="Str_KS_Find">Найти / поиск</sys:String>
+    <sys:String x:Key="Str_KS_Replace">Найти и заменить</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Следующий / предыдущий результат</sys:String>
     <sys:String x:Key="Str_KS_SelectAll">Выделите весь текст на странице</sys:String>
     <sys:String x:Key="Str_KS_CopyText">Скопировать выделенный текст</sys:String>
@@ -1225,6 +1226,17 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Search_PreviousTT">Предыдущее совпадение (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Следующее совпадение (Enter)</sys:String>
     <sys:String x:Key="Str_Search_CloseTT">Закрыть (Esc)</sys:String>
+    <sys:String x:Key="Str_Search_MatchCaseTT">Учитывать регистр (Alt+C)</sys:String>
+    <sys:String x:Key="Str_Search_WholeWordTT">Только слово целиком (Alt+W)</sys:String>
+    <sys:String x:Key="Str_Replace_ToggleTT">Показать или скрыть замену (Ctrl+H)</sys:String>
+    <sys:String x:Key="Str_Replace_WithTT">Заменить на</sys:String>
+    <sys:String x:Key="Str_Replace_One">Заменить</sys:String>
+    <sys:String x:Key="Str_Replace_OneTT">Заменить (Enter)</sys:String>
+    <sys:String x:Key="Str_Replace_All">Заменить все</sys:String>
+    <sys:String x:Key="Str_Replace_AllTT">Заменить все (Ctrl+Alt+Enter)</sys:String>
+    <sys:String x:Key="Str_Replace_Done">Заменено совпадений: {0}</sys:String>
+    <sys:String x:Key="Str_Replace_None">Нечего заменять</sys:String>
+    <sys:String x:Key="Str_Replace_SkippedTurned">Пропущен повернутый текст: {0}</sys:String>
     <sys:String x:Key="Str_Busy_FlattenPage">Сведение страницы {0} из {1}...</sys:String>
     <sys:String x:Key="Str_Busy_ExportPage">Экспорт страницы {0} из {1}...</sys:String>
     <sys:String x:Key="Str_Busy_CancelHint">(Esc для отмены)</sys:String>

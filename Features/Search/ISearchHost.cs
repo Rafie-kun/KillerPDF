@@ -29,5 +29,9 @@ namespace KillerPDF.Features
         /// <summary>Repaints highlights on every page on screen right now, with the current
         /// match emphasized.</summary>
         void RepaintHighlights();
+
+        /// <summary>True when an edit already covers this match (unrotated page points), so the
+        /// text under it is no longer what the reader sees, as after Find and Replace.</summary>
+        bool IsCovered(int pageIdx, double left, double bottom, double right, double top);
     }
 }

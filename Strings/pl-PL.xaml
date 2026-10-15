@@ -145,6 +145,7 @@ Stronę można zastąpić jej obrazem z zaczernionymi zaznaczonymi obszarami. Te
     <sys:String x:Key="Str_DocInfo_Save">Zapisz</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">Anuluj</sys:String>
     <sys:String x:Key="Str_KS_Find">Znajdź / wyszukaj</sys:String>
+    <sys:String x:Key="Str_KS_Replace">Znajdź i zamień</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Następny / poprzedni wynik</sys:String>
     <sys:String x:Key="Str_KS_SelectAll">Zaznacz cały tekst na stronie</sys:String>
     <sys:String x:Key="Str_KS_CopyText">Skopiuj zaznaczony tekst</sys:String>
@@ -1213,6 +1214,17 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Search_PreviousTT">Poprzedni wynik (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Następny wynik (Enter)</sys:String>
     <sys:String x:Key="Str_Search_CloseTT">Zamknij (Esc)</sys:String>
+    <sys:String x:Key="Str_Search_MatchCaseTT">Uwzględniaj wielkość liter (Alt+C)</sys:String>
+    <sys:String x:Key="Str_Search_WholeWordTT">Całe wyrazy (Alt+W)</sys:String>
+    <sys:String x:Key="Str_Replace_ToggleTT">Pokaż lub ukryj zamianę (Ctrl+H)</sys:String>
+    <sys:String x:Key="Str_Replace_WithTT">Zamień na</sys:String>
+    <sys:String x:Key="Str_Replace_One">Zamień</sys:String>
+    <sys:String x:Key="Str_Replace_OneTT">Zamień (Enter)</sys:String>
+    <sys:String x:Key="Str_Replace_All">Zamień wszystko</sys:String>
+    <sys:String x:Key="Str_Replace_AllTT">Zamień wszystko (Ctrl+Alt+Enter)</sys:String>
+    <sys:String x:Key="Str_Replace_Done">Zamienione wyniki: {0}</sys:String>
+    <sys:String x:Key="Str_Replace_None">Nie ma czego zamienić</sys:String>
+    <sys:String x:Key="Str_Replace_SkippedTurned">Pominięty obrócony tekst: {0}</sys:String>
     <sys:String x:Key="Str_Busy_FlattenPage">Spłaszczanie strony {0} z {1}...</sys:String>
     <sys:String x:Key="Str_Busy_ExportPage">Eksportowanie strony {0} z {1}...</sys:String>
     <sys:String x:Key="Str_Busy_CancelHint">(Esc anuluje)</sys:String>

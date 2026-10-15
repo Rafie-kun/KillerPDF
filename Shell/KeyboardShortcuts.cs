@@ -119,6 +119,11 @@ namespace KillerPDF
                 ToggleSearchBar();
                 e.Handled = true;
             }
+            else if (e.Key == Key.H && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                ShowReplaceBar();
+                e.Handled = true;
+            }
             else if (e.Key == Key.F3 && (Keyboard.Modifiers == ModifierKeys.None || Keyboard.Modifiers == ModifierKeys.Shift))
             {
                 // F3 / Shift+F3 - next / previous search match, the Find Next convention (Acrobat and

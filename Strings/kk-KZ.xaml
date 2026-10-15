@@ -120,6 +120,7 @@
     <sys:String x:Key="Str_DocInfo_Save">Сақтау</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">Болдырмау</sys:String>
     <sys:String x:Key="Str_KS_Find">Табу / іздеу</sys:String>
+    <sys:String x:Key="Str_KS_Replace">Табу және ауыстыру</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Келесі / алдыңғы нәтиже</sys:String>
     <sys:String x:Key="Str_KS_SelectAll">Беттегі барлық мәтінді таңдау</sys:String>
     <sys:String x:Key="Str_KS_CopyText">Таңдалған мәтінді көшіру</sys:String>
@@ -1175,6 +1176,17 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Search_PreviousTT">Алдыңғы сәйкестік (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Келесі сәйкестік (Enter)</sys:String>
     <sys:String x:Key="Str_Search_CloseTT">Жабу (Esc)</sys:String>
+    <sys:String x:Key="Str_Search_MatchCaseTT">Регистрді ескеру (Alt+C)</sys:String>
+    <sys:String x:Key="Str_Search_WholeWordTT">Тек тұтас сөз (Alt+W)</sys:String>
+    <sys:String x:Key="Str_Replace_ToggleTT">Ауыстыруды көрсету не жасыру (Ctrl+H)</sys:String>
+    <sys:String x:Key="Str_Replace_WithTT">Мынаған ауыстыру</sys:String>
+    <sys:String x:Key="Str_Replace_One">Ауыстыру</sys:String>
+    <sys:String x:Key="Str_Replace_OneTT">Ауыстыру (Enter)</sys:String>
+    <sys:String x:Key="Str_Replace_All">Барлығын ауыстыру</sys:String>
+    <sys:String x:Key="Str_Replace_AllTT">Барлығын ауыстыру (Ctrl+Alt+Enter)</sys:String>
+    <sys:String x:Key="Str_Replace_Done">Ауыстырылған сәйкестіктер: {0}</sys:String>
+    <sys:String x:Key="Str_Replace_None">Ауыстыратын ештеңе жоқ</sys:String>
+    <sys:String x:Key="Str_Replace_SkippedTurned">Бұрылған мәтін өткізілді: {0}</sys:String>
     <sys:String x:Key="Str_Busy_FlattenPage">{0} / {1} бет тегістелуде...</sys:String>
     <sys:String x:Key="Str_Busy_ExportPage">{0} / {1} бет экспортталуда...</sys:String>
     <sys:String x:Key="Str_Busy_CancelHint">(болдырмау үшін Esc)</sys:String>

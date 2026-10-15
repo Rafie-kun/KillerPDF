@@ -12,10 +12,11 @@ namespace KillerPDF.Services
     internal sealed class SearchService
     {
         /// <summary>
-        /// Scans every page of <paramref name="filePath"/> for <paramref name="query"/> (case-insensitive).
-        /// Returns an empty result when query is blank or the file cannot be opened.
+        /// Scans every page of <paramref name="filePath"/> for <paramref name="query"/>, ignoring case
+        /// unless <paramref name="matchCase"/> is set; <paramref name="wholeWord"/> skips matches inside
+        /// longer words. Returns an empty result when query is blank or the file cannot be opened.
         /// </summary>
-        public static SearchResult Search(string filePath, string query)
+        public static SearchResult Search(string filePath, string query, bool matchCase = false, bool wholeWord = false)
         {
             var result = new SearchResult();
             if (string.IsNullOrWhiteSpace(query) || string.IsNullOrWhiteSpace(filePath))
@@ -27,7 +28,7 @@ namespace KillerPDF.Services
                 for (int pi = 0; pi < doc.NumberOfPages; pi++)
                 {
                     var page = doc.GetPage(pi + 1);
-                    var hits = FindMatchesOnPage(page, query);
+                    var hits = FindMatchesOnPage(page, query, matchCase, wholeWord);
                     if (hits.Count > 0)
                     {
                         result.PageRects[pi] = hits;
@@ -42,10 +43,14 @@ namespace KillerPDF.Services
         }
 
         internal static List<(double Left, double Bottom, double Right, double Top)> FindMatchesOnPage(
-            KillerPdf.Engine.Documents.PdfPageContent page, string query)
+            KillerPdf.Engine.Documents.PdfPageContent page, string query, bool matchCase = false, bool wholeWord = false)
         {
             var result = new List<(double, double, double, double)>();
             var words = page.GetWords().ToList();
+            var comparison = matchCase ? System.StringComparison.Ordinal : System.StringComparison.OrdinalIgnoreCase;
+            bool Matches(string text) => wholeWord
+                ? TextReplacePlanner.FindAll(text, query, matchCase, wholeWord: true).Count > 0
+                : text.Contains(query, comparison);
 
             // A multi-word phrase can span adjacent words; a single token never does, so for single-token
             // queries we only do the per-word substring match (the cross-word union box below would
@@ -54,7 +59,7 @@ namespace KillerPDF.Services
 
             for (int i = 0; i < words.Count; i++)
             {
-                if (words[i].Text.Contains(query, System.StringComparison.OrdinalIgnoreCase))
+                if (Matches(words[i].Text))
                 {
                     var bb = words[i].BoundingBox;
                     result.Add((bb.Left, bb.Bottom, bb.Right, bb.Top));
@@ -68,7 +73,7 @@ namespace KillerPDF.Services
                 for (int j = i + 1; j < words.Count && combined.Length < query.Length + 20; j++)
                 {
                     combined += " " + words[j].Text;
-                    if (combined.Contains(query, System.StringComparison.OrdinalIgnoreCase))
+                    if (Matches(combined))
                     {
                         double minX = double.MaxValue, minY = double.MaxValue;
                         double maxX = double.MinValue, maxY = double.MinValue;

@@ -235,6 +235,7 @@ namespace KillerPDF
             B("%ctrl%+%shift%+T", "Str_Ocr_ScanToText", "Ocr", Cap("CtrlShift:T")),
 
             B("%ctrl%+F",                  "Str_KS_Find",           "Search", Cap("Ctrl:F")),
+            B("%ctrl%+H",                  "Str_KS_Replace",        "Search", Cap("Ctrl:H")),
             B("F3 / %shift%+F3",           "Str_KS_NextPrevResult", "Search", Cap("F3",       "Str_Kb_NextResult"),
                                                                               Cap("Shift:F3", "Str_Kb_PrevResult")),
             B("%enter% / %shift%+%enter%", "Str_KS_NextPrevResult", "Search", Cap("Shift:Enter", "Str_Kb_PrevResult")),
