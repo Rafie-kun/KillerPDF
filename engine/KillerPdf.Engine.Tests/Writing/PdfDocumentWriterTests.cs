@@ -822,6 +822,8 @@ public sealed class PdfDocumentWriterTests
     [InlineData("D:20260824123456Z")]
     [InlineData("D:20260824123456-07'00'")]
     [InlineData("D:20260824123456+05'30")]
+    [InlineData("D:20260824123456Z00'00'")]
+    [InlineData("D:20260824123456Z00'00")]
     public void Write_AcceptsValidDocumentInformationDates(string date)
     {
         PdfDocument document = PdfDocument.Open(SourcePdfWithDocumentInformation(

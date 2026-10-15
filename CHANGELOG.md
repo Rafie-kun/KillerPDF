@@ -75,6 +75,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Edit Text opens over the clicked line on rotated pages, edits sideways and upside-down text in place, keeps descriptor font names and baselines (#431), and stays on its cover when the page is rotated afterward.
 - Copied and pasted annotations, and those on a duplicated page, keep a text box's letter spacing, a shape's fill and the erased parts of a cover.
 - Save As and Extract Pages append .pdf when a different filename extension is typed (#450).
+- PDFs whose signature or document dates end in Z00'00', as Adobe signing tools write them, save again instead of failing with an invalid date error.
 - Selecting upside-down or mirrored text no longer crashes with a width and height error, and search highlights, redaction marks and Crop on that text get a real box (#453).
 - OK in the bookmark, table of contents, page label, initial view, layer, macro, navigation, portfolio, attachment and image dialogs is no longer treated as Cancel.
 - Fixed lost pages in parallel PNG exports, and invalid OCR models are ignored with the Tesseract fallback kept.

@@ -257,6 +257,32 @@ public sealed class PdfSignatureReaderTests
     }
 
     [Fact]
+    public void Read_AcceptsUniversalTimeSigningTimeWithAnOffset()
+    {
+        byte[] source = new PdfDocumentBuilder()
+            .AddBlankPage()
+            .AddSignatureField(0, "approval", 20, 20, 160, 40)
+            .Build();
+        byte[] signed = PdfDetachedSignatureWriter.Sign(PdfDocument.Open(source),
+            _ => [0x30, 0x01, 0x00], new PdfSignatureOptions
+            {
+                FieldName = "approval",
+                SigningTime = new DateTimeOffset(2014, 7, 24, 18, 37, 56, TimeSpan.FromHours(-4)),
+                ReservedSignatureSize = 16
+            });
+        // Adobe signers write Z followed by a zero offset. A trailing space keeps the length, so
+        // the byte range and cross-reference offsets still hold.
+        string text = Encoding.Latin1.GetString(signed);
+        const string written = "(D:20140724183756-04'00')";
+        Assert.Contains(written, text, StringComparison.Ordinal);
+        byte[] adobe = Encoding.Latin1.GetBytes(text.Replace(written, "(D:20140724223756Z00'00) ", StringComparison.Ordinal));
+
+        PdfSignatureInfo signature = Assert.Single(PdfSignatureReader.Read(PdfDocument.Open(adobe)));
+
+        Assert.Equal(new DateTimeOffset(2014, 7, 24, 22, 37, 56, TimeSpan.Zero), signature.SigningTime);
+    }
+
+    [Fact]
     public void Read_ResolvesIndirectSignatureTransformScalars()
     {
         byte[] source = new PdfDocumentBuilder()

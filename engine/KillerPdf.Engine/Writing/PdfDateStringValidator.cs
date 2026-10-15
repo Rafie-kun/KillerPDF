@@ -31,8 +31,9 @@ internal static class PdfDateStringValidator
             return false;
         if (index == text.Length) return true;
         if (componentCount != components.Length) return false;
-        if (text[index] == 'Z') return index + 1 == text.Length;
-        if (text[index] is not ('+' or '-')) return false;
+        // ISO 32000-1 7.9.4 lets Z carry an HH'mm offset too, as Adobe signers write Z00'00'.
+        if (text[index] == 'Z' && index + 1 == text.Length) return true;
+        if (text[index] is not ('+' or '-' or 'Z')) return false;
         index++;
         if (!ReadDigits(text, ref index, 2, out int offsetHour)
             || offsetHour > 23) return false;

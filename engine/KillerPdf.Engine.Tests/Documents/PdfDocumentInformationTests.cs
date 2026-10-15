@@ -1,6 +1,8 @@
 using KillerPdf.Engine.Authoring;
 using KillerPdf.Engine.Documents;
+using KillerPdf.Engine.Objects;
 using KillerPdf.Engine.Syntax;
+using KillerPdf.Engine.Writing;
 using Xunit;
 
 namespace KillerPdf.Engine.Tests.Documents;
@@ -36,6 +38,25 @@ public sealed class PdfDocumentInformationTests
 
         Assert.Null(information.Trapped);
         Assert.Equal("Report", information.Title);
+    }
+
+    [Theory]
+    [InlineData("D:20140724223756Z00'00'")]
+    [InlineData("D:20140724223756Z00'00")]
+    [InlineData("D:20140724223756Z")]
+    public void Read_TreatsZWithAnOffsetAsUniversalTime(string date)
+    {
+        PdfDocument source = PdfDocument.Open(new PdfDocumentBuilder().AddBlankPage().Build());
+        var update = new PdfIncrementalUpdateBuilder(source);
+        PdfIndirectReference information = update.AddObject(new PdfDictionary([
+            new(new PdfName("ModDate"u8.ToArray()),
+                new PdfString(System.Text.Encoding.Latin1.GetBytes(date), PdfStringForm.Literal))
+        ]));
+
+        PdfDocumentInformation info = PdfDocumentInformation.Read(
+            PdfDocument.Open(update.SetDocumentInformation(information).Build()));
+
+        Assert.Equal(new DateTimeOffset(2014, 7, 24, 22, 37, 56, TimeSpan.Zero), info.ModificationDate);
     }
 
     [Fact]

@@ -425,11 +425,14 @@ public static class PdfSignatureReader
             if (suffix.Length > 0 && suffix != "Z")
             {
                 char sign = suffix[0];
-                if (sign is not ('+' or '-')) throw new FormatException();
+                // ISO 32000-1 7.9.4 lets Z carry an HH'mm offset too (Adobe signers write Z00'00');
+                // Z means universal time either way.
+                if (sign is not ('+' or '-' or 'Z')) throw new FormatException();
                 string compact = suffix[1..].Replace("'", string.Empty, StringComparison.Ordinal);
                 if (compact.Length != 4 || !int.TryParse(compact[..2], out int zoneHour)
                     || !int.TryParse(compact[2..], out int zoneMinute)) throw new FormatException();
-                zone = new TimeSpan(zoneHour, zoneMinute, 0) * (sign == '-' ? -1 : 1);
+                zone = sign == 'Z' ? TimeSpan.Zero
+                    : new TimeSpan(zoneHour, zoneMinute, 0) * (sign == '-' ? -1 : 1);
             }
             return new DateTimeOffset(year, month, day, hour, minute, second, zone);
         }
