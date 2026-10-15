@@ -1071,24 +1071,19 @@ namespace KillerPDF
         }
 
         // ============================================================
-        // Silent (machine-wide) install - winget / choco / RMM / the all-users checkbox
+        // Silent install - winget / choco / RMM / the all-users checkbox / the Microsoft Store
         // ============================================================
 
         /// <summary>
-        /// Machine-wide install. Runs elevated with no UI by definition, so the exit code is the
-        /// only signal a deployment tool - or RunElevatedSilentInstall - gets back.
+        /// Silent install with no UI, so the exit code is the only signal a deployment tool - or
+        /// RunElevatedSilentInstall - gets back. Elevated, it installs machine-wide; without admin
+        /// rights it installs for the current user.
         ///
-        /// File associations are registered in HKLM so every account sees KillerPDF in Open With
-        /// and Default apps. Windows still leaves the actual default choice to each user.
+        /// A machine-wide install registers file associations in HKLM so every account sees KillerPDF
+        /// in Open With and Default apps. Windows still leaves the actual default choice to each user.
         /// </summary>
         private static int DoSilentInstall()
         {
-            // Without admin rights, as the Microsoft Store installs, the install relaunches
-            // itself elevated through UAC and returns that copy's exit code.
-            int? elevated = KillerFamily.Deployment.InstallerExitCodes.ElevateIfNeeded(
-                "/silent", () => VerifyAuthenticode(Environment.ProcessPath ?? string.Empty).Valid);
-            if (elevated.HasValue) return elevated.Value;
-
             try
             {
                 using var installLease = KillerFamily.Deployment.InstallerExitCodes.Acquire(AppName);
@@ -1104,14 +1099,21 @@ namespace KillerPDF
                     return KillerFamily.Deployment.InstallerExitCodes.SecurityRejected;
                 }
 
-                Directory.CreateDirectory(MachineInstallDir);
-                if (File.Exists(MachineInstallExe))
+                // With admin rights (winget, choco, RMM) the install is machine-wide. Without them,
+                // as the Microsoft Store runs installers, it is the normal per-user install with no
+                // prompt. The app never needs admin rights.
+                bool machine = KillerFamily.Deployment.InstallerExitCodes.IsElevated();
+                string installDir = machine ? MachineInstallDir : InstallDir;
+                string installExe = machine ? MachineInstallExe : InstallExe;
+
+                Directory.CreateDirectory(installDir);
+                if (File.Exists(installExe))
                 {
-                    try { File.SetAttributes(MachineInstallExe, FileAttributes.Normal); } catch { }
+                    try { File.SetAttributes(installExe, FileAttributes.Normal); } catch { }
                 }
-                File.Copy(src, MachineInstallExe, overwrite: true);
-                try { File.SetAttributes(MachineInstallExe, FileAttributes.Normal); } catch { }
-                RegisterInstalledCopy(machine: true, desktop: false);
+                File.Copy(src, installExe, overwrite: true);
+                try { File.SetAttributes(installExe, FileAttributes.Normal); } catch { }
+                RegisterInstalledCopy(machine: machine, desktop: false);
                 return KillerFamily.Deployment.InstallerExitCodes.Success;
             }
             catch (Exception ex)
