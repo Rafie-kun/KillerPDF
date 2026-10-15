@@ -3369,7 +3369,14 @@
                          set the card's width (family rule), and two checkboxes on one row would
                          overrun it. -->
                     <StackPanel DockPanel.Dock="Left" VerticalAlignment="Center">
-                        <CheckBox x:Name="NoRecentCheck" Margin="0"
+                        <!-- First, like every Killer Tools About card: the way back after the
+                             update prompt's "Always check on startup" box was cleared. -->
+                        <CheckBox x:Name="StartupUpdateCheck" Margin="0"
+                                  Style="{StaticResource ThemeCheck}" FontSize="11"
+                                  Click="StartupUpdateCheck_Click">
+                            <TextBlock Text="{DynamicResource Str_StartupUpdateCheck}" TextWrapping="Wrap"/>
+                        </CheckBox>
+                        <CheckBox x:Name="NoRecentCheck" Margin="0,6,0,0"
                                   Content="{DynamicResource Str_NoRecentSetting}"
                                   Style="{StaticResource ThemeCheck}" FontSize="11"
                                   Checked="NoRecentCheck_Toggled" Unchecked="NoRecentCheck_Toggled"/>
@@ -3381,11 +3388,6 @@
                                   Content="{DynamicResource Str_LinkConfirmSetting}"
                                   Style="{StaticResource ThemeCheck}" FontSize="11"
                                   Checked="LinkConfirmCheck_Toggled" Unchecked="LinkConfirmCheck_Toggled"/>
-                        <CheckBox x:Name="StartupUpdateCheck" Margin="0,6,0,0"
-                                  Style="{StaticResource ThemeCheck}" FontSize="11"
-                                  Click="StartupUpdateCheck_Click">
-                            <TextBlock Text="{DynamicResource Str_StartupUpdateCheck}" TextWrapping="Wrap"/>
-                        </CheckBox>
                     </StackPanel>
                     <TextBlock DockPanel.Dock="Right" FontFamily="{DynamicResource UiFont}" FontSize="10"
                                VerticalAlignment="Top" Margin="0,6,0,0">
