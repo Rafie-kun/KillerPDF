@@ -322,6 +322,8 @@ namespace KillerPDF.Controls
         private void RemoveLinkAnnotation(int pageIndex, int annotIndex)
         {
             if (_doc is null || annotIndex < 0) return;
+            // A restricted PDF asks for the owner password; the user removes the link again after.
+            if (IsOwnerRestricted) { Host?.UnlockOwnerRestrictions(); return; }
             PdfEngineDocumentSession session = EnsureEngineDocumentSession();
             if (pageIndex < 0 || pageIndex >= session.PageCount) return;
             try

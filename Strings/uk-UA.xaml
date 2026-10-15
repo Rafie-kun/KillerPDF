@@ -172,7 +172,8 @@
     <sys:String x:Key="Str_Restricted_Prompt">«{0}» обмежує редагування. Введіть пароль власника, щоб редагувати його.</sys:String>
     <sys:String x:Key="Str_Restricted_Unlock">Розблокувати</sys:String>
     <sys:String x:Key="Str_Restricted_Unlocked">{0} розблоковано для редагування</sys:String>
-    <sys:String x:Key="Str_Restricted_WrongPassword">Це не пароль власника цього PDF, тому він залишається лише для читання.</sys:String>
+    <sys:String x:Key="Str_Restricted_WrongPassword">Це не пароль власника цього PDF.</sys:String>
+    <sys:String x:Key="Str_Restricted_OwnerRequired">«{0}» обмежує редагування, тому KillerPDF потрібен пароль власника, щоб відкрити його.</sys:String>
     <sys:String x:Key="Str_OpenedReadOnlyXRef">Відкрито {0} (лише для читання - нестандартна таблиця XRef) - сторінок: {1}</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">Відкрито {0} (відновлена копія - збережіть, щоб зберегти зміни) - сторінок: {1}</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">Відкрито {0} (растрове відновлення - збережіть, щоб зберегти зміни) - сторінок: {1}</sys:String>

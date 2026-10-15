@@ -157,7 +157,8 @@
     <sys:String x:Key="Str_Restricted_Prompt">「{0}」限制了編輯。輸入擁有者密碼即可編輯。</sys:String>
     <sys:String x:Key="Str_Restricted_Unlock">解除鎖定</sys:String>
     <sys:String x:Key="Str_Restricted_Unlocked">已解除 {0} 的編輯限制</sys:String>
-    <sys:String x:Key="Str_Restricted_WrongPassword">這不是此 PDF 的擁有者密碼，因此仍為唯讀。</sys:String>
+    <sys:String x:Key="Str_Restricted_WrongPassword">這不是此 PDF 的擁有者密碼。</sys:String>
+    <sys:String x:Key="Str_Restricted_OwnerRequired">「{0}」限制了編輯，因此 KillerPDF 需要擁有者密碼才能開啟。</sys:String>
     <sys:String x:Key="Str_OpenedReadOnlyXRef">已開啟 {0}（唯讀 - 非標準 XRef 表）- {1} 頁</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">已開啟 {0}（已修復副本 - 請儲存以保留變更）- {1} 頁</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">已開啟 {0}（點陣化修復 - 請儲存以保留變更）- {1} 頁</sys:String>

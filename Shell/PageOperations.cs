@@ -20,6 +20,7 @@ namespace KillerPDF
         private void RotatePages_Click(int delta)
         {
             if (_doc is null) return;
+            if (!EnsureEditable(continueAfterUnlock: false)) return;
             var selected = PageList.SelectedItems;
             if (selected.Count == 0) return;
             try
@@ -84,6 +85,7 @@ namespace KillerPDF
         private void Delete_Click(object sender, RoutedEventArgs e)
         {
             if (_doc is null) { KillerDialog.Show(this, Loc("Str_Msg_OpenFirst")); return; }
+            if (!EnsureEditable(continueAfterUnlock: false)) return;
             var selected = PageList.SelectedItems;
             if (selected.Count == 0) { KillerDialog.Show(this, Loc("Str_Dlg_SelectDelete")); return; }
             var result = KillerDialog.Show(this, selected.Count == 1 ? Loc("Str_Dlg_DeletePage1") : string.Format(Loc("Str_Dlg_DeletePagesN"), selected.Count), "KillerPDF",
@@ -128,6 +130,7 @@ namespace KillerPDF
         private void InsertBlankPage_Click(object sender, RoutedEventArgs e)
         {
             if (_doc is null) { KillerDialog.Show(this, Loc("Str_Msg_OpenFirst")); return; }
+            if (!EnsureEditable(continueAfterUnlock: false)) return;
             int insertAfter = PageList.SelectedIndex >= 0
                 ? PageList.SelectedIndex : _doc.PageCount - 1;
             int insertIndex = insertAfter + 1;
@@ -178,6 +181,7 @@ namespace KillerPDF
         private void AddBlankPageAtEnd()
         {
             if (_doc is null) { KillerDialog.Show(this, Loc("Str_Msg_OpenFirst")); return; }
+            if (!EnsureEditable()) return;
             int referencePage = Math.Clamp(PageList.SelectedIndex >= 0
                 ? PageList.SelectedIndex : _currentPage, 0, _doc.PageCount - 1);
             var (pageWidth, pageHeight) = EnsureEngineDocumentSession()
@@ -207,6 +211,7 @@ namespace KillerPDF
         private void MoveUp_Click(object sender, RoutedEventArgs e)
         {
             if (_doc is null || PageList.SelectedIndex <= 0) return;
+            if (!EnsureEditable(continueAfterUnlock: false)) return;
             int idx = PageList.SelectedIndex;
             IReadOnlyList<int> order = PdfEngineIntegration.PageOrderAfterMove(
                 _doc.PageCount, [idx], idx - 1);
@@ -224,6 +229,7 @@ namespace KillerPDF
         private void MoveDown_Click(object sender, RoutedEventArgs e)
         {
             if (_doc is null || PageList.SelectedIndex < 0 || PageList.SelectedIndex >= _doc.PageCount - 1) return;
+            if (!EnsureEditable(continueAfterUnlock: false)) return;
             int idx = PageList.SelectedIndex;
             IReadOnlyList<int> order = PdfEngineIntegration.PageOrderAfterMove(
                 _doc.PageCount, [idx], idx + 2);

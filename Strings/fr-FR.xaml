@@ -172,7 +172,8 @@ La page peut être remplacée par une image d'elle-même avec les zones marquée
     <sys:String x:Key="Str_Restricted_Prompt">« {0} » restreint la modification. Saisissez le mot de passe propriétaire pour le modifier.</sys:String>
     <sys:String x:Key="Str_Restricted_Unlock">Déverrouiller</sys:String>
     <sys:String x:Key="Str_Restricted_Unlocked">{0} déverrouillé pour modification</sys:String>
-    <sys:String x:Key="Str_Restricted_WrongPassword">Ce n’est pas le mot de passe propriétaire de ce PDF, il reste donc en lecture seule.</sys:String>
+    <sys:String x:Key="Str_Restricted_WrongPassword">Ce n’est pas le mot de passe propriétaire de ce PDF.</sys:String>
+    <sys:String x:Key="Str_Restricted_OwnerRequired">« {0} » restreint la modification, KillerPDF a donc besoin du mot de passe propriétaire pour l’ouvrir.</sys:String>
     <sys:String x:Key="Str_OpenedReadOnlyXRef">Ouvert : {0} (lecture seule - table XRef non standard) - {1} page(s)</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">Ouvert : {0} (copie réparée - enregistrer pour conserver les modifications) - {1} page(s)</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">Ouvert : {0} (réparation raster - enregistrer pour conserver les modifications) - {1} page(s)</sys:String>

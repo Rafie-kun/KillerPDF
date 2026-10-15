@@ -172,7 +172,8 @@ Stronę można zastąpić jej obrazem z zaczernionymi zaznaczonymi obszarami. Te
     <sys:String x:Key="Str_Restricted_Prompt">Plik „{0}” ogranicza edycję. Wprowadź hasło właściciela, aby go edytować.</sys:String>
     <sys:String x:Key="Str_Restricted_Unlock">Odblokuj</sys:String>
     <sys:String x:Key="Str_Restricted_Unlocked">Odblokowano {0} do edycji</sys:String>
-    <sys:String x:Key="Str_Restricted_WrongPassword">To nie jest hasło właściciela tego pliku PDF, więc pozostaje tylko do odczytu.</sys:String>
+    <sys:String x:Key="Str_Restricted_WrongPassword">To nie jest hasło właściciela tego pliku PDF.</sys:String>
+    <sys:String x:Key="Str_Restricted_OwnerRequired">Plik „{0}” ogranicza edycję, więc KillerPDF potrzebuje hasła właściciela, aby go otworzyć.</sys:String>
     <sys:String x:Key="Str_OpenedReadOnlyXRef">Otwarto {0} (tylko do odczytu - niestandardowa tabela XRef) - {1} stronę(y)</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">Otwarto {0} (naprawioną kopię - zapisano do zachowania zmian) - {1} stronę(y)</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">Otwarto {0} (naprawioną rasteryzowaną - zapisano do zachowania zmian) - {1} stronę(y)</sys:String>

@@ -147,7 +147,8 @@
     <sys:String x:Key="Str_Restricted_Prompt">«{0}» өңдеуді шектейді. Өңдеу үшін иесінің құпиясөзін енгізіңіз.</sys:String>
     <sys:String x:Key="Str_Restricted_Unlock">Құлпын ашу</sys:String>
     <sys:String x:Key="Str_Restricted_Unlocked">{0} өңдеу үшін ашылды</sys:String>
-    <sys:String x:Key="Str_Restricted_WrongPassword">Бұл осы PDF иесінің құпиясөзі емес, сондықтан ол тек оқу күйінде қалады.</sys:String>
+    <sys:String x:Key="Str_Restricted_WrongPassword">Бұл осы PDF иесінің құпиясөзі емес.</sys:String>
+    <sys:String x:Key="Str_Restricted_OwnerRequired">«{0}» өңдеуді шектейді, сондықтан KillerPDF оны ашу үшін иесінің құпиясөзін қажет етеді.</sys:String>
     <sys:String x:Key="Str_OpenedReadOnlyXRef">{0} ашылды (тек оқу - стандартты емес XRef кестесі) - {1} бет</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">{0} ашылды (жөнделген көшірме - өзгерістерді сақтаңыз) - {1} бет</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">{0} ашылды (растрленген жөндеу - өзгерістерді сақтаңыз) - {1} бет</sys:String>

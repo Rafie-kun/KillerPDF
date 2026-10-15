@@ -29,6 +29,14 @@ namespace KillerPDF
             bool preserveRenderedPages = false)
         {
             if (_doc is null || _currentFile is null) return;
+            // Every user command asks for the owner password before it gets here. This catches
+            // any path that does not, so a restricted PDF is never handed to a rewrite the
+            // engine refuses.
+            if (IsOwnerRestricted)
+            {
+                SetStatus(Loc("Str_Restricted_Notice"));
+                return;
+            }
             // Capture the previous serialized working file before any rewrite. Most operations
             // mutate through finalizeSavedFile below, while the few that adjust side state before
             // arriving here pass an explicit pre-mutation entry. Push only after every save,

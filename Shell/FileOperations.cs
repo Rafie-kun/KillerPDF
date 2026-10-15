@@ -106,6 +106,12 @@ namespace KillerPDF
                     FinishOpenFile(path, tempDec);
                     _openedFromProtected = true;   // #149: unlocked with the user's password
                 }
+                catch (Exception) when (PdfEngineIntegration.IsRestrictedForPassword(srcPath, pw))
+                {
+                    // The user password opens the file, but its owner forbids editing, and KillerPDF
+                    // works on a decrypted copy, so only the owner password can open it here.
+                    OpenWithOwnerPassword(srcPath, path);
+                }
                 catch (Exception ex2)
                 {
                     KillerDialog.Show(this, string.Format(Loc("Str_Dlg_FailedOpen"), ex2.Message), Loc("Str_Dlg_AppTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
@@ -425,13 +431,40 @@ namespace KillerPDF
             }
         }
 
+        // Opens a PDF whose user password forbids editing by asking for its owner password.
+        private void OpenWithOwnerPassword(string srcPath, string displayPath)
+        {
+            string? ownerPassword = KillerDialog.PromptPassword(this, displayPath,
+                Loc("Str_Restricted_OwnerRequired"), Loc("Str_Btn_Open"));
+            if (ownerPassword is null) return;
+            try
+            {
+                string tempDec = App.MakeTempFile("dec");
+                PdfEngineIntegration.RemoveEncryption(srcPath, tempDec, ownerPassword);
+                _doc?.Close();
+                _doc = null;
+                _doc = PdfWorkingDocument.Open(tempDec);
+                _currentFile = tempDec;
+                FinishOpenFile(displayPath, tempDec);
+                _openedFromProtected = true;   // #149: unlocked with the owner password
+            }
+            catch (Exception error) when (error is not OutOfMemoryException)
+            {
+                KillerDialog.Show(this, Loc("Str_Restricted_WrongPassword"), "KillerPDF",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
         // A PDF whose owner password forbids editing stays read-only, the way Acrobat treats it,
         // until the user supplies that owner password. The notice bar in the pane offers this.
         private bool IsOwnerRestricted => ActiveViewer.IsOwnerRestricted;
 
         // Gate for anything that edits or rewrites the document. Returns true when it may go
-        // ahead, asking for the owner password first on a restricted PDF.
-        private bool EnsureEditable() => !IsOwnerRestricted || UnlockOwnerRestrictions();
+        // ahead, asking for the owner password first on a restricted PDF. Commands that act on the
+        // page selection pass continueAfterUnlock: false, because the reopen resets the selection;
+        // the user then repeats the command on the unlocked document.
+        private bool EnsureEditable(bool continueAfterUnlock = true)
+            => !IsOwnerRestricted || (UnlockOwnerRestrictions() && continueAfterUnlock);
 
         // Asks for the owner password and reopens the restricted PDF from an unrestricted working
         // copy. A wrong password, or the empty user password, leaves the document read-only.
@@ -457,6 +490,16 @@ namespace KillerPDF
                 return false;
             }
 
+            // The unlocked copy has the same pages, so overlay work made while read-only (form
+            // entries, pasted annotations) carries over instead of being lost to the reopen.
+            bool wasDirty = _isDirty;
+            var annotations = _annotations.ToDictionary(pair => pair.Key, pair => pair.Value);
+            var rotations = new Dictionary<int, int>(_pageRotations);
+            var textValues = new Dictionary<string, string>(_formTextValues);
+            var choiceValues = new Dictionary<string, string>(_formChoiceValues);
+            var checkValues = new Dictionary<string, bool>(_formCheckValues);
+            var radioValues = new Dictionary<string, string>(_formRadioValues);
+            var fontSizes = new Dictionary<string, double>(_formFontSizes);
             try
             {
                 _doc?.Close();
@@ -465,6 +508,15 @@ namespace KillerPDF
                 _currentFile = unlockedPath;
                 FinishOpenFile(displayPath, unlockedPath);
                 _openedFromProtected = true;   // #149: the source still carries its encryption
+                foreach (var pair in annotations) _annotations[pair.Key] = pair.Value;
+                foreach (var pair in rotations) _pageRotations[pair.Key] = pair.Value;
+                foreach (var pair in textValues) _formTextValues[pair.Key] = pair.Value;
+                foreach (var pair in choiceValues) _formChoiceValues[pair.Key] = pair.Value;
+                foreach (var pair in checkValues) _formCheckValues[pair.Key] = pair.Value;
+                foreach (var pair in radioValues) _formRadioValues[pair.Key] = pair.Value;
+                foreach (var pair in fontSizes) _formFontSizes[pair.Key] = pair.Value;
+                foreach (int page in annotations.Keys) RenderAllAnnotations(page);
+                if (wasDirty) MarkDirty(true);
                 FinalizeAsyncOpen();
                 SetStatus(string.Format(Loc("Str_Restricted_Unlocked"), System.IO.Path.GetFileName(displayPath)));
                 return true;
@@ -912,6 +964,7 @@ namespace KillerPDF
             dlg.ShowDialog();   // fade-close dialogs don't reliably return true; rely on the Saved flag
             if (dlg.Saved && editedMetadata is not null)
             {
+                if (!EnsureEditable()) return;
                 var completeMetadata = editedMetadata with
                 {
                     Language = info.Language,
@@ -933,6 +986,7 @@ namespace KillerPDF
         private async Task MergeAtIndex(int? insertionIndex)
         {
             if (_doc is null) { KillerDialog.Show(this, Loc("Str_Msg_OpenFirst")); return; }
+            if (!EnsureEditable()) return;
             var dlg = new Controls.FileDialog(Controls.FileDialogMode.Open)
                           { Filter = Loc("Str_Filter_Pdf") + "|*.pdf", Title = Loc("Str_Dlg_SelectMerge"), Multiselect = true };
             if (dlg.ShowDialog(this) != true) return;

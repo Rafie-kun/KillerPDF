@@ -285,6 +285,7 @@ public partial class MainWindow
             var plan = PdfEngineIntegration.PlanTableOfContents(_currentFile, dialog.MaximumDepth);
             const int rowsPerPage = 40;
             int insertedPages = Math.Max(1, (plan.Entries.Count + rowsPerPage - 1) / rowsPerPage);
+            if (!EnsureEditable()) return;
             UndoEntry? documentUndo = CaptureDocumentUndo();
             var annotationBackup = _annotations.ToDictionary(pair => pair.Key, pair => pair.Value);
             try
@@ -342,6 +343,7 @@ public partial class MainWindow
 
             var dialog = new LayerEditorDialog(this, layers);
             if (dialog.ShowDialog() != true) return;
+            if (!EnsureEditable()) return;
             UndoEntry? documentUndo = CaptureDocumentUndo();
             SaveTempAndReload(
                 keepAnnotations: true,
@@ -373,6 +375,7 @@ public partial class MainWindow
             var dialog = new InitialViewDialog(
                 this, information.InitialView, information.PageCount);
             if (dialog.ShowDialog() != true || dialog.InitialView is null) return;
+            if (!EnsureEditable()) return;
             UndoEntry? documentUndo = CaptureDocumentUndo();
             SaveTempAndReload(
                 keepAnnotations: true,
@@ -405,6 +408,7 @@ public partial class MainWindow
                 this, state.Collection,
                 [.. state.Attachments.Select(attachment => attachment.FileName)]);
             if (dialog.ShowDialog() != true) return;
+            if (!EnsureEditable()) return;
             UndoEntry? documentUndo = CaptureDocumentUndo();
             SaveTempAndReload(
                 keepAnnotations: true,
@@ -442,6 +446,7 @@ public partial class MainWindow
             var dialog = new PortfolioStructureDialog(
                 this, state.Collection, state.Attachments);
             if (dialog.ShowDialog() != true) return;
+            if (!EnsureEditable()) return;
             UndoEntry? documentUndo = CaptureDocumentUndo();
             SaveTempAndReload(
                 keepAnnotations: true,
@@ -478,6 +483,7 @@ public partial class MainWindow
             }
             var dialog = new AttachmentEditorDialog(this, attachments);
             if (dialog.ShowDialog() != true) return;
+            if (!EnsureEditable()) return;
             UndoEntry? documentUndo = CaptureDocumentUndo();
             SaveTempAndReload(
                 keepAnnotations: true,
@@ -514,6 +520,7 @@ public partial class MainWindow
                 this, PdfEngineIntegration.FormatNavigationAudit(_currentFile),
                 hasUnsafeLinks, hasUnresolvedLinks);
             if (dialog.ShowDialog() != true) return;
+            if (!EnsureEditable()) return;
             UndoEntry? documentUndo = CaptureDocumentUndo();
             SaveTempAndReload(
                 keepAnnotations: true,
@@ -554,6 +561,7 @@ public partial class MainWindow
 
             var review = new BookmarkReviewDialog(this, proposals);
             if (review.ShowDialog() != true) return;
+            if (!EnsureEditable()) return;
             UndoEntry? documentUndo = CaptureDocumentUndo();
             SaveTempAndReload(
                 keepAnnotations: true,
@@ -586,6 +594,7 @@ public partial class MainWindow
                 EnsureEngineDocumentSession().Document).PageCount;
             var dialog = new PageLabelsDialog(this, pageCount);
             if (dialog.ShowDialog() != true) return;
+            if (!EnsureEditable()) return;
             UndoEntry? documentUndo = CaptureDocumentUndo();
             SaveTempAndReload(
                 keepAnnotations: true,

@@ -86,6 +86,7 @@ namespace KillerPDF
             bool useJpegCompression = false, int jpegQuality = 85)
         {
             if (_doc is null || _currentFile is null) return;
+            if (!EnsureEditable(continueAfterUnlock: false)) return;
             PdfEngineDocumentSession engineSession = EnsureEngineDocumentSession();
             int[] pages = [.. pageIndices.Distinct().OrderBy(index => index)];
             if (pages.Length == 0 || pages.Any(index => index < 0 || index >= engineSession.PageCount)) return;

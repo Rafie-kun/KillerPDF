@@ -712,6 +712,24 @@ internal static class PdfEngineIntegration
         ReplaceWithBuiltResult(destinationPath, result);
     }
 
+    /// <summary>True when the password opens the PDF as its user but the owner forbids the
+    /// document modification KillerPDF edits through, so only the owner password unlocks it.</summary>
+    internal static bool IsRestrictedForPassword(string path, string password)
+    {
+        try
+        {
+            PdfDocument document = PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(path), password);
+            return document.IsDecrypted
+                && document.PasswordAuthenticationRole == KillerPdf.Engine.Security.PdfPasswordAuthenticationRole.User
+                && (document.DeclaredPermissions is not KillerPdf.Engine.Security.PdfDocumentPermissions permissions
+                    || !permissions.AllowDocumentModification);
+        }
+        catch (Exception error) when (error is not OutOfMemoryException)
+        {
+            return false;
+        }
+    }
+
     /// <summary>Attempts owner-only encryption removal through the engine.</summary>
     internal static bool TryRemoveEncryptionWithoutPassword(
         string sourcePath, string destinationPath)

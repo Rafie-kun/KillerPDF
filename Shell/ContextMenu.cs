@@ -298,6 +298,7 @@ namespace KillerPDF
         private void DuplicatePage(int pageIdx)
         {
             if (_doc is null || pageIdx < 0 || pageIdx >= _doc.PageCount) return;
+            if (!EnsureEditable(continueAfterUnlock: false)) return;
             try
             {
                 ReloadWithRemappedAnnotations(

@@ -11,13 +11,13 @@ namespace KillerPDF.Tests;
 // owner password, the way Acrobat treats it.
 public sealed class OwnerRestrictionTests
 {
-    private static string WriteOwnerRestricted()
+    private static string WriteOwnerRestricted(string userPassword = "")
     {
         string path = Path.Combine(Path.GetTempPath(), $"killerpdf-owner-unlock-{Guid.NewGuid():N}.pdf");
         File.WriteAllBytes(path, new PdfDocumentBuilder()
             .SetPasswordEncryption(new PdfPasswordEncryptionOptions
             {
-                UserPassword = string.Empty,
+                UserPassword = userPassword,
                 OwnerPassword = "owner",
                 AllowDocumentModification = false
             })
@@ -79,5 +79,21 @@ public sealed class OwnerRestrictionTests
             File.Delete(source);
             if (File.Exists(output)) File.Delete(output);
         }
+    }
+
+    [Theory]
+    [InlineData("", "", true)]
+    [InlineData("user", "user", true)]
+    [InlineData("user", "owner", false)]
+    [InlineData("user", "wrong", false)]
+    public void IsRestrictedForPassword_FlagsOnlyTheRestrictedUserRole(
+        string userPassword, string entered, bool restricted)
+    {
+        string source = WriteOwnerRestricted(userPassword);
+        try
+        {
+            Assert.Equal(restricted, PdfEngineIntegration.IsRestrictedForPassword(source, entered));
+        }
+        finally { File.Delete(source); }
     }
 }

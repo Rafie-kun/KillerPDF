@@ -172,7 +172,8 @@ Có thể thay trang bằng hình ảnh của chính nó với các vùng đã �
     <sys:String x:Key="Str_Restricted_Prompt">“{0}” hạn chế chỉnh sửa. Nhập mật khẩu chủ sở hữu để chỉnh sửa.</sys:String>
     <sys:String x:Key="Str_Restricted_Unlock">Mở khóa</sys:String>
     <sys:String x:Key="Str_Restricted_Unlocked">Đã mở khóa {0} để chỉnh sửa</sys:String>
-    <sys:String x:Key="Str_Restricted_WrongPassword">Đây không phải mật khẩu chủ sở hữu của PDF này, nên tệp vẫn ở chế độ chỉ đọc.</sys:String>
+    <sys:String x:Key="Str_Restricted_WrongPassword">Đây không phải mật khẩu chủ sở hữu của PDF này.</sys:String>
+    <sys:String x:Key="Str_Restricted_OwnerRequired">“{0}” hạn chế chỉnh sửa, nên KillerPDF cần mật khẩu chủ sở hữu để mở.</sys:String>
     <sys:String x:Key="Str_OpenedReadOnlyXRef">Đã mở {0} (chỉ đọc - bảng XRef không chuẩn) - {1} trang</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">Đã mở {0} (bản sao đã sửa chữa - hãy lưu lại để giữ các thay đổi) - {1} trang</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">Đã mở {0} (đã sửa bằng cách rasterize - hãy lưu lại để giữ các thay đổi) - {1} trang</sys:String>

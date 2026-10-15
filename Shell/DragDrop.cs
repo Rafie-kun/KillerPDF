@@ -237,6 +237,7 @@ namespace KillerPDF
             if (payload.PageIndices.Length == 0 || !File.Exists(payload.SourcePath)) return;
             FocusPane(target);
             if (_doc is null || _currentFile is null) return;
+            if (!EnsureEditable(continueAfterUnlock: false)) return;
             CommitActiveTextBox();
 
             int insertAt = Math.Clamp(insertionIndex, 0, _doc.PageCount);
@@ -440,6 +441,7 @@ namespace KillerPDF
         private async void AppendFilesToCurrentDoc(string[] files, int? insertionIndex = null)
         {
             if (_doc is null) return;
+            if (!EnsureEditable(continueAfterUnlock: false)) return;
             CommitActiveTextBox();
             var imports = new List<PdfEngineIntegration.ImportedDocument>();
             foreach (var f in files)
@@ -567,6 +569,7 @@ namespace KillerPDF
             if (_doc is null || !e.Data.GetDataPresent(typeof(int[]))) { HidePageDropIndicator(); return; }
             int[] fromIndices = (int[])e.Data.GetData(typeof(int[]))!;
             if (fromIndices.Length == 0) { HidePageDropIndicator(); return; }
+            if (!EnsureEditable(continueAfterUnlock: false)) { HidePageDropIndicator(); return; }
             int insertionIndex = _pageDropInsertionIndex;
             if (insertionIndex < 0)
                 insertionIndex = PageDropSlot(e.GetPosition(PageList))?.Index ?? fromIndices[0];

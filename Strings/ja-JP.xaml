@@ -172,7 +172,8 @@
     <sys:String x:Key="Str_Restricted_Prompt">「{0}」は編集が制限されています。編集するには所有者パスワードを入力してください。</sys:String>
     <sys:String x:Key="Str_Restricted_Unlock">ロック解除</sys:String>
     <sys:String x:Key="Str_Restricted_Unlocked">{0} の編集制限を解除しました</sys:String>
-    <sys:String x:Key="Str_Restricted_WrongPassword">この PDF の所有者パスワードではないため、読み取り専用のままです。</sys:String>
+    <sys:String x:Key="Str_Restricted_WrongPassword">この PDF の所有者パスワードではありません。</sys:String>
+    <sys:String x:Key="Str_Restricted_OwnerRequired">「{0}」は編集が制限されているため、KillerPDF で開くには所有者パスワードが必要です。</sys:String>
     <sys:String x:Key="Str_OpenedReadOnlyXRef">{0} を開きました (読み取り専用 - 非標準 XRef テーブル) - {1} ページ</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">{0} を開きました (修復済みコピー - 変更を保存するには保存が必要) - {1} ページ</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">{0} を開きました (ラスタライズ修復 - 変更を保存するには保存が必要) - {1} ページ</sys:String>
