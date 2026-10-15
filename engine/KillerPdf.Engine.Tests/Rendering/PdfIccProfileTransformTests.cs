@@ -345,9 +345,10 @@ public sealed class PdfIccProfileTransformTests
         Assert.Null(available.ForIntent(1));
         if (saturation) Assert.Null(available.ForIntent(0));
         Assert.Same(available, available.ForIntent(saturation ? 2 : 0));
-        start = GC.GetAllocatedBytesForCurrentThread();
-        for (int repeat = 0; repeat < 100; repeat++) _ = available.ForIntent(1);
-        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - start);
+        AllocationAssert.None(() =>
+        {
+            for (int repeat = 0; repeat < 100; repeat++) _ = available.ForIntent(1);
+        });
     }
 
     [Theory]
@@ -604,9 +605,10 @@ public sealed class PdfIccProfileTransformTests
         var variants = new PdfIccProfileTransform?[32];
         Parallel.For(0, variants.Length, index => variants[index] = profile.ForIntent(3));
         Assert.All(variants, value => Assert.Same(absolute, value));
-        start = GC.GetAllocatedBytesForCurrentThread();
-        for (int repeat = 0; repeat < 100; repeat++) _ = profile.ForIntent(repeat % 4);
-        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - start);
+        AllocationAssert.None(() =>
+        {
+            for (int repeat = 0; repeat < 100; repeat++) _ = profile.ForIntent(repeat % 4);
+        });
     }
 
     [Theory]
@@ -650,9 +652,10 @@ public sealed class PdfIccProfileTransformTests
         var profile = new PdfIccProfileTransform(Profile("RGB ", "XYZ ",
             ("A2B0", Lut(true, false, true)), ("wtpt", Xyz(0, 1, 1))));
         Assert.Null(profile.ForIntent(3));
-        long start = GC.GetAllocatedBytesForCurrentThread();
-        for (int repeat = 0; repeat < 100; repeat++) _ = profile.ForIntent(3);
-        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - start);
+        AllocationAssert.None(() =>
+        {
+            for (int repeat = 0; repeat < 100; repeat++) _ = profile.ForIntent(3);
+        });
     }
 
     [Theory]
@@ -685,13 +688,14 @@ public sealed class PdfIccProfileTransformTests
         var restored = new double[input.Length];
         absolute.FromXyz(actual, restored);
         for (int channel = 0; channel < input.Length; channel++) Assert.Equal(input[channel], restored[channel], 12);
-        long start = GC.GetAllocatedBytesForCurrentThread();
-        for (int repeat = 0; repeat < 100; repeat++)
+        AllocationAssert.None(() =>
         {
-            absolute.ToXyz(input, actual);
-            absolute.FromXyz(actual, restored);
-        }
-        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - start);
+            for (int repeat = 0; repeat < 100; repeat++)
+            {
+                absolute.ToXyz(input, actual);
+                absolute.FromXyz(actual, restored);
+            }
+        });
     }
 
     [Theory]

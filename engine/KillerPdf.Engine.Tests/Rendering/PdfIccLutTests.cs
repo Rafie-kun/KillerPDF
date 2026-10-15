@@ -57,9 +57,10 @@ public sealed class PdfIccLutTests
         var lut = new PdfIccLut(Table(3, true));
         double[] values = [0.25, 0.5, 0.75];
         for (int index = 0; index < 100; index++) lut.Transform(values, values);
-        long before = GC.GetAllocatedBytesForCurrentThread();
-        for (int index = 0; index < 1000; index++) lut.Transform(values, values);
-        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
+        AllocationAssert.None(() =>
+        {
+            for (int index = 0; index < 1000; index++) lut.Transform(values, values);
+        });
         Assert.Equal([0.25, 0.5, 0.75], values);
     }
 

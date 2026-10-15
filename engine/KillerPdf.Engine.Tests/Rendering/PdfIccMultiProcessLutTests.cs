@@ -41,9 +41,10 @@ public sealed class PdfIccMultiProcessLutTests
         var table = PdfIccTable.Read(Table(false, true, 3, 3, false));
         double[] values = [0.25, 0, 0.75];
         for (int index = 0; index < 100; index++) table.Transform(values, values);
-        long before = GC.GetAllocatedBytesForCurrentThread();
-        for (int index = 0; index < 1000; index++) table.Transform(values, values);
-        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
+        AllocationAssert.None(() =>
+        {
+            for (int index = 0; index < 1000; index++) table.Transform(values, values);
+        });
         Assert.Equal([0.25, 0, 0.75], values);
     }
 
