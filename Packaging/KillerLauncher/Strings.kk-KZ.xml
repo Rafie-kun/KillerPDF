@@ -2,7 +2,6 @@
 <!-- KillerPDF installer text. Write \n for a line break inside a value. -->
 <locale name="kk-KZ">
   <string key="SetupTitle">KillerPDF орнату</string>
-  <string key="SetupVersion">ОРНАТУ  •  {0}</string>
   <string key="Tagline">Құпиялық пен жылдамдық үшін нөлден жасалған тегін әрі заманауи PDF редакторы.</string>
   <string key="CurrentAccount">Менің тіркелгім үшін орнату</string>
   <string key="Everyone">Осы компьютердің барлық пайдаланушылары үшін орнату</string>

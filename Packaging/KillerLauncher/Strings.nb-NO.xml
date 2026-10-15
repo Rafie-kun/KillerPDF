@@ -2,7 +2,6 @@
 <!-- KillerPDF installer text. Write \n for a line break inside a value. -->
 <locale name="nb-NO">
   <string key="SetupTitle">KillerPDF-installasjon</string>
-  <string key="SetupVersion">INSTALLASJON  •  {0}</string>
   <string key="Tagline">Et gratis og moderne PDF-redigeringsprogram, bygget fra bunnen av for personvern og hastighet.</string>
   <string key="CurrentAccount">Installer for kontoen min</string>
   <string key="Everyone">Installer for alle på denne datamaskinen</string>

@@ -2,7 +2,6 @@
 <!-- KillerPDF installer text. Write \n for a line break inside a value. -->
 <locale name="zh-TW">
   <string key="SetupTitle">KillerPDF 安裝程式</string>
-  <string key="SetupVersion">安裝程式  •  {0}</string>
   <string key="Tagline">免費、現代化的 PDF 編輯器，從零打造，注重隱私與速度。</string>
   <string key="CurrentAccount">僅為我的帳戶安裝</string>
   <string key="Everyone">為此電腦的所有使用者安裝</string>

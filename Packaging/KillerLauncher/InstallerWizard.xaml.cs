@@ -21,8 +21,7 @@ namespace KillerLauncher
         {
             InitializeComponent();
             TaskbarIdentity.Track(this);
-            SetupVersionLabel.SetVersion(LauncherStrings.Get("SetupVersion"),
-                typeof(InstallerWizard).Assembly.GetName().Version!.ToString(3));
+            SetupVersionLabel.SetVersion(typeof(InstallerWizard).Assembly.GetName().Version!.ToString(3));
             _existing = Program.FindInstalledCopy();
             InstallFolder.Text = _existing?.Directory ?? Program.DefaultInstallDirectory(false);
             if (_existing != null)

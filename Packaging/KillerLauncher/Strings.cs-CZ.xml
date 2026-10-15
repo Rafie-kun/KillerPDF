@@ -2,7 +2,6 @@
 <!-- KillerPDF installer text. Write \n for a line break inside a value. -->
 <locale name="cs-CZ">
   <string key="SetupTitle">Instalace KillerPDF</string>
-  <string key="SetupVersion">INSTALACE  •  {0}</string>
   <string key="Tagline">Bezplatný moderní editor PDF, vytvořený od základu s důrazem na soukromí a rychlost.</string>
   <string key="CurrentAccount">Nainstalovat pro můj účet</string>
   <string key="Everyone">Nainstalovat pro všechny uživatele počítače</string>

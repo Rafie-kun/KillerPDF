@@ -2,7 +2,6 @@
 <!-- KillerPDF installer text. Write \n for a line break inside a value. -->
 <locale name="ru-RU">
   <string key="SetupTitle">Установка KillerPDF</string>
-  <string key="SetupVersion">УСТАНОВКА  •  {0}</string>
   <string key="Tagline">Бесплатный современный редактор PDF, созданный с нуля ради конфиденциальности и скорости.</string>
   <string key="CurrentAccount">Установить для моей учетной записи</string>
   <string key="Everyone">Установить для всех пользователей компьютера</string>
