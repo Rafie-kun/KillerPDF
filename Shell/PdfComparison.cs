@@ -194,6 +194,7 @@ public partial class MainWindow
         ComparePdfBtn.ToolTip = Loc("Str_TT_ExitComparison");
         ComparisonFilesText.Text = $"{source.Title}  ↔  {comparison.Title}";
         ComparisonResultText.Text = Loc("Str_Compare_Comparing");
+        WireComparisonBarDock();
         ComparisonBar.Visibility = Visibility.Visible;
         BalanceComparisonPanes();
         int page = Math.Max(0, Viewer.CurrentPageIndex);

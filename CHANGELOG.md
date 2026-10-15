@@ -34,6 +34,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Added Find and Replace (Ctrl+H) with Match case and Whole word options. Each replaced line is rewritten in its original font, size and color, and Replace All is a single undo (#422).
 - Added Reverse Page Order, Fix Page Orientation and Straighten Scanned Pages to the page menu (#436). Orientation is read from the direction of the text, or with OCR on scans, and fixed by rotating the page. Straightening measures each scan's tilt and levels it without changing the page size.
 - Added drag and drop to the Outlines panel. A bookmark and its children can be dragged above, below or into another bookmark (#391).
+- Added docking for the comparison bar. Drag it to the top half of the documents to dock it above them, or back down to dock it below (#427).
 
 ### Changed
 - Replaced PDFium, Docnet.Core and PdfPig with the engine for rendering, search, selection, copying and text editing, and built the JPEG 2000 decoder from vendored CoreJ2K sources. The engine keeps the previous renderer's page dimensions for viewing and image export.
