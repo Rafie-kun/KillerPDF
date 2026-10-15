@@ -464,7 +464,7 @@
                 </Border>
 
                 <!-- PDF page with annotation overlay -->
-                <ScrollViewer x:Name="PagePreviewPanel" Visibility="Collapsed"
+                <ScrollViewer x:Name="PagePreviewPanel" Visibility="Collapsed" AutomationProperties.Name="{DynamicResource Str_Print_Pages}"
                               HorizontalScrollBarVisibility="Auto"
                               VerticalScrollBarVisibility="Auto"
                               PanningMode="Both"

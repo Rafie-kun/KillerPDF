@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Microsoft.Win32;
 using KillerPDF.Services;
+using KillerFamily.Accessibility;
 
 namespace KillerPDF
 {
@@ -409,7 +410,7 @@ namespace KillerPDF
             };
             border.SetResourceReference(Border.BackgroundProperty, "MenuBackgroundBrush");
             border.SetResourceReference(Border.BorderBrushProperty, "MenuBorderBrush");
-            var glyph = new TextBlock
+            var glyph = new Glyph
             {
                 Text = ((char)0xE712).ToString(),   // MDL2 More - the same chevron as the toolbar overflow
                 FontFamily = UiKit.IconFont,

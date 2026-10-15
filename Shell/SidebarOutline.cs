@@ -12,6 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Microsoft.Win32;
 using KillerPDF.Services;
+using KillerFamily.Accessibility;
 
 namespace KillerPDF
 {
@@ -562,7 +563,7 @@ namespace KillerPDF
         /// context menu and the refresh walks treat it as a non-bookmark row.</summary>
         private TreeViewItem BuildAddBookmarkGhostRow()
         {
-            var icon = new TextBlock
+            var icon = new Glyph
             {
                 Text = "\uE710",   // Segoe MDL2 Add
                 FontFamily = new FontFamily("Segoe MDL2 Assets"),

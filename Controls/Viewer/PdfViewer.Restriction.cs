@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using KillerFamily.Accessibility;
 
 namespace KillerPDF.Controls
 {
@@ -35,7 +36,7 @@ namespace KillerPDF.Controls
         // the top of the pane.
         private static Border BuildRestrictionNotice(Features.IViewerHost host)
         {
-            var lockGlyph = new TextBlock
+            var lockGlyph = new Glyph
             {
                 Text = "\uE72E",
                 FontFamily = UiKit.IconFont,

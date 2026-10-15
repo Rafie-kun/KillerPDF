@@ -39,8 +39,8 @@ public sealed class ComparisonBarLayoutTests
                     Height = (double)close.Attribute("Height")!,
                     Background = Brushes.Transparent,
                     Foreground = Brushes.White,
-                    Template = (ControlTemplate)XamlReader.Parse(template.ToString()),
-                    Content = XamlReader.Parse(content.ToString())
+                    Template = (ControlTemplate)ParseFragment(template.ToString()),
+                    Content = ParseFragment(content.ToString())
                 };
                 button.Measure(new Size(button.Width, button.Height));
                 button.Arrange(new Rect(0, 0, button.Width, button.Height));
@@ -155,9 +155,10 @@ public sealed class ComparisonBarLayoutTests
         bar.SetAttributeValue("Grid.Row", null);
         bar.SetAttributeValue("Grid.ColumnSpan", null);
         var markup = new XElement(p + "Grid", new XAttribute(XNamespace.Xmlns + "x", x),
+            new XAttribute(XNamespace.Xmlns + "a11y", "clr-namespace:KillerFamily.Accessibility"),
             new XAttribute("Background", "Transparent"),
             new XElement(p + "Grid.Resources", resources), bar);
-        var root = (Grid)XamlReader.Parse(markup.ToString());
+        var root = (Grid)ParseFragment(markup.ToString());
         root.Resources["ComparisonBarForegroundBrush"] = Brushes.White;
         root.Resources["ComparisonBarCloseHoverBrush"] = Brushes.Red;
         root.Resources["MenuFontFamily"] = new FontFamily("Segoe UI");
@@ -275,6 +276,12 @@ public sealed class ComparisonBarLayoutTests
             .Single(element => (string?)element.Attribute(x + "Name") == "ComparisonDetailsPopup");
         Assert.Equal("Top", (string?)detailsPopup.Attribute("Placement"));
     }
+
+    // Compiled XAML resolves the app's own a11y namespace without an assembly name; a runtime
+    // parse of a copied fragment needs it spelled out; the tests link that file into this assembly.
+    private static object ParseFragment(string xaml) => XamlReader.Parse(xaml.Replace(
+        "clr-namespace:KillerFamily.Accessibility\"",
+        "clr-namespace:KillerFamily.Accessibility;assembly=KillerPDF.Tests\""));
 
     private static string FindRepositoryRoot()
     {

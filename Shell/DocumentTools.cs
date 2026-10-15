@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using KillerPdf.Engine.Documents;
 using KillerPdf.Engine.Parsing;
 using KillerPDF.Services;
+using KillerFamily.Accessibility;
 
 namespace KillerPDF;
 
@@ -69,7 +70,7 @@ public partial class MainWindow
         {
             Header = Loc("Str_DocumentTools"),
             InputGestureText = ShortcutTable.DocumentToolsChord,
-            Icon = new TextBlock
+            Icon = new Glyph
             {
                 Text = "\uE9D2",
                 FontFamily = UiKit.IconFont,

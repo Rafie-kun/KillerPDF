@@ -12,6 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Microsoft.Win32;
 using KillerPDF.Services;
+using KillerFamily.Accessibility;
 
 namespace KillerPDF
 {
@@ -351,7 +352,7 @@ namespace KillerPDF
             }
             else
             {
-                var closeText = new TextBlock
+                var closeText = new Glyph
                 {
                     Text = "",
                     FontFamily = UiKit.IconFont,

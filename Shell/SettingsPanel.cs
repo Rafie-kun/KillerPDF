@@ -12,6 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Microsoft.Win32;
 using KillerPDF.Services;
+using KillerFamily.Accessibility;
 
 namespace KillerPDF
 {
@@ -921,7 +922,7 @@ namespace KillerPDF
             }
             if (glyph != TransformGlyph)
             {
-                return new TextBlock
+                return new Glyph
                 {
                     Text = glyph,
                     FontFamily = UiKit.IconFont,

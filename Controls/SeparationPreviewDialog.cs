@@ -3,6 +3,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using KillerPDF.Services;
+using KillerFamily.Accessibility;
 
 namespace KillerPDF;
 
@@ -66,10 +67,10 @@ internal sealed class SeparationPreviewDialog : Window
         DockPanel.SetDock(_status, Dock.Bottom);
         body.Children.Add(_status);
 
-        _previous = UiKit.Make(new TextBlock { Text = "", FontFamily = UiKit.IconFont, FontSize = 12 }, accent: false);
+        _previous = UiKit.Make(new Glyph { Text = "", FontFamily = UiKit.IconFont, FontSize = 12 }, accent: false);
         _previous.ToolTip = L("Str_Kb_PrevPage");
         _previous.Click += (_, _) => ShowPage(_page - 1);
-        _next = UiKit.Make(new TextBlock { Text = "", FontFamily = UiKit.IconFont, FontSize = 12 }, accent: false);
+        _next = UiKit.Make(new Glyph { Text = "", FontFamily = UiKit.IconFont, FontSize = 12 }, accent: false);
         _next.ToolTip = L("Str_Kb_NextPage");
         _next.Click += (_, _) => ShowPage(_page + 1);
         _pageLabel = new TextBlock

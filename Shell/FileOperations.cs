@@ -17,6 +17,7 @@ using KillerPdf.Engine.Writing;
 // CliParsePageRange moved out with the CLI runner but is used here too (Export Images'
 // range box); its encoder sibling is now Services/BitmapHelpers.EncodeJpeg.
 using static KillerPDF.Features.CliRunner;
+using KillerFamily.Accessibility;
 
 namespace KillerPDF
 {
@@ -829,7 +830,7 @@ namespace KillerPDF
 
                 // Per-row remove button: a small X that fades in on hover and drops just this
                 // entry from the recents list (it does not touch the file on disk).
-                var delIcon = new TextBlock
+                var delIcon = new Glyph
                 {
                     Text              = "",   // close (X) glyph below set via code
                     FontFamily        = UiKit.IconFont,

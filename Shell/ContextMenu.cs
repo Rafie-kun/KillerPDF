@@ -12,6 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Microsoft.Win32;
 using KillerPDF.Services;
+using KillerFamily.Accessibility;
 
 namespace KillerPDF
 {
@@ -748,7 +749,7 @@ namespace KillerPDF
                 item.InputGestureText = gesture;
             if (glyph != null)
             {
-                var icon = new TextBlock
+                var icon = new Glyph
                 {
                     Text = glyph,
                     FontFamily = new System.Windows.Media.FontFamily("Segoe MDL2 Assets"),
@@ -789,7 +790,7 @@ namespace KillerPDF
             };
             box.SetBinding(Border.BorderBrushProperty, new System.Windows.Data.Binding(nameof(MenuItem.Foreground)) { Source = item });
             icon.Children.Add(box);
-            icon.Children.Add(new TextBlock
+            icon.Children.Add(new Glyph
             {
                 Text = "\uE7C2",
                 FontFamily = new System.Windows.Media.FontFamily("Segoe MDL2 Assets"),

@@ -1,6 +1,7 @@
 <Window x:Class="KillerPDF.MainWindow" Icon="pack://application:,,,/Resources/kp-icon.ico"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:a11y="clr-namespace:KillerFamily.Accessibility"
         xmlns:icons="clr-namespace:KillerPDF.Controls"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -1438,7 +1439,7 @@
                     <Button Click="MinimizeBtn_Click" Style="{StaticResource ChromeButton}" ToolTip="{DynamicResource Str_Sys_Minimize}"
                             Foreground="{DynamicResource CaptionGlyphBrush}">
                         <Grid Height="{DynamicResource CaptionButtonHeight}">
-                            <TextBlock Text="&#xE921;" FontFamily="Segoe MDL2 Assets" FontSize="10"
+                            <a11y:Glyph Text="&#xE921;" FontFamily="Segoe MDL2 Assets" FontSize="10"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"
                                        FontWeight="{DynamicResource CaptionGlyphWeight}"
                                        Visibility="{DynamicResource CaptionFontGlyphVisibility}"/>
@@ -1451,7 +1452,7 @@
                     <Button x:Name="MaximizeBtn" Click="MaximizeBtn_Click" Style="{StaticResource ChromeButton}" ToolTip="{DynamicResource Str_Sys_Maximize}"
                             Foreground="{DynamicResource CaptionGlyphBrush}">
                         <Grid>
-                            <TextBlock Text="&#xE922;" FontFamily="Segoe MDL2 Assets" FontSize="10"
+                            <a11y:Glyph Text="&#xE922;" FontFamily="Segoe MDL2 Assets" FontSize="10"
                                        FontWeight="{DynamicResource CaptionGlyphWeight}"
                                        Visibility="{DynamicResource CaptionFontGlyphVisibility}"/>
                             <Grid Width="9" Height="9" HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -1537,7 +1538,7 @@
                     <Button x:Name="ToolRotateBtn" Style="{StaticResource ToolbarButton}" Click="ToolRotate_Click" ToolTip="{DynamicResource Str_TT_RotateTool}">
                         <Grid Width="16" Height="16">
                             <Border Width="14" Height="14" BorderBrush="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            <TextBlock Text="&#xE7C2;" FontFamily="Segoe MDL2 Assets" FontSize="9" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <a11y:Glyph Text="&#xE7C2;" FontFamily="Segoe MDL2 Assets" FontSize="9" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Grid>
                     </Button>
                     <Button x:Name="ToolColorCorrectionBtn" Content="&#xE790;" Style="{StaticResource ToolbarButton}" Click="ToolColorCorrection_Click" ToolTip="{DynamicResource Str_ColorCorrection}"/>
@@ -1601,22 +1602,22 @@
                                     </StackPanel>
                                 </Button>
                                 <Button x:Name="MiMerge" Style="{StaticResource OverflowMenuButton}" Visibility="Collapsed" Click="Merge_Click">
-                                    <StackPanel Orientation="Horizontal"><TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_Merge}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
+                                    <StackPanel Orientation="Horizontal"><a11y:Glyph Text="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_Merge}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
                                 </Button>
                                 <Button x:Name="MiExtract" Style="{StaticResource OverflowMenuButton}" Visibility="Collapsed" Click="Split_Click">
-                                    <StackPanel Orientation="Horizontal"><TextBlock Text="&#xE8B1;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_Extract}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
+                                    <StackPanel Orientation="Horizontal"><a11y:Glyph Text="&#xE8B1;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_Extract}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
                                 </Button>
                                 <Button x:Name="MiDelete" Style="{StaticResource OverflowMenuButton}" Visibility="Collapsed" Click="Delete_Click">
-                                    <StackPanel Orientation="Horizontal"><TextBlock Text="&#xE8C6;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_Delete}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
+                                    <StackPanel Orientation="Horizontal"><a11y:Glyph Text="&#xE8C6;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_Delete}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
                                 </Button>
                                 <Button x:Name="MiMoveUp" Style="{StaticResource OverflowMenuButton}" Visibility="Collapsed" Click="MoveUp_Click">
-                                    <StackPanel Orientation="Horizontal"><TextBlock Text="&#xE74A;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_MoveUp}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
+                                    <StackPanel Orientation="Horizontal"><a11y:Glyph Text="&#xE74A;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_MoveUp}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
                                 </Button>
                                 <Button x:Name="MiMoveDown" Style="{StaticResource OverflowMenuButton}" Visibility="Collapsed" Click="MoveDown_Click">
-                                    <StackPanel Orientation="Horizontal"><TextBlock Text="&#xE74B;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_MoveDown}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
+                                    <StackPanel Orientation="Horizontal"><a11y:Glyph Text="&#xE74B;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_MoveDown}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
                                 </Button>
                                 <Button x:Name="MiText" Style="{StaticResource OverflowMenuButton}" Visibility="Collapsed" Click="ToolText_Click">
-                                    <StackPanel Orientation="Horizontal"><TextBlock Text="&#xE8D2;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_Text}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
+                                    <StackPanel Orientation="Horizontal"><a11y:Glyph Text="&#xE8D2;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_Text}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
                                 </Button>
                                 <Button x:Name="MiFormField" Style="{StaticResource OverflowMenuButton}" Visibility="Collapsed" Click="ToolFormField_Click">
                                     <StackPanel Orientation="Horizontal">
@@ -1628,43 +1629,43 @@
                                     </StackPanel>
                                 </Button>
                                 <Button x:Name="MiUnderline" Style="{StaticResource OverflowMenuButton}" Visibility="Collapsed" Click="ToolLine_Click">
-                                    <StackPanel Orientation="Horizontal"><TextBlock Text="&#xE738;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_Line}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
+                                    <StackPanel Orientation="Horizontal"><a11y:Glyph Text="&#xE738;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_Line}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
                                 </Button>
                                 <Button x:Name="MiHighlight" Style="{StaticResource OverflowMenuButton}" Visibility="Collapsed" Click="ToolHighlight_Click">
-                                    <StackPanel Orientation="Horizontal"><TextBlock Text="&#xE7E6;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_Highlight}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
+                                    <StackPanel Orientation="Horizontal"><a11y:Glyph Text="&#xE7E6;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_Highlight}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
                                 </Button>
                                 <Button x:Name="MiDraw" Style="{StaticResource OverflowMenuButton}" Visibility="Collapsed" Click="ToolDraw_Click">
-                                    <StackPanel Orientation="Horizontal"><TextBlock Text="&#xED63;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_Draw}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
+                                    <StackPanel Orientation="Horizontal"><a11y:Glyph Text="&#xED63;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_Draw}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
                                 </Button>
                                 <Button x:Name="MiShape" Style="{StaticResource OverflowMenuButton}" Visibility="Collapsed" Click="ToolShape_Click">
-                                    <StackPanel Orientation="Horizontal"><TextBlock Text="&#xE739;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_Shape}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
+                                    <StackPanel Orientation="Horizontal"><a11y:Glyph Text="&#xE739;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_Shape}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
                                 </Button>
                                 <Button x:Name="MiImage" Style="{StaticResource OverflowMenuButton}" Visibility="Collapsed" Click="ToolImage_Click">
-                                    <StackPanel Orientation="Horizontal"><TextBlock Text="&#xEB9F;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_Image}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
+                                    <StackPanel Orientation="Horizontal"><a11y:Glyph Text="&#xEB9F;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_Image}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
                                 </Button>
                                 <Button x:Name="MiSignature" Style="{StaticResource OverflowMenuButton}" Visibility="Collapsed" Click="ToolSignature_Click">
-                                    <StackPanel Orientation="Horizontal"><TextBlock Text="&#xEE56;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_Signature}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
+                                    <StackPanel Orientation="Horizontal"><a11y:Glyph Text="&#xEE56;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_Signature}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
                                 </Button>
                                 <Button x:Name="MiCrop" Style="{StaticResource OverflowMenuButton}" Visibility="Collapsed" Click="ToolCrop_Click">
-                                    <StackPanel Orientation="Horizontal"><TextBlock Text="&#xE7A8;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_Crop}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
+                                    <StackPanel Orientation="Horizontal"><a11y:Glyph Text="&#xE7A8;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_Crop}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
                                 </Button>
                                 <Button x:Name="MiColorCorrection" Style="{StaticResource OverflowMenuButton}" Visibility="Collapsed" Click="ToolColorCorrection_Click">
-                                    <StackPanel Orientation="Horizontal"><TextBlock Text="&#xE790;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_ColorCorrection}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
+                                    <StackPanel Orientation="Horizontal"><a11y:Glyph Text="&#xE790;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_ColorCorrection}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
                                 </Button>
                                 <Button x:Name="MiMeasure" Style="{StaticResource OverflowMenuButton}" Visibility="Collapsed" Click="ToolMeasure_Click">
-                                    <StackPanel Orientation="Horizontal"><TextBlock Text="&#xED5E;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_Measure}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
+                                    <StackPanel Orientation="Horizontal"><a11y:Glyph Text="&#xED5E;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_Measure}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
                                 </Button>
                                 <Button x:Name="MiRedact" Style="{StaticResource OverflowMenuButton}" Visibility="Collapsed" Click="ToolRedact_Click">
-                                    <StackPanel Orientation="Horizontal"><TextBlock Text="&#xED1A;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_Redact}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
+                                    <StackPanel Orientation="Horizontal"><a11y:Glyph Text="&#xED1A;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_Redact}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
                                 </Button>
                                 <Button x:Name="MiStamp" Style="{StaticResource OverflowMenuButton}" Visibility="Collapsed" Click="ToolStamp_Click">
-                                    <StackPanel Orientation="Horizontal"><TextBlock Text="&#xE932;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_Stamp}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
+                                    <StackPanel Orientation="Horizontal"><a11y:Glyph Text="&#xE932;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_Stamp}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
                                 </Button>
                                 <Button x:Name="MiUndo" Style="{StaticResource OverflowMenuButton}" Visibility="Collapsed" Click="Undo_Click">
-                                    <StackPanel Orientation="Horizontal"><TextBlock Text="&#xE7A7;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_Undo}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
+                                    <StackPanel Orientation="Horizontal"><a11y:Glyph Text="&#xE7A7;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_Undo}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
                                 </Button>
                                 <Button x:Name="MiClear" Style="{StaticResource OverflowMenuButton}" Visibility="Collapsed" Click="ClearAllAnnotations_Click">
-                                    <StackPanel Orientation="Horizontal"><TextBlock Text="&#xED62;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_Clear}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
+                                    <StackPanel Orientation="Horizontal"><a11y:Glyph Text="&#xED62;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_Clear}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
                                 </Button>
                             </StackPanel>
                             </Grid>
@@ -1842,7 +1843,7 @@
                                     <GradientStop x:Name="PageListFadeBottomOuter" Color="#FF000000" Offset="1"/>
                                 </LinearGradientBrush>
                             </Border.OpacityMask>
-                            <ListBox x:Name="PageList" Style="{StaticResource PageListBox}"
+                            <ListBox x:Name="PageList" Style="{StaticResource PageListBox}" AutomationProperties.Name="{DynamicResource Str_Print_Pages}"
                                  BorderThickness="0" SelectionMode="Extended"
                                  VirtualizingPanel.IsVirtualizing="True"
                                  VirtualizingPanel.VirtualizationMode="Recycling"
@@ -2765,7 +2766,7 @@
                                             <TextBlock x:Name="ComparisonResultText" FontFamily="{DynamicResource MenuFontFamily}"
                                                        FontSize="{DynamicResource MenuFontSize}" Foreground="{DynamicResource ComparisonBarForegroundBrush}"
                                                        VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="280"/>
-                                            <TextBlock Text="&#xE76C;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                            <a11y:Glyph Text="&#xE76C;" FontFamily="Segoe MDL2 Assets" FontSize="12"
                                                        Foreground="{DynamicResource ComparisonBarForegroundBrush}" Margin="8,0,1,0" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </Button>
@@ -2773,7 +2774,7 @@
                                         <Button Width="24" Height="24" Padding="0" Style="{StaticResource ComparisonBarButton}"
                                                 Foreground="{DynamicResource ComparisonBarForegroundBrush}"
                                                 Click="ComparisonPreviousDifference_Click" ToolTip="{DynamicResource Str_Compare_PreviousRegion}">
-                                            <TextBlock Text="&#xE76B;" FontFamily="Segoe MDL2 Assets" FontSize="11"/>
+                                            <a11y:Glyph Text="&#xE76B;" FontFamily="Segoe MDL2 Assets" FontSize="11"/>
                                         </Button>
                                         <TextBlock x:Name="ComparisonRegionText" MinWidth="38" TextAlignment="Center"
                                                    FontFamily="{DynamicResource MenuFontFamily}" FontSize="{DynamicResource MenuFontSize}"
@@ -2781,7 +2782,7 @@
                                         <Button Width="24" Height="24" Padding="0" Style="{StaticResource ComparisonBarButton}"
                                                 Foreground="{DynamicResource ComparisonBarForegroundBrush}"
                                                 Click="ComparisonNextDifference_Click" ToolTip="{DynamicResource Str_Compare_NextRegion}">
-                                            <TextBlock Text="&#xE76C;" FontFamily="Segoe MDL2 Assets" FontSize="11"/>
+                                            <a11y:Glyph Text="&#xE76C;" FontFamily="Segoe MDL2 Assets" FontSize="11"/>
                                         </Button>
                                     </StackPanel>
                                     <Button x:Name="ComparisonCloseButtonControl" Grid.Column="4" Width="25" Height="24" Margin="10,0,0,0"

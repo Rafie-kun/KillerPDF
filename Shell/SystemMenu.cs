@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Media.Animation;
+using KillerFamily.Accessibility;
 
 // ============================================================
 // THEMED WINDOWS SYSTEM MENU (from KillerUI/Shell/SystemMenu.cs)
@@ -137,7 +138,7 @@ namespace KillerPDF
                 // half-translated locale never shows "Str_Sys_Move" in the menu.
                 if (Loc(key) == key) mi.Header = fallback;
 
-                var ico = new TextBlock
+                var ico = new Glyph
                 {
                     Text = char.ConvertFromUtf32(glyph),
                     FontFamily = new System.Windows.Media.FontFamily("Segoe MDL2 Assets"),

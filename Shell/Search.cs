@@ -13,6 +13,7 @@ using System.Windows.Shapes;
 using Microsoft.Win32;
 using KillerPDF.Features;
 using KillerPDF.Services;
+using KillerFamily.Accessibility;
 
 namespace KillerPDF
 {
@@ -190,7 +191,7 @@ namespace KillerPDF
                 _replaceBox.ToolTip = Loc("Str_Replace_WithTT");
                 _replaceBox.SetValue(System.Windows.Automation.AutomationProperties.NameProperty, Loc("Str_Replace_WithTT"));
 
-                var searchIcon = new TextBlock
+                var searchIcon = new Glyph
                 {
                     Text = "",  // Segoe MDL2 Search / magnifying glass
                     FontFamily = UiKit.IconFont,

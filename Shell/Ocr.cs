@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using KillerPDF.Features;
 using KillerPDF.Services;
+using KillerFamily.Accessibility;
 
 namespace KillerPDF
 {
@@ -79,7 +80,7 @@ namespace KillerPDF
             var root = new MenuItem
             {
                 Header = Loc("Str_Ocr_Language"),
-                Icon = new TextBlock
+                Icon = new Glyph
                 {
                     Text = "",
                     FontFamily = new System.Windows.Media.FontFamily("Segoe MDL2 Assets"),
