@@ -157,7 +157,7 @@ namespace KillerPDF.Controls
             {
                 if (_currentTool != EditTool.FormField || field.FieldType != "/Tx") return;
                 e.Handled = true;
-                OpenFormFieldColorPicker(field, pageIndex);
+                ShowFormFieldMenu(field, pageIndex, element);
             };
             element.PreviewMouseMove += (_, e) =>
             {

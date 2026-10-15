@@ -27,6 +27,7 @@
     <Compile Include="..\Services\AppDataPaths.cs" Link="Services\AppDataPaths.cs" />
     <Compile Include="..\Services\SignatureStore.cs" Link="Services\SignatureStore.cs" />
     <Compile Include="..\Services\TextFieldPresetStore.cs" Link="Services\TextFieldPresetStore.cs" />
+    <Compile Include="..\Services\TextFieldPresetCapture.cs" Link="Services\TextFieldPresetCapture.cs" />
     <Compile Include="..\Services\PdfMacroStore.cs" Link="Services\PdfMacroStore.cs" />
     <Compile Include="..\Services\PdfDataMergeWorkflow.cs" Link="Services\PdfDataMergeWorkflow.cs" />
     <Compile Include="..\Services\ImageAssetStore.cs" Link="Services\ImageAssetStore.cs" />

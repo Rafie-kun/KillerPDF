@@ -481,9 +481,11 @@ internal static class PdfEngineIntegration
             PdfPartialRasterization.Apply(document, replacements, cancellationToken));
     }
 
-    /// <summary>Adds one editable AcroForm text field to an existing page.</summary>
+    /// <summary>Adds one editable AcroForm text field to an existing page, styled by a saved
+    /// preset (#340) when one is given.</summary>
     internal static string AddTextField(
-        string path, int pageIndex, double x, double y, double width, double height)
+        string path, int pageIndex, double x, double y, double width, double height,
+        PdfTextFieldPreset? preset = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
         PdfDocument document = PdfDocument.Open(File.ReadAllBytes(path));
@@ -499,7 +501,7 @@ internal static class PdfEngineIntegration
         do name = $"answer_{suffix++:000}";
         while (existingNames.Contains(name));
 
-        var appearance = new PdfFormFieldAppearanceStyle
+        PdfFormFieldAppearanceStyle appearance = preset?.AppearanceStyle ?? new PdfFormFieldAppearanceStyle
         {
             BackgroundColor = new PdfRgbColor(1, 1, 1),
             BorderColor = new PdfRgbColor(1, 0, 0),
@@ -507,7 +509,7 @@ internal static class PdfEngineIntegration
             BorderWidth = 1
         };
         var options = new PdfTextFieldOptions { Multiline = height >= 32 };
-        double initialFontSize = Math.Clamp(height * 0.5, 12, 24);
+        double initialFontSize = preset?.FontSize ?? Math.Clamp(height * 0.5, 12, 24);
         byte[] result = new PdfIncrementalPageEditor(document).AddTextField(
             pageIndex, name, x, y, width, height, fontSize: initialFontSize,
             options: options,
@@ -517,6 +519,78 @@ internal static class PdfEngineIntegration
             }, appearanceStyle: appearance).Build();
         ReplaceWithBuiltResult(path, result);
         return name;
+    }
+
+    /// <summary>
+    /// A preset (#340) from a text field already in the document: its size as it shows on the
+    /// page, font size, text, background and border colors, and border width and style. A
+    /// <paramref name="fontSize"/> overrides the saved one when the user has just changed it.
+    /// </summary>
+    internal static PdfTextFieldPreset ReadTextFieldPreset(
+        string path, string fieldName, string presetName, double? fontSize = null)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        ArgumentException.ThrowIfNullOrWhiteSpace(fieldName);
+        PdfDocument document = PdfDocument.Open(File.ReadAllBytes(path));
+        int pageCount = PdfPageInformation.Read(document).Count;
+        PdfFormWidgetInfo? widget = null;
+        for (int index = 0; index < pageCount && widget is null; index++)
+            widget = PdfFormWidgetReader.ReadPage(document, index).FirstOrDefault(candidate =>
+                candidate.FieldKind == PdfFormFieldKind.Text
+                && string.Equals(candidate.FieldName, fieldName, StringComparison.Ordinal));
+        if (widget is null)
+            throw new KeyNotFoundException($"Text field '{fieldName}' was not found.");
+
+        double width = Math.Abs(widget.Right - widget.Left), height = Math.Abs(widget.Top - widget.Bottom);
+        if (widget.PageRotation is 90 or 270) (width, height) = (height, width);
+        (double savedSize, PdfRgbColor textColor) =
+            TextFieldPresetCapture.ParseDefaultAppearance(widget.DefaultAppearance);
+        double size = fontSize is > 0 ? fontSize.Value : savedSize > 0 ? savedSize : 12;
+
+        double borderWidth = 1;
+        PdfFormFieldBorderStyle borderStyle = PdfFormFieldBorderStyle.Solid;
+        IReadOnlyList<double>? dash = null;
+        PdfObject Resolve(PdfObject value) =>
+            value is PdfIndirectReference reference ? document.Resolve(reference) : value;
+        static double? Number(PdfObject value) => value switch
+        {
+            PdfInteger integer => integer.Value,
+            PdfReal real => real.Value,
+            _ => null
+        };
+        if (widget.ObjectNumber > 0
+            && document.Resolve(new PdfIndirectReference(widget.ObjectNumber, widget.Generation)) is PdfDictionary dictionary)
+        {
+            if (dictionary.TryGetValue(new PdfName("BS"u8), out PdfObject bsValue)
+                && Resolve(bsValue) is PdfDictionary bs)
+            {
+                if (bs.TryGetValue(new PdfName("W"u8), out PdfObject w) && Number(Resolve(w)) is double bw && bw >= 0)
+                    borderWidth = bw;
+                if (bs.TryGetValue(new PdfName("S"u8), out PdfObject s) && Resolve(s) is PdfName styleName)
+                    borderStyle = TextFieldPresetCapture.BorderStyleFromName(styleName.ValueAsLatin1());
+                if (bs.TryGetValue(new PdfName("D"u8), out PdfObject d) && Resolve(d) is PdfArray dashArray)
+                {
+                    double[] lengths = [.. dashArray.Select(item => Number(Resolve(item)) ?? 0)];
+                    if (lengths.Length > 0 && lengths.All(length => double.IsFinite(length) && length > 0))
+                        dash = lengths;
+                }
+            }
+            else if (dictionary.TryGetValue(new PdfName("Border"u8), out PdfObject borderValue)
+                && Resolve(borderValue) is PdfArray border && border.Count >= 3
+                && Number(Resolve(border[2])) is double legacyWidth && legacyWidth >= 0)
+                borderWidth = legacyWidth;
+        }
+        if (borderStyle == PdfFormFieldBorderStyle.Dashed && dash is null) dash = [3];
+
+        return new PdfTextFieldPreset(presetName, width, height, size, new PdfFormFieldAppearanceStyle
+        {
+            BackgroundColor = widget.BackgroundColor,
+            BorderColor = widget.BorderColor,
+            TextColor = textColor,
+            BorderWidth = borderWidth,
+            BorderStyle = borderStyle,
+            DashPattern = dash
+        });
     }
 
     /// <summary>Moves one native form widget while preserving its field and appearance.</summary>

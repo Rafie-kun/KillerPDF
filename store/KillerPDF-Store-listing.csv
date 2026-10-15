@@ -1,0 +1,964 @@
+﻿Field,Type,English,Bangla,Czech,German,Spanish,Hungarian,Italian,Japanese,Kazakh,Turkish,Ukrainian,Vietnamese (Vietnam),Portuguese (Brazil),Polish,Norwegian (Bokmål),Chinese (Simplified),Chinese (Traditional),French,Russian
+ProductName,Text,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF
+Description,Text,"View, edit, OCR, organize, compare, fill, sign, and batch process PDFs locally, privately, and without an account.
+
+Install or run portable. Free, open source, GPLv3. No accounts or subscriptions required. No telemetry is sent and no ads... ever.
+
+View & navigate
+PDFium rendering with four view modes - single page, continuous scroll, two-page with optional book layout, and a grid of every page. Open several PDFs in tabs, with search, outlines, and clickable links.
+
+Split pane
+F10 shows two documents side by side in one window, sharing the same toolbar and sidebar while keeping independent view and invert settings. Drag a tab from one pane to the other, and F10 again closes the split.
+
+Annotate & edit
+Inline text editing with font matching, plus text boxes, freehand drawing, lines, shapes with optional fill, and text-hugging highlights - each with its own color, opacity, and width. A full RGB color picker on every swatch.
+
+Search & select text
+Search the whole document with every result highlighted as you scroll. Text selection follows columns and reading order, so copying one column no longer pulls in the next.
+
+OCR built in
+OCR a page or a dragged region to the clipboard, make a scanned PDF searchable, or extract all text to a file. All OCR language models, including English, download on first use and remain cached. Native Tesseract libraries extract to the versioned OCR cache.
+
+Forms & signing
+Fill PDF forms and save them back. Draw reusable signatures, or sign with a certificate from Windows or a .pfx file and click-to-sign form fields.
+
+Organize pages
+Merge PDFs and split out pages, drag to reorder, rotate, extract, and stamp page numbers. Drop a folder or .zip to merge everything inside into one PDF or open each separately.
+
+Compare PDFs
+Page navigation, zoom and scrolling stay synchronized. Difference regions are marked directly over the pages, with a changed percentage for each pair. The results also identify different page dimensions and pages that exist in only one document. You can export the comparison report without changing either source PDF.
+
+Transform
+Rotate, scale, flip, straighten with a level line, correct perspective, and tune levels - all with a live preview, while annotations follow the page.
+
+Stamps & watermarks
+Stamp page numbers or a text watermark across any page range - positioned, sized, and styled - applied as a single undo.
+
+Print & flatten
+A real in-app print preview with printer paper and source controls, collapsible layout and output sections, scale, margins, N-up, subsets, duplex, and live preparation and spool progress at 300 DPI. Or flatten or export pages as images.
+
+Open & repair PDFs
+Opens password-protected PDFs by prompting instead of erroring, and repairs damaged or broken-xref files so they open and print.
+
+Document info
+View and edit a PDF's title, author, subject, keywords, and creator metadata, saved back into the file.
+
+Automation & command line
+Merge, split, decrypt, resize, flatten, print, OCR, or batch-resave files from PowerShell or cmd without opening a window. Every command returns a script-friendly exit code.
+
+Themes & languages
+Thirteen themes - Dark, Light, Black, 98SE, Blood, Greed, Cyanotic, Ectoplasm, Decay, Malaise, Sepulchre, Delirium and Mourning - all switchable live. Four of them - Dark, Light, Black and 98SE - each take one of eight accent colors, so 41 looks in all. UI localized in nineteen languages, including Vietnamese, Kazakh, Polish, Hungarian and Russian.","PDF দেখুন, সম্পাদনা করুন, OCR করুন, সাজান, তুলনা করুন, পূরণ করুন, স্বাক্ষর করুন এবং ব্যাচে প্রক্রিয়া করুন স্থানীয়ভাবে, ব্যক্তিগতভাবে এবং কোনো অ্যাকাউন্ট ছাড়াই।
+
+ইনস্টল করুন অথবা পোর্টেবলভাবে চালান। বিনামূল্যে, ওপেন সোর্স, GPLv3। কোনো অ্যাকাউন্ট বা সাবস্ক্রিপশন প্রয়োজন নেই। কোনো টেলিমেট্রি পাঠানো হয় না এবং কোনো বিজ্ঞাপন নেই... কখনোই না।
+
+দেখুন ও চলাফেরা করুন
+চারটি ভিউ মোডসহ PDFium রেন্ডারিং - একক পৃষ্ঠা, ধারাবাহিক স্ক্রল, ঐচ্ছিক বুক লেআউটসহ দুই পৃষ্ঠা, এবং সব পৃষ্ঠার একটি গ্রিড। ট্যাবে একাধিক PDF খুলুন, সঙ্গে অনুসন্ধান, আউটলাইন এবং ক্লিকযোগ্য লিঙ্ক।
+
+বিভক্ত ভিউ
+F10 একই উইন্ডোতে দুটি নথি পাশাপাশি দেখায়, একই টুলবার ও সাইডবার ভাগ করে নিয়ে, তবে ভিউ ও উল্টে দেওয়ার সেটিং আলাদা রেখে। একটি ট্যাব এক প্যান থেকে অন্যটিতে টেনে নিন; আবার F10 চাপলে বিভাজন বন্ধ হয়।
+
+টীকা ও সম্পাদনা
+ফন্ট মিলিয়ে ইনলাইন টেক্সট সম্পাদনা, সঙ্গে টেক্সট বক্স, হাতে আঁকা অঙ্কন, রেখা, ঐচ্ছিক ভরাটসহ আকার এবং টেক্সট-অনুসারী হাইলাইট - প্রতিটির নিজস্ব রঙ, অস্বচ্ছতা এবং প্রস্থ রয়েছে। প্রতিটি সোয়াচে একটি সম্পূর্ণ RGB রঙ নির্বাচক।
+
+লেখা খোঁজা ও নির্বাচন
+পুরো নথিতে খুঁজুন, স্ক্রল করার সময়ও প্রতিটি ফলাফল হাইলাইট থাকে। লেখা নির্বাচন কলাম ও পড়ার ক্রম অনুসরণ করে, তাই একটি কলাম কপি করলে আর পাশেরটি চলে আসে না।
+
+অন্তর্নির্মিত OCR
+একটি পৃষ্ঠা বা টেনে নেওয়া একটি অঞ্চল OCR করে ক্লিপবোর্ডে নিন, একটি স্ক্যান করা PDF অনুসন্ধানযোগ্য করুন, বা সমস্ত টেক্সট একটি ফাইলে নিষ্কাশন করুন। Tesseract exe-এর মধ্যেই আসে; বাড়তি ভাষা প্রয়োজনমতো ডাউনলোড হয়।
+
+ফর্ম ও স্বাক্ষর
+PDF ফর্ম পূরণ করুন এবং সেগুলি সংরক্ষণ করুন। পুনর্ব্যবহারযোগ্য স্বাক্ষর আঁকুন, অথবা Windows সার্টিফিকেট স্টোর বা একটি .pfx ফাইলের সার্টিফিকেট এবং ক্লিক-করে-স্বাক্ষর ফর্ম ক্ষেত্র দিয়ে স্বাক্ষর করুন।
+
+পৃষ্ঠা সাজান
+PDF একত্র করুন এবং পৃষ্ঠা আলাদা করুন, পুনর্বিন্যাস করতে টেনে নিন, ঘোরান, নিষ্কাশন করুন এবং পৃষ্ঠা নম্বর স্ট্যাম্প করুন। ভেতরের সবকিছু একটি PDF-এ একত্র করতে বা প্রতিটি আলাদাভাবে খুলতে একটি ফোল্ডার বা .zip ছেড়ে দিন।
+
+PDF তুলনা
+পৃষ্ঠা নেভিগেশন, জুম ও স্ক্রল সমলয়ে থাকে। পার্থক্যের অঞ্চলগুলি সরাসরি পৃষ্ঠার উপরে চিহ্নিত হয়, প্রতিটি জোড়ার জন্য পরিবর্তনের শতাংশসহ। ফলাফলে ভিন্ন পৃষ্ঠা মাপ এবং শুধু একটি নথিতেই থাকা পৃষ্ঠাগুলিও চিহ্নিত হয়। কোনো উৎস PDF না বদলেই তুলনার প্রতিবেদন রপ্তানি করা যায়।
+
+রূপান্তর
+ঘোরান, মাপ বদলান, উল্টান, সমতল রেখা দিয়ে সোজা করুন, দৃষ্টিকোণ ঠিক করুন এবং লেভেল সমন্বয় করুন - সবই সরাসরি প্রিভিউসহ, আর টীকা পৃষ্ঠার সঙ্গেই চলে।
+
+স্ট্যাম্প ও জলছাপ
+যেকোনো পৃষ্ঠা পরিসরে পৃষ্ঠা নম্বর বা একটি টেক্সট জলছাপ স্ট্যাম্প করুন - অবস্থান নির্ধারিত, আকার নির্ধারিত এবং শৈলীকৃত - একটিমাত্র আনডু হিসেবে প্রয়োগ করা।
+
+মুদ্রণ ও সমতলকরণ
+অ্যাপের ভেতরেই সত্যিকারের প্রিন্ট প্রিভিউ, প্রিন্টারের কাগজ ও উৎস নিয়ন্ত্রণ, ভাঁজযোগ্য লেআউট ও আউটপুট অংশ, স্কেল, মার্জিন, N-up, উপসেট, দ্বিমুখী ছাপা এবং 300 DPI-তে প্রস্তুতি ও স্পুলের সরাসরি অগ্রগতিসহ। অথবা পৃষ্ঠাগুলিকে সমতল করুন বা ছবি হিসেবে রপ্তানি করুন।
+
+যেকোনো কিছু খোলে
+পাসওয়ার্ড-সুরক্ষিত PDF ত্রুটি না দেখিয়ে পাসওয়ার্ড চেয়ে খোলে, এবং ক্ষতিগ্রস্ত বা ভাঙা-xref ফাইল মেরামত করে যাতে সেগুলি খোলা ও মুদ্রণ করা যায়।
+
+নথির তথ্য
+একটি PDF-এর শিরোনাম, লেখক, বিষয়, কীওয়ার্ড এবং নির্মাতা মেটাডেটা দেখুন এবং সম্পাদনা করুন, যা ফাইলে ফিরে সংরক্ষিত হয়।
+
+স্বয়ংক্রিয়করণ ও কমান্ড লাইন
+PowerShell বা cmd থেকে উইন্ডো না খুলেই ফাইল একত্র করুন, ভাগ করুন, ডিক্রিপ্ট করুন, আকার বদলান, সমতল করুন, ছাপুন, OCR চালান বা একসঙ্গে অনেক ফাইল আবার সংরক্ষণ করুন। প্রতিটি কমান্ড স্ক্রিপ্টের উপযোগী একটি এক্সিট কোড ফেরত দেয়।
+
+থিম ও ভাষা
+রিস্টার্ট ছাড়াই বদলানো যায় এমন ১৩টি থিম ও ৪১টি চেহারা। ইন্টারফেস বাংলা, রুশ, কাজাখ, পোলিশ ও হাঙ্গেরিয়ানসহ ১৯টি ভাষায় পাওয়া যায়।","Prohlížejte, upravujte, rozpoznávejte text, organizujte, porovnávejte, vyplňujte, podepisujte a dávkově zpracovávejte PDF lokálně, soukromě a bez účtu.
+
+Nainstalujte, nebo spusťte přenosně. Zdarma, open source, GPLv3. Žádné účty ani předplatná. Neodesílá se žádná telemetrie a žádné reklamy... nikdy.
+
+Zobrazení a navigace
+Vykreslování přes PDFium se čtyřmi režimy zobrazení - jedna stránka, plynulé posouvání, dvoustrana s volitelným knižním rozvržením a mřížka všech stránek. Otevřete více PDF na kartách, s vyhledáváním, osnovami a klikatelnými odkazy.
+
+Rozdělené zobrazení
+F10 zobrazí dva dokumenty vedle sebe v jednom okně, se sdílenou lištou nástrojů i postranním panelem, ale s nezávislým nastavením zobrazení a invertování. Přetáhněte kartu z jednoho podokna do druhého; dalším F10 rozdělení zavřete.
+
+Anotace a úpravy
+Úprava textu přímo v dokumentu s napodobením písma, plus textová pole, kreslení od ruky, čáry, tvary s volitelnou výplní a zvýraznění kopírující text - každé s vlastní barvou, krytím a šířkou. Plný RGB výběr barvy na každém vzorníku.
+
+Hledání a výběr textu
+Prohledejte celý dokument, přičemž každý výsledek zůstane při posouvání zvýrazněný. Výběr textu sleduje sloupce a pořadí čtení, takže zkopírování jednoho sloupce už nestrhne i ten vedlejší.
+
+Vestavěné OCR
+Proveďte OCR stránky nebo tažené oblasti do schránky, udělejte naskenované PDF prohledávatelným, nebo vytáhněte všechen text do souboru. Tesseract je součástí exe; další jazyky se stahují na vyžádání.
+
+Formuláře a podepisování
+Vyplňujte PDF formuláře a ukládejte je zpět. Kreslete opakovaně použitelné podpisy, nebo podepisujte certifikátem z úložiště Windows nebo ze souboru .pfx a podpisovými poli na jedno kliknutí.
+
+Organizace stránek
+Slučujte PDF a oddělujte stránky, měňte pořadí tažením, otáčejte, extrahujte a razítkujte čísla stránek. Přetáhněte složku nebo .zip a slučte vše uvnitř do jednoho PDF, nebo otevřete každý soubor zvlášť.
+
+Porovnání PDF
+Navigace mezi stránkami, zoom i posouvání zůstávají synchronizované. Oblasti rozdílů jsou vyznačeny přímo na stránkách, s procentem změny u každé dvojice. Výsledky také rozpoznají odlišné rozměry stránek a stránky existující jen v jednom z dokumentů. Zprávu z porovnání můžete exportovat, aniž byste změnili kterékoli zdrojové PDF.
+
+Transformace
+Otáčejte, měňte měřítko, převracejte, narovnávejte pomocí vodicí čáry, opravujte perspektivu a ladte úrovně - vše s živým náhledem, přičemž anotace sledují stránku.
+
+Razítka a vodoznaky
+Razítkujte čísla stránek nebo textový vodoznak přes libovolný rozsah stránek - umístěné, zvětšené a nastylované - aplikované jako jediný krok zpět.
+
+Tisk a sloučení vrstev
+Skutečný náhled tisku přímo v aplikaci, s ovládáním papíru a zásobníku tiskárny, sbalitelnými sekcemi rozvržení a výstupu, měřítkem, okraji, N-up, podmnožinami, oboustranným tiskem a živým průběhem přípravy i fronty při 300 DPI. Nebo stránky slučte či exportujte jako obrázky.
+
+Otevře cokoli
+PDF chráněná heslem otevírá dotazem místo chyby a opravuje poškozené soubory či soubory s rozbitým xref, aby šly otevřít a vytisknout.
+
+Informace o dokumentu
+Zobrazte a upravte název, autora, předmět, klíčová slova a metadata tvůrce PDF, uložené zpět do souboru.
+
+Automatizace a příkazový řádek
+Slučujte, dělte, dešifrujte, měňte velikost, slučujte vrstvy, tiskněte, provádějte OCR nebo dávkově přeukládejte soubory z PowerShellu či cmd, aniž by se otevřelo okno. Každý příkaz vrací návratový kód vhodný pro skriptování.
+
+Motivy a jazyky
+13 motivů a 41 vzhledů, přepínatelných bez restartu. Rozhraní je dostupné v 19 jazycích, včetně češtiny, ruštiny, kazaštiny, polštiny a maďarštiny.","PDFs anzeigen, bearbeiten, per OCR erkennen, organisieren, vergleichen, ausfüllen, signieren und stapelweise verarbeiten lokal, privat und ohne Konto.
+
+Installieren oder portabel ausführen. Kostenlos, quelloffen, GPLv3. Keine Konten oder Abonnements erforderlich. Es wird keine Telemetrie gesendet und keine Werbung... niemals.
+
+Anzeigen und navigieren
+PDFium-Rendering mit vier Ansichtsmodi - Einzelseite, fortlaufendes Scrollen, Doppelseite mit optionalem Buchlayout und ein Raster aller Seiten. Öffnen Sie mehrere PDFs in Registerkarten, mit Suche, Gliederungen und anklickbaren Links.
+
+Geteilte Ansicht
+F10 zeigt zwei Dokumente nebeneinander in einem Fenster, mit gemeinsamer Symbolleiste und Seitenleiste, aber unabhängigen Ansichts- und Invertierungseinstellungen. Ziehen Sie eine Registerkarte von einem Bereich in den anderen; F10 schließt die Teilung wieder.
+
+Kommentieren und bearbeiten
+Inline-Textbearbeitung mit Schriftabgleich, dazu Textfelder, freihändiges Zeichnen, Linien, Formen mit optionaler Füllung und dem Text folgende Hervorhebungen - jeweils mit eigener Farbe, Deckkraft und Breite. Ein vollständiger RGB-Farbwähler an jedem Farbfeld.
+
+Text suchen & auswählen
+Durchsuchen Sie das ganze Dokument, wobei jeder Treffer beim Scrollen hervorgehoben bleibt. Die Textauswahl folgt Spalten und Lesereihenfolge, sodass das Kopieren einer Spalte nicht mehr die nächste mitnimmt.
+
+OCR integriert
+Wende OCR auf eine Seite oder einen gezogenen Bereich in die Zwischenablage an, mache ein gescanntes PDF durchsuchbar oder extrahiere den gesamten Text in eine Datei. Tesseract ist in der exe enthalten; zusätzliche Sprachen werden bei Bedarf heruntergeladen.
+
+Formulare und Signieren
+Fülle PDF-Formulare aus und speichere sie zurück. Zeichne wiederverwendbare Signaturen oder signiere mit einem Zertifikat aus dem Windows-Zertifikatspeicher oder einer .pfx-Datei und Formularfeldern zum Signieren per Klick.
+
+Seiten organisieren
+Führe PDFs zusammen und trenne Seiten heraus, ziehe zum Neuordnen, drehe, extrahiere und stemple Seitenzahlen. Lege einen Ordner oder eine .zip ab, um alles darin zu einem PDF zusammenzuführen oder jede Datei einzeln zu öffnen.
+
+PDFs vergleichen
+Seitennavigation, Zoom und Bildlauf bleiben synchronisiert. Unterschiedsbereiche werden direkt auf den Seiten markiert, mit einem Änderungsprozentsatz für jedes Paar. Die Ergebnisse weisen auch auf unterschiedliche Seitenmaße und auf Seiten hin, die nur in einem der Dokumente existieren. Sie können den Vergleichsbericht exportieren, ohne eines der Quell-PDFs zu verändern.
+
+Transformieren
+Drehen, skalieren, spiegeln, mit einer Ausrichtungslinie begradigen, Perspektive korrigieren und Tonwerte anpassen - alles mit Live-Vorschau, während die Anmerkungen der Seite folgen.
+
+Stempel und Wasserzeichen
+Stemple Seitenzahlen oder ein Text-Wasserzeichen über einen beliebigen Seitenbereich - positioniert, dimensioniert und gestaltet - als einzelner Rückgängig-Schritt angewendet.
+
+Drucken und verflachen
+Eine echte Druckvorschau in der App mit Papier- und Zufuhrsteuerung des Druckers, einklappbaren Layout- und Ausgabebereichen, Skalierung, Rändern, N-up, Teilmengen, Duplex sowie Live-Fortschritt bei Vorbereitung und Spooling mit 300 DPI. Oder Seiten reduzieren beziehungsweise als Bilder exportieren.
+
+Öffnet alles
+Öffnet passwortgeschützte PDFs durch Nachfrage statt mit einem Fehler und repariert beschädigte oder Dateien mit defektem Xref, damit sie sich öffnen und drucken lassen.
+
+Dokumentinfo
+Zeige und bearbeite Titel, Autor, Betreff, Schlüsselwörter und Ersteller-Metadaten eines PDFs, zurück in die Datei gespeichert.
+
+Automatisierung & Befehlszeile
+Zusammenführen, teilen, entschlüsseln, Größe ändern, reduzieren, drucken, OCR oder Dateien stapelweise neu speichern - aus PowerShell oder cmd, ohne ein Fenster zu öffnen. Jeder Befehl liefert einen skriptfreundlichen Exitcode.
+
+Designs und Sprachen
+13 Designs und 41 Erscheinungsbilder, ohne Neustart umschaltbar. Die Oberfläche ist in 19 Sprachen verfügbar, darunter Deutsch, Russisch, Kasachisch, Polnisch und Ungarisch.","Visualiza, edita, aplica OCR, organiza, compara, rellena, firma y procesa PDF por lotes de forma local, privada y sin una cuenta.
+
+Instala o ejecuta en modo portátil. Gratis, de código abierto, GPLv3. No se requieren cuentas ni suscripciones. No se envía telemetría y sin anuncios... nunca.
+
+Ver y navegar
+Renderizado con PDFium y cuatro modos de vista: página única, desplazamiento continuo, doble página con diseño de libro opcional y una cuadrícula con todas las páginas. Abra varios PDF en pestañas, con búsqueda, esquemas y enlaces en los que se puede hacer clic.
+
+Vista dividida
+F10 muestra dos documentos uno al lado del otro en una misma ventana, compartiendo la barra de herramientas y la barra lateral pero manteniendo ajustes de vista e inversión independientes. Arrastre una pestaña de un panel al otro; F10 vuelve a cerrar la división.
+
+Anotar y editar
+Edición de texto en línea con coincidencia de fuentes, además de cuadros de texto, dibujo a mano alzada, líneas, formas con relleno opcional y resaltados que se ajustan al texto - cada uno con su propio color, opacidad y grosor. Un selector de color RGB completo en cada muestra.
+
+Buscar y seleccionar texto
+Busque en todo el documento con cada resultado resaltado mientras se desplaza. La selección de texto sigue las columnas y el orden de lectura, así que copiar una columna ya no arrastra la siguiente.
+
+OCR integrado
+Aplica OCR a una página o a una región arrastrada hacia el portapapeles, haz que un PDF escaneado sea búsquedable, o extrae todo el texto a un archivo. Tesseract viene incluido en el exe; los idiomas adicionales se descargan cuando se necesitan.
+
+Formularios y firma
+Rellena formularios PDF y guárdalos de nuevo. Dibuja firmas reutilizables, o firma con un certificado del almacén de Windows o de un archivo .pfx y campos de formulario para firmar con un clic.
+
+Organizar páginas
+Combina PDF y divide páginas, arrastra para reordenar, rota, extrae y estampa números de página. Suelta una carpeta o un .zip para combinar todo su contenido en un solo PDF o abrir cada archivo por separado.
+
+Comparar PDF
+La navegación por páginas, el zoom y el desplazamiento permanecen sincronizados. Las regiones con diferencias se marcan directamente sobre las páginas, con un porcentaje de cambio por cada par. Los resultados también identifican dimensiones de página distintas y páginas que solo existen en uno de los documentos. Puede exportar el informe de comparación sin cambiar ninguno de los PDF de origen.
+
+Transformar
+Gire, escale, voltee, enderece con una línea de nivel, corrija la perspectiva y ajuste los niveles, todo con vista previa en vivo y con las anotaciones siguiendo a la página.
+
+Sellos y marcas de agua
+Estampa números de página o una marca de agua de texto en cualquier rango de páginas - posicionado, dimensionado y con estilo - aplicado como un único deshacer.
+
+Imprimir y aplanar
+Una vista previa de impresión real dentro de la aplicación, con controles de papel y origen de la impresora, secciones de diseño y salida plegables, escala, márgenes, N-up, subconjuntos, dúplex y progreso en vivo de preparación y cola a 300 PPP. O aplane o exporte las páginas como imágenes.
+
+Abre cualquier cosa
+Abre PDF protegidos con contraseña solicitándola en lugar de dar error, y repara archivos dañados o con xref roto para que se abran y se impriman.
+
+Información del documento
+Consulta y edita el título, autor, asunto, palabras clave y metadatos del creador de un PDF, guardados de nuevo en el archivo.
+
+Automatización y línea de comandos
+Combine, divida, descifre, redimensione, aplane, imprima, aplique OCR o vuelva a guardar archivos por lotes desde PowerShell o cmd sin abrir una ventana. Cada comando devuelve un código de salida apto para scripts.
+
+Temas e idiomas
+13 temas y 41 apariencias, seleccionables sin reiniciar. Interfaz disponible en 19 idiomas, incluidos español, ruso, kazajo, polaco y húngaro.","PDF-ek megtekintése, szerkesztése, OCR-ezése, rendezése, összehasonlítása, kitöltése, aláírása és kötegelt feldolgozása helyben, privát módon és fiók nélkül.
+
+Telepítse vagy futtassa a hordozható eszközt. Ingyenes, nyílt forráskódú, GPLv3. Nincs szükség fiókra vagy előfizetésre. Nem küldenek telemetriát és nem küldenek hirdetéseket... soha.
+
+Megtekintés és navigáció
+PDFium renderelés négy megtekintési móddal - egyoldalas, folyamatos görgetés, kétoldalas opcionális könyvelrendezéssel és minden oldal rácsával. Nyisson meg több PDF-fájlt a lapokon, kereséssel, körvonalakkal és kattintható hivatkozásokkal.
+
+Osztott ablaktábla
+Az F10 két dokumentumot jelenít meg egymás mellett egy ablakban, ugyanazt az eszköztárat és oldalsávot osztva meg, miközben megtartja a független nézetet és megfordítja a beállításokat. Húzzon egy lapot az egyik ablaktáblából a másikba, és az F10 billentyű ismét bezárja a felosztást.
+
+Megjegyzések és szerkesztés
+Soron belüli szövegszerkesztés betűtípus-illesztéssel, valamint szövegdobozok, szabadkézi rajzok, vonalak, formák opcionális kitöltéssel és szöveget átölelő kiemelések - mindegyiknek saját színe, átlátszatlansága és szélessége van. Teljes RGB színválasztó minden színmintán.
+
+Keresés és szöveg kiválasztása
+Keressen a teljes dokumentumban úgy, hogy a görgetés során minden találat kiemelve van. A szövegkijelölés az oszlopokat és az olvasási sorrendet követi, így az egyik oszlop másolása már nem vonja be a következőt.
+
+Beépített OCR
+OCR egy oldalt vagy egy húzott területet a vágólapra, tegye kereshetővé a beolvasott PDF-et, vagy bontsa ki az összes szöveget egy fájlba. Tesseract hajók az exe-ben; extra nyelvek letöltése igény szerint.
+
+Nyomtatványok és aláírás
+Töltse ki a PDF űrlapokat, és mentse vissza őket. Rajzoljon újrafelhasználható aláírásokat, vagy írjon alá a Windows tanúsítványtárolójából vagy .pfx fájlból származó tanúsítvánnyal és kattintással aláírható űrlapmezőkkel.
+
+Az oldalak rendszerezése
+Egyesítse a PDF-fájlokat és ossza fel az oldalakat, húzza át az átrendezéshez, elforgatáshoz, kibontáshoz és bélyegzéshez. Dobjon el egy mappát vagy .zip fájlt, hogy egy PDF-be egyesítsen mindent, vagy nyissa meg mindegyiket külön-külön.
+
+PDF-ek összehasonlítása
+Az oldalnavigáció, a nagyítás és a görgetés szinkronban marad. Az eltérések területei közvetlenül az oldalakon jelennek meg, minden párnál a változás százalékos arányával. Az eredmények az eltérő oldalméreteket és a csak az egyik dokumentumban létező oldalakat is azonosítják. Az összehasonlítási jelentés exportálható anélkül, hogy bármelyik forrás-PDF megváltozna.
+
+Átalakítani
+Forgatás, méretezés, átfordítás, egyenesítés szintvonallal, perspektíva helyesbítése és szintek hangolása - mindez élő előnézettel, miközben a kommentárok követik az oldalt.
+
+Bélyegek és vízjelek
+Oldalszámok vagy szöveges vízjel bélyegzése bármely oldaltartományban - elhelyezve, méretezve és stílusosan - egyetlen visszavonásként alkalmazva.
+
+Nyomtatás és lapítás
+Valódi alkalmazáson belüli nyomtatási előnézet nyomtatópapírral és forrásvezérlőkkel, összecsukható elrendezéssel és kimeneti részekkel, léptékkel, margókkal, N-up, részhalmazokkal, duplex, valamint élő előkészítéssel és 300 DPI-s spool folyamattal. Vagy lapítsa ki vagy exportálja az oldalakat képként.
+
+Bármit kinyit
+Megnyitja a jelszóval védett PDF-fájlokat a hiba helyett felszólítással, és kijavítja a sérült vagy törött xref fájlokat, így azok megnyithatók és kinyomtathatók.
+
+Dokumentum információ
+Megtekintheti és szerkesztheti a fájlba visszamentett PDF címét, szerzőjét, tárgyát, kulcsszavait és alkotói metaadatait.
+
+Automatizálás és parancssor
+Fájlok egyesítése, felosztása, visszafejtése, átméretezése, laposítása, nyomtatása, OCR vagy kötegelt újramentése a PowerShellből vagy a cmd-ből ablak megnyitása nélkül. Minden parancs egy szkriptbarát kilépési kódot ad vissza.
+
+Témák és nyelvek
+13 téma és 41 megjelenés, újraindítás nélkül vált8ók. A felület 19 nyelven érhető el, köztük magyarul, oroszul, kazahul és lengyelül.","Visualizza, modifica, esegui OCR, organizza, confronta, compila, firma ed elabora in batch i PDF in locale, in privato e senza account.
+
+Installalo oppure eseguilo in modo portatile. Gratuito, open source, GPLv3. Nessun account e nessun abbonamento. Nessuna telemetria e nessuna pubblicità... mai.
+
+Visualizza e naviga
+Disegno delle pagine con PDFium e quattro modalità di visualizzazione: pagina singola, scorrimento continuo, due pagine affiancate con layout libro opzionale e una griglia di tutte le pagine. Apri più PDF in schede, con ricerca, struttura e link cliccabili.
+
+Riquadro diviso
+F10 mostra due documenti affiancati in un'unica finestra, che condividono la stessa barra strumenti e la stessa barra laterale ma mantengono impostazioni di visualizzazione e di inversione indipendenti. Trascina una scheda da un riquadro all'altro; F10 di nuovo chiude la divisione.
+
+Annota e modifica
+Modifica del testo in linea con riconoscimento del font, più caselle di testo, disegno a mano libera, linee, forme con riempimento opzionale ed evidenziazioni che seguono il testo, ognuna con colore, opacità e spessore propri. Un selettore RGB completo su ogni campione di colore.
+
+Cerca e seleziona il testo
+Cerca in tutto il documento con ogni risultato evidenziato mentre scorri. La selezione del testo segue le colonne e l'ordine di lettura, quindi copiare una colonna non trascina più dentro anche quella accanto.
+
+OCR integrato
+Esegui l'OCR di una pagina o di una regione trascinata copiandola negli appunti, rendi ricercabile un PDF scansionato oppure estrai tutto il testo in un file. Tesseract è già nell'exe; le lingue aggiuntive si scaricano quando servono.
+
+Moduli e firma
+Compila i moduli PDF e salvali. Disegna firme riutilizzabili oppure firma con un certificato dall'archivio di Windows o da un file .pfx e con i campi modulo che si firmano con un clic.
+
+Organizza le pagine
+Unisci PDF ed estrai pagine, trascina per riordinare, ruota, estrai e stampa i numeri di pagina. Trascina una cartella o un file .zip per unire tutto il contenuto in un unico PDF o per aprire ogni file separatamente.
+
+Confronta PDF
+Navigazione tra le pagine, zoom e scorrimento restano sincronizzati. Le aree di differenza sono marcate direttamente sopra le pagine, con una percentuale di modifica per ogni coppia. I risultati segnalano anche dimensioni di pagina diverse e pagine presenti in un solo documento. Puoi esportare il rapporto di confronto senza modificare nessuno dei due PDF di origine.
+
+Trasforma
+Ruota, scala, capovolgi, raddrizza con una linea di livello, correggi la prospettiva e regola i livelli, tutto con anteprima in tempo reale e con le annotazioni che seguono la pagina.
+
+Timbri e filigrane
+Applica numeri di pagina o una filigrana di testo su qualsiasi intervallo di pagine, con posizione, dimensione e stile a scelta, il tutto come un unico annullamento.
+
+Stampa e appiattisci
+Una vera anteprima di stampa nell'applicazione, con controlli per formato e origine della carta, sezioni layout e output richiudibili, scala, margini, più pagine per foglio, sottoinsiemi, fronte/retro e avanzamento in tempo reale di preparazione e coda a 300 DPI. Oppure appiattisci o esporta le pagine come immagini.
+
+Apre qualsiasi cosa
+Apre i PDF protetti da password chiedendola invece di dare errore e ripara i file danneggiati o con xref rotta, in modo che si aprano e si stampino.
+
+Info documento
+Visualizza e modifica titolo, autore, soggetto, parole chiave e creatore di un PDF, salvandoli di nuovo nel file.
+
+Automazione e riga di comando
+Unisci, dividi, decifra, ridimensiona, appiattisci, stampa, esegui l'OCR o risalva in blocco i file da PowerShell o cmd senza aprire alcuna finestra. Ogni comando restituisce un codice di uscita adatto agli script.
+
+Temi e lingue
+13 temi e 41 aspetti, selezionabili senza riavviare. Interfaccia disponibile in 19 lingue, tra cui italiano, russo, kazako, polacco e ungherese.","PDF の閲覧、編集、OCR、整理、比較、フォーム入力、署名、一括処理をローカルかつプライベートに、アカウントなしで。
+
+インストールしても、ポータブルでそのまま実行しても OK。無料、オープンソース、GPLv3。アカウントもサブスクリプションも不要。テレメトリーの送信も広告も... 一切ありません。
+
+表示 & ナビゲーション
+PDFium による描画と 4 つの表示モード（単一ページ、連続スクロール、見開き（ブックレイアウト切り替え可）、全ページのグリッド）。複数の PDF をタブで開き、検索、アウトライン、クリックできるリンクも利用できます。
+
+分割ビュー
+F10 で 1 つのウィンドウに 2 つの文書を並べて表示します。ツールバーとサイドバーは共有しつつ、表示と反転の設定はペインごとに独立します。タブは一方のペインからもう一方へドラッグでき、もう一度 F10 を押すと分割を閉じます。
+
+注釈 & 編集
+フォントを自動で合わせるインラインテキスト編集に加え、テキストボックス、フリーハンド描画、線、塗りつぶし可能な図形、テキストに沿うハイライトを搭載 - それぞれに色、不透明度、太さを個別に設定できます。すべてのスウォッチでフル RGB カラーピッカーが使えます。
+
+テキストの検索と選択
+文書全体を検索し、スクロールしても各結果がハイライトされたままになります。テキスト選択は段組みと読み順に従うため、1 つの段をコピーしても隣の段を巻き込みません。
+
+OCR を標準搭載
+ページやドラッグした領域を OCR してクリップボードへ。スキャンした PDF を検索可能にしたり、すべてのテキストをファイルに抽出したりもできます。Tesseract は exe に同梱。追加の言語は必要なときにダウンロードされます。
+
+フォーム & 署名
+PDF フォームに入力してそのまま保存。再利用できる手書き署名を作成できるほか、Windows の証明書ストアまたは .pfx ファイルの証明書による署名や、クリックで署名できるフォームフィールドにも対応します。
+
+ページの整理
+PDF の結合とページの分割、ドラッグでの並べ替え、回転、抽出、ページ番号のスタンプ。フォルダーや .zip をドロップすれば、中身をまとめて 1 つの PDF に結合することも、個別に開くこともできます。
+
+PDF の比較
+ページ移動、拡大縮小、スクロールは同期したままです。相違のある領域はページ上に直接マークされ、各ペアには変更率が表示されます。 結果では、ページ寸法の違いや、一方の文書にしか存在しないページも特定されます。比較レポートは、どちらの元 PDF も変更せずに書き出せます。
+
+変換
+回転、拡大縮小、反転、水平線を引いての傾き補正、遠近補正、レベル調整。すべてライブプレビュー付きで、注釈もページに追従します。
+
+スタンプ & 透かし
+任意のページ範囲にページ番号やテキストの透かしをスタンプ。位置、サイズ、スタイルを指定でき、適用は 1 回の「元に戻す」でまとめて取り消せます。
+
+印刷 & フラット化
+アプリ内の本物の印刷プレビュー。プリンターの用紙と給紙の設定、折りたためるレイアウトと出力のセクション、拡大縮小、余白、N-up、範囲指定、両面印刷、そして 300 DPI での準備とスプールの進捗をリアルタイムに表示します。ページを画像として書き出したり、フラット化したりもできます。
+
+何でも開ける
+パスワード保護された PDF はエラーにせず入力を求めて開き、破損したファイルや xref が壊れたファイルも修復して、開いて印刷できるようにします。
+
+ドキュメント情報
+PDF のタイトル、作成者、件名、キーワード、作成ソフトのメタデータを表示・編集し、ファイルに保存し直せます。
+
+自動化とコマンドライン
+PowerShell や cmd から、ウィンドウを開かずに結合、分割、復号、リサイズ、フラット化、印刷、OCR、一括再保存を実行できます。どのコマンドもスクリプトで扱いやすい終了コードを返します。
+
+テーマ & 言語
+再起動せずに切り替えられる 13 種類のテーマと 41 通りの外観。UI は日本語、ロシア語、カザフ語、ポーランド語、ハンガリー語など 19 言語に対応しています。","PDF файлдарын қараңыз, өңдеңіз, OCR жасаңыз, реттеңіз, салыстырыңыз, толтырыңыз, қол қойыңыз және топтамамен өңдеңіз Барлығы жергілікті, құпия және тіркелгісіз орындалады.
+
+Орнатыңыз немесе портативті нұсқасын іске қосыңыз. Тегін, бастапқы коды ашық, GPLv3. Тіркелгі де, жазылым да қажет емес. Телеметрия жіберілмейді және жарнама ешқашан көрсетілмейді.
+
+Қарау және шарлау
+PDFium көмегімен төрт көру режимінде көрсетеді: бір бет, үздіксіз айналдыру, кітап пішімі қосылатын екі бет және барлық бет торы. Бірнеше PDF файлын қойындыларда ашып, іздеуді, құрылымды және басылатын сілтемелерді пайдаланыңыз.
+
+Бөлінген панель
+F10 бір терезеде екі құжатты қатар көрсетеді. Олар бір құралдар тақтасы мен бүйірлік тақтаны пайдаланады, бірақ көру және түсті терістеу параметрлері бөлек сақталады. Қойындыны бір панельден екіншісіне сүйреңіз. Панельді жабу үшін F10 пернесін қайта басыңыз.
+
+Аннотация және өңдеу
+Қаріпті сәйкестендіріп мәтінді орнында өңдеңіз. Мәтін жолақтарын, еркін суретті, сызықтарды, толтырылатын пішіндерді және мәтінге жабысып тұратын ерекшелеулерді қосыңыз. Әр нысанның өз түсі, мөлдірлігі және ені бар. Әр түс үлгісінде толық RGB түс таңдағышы бар.
+
+Мәтінді іздеу және таңдау
+Бүкіл құжаттан іздеңіз. Айналдыру кезінде барлық нәтиже ерекшеленіп тұрады. Мәтін таңдау бағандар мен оқу ретін сақтайды, сондықтан бір бағанды көшіру келесі бағанды қоса алмайды.
+
+Кірістірілген OCR
+Бетті немесе сүйреп таңдалған аймақты OCR арқылы танып, алмасу буферіне көшіріңіз. Скандалған PDF файлын іздеуге жарамды етіңіз немесе бүкіл мәтінді файлға шығарыңыз. Tesseract exe файлына кіреді. Қосымша тілдер қажет болғанда жүктеледі.
+
+Пішіндер және қол қою
+PDF пішіндерін толтырып, қайта сақтаңыз. Қайта пайдаланылатын қолтаңба салыңыз немесе Windows қоймасындағы немесе .pfx файлындағы сертификатпен қол қойыңыз. Қол қою өрістерін бір рет басып толтырыңыз.
+
+Беттерді реттеу
+PDF файлдарын біріктіріңіз және беттерді бөліп алыңыз. Беттерді сүйреп қайта реттеңіз, бұрыңыз, шығарып алыңыз және бет нөмірлерін мөрлеңіз. Қалтаны немесе .zip файлын сүйреп апарып, ішіндегінің бәрін бір PDF файлына біріктіріңіз немесе әрқайсын бөлек ашыңыз.
+
+PDF файлдарын салыстыру
+Бет шарлауы, масштаб және айналдыру синхронды болып қалады. Айырмашылық аймақтары тікелей беттердің үстінде белгіленеді және әр жұп үшін өзгеріс пайызы көрсетіледі. Нәтижелер бет өлшемдерінің айырмашылығын және тек бір құжатта бар беттерді де анықтайды. Салыстыру есебін екі бастапқы PDF файлын да өзгертпей экспорттауға болады.
+
+Түрлендіру
+Бұрыңыз, масштабтаңыз, аударыңыз, деңгей сызығымен түзетіңіз, перспективаны жөндеңіз және деңгейлерді реттеңіз. Барлығы нақты уақыттағы алдын ала қараумен орындалады, ал аннотациялар бетпен бірге қозғалады.
+
+Мөрлер және сутаңбалар
+Кез келген беттер ауқымына бет нөмірлерін немесе мәтіндік сутаңбаны қойыңыз. Орнын, өлшемін және мәнерін таңдаңыз. Бүкіл әрекетті бір рет болдырмауға болады.
+
+Басып шығару және тегістеу
+Қолданбаның ішінде принтер қағазы мен дереккөз басқару элементтері бар толық басып шығару көрінісі ұсынылады. Орналасу мен шығыс бөлімдерін жинауға болады. Масштаб, жиектер, бір парақтағы бірнеше бет, бет жиындары, екі жақты басып шығару және 300 DPI кезінде дайындау мен кезек барысы көрсетіледі. Беттерді тегістеуге немесе кескін ретінде экспорттауға да болады.
+
+Кез келген файлды ашады
+Құпиясөзбен қорғалған PDF файлында қате шығарудың орнына құпиясөзді сұрайды. Зақымдалған немесе xref құрылымы бұзылған файлдарды ашылып, басып шығарылатындай жөндейді.
+
+Құжат туралы ақпарат
+PDF файлының атауын, авторын, тақырыбын, кілт сөздерін және жасаушы метадеректерін қарап, өңдеңіз. Өзгерістер файлға сақталады.
+
+Автоматтандыру және пәрмен жолы
+Терезе ашпай, PowerShell немесе cmd арқылы файлдарды біріктіріңіз, бөліңіз, шифрын шешіңіз, өлшемін өзгертіңіз, тегістеңіз, басып шығарыңыз, OCR жасаңыз немесе топтап қайта сақтаңыз. Әр пәрмен сценарийлерге ыңғайлы шығу кодын қайтарады.
+
+Тақырыптар және тілдер
+Қайта іске қоспай ауыстырылатын 13 тақырып пен 41 көрініс. Интерфейс қазақ, орыс, поляк және венгр тілдерін қоса алғанда 19 тілде қолжетімді.","PDF'leri görüntüleyin, düzenleyin, OCR uygulayın, organize edin, karşılaştırın, doldurun, imzalayın ve toplu olarak işleyin yerel, gizli ve hesap gerektirmeden.
+
+Kurun ya da taşınabilir olarak çalıştırın. Ücretsiz, açık kaynak, GPLv3. Hesap veya abonelik gerekmez. Telemetri gönderilmez ve reklam yoktur... asla.
+
+Görüntüle ve gezin
+Dört görünüm moduyla PDFium işleme: tek sayfa, sürekli kaydırma, isteğe bağlı kitap düzenli çift sayfa ve tüm sayfaların ızgarası. Birden çok PDF'yi sekmelerde açın; arama, ana hatlar ve tıklanabilir bağlantılarla birlikte.
+
+Bölünmüş görünüm
+F10, iki belgeyi tek pencerede yan yana gösterir; araç çubuğu ve kenar çubuğu ortaktır, görünüm ve tersine çevirme ayarları ise bağımsız kalır. Bir sekmeyi bir bölmeden diğerine sürükleyin; F10 bölmeyi yeniden kapatır.
+
+Not al ve düzenle
+Yazı tipi eşleştirmeli satır içi metin düzenleme, ayrıca metin kutuları, serbest çizim, çizgiler, isteğe bağlı dolgulu şekiller ve metni izleyen vurgular - her biri kendi rengi, opaklığı ve genişliği ile. Her renk örneğinde tam bir RGB renk seçici.
+
+Metin arama ve seçme
+Belgenin tamamında arayın; kaydırdıkça her sonuç vurgulu kalır. Metin seçimi sütunları ve okuma sırasını izler, böylece bir sütunu kopyalamak artık yanındakini de sürüklemez.
+
+Dahili OCR
+Bir sayfaya veya sürüklenen bir bölgeye OCR uygulayıp panoya kopyalayın, taranmış bir PDF'i aranabilir hale getirin veya tüm metni bir dosyaya çıkarın. Tesseract exe içinde gelir; ek diller ihtiyaç duyuldukça indirilir.
+
+Formlar ve imzalama
+PDF formlarını doldurun ve geri kaydedin. Yeniden kullanılabilir imzalar çizin veya Windows sertifika deposundan veya bir .pfx dosyasından alınan bir sertifikayla ve tıkla-imzala form alanlarıyla imzalayın.
+
+Sayfaları düzenle
+PDF'leri birleştirin ve sayfaları ayırın, yeniden sıralamak için sürükleyin, döndürün, çıkarın ve sayfa numaraları damgalayın. İçindeki her şeyi tek bir PDF'te birleştirmek ya da her birini ayrı açmak için bir klasör veya .zip bırakın.
+
+PDF'leri karşılaştırma
+Sayfa gezinme, yakınlaştırma ve kaydırma eşitlenmiş kalır. Fark bölgeleri doğrudan sayfaların üzerinde işaretlenir ve her çift için değişim yüzdesi gösterilir. Sonuçlar ayrıca farklı sayfa boyutlarını ve yalnızca tek belgede bulunan sayfaları da belirler. Karşılaştırma raporunu, kaynak PDF'lerin hiçbirini değiştirmeden dışa aktarabilirsiniz.
+
+Dönüştür
+Döndürün, ölçekleyin, çevirin, bir hizalama çizgisiyle düzeltin, perspektifi düzeltin ve seviyeleri ayarlayın; hepsi canlı önizlemeyle ve açıklamalar sayfayı izlerken.
+
+Damgalar ve filigranlar
+Herhangi bir sayfa aralığına sayfa numaraları veya bir metin filigranı damgalayın - konumlandırılmış, boyutlandırılmış ve biçimlendirilmiş - tek bir geri alma olarak uygulanır.
+
+Yazdır ve düzleştir
+Uygulama içinde gerçek bir yazdırma önizlemesi: yazıcı kağıdı ve kaynak denetimleri, katlanabilir düzen ve çıktı bölümleri, ölçek, kenar boşlukları, N-up, alt kümeler, çift taraflı baskı ve 300 DPI'da canlı hazırlık ve kuyruk ilerlemesi. Ya da sayfaları düzleştirin veya görüntü olarak dışa aktarın.
+
+Her şeyi açar
+Parola korumalı PDF'leri hata vermek yerine parola isteyerek açar ve hasarlı veya bozuk xref'li dosyaları açılıp yazdırılabilmeleri için onarır.
+
+Belge bilgisi
+Bir PDF'in başlığını, yazarını, konusunu, anahtar kelimelerini ve oluşturucu üst verilerini görüntüleyin ve düzenleyin, dosyaya geri kaydedilir.
+
+Otomasyon ve komut satırı
+PowerShell veya cmd üzerinden pencere açmadan dosyaları birleştirin, bölün, şifresini çözün, yeniden boyutlandırın, düzleştirin, yazdırın, OCR uygulayın veya toplu olarak yeniden kaydedin. Her komut, betiklere uygun bir çıkış kodu döndürür.
+
+Temalar ve diller
+Yeniden başlatmadan değiştirilebilen 13 tema ve 41 görünüm. Arayüz Türkçe, Rusça, Kazakça, Lehçe ve Macarca dahil 19 dilde kullanılabilir.","Переглядайте, редагуйте, розпізнавайте (OCR), упорядковуйте, порівнюйте, заповнюйте, підписуйте та пакетно обробляйте PDF локально, приватно й без облікового запису.
+
+Встановіть або запускайте портативно. Безкоштовно, відкритий код, GPLv3. Облікові записи та підписки не потрібні. Телеметрія не надсилається, реклами немає... ніколи.
+
+Перегляд & навігація
+Відображення через PDFium із чотирма режимами перегляду: одна сторінка, безперервне прокручування, дві сторінки з необов'язковим книжковим розташуванням і сітка з усіх сторінок. Відкривайте кілька PDF у вкладках із пошуком, змістом і клікабельними посиланнями.
+
+Розділена панель
+F10 показує два документи поруч в одному вікні з єдиною панеллю інструментів і бічною панеллю, зберігаючи незалежні налаштування перегляду та інверсії. Перетягніть вкладку з однієї панелі на іншу, а повторне натискання F10 закриває розділення.
+
+Анотації & редагування
+Редагування тексту прямо на сторінці з підбором шрифту, а також текстові поля, довільне малювання, лінії, фігури з необов'язковою заливкою та виділення, що точно повторюють текст, кожне з власним кольором, непрозорістю й товщиною. Повноцінний вибір кольору RGB на кожному зразку.
+
+Пошук & виділення тексту
+Шукайте в усьому документі, а кожен результат підсвічується під час прокручування. Виділення тексту йде за колонками та порядком читання, тож копіювання однієї колонки більше не захоплює наступну.
+
+Вбудований OCR
+Розпізнавайте сторінку або виділену область у буфер обміну, робіть відсканований PDF придатним для пошуку або витягуйте весь текст у файл. Tesseract постачається в exe, додаткові мови завантажуються за потреби.
+
+Форми & підписання
+Заповнюйте форми PDF і зберігайте їх назад. Малюйте підписи для повторного використання або підписуйте сертифікатом зі сховища Windows або файлу .pfx і полями форм для підпису одним клацанням.
+
+Упорядкування сторінок
+Об'єднуйте PDF і виокремлюйте сторінки, перетягуйте для зміни порядку, повертайте, витягуйте та ставте номери сторінок. Перетягніть папку або .zip, щоб об'єднати весь вміст в один PDF або відкрити кожен окремо.
+
+Порівняння PDF
+Навігація сторінками, масштаб і прокручування залишаються синхронізованими. Ділянки відмінностей позначаються прямо на сторінках, а для кожної пари вказано відсоток змін. Результати також визначають різні розміри сторінок і сторінки, що є лише в одному документі. Звіт про порівняння можна експортувати, не змінюючи жоден із вихідних PDF.
+
+Трансформація
+Повертайте, масштабуйте, віддзеркалюйте, вирівнюйте за лінією рівня, виправляйте перспективу та налаштовуйте рівні, усе з перегляду наживо, а анотації слідують за сторінкою.
+
+Штампи & водяні знаки
+Ставте номери сторінок або текстовий водяний знак на будь-який діапазон сторінок з налаштуванням позиції, розміру та стилю, і все це скасовується одним кроком.
+
+Друк & зведення
+Справжній попередній перегляд друку в застосунку з керуванням папером і джерелом принтера, згортними розділами розташування та виводу, масштабом, полями, N-up, підмножинами, двостороннім друком і поточним прогресом підготовки та спулу на 300 DPI. Або зводьте чи експортуйте сторінки як зображення.
+
+Відкриває все
+Відкриває PDF із паролем, запитуючи його замість помилки, і відновлює пошкоджені файли або файли зі зламаною таблицею xref, щоб їх можна було відкрити та надрукувати.
+
+Відомості про документ
+Переглядайте та редагуйте назву, автора, тему, ключові слова й метадані творця PDF, які зберігаються назад у файл.
+
+Автоматизація & командний рядок
+Об'єднуйте, розділяйте, розшифровуйте, змінюйте розмір, зводьте, друкуйте, розпізнавайте (OCR) або пакетно пересохраняйте файли з PowerShell чи cmd без відкриття вікна. Кожна команда повертає код завершення, зручний для скриптів.
+
+Теми & мови
+Тринадцять тем: Dark, Light, Black, 98SE, Blood, Greed, Cyanotic, Ectoplasm, Decay, Malaise, Sepulchre, Delirium і Mourning, і всі перемикаються наживо. Чотири з них (Dark, Light, Black і 98SE) приймають по одному з 8 акцентних кольорів, разом 41 вигляд. Інтерфейс локалізовано дев'ятнадцятьма мовами, зокрема в'єтнамською, казахською, польською, угорською та російською.","Xem, chỉnh sửa, OCR, sắp xếp, so sánh, điền, ký và xử lý hàng loạt tệp PDF ngay trên máy, riêng tư và không cần tài khoản.
+
+Cài đặt hoặc chạy bản portable. Miễn phí, mã nguồn mở, GPLv3. Không cần tài khoản hay đăng ký. Không gửi dữ liệu telemetry và không có quảng cáo... bao giờ.
+
+Xem & điều hướng
+Kết xuất bằng PDFium với bốn chế độ xem: một trang, cuộn liên tục, hai trang với bố cục sách tùy chọn, và lưới tất cả các trang. Mở nhiều tệp PDF trong các tab, kèm tìm kiếm, mục lục và liên kết có thể nhấp.
+
+Chia đôi khung
+Nhấn F10 để hiển thị hai tài liệu song song trong một cửa sổ, dùng chung thanh công cụ và thanh bên nhưng vẫn giữ riêng các thiết lập chế độ xem và đảo màu. Kéo một tab từ khung này sang khung kia, và nhấn F10 lần nữa để đóng chế độ chia đôi.
+
+Chú thích & chỉnh sửa
+Chỉnh sửa văn bản trực tiếp với khả năng khớp phông chữ, cùng hộp văn bản, vẽ tay tự do, đường thẳng, hình vẽ có thể tô màu tùy chọn và đánh dấu ôm sát văn bản - mỗi loại có màu, độ mờ và độ rộng riêng. Mỗi mẫu màu đều có bộ chọn màu RGB đầy đủ.
+
+Tìm kiếm & chọn văn bản
+Tìm kiếm trong toàn bộ tài liệu, mọi kết quả đều được tô sáng khi bạn cuộn. Việc chọn văn bản tuân theo các cột và thứ tự đọc, nên sao chép một cột sẽ không còn kéo theo cột kế bên.
+
+Tích hợp sẵn OCR
+Dùng OCR cho một trang hoặc một vùng kéo chọn rồi chép vào clipboard, biến tệp PDF quét thành tệp có thể tìm kiếm, hoặc trích xuất toàn bộ văn bản ra một tệp. Tesseract được tích hợp sẵn trong tệp exe; các ngôn ngữ bổ sung được tải về khi cần.
+
+Biểu mẫu & chữ ký
+Điền biểu mẫu PDF và lưu lại. Vẽ chữ ký để dùng lại nhiều lần, hoặc ký bằng chứng chỉ từ kho chứng chỉ Windows hoặc tệp .pfx và nhấp để ký vào các trường biểu mẫu.
+
+Sắp xếp trang
+Gộp các tệp PDF và tách trang, kéo để sắp xếp lại, xoay, trích xuất và đóng dấu số trang. Thả một thư mục hoặc tệp .zip để gộp mọi tệp bên trong thành một PDF hoặc mở riêng từng tệp.
+
+So sánh PDF
+Việc chuyển trang, thu phóng và cuộn luôn được đồng bộ. Các vùng khác biệt được đánh dấu trực tiếp trên trang, kèm phần trăm thay đổi của từng cặp trang. Kết quả cũng cho biết các trang có kích thước khác nhau và các trang chỉ tồn tại trong một tài liệu. Bạn có thể xuất báo cáo so sánh mà không làm thay đổi bất kỳ PDF gốc nào.
+
+Chuyển đổi
+Xoay, đổi tỷ lệ, lật, nắn thẳng bằng đường thăng bằng, sửa phối cảnh và tinh chỉnh mức độ sáng tối, tất cả đều có bản xem trước trực tiếp, trong khi các chú thích đi theo trang.
+
+Đóng dấu & hình mờ
+Đóng dấu số trang hoặc hình mờ dạng văn bản lên bất kỳ phạm vi trang nào, với vị trí, kích thước và kiểu dáng tùy chọn, và chỉ cần một lần hoàn tác để thu hồi.
+
+In & làm phẳng
+Bản xem trước khi in thực sự ngay trong ứng dụng, với các điều khiển máy in, khổ giấy và nguồn giấy, các phần bố cục và đầu ra có thể thu gọn, tỷ lệ, lề, N-up, tập con trang, in hai mặt, cùng tiến trình chuẩn bị và spool trực tiếp ở 300 DPI. Hoặc làm phẳng hay xuất các trang thành ảnh.
+
+Mở được mọi tệp
+Mở được các tệp PDF có mật khẩu bằng cách yêu cầu nhập mật khẩu thay vì báo lỗi, đồng thời sửa các tệp bị hỏng hoặc lỗi bảng xref để vẫn mở và in được.
+
+Thông tin tài liệu
+Xem và chỉnh sửa siêu dữ liệu tiêu đề, tác giả, chủ đề, từ khóa và người tạo của tệp PDF, được lưu ngược vào chính tệp.
+
+Tự động hóa & dòng lệnh
+Gộp, tách, giải mã, đổi kích thước, làm phẳng, in, OCR hoặc lưu lại hàng loạt các tệp từ PowerShell hoặc cmd mà không cần mở cửa sổ. Mọi lệnh đều trả về mã thoát thân thiện với script.
+
+Giao diện & ngôn ngữ
+Mười ba giao diện - Dark, Light, Black, 98SE, Blood, Greed, Cyanotic, Ectoplasm, Decay, Malaise, Sepulchre, Delirium và Mourning - đều có thể chuyển đổi ngay lập tức. Bốn giao diện trong số đó - Dark, Light, Black và 98SE - mỗi giao diện nhận một trong tám màu nhấn, tạo nên tổng cộng 41 kiểu hiển thị. Giao diện ứng dụng được bản địa hóa sang mười chín ngôn ngữ, trong đó có tiếng Việt, tiếng Kazakh, tiếng Ba Lan, tiếng Hungary và tiếng Nga.","Visualize, edite, faça OCR, organize, compare, preencha, assine e processe PDFs em lote localmente, com privacidade e sem conta.
+
+Instale ou execute como portátil. Gratuito, código aberto, GPLv3. Sem contas nem assinaturas. Nenhuma telemetria é enviada e nenhum anúncio... nunca.
+
+Exibir & navegar
+Renderização com PDFium em quatro modos de exibição: página única, rolagem contínua, duas páginas com layout de livro opcional e uma grade com todas as páginas. Abra vários PDFs em guias, com busca, estrutura de tópicos e links clicáveis.
+
+Painel dividido
+F10 mostra dois documentos lado a lado em uma só janela, compartilhando a mesma barra de ferramentas e a mesma barra lateral, com configurações de exibição e inversão independentes. Arraste uma guia de um painel para o outro, e F10 de novo fecha a divisão.
+
+Anotar & editar
+Edição de texto direto no PDF com correspondência de fonte, além de caixas de texto, desenho livre, linhas, formas com preenchimento opcional e realces que acompanham o texto, cada um com sua própria cor, opacidade e espessura. Um seletor de cores RGB completo em cada amostra.
+
+Buscar & selecionar texto
+Pesquise o documento inteiro com todos os resultados realçados enquanto você rola. A seleção de texto segue as colunas e a ordem de leitura, então copiar uma coluna não traz mais a seguinte junto.
+
+OCR integrado
+Faça OCR de uma página ou de uma região arrastada para a área de transferência, torne um PDF digitalizado pesquisável ou extraia todo o texto para um arquivo. O Tesseract já vem no exe; idiomas extras são baixados sob demanda.
+
+Formulários & assinatura
+Preencha formulários PDF e salve-os de volta. Desenhe assinaturas reutilizáveis ou assine com um certificado do repositório do Windows ou de um arquivo .pfx e com campos de formulário de assinar com um clique.
+
+Organizar páginas
+Mescle PDFs e separe páginas, arraste para reordenar, gire, extraia e carimbe números de página. Solte uma pasta ou um .zip para mesclar tudo o que houver nele em um único PDF ou abrir cada arquivo separadamente.
+
+Comparar PDFs
+A navegação entre páginas, o zoom e a rolagem permanecem sincronizados. As regiões com diferenças são marcadas diretamente sobre as páginas, com a porcentagem alterada de cada par. Os resultados também identificam páginas com dimensões diferentes e páginas que existem em apenas um documento. Você pode exportar o relatório de comparação sem alterar nenhum dos PDFs de origem.
+
+Transformar
+Gire, redimensione, espelhe, endireite com uma linha de nível, corrija a perspectiva e ajuste os níveis, tudo com prévia ao vivo, enquanto as anotações acompanham a página.
+
+Carimbos & marcas d’água
+Carimbe números de página ou uma marca d’água de texto em qualquer intervalo de páginas, com posição, tamanho e estilo definidos, aplicado como uma única ação desfazível.
+
+Imprimir & nivelar
+Uma prévia de impressão de verdade dentro do aplicativo, com controles de papel e origem da impressora, seções de layout e saída recolhíveis, escala, margens, várias páginas por folha, subconjuntos, frente e verso e progresso ao vivo da preparação e do spool a 300 DPI. Ou nivele ou exporte páginas como imagens.
+
+Abre qualquer coisa
+Abre PDFs protegidos por senha pedindo a senha em vez de dar erro e repara arquivos danificados ou com xref quebrada para que possam ser abertos e impressos.
+
+Informações do documento
+Veja e edite os metadados de título, autor, assunto, palavras-chave e criador de um PDF, salvos de volta no arquivo.
+
+Automação & linha de comando
+Mescle, divida, descriptografe, redimensione, nivele, imprima, faça OCR ou salve em lote novamente os arquivos pelo PowerShell ou pelo cmd, sem abrir uma janela. Todo comando retorna um código de saída amigável para scripts.
+
+Temas & idiomas
+Treze temas - Dark, Light, Black, 98SE, Blood, Greed, Cyanotic, Ectoplasm, Decay, Malaise, Sepulchre, Delirium e Mourning - todos alternáveis ao vivo. Quatro deles - Dark, Light, Black e 98SE - aceitam cada um uma de 8 cores de destaque, totalizando 41 visuais. Interface localizada em dezenove idiomas, incluindo vietnamita, cazaque, polonês, húngaro e russo.","Przeglądaj, edytuj, rozpoznawaj tekst, organizuj, porównuj, wypełniaj, podpisuj i przetwarzaj wsadowo pliki PDF lokalnie, prywatnie i bez konta.
+
+Zainstaluj lub uruchom w trybie przenośnym. Bezpłatny, otwartoźródłowy, GPLv3. Bez kont i subskrypcji. Bez telemetrii i reklam - zawsze.
+
+Przeglądanie i nawigacja
+Renderowanie przez PDFium w czterech trybach: pojedyncza strona, przewijanie ciągłe, dwie strony z opcjonalnym układem książki oraz siatka wszystkich stron. Otwieraj wiele plików PDF w kartach, korzystaj z wyszukiwania, konspektu i aktywnych łączy.
+
+Widok dzielony
+Klawisz F10 wyświetla dwa dokumenty obok siebie w jednym oknie ze wspólnym paskiem narzędzi i panelem bocznym, ale z niezależnymi ustawieniami widoku i odwrócenia kolorów. Przeciągnij kartę między panelami, aby ją przenieść, i naciśnij F10 ponownie, aby zamknąć podział.
+
+Adnotacje i edycja
+Edycja tekstu w miejscu z dopasowaniem czcionki, a także pola tekstowe, rysowanie odręczne, linie, kształty z opcjonalnym wypełnieniem i podświetlenia dopasowane do tekstu - każde z własnym kolorem, kryciem i szerokością. Pełny wybór kolorów RGB dla każdej próbki.
+
+Wyszukiwanie i zaznaczanie tekstu
+Przeszukuj cały dokument, a wszystkie wyniki pozostaną podświetlone podczas przewijania. Zaznaczanie tekstu uwzględnia kolumny i kolejność czytania, więc kopiowanie jednej kolumny nie obejmuje już następnej.
+
+Wbudowane OCR
+Rozpoznawaj tekst na stronie lub w zaznaczonym obszarze i kopiuj go do schowka, zmieniaj skany w przeszukiwalne pliki PDF albo wyodrębniaj cały tekst do pliku. Tesseract jest dołączony do programu, a dodatkowe języki pobierane na żądanie.
+
+Formularze i podpisy
+Wypełniaj formularze PDF i zapisuj zmiany. Rysuj podpisy wielokrotnego użytku albo podpisuj certyfikatem z magazynu Windows lub pliku .pfx oraz polami formularza typu „kliknij, aby podpisać”.
+
+Organizowanie stron
+Scalaj pliki PDF i wydzielaj strony, zmieniaj ich kolejność przeciąganiem, obracaj, wyodrębniaj i dodawaj numery. Upuść folder lub plik .zip, aby scalić jego zawartość w jeden PDF albo otworzyć każdy plik osobno.
+
+Porównywanie PDF-ów
+Nawigacja po stronach, powiększenie i przewijanie pozostają zsynchronizowane. Obszary różnic są oznaczane wprost na stronach, z procentem zmian dla każdej pary. Wyniki wskazują też odmienne wymiary stron oraz strony istniejące tylko w jednym z dokumentów. Raport porównania możesz wyeksportować bez zmieniania żadnego ze źródłowych PDF-ów.
+
+Przekształcanie
+Obracaj, skaluj, odbijaj i prostuj strony linią poziomu, koryguj perspektywę oraz reguluj poziomy - wszystko z podglądem na żywo; adnotacje podążają za stroną.
+
+Stemple i znaki wodne
+Dodawaj numery stron lub tekstowy znak wodny do dowolnego zakresu stron - z wybranym położeniem, rozmiarem i stylem - jako jedną operację możliwą do cofnięcia.
+
+Drukowanie i spłaszczanie
+Prawdziwy podgląd wydruku z wyborem rozmiaru i źródła papieru, zwijanymi sekcjami układu i wyjścia, skalą, marginesami, drukiem wielu stron na arkusz, podzbiorami, dupleksem oraz postępem przygotowania i buforowania w 300 DPI. Możesz też spłaszczyć plik lub wyeksportować strony jako obrazy.
+
+Otwiera niemal wszystko
+Otwiera pliki PDF chronione hasłem, wyświetlając pytanie zamiast błędu, oraz naprawia uszkodzone pliki i błędne tablice xref, aby można je było otworzyć i wydrukować.
+
+Informacje o dokumencie
+Wyświetlaj i edytuj tytuł, autora, temat, słowa kluczowe i metadane twórcy pliku PDF, a następnie zapisuj je z powrotem w pliku.
+
+Automatyzacja i wiersz poleceń
+Scalaj, dziel, odszyfrowuj, zmieniaj rozmiar, spłaszczaj, drukuj, wykonuj OCR i seryjnie zapisuj pliki z PowerShell lub cmd - bez otwierania okna. Każde polecenie zwraca kod zakończenia przyjazny dla skryptów.
+
+Motywy i języki
+13 motywów i 41 wyglądów, przełączane bez restartu. Interfejs jest dostępny w 19 językach, w tym polskim, rosyjskim, kazachskim i węgierskim.","Vis, rediger, OCR-behandle, organiser, sammenlign, fyll ut, signer og batchbehandle PDF-er lokalt, privat og uten konto.
+
+Installer eller kjør bærbart. Gratis, åpen kildekode, GPLv3. Ingen kontoer eller abonnementer kreves. Ingen telemetri sendes og ingen reklame... aldri.
+
+Vis & naviger
+PDFium-gjengivelse med fire visningsmoduser - enkeltside, kontinuerlig rulling, tosidevisning med valgfri bokoppsett og et rutenett med alle sidene. Åpne flere PDF-er i faner, med søk, disposisjoner og klikkbare lenker.
+
+Delt rute
+F10 viser to dokumenter side ved side i ett vindu, med felles verktøylinje og sidepanel, men uavhengige visnings- og inverteringsinnstillinger. Dra en fane fra den ene ruten til den andre, og F10 igjen lukker delingen.
+
+Merk & rediger
+Redigering av tekst direkte med skrifttypetilpasning, pluss tekstbokser, frihåndstegning, linjer, former med valgfri fyll og utheving som følger teksten - alle med egen farge, gjennomsiktighet og bredde. En fullstendig RGB-fargevelger på hver fargeprøve.
+
+Søk & marker tekst
+Søk i hele dokumentet med alle treff uthevet mens du ruller. Tekstmarkeringen følger kolonner og leserekkefølge, så kopiering av én kolonne trekker ikke lenger med den neste.
+
+Innebygd OCR
+OCR-behandle en side eller et område du drar opp til utklippstavlen, gjør en skannet PDF søkbar, eller trekk ut all tekst til en fil. Tesseract følger med i exe-filen, og flere språk lastes ned ved behov.
+
+Skjemaer & signering
+Fyll ut PDF-skjemaer og lagre dem tilbake. Tegn gjenbrukbare signaturer, eller signer med et sertifikat fra Windows-sertifikatlageret eller en .pfx-fil og klikk-for-å-signere-skjemafelt.
+
+Organiser sider
+Slå sammen PDF-er og del ut sider, dra for å endre rekkefølge, roter, trekk ut og legg til sidetall. Slipp en mappe eller en .zip for å slå sammen alt innholdet til én PDF eller åpne hver fil for seg.
+
+Sammenlign PDF-er
+Sidenavigasjon, zoom og rulling holdes synkronisert. Forskjellsområder merkes rett på sidene, med en endringsprosent for hvert par. Resultatene viser også ulike sidedimensjoner og sider som bare finnes i ett av dokumentene. Du kan eksportere sammenligningsrapporten uten å endre noen av kilde-PDF-ene.
+
+Transformer
+Roter, skaler, speilvend, rett opp med en nivålinje, korriger perspektiv og juster nivåer - alt med live forhåndsvisning, mens merknadene følger siden.
+
+Stempler & vannmerker
+Legg til sidetall eller et tekstvannmerke på et hvilket som helst sideområde - plassert, dimensjonert og formatert - som én enkelt angring.
+
+Skriv ut & flat ut
+En ekte forhåndsvisning av utskrift i programmet med kontroller for skriverpapir og kilde, sammenleggbare seksjoner for oppsett og utdata, skala, marger, N-opp, delmengder, tosidig utskrift og live fremdrift for klargjøring og spooling ved 300 DPI. Eller flat ut eller eksporter sider som bilder.
+
+Åpner alt
+Åpner passordbeskyttede PDF-er ved å be om passord i stedet for å vise feil, og reparerer skadede filer eller filer med ødelagt xref slik at de kan åpnes og skrives ut.
+
+Dokumentinfo
+Vis og rediger en PDFs metadata for tittel, forfatter, emne, nøkkelord og opprettet med, og lagre dem tilbake i filen.
+
+Automatisering & kommandolinje
+Slå sammen, del, dekrypter, endre størrelse, flat ut, skriv ut, OCR-behandle eller lagre filer på nytt i batch fra PowerShell eller cmd uten å åpne et vindu. Hver kommando returnerer en skriptvennlig avslutningskode.
+
+Temaer & språk
+Tretten temaer - Dark, Light, Black, 98SE, Blood, Greed, Cyanotic, Ectoplasm, Decay, Malaise, Sepulchre, Delirium og Mourning - som alle kan byttes live. Fire av dem - Dark, Light, Black og 98SE - kan hver ta én av 8 aksentfarger, så det blir 41 utseender til sammen. Grensesnittet er lokalisert til nitten språk, blant annet vietnamesisk, kasakhisk, polsk, ungarsk og russisk.","查看、编辑、OCR、整理、比较、填写、签署及批量处理 PDF 全程在本机私密完成，无需账户。
+
+可安装或以便携方式运行。免费、开源、GPLv3。无需账户或订阅。不发送遥测，也没有广告...永远不会。
+
+查看与导航
+以 PDFium 渲染，提供四种视图模式：单页、连续滚动、可选书本版式的双页，以及所有页面的网格视图。可在标签页中打开多个 PDF，并支持搜索、大纲和可点击的链接。
+
+拆分视图
+F10 会在同一个窗口中并排显示两份文档，共用工具栏和侧边栏，但视图与反转设置各自独立。可将标签页从一个窗格拖到另一个窗格；再按一次 F10 即可关闭分屏。
+
+标注与编辑
+具字体匹配的就地文本编辑，还有文本框、手绘、直线、可选填充的形状，以及贴合文本的高亮 - 每项都有自己的颜色、不透明度与宽度。每个色板上都有完整的 RGB 调色板。
+
+搜索与选择文本
+搜索整个文档，滚动时每个结果都保持高亮。文本选择会遵循分栏和阅读顺序，因此复制某一栏时不会再把相邻栏一并带上。
+
+内置 OCR
+对一页或拖动选取的区域进行 OCR 并复制到剪贴板、让扫描的 PDF 可供搜索，或将全部文本提取到文件。Tesseract 随 exe 一并提供；额外语言按需下载。
+
+表单与签署
+填写 PDF 表单并存回。绘制可重复使用的签名，或使用Windows 证书存储或 .pfx 文件中的证书与点击即签的表单字段进行签署。
+
+整理页面
+合并 PDF 并拆分页面、拖动重新排序、旋转、提取并加盖页码。拖入一个文件夹或 .zip，即可将其中所有内容合并成一个 PDF，或分别打开每一个。
+
+比较 PDF
+页面导航、缩放和滚动保持同步。差异区域会直接标注在页面上，并为每组配对显示变化百分比。 结果还会指出页面尺寸不同之处，以及仅存在于其中一份文档的页面。你可以导出比较报告，而不会更改任何一个源 PDF。
+
+变换
+旋转、缩放、翻转、用水平线校正倾斜、修正透视并调整色阶，全部都有实时预览，且批注会跟随页面一起变化。
+
+戳记与水印
+在任意页面范围加盖页码或文本水印 - 可定位、调整大小并设置样式 - 以单次撤销应用。
+
+打印与平面化
+应用内真正的打印预览，具备打印机纸张与纸盒控制、可折叠的版式与输出区块、缩放、页边距、N-up、页面子集、双面打印，以及 300 DPI 下的实时准备与后台打印进度。也可以将页面平面化或导出为图像。
+
+什么都能打开
+打开受密码保护的 PDF 时会提示输入密码而非报错，并修复损坏或 xref 损坏的文件，让它们得以打开与打印。
+
+文档信息
+查看并编辑 PDF 的标题、作者、主题、关键字与创建者元数据，并存回文件中。
+
+自动化与命令行
+可从 PowerShell 或 cmd 合并、拆分、解密、调整大小、平面化、打印、执行 OCR 或批量重新保存文件，完全无需打开窗口。每个命令都会返回便于脚本判断的退出码。
+
+主题与语言
+13 种主题和 41 种外观，无需重启即可切换。界面支持 19 种语言，包括简体中文、繁体中文、俄语、哈萨克语、波兰语和匈牙利语。","檢視、編輯、OCR、整理、比較、填寫、簽署及批次處理 PDF 全程在本機私密完成，無需帳號。
+
+可安裝或以可攜方式執行。免費、開放原始碼、GPLv3。無需帳號或訂閱。不傳送遙測，也沒有廣告...永遠不會。
+
+檢視與導覽
+以 PDFium 算繪，提供四種檢視模式：單頁、連續捲動、可選書本版面的雙頁，以及所有頁面的格線檢視。可在分頁中開啟多個 PDF，並支援搜尋、大綱與可點擊的連結。
+
+分割視窗
+F10 會在同一個視窗中並排顯示兩份文件，共用工具列與側邊欄，但檢視與反轉設定各自獨立。可將分頁從一個窗格拖到另一個窗格；再按一次 F10 即可關閉分割。
+
+標註與編輯
+具字型比對的就地文字編輯，還有文字方塊、手繪、直線、可選填滿的形狀，以及貼合文字的螢光標示 - 每項都有自己的顏色、不透明度與寬度。每個色票上都有完整的 RGB 調色盤。
+
+搜尋與選取文字
+搜尋整份文件，捲動時每個結果都保持標示。文字選取會依照欄位與閱讀順序，因此複製某一欄時不會再把隔壁欄一起帶走。
+
+內建 OCR
+對一頁或拖曳選取的區域進行 OCR 並複製到剪貼簿、讓掃描的 PDF 可供搜尋，或將全部文字擷取到檔案。Tesseract 隨 exe 一併提供；額外語言依需求下載。
+
+表單與簽署
+填寫 PDF 表單並存回。繪製可重複使用的簽名，或使用Windows 憑證存放區或 .pfx 檔案中的憑證與點擊即簽的表單欄位進行簽署。
+
+整理頁面
+合併 PDF 並分割頁面、拖曳重新排序、旋轉、擷取並加蓋頁碼。拖入一個資料夾或 .zip，即可將其中所有內容合併成一份 PDF，或分別開啟每一份。
+
+比較 PDF
+頁面瀏覽、縮放與捲動保持同步。差異區域會直接標示在頁面上，並為每組配對顯示變更百分比。 結果也會指出頁面尺寸不同之處，以及僅存在於其中一份文件的頁面。您可以匯出比較報告，而不會變更任一來源 PDF。
+
+變形
+旋轉、縮放、翻轉、以水平線校正傾斜、修正透視並調整色階，全部都有即時預覽，且註解會跟著頁面一起變動。
+
+戳記與浮水印
+在任意頁面範圍加蓋頁碼或文字浮水印 - 可定位、調整大小並設定樣式 - 以單一次復原套用。
+
+列印與平面化
+應用程式內真正的列印預覽，具備印表機紙張與紙匣控制、可摺疊的版面與輸出區塊、縮放、邊界、N-up、頁面子集、雙面列印，以及 300 DPI 下的即時準備與多工緩衝處理進度。也可以將頁面平面化或匯出為影像。
+
+什麼都能開
+開啟受密碼保護的 PDF 時會提示輸入密碼而非報錯，並修復損毀或 xref 損壞的檔案，讓它們得以開啟與列印。
+
+文件資訊
+檢視並編輯 PDF 的標題、作者、主旨、關鍵字與建立者中繼資料，並存回檔案中。
+
+自動化與命令列
+可從 PowerShell 或 cmd 合併、分割、解密、調整大小、平面化、列印、執行 OCR 或批次重新儲存檔案，完全不需開啟視窗。每個命令都會回傳適合指令碼判讀的結束代碼。
+
+佈景主題與語言
+13 種佈景主題和 41 種外觀，無需重新啟動即可切換。介面支援 19 種語言，包含繁體中文、簡體中文、俄文、哈薩克文、波蘭文和匈牙利文。","Affichez, modifiez, OCRisez, organisez, comparez, remplissez, signez et traitez vos PDF par lots en local, en privé et sans compte.
+
+Installez-le ou exécutez-le en mode portable. Gratuit, open source, GPLv3. Aucun compte ni abonnement requis. Aucune télémétrie n'est envoyée et aucune publicité... jamais.
+
+Afficher et naviguer
+Rendu PDFium avec quatre modes d'affichage : page simple, défilement continu, double page avec disposition en livre facultative et une grille de toutes les pages. Ouvrez plusieurs PDF dans des onglets, avec recherche, plans et liens cliquables.
+
+Vue partagée
+F10 affiche deux documents côte à côte dans une même fenêtre, avec la même barre d'outils et le même volet latéral, mais des réglages d'affichage et d'inversion indépendants. Faites glisser un onglet d'un volet à l'autre ; F10 referme la division.
+
+Annoter et modifier
+Édition de texte en ligne avec correspondance des polices, plus des zones de texte, du dessin à main levée, des lignes, des formes avec remplissage optionnel et des surlignages qui épousent le texte - chacun avec sa propre couleur, opacité et largeur. Un sélecteur de couleur RGB complet sur chaque échantillon.
+
+Rechercher et sélectionner du texte
+Recherchez dans tout le document, chaque résultat restant surligné au fil du défilement. La sélection de texte suit les colonnes et l'ordre de lecture, si bien que copier une colonne n'entraîne plus la suivante.
+
+OCR intégré
+Appliquez l'OCR à une page ou à une région glissée vers le presse-papiers, rendez un PDF numérisé consultable, ou extrayez tout le texte dans un fichier. Tesseract est inclus dans l'exe ; les langues supplémentaires se téléchargent à la demande.
+
+Formulaires et signature
+Remplissez des formulaires PDF et enregistrez-les. Dessinez des signatures réutilisables, ou signez avec un certificat du magasin Windows ou d'un fichier .pfx et des champs de formulaire à signer d'un clic.
+
+Organiser les pages
+Fusionnez des PDF et extrayez des pages, faites glisser pour réorganiser, faites pivoter, extrayez et apposez des numéros de page. Déposez un dossier ou un .zip pour fusionner tout son contenu en un seul PDF ou ouvrir chaque fichier séparément.
+
+Comparer des PDF
+La navigation entre les pages, le zoom et le défilement restent synchronisés. Les zones de différence sont marquées directement sur les pages, avec un pourcentage de changement pour chaque paire. Les résultats identifient aussi les dimensions de page différentes et les pages qui n'existent que dans un seul document. Vous pouvez exporter le rapport de comparaison sans modifier aucun des deux PDF d'origine.
+
+Transformer
+Pivotez, mettez à l'échelle, retournez, redressez à l'aide d'une ligne de niveau, corrigez la perspective et ajustez les niveaux, le tout avec un aperçu en direct et des annotations qui suivent la page.
+
+Tampons et filigranes
+Apposez des numéros de page ou un filigrane de texte sur n'importe quelle plage de pages - positionné, dimensionné et stylisé - appliqué en une seule annulation.
+
+Imprimer et aplatir
+Un véritable aperçu avant impression intégré, avec les commandes de papier et d'alimentation de l'imprimante, des sections Disposition et Sortie repliables, l'échelle, les marges, le N-up, les sous-ensembles, le recto verso et la progression en direct de la préparation et de la file d'attente à 300 ppp. Ou aplatissez les pages, ou exportez-les en images.
+
+Ouvre tout
+Ouvre les PDF protégés par mot de passe en le demandant plutôt qu'en générant une erreur, et répare les fichiers endommagés ou à xref cassé pour qu'ils s'ouvrent et s'impriment.
+
+Informations du document
+Consultez et modifiez le titre, l'auteur, le sujet, les mots-clés et les métadonnées du créateur d'un PDF, enregistrés dans le fichier.
+
+Automatisation et ligne de commande
+Fusionnez, divisez, déchiffrez, redimensionnez, aplatissez, imprimez, appliquez l'OCR ou réenregistrez des fichiers par lots depuis PowerShell ou cmd, sans ouvrir de fenêtre. Chaque commande renvoie un code de sortie exploitable en script.
+
+Thèmes et langues
+13 thèmes et 41 apparences, modifiables sans redémarrer. Interface disponible en 19 langues, dont le français, le russe, le kazakh, le polonais et le hongrois.","Просматривайте, редактируйте, распознавайте, упорядочивайте, сравнивайте, заполняйте, подписывайте и пакетно обрабатывайте PDF локально, приватно и без учетной записи.
+
+Установите или запускайте портативно. Бесплатно, с открытым исходным кодом, GPLv3. Не нужны ни учетные записи, ни подписки. Никакой телеметрии и никакой рекламы... никогда.
+
+Просмотр & навигация
+Отрисовка PDFium с четырьмя режимами просмотра - одна страница, непрерывная прокрутка, две страницы с опциональной книжной раскладкой и сетка всех страниц. Открывайте несколько PDF во вкладках, с поиском, оглавлением и кликабельными ссылками.
+
+Разделенная панель
+F10 показывает два документа рядом в одном окне: общая панель инструментов и боковая панель, но независимые настройки просмотра и инверсии. Перетащите вкладку из одной панели в другую; повторное нажатие F10 закрывает разделение.
+
+Аннотации & правка
+Правка текста прямо на странице с подбором шрифта, плюс текстовые блоки, рисование от руки, линии, фигуры с необязательной заливкой и выделения, обтекающие текст - у каждого элемента свой цвет, прозрачность и толщина. Полноценный выбор цвета RGB на каждом образце.
+
+Поиск & выделение текста
+Ищите по всему документу - каждый результат подсвечивается при прокрутке. Выделение текста учитывает колонки и порядок чтения, поэтому копирование одной колонки больше не захватывает соседнюю.
+
+Встроенный OCR
+Распознайте страницу или выделенную область в буфер обмена, сделайте отсканированный PDF доступным для поиска или извлеките весь текст в файл. Tesseract встроен в exe; дополнительные языки загружаются по запросу.
+
+Формы & подписание
+Заполняйте PDF-формы и сохраняйте их обратно. Рисуйте многоразовые подписи или подписывайте сертификатом из хранилища Windows или файла .pfx и полями формы с подписью по клику.
+
+Организация страниц
+Объединяйте PDF и извлекайте страницы, перетаскивайте их для изменения порядка, поворачивайте, извлекайте и ставьте номера страниц. Перетащите папку или .zip, чтобы объединить все содержимое в один PDF или открыть каждый файл отдельно.
+
+Сравнение PDF
+Навигация по страницам, масштаб и прокрутка остаются синхронизированными. Области различий помечаются прямо на страницах, с процентом изменений для каждой пары. Результаты также выявляют разные размеры страниц и страницы, которые есть только в одном документе. Отчет о сравнении можно экспортировать, не изменяя ни один из исходных PDF.
+
+Трансформация
+Поворот, масштабирование, отражение, выравнивание по линии горизонта, исправление перспективы и настройка уровней - все с живым предпросмотром, а аннотации следуют за страницей.
+
+Штампы & водяные знаки
+Ставьте номера страниц или текстовый водяной знак на любой диапазон страниц - с настройкой положения, размера и стиля - и все применяется как одно действие отмены.
+
+Печать & сведение
+Настоящий предпросмотр печати в приложении с управлением бумагой принтера и источником, сворачиваемыми разделами макета и вывода, масштабом, полями, режимом N-up, диапазонами, двусторонней печатью и живым прогрессом подготовки и отправки в очередь при 300 DPI. Или сведите либо экспортируйте страницы как изображения.
+
+Открывает что угодно
+Открывает защищенные паролем PDF, запрашивая пароль вместо ошибки, и чинит поврежденные файлы и файлы со сломанной таблицей xref, чтобы они открывались и печатались.
+
+Сведения о документе
+Просматривайте и редактируйте метаданные PDF - заголовок, автора, тему, ключевые слова и создателя - с сохранением обратно в файл.
+
+Автоматизация & командная строка
+Объединяйте, разделяйте, расшифровывайте, изменяйте размер, сводите, печатайте, распознавайте или пакетно пересохраняйте файлы из PowerShell или cmd без открытия окна. Каждая команда возвращает удобный для скриптов код выхода.
+
+Темы & языки
+13 тем и 41 вариант оформления, переключаемые без перезапуска. Интерфейс доступен на 19 языках, включая русский, казахский, польский и венгерский."
+WhatsNew,Text,,,,,,,,,,,,,,,,,,,
+ProductFeatures1,Text,Four view modes across unlimited tabs,সীমাহীন ট্যাব জুড়ে চারটি ভিউ মোড,Čtyři režimy zobrazení v neomezeném počtu karet,Vier Ansichtsmodi über unbegrenzte Tabs,Cuatro modos de vista en pestañas ilimitadas,Négy nézetmód korlátlan számú lapon,Quattro modalità di visualizzazione su schede illimitate,4 つの表示モードと無制限のタブ,Шексіз қойындыда төрт көру режимі,Sınırsız sekmede dört görünüm modu,Чотири режими перегляду та необмежена кількість вкладок,Bốn chế độ xem trên số lượng tab không giới hạn,Quatro modos de exibição em guias ilimitadas,Cztery tryby widoku i dowolna liczba kart,Fire visningsmoduser med ubegrenset antall faner,四种视图模式，可跨无限标签页,四種檢視模式，可跨無限分頁,Quatre modes d'affichage sur un nombre illimité d'onglets,Четыре режима просмотра и неограниченное число вкладок
+ProductFeatures2,Text,Split panes show two documents side by side,বিভক্ত ভিউ - পাশাপাশি দুটি নথি,Rozdělené zobrazení - dva dokumenty vedle sebe,Geteilte Ansicht - zwei Dokumente nebeneinander,Vista dividida - dos documentos lado a lado,Az osztott ablaktáblákon két dokumentum látható egymás mellett,I riquadri divisi mostrano due documenti affiancati,分割ビュー - 2つの文書を左右に並べて表示,Бөлінген панельде екі құжат қатар көрсетіледі,Bölünmüş görünüm - iki belge yan yana,Розділені панелі показують два документи поруч,Chia đôi khung để xem hai tài liệu song song nhau,Painéis divididos mostram dois documentos lado a lado,Dwa dokumenty obok siebie w widoku dzielonym,Delte ruter viser to dokumenter side ved side,拆分视图 - 两份文档并排显示,分割視窗 - 兩份文件並排顯示,Vue partagée - deux documents côte à côte,Разделенные панели показывают два документа рядом
+ProductFeatures3,Text,"Text, highlights, drawing and shapes","টেক্সট, হাইলাইট, অঙ্কন এবং আকৃতি","Text, zvýraznění, kreslení a tvary","Text, Hervorhebungen, Zeichnen und Formen","Texto, resaltados, dibujo y formas","Szöveg, kiemelések, rajzok és formák","Testo, evidenziazioni, disegno e forme",テキスト、ハイライト、描画、図形,"Мәтін, ерекшелеу, сурет салу және пішіндер","Metin, vurgular, çizim ve şekiller","Текст, виділення, малювання та фігури","Văn bản, đánh dấu, vẽ tay và hình vẽ","Texto, realces, desenho e formas","Tekst, podświetlenia, rysunki i kształty","Tekst, utheving, tegning og former",文本、高亮、绘图与形状,文字、螢光標示、繪圖與形狀,"Texte, surlignages, dessin et formes","Текст, выделения, рисование и фигуры"
+ProductFeatures4,Text,Edit text inline and OCR scans,ইনলাইনে টেক্সট সম্পাদনা করুন এবং স্ক্যান OCR করুন,Úprava textu přímo v dokumentu a OCR skenů,Text direkt bearbeiten und Scans per OCR erfassen,Edita texto en línea y aplica OCR a escaneos,Szöveg soron belüli szerkesztése és OCR-beolvasások,Modifica del testo in linea e OCR delle scansioni,テキストのインライン編集とスキャンの OCR,Мәтінді орнында өңдеу және скандарды OCR арқылы тану,Metni satır içinde düzenle ve taramalara OCR uygula,Редагування тексту прямо на сторінці та OCR сканів,Chỉnh sửa văn bản trực tiếp và OCR bản quét,Edite texto direto no PDF e faça OCR de digitalizações,Edycja tekstu w miejscu i OCR skanów,Rediger tekst direkte og OCR-behandle skanninger,就地编辑文本并对扫描件进行 OCR,就地編輯文字並對掃描件進行 OCR,Modifier le texte en ligne et appliquer l'OCR aux numérisations,Правка текста прямо на странице и OCR сканов
+ProductFeatures5,Text,Fill and sign PDF forms,PDF ফর্ম পূরণ করুন এবং স্বাক্ষর করুন,Vyplňování a podepisování PDF formulářů,PDF-Formulare ausfüllen und signieren,Rellena y firma formularios PDF,PDF-űrlapok kitöltése és aláírása,Compilazione e firma dei moduli PDF,PDF フォームの入力と署名,PDF пішіндерін толтыру және қол қою,PDF formlarını doldur ve imzala,Заповнення та підписання PDF-форм,Điền và ký biểu mẫu PDF,Preencha e assine formulários PDF,Wypełnianie i podpisywanie formularzy PDF,Fyll ut og signer PDF-skjemaer,填写并签署 PDF 表单,填寫並簽署 PDF 表單,Remplir et signer des formulaires PDF,Заполнение и подписание PDF-форм
+ProductFeatures6,Text,Stamp page numbers and watermarks,পৃষ্ঠা নম্বর এবং জলছাপ স্ট্যাম্প করুন,Razítka s čísly stránek a vodoznaky,Seitenzahlen und Wasserzeichen stempeln,Estampa números de página y marcas de agua,Oldalszámok és vízjelek bélyegzése,Numeri di pagina e filigrane,ページ番号と透かしのスタンプ,Бет нөмірлері мен сутаңбаларды мөрлеу,Sayfa numaraları ve filigran damgala,Штамп номерів сторінок і водяні знаки,Đóng dấu số trang và hình mờ,Carimbe números de página e marcas d’água,Numery stron i znaki wodne,Legg til sidetall og vannmerker,加盖页码与水印,加蓋頁碼與浮水印,Apposer des numéros de page et des filigranes,Штамп номеров страниц и водяные знаки
+ProductFeatures7,Text,"Crop, transform, merge and split","ক্রপ, রূপান্তর, একত্র এবং বিভক্ত করুন","Oříznutí, transformace, sloučení a rozdělení","Zuschneiden, transformieren, zusammenführen und teilen","Recorta, transforma, combina y divide","Vágás, átalakítás, egyesítés és felosztás","Ritaglio, trasformazione, unione e divisione",トリミング、変換、結合、分割,"Қию, түрлендіру, біріктіру және бөлу","Kırp, dönüştür, birleştir ve böl","Обрізання, трансформація, об'єднання та розділення","Cắt, chuyển đổi, gộp và tách","Corte, transforme, mescle e divida","Przycinanie, przekształcanie, scalanie i dzielenie","Beskjær, transformer, slå sammen og del",裁剪、变换、合并与拆分,裁切、變形、合併與分割,"Recadrer, transformer, fusionner et diviser","Обрезка, трансформация, объединение и разделение"
+ProductFeatures8,Text,Compare PDFs page by page,পৃষ্ঠা ধরে PDF তুলনা করুন,Porovnávání PDF stránku po stránce,PDFs Seite für Seite vergleichen,Compara archivos PDF página por página,PDF-ek összehasonlítása oldalanként,Confronto dei PDF pagina per pagina,PDF をページごとに比較,PDF файлдарын бет бойынша салыстыру,PDF dosyalarını sayfa sayfa karşılaştır,Порівняння PDF посторінково,So sánh PDF từng trang một,Compare PDFs página a página,Porównywanie plików PDF strona po stronie,Sammenlign PDF-er side for side,逐页比较 PDF,逐頁比較 PDF,Comparer les PDF page par page,Сравнение PDF постранично
+ProductFeatures9,Text,"Print with full control, or flatten","সম্পূর্ণ নিয়ন্ত্রণসহ মুদ্রণ করুন, বা সমতল করুন","Tisk s plnou kontrolou, nebo sloučení do jedné vrstvy",Mit voller Kontrolle drucken oder verflachen,"Imprime con control total, o aplana",Nyomtatás teljes vezérléssel vagy lapítás,"Stampa con pieno controllo, oppure appiattimento",細かく制御できる印刷、またはフラット化,Толық басқарумен басып шығару немесе тегістеу,Tam denetimle yazdır veya düzleştir,Друк з повним контролем або зведення,"In với toàn quyền kiểm soát, hoặc làm phẳng",Imprima com controle total ou nivele,Pełna kontrola druku lub spłaszczanie,"Skriv ut med full kontroll, eller flat ut",完全掌控地打印，或进行平面化,完全掌控地列印，或進行平面化,"Imprimer avec un contrôle total, ou aplatir",Печать с полным контролем или сведение
+ProductFeatures10,Text,,,,,,,,,,,,,,,,,,,
+ProductFeatures11,Text,,,,,,,,,,,,,,,,,,,
+ProductFeatures12,Text,,,,,,,,,,,,,,,,,,,
+ProductFeatures13,Text,,,,,,,,,,,,,,,,,,,
+ProductFeatures14,Text,,,,,,,,,,,,,,,,,,,
+ProductFeatures15,Text,,,,,,,,,,,,,,,,,,,
+ProductFeatures16,Text,,,,,,,,,,,,,,,,,,,
+ProductFeatures17,Text,,,,,,,,,,,,,,,,,,,
+ProductFeatures18,Text,,,,,,,,,,,,,,,,,,,
+ProductFeatures19,Text,,,,,,,,,,,,,,,,,,,
+ProductFeatures20,Text,,,,,,,,,,,,,,,,,,,
+ShortDescription,Text,"View, edit, OCR, organize, compare, fill, sign, and batch process PDFs locally, privately, and without an account.","PDF দেখুন, সম্পাদনা করুন, OCR করুন, সাজান, তুলনা করুন, পূরণ করুন, স্বাক্ষর করুন এবং ব্যাচে প্রক্রিয়া করুন স্থানীয়ভাবে, ব্যক্তিগতভাবে এবং কোনো অ্যাকাউন্ট ছাড়াই।","Prohlížejte, upravujte, rozpoznávejte text, organizujte, porovnávejte, vyplňujte, podepisujte a dávkově zpracovávejte PDF lokálně, soukromě a bez účtu.","PDFs anzeigen, bearbeiten, per OCR erkennen, organisieren, vergleichen, ausfüllen, signieren und stapelweise verarbeiten lokal, privat und ohne Konto.","Visualiza, edita, aplica OCR, organiza, compara, rellena, firma y procesa PDF por lotes de forma local, privada y sin una cuenta.","PDF-ek megtekintése, szerkesztése, OCR-ezése, rendezése, összehasonlítása, kitöltése, aláírása és kötegelt feldolgozása helyben, privát módon és fiók nélkül.","Visualizza, modifica, esegui OCR, organizza, confronta, compila, firma ed elabora in batch i PDF in locale, in privato e senza account.",PDF の閲覧、編集、OCR、整理、比較、フォーム入力、署名、一括処理をローカルかつプライベートに、アカウントなしで。,"PDF файлдарын қараңыз, өңдеңіз, OCR жасаңыз, реттеңіз, салыстырыңыз, толтырыңыз, қол қойыңыз және топтамамен өңдеңіз Барлығы жергілікті, құпия және тіркелгісіз орындалады.","PDF'leri görüntüleyin, düzenleyin, OCR uygulayın, organize edin, karşılaştırın, doldurun, imzalayın ve toplu olarak işleyin yerel, gizli ve hesap gerektirmeden.","Переглядайте, редагуйте, розпізнавайте (OCR), упорядковуйте, порівнюйте, заповнюйте, підписуйте та пакетно обробляйте PDF локально, приватно й без облікового запису.","Xem, chỉnh sửa, OCR, sắp xếp, so sánh, điền, ký và xử lý hàng loạt tệp PDF ngay trên máy, riêng tư và không cần tài khoản.","Visualize, edite, faça OCR, organize, compare, preencha, assine e processe PDFs em lote localmente, com privacidade e sem conta.","Przeglądaj, edytuj, rozpoznawaj tekst, organizuj, porównuj, wypełniaj, podpisuj i przetwarzaj wsadowo pliki PDF lokalnie, prywatnie i bez konta.","Vis, rediger, OCR-behandle, organiser, sammenlign, fyll ut, signer og batchbehandle PDF-er lokalt, privat og uten konto.",查看、编辑、OCR、整理、比较、填写、签署及批量处理 PDF 全程在本机私密完成，无需账户。,檢視、編輯、OCR、整理、比較、填寫、簽署及批次處理 PDF 全程在本機私密完成，無需帳號。,"Affichez, modifiez, OCRisez, organisez, comparez, remplissez, signez et traitez vos PDF par lots en local, en privé et sans compte.","Просматривайте, редактируйте, распознавайте, упорядочивайте, сравнивайте, заполняйте, подписывайте и пакетно обрабатывайте PDF локально, приватно и без учетной записи."
+SearchTerms1,Text,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor
+SearchTerms2,Text,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer
+SearchTerms3,Text,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR
+SearchTerms4,Text,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms
+SearchTerms5,Text,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF
+SearchTerms6,Text,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF
+SearchTerms7,Text,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF
+Applicable license terms,Text,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF
+Copyright,Text,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer
+DevelopedBy,Text,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer
+RequirementsMinimum1,Text,Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64)
+RequirementsMinimum2,Text,,,,,,,,,,,,,,,,,,,
+RequirementsMinimum3,Text,,,,,,,,,,,,,,,,,,,
+RequirementsMinimum4,Text,,,,,,,,,,,,,,,,,,,
+RequirementsMinimum5,Text,,,,,,,,,,,,,,,,,,,
+RequirementsMinimum6,Text,,,,,,,,,,,,,,,,,,,
+RequirementsMinimum7,Text,,,,,,,,,,,,,,,,,,,
+RequirementsMinimum8,Text,,,,,,,,,,,,,,,,,,,
+RequirementsMinimum9,Text,,,,,,,,,,,,,,,,,,,
+RequirementsMinimum10,Text,,,,,,,,,,,,,,,,,,,
+RequirementsMinimum11,Text,,,,,,,,,,,,,,,,,,,
+RequirementsRecommended1,Text,,,,,,,,,,,,,,,,,,,
+RequirementsRecommended2,Text,,,,,,,,,,,,,,,,,,,
+RequirementsRecommended3,Text,,,,,,,,,,,,,,,,,,,
+RequirementsRecommended4,Text,,,,,,,,,,,,,,,,,,,
+RequirementsRecommended5,Text,,,,,,,,,,,,,,,,,,,
+RequirementsRecommended6,Text,,,,,,,,,,,,,,,,,,,
+RequirementsRecommended7,Text,,,,,,,,,,,,,,,,,,,
+RequirementsRecommended8,Text,,,,,,,,,,,,,,,,,,,
+RequirementsRecommended9,Text,,,,,,,,,,,,,,,,,,,
+RequirementsRecommended10,Text,,,,,,,,,,,,,,,,,,,
+RequirementsRecommended11,Text,,,,,,,,,,,,,,,,,,,
+StoreLogos1,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png
+StoreLogos2,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,,,,,,,,,,,,,,,,,,,
+Screenshots1,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png
+Screenshots2,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png
+Screenshots3,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png
+Screenshots4,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png
+Screenshots5,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png
+Screenshots6,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png
+Screenshots7,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png
+Screenshots8,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png
+Screenshots9,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png
+Screenshots10,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png
+HeroArts,Text,,,,,,,,,,,,,,,,,,,
+Trailers,Text,,,,,,,,,,,,,,,,,,,

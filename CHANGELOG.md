@@ -39,6 +39,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Added Reduce File Size to the Save menu. It saves a smaller copy with unused objects removed and the file compressed, and can downsample images drawn at more resolution than the page shows. The command line takes the same option as `--optimize --images <dpi>` (#433).
 - Added Customize Shortcuts to the keyboard shortcuts overlay. Commands on letters, numbers, F1 to F12, Delete and Insert can move to another key, and the list and keyboard map show the keys as chosen (#190).
 - Added SVG signatures. An imported SVG keeps its outlines, fill and stroke, and is saved into the PDF as vectors, so it stays sharp at any size and zoom (#398).
+- Added fillable text field presets. Right-click a text field with the Forms tool to save its size, font size, text color, background and border, then insert it from any page's right-click menu in any document. Presets can be renamed, reordered and deleted (#340).
 
 ### Changed
 - Replaced PDFium, Docnet.Core and PdfPig with the engine for rendering, search, selection, copying and text editing, and built the JPEG 2000 decoder from vendored CoreJ2K sources. The engine keeps the previous renderer's page dimensions for viewing and image export.

@@ -251,6 +251,7 @@ namespace KillerPDF
                 if (_pendingSignature is not null) PlaceSignature(pt, pageIdx);
                 else { SetTool(EditTool.Signature); ShowSignaturePopup(); }
             }, "G", ""));
+            _ctxMenu.Items.Add(BuildFieldPresetMenu(pt, pageIdx));
             _ctxMenu.Items.Add(new Separator());
 
             _ctxMenu.Items.Add(MakeTransformMenuItem(Loc("Str_Lbl_Rotate"), (s, e) => OpenTransformWindow(), "R"));
