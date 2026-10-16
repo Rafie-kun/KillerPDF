@@ -63,6 +63,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Esc no longer closes KillerPDF. It still cancels the open tool, search or overlay, and with nothing to cancel it does nothing, as in other Windows apps.
 
 ### Fixed
+- On the Light theme's Yellow accent, buttons, links, tabs and accent icons stay yellow with a dark shadow behind yellow text and icons, instead of turning near-black.
 - Saving an Edit Text change removes the replaced words from the file, so they can no longer be found, copied or brought back by editing the line again.
 - Restoring a maximized window after Win+D, a taskbar click or a touchpad gesture no longer leaves it black and unresponsive (#437).
 - Opening the theme picker and switching themes or accents no longer crashes the installed or portable app (#452).
