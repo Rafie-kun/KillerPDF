@@ -99,6 +99,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Corrected Help and Technical instructions, documentation navigation, current feature descriptions, and automatic Engine release facts.
 - The website top bar no longer leaves extra space under the wordmark and buttons.
 - Theme and language radio buttons and the Film Grain checkbox line up with their labels again.
+- The checked boxes in the annotation bars and Crop's All pages box keep a readable tick on every accent instead of white on yellow.
 
 ## [1.8.91] - 2026-10-14
 

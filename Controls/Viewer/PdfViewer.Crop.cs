@@ -351,7 +351,10 @@ namespace KillerPDF.Controls
 
             // "All" checkbox - the same compact look as the annotate-bar toggles (no WPF CheckBox chrome).
             bool cropAll = false;
-            var allTick = new TextBlock { Text = "✓", Foreground = Brushes.White, FontSize = 10, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center, Visibility = Visibility.Collapsed };
+            var allTick = new TextBlock { Text = "✓", FontSize = 10, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center, Visibility = Visibility.Collapsed };
+            // The checked box is the family selection pair, so the tick reads on every accent
+            // (white on the yellow accent was unreadable).
+            allTick.SetResourceReference(TextBlock.ForegroundProperty, "SelectionFg");
             var allBox = new Border { Width = 15, Height = 15, CornerRadius = new CornerRadius(3), BorderThickness = new Thickness(1), BorderBrush = _swatchDimBorder, Background = Brushes.Transparent, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 5, 0), Child = allTick };
             var allRow = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center, Cursor = Cursors.Hand, Margin = new Thickness(0, 0, 10, 0) };
             allRow.SetResourceReference(FrameworkElement.ToolTipProperty, "Str_Crop_AllTip");
@@ -361,7 +364,7 @@ namespace KillerPDF.Controls
             {
                 cropAll = !cropAll;
                 allTick.Visibility = cropAll ? Visibility.Visible : Visibility.Collapsed;
-                if (cropAll) allBox.SetResourceReference(Border.BackgroundProperty, "SelectionAccent");
+                if (cropAll) allBox.SetResourceReference(Border.BackgroundProperty, "SelectionBg");
                 else { allBox.Background = Brushes.Transparent; allBox.BorderBrush = _swatchDimBorder; }
             };
             outer.Children.Add(allRow);
