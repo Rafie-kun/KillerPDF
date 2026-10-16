@@ -31,6 +31,9 @@ public sealed class PdfCrossReferenceTable : IReadOnlyDictionary<int, PdfCrossRe
     private readonly Dictionary<int, PdfCrossReferenceEntry> _entries;
     private readonly List<Revision> _revisions;
     private readonly Dictionary<int, HashSet<(int ObjectNumber, int Index)>> _recoveredHeaders = [];
+    private readonly Lock _compressedIndexSync = new();
+    private Dictionary<PdfCrossReferenceSection, Dictionary<long, List<(int ObjectNumber, int Index)>>>?
+        _compressedEntriesBySection;
 
     private PdfCrossReferenceTable(
         PdfHeader header,
@@ -88,11 +91,33 @@ public sealed class PdfCrossReferenceTable : IReadOnlyDictionary<int, PdfCrossRe
 
         void AddRegistrations(PdfCrossReferenceSection section)
         {
-            foreach (PdfCrossReferenceEntry candidate in section.Values)
-                if (candidate.Type == PdfCrossReferenceEntryType.Compressed
-                    && candidate.Field1 == streamNumber)
-                    result.Add((candidate.ObjectNumber, candidate.Field2));
+            if (CompressedEntriesByStream(section).TryGetValue(streamNumber,
+                    out List<(int ObjectNumber, int Index)>? registrations))
+                result.UnionWith(registrations);
         }
+    }
+
+    // Groups each section's compressed entries by object stream once, so looking up one
+    // stream's registrations does not scan every entry of every revision again.
+    private Dictionary<long, List<(int ObjectNumber, int Index)>> CompressedEntriesByStream(
+        PdfCrossReferenceSection section)
+    {
+        using Lock.Scope scope = _compressedIndexSync.EnterScope();
+        _compressedEntriesBySection ??= new(ReferenceEqualityComparer.Instance);
+        if (_compressedEntriesBySection.TryGetValue(section,
+                out Dictionary<long, List<(int ObjectNumber, int Index)>>? index))
+            return index;
+        index = [];
+        foreach (PdfCrossReferenceEntry candidate in section.Values)
+        {
+            if (candidate.Type != PdfCrossReferenceEntryType.Compressed)
+                continue;
+            if (!index.TryGetValue(candidate.Field1, out List<(int ObjectNumber, int Index)>? registrations))
+                index.Add(candidate.Field1, registrations = []);
+            registrations.Add((candidate.ObjectNumber, candidate.Field2));
+        }
+        _compressedEntriesBySection.Add(section, index);
+        return index;
     }
 
     /// <summary>Gets the trailer belonging to the newest primary section.</summary>

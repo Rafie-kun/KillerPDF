@@ -646,8 +646,9 @@ public sealed partial class PdfDocument
             throw Error("Object stream /First points beyond the decoded stream", EntryOffset(entry));
 
         List<ObjectHeader> headers = ReadObjectHeaders(decoded, objectCount, firstObjectOffset, EntryOffset(entry));
-        HashSet<(int ObjectNumber, int Index)> registeredHeaders =
-            CrossReferences.RegisteredHeadersForCurrentObjectStream(streamNumber);
+        // Only a header that the current table does not point at needs the older registrations,
+        // and collecting them scans every revision, so it waits until such a header appears.
+        HashSet<(int ObjectNumber, int Index)>? registeredHeaders = null;
         var items = new List<ObjectStreamItem>(objectCount);
         var objectNumbers = new HashSet<int>();
         bool recoveredIndexes = false;
@@ -675,7 +676,8 @@ public sealed partial class PdfDocument
                     "does not match its compressed cross-reference entry",
                     EntryOffset(entry));
             bool wasRegistered = isCurrent
-                || registeredHeaders.Contains((header.ObjectNumber, index));
+                || (registeredHeaders ??= CrossReferences.RegisteredHeadersForCurrentObjectStream(streamNumber))
+                    .Contains((header.ObjectNumber, index));
             if (!wasRegistered)
                 throw Error(
                     $"Object stream header entry {index} for object {header.ObjectNumber} " +
