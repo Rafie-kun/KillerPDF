@@ -379,6 +379,7 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
 
     <!-- ── Print dialog ───────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Print_Title">KillerPDF - Skriv ut</sys:String>
+    <sys:String x:Key="Str_Print_Rendering">Gjengir {0} / {1}</sys:String>
     <sys:String x:Key="Str_Print_Printer">Skriver</sys:String>
     <sys:String x:Key="Str_Print_Paper">Papirstørrelse</sys:String>
     <sys:String x:Key="Str_Print_PaperAuto">Tilpass dokumentet</sys:String>
@@ -557,6 +558,7 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Tf_FlipV">Speilvend loddrett</sys:String>
     <sys:String x:Key="Str_Tf_LevelLine">Tegn en vaterlinje</sys:String>
     <sys:String x:Key="Str_Tf_SkewHint">Dra langs noe som skal være vannrett (en kant, en tekstlinje). Siden roteres slik at den passer.</sys:String>
+    <sys:String x:Key="Str_Tf_LineCoords" xml:space="preserve">Start  {0}, {1} pt&#10;Slutt  {2}, {3} pt</sys:String>
     <sys:String x:Key="Str_Tf_Perspective">PERSPEKTIV</sys:String>
     <sys:String x:Key="Str_Tf_Levels">NIVÅER</sys:String>
     <sys:String x:Key="Str_Tf_LevelsBlack">Svartpunkt</sys:String>

@@ -379,6 +379,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
 
     <!-- ── Print dialog ───────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Print_Title">KillerPDF: Print</sys:String>
+    <sys:String x:Key="Str_Print_Rendering">Rendering {0} / {1}</sys:String>
     <sys:String x:Key="Str_Print_Printer">Printer</sys:String>
     <sys:String x:Key="Str_Print_Paper">Paper size</sys:String>
     <sys:String x:Key="Str_Print_PaperAuto">Match document</sys:String>
@@ -557,6 +558,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Tf_FlipV">Flip vertical</sys:String>
     <sys:String x:Key="Str_Tf_LevelLine">Draw a level line</sys:String>
     <sys:String x:Key="Str_Tf_SkewHint">Drag along anything that should be level (an edge, a line of text). The page rotates to match.</sys:String>
+    <sys:String x:Key="Str_Tf_LineCoords" xml:space="preserve">Start  {0}, {1} pt&#10;End    {2}, {3} pt</sys:String>
     <sys:String x:Key="Str_Tf_Perspective">PERSPECTIVE</sys:String>
     <sys:String x:Key="Str_Tf_Levels">LEVELS</sys:String>
     <sys:String x:Key="Str_Tf_LevelsBlack">Black point</sys:String>

@@ -192,20 +192,20 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
 
 
     <!-- ── Theme names ────────────────────────────────────────────────── -->
-    <sys:String x:Key="Str_Theme_Dark">অন্ধকার</sys:String>
+    <sys:String x:Key="Str_Theme_Dark">গাঢ়</sys:String>
     <sys:String x:Key="Str_Theme_Light">হালকা</sys:String>
     <sys:String x:Key="Str_Theme_Black">কালো</sys:String>
     <sys:String x:Key="Str_Theme_Blood">রক্ত</sys:String>
     <sys:String x:Key="Str_Theme_Greed">লোভ</sys:String>
-    <sys:String x:Key="Str_Theme_Cyanotic">সায়ানোটিক</sys:String>
+    <sys:String x:Key="Str_Theme_Cyanotic">নীলাভ</sys:String>
     <sys:String x:Key="Str_Theme_98SE">98SE</sys:String>
-    <sys:String x:Key="Str_Theme_Ectoplasm">Ectoplasm</sys:String>
-    <sys:String x:Key="Str_Theme_Decay">Decay</sys:String>
-    <sys:String x:Key="Str_Theme_Mourning">Mourning</sys:String>
+    <sys:String x:Key="Str_Theme_Ectoplasm">এক্টোপ্লাজম</sys:String>
+    <sys:String x:Key="Str_Theme_Decay">ক্ষয়</sys:String>
+    <sys:String x:Key="Str_Theme_Mourning">শোক</sys:String>
     <sys:String x:Key="Str_Theme_FilmGrain">ফিল্ম গ্রেইন</sys:String>
-    <sys:String x:Key="Str_Theme_Sepulchre">Sepulchre</sys:String>
-    <sys:String x:Key="Str_Theme_Delirium">Delirium</sys:String>
-    <sys:String x:Key="Str_Theme_Malaise">Malaise</sys:String>
+    <sys:String x:Key="Str_Theme_Sepulchre">সমাধি</sys:String>
+    <sys:String x:Key="Str_Theme_Delirium">প্রলাপ</sys:String>
+    <sys:String x:Key="Str_Theme_Malaise">অস্বস্তি</sys:String>
 
     <!-- ── Zoom dropdown ──────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Zoom_FitWidth">প্রস্থ মেলান</sys:String>
@@ -281,10 +281,10 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Stamp_Title">পৃষ্ঠা নম্বর বসান</sys:String>
     <sys:String x:Key="Str_Stamp_StartAt">শুরু হবে</sys:String>
     <sys:String x:Key="Str_Stamp_Format">ফরম্যাট</sys:String>
-    <sys:String x:Key="Str_Stamp_Hint">{}{n} = পৃষ্ঠা নম্বর, {N} = মোট। যেমন "Page {n} of {N}"</sys:String>
+    <sys:String x:Key="Str_Stamp_Hint">পৃষ্ঠা নম্বরের জন্য {n} এবং মোটের জন্য {N} ব্যবহার করুন</sys:String>
     <sys:String x:Key="Str_Stamp_Position">অবস্থান</sys:String>
     <sys:String x:Key="Str_Stamp_FontSize">ফন্ট আকার (pt)</sys:String>
-    <sys:String x:Key="Str_Stamp_Hint2">উদাহরণ: &quot;Page {n} of {N}&quot;</sys:String>
+    <sys:String x:Key="Str_Stamp_Hint2">উদাহরণ: "পৃষ্ঠা {n} / {N}"</sys:String>
     <sys:String x:Key="Str_Stamp_Suffix">পৃষ্ঠা স্ট্যাম্প করুন</sys:String>
     <sys:String x:Key="Str_Stamp_SecNumbers">পৃষ্ঠা নম্বর</sys:String>
     <sys:String x:Key="Str_Stamp_SecWatermark">ওয়াটারমার্ক</sys:String>
@@ -313,6 +313,7 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
 
     <!-- ── Print dialog ───────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Print_Title">KillerPDF - মুদ্রণ</sys:String>
+    <sys:String x:Key="Str_Print_Rendering">রেন্ডার হচ্ছে {0} / {1}</sys:String>
     <sys:String x:Key="Str_Print_Printer">প্রিন্টার</sys:String>
     <sys:String x:Key="Str_Print_Orientation">অভিমুখ</sys:String>
     <sys:String x:Key="Str_Print_Portrait">পোর্ট্রেট</sys:String>
@@ -496,6 +497,7 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Tf_FlipV">উল্লম্বভাবে উল্টান</sys:String>
     <sys:String x:Key="Str_Tf_LevelLine">একটি সমতল রেখা আঁকুন</sys:String>
     <sys:String x:Key="Str_Tf_SkewHint">যা সমতল হওয়া উচিত তার বরাবর টানুন (একটি প্রান্ত, একটি লেখার লাইন)। পৃষ্ঠাটি সেই অনুযায়ী ঘুরবে।</sys:String>
+    <sys:String x:Key="Str_Tf_LineCoords" xml:space="preserve">শুরু  {0}, {1} pt&#10;শেষ   {2}, {3} pt</sys:String>
     <sys:String x:Key="Str_Tf_Perspective">পার্সপেক্টিভ</sys:String>
     <sys:String x:Key="Str_Tf_CorrectPerspective">ট্র্যাপিজয়েড বিকৃতি ঠিক করুন</sys:String>
     <sys:String x:Key="Str_Tf_PerspectiveHint">চারটি কোণ ছবিতে তোলা পৃষ্ঠার সীমানায় টানুন। প্রয়োগ করলে এটি সোজা আয়তক্ষেত্র হবে।</sys:String>

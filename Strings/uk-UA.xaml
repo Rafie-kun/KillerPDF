@@ -379,6 +379,7 @@ KillerPDF не створюватиме двох установлених коп
 
     <!-- ── Print dialog ───────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Print_Title">KillerPDF - Друк</sys:String>
+    <sys:String x:Key="Str_Print_Rendering">Відтворення {0} / {1}</sys:String>
     <sys:String x:Key="Str_Print_Printer">Принтер</sys:String>
     <sys:String x:Key="Str_Print_Paper">Розмір паперу</sys:String>
     <sys:String x:Key="Str_Print_PaperAuto">Як у документі</sys:String>
@@ -557,6 +558,7 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Tf_FlipV">Віддзеркалити по вертикалі</sys:String>
     <sys:String x:Key="Str_Tf_LevelLine">Провести лінію рівня</sys:String>
     <sys:String x:Key="Str_Tf_SkewHint">Проведіть уздовж усього, що має бути горизонтальним (край, рядок тексту). Сторінка повернеться відповідно.</sys:String>
+    <sys:String x:Key="Str_Tf_LineCoords" xml:space="preserve">Початок  {0}, {1} pt&#10;Кінець   {2}, {3} pt</sys:String>
     <sys:String x:Key="Str_Tf_Perspective">ПЕРСПЕКТИВА</sys:String>
     <sys:String x:Key="Str_Tf_Levels">РІВНІ</sys:String>
     <sys:String x:Key="Str_Tf_LevelsBlack">Чорна точка</sys:String>

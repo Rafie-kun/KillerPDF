@@ -249,18 +249,18 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <!-- ── Tên giao diện ──────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Theme_Dark">Tối</sys:String>
     <sys:String x:Key="Str_Theme_Light">Sáng</sys:String>
-    <sys:String x:Key="Str_Theme_Black">Đen tuyền</sys:String>
+    <sys:String x:Key="Str_Theme_Black">Đen</sys:String>
     <sys:String x:Key="Str_Theme_Blood">Máu</sys:String>
-    <sys:String x:Key="Str_Theme_Greed">Lòng tham</sys:String>
+    <sys:String x:Key="Str_Theme_Greed">Tham lam</sys:String>
     <sys:String x:Key="Str_Theme_Cyanotic">Tím tái</sys:String>
     <sys:String x:Key="Str_Theme_98SE">98SE</sys:String>
-    <sys:String x:Key="Str_Theme_Ectoplasm">Chất ngoại cảm</sys:String>
-    <sys:String x:Key="Str_Theme_Decay">Phân hủy</sys:String>
-    <sys:String x:Key="Str_Theme_Mourning">Tang lễ</sys:String>
+    <sys:String x:Key="Str_Theme_Ectoplasm">Ngoại chất</sys:String>
+    <sys:String x:Key="Str_Theme_Decay">Mục rữa</sys:String>
+    <sys:String x:Key="Str_Theme_Mourning">Tang tóc</sys:String>
     <sys:String x:Key="Str_Theme_FilmGrain">Hạt phim</sys:String>
     <sys:String x:Key="Str_Theme_Sepulchre">Hầm mộ</sys:String>
     <sys:String x:Key="Str_Theme_Delirium">Mê sảng</sys:String>
-    <sys:String x:Key="Str_Theme_Malaise">Khó ở</sys:String>
+    <sys:String x:Key="Str_Theme_Malaise">Uể oải</sys:String>
 
     <!-- ── Menu thả xuống thu phóng ────────────────────────────────────── -->
     <sys:String x:Key="Str_Zoom_FitWidth">Vừa chiều rộng</sys:String>
@@ -379,6 +379,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
 
     <!-- ── Hộp thoại In ───────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Print_Title">KillerPDF - In</sys:String>
+    <sys:String x:Key="Str_Print_Rendering">Đang kết xuất {0} / {1}</sys:String>
     <sys:String x:Key="Str_Print_Printer">Máy in</sys:String>
     <sys:String x:Key="Str_Print_Paper">Kích thước giấy</sys:String>
     <sys:String x:Key="Str_Print_PaperAuto">Khớp với tài liệu</sys:String>
@@ -557,6 +558,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Tf_FlipV">Lật dọc</sys:String>
     <sys:String x:Key="Str_Tf_LevelLine">Vẽ một đường thăng bằng</sys:String>
     <sys:String x:Key="Str_Tf_SkewHint">Kéo dọc theo bất kỳ thứ gì cần giữ thăng bằng (cạnh, dòng văn bản). Trang sẽ xoay để khớp.</sys:String>
+    <sys:String x:Key="Str_Tf_LineCoords" xml:space="preserve">Đầu   {0}, {1} pt&#10;Cuối  {2}, {3} pt</sys:String>
     <sys:String x:Key="Str_Tf_Perspective">PHỐI CẢNH</sys:String>
     <sys:String x:Key="Str_Tf_Levels">MỨC ĐỘ</sys:String>
     <sys:String x:Key="Str_Tf_LevelsBlack">Điểm đen</sys:String>

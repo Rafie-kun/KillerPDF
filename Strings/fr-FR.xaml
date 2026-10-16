@@ -26,7 +26,7 @@
     <sys:String x:Key="Str_TT_MovePageDown">Déplacer la page vers le bas (réorganiser)</sys:String>
     <sys:String x:Key="Str_TT_SelectTool">Outil Sélection - cliquer sur les annotations, glisser pour sélectionner du texte, double-cliquer pour modifier (V)</sys:String>
     <sys:String x:Key="Str_TT_TextTool">Outil Texte - cliquer pour ajouter du texte (T)</sys:String>
-    <sys:String x:Key="Str_TT_FormFieldTool">Champ de texte remplissable – créer, sélectionner, déplacer, redimensionner ou supprimer des champs ; clic droit pour modifier la couleur de remplissage (F)</sys:String>
+    <sys:String x:Key="Str_TT_FormFieldTool">Champ de texte remplissable : créer, sélectionner, déplacer, redimensionner ou supprimer des champs ; clic droit pour modifier la couleur de remplissage (F)</sys:String>
     <sys:String x:Key="Str_TT_HighlightTool">Outil Surlignage - glisser pour surligner (H)</sys:String>
     <sys:String x:Key="Str_TT_StrikeTool">Barré - glisser sur le texte</sys:String>
     <sys:String x:Key="Str_TT_UnderlineTool">Souligné - glisser sur le texte</sys:String>
@@ -251,7 +251,7 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Theme_Light">Clair</sys:String>
     <sys:String x:Key="Str_Theme_Black">Noir</sys:String>
     <sys:String x:Key="Str_Theme_Blood">Sang</sys:String>
-    <sys:String x:Key="Str_Theme_Greed">Cupidité</sys:String>
+    <sys:String x:Key="Str_Theme_Greed">Avarice</sys:String>
     <sys:String x:Key="Str_Theme_Cyanotic">Cyanotique</sys:String>
     <sys:String x:Key="Str_Theme_98SE">98SE</sys:String>
     <sys:String x:Key="Str_Theme_Ectoplasm">Ectoplasme</sys:String>
@@ -379,6 +379,7 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
 
     <!-- ── Print dialog ───────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Print_Title">KillerPDF - Imprimer</sys:String>
+    <sys:String x:Key="Str_Print_Rendering">Rendu {0} / {1}</sys:String>
     <sys:String x:Key="Str_Print_Printer">Imprimante</sys:String>
     <sys:String x:Key="Str_Print_Paper">Format du papier</sys:String>
     <sys:String x:Key="Str_Print_PaperAuto">Identique au document</sys:String>
@@ -557,6 +558,7 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Tf_FlipV">Retourner verticalement</sys:String>
     <sys:String x:Key="Str_Tf_LevelLine">Tracer une ligne de niveau</sys:String>
     <sys:String x:Key="Str_Tf_SkewHint">Glissez le long de tout ce qui devrait être de niveau (un bord, une ligne de texte). La page pivote pour correspondre.</sys:String>
+    <sys:String x:Key="Str_Tf_LineCoords" xml:space="preserve">Début  {0}, {1} pt&#10;Fin    {2}, {3} pt</sys:String>
     <sys:String x:Key="Str_Tf_Perspective">PERSPECTIVE</sys:String>
     <sys:String x:Key="Str_Tf_Levels">NIVEAUX</sys:String>
     <sys:String x:Key="Str_Tf_LevelsBlack">Point noir</sys:String>
@@ -957,7 +959,7 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_St_PlaceSignature">Cliquer sur la page pour placer votre signature</sys:String>
     <sys:String x:Key="Str_St_PlaceInitials">Cliquer sur la page pour placer vos initiales</sys:String>
     <sys:String x:Key="Str_St_SelectionCleared">Sélection annulée</sys:String>
-    <sys:String x:Key="Str_St_AnnotationsSelected">{0} annotations sélectionnées – appuyez sur Suppr pour les retirer</sys:String>
+    <sys:String x:Key="Str_St_AnnotationsSelected">{0} annotations sélectionnées. Appuyez sur Suppr pour les retirer</sys:String>
     <sys:String x:Key="Str_St_CopiedAnnotationOne">1 annotation copiée</sys:String>
     <sys:String x:Key="Str_St_CopiedAnnotationMany">{0} annotations copiées</sys:String>
     <sys:String x:Key="Str_St_PastedAnnotationOne">1 annotation collée</sys:String>

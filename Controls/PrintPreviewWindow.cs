@@ -1138,7 +1138,7 @@ namespace KillerPDF
         {
             if (_isLoading)
             {
-                _renderLabel.Text = $"Rendering {_loadedCount} / {_pages.Length}";
+                _renderLabel.Text = string.Format(S("Str_Print_Rendering"), _loadedCount, _pages.Length);
                 _renderLabel.Visibility = Visibility.Visible;
             }
             else _renderLabel.Visibility = Visibility.Collapsed;
@@ -1205,7 +1205,7 @@ namespace KillerPDF
             sp.Children.Add(ring);
             sp.Children.Add(new TextBlock
             {
-                Text                = $"Rendering {_loadedCount} / {_pages.Length}",
+                Text                = string.Format(S("Str_Print_Rendering"), _loadedCount, _pages.Length),
                 Foreground          = R("MutedTextBrush"),
                 FontSize            = 12,
                 HorizontalAlignment = HorizontalAlignment.Center,
