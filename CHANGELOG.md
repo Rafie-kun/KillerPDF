@@ -47,6 +47,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Added Scan to PDF to the Open menu. It scans through the scanner's TWAIN driver, with or without the scanner's own settings window, and opens the pages as a new PDF (#73).
 - Added Convert Word or Excel file to the Open menu. KillerPDF lays out .docx and .xlsx files itself, with their fonts, lists, tables, pictures, headers, footers, cell formats and page setup, and opens the result as a new PDF. Older .doc and .xls files convert through Word or Excel when installed (#74).
 - Added optional PDF previews for File Explorer and Outlook to the installed edition. Setup offers them as a checkbox, the preview pages scroll with fit width, fit page and zoom, and Open in KillerPDF opens a read-only copy of the previewed file. The portable edition registers nothing (#410).
+- Added a Microsoft Store button to the website's top bar on every page.
 
 ### Changed
 - Replaced PDFium, Docnet.Core and PdfPig with the engine for rendering, search, selection, copying and text editing, and built the JPEG 2000 decoder from vendored CoreJ2K sources. The engine keeps the previous renderer's page dimensions for viewing and image export.
@@ -61,6 +62,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Check for updates on startup is the first of the About options, as in the other Killer Tools apps.
 - The Light theme draws a softer shadow under the toolbars.
 - Esc no longer closes KillerPDF. It still cancels the open tool, search or overlay, and with nothing to cancel it does nothing, as in other Windows apps.
+- The website's top bar Download button uses the same font and height as the other top bar buttons.
 
 ### Fixed
 - On the Light theme's Yellow accent, buttons, links, tabs and accent icons stay yellow with a thin gray outline around yellow text and icons, instead of turning near-black.
