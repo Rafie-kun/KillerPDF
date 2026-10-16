@@ -122,16 +122,18 @@
                     </icons:AppIcon>
                     <StackPanel Grid.Row="1" Margin="0,8,0,0">
                         <Grid HorizontalAlignment="Left"><TextBlock Foreground="#D8000000" Opacity="0.45" Margin="1,2,-1,-2" IsHitTestVisible="False"><TextBlock.Effect><BlurEffect Radius="3"/></TextBlock.Effect><Run Text="Killer" FontFamily="{StaticResource Wordmark}" FontSize="19.56"/><Run Text="PDF" FontFamily="{StaticResource WordmarkAccent}" FontSize="29.37"/></TextBlock><TextBlock><Run Text="Killer" FontFamily="{StaticResource Wordmark}" FontSize="19.56"/><Run Text="PDF" FontFamily="{StaticResource WordmarkAccent}" FontSize="29.37" Foreground="{StaticResource Green}"/></TextBlock></Grid>
-                        <local:SetupVersionText x:Name="SetupVersionLabel" TextElement.FontFamily="{StaticResource BrandSans}" TextElement.FontSize="18.5" TextElement.Foreground="#a0a0a0" TextOptions.TextFormattingMode="Ideal" Margin="1,2,0,0"/>
+                        <local:SetupVersionText x:Name="SetupVersionLabel" TextElement.FontFamily="{StaticResource BrandSans}" TextElement.FontSize="13.44" TextElement.Foreground="#a0a0a0" TextOptions.TextFormattingMode="Ideal" Margin="1,2,0,0"/>
                         <Viewbox Stretch="Uniform" StretchDirection="DownOnly" Margin="1,1,0,0">
-                            <TextBlock x:Name="SetupLabel" Text="{local:Loc SetupLabel}" FontFamily="{StaticResource HeadingFont}" FontSize="11" Foreground="#d0d0d0" TextOptions.TextFormattingMode="Ideal" TextWrapping="NoWrap"/>
+                            <TextBlock x:Name="SetupLabel" Text="{local:Loc SetupLabel}" FontFamily="{StaticResource HeadingFont}" FontSize="16" Foreground="#d0d0d0" TextOptions.TextFormattingMode="Ideal" TextWrapping="NoWrap"/>
                         </Viewbox>
                     </StackPanel>
                     <TextBlock Grid.Row="2" Margin="1,14,0,0" TextWrapping="Wrap" Foreground="#d0d0d0" LineHeight="17"
                                Text="{local:Loc Tagline}"/>
-                    <TextBlock Grid.Row="3" FontFamily="{StaticResource BrandSans}" FontSize="14" TextOptions.TextFormattingMode="Ideal" Foreground="#a0a0a0">
-                        <Run Text="&#x00A9; 2026 "/><Hyperlink NavigateUri="https://thekiller.net" Click="Website_Click" Style="{StaticResource FooterLink}"><Run Text="Steve the Killer"/></Hyperlink>
-                    </TextBlock>
+                    <Viewbox x:Name="FooterBox" Grid.Row="3" Stretch="Uniform" StretchDirection="DownOnly" HorizontalAlignment="Left">
+                        <TextBlock FontFamily="{StaticResource BrandSans}" FontSize="14" TextOptions.TextFormattingMode="Ideal" Foreground="#a0a0a0" TextWrapping="NoWrap">
+                            <Run Text="&#x00A9; 2026 "/><Hyperlink NavigateUri="https://thekiller.net" Click="Website_Click" Style="{StaticResource FooterLink}"><Run Text="Steve the Killer"/></Hyperlink>
+                        </TextBlock>
+                    </Viewbox>
                     </Grid>
                 </Grid>
             </Border>

@@ -19,6 +19,7 @@ try {
     $versionLine = $window.FindName('SetupVersionLabel')
     $setupLabel = $window.FindName('SetupLabel')
     $setupBox = $setupLabel.Parent
+    $footerBox = $window.FindName('FooterBox')
     $header = $versionLine.Parent
     $sidebar = $header.Parent
     $columns = $sidebar.Parent.Parent.Parent
@@ -53,6 +54,7 @@ try {
             $setupTop = $setupBox.TranslatePoint((New-Object Windows.Point 0,0), $sidebar).Y
             if ($setupTop -lt $versionBottom) { throw "Setup line is not below the version: $case" }
             if ($setupBox.ActualWidth -gt $width + 1) { throw "Setup line wider than the sidebar: $case" }
+            if ($footerBox.ActualWidth -gt $width + 1) { throw "Copyright line wider than the sidebar: $case" }
             $bottom = $setupBox.TranslatePoint((New-Object Windows.Point 0,$setupBox.ActualHeight), $sidebar).Y
             $top = $tagline.TranslatePoint((New-Object Windows.Point 0,0), $sidebar).Y
             if ($bottom -gt $top) { throw "Tagline overlap: $case" }
