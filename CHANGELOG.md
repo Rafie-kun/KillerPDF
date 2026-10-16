@@ -48,6 +48,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Added Convert Word or Excel file to the Open menu. KillerPDF lays out .docx and .xlsx files itself, with their fonts, lists, tables, pictures, headers, footers, cell formats and page setup, and opens the result as a new PDF. Older .doc and .xls files convert through Word or Excel when installed (#74).
 - Added optional PDF previews for File Explorer and Outlook to the installed edition. Setup offers them as a checkbox, the preview pages scroll with fit width, fit page and zoom, and Open in KillerPDF opens a read-only copy of the previewed file. The portable edition registers nothing (#410).
 - Added a Microsoft Store button to the website's top bar on every page.
+- Added a Microsoft Store button for KillerMCP to the website's MCP page.
 
 ### Changed
 - Replaced PDFium, Docnet.Core and PdfPig with the engine for rendering, search, selection, copying and text editing, and built the JPEG 2000 decoder from vendored CoreJ2K sources. The engine keeps the previous renderer's page dimensions for viewing and image export.
