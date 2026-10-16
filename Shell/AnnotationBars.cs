@@ -594,19 +594,21 @@ namespace KillerPDF
                 var mark = new TextBlock
                 {
                     Text = "✓",
-                    Foreground = Brushes.White,
                     FontSize = 10,
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center
                 };
                 box.Child = mark;
+                // The checked box is the family selection pair, so the tick reads on every accent
+                // (white on the yellow accent was unreadable).
+                mark.SetResourceReference(TextBlock.ForegroundProperty, "SelectionFg");
                 box.BorderBrush = _swatchDimBorder;
                 void UpdateCheckVisual()
                 {
                     box.BorderThickness = new Thickness(active ? 0 : 1);
                     mark.Visibility = active ? Visibility.Visible : Visibility.Collapsed;
                     // Keep the checked fill live so it follows theme changes.
-                    if (active) box.SetResourceReference(Border.BackgroundProperty, "SelectionAccent");
+                    if (active) box.SetResourceReference(Border.BackgroundProperty, "SelectionBg");
                     else box.Background = Brushes.Transparent;
                 }
                 UpdateCheckVisual();
