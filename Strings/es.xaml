@@ -233,7 +233,7 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Theme_Cyanotic">Cianótico</sys:String>
     <sys:String x:Key="Str_Theme_98SE">98SE</sys:String>
     <sys:String x:Key="Str_Theme_Ectoplasm">Ectoplasma</sys:String>
-    <sys:String x:Key="Str_Theme_Decay">Decadencia</sys:String>
+    <sys:String x:Key="Str_Theme_Decay">Descomposición</sys:String>
     <sys:String x:Key="Str_Theme_Mourning">Luto</sys:String>
     <sys:String x:Key="Str_Theme_FilmGrain">Grano de película</sys:String>
     <sys:String x:Key="Str_Theme_Sepulchre">Sepulcro</sys:String>
@@ -357,6 +357,7 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
 
     <!-- ── Print dialog ───────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Print_Title">KillerPDF - Imprimir</sys:String>
+    <sys:String x:Key="Str_Print_Rendering">Renderizando {0} / {1}</sys:String>
     <sys:String x:Key="Str_Print_Printer">Impresora</sys:String>
     <sys:String x:Key="Str_Print_Orientation">Orientación</sys:String>
     <sys:String x:Key="Str_Print_Portrait">Vertical</sys:String>
@@ -754,6 +755,7 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Tf_FlipV">Voltear verticalmente</sys:String>
     <sys:String x:Key="Str_Tf_LevelLine">Dibujar una línea de nivel</sys:String>
     <sys:String x:Key="Str_Tf_SkewHint">Arrastra a lo largo de algo que deba quedar nivelado (un borde, una línea de texto). La página rota para coincidir.</sys:String>
+    <sys:String x:Key="Str_Tf_LineCoords" xml:space="preserve">Inicio  {0}, {1} pt&#10;Fin     {2}, {3} pt</sys:String>
     <sys:String x:Key="Str_Tf_Perspective">PERSPECTIVA</sys:String>
     <sys:String x:Key="Str_Tf_CorrectPerspective">Corregir distorsión trapezoidal</sys:String>
     <sys:String x:Key="Str_Tf_PerspectiveHint">Arrastra las cuatro esquinas al contorno de la página fotografiada. Aplicar la endereza en un rectángulo.</sys:String>

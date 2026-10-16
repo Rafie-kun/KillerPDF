@@ -286,19 +286,19 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
 
     <!-- ── Theme names ────────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Theme_Dark">Sötét</sys:String>
-    <sys:String x:Key="Str_Theme_Light">Világos</sys:String>
+    <sys:String x:Key="Str_Theme_Light">Fény</sys:String>
     <sys:String x:Key="Str_Theme_Black">Fekete</sys:String>
     <sys:String x:Key="Str_Theme_Blood">Vér</sys:String>
     <sys:String x:Key="Str_Theme_Greed">Kapzsiság</sys:String>
     <sys:String x:Key="Str_Theme_Cyanotic">Cianotikus</sys:String>
     <sys:String x:Key="Str_Theme_98SE">98SE</sys:String>
     <sys:String x:Key="Str_Theme_Ectoplasm">Ektoplazma</sys:String>
-    <sys:String x:Key="Str_Theme_Decay">Enyészet</sys:String>
+    <sys:String x:Key="Str_Theme_Decay">Bomlás</sys:String>
     <sys:String x:Key="Str_Theme_Mourning">Gyász</sys:String>
     <sys:String x:Key="Str_Theme_FilmGrain">Filmszemcse</sys:String>
-    <sys:String x:Key="Str_Theme_Sepulchre">Sírbolt</sys:String>
+    <sys:String x:Key="Str_Theme_Sepulchre">Sír</sys:String>
     <sys:String x:Key="Str_Theme_Delirium">Delírium</sys:String>
-    <sys:String x:Key="Str_Theme_Malaise">Levertség</sys:String>
+    <sys:String x:Key="Str_Theme_Malaise">Rosszullét</sys:String>
 
     <!-- ── Zoom dropdown ──────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Zoom_FitWidth">Szélességhez igazítás</sys:String>
@@ -429,6 +429,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
 
     <!-- ── Print dialog ───────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Print_Title">KillerPDF - Nyomtatás</sys:String>
+    <sys:String x:Key="Str_Print_Rendering">Megjelenítés {0} / {1}</sys:String>
     <sys:String x:Key="Str_Print_Printer">Nyomtató</sys:String>
     <sys:String x:Key="Str_Print_Paper">Papírméret</sys:String>
     <sys:String x:Key="Str_Print_PaperAuto">Dokumentumhoz igazítás</sys:String>
@@ -822,6 +823,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Tf_FlipV">Függőleges tükrözés</sys:String>
     <sys:String x:Key="Str_Tf_LevelLine">Rajzoljon egy szintvonalat</sys:String>
     <sys:String x:Key="Str_Tf_SkewHint">Húzzon végig bármi mentén, aminek vízszintesnek kellene lennie (egy él, egy szövegsor). Az oldal ehhez igazodva elfordul.</sys:String>
+    <sys:String x:Key="Str_Tf_LineCoords" xml:space="preserve">Kezdet  {0}, {1} pt&#10;Vég     {2}, {3} pt</sys:String>
     <sys:String x:Key="Str_Tf_Perspective">PERSPEKTÍVA</sys:String>
     <sys:String x:Key="Str_Tf_Levels">SZINTEK</sys:String>
     <sys:String x:Key="Str_Tf_LevelsBlack">Fekete pont</sys:String>

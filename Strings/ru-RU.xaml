@@ -189,7 +189,7 @@
     <sys:String x:Key="Str_RemovedCrop">Удалена зона обрезки из {0} страниц </sys:String>
     <sys:String x:Key="Str_RemoveCropFailed">Удалить обрезку не удалось: {0}</sys:String>
     <sys:String x:Key="Str_Extracted">Извлеченно {0} страниц(ы) к {1}</sys:String>
-    <sys:String x:Key="Str_Deleted">Удалено {0} страниц(ы) - {1} remaining</sys:String>
+    <sys:String x:Key="Str_Deleted">Удалено страниц: {0}, осталось: {1}</sys:String>
     <sys:String x:Key="Str_Printed">Отправлено {0} страниц на принтер</sys:String>
     <sys:String x:Key="Str_LinkRemoved">Ссылка удалена.</sys:String>
     <sys:String x:Key="Str_LinkRemoveFailed">Не удалось удалить ссылку:</sys:String>
@@ -267,7 +267,7 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Btn_DoUpdate">Обновить</sys:String>
     <sys:String x:Key="Str_Chk_Desktop">Добавить ярлык на рабочий стол</sys:String>
     <sys:String x:Key="Str_Chk_AllUsers">Установка для всех пользователей этого компьютера (требуется администратор)</sys:String>
-    <sys:String x:Key="Str_Status_InstallFailed">Установка не завершена - KillerPDF все еще работает в режиме portable.</sys:String>
+    <sys:String x:Key="Str_Status_InstallFailed">Установка не завершена: KillerPDF по-прежнему работает в портативном режиме.</sys:String>
     <sys:String x:Key="Str_Dlg_SetDefaultPdfMsg" xml:space="preserve">Хотите ли вы установить KillerPDF в качестве средства просмотра PDF-файлов по умолчанию?
 
 Открывает настройки Windows - Приложения по умолчанию.</sys:String>
@@ -285,19 +285,19 @@ KillerPDF не будет создавать две установленные �
 
 
     <!-- ── Theme names ────────────────────────────────────────────────── -->
-    <sys:String x:Key="Str_Theme_Dark">Темный</sys:String>
-    <sys:String x:Key="Str_Theme_Light">Светлый</sys:String>
-    <sys:String x:Key="Str_Theme_Black">Черный</sys:String>
-    <sys:String x:Key="Str_Theme_Blood">Кровавый</sys:String>
-    <sys:String x:Key="Str_Theme_Greed">Жадный</sys:String>
-    <sys:String x:Key="Str_Theme_Cyanotic">Синюшный</sys:String>
+    <sys:String x:Key="Str_Theme_Dark">Тёмная</sys:String>
+    <sys:String x:Key="Str_Theme_Light">Светлая</sys:String>
+    <sys:String x:Key="Str_Theme_Black">Чёрная</sys:String>
+    <sys:String x:Key="Str_Theme_Blood">Кровь</sys:String>
+    <sys:String x:Key="Str_Theme_Greed">Алчность</sys:String>
+    <sys:String x:Key="Str_Theme_Cyanotic">Цианоз</sys:String>
     <sys:String x:Key="Str_Theme_98SE">98SE</sys:String>
     <sys:String x:Key="Str_Theme_Ectoplasm">Эктоплазма</sys:String>
     <sys:String x:Key="Str_Theme_Decay">Распад</sys:String>
     <sys:String x:Key="Str_Theme_Mourning">Траур</sys:String>
     <sys:String x:Key="Str_Theme_FilmGrain">Зернистость плёнки</sys:String>
-    <sys:String x:Key="Str_Theme_Sepulchre">Гробница</sys:String>
-    <sys:String x:Key="Str_Theme_Delirium">Делирий</sys:String>
+    <sys:String x:Key="Str_Theme_Sepulchre">Склеп</sys:String>
+    <sys:String x:Key="Str_Theme_Delirium">Бред</sys:String>
     <sys:String x:Key="Str_Theme_Malaise">Недомогание</sys:String>
 
     <!-- ── Zoom dropdown ──────────────────────────────────────────────── -->
@@ -429,6 +429,7 @@ KillerPDF не будет создавать две установленные �
 
     <!-- ── Print dialog ───────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Print_Title">KillerPDF - Печать</sys:String>
+    <sys:String x:Key="Str_Print_Rendering">Отрисовка {0} / {1}</sys:String>
     <sys:String x:Key="Str_Print_Printer">Принтер</sys:String>
     <sys:String x:Key="Str_Print_Paper">Размер бумаги</sys:String>
     <sys:String x:Key="Str_Print_PaperAuto">В соответствии с документом</sys:String>
@@ -718,7 +719,7 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Sig_Initials">Инициалы</sys:String>
     <sys:String x:Key="Str_Sig_Pen">Ручка</sys:String>
     <sys:String x:Key="Str_Sig_Thin">Тонкий</sys:String>
-    <sys:String x:Key="Str_Sig_Medium">Medium</sys:String>
+    <sys:String x:Key="Str_Sig_Medium">Средний</sys:String>
     <sys:String x:Key="Str_Sig_Thick">Толстый</sys:String>
     <!-- ── Digital Signature dialog ───────────────────────────────────── -->
     <sys:String x:Key="Str_Sign_Desc">Заверить {0} печатью сертификата и сохранить подписанную копию.</sys:String>
@@ -821,7 +822,8 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Tf_FlipH">Перевернуть горизонтально</sys:String>
     <sys:String x:Key="Str_Tf_FlipV">Перевернуть вертикально</sys:String>
     <sys:String x:Key="Str_Tf_LevelLine">Нарисовать ровную линию</sys:String>
-    <sys:String x:Key="Str_Tf_SkewHint">Протяните горизонтальную линию вдоль всего, что криво повернуто набок, но должно находиться на одном горизонтальном или вертикальном уровне (кромку, строку текста). Страница поворачивается в соответствии с новой линией устраняя перекос.</sys:String>
+    <sys:String x:Key="Str_Tf_SkewHint">Проведите вдоль того, что должно быть ровным (край, строка текста). Страница повернётся, чтобы совпасть с линией.</sys:String>
+    <sys:String x:Key="Str_Tf_LineCoords" xml:space="preserve">Начало  {0}, {1} pt&#10;Конец   {2}, {3} pt</sys:String>
     <sys:String x:Key="Str_Tf_Perspective">ПЕРСПЕКТИВА</sys:String>
     <sys:String x:Key="Str_Tf_Levels">УРОВНИ</sys:String>
     <sys:String x:Key="Str_Tf_LevelsBlack">Черная точка</sys:String>
@@ -1024,7 +1026,7 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_QA_Desktop">Рабочий стол</sys:String>
     <sys:String x:Key="Str_QA_Documents">Документы</sys:String>
     <sys:String x:Key="Str_QA_Downloads">Загрузки</sys:String>
-    <sys:String x:Key="Str_QA_Home">Home</sys:String>
+    <sys:String x:Key="Str_QA_Home">Домашняя папка</sys:String>
     <sys:String x:Key="Str_QA_Pictures">Картинки</sys:String>
     <sys:String x:Key="Str_Sum_Counts">{0} папка(и), {1} файл(ы)</sys:String>
     <sys:String x:Key="Str_TT_RecentLocations">Недавние места</sys:String>
@@ -1076,7 +1078,7 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Dlg_InstallShortcut">Создать ярлык на рабочем столе</sys:String>
     <sys:String x:Key="Str_Stamp_DefaultText">ПРОЕКТ</sys:String>
     <sys:String x:Key="Str_Sign_NeedCertFile">Выберите файл сертификата (.pfx / .p12) сперва.</sys:String>
-    <sys:String x:Key="Str_Sign_NoStoreCert">Сертификат подписи недоступен в магазине Windows Store.</sys:String>
+    <sys:String x:Key="Str_Sign_NoStoreCert">В хранилище сертификатов Windows нет доступного сертификата для подписи.</sys:String>
     <sys:String x:Key="Str_Sign_NeedOutput">Выберите, где сохранить подписанную копию.</sys:String>
     <sys:String x:Key="Str_Sign_BadCert" xml:space="preserve">Не удалось открыть сертификат.&#10;&#10;Возможно, введен неверный пароль или файл не является действительным .pfx / .p12 сертификатом.</sys:String>
     <sys:String x:Key="Str_Sign_CertLoadFailed">Не удалось загрузить сертификат:</sys:String>
@@ -1156,7 +1158,7 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_St_OcrNoTextPage">Распознавание: текст на странице не найден {0}</sys:String>
     <sys:String x:Key="Str_St_OcrCopiedPage">Распознавание: скопировано {0} символов со страницы {1} (уверенность {2})</sys:String>
     <sys:String x:Key="Str_St_OcrCopiedPages">Распознавание: скопировано {0} символов с {1} страниц (уверенность {2})</sys:String>
-    <sys:String x:Key="Str_St_OcrCopiedRegion">OCR: copied {0} chars from the region ({1} уверенность)</sys:String>
+    <sys:String x:Key="Str_St_OcrCopiedRegion">OCR: из области скопировано символов: {0} (уверенность {1})</sys:String>
     <sys:String x:Key="Str_St_SearchableSaved">Сохранен PDF-файл с возможностью поиска: {0} страниц, {1} слов распознано</sys:String>
     <sys:String x:Key="Str_St_ScanTextSaved">Преобразованный PDF сохранен: отсканированных страниц: {0}, слов стало текстом: {1}</sys:String>
     <sys:String x:Key="Str_St_TextExtracted">Текст, извлечен из {0} страниц -> {1}</sys:String>

@@ -230,15 +230,15 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Theme_Black">黑色</sys:String>
     <sys:String x:Key="Str_Theme_Blood">血色</sys:String>
     <sys:String x:Key="Str_Theme_Greed">贪婪</sys:String>
-    <sys:String x:Key="Str_Theme_Cyanotic">青色</sys:String>
+    <sys:String x:Key="Str_Theme_Cyanotic">发绀</sys:String>
     <sys:String x:Key="Str_Theme_98SE">98SE</sys:String>
-    <sys:String x:Key="Str_Theme_Ectoplasm">Ectoplasm</sys:String>
-    <sys:String x:Key="Str_Theme_Decay">Decay</sys:String>
-    <sys:String x:Key="Str_Theme_Mourning">Mourning</sys:String>
+    <sys:String x:Key="Str_Theme_Ectoplasm">灵质</sys:String>
+    <sys:String x:Key="Str_Theme_Decay">腐朽</sys:String>
+    <sys:String x:Key="Str_Theme_Mourning">哀悼</sys:String>
     <sys:String x:Key="Str_Theme_FilmGrain">胶片颗粒</sys:String>
-    <sys:String x:Key="Str_Theme_Sepulchre">Sepulchre</sys:String>
-    <sys:String x:Key="Str_Theme_Delirium">Delirium</sys:String>
-    <sys:String x:Key="Str_Theme_Malaise">Malaise</sys:String>
+    <sys:String x:Key="Str_Theme_Sepulchre">陵墓</sys:String>
+    <sys:String x:Key="Str_Theme_Delirium">谵妄</sys:String>
+    <sys:String x:Key="Str_Theme_Malaise">倦怠</sys:String>
 
     <!-- ── Zoom dropdown ──────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Zoom_FitWidth">适合宽度</sys:String>
@@ -325,7 +325,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Stamp_Title">标记页码</sys:String>
     <sys:String x:Key="Str_Stamp_StartAt">起始号码</sys:String>
     <sys:String x:Key="Str_Stamp_Format">格式</sys:String>
-    <sys:String x:Key="Str_Stamp_Hint">{}{n} = 页码，{N} = 总页数。例如「Page {n} of {N}」</sys:String>
+    <sys:String x:Key="Str_Stamp_Hint">用 {n} 表示页码，{N} 表示总页数</sys:String>
     <sys:String x:Key="Str_Stamp_Position">位置</sys:String>
     <sys:String x:Key="Str_Stamp_FontSize">字体大小 (pt)</sys:String>
     <sys:String x:Key="Str_Stamp_Hint2">示例：&quot;第 {n} 页，共 {N} 页&quot;</sys:String>
@@ -357,6 +357,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
 
     <!-- ── Print dialog ───────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Print_Title">KillerPDF - 打印</sys:String>
+    <sys:String x:Key="Str_Print_Rendering">正在渲染 {0} / {1}</sys:String>
     <sys:String x:Key="Str_Print_Printer">打印机</sys:String>
     <sys:String x:Key="Str_Print_Orientation">方向</sys:String>
     <sys:String x:Key="Str_Print_Portrait">直向</sys:String>
@@ -756,6 +757,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Tf_FlipV">垂直翻转</sys:String>
     <sys:String x:Key="Str_Tf_LevelLine">绘制一条水平线</sys:String>
     <sys:String x:Key="Str_Tf_SkewHint">沿着任何应当水平的对象拖动（边缘、一行文本）。页面将随之旋转对齐。</sys:String>
+    <sys:String x:Key="Str_Tf_LineCoords" xml:space="preserve">起点  {0}, {1} pt&#10;终点  {2}, {3} pt</sys:String>
     <sys:String x:Key="Str_Tf_Perspective">透视校正</sys:String>
     <sys:String x:Key="Str_Tf_CorrectPerspective">校正梯形失真</sys:String>
     <sys:String x:Key="Str_Tf_PerspectiveHint">将四个角拖到拍摄页面的轮廓上。应用后会将其校正为矩形。</sys:String>

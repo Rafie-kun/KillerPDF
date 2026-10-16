@@ -236,7 +236,7 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Theme_Decay">Verfall</sys:String>
     <sys:String x:Key="Str_Theme_Mourning">Trauer</sys:String>
     <sys:String x:Key="Str_Theme_FilmGrain">Filmkorn</sys:String>
-    <sys:String x:Key="Str_Theme_Sepulchre">Grab</sys:String>
+    <sys:String x:Key="Str_Theme_Sepulchre">Grabmal</sys:String>
     <sys:String x:Key="Str_Theme_Delirium">Delirium</sys:String>
     <sys:String x:Key="Str_Theme_Malaise">Unwohlsein</sys:String>
 
@@ -357,6 +357,7 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
 
     <!-- ── Print dialog ───────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Print_Title">KillerPDF - Drucken</sys:String>
+    <sys:String x:Key="Str_Print_Rendering">Rendern {0} / {1}</sys:String>
     <sys:String x:Key="Str_Print_Printer">Drucker</sys:String>
     <sys:String x:Key="Str_Print_Orientation">Ausrichtung</sys:String>
     <sys:String x:Key="Str_Print_Portrait">Hochformat</sys:String>
@@ -756,6 +757,7 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Tf_FlipV">Vertikal spiegeln</sys:String>
     <sys:String x:Key="Str_Tf_LevelLine">Eine Hilfslinie ziehen</sys:String>
     <sys:String x:Key="Str_Tf_SkewHint">Ziehen Sie entlang etwas, das gerade sein sollte (eine Kante, eine Textzeile). Die Seite wird passend gedreht.</sys:String>
+    <sys:String x:Key="Str_Tf_LineCoords" xml:space="preserve">Anfang  {0}, {1} pt&#10;Ende    {2}, {3} pt</sys:String>
     <sys:String x:Key="Str_Tf_Perspective">PERSPEKTIVE</sys:String>
     <sys:String x:Key="Str_Tf_CorrectPerspective">Trapezverzerrung korrigieren</sys:String>
     <sys:String x:Key="Str_Tf_PerspectiveHint">Ziehen Sie die vier Ecken auf den Umriss der fotografierten Seite. Anwenden richtet sie zu einem Rechteck aus.</sys:String>

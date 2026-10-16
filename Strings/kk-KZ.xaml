@@ -261,19 +261,19 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
 
     <!-- ── Theme names ────────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Theme_Dark">Қараңғы</sys:String>
-    <sys:String x:Key="Str_Theme_Light">Жарық</sys:String>
+    <sys:String x:Key="Str_Theme_Light">Ашық</sys:String>
     <sys:String x:Key="Str_Theme_Black">Қара</sys:String>
     <sys:String x:Key="Str_Theme_Blood">Қан</sys:String>
     <sys:String x:Key="Str_Theme_Greed">Ашкөздік</sys:String>
-    <sys:String x:Key="Str_Theme_Cyanotic">Цианозды</sys:String>
+    <sys:String x:Key="Str_Theme_Cyanotic">Цианоз</sys:String>
     <sys:String x:Key="Str_Theme_98SE">98SE</sys:String>
     <sys:String x:Key="Str_Theme_Ectoplasm">Эктоплазма</sys:String>
     <sys:String x:Key="Str_Theme_Decay">Ыдырау</sys:String>
-    <sys:String x:Key="Str_Theme_Mourning">Жоқтау</sys:String>
+    <sys:String x:Key="Str_Theme_Mourning">Аза</sys:String>
     <sys:String x:Key="Str_Theme_FilmGrain">Пленка түйіршігі</sys:String>
-    <sys:String x:Key="Str_Theme_Sepulchre">Қабірхана</sys:String>
-    <sys:String x:Key="Str_Theme_Delirium">Делирий</sys:String>
-    <sys:String x:Key="Str_Theme_Malaise">Әлсіздік</sys:String>
+    <sys:String x:Key="Str_Theme_Sepulchre">Кесене</sys:String>
+    <sys:String x:Key="Str_Theme_Delirium">Сандырақ</sys:String>
+    <sys:String x:Key="Str_Theme_Malaise">Науқастық</sys:String>
 
     <!-- ── Zoom dropdown ──────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Zoom_FitWidth">Еніне сыйғызу</sys:String>
@@ -402,6 +402,7 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
 
     <!-- ── Print dialog ───────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Print_Title">KillerPDF - Басып шығару</sys:String>
+    <sys:String x:Key="Str_Print_Rendering">Көрсету {0} / {1}</sys:String>
     <sys:String x:Key="Str_Print_Printer">Принтер</sys:String>
     <sys:String x:Key="Str_Print_Paper">Қағаз өлшемі</sys:String>
     <sys:String x:Key="Str_Print_PaperAuto">Құжатқа сәйкес</sys:String>
@@ -780,6 +781,7 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Tf_FlipV">Тігінен айналау</sys:String>
     <sys:String x:Key="Str_Tf_LevelLine">Деңгей сызығын сызу</sys:String>
     <sys:String x:Key="Str_Tf_SkewHint">Тегіс болуы керек нәрсенің бойымен сүйреңіз (жиек, мәтін жолы). Бет соған сәйкес бұрылады.</sys:String>
+    <sys:String x:Key="Str_Tf_LineCoords" xml:space="preserve">Басы  {0}, {1} pt&#10;Соңы  {2}, {3} pt</sys:String>
     <sys:String x:Key="Str_Tf_Perspective">ПЕРСПЕКТИВА</sys:String>
     <sys:String x:Key="Str_Tf_Levels">ДЕҢГЕЙЛЕР</sys:String>
     <sys:String x:Key="Str_Tf_LevelsBlack">Қара нүкте</sys:String>

@@ -297,7 +297,7 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Theme_Mourning">モーニング</sys:String>
     <sys:String x:Key="Str_Theme_FilmGrain">フィルムグレイン</sys:String>
     <sys:String x:Key="Str_Theme_Sepulchre">セパルカー</sys:String>
-    <sys:String x:Key="Str_Theme_Delirium">デリリアム</sys:String>
+    <sys:String x:Key="Str_Theme_Delirium">デリリウム</sys:String>
     <sys:String x:Key="Str_Theme_Malaise">マレーズ</sys:String>
 
     <!-- ── ズーム ドロップダウン ─────────────────────────────────────── -->
@@ -429,6 +429,7 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
 
     <!-- ── 印刷ダイアログ ────────────────────────────────────────── -->
     <sys:String x:Key="Str_Print_Title">KillerPDF - 印刷</sys:String>
+    <sys:String x:Key="Str_Print_Rendering">レンダリング中 {0} / {1}</sys:String>
     <sys:String x:Key="Str_Print_Printer">プリンター</sys:String>
     <sys:String x:Key="Str_Print_Paper">用紙サイズ</sys:String>
     <sys:String x:Key="Str_Print_PaperAuto">文書に合わせる</sys:String>
@@ -822,6 +823,7 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Tf_FlipV">上下反転</sys:String>
     <sys:String x:Key="Str_Tf_LevelLine">水平線を描画</sys:String>
     <sys:String x:Key="Str_Tf_SkewHint">水平にすべきもの (端、テキスト行など)に沿ってドラッグします。ページがそれに合わせて回転します。</sys:String>
+    <sys:String x:Key="Str_Tf_LineCoords" xml:space="preserve">始点  {0}, {1} pt&#10;終点  {2}, {3} pt</sys:String>
     <sys:String x:Key="Str_Tf_Perspective">遠近補正</sys:String>
     <sys:String x:Key="Str_Tf_Levels">レベル補正</sys:String>
     <sys:String x:Key="Str_Tf_LevelsBlack">ブラックポイント</sys:String>

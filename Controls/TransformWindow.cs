@@ -679,7 +679,7 @@ namespace KillerPDF
         }
 
         private void ShowLineCoords(Point endPage)
-            => _lineCoords.Text = $"Start  {_startPagePt.X:0}, {_startPagePt.Y:0} pt\nEnd    {endPage.X:0}, {endPage.Y:0} pt";
+            => _lineCoords.Text = string.Format(S("Str_Tf_LineCoords"), _startPagePt.X.ToString("0"), _startPagePt.Y.ToString("0"), endPage.X.ToString("0"), endPage.Y.ToString("0"));
 
         private void LineCanvas_Down(object sender, MouseButtonEventArgs e)
         {

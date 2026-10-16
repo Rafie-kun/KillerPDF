@@ -429,6 +429,7 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
 
     <!-- ── Print dialog ───────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Print_Title">KillerPDF - Imprimir</sys:String>
+    <sys:String x:Key="Str_Print_Rendering">Renderizando {0} / {1}</sys:String>
     <sys:String x:Key="Str_Print_Printer">Impressora</sys:String>
     <sys:String x:Key="Str_Print_Paper">Tamanho do papel</sys:String>
     <sys:String x:Key="Str_Print_PaperAuto">Igual ao documento</sys:String>
@@ -822,6 +823,7 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Tf_FlipV">Espelhar verticalmente</sys:String>
     <sys:String x:Key="Str_Tf_LevelLine">Desenhar uma linha de nível</sys:String>
     <sys:String x:Key="Str_Tf_SkewHint">Arraste ao longo de qualquer elemento que deveria estar nivelado (uma borda, uma linha de texto). A página gira para acompanhar.</sys:String>
+    <sys:String x:Key="Str_Tf_LineCoords" xml:space="preserve">Início  {0}, {1} pt&#10;Fim     {2}, {3} pt</sys:String>
     <sys:String x:Key="Str_Tf_Perspective">PERSPECTIVA</sys:String>
     <sys:String x:Key="Str_Tf_Levels">NÍVEIS</sys:String>
     <sys:String x:Key="Str_Tf_LevelsBlack">Ponto preto</sys:String>
