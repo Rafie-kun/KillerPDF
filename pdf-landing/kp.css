@@ -513,6 +513,12 @@ body .engine-lockup img.wm-logo { height: 81.7383px; }
   body img.tb-wm { height: 38.1445px; margin: -0.4154px 0 -0.4066px; }
   body .engine-lockup img.wm-logo { height: 65.3906px; }
 }
+@media (max-width: 560px) {
+  body .engine-lockup { font-size: min(23px, 4.42vw); gap: min(6px, 1.15vw); }
+  body .engine-lockup .engine-icon { width: min(48px, 9.23vw); height: min(48px, 9.23vw); }
+  body .engine-lockup img.wm-logo { height: min(65.3906px, 12.57vw); }
+  body .hero-info .hash { white-space: normal; overflow-wrap: anywhere; }
+}
 
 /* Shared reading sizes for help, technical pages and engine documentation. */
 :root { --kt-body-size: 14px; --kt-body-leading: 1.7; --kt-heading-size: 24px; --kt-subheading-size: 15px; --kt-nav-size: 13px; }
