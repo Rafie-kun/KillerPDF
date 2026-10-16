@@ -1436,4 +1436,12 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Macro_Complete">Výstup makra byl uložen do {0}</sys:String>
     <sys:String x:Key="Str_Macro_Failed">Makro se nepodařilo dokončit.</sys:String>
     <sys:String x:Key="Str_Macro_Canceled">Makro bylo zrušeno</sys:String>
+    <sys:String x:Key="Str_Scroll_Up">Posunout nahoru</sys:String>
+    <sys:String x:Key="Str_Scroll_Down">Posunout dolů</sys:String>
+    <sys:String x:Key="Str_Scroll_Left">Posunout doleva</sys:String>
+    <sys:String x:Key="Str_Scroll_Right">Posunout doprava</sys:String>
+    <sys:String x:Key="Str_Scroll_PageUp">O stránku nahoru</sys:String>
+    <sys:String x:Key="Str_Scroll_PageDown">O stránku dolů</sys:String>
+    <sys:String x:Key="Str_Scroll_PageLeft">O stránku doleva</sys:String>
+    <sys:String x:Key="Str_Scroll_PageRight">O stránku doprava</sys:String>
 </ResourceDictionary>

@@ -1431,4 +1431,12 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Macro_Complete">Makro çıktısı {0} konumuna kaydedildi</sys:String>
     <sys:String x:Key="Str_Macro_Failed">Makro tamamlanamadı.</sys:String>
     <sys:String x:Key="Str_Macro_Canceled">Makro iptal edildi</sys:String>
+    <sys:String x:Key="Str_Scroll_Up">Yukarı kaydır</sys:String>
+    <sys:String x:Key="Str_Scroll_Down">Aşağı kaydır</sys:String>
+    <sys:String x:Key="Str_Scroll_Left">Sola kaydır</sys:String>
+    <sys:String x:Key="Str_Scroll_Right">Sağa kaydır</sys:String>
+    <sys:String x:Key="Str_Scroll_PageUp">Bir sayfa yukarı</sys:String>
+    <sys:String x:Key="Str_Scroll_PageDown">Bir sayfa aşağı</sys:String>
+    <sys:String x:Key="Str_Scroll_PageLeft">Bir sayfa sola</sys:String>
+    <sys:String x:Key="Str_Scroll_PageRight">Bir sayfa sağa</sys:String>
 </ResourceDictionary>

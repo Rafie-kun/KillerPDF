@@ -1451,4 +1451,12 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Macro_Complete">マクロの出力を {0} に保存しました</sys:String>
     <sys:String x:Key="Str_Macro_Failed">マクロを完了できませんでした。</sys:String>
     <sys:String x:Key="Str_Macro_Canceled">マクロをキャンセルしました</sys:String>
+    <sys:String x:Key="Str_Scroll_Up">上へスクロール</sys:String>
+    <sys:String x:Key="Str_Scroll_Down">下へスクロール</sys:String>
+    <sys:String x:Key="Str_Scroll_Left">左へスクロール</sys:String>
+    <sys:String x:Key="Str_Scroll_Right">右へスクロール</sys:String>
+    <sys:String x:Key="Str_Scroll_PageUp">1 ページ上へ</sys:String>
+    <sys:String x:Key="Str_Scroll_PageDown">1 ページ下へ</sys:String>
+    <sys:String x:Key="Str_Scroll_PageLeft">1 ページ左へ</sys:String>
+    <sys:String x:Key="Str_Scroll_PageRight">1 ページ右へ</sys:String>
 </ResourceDictionary>

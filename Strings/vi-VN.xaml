@@ -1451,4 +1451,12 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Macro_Complete">Đã lưu đầu ra macro vào {0}</sys:String>
     <sys:String x:Key="Str_Macro_Failed">Không thể hoàn tất macro.</sys:String>
     <sys:String x:Key="Str_Macro_Canceled">Đã hủy macro</sys:String>
+    <sys:String x:Key="Str_Scroll_Up">Cuộn lên</sys:String>
+    <sys:String x:Key="Str_Scroll_Down">Cuộn xuống</sys:String>
+    <sys:String x:Key="Str_Scroll_Left">Cuộn sang trái</sys:String>
+    <sys:String x:Key="Str_Scroll_Right">Cuộn sang phải</sys:String>
+    <sys:String x:Key="Str_Scroll_PageUp">Lên một trang</sys:String>
+    <sys:String x:Key="Str_Scroll_PageDown">Xuống một trang</sys:String>
+    <sys:String x:Key="Str_Scroll_PageLeft">Sang trái một trang</sys:String>
+    <sys:String x:Key="Str_Scroll_PageRight">Sang phải một trang</sys:String>
 </ResourceDictionary>

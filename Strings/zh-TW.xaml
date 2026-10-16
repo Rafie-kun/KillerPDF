@@ -1433,4 +1433,12 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_Macro_Complete">巨集輸出已儲存到 {0}</sys:String>
     <sys:String x:Key="Str_Macro_Failed">無法完成巨集。</sys:String>
     <sys:String x:Key="Str_Macro_Canceled">巨集已取消</sys:String>
+    <sys:String x:Key="Str_Scroll_Up">向上捲動</sys:String>
+    <sys:String x:Key="Str_Scroll_Down">向下捲動</sys:String>
+    <sys:String x:Key="Str_Scroll_Left">向左捲動</sys:String>
+    <sys:String x:Key="Str_Scroll_Right">向右捲動</sys:String>
+    <sys:String x:Key="Str_Scroll_PageUp">向上翻頁</sys:String>
+    <sys:String x:Key="Str_Scroll_PageDown">向下翻頁</sys:String>
+    <sys:String x:Key="Str_Scroll_PageLeft">向左翻頁</sys:String>
+    <sys:String x:Key="Str_Scroll_PageRight">向右翻頁</sys:String>
 </ResourceDictionary>

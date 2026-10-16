@@ -1451,4 +1451,12 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Macro_Complete">Saída da macro salva em {0}</sys:String>
     <sys:String x:Key="Str_Macro_Failed">Não foi possível concluir a macro.</sys:String>
     <sys:String x:Key="Str_Macro_Canceled">Macro cancelada</sys:String>
+    <sys:String x:Key="Str_Scroll_Up">Rolar para cima</sys:String>
+    <sys:String x:Key="Str_Scroll_Down">Rolar para baixo</sys:String>
+    <sys:String x:Key="Str_Scroll_Left">Rolar para a esquerda</sys:String>
+    <sys:String x:Key="Str_Scroll_Right">Rolar para a direita</sys:String>
+    <sys:String x:Key="Str_Scroll_PageUp">Uma página acima</sys:String>
+    <sys:String x:Key="Str_Scroll_PageDown">Uma página abaixo</sys:String>
+    <sys:String x:Key="Str_Scroll_PageLeft">Uma página à esquerda</sys:String>
+    <sys:String x:Key="Str_Scroll_PageRight">Uma página à direita</sys:String>
 </ResourceDictionary>

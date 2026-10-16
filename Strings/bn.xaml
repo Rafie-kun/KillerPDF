@@ -1431,4 +1431,12 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Macro_Complete">ম্যাক্রোর আউটপুট {0} এ সংরক্ষিত হয়েছে</sys:String>
     <sys:String x:Key="Str_Macro_Failed">ম্যাক্রো সম্পন্ন করা যায়নি।</sys:String>
     <sys:String x:Key="Str_Macro_Canceled">ম্যাক্রো বাতিল হয়েছে</sys:String>
+    <sys:String x:Key="Str_Scroll_Up">উপরে স্ক্রল করুন</sys:String>
+    <sys:String x:Key="Str_Scroll_Down">নিচে স্ক্রল করুন</sys:String>
+    <sys:String x:Key="Str_Scroll_Left">বাঁয়ে স্ক্রল করুন</sys:String>
+    <sys:String x:Key="Str_Scroll_Right">ডানে স্ক্রল করুন</sys:String>
+    <sys:String x:Key="Str_Scroll_PageUp">এক পৃষ্ঠা উপরে</sys:String>
+    <sys:String x:Key="Str_Scroll_PageDown">এক পৃষ্ঠা নিচে</sys:String>
+    <sys:String x:Key="Str_Scroll_PageLeft">এক পৃষ্ঠা বাঁয়ে</sys:String>
+    <sys:String x:Key="Str_Scroll_PageRight">এক পৃষ্ঠা ডানে</sys:String>
 </ResourceDictionary>

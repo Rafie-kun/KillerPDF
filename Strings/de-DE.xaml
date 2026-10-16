@@ -1437,4 +1437,12 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Macro_Complete">Makroausgabe wurde unter {0} gespeichert</sys:String>
     <sys:String x:Key="Str_Macro_Failed">Das Makro konnte nicht abgeschlossen werden.</sys:String>
     <sys:String x:Key="Str_Macro_Canceled">Makro abgebrochen</sys:String>
+    <sys:String x:Key="Str_Scroll_Up">Nach oben scrollen</sys:String>
+    <sys:String x:Key="Str_Scroll_Down">Nach unten scrollen</sys:String>
+    <sys:String x:Key="Str_Scroll_Left">Nach links scrollen</sys:String>
+    <sys:String x:Key="Str_Scroll_Right">Nach rechts scrollen</sys:String>
+    <sys:String x:Key="Str_Scroll_PageUp">Seite nach oben</sys:String>
+    <sys:String x:Key="Str_Scroll_PageDown">Seite nach unten</sys:String>
+    <sys:String x:Key="Str_Scroll_PageLeft">Seite nach links</sys:String>
+    <sys:String x:Key="Str_Scroll_PageRight">Seite nach rechts</sys:String>
 </ResourceDictionary>

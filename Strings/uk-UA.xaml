@@ -1451,4 +1451,12 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Macro_Complete">Вихідний файл макросу збережено до {0}</sys:String>
     <sys:String x:Key="Str_Macro_Failed">Не вдалося завершити макрос.</sys:String>
     <sys:String x:Key="Str_Macro_Canceled">Макрос скасовано</sys:String>
+    <sys:String x:Key="Str_Scroll_Up">Прокрутити вгору</sys:String>
+    <sys:String x:Key="Str_Scroll_Down">Прокрутити вниз</sys:String>
+    <sys:String x:Key="Str_Scroll_Left">Прокрутити ліворуч</sys:String>
+    <sys:String x:Key="Str_Scroll_Right">Прокрутити праворуч</sys:String>
+    <sys:String x:Key="Str_Scroll_PageUp">На сторінку вгору</sys:String>
+    <sys:String x:Key="Str_Scroll_PageDown">На сторінку вниз</sys:String>
+    <sys:String x:Key="Str_Scroll_PageLeft">На сторінку ліворуч</sys:String>
+    <sys:String x:Key="Str_Scroll_PageRight">На сторінку праворуч</sys:String>
 </ResourceDictionary>

@@ -1439,4 +1439,12 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Macro_Complete">Plik wyjściowy makra zapisano w {0}</sys:String>
     <sys:String x:Key="Str_Macro_Failed">Nie można ukończyć makra.</sys:String>
     <sys:String x:Key="Str_Macro_Canceled">Makro anulowano</sys:String>
+    <sys:String x:Key="Str_Scroll_Up">Przewiń w górę</sys:String>
+    <sys:String x:Key="Str_Scroll_Down">Przewiń w dół</sys:String>
+    <sys:String x:Key="Str_Scroll_Left">Przewiń w lewo</sys:String>
+    <sys:String x:Key="Str_Scroll_Right">Przewiń w prawo</sys:String>
+    <sys:String x:Key="Str_Scroll_PageUp">Strona w górę</sys:String>
+    <sys:String x:Key="Str_Scroll_PageDown">Strona w dół</sys:String>
+    <sys:String x:Key="Str_Scroll_PageLeft">Strona w lewo</sys:String>
+    <sys:String x:Key="Str_Scroll_PageRight">Strona w prawo</sys:String>
 </ResourceDictionary>

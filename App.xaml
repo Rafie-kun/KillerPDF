@@ -238,7 +238,7 @@
                     <Setter.Value>
                         <ControlTemplate TargetType="ScrollBar">
                             <DockPanel LastChildFill="True">
-                                <RepeatButton x:Name="LineUp" DockPanel.Dock="Top" Command="ScrollBar.LineUpCommand"
+                                <RepeatButton x:Name="LineUp" DockPanel.Dock="Top" Command="ScrollBar.LineUpCommand" AutomationProperties.Name="{DynamicResource Str_Scroll_Up}"
                                               Content="0" Focusable="False" IsTabStop="False"
                                               Width="{DynamicResource ScrollArrowSize}" Height="{DynamicResource ScrollArrowSize}">
                                     <RepeatButton.Template>
@@ -264,7 +264,7 @@
                                         </ControlTemplate>
                                     </RepeatButton.Template>
                                 </RepeatButton>
-                                <RepeatButton x:Name="LineDown" DockPanel.Dock="Bottom" Command="ScrollBar.LineDownCommand"
+                                <RepeatButton x:Name="LineDown" DockPanel.Dock="Bottom" Command="ScrollBar.LineDownCommand" AutomationProperties.Name="{DynamicResource Str_Scroll_Down}"
                                               Content="180" Focusable="False" IsTabStop="False"
                                               Width="{DynamicResource ScrollArrowSize}" Height="{DynamicResource ScrollArrowSize}">
                                     <RepeatButton.Template>
@@ -310,14 +310,14 @@
                                         </MultiBinding>
                                     </Track.ViewportSize>
                                     <Track.DecreaseRepeatButton>
-                                        <RepeatButton x:Name="PageBack" Command="ScrollBar.PageUpCommand" Focusable="False" IsTabStop="False">
+                                        <RepeatButton x:Name="PageBack" Command="ScrollBar.PageUpCommand" AutomationProperties.Name="{DynamicResource Str_Scroll_PageUp}" Focusable="False" IsTabStop="False">
                                             <RepeatButton.Template>
                                                 <ControlTemplate TargetType="RepeatButton"><Border Background="Transparent"/></ControlTemplate>
                                             </RepeatButton.Template>
                                         </RepeatButton>
                                     </Track.DecreaseRepeatButton>
                                     <Track.IncreaseRepeatButton>
-                                        <RepeatButton x:Name="PageForward" Command="ScrollBar.PageDownCommand" Focusable="False" IsTabStop="False">
+                                        <RepeatButton x:Name="PageForward" Command="ScrollBar.PageDownCommand" AutomationProperties.Name="{DynamicResource Str_Scroll_PageDown}" Focusable="False" IsTabStop="False">
                                             <RepeatButton.Template>
                                                 <ControlTemplate TargetType="RepeatButton"><Border Background="Transparent"/></ControlTemplate>
                                             </RepeatButton.Template>
@@ -371,11 +371,15 @@
                                 <Trigger Property="Orientation" Value="Horizontal">
                                     <Setter TargetName="PART_Track"   Property="IsDirectionReversed" Value="False"/>
                                     <Setter TargetName="PageBack"     Property="Command" Value="ScrollBar.PageLeftCommand"/>
+                                    <Setter TargetName="PageBack"     Property="AutomationProperties.Name" Value="{DynamicResource Str_Scroll_PageLeft}"/>
                                     <Setter TargetName="PageForward"  Property="Command" Value="ScrollBar.PageRightCommand"/>
+                                    <Setter TargetName="PageForward"  Property="AutomationProperties.Name" Value="{DynamicResource Str_Scroll_PageRight}"/>
                                     <Setter TargetName="LineUp" Property="DockPanel.Dock" Value="Left"/>
                                     <Setter TargetName="LineDown" Property="DockPanel.Dock" Value="Right"/>
                                     <Setter TargetName="LineUp" Property="Command" Value="ScrollBar.LineLeftCommand"/>
+                                    <Setter TargetName="LineUp" Property="AutomationProperties.Name" Value="{DynamicResource Str_Scroll_Left}"/>
                                     <Setter TargetName="LineDown" Property="Command" Value="ScrollBar.LineRightCommand"/>
+                                    <Setter TargetName="LineDown" Property="AutomationProperties.Name" Value="{DynamicResource Str_Scroll_Right}"/>
                                     <Setter TargetName="LineUp" Property="Content" Value="270"/>
                                     <Setter TargetName="LineDown" Property="Content" Value="90"/>
                                 </Trigger>
