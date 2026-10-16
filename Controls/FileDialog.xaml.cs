@@ -242,10 +242,23 @@ namespace KillerPDF.Controls
         {
             if (owner != null && owner.IsVisible) Owner = owner;
 
-            // The picker uses the caller's operation title in its caption. Reuse the owner's
-            // canonical close-button template so 98SE gets the square raised caption button.
-            if (owner?.TryFindResource("ChromeCloseButton") is Style closeStyle)
+            // The picker's close follows DialogChrome: the family close (OverlayCloseButton, a bare
+            // X that turns red on hover without filling) on every theme but a classic caption one,
+            // which keeps the square raised caption button. The markup's local MDL2 font and size
+            // are cleared on the family path, or they would outrank the style's own.
+            bool classicCaption = owner?.TryFindResource("UseDialogCaption") is true;
+            if (!classicCaption && owner?.TryFindResource("OverlayCloseButton") is Style overlayClose)
+            {
+                CaptionCloseButton.Style = overlayClose;
+                CaptionCloseButton.ClearValue(Control.FontFamilyProperty);
+                CaptionCloseButton.ClearValue(Control.FontSizeProperty);
+                CaptionCloseButton.SetResourceReference(ContentControl.ContentProperty, "AboutCloseGlyph");
+                CaptionCloseButton.VerticalAlignment = VerticalAlignment.Center;
+            }
+            else if (owner?.TryFindResource("ChromeCloseButton") is Style closeStyle)
+            {
                 CaptionCloseButton.Style = closeStyle;
+            }
             AcceptButton.Content = Loc(_mode == FileDialogMode.Save ? "Str_Btn_Save" : "Str_Btn_Open");
             ConfigureImagePreview();
             // Extended, not Multiple: Extended is the Explorer behavior (plain click replaces the
