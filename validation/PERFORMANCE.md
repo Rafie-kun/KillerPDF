@@ -450,8 +450,9 @@ and full rewrites stopped growing their output buffer through repeated copies. A
 same 1.8.90 payload, with one warmup and five alternating passes, 1.9.0 regression took
 1.74% longer (within session noise) with 6.45% less CPU time and 56.85% less peak memory,
 and standards took 9.53% less time with 4.87% less CPU time and 37.97% less peak memory. A
-single stress pass per build used 50.43% less peak memory and 11.51% more CPU time on 1.9.0,
-which needs a full stress series to confirm. The poppler input now saves, and the
+full stress series on a later build, which stops object stream reads from rescanning every
+cross-reference entry, took 7.62% less time with 6.20% less CPU time and 49.37% less peak
+memory. The poppler input now saves, and the
 damaged-file gate matched 1.8.90 with no crashes or timeouts. See the
 [1.9.0 report](benchmarks/1.9.0/CORPUS.md#follow-up-run-on-2026-10-15).
 

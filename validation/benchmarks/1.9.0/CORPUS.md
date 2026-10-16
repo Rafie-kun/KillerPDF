@@ -4,7 +4,7 @@ Test date: 2026-10-13
 
 In the 2026-10-13 run, KillerPDF 1.9.0 (development build) saved 108 more PDFs than KillerPDF 1.8.90 across the three normal collections: 109 inputs that 1.8.90 skipped or failed now saved, and one stress input that 1.8.90 saved failed. Its regression and standards timings were above the 10% investigation threshold. Both builds received one warmup and five measured passes per collection in alternating order.
 
-A [follow-up run on 2026-10-15](#follow-up-run-on-2026-10-15) with a newer 1.9.0 build resolves both items. That stress input now saves, so 1.9.0 saves 109 more PDFs than 1.8.90 and loses none. Regression and standards are back under the threshold, and 1.9.0 used 38% to 57% less peak memory than 1.8.90. The damaged-file gate had zero crashes and zero timeouts in both runs, and its outcomes are identical to 1.8.90.
+A [follow-up run on 2026-10-15](#follow-up-run-on-2026-10-15) with a newer 1.9.0 build resolves both items. That stress input now saves, so 1.9.0 saves 109 more PDFs than 1.8.90 and loses none. Every timed collection is now under the threshold, stress runs 7.62% faster with 6.20% less CPU time, and 1.9.0 used 38% to 57% less peak memory than 1.8.90. The damaged-file gate had zero crashes and zero timeouts in both runs, and its outcomes are identical to 1.8.90.
 
 ## Results
 
@@ -55,17 +55,17 @@ Batch resave now opens each file once instead of twice, and full rewrites alloca
 | Standards and color | Seconds | 6.968 | 6.304 | 9.53% shorter |
 | Standards and color | CPU seconds | 8.344 | 7.938 | 4.87% less |
 | Standards and color | Peak working set MB | 1,136.9 | 705.2 | 37.97% less |
-| Private stress, one pass | Seconds | 699.164 | 720.049 | 2.99% longer |
-| Private stress, one pass | CPU seconds | 301.000 | 335.656 | 11.51% more |
-| Private stress, one pass | Peak working set MB | 2,155.5 | 1,068.5 | 50.43% less |
+| Private stress | Seconds | 676.155 | 624.659 | 7.62% shorter |
+| Private stress | CPU seconds | 328.109 | 307.781 | 6.20% less |
+| Private stress | Peak working set MB | 2,116.9 | 1,071.7 | 49.37% less |
 
 - Regression and standards are both under the 10% threshold. Regression pass times overlap between the builds (1.8.90 from 314.470 to 360.820 seconds, 1.9.0 from 288.683 to 357.053), so its 1.74% difference is within session noise. Host CPU load was about 56% before the run because other work was running, so the host was not certified idle.
-- Stress ran once per build, so its timing is not a series. Its 11.51% higher CPU time for 1.9.0 needs a full stress series before it can be confirmed or ruled out.
+- Stress first ran once per build, and that pass showed 11.51% more CPU time for 1.9.0. Profiling traced most of the slowest stress saves to object stream reads that scanned every cross-reference entry of every revision. Source commit `76848ffdcf8d5a8bf3fcf8bb9e7933fa28ee2a77` limits that scan, and the stress rows above come from a full series on that build: one warmup and five alternating passes per build, app DLL SHA-256 `E212E0AC63BCAC548B118760651431DF664966E5EB38F92B91DB55B5F6302B19` and engine DLL SHA-256 `BC0654FED696590509655E0C44421FC1FEA376BC137E89276EF5B1D5A84255EA`. Every 1.9.0 stress pass (620.156 to 644.205 seconds) was faster than every 1.8.90 pass (654.077 to 701.352 seconds).
 - All five measured passes of each build produced identical per-file outcomes. Regression and standards outcomes match the 2026-10-13 1.9.0 run. One regression input, `pdfjs/test/pdfs/poppler-395-0-fuzzed.pdf`, still fails, and it now reports its broken cross-reference instead of the signature date.
 - In stress, 1.9.0 saves 66 inputs that 1.8.90 fails and loses none: 25,081 saved against 25,015. Across the three normal collections 1.9.0 saves 40,672 inputs against 40,563 for 1.8.90.
 - The damaged-file gate ran all 80 files for each build, alternating per file with a 30-second timeout. Both builds produced 78 skips and the same 2 failures, with no crashes or timeouts. The slowest run took 0.589 seconds.
 - Peak working set is the largest value sampled every 200 ms during a pass, so a spike shorter than that can be missed. One 1.8.90 regression pass peaked at 2,318.6 MB and the other four between 1,419.0 and 1,671.8 MB. All five 1.9.0 regression passes peaked between 689.6 and 691.7 MB.
-- The committed [follow-up run data](benchmark-followup.csv) holds every pass. Full per-file logs remain outside the application repository at `C:\Users\steve\scratch\kp-bench-render\release-1.8.90-vs-1.9-rerun-20261015`.
+- The committed [follow-up run data](benchmark-followup.csv) holds every pass, with the source commit of each 1.9.0 build. Full per-file logs remain outside the application repository at `C:\Users\steve\scratch\kp-bench-render\release-1.8.90-vs-1.9-rerun-20261015` and, for the stress series, `C:\Users\steve\scratch\kp-bench-render\release-1.8.90-vs-1.9-stress-20261015`.
 
 ## Builds and method
 
