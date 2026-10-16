@@ -2,6 +2,7 @@
 <!-- KillerPDF installer text. Write \n for a line break inside a value. -->
 <locale name="zh-CN">
   <string key="SetupTitle">KillerPDF 安装程序</string>
+  <string key="SetupLabel">安装程序</string>
   <string key="Tagline">免费、现代的 PDF 编辑器，从零打造，注重隐私和速度。</string>
   <string key="CurrentAccount">仅为我的账户安装</string>
   <string key="Everyone">为此计算机的所有用户安装</string>

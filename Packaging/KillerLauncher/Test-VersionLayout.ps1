@@ -17,6 +17,8 @@ $count = 0
 try {
     $window = $constructor.Invoke(@())
     $versionLine = $window.FindName('SetupVersionLabel')
+    $setupLabel = $window.FindName('SetupLabel')
+    $setupBox = $setupLabel.Parent
     $header = $versionLine.Parent
     $sidebar = $header.Parent
     $columns = $sidebar.Parent.Parent.Parent
@@ -46,7 +48,12 @@ try {
                 throw "Clipped version: $case"
             }
             if ($versionLine.ActualHeight -gt $header.ActualHeight) { throw "Clipped parent: $case" }
-            $bottom = $versionLine.TranslatePoint((New-Object Windows.Point 0,$versionLine.ActualHeight), $sidebar).Y
+            if ([string]::IsNullOrWhiteSpace($setupLabel.Text) -or $setupLabel.TextWrapping -ne 'NoWrap') { throw "Missing or wrapped Setup line: $case" }
+            $versionBottom = $versionLine.TranslatePoint((New-Object Windows.Point 0,$versionLine.ActualHeight), $sidebar).Y
+            $setupTop = $setupBox.TranslatePoint((New-Object Windows.Point 0,0), $sidebar).Y
+            if ($setupTop -lt $versionBottom) { throw "Setup line is not below the version: $case" }
+            if ($setupBox.ActualWidth -gt $width + 1) { throw "Setup line wider than the sidebar: $case" }
+            $bottom = $setupBox.TranslatePoint((New-Object Windows.Point 0,$setupBox.ActualHeight), $sidebar).Y
             $top = $tagline.TranslatePoint((New-Object Windows.Point 0,0), $sidebar).Y
             if ($bottom -gt $top) { throw "Tagline overlap: $case" }
             $count++
@@ -56,4 +63,4 @@ try {
     if ($window) { $window.Close() }
     $application.Shutdown()
 }
-"Installer version layout passed: $count offscreen cases with the complete version alone and centered."
+"Installer version layout passed: $count offscreen cases with the complete version centered and the Setup line below it."

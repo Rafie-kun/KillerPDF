@@ -17,11 +17,23 @@ namespace KillerLauncher
         private string _installedDirectory = string.Empty;
         private readonly Program.InstalledCopy? _existing;
 
+        // Lacquer has no Cyrillic, CJK, Bengali or some accented Latin letters. Setting a word that
+        // Lacquer cannot fully draw in the UI font keeps it in one face instead of mixing letters.
+        private bool LacquerCovers(string text)
+        {
+            if (!new Typeface((FontFamily)FindResource("WordmarkAccent"), FontStyles.Normal, FontWeights.Normal, FontStretches.Normal)
+                    .TryGetGlyphTypeface(out GlyphTypeface face)) return false;
+            foreach (char c in text)
+                if (!char.IsWhiteSpace(c) && !face.CharacterToGlyphMap.ContainsKey(c)) return false;
+            return true;
+        }
+
         private InstallerWizard()
         {
             InitializeComponent();
             TaskbarIdentity.Track(this);
             SetupVersionLabel.SetVersion(typeof(InstallerWizard).Assembly.GetName().Version!.ToString(3));
+            if (!LacquerCovers(SetupLabel.Text)) SetupLabel.FontFamily = (FontFamily)FindResource("UiFont");
             _existing = Program.FindInstalledCopy();
             InstallFolder.Text = _existing?.Directory ?? Program.DefaultInstallDirectory(false);
             if (_existing != null)

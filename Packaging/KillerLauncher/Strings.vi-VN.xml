@@ -2,6 +2,7 @@
 <!-- KillerPDF installer text. Write \n for a line break inside a value. -->
 <locale name="vi-VN">
   <string key="SetupTitle">Thiết lập KillerPDF</string>
+  <string key="SetupLabel">Thiết lập</string>
   <string key="Tagline">Trình chỉnh sửa PDF miễn phí và hiện đại, được xây dựng từ đầu vì quyền riêng tư và tốc độ.</string>
   <string key="CurrentAccount">Cài đặt cho tài khoản của tôi</string>
   <string key="Everyone">Cài đặt cho mọi người trên máy tính này</string>

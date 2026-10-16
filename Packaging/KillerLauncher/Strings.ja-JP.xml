@@ -2,6 +2,7 @@
 <!-- KillerPDF installer text. Write \n for a line break inside a value. -->
 <locale name="ja-JP">
   <string key="SetupTitle">KillerPDF セットアップ</string>
+  <string key="SetupLabel">セットアップ</string>
   <string key="Tagline">プライバシーと速度を重視し、ゼロから開発された無料の最新PDFエディター。</string>
   <string key="CurrentAccount">自分のアカウントにインストール</string>
   <string key="Everyone">このコンピューターの全ユーザーにインストール</string>

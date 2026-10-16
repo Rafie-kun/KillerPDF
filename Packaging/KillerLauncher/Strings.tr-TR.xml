@@ -2,6 +2,7 @@
 <!-- KillerPDF installer text. Write \n for a line break inside a value. -->
 <locale name="tr-TR">
   <string key="SetupTitle">KillerPDF Kurulumu</string>
+  <string key="SetupLabel">Kurulum</string>
   <string key="Tagline">Gizlilik ve hız için sıfırdan geliştirilen ücretsiz, modern bir PDF düzenleyicisi.</string>
   <string key="CurrentAccount">Hesabım için yükle</string>
   <string key="Everyone">Bu bilgisayardaki tüm kullanıcılar için yükle</string>

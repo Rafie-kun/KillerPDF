@@ -20,6 +20,7 @@
         <FontFamily x:Key="WordmarkAccent">./Fonts/#Lacquer</FontFamily>
         <FontFamily x:Key="BrandSans">./Fonts/#Killer Sans</FontFamily>
         <FontFamily x:Key="UiFont">./Fonts/#Killer Sans UI, Segoe UI</FontFamily>
+        <FontFamily x:Key="HeadingFont">./Fonts/#Lacquer, ./Fonts/#Killer Sans UI, Segoe UI, Microsoft JhengHei UI, Nirmala UI</FontFamily>
         <SolidColorBrush x:Key="Green" Color="#1ea54c"/>
         <LinearGradientBrush x:Key="AccentFill" StartPoint="0,0" EndPoint="0,1"><GradientStop Color="#1ea54c" Offset="0"/><GradientStop Color="#198b40" Offset="1"/></LinearGradientBrush>
         <Style x:Key="FooterLink" TargetType="Hyperlink">
@@ -121,7 +122,10 @@
                     </icons:AppIcon>
                     <StackPanel Grid.Row="1" Margin="0,8,0,0">
                         <Grid HorizontalAlignment="Left"><TextBlock Foreground="#D8000000" Opacity="0.45" Margin="1,2,-1,-2" IsHitTestVisible="False"><TextBlock.Effect><BlurEffect Radius="3"/></TextBlock.Effect><Run Text="Killer" FontFamily="{StaticResource Wordmark}" FontSize="19.56"/><Run Text="PDF" FontFamily="{StaticResource WordmarkAccent}" FontSize="29.37"/></TextBlock><TextBlock><Run Text="Killer" FontFamily="{StaticResource Wordmark}" FontSize="19.56"/><Run Text="PDF" FontFamily="{StaticResource WordmarkAccent}" FontSize="29.37" Foreground="{StaticResource Green}"/></TextBlock></Grid>
-                        <local:SetupVersionText x:Name="SetupVersionLabel" TextElement.FontFamily="{StaticResource UiFont}" TextElement.FontSize="10.5" TextElement.Foreground="#a0a0a0" Margin="1,2,0,0"/>
+                        <local:SetupVersionText x:Name="SetupVersionLabel" TextElement.FontFamily="{StaticResource BrandSans}" TextElement.FontSize="12" TextElement.Foreground="#a0a0a0" TextOptions.TextFormattingMode="Ideal" Margin="1,2,0,0"/>
+                        <Viewbox Stretch="Uniform" StretchDirection="DownOnly" Margin="1,1,0,0">
+                            <TextBlock x:Name="SetupLabel" Text="{local:Loc SetupLabel}" FontFamily="{StaticResource HeadingFont}" FontSize="18" Foreground="#d0d0d0" TextOptions.TextFormattingMode="Ideal" TextWrapping="NoWrap"/>
+                        </Viewbox>
                     </StackPanel>
                     <TextBlock Grid.Row="2" Margin="1,14,0,0" TextWrapping="Wrap" Foreground="#d0d0d0" LineHeight="17"
                                Text="{local:Loc Tagline}"/>

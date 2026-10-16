@@ -2,6 +2,7 @@
 <!-- KillerPDF installer text. Write \n for a line break inside a value. -->
 <locale name="hu-HU">
   <string key="SetupTitle">KillerPDF telepítő</string>
+  <string key="SetupLabel">Telepítő</string>
   <string key="Tagline">Ingyenes, modern PDF-szerkesztő, az alapoktól az adatvédelem és a sebesség szem előtt tartásával.</string>
   <string key="CurrentAccount">Telepítés a saját fiókomhoz</string>
   <string key="Everyone">Telepítés a számítógép minden felhasználójának</string>
