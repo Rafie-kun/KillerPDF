@@ -74,6 +74,7 @@ namespace KillerPDF
         protected override void OnStartup(StartupEventArgs e)
         {
             KillerFamily.Accessibility.AccessibleControls.Initialize();
+            KillerFamily.Theming.AccentShadow.Initialize();
             if (IsStartupSmoke)
             {
                 RunStartupSmoke(e);
