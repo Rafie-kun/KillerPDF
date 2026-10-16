@@ -271,6 +271,16 @@ differences, interactive behavior, and release feature coverage remain open.
 See the memory comparison record (archived locally: `C:/Users/steve/scratch/kp-bench-render/repo-cleanup-20260908-final/1.9.0-memory-parity/README.md`)
 for every run, both engine controls, build identity, and limitations.
 
+On 2026-10-16 the policy moved from level 9 to level 7. On a 3,401-file stress slice, level 7
+cut batch resave CPU time by 11% for 2% more peak memory. A rotating render comparison on the
+same two sets (three runs, identical DLLs, the runtime level as the only engine difference)
+measured level 7 at 614.5 MiB against 627.2 MiB for level 9 on the shared set and 630.3
+against 641.5 MiB on the difficult set, with identical pixels. The current parallel batch
+renderer finishes these sets 2.4 to 2.7 times faster than PDFium 1.8.90, but at either level
+it peaks at about 630 MiB on the difficult set against PDFium's 279 MiB, so the difficult-set
+memory target above no longer holds. Raw data:
+`C:/Users/steve/scratch/kp-bench-render/conserve7-20261016`.
+
 ## KillerPDF 1.9.0 memory ownership follow-up
 
 Bounded surfaces, compact clips, explicit scratch lifetimes, shared immutable
