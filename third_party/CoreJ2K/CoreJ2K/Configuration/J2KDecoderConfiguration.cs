@@ -21,9 +21,13 @@ namespace CoreJ2K.Configuration
         private int _decodingBytes = -1; // -1 means decode all
         private bool _useColorSpace = true;
         private bool _parsingMode = true;
+        private bool _parsingModeChosen;
         private QuitConditions _quitConditions = new QuitConditions();
         private ComponentTransformSettings _componentTransform = new ComponentTransformSettings();
         private bool _verbose = true;
+        private DecoderLimits? _limits;
+        private CancellationToken _cancellationToken;
+        private int _maxDegreeOfParallelism;
         
         /// <summary>
         /// Gets or sets the resolution level for decoding.
@@ -167,6 +171,7 @@ namespace CoreJ2K.Configuration
         public J2KDecoderConfiguration WithParsingMode(bool parsingMode)
         {
             _parsingMode = parsingMode;
+            _parsingModeChosen = true;
             return this;
         }
         
@@ -177,6 +182,7 @@ namespace CoreJ2K.Configuration
         public J2KDecoderConfiguration WithProgressiveDecoding()
         {
             _parsingMode = true;
+            _parsingModeChosen = true;
             return this;
         }
         
@@ -214,6 +220,71 @@ namespace CoreJ2K.Configuration
         }
         
         /// <summary>
+        /// Gets or sets the resource limits for this decode, or <c>null</c> (the default) to use
+        /// <see cref="DecoderLimits.Default"/>.
+        /// </summary>
+        public DecoderLimits? Limits
+        {
+            get => _limits;
+            set => _limits = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the maximum number of threads used to decode code-blocks in parallel. 1 decodes on the
+        /// calling thread only; 0 (the default) or a negative value uses
+        /// <see cref="J2kImage.DefaultMaxDegreeOfParallelism"/>. The decoded output is identical for every value.
+        /// </summary>
+        public int MaxDegreeOfParallelism
+        {
+            get => _maxDegreeOfParallelism;
+            set => _maxDegreeOfParallelism = value;
+        }
+
+        /// <summary>
+        /// Gets or sets a token that cancels decodes started with this configuration. Cancellation is cooperative: the decode
+        /// stops within about one code-block and throws <see cref="OperationCanceledException"/>. Defaults to
+        /// <see cref="CancellationToken.None"/>.
+        /// </summary>
+        public CancellationToken CancellationToken
+        {
+            get => _cancellationToken;
+            set => _cancellationToken = value;
+        }
+
+        /// <summary>
+        /// Sets a token that cancels decodes started with this configuration.
+        /// </summary>
+        /// <param name="cancellationToken">The token to observe.</param>
+        /// <returns>This configuration instance for method chaining.</returns>
+        public J2KDecoderConfiguration WithCancellationToken(CancellationToken cancellationToken)
+        {
+            _cancellationToken = cancellationToken;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the resource limits for this decode.
+        /// </summary>
+        /// <param name="limits">The limits, e.g. <see cref="DecoderLimits.Strict"/> or <see cref="DecoderLimits.None"/>.</param>
+        /// <returns>This configuration instance for method chaining.</returns>
+        public J2KDecoderConfiguration WithLimits(DecoderLimits limits)
+        {
+            _limits = limits ?? throw new ArgumentNullException(nameof(limits));
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the maximum number of threads used to decode code-blocks in parallel.
+        /// </summary>
+        /// <param name="maxDegreeOfParallelism">1 for single-threaded; 0 or negative for the process-wide default.</param>
+        /// <returns>This configuration instance for method chaining.</returns>
+        public J2KDecoderConfiguration WithMaxDegreeOfParallelism(int maxDegreeOfParallelism)
+        {
+            _maxDegreeOfParallelism = maxDegreeOfParallelism;
+            return this;
+        }
+
+        /// <summary>
         /// Converts this configuration to a ParameterList for use with the decoder.
         /// </summary>
         /// <returns>ParameterList with all configured parameters.</returns>
@@ -238,7 +309,9 @@ namespace CoreJ2K.Configuration
             pl["nocolorspace"] = _useColorSpace ? "off" : "on";
             
             // Parsing mode
-            pl["parsing"] = _parsingMode ? "on" : "off";
+            // A limit on code-blocks cannot be combined with parsing mode, so unless parsing was asked for it is turned off
+            var parsing = _parsingMode && (_parsingModeChosen || _quitConditions.MaxCodeBlocks < 0);
+            pl["parsing"] = parsing ? "on" : "off";
             
             // Verbose
             pl["verbose"] = _verbose ? "on" : "off";
@@ -248,6 +321,18 @@ namespace CoreJ2K.Configuration
             
             // Component transform
             _componentTransform.ApplyTo(pl);
+            
+            // Resource limits and parallelism (unset leaves the process-wide defaults in effect)
+            if (_limits != null)
+            {
+                pl["max_pixels"] = _limits.MaxPixels.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                pl["max_memory"] = _limits.MaxMemoryBytes.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                pl["max_tile_components"] = _limits.MaxTileComponents.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            }
+            if (_maxDegreeOfParallelism > 0)
+            {
+                pl["threads"] = _maxDegreeOfParallelism.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            }
             
             return pl;
         }
@@ -281,6 +366,11 @@ namespace CoreJ2K.Configuration
             }
             
             errors.AddRange(_quitConditions.Validate());
+
+            if (_parsingModeChosen && _parsingMode && _quitConditions.MaxCodeBlocks >= 0)
+            {
+                errors.Add("A limit on code-blocks cannot be combined with parsing mode; leave parsing mode unset or call WithParsingMode(false)");
+            }
             
             return errors;
         }

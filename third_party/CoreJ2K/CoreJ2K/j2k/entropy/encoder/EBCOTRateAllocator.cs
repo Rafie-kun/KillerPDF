@@ -38,6 +38,11 @@ using CoreJ2K.j2k.image;
 using CoreJ2K.j2k.util;
 using CoreJ2K.j2k.wavelet.analysis;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.ExceptionServices;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace CoreJ2K.j2k.entropy.encoder
 {
@@ -425,7 +430,400 @@ namespace CoreJ2K.j2k.entropy.encoder
         public override void runAndWrite()
         {
             //Now, run the rate allocation
-            buildAndWriteLayers();
+            WriteLayers();
+        }
+
+        // ---- Parallel packet passes ---------------------------------------------------------------------------------------
+
+        /// <summary>The fewest code-blocks a packet pass must cover to be spread over several threads.</summary>
+        /// <remarks>Parallel set-up is wasted on a handful of blocks. Tests lower this to 0 to exercise the parallel path on small images.</remarks>
+        internal static int MinParallelBlocks = 512;
+
+        /// <summary>Overrides <see cref="MinParallelBlocks"/> for encodes started on the current thread (tests only).</summary>
+        [ThreadStatic]
+        internal static int? MinParallelBlocksForCurrentThread;
+
+        /// <summary>
+        /// Called on the calling thread as each pass over the packets starts, with "simulate" or "write", for the current thread only
+        /// (tests cancel or fail an encode at a known point here).
+        /// </summary>
+        [ThreadStatic]
+        internal static Action<string>? BeforePacketPassForCurrentThread;
+
+        private int parallelDegree = 1;
+
+        private int? codestreamByteLimit;
+
+        /// <summary>Collects what the final write keeps; null (and nothing is allocated) unless the caller asked for telemetry.</summary>
+        internal sealed class TelemetryCollector
+        {
+            internal readonly List<CodeBlockTelemetry> Blocks = new List<CodeBlockTelemetry>();
+            internal int Packets;
+            internal int Layers;
+        }
+
+        private TelemetryCollector? telemetry;
+
+        /// <summary>Records the code-blocks and packets of the final write in <paramref name="collector"/>.</summary>
+        internal void SetTelemetry(TelemetryCollector collector) => telemetry = collector;
+
+        private const int EocMarkerBytes = 2;
+
+        /// <summary>
+        /// Sets the exact number of bytes the whole codestream may take, in place of the one the overall bitrate works out to.
+        /// </summary>
+        /// <param name="bytes">The limit, headers and EOC marker included.</param>
+        internal void SetCodestreamByteLimit(int bytes) => codestreamByteLimit = bytes;
+
+        /// <summary>
+        /// Allows packets to be built on up to <paramref name="maxDegreeOfParallelism"/> threads. The packets, and so the codestream,
+        /// are identical whatever the degree.
+        /// </summary>
+        internal void SetMaxDegreeOfParallelism(int maxDegreeOfParallelism) => parallelDegree = Math.Max(1, maxDegreeOfParallelism);
+
+        /// <summary>One packet position of a layer: a precinct of a resolution level of a tile-component.</summary>
+        private sealed class PacketJob
+        {
+            public int Tile, Comp, Res, Precinct;
+
+            /// <summary>The tile-component's subband tree, read once because asking the source for it is not thread-safe.</summary>
+            public SubbandAn Root = null!;
+
+            /// <summary>The LL subband of the resolution level, parent of every subband in the packet.</summary>
+            public SubbandAn Ll = null!;
+
+            public bool Sop, Eph;
+
+            /// <summary>The number of code-blocks in the precinct, used to start the largest packets first.</summary>
+            public int Blocks;
+        }
+
+        private PacketJob[]? packetJobs;
+
+        /// <summary>Index in the jobs of precinct 0 of each tile, component and resolution level.</summary>
+        private int[][][]? packetJobBase;
+        private int[]? packetJobOrder;
+        private long packetJobBlocks;
+
+        /// <summary>
+        /// Lists every packet position of a layer, in the order the layer is simulated: tile, component, resolution level, precinct.
+        /// Asking the source for subband trees is done here, on the calling thread, so the passes never have to.
+        /// </summary>
+        private PacketJob[] GetPacketJobs()
+        {
+            if (packetJobs != null) return packetJobs;
+
+            var jobs = new List<PacketJob>();
+            var nt = src.GetNumTiles();
+            var nc = src.NumComps;
+            var jobBase = new int[nt][][];
+            for (var t = 0; t < nt; t++)
+            {
+                jobBase[t] = new int[nc][];
+                var sop = string.Equals((string)encSpec.sops.GetTileDef(t), "on", StringComparison.OrdinalIgnoreCase);
+                var eph = string.Equals((string)encSpec.ephs.GetTileDef(t), "on", StringComparison.OrdinalIgnoreCase);
+                for (var c = 0; c < nc; c++)
+                {
+                    var root = src.GetAnSubbandTree(t, c);
+                    var ll = root;
+                    while (ll.subb_LL != null) ll = ll.subb_LL;
+
+                    jobBase[t][c] = new int[root.resLvl + 1];
+                    for (var r = 0; r <= root.resLvl; r++)
+                    {
+                        jobBase[t][c][r] = jobs.Count;
+                        var nPrec = numPrec[t][c][r].x * numPrec[t][c][r].y;
+                        for (var p = 0; p < nPrec; p++)
+                        {
+                            var prec = pktEnc.GetPrecInfo(t, c, r, p);
+                            var blocks = 0;
+                            for (var s = r == 0 ? 0 : 1; s < (r == 0 ? 1 : 4); s++) blocks += prec.nblk[s];
+
+                            jobs.Add(new PacketJob
+                            {
+                                Tile = t, Comp = c, Res = r, Precinct = p, Root = root, Ll = ll, Sop = sop, Eph = eph, Blocks = blocks,
+                            });
+                            packetJobBlocks += blocks;
+                        }
+                        ll = ll.parentband!;
+                    }
+                }
+            }
+
+            // The largest packets first, so that one of them is not left until last. Results are filed by job index, not by completion.
+            var order = Enumerable.Range(0, jobs.Count).OrderByDescending(i => jobs[i].Blocks).ToArray();
+            packetJobOrder = order;
+            packetJobBase = jobBase;
+            return packetJobs = jobs.ToArray();
+        }
+
+        /// <summary>Sizes marker for a position where there is no packet to write.</summary>
+        private const int NoPacket = -1;
+
+        /// <summary>
+        /// Builds the packets of one layer for every precinct, with the code-blocks' truncation points chosen by
+        /// <paramref name="threshold"/>, and adds up their sizes. The packet encoder's state moves on to the next layer, as it does
+        /// when the packets are written; callers that only probe a threshold restore it afterwards. Nothing is written.
+        /// </summary>
+        /// <param name="sizes">If given, receives each job's packet size in bytes, or <see cref="NoPacket"/>, indexed like the jobs.</param>
+        /// <returns>The total size of the layer's packets.</returns>
+        private int SimulateLayer(int layerIdx, float threshold, int[]? sizes)
+        {
+            var jobs = GetPacketJobs();
+            var order = packetJobOrder!;
+            BeforePacketPassForCurrentThread?.Invoke("simulate");
+
+            int Simulate(int index, PktEncoder.PacketBuffers buffers)
+            {
+                var job = jobs[index];
+                findTruncIndices(layerIdx, job.Comp, job.Res, job.Tile, job.Ll, threshold, job.Precinct);
+                CancellationToken.ThrowIfCancellationRequested();
+
+                pktEnc.EncodePacket(buffers, job.Root, layerIdx + 1, job.Comp, job.Res, job.Tile, cblks[job.Tile][job.Comp][job.Res],
+                    truncIdxs[job.Tile][layerIdx][job.Comp][job.Res], job.Precinct, simulate: true);
+                var size = NoPacket;
+                if (buffers.Writable)
+                {
+                    size = bsWriter.writePacketHead(buffers.Head!.Buffer, buffers.Head.Length, true, job.Sop, job.Eph)
+                           + bsWriter.writePacketBody(buffers.Body ?? Array.Empty<byte>(), buffers.BodyLength, true, buffers.RoiInPacket, buffers.RoiLength);
+                }
+                if (sizes != null) sizes[index] = size;
+                return size;
+            }
+
+            var total = 0;
+            if (!ShouldBuildPacketsInParallel())
+            {
+                var buffers = new PktEncoder.PacketBuffers();
+                foreach (var index in order)
+                {
+                    var size = Simulate(index, buffers);
+                    if (size != NoPacket) total += size;
+                }
+                return total;
+            }
+
+            try
+            {
+                Parallel.For(0, order.Length,
+                    new ParallelOptions { MaxDegreeOfParallelism = parallelDegree, CancellationToken = CancellationToken },
+                    () => (Buffers: new PktEncoder.PacketBuffers(), Bytes: 0),
+                    (i, _, local) =>
+                    {
+                        var size = Simulate(order[i], local.Buffers);
+                        return size == NoPacket ? local : (local.Buffers, local.Bytes + size);
+                    },
+                    local => Interlocked.Add(ref total, local.Bytes));
+            }
+            catch (AggregateException e)
+            {
+                // Surface the original exception (a configuration error, or cancellation) with its type intact.
+                ExceptionDispatchInfo.Capture(e.Flatten().InnerExceptions[0]).Throw();
+                throw;
+            }
+            return total;
+        }
+
+        // ---- Writing packets --------------------------------------------------------------------------------------------
+
+        private sealed class PendingPacket
+        {
+            public int Layer, Comp, Res, Tile, Precinct, Job;
+            public bool Sop, Eph;
+        }
+
+        /// <summary>A packet built ahead of being written.</summary>
+        private sealed class BuiltPacket
+        {
+            public byte[] Head = Array.Empty<byte>();
+            public byte[] Body = Array.Empty<byte>();
+            public int BodyLength;
+            public bool Writable, RoiInPacket;
+            public int RoiLength;
+            public List<CodeBlockTelemetry>? Blocks;
+        }
+
+        /// <summary>Packets waiting to be built in parallel and written, in writing order; null when packets are written one by one.</summary>
+        private List<PendingPacket>? pendingPackets;
+
+        private long pendingBytes;
+
+        /// <summary>Most estimated packet bytes held back at once; bounds the memory the packets built ahead take.</summary>
+        private const long MaxPendingBytes = 64L << 20;
+
+        /// <summary>Most packets held back at once.</summary>
+        private const int MaxPendingPackets = 1 << 14;
+
+        /// <summary>The size of each packet as simulated, per layer then job; tells how many packets fit in the bytes held back.</summary>
+        private int[][]? layerPacketSizes;
+
+        private PktEncoder.PacketBuffers? serialBuffers;
+
+        /// <summary>Whether <see cref="EmitPacket"/> only records the packets' lengths in the PLT data, in the order they will be written.</summary>
+        private bool recordingPacketOrder;
+
+        /// <summary>Whether a pass over every packet is worth spreading over several threads.</summary>
+        private bool ShouldBuildPacketsInParallel()
+            => parallelDegree >= 2 && GetPacketJobs().Length >= 2 && packetJobBlocks >= (MinParallelBlocksForCurrentThread ?? MinParallelBlocks);
+
+        /// <summary>The number of threads to save and restore the packet encoder's state on.</summary>
+        private int SaveRestoreDegree() => ShouldBuildPacketsInParallel() ? parallelDegree : 1;
+
+        /// <summary>Called by the progression writers for each packet, in writing order. Either writes it, or queues it.</summary>
+        private void EmitPacket(int l, int c, int r, int t, int p, bool sop, bool eph)
+        {
+            if (recordingPacketOrder)
+            {
+                // Nothing is written: the packet's simulated length goes into the PLT data, at the place in the tile-part the
+                // progression puts the packet. A position that has no packet is not written later either.
+                if (p < numPrec[t][c][r].x * numPrec[t][c][r].y)
+                {
+                    var size = layerPacketSizes![l][packetJobBase![t][c][r] + p];
+                    if (size != NoPacket) pltData!.AddPacket(t, size);
+                }
+                return;
+            }
+
+            if (pendingPackets != null)
+            {
+                var first = packetJobBase![t][c][r];
+                if (p < numPrec[t][c][r].x * numPrec[t][c][r].y)
+                {
+                    var job = first + p;
+                    pendingPackets.Add(new PendingPacket { Layer = l, Comp = c, Res = r, Tile = t, Precinct = p, Job = job, Sop = sop, Eph = eph });
+                    pendingBytes += Math.Max(0, layerPacketSizes![l][job]);
+                    if (pendingBytes >= MaxPendingBytes || pendingPackets.Count >= MaxPendingPackets)
+                    {
+                        WritePendingPackets();
+                    }
+                    return;
+                }
+
+                // Not a packet the simulation knew about: write what is queued, then fail or succeed exactly as when writing one by one.
+                WritePendingPackets();
+            }
+
+            WritePacketNow(l, c, r, t, p, sop, eph);
+        }
+
+        private void WritePacketNow(int l, int c, int r, int t, int p, bool sop, bool eph)
+        {
+            var sb = src.GetAnSubbandTree(t, c);
+            for (var i = sb.resLvl; i > r; i--)
+            {
+                sb = sb.subb_LL!;
+            }
+
+            findTruncIndices(l, c, r, t, sb, layers[l].rdThreshold, p);
+
+            CancellationToken.ThrowIfCancellationRequested();
+
+            var buffers = serialBuffers ??= new PktEncoder.PacketBuffers();
+            buffers.Blocks = telemetry != null ? new List<CodeBlockTelemetry>() : null;
+            pktEnc.EncodePacket(buffers, src.GetAnSubbandTree(t, c), l + 1, c, r, t, cblks[t][c][r], truncIdxs[t][l][c][r], p, simulate: false);
+            if (buffers.Writable)
+            {
+                if (telemetry != null)
+                {
+                    telemetry.Packets++;
+                    telemetry.Blocks.AddRange(buffers.Blocks!);
+                }
+                bsWriter.writePacketHead(buffers.Head!.Buffer, buffers.Head.Length, false, sop, eph);
+                bsWriter.writePacketBody(buffers.Body!, buffers.BodyLength, false, buffers.RoiInPacket, buffers.RoiLength);
+            }
+        }
+
+        /// <summary>
+        /// Builds the queued packets on several threads and writes them, in the order they were queued. The packets of one precinct
+        /// are built in layer order by one thread, since they share tag-tree state; different precincts are independent.
+        /// </summary>
+        private void WritePendingPackets()
+        {
+            var queue = pendingPackets!;
+            if (queue.Count == 0) return;
+            BeforePacketPassForCurrentThread?.Invoke("write");
+
+            var built = new BuiltPacket[queue.Count];
+            var chains = new Dictionary<int, List<int>>();
+            for (var i = 0; i < queue.Count; i++)
+            {
+                if (!chains.TryGetValue(queue[i].Job, out var chain))
+                {
+                    chains[queue[i].Job] = chain = new List<int>();
+                }
+                chain.Add(i);
+            }
+
+            var jobs = GetPacketJobs();
+            var work = chains.OrderByDescending(chain => jobs[chain.Key].Blocks * (long)chain.Value.Count).Select(chain => chain.Value).ToArray();
+
+            void Build(List<int> chain, PktEncoder.PacketBuffers buffers)
+            {
+                foreach (var index in chain)
+                {
+                    var packet = queue[index];
+                    var job = jobs[packet.Job];
+                    findTruncIndices(packet.Layer, packet.Comp, packet.Res, packet.Tile, job.Ll, layers[packet.Layer].rdThreshold, packet.Precinct);
+                    CancellationToken.ThrowIfCancellationRequested();
+
+                    buffers.Body = null; // a body is not reused: it is kept until it has been written
+                    buffers.Blocks = telemetry != null ? new List<CodeBlockTelemetry>() : null;
+                    pktEnc.EncodePacket(buffers, job.Root, packet.Layer + 1, packet.Comp, packet.Res, packet.Tile,
+                        cblks[packet.Tile][packet.Comp][packet.Res], truncIdxs[packet.Tile][packet.Layer][packet.Comp][packet.Res],
+                        packet.Precinct, simulate: false);
+
+                    var result = new BuiltPacket { Writable = buffers.Writable };
+                    if (buffers.Writable)
+                    {
+                        result.Head = new byte[buffers.Head!.Length];
+                        Buffer.BlockCopy(buffers.Head.Buffer, 0, result.Head, 0, result.Head.Length);
+                        result.Body = buffers.Body ?? Array.Empty<byte>();
+                        result.BodyLength = buffers.BodyLength;
+                        result.RoiInPacket = buffers.RoiInPacket;
+                        result.RoiLength = buffers.RoiLength;
+                        result.Blocks = buffers.Blocks;
+                    }
+                    built[index] = result;
+                }
+            }
+
+            try
+            {
+                Parallel.For(0, work.Length,
+                    new ParallelOptions { MaxDegreeOfParallelism = parallelDegree, CancellationToken = CancellationToken },
+                    () => new PktEncoder.PacketBuffers(),
+                    (i, _, buffers) =>
+                    {
+                        Build(work[i], buffers);
+                        return buffers;
+                    },
+                    _ => { });
+            }
+            catch (AggregateException e)
+            {
+                // Surface the original exception (a configuration error, or cancellation) with its type intact.
+                ExceptionDispatchInfo.Capture(e.Flatten().InnerExceptions[0]).Throw();
+                throw;
+            }
+
+            for (var i = 0; i < queue.Count; i++)
+            {
+                var packet = built[i];
+                if (!packet.Writable) continue;
+
+                // Recorded here, on the calling thread and in writing order, not where the packet was built.
+                if (telemetry != null)
+                {
+                    telemetry.Packets++;
+                    telemetry.Blocks.AddRange(packet.Blocks!);
+                }
+                bsWriter.writePacketHead(packet.Head, packet.Head.Length, false, queue[i].Sop, queue[i].Eph);
+                bsWriter.writePacketBody(packet.Body, packet.BodyLength, false, packet.RoiInPacket, packet.RoiLength);
+                built[i] = null!; // let the body go as soon as it has been written
+            }
+
+            queue.Clear();
+            pendingBytes = 0;
         }
 
         /// <summary> Initializes the layers array. This must be called after the main header
@@ -596,7 +994,9 @@ namespace CoreJ2K.j2k.entropy.encoder
             // Ensure minimum size of last layer (this one determines overall
             // bitrate)
             n = num_Layers - 2;
-            nextbytes = (int)(lyrSpec.TotBitrate * np) - ho;
+            // A byte limit is exact; a bitrate is rounded to whole bytes and can only be that precise.
+            // The EOC marker that ends the codestream comes after the last packet, and is not part of 'ho'.
+            nextbytes = (codestreamByteLimit.HasValue ? codestreamByteLimit.Value - EocMarkerBytes : (int)(lyrSpec.TotBitrate * np)) - ho;
             newbytes = nextbytes - ((n >= 0) ? layers[n].maxBytes : 0);
             while (newbytes < minlsz)
             {
@@ -604,7 +1004,9 @@ namespace CoreJ2K.j2k.entropy.encoder
                 {
                     if (newbytes <= 0)
                     {
-                        throw new ArgumentException("Overall target bitrate too low, given the current bit stream header overhead");
+                        throw new ArgumentException(codestreamByteLimit.HasValue
+                            ? "The byte limit is too low, given the current bit stream header overhead"
+                            : "Overall target bitrate too low, given the current bit stream header overhead");
                     }
                     break;
                 }
@@ -655,6 +1057,10 @@ namespace CoreJ2K.j2k.entropy.encoder
                     }
                 }
             } // End loop on tiles
+
+            // The layers are built, and the length of every tile-part found, here and not when the packets are written, because the
+            // codestream's main header (TLM) and the tile-part headers (SOT) have to be known before anything is written.
+            BuildLayers();
 
 #if DO_TIMING
 			initTime += (System.DateTime.Now.Ticks - 621355968000000000) / 10000 - stime;
@@ -733,6 +1139,7 @@ namespace CoreJ2K.j2k.entropy.encoder
                     //Get next coded code-block coordinates
                     while ((ccb = src.GetNextCodeBlock(c, ccb)) != null)
                     {
+                        CancellationToken.ThrowIfCancellationRequested();
 #if DO_TIMING
 						stime = (System.DateTime.Now.Ticks - 621355968000000000) / 10000;
 #endif
@@ -776,7 +1183,8 @@ namespace CoreJ2K.j2k.entropy.encoder
                     }
                 }
 
-                //Goto next tile
+                CancellationToken.ThrowIfCancellationRequested();
+            //Goto next tile
                 if (t < numTiles - 1)
                     //not at last tile
                     src.NextTile();
@@ -789,22 +1197,12 @@ namespace CoreJ2K.j2k.entropy.encoder
         /// writes the layer bit streams according to the progressive type.
         /// 
         /// </summary>
-        private void buildAndWriteLayers()
+        private void BuildLayers()
         {
-            var nPrec = 0;
             int maxBytes, actualBytes;
             float rdThreshold;
-            SubbandAn? sb;
-            //float threshold;
-            BitOutputBuffer? hBuff = null;
-            byte[]? bBuff = null;
-            int[] tileLengths; // Length of each tile
-            int tmp;
-            bool sopUsed; // Should SOP markers be used ?
-            bool ephUsed; // Should EPH markers be used ?
             var nc = src.NumComps;
             var nt = src.GetNumTiles();
-            int mrl;
 #if DO_TIMING
 			long stime = 0L;
 			stime = (System.DateTime.Now.Ticks - 621355968000000000) / 10000;
@@ -821,13 +1219,14 @@ namespace CoreJ2K.j2k.entropy.encoder
             }
 
             // PLT SUPPORT: Initialize PLT data collection if enabled
-            codestream.metadata.PacketLengthsData? pltData = null;
+            pltData = null;
             if (headEnc!.IsPLTEnabled)
             {
                 pltData = new codestream.metadata.PacketLengthsData();
             }
 
             tileLengths = new int[nt];
+            layerPacketSizes = new int[num_Layers][];
             actualBytes = 0;
 
             // +------------------------------+
@@ -837,6 +1236,7 @@ namespace CoreJ2K.j2k.entropy.encoder
             for (var l = 0; l < num_Layers; l++)
             {
                 //loop on layers
+                CancellationToken.ThrowIfCancellationRequested();
 
                 maxBytes = layers[l].maxBytes;
                 if (layers[l].optimize)
@@ -852,65 +1252,60 @@ namespace CoreJ2K.j2k.entropy.encoder
                     rdThreshold = estimateLayerThreshold(maxBytes, layers[l - 1]);
                 }
 
-                for (var t = 0; t < nt; t++)
+                if (l == 0)
                 {
-                    //loop on tiles
-                    if (l == 0)
+                    for (var t = 0; t < nt; t++)
                     {
                         // Tile header
                         headEnc.reset();
                         headEnc.encodeTilePartHeader(0, t);
                         tileLengths[t] += headEnc.Length;
                     }
+                }
 
-                    for (var c = 0; c < nc; c++)
-                    {
-                        //loop on components
+                // The layer's packets are built in parallel, but their sizes are added up in the order the layer is simulated.
+                var jobs = GetPacketJobs();
+                var sizes = new int[jobs.Length];
+                SimulateLayer(l, rdThreshold, sizes);
+                layerPacketSizes[l] = sizes;
+                for (var j = 0; j < jobs.Length; j++)
+                {
+                    if (sizes[j] == NoPacket) continue;
 
-                        // set boolean sopUsed here (SOP markers)
-                        sopUsed = string.Equals((string)encSpec.sops.GetTileDef(t), "on", StringComparison.OrdinalIgnoreCase);
-                        // set boolean ephUsed here (EPH markers)
-                        ephUsed = string.Equals((string)encSpec.ephs.GetTileDef(t), "on", StringComparison.OrdinalIgnoreCase);
-
-                        // Go to LL band
-                        sb = src.GetAnSubbandTree(t, c);
-                        mrl = sb.resLvl + 1;
-
-                        while (sb.subb_LL != null)
-                        {
-                            sb = sb!.subb_LL;
-                        }
-
-                        for (var r = 0; r < mrl; r++)
-                        {
-                            // loop on resolution levels
-
-                            nPrec = numPrec[t][c][r].x * numPrec[t][c][r].y;
-                            for (var p = 0; p < nPrec; p++)
-                            {
-                                // loop on precincts
-
-                                findTruncIndices(l, c, r, t, sb, rdThreshold, p);
-
-                                hBuff = pktEnc.encodePacket(l + 1, c, r, t, cblks[t][c][r], truncIdxs[t][l][c][r], hBuff, bBuff, p);
-                                if (pktEnc.PacketWritable)
-                                {
-                                    tmp = bsWriter.writePacketHead(hBuff!.Buffer, hBuff!.Length, true, sopUsed, ephUsed);
-                                    tmp += bsWriter.writePacketBody(pktEnc.LastBodyBuf, pktEnc.LastBodyLen, true, pktEnc.ROIinPkt, pktEnc.ROILen);
-                                    actualBytes += tmp;
-                                    tileLengths[t] += tmp;
-
-                                    // PLT SUPPORT: Record packet length (header + body)
-                                    pltData?.AddPacket(t, tmp);
-                                }
-                            } // End loop on precincts
-                            sb = sb!.parentband;
-                        } // End loop on resolution levels
-                    } // End loop on components
-                } // end loop on tiles
+                    actualBytes += sizes[j];
+                    tileLengths[jobs[j].Tile] += sizes[j];
+                }
                 layers[l].rdThreshold = rdThreshold;
                 layers[l].actualBytes = actualBytes;
             } // end loop on layers
+
+            // PLT SUPPORT: The PLT markers list the packets of a tile-part in the order they are written, which is the order of the
+            // tile's progression and not the one the layers were simulated in. Walk the progression without writing, to record them.
+            if (pltData != null)
+            {
+                recordingPacketOrder = true;
+                try
+                {
+                    // The position-based progressions read the geometry of the current tile, which writing a tile-part header sets.
+                    var numTiles = GetNumTiles(null);
+                    for (var t = 0; t < nt; t++)
+                    {
+                        SetTile(t % numTiles.x, t / numTiles.x);
+                        WriteTileProgressions(t);
+                    }
+                }
+                finally
+                {
+                    recordingPacketOrder = false;
+                }
+
+                // The tile-part headers measured while building the layers had no PLT marker yet, but the ones written do, and the
+                // tile-part length in SOT (and TLM) must count every byte of the tile-part.
+                for (var t = 0; t < nt; t++)
+                {
+                    tileLengths[t] += HeaderEncoder.GetPLTLength(pltData, t);
+                }
+            }
 
             if (tlmData != null)
             {
@@ -919,101 +1314,143 @@ namespace CoreJ2K.j2k.entropy.encoder
                     // tileLengths[t] includes the complete tile-part length
                     tlmData.AddTilePart(t, 0, tileLengths[t]);
                 }
-            }
 
-            // PLT SUPPORT: Pass collected PLT data to header encoder
-            if (pltData != null)
-            {
-                headEnc.SetPLTData(pltData);
+                // TLM SUPPORT: Pass collected TLM data to header encoder, which writes it in the main header
+                headEnc.SetTLMData(tlmData);
             }
 
 #if DO_TIMING
 			buildTime += (System.DateTime.Now.Ticks - 621355968000000000) / 10000 - stime;
+#endif
+        }
+
+        /// <summary>The length of the tile-part of each tile, found by <see cref="BuildLayers"/>.</summary>
+        private int[]? tileLengths;
+
+        /// <summary>The lengths of the packets of each tile, found by <see cref="BuildLayers"/> when PLT markers are written.</summary>
+        private codestream.metadata.PacketLengthsData? pltData;
+
+        /// <summary>
+        /// Walks the packets of a tile in the order of its progression(s), handing each to <see cref="EmitPacket"/>: written, queued to be
+        /// built in parallel and written, or only recorded, according to the state the allocator is in.
+        /// </summary>
+        private void WriteTileProgressions(int t)
+        {
+            var nc = src.NumComps;
+            Progression[] prog; // Progression(s) in each tile
+            int cs, ce, rs, re, lye;
+
+            var mrlc = new int[nc];
+            //int[][] lysA; // layer index start for each component and
+            // resolution level
+            var lys = new int[nc][];
+            for (var c = 0; c < nc; c++)
+            {
+                mrlc[c] = src.GetAnSubbandTree(t, c).resLvl;
+                lys[c] = new int[mrlc[c] + 1];
+            }
+
+            prog = (Progression[])encSpec.pocs.GetTileDef(t);
+
+            foreach (var p in prog)
+            {
+                // Loop on progression
+                lye = p.lye;
+                cs = p.cs;
+                ce = p.ce;
+                rs = p.rs;
+                re = p.re;
+
+                switch (p.type)
+                {
+
+                    case ProgressionType.RES_LY_COMP_POS_PROG:
+                        writeResLyCompPos(t, rs, re, cs, ce, lys, lye);
+                        break;
+
+                    case ProgressionType.LY_RES_COMP_POS_PROG:
+                        writeLyResCompPos(t, rs, re, cs, ce, lys, lye);
+                        break;
+
+                    case ProgressionType.POS_COMP_RES_LY_PROG:
+                        writePosCompResLy(t, rs, re, cs, ce, lys, lye);
+                        break;
+
+                    case ProgressionType.COMP_POS_RES_LY_PROG:
+                        writeCompPosResLy(t, rs, re, cs, ce, lys, lye);
+                        break;
+
+                    case ProgressionType.RES_POS_COMP_LY_PROG:
+                        writeResPosCompLy(t, rs, re, cs, ce, lys, lye);
+                        break;
+
+                    default:
+                        throw new InvalidOperationException("Unsupported bit stream progression type");
+
+                } // switch on progression
+
+                // Packets of the progression that were queued to be built in parallel must be written before its layer indices
+                // move on, and before the next tile's header.
+                if (pendingPackets != null)
+                {
+                    WritePendingPackets();
+                }
+
+                // Update next first layer index 
+                for (var c = cs; c < ce; c++)
+                    for (var r = rs; r < re; r++)
+                    {
+                        if (r > mrlc[c])
+                            continue;
+                        lys[c][r] = lye;
+                    }
+            }
+        }
+
+        /// <summary> Writes the tiles' tile-part headers and packets to the bit stream, according to their progression orders. The main
+        /// header must have been written already.
+        /// 
+        /// </summary>
+        private void WriteLayers()
+        {
+            var nc = src.NumComps;
+            var nt = src.GetNumTiles();
+            var tileLengths = this.tileLengths!;
+#if DO_TIMING
+			long stime = 0L;
 			stime = (System.DateTime.Now.Ticks - 621355968000000000) / 10000;
 #endif
+            // PLT SUPPORT: Pass collected PLT data to header encoder. It goes in the tile-part headers; if it was set earlier, the
+            // main header would carry it too.
+            if (pltData != null)
+            {
+                headEnc!.SetPLTData(pltData);
+            }
+
             // +--------------------------------------------------+
             // | Write tiles according to their Progression order |
             // +--------------------------------------------------+
             // Reset the packet encoder before writing all packets
             pktEnc.reset();
-            Progression[] prog; // Progression(s) in each tile
-            int cs, ce, rs, re, lye;
-
-            var mrlc = new int[nc];
+            if (telemetry != null) telemetry.Layers = num_Layers; // empty trailing layers have been dropped from this count
+            pendingPackets = ShouldBuildPacketsInParallel() ? new List<PendingPacket>() : null;
             for (var t = 0; t < nt; t++)
             {
-                //loop on tiles
-                //int[][] lysA; // layer index start for each component and
-                // resolution level
-                var lys = new int[nc][];
-                for (var c = 0; c < nc; c++)
-                {
-                    mrlc[c] = src.GetAnSubbandTree(t, c).resLvl;
-                    lys[c] = new int[mrlc[c] + 1];
-                }
-
                 // Tile header
                 headEnc.reset();
                 headEnc.encodeTilePartHeader(tileLengths[t], t);
                 bsWriter.commitBitstreamHeader(headEnc);
-                prog = (Progression[])encSpec.pocs.GetTileDef(t);
 
-                foreach (var p in prog)
-                {
-                    // Loop on progression
-                    lye = p.lye;
-                    cs = p.cs;
-                    ce = p.ce;
-                    rs = p.rs;
-                    re = p.re;
-
-                    switch (p.type)
-                    {
-
-                        case ProgressionType.RES_LY_COMP_POS_PROG:
-                            writeResLyCompPos(t, rs, re, cs, ce, lys, lye);
-                            break;
-
-                        case ProgressionType.LY_RES_COMP_POS_PROG:
-                            writeLyResCompPos(t, rs, re, cs, ce, lys, lye);
-                            break;
-
-                        case ProgressionType.POS_COMP_RES_LY_PROG:
-                            writePosCompResLy(t, rs, re, cs, ce, lys, lye);
-                            break;
-
-                        case ProgressionType.COMP_POS_RES_LY_PROG:
-                            writeCompPosResLy(t, rs, re, cs, ce, lys, lye);
-                            break;
-
-                        case ProgressionType.RES_POS_COMP_LY_PROG:
-                            writeResPosCompLy(t, rs, re, cs, ce, lys, lye);
-                            break;
-
-                        default:
-                            throw new InvalidOperationException("Unsupported bit stream progression type");
-
-                    } // switch on progression
-
-                    // Update next first layer index 
-                    for (var c = cs; c < ce; c++)
-                        for (var r = rs; r < re; r++)
-                        {
-                            if (r > mrlc[c])
-                                continue;
-                            lys[c][r] = lye;
-                        }
-                }
+                WriteTileProgressions(t);
             } // End loop on tiles
 
 #if DO_TIMING
 			writeTime += (System.DateTime.Now.Ticks - 621355968000000000) / 10000 - stime;
 #endif
-            // TLM SUPPORT: Pass collected TLM data to header encoder
-            if (tlmData != null)
-            {
-                headEnc.SetTLMData(tlmData);
-            }
+            pendingPackets = null;
+            layerPacketSizes = null;
+            this.tileLengths = null;
+            pltData = null;
 
         }
 
@@ -1049,10 +1486,6 @@ namespace CoreJ2K.j2k.entropy.encoder
             bool ephUsed; // Should EPH markers be used ?
             var nc = src.NumComps;
             var mrl = new int[nc];
-            SubbandAn? sb;
-            float threshold;
-            BitOutputBuffer? hBuff = null;
-            byte[]? bBuff = null;
             var nPrec = 0;
 
             // Max number of resolution levels in the tile
@@ -1106,22 +1539,7 @@ namespace CoreJ2K.j2k.entropy.encoder
                             // set boolean ephUsed here (EPH markers)
                             ephUsed = ((string)encSpec.ephs.GetTileDef(t)).Equals("on");
 
-                            sb = src.GetAnSubbandTree(t, c);
-                            for (var i = mrl[c]; i > r; i--)
-                            {
-                                sb = sb!.subb_LL;
-                            }
-
-                            threshold = layers[l].rdThreshold;
-                            findTruncIndices(l, c, r, t, sb, threshold, p);
-
-                            hBuff = pktEnc.encodePacket(l + 1, c, r, t, cblks[t][c][r], truncIdxs[t][l][c][r], hBuff, bBuff, p);
-
-                            if (pktEnc.PacketWritable)
-                            {
-                                bsWriter.writePacketHead(hBuff!.Buffer, hBuff!.Length, false, sopUsed, ephUsed);
-                                bsWriter.writePacketBody(pktEnc.LastBodyBuf, pktEnc.LastBodyLen, false, pktEnc.ROIinPkt, pktEnc.ROILen);
-                            }
+                            EmitPacket(l, c, r, t, p, sopUsed, ephUsed);
                         } // End loop on precincts
                     } // End loop on components
                 } // End loop on layers
@@ -1160,10 +1578,6 @@ namespace CoreJ2K.j2k.entropy.encoder
             bool ephUsed; // Should EPH markers be used ?
             var nc = src.NumComps;
             int mrl;
-            SubbandAn? sb;
-            float threshold;
-            BitOutputBuffer? hBuff = null;
-            byte[]? bBuff = null;
             var nPrec = 0;
 
             var minlys = 100000; // minimum layer start index of each component
@@ -1205,22 +1619,7 @@ namespace CoreJ2K.j2k.entropy.encoder
                             // set boolean ephUsed here (EPH markers)
                             ephUsed = ((string)encSpec.ephs.GetTileDef(t)).Equals("on");
 
-                            sb = src.GetAnSubbandTree(t, c);
-                            for (var i = mrl; i > r; i--)
-                            {
-                                sb = sb!.subb_LL;
-                            }
-
-                            threshold = layers[l].rdThreshold;
-                            findTruncIndices(l, c, r, t, sb, threshold, p);
-
-                            hBuff = pktEnc.encodePacket(l + 1, c, r, t, cblks[t][c][r], truncIdxs[t][l][c][r], hBuff, bBuff, p);
-
-                            if (pktEnc.PacketWritable)
-                            {
-                                bsWriter.writePacketHead(hBuff!.Buffer, hBuff!.Length, false, sopUsed, ephUsed);
-                                bsWriter.writePacketBody(pktEnc.LastBodyBuf, pktEnc.LastBodyLen, false, pktEnc.ROIinPkt, pktEnc.ROILen);
-                            }
+                            EmitPacket(l, c, r, t, p, sopUsed, ephUsed);
                         } // end loop on precincts
                     } // end loop on components
                 } // end loop on resolution levels
@@ -1259,10 +1658,6 @@ namespace CoreJ2K.j2k.entropy.encoder
             bool ephUsed; // Should EPH markers be used ?
             var nc = src.NumComps;
             int mrl;
-            SubbandAn? sb;
-            float threshold;
-            BitOutputBuffer? hBuff = null;
-            byte[]? bBuff = null;
 
             // Computes current tile offset in the reference grid
             var nTiles = src.GetNumTiles(null);
@@ -1389,22 +1784,7 @@ namespace CoreJ2K.j2k.entropy.encoder
                                 // set boolean ephUsed here (EPH markers)
                                 ephUsed = ((string)encSpec.ephs.GetTileDef(t)).Equals("on");
 
-                                sb = src.GetAnSubbandTree(t, c);
-                                for (var i = mrl; i > r; i--)
-                                {
-                                    sb = sb!.subb_LL;
-                                }
-
-                                threshold = layers[l].rdThreshold;
-                                findTruncIndices(l, c, r, t, sb, threshold, nextPrec[c][r]);
-
-                                hBuff = pktEnc.encodePacket(l + 1, c, r, t, cblks[t][c][r], truncIdxs[t][l][c][r], hBuff, bBuff, nextPrec[c][r]);
-
-                                if (pktEnc.PacketWritable)
-                                {
-                                    bsWriter.writePacketHead(hBuff!.Buffer, hBuff!.Length, false, sopUsed, ephUsed);
-                                    bsWriter.writePacketBody(pktEnc.LastBodyBuf, pktEnc.LastBodyLen, false, pktEnc.ROIinPkt, pktEnc.ROILen);
-                                }
+                                EmitPacket(l, c, r, t, nextPrec[c][r], sopUsed, ephUsed);
                             } // layers
                             nextPrec[c][r]++;
                         } // Resolution levels
@@ -1477,10 +1857,6 @@ namespace CoreJ2K.j2k.entropy.encoder
             bool ephUsed; // Should EPH markers be used ?
             var nc = src.NumComps;
             int mrl;
-            SubbandAn? sb;
-            float threshold;
-            BitOutputBuffer? hBuff = null;
-            byte[]? bBuff = null;
 
             // Computes current tile offset in the reference grid
             var nTiles = src.GetNumTiles(null);
@@ -1610,22 +1986,7 @@ namespace CoreJ2K.j2k.entropy.encoder
                                 // set boolean ephUsed here (EPH markers)
                                 ephUsed = ((string)encSpec.ephs.GetTileDef(t)).Equals("on");
 
-                                sb = src.GetAnSubbandTree(t, c);
-                                for (var i = mrl; i > r; i--)
-                                {
-                                    sb = sb!.subb_LL;
-                                }
-
-                                threshold = layers[l].rdThreshold;
-                                findTruncIndices(l, c, r, t, sb, threshold, nextPrec[c][r]);
-
-                                hBuff = pktEnc.encodePacket(l + 1, c, r, t, cblks[t][c][r], truncIdxs[t][l][c][r], hBuff, bBuff, nextPrec[c][r]);
-
-                                if (pktEnc.PacketWritable)
-                                {
-                                    bsWriter.writePacketHead(hBuff!.Buffer, hBuff!.Length, false, sopUsed, ephUsed);
-                                    bsWriter.writePacketBody(pktEnc.LastBodyBuf, pktEnc.LastBodyLen, false, pktEnc.ROIinPkt, pktEnc.ROILen);
-                                }
+                                EmitPacket(l, c, r, t, nextPrec[c][r], sopUsed, ephUsed);
                             } // Layers
                             nextPrec[c][r]++;
                         } // Resolution levels                    
@@ -1698,10 +2059,6 @@ namespace CoreJ2K.j2k.entropy.encoder
             bool ephUsed; // Should EPH markers be used ?
             var nc = src.NumComps;
             int mrl;
-            SubbandAn? sb;
-            float threshold;
-            BitOutputBuffer? hBuff = null;
-            byte[]? bBuff = null;
 
             // Computes current tile offset in the reference grid
             var nTiles = src.GetNumTiles(null);
@@ -1828,22 +2185,7 @@ namespace CoreJ2K.j2k.entropy.encoder
                                 // set boolean ephUsed here (EPH markers)
                                 ephUsed = ((string)encSpec.ephs.GetTileDef(t)).Equals("on");
 
-                                sb = src.GetAnSubbandTree(t, c);
-                                for (var i = mrl; i > r; i--)
-                                {
-                                    sb = sb!.subb_LL;
-                                }
-
-                                threshold = layers[l].rdThreshold;
-                                findTruncIndices(l, c, r, t, sb, threshold, nextPrec[c][r]);
-
-                                hBuff = pktEnc.encodePacket(l + 1, c, r, t, cblks[t][c][r], truncIdxs[t][l][c][r], hBuff, bBuff, nextPrec[c][r]);
-
-                                if (pktEnc.PacketWritable)
-                                {
-                                    bsWriter.writePacketHead(hBuff!.Buffer, hBuff!.Length, false, sopUsed, ephUsed);
-                                    bsWriter.writePacketBody(pktEnc.LastBodyBuf, pktEnc.LastBodyLen, false, pktEnc.ROIinPkt, pktEnc.ROILen);
-                                }
+                                EmitPacket(l, c, r, t, nextPrec[c][r], sopUsed, ephUsed);
                             } // layers
                             nextPrec[c][r]++;
                         } // Components
@@ -1914,28 +2256,12 @@ namespace CoreJ2K.j2k.entropy.encoder
         private float optimizeBitstreamLayer(int layerIdx, float fmaxt, int maxBytes, int prevBytes)
         {
 
-            int nt; // The total number of tiles
-            int nc; // The total number of components
-            int numLvls; // The total number of resolution levels
             int actualBytes; // Actual number of bytes for a layer
             float fmint; // Minimum of the current threshold interval
             float ft; // Current threshold
-            SubbandAn? sb; // Current subband
-            BitOutputBuffer? hBuff; // The packet head buffer
-            byte[]? bBuff; // The packet body buffer
             int sidx; // The index in the summary table
-            bool sopUsed; // Should SOP markers be used ?
-            bool ephUsed; // Should EPH markers be used ?
-                          //int precinctIdx; // Precinct index for current packet
-            int nPrec; // Number of precincts in the current resolution level
 
-            // Save the packet encoder state
-            pktEnc.save();
-
-            nt = src.GetNumTiles();
-            nc = src.NumComps;
-            hBuff = null;
-            bBuff = null;
+            pktEnc.Save(SaveRestoreDegree());
 
             // Estimate the minimum slope to start with from the summary
             // information in 'RDSlopesRates'. This is a real minimum since it
@@ -1989,44 +2315,8 @@ namespace CoreJ2K.j2k.entropy.encoder
             {
                 // Get the number of bytes used by this layer, if 'ft' is the
                 // threshold, by simulation.
-                actualBytes = prevBytes;
                 src.SetTile(0, 0);
-
-                for (var t = 0; t < nt; t++)
-                {
-                    for (var c = 0; c < nc; c++)
-                    {
-                        // set boolean sopUsed here (SOP markers)
-                        sopUsed = string.Equals((string)encSpec.sops.GetTileDef(t), "on", StringComparison.OrdinalIgnoreCase);
-                        // set boolean ephUsed here (EPH markers)
-                        ephUsed = string.Equals((string)encSpec.ephs.GetTileDef(t), "on", StringComparison.OrdinalIgnoreCase);
-
-                        // Get LL subband
-                        sb = src.GetAnSubbandTree(t, c);
-                        numLvls = sb.resLvl + 1;
-                        sb = (SubbandAn)sb.GetSubbandByIdx(0, 0);
-                        //loop on resolution levels
-                        for (var r = 0; r < numLvls; r++)
-                        {
-
-                            nPrec = numPrec[t][c][r].x * numPrec[t][c][r].y;
-                            for (var p = 0; p < nPrec; p++)
-                            {
-
-                                findTruncIndices(layerIdx, c, r, t, sb, ft, p);
-                                hBuff = pktEnc.encodePacket(layerIdx + 1, c, r, t, cblks[t][c][r], truncIdxs[t][layerIdx][c][r], hBuff, bBuff, p);
-
-                                if (pktEnc.PacketWritable)
-                                {
-                                    bBuff = pktEnc.LastBodyBuf;
-                                    actualBytes += bsWriter.writePacketHead(hBuff!.Buffer, hBuff!.Length, true, sopUsed, ephUsed);
-                                    actualBytes += bsWriter.writePacketBody(bBuff, pktEnc.LastBodyLen, true, pktEnc.ROIinPkt, pktEnc.ROILen);
-                                }
-                            } // end loop on precincts
-                            sb = sb!.parentband;
-                        } // End loop on resolution levels
-                    } // End loop on components
-                } // End loop on tiles
+                actualBytes = prevBytes + SimulateLayer(layerIdx, ft, null);
 
                 // Move the interval bounds according to simulation result
                 if (actualBytes > maxBytes)
@@ -2052,8 +2342,7 @@ namespace CoreJ2K.j2k.entropy.encoder
                 if (ft <= fmint)
                     ft = fmaxt;
 
-                // Restore previous packet encoder state
-                pktEnc.restore();
+                pktEnc.Restore(SaveRestoreDegree());
 
                 // We continue to iterate, until the threshold reaches the upper
                 // limit of the interval, within a FLOAT_REL_PRECISION relative
@@ -2255,6 +2544,7 @@ namespace CoreJ2K.j2k.entropy.encoder
         /// </param>
         private void findTruncIndices(int layerIdx, int compIdx, int lvlIdx, int tileIdx, SubbandAn? subb, float fthresh, int precinctIdx)
         {
+            CancellationToken.ThrowIfCancellationRequested();
             int minsbi, maxsbi, b, n; // bIdx removed
                                       //Coord ncblks = null;
             SubbandAn? sb;
@@ -2289,7 +2579,11 @@ namespace CoreJ2K.j2k.entropy.encoder
                         cur_cblk = cblks[tileIdx][compIdx][lvlIdx][s][b];
                         for (n = 0; n < cur_cblk.nVldTrunc; n++)
                         {
-                            if (cur_cblk.truncSlopes[n] < fthresh)
+                            // A threshold of 0 takes everything into the layer (the search sets it so for the layer that has all the
+                            // data, to send every bit-plane of a lossless encode). The last point of a lossless block is kept valid
+                            // whatever its slope, and the distortion estimate can make that slope negative, so it must not be
+                            // compared with the threshold then.
+                            if (fthresh > 0f && cur_cblk.truncSlopes[n] < fthresh)
                             {
                                 break;
                             }

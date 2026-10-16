@@ -16,6 +16,11 @@ namespace CoreJ2K.Configuration
         private QuantizationType _type = QuantizationType.Expounded;
         private float _baseStepSize = 0.0078125f;
         private int _guardBits = 1;
+
+        // Whether the caller chose the value; see WaveletConfigurationBuilder.FilterIsSet.
+        internal bool TypeIsSet { get; private set; }
+        internal bool BaseStepSizeIsSet { get; private set; }
+        internal bool GuardBitsAreSet { get; private set; }
         private Dictionary<int, Dictionary<string, float>> _subbandSteps = new Dictionary<int, Dictionary<string, float>>();
         private bool _useDefaultSteps = true;
         
@@ -25,7 +30,7 @@ namespace CoreJ2K.Configuration
         public QuantizationType Type
         {
             get => _type;
-            set => _type = value;
+            set { _type = value; TypeIsSet = true; }
         }
         
         /// <summary>
@@ -35,7 +40,7 @@ namespace CoreJ2K.Configuration
         public float BaseStepSize
         {
             get => _baseStepSize;
-            set => _baseStepSize = value;
+            set { _baseStepSize = value; BaseStepSizeIsSet = true; }
         }
         
         /// <summary>
@@ -45,7 +50,7 @@ namespace CoreJ2K.Configuration
         public int GuardBits
         {
             get => _guardBits;
-            set => _guardBits = value;
+            set { _guardBits = value; GuardBitsAreSet = true; }
         }
         
         /// <summary>
@@ -64,7 +69,7 @@ namespace CoreJ2K.Configuration
         /// <returns>This configuration instance for method chaining.</returns>
         public QuantizationConfigurationBuilder UseReversible()
         {
-            _type = QuantizationType.Reversible;
+            Type = QuantizationType.Reversible;
             return this;
         }
         
@@ -75,7 +80,7 @@ namespace CoreJ2K.Configuration
         /// <returns>This configuration instance for method chaining.</returns>
         public QuantizationConfigurationBuilder UseDerived()
         {
-            _type = QuantizationType.Derived;
+            Type = QuantizationType.Derived;
             _useDefaultSteps = true;
             return this;
         }
@@ -87,7 +92,7 @@ namespace CoreJ2K.Configuration
         /// <returns>This configuration instance for method chaining.</returns>
         public QuantizationConfigurationBuilder UseExpounded()
         {
-            _type = QuantizationType.Expounded;
+            Type = QuantizationType.Expounded;
             return this;
         }
         
@@ -102,7 +107,7 @@ namespace CoreJ2K.Configuration
             if (stepSize <= 0)
                 throw new ArgumentException("Step size must be positive", nameof(stepSize));
             
-            _baseStepSize = stepSize;
+            BaseStepSize = stepSize;
             return this;
         }
         
@@ -117,18 +122,20 @@ namespace CoreJ2K.Configuration
             if (bits < 0 || bits > 7)
                 throw new ArgumentException("Guard bits must be between 0 and 7", nameof(bits));
             
-            _guardBits = bits;
+            GuardBits = bits;
             return this;
         }
         
         /// <summary>
         /// Sets the quantization step size for a specific resolution level and subband.
-        /// Only applicable for expounded quantization.
+        /// Not supported: the encoder derives every subband's step from the base step, so <see cref="ApplyTo"/> and the complete
+        /// builder's <c>Build()</c> throw <see cref="NotSupportedException"/> when a step is set here.
         /// </summary>
         /// <param name="resolutionLevel">Resolution level (0 = coarsest).</param>
         /// <param name="subband">Subband orientation ("LL", "HL", "LH", "HH").</param>
         /// <param name="stepSize">Step size for this subband.</param>
         /// <returns>This configuration instance for method chaining.</returns>
+        [Obsolete("The encoder has no per-subband step sizes: Build() and ApplyTo throw NotSupportedException when they are set. Use WithDistortionWeights to favour a subband or resolution level in rate allocation, or WithBaseStepSize to change the quantization.")]
         public QuantizationConfigurationBuilder WithSubbandStep(int resolutionLevel, string subband, float stepSize)
         {
             if (resolutionLevel < 0)
@@ -155,7 +162,7 @@ namespace CoreJ2K.Configuration
         
         /// <summary>
         /// Sets quantization step sizes for all subbands at a resolution level.
-        /// Only applicable for expounded quantization.
+        /// Not supported, like <see cref="WithSubbandStep"/>.
         /// </summary>
         /// <param name="resolutionLevel">Resolution level (0 = coarsest).</param>
         /// <param name="llStep">Step size for LL subband (low-low).</param>
@@ -163,6 +170,7 @@ namespace CoreJ2K.Configuration
         /// <param name="lhStep">Step size for LH subband (low-high).</param>
         /// <param name="hhStep">Step size for HH subband (high-high).</param>
         /// <returns>This configuration instance for method chaining.</returns>
+        [Obsolete("The encoder has no per-subband step sizes: Build() and ApplyTo throw NotSupportedException when they are set. Use WithDistortionWeights to favour a subband or resolution level in rate allocation, or WithBaseStepSize to change the quantization.")]
         public QuantizationConfigurationBuilder WithResolutionSteps(
             int resolutionLevel,
             float llStep,
@@ -234,6 +242,8 @@ namespace CoreJ2K.Configuration
         /// <param name="pl">The parameter list to configure.</param>
         public void ApplyTo(ParameterList pl)
         {
+            ThrowIfSubbandStepsAreSet();
+
             string qtypeValue;
             switch (_type)
             {
@@ -256,27 +266,16 @@ namespace CoreJ2K.Configuration
             // The QuantStepSizeSpec constructor expects it to be present
             pl["Qstep"] = _baseStepSize.ToString(System.Globalization.CultureInfo.InvariantCulture);
             
-            // Apply custom subband steps if specified (only for non-reversible)
-            if (_type != QuantizationType.Reversible && !_useDefaultSteps && _subbandSteps.Count > 0)
-            {
-                // Build subband step specification string
-                var stepSpecs = new List<string>();
-                foreach (var level in _subbandSteps.Keys)
-                {
-                    foreach (var subband in _subbandSteps[level].Keys)
-                    {
-                        var step = _subbandSteps[level][subband];
-                        stepSpecs.Add($"{level}-{subband}:{step.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
-                    }
-                }
-                
-                if (stepSpecs.Count > 0)
-                {
-                    pl["Qstep_subband"] = string.Join(",", stepSpecs);
-                }
-            }
-            
             pl["Qguard_bits"] = _guardBits.ToString();
+        }
+
+        internal bool HasSubbandSteps => !_useDefaultSteps && _subbandSteps.Count > 0;
+
+        internal void ThrowIfSubbandStepsAreSet()
+        {
+            if (HasSubbandSteps)
+                throw new NotSupportedException("Per-subband quantization step sizes are not supported by the encoder. "
+                    + "Use WithDistortionWeights to favour a subband or resolution level in rate allocation, or WithBaseStepSize to change the quantization.");
         }
         
         /// <summary>
@@ -293,6 +292,9 @@ namespace CoreJ2K.Configuration
             if (_guardBits < 0 || _guardBits > 7)
                 errors.Add("Guard bits must be between 0 and 7");
             
+            if (HasSubbandSteps)
+                errors.Add("Per-subband quantization step sizes are not supported by the encoder");
+
             if (_type == QuantizationType.Reversible && !_useDefaultSteps)
                 errors.Add("Custom subband steps are not applicable for reversible quantization");
             
@@ -330,7 +332,10 @@ namespace CoreJ2K.Configuration
                 _type = this._type,
                 _baseStepSize = this._baseStepSize,
                 _guardBits = this._guardBits,
-                _useDefaultSteps = this._useDefaultSteps
+                _useDefaultSteps = this._useDefaultSteps,
+                TypeIsSet = this.TypeIsSet,
+                BaseStepSizeIsSet = this.BaseStepSizeIsSet,
+                GuardBitsAreSet = this.GuardBitsAreSet
             };
             
             foreach (var level in _subbandSteps.Keys)

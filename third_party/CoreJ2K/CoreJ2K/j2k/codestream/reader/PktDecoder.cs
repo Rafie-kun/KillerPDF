@@ -324,10 +324,12 @@ namespace CoreJ2K.j2k.codestream.reader
                         sameGeometry = false;
                         break;
                     }
+                    // numPrec still holds the previous tile's counts at this point, so compare the
+                    // counts this tile will have against the ones the scaffold was built for.
                     for (var r2 = 0; r2 <= mdl[c2] && sameGeometry; r2++)
                     {
-                        if (_prevNumPrec[c2][r2].x != numPrec[c2][r2].x ||
-                            _prevNumPrec[c2][r2].y != numPrec[c2][r2].y)
+                        CountPrecincts(c2, r2, mdl[c2], out var nx, out var ny);
+                        if (_prevNumPrec[c2][r2].x != nx || _prevNumPrec[c2][r2].y != ny)
                             sameGeometry = false;
                     }
                 }
@@ -342,14 +344,6 @@ namespace CoreJ2K.j2k.codestream.reader
                 numPrec = new Coord[nc][];
                 ppinfo = new PrecInfo[nc][][];
             }
-
-            // Used to compute the maximum number of precincts for each resolution
-            // level
-            int tcx0, tcy0, tcx1, tcy1; // Current tile position in the domain of
-                                        // the image component
-            int trx0, try0, trx1, try1; // Current tile position in the reduced
-                                        // resolution image domain
-                                        //int xrsiz, yrsiz; // Component sub-sampling factors
 
             SubbandSyn root, sb;
             int mins, maxs;
@@ -369,44 +363,15 @@ namespace CoreJ2K.j2k.codestream.reader
                     ppinfo[c] = new PrecInfo[mdl[c] + 1][];
                 }
 
-                // Get the tile-component coordinates on the reference grid
-                tcx0 = src.GetResULX(c, mdl[c]);
-                tcy0 = src.GetResULY(c, mdl[c]);
-                tcx1 = tcx0 + src.GetTileCompWidth(tIdx, c, mdl[c]);
-                tcy1 = tcy0 + src.GetTileCompHeight(tIdx, c, mdl[c]);
-
                 for (var r = 0; r <= mdl[c]; r++)
                 {
-                    // Tile's coordinates in the reduced resolution image domain
-                    trx0 = (int)Math.Ceiling(tcx0 / (double)(1 << (mdl[c] - r)));
-                    try0 = (int)Math.Ceiling(tcy0 / (double)(1 << (mdl[c] - r)));
-                    trx1 = (int)Math.Ceiling(tcx1 / (double)(1 << (mdl[c] - r)));
-                    try1 = (int)Math.Ceiling(tcy1 / (double)(1 << (mdl[c] - r)));
-
                     // Calculate the maximum number of precincts for each
                     // resolution level taking into account tile specific options.
-                    double twoppx = GetPPX(tIdx, c, r);
-                    double twoppy = GetPPY(tIdx, c, r);
                     if (!sameGeometry)
                     {
                         numPrec[c][r] = new Coord();
                     }
-                    if (trx1 > trx0)
-                    {
-                        numPrec[c][r].x = (int)Math.Ceiling((trx1 - cb0x) / twoppx) - (int)Math.Floor((trx0 - cb0x) / twoppx);
-                    }
-                    else
-                    {
-                        numPrec[c][r].x = 0;
-                    }
-                    if (try1 > try0)
-                    {
-                        numPrec[c][r].y = (int)Math.Ceiling((try1 - cb0y) / twoppy) - (int)Math.Floor((try0 - cb0y) / twoppy);
-                    }
-                    else
-                    {
-                        numPrec[c][r].y = 0;
-                    }
+                    CountPrecincts(c, r, mdl[c], out numPrec[c][r].x, out numPrec[c][r].y);
 
                     // First and last subbands indexes
                     mins = (r == 0) ? 0 : 1;
@@ -472,6 +437,30 @@ namespace CoreJ2K.j2k.codestream.reader
                                     row[i4]?.Reset(nl);
                                 }
                             }
+
+                            // Tiles of identical size but different origin have different subband extents
+                            // at deeper resolution levels, so the reused code-blocks must take this tile's
+                            // position and size. Do it for every block, not only those a packet visits:
+                            // getCodeBlock() hands unvisited (ctp == 0) blocks to the entropy decoder too.
+                            for (var p = 0; p < ppinfo[c][r].Length; p++)
+                            {
+                                var prec = ppinfo[c][r][p];
+                                if (prec.nblk[s] == 0) continue;
+                                var coords = prec.cblk[s];
+                                for (var m = 0; m < coords.Length; m++)
+                                {
+                                    for (var n = 0; n < coords[m].Length; n++)
+                                    {
+                                        var coord = coords[m][n];
+                                        var info = cbI[c][r][s][coord.idx.y][coord.idx.x];
+                                        if (info == null) continue;
+                                        info.ulx = coord.ulx;
+                                        info.uly = coord.uly;
+                                        info.w = coord.w;
+                                        info.h = coord.h;
+                                    }
+                                }
+                            }
                         }
 
                         for (var i = nBlk.y - 1; i >= 0; i--)
@@ -500,6 +489,34 @@ namespace CoreJ2K.j2k.codestream.reader
             }
 
             return cbI;
+        }
+
+        /// <summary>Computes the number of precincts of the current tile-component at resolution
+        /// level <paramref name="r"/> (B.6 of ISO/IEC 15444-1), honouring tile-specific precinct sizes.</summary>
+        private void CountPrecincts(int c, int r, int mdlc, out int nx, out int ny)
+        {
+            var tcx0 = src.GetResULX(c, mdlc);
+            var tcy0 = src.GetResULY(c, mdlc);
+            var tcx1 = tcx0 + src.GetTileCompWidth(tIdx, c, mdlc);
+            var tcy1 = tcy0 + src.GetTileCompHeight(tIdx, c, mdlc);
+
+            // Tile's coordinates in the reduced resolution image domain
+            var trx0 = CeilDiv(tcx0, 1 << (mdlc - r));
+            var try0 = CeilDiv(tcy0, 1 << (mdlc - r));
+            var trx1 = CeilDiv(tcx1, 1 << (mdlc - r));
+            var try1 = CeilDiv(tcy1, 1 << (mdlc - r));
+
+            double twoppx = GetPPX(tIdx, c, r);
+            double twoppy = GetPPY(tIdx, c, r);
+            var cb0x = src.CbULX;
+            var cb0y = src.CbULY;
+
+            nx = trx1 > trx0
+                ? (int)Math.Ceiling((trx1 - cb0x) / twoppx) - (int)Math.Floor((trx0 - cb0x) / twoppx)
+                : 0;
+            ny = try1 > try0
+                ? (int)Math.Ceiling((try1 - cb0y) / twoppy) - (int)Math.Floor((try0 - cb0y) / twoppy)
+                : 0;
         }
 
         /// <summary>Resets an existing TagTreeDecoder in-place or creates a new one if the
@@ -597,10 +614,13 @@ namespace CoreJ2K.j2k.codestream.reader
             {
                 for (var j = jstart; j <= jend; j++, nPrec++)
                 {
-                    prg_ulx = (j == jstart && (trx0 - cb0x) % (xrsiz * twoppx) != 0)
+                    // The first precinct of the tile-component is at the tile's own origin when the resolution level does not begin
+                    // at a precinct boundary (ISO/IEC 15444-1 B.12.1.3: trx0 * 2^(NL-r) not divisible by 2^(PPx + NL - r)); the
+                    // component's subsampling factor has no part in that test
+                    prg_ulx = (j == jstart && (trx0 - cb0x) % twoppx != 0)
                         ? tx0
                         : cb0x + j * xrsiz * (twoppx << ndl);
-                    prg_uly = (i == istart && (try0 - cb0y) % (yrsiz * twoppy) != 0)
+                    prg_uly = (i == istart && (try0 - cb0y) % twoppy != 0)
                         ? ty0
                         : cb0y + i * yrsiz * (twoppy << ndl);
 
@@ -795,6 +815,12 @@ namespace CoreJ2K.j2k.codestream.reader
         {
             return numPrec[c][r].x * numPrec[c][r].y;
         }
+
+        /// <summary>The most bit-planes a code-block can skip: a coefficient has at most 31 bit-planes, and a region of interest doubles them.</summary>
+        private const int MaxZeroBitPlanes = 70;
+
+        /// <summary>The largest length indicator (the number of bits a length is read with): lengths are less than 2^32.</summary>
+        private const int MaxLblock = 40;
 
         /// <summary> Read specified packet head and found length of each code-block's piece
         /// of codewords as well as number of skipped most significant bit-planes.
@@ -1000,6 +1026,10 @@ namespace CoreJ2K.j2k.codestream.reader
                                 tmp = 1; // initialization
                                 for (tmp2 = 1; tmp >= tmp2; tmp2++)
                                 {
+                                    // A code-block has at most a few dozen bit-planes; a tag tree that goes on past that is reading
+                                    // bits that are not a packet header
+                                    if (tmp2 > MaxZeroBitPlanes)
+                                        throw new CorruptedCodestreamException("Number of missing bit-planes of a code-block is out of range");
                                     tmp = tdBD.update(m, n, tmp2, bin);
                                 }
                                 ccb.msbSkipped = tmp2 - 2;
@@ -1142,7 +1172,8 @@ namespace CoreJ2K.j2k.codestream.reader
                             // Reads lblock increment (common to all segments)
                             while (bin.readBit() != 0)
                             {
-                                lblock[c][r][s][cbc.y][cbc.x]++;
+                                if (++lblock[c][r][s][cbc.y][cbc.x] > MaxLblock)
+                                    throw new CorruptedCodestreamException("Code-block length indicator is out of range");
                             }
 
                             if (nSeg == 1)
@@ -1596,11 +1627,12 @@ namespace CoreJ2K.j2k.codestream.reader
             val <<= 8;
             val |= (sopArray[5] & 0xff);
 
-            if (!pph && val != pktIdx)
+            // The sequence number is 16 bits and wraps back to 0 after 65535, so it is compared with the packet index modulo 65536.
+            if (!pph && val != (pktIdx & 0xFFFF))
             {
                 throw new InvalidOperationException("Corrupted Bitstream: SOP marker out of " + "sequence !");
             }
-            if (pph && val != pktIdx - 1)
+            if (pph && val != ((pktIdx - 1) & 0xFFFF))
             {
                 // if packed packet headers are used, packet header was read
                 // before SOP marker segment

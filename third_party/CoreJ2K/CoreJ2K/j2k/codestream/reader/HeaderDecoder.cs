@@ -280,6 +280,12 @@ namespace CoreJ2K.j2k.codestream.reader
         /// <summary>Counts number of QCC markers found in the header </summary>
         private int nQCCMarkSeg = 0;
 
+        /// <summary>Counts number of PLT marker segments found in the tile-part header </summary>
+        private int nPLTMarkSeg = 0;
+
+        /// <summary>Counts number of TLM marker segments found in the main header </summary>
+        private int nTLMMarkSeg = 0;
+
         /// <summary>Counts number of COM markers found in the header </summary>
         private int nCOMMarkSeg = 0;
 
@@ -650,7 +656,7 @@ namespace CoreJ2K.j2k.codestream.reader
                 filtIdx[0] = ehs.ReadByte();
             if (kid >= (1 << 7))
             {
-                throw new NotImplementedException("Custom filters not supported");
+                throw new NotSupportedException("Custom wavelet filters are not supported");
             }
             // Return filter based on ID
             switch (kid)
@@ -714,6 +720,9 @@ namespace CoreJ2K.j2k.codestream.reader
         /// encoded header stream
         /// 
         /// </exception>
+        /// <summary>Limits applied to the structure declared in the SIZ marker segment.</summary>
+        private readonly DecoderLimits limits;
+
         private void readSIZ(System.IO.BinaryReader ehs)
         {
             var ms = hi.NewSIZ;
@@ -752,10 +761,11 @@ namespace CoreJ2K.j2k.codestream.reader
                 throw new System.IO.IOException("JJ2000 does not support images offset " + "not in the range: 0 -- (2^31)-1");
             }
 
-            // Read size of tile
-            ms.xtsiz = ehs.ReadInt32();
-            ms.ytsiz = ehs.ReadInt32();
-            if (ms.xtsiz <= 0 || ms.ytsiz <= 0)
+            // Read size of tile (an unsigned 32-bit value: one that does not fit in an int is a tile larger than any image this reader
+            // holds, and so one tile that covers everything; it is cut down to the image below)
+            var xtsizRaw = ehs.ReadInt32();
+            var ytsizRaw = ehs.ReadInt32();
+            if (xtsizRaw == 0 || ytsizRaw == 0)
             {
                 throw new System.IO.IOException("JJ2000 does not support tiles whose " + "width and/or height are not in  " + "the range: 1 -- (2^31)-1");
             }
@@ -767,6 +777,10 @@ namespace CoreJ2K.j2k.codestream.reader
             {
                 throw new System.IO.IOException("JJ2000 does not support tiles whose " + "offset is not in  " + "the range: 0 -- (2^31)-1");
             }
+
+            // a tile reaches at most to the edge of the image
+            ms.xtsiz = (int)Math.Min((uint)xtsizRaw, (uint)Math.Max(1, ms.xsiz - ms.xt0siz));
+            ms.ytsiz = (int)Math.Min((uint)ytsizRaw, (uint)Math.Max(1, ms.ysiz - ms.yt0siz));
 
             // Read number of components and initialize related arrays
             nComp = ms.csiz = ehs.ReadUInt16();
@@ -789,6 +803,12 @@ namespace CoreJ2K.j2k.codestream.reader
 
             // Check marker length
             checkMarkerLength(ehs, "SIZ marker");
+
+            // Reject hostile tile/component counts before sizing any per-tile table. The tile count is
+            // computed in long: the int product used by NumTiles overflows for e.g. 65535x65535 with 1x1 tiles.
+            var tilesAcross = ((long)ms.xsiz - ms.xt0siz + ms.xtsiz - 1) / ms.xtsiz;
+            var tilesDown = ((long)ms.ysiz - ms.yt0siz + ms.ytsiz - 1) / ms.ytsiz;
+            limits.ValidateStructure(Math.Max(tilesAcross, 0) * Math.Max(tilesDown, 0), nComp);
 
             // Create needed ModuleSpec
             nTiles = ms.NumTiles;
@@ -950,6 +970,24 @@ namespace CoreJ2K.j2k.codestream.reader
             checkMarkerLength(ehs, "COM marker");
         }
 
+        /// <summary>
+        /// The next step size entry of a QCD or QCC marker segment, or zero when the segment is already used up. Some encoders write
+        /// fewer entries than the decomposition has subbands (the 32-level image of the OpenJPEG test suite has 18 of about 97); the
+        /// subbands that are left over have no step size to read, and a zero exponent is what other decoders give them.
+        /// </summary>
+        private static int ReadStepByte(System.IO.BinaryReader ehs)
+        {
+            try { return ehs.ReadByte(); }
+            catch (Exception e) when (e is System.IO.EndOfStreamException || e is ArgumentOutOfRangeException) { return 0; }
+        }
+
+        /// <summary>The 16-bit variant of <see cref="ReadStepByte"/>, for the expounded quantization.</summary>
+        private static int ReadStepWord(System.IO.BinaryReader ehs)
+        {
+            try { return ehs.ReadUInt16(); }
+            catch (Exception e) when (e is System.IO.EndOfStreamException || e is ArgumentOutOfRangeException) { return 0; }
+        }
+
         /// <summary> Reads a QCD marker segment and realigns the codestream at the point
         /// where the next marker should be found. QCD is a functional marker
         /// segment that describes the quantization default.
@@ -1100,7 +1138,7 @@ namespace CoreJ2K.j2k.codestream.reader
 
                     for (j = minb; j < maxb; j++)
                     {
-                        tmp = ms.spqcd[rl][j] = ehs.ReadByte();
+                        tmp = ms.spqcd[rl][j] = ReadStepByte(ehs);
                         exp[rl][j] = (tmp >> Markers.SQCX_EXP_SHIFT) & Markers.SQCX_EXP_MASK;
                     }
                 } // end for rl
@@ -1175,7 +1213,7 @@ namespace CoreJ2K.j2k.codestream.reader
 
                     for (j = minb; j < maxb; j++)
                     {
-                        tmp = ms.spqcd[rl][j] = ehs.ReadUInt16();
+                        tmp = ms.spqcd[rl][j] = ReadStepWord(ehs);
                         exp[rl][j] = (tmp >> 11) & 0x1f;
                         // NOTE: the formula below does not support more than 5
                         // bits for the exponent, otherwise (-1<<exp) might
@@ -1354,7 +1392,7 @@ namespace CoreJ2K.j2k.codestream.reader
 
                     for (j = minb; j < maxb; j++)
                     {
-                        tmp = ms.spqcc[rl][j] = ehs.ReadByte();
+                        tmp = ms.spqcc[rl][j] = ReadStepByte(ehs);
                         expC[rl][j] = (tmp >> Markers.SQCX_EXP_SHIFT) & Markers.SQCX_EXP_MASK;
                     }
                 } // end for rl
@@ -1408,7 +1446,7 @@ namespace CoreJ2K.j2k.codestream.reader
 
                     for (j = minb; j < maxb; j++)
                     {
-                        tmp = ms.spqcc[rl][j] = ehs.ReadUInt16();
+                        tmp = ms.spqcc[rl][j] = ReadStepWord(ehs);
                         expC[rl][j] = (tmp >> 11) & 0x1f;
                         // NOTE: the formula below does not support more than 5
                         // bits for the exponent, otherwise (-1<<exp) might
@@ -1916,13 +1954,15 @@ namespace CoreJ2K.j2k.codestream.reader
             int tmp;
             var nOldChg = 0;
             HeaderInfo.POC ms;
-            if (mainh || hi.pocValue[$"t{t}"] == null)
+            HeaderInfo.POC? earlier = null;
+            if (!mainh) hi.pocValue.TryGetValue($"t{t}", out earlier);
+            if (earlier == null)
             {
                 ms = hi.NewPOC;
             }
             else
             {
-                ms = hi.pocValue[$"t{t}"];
+                ms = earlier;
                 nOldChg = ms.rspoc.Length;
             }
 
@@ -2069,19 +2109,16 @@ namespace CoreJ2K.j2k.codestream.reader
         /// <param name="ehs">The encoded header stream.
         /// 
         /// </param>
-        /// <returns>TilePartLengthsData containing the parsed TLM information, or null if parsing fails
-        /// 
-        /// </returns>
-        /// <exception cref="IOException">If an I/O error occurs while reading from the
-        /// encoder header stream
-        /// 
-        /// </exception>
-        private codestream.metadata.TilePartLengthsData readTLM(System.IO.BinaryReader ehs)
+        /// <param name="tlm">Receives the tile-part lengths read; a header can have several TLM marker segments, which are read in turn.</param>
+        /// <param name="tileOrdinal">The number of tile-part entries read so far, in all TLM marker segments.</param>
+        /// <param name="currentTileIndex">The tile of the last entry read.</param>
+        /// <param name="tilePartIndex">The number of the next tile-part of that tile.</param>
+        /// <returns>True if the marker segment was valid; false (with a warning) if it was not</returns>
+        private bool readTLM(System.IO.BinaryReader ehs, codestream.metadata.TilePartLengthsData tlm, ref int tileOrdinal,
+            ref int currentTileIndex, ref int tilePartIndex)
         {
             try
             {
-                var tlm = new codestream.metadata.TilePartLengthsData();
-                
                 // Ltlm (marker segment length)
                 int ltlm = ehs.ReadUInt16();
                 int dataLength = ltlm - 2; // Remaining bytes after Ltlm
@@ -2094,43 +2131,25 @@ namespace CoreJ2K.j2k.codestream.reader
                 int stlm = ehs.ReadByte();
                 dataLength--;
                 
-                // Parse Stlm field
-                // Bits 6-7: Size of Ttlm field (tile index)
-                int ttlmSize = (stlm >> 6) & 0x03;
+                // Parse Stlm field (ISO/IEC 15444-1, A.7.1)
+                // Bits 4-5 (ST): Size of Ttlm field (tile index): 0, 1 or 2 bytes
+                int ttlmSize = (stlm >> 4) & 0x03;
                 
-                // Bits 4-5: Size of Ptlm field (tile-part length)
-                // 00 = 16 bits (2 bytes), 01 = 32 bits (4 bytes)
-                int ptlmSize = ((stlm >> 4) & 0x03) == 0 ? 2 : 4;
+                // Bit 6 (SP): Size of Ptlm field (tile-part length)
+                // 0 = 16 bits (2 bytes), 1 = 32 bits (4 bytes)
+                int ptlmSize = ((stlm >> 6) & 0x01) == 0 ? 2 : 4;
                 
                 // Validate field sizes
                 if (ttlmSize == 3)
                 {
                     FacilityManager.GetMsgLogger().printmsg(MsgLogger_Fields.WARNING,
                         "Invalid TLM marker: reserved Ttlm size value (3)");
-                    return null;
-                }
-                
-                if (((stlm >> 4) & 0x03) > 1)
-                {
-                    FacilityManager.GetMsgLogger().printmsg(MsgLogger_Fields.WARNING,
-                        "Invalid TLM marker: reserved Ptlm size value");
-                    return null;
+                    return false;
                 }
                 
                 // Calculate entry size and number of entries
                 int entrySize = ttlmSize + ptlmSize;
-                if (entrySize == 0)
-                {
-                    FacilityManager.GetMsgLogger().printmsg(MsgLogger_Fields.WARNING,
-                        "Invalid TLM marker: entry size is zero");
-                    return null;
-                }
-                
                 int numEntries = dataLength / entrySize;
-                
-                // Track current tile index for implicit tile indexing
-                int currentTileIndex = 0;
-                int tilePartIndex = 0;
                 
                 // Read tile-part entries
                 for (int i = 0; i < numEntries; i++)
@@ -2140,30 +2159,27 @@ namespace CoreJ2K.j2k.codestream.reader
                     // Read Ttlm (tile index) - size depends on ttlmSize
                     if (ttlmSize == 0)
                     {
-                        // Implicit: tiles in sequential order
-                        tileIndex = currentTileIndex;
+                        // Absent: the tile-parts are those of tiles 0, 1, 2, ... in turn, one for each, so the tile is the entry's
+                        // position among all the entries of all the TLM marker segments.
+                        tileIndex = tileOrdinal;
                     }
                     else if (ttlmSize == 1)
                     {
                         // 1 byte tile index
                         tileIndex = ehs.ReadByte();
-                        if (tileIndex != currentTileIndex)
-                        {
-                            // New tile, reset part index
-                            tilePartIndex = 0;
-                            currentTileIndex = tileIndex;
-                        }
                     }
                     else // ttlmSize == 2
                     {
                         // 2 byte tile index
                         tileIndex = ehs.ReadUInt16();
-                        if (tileIndex != currentTileIndex)
-                        {
-                            // New tile, reset part index
-                            tilePartIndex = 0;
-                            currentTileIndex = tileIndex;
-                        }
+                    }
+
+                    // The tile-part number counts the tile-parts of one tile in the order they are listed; it starts again at 0 for the
+                    // next tile, which may be listed in a later TLM marker segment.
+                    if (tileIndex != currentTileIndex)
+                    {
+                        tilePartIndex = 0;
+                        currentTileIndex = tileIndex;
                     }
                     
                     // Read Ptlm (tile-part length)
@@ -2181,37 +2197,23 @@ namespace CoreJ2K.j2k.codestream.reader
                     
                     // Add to TLM data
                     tlm.AddTilePart(tileIndex, tilePartIndex, tilePartLength);
-                    
-                    // Increment part index
-                    if (ttlmSize == 0)
-                    {
-                        // For implicit tiles, increment both indices
-                        tilePartIndex++;
-                        if (tilePartLength == 0)
-                        {
-                            // End of current tile, move to next
-                            currentTileIndex++;
-                            tilePartIndex = 0;
-                        }
-                    }
-                    else
-                    {
-                        tilePartIndex++;
-                    }
+                    tilePartIndex++;
+                    tileOrdinal++;
                 }
                 
                 FacilityManager.GetMsgLogger().printmsg(MsgLogger_Fields.INFO,
                     $"TLM marker parsed: {numEntries} tile-part entries (Ztlm={ztlm})");
                 
-                return tlm;
+                return true;
             }
             catch (Exception e)
             {
                 FacilityManager.GetMsgLogger().printmsg(MsgLogger_Fields.WARNING,
                     $"Error parsing TLM marker: {e.Message}");
-                return null;
+                return false;
             }
         }
+
         /// <summary> Reads PLM marker segment and realigns the codestream where the next
         /// marker should be found. Informations stored in these fields are
         /// currently not taken into account.
@@ -2564,12 +2566,9 @@ namespace CoreJ2K.j2k.codestream.reader
                     break;
 
                 case Markers.TLM:
-                    if ((nfMarkSeg & TLM_FOUND) != 0)
-                    {
-                        throw new CorruptedCodestreamException("More than one TLM " + "marker " + "found in main header");
-                    }
+                    // Several TLM marker segments are allowed, indexed by their Ztlm: one holds only so many tile-parts.
                     nfMarkSeg |= TLM_FOUND;
-                    htKey = "TLM";
+                    htKey = $"TLM{(nTLMMarkSeg++)}";
                     break;
 
                 case Markers.PLM:
@@ -2797,7 +2796,7 @@ namespace CoreJ2K.j2k.codestream.reader
                         throw new CorruptedCodestreamException("PLT marker found even though PLM marker found in main header");
                     }
                     nfMarkSeg |= PLT_FOUND;
-                    htKey = "PLT";
+                    htKey = $"PLT{(nPLTMarkSeg++)}";
                     break;
 
                 default:
@@ -2871,8 +2870,19 @@ namespace CoreJ2K.j2k.codestream.reader
             // TLM marker segment
             if ((nfMarkSeg & TLM_FOUND) != 0)
             {
-                bais = new System.IO.MemoryStream(ht["TLM"]);
-                hi.tlmValue = readTLM(new Util.EndianBinaryReader(bais, true));
+                // The marker segments are read in the order of their Ztlm (the third byte of a segment, after Ltlm).
+                var order = System.Linq.Enumerable.ToList(System.Linq.Enumerable.OrderBy(System.Linq.Enumerable.Range(0, nTLMMarkSeg),
+                    i => ht[$"TLM{i}"].Length > 2 ? ht[$"TLM{i}"][2] : 0));
+
+                var tlm = new codestream.metadata.TilePartLengthsData();
+                int tileOrdinal = 0, currentTileIndex = -1, tilePartIndex = 0;
+                var valid = true;
+                foreach (var i in order)
+                {
+                    bais = new System.IO.MemoryStream(ht[$"TLM{i}"]);
+                    valid &= readTLM(new Util.EndianBinaryReader(bais, true), tlm, ref tileOrdinal, ref currentTileIndex, ref tilePartIndex);
+                }
+                hi.tlmValue = valid ? tlm : null;
             }
 
             // COM marker segments
@@ -2961,7 +2971,7 @@ namespace CoreJ2K.j2k.codestream.reader
                 for (var i = 0; i < nPPMMarkSeg; i++)
                 {
                     bais = new System.IO.MemoryStream(ht[$"PPM{i}"]);
-                    readPPM(new Util.EndianBinaryReader(bais));
+                    readPPM(new Util.EndianBinaryReader(bais, true));
                 }
             }
 
@@ -3124,10 +3134,15 @@ namespace CoreJ2K.j2k.codestream.reader
             }
 
             // PLT marker segment
+            // A tile-part header has several PLT marker segments when its packet lengths do not fit in one; they follow each other in
+            // the order of their lengths.
             if ((nfMarkSeg & PLT_FOUND) != 0)
             {
-                bais = new System.IO.MemoryStream(ht["PLT"]);
-                readPLTFields(new Util.EndianBinaryReader(bais, true));
+                for (var i = 0; i < nPLTMarkSeg; i++)
+                {
+                    bais = new System.IO.MemoryStream(ht[$"PLT{i}"]);
+                    readPLTFields(new Util.EndianBinaryReader(bais, true));
+                }
             }
 
             // Reset ht
@@ -3163,6 +3178,7 @@ namespace CoreJ2K.j2k.codestream.reader
         {
 
             this.hi = hi;
+            limits = DecoderLimits.FromParameters(pl);
             // CONVERSION PROBLEM?
             //this.verbose = verbose;
 
@@ -3349,6 +3365,7 @@ namespace CoreJ2K.j2k.codestream.reader
             nQCCMarkSeg = 0;
             nCOMMarkSeg = 0;
             nRGNMarkSeg = 0;
+            nPLTMarkSeg = 0;
         }
 
         /// <summary> Print information about the current header.

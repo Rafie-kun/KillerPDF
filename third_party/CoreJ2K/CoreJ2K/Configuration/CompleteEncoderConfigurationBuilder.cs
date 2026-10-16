@@ -229,8 +229,75 @@ namespace CoreJ2K.Configuration
             return this;
         }
         
+        /// <summary>
+        /// Configures for a small portrait that must fit a hard size limit, such as a face image on an identity card.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The recipe is a JP2 file with one tile and one quality layer, the irreversible colour transform and 9/7 wavelet,
+        /// five decomposition levels, 64×64 code-blocks, and a luma distortion weight of 1.25. The encoder keeps as much of the
+        /// image as fits in <paramref name="maxBytes"/> and never writes more, JP2 boxes included. Quantization is expounded
+        /// with a base step of 1/128 and two guard bits, the progression order is layer-resolution-component-position, and
+        /// everything else keeps the codec default.
+        /// </para>
+        /// <para>
+        /// With <paramref name="face"/>, that region is coded as Maxshift ROI on every component, with the lowest five resolution
+        /// levels (<c>start level</c> 4) coded entirely as ROI. The mask must be the size of the image. A face that
+        /// needs more than 15 quantized magnitude bits is refused, which this recipe's step size does not reach for 8-bit input.
+        /// </para>
+        /// <para>
+        /// The preset replaces the quantization, wavelet, progression, tile, code-block, entropy-coding, error-resilience and
+        /// distortion-weight settings, the rate, and the file-format choice, so call it before adjusting any of those. It leaves a region of interest set
+        /// earlier alone unless <paramref name="face"/> is given. Calling <see cref="WithMaxBytes"/> afterwards changes the limit.
+        /// </para>
+        /// </remarks>
+        /// <param name="maxBytes">The most bytes the complete output may take.</param>
+        /// <param name="face">The region to prioritise, or null for no ROI.</param>
+        /// <returns>This configuration instance for method chaining.</returns>
+        public CompleteEncoderConfigurationBuilder ForPortrait(int maxBytes, j2k.roi.ROIMask? face = null)
+        {
+            // These builder fields overwrite the configuration when Build() runs, so drop any left by an earlier preset.
+            _quantization = null;
+            _wavelet = null;
+            _progression = null;
+
+            _encoderConfig.WithBitrate(-1f); // not lossless; the byte limit replaces the rate
+            _encoderConfig.WithFileFormat(true);
+            _encoderConfig.WithMaxBytes(maxBytes);
+            _encoderConfig.WithTiles(t => t.SetSize(0, 0));
+            _encoderConfig.WithWavelet(w => w.UseIrreversible97().WithDecompositionLevels(5));
+            _encoderConfig.WithQuantization(q => q.UseExpounded().WithBaseStepSize(0.0078125f).WithGuardBits(2));
+            _encoderConfig.WithProgression(p =>
+            {
+                p.WithOrder(ProgressionOrder.LRCP);
+                p.QualityLayers.Clear();
+            });
+            _encoderConfig.WithCodeBlocks(c => c.SetSize(64, 64));
+            _encoderConfig.WithEntropyCoding(e =>
+            {
+                e.LengthCalculation = LengthCalculation.NearOptimal;
+                e.Termination = TerminationType.NearOptimal;
+                e.SegmentationSymbol = false;
+                e.CausalMode = false;
+                e.ResetMQ = false;
+                e.BypassMode = false;
+                e.RegularTermination = false;
+            });
+            _encoderConfig.WithErrorResilience(r =>
+            {
+                r.SOPMarkers = false;
+                r.EPHMarkers = false;
+            });
+            _encoderConfig.WithDistortionWeights(new j2k.encoder.DistortionWeights().ForComponent(0, 1.25));
+
+            if (face != null)
+                _encoderConfig.WithROI(new j2k.roi.ROIConfiguration().AddMask(-1, face).SetStartLevel(4));
+
+            return this;
+        }
+
         #endregion
-        
+
         #region Configuration Methods
         
         /// <summary>
@@ -472,14 +539,18 @@ namespace CoreJ2K.Configuration
         /// <returns>A configured J2KEncoderConfiguration instance.</returns>
         public J2KEncoderConfiguration Build()
         {
+            _quantization?.ThrowIfSubbandStepsAreSet();
+
             // Apply quantization if configured
             if (_quantization != null)
             {
                 _encoderConfig.WithQuantization(q =>
                 {
-                    q.Type = _quantization.Type;
-                    q.BaseStepSize = _quantization.BaseStepSize;
-                    q.GuardBits = _quantization.GuardBits;
+                    // Only what was chosen: the rest keeps what the encoder configuration already has (for example a lossless
+                    // setting, or a preset's guard bits)
+                    if (_quantization.TypeIsSet) q.Type = _quantization.Type;
+                    if (_quantization.BaseStepSizeIsSet) q.BaseStepSize = _quantization.BaseStepSize;
+                    if (_quantization.GuardBitsAreSet) q.GuardBits = _quantization.GuardBits;
                 });
             }
             
@@ -488,8 +559,13 @@ namespace CoreJ2K.Configuration
             {
                 _encoderConfig.WithWavelet(w =>
                 {
-                    w.Filter = _wavelet.Filter;
-                    w.DecompositionLevels = _wavelet.DecompositionLevels;
+                    if (_wavelet.FilterIsSet) w.Filter = _wavelet.Filter;
+                    if (_wavelet.DecompositionLevelsAreSet) w.DecompositionLevels = _wavelet.DecompositionLevels;
+                    if (!_wavelet.UseDefaultFilters)
+                    {
+                        foreach (var cf in _wavelet.ComponentFilters)
+                            w.ComponentFilters[cf.Key] = cf.Value;
+                    }
                 });
             }
             
@@ -499,6 +575,11 @@ namespace CoreJ2K.Configuration
                 _encoderConfig.WithProgression(p =>
                 {
                     p.Order = _progression.DefaultOrder;
+                    if (!_progression.UseDefaultOrder)
+                    {
+                        foreach (var to in _progression.TileOrders)
+                            p.TileOrders[to.Key] = to.Value;
+                    }
                 });
             }
             
@@ -520,17 +601,23 @@ namespace CoreJ2K.Configuration
         /// <param name="imgsrc">The image source to encode.</param>
         /// <param name="output">The stream to write the encoded data to.</param>
         public void WriteTo(j2k.image.BlkImgDataSrc imgsrc, System.IO.Stream output)
+            => WriteTo(imgsrc, output, CancellationToken.None);
+
+        /// <summary>
+        /// Encodes an image using this configuration and writes the result to <paramref name="output"/>, stopping if
+        /// <paramref name="cancellationToken"/> or the configuration's own token is cancelled.
+        /// </summary>
+        /// <param name="imgsrc">The image source to encode.</param>
+        /// <param name="output">The stream to write the encoded data to.</param>
+        /// <param name="cancellationToken">Cancels the encode.</param>
+        /// <exception cref="OperationCanceledException">A token was cancelled; nothing has been written to <paramref name="output"/>.</exception>
+        public void WriteTo(j2k.image.BlkImgDataSrc imgsrc, System.IO.Stream output, CancellationToken cancellationToken)
         {
             if (output == null) throw new System.ArgumentNullException(nameof(output));
-            var config = Build();
-            var metadata = GetMetadata();
-            var pl = config.ToParameterList();
-            RemoveFilterOptionsForAtk(pl);
-            J2kImage.WriteTo(output, imgsrc, metadata, pl,
-                _nlts is { Count: > 0 } ? _nlts : null,
-                _mcts is { Count: > 0 } ? _mcts : null,
-                _dco,
-                _atk);
+            using var linked = J2kImage.LinkTokens(_encoderConfig.CancellationToken, cancellationToken, out var token);
+            var data = EncodeCore(imgsrc, token);
+            token.ThrowIfCancellationRequested();
+            output.Write(data, 0, data.Length);
         }
 
         /// <summary>
@@ -540,7 +627,103 @@ namespace CoreJ2K.Configuration
         /// <param name="imgsrc">The image source to encode.</param>
         /// <returns>The encoded JPEG 2000 data.</returns>
         public byte[] Encode(j2k.image.BlkImgDataSrc imgsrc)
+            => Encode(imgsrc, CancellationToken.None);
+
+        /// <summary>
+        /// Encodes an image using this configuration, stopping if <paramref name="cancellationToken"/> or the configuration's own
+        /// token is cancelled.
+        /// </summary>
+        /// <param name="imgsrc">The image source to encode.</param>
+        /// <param name="cancellationToken">Cancels the encode.</param>
+        /// <returns>The encoded JPEG 2000 data.</returns>
+        /// <exception cref="OperationCanceledException">A token was cancelled.</exception>
+        public byte[] Encode(j2k.image.BlkImgDataSrc imgsrc, CancellationToken cancellationToken)
         {
+            using var linked = J2kImage.LinkTokens(_encoderConfig.CancellationToken, cancellationToken, out var token);
+            return EncodeCore(imgsrc, token);
+        }
+
+        /// <summary>
+        /// Weights the distortion of code-blocks by component, resolution level and subband. See <see cref="J2KEncoderConfiguration.WithDistortionWeights"/>.
+        /// </summary>
+        /// <param name="weights">The weights.</param>
+        /// <returns>This builder for method chaining.</returns>
+        public CompleteEncoderConfigurationBuilder WithDistortionWeights(j2k.encoder.DistortionWeights weights)
+        {
+            _encoderConfig.WithDistortionWeights(weights);
+            return this;
+        }
+
+        /// <summary>
+        /// Reports what the encode kept to <paramref name="callback"/> when it is done. See <see cref="J2KEncoderConfiguration.WithTelemetry"/>.
+        /// </summary>
+        /// <param name="callback">Receives the report, or null to turn it off.</param>
+        /// <returns>This builder for method chaining.</returns>
+        public CompleteEncoderConfigurationBuilder WithTelemetry(Action<EncodeTelemetry>? callback)
+        {
+            _encoderConfig.WithTelemetry(callback);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets a hard limit on the size of the complete output, JP2 boxes included. See <see cref="J2KEncoderConfiguration.WithMaxBytes"/>.
+        /// </summary>
+        /// <param name="maxBytes">The most bytes the output may take.</param>
+        /// <returns>This builder for method chaining.</returns>
+        public CompleteEncoderConfigurationBuilder WithMaxBytes(int maxBytes)
+        {
+            _encoderConfig.WithMaxBytes(maxBytes);
+            return this;
+        }
+
+        /// <summary>
+        /// Encodes the given regions of interest with higher priority than the rest of the image.
+        /// </summary>
+        /// <param name="roiConfig">The ROI configuration.</param>
+        /// <returns>This builder for method chaining.</returns>
+        public CompleteEncoderConfigurationBuilder WithROI(j2k.roi.ROIConfiguration roiConfig)
+        {
+            _encoderConfig.WithROI(roiConfig);
+            return this;
+        }
+
+        /// <summary>
+        /// Encodes the regions of interest set up by <paramref name="configurator"/> with higher priority than the rest of the image.
+        /// </summary>
+        /// <param name="configurator">Adds regions to a new ROI configuration.</param>
+        /// <returns>This builder for method chaining.</returns>
+        public CompleteEncoderConfigurationBuilder WithROI(Action<j2k.roi.ROIConfiguration> configurator)
+        {
+            var roiConfig = new j2k.roi.ROIConfiguration();
+            configurator?.Invoke(roiConfig);
+            return WithROI(roiConfig);
+        }
+
+        /// <summary>
+        /// Sets the maximum number of threads used to encode.
+        /// </summary>
+        /// <param name="maxDegreeOfParallelism">1 for single-threaded; 0 or negative for the process-wide default.</param>
+        /// <returns>This builder for method chaining.</returns>
+        public CompleteEncoderConfigurationBuilder WithMaxDegreeOfParallelism(int maxDegreeOfParallelism)
+        {
+            _encoderConfig.MaxDegreeOfParallelism = maxDegreeOfParallelism;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets a token that cancels encodes started with this builder.
+        /// </summary>
+        /// <param name="cancellationToken">The token to observe.</param>
+        /// <returns>This builder for method chaining.</returns>
+        public CompleteEncoderConfigurationBuilder WithCancellationToken(CancellationToken cancellationToken)
+        {
+            _encoderConfig.CancellationToken = cancellationToken;
+            return this;
+        }
+
+        private byte[] EncodeCore(j2k.image.BlkImgDataSrc imgsrc, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
             var config = Build();
             var metadata = GetMetadata();
             var pl = config.ToParameterList();
@@ -550,7 +733,8 @@ namespace CoreJ2K.Configuration
                 _nlts is { Count: > 0 } ? _nlts : null,
                 _mcts is { Count: > 0 } ? _mcts : null,
                 _dco,
-                _atk)!;
+                _atk,
+                cancellationToken)!;
         }
         
         // The ATK kernel replaces the wavelet filter, so any Ffilters value emitted by
@@ -559,7 +743,6 @@ namespace CoreJ2K.Configuration
         {
             if (_atk == null) return;
             pl.Remove("Ffilters");
-            pl.Remove("Ffilters_comp");
         }
 
         /// <summary>
@@ -572,6 +755,11 @@ namespace CoreJ2K.Configuration
             return Encode(imgsrc);
         }
 
+        /// <summary>Encodes an image object, stopping if <paramref name="cancellationToken"/> or the configuration's own token is cancelled.</summary>
+        /// <exception cref="OperationCanceledException">A token was cancelled.</exception>
+        public byte[] Encode(object imageObject, CancellationToken cancellationToken)
+            => Encode(ImageFactory.ToPortableImageSource(imageObject), cancellationToken);
+
         /// <summary>
         /// Encodes an image and writes the result to <paramref name="output"/>.
         /// The object is converted to an encodable source via <see cref="ImageFactory"/>.
@@ -583,19 +771,32 @@ namespace CoreJ2K.Configuration
         }
 
         /// <summary>Encodes an image asynchronously and returns the encoded bytes.</summary>
-        public Task<byte[]> EncodeAsync(j2k.image.BlkImgDataSrc imgsrc,
+        public async Task<byte[]> EncodeAsync(j2k.image.BlkImgDataSrc imgsrc,
             CancellationToken cancellationToken = default)
-            => Task.Run(() => Encode(imgsrc), cancellationToken);
+        {
+            // Link once, so a cancelled encode ends the task in the Canceled state rather than Faulted.
+            using var linked = J2kImage.LinkTokens(_encoderConfig.CancellationToken, cancellationToken, out var token);
+            return await Task.Run(() => EncodeCore(imgsrc, token), token).ConfigureAwait(false);
+        }
 
         /// <summary>Encodes an image object asynchronously and returns the encoded bytes.</summary>
         public Task<byte[]> EncodeAsync(object imageObject,
             CancellationToken cancellationToken = default)
-            => Task.Run(() => Encode(imageObject), cancellationToken);
+            => EncodeAsync(ImageFactory.ToPortableImageSource(imageObject), cancellationToken);
 
         /// <summary>Encodes an image asynchronously and writes the result to <paramref name="output"/>.</summary>
-        public Task WriteToAsync(j2k.image.BlkImgDataSrc imgsrc, Stream output,
+        public async Task WriteToAsync(j2k.image.BlkImgDataSrc imgsrc, Stream output,
             CancellationToken cancellationToken = default)
-            => Task.Run(() => WriteTo(imgsrc, output), cancellationToken);
+        {
+            if (output == null) throw new System.ArgumentNullException(nameof(output));
+            using var linked = J2kImage.LinkTokens(_encoderConfig.CancellationToken, cancellationToken, out var token);
+            await Task.Run(() =>
+            {
+                var data = EncodeCore(imgsrc, token);
+                token.ThrowIfCancellationRequested();
+                output.Write(data, 0, data.Length);
+            }, token).ConfigureAwait(false);
+        }
 
         #endregion
 
@@ -749,6 +950,15 @@ namespace CoreJ2K.Configuration
                 .ForHighQuality()
                 .WithComment("High-quality photograph");
         
+        /// <summary>
+        /// Portrait preset for a hard size limit; see <see cref="CompleteEncoderConfigurationBuilder.ForPortrait"/>.
+        /// </summary>
+        /// <param name="maxBytes">The most bytes the complete output may take.</param>
+        /// <param name="face">The region to prioritise, or null for no ROI.</param>
+        public static CompleteEncoderConfigurationBuilder Portrait(int maxBytes, j2k.roi.ROIMask? face = null) =>
+            new CompleteEncoderConfigurationBuilder()
+                .ForPortrait(maxBytes, face);
+
         /// <summary>
         /// Balanced general purpose preset.
         /// </summary>

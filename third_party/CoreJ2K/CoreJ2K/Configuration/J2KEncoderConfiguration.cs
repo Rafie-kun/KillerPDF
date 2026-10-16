@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using CoreJ2K.j2k.encoder;
 using CoreJ2K.j2k.roi;
 using CoreJ2K.j2k.util;
 
@@ -25,7 +27,56 @@ namespace CoreJ2K.Configuration
         private EntropyCodingConfiguration _entropyConfig = new EntropyCodingConfiguration();
         private ErrorResilienceConfiguration _resilienceConfig = new ErrorResilienceConfiguration();
         private ROIConfiguration? _roiConfig = null;
+        private int? _maxBytes;
+        private Action<EncodeTelemetry>? _telemetry;
+        private DistortionWeights? _distortionWeights;
+        private System.Threading.CancellationToken _cancellationToken;
+        private int _maxDegreeOfParallelism;
         
+        /// <summary>
+        /// Gets or sets a token that cancels encodes started with this configuration. Cancellation is cooperative: the encoder
+        /// stops within about one code-block, packet or few rows of the wavelet transform and throws
+        /// <see cref="System.OperationCanceledException"/>. Defaults to <see cref="System.Threading.CancellationToken.None"/>.
+        /// </summary>
+        public System.Threading.CancellationToken CancellationToken
+        {
+            get => _cancellationToken;
+            set => _cancellationToken = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the maximum number of threads used to encode (the forward wavelet transform and the coding of code-blocks).
+        /// 1 keeps everything on the calling thread; 0 (the default) or a negative value uses <see cref="J2kImage.DefaultMaxDegreeOfParallelism"/>. The encoded output is identical
+        /// for every value.
+        /// </summary>
+        public int MaxDegreeOfParallelism
+        {
+            get => _maxDegreeOfParallelism;
+            set => _maxDegreeOfParallelism = value;
+        }
+
+        /// <summary>
+        /// Sets the maximum number of threads used to encode.
+        /// </summary>
+        /// <param name="maxDegreeOfParallelism">1 for single-threaded; 0 or negative for the process-wide default.</param>
+        /// <returns>This configuration instance for method chaining.</returns>
+        public J2KEncoderConfiguration WithMaxDegreeOfParallelism(int maxDegreeOfParallelism)
+        {
+            _maxDegreeOfParallelism = maxDegreeOfParallelism;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets a token that cancels encodes started with this configuration.
+        /// </summary>
+        /// <param name="cancellationToken">The token to observe.</param>
+        /// <returns>This configuration instance for method chaining.</returns>
+        public J2KEncoderConfiguration WithCancellationToken(System.Threading.CancellationToken cancellationToken)
+        {
+            _cancellationToken = cancellationToken;
+            return this;
+        }
+
         /// <summary>
         /// Gets or sets the target bitrate in bits per pixel.
         /// -1 means no rate limit (lossless if using reversible transform).
@@ -36,6 +87,21 @@ namespace CoreJ2K.Configuration
             set => _targetBitrate = value;
         }
         
+        /// <summary>
+        /// Gets or sets the most bytes the complete output may take, or null for no hard limit.
+        /// See <see cref="WithMaxBytes"/>.
+        /// </summary>
+        public int? MaxBytes
+        {
+            get => _maxBytes;
+            set => _maxBytes = value;
+        }
+
+        /// <summary>
+        /// Gets the weights on the distortion of code-blocks, if any. See <see cref="WithDistortionWeights"/>.
+        /// </summary>
+        public DistortionWeights? DistortionWeights => _distortionWeights;
+
         /// <summary>
         /// Gets or sets whether to use lossless compression.
         /// This automatically sets reversible quantization and 5-3 wavelet filter.
@@ -110,6 +176,64 @@ namespace CoreJ2K.Configuration
             return this;
         }
         
+        /// <summary>
+        /// Weights the distortion of code-blocks by component, resolution level and subband, which steers where the rate allocator
+        /// spends the bytes it has. See <see cref="DistortionWeights"/>.
+        /// </summary>
+        /// <remarks>
+        /// Components are numbered after the colour transform, which is on by default for three components: 0 is luma (Y), 1 and 2
+        /// are chroma. The weights are not recorded in the codestream, and a lossless encode keeps all of its data whatever they are.
+        /// </remarks>
+        /// <param name="weights">The weights.</param>
+        /// <returns>This configuration instance for method chaining.</returns>
+        public J2KEncoderConfiguration WithDistortionWeights(DistortionWeights weights)
+        {
+            _distortionWeights = weights;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets a hard limit on the size of the complete output, in bytes. The encoder keeps as much of the image as fits
+        /// and never writes more: with <see cref="UseFileFormat"/> on, the JP2 boxes (including any metadata) count towards the limit,
+        /// and the encode fails if even the headers do not fit.
+        /// </summary>
+        /// <remarks>
+        /// The limit replaces the target bitrate. It needs a single quality layer, which it sets up, and cannot be combined with
+        /// lossless coding, PLT markers, tile-parts or packed packet headers (those are sized after the layers are built).
+        /// </remarks>
+        /// <param name="maxBytes">The most bytes the output may take; at least 1.</param>
+        /// <returns>This configuration instance for method chaining.</returns>
+        public J2KEncoderConfiguration WithMaxBytes(int maxBytes)
+        {
+            if (maxBytes <= 0)
+                throw new ArgumentOutOfRangeException(nameof(maxBytes), "The byte limit must be positive");
+
+            _maxBytes = maxBytes;
+            return this;
+        }
+
+        /// <summary>
+        /// Gets the callback that receives what the encode kept; see <see cref="WithTelemetry"/>.
+        /// </summary>
+        public Action<EncodeTelemetry>? Telemetry => _telemetry;
+
+        /// <summary>
+        /// Asks for a report of what the encode kept: every code-block's passes, bytes and distortion per quality layer, and the bytes
+        /// of each part of the output. <paramref name="callback"/> is called once, on the encoding thread, after the output is final and has
+        /// passed the size checks; it is not called if the encode fails. See <see cref="EncodeTelemetry"/>.
+        /// </summary>
+        /// <remarks>
+        /// Costs nothing when not set, and does not change the output. It cannot be combined with tile-parts or packed packet headers,
+        /// which rewrite the codestream after the packets are written.
+        /// </remarks>
+        /// <param name="callback">Receives the report, or null to turn it off.</param>
+        /// <returns>This configuration instance for method chaining.</returns>
+        public J2KEncoderConfiguration WithTelemetry(Action<EncodeTelemetry>? callback)
+        {
+            _telemetry = callback;
+            return this;
+        }
+
         /// <summary>
         /// Sets the target quality level (0.0 to 1.0).
         /// This is converted to an appropriate bitrate.
@@ -276,6 +400,7 @@ namespace CoreJ2K.Configuration
             
             // Quantization
             _quantizationConfig.ApplyTo(pl);
+            _waveletConfig.ApplyComponentQuantization(pl, _quantizationConfig.Type);
             
             // Progression
             _progressionConfig.ApplyTo(pl);
@@ -289,7 +414,25 @@ namespace CoreJ2K.Configuration
             // Error resilience
             _resilienceConfig.ApplyTo(pl);
             
-            // ROI (handled separately in encoding pipeline)
+            // Distortion weights
+            _distortionWeights?.ApplyTo(pl);
+
+            // Hard size limit (replaces the bitrate)
+            if (_maxBytes.HasValue)
+            {
+                pl["max_bytes"] = _maxBytes.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            }
+
+            // Parallelism (unset leaves the process-wide default in effect)
+            if (_maxDegreeOfParallelism > 0)
+            {
+                pl["threads"] = _maxDegreeOfParallelism.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            }
+
+            // ROI
+            _roiConfig?.ApplyTo(pl);
+
+            pl.TelemetryCallback = _telemetry;
             
             return pl;
         }
@@ -307,6 +450,19 @@ namespace CoreJ2K.Configuration
                 errors.Add("Cannot specify both lossless mode and a target bitrate");
             }
             
+            if (_distortionWeights != null)
+            {
+                errors.AddRange(_distortionWeights.Validate());
+            }
+
+            if (_maxBytes.HasValue)
+            {
+                if (_maxBytes.Value <= 0)
+                    errors.Add("The byte limit must be positive");
+                if (_lossless)
+                    errors.Add("Cannot specify both lossless mode and a byte limit");
+            }
+
             if (_targetBitrate < -1)
             {
                 errors.Add("Target bitrate must be -1 (unlimited) or positive");
@@ -314,6 +470,8 @@ namespace CoreJ2K.Configuration
             
             errors.AddRange(_tileConfig.Validate());
             errors.AddRange(_waveletConfig.Validate());
+            if (_lossless && _waveletConfig.ComponentFilters.Values.Any(f => f != WaveletFilter.Reversible53))
+                errors.Add("Cannot specify both lossless mode and a 9-7 filter for a component");
             errors.AddRange(_quantizationConfig.Validate());
             errors.AddRange(_progressionConfig.Validate());
             errors.AddRange(_codeBlockConfig.Validate());

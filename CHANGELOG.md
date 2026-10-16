@@ -72,6 +72,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - On the website's Light theme with the Yellow accent, links, headings and labels stay yellow with a thin gray outline instead of turning olive brown.
 - The exe's file properties show Steve the Killer as the copyright holder instead of leaving it blank.
 - The file picker's close button turns red on hover without filling a red block, like every other dialog's close, and keeps the classic caption button on 98SE.
+- JPEG 2000 images that rendered blank, scrambled or missing, or with stray noise or a false color cast, now render correctly, from updating the built-in JPEG 2000 decoder to CoreJ2K 2.4.1.
 - Saving an Edit Text change removes the replaced words from the file, so they can no longer be found, copied or brought back by editing the line again.
 - Restoring a maximized window after Win+D, a taskbar click or a touchpad gesture no longer leaves it black and unresponsive (#437).
 - Opening the theme picker and switching themes or accents no longer crashes the installed or portable app (#452).

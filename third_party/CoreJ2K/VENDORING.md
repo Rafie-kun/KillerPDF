@@ -9,12 +9,16 @@ in place.
 
 - Repository: https://github.com/cinderblocks/CoreJ2K
 - Branch: `master`
-- Commit: `f75a5263ba21fcbeb8ee05cf354e9a32737fa42f`
-- Commit date: 2026-07-21
-- Relationship to releases: one commit after tag `v2.3.3`, which is the release the
-  NuGet package 2.3.3.91 was built from. That extra commit downgrades truncation
-  warnings to informational messages, which matters for partially readable JP2
-  streams embedded in damaged PDFs.
+- Commit: `f5895ac7f8371d6cf1c23828516c66675e07a87a`
+- Commit date: 2026-10-09
+- Relationship to releases: the `v2.4.1` release tag. It brings the decoder
+  conformance fixes found against the ISO test suite and OpenJPEG, damaged-file
+  handling, PPM and TLM marker reading, and files whose components use different
+  wavelet filters.
+- Previously vendored: `f75a5263ba21fcbeb8ee05cf354e9a32737fa42f` (2026-07-21), one
+  commit after `v2.3.3`, which downgraded truncation warnings to informational
+  messages for partially readable JP2 streams embedded in damaged PDFs. That change
+  is part of `v2.4.1`.
 - License: BSD-3-Clause. The upstream `LICENSE` and `COPYRIGHT-JJ2000-5.1` are kept
   beside this file. The notice text also appears in `engine/THIRD-PARTY-NOTICES.txt`.
 
@@ -63,10 +67,12 @@ properties that file supplied are reproduced inline. The changes are:
    it. The bare `NETSTANDARD` define was dropped too; no source file tests for it.
 3. `LangVersion`, `Nullable`, `TreatWarningsAsErrors` and the `WarningsNotAsErrors`
    nullable exemption list copied from the upstream props file, so warning behavior
-   is unchanged. The build produces 659 nullable warnings, the same as upstream.
+   is unchanged. The build produces 660 nullable warnings, the same as upstream
+   builds for net10.0. Upstream's `NuGetAuditSuppress` entries are not reproduced:
+   they cover SixLabors.ImageSharp, which only the adapter projects reference.
 4. `Version`, `Product`, `Authors`, `Company` and `Copyright` copied from the same
    props file so the compiled assembly still carries the JJ2000, Clary, Cureos and
-   Sjofn LLC copyright.
+   Sjofn LLC copyright. `Version` follows the vendored release (2.4.1.0).
 
 `CoreJ2K/j2k/entropy/decoder/ByteInputBuffer.cs` seals the concrete buffer type,
 removes virtual dispatch from its methods, and requests inlining for the hot
@@ -78,8 +84,8 @@ decoded pixels identical while reducing JPEG 2000 entropy-decoding overhead.
 ```
 cd C:\Users\steve\code\CoreJ2K
 git fetch
-git log --oneline f75a5263ba21fcbeb8ee05cf354e9a32737fa42f..origin/master
-git diff f75a5263ba21fcbeb8ee05cf354e9a32737fa42f..origin/master -- CoreJ2K
+git log --oneline f5895ac7f8371d6cf1c23828516c66675e07a87a..origin/master
+git diff f5895ac7f8371d6cf1c23828516c66675e07a87a..origin/master -- CoreJ2K
 ```
 
 Apply the relevant changes to `third_party/CoreJ2K/CoreJ2K`, keeping the project
@@ -91,7 +97,18 @@ specific to KillerPDF, so it can come back through a normal sync.
 
 ## Verification after a sync
 
-Build the engine in Release, then run both suites and confirm rendering is
-unchanged on the corpus files that use `JPXDecode`. As of this vendoring the
-corpus holds 452 such files out of 46,946, and 388 of those are in
-`stress/pdf-association`.
+Build the engine in Release, then run both suites and render the corpus files
+that use `JPXDecode` with the previous and the new build
+(`tools/EngineCorpusComparison`, the previous build's PNGs as the baseline).
+A sync that carries decoder fixes changes pixels, so inspect every changed page
+rather than expecting none. As of this vendoring the corpus holds 452 such files
+out of 46,946, and 388 of those are in `stress/pdf-association`.
+
+The v2.4.1 sync was verified this way at 1200 pixels, three pages per file: 6,441
+engine tests and 737 application tests passed, the same 32 files failed to open
+before and after, and 380 of 896 pages changed. Most conformance and regression
+changes were one or two levels in a channel, from the color transform rounding
+fix. The large changes were repairs: pages that rendered blank or with scrambled
+or missing JPEG 2000 images (a Ghostscript magazine cover, a pdf.js article, the
+FOP image test sheet) now render them, and stray noise and false color casts are
+gone from a PDFium form test and two government documents.

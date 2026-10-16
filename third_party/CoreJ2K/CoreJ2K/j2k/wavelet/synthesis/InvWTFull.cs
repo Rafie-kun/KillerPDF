@@ -37,9 +37,14 @@
 * */
 using CoreJ2K.j2k.decoder;
 using CoreJ2K.j2k.image;
+using CoreJ2K.j2k.wavelet;
 using System;
 using System.Collections.Generic;
 using System.Buffers;
+using System.Collections.Concurrent;
+using System.Runtime.ExceptionServices;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace CoreJ2K.j2k.wavelet.synthesis
 {
@@ -109,6 +114,60 @@ namespace CoreJ2K.j2k.wavelet.synthesis
         /// Recommended: true for sensitive images (medical, personal photos, etc.)
         /// </summary>
         public static bool ClearArrayPoolBuffersOnReturn { get; set; } = false;
+
+        // ---- Parallel code-block decoding -------------------------------------------------------------------
+        // The code-block stage (bitstream parse, entropy decode, dequantisation) dominates decode time and is
+        // independent per code-block, so the blocks of a tile-component are decoded together by a team of workers,
+        // each with its own entropy-decoder/ROI/dequantiser chain, and written straight into their own rectangle of
+        // the tile-component buffer. The wavelet recursion then runs unchanged on the filled buffer.
+
+        /// <summary>Tile-components with fewer code-blocks than this are decoded sequentially.</summary>
+        /// <remarks>Parallel set-up is wasted on thumbnails. Tests lower this to 0 to exercise the parallel path on small images.</remarks>
+        internal static int MinParallelBlocks = 16;
+
+        /// <summary>Overrides <see cref="MinParallelBlocks"/> for decodes started on the current thread (tests only).</summary>
+        [ThreadStatic]
+        internal static int? MinParallelBlocksForCurrentThread;
+
+        private sealed class BlockWorker
+        {
+            public CBlkWTDataSrcDec Chain = null!;
+            public DataBlk? Block;
+            public int Tile = -1;
+        }
+
+        private struct BlockJob
+        {
+            public SubbandSyn Subband;
+            public int M, N;
+        }
+
+        private int parallelDegree = 1;
+
+        // Observed between code-blocks and between wavelet levels so a cancelled decode stops within about one code-block.
+        private CancellationToken cancellationToken;
+
+        /// <summary>
+        /// Makes the reconstruction cooperative: once <paramref name="token"/> is cancelled, it throws
+        /// <see cref="OperationCanceledException"/> before decoding the next code-block or wavelet level.
+        /// </summary>
+        internal void SetCancellationToken(CancellationToken token) => cancellationToken = token;
+        private Func<CBlkWTDataSrcDec>? workerChainFactory;
+        private readonly ConcurrentBag<BlockWorker> idleWorkers = new ConcurrentBag<BlockWorker>();
+
+        /// <summary>
+        /// Allows this transform to decode the code-blocks of a tile-component on several threads.
+        /// </summary>
+        /// <param name="maxDegreeOfParallelism">Maximum number of threads; 1 or less keeps decoding sequential.</param>
+        /// <param name="chainFactory">
+        /// Creates an additional chain of code-block decoding stages that follows this transform's source. Each
+        /// worker thread uses its own chain, so the stages themselves need not be thread-safe.
+        /// </param>
+        internal void EnableParallelDecoding(int maxDegreeOfParallelism, Func<CBlkWTDataSrcDec> chainFactory)
+        {
+            parallelDegree = Math.Max(1, maxDegreeOfParallelism);
+            workerChainFactory = parallelDegree > 1 ? chainFactory : null;
+        }
 
         /// <summary> The reversible flag for each component in each tile. The first index is
         /// the tile index, the second one is the component index. The
@@ -288,15 +347,20 @@ namespace CoreJ2K.j2k.wavelet.synthesis
                 // dtype determination and waveletTreeReconstruction — avoids the extra
                 // virtual dispatch that was occurring on every call in the original code.
                 var synTree = src.GetSynSubbandTree(tIdx, compIndex);
-                dtype = synTree.HorWFilter! == null ? DataBlk.TYPE_INT : synTree.HorWFilter!.DataType;
+                // Without a decomposition there is no filter to say which type the data has; it is the dequantizer's: integers if the
+                // quantization is reversible, otherwise floats (integers would drop the fraction of every coefficient, which the
+                // component transform that follows needs)
+                dtype = synTree.HorWFilter! != null
+                    ? synTree.HorWFilter!.DataType
+                    : (decSpec.qts.IsReversible(tIdx, compIndex) ? DataBlk.TYPE_INT : DataBlk.TYPE_FLOAT);
 
                 //Allocate component data buffer
                 switch (dtype)
                 {
 
                     case DataBlk.TYPE_FLOAT:
-                        var fwidth = GetTileCompWidth(tIdx, compIndex);
-                        var fheight = GetTileCompHeight(tIdx, compIndex);
+                        var fwidth = GetFullTileCompWidth(tIdx, compIndex);
+                        var fheight = GetFullTileCompHeight(tIdx, compIndex);
 
                         // Validate dimensions to prevent integer overflow
                         long fBufferSize = (long)fwidth * fheight;
@@ -327,6 +391,9 @@ namespace CoreJ2K.j2k.wavelet.synthesis
                         try
                         {
                             var rent = ArrayPool<float>.Shared.Rent((int)fBufferSize);
+                            // Rent() may hand back a buffer holding a previous decode's samples, and code-blocks
+                            // that are skipped or truncated never write their area, so start from zero.
+                            Array.Clear(rent, 0, (int)fBufferSize);
                             reconstructedComps[compIndex].Data = rent;
                             rentedFloatBuffers[compIndex] = rent;
                         }
@@ -338,8 +405,8 @@ namespace CoreJ2K.j2k.wavelet.synthesis
                         break;
 
                     case DataBlk.TYPE_INT:
-                        var iwidth = GetTileCompWidth(tIdx, compIndex);
-                        var iheight = GetTileCompHeight(tIdx, compIndex);
+                        var iwidth = GetFullTileCompWidth(tIdx, compIndex);
+                        var iheight = GetFullTileCompHeight(tIdx, compIndex);
 
                         // Validate dimensions to prevent integer overflow
                         long iBufferSize = (long)iwidth * iheight;
@@ -370,6 +437,7 @@ namespace CoreJ2K.j2k.wavelet.synthesis
                         try
                         {
                             var irent = ArrayPool<int>.Shared.Rent((int)iBufferSize);
+                            Array.Clear(irent, 0, (int)iBufferSize);
                             reconstructedComps[compIndex].Data = irent;
                             rentedIntBuffers[compIndex] = irent;
                         }
@@ -381,7 +449,7 @@ namespace CoreJ2K.j2k.wavelet.synthesis
                         break;
                 }
                 //Reconstruct source image — reuse the synTree reference already fetched above
-                waveletTreeReconstruction(reconstructedComps[compIndex], synTree, compIndex);
+                ReconstructComponent(reconstructedComps[compIndex], synTree, compIndex);
             }
             else
             {
@@ -508,6 +576,148 @@ namespace CoreJ2K.j2k.wavelet.synthesis
             return blk;
         }
 
+        /// <summary>
+        /// Tile-component passes with fewer samples than this run on the calling thread; splitting them costs more than it saves.
+        /// </summary>
+        internal static int MinParallelWaveletSamples = 1 << 17;
+
+        /// <summary>Number of adjacent columns the vertical passes process together (16 four-byte samples fill a 64-byte cache line).</summary>
+        private const int ColumnBlock = 16;
+
+        /// <summary>Overrides <see cref="MinParallelWaveletSamples"/> for decodes started on the current thread (tests only).</summary>
+        [ThreadStatic]
+        internal static int? MinParallelWaveletSamplesForCurrentThread;
+
+        /// <summary>
+        /// Runs one pass of the 2D inverse transform (all rows, or all columns), inline or split across threads; see
+        /// <see cref="WaveletPass.Run{T}"/>.
+        /// </summary>
+        private void RunPass<T>(int count, int itemLength, int scratchLength, ref T[]? sequentialScratch, Action<int, int, T[]> body)
+            => WaveletPass.Run(count, itemLength, scratchLength, ref sequentialScratch, parallelDegree,
+                MinParallelWaveletSamplesForCurrentThread ?? MinParallelWaveletSamples, cancellationToken, body);
+
+        /// <summary>Horizontal 5x3 synthesis of rows [rowStart, rowEnd) of a subband whose first row starts at <paramref name="baseOffset"/>.</summary>
+        private void HorizontalPass5x3(int[] data, int[] buf, SynWTFilterIntLift5x3 filter, bool evenStart, int baseOffset, int stride,
+            int w, int rowStart, int rowEnd)
+        {
+            int wHalf = w / 2, wHalfCeil = (w + 1) / 2;
+            for (var i = rowStart; i < rowEnd; i++)
+            {
+                if ((i & 63) == 0) cancellationToken.ThrowIfCancellationRequested();
+                var offset = baseOffset + i * stride;
+                new ReadOnlySpan<int>(data, offset, w).CopyTo(buf);
+                if (evenStart)
+                    filter.synthetize_lpf(buf, 0, wHalfCeil, 1, buf, wHalfCeil, wHalf, 1, data, offset, 1);
+                else
+                    filter.synthetize_hpf(buf, 0, wHalf, 1, buf, wHalf, wHalfCeil, 1, data, offset, 1);
+            }
+        }
+
+        /// <summary>
+        /// Vertical 5x3 synthesis of columns [colStart, colEnd) of a subband whose first column starts at <paramref name="baseOffset"/>.
+        /// Columns are processed <see cref="ColumnBlock"/> at a time: gathering one column touches a cache line per sample, so
+        /// reading and writing a block of adjacent columns together uses each cache line fully. <paramref name="buf"/> must hold
+        /// 2 * <see cref="ColumnBlock"/> * <paramref name="h"/> samples (the gathered columns, then the synthesised ones).
+        /// </summary>
+        private void VerticalPass5x3(int[] data, int[] buf, SynWTFilterIntLift5x3 filter, bool evenStart, int baseOffset, int stride,
+            int h, int colStart, int colEnd)
+        {
+            int hHalf = h / 2, hHalfCeil = (h + 1) / 2;
+            var outBase = ColumnBlock * h;
+            for (var blockStart = colStart; blockStart < colEnd; blockStart += ColumnBlock)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var width = Math.Min(ColumnBlock, colEnd - blockStart);
+                var rowBase = baseOffset + blockStart;
+
+                // Gather: one pass down the rows, reading 'width' adjacent samples (one cache line) per row.
+                for (var i = 0; i < h; i++)
+                {
+                    var src = rowBase + i * stride;
+                    for (var cc = 0; cc < width; cc++)
+                        buf[cc * h + i] = data[src + cc];
+                }
+
+                for (var cc = 0; cc < width; cc++)
+                {
+                    var inOff = cc * h;
+                    if (evenStart)
+                        filter.synthetize_lpf(buf, inOff, hHalfCeil, 1, buf, inOff + hHalfCeil, hHalf, 1, buf, outBase + inOff, 1);
+                    else
+                        filter.synthetize_hpf(buf, inOff, hHalf, 1, buf, inOff + hHalf, hHalfCeil, 1, buf, outBase + inOff, 1);
+                }
+
+                // Scatter the synthesised columns back, again a cache line per row.
+                for (var i = 0; i < h; i++)
+                {
+                    var dst = rowBase + i * stride;
+                    for (var cc = 0; cc < width; cc++)
+                        data[dst + cc] = buf[outBase + cc * h + i];
+                }
+            }
+        }
+
+        /// <summary>Horizontal 9x7 synthesis of rows [rowStart, rowEnd) of a subband whose first row starts at <paramref name="baseOffset"/>.</summary>
+        private void HorizontalPass9x7(float[] data, float[] buf, SynWTFilterFloatLift9x7 filter, bool evenStart, int baseOffset, int stride,
+            int w, int rowStart, int rowEnd)
+        {
+            int wHalf = w / 2, wHalfCeil = (w + 1) / 2;
+            for (var i = rowStart; i < rowEnd; i++)
+            {
+                if ((i & 63) == 0) cancellationToken.ThrowIfCancellationRequested();
+                var offset = baseOffset + i * stride;
+                new ReadOnlySpan<float>(data, offset, w).CopyTo(buf);
+                if (evenStart)
+                    filter.synthetize_lpf(buf, 0, wHalfCeil, 1, buf, wHalfCeil, wHalf, 1, data, offset, 1);
+                else
+                    filter.synthetize_hpf(buf, 0, wHalf, 1, buf, wHalf, wHalfCeil, 1, data, offset, 1);
+            }
+        }
+
+        /// <summary>
+        /// Vertical 9x7 synthesis of columns [colStart, colEnd) of a subband whose first column starts at <paramref name="baseOffset"/>.
+        /// Columns are processed <see cref="ColumnBlock"/> at a time: gathering one column touches a cache line per sample, so
+        /// reading and writing a block of adjacent columns together uses each cache line fully. <paramref name="buf"/> must hold
+        /// 2 * <see cref="ColumnBlock"/> * <paramref name="h"/> samples (the gathered columns, then the synthesised ones).
+        /// </summary>
+        private void VerticalPass9x7(float[] data, float[] buf, SynWTFilterFloatLift9x7 filter, bool evenStart, int baseOffset, int stride,
+            int h, int colStart, int colEnd)
+        {
+            int hHalf = h / 2, hHalfCeil = (h + 1) / 2;
+            var outBase = ColumnBlock * h;
+            for (var blockStart = colStart; blockStart < colEnd; blockStart += ColumnBlock)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var width = Math.Min(ColumnBlock, colEnd - blockStart);
+                var rowBase = baseOffset + blockStart;
+
+                // Gather: one pass down the rows, reading 'width' adjacent samples (one cache line) per row.
+                for (var i = 0; i < h; i++)
+                {
+                    var src = rowBase + i * stride;
+                    for (var cc = 0; cc < width; cc++)
+                        buf[cc * h + i] = data[src + cc];
+                }
+
+                for (var cc = 0; cc < width; cc++)
+                {
+                    var inOff = cc * h;
+                    if (evenStart)
+                        filter.synthetize_lpf(buf, inOff, hHalfCeil, 1, buf, inOff + hHalfCeil, hHalf, 1, buf, outBase + inOff, 1);
+                    else
+                        filter.synthetize_hpf(buf, inOff, hHalf, 1, buf, inOff + hHalf, hHalfCeil, 1, buf, outBase + inOff, 1);
+                }
+
+                // Scatter the synthesised columns back, again a cache line per row.
+                for (var i = 0; i < h; i++)
+                {
+                    var dst = rowBase + i * stride;
+                    for (var cc = 0; cc < width; cc++)
+                        data[dst + cc] = buf[outBase + cc * h + i];
+                }
+            }
+        }
+
         /// <summary> Performs the 2D inverse wavelet transform on a subband of the image, on
         /// the specified component. This method will successively perform 1D
         /// filtering steps on all columns and then all lines of the subband.
@@ -545,118 +755,33 @@ namespace CoreJ2K.j2k.wavelet.synthesis
 
             buf = null; // To keep compiler happy
 
-            // Fast path: both filters are the concrete 5x3 int type – call typed methods
-            // directly to eliminate the object-typed virtual dispatch chain and the slower
-            // Array.Copy(Array,...) overload used in the generic fallback.
+            // Fast paths: both filters are the same concrete type (5x3 int or 9x7 float) – call the typed methods
+            // directly to eliminate the object-typed virtual dispatch chain and the slower Array.Copy(Array,...)
+            // overload used in the generic fallback. Rows (then columns) are independent, so each pass may be split
+            // across threads; see RunPass.
+            var baseOffset = (uly - db.uly) * db.w + ulx - db.ulx;
+            var stride = db.w;
+            var evenStartX = sb.ulcx % 2 == 0;
+            var evenStartY = sb.ulcy % 2 == 0;
+            var need = (w >= h) ? w : h;
+
             if (sb.hFilter is SynWTFilterIntLift5x3 hf5x3 && sb.vFilter is SynWTFilterIntLift5x3 vf5x3)
             {
-                int[] data_int5x3 = (int[])data!;
-                int need5x3 = (w >= h) ? w : h;
-                if (_waveletScratchInt == null || _waveletScratchInt.Length < need5x3)
-                    _waveletScratchInt = new int[need5x3];
-                int[] buf_int5x3 = _waveletScratchInt;
-                {
-                    // Hoist loop-invariant half-lengths
-                    int wHalf = w / 2, wHalfCeil = (w + 1) / 2;
-                    int hHalf = h / 2, hHalfCeil = (h + 1) / 2;
-
-                    // Horizontal reconstruction
-                    offset = (uly - db.uly) * db.w + ulx - db.ulx;
-                    if (sb.ulcx % 2 == 0)
-                    {
-                        for (i = 0; i < h; i++, offset += db.w)
-                        {
-                            new ReadOnlySpan<int>(data_int5x3, offset, w).CopyTo(buf_int5x3);
-                            hf5x3.synthetize_lpf(buf_int5x3, 0, wHalfCeil, 1, buf_int5x3, wHalfCeil, wHalf, 1, data_int5x3!, offset, 1);
-                        }
-                    }
-                    else
-                    {
-                        for (i = 0; i < h; i++, offset += db.w)
-                        {
-                            new ReadOnlySpan<int>(data_int5x3, offset, w).CopyTo(buf_int5x3);
-                            hf5x3.synthetize_hpf(buf_int5x3, 0, wHalf, 1, buf_int5x3, wHalf, wHalfCeil, 1, data_int5x3!, offset, 1);
-                        }
-                    }
-
-                    // Vertical reconstruction — forward gather for hardware-prefetch friendliness
-                    offset = (uly - db.uly) * db.w + ulx - db.ulx;
-                    if (sb.ulcy % 2 == 0)
-                    {
-                        for (j = 0; j < w; j++, offset++)
-                        {
-                            for (i = 0, k = offset; i < h; i++, k += db.w)
-                                buf_int5x3[i] = data_int5x3[k];
-                            vf5x3.synthetize_lpf(buf_int5x3, 0, hHalfCeil, 1, buf_int5x3, hHalfCeil, hHalf, 1, data_int5x3!, offset, db.w);
-                        }
-                    }
-                    else
-                    {
-                        for (j = 0; j < w; j++, offset++)
-                        {
-                            for (i = 0, k = offset; i < h; i++, k += db.w)
-                                buf_int5x3[i] = data_int5x3[k];
-                            vf5x3.synthetize_hpf(buf_int5x3, 0, hHalf, 1, buf_int5x3, hHalf, hHalfCeil, 1, data_int5x3!, offset, db.w);
-                        }
-                    }
-                }
+                var intData = (int[])data!;
+                RunPass(h, w, need, ref _waveletScratchInt,
+                    (rowStart, rowEnd, scratch) => HorizontalPass5x3(intData, scratch, hf5x3, evenStartX, baseOffset, stride, w, rowStart, rowEnd));
+                RunPass(w, h, Math.Max(need, 2 * ColumnBlock * h), ref _waveletScratchInt,
+                    (colStart, colEnd, scratch) => VerticalPass5x3(intData, scratch, vf5x3, evenStartY, baseOffset, stride, h, colStart, colEnd));
                 return;
             }
 
-            // Fast path: both filters are the concrete 9x7 float type – call typed sealed
-            // methods directly to eliminate the object-typed virtual dispatch chain.
             if (sb.hFilter is SynWTFilterFloatLift9x7 hf9x7 && sb.vFilter is SynWTFilterFloatLift9x7 vf9x7)
             {
-                float[] data_float = (float[])data!;
-                int need9x7 = (w >= h) ? w : h;
-                if (_waveletScratchFloat == null || _waveletScratchFloat.Length < need9x7)
-                    _waveletScratchFloat = new float[need9x7];
-                float[] buf_float = _waveletScratchFloat;
-                {
-                    // Hoist loop-invariant half-lengths
-                    int wHalf9 = w / 2, wHalfCeil9 = (w + 1) / 2;
-                    int hHalf9 = h / 2, hHalfCeil9 = (h + 1) / 2;
-
-                    // Horizontal reconstruction
-                    offset = (uly - db.uly) * db.w + ulx - db.ulx;
-                    if (sb.ulcx % 2 == 0)
-                    {
-                        for (i = 0; i < h; i++, offset += db.w)
-                        {
-                            new ReadOnlySpan<float>(data_float, offset, w).CopyTo(buf_float);
-                            hf9x7.synthetize_lpf(buf_float, 0, wHalfCeil9, 1, buf_float, wHalfCeil9, wHalf9, 1, data_float, offset, 1);
-                        }
-                    }
-                    else
-                    {
-                        for (i = 0; i < h; i++, offset += db.w)
-                        {
-                            new ReadOnlySpan<float>(data_float, offset, w).CopyTo(buf_float);
-                            hf9x7.synthetize_hpf(buf_float, 0, wHalf9, 1, buf_float, wHalf9, wHalfCeil9, 1, data_float, offset, 1);
-                        }
-                    }
-
-                    // Vertical reconstruction — forward gather for hardware-prefetch friendliness
-                    offset = (uly - db.uly) * db.w + ulx - db.ulx;
-                    if (sb.ulcy % 2 == 0)
-                    {
-                        for (j = 0; j < w; j++, offset++)
-                        {
-                            for (i = 0, k = offset; i < h; i++, k += db.w)
-                                buf_float[i] = data_float[k];
-                            vf9x7.synthetize_lpf(buf_float, 0, hHalfCeil9, 1, buf_float, hHalfCeil9, hHalf9, 1, data_float, offset, db.w);
-                        }
-                    }
-                    else
-                    {
-                        for (j = 0; j < w; j++, offset++)
-                        {
-                            for (i = 0, k = offset; i < h; i++, k += db.w)
-                                buf_float[i] = data_float[k];
-                            vf9x7.synthetize_hpf(buf_float, 0, hHalf9, 1, buf_float, hHalf9, hHalfCeil9, 1, data_float, offset, db.w);
-                        }
-                    }
-                }
+                var floatData = (float[])data!;
+                RunPass(h, w, need, ref _waveletScratchFloat,
+                    (rowStart, rowEnd, scratch) => HorizontalPass9x7(floatData, scratch, hf9x7, evenStartX, baseOffset, stride, w, rowStart, rowEnd));
+                RunPass(w, h, Math.Max(need, 2 * ColumnBlock * h), ref _waveletScratchFloat,
+                    (colStart, colEnd, scratch) => VerticalPass9x7(floatData, scratch, vf9x7, evenStartY, baseOffset, stride, h, colStart, colEnd));
                 return;
             }
 
@@ -689,6 +814,7 @@ namespace CoreJ2K.j2k.wavelet.synthesis
                     // start index is even => use LPF
                     for (i = 0; i < h; i++, offset += db.w)
                     {
+                        if ((i & 63) == 0) cancellationToken.ThrowIfCancellationRequested();
                         Array.Copy((Array)data!, offset, (Array)buf!, 0, w);
                         sb.hFilter!.synthetize_lpf(buf, 0, wHalfCeilG, 1, buf, wHalfCeilG, wHalfG, 1, data, offset, 1);
                     }
@@ -698,6 +824,7 @@ namespace CoreJ2K.j2k.wavelet.synthesis
                     // start index is odd => use HPF
                     for (i = 0; i < h; i++, offset += db.w)
                     {
+                        if ((i & 63) == 0) cancellationToken.ThrowIfCancellationRequested();
                         Array.Copy((Array)data!, offset, (Array)buf!, 0, w);
                         sb.hFilter!.synthetize_hpf(buf, 0, wHalfG, 1, buf, wHalfG, wHalfCeilG, 1, data, offset, 1);
                     }
@@ -717,6 +844,7 @@ namespace CoreJ2K.j2k.wavelet.synthesis
                             // start index is even => use LPF
                             for (j = 0; j < w; j++, offset++)
                             {
+                                if ((j & 63) == 0) cancellationToken.ThrowIfCancellationRequested();
                                 for (i = 0, k = offset; i < h; i++, k += db.w)
                                     buf_int[i] = data_int[k];
                                 sb.vFilter!.synthetize_lpf(buf, 0, hHalfCeilG, 1, buf, hHalfCeilG, hHalfG, 1, data, offset, db.w);
@@ -727,6 +855,7 @@ namespace CoreJ2K.j2k.wavelet.synthesis
                             // start index is odd => use HPF
                             for (j = 0; j < w; j++, offset++)
                             {
+                                if ((j & 63) == 0) cancellationToken.ThrowIfCancellationRequested();
                                 for (i = 0, k = offset; i < h; i++, k += db.w)
                                     buf_int[i] = data_int[k];
                                 sb.vFilter!.synthetize_hpf(buf, 0, hHalfG, 1, buf, hHalfG, hHalfCeilG, 1, data, offset, db.w);
@@ -743,6 +872,7 @@ namespace CoreJ2K.j2k.wavelet.synthesis
                             // start index is even => use LPF
                             for (j = 0; j < w; j++, offset++)
                             {
+                                if ((j & 63) == 0) cancellationToken.ThrowIfCancellationRequested();
                                 for (i = 0, k = offset; i < h; i++, k += db.w)
                                     buf_float2[i] = data_float2[k];
                                 sb.vFilter!.synthetize_lpf(buf, 0, hHalfCeilG, 1, buf, hHalfCeilG, hHalfG, 1, data, offset, db.w);
@@ -753,6 +883,7 @@ namespace CoreJ2K.j2k.wavelet.synthesis
                             // start index is odd => use HPF
                             for (j = 0; j < w; j++, offset++)
                             {
+                                if ((j & 63) == 0) cancellationToken.ThrowIfCancellationRequested();
                                 for (i = 0, k = offset; i < h; i++, k += db.w)
                                     buf_float2[i] = data_float2[k];
                                 sb.vFilter!.synthetize_hpf(buf, 0, hHalfG, 1, buf, hHalfG, hHalfCeilG, 1, data, offset, db.w);
@@ -783,7 +914,122 @@ namespace CoreJ2K.j2k.wavelet.synthesis
         /// <param name="c">The index of the component to reconstruct 
         /// 
         /// </param>
-        private void waveletTreeReconstruction(DataBlk img, SubbandSyn sb, int c)
+        /// <summary>
+        /// Fills the tile-component buffer from the code-blocks and performs the inverse wavelet transform on it.
+        /// </summary>
+        private void ReconstructComponent(DataBlk img, SubbandSyn root, int c)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (workerChainFactory != null)
+            {
+                var jobs = new List<BlockJob>();
+                CollectCodeBlocks(root, c, jobs);
+                if (jobs.Count >= (MinParallelBlocksForCurrentThread ?? MinParallelBlocks))
+                {
+                    DecodeCodeBlocksInParallel(img, jobs, c);
+                    waveletTreeReconstruction(img, root, c, loadCodeBlocks: false);
+                    return;
+                }
+            }
+
+            waveletTreeReconstruction(img, root, c, loadCodeBlocks: true);
+        }
+
+        /// <summary>Lists the code-blocks <see cref="waveletTreeReconstruction"/> would read, in the same subband order.</summary>
+        private void CollectCodeBlocks(SubbandSyn sb, int c, List<BlockJob> jobs)
+        {
+            if (!sb.isNode)
+            {
+                if (sb.w == 0 || sb.h == 0) return;
+                var ncblks = sb.numCb;
+                for (var m = 0; m < ncblks.y; m++)
+                    for (var n = 0; n < ncblks.x; n++)
+                        jobs.Add(new BlockJob { Subband = sb, M = m, N = n });
+                return;
+            }
+
+            CollectCodeBlocks((SubbandSyn)sb.LL!, c, jobs);
+            if (sb.resLvl <= reslvl - maxImgRes + ndl[c])
+            {
+                CollectCodeBlocks((SubbandSyn)sb.HL, c, jobs);
+                CollectCodeBlocks((SubbandSyn)sb.LH, c, jobs);
+                CollectCodeBlocks((SubbandSyn)sb.HH, c, jobs);
+            }
+        }
+
+        private BlockWorker RentWorker(int tile)
+        {
+            if (!idleWorkers.TryTake(out var worker))
+            {
+                worker = new BlockWorker { Chain = workerChainFactory!() };
+            }
+
+            if (worker.Tile != tile)
+            {
+                // The primary chain has already moved the shared reader to this tile; bring this chain's view along.
+                var numTiles = src.GetNumTiles(null);
+                worker.Chain.SetTile(tile % numTiles.x, tile / numTiles.x);
+                worker.Tile = tile;
+            }
+
+            if (worker.Block == null || worker.Block.DataType != dtype)
+            {
+                worker.Block = dtype == DataBlk.TYPE_INT ? (DataBlk)new DataBlkInt() : new DataBlkFloat();
+            }
+            return worker;
+        }
+
+        private void DecodeCodeBlocksInParallel(DataBlk img, List<BlockJob> jobs, int c)
+        {
+            var tile = src.TileIdx;
+            var options = new ParallelOptions { MaxDegreeOfParallelism = parallelDegree, CancellationToken = cancellationToken };
+
+            try
+            {
+                Parallel.For(0, jobs.Count, options,
+                    () => RentWorker(tile),
+                    (i, _, worker) =>
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+                        var job = jobs[i];
+                        var blk = worker.Chain.GetInternCodeBlock(c, job.M, job.N, job.Subband, worker.Block!);
+                        worker.Block = blk;
+                        CopyCodeBlock(blk, img);
+                        return worker;
+                    },
+                    worker => idleWorkers.Add(worker));
+            }
+            catch (AggregateException e)
+            {
+                // Surface the original exception (e.g. a decoder limit or corrupt-codestream error) with its type intact.
+                ExceptionDispatchInfo.Capture(e.Flatten().InnerExceptions[0]).Throw();
+                throw;
+            }
+        }
+
+        /// <summary>Copies a decoded code-block into its (disjoint) rectangle of the tile-component buffer.</summary>
+        private static void CopyCodeBlock(DataBlk blk, DataBlk img)
+        {
+            var dstBase = blk.uly * img.w + blk.ulx;
+            if (blk.DataType == DataBlk.TYPE_INT)
+            {
+                var srcArr = (int[])blk.Data!;
+                var dstArr = (int[])img.Data!;
+                for (var i = blk.h - 1; i >= 0; i--)
+                    new ReadOnlySpan<int>(srcArr, blk.offset + i * blk.scanw, blk.w)
+                        .CopyTo(dstArr.AsSpan(dstBase + i * img.w, blk.w));
+            }
+            else
+            {
+                var srcArr = (float[])blk.Data!;
+                var dstArr = (float[])img.Data!;
+                for (var i = blk.h - 1; i >= 0; i--)
+                    new ReadOnlySpan<float>(srcArr, blk.offset + i * blk.scanw, blk.w)
+                        .CopyTo(dstArr.AsSpan(dstBase + i * img.w, blk.w));
+            }
+        }
+
+        private void waveletTreeReconstruction(DataBlk img, SubbandSyn sb, int c, bool loadCodeBlocks = true)
         {
 
             DataBlk subbData;
@@ -791,6 +1037,8 @@ namespace CoreJ2K.j2k.wavelet.synthesis
             // If the current subband is a leaf then get the data from the source
             if (!sb.isNode)
             {
+                if (!loadCodeBlocks) return; // Already filled by DecodeCodeBlocksInParallel
+
                 int i, m, n;
                 Coord ncblks;
 
@@ -818,6 +1066,7 @@ namespace CoreJ2K.j2k.wavelet.synthesis
                     {
                         for (n = 0; n < ncblks.x; n++)
                         {
+                            cancellationToken.ThrowIfCancellationRequested();
                             subbData = src.GetInternCodeBlock(c, m, n, sb, subbData);
                             int[] srcArr = (int[])subbData.Data!;
                             int dstBase = subbData.uly * img.w + subbData.ulx;
@@ -836,6 +1085,7 @@ namespace CoreJ2K.j2k.wavelet.synthesis
                     {
                         for (n = 0; n < ncblks.x; n++)
                         {
+                            cancellationToken.ThrowIfCancellationRequested();
                             subbData = src.GetInternCodeBlock(c, m, n, sb, subbData);
                             float[] srcArr = (float[])subbData.Data!;
                             int dstBase = subbData.uly * img.w + subbData.ulx;
@@ -854,16 +1104,17 @@ namespace CoreJ2K.j2k.wavelet.synthesis
                 // is a node
 
                 //Perform the reconstruction of the LL subband
-                waveletTreeReconstruction(img, (SubbandSyn)sb.LL!, c);
+                waveletTreeReconstruction(img, (SubbandSyn)sb.LL!, c, loadCodeBlocks);
 
                 if (sb.resLvl <= reslvl - maxImgRes + ndl[c])
                 {
                     //Reconstruct the other subbands
-                    waveletTreeReconstruction(img, (SubbandSyn)sb.HL, c);
-                    waveletTreeReconstruction(img, (SubbandSyn)sb.LH, c);
-                    waveletTreeReconstruction(img, (SubbandSyn)sb.HH, c);
+                    waveletTreeReconstruction(img, (SubbandSyn)sb.HL, c, loadCodeBlocks);
+                    waveletTreeReconstruction(img, (SubbandSyn)sb.LH, c, loadCodeBlocks);
+                    waveletTreeReconstruction(img, (SubbandSyn)sb.HH, c, loadCodeBlocks);
 
                     //Perform the 2D wavelet decomposition of the current subband
+                    cancellationToken.ThrowIfCancellationRequested();
                     wavelet2DReconstruction(img, sb, c);
                 }
             }
@@ -913,8 +1164,8 @@ namespace CoreJ2K.j2k.wavelet.synthesis
             // Ensure rented buffers are large enough for new tile; do not return them so they are reused
             for (i = 0; i < nc; i++)
             {
-                var newWidth = GetTileCompWidth(tIdx, i);
-                var newHeight = GetTileCompHeight(tIdx, i);
+                var newWidth = GetFullTileCompWidth(tIdx, i);
+                var newHeight = GetFullTileCompHeight(tIdx, i);
                 
                 // Validate dimensions to prevent integer overflow
                 long needed = (long)newWidth * newHeight;
@@ -1004,8 +1255,8 @@ namespace CoreJ2K.j2k.wavelet.synthesis
             // Ensure rented buffers are large enough for new tile; keep them for reuse
             for (i = 0; i < nc; i++)
             {
-                var newWidth = GetTileCompWidth(tIdx, i);
-                var newHeight = GetTileCompHeight(tIdx, i);
+                var newWidth = GetFullTileCompWidth(tIdx, i);
+                var newHeight = GetFullTileCompHeight(tIdx, i);
                 
                 // Validate dimensions to prevent integer overflow
                 long needed = (long)newWidth * newHeight;

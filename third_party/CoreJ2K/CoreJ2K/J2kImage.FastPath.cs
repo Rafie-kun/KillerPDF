@@ -17,6 +17,7 @@ namespace CoreJ2K
     using j2k.roi;
     using j2k.util;
     using j2k.wavelet.synthesis;
+    using System.Threading;
     using Color;
     using System;
     using System.IO;
@@ -42,7 +43,7 @@ namespace CoreJ2K
         public static T DecodeToImage<T>(Stream stream, ParameterList? parameters = null)
         {
             if (stream == null) throw new ArgumentNullException(nameof(stream));
-            return DecodeToImageCore<T>(stream, parameters);
+            return DecodeToImageCore<T>(stream, parameters, CancellationToken.None);
         }
 
         /// <summary>
@@ -79,9 +80,75 @@ namespace CoreJ2K
             }
         }
 
+        /// <summary>
+        /// Decodes a JPEG 2000 stream straight into the platform image <typeparamref name="T"/>, stopping if
+        /// <paramref name="cancellationToken"/> is cancelled. See <see cref="DecodeToImage{T}(Stream, ParameterList?)"/>.
+        /// </summary>
+        /// <exception cref="OperationCanceledException">The token was cancelled.</exception>
+        public static T DecodeToImage<T>(Stream stream, ParameterList? parameters, CancellationToken cancellationToken)
+        {
+            if (stream == null) throw new ArgumentNullException(nameof(stream));
+            return DecodeToImageCore<T>(stream, parameters, cancellationToken);
+        }
+
+        /// <summary>
+        /// Decodes JPEG 2000 data straight into the platform image <typeparamref name="T"/>, stopping if
+        /// <paramref name="cancellationToken"/> is cancelled.
+        /// </summary>
+        /// <exception cref="OperationCanceledException">The token was cancelled.</exception>
+        public static T DecodeToImage<T>(byte[] j2kdata, ParameterList? parameters, CancellationToken cancellationToken)
+        {
+            if (j2kdata == null) throw new ArgumentNullException(nameof(j2kdata));
+            using (var ms = new MemoryStream(j2kdata))
+            {
+                return DecodeToImageCore<T>(ms, parameters, cancellationToken);
+            }
+        }
+
+        /// <summary>
+        /// Decodes a JPEG 2000 file straight into the platform image <typeparamref name="T"/>, stopping if
+        /// <paramref name="cancellationToken"/> is cancelled.
+        /// </summary>
+        /// <exception cref="OperationCanceledException">The token was cancelled.</exception>
+        public static T DecodeFileToImage<T>(string filename, ParameterList? parameters, CancellationToken cancellationToken)
+        {
+            if (filename == null) throw new ArgumentNullException(nameof(filename));
+            using (var stream = FileStreamFactory.New(filename, "r"))
+            {
+                return DecodeToImageCore<T>(stream, parameters, cancellationToken);
+            }
+        }
+
         #endregion
 
         #region Core decode
+
+        /// <summary>
+        /// Applies the <see cref="DecoderLimits"/> to the image that is about to be produced, using its size at the requested
+        /// resolution. Runs before the output buffer is allocated; building the decoding chain beforehand allocates nothing
+        /// image-sized.
+        /// </summary>
+        /// <param name="invWT">The inverse wavelet transform, whose tile-components are the working buffers.</param>
+        /// <param name="decodedImage">The final image of the chain (after colour-space mapping), whose size and component count
+        /// are what the output buffer is sized from. A palette or multiple-component transform can give it more components than
+        /// the codestream has.</param>
+        /// <param name="bytesPerOutputSample">Bytes per sample the caller keeps for the output (4 for <see cref="InterleavedImage"/>, 1 for the fast path).</param>
+        private static void EnforceDecoderLimits(ParameterList pl, HeaderInfo hi, InverseWT invWT, BlkImgDataSrc decodedImage,
+            int bytesPerOutputSample)
+        {
+            var limits = DecoderLimits.FromParameters(pl);
+
+            long width = decodedImage.ImgWidth, height = decodedImage.ImgHeight;
+            var siz = hi.sizValue;
+            double fullWidth = Math.Max(1, (long)siz.xsiz - siz.x0siz), fullHeight = Math.Max(1, (long)siz.ysiz - siz.y0siz);
+
+            // Largest tile at the output resolution, scaled from the full-resolution tile size. The working buffers are the
+            // codestream's tile-components, so they use the codestream's component count rather than the output's.
+            var tileWidth = (long)Math.Ceiling(Math.Min(siz.xtsiz, fullWidth) * invWT.ImgWidth / fullWidth);
+            var tileHeight = (long)Math.Ceiling(Math.Min(siz.ytsiz, fullHeight) * invWT.ImgHeight / fullHeight);
+
+            limits.ValidateOutput(width, height, decodedImage.NumComps, tileWidth, tileHeight, invWT.NumComps, bytesPerOutputSample);
+        }
 
         /// <summary>
         /// Core implementation of the 8-bit fast-path decode.
@@ -104,8 +171,9 @@ namespace CoreJ2K
         /// silently truncated.  The source stream must be seekable in that case.
         /// </para>
         /// </remarks>
-        private static T DecodeToImageCore<T>(Stream stream, ParameterList? parameters)
+        private static T DecodeToImageCore<T>(Stream stream, ParameterList? parameters, CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             InverseWT? invWT = null;
             try
             {
@@ -153,8 +221,18 @@ namespace CoreJ2K
                     throw new InvalidOperationException("Cannot instantiate bit stream reader.", e);
                 }
 
+                (breader as FileBitstreamReaderAgent)?.SetCancellationToken(cancellationToken);
+
+                // When several threads decode code-blocks they share one bitstream reader through a locking wrapper.
+
+                var parallelDegree = ResolveDegreeOfParallelism(pl);
+
+                var sharedSource = parallelDegree > 1 ? new SharedCodedBlockSource(breader) : null;
+
+                CodedCBlkDataSrcDec blockSource = sharedSource ?? (CodedCBlkDataSrcDec)breader;
+
                 EntropyDecoder entdec;
-                try { entdec = hd.createEntropyDecoder(breader, pl); }
+                try { entdec = hd.createEntropyDecoder(blockSource, pl); }
                 catch (ArgumentException e) { throw new InvalidOperationException("Cannot instantiate entropy decoder.", e); }
 
                 ROIDeScaler roids;
@@ -170,6 +248,7 @@ namespace CoreJ2K
 
                 var res = breader.ImgRes;
                 invWT.ImgResLevel = res;
+                ConfigureInverseTransform(invWT, sharedSource, parallelDegree, hd, pl, decSpec, depth, cancellationToken);
 
                 var converter = new ImgDataConverter(invWT, 0);
                 var ictransf = new InvCompTransf(converter, decSpec, depth, pl);
@@ -195,16 +274,20 @@ namespace CoreJ2K
                     postCt = new InvDCO(postCt, hd.DcoSegment);
                 }
 
+                // Components may be subsampled, and so differ in size; put them on one grid before anything is made of them
+                postCt = j2k.image.ComponentGridUpsampler.IfNeeded(postCt);
+
                 BlkImgDataSrc color;
                 if (ff.JP2FFUsed && pl.GetParameter("nocolorspace").Equals("off"))
                 {
                     try
                     {
                         var csMap = new ColorSpace(in_stream, hd, pl);
-                        var channels = hd.createChannelDefinitionMapper(postCt, csMap);
-                        var resampled = hd.createResampler(channels, csMap);
+                        // the channel definitions name the channels the palette makes, so they come after it
+                        var resampled = hd.createResampler(postCt, csMap);
                         var palettized = hd.createPalettizedColorSpaceMapper(resampled, csMap);
-                        color = hd.createColorSpaceMapper(palettized, csMap);
+                        var channels = hd.createChannelDefinitionMapper(palettized, csMap);
+                        color = ConvertColors(hd, channels, csMap);
                     }
                     catch (ArgumentException e)
                     {
@@ -250,13 +333,15 @@ namespace CoreJ2K
                     try { invWT.Close(); } catch { /* ignore */ }
                     invWT = null;
                     stream.Position = 0;
-                    using (var img = FromStream(stream, parameters))
+                    using (var img = FromStreamCore(stream, parameters, cancellationToken))
                     {
                         return img.As<T>();
                     }
                 }
 
                 // **** 8-bit fast path: decode straight into a byte buffer ****
+                // Checked on the final image (a palette or MCT can output more components than the codestream has).
+                EnforceDecoderLimits(pl, hi, invWT!, decodedImage, 1);
                 var totalBytes = checked(imgWidth * imgHeight * numComps);
                 var pixelBytes = new byte[totalBytes];
 
@@ -266,6 +351,7 @@ namespace CoreJ2K
                 {
                     for (var x = 0; x < numTiles.x; x++, tIdx++)
                     {
+                        cancellationToken.ThrowIfCancellationRequested();
                         decodedImage.SetTile(x, y);
 
                         var tileHeight = decodedImage.GetTileCompHeight(tIdx, 0);
@@ -295,6 +381,7 @@ namespace CoreJ2K
 
                         for (var l = 0; l < tileHeight; l++)
                         {
+                            if ((l & 15) == 0) cancellationToken.ThrowIfCancellationRequested();
                             var destLine = tOffy + l;
                             if (destLine < 0) continue;
                             if (destLine >= imgHeight) break;
@@ -305,7 +392,7 @@ namespace CoreJ2K
                                 db[i].uly = l;
                                 db[i].w = tileWidth;
                                 db[i].h = 1;
-                                decodedImage.GetInternCompData(db[i], i);
+                                db[i] = (DataBlkInt)decodedImage.GetInternCompData(db[i], i);
                                 k[i] = db[i].offset;
                             }
 

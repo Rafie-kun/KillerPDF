@@ -114,7 +114,47 @@ namespace CoreJ2K
         }
 
         public static InterleavedImage FromStream(Stream stream, ParameterList? parameters = null)
+            => FromStreamCore(stream, parameters, CancellationToken.None);
+
+        /// <summary>
+        /// Decodes a JPEG 2000 stream, stopping if <paramref name="cancellationToken"/> is cancelled.
+        /// </summary>
+        /// <param name="stream">The stream containing JPEG 2000 data.</param>
+        /// <param name="parameters">Optional decoder parameters.</param>
+        /// <param name="cancellationToken">Cancels the decode. Cancellation is cooperative: the decode stops within about one code-block.</param>
+        /// <exception cref="OperationCanceledException">The token was cancelled.</exception>
+        public static InterleavedImage FromStream(Stream stream, ParameterList? parameters, CancellationToken cancellationToken)
+            => FromStreamCore(stream, parameters, cancellationToken);
+
+        /// <summary>The exceptions a damaged file makes the decoder throw by running into a structure that is not there.</summary>
+        private static bool IsDamagedFileSymptom(Exception e) =>
+            e is NullReferenceException || e is IndexOutOfRangeException || e is InvalidCastException || e is DivideByZeroException
+            || e is OverflowException || e is KeyNotFoundException || e is ArrayTypeMismatchException;
+
+        /// <summary>
+        /// The stage that converts the channels to the colour space the file names. When that cannot be done here (an ICC profile for
+        /// another number of channels than the image has, as with an RGB profile on an image that also has an alpha channel, or a profile
+        /// that cannot be read), and when the colour space is not one that is converted, the channels are used as they are, which is
+        /// what other decoders do; the image is decoded all the same.
+        /// </summary>
+        private static BlkImgDataSrc ConvertColors(HeaderDecoder hd, BlkImgDataSrc channels, Color.ColorSpace csMap)
         {
+            try
+            {
+                return hd.createColorSpaceMapper(channels, csMap) ?? channels;
+            }
+            catch (Exception e) when (e is ArgumentException || e is Color.ColorSpaceException || e is Icc.ICCProfileException
+                                      || e is Icc.Lut.MatrixBasedTransformException || e is Icc.Lut.MonochromeTransformException)
+            {
+                FacilityManager.GetMsgLogger().printmsg(MsgLogger_Fields.WARNING,
+                    $"The colour space of the file is not applied: {e.Message}");
+                return channels;
+            }
+        }
+
+        private static InterleavedImage FromStreamCore(Stream stream, ParameterList? parameters, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
             RandomAccessIO? in_stream = null;
             InverseWT? invWT = null;
 
@@ -179,10 +219,15 @@ namespace CoreJ2K
             }
 
             // **** Entropy decoder ****
+            (breader as FileBitstreamReaderAgent)?.SetCancellationToken(cancellationToken);
+            // When several threads decode code-blocks they share one bitstream reader through a locking wrapper.
+            var parallelDegree = ResolveDegreeOfParallelism(pl);
+            var sharedSource = parallelDegree > 1 ? new SharedCodedBlockSource(breader) : null;
+            CodedCBlkDataSrcDec blockSource = sharedSource ?? (CodedCBlkDataSrcDec)breader;
             EntropyDecoder entdec;
             try
             {
-                entdec = hd.createEntropyDecoder(breader, pl);
+                entdec = hd.createEntropyDecoder(blockSource, pl);
             }
             catch (ArgumentException e)
             {
@@ -225,6 +270,7 @@ namespace CoreJ2K
 
             var res = breader.ImgRes;
             invWT.ImgResLevel = res;
+            ConfigureInverseTransform(invWT, sharedSource, parallelDegree, hd, pl, decSpec, depth, cancellationToken);
 
             // **** Data converter **** (after inverse transform module)
             var converter = new ImgDataConverter(invWT, 0);
@@ -253,6 +299,11 @@ namespace CoreJ2K
                 postCt = new InvDCO(postCt, hd.DcoSegment);
             }
 
+            // **** Component grid ****
+            // Components may be subsampled, and so differ in size; put them on one grid (the image as large as the components
+            // when they are all sampled alike) before anything is made of them
+            postCt = j2k.image.ComponentGridUpsampler.IfNeeded(postCt);
+
             // **** Color space mapping ****
             BlkImgDataSrc color;
             if (ff.JP2FFUsed && pl.GetParameter("nocolorspace").Equals("off"))
@@ -260,10 +311,11 @@ namespace CoreJ2K
                 try
                 {
                     var csMap = new ColorSpace(in_stream, hd, pl);
-                    var channels = hd.createChannelDefinitionMapper(postCt, csMap);
-                    var resampled = hd.createResampler(channels, csMap);
+                    // the channel definitions name the channels the palette makes, so they come after it
+                    var resampled = hd.createResampler(postCt, csMap);
                     var palettized = hd.createPalettizedColorSpaceMapper(resampled, csMap);
-                    color = hd.createColorSpaceMapper(palettized, csMap);
+                    var channels = hd.createChannelDefinitionMapper(palettized, csMap);
+                    color = ConvertColors(hd, channels, csMap);
                 }
                 catch (ArgumentException e)
                 {
@@ -295,6 +347,10 @@ namespace CoreJ2K
             var bitsUsed = new int[numComps];
             for (var j = 0; j < numComps; ++j) bitsUsed[j] = decodedImage.GetNomRangeBits(j);
 
+            // Refuse an image that would exceed the decoder limits before allocating the output buffer. This is checked
+            // on the final image: a palette or multiple-component transform can output more components than the codestream has.
+            EnforceDecoderLimits(pl, hi, invWT, decodedImage, 4);
+
             var dst = new InterleavedImage(imgWidth, decodedImage.ImgHeight, numComps, bitsUsed);
 
             var numTiles = decodedImage.GetNumTiles(null);
@@ -306,6 +362,7 @@ namespace CoreJ2K
                 // Loop on horizontal tiles
                 for (var x = 0; x < numTiles.x; x++, tIdx++)
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
                     decodedImage.SetTile(x, y);
 
                     var height = decodedImage.GetTileCompHeight(tIdx, 0);
@@ -351,6 +408,7 @@ namespace CoreJ2K
 
                     for (var l = 0; l < height; l++)
                     {
+                        if ((l & 15) == 0) cancellationToken.ThrowIfCancellationRequested();
                         // Map tile-local row 'l' to destination image line
                         var destLine = tOffy + l;
                         // Skip rows that end up above the destination image
@@ -365,7 +423,7 @@ namespace CoreJ2K
                             db[i].uly = l;
                             db[i].w = width;
                             db[i].h = 1;
-                            decodedImage.GetInternCompData(db[i], i);
+                            db[i] = (DataBlkInt)decodedImage.GetInternCompData(db[i], i);
                             k[i] = db[i].offset; // start index for forward iteration
                         }
 
@@ -394,6 +452,12 @@ namespace CoreJ2K
 
             return dst;
             }
+            catch (Exception e) when (IsDamagedFileSymptom(e))
+            {
+                // The decoder trusts the structure it reads; a file that breaks that trust shows as one of these. Report the file, not the
+                // line of the decoder that was the first to notice (it stays in InnerException).
+                throw new InvalidOperationException($"The data is damaged or is not a JPEG 2000 file it can decode: {e.Message}", e);
+            }
             finally
             {
                 // Ensure resources are cleaned up even if an exception occurs
@@ -420,7 +484,25 @@ namespace CoreJ2K
         /// <param name="parameters">Optional decoder parameters.</param>
         /// <returns>The decoded image.</returns>
         public static InterleavedImage FromStream(Stream stream, out j2k.fileformat.metadata.J2KMetadata metadata, ParameterList? parameters = null)
+            => FromStreamCore(stream, out metadata, parameters, CancellationToken.None);
+
+        /// <summary>
+        /// Decodes a JPEG2000 stream and returns both the image and any metadata found, stopping if
+        /// <paramref name="cancellationToken"/> is cancelled.
+        /// </summary>
+        /// <param name="stream">The stream containing JPEG2000 data.</param>
+        /// <param name="metadata">Output parameter that receives the metadata (comments, XML, UUIDs).</param>
+        /// <param name="parameters">Optional decoder parameters.</param>
+        /// <param name="cancellationToken">Cancels the decode. Cancellation is cooperative: the decode stops within about one code-block.</param>
+        /// <exception cref="OperationCanceledException">The token was cancelled.</exception>
+        public static InterleavedImage FromStream(Stream stream, out j2k.fileformat.metadata.J2KMetadata metadata,
+            ParameterList? parameters, CancellationToken cancellationToken)
+            => FromStreamCore(stream, out metadata, parameters, cancellationToken);
+
+        private static InterleavedImage FromStreamCore(Stream stream, out j2k.fileformat.metadata.J2KMetadata metadata,
+            ParameterList? parameters, CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             RandomAccessIO? in_stream = null;
             InverseWT? invWT = null;
 
@@ -481,10 +563,15 @@ namespace CoreJ2K
             }
 
             // **** Entropy decoder ****
+            (breader as FileBitstreamReaderAgent)?.SetCancellationToken(cancellationToken);
+            // When several threads decode code-blocks they share one bitstream reader through a locking wrapper.
+            var parallelDegree = ResolveDegreeOfParallelism(pl);
+            var sharedSource = parallelDegree > 1 ? new SharedCodedBlockSource(breader) : null;
+            CodedCBlkDataSrcDec blockSource = sharedSource ?? (CodedCBlkDataSrcDec)breader;
             EntropyDecoder entdec;
             try
             {
-                entdec = hd.createEntropyDecoder(breader, pl);
+                entdec = hd.createEntropyDecoder(blockSource, pl);
             }
             catch (ArgumentException e)
             {
@@ -527,6 +614,7 @@ namespace CoreJ2K
 
             var res = breader.ImgRes;
             invWT.ImgResLevel = res;
+            ConfigureInverseTransform(invWT, sharedSource, parallelDegree, hd, pl, decSpec, depth, cancellationToken);
 
             // **** Data converter **** (after inverse transform module)
             var converter = new ImgDataConverter(invWT, 0);
@@ -555,6 +643,11 @@ namespace CoreJ2K
                 postCt = new InvDCO(postCt, hd.DcoSegment);
             }
 
+            // **** Component grid ****
+            // Components may be subsampled, and so differ in size; put them on one grid (the image as large as the components
+            // when they are all sampled alike) before anything is made of them
+            postCt = j2k.image.ComponentGridUpsampler.IfNeeded(postCt);
+
             // **** Color space mapping ****
             BlkImgDataSrc color;
             if (ff.JP2FFUsed && pl.GetParameter("nocolorspace").Equals("off"))
@@ -562,10 +655,11 @@ namespace CoreJ2K
                 try
                 {
                     var csMap = new ColorSpace(in_stream, hd, pl);
-                    var channels = hd.createChannelDefinitionMapper(postCt, csMap);
-                    var resampled = hd.createResampler(channels, csMap);
+                    // the channel definitions name the channels the palette makes, so they come after it
+                    var resampled = hd.createResampler(postCt, csMap);
                     var palettized = hd.createPalettizedColorSpaceMapper(resampled, csMap);
-                    color = hd.createColorSpaceMapper(palettized, csMap);
+                    var channels = hd.createChannelDefinitionMapper(palettized, csMap);
+                    color = ConvertColors(hd, channels, csMap);
                 }
                 catch (ArgumentException e)
                 {
@@ -597,6 +691,10 @@ namespace CoreJ2K
             var bitsUsed = new int[numComps];
             for (var j = 0; j < numComps; ++j) bitsUsed[j] = decodedImage.GetNomRangeBits(j);
 
+            // Refuse an image that would exceed the decoder limits before allocating the output buffer. This is checked
+            // on the final image: a palette or multiple-component transform can output more components than the codestream has.
+            EnforceDecoderLimits(pl, hi, invWT, decodedImage, 4);
+
             var dst = new InterleavedImage(imgWidth, decodedImage.ImgHeight, numComps, bitsUsed);
 
             var numTiles = decodedImage.GetNumTiles(null);
@@ -608,6 +706,7 @@ namespace CoreJ2K
                 // Loop on horizontal tiles
                 for (var x = 0; x < numTiles.x; x++, tIdx++)
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
                     decodedImage.SetTile(x, y);
 
                     var height = decodedImage.GetTileCompHeight(tIdx, 0);
@@ -653,6 +752,7 @@ namespace CoreJ2K
 
                     for (var l = 0; l < height; l++)
                     {
+                        if ((l & 15) == 0) cancellationToken.ThrowIfCancellationRequested();
                         // Map tile-local row 'l' to destination image line
                         var destLine = tOffy + l;
                         // Skip rows that end up above the destination image
@@ -667,7 +767,7 @@ namespace CoreJ2K
                             db[i].uly = l;
                             db[i].w = width;
                             db[i].h = 1;
-                            decodedImage.GetInternCompData(db[i], i);
+                            db[i] = (DataBlkInt)decodedImage.GetInternCompData(db[i], i);
                             k[i] = db[i].offset; // start index for forward iteration
                         }
 
@@ -695,6 +795,12 @@ namespace CoreJ2K
             }
 
             return dst;
+            }
+            catch (Exception e) when (IsDamagedFileSymptom(e))
+            {
+                // The decoder trusts the structure it reads; a file that breaks that trust shows as one of these. Report the file, not the
+                // line of the decoder that was the first to notice (it stays in InnerException).
+                throw new InvalidOperationException($"The data is damaged or is not a JPEG 2000 file it can decode: {e.Message}", e);
             }
             finally
             {
@@ -731,7 +837,7 @@ namespace CoreJ2K
             // Convert modern configuration to ParameterList
             var pl = configuration.ToParameterList();
             
-            return FromStream(stream, pl);
+            return FromStreamCore(stream, pl, configuration.CancellationToken);
         }
 
         /// <summary>
@@ -752,7 +858,7 @@ namespace CoreJ2K
             // Convert modern configuration to ParameterList
             var pl = configuration.ToParameterList();
             
-            return FromStream(stream, out metadata, pl);
+            return FromStreamCore(stream, out metadata, pl, configuration.CancellationToken);
         }
 
         #endregion
@@ -805,9 +911,74 @@ namespace CoreJ2K
 
         /// <summary>Decodes a JPEG 2000 stream and returns both the image and any file-format metadata.</summary>
         public static J2kDecodeResult DecodeStream(Stream stream, ParameterList? parameters = null)
+            => DecodeStreamCore(stream, parameters, CancellationToken.None);
+
+        /// <summary>Decodes a JPEG 2000 stream, stopping if <paramref name="cancellationToken"/> is cancelled.</summary>
+        /// <exception cref="OperationCanceledException">The token was cancelled.</exception>
+        public static J2kDecodeResult DecodeStream(Stream stream, ParameterList? parameters, CancellationToken cancellationToken)
+            => DecodeStreamCore(stream, parameters, cancellationToken);
+
+        private static J2kDecodeResult DecodeStreamCore(Stream stream, ParameterList? parameters, CancellationToken cancellationToken)
         {
-            var image = FromStream(stream, out var metadata, parameters);
+            var image = FromStreamCore(stream, out var metadata, parameters, cancellationToken);
             return new J2kDecodeResult(image, metadata);
+        }
+
+        internal static CancellationTokenSource? LinkTokens(CancellationToken first, CancellationToken second, out CancellationToken combined)
+        {
+            if (!first.CanBeCanceled) { combined = second; return null; }
+            if (!second.CanBeCanceled || first.Equals(second)) { combined = first; return null; }
+            var source = CancellationTokenSource.CreateLinkedTokenSource(first, second);
+            combined = source.Token;
+            return source;
+        }
+
+        /// <summary>Decodes a JPEG 2000 file, stopping if <paramref name="cancellationToken"/> is cancelled.</summary>
+        /// <exception cref="OperationCanceledException">The token was cancelled.</exception>
+        public static J2kDecodeResult DecodeFile(string filename, ParameterList? parameters, CancellationToken cancellationToken)
+        {
+            using var stream = FileStreamFactory.New(filename, "r");
+            return DecodeStreamCore(stream, parameters, cancellationToken);
+        }
+
+        /// <summary>Decodes JPEG 2000 data from a byte array, stopping if <paramref name="cancellationToken"/> is cancelled.</summary>
+        /// <exception cref="OperationCanceledException">The token was cancelled.</exception>
+        public static J2kDecodeResult DecodeBytes(byte[] data, ParameterList? parameters, CancellationToken cancellationToken)
+        {
+            using var stream = new MemoryStream(data);
+            return DecodeStreamCore(stream, parameters, cancellationToken);
+        }
+
+        /// <summary>Decodes JPEG 2000 data from a buffer, stopping if <paramref name="cancellationToken"/> is cancelled.</summary>
+        /// <exception cref="OperationCanceledException">The token was cancelled.</exception>
+        public static J2kDecodeResult DecodeBytes(ReadOnlyMemory<byte> data, ParameterList? parameters, CancellationToken cancellationToken)
+        {
+            using var stream = MemoryStreamFromMemory(data);
+            return DecodeStreamCore(stream, parameters, cancellationToken);
+        }
+
+        /// <summary>Decodes a JPEG 2000 file to an image, stopping if <paramref name="cancellationToken"/> is cancelled.</summary>
+        /// <exception cref="OperationCanceledException">The token was cancelled.</exception>
+        public static InterleavedImage FromFile(string filename, ParameterList? parameters, CancellationToken cancellationToken)
+        {
+            using var stream = FileStreamFactory.New(filename, "r");
+            return FromStreamCore(stream, parameters, cancellationToken);
+        }
+
+        /// <summary>Decodes JPEG 2000 data from a byte array to an image, stopping if <paramref name="cancellationToken"/> is cancelled.</summary>
+        /// <exception cref="OperationCanceledException">The token was cancelled.</exception>
+        public static InterleavedImage FromBytes(byte[] j2kdata, ParameterList? parameters, CancellationToken cancellationToken)
+        {
+            using var stream = new MemoryStream(j2kdata);
+            return FromStreamCore(stream, parameters, cancellationToken);
+        }
+
+        /// <summary>Decodes JPEG 2000 data from a buffer to an image, stopping if <paramref name="cancellationToken"/> is cancelled.</summary>
+        /// <exception cref="OperationCanceledException">The token was cancelled.</exception>
+        public static InterleavedImage FromBytes(ReadOnlyMemory<byte> data, ParameterList? parameters, CancellationToken cancellationToken)
+        {
+            using var stream = MemoryStreamFromMemory(data);
+            return FromStreamCore(stream, parameters, cancellationToken);
         }
 
         /// <summary>Decodes a JPEG 2000 stream using modern configuration and returns image and metadata.</summary>
@@ -815,6 +986,44 @@ namespace CoreJ2K
         {
             var image = FromStream(stream, out var metadata, configuration);
             return new J2kDecodeResult(image, metadata);
+        }
+
+        /// <summary>
+        /// Runs a configured decode on the thread pool. The configuration's token and the call's token are linked exactly once,
+        /// and the combined token is both observed by the decoder and given to <see cref="Task.Run(Func{TResult}, CancellationToken)"/>,
+        /// so a cancelled decode ends the task in the Canceled state rather than Faulted.
+        /// </summary>
+        private static async Task<J2kDecodeResult> DecodeConfiguredAsync(Configuration.J2KDecoderConfiguration configuration,
+            CancellationToken cancellationToken, Func<ParameterList, CancellationToken, J2kDecodeResult> decode)
+        {
+            if (configuration == null)
+                throw new ArgumentNullException(nameof(configuration));
+
+            if (!configuration.IsValid)
+                throw new ArgumentException($"Invalid configuration: {string.Join(", ", configuration.Validate())}");
+
+            using var linked = LinkTokens(configuration.CancellationToken, cancellationToken, out var token);
+            var pl = configuration.ToParameterList();
+            return await Task.Run(() => decode(pl, token), token).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Runs a configured encode on the thread pool. As for decoding, the configuration's token and the call's token are linked
+        /// exactly once and the combined token is both observed by the encoder and given to <c>Task.Run</c>, so a cancelled encode
+        /// ends the task in the Canceled state rather than Faulted.
+        /// </summary>
+        private static async Task<byte[]> EncodeConfiguredAsync(Configuration.J2KEncoderConfiguration configuration,
+            CancellationToken cancellationToken, Func<ParameterList, CancellationToken, byte[]> encode)
+        {
+            if (configuration == null)
+                throw new ArgumentNullException(nameof(configuration));
+
+            if (!configuration.IsValid)
+                throw new ArgumentException($"Invalid configuration: {string.Join(", ", configuration.Validate())}");
+
+            using var linked = LinkTokens(configuration.CancellationToken, cancellationToken, out var token);
+            var pl = configuration.ToParameterList();
+            return await Task.Run(() => encode(pl, token), token).ConfigureAwait(false);
         }
 
         private static MemoryStream MemoryStreamFromMemory(ReadOnlyMemory<byte> data)
@@ -923,7 +1132,46 @@ namespace CoreJ2K
             System.Collections.Generic.IList<j2k.codestream.MctEncodeSpec>? mctSpecs = null,
             j2k.codestream.DCOMarkerSegment? dcoSegment = null,
             j2k.codestream.AtkMarkerSegment? atkKernel = null)
+            => ToBytesCore(imgsrc, metadata, parameters, nltSegments, mctSpecs, dcoSegment, atkKernel, CancellationToken.None);
+
+        /// <summary>
+        /// Encodes an image source to JPEG 2000 with Part 2 extensions, stopping if <paramref name="cancellationToken"/> is cancelled.
+        /// See the overload without a token for the other parameters.
+        /// </summary>
+        /// <param name="cancellationToken">Cancels the encode. Cancellation is cooperative: the encoder stops within about one code-block, packet or few rows of the transform.</param>
+        /// <exception cref="OperationCanceledException">The token was cancelled. The image source is left open, as for any other failure.</exception>
+        public static byte[] ToBytes(BlkImgDataSrc imgsrc, j2k.fileformat.metadata.J2KMetadata? metadata, ParameterList? parameters,
+            System.Collections.Generic.IList<j2k.codestream.NLTMarkerSegment>? nltSegments,
+            System.Collections.Generic.IList<j2k.codestream.MctEncodeSpec>? mctSpecs,
+            j2k.codestream.DCOMarkerSegment? dcoSegment,
+            j2k.codestream.AtkMarkerSegment? atkKernel,
+            CancellationToken cancellationToken)
+            => ToBytesCore(imgsrc, metadata, parameters, nltSegments, mctSpecs, dcoSegment, atkKernel, cancellationToken);
+
+        /// <summary>Encodes an image object, stopping if <paramref name="cancellationToken"/> is cancelled.</summary>
+        /// <exception cref="OperationCanceledException">The token was cancelled.</exception>
+        public static byte[] ToBytes(object imageObject, ParameterList? parameters, CancellationToken cancellationToken)
+            => ToBytesCore(ImageFactory.ToPortableImageSource(imageObject), null, parameters, null, null, null, null, cancellationToken);
+
+        /// <summary>Encodes an image source, stopping if <paramref name="cancellationToken"/> is cancelled.</summary>
+        /// <exception cref="OperationCanceledException">The token was cancelled.</exception>
+        public static byte[] ToBytes(BlkImgDataSrc imgsrc, ParameterList? parameters, CancellationToken cancellationToken)
+            => ToBytesCore(imgsrc, null, parameters, null, null, null, null, cancellationToken);
+
+        /// <summary>Encodes an image source with metadata, stopping if <paramref name="cancellationToken"/> is cancelled.</summary>
+        /// <exception cref="OperationCanceledException">The token was cancelled.</exception>
+        public static byte[] ToBytes(BlkImgDataSrc imgsrc, j2k.fileformat.metadata.J2KMetadata? metadata, ParameterList? parameters,
+            CancellationToken cancellationToken)
+            => ToBytesCore(imgsrc, metadata, parameters, null, null, null, null, cancellationToken);
+
+        private static byte[] ToBytesCore(BlkImgDataSrc imgsrc, j2k.fileformat.metadata.J2KMetadata? metadata, ParameterList? parameters,
+            System.Collections.Generic.IList<j2k.codestream.NLTMarkerSegment>? nltSegments,
+            System.Collections.Generic.IList<j2k.codestream.MctEncodeSpec>? mctSpecs,
+            j2k.codestream.DCOMarkerSegment? dcoSegment,
+            j2k.codestream.AtkMarkerSegment? atkKernel,
+            CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             if (imgsrc == null)
             {
                 throw new ArgumentNullException(nameof(imgsrc), "Image source cannot be null. Use ImageFactory.ToPortableImageSource(image) to convert image objects to a portable source.");
@@ -1030,6 +1278,8 @@ namespace CoreJ2K
             {
                 throw new ArgumentException($"Invalid value in 'rate' option: {pl.GetParameter("rate")}");
             }
+            var maxBytes = ParseMaxBytes(pl, defpl);
+            j2k.encoder.DistortionWeights.FromParameterList(pl); // fail early, with its own message, if the weights are malformed
             int pktspertp;
             try
             {
@@ -1051,6 +1301,13 @@ namespace CoreJ2K
             catch (FormatException)
             {
                 throw new ArgumentException($"Invalid value in 'tile_parts' option: {pl.GetParameter("tile_parts")}");
+            }
+
+            if (pl.TelemetryCallback != null && (pktspertp > 0 || pphTile || pphMain))
+            {
+                // Tile-parts and packed packet headers are made by rewriting the codestream after the packets are written, so the bytes
+                // counted while writing would no longer be where they were.
+                throw new ArgumentException("Telemetry cannot be combined with tile-parts or packed packet headers.");
             }
 
             // **** ImgReader ****
@@ -1352,6 +1609,32 @@ namespace CoreJ2K
                     throw new InvalidOperationException($"Could not open output stream for writing: {e.Message}", e);
                 }
 
+                // The reader requirements box that Part 2 features need is written with the file format, so it takes part in the
+                // size of the wrapper whenever that is measured.
+                var isJpx = hasNlt || hasMct || hasDco || hasAtk
+                            || (metadata?.HasJpxBoxes ?? false)
+                            || (metadata?.UseJpxBrand ?? false);
+                if (useFileFormat && isJpx)
+                {
+                    metadata ??= new j2k.fileformat.metadata.J2KMetadata();
+                    metadata.ReaderRequirements ??= j2k.fileformat.metadata.ReaderRequirementsBox.BuildForJpx(hasMct, hasNlt, hasDco, hasAtk);
+                }
+
+                // With a hard limit, the codestream may use what the limit leaves after the file format wrapper.
+                var wrapperBytes = 0;
+                int? codestreamLimit = null;
+                if (maxBytes.HasValue)
+                {
+                    wrapperBytes = useFileFormat ? MeasureFileFormatBytes(imgsrc, metadata) : 0;
+                    codestreamLimit = maxBytes.Value - wrapperBytes;
+                    if (codestreamLimit.Value <= 0)
+                    {
+                        throw new ArgumentException(
+                            $"The limit of {maxBytes.Value} bytes cannot hold the {wrapperBytes} bytes of the file format wrapper.");
+                    }
+                    rate = codestreamLimit.Value * 8f / ((float)imgsrc.ImgWidth * imgsrc.ImgHeight);
+                }
+
                 // **** Rate allocator ****
                 PostCompRateAllocator ralloc;
                 try
@@ -1366,6 +1649,12 @@ namespace CoreJ2K
                 // **** HeaderEncoder ****
                 var imsigned = Enumerable.Repeat(false, ncomp).ToArray();   // TODO Consider supporting signed components.
                 var headenc = new HeaderEncoder(imgsrc, imsigned, dwt, imgtiler, encSpec, rois, ralloc, pl);
+                if (headenc.IsTLMEnabled && (pktspertp > 0 || pphTile || pphMain))
+                {
+                    // The tile-parts are rewritten after the codestream is written, so the lengths recorded in the TLM would be wrong.
+                    warning("TLM markers (Htlm) cannot be written together with tile_parts or packed packet headers; they are left out.");
+                    headenc.DisableTLM();
+                }
                 if (hasDco)
                 {
                     headenc.DcoSegment = dcoSegment;
@@ -1394,12 +1683,46 @@ namespace CoreJ2K
                 }
                 ralloc.HeaderEncoder = headenc;
 
+                // The rate allocator pulls every code-block through the wavelet transform and entropy coder, then writes the packets.
+                ralloc.CancellationToken = cancellationToken;
+                var encodeThreads = ResolveDegreeOfParallelism(pl);
+                if (dwt is ForwWTFull forwardTransform)
+                {
+                    forwardTransform.SetCancellationToken(cancellationToken);
+                    forwardTransform.SetMaxDegreeOfParallelism(encodeThreads);
+                }
+                if (ecoder is StdEntropyCoder blockCoder)
+                {
+                    blockCoder.SetCancellationToken(cancellationToken);
+                    blockCoder.SetMaxDegreeOfParallelism(encodeThreads);
+                }
+                EBCOTRateAllocator.TelemetryCollector? telemetry = null;
+                if (ralloc is EBCOTRateAllocator packetBuilder)
+                {
+                    if (pl.TelemetryCallback != null)
+                    {
+                        telemetry = new EBCOTRateAllocator.TelemetryCollector();
+                        packetBuilder.SetTelemetry(telemetry);
+                    }
+                    packetBuilder.SetMaxDegreeOfParallelism(encodeThreads);
+                    if (codestreamLimit.HasValue) packetBuilder.SetCodestreamByteLimit(codestreamLimit.Value);
+                }
+
                 // **** Write header to be able to estimate header overhead ****
                 headenc.encodeMainHeader();
 
                 // **** Initialize rate allocator, with proper header
                 // overhead. This will also encode all the data ****
-                ralloc.initialize();
+                try
+                {
+                    ralloc.initialize();
+                }
+                finally
+                {
+                    // initialize() codes every block. If it failed or was cancelled, make sure no producer thread is left waiting.
+                    (ecoder as StdEntropyCoder)?.StopProducer();
+                }
+                cancellationToken.ThrowIfCancellationRequested();
 
                 // **** Write header (final) ****
                 headenc.reset();
@@ -1412,6 +1735,7 @@ namespace CoreJ2K
                 ralloc.runAndWrite();
 
                 // **** Done ****
+                cancellationToken.ThrowIfCancellationRequested();
                 bwriter.Close();
 
                 // **** Calculate file length ****
@@ -1455,20 +1779,12 @@ namespace CoreJ2K
                     }
                 }
 
+                var codestreamBytes = fileLength;
+                var containerBytes = 0;
+
                 // **** File Format ****
                 if (useFileFormat)
                 {
-                    // Auto-generate Reader Requirements for JPX output when Part 2 features are active.
-                    // The rreq box is required in every conformant JPX file (ISO/IEC 15444-2 §M.9.2).
-                    var isJpx = hasNlt || hasMct || hasDco || hasAtk
-                                || (metadata?.HasJpxBoxes ?? false)
-                                || (metadata?.UseJpxBrand ?? false);
-                    if (isJpx)
-                    {
-                        metadata ??= new j2k.fileformat.metadata.J2KMetadata();
-                        metadata.ReaderRequirements ??= j2k.fileformat.metadata.ReaderRequirementsBox.BuildForJpx(hasMct, hasNlt, hasDco, hasAtk);
-                    }
-
                     try
                     {
                         var nc = imgsrc.NumComps;
@@ -1493,7 +1809,8 @@ namespace CoreJ2K
                             ffw.Metadata = metadata;
                         }
                         
-                        fileLength += ffw.writeFileFormat();
+                        containerBytes = ffw.writeFileFormat();
+                        fileLength += containerBytes;
                     }
                     catch (IOException e)
                     {
@@ -1502,8 +1819,26 @@ namespace CoreJ2K
                 }
 
                 // **** Close image readers ***
-
+                cancellationToken.ThrowIfCancellationRequested();
                 imgsrc.Close();
+
+                if (maxBytes.HasValue && outStream.Length > maxBytes.Value)
+                {
+                    // The allocator keeps to the limit by construction; this is the check that nothing sized later pushed it over.
+                    throw new InvalidOperationException(
+                        $"The encoded output is {outStream.Length} bytes, over the limit of {maxBytes.Value}.");
+                }
+
+                if (pl.TelemetryCallback != null)
+                {
+                    if (telemetry == null || bwriter is not FileCodestreamWriter counted)
+                    {
+                        throw new InvalidOperationException("Telemetry needs the EBCOT rate allocator.");
+                    }
+                    pl.TelemetryCallback(new EncodeTelemetry(telemetry.Blocks.ToArray(), telemetry.Layers, telemetry.Packets,
+                        counted.HeaderBytesWritten, counted.PacketHeaderBytesWritten, counted.PacketBodyBytesWritten,
+                        counted.EndOfCodestreamBytesWritten, codestreamBytes, containerBytes));
+                }
 
                 return outStream.ToArray();
             }
@@ -1544,11 +1879,9 @@ namespace CoreJ2K
             // Convert modern configuration to ParameterList
             var pl = configuration.ToParameterList();
             
-            // Handle ROI if configured
             j2k.fileformat.metadata.J2KMetadata? metadata = null;
-            // Note: ROI is handled through ParameterList in the existing encoding pipeline
             
-            return ToBytes(imgsrc, metadata, pl);
+            return ToBytesCore(imgsrc, metadata, pl, null, null, null, null, configuration.CancellationToken);
         }
         
         /// <summary>
@@ -1569,7 +1902,7 @@ namespace CoreJ2K
             // Convert modern configuration to ParameterList
             var pl = configuration.ToParameterList();
             
-            return ToBytes(imgsrc, metadata, pl);
+            return ToBytesCore(imgsrc, metadata, pl, null, null, null, null, configuration.CancellationToken);
         }
 
         #endregion
@@ -1592,6 +1925,22 @@ namespace CoreJ2K
         }
 
         /// <summary>Encodes with metadata and writes to <paramref name="output"/>.</summary>
+        /// <summary>Encodes an image source and writes the result to <paramref name="output"/>, stopping if <paramref name="cancellationToken"/> is cancelled.</summary>
+        /// <exception cref="OperationCanceledException">The token was cancelled; nothing has been written to <paramref name="output"/>.</exception>
+        public static void WriteTo(Stream output, BlkImgDataSrc imgsrc, ParameterList? parameters, CancellationToken cancellationToken)
+            => WriteTo(output, imgsrc, null, parameters, cancellationToken);
+
+        /// <summary>Encodes an image source with metadata and writes the result to <paramref name="output"/>, stopping if <paramref name="cancellationToken"/> is cancelled.</summary>
+        /// <exception cref="OperationCanceledException">The token was cancelled; nothing has been written to <paramref name="output"/>.</exception>
+        public static void WriteTo(Stream output, BlkImgDataSrc imgsrc,
+            j2k.fileformat.metadata.J2KMetadata? metadata, ParameterList? parameters, CancellationToken cancellationToken)
+        {
+            if (output == null) throw new ArgumentNullException(nameof(output));
+            var data = ToBytesCore(imgsrc, metadata, parameters, null, null, null, null, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+            output.Write(data, 0, data.Length);
+        }
+
         public static void WriteTo(Stream output, BlkImgDataSrc imgsrc,
             j2k.fileformat.metadata.J2KMetadata? metadata, ParameterList? parameters = null)
         {
@@ -1639,57 +1988,64 @@ namespace CoreJ2K
         /// <summary>Decodes a JPEG 2000 stream asynchronously and returns image and metadata.</summary>
         public static Task<J2kDecodeResult> DecodeStreamAsync(Stream stream,
             ParameterList? parameters = null, CancellationToken cancellationToken = default)
-            => Task.Run(() => DecodeStream(stream, parameters), cancellationToken);
+            => Task.Run(() => DecodeStreamCore(stream, parameters, cancellationToken), cancellationToken);
 
         /// <summary>Decodes a JPEG 2000 stream asynchronously using modern configuration.</summary>
         public static Task<J2kDecodeResult> DecodeStreamAsync(Stream stream,
             Configuration.J2KDecoderConfiguration configuration,
             CancellationToken cancellationToken = default)
-            => Task.Run(() => DecodeStream(stream, configuration), cancellationToken);
+            => DecodeConfiguredAsync(configuration, cancellationToken, (pl, token) => DecodeStreamCore(stream, pl, token));
 
         /// <summary>Decodes JPEG 2000 data from a byte array asynchronously.</summary>
         public static Task<J2kDecodeResult> DecodeBytesAsync(byte[] data,
             ParameterList? parameters = null, CancellationToken cancellationToken = default)
-            => Task.Run(() => DecodeBytes(data, parameters), cancellationToken);
+            => Task.Run(() => DecodeBytes(data, parameters, cancellationToken), cancellationToken);
 
         /// <summary>Decodes JPEG 2000 data from a byte array asynchronously using modern configuration.</summary>
         public static Task<J2kDecodeResult> DecodeBytesAsync(byte[] data,
             Configuration.J2KDecoderConfiguration configuration,
             CancellationToken cancellationToken = default)
-            => Task.Run(() => DecodeBytes(data, configuration), cancellationToken);
+            => DecodeConfiguredAsync(configuration, cancellationToken, (pl, token) => DecodeBytes(data, pl, token));
 
         /// <summary>Decodes JPEG 2000 data from a <see cref="ReadOnlyMemory{T}"/> buffer asynchronously.</summary>
         public static Task<J2kDecodeResult> DecodeBytesAsync(ReadOnlyMemory<byte> data,
             ParameterList? parameters = null, CancellationToken cancellationToken = default)
-            => Task.Run(() => DecodeBytes(data, parameters), cancellationToken);
+            => Task.Run(() => DecodeBytes(data, parameters, cancellationToken), cancellationToken);
 
         /// <summary>Decodes JPEG 2000 data from a <see cref="ReadOnlyMemory{T}"/> buffer asynchronously using modern configuration.</summary>
         public static Task<J2kDecodeResult> DecodeBytesAsync(ReadOnlyMemory<byte> data,
             Configuration.J2KDecoderConfiguration configuration,
             CancellationToken cancellationToken = default)
-            => Task.Run(() => DecodeBytes(data, configuration), cancellationToken);
+            => DecodeConfiguredAsync(configuration, cancellationToken, (pl, token) => DecodeBytes(data, pl, token));
 
         /// <summary>Encodes an image source asynchronously and returns the encoded bytes.</summary>
         public static Task<byte[]> ToBytesAsync(BlkImgDataSrc imgsrc,
             ParameterList? parameters = null, CancellationToken cancellationToken = default)
-            => Task.Run(() => ToBytes(imgsrc, parameters), cancellationToken);
+            => Task.Run(() => ToBytes(imgsrc, parameters, cancellationToken), cancellationToken);
 
         /// <summary>Encodes an image source asynchronously using modern configuration.</summary>
         public static Task<byte[]> ToBytesAsync(BlkImgDataSrc imgsrc,
             Configuration.J2KEncoderConfiguration configuration,
             CancellationToken cancellationToken = default)
-            => Task.Run(() => ToBytes(imgsrc, configuration), cancellationToken);
+            => EncodeConfiguredAsync(configuration, cancellationToken, (pl, token) => ToBytesCore(imgsrc, null, pl, null, null, null, null, token));
 
         /// <summary>Encodes an image source asynchronously and writes the result to <paramref name="output"/>.</summary>
         public static Task WriteToAsync(Stream output, BlkImgDataSrc imgsrc,
             ParameterList? parameters = null, CancellationToken cancellationToken = default)
-            => Task.Run(() => WriteTo(output, imgsrc, parameters), cancellationToken);
+            => Task.Run(() => WriteTo(output, imgsrc, parameters, cancellationToken), cancellationToken);
 
         /// <summary>Encodes an image source asynchronously using modern configuration and writes to <paramref name="output"/>.</summary>
         public static Task WriteToAsync(Stream output, BlkImgDataSrc imgsrc,
             Configuration.J2KEncoderConfiguration configuration,
             CancellationToken cancellationToken = default)
-            => Task.Run(() => WriteTo(output, imgsrc, configuration), cancellationToken);
+            => EncodeConfiguredAsync(configuration, cancellationToken, (pl, token) =>
+            {
+                if (output == null) throw new ArgumentNullException(nameof(output));
+                var data = ToBytesCore(imgsrc, null, pl, null, null, null, null, token);
+                token.ThrowIfCancellationRequested();
+                output.Write(data, 0, data.Length);
+                return data;
+            });
 
         #endregion
 
@@ -1832,6 +2188,36 @@ namespace CoreJ2K
                     },
                 new string?[]
                     {
+                        "max_pixels", "<pixels>",
+                        "Maximum number of pixels (width x height) of the decoded image at the requested "
+                        + "resolution. Larger images are rejected with a DecoderLimitException before any image "
+                        + "buffer is allocated. Defaults to DecoderLimits.Default.",
+                        null
+                    },
+                new string?[]
+                    {
+                        "max_memory", "<bytes>",
+                        "Maximum estimated memory, in bytes, a decode may need (decoded image plus working "
+                        + "buffers for the largest tile). Defaults to DecoderLimits.Default.",
+                        null
+                    },
+                new string?[]
+                    {
+                        "max_tile_components", "<count>",
+                        "Maximum number of tiles x components the codestream may declare. Defaults to "
+                        + "DecoderLimits.Default.",
+                        null
+                    },
+                new string?[]
+                    {
+                        "threads", "<count>",
+                        "Maximum number of threads used to decode code-blocks in parallel. 1 decodes on the "
+                        + "calling thread only; 0 or unset uses J2kImage.DefaultMaxDegreeOfParallelism "
+                        + "(all processors unless changed). Output is identical for every value.",
+                        null
+                    },
+                new string?[]
+                    {
                         "i", "<filename or url>",
                         "The file containing the JPEG 2000 compressed data. This can be "
                         + "either a JPEG 2000 codestream or a JP2 file containing a "
@@ -1969,10 +2355,77 @@ namespace CoreJ2K
 
         #endregion
 
+        /// <summary>
+        /// Reads the <c>max_bytes</c> option and checks it against the options it cannot be combined with, and puts the
+        /// single quality layer it needs in place of the default layers.
+        /// </summary>
+        private static int? ParseMaxBytes(ParameterList pl, ParameterList defpl)
+        {
+            var text = pl.GetParameter("max_bytes");
+            if (text == null) return null;
+
+            if (!int.TryParse(text, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out var maxBytes)
+                || maxBytes <= 0)
+            {
+                throw new ArgumentException($"Invalid value in 'max_bytes' option: {text}");
+            }
+            if (pl.GetBooleanParameter("lossless"))
+                throw new ArgumentException("Cannot use 'max_bytes' and 'lossless' at the same time.");
+            if (pl.GetBooleanParameter("Hplt"))
+                throw new ArgumentException("Cannot use 'max_bytes' with PLT markers ('Hplt'): their size is known only after the layers are built.");
+            if (pl.GetIntParameter("tile_parts") != 0 || pl.GetBooleanParameter("pph_tile") || pl.GetBooleanParameter("pph_main"))
+                throw new ArgumentException("Cannot use 'max_bytes' with tile-parts or packed packet headers: they are sized after the layers are built.");
+
+            var layers = pl.GetParameter("Alayers");
+            if (layers != null && layers != defpl.GetParameter("Alayers") && !string.Equals(layers, "sl", StringComparison.OrdinalIgnoreCase))
+                throw new ArgumentException("'max_bytes' needs a single quality layer; do not set 'Alayers' to anything but 'sl'.");
+            pl["Alayers"] = "sl";
+            return maxBytes;
+        }
+
+        /// <summary>The bytes the JP2 file format adds around a codestream, found by writing the wrapper around an empty one.</summary>
+        private static int MeasureFileFormatBytes(BlkImgDataSrc imgsrc, j2k.fileformat.metadata.J2KMetadata? metadata)
+        {
+            var bpc = new int[imgsrc.NumComps];
+            for (var comp = 0; comp < bpc.Length; comp++) bpc[comp] = imgsrc.GetNomRangeBits(comp);
+            using var scratch = new MemoryStream();
+            var writer = new FileFormatWriter(scratch, imgsrc.ImgHeight, imgsrc.ImgWidth, bpc.Length, bpc, 0);
+            if (metadata != null) writer.Metadata = metadata;
+            return writer.writeFileFormat();
+        }
+
         #region Encoder Parameters
 
         private static readonly string?[][] encoder_pinfo =
             {
+                new string?[]
+                    {
+                        "threads", "<count>",
+                        "Maximum number of threads used to encode: the forward wavelet transform and the entropy coding "
+                        + "of code-blocks. 1 keeps everything on the calling thread; 0 or unset uses "
+                        + "J2kImage.DefaultMaxDegreeOfParallelism (all processors unless changed). The encoded output "
+                        + "is identical for every value.",
+                        null
+                    },
+                new string?[]
+                    {
+                        "Dweights", "<weight>[:c<component>][:r<resolution>][:LL|HL|LH|HH] [...]",
+                        "Weights on the distortion of code-blocks, which steer the rate allocator: a weight above 1 spends more of the "
+                        + "bytes on the matching code-blocks. Each word is a factor from 0.0625 to 16 and optional conditions on the "
+                        + "component, the resolution level (0 is the lowest) and the subband; a code-block's weight is the product of "
+                        + "the words it matches. Example: '1.25:c0 0.8:c1 0.8:c2' favours the first component over the others.",
+                        null
+                    },
+                new string?[]
+                    {
+                        "max_bytes", "<bytes>",
+                        "Hard limit on the size of the complete output, JP2 boxes included when 'file_format' is on. The encoder "
+                        + "keeps as much of the image as fits and never writes more; if even the headers do not fit it fails. "
+                        + "Replaces 'rate'. Needs a single quality layer (the default 'Alayers' is replaced by 'sl') and "
+                        + "cannot be combined with PLT markers, tile-parts or packed packet headers, because those are sized "
+                        + "after the layers are built.",
+                        null
+                    },
                 new string?[]
                     {
                         "debug", null,

@@ -40,6 +40,7 @@ using CoreJ2K.j2k.util;
 using CoreJ2K.j2k.wavelet.synthesis;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace CoreJ2K.j2k.codestream.reader
 {
@@ -216,20 +217,39 @@ namespace CoreJ2K.j2k.codestream.reader
                 return -1; // TLM not available, use slow path
             }
 
-            if (tileIdx < 0 || tileIdx > tlmData.MaxTileIndex)
+            // Calculate offset: main header + sum of all previous tiles. Every tile's offset comes from one pass over the entries, the
+            // first time one is needed; asking the data for each previous tile's length for every tile would take time that grows with
+            // the cube of the number of tiles.
+            tlmTileOffsets ??= BuildTlmTileOffsets(tlmData);
+
+            if (tileIdx < 0 || tileIdx >= tlmTileOffsets.Length)
             {
                 return -1; // Invalid tile index
             }
 
-            // Calculate offset: main header + sum of all previous tiles
-            long offset = mainHeadLen;
+            return tlmTileOffsets[tileIdx];
+        }
 
-            for (var t = 0; t < tileIdx; t++)
+        /// <summary>The offset of each tile from the start of the codestream, found from the TLM data; null until needed.</summary>
+        private long[]? tlmTileOffsets;
+
+        private long[] BuildTlmTileOffsets(codestream.metadata.TilePartLengthsData tlmData)
+        {
+            var lengths = new long[tlmData.MaxTileIndex + 1];
+            foreach (var entry in tlmData.TilePartEntries)
             {
-                offset += tlmData.GetTotalTileLength(t);
+                lengths[entry.TileIndex] += entry.TilePartLength;
             }
 
-            return offset;
+            // the tile-part lengths are measured from the start of the codestream, which is not the start of the file in a JP2
+            var offsets = new long[lengths.Length];
+            var offset = (long)hd.mainHeadOff + mainHeadLen;
+            for (var t = 0; t < lengths.Length; t++)
+            {
+                offsets[t] = offset;
+                offset += lengths[t];
+            }
+            return offsets;
         }
 
         /// <summary>
@@ -261,6 +281,13 @@ namespace CoreJ2K.j2k.codestream.reader
 
             return usedFastPath;
         }
+
+        // Observed once per packet while a tile's packet headers are parsed, which for a large tile is a noticeable
+        // stretch of work before the first code-block is decoded.
+        private CancellationToken cancellationToken;
+
+        /// <summary>Makes packet parsing observe <paramref name="token"/>; it throws <see cref="OperationCanceledException"/> once cancelled.</summary>
+        internal void SetCancellationToken(CancellationToken token) => cancellationToken = token;
 
         /// <summary> Reads all tiles headers and keep offset of their first
         /// packet. Finally, it calls the rate allocation method.
@@ -447,7 +474,7 @@ namespace CoreJ2K.j2k.codestream.reader
 
             try
             {
-                while (remainingTileParts != 0)
+                while (remainingTileParts != 0 || TilePartFollows())
                 {
 
                     tilePartStart = inStream.Pos;
@@ -906,6 +933,22 @@ namespace CoreJ2K.j2k.codestream.reader
                     }
                 }
             }
+            else if (tileParts[tile] != 0 && tilePart >= Math.Max(nrOfTileParts, tileParts[tile]))
+            {
+                // A tile-part past the number the tile-part headers announce. Some encoders write the index of the last tile-part
+                // where the number of them belongs (OpenJPEG: "Non conformant codestream TPsot==TNsot"), which leaves the last
+                // tile-part of every tile beyond the count. Taking it in is what other decoders do.
+                var count = tilePart + 1;
+                FacilityManager.GetMsgLogger().printmsg(MsgLogger_Fields.WARNING,
+                    $"Tile-part {tilePart} of tile {tile} is beyond the {tileParts[tile]} the tile-part headers announce. Reading it nevertheless.");
+                remainingTileParts += count - tileParts[tile];
+                tileParts[tile] = count;
+                nrOfTileParts = count;
+                tilePartLen[tile] = GrowTo(tilePartLen[tile], count);
+                tilePartNum[tile] = GrowTo(tilePartNum[tile], count);
+                firstPackOff[tile] = GrowTo(firstPackOff[tile], count);
+                tilePartHeadLen[tile] = GrowTo(tilePartHeadLen[tile], count);
+            }
             else
             {
                 // The number of tile-parts is specified in the tile-part
@@ -1004,6 +1047,32 @@ namespace CoreJ2K.j2k.codestream.reader
             return tile;
         }
 
+        /// <summary>A copy of <paramref name="array"/> with room for <paramref name="length"/> entries.</summary>
+        private static int[] GrowTo(int[]? array, int length)
+        {
+            var grown = new int[length];
+            if (array != null) Array.Copy(array, grown, Math.Min(array.Length, length));
+            return grown;
+        }
+
+        /// <summary>Whether the next marker of the codestream starts a tile-part; the position is left where it was.</summary>
+        private bool TilePartFollows()
+        {
+            var position = inStream.Pos;
+            try
+            {
+                return position + 2 <= inStream.length() && inStream.readShort() == Markers.SOT;
+            }
+            catch (System.IO.EndOfStreamException)
+            {
+                return false;
+            }
+            finally
+            {
+                inStream.seek(position);
+            }
+        }
+
         /// <summary> Reads packets of the current tile according to the
         /// layer-resolution-component-position progressiveness.
         /// 
@@ -1084,6 +1153,7 @@ namespace CoreJ2K.j2k.codestream.reader
                         for (var p = 0; p < nPrec; p++)
                         {
                             // loop on precincts
+                            cancellationToken.ThrowIfCancellationRequested();
                             start = inStream.Pos;
 
                             // If packed packet headers are used, there is no need
@@ -1095,11 +1165,13 @@ namespace CoreJ2K.j2k.codestream.reader
 
                             // If we are about to read outside of tile-part,
                             // skip to next tile-part
-                            if (start > lastByte && curTilePart < firstPackOff[t].Length - 1)
+                            // (a tile-part may hold no packet at all, so more than one can have to be passed)
+                            while (start > lastByte && curTilePart < firstPackOff[t].Length - 1)
                             {
                                 curTilePart++;
                                 inStream.seek(firstPackOff[t][curTilePart]);
                                 lastByte = inStream.Pos + tilePartLen[t][curTilePart] - 1 - tilePartHeadLen[t][curTilePart];
+                                start = inStream.Pos;
                             }
 
                             // Read SOP marker segment if necessary
@@ -1240,6 +1312,7 @@ namespace CoreJ2K.j2k.codestream.reader
                         for (var p = 0; p < nPrec; p++)
                         {
                             // loop on precincts
+                            cancellationToken.ThrowIfCancellationRequested();
                             start = inStream.Pos;
 
                             // If packed packet headers are used, there is no need
@@ -1251,11 +1324,13 @@ namespace CoreJ2K.j2k.codestream.reader
 
                             // If we are about to read outside of tile-part,
                             // skip to next tile-part
-                            if (start > lastByte && curTilePart < firstPackOff[t].Length - 1)
+                            // (a tile-part may hold no packet at all, so more than one can have to be passed)
+                            while (start > lastByte && curTilePart < firstPackOff[t].Length - 1)
                             {
                                 curTilePart++;
                                 inStream.seek(firstPackOff[t][curTilePart]);
                                 lastByte = inStream.Pos + tilePartLen[t][curTilePart] - 1 - tilePartHeadLen[t][curTilePart];
+                                start = inStream.Pos;
                             }
 
                             // Read SOP marker segment if necessary
@@ -1477,6 +1552,8 @@ namespace CoreJ2K.j2k.codestream.reader
                                 if (l < lys[c][r] || l >= numLayers)
                                     continue;
 
+                                cancellationToken.ThrowIfCancellationRequested();
+
                                 start = inStream.Pos;
 
                                 // If packed packet headers are used, there is no
@@ -1489,11 +1566,13 @@ namespace CoreJ2K.j2k.codestream.reader
 
                                 // If we are about to read outside of tile-part,
                                 // skip to next tile-part
-                                if (start > lastByte && curTilePart < firstPackOff[t].Length - 1)
+                                // (a tile-part may hold no packet at all, so more than one can have to be passed)
+                                while (start > lastByte && curTilePart < firstPackOff[t].Length - 1)
                                 {
                                     curTilePart++;
                                     inStream.seek(firstPackOff[t][curTilePart]);
                                     lastByte = inStream.Pos + tilePartLen[t][curTilePart] - 1 - tilePartHeadLen[t][curTilePart];
+                                    start = inStream.Pos;
                                 }
 
                                 // Read SOP marker segment if necessary
@@ -1729,6 +1808,8 @@ namespace CoreJ2K.j2k.codestream.reader
                                 if (l < lys[c][r] || l >= numLayers)
                                     continue;
 
+                                cancellationToken.ThrowIfCancellationRequested();
+
                                 start = inStream.Pos;
 
                                 // If packed packet headers are used, there is no
@@ -1741,11 +1822,13 @@ namespace CoreJ2K.j2k.codestream.reader
 
                                 // If we are about to read outside of tile-part,
                                 // skip to next tile-part
-                                if (start > lastByte && curTilePart < firstPackOff[t].Length - 1)
+                                // (a tile-part may hold no packet at all, so more than one can have to be passed)
+                                while (start > lastByte && curTilePart < firstPackOff[t].Length - 1)
                                 {
                                     curTilePart++;
                                     inStream.seek(firstPackOff[t][curTilePart]);
                                     lastByte = inStream.Pos + tilePartLen[t][curTilePart] - 1 - tilePartHeadLen[t][curTilePart];
+                                    start = inStream.Pos;
                                 }
 
                                 // Read SOP marker segment if necessary
@@ -1983,6 +2066,8 @@ namespace CoreJ2K.j2k.codestream.reader
                                 if (l < lys[c][r])
                                     continue;
 
+                                cancellationToken.ThrowIfCancellationRequested();
+
                                 start = inStream.Pos;
 
                                 // If packed packet headers are used, there is no
@@ -1995,11 +2080,13 @@ namespace CoreJ2K.j2k.codestream.reader
 
                                 // If we are about to read outside of tile-part,
                                 // skip to next tile-part
-                                if (start > lastByte && curTilePart < firstPackOff[t].Length - 1)
+                                // (a tile-part may hold no packet at all, so more than one can have to be passed)
+                                while (start > lastByte && curTilePart < firstPackOff[t].Length - 1)
                                 {
                                     curTilePart++;
                                     inStream.seek(firstPackOff[t][curTilePart]);
                                     lastByte = inStream.Pos + tilePartLen[t][curTilePart] - 1 - tilePartHeadLen[t][curTilePart];
+                                    start = inStream.Pos;
                                 }
 
                                 // Read SOP marker segment if necessary
@@ -2336,13 +2423,21 @@ namespace CoreJ2K.j2k.codestream.reader
                                         }
                                         cb = cbI[c][r][s][m][n];
 
+                                        // No packet was read for this code-block in this layer (the codestream was
+                                        // truncated before it), so there is no head or data to account for.
+                                        if (cb.pktIdx[l] < 0)
+                                        {
+                                            continue;
+                                        }
+
                                         // If no code-block has been refused until
                                         // now
                                         if (!reject)
                                         {
                                             // Rate is to low to allow reading of
-                                            // packet's head
-                                            if (nBytes[t] < pktHeadLen[cb.pktIdx[l]])
+                                            // packet's head. A packet whose head was cut short by a truncated
+                                            // codestream has no recorded head length at all.
+                                            if (cb.pktIdx[l] >= pktHeadLen.Length || nBytes[t] < pktHeadLen[cb.pktIdx[l]])
                                             {
                                                 // Stop parsing
                                                 stopCount = true;
@@ -2440,6 +2535,7 @@ namespace CoreJ2K.j2k.codestream.reader
             if (tlmOffset >= 0 && !isTruncMode)
             {
                 // TLM available - attempt fast path
+                var positionBefore = inStream.Pos;
                 try
                 {
                     // Reset byte counters if starting from tile 0
@@ -2550,8 +2646,11 @@ namespace CoreJ2K.j2k.codestream.reader
                     FacilityManager.GetMsgLogger().printmsg(MsgLogger_Fields.WARNING,
                         $"TLM fast seek failed for tile {t}: {e.Message}, using sequential parsing");
                 }
+
+                // The fast path returns when it succeeds; here it did not, so parse on from where the previous tile ended
+                inStream.seek(positionBefore);
             }
-            else
+
             {
                 // Reset number of read bytes if needed
                 if (t == 0)
@@ -2723,9 +2822,10 @@ namespace CoreJ2K.j2k.codestream.reader
 
             // If the l quit condition is used, Make sure that no layer 
             // after lquit is returned
-            if (lQuit != -1 && fl + nl > lQuit)
+            // (layers are numbered from 1, so the last one returned is fl + nl - 1)
+            if (lQuit != -1 && fl + nl - 1 > lQuit)
             {
-                nl = lQuit - fl;
+                nl = Math.Max(0, lQuit - fl + 1);
             }
 
             // Check validity of resquested resolution level (according to the
