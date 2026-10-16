@@ -29,6 +29,16 @@ namespace KillerPDF.Features
         private const int DefaultSize = 1024;
         private const int MaximumSize = 8192;
 
+        // Each file worker holds its own render session, decoded images and page bitmap, so
+        // peak memory grows with the worker count rather than the core count. These caps keep
+        // a default batch near the previous renderer's peak memory while staying faster.
+        private const int LargeRenderSize = 1024;
+        private const int LargeRenderWorkers = 3;
+        private const int DefaultRenderWorkers = 6;
+
+        internal static int DefaultParallelism(int size, int processorCount) =>
+            Math.Clamp(processorCount, 1, size > LargeRenderSize ? LargeRenderWorkers : DefaultRenderWorkers);
+
         internal static bool TryRunBatchRender(string[] args, out int exitCode)
         {
             exitCode = 0;
@@ -39,7 +49,7 @@ namespace KillerPDF.Features
             var con = BatchRunner.OpenBatchConsole();
             string? input = null, output = null, logPath = null;
             int size = DefaultSize, pages = 1;
-            int parallelism = Math.Max(1, Environment.ProcessorCount);
+            int parallelism = 0;
             bool quiet = false, badUsage = false;
             for (int i = flagIdx + 1; i < args.Length; i++)
             {
@@ -88,6 +98,7 @@ namespace KillerPDF.Features
 
             try
             {
+                if (parallelism == 0) parallelism = DefaultParallelism(size, Environment.ProcessorCount);
                 exitCode = Run(input!, output!, size, pages, parallelism, logPath, quiet, con);
             }
             catch (Exception ex)
@@ -130,9 +141,8 @@ namespace KillerPDF.Features
             // stay independent. Per-file directory creation is done up-front, single-threaded, to
             // avoid Directory.CreateDirectory races on shared parents. The console and log writes
             // happen under a lock so their line order is coherent, but the render themselves run
-            // concurrently. File-level parallelism uses ProcessorCount workers and each session
-            // internally still uses its own row-parallelism cap, so total in-flight thread count
-            // grows: acceptable for a batch benchmark, where wall-clock throughput is the goal.
+            // concurrently. File-level parallelism defaults to DefaultParallelism workers (or --parallel)
+            // and each session internally still uses its own row-parallelism cap.
             foreach (var (rel, _) in work)
             {
                 string dstBase = Path.Combine(outRoot, rel);

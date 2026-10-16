@@ -281,6 +281,29 @@ it peaks at about 630 MiB on the difficult set against PDFium's 279 MiB, so the 
 memory target above no longer holds. Raw data:
 `C:/Users/steve/scratch/kp-bench-render/conserve7-20261016`.
 
+Later on 2026-10-16 the batch renderer stopped defaulting to one file worker per processor.
+A sweep of 1, 2, 3, 4, 6 and 12 workers on the 12-thread test machine showed peak memory
+rising with the worker count (difficult set: 266 MiB at one worker, about 310 at three,
+about 625 at twelve) while wall time flattened past six workers on the shared set and past
+three on the difficult set. The default is now at most six workers, or three above 1024
+pixels; `--parallel` still overrides it. Five alternating pairs against the previous default
+(twelve workers, both at level 7) gave these medians:
+
+| Set | Workers | Wall (s) | CPU (s) | Peak working set (MiB) |
+|---|---|---|---|---|
+| Shared, 1024 px | 12 | 16.98 | 59.06 | 617.8 |
+| Shared, 1024 px | 6 | 17.89 | 57.94 | 535.4 |
+| Difficult, 2048 px | 12 | 4.61 | 26.39 | 636.9 |
+| Difficult, 2048 px | 3 | 8.69 | 27.20 | 321.7 |
+
+Against the PDFium medians above (627 MiB and 24.9 s shared, 279 MiB and 11.1 s difficult),
+the new default uses less memory on the shared set and about 15% more on the difficult set,
+and is faster on both. No worker count above one met the strict difficult-set target in the
+sweep; two workers peaked near 304 MiB without beating PDFium's time. Rendered PNG hashes were
+identical for both defaults on both sets. Another session was building on the machine during
+some shared-set runs, so those wall times are noisier than the difficult-set runs. Raw data:
+`C:/Users/steve/scratch/kp-bench-render/render-parallel-20261016`.
+
 ## KillerPDF 1.9.0 memory ownership follow-up
 
 Bounded surfaces, compact clips, explicit scratch lifetimes, shared immutable
