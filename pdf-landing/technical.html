@@ -276,13 +276,13 @@
 <p data-i18n="pt_67">KillerPDF keeps <i>where</i> a mark sits separate from <i>how large</i> it is drawn. The position is stored in a fixed internal measurement that never changes as you zoom, while the number of pixels actually drawn grows as you zoom in. Holding those two ideas apart is what lets an annotation stay locked to the same spot on the page while the page is always drawn sharply at whatever magnification you are using.</p>
 <h3 id="render-dim-space" data-i18n="pt_68">1. A fixed internal size ("render-dim")</h3>
 <p data-i18n="pt_69">Every page is first scaled to a standard internal size: the longer of its two sides is set to exactly 2048 units, and the shorter side is scaled to keep the page's proportions. These units are counted on their own and have nothing to do with screen pixels, so they do not change when you zoom or switch view modes. Annotation positions are recorded in this fixed measurement, which is why a mark stays in exactly the same place on the page no matter how far you zoom or which layout you view. The code calls this <b>render-dim</b> space, and the two resulting numbers, the page's width and height in these units, are written <code>rdW</code> and <code>rdH</code> below. One <b>point</b>, the unit the PDF itself uses, is 1/72 of an inch.</p>
-<div class="codeblock">maxDim = max(pageWidthPt, pageHeightPt)<br>rdW = round(2048 &times; pageWidthPt  / maxDim)<br>rdH = round(2048 &times; pageHeightPt / maxDim)   <span class="cm">// longest side -&gt; 2048</span></div>
+<div class="codeblock">maxDim = max(pageWidthPt, pageHeightPt)<br>rdW = round(2048 &times; pageWidthPt  / maxDim)<br>rdH = round(2048 &times; pageHeightPt / maxDim)   <span class="cm" data-i18n="pt_cm_1">// longest side -&gt; 2048</span></div>
 <h3 id="decoupled-bitmap-resolution" data-i18n="pt_70">2. Drawing sharpness follows zoom, not position</h3>
 <p data-i18n="pt_71">The page image (the <b>bitmap</b>, meaning the grid of pixels the page is rendered into) is drawn at a resolution that follows two things: your display's pixel density and your current zoom. Magnify a page three times and it is redrawn from three times as many pixels rather than stretched, so text and lines stay sharp instead of turning blocky. A ceiling of 6144 pixels on the longest side limits how much memory a single page can take. This affects only sharpness; the stored positions from step 1 are untouched, which is the entire reason the two are kept apart.</p>
-<div class="codeblock">scaledMax = min( 6144,  int( 2048 &times; max(dpiScaleX, dpiScaleY) &times; max(1.0, zoom) ) )<br><span class="cm">// dpiScale = display pixel density (1.0 at 96 DPI, 1.5 at 150%); zoom = current magnification</span></div>
+<div class="codeblock">scaledMax = min( 6144,  int( 2048 &times; max(dpiScaleX, dpiScaleY) &times; max(1.0, zoom) ) )<br><span class="cm" data-i18n="pt_cm_2">// dpiScale = display pixel density (1.0 at 96 DPI, 1.5 at 150%); zoom = current magnification</span></div>
 <h3 id="the-coordinate-y-flip" data-i18n="pt_72">3. The coordinate Y-flip</h3>
 <p data-i18n="pt_73">The final step is that the PDF format and the screen disagree about where a page begins. A PDF measures positions from the <b>bottom-left</b> corner and counts upward, while the screen, and KillerPDF's drawing surface, measures from the <b>top-left</b> corner and counts downward. So every mark has to be turned top-to-bottom as it is drawn, and scaled from the PDF's own points into render-dim units at the same time. In the formula below, <code>pdfW</code> and <code>pdfH</code> are the page's width and height in PDF points; <code>renderW</code> and <code>renderH</code> are the same page in render-dim units (the <code>rdW</code> and <code>rdH</code> from step 1); <code>sx</code> and <code>sy</code> are the scale factors between the two; <code>left</code> and <code>top</code> are the mark's position read from the PDF; and the result, <code>canvasX</code> and <code>canvasY</code>, is where the mark is placed on the drawing surface.</p>
-<div class="codeblock">sx = renderW / pdfW      sy = renderH / pdfH<br>canvasX = left &times; sx<br>canvasY = renderH - top &times; sy   <span class="cm">// flip the vertical axis</span></div>
+<div class="codeblock">sx = renderW / pdfW      sy = renderH / pdfH<br>canvasX = left &times; sx<br>canvasY = renderH - top &times; sy   <span class="cm" data-i18n="pt_cm_3">// flip the vertical axis</span></div>
 <figure class="diagram">
 <svg viewBox="0 0 740 300" xmlns="http://www.w3.org/2000/svg">
 <defs>
@@ -377,7 +377,7 @@
 <h2 data-i18n="pt_99">Zoom &amp; interaction</h2>
 <h3 id="cursor-anchored-zoom" data-i18n="pt_100">Cursor-anchored zoom</h3>
 <p data-i18n="pt_101">Ctrl+wheel zooms around the cursor. The cursor position and scroll offsets are captured <b>before</b> the zoom changes, then the offsets that keep that point fixed are applied once layout settles:</p>
-<div class="codeblock">ratio   = newZoom / oldZoom<br>newHOff = (oldHOff + cursorX) &times; ratio - cursorX<br>newVOff = (oldVOff + cursorY) &times; ratio - cursorY   <span class="cm">// clamped at &gt;= 0</span></div>
+<div class="codeblock">ratio   = newZoom / oldZoom<br>newHOff = (oldHOff + cursorX) &times; ratio - cursorX<br>newVOff = (oldVOff + cursorY) &times; ratio - cursorY   <span class="cm" data-i18n="pt_cm_4">// clamped at &gt;= 0</span></div>
 <h3 id="grid-zoom-by-column-count" data-i18n="pt_102">Grid zoom by column count</h3>
 <p data-i18n="pt_103">Grid snaps to a whole number of columns: the count is authoritative and the zoom is derived from it, so the grid lays out exactly N pages with no leftover gap.</p>
 <div class="codeblock">GridZoomForN(n) = (viewportW - 24) / ( n &times; (rdW + 12) )</div>
@@ -503,10 +503,10 @@
 <span class="right"><span id="verEgg" title="Click">v1.8.91</span> &middot; &copy; 2026 <b><a href="https://thekiller.net" target="_blank" rel="noopener">Steve the Killer</a></b></span>
 </footer>
 <div class="egg-toast" id="eggToast"></div>
-<script src="kp-i18n.js?v=21"></script>
+<script src="kp-i18n.js?v=22"></script>
 <script src="engine/engine-site-facts.js?v=1.8.91"></script>
 <script src="kp-site-info.js?v=1"></script>
-<script src="kp.js?v=19"></script>
+<script src="kp.js?v=20"></script>
 <script>
 // COLLAPSIBLE OUTLINE. The page has thirteen sections and twenty-four subsections, and listing
 // all thirty-seven flat made the sidebar a wall you had to read to navigate.
@@ -548,6 +548,13 @@
     });
     g.head.appendChild(t);
   });
+  // The section toggles are made after the page strings load, so their label follows the language here.
+  function chevLabels(){
+    var l=document.documentElement.getAttribute('lang')||'en'; l=l==='zh-Hant'?'zh':(l==='zh-Hans'?'zh-cn':l);
+    var d=(window.I18N&&window.I18N[l])||{};
+    document.querySelectorAll('.ol-chev').forEach(function(b){ b.setAttribute('aria-label', d.ui_expand_section||'Expand section'); });
+  }
+  chevLabels(); document.addEventListener('kpdf-languagechange', chevLabels);
   // Reading a section opens it. Sections you opened by hand stay open; the rest close, so the
   // sidebar keeps showing where you are rather than growing as you scroll.
   window.knOutlineReveal=function(a){
