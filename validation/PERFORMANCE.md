@@ -424,8 +424,9 @@ input. Versions 1.8.4 and 1.8.6 reproduced every prior outcome and diagnostic de
 Version 1.8.70 reproduced every 1.8.6 file outcome and diagnostic detail. Version
 1.8.80 reproduced every 1.8.71 outcome and diagnostic detail across the paired
 warmups and measured passes. Version 1.8.90 reproduced every 1.8.80 outcome and
-diagnostic detail across all passes. Version 1.9.0 saved 108 more files than 1.8.90 (109
-newly saved and one newly failed), so it is not an exact outcome match. All recorded builds had zero crashes and timeouts in the separate damaged-file safety
+diagnostic detail across all passes. In the 2026-10-13 run, version 1.9.0 saved 108 more
+files than 1.8.90 (109 newly saved and one newly failed). That stress input saves in the
+2026-10-15 follow-up, so 1.9.0 now saves 109 more files and loses none. All recorded builds had zero crashes and timeouts in the separate damaged-file safety
 collection. See the
 [1.8.2 release record](https://github.com/SteveTheKiller/KillerPDF-Corpus/blob/main/benchmarks/killerpdf-v1.8.2.md)
 and the reports and measured runs for [1.8.3](https://github.com/SteveTheKiller/KillerPDF-Corpus/blob/main/benchmarks/killerpdf-v1.8.3.md) and
@@ -438,12 +439,21 @@ stress. All changes remain below the 10% investigation threshold.
 
 Compared directly with 1.8.90 in the alternating session, the 1.9.0 medians were 11.53%
 longer for regression, 12.12% longer for standards, and 7.84% longer for stress. The
-regression and standards changes are above the 10% investigation threshold and have not
-been investigated. The slowest 1.8.90 pass was faster than the fastest 1.9.0 pass in every
-collection. One private stress input that 1.8.90 saves
-(`pdf-association/poppler/poppler-81748-0.pdf`) fails in 1.9.0 with "The signature /M
-value is not a valid PDF date"; it is unresolved and blocks an outcome parity claim.
-Host CPU load was not idle (42% to 80% in the samples taken) and memory was not measured.
+regression and standards changes were above the 10% investigation threshold. The slowest
+1.8.90 pass was faster than the fastest 1.9.0 pass in every collection. One private stress
+input that 1.8.90 saves (`pdf-association/poppler/poppler-81748-0.pdf`) failed in 1.9.0
+with "The signature /M value is not a valid PDF date". Host CPU load was not idle (42% to
+80% in the samples taken) and memory was not measured.
+
+A follow-up on 2026-10-15 rebuilt 1.9.0 after batch resave stopped opening each file twice
+and full rewrites stopped growing their output buffer through repeated copies. Against the
+same 1.8.90 payload, with one warmup and five alternating passes, 1.9.0 regression took
+1.74% longer (within session noise) with 6.45% less CPU time and 56.85% less peak memory,
+and standards took 9.53% less time with 4.87% less CPU time and 37.97% less peak memory. A
+single stress pass per build used 50.43% less peak memory and 11.51% more CPU time on 1.9.0,
+which needs a full stress series to confirm. The poppler input now saves, and the
+damaged-file gate matched 1.8.90 with no crashes or timeouts. See the
+[1.9.0 report](benchmarks/1.9.0/CORPUS.md#follow-up-run-on-2026-10-15).
 
 The 1.8.90 corpus medians above were measured on a busy host and are 19.8% (regression),
 9.1% (standards), and 15.2% (stress) above the recorded 1.8.80 medians. A same-session
