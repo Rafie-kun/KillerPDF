@@ -106,6 +106,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - On the website, text on accent-colored buttons, tabs and highlights switches to white or near-black for contrast, so it is never white on yellow.
 - Theme names and the status, OCR, signing and stamp labels that were still in English are translated in every language.
 - The website's About page, MCP page, accent bar, code comments and section toggles are translated in every language, and About text that had lost its accents is restored.
+- On phones, the website's logo and its Engine and Corpus headings fit the screen instead of making the home page scroll sideways.
 
 ## [1.8.91] - 2026-10-14
 

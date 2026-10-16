@@ -513,22 +513,6 @@ html[data-theme="light"] { --typewriter-depth: 0 1px 1px rgba(255,255,255,0.72),
     max-width: 100%;
   }
 
-  .hero .hero-lockup {
-    flex-direction: column;
-  }
-
-  .hero .hero-icon {
-    width: auto !important;
-    height: min(30vw, 116px) !important;
-    max-width: 100% !important;
-  }
-
-  .hero .hero-lockup .wm-logo {
-    width: min(82vw, 320px) !important;
-    height: auto !important;
-    max-width: calc(100vw - 32px) !important;
-  }
-
   body .mcp-brand {
     gap: 6px !important;
   }
@@ -629,6 +613,11 @@ body .engine-lockup img.wm-logo { height: 81.7383px; }
 @media (max-width: 600px) {
   body img.tb-wm { height: 38.1445px; margin: -0.4154px 0 -0.4066px; }
   body .engine-lockup img.wm-logo { height: 65.3906px; }
+}
+@media (max-width: 560px) {
+  body .engine-lockup { font-size: min(23px, 4.42vw); gap: min(6px, 1.15vw); }
+  body .engine-lockup .engine-icon { width: min(48px, 9.23vw); height: min(48px, 9.23vw); }
+  body .engine-lockup img.wm-logo { height: min(65.3906px, 12.57vw); }
 }
 
 /* Shared reading sizes for help, technical pages and engine documentation. */
