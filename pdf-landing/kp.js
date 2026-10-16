@@ -187,7 +187,7 @@
     var pill = document.createElement('div'); pill.className = 'pill';
     var grip = document.createElement('span'); grip.className = 'grip'; grip.setAttribute('aria-hidden', 'true');
     pill.appendChild(grip);
-    var blbl = document.createElement('span'); blbl.className = 'lbl'; blbl.textContent = 'accent:';
+    var blbl = document.createElement('span'); blbl.className = 'lbl'; blbl.setAttribute('data-i18n', 'accent_label'); blbl.textContent = 'accent:';
     pill.appendChild(blbl);
     accDots.forEach(function (d) { pill.appendChild(d); });
     var bx = document.createElement('button'); bx.className = 'x'; bx.setAttribute('aria-label', 'Close'); bx.innerHTML = '&times;';
@@ -275,7 +275,7 @@
   var langToggle = document.getElementById('langToggle');
   var langMenu = document.getElementById('langMenu');
 
-  var labelKeys = {"Theme":"ui_Theme","Language":"ui_Language","Dark":"ui_Theme_Dark","Light":"ui_Theme_Light","Black":"ui_Theme_Black","Blood":"ui_Theme_Blood","Greed":"ui_Theme_Greed","Cyanotic":"ui_Theme_Cyanotic","98SE":"ui_Theme_98SE","Ectoplasm":"ui_Theme_Ectoplasm","Decay":"ui_Theme_Decay","Mourning":"ui_Theme_Mourning","Sepulchre":"ui_Theme_Sepulchre","Delirium":"ui_Theme_Delirium","Malaise":"ui_Theme_Malaise","Close":"ui_Lbl_Close","Ctrl":"ui_Key_Ctrl","Alt":"ui_Key_Alt","Shift":"ui_Key_Shift","Delete":"ui_Key_Delete","Enter":"ui_Key_Enter","Esc":"ui_Key_Esc","Menu":"ui_Key_Menu","Home":"ui_Key_Home","End":"ui_Key_End","PgUp":"ui_Key_PgUp","PgDn":"ui_Key_PgDn","Tab":"ui_Key_Tab","Scroll":"ui_Key_Scroll","Click":"ui_Key_Click","or":"ui_Key_Or","Wheel on view":"ui_Key_WheelView","Wheel on logo":"ui_Key_WheelLogo","Middle drag":"ui_Key_MiddleDrag","Space + drag":"ui_Key_SpaceDrag","Accent color":"ui_extra_0","Red":"ui_extra_1","Orange":"ui_extra_2","Green":"ui_extra_3","Teal":"ui_extra_4","Blue":"ui_extra_5","Purple":"ui_extra_6","Previous feature":"ui_extra_7","Next feature":"ui_extra_8","Choose a feature":"ui_extra_9","Expanded KillerPDF screenshot":"ui_extra_10","version":"ui_extra_11","released":"ui_extra_12","size":"ui_extra_13","platform":"ui_extra_14","BASE":"ui_extra_15","Choose theme":"ui_Theme","High Contrast":"ui_Theme_Black","KillerPDF features":"features_h"};
+  var labelKeys = {"Theme":"ui_Theme","Language":"ui_Language","Dark":"ui_Theme_Dark","Light":"ui_Theme_Light","Black":"ui_Theme_Black","Blood":"ui_Theme_Blood","Greed":"ui_Theme_Greed","Cyanotic":"ui_Theme_Cyanotic","98SE":"ui_Theme_98SE","Ectoplasm":"ui_Theme_Ectoplasm","Decay":"ui_Theme_Decay","Mourning":"ui_Theme_Mourning","Sepulchre":"ui_Theme_Sepulchre","Delirium":"ui_Theme_Delirium","Malaise":"ui_Theme_Malaise","Close":"ui_Lbl_Close","Ctrl":"ui_Key_Ctrl","Alt":"ui_Key_Alt","Shift":"ui_Key_Shift","Delete":"ui_Key_Delete","Enter":"ui_Key_Enter","Esc":"ui_Key_Esc","Menu":"ui_Key_Menu","Home":"ui_Key_Home","End":"ui_Key_End","PgUp":"ui_Key_PgUp","PgDn":"ui_Key_PgDn","Tab":"ui_Key_Tab","Scroll":"ui_Key_Scroll","Click":"ui_Key_Click","or":"ui_Key_Or","Wheel on view":"ui_Key_WheelView","Wheel on logo":"ui_Key_WheelLogo","Middle drag":"ui_Key_MiddleDrag","Space + drag":"ui_Key_SpaceDrag","Accent color":"ui_extra_0","Red":"ui_extra_1","Orange":"ui_extra_2","Green":"ui_extra_3","Teal":"ui_extra_4","Blue":"ui_extra_5","Purple":"ui_extra_6","Yellow":"ui_accent_yellow","Magenta":"ui_accent_magenta","click me":"ui_click_me","KillerMCP on GitHub":"mcp_gh","Previous feature":"ui_extra_7","Next feature":"ui_extra_8","Choose a feature":"ui_extra_9","Expanded KillerPDF screenshot":"ui_extra_10","version":"ui_extra_11","released":"ui_extra_12","size":"ui_extra_13","platform":"ui_extra_14","BASE":"ui_extra_15","Choose theme":"ui_Theme","High Contrast":"ui_Theme_Black","KillerPDF features":"features_h"};
   function translateLabels(dict) {
     labelKeys['Corpus figures'] = 'corpus_stats_aria';
     function lookup(text) {
@@ -310,7 +310,7 @@
     var dict = (lang === 'en') ? EN : (I18N[lang] || {});
     var pageName = window.location.pathname.split('/').pop();
     var titleKey = pageName === 'help.html' ? 'nav_help' :
-      (pageName === 'technical.html' ? 'nav_tech' : null);
+      (pageName === 'technical.html' ? 'nav_tech' : (pageName === 'about.html' ? 'nav_about' : null));
     if (lang === 'en') document.title = englishTitle;
     else if (titleKey && dict[titleKey]) document.title = 'KillerPDF | ' + dict[titleKey];
     else if (!pageName || pageName === 'index.html') document.title = 'KillerPDF';
@@ -415,9 +415,12 @@
   function highlightStaticCodeBlocks() {
     [].forEach.call(document.querySelectorAll('.codeblock, .code-block'), function (block) {
       if (block.querySelector('[class^="tok-"],[class*=" tok-"],[class^="syntax-"],[class*=" syntax-"]')) return;
+      var keys = [].map.call(block.querySelectorAll('.cm[data-i18n]'), function (n) { return n.getAttribute('data-i18n'); });
       var source = codeBlockText(block);
       var formula = /\b(?:maxDim|scaledMax|newHOff|GridZoomForN|canvasX)\b/.test(source);
       block.innerHTML = formula ? highlightFormula(source) : highlightCommand(source);
+      // Comments keep their translation key through the rewrite, so a later language change still reaches them.
+      [].forEach.call(block.querySelectorAll('.syn-comment'), function (n, i) { if (keys[i]) n.setAttribute('data-i18n', keys[i]); });
     });
   }
 
