@@ -309,5 +309,5 @@
   }
   loadDocsL10n();
   loadSharedScript('../kp-i18n.js?v=21');
-  loadSharedScript('../kp.js?v=18');
+  loadSharedScript('../kp.js?v=19');
 })(window);
