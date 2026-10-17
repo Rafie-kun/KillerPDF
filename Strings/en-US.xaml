@@ -479,6 +479,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_DocumentTools_PrintProduction">Print production report</sys:String>
     <sys:String x:Key="Str_DocumentTools_Preflight">Preflight report</sys:String>
     <sys:String x:Key="Str_DocumentTools_Accessibility">Accessibility report</sys:String>
+    <sys:String x:Key="Str_DocumentTools_Signatures">Signatures report</sys:String>
     <sys:String x:Key="Str_DocumentTools_Layers">Layers report</sys:String>
     <sys:String x:Key="Str_DocumentTools_EditLayers">Edit layers</sys:String>
     <sys:String x:Key="Str_DocumentTools_LayerName">Layer name</sys:String>

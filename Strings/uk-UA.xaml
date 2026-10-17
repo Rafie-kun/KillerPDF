@@ -479,6 +479,7 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_DocumentTools_PrintProduction">Звіт про друкарське виробництво</sys:String>
     <sys:String x:Key="Str_DocumentTools_Preflight">Звіт передпечатної перевірки</sys:String>
     <sys:String x:Key="Str_DocumentTools_Accessibility">Звіт про доступність</sys:String>
+    <sys:String x:Key="Str_DocumentTools_Signatures">Звіт про підписи</sys:String>
     <sys:String x:Key="Str_DocumentTools_Layers">Звіт про шари</sys:String>
     <sys:String x:Key="Str_DocumentTools_EditLayers">Редагувати шари</sys:String>
     <sys:String x:Key="Str_DocumentTools_LayerName">Назва шару</sys:String>

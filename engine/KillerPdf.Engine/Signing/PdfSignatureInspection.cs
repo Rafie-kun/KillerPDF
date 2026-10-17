@@ -26,6 +26,12 @@ public sealed partial record PdfSignatureInspectionReport(IReadOnlyList<PdfSigna
             .Append("Signatures: ").AppendLine(Entries.Count.ToString());
         foreach (PdfSignatureInspectionEntry entry in Entries)
         {
+            // An empty signature field has nothing to verify; it is only waiting to be signed.
+            if (!entry.Signature.IsSigned)
+            {
+                output.AppendLine(entry.Signature.FieldName).AppendLine("  Signed: No");
+                continue;
+            }
             output.AppendLine(entry.Signature.FieldName)
                 .Append("  Signed: ").AppendLine(entry.Signature.IsSigned ? "Yes" : "No")
                 .Append("  Document timestamp: ")
@@ -41,6 +47,12 @@ public sealed partial record PdfSignatureInspectionReport(IReadOnlyList<PdfSigna
                 .Append("  PAdES evidence: ").AppendLine(entry.PadesProfile.ToString())
                 .Append("  Covers whole document: ")
                 .AppendLine(entry.Signature.CoversWholeDocument ? "Yes" : "No");
+            Add("  Signer name: ", entry.Signature.SignerName);
+            if (entry.Signature.SigningTime is DateTimeOffset signingTime)
+                output.Append("  Signing time: ").AppendLine(signingTime.ToString("O"));
+            Add("  Reason: ", entry.Signature.Reason);
+            Add("  Location: ", entry.Signature.Location);
+            Add("  Contact: ", entry.Signature.ContactInformation);
             if (entry.Verification.RequestedRevocationMode is { } revocationMode)
                 output.Append("  Requested revocation mode: ")
                     .AppendLine(revocationMode.ToString());

@@ -397,6 +397,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_DocumentTools_PrintProduction">Baskı üretim raporu</sys:String>
     <sys:String x:Key="Str_DocumentTools_Preflight">Ön kontrol raporu</sys:String>
     <sys:String x:Key="Str_DocumentTools_Accessibility">Erişilebilirlik raporu</sys:String>
+    <sys:String x:Key="Str_DocumentTools_Signatures">İmza raporu</sys:String>
     <sys:String x:Key="Str_DocumentTools_Layers">Katman raporu</sys:String>
     <sys:String x:Key="Str_DocumentTools_EditLayers">Katmanları düzenle</sys:String>
     <sys:String x:Key="Str_DocumentTools_LayerName">Katman adı</sys:String>

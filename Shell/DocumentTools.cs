@@ -35,6 +35,8 @@ public partial class MainWindow
             DocumentToolItem("Str_DocumentTools_Separations", ShowSeparationPreview, "\uE790"),
             DocumentToolItem("Str_DocumentTools_Accessibility", () => ShowDocumentReport(Loc("Str_DocumentTools_Accessibility"),
                 path => PdfEngineIntegration.InspectAccessibility(path).ToText()), "\uE776"),
+            DocumentToolItem("Str_DocumentTools_Signatures", () => ShowDocumentReport(Loc("Str_DocumentTools_Signatures"),
+                path => PdfEngineIntegration.InspectSignatures(path).ToText()), "\uE8D7"),
             DocumentToolItem("Str_DocumentTools_Layers", () => ShowDocumentReport(Loc("Str_DocumentTools_Layers"),
                 path => PdfEngineIntegration.InspectLayers(path).ToText()), "\uE8A1"),
             DocumentToolItem("Str_DocumentTools_EditLayers", EditLayers, "\uE70F"),

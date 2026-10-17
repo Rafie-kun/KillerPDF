@@ -479,6 +479,7 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_DocumentTools_PrintProduction">Отчет о допечатной подготовке</sys:String>
     <sys:String x:Key="Str_DocumentTools_Preflight">Отчет предпечатной проверки</sys:String>
     <sys:String x:Key="Str_DocumentTools_Accessibility">Отчет о доступности</sys:String>
+    <sys:String x:Key="Str_DocumentTools_Signatures">Отчет о подписях</sys:String>
     <sys:String x:Key="Str_DocumentTools_Layers">Отчет о слоях</sys:String>
     <sys:String x:Key="Str_DocumentTools_EditLayers">Изменить слои</sys:String>
     <sys:String x:Key="Str_DocumentTools_LayerName">Имя слоя</sys:String>

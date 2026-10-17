@@ -251,6 +251,7 @@ public sealed class PdfSignatureVerifierTests
         Assert.Contains("PAdES evidence: BaselineB", text);
         Assert.Contains($"Signer subject: {certificate.Subject}", text);
         Assert.Contains($"Signer issuer: {certificate.Issuer}", text);
+        Assert.Contains("Signer name: Ada", text);
         Assert.Contains("Certificate SHA-256: ", text);
         Assert.Contains("Digest algorithm: 2.16.840.1.101.3.4.2.1", text);
         Assert.Contains("Signature algorithm: ", text);

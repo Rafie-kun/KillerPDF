@@ -461,6 +461,7 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_DocumentTools_PrintProduction">Raport produkcji poligraficznej</sys:String>
     <sys:String x:Key="Str_DocumentTools_Preflight">Raport inspekcji wstępnej</sys:String>
     <sys:String x:Key="Str_DocumentTools_Accessibility">Raport dostępności</sys:String>
+    <sys:String x:Key="Str_DocumentTools_Signatures">Raport podpisów</sys:String>
     <sys:String x:Key="Str_DocumentTools_Layers">Raport warstw</sys:String>
     <sys:String x:Key="Str_DocumentTools_EditLayers">Edytuj warstwy</sys:String>
     <sys:String x:Key="Str_DocumentTools_LayerName">Nazwa warstwy</sys:String>

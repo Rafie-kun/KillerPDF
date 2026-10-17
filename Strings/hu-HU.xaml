@@ -479,6 +479,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_DocumentTools_PrintProduction">Nyomdai gyártási jelentés</sys:String>
     <sys:String x:Key="Str_DocumentTools_Preflight">Előellenőrzési jelentés</sys:String>
     <sys:String x:Key="Str_DocumentTools_Accessibility">Akadálymentességi jelentés</sys:String>
+    <sys:String x:Key="Str_DocumentTools_Signatures">Aláírásjelentés</sys:String>
     <sys:String x:Key="Str_DocumentTools_Layers">Rétegjelentés</sys:String>
     <sys:String x:Key="Str_DocumentTools_EditLayers">Rétegek szerkesztése</sys:String>
     <sys:String x:Key="Str_DocumentTools_LayerName">Réteg neve</sys:String>

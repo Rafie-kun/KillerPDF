@@ -165,6 +165,20 @@ public sealed class PdfSignatureReaderTests
     }
 
     [Fact]
+    public void Inspect_ListsUnsignedFieldWithoutVerificationResults()
+    {
+        PdfDocument document = PdfDocument.Open(new PdfDocumentBuilder()
+            .AddBlankPage()
+            .AddSignatureField(0, "approval", 20, 20, 160, 40)
+            .Build());
+
+        string text = PdfSignatureInspection.Inspect(document).ToText();
+
+        Assert.Contains("approval" + Environment.NewLine + "  Signed: No", text);
+        Assert.DoesNotContain("Cryptographic integrity", text);
+    }
+
+    [Fact]
     public void Read_TreatsEmptySignatureStringAsUnsigned()
     {
         PdfDocument source = PdfDocument.Open(new PdfDocumentBuilder()

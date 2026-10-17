@@ -479,6 +479,7 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_DocumentTools_PrintProduction">Relatório de produção gráfica</sys:String>
     <sys:String x:Key="Str_DocumentTools_Preflight">Relatório de verificação prévia</sys:String>
     <sys:String x:Key="Str_DocumentTools_Accessibility">Relatório de acessibilidade</sys:String>
+    <sys:String x:Key="Str_DocumentTools_Signatures">Relatório de assinaturas</sys:String>
     <sys:String x:Key="Str_DocumentTools_Layers">Relatório de camadas</sys:String>
     <sys:String x:Key="Str_DocumentTools_EditLayers">Editar camadas</sys:String>
     <sys:String x:Key="Str_DocumentTools_LayerName">Nome da camada</sys:String>

@@ -397,6 +397,7 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_DocumentTools_PrintProduction">Druckproduktionsbericht</sys:String>
     <sys:String x:Key="Str_DocumentTools_Preflight">Preflight-Bericht</sys:String>
     <sys:String x:Key="Str_DocumentTools_Accessibility">Barrierefreiheitsbericht</sys:String>
+    <sys:String x:Key="Str_DocumentTools_Signatures">Signaturbericht</sys:String>
     <sys:String x:Key="Str_DocumentTools_Layers">Ebenenbericht</sys:String>
     <sys:String x:Key="Str_DocumentTools_EditLayers">Ebenen bearbeiten</sys:String>
     <sys:String x:Key="Str_DocumentTools_LayerName">Ebenenname</sys:String>

@@ -452,6 +452,7 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_DocumentTools_PrintProduction">Баспа өндірісі есебі</sys:String>
     <sys:String x:Key="Str_DocumentTools_Preflight">Баспаға дейінгі тексеру есебі</sys:String>
     <sys:String x:Key="Str_DocumentTools_Accessibility">Қолжетімділік есебі</sys:String>
+    <sys:String x:Key="Str_DocumentTools_Signatures">Қолтаңбалар есебі</sys:String>
     <sys:String x:Key="Str_DocumentTools_Layers">Қабаттар есебі</sys:String>
     <sys:String x:Key="Str_DocumentTools_EditLayers">Қабаттарды өңдеу</sys:String>
     <sys:String x:Key="Str_DocumentTools_LayerName">Қабат атауы</sys:String>

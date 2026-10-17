@@ -17,6 +17,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Added export from the Save menu to Word, Excel, PowerPoint, HTML, Markdown, plain text and JSON, with page selection, OCR, batches and loss warnings (#346), and reviewable OCR correction with searchable output and accuracy checks (#345).
 - Added Protect Document (Ctrl+Shift+P) to the Save menu. It writes an AES-256 encrypted copy protected by passwords with print, copy and edit permissions, or for certificate recipients, and PDFs encrypted for certificate recipients open with a matching certificate from the Windows certificate store.
 - Added signature trust and validation evidence (#336), and trusted RFC 3161 timestamps in the signing dialog. A failed timestamp is reported separately from certificate problems.
+- Added a Signatures report to the Document tools (Ctrl+Shift+D, W). It shows each digital signature's signer, signing time, certificate chain and trust, and whether the document changed after it was signed (#425).
 - Added reviewable repair, optimization, sanitization and duplicate resource cleanup (#333). The command line can also remove metadata, attachments, JavaScript, comments, thumbnails, bookmarks, form fields, XFA data, the open action and layers.
 - Added preflight profiles and corrections (#334), accessibility inspection, repairs and reading-order reports (#335), and print-production, separation, layer, portfolio and structural comparison reports, localized in the app and available from the command line.
 - Added a macro library with starter workflows, step editing, import and export, and exact previews of the current document (#343).
@@ -72,6 +73,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - The website's top bar Download button uses the same font and height as the other top bar buttons.
 
 ### Fixed
+- Digitally signed fields show their signature instead of a blue Sign box (#425).
 - On the Light theme's Yellow accent, buttons, links, tabs and accent icons stay yellow with a thin gray outline around yellow text and icons, instead of turning near-black.
 - On the website's Light theme with the Yellow accent, links, headings and labels stay yellow with a thin gray outline instead of turning olive brown.
 - The exe's file properties show Steve the Killer as the copyright holder instead of leaving it blank.

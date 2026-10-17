@@ -397,6 +397,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_DocumentTools_PrintProduction">印刷生产报告</sys:String>
     <sys:String x:Key="Str_DocumentTools_Preflight">印前检查报告</sys:String>
     <sys:String x:Key="Str_DocumentTools_Accessibility">无障碍报告</sys:String>
+    <sys:String x:Key="Str_DocumentTools_Signatures">签名报告</sys:String>
     <sys:String x:Key="Str_DocumentTools_Layers">图层报告</sys:String>
     <sys:String x:Key="Str_DocumentTools_EditLayers">编辑图层</sys:String>
     <sys:String x:Key="Str_DocumentTools_LayerName">图层名称</sys:String>

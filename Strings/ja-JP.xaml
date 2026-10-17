@@ -479,6 +479,7 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_DocumentTools_PrintProduction">印刷製作レポート</sys:String>
     <sys:String x:Key="Str_DocumentTools_Preflight">プリフライトレポート</sys:String>
     <sys:String x:Key="Str_DocumentTools_Accessibility">アクセシビリティレポート</sys:String>
+    <sys:String x:Key="Str_DocumentTools_Signatures">署名レポート</sys:String>
     <sys:String x:Key="Str_DocumentTools_Layers">レイヤーレポート</sys:String>
     <sys:String x:Key="Str_DocumentTools_EditLayers">レイヤーを編集</sys:String>
     <sys:String x:Key="Str_DocumentTools_LayerName">レイヤー名</sys:String>

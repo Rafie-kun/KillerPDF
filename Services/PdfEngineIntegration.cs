@@ -132,6 +132,15 @@ internal static class PdfEngineIntegration
         return PdfAccessibilityInspector.Inspect(OpenForReading(File.ReadAllBytes(path)));
     }
 
+    /// <summary>Checks each signature's integrity, its certificate against the Windows trust
+    /// store without downloading anything, and whether the document changed after signing.</summary>
+    internal static PdfSignatureInspectionReport InspectSignatures(string path)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        return PdfSignatureInspection.Inspect(OpenForReading(File.ReadAllBytes(path)),
+            new PdfSignatureTrustOptions { DisableCertificateDownloads = true });
+    }
+
     /// <summary>Reads the document's optional-content layer definitions and state.</summary>
     internal static PdfOptionalContentInfo InspectLayers(string path)
     {

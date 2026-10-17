@@ -15569,3 +15569,21 @@ if (I18N["pt"]) Object.assign(I18N["pt"], {
   "pt_cm_3": "// inverte o eixo vertical",
   "pt_cm_4": "// limitado a &gt;= 0"
 });
+if (I18N["bn"]) Object.assign(I18N["bn"], {"kb_dt_signatures": "স্বাক্ষর রিপোর্ট"});
+if (I18N["cs"]) Object.assign(I18N["cs"], {"kb_dt_signatures": "Zpráva o podpisech"});
+if (I18N["de"]) Object.assign(I18N["de"], {"kb_dt_signatures": "Signaturbericht"});
+if (I18N["es"]) Object.assign(I18N["es"], {"kb_dt_signatures": "Informe de firmas"});
+if (I18N["fr"]) Object.assign(I18N["fr"], {"kb_dt_signatures": "Rapport des signatures"});
+if (I18N["hu"]) Object.assign(I18N["hu"], {"kb_dt_signatures": "Aláírásjelentés"});
+if (I18N["it"]) Object.assign(I18N["it"], {"kb_dt_signatures": "Rapporto firme"});
+if (I18N["ja"]) Object.assign(I18N["ja"], {"kb_dt_signatures": "署名レポート"});
+if (I18N["kk"]) Object.assign(I18N["kk"], {"kb_dt_signatures": "Қолтаңбалар есебі"});
+if (I18N["nb"]) Object.assign(I18N["nb"], {"kb_dt_signatures": "Signaturrapport"});
+if (I18N["pl"]) Object.assign(I18N["pl"], {"kb_dt_signatures": "Raport podpisów"});
+if (I18N["pt"]) Object.assign(I18N["pt"], {"kb_dt_signatures": "Relatório de assinaturas"});
+if (I18N["ru"]) Object.assign(I18N["ru"], {"kb_dt_signatures": "Отчет о подписях"});
+if (I18N["tr"]) Object.assign(I18N["tr"], {"kb_dt_signatures": "İmza raporu"});
+if (I18N["uk"]) Object.assign(I18N["uk"], {"kb_dt_signatures": "Звіт про підписи"});
+if (I18N["vi"]) Object.assign(I18N["vi"], {"kb_dt_signatures": "Báo cáo chữ ký"});
+if (I18N["zh-cn"]) Object.assign(I18N["zh-cn"], {"kb_dt_signatures": "签名报告"});
+if (I18N["zh"]) Object.assign(I18N["zh"], {"kb_dt_signatures": "簽章報告"});

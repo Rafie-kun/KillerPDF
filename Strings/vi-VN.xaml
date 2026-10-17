@@ -479,6 +479,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_DocumentTools_PrintProduction">Báo cáo sản xuất in</sys:String>
     <sys:String x:Key="Str_DocumentTools_Preflight">Báo cáo kiểm tra trước khi in</sys:String>
     <sys:String x:Key="Str_DocumentTools_Accessibility">Báo cáo khả năng tiếp cận</sys:String>
+    <sys:String x:Key="Str_DocumentTools_Signatures">Báo cáo chữ ký</sys:String>
     <sys:String x:Key="Str_DocumentTools_Layers">Báo cáo lớp</sys:String>
     <sys:String x:Key="Str_DocumentTools_EditLayers">Chỉnh sửa lớp</sys:String>
     <sys:String x:Key="Str_DocumentTools_LayerName">Tên lớp</sys:String>

@@ -354,6 +354,10 @@ namespace KillerPDF.Controls
 
                 // Text field
                 var fillRole = ClassifyFormField(f);
+                // A field that already holds a digital signature keeps its signed appearance on the
+                // page. A Sign box over it would hide the signature (#425).
+                if (f.FieldType == "/Sig" && SignedFieldNames().Contains(f.FieldName))
+                    continue;
                 if (fillRole == FormFillRole.Signature || fillRole == FormFillRole.Initials)
                 {
                     ctrl = BuildSignZone(f, fillRole == FormFillRole.Initials, pageIndex);
@@ -940,6 +944,29 @@ namespace KillerPDF.Controls
             if (Word(@"\b(signature|signed|sign)\b")) return FormFillRole.Signature;
             if (Word(@"\bdated?\b"))                   return FormFillRole.Date;
             return FormFillRole.None;
+        }
+
+        // The signature fields that already hold a signature, read once per engine document.
+        private KillerPdf.Engine.Documents.PdfDocument? _signedFieldsDocument;
+        private HashSet<string> _signedFieldNames = new(StringComparer.Ordinal);
+
+        private HashSet<string> SignedFieldNames()
+        {
+            KillerPdf.Engine.Documents.PdfDocument document = EnsureEngineDocumentSession().Document;
+            if (ReferenceEquals(document, _signedFieldsDocument)) return _signedFieldNames;
+            _signedFieldsDocument = document;
+            try
+            {
+                _signedFieldNames = new HashSet<string>(KillerPdf.Engine.Signing.PdfSignatureReader.Read(document)
+                    .Where(signature => signature.IsSigned)
+                    .Select(signature => signature.FieldName), StringComparer.Ordinal);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"SignedFieldNames (engine): {ex}");
+                _signedFieldNames = new HashSet<string>(StringComparer.Ordinal);
+            }
+            return _signedFieldNames;
         }
 
         // A highlighted, clickable overlay sized to the field rectangle. Clicking fills it.

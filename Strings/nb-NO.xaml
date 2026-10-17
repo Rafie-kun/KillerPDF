@@ -479,6 +479,7 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_DocumentTools_PrintProduction">Rapport for trykkproduksjon</sys:String>
     <sys:String x:Key="Str_DocumentTools_Preflight">Preflight-rapport</sys:String>
     <sys:String x:Key="Str_DocumentTools_Accessibility">Tilgjengelighetsrapport</sys:String>
+    <sys:String x:Key="Str_DocumentTools_Signatures">Signaturrapport</sys:String>
     <sys:String x:Key="Str_DocumentTools_Layers">Lagrapport</sys:String>
     <sys:String x:Key="Str_DocumentTools_EditLayers">Rediger lag</sys:String>
     <sys:String x:Key="Str_DocumentTools_LayerName">Lagnavn</sys:String>
