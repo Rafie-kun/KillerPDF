@@ -510,8 +510,8 @@ namespace KillerPDF
             AfterReplace(find, ActiveViewer.ReplaceTextExt(find, _replaceBox?.Text ?? "", Search.MatchCase, Search.WholeWord));
         }
 
-        // Replaced text sits under a cover now, so the fresh search moves the cursor on to the
-        // next match still showing.
+        // Replaced text no longer reads as the search text, so the fresh search moves the cursor
+        // on to the next match still showing.
         private void AfterReplace(string find, KillerPDF.Controls.TextReplaceResult result)
         {
             _searchDebounce?.Stop();

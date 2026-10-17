@@ -1741,6 +1741,27 @@ internal static class PdfEngineIntegration
         return result;
     }
 
+    /// <summary>Rewrites several lines in place, one after another, and swaps in the result.
+    /// Returns the indexes of the edits the page content could not take.</summary>
+    internal static IReadOnlyList<int> ReplaceTextLines(string path, IReadOnlyList<PdfTextLineEdit> edits)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        ArgumentNullException.ThrowIfNull(edits);
+        byte[] current = File.ReadAllBytes(path);
+        var failed = new List<int>();
+        for (int index = 0; index < edits.Count; index++)
+        {
+            try { current = PdfTextLineEditor.Replace(PdfDocument.Open(current), edits[index]).Document; }
+            catch (Exception ex) when (ex is NotSupportedException or InvalidOperationException
+                or FormatException or ArgumentException)
+            {
+                failed.Add(index);
+            }
+        }
+        if (failed.Count < edits.Count) ReplaceWithBuiltResult(path, current);
+        return failed;
+    }
+
     /// <summary>The installed face that can show the text, starting from the wanted family, for
     /// embedding when a line's own font cannot show it. Null when no face loads.</summary>
     internal static (TrueTypeFont Font, string Family)? LoadTextFont(string family, string text, bool bold, bool italic)

@@ -1,7 +1,9 @@
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
 using KillerPDF.Services;
 using ContentDoc = KillerPDF.Services.PdfContentDocument;
+using EngineDocs = KillerPdf.Engine.Documents;
 
 namespace KillerPDF.Controls
 {
@@ -9,9 +11,10 @@ namespace KillerPDF.Controls
     internal readonly record struct TextReplaceResult(int Occurrences, int Lines, int SkippedTurnedLines);
 
     // Find and Replace (#422). Each PDF line that contains the search text gets the same edit the
-    // Text tool makes when a line is double-clicked: an opaque cover over the line in the sampled
-    // background color, paired with replacement text in the detected font, size and ink color.
-    // Text already placed as an annotation is rewritten in place. The whole pass is one undo.
+    // Text tool makes when a line is double-clicked: the line is rewritten in the page content, in
+    // its own font when that font can show the new text. A line the page content cannot take, such
+    // as recognized text over a scan, falls back to a cover with replacement text on top. Text
+    // already placed as an annotation is rewritten in place. The whole pass is one undo.
     public partial class PdfViewer
     {
         internal TextReplaceResult ReplaceTextExt(string find, string replace, bool matchCase, bool wholeWord,
@@ -38,14 +41,9 @@ namespace KillerPDF.Controls
             CommitActiveTextBox();
             replace ??= string.Empty;
 
-            var snapshot = new Dictionary<int, List<PageAnnotation>>();
-            void Snapshot(int page)
-            {
-                if (snapshot.ContainsKey(page)) return;
-                snapshot[page] = _annotations.TryGetValue(page, out var list) ? [.. list] : [];
-            }
-
             int occurrences = 0, lines = 0, skippedTurned = 0;
+            var direct = new List<DirectReplacement>();
+            var annotationEdits = new List<(int Page, TextAnnotation Original, string Content)>();
             using (var contentDoc = ContentDoc.Open(_currentFile))
             {
                 IEnumerable<int> pages = onlyMatch is { } match
@@ -95,46 +93,113 @@ namespace KillerPDF.Controls
                         onlyCanvas is Rect target ? bounds => Intersection(bounds, target) > 0 : null);
                     foreach (ReplaceLine plan in plans)
                     {
-                        // A line someone already edited is consumed: its replacement text is an
-                        // annotation and gets rewritten below instead.
+                        // A line someone already edited with a cover is consumed: its replacement
+                        // text is an annotation and gets rewritten below instead.
                         if (coversOnPage.Any(cover => cover.IntersectsWith(plan.Bounds))) continue;
-                        Snapshot(pageIndex);
-                        AddReplacementEdit(pageIndex, frame, plan, levelSource[plan.WordIndices[0]]);
+                        var (left, bottom, right, top) = RedactionGeometry.CanvasToPage(plan.Bounds,
+                            frame.PdfWidth, frame.PdfHeight, frame.RenderWidth, frame.RenderHeight, frame.Rotation);
+                        direct.Add(new DirectReplacement(pageIndex, frame, plan, levelSource[plan.WordIndices[0]],
+                            new EngineDocs.PdfContentBounds(left - 0.5, bottom - 0.5, right + 0.5, top + 0.5)));
                         occurrences += plan.MatchBounds.Count;
                         lines++;
                     }
 
                     if (onlyMatch is null && _annotations.TryGetValue(pageIndex, out var annotations))
                     {
-                        for (int i = 0; i < annotations.Count; i++)
+                        foreach (TextAnnotation text in annotations.OfType<TextAnnotation>())
                         {
-                            if (annotations[i] is not TextAnnotation text) continue;
                             var starts = TextReplacePlanner.FindAll(text.Content, find, matchCase, wholeWord);
                             if (starts.Count == 0) continue;
-                            Snapshot(pageIndex);
-                            // A clone carries the new text so the undo snapshot keeps the original.
-                            if (CloneAnnotation(text) is not TextAnnotation updated) continue;
-                            updated.Content = TextReplacePlanner.ReplaceAt(text.Content, starts, find.Length, replace);
-                            annotations[i] = updated;
+                            annotationEdits.Add((pageIndex, text,
+                                TextReplacePlanner.ReplaceAt(text.Content, starts, find.Length, replace)));
                             occurrences += starts.Count;
                             lines++;
                         }
                     }
                 }
             }
+            var result = new TextReplaceResult(occurrences, lines, skippedTurned);
+            if (direct.Count == 0 && annotationEdits.Count == 0) return result;
 
-            if (snapshot.Count > 0)
+            if (direct.Count > 0)
             {
-                PushUndo(new UndoEntry(UndoKind.PageSnapshot, WasDirty: _isDirty, AnnotSnapshot: snapshot));
+                // The page lines change in the page content in one rewrite. Its document undo also
+                // holds the annotations as they were, so the annotation changes made after it undo
+                // with it in one step.
+                var edits = direct.Select(item => new EngineDocs.PdfTextLineEdit(item.Page, item.Region, item.Plan.NewText)
+                {
+                    Substitute = SubstituteFont(item.First, item.Plan.NewText)
+                }).ToList();
+                IReadOnlyList<int> failed = [.. Enumerable.Range(0, direct.Count)];
+                Mouse.OverrideCursor = Cursors.Wait;
+                try
+                {
+                    SaveTempAndReload(keepAnnotations: true, preserveZoom: true,
+                        finalizeSavedFile: path => failed = PdfEngineIntegration.ReplaceTextLines(path, edits));
+                }
+                catch (Exception ex) when (ex is InvalidOperationException or System.IO.IOException) { }
+                finally { Mouse.OverrideCursor = null; }
+                foreach (int index in failed)
+                {
+                    DirectReplacement item = direct[index];
+                    AddReplacementEdit(item.Page, item.Frame, item.Plan, item.First);
+                }
+                ApplyAnnotationEdits(annotationEdits);
                 MarkDirty();
                 ClearSelection();
-                foreach (int page in snapshot.Keys) RenderAllAnnotations(page);
+                foreach (int page in direct.Select(item => item.Page).Concat(annotationEdits.Select(edit => edit.Page)).Distinct())
+                    RenderAllAnnotations(page);
+                return result;
             }
-            return new TextReplaceResult(occurrences, lines, skippedTurned);
+
+            var snapshot = new Dictionary<int, List<PageAnnotation>>();
+            foreach (int page in annotationEdits.Select(edit => edit.Page).Distinct())
+                snapshot[page] = _annotations.TryGetValue(page, out var list) ? [.. list] : [];
+            ApplyAnnotationEdits(annotationEdits);
+            PushUndo(new UndoEntry(UndoKind.PageSnapshot, WasDirty: _isDirty, AnnotSnapshot: snapshot));
+            MarkDirty();
+            ClearSelection();
+            foreach (int page in snapshot.Keys) RenderAllAnnotations(page);
+            return result;
         }
 
-        // One replaced line: the cover over the original text and the paired replacement text,
-        // placed and styled the way StartCoverTextEdit and CommitActiveTextBox do it by hand.
+        // A matched line of page text, with what its fallback edit needs if the page content cannot take it.
+        private readonly record struct DirectReplacement(int Page, CanvasFrame Frame, ReplaceLine Plan,
+            KillerPdf.Engine.Documents.PdfExtractedWord First, EngineDocs.PdfContentBounds Region);
+
+        // A clone carries each new text, so an undo snapshot taken before keeps the original.
+        private void ApplyAnnotationEdits(List<(int Page, TextAnnotation Original, string Content)> edits)
+        {
+            foreach (var (page, original, content) in edits)
+            {
+                if (!_annotations.TryGetValue(page, out var list)) continue;
+                int index = list.IndexOf(original);
+                if (index < 0 || CloneAnnotation(original) is not TextAnnotation updated) continue;
+                updated.Content = content;
+                list[index] = updated;
+            }
+        }
+
+        // The installed face for a line whose own font cannot show its new text, from the font the
+        // line was found in.
+        private static KillerPdf.Engine.Fonts.TrueTypeFont? SubstituteFont(
+            KillerPdf.Engine.Documents.PdfExtractedWord firstWord, string text)
+        {
+            string family = "Segoe UI";
+            bool bold = false, italic = false;
+            if (firstWord.Letters.Count > 0 && !string.IsNullOrEmpty(firstWord.Letters[0].FontName))
+            {
+                var detected = PdfFontStyle.FromPdfName(firstWord.Letters[0].FontName!);
+                family = detected.Family;
+                bold = detected.Bold;
+                italic = detected.Italic;
+            }
+            family = PdfFontStyle.ResolveInstalledFamily(family, MainWindow.SystemFontNames);
+            return PdfEngineIntegration.LoadTextFont(family, text, bold, italic)?.Font;
+        }
+
+        // One replaced line edited the fallback way: a cover over the original text and the paired
+        // replacement text, placed and styled the way StartCoverTextEdit and CommitActiveTextBox do it.
         private void AddReplacementEdit(int pageIndex, CanvasFrame frame, ReplaceLine plan,
             KillerPdf.Engine.Documents.PdfExtractedWord firstWord)
         {
