@@ -22,9 +22,9 @@
 
     <!-- Resting accent edge: the accent at 40%, for a lip that reads as accent-colored
          without claiming to be the live thing. The active tab of the UNFOCUSED pane. -->
-    <SolidColorBrush x:Key="TabEdgeBrush"          Color="#66ff6f91" po:Freeze="True"/>
-    <SolidColorBrush x:Key="ScrollThumbBrush"      Color="#55ff6f91" po:Freeze="True"/>
-    <SolidColorBrush x:Key="ScrollThumbHoverBrush" Color="#ff6f91" po:Freeze="True"/>
+    <SolidColorBrush x:Key="TabEdgeBrush"          Color="#66ffa9bd" po:Freeze="True"/>
+    <SolidColorBrush x:Key="ScrollThumbBrush"      Color="#55ffa9bd" po:Freeze="True"/>
+    <SolidColorBrush x:Key="ScrollThumbHoverBrush" Color="#ffa9bd" po:Freeze="True"/>
 
     <!-- Shortcut categories. One color per group, shared by the list headings and the
          keyboard map's keycap borders (KeyboardMapOverlay.cs). -->
@@ -36,7 +36,7 @@
     <SolidColorBrush x:Key="KsCatTabs"      Color="#ffd319" po:Freeze="True"/>
     <SolidColorBrush x:Key="KsCatHelp"      Color="#39ff14" po:Freeze="True"/>
 
-    <SolidColorBrush x:Key="PrimaryBrush" Color="#ff6f91" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" />
+    <SolidColorBrush x:Key="PrimaryBrush" Color="#ffa9bd" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" />
 
     <SolidColorBrush x:Key="AccentLogo" Color="#ff6f91" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" />
 
@@ -104,8 +104,8 @@
     <SolidColorBrush x:Key="TitleBarBrush" Color="#3b3642" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" />
 
     <SolidColorBrush x:Key="FooterAccentBrush" Color="#FF7696"/>
-    <SolidColorBrush x:Key="SelectionAccent" Color="#FFFF6F91" po:Freeze="True"/>
-    <SolidColorBrush x:Key="RadioAccent" Color="#FFFF6F91" po:Freeze="True"/>
+    <SolidColorBrush x:Key="SelectionAccent" Color="#FFFFA9BD" po:Freeze="True"/>
+    <SolidColorBrush x:Key="RadioAccent" Color="#FFFFA9BD" po:Freeze="True"/>
     <SolidColorBrush x:Key="DialogTitleBarBrush" Color="#FF3B3642" po:Freeze="True"/>
     <SolidColorBrush x:Key="SurfaceHoverBrush" Color="#FFA75167" po:Freeze="True"/>
     <SolidColorBrush x:Key="FooterBackgroundBrush" Color="#FF3B3642" po:Freeze="True"/>
