@@ -25,7 +25,10 @@ public sealed partial record PdfMeasurementProfile
         Precision = precision;
     }
 
-    /// <summary>Gets the profile name.</summary>
+    /// <summary>
+    /// Gets the profile name. Saved measurements and page scales write it as the scale ratio
+    /// text (/R) other viewers show, so a name such as "1 in = 10 ft" reads well there.
+    /// </summary>
     public string Name { get; }
     /// <summary>Gets drawing units represented by one PDF point.</summary>
     public double UnitsPerPoint { get; }

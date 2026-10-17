@@ -217,7 +217,8 @@ public sealed partial class PdfPageRenderer
             return RenderUncached(pageIndex, options, cancellationToken);
         var key = new RenderCacheKey(pageIndex, options.Width, options.Height,
             options.TransparentBackground, options.IncludeAnnotations,
-            options.IncludeFormFields, options.IncludeRedactionMarks);
+            options.IncludeFormFields, options.IncludeRedactionMarks,
+            options.IncludeMeasurementAnnotations);
         return _renderCache.GetOrAdd(key,
             _ => RenderUncached(pageIndex, options, cancellationToken));
     }
@@ -2351,6 +2352,7 @@ public sealed partial class PdfPageRenderer
                 bool widget = IsName(annotation, "Subtype", "Widget");
                 if (widget ? !options.IncludeFormFields : !options.IncludeAnnotations) continue;
                 if (!options.IncludeRedactionMarks && IsName(annotation, "Subtype", "Redact")) continue;
+                if (!options.IncludeMeasurementAnnotations && IsMeasurementAnnotation(annotation)) continue;
                 // ISO 32000-2 12.5.3: a Hidden annotation is neither displayed nor printed,
                 // whatever its other flags say.
                 if (annotation.TryGetValue(Name("F"), out PdfObject? flagsValue)
@@ -8519,7 +8521,17 @@ public sealed partial class PdfPageRenderer
     }
     private readonly record struct RenderCacheKey(
         int PageIndex, int Width, int Height, bool TransparentBackground,
-        bool IncludeAnnotations, bool IncludeFormFields, bool IncludeRedactionMarks);
+        bool IncludeAnnotations, bool IncludeFormFields, bool IncludeRedactionMarks,
+        bool IncludeMeasurementAnnotations);
+
+    // A dimension line, polyline, or polygon, or one of those carrying a /Measure dictionary:
+    // what PdfMeasurementAnnotationReader reads back as a measurement.
+    private bool IsMeasurementAnnotation(PdfDictionary annotation) =>
+        (IsName(annotation, "Subtype", "Line") || IsName(annotation, "Subtype", "PolyLine")
+            || IsName(annotation, "Subtype", "Polygon"))
+        && (annotation.ContainsKey(Name("Measure")) || IsName(annotation, "IT", "LineDimension")
+            || IsName(annotation, "IT", "PolyLineDimension")
+            || IsName(annotation, "IT", "PolygonDimension"));
     internal readonly record struct ImageCacheKey(PdfStream Stream, int ResolutionLevel,
         int MaskWidth = 0, int MaskHeight = 0);
     internal sealed record DecodedImage(byte[] Samples, int Width, int Height, byte[]? Alpha = null,

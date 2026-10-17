@@ -44,6 +44,12 @@ public sealed record PdfRenderOptions
     /// draws the marks itself turns this off so they are not shown twice.
     /// </summary>
     public bool IncludeRedactionMarks { get; init; } = true;
+    /// <summary>
+    /// Gets whether measurement annotations (dimension lines, polylines, and polygons, and any
+    /// line, polyline, or polygon with a /Measure dictionary) are painted. A viewer that draws
+    /// and edits measurements itself turns this off so they are not shown twice.
+    /// </summary>
+    public bool IncludeMeasurementAnnotations { get; init; } = true;
     /// <summary>Gets the caller-supplied output pixel-buffer limit.</summary>
     public long PixelByteLimit { get; }
     /// <summary>Gets whether the renderer may reuse and retain this finished bitmap.</summary>

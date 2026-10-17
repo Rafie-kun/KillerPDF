@@ -608,8 +608,16 @@ internal static class PdfPreflightDocumentChecks
                     if (!IsName(measure, "Subtype", "RL"))
                         throw new InvalidOperationException(
                             "A measurement annotation does not use a rectilinear scale.");
+                    // ISO 32000 12.9.1: /X converts points to the drawing unit and /D converts
+                    // that unit to the distance unit, so the scale is their product.
                     (double scale, string unit, int precision) = ReadMeasurementFormat(
-                        document, measure, "D");
+                        document, measure, "X");
+                    if (measure.ContainsKey(Name("D")))
+                    {
+                        (double distanceScale, unit, precision) = ReadMeasurementFormat(
+                            document, measure, "D");
+                        scale *= distanceScale;
+                    }
                     findings.Add(Information("Measurement.Calibration",
                         $"Measurement scale: {scale:R} {unit} per PDF point, precision {precision}.",
                         page.Index, objectNumber));

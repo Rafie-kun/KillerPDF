@@ -2118,9 +2118,13 @@ public sealed class PdfIncrementalAnnotationEditorTests
             annotation[Name("IT")]).ValueAsLatin1());
         PdfDictionary measure = Assert.IsType<PdfDictionary>(annotation[Name("Measure")]);
         Assert.Equal("RL", Assert.IsType<PdfName>(measure[Name("Subtype")]).ValueAsLatin1());
+        PdfDictionary scale = Assert.IsType<PdfDictionary>(
+            Assert.IsType<PdfArray>(measure[Name("X")])[0]);
+        Assert.Equal(0.125, Assert.IsType<PdfReal>(scale[Name("C")]).Value);
         PdfDictionary distance = Assert.IsType<PdfDictionary>(
             Assert.IsType<PdfArray>(measure[Name("D")])[0]);
-        Assert.Equal(0.125, Assert.IsType<PdfReal>(distance[Name("C")]).Value);
+        // The distance format converts from the /X unit, so it carries no second scale.
+        Assert.Equal(1, Assert.IsType<PdfInteger>(distance[Name("C")]).Value);
         Assert.Equal(1000, Assert.IsType<PdfInteger>(distance[Name("D")]).Value);
         ReadOnlySpan<byte> units = Assert.IsType<PdfString>(distance[Name("U")]).Bytes.Span;
         Assert.Equal("ft", Encoding.BigEndianUnicode.GetString(units[2..]));
@@ -2184,7 +2188,9 @@ public sealed class PdfIncrementalAnnotationEditorTests
         PdfDictionary measure = Assert.IsType<PdfDictionary>(polygon[Name("Measure")]);
         PdfDictionary area = Assert.IsType<PdfDictionary>(
             Assert.IsType<PdfArray>(measure[Name("A")])[0]);
-        Assert.Equal(0.25, Assert.IsType<PdfReal>(area[Name("C")]).Value);
+        Assert.Equal(1, Assert.IsType<PdfInteger>(area[Name("C")]).Value);
+        Assert.Equal(0.5, Assert.IsType<PdfReal>(Assert.IsType<PdfDictionary>(
+            Assert.IsType<PdfArray>(measure[Name("X")])[0])[Name("C")]).Value);
     }
 
     [Fact]

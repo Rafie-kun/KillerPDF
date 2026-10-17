@@ -31,6 +31,12 @@ public sealed class PdfIncrementalAnnotationEditor
     private static readonly PdfName NamespacesName = new("Namespaces"u8);
     private static readonly PdfName VersionName = new("Version"u8);
     private static readonly PdfName MetadataName = new("Metadata"u8);
+    private static readonly PdfName ViewportsName = new("VP"u8);
+    private static readonly PdfName MediaBoxName = new("MediaBox"u8);
+    // Where KillerPDF keeps a measurement's label position and size: [x y size] in page space.
+    // Line annotations also carry the standard /CO caption offset for other viewers.
+    private const string CaptionKey = "KillerPDFCaption";
+    private const string FeetAndInches = "ft-in";
 
     private readonly PdfDocument _document;
     private readonly PdfPageTree _tree;
@@ -38,6 +44,7 @@ public sealed class PdfIncrementalAnnotationEditor
     private readonly List<PendingAnnotation> _annotations = [];
     private readonly List<PendingRemoval> _removals = [];
     private readonly List<PendingAnnotationUpdate> _updates = [];
+    private readonly Dictionary<int, PendingViewport> _viewports = [];
 
     /// <summary>Initializes a byte-preserving annotation editor for an opened document.</summary>
     public PdfIncrementalAnnotationEditor(PdfDocument document)
@@ -51,7 +58,32 @@ public sealed class PdfIncrementalAnnotationEditor
     public int PageCount => _pages.Count;
 
     /// <summary>Gets whether this editor contains pending annotation changes.</summary>
-    public bool HasChanges => _annotations.Count > 0 || _removals.Count > 0 || _updates.Count > 0;
+    public bool HasChanges => _annotations.Count > 0 || _removals.Count > 0 || _updates.Count > 0
+        || _viewports.Count > 0;
+
+    /// <summary>
+    /// Sets the measurement scale of a page by replacing its /VP viewports with one viewport that
+    /// carries <paramref name="measurement"/>. The viewport covers <paramref name="area"/>, or the
+    /// page's media box when no area is given. A null profile removes the page's viewports.
+    /// </summary>
+    public PdfIncrementalAnnotationEditor SetPageMeasurementScale(
+        int pageIndex, PdfMeasurementProfile? measurement, PdfContentBounds? area = null)
+    {
+        ValidatePage(pageIndex);
+        if (area is { } bounds)
+        {
+            if (measurement is null)
+                throw new ArgumentException(
+                    "Removing a page scale takes no area.", nameof(area));
+            if (!double.IsFinite(bounds.Left) || !double.IsFinite(bounds.Bottom)
+                || !double.IsFinite(bounds.Right) || !double.IsFinite(bounds.Top)
+                || bounds.Right <= bounds.Left || bounds.Top <= bounds.Bottom)
+                throw new ArgumentException(
+                    "A page scale area must be a finite rectangle with positive size.", nameof(area));
+        }
+        _viewports[pageIndex] = new PendingViewport(measurement, area);
+        return this;
+    }
 
     /// <summary>Removes visual styling from every indirect link annotation.</summary>
     public PdfIncrementalAnnotationEditor StripLinkAppearances()
@@ -428,10 +460,12 @@ public sealed class PdfIncrementalAnnotationEditor
         PdfLineAnnotationIntent? intent = null,
         PdfMeasurementProfile? measurement = null,
         double leaderLineLength = 0,
-        double leaderLineExtension = 0)
+        double leaderLineExtension = 0,
+        PdfMeasurementCaption? caption = null)
     {
         ValidatePage(pageIndex);
         ValidateStroke(lineWidth, opacity);
+        ValidateCaption(caption, contents);
         double[]? dash = ValidateDashPattern(dashPattern);
         if (!Enum.IsDefined(startEnding))
             throw new ArgumentOutOfRangeException(nameof(startEnding));
@@ -459,8 +493,26 @@ public sealed class PdfIncrementalAnnotationEditor
             pageIndex, start, end, color ?? new PdfRgbColor(0, 0, 0),
             lineWidth, opacity, contents, annotationMetadata, dash,
             startEnding, endEnding, interiorColor, intent, measurement,
-            leaderLineLength, leaderLineExtension));
+            leaderLineLength, leaderLineExtension, caption));
         return this;
+    }
+
+    /// <summary>Adds an editable calibrated distance measurement with a calculated label.</summary>
+    public PdfIncrementalAnnotationEditor AddDistanceMeasurement(
+        int pageIndex, PdfPoint start, PdfPoint end, PdfMeasurementProfile measurement,
+        PdfRgbColor? color = null, double lineWidth = 1, double opacity = 1,
+        string? contents = null, PdfAnnotationMetadata? annotationMetadata = null,
+        IReadOnlyList<double>? dashPattern = null, PdfMeasurementCaption? caption = null)
+    {
+        ArgumentNullException.ThrowIfNull(measurement);
+        double distance = PdfMeasurement.Distance(measurement,
+            new PdfMeasurementPoint(start.X, start.Y), new PdfMeasurementPoint(end.X, end.Y));
+        string label = contents ?? distance.ToString(
+            $"F{measurement.Precision}", CultureInfo.InvariantCulture)
+            + " " + measurement.UnitSymbol;
+        return AddLine(pageIndex, start, end, color, lineWidth, opacity, label,
+            annotationMetadata, dashPattern, intent: PdfLineAnnotationIntent.Dimension,
+            measurement: measurement, caption: caption);
     }
 
     /// <summary>Adds a rectangle annotation with optional fill and dashed border.</summary>
@@ -497,10 +549,11 @@ public sealed class PdfIncrementalAnnotationEditor
         PdfRgbColor? interiorColor = null,
         PdfAnnotationMetadata? annotationMetadata = null,
         PdfVertexAnnotationIntent? intent = null,
-        PdfMeasurementProfile? measurement = null)
+        PdfMeasurementProfile? measurement = null,
+        PdfMeasurementCaption? caption = null)
         => AddVertex(pageIndex, vertices, false, color, null, lineWidth,
             opacity, contents, startEnding, endEnding, dashPattern,
-            interiorColor, annotationMetadata, intent, measurement);
+            interiorColor, annotationMetadata, intent, measurement, caption);
 
     /// <summary>Adds an editable three-point angle measurement with a calculated label.</summary>
     public PdfIncrementalAnnotationEditor AddAngleMeasurement(
@@ -508,7 +561,8 @@ public sealed class PdfIncrementalAnnotationEditor
         PdfRgbColor? color = null, double lineWidth = 1, double opacity = 1,
         int precision = 1, string? contents = null,
         PdfAnnotationMetadata? annotationMetadata = null,
-        IReadOnlyList<double>? dashPattern = null)
+        IReadOnlyList<double>? dashPattern = null,
+        PdfMeasurementCaption? caption = null)
     {
         if (precision is < 0 or > 10)
             throw new ArgumentOutOfRangeException(nameof(precision));
@@ -520,7 +574,7 @@ public sealed class PdfIncrementalAnnotationEditor
         return AddPolyline(pageIndex, [first, vertex, second], color,
             lineWidth, opacity, label, dashPattern: dashPattern,
             annotationMetadata: annotationMetadata,
-            intent: PdfVertexAnnotationIntent.Dimension);
+            intent: PdfVertexAnnotationIntent.Dimension, caption: caption);
     }
 
     /// <summary>Adds an editable closed-path perimeter measurement with a calculated label.</summary>
@@ -528,7 +582,7 @@ public sealed class PdfIncrementalAnnotationEditor
         int pageIndex, IReadOnlyList<PdfPoint> vertices, PdfMeasurementProfile measurement,
         PdfRgbColor? color = null, double lineWidth = 1, double opacity = 1,
         string? contents = null, PdfAnnotationMetadata? annotationMetadata = null,
-        IReadOnlyList<double>? dashPattern = null)
+        IReadOnlyList<double>? dashPattern = null, PdfMeasurementCaption? caption = null)
     {
         ArgumentNullException.ThrowIfNull(vertices);
         ArgumentNullException.ThrowIfNull(measurement);
@@ -542,7 +596,8 @@ public sealed class PdfIncrementalAnnotationEditor
             ? [.. vertices, vertices[0]] : [.. vertices];
         return AddPolyline(pageIndex, closed, color, lineWidth, opacity, label,
             dashPattern: dashPattern, annotationMetadata: annotationMetadata,
-            intent: PdfVertexAnnotationIntent.Dimension, measurement: measurement);
+            intent: PdfVertexAnnotationIntent.Dimension, measurement: measurement,
+            caption: caption);
     }
 
     /// <summary>Adds an editable polygon area measurement with a calculated label.</summary>
@@ -551,7 +606,7 @@ public sealed class PdfIncrementalAnnotationEditor
         PdfRgbColor? strokeColor = null, PdfRgbColor? fillColor = null,
         double lineWidth = 1, double opacity = 1, string? contents = null,
         PdfAnnotationMetadata? annotationMetadata = null,
-        IReadOnlyList<double>? dashPattern = null)
+        IReadOnlyList<double>? dashPattern = null, PdfMeasurementCaption? caption = null)
     {
         ArgumentNullException.ThrowIfNull(vertices);
         ArgumentNullException.ThrowIfNull(measurement);
@@ -562,7 +617,7 @@ public sealed class PdfIncrementalAnnotationEditor
             + " " + measurement.UnitSymbol + "^2";
         return AddPolygon(pageIndex, vertices, strokeColor, fillColor, lineWidth,
             opacity, label, dashPattern, annotationMetadata,
-            PdfVertexAnnotationIntent.Dimension, measurement);
+            PdfVertexAnnotationIntent.Dimension, measurement, caption);
     }
 
     /// <summary>Adds a polygon annotation with optional fill, dash style, and intent.</summary>
@@ -573,11 +628,12 @@ public sealed class PdfIncrementalAnnotationEditor
         IReadOnlyList<double>? dashPattern = null,
         PdfAnnotationMetadata? annotationMetadata = null,
         PdfVertexAnnotationIntent? intent = null,
-        PdfMeasurementProfile? measurement = null)
+        PdfMeasurementProfile? measurement = null,
+        PdfMeasurementCaption? caption = null)
         => AddVertex(pageIndex, vertices, true, strokeColor, fillColor,
             lineWidth, opacity, contents, PdfLineEndingStyle.None,
             PdfLineEndingStyle.None, dashPattern, null, annotationMetadata, intent,
-            measurement);
+            measurement, caption);
 
     /// <summary>Adds a single-path ink annotation.</summary>
     public PdfIncrementalAnnotationEditor AddInk(
@@ -895,11 +951,12 @@ public sealed class PdfIncrementalAnnotationEditor
         PdfLineEndingStyle startEnding, PdfLineEndingStyle endEnding,
         IReadOnlyList<double>? dashPattern, PdfRgbColor? interiorColor,
         PdfAnnotationMetadata? metadata, PdfVertexAnnotationIntent? intent,
-        PdfMeasurementProfile? measurement)
+        PdfMeasurementProfile? measurement, PdfMeasurementCaption? caption)
     {
         ValidatePage(pageIndex);
         ArgumentNullException.ThrowIfNull(vertices);
         ValidateStroke(lineWidth, opacity);
+        ValidateCaption(caption, contents);
         if (!Enum.IsDefined(startEnding))
             throw new ArgumentOutOfRangeException(nameof(startEnding));
         if (!Enum.IsDefined(endEnding))
@@ -929,8 +986,15 @@ public sealed class PdfIncrementalAnnotationEditor
         _annotations.Add(new PendingVertex(pageIndex, values, closed,
             strokeColor ?? new PdfRgbColor(0, 0, 0), fillColor, lineWidth,
             opacity, contents, startEnding, endEnding, dash, interiorColor,
-            metadata, intent, measurement));
+            metadata, intent, measurement, caption));
         return this;
+    }
+
+    private static void ValidateCaption(PdfMeasurementCaption? caption, string? contents)
+    {
+        if (caption is not null && string.IsNullOrWhiteSpace(contents))
+            throw new ArgumentException(
+                "A caption shows the annotation contents, so it requires contents.", nameof(caption));
     }
 
     private PdfIncrementalAnnotationEditor AddTextMarkup(
@@ -993,7 +1057,8 @@ public sealed class PdfIncrementalAnnotationEditor
     /// <summary>Validates pending annotation edits and appends one incremental revision.</summary>
     public byte[] Build(PdfIncrementalUpdateWriteOptions? options = null)
     {
-        if (_annotations.Count == 0 && _removals.Count == 0 && _updates.Count == 0)
+        if (_annotations.Count == 0 && _removals.Count == 0 && _updates.Count == 0
+            && _viewports.Count == 0)
             throw new InvalidOperationException("The incremental annotation update is empty.");
         if (_document.PasswordAuthenticationRole == PdfPasswordAuthenticationRole.User
             && (_document.DeclaredPermissions is not PdfDocumentPermissions permissions
@@ -1020,9 +1085,12 @@ public sealed class PdfIncrementalAnnotationEditor
             ? []
             : PrepareTaggedAnnotationStructure(update, allocated);
         Dictionary<TrueTypeFont, EditorFontBinding> fonts = AllocateFonts(update);
-        PdfIndirectReference? baselineRedactionFont = _annotations
+        // One plain Helvetica serves redaction overlay text and measurement captions.
+        PdfIndirectReference? baselineHelvetica = _annotations
             .OfType<PendingRedaction>().Any(value =>
                 value.OverlayText is not null && value.OverlayFont is null)
+            || _annotations.Any(value => value is PendingLine { Caption: not null }
+                or PendingVertex { Caption: not null })
             ? update.AddObject(Dictionary(
                 ("Type", Name("Font")), ("Subtype", Name("Type1")),
                 ("BaseFont", Name("Helvetica")),
@@ -1077,7 +1145,8 @@ public sealed class PdfIncrementalAnnotationEditor
                         WithStructureParent(LineDictionary(line, page.Reference,
                             item.AnnotationReference, item.AppearanceReference!), item,
                             structureParentKeys));
-                    update.SetObject(item.AppearanceReference!, LineAppearance(line));
+                    update.SetObject(item.AppearanceReference!,
+                        LineAppearance(line, baselineHelvetica));
                     break;
                 case PendingShape shape:
                     update.SetObject(item.AnnotationReference,
@@ -1092,7 +1161,8 @@ public sealed class PdfIncrementalAnnotationEditor
                         WithStructureParent(VertexDictionary(vertex, page.Reference,
                             item.AnnotationReference, item.AppearanceReference!), item,
                             structureParentKeys));
-                    update.SetObject(item.AppearanceReference!, VertexAppearance(vertex));
+                    update.SetObject(item.AppearanceReference!,
+                        VertexAppearance(vertex, baselineHelvetica));
                     break;
                 case PendingInk ink:
                     update.SetObject(item.AnnotationReference,
@@ -1120,7 +1190,7 @@ public sealed class PdfIncrementalAnnotationEditor
                     EditorFontBinding? redactionFont = redaction.OverlayFont is null
                         ? null : fonts[redaction.OverlayFont];
                     PdfIndirectReference? fontReference = redactionFont?.Type0Reference
-                        ?? baselineRedactionFont;
+                        ?? baselineHelvetica;
                     PdfName? fontResource = redaction.OverlayText is null
                         ? null : redactionFont?.Resource ?? Name("Helv");
                     update.SetObject(item.AnnotationReference,
@@ -1161,6 +1231,7 @@ public sealed class PdfIncrementalAnnotationEditor
             }
         }
 
+        var replacedPages = new HashSet<int>();
         foreach (int pageIndex in allocated.Select(item => item.Definition.PageIndex)
                      .Concat(_removals.Select(item => item.PageIndex)).Distinct())
         {
@@ -1175,8 +1246,12 @@ public sealed class PdfIncrementalAnnotationEditor
                     {
                         (item.AnnotationReference, AllocatedAnnotationName(item)),
                         (item.PopupReference, $"KillerPDF-Popup-{item.PopupReference.ObjectNumber}")
-                    }), pageRemovals);
+                    }), replacedPages, pageRemovals);
         }
+        foreach (int pageIndex in _viewports.Keys)
+            if (!replacedPages.Contains(pageIndex))
+                update.ReplaceObject(_pages[pageIndex].Reference.ObjectNumber,
+                    PageDictionary(_pages[pageIndex]));
         return update.Build(options);
     }
 
@@ -2286,7 +2361,7 @@ public sealed class PdfIncrementalAnnotationEditor
     private void AppendPageAnnotations(
         PdfIncrementalUpdateBuilder update, PdfPageTreeEntry page,
         IEnumerable<(PdfIndirectReference Reference, string Name)> additions,
-        IReadOnlyList<PendingRemoval>? removals = null)
+        ISet<int> replacedPages, IReadOnlyList<PendingRemoval>? removals = null)
     {
         var pending = additions.ToArray();
         var removed = (removals ?? []).SelectMany(value =>
@@ -2338,11 +2413,12 @@ public sealed class PdfIncrementalAnnotationEditor
                 {
                     PdfIndirectReference replacementArray = update.AddObject(
                         new PdfArray(values));
-                    PdfDictionary replacementPage = new(page.Dictionary
+                    PdfDictionary replacementPage = new(PageDictionary(page)
                         .Where(entry => !entry.Key.Equals(AnnotsName))
                         .Append(new KeyValuePair<PdfName, PdfObject>(
                             AnnotsName, replacementArray)));
                     update.ReplaceObject(page.Reference.ObjectNumber, replacementPage);
+                    replacedPages.Add(page.Index);
                     return;
                 }
                 update.ReplaceObject(arrayReference.ObjectNumber, new PdfArray(values));
@@ -2351,10 +2427,11 @@ public sealed class PdfIncrementalAnnotationEditor
         }
         else
             AddPendingAnnotations();
-        var replacement = new PdfDictionary(page.Dictionary
+        var replacement = new PdfDictionary(PageDictionary(page)
             .Where(entry => !entry.Key.Equals(AnnotsName))
             .Append(new KeyValuePair<PdfName, PdfObject>(AnnotsName, new PdfArray(values))));
         update.ReplaceObject(page.Reference.ObjectNumber, replacement);
+        replacedPages.Add(page.Index);
 
         void AddPendingAnnotations()
         {
@@ -3082,43 +3159,161 @@ public sealed class PdfIncrementalAnnotationEditor
             entries.Add(("LL", Number(line.LeaderLineLength)));
         if (line.LeaderLineExtension != 0)
             entries.Add(("LLE", Number(line.LeaderLineExtension)));
+        if (line.Caption is not null)
+        {
+            (double along, double across) = CaptionOffset(line);
+            entries.Add(("Cap", new PdfBoolean(true)));
+            entries.Add(("CP", Name("Inline")));
+            entries.Add(("CO", new PdfArray([Number(along), Number(across)])));
+            entries.Add((CaptionKey, CaptionArray(line.Caption)));
+        }
         return Dictionary([.. entries]);
     }
 
+    // The standard caption offset: along the line from its midpoint, then across it, with the
+    // leader-line offset already applied to the line the caption sits on.
+    private static (double Along, double Across) CaptionOffset(PendingLine line)
+    {
+        double dx = line.End.X - line.Start.X;
+        double dy = line.End.Y - line.Start.Y;
+        double length = Math.Sqrt(dx * dx + dy * dy);
+        double ux = dx / length, uy = dy / length;
+        double baseX = (line.Start.X + line.End.X) / 2 - uy * line.LeaderLineLength;
+        double baseY = (line.Start.Y + line.End.Y) / 2 + ux * line.LeaderLineLength;
+        double offsetX = line.Caption!.Center.X - baseX;
+        double offsetY = line.Caption.Center.Y - baseY;
+        return (offsetX * ux + offsetY * uy, -offsetX * uy + offsetY * ux);
+    }
+
+    private static PdfArray CaptionArray(PdfMeasurementCaption caption) =>
+        new([Number(caption.Center.X), Number(caption.Center.Y), Number(caption.FontSize)]);
+
+    // The label box, centered on the caption point, sized from Helvetica's widths.
+    private static (double Left, double Bottom, double Right, double Top, double TextX,
+        double TextY) CaptionBox(string text, PdfMeasurementCaption caption)
+    {
+        double size = caption.FontSize;
+        double width = PdfWinAnsiText.Width("Helvetica", PdfWinAnsiText.Encode(text)) * size;
+        double padding = size * 0.3;
+        double left = caption.Center.X - width / 2 - padding;
+        double bottom = caption.Center.Y - size / 2 - padding;
+        return (left, bottom, caption.Center.X + width / 2 + padding,
+            caption.Center.Y + size / 2 + padding,
+            caption.Center.X - width / 2, caption.Center.Y - size * 0.36);
+    }
+
+    private static IEnumerable<PdfPoint> CaptionCorners(string? text, PdfMeasurementCaption? caption)
+    {
+        if (caption is null || text is null) return [];
+        var box = CaptionBox(text, caption);
+        return [new PdfPoint(box.Left, box.Bottom), new PdfPoint(box.Right, box.Top)];
+    }
+
+    private static bool DrawsCaption(string? text, PdfMeasurementCaption? caption,
+        PdfIndirectReference? font) =>
+        caption is not null && font is not null && text is not null
+        && PdfWinAnsiText.CanEncode(text);
+
+    // Writes the label over a white box so it stays readable on top of the drawing.
+    private static void WriteCaption(Stream output, string text,
+        PdfMeasurementCaption caption, PdfRgbColor color, Bounds bounds)
+    {
+        var box = CaptionBox(text, caption);
+        WriteAscii(output,
+            $"1 1 1 rg\n{Format(box.Left - bounds.X)} {Format(box.Bottom - bounds.Y)} " +
+            $"{Format(box.Right - box.Left)} {Format(box.Top - box.Bottom)} re\nf\n" +
+            $"BT\n/Helv {Format(caption.FontSize)} Tf\n{ColorOperands(color)} rg\n" +
+            $"1 0 0 1 {Format(box.TextX - bounds.X)} {Format(box.TextY - bounds.Y)} Tm\n");
+        output.Write(PdfObjectWriter.Write(new PdfString(
+            PdfWinAnsiText.Encode(text), PdfStringForm.Literal)));
+        output.Write(" Tj\nET\n"u8);
+    }
+
+    private PdfDictionary PageDictionary(PdfPageTreeEntry page)
+    {
+        if (!_viewports.TryGetValue(page.Index, out PendingViewport? viewport))
+            return page.Dictionary;
+        IEnumerable<KeyValuePair<PdfName, PdfObject>> entries = page.Dictionary
+            .Where(entry => !entry.Key.Equals(ViewportsName));
+        if (viewport.Measurement is null) return new PdfDictionary(entries);
+        PdfContentBounds area = viewport.Area ?? PageMediaBox(page);
+        PdfDictionary value = Dictionary(
+            ("Type", Name("Viewport")),
+            ("BBox", new PdfArray([Number(area.Left), Number(area.Bottom),
+                Number(area.Right), Number(area.Top)])),
+            ("Name", UnicodeString(viewport.Measurement.Name)),
+            ("Measure", MeasurementDictionary(viewport.Measurement, true)));
+        return new PdfDictionary(entries.Append(
+            new KeyValuePair<PdfName, PdfObject>(ViewportsName, new PdfArray([value]))));
+    }
+
+    private PdfContentBounds PageMediaBox(PdfPageTreeEntry page)
+    {
+        if ((page.Dictionary.TryGetValue(MediaBoxName, out PdfObject? value)
+                || page.InheritedValues.TryGetValue(MediaBoxName, out value))
+            && ResolveValue(value, $"Page {page.Index + 1} /MediaBox value") is PdfArray box
+            && box.Count == 4)
+        {
+            double[] numbers = new double[4];
+            for (int index = 0; index < 4; index++)
+            {
+                numbers[index] = ResolveValue(box[index],
+                    $"Page {page.Index + 1} /MediaBox entry") switch
+                {
+                    PdfInteger integer => integer.Value,
+                    PdfReal real => real.Value,
+                    _ => double.NaN
+                };
+            }
+            if (numbers.All(double.IsFinite)
+                && numbers[0] != numbers[2] && numbers[1] != numbers[3])
+                return new PdfContentBounds(Math.Min(numbers[0], numbers[2]),
+                    Math.Min(numbers[1], numbers[3]), Math.Max(numbers[0], numbers[2]),
+                    Math.Max(numbers[1], numbers[3]));
+        }
+        throw new InvalidOperationException(
+            $"Page {page.Index + 1} has no usable /MediaBox for a page scale.");
+    }
+
+    // ISO 32000 12.9.1: the first /X format converts default user space to the drawing unit,
+    // and the first /D and /A formats convert from that unit, so they carry a factor of 1. The
+    // profile name is written as the scale ratio text (/R). A feet-and-inches profile counts in
+    // feet and chains an inches format after it, the way Acrobat shows 3 ft 4 in.
     private static PdfDictionary MeasurementDictionary(
         PdfMeasurementProfile profile, bool includeArea)
     {
         long denominator = 1;
         for (int index = 0; index < profile.Precision; index++) denominator *= 10;
-        PdfDictionary format = Dictionary(
-            ("Type", Name("NumberFormat")),
-            ("U", UnicodeString(profile.UnitSymbol)),
-            ("C", Number(profile.UnitsPerPoint)),
-            ("F", Name("D")),
-            ("D", new PdfInteger(denominator)),
-            ("FD", new PdfBoolean(true)));
-        PdfArray formats = new([format]);
+        bool feetAndInches = profile.UnitSymbol == FeetAndInches;
+        PdfArray Formats(double conversion) => feetAndInches
+            ? new PdfArray([NumberFormat("ft", conversion, 1), NumberFormat("in", 12, denominator)])
+            : new PdfArray([NumberFormat(profile.UnitSymbol, conversion, denominator)]);
+        PdfArray scale = Formats(profile.UnitsPerPoint);
         var entries = new List<(string, PdfObject)>
         {
             ("Type", Name("Measure")),
             ("Subtype", Name("RL")),
-            ("R", UnicodeString($"1 pt = {Format(profile.UnitsPerPoint)} {profile.UnitSymbol}")),
-            ("X", formats),
-            ("Y", formats),
-            ("D", formats)
+            ("R", UnicodeString(profile.Name)),
+            ("X", scale),
+            ("Y", scale),
+            ("D", Formats(1))
         };
         if (includeArea)
-            entries.Add(("A", new PdfArray([Dictionary(
-                ("Type", Name("NumberFormat")),
-                ("U", UnicodeString(profile.UnitSymbol + "^2")),
-                ("C", Number(profile.UnitsPerPoint * profile.UnitsPerPoint)),
-                ("F", Name("D")),
-                ("D", new PdfInteger(denominator)),
-                ("FD", new PdfBoolean(true)))])));
+            entries.Add(("A", new PdfArray([NumberFormat(
+                "sq " + (feetAndInches ? "ft" : profile.UnitSymbol), 1, denominator)])));
         return Dictionary([.. entries]);
     }
 
-    private static PdfStream LineAppearance(PendingLine line)
+    private static PdfDictionary NumberFormat(string unit, double conversion, long denominator) =>
+        Dictionary(
+            ("Type", Name("NumberFormat")),
+            ("U", UnicodeString(unit)),
+            ("C", Number(conversion)),
+            ("F", Name("D")),
+            ("D", new PdfInteger(denominator)),
+            ("FD", new PdfBoolean(true)));
+
+    private static PdfStream LineAppearance(PendingLine line, PdfIndirectReference? font)
     {
         Bounds bounds = PointBounds(LineBoundsPoints(line),
             LineEndingPadding(line.LineWidth, line.StartEnding, line.EndEnding));
@@ -3145,15 +3340,19 @@ public sealed class PdfIncrementalAnnotationEditor
                 $"{Format(leaders[2].X - bounds.X)} {Format(leaders[2].Y - bounds.Y)} m\n" +
                 $"{Format(leaders[3].X - bounds.X)} {Format(leaders[3].Y - bounds.Y)} l\nS\n");
         }
+        bool caption = DrawsCaption(line.Contents, line.Caption, font);
+        if (caption) WriteCaption(output, line.Contents!, line.Caption!, line.Color, bounds);
         output.Write("Q\n"u8);
         return Appearance(bounds.Width, bounds.Height,
-            OpacityResources(line.Opacity), output.ToArray());
+            caption ? OpacityResources(line.Opacity, (Name("Helv"), font!))
+                : OpacityResources(line.Opacity), output.ToArray());
     }
 
     private static IReadOnlyList<PdfPoint> LineBoundsPoints(PendingLine line) =>
         line.LeaderLineLength == 0
-            ? [line.Start, line.End]
-            : [line.Start, line.End, .. LineLeaderPoints(line)];
+            ? [line.Start, line.End, .. CaptionCorners(line.Contents, line.Caption)]
+            : [line.Start, line.End, .. LineLeaderPoints(line),
+                .. CaptionCorners(line.Contents, line.Caption)];
 
     private static PdfPoint[] LineLeaderPoints(PendingLine line)
     {
@@ -3210,7 +3409,7 @@ public sealed class PdfIncrementalAnnotationEditor
         double padding = vertex.Closed ? vertex.LineWidth / 2
             : LineEndingPadding(vertex.LineWidth,
                 vertex.StartEnding, vertex.EndEnding);
-        Bounds bounds = PointBounds(vertex.Vertices, padding);
+        Bounds bounds = PointBounds(VertexBoundsPoints(vertex), padding);
         string subtype = vertex.Closed ? "Polygon" : "PolyLine";
         var entries = CommonEntries(subtype, bounds.X, bounds.Y,
             bounds.Width, bounds.Height, page, annotation, appearance,
@@ -3234,15 +3433,20 @@ public sealed class PdfIncrementalAnnotationEditor
             if (vertex.InteriorColor.HasValue)
                 entries.Add(("IC", ColorArray(vertex.InteriorColor.Value)));
         }
+        if (vertex.Caption is not null)
+            entries.Add((CaptionKey, CaptionArray(vertex.Caption)));
         return Dictionary([.. entries]);
     }
 
-    private static PdfStream VertexAppearance(PendingVertex vertex)
+    private static IEnumerable<PdfPoint> VertexBoundsPoints(PendingVertex vertex) =>
+        vertex.Vertices.Concat(CaptionCorners(vertex.Contents, vertex.Caption));
+
+    private static PdfStream VertexAppearance(PendingVertex vertex, PdfIndirectReference? font)
     {
         double padding = vertex.Closed ? vertex.LineWidth / 2
             : LineEndingPadding(vertex.LineWidth,
                 vertex.StartEnding, vertex.EndEnding);
-        Bounds bounds = PointBounds(vertex.Vertices, padding);
+        Bounds bounds = PointBounds(VertexBoundsPoints(vertex), padding);
         using var output = new MemoryStream();
         WriteAscii(output, "q\n/GS1 gs\n");
         if (vertex.FillColor.HasValue)
@@ -3275,9 +3479,12 @@ public sealed class PdfIncrementalAnnotationEditor
                 vertex.EndEnding, vertex.LineWidth,
                 vertex.Color, vertex.InteriorColor);
         }
+        bool caption = DrawsCaption(vertex.Contents, vertex.Caption, font);
+        if (caption) WriteCaption(output, vertex.Contents!, vertex.Caption!, vertex.Color, bounds);
         output.Write("Q\n"u8);
         return Appearance(bounds.Width, bounds.Height,
-            OpacityResources(vertex.Opacity), output.ToArray());
+            caption ? OpacityResources(vertex.Opacity, (Name("Helv"), font!))
+                : OpacityResources(vertex.Opacity), output.ToArray());
     }
 
     private static PdfDictionary InkDictionary(
@@ -3888,6 +4095,11 @@ public sealed class PdfIncrementalAnnotationEditor
         PdfVersion required = _annotations.Any(annotation =>
             annotation is PendingRedaction)
                 ? PdfVersion.Pdf17
+                : _annotations.Any(annotation => annotation is
+                    PendingLine { Measurement: not null }
+                    or PendingVertex { Measurement: not null })
+                    || _viewports.Values.Any(viewport => viewport.Measurement is not null)
+                ? new PdfVersion(1, 6)
                 : _annotations.Any(annotation =>
             annotation is PendingVertex or PendingCaret)
                 ? new PdfVersion(1, 5)
@@ -4030,7 +4242,7 @@ public sealed class PdfIncrementalAnnotationEditor
         PdfLineEndingStyle StartEnding, PdfLineEndingStyle EndEnding,
         PdfRgbColor? InteriorColor, PdfLineAnnotationIntent? Intent,
         PdfMeasurementProfile? Measurement, double LeaderLineLength,
-        double LeaderLineExtension)
+        double LeaderLineExtension, PdfMeasurementCaption? Caption)
         : PendingAnnotation(PageIndex);
     private sealed record PendingShape(
         PendingShapeType Type, int PageIndex, double X, double Y, double Width, double Height,
@@ -4044,8 +4256,11 @@ public sealed class PdfIncrementalAnnotationEditor
         double Opacity, string? Contents, PdfLineEndingStyle StartEnding,
         PdfLineEndingStyle EndEnding, IReadOnlyList<double>? DashPattern,
         PdfRgbColor? InteriorColor, PdfAnnotationMetadata? Metadata,
-        PdfVertexAnnotationIntent? Intent, PdfMeasurementProfile? Measurement)
+        PdfVertexAnnotationIntent? Intent, PdfMeasurementProfile? Measurement,
+        PdfMeasurementCaption? Caption)
         : PendingAnnotation(PageIndex);
+    private sealed record PendingViewport(
+        PdfMeasurementProfile? Measurement, PdfContentBounds? Area);
     private sealed record PendingInk(
         int PageIndex, IReadOnlyList<IReadOnlyList<PdfPoint>> Strokes, PdfRgbColor Color,
         double LineWidth, double Opacity, string? Contents,
