@@ -93,9 +93,9 @@ namespace KillerPDF
                 { EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut } });
         }
 
-        private static void FadeOverlayOut(UIElement el)
+        private static void FadeOverlayOut(UIElement el, Action? done = null)
         {
-            if (el.Visibility != Visibility.Visible) return;
+            if (el.Visibility != Visibility.Visible) { done?.Invoke(); return; }
             var anim = new DoubleAnimation(1, 0, new Duration(TimeSpan.FromMilliseconds(90)))
             { EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn } };
             anim.Completed += (_, _) =>
@@ -103,6 +103,7 @@ namespace KillerPDF
                 el.Visibility = Visibility.Collapsed;
                 el.BeginAnimation(UIElement.OpacityProperty, null);
                 el.Opacity = 1;
+                done?.Invoke();
             };
             el.BeginAnimation(UIElement.OpacityProperty, anim);
         }

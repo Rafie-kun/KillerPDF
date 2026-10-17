@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -32,7 +33,125 @@ namespace KillerPDF
 
         private void CloseAboutOverlay()
         {
-            FadeOverlayOut(AboutOverlay);
+            if (_aboutHost is { } host) FadeOverlayOut(AboutOverlay, () => host.Close());
+            else FadeOverlayOut(AboutOverlay);
+        }
+
+        // ---- About above dialogs and tool windows ----------------------------------------------
+        //
+        // The card is a main-window overlay. A tool window such as Transform, or a dialog, is owned
+        // by the main window and always sits above it, so an overlay drawn there would open behind
+        // that window and leave it in front of the darkened backdrop. While one is open, the same
+        // card moves into a transparent window over the main window, owned by the window in front,
+        // and comes back when About closes. F12 also opens it from those windows.
+
+        private Window? _aboutHost;
+        private Panel? _aboutHome;
+        private int _aboutHomeIndex;
+
+        static MainWindow()
+        {
+            EventManager.RegisterClassHandler(typeof(Window), Keyboard.PreviewKeyDownEvent,
+                new KeyEventHandler(OwnedWindowAboutKey));
+        }
+
+        /// <summary>F12 (or whatever key About is mapped to) pressed in a window the main window
+        /// owns, directly or through another owned window, opens About above it.</summary>
+        private static void OwnedWindowAboutKey(object sender, KeyEventArgs e)
+        {
+            if (e.Handled || sender is not Window window || window is MainWindow) return;
+            MainWindow? main = null;
+            for (Window? owner = window.Owner; owner is not null; owner = owner.Owner)
+                if (owner is MainWindow found) { main = found; break; }
+            if (main is null || ReferenceEquals(window, main._aboutHost) || !KeyboardShortcutsEnabled) return;
+            var (key, _, _, swallow) = main.TranslateShortcut(e.Key, Keyboard.Modifiers, e.SystemKey);
+            if (swallow || key != Key.F12) return;
+            main.ShowAboutOverlay();
+            e.Handled = true;
+        }
+
+        /// <summary>The window About should open above: the active window the main window owns,
+        /// else the newest one still showing, else none and the card stays a main-window overlay.</summary>
+        private Window? AboutFrontWindow()
+        {
+            Window? active = null, newest = null;
+            foreach (Window window in Application.Current.Windows)
+            {
+                if (ReferenceEquals(window, this) || ReferenceEquals(window, _aboutHost) || !window.IsVisible) continue;
+                bool ours = false;
+                for (Window? owner = window.Owner; owner is not null; owner = owner.Owner)
+                    if (ReferenceEquals(owner, this)) { ours = true; break; }
+                if (!ours) continue;
+                newest = window;
+                if (window.IsActive) active = window;
+            }
+            return active ?? newest;
+        }
+
+        /// <summary>Moves the card into a borderless transparent window that covers the main
+        /// window, owned by <paramref name="front"/> so it sits above it.</summary>
+        private void HostAboutAbove(Window front)
+        {
+            if (_aboutHost is not null || AboutOverlay.Parent is not Panel home) return;
+            _aboutHome = home;
+            _aboutHomeIndex = home.Children.IndexOf(AboutOverlay);
+            home.Children.Remove(AboutOverlay);
+
+            // Cover the main window's frame, or the front window when the main one is minimized.
+            FrameworkElement area = WindowState == WindowState.Minimized ? front : RootBorder;
+            var source = PresentationSource.FromVisual(area);
+            Point topLeft = area.PointToScreen(new Point(0, 0));
+            if (source?.CompositionTarget is { } target) topLeft = target.TransformFromDevice.Transform(topLeft);
+            double width = area.ActualWidth, height = area.ActualHeight;
+            double radius = ReferenceEquals(area, RootBorder) ? RootBorder.CornerRadius.TopLeft : 0;
+
+            var frame = new Grid { Clip = new RectangleGeometry(new Rect(0, 0, width, height), radius, radius) };
+            frame.Children.Add(AboutOverlay);
+            var host = new Window
+            {
+                Owner = front,
+                Title = Title,
+                WindowStyle = WindowStyle.None,
+                AllowsTransparency = true,
+                Background = Brushes.Transparent,
+                ResizeMode = ResizeMode.NoResize,
+                ShowInTaskbar = false,
+                WindowStartupLocation = WindowStartupLocation.Manual,
+                Left = topLeft.X,
+                Top = topLeft.Y,
+                Width = width,
+                Height = height,
+                FontFamily = FontFamily,
+                Content = frame
+            };
+            // The card's styles and brushes live in the main window's resources.
+            host.Resources.MergedDictionaries.Add(Resources);
+            host.PreviewKeyDown += (_, e) =>
+            {
+                var (key, _, _, swallow) = TranslateShortcut(e.Key, Keyboard.Modifiers, e.SystemKey);
+                if (!swallow && (key == Key.Escape || key == Key.F12))
+                {
+                    CloseAboutOverlay();
+                    e.Handled = true;
+                }
+            };
+            host.Closed += (_, _) => ReturnAboutHome(front);
+            _aboutHost = host;
+            host.Show();
+        }
+
+        /// <summary>Puts the card back in the main window after the host window closes.</summary>
+        private void ReturnAboutHome(Window front)
+        {
+            if (AboutOverlay.Parent is Panel frame) frame.Children.Remove(AboutOverlay);
+            if (_aboutHome is { } home)
+                home.Children.Insert(Math.Clamp(_aboutHomeIndex, 0, home.Children.Count), AboutOverlay);
+            AboutOverlay.BeginAnimation(UIElement.OpacityProperty, null);
+            AboutOverlay.Opacity = 1;
+            AboutOverlay.Visibility = Visibility.Collapsed;
+            _aboutHost = null;
+            _aboutHome = null;
+            if (front.IsVisible) front.Activate();
         }
 
         // ---- IShellServices ------------------------------------------------------------------
@@ -92,6 +211,7 @@ namespace KillerPDF
             if (ShortcutOverlay.Visibility == Visibility.Visible) FadeOverlayOut(ShortcutOverlay);
 
             BuildAboutStaticContent();
+            if (_aboutHost is null && AboutFrontWindow() is { } front) HostAboutAbove(front);
             FadeOverlayIn(AboutOverlay);
         }
 
@@ -227,14 +347,15 @@ namespace KillerPDF
         /// </summary>
         private void AboutClearData_Click(object sender, RoutedEventArgs e)
         {
-            var res = KillerDialog.Show(this,
+            Window owner = _aboutHost ?? this;
+            var res = KillerDialog.Show(owner,
                 Loc("Str_ClearDataConfirm"),
                 Loc("Str_ClearAllData"), MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (res != MessageBoxResult.Yes) return;
 
             App.ClearAllData();
             SetStatus(Loc("Str_St_DataCleared"));
-            KillerDialog.Show(this,
+            KillerDialog.Show(owner,
                 Loc("Str_ClearDataDone"),
                 Loc("Str_ClearAllData"), MessageBoxButton.OK, MessageBoxImage.Information);
         }
