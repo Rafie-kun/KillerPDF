@@ -65,6 +65,9 @@ namespace KillerPDF.Features
             "--sheet", "--margin", "--gutter", "--creep", "--binding", "--grid",
             "--min-size", "--depth", "--pattern", "--width", "--height", "--images",
             "--direction", "--position",
+            "--title", "--zoom", "--layout", "--panel", "--page", "--hide-toolbar", "--hide-menu",
+            "--hide-window-ui", "--fit-window", "--center-window", "--show-title", "--visible", "--locked",
+            "--description", "--relationship", "--rename", "--mime", "--view", "--initial",
         ];
 
         /// <summary>
@@ -96,7 +99,13 @@ namespace KillerPDF.Features
                 Eq(a, "--delete-pages") || Eq(a, "--move-pages") || Eq(a, "--insert-blank") ||
                 Eq(a, "--duplicate-page") || Eq(a, "--document-info") || Eq(a, "--search-text") ||
                 Eq(a, "--reverse-pages") || Eq(a, "--fix-orientation") || Eq(a, "--straighten") ||
-                Eq(a, "--divide-spreads") || Eq(a, "--rasterize-region"));
+                Eq(a, "--divide-spreads") || Eq(a, "--rasterize-region") ||
+                Eq(a, "--print-production") || Eq(a, "--signatures") || Eq(a, "--layers") ||
+                Eq(a, "--portfolio") || Eq(a, "--comments") || Eq(a, "--navigation-audit") ||
+                Eq(a, "--compare-structure") || Eq(a, "--measurements") || Eq(a, "--separations") ||
+                Eq(a, "--repair-links") || Eq(a, "--toc") || Eq(a, "--page-labels") ||
+                Eq(a, "--initial-view") || Eq(a, "--set-layer") || Eq(a, "--add-attachment") ||
+                Eq(a, "--edit-attachment") || Eq(a, "--portfolio-view"));
             if (command is null) return false;
 
             var con = OpenBatchConsole();
@@ -209,6 +218,47 @@ namespace KillerPDF.Features
                     case "--rasterize-region":
                         exitCode = CliRasterizeRegion(positionals, options, con);
                         break;
+                    case "--print-production":
+                    case "--signatures":
+                    case "--layers":
+                    case "--portfolio":
+                    case "--comments":
+                    case "--navigation-audit":
+                        exitCode = CliDocumentReport(command.ToLowerInvariant(), positionals, options, con);
+                        break;
+                    case "--compare-structure":
+                        exitCode = CliCompareStructure(positionals, options, con);
+                        break;
+                    case "--measurements":
+                        exitCode = CliMeasurements(positionals, options, con);
+                        break;
+                    case "--separations":
+                        exitCode = CliSeparations(positionals, options, con);
+                        break;
+                    case "--repair-links":
+                        exitCode = CliRepairLinks(positionals, options, con);
+                        break;
+                    case "--toc":
+                        exitCode = CliTableOfContents(positionals, options, con);
+                        break;
+                    case "--page-labels":
+                        exitCode = CliPageLabels(positionals, options, con);
+                        break;
+                    case "--initial-view":
+                        exitCode = CliInitialView(positionals, options, con);
+                        break;
+                    case "--set-layer":
+                        exitCode = CliSetLayer(positionals, options, con);
+                        break;
+                    case "--add-attachment":
+                        exitCode = CliAddAttachment(positionals, options, con);
+                        break;
+                    case "--edit-attachment":
+                        exitCode = CliEditAttachment(positionals, options, con);
+                        break;
+                    case "--portfolio-view":
+                        exitCode = CliPortfolioView(positionals, options, con);
+                        break;
                 }
             }
             catch (Exception ex)
@@ -303,6 +353,33 @@ namespace KillerPDF.Features
             "                                           [--position <0.1-0.9>]   split two-page spreads",
             "  --rasterize-region <in.pdf> <page> <left,bottom,right,top> <out.pdf> [--dpi <n>]",
             "                                           turn one box (points, unrotated page) into an image",
+            "  --print-production <in.pdf> [--json]    page boxes, inks and output intents",
+            "  --signatures <in.pdf> [--json]          each signature's signer, time, trust and changes",
+            "  --layers <in.pdf> [--json]              list layers and their visibility and locks",
+            "  --set-layer <in.pdf> <out.pdf> <layer|#object> [--name <new>] [--visible on|off] [--locked on|off]",
+            "  --portfolio <in.pdf> [--json]           portfolio presentation, fields and folders",
+            "  --portfolio-view <in.pdf> <out.pdf> (--view details|tile|hidden [--initial <name>] | --clear)",
+            "  --add-attachment <in.pdf> <out.pdf> <file> [<file> ...] [--description <text>]",
+            "                                           [--relationship data|source|alternative|supplement|unspecified]",
+            "  --edit-attachment <in.pdf> <out.pdf> <name> [--rename <new>] [--description <text>]",
+            "                                           [--mime <type>] [--relationship <name>] [--remove]",
+            "  --comments <in.pdf> [--json]            list review comments and their replies",
+            "  --measurements <in.pdf> [--json | --csv] report the saved measurements",
+            "  --separations <in.pdf> [<outDir>] [--pages <range>] [--dpi <n>] [--json]",
+            "                                           list inks, or write each page's plates as images",
+            "  --compare-structure <original.pdf> <changed.pdf> [--json]",
+            "                                           compare content, resources and geometry; exit 3 when they differ",
+            "  --navigation-audit <in.pdf> [--json]    check links, bookmarks and destinations; exit 3 when found",
+            "  --repair-links <in.pdf> <out.pdf> [--unsafe] [--unresolved]",
+            "                                           remove unsafe or broken links (both by default)",
+            "  --toc <in.pdf> <out.pdf> [--title <text>] [--depth <1-6>]",
+            "                                           insert clickable contents pages built from the bookmarks",
+            "  --page-labels <in.pdf> <out.pdf> <page:style[:prefix[:start]],...>",
+            "                                           set page-label ranges, such as 1:lower-roman,5:decimal",
+            "  --initial-view <in.pdf> <out.pdf> [--page <n>] [--zoom fit-page|fit-width|fit-height|actual|<percent>]",
+            "                                           [--layout <name>] [--panel <name>] [--hide-toolbar on|off]",
+            "                                           [--hide-menu on|off] [--hide-window-ui on|off] [--fit-window on|off]",
+            "                                           [--center-window on|off] [--show-title on|off]",
             "  --document-info <in.pdf>                 print document details as JSON",
             "  --search-text <in.pdf> <query>            print page hits as JSON",
             "  --batch-resave <in> <out> [--log <f.csv>] [--quiet]",
