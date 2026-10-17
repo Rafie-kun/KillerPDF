@@ -54,6 +54,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Added `killerpdf` to PATH for the installed edition, so the command line runs from any new terminal, waits for the result and returns its exit code. Uninstalling removes it again.
 - Added a Microsoft Store button to the website's top bar on every page.
 - Added a Microsoft Store button for KillerMCP to the website's MCP page.
+- Added Distance, Perimeter, Area and Angle to the Measure tool (Shift+M steps through them), with snapping to page lines and corners, a drawing scale per page set by ratio or by drawing a line, imperial and metric units, and a Measurements report (Ctrl+Shift+D, Y). Measurements are saved as standard PDF measurement annotations that can be moved, adjusted, restyled and deleted.
+- Added Comments, Attachments, Layers and Signatures panels to the sidebar rail beside Pages and Outline. Each loads in the background, and Comments can list comments, measurements or both.
 
 ### Changed
 - Replaced PDFium, Docnet.Core and PdfPig with the engine for rendering, search, selection, copying and text editing, and built the JPEG 2000 decoder from vendored CoreJ2K sources. The engine keeps the previous renderer's page dimensions for viewing and image export.

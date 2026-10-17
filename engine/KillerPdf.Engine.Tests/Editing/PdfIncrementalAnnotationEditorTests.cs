@@ -2219,6 +2219,36 @@ public sealed class PdfIncrementalAnnotationEditorTests
             new PdfPoint(0, 0), new PdfPoint(0, 0), new PdfPoint(1, 0)));
         Assert.Throws<ArgumentOutOfRangeException>(() => editor.AddAngleMeasurement(0,
             new PdfPoint(0, 1), new PdfPoint(0, 0), new PdfPoint(1, 0), precision: 11));
+        Assert.Throws<ArgumentOutOfRangeException>(() => editor.AddAngleMeasurement(0,
+            new PdfPoint(0, 1), new PdfPoint(0, 0), new PdfPoint(1, 0), arcRadius: 0));
+    }
+
+    [Fact]
+    public void Build_DrawsTheAngleArcOnlyWhenARadiusIsGiven()
+    {
+        static string Appearance(double? arcRadius)
+        {
+            PdfDocument reopened = PdfDocument.Open(new PdfIncrementalAnnotationEditor(
+                PdfDocument.Open(new PdfDocumentBuilder().AddBlankPage(200, 200).Build()))
+                .AddAngleMeasurement(0, new PdfPoint(50, 100), new PdfPoint(50, 50),
+                    new PdfPoint(100, 50), arcRadius: arcRadius)
+                .Build());
+            PdfDictionary annotation = ResolveDictionary(reopened,
+                Assert.IsType<PdfArray>(Pages(reopened)[0].Page[Name("Annots")])[0]);
+            PdfStream stream = Assert.IsType<PdfStream>(reopened.Resolve(Assert.IsType<PdfIndirectReference>(
+                Assert.IsType<PdfDictionary>(annotation[Name("AP")])[Name("N")])));
+            return Encoding.Latin1.GetString(PdfStreamDecoder.Decode(stream));
+        }
+
+        static int Count(string text, string value) =>
+            (text.Length - text.Replace(value, "", StringComparison.Ordinal).Length) / value.Length;
+
+        string plain = Appearance(null);
+        string withArc = Appearance(10);
+        Assert.Equal(1, Count(plain, "S\n"));
+        Assert.Equal(2, Count(withArc, "S\n"));
+        // A right angle at one segment per 7.5 degrees adds 12 segments to the arms' two.
+        Assert.Equal(Count(plain, " l\n") + 12, Count(withArc, " l\n"));
     }
 
     [Fact]

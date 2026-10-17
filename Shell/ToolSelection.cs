@@ -112,8 +112,8 @@ namespace KillerPDF
             foreach (var overlay in _continuousCanvases.Values)
                 overlay.Cursor = toolCursor;
 
-            // Show/hide draw settings bar
-            if ((tool is EditTool.Draw or EditTool.Line or EditTool.Shape) || tool == EditTool.Highlight
+            // Show/hide draw settings bar (the Measure bar is the draw bar with the Measure controls)
+            if ((tool is EditTool.Draw or EditTool.Line or EditTool.Shape or EditTool.Measure) || tool == EditTool.Highlight
                 || tool == EditTool.Strikethrough || tool == EditTool.Underline)
                 ShowDrawSettings(tool);
             else
@@ -185,13 +185,7 @@ namespace KillerPDF
             if (_sidebarCollapsed)
             {
                 // Save current width before collapsing so expand restores it.
-                if (_sidebarCol.ActualWidth > 24)
-                {
-                    if (_sidebarShowingOutlines)
-                        _savedOutlinesWidth = Math.Min(_sidebarCol.ActualWidth, SbPx(SidebarMaxOutlines));
-                    else
-                        _savedPagesWidth = Math.Min(_sidebarCol.ActualWidth, SbPx(SidebarMaxPages));
-                }
+                if (_sidebarCol.ActualWidth > 24) RememberSidebarWidth(_sidebarCol.ActualWidth);
                 _sidebarToggleBtn.ToolTip = ShortcutTip("Str_TT_ExpandSidebar", "F9");
                 // Glide shut sliding, not squishing: freeze the content at its open width so
                 // the shrinking border CLIPS it (thumbnails hold their size), then hide the
@@ -209,7 +203,7 @@ namespace KillerPDF
             else
             {
                 _sidebarBorder.Visibility = Visibility.Visible;
-                double restore = _sidebarShowingOutlines ? _savedOutlinesWidth : _savedPagesWidth;
+                double restore = SavedSidebarWidth();
                 // Slide in at full size: content fixed at the target width from the first
                 // frame, revealed by the growing border instead of reflowing up to size.
                 BeginSidebarSlide(_sbSlideContentW > 0 ? _sbSlideContentW
@@ -341,8 +335,7 @@ namespace KillerPDF
                 _sidebarBorder.Visibility = Visibility.Visible;        // ensure the list shows when settled open
                 SidebarContentPanel.Visibility = Visibility.Visible;
                 _sidebarCol.MinWidth = SbPx(SidebarMinOpen);           // clamp future resizes so they can't clip
-                if (_sidebarShowingOutlines) _savedOutlinesWidth = Math.Min(w, SbPx(SidebarMaxOutlines));
-                else _savedPagesWidth = Math.Min(w, SbPx(SidebarMaxPages));
+                RememberSidebarWidth(w);
             }));
         }
 
@@ -373,8 +366,9 @@ namespace KillerPDF
 
         private void SyncSidebarToDocState(bool hasDoc, bool startup)
         {
-            PageControlsRow?.Visibility = (hasDoc && !_sidebarShowingOutlines)
+            PageControlsRow?.Visibility = (hasDoc && _sidebarPanel == SidebarPanel.Pages)
                     ? Visibility.Visible : Visibility.Collapsed;
+            SyncRailPanelAvailability(hasDoc);
 
             _sidebarAutoToggling = true;
             try

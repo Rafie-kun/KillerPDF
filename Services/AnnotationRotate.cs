@@ -80,6 +80,12 @@ namespace KillerPDF.Services
                             ia.Points[i] = MapPoint(ia.Points[i]);
                         break;
 
+                    case MeasurementAnnotation ma:   // measures what it marks, so it turns with it
+                        for (int i = 0; i < ma.Points.Count; i++)
+                            ma.Points[i] = MapPoint(ma.Points[i]);
+                        if (ma.LabelCenter is Point label) ma.LabelCenter = MapPoint(label);
+                        break;
+
                     case TextAnnotation ta:
                         ta.Position = MapAnchor(ta.Position.X, ta.Position.Y, ta.Width, ta.Height);
                         break;

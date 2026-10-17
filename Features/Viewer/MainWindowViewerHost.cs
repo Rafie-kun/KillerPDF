@@ -123,6 +123,7 @@ namespace KillerPDF
             ComparisonPageChanged(viewer, pageIndex);
             if (!ReferenceEquals(ActiveViewer, viewer)) return;
             UpdatePageSizeDisplay();
+            RefreshMeasureBar();
             // Direct assignment, because that is what the 84 existing call sites do - there is no
             // SyncPageListSelection helper today. The guard avoids re-entering the selection
             // handler when the list already agrees.

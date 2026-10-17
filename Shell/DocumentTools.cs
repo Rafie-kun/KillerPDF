@@ -46,6 +46,7 @@ public partial class MainWindow
             DocumentToolItem("Str_DocumentTools_EditPortfolioStructure", EditPortfolioStructure, "\uE70F"),
             DocumentToolItem("Str_DocumentTools_EditAttachments", EditAttachments, "\uE8B7"),
             DocumentToolItem("Str_DocumentTools_Comments", EditComments, "\uE90A"),
+            DocumentToolItem("Str_DocumentTools_Measurements", ShowMeasurementReport, "\uED5E"),
             DocumentToolItem("Str_DocumentTools_NavigationAudit", AuditNavigation, "\uE9D9"),
             DocumentToolItem("Str_DocumentTools_AutoBookmarks", GenerateBookmarks, "\uE8FD"),
             DocumentToolItem("Str_DocumentTools_PageLabels", EditPageLabels, "\uE70F"),

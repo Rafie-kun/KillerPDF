@@ -89,11 +89,13 @@ namespace KillerPDF
             PdfEngineIntegration.ClearInvalidatedSignatures(copy);
             if (_annotations.Values.Any(list => list.Count > 0) || HasActiveStamps)
             {
-                PdfEngineBurn.Burn(copy, _annotations, _renderDims, _docStampSpec, null, _pageRotations);
+                PdfEngineBurn.Burn(copy, _annotations, _renderDims, _docStampSpec, null, _pageRotations,
+                    measurementsAsAnnotations: true);
                 PdfEngineIntegration.StripLinkAppearances(copy);
             }
             WriteFormValuesToDocument(copy);
             WriteRedactionMarksToDocument(copy);
+            WriteMeasurementsToDocument(copy);
             PdfEngineIntegration.ApplyPageRotations(copy, rotations);
             return copy;
         }

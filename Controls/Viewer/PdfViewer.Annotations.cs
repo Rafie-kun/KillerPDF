@@ -250,6 +250,10 @@ namespace KillerPDF.Controls
                         }
                         break;
 
+                    case MeasurementAnnotation measurement:
+                        DrawMeasurementOverlay(measurement);
+                        break;
+
                     case ImageAnnotation ia:
                         var iaBmp = GetAnnotationBitmap(ia, ia.ImageData);
                         if (iaBmp != null && TryGetPlacedSize(ia, out double imageWidth, out double imageHeight))
@@ -350,8 +354,10 @@ namespace KillerPDF.Controls
                 HideTextSettings();
             // Likewise the draw bar: if it was opened to edit a selected highlight / line / ink
             // annotation (the active tool isn't a draw-family tool), close it when the selection clears.
-            if (_currentTool is not (EditTool.Draw or EditTool.Highlight or EditTool.Strikethrough or EditTool.Underline)
-                && _annotBarTool is EditTool.Draw or EditTool.Highlight or EditTool.Strikethrough or EditTool.Underline)
+            if (_currentTool is not (EditTool.Draw or EditTool.Highlight or EditTool.Strikethrough or EditTool.Underline
+                    or EditTool.Measure)
+                && _annotBarTool is EditTool.Draw or EditTool.Highlight or EditTool.Strikethrough or EditTool.Underline
+                    or EditTool.Measure)
                 HideDrawSettings();
         }
 
@@ -535,6 +541,10 @@ namespace KillerPDF.Controls
                     bounds = new Rect(sa.Position.X, sa.Position.Y, sigW, sigH);
                     return bounds.Contains(pos);
 
+                case MeasurementAnnotation measurement:
+                    bounds = MeasurementBounds(measurement);
+                    return HitTestMeasurement(measurement, pos);
+
                 case ImageAnnotation ia:
                     double iaW = ia.SourceWidth * ia.Scale;
                     double iaH = ia.SourceHeight * ia.Scale;
@@ -641,9 +651,16 @@ namespace KillerPDF.Controls
                 _activeCanvas.Children.Add(_pairedCoverOutline);
             }
 
+            // A measurement gets a handle on each point and one on its label instead of corners.
+            if (annot is MeasurementAnnotation measured)
+            {
+                AddMeasurementHandles(measured, selBrush, inv);
+                SetStatus(string.Format(Loc("Str_St_AnnotSelected"), Loc("Str_Annot_Measurement"),
+                    Loc("Str_St_MeasureHowEdit")));
+            }
             // Add four corner resize handles for resizable annotations (signature, image, text box,
             // highlight/strikethrough/underline, and ink).
-            if (annot is PlacedAnnotation or TextAnnotation or HighlightAnnotation or InkAnnotation)
+            else if (annot is PlacedAnnotation or TextAnnotation or HighlightAnnotation or InkAnnotation)
             {
                 double hSize = 14 * inv;
                 _resizeHandles.Clear();
@@ -720,9 +737,18 @@ namespace KillerPDF.Controls
                 _drawWidth   = isel.StrokeWidth;
                 ShowDrawSettings(EditTool.Draw);
             }
+            // A measurement opens the Measure bar, whose color, size and opacity then restyle it.
+            else if (annot is MeasurementAnnotation msel)
+            {
+                _drawColor   = msel.GetColor();
+                _drawOpacity = msel.GetColor().A;
+                _drawWidth   = msel.StrokeWidth;
+                ShowDrawSettings(EditTool.Measure);
+            }
         }
 
-        private static bool IsDraggable(PageAnnotation a) => a is PlacedAnnotation or TextAnnotation or HighlightAnnotation or InkAnnotation;
+        private static bool IsDraggable(PageAnnotation a) => a is PlacedAnnotation or TextAnnotation or HighlightAnnotation or InkAnnotation
+            or MeasurementAnnotation;
 
         // Shortest distance from point p to the segment a-b. Used to hit-test straight lines and ink
         // strokes along their length, not just at their sample points.
@@ -745,6 +771,8 @@ namespace KillerPDF.Controls
             // Ink has no single origin; use the stroke's bounding-box top-left.
             InkAnnotation ink when ink.Points.Count > 0
                 => new Point(ink.Points.Min(p => p.X), ink.Points.Min(p => p.Y)),
+            // A measurement moves by its whole footprint, label included, so the page clamp sees it all.
+            MeasurementAnnotation measurement => MeasurementBounds(measurement).Location,
             _                  => default
         };
         private static void AnnotSetPos(PageAnnotation a, Point pos)
@@ -763,6 +791,9 @@ namespace KillerPDF.Controls
                                 e.Points[i] = new Point(e.Points[i].X + hdx, e.Points[i].Y + hdy);
                     break;
                 }
+                case MeasurementAnnotation measurement:
+                    MoveMeasurement(measurement, pos);
+                    break;
                 case InkAnnotation ink when ink.Points.Count > 0:
                     // Move the whole stroke by the delta from its current bounding-box origin.
                     double ox = ink.Points.Min(p => p.X), oy = ink.Points.Min(p => p.Y);
@@ -1027,6 +1058,14 @@ namespace KillerPDF.Controls
             // Crop corner handles live in the outer panel and have direct MouseLeftButtonDown
             // handlers attached in AddCropHandles() - no detection needed here.
 
+            // A selected measurement's point and label handles, in any tool.
+            if (_selectedAnnotation is MeasurementAnnotation selectedMeasure && _resizeHandles.Count > 0
+                && !MeasurePlacementActive && TryBeginMeasureEdit(selectedMeasure, pos))
+            {
+                e.Handled = true;
+                return;
+            }
+
             // Check if click is on any of the four corner resize handles (signature, image, or text box)
             if (_resizeHandles.Count > 0 && _selectedAnnotation is not null)
             {
@@ -1260,7 +1299,7 @@ namespace KillerPDF.Controls
                     break;
 
                 case EditTool.Measure:
-                    BeginMeasurement(pageIdx, pos);
+                    MeasureMouseDown(pageIdx, pos, e);
                     e.Handled = true;
                     break;
 
@@ -1480,6 +1519,11 @@ namespace KillerPDF.Controls
                 UpdateShapePolyRubber(e);
                 return;
             }
+
+            // Measure tool: dragging a placed measurement's point or label, or rubber-banding the
+            // measurement being placed.
+            if (_measureEditing && MeasureEditMove(e)) return;
+            if (_currentTool == EditTool.Measure && MeasureMouseMove(e)) return;
 
             // Tiled views: hand cursor + the link's target in the status bar while hovering (links have no
             // clickable overlay here - see Canvas_MouseLeftButtonDown - so hover is resolved by hit-testing
@@ -1707,6 +1751,8 @@ namespace KillerPDF.Controls
                 }
                 if (_dragAnnot is PlacedAnnotation or TextAnnotation or HighlightAnnotation or InkAnnotation)
                     LayoutResizeHandles(db.X, db.Y, db.Width, db.Height);
+                else if (_dragAnnot is MeasurementAnnotation draggedMeasure)
+                    LayoutMeasurementHandles(draggedMeasure);
                 RenderAllAnnotations(_dragAnnot.PageIndex);
                 ReattachSelectionVisuals();   // re-add border + handles + the paired cover outline (stays put during resize/move)
                 if (_dragGroupOrig.Count > 0) ReattachMultiOutlines();   // keep group outlines live during the drag
@@ -1769,10 +1815,6 @@ namespace KillerPDF.Controls
 
             switch (_currentTool)
             {
-                case EditTool.Measure:
-                    UpdateMeasurement(pos);
-                    break;
-
                 case EditTool.Shape when _activePreview is Rectangle:
                 case EditTool.Highlight when _activePreview is Rectangle:
                 case EditTool.Strikethrough when _activePreview is Rectangle:
@@ -1856,6 +1898,13 @@ namespace KillerPDF.Controls
 
             if (_currentTool == EditTool.Redact && RedactionMouseUp(pageIdx, e))
             {
+                e.Handled = true;
+                return;
+            }
+
+            if (_measureEditing)
+            {
+                FinishMeasureEdit();
                 e.Handled = true;
                 return;
             }
@@ -1981,6 +2030,13 @@ namespace KillerPDF.Controls
                 return;
             }
 
+            // Measure tool: a dragged distance finishes on release; clicks keep placing points.
+            if (_currentTool == EditTool.Measure && MeasureMouseUp(e))
+            {
+                e.Handled = true;
+                return;
+            }
+
             // Flowing text selection release (#127): commit the run, copy it, keep the quads on screen.
             if (_txtSelActive)
             {
@@ -2086,10 +2142,6 @@ namespace KillerPDF.Controls
 
             switch (_currentTool)
             {
-                case EditTool.Measure:
-                    FinishMeasurement(releasePos);
-                    return;
-
                 case EditTool.FormField when _activePreview is Rectangle fieldRect:
                     CommitFormFieldDrag(pageIdx, fieldRect);
                     break;

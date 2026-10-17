@@ -10,6 +10,10 @@ namespace KillerPDF
     /// out a free-form polygon vertex by vertex.</summary>
     public enum ShapeKind { Rectangle, Ellipse, Polygon }
 
+    /// <summary>What the Measure tool measures: a straight distance, the length around a path,
+    /// the area inside a polygon, or the angle at a corner.</summary>
+    public enum MeasurementKind { Distance, Perimeter, Area, Angle }
+
     /// <summary>How a HighlightAnnotation paints over its bounds.</summary>
     public enum HighlightStyle { Fill, Strikethrough, Underline }
 
@@ -173,6 +177,45 @@ namespace KillerPDF
 
         /// <summary>Recolor the cover but keep it fully opaque - drop any alpha the caller passed.</summary>
         public override void SetColor(Color c) => base.SetColor(Color.FromArgb(255, c.R, c.G, c.B));
+    }
+
+    /// <summary>
+    /// A measurement drawn with the Measure tool. Unlike the other overlay annotations it is not
+    /// burned into the page on save: it is written as a real PDF measurement annotation (a
+    /// dimension line, polyline or polygon with its scale), so Acrobat and other viewers can read
+    /// it and KillerPDF can open it for editing again. Geometry is in canvas units like every
+    /// other annotation. Each measurement keeps the scale it was made with, as the PDF does.
+    /// </summary>
+    public class MeasurementAnnotation : PageAnnotation
+    {
+        public MeasurementKind Kind { get; set; }
+        /// <summary>The measured points. An angle is first arm end, corner, second arm end. A closed
+        /// perimeter does not repeat its first point.</summary>
+        public List<Point> Points { get; set; } = [];
+        /// <summary>True when a perimeter returns to its first point.</summary>
+        public bool Closed { get; set; }
+        /// <summary>Center of the value label, or null for the automatic spot.</summary>
+        public Point? LabelCenter { get; set; }
+        /// <summary>Label text size in canvas units.</summary>
+        public double LabelSize { get; set; } = 26;
+        public double StrokeWidth { get; set; } = 2;
+        public byte ColorR { get; set; } = 255;
+        public byte ColorG { get; set; } = 0;
+        public byte ColorB { get; set; } = 0;
+        public byte ColorA { get; set; } = 255;
+        /// <summary>The scale ratio text saved with the measurement, such as "1 in = 10 ft".</summary>
+        public string ScaleName { get; set; } = "1 in = 1 in";
+        /// <summary>Drawing units per PDF point.</summary>
+        public double UnitsPerPoint { get; set; } = 1.0 / 72.0;
+        /// <summary>Unit id from MeasurementUnits (in, ft, ft-in, yd, mi, mm, cm, m, km).</summary>
+        public string Unit { get; set; } = "in";
+        public int Precision { get; set; } = 2;
+
+        // Runtime-only: where the label was last drawn, for hit testing and the selection outline.
+        public Rect LabelBounds;
+
+        public Color GetColor() => Color.FromArgb(ColorA, ColorR, ColorG, ColorB);
+        public void SetColor(Color c) { ColorR = c.R; ColorG = c.G; ColorB = c.B; ColorA = c.A; }
     }
 
     /// <summary>

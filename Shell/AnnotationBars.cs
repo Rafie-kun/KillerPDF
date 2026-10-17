@@ -547,7 +547,7 @@ namespace KillerPDF
             // crossfade through ~50% opacity and read as a blink even though nothing visually changed.
             bool prevWasDrawBar = _annotBarTool is EditTool.Draw or EditTool.Highlight
                                                 or EditTool.Underline or EditTool.Strikethrough or EditTool.Line
-                                                or EditTool.Shape;
+                                                or EditTool.Shape or EditTool.Measure;
             bool appearing = _annotBarTool != tool && !prevWasDrawBar;
             if (_drawSettingsBar is not null)
             {
@@ -567,6 +567,20 @@ namespace KillerPDF
             // Drag grip so the bar can be slid left/right along the top.
             var drawGrip = MakeBarGrip();
             panel.Children.Add(drawGrip);
+
+            // The Measure tool leads with its own controls; color, size and opacity follow.
+            StackPanel? measureMain = null, measureInfo = null;
+            if (tool == EditTool.Measure)
+            {
+                (measureMain, measureInfo) = BuildMeasureGroups();
+                panel.Children.Add(measureMain);
+                panel.Children.Add(measureInfo);
+            }
+            else
+            {
+                _measureScaleButton = null;
+                _measurePageSizeText = null;
+            }
 
             // A small checkbox + label for the bar (Level on the Line tool, Eraser on Highlight / Draw).
             StackPanel BarCheck(string label, bool active, string tip, Action<bool> onChanged)
@@ -719,7 +733,7 @@ namespace KillerPDF
 
             // Color swatches
             bool isLineTool = tool == EditTool.Strikethrough || tool == EditTool.Underline;
-            var activeColor = (tool is EditTool.Draw or EditTool.Line or EditTool.Shape) ? _drawColor
+            var activeColor = (tool is EditTool.Draw or EditTool.Line or EditTool.Shape or EditTool.Measure) ? _drawColor
                             : isLineTool ? Color.FromRgb(_lineAnnotColor.R, _lineAnnotColor.G, _lineAnnotColor.B)
                             : Color.FromRgb(_highlightColor.R, _highlightColor.G, _highlightColor.B);
             foreach (var color in SwatchColors)
@@ -743,7 +757,7 @@ namespace KillerPDF
                 swatch.MouseLeftButtonDown += (s, e) =>
                 {
                     var c = (Color)((Border)s!).Tag;
-                    if ((tool is EditTool.Draw or EditTool.Line or EditTool.Shape))
+                    if ((tool is EditTool.Draw or EditTool.Line or EditTool.Shape or EditTool.Measure))
                         _drawColor = Color.FromArgb(_drawOpacity, c.R, c.G, c.B);
                     else if (isLineTool)
                         _lineAnnotColor = Color.FromArgb(_lineAnnotColor.A, c.R, c.G, c.B);
@@ -780,7 +794,7 @@ namespace KillerPDF
             };
             moreDraw.MouseLeftButtonDown += (_, _) => OpenColorPicker(activeColor, c =>
             {
-                if ((tool is EditTool.Draw or EditTool.Line or EditTool.Shape)) _drawColor = Color.FromArgb(_drawOpacity, c.R, c.G, c.B);
+                if ((tool is EditTool.Draw or EditTool.Line or EditTool.Shape or EditTool.Measure)) _drawColor = Color.FromArgb(_drawOpacity, c.R, c.G, c.B);
                 else if (isLineTool) _lineAnnotColor = Color.FromArgb(_lineAnnotColor.A, c.R, c.G, c.B);
                 else _highlightColor = Color.FromArgb(_highlightColor.A, c.R, c.G, c.B);
                 ApplyDrawStyleToSelection();
@@ -798,7 +812,7 @@ namespace KillerPDF
             _annotBarDragInners.Clear();
 
             // Size slider (draw only)
-            if ((tool is EditTool.Draw or EditTool.Line or EditTool.Shape))
+            if ((tool is EditTool.Draw or EditTool.Line or EditTool.Shape or EditTool.Measure))
             {
                 var sizeGroup = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 2, 16, 2) };
                 var sizeLbl = new TextBlock
@@ -856,7 +870,7 @@ namespace KillerPDF
             opacityLbl.SetResourceReference(TextBlock.ForegroundProperty, "MutedTextBrush");
             opacityGroup.Children.Add(opacityLbl);
 
-            byte currentOpacity = (tool is EditTool.Draw or EditTool.Line or EditTool.Shape) ? _drawOpacity : isLineTool ? _lineAnnotColor.A : _highlightColor.A;
+            byte currentOpacity = (tool is EditTool.Draw or EditTool.Line or EditTool.Shape or EditTool.Measure) ? _drawOpacity : isLineTool ? _lineAnnotColor.A : _highlightColor.A;
             var opacitySlider = new Slider
             {
                 Minimum = 10,
@@ -881,7 +895,7 @@ namespace KillerPDF
             {
                 byte a = (byte)e.NewValue;
                 opacityLabel.Text = $"{(int)(a / 255.0 * 100)}%";
-                if ((tool is EditTool.Draw or EditTool.Line or EditTool.Shape))
+                if ((tool is EditTool.Draw or EditTool.Line or EditTool.Shape or EditTool.Measure))
                 {
                     _drawOpacity = a;
                     _drawColor = Color.FromArgb(a, _drawColor.R, _drawColor.G, _drawColor.B);
@@ -943,6 +957,12 @@ namespace KillerPDF
                     ? new StackPanel[] { colorGroup, dOpacityUnit }
                     : [colorGroup, sizeGroupRef, dOpacityUnit];
                 int[] drawShed = sizeGroupRef is null ? [1] : [2, 1];   // opacity unit first, then size; color anchored
+                if (measureMain is not null && measureInfo is not null)
+                {
+                    // Measure: the type, scale and units stay; page size and report go after opacity and size.
+                    drawGroups = [measureMain, measureInfo, .. drawGroups];
+                    drawShed = [.. drawShed.Select(index => index + 2), 1];
+                }
                 WireBarOverflow(panel, drawOverflowBtn, drawOverflowPopup, drawOverflowStack, drawGroups, drawShed, previewArea);
                 PlaceAnnotationBar(_drawSettingsBar, drawGrip, fadeIn: appearing);
             }
@@ -955,8 +975,10 @@ namespace KillerPDF
             FadeOutAndRemoveBar(_drawSettingsBar);
             _drawSettingsBar = null;
             if (_annotBarTool is EditTool.Draw or EditTool.Highlight
-                or EditTool.Strikethrough or EditTool.Underline or EditTool.Shape)
+                or EditTool.Strikethrough or EditTool.Underline or EditTool.Shape or EditTool.Measure)
                 _annotBarTool = null;
+            _measureScaleButton = null;
+            _measurePageSizeText = null;
         }
     }
 }

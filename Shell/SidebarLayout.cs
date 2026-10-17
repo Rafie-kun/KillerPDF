@@ -254,6 +254,7 @@ namespace KillerPDF
             if (_sidebarToggleBtn == null) return;
             bool pointLeft = _sidebarRight ? _sidebarCollapsed : !_sidebarCollapsed;
             _sidebarToggleBtn.Content = pointLeft ? "" : "";   // ChevronLeft / ChevronRight
+            SyncRailPanelButtons();   // the open panel's rail button is lit only while the sidebar is open
         }
 
         private void SelectSidebarSide(bool right)

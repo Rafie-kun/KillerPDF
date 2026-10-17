@@ -170,6 +170,7 @@ namespace KillerPDF
 
         private void FinishOpenFile(string displayPath, string workingPath)
         {
+            List<PdfEngineIntegration.MeasurementData> openedMeasurements = TakeMeasurementsFromWorkingCopy(ref workingPath);
             _currentFile = workingPath;
             _originalFile = displayPath;
             FileNameLabel.Text = System.IO.Path.GetFileName(displayPath);
@@ -194,6 +195,7 @@ namespace KillerPDF
             _formFontSizes.Clear();
             _formRadioValues.Clear();
             LoadRedactionMarksFromDocument();
+            ActiveViewer.LoadMeasurements(openedMeasurements);
             Search.ClearPageResults();
             _gridScrollToPage = -1;
             MarkDirty(false);
@@ -224,6 +226,32 @@ namespace KillerPDF
             }
             SetStatus(string.Format(Loc("Str_Opened"), System.IO.Path.GetFileName(displayPath), pageCount));
             SyncSidebarToDocState(hasDoc: true, startup: false);   // a document is up: open the rail, show page controls
+        }
+
+        // Measurements are edited on the page overlay and written back on save, so the working copy
+        // sheds the ones the file carries and they return as overlay measurements. A read-only open
+        // keeps them in the page, where the renderer still shows them.
+        private List<PdfEngineIntegration.MeasurementData> TakeMeasurementsFromWorkingCopy(ref string workingPath)
+        {
+            if (_doc is null || _doc.IsReadOnly) return [];
+            try
+            {
+                List<PdfEngineIntegration.MeasurementData> measurements =
+                    PdfEngineIntegration.ReadMeasurements(PdfDocument.Open(File.ReadAllBytes(workingPath)));
+                if (measurements.Count == 0) return measurements;
+                string stripped = App.MakeTempFile("measure");
+                PdfEngineIntegration.RemoveMeasurements(workingPath, stripped);
+                _doc.Close();
+                _doc = PdfWorkingDocument.Open(stripped);
+                workingPath = stripped;
+                return measurements;
+            }
+            catch (Exception ex) when (ex is FormatException or InvalidOperationException
+                or NotSupportedException or ArgumentException or IOException)
+            {
+                System.Diagnostics.Debug.WriteLine($"TakeMeasurementsFromWorkingCopy: {ex}");
+                return [];
+            }
         }
 
         // Themed "Password Required" prompt (KillerDialog): family dialog chrome + themed PasswordBox.
@@ -1125,10 +1153,11 @@ namespace KillerPDF
                     System.IO.File.Copy(tempClean, tempEdited, true);
                     PdfEngineIntegration.ClearInvalidatedSignatures(tempEdited);
                     PdfEngineBurn.Burn(tempEdited, _annotations, _renderDims,
-                        _docStampSpec, null, _pageRotations);
+                        _docStampSpec, null, _pageRotations, measurementsAsAnnotations: true);
                     PdfEngineIntegration.StripLinkAppearances(tempEdited);
                     WriteFormValuesToDocument(tempEdited);
                     WriteRedactionMarksToDocument(tempEdited);
+                    WriteMeasurementsToDocument(tempEdited);
                     PdfEngineIntegration.ApplyPageRotations(tempEdited, finalRotations);
                     PdfEngineIntegration.ReplaceFileAtomically(tempEdited, saveTarget);
                     _doc.Close();
@@ -1158,6 +1187,7 @@ namespace KillerPDF
                     PdfEngineIntegration.StripLinkAppearances(tempSaved);
                     WriteFormValuesToDocument(tempSaved);
                     WriteRedactionMarksToDocument(tempSaved);
+                    WriteMeasurementsToDocument(tempSaved);
                     PdfEngineIntegration.ApplyPageRotations(tempSaved, finalRotations);
                     PdfEngineIntegration.ReplaceFileAtomically(tempSaved, saveTarget);
                 }
@@ -1251,10 +1281,11 @@ namespace KillerPDF
                     System.IO.File.Copy(tempClean, tempEdited, true);
                     PdfEngineIntegration.ClearInvalidatedSignatures(tempEdited);
                     PdfEngineBurn.Burn(tempEdited, _annotations, _renderDims,
-                        _docStampSpec, null, _pageRotations);
+                        _docStampSpec, null, _pageRotations, measurementsAsAnnotations: true);
                     PdfEngineIntegration.StripLinkAppearances(tempEdited);
                     WriteFormValuesToDocument(tempEdited);
                     WriteRedactionMarksToDocument(tempEdited);
+                    WriteMeasurementsToDocument(tempEdited);
                     PdfEngineIntegration.ApplyPageRotations(tempEdited, finalRotations);
                     PdfEngineIntegration.ReplaceFileAtomically(tempEdited, dlg.FileName);
                     _doc.Close();
@@ -1295,6 +1326,7 @@ namespace KillerPDF
                     PdfEngineIntegration.StripLinkAppearances(tempSaved);
                     WriteFormValuesToDocument(tempSaved);
                     WriteRedactionMarksToDocument(tempSaved);
+                    WriteMeasurementsToDocument(tempSaved);
                     PdfEngineIntegration.ApplyPageRotations(tempSaved, finalRotations);
                     PdfEngineIntegration.ReplaceFileAtomically(tempSaved, dlg.FileName);
                     _originalFile = dlg.FileName;

@@ -24,6 +24,7 @@ namespace KillerPDF
         private void MarkDirty(bool dirty = true)
         {
             _isDirty = dirty;
+            ScheduleSidebarPanelRefresh();   // measurements listed in the Comments panel may have changed
             if (_saveAsBtnRef != null)
             {
                 if (dirty)

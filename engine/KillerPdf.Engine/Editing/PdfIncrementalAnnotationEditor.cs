@@ -497,7 +497,10 @@ public sealed class PdfIncrementalAnnotationEditor
         return this;
     }
 
-    /// <summary>Adds an editable calibrated distance measurement with a calculated label.</summary>
+    /// <summary>
+    /// Adds an editable calibrated distance measurement with a calculated label. Its ends get
+    /// short square ticks so the measured span reads clearly.
+    /// </summary>
     public PdfIncrementalAnnotationEditor AddDistanceMeasurement(
         int pageIndex, PdfPoint start, PdfPoint end, PdfMeasurementProfile measurement,
         PdfRgbColor? color = null, double lineWidth = 1, double opacity = 1,
@@ -511,8 +514,8 @@ public sealed class PdfIncrementalAnnotationEditor
             $"F{measurement.Precision}", CultureInfo.InvariantCulture)
             + " " + measurement.UnitSymbol;
         return AddLine(pageIndex, start, end, color, lineWidth, opacity, label,
-            annotationMetadata, dashPattern, intent: PdfLineAnnotationIntent.Dimension,
-            measurement: measurement, caption: caption);
+            annotationMetadata, dashPattern, PdfLineEndingStyle.Butt, PdfLineEndingStyle.Butt,
+            intent: PdfLineAnnotationIntent.Dimension, measurement: measurement, caption: caption);
     }
 
     /// <summary>Adds a rectangle annotation with optional fill and dashed border.</summary>
@@ -555,26 +558,55 @@ public sealed class PdfIncrementalAnnotationEditor
             opacity, contents, startEnding, endEnding, dashPattern,
             interiorColor, annotationMetadata, intent, measurement, caption);
 
-    /// <summary>Adds an editable three-point angle measurement with a calculated label.</summary>
+    /// <summary>
+    /// Adds an editable three-point angle measurement with a calculated label. A positive
+    /// <paramref name="arcRadius"/> also draws the arc between the arms, that many points from the
+    /// vertex, into the appearance.
+    /// </summary>
     public PdfIncrementalAnnotationEditor AddAngleMeasurement(
         int pageIndex, PdfPoint first, PdfPoint vertex, PdfPoint second,
         PdfRgbColor? color = null, double lineWidth = 1, double opacity = 1,
         int precision = 1, string? contents = null,
         PdfAnnotationMetadata? annotationMetadata = null,
         IReadOnlyList<double>? dashPattern = null,
-        PdfMeasurementCaption? caption = null)
+        PdfMeasurementCaption? caption = null,
+        double? arcRadius = null)
     {
         if (precision is < 0 or > 10)
             throw new ArgumentOutOfRangeException(nameof(precision));
+        if (arcRadius is { } radius && (!double.IsFinite(radius) || radius <= 0))
+            throw new ArgumentOutOfRangeException(nameof(arcRadius));
         double angle = PdfMeasurement.Angle(
             new PdfMeasurementPoint(first.X, first.Y),
             new PdfMeasurementPoint(vertex.X, vertex.Y),
             new PdfMeasurementPoint(second.X, second.Y));
         string label = contents ?? angle.ToString($"F{precision}", CultureInfo.InvariantCulture) + " deg";
-        return AddPolyline(pageIndex, [first, vertex, second], color,
+        AddPolyline(pageIndex, [first, vertex, second], color,
             lineWidth, opacity, label, dashPattern: dashPattern,
             annotationMetadata: annotationMetadata,
             intent: PdfVertexAnnotationIntent.Dimension, caption: caption);
+        if (arcRadius is { } arc)
+            _annotations[^1] = (PendingVertex)_annotations[^1] with { Arc = AngleArc(first, vertex, second, arc) };
+        return this;
+    }
+
+    // The arc from the first arm to the second the short way round, as a polyline fine enough
+    // to read as a curve (one segment per 7.5 degrees).
+    private static PdfPoint[] AngleArc(PdfPoint first, PdfPoint vertex, PdfPoint second, double radius)
+    {
+        double start = Math.Atan2(first.Y - vertex.Y, first.X - vertex.X);
+        double end = Math.Atan2(second.Y - vertex.Y, second.X - vertex.X);
+        double sweep = end - start;
+        while (sweep > Math.PI) sweep -= 2 * Math.PI;
+        while (sweep < -Math.PI) sweep += 2 * Math.PI;
+        int steps = Math.Max(4, (int)Math.Ceiling(Math.Abs(sweep) / (Math.PI / 24)));
+        var arc = new PdfPoint[steps + 1];
+        for (int step = 0; step <= steps; step++)
+        {
+            double angle = start + sweep * step / steps;
+            arc[step] = new PdfPoint(vertex.X + Math.Cos(angle) * radius, vertex.Y + Math.Sin(angle) * radius);
+        }
+        return arc;
     }
 
     /// <summary>Adds an editable closed-path perimeter measurement with a calculated label.</summary>
@@ -3439,7 +3471,7 @@ public sealed class PdfIncrementalAnnotationEditor
     }
 
     private static IEnumerable<PdfPoint> VertexBoundsPoints(PendingVertex vertex) =>
-        vertex.Vertices.Concat(CaptionCorners(vertex.Contents, vertex.Caption));
+        vertex.Vertices.Concat(vertex.Arc ?? []).Concat(CaptionCorners(vertex.Contents, vertex.Caption));
 
     private static PdfStream VertexAppearance(PendingVertex vertex, PdfIndirectReference? font)
     {
@@ -3478,6 +3510,13 @@ public sealed class PdfIncrementalAnnotationEditor
                 vertex.Vertices[last - 1].Y - bounds.Y,
                 vertex.EndEnding, vertex.LineWidth,
                 vertex.Color, vertex.InteriorColor);
+        }
+        if (vertex.Arc is { Count: >= 2 } arc)
+        {
+            WriteAscii(output, $"{Format(arc[0].X - bounds.X)} {Format(arc[0].Y - bounds.Y)} m\n");
+            foreach (PdfPoint point in arc.Skip(1))
+                WriteAscii(output, $"{Format(point.X - bounds.X)} {Format(point.Y - bounds.Y)} l\n");
+            output.Write("S\n"u8);
         }
         bool caption = DrawsCaption(vertex.Contents, vertex.Caption, font);
         if (caption) WriteCaption(output, vertex.Contents!, vertex.Caption!, vertex.Color, bounds);
@@ -4257,7 +4296,7 @@ public sealed class PdfIncrementalAnnotationEditor
         PdfLineEndingStyle EndEnding, IReadOnlyList<double>? DashPattern,
         PdfRgbColor? InteriorColor, PdfAnnotationMetadata? Metadata,
         PdfVertexAnnotationIntent? Intent, PdfMeasurementProfile? Measurement,
-        PdfMeasurementCaption? Caption)
+        PdfMeasurementCaption? Caption, IReadOnlyList<PdfPoint>? Arc = null)
         : PendingAnnotation(PageIndex);
     private sealed record PendingViewport(
         PdfMeasurementProfile? Measurement, PdfContentBounds? Area);

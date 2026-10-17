@@ -873,6 +873,46 @@
             </Setter>
         </Style>
 
+        <!-- Sidebar panel buttons on the rail (Pages, Outline, Comments, Attachments, Layers,
+             Signatures). The glyph is the Content. Lit in the accent on hover and while the
+             button's panel is the one open (Tag="on", set from SyncRailPanelButtons), dimmed
+             while there is no document to show. -->
+        <Style x:Key="RailPanelBtn" TargetType="Button">
+            <Setter Property="Width" Value="24"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="Transparent">
+                            <TextBlock x:Name="Glyph" Text="{TemplateBinding Content}"
+                                       FontFamily="Segoe MDL2 Assets" FontSize="15"
+                                       Foreground="{DynamicResource TextBrush}"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock.Effect>
+                                    <DropShadowEffect Color="Black" BlurRadius="4" ShadowDepth="2" Direction="270" Opacity="{DynamicResource IconShadowOpacity}"/>
+                                </TextBlock.Effect>
+                            </TextBlock>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Glyph" Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+                            </Trigger>
+                            <Trigger Property="Tag" Value="on">
+                                <Setter TargetName="Glyph" Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Glyph" Property="Opacity" Value="0.35"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <!-- Dark TreeView for PDF outline/bookmarks -->
         <Style x:Key="OutlineTreeStyle" TargetType="TreeView">
             <Setter Property="Background" Value="Transparent"/>
@@ -1742,20 +1782,26 @@
                     <Control Panel.ZIndex="20" Style="{StaticResource PaneBevelOverlay}"/>
                     <DockPanel x:Name="SidebarContentPanel">
                         <!-- Sticky header - lives outside the ScrollViewer so it never scrolls away -->
-                        <!-- Tab row: PAGES (left) | OUTLINES (right) -->
+                        <!-- Header row: the open panel's name on the left (the rail buttons pick the
+                             panel), its own actions on the right. -->
                         <DockPanel DockPanel.Dock="Top" LastChildFill="False" Height="20" Margin="10,6,8,0">
-                            <Button x:Name="SidebarPagesTab" Content="{DynamicResource Str_TabPages}"
-                                    DockPanel.Dock="Left"
-                                    Style="{StaticResource SidebarTabBtn}"
-                                    VerticalAlignment="Center"
-                                    Foreground="{DynamicResource PrimaryBrush}"
-                                    Click="SidebarPagesTab_Click"/>
-                            <Button x:Name="SidebarOutlinesTab" Content="{DynamicResource Str_TabOutlines}"
+                            <TextBlock x:Name="SidebarPanelTitle" Text="{DynamicResource Str_TabPages}"
+                                       DockPanel.Dock="Left"
+                                       FontFamily="{DynamicResource BrandSansFont}" FontSize="14"
+                                       Padding="2,2,8,2"
+                                       VerticalAlignment="Center"
+                                       Foreground="{DynamicResource PrimaryBrush}"/>
+                            <Button x:Name="SidebarPanelEditButton"
                                     DockPanel.Dock="Right"
                                     Style="{StaticResource SidebarTabBtn}"
+                                    Width="18" Height="18" Padding="0"
                                     VerticalAlignment="Center"
-                                    IsEnabled="False"
-                                    Click="SidebarOutlinesTab_Click"/>
+                                    Visibility="Collapsed"
+                                    Click="SidebarPanelEdit_Click">
+                                <TextBlock Text="&#xE70F;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                            </Button>
                             <Button x:Name="OutlineExpandCollapseAllButton"
                                     DockPanel.Dock="Right"
                                     ToolTip="{DynamicResource Str_Outline_CollapseAll}"
@@ -1839,7 +1885,8 @@
                              fades the list itself so the real themed sidebar and grain remain visible
                              behind it. SyncPageListEdgeFades drives the stops; 98SE makes the mask
                              fully opaque because that theme deliberately has no edge fades. -->
-                        <Grid>
+                        <Grid x:Name="SidebarPanelsHost">
+                        <Grid x:Name="PageListHost">
                         <Border x:Name="PageListFadeHost" Background="Transparent">
                             <Border.OpacityMask>
                                 <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
@@ -1933,6 +1980,9 @@
                                       PreviewKeyDown="OutlineTree_PreviewKeyDown"
                                       Padding="4,2"/>
                         </ScrollViewer>
+                        <!-- Comments, Attachments, Layers and Signatures (Shell/SidebarPanels.cs). -->
+                        <DockPanel x:Name="SidebarListPanel" Visibility="Collapsed"/>
+                        </Grid><!-- /SidebarPanelsHost -->
                     </DockPanel>
                     </Grid>
                 </Border>
@@ -1952,6 +2002,22 @@
                                 Click="SidebarToggle_Click"/>
                         <!-- Settings and help icons pinned to bottom -->
                         <StackPanel VerticalAlignment="Bottom" Margin="0,0,0,6">
+                            <!-- The sidebar's panels, always on the rail. A click opens that panel
+                                 (opening the sidebar if it is closed); a click on the open panel's
+                                 button closes the sidebar. -->
+                            <Button x:Name="SidebarPagesTab" Style="{StaticResource RailPanelBtn}" Content="&#xE8A9;"
+                                    ToolTip="{DynamicResource Str_Rail_Pages}" IsEnabled="False" Click="SidebarPagesTab_Click"/>
+                            <Button x:Name="SidebarOutlinesTab" Style="{StaticResource RailPanelBtn}" Content="&#xE8A4;"
+                                    ToolTip="{DynamicResource Str_Rail_Outline}" IsEnabled="False" Click="SidebarOutlinesTab_Click"/>
+                            <Button x:Name="SidebarCommentsTab" Style="{StaticResource RailPanelBtn}" Content="&#xE90A;"
+                                    ToolTip="{DynamicResource Str_Rail_Comments}" IsEnabled="False" Click="SidebarCommentsTab_Click"/>
+                            <Button x:Name="SidebarAttachmentsTab" Style="{StaticResource RailPanelBtn}" Content="&#xE723;"
+                                    ToolTip="{DynamicResource Str_Rail_Attachments}" IsEnabled="False" Click="SidebarAttachmentsTab_Click"/>
+                            <Button x:Name="SidebarLayersTab" Style="{StaticResource RailPanelBtn}" Content="&#xE81E;"
+                                    ToolTip="{DynamicResource Str_Rail_Layers}" IsEnabled="False" Click="SidebarLayersTab_Click"/>
+                            <Button x:Name="SidebarSignaturesTab" Style="{StaticResource RailPanelBtn}" Content="&#xEB95;"
+                                    ToolTip="{DynamicResource Str_Rail_Signatures}" IsEnabled="False" Click="SidebarSignaturesTab_Click"
+                                    Margin="0,0,0,14"/>
                             <!-- E9A6 (two panes): open or close the second document pane, F10 from
                                  the keyboard. On the rail rather than the toolbar because it acts
                                  on the WINDOW, not on the document the toolbar is editing. Lit in

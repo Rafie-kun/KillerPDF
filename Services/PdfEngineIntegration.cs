@@ -1173,6 +1173,156 @@ internal static class PdfEngineIntegration
         ReplaceWithBuiltResult(path, editor.Build());
     }
 
+    /// <summary>
+    /// One measurement in unrotated, crop-relative page points, with its scale and style. The
+    /// label center and size are in page points too.
+    /// </summary>
+    internal sealed record MeasurementData(
+        int PageIndex, PdfMeasurementKind Kind, IReadOnlyList<PdfPoint> Points, bool Closed,
+        PdfMeasurementProfile? Profile, string? Contents, PdfRgbColor Color, double LineWidth,
+        double Opacity, PdfPoint? LabelCenter, double? LabelSize, double? ArcRadius = null);
+
+    /// <summary>The scale written when a measurement carries none of its own.</summary>
+    internal static readonly PdfMeasurementProfile ActualSizeProfile = new("1 in = 1 in", 1.0 / 72.0, "in", 2);
+
+    /// <summary>Reads the measurement annotations saved in a document, crop-relative.</summary>
+    internal static List<MeasurementData> ReadMeasurements(PdfDocument document)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        IReadOnlyList<PdfPageInformation> pages = PdfPageInformation.Read(document);
+        var measurements = new List<MeasurementData>();
+        foreach (PdfMeasurementAnnotationInfo info in PdfMeasurementAnnotationReader.Read(document))
+        {
+            if (info.PageIndex < 0 || info.PageIndex >= pages.Count) continue;
+            PdfPageInformation page = pages[info.PageIndex];
+            PdfPoint Local(PdfMeasurementPoint point) => new(point.X - page.Left, point.Y - page.Bottom);
+            measurements.Add(new MeasurementData(info.PageIndex, info.Kind,
+                [.. info.Points.Select(Local)], info.Closed, info.Profile, info.Contents,
+                info.Color ?? new PdfRgbColor(1, 0, 0), info.LineWidth > 0 ? info.LineWidth : 1,
+                info.Opacity, info.CaptionCenter is { } center ? Local(center) : null,
+                info.CaptionFontSize));
+        }
+        return measurements;
+    }
+
+    /// <summary>
+    /// Replaces the measurement annotations saved in a file with the given ones, written as the
+    /// dimension lines, polylines and polygons Acrobat reads, each with its own scale.
+    /// </summary>
+    internal static void WriteMeasurements(string path, IReadOnlyList<MeasurementData> measurements)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        ArgumentNullException.ThrowIfNull(measurements);
+        PdfDocument source = PdfDocument.Open(File.ReadAllBytes(path));
+        IReadOnlyList<PdfMeasurementAnnotationInfo> existing = PdfMeasurementAnnotationReader.Read(source);
+        if (existing.Count == 0 && measurements.Count == 0) return;
+        IReadOnlyList<PdfPageInformation> pages = PdfPageInformation.Read(source);
+        var editor = new PdfIncrementalAnnotationEditor(source);
+        foreach (PdfMeasurementAnnotationInfo measurement in existing)
+            editor.RemoveAnnotationAt(measurement.PageIndex, measurement.AnnotationIndex);
+        foreach (MeasurementData measurement in measurements)
+        {
+            if (measurement.PageIndex < 0 || measurement.PageIndex >= pages.Count) continue;
+            PdfPageInformation page = pages[measurement.PageIndex];
+            PdfPoint Absolute(PdfPoint point) => new(page.Left + point.X, page.Bottom + point.Y);
+            PdfPoint[] points = [.. measurement.Points.Select(Absolute)];
+            string? contents = string.IsNullOrWhiteSpace(measurement.Contents) ? null : measurement.Contents;
+            PdfMeasurementCaption? caption = contents is not null && measurement.LabelCenter is { } center
+                ? new PdfMeasurementCaption(Absolute(center), Math.Clamp(measurement.LabelSize ?? 10, 1, 144))
+                : null;
+            PdfMeasurementProfile profile = measurement.Profile ?? ActualSizeProfile;
+            double width = double.IsFinite(measurement.LineWidth) && measurement.LineWidth > 0
+                ? measurement.LineWidth : 1;
+            double opacity = Math.Clamp(double.IsFinite(measurement.Opacity) ? measurement.Opacity : 1, 0, 1);
+            try
+            {
+                switch (measurement.Kind)
+                {
+                    case PdfMeasurementKind.Distance when points.Length >= 2:
+                        editor.AddDistanceMeasurement(measurement.PageIndex, points[0], points[1], profile,
+                            measurement.Color, width, opacity, contents, caption: caption);
+                        break;
+                    case PdfMeasurementKind.Perimeter when points.Length >= 2:
+                        PdfPoint[] vertices = measurement.Closed && points.Length > 2 ? [.. points, points[0]] : points;
+                        editor.AddPolyline(measurement.PageIndex, vertices, measurement.Color, width, opacity,
+                            contents, intent: PdfVertexAnnotationIntent.Dimension, measurement: profile,
+                            caption: caption);
+                        break;
+                    case PdfMeasurementKind.Area when points.Length >= 3:
+                        editor.AddPolygon(measurement.PageIndex, points, measurement.Color, null, width,
+                            opacity, contents, intent: PdfVertexAnnotationIntent.Dimension,
+                            measurement: profile, caption: caption);
+                        break;
+                    case PdfMeasurementKind.Angle when points.Length >= 3:
+                        editor.AddAngleMeasurement(measurement.PageIndex, points[0], points[1], points[2],
+                            measurement.Color, width, opacity, 1, contents, caption: caption,
+                            arcRadius: measurement.ArcRadius is > 0 and var arc && double.IsFinite(arc) ? arc : null);
+                        break;
+                }
+            }
+            catch (ArgumentException)
+            {
+                // A measurement whose points collapsed onto each other has nothing to save.
+            }
+        }
+        if (editor.HasChanges) ReplaceWithBuiltResult(path, editor.Build());
+    }
+
+    /// <summary>
+    /// Writes a copy of <paramref name="sourcePath"/> without its measurement annotations, so the
+    /// viewer can edit them on its overlay and write them back on save. Returns how many it removed.
+    /// </summary>
+    internal static int RemoveMeasurements(string sourcePath, string destinationPath)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(sourcePath);
+        ArgumentException.ThrowIfNullOrWhiteSpace(destinationPath);
+        PdfDocument source = PdfDocument.Open(File.ReadAllBytes(sourcePath));
+        IReadOnlyList<PdfMeasurementAnnotationInfo> existing = PdfMeasurementAnnotationReader.Read(source);
+        File.Copy(sourcePath, destinationPath, true);
+        if (existing.Count == 0) return 0;
+        var editor = new PdfIncrementalAnnotationEditor(source);
+        foreach (PdfMeasurementAnnotationInfo measurement in existing)
+            editor.RemoveAnnotationAt(measurement.PageIndex, measurement.AnnotationIndex);
+        ReplaceWithBuiltResult(destinationPath, editor.Build());
+        return existing.Count;
+    }
+
+    /// <summary>
+    /// Sets the drawing scale of the listed pages, saved as each page's /VP viewport, or removes
+    /// it when <paramref name="profile"/> is null.
+    /// </summary>
+    internal static void SetPageScales(string path, IReadOnlyList<int> pageIndexes, PdfMeasurementProfile? profile)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        ArgumentNullException.ThrowIfNull(pageIndexes);
+        PdfDocument source = PdfDocument.Open(File.ReadAllBytes(path));
+        var editor = new PdfIncrementalAnnotationEditor(source);
+        foreach (int page in pageIndexes.Distinct())
+            if (page >= 0 && page < editor.PageCount) editor.SetPageMeasurementScale(page, profile);
+        if (editor.HasChanges) ReplaceWithBuiltResult(path, editor.Build());
+    }
+
+    /// <summary>
+    /// The drawing scales saved in a document's page viewports, with regional scales moved into
+    /// crop-relative page points to match the viewer's other page geometry.
+    /// </summary>
+    internal static PdfMeasurementProfileMap ReadPageScales(PdfDocument document)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        IReadOnlyList<PdfPageInformation> pages = PdfPageInformation.Read(document);
+        var assignments = new List<PdfMeasurementProfileAssignment>();
+        foreach (PdfMeasurementProfileAssignment assignment in PdfMeasurementAnnotationReader.ReadPageScales(document))
+        {
+            if (assignment.PageIndex is not int page || page < 0 || page >= pages.Count) continue;
+            PdfContentBounds? region = assignment.Region is { } bounds
+                ? new PdfContentBounds(bounds.Left - pages[page].Left, bounds.Bottom - pages[page].Bottom,
+                    bounds.Right - pages[page].Left, bounds.Top - pages[page].Bottom)
+                : null;
+            assignments.Add(new PdfMeasurementProfileAssignment(assignment.Profile, page, region));
+        }
+        return new PdfMeasurementProfileMap(assignments);
+    }
+
     /// <summary>Normalizes native links to invisible clickable regions through one revision.</summary>
     internal static void StripLinkAppearances(string path)
     {

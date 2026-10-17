@@ -86,6 +86,8 @@
     <Compile Include="..\Services\ShortcutTable.cs" Link="Services\ShortcutTable.cs" />
     <Compile Include="..\Services\ShortcutRemap.cs" Link="Services\ShortcutRemap.cs" />
     <Compile Include="..\Services\CommandSearch.cs" Link="Services\CommandSearch.cs" />
+    <Compile Include="..\Services\MeasurementUnits.cs" Link="Services\MeasurementUnits.cs" />
+    <Compile Include="..\Services\MeasurementGeometry.cs" Link="Services\MeasurementGeometry.cs" />
     <Compile Include="..\Services\EditableTextShortcutPolicy.cs" Link="Services\EditableTextShortcutPolicy.cs" />
     <Compile Include="..\Services\ShortcutTogglePolicy.cs" Link="Services\ShortcutTogglePolicy.cs" />
     <Compile Include="..\Services\ReleaseUpdateCheck.cs" Link="Services\ReleaseUpdateCheck.cs" />

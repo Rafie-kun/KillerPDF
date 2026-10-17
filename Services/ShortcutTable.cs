@@ -112,6 +112,7 @@ namespace KillerPDF
             ('U', "Str_DocumentTools_EditPortfolioStructure"),
             ('T', "Str_DocumentTools_EditAttachments"),
             ('K', "Str_DocumentTools_Comments"),
+            ('Y', "Str_DocumentTools_Measurements"),
             ('N', "Str_DocumentTools_NavigationAudit"),
             ('B', "Str_DocumentTools_AutoBookmarks"),
             ('G', "Str_DocumentTools_PageLabels"),
@@ -166,6 +167,7 @@ namespace KillerPDF
             B("F",               "Str_KS_FormField",  "Tools", Cap("F")),
             B("E",               "Str_ColorCorrection", "Tools", Cap("E")),
             B("M",               "Str_Lbl_Measure",   "Tools", Cap("M")),
+            B("%shift%+M",       "Str_KS_NextMeasure", "Tools", Cap("Shift:M")),
             B("X",               "Str_Lbl_Redact",    "Tools", Cap("X")),
 
             B("%ctrl%+Z",         "Str_KS_Undo",        "Edit", Cap("Ctrl:Z")),

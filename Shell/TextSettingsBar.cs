@@ -203,6 +203,12 @@ namespace KillerPDF
                     ia.StrokeWidth = _drawWidth;
                     touched.Add(ia.PageIndex);
                 }
+                else if (a is MeasurementAnnotation ma)
+                {
+                    ma.SetColor(Color.FromArgb(_drawOpacity, _drawColor.R, _drawColor.G, _drawColor.B));
+                    ma.StrokeWidth = _drawWidth;
+                    touched.Add(ma.PageIndex);
+                }
             }
             if (_selectedAnnotation is not null) Apply(_selectedAnnotation);
             foreach (var a in _selectedSet)

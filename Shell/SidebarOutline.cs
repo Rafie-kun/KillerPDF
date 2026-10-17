@@ -22,8 +22,8 @@ namespace KillerPDF
         // Sidebar outline/bookmark panel
         // ============================================================
 
-        private void SidebarPagesTab_Click(object sender, RoutedEventArgs e) => SwitchSidebarToPagesTab();
-        private void SidebarOutlinesTab_Click(object sender, RoutedEventArgs e) => SwitchSidebarToOutlinesTab();
+        private void SidebarPagesTab_Click(object sender, RoutedEventArgs e) => OpenSidebarPanel(SidebarPanel.Pages);
+        private void SidebarOutlinesTab_Click(object sender, RoutedEventArgs e) => OpenSidebarPanel(SidebarPanel.Outlines);
 
         private const double SidebarMaxPages = 234;   // stops when the 200px-capped thumbnail fills (200 + margins + scrollbar)
         private const double SidebarMaxOutlines = 480;
@@ -31,16 +31,16 @@ namespace KillerPDF
 
         private void SwitchSidebarToPagesTab()
         {
+            // Save the outgoing panel's width before snapping back to pages.
+            if (!_sidebarCollapsed && _sidebarCol.ActualWidth > 0)
+                RememberSidebarWidth(_sidebarCol.ActualWidth);
+            _sidebarPanel = SidebarPanel.Pages;
             _sidebarShowingOutlines = false;
             PageList.Visibility = Visibility.Visible;
             OutlineScrollViewer.Visibility = Visibility.Collapsed;
             OutlineExpandCollapseAllButton.Visibility = Visibility.Collapsed;
             PageControlsRow.Visibility = _doc != null ? Visibility.Visible : Visibility.Collapsed;   // no empty box when nothing is open
-            SidebarPagesTab.Foreground = (Brush)FindResource("PrimaryBrush");
-            SidebarOutlinesTab.Foreground = (Brush)FindResource("MutedTextBrush");
-            // Save current outlines width before snapping back to pages.
-            if (!_sidebarCollapsed && _sidebarCol.ActualWidth > 0)
-                _savedOutlinesWidth = Math.Min(_sidebarCol.ActualWidth, SbPx(SidebarMaxOutlines));
+            ShowControlPanelHeader(SidebarPanel.Pages);
 
             SidebarSplitter.IsEnabled = true;   // pages are resizable too now (drag the splitter)
             _sidebarCol.MaxWidth = SbPx(SidebarMaxPages);
@@ -55,17 +55,17 @@ namespace KillerPDF
 
         private void SwitchSidebarToOutlinesTab()
         {
-            // Save current pages width, then restore (or auto-fit) the outlines width.
+            // Save the outgoing panel's width, then restore (or auto-fit) the outlines width.
             if (!_sidebarCollapsed && _sidebarCol.ActualWidth > 0)
-                _savedPagesWidth = Math.Min(_sidebarCol.ActualWidth, SbPx(SidebarMaxPages));
+                RememberSidebarWidth(_sidebarCol.ActualWidth);
 
+            _sidebarPanel = SidebarPanel.Outlines;
             _sidebarShowingOutlines = true;
             PageList.Visibility = Visibility.Collapsed;
             OutlineScrollViewer.Visibility = Visibility.Visible;
             OutlineExpandCollapseAllButton.Visibility = Visibility.Visible;
             PageControlsRow.Visibility = Visibility.Collapsed;
-            SidebarPagesTab.Foreground = (Brush)FindResource("MutedTextBrush");
-            SidebarOutlinesTab.Foreground = (Brush)FindResource("PrimaryBrush");
+            ShowControlPanelHeader(SidebarPanel.Outlines);
             SidebarSplitter.IsEnabled = true;
             _sidebarCol.MaxWidth = SbPx(SidebarMaxOutlines);
             if (!_sidebarCollapsed)
@@ -189,6 +189,7 @@ namespace KillerPDF
             finally
             {
                 UpdateOutlineExpandCollapseButton();
+                RefreshSidebarPanel();   // the document changed, so the open list panel follows it
             }
         }
 

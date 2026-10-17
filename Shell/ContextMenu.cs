@@ -502,6 +502,26 @@ namespace KillerPDF
                 BgB = t.BgB,
                 BgA = t.BgA
             },
+            MeasurementAnnotation m => new MeasurementAnnotation
+            {
+                PageIndex = m.PageIndex,
+                PairId = m.PairId,
+                GroupId = m.GroupId,
+                Kind = m.Kind,
+                Points = [.. m.Points],
+                Closed = m.Closed,
+                LabelCenter = m.LabelCenter,
+                LabelSize = m.LabelSize,
+                StrokeWidth = m.StrokeWidth,
+                ColorR = m.ColorR,
+                ColorG = m.ColorG,
+                ColorB = m.ColorB,
+                ColorA = m.ColorA,
+                ScaleName = m.ScaleName,
+                UnitsPerPoint = m.UnitsPerPoint,
+                Unit = m.Unit,
+                Precision = m.Precision
+            },
             InkAnnotation ink => new InkAnnotation
             {
                 PageIndex = ink.PageIndex,

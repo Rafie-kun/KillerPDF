@@ -156,6 +156,22 @@ namespace KillerPDF
                 }
                 e.Handled = true;
             }
+            else if (key == Key.Escape && ActiveViewer.CancelMeasurePlacement())
+            {
+                // Measure tool: abandon the measurement (or calibration line) being placed.
+                e.Handled = true;
+            }
+            else if (key == Key.Back && ActiveViewer.MeasurePlacementActive)
+            {
+                ActiveViewer.RemoveLastMeasurePoint();
+                e.Handled = true;
+            }
+            else if (key == Key.Enter && ActiveViewer.MeasurePlacementActive)
+            {
+                // Finish a perimeter or area from the keyboard.
+                ActiveViewer.FinishMeasurePlacement();
+                e.Handled = true;
+            }
             else if (key == Key.Escape && _shapePolyPoints.Count > 0)
             {
                 // Shapes tool (#127 Phase 3): abandon the in-progress polygon.
@@ -442,6 +458,14 @@ namespace KillerPDF
             {
                 // Shift+O pairs with the Shapes key O: steps to the next shape type.
                 CycleShapeKind();
+                e.Handled = true;
+            }
+            else if (key == Key.M && mods == ModifierKeys.Shift && _doc is not null
+                     && ShortcutOverlay.Visibility != Visibility.Visible
+                     && AboutOverlay.Visibility != Visibility.Visible)
+            {
+                // Shift+M pairs with the Measure key M: steps to the next measurement type.
+                CycleMeasureMode();
                 e.Handled = true;
             }
             // App-wide accessibility size (AppScale.cs), distinct from the Ctrl+wheel page zoom:

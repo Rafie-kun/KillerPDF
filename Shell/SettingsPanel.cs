@@ -317,9 +317,10 @@ namespace KillerPDF
             // SetResourceReference bindings update automatically; sidebar tabs and
             // active tool button background still need an explicit refresh.
             SetTool(_currentTool);
-            if (_sidebarShowingOutlines)
+            // The list panels use resource references throughout and need no refresh.
+            if (_sidebarPanel == SidebarPanel.Outlines)
                 SwitchSidebarToOutlinesTab();
-            else
+            else if (_sidebarPanel == SidebarPanel.Pages)
                 SwitchSidebarToPagesTab();
             // Re-evaluate the page-list edge overlays immediately. 98SE sets the theme
             // multiplier to zero; modern themes leave it at the default full strength.

@@ -23,7 +23,8 @@ internal static class PdfEngineBurn
         StampSpec? stamps = null,
         int? onlyPage = null,
         IReadOnlyDictionary<int, int>? rotations = null,
-        bool forRasterization = false)
+        bool forRasterization = false,
+        bool measurementsAsAnnotations = false)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
         if (annotations.Values.Any(items => items.Count > 0))
@@ -74,7 +75,12 @@ internal static class PdfEngineBurn
                 double sx = visualWidth / renderWidth;
                 double sy = visualHeight / renderHeight;
                 foreach (PageAnnotation annotation in pageAnnotations!)
+                {
+                    // A save writes measurements as real measurement annotations instead
+                    // (PdfEngineIntegration.WriteMeasurements); prints and exports draw them in.
+                    if (measurementsAsAnnotations && annotation is MeasurementAnnotation) continue;
                     DrawAnnotation(content, annotation, sx, sy, fonts);
+                }
             }
 
             content.RestoreState();
@@ -159,7 +165,54 @@ internal static class PdfEngineBurn
             case SignatureAnnotation signature: DrawSignature(content, signature, sx, sy); break;
             case ImageAnnotation image: DrawImage(content, image.ImageData, image.Position,
                 image.SourceWidth * image.Scale, image.SourceHeight * image.Scale, sx, sy); break;
+            case MeasurementAnnotation measurement: DrawMeasurement(content, measurement, sx, sy, fonts); break;
         }
+    }
+
+    // The same picture the page overlay shows: the measured lines, the arc of an angle, and the
+    // value on a white box at the label point.
+    private static void DrawMeasurement(PdfContentStreamBuilder content, MeasurementAnnotation measurement,
+        double sx, double sy, Dictionary<string, TrueTypeFont> fonts)
+    {
+        if (!MeasurementGeometry.IsUsable(measurement)) return;
+        var points = measurement.Points;
+        content.SaveState().SetStrokeRgb(measurement.ColorR / 255d, measurement.ColorG / 255d, measurement.ColorB / 255d)
+            .SetOpacity(measurement.ColorA / 255d, measurement.ColorA / 255d)
+            .SetLineWidth(Math.Max(.01, measurement.StrokeWidth * sy))
+            .SetLineCap(PdfLineCap.Round).SetLineJoin(PdfLineJoin.Round)
+            .MoveTo(points[0].X * sx, points[0].Y * sy);
+        foreach (WpfPoint point in points.Skip(1)) content.LineTo(point.X * sx, point.Y * sy);
+        if (measurement.Kind == MeasurementKind.Area
+            || (measurement.Kind == MeasurementKind.Perimeter && measurement.Closed))
+            content.ClosePath();
+        content.Stroke();
+        foreach (var (a, b) in MeasurementGeometry.DistanceTicks(measurement, sy))
+            content.MoveTo(a.X * sx, a.Y * sy).LineTo(b.X * sx, b.Y * sy).Stroke();
+        if (measurement.Kind == MeasurementKind.Angle)
+        {
+            List<WpfPoint> arc = MeasurementGeometry.ArcPoints(measurement);
+            if (arc.Count > 1)
+            {
+                content.MoveTo(arc[0].X * sx, arc[0].Y * sy);
+                foreach (WpfPoint point in arc.Skip(1)) content.LineTo(point.X * sx, point.Y * sy);
+                content.Stroke();
+            }
+        }
+        content.RestoreState();
+
+        string label = MeasurementGeometry.Label(measurement, sy, System.Globalization.CultureInfo.CurrentCulture);
+        TrueTypeFont? font = Font(fonts, "Arial", label, false, false);
+        if (font is null) return;
+        double size = Math.Max(1, measurement.LabelSize * sy);
+        WpfPoint center = measurement.LabelCenter ?? MeasurementGeometry.AutoLabelCenter(measurement);
+        center = new WpfPoint(center.X * sx, center.Y * sy);
+        double width = Measure(font, label, size);
+        Rect box = MeasurementGeometry.LabelBox(center, width, size);
+        content.SaveState().SetOpacity(measurement.ColorA / 255d)
+            .SetFillRgb(1, 1, 1).Rectangle(box.X, box.Y, box.Width, box.Height).Fill()
+            .SetFillRgb(measurement.ColorR / 255d, measurement.ColorG / 255d, measurement.ColorB / 255d)
+            .BeginText().SetFont(font, size).SetTextMatrix(1, 0, 0, -1, center.X - width / 2, center.Y + size * 0.36)
+            .ShowUnicodeText(label).EndText().RestoreState();
     }
 
     private static void DrawText(PdfContentStreamBuilder content, TextAnnotation text,
