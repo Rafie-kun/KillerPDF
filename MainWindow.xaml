@@ -3281,7 +3281,7 @@
                                   HorizontalAlignment="Left" VerticalAlignment="Center"
                                   Style="{StaticResource ThemeCheck}"
                                   ToolTip="{DynamicResource Str_KS_ToggleTip}"
-                                  Click="KeyboardShortcutsCheck_Click">
+                                  AutomationProperties.Name="{DynamicResource Str_KS_Enabled}" Click="KeyboardShortcutsCheck_Click">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="{DynamicResource Str_KS_Enabled}"/>
                                 <TextBlock x:Name="KeyboardShortcutsChordLabel"/>
