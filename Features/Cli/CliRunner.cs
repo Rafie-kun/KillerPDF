@@ -110,7 +110,8 @@ namespace KillerPDF.Features
                 Eq(a, "--edit-attachment") || Eq(a, "--portfolio-view") ||
                 Eq(a, "--redact") || Eq(a, "--protect") || Eq(a, "--export") || Eq(a, "--convert-office") ||
                 Eq(a, "--data-merge") || Eq(a, "--replace-text") || Eq(a, "--export-form-data") || Eq(a, "--import-form-data") ||
-                Eq(a, "--recognize-fields") || Eq(a, "--xfa-to-acroform") || Eq(a, "--flatten-forms"));
+                Eq(a, "--recognize-fields") || Eq(a, "--xfa-to-acroform") || Eq(a, "--flatten-forms") ||
+                Eq(a, "--macro"));
             if (command is null) return false;
 
             var con = OpenBatchConsole();
@@ -297,6 +298,9 @@ namespace KillerPDF.Features
                     case "--flatten-forms":
                         exitCode = CliFlattenForms(positionals, con);
                         break;
+                    case "--macro":
+                        exitCode = CliMacro(positionals, options, con);
+                        break;
                 }
             }
             catch (Exception ex)
@@ -438,6 +442,9 @@ namespace KillerPDF.Features
             "                                           find form fields; with an output, add the text fields and check boxes",
             "  --xfa-to-acroform <in.pdf> <out.pdf> [--flatten]   convert an XFA form to standard fields",
             "  --flatten-forms <in.pdf> <out.pdf>      turn form fields into page content",
+            "  --macro <in.pdf> <saved name | macro.json | starter:<name>> <out.pdf> [--lang <code>]",
+            "                                           [--text <phrase>] [--terms <file>] [--rasterize] [--json]",
+            "                                           run a macro; --macro --list shows the saved ones",
             "  --document-info <in.pdf>                 print document details as JSON",
             "  --search-text <in.pdf> <query>            print page hits as JSON",
             "  --batch-resave <in> <out> [--log <f.csv>] [--quiet]",
@@ -1840,7 +1847,7 @@ namespace KillerPDF.Features
 
             CliEnsureParentDir(outPath);
             var (pages, words) = OcrController.BuildSearchablePdf(srcForOcr, outPath,
-                (i, n) => { if (i == 1 || i == n || i % 10 == 0) con.WriteLine($"OCR page {i}/{n}"); },
+                (i, n) => { if (i == 0 || i + 1 == n || (i + 1) % 10 == 0) con.WriteLine($"OCR page {i + 1}/{n}"); },
                 lang, formAware: false, ct: CancellationToken.None);
 
             // The render source had /Rotate stripped; put the angles back on the
