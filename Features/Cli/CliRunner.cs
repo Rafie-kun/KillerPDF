@@ -68,6 +68,8 @@ namespace KillerPDF.Features
             "--title", "--zoom", "--layout", "--panel", "--page", "--hide-toolbar", "--hide-menu",
             "--hide-window-ui", "--fit-window", "--center-window", "--show-title", "--visible", "--locked",
             "--description", "--relationship", "--rename", "--mime", "--view", "--initial",
+            "--user-password", "--owner-password", "--allow", "--recipients", "--text", "--terms",
+            "--regex", "--find", "--whole-pages", "--fill", "--overlay", "--sanitize",
         ];
 
         /// <summary>
@@ -105,7 +107,10 @@ namespace KillerPDF.Features
                 Eq(a, "--compare-structure") || Eq(a, "--measurements") || Eq(a, "--separations") ||
                 Eq(a, "--repair-links") || Eq(a, "--toc") || Eq(a, "--page-labels") ||
                 Eq(a, "--initial-view") || Eq(a, "--set-layer") || Eq(a, "--add-attachment") ||
-                Eq(a, "--edit-attachment") || Eq(a, "--portfolio-view"));
+                Eq(a, "--edit-attachment") || Eq(a, "--portfolio-view") ||
+                Eq(a, "--redact") || Eq(a, "--protect") || Eq(a, "--export") || Eq(a, "--convert-office") ||
+                Eq(a, "--data-merge") || Eq(a, "--replace-text") || Eq(a, "--export-form-data") || Eq(a, "--import-form-data") ||
+                Eq(a, "--recognize-fields") || Eq(a, "--xfa-to-acroform") || Eq(a, "--flatten-forms"));
             if (command is null) return false;
 
             var con = OpenBatchConsole();
@@ -259,6 +264,39 @@ namespace KillerPDF.Features
                     case "--portfolio-view":
                         exitCode = CliPortfolioView(positionals, options, con);
                         break;
+                    case "--redact":
+                        exitCode = CliRedact(positionals, options, con);
+                        break;
+                    case "--protect":
+                        exitCode = CliProtect(positionals, options, con);
+                        break;
+                    case "--export":
+                        exitCode = CliExport(positionals, options, con);
+                        break;
+                    case "--convert-office":
+                        exitCode = CliConvertOffice(positionals, con);
+                        break;
+                    case "--data-merge":
+                        exitCode = CliDataMerge(positionals, options, con);
+                        break;
+                    case "--replace-text":
+                        exitCode = CliReplaceText(positionals, options, con);
+                        break;
+                    case "--export-form-data":
+                        exitCode = CliExportFormData(positionals, options, con);
+                        break;
+                    case "--import-form-data":
+                        exitCode = CliImportFormData(positionals, options, con);
+                        break;
+                    case "--recognize-fields":
+                        exitCode = CliRecognizeFields(positionals, options, con);
+                        break;
+                    case "--xfa-to-acroform":
+                        exitCode = CliXfaToAcroForm(positionals, options, con);
+                        break;
+                    case "--flatten-forms":
+                        exitCode = CliFlattenForms(positionals, con);
+                        break;
                 }
             }
             catch (Exception ex)
@@ -380,6 +418,26 @@ namespace KillerPDF.Features
             "                                           [--layout <name>] [--panel <name>] [--hide-toolbar on|off]",
             "                                           [--hide-menu on|off] [--hide-window-ui on|off] [--fit-window on|off]",
             "                                           [--center-window on|off] [--show-title on|off]",
+            "  --redact <in.pdf> <out.pdf> [--text <phrase>] [--terms <file>] [--regex <pattern>]",
+            "                                           [--find email,phone,ssn,card,iban] [--whole-pages <range>] [--marked]",
+            "                                           [--match-case] [--fill <color>] [--overlay <text>] [--rasterize]",
+            "                                           [--sanitize all|<list>] [--dry-run]   permanently remove content",
+            "  --protect <in.pdf> <out.pdf> [--user-password <p>] [--owner-password <p>] [--allow print,copy,edit]",
+            "                                           [--recipients <cert.cer>,...] [--invalidate-signatures]   AES-256 copy",
+            "  --export <in.pdf> <out.docx|.xlsx|.pptx|.html|.md|.txt|.json> [--pages <range>] [--report]",
+            "                                           export to Office, web and text formats",
+            "  --convert-office <in.docx|.xlsx|.doc|.xls> <out.pdf>",
+            "                                           convert a Word or Excel file to PDF",
+            "  --data-merge <template.pdf> <data.csv|.json|.xlsx> <outDir> [--name <file name>] [--flatten]",
+            "                                           fill one copy of the form per record",
+            "  --replace-text <in.pdf> <out.pdf> <find> <replace> [--match-case] [--whole-word]",
+            "                                           rewrite matching lines in their own fonts",
+            "  --export-form-data <in.pdf> <out.fdf|.xfdf|.json> [--no-comments]",
+            "  --import-form-data <in.pdf> <data.fdf|.xfdf> <out.pdf> [--flatten]",
+            "  --recognize-fields <in.pdf> [<out.pdf>] [--json]",
+            "                                           find form fields; with an output, add the text fields and check boxes",
+            "  --xfa-to-acroform <in.pdf> <out.pdf> [--flatten]   convert an XFA form to standard fields",
+            "  --flatten-forms <in.pdf> <out.pdf>      turn form fields into page content",
             "  --document-info <in.pdf>                 print document details as JSON",
             "  --search-text <in.pdf> <query>            print page hits as JSON",
             "  --batch-resave <in> <out> [--log <f.csv>] [--quiet]",

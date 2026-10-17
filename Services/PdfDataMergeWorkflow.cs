@@ -84,4 +84,42 @@ internal static class PdfDataMergeWorkflow
             "Desktop data merge", mappings, "{{" + OutputNameField + "}}");
         return new PdfDataMergePlan(profile, preparedRecords, outputNames, mappings.Count);
     }
+
+    /// <summary>
+    /// Fills one copy of the template per record and writes each into the folder, replacing a
+    /// file of the same name only once its new copy is complete. A copy that cannot be written
+    /// is reported as failed rather than stopping the rest.
+    /// </summary>
+    internal static PdfDataMergeBatchReport RunToDirectory(byte[] templateBytes, PdfDataMergePlan plan,
+        string outputDirectory, PdfDataMergeOutputMode mode, CancellationToken token)
+    {
+        IReadOnlyList<PdfDataMergeDocumentResult> generated = PdfDataMerge.RunFormBatch(
+            PdfDocument.Open(templateBytes), plan.Records, plan.Profile, mode, token);
+        var completed = new List<PdfDataMergeDocumentResult>(generated.Count);
+        foreach (PdfDataMergeDocumentResult result in generated)
+        {
+            if (!result.Succeeded || result.Data is null || result.OutputFileName is null)
+            {
+                completed.Add(result);
+                continue;
+            }
+            string destination = Path.Combine(outputDirectory, result.OutputFileName);
+            string temporary = destination + "." + Guid.NewGuid().ToString("N") + ".tmp";
+            try
+            {
+                File.WriteAllBytes(temporary, result.Data.Value.ToArray());
+                File.Move(temporary, destination, overwrite: true);
+                completed.Add(result);
+            }
+            catch (Exception ex) when (ex is not OutOfMemoryException
+                and not StackOverflowException and not AccessViolationException)
+            {
+                try { if (File.Exists(temporary)) File.Delete(temporary); }
+                catch { }
+                completed.Add(new PdfDataMergeDocumentResult(
+                    result.RecordIndex, result.OutputFileName, null, ex.Message));
+            }
+        }
+        return PdfDataMergeBatchReport.Create(completed);
+    }
 }

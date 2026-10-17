@@ -181,8 +181,8 @@ namespace KillerPDF.Controls
         }
 
         // The installed face for a line whose own font cannot show its new text, from the font the
-        // line was found in.
-        private static KillerPdf.Engine.Fonts.TrueTypeFont? SubstituteFont(
+        // line was found in. The command line's --replace-text picks faces the same way.
+        internal static KillerPdf.Engine.Fonts.TrueTypeFont? SubstituteFont(
             KillerPdf.Engine.Documents.PdfExtractedWord firstWord, string text)
         {
             string family = "Segoe UI";

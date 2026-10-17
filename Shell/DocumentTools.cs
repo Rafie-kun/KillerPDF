@@ -202,38 +202,8 @@ public partial class MainWindow
         CancellationToken token = BeginCancellableOp(Loc("Str_DocumentTools_DataMerge"));
         try
         {
-            PdfDataMergeBatchReport report = await Task.Run(() =>
-            {
-                IReadOnlyList<PdfDataMergeDocumentResult> generated = PdfDataMerge.RunFormBatch(
-                    PdfDocument.Open(templateBytes), plan.Records, plan.Profile,
-                    PdfDataMergeOutputMode.Editable, token);
-                var completed = new List<PdfDataMergeDocumentResult>(generated.Count);
-                foreach (PdfDataMergeDocumentResult result in generated)
-                {
-                    if (!result.Succeeded || result.Data is null || result.OutputFileName is null)
-                    {
-                        completed.Add(result);
-                        continue;
-                    }
-                    string destination = Path.Combine(outputDirectory, result.OutputFileName);
-                    string temporary = destination + "." + Guid.NewGuid().ToString("N") + ".tmp";
-                    try
-                    {
-                        File.WriteAllBytes(temporary, result.Data.Value.ToArray());
-                        File.Move(temporary, destination, overwrite: true);
-                        completed.Add(result);
-                    }
-                    catch (Exception ex) when (ex is not OutOfMemoryException
-                        and not StackOverflowException and not AccessViolationException)
-                    {
-                        try { if (File.Exists(temporary)) File.Delete(temporary); }
-                        catch { }
-                        completed.Add(new PdfDataMergeDocumentResult(
-                            result.RecordIndex, result.OutputFileName, null, ex.Message));
-                    }
-                }
-                return PdfDataMergeBatchReport.Create(completed);
-            });
+            PdfDataMergeBatchReport report = await Task.Run(() => PdfDataMergeWorkflow.RunToDirectory(
+                templateBytes, plan, outputDirectory, PdfDataMergeOutputMode.Editable, token));
 
             HideBusyOverlay(busy);
             SetStatus(token.IsCancellationRequested
