@@ -184,7 +184,7 @@ namespace KillerPDF.Services
             bool themeOwnsComboHighlightText = newDict.Contains("ComboHighlightTextBrush");
             bool themeOwnsFooterAccent = newDict.Contains("FooterAccentBrush");
             // A palette can fill buttons with a deeper shade than its accent text (PrimaryFillBaseBrush).
-            object fillBase = newDict.Contains("PrimaryFillBaseBrush") ? newDict["PrimaryFillBaseBrush"] : null;
+            object? fillBase = newDict.Contains("PrimaryFillBaseBrush") ? newDict["PrimaryFillBaseBrush"] : null;
             CompleteAppPalette(newDict);
             var merged  = Application.Current.Resources.MergedDictionaries;
 
