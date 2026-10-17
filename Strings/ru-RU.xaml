@@ -7,24 +7,24 @@
          ================================================================ -->
 
     <!-- ── Toolbar tooltips ─────────────────────────────────────────── -->
-    <sys:String x:Key="Str_TT_Open">Открыть PDF-файл в новой вкладке (Ctrl+O)</sys:String>
+    <sys:String x:Key="Str_TT_Open">Открыть (Ctrl+O)</sys:String>
     <sys:String x:Key="Str_TT_NewBlank">Новый пустой документ (Ctrl+N)</sys:String>
     <sys:String x:Key="Str_TT_CloseFile">Закрыть файл (Ctrl+W)</sys:String>
     <sys:String x:Key="Str_TT_Save">Сохранить (Ctrl+S)</sys:String>
 
     <!-- ── Drop zone / empty state ──────────────────────────────────── -->
     <sys:String x:Key="Str_Drop_Title">Перетащите PDF-файл сюда</sys:String>
-    <sys:String x:Key="Str_Drop_Sub">или нажмите, чтобы просмотреть</sys:String>
+    <sys:String x:Key="Str_Drop_Sub">или нажмите, чтобы выбрать файл</sys:String>
     <sys:Double x:Key="ZoomBoxWidth">96</sys:Double>
     <sys:String x:Key="Str_TT_SaveAs">Сохранить как (Ctrl+Shift+S)</sys:String>
-    <sys:String x:Key="Str_TT_SaveFlattened">Сохранить сжатый PDF-файл (растеризует все страницы - итоговый файл станет недоступным для редактирования)</sys:String>
+    <sys:String x:Key="Str_TT_SaveFlattened">Сохранить сведённый PDF-файл (растеризует все страницы - итоговый файл станет недоступным для редактирования)</sys:String>
     <sys:String x:Key="Str_TT_Print">Печать (Ctrl+P)</sys:String>
-    <sys:String x:Key="Str_TT_MergePDFs">Добавить PDF-файлы в текущий проект</sys:String>
+    <sys:String x:Key="Str_TT_MergePDFs">Объединение PDF-файлов (добавление других PDF-файлов в этот документ)</sys:String>
     <sys:String x:Key="Str_TT_ExtractPages">Извлечение страниц (сохранение выбранных страниц в новом PDF-файле)</sys:String>
     <sys:String x:Key="Str_TT_DeletePages">Удаление выбранных страниц</sys:String>
     <sys:String x:Key="Str_TT_MovePageUp">Переместить страницу вверх (изменить порядок)</sys:String>
     <sys:String x:Key="Str_TT_MovePageDown">Переместить страницу вниз (изменить порядок)</sys:String>
-    <sys:String x:Key="Str_TT_SelectTool">Выберите инструмент - щелкните аннотации, перетащите, чтобы выделить текст, дважды щелкните, чтобы отредактировать (V)</sys:String>
+    <sys:String x:Key="Str_TT_SelectTool">Инструмент «Выбор» - щелкните аннотации, перетащите, чтобы выделить текст, дважды щелкните, чтобы отредактировать (V)</sys:String>
     <sys:String x:Key="Str_TT_TextTool">Текстовый инструмент - нажмите, чтобы добавить текст (T)</sys:String>
     <sys:String x:Key="Str_TT_FormFieldTool">Заполняемое текстовое поле - создание, выбор, перемещение, изменение размера или удаление; щелкните правой кнопкой, чтобы изменить цвет заливки (F)</sys:String>
     <sys:String x:Key="Str_TT_HighlightTool">Инструмент выделения - перетащите его, чтобы выделить (H)</sys:String>
@@ -53,10 +53,10 @@
     <!-- ── About overlay ─────────────────────────────────────────────── -->
     <sys:String x:Key="Str_About_Version">ВЕРСИЯ</sys:String>
     <sys:String x:Key="Str_About_Publisher">ИЗДАТЕЛЬ</sys:String>
-    <sys:String x:Key="Str_About_Thumbprint">ПОДПИСЬ</sys:String>
+    <sys:String x:Key="Str_About_Thumbprint">ОТПЕЧАТОК</sys:String>
     <sys:String x:Key="Str_About_ExeSha">EXE SHA256</sys:String>
     <sys:String x:Key="Str_About_Computing">Вычисляю...</sys:String>
-    <sys:String x:Key="Str_Tagline">Быстрый бесплатный PDF-инструментарий для Windows с аннотациями, объединением, распознаванием текста, подписью и инструментами формирования форм. Утилита на базе GPLv3 {0}.</sys:String>
+    <sys:String x:Key="Str_Tagline">Быстрый бесплатный PDF-инструментарий для Windows с аннотациями, объединением, распознаванием текста, подписью и инструментами формирования форм. Утилита GPLv3 от {0}.</sys:String>
 
     <!-- ── Sidebar tabs ──────────────────────────────────────────────── -->
     <sys:String x:Key="Str_TabPages">СТРАНИЦЫ</sys:String>
@@ -82,7 +82,7 @@
     <sys:String x:Key="Str_St_ToolbarShown">Показана панель инструментов</sys:String>
     <sys:String x:Key="Str_Lang_English">Английский</sys:String>
     <sys:String x:Key="Str_Lang_Spanish">Испанский</sys:String>
-    <sys:String x:Key="Str_Lang_Chinese">Китайский</sys:String>
+    <sys:String x:Key="Str_Lang_Chinese">Китайский (традиционный)</sys:String>
 
     <!-- ── Keyboard shortcuts overlay ───────────────────────────────── -->
     <sys:String x:Key="Str_KS_Title">Сочетания клавиш</sys:String>
@@ -101,7 +101,7 @@
     <sys:String x:Key="Str_KS_ZoomCursor">Увеличение / уменьшение масштаба (при наведении курсора)</sys:String>
     <sys:String x:Key="Str_KS_ZoomInOut">Увеличение / уменьшение масштаба</sys:String>
     <sys:String x:Key="Str_KS_ResetZoom">Сбросьте масштаб до 100%</sys:String>
-    <sys:String x:Key="Str_KS_PanView">Панорамный вид</sys:String>
+    <sys:String x:Key="Str_KS_PanView">Панорамирование</sys:String>
     <sys:String x:Key="Str_KS_Editing">РЕДАКТИРОВАНИЕ</sys:String>
     <sys:String x:Key="Str_KS_Undo">Отменить</sys:String>
     <sys:String x:Key="Str_KS_DeleteAnnot">Удалить выбранную аннотацию</sys:String>
@@ -114,7 +114,7 @@
     <sys:String x:Key="Str_DocInfo_Suffix">Информация о документе</sys:String>
     <sys:String x:Key="Str_DocInfo_Title">Заголовок</sys:String>
     <sys:String x:Key="Str_DocInfo_Author">Автор</sys:String>
-    <sys:String x:Key="Str_DocInfo_Subject">Предмет</sys:String>
+    <sys:String x:Key="Str_DocInfo_Subject">Тема</sys:String>
     <sys:String x:Key="Str_DocInfo_Keywords">Ключевые слова</sys:String>
     <sys:String x:Key="Str_DocInfo_Creator">Создатель</sys:String>
     <sys:String x:Key="Str_DocInfo_Producer">Производитель</sys:String>
@@ -125,8 +125,8 @@
     <sys:String x:Key="Str_KS_SelectAll">Выделите весь текст на странице</sys:String>
     <sys:String x:Key="Str_KS_CopyText">Скопировать выделенный текст</sys:String>
     <sys:String x:Key="Str_KS_Help">ПОМОЩЬ</sys:String>
-    <sys:String x:Key="Str_KS_ThisList">Этот список сокращений</sys:String>
-    <sys:String x:Key="Str_KS_About">О документе</sys:String>
+    <sys:String x:Key="Str_KS_ThisList">Этот список сочетаний</sys:String>
+    <sys:String x:Key="Str_KS_About">Окно «О программе»</sys:String>
     <sys:String x:Key="Str_KS_DocInfo">Информация о документе</sys:String>
     <sys:String x:Key="Str_KS_OnlineHelp">Полное руководство &amp; инструкция по работе в Интернете</sys:String>
     <sys:String x:Key="Str_KS_Tools">ИНСТРУМЕНТЫ</sys:String>
@@ -140,7 +140,7 @@
     <sys:String x:Key="Str_InstallBtn">Установить KillerPDF</sys:String>
 
     <!-- ── Status messages (format strings - use string.Format) ─────── -->
-    <sys:String x:Key="Str_Opened">Открыто{0} - {1} страниц(ы)</sys:String>
+    <sys:String x:Key="Str_Opened">Открыто {0} - {1} страниц(ы)</sys:String>
     <sys:String x:Key="Str_OpenedReadOnly">Открыто {0} (только-для-чтения - ограничено собственником) - {1} страница(ы)</sys:String>
     <sys:String x:Key="Str_OpenedReadOnlyXRef">Открыто {0} (только-для-чтения - не-стандартная XRef таблица) - {1} страница(ы)</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">Открыто {0} (восстановленная копия - сохраните, чтобы сохранить изменения) - {1} страница(ы)</sys:String>
@@ -155,7 +155,7 @@
     <sys:String x:Key="Str_CropFailed">Обрезать не удалось: {0}</sys:String>
     <sys:String x:Key="Str_RemovedCrop">Удалена зона обрезки из {0} страниц </sys:String>
     <sys:String x:Key="Str_RemoveCropFailed">Удалить обрезку не удалось: {0}</sys:String>
-    <sys:String x:Key="Str_Extracted">Извлеченно {0} страниц(ы) к {1}</sys:String>
+    <sys:String x:Key="Str_Extracted">Извлечено {0} страниц(ы) в {1}</sys:String>
     <sys:String x:Key="Str_Deleted">Удалено страниц: {0}, осталось: {1}</sys:String>
     <sys:String x:Key="Str_Printed">Отправлено {0} страниц на принтер</sys:String>
     <sys:String x:Key="Str_LinkRemoved">Ссылка удалена.</sys:String>
@@ -207,10 +207,10 @@
     <sys:String x:Key="Str_Dlg_SaveRemovesSignature" xml:space="preserve">Файл "{0}" имеет цифровую подпись.
 
 При сохранении файл будет заменен, а его подпись удалена. Чтобы сохранить подписанный файл, отмените действие и используйте команду "Сохранить как" с другим именем.</sys:String>
-    <sys:String x:Key="Str_Dlg_SaveOtherPaneDirty" xml:space="preserve">Другая панель также была "{0}" открыта, с собственными несохраненными изменениями.
+    <sys:String x:Key="Str_Dlg_SaveOtherPaneDirty" xml:space="preserve">В другой панели тоже открыт файл "{0}" с собственными несохраненными изменениями.
 
 При сохранении сейчас файл будет перезаписан, и эти изменения будут потеряны. Если вы хотите сохранить их, сначала сохраните другую панель.</sys:String>
-    <sys:String x:Key="Str_St_SplitOn">Раздельная панель, на - F10, чтобы закрыть</sys:String>
+    <sys:String x:Key="Str_St_SplitOn">Разделенная панель включена - F10, чтобы закрыть</sys:String>
     <sys:String x:Key="Str_St_SplitOff">Отключить Раздельную панель</sys:String>
     <sys:String x:Key="Str_Dlg_InstallTitle">Установить KillerPDF</sys:String>
     <sys:String x:Key="Str_Dlg_InstallMsg" xml:space="preserve">Установить KillerPDF на этот компьютер?
@@ -219,7 +219,7 @@
     <sys:String x:Key="Str_Dlg_UpdateMachineMsg" xml:space="preserve">Обновить существующую установку KillerPDF для всех пользователей ?
 
 Это заменяет копию в Program Files на более быструю версию с несколькими файлами. Все старые копии, предназначенные для каждого пользователя, удаляются, поэтому KillerPDF отображается только один раз. Впоследствии вы можете сохранить или удалить этот переносимый файл.</sys:String>
-    <sys:String x:Key="Str_Dlg_UpdateUserMsg" xml:space="preserve">Обновите существующую установку KillerPDF?
+    <sys:String x:Key="Str_Dlg_UpdateUserMsg" xml:space="preserve">Обновить существующую установку KillerPDF?
 
 Это заменит установленную копию на более быструю версию с несколькими файлами. Впоследствии вы можете сохранить или удалить этот переносимый файл.</sys:String>
     <sys:String x:Key="Str_Dlg_OneInstallOnly" xml:space="preserve">KillerPDF уже установлен для всех пользователей на этом компьютере. Обновите эту программу или удалите ее, прежде чем выбирать установку для каждого пользователя.
@@ -275,14 +275,14 @@ KillerPDF не будет создавать две установленные �
     <!-- ── View mode ──────────────────────────────────────────────────── -->
     <sys:String x:Key="Str_ViewMode">РЕЖИМ ПРОСМОТРА</sys:String>
     <sys:String x:Key="Str_View_Single">Одна страница</sys:String>
-    <sys:String x:Key="Str_View_Continuous">Последовательность</sys:String>
+    <sys:String x:Key="Str_View_Continuous">Непрерывный</sys:String>
     <sys:String x:Key="Str_View_TwoPage">Две страницы</sys:String>
     <sys:String x:Key="Str_View_Grid">Плитка</sys:String>
     <sys:String x:Key="Str_View_BookMode">Книжный разворот</sys:String>
     <sys:String x:Key="Str_Continuous_EditMsg">Переключитесь в одностраничный режим, чтобы использовать инструменты редактирования</sys:String>
 
     <!-- ── Overflow menu + menu item labels ───────────────────────────── -->
-    <sys:String x:Key="Str_Lbl_Merge">Добавить PDF</sys:String>
+    <sys:String x:Key="Str_Lbl_Merge">Объединить PDF</sys:String>
     <sys:String x:Key="Str_Lbl_Extract">Извл.страниц</sys:String>
     <sys:String x:Key="Str_Lbl_Delete">Удалить</sys:String>
     <sys:String x:Key="Str_Lbl_MoveUp">Вверх</sys:String>
@@ -366,7 +366,7 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Stamp_Scale">Масштаб</sys:String>
     <sys:String x:Key="Str_Stamp_Angle">Угол</sys:String>
     <sys:String x:Key="Str_Stamp_Opacity">Непрозрачность</sys:String>
-    <sys:String x:Key="Str_Stamp_Mirror">Зеркальное отображение на лицевой стороне страницы (внешний край)</sys:String>
+    <sys:String x:Key="Str_Stamp_Mirror">Зеркальное отображение на разворотах (внешний край)</sys:String>
     <sys:String x:Key="Str_Stamp_Applied">Проштамповано {0} страница(ы)</sys:String>
     <sys:String x:Key="Str_TT_StampTool">Добавить штампы поверх страницы (S)</sys:String>
     <sys:String x:Key="Str_Ctx_StampPages">Добавить штампы поверх страницы</sys:String>
@@ -389,8 +389,8 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Print_SecLayout">РАСПОЛОЖЕНИЕ</sys:String>
     <sys:String x:Key="Str_Print_SecOutput">ВЫВОД</sys:String>
     <sys:String x:Key="Str_Print_Orientation">ОРИЕНТАЦИЯ</sys:String>
-    <sys:String x:Key="Str_Print_Portrait">Портрет</sys:String>
-    <sys:String x:Key="Str_Print_Landscape">Пейзаж</sys:String>
+    <sys:String x:Key="Str_Print_Portrait">Книжная</sys:String>
+    <sys:String x:Key="Str_Print_Landscape">Альбомная</sys:String>
     <sys:String x:Key="Str_Print_Scale">Масштаб</sys:String>
     <sys:String x:Key="Str_Print_Fit">По размеру страницы</sys:String>
     <sys:String x:Key="Str_Print_Actual">Фактический размер (100%)</sys:String>
@@ -410,7 +410,7 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Print_Color">Цвет</sys:String>
     <sys:String x:Key="Str_Print_BW">Черный &amp; белый</sys:String>
     <sys:String x:Key="Str_Pos_Center">Центр</sys:String>
-    <sys:String x:Key="Str_Pos_Custom">Пользовательский (перетащить для просмотра)</sys:String>
+    <sys:String x:Key="Str_Pos_Custom">Пользовательский (перетащить на предпросмотре)</sys:String>
     <sys:String x:Key="Str_Pos_Top">Верх</sys:String>
     <sys:String x:Key="Str_Pos_Bottom">Низ</sys:String>
     <sys:String x:Key="Str_Pos_Left">Лево</sys:String>
@@ -419,13 +419,13 @@ KillerPDF не будет создавать две установленные �
     <!-- ── Save / recent menus + signature dialog ──────────────────── -->
     <sys:String x:Key="Str_Menu_Save">Сохранить</sys:String>
     <sys:String x:Key="Str_Menu_SaveAs">Сохранить как...</sys:String>
-    <sys:String x:Key="Str_Menu_SaveNothing">Не сохранять</sys:String>
+    <sys:String x:Key="Str_Menu_SaveNothing">Нечего сохранять</sys:String>
     <sys:String x:Key="Str_Menu_RecentNone">Нет последних файлов</sys:String>
     <sys:String x:Key="Str_Menu_ClearList">Очистить список</sys:String>
     <sys:String x:Key="Str_Menu_RemoveFromRecents">Удалить из последних</sys:String>
 
     <!-- Import images as PDF / Compress to ZIP -->
-    <sys:String x:Key="Str_Menu_Import">Импорт изображения в новую PDF вкладку</sys:String>
+    <sys:String x:Key="Str_Menu_Import">Импорт изображений как PDF</sys:String>
     <sys:String x:Key="Str_Menu_CompressZip">Сжать в ZIP</sys:String>
     <sys:String x:Key="Str_Filter_Images">Изображения</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">Все файлы</sys:String>
@@ -434,11 +434,11 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Err_ImportFailed">Не удалось импортировать:</sys:String>
     <sys:String x:Key="Str_Err_NoImages">Нет изображений доступных к прочтению.</sys:String>
     <sys:String x:Key="Str_Drop_Prompt">Вы добавили {0} файлов. Как бы вы хотели их открыть?</sys:String>
-    <sys:String x:Key="Str_Drop_Merge">Добавить PDF-файл</sys:String>
+    <sys:String x:Key="Str_Drop_Merge">Объединить в один PDF-файл</sys:String>
     <sys:String x:Key="Str_Drop_Separate">Открыть отдельно</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">Не найдено PDF или изображений чтобы открыть.</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">Будет открыто {0} отдельных вкладок. Продолжить?</sys:String>
-    <sys:String x:Key="Str_Drop_TooMany">Эта папка или архив имеет {0} файлов. KillerPDF откроет только первый {1}. Продолжить?</sys:String>
+    <sys:String x:Key="Str_Drop_TooMany">Эта папка или архив содержит файлов: {0}. KillerPDF откроет только первые {1}. Продолжить?</sys:String>
     <sys:String x:Key="Str_Status_Merged">Объединено {0} файлов - пока не сохранены</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Объединяем файлы...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">Объединение отменено</sys:String>
@@ -446,9 +446,9 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Msg_OpenFirst">Сначала откройте PDF-файл.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">Сохранить изменения перед сжатием в ZIP-файл?</sys:String>
     <sys:String x:Key="Str_Status_Zipped">Сжато в {0} - {1} (было {2})</sys:String>
-    <sys:String x:Key="Str_Err_ZipFailed">Сжатие в ZIP нарушено:</sys:String>
+    <sys:String x:Key="Str_Err_ZipFailed">Не удалось выполнить сжатие в ZIP:</sys:String>
     <sys:String x:Key="Str_Sig_Title">Подписи</sys:String>
-    <sys:String x:Key="Str_Sig_None">Нет сохраненных подпсей</sys:String>
+    <sys:String x:Key="Str_Sig_None">Нет сохраненных подписей</sys:String>
     <sys:String x:Key="Str_Sig_Create">Создать подпись</sys:String>
     <sys:String x:Key="Str_Sig_Import">Импорт изображения</sys:String>
     <sys:String x:Key="Str_Sig_DrawHere">Поставьте здесь свою подпись</sys:String>
@@ -468,9 +468,9 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Ctx_Edit">Редактирование</sys:String>
     <sys:String x:Key="Str_Ctx_Raise">Поднять</sys:String>
     <sys:String x:Key="Str_Ctx_Lower">Опустить</sys:String>
-    <sys:String x:Key="Str_Ctx_SelectCover">Выделить обложку</sys:String>
+    <sys:String x:Key="Str_Ctx_SelectCover">Выделить накладку</sys:String>
     <sys:String x:Key="Str_Ctx_SelectText">Выделить текст</sys:String>
-    <sys:String x:Key="Str_Ctx_Unpair">Распаковать текст + обложку</sys:String>
+    <sys:String x:Key="Str_Ctx_Unpair">Разъединить текст + обложку</sys:String>
     <sys:String x:Key="Str_Ctx_Group">Сгруппировать выделенное</sys:String>
     <sys:String x:Key="Str_Ctx_Ungroup">Разгруппировать</sys:String>
     <sys:String x:Key="Str_Ctx_RemoveFromGroup">Удалить из группы</sys:String>
@@ -572,9 +572,9 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Tf_SetDpi">Задать выходное разрешение (DPI)</sys:String>
     <sys:String x:Key="Str_Tf_UseJpeg">Использовать JPEG компрессию</sys:String>
     <sys:String x:Key="Str_Tf_CorrectPerspective">Исправить трапециевидное искажение</sys:String>
-    <sys:String x:Key="Str_Tf_PerspectiveHint">Перетащите четыре угла на контур сфотографированной страницы. С помощью приложения изображение выпрямляется и превращается в прямоугольник.</sys:String>
+    <sys:String x:Key="Str_Tf_PerspectiveHint">Перетащите четыре угла на контур сфотографированной страницы. Кнопка «Применить» выпрямляет изображение в прямоугольник.</sys:String>
     <sys:String x:Key="Str_Tf_ResetCorners">Сбросить углы</sys:String>
-    <sys:String x:Key="Str_Tf_Output">Вывод: {0} × {1} в</sys:String>
+    <sys:String x:Key="Str_Tf_Output">Вывод: {0} × {1} дюйм.</sys:String>
     <sys:String x:Key="Str_Tf_ResetAll">Сбросить все</sys:String>
     <sys:String x:Key="Str_Tf_Reset">Сбросить</sys:String>
     <sys:String x:Key="Str_Tf_Cancel">Отменить</sys:String>
@@ -608,16 +608,16 @@ KillerPDF не будет создавать две установленные �
 
     <!-- Status-bar messages (extracted from code) -->
     <sys:String x:Key="Str_St_DataCleared">Все данные KillerPDF очищены</sys:String>
-    <sys:String x:Key="Str_St_OcrRegionCanceled">Распознование области отменено</sys:String>
+    <sys:String x:Key="Str_St_OcrRegionCanceled">Распознавание области отменено</sys:String>
     <sys:String x:Key="Str_St_Erased">Стерто</sys:String>
     <sys:String x:Key="Str_St_Ungrouped">Разгруппировано</sys:String>
     <sys:String x:Key="Str_St_RemovedFromGroup">Удалено из группы</sys:String>
     <sys:String x:Key="Str_St_NothingToUndo">Нечего отменять</sys:String>
-    <sys:String x:Key="Str_St_UndidAnnotation">Отменить последнюю аннотацию</sys:String>
+    <sys:String x:Key="Str_St_UndidAnnotation">Отменена последняя аннотация</sys:String>
     <sys:String x:Key="Str_St_UndidTextEdit">Отменить редактирование текста</sys:String>
     <sys:String x:Key="Str_St_RemovedStamps">Удалены проштампованные номера страниц</sys:String>
     <sys:String x:Key="Str_St_RestoredAnnotations">Восстановлены очищенные аннотации</sys:String>
-    <sys:String x:Key="Str_St_Undone">Несделано</sys:String>
+    <sys:String x:Key="Str_St_Undone">Отменено</sys:String>
     <sys:String x:Key="Str_St_UndidDocChange">Отменено изменение документа</sys:String>
     <sys:String x:Key="Str_St_ClearedPageAnnotations">Удалены аннотации на этой странице</sys:String>
     <sys:String x:Key="Str_St_NoAnnotationsToClear">Нет аннотаций, которые нужно убрать</sys:String>
@@ -625,7 +625,7 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_St_Canceled">Отменено</sys:String>
     <sys:String x:Key="Str_St_DocInfoUpdated">Обновлена информация о документе - сохраните файл, чтобы сохранить изменения</sys:String>
     <sys:String x:Key="Str_St_FlattenCanceled">Сведение отменено (файл не записан)</sys:String>
-    <sys:String x:Key="Str_St_FlattenPrintFailed">Не удалось выровнять аннотации для печати; печать без них.</sys:String>
+    <sys:String x:Key="Str_St_FlattenPrintFailed">Не удалось свести аннотации для печати; печать без них.</sys:String>
     <sys:String x:Key="Str_St_HqDownloadCanceled">Отменена загрузка в высоком качестве</sys:String>
     <sys:String x:Key="Str_St_LangDownloadCanceled">Загрузка языка отменена</sys:String>
     <sys:String x:Key="Str_St_OcrCanceled">Распознавание отменено</sys:String>
@@ -639,19 +639,19 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_St_NoTextInSelection">В выделенной области текст не найден</sys:String>
     <sys:String x:Key="Str_St_NoTextUseShapes">Здесь нет текста - Форма находится на 4</sys:String>
     <sys:String x:Key="Str_St_SignaturePlaced">Подпись размещена - перетащите для изменения положения, используйте угловой маркер для изменения размера</sys:String>
-    <sys:String x:Key="Str_St_FieldCleared">Поле расчищено</sys:String>
+    <sys:String x:Key="Str_St_FieldCleared">Поле очищено</sys:String>
     <sys:String x:Key="Str_St_FieldSigned">Поле подписано</sys:String>
     <sys:String x:Key="Str_St_SignatureSaved">Подпись сохранена - нажмите на страницу, чтобы разместить ее</sys:String>
     <sys:String x:Key="Str_St_ImageLoaded">Изображение загружено - нажмите на страницу, чтобы разместить его</sys:String>
     <sys:String x:Key="Str_St_EditingText">Редактирование текста - измените размер / цвет выше, Enter чтобы сохранить</sys:String>
-    <sys:String x:Key="Str_St_AlreadyEditHere">Здесь уже есть правка - щелкните по тексту, чтобы отредактировать заново, или перетащите обложку</sys:String>
+    <sys:String x:Key="Str_St_AlreadyEditHere">Здесь уже есть правка - щелкните по тексту, чтобы отредактировать заново, или перетащите покрытие</sys:String>
     <sys:String x:Key="Str_St_NoTextLine">В этой позиции не найдено ни одной текстовой строки</sys:String>
     <sys:String x:Key="Str_St_LineAlreadyEdited">Эта строка уже отредактирована - щелкните по ее тексту, чтобы изменить его</sys:String>
     <sys:String x:Key="Str_St_ImagePlaced">Размещенное изображение - перетащите для изменения положения, используйте угловой маркер для изменения размера</sys:String>
     <sys:String x:Key="Str_St_ClipImageUnreadable">Изображение из буфера обмена не удалось прочитать</sys:String>
     <sys:String x:Key="Str_St_PastedImage">Вставленное изображение - перетащите для изменения положения, используйте угловой маркер для изменения размера</sys:String>
     <sys:String x:Key="Str_St_ClipNoText">В буфере обмена нет текста для вставки</sys:String>
-    <sys:String x:Key="Str_St_PastedText">Вставленный текст - перетащите, чтобы переместить, удалите, чтобы удалить</sys:String>
+    <sys:String x:Key="Str_St_PastedText">Вставленный текст - перетащите, чтобы переместить, нажмите Delete, чтобы удалить</sys:String>
     <sys:String x:Key="Str_St_ClipEmpty">В буфер обмена нечего вставлять</sys:String>
 
     <!-- Dialog / message-box strings (extracted from code) -->
@@ -661,7 +661,7 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Dlg_SelectDelete">Выберите страницы для удаления.</sys:String>
     <sys:String x:Key="Str_Dlg_NoPrinter">Принтер недоступен.</sys:String>
     <sys:String x:Key="Str_Dlg_NoValidPages">В этом диапазоне нет допустимых страниц.</sys:String>
-    <sys:String x:Key="Str_Dlg_SignedSavedTo">Подписанная копия, сохранена в:</sys:String>
+    <sys:String x:Key="Str_Dlg_SignedSavedTo">Подписанная копия сохранена в:</sys:String>
     <sys:String x:Key="Str_Dlg_DrawSignatureFirst">Сначала нарисуйте подпись.</sys:String>
 
     <!-- ── Bookmark editing (#133, added v1.6.4) ───────────────── -->
@@ -674,14 +674,14 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Bm_DeleteKids">Удалить эту закладку и ее {0} дочернюю закладку(и)?</sys:String>
     <sys:String x:Key="Str_Ctx_BmMoveUp">Сдвинуть вверх</sys:String>
     <sys:String x:Key="Str_Ctx_BmMoveDown">Сдвинуть вниз</sys:String>
-    <sys:String x:Key="Str_Ctx_BmSetDest">Наведите на текущую страницу</sys:String>
+    <sys:String x:Key="Str_Ctx_BmSetDest">Указать на текущую страницу</sys:String>
     <sys:String x:Key="Str_Ctx_BmDeleteAll">Удалить все закладки</sys:String>
     <sys:String x:Key="Str_Bm_DeleteMulti">Удалить {0} закладок?</sys:String>
-    <sys:String x:Key="Str_Bm_DeleteAllConfirm">Удалите все закладки из этого документа?</sys:String>
+    <sys:String x:Key="Str_Bm_DeleteAllConfirm">Удалить все закладки из этого документа?</sys:String>
 
-    <sys:String x:Key="Str_Ctx_Redo">Переделать</sys:String>
-    <sys:String x:Key="Str_St_Redone">Переделано</sys:String>
-    <sys:String x:Key="Str_St_NothingToRedo">Нечего переделывать</sys:String>
+    <sys:String x:Key="Str_Ctx_Redo">Повторить</sys:String>
+    <sys:String x:Key="Str_St_Redone">Повторено</sys:String>
+    <sys:String x:Key="Str_St_NothingToRedo">Нечего повторять</sys:String>
     <sys:String x:Key="Str_KS_FirstLast">Первая / последняя страница</sys:String>
     <sys:String x:Key="Str_KS_BackForward">Назад / вперед (история переходов)</sys:String>
     <sys:String x:Key="Str_KS_ZoomPresets">Текущий размер / подогнать по ширине / по странице</sys:String>
@@ -689,8 +689,8 @@ KillerPDF не будет создавать две установленные �
 
     <sys:String x:Key="Str_KS_ViewList">СПИСОК</sys:String>
     <sys:String x:Key="Str_KS_ViewKeyboard">КЛАВИАТУРА</sys:String>
-    <sys:String x:Key="Str_KS_HoldHint">Удерживайте Ctrl, Shift или Alt, чтобы просмотреть этот слой - наведите курсор на подсвеченную клавишу для его отображения</sys:String>
-    <sys:String x:Key="Str_Zoom_ActualSize">Текущий размер</sys:String>
+    <sys:String x:Key="Str_KS_HoldHint">Удерживайте Ctrl, Shift или Alt, чтобы просмотреть этот слой - наведите курсор на подсвеченную клавишу, чтобы увидеть её действие</sys:String>
+    <sys:String x:Key="Str_Zoom_ActualSize">Реальный размер</sys:String>
     <sys:String x:Key="Str_KS_PrevTab">Предыдущая вкладка</sys:String>
 
     <sys:String x:Key="Str_Kb_PrevPage">Предыдущая страница</sys:String>
@@ -708,8 +708,8 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Sys_Restore">Восстановить</sys:String>
     <sys:String x:Key="Str_Sys_Move">Переместить</sys:String>
     <sys:String x:Key="Str_Sys_Size">Размер</sys:String>
-    <sys:String x:Key="Str_Sys_Minimize">Минимизировать</sys:String>
-    <sys:String x:Key="Str_Sys_Maximize">Максимизировать</sys:String>
+    <sys:String x:Key="Str_Sys_Minimize">Свернуть</sys:String>
+    <sys:String x:Key="Str_Sys_Maximize">Развернуть</sys:String>
     <sys:String x:Key="Str_Sys_Close">Закрыть</sys:String>
     <sys:String x:Key="Str_Btn_Cancel">Отменить</sys:String>
 
@@ -761,7 +761,7 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_QA_Documents">Документы</sys:String>
     <sys:String x:Key="Str_QA_Downloads">Загрузки</sys:String>
     <sys:String x:Key="Str_QA_Home">Домашняя папка</sys:String>
-    <sys:String x:Key="Str_QA_Pictures">Картинки</sys:String>
+    <sys:String x:Key="Str_QA_Pictures">Изображения</sys:String>
     <sys:String x:Key="Str_Sum_Counts">{0} папка(и), {1} файл(ы)</sys:String>
     <sys:String x:Key="Str_TT_RecentLocations">Недавние места</sys:String>
     <sys:String x:Key="Str_TT_ShowHidden">Показывать скрытые и системные элементы</sys:String>
@@ -797,7 +797,7 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Dlg_OpenPdf">Открыть PDF</sys:String>
     <sys:String x:Key="Str_Dlg_SelectMerge">Выберите PDF-файл для объединения</sys:String>
     <sys:String x:Key="Str_Dlg_SavePdfAs">Сохранить PDF как</sys:String>
-    <sys:String x:Key="Str_Dlg_SaveFlattened">Сохранить сжатый PDF-файл</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveFlattened">Сохранить сведённый PDF-файл</sys:String>
     <sys:String x:Key="Str_Dlg_SaveExtractedAs">Сохраните извлеченные страницы как</sys:String>
     <sys:String x:Key="Str_Dlg_InsertImage">Вставить изображение</sys:String>
     <sys:String x:Key="Str_Dlg_InstallShortcut">Создать ярлык на рабочем столе</sys:String>
@@ -815,7 +815,7 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Err_PrintFailed">Не удалось выполнить печать:</sys:String>
     <sys:String x:Key="Str_Err_OcrFailed">Не удалось распознать текст:</sys:String>
     <sys:String x:Key="Str_Err_PrepareDoc">Не удалось подготовить документ:</sys:String>
-    <sys:String x:Key="Str_Err_SearchableFailed">Не удалось найти PDF-файл с возможностью поиска:</sys:String>
+    <sys:String x:Key="Str_Err_SearchableFailed">Не удалось создать PDF-файл с возможностью поиска:</sys:String>
     <sys:String x:Key="Str_Err_ExtractFailed">Не удалось извлечь текст:</sys:String>
     <sys:String x:Key="Str_Err_DuplicateFailed">Не удалось выполнить дублирование:</sys:String>
     <sys:String x:Key="Str_Err_RepairFailed">Не удалось выполнить ремонт:</sys:String>
@@ -824,7 +824,7 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Err_FileNotFound">Файл не найден:</sys:String>
     <sys:String x:Key="Str_Err_MergeFailed">Не удалось выполнить слияние:</sys:String>
     <sys:String x:Key="Str_Err_SaveFailed">Сохранить не удалось:</sys:String>
-    <sys:String x:Key="Str_Err_FlattenFailed">Сжать не удалось:</sys:String>
+    <sys:String x:Key="Str_Err_FlattenFailed">Не удалось выполнить сведение:</sys:String>
     <sys:String x:Key="Str_Err_ExportFailed">Не удалось выполнить экспорт:</sys:String>
     <sys:String x:Key="Str_Err_SplitFailed">Разделение не удалось:</sys:String>
     <sys:String x:Key="Str_Err_DeleteFailed">Удалить не удалось:</sys:String>
@@ -835,18 +835,18 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Err_PasteFailed">Не удалось вставить:</sys:String>
     <sys:String x:Key="Str_Err_HqDownloadFailed">Не удалось выполнить загрузку в высоком качестве:</sys:String>
     <sys:String x:Key="Str_Err_ModelDownloadFailed">Не удалось загрузить языковую модель:</sys:String>
-    <sys:String x:Key="Str_Err_LangDataFailed">Не удалось загрузить {0} языковые данные:</sys:String>
-    <sys:String x:Key="Str_Dlg_DownloadTimeout">Загрузка {0} таймаут. Проверьте подключение и повторите попытку.</sys:String>
-    <sys:String x:Key="Str_Dlg_CancelBusy">Отмените текущее {0}?</sys:String>
+    <sys:String x:Key="Str_Err_LangDataFailed">Не удалось загрузить языковые данные {0}:</sys:String>
+    <sys:String x:Key="Str_Dlg_DownloadTimeout">Время ожидания загрузки {0} истекло. Проверьте подключение и повторите попытку.</sys:String>
+    <sys:String x:Key="Str_Dlg_CancelBusy">Отменить текущее {0}?</sys:String>
     <sys:String x:Key="Str_Dlg_DeletePage1">Удалить эту страницу?</sys:String>
     <sys:String x:Key="Str_Dlg_DeletePagesN">Удалить {0} страниц?</sys:String>
 
     <!-- Cancellable-operation labels (fill {0} in Str_Dlg_CancelBusy) and busy-overlay messages -->
     <sys:String x:Key="Str_Op_Repair">ремонт</sys:String>
     <sys:String x:Key="Str_Op_Operation">операция</sys:String>
-    <sys:String x:Key="Str_Op_Flatten">выравнивать</sys:String>
+    <sys:String x:Key="Str_Op_Flatten">сведение</sys:String>
     <sys:String x:Key="Str_Op_Export">экспорт</sys:String>
-    <sys:String x:Key="Str_Op_Merge">поглощать</sys:String>
+    <sys:String x:Key="Str_Op_Merge">объединение</sys:String>
     <sys:String x:Key="Str_Op_LangDownload">загрузка языка</sys:String>
     <sys:String x:Key="Str_Op_Ocr">Операция распознавания текста</sys:String>
     <sys:String x:Key="Str_Op_OcrRegion">Распознавание области</sys:String>
@@ -863,39 +863,39 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_St_AnnotSelected">{0} выделено - {1}</sys:String>
     <sys:String x:Key="Str_St_AnnotHowText">перетащите боковой угол, чтобы задать ширину, дважды щелкните, чтобы отредактировать, Delete, чтобы удалить</sys:String>
     <sys:String x:Key="Str_St_AnnotHowGeneric">перетащите любой угол, чтобы изменить размер, Delete, чтобы удалить</sys:String>
-    <sys:String x:Key="Str_St_AnnotSelectedSimple">Выделено{0} аннотаций - нажмите Delete чтобы удалить</sys:String>
+    <sys:String x:Key="Str_St_AnnotSelectedSimple">Выделено аннотаций: {0} - нажмите Delete, чтобы удалить</sys:String>
     <sys:String x:Key="Str_St_SelectedOne">Выделена 1 аннотация</sys:String>
     <sys:String x:Key="Str_St_SelectedMany">Выделено {0} аннотаций</sys:String>
     <sys:String x:Key="Str_St_Grouped">Сгруппировано {0} аннотаций - теперь они движутся вместе</sys:String>
     <sys:String x:Key="Str_St_ClearedAll">Очищены все аннотации ({0})</sys:String>
     <sys:String x:Key="Str_St_CopiedWords">Скопировано {0} слов(а) в буфер обмена</sys:String>
-    <sys:String x:Key="Str_St_HighlightedLines">Подчеркнуто {0} линий(я)</sys:String>
-    <sys:String x:Key="Str_St_StruckLines">Пронзено {0} линий(я)</sys:String>
+    <sys:String x:Key="Str_St_HighlightedLines">Выделено {0} линий(я)</sys:String>
+    <sys:String x:Key="Str_St_StruckLines">Зачеркнуто {0} линий(я)</sys:String>
     <sys:String x:Key="Str_St_UnderlinedLines">Подчеркнуто {0} линий(я)</sys:String>
     <sys:String x:Key="Str_St_SelectAllCopied">Выделен весь текст - скопирован в буфер обмена</sys:String>
-    <sys:String x:Key="Str_St_SelectAllError">Выберать все ошибки: {0}</sys:String>
+    <sys:String x:Key="Str_St_SelectAllError">Ошибка выделения всего: {0}</sys:String>
     <sys:String x:Key="Str_St_Copied">Скопировано в буфер обмена</sys:String>
     <sys:String x:Key="Str_St_ExtractError">Ошибка при извлечении текста: {0}</sys:String>
     <sys:String x:Key="Str_St_AlreadyOpen">Уже открыто: {0}</sys:String>
     <sys:String x:Key="Str_St_TextEditError">Ошибка редактирования текста: {0}</sys:String>
-    <sys:String x:Key="Str_St_OcrNoTextPage">Распознавание: текст на странице не найден {0}</sys:String>
+    <sys:String x:Key="Str_St_OcrNoTextPage">Распознавание: текст на странице {0} не найден</sys:String>
     <sys:String x:Key="Str_St_OcrCopiedPage">Распознавание: скопировано {0} символов со страницы {1} (уверенность {2})</sys:String>
     <sys:String x:Key="Str_St_OcrCopiedPages">Распознавание: скопировано {0} символов с {1} страниц (уверенность {2})</sys:String>
     <sys:String x:Key="Str_St_OcrCopiedRegion">OCR: из области скопировано символов: {0} (уверенность {1})</sys:String>
     <sys:String x:Key="Str_St_SearchableSaved">Сохранен PDF-файл с возможностью поиска: {0} страниц, {1} слов распознано</sys:String>
-    <sys:String x:Key="Str_St_TextExtracted">Текст, извлечен из {0} страниц -> {1}</sys:String>
+    <sys:String x:Key="Str_St_TextExtracted">Текст извлечен из {0} страниц -&gt; {1}</sys:String>
     <sys:String x:Key="Str_St_DuplicatedPage">Дублирована страница {0}</sys:String>
     <sys:String x:Key="Str_St_Merged">Объединено {0} файлов(а) - {1} всего страниц</sys:String>
     <sys:String x:Key="Str_St_Saved">Сохранено - {0}</sys:String>
     <sys:String x:Key="Str_St_SavedWithAnnots">Сохранено с аннотациями в {0}</sys:String>
     <sys:String x:Key="Str_St_SavedTo">Сохранено в {0}</sys:String>
-    <sys:String x:Key="Str_St_FlattenedSaved">Сглаженный PDF-файл, сохранен в {0}</sys:String>
+    <sys:String x:Key="Str_St_FlattenedSaved">Сведенный PDF-файл сохранен в {0}</sys:String>
     <sys:String x:Key="Str_St_OcrLanguage">Язык распознавания текста: {0}</sys:String>
-    <sys:String x:Key="Str_St_LangInstalled">{0} Установлен язык распознавания текста: {1}</sys:String>
+    <sys:String x:Key="Str_St_LangInstalled">{0} установлен. Язык распознавания текста: {1}</sys:String>
     <sys:String x:Key="Str_St_LangCanceled">{0} Загрузка отменена</sys:String>
     <sys:String x:Key="Str_St_HqFailed">Установлены высококачественные модели; произошел сбой: {0}</sys:String>
-    <sys:String x:Key="Str_St_HqInstalled">Высококачественные модели, установлены для: {0}</sys:String>
-    <sys:String x:Key="Str_St_InsertedBlank">Вставленная пустая страница в нужном положении {0}</sys:String>
+    <sys:String x:Key="Str_St_HqInstalled">Высококачественные модели установлены для: {0}</sys:String>
+    <sys:String x:Key="Str_St_InsertedBlank">Вставлена пустая страница в позицию {0}</sys:String>
     <sys:String x:Key="Str_St_AddedBlank">Добавлена пустая страница (сейчас {0} страниц)</sys:String>
     <sys:String x:Key="Str_St_RestorePane">Не удалось восстановить вторую панель: {0}</sys:String>
 
@@ -903,15 +903,15 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Annot_Signature">Подпись</sys:String>
     <sys:String x:Key="Str_Annot_Image">Изображение</sys:String>
     <sys:String x:Key="Str_Annot_TextBox">Текстовое поле</sys:String>
-    <sys:String x:Key="Str_Annot_Cover">Текстовая обложка</sys:String>
+    <sys:String x:Key="Str_Annot_Cover">Накладка на текст</sys:String>
     <sys:String x:Key="Str_Annot_Strikethrough">Зачеркнуто</sys:String>
     <sys:String x:Key="Str_Annot_Underline">Подчеркивать</sys:String>
     <sys:String x:Key="Str_Annot_Highlight">Выделять</sys:String>
     <sys:String x:Key="Str_Annot_Drawing">Рисование</sys:String>
-    <sys:String x:Key="Str_Annot_Item">Предмет</sys:String>
+    <sys:String x:Key="Str_Annot_Item">Элемент</sys:String>
     <sys:String x:Key="Str_Busy_SearchablePage">Создание PDF-файла с возможностью поиска... страница {0} из {1}  (Esc для отмены)</sys:String>
     <sys:String x:Key="Str_Busy_ExtractingPage">Извлечение текста... страница {0} из {1}  (Esc для отмены)</sys:String>
-    <sys:String x:Key="Str_Busy_LangData">Загрузка {0} языковые данные...</sys:String>
+    <sys:String x:Key="Str_Busy_LangData">Загрузка языковых данных {0}...</sys:String>
     <sys:String x:Key="Str_Busy_Downloading">Загрузка {0}...</sys:String>
     <sys:String x:Key="Str_Busy_DownloadingHq">Загрузка {0} (HQ) - {1} из {2} -</sys:String>
     <sys:String x:Key="Str_Busy_Opening">Открытие PDF...</sys:String>
@@ -920,7 +920,10 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_St_HqNextTime">При следующем запуске распознавания текста будут использованы высококачественные модели</sys:String>
     <sys:String x:Key="Str_Ocr_SuffixDownload">(загрузка)</sys:String>
     <sys:String x:Key="Str_Ocr_SuffixDownloadHq">(загрузка HQ)</sys:String>
-    <sys:String x:Key="Str_Dlg_SearchableSaved" xml:space="preserve">Сохранен PDF-файл с возможностью поиска:&#10;{0}&#10;&#10;{1} обработано страниц, {2} распознано слова.</sys:String>
+    <sys:String x:Key="Str_Dlg_SearchableSaved" xml:space="preserve">Сохранен PDF-файл с возможностью поиска:
+{0}
+
+Обработано страниц: {1}, распознано слов: {2}.</sys:String>
     <sys:String x:Key="Str_Dlg_Repaired" xml:space="preserve">"{0}" был успешно отремонтирован.&#10;&#10;Возможно, были утеряны закладки, формы и другие интерактивные функции. Используйте функцию Сохранить как, чтобы записать восстановленный файл в новое место.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairedRaster" xml:space="preserve">"{0}" был восстановлен путем растеризации с помощью PDFium.&#10;&#10;Текст в восстановленной копии невозможно выбрать. Используйте "Сохранить как", чтобы записать его в новое место.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairAsk" xml:space="preserve">"{0}" имеет поврежденную структуру и не может быть добавлен.&#10;&#10;Хотите, чтобы KillerPDF попытался выполнить восстановление? Будет создана восстановленная копия. Исходный файл изменен не будет.&#10;&#10;Примечание: в восстановленных файлах могут отсутствовать закладки, формы и другие интерактивные функции.</sys:String>
@@ -931,10 +934,10 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Bar_TT_EraserBrush">Проведите кистью по аннотациям, чтобы удалить их</sys:String>
     <sys:String x:Key="Str_Bar_TT_ShapeBox">Прямоугольник - перетащите прямоугольник</sys:String>
     <sys:String x:Key="Str_Bar_TT_ShapeEllipse">Эллипс - перетаскивание овала</sys:String>
-    <sys:String x:Key="Str_Bar_TT_ShapeFreeform">Точки произвольной формы; щелкните первую точку или дважды щелкните, чтобы закрыть, клавиша Esc отменяет, клавиша Backspace удаляет последнюю точку</sys:String>
+    <sys:String x:Key="Str_Bar_TT_ShapeFreeform">Произвольная форма: щелкайте, чтобы ставить точки; щелкните первую точку или дважды щелкните, чтобы закрыть, клавиша Esc отменяет, клавиша Backspace удаляет последнюю точку</sys:String>
     <sys:String x:Key="Str_Bar_TT_ShapeFill">Заполните форму изнутри</sys:String>
     <sys:String x:Key="Str_TT_RecentFiles">Последние файлы</sys:String>
-    <sys:String x:Key="Str_TT_SaveOptions">Сохранить параметры</sys:String>
+    <sys:String x:Key="Str_TT_SaveOptions">Параметры сохранения</sys:String>
     <sys:String x:Key="Str_TT_OcrOptions">Параметры распознавания текста</sys:String>
     <sys:String x:Key="Str_RecentHeading">НЕДАВНЕЕ</sys:String>
     <sys:String x:Key="Str_KS_WindowTitle">KillerPDF - Сочетания клавиш</sys:String>
@@ -946,8 +949,8 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_ClearDataDone" xml:space="preserve">Настройки, языковые пакеты и временные файлы были удалены.&#10;&#10;Перезапустите KillerPDF, чтобы завершить очистку всех файлов, которые все еще используются в этом сеансе.</sys:String>
     <sys:String x:Key="Str_Crash_Title">KillerPDF - Непредвиденная ошибка</sys:String>
     <sys:String x:Key="Str_Crash_Log">Журнал: {0}</sys:String>
-    <sys:String x:Key="Str_Crash_Copy">Копия отчета</sys:String>
-    <sys:String x:Key="Str_Crash_OpenLogs">Открытые журналы</sys:String>
+    <sys:String x:Key="Str_Crash_Copy">Копировать отчет</sys:String>
+    <sys:String x:Key="Str_Crash_OpenLogs">Открыть журналы</sys:String>
     <sys:String x:Key="Str_Crash_Report">Отчет на GitHub</sys:String>
     <sys:String x:Key="Str_Crash_Continue">Продолжить</sys:String>
     <sys:String x:Key="Str_Crash_Quit">Выйти</sys:String>

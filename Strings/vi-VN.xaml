@@ -516,7 +516,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Sign_TopRight">Phải trên</sys:String>
     <sys:String x:Key="Str_Sign_Width">Chiều rộng</sys:String>
     <sys:String x:Key="Str_Sign_Height">Chiều cao</sys:String>
-    <sys:String x:Key="Str_Sign_FontSize">Kỡ chữ</sys:String>
+    <sys:String x:Key="Str_Sign_FontSize">Cỡ chữ</sys:String>
     <sys:String x:Key="Str_Sign_PreviewSigner">Chủ sở hữu chứng chỉ</sys:String>
     <sys:String x:Key="Str_Sign_BadAppearance">Kiểm tra lại trang chữ ký, kích thước và cỡ chữ.</sys:String>
     <sys:String x:Key="Str_Sign_SaveAs">Lưu bản đã ký thành</sys:String>
@@ -922,7 +922,9 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Ocr_SuffixDownloadHq">(tải xuống chất lượng cao)</sys:String>
     <sys:String x:Key="Str_Dlg_SearchableSaved" xml:space="preserve">Đã lưu PDF có thể tìm kiếm:&#10;{0}&#10;&#10;Đã xử lý {1} trang, nhận dạng được {2} từ.</sys:String>
     <sys:String x:Key="Str_Dlg_Repaired" xml:space="preserve">"{0}" đã được sửa chữa thành công.&#10;&#10;Dấu trang, biểu mẫu và các tính năng tương tác khác có thể đã bị mất. Sử dụng Lưu thành để ghi tệp đã sửa chữa vào một vị trí mới.</sys:String>
-    <sys:String x:Key="Str_Dlg_RepairedRaster" xml:space="preserve">"{0}" đã được sửa chữa bằng cách chuyển thành dạng mẻ qua PDFium.&#10;&#10;Không thể chọn văn bản trong bản sao đã sửa chữa. Sử dụng Lưu thành để ghi tệp vào một vị trí mới.</sys:String>
+    <sys:String x:Key="Str_Dlg_RepairedRaster" xml:space="preserve">"{0}" đã được sửa chữa bằng cách raster hóa qua PDFium.
+
+Không thể chọn văn bản trong bản sao đã sửa chữa. Sử dụng Lưu thành để ghi tệp vào một vị trí mới.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairAsk" xml:space="preserve">"{0}" có cấu trúc bị hỏng và không thể thêm được.&#10;&#10;Bạn có muốn KillerPDF thử sửa chữa không? Một bản sao đã sửa chữa sẽ được tạo. Tệp gốc sẽ không bị thay đổi.&#10;&#10;Lưu ý: các tệp được sửa chữa có thể bị mất dấu trang, biểu mẫu và các tính năng tương tác khác.</sys:String>
     <sys:String x:Key="Str_Dlg_LangDownloadAsk" xml:space="preserve">Một mô hình ngôn ngữ ({0}) sẽ được tải xuống ngay bây giờ để OCR có thể chạy.&#10;&#10;Bạn có thể thêm nhiều ngôn ngữ hơn hoặc chuyển sang các mô hình chất lượng cao hơn bất cứ lúc nào từ menu OCR.</sys:String>
     <sys:String x:Key="Str_Bar_More">Thêm cài đặt</sys:String>
@@ -1005,7 +1007,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
 
     <!-- ── Từ chối chuyển giao trình duyệt ────────────────────────────────────── -->
     <sys:String x:Key="Str_Handoff_Failed">KillerPDF không thể mở tệp PDF trên trình duyệt.</sys:String>
-    <sys:String x:Key="Str_Handoff_UnknownCommand">Lệnh trình duyệt đó không có trong cơ sở dữ liệu của KillerPDF.</sys:String>
+    <sys:String x:Key="Str_Handoff_UnknownCommand">KillerPDF không nhận ra lệnh trình duyệt đó.</sys:String>
     <sys:String x:Key="Str_Handoff_MissingUrl">Quá trình chuyển đổi không bao gồm địa chỉ PDF.</sys:String>
     <sys:String x:Key="Str_Handoff_MalformedUrl">Không thể đọc địa chỉ PDF trong quá trình chuyển đổi.</sys:String>
     <sys:String x:Key="Str_Handoff_SchemeNotAllowed">KillerPDF chỉ mở các thao tác chuyển đổi trên trình duyệt qua giao thức https.</sys:String>

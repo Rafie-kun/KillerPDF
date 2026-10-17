@@ -363,7 +363,7 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Stamp_Scale">Масштаб</sys:String>
     <sys:String x:Key="Str_Stamp_Angle">Бұрыш</sys:String>
     <sys:String x:Key="Str_Stamp_Opacity">Мөлдірлік</sys:String>
-    <sys:String x:Key="Str_Stamp_Mirror">Қарсы беттерде айналау (сыртқы жиек)</sys:String>
+    <sys:String x:Key="Str_Stamp_Mirror">Қарсы беттерде айна бейнесі (сыртқы жиек)</sys:String>
     <sys:String x:Key="Str_Stamp_Applied">{0} бетке мөр қойылды</sys:String>
     <sys:String x:Key="Str_TT_StampTool">Беттерге мөр (S)</sys:String>
     <sys:String x:Key="Str_Ctx_StampPages">Беттерге мөр</sys:String>
@@ -381,7 +381,7 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Print_Paper">Қағаз өлшемі</sys:String>
     <sys:String x:Key="Str_Print_PaperAuto">Құжатқа сәйкес</sys:String>
     <sys:String x:Key="Str_Print_Source">Қағаз көзі</sys:String>
-    <sys:String x:Key="Str_Print_SourceAuto">Принтер әдепі</sys:String>
+    <sys:String x:Key="Str_Print_SourceAuto">Принтердің әдепкі мәні</sys:String>
     <sys:String x:Key="Str_Print_SecPrinter">ПРИНТЕР</sys:String>
     <sys:String x:Key="Str_Print_SecLayout">ОРНАЛАСУ</sys:String>
     <sys:String x:Key="Str_Print_SecOutput">ШЫҒАРЫЛЫМ</sys:String>
@@ -495,7 +495,7 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Sign_Desc">{0} құжатын сертификатпен мөрлейді және қол қойылған көшірмені сақтайды.</sys:String>
     <sys:String x:Key="Str_Sign_Certificate">Сертификат</sys:String>
     <sys:String x:Key="Str_Sign_FromFile">Файлдан (.pfx / .p12)</sys:String>
-    <sys:String x:Key="Str_Sign_FromStore">Windows сертификат қоймасынан</sys:String>
+    <sys:String x:Key="Str_Sign_FromStore">Windows сертификат қоймасынан / USB токенінен</sys:String>
     <sys:String x:Key="Str_Sign_Browse">Шолу...</sys:String>
     <sys:String x:Key="Str_Sign_Password">Құпиясөз</sys:String>
     <sys:String x:Key="Str_Sign_Reason">Себеп (міндетті емес)</sys:String>
@@ -897,7 +897,11 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Dlg_SearchableSaved" xml:space="preserve">Ізделетін PDF сақталды:&#10;{0}&#10;&#10;{1} бет өңделді, {2} сөз танылды.</sys:String>
     <sys:String x:Key="Str_Dlg_Repaired" xml:space="preserve">"{0}" сәтті жөнделді.&#10;&#10;Бетбелгілер, пішіндер және басқа интерактивті мүмкіндіктер жоғалуы мүмкін. Жөнделген файлды жаңа орынға жазу үшін Басқаша сақтауды пайдаланыңыз.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairedRaster" xml:space="preserve">"{0}" PDFium арқылы растрлеу жолымен жөнделді.&#10;&#10;Жөнделген көшірмеде мәтін таңдалмайды. Оны жаңа орынға жазу үшін Басқаша сақтауды пайдаланыңыз.</sys:String>
-    <sys:String x:Key="Str_Dlg_RepairAsk" xml:space="preserve">"{0}" құрылымы зақымдалған және қосылмады.&#10;&#10;KillerPDF жөндеуді көшсін бе? Жөнделген көшірме жасалады. Түпнұсқа файл өзгертілмейді.&#10;&#10;Ескерту: жөнделген файлдарда бетбелгілер, пішіндер және басқа интерактивті мүмкіндіктер болмауы мүмкін.</sys:String>
+    <sys:String x:Key="Str_Dlg_RepairAsk" xml:space="preserve">"{0}" құрылымы зақымдалған және қосылмады.
+
+KillerPDF жөндеуге әрекет жасасын ба? Жөнделген көшірме жасалады. Түпнұсқа файл өзгертілмейді.
+
+Ескерту: жөнделген файлдарда бетбелгілер, пішіндер және басқа интерактивті мүмкіндіктер болмауы мүмкін.</sys:String>
     <sys:String x:Key="Str_Dlg_LangDownloadAsk" xml:space="preserve">OCR іске қосылуы үшін қазір тіл үлгісі ({0}) жүктеледі.&#10;&#10;OCR мәзірінен кез келген уақытта қосымша тілдер қоса немесе жоғары сапалы үлгілерге ауыса аласыз.</sys:String>
     <sys:String x:Key="Str_Bar_More">Қосымша параметрлер</sys:String>
     <sys:String x:Key="Str_Bar_TT_Level">Сызықты ең жақын осьте ұстау (көлденең немесе тік)</sys:String>

@@ -160,7 +160,7 @@
     <sys:String x:Key="Str_Dlg_InstallTitle">KillerPDF ইনস্টল করুন</sys:String>
     <sys:String x:Key="Str_Dlg_InstallMsg" xml:space="preserve">এই কম্পিউটারে KillerPDF ইনস্টল করবেন?
 
-KillerPDF আপনার প্রোগ্রাম ফোল্ডারে কপি করা হবে এবং একটি স্টার্ট মেনু এন্ট্রি যোগ করা হবে। EXE-র এই কপিটি যেখানে আছে সেখানেই থাকবে, এবং যেকোনো সময় Add/Remove Programs-এর মাধ্যমে আনইনস্টল করা যাবে।</sys:String>
+ইনস্টল করলে দ্রুত চালুর জন্য অ্যাপটি আপনার প্রোগ্রাম ফোল্ডারে কপি করা হবে এবং একটি স্টার্ট মেনু এন্ট্রি যোগ করা হবে। এরপর এই পোর্টেবল ফাইলটি রাখতে বা মুছে ফেলতে পারবেন।</sys:String>
     <sys:String x:Key="Str_Btn_DoInstall">ইনস্টল করুন</sys:String>
     <sys:String x:Key="Str_Btn_DoUpdate">আপডেট</sys:String>
     <sys:String x:Key="Str_Dlg_UpdateUserMsg" xml:space="preserve">বিদ্যমান KillerPDF ইনস্টলেশন আপডেট করবেন?
@@ -239,14 +239,14 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Lbl_Bold">বোল্ড</sys:String>
     <sys:String x:Key="Str_Lbl_Italic">ইটালিক</sys:String>
     <sys:String x:Key="Str_Lbl_Draw">আঁকুন</sys:String>
-    <sys:String x:Key="Str_Lbl_Shape">আকার</sys:String>
+    <sys:String x:Key="Str_Lbl_Shape">আকৃতি</sys:String>
     <sys:String x:Key="Str_Bar_ShapeFill">ভরাট</sys:String>
     <sys:String x:Key="Str_Lbl_Crop">ক্রপ</sys:String>
     <sys:String x:Key="Str_Lbl_Measure">পরিমাপ</sys:String>
     <sys:String x:Key="Str_Lbl_Image">ছবি যোগ করুন</sys:String>
     <sys:String x:Key="Str_Lbl_Signature">স্বাক্ষর</sys:String>
     <sys:String x:Key="Str_Lbl_Undo">পূর্বাবস্থায় ফেরান</sys:String>
-    <sys:String x:Key="Str_Lbl_Clear">টীকা মুছুন</sys:String>
+    <sys:String x:Key="Str_Lbl_Clear">সব টীকা মুছুন</sys:String>
     <sys:String x:Key="Str_Lbl_New">নতুন</sys:String>
     <sys:String x:Key="Str_Lbl_Open">খুলুন</sys:String>
     <sys:String x:Key="Str_Lbl_Close">বন্ধ</sys:String>
@@ -724,7 +724,7 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Dlg_Preview">পূর্বরূপ</sys:String>
     <sys:String x:Key="Str_Dlg_NoSuchFile">ওই ফাইলটি নেই।</sys:String>
     <sys:String x:Key="Str_Dlg_NoSuchFolder">ওই ফোল্ডারটি নেই।</sys:String>
-    <sys:String x:Key="Str_Dlg_OverwriteMsg">{0} পরিবর্তন করবেন?</sys:String>
+    <sys:String x:Key="Str_Dlg_OverwriteMsg">{0} প্রতিস্থাপন করবেন?</sys:String>
     <sys:String x:Key="Str_Menu_PinPlace">স্থানে পিন করুন</sys:String>
     <sys:String x:Key="Str_Menu_UnpinPlace">স্থান থেকে সরান</sys:String>
     <sys:String x:Key="Str_QA_Desktop">ডেস্কটপ</sys:String>
@@ -985,7 +985,7 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
 
     <!-- ── Browser handoff refusals ────────────────────────────────────── -->
     <sys:String x:Key="Str_Handoff_Failed">KillerPDF ব্রাউজার পিডিএফ খুলতে পারেনি ।</sys:String>
-    <sys:String x:Key="Str_Handoff_UnknownCommand">সেই ব্রাউজার কমান্ডটি একজন কিলারপিডিএফ জানে না ।</sys:String>
+    <sys:String x:Key="Str_Handoff_UnknownCommand">সেই ব্রাউজার কমান্ডটি KillerPDF চেনে না।</sys:String>
     <sys:String x:Key="Str_Handoff_MissingUrl">হ্যান্ডঅফটিতে কোনও পিডিএফ ঠিকানা অন্তর্ভুক্ত করা হয়নি ।</sys:String>
     <sys:String x:Key="Str_Handoff_MalformedUrl">হ্যান্ডঅফের পিডিএফ ঠিকানাটি পড়া যায়নি ।</sys:String>
     <sys:String x:Key="Str_Handoff_SchemeNotAllowed">KillerPDF শুধুমাত্র HTTPS এর মাধ্যমে ব্রাউজার হ্যান্ডঅফগুলি খোলে ।</sys:String>
