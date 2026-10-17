@@ -28,6 +28,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - The checked boxes in the annotation bars and Crop's All pages box keep a readable tick on every accent instead of white on yellow.
 - Opening the shortcuts or About card moves keyboard focus into it, Tab stays inside the card, and closing it returns focus to where it was.
 - Tab no longer stops on hidden links, which screen readers announced as the window.
+- Screen readers name the Enable keyboard shortcuts check box in the shortcuts card.
 - On the website, text on accent-colored buttons, tabs and highlights switches to white or near-black for contrast, so it is never white on yellow.
 - Theme names and the status, OCR, signing and stamp labels that were still in English are translated in every language.
 - The website's About page, MCP page, accent bar, code comments and section toggles are translated in every language, and About text that had lost its accents is restored.
