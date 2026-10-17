@@ -160,6 +160,7 @@ Sayfa, işaretli alanları karartılmış kendi görüntüsüyle değiştirilebi
     <!-- ── Klavye kısayolları katmanı ───────────────────────────────── -->
     <sys:String x:Key="Str_KS_Title">Klavye Kısayolları</sys:String>
     <sys:String x:Key="Str_KS_FormField">Doldurulabilir metin alanı</sys:String>
+    <sys:String x:Key="Str_KS_NextShape">Sonraki şekil türü</sys:String>
     <sys:String x:Key="Str_KS_File">DOSYA</sys:String>
     <sys:String x:Key="Str_KS_Open">Aç</sys:String>
     <sys:String x:Key="Str_KS_CloseFile">Dosyayı kapat</sys:String>

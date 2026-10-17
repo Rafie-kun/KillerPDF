@@ -69,6 +69,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Split the installer text into one file per language, with \n marking line breaks inside a value, so translations can be reviewed and compared key by key (#409).
 - The installer sidebar shows the version in Killer Sans under the wordmark, with a translated Setup line below it in Lacquer (#440).
 - Shortcuts shown in menus and tooltips follow customized shortcuts and the app language, and the toolbar's overflow menu lists each item's shortcut.
+- Tools answer to one letter each instead of the number row, so a key keeps its tool however many tools there are. Shapes moved from 4 to O, and Shift+O steps to the next shape type.
 - Check for updates on startup is the first of the About options, as in the other Killer Tools apps.
 - The Light theme draws a softer shadow under the toolbars.
 - Esc no longer closes KillerPDF. It still cancels the open tool, search or overlay, and with nothing to cancel it does nothing, as in other Windows apps.

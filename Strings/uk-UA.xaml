@@ -164,6 +164,7 @@
     <!-- ── Keyboard shortcuts overlay ───────────────────────────────── -->
     <sys:String x:Key="Str_KS_Title">Комбінації клавіш</sys:String>
     <sys:String x:Key="Str_KS_FormField">Текстове поле для заповнення</sys:String>
+    <sys:String x:Key="Str_KS_NextShape">Наступний тип фігури</sys:String>
     <sys:String x:Key="Str_KS_File">ФАЙЛ</sys:String>
     <sys:String x:Key="Str_KS_Open">Відкрити</sys:String>
     <sys:String x:Key="Str_KS_CloseFile">Закрити файл</sys:String>

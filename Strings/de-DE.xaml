@@ -160,6 +160,7 @@ Die Seite kann durch ein Bild ihrer selbst ersetzt werden, in dem die markierten
     <!-- ── Keyboard shortcuts overlay ───────────────────────────────── -->
     <sys:String x:Key="Str_KS_Title">Tastenkürzel</sys:String>
     <sys:String x:Key="Str_KS_FormField">Ausfüllbares Textfeld</sys:String>
+    <sys:String x:Key="Str_KS_NextShape">Nächste Formart</sys:String>
     <sys:String x:Key="Str_KS_File">DATEI</sys:String>
     <sys:String x:Key="Str_KS_Open">Öffnen</sys:String>
     <sys:String x:Key="Str_KS_CloseFile">Datei schließen</sys:String>

@@ -86,6 +86,7 @@
     <!-- ── Keyboard shortcuts overlay ───────────────────────────────── -->
     <sys:String x:Key="Str_KS_Title">Пернелер тіркесімі</sys:String>
     <sys:String x:Key="Str_KS_FormField">Толтырылатын мәтін өрісі</sys:String>
+    <sys:String x:Key="Str_KS_NextShape">Келесі пішін түрі</sys:String>
     <sys:String x:Key="Str_KS_File">ФАЙЛ</sys:String>
     <sys:String x:Key="Str_KS_Open">Ашу</sys:String>
     <sys:String x:Key="Str_KS_CloseFile">Файлды жабу</sys:String>

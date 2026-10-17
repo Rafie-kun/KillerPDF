@@ -164,6 +164,7 @@ Có thể thay trang bằng hình ảnh của chính nó với các vùng đã �
     <!-- ── Lớp phím tắt bàn phím ────────────────────────────────────── -->
     <sys:String x:Key="Str_KS_Title">Phím tắt bàn phím</sys:String>
     <sys:String x:Key="Str_KS_FormField">Trường văn bản điền được</sys:String>
+    <sys:String x:Key="Str_KS_NextShape">Loại hình vẽ tiếp theo</sys:String>
     <sys:String x:Key="Str_KS_File">TỆP</sys:String>
     <sys:String x:Key="Str_KS_Open">Mở</sys:String>
     <sys:String x:Key="Str_KS_CloseFile">Đóng tệp</sys:String>

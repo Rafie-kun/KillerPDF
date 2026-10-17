@@ -423,6 +423,14 @@ namespace KillerPDF
                 ToggleInvertImages(!BitmapHelpers.DocInvertImages);
                 e.Handled = true;
             }
+            else if (key == Key.O && mods == ModifierKeys.Shift && _doc is not null
+                     && ShortcutOverlay.Visibility != Visibility.Visible
+                     && AboutOverlay.Visibility != Visibility.Visible)
+            {
+                // Shift+O pairs with the Shapes key O: steps to the next shape type.
+                CycleShapeKind();
+                e.Handled = true;
+            }
             // App-wide accessibility size (AppScale.cs), distinct from the Ctrl+wheel page zoom:
             // Ctrl+Shift +/- steps the whole-app size, Ctrl+Shift+0 resets it. Works with no
             // mouse; the wheel-over-logo gesture drives the same scale.
@@ -442,8 +450,7 @@ namespace KillerPDF
                 e.Handled = true;
             }
             // Toolbar appearance, mirroring the bar's right-click menu top to bottom: Ctrl+Shift+1/2
-            // pick the icon size, Ctrl+Shift+3..6 pick where the text goes. Number row only - the
-            // numpad digits stay clear of the tool shortcuts' numpad mappings.
+            // pick the icon size, Ctrl+Shift+3..6 pick where the text goes. Number row only.
             else if (key is >= Key.D1 and <= Key.D6 && mods == (ModifierKeys.Control | ModifierKeys.Shift))
             {
                 switch (key)
@@ -745,25 +752,22 @@ namespace KillerPDF
         {
             switch (key)
             {
-                // Tools are reachable by their toolbar position (digits 1-9, 0 mirror the toolbar,
-                // left to right); the original letter keys stay as fallbacks. Both the number-row and
-                // numpad digits map. 1.6.6 remap (#127 Phase 3): Select is V-only (the Photoshop /
-                // Illustrator / Figma convention) - its digit went to Text so Shapes could take 4 and
-                // the digits keep mirroring the toolbar order.
+                // One letter per tool, so a key keeps its tool however the toolbar grows. Select is
+                // V (the Photoshop / Illustrator / Figma convention) and Shapes is O; Line also keeps
+                // U. Signature, Transform, Stamp, Color Correction, Measure and Redact go through
+                // their toolbar handlers so their pickers open.
                 case Key.V: SetTool(EditTool.Select); return true;
                 case Key.F: SetTool(EditTool.FormField); return true;
-                case Key.T: case Key.D1: case Key.NumPad1: SetTool(EditTool.Text); return true;
-                case Key.H: case Key.D2: case Key.NumPad2: SetTool(EditTool.Highlight); return true;
-                case Key.L: case Key.U: case Key.D3: case Key.NumPad3: SetTool(EditTool.Line); return true;
-                case Key.D4: case Key.NumPad4: SetTool(EditTool.Shape); return true;
-                case Key.D: case Key.D5: case Key.NumPad5: SetTool(EditTool.Draw); return true;
-                case Key.I: case Key.D6: case Key.NumPad6: SetTool(EditTool.Image); return true;
-                case Key.G: case Key.D7: case Key.NumPad7: ToolSignature_Click(this, new RoutedEventArgs()); return true;
-                case Key.C: case Key.D8: case Key.NumPad8: SetTool(EditTool.Crop); return true;
-                case Key.R: case Key.D9: case Key.NumPad9: ToolRotate_Click(this, new RoutedEventArgs()); return true;
-                case Key.S: case Key.D0: case Key.NumPad0: ToolStamp_Click(this, new RoutedEventArgs()); return true;
-                // The tools past the numbered ten get letters only: E for Color Correction, M for
-                // Measure and X for Redact, each through its toolbar handler.
+                case Key.T: SetTool(EditTool.Text); return true;
+                case Key.H: SetTool(EditTool.Highlight); return true;
+                case Key.L: case Key.U: SetTool(EditTool.Line); return true;
+                case Key.O: SetTool(EditTool.Shape); return true;
+                case Key.D: SetTool(EditTool.Draw); return true;
+                case Key.I: SetTool(EditTool.Image); return true;
+                case Key.G: ToolSignature_Click(this, new RoutedEventArgs()); return true;
+                case Key.C: SetTool(EditTool.Crop); return true;
+                case Key.R: ToolRotate_Click(this, new RoutedEventArgs()); return true;
+                case Key.S: ToolStamp_Click(this, new RoutedEventArgs()); return true;
                 case Key.E: ToolColorCorrection_Click(this, new RoutedEventArgs()); return true;
                 case Key.M: ToolMeasure_Click(this, new RoutedEventArgs()); return true;
                 case Key.X: ToolRedact_Click(this, new RoutedEventArgs()); return true;

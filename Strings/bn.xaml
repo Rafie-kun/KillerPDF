@@ -160,6 +160,7 @@
     <!-- ── Keyboard shortcuts overlay ───────────────────────────────── -->
     <sys:String x:Key="Str_KS_Title">কীবোর্ড শর্টকাট</sys:String>
     <sys:String x:Key="Str_KS_FormField">পূরণযোগ্য টেক্সট ক্ষেত্র</sys:String>
+    <sys:String x:Key="Str_KS_NextShape">পরবর্তী আকারের ধরন</sys:String>
     <sys:String x:Key="Str_KS_File">ফাইল</sys:String>
     <sys:String x:Key="Str_KS_Open">খুলুন</sys:String>
     <sys:String x:Key="Str_KS_CloseFile">ফাইল বন্ধ করুন</sys:String>

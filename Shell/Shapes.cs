@@ -39,6 +39,21 @@ namespace KillerPDF
         private Color ShapeFillColor()
             => Color.FromArgb((byte)Math.Max(20, _drawColor.A / 2), _drawColor.R, _drawColor.G, _drawColor.B);
 
+        /// <summary>Shift+O: steps to the next shape type (Box, Ellipse, Freeform) and arms the
+        /// Shapes tool, the same change as clicking the next button in the shape bar's picker.</summary>
+        private void CycleShapeKind()
+        {
+            _shapeKind = _shapeKind switch
+            {
+                ShapeKind.Rectangle => ShapeKind.Ellipse,
+                ShapeKind.Ellipse => ShapeKind.Polygon,
+                _ => ShapeKind.Rectangle,
+            };
+            if (_shapeKind != ShapeKind.Polygon) CancelShapePolygon();
+            if (_currentTool == EditTool.Shape) ShowDrawSettings(EditTool.Shape);
+            else SetTool(EditTool.Shape);
+        }
+
         /// <summary>Mouse-down entry for the Shapes tool (called from Canvas_MouseLeftButtonDown).</summary>
         private void ShapeToolMouseDown(int pageIdx, Point pos, MouseButtonEventArgs e)
         {

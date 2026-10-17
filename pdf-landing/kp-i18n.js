@@ -259,7 +259,7 @@ var I18N = {
   "ph_70": "Нажмите <code>L</code> (или <code>U</code>) для инструмента <b>Линия</b> - прямого отрезка по двум точкам.",
   "ph_71": "Включите <b>Уровень</b> - и линия привязывается к строго горизонтальному или вертикальному положению, смотря к чему ближе ваше движение.",
   "ph_72": "Все три инструмента несут цвет, прозрачность и толщину на своей панели.",
-  "ph_226": "Фигуры<span class=\"kbd\">4</span><span class=\"chev\">&#9656;</span>",
+  "ph_226": "Фигуры<span class=\"kbd\">O</span><span class=\"chev\">&#9656;</span>",
   "ph_227": "Инструмент «Фигуры» рисует <b>прямоугольники, эллипсы и произвольные многоугольники</b>, каждый с необязательной заливкой - выберите подрежим и включите <b>Заливку</b> на панели.",
   "ph_228": "<b>Рамка</b> сохраняет классический жест растягивания прямоугольника. <b>Эллипс</b> рисуется тем же движением как замкнутый контур.",
   "ph_229": "<b>Произвольная фигура</b> ставит точки щелчок за щелчком: щелкните первую точку снова (ее мишень подсвечивается при приближении) или дважды щелкните, чтобы замкнуть многоугольник; <code>Esc</code> отменяет, <code>Backspace</code> убирает последнюю точку.",
@@ -1073,7 +1073,7 @@ var I18N = {
   "shot_01": "Vista a griglia di sei pagine della brochure di KillerPDF",
   "ph_224": "<b>Inverti colori documento:</b> l'interruttore a forma di luna in fondo alla barra laterale (o il tasto <code>N</code>) disegna il documento con i colori invertiti per leggere in modalità scura. Riguarda solo la visualizzazione: salvataggio, stampa, esportazione, OCR e miniature mantengono i colori reali del documento, e la scelta viene ricordata tra un avvio e l'altro.",
   "ph_225": "<b>Dimensione dell'app:</b> fai girare la rotellina del mouse sul logo nella barra del titolo (oppure <code>Ctrl+Shift</code> e <code>+</code> / <code>-</code>, <code>Ctrl+Shift+0</code> per ripristinare) per scalare tutta l'interfaccia dal 70% al 250%, barra strumenti, barra laterale e schede comprese, mentre il documento mantiene il suo zoom. Pensata sia per gli occhi stanchi sia per i portatili ad alta densità.",
-  "ph_226": "Forme<span class=\"kbd\">4</span><span class=\"chev\">&#9656;</span>",
+  "ph_226": "Forme<span class=\"kbd\">O</span><span class=\"chev\">&#9656;</span>",
   "ph_227": "Lo strumento Forme disegna <b>rettangoli, ellissi e poligoni a mano libera</b>, ognuno con riempimento opzionale: scegli la sotto-modalità e attiva <b>Riempimento</b> sulla barra.",
   "ph_228": "<b>Riquadro</b> mantiene il classico gesto di trascinare un rettangolo. <b>Ellisse</b> si trascina allo stesso modo come contorno chiuso.",
   "ph_229": "<b>Mano libera</b> posiziona i punti un clic alla volta: fai di nuovo clic sul primo punto (il suo bersaglio si accende quando gli sei vicino) oppure doppio clic per chiudere il poligono, <code>Esc</code> annulla, <code>Backspace</code> rimuove l'ultimo punto.",
@@ -1917,7 +1917,7 @@ var I18N = {
   "shot_01": "Chế độ xem lưới sáu trang của tập giới thiệu KillerPDF",
   "ph_224": "<b>Màu tài liệu:</b> nút chuyển hình mặt trăng ở cuối thanh bên (hoặc phím <code>N</code>) hiển thị tài liệu với màu đảo ngược để đọc trong chế độ tối. Nút này chỉ ảnh hưởng đến phần hiển thị: việc lưu, in, xuất, OCR và ảnh thu nhỏ vẫn giữ màu thật của tài liệu, và lựa chọn của bạn được ghi nhớ giữa các lần mở ứng dụng.",
   "ph_225": "<b>Kích thước ứng dụng:</b> cuộn con lăn chuột trên logo ở thanh tiêu đề (hoặc nhấn <code>Ctrl+Shift</code> và <code>+</code> / <code>-</code>, <code>Ctrl+Shift+0</code> để đặt lại) để phóng to hoặc thu nhỏ toàn bộ giao diện từ 70% đến 250% - thanh công cụ, thanh bên và các thẻ, trong khi tài liệu vẫn giữ mức thu phóng riêng. Phù hợp cho cả đôi mắt mỏi lẫn laptop độ phân giải cao.",
-  "ph_226": "Hình khối<span class=\"kbd\">4</span><span class=\"chev\">▸</span>",
+  "ph_226": "Hình khối<span class=\"kbd\">O</span><span class=\"chev\">▸</span>",
   "ph_227": "Công cụ Hình khối vẽ <b>hình chữ nhật, hình elip và đa giác tự do</b>, mỗi hình có thể tô màu tùy chọn - chọn chế độ con và bật <b>Tô màu</b> trên thanh công cụ.",
   "ph_228": "<b>Hộp</b> giữ thao tác quen thuộc là kéo ra một hình chữ nhật. <b>Elip</b> được kéo theo cách tương tự thành một đường viền khép kín.",
   "ph_229": "<b>Tự do</b> đặt từng điểm theo từng cú nhấp: nhấp lại vào điểm đầu tiên (vùng bắt điểm sẽ sáng lên khi bạn ở gần) hoặc nhấp đúp để đóng đa giác, <code>Esc</code> để hủy, <code>Backspace</code> để xóa điểm cuối cùng.",
@@ -2830,7 +2830,7 @@ var I18N = {
   "ph_22": "Az aktív lap mindig látható marad; amikor a csík megtelik, a többi átlép egy túlcsordulási menübe.",
   "ph_224_172": "<b>A dokumentum színeinek megfordítása:</b> az oldalsáv sínének alján található holdkapcsoló (vagy az <code>N</code> billentyű) fordított színekkel jeleníti meg a dokumentumot a sötét módban történő olvasáshoz. Osztott nézetben ez a beállítás a fókuszált ablaktáblához tartozik. Csak megjelenítésre kerül - a mentés, a nyomtatás, az exportálás, az OCR és a miniatűrök megtartják a dokumentum valódi színeit -, és minden indításkor megjegyzik.",
   "ph_225": "<b>Alkalmazás mérete:</b> görgessen az egér görgőjével a címsor logója fölé (vagy <code>Ctrl+Shift</code> és <code>+</code> / <code>-</code>, <code>Ctrl+Shift+0</code> az alaphelyzetbe állításhoz), hogy a teljes felületet 70%-ról 250%-ra skálázza - az eszköztár, az oldalsáv és a tabulátorok a sajátjai. Fáradt szemeknek és nagy DPI-s laptopoknak egyaránt készült.",
-  "ph_226": "Alakzatok<span class=\"kbd\">4</span><span class=\"chev\">▸</span>",
+  "ph_226": "Alakzatok<span class=\"kbd\">O</span><span class=\"chev\">▸</span>",
   "ph_227": "Az Alakzatok eszköz <b>téglalapokat, ellipsziseket és szabad formájú sokszögeket</b> rajzol, mindegyik opcionális kitöltéssel - válassza ki az almódot, és kapcsolja be a <b>Kitöltés</b> lehetőséget a sávon.",
   "ph_228": "A <b>Box</b> megtartja a klasszikus „húzd a téglalap” mozdulatot. Az <b>Ellipszis</b> ugyanúgy húzódik, mint a zárt körvonal.",
   "ph_229": "A <b>Freeform</b> pontokat kattintásról kattintásra helyezi el: kattintson újra az első pontra (a célpontja világít, ha közel van), vagy kattintson duplán a sokszög bezárásához, az <code>Esc</code> törli, a <code>Backspace</code> pedig eltávolítja az utolsó pontot.",
@@ -3509,7 +3509,7 @@ var I18N = {
   "ph_70": "Naciśnij <code>L</code> (lub <code>U</code>), aby użyć narzędzia <b>Linia</b>, czyli prostego odcinka o dwóch punktach.",
   "ph_71": "Włącz <b>Poziomowanie</b>, a linia przyciągnie się idealnie do poziomu lub pionu, w zależności od tego, do czego bliżej jest Twojemu przeciągnięciu.",
   "ph_72": "Wszystkie trzy mają na swoim pasku kolor, krycie i szerokość.",
-  "ph_226": "Kształty<span class=\"kbd\">4</span><span class=\"chev\">&#9656;</span>",
+  "ph_226": "Kształty<span class=\"kbd\">O</span><span class=\"chev\">&#9656;</span>",
   "ph_227": "Narzędzie Kształty rysuje <b>prostokąty, elipsy i dowolne wielokąty</b>, każdy z opcjonalnym wypełnieniem - wybierz tryb i przełącz <b>Wypełnienie</b> na pasku.",
   "ph_228": "<b>Prostokąt</b> zachowuje klasyczny gest przeciągnięcia. <b>Elipsa</b> przeciąga się tak samo, jako zamknięty obrys.",
   "ph_229": "<b>Dowolny</b> stawia punkty kliknięcie po kliknięciu: kliknij ponownie pierwszy punkt (jego cel podświetla się, gdy jesteś blisko) albo kliknij dwukrotnie, aby zamknąć wielokąt, <code>Esc</code> anuluje, a <code>Backspace</code> usuwa ostatni punkt.",
@@ -4414,7 +4414,7 @@ var I18N = {
   "shot_01": "Šestistránkové mřížkové zobrazení brožury KillerPDF",
   "ph_224": "<b>Invertovat barvy dokumentu:</b> přepínač měsíce dole na kolejnici postranního panelu (nebo <code>N</code>) vykreslí dokument s invertovanými barvami pro čtení v tmavém režimu. Jen pro zobrazení - ukládání, tisk, export, OCR i miniatury zachovávají skutečné barvy dokumentu - a pamatuje se mezi spuštěními.",
   "ph_225": "<b>Velikost aplikace:</b> rolováním kolečka myši nad logem v záhlaví okna (nebo <code>Ctrl+Shift</code> a <code>+</code> / <code>-</code>, <code>Ctrl+Shift+0</code> pro reset) škálujete celé rozhraní od 70 % do 250 % - panel nástrojů, postranní panel a karty, zatímco dokument si drží vlastní zoom. Pro unavené oči i notebooky s vysokým DPI.",
-  "ph_226": "Tvary<span class=\"chev\">&#9656;</span>",
+  "ph_226": "Tvary<span class=\"kbd\">O</span><span class=\"chev\">&#9656;</span>",
   "ph_227": "Nástroj Tvary kreslí <b>obdélníky, elipsy a mnohoúhelníky od ruky</b>, každý s volitelnou výplní - vyberte podrežim a přepněte <b>Výplň</b> na liště.",
   "ph_228": "<b>Rámeček</b> zachovává klasické gesto tažení obdélníku. <b>Elipsa</b> se táhne stejně, jako uzavřený obrys.",
   "ph_229": "<b>Od ruky</b> pokládá body klik po kliku: kliknutím znovu na první bod (jeho terč se rozsvítí, když jste blízko) nebo dvojklikem mnohoúhelník uzavřete, <code>Esc</code> zruší, <code>Backspace</code> odebere poslední bod.",
@@ -5258,7 +5258,7 @@ var I18N = {
   "shot_01": "Vista de cuadrícula de seis páginas del folleto de KillerPDF",
   "ph_224": "<b>Invertir colores del documento:</b> el interruptor de luna al final del riel de la barra lateral (o <code>N</code>) muestra el documento con los colores invertidos para leer en modo oscuro. Solo visualización - guardar, imprimir, exportar, el OCR y las miniaturas conservan los colores reales del documento - y se recuerda entre sesiones.",
   "ph_225": "<b>Tamaño de la aplicación:</b> desplaza la rueda del ratón sobre el logotipo de la barra de título (o <code>Ctrl+Shift</code> y <code>+</code> / <code>-</code>, <code>Ctrl+Shift+0</code> para restablecer) para escalar toda la interfaz del 70% al 250% - barra de herramientas, barra lateral y pestañas, mientras el documento mantiene su propio zoom. Pensado tanto para ojos cansados como para portátiles de alta densidad.",
-  "ph_226": "Formas<span class=\"chev\">&#9656;</span>",
+  "ph_226": "Formas<span class=\"kbd\">O</span><span class=\"chev\">&#9656;</span>",
   "ph_227": "La herramienta Formas dibuja <b>rectángulos, elipses y polígonos a mano alzada</b>, cada uno con relleno opcional - elige el submodo y activa <b>Relleno</b> en la barra.",
   "ph_228": "<b>Caja</b> mantiene el clásico gesto de arrastrar un rectángulo. <b>Elipse</b> se arrastra igual, como contorno cerrado.",
   "ph_229": "<b>Forma libre</b> coloca puntos clic a clic: haz clic de nuevo en el primer punto (su objetivo se ilumina cuando estás cerca) o doble clic para cerrar el polígono, <code>Esc</code> cancela, <code>Retroceso</code> elimina el último punto.",
@@ -6102,7 +6102,7 @@ var I18N = {
   "shot_01": "Sechsseitige Rasteransicht der KillerPDF-Broschüre",
   "ph_224": "<b>Dokumentfarben invertieren:</b> der Mond-Schalter am unteren Ende der Seitenleisten-Leiste (oder <code>N</code>) zeigt das Dokument mit invertierten Farben für das Lesen im Dunkelmodus. Nur Anzeige - Speichern, Drucken, Exportieren, OCR und die Miniaturen behalten die echten Farben des Dokuments - und die Wahl bleibt über Neustarts erhalten.",
   "ph_225": "<b>App-Größe:</b> mit dem Mausrad über das Logo in der Titelleiste scrollen (oder <code>Strg+Umschalt</code> und <code>+</code> / <code>-</code>, <code>Strg+Umschalt+0</code> zum Zurücksetzen), um die gesamte Oberfläche von 70% bis 250% zu skalieren - Werkzeugleiste, Seitenleiste und Tabs, während das Dokument seinen eigenen Zoom behält. Gemacht für müde Augen ebenso wie für High-DPI-Laptops.",
-  "ph_226": "Formen<span class=\"chev\">&#9656;</span>",
+  "ph_226": "Formen<span class=\"kbd\">O</span><span class=\"chev\">&#9656;</span>",
   "ph_227": "Das Formen-Werkzeug zeichnet <b>Rechtecke, Ellipsen und Freiform-Polygone</b>, jeweils mit optionaler Füllung - Untermodus wählen und <b>Füllung</b> auf der Leiste umschalten.",
   "ph_228": "<b>Rechteck</b> behält die klassische Zieh-Geste. <b>Ellipse</b> wird genauso gezogen, als geschlossener Umriss.",
   "ph_229": "<b>Freiform</b> setzt Punkte Klick für Klick: erneut auf den ersten Punkt klicken (sein Ziel leuchtet auf, wenn Sie nah dran sind) oder doppelklicken, um das Polygon zu schließen, <code>Esc</code> bricht ab, <code>Rücktaste</code> entfernt den letzten Punkt.",
@@ -6946,7 +6946,7 @@ var I18N = {
   "shot_01": "Vue en grille de six pages de la brochure KillerPDF",
   "ph_224": "<b>Inverser les couleurs du document :</b> l'interrupteur lune en bas du rail de la barre latérale (ou <code>N</code>) affiche le document avec les couleurs inversées pour la lecture en mode sombre. Affichage uniquement - l'enregistrement, l'impression, l'export, l'OCR et les miniatures conservent les vraies couleurs du document - et le choix est mémorisé entre les sessions.",
   "ph_225": "<b>Taille de l'application :</b> faites défiler la molette sur le logo de la barre de titre (ou <code>Ctrl+Maj</code> et <code>+</code> / <code>-</code>, <code>Ctrl+Maj+0</code> pour réinitialiser) pour mettre toute l'interface à l'échelle de 70% à 250% - barre d'outils, barre latérale et onglets, tandis que le document garde son propre zoom. Pensé pour les yeux fatigués comme pour les portables haute densité.",
-  "ph_226": "Formes<span class=\"chev\">&#9656;</span>",
+  "ph_226": "Formes<span class=\"kbd\">O</span><span class=\"chev\">&#9656;</span>",
   "ph_227": "L'outil Formes dessine des <b>rectangles, ellipses et polygones à main levée</b>, chacun avec un remplissage optionnel - choisissez le sous-mode et activez <b>Remplissage</b> sur la barre.",
   "ph_228": "<b>Rectangle</b> garde le geste classique de glisser un rectangle. <b>Ellipse</b> se glisse de la même façon, en contour fermé.",
   "ph_229": "<b>Forme libre</b> place des points clic par clic : cliquez à nouveau sur le premier point (sa cible s'illumine quand vous êtes proche) ou double-cliquez pour fermer le polygone, <code>Échap</code> annule, <code>Retour arrière</code> supprime le dernier point.",
@@ -7790,7 +7790,7 @@ var I18N = {
   "shot_01": "KillerPDF broşürünün altı sayfalık ızgara görünümü",
   "ph_224": "<b>Belge renklerini ters çevir:</b> kenar çubuğu rayının altındaki ay düğmesi (veya <code>N</code>) belgeyi karanlık modda okumak için ters çevrilmiş renklerle gösterir. Yalnızca görüntüleme - kaydetme, yazdırma, dışa aktarma, OCR ve küçük resimler belgenin gerçek renklerini korur - ve seçim oturumlar arasında hatırlanır.",
   "ph_225": "<b>Uygulama boyutu:</b> başlık çubuğundaki logonun üzerinde fare tekerleğini kaydırın (veya <code>Ctrl+Shift</code> ile <code>+</code> / <code>-</code>, sıfırlamak için <code>Ctrl+Shift+0</code>) ve tüm arayüzü %70 ile %250 arasında ölçekleyin - araç çubuğu, kenar çubuğu ve sekmeler, belge kendi yakınlaştırmasını korurken. Yorgun gözler için de yüksek DPI dizüstüler için de.",
-  "ph_226": "Şekiller<span class=\"chev\">&#9656;</span>",
+  "ph_226": "Şekiller<span class=\"kbd\">O</span><span class=\"chev\">&#9656;</span>",
   "ph_227": "Şekiller aracı <b>dikdörtgenler, elipsler ve serbest çokgenler</b> çizer, her biri isteğe bağlı dolguyla - alt modu seçin ve çubuktan <b>Dolgu</b>'yu açın.",
   "ph_228": "<b>Kutu</b> klasik dikdörtgen sürükleme hareketini korur. <b>Elips</b> aynı şekilde sürüklenir, kapalı bir kontur olarak.",
   "ph_229": "<b>Serbest form</b> noktaları tık tık yerleştirir: çokgeni kapatmak için ilk noktaya yeniden tıklayın (yaklaştığınızda hedefi yanar) veya çift tıklayın, <code>Esc</code> iptal eder, <code>Geri Al tuşu</code> son noktayı kaldırır.",
@@ -8634,7 +8634,7 @@ var I18N = {
   "shot_01": "KillerPDF 手冊的六頁格線檢視",
   "ph_224": "<b>反轉文件顏色：</b>側邊欄下方的月亮開關（或 <code>N</code>）以反轉的顏色顯示文件，方便在深色模式下閱讀。僅影響顯示 - 儲存、列印、匯出、OCR 與縮圖都保留文件的真實顏色 - 且選擇會在重新啟動後保留。",
   "ph_225": "<b>應用程式大小：</b>在標題列標誌上滾動滑鼠滾輪（或 <code>Ctrl+Shift</code> 加 <code>+</code> / <code>-</code>，<code>Ctrl+Shift+0</code> 重設），將整個介面從 70% 縮放到 250% - 工具列、側邊欄與分頁，而文件保留自己的縮放。為疲勞的眼睛與高 DPI 筆電而設。",
-  "ph_226": "形狀<span class=\"chev\">&#9656;</span>",
+  "ph_226": "形狀<span class=\"kbd\">O</span><span class=\"chev\">&#9656;</span>",
   "ph_227": "形狀工具可繪製<b>矩形、橢圓與自由多邊形</b>，各有可選的填滿 - 選擇子模式並在工具列上切換<b>填滿</b>。",
   "ph_228": "<b>矩形</b>保留經典的拖曳矩形手勢。<b>橢圓</b>以同樣方式拖曳，為封閉輪廓。",
   "ph_229": "<b>自由形狀</b>逐點點擊放置：再次點擊第一個點（靠近時其目標會亮起）或雙擊以閉合多邊形，<code>Esc</code> 取消，<code>Backspace</code> 移除最後一點。",
@@ -9478,7 +9478,7 @@ var I18N = {
   "shot_01": "KillerPDF 手册的六页网格视图",
   "ph_224": "<b>反转文档颜色：</b>侧边栏下方的月亮开关（或 <code>N</code>）以反转的颜色显示文档，方便在深色模式下阅读。仅影响显示 - 保存、打印、导出、OCR 与缩略图都保留文档的真实颜色 - 且选择会在重启后保留。",
   "ph_225": "<b>应用大小：</b>在标题栏标志上滚动鼠标滚轮（或 <code>Ctrl+Shift</code> 加 <code>+</code> / <code>-</code>，<code>Ctrl+Shift+0</code> 重置），将整个界面从 70% 缩放到 250% - 工具栏、侧边栏与标签页，而文档保留自己的缩放。为疲劳的眼睛与高 DPI 笔记本而设。",
-  "ph_226": "形状<span class=\"chev\">&#9656;</span>",
+  "ph_226": "形状<span class=\"kbd\">O</span><span class=\"chev\">&#9656;</span>",
   "ph_227": "形状工具可绘制<b>矩形、椭圆与自由多边形</b>，各有可选的填充 - 选择子模式并在工具栏上切换<b>填充</b>。",
   "ph_228": "<b>矩形</b>保留经典的拖拽矩形手势。<b>椭圆</b>以同样方式拖拽，为闭合轮廓。",
   "ph_229": "<b>自由形状</b>逐点点击放置：再次点击第一个点（靠近时其目标会亮起）或双击以闭合多边形，<code>Esc</code> 取消，<code>Backspace</code> 移除最后一点。",
@@ -10322,7 +10322,7 @@ var I18N = {
   "shot_01": "KillerPDF ব্রোশিওরের ছয় পৃষ্ঠার গ্রিড ভিউ",
   "ph_224": "<b>ডকুমেন্টের রং উল্টে দিন:</b> সাইডবার রেইলের নিচের চাঁদ সুইচ (বা <code>N</code>) ডার্ক মোডে পড়ার জন্য উল্টানো রঙে ডকুমেন্ট দেখায়। শুধু প্রদর্শনের জন্য - সংরক্ষণ, মুদ্রণ, এক্সপোর্ট, OCR ও থাম্বনেইল ডকুমেন্টের আসল রং রাখে - এবং পছন্দটি সেশনজুড়ে মনে থাকে।",
   "ph_225": "<b>অ্যাপের আকার:</b> টাইটেল বারের লোগোর উপর মাউস হুইল স্ক্রোল করুন (বা <code>Ctrl+Shift</code> ও <code>+</code> / <code>-</code>, রিসেট করতে <code>Ctrl+Shift+0</code>) - পুরো ইন্টারফেস ৭০% থেকে ২৫০% পর্যন্ত স্কেল হয় - টুলবার, সাইডবার ও ট্যাব, আর ডকুমেন্ট তার নিজের জুম রাখে। ক্লান্ত চোখ ও উচ্চ-DPI ল্যাপটপ, দুয়ের জন্যই।",
-  "ph_226": "আকার<span class=\"chev\">&#9656;</span>",
+  "ph_226": "আকার<span class=\"kbd\">O</span><span class=\"chev\">&#9656;</span>",
   "ph_227": "আকার টুল <b>আয়তক্ষেত্র, উপবৃত্ত ও মুক্ত বহুভুজ</b> আঁকে, প্রতিটিতে ঐচ্ছিক ভরাট - সাব-মোড বেছে নিন এবং বারে <b>ভরাট</b> চালু করুন।",
   "ph_228": "<b>বাক্স</b> ক্লাসিক আয়তক্ষেত্র-টানা ভঙ্গি রাখে। <b>উপবৃত্ত</b> একইভাবে টানা হয়, বদ্ধ রূপরেখা হিসেবে।",
   "ph_229": "<b>মুক্ত আকার</b> ক্লিকে ক্লিকে বিন্দু বসায়: বহুভুজ বন্ধ করতে প্রথম বিন্দুতে আবার ক্লিক করুন (কাছে এলে এর লক্ষ্য জ্বলে ওঠে) বা ডাবল-ক্লিক করুন, <code>Esc</code> বাতিল করে, <code>Backspace</code> শেষ বিন্দুটি সরায়।",
@@ -11166,7 +11166,7 @@ var I18N = {
   "shot_01": "KillerPDF パンフレットの 6 ページグリッド表示",
   "ph_224": "<b>文書の色を反転：</b>サイドバーレール下部の月のトグル (または <code>N</code>) で、ダークモード読書向けに文書を反転色で表示します。表示のみ - 保存、印刷、エクスポート、OCR、サムネイルは文書の本来の色を保ちます - 設定は再起動後も維持されます。",
   "ph_225": "<b>アプリのサイズ：</b>タイトルバーのロゴ上でマウスホイールをスクロール (または <code>Ctrl+Shift</code> と <code>+</code> / <code>-</code>、<code>Ctrl+Shift+0</code> でリセット) すると、インターフェイス全体を 70% から 250% まで拡大縮小できます - ツールバー、サイドバー、タブが対象で、文書は独自のズームを保ちます。疲れた目にも高 DPI ノート PC にも。",
-  "ph_226": "図形<span class=\"chev\">&#9656;</span>",
+  "ph_226": "図形<span class=\"kbd\">O</span><span class=\"chev\">&#9656;</span>",
   "ph_227": "図形ツールは<b>長方形、楕円、自由多角形</b>を描画します。それぞれに任意の塗りつぶしがあり、サブモードを選んでバーの<b>塗りつぶし</b>を切り替えます。",
   "ph_228": "<b>ボックス</b>は従来の長方形ドラッグ操作を維持します。<b>楕円</b>も同じようにドラッグし、閉じた輪郭になります。",
   "ph_229": "<b>フリーフォーム</b>はクリックごとに点を置きます：最初の点をもう一度クリック (近づくとターゲットが光ります) するか、ダブルクリックで多角形を閉じます。<code>Esc</code> でキャンセル、<code>Backspace</code> で最後の点を削除。",
@@ -11903,7 +11903,7 @@ var I18N = {
   "ph_70": "Түзу екі нүктелі кесінді салатын <b>Сызық</b> құралы үшін <code>L</code> (немесе <code>U</code>) пернесін басыңыз.",
   "ph_71": "<b>Деңгей</b> опциясын қоссаңыз, сызық сүйреуіңіз қай бағытқа жақын болса, соған қарай мүлдем көлденең немесе тік күйге бекітіледі.",
   "ph_72": "Үшеуінің де жолағында түс, мөлдірлік және ені бар.",
-  "ph_226": "Фигуралар<span class=\"kbd\">4</span><span class=\"chev\">&#9656;</span>",
+  "ph_226": "Фигуралар<span class=\"kbd\">O</span><span class=\"chev\">&#9656;</span>",
   "ph_227": "Фигуралар құралы <b>тіктөртбұрыштар, эллипстер және еркін көпбұрыштар</b> салады, әрқайсысында қосымша толтыру бар - ішкі режимді таңдап, жолақтағы <b>Толтыру</b> опциясын қосыңыз.",
   "ph_228": "<b>Қорап</b> режимі классикалық тіктөртбұрыш сүйреу қимылын сақтайды. <b>Эллипс</b> те солай сүйреледі, бірақ тұйық контур салады.",
   "ph_229": "<b>Еркін пішін</b> нүктелерді басу сайын қояды: көпбұрышты тұйықтау үшін бірінші нүктені қайта басыңыз (жақындағанда оның нысанасы жанады) немесе екі рет басыңыз, <code>Esc</code> болдырмайды, <code>Backspace</code> соңғы нүктені өшіреді.",
@@ -12740,7 +12740,7 @@ I18N.uk = {
  "ph_70": "Натисніть <code>L</code> (або <code>U</code>) для інструмента <b>Лінія</b>, прямого відрізка з двох точок.",
  "ph_71": "Увімкніть <b>Рівень</b>, і лінія прилипатиме до ідеально горизонтального або вертикального положення, залежно від того, до якого ближче ваше перетягування.",
  "ph_72": "Усі три мають колір, непрозорість і товщину на своїй панелі.",
- "ph_226": "Фігури<span class=\"kbd\">4</span><span class=\"chev\">&#9656;</span>",
+ "ph_226": "Фігури<span class=\"kbd\">O</span><span class=\"chev\">&#9656;</span>",
  "ph_227": "Інструмент «Фігури» малює <b>прямокутники, еліпси та довільні багатокутники</b>, кожен з необов'язковою заливкою: виберіть підрежим і перемкніть <b>Заливку</b> на панелі.",
  "ph_228": "<b>Прямокутник</b> зберігає класичний жест перетягування прямокутника. <b>Еліпс</b> перетягується так само як замкнений контур.",
  "ph_229": "<b>Довільна</b> розміщує точки клацання за клацанням: клацніть першу точку ще раз (її ціль підсвічується, коли ви близько) або двічі клацніть, щоб замкнути багатокутник, <code>Esc</code> скасовує, <code>Backspace</code> видаляє останню точку.",
@@ -13566,7 +13566,7 @@ I18N.nb = {
  "ph_70": "Trykk <code>L</code> (eller <code>U</code>) for <b>Linje</b>-verktøyet, et rett segment med to punkter.",
  "ph_71": "Slå på <b>Vater</b>, så låses linjen til helt vannrett eller loddrett, avhengig av hva draget ditt ligger nærmest.",
  "ph_72": "Alle tre har farge, gjennomsiktighet og bredde i sin egen linje.",
- "ph_226": "Former<span class=\"kbd\">4</span><span class=\"chev\">&#9656;</span>",
+ "ph_226": "Former<span class=\"kbd\">O</span><span class=\"chev\">&#9656;</span>",
  "ph_227": "Formverktøyet tegner <b>rektangler, ellipser og frie polygoner</b>, alle med valgfri fyll - velg undermodus og slå på <b>Fyll</b> i linjen.",
  "ph_228": "<b>Boks</b> beholder den klassiske gesten med å dra et rektangel. <b>Ellipse</b> dras på samme måte som en lukket kontur.",
  "ph_229": "<b>Fri form</b> plasserer punkter ett klikk av gangen: klikk på det første punktet igjen (målet lyser opp når du er nær) eller dobbeltklikk for å lukke polygonet, <code>Esc</code> avbryter, <code>Backspace</code> fjerner det siste punktet.",
@@ -14329,7 +14329,7 @@ I18N.pt = {
  "ph_70": "Pressione <code>L</code> (ou <code>U</code>) para a ferramenta <b>Linha</b>, um segmento reto de dois pontos.",
  "ph_71": "Ative <b>Nível</b> e a linha se ajusta à horizontal ou à vertical perfeita, a que estiver mais próxima do seu arrasto.",
  "ph_72": "Os três trazem cor, opacidade e espessura na barra.",
- "ph_226": "Formas<span class=\"kbd\">4</span><span class=\"chev\">&#9656;</span>",
+ "ph_226": "Formas<span class=\"kbd\">O</span><span class=\"chev\">&#9656;</span>",
  "ph_227": "A ferramenta Formas desenha <b>retângulos, elipses e polígonos de forma livre</b>, cada um com preenchimento opcional; escolha o submodo e ative <b>Preencher</b> na barra.",
  "ph_228": "<b>Caixa</b> mantém o gesto clássico de arrastar um retângulo. <b>Elipse</b> arrasta do mesmo jeito, como contorno fechado.",
  "ph_229": "<b>Forma livre</b> coloca os pontos clique a clique: clique no primeiro ponto de novo (o alvo se acende quando você está perto) ou clique duas vezes para fechar o polígono; <code>Esc</code> cancela e <code>Backspace</code> remove o último ponto.",
@@ -15587,3 +15587,21 @@ if (I18N["uk"]) Object.assign(I18N["uk"], {"kb_dt_signatures": "Звіт про 
 if (I18N["vi"]) Object.assign(I18N["vi"], {"kb_dt_signatures": "Báo cáo chữ ký"});
 if (I18N["zh-cn"]) Object.assign(I18N["zh-cn"], {"kb_dt_signatures": "签名报告"});
 if (I18N["zh"]) Object.assign(I18N["zh"], {"kb_dt_signatures": "簽章報告"});
+if (I18N["bn"]) Object.assign(I18N["bn"], {"kb_next_shape": "পরবর্তী আকারের ধরন"});
+if (I18N["cs"]) Object.assign(I18N["cs"], {"kb_next_shape": "Další typ tvaru"});
+if (I18N["de"]) Object.assign(I18N["de"], {"kb_next_shape": "Nächste Formart"});
+if (I18N["es"]) Object.assign(I18N["es"], {"kb_next_shape": "Siguiente tipo de forma"});
+if (I18N["fr"]) Object.assign(I18N["fr"], {"kb_next_shape": "Type de forme suivant"});
+if (I18N["hu"]) Object.assign(I18N["hu"], {"kb_next_shape": "Következő alakzattípus"});
+if (I18N["it"]) Object.assign(I18N["it"], {"kb_next_shape": "Tipo di forma successivo"});
+if (I18N["ja"]) Object.assign(I18N["ja"], {"kb_next_shape": "次の図形の種類"});
+if (I18N["kk"]) Object.assign(I18N["kk"], {"kb_next_shape": "Келесі пішін түрі"});
+if (I18N["nb"]) Object.assign(I18N["nb"], {"kb_next_shape": "Neste formtype"});
+if (I18N["pl"]) Object.assign(I18N["pl"], {"kb_next_shape": "Następny typ kształtu"});
+if (I18N["pt"]) Object.assign(I18N["pt"], {"kb_next_shape": "Próximo tipo de forma"});
+if (I18N["ru"]) Object.assign(I18N["ru"], {"kb_next_shape": "Следующий тип формы"});
+if (I18N["tr"]) Object.assign(I18N["tr"], {"kb_next_shape": "Sonraki şekil türü"});
+if (I18N["uk"]) Object.assign(I18N["uk"], {"kb_next_shape": "Наступний тип фігури"});
+if (I18N["vi"]) Object.assign(I18N["vi"], {"kb_next_shape": "Loại hình vẽ tiếp theo"});
+if (I18N["zh-cn"]) Object.assign(I18N["zh-cn"], {"kb_next_shape": "下一个形状类型"});
+if (I18N["zh"]) Object.assign(I18N["zh"], {"kb_next_shape": "下一個形狀類型"});

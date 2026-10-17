@@ -164,6 +164,7 @@ La pagina può essere sostituita da un'immagine di sé stessa con le aree contra
     <!-- ── Keyboard shortcuts overlay ───────────────────────────────── -->
     <sys:String x:Key="Str_KS_Title">Scorciatoie tastiera</sys:String>
     <sys:String x:Key="Str_KS_FormField">Campo testo compilabile</sys:String>
+    <sys:String x:Key="Str_KS_NextShape">Tipo di forma successivo</sys:String>
     <sys:String x:Key="Str_KS_File">FILE</sys:String>
     <sys:String x:Key="Str_KS_Open">Apri</sys:String>
     <sys:String x:Key="Str_KS_CloseFile">Chiudi file</sys:String>

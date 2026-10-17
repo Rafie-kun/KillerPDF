@@ -164,6 +164,7 @@ A página pode ser substituída por uma imagem dela mesma com as áreas marcadas
     <!-- ── Keyboard shortcuts overlay ───────────────────────────────── -->
     <sys:String x:Key="Str_KS_Title">Atalhos de teclado</sys:String>
     <sys:String x:Key="Str_KS_FormField">Campo de texto preenchível</sys:String>
+    <sys:String x:Key="Str_KS_NextShape">Próximo tipo de forma</sys:String>
     <sys:String x:Key="Str_KS_File">ARQUIVO</sys:String>
     <sys:String x:Key="Str_KS_Open">Abrir</sys:String>
     <sys:String x:Key="Str_KS_CloseFile">Fechar arquivo</sys:String>

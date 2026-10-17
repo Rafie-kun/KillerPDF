@@ -91,8 +91,8 @@ namespace KillerPDF
 
         /// <summary>
         /// Rebuilds every tooltip that names a shortcut. Called at startup, after a language
-        /// change and after the user moves a shortcut. Tool buttons list the toolbar digit first
-        /// and the letter second, the same order as the overlay rows.
+        /// change and after the user moves a shortcut. Tool buttons list their keys in the same
+        /// order as the overlay rows.
         /// </summary>
         private void ApplyShortcutTooltips()
         {
@@ -110,16 +110,16 @@ namespace KillerPDF
             Tip(PrintBtn, "Str_TT_Print", "Ctrl:P");
 
             Tip(ToolSelectBtn, "Str_TT_SelectTool", "V");
-            Tip(ToolTextBtn, "Str_TT_TextTool", "D1", "T");
-            Tip(ToolHighlightBtn, "Str_TT_HighlightTool", "D2", "H");
-            Tip(ToolUnderlineBtn, "Str_TT_LineTool", "D3", "L", "U");   // repurposed to the Line tool
-            Tip(ToolShapeBtn, "Str_TT_ShapeTool", "D4");
-            Tip(ToolDrawBtn, "Str_TT_DrawTool", "D5", "D");
-            Tip(ToolImageBtn, "Str_TT_ImageTool", "D6", "I");
-            Tip(ToolSignatureBtn, "Str_TT_SignatureTool", "D7", "G");
-            Tip(ToolCropBtn, "Str_TT_CropTool", "D8", "C");
-            Tip(_toolRotateBtn, "Str_TT_RotateTool", "D9", "R");
-            Tip(ToolStampBtn, "Str_TT_StampTool", "D0", "S");
+            Tip(ToolTextBtn, "Str_TT_TextTool", "T");
+            Tip(ToolHighlightBtn, "Str_TT_HighlightTool", "H");
+            Tip(ToolUnderlineBtn, "Str_TT_LineTool", "L", "U");   // repurposed to the Line tool
+            Tip(ToolShapeBtn, "Str_TT_ShapeTool", "O");
+            Tip(ToolDrawBtn, "Str_TT_DrawTool", "D");
+            Tip(ToolImageBtn, "Str_TT_ImageTool", "I");
+            Tip(ToolSignatureBtn, "Str_TT_SignatureTool", "G");
+            Tip(ToolCropBtn, "Str_TT_CropTool", "C");
+            Tip(_toolRotateBtn, "Str_TT_RotateTool", "R");
+            Tip(ToolStampBtn, "Str_TT_StampTool", "S");
             Tip(ToolColorCorrectionBtn, "Str_ColorCorrection", "E");
             Tip(ToolMeasureBtn, "Str_TT_MeasureTool", "M");
             Tip(ToolRedactBtn, "Str_TT_RedactTool", "X");
@@ -163,15 +163,14 @@ namespace KillerPDF
 
         /// <summary>
         /// The overflow chevron's items carry the same right-hand shortcut column as the context
-        /// menus. Tools show their letter there, as the page menu does, because the toolbar digit
-        /// describes a position on a bar the item has left.
+        /// menus. Tools show their letter there, as the page menu does.
         /// </summary>
         private void ApplyOverflowGestures()
         {
             (Button Item, string Cap)[] items =
             [
                 (MiText, "T"), (MiFormField, "F"), (MiUnderline, "L"), (MiHighlight, "H"),
-                (MiDraw, "D"), (MiShape, "D4"), (MiImage, "I"), (MiSignature, "G"), (MiCrop, "C"),
+                (MiDraw, "D"), (MiShape, "O"), (MiImage, "I"), (MiSignature, "G"), (MiCrop, "C"),
                 (MiColorCorrection, "E"), (MiMeasure, "M"), (MiRedact, "X"), (MiStamp, "S"),
                 (MiUndo, "Ctrl:Z"), (MiRedo, "Ctrl:Y"),
             ];

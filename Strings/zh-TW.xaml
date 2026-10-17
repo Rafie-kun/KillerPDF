@@ -162,6 +162,7 @@
     <!-- ── Keyboard shortcuts overlay ───────────────────────────────── -->
     <sys:String x:Key="Str_KS_Title">鍵盤快速鍵</sys:String>
     <sys:String x:Key="Str_KS_FormField">可填寫文字欄位</sys:String>
+    <sys:String x:Key="Str_KS_NextShape">下一個形狀類型</sys:String>
     <sys:String x:Key="Str_KS_File">檔案</sys:String>
     <sys:String x:Key="Str_KS_Open">開啟</sys:String>
     <sys:String x:Key="Str_KS_CloseFile">關閉檔案</sys:String>

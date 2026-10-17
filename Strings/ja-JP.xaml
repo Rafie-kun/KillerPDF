@@ -164,6 +164,7 @@
     <!-- ── キーボードショートカットオーバーレイ ─────────────────────────────── -->
     <sys:String x:Key="Str_KS_Title">キーボードショートカット</sys:String>
     <sys:String x:Key="Str_KS_FormField">入力可能なテキストフィールド</sys:String>
+    <sys:String x:Key="Str_KS_NextShape">次の図形の種類</sys:String>
     <sys:String x:Key="Str_KS_File">ファイル</sys:String>
     <sys:String x:Key="Str_KS_Open">開く</sys:String>
     <sys:String x:Key="Str_KS_CloseFile">ファイルを閉じる</sys:String>

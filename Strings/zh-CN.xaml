@@ -160,6 +160,7 @@
     <!-- ── Keyboard shortcuts overlay ───────────────────────────────── -->
     <sys:String x:Key="Str_KS_Title">键盘快速键</sys:String>
     <sys:String x:Key="Str_KS_FormField">可填写文本字段</sys:String>
+    <sys:String x:Key="Str_KS_NextShape">下一个形状类型</sys:String>
     <sys:String x:Key="Str_KS_File">文件</sys:String>
     <sys:String x:Key="Str_KS_Open">打开</sys:String>
     <sys:String x:Key="Str_KS_CloseFile">关闭文件</sys:String>

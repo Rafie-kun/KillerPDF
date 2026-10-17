@@ -164,6 +164,7 @@ Siden kan erstattes med et bilde av seg selv der de markerte områdene er sverte
     <!-- ── Keyboard shortcuts overlay ───────────────────────────────── -->
     <sys:String x:Key="Str_KS_Title">Hurtigtaster</sys:String>
     <sys:String x:Key="Str_KS_FormField">Fyllbart tekstfelt</sys:String>
+    <sys:String x:Key="Str_KS_NextShape">Neste formtype</sys:String>
     <sys:String x:Key="Str_KS_File">FIL</sys:String>
     <sys:String x:Key="Str_KS_Open">Åpne</sys:String>
     <sys:String x:Key="Str_KS_CloseFile">Lukk fil</sys:String>

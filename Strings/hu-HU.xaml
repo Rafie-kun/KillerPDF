@@ -164,6 +164,7 @@ Az oldal lecserélhető a saját képére, amelyen a megjelölt területek feket
     <!-- ── Keyboard shortcuts overlay ───────────────────────────────── -->
     <sys:String x:Key="Str_KS_Title">Billentyűparancsok</sys:String>
     <sys:String x:Key="Str_KS_FormField">Kitölthető szövegmező</sys:String>
+    <sys:String x:Key="Str_KS_NextShape">Következő alakzattípus</sys:String>
     <sys:String x:Key="Str_KS_File">FÁJL</sys:String>
     <sys:String x:Key="Str_KS_Open">Megnyitás</sys:String>
     <sys:String x:Key="Str_KS_CloseFile">Fájl bezárása</sys:String>

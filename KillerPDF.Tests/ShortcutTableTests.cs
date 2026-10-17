@@ -189,8 +189,25 @@ namespace KillerPDF.Tests
             var map = ShortcutTable.BuildMap()[KbLayer.Base];
 
             Assert.Equal("Str_KS_FormField", map["F"].Label);
-            Assert.Equal("Str_Ctx_StampPages", map["D0"].Label);
             Assert.Equal("Str_Ctx_StampPages", map["S"].Label);
+        }
+
+        /// <summary>Tools answer to letters only. The number row used to mirror toolbar positions,
+        /// which renumbered whenever a tool was added.</summary>
+        [Fact]
+        public void ToolsUseLettersOnly()
+        {
+            var digits = ShortcutTable.KsAll
+                .Where(b => b.Cat == "Tools")
+                .SelectMany(b => b.Caps)
+                .Where(c => c.Layer == KbLayer.Base && c.Id.Length == 2 && c.Id[0] == 'D' && char.IsDigit(c.Id[1]))
+                .Select(c => c.Id)
+                .ToList();
+            Assert.True(digits.Count == 0, "tool rows still claim number keys: " + string.Join(", ", digits));
+
+            var map = ShortcutTable.BuildMap();
+            Assert.Equal("Str_Lbl_Shape", map[KbLayer.Base]["O"].Label);
+            Assert.Equal("Str_KS_NextShape", map[KbLayer.Shift]["O"].Label);
         }
 
         [Fact]

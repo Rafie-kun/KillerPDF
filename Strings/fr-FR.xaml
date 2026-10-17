@@ -164,6 +164,7 @@ La page peut être remplacée par une image d'elle-même avec les zones marquée
     <!-- ── Keyboard shortcuts overlay ───────────────────────────────── -->
     <sys:String x:Key="Str_KS_Title">Raccourcis clavier</sys:String>
     <sys:String x:Key="Str_KS_FormField">Champ de texte remplissable</sys:String>
+    <sys:String x:Key="Str_KS_NextShape">Type de forme suivant</sys:String>
     <sys:String x:Key="Str_KS_File">FICHIER</sys:String>
     <sys:String x:Key="Str_KS_Open">Ouvrir</sys:String>
     <sys:String x:Key="Str_KS_CloseFile">Fermer le fichier</sys:String>

@@ -164,6 +164,7 @@ The page can be replaced with an image of itself with the marked areas blacked o
     <!-- ── Keyboard shortcuts overlay ───────────────────────────────── -->
     <sys:String x:Key="Str_KS_Title">Keyboard Shortcuts</sys:String>
     <sys:String x:Key="Str_KS_FormField">Fillable text field</sys:String>
+    <sys:String x:Key="Str_KS_NextShape">Next shape type</sys:String>
     <sys:String x:Key="Str_KS_File">FILE</sys:String>
     <sys:String x:Key="Str_KS_Open">Open</sys:String>
     <sys:String x:Key="Str_KS_CloseFile">Close file</sys:String>

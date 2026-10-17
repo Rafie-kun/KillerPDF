@@ -164,6 +164,7 @@ Stronę można zastąpić jej obrazem z zaczernionymi zaznaczonymi obszarami. Te
     <!-- ── Keyboard shortcuts overlay ───────────────────────────────── -->
     <sys:String x:Key="Str_KS_Title">Skróty Klawiaturowe</sys:String>
     <sys:String x:Key="Str_KS_FormField">Wypełnialne pole tekstowe</sys:String>
+    <sys:String x:Key="Str_KS_NextShape">Następny typ kształtu</sys:String>
     <sys:String x:Key="Str_KS_File">PLIK</sys:String>
     <sys:String x:Key="Str_KS_Open">Otwórz</sys:String>
     <sys:String x:Key="Str_KS_CloseFile">Zamknij plik</sys:String>
