@@ -183,6 +183,8 @@ namespace KillerPDF.Services
             bool themeOwnsOutlineHoverText = newDict.Contains("OutlineHoverTextBrush");
             bool themeOwnsComboHighlightText = newDict.Contains("ComboHighlightTextBrush");
             bool themeOwnsFooterAccent = newDict.Contains("FooterAccentBrush");
+            // A palette can fill buttons with a deeper shade than its accent text (PrimaryFillBaseBrush).
+            object fillBase = newDict.Contains("PrimaryFillBaseBrush") ? newDict["PrimaryFillBaseBrush"] : null;
             CompleteAppPalette(newDict);
             var merged  = Application.Current.Resources.MergedDictionaries;
 
@@ -226,6 +228,7 @@ namespace KillerPDF.Services
                     target[key] = accentDict[key];
                 themeOwnsComboHighlightText |= accentDict.Contains("ComboHighlightTextBrush");
                 themeOwnsFooterAccent |= accentDict.Contains("FooterAccentBrush");
+                if (accentDict.Contains("PrimaryFillBaseBrush")) fillBase = accentDict["PrimaryFillBaseBrush"];
                 // Aliases derived from PrimaryBrush were materialized against the BASE palette
                 // (CompleteAppPalette runs before this overlay), so an overlay that recolors
                 // PrimaryBrush without carrying the alias left them on the base hue - the green
@@ -276,7 +279,7 @@ namespace KillerPDF.Services
             // palette and accent overlay are fully merged so gradient BackgroundBrush values are
             // preserved instead of being flattened or replaced by MenuBackgroundBrush.
             liveResources["OverlayWindowBrush"] = liveResources["BackgroundBrush"];
-            liveResources["PrimaryFillBrush"] = ButtonFill(liveResources["PrimaryBrush"], theme == Theme.SE98);
+            liveResources["PrimaryFillBrush"] = ButtonFill(fillBase ?? liveResources["PrimaryBrush"], theme == Theme.SE98);
             liveResources["OutlineHoverBrush"] = ButtonFill(liveResources["OutlineHoverBrush"], theme == Theme.SE98);
             appResources["RadWindow"] = liveResources["WindowCornerRadius"];
             appResources["RadCard"] = liveResources["PanelCornerRadius"];
