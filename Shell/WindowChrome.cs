@@ -205,7 +205,13 @@ namespace KillerPDF
                 {
                     if (hit is Control && !ReferenceEquals(hit, this)) hitTest = HTCLIENT;
                     if (ReferenceEquals(hit, LogoBar)) hitTest = HTCLIENT;
-                    hit = VisualTreeHelper.GetParent(hit);
+                    // Text hits land on the Run inside a TextBlock (the wordmark, or the plain title
+                    // on flat themes). A Run is not a Visual, so VisualTreeHelper throws on it and the
+                    // whole logo fell back to the native caption, which kept the wheel from reaching
+                    // the app-size zoom. Step out of text through the logical tree.
+                    hit = hit is Visual or System.Windows.Media.Media3D.Visual3D
+                        ? VisualTreeHelper.GetParent(hit)
+                        : LogicalTreeHelper.GetParent(hit);
                 }
                 return true;
             }

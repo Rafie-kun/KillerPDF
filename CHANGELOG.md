@@ -82,6 +82,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - The website's top bar Download button uses the same font and height as the other top bar buttons.
 
 ### Fixed
+- The mouse wheel over the title bar wordmark, or the plain title on flat themes, changes the app size, as it already did over the icon.
 - About opens above Transform, Color Correction and other open dialogs instead of behind them, F12 opens it from inside those windows too, and Esc or F12 closes it.
 - Digitally signed fields show their signature instead of a blue Sign box (#425).
 - The Archival, Scanning and Privacy macro starters run instead of reporting steps unavailable. OCR adds a searchable text layer like Make Searchable PDF. Redact asks for the words to remove, also removes areas marked with the Redact tool, and uses the Redact tool's verification and page image approval. Both steps can be added to any macro (#343).
