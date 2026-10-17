@@ -62,6 +62,11 @@ La pagina può essere sostituita da un'immagine di sé stessa con le aree contra
     <sys:String x:Key="Str_Redact_VerifyFailed">il risultato mostrava ancora contenuto contrassegnato, quindi non è stato modificato nulla</sys:String>
     <sys:String x:Key="Str_Redact_Find">Trova testo</sys:String>
     <sys:String x:Key="Str_Redact_FindTip">Trova parole, frasi o schemi come indirizzi e-mail, controlla i risultati e contrassegnali</sys:String>
+    <sys:String x:Key="Str_Redact_MarkPages">Contrassegna pagine</sys:String>
+    <sys:String x:Key="Str_Redact_MarkPagesTip">Contrassegna pagine intere per rimuoverne tutto il contenuto</sys:String>
+    <sys:String x:Key="Str_Redact_MarkPagesPrompt">Pagine da contrassegnare per intero, ad esempio 1, 3-5. Tutto il contenuto viene rimosso quando fai clic su Oscura.</sys:String>
+    <sys:String x:Key="Str_Redact_MarkPagesConfirm">Contrassegna</sys:String>
+    <sys:String x:Key="Str_Redact_MarkedPages">Pagine contrassegnate: {0}</sys:String>
     <sys:String x:Key="Str_RedactFind_Title">Trova testo da oscurare</sys:String>
     <sys:String x:Key="Str_RedactFind_Kind">Cerca</sys:String>
     <sys:String x:Key="Str_RedactFind_KindText">Parole o frasi</sys:String>

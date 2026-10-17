@@ -63,6 +63,7 @@ namespace KillerPDF.Controls
 
             BarButton("Str_Redact_Find", "Str_Redact_FindTip", false, (_, _) => FindTextForRedaction());
             BarButton("Str_Redact_MarkSearch", "Str_Redact_MarkSearchTip", false, (_, _) => MarkSearchResultsForRedaction());
+            BarButton("Str_Redact_MarkPages", "Str_Redact_MarkPagesTip", false, (_, _) => MarkPagesForRedaction());
             BarButton("Str_Redact_Clear", "Str_Redact_ClearTip", false, (_, _) => ClearRedactionMarks());
             var divider = new Border { Width = 1, Margin = new Thickness(2, 0, 8, 0), VerticalAlignment = VerticalAlignment.Stretch };
             divider.SetResourceReference(Border.BackgroundProperty, "CardBorderBrush");
@@ -378,6 +379,38 @@ namespace KillerPDF.Controls
             UpdateRedactionCount();
             RepaintRedactionMarks();
             SetStatus(string.Format(Loc("Str_Redact_MarkedSearch"), added));
+        }
+
+        // The Redact bar's Mark pages: each listed page gets one mark over its whole visible area,
+        // so everything drawn on it goes when the redaction is applied.
+        private void MarkPagesForRedaction()
+        {
+            if (_doc is null) return;
+            PdfEngineDocumentSession session = EnsureEngineDocumentSession();
+            Window? owner = Window.GetWindow(this);
+            string? range = KillerDialog.PromptText(owner, Loc("Str_Redact_MarkPages"), Loc("Str_Redact_MarkPagesPrompt"),
+                (CurrentPageIndex + 1).ToString(System.Globalization.CultureInfo.CurrentCulture), Loc("Str_Redact_MarkPagesConfirm"));
+            if (range is null) return;
+            List<int>? pages = string.IsNullOrWhiteSpace(range) ? null
+                : Features.CliRunner.CliParsePageRange(range, session.PageCount, out _);
+            if (pages is null || pages.Count == 0)
+            {
+                KillerDialog.Show(owner, Loc("Str_InvalidRange"), "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            int added = 0;
+            foreach (int page in pages)
+            {
+                double width = session.Pages[page].Width, height = session.Pages[page].Height;
+                if (_redactMarks.Any(mark => mark.PageIndex == page && mark.Left <= 0 && mark.Bottom <= 0
+                    && mark.Right >= width && mark.Top >= height)) continue;
+                _redactMarks.Add(new RedactionMark(page, 0, 0, width, height));
+                added++;
+            }
+            if (added > 0) MarkDirty();
+            UpdateRedactionCount();
+            RepaintRedactionMarks();
+            SetStatus(string.Format(Loc("Str_Redact_MarkedPages"), added));
         }
 
         private void ClearRedactionMarks()

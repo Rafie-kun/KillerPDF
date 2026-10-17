@@ -62,6 +62,11 @@ Az oldal lecserélhető a saját képére, amelyen a megjelölt területek feket
     <sys:String x:Key="Str_Redact_VerifyFailed">az eredmény még mutatott megjelölt tartalmat, ezért semmi sem változott</sys:String>
     <sys:String x:Key="Str_Redact_Find">Szöveg keresése</sys:String>
     <sys:String x:Key="Str_Redact_FindTip">Szavak, kifejezések vagy minták, például e-mail-címek keresése, a találatok áttekintése és megjelölése</sys:String>
+    <sys:String x:Key="Str_Redact_MarkPages">Oldalak megjelölése</sys:String>
+    <sys:String x:Key="Str_Redact_MarkPagesTip">Teljes oldalak megjelölése, hogy minden törlődjön róluk</sys:String>
+    <sys:String x:Key="Str_Redact_MarkPagesPrompt">Teljesen megjelölendő oldalak, például 1, 3-5. A Kitakarás gombra kattintva minden törlődik ezekről az oldalakról.</sys:String>
+    <sys:String x:Key="Str_Redact_MarkPagesConfirm">Megjelölés</sys:String>
+    <sys:String x:Key="Str_Redact_MarkedPages">Megjelölt oldalak: {0}</sys:String>
     <sys:String x:Key="Str_RedactFind_Title">Kitakarandó szöveg keresése</sys:String>
     <sys:String x:Key="Str_RedactFind_Kind">Keresés erre</sys:String>
     <sys:String x:Key="Str_RedactFind_KindText">Szavak vagy kifejezések</sys:String>

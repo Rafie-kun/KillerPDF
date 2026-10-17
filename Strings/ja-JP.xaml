@@ -62,6 +62,11 @@
     <sys:String x:Key="Str_Redact_VerifyFailed">結果にマークした内容がまだ残っていたため、何も変更していません</sys:String>
     <sys:String x:Key="Str_Redact_Find">テキストを検索</sys:String>
     <sys:String x:Key="Str_Redact_FindTip">単語、語句、メールアドレスなどのパターンを検索し、結果を確認してマークします</sys:String>
+    <sys:String x:Key="Str_Redact_MarkPages">ページをマーク</sys:String>
+    <sys:String x:Key="Str_Redact_MarkPagesTip">ページ全体をマークして、その内容をすべて削除します</sys:String>
+    <sys:String x:Key="Str_Redact_MarkPagesPrompt">全体をマークするページ (例: 1, 3-5)。[墨消し] をクリックすると、これらのページの内容はすべて削除されます。</sys:String>
+    <sys:String x:Key="Str_Redact_MarkPagesConfirm">マーク</sys:String>
+    <sys:String x:Key="Str_Redact_MarkedPages">マークしたページ: {0}</sys:String>
     <sys:String x:Key="Str_RedactFind_Title">墨消しするテキストを検索</sys:String>
     <sys:String x:Key="Str_RedactFind_Kind">検索対象</sys:String>
     <sys:String x:Key="Str_RedactFind_KindText">単語または語句</sys:String>

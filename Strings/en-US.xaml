@@ -62,6 +62,11 @@ The page can be replaced with an image of itself with the marked areas blacked o
     <sys:String x:Key="Str_Redact_VerifyFailed">the result still exposed marked content, so nothing was changed</sys:String>
     <sys:String x:Key="Str_Redact_Find">Find text</sys:String>
     <sys:String x:Key="Str_Redact_FindTip">Find words, phrases or patterns such as email addresses, review the results and mark them</sys:String>
+    <sys:String x:Key="Str_Redact_MarkPages">Mark pages</sys:String>
+    <sys:String x:Key="Str_Redact_MarkPagesTip">Mark whole pages so everything on them is removed</sys:String>
+    <sys:String x:Key="Str_Redact_MarkPagesPrompt">Pages to mark completely, such as 1, 3-5. Everything on these pages is removed when you click Redact.</sys:String>
+    <sys:String x:Key="Str_Redact_MarkPagesConfirm">Mark</sys:String>
+    <sys:String x:Key="Str_Redact_MarkedPages">Pages marked: {0}</sys:String>
     <sys:String x:Key="Str_RedactFind_Title">Find Text to Redact</sys:String>
     <sys:String x:Key="Str_RedactFind_Kind">Search for</sys:String>
     <sys:String x:Key="Str_RedactFind_KindText">Words or phrases</sys:String>

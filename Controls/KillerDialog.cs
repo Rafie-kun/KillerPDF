@@ -545,6 +545,41 @@ namespace KillerPDF
             return result;
         }
 
+        /// <summary>Asks for one line of text, starting from <paramref name="initial"/>. Returns null on Cancel.</summary>
+        public static string? PromptText(Window? owner, string title, string message, string initial, string confirmText)
+        {
+            string? result = null;
+
+            var win = new Window { Width = 420, SizeToContent = SizeToContent.Height };
+            DialogChrome.Configure(win, owner, fade: true);
+
+            void CloseCancel() { result = null; win.Close(); }
+
+            var body = new StackPanel();
+            body.Children.Add(new Border
+            {
+                Padding = new Thickness(20, 4, 20, 10),
+                Child = new TextBlock { Text = message, Foreground = R("TextBrush"), FontSize = 13, TextWrapping = TextWrapping.Wrap }
+            });
+
+            TextBox box = UiKit.Field();
+            box.Text = initial;
+            body.Children.Add(new Border { Padding = new Thickness(20, 0, 20, 4), Child = box });
+
+            var okBtn = UiKit.Make(confirmText, accent: true);
+            okBtn.IsDefault = true;
+            okBtn.Click += (_, _2) => { result = box.Text; win.Close(); };
+            var cancelBtn = UiKit.Make(L("Str_Btn_Cancel", "Cancel"), accent: false);
+            cancelBtn.IsCancel = true;
+            cancelBtn.Click += (_, _2) => CloseCancel();
+            body.Children.Add(new Border { Padding = new Thickness(16, 12, 16, 16), Child = UiKit.ButtonRow(okBtn, cancelBtn) });
+
+            win.Content = DialogChrome.Frame(win, owner, title, CloseCancel, body);
+            win.Loaded += (_, _2) => { box.Focus(); box.SelectAll(); };
+            win.ShowDialog();
+            return result;
+        }
+
         /// <summary>Asks for several lines of text, one entry per line. Returns null on Cancel.</summary>
         public static string? PromptLines(Window? owner, string title, string message, string confirmText)
         {

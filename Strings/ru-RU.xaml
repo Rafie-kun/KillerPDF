@@ -62,6 +62,11 @@
     <sys:String x:Key="Str_Redact_VerifyFailed">в результате всё ещё был виден отмеченный контент, поэтому ничего не изменено</sys:String>
     <sys:String x:Key="Str_Redact_Find">Найти текст</sys:String>
     <sys:String x:Key="Str_Redact_FindTip">Найти слова, фразы или шаблоны, например адреса эл. почты, проверить результаты и отметить их</sys:String>
+    <sys:String x:Key="Str_Redact_MarkPages">Отметить страницы</sys:String>
+    <sys:String x:Key="Str_Redact_MarkPagesTip">Отметить целые страницы, чтобы удалить с них всё</sys:String>
+    <sys:String x:Key="Str_Redact_MarkPagesPrompt">Страницы для полной отметки, например 1, 3-5. При нажатии «Скрыть» всё на этих страницах будет удалено.</sys:String>
+    <sys:String x:Key="Str_Redact_MarkPagesConfirm">Отметить</sys:String>
+    <sys:String x:Key="Str_Redact_MarkedPages">Отмечено страниц: {0}</sys:String>
     <sys:String x:Key="Str_RedactFind_Title">Найти текст для скрытия</sys:String>
     <sys:String x:Key="Str_RedactFind_Kind">Искать</sys:String>
     <sys:String x:Key="Str_RedactFind_KindText">Слова или фразы</sys:String>
