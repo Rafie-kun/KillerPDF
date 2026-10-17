@@ -177,6 +177,9 @@ namespace KillerPDF
             ];
             foreach (var (item, cap) in items)
                 SetOverflowGesture(item, GestureFor(cap));
+            // The rows ToolbarLayout adds for buttons the XAML gives none (New, Open, Select, ...).
+            foreach (var (item, cap) in ToolbarOverflowGestures().Where(row => !items.Any(fixedRow => ReferenceEquals(fixedRow.Item, row.Item))))
+                SetOverflowGesture(item, GestureFor(cap));
         }
 
         private static void SetOverflowGesture(Button item, string gestureText)

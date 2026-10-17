@@ -411,6 +411,7 @@ namespace KillerPDF
                 _sidebarRight = true;
             RestoreToolSettings();   // Draw + Text tool styles carry across sessions
             Loaded += (_, _) => AdjustZoomBoxWidth();   // fit the zoom box to the longest localized term
+            InitToolbarLayout();        // arrange both bars from the saved layout (ToolbarLayout.cs)
             IndexToolbarButtons();
             OutlineTree.SelectedItemChanged += OutlineTree_SelectedItemChanged;
             LoadSignatures();

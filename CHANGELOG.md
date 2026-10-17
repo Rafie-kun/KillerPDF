@@ -110,7 +110,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Fixed lost pages in parallel PNG exports, and invalid OCR models are ignored with the Tesseract fallback kept.
 - Silent installs return specific Windows error codes and reject a second concurrent install instead of reporting a general failure.
 - A silent install started without admin rights, as the Microsoft Store runs it, installs for the current user with no prompt instead of failing.
-- Icon-only buttons give screen readers the name from their tooltip, icon glyphs stay out of what screen readers read, page thumbnails read as their page number instead of a type name, every part of each scroll bar has a name, and controls reached with the keyboard show a dotted focus outline.
+- Icon-only buttons give screen readers the name from their tooltip, icon glyphs stay out of what screen readers read, page thumbnails read as their page number instead of a type name, every part of each scroll bar has a name, and controls reached with the keyboard show a thin solid focus ring in the theme accent.
 - The page label, initial view, macro, navigation audit, portfolio and attachment dialogs follow the theme, and the longer ones size to their contents.
 - Opening the split pane keeps the window on its own monitor, sliding it left when needed, instead of widening it past the edge of a secondary monitor.
 - Closing the split pane returns the window to the width it had before it opened, and a window snapped to half the screen stays snapped and splits in place.

@@ -1526,42 +1526,42 @@
                          the window-level menu styles reach it. -->
                     <ContextMenu x:Name="ToolbarMenu"/>
                 </Grid.ContextMenu>
-                <!-- File operations -->
+                <!-- File operations. The order below is only the default: ApplyToolbarLayout
+                     (Shell/ToolbarLayout.cs) arranges both bars from the saved layout at startup and
+                     after Customize toolbar, and adds the separators, so neither bar declares any. -->
                 <StackPanel x:Name="LeftBar" Orientation="Horizontal" HorizontalAlignment="Left">
                     <!-- File: New / Open / Close / Save / Print -->
                     <Button x:Name="NewBlankBtn" Content="&#xE7C3;" Style="{StaticResource ToolbarButton}" Click="New_Click" ToolTip="{DynamicResource Str_TT_NewBlank}"/>
                     <Button x:Name="CloseFileBtn" Content="&#xE711;" Style="{StaticResource ToolbarButton}" Click="CloseFile_Click" ToolTip="{DynamicResource Str_TT_CloseFile}" IsEnabled="False"/>
-                    <Button x:Name="OpenFileBtn" Content="&#xE8DA;" Style="{StaticResource ToolbarSplitMain}" Click="Open_Click" MouseRightButtonUp="OpenRecent_Click" ToolTip="{DynamicResource Str_TT_Open}"/>
-                    <Button x:Name="OpenRecentBtn" Content="&#xE70D;" FontSize="10" Width="13" Padding="0" Margin="-6,0,0,0" Style="{StaticResource ToolbarButton}" Click="OpenRecent_Click" ToolTip="{DynamicResource Str_TT_RecentFiles}"/>
-                    <Button x:Name="SaveAsBtn" Content="&#xE74E;" Style="{StaticResource ToolbarSplitMainAccent}" Click="Save_Click" MouseRightButtonUp="SaveMenu_Click" ToolTip="{DynamicResource Str_TT_Save}"/>
-                    <Button x:Name="SaveMenuBtn" Content="&#xE70D;" FontSize="10" Width="13" Padding="0" Margin="-6,0,0,0" Style="{StaticResource ToolbarButton}" Click="SaveMenu_Click" ToolTip="{DynamicResource Str_TT_SaveOptions}"/>
-                    <Button x:Name="OcrBtn" Content="&#xEE6F;" Style="{StaticResource ToolbarSplitMain}" Click="Ocr_Click" MouseRightButtonUp="OcrMenu_Click" ToolTip="{DynamicResource Str_TT_Ocr}"/>
-                    <Button x:Name="OcrMenuBtn" Content="&#xE70D;" FontSize="10" Width="13" Padding="0" Margin="-6,0,0,0" Style="{StaticResource ToolbarButton}" Click="OcrMenu_Click" ToolTip="{DynamicResource Str_TT_OcrOptions}"/>
-                    <Button Content="&#xE8B9;" Style="{StaticResource ToolbarButton}" Click="SaveFlattened_Click" ToolTip="{DynamicResource Str_TT_SaveFlattened}"/>
+                    <StackPanel x:Name="GrpOpen" Orientation="Horizontal">
+                        <Button x:Name="OpenFileBtn" Content="&#xE8DA;" Style="{StaticResource ToolbarSplitMain}" Click="Open_Click" MouseRightButtonUp="OpenRecent_Click" ToolTip="{DynamicResource Str_TT_Open}"/>
+                        <Button x:Name="OpenRecentBtn" Content="&#xE70D;" FontSize="10" Width="13" Padding="0" Margin="-6,0,0,0" Style="{StaticResource ToolbarButton}" Click="OpenRecent_Click" ToolTip="{DynamicResource Str_TT_RecentFiles}"/>
+                    </StackPanel>
+                    <StackPanel x:Name="GrpSave" Orientation="Horizontal">
+                        <Button x:Name="SaveAsBtn" Content="&#xE74E;" Style="{StaticResource ToolbarSplitMainAccent}" Click="Save_Click" MouseRightButtonUp="SaveMenu_Click" ToolTip="{DynamicResource Str_TT_Save}"/>
+                        <Button x:Name="SaveMenuBtn" Content="&#xE70D;" FontSize="10" Width="13" Padding="0" Margin="-6,0,0,0" Style="{StaticResource ToolbarButton}" Click="SaveMenu_Click" ToolTip="{DynamicResource Str_TT_SaveOptions}"/>
+                    </StackPanel>
+                    <StackPanel x:Name="GrpOcr" Orientation="Horizontal">
+                        <Button x:Name="OcrBtn" Content="&#xEE6F;" Style="{StaticResource ToolbarSplitMain}" Click="Ocr_Click" MouseRightButtonUp="OcrMenu_Click" ToolTip="{DynamicResource Str_TT_Ocr}"/>
+                        <Button x:Name="OcrMenuBtn" Content="&#xE70D;" FontSize="10" Width="13" Padding="0" Margin="-6,0,0,0" Style="{StaticResource ToolbarButton}" Click="OcrMenu_Click" ToolTip="{DynamicResource Str_TT_OcrOptions}"/>
+                    </StackPanel>
+                    <Button x:Name="FlattenBtn" Content="&#xE8B9;" Style="{StaticResource ToolbarButton}" Click="SaveFlattened_Click" ToolTip="{DynamicResource Str_TT_SaveFlattened}"/>
                     <Button x:Name="PrintBtn" Content="&#xE749;" Style="{StaticResource ToolbarButton}" Click="Print_Click" ToolTip="{DynamicResource Str_TT_Print}"/>
-                    <StackPanel x:Name="GrpCompare" Orientation="Horizontal">
-                        <Button x:Name="ComparePdfBtn" Style="{StaticResource ToolbarButton}" Padding="8,6" Click="ComparePdf_Click" ToolTip="{DynamicResource Str_TT_ComparePDFs}">
-                            <Grid Width="18" Height="16">
-                                <Border Width="7" Height="13" HorizontalAlignment="Left" VerticalAlignment="Center" BorderBrush="{DynamicResource TextBrush}" BorderThickness="1" CornerRadius="1">
-                                    <Rectangle Height="1" Margin="1" VerticalAlignment="Center" Fill="{DynamicResource TextBrush}"/>
-                                </Border>
-                                <Border Width="7" Height="13" HorizontalAlignment="Right" VerticalAlignment="Center" BorderBrush="{DynamicResource PrimaryBrush}" BorderThickness="1" CornerRadius="1">
-                                    <Rectangle Height="1" Margin="1" VerticalAlignment="Center" Fill="{DynamicResource PrimaryBrush}"/>
-                                </Border>
-                            </Grid>
-                        </Button>
-                    </StackPanel>
-                    <StackPanel x:Name="GrpPageOps" Orientation="Horizontal">
-                        <Rectangle Width="1" Fill="{DynamicResource CardBorderBrush}" Margin="4,6"/>
-                        <Button Content="&#xE710;" Style="{StaticResource ToolbarButton}" Click="Merge_Click" ToolTip="{DynamicResource Str_TT_MergePDFs}"/>
-                        <Button Content="&#xE8B1;" Style="{StaticResource ToolbarButton}" Click="Split_Click" ToolTip="{DynamicResource Str_TT_ExtractPages}"/>
-                    </StackPanel>
-                    <StackPanel x:Name="GrpPageEdit" Orientation="Horizontal">
-                        <Rectangle Width="1" Fill="{DynamicResource CardBorderBrush}" Margin="4,6"/>
-                        <Button Content="&#xE8C6;" Style="{StaticResource ToolbarButton}" Click="Delete_Click" ToolTip="{DynamicResource Str_TT_DeletePages}"/>
-                        <Button Content="&#xE74A;" Style="{StaticResource ToolbarButton}" Click="MoveUp_Click" ToolTip="{DynamicResource Str_TT_MovePageUp}"/>
-                        <Button Content="&#xE74B;" Style="{StaticResource ToolbarButton}" Click="MoveDown_Click" ToolTip="{DynamicResource Str_TT_MovePageDown}"/>
-                    </StackPanel>
+                    <Button x:Name="ComparePdfBtn" Style="{StaticResource ToolbarButton}" Padding="8,6" Click="ComparePdf_Click" ToolTip="{DynamicResource Str_TT_ComparePDFs}">
+                        <Grid Width="18" Height="16">
+                            <Border Width="7" Height="13" HorizontalAlignment="Left" VerticalAlignment="Center" BorderBrush="{DynamicResource TextBrush}" BorderThickness="1" CornerRadius="1">
+                                <Rectangle Height="1" Margin="1" VerticalAlignment="Center" Fill="{DynamicResource TextBrush}"/>
+                            </Border>
+                            <Border Width="7" Height="13" HorizontalAlignment="Right" VerticalAlignment="Center" BorderBrush="{DynamicResource PrimaryBrush}" BorderThickness="1" CornerRadius="1">
+                                <Rectangle Height="1" Margin="1" VerticalAlignment="Center" Fill="{DynamicResource PrimaryBrush}"/>
+                            </Border>
+                        </Grid>
+                    </Button>
+                    <Button x:Name="MergeBtn" Content="&#xE710;" Style="{StaticResource ToolbarButton}" Click="Merge_Click" ToolTip="{DynamicResource Str_TT_MergePDFs}"/>
+                    <Button x:Name="ExtractPagesBtn" Content="&#xE8B1;" Style="{StaticResource ToolbarButton}" Click="Split_Click" ToolTip="{DynamicResource Str_TT_ExtractPages}"/>
+                    <Button x:Name="DeletePagesBtn" Content="&#xE8C6;" Style="{StaticResource ToolbarButton}" Click="Delete_Click" ToolTip="{DynamicResource Str_TT_DeletePages}"/>
+                    <Button x:Name="MovePageUpBtn" Content="&#xE74A;" Style="{StaticResource ToolbarButton}" Click="MoveUp_Click" ToolTip="{DynamicResource Str_TT_MovePageUp}"/>
+                    <Button x:Name="MovePageDownBtn" Content="&#xE74B;" Style="{StaticResource ToolbarButton}" Click="MoveDown_Click" ToolTip="{DynamicResource Str_TT_MovePageDown}"/>
                 </StackPanel>
                 <!-- Edit tools + zoom -->
                 <StackPanel x:Name="RightContainer" Orientation="Horizontal" HorizontalAlignment="Right">
@@ -1573,9 +1573,7 @@
                     <Button x:Name="ToolShapeBtn" Content="&#xE739;" Style="{StaticResource ToolbarButton}" Click="ToolShape_Click" ToolTip="{DynamicResource Str_TT_ShapeTool}"/>
                     <Button x:Name="ToolDrawBtn" Content="&#xED63;" Style="{StaticResource ToolbarButton}" Click="ToolDraw_Click" ToolTip="{DynamicResource Str_TT_DrawTool}"/>
                     <Button x:Name="ToolImageBtn" Content="&#xEB9F;" Style="{StaticResource ToolbarButton}" Click="ToolImage_Click" ToolTip="{DynamicResource Str_TT_ImageTool}"/>
-                    <StackPanel x:Name="GrpSignature" Orientation="Horizontal">
-                        <Button x:Name="ToolSignatureBtn" Content="&#xEE56;" Style="{StaticResource ToolbarButton}" Click="ToolSignature_Click" ToolTip="{DynamicResource Str_TT_SignatureTool}"/>
-                    </StackPanel>
+                    <Button x:Name="ToolSignatureBtn" Content="&#xEE56;" Style="{StaticResource ToolbarButton}" Click="ToolSignature_Click" ToolTip="{DynamicResource Str_TT_SignatureTool}"/>
                     <Button x:Name="ToolCropBtn" Content="&#xE7A8;" Style="{StaticResource ToolbarButton}" Click="ToolCrop_Click" ToolTip="{DynamicResource Str_TT_CropTool}"/>
                     <Button x:Name="ToolRotateBtn" Style="{StaticResource ToolbarButton}" Click="ToolRotate_Click" ToolTip="{DynamicResource Str_TT_RotateTool}">
                         <Grid Width="16" Height="16">
@@ -1587,23 +1585,16 @@
                     <Button x:Name="ToolMeasureBtn" Content="&#xED5E;" Style="{StaticResource ToolbarButton}" Click="ToolMeasure_Click" ToolTip="{DynamicResource Str_TT_MeasureTool}"/>
                     <Button x:Name="ToolRedactBtn" Content="&#xED1A;" Style="{StaticResource ToolbarButton}" Click="ToolRedact_Click" ToolTip="{DynamicResource Str_TT_RedactTool}"/>
                     <Button x:Name="ToolStampBtn" Content="&#xE932;" Style="{StaticResource ToolbarButton}" Click="ToolStamp_Click" ToolTip="{DynamicResource Str_TT_StampTool}"/>
-                    <StackPanel x:Name="GrpFormField" Orientation="Horizontal">
-                        <Rectangle Width="1" Fill="{DynamicResource CardBorderBrush}" Margin="4,6"/>
-                        <Button x:Name="ToolFormFieldBtn" Style="{StaticResource ToolbarButton}" Padding="8,6" Click="ToolFormField_Click" ToolTip="{DynamicResource Str_TT_FormFieldTool}">
-                            <Grid Width="18" Height="16">
-                                <Border BorderBrush="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" BorderThickness="1" CornerRadius="1" Margin="1,2,1,1"/>
-                                <TextBlock Text="T" FontFamily="Segoe UI" FontWeight="SemiBold" FontSize="10" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,1,0,0"/>
-                            </Grid>
-                        </Button>
-                    </StackPanel>
-                    <StackPanel x:Name="GrpUndo" Orientation="Horizontal">
-                        <Rectangle Width="1" Fill="{DynamicResource CardBorderBrush}" Margin="4,6"/>
-                        <Button x:Name="UndoBtn" Content="&#xE7A7;" Style="{StaticResource ToolbarButton}" Click="Undo_Click" ToolTip="{DynamicResource Str_TT_UndoLast}"/>
-                        <Button x:Name="RedoBtn" Content="&#xE7A6;" Style="{StaticResource ToolbarButton}" Click="Redo_Click" ToolTip="{DynamicResource Str_Ctx_Redo}"/>
-                        <Button Content="&#xED62;" Style="{StaticResource ToolbarButtonDanger}" Click="ClearAllAnnotations_Click" ToolTip="{DynamicResource Str_TT_ClearAnnotations}"/>
-                        <Rectangle Width="1" Fill="{DynamicResource CardBorderBrush}" Margin="4,6"/>
-                        <Button x:Name="SearchBtn" Content="&#xE721;" Style="{StaticResource ToolbarButton}" Click="Search_Click" ToolTip="{DynamicResource Str_TT_Search}"/>
-                    </StackPanel>
+                    <Button x:Name="ToolFormFieldBtn" Style="{StaticResource ToolbarButton}" Padding="8,6" Click="ToolFormField_Click" ToolTip="{DynamicResource Str_TT_FormFieldTool}">
+                        <Grid Width="18" Height="16">
+                            <Border BorderBrush="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" BorderThickness="1" CornerRadius="1" Margin="1,2,1,1"/>
+                            <TextBlock Text="T" FontFamily="Segoe UI" FontWeight="SemiBold" FontSize="10" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,1,0,0"/>
+                        </Grid>
+                    </Button>
+                    <Button x:Name="UndoBtn" Content="&#xE7A7;" Style="{StaticResource ToolbarButton}" Click="Undo_Click" ToolTip="{DynamicResource Str_TT_UndoLast}"/>
+                    <Button x:Name="RedoBtn" Content="&#xE7A6;" Style="{StaticResource ToolbarButton}" Click="Redo_Click" ToolTip="{DynamicResource Str_Ctx_Redo}"/>
+                    <Button x:Name="ClearAllBtn" Content="&#xED62;" Style="{StaticResource ToolbarButtonDanger}" Click="ClearAllAnnotations_Click" ToolTip="{DynamicResource Str_TT_ClearAnnotations}"/>
+                    <Button x:Name="SearchBtn" Content="&#xE721;" Style="{StaticResource ToolbarButton}" Click="Search_Click" ToolTip="{DynamicResource Str_TT_Search}"/>
                     </StackPanel>
                     <!-- Overflow chevron: shown only when the bar is too narrow -->
                     <ToggleButton x:Name="OverflowChevron" Visibility="Collapsed" Width="26"

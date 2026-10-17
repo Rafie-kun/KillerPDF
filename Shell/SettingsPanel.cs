@@ -1202,6 +1202,9 @@ namespace KillerPDF
             }
 
             ToolbarMenu.Items.Add(new Separator());
+            var customize = new MenuItem { Header = Loc("Str_Toolbar_Customize") };
+            customize.Click += (_, _2) => OpenCustomizeToolbar();
+            ToolbarMenu.Items.Add(customize);
             var hide = new MenuItem { Header = Loc("Str_Toolbar_Hide"), Tag = "hide", IsCheckable = true,
                                       IsChecked = _toolbarHidden, InputGestureText = GestureFor("Alt:M") };
             hide.Click += (_, _2) => ToggleToolbarHidden();
@@ -1286,42 +1289,19 @@ namespace KillerPDF
             _reflowingToolbar = true;
             try
             {
-                // Order in which buttons move to the overflow menu as the bar narrows: FIRST entry
-                // goes first. Lowest-value / most-redundant first - page move/delete and merge/extract
-                // (all reachable from the sidebar right-click), then signature/image/crop, then
-                // undo-clear, with the text-markup tools (draw, strike, underline, highlight, text)
-                // kept on the bar the longest. Zoom, Select, and the file basics never collapse here;
-                // they only shed their captions later (see LabelStripRank). Edit this list to retune.
-                var order = new (UIElement bar, UIElement[] items)[]
+                // The order in which buttons move to the More menu as the bar narrows is
+                // ToolbarShedOrder (ToolbarLayout.cs); buttons the user put in the More menu stay
+                // there at any width. Start fully expanded: every other button on the bar, and only
+                // the user's choices in the menu.
+                var units = _toolbarUnits.ToDictionary(unit => unit.Id);
+                var chosen = _toolbarLayout.More.ToHashSet();
+                foreach (ToolbarUnit unit in _toolbarUnits)
                 {
-                    (GrpCompare,        new UIElement[] { MiCompare }),
-                    (GrpPageEdit,       new UIElement[] { MiDelete, MiMoveUp, MiMoveDown }),
-                    (GrpPageOps,        new UIElement[] { MiMerge, MiExtract }),
-                    // Stamp goes before signature, image and the markup tools: it is the most
-                    // occasional of them, and inserting an image or typing text is reached for far
-                    // more often (2026-08-01).
-                    (ToolStampBtn,      new UIElement[] { MiStamp }),
-                    (GrpSignature,      new UIElement[] { MiSignature }),
-                    (ToolImageBtn,      new UIElement[] { MiImage }),
-                    (ToolCropBtn,       new UIElement[] { MiCrop }),
-                    (ToolColorCorrectionBtn, new UIElement[] { MiColorCorrection }),
-                    (ToolMeasureBtn,    new UIElement[] { MiMeasure }),
-                    (ToolRedactBtn,     new UIElement[] { MiRedact }),
-                    (GrpUndo,           new UIElement[] { MiUndo, MiRedo, MiClear }),
-                    (ToolShapeBtn,      new UIElement[] { MiShape }),
-                    (ToolDrawBtn,       new UIElement[] { MiDraw }),
-                    (ToolUnderlineBtn,  new UIElement[] { MiUnderline }),   // now the Line tool
-                    (ToolHighlightBtn,  new UIElement[] { MiHighlight }),
-                    (GrpFormField,      new UIElement[] { MiFormField }),
-                    (ToolTextBtn,       new UIElement[] { MiText }),
-                };
-
-                // Start fully expanded (everything in the bar, nothing in the popup).
-                foreach (var (grp, items) in order)
-                {
-                    grp.Visibility = Visibility.Visible;
-                    foreach (var it in items) it.Visibility = Visibility.Collapsed;
+                    bool inMenu = chosen.Contains(unit.Id);
+                    unit.Bar.Visibility = inMenu ? Visibility.Collapsed : Visibility.Visible;
+                    unit.Overflow.Visibility = inMenu ? Visibility.Visible : Visibility.Collapsed;
                 }
+                SyncToolbarSeparators();
                 MeasureToolbarBars();
 
                 double avail = ToolbarGrid.ActualWidth;
@@ -1338,31 +1318,39 @@ namespace KillerPDF
 
                 // Keep the ACTIVE tool on the bar no matter how narrow, so its selected state stays visible -
                 // otherwise it vanishes into the overflow chevron and there's no way to tell what's active.
-                UIElement? activeToolBar = _currentTool switch
+                string? activeTool = _currentTool switch
                 {
-                    EditTool.Text      => ToolTextBtn,
-                    EditTool.FormField => GrpFormField,
-                    EditTool.Line      => ToolUnderlineBtn,   // repurposed to the Line tool
-                    EditTool.Highlight => ToolHighlightBtn,
-                    EditTool.Draw      => ToolDrawBtn,
-                    EditTool.Shape     => ToolShapeBtn,
-                    EditTool.Image     => ToolImageBtn,
-                    EditTool.Crop      => ToolCropBtn,
-                    EditTool.Redact    => ToolRedactBtn,
-                    EditTool.Signature => GrpSignature,
+                    EditTool.Text      => "text",
+                    EditTool.FormField => "formfield",
+                    EditTool.Line      => "line",
+                    EditTool.Highlight => "highlight",
+                    EditTool.Draw      => "draw",
+                    EditTool.Shape     => "shape",
+                    EditTool.Image     => "image",
+                    EditTool.Crop      => "crop",
+                    EditTool.Redact    => "redact",
+                    EditTool.Signature => "signature",
+                    EditTool.Measure   => "measure",
                     _ => null
                 };
 
-                // First defense against a narrow bar (and the long-standing behavior): collapse whole
-                // low-priority groups into the overflow menu, KEEPING captions on whatever stays. This
+                // First defense against a narrow bar (and the long-standing behavior): move whole
+                // low-priority groups into the More menu, KEEPING captions on whatever stays. This
                 // is what runs at normal widths - captions stay, extras move to the chevron.
                 if (LeftBar.DesiredSize.Width + RightContainer.DesiredSize.Width > avail)
                 {
-                    foreach (var (grp, items) in order)
+                    foreach (string[] group in ToolbarShedOrder)
                     {
-                        if (ReferenceEquals(grp, activeToolBar)) continue;   // never collapse the active tool
-                        grp.Visibility = Visibility.Collapsed;          // pull this group out of the bar
-                        foreach (var it in items) it.Visibility = Visibility.Visible;  // ...into the popup
+                        bool moved = false;
+                        foreach (string id in group)
+                        {
+                            if (id == activeTool || chosen.Contains(id) || !units.TryGetValue(id, out ToolbarUnit? unit)) continue;
+                            unit.Bar.Visibility = Visibility.Collapsed;     // pull this button out of the bar
+                            unit.Overflow.Visibility = Visibility.Visible;  // ...into the menu
+                            moved = true;
+                        }
+                        if (!moved) continue;
+                        SyncToolbarSeparators();
                         MeasureToolbarBars();
                         if (LeftBar.DesiredSize.Width + RightContainer.DesiredSize.Width + 30 <= avail) break;
                     }
@@ -1383,7 +1371,7 @@ namespace KillerPDF
                     }
                 }
 
-                bool anyCollapsed = order.Any(o => o.bar.Visibility != Visibility.Visible);
+                bool anyCollapsed = _toolbarUnits.Any(unit => unit.Overflow.Visibility == Visibility.Visible);
                 OverflowChevron.Visibility = anyCollapsed ? Visibility.Visible : Visibility.Collapsed;
                 if (!anyCollapsed) OverflowChevron.IsChecked = false;
 

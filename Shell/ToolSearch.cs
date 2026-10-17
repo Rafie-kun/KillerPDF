@@ -73,7 +73,7 @@ namespace KillerPDF
             "Str_KS_FullScreen", "Str_Toolbar_Hide", "Str_KS_AppSize", "Str_Theme_FilmGrain",
             "Str_Toolbar_SmallIcons", "Str_Toolbar_LargeIcons", "Str_Toolbar_TextNone",
             "Str_Toolbar_TextBeside", "Str_Toolbar_TextUnder", "Str_Toolbar_TextOnly",
-            "Str_KS_ToggleSidebar", "Str_KS_SidebarSide", "Str_KS_SplitPane",
+            "Str_KS_ToggleSidebar", "Str_KS_SidebarSide", "Str_KS_SplitPane", "Str_Toolbar_Customize",
         ];
 
         // Other words people search for, in English whatever the interface language, because the
@@ -122,6 +122,7 @@ namespace KillerPDF
             ["Str_TT_ComparePDFs"] = "compare diff difference",
             ["Str_Menu_ReduceSize"] = "compress smaller optimize shrink",
             ["Str_Lbl_DigitalSig"] = "certificate digital signature sign",
+            ["Str_Toolbar_Customize"] = "customize toolbar buttons rearrange reorder hide more menu overflow",
         };
 
         // Built once at startup: the magnifier caption button and the box it opens, placed in the
@@ -443,6 +444,7 @@ namespace KillerPDF
             Add("Str_Lbl_Merge", "File", "", () => Merge_Click(this, click));
             Add("Str_Ctx_ExtractPages", "File", "", () => Split_Click(this, click));
             Add("Str_TT_ComparePDFs", "File", "", () => ComparePdf_Click(this, click));
+            Add("Str_Toolbar_Customize", "View", "", OpenCustomizeToolbar);
             return entries;
         }
 
