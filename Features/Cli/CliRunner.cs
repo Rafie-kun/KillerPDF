@@ -70,6 +70,8 @@ namespace KillerPDF.Features
             "--description", "--relationship", "--rename", "--mime", "--view", "--initial",
             "--user-password", "--owner-password", "--allow", "--recipients", "--text", "--terms",
             "--regex", "--find", "--whole-pages", "--fill", "--overlay", "--sanitize",
+            "--pfx", "--pfx-password", "--cert", "--reason", "--location", "--contact", "--timestamp-server",
+            "--appearance", "--appearance-text",
         ];
 
         /// <summary>
@@ -111,7 +113,7 @@ namespace KillerPDF.Features
                 Eq(a, "--redact") || Eq(a, "--protect") || Eq(a, "--export") || Eq(a, "--convert-office") ||
                 Eq(a, "--data-merge") || Eq(a, "--replace-text") || Eq(a, "--export-form-data") || Eq(a, "--import-form-data") ||
                 Eq(a, "--recognize-fields") || Eq(a, "--xfa-to-acroform") || Eq(a, "--flatten-forms") ||
-                Eq(a, "--macro"));
+                Eq(a, "--macro") || Eq(a, "--sign"));
             if (command is null) return false;
 
             var con = OpenBatchConsole();
@@ -301,6 +303,9 @@ namespace KillerPDF.Features
                     case "--macro":
                         exitCode = CliMacro(positionals, options, con);
                         break;
+                    case "--sign":
+                        exitCode = CliSign(positionals, options, con);
+                        break;
                 }
             }
             catch (Exception ex)
@@ -428,6 +433,11 @@ namespace KillerPDF.Features
             "                                           [--sanitize all|<list>] [--dry-run]   permanently remove content",
             "  --protect <in.pdf> <out.pdf> [--user-password <p>] [--owner-password <p>] [--allow print,copy,edit]",
             "                                           [--recipients <cert.cer>,...] [--invalidate-signatures]   AES-256 copy",
+            "  --sign <in.pdf> <out.pdf> (--pfx <file> [--pfx-password <p>] | --cert <thumbprint or name>)",
+            "                                           [--reason <text>] [--location <text>] [--contact <text>]",
+            "                                           [--timestamp] [--timestamp-server <url>] [--appearance <page>[:<corner>]]",
+            "                                           [--appearance-text <text>] [--width <pt>] [--height <pt>] [--font-size <pt>]",
+            "                                           add a digital signature, optionally timestamped and visible",
             "  --export <in.pdf> <out.docx|.xlsx|.pptx|.html|.md|.txt|.json> [--pages <range>] [--report]",
             "                                           export to Office, web and text formats",
             "  --convert-office <in.docx|.xlsx|.doc|.xls> <out.pdf>",
