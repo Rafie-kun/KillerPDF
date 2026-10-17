@@ -22,6 +22,7 @@ public partial class MainWindow
             PdfMacroOperation.Flatten,
             PdfMacroOperation.Validate,
             PdfMacroOperation.RemoveUnresolvedLinks,
+            PdfMacroOperation.Ocr,
             PdfMacroOperation.Save
         ];
         var dialog = new MacroDialog(this, supported, addable);
@@ -58,6 +59,9 @@ public partial class MainWindow
             sourceName, outputDialog.FileName, steps);
         if (KillerDialog.Show(this, message, Loc("Str_DocumentTools_Macros"),
                 MessageBoxButton.YesNo, MessageBoxImage.Information) != MessageBoxResult.Yes)
+            return;
+        if (macro.Steps.Any(step => step.Operation == PdfMacroOperation.Ocr)
+            && !await EnsureOcrModelsReadyAsync())
             return;
 
         CommitActiveTextBox();
@@ -97,13 +101,46 @@ public partial class MainWindow
         }
     }
 
-    private static PdfMacroDispatcher CreateMacroDispatcher() => new([
-        new PdfMacroOperationRegistration(PdfMacroOperation.Save,
-            (_, source, _, cancellationToken) =>
+    private PdfMacroDispatcher CreateMacroDispatcher()
+    {
+        string language = CurrentOcrLanguageString();
+        bool formAware = OcrFormAware;
+        return new([
+            new PdfMacroOperationRegistration(PdfMacroOperation.Save,
+                (_, source, _, cancellationToken) =>
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    return new PdfMacroOperationResult(source);
+                }),
+            new PdfMacroOperationRegistration(PdfMacroOperation.Ocr,
+                (_, source, _, cancellationToken) =>
+                    RecognizeMacroText(source, language, formAware, cancellationToken))]);
+    }
+
+    // Adds a searchable text layer the same way Make Searchable PDF does, working on temp copies.
+    private static PdfMacroOperationResult RecognizeMacroText(ReadOnlyMemory<byte> source,
+        string language, bool formAware, CancellationToken cancellationToken)
+    {
+        string input = App.MakeTempFile("macroocrsrc");
+        string output = App.MakeTempFile("macroocr");
+        try
+        {
+            File.WriteAllBytes(input, source.ToArray());
+            Features.OcrController.BuildSearchablePdf(input, output, (_, _) => { },
+                language, formAware, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+            return new PdfMacroOperationResult(File.ReadAllBytes(output));
+        }
+        finally
+        {
+            foreach (string path in new[] { input, output })
             {
-                cancellationToken.ThrowIfCancellationRequested();
-                return new PdfMacroOperationResult(source);
-            })]);
+                try { if (File.Exists(path)) File.Delete(path); }
+                catch (IOException) { }
+                catch (UnauthorizedAccessException) { }
+            }
+        }
+    }
 
     private static PdfMacroFileResult AssertSingleResult(PdfMacroRunReport report) =>
         report.Results.Count == 1 ? report.Results[0]
