@@ -540,7 +540,7 @@ namespace KillerPDF.Controls
             {
                 string reason = failure is PdfRedactionVerificationException
                     ? Loc("Str_Redact_VerifyFailed") : failure?.Message ?? string.Empty;
-                SetStatus(string.Format(Loc("Str_Redact_Failed"), reason));
+                ReportResult(string.Format(Loc("Str_Redact_Failed"), reason));
                 return;
             }
             foreach (var (page, annotation) in covered)
@@ -554,7 +554,7 @@ namespace KillerPDF.Controls
                 : string.Format(Loc("Str_RedactedRaster"), regions.Count, pages, approved.Count);
             if (skipped.Count > 0)
                 status += " " + string.Format(Loc("Str_Redact_SkippedPages"), string.Join(", ", skipped.Order().Select(page => page + 1)));
-            SetStatus(status);
+            ReportResult(status);
             FinishRedaction();
         }
 
@@ -585,7 +585,7 @@ namespace KillerPDF.Controls
                 finally { Mouse.OverrideCursor = null; }
                 if (failure is not null)
                 {
-                    SetStatus(string.Format(Loc("Str_RedactFinish_Failed"), failure.Message));
+                    ReportResult(string.Format(Loc("Str_RedactFinish_Failed"), failure.Message));
                     return;
                 }
                 if (choices.FormFields)
@@ -598,7 +598,7 @@ namespace KillerPDF.Controls
                     _formRadioValues.Clear();
                     _formFontSizes.Clear();
                 }
-                SetStatus(Loc("Str_RedactFinish_Done"));
+                ReportResult(Loc("Str_RedactFinish_Done"));
             }
             if (dialog.SaveCopy) Host!.SaveAsWithName(suggested);
         }

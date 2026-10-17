@@ -383,6 +383,16 @@ namespace KillerPDF.Controls
                 SetStatus(string.Format(Loc("Str_PageOf"), nearest + 1, _doc.PageCount) + $" - {DisplayZoomPct():F0}%");
         }
 
+        // Shows an edit's result now and again once a reload's scroll has settled. The settle
+        // reports the page position, which would otherwise replace the result before it is read.
+        internal void ReportResult(string text)
+        {
+            SetStatus(text);
+            var report = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1200) };
+            report.Tick += (_, _) => { report.Stop(); SetStatus(text); };
+            report.Start();
+        }
+
         // Common overlay wiring shared by the continuous and secondary-tile builders: the move/up
         // gesture handlers, the shared right-click context menu (per-page overlays don't inherit the
         // primary's ContextMenu), and registration in both page maps. The mouse-DOWN handler and the

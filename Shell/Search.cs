@@ -516,7 +516,7 @@ namespace KillerPDF
         {
             _searchDebounce?.Stop();
             Search.Run(find);
-            SetStatus(ReplaceStatus(result));
+            ActiveViewer.ReportResult(ReplaceStatus(result));
         }
 
         private string ReplaceStatus(KillerPDF.Controls.TextReplaceResult result)

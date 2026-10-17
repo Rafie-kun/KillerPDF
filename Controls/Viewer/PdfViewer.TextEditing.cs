@@ -655,18 +655,14 @@ namespace KillerPDF.Controls
 
             if (failure is not null || result is null)
             {
-                SetStatus(string.Format(Loc("Str_St_TextEditFailed"), failure?.Message ?? string.Empty));
+                ReportResult(string.Format(Loc("Str_St_TextEditFailed"), failure?.Message ?? string.Empty));
                 return;
             }
             string done = result.Font == EngineDocs.PdfTextLineFont.Original
                 ? Loc("Str_St_TextEditedInPage")
                 : string.Format(Loc(restyled ? "Str_St_TextEditedChosenFont" : "Str_St_TextEditedSubstitute"),
                     substitute?.Family ?? _textFontName);
-            // The reload reports the page position as its scroll settles, so the result is shown
-            // once that has happened instead of being replaced by it.
-            var report = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1200) };
-            report.Tick += (_, _) => { report.Stop(); SetStatus(done); };
-            report.Start();
+            ReportResult(done);
         }
 
         // ============================================================
