@@ -268,5 +268,24 @@ namespace KillerPDF.Services
             encoder.Save(ms);
             return ms.ToArray();
         }
+
+        /// <summary>
+        /// Encodes a bitmap to JPEG at <paramref name="quality"/>, as gray when the page holds
+        /// only shades of gray. Shared by Transform and Straighten Scanned Pages.
+        /// </summary>
+        internal static byte[] EncodeJpeg(BitmapSource source, int quality, bool grayscale)
+        {
+            BitmapSource encodedSource = grayscale
+                ? new FormatConvertedBitmap(source, PixelFormats.Gray8, null, 0)
+                : source;
+            var encoder = new JpegBitmapEncoder
+            {
+                QualityLevel = Math.Clamp(quality, 1, 100)
+            };
+            encoder.Frames.Add(BitmapFrame.Create(encodedSource));
+            using var stream = new MemoryStream();
+            encoder.Save(stream);
+            return stream.ToArray();
+        }
     }
 }

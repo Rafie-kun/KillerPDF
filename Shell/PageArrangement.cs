@@ -73,7 +73,8 @@ namespace KillerPDF
                 await Dispatcher.Yield(DispatcherPriority.Background);
 
                 string file = _currentFile;
-                Dictionary<int, int?> fromText = await Task.Run(() => UprightFromText(file, pages, ct), ct);
+                Dictionary<int, int?> fromText = await Task.Run(
+                    () => PageArrangementService.UprightFromText(file, pages, ct), ct);
                 var scans = new List<int>();
                 foreach (int page in pages)
                 {
@@ -104,7 +105,8 @@ namespace KillerPDF
                             int width = bitmap.PixelWidth, height = bitmap.PixelHeight;
                             var bgra = new byte[width * height * 4];
                             bitmap.CopyPixels(bgra, width * 4, 0);
-                            int? turn = await Task.Run(() => ScanUprightTurn(ocr, bgra, width, height, ct), ct);
+                            int? turn = await Task.Run(
+                                () => PageArrangementService.ScanUprightTurn(ocr, bgra, width, height, ct), ct);
                             if (turn is null) unread++;
                             else if (turn != 0) turns[scans[i]] = turn.Value;
                         }
@@ -155,76 +157,6 @@ namespace KillerPDF
 
         private int CurrentPageRotation(int page) => _pageRotations.TryGetValue(page, out int rotation) ? rotation : 0;
 
-        // The rotation that shows each page's text upright, for every page that has text. A page
-        // whose text runs several ways maps to null; a page without text is left out.
-        private static Dictionary<int, int?> UprightFromText(string file, int[] pages, CancellationToken ct)
-        {
-            var result = new Dictionary<int, int?>();
-            using var content = PdfContentDocument.Open(file);
-            foreach (int page in pages)
-            {
-                ct.ThrowIfCancellationRequested();
-                if (page >= content.NumberOfPages) continue;
-                List<(double, double, int)> baselines;
-                try
-                {
-                    baselines = [.. content.GetPage(page + 1).GetWords()
-                        .Where(word => word.Letters.Count > 0)
-                        .Select(word =>
-                        {
-                            var first = word.Letters[0];
-                            var last = word.Letters[^1];
-                            return (last.EndBaseLine.X - first.StartBaseLine.X,
-                                last.EndBaseLine.Y - first.StartBaseLine.Y, word.Letters.Count);
-                        })];
-                }
-                catch (Exception error) when (error is FormatException or NotSupportedException or InvalidOperationException)
-                {
-                    continue;
-                }
-                if (baselines.Count > 0) result[page] = PageGeometry.UprightRotation(baselines);
-            }
-            return result;
-        }
-
-        // How far a scan must turn clockwise to read upright, or null when no reading is clearly
-        // better. The ink's line direction picks the two candidates, so a page costs two OCR
-        // passes at most, and one when it already reads cleanly as it is.
-        private static int? ScanUprightTurn(OcrService ocr, byte[] bgra, int width, int height, CancellationToken ct)
-        {
-            byte[] gray = PageGeometry.DownscaleGray(bgra, width, height, 800, out int grayWidth, out int grayHeight);
-            double ratio = PageGeometry.LineAxisRatio(gray, grayWidth, grayHeight);
-            int[] candidates = ratio >= 1.25 ? [0, 180] : ratio <= 0.8 ? [90, 270] : [0, 180, 90, 270];
-            int best = -1;
-            double bestScore = 0, runnerUp = 0;
-            foreach (int turn in candidates)
-            {
-                ct.ThrowIfCancellationRequested();
-                PdfOcrResult result;
-                if (turn == 0)
-                    result = ocr.RecognizeBgra(bgra, width, height, cancellationToken: ct);
-                else
-                {
-                    PdfOcrBgraImage turned = PdfOcrImagePreprocessor.RotateBgra(bgra, width, height, turn, ct);
-                    result = ocr.RecognizeBgra(turned.Pixels, turned.Width, turned.Height, cancellationToken: ct);
-                }
-                double score = ReadingScore(result);
-                if (score > bestScore) { runnerUp = bestScore; bestScore = score; best = turn; }
-                else runnerUp = Math.Max(runnerUp, score);
-                if (turn == 0 && score >= 0.85) return 0;
-            }
-            return best >= 0 && bestScore - runnerUp >= 0.08 ? best : null;
-        }
-
-        // Mean word confidence, scaled down for pages with only a few words so a stray reading of
-        // noise cannot outvote real text.
-        private static double ReadingScore(PdfOcrResult result)
-        {
-            var words = result.Words.Where(word => word.Text.Any(char.IsLetterOrDigit)).ToList();
-            if (words.Count < 3) return 0;
-            return words.Average(word => word.Confidence) * Math.Min(1.0, words.Count / 20.0);
-        }
-
         // ---- Straighten Scanned Pages --------------------------------------------------------
 
         // Measures each scan's tilt from its lines of text and turns the page image back level,
@@ -245,7 +177,8 @@ namespace KillerPDF
                 await Dispatcher.Yield(DispatcherPriority.Background);
 
                 string file = _currentFile;
-                var (scans, withText) = await Task.Run(() => ScansWithoutText(file, pages, ct), ct);
+                var (scans, withText) = await Task.Run(
+                    () => PageArrangementService.ScansWithoutText(file, pages, ct), ct);
                 string skipped = withText > 0 ? " " + string.Format(Loc("Str_Pages_TextLayerSkipped"), withText) : "";
 
                 var tilts = new Dictionary<int, double>();
@@ -259,12 +192,8 @@ namespace KillerPDF
                     int width = preview.PixelWidth, height = preview.PixelHeight;
                     var bgra = new byte[width * height * 4];
                     preview.CopyPixels(bgra, width * 4, 0);
-                    double tilt = await Task.Run(() =>
-                    {
-                        byte[] gray = PageGeometry.DownscaleGray(bgra, width, height, 1600, out int gw, out int gh);
-                        return PageGeometry.EstimateSkewDegrees(gray, gw, gh);
-                    }, ct);
-                    if (Math.Abs(tilt) >= 0.15) tilts[scans[i]] = tilt;
+                    double tilt = await Task.Run(() => PageArrangementService.MeasureTilt(bgra, width, height), ct);
+                    if (Math.Abs(tilt) >= PageArrangementService.MinimumTilt) tilts[scans[i]] = tilt;
                 }
                 if (tilts.Count == 0)
                 {
@@ -291,24 +220,9 @@ namespace KillerPDF
                     int budget = Math.Clamp((int)Math.Ceiling(Math.Max(pageWidth, pageHeight) * 300 / 72.0), 1000, 6000);
                     var source = RenderPageBitmap(page, budget, burned)
                         ?? throw new InvalidOperationException(Loc("Str_Tf_NoRender"));
-                    var pixels = new byte[source.PixelWidth * source.PixelHeight * 4];
-                    source.CopyPixels(pixels, source.PixelWidth * 4, 0);
-                    ScanTone tone = PageGeometry.ClassifyTone(pixels);
-
-                    BitmapSource level = RotateWithinPage(source, -tilt);
-                    if (tone == ScanTone.BlackAndWhite)
-                        level = PageQualityConverter.ApplyColorMode(level, PageColorMode.BlackAndWhite, 160);
-                    var levelPixels = new byte[level.PixelWidth * level.PixelHeight * 4];
-                    level.CopyPixels(levelPixels, level.PixelWidth * 4, 0);
-                    ReadOnlyMemory<byte> jpeg = tone == ScanTone.BlackAndWhite
-                        ? default : EncodeJpeg(level, 90, tone == ScanTone.Grayscale);
-
                     string tmp = App.MakeTempFile("straighten");
                     File.WriteAllBytes(tmp, PdfEngineIntegration.CreateRasterDocument([
-                        new PdfEngineIntegration.RasterPage(level.PixelWidth, level.PixelHeight,
-                            pageWidth, pageHeight, levelPixels, jpeg,
-                            Bitonal: tone == ScanTone.BlackAndWhite,
-                            Grayscale: tone == ScanTone.Grayscale)]));
+                        PageArrangementService.LevelPage(source, tilt, pageWidth, pageHeight)]));
                     replacements[page] = tmp;
                 }
 
@@ -346,51 +260,6 @@ namespace KillerPDF
                 if (busy is not null) HideBusyOverlay(busy);
                 EndCancellableOp();
             }
-        }
-
-        // Scanned pages among the targets that have no text layer, and how many scans do have one.
-        private static (List<int> Scans, int WithText) ScansWithoutText(string file, int[] pages, CancellationToken ct)
-        {
-            byte[] bytes = File.ReadAllBytes(file);
-            IReadOnlyList<bool> scanned = PdfScanTextAnalyzer.ReadScannedPages(
-                KillerPdf.Engine.Documents.PdfDocument.Open(bytes, string.Empty), ct);
-            using var content = PdfContentDocument.Open(bytes);
-            var scans = new List<int>();
-            int withText = 0;
-            foreach (int page in pages)
-            {
-                ct.ThrowIfCancellationRequested();
-                if (page >= scanned.Count || !scanned[page]) continue;
-                bool hasText;
-                try { hasText = content.GetPage(page + 1).GetWords().Any(); }
-                catch (Exception error) when (error is FormatException or NotSupportedException or InvalidOperationException)
-                {
-                    hasText = false;
-                }
-                if (hasText) withText++;
-                else scans.Add(page);
-            }
-            return (scans, withText);
-        }
-
-        // Turns the image about its center inside the same canvas, on white, so the page keeps
-        // its size and only the corners the turn uncovers are filled.
-        private static BitmapSource RotateWithinPage(BitmapSource source, double degrees)
-        {
-            int width = source.PixelWidth, height = source.PixelHeight;
-            var visual = new DrawingVisual();
-            RenderOptions.SetBitmapScalingMode(visual, BitmapScalingMode.HighQuality);
-            using (var dc = visual.RenderOpen())
-            {
-                dc.DrawRectangle(Brushes.White, null, new Rect(0, 0, width, height));
-                dc.PushTransform(new RotateTransform(degrees, width / 2.0, height / 2.0));
-                dc.DrawImage(source, new Rect(0, 0, width, height));
-                dc.Pop();
-            }
-            var result = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
-            result.Render(visual);
-            result.Freeze();
-            return result;
         }
     }
 }

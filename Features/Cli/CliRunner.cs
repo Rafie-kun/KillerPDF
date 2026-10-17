@@ -52,7 +52,7 @@ namespace KillerPDF.Features
     // Every member here is static and none of them touch the window, so this was never really a
     // MainWindow partial - it just happened to be declared as one. Extracted to its own class
     // 2026-07-31.
-    internal static class CliRunner
+    internal static partial class CliRunner
     {
         // Options that consume the next argument as their value.
         private static readonly string[] CliValueOptions =
@@ -64,6 +64,7 @@ namespace KillerPDF.Features
             "--start", "--digits", "--prefix", "--suffix", "--profile",
             "--sheet", "--margin", "--gutter", "--creep", "--binding", "--grid",
             "--min-size", "--depth", "--pattern", "--width", "--height", "--images",
+            "--direction", "--position",
         ];
 
         /// <summary>
@@ -93,7 +94,9 @@ namespace KillerPDF.Features
                 Eq(a, "--decrypt") || Eq(a, "--to-image") || Eq(a, "--flatten") ||
                 Eq(a, "--print") || Eq(a, "--ocr") || Eq(a, "--scan-to-text") || Eq(a, "--rotate-pages") ||
                 Eq(a, "--delete-pages") || Eq(a, "--move-pages") || Eq(a, "--insert-blank") ||
-                Eq(a, "--duplicate-page") || Eq(a, "--document-info") || Eq(a, "--search-text"));
+                Eq(a, "--duplicate-page") || Eq(a, "--document-info") || Eq(a, "--search-text") ||
+                Eq(a, "--reverse-pages") || Eq(a, "--fix-orientation") || Eq(a, "--straighten") ||
+                Eq(a, "--divide-spreads") || Eq(a, "--rasterize-region"));
             if (command is null) return false;
 
             var con = OpenBatchConsole();
@@ -191,6 +194,21 @@ namespace KillerPDF.Features
                     case "--search-text":
                         exitCode = CliSearchText(positionals, con);
                         break;
+                    case "--reverse-pages":
+                        exitCode = CliReversePages(positionals, options, con);
+                        break;
+                    case "--fix-orientation":
+                        exitCode = CliFixOrientation(positionals, options, con);
+                        break;
+                    case "--straighten":
+                        exitCode = CliStraighten(positionals, options, con);
+                        break;
+                    case "--divide-spreads":
+                        exitCode = CliDivideSpreads(positionals, options, con);
+                        break;
+                    case "--rasterize-region":
+                        exitCode = CliRasterizeRegion(positionals, options, con);
+                        break;
                 }
             }
             catch (Exception ex)
@@ -275,6 +293,16 @@ namespace KillerPDF.Features
             "  --insert-blank <in.pdf> <position> <out.pdf> [--width <pt>] [--height <pt>]",
             "                                           insert a blank page before a one-based position",
             "  --duplicate-page <in.pdf> <page> <out.pdf> duplicate one page",
+            "  --reverse-pages <in.pdf> <out.pdf> [--pages <range>]",
+            "                                           reverse the order of all or the selected pages",
+            "  --fix-orientation <in.pdf> <out.pdf> [--pages <range>] [--lang <code>]",
+            "                                           turn pages to read upright (OCR reads scans)",
+            "  --straighten <in.pdf> <out.pdf> [--pages <range>]",
+            "                                           level tilted scans that have no text layer",
+            "  --divide-spreads <in.pdf> <out.pdf> [--pages <range>] [--direction vertical|horizontal]",
+            "                                           [--position <0.1-0.9>]   split two-page spreads",
+            "  --rasterize-region <in.pdf> <page> <left,bottom,right,top> <out.pdf> [--dpi <n>]",
+            "                                           turn one box (points, unrotated page) into an image",
             "  --document-info <in.pdf>                 print document details as JSON",
             "  --search-text <in.pdf> <query>            print page hits as JSON",
             "  --batch-resave <in> <out> [--log <f.csv>] [--quiet]",
