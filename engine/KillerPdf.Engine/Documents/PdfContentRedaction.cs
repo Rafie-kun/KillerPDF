@@ -29,7 +29,11 @@ public sealed record PdfRedactionPageAnalysis(
     int RemovedGlyphs,
     int RemovedImages,
     int RemovedPaths,
-    int RemovedAnnotations);
+    int RemovedAnnotations)
+{
+    /// <summary>Gets the number of partly covered images whose covered pixels are painted over.</summary>
+    public int RedactedImages { get; init; }
+}
 
 /// <summary>The per-page redaction analysis for a set of regions.</summary>
 public sealed record PdfContentRedactionPlan(IReadOnlyList<PdfRedactionPageAnalysis> Pages)
@@ -123,7 +127,10 @@ public static class PdfContentRedaction
             pages.Add(new PdfRedactionPageAnalysis(pageIndex,
                 rewriter.Reasons.Count == 0 ? PdfRedactionPageMethod.Content : PdfRedactionPageMethod.Raster,
                 Array.AsReadOnly(rewriter.Reasons.Order(StringComparer.Ordinal).ToArray()),
-                rewriter.RemovedGlyphs, rewriter.RemovedImages, rewriter.RemovedPaths, annotations));
+                rewriter.RemovedGlyphs, rewriter.RemovedImages, rewriter.RemovedPaths, annotations)
+            {
+                RedactedImages = rewriter.RedactedImages
+            });
         }
         return new PdfContentRedactionPlan(Array.AsReadOnly(pages.ToArray()));
     }
@@ -246,7 +253,8 @@ public static class PdfContentRedaction
             PdfPageTreeEntry page = tree.Pages[pageIndex];
             PageGeometry geometry = Geometry(document, page);
             bool raster = rasterPages.Contains(pageIndex);
-            var rewriter = new ContentRewriter(document, update, pageRegions, raster, fonts, cancellationToken);
+            var rewriter = new ContentRewriter(document, update, pageRegions, raster, fonts, cancellationToken,
+                fills: [.. covers[pageIndex].Select(cover => cover.FillColor ?? DefaultFill)]);
             List<PdfContentInstruction> content = rewriter.RewritePage(page, geometry);
             if (!raster && rewriter.Reasons.Count != 0)
                 throw new InvalidOperationException($"Page {pageIndex + 1} changed while it was being redacted.");
@@ -352,7 +360,9 @@ public static class PdfContentRedaction
             foreach (PdfExtractedImage image in content.Images)
             {
                 if (raster && image.ResourceName == RedactionImageName) continue;
-                if (pageRegions.Any(region => Overlaps(image.BoundingBox, region)))
+                PdfRedactionRegion[] hits = [.. covers[pageIndex].Where(cover => Overlaps(image.BoundingBox, cover.Bounds))];
+                // An image may stay over a region only when every covered pixel is painted with the fill.
+                if (hits.Length != 0 && !IsPainted(document, image, hits))
                 {
                     findings.Add(new("ImageInRegion", "An image remains inside a redacted area.", pageIndex));
                     break;
@@ -762,6 +772,15 @@ public static class PdfContentRedaction
         return result.ToDictionary(item => item.Key, item => item.Value.ToArray());
     }
 
+    private static bool IsPainted(PdfDocument document, PdfExtractedImage image, PdfRedactionRegion[] hits)
+    {
+        if (image.Source is not PdfStream source || image.Placement is not Matrix placement
+            || PdfImageRedaction.Decode(document, source) is not PdfImageRedaction.Samples samples) return false;
+        PdfImageRedaction.Plan? plan = PdfImageRedaction.Covers(placement, samples,
+            hits.Select(hit => (hit.Bounds, hit.FillColor ?? DefaultFill)));
+        return plan is not null && PdfImageRedaction.IsPainted(samples, plan);
+    }
+
     private static Dictionary<int, PdfRedactionRegion[]> GroupCovers(IEnumerable<PdfRedactionRegion> regions) =>
         regions.GroupBy(region => region.PageIndex).ToDictionary(group => group.Key, group => group.ToArray());
 
@@ -1005,7 +1024,7 @@ public static class PdfContentRedaction
     /// region is removed, while images, drawings and every resource stay as they were.</remarks>
     private sealed class ContentRewriter(PdfDocument document, PdfIncrementalUpdateBuilder? update,
         PdfContentBounds[] regions, bool textOnly, Dictionary<PdfDictionary, PdfExtractionFont?> fonts,
-        CancellationToken cancellationToken, bool glyphsOnly = false)
+        CancellationToken cancellationToken, bool glyphsOnly = false, PdfRgbColor[]? fills = null)
     {
         private static readonly PdfName FontCategory = Name("Font");
         private static readonly PdfName XObjectCategory = Name("XObject");
@@ -1022,6 +1041,7 @@ public static class PdfContentRedaction
         internal bool FormMarkedContentTouched { get; private set; }
         internal int RemovedGlyphs { get; private set; }
         internal int RemovedImages { get; private set; }
+        internal int RedactedImages { get; private set; }
         internal int RemovedPaths { get; private set; }
         internal ResourceScope? PageScope { get; private set; }
 
@@ -1438,6 +1458,7 @@ public static class PdfContentRedaction
                             localChanged = true;
                             return;
                         }
+                        if (PaintImage(xobject)) return;
                         Reasons.Add("Image");
                     }
                     scope.Use(XObjectCategory, name);
@@ -1503,6 +1524,27 @@ public static class PdfContentRedaction
                     output.Add(new PdfContentInstruction("Do", 0, [alias]));
                 }
                 finally { _activeForms.Remove(xobject); }
+            }
+
+            // A partly covered image keeps its picture with the covered pixels painted over,
+            // drawn from a new image so the original samples leave the page.
+            bool PaintImage(PdfStream xobject)
+            {
+                if (PdfImageRedaction.Decode(document, xobject) is not PdfImageRedaction.Samples samples) return false;
+                PdfImageRedaction.Plan? plan = PdfImageRedaction.Covers(state.Ctm, samples,
+                    regions.Select((region, index) => (region, fills is not null && index < fills.Length
+                        ? fills[index] : DefaultFill)));
+                if (plan is null || plan.Image.Count == 0) return false;
+                RedactedImages++;
+                localChanged = true;
+                if (update is null) return true;
+                PdfImageRedaction.Paint(samples, plan);
+                PdfIndirectReference? mask = samples.Mask is PdfImageRedaction.Samples alpha
+                    ? update.AddObject(PdfImageRedaction.Encode(alpha)) : null;
+                PdfIndirectReference copy = update.AddObject(PdfImageRedaction.Encode(samples, mask));
+                PdfName alias = scope.Add(XObjectCategory, PdfImageRedaction.ResourcePrefix, copy);
+                output.Add(new PdfContentInstruction("Do", 0, [alias]));
+                return true;
             }
 
             void InlineImage(PdfContentInstruction instruction)

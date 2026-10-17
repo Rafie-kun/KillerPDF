@@ -81,6 +81,11 @@ public sealed record PdfExtractedImage(
     double RenderedWidth = 0,
     double RenderedHeight = 0)
 {
+    /// <summary>Gets the image stream drawn, when it is an XObject.</summary>
+    internal PdfStream? Source { get; init; }
+    /// <summary>Gets the matrix that maps the image's unit square onto the page.</summary>
+    internal PdfTextContentReader.Matrix? Placement { get; init; }
+
     /// <summary>Gets the effective horizontal resolution in dots per inch.</summary>
     public double? HorizontalDpi => PixelWidth > 0 && RenderedWidth > 0
         ? PixelWidth * 72d / RenderedWidth : null;

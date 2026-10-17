@@ -125,11 +125,12 @@ public sealed class PdfContentRedactionTests
     }
 
     [Fact]
-    public void PartlyCoveredScanNeedsApprovalAndKeepsItsSearchableTextOutsideTheRegion()
+    public void PartlyCoveredImageThatCannotBePaintedNeedsApprovalAndKeepsItsSearchableTextOutsideTheRegion()
     {
+        // A color-key mask keeps the image out of pixel painting, so the page needs the image fallback.
         PdfDocument document = PdfDocument.Open(ImagePage(
             "q 300 0 0 300 50 50 cm /Im1 Do Q BT 3 Tr /F1 12 Tf 230 100 Td (SCANNED SSN 123) Tj ET",
-            rotate: 90));
+            rotate: 90, imageEntries: "/Mask [0 0 0 0 0 0]"));
         PdfRedactionRegion region = Region(document, 0, "123");
 
         PdfContentRedactionPlan plan = PdfContentRedaction.Analyze(document, [region]);
@@ -155,6 +156,61 @@ public sealed class PdfContentRedactionTests
         Assert.True(IsBlack(rendered, (int)cy, (int)cx));
         (byte red, byte green, byte blue) = Pixel(rendered, 275, 125);
         Assert.True(red > 200 && green < 60 && blue < 60, $"Expected red, got {red},{green},{blue}.");
+    }
+
+    [Fact]
+    public void PartlyCoveredImageHasOnlyItsCoveredPixelsPaintedAndThePageStaysText()
+    {
+        PdfDocument document = PdfDocument.Open(ImagePage(
+            "q 300 0 0 300 50 50 cm /Im1 Do Q BT /F1 12 Tf 60 30 Td (Caption) Tj ET", rotate: 0));
+        var region = new PdfRedactionRegion(0, new PdfContentBounds(60, 210, 120, 300));
+
+        PdfContentRedactionPlan plan = PdfContentRedaction.Analyze(document, [region]);
+        Assert.Empty(plan.RasterPages);
+        Assert.Equal(1, Assert.Single(plan.Pages).RedactedImages);
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, [region]);
+
+        Assert.True(result.Verification.Succeeded);
+        PdfDocument output = PdfDocument.Open(result.Document);
+        PdfExtractedImage image = Assert.Single(new PdfPageContentReader(output).Read(0).Images);
+        Assert.StartsWith("KPRI", image.ResourceName);
+        Assert.Contains("Caption", Letters(output, 0));
+        // The top-left pixel was red and is now black; the other three keep their colors.
+        PdfRenderedPage rendered = new PdfPageRenderer(output).Render(0, new PdfRenderOptions(400, 400));
+        Assert.True(IsBlack(rendered, 90, 150));
+        (byte red, byte green, byte blue) = Pixel(rendered, 275, 125);
+        Assert.True(green > 200 && red < 60 && blue < 60, $"Expected green, got {red},{green},{blue}.");
+        (red, green, blue) = Pixel(rendered, 125, 275);
+        Assert.True(blue > 200 && red < 60 && green < 60, $"Expected blue, got {red},{green},{blue}.");
+        Assert.Contains(PdfContentRedaction.Verify(document.Source, [region], [], expectMetadataCleared: false).Findings,
+            finding => finding.Code == "ImageInRegion");
+    }
+
+    [Fact]
+    public void PaintsTheSoftMaskOpaqueUnderThePaintedPixels()
+    {
+        // The top-left pixel is fully transparent, so only an opaque mask lets the fill show there.
+        PdfDocument document = PdfDocument.Open(CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 400 400] /Resources << /XObject << /Im1 5 0 R >> >> /Contents 4 0 R >>",
+            Stream("q 300 0 0 300 50 50 cm /Im1 Do Q"),
+            "<< /Type /XObject /Subtype /Image /Width 2 /Height 2 /ColorSpace /DeviceRGB /BitsPerComponent 8 /SMask 6 0 R /Length 12 >>\nstream\n"
+                + Encoding.Latin1.GetString([255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255]) + "\nendstream",
+            "<< /Type /XObject /Subtype /Image /Width 2 /Height 2 /ColorSpace /DeviceGray /BitsPerComponent 8 /Decode [0 1] /Length 4 >>\nstream\n"
+                + Encoding.Latin1.GetString([0, 255, 255, 255]) + "\nendstream"
+        ]));
+        var region = new PdfRedactionRegion(0, new PdfContentBounds(60, 210, 120, 300));
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, [region]);
+
+        Assert.True(result.Verification.Succeeded);
+        Assert.Empty(result.Plan.RasterPages);
+        PdfRenderedPage rendered = new PdfPageRenderer(PdfDocument.Open(result.Document))
+            .Render(0, new PdfRenderOptions(400, 400));
+        Assert.True(IsBlack(rendered, 90, 150));
+        (byte red, byte green, byte blue) = Pixel(rendered, 275, 125);
+        Assert.True(green > 200 && red < 60 && blue < 60, $"Expected green, got {red},{green},{blue}.");
     }
 
     [Fact]
@@ -417,14 +473,14 @@ public sealed class PdfContentRedactionTests
             Stream(content)
         ]);
 
-    private static byte[] ImagePage(string content, int rotate) =>
+    private static byte[] ImagePage(string content, int rotate, string imageEntries = "") =>
         CreatePdf([
             "<< /Type /Catalog /Pages 2 0 R >>",
             "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
             $"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 400 400] /Rotate {rotate} /Resources << /Font << /F1 4 0 R >> /XObject << /Im1 6 0 R >> >> /Contents 5 0 R >>",
             Helvetica,
             Stream(content),
-            "<< /Type /XObject /Subtype /Image /Width 2 /Height 2 /ColorSpace /DeviceRGB /BitsPerComponent 8 /Length 12 >>\nstream\n"
+            $"<< /Type /XObject /Subtype /Image /Width 2 /Height 2 /ColorSpace /DeviceRGB /BitsPerComponent 8 {imageEntries} /Length 12 >>\nstream\n"
                 + Encoding.Latin1.GetString([255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255]) + "\nendstream"
         ]);
 

@@ -328,7 +328,7 @@ public sealed class PdfPageContentReader
                         var subtype = xobject.Dictionary.TryGetValue(Name("Subtype"), out var type) ? Resolve(type) as PdfName : null;
                         if (subtype?.ValueAsLatin1() == "Image")
                         {
-                            Image(ctm, clip, xName.ValueAsLatin1(), false, xobject.Dictionary);
+                            Image(ctm, clip, xName.ValueAsLatin1(), false, xobject.Dictionary, xobject);
                             continue;
                         }
                         if (subtype?.ValueAsLatin1() != "Form") continue;
@@ -451,7 +451,8 @@ public sealed class PdfPageContentReader
                 _ => null
             };
         }
-        void Image(Matrix matrix, PdfContentBounds clip, string? resourceName, bool isInline, PdfDictionary dictionary)
+        void Image(Matrix matrix, PdfContentBounds clip, string? resourceName, bool isInline, PdfDictionary dictionary,
+            PdfStream? source = null)
         {
             var bounds = Intersect(Transform(new(0, 0, 1, 1), matrix), clip);
             double renderedWidth = Math.Sqrt(matrix.A * matrix.A + matrix.B * matrix.B);
@@ -459,7 +460,11 @@ public sealed class PdfPageContentReader
             int pixelWidth = ImageDimension(dictionary, "Width");
             int pixelHeight = ImageDimension(dictionary, "Height");
             if (bounds.Width > 0 && bounds.Height > 0)
-                images.Add(new(bounds, resourceName, isInline, pixelWidth, pixelHeight, renderedWidth, renderedHeight));
+                images.Add(new(bounds, resourceName, isInline, pixelWidth, pixelHeight, renderedWidth, renderedHeight)
+                {
+                    Source = source,
+                    Placement = matrix
+                });
         }
         int ImageDimension(PdfDictionary dictionary, string key)
         {
