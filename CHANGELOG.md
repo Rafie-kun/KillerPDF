@@ -50,6 +50,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Added Scan to PDF to the Open menu. It scans through the scanner's TWAIN driver, with or without the scanner's own settings window, and opens the pages as a new PDF (#73).
 - Added Convert Word or Excel file to the Open menu. KillerPDF lays out .docx and .xlsx files itself, with their fonts, lists, tables, pictures, headers, footers, cell formats and page setup, and opens the result as a new PDF. Older .doc and .xls files convert through Word or Excel when installed (#74).
 - Added optional PDF previews for File Explorer and Outlook to the installed edition. Setup offers them as a checkbox, the preview pages scroll with fit width, fit page and zoom, and Open in KillerPDF opens a read-only copy of the previewed file. The portable edition registers nothing (#410).
+- Added `killerpdf` to PATH for the installed edition, so the command line runs from any new terminal, waits for the result and returns its exit code. Uninstalling removes it again.
 - Added a Microsoft Store button to the website's top bar on every page.
 - Added a Microsoft Store button for KillerMCP to the website's MCP page.
 

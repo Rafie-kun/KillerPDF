@@ -930,6 +930,7 @@ namespace KillerPDF
             try { Registry.LocalMachine.DeleteSubKeyTree(
                 @"Software\Microsoft\Windows\CurrentVersion\Uninstall\KillerPDF"); } catch { }
             string directory = Path.GetDirectoryName(registeredExe ?? MachineInstallExe) ?? MachineInstallDir;
+            Services.CommandLinePath.Unregister(directory, machine: true);
             Services.PreviewHandlerRegistration.StopHosts(directory);
             try { if (Directory.Exists(directory)) Directory.Delete(directory, true); } catch { }
             SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, IntPtr.Zero, IntPtr.Zero);
@@ -1065,6 +1066,7 @@ namespace KillerPDF
             try { if (Directory.Exists(StartMenuDir)) Directory.Delete(StartMenuDir, true); } catch { }
             try { if (File.Exists(DesktopLnk)) File.Delete(DesktopLnk); } catch { }
             string directory = Path.GetDirectoryName(registeredExe ?? InstallExe) ?? InstallDir;
+            Services.CommandLinePath.Unregister(directory, machine: false);
             Services.PreviewHandlerRegistration.Unregister(Registry.CurrentUser);
             Services.PreviewHandlerRegistration.StopHosts(directory);
             try { if (Directory.Exists(directory)) Directory.Delete(directory, true); } catch { }
@@ -2085,6 +2087,8 @@ namespace KillerPDF
             if (!File.Exists(iconPath)) ExtractFileIcon(iconPath);
             RegisterFileHandler(registryRoot, exePath, iconPath);
             Services.ProtocolRegistrar.Register(registryRoot, exePath);
+            // "killerpdf" from any new terminal runs the command line of this copy.
+            Services.CommandLinePath.Register(installDirectory, Path.GetFileName(exePath), machine);
 
             // #410: PDF previews in File Explorer and Outlook when setup asked for them. Without a
             // choice, a copy that already had them keeps them, as long as the handler is present.
@@ -2176,6 +2180,8 @@ namespace KillerPDF
             try { Registry.CurrentUser.DeleteSubKeyTree(
                 @"Software\Microsoft\Windows\CurrentVersion\Uninstall\KillerPDF"); } catch { }
             UnregisterFileHandler(Registry.CurrentUser);
+            string installedDirectory = Path.GetDirectoryName(currentExe) ?? AppContext.BaseDirectory;
+            Services.CommandLinePath.Unregister(installedDirectory, machine: false);
 
             // Machine-wide half. Only reachable when Add/Remove Programs launched the Program Files
             // copy, which Windows runs elevated from the HKLM uninstall entry - so these writes
@@ -2187,13 +2193,14 @@ namespace KillerPDF
                 UnregisterFileHandler(Registry.LocalMachine);
                 Services.ProtocolRegistrar.Unregister(Registry.LocalMachine);   // #183
                 Services.PreviewHandlerRegistration.Unregister(Registry.LocalMachine);
+                Services.CommandLinePath.Unregister(installedDirectory, machine: true);
                 try { Registry.LocalMachine.DeleteSubKeyTree(@"Software\KillerPDF"); } catch { }
                 try { Registry.LocalMachine.DeleteSubKeyTree(
                     @"Software\Microsoft\Windows\CurrentVersion\Uninstall\KillerPDF"); } catch { }
             }
 
             // A preview surrogate holding the handler would keep the folder from being removed.
-            Services.PreviewHandlerRegistration.StopHosts(Path.GetDirectoryName(currentExe) ?? AppContext.BaseDirectory);
+            Services.PreviewHandlerRegistration.StopHosts(installedDirectory);
 
             // Self-delete: deferred via cmd batch so the EXE can exit first
             string bat = Path.Combine(Path.GetTempPath(), "killerpdf_uninstall.bat");
