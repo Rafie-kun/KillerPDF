@@ -115,7 +115,7 @@ La page peut être remplacée par une image d'elle-même avec les zones marquée
     <sys:String x:Key="Str_RedactFind_Hint">Les résultats cochés sont marqués sur la page. Rien n'est supprimé avant que vous cliquiez sur Caviarder dans la barre Caviarder.</sys:String>
     <sys:String x:Key="Str_TT_RotateTool">Transformer la page : pivoter, mettre à l'échelle, retourner, redresser ou corriger la perspective (R)</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">Supprimer toutes les annotations</sys:String>
-    <sys:String x:Key="Str_TT_Search">Rechercher (Ctrl+F)</sys:String>
+    <sys:String x:Key="Str_TT_Search">Rechercher du texte (Ctrl+F)</sys:String>
     <sys:String x:Key="Str_TT_UndoLast">Annuler la dernière action (Ctrl+Z)</sys:String>
     <sys:String x:Key="Str_TT_MultiPageGrid">Vue en grille multi-pages (F8)</sys:String>
     <sys:String x:Key="Str_TT_ZoomOut">Réduire le zoom (Ctrl+-)</sys:String>
@@ -165,6 +165,8 @@ La page peut être remplacée par une image d'elle-même avec les zones marquée
     <sys:String x:Key="Str_KS_Title">Raccourcis clavier</sys:String>
     <sys:String x:Key="Str_KS_FormField">Champ de texte remplissable</sys:String>
     <sys:String x:Key="Str_KS_NextShape">Type de forme suivant</sys:String>
+    <sys:String x:Key="Str_ToolSearch">Rechercher des outils</sys:String>
+    <sys:String x:Key="Str_ToolSearch_None">Aucun outil ni aucune commande ne correspond</sys:String>
     <sys:String x:Key="Str_KS_File">FICHIER</sys:String>
     <sys:String x:Key="Str_KS_Open">Ouvrir</sys:String>
     <sys:String x:Key="Str_KS_CloseFile">Fermer le fichier</sys:String>
@@ -198,7 +200,7 @@ La page peut être remplacée par une image d'elle-même avec les zones marquée
     <sys:String x:Key="Str_DocInfo_Producer">Producteur</sys:String>
     <sys:String x:Key="Str_DocInfo_Save">Enregistrer</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">Annuler</sys:String>
-    <sys:String x:Key="Str_KS_Find">Rechercher</sys:String>
+    <sys:String x:Key="Str_KS_Find">Rechercher du texte</sys:String>
     <sys:String x:Key="Str_KS_Replace">Rechercher et remplacer</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Résultat suivant / précédent</sys:String>
     <sys:String x:Key="Str_KS_SelectAll">Sélectionner tout le texte de la page</sys:String>
@@ -405,7 +407,7 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Lbl_Select">Sélectionner</sys:String>
     <sys:String x:Key="Str_Lbl_ZoomOut">Zoom arrière</sys:String>
     <sys:String x:Key="Str_Lbl_ZoomIn">Zoom avant</sys:String>
-    <sys:String x:Key="Str_Lbl_Search">Rechercher</sys:String>
+    <sys:String x:Key="Str_Lbl_Search">Rechercher du texte</sys:String>
 
     <!-- ── Right-click menu labels ────────────────────────────────────── -->
     <sys:String x:Key="Str_Ctx_CopyText">Copier le texte</sys:String>

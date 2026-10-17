@@ -1436,6 +1436,8 @@
                            Foreground="{DynamicResource FilenameBrush}" FontFamily="{DynamicResource FileNameFont}" FontSize="{DynamicResource FileNameFontSize}"
                            RenderTransform="{DynamicResource FileNameTransform}" TextOptions.TextFormattingMode="Ideal"/>
                 <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="{DynamicResource CaptionButtonsMargin}">
+                    <!-- Tool search (Ctrl+K): the magnifier and the box it opens, built in Shell/ToolSearch.cs. -->
+                    <StackPanel x:Name="ToolSearchHost" Orientation="Horizontal" Margin="0,0,12,0"/>
                     <Button Click="MinimizeBtn_Click" Style="{StaticResource ChromeButton}" ToolTip="{DynamicResource Str_Sys_Minimize}"
                             Foreground="{DynamicResource CaptionGlyphBrush}">
                         <Grid Height="{DynamicResource CaptionButtonHeight}">

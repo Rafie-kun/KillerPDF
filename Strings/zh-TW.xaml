@@ -163,6 +163,8 @@
     <sys:String x:Key="Str_KS_Title">鍵盤快速鍵</sys:String>
     <sys:String x:Key="Str_KS_FormField">可填寫文字欄位</sys:String>
     <sys:String x:Key="Str_KS_NextShape">下一個形狀類型</sys:String>
+    <sys:String x:Key="Str_ToolSearch">搜尋工具</sys:String>
+    <sys:String x:Key="Str_ToolSearch_None">沒有符合的工具或命令</sys:String>
     <sys:String x:Key="Str_KS_File">檔案</sys:String>
     <sys:String x:Key="Str_KS_Open">開啟</sys:String>
     <sys:String x:Key="Str_KS_CloseFile">關閉檔案</sys:String>
@@ -183,7 +185,7 @@
     <sys:String x:Key="Str_KS_DeleteAnnot">刪除選取的注釋</sys:String>
     <sys:String x:Key="Str_KS_ConfirmCancel">確認 / 取消文字或裁切</sys:String>
     <sys:String x:Key="Str_KS_SearchSelect">搜尋與選取</sys:String>
-    <sys:String x:Key="Str_KS_Find">尋找 / 搜尋</sys:String>
+    <sys:String x:Key="Str_KS_Find">尋找文字</sys:String>
     <sys:String x:Key="Str_KS_Replace">尋找和取代</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">下一個 / 上一個結果</sys:String>
     <sys:String x:Key="Str_KS_SelectAll">選取頁面上所有文字</sys:String>
@@ -770,8 +772,8 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_KS_CycleView">下一個檢視模式</sys:String>
     <sys:String x:Key="Str_TT_ViewMode">檢視模式</sys:String>
     <sys:String x:Key="Str_KS_NextTab">下一個分頁（Shift：上一個）</sys:String>
-    <sys:String x:Key="Str_Lbl_Search">搜尋</sys:String>
-    <sys:String x:Key="Str_TT_Search">搜尋 (Ctrl+F)</sys:String>
+    <sys:String x:Key="Str_Lbl_Search">尋找文字</sys:String>
+    <sys:String x:Key="Str_TT_Search">尋找文字 (Ctrl+F)</sys:String>
     <sys:String x:Key="Str_Ctx_DeletePage">刪除頁面</sys:String>
     <sys:String x:Key="Str_Ctx_DuplicatePage">複製頁面</sys:String>
     <sys:String x:Key="Str_Ctx_AddBlankPage">新增空白頁</sys:String>

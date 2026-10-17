@@ -38,6 +38,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Added docking for the comparison bar. Drag it to the top half of the documents to dock it above them, or back down to dock it below (#427).
 - Added a scanned look to Save Flattened: slightly tilted pages, warm paper, scanner grain, soft focus and an edge shadow, alongside the existing grayscale and JPEG options (#426).
 - Added Reduce File Size to the Save menu. It saves a smaller copy with unused objects removed and the file compressed, and can downsample images drawn at more resolution than the page shows. The command line takes the same option as `--optimize --images <dpi>` (#433).
+- Added Search Tools to the title bar, left of the minimize button. Click the magnifier or press Ctrl+K and type part of a tool or command name, and matching tools, commands and document tools appear as you type with their shortcuts. Enter or a click runs one.
 - Added Customize Shortcuts to the keyboard shortcuts overlay. Commands on letters, numbers, F1 to F12, Delete and Insert can move to another key, and the list and keyboard map show the keys as chosen (#190).
 - Added Back and Forward buttons across the top of the page menus, with Select All, Paste for clipboard images and text, and Full Screen. Selected text can be highlighted, underlined, struck through or marked for redaction from the page menu, the tab menu has Close All Tabs, and the thumbnail menu has OCR Page.
 - Added a Redo button beside Undo, and a full screen button on the sidebar rail.
@@ -70,6 +71,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - The installer sidebar shows the version in Killer Sans under the wordmark, with a translated Setup line below it in Lacquer (#440).
 - Shortcuts shown in menus and tooltips follow customized shortcuts and the app language, and the toolbar's overflow menu lists each item's shortcut.
 - Tools answer to one letter each instead of the number row, so a key keeps its tool however many tools there are. Shapes moved from 4 to O, and Shift+O steps to the next shape type.
+- The toolbar's Search button is now Find Text, so it reads apart from Search Tools.
 - Check for updates on startup is the first of the About options, as in the other Killer Tools apps.
 - The Light theme draws a softer shadow under the toolbars.
 - Esc no longer closes KillerPDF. It still cancels the open tool, search or overlay, and with nothing to cancel it does nothing, as in other Windows apps.

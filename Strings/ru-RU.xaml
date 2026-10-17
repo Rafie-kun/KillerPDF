@@ -115,7 +115,7 @@
     <sys:String x:Key="Str_RedactFind_Hint">Выбранные результаты отмечаются на странице. Ничего не удаляется, пока вы не нажмёте «Скрыть» на панели «Скрыть».</sys:String>
     <sys:String x:Key="Str_TT_RotateTool">Трансформация страницы: поворот, масштабирование, отражение, выравнивание или коррекция перспективы (R)</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">Очистите все аннотации</sys:String>
-    <sys:String x:Key="Str_TT_Search">Поиск (Ctrl+F)</sys:String>
+    <sys:String x:Key="Str_TT_Search">Найти текст (Ctrl+F)</sys:String>
     <sys:String x:Key="Str_TT_UndoLast">Отменить последнее изменение (Ctrl+Z)</sys:String>
     <sys:String x:Key="Str_TT_MultiPageGrid">Многостраничный вид сетки (F8)</sys:String>
     <sys:String x:Key="Str_TT_ZoomOut">Уменьшить масштаб (Ctrl+-)</sys:String>
@@ -165,6 +165,8 @@
     <sys:String x:Key="Str_KS_Title">Сочетания клавиш</sys:String>
     <sys:String x:Key="Str_KS_FormField">Заполняемое текстовое поле</sys:String>
     <sys:String x:Key="Str_KS_NextShape">Следующий тип формы</sys:String>
+    <sys:String x:Key="Str_ToolSearch">Поиск инструментов</sys:String>
+    <sys:String x:Key="Str_ToolSearch_None">Нет подходящих инструментов или команд</sys:String>
     <sys:String x:Key="Str_KS_File">ФАЙЛ</sys:String>
     <sys:String x:Key="Str_KS_Open">ОТКРЫТЬ</sys:String>
     <sys:String x:Key="Str_KS_CloseFile">Закрыть файл</sys:String>
@@ -198,7 +200,7 @@
     <sys:String x:Key="Str_DocInfo_Producer">Производитель</sys:String>
     <sys:String x:Key="Str_DocInfo_Save">Сохранить</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">Отменить</sys:String>
-    <sys:String x:Key="Str_KS_Find">Найти / поиск</sys:String>
+    <sys:String x:Key="Str_KS_Find">Найти текст</sys:String>
     <sys:String x:Key="Str_KS_Replace">Найти и заменить</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Следующий / предыдущий результат</sys:String>
     <sys:String x:Key="Str_KS_SelectAll">Выделите весь текст на странице</sys:String>
@@ -405,7 +407,7 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Lbl_Select">Выделить</sys:String>
     <sys:String x:Key="Str_Lbl_ZoomOut">Уменьш.</sys:String>
     <sys:String x:Key="Str_Lbl_ZoomIn">Увелич.</sys:String>
-    <sys:String x:Key="Str_Lbl_Search">Поиск</sys:String>
+    <sys:String x:Key="Str_Lbl_Search">Найти текст</sys:String>
 
     <!-- ── Right-click menu labels ────────────────────────────────────── -->
     <sys:String x:Key="Str_Ctx_CopyText">Копировать текст</sys:String>

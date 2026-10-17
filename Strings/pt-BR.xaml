@@ -115,7 +115,7 @@ A página pode ser substituída por uma imagem dela mesma com as áreas marcadas
     <sys:String x:Key="Str_RedactFind_Hint">Os resultados selecionados são marcados na página. Nada é removido até você clicar em Tarjar na barra Tarjar.</sys:String>
     <sys:String x:Key="Str_TT_RotateTool">Transformar página: girar, dimensionar, espelhar, corrigir inclinação ou perspectiva (R)</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">Limpar todas as anotações</sys:String>
-    <sys:String x:Key="Str_TT_Search">Pesquisar (Ctrl+F)</sys:String>
+    <sys:String x:Key="Str_TT_Search">Localizar texto (Ctrl+F)</sys:String>
     <sys:String x:Key="Str_TT_UndoLast">Desfazer último (Ctrl+Z)</sys:String>
     <sys:String x:Key="Str_TT_MultiPageGrid">Visualização em grade de várias páginas (F8)</sys:String>
     <sys:String x:Key="Str_TT_ZoomOut">Diminuir zoom (Ctrl+-)</sys:String>
@@ -165,6 +165,8 @@ A página pode ser substituída por uma imagem dela mesma com as áreas marcadas
     <sys:String x:Key="Str_KS_Title">Atalhos de teclado</sys:String>
     <sys:String x:Key="Str_KS_FormField">Campo de texto preenchível</sys:String>
     <sys:String x:Key="Str_KS_NextShape">Próximo tipo de forma</sys:String>
+    <sys:String x:Key="Str_ToolSearch">Pesquisar ferramentas</sys:String>
+    <sys:String x:Key="Str_ToolSearch_None">Nenhuma ferramenta ou comando correspondente</sys:String>
     <sys:String x:Key="Str_KS_File">ARQUIVO</sys:String>
     <sys:String x:Key="Str_KS_Open">Abrir</sys:String>
     <sys:String x:Key="Str_KS_CloseFile">Fechar arquivo</sys:String>
@@ -198,7 +200,7 @@ A página pode ser substituída por uma imagem dela mesma com as áreas marcadas
     <sys:String x:Key="Str_DocInfo_Producer">Produtor</sys:String>
     <sys:String x:Key="Str_DocInfo_Save">Salvar</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">Cancelar</sys:String>
-    <sys:String x:Key="Str_KS_Find">Localizar / pesquisar</sys:String>
+    <sys:String x:Key="Str_KS_Find">Localizar texto</sys:String>
     <sys:String x:Key="Str_KS_Replace">Localizar e substituir</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Resultado seguinte / anterior</sys:String>
     <sys:String x:Key="Str_KS_SelectAll">Selecionar todo o texto da página</sys:String>
@@ -405,7 +407,7 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Lbl_Select">Selecionar</sys:String>
     <sys:String x:Key="Str_Lbl_ZoomOut">Diminuir zoom</sys:String>
     <sys:String x:Key="Str_Lbl_ZoomIn">Aumentar zoom</sys:String>
-    <sys:String x:Key="Str_Lbl_Search">Pesquisar</sys:String>
+    <sys:String x:Key="Str_Lbl_Search">Localizar texto</sys:String>
 
     <!-- ── Right-click menu labels ────────────────────────────────────── -->
     <sys:String x:Key="Str_Ctx_CopyText">Copiar texto</sys:String>

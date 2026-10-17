@@ -115,7 +115,7 @@ La pagina può essere sostituita da un'immagine di sé stessa con le aree contra
     <sys:String x:Key="Str_RedactFind_Hint">I risultati selezionati vengono contrassegnati sulla pagina. Non viene rimosso nulla finché non fai clic su Oscura nella barra Oscura.</sys:String>
     <sys:String x:Key="Str_TT_RotateTool">Trasforma pagina: ruota, ridimensiona, capovolgi, raddrizza o correggi la prospettiva (R)</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">Cancella tutte le annotazioni</sys:String>
-    <sys:String x:Key="Str_TT_Search">Cerca (Ctrl+F)</sys:String>
+    <sys:String x:Key="Str_TT_Search">Trova testo (Ctrl+F)</sys:String>
     <sys:String x:Key="Str_TT_UndoLast">Annulla ultima operazione (Ctrl+Z)</sys:String>
     <sys:String x:Key="Str_TT_MultiPageGrid">Visualizzazione griglia multi pagina (F8)</sys:String>
     <sys:String x:Key="Str_TT_ZoomOut">Zoom - (Ctrl+-)</sys:String>
@@ -165,6 +165,8 @@ La pagina può essere sostituita da un'immagine di sé stessa con le aree contra
     <sys:String x:Key="Str_KS_Title">Scorciatoie tastiera</sys:String>
     <sys:String x:Key="Str_KS_FormField">Campo testo compilabile</sys:String>
     <sys:String x:Key="Str_KS_NextShape">Tipo di forma successivo</sys:String>
+    <sys:String x:Key="Str_ToolSearch">Cerca strumenti</sys:String>
+    <sys:String x:Key="Str_ToolSearch_None">Nessuno strumento o comando corrispondente</sys:String>
     <sys:String x:Key="Str_KS_File">FILE</sys:String>
     <sys:String x:Key="Str_KS_Open">Apri</sys:String>
     <sys:String x:Key="Str_KS_CloseFile">Chiudi file</sys:String>
@@ -198,7 +200,7 @@ La pagina può essere sostituita da un'immagine di sé stessa con le aree contra
     <sys:String x:Key="Str_DocInfo_Producer">Produttore</sys:String>
     <sys:String x:Key="Str_DocInfo_Save">Salva</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">Annulla</sys:String>
-    <sys:String x:Key="Str_KS_Find">Trova/cerca</sys:String>
+    <sys:String x:Key="Str_KS_Find">Trova testo</sys:String>
     <sys:String x:Key="Str_KS_Replace">Trova e sostituisci</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Risultato precedente/successivo</sys:String>
     <sys:String x:Key="Str_KS_SelectAll">Seleziona tutto il testo sulla pagina</sys:String>
@@ -405,7 +407,7 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_Lbl_Select">Seleziona</sys:String>
     <sys:String x:Key="Str_Lbl_ZoomOut">Zoom -</sys:String>
     <sys:String x:Key="Str_Lbl_ZoomIn">Zoom +</sys:String>
-    <sys:String x:Key="Str_Lbl_Search">Cerca</sys:String>
+    <sys:String x:Key="Str_Lbl_Search">Trova testo</sys:String>
 
     <!-- ── Right-click menu labels ────────────────────────────────────── -->
     <sys:String x:Key="Str_Ctx_CopyText">Copia testo</sys:String>

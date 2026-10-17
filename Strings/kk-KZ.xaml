@@ -37,7 +37,7 @@
     <sys:String x:Key="Str_TT_CropTool">Қию құралы - қию аумағын белгілеу үшін сүйреңіз, содан кейін бет(тер)ге қолданыңыз (C)</sys:String>
     <sys:String x:Key="Str_TT_RotateTool">Бетті түрлендіру: бұру, масштабтау, айналдыру, қисықтықты түзету немесе перспективаны түзету (R)</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">Барлық ескертпелерді тазалау</sys:String>
-    <sys:String x:Key="Str_TT_Search">Іздеу (Ctrl+F)</sys:String>
+    <sys:String x:Key="Str_TT_Search">Мәтінді табу (Ctrl+F)</sys:String>
     <sys:String x:Key="Str_TT_UndoLast">Соңғы әрекетті кері қайтару (Ctrl+Z)</sys:String>
     <sys:String x:Key="Str_TT_MultiPageGrid">Көпбеттік тор көрінісі (F8)</sys:String>
     <sys:String x:Key="Str_TT_ZoomOut">Кішірейту (Ctrl+-)</sys:String>
@@ -87,6 +87,8 @@
     <sys:String x:Key="Str_KS_Title">Пернелер тіркесімі</sys:String>
     <sys:String x:Key="Str_KS_FormField">Толтырылатын мәтін өрісі</sys:String>
     <sys:String x:Key="Str_KS_NextShape">Келесі пішін түрі</sys:String>
+    <sys:String x:Key="Str_ToolSearch">Құралдарды іздеу</sys:String>
+    <sys:String x:Key="Str_ToolSearch_None">Сәйкес құралдар немесе пәрмендер жоқ</sys:String>
     <sys:String x:Key="Str_KS_File">ФАЙЛ</sys:String>
     <sys:String x:Key="Str_KS_Open">Ашу</sys:String>
     <sys:String x:Key="Str_KS_CloseFile">Файлды жабу</sys:String>
@@ -120,7 +122,7 @@
     <sys:String x:Key="Str_DocInfo_Producer">Өндіруші</sys:String>
     <sys:String x:Key="Str_DocInfo_Save">Сақтау</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">Болдырмау</sys:String>
-    <sys:String x:Key="Str_KS_Find">Табу / іздеу</sys:String>
+    <sys:String x:Key="Str_KS_Find">Мәтінді табу</sys:String>
     <sys:String x:Key="Str_KS_Replace">Табу және ауыстыру</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Келесі / алдыңғы нәтиже</sys:String>
     <sys:String x:Key="Str_KS_SelectAll">Беттегі барлық мәтінді таңдау</sys:String>
@@ -326,7 +328,7 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Lbl_Select">Таңдау</sys:String>
     <sys:String x:Key="Str_Lbl_ZoomOut">Кішірейту</sys:String>
     <sys:String x:Key="Str_Lbl_ZoomIn">Үлкейту</sys:String>
-    <sys:String x:Key="Str_Lbl_Search">Іздеу</sys:String>
+    <sys:String x:Key="Str_Lbl_Search">Мәтінді табу</sys:String>
 
     <!-- ── Right-click menu labels ────────────────────────────────────── -->
     <sys:String x:Key="Str_Ctx_CopyText">Мәтінді көшіру</sys:String>

@@ -161,6 +161,8 @@ La página se puede sustituir por una imagen de sí misma con las áreas marcada
     <sys:String x:Key="Str_KS_Title">Atajos de teclado</sys:String>
     <sys:String x:Key="Str_KS_FormField">Campo de texto rellenable</sys:String>
     <sys:String x:Key="Str_KS_NextShape">Siguiente tipo de forma</sys:String>
+    <sys:String x:Key="Str_ToolSearch">Buscar herramientas</sys:String>
+    <sys:String x:Key="Str_ToolSearch_None">No hay herramientas ni comandos que coincidan</sys:String>
     <sys:String x:Key="Str_KS_File">ARCHIVO</sys:String>
     <sys:String x:Key="Str_KS_Open">Abrir</sys:String>
     <sys:String x:Key="Str_KS_CloseFile">Cerrar archivo</sys:String>
@@ -181,7 +183,7 @@ La página se puede sustituir por una imagen de sí misma con las áreas marcada
     <sys:String x:Key="Str_KS_DeleteAnnot">Eliminar anotación seleccionada</sys:String>
     <sys:String x:Key="Str_KS_ConfirmCancel">Confirmar / cancelar texto o recorte</sys:String>
     <sys:String x:Key="Str_KS_SearchSelect">BUSCAR Y SELECCIONAR</sys:String>
-    <sys:String x:Key="Str_KS_Find">Buscar</sys:String>
+    <sys:String x:Key="Str_KS_Find">Buscar texto</sys:String>
     <sys:String x:Key="Str_KS_Replace">Buscar y reemplazar</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Resultado siguiente / anterior</sys:String>
     <sys:String x:Key="Str_KS_SelectAll">Seleccionar todo el texto de la página</sys:String>
@@ -768,8 +770,8 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_KS_CycleView">Cambiar al siguiente modo de vista</sys:String>
     <sys:String x:Key="Str_TT_ViewMode">Modo de vista</sys:String>
     <sys:String x:Key="Str_KS_NextTab">Pestaña siguiente (Mayús: anterior)</sys:String>
-    <sys:String x:Key="Str_Lbl_Search">Buscar</sys:String>
-    <sys:String x:Key="Str_TT_Search">Buscar (Ctrl+F)</sys:String>
+    <sys:String x:Key="Str_Lbl_Search">Buscar texto</sys:String>
+    <sys:String x:Key="Str_TT_Search">Buscar texto (Ctrl+F)</sys:String>
     <sys:String x:Key="Str_Ctx_DeletePage">Eliminar página</sys:String>
     <sys:String x:Key="Str_Ctx_DuplicatePage">Duplicar página</sys:String>
     <sys:String x:Key="Str_Ctx_AddBlankPage">Añadir página en blanco</sys:String>

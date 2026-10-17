@@ -115,7 +115,7 @@ Siden kan erstattes med et bilde av seg selv der de markerte områdene er sverte
     <sys:String x:Key="Str_RedactFind_Hint">Avkryssede resultater merkes på siden. Ingenting fjernes før du klikker Sladd på Sladd-linjen.</sys:String>
     <sys:String x:Key="Str_TT_RotateTool">Transformer side: roter, skaler, speilvend, rett opp skjevhet eller korriger perspektiv (R)</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">Fjern alle merknader</sys:String>
-    <sys:String x:Key="Str_TT_Search">Søk (Ctrl+F)</sys:String>
+    <sys:String x:Key="Str_TT_Search">Finn tekst (Ctrl+F)</sys:String>
     <sys:String x:Key="Str_TT_UndoLast">Angre siste (Ctrl+Z)</sys:String>
     <sys:String x:Key="Str_TT_MultiPageGrid">Rutenettvisning med flere sider (F8)</sys:String>
     <sys:String x:Key="Str_TT_ZoomOut">Zoom ut (Ctrl+-)</sys:String>
@@ -165,6 +165,8 @@ Siden kan erstattes med et bilde av seg selv der de markerte områdene er sverte
     <sys:String x:Key="Str_KS_Title">Hurtigtaster</sys:String>
     <sys:String x:Key="Str_KS_FormField">Fyllbart tekstfelt</sys:String>
     <sys:String x:Key="Str_KS_NextShape">Neste formtype</sys:String>
+    <sys:String x:Key="Str_ToolSearch">Søk i verktøy</sys:String>
+    <sys:String x:Key="Str_ToolSearch_None">Ingen samsvarende verktøy eller kommandoer</sys:String>
     <sys:String x:Key="Str_KS_File">FIL</sys:String>
     <sys:String x:Key="Str_KS_Open">Åpne</sys:String>
     <sys:String x:Key="Str_KS_CloseFile">Lukk fil</sys:String>
@@ -198,7 +200,7 @@ Siden kan erstattes med et bilde av seg selv der de markerte områdene er sverte
     <sys:String x:Key="Str_DocInfo_Producer">Produsent</sys:String>
     <sys:String x:Key="Str_DocInfo_Save">Lagre</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">Avbryt</sys:String>
-    <sys:String x:Key="Str_KS_Find">Finn / søk</sys:String>
+    <sys:String x:Key="Str_KS_Find">Finn tekst</sys:String>
     <sys:String x:Key="Str_KS_Replace">Finn og erstatt</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Neste / forrige treff</sys:String>
     <sys:String x:Key="Str_KS_SelectAll">Marker all tekst på siden</sys:String>
@@ -405,7 +407,7 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Lbl_Select">Marker</sys:String>
     <sys:String x:Key="Str_Lbl_ZoomOut">Zoom ut</sys:String>
     <sys:String x:Key="Str_Lbl_ZoomIn">Zoom inn</sys:String>
-    <sys:String x:Key="Str_Lbl_Search">Søk</sys:String>
+    <sys:String x:Key="Str_Lbl_Search">Finn tekst</sys:String>
 
     <!-- ── Right-click menu labels ────────────────────────────────────── -->
     <sys:String x:Key="Str_Ctx_CopyText">Kopier tekst</sys:String>

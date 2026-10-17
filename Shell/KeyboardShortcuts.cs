@@ -25,13 +25,16 @@ namespace KillerPDF
         {
             base.OnPreviewKeyDown(e);
 
-            if (ShortcutTogglePolicy.IsToggle(e.Key, Keyboard.Modifiers, e.SystemKey))
+            // The title bar search box keeps its own navigation keys while it has focus.
+            if (_syntheticShortcut is null && HandleToolSearchKey(e)) return;
+
+            if (_syntheticShortcut is null && ShortcutTogglePolicy.IsToggle(e.Key, Keyboard.Modifiers, e.SystemKey))
             {
                 if (!e.IsRepeat) SetKeyboardShortcutsEnabled(!KeyboardShortcutsEnabled);
                 e.Handled = true;
                 return;
             }
-            if (!KeyboardShortcutsEnabled)
+            if (_syntheticShortcut is null && !KeyboardShortcutsEnabled)
             {
                 e.Handled = ShortcutTogglePolicy.SuppressWhenDisabled(
                     e.Key, e.OriginalSource is TextBox or PasswordBox, e.SystemKey);
@@ -39,13 +42,18 @@ namespace KillerPDF
             }
 
             // Keyboard view of the shortcuts overlay: holding Ctrl / Shift / Alt previews that layer.
-            KbSyncLayerFromModifiers();
+            if (_syntheticShortcut is null) KbSyncLayerFromModifiers();
 
             // #190: a custom shortcut stands in for the key its command shipped on. Everything
             // below matches the translated key; a focused text box still gets the keys as typed.
             Key rawKey = e.Key, rawSystemKey = e.SystemKey;
             ModifierKeys rawMods = Keyboard.Modifiers;
-            var (key, mods, systemKey, swallow) = TranslateShortcut(rawKey, rawMods, rawSystemKey);
+            // A command run from the title bar search (ToolSearch.cs) arrives as its built-in key,
+            // which is what every branch below matches, so it skips the custom-key translation.
+            if (_syntheticShortcut is { } synthetic) (rawKey, rawMods, rawSystemKey) = synthetic;
+            var (key, mods, systemKey, swallow) = _syntheticShortcut is null
+                ? TranslateShortcut(rawKey, rawMods, rawSystemKey)
+                : (rawKey, rawMods, rawSystemKey, false);
 
             if (_comparisonActive && key == Key.Escape && mods == ModifierKeys.None)
             {
@@ -123,6 +131,11 @@ namespace KillerPDF
             else if (key == Key.F && mods == ModifierKeys.Control)
             {
                 ToggleSearchBar();
+                e.Handled = true;
+            }
+            else if (key == Key.K && mods == ModifierKeys.Control)
+            {
+                ToggleToolSearch();   // ToolSearch.cs: the title bar's tool and command search
                 e.Handled = true;
             }
             else if (key == Key.H && mods == ModifierKeys.Control)

@@ -115,7 +115,7 @@ The page can be replaced with an image of itself with the marked areas blacked o
     <sys:String x:Key="Str_RedactFind_Hint">Checked results are marked on the page. Nothing is removed until you click Redact on the Redact bar.</sys:String>
     <sys:String x:Key="Str_TT_RotateTool">Transform page: rotate, scale, flip, deskew, or correct perspective (R)</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">Clear All Annotations</sys:String>
-    <sys:String x:Key="Str_TT_Search">Search (Ctrl+F)</sys:String>
+    <sys:String x:Key="Str_TT_Search">Find Text (Ctrl+F)</sys:String>
     <sys:String x:Key="Str_TT_UndoLast">Undo Last (Ctrl+Z)</sys:String>
     <sys:String x:Key="Str_TT_MultiPageGrid">Multi-page grid view (F8)</sys:String>
     <sys:String x:Key="Str_TT_ZoomOut">Zoom out (Ctrl+-)</sys:String>
@@ -165,6 +165,8 @@ The page can be replaced with an image of itself with the marked areas blacked o
     <sys:String x:Key="Str_KS_Title">Keyboard Shortcuts</sys:String>
     <sys:String x:Key="Str_KS_FormField">Fillable text field</sys:String>
     <sys:String x:Key="Str_KS_NextShape">Next shape type</sys:String>
+    <sys:String x:Key="Str_ToolSearch">Search Tools</sys:String>
+    <sys:String x:Key="Str_ToolSearch_None">No matching tools or commands</sys:String>
     <sys:String x:Key="Str_KS_File">FILE</sys:String>
     <sys:String x:Key="Str_KS_Open">Open</sys:String>
     <sys:String x:Key="Str_KS_CloseFile">Close file</sys:String>
@@ -198,7 +200,7 @@ The page can be replaced with an image of itself with the marked areas blacked o
     <sys:String x:Key="Str_DocInfo_Producer">Producer</sys:String>
     <sys:String x:Key="Str_DocInfo_Save">Save</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">Cancel</sys:String>
-    <sys:String x:Key="Str_KS_Find">Find / search</sys:String>
+    <sys:String x:Key="Str_KS_Find">Find Text</sys:String>
     <sys:String x:Key="Str_KS_Replace">Find and replace</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Next / previous result</sys:String>
     <sys:String x:Key="Str_KS_SelectAll">Select all text on page</sys:String>
@@ -405,7 +407,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Lbl_Select">Select</sys:String>
     <sys:String x:Key="Str_Lbl_ZoomOut">Zoom Out</sys:String>
     <sys:String x:Key="Str_Lbl_ZoomIn">Zoom In</sys:String>
-    <sys:String x:Key="Str_Lbl_Search">Search</sys:String>
+    <sys:String x:Key="Str_Lbl_Search">Find Text</sys:String>
 
     <!-- ── Right-click menu labels ────────────────────────────────────── -->
     <sys:String x:Key="Str_Ctx_CopyText">Copy Text</sys:String>

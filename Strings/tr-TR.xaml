@@ -161,6 +161,8 @@ Sayfa, işaretli alanları karartılmış kendi görüntüsüyle değiştirilebi
     <sys:String x:Key="Str_KS_Title">Klavye Kısayolları</sys:String>
     <sys:String x:Key="Str_KS_FormField">Doldurulabilir metin alanı</sys:String>
     <sys:String x:Key="Str_KS_NextShape">Sonraki şekil türü</sys:String>
+    <sys:String x:Key="Str_ToolSearch">Araç ara</sys:String>
+    <sys:String x:Key="Str_ToolSearch_None">Eşleşen araç veya komut yok</sys:String>
     <sys:String x:Key="Str_KS_File">DOSYA</sys:String>
     <sys:String x:Key="Str_KS_Open">Aç</sys:String>
     <sys:String x:Key="Str_KS_CloseFile">Dosyayı kapat</sys:String>
@@ -181,7 +183,7 @@ Sayfa, işaretli alanları karartılmış kendi görüntüsüyle değiştirilebi
     <sys:String x:Key="Str_KS_DeleteAnnot">Seçili açıklamayı sil</sys:String>
     <sys:String x:Key="Str_KS_ConfirmCancel">Metni veya kırpmayı onayla / iptal et</sys:String>
     <sys:String x:Key="Str_KS_SearchSelect">ARA &amp; SEÇ</sys:String>
-    <sys:String x:Key="Str_KS_Find">Bul / ara</sys:String>
+    <sys:String x:Key="Str_KS_Find">Metin bul</sys:String>
     <sys:String x:Key="Str_KS_Replace">Bul ve değiştir</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Sonraki / önceki sonuç</sys:String>
     <sys:String x:Key="Str_KS_SelectAll">Sayfadaki tüm metni seç</sys:String>
@@ -768,8 +770,8 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_KS_CycleView">Sonraki görünüm modu</sys:String>
     <sys:String x:Key="Str_TT_ViewMode">Görünüm modu</sys:String>
     <sys:String x:Key="Str_KS_NextTab">Sonraki sekme (Shift: önceki)</sys:String>
-    <sys:String x:Key="Str_Lbl_Search">Ara</sys:String>
-    <sys:String x:Key="Str_TT_Search">Ara (Ctrl+F)</sys:String>
+    <sys:String x:Key="Str_Lbl_Search">Metin bul</sys:String>
+    <sys:String x:Key="Str_TT_Search">Metin bul (Ctrl+F)</sys:String>
     <sys:String x:Key="Str_Ctx_DeletePage">Sayfayı sil</sys:String>
     <sys:String x:Key="Str_Ctx_DuplicatePage">Sayfayı çoğalt</sys:String>
     <sys:String x:Key="Str_Ctx_AddBlankPage">Boş sayfa ekle</sys:String>

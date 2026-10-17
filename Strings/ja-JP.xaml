@@ -115,7 +115,7 @@
     <sys:String x:Key="Str_RedactFind_Hint">チェックした結果がページ上でマークされます。墨消しバーの [墨消し] をクリックするまで何も削除されません。</sys:String>
     <sys:String x:Key="Str_TT_RotateTool">ページ変換: 回転、拡大縮小、反転、傾き補正、遠近補正 (R)</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">すべての注釈をクリア</sys:String>
-    <sys:String x:Key="Str_TT_Search">検索 (Ctrl+F)</sys:String>
+    <sys:String x:Key="Str_TT_Search">テキストを検索 (Ctrl+F)</sys:String>
     <sys:String x:Key="Str_TT_UndoLast">元に戻す (Ctrl+Z)</sys:String>
     <sys:String x:Key="Str_TT_MultiPageGrid">マルチページグリッド表示 (F8)</sys:String>
     <sys:String x:Key="Str_TT_ZoomOut">ズームアウト (Ctrl+-)</sys:String>
@@ -165,6 +165,8 @@
     <sys:String x:Key="Str_KS_Title">キーボードショートカット</sys:String>
     <sys:String x:Key="Str_KS_FormField">入力可能なテキストフィールド</sys:String>
     <sys:String x:Key="Str_KS_NextShape">次の図形の種類</sys:String>
+    <sys:String x:Key="Str_ToolSearch">ツールを検索</sys:String>
+    <sys:String x:Key="Str_ToolSearch_None">一致するツールやコマンドはありません</sys:String>
     <sys:String x:Key="Str_KS_File">ファイル</sys:String>
     <sys:String x:Key="Str_KS_Open">開く</sys:String>
     <sys:String x:Key="Str_KS_CloseFile">ファイルを閉じる</sys:String>
@@ -198,7 +200,7 @@
     <sys:String x:Key="Str_DocInfo_Producer">生成ソフト</sys:String>
     <sys:String x:Key="Str_DocInfo_Save">保存</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">キャンセル</sys:String>
-    <sys:String x:Key="Str_KS_Find">検索</sys:String>
+    <sys:String x:Key="Str_KS_Find">テキストを検索</sys:String>
     <sys:String x:Key="Str_KS_Replace">検索と置換</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">次の結果 / 前の結果</sys:String>
     <sys:String x:Key="Str_KS_SelectAll">ページ内のすべてのテキストを選択</sys:String>
@@ -405,7 +407,7 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Lbl_Select">選択</sys:String>
     <sys:String x:Key="Str_Lbl_ZoomOut">ズームアウト</sys:String>
     <sys:String x:Key="Str_Lbl_ZoomIn">ズームイン</sys:String>
-    <sys:String x:Key="Str_Lbl_Search">検索</sys:String>
+    <sys:String x:Key="Str_Lbl_Search">テキストを検索</sys:String>
 
     <!-- ── 右クリックメニューラベル ───────────────────────────────────── -->
     <sys:String x:Key="Str_Ctx_CopyText">テキストをコピー</sys:String>

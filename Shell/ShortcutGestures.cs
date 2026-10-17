@@ -128,6 +128,7 @@ namespace KillerPDF
             Tip(UndoBtn, "Str_TT_UndoLast", "Ctrl:Z");
             Tip(RedoBtn, "Str_Ctx_Redo", "Ctrl:Y");
             Tip(SearchBtn, "Str_TT_Search", "Ctrl:F");
+            Tip(_toolSearchBtn, "Str_ToolSearch", "Ctrl:K");
 
             Tip(SplitPaneRailBtn, "Str_TT_SplitPane", "F10");
             Tip(FullScreenRailBtn, "Str_KS_FullScreen", "F11");

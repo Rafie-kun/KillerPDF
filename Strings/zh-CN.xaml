@@ -161,6 +161,8 @@
     <sys:String x:Key="Str_KS_Title">键盘快速键</sys:String>
     <sys:String x:Key="Str_KS_FormField">可填写文本字段</sys:String>
     <sys:String x:Key="Str_KS_NextShape">下一个形状类型</sys:String>
+    <sys:String x:Key="Str_ToolSearch">搜索工具</sys:String>
+    <sys:String x:Key="Str_ToolSearch_None">没有匹配的工具或命令</sys:String>
     <sys:String x:Key="Str_KS_File">文件</sys:String>
     <sys:String x:Key="Str_KS_Open">打开</sys:String>
     <sys:String x:Key="Str_KS_CloseFile">关闭文件</sys:String>
@@ -181,7 +183,7 @@
     <sys:String x:Key="Str_KS_DeleteAnnot">删除选取的注释</sys:String>
     <sys:String x:Key="Str_KS_ConfirmCancel">确认 / 取消文本或裁切</sys:String>
     <sys:String x:Key="Str_KS_SearchSelect">搜索与选取</sys:String>
-    <sys:String x:Key="Str_KS_Find">寻找 / 搜索</sys:String>
+    <sys:String x:Key="Str_KS_Find">查找文本</sys:String>
     <sys:String x:Key="Str_KS_Replace">查找和替换</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">下一个 / 上一个结果</sys:String>
     <sys:String x:Key="Str_KS_SelectAll">选取页面上所有文本</sys:String>
@@ -768,8 +770,8 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_KS_CycleView">下一个查看模式</sys:String>
     <sys:String x:Key="Str_TT_ViewMode">查看模式</sys:String>
     <sys:String x:Key="Str_KS_NextTab">下一个标签页（Shift：上一个）</sys:String>
-    <sys:String x:Key="Str_Lbl_Search">搜索</sys:String>
-    <sys:String x:Key="Str_TT_Search">搜索 (Ctrl+F)</sys:String>
+    <sys:String x:Key="Str_Lbl_Search">查找文本</sys:String>
+    <sys:String x:Key="Str_TT_Search">查找文本 (Ctrl+F)</sys:String>
     <sys:String x:Key="Str_Ctx_DeletePage">删除页面</sys:String>
     <sys:String x:Key="Str_Ctx_DuplicatePage">复制页面</sys:String>
     <sys:String x:Key="Str_Ctx_AddBlankPage">添加空白页</sys:String>

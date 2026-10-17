@@ -115,7 +115,7 @@ Stronę można zastąpić jej obrazem z zaczernionymi zaznaczonymi obszarami. Te
     <sys:String x:Key="Str_RedactFind_Hint">Wybrane wyniki są zaznaczane na stronie. Nic nie zostanie usunięte, dopóki nie klikniesz Zaczernij na pasku Zaczernij.</sys:String>
     <sys:String x:Key="Str_TT_RotateTool">Przekształć stronę: obrót, skalowanie, odbicie, korekcja zniekształceń lub perspektywy (R)</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">Wyczyść wszystkie adnotacje</sys:String>
-    <sys:String x:Key="Str_TT_Search">Szukaj (Ctrl+F)</sys:String>
+    <sys:String x:Key="Str_TT_Search">Znajdź tekst (Ctrl+F)</sys:String>
     <sys:String x:Key="Str_TT_UndoLast">Cofnij ostatnie (Ctrl+Z)</sys:String>
     <sys:String x:Key="Str_TT_MultiPageGrid">Wielostronicowy widok siatki (F8)</sys:String>
     <sys:String x:Key="Str_TT_ZoomOut">Pomniejsz (Ctrl+-)</sys:String>
@@ -165,6 +165,8 @@ Stronę można zastąpić jej obrazem z zaczernionymi zaznaczonymi obszarami. Te
     <sys:String x:Key="Str_KS_Title">Skróty Klawiaturowe</sys:String>
     <sys:String x:Key="Str_KS_FormField">Wypełnialne pole tekstowe</sys:String>
     <sys:String x:Key="Str_KS_NextShape">Następny typ kształtu</sys:String>
+    <sys:String x:Key="Str_ToolSearch">Szukaj narzędzi</sys:String>
+    <sys:String x:Key="Str_ToolSearch_None">Brak pasujących narzędzi i poleceń</sys:String>
     <sys:String x:Key="Str_KS_File">PLIK</sys:String>
     <sys:String x:Key="Str_KS_Open">Otwórz</sys:String>
     <sys:String x:Key="Str_KS_CloseFile">Zamknij plik</sys:String>
@@ -198,7 +200,7 @@ Stronę można zastąpić jej obrazem z zaczernionymi zaznaczonymi obszarami. Te
     <sys:String x:Key="Str_DocInfo_Producer">Producent</sys:String>
     <sys:String x:Key="Str_DocInfo_Save">Zapisz</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">Anuluj</sys:String>
-    <sys:String x:Key="Str_KS_Find">Znajdź / wyszukaj</sys:String>
+    <sys:String x:Key="Str_KS_Find">Znajdź tekst</sys:String>
     <sys:String x:Key="Str_KS_Replace">Znajdź i zamień</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Następny / poprzedni wynik</sys:String>
     <sys:String x:Key="Str_KS_SelectAll">Zaznacz cały tekst na stronie</sys:String>
@@ -396,7 +398,7 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Lbl_Select">Wybierz</sys:String>
     <sys:String x:Key="Str_Lbl_ZoomOut">Pomniejsz</sys:String>
     <sys:String x:Key="Str_Lbl_ZoomIn">Powiększ</sys:String>
-    <sys:String x:Key="Str_Lbl_Search">Szukaj</sys:String>
+    <sys:String x:Key="Str_Lbl_Search">Znajdź tekst</sys:String>
 
     <!-- ── Right-click menu labels ────────────────────────────────────── -->
     <sys:String x:Key="Str_Ctx_CopyText">Kopiuj tekst</sys:String>

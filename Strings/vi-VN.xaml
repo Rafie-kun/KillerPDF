@@ -115,7 +115,7 @@ Có thể thay trang bằng hình ảnh của chính nó với các vùng đã �
     <sys:String x:Key="Str_RedactFind_Hint">Các kết quả đã chọn được đánh dấu trên trang. Không có gì bị xóa cho đến khi bạn bấm Che trên thanh Che.</sys:String>
     <sys:String x:Key="Str_TT_RotateTool">Chuyển đổi trang: xoay, thu phóng, lật, làm thẳng hoặc chỉnh phối cảnh (R)</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">Xóa tất cả chú thích</sys:String>
-    <sys:String x:Key="Str_TT_Search">Tìm kiếm (Ctrl+F)</sys:String>
+    <sys:String x:Key="Str_TT_Search">Tìm văn bản (Ctrl+F)</sys:String>
     <sys:String x:Key="Str_TT_UndoLast">Hoàn tác thao tác cuối (Ctrl+Z)</sys:String>
     <sys:String x:Key="Str_TT_MultiPageGrid">Xem lưới nhiều trang (F8)</sys:String>
     <sys:String x:Key="Str_TT_ZoomOut">Thu nhỏ (Ctrl+-)</sys:String>
@@ -165,6 +165,8 @@ Có thể thay trang bằng hình ảnh của chính nó với các vùng đã �
     <sys:String x:Key="Str_KS_Title">Phím tắt bàn phím</sys:String>
     <sys:String x:Key="Str_KS_FormField">Trường văn bản điền được</sys:String>
     <sys:String x:Key="Str_KS_NextShape">Loại hình vẽ tiếp theo</sys:String>
+    <sys:String x:Key="Str_ToolSearch">Tìm công cụ</sys:String>
+    <sys:String x:Key="Str_ToolSearch_None">Không có công cụ hoặc lệnh phù hợp</sys:String>
     <sys:String x:Key="Str_KS_File">TỆP</sys:String>
     <sys:String x:Key="Str_KS_Open">Mở</sys:String>
     <sys:String x:Key="Str_KS_CloseFile">Đóng tệp</sys:String>
@@ -198,7 +200,7 @@ Có thể thay trang bằng hình ảnh của chính nó với các vùng đã �
     <sys:String x:Key="Str_DocInfo_Producer">Nhà sản xuất</sys:String>
     <sys:String x:Key="Str_DocInfo_Save">Lưu</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">Hủy</sys:String>
-    <sys:String x:Key="Str_KS_Find">Tìm / tìm kiếm</sys:String>
+    <sys:String x:Key="Str_KS_Find">Tìm văn bản</sys:String>
     <sys:String x:Key="Str_KS_Replace">Tìm và thay thế</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Kết quả tiếp theo / trước đó</sys:String>
     <sys:String x:Key="Str_KS_SelectAll">Chọn toàn bộ văn bản trên trang</sys:String>
@@ -405,7 +407,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Lbl_Select">Chọn</sys:String>
     <sys:String x:Key="Str_Lbl_ZoomOut">Thu nhỏ</sys:String>
     <sys:String x:Key="Str_Lbl_ZoomIn">Phóng to</sys:String>
-    <sys:String x:Key="Str_Lbl_Search">Tìm kiếm</sys:String>
+    <sys:String x:Key="Str_Lbl_Search">Tìm văn bản</sys:String>
 
     <!-- ── Nhãn menu chuột phải ────────────────────────────────────────── -->
     <sys:String x:Key="Str_Ctx_CopyText">Sao chép văn bản</sys:String>

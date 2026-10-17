@@ -417,6 +417,7 @@ namespace KillerPDF
             BuildContextMenu();
             SetTool(EditTool.Select);
             ApplyGrainTexture();
+            BuildToolSearch();           // the title bar's magnifier and search box (ToolSearch.cs)
             ApplyShortcutTooltips();     // every tooltip that names a key, from the live bindings
             BuildShortcutsOverlay();     // generate the shortcuts card from the single-source table (ShortcutsOverlay.cs)
             SourceInitialized += MainWindow_SourceInitialized;

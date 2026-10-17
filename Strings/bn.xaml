@@ -161,6 +161,8 @@
     <sys:String x:Key="Str_KS_Title">কীবোর্ড শর্টকাট</sys:String>
     <sys:String x:Key="Str_KS_FormField">পূরণযোগ্য টেক্সট ক্ষেত্র</sys:String>
     <sys:String x:Key="Str_KS_NextShape">পরবর্তী আকারের ধরন</sys:String>
+    <sys:String x:Key="Str_ToolSearch">টুল খুঁজুন</sys:String>
+    <sys:String x:Key="Str_ToolSearch_None">মিলে যাওয়া কোনো টুল বা কমান্ড নেই</sys:String>
     <sys:String x:Key="Str_KS_File">ফাইল</sys:String>
     <sys:String x:Key="Str_KS_Open">খুলুন</sys:String>
     <sys:String x:Key="Str_KS_CloseFile">ফাইল বন্ধ করুন</sys:String>
@@ -181,7 +183,7 @@
     <sys:String x:Key="Str_KS_DeleteAnnot">নির্বাচিত অ্যানোটেশন মুছুন</sys:String>
     <sys:String x:Key="Str_KS_ConfirmCancel">টেক্সট বা ক্রপ নিশ্চিত / বাতিল করুন</sys:String>
     <sys:String x:Key="Str_KS_SearchSelect">অনুসন্ধান &amp; নির্বাচন</sys:String>
-    <sys:String x:Key="Str_KS_Find">খুঁজুন / অনুসন্ধান করুন</sys:String>
+    <sys:String x:Key="Str_KS_Find">লেখা খুঁজুন</sys:String>
     <sys:String x:Key="Str_KS_Replace">খুঁজুন ও প্রতিস্থাপন করুন</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">পরবর্তী / আগের ফলাফল</sys:String>
     <sys:String x:Key="Str_KS_SelectAll">পৃষ্ঠার সব টেক্সট নির্বাচন করুন</sys:String>
@@ -768,8 +770,8 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_KS_CycleView">পরবর্তী ভিউ মোড</sys:String>
     <sys:String x:Key="Str_TT_ViewMode">ভিউ মোড</sys:String>
     <sys:String x:Key="Str_KS_NextTab">পরবর্তী ট্যাব (Shift: পূর্ববর্তী)</sys:String>
-    <sys:String x:Key="Str_Lbl_Search">অনুসন্ধান</sys:String>
-    <sys:String x:Key="Str_TT_Search">অনুসন্ধান (Ctrl+F)</sys:String>
+    <sys:String x:Key="Str_Lbl_Search">লেখা খুঁজুন</sys:String>
+    <sys:String x:Key="Str_TT_Search">লেখা খুঁজুন (Ctrl+F)</sys:String>
     <sys:String x:Key="Str_Ctx_DeletePage">পৃষ্ঠা মুছুন</sys:String>
     <sys:String x:Key="Str_Ctx_DuplicatePage">পৃষ্ঠা সদৃশ করুন</sys:String>
     <sys:String x:Key="Str_Ctx_AddBlankPage">ফাঁকা পৃষ্ঠা যোগ করুন</sys:String>

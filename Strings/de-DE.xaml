@@ -161,6 +161,8 @@ Die Seite kann durch ein Bild ihrer selbst ersetzt werden, in dem die markierten
     <sys:String x:Key="Str_KS_Title">Tastenkürzel</sys:String>
     <sys:String x:Key="Str_KS_FormField">Ausfüllbares Textfeld</sys:String>
     <sys:String x:Key="Str_KS_NextShape">Nächste Formart</sys:String>
+    <sys:String x:Key="Str_ToolSearch">Werkzeuge suchen</sys:String>
+    <sys:String x:Key="Str_ToolSearch_None">Keine passenden Werkzeuge oder Befehle</sys:String>
     <sys:String x:Key="Str_KS_File">DATEI</sys:String>
     <sys:String x:Key="Str_KS_Open">Öffnen</sys:String>
     <sys:String x:Key="Str_KS_CloseFile">Datei schließen</sys:String>
@@ -181,7 +183,7 @@ Die Seite kann durch ein Bild ihrer selbst ersetzt werden, in dem die markierten
     <sys:String x:Key="Str_KS_DeleteAnnot">Ausgewählte Anmerkung löschen</sys:String>
     <sys:String x:Key="Str_KS_ConfirmCancel">Text oder Zuschnitt bestätigen / abbrechen</sys:String>
     <sys:String x:Key="Str_KS_SearchSelect">SUCHEN &amp; AUSWÄHLEN</sys:String>
-    <sys:String x:Key="Str_KS_Find">Suchen</sys:String>
+    <sys:String x:Key="Str_KS_Find">Text suchen</sys:String>
     <sys:String x:Key="Str_KS_Replace">Suchen und ersetzen</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Nächstes / vorheriges Ergebnis</sys:String>
     <sys:String x:Key="Str_KS_SelectAll">Gesamten Text auf der Seite auswählen</sys:String>
@@ -768,8 +770,8 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_KS_CycleView">Nächster Ansichtsmodus</sys:String>
     <sys:String x:Key="Str_TT_ViewMode">Ansichtsmodus</sys:String>
     <sys:String x:Key="Str_KS_NextTab">Nächster Tab (Umschalt: vorheriger)</sys:String>
-    <sys:String x:Key="Str_Lbl_Search">Suchen</sys:String>
-    <sys:String x:Key="Str_TT_Search">Suchen (Strg+F)</sys:String>
+    <sys:String x:Key="Str_Lbl_Search">Text suchen</sys:String>
+    <sys:String x:Key="Str_TT_Search">Text suchen (Strg+F)</sys:String>
     <sys:String x:Key="Str_Ctx_DeletePage">Seite löschen</sys:String>
     <sys:String x:Key="Str_Ctx_DuplicatePage">Seite duplizieren</sys:String>
     <sys:String x:Key="Str_Ctx_AddBlankPage">Leere Seite hinzufügen</sys:String>

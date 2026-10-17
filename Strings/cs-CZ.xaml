@@ -115,7 +115,7 @@ Stránku lze nahradit jejím obrázkem se začerněnými označenými oblastmi. 
     <sys:String x:Key="Str_RedactFind_Hint">Zaškrtnuté výsledky se na stránce označí. Nic se neodstraní, dokud na panelu Začernit neklepnete na Začernit.</sys:String>
     <sys:String x:Key="Str_TT_RotateTool">Transformace stránky: otočení, změna měřítka, převrácení, narovnání nebo oprava perspektivy (R)</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">Odstranit všechny anotace</sys:String>
-    <sys:String x:Key="Str_TT_Search">Hledat (Ctrl+F)</sys:String>
+    <sys:String x:Key="Str_TT_Search">Najít text (Ctrl+F)</sys:String>
     <sys:String x:Key="Str_TT_UndoLast">Zpět (Ctrl+Z)</sys:String>
     <sys:String x:Key="Str_TT_MultiPageGrid">Mřížkové zobrazení více stránek (F8)</sys:String>
     <sys:String x:Key="Str_TT_ZoomOut">Oddálit (Ctrl+-)</sys:String>
@@ -165,6 +165,8 @@ Stránku lze nahradit jejím obrázkem se začerněnými označenými oblastmi. 
     <sys:String x:Key="Str_KS_Title">Klávesové zkratky</sys:String>
     <sys:String x:Key="Str_KS_FormField">Vyplnitelné textové pole</sys:String>
     <sys:String x:Key="Str_KS_NextShape">Další typ tvaru</sys:String>
+    <sys:String x:Key="Str_ToolSearch">Hledat nástroje</sys:String>
+    <sys:String x:Key="Str_ToolSearch_None">Žádné odpovídající nástroje ani příkazy</sys:String>
     <sys:String x:Key="Str_KS_File">SOUBOR</sys:String>
     <sys:String x:Key="Str_KS_Open">Otevřít</sys:String>
     <sys:String x:Key="Str_KS_CloseFile">Zavřít soubor</sys:String>
@@ -198,7 +200,7 @@ Stránku lze nahradit jejím obrázkem se začerněnými označenými oblastmi. 
     <sys:String x:Key="Str_DocInfo_Producer">Producent</sys:String>
     <sys:String x:Key="Str_DocInfo_Save">Uložit</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">Zrušit</sys:String>
-    <sys:String x:Key="Str_KS_Find">Najít / hledat</sys:String>
+    <sys:String x:Key="Str_KS_Find">Najít text</sys:String>
     <sys:String x:Key="Str_KS_Replace">Najít a nahradit</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Další / předchozí výsledek</sys:String>
     <sys:String x:Key="Str_KS_SelectAll">Vybrat veškerý text na stránce</sys:String>
@@ -405,7 +407,7 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Lbl_Select">Výběr</sys:String>
     <sys:String x:Key="Str_Lbl_ZoomOut">Oddálit</sys:String>
     <sys:String x:Key="Str_Lbl_ZoomIn">Přiblížit</sys:String>
-    <sys:String x:Key="Str_Lbl_Search">Hledat</sys:String>
+    <sys:String x:Key="Str_Lbl_Search">Najít text</sys:String>
 
     <!-- ── Right-click menu labels ────────────────────────────────────── -->
     <sys:String x:Key="Str_Ctx_CopyText">Kopírovat text</sys:String>
