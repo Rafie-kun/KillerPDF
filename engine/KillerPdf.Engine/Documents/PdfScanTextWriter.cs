@@ -209,8 +209,10 @@ public static class PdfScanTextWriter
         var probes = new List<PdfScanTextWord>(words.Count * 2);
         var owners = new List<int>(words.Count * 2);
         var distinct = new List<bool>(words.Count * 2);
+        var ownProbe = new int[words.Count];
         for (int i = 0; i < words.Count; i++)
         {
+            ownProbe[i] = probes.Count;
             probes.Add(words[i]);
             owners.Add(i);
             distinct.Add(false);
@@ -224,14 +226,30 @@ public static class PdfScanTextWriter
             }
         }
         cancellationToken.ThrowIfCancellationRequested();
-        double[] shapes = MatchWords(analysis, face, probes, out _, out _, strict: true);
+        // Each swap is also judged where it happens: the letters around the swapped position,
+        // set both ways, are compared with the ink there. A whole-word score dilutes one wrong
+        // letter among the right ones, which let t and f, i and l, or rn and m pass on a face
+        // that matches the print only roughly.
+        var windows = new SwapSpan[probes.Count];
+        for (int k = 0; k < probes.Count; k++)
+            windows[k] = k == ownProbe[owners[k]] ? SwapSpan.None
+                : SwapWindow(face, words[owners[k]], probes[k], ownProbe[owners[k]]);
+        double[] shapes = MatchWords(analysis, face, probes, out _, out _, strict: true,
+            windows, out double[] localGain);
         double[] own = new double[words.Count], rival = new double[words.Count];
         double[] distinctRival = new double[words.Count];
         string?[] distinctText = new string?[words.Count];
+        double[] localRival = new double[words.Count];
+        string?[] localText = new string?[words.Count];
         for (int k = 0; k < probes.Count; k++)
         {
             PdfScanTextWord owner = words[owners[k]];
             if (ReferenceEquals(probes[k], owner)) { own[owners[k]] = shapes[k]; continue; }
+            if (localGain[k] > localRival[owners[k]])
+            {
+                localRival[owners[k]] = localGain[k];
+                localText[owners[k]] = probes[k].Word.Text;
+            }
             if (distinct[k] && shapes[k] > distinctRival[owners[k]])
             {
                 distinctRival[owners[k]] = shapes[k];
@@ -256,9 +274,17 @@ public static class PdfScanTextWriter
             words[i].Match = matches[i];
             bool tied = words[i].Word.Confidence < typicalConfidence - 0.05
                 && distinctRival[i] >= own[i] - 0.01 / Math.Max(1, words[i].Word.Text.Count(char.IsLetterOrDigit));
+            // At the swapped letters themselves, a lookalike that covers the ink clearly better
+            // than the recognized letters means the recognizer most likely misread them.
+            bool locallyBeaten = localRival[i] > LocalSwapMargin;
             if (matches[i] >= minimumMatch && matches[i] >= typical - 0.15
-                && own[i] >= typicalShape - 0.12 && rival[i] <= own[i] + 0.05 && !tied)
+                && own[i] >= typicalShape - 0.12 && rival[i] <= own[i] + 0.05 && !tied && !locallyBeaten)
                 continue;
+            if (locallyBeaten && rival[i] <= own[i] + 0.05 && !tied)
+            {
+                words[i].Lookalike = localText[i];
+                words[i].LookalikeMatch = own[i] + localRival[i];
+            }
             if (tied && rival[i] <= own[i] + 0.05)
             {
                 words[i].Lookalike = distinctText[i];
@@ -268,6 +294,58 @@ public static class PdfScanTextWriter
             rejected++;
         }
         return rejected;
+    }
+
+    // How much better, as an F1 score over the swapped letters, a lookalike must cover the ink
+    // there before the recognized reading is doubted. Correct readings stay well below it even
+    // on noisy scans, where the letters' edges wander by a pixel or two.
+    private const double LocalSwapMargin = 0.04;
+
+    // The columns, in the word's mask, of the letters a swap changes, as the lookalike sets them
+    // and as the recognized reading (the probe Against) sets its own letters there, each widened
+    // by a little of the x-height so the letters' edges count. The two readings place the letters
+    // after a swap differently when their widths differ, so each may slide a quarter of the
+    // x-height to meet the ink.
+    private static SwapSpan SwapWindow(PdfScanTextFace face,
+        PdfScanTextWord word, PdfScanTextWord probe, int against)
+    {
+        string a = word.Word.Text, b = probe.Word.Text;
+        int prefix = 0;
+        while (prefix < a.Length && prefix < b.Length && a[prefix] == b[prefix]) prefix++;
+        int suffix = 0;
+        while (suffix < a.Length - prefix && suffix < b.Length - prefix
+               && a[a.Length - 1 - suffix] == b[b.Length - 1 - suffix]) suffix++;
+        (double aFrom, double aTo) = LetterSpan(face, word, a, prefix, a.Length - suffix);
+        (double bFrom, double bTo) = LetterSpan(face, probe, b, prefix, b.Length - suffix);
+        double margin = Math.Max(1, word.XHeight * 0.08);
+        int Lo(double x) => Math.Clamp((int)Math.Floor(x - margin), 0, word.MaskWidth);
+        int Hi(double x) => Math.Clamp((int)Math.Ceiling(x + margin), 0, word.MaskWidth);
+        int reach = Math.Max(1, (int)Math.Round(word.XHeight * 0.25));
+        return Hi(bTo) - Lo(bFrom) >= 2 && Hi(aTo) - Lo(aFrom) >= 2
+            ? new SwapSpan(Lo(bFrom), Hi(bTo), against, Lo(aFrom), Hi(aTo), reach)
+            : SwapSpan.None;
+    }
+
+    // The columns of a reading's swapped letters, the reading it is compared against and that
+    // reading's columns for the letters it has there, and how far either may slide to meet the ink.
+    private readonly record struct SwapSpan(int From, int To, int Against, int AgainstFrom, int AgainstTo,
+        int Reach)
+    {
+        public static SwapSpan None => new(0, 0, -1, 0, 0, 0);
+    }
+
+    // Where the letters [first, last) of a word's text fall, in mask columns, as SetWord sets them
+    // on its own (the line's shared scale is close to the word's own fit, so this is near enough).
+    private static (double From, double To) LetterSpan(PdfScanTextFace face, PdfScanTextWord word,
+        string text, int first, int last)
+    {
+        TrueTypeFont font = FaceFor(face, word);
+        double size = PixelSize(font, word);
+        double advance = Advance(font, word.FitText ?? text) * size / 1000;
+        double scale = advance > 0 ? Math.Clamp((word.Right - word.Left) / advance, 0.5, 2) : 1;
+        double unit = size / 1000 * scale;
+        double origin = word.Left - word.MaskLeft;
+        return (origin + Advance(font, text[..first]) * unit, origin + Advance(font, text[..last]) * unit);
     }
 
     // Letters and pairs a recognizer commonly takes for one another, most telling first, and
@@ -325,7 +403,15 @@ public static class PdfScanTextWriter
     // rendered letters with the scanned ink as intersection over union.
     private static double[] MatchWords(PdfScanTextPageAnalysis analysis, PdfScanTextFace face,
         List<PdfScanTextWord> words, out Dictionary<int, double> lineScales, out double[] strokes,
-        bool strict = false)
+        bool strict = false) =>
+        MatchWords(analysis, face, words, out lineScales, out strokes, strict, null, out _);
+
+    // windows, when given, holds for each word the columns of its swapped letters and the word
+    // whose setting it is compared against there; localGain receives how much better, as an F1
+    // score over those letters, the word covers the scanned ink than that other word.
+    private static double[] MatchWords(PdfScanTextPageAnalysis analysis, PdfScanTextFace face,
+        List<PdfScanTextWord> words, out Dictionary<int, double> lineScales, out double[] strokes,
+        bool strict, SwapSpan[]? windows, out double[] localGain)
     {
         // The words are packed side by side onto a small canvas, each with a margin, instead of
         // rendering the page area they span.
@@ -368,11 +454,14 @@ public static class PdfScanTextWriter
         // heavier face still matches while a wrong or misplaced letter does not.
         double[] matches = new double[words.Count];
         strokes = new double[words.Count];
+        localGain = new double[words.Count];
+        bool[]?[] settings = windows is null ? [] : new bool[]?[words.Count];
         for (int i = 0; i < words.Count; i++)
         {
             PdfScanTextWord word = words[i];
             int w = word.MaskWidth, h = word.MaskHeight;
             bool[] set = new bool[w * h];
+            if (windows is not null) settings[i] = set;
             for (int y = 0; y < h; y++)
             {
                 int py = places[i].Y + y;
@@ -408,7 +497,46 @@ public static class PdfScanTextWriter
                 (int)Math.Round(word.Baseline - word.XHeight) - word.MaskTop,
                 (int)Math.Round(word.Baseline) - 1 - word.MaskTop);
         }
+        if (windows is not null)
+        {
+            var nearScans = new Dictionary<bool[], bool[]>(ReferenceEqualityComparer.Instance);
+            for (int i = 0; i < words.Count; i++)
+            {
+                SwapSpan span = windows[i];
+                if (span.Against < 0 || settings[i] is not bool[] mine || settings[span.Against] is not bool[] theirs) continue;
+                PdfScanTextWord word = words[i];
+                if (!nearScans.TryGetValue(word.Mask, out bool[]? nearScan))
+                    nearScans[word.Mask] = nearScan = PdfScanTextAnalyzer.Grow(word.Mask, word.MaskWidth, word.MaskHeight, 1);
+                localGain[i] = LocalCover(word, nearScan, mine, span.From, span.To, span.Reach)
+                    - LocalCover(word, nearScan, theirs, span.AgainstFrom, span.AgainstTo, span.Reach);
+            }
+        }
         return matches;
+    }
+
+    // The best F1 of a setting's mask columns [from, to) against the word's scanned ink, the
+    // setting slid up to reach pixels either way, each side allowed a pixel as the face choice is.
+    private static double LocalCover(PdfScanTextWord word, bool[] nearScan, bool[] set, int from, int to, int reach)
+    {
+        int w = word.MaskWidth, h = word.MaskHeight;
+        bool[] nearSet = PdfScanTextAnalyzer.Grow(set, w, h, 1);
+        double best = 0;
+        for (int shift = -reach; shift <= reach; shift++)
+        {
+            int setCount = 0, setHits = 0, scanCount = 0, scanHits = 0;
+            for (int y = 0; y < h; y++)
+                for (int x = from; x < to; x++)
+                {
+                    int sx = x + shift;
+                    if ((uint)sx >= (uint)w) continue;
+                    int k = y * w + x, s = y * w + sx;
+                    if (set[k]) { setCount++; if (nearScan[s]) setHits++; }
+                    if (word.Mask[s]) { scanCount++; if (nearSet[k]) scanHits++; }
+                }
+            double precision = Ratio(setHits, setCount), recall = Ratio(scanHits, scanCount);
+            if (precision + recall > 0) best = Math.Max(best, 2 * precision * recall / (precision + recall));
+        }
+        return best;
     }
 
     private static double Ratio(int part, int whole) => whole == 0 ? 0 : part / (double)whole;

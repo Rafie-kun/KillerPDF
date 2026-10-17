@@ -89,6 +89,30 @@ public sealed class PdfScanTextTests
             word => Assert.True(word.Replaceable, word.Word.Text));
     }
 
+    [Theory]
+    [InlineData("Times-Roman", 0, "she will fill the cups", "fill", "fiil")]
+    [InlineData("Times-Roman", 0, "a little kitten slept", "little", "iittle")]
+    [InlineData("Helvetica", 1, "she will fill the cups", "fill", "fiil")]
+    [InlineData("Helvetica", 1, "the soft fabric felt warm", "felt", "telt")]
+    public void ALookalikeLetterInALongerWordStaysInTheImage(string fontName, int faceIndex,
+        string line, string printed, string misread)
+    {
+        Scan scan = Render(PdfStandardFontSubstitutes.Find(fontName), line, "with a few more words");
+        PdfScanTextFace face = PdfScanTextWriter.BundledFaces()[faceIndex];
+        List<PdfOcrPixelWord> words = [.. scan.Words.Select(word =>
+            word.Text == printed ? word with { Text = misread } : word)];
+        PdfScanTextPageAnalysis misreadPage = PdfScanTextAnalyzer.Analyze(
+            scan.Pixels, scan.Width, scan.Height, words);
+        PdfScanTextPageAnalysis readPage = PdfScanTextAnalyzer.Analyze(
+            scan.Pixels, scan.Width, scan.Height, scan.Words);
+
+        PdfScanTextWriter.Verify(misreadPage, face);
+        PdfScanTextWriter.Verify(readPage, face);
+
+        Assert.False(misreadPage.Words.Single(word => word.Word.Text == misread).Replaceable);
+        Assert.True(readPage.Words.Single(word => word.Word.Text == printed).Replaceable);
+    }
+
     [Fact]
     public void ABracketPressedAgainstALetterStaysInTheImage()
     {
