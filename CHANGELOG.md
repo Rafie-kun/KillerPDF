@@ -26,6 +26,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Theme and language radio buttons and the Film Grain checkbox line up with their labels again.
 - The file picker's close button turns red on hover without filling a red block, like every other dialog's close, and keeps the classic caption button on 98SE.
 - The checked boxes in the annotation bars and Crop's All pages box keep a readable tick on every accent instead of white on yellow.
+- Opening the shortcuts or About card moves keyboard focus into it, Tab stays inside the card, and closing it returns focus to where it was.
 - On the website, text on accent-colored buttons, tabs and highlights switches to white or near-black for contrast, so it is never white on yellow.
 - Theme names and the status, OCR, signing and stamp labels that were still in English are translated in every language.
 - The website's About page, MCP page, accent bar, code comments and section toggles are translated in every language, and About text that had lost its accents is restored.
