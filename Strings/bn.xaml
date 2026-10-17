@@ -1432,6 +1432,13 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Err_FileRepairFailed">“{0}” মেরামত করা যায়নি।</sys:String>
     <sys:String x:Key="Str_St_TextEditDetectedFont">{0}, {1} pt দিয়ে সম্পাদনা করা হচ্ছে। ফন্টের মাপ মূলের থেকে আলাদা হতে পারে।</sys:String>
     <sys:String x:Key="Str_St_TextEditFontSubstituted">{0} ফন্টটি উপলব্ধ নয়। {1}, {2} pt দিয়ে সম্পাদনা করা হচ্ছে।</sys:String>
+    <sys:String x:Key="Str_St_TextEditInPage">এই লাইনটি পৃষ্ঠার ভেতরেই সম্পাদনা হচ্ছে, {0} pt। যেখানে সম্ভব এটি নিজের ফন্ট রাখে।</sys:String>
+    <sys:String x:Key="Str_St_TextEditedInPage">লাইনটি পৃষ্ঠায় তার নিজের ফন্টে বদলানো হয়েছে।</sys:String>
+    <sys:String x:Key="Str_St_TextEditedChosenFont">লাইনটি পৃষ্ঠায় {0} ফন্টে বদলানো হয়েছে।</sys:String>
+    <sys:String x:Key="Str_St_TextEditedSubstitute">লাইনটি পৃষ্ঠায় {0} ফন্টে বদলানো হয়েছে, কারণ এর নিজের ফন্ট নতুন অক্ষরগুলো দেখাতে পারে না।</sys:String>
+    <sys:String x:Key="Str_St_TextEditFailed">লাইনটি বদলানো যায়নি: {0}</sys:String>
+    <sys:String x:Key="Str_St_TextEditCoverScan">এই লাইনটি একটি স্ক্যানের উপর শনাক্ত করা লেখা, তাই সম্পাদনাটি এর বদলে এটিকে ঢেকে দেয়।</sys:String>
+    <sys:String x:Key="Str_St_TextEditCoverOther">এই লাইনটি পৃষ্ঠায় বদলানো যায় না, তাই সম্পাদনাটি এর বদলে এটিকে ঢেকে দেয়।</sys:String>
     <sys:String x:Key="Str_Print_NoTwoSidedSupport">নির্বাচিত প্রিন্টারটি দুই পাশে মুদ্রণের সমর্থন জানায় না।</sys:String>
     <sys:String x:Key="Str_Form_ClickInitials">আপনার আদ্যক্ষর যোগ করতে ক্লিক করুন</sys:String>
     <sys:String x:Key="Str_Form_ClickSign">স্বাক্ষর করতে ক্লিক করুন</sys:String>

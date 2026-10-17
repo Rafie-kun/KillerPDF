@@ -1718,6 +1718,44 @@ internal static class PdfEngineIntegration
         return result;
     }
 
+    /// <summary>Reports whether a line in the file can be rewritten in the page content, or null
+    /// when the file cannot be read for it.</summary>
+    internal static PdfTextLineInspection? InspectTextLine(string path, int pageIndex, PdfContentBounds region)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        try { return PdfTextLineEditor.Inspect(PdfDocument.Open(File.ReadAllBytes(path)), pageIndex, region); }
+        catch (Exception ex) when (ex is FormatException or InvalidOperationException or NotSupportedException
+            or ArgumentException or IOException)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>Rewrites a line of the page's own text in place and swaps in the result.</summary>
+    internal static PdfTextLineEditResult ReplaceTextLine(string path, PdfTextLineEdit edit)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        ArgumentNullException.ThrowIfNull(edit);
+        PdfTextLineEditResult result = PdfTextLineEditor.Replace(PdfDocument.Open(File.ReadAllBytes(path)), edit);
+        ReplaceWithBuiltResult(path, result.Document);
+        return result;
+    }
+
+    /// <summary>The installed face that can show the text, starting from the wanted family, for
+    /// embedding when a line's own font cannot show it. Null when no face loads.</summary>
+    internal static (TrueTypeFont Font, string Family)? LoadTextFont(string family, string text, bool bold, bool italic)
+    {
+        string chosen = FontCoverage.PickFamily(string.IsNullOrWhiteSpace(family) ? "Segoe UI" : family, text);
+        byte[]? bytes = InstalledFontCatalog.FaceBytes(chosen, bold, italic) ?? InstalledFontCatalog.RegularFaceBytes(chosen);
+        if (bytes is null) return null;
+        try { return (TrueTypeFont.Load(bytes), chosen); }
+        catch (Exception ex) when (ex is FormatException or NotSupportedException or ArgumentException
+            or InvalidDataException or InvalidOperationException)
+        {
+            return null;
+        }
+    }
+
     /// <summary>The kinds of hidden information removed after a redaction.</summary>
     internal sealed record SanitizeChoices(bool Comments, bool Attachments, bool FormFields,
         bool HiddenLayers, bool Scripts, bool Links, bool Bookmarks);

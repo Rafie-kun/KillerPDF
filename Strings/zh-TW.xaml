@@ -1434,6 +1434,13 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_Err_FileRepairFailed">無法修復「{0}」。</sys:String>
     <sys:String x:Key="Str_St_TextEditDetectedFont">正在使用 {0}、{1} 點編輯。字型度量可能與原文不同。</sys:String>
     <sys:String x:Key="Str_St_TextEditFontSubstituted">字型 {0} 無法使用。正在使用 {1}、{2} 點編輯。</sys:String>
+    <sys:String x:Key="Str_St_TextEditInPage">正在頁面中直接編輯此行，{0} pt。盡可能保留其原有字型。</sys:String>
+    <sys:String x:Key="Str_St_TextEditedInPage">已在頁面中以原有字型變更此行。</sys:String>
+    <sys:String x:Key="Str_St_TextEditedChosenFont">已在頁面中以 {0} 變更此行。</sys:String>
+    <sys:String x:Key="Str_St_TextEditedSubstitute">已在頁面中以 {0} 變更此行，因為原有字型無法顯示新字元。</sys:String>
+    <sys:String x:Key="Str_St_TextEditFailed">無法變更此行：{0}</sys:String>
+    <sys:String x:Key="Str_St_TextEditCoverScan">此行是掃描件上的辨識文字，因此編輯改為覆蓋它。</sys:String>
+    <sys:String x:Key="Str_St_TextEditCoverOther">此行無法在頁面中變更，因此編輯改為覆蓋它。</sys:String>
     <sys:String x:Key="Str_Print_NoTwoSidedSupport">所選印表機未回報支援雙面列印。</sys:String>
     <sys:String x:Key="Str_Form_ClickInitials">按一下以新增您的姓名縮寫</sys:String>
     <sys:String x:Key="Str_Form_ClickSign">按一下以簽名</sys:String>

@@ -63,6 +63,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - The runtime uses a lighter memory-conservation level, so batch resave takes about a tenth less processor time while rendering keeps the same memory and pixels.
 - Batch rendering works on at most six files at once, or three when pages are larger than 1024 pixels, so large-page batches use about half the memory while still finishing faster than the previous renderer. `--parallel` still sets the count.
 - Select mode no longer edits, and existing PDF text changes use the Text tool (#411). Arrow keys move selected objects one step instead of scrolling (#368).
+- Edit Text changes the page's own text instead of covering it. The old words leave the page content and the new words take their place in the same font, size and color, or in an embedded font when the original cannot show the new characters, so nothing is drawn over the page. Recognized text over a scan is still edited with a cover.
 - Split Transform and Color Correction into separate tools, and routed OCR provider selection through the engine with complete installed-language checks.
 - Message, confirm, install and uninstall dialogs use the family setup dialog layout, with a notice icon, a larger Lacquer heading, evenly sized buttons and the action button last. Dialog and installer action buttons are hollow in the accent color and fill with the button gradient on hover, instead of showing a solid block with hidden text.
 - Split the installer text into one file per language, with \n marking line breaks inside a value, so translations can be reviewed and compared key by key (#409).
@@ -81,7 +82,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - The exe's file properties show Steve the Killer as the copyright holder instead of leaving it blank.
 - The file picker's close button turns red on hover without filling a red block, like every other dialog's close, and keeps the classic caption button on 98SE.
 - JPEG 2000 images that rendered blank, scrambled or missing, or with stray noise or a false color cast, now render correctly, from updating the built-in JPEG 2000 decoder to CoreJ2K 2.4.1.
-- Saving an Edit Text change removes the replaced words from the file, so they can no longer be found, copied or brought back by editing the line again.
 - Restoring a maximized window after Win+D, a taskbar click or a touchpad gesture no longer leaves it black and unresponsive (#437).
 - Opening the theme picker and switching themes or accents no longer crashes the installed or portable app (#452).
 - PDFs with a slightly wrong cross-reference size open normally instead of asking for a repair and showing a crash report (#406).

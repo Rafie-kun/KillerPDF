@@ -1451,6 +1451,13 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Err_FileRepairFailed">«{0}» файлын жөндеу мүмкін болмады.</sys:String>
     <sys:String x:Key="Str_St_TextEditDetectedFont">{0}, {1} pt қарпімен өңделуде. Қаріп өлшемдері түпнұсқадан өзгеше болуы мүмкін.</sys:String>
     <sys:String x:Key="Str_St_TextEditFontSubstituted">{0} қарпі қолжетімсіз. {1}, {2} pt қарпімен өңделуде.</sys:String>
+    <sys:String x:Key="Str_St_TextEditInPage">Бұл жол беттің өзінде өңделуде, {0} pt. Мүмкін болса, өз қаріпін сақтайды.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedInPage">Жол бетте өз қаріпімен өзгертілді.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedChosenFont">Жол бетте {0} қаріпімен өзгертілді.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedSubstitute">Жол бетте {0} қаріпімен өзгертілді, себебі өз қаріпі жаңа таңбаларды көрсете алмайды.</sys:String>
+    <sys:String x:Key="Str_St_TextEditFailed">Жолды өзгерту мүмкін болмады: {0}</sys:String>
+    <sys:String x:Key="Str_St_TextEditCoverScan">Бұл жол сканерленген бет үстіндегі танылған мәтін, сондықтан өңдеу оның орнына оны жабады.</sys:String>
+    <sys:String x:Key="Str_St_TextEditCoverOther">Бұл жолды бетте өзгерту мүмкін емес, сондықтан өңдеу оның орнына оны жабады.</sys:String>
     <sys:String x:Key="Str_Print_NoTwoSidedSupport">Таңдалған принтер екі жақты басып шығаруды қолдайтынын хабарламайды.</sys:String>
     <sys:String x:Key="Str_Form_ClickInitials">Инициалдарыңызды қосу үшін басыңыз</sys:String>
     <sys:String x:Key="Str_Form_ClickSign">Қол қою үшін басыңыз</sys:String>

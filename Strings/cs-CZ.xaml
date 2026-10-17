@@ -1437,6 +1437,13 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Err_FileRepairFailed">Soubor „{0}“ se nepodařilo opravit.</sys:String>
     <sys:String x:Key="Str_St_TextEditDetectedFont">Úprava písmem {0}, {1} pt. Metriky písma se mohou lišit od originálu.</sys:String>
     <sys:String x:Key="Str_St_TextEditFontSubstituted">Písmo {0} není dostupné. Úprava písmem {1}, {2} pt.</sys:String>
+    <sys:String x:Key="Str_St_TextEditInPage">Úprava tohoto řádku přímo na stránce, {0} pt. Kde to jde, zachová své vlastní písmo.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedInPage">Řádek byl na stránce změněn ve vlastním písmu.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedChosenFont">Řádek byl na stránce změněn písmem {0}.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedSubstitute">Řádek byl na stránce změněn písmem {0}, protože jeho vlastní písmo nové znaky nezobrazí.</sys:String>
+    <sys:String x:Key="Str_St_TextEditFailed">Řádek nelze změnit: {0}</sys:String>
+    <sys:String x:Key="Str_St_TextEditCoverScan">Tento řádek je rozpoznaný text na skenu, takže úprava ho místo toho zakryje.</sys:String>
+    <sys:String x:Key="Str_St_TextEditCoverOther">Tento řádek nelze na stránce změnit, takže úprava ho místo toho zakryje.</sys:String>
     <sys:String x:Key="Str_Print_NoTwoSidedSupport">Vybraná tiskárna nehlásí podporu oboustranného tisku.</sys:String>
     <sys:String x:Key="Str_Form_ClickInitials">Kliknutím přidáte své iniciály</sys:String>
     <sys:String x:Key="Str_Form_ClickSign">Kliknutím podepíšete</sys:String>

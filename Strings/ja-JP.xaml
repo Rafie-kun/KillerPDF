@@ -1452,6 +1452,13 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Err_FileRepairFailed">「{0}」を修復できませんでした。</sys:String>
     <sys:String x:Key="Str_St_TextEditDetectedFont">{0}、{1} pt で編集中です。フォントのメトリクスが元のものと異なる場合があります。</sys:String>
     <sys:String x:Key="Str_St_TextEditFontSubstituted">フォント {0} は使用できません。{1}、{2} pt で編集中です。</sys:String>
+    <sys:String x:Key="Str_St_TextEditInPage">この行をページ内で直接編集しています ({0} pt)。可能な限り元のフォントを使います。</sys:String>
+    <sys:String x:Key="Str_St_TextEditedInPage">ページ内の行を元のフォントで変更しました。</sys:String>
+    <sys:String x:Key="Str_St_TextEditedChosenFont">ページ内の行を {0} で変更しました。</sys:String>
+    <sys:String x:Key="Str_St_TextEditedSubstitute">元のフォントでは新しい文字を表示できないため、ページ内の行を {0} で変更しました。</sys:String>
+    <sys:String x:Key="Str_St_TextEditFailed">行を変更できませんでした: {0}</sys:String>
+    <sys:String x:Key="Str_St_TextEditCoverScan">この行はスキャン上の認識済みテキストのため、編集では代わりに覆い隠します。</sys:String>
+    <sys:String x:Key="Str_St_TextEditCoverOther">この行はページ内で変更できないため、編集では代わりに覆い隠します。</sys:String>
     <sys:String x:Key="Str_Print_NoTwoSidedSupport">選択したプリンターは両面印刷の対応状況を報告していません。</sys:String>
     <sys:String x:Key="Str_Form_ClickInitials">クリックしてイニシャルを追加</sys:String>
     <sys:String x:Key="Str_Form_ClickSign">クリックして署名</sys:String>

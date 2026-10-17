@@ -1452,6 +1452,13 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Err_FileRepairFailed">&quot;{0}&quot; could not be repaired.</sys:String>
     <sys:String x:Key="Str_St_TextEditDetectedFont">Editing with {0}, {1} pt. Font metrics may differ from the original.</sys:String>
     <sys:String x:Key="Str_St_TextEditFontSubstituted">Font {0} is unavailable. Editing with {1}, {2} pt.</sys:String>
+    <sys:String x:Key="Str_St_TextEditInPage">Editing this line in the page itself, {0} pt. It keeps its own font where it can.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedInPage">Line changed in the page, in its own font.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedChosenFont">Line changed in the page, in {0}.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedSubstitute">Line changed in the page, in {0}, because its own font can't show the new characters.</sys:String>
+    <sys:String x:Key="Str_St_TextEditFailed">The line could not be changed: {0}</sys:String>
+    <sys:String x:Key="Str_St_TextEditCoverScan">This line is recognized text over a scan, so the edit covers it instead.</sys:String>
+    <sys:String x:Key="Str_St_TextEditCoverOther">This line can't be changed in the page, so the edit covers it instead.</sys:String>
     <sys:String x:Key="Str_Print_NoTwoSidedSupport">The selected printer doesn't report two-sided support.</sys:String>
     <sys:String x:Key="Str_Form_ClickInitials">Click to add your initials</sys:String>
     <sys:String x:Key="Str_Form_ClickSign">Click to sign</sys:String>

@@ -1452,6 +1452,13 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Err_FileRepairFailed">«{0}» kunne ikke repareres.</sys:String>
     <sys:String x:Key="Str_St_TextEditDetectedFont">Redigerer med {0}, {1} pt. Skriftmålene kan avvike fra originalen.</sys:String>
     <sys:String x:Key="Str_St_TextEditFontSubstituted">Skriften {0} er ikke tilgjengelig. Redigerer med {1}, {2} pt.</sys:String>
+    <sys:String x:Key="Str_St_TextEditInPage">Redigerer denne linjen direkte på siden, {0} pt. Den beholder sin egen skrift der det går.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedInPage">Linjen er endret på siden, i sin egen skrift.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedChosenFont">Linjen er endret på siden, i {0}.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedSubstitute">Linjen er endret på siden, i {0}, fordi dens egen skrift ikke kan vise de nye tegnene.</sys:String>
+    <sys:String x:Key="Str_St_TextEditFailed">Linjen kunne ikke endres: {0}</sys:String>
+    <sys:String x:Key="Str_St_TextEditCoverScan">Denne linjen er gjenkjent tekst over en skanning, så redigeringen dekker den i stedet.</sys:String>
+    <sys:String x:Key="Str_St_TextEditCoverOther">Denne linjen kan ikke endres på siden, så redigeringen dekker den i stedet.</sys:String>
     <sys:String x:Key="Str_Print_NoTwoSidedSupport">Den valgte skriveren oppgir ikke støtte for tosidig utskrift.</sys:String>
     <sys:String x:Key="Str_Form_ClickInitials">Klikk for å legge til initialene dine</sys:String>
     <sys:String x:Key="Str_Form_ClickSign">Klikk for å signere</sys:String>

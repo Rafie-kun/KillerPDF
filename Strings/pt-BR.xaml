@@ -1452,6 +1452,13 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Err_FileRepairFailed">Não foi possível reparar &quot;{0}&quot;.</sys:String>
     <sys:String x:Key="Str_St_TextEditDetectedFont">Editando com {0}, {1} pt. As métricas da fonte podem diferir do original.</sys:String>
     <sys:String x:Key="Str_St_TextEditFontSubstituted">A fonte {0} não está disponível. Editando com {1}, {2} pt.</sys:String>
+    <sys:String x:Key="Str_St_TextEditInPage">Editando esta linha na própria página, {0} pt. Ela mantém a própria fonte sempre que possível.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedInPage">Linha alterada na página, com a própria fonte.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedChosenFont">Linha alterada na página, com {0}.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedSubstitute">Linha alterada na página, com {0}, porque a própria fonte não consegue mostrar os novos caracteres.</sys:String>
+    <sys:String x:Key="Str_St_TextEditFailed">Não foi possível alterar a linha: {0}</sys:String>
+    <sys:String x:Key="Str_St_TextEditCoverScan">Esta linha é texto reconhecido sobre uma digitalização, então a edição a cobre em vez disso.</sys:String>
+    <sys:String x:Key="Str_St_TextEditCoverOther">Esta linha não pode ser alterada na página, então a edição a cobre em vez disso.</sys:String>
     <sys:String x:Key="Str_Print_NoTwoSidedSupport">A impressora selecionada não informa suporte a impressão frente e verso.</sys:String>
     <sys:String x:Key="Str_Form_ClickInitials">Clique para adicionar suas iniciais</sys:String>
     <sys:String x:Key="Str_Form_ClickSign">Clique para assinar</sys:String>

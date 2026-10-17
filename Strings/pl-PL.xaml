@@ -1440,6 +1440,13 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Err_FileRepairFailed">Nie można naprawić pliku „{0}”.</sys:String>
     <sys:String x:Key="Str_St_TextEditDetectedFont">Edycja czcionką {0}, {1} pkt. Metryki czcionki mogą różnić się od oryginału.</sys:String>
     <sys:String x:Key="Str_St_TextEditFontSubstituted">Czcionka {0} jest niedostępna. Edycja czcionką {1}, {2} pkt.</sys:String>
+    <sys:String x:Key="Str_St_TextEditInPage">Edycja tego wiersza bezpośrednio na stronie, {0} pt. Tam, gdzie to możliwe, zachowuje własną czcionkę.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedInPage">Wiersz zmieniony na stronie, w jego własnej czcionce.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedChosenFont">Wiersz zmieniony na stronie, czcionką {0}.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedSubstitute">Wiersz zmieniony na stronie, czcionką {0}, ponieważ jego własna czcionka nie pokazuje nowych znaków.</sys:String>
+    <sys:String x:Key="Str_St_TextEditFailed">Nie udało się zmienić wiersza: {0}</sys:String>
+    <sys:String x:Key="Str_St_TextEditCoverScan">Ten wiersz to rozpoznany tekst nad skanem, więc edycja zamiast tego go zakrywa.</sys:String>
+    <sys:String x:Key="Str_St_TextEditCoverOther">Tego wiersza nie można zmienić na stronie, więc edycja zamiast tego go zakrywa.</sys:String>
     <sys:String x:Key="Str_Print_NoTwoSidedSupport">Wybrana drukarka nie zgłasza obsługi drukowania dwustronnego.</sys:String>
     <sys:String x:Key="Str_Form_ClickInitials">Kliknij, aby dodać inicjały</sys:String>
     <sys:String x:Key="Str_Form_ClickSign">Kliknij, aby podpisać</sys:String>

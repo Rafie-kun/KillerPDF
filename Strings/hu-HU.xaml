@@ -1439,6 +1439,13 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Err_FileRepairFailed">A(z) „{0}” nem javítható.</sys:String>
     <sys:String x:Key="Str_St_TextEditDetectedFont">Szerkesztés ezzel: {0}, {1} pt. A betűméretek eltérhetnek az eredetitől.</sys:String>
     <sys:String x:Key="Str_St_TextEditFontSubstituted">A(z) {0} betűtípus nem érhető el. Szerkesztés ezzel: {1}, {2} pt.</sys:String>
+    <sys:String x:Key="Str_St_TextEditInPage">A sor szerkesztése közvetlenül az oldalon, {0} pt. Ahol lehet, megtartja a saját betűtípusát.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedInPage">A sor megváltozott az oldalon, a saját betűtípusával.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedChosenFont">A sor megváltozott az oldalon, {0} betűtípussal.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedSubstitute">A sor megváltozott az oldalon, {0} betűtípussal, mert a saját betűtípusa nem tudja megjeleníteni az új karaktereket.</sys:String>
+    <sys:String x:Key="Str_St_TextEditFailed">A sort nem sikerült módosítani: {0}</sys:String>
+    <sys:String x:Key="Str_St_TextEditCoverScan">Ez a sor egy szkennelt kép fölötti felismert szöveg, ezért a szerkesztés inkább letakarja.</sys:String>
+    <sys:String x:Key="Str_St_TextEditCoverOther">Ez a sor nem módosítható az oldalon, ezért a szerkesztés inkább letakarja.</sys:String>
     <sys:String x:Key="Str_Print_NoTwoSidedSupport">A kiválasztott nyomtató nem jelzi a kétoldalas nyomtatás támogatását.</sys:String>
     <sys:String x:Key="Str_Form_ClickInitials">Kattintson a monogram hozzáadásához</sys:String>
     <sys:String x:Key="Str_Form_ClickSign">Kattintson az aláíráshoz</sys:String>

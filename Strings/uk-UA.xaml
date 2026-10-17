@@ -1452,6 +1452,13 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Err_FileRepairFailed">Не вдалося відновити &quot;{0}&quot;.</sys:String>
     <sys:String x:Key="Str_St_TextEditDetectedFont">Редагування шрифтом {0}, {1} пт. Метрики шрифту можуть відрізнятися від оригінальних.</sys:String>
     <sys:String x:Key="Str_St_TextEditFontSubstituted">Шрифт {0} недоступний. Редагування шрифтом {1}, {2} пт.</sys:String>
+    <sys:String x:Key="Str_St_TextEditInPage">Цей рядок редагується безпосередньо на сторінці, {0} pt. Де можливо, він зберігає власний шрифт.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedInPage">Рядок змінено на сторінці власним шрифтом.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedChosenFont">Рядок змінено на сторінці шрифтом {0}.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedSubstitute">Рядок змінено на сторінці шрифтом {0}, бо його власний шрифт не може показати нові символи.</sys:String>
+    <sys:String x:Key="Str_St_TextEditFailed">Не вдалося змінити рядок: {0}</sys:String>
+    <sys:String x:Key="Str_St_TextEditCoverScan">Цей рядок є розпізнаним текстом поверх скану, тому редагування натомість закриває його.</sys:String>
+    <sys:String x:Key="Str_St_TextEditCoverOther">Цей рядок не можна змінити на сторінці, тому редагування натомість закриває його.</sys:String>
     <sys:String x:Key="Str_Print_NoTwoSidedSupport">Вибраний принтер не повідомляє про підтримку двостороннього друку.</sys:String>
     <sys:String x:Key="Str_Form_ClickInitials">Натисніть, щоб додати ініціали</sys:String>
     <sys:String x:Key="Str_Form_ClickSign">Натисніть, щоб підписати</sys:String>

@@ -86,7 +86,7 @@ public sealed class PdfRedactionVerificationException(PdfRedactionVerificationRe
 /// only approved unsafe pages with sanitized images, and verifies the rewritten file.
 /// </summary>
 /// <remarks>Regions use unrotated, crop-relative PDF points, the coordinates of <see cref="PdfPageContentReader"/>.</remarks>
-public static class PdfContentRedaction
+public static partial class PdfContentRedaction
 {
     internal const string RedactionImageName = "KPRedactImage";
     private const int MaximumCurvedPartialSegments = 8;
@@ -1017,14 +1017,23 @@ public static class PdfContentRedaction
 
     private sealed record TextState(Matrix Ctm, PdfContentBounds Clip, PdfExtractionFont? Font = null,
         bool FontMissing = false, double Size = 0, double CharacterSpacing = 0, double WordSpacing = 0,
-        double Scale = 1, double Leading = 0, double Rise = 0);
+        double Scale = 1, double Leading = 0, double Rise = 0)
+    {
+        // The font as a resource value and, when Tf selected it, its resource name.
+        internal PdfObject? FontObject { get; init; }
+        internal PdfName? FontResource { get; init; }
+        // The operators that set the current nonstroking color, replayed to restore it.
+        internal PdfContentInstruction[] Fill { get; init; } = [];
+        internal int RenderMode { get; init; }
+    }
 
     /// <summary>Rewrites page and form content so nothing drawn inside a region survives.</summary>
     /// <remarks>With <paramref name="glyphsOnly"/> only text goes: a glyph whose center lies in a
     /// region is removed, while images, drawings and every resource stay as they were.</remarks>
     private sealed class ContentRewriter(PdfDocument document, PdfIncrementalUpdateBuilder? update,
         PdfContentBounds[] regions, bool textOnly, Dictionary<PdfDictionary, PdfExtractionFont?> fonts,
-        CancellationToken cancellationToken, bool glyphsOnly = false, PdfRgbColor[]? fills = null)
+        CancellationToken cancellationToken, bool glyphsOnly = false, PdfRgbColor[]? fills = null,
+        LineInsertion? insertion = null, Dictionary<object, Dictionary<uint, PdfDecodedCharacter>>? usedCodes = null)
     {
         private static readonly PdfName FontCategory = Name("Font");
         private static readonly PdfName XObjectCategory = Name("XObject");
@@ -1109,13 +1118,25 @@ public static class PdfContentRedaction
                         insideText = true; text = line = Matrix.Identity; Emit(instruction);
                         if (textOnly) { output.Add(Op("Tr", 3)); localChanged = true; }
                         break;
-                    case "ET": insideText = false; Emit(instruction); break;
+                    case "ET":
+                        insideText = false; Emit(instruction);
+                        if (insertion?.AfterText is { } after && insertion.AfterTextDepth == depth)
+                        {
+                            output.AddRange(after);
+                            insertion.AfterText = null;
+                        }
+                        break;
                     case "Tf":
                         if (args.Count == 2 && args[0] is PdfName fontName)
                         {
                             scope.Use(FontCategory, fontName);
-                            PdfExtractionFont? font = ReadFont(scope.Lookup(FontCategory, fontName));
-                            state = state with { Font = font, FontMissing = font is null, Size = N(args[1]) };
+                            PdfObject? fontObject = scope.Lookup(FontCategory, fontName);
+                            PdfExtractionFont? font = ReadFont(fontObject);
+                            state = state with
+                            {
+                                Font = font, FontMissing = font is null, Size = N(args[1]),
+                                FontObject = fontObject, FontResource = fontName
+                            };
                         }
                         Emit(instruction); break;
                     case "Tc": state = state with { CharacterSpacing = Arg(args, 0) }; Emit(instruction); break;
@@ -1125,7 +1146,11 @@ public static class PdfContentRedaction
                     case "Ts": state = state with { Rise = Arg(args, 0) }; Emit(instruction); break;
                     case "Tr":
                         if (textOnly) { output.Add(Op("Tr", 3)); localChanged = true; }
-                        else Emit(instruction);
+                        else
+                        {
+                            if (args.Count == 1) state = state with { RenderMode = (int)N(args[0]) };
+                            Emit(instruction);
+                        }
                         break;
                     case "Tm":
                         if (args.Count == 6) text = line = new Matrix(N(args[0]), N(args[1]), N(args[2]), N(args[3]), N(args[4]), N(args[5]));
@@ -1189,10 +1214,18 @@ public static class PdfContentRedaction
                         if (textOnly) { localChanged = true; break; }
                         if (args.Count == 1 && args[0] is PdfName space && !IsDeviceSpace(space))
                             scope.Use(ColorSpaceCategory, space);
+                        if (instruction.Operator == "cs") state = state with { Fill = [instruction] };
                         Emit(instruction); break;
                     case "SC": case "SCN": case "sc": case "scn": case "G": case "g": case "RG": case "rg": case "K": case "k":
                         if (textOnly) { localChanged = true; break; }
                         if (args.Count > 0 && args[^1] is PdfName pattern) scope.Use(PatternCategory, pattern);
+                        if (instruction.Operator is "g" or "rg" or "k") state = state with { Fill = [instruction] };
+                        else if (instruction.Operator is "sc" or "scn")
+                            state = state with
+                            {
+                                Fill = state.Fill.Length > 0 && state.Fill[0].Operator == "cs"
+                                    ? [state.Fill[0], instruction] : [instruction]
+                            };
                         Emit(instruction); break;
                     case "BMC":
                         marked.Push((output.Count, null, false, null)); Emit(instruction); break;
@@ -1291,6 +1324,7 @@ public static class PdfContentRedaction
                 if (!removed || items is null) { Emit(instruction); return; }
                 output.AddRange(prefix);
                 output.Add(new PdfContentInstruction("TJ", 0, [new PdfArray(Merge(items))]));
+                insertion?.WritePending(output, state, text, line, scope, depth);
             }
 
             void ShowArray(PdfContentInstruction instruction, PdfArray array)
@@ -1317,6 +1351,7 @@ public static class PdfContentRedaction
                 }
                 if (!removedAny) { Emit(instruction); return; }
                 output.Add(new PdfContentInstruction("TJ", 0, [new PdfArray(Merge(items))]));
+                insertion?.WritePending(output, state, text, line, scope, depth);
             }
 
             List<PdfObject>? Show(PdfString source, out bool removed)
@@ -1343,8 +1378,13 @@ public static class PdfContentRedaction
                 var items = new List<PdfObject>();
                 var kept = new List<byte>();
                 int offset = 0;
+                Dictionary<uint, PdfDecodedCharacter>? used = null;
+                if (usedCodes is not null && FontKey(document, state.FontObject) is { } key
+                    && !usedCodes.TryGetValue(key, out used))
+                    usedCodes[key] = used = [];
                 foreach (PdfDecodedCharacter character in characters)
                 {
+                    used?.TryAdd(character.Code, character);
                     double width = font.GetWidth(character.Code) / 1000 * state.Size * state.Scale;
                     PdfVerticalGlyphMetrics vertical = font.GetVerticalMetrics(character.Code);
                     double advanceY = font.IsVertical ? vertical.Advance / 1000 * state.Size : 0;
@@ -1368,6 +1408,7 @@ public static class PdfContentRedaction
                     if (covered)
                     {
                         if (state.Size == 0) Reasons.Add("ZeroSizeText");
+                        insertion?.Observe(state, text);
                         Flush();
                         double displacement = font.IsVertical
                             ? vertical.Advance + (state.Size == 0 ? 0 : spacing * 1000 / state.Size)
@@ -1404,7 +1445,11 @@ public static class PdfContentRedaction
                 {
                     fontValue = fontArray[0];
                     PdfExtractionFont? font = ReadFont(fontValue);
-                    state = state with { Font = font, FontMissing = font is null, Size = Number(document, fontArray[1]) };
+                    state = state with
+                    {
+                        Font = font, FontMissing = font is null, Size = Number(document, fontArray[1]),
+                        FontObject = fontValue, FontResource = null
+                    };
                 }
                 if (textOnly)
                 {

@@ -1452,6 +1452,13 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_Err_FileRepairFailed">Impossibile riparare &quot;{0}&quot;.</sys:String>
     <sys:String x:Key="Str_St_TextEditDetectedFont">Modifica con {0}, {1} pt. Le metriche del font potrebbero differire dall’originale.</sys:String>
     <sys:String x:Key="Str_St_TextEditFontSubstituted">Il font {0} non è disponibile. Modifica con {1}, {2} pt.</sys:String>
+    <sys:String x:Key="Str_St_TextEditInPage">Modifica di questa riga direttamente nella pagina, {0} pt. Mantiene il suo carattere quando possibile.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedInPage">Riga modificata nella pagina, con il suo carattere.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedChosenFont">Riga modificata nella pagina, con {0}.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedSubstitute">Riga modificata nella pagina, con {0}, perché il suo carattere non può mostrare i nuovi caratteri.</sys:String>
+    <sys:String x:Key="Str_St_TextEditFailed">Impossibile modificare la riga: {0}</sys:String>
+    <sys:String x:Key="Str_St_TextEditCoverScan">Questa riga è testo riconosciuto sopra una scansione, quindi la modifica la copre.</sys:String>
+    <sys:String x:Key="Str_St_TextEditCoverOther">Questa riga non può essere modificata nella pagina, quindi la modifica la copre.</sys:String>
     <sys:String x:Key="Str_Print_NoTwoSidedSupport">La stampante selezionata non dispone del supporto per la stampa fronte-retro.</sys:String>
     <sys:String x:Key="Str_Form_ClickInitials">Fai clic per aggiungere le iniziali</sys:String>
     <sys:String x:Key="Str_Form_ClickSign">Fai clic per firmare</sys:String>

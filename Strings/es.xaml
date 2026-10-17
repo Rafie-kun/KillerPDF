@@ -1432,6 +1432,13 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Err_FileRepairFailed">No se pudo reparar &quot;{0}&quot;.</sys:String>
     <sys:String x:Key="Str_St_TextEditDetectedFont">Editando con {0}, {1} pt. Las métricas de la fuente pueden diferir del original.</sys:String>
     <sys:String x:Key="Str_St_TextEditFontSubstituted">La fuente {0} no está disponible. Editando con {1}, {2} pt.</sys:String>
+    <sys:String x:Key="Str_St_TextEditInPage">Editando esta línea en la propia página, {0} pt. Conserva su propia fuente siempre que puede.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedInPage">Línea cambiada en la página, con su propia fuente.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedChosenFont">Línea cambiada en la página, con {0}.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedSubstitute">Línea cambiada en la página, con {0}, porque su propia fuente no puede mostrar los caracteres nuevos.</sys:String>
+    <sys:String x:Key="Str_St_TextEditFailed">No se pudo cambiar la línea: {0}</sys:String>
+    <sys:String x:Key="Str_St_TextEditCoverScan">Esta línea es texto reconocido sobre un escaneo, así que la edición la cubre en su lugar.</sys:String>
+    <sys:String x:Key="Str_St_TextEditCoverOther">Esta línea no se puede cambiar en la página, así que la edición la cubre en su lugar.</sys:String>
     <sys:String x:Key="Str_Print_NoTwoSidedSupport">La impresora seleccionada no indica que admita impresión a doble cara.</sys:String>
     <sys:String x:Key="Str_Form_ClickInitials">Haga clic para añadir sus iniciales</sys:String>
     <sys:String x:Key="Str_Form_ClickSign">Haga clic para firmar</sys:String>

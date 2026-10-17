@@ -14,6 +14,7 @@ using System.Windows.Shapes;
 using Microsoft.Win32;
 using KillerPDF.Services;
 using ContentDoc = KillerPDF.Services.PdfContentDocument;
+using EngineDocs = KillerPdf.Engine.Documents;
 
 namespace KillerPDF.Controls
 {
@@ -422,7 +423,6 @@ namespace KillerPDF.Controls
                 // box empty (like a manual edit) instead of pre-filling garbage - the user types over the
                 // whited-out original.
                 string prefill = LooksGarbled(lineText) ? "" : lineText;
-                string requestedFamily = fontName;
                 fontName = PdfFontStyle.ResolveInstalledFamily(fontName, MainWindow.SystemFontNames);
                 double boxFontCanvas = Math.Max(canvasFontSize, syInv);
                 double editorLeft = sourceLeft is double origin
@@ -439,12 +439,28 @@ namespace KillerPDF.Controls
                     }
                 }
                 catch { /* retain the extracted glyph top */ }
+                // The line is rewritten in the page content itself when the engine can do it: its old
+                // glyphs leave the content stream and the new text takes their place, in the same font
+                // when that font can show it. Only text the page does not really draw, such as the
+                // recognized layer over a scan, falls back to a cover with new text on top.
+                var (pageLeft, pageBottom, pageRight, pageTop) = RedactionGeometry.CanvasToPage(lineRect,
+                    pdfW, pdfH, renderW, renderH, rotation);
+                var region = new EngineDocs.PdfContentBounds(pageLeft - 0.5, pageBottom - 0.5,
+                    pageRight + 0.5, pageTop + 0.5);
+                EngineDocs.PdfTextLineInspection? inspection =
+                    PdfEngineIntegration.InspectTextLine(_currentFile, pageIdx, region);
+                if (inspection is { CanEdit: true })
+                {
+                    StartDirectTextEdit(pageIdx, new Rect(cLeft, cTop, cWidth, cHeight), prefill,
+                        boxFontCanvas, fontName, syInv, fontBold, fontItalic, editorLeft, editorTop, turn, region);
+                    SetStatus(string.Format(Loc("Str_St_TextEditInPage"), _textFontSize.ToString("0.##")));
+                    return;
+                }
                 StartCoverTextEdit(pageIdx, new Rect(cLeft, cTop, cWidth, cHeight), prefill,
                     boxFontCanvas, fontName, syInv,
                     fontBold, fontItalic, editorLeft, editorTop, turn);
-                SetStatus(string.Equals(requestedFamily, fontName, StringComparison.OrdinalIgnoreCase)
-                    ? string.Format(Loc("Str_St_TextEditDetectedFont"), fontName, _textFontSize.ToString("0.##"))
-                    : string.Format(Loc("Str_St_TextEditFontSubstituted"), requestedFamily, fontName, _textFontSize.ToString("0.##")));
+                SetStatus(Loc(inspection?.Blocker == EngineDocs.PdfTextLineBlocker.InvisibleText
+                    ? "Str_St_TextEditCoverScan" : "Str_St_TextEditCoverOther"));
             }
             catch (Exception ex)
             {
@@ -527,6 +543,130 @@ namespace KillerPDF.Controls
             QueueTextEditorFocus(tb, selectAll: true);
             ShowTextSettings();
             SetStatus(Loc("Str_St_EditingText"));
+        }
+
+        // A line of the page's own text being edited in place: where it is, what it said and how it
+        // looked when the edit began, so the commit changes only what the user changed.
+        private sealed record DirectTextEdit(int PageIndex, EngineDocs.PdfContentBounds Region, string Original,
+            string FontName, bool Bold, bool Italic, double FontSize, Color Ink);
+
+        private DirectTextEdit? _pendingDirectEdit;
+
+        // Opens the editor for a line that the commit rewrites in the page content. Nothing is added to
+        // the page while typing: the box takes the page color so the old line does not show through,
+        // and committing replaces the line's glyphs in the content stream. lineRect and the editor
+        // origin are in the reading frame of 'turn', as for StartCoverTextEdit.
+        private void StartDirectTextEdit(int pageIdx, Rect lineRect, string text, double boxFontCanvas,
+                                         string fontName, double syInv, bool bold, bool italic,
+                                         double? editorLeft, double? editorTop, int turn,
+                                         EngineDocs.PdfContentBounds region)
+        {
+            double cLeft = lineRect.X, cTop = lineRect.Y, cWidth = lineRect.Width;
+            Rect canvasLine = TextTurn.FromReading(lineRect, turn);
+            Color background = SampleCoverColor(pageIdx, canvasLine);
+            Color inkColor = SampleTextColor(pageIdx, canvasLine, background);
+            _textColor = inkColor; _textOpacity = inkColor.A;
+            _textFontSize = Math.Max(1, boxFontCanvas / syInv);   // canvas units -> points
+            _textFontName = string.IsNullOrEmpty(fontName) ? "Segoe UI" : fontName;
+            _textBold = bold;
+            _textItalic = italic;
+            _textStrike = _textUnderline = false;
+            _textLetterSpacing = 0;
+            _pendingDirectEdit = new DirectTextEdit(pageIdx, region, text, _textFontName, bold, italic,
+                _textFontSize, inkColor);
+
+            var tb = new TextBox
+            {
+                Text = text,
+                Background = new SolidColorBrush(background),   // hides the old line while typing
+                Foreground = new SolidColorBrush(inkColor),
+                BorderBrush = (SolidColorBrush)FindResource("PrimaryBrush"),
+                SelectionBrush = AccentBrush(),
+                CaretBrush = new SolidColorBrush(inkColor),
+                Template = FlatTextBoxTemplate(),
+                BorderThickness = new Thickness(1),
+                FontFamily = new FontFamily(_textFontName),
+                FontSize = boxFontCanvas,
+                MinWidth = Math.Max(cWidth + 20, 80),
+                MinHeight = 24,
+                Padding = new Thickness(2, 0, 2, 0),
+                AcceptsReturn = true,
+                TextWrapping = TextWrapping.NoWrap,   // a line keeps its breaks; it does not reflow
+                Tag = pageIdx
+            };
+            if (TextTurn.Normalize(turn) == 0)
+            {
+                Canvas.SetLeft(tb, editorLeft ?? cLeft);
+                Canvas.SetTop(tb, editorTop ?? cTop);
+            }
+            else PlaceTurnedEditBox(tb, TextTurn.FromReading(new Point(editorLeft ?? cLeft, editorTop ?? cTop), turn), turn);
+            TextEditorLayerFor(_activeCanvas).Children.Add(tb);
+            _activeTextBox = tb;
+            StyleEditBox(tb);
+            tb.PreviewKeyDown += TextBox_PreviewKeyDown;
+            tb.LostFocus += TextBox_LostFocus;
+            tb.Loaded += (_, _) => QueueTextEditorFocus(tb, selectAll: true);
+            tb.PreviewMouseLeftButtonDown += (_, _) => QueueTextEditorFocus(tb);
+            QueueTextEditorFocus(tb, selectAll: true);
+            ShowTextSettings();
+        }
+
+        // Rewrites the edited line in the page content. Only what the user changed is passed on: the
+        // new text, and a size, color, spacing, typeface or rule that differs from the line as found.
+        private void CommitDirectTextEdit(DirectTextEdit edit, string typed)
+        {
+            string text = string.Join("\n", typed.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n')
+                .Select(line => line.TrimEnd())).Trim('\n');
+            bool restyled = !string.Equals(_textFontName, edit.FontName, StringComparison.OrdinalIgnoreCase)
+                || _textBold != edit.Bold || _textItalic != edit.Italic;
+            bool resized = Math.Abs(_textFontSize - edit.FontSize) > 0.01;
+            bool recolored = _textColor.R != edit.Ink.R || _textColor.G != edit.Ink.G || _textColor.B != edit.Ink.B;
+            bool spaced = Math.Abs(_textLetterSpacing) > 0.001;
+            if (text == edit.Original && !restyled && !resized && !recolored && !spaced && !_textUnderline && !_textStrike)
+                return;
+
+            var substitute = PdfEngineIntegration.LoadTextFont(_textFontName, text, _textBold, _textItalic);
+            Color color = _textColor;
+            var request = new EngineDocs.PdfTextLineEdit(edit.PageIndex, edit.Region, text)
+            {
+                Substitute = substitute?.Font,
+                UseSubstitute = restyled && substitute is not null,
+                FontSize = resized ? _textFontSize : null,
+                FillColor = recolored
+                    ? new KillerPdf.Engine.Authoring.PdfRgbColor(color.R / 255d, color.G / 255d, color.B / 255d) : null,
+                CharacterSpacing = spaced ? _textLetterSpacing : null,
+                Underline = _textUnderline,
+                Strike = _textStrike
+            };
+            EngineDocs.PdfTextLineEditResult? result = null;
+            Exception? failure = null;
+            Mouse.OverrideCursor = Cursors.Wait;
+            try
+            {
+                SaveTempAndReload(keepAnnotations: true, preserveZoom: true, finalizeSavedFile: path =>
+                {
+                    try { result = PdfEngineIntegration.ReplaceTextLine(path, request); }
+                    catch (Exception ex) when (ex is NotSupportedException or InvalidOperationException
+                        or FormatException or ArgumentException or IOException) { failure = ex; }
+                });
+            }
+            catch (Exception ex) when (ex is InvalidOperationException or IOException) { failure ??= ex; }
+            finally { Mouse.OverrideCursor = null; }
+
+            if (failure is not null || result is null)
+            {
+                SetStatus(string.Format(Loc("Str_St_TextEditFailed"), failure?.Message ?? string.Empty));
+                return;
+            }
+            string done = result.Font == EngineDocs.PdfTextLineFont.Original
+                ? Loc("Str_St_TextEditedInPage")
+                : string.Format(Loc(restyled ? "Str_St_TextEditedChosenFont" : "Str_St_TextEditedSubstitute"),
+                    substitute?.Family ?? _textFontName);
+            // The reload reports the page position as its scroll settles, so the result is shown
+            // once that has happened instead of being replaced by it.
+            var report = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1200) };
+            report.Tick += (_, _) => { report.Stop(); SetStatus(done); };
+            report.Start();
         }
 
         // ============================================================
@@ -812,6 +952,7 @@ namespace KillerPDF.Controls
             }
             // Canceling an existing-text edit drops the cover too (it was placed un-undone).
             if (_pendingCover is not null) DiscardPendingCover();
+            _pendingDirectEdit = null;   // the page was never changed, so nothing to put back
             if (_reeditOriginal is not null)
             {
                 int rp = _reeditOriginal.PageIndex;
@@ -829,7 +970,8 @@ namespace KillerPDF.Controls
             if (_draggingTextEditHandle) return;
             // Commit if the box has content, or (for an existing-text edit) even when emptied, so the
             // pending cover is resolved instead of lingering when the user clicks away from a blank edit.
-            if (_activeTextBox is not null && (!string.IsNullOrWhiteSpace(_activeTextBox.Text) || _pendingCover is not null))
+            if (_activeTextBox is not null && (!string.IsNullOrWhiteSpace(_activeTextBox.Text) || _pendingCover is not null
+                || _pendingDirectEdit is not null))
             {
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
@@ -882,6 +1024,15 @@ namespace KillerPDF.Controls
             // either of which leaves the box orphaned (visible, but immune to Delete/Clear All). Its
             // live Parent is the correct host.
             RemoveFromParent(tb);
+
+            if (_pendingDirectEdit is { } direct)
+            {
+                // A line of the page's own text: the page content changes, no annotation is added.
+                _pendingDirectEdit = null;
+                CommitDirectTextEdit(direct, tb.Text);
+                if (_currentTool != EditTool.Text) HideTextSettings();
+                return;
+            }
 
             if (!string.IsNullOrEmpty(content))
             {

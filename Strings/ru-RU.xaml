@@ -1452,6 +1452,13 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Err_FileRepairFailed">Не удалось восстановить файл «{0}».</sys:String>
     <sys:String x:Key="Str_St_TextEditDetectedFont">Редактирование шрифтом {0}, {1} пт. Метрики шрифта могут отличаться от оригинала.</sys:String>
     <sys:String x:Key="Str_St_TextEditFontSubstituted">Шрифт {0} недоступен. Редактирование шрифтом {1}, {2} пт.</sys:String>
+    <sys:String x:Key="Str_St_TextEditInPage">Эта строка редактируется прямо на странице, {0} pt. Где возможно, она сохраняет свой шрифт.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedInPage">Строка изменена на странице своим шрифтом.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedChosenFont">Строка изменена на странице шрифтом {0}.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedSubstitute">Строка изменена на странице шрифтом {0}, потому что её собственный шрифт не может показать новые символы.</sys:String>
+    <sys:String x:Key="Str_St_TextEditFailed">Не удалось изменить строку: {0}</sys:String>
+    <sys:String x:Key="Str_St_TextEditCoverScan">Эта строка является распознанным текстом поверх скана, поэтому правка вместо этого закрывает её.</sys:String>
+    <sys:String x:Key="Str_St_TextEditCoverOther">Эту строку нельзя изменить на странице, поэтому правка вместо этого закрывает её.</sys:String>
     <sys:String x:Key="Str_Print_NoTwoSidedSupport">Выбранный принтер не сообщает о поддержке двусторонней печати.</sys:String>
     <sys:String x:Key="Str_Form_ClickInitials">Щелкните, чтобы добавить инициалы</sys:String>
     <sys:String x:Key="Str_Form_ClickSign">Щелкните, чтобы подписать</sys:String>

@@ -1452,6 +1452,13 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Err_FileRepairFailed">&quot;{0}&quot; không thể sửa chữa được.</sys:String>
     <sys:String x:Key="Str_St_TextEditDetectedFont">Đang chỉnh sửa bằng {0}, {1} pt. Các chỉ số phông chữ có thể khác với bản gốc.</sys:String>
     <sys:String x:Key="Str_St_TextEditFontSubstituted">Phông chữ {0} không khả dụng. Đang chỉnh sửa bằng {1}, {2} pt.</sys:String>
+    <sys:String x:Key="Str_St_TextEditInPage">Đang sửa dòng này ngay trong trang, {0} pt. Dòng giữ phông chữ riêng khi có thể.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedInPage">Đã đổi dòng trong trang, bằng phông chữ riêng của nó.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedChosenFont">Đã đổi dòng trong trang, bằng {0}.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedSubstitute">Đã đổi dòng trong trang, bằng {0}, vì phông chữ riêng của nó không hiển thị được các ký tự mới.</sys:String>
+    <sys:String x:Key="Str_St_TextEditFailed">Không thể đổi dòng: {0}</sys:String>
+    <sys:String x:Key="Str_St_TextEditCoverScan">Dòng này là văn bản nhận dạng nằm trên bản quét, nên thao tác sửa sẽ che nó lại.</sys:String>
+    <sys:String x:Key="Str_St_TextEditCoverOther">Không thể đổi dòng này trong trang, nên thao tác sửa sẽ che nó lại.</sys:String>
     <sys:String x:Key="Str_Print_NoTwoSidedSupport">Máy in được chọn không hỗ trợ in hai mặt.</sys:String>
     <sys:String x:Key="Str_Form_ClickInitials">Nhấp để thêm tên viết tắt của bạn (&amp;I)</sys:String>
     <sys:String x:Key="Str_Form_ClickSign">Nhấp để ký (&amp;S)</sys:String>

@@ -1452,6 +1452,13 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Err_FileRepairFailed">Impossible de réparer « {0} ».</sys:String>
     <sys:String x:Key="Str_St_TextEditDetectedFont">Modification avec {0}, {1} pt. Les métriques de la police peuvent différer de l’original.</sys:String>
     <sys:String x:Key="Str_St_TextEditFontSubstituted">La police {0} n’est pas disponible. Modification avec {1}, {2} pt.</sys:String>
+    <sys:String x:Key="Str_St_TextEditInPage">Modification de cette ligne directement dans la page, {0} pt. Elle garde sa propre police quand c'est possible.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedInPage">Ligne modifiée dans la page, dans sa propre police.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedChosenFont">Ligne modifiée dans la page, en {0}.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedSubstitute">Ligne modifiée dans la page, en {0}, car sa propre police ne peut pas afficher les nouveaux caractères.</sys:String>
+    <sys:String x:Key="Str_St_TextEditFailed">Impossible de modifier la ligne : {0}</sys:String>
+    <sys:String x:Key="Str_St_TextEditCoverScan">Cette ligne est du texte reconnu sur une numérisation, la modification la recouvre donc à la place.</sys:String>
+    <sys:String x:Key="Str_St_TextEditCoverOther">Cette ligne ne peut pas être modifiée dans la page, la modification la recouvre donc à la place.</sys:String>
     <sys:String x:Key="Str_Print_NoTwoSidedSupport">L’imprimante sélectionnée ne signale pas la prise en charge de l’impression recto verso.</sys:String>
     <sys:String x:Key="Str_Form_ClickInitials">Cliquez pour ajouter vos initiales</sys:String>
     <sys:String x:Key="Str_Form_ClickSign">Cliquez pour signer</sys:String>

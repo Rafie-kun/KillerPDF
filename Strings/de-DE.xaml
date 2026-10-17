@@ -1438,6 +1438,13 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Err_FileRepairFailed">&quot;{0}&quot; konnte nicht repariert werden.</sys:String>
     <sys:String x:Key="Str_St_TextEditDetectedFont">Bearbeitung mit {0}, {1} pt. Die Schriftmaße können vom Original abweichen.</sys:String>
     <sys:String x:Key="Str_St_TextEditFontSubstituted">Die Schriftart {0} ist nicht verfügbar. Bearbeitung mit {1}, {2} pt.</sys:String>
+    <sys:String x:Key="Str_St_TextEditInPage">Diese Zeile wird direkt in der Seite bearbeitet, {0} pt. Sie behält ihre eigene Schrift, wo es geht.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedInPage">Zeile in der Seite in ihrer eigenen Schrift geändert.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedChosenFont">Zeile in der Seite in {0} geändert.</sys:String>
+    <sys:String x:Key="Str_St_TextEditedSubstitute">Zeile in der Seite in {0} geändert, weil ihre eigene Schrift die neuen Zeichen nicht darstellen kann.</sys:String>
+    <sys:String x:Key="Str_St_TextEditFailed">Die Zeile konnte nicht geändert werden: {0}</sys:String>
+    <sys:String x:Key="Str_St_TextEditCoverScan">Diese Zeile ist erkannter Text über einem Scan, daher wird sie stattdessen abgedeckt.</sys:String>
+    <sys:String x:Key="Str_St_TextEditCoverOther">Diese Zeile kann in der Seite nicht geändert werden, daher wird sie stattdessen abgedeckt.</sys:String>
     <sys:String x:Key="Str_Print_NoTwoSidedSupport">Der ausgewählte Drucker meldet keine Unterstützung für beidseitigen Druck.</sys:String>
     <sys:String x:Key="Str_Form_ClickInitials">Klicken, um Ihre Initialen hinzuzufügen</sys:String>
     <sys:String x:Key="Str_Form_ClickSign">Zum Unterschreiben klicken</sys:String>
