@@ -81,9 +81,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 ### Fixed
 - Digitally signed fields show their signature instead of a blue Sign box (#425).
 - The Archival, Scanning and Privacy macro starters run instead of reporting steps unavailable. OCR adds a searchable text layer like Make Searchable PDF. Redact asks for the words to remove, also removes areas marked with the Redact tool, and uses the Redact tool's verification and page image approval. Both steps can be added to any macro (#343).
-- On the Light theme's Yellow accent, buttons, links, tabs and accent icons stay yellow with a thin gray outline around yellow text and icons, instead of turning near-black.
+- On the Light theme's Yellow and Orange accents, buttons, links, tabs and accent icons keep their color with a thin gray outline around accent text and icons, instead of turning near-black or brown.
 - Gray, menu and accent text reads at 4.5:1 contrast or better in every theme and accent, and the footer's version and copyright are slightly dimmed.
-- On the website's Light theme with the Yellow accent, links, headings and labels stay yellow with a thin gray outline instead of turning olive brown.
+- The Dark theme's Red accent stays a true red on buttons, lines, scroll bars and the website's accent swatches, and only small red text uses a lighter red.
+- The website's text and accent colors read at 4.5:1 contrast or better in every theme, and a narrow top bar shrinks the Microsoft Store and MCP buttons to their logos and moves links into a More menu instead of wrapping.
+- On the website's Light theme with the Yellow or Orange accent, links, headings and labels keep their color with a thin gray outline instead of turning olive or brown.
 - The exe's file properties show Steve the Killer as the copyright holder instead of leaving it blank.
 - The file picker's close button turns red on hover without filling a red block, like every other dialog's close, and keeps the classic caption button on 98SE.
 - JPEG 2000 images that rendered blank, scrambled or missing, or with stray noise or a false color cast, now render correctly, from updating the built-in JPEG 2000 decoder to CoreJ2K 2.4.1.
