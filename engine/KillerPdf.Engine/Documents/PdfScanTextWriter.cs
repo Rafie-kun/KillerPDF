@@ -70,8 +70,10 @@ public static class PdfScanTextWriter
         int replaced = 0, searchable = 0;
 
         // All the new page content is authored as one document so its fonts are shared, then
-        // each page's content replaces the scanned page's own.
-        var authored = new PdfDocumentBuilder();
+        // each page's content replaces the scanned page's own. The text stands in for print at
+        // the scan's size, so its faces leave out the hinting instructions, which only tune letters
+        // to a low-resolution pixel grid.
+        var authored = new PdfDocumentBuilder { OmitFontHinting = true };
         foreach (PdfScanTextPage page in pages)
         {
             if (page.PageIndex < 0 || page.PageIndex >= information.Count)

@@ -4,6 +4,7 @@ using KillerPdf.Engine.Authoring;
 using KillerPdf.Engine.Documents;
 using KillerPdf.Engine.Fonts;
 using KillerPdf.Engine.Objects;
+using KillerPdf.Engine.Rendering;
 using Xunit;
 
 namespace KillerPdf.Engine.Tests.Fonts;
@@ -199,6 +200,38 @@ public sealed class TrueTypeFontTests
         Assert.Equal(first, second);
         Assert.Equal((ushort)1, reopened.GetGlyphId('A'));
         Assert.Equal(600, reopened.GetPdfAdvanceWidth(1));
+    }
+
+    [Fact]
+    public void CreateSubset_WithoutHintingDropsTheInstructionsAndKeepsTheOutlines()
+    {
+        TrueTypeFont font = PdfStandardFontSubstitutes.Find("Times-Roman");
+        ushort[] glyphs = [.. "Hinting & fill".Select(character => font.GetGlyphId(character)).Distinct()];
+
+        byte[] hinted = font.CreateSubset(glyphs);
+        byte[] plain = font.CreateSubset(glyphs, hinting: false);
+        TrueTypeFont reopened = TrueTypeFont.Load(plain);
+
+        Assert.Contains("fpgm", TableTags(hinted));
+        Assert.DoesNotContain("fpgm", TableTags(plain));
+        Assert.DoesNotContain("prep", TableTags(plain));
+        Assert.DoesNotContain("cvt ", TableTags(plain));
+        Assert.True(plain.Length < hinted.Length, $"{plain.Length} vs {hinted.Length}");
+        Assert.Equal(font.GetGlyphId('f'), reopened.GetGlyphId('f'));
+        Assert.Equal(RenderText(font, omitHinting: false), RenderText(font, omitHinting: true));
+    }
+
+    private static List<string> TableTags(byte[] font) =>
+        [.. Enumerable.Range(0, BinaryPrimitives.ReadUInt16BigEndian(font.AsSpan(4, 2)))
+            .Select(index => Encoding.ASCII.GetString(font, 12 + index * 16, 4))];
+
+    private static byte[] RenderText(TrueTypeFont font, bool omitHinting)
+    {
+        var content = new PdfContentStreamBuilder().BeginText().SetFont(font, 18)
+            .SetTextMatrix(1, 0, 0, 1, 6, 12).ShowUnicodeText("Hinting & fill").EndText();
+        PdfDocument document = PdfDocument.Open(new PdfDocumentBuilder { OmitFontHinting = omitHinting }
+            .AddPage(160, 36, content).Build());
+        return new PdfPageRenderer(document).Render(0, new PdfRenderOptions(480, 108)).Pixels.ToArray();
     }
 
     [Fact]

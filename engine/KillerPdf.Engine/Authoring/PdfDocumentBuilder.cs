@@ -58,6 +58,9 @@ public sealed partial class PdfDocumentBuilder
     public int PageCount => _pages.Count;
     /// <summary>Gets the descriptive metadata that will be written to the document.</summary>
     public PdfDocumentMetadata? Metadata { get; private set; }
+    // Whether embedded TrueType subsets leave out their hinting instructions, for documents
+    // whose text matters more for its size than for its fit to a low-resolution pixel grid.
+    internal bool OmitFontHinting { get; set; }
 
     /// <summary>Sets the document information, language, and descriptive XMP values.</summary>
     public PdfDocumentBuilder SetMetadata(PdfDocumentMetadata metadata)
@@ -2793,7 +2796,7 @@ public sealed partial class PdfDocumentBuilder
         foreach ((PdfStandardFont font, int number) in fontNumbers.OrderBy(entry => entry.Value))
             objects.Add(new PdfIndirectObject(number, 0, StandardFontDictionary(font), 0));
         foreach (AllocatedEmbeddedFont font in embeddedFonts)
-            AddEmbeddedFontObjects(objects, font);
+            AddEmbeddedFontObjects(objects, font, !OmitFontHinting);
         foreach ((PdfImage image, int number) in imageNumbers.OrderBy(entry => entry.Value))
             objects.Add(new PdfIndirectObject(number, 0,
                 PdfImageXObjectFactory.Create(image, image.SoftMask is null ? null
@@ -5680,7 +5683,7 @@ public sealed partial class PdfDocumentBuilder
         string.Join(" ", value.EnumerateRunes().Select(rune => $"U+{rune.Value:X4}"));
 
     private static void AddEmbeddedFontObjects(
-        List<PdfIndirectObject> objects, AllocatedEmbeddedFont allocated)
+        List<PdfIndirectObject> objects, AllocatedEmbeddedFont allocated, bool hinting)
     {
         var type0 = new PdfIndirectReference(allocated.Type0Number, 0);
         var cidFont = new PdfIndirectReference(allocated.CidFontNumber, 0);
@@ -5690,7 +5693,7 @@ public sealed partial class PdfDocumentBuilder
         var encoding = new PdfIndirectReference(allocated.EncodingNumber, 0);
         EmbeddedTrueTypeFontObjects values = PdfEmbeddedTrueTypeFontFactory.Create(
             allocated.Font, allocated.Mappings, type0, cidFont, descriptor, fontFile, toUnicode,
-            encoding);
+            encoding, hinting);
         objects.Add(new PdfIndirectObject(allocated.FontFileNumber, 0, values.FontFile, 0));
         objects.Add(new PdfIndirectObject(allocated.DescriptorNumber, 0, values.Descriptor, 0));
         objects.Add(new PdfIndirectObject(allocated.CidFontNumber, 0, values.CidFont, 0));

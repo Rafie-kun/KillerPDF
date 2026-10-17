@@ -310,7 +310,11 @@ public sealed class TrueTypeFont
     }
 
     /// <summary>Builds a deterministic TrueType subset while retaining original glyph identifiers.</summary>
-    public byte[] CreateSubset(IEnumerable<ushort> glyphIds)
+    public byte[] CreateSubset(IEnumerable<ushort> glyphIds) => CreateSubset(glyphIds, hinting: true);
+
+    // hinting false leaves the TrueType instructions out of the subset, for text whose exact
+    // fit to a low-resolution pixel grid matters less than the file's size.
+    internal byte[] CreateSubset(IEnumerable<ushort> glyphIds, bool hinting)
     {
         ArgumentNullException.ThrowIfNull(glyphIds);
         if (HasCffOutlines)
@@ -320,7 +324,7 @@ public sealed class TrueTypeFont
             throw new InvalidOperationException($"The embedding permissions in {PostScriptName} prohibit subsetting.");
         if (_directoryOffset != 0)
             throw new NotSupportedException("Faces read from a font collection are not subset.");
-        return TrueTypeSubsetter.Create(_data, GlyphCount, glyphIds);
+        return TrueTypeSubsetter.Create(_data, GlyphCount, glyphIds, hinting);
     }
 
     private ushort[] ReadWidths(Table table, int glyphCount, int metricCount, bool extraction)

@@ -12,8 +12,14 @@ internal static class TrueTypeSubsetter
         "OS/2", "cmap", "cvt ", "fpgm", "gasp", "glyf", "head", "hhea",
         "hmtx", "loca", "maxp", "name", "post", "prep"
     ];
+    private const ushort CompositeHasInstructions = 0x0100;
+    // The tables that only carry the font's hinting program and its data.
+    private static readonly HashSet<string> HintingTables = ["cvt ", "fpgm", "prep"];
 
-    public static byte[] Create(byte[] source, int glyphCount, IEnumerable<ushort> glyphIds)
+    // hinting false leaves out the TrueType instructions, which fit outlines to the pixel grid
+    // on low-resolution screens and often make up a third of a face's size.
+    public static byte[] Create(byte[] source, int glyphCount, IEnumerable<ushort> glyphIds,
+        bool hinting = true)
     {
         Dictionary<string, Table> directory = ReadDirectory(source);
         if (!directory.TryGetValue("head", out Table head)
@@ -36,11 +42,12 @@ internal static class TrueTypeSubsetter
         }
         AddCompositeDependencies(source, glyf, offsets, retained, glyphCount);
 
-        byte[] subsetGlyf = BuildGlyphTable(source, glyf, offsets, retained, glyphCount, out byte[] subsetLoca);
+        byte[] subsetGlyf = BuildGlyphTable(source, glyf, offsets, retained, glyphCount, hinting,
+            out byte[] subsetLoca);
         var tables = new SortedDictionary<string, byte[]>(StringComparer.Ordinal);
         foreach ((string tag, Table table) in directory)
         {
-            if (RetainedTables.Contains(tag))
+            if (RetainedTables.Contains(tag) && (hinting || !HintingTables.Contains(tag)))
                 tables[tag] = source.AsSpan(table.Offset, table.Length).ToArray();
         }
         // A PDF reaches an embedded font's glyphs by number, never by name, so the subset keeps
@@ -149,7 +156,7 @@ internal static class TrueTypeSubsetter
 
     private static byte[] BuildGlyphTable(
         byte[] source, Table glyf, uint[] offsets, SortedSet<ushort> retained,
-        int glyphCount, out byte[] loca)
+        int glyphCount, bool hinting, out byte[] loca)
     {
         using var output = new MemoryStream();
         var newOffsets = new uint[glyphCount + 1];
@@ -160,7 +167,10 @@ internal static class TrueTypeSubsetter
             {
                 int start = checked(glyf.Offset + (int)offsets[glyph]);
                 int length = checked((int)(offsets[glyph + 1] - offsets[glyph]));
-                output.Write(source, start, length);
+                if (hinting || length < 10)
+                    output.Write(source, start, length);
+                else
+                    WriteWithoutInstructions(source, start, length, output);
                 while ((output.Position & 3) != 0)
                     output.WriteByte(0);
             }
@@ -170,6 +180,56 @@ internal static class TrueTypeSubsetter
         for (int index = 0; index < newOffsets.Length; index++)
             BinaryPrimitives.WriteUInt32BigEndian(loca.AsSpan(index * 4, 4), newOffsets[index]);
         return output.ToArray();
+    }
+
+    // Writes a glyph with its instructions left out. A simple glyph keeps its contours and
+    // points with a zero instruction length; a composite glyph keeps its components and drops
+    // the instructions after the last one. A glyph whose layout does not add up is kept whole.
+    private static void WriteWithoutInstructions(byte[] source, int start, int length, MemoryStream output)
+    {
+        int end = start + length;
+        short contours = S16(source, start);
+        if (contours >= 0)
+        {
+            int lengthField = start + 10 + contours * 2;
+            if (lengthField + 2 > end || lengthField + 2 + U16(source, lengthField) > end)
+            {
+                output.Write(source, start, length);
+                return;
+            }
+            int points = lengthField + 2 + U16(source, lengthField);
+            output.Write(source, start, lengthField - start);
+            output.WriteByte(0);
+            output.WriteByte(0);
+            output.Write(source, points, end - points);
+            return;
+        }
+        byte[] composite = source.AsSpan(start, length).ToArray();
+        int position = 10;
+        ushort flags;
+        do
+        {
+            if (position + 4 > length)
+            {
+                output.Write(source, start, length);
+                return;
+            }
+            flags = BinaryPrimitives.ReadUInt16BigEndian(composite.AsSpan(position, 2));
+            BinaryPrimitives.WriteUInt16BigEndian(composite.AsSpan(position, 2),
+                (ushort)(flags & ~CompositeHasInstructions));
+            position += 4;
+            position += (flags & 0x0001) != 0 ? 4 : 2;
+            if ((flags & 0x0008) != 0) position += 2;
+            else if ((flags & 0x0040) != 0) position += 4;
+            else if ((flags & 0x0080) != 0) position += 8;
+        }
+        while ((flags & CompositeMoreComponents) != 0);
+        if (position > length)
+        {
+            output.Write(source, start, length);
+            return;
+        }
+        output.Write(composite, 0, position);
     }
 
     private static byte[] BuildFont(SortedDictionary<string, byte[]> tables)

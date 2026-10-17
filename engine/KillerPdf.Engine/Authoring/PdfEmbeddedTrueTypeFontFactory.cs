@@ -12,7 +12,8 @@ internal static class PdfEmbeddedTrueTypeFontFactory
         TrueTypeFont font, IReadOnlyDictionary<ushort, EmbeddedCharacterMapping> mappings,
         PdfIndirectReference _, PdfIndirectReference cidFontReference,
         PdfIndirectReference descriptorReference, PdfIndirectReference fontFileReference,
-        PdfIndirectReference toUnicodeReference, PdfIndirectReference encodingReference)
+        PdfIndirectReference toUnicodeReference, PdfIndirectReference encodingReference,
+        bool hinting = true)
     {
         byte[] fontProgram = font.FontData.ToArray();
         bool subset = false;
@@ -20,7 +21,7 @@ internal static class PdfEmbeddedTrueTypeFontFactory
         {
             try
             {
-                fontProgram = font.CreateSubset(mappings.Values.Select(mapping => mapping.Glyph));
+                fontProgram = font.CreateSubset(mappings.Values.Select(mapping => mapping.Glyph), hinting);
                 subset = true;
             }
             catch (NotSupportedException)
