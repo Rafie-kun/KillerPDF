@@ -1459,4 +1459,22 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Scroll_PageDown">Side ned</sys:String>
     <sys:String x:Key="Str_Scroll_PageLeft">Side til venstre</sys:String>
     <sys:String x:Key="Str_Scroll_PageRight">Side til høyre</sys:String>
+    <!-- Menus, signed fields and setup dialogs -->
+    <sys:String x:Key="Str_Ctx_CloseAllTabs">Lukk alle faner</sys:String>
+    <sys:String x:Key="Str_Ctx_FullScreen">Fullskjerm</sys:String>
+    <sys:String x:Key="Str_Sig_ChangeSignature">Endre signatur</sys:String>
+    <sys:String x:Key="Str_Sig_RemoveSignature">Fjern signatur</sys:String>
+    <sys:String x:Key="Str_Sig_ChangeInitials">Endre initialer</sys:String>
+    <sys:String x:Key="Str_Sig_RemoveInitials">Fjern initialer</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallTitle">Dobbel KillerPDF-installasjon</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallMachine" xml:space="preserve">KillerPDF fant to installerte kopier på denne datamaskinen.&#10;&#10;Du bruker installasjonen for alle brukere. Det finnes også en eldre kopi for én bruker, vanligvis fordi den var i bruk under en tidligere oppdatering.&#10;&#10;Vil du fjerne den ubrukte kopien for én bruker nå? Innstillingene og PDF-filene dine blir ikke fjernet.</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallUser" xml:space="preserve">KillerPDF fant to installerte kopier på denne datamaskinen.&#10;&#10;Du bruker installasjonen for én bruker. Det finnes også en kopi for alle brukere.&#10;&#10;Vil du fjerne den ubrukte kopien for alle brukere nå? Windows ber om administratortillatelse. Innstillingene og PDF-filene dine blir ikke fjernet.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallUnsigned" xml:space="preserve">Installasjonen ble avvist: EXE-filen som kjører, har ikke en gyldig Authenticode-signatur.&#10;&#10;Bare signerte versjoner av KillerPDF kan installeres.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallDowngrade" xml:space="preserve">Du er i ferd med å installere en eldre versjon ({0}) over den installerte versjonen ({1}).&#10;&#10;Vil du gå tilbake til den eldre versjonen likevel?</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallWriteFailed" xml:space="preserve">Kunne ikke skrive den installerte kopien til:&#10;{0}&#10;&#10;Lukk alle åpne KillerPDF-vinduer (og se etter KillerPDF.exe i Oppgavebehandling), og kjør installasjonsprogrammet på nytt.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallFailed" xml:space="preserve">Installasjonen mislyktes:&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">Avinstalleringen kunne ikke be om administratortilgang:&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallConfirm">Vil du avinstallere KillerPDF fra denne datamaskinen?</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF kjører fortsatt.&#10;Lukk programmet, og prøv å avinstallere på nytt.</sys:String>
+    <sys:String x:Key="Str_Btn_Uninstall">Avinstaller</sys:String>
 </ResourceDictionary>

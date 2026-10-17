@@ -1458,4 +1458,22 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Scroll_PageDown">Бір бет төмен</sys:String>
     <sys:String x:Key="Str_Scroll_PageLeft">Бір бет солға</sys:String>
     <sys:String x:Key="Str_Scroll_PageRight">Бір бет оңға</sys:String>
+    <!-- Menus, signed fields and setup dialogs -->
+    <sys:String x:Key="Str_Ctx_CloseAllTabs">Барлық қойындыларды жабу</sys:String>
+    <sys:String x:Key="Str_Ctx_FullScreen">Толық экран</sys:String>
+    <sys:String x:Key="Str_Sig_ChangeSignature">Қолтаңбаны өзгерту</sys:String>
+    <sys:String x:Key="Str_Sig_RemoveSignature">Қолтаңбаны жою</sys:String>
+    <sys:String x:Key="Str_Sig_ChangeInitials">Инициалдарды өзгерту</sys:String>
+    <sys:String x:Key="Str_Sig_RemoveInitials">Инициалдарды жою</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallTitle">KillerPDF екі рет орнатылған</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallMachine" xml:space="preserve">KillerPDF осы компьютерде екі орнатылған көшірме тапты.&#10;&#10;Қазір барлық пайдаланушыларға арналған орнатылым іске қосылған. Бір пайдаланушыға арналған ескі көшірме де бар, әдетте ол бұрынғы жаңарту кезінде пайдаланылып тұрған.&#10;&#10;Пайдаланылмайтын бір пайдаланушылық көшірмені қазір жою керек пе? Параметрлеріңіз бен PDF файлдарыңыз жойылмайды.</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallUser" xml:space="preserve">KillerPDF осы компьютерде екі орнатылған көшірме тапты.&#10;&#10;Қазір бір пайдаланушыға арналған орнатылым іске қосылған. Барлық пайдаланушыларға арналған көшірме де бар.&#10;&#10;Барлық пайдаланушыларға арналған пайдаланылмайтын көшірмені қазір жою керек пе? Windows әкімші рұқсатын сұрайды. Параметрлеріңіз бен PDF файлдарыңыз жойылмайды.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallUnsigned" xml:space="preserve">Орнатудан бас тартылды: іске қосылған EXE файлында жарамды Authenticode қолтаңбасы жоқ.&#10;&#10;Тек қолтаңбаланған KillerPDF жинақтарын орнатуға болады.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallDowngrade" xml:space="preserve">Орнатылған нұсқаның ({1}) үстіне ескі нұсқаны ({0}) орнатқалы жатырсыз.&#10;&#10;Бәрібір ескі нұсқаға қайту керек пе?</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallWriteFailed" xml:space="preserve">Орнатылған көшірмені мына жерге жазу мүмкін болмады:&#10;{0}&#10;&#10;Ашық тұрған KillerPDF терезелерін жабыңыз (және Тапсырмалар реттеушісінде KillerPDF.exe бар-жоғын тексеріңіз), содан кейін орнатушыны қайта іске қосыңыз.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallFailed" xml:space="preserve">Орнату сәтсіз аяқталды:&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">Жою үшін әкімші рұқсатын сұрау мүмкін болмады:&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallConfirm">KillerPDF бағдарламасын осы компьютерден жою керек пе?</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF әлі жұмыс істеп тұр.&#10;Оны жауып, жоюды қайталап көріңіз.</sys:String>
+    <sys:String x:Key="Str_Btn_Uninstall">Жою</sys:String>
 </ResourceDictionary>

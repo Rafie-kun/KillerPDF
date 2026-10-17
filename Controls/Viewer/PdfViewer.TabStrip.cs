@@ -425,12 +425,15 @@ namespace KillerPDF.Controls
             openFolder.IsEnabled = !string.IsNullOrWhiteSpace(sourcePath) && System.IO.File.Exists(sourcePath);
             menu.Items.Add(openFolder);
             menu.Items.Add(new Separator());
-            menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_CloseTab"), (_, _) => CloseTab(s), "Ctrl+W", ""));
-            var others = MakeMenuItem(Loc("Str_Ctx_CloseOthers"), (_, _) => CloseOtherTabs(s), "Ctrl+Shift+W", "");
+            menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_CloseTab"), (_, _) => CloseTab(s), GestureFor("Ctrl:W"), ""));
+            var others = MakeMenuItem(Loc("Str_Ctx_CloseOthers"), (_, _) => CloseOtherTabs(s), GestureFor("CtrlShift:W"), "");
             others.IsEnabled = _sessions.Count(z => z.Doc != null || z.DeferredPath != null) > 1;
             menu.Items.Add(others);
+            var closeAll = MakeMenuItem(Loc("Str_Ctx_CloseAllTabs"), (_, _) => CloseAllTabs(), GestureFor("Ctrl:Q"));
+            closeAll.IsEnabled = _sessions.Any(z => z.Doc != null || z.DeferredPath != null);
+            menu.Items.Add(closeAll);
             // Ctrl+Shift+N moves the active tab the same way; dragging a tab out of the window does too.
-            var newWindow = MakeMenuItem(Loc("Str_Ctx_MoveToNewWindow"), (_, _) => Host?.TearOutTab(this, s), "Ctrl+Shift+N", "\uE8A7");
+            var newWindow = MakeMenuItem(Loc("Str_Ctx_MoveToNewWindow"), (_, _) => Host?.TearOutTab(this, s), GestureFor("CtrlShift:N"), "\uE8A7");
             newWindow.IsEnabled = s.Doc != null || s.DeferredPath != null;
             menu.Items.Add(newWindow);
             menu.PlacementTarget = fe;

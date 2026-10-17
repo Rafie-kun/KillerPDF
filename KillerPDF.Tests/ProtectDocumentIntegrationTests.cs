@@ -101,7 +101,7 @@ public sealed class ProtectDocumentIntegrationTests
         string files = File.ReadAllText(Path.Combine(root, "Shell", "FileOperations.cs"));
 
         Assert.Contains("if (!e.IsRepeat) OpenProtectDialog();", keyboard, StringComparison.Ordinal);
-        Assert.Contains("(_, _) => OpenProtectDialog(), \"Ctrl+Shift+P\"", files, StringComparison.Ordinal);
+        Assert.Contains("(_, _) => OpenProtectDialog(), GestureFor(\"CtrlShift:P\")", files, StringComparison.Ordinal);
     }
 
     private static string RepoRoot()

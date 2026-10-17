@@ -1459,4 +1459,22 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Scroll_PageDown">1 ページ下へ</sys:String>
     <sys:String x:Key="Str_Scroll_PageLeft">1 ページ左へ</sys:String>
     <sys:String x:Key="Str_Scroll_PageRight">1 ページ右へ</sys:String>
+    <!-- Menus, signed fields and setup dialogs -->
+    <sys:String x:Key="Str_Ctx_CloseAllTabs">すべてのタブを閉じる</sys:String>
+    <sys:String x:Key="Str_Ctx_FullScreen">全画面</sys:String>
+    <sys:String x:Key="Str_Sig_ChangeSignature">署名を変更</sys:String>
+    <sys:String x:Key="Str_Sig_RemoveSignature">署名を削除</sys:String>
+    <sys:String x:Key="Str_Sig_ChangeInitials">イニシャルを変更</sys:String>
+    <sys:String x:Key="Str_Sig_RemoveInitials">イニシャルを削除</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallTitle">KillerPDF の重複インストール</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallMachine" xml:space="preserve">このコンピューターに KillerPDF のインストール済みコピーが 2 つ見つかりました。&#10;&#10;現在実行しているのは全ユーザー向けのインストールです。通常は以前の更新時に使用中だったため、古いユーザーごとのコピーも残っています。&#10;&#10;使用していないユーザーごとのコピーを今すぐ削除しますか？設定と PDF ファイルは削除されません。</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallUser" xml:space="preserve">このコンピューターに KillerPDF のインストール済みコピーが 2 つ見つかりました。&#10;&#10;現在実行しているのはユーザーごとのインストールです。全ユーザー向けのコピーもあります。&#10;&#10;使用していない全ユーザー向けのコピーを今すぐ削除しますか？Windows が管理者の許可を求めます。設定と PDF ファイルは削除されません。</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallUnsigned" xml:space="preserve">インストールを拒否しました: 実行中の EXE に有効な Authenticode 署名がありません。&#10;&#10;インストールできるのは署名済みの KillerPDF ビルドだけです。</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallDowngrade" xml:space="preserve">インストール済みのバージョン ({1}) に古いバージョン ({0}) を上書きインストールしようとしています。&#10;&#10;それでも古いバージョンに戻しますか？</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallWriteFailed" xml:space="preserve">インストール済みコピーを書き込めませんでした:&#10;{0}&#10;&#10;開いている KillerPDF のウィンドウをすべて閉じて (タスク マネージャーで KillerPDF.exe も確認してください)、インストーラーをもう一度実行してください。</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallFailed" xml:space="preserve">インストールに失敗しました:&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">アンインストールに必要な管理者アクセスを要求できませんでした:&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallConfirm">このコンピューターから KillerPDF をアンインストールしますか？</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF はまだ実行中です。&#10;終了してから、もう一度アンインストールしてください。</sys:String>
+    <sys:String x:Key="Str_Btn_Uninstall">アンインストール</sys:String>
 </ResourceDictionary>

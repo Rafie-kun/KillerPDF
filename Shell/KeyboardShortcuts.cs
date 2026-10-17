@@ -109,9 +109,7 @@ namespace KillerPDF
             }
             else if (key == Key.V && mods == ModifierKeys.Control)
             {
-                // Internal annotation clipboard takes priority over an OS-clipboard image paste.
-                if (_annotationClipboard.Count > 0) PasteAnnotations(PageList.SelectedIndex);
-                else PasteFromClipboard();
+                PasteInView(PageList.SelectedIndex);
                 e.Handled = true;
             }
             else if (key == Key.A && mods == ModifierKeys.Control)
@@ -119,11 +117,7 @@ namespace KillerPDF
                 if (PageList.IsKeyboardFocusWithin)
                     PageList.SelectAll();
                 else
-                {
-                    // Prefer selecting all annotations (shows where everything is, makes stacked annotations
-                    // editable); fall back to selecting page text when there are none on screen.
-                    if (!SelectAllAnnotations()) SelectAllText();
-                }
+                    SelectAllInView();
                 e.Handled = true;
             }
             else if (key == Key.F && mods == ModifierKeys.Control)
@@ -777,36 +771,29 @@ namespace KillerPDF
             }
         }
 
-        // Appends each tool's key to its tooltip, e.g. "Highlight (2)". Digits mirror the toolbar
-        // position (1-9, 0); Select shows its letter (V) since the 1.6.6 remap made it V-only.
-        // Re-resolves the localized base text so a language switch keeps the right wording (from SelectLocale).
-        private void ApplyToolNumberTooltips()
+        // Ctrl+A and the page menu's Select All. Prefer selecting all annotations (shows where
+        // everything is, makes stacked annotations editable); fall back to selecting page text when
+        // there are none on screen.
+        private void SelectAllInView()
         {
-            // n null or empty = no key to advertise, so the tooltip is just the localized text
-            // rather than a stray empty bracket pair.
-            void Set(System.Windows.Controls.Button btn, string key, string? n)
-            {
-                if (btn == null || TryFindResource(key) is not string s) return;
-                btn.ToolTip = string.IsNullOrEmpty(n) ? s : $"{s} ({n})";
-            }
-            // Select and Form Field already carry their letter shortcuts in the localized base
-            // text. Only add the numeric aliases that are not already present there.
-            Set(ToolSelectBtn, "Str_TT_SelectTool", null);
-            Set(ToolTextBtn, "Str_TT_TextTool", "1");
-            Set(ToolHighlightBtn, "Str_TT_HighlightTool", "2");
-            Set(ToolUnderlineBtn, "Str_TT_LineTool", "3");   // repurposed to the Line tool
-            Set(ToolShapeBtn, "Str_TT_ShapeTool", "4");
-            Set(ToolDrawBtn, "Str_TT_DrawTool", "5");
-            Set(ToolImageBtn, "Str_TT_ImageTool", "6");
-            Set(ToolSignatureBtn, "Str_TT_SignatureTool", "7");
-            Set(ToolCropBtn, "Str_TT_CropTool", "8");
-            Set(_toolRotateBtn, "Str_TT_RotateTool", "9");
-            Set(ToolStampBtn, "Str_TT_StampTool", "0");
-            Set(ToolColorCorrectionBtn, "Str_ColorCorrection", "E");
-            Set(ToolMeasureBtn, "Str_TT_MeasureTool", "M");
-            Set(ToolRedactBtn, "Str_TT_RedactTool", "X");
-            if (TryFindResource("Str_Theme_FilmGrain") is string grain)
-                FilmGrainCheck.ToolTip = $"{grain} (Alt+Shift+G)";
+            if (!SelectAllAnnotations()) SelectAllText();
+        }
+
+        // Ctrl+V and the page menu's Paste. Copied annotations take priority over whatever image or
+        // text the Windows clipboard holds.
+        private void PasteInView(int pageIndex)
+        {
+            if (_annotationClipboard.Count > 0) PasteAnnotations(pageIndex);
+            else PasteFromClipboard();
+        }
+
+        // Whether Paste has anything to place. The clipboard is checked when a menu opens, and
+        // another program holding it open is treated as nothing to paste.
+        private bool CanPasteInView()
+        {
+            if (_annotationClipboard.Count > 0) return true;
+            try { return Clipboard.ContainsImage() || Clipboard.ContainsText(); }
+            catch (System.Runtime.InteropServices.ExternalException) { return false; }
         }
 
         // Alt+Shift+G: Film Grain on or off, kept in step with the theme menu's check box.

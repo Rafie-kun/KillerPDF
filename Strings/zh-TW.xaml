@@ -1441,4 +1441,22 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_Scroll_PageDown">向下翻頁</sys:String>
     <sys:String x:Key="Str_Scroll_PageLeft">向左翻頁</sys:String>
     <sys:String x:Key="Str_Scroll_PageRight">向右翻頁</sys:String>
+    <!-- Menus, signed fields and setup dialogs -->
+    <sys:String x:Key="Str_Ctx_CloseAllTabs">關閉所有分頁</sys:String>
+    <sys:String x:Key="Str_Ctx_FullScreen">全螢幕</sys:String>
+    <sys:String x:Key="Str_Sig_ChangeSignature">變更簽名</sys:String>
+    <sys:String x:Key="Str_Sig_RemoveSignature">移除簽名</sys:String>
+    <sys:String x:Key="Str_Sig_ChangeInitials">變更姓名縮寫</sys:String>
+    <sys:String x:Key="Str_Sig_RemoveInitials">移除姓名縮寫</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallTitle">KillerPDF 重複安裝</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallMachine" xml:space="preserve">KillerPDF 在這部電腦上找到兩個已安裝的複本。&#10;&#10;您目前執行的是供所有使用者使用的安裝。另外還有一個較舊的單一使用者複本，通常是因為它在先前的更新期間正在使用。&#10;&#10;要立即移除未使用的單一使用者複本嗎？您的設定和 PDF 檔案不會被移除。</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallUser" xml:space="preserve">KillerPDF 在這部電腦上找到兩個已安裝的複本。&#10;&#10;您目前執行的是單一使用者安裝。另外還有一個供所有使用者使用的複本。&#10;&#10;要立即移除未使用的所有使用者複本嗎？Windows 會要求系統管理員權限。您的設定和 PDF 檔案不會被移除。</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallUnsigned" xml:space="preserve">已拒絕安裝：執行中的 EXE 沒有有效的 Authenticode 簽章。&#10;&#10;只能安裝已簽署的 KillerPDF 組建。</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallDowngrade" xml:space="preserve">您即將在已安裝的版本 ({1}) 上安裝較舊的版本 ({0})。&#10;&#10;仍要降級嗎？</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallWriteFailed" xml:space="preserve">無法寫入已安裝的複本：&#10;{0}&#10;&#10;請關閉所有開啟的 KillerPDF 視窗（並在工作管理員中檢查 KillerPDF.exe），然後重新執行安裝程式。</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallFailed" xml:space="preserve">安裝失敗：&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">解除安裝無法要求系統管理員權限：&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallConfirm">要從這部電腦解除安裝 KillerPDF 嗎？</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF 仍在執行。&#10;請關閉它，然後再試一次解除安裝。</sys:String>
+    <sys:String x:Key="Str_Btn_Uninstall">解除安裝</sys:String>
 </ResourceDictionary>

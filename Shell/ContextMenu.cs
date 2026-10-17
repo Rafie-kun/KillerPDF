@@ -210,10 +210,10 @@ namespace KillerPDF
                 _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Ctx_Group"), (s, e) => GroupSelected(), glyph: ""));
 
             _ctxMenu.Items.Add(new Separator());
-            _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Ctx_Copy"), (s, e) => CopySelectedAnnotations(), "Ctrl+C", ""));
+            _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Ctx_Copy"), (s, e) => CopySelectedAnnotations(), GestureFor("Ctrl:C"), ""));
             if (_annotationClipboard.Count > 0)
-                _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Ctx_Paste"), (s, e) => PasteAnnotations(hit.PageIndex), "Ctrl+V", ""));
-            _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Ctx_DeleteSel"), (s, e) => DeleteSelected(), "Delete", ""));
+                _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Ctx_Paste"), (s, e) => PasteAnnotations(hit.PageIndex), GestureFor("Ctrl:V"), ""));
+            _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Ctx_DeleteSel"), (s, e) => DeleteSelected(), GestureFor("Del"), ""));
         }
 
         // Page-level menu shown when the right-click lands on empty page space (no annotation under it).
@@ -225,12 +225,28 @@ namespace KillerPDF
             bool hasSelection = SelectionCount() > 0;
             bool hasTextSel   = !string.IsNullOrEmpty(_selectedText);
 
+            AddNavRow(_ctxMenu);
+
             // Copy Text only when there is actually selected text to copy.
             if (hasTextSel)
-                _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Ctx_CopyText"), (s, e) => CopySelectedText(), "Ctrl+C", ""));
-            _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Ctx_Print"), (s, e) => Print_Click(s!, e), "Ctrl+P", ""));
+                _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Ctx_CopyText"), (s, e) => CopySelectedText(), GestureFor("Ctrl:C"), ""));
+            // A flowing text selection can become markup or a redaction right here, the way the
+            // Highlight tools would mark it, without switching tools first.
+            if (ActiveViewer.HasTextSelectionRangeExt)
+            {
+                _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Lbl_Highlight"),
+                    (s, e) => ActiveViewer.AnnotateTextSelectionExt(EditTool.Highlight)));
+                _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Lbl_Underline"),
+                    (s, e) => ActiveViewer.AnnotateTextSelectionExt(EditTool.Underline)));
+                _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Lbl_Strike"),
+                    (s, e) => ActiveViewer.AnnotateTextSelectionExt(EditTool.Strikethrough)));
+                _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Lbl_Redact"),
+                    (s, e) => ActiveViewer.MarkTextSelectionForRedaction(), glyph: ""));
+                _ctxMenu.Items.Add(new Separator());
+            }
+            _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Ctx_Print"), (s, e) => Print_Click(s!, e), GestureFor("Ctrl:P"), ""));
             _ctxMenu.Items.Add(BuildComparisonContextItem());
-            _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Ctx_OcrPage"), (s, e) => OcrPageToClipboard(pageIdx), "Ctrl+Shift+O", ""));
+            _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Ctx_OcrPage"), (s, e) => OcrPageToClipboard(pageIdx), GestureFor("CtrlShift:O"), ""));
             _ctxMenu.Items.Add(new Separator());
 
             // Placement actions - drop the item exactly where the user right-clicked (Select / Highlight /
@@ -240,24 +256,24 @@ namespace KillerPDF
                 SetTool(EditTool.Text);
                 _activeCanvas = CanvasForPage(pageIdx);
                 PlaceTextBox(pt, pageIdx);
-            }, "T", ""));
+            }, GestureFor("T"), ""));
             _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Lbl_Image"), (s, e) =>
             {
                 _activeCanvas = CanvasForPage(pageIdx);
                 PlaceImageFromDialog(pt, pageIdx);
-            }, "I", ""));
+            }, GestureFor("I"), ""));
             _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Lbl_Signature"), (s, e) =>
             {
                 _activeCanvas = CanvasForPage(pageIdx);
                 if (_pendingSignature is not null) PlaceSignature(pt, pageIdx);
                 else { SetTool(EditTool.Signature); ShowSignaturePopup(); }
-            }, "G", ""));
+            }, GestureFor("G"), ""));
             _ctxMenu.Items.Add(BuildFieldPresetMenu(pt, pageIdx));
             _ctxMenu.Items.Add(new Separator());
 
-            _ctxMenu.Items.Add(MakeTransformMenuItem(Loc("Str_Lbl_Rotate"), (s, e) => OpenTransformWindow(), "R"));
+            _ctxMenu.Items.Add(MakeTransformMenuItem(Loc("Str_Lbl_Rotate"), (s, e) => OpenTransformWindow(), GestureFor("R")));
             _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_ColorCorrection"), (s, e) =>
-                OpenTransformWindow(TransformWindowMode.ColorCorrection), gesture: "E", glyph: ""));
+                OpenTransformWindow(TransformWindowMode.ColorCorrection), gesture: GestureFor("E"), glyph: ""));
             _ctxMenu.Items.Add(MakeRotateMenuItem(Loc("Str_Ctx_RotateCW"), (s, e) => RotatePages_Click(90), clockwise: true));
             _ctxMenu.Items.Add(MakeRotateMenuItem(Loc("Str_Ctx_RotateCCW"), (s, e) => RotatePages_Click(-90), clockwise: false));
             _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Pages_RasterizeRegion"), (s, e) => RasterizeRegion(pageIdx)));
@@ -267,19 +283,73 @@ namespace KillerPDF
             // Delete Selected when something is selected; otherwise Delete Page (the page under the cursor,
             // which the right-click already made the selected page).
             if (hasSelection)
-                _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Ctx_DeleteSel"), (s, e) => DeleteSelected(), "Delete", ""));
+                _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Ctx_DeleteSel"), (s, e) => DeleteSelected(), GestureFor("Del"), ""));
             else
                 _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Ctx_DeletePage"), (s, e) => Delete_Click(s!, e), glyph: ""));
             _ctxMenu.Items.Add(new Separator());
 
-            if (_annotationClipboard.Count > 0)
-                _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Ctx_Paste"), (s, e) => PasteAnnotations(pageIdx), "Ctrl+V", ""));
+            if (CanPasteInView())
+                _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Ctx_Paste"), (s, e) => PasteInView(pageIdx), GestureFor("Ctrl:V"), ""));
 
-            _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Ctx_StampPages"), (s, e) => OpenStampTool(), "S", ""));
-            _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Ctx_UndoLast"), (s, e) => Undo_Click(s!, e), "Ctrl+Z", ""));
-            _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Ctx_Redo"), (s, e) => Redo_Click(s!, e), "Ctrl+Y", ""));
+            _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Ctx_SelectAll"), (s, e) => SelectAllInView(), GestureFor("Ctrl:A")));
+            _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Ctx_StampPages"), (s, e) => OpenStampTool(), GestureFor("S"), ""));
+            _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Ctx_UndoLast"), (s, e) => Undo_Click(s!, e), GestureFor("Ctrl:Z"), ""));
+            _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Ctx_Redo"), (s, e) => Redo_Click(s!, e), GestureFor("Ctrl:Y"), ""));
             _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Ctx_ClearPage"), (s, e) => ClearAnnotations_Click(s!, e), glyph: ""));
-            AppendBookLayoutItem(_ctxMenu);
+            AppendViewItems(_ctxMenu);
+        }
+
+        // Back and Forward across the top of the page menus, laid out the way a browser shows them,
+        // retracing the same jump history as Alt+Left, Alt+Right and the mouse's side buttons.
+        private void AddNavRow(ContextMenu menu)
+        {
+            var row = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(4, 0, 4, 2) };
+            row.Children.Add(NavRowButton(menu, "", "Str_Kb_Back", "Alt:Left", back: true, _navBack.Count > 0));
+            row.Children.Add(NavRowButton(menu, "", "Str_Kb_Forward", "Alt:Right", back: false, _navForward.Count > 0));
+            menu.Items.Add(new MenuItem { Header = row, Focusable = false, Template = NavRowTemplate });
+            menu.Items.Add(new Separator());
+        }
+
+        private Button NavRowButton(ContextMenu menu, string glyph, string labelKey, string cap, bool back, bool enabled)
+        {
+            var button = new Button
+            {
+                Content = glyph,
+                IsEnabled = enabled,
+                ToolTip = WithGesture(Loc(labelKey), cap),
+            };
+            if (TryFindResource("ToolbarButton") is Style style) button.Style = style;
+            ToolTipService.SetShowOnDisabled(button, true);
+            button.Click += (_, _) =>
+            {
+                menu.IsOpen = false;
+                NavHistoryGo(back);
+            };
+            return button;
+        }
+
+        // The row's host item draws only the buttons: no highlight, no gutter, no click of its own.
+        private static readonly ControlTemplate NavRowTemplate = BuildNavRowTemplate();
+
+        private static ControlTemplate BuildNavRowTemplate()
+        {
+            var presenter = new FrameworkElementFactory(typeof(ContentPresenter));
+            presenter.SetValue(ContentPresenter.ContentSourceProperty, "Header");
+            var template = new ControlTemplate(typeof(MenuItem)) { VisualTree = presenter };
+            template.Seal();
+            return template;
+        }
+
+        // Full Screen and Book Layout end both page menus. Full Screen is checked while it is on,
+        // so the same item is the way back out once the rail and toolbar are hidden.
+        private void AppendViewItems(ContextMenu menu)
+        {
+            menu.Items.Add(new Separator());
+            var fullScreen = MakeMenuItem(Loc("Str_Ctx_FullScreen"), (s, e) => ToggleFullScreen(), GestureFor("F11"));
+            fullScreen.IsCheckable = true;
+            fullScreen.IsChecked = _fullScreen;
+            menu.Items.Add(fullScreen);
+            AppendBookLayoutItem(menu);
         }
 
         // Book layout changes the whole two-page viewport, so it belongs on both the page menu and
@@ -289,8 +359,7 @@ namespace KillerPDF
         {
             if (_viewMode != ViewMode.TwoPage) return;
 
-            menu.Items.Add(new Separator());
-            var book = MakeMenuItem(Loc("Str_View_BookMode"), (s, e) => ToggleBookMode(), "B", "");
+            var book = MakeMenuItem(Loc("Str_View_BookMode"), (s, e) => ToggleBookMode(), GestureFor("B"), "");
             book.IsCheckable = true;
             book.IsChecked = Controls.PdfViewer.BookMode;
             menu.Items.Add(book);
@@ -617,15 +686,18 @@ namespace KillerPDF
                 menu.Items.Add(new Separator());
                 menu.Items.Add(MakeRotateMenuItem(Loc("Str_Ctx_RotateCWShort"), (s, ev) => RotatePages_Click(90), clockwise: true));
                 menu.Items.Add(MakeRotateMenuItem(Loc("Str_Ctx_RotateCCWShort"), (s, ev) => RotatePages_Click(-90), clockwise: false));
-                menu.Items.Add(MakeTransformMenuItem(Loc("Str_Tf_Suffix"), (s, ev) => OpenTransformWindow()));
+                menu.Items.Add(MakeTransformMenuItem(Loc("Str_Tf_Suffix"), (s, ev) => OpenTransformWindow(), GestureFor("R")));
                 menu.Items.Add(MakeMenuItem(Loc("Str_ColorCorrection"), (s, ev) =>
-                    OpenTransformWindow(TransformWindowMode.ColorCorrection), gesture: "E", glyph: ""));
+                    OpenTransformWindow(TransformWindowMode.ColorCorrection), gesture: GestureFor("E"), glyph: ""));
                 // #436: with two or more pages selected these act on the selection, otherwise on
                 // the whole document.
                 menu.Items.Add(MakeMenuItem(Loc("Str_Pages_FixOrientation"), (s, ev) => FixPageOrientation(), glyph: "\uE7AD"));
                 menu.Items.Add(MakeMenuItem(Loc("Str_Pages_Straighten"), (s, ev) => StraightenScannedPages()));
                 menu.Items.Add(MakeMenuItem(Loc("Str_Pages_DivideSpreads"), (s, ev) => DivideSpreads()));
                 menu.Items.Add(MakeMenuItem(Loc("Str_Pages_RasterizeRegion"), (s, ev) => RasterizeRegion(clickedPage)));
+                // The thumbnails' own Ctrl+Shift+O: every selected page, not only the clicked one.
+                menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_OcrPage"), (s, ev) => OcrSelectedPagesToClipboard(),
+                    GestureFor("CtrlShift:O"), ""));
                 menu.Items.Add(new Separator());
                 menu.Items.Add(MakeMenuItem(Loc("Str_Lbl_MoveUp"), (s, ev) => MoveUp_Click(s!, ev), glyph: ""));
                 menu.Items.Add(MakeMenuItem(Loc("Str_Lbl_MoveDown"), (s, ev) => MoveDown_Click(s!, ev), glyph: ""));
@@ -639,9 +711,9 @@ namespace KillerPDF
                                        .Select(vm => vm.PageIndex + 1).OrderBy(n => n);
                     _ = ExportImagesFlow(string.Join(",", nums));
                 }, glyph: null));
-                menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_DeletePages"), (s, ev) => Delete_Click(s!, ev), glyph: ""));
+                menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_DeletePages"), (s, ev) => Delete_Click(s!, ev), GestureFor("Del"), glyph: ""));
                 menu.Items.Add(new Separator());
-                menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_StampPages"), (s, ev) => OpenStampTool(), glyph: ""));
+                menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_StampPages"), (s, ev) => OpenStampTool(), GestureFor("S"), glyph: ""));
             }
             else if (_doc is not null)
             {
@@ -674,7 +746,7 @@ namespace KillerPDF
 
         // The sidebar-side picker rides the bottom of the sidebar's own right-click menu (it moved
         // out of the Settings panel, like the toolbar picker moved onto the toolbar). The keyboard
-        // gesture is shown on the side Ctrl+Shift+B would switch TO - it is a toggle, so putting it
+        // gesture is shown on the side Shift+F9 would switch TO - it is a toggle, so putting it
         // on the checked row would advertise a press that does nothing.
         private void AppendSidebarSideSection(ContextMenu menu)
         {
@@ -682,7 +754,7 @@ namespace KillerPDF
             menu.Items.Add(new MenuItem { Header = Loc("Str_Sidebar"), IsEnabled = false });
             var left  = new MenuItem { Header = Loc("Str_Sidebar_Left"),  IsCheckable = true, IsChecked = !_sidebarRight };
             var right = new MenuItem { Header = Loc("Str_Sidebar_Right"), IsCheckable = true, IsChecked = _sidebarRight };
-            (_sidebarRight ? left : right).InputGestureText = "Shift+F9";
+            (_sidebarRight ? left : right).InputGestureText = GestureFor("Shift:F9");
             left.Click  += (_, _2) => SelectSidebarSide(false);
             right.Click += (_, _2) => SelectSidebarSide(true);
             menu.Items.Add(left);
@@ -705,21 +777,25 @@ namespace KillerPDF
         // area below the thumbnails, or the gray area around the page in the document pane.
         private void FillPageAgnosticMenu(ContextMenu menu)
         {
+            AddNavRow(menu);
             menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_AddBlankPage"), (s, e) => AddBlankPageAtEnd(), glyph: ""));
             menu.Items.Add(MakeMenuItem(Loc("Str_Pages_Reverse"), (s, e) => ReversePageOrder(), glyph: "\uE8CB"));
             menu.Items.Add(MakeMenuItem(Loc("Str_Pages_FixOrientation"), (s, e) => FixPageOrientation(), glyph: "\uE7AD"));
             menu.Items.Add(MakeMenuItem(Loc("Str_Pages_Straighten"), (s, e) => StraightenScannedPages()));
             menu.Items.Add(MakeMenuItem(Loc("Str_Pages_DivideSpreads"), (s, e) => DivideSpreads()));
             menu.Items.Add(new Separator());
-            menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_Print"), (s, e) => Print_Click(s!, e), "Ctrl+P", ""));
+            menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_Print"), (s, e) => Print_Click(s!, e), GestureFor("Ctrl:P"), ""));
             menu.Items.Add(BuildComparisonContextItem());
-            menu.Items.Add(MakeMenuItem(Loc("Str_Lbl_ZoomIn"), (s, e) => ZoomIn_Click(s!, e), "Ctrl++", ""));
-            menu.Items.Add(MakeMenuItem(Loc("Str_Lbl_ZoomOut"), (s, e) => ZoomOut_Click(s!, e), "Ctrl+-", ""));
+            menu.Items.Add(MakeMenuItem(Loc("Str_Lbl_ZoomIn"), (s, e) => ZoomIn_Click(s!, e), GestureFor("Ctrl:Equals"), ""));
+            menu.Items.Add(MakeMenuItem(Loc("Str_Lbl_ZoomOut"), (s, e) => ZoomOut_Click(s!, e), GestureFor("Ctrl:Minus"), ""));
             menu.Items.Add(new Separator());
-            menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_UndoLast"), (s, e) => Undo_Click(s!, e), "Ctrl+Z", ""));
-            menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_Redo"), (s, e) => Redo_Click(s!, e), "Ctrl+Y", ""));
+            if (CanPasteInView())
+                menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_Paste"), (s, e) => PasteInView(PageList.SelectedIndex), GestureFor("Ctrl:V")));
+            menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_SelectAll"), (s, e) => SelectAllInView(), GestureFor("Ctrl:A")));
+            menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_UndoLast"), (s, e) => Undo_Click(s!, e), GestureFor("Ctrl:Z"), ""));
+            menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_Redo"), (s, e) => Redo_Click(s!, e), GestureFor("Ctrl:Y"), ""));
             menu.Items.Add(MakeMenuItem(Loc("Str_Lbl_Clear"), (s, e) => ClearAllAnnotations_Click(s!, e), glyph: ""));
-            AppendBookLayoutItem(menu);
+            AppendViewItems(menu);
         }
 
         // Opens the page-agnostic menu for a right-click on the gray area around the page (the document
@@ -761,11 +837,9 @@ namespace KillerPDF
             return item;
         }
 
-        private static MenuItem MakeRotateMenuItem(string header, RoutedEventHandler click, bool clockwise)
+        private MenuItem MakeRotateMenuItem(string header, RoutedEventHandler click, bool clockwise)
         {
-            string gesture = clockwise
-                ? Loc("Str_Key_Ctrl") + "+R"
-                : Loc("Str_Key_Ctrl") + "+" + Loc("Str_Key_Shift") + "+R";
+            string gesture = GestureFor(clockwise ? "Ctrl:R" : "CtrlShift:R");
             var item = MakeMenuItem(header, click, gesture, glyph: "\uE7AD");
             if (item.Icon is TextBlock icon)
             {

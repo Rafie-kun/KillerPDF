@@ -1445,4 +1445,22 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Scroll_PageDown">Seite nach unten</sys:String>
     <sys:String x:Key="Str_Scroll_PageLeft">Seite nach links</sys:String>
     <sys:String x:Key="Str_Scroll_PageRight">Seite nach rechts</sys:String>
+    <!-- Menus, signed fields and setup dialogs -->
+    <sys:String x:Key="Str_Ctx_CloseAllTabs">Alle Tabs schließen</sys:String>
+    <sys:String x:Key="Str_Ctx_FullScreen">Vollbild</sys:String>
+    <sys:String x:Key="Str_Sig_ChangeSignature">Signatur ändern</sys:String>
+    <sys:String x:Key="Str_Sig_RemoveSignature">Signatur entfernen</sys:String>
+    <sys:String x:Key="Str_Sig_ChangeInitials">Initialen ändern</sys:String>
+    <sys:String x:Key="Str_Sig_RemoveInitials">Initialen entfernen</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallTitle">Doppelte KillerPDF-Installation</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallMachine" xml:space="preserve">KillerPDF hat auf diesem Computer zwei installierte Kopien gefunden.&#10;&#10;Sie verwenden gerade die Installation für alle Benutzer. Außerdem ist eine ältere Kopie nur für Ihr Konto vorhanden, meist weil sie bei einem früheren Update in Gebrauch war.&#10;&#10;Die nicht verwendete Kopie für Ihr Konto jetzt entfernen? Ihre Einstellungen und PDF-Dateien werden nicht entfernt.</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallUser" xml:space="preserve">KillerPDF hat auf diesem Computer zwei installierte Kopien gefunden.&#10;&#10;Sie verwenden gerade die Installation nur für Ihr Konto. Außerdem ist eine Kopie für alle Benutzer vorhanden.&#10;&#10;Die nicht verwendete Kopie für alle Benutzer jetzt entfernen? Windows fragt dafür nach Administratorrechten. Ihre Einstellungen und PDF-Dateien werden nicht entfernt.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallUnsigned" xml:space="preserve">Installation abgelehnt: Die ausgeführte EXE-Datei hat keine gültige Authenticode-Signatur.&#10;&#10;Nur signierte KillerPDF-Builds können installiert werden.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallDowngrade" xml:space="preserve">Sie installieren gerade eine ältere Version ({0}) über die installierte Version ({1}).&#10;&#10;Trotzdem zur älteren Version wechseln?</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallWriteFailed" xml:space="preserve">Die installierte Kopie konnte nicht geschrieben werden:&#10;{0}&#10;&#10;Schließen Sie alle geöffneten KillerPDF-Fenster (und prüfen Sie im Task-Manager, ob KillerPDF.exe noch läuft) und starten Sie die Installation erneut.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallFailed" xml:space="preserve">Installation fehlgeschlagen:&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">Für die Deinstallation konnten keine Administratorrechte angefordert werden:&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallConfirm">KillerPDF von diesem Computer deinstallieren?</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF läuft noch.&#10;Schließen Sie es und versuchen Sie die Deinstallation erneut.</sys:String>
+    <sys:String x:Key="Str_Btn_Uninstall">Deinstallieren</sys:String>
 </ResourceDictionary>

@@ -928,12 +928,12 @@ namespace KillerPDF
             }
             else
             {
-                menu.Items.Add(MakeMenuItem(Loc("Str_Menu_Save"), (_, _) => SaveInPlace(), "Ctrl+S", ""));
-                menu.Items.Add(MakeMenuItem(Loc("Str_Menu_SaveAs"), (s2, e2) => SaveAs_Click(s2, e2), "Ctrl+Shift+S", ""));
+                menu.Items.Add(MakeMenuItem(Loc("Str_Menu_Save"), (_, _) => SaveInPlace(), GestureFor("Ctrl:S"), ""));
+                menu.Items.Add(MakeMenuItem(Loc("Str_Menu_SaveAs"), (s2, e2) => SaveAs_Click(s2, e2), GestureFor("CtrlShift:S"), ""));
                 menu.Items.Add(MakeMenuItem(Loc("Str_Menu_ReduceSize"), (s2, e2) => ReduceFileSize_Click(s2, e2)));   // #433
                 menu.Items.Add(MakeMenuItem(Loc("Str_Menu_CompressZip"), (s2, e2) => CompressToZip_Click(s2, e2), null, ""));
                 menu.Items.Add(MakeMenuItem(Loc("Str_Menu_ExportImages"), (s2, e2) => ExportImages_Click(s2, e2), null, ""));   // #132
-                menu.Items.Add(MakeMenuItem(Loc("Str_Menu_ExportDocument"), (s2, e2) => ExportDocument_Click(s2, e2), "Ctrl+Shift+E", ""));
+                menu.Items.Add(MakeMenuItem(Loc("Str_Menu_ExportDocument"), (s2, e2) => ExportDocument_Click(s2, e2), GestureFor("CtrlShift:E"), ""));
                 menu.Items.Add(new Separator());
                 menu.Items.Add(MakeMenuItem(Loc("Str_Lbl_DigitalSig"), (_, _) => OpenSignDialog(), null, ""));
                 // #149: visible always (discoverability, the PDF Viewer Plus way), enabled only when the
@@ -942,7 +942,7 @@ namespace KillerPDF
                 var removePw = MakeMenuItem(Loc("Str_Menu_RemovePassword"), (_, _) => SaveInPlace(), null, "");
                 removePw.IsEnabled = _openedFromProtected;
                 menu.Items.Add(removePw);
-                menu.Items.Add(MakeMenuItem(Loc("Str_Menu_ProtectDocument"), (_, _) => OpenProtectDialog(), "Ctrl+Shift+P", ""));
+                menu.Items.Add(MakeMenuItem(Loc("Str_Menu_ProtectDocument"), (_, _) => OpenProtectDialog(), GestureFor("CtrlShift:P"), ""));
                 menu.Items.Add(new Separator());
                 menu.Items.Add(BuildDocumentToolsMenu());
             }

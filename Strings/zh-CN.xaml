@@ -1443,4 +1443,22 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Scroll_PageDown">向下翻页</sys:String>
     <sys:String x:Key="Str_Scroll_PageLeft">向左翻页</sys:String>
     <sys:String x:Key="Str_Scroll_PageRight">向右翻页</sys:String>
+    <!-- Menus, signed fields and setup dialogs -->
+    <sys:String x:Key="Str_Ctx_CloseAllTabs">关闭所有标签页</sys:String>
+    <sys:String x:Key="Str_Ctx_FullScreen">全屏</sys:String>
+    <sys:String x:Key="Str_Sig_ChangeSignature">更改签名</sys:String>
+    <sys:String x:Key="Str_Sig_RemoveSignature">删除签名</sys:String>
+    <sys:String x:Key="Str_Sig_ChangeInitials">更改姓名首字母</sys:String>
+    <sys:String x:Key="Str_Sig_RemoveInitials">删除姓名首字母</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallTitle">KillerPDF 重复安装</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallMachine" xml:space="preserve">KillerPDF 在此计算机上发现了两个已安装的副本。&#10;&#10;你当前运行的是面向所有用户的安装。另外还有一个较旧的单用户副本，通常是因为它在之前的更新期间正在使用。&#10;&#10;现在删除未使用的单用户副本吗？你的设置和 PDF 文件不会被删除。</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallUser" xml:space="preserve">KillerPDF 在此计算机上发现了两个已安装的副本。&#10;&#10;你当前运行的是单用户安装。另外还有一个面向所有用户的副本。&#10;&#10;现在删除未使用的所有用户副本吗？Windows 会请求管理员权限。你的设置和 PDF 文件不会被删除。</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallUnsigned" xml:space="preserve">已拒绝安装：正在运行的 EXE 没有有效的 Authenticode 签名。&#10;&#10;只能安装已签名的 KillerPDF 版本。</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallDowngrade" xml:space="preserve">你即将在已安装的版本 ({1}) 上安装较旧的版本 ({0})。&#10;&#10;仍要降级吗？</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallWriteFailed" xml:space="preserve">无法写入已安装的副本：&#10;{0}&#10;&#10;请关闭所有打开的 KillerPDF 窗口（并在任务管理器中检查 KillerPDF.exe），然后重新运行安装程序。</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallFailed" xml:space="preserve">安装失败：&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">卸载无法请求管理员权限：&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallConfirm">从此计算机卸载 KillerPDF 吗？</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF 仍在运行。&#10;请关闭它，然后重试卸载。</sys:String>
+    <sys:String x:Key="Str_Btn_Uninstall">卸载</sys:String>
 </ResourceDictionary>

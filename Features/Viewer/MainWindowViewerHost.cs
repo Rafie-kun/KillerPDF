@@ -87,6 +87,7 @@ namespace KillerPDF
             => WordsToText(words);
         System.Windows.Controls.MenuItem IViewerHost.MakeMenuItem(string header, RoutedEventHandler click,
             string? gesture, string? glyph) => MakeMenuItem(header, click, gesture, glyph);
+        string IViewerHost.GestureFor(string cap) => GestureFor(cap);
 
         bool IViewerHost.FullScreen => _fullScreen;
         bool IViewerHost.VerticalScrollVisible

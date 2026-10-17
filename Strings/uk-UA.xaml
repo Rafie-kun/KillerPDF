@@ -1459,4 +1459,22 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Scroll_PageDown">На сторінку вниз</sys:String>
     <sys:String x:Key="Str_Scroll_PageLeft">На сторінку ліворуч</sys:String>
     <sys:String x:Key="Str_Scroll_PageRight">На сторінку праворуч</sys:String>
+    <!-- Menus, signed fields and setup dialogs -->
+    <sys:String x:Key="Str_Ctx_CloseAllTabs">Закрити всі вкладки</sys:String>
+    <sys:String x:Key="Str_Ctx_FullScreen">На весь екран</sys:String>
+    <sys:String x:Key="Str_Sig_ChangeSignature">Змінити підпис</sys:String>
+    <sys:String x:Key="Str_Sig_RemoveSignature">Видалити підпис</sys:String>
+    <sys:String x:Key="Str_Sig_ChangeInitials">Змінити ініціали</sys:String>
+    <sys:String x:Key="Str_Sig_RemoveInitials">Видалити ініціали</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallTitle">Дві установки KillerPDF</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallMachine" xml:space="preserve">KillerPDF виявив на цьому комп'ютері дві встановлені копії.&#10;&#10;Зараз запущено установку для всіх користувачів. Також є старіша копія для окремого користувача, зазвичай тому, що вона використовувалася під час попереднього оновлення.&#10;&#10;Видалити невикористовувану копію для окремого користувача зараз? Ваші налаштування та PDF-файли не буде видалено.</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallUser" xml:space="preserve">KillerPDF виявив на цьому комп'ютері дві встановлені копії.&#10;&#10;Зараз запущено установку для окремого користувача. Також є копія для всіх користувачів.&#10;&#10;Видалити невикористовувану копію для всіх користувачів зараз? Windows попросить дозвіл адміністратора. Ваші налаштування та PDF-файли не буде видалено.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallUnsigned" xml:space="preserve">Установлення відхилено: запущений EXE-файл не має дійсного підпису Authenticode.&#10;&#10;Установлювати можна лише підписані збірки KillerPDF.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallDowngrade" xml:space="preserve">Ви збираєтеся встановити старішу версію ({0}) поверх установленої версії ({1}).&#10;&#10;Усе одно повернутися до старішої версії?</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallWriteFailed" xml:space="preserve">Не вдалося записати встановлену копію в:&#10;{0}&#10;&#10;Закрийте всі відкриті вікна KillerPDF (і перевірте KillerPDF.exe у диспетчері завдань), а потім знову запустіть інсталятор.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallFailed" xml:space="preserve">Помилка встановлення:&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">Не вдалося запитати права адміністратора для видалення:&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallConfirm">Видалити KillerPDF із цього комп'ютера?</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF усе ще працює.&#10;Закрийте його та спробуйте видалити знову.</sys:String>
+    <sys:String x:Key="Str_Btn_Uninstall">Видалити</sys:String>
 </ResourceDictionary>

@@ -56,10 +56,10 @@ public partial class MainWindow
         ];
     }
 
-    private static MenuItem DocumentToolItem(string labelKey, Action run, string glyph)
+    private MenuItem DocumentToolItem(string labelKey, Action run, string glyph)
     {
         var item = MakeMenuItem(Loc(labelKey), (_, _) => run(),
-            ShortcutTable.DocumentToolGesture(labelKey), glyph);
+            GestureFor("CtrlShift:D") + ", " + ShortcutTable.DocumentToolKey(labelKey), glyph);
         item.Tag = ShortcutTable.DocumentToolKey(labelKey);
         return item;
     }
@@ -69,7 +69,7 @@ public partial class MainWindow
         var menu = new MenuItem
         {
             Header = Loc("Str_DocumentTools"),
-            InputGestureText = ShortcutTable.DocumentToolsChord,
+            InputGestureText = GestureFor("CtrlShift:D"),
             Icon = new Glyph
             {
                 Text = "\uE9D2",

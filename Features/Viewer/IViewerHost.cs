@@ -114,6 +114,9 @@ namespace KillerPDF.Features
         void FadeOutAndRemoveBar(Border? bar);
         string WordsToText(System.Collections.Generic.IEnumerable<KillerPdf.Engine.Documents.PdfExtractedWord> words);
         MenuItem MakeMenuItem(string header, RoutedEventHandler click, string? gesture, string? glyph);
+        /// <summary>A command's current key as menu text, localized and following custom
+        /// shortcuts. Takes keyboard map names such as "Ctrl:W".</summary>
+        string GestureFor(string cap);
         bool FullScreen { get; }
         bool VerticalScrollVisible { get; set; }
         bool SpaceHeld { get; }

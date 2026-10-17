@@ -227,7 +227,7 @@ namespace KillerPDF
                 Header = Loc("Str_InvertImagesToo"),
                 IsCheckable = true,
                 IsChecked = BitmapHelpers.DocInvertImages,
-                InputGestureText = "Shift+N",   // right-aligned in the family MenuItem template
+                InputGestureText = GestureFor("Shift:N"),   // right-aligned in the family MenuItem template
             };
             mi.Click += (_, _2) => ToggleInvertImages(!BitmapHelpers.DocInvertImages);
             menu.Items.Add(mi);
@@ -596,7 +596,7 @@ namespace KillerPDF
         internal void HookExternalLangReload()
             => KillerPDF.Services.LocaleManager.ExternalReloaded += () =>
             {
-                ApplyToolNumberTooltips();
+                ApplyShortcutTooltips();
                 BuildToolbarMenu();
                 BuildContextMenu();
                 ApplyToolbarAppearance();
@@ -630,7 +630,7 @@ namespace KillerPDF
         private void SelectLocale(KillerPDF.Services.Locale loc)
         {
             KillerPDF.Services.LocaleManager.Apply(loc);
-            ApplyToolNumberTooltips();   // re-append the numbers to the now-localized tool tooltips
+            ApplyShortcutTooltips();     // tooltips carry key names, which differ per language
             BuildToolbarMenu();   // the toolbar right-click picker's items carry Loc() captions
             LangFlyout.IsOpen = false;   // a pick closes the rail flyout, like the accordion used to collapse
 
@@ -829,6 +829,7 @@ namespace KillerPDF
             ["\uED5E"] = "Str_Lbl_Measure",
             ["\uED1A"] = "Str_Lbl_Redact",
             ["\uE790"] = "Str_ColorCorrection",
+            [""] = "Str_Ctx_Redo",
         };
 
         // Walks LeftBar + RightBar once and records each icon button with its glyph + label key.
@@ -1058,7 +1059,7 @@ namespace KillerPDF
         {
             "Str_Lbl_ZoomOut" or "Str_Lbl_ZoomIn" => 0,
             "Str_Lbl_Select" => 1,
-            "Str_Lbl_Undo" or "Str_Lbl_Clear" => 2,
+            "Str_Lbl_Undo" or "Str_Ctx_Redo" or "Str_Lbl_Clear" => 2,
             "Str_Lbl_New" or "Str_Lbl_Open" or "Str_Lbl_Close"
                 or "Str_Lbl_Save" or "Str_Lbl_Flatten" or "Str_Lbl_Ocr" or "Str_Lbl_Print" => 3,
             "Str_Lbl_MoveUp" or "Str_Lbl_MoveDown" or "Str_Lbl_Delete"
@@ -1170,8 +1171,8 @@ namespace KillerPDF
             ToolbarMenu.Items.Add(new Separator());
 
             foreach (var (size, key, gesture) in new[]
-                     { (ToolbarIconSize.Small, "Str_Toolbar_SmallIcons", "Ctrl+Shift+1"),
-                       (ToolbarIconSize.Large, "Str_Toolbar_LargeIcons", "Ctrl+Shift+2") })
+                     { (ToolbarIconSize.Small, "Str_Toolbar_SmallIcons", GestureFor("CtrlShift:D1")),
+                       (ToolbarIconSize.Large, "Str_Toolbar_LargeIcons", GestureFor("CtrlShift:D2")) })
             {
                 var mi = new MenuItem { Header = Loc(key), Tag = size, IsCheckable = true,
                                         IsChecked = size == _toolbarIconSize, StaysOpenOnClick = true,
@@ -1186,10 +1187,10 @@ namespace KillerPDF
             ToolbarMenu.Items.Add(new Separator());
 
             foreach (var (mode, key, gesture) in new[]
-                     { (ToolbarLabelMode.None,   "Str_Toolbar_TextNone",   "Ctrl+Shift+3"),
-                       (ToolbarLabelMode.Beside, "Str_Toolbar_TextBeside", "Ctrl+Shift+4"),
-                       (ToolbarLabelMode.Under,  "Str_Toolbar_TextUnder",  "Ctrl+Shift+5"),
-                       (ToolbarLabelMode.Only,   "Str_Toolbar_TextOnly",   "Ctrl+Shift+6") })
+                     { (ToolbarLabelMode.None,   "Str_Toolbar_TextNone",   GestureFor("CtrlShift:D3")),
+                       (ToolbarLabelMode.Beside, "Str_Toolbar_TextBeside", GestureFor("CtrlShift:D4")),
+                       (ToolbarLabelMode.Under,  "Str_Toolbar_TextUnder",  GestureFor("CtrlShift:D5")),
+                       (ToolbarLabelMode.Only,   "Str_Toolbar_TextOnly",   GestureFor("CtrlShift:D6")) })
             {
                 var mi = new MenuItem { Header = Loc(key), Tag = mode, IsCheckable = true,
                                         IsChecked = mode == _toolbarLabelMode, StaysOpenOnClick = true,
@@ -1201,7 +1202,7 @@ namespace KillerPDF
 
             ToolbarMenu.Items.Add(new Separator());
             var hide = new MenuItem { Header = Loc("Str_Toolbar_Hide"), Tag = "hide", IsCheckable = true,
-                                      IsChecked = _toolbarHidden, InputGestureText = "Alt+M" };
+                                      IsChecked = _toolbarHidden, InputGestureText = GestureFor("Alt:M") };
             hide.Click += (_, _2) => ToggleToolbarHidden();
             ToolbarMenu.Items.Add(hide);
         }
@@ -1305,7 +1306,7 @@ namespace KillerPDF
                     (ToolColorCorrectionBtn, new UIElement[] { MiColorCorrection }),
                     (ToolMeasureBtn,    new UIElement[] { MiMeasure }),
                     (ToolRedactBtn,     new UIElement[] { MiRedact }),
-                    (GrpUndo,           new UIElement[] { MiUndo, MiClear }),
+                    (GrpUndo,           new UIElement[] { MiUndo, MiRedo, MiClear }),
                     (ToolShapeBtn,      new UIElement[] { MiShape }),
                     (ToolDrawBtn,       new UIElement[] { MiDraw }),
                     (ToolUnderlineBtn,  new UIElement[] { MiUnderline }),   // now the Line tool

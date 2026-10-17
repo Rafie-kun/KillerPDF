@@ -1459,4 +1459,22 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Scroll_PageDown">Page vers le bas</sys:String>
     <sys:String x:Key="Str_Scroll_PageLeft">Page vers la gauche</sys:String>
     <sys:String x:Key="Str_Scroll_PageRight">Page vers la droite</sys:String>
+    <!-- Menus, signed fields and setup dialogs -->
+    <sys:String x:Key="Str_Ctx_CloseAllTabs">Fermer tous les onglets</sys:String>
+    <sys:String x:Key="Str_Ctx_FullScreen">Plein écran</sys:String>
+    <sys:String x:Key="Str_Sig_ChangeSignature">Modifier la signature</sys:String>
+    <sys:String x:Key="Str_Sig_RemoveSignature">Supprimer la signature</sys:String>
+    <sys:String x:Key="Str_Sig_ChangeInitials">Modifier les initiales</sys:String>
+    <sys:String x:Key="Str_Sig_RemoveInitials">Supprimer les initiales</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallTitle">Installation de KillerPDF en double</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallMachine" xml:space="preserve">KillerPDF a trouvé deux copies installées sur cet ordinateur.&#10;&#10;Vous utilisez actuellement l'installation pour tous les utilisateurs. Une ancienne copie par utilisateur est aussi présente, en général parce qu'elle était en cours d'utilisation lors d'une mise à jour précédente.&#10;&#10;Supprimer maintenant la copie par utilisateur inutilisée ? Vos paramètres et vos fichiers PDF ne seront pas supprimés.</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallUser" xml:space="preserve">KillerPDF a trouvé deux copies installées sur cet ordinateur.&#10;&#10;Vous utilisez actuellement l'installation par utilisateur. Une copie pour tous les utilisateurs est aussi présente.&#10;&#10;Supprimer maintenant la copie pour tous les utilisateurs inutilisée ? Windows demandera l'autorisation d'un administrateur. Vos paramètres et vos fichiers PDF ne seront pas supprimés.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallUnsigned" xml:space="preserve">Installation refusée : l'EXE en cours d'exécution ne porte pas de signature Authenticode valide.&#10;&#10;Seules les versions signées de KillerPDF peuvent être installées.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallDowngrade" xml:space="preserve">Vous êtes sur le point d'installer une version plus ancienne ({0}) à la place de la version installée ({1}).&#10;&#10;Revenir quand même à la version antérieure ?</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallWriteFailed" xml:space="preserve">Impossible d'écrire la copie installée à l'emplacement :&#10;{0}&#10;&#10;Fermez toute fenêtre KillerPDF ouverte (et vérifiez KillerPDF.exe dans le Gestionnaire des tâches), puis relancez le programme d'installation.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallFailed" xml:space="preserve">Échec de l'installation :&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">La désinstallation n'a pas pu demander l'accès administrateur :&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallConfirm">Désinstaller KillerPDF de cet ordinateur ?</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF est toujours en cours d'exécution.&#10;Fermez-le, puis réessayez la désinstallation.</sys:String>
+    <sys:String x:Key="Str_Btn_Uninstall">Désinstaller</sys:String>
 </ResourceDictionary>

@@ -1444,4 +1444,22 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Scroll_PageDown">O stránku dolů</sys:String>
     <sys:String x:Key="Str_Scroll_PageLeft">O stránku doleva</sys:String>
     <sys:String x:Key="Str_Scroll_PageRight">O stránku doprava</sys:String>
+    <!-- Menus, signed fields and setup dialogs -->
+    <sys:String x:Key="Str_Ctx_CloseAllTabs">Zavřít všechny karty</sys:String>
+    <sys:String x:Key="Str_Ctx_FullScreen">Celá obrazovka</sys:String>
+    <sys:String x:Key="Str_Sig_ChangeSignature">Změnit podpis</sys:String>
+    <sys:String x:Key="Str_Sig_RemoveSignature">Odebrat podpis</sys:String>
+    <sys:String x:Key="Str_Sig_ChangeInitials">Změnit iniciály</sys:String>
+    <sys:String x:Key="Str_Sig_RemoveInitials">Odebrat iniciály</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallTitle">Duplicitní instalace KillerPDF</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallMachine" xml:space="preserve">KillerPDF našel na tomto počítači dvě nainstalované kopie.&#10;&#10;Právě používáte instalaci pro všechny uživatele. Je zde také starší kopie pro jednoho uživatele, obvykle proto, že se při dřívější aktualizaci používala.&#10;&#10;Odebrat nyní nepoužívanou kopii pro jednoho uživatele? Vaše nastavení a soubory PDF nebudou odebrány.</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallUser" xml:space="preserve">KillerPDF našel na tomto počítači dvě nainstalované kopie.&#10;&#10;Právě používáte instalaci pro jednoho uživatele. Je zde také kopie pro všechny uživatele.&#10;&#10;Odebrat nyní nepoužívanou kopii pro všechny uživatele? Windows požádá o oprávnění správce. Vaše nastavení a soubory PDF nebudou odebrány.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallUnsigned" xml:space="preserve">Instalace odmítnuta: spuštěný soubor EXE nemá platný podpis Authenticode.&#10;&#10;Nainstalovat lze pouze podepsaná sestavení KillerPDF.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallDowngrade" xml:space="preserve">Chystáte se nainstalovat starší verzi ({0}) přes nainstalovanou verzi ({1}).&#10;&#10;Přesto přejít na starší verzi?</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallWriteFailed" xml:space="preserve">Nainstalovanou kopii se nepodařilo zapsat do umístění:&#10;{0}&#10;&#10;Zavřete všechna otevřená okna KillerPDF (a ve Správci úloh zkontrolujte KillerPDF.exe) a spusťte instalační program znovu.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallFailed" xml:space="preserve">Instalace se nezdařila:&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">Odinstalace nemohla požádat o oprávnění správce:&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallConfirm">Odinstalovat KillerPDF z tohoto počítače?</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF stále běží.&#10;Zavřete ho a zkuste odinstalaci znovu.</sys:String>
+    <sys:String x:Key="Str_Btn_Uninstall">Odinstalovat</sys:String>
 </ResourceDictionary>

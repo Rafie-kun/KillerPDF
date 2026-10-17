@@ -462,6 +462,10 @@ namespace KillerPDF
         private static string CrashText(string key, string fallback) =>
             System.Windows.Application.Current?.TryFindResource(key) as string ?? fallback;
 
+        // Install and uninstall wording. These run before or without the main window, so each line
+        // carries its English text in case the language dictionary has not loaded.
+        private static string SetupText(string key, string fallback) => CrashText(key, fallback);
+
         private static void EnsureCrashPreviewGrain()
         {
             const int size = 256;
@@ -892,10 +896,11 @@ namespace KillerPDF
             if (!runningMachine && !runningUser) return;
 
             string message = runningMachine
-                ? "KillerPDF found two installed copies on this computer.\n\nYou are currently running the all-users installation. An older per-user copy is also present, usually because it was in use during an earlier update.\n\nRemove the unused per-user copy now? Your settings and PDF files will not be removed."
-                : "KillerPDF found two installed copies on this computer.\n\nYou are currently running the per-user installation. An all-users copy is also present.\n\nRemove the unused all-users copy now? Windows will ask for administrator permission. Your settings and PDF files will not be removed.";
+                ? SetupText("Str_Dlg_DuplicateInstallMachine", "KillerPDF found two installed copies on this computer.\n\nYou are currently running the all-users installation. An older per-user copy is also present, usually because it was in use during an earlier update.\n\nRemove the unused per-user copy now? Your settings and PDF files will not be removed.")
+                : SetupText("Str_Dlg_DuplicateInstallUser", "KillerPDF found two installed copies on this computer.\n\nYou are currently running the per-user installation. An all-users copy is also present.\n\nRemove the unused all-users copy now? Windows will ask for administrator permission. Your settings and PDF files will not be removed.");
             if (KillerDialog.Show(Current.MainWindow, message,
-                $"{AppName} duplicate installation", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+                SetupText("Str_Dlg_DuplicateInstallTitle", "Duplicate KillerPDF installation"),
+                MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
 
             if (runningMachine)
             {
@@ -1840,8 +1845,9 @@ namespace KillerPDF
             if (!valid)
             {
                 KillerDialog.Show(Current.MainWindow,
-                    "Installation refused: the running EXE does not carry a valid Authenticode " +
-                    "signature.\n\nOnly signed builds of KillerPDF can be installed.",
+                    SetupText("Str_Dlg_InstallUnsigned",
+                        "Installation refused: the running EXE does not carry a valid Authenticode " +
+                        "signature.\n\nOnly signed builds of KillerPDF can be installed."),
                     AppName, MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
@@ -1854,9 +1860,10 @@ namespace KillerPDF
                 if (string.Compare(runVer, instVer, StringComparison.OrdinalIgnoreCase) < 0)
                 {
                     var res = KillerDialog.Show(Current.MainWindow,
-                        $"You are about to install an older version ({runVer}) " +
-                        $"over the currently installed version ({instVer}).\n\n" +
-                        "Downgrade anyway?",
+                        string.Format(SetupText("Str_Dlg_InstallDowngrade",
+                            "You are about to install an older version ({0}) " +
+                            "over the currently installed version ({1}).\n\n" +
+                            "Downgrade anyway?"), runVer, instVer),
                         AppName, MessageBoxButton.YesNo, MessageBoxImage.Warning);
                     if (res != MessageBoxResult.Yes) return;
                 }
@@ -1881,9 +1888,10 @@ namespace KillerPDF
                 catch (Exception copyEx) when (copyEx is UnauthorizedAccessException or IOException)
                 {
                     KillerDialog.Show(Current.MainWindow,
-                        "Couldn't write the installed copy at:\n" + InstallExe +
-                        "\n\nClose any open KillerPDF window (and check Task Manager for KillerPDF.exe), " +
-                        "then run the installer again.",
+                        string.Format(SetupText("Str_Dlg_InstallWriteFailed",
+                            "Couldn't write the installed copy at:\n{0}" +
+                            "\n\nClose any open KillerPDF window (and check Task Manager for KillerPDF.exe), " +
+                            "then run the installer again."), InstallExe),
                         AppName, MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
@@ -1892,7 +1900,8 @@ namespace KillerPDF
             }
             catch (Exception ex)
             {
-                KillerDialog.Show(Current.MainWindow, $"Installation failed:\n{ex.Message}", AppName,
+                KillerDialog.Show(Current.MainWindow,
+                    string.Format(SetupText("Str_Dlg_InstallFailed", "Installation failed:\n{0}"), ex.Message), AppName,
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -2047,7 +2056,9 @@ namespace KillerPDF
             catch (Exception ex)
             {
                 if (!silent)
-                    KillerDialog.Show(null, $"Uninstall could not request administrator access:\n{ex.Message}",
+                    KillerDialog.Show(null,
+                        string.Format(SetupText("Str_Dlg_UninstallElevationFailed",
+                            "Uninstall could not request administrator access:\n{0}"), ex.Message),
                         AppName, MessageBoxButton.OK, MessageBoxImage.Error);
             }
             return true;
@@ -2134,7 +2145,7 @@ namespace KillerPDF
             {
                 var res = KillerDialog.Show(
                     null,
-                    "Uninstall KillerPDF from this computer?",
+                    SetupText("Str_Dlg_UninstallConfirm", "Uninstall KillerPDF from this computer?"),
                     AppName,
                     MessageBoxButton.YesNo,
                     MessageBoxImage.Question,
@@ -2147,7 +2158,8 @@ namespace KillerPDF
             {
                 if (!silent)
                     KillerDialog.Show(null,
-                        "KillerPDF is still running.\nClose it, then try uninstalling again.",
+                        SetupText("Str_Dlg_UninstallStillRunning",
+                            "KillerPDF is still running.\nClose it, then try uninstalling again."),
                         AppName, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }

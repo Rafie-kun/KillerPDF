@@ -830,11 +830,11 @@ namespace KillerPDF
                 if (inMulti && _bmExtraSel.Count > 1)
                 {
                     menu.Items.Add(MakeMenuItem($"{Loc("Str_Ctx_BmDelete")} ({_bmExtraSel.Count})",
-                                                (_, _2) => DeleteSelectedBookmarks(nref), "Delete", ""));
+                                                (_, _2) => DeleteSelectedBookmarks(nref), KeyText("%del%"), ""));
                 }
                 else
                 {
-                    menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_BmRename"), (_, _2) => BeginInlineRename(tvi, nref), "F2", ""));
+                    menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_BmRename"), (_, _2) => BeginInlineRename(tvi, nref), GestureFor("F2"), ""));
                     menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_BmAddChild"), (_, _2) => AddBookmarkInto(nref), glyph: ""));
                     menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_BmSetDest"), (_, _2) => SetBookmarkDestination(nref), glyph: ""));
                     menu.Items.Add(new Separator());
@@ -847,7 +847,7 @@ namespace KillerPDF
                     down.IsEnabled = idx >= 0 && idx < siblingCount - 1;
                     menu.Items.Add(down);
                     menu.Items.Add(new Separator());
-                    menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_BmDelete"), (_, _2) => DeleteSelectedBookmarks(nref), "Delete", ""));
+                    menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_BmDelete"), (_, _2) => DeleteSelectedBookmarks(nref), KeyText("%del%"), ""));
                 }
             }
             else

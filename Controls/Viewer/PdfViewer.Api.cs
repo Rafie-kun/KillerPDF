@@ -185,6 +185,13 @@ namespace KillerPDF.Controls
         // ── Text selection ───────────────────────────────────────────────────────────────────
         internal void CopySelectedTextExt() => CopySelectedText();
         internal void SelectAllTextExt() => SelectAllText();
+        internal bool HasTextSelectionRangeExt => _txtSelHasRange;
+        /// <summary>The page menu's Highlight, Underline and Strikethrough on a flowing text
+        /// selection: the same commit the markup tools make when their drag ends.</summary>
+        internal void AnnotateTextSelectionExt(EditTool tool)
+        {
+            if (_txtSelHasRange) CommitFlowingHighlight(tool);
+        }
 
         // ── Crop ─────────────────────────────────────────────────────────────────────────────
         internal void ApplyCropExt(int[] pageIndices) => ApplyCrop(pageIndices);

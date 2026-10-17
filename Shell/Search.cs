@@ -166,7 +166,7 @@ namespace KillerPDF
                     TextDecorations = TextDecorations.Underline };
 
                 // The chevron at the left opens the replace row, as Ctrl+H does.
-                _replaceToggleBtn = SearchNavBtn("", Loc("Str_Replace_ToggleTT"),
+                _replaceToggleBtn = SearchNavBtn("", ShortcutTip("Str_Replace_ToggleTT", "Ctrl:H"),
                     () => SetReplaceRowVisible(_replaceBox?.Visibility != Visibility.Visible)); // ChevronRight
 
                 Button ReplaceBtn(string label, string tip, Action onClick)

@@ -204,5 +204,6 @@ namespace KillerPDF.Controls
         private MenuItem MakeMenuItem(string header, RoutedEventHandler click,
                                       string? gesture = null, string? glyph = null)
             => Host!.MakeMenuItem(header, click, gesture, glyph);
+        private string GestureFor(string cap) => Host!.GestureFor(cap);
     }
 }

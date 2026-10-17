@@ -1487,7 +1487,7 @@
                 <!-- File operations -->
                 <StackPanel x:Name="LeftBar" Orientation="Horizontal" HorizontalAlignment="Left">
                     <!-- File: New / Open / Close / Save / Print -->
-                    <Button Content="&#xE7C3;" Style="{StaticResource ToolbarButton}" Click="New_Click" ToolTip="{DynamicResource Str_TT_NewBlank}"/>
+                    <Button x:Name="NewBlankBtn" Content="&#xE7C3;" Style="{StaticResource ToolbarButton}" Click="New_Click" ToolTip="{DynamicResource Str_TT_NewBlank}"/>
                     <Button x:Name="CloseFileBtn" Content="&#xE711;" Style="{StaticResource ToolbarButton}" Click="CloseFile_Click" ToolTip="{DynamicResource Str_TT_CloseFile}" IsEnabled="False"/>
                     <Button x:Name="OpenFileBtn" Content="&#xE8DA;" Style="{StaticResource ToolbarSplitMain}" Click="Open_Click" MouseRightButtonUp="OpenRecent_Click" ToolTip="{DynamicResource Str_TT_Open}"/>
                     <Button x:Name="OpenRecentBtn" Content="&#xE70D;" FontSize="10" Width="13" Padding="0" Margin="-6,0,0,0" Style="{StaticResource ToolbarButton}" Click="OpenRecent_Click" ToolTip="{DynamicResource Str_TT_RecentFiles}"/>
@@ -1496,7 +1496,7 @@
                     <Button x:Name="OcrBtn" Content="&#xEE6F;" Style="{StaticResource ToolbarSplitMain}" Click="Ocr_Click" MouseRightButtonUp="OcrMenu_Click" ToolTip="{DynamicResource Str_TT_Ocr}"/>
                     <Button x:Name="OcrMenuBtn" Content="&#xE70D;" FontSize="10" Width="13" Padding="0" Margin="-6,0,0,0" Style="{StaticResource ToolbarButton}" Click="OcrMenu_Click" ToolTip="{DynamicResource Str_TT_OcrOptions}"/>
                     <Button Content="&#xE8B9;" Style="{StaticResource ToolbarButton}" Click="SaveFlattened_Click" ToolTip="{DynamicResource Str_TT_SaveFlattened}"/>
-                    <Button Content="&#xE749;" Style="{StaticResource ToolbarButton}" Click="Print_Click" ToolTip="{DynamicResource Str_TT_Print}"/>
+                    <Button x:Name="PrintBtn" Content="&#xE749;" Style="{StaticResource ToolbarButton}" Click="Print_Click" ToolTip="{DynamicResource Str_TT_Print}"/>
                     <StackPanel x:Name="GrpCompare" Orientation="Horizontal">
                         <Button x:Name="ComparePdfBtn" Style="{StaticResource ToolbarButton}" Padding="8,6" Click="ComparePdf_Click" ToolTip="{DynamicResource Str_TT_ComparePDFs}">
                             <Grid Width="18" Height="16">
@@ -1556,7 +1556,8 @@
                     </StackPanel>
                     <StackPanel x:Name="GrpUndo" Orientation="Horizontal">
                         <Rectangle Width="1" Fill="{DynamicResource CardBorderBrush}" Margin="4,6"/>
-                        <Button Content="&#xE7A7;" Style="{StaticResource ToolbarButton}" Click="Undo_Click" ToolTip="{DynamicResource Str_TT_UndoLast}"/>
+                        <Button x:Name="UndoBtn" Content="&#xE7A7;" Style="{StaticResource ToolbarButton}" Click="Undo_Click" ToolTip="{DynamicResource Str_TT_UndoLast}"/>
+                        <Button x:Name="RedoBtn" Content="&#xE7A6;" Style="{StaticResource ToolbarButton}" Click="Redo_Click" ToolTip="{DynamicResource Str_Ctx_Redo}"/>
                         <Button Content="&#xED62;" Style="{StaticResource ToolbarButtonDanger}" Click="ClearAllAnnotations_Click" ToolTip="{DynamicResource Str_TT_ClearAnnotations}"/>
                         <Rectangle Width="1" Fill="{DynamicResource CardBorderBrush}" Margin="4,6"/>
                         <Button x:Name="SearchBtn" Content="&#xE721;" Style="{StaticResource ToolbarButton}" Click="Search_Click" ToolTip="{DynamicResource Str_TT_Search}"/>
@@ -1663,6 +1664,9 @@
                                 </Button>
                                 <Button x:Name="MiUndo" Style="{StaticResource OverflowMenuButton}" Visibility="Collapsed" Click="Undo_Click">
                                     <StackPanel Orientation="Horizontal"><a11y:Glyph Text="&#xE7A7;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_Undo}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
+                                </Button>
+                                <Button x:Name="MiRedo" Style="{StaticResource OverflowMenuButton}" Visibility="Collapsed" Click="Redo_Click">
+                                    <StackPanel Orientation="Horizontal"><a11y:Glyph Text="&#xE7A6;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Ctx_Redo}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
                                 </Button>
                                 <Button x:Name="MiClear" Style="{StaticResource OverflowMenuButton}" Visibility="Collapsed" Click="ClearAllAnnotations_Click">
                                     <StackPanel Orientation="Horizontal"><a11y:Glyph Text="&#xED62;" FontFamily="Segoe MDL2 Assets" FontSize="14" Width="24" Foreground="{DynamicResource TextBrush}"/><TextBlock Text="{DynamicResource Str_Lbl_Clear}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/></StackPanel>
@@ -1989,8 +1993,39 @@
                                     </ControlTemplate>
                                 </Button.Template>
                             </Button>
+                            <!-- E740 (full screen): F11 from the keyboard. On the rail beside the split
+                                 pane because it also acts on the window. Full screen hides the rail, so
+                                 the way back is F11, Esc or the page menu's Full Screen item. -->
+                            <Button x:Name="FullScreenRailBtn" Click="FullScreenRailBtn_Click"
+                                    Cursor="Hand" FocusVisualStyle="{x:Null}"
+                                    ToolTip="{DynamicResource Str_KS_FullScreen}"
+                                    Width="24" Height="24" Padding="0" Margin="0,0,0,6">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="Transparent">
+                                            <TextBlock Text="&#xE740;"
+                                                       FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                                       Foreground="{DynamicResource TextBrush}"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <TextBlock.Effect>
+                                                    <DropShadowEffect Color="Black" BlurRadius="4" ShadowDepth="2" Direction="270" Opacity="{DynamicResource IconShadowOpacity}"/>
+                                                </TextBlock.Effect>
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Button}}" Value="True">
+                                                                <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
                             <!-- Invert document colors (#135): moon toggle, lit in the accent while
-                                 active (Tag="on", set from ToggleDocInvert). Ctrl+I does the same. -->
+                                 active (Tag="on", set from ToggleDocInvert). N does the same. -->
                             <Button x:Name="DocInvertBtn" Click="DocInvertBtn_Click"
                                     MouseRightButtonUp="DocInvertBtn_RightClick"
                                     Cursor="Hand" FocusVisualStyle="{x:Null}"
@@ -2023,7 +2058,7 @@
                                     </ControlTemplate>
                                 </Button.Template>
                             </Button>
-                            <Button Click="DocInfo_Click"
+                            <Button x:Name="DocInfoRailBtn" Click="DocInfo_Click"
                                     Cursor="Hand" FocusVisualStyle="{x:Null}"
                                     ToolTip="{DynamicResource Str_TT_DocInfo}"
                                     Width="24" Height="24" Padding="0" Margin="1,0,0,6">
@@ -2056,7 +2091,7 @@
                                  muscle memory carries across the apps. Flyouts follow the family standard:
                                  ContextMenus with FlyoutCard/FlyoutGrain chrome, opened against the content
                                  pane's rail-adjacent edge at the opening button's height (Shell/RailFlyouts.cs). -->
-                            <Button Click="ShortcutHelp_Click"
+                            <Button x:Name="ShortcutHelpRailBtn" Click="ShortcutHelp_Click"
                                     Cursor="Hand" FocusVisualStyle="{x:Null}"
                                     ToolTip="{DynamicResource Str_TT_KeyboardShortcuts}"
                                     Width="24" Height="24" Padding="0" Margin="0,0,0,6">

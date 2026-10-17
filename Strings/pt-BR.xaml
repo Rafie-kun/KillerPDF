@@ -1459,4 +1459,22 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Scroll_PageDown">Uma página abaixo</sys:String>
     <sys:String x:Key="Str_Scroll_PageLeft">Uma página à esquerda</sys:String>
     <sys:String x:Key="Str_Scroll_PageRight">Uma página à direita</sys:String>
+    <!-- Menus, signed fields and setup dialogs -->
+    <sys:String x:Key="Str_Ctx_CloseAllTabs">Fechar todas as guias</sys:String>
+    <sys:String x:Key="Str_Ctx_FullScreen">Tela cheia</sys:String>
+    <sys:String x:Key="Str_Sig_ChangeSignature">Alterar assinatura</sys:String>
+    <sys:String x:Key="Str_Sig_RemoveSignature">Remover assinatura</sys:String>
+    <sys:String x:Key="Str_Sig_ChangeInitials">Alterar iniciais</sys:String>
+    <sys:String x:Key="Str_Sig_RemoveInitials">Remover iniciais</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallTitle">Instalação duplicada do KillerPDF</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallMachine" xml:space="preserve">O KillerPDF encontrou duas cópias instaladas neste computador.&#10;&#10;Você está usando a instalação para todos os usuários. Também há uma cópia antiga por usuário, normalmente porque ela estava em uso durante uma atualização anterior.&#10;&#10;Remover agora a cópia por usuário que não é usada? Suas configurações e seus arquivos PDF não serão removidos.</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallUser" xml:space="preserve">O KillerPDF encontrou duas cópias instaladas neste computador.&#10;&#10;Você está usando a instalação por usuário. Também há uma cópia para todos os usuários.&#10;&#10;Remover agora a cópia para todos os usuários que não é usada? O Windows pedirá permissão de administrador. Suas configurações e seus arquivos PDF não serão removidos.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallUnsigned" xml:space="preserve">Instalação recusada: o EXE em execução não tem uma assinatura Authenticode válida.&#10;&#10;Somente compilações assinadas do KillerPDF podem ser instaladas.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallDowngrade" xml:space="preserve">Você está prestes a instalar uma versão mais antiga ({0}) sobre a versão instalada ({1}).&#10;&#10;Voltar para a versão anterior mesmo assim?</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallWriteFailed" xml:space="preserve">Não foi possível gravar a cópia instalada em:&#10;{0}&#10;&#10;Feche todas as janelas abertas do KillerPDF (e procure KillerPDF.exe no Gerenciador de Tarefas) e execute o instalador novamente.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallFailed" xml:space="preserve">Falha na instalação:&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">A desinstalação não conseguiu solicitar acesso de administrador:&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallConfirm">Desinstalar o KillerPDF deste computador?</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">O KillerPDF ainda está em execução.&#10;Feche-o e tente desinstalar novamente.</sys:String>
+    <sys:String x:Key="Str_Btn_Uninstall">Desinstalar</sys:String>
 </ResourceDictionary>

@@ -90,16 +90,16 @@ namespace KillerPDF
         // Re-clicking a signed field: change (re-pick) or remove it.
         private void ShowSignedFieldMenu(bool initials, int objNum, int pageIndex, double x, double y, double w, double h)
         {
-            string what = initials ? "initials" : "signature";
             var menu = MakeThemedMenu();
             menu.Placement = System.Windows.Controls.Primitives.PlacementMode.MousePoint;
-            menu.Items.Add(MakeMenuItem("Change " + what, (_, _) =>
+            menu.Items.Add(MakeMenuItem(Loc(initials ? "Str_Sig_ChangeInitials" : "Str_Sig_ChangeSignature"), (_, _) =>
             {
                 RemoveSignedField(objNum, pageIndex);
                 _pendingSignField = (initials, objNum, pageIndex, x, y, w, h);
                 ShowSignaturePopup();
             }, glyph: ""));
-            menu.Items.Add(MakeMenuItem("Remove " + what, (_, _) => RemoveSignedField(objNum, pageIndex), glyph: ""));
+            menu.Items.Add(MakeMenuItem(Loc(initials ? "Str_Sig_RemoveInitials" : "Str_Sig_RemoveSignature"),
+                (_, _) => RemoveSignedField(objNum, pageIndex), glyph: ""));
             menu.IsOpen = true;
         }
 

@@ -1459,4 +1459,22 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Scroll_PageDown">Xuống một trang</sys:String>
     <sys:String x:Key="Str_Scroll_PageLeft">Sang trái một trang</sys:String>
     <sys:String x:Key="Str_Scroll_PageRight">Sang phải một trang</sys:String>
+    <!-- Menus, signed fields and setup dialogs -->
+    <sys:String x:Key="Str_Ctx_CloseAllTabs">Đóng tất cả các tab</sys:String>
+    <sys:String x:Key="Str_Ctx_FullScreen">Toàn màn hình</sys:String>
+    <sys:String x:Key="Str_Sig_ChangeSignature">Đổi chữ ký</sys:String>
+    <sys:String x:Key="Str_Sig_RemoveSignature">Xóa chữ ký</sys:String>
+    <sys:String x:Key="Str_Sig_ChangeInitials">Đổi chữ ký tắt</sys:String>
+    <sys:String x:Key="Str_Sig_RemoveInitials">Xóa chữ ký tắt</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallTitle">KillerPDF bị cài đặt trùng lặp</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallMachine" xml:space="preserve">KillerPDF tìm thấy hai bản sao đã cài đặt trên máy tính này.&#10;&#10;Bạn đang chạy bản cài đặt cho mọi người dùng. Còn có một bản sao cũ hơn cài cho riêng người dùng, thường vì nó đang được sử dụng trong một lần cập nhật trước.&#10;&#10;Gỡ bản sao cài cho riêng người dùng không dùng đến ngay bây giờ? Cài đặt và tệp PDF của bạn sẽ không bị xóa.</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallUser" xml:space="preserve">KillerPDF tìm thấy hai bản sao đã cài đặt trên máy tính này.&#10;&#10;Bạn đang chạy bản cài đặt cho riêng người dùng. Còn có một bản sao cài cho mọi người dùng.&#10;&#10;Gỡ bản sao cài cho mọi người dùng không dùng đến ngay bây giờ? Windows sẽ yêu cầu quyền quản trị viên. Cài đặt và tệp PDF của bạn sẽ không bị xóa.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallUnsigned" xml:space="preserve">Đã từ chối cài đặt: tệp EXE đang chạy không có chữ ký Authenticode hợp lệ.&#10;&#10;Chỉ có thể cài đặt các bản dựng KillerPDF đã được ký.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallDowngrade" xml:space="preserve">Bạn sắp cài đặt một phiên bản cũ hơn ({0}) đè lên phiên bản đã cài đặt ({1}).&#10;&#10;Vẫn hạ cấp?</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallWriteFailed" xml:space="preserve">Không thể ghi bản sao đã cài đặt vào:&#10;{0}&#10;&#10;Hãy đóng mọi cửa sổ KillerPDF đang mở (và kiểm tra KillerPDF.exe trong Trình quản lý tác vụ), rồi chạy lại trình cài đặt.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallFailed" xml:space="preserve">Cài đặt không thành công:&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">Không thể yêu cầu quyền quản trị viên để gỡ cài đặt:&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallConfirm">Gỡ cài đặt KillerPDF khỏi máy tính này?</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF vẫn đang chạy.&#10;Hãy đóng ứng dụng, rồi thử gỡ cài đặt lại.</sys:String>
+    <sys:String x:Key="Str_Btn_Uninstall">Gỡ cài đặt</sys:String>
 </ResourceDictionary>

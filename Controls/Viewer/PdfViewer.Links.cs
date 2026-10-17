@@ -164,19 +164,20 @@ namespace KillerPDF.Controls
         // Builds the right-click actions for a link onto `menu`: Open Link (via the safe FollowLinkTarget
         // path), Copy Link Address / Copy Email Address, and Remove Link from PDF when the native
         // annotation index is available. Shared by the single-page overlay menu and the tiled-
-        // view canvas menu so both views offer the same actions.
+        // view canvas menu so both views offer the same actions. None of them shows a shortcut:
+        // Ctrl+C and Delete act on the text or annotation selection, never on a link.
         private void AddLinkMenuItems(ContextMenu menu, object target, int annotIndex, int pageIndex)
         {
             menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_OpenLink"), (_, _) => FollowLinkTarget(target), glyph: ""));
             if (target is string uri)
             {
                 if (uri.StartsWith("mailto:", StringComparison.OrdinalIgnoreCase))
-                    menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_CopyEmail"), (_, _) => TrySetClipboard(uri["mailto:".Length..]), "Ctrl+C", ""));
+                    menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_CopyEmail"), (_, _) => TrySetClipboard(uri["mailto:".Length..]), null, ""));
                 else
-                    menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_CopyLink"), (_, _) => TrySetClipboard(uri), "Ctrl+C", ""));
+                    menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_CopyLink"), (_, _) => TrySetClipboard(uri), null, ""));
             }
             if (annotIndex >= 0)
-                menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_RemoveLink"), (_, _) => RemoveLinkAnnotation(pageIndex, annotIndex), "Delete", ""));
+                menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_RemoveLink"), (_, _) => RemoveLinkAnnotation(pageIndex, annotIndex), null, ""));
         }
 
         // Clipboard COM calls throw when another app is holding the clipboard open; swallow so a copy

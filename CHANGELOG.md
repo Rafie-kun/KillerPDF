@@ -38,6 +38,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Added a scanned look to Save Flattened: slightly tilted pages, warm paper, scanner grain, soft focus and an edge shadow, alongside the existing grayscale and JPEG options (#426).
 - Added Reduce File Size to the Save menu. It saves a smaller copy with unused objects removed and the file compressed, and can downsample images drawn at more resolution than the page shows. The command line takes the same option as `--optimize --images <dpi>` (#433).
 - Added Customize Shortcuts to the keyboard shortcuts overlay. Commands on letters, numbers, F1 to F12, Delete and Insert can move to another key, and the list and keyboard map show the keys as chosen (#190).
+- Added Back and Forward buttons across the top of the page menus, with Select All, Paste for clipboard images and text, and Full Screen. Selected text can be highlighted, underlined, struck through or marked for redaction from the page menu, the tab menu has Close All Tabs, and the thumbnail menu has OCR Page.
+- Added a Redo button beside Undo, and a full screen button on the sidebar rail.
 - Added SVG signatures. An imported SVG keeps its outlines, fill and stroke, and is saved into the PDF as vectors, so it stays sharp at any size and zoom (#398).
 - Added fillable text field presets. Right-click a text field with the Forms tool to save its size, font size, text color, background and border, then insert it from any page's right-click menu in any document. Presets can be renamed, reordered and deleted (#340).
 - Added Comments to the Document tools (Ctrl+Shift+D, K). It lists the PDF's review comments with their replies, and each can be edited, answered or deleted. New notes can be added to the current page, and the whole change is one undo (#288).
@@ -63,6 +65,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Message, confirm, install and uninstall dialogs use the family setup dialog layout, with a notice icon, a larger Lacquer heading, evenly sized buttons and the action button last. Dialog and installer action buttons are hollow in the accent color and fill with the button gradient on hover, instead of showing a solid block with hidden text.
 - Split the installer text into one file per language, with \n marking line breaks inside a value, so translations can be reviewed and compared key by key (#409).
 - The installer sidebar shows the version in Killer Sans under the wordmark, with a translated Setup line below it in Lacquer (#440).
+- Shortcuts shown in menus and tooltips follow customized shortcuts and the app language, and the toolbar's overflow menu lists each item's shortcut.
 - Check for updates on startup is the first of the About options, as in the other Killer Tools apps.
 - The Light theme draws a softer shadow under the toolbars.
 - Esc no longer closes KillerPDF. It still cancels the open tool, search or overlay, and with nothing to cancel it does nothing, as in other Windows apps.
@@ -103,6 +106,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - The About card marks 1.9 development builds as unreleased.
 - The installer centers the complete version number on its own line (#440).
 - The repair prompt reads as plain sentences in every language.
+- Link menu items no longer show Ctrl+C and Delete, which never acted on a link, and tool tooltips no longer show their key twice.
 - Centered website logos with space above and below, standardized fonts and spacing, refreshed Engine branding, and added a two-column Corpus layout.
 - Corrected Help and Technical instructions, documentation navigation, current feature descriptions, and automatic Engine release facts.
 - The website top bar no longer leaves extra space under the wordmark and buttons.
@@ -110,6 +114,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - The checked boxes in the annotation bars and Crop's All pages box keep a readable tick on every accent instead of white on yellow.
 - On the website, text on accent-colored buttons, tabs and highlights switches to white or near-black for contrast, so it is never white on yellow.
 - Theme names and the status, OCR, signing and stamp labels that were still in English are translated in every language.
+- The signed field menu and the install and uninstall messages that were still in English are translated in every language.
 - The website's About page, MCP page, accent bar, code comments and section toggles are translated in every language, and About text that had lost its accents is restored.
 - On phones, the website's logo and its Engine and Corpus headings fit the screen instead of making the home page scroll sideways.
 

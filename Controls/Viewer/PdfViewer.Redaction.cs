@@ -283,6 +283,42 @@ namespace KillerPDF.Controls
             _redactDrawRect = null;
         }
 
+        /// <summary>
+        /// The page menu's Redact on a flowing text selection: each selected line becomes a mark
+        /// and the Redact tool opens on them, so the bar's Apply removes exactly that text.
+        /// </summary>
+        internal void MarkTextSelectionForRedaction()
+        {
+            if (!_txtSelHasRange || _doc is null) return;
+            var (start, end) = OrderedSelection();
+            var marks = new List<RedactionMark>();
+            for (int page = start.Page; page <= end.Page; page++)
+            {
+                if (!TryPageGeometry(page, out double pw, out double ph, out double cw, out double ch, out int rot))
+                    continue;
+                foreach (Rect line in SelectionLineRectsForPage(page))
+                {
+                    var (left, bottom, right, top) = RedactionGeometry.CanvasToPage(line, pw, ph, cw, ch, rot);
+                    if (right - left > 0.5 && top - bottom > 0.5)
+                        marks.Add(new RedactionMark(page, left, bottom, right, top));
+                }
+            }
+            if (marks.Count == 0) return;
+
+            ClearTextSelection();
+            if (_currentTool != EditTool.Redact) SetTool(EditTool.Redact);
+            // An owner-restricted document stays on Select until it is unlocked.
+            if (_currentTool != EditTool.Redact) return;
+            if (!ReferenceEquals(_redactSession, _active))
+            {
+                _redactMarks.Clear();
+                _redactSession = _active;
+            }
+            _redactMarks.AddRange(marks);
+            UpdateRedactionCount();
+            RepaintRedactionMarks();
+        }
+
         private void MarkSearchResultsForRedaction()
         {
             if (!Search.HasResults)

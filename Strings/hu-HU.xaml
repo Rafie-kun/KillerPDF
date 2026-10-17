@@ -1446,4 +1446,22 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Scroll_PageDown">Egy oldallal lejjebb</sys:String>
     <sys:String x:Key="Str_Scroll_PageLeft">Egy oldallal balra</sys:String>
     <sys:String x:Key="Str_Scroll_PageRight">Egy oldallal jobbra</sys:String>
+    <!-- Menus, signed fields and setup dialogs -->
+    <sys:String x:Key="Str_Ctx_CloseAllTabs">Összes lap bezárása</sys:String>
+    <sys:String x:Key="Str_Ctx_FullScreen">Teljes képernyő</sys:String>
+    <sys:String x:Key="Str_Sig_ChangeSignature">Aláírás módosítása</sys:String>
+    <sys:String x:Key="Str_Sig_RemoveSignature">Aláírás eltávolítása</sys:String>
+    <sys:String x:Key="Str_Sig_ChangeInitials">Monogram módosítása</sys:String>
+    <sys:String x:Key="Str_Sig_RemoveInitials">Monogram eltávolítása</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallTitle">Kétszeres KillerPDF-telepítés</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallMachine" xml:space="preserve">A KillerPDF két telepített példányt talált ezen a számítógépen.&#10;&#10;Jelenleg a minden felhasználó számára készült telepítést használja. Egy régebbi, felhasználónkénti példány is jelen van, általában azért, mert egy korábbi frissítéskor használatban volt.&#10;&#10;Eltávolítja most a nem használt felhasználónkénti példányt? A beállításai és PDF-fájljai nem törlődnek.</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallUser" xml:space="preserve">A KillerPDF két telepített példányt talált ezen a számítógépen.&#10;&#10;Jelenleg a felhasználónkénti telepítést használja. Egy minden felhasználó számára készült példány is jelen van.&#10;&#10;Eltávolítja most a nem használt, minden felhasználó számára készült példányt? A Windows rendszergazdai engedélyt fog kérni. A beállításai és PDF-fájljai nem törlődnek.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallUnsigned" xml:space="preserve">A telepítés elutasítva: a futó EXE-fájl nem rendelkezik érvényes Authenticode-aláírással.&#10;&#10;Csak a KillerPDF aláírt buildjei telepíthetők.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallDowngrade" xml:space="preserve">Egy régebbi verziót ({0}) készül telepíteni a jelenleg telepített verzió ({1}) helyére.&#10;&#10;Mégis visszaáll a régebbi verzióra?</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallWriteFailed" xml:space="preserve">Nem sikerült írni a telepített példányt ide:&#10;{0}&#10;&#10;Zárja be a megnyitott KillerPDF-ablakokat (és ellenőrizze a KillerPDF.exe folyamatot a Feladatkezelőben), majd futtassa újra a telepítőt.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallFailed" xml:space="preserve">A telepítés sikertelen:&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">Az eltávolítás nem tudott rendszergazdai hozzáférést kérni:&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallConfirm">Eltávolítja a KillerPDF-et erről a számítógépről?</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">A KillerPDF még fut.&#10;Zárja be, majd próbálja újra az eltávolítást.</sys:String>
+    <sys:String x:Key="Str_Btn_Uninstall">Eltávolítás</sys:String>
 </ResourceDictionary>

@@ -20,6 +20,10 @@ namespace KillerPDF
         private double _fsPrevLeft, _fsPrevTop, _fsPrevW, _fsPrevH;
         private bool _fsAnimating;
 
+        // The sidebar rail's full screen button. The rail hides with the rest of the chrome, so the
+        // page menu's Full Screen item, F11 and Esc are the ways back.
+        private void FullScreenRailBtn_Click(object sender, RoutedEventArgs e) => ToggleFullScreen();
+
         // F11 distraction-free mode: hides all chrome (title bar, toolbar, tab strip, sidebar, footer) and
         // grows the window over the whole monitor so just the document pane fills the screen on a dark-gray
         // backdrop. F11 or Esc exits. The switch happens under a black cross-fade so the resize never jumps.

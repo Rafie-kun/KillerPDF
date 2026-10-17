@@ -192,7 +192,7 @@ namespace KillerPDF
                     else
                         _savedPagesWidth = Math.Min(_sidebarCol.ActualWidth, SbPx(SidebarMaxPages));
                 }
-                _sidebarToggleBtn.ToolTip = Loc("Str_TT_ExpandSidebar");
+                _sidebarToggleBtn.ToolTip = ShortcutTip("Str_TT_ExpandSidebar", "F9");
                 // Glide shut sliding, not squishing: freeze the content at its open width so
                 // the shrinking border CLIPS it (thumbnails hold their size), then hide the
                 // border once the strip width is reached. MinWidth drops first so the
@@ -219,7 +219,7 @@ namespace KillerPDF
                     _sidebarCol.MinWidth = SbPx(SidebarMinOpen);   // open: clamp so the list can't be dragged below readable
                     EndSidebarSlide();
                 });
-                _sidebarToggleBtn.ToolTip = Loc("Str_TT_CollapseSidebar");
+                _sidebarToggleBtn.ToolTip = ShortcutTip("Str_TT_CollapseSidebar", "F9");
                 SidebarSplitter.IsEnabled = true;
             }
             UpdateSidebarToggleGlyph();
@@ -291,7 +291,7 @@ namespace KillerPDF
             _sidebarDragOpening = true;
             _sidebarBorder.Visibility = Visibility.Visible;
             SidebarContentPanel.Visibility = Visibility.Collapsed;
-            _sidebarToggleBtn.ToolTip = Loc("Str_TT_CollapseSidebar");
+            _sidebarToggleBtn.ToolTip = ShortcutTip("Str_TT_CollapseSidebar", "F9");
             UpdateSidebarToggleGlyph();
         }
 
@@ -351,7 +351,7 @@ namespace KillerPDF
         private void CollapseSidebarToStrip()
         {
             _sidebarCollapsed = true;
-            _sidebarToggleBtn.ToolTip = Loc("Str_TT_ExpandSidebar");
+            _sidebarToggleBtn.ToolTip = ShortcutTip("Str_TT_ExpandSidebar", "F9");
             _sidebarBorder.Visibility = Visibility.Collapsed;
             SidebarContentPanel.Visibility = Visibility.Visible;   // reset so the next border-show has content
             _sidebarCol.Width = new GridLength(SbPx(24));

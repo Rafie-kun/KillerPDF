@@ -1012,7 +1012,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Col_Name">name</sys:String>
     <sys:String x:Key="Str_Col_Size">size</sys:String>
     <sys:String x:Key="Str_Ctx_Cut">Cut</sys:String>
-    <sys:String x:Key="Str_Ctx_SelectAll">Select all</sys:String>
+    <sys:String x:Key="Str_Ctx_SelectAll">Select All</sys:String>
     <sys:String x:Key="Str_Dlg_AllFiles">All files</sys:String>
     <sys:String x:Key="Str_Dlg_FileName">File name:</sys:String>
     <sys:String x:Key="Str_Dlg_FileType">File type:</sys:String>
@@ -1459,4 +1459,22 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Scroll_PageDown">Page down</sys:String>
     <sys:String x:Key="Str_Scroll_PageLeft">Page left</sys:String>
     <sys:String x:Key="Str_Scroll_PageRight">Page right</sys:String>
+    <!-- Menus, signed fields and setup dialogs -->
+    <sys:String x:Key="Str_Ctx_CloseAllTabs">Close All Tabs</sys:String>
+    <sys:String x:Key="Str_Ctx_FullScreen">Full Screen</sys:String>
+    <sys:String x:Key="Str_Sig_ChangeSignature">Change Signature</sys:String>
+    <sys:String x:Key="Str_Sig_RemoveSignature">Remove Signature</sys:String>
+    <sys:String x:Key="Str_Sig_ChangeInitials">Change Initials</sys:String>
+    <sys:String x:Key="Str_Sig_RemoveInitials">Remove Initials</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallTitle">Duplicate KillerPDF installation</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallMachine" xml:space="preserve">KillerPDF found two installed copies on this computer.&#10;&#10;You are currently running the all-users installation. An older per-user copy is also present, usually because it was in use during an earlier update.&#10;&#10;Remove the unused per-user copy now? Your settings and PDF files will not be removed.</sys:String>
+    <sys:String x:Key="Str_Dlg_DuplicateInstallUser" xml:space="preserve">KillerPDF found two installed copies on this computer.&#10;&#10;You are currently running the per-user installation. An all-users copy is also present.&#10;&#10;Remove the unused all-users copy now? Windows will ask for administrator permission. Your settings and PDF files will not be removed.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallUnsigned" xml:space="preserve">Installation refused: the running EXE does not carry a valid Authenticode signature.&#10;&#10;Only signed builds of KillerPDF can be installed.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallDowngrade" xml:space="preserve">You are about to install an older version ({0}) over the currently installed version ({1}).&#10;&#10;Downgrade anyway?</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallWriteFailed" xml:space="preserve">Couldn't write the installed copy at:&#10;{0}&#10;&#10;Close any open KillerPDF window (and check Task Manager for KillerPDF.exe), then run the installer again.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallFailed" xml:space="preserve">Installation failed:&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">Uninstall could not request administrator access:&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallConfirm">Uninstall KillerPDF from this computer?</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF is still running.&#10;Close it, then try uninstalling again.</sys:String>
+    <sys:String x:Key="Str_Btn_Uninstall">Uninstall</sys:String>
 </ResourceDictionary>
