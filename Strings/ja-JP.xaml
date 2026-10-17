@@ -309,7 +309,7 @@
     <sys:String x:Key="Str_Dlg_InstallTitle">KillerPDF をインストール</sys:String>
     <sys:String x:Key="Str_Dlg_InstallMsg" xml:space="preserve">KillerPDF をこのコンピューターにインストールしますか？
 
-KillerPDF はプログラムフォルダーにコピーされ、スタートメニューに項目が追加されます。この EXE のコピーはそのままの場所に残り、いつでも「プログラムの追加と削除」からアンインストールできます。</sys:String>
+インストールすると、アプリがプログラムフォルダーにコピーされて起動が速くなり、スタートメニューに項目が追加されます。このポータブル ファイルは、その後で残しても削除してもかまいません。</sys:String>
     <sys:String x:Key="Str_Dlg_UpdateMachineMsg" xml:space="preserve">全ユーザー向けの既存の KillerPDF インストールを更新しますか？
 
 Program Files のコピーを、より高速なマルチファイル版に置き換えます。古いユーザーごとのコピーは削除され、KillerPDF は 1 つだけ表示されます。このポータブルファイルはその後、保持しても削除してもかまいません。</sys:String>
@@ -870,7 +870,7 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Tf_Rotate">回転</sys:String>
     <sys:String x:Key="Str_Tf_Scale">拡大縮小</sys:String>
     <sys:String x:Key="Str_Tf_Flip">反転</sys:String>
-    <sys:String x:Key="Str_Tf_Skew">傾き補正</sys:String>
+    <sys:String x:Key="Str_Tf_Skew">傾斜</sys:String>
     <sys:String x:Key="Str_Tf_Angle">角度</sys:String>
     <sys:String x:Key="Str_Tf_Size">サイズ</sys:String>
     <sys:String x:Key="Str_Tf_WhenScaling">拡大縮小時 :</sys:String>

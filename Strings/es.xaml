@@ -249,7 +249,7 @@ Al guardar ahora se sobrescribe el archivo y esos cambios se perderán. Guarde p
     <sys:String x:Key="Str_Dlg_InstallTitle">Instalar KillerPDF</sys:String>
     <sys:String x:Key="Str_Dlg_InstallMsg" xml:space="preserve">¿Instalar KillerPDF en este equipo?
 
-KillerPDF se copiará a su carpeta de programas y se añadirá una entrada en el menú Inicio. Esta copia del ejecutable se queda donde está, y puede desinstalarla en cualquier momento desde Agregar o quitar programas.</sys:String>
+La instalación copia la aplicación a su carpeta de programas para un inicio más rápido y añade una entrada en el menú Inicio. Después puede conservar o eliminar este archivo portátil.</sys:String>
     <sys:String x:Key="Str_Btn_DoInstall">Instalar</sys:String>
     <sys:String x:Key="Str_Btn_DoUpdate">Actualizar</sys:String>
     <sys:String x:Key="Str_Dlg_UpdateUserMsg" xml:space="preserve">¿Actualizar la instalación existente de KillerPDF?
@@ -381,7 +381,7 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Stamp_Title">Numerar páginas</sys:String>
     <sys:String x:Key="Str_Stamp_StartAt">Empezar en</sys:String>
     <sys:String x:Key="Str_Stamp_Format">Formato</sys:String>
-    <sys:String x:Key="Str_Stamp_Hint">{}{n} = número de página, {N} = total. ej. "Página {n} de {N}"</sys:String>
+    <sys:String x:Key="Str_Stamp_Hint">Use {n} para el número de página y {N} para el total</sys:String>
     <sys:String x:Key="Str_Stamp_Position">Posición</sys:String>
     <sys:String x:Key="Str_Stamp_FontSize">Tamaño de fuente (pt)</sys:String>
     <sys:String x:Key="Str_Stamp_Hint2">Ejemplo: &quot;Página {n} de {N}&quot;</sys:String>
@@ -863,8 +863,8 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_St_RepairCanceled">Reparación cancelada</sys:String>
     <sys:String x:Key="Str_St_Canceled">Cancelado</sys:String>
     <sys:String x:Key="Str_St_DocInfoUpdated">Información del documento actualizada - guarde el archivo para conservar los cambios</sys:String>
-    <sys:String x:Key="Str_St_FlattenCanceled">Acoplado cancelado (no se escribió ningún archivo)</sys:String>
-    <sys:String x:Key="Str_St_FlattenPrintFailed">No se pudieron acoplar las anotaciones para imprimir; se imprimirá sin ellas.</sys:String>
+    <sys:String x:Key="Str_St_FlattenCanceled">Aplanado cancelado (no se escribió ningún archivo)</sys:String>
+    <sys:String x:Key="Str_St_FlattenPrintFailed">No se pudieron aplanar las anotaciones para imprimir; se imprimirá sin ellas.</sys:String>
     <sys:String x:Key="Str_St_HqDownloadCanceled">Descarga de alta calidad cancelada</sys:String>
     <sys:String x:Key="Str_St_LangDownloadCanceled">Descarga de idioma cancelada</sys:String>
     <sys:String x:Key="Str_St_OcrCanceled">OCR cancelado</sys:String>
@@ -1220,7 +1220,7 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Annot_Signature">Firma</sys:String>
     <sys:String x:Key="Str_Annot_Image">Imagen</sys:String>
     <sys:String x:Key="Str_Annot_TextBox">Cuadro de texto</sys:String>
-    <sys:String x:Key="Str_Annot_Cover">Cobertura de texto</sys:String>
+    <sys:String x:Key="Str_Annot_Cover">Cubierta de texto</sys:String>
     <sys:String x:Key="Str_Annot_Strikethrough">Tachado</sys:String>
     <sys:String x:Key="Str_Annot_Underline">Subrayado</sys:String>
     <sys:String x:Key="Str_Annot_Highlight">Resaltado</sys:String>
@@ -1385,8 +1385,8 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Comments_Updated">Comentarios actualizados</sys:String>
     <sys:String x:Key="Str_Comments_Failed">No se pudieron guardar los comentarios.</sys:String>
     <sys:String x:Key="Str_Comments_ReadFailed">No se pudieron leer los comentarios.</sys:String>
-    <sys:String x:Key="Str_Pages_DivideSpreads">Dividir pliegos...</sys:String>
-    <sys:String x:Key="Str_Divide_Title">Dividir pliegos</sys:String>
+    <sys:String x:Key="Str_Pages_DivideSpreads">Dividir páginas dobles...</sys:String>
+    <sys:String x:Key="Str_Divide_Title">Dividir páginas dobles</sys:String>
     <sys:String x:Key="Str_Divide_Hint">Arrastre o haga clic para colocar la línea en el medianil entre las dos páginas. Cada página dividida se convierte en dos páginas en orden de lectura.</sys:String>
     <sys:String x:Key="Str_Divide_LeftRight">Páginas izquierda y derecha</sys:String>
     <sys:String x:Key="Str_Divide_TopBottom">Páginas superior e inferior</sys:String>

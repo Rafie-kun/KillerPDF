@@ -181,7 +181,7 @@ La page peut être remplacée par une image d'elle-même avec les zones marquée
     <sys:String x:Key="Str_KS_ZoomCursor">Agrandir / Réduire (au curseur)</sys:String>
     <sys:String x:Key="Str_KS_ZoomInOut">Agrandir / Réduire</sys:String>
     <sys:String x:Key="Str_KS_ResetZoom">Réinitialiser le zoom à 100 %</sys:String>
-    <sys:String x:Key="Str_KS_PanView">Vue panoramique</sys:String>
+    <sys:String x:Key="Str_KS_PanView">Déplacer la vue</sys:String>
     <sys:String x:Key="Str_KS_Editing">ÉDITION</sys:String>
     <sys:String x:Key="Str_KS_Undo">Annuler</sys:String>
     <sys:String x:Key="Str_KS_DeleteAnnot">Supprimer l'annotation sélectionnée</sys:String>
@@ -454,7 +454,7 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Stamp_Title">Numéroter les pages</sys:String>
     <sys:String x:Key="Str_Stamp_StartAt">Commencer à</sys:String>
     <sys:String x:Key="Str_Stamp_Format">Format</sys:String>
-    <sys:String x:Key="Str_Stamp_Hint">{}{n} = numéro de page, {N} = total. p. ex. « Page {n} sur {N} »</sys:String>
+    <sys:String x:Key="Str_Stamp_Hint">{n} = numéro de page, {N} = total. p. ex. « Page {n} sur {N} »</sys:String>
     <sys:String x:Key="Str_Stamp_Hint2">Exemple : &quot;Page {n} sur {N}&quot;</sys:String>
     <sys:String x:Key="Str_Stamp_Position">Position</sys:String>
     <sys:String x:Key="Str_Stamp_FontSize">Taille de police (pt)</sys:String>
@@ -886,7 +886,7 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Tf_LevelsBlack">Point noir</sys:String>
     <sys:String x:Key="Str_Tf_LevelsWhite">Point blanc</sys:String>
     <sys:String x:Key="Str_Tf_LevelsGamma">Tons moyens</sys:String>
-    <sys:String x:Key="Str_Tf_Quality">Qualité</sys:String>
+    <sys:String x:Key="Str_Tf_Quality">Qualité de la page</sys:String>
     <sys:String x:Key="Str_Tf_ColorMode">Mode couleur</sys:String>
     <sys:String x:Key="Str_Tf_Grayscale">Niveaux de gris</sys:String>
     <sys:String x:Key="Str_Tf_BlackWhite">Noir et blanc</sys:String>
@@ -1030,7 +1030,7 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <!-- Themed Windows system menu (caption right-click / Alt+Space) -->
     <sys:String x:Key="Str_Sys_Restore">Restaurer</sys:String>
     <sys:String x:Key="Str_Sys_Move">Déplacer</sys:String>
-    <sys:String x:Key="Str_Sys_Size">Dimensionner</sys:String>
+    <sys:String x:Key="Str_Sys_Size">Taille</sys:String>
     <sys:String x:Key="Str_Sys_Minimize">Réduire</sys:String>
     <sys:String x:Key="Str_Sys_Maximize">Agrandir</sys:String>
     <sys:String x:Key="Str_Sys_Close">Fermer</sys:String>
@@ -1215,7 +1215,7 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_St_TextEditError">Erreur de modification du texte : {0}</sys:String>
     <sys:String x:Key="Str_St_OcrNoTextPage">OCR : aucun texte trouvé sur la page {0}</sys:String>
     <sys:String x:Key="Str_St_OcrCopiedPage">OCR : {0} caractères copiés de la page {1} (confiance {2})</sys:String>
-    <sys:String x:Key="Str_St_OcrCopiedPages">OCR : {0} caractères copiés depuis {1} pages (confidance : {2})</sys:String>
+    <sys:String x:Key="Str_St_OcrCopiedPages">OCR : {0} caractères copiés depuis {1} pages (confiance : {2})</sys:String>
     <sys:String x:Key="Str_St_OcrCopiedRegion">OCR : {0} caractères copiés de la région (confiance {1})</sys:String>
     <sys:String x:Key="Str_St_SearchableSaved">PDF interrogeable enregistré : {0} pages, {1} mots reconnus</sys:String>
     <sys:String x:Key="Str_St_ScanTextSaved">PDF converti enregistré : {0} pages numérisées, {1} mots devenus du texte</sys:String>
@@ -1419,12 +1419,12 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Divide_MarkupWarn">Les annotations des pages divisées feront partie de ces pages et ne pourront plus être modifiées. Diviser quand même ?</sys:String>
     <sys:String x:Key="Str_Divide_Done">{0} page(s) divisée(s) en {1}</sys:String>
     <sys:String x:Key="Str_Divide_Failed">Impossible de diviser les pages : {0}</sys:String>
-    <sys:String x:Key="Str_Pages_RasterizeRegion">Pixelliser une zone...</sys:String>
-    <sys:String x:Key="Str_Raster_Title">Pixelliser une zone</sys:String>
+    <sys:String x:Key="Str_Pages_RasterizeRegion">Rastériser une zone...</sys:String>
+    <sys:String x:Key="Str_Raster_Title">Rastériser une zone</sys:String>
     <sys:String x:Key="Str_Raster_Hint">Tracez un cadre autour de la partie de la page à transformer en image. Tout ce qui est hors du cadre reste inchangé.</sys:String>
     <sys:String x:Key="Str_Raster_None">Tracez un cadre sur la page.</sys:String>
     <sys:String x:Key="Str_Raster_Affects">Le cadre couvre {0} segments de texte, {1} images et {2} dessins. Ils deviennent une seule image et le texte qu'elle contient ne pourra plus être sélectionné ni recherché.</sys:String>
-    <sys:String x:Key="Str_Raster_Apply">Pixelliser</sys:String>
+    <sys:String x:Key="Str_Raster_Apply">Rastériser</sys:String>
     <sys:String x:Key="Str_Raster_Done">Zone de la page {0} pixellisée</sys:String>
     <sys:String x:Key="Str_Raster_Failed">Impossible de pixelliser la zone : {0}</sys:String>
     <sys:String x:Key="Str_Sep_Hint">Chaque plaque montre la quantité de cette encre déposée par la page : noir pour une couverture totale, blanc pour aucune. Les plaques sans encre sur cette page sont estompées.</sys:String>

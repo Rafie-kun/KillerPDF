@@ -249,7 +249,7 @@ Kaydetmek dosyayı değiştirir ve imzasını kaldırır. İmzalı dosyayı koru
     <sys:String x:Key="Str_Dlg_InstallTitle">KillerPDF'i Yükle</sys:String>
     <sys:String x:Key="Str_Dlg_InstallMsg" xml:space="preserve">KillerPDF bu bilgisayara yüklensin mi?
 
-KillerPDF programlar klasörünüze kopyalanır ve bir Başlat Menüsü girdisi eklenir. EXE dosyasının bu kopyası olduğu yerde kalır ve istediğiniz zaman Program Ekle/Kaldır üzerinden kaldırabilirsiniz.</sys:String>
+Yükleme, daha hızlı başlatma için uygulamayı Programlar klasörünüze kopyalar ve bir Başlat Menüsü girdisi ekler. Bu taşınabilir dosyayı daha sonra saklayabilir veya silebilirsiniz.</sys:String>
     <sys:String x:Key="Str_Btn_DoInstall">Yükle</sys:String>
     <sys:String x:Key="Str_Btn_DoUpdate">Güncelle</sys:String>
     <sys:String x:Key="Str_Dlg_UpdateUserMsg" xml:space="preserve">Mevcut KillerPDF kurulumu güncellensin mi?
@@ -381,7 +381,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Stamp_Title">Sayfa Numarası Bas</sys:String>
     <sys:String x:Key="Str_Stamp_StartAt">Başlangıç</sys:String>
     <sys:String x:Key="Str_Stamp_Format">Biçim</sys:String>
-    <sys:String x:Key="Str_Stamp_Hint">{}{n} = sayfa numarası, {N} = toplam. örn. "Sayfa {n} / {N}"</sys:String>
+    <sys:String x:Key="Str_Stamp_Hint">{n} = sayfa numarası, {N} = toplam. örn. "Sayfa {n} / {N}"</sys:String>
     <sys:String x:Key="Str_Stamp_Position">Konum</sys:String>
     <sys:String x:Key="Str_Stamp_FontSize">Yazı boyutu (pt)</sys:String>
     <sys:String x:Key="Str_Stamp_Hint2">Örnek: &quot;Sayfa {n} / {N}&quot;</sys:String>
@@ -420,7 +420,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Print_Landscape">Yatay</sys:String>
     <sys:String x:Key="Str_Print_Scale">Ölçek</sys:String>
     <sys:String x:Key="Str_Print_Fit">Sayfaya Sığdır</sys:String>
-    <sys:String x:Key="Str_Print_Actual">Gerçek boyut (100%)</sys:String>
+    <sys:String x:Key="Str_Print_Actual">Gerçek boyut (%100)</sys:String>
     <sys:String x:Key="Str_Print_Custom">Özel %</sys:String>
     <sys:String x:Key="Str_Print_ScaleHint">Ölçek yüzdesi (örn. 50 veya 50.23)</sys:String>
     <sys:String x:Key="Str_Print_Copies">Kopya</sys:String>
@@ -766,7 +766,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Sidebar_Right">Sağ</sys:String>
     <sys:String x:Key="Str_KS_ToggleSidebar">Kenar çubuğunu aç/kapat</sys:String>
     <sys:String x:Key="Str_KS_ToolbarStyle">Araç çubuğu görünümü</sys:String>
-    <sys:String x:Key="Str_KS_SidebarSide">Kenar çubuğu solda / sağda</sys:String>
+    <sys:String x:Key="Str_KS_SidebarSide">Kenar çubuğunu sola / sağa taşı</sys:String>
     <sys:String x:Key="Str_KS_CycleView">Sonraki görünüm modu</sys:String>
     <sys:String x:Key="Str_TT_ViewMode">Görünüm modu</sys:String>
     <sys:String x:Key="Str_KS_NextTab">Sonraki sekme (Shift: önceki)</sys:String>
@@ -824,7 +824,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Tf_Apply">Uygula</sys:String>
     <sys:String x:Key="Str_Tf_Warn">Bir sayfayı dönüştürmek (döndürmek veya ölçeklemek) onu rasterize eder: sayfa bir görsel olarak yeniden kaydedilir, bu nedenle üzerindeki seçilebilir metin kaybolur. Daha sonra OCR uygulayarak tekrar aranabilir hale getirebilirsiniz.</sys:String>
     <sys:String x:Key="Str_Tf_DontWarn">Beni bir daha uyarma</sys:String>
-    <sys:String x:Key="Str_Tf_Done">{0} sayfa dönüştürüldü</sys:String>
+    <sys:String x:Key="Str_Tf_Done">{0}. sayfa dönüştürüldü</sys:String>
     <sys:String x:Key="Str_Tf_DoneBatch">{0} sayfa dönüştürüldü</sys:String>
     <sys:String x:Key="Str_Tf_NoRender">Sayfa görüntülenemedi - birazdan tekrar deneyin.</sys:String>
     <sys:String x:Key="Str_Tf_Failed">Dönüştürme başarısız: {0}</sys:String>
@@ -839,10 +839,10 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_KS_FullScreen">Tam ekran</sys:String>
     <sys:String x:Key="Str_FullScreen_Hint">Tam ekrandan çıkmak için F11 veya Esc'e basın</sys:String>
     <!-- Quit prompt -->
-    <sys:String x:Key="Str_Dlg_QuitMsg">KillerPDF'den cikilsin mi?</sys:String>
-    <sys:String x:Key="Str_Chk_CloseTabs">Acik sekmelerimi kapat</sys:String>
-    <sys:String x:Key="Str_Btn_Quit">Cik</sys:String>
-    <sys:String x:Key="Str_Btn_CancelDlg">Iptal</sys:String>
+    <sys:String x:Key="Str_Dlg_QuitMsg">KillerPDF'den çıkılsın mı?</sys:String>
+    <sys:String x:Key="Str_Chk_CloseTabs">Açık sekmelerimi kapat</sys:String>
+    <sys:String x:Key="Str_Btn_Quit">Çık</sys:String>
+    <sys:String x:Key="Str_Btn_CancelDlg">İptal</sys:String>
 
 
     <!-- Status-bar + dialog strings (extracted from code) -->

@@ -251,7 +251,7 @@
     <sys:String x:Key="Str_Dlg_InstallTitle">安裝 KillerPDF</sys:String>
     <sys:String x:Key="Str_Dlg_InstallMsg" xml:space="preserve">要將 KillerPDF 安裝到這台電腦嗎？
 
-KillerPDF 將被複製到您的程式資料夾，並新增開始功能表項目。此 EXE 副本會保留在原處，您可以隨時透過新增或移除程式來解除安裝。</sys:String>
+安裝會將應用程式複製到您的程式資料夾以加快啟動速度，並新增開始功能表項目。之後您可以保留或刪除這個可攜檔案。</sys:String>
     <sys:String x:Key="Str_Btn_DoInstall">安裝</sys:String>
     <sys:String x:Key="Str_Btn_DoUpdate">更新</sys:String>
     <sys:String x:Key="Str_Dlg_UpdateUserMsg" xml:space="preserve">更新現有的 KillerPDF 安裝？
@@ -494,13 +494,13 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_InitialView_ActualSize">實際大小</sys:String>
     <sys:String x:Key="Str_InitialView_CustomZoom">自訂縮放</sys:String>
     <sys:String x:Key="Str_InitialView_Invalid">請輸入有效的頁碼，以及 1% 至 6400% 之間的自訂縮放比例。</sys:String>
-    <sys:String x:Key="Str_DocumentTools_Portfolio">PDF 包報告</sys:String>
+    <sys:String x:Key="Str_DocumentTools_Portfolio">PDF 封裝報告</sys:String>
     <sys:String x:Key="Str_DocumentTools_Separations">分色預覽報告</sys:String>
     <sys:String x:Key="Str_DocumentTools_StructuralComparison">結構比較報告</sys:String>
     <sys:String x:Key="Str_DocumentTools_ComparisonNeedsTwo">在每個窗格中開啟一個文件以比較其結構。</sys:String>
     <sys:String x:Key="Str_DocumentTools_InsertToc">插入目錄</sys:String>
     <sys:String x:Key="Str_DocumentTools_DataMerge">資料合併</sys:String>
-    <sys:String x:Key="Str_DocumentTools_EditPortfolio">編輯 PDF 包</sys:String>
+    <sys:String x:Key="Str_DocumentTools_EditPortfolio">編輯 PDF 封裝</sys:String>
     <sys:String x:Key="Str_DocumentTools_EditPortfolioStructure">編輯 PDF 包結構</sys:String>
     <sys:String x:Key="Str_Portfolio_Fields">欄位</sys:String>
     <sys:String x:Key="Str_Portfolio_Sort">排序規則</sys:String>
@@ -523,10 +523,10 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_Portfolio_Prefix">前置詞</sys:String>
     <sys:String x:Key="Str_Portfolio_CustomField">自訂欄位</sys:String>
     <sys:String x:Key="Str_Portfolio_NewFolder">新增資料夾</sys:String>
-    <sys:String x:Key="Str_Portfolio_StructureInvalid">PDF 包欄位必須唯一且有效。排序鍵和附件鍵必須參照這些欄位。資料夾 ID 必須唯一，且每個父層必須出現在其子層之前。</sys:String>
+    <sys:String x:Key="Str_Portfolio_StructureInvalid">PDF 組合欄位必須唯一且有效。排序鍵和附件鍵必須參照這些欄位。資料夾 ID 必須唯一，且每個父層必須出現在其子層之前。</sys:String>
     <sys:String x:Key="Str_Portfolio_StructureUpdated">PDF 包結構已更新</sys:String>
     <sys:String x:Key="Str_Portfolio_StructureFailed">無法更新 PDF 包結構:</sys:String>
-    <sys:String x:Key="Str_Portfolio_View">PDF 包檢視</sys:String>
+    <sys:String x:Key="Str_Portfolio_View">PDF 封裝檢視</sys:String>
     <sys:String x:Key="Str_Portfolio_Details">詳細資料</sys:String>
     <sys:String x:Key="Str_Portfolio_Tile">並排</sys:String>
     <sys:String x:Key="Str_Portfolio_Hidden">隱藏</sys:String>
@@ -748,7 +748,7 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceText">簽名文字</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceDefault">數位簽署者：{name}&#10;日期：{date}&#10;原因：{reason}&#10;位置：{location}</sys:String>
     <sys:String x:Key="Str_Sign_Page">頁次</sys:String>
-    <sys:String x:Key="Str_Sign_Position">職稱</sys:String>
+    <sys:String x:Key="Str_Sign_Position">位置</sys:String>
     <sys:String x:Key="Str_Sign_BottomLeft">下方置左</sys:String>
     <sys:String x:Key="Str_Sign_BottomRight">右下方</sys:String>
     <sys:String x:Key="Str_Sign_TopLeft">上方靠左</sys:String>
@@ -1398,7 +1398,7 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_Divide_Selected">選取的頁面 ({0})</sys:String>
     <sys:String x:Key="Str_Divide_All">所有頁面 ({0})</sys:String>
     <sys:String x:Key="Str_Divide_Apply">分割</sys:String>
-    <sys:String x:Key="Str_Divide_MarkupWarn">要分割頁面上的標記將成為頁面的一部分，之後無法再編輯。仍要分割嗎?</sys:String>
+    <sys:String x:Key="Str_Divide_MarkupWarn">要分割的頁面上的標記將成為頁面的一部分，之後無法再編輯。仍要分割嗎?</sys:String>
     <sys:String x:Key="Str_Divide_Done">已將 {0} 頁分割為 {1} 頁</sys:String>
     <sys:String x:Key="Str_Divide_Failed">無法分割頁面：{0}</sys:String>
     <sys:String x:Key="Str_Pages_RasterizeRegion">點陣化區域...</sys:String>

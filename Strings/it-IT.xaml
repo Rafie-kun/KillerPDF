@@ -132,7 +132,7 @@ La pagina può essere sostituita da un'immagine di sé stessa con le aree contra
     <sys:String x:Key="Str_About_Publisher">EDITORE</sys:String>
     <sys:String x:Key="Str_About_Thumbprint">IMPRONTA CERTIFICATO</sys:String>
     <sys:String x:Key="Str_About_ExeSha">EXE SHA256</sys:String>
-    <sys:String x:Key="Str_About_Computing">Informatica...</sys:String>
+    <sys:String x:Key="Str_About_Computing">Calcolo in corso...</sys:String>
     <sys:String x:Key="Str_Tagline">Un toolkit PDF veloce e gratuito per Windows con strumenti di annotazione, unione, OCR, firma e moduli. Un'utilità GPLv3 da {0}.</sys:String>
 
     <!-- ── Sidebar tabs ──────────────────────────────────────────────── -->
@@ -181,7 +181,7 @@ La pagina può essere sostituita da un'immagine di sé stessa con le aree contra
     <sys:String x:Key="Str_KS_ZoomCursor">Zoom +/- (ancorato al cursore)</sys:String>
     <sys:String x:Key="Str_KS_ZoomInOut">Zoom +/-</sys:String>
     <sys:String x:Key="Str_KS_ResetZoom">Ripristina zoom al 100%</sys:String>
-    <sys:String x:Key="Str_KS_PanView">Vista panoramica</sys:String>
+    <sys:String x:Key="Str_KS_PanView">Sposta vista</sys:String>
     <sys:String x:Key="Str_KS_Editing">MODIFICA</sys:String>
     <sys:String x:Key="Str_KS_Undo">Annulla operazione</sys:String>
     <sys:String x:Key="Str_KS_DeleteAnnot">Elimina annotazione selezionata</sys:String>
@@ -223,7 +223,7 @@ La pagina può essere sostituita da un'immagine di sé stessa con le aree contra
 
     <!-- ── Status messages (format strings - use string.Format) ─────── -->
     <sys:String x:Key="Str_Opened">Aperto {0} - {1} pagine</sys:String>
-    <sys:String x:Key="Str_OpenedReadOnly">Aperto {0} aperto (sola lettura - limitazioni del proprietario) - {1} pagine</sys:String>
+    <sys:String x:Key="Str_OpenedReadOnly">Aperto {0} (sola lettura - limitazioni del proprietario) - {1} pagine</sys:String>
     <sys:String x:Key="Str_Restricted_Notice">Il proprietario di questo PDF limita la modifica, quindi è aperto in sola lettura.</sys:String>
     <sys:String x:Key="Str_Restricted_EnterPassword">Inserisci password proprietario</sys:String>
     <sys:String x:Key="Str_Restricted_Prompt">'{0}' limita la modifica. Inserisci la password del proprietario per modificarlo.</sys:String>
@@ -231,7 +231,7 @@ La pagina può essere sostituita da un'immagine di sé stessa con le aree contra
     <sys:String x:Key="Str_Restricted_Unlocked">{0} sbloccato per la modifica</sys:String>
     <sys:String x:Key="Str_Restricted_WrongPassword">Questa non è la password del proprietario di questo PDF.</sys:String>
     <sys:String x:Key="Str_Restricted_OwnerRequired">'{0}' limita la modifica, quindi KillerPDF richiede la password del proprietario per aprirlo.</sys:String>
-    <sys:String x:Key="Str_OpenedReadOnlyXRef">Aperto {0} aperto (sola lettura - tabella XRef non standard) - {1} pagine</sys:String>
+    <sys:String x:Key="Str_OpenedReadOnlyXRef">Aperto {0} (sola lettura - tabella XRef non standard) - {1} pagine</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">Aperto {0} (copia riparata - salva per mantenere le modifiche) - {1} pagine</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">Aperto {0} (riparazione rasterizzata - salva per mantenere le modifiche) - {1} pagine</sys:String>
     <sys:String x:Key="Str_PageOf">Pagina {0} / {1}</sys:String>
@@ -242,7 +242,7 @@ La pagina può essere sostituita da un'immagine di sé stessa con le aree contra
     <sys:String x:Key="Str_Rotated">{0} pagine ruotate</sys:String>
     <sys:String x:Key="Str_Cropped">{0} pagine ritagliate</sys:String>
     <sys:String x:Key="Str_CropFailed">Ritaglio fallito: {0}</sys:String>
-    <sys:String x:Key="Str_RemovedCrop">Rimuovi CropBox da {0} pagina/e</sys:String>
+    <sys:String x:Key="Str_RemovedCrop">Rimosso CropBox da {0} pagina/e</sys:String>
     <sys:String x:Key="Str_RemoveCropFailed">Rimozione ritaglio fallita: {0}</sys:String>
     <sys:String x:Key="Str_Extracted">Estratte {0} pagine in {1}</sys:String>
     <sys:String x:Key="Str_Deleted">Eliminate {0} pagine - rimanenti {1}</sys:String>
@@ -303,13 +303,13 @@ La pagina può essere sostituita da un'immagine di sé stessa con le aree contra
 Il salvataggio sostituisce il file e ne rimuove la firma. Per conservare il file firmato, annulla e usa Salva come con un altro nome.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveOtherPaneDirty" xml:space="preserve">Anche l'altro riquadro ha "{0}" aperto, con le proprie modifiche non salvate.
 
-Il salvataggio sovrascrive il file e le modifiche andranno perse. se desideri mantenerli salva prima l'altro riquadro.</sys:String>
+Il salvataggio sovrascrive il file e quelle modifiche andranno perse. Se desideri mantenerle, salva prima l'altro riquadro.</sys:String>
     <sys:String x:Key="Str_St_SplitOn">Pannello suddivisione on - F10 per chiudere</sys:String>
     <sys:String x:Key="Str_St_SplitOff">Pannello suddivisione off</sys:String>
     <sys:String x:Key="Str_Dlg_InstallTitle">Installa KillerPDF</sys:String>
     <sys:String x:Key="Str_Dlg_InstallMsg" xml:space="preserve">Vuoi installare KillerPDF in questo computer?
 
-KillerPDF verrà copiato nella cartella dei programmi e verrà aggiunta una voce al menu Start.&#10;Questa copia dell'exe viene lasciata dov'è e puoi disinstallarla in qualsiasi momento tramite Aggiungi/Rimuovi programmi.</sys:String>
+L'installazione copia l'app nella cartella Programmi per un avvio più rapido e aggiunge una voce al menu Start. Dopo puoi tenere o eliminare questo file portatile.</sys:String>
     <sys:String x:Key="Str_Dlg_UpdateMachineMsg" xml:space="preserve">Vuoi aggiornare l'installazione esistente di KillerPDF per tutti gli utenti?
 
 Verrà sostituita la copia in Programmi con la versione multi-file più veloce.&#10;Qualsiasi copia precedente per utente viene rimossa in modo che KillerPDF venga visualizzato solo una volta. Successivamente potrai conservare o eliminare questo file portatile.</sys:String>
@@ -326,12 +326,12 @@ KillerPDF non creerà due copie installate.</sys:String>
     <sys:String x:Key="Str_Status_InstallFailed">L'installazione non è stata completata: KillerPDF è ancora in esecuzione in modo portatile.</sys:String>
     <sys:String x:Key="Str_Dlg_SetDefaultPdfMsg" xml:space="preserve">Vuoi impostare KillerPDF come visualizzatore PDF predefinito?
 
-Apri Impostazioni Windows - App predefinite.</sys:String>
+Verrà aperta la sezione App predefinite nelle Impostazioni di Windows.</sys:String>
     <sys:String x:Key="Str_Dlg_UnsavedClose">Questo file contiene modifiche non salvate. Vuoi salvarle prima di chiuderlo?</sys:String>
     <sys:String x:Key="Str_Dlg_UnsavedExit">Sono presenti modifiche non salvate. Vuoi salvarle prima di chiudere KillerPDF?</sys:String>
-    <sys:String x:Key="Str_Dlg_PageOutOfRange" xml:space="preserve">Questo documento ha {0} pagine di dimensioni superiori a quelle supportate da Adobe Reader (da 3 a 14.400 punti per lato): Adobe le visualizza come pagine vuote.
+    <sys:String x:Key="Str_Dlg_PageOutOfRange" xml:space="preserve">Questo documento ha {0} pagine di dimensioni al di fuori di quelle supportate da Adobe Reader (da 3 a 14.400 punti per lato): Adobe le visualizza come pagine vuote.
 
-Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterranno il loro aspetto e le loro proporzioni..</sys:String>
+Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno il loro aspetto e le loro proporzioni.</sys:String>
     <sys:String x:Key="Str_Dlg_FailedOpen" xml:space="preserve">Impossibile aprire il PDF:
 {0}</sys:String>
     <sys:String x:Key="Str_Dlg_AppTitle">KillerPDF</sys:String>
@@ -367,7 +367,7 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
 
 
     <!-- ── View mode ──────────────────────────────────────────────────── -->
-    <sys:String x:Key="Str_ViewMode">MODO VISUALIZZAIONE</sys:String>
+    <sys:String x:Key="Str_ViewMode">MODO VISUALIZZAZIONE</sys:String>
     <sys:String x:Key="Str_View_Single">Pagina singola</sys:String>
     <sys:String x:Key="Str_View_Continuous">Pagine continue</sys:String>
     <sys:String x:Key="Str_View_TwoPage">Due pagine affiancate</sys:String>
@@ -384,7 +384,7 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_Lbl_Text">Testo</sys:String>
     <sys:String x:Key="Str_Lbl_FormField">Moduli (F)</sys:String>
     <sys:String x:Key="Str_Lbl_Highlight">Evidenza</sys:String>
-    <sys:String x:Key="Str_Lbl_Strike">Ribattuto</sys:String>
+    <sys:String x:Key="Str_Lbl_Strike">Barrato</sys:String>
     <sys:String x:Key="Str_Lbl_Underline">Sottolineato</sys:String>
     <sys:String x:Key="Str_Lbl_Bold">Grassetto</sys:String>
     <sys:String x:Key="Str_Lbl_Italic">Corsivo</sys:String>
@@ -402,7 +402,7 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_Lbl_Open">Apri</sys:String>
     <sys:String x:Key="Str_Lbl_Close">Chiudi</sys:String>
     <sys:String x:Key="Str_Lbl_Save">Salva</sys:String>
-    <sys:String x:Key="Str_Lbl_Flatten">Semplice</sys:String>
+    <sys:String x:Key="Str_Lbl_Flatten">Appiattisci</sys:String>
     <sys:String x:Key="Str_Lbl_Print">Stampa</sys:String>
     <sys:String x:Key="Str_Lbl_Select">Seleziona</sys:String>
     <sys:String x:Key="Str_Lbl_ZoomOut">Zoom -</sys:String>
@@ -428,7 +428,7 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_Ctx_DrawTool">Strumento disegno</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCW">Ruota pagina senso orario</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCCW">Ruota pagina senso anti orario</sys:String>
-    <sys:String x:Key="Str_Ctx_StampNumbers">Stampa numeri pagine...</sys:String>
+    <sys:String x:Key="Str_Ctx_StampNumbers">Applica numeri di pagina...</sys:String>
     <sys:String x:Key="Str_Ctx_DeleteSel">Elimina selezionati</sys:String>
     <sys:String x:Key="Str_Ctx_UndoLast">Annulla ultima operazione</sys:String>
     <sys:String x:Key="Str_Ctx_ClearPage">Azzera annotazione pagina</sys:String>
@@ -451,7 +451,7 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_Ctx_DeletePages">Elimina pagine</sys:String>
 
     <!-- ── Stamp Page Numbers dialog ──────────────────────────────────── -->
-    <sys:String x:Key="Str_Stamp_Title">Stampa numeri pagine</sys:String>
+    <sys:String x:Key="Str_Stamp_Title">Timbra numeri pagine</sys:String>
     <sys:String x:Key="Str_Stamp_StartAt">Inizia da</sys:String>
     <sys:String x:Key="Str_Stamp_Format">Formato</sys:String>
     <sys:String x:Key="Str_Stamp_Hint">Usa {n} per il numero di pagina, {N} per il totale</sys:String>
@@ -459,8 +459,8 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_Stamp_Position">Posizione</sys:String>
     <sys:String x:Key="Str_Stamp_FontSize">Dimensione font (pt)</sys:String>
     <sys:String x:Key="Str_Stamp_Cancel">Annulla</sys:String>
-    <sys:String x:Key="Str_Stamp_Stamp">Stampa</sys:String>
-    <sys:String x:Key="Str_Stamp_Suffix">Stampa pagine</sys:String>
+    <sys:String x:Key="Str_Stamp_Stamp">Timbra</sys:String>
+    <sys:String x:Key="Str_Stamp_Suffix">Timbra pagine</sys:String>
     <sys:String x:Key="Str_Stamp_SecNumbers">Numeri pagine</sys:String>
     <sys:String x:Key="Str_Stamp_SecWatermark">Filigrana</sys:String>
     <sys:String x:Key="Str_Stamp_Color">Colore</sys:String>
@@ -473,9 +473,9 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_Stamp_Angle">Angolo</sys:String>
     <sys:String x:Key="Str_Stamp_Opacity">Opacità</sys:String>
     <sys:String x:Key="Str_Stamp_Mirror">Specchio pagine affiancate (bordo esterno)</sys:String>
-    <sys:String x:Key="Str_Stamp_Applied">Stampate {0} pagine</sys:String>
-    <sys:String x:Key="Str_TT_StampTool">Stampa pagine (S)</sys:String>
-    <sys:String x:Key="Str_Ctx_StampPages">Stampa pagine</sys:String>
+    <sys:String x:Key="Str_Stamp_Applied">Timbrate {0} pagine</sys:String>
+    <sys:String x:Key="Str_TT_StampTool">Timbra pagine (S)</sys:String>
+    <sys:String x:Key="Str_Ctx_StampPages">Timbra pagine</sys:String>
     <sys:String x:Key="Str_Pos_BottomCenter">In basso al centro</sys:String>
     <sys:String x:Key="Str_Pos_BottomRight">In basso a destra</sys:String>
     <sys:String x:Key="Str_Pos_BottomLeft">In basso a sinistra</sys:String>
@@ -488,7 +488,7 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_Print_Rendering">Elaborazione {0} / {1}</sys:String>
     <sys:String x:Key="Str_Print_Printer">Stampante</sys:String>
     <sys:String x:Key="Str_Print_Paper">Formato carta</sys:String>
-    <sys:String x:Key="Str_Print_PaperAuto">Corrispondente documento</sys:String>
+    <sys:String x:Key="Str_Print_PaperAuto">Corrisponde al documento</sys:String>
     <sys:String x:Key="Str_Print_Source">Alimentazione carta</sys:String>
     <sys:String x:Key="Str_Print_SourceAuto">Predefinita stampante</sys:String>
     <sys:String x:Key="Str_Print_Properties">Proprietà stampante...</sys:String>
@@ -503,7 +503,7 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_Print_Fit">Adatta alla pagina</sys:String>
     <sys:String x:Key="Str_Print_Actual">Dimensione attuale (100%)</sys:String>
     <sys:String x:Key="Str_Print_Custom">Personalizzata %</sys:String>
-    <sys:String x:Key="Str_Print_ScaleHint">Percentuale scala (es. 50 or 50.23)</sys:String>
+    <sys:String x:Key="Str_Print_ScaleHint">Percentuale scala (es. 50 o 50.23)</sys:String>
     <sys:String x:Key="Str_Print_Copies">Copie</sys:String>
     <sys:String x:Key="Str_Print_Pages">Pagine</sys:String>
     <sys:String x:Key="Str_Print_PagesHint">es. 1-3,5  (vuoto = tutte)</sys:String>
@@ -712,12 +712,12 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_Status_Imported">Importate {0} immagini - non ancora salvate</sys:String>
     <sys:String x:Key="Str_Err_ImportFailed">Importazione fallita:</sys:String>
     <sys:String x:Key="Str_Err_NoImages">Nessuna immagine può essere letta.</sys:String>
-    <sys:String x:Key="Str_Drop_Prompt">Hai eliminato {0} file. Come vorresti aprirli?</sys:String>
+    <sys:String x:Key="Str_Drop_Prompt">Hai trascinato {0} file. Come vorresti aprirli?</sys:String>
     <sys:String x:Key="Str_Drop_Merge">Unisci i file in un unico file PDF</sys:String>
     <sys:String x:Key="Str_Drop_Separate">Apri i file separatamente</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">Nessun PDF o immagine trovata da aprire.</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">Verranno aperte {0} schede separate. Vuoi continuare?</sys:String>
-    <sys:String x:Key="Str_Drop_TooMany">Questa cartella o archivio contiene {0} file. KillerPDF aprirà solo il primo {1}. Vuoi continuare?</sys:String>
+    <sys:String x:Key="Str_Drop_TooMany">Questa cartella o archivio contiene {0} file. KillerPDF aprirà solo i primi {1}. Vuoi continuare?</sys:String>
     <sys:String x:Key="Str_Status_Merged">Uniti {0} file: non ancora salvati</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Unione file...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">Unione annullata</sys:String>
@@ -751,10 +751,10 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_Ctx_Edit">Modifica</sys:String>
     <sys:String x:Key="Str_Ctx_Raise">Aumenta</sys:String>
     <sys:String x:Key="Str_Ctx_Lower">Diminuisci</sys:String>
-    <sys:String x:Key="Str_Ctx_SelectCover">Seleziona copertina</sys:String>
+    <sys:String x:Key="Str_Ctx_SelectCover">Seleziona copertura</sys:String>
     <sys:String x:Key="Str_Ctx_SelectText">Seleziona testo</sys:String>
-    <sys:String x:Key="Str_Ctx_Unpair">Disaccoppia testo + copertina</sys:String>
-    <sys:String x:Key="Str_Ctx_Group">Gruppo selezionato</sys:String>
+    <sys:String x:Key="Str_Ctx_Unpair">Disaccoppia testo + copertura</sys:String>
+    <sys:String x:Key="Str_Ctx_Group">Raggruppa selezione</sys:String>
     <sys:String x:Key="Str_Ctx_Ungroup">Separa</sys:String>
     <sys:String x:Key="Str_Ctx_RemoveFromGroup">Rimuovi dal gruppo</sys:String>
     <sys:String x:Key="Str_Ctx_Copy">Copia</sys:String>
@@ -848,7 +848,7 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_Sidebar_Left">A sinistra</sys:String>
     <sys:String x:Key="Str_Sidebar_Right">A destra</sys:String>
     <sys:String x:Key="Str_KS_ToggleSidebar">Attiva/disattiva barra laterale</sys:String>
-    <sys:String x:Key="Str_KS_ToolbarStyle">Attiva/disattiva apparenza</sys:String>
+    <sys:String x:Key="Str_KS_ToolbarStyle">Aspetto della barra strumenti</sys:String>
     <sys:String x:Key="Str_KS_SidebarSide">Sposta barra laterale sinistra / destra</sys:String>
     <sys:String x:Key="Str_KS_CycleView">Cambia modalità visualizzazione</sys:String>
     <sys:String x:Key="Str_TT_ViewMode">Modalità visualizzazione</sys:String>
@@ -869,7 +869,7 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_Tf_Suffix">Trasforma</sys:String>
     <sys:String x:Key="Str_Tf_Rotate">RUOTA</sys:String>
     <sys:String x:Key="Str_Tf_Scale">RIDIMENSIONA</sys:String>
-    <sys:String x:Key="Str_Tf_Flip">RIEMPI</sys:String>
+    <sys:String x:Key="Str_Tf_Flip">RIBALTA</sys:String>
     <sys:String x:Key="Str_Tf_Skew">INCLINAZIONE</sys:String>
     <sys:String x:Key="Str_Tf_Angle">Angolo</sys:String>
     <sys:String x:Key="Str_Tf_Size">Dimensione</sys:String>
@@ -920,7 +920,7 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <!-- View-mode + full-screen shortcuts -->
     <sys:String x:Key="Str_KS_View">VISUALIZZA</sys:String>
     <sys:String x:Key="Str_KS_FullScreen">Schermo pieno</sys:String>
-    <sys:String x:Key="Str_FullScreen_Hint">Per uscire dallo schermo pieno premi F11</sys:String>
+    <sys:String x:Key="Str_FullScreen_Hint">Per uscire dallo schermo intero premi F11 o Esc</sys:String>
     <!-- Quit prompt (family standard) -->
     <sys:String x:Key="Str_Dlg_QuitMsg">Vuoi uscire da KillerPDF?</sys:String>
     <sys:String x:Key="Str_Chk_CloseTabs">Chiudi le schede aperte</sys:String>
@@ -930,7 +930,7 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
 
     <!-- Status-bar messages (extracted from code) -->
     <sys:String x:Key="Str_St_DataCleared">Tutti i dati KillerPDF sono stati cancellati</sys:String>
-    <sys:String x:Key="Str_St_OcrRegionCanceled">Regione OCR cancellata</sys:String>
+    <sys:String x:Key="Str_St_OcrRegionCanceled">Regione OCR annullata</sys:String>
     <sys:String x:Key="Str_St_Erased">Cancellata</sys:String>
     <sys:String x:Key="Str_St_Ungrouped">Separati</sys:String>
     <sys:String x:Key="Str_St_RemovedFromGroup">Rimosso dal gruppo</sys:String>
@@ -967,7 +967,7 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_St_SignatureSaved">Firma salvata: fai clic sulla pagina per posizionarla</sys:String>
     <sys:String x:Key="Str_St_ImageLoaded">Immagine caricata: fai clic sulla pagina per posizionarla</sys:String>
     <sys:String x:Key="Str_St_EditingText">Modifica testo: modifica dimensione/colore sopra, 'Invio' per salvare</sys:String>
-    <sys:String x:Key="Str_St_AlreadyEditHere">C'è già una modifica: fai clic sul testo per modificarlo nuovamente o trascina la copertina</sys:String>
+    <sys:String x:Key="Str_St_AlreadyEditHere">C'è già una modifica: fai clic sul testo per modificarlo nuovamente o trascina la copertura</sys:String>
     <sys:String x:Key="Str_St_NoTextLine">Nessuna riga testo trovata in questa posizione</sys:String>
     <sys:String x:Key="Str_St_LineAlreadyEdited">Questa riga è già stata modificata: fai clic sul testo per modificarlo</sys:String>
     <sys:String x:Key="Str_St_ImagePlaced">Immagine posizionata: trascina per riposizionare, usa l'angolo della maniglia per ridimensionare</sys:String>
@@ -1141,8 +1141,8 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_Sign_BadCert" xml:space="preserve">Impossibile aprire il certificato.&#10;&#10;La password potrebbe non essere corretta oppure il file non è un certificato .pfx / .p12 valido.</sys:String>
     <sys:String x:Key="Str_Sign_CertLoadFailed">Impossibile caricare il certificato:</sys:String>
     <sys:String x:Key="Str_Sign_Failed">Firma non riuscita:</sys:String>
-    <sys:String x:Key="Str_St_ShapeHint">Fai clic per aggiungere punti: fai clic sul primo punto o fai doppio clic per chiudere, 'Esc' per annullare, 'Backspace' per rimuove l'ultimo punto</sys:String>
-    <sys:String x:Key="Str_St_ShapeCanceled">Forma cancellata</sys:String>
+    <sys:String x:Key="Str_St_ShapeHint">Fai clic per aggiungere punti: fai clic sul primo punto o fai doppio clic per chiudere, 'Esc' per annullare, 'Backspace' per rimuovere l'ultimo punto</sys:String>
+    <sys:String x:Key="Str_St_ShapeCanceled">Forma annullata</sys:String>
 
     <!-- Error-dialog prefixes (code appends the exception detail after a newline) -->
     <sys:String x:Key="Str_Err_PrintFailed">Stampa fallita:</sys:String>
@@ -1228,7 +1228,7 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_St_FlattenedSaved">PDF appiattito salvato in {0}</sys:String>
     <sys:String x:Key="Str_St_OcrLanguage">Lingua OCR: {0}</sys:String>
     <sys:String x:Key="Str_St_LangInstalled">{0} installati - lingua OCR: {1}</sys:String>
-    <sys:String x:Key="Str_St_LangCanceled">{0} download annullati</sys:String>
+    <sys:String x:Key="Str_St_LangCanceled">Download di {0} annullato</sys:String>
     <sys:String x:Key="Str_St_HqFailed">Modelli alta qualità installati; fallito: {0}</sys:String>
     <sys:String x:Key="Str_St_HqInstalled">Modelli alta qualità installati per: {0}</sys:String>
     <sys:String x:Key="Str_St_InsertedBlank">Pagina vuota inserita nella posizione {0}</sys:String>
@@ -1239,7 +1239,7 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_Annot_Signature">Firma</sys:String>
     <sys:String x:Key="Str_Annot_Image">Immagine</sys:String>
     <sys:String x:Key="Str_Annot_TextBox">Riquadro testo</sys:String>
-    <sys:String x:Key="Str_Annot_Cover">Copertina testo</sys:String>
+    <sys:String x:Key="Str_Annot_Cover">Copertura testo</sys:String>
     <sys:String x:Key="Str_Annot_Strikethrough">Barrato</sys:String>
     <sys:String x:Key="Str_Annot_Underline">Sottolineato</sys:String>
     <sys:String x:Key="Str_Annot_Highlight">Evidenziato</sys:String>
@@ -1267,10 +1267,10 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_Bar_More">Altre impostazioni</sys:String>
     <sys:String x:Key="Str_Bar_TT_Level">Mantieni la linea sull'asse più vicino (orizzontale o verticale)</sys:String>
     <sys:String x:Key="Str_Bar_TT_EraserBox">Trascina una casella per eliminare ogni annotazione al suo interno</sys:String>
-    <sys:String x:Key="Str_Bar_TT_EraserBrush">Scorri le annotazioni per eliminarle</sys:String>
+    <sys:String x:Key="Str_Bar_TT_EraserBrush">Passa il pennello sulle annotazioni per eliminarle</sys:String>
     <sys:String x:Key="Str_Bar_TT_ShapeBox">Riquadro: trascina un rettangolo</sys:String>
     <sys:String x:Key="Str_Bar_TT_ShapeEllipse">Ellisse: trascina un ovale</sys:String>
-    <sys:String x:Key="Str_Bar_TT_ShapeFreeform">A mano libera: punti clic; fai clic sul primo punto o fai doppio clic per chiudere, 'Esc' per annullare, 'Backspace' per rimuovere l'ultimo punto</sys:String>
+    <sys:String x:Key="Str_Bar_TT_ShapeFreeform">A mano libera: fai clic per aggiungere punti; fai clic sul primo punto o fai doppio clic per chiudere, 'Esc' per annullare, 'Backspace' per rimuovere l'ultimo punto</sys:String>
     <sys:String x:Key="Str_Bar_TT_ShapeFill">Riempi l'interno della forma</sys:String>
     <sys:String x:Key="Str_TT_RecentFiles">File recenti</sys:String>
     <sys:String x:Key="Str_TT_SaveOptions">Opzioni salvataggio</sys:String>
@@ -1299,10 +1299,10 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_St_PlaceInitials">Clic sulla pagina per inserire le iniziali</sys:String>
     <sys:String x:Key="Str_St_SelectionCleared">Selezione cancellata</sys:String>
     <sys:String x:Key="Str_St_AnnotationsSelected">{0} annotazioni selezionate - premi 'Canc' per rimuoverle</sys:String>
-    <sys:String x:Key="Str_St_CopiedAnnotationOne">Copiato 1 annotazione</sys:String>
+    <sys:String x:Key="Str_St_CopiedAnnotationOne">Copiata 1 annotazione</sys:String>
     <sys:String x:Key="Str_St_CopiedAnnotationMany">Copiate {0} annotazioni</sys:String>
     <sys:String x:Key="Str_St_PastedAnnotationOne">Incollata 1 annotazione</sys:String>
-    <sys:String x:Key="Str_St_PastedAnnotationMany">Copiate {0} annotazioni</sys:String>
+    <sys:String x:Key="Str_St_PastedAnnotationMany">Incollate {0} annotazioni</sys:String>
     <sys:String x:Key="Str_St_DeletedAnnotationOne">Eliminata 1 annotazione</sys:String>
     <sys:String x:Key="Str_St_DeletedAnnotationMany">Eliminate {0} annotazioni</sys:String>
     <sys:String x:Key="Str_Search_NoMatches">Nessuna corrispondenza</sys:String>
@@ -1322,7 +1322,7 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_Replace_Done">Corrispondenze sostituite: {0}</sys:String>
     <sys:String x:Key="Str_Replace_None">Niente da sostituire</sys:String>
     <sys:String x:Key="Str_Replace_SkippedTurned">Testo ruotato ignorato: {0}</sys:String>
-    <sys:String x:Key="Str_Busy_FlattenPage">Semplificazione pagina {0} / {1}...</sys:String>
+    <sys:String x:Key="Str_Busy_FlattenPage">Appiattimento pagina {0} / {1}...</sys:String>
     <sys:String x:Key="Str_Busy_ExportPage">Esportazione pagina {0} / {1}...</sys:String>
     <sys:String x:Key="Str_Busy_CancelHint">(Esc per annullare)</sys:String>
     <sys:String x:Key="Str_Busy_DownloadingMany">Download {0} - {1} / {2} -</sys:String>

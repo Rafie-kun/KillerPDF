@@ -836,7 +836,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Sign_TopRight">Phải trên</sys:String>
     <sys:String x:Key="Str_Sign_Width">Chiều rộng</sys:String>
     <sys:String x:Key="Str_Sign_Height">Chiều cao</sys:String>
-    <sys:String x:Key="Str_Sign_FontSize">Kỡ chữ</sys:String>
+    <sys:String x:Key="Str_Sign_FontSize">Cỡ chữ</sys:String>
     <sys:String x:Key="Str_Sign_PreviewSigner">Chủ sở hữu chứng chỉ</sys:String>
     <sys:String x:Key="Str_Sign_BadAppearance">Kiểm tra lại trang chữ ký, kích thước và cỡ chữ.</sys:String>
     <sys:String x:Key="Str_Sign_SaveAs">Lưu bản đã ký thành</sys:String>
@@ -1355,7 +1355,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
 
     <!-- ── Từ chối chuyển giao trình duyệt ────────────────────────────────────── -->
     <sys:String x:Key="Str_Handoff_Failed">KillerPDF không thể mở tệp PDF trên trình duyệt.</sys:String>
-    <sys:String x:Key="Str_Handoff_UnknownCommand">Lệnh trình duyệt đó không có trong cơ sở dữ liệu của KillerPDF.</sys:String>
+    <sys:String x:Key="Str_Handoff_UnknownCommand">KillerPDF không nhận ra lệnh trình duyệt đó.</sys:String>
     <sys:String x:Key="Str_Handoff_MissingUrl">Quá trình chuyển đổi không bao gồm địa chỉ PDF.</sys:String>
     <sys:String x:Key="Str_Handoff_MalformedUrl">Không thể đọc địa chỉ PDF trong quá trình chuyển đổi.</sys:String>
     <sys:String x:Key="Str_Handoff_SchemeNotAllowed">KillerPDF chỉ mở các thao tác chuyển đổi trên trình duyệt qua giao thức https.</sys:String>

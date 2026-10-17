@@ -29,7 +29,7 @@
     <sys:String x:Key="Str_TT_FormFieldTool">可填写文本字段 - 创建、选择、移动、调整大小或删除字段；右键单击可更改填充颜色 (F)</sys:String>
     <sys:String x:Key="Str_TT_HighlightTool">高亮笔工具 - 拖曳以高亮标记 (H)</sys:String>
     <sys:String x:Key="Str_TT_StrikeTool">删除线 - 拖曳划过文本</sys:String>
-    <sys:String x:Key="Str_TT_UnderlineTool">底线 - 拖曳划过文本</sys:String>
+    <sys:String x:Key="Str_TT_UnderlineTool">下划线 - 拖曳划过文本</sys:String>
     <sys:String x:Key="Str_TT_DrawTool">绘图工具 - 自由手绘 (D)</sys:String>
     <sys:String x:Key="Str_TT_ShapeTool">形状 - 矩形、椭圆或自由多边形</sys:String>
     <sys:String x:Key="Str_TT_SignatureTool">签名 - 创建并放置签名 (G)</sys:String>
@@ -114,7 +114,7 @@
     <sys:String x:Key="Str_RedactFind_Mark">标记已勾选项</sys:String>
     <sys:String x:Key="Str_RedactFind_Hint">已勾选的结果会在页面上标记。在涂黑栏上单击“涂黑”之前，不会删除任何内容。</sys:String>
     <sys:String x:Key="Str_TT_ClearAnnotations">清除所有注释</sys:String>
-    <sys:String x:Key="Str_TT_UndoLast">复原上一步 (Ctrl+Z)</sys:String>
+    <sys:String x:Key="Str_TT_UndoLast">撤销上一步 (Ctrl+Z)</sys:String>
     <sys:String x:Key="Str_TT_MultiPageGrid">多页网格视图 (F8)</sys:String>
     <sys:String x:Key="Str_TT_ZoomOut">缩小 (Ctrl+-)</sys:String>
     <sys:String x:Key="Str_TT_ZoomLevel">缩放比例 (Ctrl+滚轮 · Ctrl++/- · Ctrl+0=重设)</sys:String>
@@ -122,7 +122,7 @@
     <sys:String x:Key="Str_TT_GoToPage">前往页面（按 Enter 导航）</sys:String>
     <sys:String x:Key="Str_TT_CollapseSidebar">折叠侧边栏 (F9)</sys:String>
     <sys:String x:Key="Str_TT_ExpandSidebar">展开侧边栏 (F9)</sys:String>
-    <sys:String x:Key="Str_TT_KeyboardShortcuts">键盘快速键 (F1)</sys:String>
+    <sys:String x:Key="Str_TT_KeyboardShortcuts">键盘快捷键 (F1)</sys:String>
     <sys:String x:Key="Str_TT_About">关于 KillerPDF (F12)</sys:String>
 
     <!-- ── About overlay ─────────────────────────────────────────────── -->
@@ -155,10 +155,10 @@
     <sys:String x:Key="Str_St_ToolbarShown">已显示工具栏</sys:String>
     <sys:String x:Key="Str_Lang_English">English</sys:String>
     <sys:String x:Key="Str_Lang_Spanish">Español</sys:String>
-    <sys:String x:Key="Str_Lang_Chinese">中文 (简体)</sys:String>
+    <sys:String x:Key="Str_Lang_Chinese">中文 (繁體)</sys:String>
 
     <!-- ── Keyboard shortcuts overlay ───────────────────────────────── -->
-    <sys:String x:Key="Str_KS_Title">键盘快速键</sys:String>
+    <sys:String x:Key="Str_KS_Title">键盘快捷键</sys:String>
     <sys:String x:Key="Str_KS_FormField">可填写文本字段</sys:String>
     <sys:String x:Key="Str_KS_NextShape">下一个形状类型</sys:String>
     <sys:String x:Key="Str_ToolSearch">搜索工具</sys:String>
@@ -179,7 +179,7 @@
     <sys:String x:Key="Str_KS_ResetZoom">重设缩放至 100%</sys:String>
     <sys:String x:Key="Str_KS_PanView">平移查看</sys:String>
     <sys:String x:Key="Str_KS_Editing">编辑</sys:String>
-    <sys:String x:Key="Str_KS_Undo">复原</sys:String>
+    <sys:String x:Key="Str_KS_Undo">撤销</sys:String>
     <sys:String x:Key="Str_KS_DeleteAnnot">删除选取的注释</sys:String>
     <sys:String x:Key="Str_KS_ConfirmCancel">确认 / 取消文本或裁切</sys:String>
     <sys:String x:Key="Str_KS_SearchSelect">搜索与选取</sys:String>
@@ -189,7 +189,7 @@
     <sys:String x:Key="Str_KS_SelectAll">选取页面上所有文本</sys:String>
     <sys:String x:Key="Str_KS_CopyText">复制选取的文本</sys:String>
     <sys:String x:Key="Str_KS_Help">说明</sys:String>
-    <sys:String x:Key="Str_KS_ThisList">此快速键清单</sys:String>
+    <sys:String x:Key="Str_KS_ThisList">此快捷键列表</sys:String>
     <sys:String x:Key="Str_KS_About">关于对话框</sys:String>
     <sys:String x:Key="Str_KS_DocInfo">文档信息</sys:String>
     <sys:String x:Key="Str_KS_OnlineHelp">完整指南和在线教程</sys:String>
@@ -249,7 +249,7 @@
     <sys:String x:Key="Str_Dlg_InstallTitle">安装 KillerPDF</sys:String>
     <sys:String x:Key="Str_Dlg_InstallMsg" xml:space="preserve">要将 KillerPDF 安装到这台电脑吗？
 
-KillerPDF 将被复制到您的程序文件夹，并添加开始菜单项。此 EXE 副本会保留在原处，您可以随时通过添加或删除程序来卸载。</sys:String>
+安装会将应用复制到您的程序文件夹以加快启动速度，并添加开始菜单项。之后您可以保留或删除这个便携文件。</sys:String>
     <sys:String x:Key="Str_Btn_DoInstall">安装</sys:String>
     <sys:String x:Key="Str_Btn_DoUpdate">更新</sys:String>
     <sys:String x:Key="Str_Dlg_UpdateUserMsg" xml:space="preserve">更新现有的 KillerPDF 安装？
@@ -334,7 +334,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Lbl_Measure">测量</sys:String>
     <sys:String x:Key="Str_Lbl_Image">加入图片</sys:String>
     <sys:String x:Key="Str_Lbl_Signature">签名</sys:String>
-    <sys:String x:Key="Str_Lbl_Undo">复原</sys:String>
+    <sys:String x:Key="Str_Lbl_Undo">撤销</sys:String>
     <sys:String x:Key="Str_Lbl_Clear">清除注释</sys:String>
     <sys:String x:Key="Str_Lbl_New">添加</sys:String>
     <sys:String x:Key="Str_Lbl_Open">打开</sys:String>
@@ -357,7 +357,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCCW">逆时针旋转页面</sys:String>
     <sys:String x:Key="Str_Ctx_StampNumbers">标记页码...</sys:String>
     <sys:String x:Key="Str_Ctx_DeleteSel">删除选取</sys:String>
-    <sys:String x:Key="Str_Ctx_UndoLast">复原上一步</sys:String>
+    <sys:String x:Key="Str_Ctx_UndoLast">撤销上一步</sys:String>
     <sys:String x:Key="Str_Ctx_ClearPage">清除页面注释</sys:String>
     <sys:String x:Key="Str_Ctx_InsertBlank">在后方插入空白页</sys:String>
     <sys:String x:Key="Str_Ctx_RotateCWShort">顺时针旋转</sys:String>
@@ -404,10 +404,10 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Ctx_StampPages">盖章页面</sys:String>
     <sys:String x:Key="Str_Stamp_Cancel">取消</sys:String>
     <sys:String x:Key="Str_Stamp_Stamp">套用</sys:String>
-    <sys:String x:Key="Str_Pos_BottomCenter">底部置中</sys:String>
+    <sys:String x:Key="Str_Pos_BottomCenter">底部居中</sys:String>
     <sys:String x:Key="Str_Pos_BottomRight">右下</sys:String>
     <sys:String x:Key="Str_Pos_BottomLeft">左下</sys:String>
-    <sys:String x:Key="Str_Pos_TopCenter">顶部置中</sys:String>
+    <sys:String x:Key="Str_Pos_TopCenter">顶部居中</sys:String>
     <sys:String x:Key="Str_Pos_TopRight">右上</sys:String>
     <sys:String x:Key="Str_Pos_TopLeft">左上</sys:String>
 
@@ -416,18 +416,18 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Print_Rendering">正在渲染 {0} / {1}</sys:String>
     <sys:String x:Key="Str_Print_Printer">打印机</sys:String>
     <sys:String x:Key="Str_Print_Orientation">方向</sys:String>
-    <sys:String x:Key="Str_Print_Portrait">直向</sys:String>
+    <sys:String x:Key="Str_Print_Portrait">纵向</sys:String>
     <sys:String x:Key="Str_Print_Landscape">横向</sys:String>
     <sys:String x:Key="Str_Print_Scale">缩放</sys:String>
     <sys:String x:Key="Str_Print_Fit">符合页面</sys:String>
     <sys:String x:Key="Str_Print_Actual">实际大小 (100%)</sys:String>
-    <sys:String x:Key="Str_Print_Custom">自订 %</sys:String>
+    <sys:String x:Key="Str_Print_Custom">自定义 %</sys:String>
     <sys:String x:Key="Str_Print_ScaleHint">缩放百分比（例如 50 或 50.23）</sys:String>
     <sys:String x:Key="Str_Print_Copies">份数</sys:String>
     <sys:String x:Key="Str_Print_Pages">页面</sys:String>
     <sys:String x:Key="Str_Print_PagesHint">例如 1-3,5（空白 = 全部）</sys:String>
     <sys:String x:Key="Str_Print_NoPages">无页面</sys:String>
-    <sys:String x:Key="Str_Print_Margins">边界</sys:String>
+    <sys:String x:Key="Str_Print_Margins">页边距</sys:String>
     <sys:String x:Key="Str_Margin_None">无</sys:String>
     <sys:String x:Key="Str_Margin_Narrow">窄</sys:String>
     <sys:String x:Key="Str_Margin_Normal">标准</sys:String>
@@ -436,7 +436,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Print_TwoSided">双面打印</sys:String>
     <sys:String x:Key="Str_Print_Color">彩色</sys:String>
     <sys:String x:Key="Str_Print_BW">黑白</sys:String>
-    <sys:String x:Key="Str_Pos_Center">置中</sys:String>
+    <sys:String x:Key="Str_Pos_Center">居中</sys:String>
     <sys:String x:Key="Str_Pos_Top">顶部</sys:String>
     <sys:String x:Key="Str_Pos_Bottom">底部</sys:String>
     <sys:String x:Key="Str_Pos_Left">靠左</sys:String>
@@ -752,7 +752,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Sign_TopLeft">左上角</sys:String>
     <sys:String x:Key="Str_Sign_TopRight">右上</sys:String>
     <sys:String x:Key="Str_Sign_Width">宽度</sys:String>
-    <sys:String x:Key="Str_Sign_Height">飞行高度</sys:String>
+    <sys:String x:Key="Str_Sign_Height">高度</sys:String>
     <sys:String x:Key="Str_Sign_FontSize">文字大小</sys:String>
     <sys:String x:Key="Str_Sign_PreviewSigner">证书持有者</sys:String>
     <sys:String x:Key="Str_Sign_BadAppearance">请检查签名的页面、尺寸和文本大小。</sys:String>
@@ -1459,8 +1459,8 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Link_GoToPage">转到第 {0} 页</sys:String>
     <sys:String x:Key="Str_Measurement_Unavailable">测量不可用</sys:String>
     <sys:String x:Key="Str_Repair_Unrecoverable" xml:space="preserve">修复失败 - 文件损坏过于严重，无法恢复。&#10;&#10;请尝试使用其他应用程序 (Adobe Acrobat 或浏览器) 打开原始文件，这些应用程序可能提供其他恢复选项。</sys:String>
-    <sys:String x:Key="Str_KS_Enabled">启用键盘快速键</sys:String>
-    <sys:String x:Key="Str_KS_Toggle">启用或禁用键盘快速键</sys:String>
+    <sys:String x:Key="Str_KS_Enabled">启用键盘快捷键</sys:String>
+    <sys:String x:Key="Str_KS_Toggle">启用或禁用键盘快捷键</sys:String>
     <sys:String x:Key="Str_KS_Customize">自定义快捷键...</sys:String>
     <sys:String x:Key="Str_KS_CustomizeTitle">自定义快捷键</sys:String>
     <sys:String x:Key="Str_KS_CustomizeHint">点击要更改的按键，然后按下新的按键。按 Esc 取消更改。</sys:String>
@@ -1470,9 +1470,9 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_KS_Reset">重置</sys:String>
     <sys:String x:Key="Str_KS_ResetTT">恢复原来的按键</sys:String>
     <sys:String x:Key="Str_KS_ResetAll">全部重置</sys:String>
-    <sys:String x:Key="Str_KS_ToggleTip">启用或禁用应用的所有快速键。Ctrl+Shift+K 始终有效。</sys:String>
-    <sys:String x:Key="Str_KS_EnabledStatus">键盘快速键已启用</sys:String>
-    <sys:String x:Key="Str_KS_DisabledStatus">键盘快速键已禁用。按 Ctrl+Shift+K 可启用。</sys:String>
+    <sys:String x:Key="Str_KS_ToggleTip">启用或禁用应用的所有快捷键。Ctrl+Shift+K 始终有效。</sys:String>
+    <sys:String x:Key="Str_KS_EnabledStatus">键盘快捷键已启用</sys:String>
+    <sys:String x:Key="Str_KS_DisabledStatus">键盘快捷键已禁用。按 Ctrl+Shift+K 可启用。</sys:String>
     <sys:String x:Key="Str_StartupUpdateCheck">启动时检查更新</sys:String>
     <sys:String x:Key="Str_StartupUpdatePrompt" xml:space="preserve">KillerPDF {0} 已发布。是否立即下载并安装？&#10;&#10;应用将关闭并自动重新打开。</sys:String>
     <sys:String x:Key="Str_AlwaysCheckOnStartup">启动时始终检查更新</sys:String>

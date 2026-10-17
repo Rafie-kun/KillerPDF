@@ -309,7 +309,7 @@ A mentés most felülírja a fájlt, és azok a módosítások elvesznek. Előbb
     <sys:String x:Key="Str_Dlg_InstallTitle">KillerPDF telepítése</sys:String>
     <sys:String x:Key="Str_Dlg_InstallMsg" xml:space="preserve">Telepíti a KillerPDF-et erre a számítógépre?
 
-A KillerPDF a programok mappájába másolódik, és bekerül a Start menübe. Ez az exe-példány a helyén marad, és bármikor eltávolíthatja a Programok telepítése/törlése segítségével.</sys:String>
+A telepítés a gyorsabb indítás érdekében a Programok mappába másolja az alkalmazást, és hozzáad egy Start menü bejegyzést. Ezt a hordozható fájlt utána megtarthatja vagy törölheti.</sys:String>
     <sys:String x:Key="Str_Btn_DoInstall">Telepítés</sys:String>
     <sys:String x:Key="Str_Btn_DoUpdate">Frissítés</sys:String>
     <sys:String x:Key="Str_Dlg_UpdateUserMsg" xml:space="preserve">Frissíti a meglévő KillerPDF-telepítést?
@@ -342,7 +342,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
 
     <!-- ── Theme names ────────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Theme_Dark">Sötét</sys:String>
-    <sys:String x:Key="Str_Theme_Light">Fény</sys:String>
+    <sys:String x:Key="Str_Theme_Light">Világos</sys:String>
     <sys:String x:Key="Str_Theme_Black">Fekete</sys:String>
     <sys:String x:Key="Str_Theme_Blood">Vér</sys:String>
     <sys:String x:Key="Str_Theme_Greed">Kapzsiság</sys:String>
@@ -829,7 +829,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Sign_AppearanceText">Aláírás szövege</sys:String>
     <sys:String x:Key="Str_Sign_AppearanceDefault">Digitálisan aláírta: {name}&#10;Dátum: {date}&#10;Indok: {reason}&#10;Hely: {location}</sys:String>
     <sys:String x:Key="Str_Sign_Page">Oldal</sys:String>
-    <sys:String x:Key="Str_Sign_Position">Sorszám</sys:String>
+    <sys:String x:Key="Str_Sign_Position">Pozíció</sys:String>
     <sys:String x:Key="Str_Sign_BottomLeft">Alul balra</sys:String>
     <sys:String x:Key="Str_Sign_BottomRight">Alul jobbra</sys:String>
     <sys:String x:Key="Str_Sign_TopLeft">Fent balra</sys:String>
@@ -1002,7 +1002,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Bm_DeleteMulti">Töröl {0} könyvjelzőt?</sys:String>
     <sys:String x:Key="Str_Bm_DeleteAllConfirm">Eltávolítja az összes könyvjelzőt ebből a dokumentumból?</sys:String>
 
-    <sys:String x:Key="Str_Ctx_Redo">Mégis</sys:String>
+    <sys:String x:Key="Str_Ctx_Redo">Újra</sys:String>
     <sys:String x:Key="Str_St_Redone">Újra végrehajtva</sys:String>
     <sys:String x:Key="Str_St_NothingToRedo">Nincs mit újra végrehajtani</sys:String>
     <sys:String x:Key="Str_KS_FirstLast">Első / utolsó oldal</sys:String>
@@ -1215,7 +1215,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_St_Saved">Mentve - {0}</sys:String>
     <sys:String x:Key="Str_St_SavedWithAnnots">Jegyzetekkel mentve ide: {0}</sys:String>
     <sys:String x:Key="Str_St_SavedTo">Mentve ide: {0}</sys:String>
-    <sys:String x:Key="Str_St_FlattenedSaved">Egyesített PDF mentve ide: {0}</sys:String>
+    <sys:String x:Key="Str_St_FlattenedSaved">Lapított PDF mentve ide: {0}</sys:String>
     <sys:String x:Key="Str_St_OcrLanguage">OCR-nyelv: {0}</sys:String>
     <sys:String x:Key="Str_St_LangInstalled">{0} telepítve - OCR-nyelv: {1}</sys:String>
     <sys:String x:Key="Str_St_LangCanceled">A(z) {0} letöltése megszakítva</sys:String>
@@ -1309,7 +1309,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Replace_Done">Lecserélt találatok: {0}</sys:String>
     <sys:String x:Key="Str_Replace_None">Nincs mit cserélni</sys:String>
     <sys:String x:Key="Str_Replace_SkippedTurned">Kihagyott elforgatott szöveg: {0}</sys:String>
-    <sys:String x:Key="Str_Busy_FlattenPage">{0}. / {1} oldal egyesítése...</sys:String>
+    <sys:String x:Key="Str_Busy_FlattenPage">{0}. / {1} oldal lapítása...</sys:String>
     <sys:String x:Key="Str_Busy_ExportPage">{0}. / {1} oldal exportálása...</sys:String>
     <sys:String x:Key="Str_Busy_CancelHint">(Esc megszakítja)</sys:String>
     <sys:String x:Key="Str_Busy_DownloadingMany">{0} letöltése - {1} / {2} -</sys:String>

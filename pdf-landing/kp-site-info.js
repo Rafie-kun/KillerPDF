@@ -71,7 +71,7 @@
     "Den portable utgaven lagrer innstillinger, signaturer og OCR-modeller i <code>KillerPDF-Data</code> ved siden av startprogrammet. Native OCR-biblioteker og midlertidige arbeidsfiler bruker fortsatt <code>%LOCALAPPDATA%\\KillerPDF</code>.",
     "Alle OCR-språkmodeller, også engelsk, lastes ned ved første bruk og blir lagret i hurtigbufferen. Native Tesseract-biblioteker pakkes ut i versjonens OCR-hurtigbuffer.",
     "Slett alle data fjerner innstillinger, OCR-modeller og midlertidige filer når det er mulig. Låste filer kan bli igjen. Den installerte utgaven beholder signaturer og logger; den portable fjerner også <code>KillerPDF-Data</code>. De opprinnelige PDF-filene slettes ikke.",
-    "Strukturelle endringer skriver og åpner en midlertidig PDF med The KillerPDF.Engine. Siderotasjoner og ventende merknader gjenopprettes ved behov. Originalen endres først når du lagrer.",
+    "Strukturelle endringer skriver en midlertidig PDF med The KillerPDF.Engine og åpner den på nytt. Siderotasjoner og ventende merknader gjenopprettes ved behov. Originalen endres først når du lagrer.",
     "Merknadsposisjoner bruker render-dim-enheter som er stabile ved zoom, med utgangspunkt øverst til venstre. PDF-koordinater omregnes ved lesing eller skriving og deles mellom alle visningsmoduser.",
     "Historisk standardvalidering",
     "Antall kildefiler og tester står i Oversikt. Corpus-resultatene viser testet bygg og inndata. qpdf, veraPDF og OpenSSL kontrollerer struktur, standarder og signaturer hver for seg.",
@@ -292,7 +292,7 @@
     strings.pt_144 = '<code>Ctrl+</code> / <code>Ctrl-</code>: ' + strings.pt_144;
     strings.ph_55 = coverCopy[language] || coverCopy.en;
     strings.pt_53 = strings.ph_238;
-    strings.ph_46 = strings.ph_46.replace(/<code>Enter<\/code>/g, '<code>Ctrl+Enter</code>');
+    if (strings.ph_46.indexOf('<code>Ctrl+Enter</code>') < 0) strings.ph_46 = strings.ph_46.replace(/<code>Enter<\/code>/g, '<code>Ctrl+Enter</code>');
     strings.ph_317 = strings.ph_317.replace(/KillerPDF\.exe/g, 'KillerPDF.App.exe');
     Object.keys(strings).forEach(function (key) {
       if (/^ph_/.test(key) && typeof strings[key] === 'string') {

@@ -309,7 +309,7 @@ Uložením se soubor přepíše a tyto změny budou ztraceny. Pokud si je chcete
     <sys:String x:Key="Str_Dlg_InstallTitle">Nainstalovat KillerPDF</sys:String>
     <sys:String x:Key="Str_Dlg_InstallMsg" xml:space="preserve">Nainstalovat KillerPDF do tohoto počítače?
 
-KillerPDF se zkopíruje do vaší složky programů a v nabídce Start se vytvoří zástupce. Tato kopie souboru EXE zůstane tam, kde je, a odinstalovat ji můžete kdykoli přes Přidat/odebrat programy.</sys:String>
+Instalací se aplikace zkopíruje do vaší složky Programs kvůli rychlejšímu spuštění a v nabídce Start se vytvoří zástupce. Tento přenosný soubor si pak můžete ponechat nebo smazat.</sys:String>
     <sys:String x:Key="Str_Btn_DoInstall">Nainstalovat</sys:String>
     <sys:String x:Key="Str_Btn_DoUpdate">Aktualizovat</sys:String>
     <sys:String x:Key="Str_Dlg_UpdateUserMsg" xml:space="preserve">Aktualizovat stávající instalaci KillerPDF?
@@ -860,7 +860,7 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Tf_Rotate">OTOČENÍ</sys:String>
     <sys:String x:Key="Str_Tf_Scale">MĚŘÍTKO</sys:String>
     <sys:String x:Key="Str_Tf_Flip">PŘEVRÁCENÍ</sys:String>
-    <sys:String x:Key="Str_Tf_Skew">NAROVNÁNÍ</sys:String>
+    <sys:String x:Key="Str_Tf_Skew">ZKOSENÍ</sys:String>
     <sys:String x:Key="Str_Tf_Angle">Úhel</sys:String>
     <sys:String x:Key="Str_Tf_Size">Velikost</sys:String>
     <sys:String x:Key="Str_Tf_WhenScaling">Při změně měřítka:</sys:String>

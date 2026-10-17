@@ -49,7 +49,7 @@
   <string key="StartFailed">Impossibile avviare KillerPDF.\n\n{0}</string>
   <string key="ProcessFailed">Impossibile creare il processo dell'applicazione.</string>
   <string key="SignatureInvalid">L'installazione è stata rifiutata perché questo download non ha una firma digitale KillerPDF valida.</string>
-  <string key="AlreadyMachine">KillerPDF è già installato per tutti gli utenti. Aggiorna usando quel tipo di installazione o prima di scegliere un'installazione per utente disinstallala l'applicazione. KillerPDF non creerà due copie installate.</string>
+  <string key="AlreadyMachine">KillerPDF è già installato per tutti gli utenti di questo computer. Aggiorna quell'installazione oppure disinstallala prima di scegliere un'installazione per utente. KillerPDF non creerà due copie installate.</string>
   <string key="InvalidDirectory">Cartella installazione non valida.</string>
   <string key="RegistrationFailed">Impossibile registrare l'integrazione con Windows (codice di uscita {0}).</string>
   <string key="StillRunning">KillerPDF è ancora in esecuzione. Chiudilo e scegli di nuovo 'Installa'.</string>

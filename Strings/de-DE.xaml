@@ -249,7 +249,7 @@ Beim Speichern wird die Datei überschrieben und diese Änderungen gehen verlore
     <sys:String x:Key="Str_Dlg_InstallTitle">KillerPDF installieren</sys:String>
     <sys:String x:Key="Str_Dlg_InstallMsg" xml:space="preserve">KillerPDF auf diesem Computer installieren?
 
-KillerPDF wird in Ihren Programmordner kopiert und eine Verknüpfung im Startmenü erstellt. Diese Kopie der EXE bleibt, wo sie ist, und Sie können das Programm jederzeit über „Programme und Features“ deinstallieren.</sys:String>
+Beim Installieren wird die App für einen schnelleren Start in Ihren Programmordner kopiert und ein Startmenüeintrag hinzugefügt. Diese portable Datei können Sie danach behalten oder löschen.</sys:String>
     <sys:String x:Key="Str_Btn_DoInstall">Installieren</sys:String>
     <sys:String x:Key="Str_Btn_DoUpdate">Aktualisieren</sys:String>
     <sys:String x:Key="Str_Dlg_UpdateUserMsg" xml:space="preserve">Die bestehende KillerPDF-Installation aktualisieren?
@@ -340,7 +340,7 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Lbl_Open">Öffnen</sys:String>
     <sys:String x:Key="Str_Lbl_Close">Schließen</sys:String>
     <sys:String x:Key="Str_Lbl_Save">Speichern</sys:String>
-    <sys:String x:Key="Str_Lbl_Flatten">Abflachen</sys:String>
+    <sys:String x:Key="Str_Lbl_Flatten">Reduzieren</sys:String>
     <sys:String x:Key="Str_Lbl_Print">Drucken</sys:String>
     <sys:String x:Key="Str_Lbl_Select">Auswählen</sys:String>
     <sys:String x:Key="Str_Lbl_ZoomOut">Verkleinern</sys:String>
@@ -659,7 +659,7 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <!-- Crop confirm bar tooltips -->
     <sys:String x:Key="Str_TT_CropThisPage">Diese Seite zuschneiden (Enter)</sys:String>
     <sys:String x:Key="Str_TT_CropRange">Seiten im angegebenen Bereich zuschneiden</sys:String>
-    <sys:String x:Key="Str_TT_CropRemove">Zuschneidebereich (und Rahmen) von dieser Seite entfernen</sys:String>
+    <sys:String x:Key="Str_TT_CropRemove">Zuschneidebereich (und Endformat-Rahmen) von dieser Seite entfernen</sys:String>
     <sys:String x:Key="Str_TT_CropRemoveAll">Zuschneidebereich von allen Seiten entfernen</sys:String>
     <sys:String x:Key="Str_TT_CropCancel">Abbrechen (Esc)</sys:String>
 
@@ -752,7 +752,7 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Sign_TopLeft">Oben links</sys:String>
     <sys:String x:Key="Str_Sign_TopRight">Oben rechts</sys:String>
     <sys:String x:Key="Str_Sign_Width">Breite</sys:String>
-    <sys:String x:Key="Str_Sign_Height">Größe</sys:String>
+    <sys:String x:Key="Str_Sign_Height">Höhe</sys:String>
     <sys:String x:Key="Str_Sign_FontSize">Textgröße</sys:String>
     <sys:String x:Key="Str_Sign_PreviewSigner">Zertifikatsinhaber</sys:String>
     <sys:String x:Key="Str_Sign_BadAppearance">Prüfen Sie Seite, Abmessungen und Textgröße der Signatur.</sys:String>
@@ -1245,7 +1245,10 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Ocr_SuffixDownload">(herunterladen)</sys:String>
     <sys:String x:Key="Str_Ocr_SuffixDownloadHq">(HQ herunterladen)</sys:String>
     <sys:String x:Key="Str_Dlg_SearchableSaved" xml:space="preserve">Durchsuchbare PDF gespeichert:&#10;{0}&#10;&#10;{1} Seiten verarbeitet, {2} Wörter erkannt.</sys:String>
-    <sys:String x:Key="Str_Dlg_ScanTextSaved" xml:space="preserve">Umgewandelte PDF gespeichert:&#10;{0}&#10;&#10;{1} gescannte Seiten umgewandelt, {2} Wörter sind jetzt Text. {3} Wörter, die nicht genau zum Scan passten, bleiben gescannt und durchsuchbar.</sys:String>
+    <sys:String x:Key="Str_Dlg_ScanTextSaved" xml:space="preserve">Umgewandeltes PDF gespeichert:
+{0}
+
+{1} gescannte Seiten umgewandelt, {2} Wörter sind jetzt Text. {3} Wörter, die nicht genau zum Scan passten, bleiben gescannt und durchsuchbar.</sys:String>
     <sys:String x:Key="Str_Dlg_ScanTextNone">Dieses Dokument hat keine gescannten Seiten zum Umwandeln, daher wurde nichts gespeichert. Seiten, die bereits Text oder Zeichnungen enthalten, bleiben unverändert.</sys:String>
     <sys:String x:Key="Str_Dlg_Repaired" xml:space="preserve">„{0}“ wurde erfolgreich repariert.&#10;&#10;Lesezeichen, Formulare und andere interaktive Funktionen können verloren gegangen sein. Verwenden Sie „Speichern unter“, um die reparierte Datei an einem neuen Ort zu speichern.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairedRaster" xml:space="preserve">„{0}“ wurde durch Rastern der Seiten repariert.&#10;&#10;Text ist in der reparierten Kopie nicht auswählbar. Verwenden Sie „Speichern unter“, um sie an einem neuen Ort zu speichern.</sys:String>
