@@ -555,6 +555,52 @@ namespace KillerPDF.Controls
             if (skipped.Count > 0)
                 status += " " + string.Format(Loc("Str_Redact_SkippedPages"), string.Join(", ", skipped.Order().Select(page => page + 1)));
             SetStatus(status);
+            FinishRedaction();
+        }
+
+        // After a redaction is applied: offer to remove the hidden information the document can
+        // still carry, then save the result as a new _Redacted copy so the original stays as it was.
+        private void FinishRedaction()
+        {
+            if (_doc is null || Window.GetWindow(this) is not Window owner) return;
+            string source = _originalFile ?? _currentFile ?? "document.pdf";
+            string stem = System.IO.Path.GetFileNameWithoutExtension(source);
+            string suggested = (stem.EndsWith("_Redacted", StringComparison.OrdinalIgnoreCase) ? stem : stem + "_Redacted") + ".pdf";
+            var dialog = new RedactionFinishDialog(owner, suggested);
+            if (dialog.ShowDialog() != true) return;
+            if (dialog.Choices is PdfEngineIntegration.SanitizeChoices choices)
+            {
+                Exception? failure = null;
+                Mouse.OverrideCursor = Cursors.Wait;
+                try
+                {
+                    SaveTempAndReload(keepAnnotations: true, preserveZoom: true, finalizeSavedFile: path =>
+                    {
+                        try { PdfEngineIntegration.SanitizeFile(path, choices); }
+                        catch (Exception ex) when (ex is InvalidOperationException or NotSupportedException
+                            or ArgumentException or FormatException or System.IO.IOException) { failure = ex; }
+                    });
+                }
+                catch (Exception ex) when (ex is InvalidOperationException or System.IO.IOException) { failure ??= ex; }
+                finally { Mouse.OverrideCursor = null; }
+                if (failure is not null)
+                {
+                    SetStatus(string.Format(Loc("Str_RedactFinish_Failed"), failure.Message));
+                    return;
+                }
+                if (choices.FormFields)
+                {
+                    // The fields are gone, so values typed into them have nothing left to fill.
+                    _formTextValues.Clear();
+                    _formChoiceValues.Clear();
+                    _formMultiChoiceValues.Clear();
+                    _formCheckValues.Clear();
+                    _formRadioValues.Clear();
+                    _formFontSizes.Clear();
+                }
+                SetStatus(Loc("Str_RedactFinish_Done"));
+            }
+            if (dialog.SaveCopy) Host!.SaveAsWithName(suggested);
         }
 
         // Pages whose marked content can't be removed by itself are only turned into an image

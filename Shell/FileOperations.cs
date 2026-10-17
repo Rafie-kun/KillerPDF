@@ -1200,7 +1200,10 @@ namespace KillerPDF
             // Cancel or closed: do nothing.
         }
 
-        private void SaveAs_Click(object sender, RoutedEventArgs e)
+        private void SaveAs_Click(object sender, RoutedEventArgs e) => SaveAsWithName(null);
+
+        // Save As, offering the given file name in place of the current one when there is one.
+        internal void SaveAsWithName(string? suggestedName)
         {
             if (_doc is null || _currentFile is null) { KillerDialog.Show(this, Loc("Str_Msg_OpenFirst")); return; }
             if (!EnsureEditable()) return;
@@ -1214,7 +1217,9 @@ namespace KillerPDF
             string? seed = _originalFile ?? _currentFile;
             try
             {
-                if (!string.IsNullOrWhiteSpace(seed))
+                if (!string.IsNullOrWhiteSpace(suggestedName))
+                    dlg.FileName = suggestedName;
+                else if (!string.IsNullOrWhiteSpace(seed))
                     dlg.FileName = System.IO.Path.GetFileName(seed);
                 if (!string.IsNullOrWhiteSpace(_originalFile))
                 {

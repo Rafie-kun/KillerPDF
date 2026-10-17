@@ -1718,6 +1718,55 @@ internal static class PdfEngineIntegration
         return result;
     }
 
+    /// <summary>The kinds of hidden information removed after a redaction.</summary>
+    internal sealed record SanitizeChoices(bool Comments, bool Attachments, bool FormFields,
+        bool HiddenLayers, bool Scripts, bool Links, bool Bookmarks);
+
+    /// <summary>
+    /// Removes the hidden information a redacted document can still carry, always including its
+    /// metadata and page thumbnails, and swaps in the single-revision result.
+    /// </summary>
+    internal static PdfOptimizationResult SanitizeFile(string path, SanitizeChoices choices)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        ArgumentNullException.ThrowIfNull(choices);
+        PdfDocument document = PdfDocument.Open(File.ReadAllBytes(path));
+        if (choices.Links)
+        {
+            var reader = new PdfLinkReader(document);
+            var editor = new PdfIncrementalAnnotationEditor(document);
+            bool removed = false;
+            int pageCount = PdfPageInformation.Read(document).Count;
+            for (int pageIndex = 0; pageIndex < pageCount; pageIndex++)
+                foreach (PdfLinkInfo link in reader.ReadPage(pageIndex).OrderByDescending(link => link.AnnotationIndex))
+                {
+                    editor.RemoveAnnotationAt(pageIndex, link.AnnotationIndex);
+                    removed = true;
+                }
+            if (removed) document = PdfDocument.Open(editor.Build());
+        }
+        PdfOptimizationOptions settings = PdfOptimizationOptions.ForDocument(document) with
+        {
+            RepairHarmlessArtifacts = true,
+            RemoveMetadata = true,
+            RemovePageThumbnails = true,
+            RemoveComments = choices.Comments,
+            RemoveAttachments = choices.Attachments,
+            RemoveFormFields = choices.FormFields,
+            RemoveXfaData = choices.FormFields,
+            FlattenOptionalContent = choices.HiddenLayers,
+            RemoveDocumentJavaScript = choices.Scripts,
+            RemoveOpenAction = choices.Scripts,
+            RemoveBookmarks = choices.Bookmarks,
+            PruneUnusedPageResources = true,
+            PruneUnreachableObjects = true,
+            AllowSignatureInvalidation = true
+        };
+        PdfOptimizationResult result = PdfOptimizer.CreatePlan(document, settings).Apply();
+        ReplaceWithBuiltResult(path, result.Data.ToArray());
+        return result;
+    }
+
     /// <summary>Removes pages as one byte-preserving incremental revision.</summary>
     internal static void RemovePages(string path, IReadOnlyCollection<int> pageIndices)
     {
