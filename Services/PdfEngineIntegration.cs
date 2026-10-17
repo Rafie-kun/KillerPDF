@@ -1115,6 +1115,57 @@ internal static class PdfEngineIntegration
         ReplaceWithBuiltResult(path, result);
     }
 
+    /// <summary>One unapplied redaction mark in unrotated, crop-relative page points.</summary>
+    internal sealed record RedactionMarkData(int PageIndex, double Left, double Bottom, double Right, double Top);
+
+    /// <summary>Reads the redaction marks saved in a document as crop-relative page areas.</summary>
+    internal static List<RedactionMarkData> ReadRedactionMarks(PdfDocument document)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        IReadOnlyList<PdfPageInformation> pages = PdfPageInformation.Read(document);
+        var marks = new List<RedactionMarkData>();
+        foreach (PdfRedactionMarkInfo mark in PdfRedactionMarkReader.Read(document))
+        {
+            if (mark.PageIndex < 0 || mark.PageIndex >= pages.Count) continue;
+            PdfPageInformation page = pages[mark.PageIndex];
+            foreach (PdfContentBounds area in mark.Areas)
+                marks.Add(new RedactionMarkData(mark.PageIndex, area.Left - page.Left,
+                    area.Bottom - page.Bottom, area.Right - page.Left, area.Top - page.Bottom));
+        }
+        return marks;
+    }
+
+    /// <summary>
+    /// Replaces the redaction marks saved in a file with the given marks, so unapplied marks
+    /// travel with the document the way Acrobat stores them.
+    /// </summary>
+    internal static void WriteRedactionMarks(string path, IReadOnlyList<RedactionMarkData> marks)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        ArgumentNullException.ThrowIfNull(marks);
+        PdfDocument source = PdfDocument.Open(File.ReadAllBytes(path));
+        IReadOnlyList<PdfRedactionMarkInfo> existing = PdfRedactionMarkReader.Read(source);
+        if (existing.Count == 0 && marks.Count == 0) return;
+        IReadOnlyList<PdfPageInformation> pages = PdfPageInformation.Read(source);
+        var editor = new PdfIncrementalAnnotationEditor(source);
+        foreach (PdfRedactionMarkInfo mark in existing)
+            editor.RemoveAnnotationAt(mark.PageIndex, mark.AnnotationIndex);
+        foreach (RedactionMarkData mark in marks)
+        {
+            if (mark.PageIndex < 0 || mark.PageIndex >= pages.Count
+                || mark.Right - mark.Left <= 0 || mark.Top - mark.Bottom <= 0) continue;
+            PdfPageInformation page = pages[mark.PageIndex];
+            double left = page.Left + mark.Left, right = page.Left + mark.Right;
+            double bottom = page.Bottom + mark.Bottom, top = page.Bottom + mark.Top;
+            editor.AddRedactionMark(mark.PageIndex,
+            [
+                new PdfTextQuad(new PdfPoint(left, top), new PdfPoint(right, top),
+                    new PdfPoint(left, bottom), new PdfPoint(right, bottom))
+            ]);
+        }
+        ReplaceWithBuiltResult(path, editor.Build());
+    }
+
     /// <summary>Normalizes native links to invisible clickable regions through one revision.</summary>
     internal static void StripLinkAppearances(string path)
     {

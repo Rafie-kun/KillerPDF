@@ -10,30 +10,24 @@ namespace KillerPDF.Controls
 {
     // Redact tool: drag areas on the page (or mark the current search results), then remove
     // everything under them for good. Marks are kept in unrotated, crop-relative page points so they
-    // survive zoom and view changes; they belong to the document they were drawn on and are dropped
-    // when the tool closes.
+    // survive zoom and view changes. They belong to the document they were drawn on, stay visible
+    // after the tool closes, and are saved into the file as /Redact annotations until applied.
+    internal sealed record RedactionMark(int PageIndex, double Left, double Bottom, double Right, double Top);
+
     public partial class PdfViewer
     {
         private const string RedactMarkTag = "RedactMark";
-        private readonly List<RedactionMark> _redactMarks = [];
-        private DocumentSession? _redactSession;
+        private List<RedactionMark> _redactMarks = [];
         private Border? _redactBar;
         private TextBlock? _redactCountText;
         private Rectangle? _redactDrawRect;
         private Point _redactDrawStart;
         private bool _redactDrawing;
 
-        private sealed record RedactionMark(int PageIndex, double Left, double Bottom, double Right, double Top);
-
         /// <summary>Shows the Redact bar for the active document, keeping marks already drawn on it.</summary>
         internal void ShowRedactionBar()
         {
             if (_doc is null) return;
-            if (!ReferenceEquals(_redactSession, _active))
-            {
-                _redactMarks.Clear();
-                _redactSession = _active;
-            }
             if (_redactBar is not null)
             {
                 UpdateRedactionCount();
@@ -100,7 +94,7 @@ namespace KillerPDF.Controls
             RepaintRedactionMarks();
         }
 
-        /// <summary>Closes the Redact bar and discards its marks.</summary>
+        /// <summary>Closes the Redact bar. The marks stay on the document until applied or cleared.</summary>
         internal void HideRedactionBar()
         {
             if (_redactBar is not null)
@@ -110,11 +104,30 @@ namespace KillerPDF.Controls
             }
             _redactCountText = null;
             CancelRedactionDrag();
-            _redactMarks.Clear();
-            _redactSession = null;
-            RemoveRedactionMarkVisuals();
             if (_annotBarTool == EditTool.Redact) _annotBarTool = null;
         }
+
+        /// <summary>Loads the marks saved in the newly opened file, replacing any from before.</summary>
+        internal void LoadRedactionMarksFromDocument()
+        {
+            _redactMarks.Clear();
+            if (_currentFile is null) return;
+            try
+            {
+                foreach (var mark in PdfEngineIntegration.ReadRedactionMarks(EnsureEngineDocumentSession().Document))
+                    _redactMarks.Add(new RedactionMark(mark.PageIndex, mark.Left, mark.Bottom, mark.Right, mark.Top));
+            }
+            catch (Exception ex) when (ex is FormatException or InvalidOperationException or NotSupportedException)
+            {
+                System.Diagnostics.Debug.WriteLine($"LoadRedactionMarksFromDocument: {ex}");
+            }
+            UpdateRedactionCount();
+        }
+
+        /// <summary>Saves the document's unapplied marks into the file being written.</summary>
+        internal void WriteRedactionMarksToDocument(string path) =>
+            PdfEngineIntegration.WriteRedactionMarks(path, [.. _redactMarks.Select(mark =>
+                new PdfEngineIntegration.RedactionMarkData(mark.PageIndex, mark.Left, mark.Bottom, mark.Right, mark.Top))]);
 
         /// <summary>True when the event came from the Redact bar, which the page canvas must not swallow.</summary>
         internal bool IsInRedactionBar(object? source) =>
@@ -168,7 +181,6 @@ namespace KillerPDF.Controls
             if (canvas is null) return;
             foreach (var old in canvas.Children.OfType<Rectangle>().Where(r => r.Tag is RedactionMark).ToList())
                 canvas.Children.Remove(old);
-            if (_currentTool != EditTool.Redact || !ReferenceEquals(_redactSession, _active)) return;
             foreach (RedactionMark mark in _redactMarks.Where(mark => mark.PageIndex == pageIndex))
             {
                 if (MarkCanvasRect(mark) is not Rect rect) continue;
@@ -198,14 +210,6 @@ namespace KillerPDF.Controls
                 var canvas = VisibleCanvasForPage(page);
                 if (canvas is not null) ApplyRedactionMarks(page, canvas);
             }
-        }
-
-        private void RemoveRedactionMarkVisuals()
-        {
-            foreach (var canvas in AllPageCanvases())
-                foreach (var old in canvas.Children.OfType<Rectangle>()
-                             .Where(r => r.Tag is RedactionMark || r.Tag as string == RedactMarkTag).ToList())
-                    canvas.Children.Remove(old);
         }
 
         internal void RedactionMouseDown(Point position)
@@ -251,24 +255,22 @@ namespace KillerPDF.Controls
             canvas?.ReleaseMouseCapture();
             var drawn = new Rect(_redactDrawStart, end);
             CancelRedactionDrag();
-            if (!ReferenceEquals(_redactSession, _active))
-            {
-                _redactMarks.Clear();
-                _redactSession = _active;
-            }
 
             if (drawn.Width < 4 || drawn.Height < 4)
             {
                 // A click removes the mark under it.
                 RedactionMark? hit = _redactMarks.LastOrDefault(mark => mark.PageIndex == pageIndex
                     && MarkCanvasRect(mark) is Rect rect && rect.Contains(end));
-                if (hit is not null) _redactMarks.Remove(hit);
+                if (hit is not null && _redactMarks.Remove(hit)) MarkDirty();
             }
             else if (TryPageGeometry(pageIndex, out double pw, out double ph, out double cw, out double ch, out int rot))
             {
                 var (left, bottom, right, top) = RedactionGeometry.CanvasToPage(drawn, pw, ph, cw, ch, rot);
                 if (right - left > 0.5 && top - bottom > 0.5)
+                {
                     _redactMarks.Add(new RedactionMark(pageIndex, left, bottom, right, top));
+                    MarkDirty();
+                }
             }
             UpdateRedactionCount();
             ApplyRedactionMarks(pageIndex, canvas);
@@ -309,12 +311,8 @@ namespace KillerPDF.Controls
             if (_currentTool != EditTool.Redact) SetTool(EditTool.Redact);
             // An owner-restricted document stays on Select until it is unlocked.
             if (_currentTool != EditTool.Redact) return;
-            if (!ReferenceEquals(_redactSession, _active))
-            {
-                _redactMarks.Clear();
-                _redactSession = _active;
-            }
             _redactMarks.AddRange(marks);
+            MarkDirty();
             UpdateRedactionCount();
             RepaintRedactionMarks();
         }
@@ -326,7 +324,6 @@ namespace KillerPDF.Controls
                 SetStatus(Loc("Str_Redact_NoSearch"));
                 return;
             }
-            _redactSession = _active;
             // Mark only the matched characters, not the whole words the search highlights.
             Dictionary<int, List<(double Left, double Bottom, double Right, double Top)>> matches;
             try { matches = SearchService.FindExactMatches(_currentFile!, Search.LastQuery); }
@@ -346,6 +343,7 @@ namespace KillerPDF.Controls
                     added++;
                 }
             }
+            if (added > 0) MarkDirty();
             UpdateRedactionCount();
             RepaintRedactionMarks();
             SetStatus(string.Format(Loc("Str_Redact_MarkedSearch"), added));
@@ -353,6 +351,7 @@ namespace KillerPDF.Controls
 
         private void ClearRedactionMarks()
         {
+            if (_redactMarks.Count > 0) MarkDirty();
             _redactMarks.Clear();
             UpdateRedactionCount();
             RepaintRedactionMarks();
@@ -417,6 +416,9 @@ namespace KillerPDF.Controls
             }
             foreach (var (page, annotation) in covered)
                 if (_annotations.TryGetValue(page, out var list)) list.Remove(annotation);
+            // The applied marks are gone with their content; marks on skipped pages stay for later.
+            _redactMarks.RemoveAll(mark => !skipped.Contains(mark.PageIndex));
+            RepaintRedactionMarks();
             int pages = regions.Select(region => region.PageIndex).Distinct().Count();
             string status = approved.Count == 0
                 ? string.Format(Loc("Str_Redacted"), regions.Count, pages)
@@ -455,10 +457,9 @@ namespace KillerPDF.Controls
         }
 
         /// <summary>The areas marked with the Redact tool on the active document, for a macro's Redact step.</summary>
-        internal List<PdfRedactionRegion> PendingRedactionRegions() => ReferenceEquals(_redactSession, _active)
-            ? [.. _redactMarks.Select(mark => new PdfRedactionRegion(mark.PageIndex,
-                new PdfContentBounds(mark.Left, mark.Bottom, mark.Right, mark.Top)))]
-            : [];
+        internal List<PdfRedactionRegion> PendingRedactionRegions() =>
+            [.. _redactMarks.Select(mark => new PdfRedactionRegion(mark.PageIndex,
+                new PdfContentBounds(mark.Left, mark.Bottom, mark.Right, mark.Top)))];
 
         // Unsaved overlay annotations drawn over a redacted area would be burned back in on save,
         // so they go with the content underneath once the redaction succeeds.

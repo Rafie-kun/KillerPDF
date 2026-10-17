@@ -269,6 +269,8 @@ internal sealed class PdfPageRenderSession : IDisposable
         return new EngineRenderOptions(engineWidth, engineHeight, transparentBackground,
             includeAnnotations, includeFormFields)
         {
+            // The viewer draws redaction marks on its own overlay.
+            IncludeRedactionMarks = false,
             MaximumParallelism = RenderParallelism(engineWidth, engineHeight),
             Jpeg2000PaintParallelism = Math.Clamp(Environment.ProcessorCount / 2, 1, 4)
         };
@@ -287,6 +289,7 @@ internal sealed class PdfPageRenderSession : IDisposable
         bool transparentBackground, bool includeFormFields) =>
         new(width, height, transparentBackground, includeAnnotations: true, includeFormFields)
         {
+            IncludeRedactionMarks = false,
             MaximumParallelism = RenderParallelism(width, height),
             Jpeg2000PaintParallelism = Math.Clamp(Environment.ProcessorCount / 2, 1, 4)
         };

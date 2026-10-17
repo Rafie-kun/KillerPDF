@@ -193,6 +193,7 @@ namespace KillerPDF
             _formCheckValues.Clear();
             _formFontSizes.Clear();
             _formRadioValues.Clear();
+            LoadRedactionMarksFromDocument();
             Search.ClearPageResults();
             _gridScrollToPage = -1;
             MarkDirty(false);
@@ -579,6 +580,7 @@ namespace KillerPDF
             _formCheckValues.Clear();
             _formFontSizes.Clear();
             _formRadioValues.Clear();
+            LoadRedactionMarksFromDocument();   // no document: drops the closed file's marks
             Search.ClearPageResults();
             _thumbCts?.Cancel();
             PageList.ItemsSource = null;
@@ -1122,6 +1124,7 @@ namespace KillerPDF
                         _docStampSpec, null, _pageRotations);
                     PdfEngineIntegration.StripLinkAppearances(tempEdited);
                     WriteFormValuesToDocument(tempEdited);
+                    WriteRedactionMarksToDocument(tempEdited);
                     PdfEngineIntegration.ApplyPageRotations(tempEdited, finalRotations);
                     PdfEngineIntegration.ReplaceFileAtomically(tempEdited, saveTarget);
                     _doc.Close();
@@ -1150,6 +1153,7 @@ namespace KillerPDF
                     PdfEngineIntegration.ClearInvalidatedSignatures(tempSaved);
                     PdfEngineIntegration.StripLinkAppearances(tempSaved);
                     WriteFormValuesToDocument(tempSaved);
+                    WriteRedactionMarksToDocument(tempSaved);
                     PdfEngineIntegration.ApplyPageRotations(tempSaved, finalRotations);
                     PdfEngineIntegration.ReplaceFileAtomically(tempSaved, saveTarget);
                 }
@@ -1241,6 +1245,7 @@ namespace KillerPDF
                         _docStampSpec, null, _pageRotations);
                     PdfEngineIntegration.StripLinkAppearances(tempEdited);
                     WriteFormValuesToDocument(tempEdited);
+                    WriteRedactionMarksToDocument(tempEdited);
                     PdfEngineIntegration.ApplyPageRotations(tempEdited, finalRotations);
                     PdfEngineIntegration.ReplaceFileAtomically(tempEdited, dlg.FileName);
                     _doc.Close();
@@ -1280,6 +1285,7 @@ namespace KillerPDF
                     PdfEngineIntegration.ClearInvalidatedSignatures(tempSaved);
                     PdfEngineIntegration.StripLinkAppearances(tempSaved);
                     WriteFormValuesToDocument(tempSaved);
+                    WriteRedactionMarksToDocument(tempSaved);
                     PdfEngineIntegration.ApplyPageRotations(tempSaved, finalRotations);
                     PdfEngineIntegration.ReplaceFileAtomically(tempSaved, dlg.FileName);
                     _originalFile = dlg.FileName;

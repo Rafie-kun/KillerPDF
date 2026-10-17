@@ -93,6 +93,7 @@ namespace KillerPDF
                 PdfEngineIntegration.StripLinkAppearances(copy);
             }
             WriteFormValuesToDocument(copy);
+            WriteRedactionMarksToDocument(copy);
             PdfEngineIntegration.ApplyPageRotations(copy, rotations);
             return copy;
         }

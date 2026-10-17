@@ -98,6 +98,8 @@ namespace KillerPDF
 
         // ── Save paths ───────────────────────────────────────────────────────────────────────
         private void WriteFormValuesToDocument(string path) => ActiveViewer.WriteFormValuesToDocumentExt(path);
+        private void WriteRedactionMarksToDocument(string path) => ActiveViewer.WriteRedactionMarksToDocument(path);
+        private void LoadRedactionMarksFromDocument() => ActiveViewer.LoadRedactionMarksFromDocument();
 
         // ── Bound from MainWindow.xaml - see the class comment, these are load-bearing ───────
         private void Undo_Click(object sender, RoutedEventArgs e) => ActiveViewer.UndoClickExt(sender, e);

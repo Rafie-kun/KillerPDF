@@ -39,6 +39,11 @@ public sealed record PdfRenderOptions
     public bool IncludeAnnotations { get; }
     /// <summary>Gets whether form-field appearances should be painted.</summary>
     public bool IncludeFormFields { get; }
+    /// <summary>
+    /// Gets whether unapplied redaction marks (/Redact annotations) are painted. A viewer that
+    /// draws the marks itself turns this off so they are not shown twice.
+    /// </summary>
+    public bool IncludeRedactionMarks { get; init; } = true;
     /// <summary>Gets the caller-supplied output pixel-buffer limit.</summary>
     public long PixelByteLimit { get; }
     /// <summary>Gets whether the renderer may reuse and retain this finished bitmap.</summary>
