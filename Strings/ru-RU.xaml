@@ -67,6 +67,17 @@
     <sys:String x:Key="Str_Redact_MarkPagesPrompt">Страницы для полной отметки, например 1, 3-5. При нажатии «Скрыть» всё на этих страницах будет удалено.</sys:String>
     <sys:String x:Key="Str_Redact_MarkPagesConfirm">Отметить</sys:String>
     <sys:String x:Key="Str_Redact_MarkedPages">Отмечено страниц: {0}</sys:String>
+    <sys:String x:Key="Str_Redact_Properties">Свойства</sys:String>
+    <sys:String x:Key="Str_Redact_PropertiesTip">Выбрать цвет заливки и текст поверх, которые рисуются на месте удалённого содержимого</sys:String>
+    <sys:String x:Key="Str_RedactProps_Title">Свойства скрытия</sys:String>
+    <sys:String x:Key="Str_RedactProps_Fill">Цвет заливки</sys:String>
+    <sys:String x:Key="Str_RedactProps_Code">Код скрытия</sys:String>
+    <sys:String x:Key="Str_RedactProps_NoCode">Нет</sys:String>
+    <sys:String x:Key="Str_RedactProps_Overlay">Текст поверх</sys:String>
+    <sys:String x:Key="Str_RedactProps_Unsupported">Текст поверх может содержать только латинские буквы, цифры и обычные знаки препинания.</sys:String>
+    <sys:String x:Key="Str_RedactProps_Preview">Просмотр</sys:String>
+    <sys:String x:Key="Str_RedactProps_ApplyExisting">Применить и к {0} отметкам, которые уже есть в документе</sys:String>
+    <sys:String x:Key="Str_RedactProps_Hint">Новые отметки используют эти свойства. При нажатии «Скрыть» каждая область заливается этим цветом, а внутри рисуется текст поверх.</sys:String>
     <sys:String x:Key="Str_RedactFind_Title">Найти текст для скрытия</sys:String>
     <sys:String x:Key="Str_RedactFind_Kind">Искать</sys:String>
     <sys:String x:Key="Str_RedactFind_KindText">Слова или фразы</sys:String>

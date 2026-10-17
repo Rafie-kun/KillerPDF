@@ -67,6 +67,17 @@ A página pode ser substituída por uma imagem dela mesma com as áreas marcadas
     <sys:String x:Key="Str_Redact_MarkPagesPrompt">Páginas a marcar por completo, como 1, 3-5. Todo o conteúdo dessas páginas é removido quando você clica em Tarjar.</sys:String>
     <sys:String x:Key="Str_Redact_MarkPagesConfirm">Marcar</sys:String>
     <sys:String x:Key="Str_Redact_MarkedPages">Páginas marcadas: {0}</sys:String>
+    <sys:String x:Key="Str_Redact_Properties">Propriedades</sys:String>
+    <sys:String x:Key="Str_Redact_PropertiesTip">Escolha a cor de preenchimento e o texto sobreposto desenhados onde o conteúdo é removido</sys:String>
+    <sys:String x:Key="Str_RedactProps_Title">Propriedades da tarja</sys:String>
+    <sys:String x:Key="Str_RedactProps_Fill">Cor de preenchimento</sys:String>
+    <sys:String x:Key="Str_RedactProps_Code">Código da tarja</sys:String>
+    <sys:String x:Key="Str_RedactProps_NoCode">Nenhum</sys:String>
+    <sys:String x:Key="Str_RedactProps_Overlay">Texto sobreposto</sys:String>
+    <sys:String x:Key="Str_RedactProps_Unsupported">O texto sobreposto só pode usar letras latinas, dígitos e pontuação comum.</sys:String>
+    <sys:String x:Key="Str_RedactProps_Preview">Visualização</sys:String>
+    <sys:String x:Key="Str_RedactProps_ApplyExisting">Usar também nas {0} marcações que já estão neste documento</sys:String>
+    <sys:String x:Key="Str_RedactProps_Hint">As novas marcações usam estas propriedades. Quando você clica em Tarjar, cada área é preenchida com esta cor e o texto sobreposto é desenhado dentro dela.</sys:String>
     <sys:String x:Key="Str_RedactFind_Title">Localizar texto para tarjar</sys:String>
     <sys:String x:Key="Str_RedactFind_Kind">Procurar</sys:String>
     <sys:String x:Key="Str_RedactFind_KindText">Palavras ou frases</sys:String>

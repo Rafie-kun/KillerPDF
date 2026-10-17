@@ -67,6 +67,17 @@ Die Seite kann durch ein Bild ihrer selbst ersetzt werden, in dem die markierten
     <sys:String x:Key="Str_Redact_MarkPagesPrompt">Vollständig zu markierende Seiten, z. B. 1, 3-5. Beim Klick auf Schwärzen wird alles auf diesen Seiten entfernt.</sys:String>
     <sys:String x:Key="Str_Redact_MarkPagesConfirm">Markieren</sys:String>
     <sys:String x:Key="Str_Redact_MarkedPages">Markierte Seiten: {0}</sys:String>
+    <sys:String x:Key="Str_Redact_Properties">Eigenschaften</sys:String>
+    <sys:String x:Key="Str_Redact_PropertiesTip">Füllfarbe und Überlagerungstext wählen, die an entfernten Stellen gezeichnet werden</sys:String>
+    <sys:String x:Key="Str_RedactProps_Title">Schwärzungseigenschaften</sys:String>
+    <sys:String x:Key="Str_RedactProps_Fill">Füllfarbe</sys:String>
+    <sys:String x:Key="Str_RedactProps_Code">Schwärzungscode</sys:String>
+    <sys:String x:Key="Str_RedactProps_NoCode">Keiner</sys:String>
+    <sys:String x:Key="Str_RedactProps_Overlay">Überlagerungstext</sys:String>
+    <sys:String x:Key="Str_RedactProps_Unsupported">Der Überlagerungstext darf nur lateinische Buchstaben, Ziffern und gängige Satzzeichen enthalten.</sys:String>
+    <sys:String x:Key="Str_RedactProps_Preview">Vorschau</sys:String>
+    <sys:String x:Key="Str_RedactProps_ApplyExisting">Auch für die {0} Markierungen verwenden, die bereits im Dokument sind</sys:String>
+    <sys:String x:Key="Str_RedactProps_Hint">Neue Markierungen verwenden diese Eigenschaften. Beim Klick auf Schwärzen wird jeder Bereich mit dieser Farbe gefüllt und der Überlagerungstext hineingezeichnet.</sys:String>
     <sys:String x:Key="Str_RedactFind_Title">Text zum Schwärzen suchen</sys:String>
     <sys:String x:Key="Str_RedactFind_Kind">Suchen nach</sys:String>
     <sys:String x:Key="Str_RedactFind_KindText">Wörter oder Ausdrücke</sys:String>

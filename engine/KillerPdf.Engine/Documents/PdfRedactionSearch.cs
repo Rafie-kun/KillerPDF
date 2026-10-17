@@ -57,7 +57,11 @@ public enum PdfRedactionTargetKind
 
 /// <summary>A rectangular page region proposed for redaction.</summary>
 public sealed record PdfRedactionRegion(int PageIndex, PdfContentBounds Bounds,
-    string? ReasonCode = null, string? OverlayText = null);
+    string? ReasonCode = null, string? OverlayText = null)
+{
+    /// <summary>Gets the color that fills the region once it is redacted, black when not set.</summary>
+    public KillerPdf.Engine.Authoring.PdfRgbColor? FillColor { get; init; }
+}
 
 /// <summary>One text match proposed for redaction.</summary>
 public sealed record PdfRedactionMatch(string Id, int PageIndex, string Text,

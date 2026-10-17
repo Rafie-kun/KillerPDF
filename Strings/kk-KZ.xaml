@@ -1251,6 +1251,17 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Redact_MarkPagesPrompt">Толық белгіленетін беттер, мысалы 1, 3-5. Жасыру түймесін басқанда бұл беттердегі барлығы жойылады.</sys:String>
     <sys:String x:Key="Str_Redact_MarkPagesConfirm">Белгілеу</sys:String>
     <sys:String x:Key="Str_Redact_MarkedPages">Белгіленген беттер: {0}</sys:String>
+    <sys:String x:Key="Str_Redact_Properties">Сипаттар</sys:String>
+    <sys:String x:Key="Str_Redact_PropertiesTip">Мазмұн жойылған жерде салынатын толтыру түсі мен үстіңгі мәтінді таңдау</sys:String>
+    <sys:String x:Key="Str_RedactProps_Title">Жасыру сипаттары</sys:String>
+    <sys:String x:Key="Str_RedactProps_Fill">Толтыру түсі</sys:String>
+    <sys:String x:Key="Str_RedactProps_Code">Жасыру коды</sys:String>
+    <sys:String x:Key="Str_RedactProps_NoCode">Жоқ</sys:String>
+    <sys:String x:Key="Str_RedactProps_Overlay">Үстіңгі мәтін</sys:String>
+    <sys:String x:Key="Str_RedactProps_Unsupported">Үстіңгі мәтінде тек латын әріптері, цифрлар және жиі қолданылатын тыныс белгілері болады.</sys:String>
+    <sys:String x:Key="Str_RedactProps_Preview">Алдын ала қарау</sys:String>
+    <sys:String x:Key="Str_RedactProps_ApplyExisting">Құжатта бұрыннан бар {0} белгіге де қолдану</sys:String>
+    <sys:String x:Key="Str_RedactProps_Hint">Жаңа белгілер осы сипаттарды пайдаланады. Жасыру түймесін басқанда әр аймақ осы түспен толтырылып, ішіне үстіңгі мәтін салынады.</sys:String>
     <sys:String x:Key="Str_RedactFind_Title">Жасыратын мәтінді табу</sys:String>
     <sys:String x:Key="Str_RedactFind_Kind">Іздеу түрі</sys:String>
     <sys:String x:Key="Str_RedactFind_KindText">Сөздер немесе тіркестер</sys:String>

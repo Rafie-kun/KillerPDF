@@ -67,6 +67,17 @@
     <sys:String x:Key="Str_Redact_MarkPagesPrompt">সম্পূর্ণ চিহ্নিত করার পৃষ্ঠা, যেমন 1, 3-5। রিড্যাক্ট ক্লিক করলে এই পৃষ্ঠাগুলোর সবকিছু সরানো হবে।</sys:String>
     <sys:String x:Key="Str_Redact_MarkPagesConfirm">চিহ্নিত করুন</sys:String>
     <sys:String x:Key="Str_Redact_MarkedPages">চিহ্নিত পৃষ্ঠা: {0}</sys:String>
+    <sys:String x:Key="Str_Redact_Properties">বৈশিষ্ট্য</sys:String>
+    <sys:String x:Key="Str_Redact_PropertiesTip">বিষয়বস্তু সরানোর জায়গায় আঁকা ভরাট রং ও ওভারলে লেখা বেছে নিন</sys:String>
+    <sys:String x:Key="Str_RedactProps_Title">রিড্যাকশনের বৈশিষ্ট্য</sys:String>
+    <sys:String x:Key="Str_RedactProps_Fill">ভরাট রং</sys:String>
+    <sys:String x:Key="Str_RedactProps_Code">রিড্যাকশন কোড</sys:String>
+    <sys:String x:Key="Str_RedactProps_NoCode">কোনোটি নয়</sys:String>
+    <sys:String x:Key="Str_RedactProps_Overlay">ওভারলে লেখা</sys:String>
+    <sys:String x:Key="Str_RedactProps_Unsupported">ওভারলে লেখায় শুধু ল্যাটিন অক্ষর, সংখ্যা ও সাধারণ যতিচিহ্ন ব্যবহার করা যায়।</sys:String>
+    <sys:String x:Key="Str_RedactProps_Preview">প্রাকদর্শন</sys:String>
+    <sys:String x:Key="Str_RedactProps_ApplyExisting">এই নথিতে আগে থেকে থাকা {0}টি চিহ্নেও এগুলো ব্যবহার করুন</sys:String>
+    <sys:String x:Key="Str_RedactProps_Hint">নতুন চিহ্নগুলো এই বৈশিষ্ট্য ব্যবহার করে। রিড্যাক্ট ক্লিক করলে প্রতিটি জায়গা এই রঙে ভরাট হয় এবং ভেতরে ওভারলে লেখা আঁকা হয়।</sys:String>
     <sys:String x:Key="Str_RedactFind_Title">রিড্যাক্ট করার লেখা খুঁজুন</sys:String>
     <sys:String x:Key="Str_RedactFind_Kind">যা খুঁজবেন</sys:String>
     <sys:String x:Key="Str_RedactFind_KindText">শব্দ বা বাক্যাংশ</sys:String>

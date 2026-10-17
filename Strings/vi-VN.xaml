@@ -67,6 +67,17 @@ Có thể thay trang bằng hình ảnh của chính nó với các vùng đã �
     <sys:String x:Key="Str_Redact_MarkPagesPrompt">Các trang cần đánh dấu toàn bộ, ví dụ 1, 3-5. Mọi thứ trên các trang này sẽ bị xóa khi bạn bấm Che.</sys:String>
     <sys:String x:Key="Str_Redact_MarkPagesConfirm">Đánh dấu</sys:String>
     <sys:String x:Key="Str_Redact_MarkedPages">Số trang đã đánh dấu: {0}</sys:String>
+    <sys:String x:Key="Str_Redact_Properties">Thuộc tính</sys:String>
+    <sys:String x:Key="Str_Redact_PropertiesTip">Chọn màu tô và văn bản phủ được vẽ ở nơi nội dung bị xóa</sys:String>
+    <sys:String x:Key="Str_RedactProps_Title">Thuộc tính che</sys:String>
+    <sys:String x:Key="Str_RedactProps_Fill">Màu tô</sys:String>
+    <sys:String x:Key="Str_RedactProps_Code">Mã che</sys:String>
+    <sys:String x:Key="Str_RedactProps_NoCode">Không có</sys:String>
+    <sys:String x:Key="Str_RedactProps_Overlay">Văn bản phủ</sys:String>
+    <sys:String x:Key="Str_RedactProps_Unsupported">Văn bản phủ chỉ có thể dùng chữ Latinh, chữ số và dấu câu thông dụng.</sys:String>
+    <sys:String x:Key="Str_RedactProps_Preview">Xem trước</sys:String>
+    <sys:String x:Key="Str_RedactProps_ApplyExisting">Cũng áp dụng cho {0} dấu đã có trong tài liệu này</sys:String>
+    <sys:String x:Key="Str_RedactProps_Hint">Các dấu mới dùng các thuộc tính này. Khi bạn bấm Che, mỗi vùng được tô bằng màu này và văn bản phủ được vẽ bên trong.</sys:String>
     <sys:String x:Key="Str_RedactFind_Title">Tìm văn bản cần che</sys:String>
     <sys:String x:Key="Str_RedactFind_Kind">Tìm</sys:String>
     <sys:String x:Key="Str_RedactFind_KindText">Từ hoặc cụm từ</sys:String>

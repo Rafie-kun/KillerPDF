@@ -1115,8 +1115,12 @@ internal static class PdfEngineIntegration
         ReplaceWithBuiltResult(path, result);
     }
 
-    /// <summary>One unapplied redaction mark in unrotated, crop-relative page points.</summary>
-    internal sealed record RedactionMarkData(int PageIndex, double Left, double Bottom, double Right, double Top);
+    /// <summary>
+    /// One unapplied redaction mark in unrotated, crop-relative page points, with the overlay text
+    /// and fill color drawn into the area when it is applied.
+    /// </summary>
+    internal sealed record RedactionMarkData(int PageIndex, double Left, double Bottom, double Right, double Top,
+        string? OverlayText = null, PdfRgbColor? FillColor = null);
 
     /// <summary>Reads the redaction marks saved in a document as crop-relative page areas.</summary>
     internal static List<RedactionMarkData> ReadRedactionMarks(PdfDocument document)
@@ -1130,7 +1134,8 @@ internal static class PdfEngineIntegration
             PdfPageInformation page = pages[mark.PageIndex];
             foreach (PdfContentBounds area in mark.Areas)
                 marks.Add(new RedactionMarkData(mark.PageIndex, area.Left - page.Left,
-                    area.Bottom - page.Bottom, area.Right - page.Left, area.Top - page.Bottom));
+                    area.Bottom - page.Bottom, area.Right - page.Left, area.Top - page.Bottom,
+                    string.IsNullOrWhiteSpace(mark.OverlayText) ? null : mark.OverlayText, mark.FillColor));
         }
         return marks;
     }
@@ -1157,11 +1162,13 @@ internal static class PdfEngineIntegration
             PdfPageInformation page = pages[mark.PageIndex];
             double left = page.Left + mark.Left, right = page.Left + mark.Right;
             double bottom = page.Bottom + mark.Bottom, top = page.Bottom + mark.Top;
+            string? overlay = string.IsNullOrWhiteSpace(mark.OverlayText)
+                || !PdfContentRedaction.SupportsOverlayText(mark.OverlayText) ? null : mark.OverlayText.Trim();
             editor.AddRedactionMark(mark.PageIndex,
             [
                 new PdfTextQuad(new PdfPoint(left, top), new PdfPoint(right, top),
                     new PdfPoint(left, bottom), new PdfPoint(right, bottom))
-            ]);
+            ], fillColor: mark.FillColor, overlayText: overlay);
         }
         ReplaceWithBuiltResult(path, editor.Build());
     }

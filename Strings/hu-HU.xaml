@@ -67,6 +67,17 @@ Az oldal lecserélhető a saját képére, amelyen a megjelölt területek feket
     <sys:String x:Key="Str_Redact_MarkPagesPrompt">Teljesen megjelölendő oldalak, például 1, 3-5. A Kitakarás gombra kattintva minden törlődik ezekről az oldalakról.</sys:String>
     <sys:String x:Key="Str_Redact_MarkPagesConfirm">Megjelölés</sys:String>
     <sys:String x:Key="Str_Redact_MarkedPages">Megjelölt oldalak: {0}</sys:String>
+    <sys:String x:Key="Str_Redact_Properties">Tulajdonságok</sys:String>
+    <sys:String x:Key="Str_Redact_PropertiesTip">A tartalom helyére rajzolt kitöltőszín és fedőszöveg kiválasztása</sys:String>
+    <sys:String x:Key="Str_RedactProps_Title">Kitakarás tulajdonságai</sys:String>
+    <sys:String x:Key="Str_RedactProps_Fill">Kitöltőszín</sys:String>
+    <sys:String x:Key="Str_RedactProps_Code">Kitakarási kód</sys:String>
+    <sys:String x:Key="Str_RedactProps_NoCode">Nincs</sys:String>
+    <sys:String x:Key="Str_RedactProps_Overlay">Fedőszöveg</sys:String>
+    <sys:String x:Key="Str_RedactProps_Unsupported">A fedőszöveg csak latin betűket, számjegyeket és gyakori írásjeleket tartalmazhat.</sys:String>
+    <sys:String x:Key="Str_RedactProps_Preview">Előnézet</sys:String>
+    <sys:String x:Key="Str_RedactProps_ApplyExisting">Alkalmazás a dokumentumban már meglévő {0} jelölésre is</sys:String>
+    <sys:String x:Key="Str_RedactProps_Hint">Az új jelölések ezeket a tulajdonságokat használják. A Kitakarás gombra kattintva minden terület ezzel a színnel töltődik ki, és belerajzolódik a fedőszöveg.</sys:String>
     <sys:String x:Key="Str_RedactFind_Title">Kitakarandó szöveg keresése</sys:String>
     <sys:String x:Key="Str_RedactFind_Kind">Keresés erre</sys:String>
     <sys:String x:Key="Str_RedactFind_KindText">Szavak vagy kifejezések</sys:String>

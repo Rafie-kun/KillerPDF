@@ -67,6 +67,17 @@ La page peut être remplacée par une image d'elle-même avec les zones marquée
     <sys:String x:Key="Str_Redact_MarkPagesPrompt">Pages à marquer entièrement, par exemple 1, 3-5. Tout leur contenu est supprimé quand vous cliquez sur Caviarder.</sys:String>
     <sys:String x:Key="Str_Redact_MarkPagesConfirm">Marquer</sys:String>
     <sys:String x:Key="Str_Redact_MarkedPages">Pages marquées : {0}</sys:String>
+    <sys:String x:Key="Str_Redact_Properties">Propriétés</sys:String>
+    <sys:String x:Key="Str_Redact_PropertiesTip">Choisir la couleur de remplissage et le texte superposé dessinés là où le contenu est supprimé</sys:String>
+    <sys:String x:Key="Str_RedactProps_Title">Propriétés du caviardage</sys:String>
+    <sys:String x:Key="Str_RedactProps_Fill">Couleur de remplissage</sys:String>
+    <sys:String x:Key="Str_RedactProps_Code">Code de caviardage</sys:String>
+    <sys:String x:Key="Str_RedactProps_NoCode">Aucun</sys:String>
+    <sys:String x:Key="Str_RedactProps_Overlay">Texte superposé</sys:String>
+    <sys:String x:Key="Str_RedactProps_Unsupported">Le texte superposé ne peut contenir que des lettres latines, des chiffres et la ponctuation courante.</sys:String>
+    <sys:String x:Key="Str_RedactProps_Preview">Aperçu</sys:String>
+    <sys:String x:Key="Str_RedactProps_ApplyExisting">Les appliquer aussi aux {0} marques déjà présentes dans ce document</sys:String>
+    <sys:String x:Key="Str_RedactProps_Hint">Les nouvelles marques utilisent ces propriétés. Quand vous cliquez sur Caviarder, chaque zone est remplie de cette couleur et le texte superposé y est dessiné.</sys:String>
     <sys:String x:Key="Str_RedactFind_Title">Rechercher le texte à caviarder</sys:String>
     <sys:String x:Key="Str_RedactFind_Kind">Rechercher</sys:String>
     <sys:String x:Key="Str_RedactFind_KindText">Mots ou expressions</sys:String>

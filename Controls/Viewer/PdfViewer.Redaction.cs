@@ -11,12 +11,19 @@ namespace KillerPDF.Controls
     // Redact tool: drag areas on the page (or mark the current search results), then remove
     // everything under them for good. Marks are kept in unrotated, crop-relative page points so they
     // survive zoom and view changes. They belong to the document they were drawn on, stay visible
-    // after the tool closes, and are saved into the file as /Redact annotations until applied.
-    internal sealed record RedactionMark(int PageIndex, double Left, double Bottom, double Right, double Top);
+    // after the tool closes, and are saved into the file as /Redact annotations until applied. Each
+    // mark carries the overlay text and fill color drawn into its area when it is applied.
+    internal sealed record RedactionMark(int PageIndex, double Left, double Bottom, double Right, double Top,
+        string? OverlayText = null, Color? Fill = null);
 
     public partial class PdfViewer
     {
         private const string RedactMarkTag = "RedactMark";
+        private const string RedactFillSetting = "RedactFillColor";
+        private const string RedactOverlaySetting = "RedactOverlayText";
+        private static Color? _redactFillDefault;
+        private static string? _redactOverlayDefault;
+        private static bool _redactDefaultsLoaded;
         private List<RedactionMark> _redactMarks = [];
         private Border? _redactBar;
         private TextBlock? _redactCountText;
@@ -64,6 +71,7 @@ namespace KillerPDF.Controls
             BarButton("Str_Redact_Find", "Str_Redact_FindTip", false, (_, _) => FindTextForRedaction());
             BarButton("Str_Redact_MarkSearch", "Str_Redact_MarkSearchTip", false, (_, _) => MarkSearchResultsForRedaction());
             BarButton("Str_Redact_MarkPages", "Str_Redact_MarkPagesTip", false, (_, _) => MarkPagesForRedaction());
+            BarButton("Str_Redact_Properties", "Str_Redact_PropertiesTip", false, (_, _) => EditRedactionProperties());
             BarButton("Str_Redact_Clear", "Str_Redact_ClearTip", false, (_, _) => ClearRedactionMarks());
             var divider = new Border { Width = 1, Margin = new Thickness(2, 0, 8, 0), VerticalAlignment = VerticalAlignment.Stretch };
             divider.SetResourceReference(Border.BackgroundProperty, "CardBorderBrush");
@@ -117,7 +125,9 @@ namespace KillerPDF.Controls
             try
             {
                 foreach (var mark in PdfEngineIntegration.ReadRedactionMarks(EnsureEngineDocumentSession().Document))
-                    _redactMarks.Add(new RedactionMark(mark.PageIndex, mark.Left, mark.Bottom, mark.Right, mark.Top));
+                    _redactMarks.Add(new RedactionMark(mark.PageIndex, mark.Left, mark.Bottom, mark.Right, mark.Top,
+                        mark.OverlayText, mark.FillColor is { } fill
+                            ? Color.FromRgb(ToByte(fill.Red), ToByte(fill.Green), ToByte(fill.Blue)) : null));
             }
             catch (Exception ex) when (ex is FormatException or InvalidOperationException or NotSupportedException)
             {
@@ -129,7 +139,42 @@ namespace KillerPDF.Controls
         /// <summary>Saves the document's unapplied marks into the file being written.</summary>
         internal void WriteRedactionMarksToDocument(string path) =>
             PdfEngineIntegration.WriteRedactionMarks(path, [.. _redactMarks.Select(mark =>
-                new PdfEngineIntegration.RedactionMarkData(mark.PageIndex, mark.Left, mark.Bottom, mark.Right, mark.Top))]);
+                new PdfEngineIntegration.RedactionMarkData(mark.PageIndex, mark.Left, mark.Bottom, mark.Right, mark.Top,
+                    mark.OverlayText, PdfFill(mark.Fill)))]);
+
+        private static byte ToByte(double component) => (byte)Math.Round(Math.Clamp(component, 0, 1) * 255);
+
+        private static KillerPdf.Engine.Authoring.PdfRgbColor? PdfFill(Color? fill) =>
+            fill is Color color ? new KillerPdf.Engine.Authoring.PdfRgbColor(color.R / 255.0, color.G / 255.0, color.B / 255.0) : null;
+
+        private static PdfRedactionRegion ToRegion(RedactionMark mark) =>
+            new(mark.PageIndex, new PdfContentBounds(mark.Left, mark.Bottom, mark.Right, mark.Top), null, mark.OverlayText)
+            {
+                FillColor = PdfFill(mark.Fill)
+            };
+
+        // The fill color and overlay text new marks get, remembered between sessions.
+        private static void LoadRedactionDefaults()
+        {
+            if (_redactDefaultsLoaded) return;
+            _redactDefaultsLoaded = true;
+            try
+            {
+                if (App.GetSetting(RedactFillSetting) is string fill && fill.Length > 0
+                    && ColorConverter.ConvertFromString(fill) is Color color)
+                    _redactFillDefault = Color.FromRgb(color.R, color.G, color.B);
+            }
+            catch (FormatException) { _redactFillDefault = null; }
+            string? overlay = App.GetSetting(RedactOverlaySetting)?.Trim();
+            _redactOverlayDefault = string.IsNullOrEmpty(overlay) || !PdfContentRedaction.SupportsOverlayText(overlay)
+                ? null : overlay;
+        }
+
+        private static RedactionMark NewMark(int pageIndex, double left, double bottom, double right, double top)
+        {
+            LoadRedactionDefaults();
+            return new RedactionMark(pageIndex, left, bottom, right, top, _redactOverlayDefault, _redactFillDefault);
+        }
 
         /// <summary>True when the event came from the Redact bar, which the page canvas must not swallow.</summary>
         internal bool IsInRedactionBar(object? source) =>
@@ -190,7 +235,8 @@ namespace KillerPDF.Controls
                 {
                     Width = Math.Max(1, rect.Width),
                     Height = Math.Max(1, rect.Height),
-                    Fill = new SolidColorBrush(Color.FromArgb(120, 0, 0, 0)),
+                    Fill = new SolidColorBrush(Color.FromArgb(120, (mark.Fill ?? Colors.Black).R,
+                        (mark.Fill ?? Colors.Black).G, (mark.Fill ?? Colors.Black).B)),
                     Stroke = new SolidColorBrush(Color.FromRgb(0xE0, 0x20, 0x20)),
                     StrokeThickness = 1.5,
                     IsHitTestVisible = false,
@@ -270,7 +316,7 @@ namespace KillerPDF.Controls
                 var (left, bottom, right, top) = RedactionGeometry.CanvasToPage(drawn, pw, ph, cw, ch, rot);
                 if (right - left > 0.5 && top - bottom > 0.5)
                 {
-                    _redactMarks.Add(new RedactionMark(pageIndex, left, bottom, right, top));
+                    _redactMarks.Add(NewMark(pageIndex, left, bottom, right, top));
                     MarkDirty();
                 }
             }
@@ -304,7 +350,7 @@ namespace KillerPDF.Controls
                 {
                     var (left, bottom, right, top) = RedactionGeometry.CanvasToPage(line, pw, ph, cw, ch, rot);
                     if (right - left > 0.5 && top - bottom > 0.5)
-                        marks.Add(new RedactionMark(page, left, bottom, right, top));
+                        marks.Add(NewMark(page, left, bottom, right, top));
                 }
             }
             if (marks.Count == 0) return;
@@ -341,7 +387,7 @@ namespace KillerPDF.Controls
                 {
                     if (_redactMarks.Any(mark => mark.PageIndex == page && mark.Left == left
                         && mark.Bottom == bottom && mark.Right == right && mark.Top == top)) continue;
-                    _redactMarks.Add(new RedactionMark(page, left, bottom, right, top));
+                    _redactMarks.Add(NewMark(page, left, bottom, right, top));
                     added++;
                 }
             }
@@ -371,7 +417,7 @@ namespace KillerPDF.Controls
                 {
                     if (_redactMarks.Any(mark => mark.PageIndex == match.PageIndex && mark.Left == area.Left
                         && mark.Bottom == area.Bottom && mark.Right == area.Right && mark.Top == area.Top)) continue;
-                    _redactMarks.Add(new RedactionMark(match.PageIndex, area.Left, area.Bottom, area.Right, area.Top));
+                    _redactMarks.Add(NewMark(match.PageIndex, area.Left, area.Bottom, area.Right, area.Top));
                     added++;
                 }
             }
@@ -404,13 +450,33 @@ namespace KillerPDF.Controls
                 double width = session.Pages[page].Width, height = session.Pages[page].Height;
                 if (_redactMarks.Any(mark => mark.PageIndex == page && mark.Left <= 0 && mark.Bottom <= 0
                     && mark.Right >= width && mark.Top >= height)) continue;
-                _redactMarks.Add(new RedactionMark(page, 0, 0, width, height));
+                _redactMarks.Add(NewMark(page, 0, 0, width, height));
                 added++;
             }
             if (added > 0) MarkDirty();
             UpdateRedactionCount();
             RepaintRedactionMarks();
             SetStatus(string.Format(Loc("Str_Redact_MarkedPages"), added));
+        }
+
+        // The Redact bar's Properties: the fill color and overlay text for new marks, and optionally
+        // for the marks already drawn.
+        private void EditRedactionProperties()
+        {
+            if (_doc is null || Window.GetWindow(this) is not Window owner) return;
+            LoadRedactionDefaults();
+            var dialog = new RedactionPropertiesDialog(owner, _redactFillDefault ?? Colors.Black,
+                _redactOverlayDefault, _redactMarks.Count);
+            if (dialog.ShowDialog() != true) return;
+            _redactFillDefault = dialog.Fill;
+            _redactOverlayDefault = dialog.OverlayText;
+            App.SetSetting(RedactFillSetting, $"#{dialog.Fill.R:X2}{dialog.Fill.G:X2}{dialog.Fill.B:X2}");
+            App.SetSetting(RedactOverlaySetting, dialog.OverlayText ?? string.Empty);
+            if (!dialog.ApplyToExisting || _redactMarks.Count == 0) return;
+            for (int index = 0; index < _redactMarks.Count; index++)
+                _redactMarks[index] = _redactMarks[index] with { OverlayText = dialog.OverlayText, Fill = dialog.Fill };
+            MarkDirty();
+            RepaintRedactionMarks();
         }
 
         private void ClearRedactionMarks()
@@ -432,8 +498,7 @@ namespace KillerPDF.Controls
             PdfEngineDocumentSession session = EnsureEngineDocumentSession();
             List<PdfRedactionRegion> regions = [.. _redactMarks
                 .Where(mark => mark.PageIndex >= 0 && mark.PageIndex < session.PageCount)
-                .Select(mark => new PdfRedactionRegion(mark.PageIndex,
-                    new PdfContentBounds(mark.Left, mark.Bottom, mark.Right, mark.Top)))];
+                .Select(ToRegion)];
 
             PdfContentRedactionPlan plan;
             try { plan = PdfEngineIntegration.AnalyzeRedaction(session.Document, regions); }
@@ -521,9 +586,7 @@ namespace KillerPDF.Controls
         }
 
         /// <summary>The areas marked with the Redact tool on the active document, for a macro's Redact step.</summary>
-        internal List<PdfRedactionRegion> PendingRedactionRegions() =>
-            [.. _redactMarks.Select(mark => new PdfRedactionRegion(mark.PageIndex,
-                new PdfContentBounds(mark.Left, mark.Bottom, mark.Right, mark.Top)))];
+        internal List<PdfRedactionRegion> PendingRedactionRegions() => [.. _redactMarks.Select(ToRegion)];
 
         // Unsaved overlay annotations drawn over a redacted area would be burned back in on save,
         // so they go with the content underneath once the redaction succeeds.

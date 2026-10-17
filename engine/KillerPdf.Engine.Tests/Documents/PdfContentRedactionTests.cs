@@ -283,6 +283,69 @@ public sealed class PdfContentRedactionTests
             [new PdfRedactionRegion(0, new PdfContentBounds(300, 100, 400, 150))]));
     }
 
+    [Fact]
+    public void FillsTheAreaWithItsColorAndDrawsTheOverlayTextAsRealText()
+    {
+        PdfDocument document = PdfDocument.Open(SinglePage(
+            "BT /F1 12 Tf 72 700 Td (Account SECRET42 closed) Tj ET"));
+        PdfRedactionRegion region = Region(document, 0, "SECRET42") with
+        {
+            OverlayText = "(b)(6)",
+            FillColor = new PdfRgbColor(1, 0, 0)
+        };
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, [region],
+            new PdfContentRedactionOptions { ProhibitedText = ["SECRET42"] });
+
+        Assert.True(result.Verification.Succeeded);
+        PdfDocument output = PdfDocument.Open(result.Document);
+        string text = Letters(output, 0);
+        Assert.Contains("(b)(6)", text);
+        Assert.Contains("Account", text);
+        Assert.DoesNotContain("SECRET", text);
+        Assert.All(new PdfPageContentReader(output).Read(0).Letters
+            .Where(letter => PdfContentRedaction.Overlaps(letter.BoundingBox, region.Bounds)),
+            letter => Assert.Contains(letter.Value, "(b)(6)"));
+        PdfRenderedPage rendered = new PdfPageRenderer(output).Render(0, new PdfRenderOptions(612, 792));
+        double cy = (region.Bounds.Bottom + region.Bounds.Top) / 2;
+        (byte red, byte green, byte blue) = Pixel(rendered, (int)region.Bounds.Left + 1, 792 - (int)cy);
+        Assert.True(red > 200 && green < 60 && blue < 60, $"Expected red, got {red},{green},{blue}.");
+    }
+
+    [Fact]
+    public void OverlayTextReadsUprightOnRotatedPagesAndFallsBackToTheReasonCode()
+    {
+        PdfDocument document = PdfDocument.Open(SinglePage(
+            "BT /F1 12 Tf 110 400 Td (HIDDEN) Tj ET", "/MediaBox [0 0 612 792] /Rotate 90"));
+        var region = new PdfRedactionRegion(0, new PdfContentBounds(100, 300, 160, 500), ReasonCode: "(b)(7)(C)");
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, [region]);
+
+        Assert.True(result.Verification.Succeeded);
+        PdfExtractedLetter[] overlay = [.. new PdfPageContentReader(PdfDocument.Open(result.Document)).Read(0).Letters];
+        Assert.Equal("(b)(7)(C)", string.Concat(overlay.Select(letter => letter.Value)));
+        Assert.All(overlay, letter =>
+        {
+            Assert.Equal(PdfWritingDirection.BottomToTop, letter.WritingDirection);
+            Assert.True(PdfContentRedaction.Overlaps(letter.BoundingBox, region.Bounds));
+        });
+    }
+
+    [Fact]
+    public void VerificationRejectsTextThatIsNotTheOverlayText()
+    {
+        PdfDocument document = PdfDocument.Open(SinglePage(
+            "BT /F1 12 Tf 72 700 Td (Account SECRET42 closed) Tj ET"));
+        PdfRedactionRegion region = Region(document, 0, "SECRET42") with { OverlayText = "(b)(6)" };
+
+        PdfRedactionVerificationReport report = PdfContentRedaction.Verify(document.Source, [region], [],
+            expectMetadataCleared: false);
+
+        Assert.Contains(report.Findings, finding => finding.Code == "TextInRegion");
+        Assert.True(PdfContentRedaction.SupportsOverlayText("Caf\u00e9 (b)(6)"));
+        Assert.False(PdfContentRedaction.SupportsOverlayText("\u79d8\u5bc6"));
+    }
+
     private static void AssertKeptLettersUnmoved(PdfDocument before, PdfDocument after, int pageIndex,
         IReadOnlyList<PdfRedactionRegion> regions)
     {

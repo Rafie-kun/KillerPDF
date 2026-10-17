@@ -67,6 +67,17 @@ Siden kan erstattes med et bilde av seg selv der de markerte områdene er sverte
     <sys:String x:Key="Str_Redact_MarkPagesPrompt">Sider som skal merkes helt, for eksempel 1, 3-5. Alt på disse sidene fjernes når du klikker Sladd.</sys:String>
     <sys:String x:Key="Str_Redact_MarkPagesConfirm">Merk</sys:String>
     <sys:String x:Key="Str_Redact_MarkedPages">Merkede sider: {0}</sys:String>
+    <sys:String x:Key="Str_Redact_Properties">Egenskaper</sys:String>
+    <sys:String x:Key="Str_Redact_PropertiesTip">Velg fyllfargen og overleggsteksten som tegnes der innhold fjernes</sys:String>
+    <sys:String x:Key="Str_RedactProps_Title">Sladdeegenskaper</sys:String>
+    <sys:String x:Key="Str_RedactProps_Fill">Fyllfarge</sys:String>
+    <sys:String x:Key="Str_RedactProps_Code">Sladdekode</sys:String>
+    <sys:String x:Key="Str_RedactProps_NoCode">Ingen</sys:String>
+    <sys:String x:Key="Str_RedactProps_Overlay">Overleggstekst</sys:String>
+    <sys:String x:Key="Str_RedactProps_Unsupported">Overleggsteksten kan bare inneholde latinske bokstaver, sifre og vanlig tegnsetting.</sys:String>
+    <sys:String x:Key="Str_RedactProps_Preview">Forhåndsvisning</sys:String>
+    <sys:String x:Key="Str_RedactProps_ApplyExisting">Bruk dem også for de {0} merkene som allerede er i dokumentet</sys:String>
+    <sys:String x:Key="Str_RedactProps_Hint">Nye merker bruker disse egenskapene. Når du klikker Sladd, fylles hvert område med denne fargen og overleggsteksten tegnes inni.</sys:String>
     <sys:String x:Key="Str_RedactFind_Title">Finn tekst som skal sladdes</sys:String>
     <sys:String x:Key="Str_RedactFind_Kind">Søk etter</sys:String>
     <sys:String x:Key="Str_RedactFind_KindText">Ord eller uttrykk</sys:String>

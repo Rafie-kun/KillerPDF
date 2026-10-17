@@ -67,6 +67,17 @@ The page can be replaced with an image of itself with the marked areas blacked o
     <sys:String x:Key="Str_Redact_MarkPagesPrompt">Pages to mark completely, such as 1, 3-5. Everything on these pages is removed when you click Redact.</sys:String>
     <sys:String x:Key="Str_Redact_MarkPagesConfirm">Mark</sys:String>
     <sys:String x:Key="Str_Redact_MarkedPages">Pages marked: {0}</sys:String>
+    <sys:String x:Key="Str_Redact_Properties">Properties</sys:String>
+    <sys:String x:Key="Str_Redact_PropertiesTip">Choose the fill color and the overlay text drawn where content is removed</sys:String>
+    <sys:String x:Key="Str_RedactProps_Title">Redaction properties</sys:String>
+    <sys:String x:Key="Str_RedactProps_Fill">Fill color</sys:String>
+    <sys:String x:Key="Str_RedactProps_Code">Redaction code</sys:String>
+    <sys:String x:Key="Str_RedactProps_NoCode">None</sys:String>
+    <sys:String x:Key="Str_RedactProps_Overlay">Overlay text</sys:String>
+    <sys:String x:Key="Str_RedactProps_Unsupported">Overlay text can only use Latin letters, digits and common punctuation.</sys:String>
+    <sys:String x:Key="Str_RedactProps_Preview">Preview</sys:String>
+    <sys:String x:Key="Str_RedactProps_ApplyExisting">Also use these for the {0} marks already on this document</sys:String>
+    <sys:String x:Key="Str_RedactProps_Hint">New marks use these properties. When you click Redact, each area is filled with this color and the overlay text is drawn inside it.</sys:String>
     <sys:String x:Key="Str_RedactFind_Title">Find Text to Redact</sys:String>
     <sys:String x:Key="Str_RedactFind_Kind">Search for</sys:String>
     <sys:String x:Key="Str_RedactFind_KindText">Words or phrases</sys:String>

@@ -152,9 +152,10 @@ public static class PdfContentRedaction
             throw new InvalidOperationException("Pages " + string.Join(", ", unapproved.Select(page => page + 1))
                 + " cannot be redacted without replacing them with an image.");
         var rasterPages = new HashSet<int>(approved.Where(byPage.ContainsKey));
+        Dictionary<int, PdfRedactionRegion[]> covers = GroupCovers(regionList);
 
         byte[] output;
-        try { output = Rewrite(document, tree, byPage, rasterPages, options, cancellationToken); }
+        try { output = Rewrite(document, tree, byPage, covers, rasterPages, options, cancellationToken); }
         catch (Exception error) when (error is InvalidOperationException or FormatException
             or NotSupportedException)
         {
@@ -168,7 +169,7 @@ public static class PdfContentRedaction
                 AllowSignatureInvalidation = options.AllowSignatureInvalidation,
                 RemoveEncryption = options.RemoveEncryption
             }));
-            output = Rewrite(normalized, PdfPageTree.Read(normalized), byPage, rasterPages, options, cancellationToken);
+            output = Rewrite(normalized, PdfPageTree.Read(normalized), byPage, covers, rasterPages, options, cancellationToken);
         }
         PdfRedactionVerificationReport verification = Verify(output, regionList, rasterPages,
             options.ProhibitedText, options.ClearDocumentMetadata, cancellationToken);
@@ -227,11 +228,12 @@ public static class PdfContentRedaction
     }
 
     private static byte[] Rewrite(PdfDocument document, PdfPageTree tree,
-        Dictionary<int, PdfContentBounds[]> byPage, HashSet<int> rasterPages,
-        PdfContentRedactionOptions options, CancellationToken cancellationToken)
+        Dictionary<int, PdfContentBounds[]> byPage, Dictionary<int, PdfRedactionRegion[]> covers,
+        HashSet<int> rasterPages, PdfContentRedactionOptions options, CancellationToken cancellationToken)
     {
         Dictionary<int, PdfImage> images = rasterPages.Count == 0 ? []
-            : RenderRasterPages(document, tree, byPage, rasterPages, options, cancellationToken);
+            : RenderRasterPages(document, tree, covers, rasterPages, options, cancellationToken);
+        PdfIndirectReference? overlayFont = null;
 
         var update = new PdfIncrementalUpdateBuilder(document);
         var fonts = new Dictionary<PdfDictionary, PdfExtractionFont?>(ReferenceEqualityComparer.Instance);
@@ -261,18 +263,21 @@ public static class PdfContentRedaction
                 instructions.Add(new PdfContentInstruction("Do", 0, [Name(RedactionImageName)]));
                 instructions.Add(Op("Q"));
             }
-            else
+            // Each area is filled with its color, and its overlay text is drawn upright as real text.
+            PdfRedactionRegion[] pageCovers = covers[pageIndex];
+            if (pageCovers.Any(cover => Overlay(cover, geometry) is not null))
             {
-                foreach (PdfContentBounds region in pageRegions)
+                overlayFont ??= update.AddObject(new PdfDictionary(new Dictionary<PdfName, PdfObject>
                 {
-                    instructions.Add(Op("q"));
-                    instructions.Add(Op("rg", 0, 0, 0));
-                    instructions.Add(Op("re", region.Left + geometry.CropLeft, region.Bottom + geometry.CropBottom,
-                        region.Width, region.Height));
-                    instructions.Add(Op("f"));
-                    instructions.Add(Op("Q"));
-                }
+                    [Name("Type")] = Name("Font"),
+                    [Name("Subtype")] = Name("Type1"),
+                    [Name("BaseFont")] = Name(OverlayFontFamily),
+                    [Name("Encoding")] = Name("WinAnsiEncoding")
+                }));
+                resources = WithEntry(resources, Name("Font"), Name(OverlayFontName), overlayFont, document);
             }
+            foreach (PdfRedactionRegion cover in pageCovers)
+                AddCover(instructions, cover, geometry);
             PdfIndirectReference contentReference = update.AddObject(
                 new PdfStream(new PdfDictionary([]), PdfContentStreamWriter.Write(instructions)));
             var entries = page.Dictionary
@@ -322,6 +327,7 @@ public static class PdfContentRedaction
     {
         ArgumentNullException.ThrowIfNull(regions);
         ArgumentNullException.ThrowIfNull(rasterPages);
+        PdfRedactionRegion[] regionList = [.. regions];
         string[] prohibited = [.. (prohibitedText ?? []).Where(value => !string.IsNullOrWhiteSpace(value))];
         var findings = new List<PdfRedactionVerificationFinding>();
         PdfDocument document = PdfDocument.Open(output);
@@ -332,18 +338,16 @@ public static class PdfContentRedaction
             findings.Add(new("DocumentInformation", "The output contains a document-information dictionary."));
         if (expectMetadataCleared && tree.Catalog.ContainsKey(MetadataName))
             findings.Add(new("XmpMetadata", "The output contains XMP metadata."));
-        Dictionary<int, PdfContentBounds[]> byPage = GroupRegions(regions, tree.Pages.Count);
+        Dictionary<int, PdfContentBounds[]> byPage = GroupRegions(regionList, tree.Pages.Count);
+        Dictionary<int, PdfRedactionRegion[]> covers = GroupCovers(regionList);
         var reader = new PdfPageContentReader(document);
         foreach ((int pageIndex, PdfContentBounds[] pageRegions) in byPage.OrderBy(item => item.Key))
         {
             cancellationToken.ThrowIfCancellationRequested();
             PdfPageContent content = reader.Read(pageIndex, cancellationToken);
-            foreach (PdfExtractedLetter letter in content.Letters)
-                if (pageRegions.Any(region => Overlaps(letter.BoundingBox, region)))
-                {
-                    findings.Add(new("TextInRegion", "Text remains inside a redacted area.", pageIndex));
-                    break;
-                }
+            PageGeometry pageGeometry = Geometry(document, tree.Pages[pageIndex]);
+            if (TextRemains(content.Letters, pageRegions, covers[pageIndex], pageGeometry))
+                findings.Add(new("TextInRegion", "Text remains inside a redacted area.", pageIndex));
             bool raster = rasterPages.Contains(pageIndex);
             foreach (PdfExtractedImage image in content.Images)
             {
@@ -362,8 +366,7 @@ public static class PdfContentRedaction
                     findings.Add(new("ShadingInRegion", "A shading remains inside a redacted area.", pageIndex));
                     break;
                 }
-            PageGeometry geometry = Geometry(document, tree.Pages[pageIndex]);
-            if (IntersectingAnnotations(document, tree.Pages[pageIndex], geometry, pageRegions).Count != 0)
+            if (IntersectingAnnotations(document, tree.Pages[pageIndex], pageGeometry, pageRegions).Count != 0)
                 findings.Add(new("AnnotationInRegion", "An annotation remains over a redacted area.", pageIndex));
             foreach (PdfName key in RemovedPageKeys)
                 if (tree.Pages[pageIndex].Dictionary.ContainsKey(key))
@@ -443,7 +446,7 @@ public static class PdfContentRedaction
     }
 
     private static Dictionary<int, PdfImage> RenderRasterPages(PdfDocument document, PdfPageTree tree,
-        Dictionary<int, PdfContentBounds[]> byPage, HashSet<int> rasterPages,
+        Dictionary<int, PdfRedactionRegion[]> covers, HashSet<int> rasterPages,
         PdfContentRedactionOptions options, CancellationToken cancellationToken)
     {
         // Render from a copy whose replaced pages carry the filled regions, so the boxes are in the pixels.
@@ -459,9 +462,11 @@ public static class PdfContentRedaction
                 else items.Add(contents);
             }
             var tail = new List<PdfContentInstruction> { Op("Q") };
-            foreach (PdfContentBounds region in byPage[pageIndex])
+            foreach (PdfRedactionRegion cover in covers[pageIndex])
             {
-                tail.Add(Op("rg", 0, 0, 0));
+                PdfContentBounds region = cover.Bounds;
+                PdfRgbColor fill = cover.FillColor ?? DefaultFill;
+                tail.Add(Op("rg", fill.Red, fill.Green, fill.Blue));
                 tail.Add(Op("re", region.Left + geometry.CropLeft, region.Bottom + geometry.CropBottom, region.Width, region.Height));
                 tail.Add(Op("f"));
             }
@@ -747,11 +752,116 @@ public static class PdfContentRedaction
             if (!double.IsFinite(bounds.Left) || !double.IsFinite(bounds.Bottom) || !double.IsFinite(bounds.Right)
                 || !double.IsFinite(bounds.Top) || bounds.Width <= 0 || bounds.Height <= 0)
                 throw new ArgumentOutOfRangeException(nameof(regions), "A redaction region must have a positive finite size.");
+            if (region.FillColor is PdfRgbColor fill && !(fill.Red is >= 0 and <= 1 && fill.Green is >= 0 and <= 1
+                && fill.Blue is >= 0 and <= 1))
+                throw new ArgumentOutOfRangeException(nameof(regions), "A redaction fill color must use components from 0 through 1.");
             if (!result.TryGetValue(region.PageIndex, out List<PdfContentBounds>? list))
                 result[region.PageIndex] = list = [];
             list.Add(bounds);
         }
         return result.ToDictionary(item => item.Key, item => item.Value.ToArray());
+    }
+
+    private static Dictionary<int, PdfRedactionRegion[]> GroupCovers(IEnumerable<PdfRedactionRegion> regions) =>
+        regions.GroupBy(region => region.PageIndex).ToDictionary(group => group.Key, group => group.ToArray());
+
+    private const string OverlayFontFamily = "Helvetica";
+    private const string OverlayFontName = "KPRedactFont";
+    private const double MaximumOverlaySize = 12;
+    private const double MinimumOverlaySize = 3;
+    private const double OverlayPadding = 2;
+    private static readonly PdfRgbColor DefaultFill = new(0, 0, 0);
+
+    /// <summary>True when overlay text can be drawn exactly with the standard overlay font.</summary>
+    public static bool SupportsOverlayText(string text)
+    {
+        ArgumentNullException.ThrowIfNull(text);
+        return PdfWinAnsiText.CanEncode(text);
+    }
+
+    private readonly record struct OverlayPlacement(byte[] Text, double Size, double[] TextMatrix);
+
+    // The overlay text, sized to fit and centered, reads upright on the displayed page.
+    private static OverlayPlacement? Overlay(PdfRedactionRegion region, PageGeometry geometry)
+    {
+        string? text = (region.OverlayText ?? region.ReasonCode)?.Trim();
+        if (string.IsNullOrEmpty(text)) return null;
+        byte[] bytes = PdfWinAnsiText.Encode(text);
+        double unit = PdfWinAnsiText.Width(OverlayFontFamily, bytes);
+        PdfContentBounds bounds = region.Bounds;
+        bool quarter = geometry.Rotation is 90 or 270;
+        double across = quarter ? bounds.Height : bounds.Width, up = quarter ? bounds.Width : bounds.Height;
+        double size = Math.Min(MaximumOverlaySize, up * 0.7);
+        if (unit > 0) size = Math.Min(size, (across - 2 * OverlayPadding) / unit);
+        if (!(size >= MinimumOverlaySize)) return null;
+        double u = (across - unit * size) / 2, v = (up - size * 0.7) / 2;
+        double x = bounds.Left + geometry.CropLeft, y = bounds.Bottom + geometry.CropBottom;
+        double w = bounds.Width, h = bounds.Height;
+        (double tx, double ty, double cos, double sin) = geometry.Rotation switch
+        {
+            90 => (x + w - v, y + u, 0d, 1d),
+            180 => (x + w - u, y + h - v, -1d, 0d),
+            270 => (x + v, y + h - u, 0d, -1d),
+            _ => (x + u, y + v, 1d, 0d)
+        };
+        return new OverlayPlacement(bytes, size, [cos, sin, -sin, cos, tx, ty]);
+    }
+
+    private static void AddCover(List<PdfContentInstruction> instructions, PdfRedactionRegion region, PageGeometry geometry)
+    {
+        PdfContentBounds bounds = region.Bounds;
+        double x = bounds.Left + geometry.CropLeft, y = bounds.Bottom + geometry.CropBottom;
+        PdfRgbColor fill = region.FillColor ?? DefaultFill;
+        instructions.Add(Op("q"));
+        instructions.Add(Op("rg", fill.Red, fill.Green, fill.Blue));
+        instructions.Add(Op("re", x, y, bounds.Width, bounds.Height));
+        instructions.Add(Op("f"));
+        if (Overlay(region, geometry) is OverlayPlacement overlay)
+        {
+            instructions.Add(Op("re", x, y, bounds.Width, bounds.Height));
+            instructions.Add(Op("W"));
+            instructions.Add(Op("n"));
+            double ink = 0.2126 * fill.Red + 0.7152 * fill.Green + 0.0722 * fill.Blue < 0.5 ? 1 : 0;
+            instructions.Add(Op("rg", ink, ink, ink));
+            instructions.Add(Op("BT"));
+            instructions.Add(new PdfContentInstruction("Tf", 0, [Name(OverlayFontName), new PdfReal(overlay.Size)]));
+            instructions.Add(Op("Tm", overlay.TextMatrix));
+            instructions.Add(new PdfContentInstruction("Tj", 0, [new PdfString(overlay.Text, PdfStringForm.Hexadecimal)]));
+            instructions.Add(Op("ET"));
+        }
+        instructions.Add(Op("Q"));
+    }
+
+    // Text in a redacted area fails verification unless it is exactly the overlay text drawn there:
+    // every letter must sit in an area with overlay text, and together they must spell those texts.
+    private static bool TextRemains(IReadOnlyList<PdfExtractedLetter> letters, PdfContentBounds[] regions,
+        PdfRedactionRegion[] covers, PageGeometry geometry)
+    {
+        PdfContentBounds[] overlaid = [.. covers.Where(cover => Overlay(cover, geometry) is not null)
+            .Select(cover => cover.Bounds)];
+        var found = new List<char>();
+        foreach (PdfExtractedLetter letter in letters)
+        {
+            if (!regions.Any(region => Overlaps(letter.BoundingBox, region))) continue;
+            if (!overlaid.Any(region => ContainsCenter(letter.BoundingBox, region))) return true;
+            found.AddRange(letter.Value.Where(character => !char.IsWhiteSpace(character)));
+        }
+        if (found.Count == 0) return false;
+        var expected = new List<char>();
+        foreach (PdfRedactionRegion cover in covers)
+            if (Overlay(cover, geometry) is OverlayPlacement overlay)
+                expected.AddRange(PdfWinAnsiText.Decode(overlay.Text).Where(character => !char.IsWhiteSpace(character)));
+        found.Sort();
+        expected.Sort();
+        // Letters may only come from the overlays, never more than they draw.
+        int next = 0;
+        foreach (char character in found)
+        {
+            while (next < expected.Count && expected[next] < character) next++;
+            if (next >= expected.Count || expected[next] != character) return true;
+            next++;
+        }
+        return false;
     }
 
     internal readonly record struct PageGeometry(double CropLeft, double CropBottom, double Width, double Height, int Rotation);

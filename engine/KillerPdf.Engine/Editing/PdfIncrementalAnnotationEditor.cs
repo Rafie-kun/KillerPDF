@@ -669,9 +669,9 @@ public sealed class PdfIncrementalAnnotationEditor
         if (!double.IsFinite(opacity) || opacity is < 0 or > 1)
             throw new ArgumentOutOfRangeException(nameof(opacity));
         if (overlayFont is null && overlayText is not null
-            && overlayText.Any(character => character > 0x7F))
+            && !PdfWinAnsiText.CanEncode(overlayText))
             throw new ArgumentException(
-                "Baseline redaction overlay text supports ASCII characters.",
+                "Baseline redaction overlay text supports WinAnsi characters.",
                 nameof(overlayText));
         if (overlayText is not null && overlayFont is null && IsPdfA4())
             throw new InvalidOperationException(
@@ -3383,7 +3383,7 @@ public sealed class PdfIncrementalAnnotationEditor
             entries.Add(("Repeat", new PdfBoolean(value.RepeatOverlayText)));
             entries.Add(("Q", new PdfInteger((int)value.OverlayAlignment)));
             entries.Add(("DA", Latin1String(
-                $"{NameToken(fontResource!)} {Format(value.OverlayFontSize)} Tf 1 1 1 rg")));
+                $"{NameToken(fontResource!)} {Format(value.OverlayFontSize)} Tf {OverlayInk(value.FillColor)} rg")));
         }
         return Dictionary([.. entries]);
     }
@@ -3429,7 +3429,8 @@ public sealed class PdfIncrementalAnnotationEditor
                 double bottom = Math.Min(quad.LowerLeft.Y, quad.LowerRight.Y) - value.Y;
                 double top = Math.Max(quad.UpperLeft.Y, quad.UpperRight.Y) - value.Y;
                 double textWidth = value.OverlayFont is null
-                    ? value.OverlayText.Length * value.OverlayFontSize * 0.5
+                    ? PdfWinAnsiText.Width("Helvetica", PdfWinAnsiText.Encode(value.OverlayText))
+                        * value.OverlayFontSize
                     : TextWidth(value.OverlayText, value.OverlayFont,
                         value.OverlayFontSize);
                 double textX = value.OverlayAlignment switch
@@ -3446,10 +3447,11 @@ public sealed class PdfIncrementalAnnotationEditor
                     (top - bottom - value.OverlayFontSize) / 2);
                 WriteAscii(output,
                     $"BT\n{NameToken(fontResource!)} {Format(value.OverlayFontSize)} Tf\n" +
-                    $"1 1 1 rg\n1 0 0 1 {Format(textX)} {Format(textY)} Tm\n");
+                    $"{OverlayInk(value.FillColor)} rg\n1 0 0 1 {Format(textX)} {Format(textY)} Tm\n");
                 if (value.OverlayFont is null)
                 {
-                    output.Write(PdfObjectWriter.Write(Latin1String(value.OverlayText)));
+                    output.Write(PdfObjectWriter.Write(new PdfString(
+                        PdfWinAnsiText.Encode(value.OverlayText), PdfStringForm.Literal)));
                     output.Write(" Tj\n"u8);
                 }
                 else
@@ -3974,6 +3976,9 @@ public sealed class PdfIncrementalAnnotationEditor
         new([Number(x), Number(y), Number(x + width), Number(y + height)]);
     private static PdfArray ColorArray(PdfRgbColor color) =>
         new([Number(color.Red), Number(color.Green), Number(color.Blue)]);
+    // Overlay text is white on a dark fill and black on a light one.
+    private static string OverlayInk(PdfRgbColor fill) =>
+        0.2126 * fill.Red + 0.7152 * fill.Green + 0.0722 * fill.Blue < 0.5 ? "1 1 1" : "0 0 0";
     private static string ColorOperands(PdfRgbColor color) =>
         $"{Format(color.Red)} {Format(color.Green)} {Format(color.Blue)}";
     private static PdfObject Number(double value) => value == Math.Truncate(value)

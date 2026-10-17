@@ -2045,7 +2045,8 @@ public sealed class PdfIncrementalAnnotationEditorTests
         Assert.Throws<ArgumentException>(() => editor.AddRedactionMark(
             0, []));
         Assert.Throws<ArgumentException>(() => editor.AddRedactionMark(0,
-            [Quad(0, 0, 10, 10)], overlayText: "é"));
+            [Quad(0, 0, 10, 10)], overlayText: "\u79d8"));
+        editor.AddRedactionMark(0, [Quad(0, 0, 10, 10)], overlayText: "Caf\u00e9");
         Assert.Throws<ArgumentOutOfRangeException>(() => editor.AddRedactionMark(0,
             [Quad(0, 0, 10, 10)], opacity: 2));
         Assert.Throws<ArgumentOutOfRangeException>(() => editor.AddRedactionMark(0,
