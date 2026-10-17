@@ -76,6 +76,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - The toolbar's Search button is now Find Text, so it reads apart from Search Tools.
 - Check for updates on startup is the first of the About options, as in the other Killer Tools apps.
 - The Light theme draws a softer shadow under the toolbars.
+- Primary, outline and secondary buttons sit raised on a soft shadow that lifts on hover and sets down when pressed. 98SE keeps its flat beveled buttons.
 - Closing KillerPDF, a tab or all tabs with unsaved changes asks Save, Don't Save or Cancel instead of only whether to close without saving. Save writes every unsaved document and then closes, and a cancelled or failed save keeps the window open.
 - Esc no longer closes KillerPDF. It still cancels the open tool, search or overlay, and with nothing to cancel it does nothing, as in other Windows apps.
 - The website's top bar Download button uses the same font and height as the other top bar buttons.
