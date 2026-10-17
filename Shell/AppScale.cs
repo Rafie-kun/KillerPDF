@@ -68,13 +68,29 @@ namespace KillerPDF
             // deliberately untouched, so the app size and the page zoom stay two separate
             // controls.
             var t = scale == 1.0 ? Transform.Identity : new ScaleTransform(scale, scale);
-            ToolbarRowBorder.LayoutTransform = t;
-            SidebarOuterGrid.LayoutTransform = t;
-            FooterDocumentControls.LayoutTransform = t;
             // BOTH panes: each carries its own strip, and scaling only the focused one would leave
             // the other pane's tabs at the previous size.
-            Viewer.TabStripBorderCtl.LayoutTransform  = t;
-            ViewerB.TabStripBorderCtl.LayoutTransform = t;
+            foreach (FrameworkElement host in new FrameworkElement[]
+                     { ToolbarRowBorder, SidebarOuterGrid, FooterDocumentControls,
+                       Viewer.TabStripBorderCtl, ViewerB.TabStripBorderCtl })
+            {
+                host.LayoutTransform = t;
+                // The window draws Display + ClearType text (MainWindow.xaml), which snaps glyphs to
+                // whole device pixels and is only crisp at 1:1. Under any other scale those snapped
+                // stems land on fractional pixels and the scaled chrome smears, so it switches to
+                // Ideal + Grayscale, which places glyphs smoothly at any scale, and hands control back
+                // to the window at exactly 1.0. The same trade the other Killer Tools apps make.
+                if (scale == 1.0)
+                {
+                    host.ClearValue(TextOptions.TextFormattingModeProperty);
+                    host.ClearValue(TextOptions.TextRenderingModeProperty);
+                }
+                else
+                {
+                    TextOptions.SetTextFormattingMode(host, TextFormattingMode.Ideal);
+                    TextOptions.SetTextRenderingMode(host, TextRenderingMode.Grayscale);
+                }
+            }
             // Keep the sidebar's LOGICAL width constant across the change: the column and
             // the saved widths are screen px, so grow them with the scale (see SbPx above).
             if (scale != prev && prev > 0)
