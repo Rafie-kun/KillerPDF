@@ -327,8 +327,8 @@ KillerPDF ne créera pas deux copies installées.</sys:String>
     <sys:String x:Key="Str_Dlg_SetDefaultPdfMsg" xml:space="preserve">Souhaitez-vous définir KillerPDF comme lecteur PDF par défaut ?
 
 Ouvre les Paramètres Windows - Applications par défaut.</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedClose">Des modifications non enregistrées sont présentes. Fermer ce fichier sans enregistrer ?</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedExit">Des modifications non enregistrées sont présentes. Quitter KillerPDF sans enregistrer ?</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedClose">Ce fichier contient des modifications non enregistrées. Les enregistrer avant de le fermer ?</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedExit">Des modifications non enregistrées sont présentes. Les enregistrer avant de quitter KillerPDF ?</sys:String>
     <sys:String x:Key="Str_Dlg_PageOutOfRange" xml:space="preserve">Ce document contient {0} page(s) dont la taille sort des limites prises en charge par Adobe Reader (3 à 14 400 points par côté) - Adobe les affiche comme des pages vides.
 
 Les redimensionner à une taille prise en charge ? Les pages conservent leur apparence et leurs proportions.</sys:String>
@@ -721,7 +721,7 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Status_Merged">{0} fichiers fusionnés - pas encore enregistré</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Fusion des fichiers...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">Fusion annulée</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Fermer tous les documents ? Les modifications non enregistrées seront perdues.</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Des modifications non enregistrées sont présentes. Les enregistrer avant de fermer tous les documents ?</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">Ouvrez d'abord un PDF.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">Enregistrer les modifications avant de compresser en ZIP ?</sys:String>
     <sys:String x:Key="Str_Status_Zipped">Compressé vers {0} - {1} (était {2})</sys:String>
@@ -1065,6 +1065,7 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Btn_Open">Ouvrir</sys:String>
     <sys:String x:Key="Str_Btn_Replace">Remplacer</sys:String>
     <sys:String x:Key="Str_Btn_Save">Enregistrer</sys:String>
+    <sys:String x:Key="Str_Btn_DontSave">Ne pas enregistrer</sys:String>
     <sys:String x:Key="Str_Col_Modified">modifié</sys:String>
     <sys:String x:Key="Str_Col_Name">nom</sys:String>
     <sys:String x:Key="Str_Col_Size">taille</sys:String>

@@ -327,8 +327,8 @@ KillerPDF non creerà due copie installate.</sys:String>
     <sys:String x:Key="Str_Dlg_SetDefaultPdfMsg" xml:space="preserve">Vuoi impostare KillerPDF come visualizzatore PDF predefinito?
 
 Apri Impostazioni Windows - App predefinite.</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedClose">Sono presenti modifiche non salvate. Vuoi chiudere questo file senza salvare?</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedExit">Sono presenti modifiche non salvate. Vuoi chiudere KillerPDF senza salvare?</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedClose">Questo file contiene modifiche non salvate. Vuoi salvarle prima di chiuderlo?</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedExit">Sono presenti modifiche non salvate. Vuoi salvarle prima di chiudere KillerPDF?</sys:String>
     <sys:String x:Key="Str_Dlg_PageOutOfRange" xml:space="preserve">Questo documento ha {0} pagine di dimensioni superiori a quelle supportate da Adobe Reader (da 3 a 14.400 punti per lato): Adobe le visualizza come pagine vuote.
 
 Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterranno il loro aspetto e le loro proporzioni..</sys:String>
@@ -721,7 +721,7 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_Status_Merged">Uniti {0} file: non ancora salvati</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Unione file...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">Unione annullata</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Vuoi chiudere tutti i documenti? Le modifiche non salvate andranno perse.</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Sono presenti modifiche non salvate. Vuoi salvarle prima di chiudere tutti i documenti?</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">Prima apri un file PDF.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">Vuoi salvare le modifiche prima di comprimerle in ZIP?</sys:String>
     <sys:String x:Key="Str_Status_Zipped">Compresso in {0} - {1} (era {2})</sys:String>
@@ -1065,6 +1065,7 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_Btn_Open">Apri</sys:String>
     <sys:String x:Key="Str_Btn_Replace">Sostituisci</sys:String>
     <sys:String x:Key="Str_Btn_Save">Salva</sys:String>
+    <sys:String x:Key="Str_Btn_DontSave">Non salvare</sys:String>
     <sys:String x:Key="Str_Col_Modified">data modifica</sys:String>
     <sys:String x:Key="Str_Col_Name">nome</sys:String>
     <sys:String x:Key="Str_Col_Size">dimensione</sys:String>

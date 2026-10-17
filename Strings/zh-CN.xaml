@@ -267,8 +267,8 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Dlg_SetDefaultPdfMsg" xml:space="preserve">要将 KillerPDF 设为默认 PDF 查看器吗？
 
 将打开 Windows 设置 - 默认应用。</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedClose">您有未保存的变更。要在不保存的情况下关闭此文件吗？</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedExit">您有未保存的变更。要在不保存的情况下关闭 KillerPDF 吗？</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedClose">此文件有未保存的更改。要在关闭之前保存吗？</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedExit">您有未保存的更改。要在关闭 KillerPDF 之前保存吗？</sys:String>
     <sys:String x:Key="Str_Dlg_PageOutOfRange" xml:space="preserve">此文档有 {0} 个页面的尺寸超出 Adobe Reader 支持的范围（每边 3 到 14400 点），Adobe 会将这些页面显示为空白。
 
 要将它们缩放到支持的尺寸吗？页面的外观和比例保持不变。</sys:String>
@@ -639,7 +639,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Status_Merged">已合并 {0} 个文件 - 尚未保存</sys:String>
     <sys:String x:Key="Str_Drop_Merging">正在合并文件...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">已取消合并</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">关闭所有文档？未保存的更改将会丢失。</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">您有未保存的更改。要在关闭所有文档之前保存吗？</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">请先打开一个 PDF。</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">压缩为 ZIP 前保存更改？</sys:String>
     <sys:String x:Key="Str_Status_Zipped">已压缩为 {0} - {1}（原 {2}）</sys:String>
@@ -1037,6 +1037,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Btn_Open">打开</sys:String>
     <sys:String x:Key="Str_Btn_Replace">替换</sys:String>
     <sys:String x:Key="Str_Btn_Save">保存</sys:String>
+    <sys:String x:Key="Str_Btn_DontSave">不保存</sys:String>
     <sys:String x:Key="Str_Col_Modified">修改时间</sys:String>
     <sys:String x:Key="Str_Col_Name">名称</sys:String>
     <sys:String x:Key="Str_Col_Size">大小</sys:String>

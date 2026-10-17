@@ -54,6 +54,7 @@ namespace KillerPDF.Controls
         internal void EnsureInitialSessionExt() => EnsureInitialSession();
         internal void MaterializeDeferredExt(DocumentSession target) => MaterializeDeferred(target);
         internal void SwitchToTabExt(DocumentSession target) => SwitchToTab(target);
+        internal bool SaveSessionForCloseExt(DocumentSession target) => SaveSessionForClose(target);
 
         // ── The load handshake (FileOperations / ImportAndZip drive this) ────────────────────
         internal DocumentSession BeginTabLoadExt(out DocumentSession? prev, out bool createdNew)

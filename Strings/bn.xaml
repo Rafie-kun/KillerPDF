@@ -267,8 +267,8 @@ KillerPDF দুটি ইনস্টল করা কপি তৈরি ক�
     <sys:String x:Key="Str_Dlg_SetDefaultPdfMsg" xml:space="preserve">KillerPDF-কে আপনার ডিফল্ট PDF ভিউয়ার হিসেবে সেট করতে চান?
 
 Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে।</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedClose">আপনার অসংরক্ষিত পরিবর্তন রয়েছে। সংরক্ষণ না করে এই ফাইলটি বন্ধ করবেন?</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedExit">আপনার অসংরক্ষিত পরিবর্তন রয়েছে। সংরক্ষণ না করে KillerPDF বন্ধ করবেন?</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedClose">এই ফাইলে অসংরক্ষিত পরিবর্তন রয়েছে। বন্ধ করার আগে সেগুলো সংরক্ষণ করবেন?</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedExit">আপনার অসংরক্ষিত পরিবর্তন রয়েছে। KillerPDF বন্ধ করার আগে সেগুলো সংরক্ষণ করবেন?</sys:String>
     <sys:String x:Key="Str_Dlg_PageOutOfRange" xml:space="preserve">এই ডকুমেন্টে {0}টি পৃষ্ঠার আকার Adobe Reader-এর সমর্থিত সীমার (প্রতি পাশে 3 থেকে 14,400 পয়েন্ট) বাইরে - Adobe এই পৃষ্ঠাগুলিকে ফাঁকা দেখায়।
 
 এগুলিকে সমর্থিত আকারে স্কেল করবেন? পৃষ্ঠার চেহারা ও অনুপাত একই থাকবে।</sys:String>
@@ -639,7 +639,7 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Status_Merged">{0}টি ফাইল একত্র করা হয়েছে - এখনও সংরক্ষণ করা হয়নি</sys:String>
     <sys:String x:Key="Str_Drop_Merging">ফাইল একত্র করা হচ্ছে...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">একত্রীকরণ বাতিল করা হয়েছে</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">সব নথি বন্ধ করবেন? অসংরক্ষিত পরিবর্তন হারিয়ে যাবে।</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">আপনার অসংরক্ষিত পরিবর্তন রয়েছে। সব নথি বন্ধ করার আগে সেগুলো সংরক্ষণ করবেন?</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">প্রথমে একটি PDF খুলুন।</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">ZIP-এ সংকুচিত করার আগে পরিবর্তনগুলি সংরক্ষণ করবেন?</sys:String>
     <sys:String x:Key="Str_Status_Zipped">{0}-এ সংকুচিত - {1} (পূর্বে {2})</sys:String>
@@ -1033,6 +1033,7 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Btn_Open">খুলুন</sys:String>
     <sys:String x:Key="Str_Btn_Replace">পরিবর্তন</sys:String>
     <sys:String x:Key="Str_Btn_Save">সংরক্ষণ</sys:String>
+    <sys:String x:Key="Str_Btn_DontSave">সংরক্ষণ করবেন না</sys:String>
     <sys:String x:Key="Str_Col_Modified">পরিবর্তিত</sys:String>
     <sys:String x:Key="Str_Col_Name">নাম</sys:String>
     <sys:String x:Key="Str_Col_Size">আকার</sys:String>

@@ -761,6 +761,18 @@ namespace KillerPDF
 
         private bool _fadingOut;
 
+        // Save on the unsaved-changes quit prompt: every document with unsaved changes, in both
+        // panes, saved the way Ctrl+S saves the open one. False as soon as one is still unsaved
+        // afterwards (its Save As was cancelled, it is read-only or the save failed), so the window
+        // stays open with that document showing.
+        private bool SaveAllDirtyDocuments()
+        {
+            foreach (var pane in new[] { Viewer, ViewerB })
+                foreach (var session in pane.SessionsRef.Where(s => s.IsDirty).ToList())
+                    if (!pane.SaveSessionForCloseExt(session)) return false;
+            return true;
+        }
+
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
             // Second pass (our own Close after the fade): let it through.
@@ -780,14 +792,15 @@ namespace KillerPDF
             if (anyDirty && askOpenTabs)
             {
                 // The unsaved-changes prompt carries the quit prompt's two checkboxes, so closing with
-                // unsaved work still asks about the open tabs in the same single dialog. Enter stays
-                // on Cancel so a stray keypress can't silently discard unsaved work.
-                var (confirmed, closeTabs, remember) = KillerDialog.ShowTwoCheckPrompt(this,
+                // unsaved work still asks about the open tabs in the same single dialog. Save saves
+                // every unsaved document and then quits, Don't Save quits without saving, and Enter
+                // is Save, so a stray keypress keeps the work instead of discarding it.
+                var (choice, closeTabs, remember) = KillerDialog.ShowTwoCheckChoice(this,
                     Loc("Str_Dlg_UnsavedExit"),
                     Loc("Str_Chk_CloseTabs"), App.GetSetting("RememberOpenFiles") == "0",
                     Loc("Str_Dlg_RememberChoice"), false,
-                    Loc("Str_Btn_Quit"), Loc("Str_Btn_CancelDlg"), cancelIsDefault: true);
-                if (!confirmed)
+                    Loc("Str_Btn_Save"), Loc("Str_Btn_DontSave"), Loc("Str_Btn_CancelDlg"));
+                if (choice < 0 || (choice == 0 && !SaveAllDirtyDocuments()))
                 {
                     e.Cancel = true;
                     return;
@@ -799,12 +812,9 @@ namespace KillerPDF
             {
                 // fadeClose:false so the prompt closes instantly instead of adding its own 150ms fade
                 // before the app's fade-out starts - otherwise the two run back-to-back (300ms of waiting).
-                // Default to No so a stray Enter can't silently discard unsaved work.
-                var res = KillerDialog.Show(this,
-                    Loc("Str_Dlg_UnsavedExit"),
-                    Loc("Str_Dlg_AppTitle"), MessageBoxButton.YesNo, MessageBoxImage.Warning, fadeClose: false,
-                    defaultResult: MessageBoxResult.No);
-                if (res != MessageBoxResult.Yes)
+                var res = KillerDialog.AskToSave(this, Loc("Str_Dlg_UnsavedExit"),
+                    Loc("Str_Btn_Save"), Loc("Str_Btn_DontSave"), Loc("Str_Btn_CancelDlg"), fadeClose: false);
+                if (res == MessageBoxResult.Cancel || (res == MessageBoxResult.Yes && !SaveAllDirtyDocuments()))
                 {
                     e.Cancel = true;
                     return;

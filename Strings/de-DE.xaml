@@ -267,8 +267,8 @@ KillerPDF legt keine zwei installierten Kopien an.</sys:String>
     <sys:String x:Key="Str_Dlg_SetDefaultPdfMsg" xml:space="preserve">Möchten Sie KillerPDF als Standard-PDF-Betrachter festlegen?
 
 Öffnet die Windows-Einstellungen - Standard-Apps.</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedClose">Es gibt ungespeicherte Änderungen. Diese Datei ohne Speichern schließen?</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedExit">Es gibt ungespeicherte Änderungen. KillerPDF ohne Speichern beenden?</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedClose">Diese Datei hat ungespeicherte Änderungen. Vor dem Schließen speichern?</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedExit">Es gibt ungespeicherte Änderungen. Vor dem Beenden von KillerPDF speichern?</sys:String>
     <sys:String x:Key="Str_Dlg_PageOutOfRange" xml:space="preserve">Dieses Dokument enthält {0} Seite(n) außerhalb des von Adobe Reader unterstützten Größenbereichs (3 bis 14.400 Punkte je Seite) - Adobe zeigt diese als leere Seiten an.
 
 Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten bleiben erhalten.</sys:String>
@@ -639,7 +639,7 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Status_Merged">{0} Dateien zusammengeführt - noch nicht gespeichert</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Dateien werden zusammengeführt...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">Zusammenführen abgebrochen</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Alle Dokumente schließen? Nicht gespeicherte Änderungen gehen verloren.</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Es gibt ungespeicherte Änderungen. Vor dem Schließen aller Dokumente speichern?</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">Öffnen Sie zuerst eine PDF.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">Änderungen vor dem Komprimieren in ZIP speichern?</sys:String>
     <sys:String x:Key="Str_Status_Zipped">Als ZIP gespeichert: {0} - {1} (vorher {2})</sys:String>
@@ -1039,6 +1039,7 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Btn_Open">Öffnen</sys:String>
     <sys:String x:Key="Str_Btn_Replace">Ersetzen</sys:String>
     <sys:String x:Key="Str_Btn_Save">Speichern</sys:String>
+    <sys:String x:Key="Str_Btn_DontSave">Nicht speichern</sys:String>
     <sys:String x:Key="Str_Col_Modified">geändert</sys:String>
     <sys:String x:Key="Str_Col_Name">Name</sys:String>
     <sys:String x:Key="Str_Col_Size">Größe</sys:String>

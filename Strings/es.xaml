@@ -267,8 +267,8 @@ KillerPDF no creará dos copias instaladas.</sys:String>
     <sys:String x:Key="Str_Dlg_SetDefaultPdfMsg" xml:space="preserve">¿Desea establecer KillerPDF como su visor de PDF predeterminado?
 
 Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedClose">Tiene cambios sin guardar. ¿Cerrar este archivo sin guardar?</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedExit">Tiene cambios sin guardar. ¿Cerrar KillerPDF sin guardar?</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedClose">Este archivo tiene cambios sin guardar. ¿Guardarlos antes de cerrarlo?</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedExit">Tiene cambios sin guardar. ¿Guardarlos antes de cerrar KillerPDF?</sys:String>
     <sys:String x:Key="Str_Dlg_PageOutOfRange" xml:space="preserve">Este documento tiene {0} página(s) con un tamaño fuera del rango que admite Adobe Reader (3 a 14.400 puntos por lado) - Adobe las muestra como páginas en blanco.
 
 ¿Escalarlas a un tamaño compatible? Las páginas conservan su aspecto y proporciones.</sys:String>
@@ -639,7 +639,7 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Status_Merged">{0} archivos combinados - sin guardar todavía</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Combinando archivos...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">Combinación cancelada</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">¿Cerrar todos los documentos? Se perderán los cambios sin guardar.</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Tiene cambios sin guardar. ¿Guardarlos antes de cerrar todos los documentos?</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">Primero abre un PDF.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">¿Guardar los cambios antes de comprimir a ZIP?</sys:String>
     <sys:String x:Key="Str_Status_Zipped">Comprimido en {0} - {1} (antes {2})</sys:String>
@@ -1033,6 +1033,7 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Btn_Open">Abrir</sys:String>
     <sys:String x:Key="Str_Btn_Replace">Reemplazar</sys:String>
     <sys:String x:Key="Str_Btn_Save">Guardar</sys:String>
+    <sys:String x:Key="Str_Btn_DontSave">No guardar</sys:String>
     <sys:String x:Key="Str_Col_Modified">modificado</sys:String>
     <sys:String x:Key="Str_Col_Name">nombre</sys:String>
     <sys:String x:Key="Str_Col_Size">tamaño</sys:String>

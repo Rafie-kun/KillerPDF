@@ -327,8 +327,8 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Dlg_SetDefaultPdfMsg" xml:space="preserve">Бажаєте зробити KillerPDF програмою перегляду PDF за промовчанням?
 
 Відкриє «Параметри Windows» - «Програми за промовчанням».</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedClose">Є незбережені зміни. Закрити цей файл без збереження?</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedExit">Є незбережені зміни. Закрити KillerPDF без збереження?</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedClose">У цьому файлі є незбережені зміни. Зберегти їх перед закриттям?</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedExit">Є незбережені зміни. Зберегти їх перед закриттям KillerPDF?</sys:String>
     <sys:String x:Key="Str_Dlg_PageOutOfRange" xml:space="preserve">У цьому документі є сторінки (кількість: {0}), розмір яких виходить за межі, що підтримує Adobe Reader (від 3 до 14 400 пунктів на сторону). Adobe показує їх як порожні.
 
 Змінити їх до підтримуваного розміру? Вигляд і пропорції сторінок збережуться.</sys:String>
@@ -721,7 +721,7 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Status_Merged">Об'єднано файлів: {0} - ще не збережено</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Об'єднання файлів...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">Об'єднання скасовано</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Закрити всі документи? Незбережені зміни буде втрачено.</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Є незбережені зміни. Зберегти їх перед закриттям усіх документів?</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">Спершу відкрийте PDF.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">Зберегти зміни перед стисканням у ZIP?</sys:String>
     <sys:String x:Key="Str_Status_Zipped">Стиснуто до {0} - {1} (було {2})</sys:String>
@@ -1065,6 +1065,7 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Btn_Open">Відкрити</sys:String>
     <sys:String x:Key="Str_Btn_Replace">Замінити</sys:String>
     <sys:String x:Key="Str_Btn_Save">Зберегти</sys:String>
+    <sys:String x:Key="Str_Btn_DontSave">Не зберігати</sys:String>
     <sys:String x:Key="Str_Col_Modified">змінено</sys:String>
     <sys:String x:Key="Str_Col_Name">назва</sys:String>
     <sys:String x:Key="Str_Col_Size">розмір</sys:String>

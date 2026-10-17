@@ -327,8 +327,8 @@ KillerPDF oppretter ikke to installerte kopier.</sys:String>
     <sys:String x:Key="Str_Dlg_SetDefaultPdfMsg" xml:space="preserve">Vil du angi KillerPDF som standard PDF-leser?
 
 Åpner Windows-innstillinger, Standardapper.</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedClose">Du har ulagrede endringer. Vil du lukke denne filen uten å lagre?</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedExit">Du har ulagrede endringer. Vil du lukke KillerPDF uten å lagre?</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedClose">Denne filen har ulagrede endringer. Vil du lagre dem før du lukker den?</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedExit">Du har ulagrede endringer. Vil du lagre dem før du lukker KillerPDF?</sys:String>
     <sys:String x:Key="Str_Dlg_PageOutOfRange" xml:space="preserve">Dette dokumentet har {0} side(r) med størrelse utenfor det Adobe Reader støtter (3 til 14 400 punkter per side). Adobe viser disse som tomme sider.
 
 Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og proporsjoner.</sys:String>
@@ -721,7 +721,7 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Status_Merged">Slo sammen {0} filer - ikke lagret ennå</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Slår sammen filer...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">Sammenslåingen er avbrutt</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Lukke alle dokumenter? Ulagrede endringer går tapt.</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Du har ulagrede endringer. Vil du lagre dem før du lukker alle dokumenter?</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">Åpne en PDF først.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">Lagre endringer før komprimering til ZIP?</sys:String>
     <sys:String x:Key="Str_Status_Zipped">Komprimert til {0} - {1} (var {2})</sys:String>
@@ -1065,6 +1065,7 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Btn_Open">Åpne</sys:String>
     <sys:String x:Key="Str_Btn_Replace">Erstatt</sys:String>
     <sys:String x:Key="Str_Btn_Save">Lagre</sys:String>
+    <sys:String x:Key="Str_Btn_DontSave">Ikke lagre</sys:String>
     <sys:String x:Key="Str_Col_Modified">endret</sys:String>
     <sys:String x:Key="Str_Col_Name">navn</sys:String>
     <sys:String x:Key="Str_Col_Size">størrelse</sys:String>

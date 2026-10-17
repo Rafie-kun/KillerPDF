@@ -60,6 +60,9 @@ namespace KillerPDF.Features
         void OpenFile(string path);
         /// <summary>Opens Save As for the active document with the given file name offered.</summary>
         void SaveAsWithName(string fileName);
+        /// <summary>Saves the active document in place, as Ctrl+S does, for a close prompt's Save.
+        /// Returns true when it has no unsaved changes left.</summary>
+        bool SaveActiveDocument();
         /// <summary>Asks for the owner password of a read-only restricted PDF and reopens it
         /// editable. Returns true when the document can now be edited.</summary>
         bool UnlockOwnerRestrictions();

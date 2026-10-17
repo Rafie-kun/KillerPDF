@@ -327,8 +327,8 @@ KillerPDF sẽ không tạo ra hai bản sao đã cài đặt.</sys:String>
     <sys:String x:Key="Str_Dlg_SetDefaultPdfMsg" xml:space="preserve">Bạn có muốn đặt KillerPDF làm trình xem PDF mặc định không?
 
 Sẽ mở Cài đặt Windows - Ứng dụng mặc định.</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedClose">Bạn có các thay đổi chưa được lưu. Đóng tệp này mà không lưu?</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedExit">Bạn có các thay đổi chưa được lưu. Đóng KillerPDF mà không lưu?</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedClose">Tệp này có các thay đổi chưa được lưu. Lưu chúng trước khi đóng?</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedExit">Bạn có các thay đổi chưa được lưu. Lưu chúng trước khi đóng KillerPDF?</sys:String>
     <sys:String x:Key="Str_Dlg_PageOutOfRange" xml:space="preserve">Tài liệu này có {0} trang có kích thước nằm ngoài mức hỗ trợ của Adobe Reader (3 đến 14.400 điểm mỗi cạnh) - Adobe hiển thị các trang này là trang trống.
 
 Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn giữ nguyên giao diện và tỷ lệ.</sys:String>
@@ -721,7 +721,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Status_Merged">Đã gộp {0} tệp - chưa được lưu</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Đang gộp các tệp...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">Đã hủy gộp</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Đóng tất cả tài liệu? Các thay đổi chưa lưu sẽ bị mất.</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Bạn có các thay đổi chưa được lưu. Lưu chúng trước khi đóng tất cả tài liệu?</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">Hãy mở tệp PDF trước.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">Lưu các thay đổi trước khi nén thành tệp ZIP?</sys:String>
     <sys:String x:Key="Str_Status_Zipped">Đã nén thành {0} - {1} (kích thước cũ {2})</sys:String>
@@ -1065,6 +1065,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Btn_Open">Mở</sys:String>
     <sys:String x:Key="Str_Btn_Replace">Thay thế</sys:String>
     <sys:String x:Key="Str_Btn_Save">Lưu</sys:String>
+    <sys:String x:Key="Str_Btn_DontSave">Không lưu</sys:String>
     <sys:String x:Key="Str_Col_Modified">đã sửa đổi</sys:String>
     <sys:String x:Key="Str_Col_Name">tên</sys:String>
     <sys:String x:Key="Str_Col_Size">kích thước</sys:String>

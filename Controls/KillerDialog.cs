@@ -274,12 +274,13 @@ namespace KillerPDF
             string message,
             string[] labels,
             int accentIndex = 0,
-            string title = "KillerPDF")
+            string title = "KillerPDF",
+            bool fadeClose = true)
         {
             int result = -1;
 
             var win = new Window { Title = title, MinWidth = 380, MaxWidth = 760, SizeToContent = SizeToContent.WidthAndHeight };
-            DialogChrome.Configure(win, owner, fade: true);
+            DialogChrome.Configure(win, owner, fade: fadeClose);
 
             var outerBorder = new Border
             {
@@ -344,6 +345,25 @@ namespace KillerPDF
         }
 
         /// <summary>
+        /// The family prompt for closing with unsaved work: Save (the accent, at the right edge),
+        /// Don't Save and Cancel. Returns Yes for Save, No for Don't Save and Cancel for Cancel or a
+        /// dialog closed without a choice.
+        /// </summary>
+        public static MessageBoxResult AskToSave(
+            Window? owner,
+            string message,
+            string saveLabel,
+            string dontSaveLabel,
+            string cancelLabel,
+            bool fadeClose = true)
+            => ShowChoices(owner, message, [saveLabel, dontSaveLabel, cancelLabel], accentIndex: 0, fadeClose: fadeClose) switch
+            {
+                0 => MessageBoxResult.Yes,
+                1 => MessageBoxResult.No,
+                _ => MessageBoxResult.Cancel,
+            };
+
+        /// <summary>
         /// Like <see cref="Show"/> but with a "don't warn again" style checkbox between the message and the
         /// buttons. Returns the button result and the checkbox state.
         /// </summary>
@@ -403,11 +423,33 @@ namespace KillerPDF
             string cancelLabel,
             bool cancelIsDefault = false)
         {
-            bool confirmed = false;
+            var (choice, check1, check2) = ShowTwoCheckChoice(owner, message, check1Text, check1Initial,
+                check2Text, check2Initial, confirmLabel, null, cancelLabel, cancelIsDefault);
+            return (choice == 0, check1, check2);
+        }
+
+        /// <summary>
+        /// The two-checkbox confirm with an optional second action between Cancel and the confirm
+        /// button, such as Don't Save beside Save. Returns 0 for the confirm button, 1 for the
+        /// second action and -1 for Cancel or a dialog closed without a choice.
+        /// </summary>
+        public static (int choice, bool check1, bool check2) ShowTwoCheckChoice(
+            Window? owner,
+            string message,
+            string check1Text,
+            bool check1Initial,
+            string check2Text,
+            bool check2Initial,
+            string confirmLabel,
+            string? secondaryLabel,
+            string cancelLabel,
+            bool cancelIsDefault = false)
+        {
+            int choice = -1;
             bool closeTabs = check1Initial;
             bool remember  = check2Initial;
 
-            var win = new Window { Title = "KillerPDF", Width = 390, SizeToContent = SizeToContent.Height };
+            var win = new Window { Title = "KillerPDF", Width = secondaryLabel is null ? 390 : 440, SizeToContent = SizeToContent.Height };
             // fade:false - the app's own fade-out follows immediately on confirm; two fades
             // back-to-back read as lag (same reasoning as the unsaved-changes prompt).
             DialogChrome.Configure(win, owner, fade: false);
@@ -460,8 +502,15 @@ namespace KillerPDF
             quitBtn.Margin    = new Thickness(8, 0, 0, 0);
             quitBtn.IsDefault = !cancelIsDefault;
             cancelBtn.IsDefault = cancelIsDefault;
-            quitBtn.Click    += (_, _2) => { confirmed = true; win.Close(); };
+            quitBtn.Click    += (_, _2) => { choice = 0; win.Close(); };
             btnPanel.Children.Add(cancelBtn);
+            if (secondaryLabel is not null)
+            {
+                var secondaryBtn = Sized(UiKit.Make(secondaryLabel, false));
+                secondaryBtn.Margin = new Thickness(8, 0, 0, 0);
+                secondaryBtn.Click += (_, _2) => { choice = 1; win.Close(); };
+                btnPanel.Children.Add(secondaryBtn);
+            }
             btnPanel.Children.Add(quitBtn);
             root.Children.Add(new Border
             {
@@ -492,7 +541,7 @@ namespace KillerPDF
             contentGrid.Children.Add(root);
             win.Content = DialogChrome.WrapContent(owner, contentGrid);
             win.ShowDialog();
-            return (confirmed, closeTabs, remember);
+            return (choice, closeTabs, remember);
         }
 
         /// <summary>

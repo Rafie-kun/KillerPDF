@@ -327,8 +327,8 @@ KillerPDF nevytvoří dvě nainstalované kopie.</sys:String>
     <sys:String x:Key="Str_Dlg_SetDefaultPdfMsg" xml:space="preserve">Chcete nastavit KillerPDF jako výchozí prohlížeč PDF?
 
 Otevře Nastavení Windows - Výchozí aplikace.</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedClose">Máte neuložené změny. Zavřít tento soubor bez uložení?</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedExit">Máte neuložené změny. Zavřít KillerPDF bez uložení?</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedClose">Tento soubor má neuložené změny. Uložit je před zavřením?</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedExit">Máte neuložené změny. Uložit je před zavřením KillerPDF?</sys:String>
     <sys:String x:Key="Str_Dlg_PageOutOfRange" xml:space="preserve">Tento dokument obsahuje stránky (počet: {0}) s rozměry mimo rozsah podporovaný aplikací Adobe Reader (3 až 14 400 bodů na stranu) - Adobe je zobrazuje jako prázdné.
 
 Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporce.</sys:String>
@@ -712,7 +712,7 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Status_Merged">Sloučeno souborů: {0} - zatím neuloženo</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Slučuji soubory...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">Slučování zrušeno</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Zavřít všechny dokumenty? Neuložené změny budou ztraceny.</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Máte neuložené změny. Uložit je před zavřením všech dokumentů?</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">Nejprve otevřete PDF.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">Uložit změny před komprimací do ZIP?</sys:String>
     <sys:String x:Key="Str_Status_Zipped">Zkomprimováno do {0} - {1} (původně {2})</sys:String>
@@ -1038,6 +1038,7 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Btn_Open">Otevřít</sys:String>
     <sys:String x:Key="Str_Btn_Replace">Nahradit</sys:String>
     <sys:String x:Key="Str_Btn_Save">Uložit</sys:String>
+    <sys:String x:Key="Str_Btn_DontSave">Neukládat</sys:String>
     <sys:String x:Key="Str_Col_Modified">změněno</sys:String>
     <sys:String x:Key="Str_Col_Name">název</sys:String>
     <sys:String x:Key="Str_Col_Size">velikost</sys:String>

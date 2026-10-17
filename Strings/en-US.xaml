@@ -327,8 +327,8 @@ KillerPDF will not create two installed copies.</sys:String>
     <sys:String x:Key="Str_Dlg_SetDefaultPdfMsg" xml:space="preserve">Would you like to set KillerPDF as your default PDF viewer?
 
 This opens Default Apps in Windows Settings.</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedClose">You have unsaved changes. Close this file without saving?</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedExit">You have unsaved changes. Close KillerPDF without saving?</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedClose">This file has unsaved changes. Save them before closing it?</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedExit">You have unsaved changes. Save them before closing KillerPDF?</sys:String>
     <sys:String x:Key="Str_Dlg_PageOutOfRange" xml:space="preserve">This document has {0} page(s) sized outside what Adobe Reader supports (3 to 14,400 points per side), and Adobe shows these as blank pages.
 
 Scale them to a supported size? The pages keep their look and proportions.</sys:String>
@@ -721,7 +721,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Status_Merged">Merged {0} files, not yet saved</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Merging files...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">Merge canceled</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Close all documents? Unsaved changes will be lost.</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">You have unsaved changes. Save them before closing all documents?</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">Open a PDF first.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">Save changes before compressing to ZIP?</sys:String>
     <sys:String x:Key="Str_Status_Zipped">Zipped to {0}: {1} (was {2})</sys:String>
@@ -1065,6 +1065,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Btn_Open">Open</sys:String>
     <sys:String x:Key="Str_Btn_Replace">Replace</sys:String>
     <sys:String x:Key="Str_Btn_Save">Save</sys:String>
+    <sys:String x:Key="Str_Btn_DontSave">Don't Save</sys:String>
     <sys:String x:Key="Str_Col_Modified">modified</sys:String>
     <sys:String x:Key="Str_Col_Name">name</sys:String>
     <sys:String x:Key="Str_Col_Size">size</sys:String>

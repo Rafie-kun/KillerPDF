@@ -327,8 +327,8 @@ O KillerPDF não criará duas cópias instaladas.</sys:String>
     <sys:String x:Key="Str_Dlg_SetDefaultPdfMsg" xml:space="preserve">Deseja definir o KillerPDF como seu visualizador de PDF padrão?
 
 Abre as Configurações do Windows - Aplicativos padrão.</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedClose">Você tem alterações não salvas. Fechar este arquivo sem salvar?</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedExit">Você tem alterações não salvas. Fechar o KillerPDF sem salvar?</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedClose">Este arquivo tem alterações não salvas. Salvar antes de fechá-lo?</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedExit">Você tem alterações não salvas. Salvar antes de fechar o KillerPDF?</sys:String>
     <sys:String x:Key="Str_Dlg_PageOutOfRange" xml:space="preserve">Este documento tem {0} página(s) com tamanho fora do que o Adobe Reader aceita (3 a 14.400 pontos por lado) - o Adobe as exibe como páginas em branco.
 
 Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as proporções.</sys:String>
@@ -721,7 +721,7 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Status_Merged">{0} arquivos mesclados - ainda não salvo</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Mesclando arquivos...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">Mesclagem cancelada</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Fechar todos os documentos? As alterações não salvas serão perdidas.</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Você tem alterações não salvas. Salvar antes de fechar todos os documentos?</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">Abra um PDF primeiro.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">Salvar as alterações antes de compactar em ZIP?</sys:String>
     <sys:String x:Key="Str_Status_Zipped">Compactado em {0} - {1} (era {2})</sys:String>
@@ -1065,6 +1065,7 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Btn_Open">Abrir</sys:String>
     <sys:String x:Key="Str_Btn_Replace">Substituir</sys:String>
     <sys:String x:Key="Str_Btn_Save">Salvar</sys:String>
+    <sys:String x:Key="Str_Btn_DontSave">Não salvar</sys:String>
     <sys:String x:Key="Str_Col_Modified">modificado</sys:String>
     <sys:String x:Key="Str_Col_Name">nome</sys:String>
     <sys:String x:Key="Str_Col_Size">tamanho</sys:String>

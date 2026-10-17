@@ -327,8 +327,8 @@ A KillerPDF nem hoz létre két telepített példányt.</sys:String>
     <sys:String x:Key="Str_Dlg_SetDefaultPdfMsg" xml:space="preserve">Beállítja a KillerPDF-et alapértelmezett PDF-megjelenítőként?
 
 Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedClose">Nem mentett módosításai vannak. Bezárja ezt a fájlt mentés nélkül?</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedExit">Nem mentett módosításai vannak. Bezárja a KillerPDF-et mentés nélkül?</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedClose">A fájlban nem mentett módosítások vannak. Menti őket a bezárás előtt?</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedExit">Nem mentett módosításai vannak. Menti őket a KillerPDF bezárása előtt?</sys:String>
     <sys:String x:Key="Str_Dlg_PageOutOfRange" xml:space="preserve">Ebben a dokumentumban {0} oldal mérete kívül esik az Adobe Reader által támogatott tartományon (oldalanként 3-14 400 pont) - az Adobe ezeket üres oldalként jeleníti meg.
 
 Átméretezi őket támogatott méretre? Az oldalak megtartják megjelenésüket és arányaikat.</sys:String>
@@ -721,7 +721,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Status_Merged">{0} fájl egyesítve - még nincs mentve</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Fájlok egyesítése...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">Egyesítés megszakítva</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Bezárja az összes dokumentumot? A nem mentett módosítások elvesznek.</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Nem mentett módosításai vannak. Menti őket az összes dokumentum bezárása előtt?</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">Először nyisson meg egy PDF-et.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">Menti a módosításokat a ZIP-be tömörítés előtt?</sys:String>
     <sys:String x:Key="Str_Status_Zipped">Tömörítve ide: {0} - {1} (eredeti: {2})</sys:String>
@@ -1063,6 +1063,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Btn_Open">Megnyitás</sys:String>
     <sys:String x:Key="Str_Btn_Replace">Csere</sys:String>
     <sys:String x:Key="Str_Btn_Save">Mentés</sys:String>
+    <sys:String x:Key="Str_Btn_DontSave">Nincs mentés</sys:String>
     <sys:String x:Key="Str_Col_Modified">módosítva</sys:String>
     <sys:String x:Key="Str_Col_Name">név</sys:String>
     <sys:String x:Key="Str_Col_Size">méret</sys:String>

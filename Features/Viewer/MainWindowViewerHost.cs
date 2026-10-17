@@ -27,6 +27,11 @@ namespace KillerPDF
             => SyncSidebarToDocState(hasDoc, startup);
         void IViewerHost.OpenFile(string path) => OpenFile(path);
         void IViewerHost.SaveAsWithName(string fileName) => SaveAsWithName(fileName);
+        bool IViewerHost.SaveActiveDocument()
+        {
+            SaveInPlace();
+            return !_isDirty;
+        }
         bool IViewerHost.UnlockOwnerRestrictions() => UnlockOwnerRestrictions();
         void IViewerHost.UpdateFooterFade() => UpdateFooterFade();
         void IViewerHost.UpdateTabStripFade() => UpdateTabStripFade();

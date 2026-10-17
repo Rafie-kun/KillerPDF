@@ -134,8 +134,13 @@ public sealed class DocumentTabLayoutTests
         string inactiveClose = source[start..focus];
 
         Assert.Contains("if (!ReferenceEquals(s, _active))", inactiveClose, StringComparison.Ordinal);
-        Assert.Contains("if (s.IsDirty)", inactiveClose, StringComparison.Ordinal);
-        Assert.Contains("if (res != MessageBoxResult.Yes) return;", inactiveClose, StringComparison.Ordinal);
+        Assert.Contains("if (!ReferenceEquals(s, _active) && s.IsDirty)", inactiveClose, StringComparison.Ordinal);
+        Assert.Contains("if (res == MessageBoxResult.Cancel) return;", inactiveClose, StringComparison.Ordinal);
+        // Save is the one answer that brings the tab forward, because a save works on the live
+        // document; Don't Save closes it in the background like a clean tab.
+        int save = inactiveClose.IndexOf("if (res == MessageBoxResult.Yes)", StringComparison.Ordinal);
+        int switchTab = inactiveClose.IndexOf("SwitchToTab(s);", StringComparison.Ordinal);
+        Assert.True(save >= 0 && switchTab > save);
         Assert.Contains("if (!_sessions.Contains(s) || ReferenceEquals(s, _active)) return;", inactiveClose, StringComparison.Ordinal);
         Assert.Contains("CancelAndRelease(s.ThumbCts);", inactiveClose, StringComparison.Ordinal);
         Assert.Contains("s.ThumbCts = null;", inactiveClose, StringComparison.Ordinal);

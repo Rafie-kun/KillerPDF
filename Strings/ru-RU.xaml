@@ -327,8 +327,8 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Dlg_SetDefaultPdfMsg" xml:space="preserve">Хотите ли вы установить KillerPDF в качестве средства просмотра PDF-файлов по умолчанию?
 
 Открывает настройки Windows - Приложения по умолчанию.</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedClose">У вас есть несохраненные изменения. Закрыть этот файл без сохранения?</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedExit">У вас есть несохраненные изменения. Закрыть KillerPDF без сохранения?</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedClose">В этом файле есть несохраненные изменения. Сохранить их перед закрытием?</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedExit">У вас есть несохраненные изменения. Сохранить их перед закрытием KillerPDF?</sys:String>
     <sys:String x:Key="Str_Dlg_PageOutOfRange" xml:space="preserve">Этот документ имеет {0} страниц(ы) с размером, отличным от того, который поддерживает Adobe Reader (от 3 до 14,400 точек на сторону) - Adobe отображает их как пустые.
 
 Масштабируйте их до поддерживаемого размера? Страницы сохраняют свой внешний вид и пропорции.</sys:String>
@@ -721,7 +721,7 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Status_Merged">Объединено {0} файлов - пока не сохранены</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Объединяем файлы...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">Объединение отменено</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Закрыть все документы? Несохраненные изменения будут потеряны.</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">У вас есть несохраненные изменения. Сохранить их перед закрытием всех документов?</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">Сначала откройте PDF-файл.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">Сохранить изменения перед сжатием в ZIP-файл?</sys:String>
     <sys:String x:Key="Str_Status_Zipped">Сжато в {0} - {1} (было {2})</sys:String>
@@ -1065,6 +1065,7 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Btn_Open">Открыть</sys:String>
     <sys:String x:Key="Str_Btn_Replace">Заменить</sys:String>
     <sys:String x:Key="Str_Btn_Save">Сохранить</sys:String>
+    <sys:String x:Key="Str_Btn_DontSave">Не сохранять</sys:String>
     <sys:String x:Key="Str_Col_Modified">изменено</sys:String>
     <sys:String x:Key="Str_Col_Name">имя</sys:String>
     <sys:String x:Key="Str_Col_Size">размер</sys:String>

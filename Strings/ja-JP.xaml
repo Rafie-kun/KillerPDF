@@ -327,8 +327,8 @@ KillerPDF がインストール済みコピーを 2 つ作成することはあ�
     <sys:String x:Key="Str_Dlg_SetDefaultPdfMsg" xml:space="preserve">KillerPDF を既定の PDF ビューアーに設定しますか？
 
 Windows の設定 - 既定のアプリ を開きます。</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedClose">保存されていない変更があります。保存せずにこのファイルを閉じますか？</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedExit">保存されていない変更があります。保存せずに KillerPDF を終了しますか？</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedClose">このファイルには保存されていない変更があります。閉じる前に保存しますか？</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedExit">保存されていない変更があります。KillerPDF を終了する前に保存しますか？</sys:String>
     <sys:String x:Key="Str_Dlg_PageOutOfRange" xml:space="preserve">この文書には、Adobe Reader が対応する範囲 (1 辺あたり 3～14,400 ポイント) 外のサイズのページが {0} ページあります。Adobe ではこれらのページは白紙で表示されます。
 
 対応するサイズに拡大・縮小しますか？ページの見た目と縦横比は変わりません。</sys:String>
@@ -721,7 +721,7 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Status_Merged">{0} 個のファイルを結合しました - 未保存です</sys:String>
     <sys:String x:Key="Str_Drop_Merging">ファイルを結合中...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">結合をキャンセルしました</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">すべてのドキュメントを閉じますか？保存されていない変更は失われます。</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">保存されていない変更があります。すべてのドキュメントを閉じる前に保存しますか？</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">先に PDF を開いてください。</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">ZIP に圧縮する前に変更を保存しますか？</sys:String>
     <sys:String x:Key="Str_Status_Zipped">{0} に ZIP 圧縮しました - {1} (元は {2})</sys:String>
@@ -1065,6 +1065,7 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Btn_Open">開く</sys:String>
     <sys:String x:Key="Str_Btn_Replace">置き換え</sys:String>
     <sys:String x:Key="Str_Btn_Save">保存</sys:String>
+    <sys:String x:Key="Str_Btn_DontSave">保存しない</sys:String>
     <sys:String x:Key="Str_Col_Modified">更新日</sys:String>
     <sys:String x:Key="Str_Col_Name">名前</sys:String>
     <sys:String x:Key="Str_Col_Size">サイズ</sys:String>

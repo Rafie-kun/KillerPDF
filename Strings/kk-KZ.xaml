@@ -249,8 +249,8 @@ KillerPDF екі орнатылған көшірме жасамайды.</sys:St
     <sys:String x:Key="Str_Dlg_SetDefaultPdfMsg" xml:space="preserve">KillerPDF-ті әдепкі PDF қарау құралы етіп орнатқыңыз келе ме?
 
 Windows параметрлері - Әдепкі қолданбалар ашылады.</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedClose">Сақталмаған өзгерістер бар. Осы файлды сақтамай жабу керек пе?</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedExit">Сақталмаған өзгерістер бар. KillerPDF-ті сақтамай жабу керек пе?</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedClose">Бұл файлда сақталмаған өзгерістер бар. Жаппас бұрын оларды сақтау керек пе?</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedExit">Сақталмаған өзгерістер бар. KillerPDF-ті жаппас бұрын оларды сақтау керек пе?</sys:String>
     <sys:String x:Key="Str_Dlg_PageOutOfRange" xml:space="preserve">Бұл құжатта Adobe Reader қолдайтын өлшемнен тыс (әр жағы 3-тен 14 400 нүктеге дейін) {0} бет бар - Adobe оларды бос бет ретінде көрсетеді.
 
 Оларды қолдау көрсетілетін өлшемге масштабтау керек пе? Беттер түрі мен пропорцияларын сақтайды.</sys:String>
@@ -641,7 +641,7 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Status_Merged">{0} файл біріктірілді - әлі сақталмаған</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Файлдар біріктірілуде...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">Біріктіру болдырылмады</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Барлық құжаттарды жабу керек пе? Сақталмаған өзгерістер жоғалады.</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Сақталмаған өзгерістер бар. Барлық құжаттарды жаппас бұрын оларды сақтау керек пе?</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">Алдымен PDF ашыңыз.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">ZIP-ке сығар алдында өзгерістерді сақтау керек пе?</sys:String>
     <sys:String x:Key="Str_Status_Zipped">{0} ішіне сығылды - {1} (бұрын {2})</sys:String>
@@ -962,6 +962,7 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Btn_Open">Ашу</sys:String>
     <sys:String x:Key="Str_Btn_Replace">Ауыстыру</sys:String>
     <sys:String x:Key="Str_Btn_Save">Сақтау</sys:String>
+    <sys:String x:Key="Str_Btn_DontSave">Сақтамау</sys:String>
     <sys:String x:Key="Str_Col_Modified">өзгертілген</sys:String>
     <sys:String x:Key="Str_Col_Name">атауы</sys:String>
     <sys:String x:Key="Str_Col_Size">өлшемі</sys:String>

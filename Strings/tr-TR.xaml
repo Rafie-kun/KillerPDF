@@ -267,8 +267,8 @@ KillerPDF iki kurulu kopya oluşturmaz.</sys:String>
     <sys:String x:Key="Str_Dlg_SetDefaultPdfMsg" xml:space="preserve">KillerPDF varsayılan PDF görüntüleyiciniz olarak ayarlansın mı?
 
 Windows Ayarları - Varsayılan Uygulamalar bölümünü açar.</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedClose">Kaydedilmemiş değişiklikleriniz var. Bu dosya kaydedilmeden kapatılsın mı?</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedExit">Kaydedilmemiş değişiklikleriniz var. KillerPDF kaydedilmeden kapatılsın mı?</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedClose">Bu dosyada kaydedilmemiş değişiklikler var. Kapatılmadan önce kaydedilsin mi?</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedExit">Kaydedilmemiş değişiklikleriniz var. KillerPDF kapatılmadan önce kaydedilsin mi?</sys:String>
     <sys:String x:Key="Str_Dlg_PageOutOfRange" xml:space="preserve">Bu belgede Adobe Reader'ın desteklediği aralığın (kenar başına 3 - 14.400 punto) dışında boyutlandırılmış {0} sayfa var - Adobe bu sayfaları boş gösterir.
 
 Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları korunur.</sys:String>
@@ -639,7 +639,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Status_Merged">{0} dosya birleştirildi - henüz kaydedilmedi</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Dosyalar birleştiriliyor...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">Birleştirme iptal edildi</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Tüm belgeler kapatılsın mı? Kaydedilmemiş değişiklikler kaybolacak.</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Kaydedilmemiş değişiklikleriniz var. Tüm belgeler kapatılmadan önce kaydedilsin mi?</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">Önce bir PDF açın.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">ZIP olarak sıkıştırmadan önce değişiklikler kaydedilsin mi?</sys:String>
     <sys:String x:Key="Str_Status_Zipped">{0} olarak sıkıştırıldı - {1} (önceki {2})</sys:String>
@@ -1033,6 +1033,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Btn_Open">Aç</sys:String>
     <sys:String x:Key="Str_Btn_Replace">Değiştir</sys:String>
     <sys:String x:Key="Str_Btn_Save">Kaydet</sys:String>
+    <sys:String x:Key="Str_Btn_DontSave">Kaydetme</sys:String>
     <sys:String x:Key="Str_Col_Modified">değiştirilme</sys:String>
     <sys:String x:Key="Str_Col_Name">ad</sys:String>
     <sys:String x:Key="Str_Col_Size">boyut</sys:String>

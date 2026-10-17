@@ -557,10 +557,14 @@ namespace KillerPDF
             if (_doc is null) return;
             if (_isDirty)
             {
-                var res = KillerDialog.Show(this,
-                    Loc("Str_Dlg_UnsavedClose"),
-                    "KillerPDF", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-                if (res != MessageBoxResult.Yes) return;
+                var res = KillerDialog.AskToSave(this, Loc("Str_Dlg_UnsavedClose"),
+                    Loc("Str_Btn_Save"), Loc("Str_Btn_DontSave"), Loc("Str_Btn_CancelDlg"));
+                if (res == MessageBoxResult.Cancel) return;
+                if (res == MessageBoxResult.Yes)
+                {
+                    SaveInPlace();
+                    if (_isDirty) return;
+                }
             }
             _doc.Close();
             _doc = null;

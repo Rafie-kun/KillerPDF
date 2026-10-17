@@ -327,8 +327,8 @@ KillerPDF nie utworzy dwóch zainstalowanych kopii.</sys:String>
     <sys:String x:Key="Str_Dlg_SetDefaultPdfMsg" xml:space="preserve">Czy chcesz ustawić KillerPDF jako domyślną przeglądarkę PDF?
 
 Otwiera Ustawienia Windows - Aplikacje domyślne.</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedClose">Masz niezapisane zmiany. Zamknąć ten plik bez zapisywania?</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedExit">Masz niezapisane zmiany. Zamknąć KillerPDF bez zapisywania?</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedClose">Ten plik ma niezapisane zmiany. Zapisać je przed zamknięciem?</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedExit">Masz niezapisane zmiany. Zapisać je przed zamknięciem KillerPDF?</sys:String>
     <sys:String x:Key="Str_Dlg_PageOutOfRange" xml:space="preserve">Ten dokument zawiera {0} stron o rozmiarze przekraczającym rozmiar obsługiwany przez Adobe Reader (od 3 do 14 400 punktów na stronę) - Adobe wyświetla je jako puste strony.
 
 Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i proporcje.</sys:String>
@@ -703,7 +703,7 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Status_Merged">Połączono {0} plików - jeszcze nie zapisano</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Łączenie plików...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">Łączenie anulowane</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Zamknąć wszystkie dokumenty? Niezapisane zmiany zostaną utracone.</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Masz niezapisane zmiany. Zapisać je przed zamknięciem wszystkich dokumentów?</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">Najpierw otwórz PDF.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">Zapisać zmiany przed skompresowaniem do ZIP?</sys:String>
     <sys:String x:Key="Str_Status_Zipped">Spakowane do {0} - {1} (było {2})</sys:String>
@@ -1030,6 +1030,7 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Btn_Open">Otwórz</sys:String>
     <sys:String x:Key="Str_Btn_Replace">Zamień</sys:String>
     <sys:String x:Key="Str_Btn_Save">Zapisz</sys:String>
+    <sys:String x:Key="Str_Btn_DontSave">Nie zapisuj</sys:String>
     <sys:String x:Key="Str_Col_Modified">zmodyfikowany</sys:String>
     <sys:String x:Key="Str_Col_Name">nazwa</sys:String>
     <sys:String x:Key="Str_Col_Size">rozmiar</sys:String>

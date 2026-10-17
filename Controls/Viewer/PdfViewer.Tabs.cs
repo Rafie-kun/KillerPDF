@@ -751,6 +751,24 @@ namespace KillerPDF.Controls
             foreach (var t in _sessions) t.IsActive = ReferenceEquals(t, s);
         }
 
+        // Save, Don't Save or Cancel for closing a document with unsaved changes.
+        private MessageBoxResult AskToSaveBeforeClose(string message)
+            => KillerDialog.AskToSave(Host!.Window, message,
+                Loc("Str_Btn_Save"), Loc("Str_Btn_DontSave"), Loc("Str_Btn_CancelDlg"));
+
+        // Saves one of this pane's documents for a close prompt's Save. A save works on the live
+        // document of the focused pane, so this pane takes focus and the tab comes forward first.
+        // True when the document has no unsaved changes left.
+        private bool SaveSessionForClose(DocumentSession s)
+        {
+            Host?.FocusViewer(this);
+            if (!ReferenceEquals(s, _active)) SwitchToTab(s);
+            if (!ReferenceEquals(s, _active)) return false;
+            bool saved = Host!.SaveActiveDocument();
+            CaptureSessionState(s);
+            return saved;
+        }
+
         // Switch the active tab to an already-loaded session.
         private void SwitchToTab(DocumentSession target)
         {
@@ -852,15 +870,22 @@ namespace KillerPDF.Controls
 
             // An inactive session already owns its saved state. Closing it must not replace
             // the live document or render a deferred tab as the empty state.
+            bool saveFirst = false;
+            if (!ReferenceEquals(s, _active) && s.IsDirty)
+            {
+                var res = AskToSaveBeforeClose(Loc("Str_Dlg_UnsavedClose"));
+                if (res == MessageBoxResult.Cancel) return;
+                if (res == MessageBoxResult.Yes)
+                {
+                    // A save works on the live document, so bring the tab forward and close it
+                    // from there, where the active path below saves it first.
+                    SwitchToTab(s);
+                    if (!ReferenceEquals(s, _active)) return;
+                    saveFirst = true;
+                }
+            }
             if (!ReferenceEquals(s, _active))
             {
-                if (s.IsDirty)
-                {
-                    var res = KillerDialog.Show(Host!.Window,
-                        Loc("Str_Dlg_UnsavedClose"),
-                        "KillerPDF", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-                    if (res != MessageBoxResult.Yes) return;
-                }
                 if (!_sessions.Contains(s) || ReferenceEquals(s, _active)) return;
 
                 CancelAndRelease(s.ThumbCts);
@@ -888,10 +913,9 @@ namespace KillerPDF.Controls
 
             if (_isDirty)
             {
-                var res = KillerDialog.Show(Host!.Window,
-                    Loc("Str_Dlg_UnsavedClose"),
-                    "KillerPDF", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-                if (res != MessageBoxResult.Yes) { RebuildTabStrip(); return; }
+                var res = saveFirst ? MessageBoxResult.Yes : AskToSaveBeforeClose(Loc("Str_Dlg_UnsavedClose"));
+                if (res == MessageBoxResult.Cancel) { RebuildTabStrip(); return; }
+                if (res == MessageBoxResult.Yes && !Host!.SaveActiveDocument()) { RebuildTabStrip(); return; }
             }
 
             int idx = _sessions.IndexOf(s);
@@ -940,9 +964,15 @@ namespace KillerPDF.Controls
 
             if (docTabs.Any(t => t.IsDirty))
             {
-                var res = KillerDialog.Show(Host!.Window, Loc("Str_Dlg_UnsavedCloseAll"),
-                    "KillerPDF", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-                if (res != MessageBoxResult.Yes) { RebuildTabStrip(); return; }
+                var res = AskToSaveBeforeClose(Loc("Str_Dlg_UnsavedCloseAll"));
+                if (res == MessageBoxResult.Cancel) { RebuildTabStrip(); return; }
+                if (res == MessageBoxResult.Yes)
+                {
+                    foreach (var dirty in docTabs.Where(t => t.IsDirty).ToList())
+                    {
+                        if (!SaveSessionForClose(dirty)) { RebuildTabStrip(); return; }
+                    }
+                }
             }
 
             CancelRenderWork();
