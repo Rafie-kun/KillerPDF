@@ -61,6 +61,7 @@ namespace KillerPDF.Controls
                 return button;
             }
 
+            BarButton("Str_Redact_Find", "Str_Redact_FindTip", false, (_, _) => FindTextForRedaction());
             BarButton("Str_Redact_MarkSearch", "Str_Redact_MarkSearchTip", false, (_, _) => MarkSearchResultsForRedaction());
             BarButton("Str_Redact_Clear", "Str_Redact_ClearTip", false, (_, _) => ClearRedactionMarks());
             var divider = new Border { Width = 1, Margin = new Thickness(2, 0, 8, 0), VerticalAlignment = VerticalAlignment.Stretch };
@@ -340,6 +341,36 @@ namespace KillerPDF.Controls
                     if (_redactMarks.Any(mark => mark.PageIndex == page && mark.Left == left
                         && mark.Bottom == bottom && mark.Right == right && mark.Top == top)) continue;
                     _redactMarks.Add(new RedactionMark(page, left, bottom, right, top));
+                    added++;
+                }
+            }
+            if (added > 0) MarkDirty();
+            UpdateRedactionCount();
+            RepaintRedactionMarks();
+            SetStatus(string.Format(Loc("Str_Redact_MarkedSearch"), added));
+        }
+
+        // The Redact bar's Find: words, phrases or patterns across the whole document, reviewed in a
+        // list, and the checked results marked letter by letter on each line they cover.
+        private void FindTextForRedaction()
+        {
+            if (_doc is null || _currentFile is null || Window.GetWindow(this) is not Window owner) return;
+            string path = _currentFile;
+            var dialog = new RedactionFindDialog(owner, () =>
+            {
+                using PdfContentDocument document = PdfContentDocument.Open(path);
+                return [.. Enumerable.Range(1, document.NumberOfPages).Select(document.GetPage)];
+            });
+            if (dialog.ShowDialog() != true) return;
+            int added = 0;
+            foreach (PdfRedactionMatch match in dialog.Checked)
+            {
+                IEnumerable<PdfContentBounds> areas = match.Areas.Count > 0 ? match.Areas : [match.Bounds];
+                foreach (PdfContentBounds area in areas)
+                {
+                    if (_redactMarks.Any(mark => mark.PageIndex == match.PageIndex && mark.Left == area.Left
+                        && mark.Bottom == area.Bottom && mark.Right == area.Right && mark.Top == area.Top)) continue;
+                    _redactMarks.Add(new RedactionMark(match.PageIndex, area.Left, area.Bottom, area.Right, area.Top));
                     added++;
                 }
             }

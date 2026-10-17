@@ -30,6 +30,30 @@ public sealed class PdfRedactionSearchTests
     }
 
     [Fact]
+    public void MatchAreasCoverOnlyTheMatchedLettersOnTheLine()
+    {
+        PdfPageContent page = Read("Account number 12345 remains");
+
+        PdfRedactionMatch whole = Assert.Single(PdfRedactionSearch.Find([page], new PdfRedactionSearchOptions
+        {
+            Kind = PdfRedactionSearchKind.ExactText,
+            Query = "number 12345"
+        }).Matches);
+        PdfRedactionMatch part = Assert.Single(PdfRedactionSearch.Find([page], new PdfRedactionSearchOptions
+        {
+            Kind = PdfRedactionSearchKind.ExactText,
+            Query = "234"
+        }).Matches);
+
+        PdfContentBounds line = Assert.Single(whole.Areas);
+        Assert.Equal(whole.Bounds, line);
+        PdfContentBounds digits = Assert.Single(part.Areas);
+        Assert.True(digits.Left > part.Bounds.Left);
+        Assert.True(digits.Right < part.Bounds.Right);
+        Assert.True(digits.Width < part.Bounds.Width * 0.7);
+    }
+
+    [Fact]
     public void FindsCommonEmailAndPhonePatterns()
     {
         PdfPageContent page = Read("Email steve@example.com or call (206) 555-0123");

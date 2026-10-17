@@ -63,7 +63,14 @@ public sealed record PdfRedactionRegion(int PageIndex, PdfContentBounds Bounds,
 public sealed record PdfRedactionMatch(string Id, int PageIndex, string Text,
     PdfContentBounds Bounds, int FirstWordIndex, int WordCount,
     string? ReasonCode = null, string? OverlayText = null,
-    PdfRedactionTargetKind TargetKind = PdfRedactionTargetKind.Text);
+    PdfRedactionTargetKind TargetKind = PdfRedactionTargetKind.Text)
+{
+    /// <summary>
+    /// Gets the matched characters as one area per text line, so a match that wraps or covers
+    /// only part of a word marks exactly that text. Empty for matches not built from text.
+    /// </summary>
+    public IReadOnlyList<PdfContentBounds> Areas { get; init; } = [];
+}
 
 /// <summary>One named document prepared for isolated redaction search.</summary>
 public sealed record PdfRedactionSearchBatchInput(
@@ -372,11 +379,53 @@ public static class PdfRedactionSearch
                 if (words.Length == 0) continue;
                 results.Add(new PdfRedactionMatch($"{pageIndex}:{match.Index}:{match.Length}", pageIndex,
                     match.Value, PdfContentBounds.Union(words.Select(item => item.span.Word.BoundingBox)),
-                    words[0].index, words.Length, options.ReasonCode, options.OverlayText));
+                    words[0].index, words.Length, options.ReasonCode, options.OverlayText)
+                {
+                    Areas = MatchAreas(words.Select(item => item.span), match.Index, match.Index + match.Length)
+                });
             }
             pageIndex++;
         }
         return new PdfRedactionReview(results);
+    }
+
+    // The matched letters of each word, merged into one box per text line. A word whose letters
+    // do not map one-to-one onto its text falls back to the whole word.
+    private static IReadOnlyList<PdfContentBounds> MatchAreas(
+        IEnumerable<(PdfExtractedWord Word, int Start, int End)> spans, int matchStart, int matchEnd)
+    {
+        var pieces = new List<PdfContentBounds>();
+        foreach (var (word, start, _) in spans)
+        {
+            int localStart = Math.Max(0, matchStart - start);
+            int localEnd = Math.Min(word.Text.Length, matchEnd - start);
+            if (localEnd <= localStart) continue;
+            var letters = new List<PdfContentBounds>();
+            int offset = 0;
+            foreach (PdfExtractedLetter letter in word.Letters)
+            {
+                int letterEnd = offset + letter.Value.Length;
+                if (letterEnd > localStart && offset < localEnd) letters.Add(letter.BoundingBox);
+                offset = letterEnd;
+            }
+            pieces.Add(letters.Count > 0 && offset == word.Text.Length
+                ? PdfContentBounds.Union(letters) : word.BoundingBox);
+        }
+        var lines = new List<PdfContentBounds>();
+        foreach (PdfContentBounds piece in pieces)
+        {
+            if (lines.Count > 0 && SameLine(lines[^1], piece))
+                lines[^1] = PdfContentBounds.Union([lines[^1], piece]);
+            else
+                lines.Add(piece);
+        }
+        return Array.AsReadOnly(lines.ToArray());
+
+        static bool SameLine(PdfContentBounds first, PdfContentBounds second)
+        {
+            double overlap = Math.Min(first.Top, second.Top) - Math.Max(first.Bottom, second.Bottom);
+            return overlap > 0.5 * Math.Min(first.Height, second.Height);
+        }
     }
 
     internal static void ValidatePresentation(string? reasonCode, string? overlayText, string parameterName)
