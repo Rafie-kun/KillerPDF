@@ -74,7 +74,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 ### Fixed
 - Digitally signed fields show their signature instead of a blue Sign box (#425).
-- The Archival and Scanning macro starters run their Convert Scan to Text step instead of reporting it unavailable, and it can be added to any macro (#343).
+- The Archival, Scanning and Privacy macro starters run instead of reporting steps unavailable. OCR adds a searchable text layer like Make Searchable PDF. Redact asks for the words to remove, also removes areas marked with the Redact tool, and uses the Redact tool's verification and page image approval. Both steps can be added to any macro (#343).
 - On the Light theme's Yellow accent, buttons, links, tabs and accent icons stay yellow with a thin gray outline around yellow text and icons, instead of turning near-black.
 - On the website's Light theme with the Yellow accent, links, headings and labels stay yellow with a thin gray outline instead of turning olive brown.
 - The exe's file properties show Steve the Killer as the copyright holder instead of leaving it blank.

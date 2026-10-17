@@ -1434,6 +1434,9 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_Macro_Complete">巨集輸出已儲存到 {0}</sys:String>
     <sys:String x:Key="Str_Macro_Failed">無法完成巨集。</sys:String>
     <sys:String x:Key="Str_Macro_Canceled">巨集已取消</sys:String>
+    <sys:String x:Key="Str_Macro_RedactPrompt">輸入要塗黑的文字或片語，每行一個。在此文件中以塗黑工具標記的區域也會被塗黑。</sys:String>
+    <sys:String x:Key="Str_Macro_RedactNothing">請至少輸入一個文字或片語，或先以塗黑工具標記區域。</sys:String>
+    <sys:String x:Key="Str_Macro_Redacted">已塗黑 {1} 頁上的 {0} 個區域。</sys:String>
     <sys:String x:Key="Str_Scroll_Up">向上捲動</sys:String>
     <sys:String x:Key="Str_Scroll_Down">向下捲動</sys:String>
     <sys:String x:Key="Str_Scroll_Left">向左捲動</sys:String>

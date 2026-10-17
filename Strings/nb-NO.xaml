@@ -1452,6 +1452,9 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Macro_Complete">Makroresultatet er lagret i {0}</sys:String>
     <sys:String x:Key="Str_Macro_Failed">Makroen kunne ikke fullføres.</sys:String>
     <sys:String x:Key="Str_Macro_Canceled">Makro avbrutt</sys:String>
+    <sys:String x:Key="Str_Macro_RedactPrompt">Skriv inn ordene eller uttrykkene som skal sladdes, ett per linje. Områder du har markert med Sladd-verktøyet i dette dokumentet, sladdes også.</sys:String>
+    <sys:String x:Key="Str_Macro_RedactNothing">Skriv inn minst ett ord eller uttrykk, eller marker først områder med Sladd-verktøyet.</sys:String>
+    <sys:String x:Key="Str_Macro_Redacted">Sladdet {0} område(r) på {1} side(r).</sys:String>
     <sys:String x:Key="Str_Scroll_Up">Rull opp</sys:String>
     <sys:String x:Key="Str_Scroll_Down">Rull ned</sys:String>
     <sys:String x:Key="Str_Scroll_Left">Rull til venstre</sys:String>

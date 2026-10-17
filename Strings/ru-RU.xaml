@@ -1452,6 +1452,9 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Macro_Complete">Результат макроса сохранен в {0}</sys:String>
     <sys:String x:Key="Str_Macro_Failed">Не удалось завершить макрос.</sys:String>
     <sys:String x:Key="Str_Macro_Canceled">Макрос отменен</sys:String>
+    <sys:String x:Key="Str_Macro_RedactPrompt">Введите слова или фразы, которые нужно скрыть, по одной в строке. Области, отмеченные в этом документе инструментом «Скрыть», тоже будут скрыты.</sys:String>
+    <sys:String x:Key="Str_Macro_RedactNothing">Введите хотя бы одно слово или фразу либо сначала отметьте области инструментом «Скрыть».</sys:String>
+    <sys:String x:Key="Str_Macro_Redacted">Скрыто: {0} обл. на {1} стр.</sys:String>
     <sys:String x:Key="Str_Scroll_Up">Прокрутить вверх</sys:String>
     <sys:String x:Key="Str_Scroll_Down">Прокрутить вниз</sys:String>
     <sys:String x:Key="Str_Scroll_Left">Прокрутить влево</sys:String>

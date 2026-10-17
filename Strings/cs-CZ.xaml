@@ -1437,6 +1437,9 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Macro_Complete">Výstup makra byl uložen do {0}</sys:String>
     <sys:String x:Key="Str_Macro_Failed">Makro se nepodařilo dokončit.</sys:String>
     <sys:String x:Key="Str_Macro_Canceled">Makro bylo zrušeno</sys:String>
+    <sys:String x:Key="Str_Macro_RedactPrompt">Zadejte slova nebo fráze k začernění, na každý řádek jedno. Oblasti označené nástrojem Začernit v tomto dokumentu se začerní také.</sys:String>
+    <sys:String x:Key="Str_Macro_RedactNothing">Zadejte alespoň jedno slovo nebo frázi, nebo nejprve označte oblasti nástrojem Začernit.</sys:String>
+    <sys:String x:Key="Str_Macro_Redacted">Začerněno oblastí: {0}, na {1} str.</sys:String>
     <sys:String x:Key="Str_Scroll_Up">Posunout nahoru</sys:String>
     <sys:String x:Key="Str_Scroll_Down">Posunout dolů</sys:String>
     <sys:String x:Key="Str_Scroll_Left">Posunout doleva</sys:String>

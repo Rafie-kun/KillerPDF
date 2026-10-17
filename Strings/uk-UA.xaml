@@ -1452,6 +1452,9 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Macro_Complete">Вихідний файл макросу збережено до {0}</sys:String>
     <sys:String x:Key="Str_Macro_Failed">Не вдалося завершити макрос.</sys:String>
     <sys:String x:Key="Str_Macro_Canceled">Макрос скасовано</sys:String>
+    <sys:String x:Key="Str_Macro_RedactPrompt">Введіть слова або фрази, які потрібно приховати, по одній у рядку. Області, позначені в цьому документі інструментом «Приховати», теж буде приховано.</sys:String>
+    <sys:String x:Key="Str_Macro_RedactNothing">Введіть принаймні одне слово чи фразу або спершу позначте області інструментом «Приховати».</sys:String>
+    <sys:String x:Key="Str_Macro_Redacted">Приховано: {0} обл. на {1} стор.</sys:String>
     <sys:String x:Key="Str_Scroll_Up">Прокрутити вгору</sys:String>
     <sys:String x:Key="Str_Scroll_Down">Прокрутити вниз</sys:String>
     <sys:String x:Key="Str_Scroll_Left">Прокрутити ліворуч</sys:String>

@@ -1439,6 +1439,9 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Macro_Complete">A makró kimenete ide lett mentve: {0}</sys:String>
     <sys:String x:Key="Str_Macro_Failed">A makró nem fejeződött be.</sys:String>
     <sys:String x:Key="Str_Macro_Canceled">Makró megszakítva</sys:String>
+    <sys:String x:Key="Str_Macro_RedactPrompt">Írja be a kitakarandó szavakat vagy kifejezéseket, soronként egyet. A dokumentumban a Kitakarás eszközzel megjelölt területek is kitakarásra kerülnek.</sys:String>
+    <sys:String x:Key="Str_Macro_RedactNothing">Írjon be legalább egy szót vagy kifejezést, vagy előbb jelöljön meg területeket a Kitakarás eszközzel.</sys:String>
+    <sys:String x:Key="Str_Macro_Redacted">Kitakarva: {0} terület, {1} oldalon.</sys:String>
     <sys:String x:Key="Str_Scroll_Up">Görgetés felfelé</sys:String>
     <sys:String x:Key="Str_Scroll_Down">Görgetés lefelé</sys:String>
     <sys:String x:Key="Str_Scroll_Left">Görgetés balra</sys:String>

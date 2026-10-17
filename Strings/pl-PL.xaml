@@ -1440,6 +1440,9 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Macro_Complete">Plik wyjściowy makra zapisano w {0}</sys:String>
     <sys:String x:Key="Str_Macro_Failed">Nie można ukończyć makra.</sys:String>
     <sys:String x:Key="Str_Macro_Canceled">Makro anulowano</sys:String>
+    <sys:String x:Key="Str_Macro_RedactPrompt">Wpisz słowa lub frazy do zaczernienia, po jednym w wierszu. Obszary zaznaczone narzędziem Zaczernij w tym dokumencie również zostaną zaczernione.</sys:String>
+    <sys:String x:Key="Str_Macro_RedactNothing">Wpisz co najmniej jedno słowo lub frazę albo najpierw zaznacz obszary narzędziem Zaczernij.</sys:String>
+    <sys:String x:Key="Str_Macro_Redacted">Zaczernione obszary: {0}, na {1} str.</sys:String>
     <sys:String x:Key="Str_Scroll_Up">Przewiń w górę</sys:String>
     <sys:String x:Key="Str_Scroll_Down">Przewiń w dół</sys:String>
     <sys:String x:Key="Str_Scroll_Left">Przewiń w lewo</sys:String>

@@ -1436,6 +1436,9 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Macro_Complete">宏输出已保存到 {0}</sys:String>
     <sys:String x:Key="Str_Macro_Failed">无法完成宏。</sys:String>
     <sys:String x:Key="Str_Macro_Canceled">宏已取消</sys:String>
+    <sys:String x:Key="Str_Macro_RedactPrompt">输入要涂黑的文字或短语，每行一个。在此文档中用涂黑工具标记的区域也会被涂黑。</sys:String>
+    <sys:String x:Key="Str_Macro_RedactNothing">请至少输入一个文字或短语，或先用涂黑工具标记区域。</sys:String>
+    <sys:String x:Key="Str_Macro_Redacted">已涂黑 {1} 页上的 {0} 个区域。</sys:String>
     <sys:String x:Key="Str_Scroll_Up">向上滚动</sys:String>
     <sys:String x:Key="Str_Scroll_Down">向下滚动</sys:String>
     <sys:String x:Key="Str_Scroll_Left">向左滚动</sys:String>

@@ -2,6 +2,7 @@ using System.IO;
 using System.Text;
 using System.Windows;
 using KillerPdf.Engine.Documents;
+using KillerPDF.Services;
 
 namespace KillerPDF;
 
@@ -23,6 +24,7 @@ public partial class MainWindow
             PdfMacroOperation.Validate,
             PdfMacroOperation.RemoveUnresolvedLinks,
             PdfMacroOperation.Ocr,
+            PdfMacroOperation.Redact,
             PdfMacroOperation.Save
         ];
         var dialog = new MacroDialog(this, supported, addable);
@@ -63,6 +65,10 @@ public partial class MainWindow
         if (macro.Steps.Any(step => step.Operation == PdfMacroOperation.Ocr)
             && !await EnsureOcrModelsReadyAsync())
             return;
+        _macroRedaction = new MacroRedaction();
+        if (macro.Steps.Any(step => step.Operation == PdfMacroOperation.Redact)
+            && !PrepareMacroRedaction())
+            return;
 
         CommitActiveTextBox();
         var busy = ShowBusyOverlay(Loc("Str_Macro_Running"));
@@ -73,6 +79,7 @@ public partial class MainWindow
             PdfMacroRunReport report = await Task.Run(() => dispatcher.RunReport(
                 macro, [new ReadOnlyMemory<byte>(source)], cancellationToken: token), token);
             PdfMacroFileResult result = AssertSingleResult(report);
+            if (_macroRedaction.Canceled) throw new OperationCanceledException();
             if (result.Succeeded && result.Data is ReadOnlyMemory<byte> data)
                 WriteMacroOutput(outputDialog.FileName, data);
 
@@ -80,8 +87,11 @@ public partial class MainWindow
             SetStatus(result.Succeeded
                 ? string.Format(Loc("Str_Macro_Complete"), outputDialog.FileName)
                 : Loc("Str_Macro_Failed"));
-            new DocumentReportDialog(this, Loc("Str_DocumentTools_Macros"),
-                report.ToText()).ShowDialog();
+            string reportText = report.ToText();
+            if (_macroRedaction.Areas > 0)
+                reportText += Environment.NewLine + string.Format(Loc("Str_Macro_Redacted"),
+                    _macroRedaction.Areas, _macroRedaction.Pages);
+            new DocumentReportDialog(this, Loc("Str_DocumentTools_Macros"), reportText).ShowDialog();
         }
         catch (OperationCanceledException)
         {
@@ -114,7 +124,82 @@ public partial class MainWindow
                 }),
             new PdfMacroOperationRegistration(PdfMacroOperation.Ocr,
                 (_, source, _, cancellationToken) =>
-                    RecognizeMacroText(source, language, formAware, cancellationToken))]);
+                    RecognizeMacroText(source, language, formAware, cancellationToken)),
+            new PdfMacroOperationRegistration(PdfMacroOperation.Redact,
+                (_, source, _, cancellationToken) => RedactMacroContent(source, cancellationToken))]);
+    }
+
+    // What the next macro run's Redact step removes: the words asked for at the start of the run
+    // and the areas already marked with the Redact tool on this document.
+    private sealed class MacroRedaction
+    {
+        internal string[] Terms = [];
+        internal List<PdfRedactionRegion> Marked = [];
+        internal int Areas;
+        internal int Pages;
+        internal bool Canceled;
+    }
+
+    private MacroRedaction _macroRedaction = new();
+
+    private bool PrepareMacroRedaction()
+    {
+        _macroRedaction = new MacroRedaction { Marked = Viewer.PendingRedactionRegions() };
+        string? text = KillerDialog.PromptLines(this, Loc("Str_Lbl_Redact"),
+            Loc("Str_Macro_RedactPrompt"), Loc("Str_Btn_OK"));
+        if (text is null) return false;
+        _macroRedaction.Terms = [.. text.Split('\n')
+            .Select(line => line.Trim()).Where(line => line.Length > 0).Distinct(StringComparer.Ordinal)];
+        if (_macroRedaction.Terms.Length > 0 || _macroRedaction.Marked.Count > 0) return true;
+        KillerDialog.Show(this, Loc("Str_Macro_RedactNothing"), Loc("Str_DocumentTools_Macros"),
+            MessageBoxButton.OK, MessageBoxImage.Information);
+        return false;
+    }
+
+    // Removes the matches and marked areas with the Redact tool's own engine pass, which verifies
+    // that nothing under them is left. A page only becomes an image after the user approves it.
+    private PdfMacroOperationResult RedactMacroContent(ReadOnlyMemory<byte> source,
+        CancellationToken cancellationToken)
+    {
+        string path = App.MakeTempFile("macroredact");
+        try
+        {
+            File.WriteAllBytes(path, source.ToArray());
+            List<PdfRedactionRegion> regions = [.. _macroRedaction.Marked];
+            foreach (string term in _macroRedaction.Terms)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                foreach (var (page, rects) in SearchService.FindExactMatches(path, term))
+                    foreach (var (left, bottom, right, top) in rects)
+                        regions.Add(new PdfRedactionRegion(page, new PdfContentBounds(left, bottom, right, top)));
+            }
+            if (regions.Count == 0) return new PdfMacroOperationResult(source);
+
+            PdfContentRedactionPlan plan = PdfEngineIntegration.AnalyzeRedaction(
+                PdfDocument.Open(source.ToArray()), regions);
+            var approved = new List<int>();
+            var skipped = new HashSet<int>();
+            if (plan.RasterPages.Count > 0
+                && !Dispatcher.Invoke(() => Viewer.ApproveRasterPages(plan.RasterPages, approved, skipped)))
+            {
+                _macroRedaction.Canceled = true;
+                throw new OperationCanceledException(cancellationToken);
+            }
+            regions.RemoveAll(region => skipped.Contains(region.PageIndex));
+            if (regions.Count == 0) return new PdfMacroOperationResult(source);
+
+            cancellationToken.ThrowIfCancellationRequested();
+            PdfEngineIntegration.ApplyRedaction(path, regions, approved);
+            _macroRedaction.Areas += regions.Count;
+            _macroRedaction.Pages += regions.Select(region => region.PageIndex).Distinct().Count();
+            return new PdfMacroOperationResult(File.ReadAllBytes(path));
+        }
+        finally
+        {
+            try { if (File.Exists(path)) File.Delete(path); }
+            catch (IOException) { }
+            catch (UnauthorizedAccessException) { }
+        }
     }
 
     // Adds a searchable text layer the same way Make Searchable PDF does, working on temp copies.

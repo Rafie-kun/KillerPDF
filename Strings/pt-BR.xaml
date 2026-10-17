@@ -1452,6 +1452,9 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Macro_Complete">Saída da macro salva em {0}</sys:String>
     <sys:String x:Key="Str_Macro_Failed">Não foi possível concluir a macro.</sys:String>
     <sys:String x:Key="Str_Macro_Canceled">Macro cancelada</sys:String>
+    <sys:String x:Key="Str_Macro_RedactPrompt">Digite as palavras ou frases a tarjar, uma por linha. As áreas marcadas com a ferramenta Tarjar neste documento também são tarjadas.</sys:String>
+    <sys:String x:Key="Str_Macro_RedactNothing">Digite pelo menos uma palavra ou frase, ou marque áreas com a ferramenta Tarjar primeiro.</sys:String>
+    <sys:String x:Key="Str_Macro_Redacted">{0} área(s) tarjada(s) em {1} página(s).</sys:String>
     <sys:String x:Key="Str_Scroll_Up">Rolar para cima</sys:String>
     <sys:String x:Key="Str_Scroll_Down">Rolar para baixo</sys:String>
     <sys:String x:Key="Str_Scroll_Left">Rolar para a esquerda</sys:String>

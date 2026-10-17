@@ -1438,6 +1438,9 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Macro_Complete">Makroausgabe wurde unter {0} gespeichert</sys:String>
     <sys:String x:Key="Str_Macro_Failed">Das Makro konnte nicht abgeschlossen werden.</sys:String>
     <sys:String x:Key="Str_Macro_Canceled">Makro abgebrochen</sys:String>
+    <sys:String x:Key="Str_Macro_RedactPrompt">Geben Sie die zu schwärzenden Wörter oder Ausdrücke ein, einen pro Zeile. Mit dem Schwärzen-Werkzeug markierte Bereiche in diesem Dokument werden ebenfalls geschwärzt.</sys:String>
+    <sys:String x:Key="Str_Macro_RedactNothing">Geben Sie mindestens ein Wort oder einen Ausdruck ein oder markieren Sie zuerst Bereiche mit dem Schwärzen-Werkzeug.</sys:String>
+    <sys:String x:Key="Str_Macro_Redacted">{0} Bereich(e) auf {1} Seite(n) geschwärzt.</sys:String>
     <sys:String x:Key="Str_Scroll_Up">Nach oben scrollen</sys:String>
     <sys:String x:Key="Str_Scroll_Down">Nach unten scrollen</sys:String>
     <sys:String x:Key="Str_Scroll_Left">Nach links scrollen</sys:String>

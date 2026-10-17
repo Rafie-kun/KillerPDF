@@ -1432,6 +1432,9 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Macro_Complete">ম্যাক্রোর আউটপুট {0} এ সংরক্ষিত হয়েছে</sys:String>
     <sys:String x:Key="Str_Macro_Failed">ম্যাক্রো সম্পন্ন করা যায়নি।</sys:String>
     <sys:String x:Key="Str_Macro_Canceled">ম্যাক্রো বাতিল হয়েছে</sys:String>
+    <sys:String x:Key="Str_Macro_RedactPrompt">যে শব্দ বা বাক্যাংশ রিড্যাক্ট করতে চান তা লিখুন, প্রতি লাইনে একটি। এই ডকুমেন্টে রিড্যাক্ট টুল দিয়ে চিহ্নিত এলাকাগুলোও রিড্যাক্ট হবে।</sys:String>
+    <sys:String x:Key="Str_Macro_RedactNothing">অন্তত একটি শব্দ বা বাক্যাংশ লিখুন, অথবা আগে রিড্যাক্ট টুল দিয়ে এলাকা চিহ্নিত করুন।</sys:String>
+    <sys:String x:Key="Str_Macro_Redacted">{1}টি পৃষ্ঠায় {0}টি এলাকা রিড্যাক্ট করা হয়েছে।</sys:String>
     <sys:String x:Key="Str_Scroll_Up">উপরে স্ক্রল করুন</sys:String>
     <sys:String x:Key="Str_Scroll_Down">নিচে স্ক্রল করুন</sys:String>
     <sys:String x:Key="Str_Scroll_Left">বাঁয়ে স্ক্রল করুন</sys:String>

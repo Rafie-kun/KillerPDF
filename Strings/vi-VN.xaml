@@ -1452,6 +1452,9 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Macro_Complete">Đã lưu đầu ra macro vào {0}</sys:String>
     <sys:String x:Key="Str_Macro_Failed">Không thể hoàn tất macro.</sys:String>
     <sys:String x:Key="Str_Macro_Canceled">Đã hủy macro</sys:String>
+    <sys:String x:Key="Str_Macro_RedactPrompt">Nhập các từ hoặc cụm từ cần che, mỗi dòng một mục. Các vùng bạn đã đánh dấu bằng công cụ Che trong tài liệu này cũng được che.</sys:String>
+    <sys:String x:Key="Str_Macro_RedactNothing">Nhập ít nhất một từ hoặc cụm từ, hoặc đánh dấu vùng bằng công cụ Che trước.</sys:String>
+    <sys:String x:Key="Str_Macro_Redacted">Đã che {0} vùng trên {1} trang.</sys:String>
     <sys:String x:Key="Str_Scroll_Up">Cuộn lên</sys:String>
     <sys:String x:Key="Str_Scroll_Down">Cuộn xuống</sys:String>
     <sys:String x:Key="Str_Scroll_Left">Cuộn sang trái</sys:String>

@@ -1451,6 +1451,9 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Macro_Complete">Макрос шығысы {0} орнына сақталды</sys:String>
     <sys:String x:Key="Str_Macro_Failed">Макросты аяқтау мүмкін болмады.</sys:String>
     <sys:String x:Key="Str_Macro_Canceled">Макрос тоқтатылды</sys:String>
+    <sys:String x:Key="Str_Macro_RedactPrompt">Жасырылатын сөздерді немесе тіркестерді әр жолға біреуден енгізіңіз. Осы құжатта Жасыру құралымен белгіленген аймақтар да жасырылады.</sys:String>
+    <sys:String x:Key="Str_Macro_RedactNothing">Кемінде бір сөз не тіркес енгізіңіз немесе алдымен Жасыру құралымен аймақтарды белгілеңіз.</sys:String>
+    <sys:String x:Key="Str_Macro_Redacted">{1} беттегі {0} аймақ жасырылды.</sys:String>
     <sys:String x:Key="Str_Scroll_Up">Жоғары айналдыру</sys:String>
     <sys:String x:Key="Str_Scroll_Down">Төмен айналдыру</sys:String>
     <sys:String x:Key="Str_Scroll_Left">Солға айналдыру</sys:String>

@@ -1452,6 +1452,9 @@ Vuoi ridimensionare le pagine ad una dimensione supportata? Le pagine manterrann
     <sys:String x:Key="Str_Macro_Complete">Output della macro salvato in {0}</sys:String>
     <sys:String x:Key="Str_Macro_Failed">Impossibile completare la macro.</sys:String>
     <sys:String x:Key="Str_Macro_Canceled">Macro annullata</sys:String>
+    <sys:String x:Key="Str_Macro_RedactPrompt">Inserisci le parole o frasi da oscurare, una per riga. Anche le aree contrassegnate con lo strumento Oscura in questo documento vengono oscurate.</sys:String>
+    <sys:String x:Key="Str_Macro_RedactNothing">Inserisci almeno una parola o frase, oppure contrassegna prima delle aree con lo strumento Oscura.</sys:String>
+    <sys:String x:Key="Str_Macro_Redacted">Oscurate {0} aree su {1} pagina/e.</sys:String>
     <sys:String x:Key="Str_Scroll_Up">Scorri verso l'alto</sys:String>
     <sys:String x:Key="Str_Scroll_Down">Scorri verso il basso</sys:String>
     <sys:String x:Key="Str_Scroll_Left">Scorri a sinistra</sys:String>

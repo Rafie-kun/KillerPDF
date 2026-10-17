@@ -1452,6 +1452,9 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Macro_Complete">Sortie de la macro enregistrée dans {0}</sys:String>
     <sys:String x:Key="Str_Macro_Failed">La macro n'a pas pu se terminer.</sys:String>
     <sys:String x:Key="Str_Macro_Canceled">Macro annulée</sys:String>
+    <sys:String x:Key="Str_Macro_RedactPrompt">Saisissez les mots ou expressions à caviarder, un par ligne. Les zones marquées avec l'outil Caviarder dans ce document sont aussi caviardées.</sys:String>
+    <sys:String x:Key="Str_Macro_RedactNothing">Saisissez au moins un mot ou une expression, ou marquez d'abord des zones avec l'outil Caviarder.</sys:String>
+    <sys:String x:Key="Str_Macro_Redacted">{0} zone(s) caviardée(s) sur {1} page(s).</sys:String>
     <sys:String x:Key="Str_Scroll_Up">Défiler vers le haut</sys:String>
     <sys:String x:Key="Str_Scroll_Down">Défiler vers le bas</sys:String>
     <sys:String x:Key="Str_Scroll_Left">Défiler vers la gauche</sys:String>

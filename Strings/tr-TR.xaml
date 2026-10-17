@@ -1432,6 +1432,9 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Macro_Complete">Makro çıktısı {0} konumuna kaydedildi</sys:String>
     <sys:String x:Key="Str_Macro_Failed">Makro tamamlanamadı.</sys:String>
     <sys:String x:Key="Str_Macro_Canceled">Makro iptal edildi</sys:String>
+    <sys:String x:Key="Str_Macro_RedactPrompt">Karartılacak sözcükleri veya ifadeleri her satıra bir tane olacak şekilde girin. Bu belgede Karart aracıyla işaretlediğiniz alanlar da karartılır.</sys:String>
+    <sys:String x:Key="Str_Macro_RedactNothing">En az bir sözcük veya ifade girin ya da önce Karart aracıyla alan işaretleyin.</sys:String>
+    <sys:String x:Key="Str_Macro_Redacted">Karartılan alanlar: {0}, sayfa sayısı: {1}.</sys:String>
     <sys:String x:Key="Str_Scroll_Up">Yukarı kaydır</sys:String>
     <sys:String x:Key="Str_Scroll_Down">Aşağı kaydır</sys:String>
     <sys:String x:Key="Str_Scroll_Left">Sola kaydır</sys:String>

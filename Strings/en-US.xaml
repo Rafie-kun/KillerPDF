@@ -1452,6 +1452,9 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Macro_Complete">Macro output saved to {0}</sys:String>
     <sys:String x:Key="Str_Macro_Failed">The macro could not complete.</sys:String>
     <sys:String x:Key="Str_Macro_Canceled">Macro canceled</sys:String>
+    <sys:String x:Key="Str_Macro_RedactPrompt">Enter the words or phrases to redact, one per line. Areas you marked with the Redact tool on this document are redacted too.</sys:String>
+    <sys:String x:Key="Str_Macro_RedactNothing">Enter at least one word or phrase, or mark areas with the Redact tool first.</sys:String>
+    <sys:String x:Key="Str_Macro_Redacted">Redacted {0} area(s) on {1} page(s).</sys:String>
     <sys:String x:Key="Str_Scroll_Up">Scroll up</sys:String>
     <sys:String x:Key="Str_Scroll_Down">Scroll down</sys:String>
     <sys:String x:Key="Str_Scroll_Left">Scroll left</sys:String>

@@ -1432,6 +1432,9 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Macro_Complete">La salida de la macro se guardó en {0}</sys:String>
     <sys:String x:Key="Str_Macro_Failed">La macro no pudo completarse.</sys:String>
     <sys:String x:Key="Str_Macro_Canceled">Macro cancelada</sys:String>
+    <sys:String x:Key="Str_Macro_RedactPrompt">Escriba las palabras o frases que desea censurar, una por línea. Las áreas marcadas con la herramienta Censurar en este documento también se censuran.</sys:String>
+    <sys:String x:Key="Str_Macro_RedactNothing">Escriba al menos una palabra o frase, o marque primero áreas con la herramienta Censurar.</sys:String>
+    <sys:String x:Key="Str_Macro_Redacted">Se censuraron {0} área(s) en {1} página(s).</sys:String>
     <sys:String x:Key="Str_Scroll_Up">Desplazar hacia arriba</sys:String>
     <sys:String x:Key="Str_Scroll_Down">Desplazar hacia abajo</sys:String>
     <sys:String x:Key="Str_Scroll_Left">Desplazar hacia la izquierda</sys:String>

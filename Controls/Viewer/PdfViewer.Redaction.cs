@@ -380,32 +380,9 @@ namespace KillerPDF.Controls
                 return;
             }
 
-            // Pages whose marked content can't be removed by itself are only turned into an image
-            // with the user's say-so, one page at a time.
             var approved = new List<int>();
             var skipped = new HashSet<int>();
-            bool approveRest = false;
-            Window? owner = Window.GetWindow(this);
-            IReadOnlyList<int> rasterPages = plan.RasterPages;
-            for (int index = 0; index < rasterPages.Count; index++)
-            {
-                int page = rasterPages[index];
-                if (approveRest) { approved.Add(page); continue; }
-                bool more = index < rasterPages.Count - 1;
-                string[] labels = more
-                    ? [Loc("Str_Redact_ConvertPage"), Loc("Str_Redact_ConvertAll"), Loc("Str_Redact_SkipPage"), Loc("Str_Btn_Cancel")]
-                    : [Loc("Str_Redact_ConvertPage"), Loc("Str_Redact_SkipPage"), Loc("Str_Btn_Cancel")];
-                int choice = KillerDialog.ShowChoices(owner,
-                    string.Format(Loc("Str_Redact_RasterPrompt"), page + 1), labels, 0, Loc("Str_Lbl_Redact"));
-                if (!more && choice >= 1) choice++;   // align the two-button layout with the four-button one
-                switch (choice)
-                {
-                    case 0: approved.Add(page); break;
-                    case 1: approved.Add(page); approveRest = true; break;
-                    case 2: skipped.Add(page); break;
-                    default: return;
-                }
-            }
+            if (!ApproveRasterPages(plan.RasterPages, approved, skipped)) return;
             if (skipped.Count > 0) regions.RemoveAll(region => skipped.Contains(region.PageIndex));
             if (regions.Count == 0)
             {
@@ -448,6 +425,40 @@ namespace KillerPDF.Controls
                 status += " " + string.Format(Loc("Str_Redact_SkippedPages"), string.Join(", ", skipped.Order().Select(page => page + 1)));
             SetStatus(status);
         }
+
+        // Pages whose marked content can't be removed by itself are only turned into an image
+        // with the user's say-so, one page at a time. False means the user canceled.
+        internal bool ApproveRasterPages(IReadOnlyList<int> rasterPages, List<int> approved, HashSet<int> skipped)
+        {
+            bool approveRest = false;
+            Window? owner = Window.GetWindow(this);
+            for (int index = 0; index < rasterPages.Count; index++)
+            {
+                int page = rasterPages[index];
+                if (approveRest) { approved.Add(page); continue; }
+                bool more = index < rasterPages.Count - 1;
+                string[] labels = more
+                    ? [Loc("Str_Redact_ConvertPage"), Loc("Str_Redact_ConvertAll"), Loc("Str_Redact_SkipPage"), Loc("Str_Btn_Cancel")]
+                    : [Loc("Str_Redact_ConvertPage"), Loc("Str_Redact_SkipPage"), Loc("Str_Btn_Cancel")];
+                int choice = KillerDialog.ShowChoices(owner,
+                    string.Format(Loc("Str_Redact_RasterPrompt"), page + 1), labels, 0, Loc("Str_Lbl_Redact"));
+                if (!more && choice >= 1) choice++;   // align the two-button layout with the four-button one
+                switch (choice)
+                {
+                    case 0: approved.Add(page); break;
+                    case 1: approved.Add(page); approveRest = true; break;
+                    case 2: skipped.Add(page); break;
+                    default: return false;
+                }
+            }
+            return true;
+        }
+
+        /// <summary>The areas marked with the Redact tool on the active document, for a macro's Redact step.</summary>
+        internal List<PdfRedactionRegion> PendingRedactionRegions() => ReferenceEquals(_redactSession, _active)
+            ? [.. _redactMarks.Select(mark => new PdfRedactionRegion(mark.PageIndex,
+                new PdfContentBounds(mark.Left, mark.Bottom, mark.Right, mark.Top)))]
+            : [];
 
         // Unsaved overlay annotations drawn over a redacted area would be burned back in on save,
         // so they go with the content underneath once the redaction succeeds.
