@@ -129,7 +129,7 @@ namespace KillerPDF
             RefreshShortcutViews();
         }
 
-        // The list and the map show the keys as they are now.
+        // The list, the map and the tooltips show the keys as they are now.
         private void RefreshShortcutViews()
         {
             KbMap = ShortcutTable.BuildMap(ShortcutRemaps.Effective);
@@ -137,6 +137,7 @@ namespace KillerPDF
             BuildShortcutsColumn(ShortcutRightColumn, KsColumn(right: true));
             if (_kbBuilt && ShortcutKeyboardHost.Visibility == Visibility.Visible) BuildKeyboardView();
             else _kbBuilt = false;
+            ApplyShortcutTooltips();
         }
     }
 }
