@@ -6,6 +6,7 @@ param(
     [Parameter(Mandatory = $true)][string]$EvidenceDirectory
 )
 $ErrorActionPreference = 'Stop'
+if (-not ([Environment]::GetCommandLineArgs() -contains '--startup-smoke')) { throw 'Include --startup-smoke in the process arguments to isolate preferences.' }
 if ([Threading.Thread]::CurrentThread.GetApartmentState() -ne 'STA') { throw 'Run with pwsh -Sta.' }
 if ([Environment]::Version.Major -ne 10) { throw 'Use PowerShell on .NET 10.' }
 $AssemblyPath = (Resolve-Path -LiteralPath $AssemblyPath).Path
@@ -124,15 +125,37 @@ try {
                         if ($cards.Count -lt 3 -or @($cards | Where-Object { $null -eq $_.Child.Clip }).Count -ne 0) { throw 'Card content is not clipped.' }
                         $continue = @($children | Where-Object { $_ -is [Windows.Controls.Button] -and $_.Content -eq $app.Resources['Str_Crash_Continue'] })[0]
                         if ($continue.IsEnabled -eq $fatal) { throw 'Fatal report Continue state changed.' }
+                        if ($width -eq 760 -and !$fatal -and $themeName -in @('Dark','Light','SE98','Malaise')) {
+                            Render-Preview $dialog "$themeName-grain-$enabled"
+                        }
+                        $actionLabels = @('Str_Crash_Copy','Str_Crash_OpenLogs','Str_Crash_Report','Str_Crash_Continue','Str_Crash_Quit') | ForEach-Object { $app.Resources[$_] }
+                        $actions = @($children | Where-Object { $_ -is [Windows.Controls.Button] -and $_.Content -in $actionLabels })
+                        if ($actions.Count -ne 5) { throw 'Crash actions are missing.' }
+                        foreach ($action in $actions) {
+                            $caption = [Windows.Media.FormattedText]::new([string]$action.Content, [Globalization.CultureInfo]::CurrentCulture, [Windows.FlowDirection]::LeftToRight,
+                                [Windows.Media.Typeface]::new($action.FontFamily, $action.FontStyle, $action.FontWeight, $action.FontStretch), $action.FontSize, $action.Foreground, 1.0)
+                            if ($caption.WidthIncludingTrailingWhitespace + $action.Padding.Left + $action.Padding.Right -gt $action.ActualWidth) { throw "Crash action caption is clipped: $themeName/$($action.Content)." }
+                            $faceKey = if ($themeName -eq 'SE98') { 'ChipFaceBrush' } else { 'OutlineFaceBrush' }
+                            $textKey = if ($themeName -eq 'SE98') { 'TextBrush' } else { 'OutlineTextBrush' }
+                            if ($action.Background.ToString() -ne $app.Resources[$faceKey].ToString() -or $action.Foreground.ToString() -ne $app.Resources[$textKey].ToString()) {
+                                throw "Crash action does not match the family button: $themeName/$($action.Content)."
+                            }
+                            $enter = [Windows.Input.MouseEventArgs]::new([Windows.Input.Mouse]::PrimaryDevice, 0)
+                            $enter.RoutedEvent = [Windows.Input.Mouse]::MouseEnterEvent
+                            $action.RaiseEvent($enter)
+                            $hoverKey = if ($themeName -eq 'SE98') { 'ChipFaceBrush' } else { 'OutlineHoverBrush' }
+                            if (-not [object]::ReferenceEquals($action.Background, $app.Resources[$hoverKey])) { throw "Crash action hover mismatch: $themeName/$($action.Content)." }
+                            $leave = [Windows.Input.MouseEventArgs]::new([Windows.Input.Mouse]::PrimaryDevice, 0)
+                            $leave.RoutedEvent = [Windows.Input.Mouse]::MouseLeaveEvent
+                            $action.RaiseEvent($leave)
+                            if (-not [object]::ReferenceEquals($action.Background, $app.Resources[$faceKey])) { throw "Crash action did not restore: $themeName/$($action.Content)." }
+                        }
                         if (!$fatal) {
                             $continue.RaiseEvent([Windows.RoutedEventArgs]::new([Windows.Controls.Button]::ClickEvent))
                             if ($script:result -ne $true) { throw 'Continue did not report recovery.' }
                         }
                         $case = "$themeName/grain=$enabled/width=$width/fatal=$fatal"
                         $rows.Add([pscustomobject]@{ Case = $case; HorizontalExtent = $scroll.ScrollableWidth; VerticalExtent = $scroll.ScrollableHeight; Cards = $cards.Count })
-                        if ($width -eq 760 -and !$fatal -and $themeName -in @('Dark','Light','SE98','Malaise')) {
-                            Render-Preview $dialog "$themeName-grain-$enabled"
-                        }
                     } finally { $dialog.Close() }
                 }
             }

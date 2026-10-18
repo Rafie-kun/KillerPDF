@@ -486,18 +486,11 @@ namespace KillerPDF
             Brush muted = UiKit.Brush("MutedTextBrush", new SolidColorBrush(Color.FromRgb(0xaa, 0xaa, 0xaa)));
             Brush dim = UiKit.Brush("DimTextBrush", new SolidColorBrush(Color.FromRgb(0x77, 0x77, 0x77)));
             Brush danger = UiKit.Brush("DangerRed", new SolidColorBrush(Color.FromRgb(0xef, 0x44, 0x44)));
-            Brush primary = UiKit.Brush("PrimaryBrush", new SolidColorBrush(Color.FromRgb(0x1e, 0xa5, 0x4c)));
-            Brush primaryHover = UiKit.Brush("PrimaryHoverBrush", primary);
-            Brush onPrimary = UiKit.Brush("OnPrimaryBrush", new SolidColorBrush(Color.FromRgb(0x0a, 0x0a, 0x0a)));
-            Brush button = UiKit.Brush("SurfaceBrush", new SolidColorBrush(Color.FromRgb(0x33, 0x33, 0x33)));
-            Brush buttonHover = UiKit.Brush("SurfaceHoverBrush", new SolidColorBrush(Color.FromRgb(0x44, 0x44, 0x44)));
             Brush grain = UiKit.Brush("GrainTileBrush", Brushes.Transparent);
             double grainOpacity = Current?.TryFindResource("GrainOpacity") is double opacity
                 ? opacity : 0.05;
             var paneShadow = Current?.TryFindResource("PaneShadowEffect")
                 as System.Windows.Media.Effects.Effect;
-            var quitNormal = new SolidColorBrush(Color.FromRgb(0x5a, 0x10, 0x10));
-            var quitHover = new SolidColorBrush(Color.FromRgb(0xc4, 0x2b, 0x1c));
             string title = CrashText("Str_Crash_Title", "KillerPDF - Unexpected Error");
             var win = new Window
             {
@@ -652,13 +645,13 @@ namespace KillerPDF
             };
             var btnPanel = new DockPanel { LastChildFill = false };
             var leftBtns = new StackPanel { Orientation = Orientation.Horizontal };
-            var copyBtn = MakeCrashButton(CrashText("Str_Crash_Copy", "Copy Report"), button, buttonHover, text, 100);
+            var copyBtn = MakeCrashButton(CrashText("Str_Crash_Copy", "Copy Report"), 100);
             copyBtn.Click += (_, _) =>
             {
                 try { Clipboard.SetText(BuildFullCrashReport(ex)); } catch { }
             };
             leftBtns.Children.Add(copyBtn);
-            var logsBtn = MakeCrashButton(CrashText("Str_Crash_OpenLogs", "Open Logs"), button, buttonHover, text, 88);
+            var logsBtn = MakeCrashButton(CrashText("Str_Crash_OpenLogs", "Open Logs"), 88);
             logsBtn.Margin = new Thickness(8, 0, 0, 0);
             logsBtn.Click += (_, _) =>
             {
@@ -670,8 +663,7 @@ namespace KillerPDF
                 catch { }
             };
             leftBtns.Children.Add(logsBtn);
-            var githubBtn = MakeCrashButton(CrashText("Str_Crash_Report", "Report on GitHub"), button, buttonHover,
-                new SolidColorBrush(Color.FromRgb(0x60, 0xc0, 0xff)), 128);
+            var githubBtn = MakeCrashButton(CrashText("Str_Crash_Report", "Report on GitHub"), 128);
             githubBtn.Margin = new Thickness(8, 0, 0, 0);
             githubBtn.Click += (_, _) =>
             {
@@ -704,13 +696,12 @@ namespace KillerPDF
                 Orientation = Orientation.Horizontal,
                 HorizontalAlignment = HorizontalAlignment.Right
             };
-            var contBtn = MakeCrashButton(CrashText("Str_Crash_Continue", "Continue"), primary, primaryHover,
-                onPrimary, 88);
+            var contBtn = MakeCrashButton(CrashText("Str_Crash_Continue", "Continue"), 88);
             contBtn.IsEnabled = !isFatal;
             contBtn.FontWeight = isFatal ? FontWeights.Normal : FontWeights.SemiBold;
             contBtn.Margin = new Thickness(0, 0, 8, 0);
             contBtn.Click += (_, _) => { complete(true); win.Close(); };
-            var quitBtnCtrl = MakeCrashButton(CrashText("Str_Crash_Quit", "Quit"), quitNormal, quitHover, Brushes.White, 72);
+            var quitBtnCtrl = MakeCrashButton(CrashText("Str_Crash_Quit", "Quit"), 72);
             quitBtnCtrl.FontWeight = isFatal ? FontWeights.SemiBold : FontWeights.Normal;
             quitBtnCtrl.Click += (_, _) => { complete(false); win.Close(); };
             rightBtns.Children.Add(contBtn);
@@ -766,11 +757,10 @@ namespace KillerPDF
             };
         }
 
-        private static Button MakeCrashButton(string label,
-            Brush normal, Brush hover, Brush fg,
-            double width = 88)
+        private static Button MakeCrashButton(string label, double width = 88)
         {
-            var btn = UiKit.Make(label, normal, hover, fg, fg);
+            var btn = UiKit.Make(label, accent: true);
+            btn.Padding = new Thickness(10, 4, 10, 4);
             btn.Width  = width;
             btn.Height = 28;
             return btn;

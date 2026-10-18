@@ -36,3 +36,18 @@ dotnet run --project Check.csproj -c Release -p:RepositoryRoot="C:\path\to\Kille
 ```
 
 Every check must print `PASS`, and the process must exit with code zero.
+
+## Crash report dialog
+
+After a normal Debug build, use PowerShell 7 on .NET 10 with STA enabled:
+
+```powershell
+pwsh -NoProfile -Sta -CommandWithArgs '& "build/Test-CrashDialog.ps1" -AssemblyPath "bin/Debug/net10.0-windows/KillerPDF.dll" -EvidenceDirectory "C:/Users/steve/scratch/kp-bench-render/crash-report-check"' --startup-smoke
+```
+
+Use a fresh evidence directory. The literal process argument `--startup-smoke`
+is required to keep preferences isolated. The check measures real controls in
+all 13 themes with grain on and off, two widths and fatal/recoverable states.
+It asserts caption fit, family rest and hover colors, clipped cards, scrolling,
+and Continue behavior. PNGs are captured before closing the tested window.
+These are synthetic offscreen previews, not physical input or screen-reader QA.

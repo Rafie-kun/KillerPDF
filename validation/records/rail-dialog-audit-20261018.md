@@ -115,3 +115,25 @@ cancellation and working-document save/reopen in Dark, Light and SE98. Its
 `native-ui-smoke` evidence is under the same run root. This narrows the native
 gate; physical input, screen-reader operation, display scaling and complete
 interaction coverage remain unverified.
+
+## Crash report follow-up
+
+The crash report used the explicit-color startup button overload instead of the
+family factory. A retained real-control assertion failed on Dark/Copy Report.
+Actions now use the shared themed factory, including hollow accent actions and
+98SE bevels. A separate caption-fit check failed on Copy Report; reduced padding
+keeps the existing widths and full English captions visible.
+
+The corrected script passed 104 cases: 13 themes, grain on/off, widths 760/620,
+and fatal/recoverable states. It checks rest, raised hover/leave events, caption
+fit, card clipping, both scroll offsets, disabled fatal Continue and recoverable
+Continue callbacks. The script requires raw process `--startup-smoke` to prevent
+preference writes. It captures before invoking Continue; the earlier ordering
+could render an already-closed dialog.
+
+Evidence: `crash-caption-green` under
+`C:\Users\steve\scratch\kp-bench-render\form-workflows-20261018`.
+Dark, Light, SE98 and Malaise previews were visually inspected. App SHA-256:
+`94B85A36258D4E8A2570B8CC5FB888540EDD185B72A5D0E80DE80FF7047EE9FA`.
+These checks do not post to GitHub, open logs or alter the clipboard.
+The normal app build and all 834 app tests passed after the final padding change.

@@ -36,4 +36,12 @@ scripts:
     failure_behavior: Return nonzero on mismatched colors, missing resources or invalid fixture inputs.
     mutates: temporary-fixture-files-and-test-owned-windows-only
 
+  crash_dialog_smoke:
+    path: build/Test-CrashDialog.ps1
+    purpose: Check crash report controls, caption fit, scrolling and recovery in 13 themes.
+    inputs: Built app DLL, fresh evidence directory, PowerShell 7 on .NET 10 and --startup-smoke.
+    outputs: Synthetic offscreen PNGs and 104 case results.
+    failure_behavior: Throw on preference isolation, layout, palette, hover, scrolling or recovery failure.
+    mutates: temporary-fixture-files-and-test-owned-windows-only
+
 documentation: docs/startup-packaging.md
