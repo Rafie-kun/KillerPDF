@@ -71,7 +71,7 @@ namespace KillerPDF.Features
             "--user-password", "--owner-password", "--allow", "--recipients", "--text", "--terms",
             "--regex", "--find", "--whole-pages", "--fill", "--overlay", "--sanitize",
             "--pfx", "--pfx-password", "--cert", "--reason", "--location", "--contact", "--timestamp-server",
-            "--appearance", "--appearance-text",
+            "--appearance", "--appearance-text", "--scanned-look",
         ];
 
         /// <summary>
@@ -375,7 +375,8 @@ namespace KillerPDF.Features
             "                                           background composites to white unless --transparent, png only)",
             "  --flatten <in.pdf> <out.pdf> [--dpi <n>] [--color-mode color|grayscale|black-white]",
             "                                           [--threshold <0-255>] [--compression lossless|jpeg]",
-            "                                           [--jpeg-quality <1-100>] rasterize into an uneditable PDF",
+            "                                           [--jpeg-quality <1-100>] [--scanned-look all|tilt,paper,grain,soft-focus,shadow]",
+            "                                           rasterize into an uneditable PDF, optionally looking scanned",
             "  --print <in.pdf> [--printer <name>] [--pages <range>] [--copies <n>]",
             "                                           print silently (default printer if none named)",
             "  --ocr <in.pdf> <out.pdf> [--lang <code>] add an invisible searchable text layer (default eng;",
@@ -1596,7 +1597,7 @@ namespace KillerPDF.Features
         {
             if (pos.Count != 2)
             {
-                con.WriteLine("Usage: KillerPDF.exe --flatten <in.pdf> <out.pdf> [--dpi <n>] [--color-mode color|grayscale|black-white] [--threshold <0-255>] [--compression lossless|jpeg] [--jpeg-quality <1-100>]");
+                con.WriteLine("Usage: KillerPDF.exe --flatten <in.pdf> <out.pdf> [--dpi <n>] [--color-mode color|grayscale|black-white] [--threshold <0-255>] [--compression lossless|jpeg] [--jpeg-quality <1-100>] [--scanned-look all|tilt,paper,grain,soft-focus,shadow]");
                 return 2;
             }
             string inPath = Path.GetFullPath(pos[0]), outPath = Path.GetFullPath(pos[1]);
@@ -1628,6 +1629,18 @@ namespace KillerPDF.Features
             }
             if (colorMode == PageColorMode.BlackAndWhite && useJpeg)
                 throw new ArgumentException("Black-and-white flattening requires lossless compression.");
+            ScanLookOptions? look = null;
+            if (options.TryGetValue("--scanned-look", out string? lookRaw))
+            {
+                string[] effects = [.. lookRaw.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .Select(effect => effect.ToLowerInvariant())];
+                string[] known = ["tilt", "paper", "grain", "soft-focus", "shadow"];
+                if (effects.Length == 1 && effects[0] == "all") effects = known;
+                if (effects.Length == 0 || effects.Any(effect => !known.Contains(effect)))
+                    throw new ArgumentException("--scanned-look takes all, or any of tilt, paper, grain, soft-focus, shadow.");
+                look = new ScanLookOptions(effects.Contains("tilt"), effects.Contains("paper"), effects.Contains("grain"),
+                    effects.Contains("soft-focus"), effects.Contains("shadow"));
+            }
             options.TryGetValue("--password", out var password);
 
             var (renderPath, rotations, dims) = CliPrepareRenderSource(inPath, password, con);
@@ -1666,7 +1679,7 @@ namespace KillerPDF.Features
                     hPt = h * 72.0 / dpi;
                 }
 
-                if (colorMode == PageColorMode.Color && !useJpeg
+                if (colorMode == PageColorMode.Color && !useJpeg && look is null
                     && PdfPageRasterInformation.TryReadFullPageJpeg(
                         renderDocument, i, out PdfImage? original)
                     && original is not null
@@ -1679,9 +1692,11 @@ namespace KillerPDF.Features
                     continue;
                 }
 
+                // The scanned look goes on before the color mode, as in Save Flattened.
+                if (look is not null) raw = ScanLook.Apply(raw, w, h, dpi, look, i);
                 PageQualityConverter.ApplyColorModeToBgra(raw, colorMode, threshold);
                 bool bitonal = colorMode == PageColorMode.BlackAndWhite
-                    || colorMode == PageColorMode.Color
+                    || colorMode == PageColorMode.Color && look is null
                     && i < bitonalHints.Count && bitonalHints[i]
                     && BitonalPageDetector.IsOpaqueGrayscaleBgra(raw, w, h);
                 bool grayscale = colorMode == PageColorMode.Grayscale;
