@@ -1498,6 +1498,29 @@ public sealed class PdfEngineIntegrationTests
     }
 
     [Fact]
+    public void ReplaceAllPagesAndCompact_AcceptsSinglePageDocument()
+    {
+        string root = Path.Combine(Path.GetTempPath(), $"killerpdf-transform-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(root);
+        string source = Path.Combine(root, "source.pdf");
+        string replacement = Path.Combine(root, "replacement.pdf");
+        try
+        {
+            File.WriteAllBytes(source, new PdfDocumentBuilder().AddBlankPage(240, 200).Build());
+            File.WriteAllBytes(replacement, PdfEngineIntegration.CreateRasterDocument([
+                new PdfEngineIntegration.RasterPage(1, 1, 200, 240, new byte[] { 0, 0, 0, 255 })]));
+
+            PdfEngineIntegration.ReplaceAllPagesAndCompact(source, [replacement]);
+
+            var page = new PdfPageContentReader(PdfDocument.Open(File.ReadAllBytes(source))).Read(0);
+            Assert.Equal(200, page.Width);
+            Assert.Equal(240, page.Height);
+            Assert.Single(page.Images);
+        }
+        finally { Directory.Delete(root, true); }
+    }
+
+    [Fact]
     public void ReplaceAllPagesAndCompact_DoesNotRetainAnyOriginalPageImages()
     {
         string path = Path.Combine(Path.GetTempPath(), $"killerpdf-all-pages-{Guid.NewGuid():N}.pdf");

@@ -1105,6 +1105,7 @@ internal static class PdfEngineIntegration
             throw new ArgumentException("At least one PDF document is required.", nameof(sources));
 
         PdfDocument document = PdfDocument.Open(sources[0]);
+        if (sources.Count == 1) return sources[0].ToArray();
         var editor = new PdfIncrementalPageEditor(document);
         for (int index = 1; index < sources.Count; index++)
             editor.AddImportedDocument(PdfDocument.Open(sources[index]));

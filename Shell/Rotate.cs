@@ -91,6 +91,12 @@ namespace KillerPDF
             int[] pages = [.. pageIndices.Distinct().OrderBy(index => index)];
             if (pages.Length == 0 || pages.Any(index => index < 0 || index >= engineSession.PageCount)) return;
 
+            var sourceViewer = ActiveViewer;
+            var sourceSession = sourceViewer.ActiveSessionExt;
+            var sourceDocument = _doc;
+            bool IsSourceCurrent() => ReferenceEquals(ActiveViewer, sourceViewer)
+                && ReferenceEquals(sourceViewer.ActiveSessionExt, sourceSession)
+                && ReferenceEquals(_doc, sourceDocument);
             Border? busy = null;
             try
             {
@@ -98,6 +104,7 @@ namespace KillerPDF
                 busy = ShowBusyOverlay($"{Loc("Str_Tf_Suffix")}: 1/{pages.Length}");
                 await System.Windows.Threading.Dispatcher.Yield(
                     System.Windows.Threading.DispatcherPriority.Background);
+                if (!IsSourceCurrent() || ct.IsCancellationRequested) return;
 
                 // This operation adjusts overlay annotations before SaveTempAndReload, so retain
                 // the complete pre-transform state for the central history push.
@@ -119,8 +126,10 @@ namespace KillerPDF
                     SetBusyMessage(busy, $"{Loc("Str_Tf_Suffix")}: {i + 1}/{pages.Length}");
                     await System.Windows.Threading.Dispatcher.Yield(
                         System.Windows.Threading.DispatcherPriority.Background);
+                    if (!IsSourceCurrent() || ct.IsCancellationRequested) return;
 
                     string? burned = BurnPageAnnotationsToTemp(pageIdx);
+                    sourceDocument = _doc;
                     if (burned != null) bakedAnnotationPages.Add(pageIdx);
                     var (epw, eph) = engineSession.VisualPageSize(pageIdx, _pageRotations);
                     int renderBudget = outputDpi > 0
@@ -176,6 +185,8 @@ namespace KillerPDF
                     documentUndo: documentUndo);
                 _ = Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded, (Action)(() =>
                 {
+                    if (!ReferenceEquals(ActiveViewer, sourceViewer)
+                        || !ReferenceEquals(sourceViewer.ActiveSessionExt, sourceSession)) return;
                     PageList.SelectedItems.Clear();
                     foreach (int pageIdx in pages)
                         if (pageIdx >= 0 && pageIdx < PageList.Items.Count)

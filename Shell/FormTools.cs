@@ -17,10 +17,17 @@ public partial class MainWindow
         try
         {
             snapshot = CreateExchangeSnapshot();
+            var sourceViewer = ActiveViewer;
+            var sourceSession = sourceViewer.ActiveSessionExt;
+            var sourceDocument = _doc;
+            bool IsSourceCurrent() => ReferenceEquals(ActiveViewer, sourceViewer)
+                && ReferenceEquals(sourceViewer.ActiveSessionExt, sourceSession)
+                && ReferenceEquals(_doc, sourceDocument);
             PdfDocument document = PdfDocument.Open(File.ReadAllBytes(snapshot));
             PdfFormRecognitionReview proposals = await Task.Run(() =>
                 PdfFormRecognizer.Recognize(document, cancellationToken: token), token);
             HideBusyOverlay(busy);
+            if (!IsSourceCurrent() || token.IsCancellationRequested) return;
             if (proposals.Proposals.Count == 0)
             {
                 KillerDialog.Show(this, Loc("Str_FormTools_None"));
@@ -28,6 +35,7 @@ public partial class MainWindow
             }
             var review = new FormRecognitionReviewDialog(this, document, proposals);
             if (review.ShowDialog() != true || review.Result is null) return;
+            if (!IsSourceCurrent() || token.IsCancellationRequested) return;
             ApplyFormWorkflow(path => PdfEngineIntegration.ApplyRecognizedFields(path, review.Result), snapshot);
         }
         catch (OperationCanceledException) { }
