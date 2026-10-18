@@ -31,6 +31,7 @@ namespace KillerFamily.Accessibility
         {
             if (_initialized) return;
             _initialized = true;
+            HighContrastResources.Initialize();
             EventManager.RegisterClassHandler(typeof(Control), FrameworkElement.SizeChangedEvent,
                 new SizeChangedEventHandler(OnControlSizeChanged), true);
             // WPF still gives Tab focus to a hyperlink whose TextBlock is collapsed: an invisible
@@ -107,6 +108,8 @@ namespace KillerFamily.Accessibility
 
         internal static void Prepare(Control control)
         {
+            if (control is Window) HighContrastResources.Initialize();
+            else HighContrastResources.PrepareCaption(control);
             // The focus adorner is shown by WPF for keyboard navigation, without changing layout.
             if (control is not Window && control.Focusable && control.FocusVisualStyle == null)
                 control.SetCurrentValue(Control.FocusVisualStyleProperty, FocusStyle);
