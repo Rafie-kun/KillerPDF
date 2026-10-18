@@ -37,6 +37,8 @@ public sealed class PdfOptionalCheckBoxAppearanceTests
 
         Assert.Equal(expected, Assert.Single(PdfFormDataExporter.Export(PdfDocument.Open(output)).Fields).Values[0]);
         Assert.Equal(source.Source.ToArray(), output[..source.Source.Length]);
+        PdfDocument flattened = PdfDocument.Open(PdfFormFlattener.Flatten(PdfDocument.Open(output)));
+        Assert.Empty(PdfFormWidgetReader.ReadPage(flattened, 0));
 
         PdfObject Resolve(PdfObject value) => value is PdfIndirectReference indirect ? original.Resolve(indirect) : value;
     }

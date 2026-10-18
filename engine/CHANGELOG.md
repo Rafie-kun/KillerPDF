@@ -120,7 +120,7 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 - Faster text: each font keeps the resolved outline for every character code it has drawn, each page render answers repeated glyphs from its own map, and small glyph paints skip the row scheduling and per-pixel bookkeeping that large fills need.
 
 ### Fixed
-- Form-data import and checkbox editing accept an omitted optional unchecked appearance (#329).
+- Form-data import and checkbox editing accept an omitted optional unchecked appearance, and form flattening generates missing text appearances and handles omitted unchecked appearances (#329, #342).
 
 - Shared host font programs across every font resource that resolves to the same installed face and stopped copying programs the CFF probe rejects, cutting live memory by about a third on long OCR'd scans.
 - Improved fractional text placement with finer glyph-mask origins and bounded reuse of glyph geometry.

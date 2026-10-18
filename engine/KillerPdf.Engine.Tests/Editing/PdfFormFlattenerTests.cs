@@ -2,12 +2,33 @@ using KillerPdf.Engine.Authoring;
 using KillerPdf.Engine.Documents;
 using KillerPdf.Engine.Editing;
 using KillerPdf.Engine.Parsing;
+using KillerPdf.Engine.Objects;
+using KillerPdf.Engine.Writing;
 using Xunit;
 
 namespace KillerPdf.Engine.Tests.Editing;
 
 public sealed class PdfFormFlattenerTests
 {
+    [Fact]
+    public void FlattenGeneratesMissingTextAppearanceWithoutLosingTheValue()
+    {
+        PdfDocument source = PdfDocument.Open(new PdfDocumentBuilder().AddBlankPage()
+            .AddTextField(0, "name", 20, 20, 160, 24, "Ada").Build());
+        PdfFormWidgetInfo widget = Assert.Single(PdfFormWidgetReader.ReadPage(source, 0));
+        PdfDictionary field = Assert.IsType<PdfDictionary>(source.Resolve(
+            new PdfIndirectReference(widget.ObjectNumber, widget.Generation)));
+        var update = new PdfIncrementalUpdateBuilder(source);
+        update.ReplaceObject(widget.ObjectNumber, new PdfDictionary(field.Where(
+            entry => entry.Key.ValueAsLatin1() != "AP")));
+        source = PdfDocument.Open(update.Build());
+
+        PdfDocument flattened = PdfDocument.Open(PdfFormFlattener.Flatten(source));
+
+        Assert.Empty(PdfFormWidgetReader.ReadPage(flattened, 0));
+        Assert.Contains("Ada", PdfStructuredExport.ToPlainText(flattened));
+    }
+
     [Fact]
     public void FlattenPaintsSelectedWidgetAppearancesAndRemovesFields()
     {

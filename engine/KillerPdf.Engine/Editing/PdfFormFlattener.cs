@@ -30,6 +30,19 @@ public static class PdfFormFlattener
             throw new NotSupportedException(
                 "Flattening direct form widgets is not supported because they have no stable identity.");
 
+        PdfFormWidgetInfo[] missingTextAppearances = [.. widgets.Where(widget =>
+            widget.FieldKind == PdfFormFieldKind.Text
+            && Resolve(document, new PdfIndirectReference(widget.ObjectNumber, widget.Generation))
+                is PdfDictionary field && !field.ContainsKey(AppearanceName))];
+        if (missingTextAppearances.Length > 0)
+        {
+            var appearanceEditor = new PdfIncrementalPageEditor(document);
+            foreach (PdfFormWidgetInfo widget in missingTextAppearances.DistinctBy(widget => widget.FieldName))
+                appearanceEditor.SetTextFieldValue(widget.FieldName, widget.Value);
+            document = PdfDocument.Open(appearanceEditor.Build());
+            tree = PdfPageTree.Read(document);
+        }
+
         var update = new PdfIncrementalUpdateBuilder(document);
         var importer = new PdfObjectGraphImporter(document, update, []);
         int resourceNumber = 1;
@@ -51,8 +64,9 @@ public static class PdfFormFlattener
                 var reference = new PdfIndirectReference(widget.ObjectNumber, widget.Generation);
                 PdfDictionary dictionary = Resolve(document, reference) as PdfDictionary
                     ?? throw new InvalidOperationException("A form widget is not a dictionary.");
-                PdfObject appearanceValue = SelectedAppearance(document, dictionary,
+                PdfObject? appearanceValue = SelectedAppearance(document, dictionary,
                     widget.FieldName);
+                if (appearanceValue is null) continue;
                 PdfStream appearance = Resolve(document, appearanceValue) as PdfStream
                     ?? throw new InvalidOperationException(
                         $"Form field '{widget.FieldName}' has no stream normal appearance.");
@@ -104,7 +118,7 @@ public static class PdfFormFlattener
         return editor.Build();
     }
 
-    private static PdfObject SelectedAppearance(PdfDocument document,
+    private static PdfObject? SelectedAppearance(PdfDocument document,
         PdfDictionary widget, string fieldName)
     {
         PdfDictionary appearance = widget.TryGetValue(AppearanceName, out PdfObject? value)
@@ -122,6 +136,7 @@ public static class PdfFormFlattener
                 $"Form field '{fieldName}' has an invalid normal appearance.");
         PdfName state = widget.TryGetValue(AppearanceStateName, out PdfObject? stateValue)
             ? Resolve(document, stateValue) as PdfName ?? Name("Off") : Name("Off");
+        if (state.Equals(Name("Off")) && !states.ContainsKey(state)) return null;
         return states.TryGetValue(state, out PdfObject? selected) ? selected
             : states.TryGetValue(Name("Off"), out PdfObject? off) ? off
             : throw new InvalidOperationException(
