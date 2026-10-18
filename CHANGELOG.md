@@ -28,6 +28,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Added a shared image library for the Image tool, image watermarks and imported signatures (#326).
 - Added DPI, color mode, threshold and JPEG compression controls to flattening (#366), and a Printer properties button that applies the driver's own settings to the job.
 - Added command-line splitting by page count, equal parts, page ranges, bookmark level or file size, and a `--batch-render` command with per-page timing. `--merge` also takes a single file, so one image becomes a PDF.
+- Commands run as `killerpdf merge`, with existing forms still supported and `killerpdf --help` listing them. Installed copies add `killerpdf` to PATH, wait for the result and return its exit code; uninstalling removes the entry. Portable copies run from their folder or full path.
 - Added keyboard shortcuts for every new tool and command, including Ctrl+Shift+D followed by a letter for each document tool, and Alt+Shift+G to turn Film Grain on or off, shown on a new Alt+Shift layer of the keyboard map.
 - Added the Windows 11 snap layouts menu to the maximize button (#374).
 - Added a Sensitivity slider when a signature is imported from an image. It removes the paper behind the ink and makes the signature lighter or darker before it is saved.
@@ -51,7 +52,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Added Scan to PDF to the Open menu. It scans through the scanner's TWAIN driver, with or without the scanner's own settings window, and opens the pages as a new PDF (#73). Also available as `--scan`.
 - Added Convert Word or Excel file to the Open menu. KillerPDF lays out .docx and .xlsx files itself, with their fonts, lists, tables, pictures, headers, footers, cell formats and page setup, and opens the result as a new PDF. Older .doc and .xls files convert through Word or Excel when installed (#74). Also available as `--convert-office`.
 - Added optional PDF previews for File Explorer and Outlook to the installed edition. Setup offers them as a checkbox, the preview pages scroll with fit width, fit page and zoom, and Open in KillerPDF opens a read-only copy of the previewed file. The portable edition registers nothing (#410).
-- Added `killerpdf` to PATH for the installed edition, so the command line runs from any new terminal, waits for the result and returns its exit code. Uninstalling removes it again.
 - Added a Microsoft Store button to the website's top bar on every page.
 - Added a Microsoft Store button for KillerMCP to the website's MCP page.
 - Added Distance, Perimeter, Area and Angle to the Measure tool (Shift+M steps through them), with snapping to page lines and corners, a drawing scale per page set by ratio or by drawing a line, imperial and metric units, and a Measurements report (Ctrl+Shift+D, Y). Measurements are saved as standard PDF measurement annotations that can be moved, adjusted, restyled and deleted, and `--measurements` reports them from the command line.
