@@ -28,7 +28,13 @@ public partial class MainWindow
             PdfMacroOperation.Save,
             PdfMacroOperation.NumberPages,
             PdfMacroOperation.GenerateBookmarks,
-            PdfMacroOperation.GenerateTableOfContents
+            PdfMacroOperation.GenerateTableOfContents,
+            PdfMacroOperation.ImposeNUp,
+            PdfMacroOperation.ImposeBooklet,
+            PdfMacroOperation.ImposeStepAndRepeat,
+            PdfMacroOperation.ImposeCutStack,
+            PdfMacroOperation.ImposeManualSequence,
+            PdfMacroOperation.ImposePoster
         ];
         var dialog = new MacroDialog(this, supported, addable);
         if (dialog.ShowDialog() == true && dialog.MacroToRun is PdfMacro macro)
@@ -266,6 +272,10 @@ public partial class MainWindow
 
     private static string MacroOperationName(PdfMacroOperation operation)
     {
+        if (operation is PdfMacroOperation.ImposeNUp or PdfMacroOperation.ImposeBooklet
+            or PdfMacroOperation.ImposeStepAndRepeat or PdfMacroOperation.ImposeCutStack
+            or PdfMacroOperation.ImposeManualSequence or PdfMacroOperation.ImposePoster)
+            return Loc(ProductionLayoutDialog.TitleKey(operation));
         string text = operation.ToString();
         var result = new StringBuilder(text.Length + 8);
         for (int index = 0; index < text.Length; index++)

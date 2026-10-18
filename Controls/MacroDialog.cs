@@ -57,7 +57,7 @@ internal sealed class MacroDialog : Window
 
         Button create = Button("Str_Lbl_New", (_, _) => CreateStarter());
         Button duplicate = Button("Str_Macro_Duplicate", (_, _) => Duplicate());
-        Button import = Button("Str_Menu_Import", (_, _) => Import());
+        Button import = Button("Str_Exchange_Import", (_, _) => Import());
         Button export = Button("Str_ExportImg_Export", (_, _) => Export());
         Button delete = Button("Str_Ctx_BmDelete", (_, _) => Delete());
         Button save = Button("Str_DocInfo_Save", (_, _) => SaveCurrent(), accent: true);
@@ -203,7 +203,9 @@ internal sealed class MacroDialog : Window
         int index = _steps.SelectedIndex < 0 ? _currentSteps.Count : _steps.SelectedIndex + 1;
         var step = new PdfMacroStep(choice.Operation);
         if (choice.Operation is PdfMacroOperation.NumberPages or PdfMacroOperation.GenerateBookmarks
-            or PdfMacroOperation.GenerateTableOfContents)
+            or PdfMacroOperation.GenerateTableOfContents or PdfMacroOperation.ImposeNUp
+            or PdfMacroOperation.ImposeBooklet or PdfMacroOperation.ImposeStepAndRepeat
+            or PdfMacroOperation.ImposeCutStack or PdfMacroOperation.ImposeManualSequence or PdfMacroOperation.ImposePoster)
         {
             step = MacroStepEditor.Edit(this, step);
             if (step is null) return;
@@ -275,7 +277,7 @@ internal sealed class MacroDialog : Window
     {
         var dialog = new Controls.FileDialog(Controls.FileDialogMode.Open)
         {
-            Title = L("Str_Menu_Import"),
+            Title = L("Str_Exchange_Import"),
             Filter = L("Str_Macro_Files") + "|*.json|" + L("Str_Dlg_AllFiles") + "|*.*"
         };
         if (dialog.ShowDialog(this) != true) return;
@@ -382,6 +384,10 @@ internal sealed class MacroDialog : Window
 
     private static string Display<T>(T value) where T : Enum
     {
+        if (value is PdfMacroOperation operation && operation is (PdfMacroOperation.ImposeNUp
+            or PdfMacroOperation.ImposeBooklet or PdfMacroOperation.ImposeStepAndRepeat or PdfMacroOperation.ImposeCutStack
+            or PdfMacroOperation.ImposeManualSequence or PdfMacroOperation.ImposePoster))
+            return L(ProductionLayoutDialog.TitleKey(operation));
         string text = value.ToString();
         var result = new StringBuilder(text.Length + 8);
         for (int index = 0; index < text.Length; index++)

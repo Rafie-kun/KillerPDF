@@ -103,6 +103,7 @@ namespace KillerPDF
             ["Str_DocumentTools_Preflight"] = "repair language metadata output intent icc bleed trim art production",
             ["Str_DocumentTools_Accessibility"] = "repair descriptions alternate text reading order table header row column",
             ["Str_DocumentTools_DataMerge"] = "csv xlsx json data merge mapping profile condition image placeholder flatten",
+            ["Str_DocumentTools_ProductionLayouts"] = "imposition booklet nup n-up poster tile step repeat cut stack manual bates batch production marks",
             ["Str_DocumentTools_BookmarkData"] = "bookmarks outline import export json",
             ["Str_Lbl_Redact"] = "black out censor hide remove sensitive",
             ["Str_KS_Open"] = "open file browse load",

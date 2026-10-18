@@ -12,6 +12,13 @@ internal static class MacroStepEditor
     {
         try
         {
+            if (step.Operation is PdfMacroOperation.ImposeNUp or PdfMacroOperation.ImposeBooklet
+                or PdfMacroOperation.ImposeStepAndRepeat or PdfMacroOperation.ImposeCutStack
+                or PdfMacroOperation.ImposeManualSequence or PdfMacroOperation.ImposePoster)
+            {
+                var dialog = new ProductionLayoutDialog(owner, step.Operation, step);
+                return dialog.ShowDialog() == true ? dialog.Step : null;
+            }
             if (step.Operation == PdfMacroOperation.Validate)
             {
                 PdfPreflightProfile[] profiles = [PdfPreflightProfile.General, PdfPreflightProfile.PrintProduction,
@@ -61,7 +68,8 @@ internal static class MacroStepEditor
             }
             KillerDialog.Show(owner, L("Str_Macro_NoSettings"));
         }
-        catch (Exception error) when (error is ArgumentException or FormatException or OverflowException or JsonException)
+        catch (Exception error) when (error is ArgumentException or FormatException or OverflowException
+            or JsonException or InvalidOperationException or NotSupportedException)
         {
             KillerDialog.Show(owner, L("Str_Macro_Invalid") + "\n" + error.Message);
         }
