@@ -44,12 +44,12 @@ namespace KillerPDF
             // Carry the sized track's current length across a flip (24px when collapsed, else the
             // user's size). A star length means it isn't the sized track yet, so fall back.
             GridLength sized = _sidebarCollapsed
-                ? new GridLength(SbPx(24))
+                ? new GridLength(SbPx(SidebarRailSize))
                 : (_sidebarCol != null && _sidebarCol.Width.GridUnitType == GridUnitType.Pixel)
                     ? _sidebarCol.Width
                     : new GridLength(SbPx(180));
             double maxW = SbPx(SidebarMaxFor(_sidebarPanel));
-            double minW = SbPx(_sidebarCollapsed ? 24 : SidebarMinOpen);
+            double minW = SbPx(_sidebarCollapsed ? SidebarRailSize : SidebarMinOpen);
             // A glide still running belongs to the track being given up; let it go so it cannot
             // keep writing a length into a track that is about to be the document's.
             _sidebarCol?.BeginAnimation(null);
@@ -228,7 +228,7 @@ namespace KillerPDF
             if (_sidebarCol == null) return;
             double change = _sidebarSide.IsStrip() ? e.VerticalChange : e.HorizontalChange;
             double w = _sidebarCol.ActualWidth + (_sidebarSide.IsTrailing() ? -change : change);
-            double min = _sidebarCol.MinWidth > 0 ? _sidebarCol.MinWidth : SbPx(24);
+            double min = _sidebarCol.MinWidth > 0 ? _sidebarCol.MinWidth : SbPx(SidebarRailSize);
             double max = double.IsPositiveInfinity(_sidebarCol.MaxWidth) ? double.MaxValue : _sidebarCol.MaxWidth;
             _sidebarCol.Width = new GridLength(Math.Max(min, Math.Min(max, w)));
             OnSidebarSplitterMove(sender, new System.Windows.Input.MouseEventArgs(
@@ -369,6 +369,11 @@ namespace KillerPDF
         private int _sidebarHeaderHomeIndex;
 
         private const double StripRailHeight = 28;
+
+        // The rail's own thickness, which is also the sidebar track's size while collapsed: a top
+        // or bottom strip collapses to its taller rail row, so the rail's glyphs keep the same
+        // space to the window edge as to the document whether the strip is open or shut.
+        private double SidebarRailSize => _sidebarSide.IsStrip() ? StripRailHeight : 24;
         // With the header at the left end, ahead of the icons, it keeps at least this width so the
         // icons stay put when a panel with a shorter name opens.
         private const double StripHeaderMinWidth = 170;
@@ -457,7 +462,7 @@ namespace KillerPDF
                 _sidebarToggleBtn.VerticalAlignment = VerticalAlignment.Center;
                 _sidebarToggleBtn.Width = 30;
                 _sidebarToggleBtn.Height = 26;
-                _sidebarToggleBtn.FontSize = 14;
+                _sidebarToggleBtn.FontSize = 16;
                 SidebarHeaderStack.Orientation = Orientation.Horizontal;
                 SidebarHeaderStack.VerticalAlignment = VerticalAlignment.Center;
                 titleLine.Margin = new Thickness(6, 0, 8, 0);

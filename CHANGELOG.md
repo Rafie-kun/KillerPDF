@@ -60,6 +60,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - The website's About page lists KillerBench and KillerShot under Also try, with larger app icons.
 
 ### Changed
+- Rail buttons and the collapse arrow sit centered across the rail on every side, open or collapsed, with the same space toward the panel and the edge, and the side choices in the sidebar's right-click menu show a picture of each position.
 - Replaced PDFium, Docnet.Core and PdfPig with the engine for rendering, search, selection, copying and text editing, and built the JPEG 2000 decoder from vendored CoreJ2K sources. The engine keeps the previous renderer's page dimensions for viewing and image export.
 - Rendering runs off the UI thread with viewport priority, cancellation and visible-region zoom refinement, and the view settles about 250 ms sooner after a zoom.
 - Rendering is faster and uses less memory across images, fonts, color management, shadings, transparency and print-production pages, without changing pixels.

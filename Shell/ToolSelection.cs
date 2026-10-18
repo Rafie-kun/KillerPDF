@@ -185,15 +185,15 @@ namespace KillerPDF
             if (_sidebarCollapsed)
             {
                 // Save current width before collapsing so expand restores it.
-                if (_sidebarCol.ActualWidth > 24) RememberSidebarWidth(_sidebarCol.ActualWidth);
+                if (_sidebarCol.ActualWidth > SbPx(SidebarRailSize)) RememberSidebarWidth(_sidebarCol.ActualWidth);
                 _sidebarToggleBtn.ToolTip = ShortcutTip("Str_TT_ExpandSidebar", "F9");
                 // Glide shut sliding, not squishing: freeze the content at its open width so
                 // the shrinking border CLIPS it (thumbnails hold their size), then hide the
                 // border once the strip width is reached. MinWidth drops first so the
                 // animation isn't clamped at the readable floor.
                 BeginSidebarSlide(_sidebarSide.IsStrip() ? SidebarContentPanel.ActualHeight : SidebarContentPanel.ActualWidth);
-                _sidebarCol.MinWidth = SbPx(24);
-                AnimateSidebarWidth(SbPx(24), () =>
+                _sidebarCol.MinWidth = SbPx(SidebarRailSize);
+                AnimateSidebarWidth(SbPx(SidebarRailSize), () =>
                 {
                     _sidebarBorder.Visibility = Visibility.Collapsed;
                     EndSidebarSlide();
@@ -347,7 +347,7 @@ namespace KillerPDF
                 {
                     // Released below the readable minimum: snap to whichever end the user let go nearer
                     // to - fully closed, or the minimum open width.
-                    double mid = SbPx((24 + SidebarMinOpen) / 2.0);
+                    double mid = SbPx((SidebarRailSize + SidebarMinOpen) / 2.0);
                     if (w < mid) { CollapseSidebarToStrip(); return; }
                     _sidebarCol.Width = new GridLength(SbPx(SidebarMinOpen));
                     w = SbPx(SidebarMinOpen);
@@ -367,8 +367,8 @@ namespace KillerPDF
             _sidebarToggleBtn.ToolTip = ShortcutTip("Str_TT_ExpandSidebar", "F9");
             _sidebarBorder.Visibility = Visibility.Collapsed;
             SidebarContentPanel.Visibility = Visibility.Visible;   // reset so the next border-show has content
-            _sidebarCol.Width = new GridLength(SbPx(24));
-            _sidebarCol.MinWidth = SbPx(24);
+            _sidebarCol.Width = new GridLength(SbPx(SidebarRailSize));
+            _sidebarCol.MinWidth = SbPx(SidebarRailSize);
             UpdateSidebarToggleGlyph();   // splitter stays enabled so it can be dragged back open
         }
 

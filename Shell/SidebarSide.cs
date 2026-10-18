@@ -68,6 +68,43 @@ namespace KillerPDF
         /// gives back the original, so the same call turns the rail either way.
         /// </summary>
         internal static Thickness Transpose(Thickness t) => new Thickness(t.Top, t.Left, t.Bottom, t.Right);
+
+        /// <summary>The side menu's icon for this side (PaneSideIcon).</summary>
+        internal static FrameworkElement MenuIcon(this SidebarSide side)
+            => PaneSideIcon(side == SidebarSide.Left ? Dock.Left : side == SidebarSide.Right ? Dock.Right
+                          : side == SidebarSide.Top ? Dock.Top : Dock.Bottom);
+
+        /// <summary>
+        /// A small window with its sidebar shaded on the given side, the icon for a side menu's
+        /// items. Drawn in the item's text color, read the way a glyph icon reads it, so it
+        /// follows the highlight; a checked item shows its checkmark in this slot instead.
+        /// </summary>
+        internal static FrameworkElement PaneSideIcon(Dock side)
+        {
+            var frame = new Border { BorderThickness = new Thickness(1) };
+            frame.SetBinding(Border.BorderBrushProperty, InheritedForeground());
+            bool across = side == Dock.Top || side == Dock.Bottom;
+            var bar = new Border
+            {
+                Width = across ? double.NaN : 3,
+                Height = across ? 3 : double.NaN,
+                HorizontalAlignment = side == Dock.Right ? HorizontalAlignment.Right
+                                    : side == Dock.Left ? HorizontalAlignment.Left : HorizontalAlignment.Stretch,
+                VerticalAlignment = side == Dock.Bottom ? VerticalAlignment.Bottom
+                                  : side == Dock.Top ? VerticalAlignment.Top : VerticalAlignment.Stretch,
+            };
+            bar.SetBinding(Border.BackgroundProperty, InheritedForeground());
+            var icon = new Grid { Width = 12, Height = 10, VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Left };
+            icon.Children.Add(frame);
+            icon.Children.Add(bar);
+            return icon;
+        }
+
+        private static System.Windows.Data.Binding InheritedForeground() => new System.Windows.Data.Binding
+        {
+            Path = new PropertyPath(System.Windows.Documents.TextElement.ForegroundProperty),
+            RelativeSource = System.Windows.Data.RelativeSource.Self,
+        };
     }
 
     /// <summary>

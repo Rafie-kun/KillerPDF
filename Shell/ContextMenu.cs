@@ -774,7 +774,7 @@ namespace KillerPDF
             menu.Items.Add(new MenuItem { Header = Loc("Str_Sidebar"), IsEnabled = false });
             foreach (SidebarSide side in new[] { SidebarSide.Left, SidebarSide.Right, SidebarSide.Top, SidebarSide.Bottom })
             {
-                var item = new MenuItem { Header = Loc(side.StringKey()), IsCheckable = true, IsChecked = side == _sidebarSide };
+                var item = new MenuItem { Header = Loc(side.StringKey()), IsCheckable = true, IsChecked = side == _sidebarSide, Icon = side.MenuIcon() };
                 if (side == _sidebarSide.Next()) item.InputGestureText = GestureFor("Shift:F9");
                 item.Click += (_, _2) => SelectSidebarSide(side);
                 menu.Items.Add(item);
