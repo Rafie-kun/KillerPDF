@@ -55,6 +55,7 @@ namespace KillerPDF
         private double _marginPx;            // extra inset inside the printable area (DIPs)
         private int _nUp = 1;                // pages per sheet (1, 2, 4, 6, 9)
         private bool _duplex;                // two-sided printing (when the printer supports it)
+        private bool _documentDuplex;        // driver advertises document-level duplex instead of job-level
         private CheckBox _duplexCheck = null!;
         private ComboBox _subsetCombo = null!;   // all / odd only / even only (#134, manual duplex)
         private bool _grayscale;             // send the job as grayscale/B&W rather than color
@@ -444,10 +445,17 @@ namespace KillerPDF
         private void UpdateDuplexAvailability()
         {
             bool ok = false;
+            _documentDuplex = false;
             try
             {
                 var caps = _queue?.GetPrintCapabilities();
                 ok = caps?.DuplexingCapability?.Contains(Duplexing.TwoSidedLongEdge) == true;
+                if (!ok && _queue is not null)
+                {
+                    using var xml = _queue.GetPrintCapabilitiesAsXml();
+                    _documentDuplex = PrintJobTicket.SupportsDocumentDuplex(xml);
+                    ok = _documentDuplex;
+                }
             }
             catch { /* capability query not supported: leave disabled */ }
 
@@ -1274,8 +1282,8 @@ namespace KillerPDF
             {
                 var seed = _driverTicket?.Clone() ?? new PrintDialog { PrintQueue = _queue }.PrintTicket;
                 if (!int.TryParse(_copiesBox.Text?.Trim(), out int copies) || copies < 1) copies = 1;
-                PrintJobTicket.Apply(seed, JobSettings(), copies,
-                    fromDriverDialog: _driverTicket is not null);
+                seed = PrintJobTicket.Apply(seed, JobSettings(), copies,
+                    fromDriverDialog: _driverTicket is not null, documentDuplex: _documentDuplex);
                 IntPtr ownerHandle = new System.Windows.Interop.WindowInteropHelper(dialogOwner).EnsureHandle();
                 EnableWindow(window, false);
                 try
@@ -1383,8 +1391,8 @@ namespace KillerPDF
                 // Relying on PrintTicket.CopyCount produced an extra copy on some printers (issue #83).
                 // The paper is the same pick the preview used: the manual combo choice when one is
                 // set, otherwise the automatic document-size match (see MediaSizeForDocument, #186).
-                PrintJobTicket.Apply(ticket, JobSettings(), copies: 1,
-                    fromDriverDialog: _driverTicket is not null);
+                ticket = PrintJobTicket.Apply(ticket, JobSettings(), copies: 1,
+                    fromDriverDialog: _driverTicket is not null, documentDuplex: _documentDuplex);
                 pd.PrintTicket = ticket;
 
                 double aw = pd.PrintableAreaWidth, ah = pd.PrintableAreaHeight;

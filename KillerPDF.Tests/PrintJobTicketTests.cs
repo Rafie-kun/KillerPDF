@@ -1,4 +1,7 @@
 using System.Printing;
+using System.IO;
+using System.Text;
+using System.Xml.Linq;
 using KillerPDF.Services;
 using Xunit;
 
@@ -6,6 +9,91 @@ namespace KillerPDF.Tests;
 
 public sealed class PrintJobTicketTests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Apply_UsesDocumentScopeFromCapabilitiesEvenWhenTheSeedHasOnlyJobScope(bool twoSided)
+    {
+        var ticket = new PrintTicket { Duplexing = Duplexing.TwoSidedShortEdge };
+        ticket = PrintJobTicket.Apply(ticket,
+            new PrintJobTicket.Settings(false, twoSided, false, null, null),
+            copies: 1, fromDriverDialog: false, documentDuplex: true);
+
+        Assert.Equal(twoSided, PrintJobTicket.Read(ticket).TwoSided);
+        Assert.Null(ticket.Duplexing);
+    }
+
+    [Theory]
+    [InlineData("http://schemas.microsoft.com/windows/2003/08/printing/printschemakeywords", "TwoSidedLongEdge", true)]
+    [InlineData("http://schemas.microsoft.com/windows/2003/08/printing/printschemakeywords", "OneSided", false)]
+    [InlineData("urn:printer-driver", "TwoSidedLongEdge", false)]
+    public void Capabilities_RecognizeDocumentDuplexByNamespace(string keywordNamespace, string option, bool expected)
+    {
+        using var xml = new MemoryStream(Encoding.UTF8.GetBytes($"""
+            <f:PrintCapabilities xmlns:f="http://schemas.microsoft.com/windows/2003/08/printing/printschemaframework"
+                xmlns:k="{keywordNamespace}" version="1">
+              <f:Feature name="k:DocumentDuplex"><f:Option name="k:{option}" /></f:Feature>
+            </f:PrintCapabilities>
+            """));
+        Assert.Equal(expected, PrintJobTicket.SupportsDocumentDuplex(xml));
+    }
+
+    [Theory]
+    [InlineData("TwoSidedLongEdge", false, false, "OneSided")]
+    [InlineData("OneSided", true, false, "TwoSidedLongEdge")]
+    [InlineData("TwoSidedShortEdge", true, true, "TwoSidedShortEdge")]
+    [InlineData("TwoSidedShortEdge", false, true, "OneSided")]
+    public void Apply_OverridesDocumentDuplexDefaultAndPreservesDriverSettings(
+        string initial, bool twoSided, bool fromDriverDialog, string expected)
+    {
+        using var xml = new MemoryStream(Encoding.UTF8.GetBytes($"""
+            <f:PrintTicket xmlns:f="http://schemas.microsoft.com/windows/2003/08/printing/printschemaframework"
+                xmlns:k="http://schemas.microsoft.com/windows/2003/08/printing/printschemakeywords"
+                xmlns:driver="urn:printer-driver" version="1">
+              <f:Feature name="k:DocumentDuplex"><f:Option name="k:{initial}">
+                <f:ScoredProperty name="driver:Binding"><f:Value>keep binding</f:Value></f:ScoredProperty>
+              </f:Option></f:Feature>
+              <f:Feature name="driver:Finishing"><f:Option name="driver:Staple" /></f:Feature>
+            </f:PrintTicket>
+            """));
+        var ticket = new PrintTicket(xml);
+
+        ticket = PrintJobTicket.Apply(ticket,
+            new PrintJobTicket.Settings(false, twoSided, false, null, null),
+            copies: 1, fromDriverDialog: fromDriverDialog);
+
+        Assert.Equal(twoSided, PrintJobTicket.Read(ticket).TwoSided);
+        using var result = ticket.GetXmlStream();
+        XDocument document = XDocument.Load(result);
+        XNamespace f = "http://schemas.microsoft.com/windows/2003/08/printing/printschemaframework";
+        XElement finishing = Assert.Single(document.Root!.Elements(f + "Feature"),
+            element => (string?)element.Attribute("name") == "driver:Finishing");
+        Assert.Equal("driver:Staple", (string?)finishing.Element(f + "Option")?.Attribute("name"));
+        XElement duplexOption = Assert.Single(document.Descendants(f + "Option"), element =>
+            ((string?)element.Attribute("name"))?.EndsWith(":" + expected, StringComparison.Ordinal) == true);
+        if (initial == expected)
+            Assert.Equal("keep binding", duplexOption.Element(f + "ScoredProperty")?.Element(f + "Value")?.Value);
+        Assert.Null(ticket.Duplexing);
+        Assert.Equal(1, ticket.CopyCount);
+    }
+
+    [Theory]
+    [InlineData("OneSided", false)]
+    [InlineData("TwoSidedLongEdge", true)]
+    [InlineData("TwoSidedShortEdge", true)]
+    public void Read_RecognizesDocumentLevelDuplex(string option, bool twoSided)
+    {
+        using var xml = new MemoryStream(Encoding.UTF8.GetBytes($"""
+            <f:PrintTicket xmlns:f="http://schemas.microsoft.com/windows/2003/08/printing/printschemaframework"
+                xmlns:k="http://schemas.microsoft.com/windows/2003/08/printing/printschemakeywords" version="1">
+              <f:Feature name="k:DocumentDuplex"><f:Option name="k:{option}" /></f:Feature>
+            </f:PrintTicket>
+            """));
+        var ticket = new PrintTicket(xml);
+        Assert.Null(ticket.Duplexing);
+        Assert.Equal(twoSided, PrintJobTicket.Read(ticket).TwoSided);
+    }
+
     [Fact]
     public void Apply_WithoutADriverTicket_WritesEveryWindowSetting()
     {
