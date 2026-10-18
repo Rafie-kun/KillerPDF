@@ -115,9 +115,21 @@ Against the frozen reference, conformance remains 572/573 changed hashes and
 PDF.js now has 765 at each size. The additional 512 difference is a reviewed
 fractional shading edge in issue18816, not an omitted or newly failed input.
 
-Strict oracle differences remain, including pre-existing visible stippling in
-`transparency_group.pdf`. A2 has only been sampled on the selected changed pages,
-not every shared corpus page. Next: diagnose the stippling, record remaining
-dispositions and rerun affected checks after any fixes.
+The later [profile-cache repair](profile-color-parallelism-20261018.md) removes
+the stippling, and the [page-group backdrop repair](page-group-backdrop-20261018.md)
+corrects the reproduced RGB blend order. The current Release application hash is
+`32A9375BCCC531B1A3C8757244B681431FFA0E65E6345A7708503BF0F84FC97E`.
+`Reconcile-CurrentPixels.py` compares its retained actual-executable captures to
+the frozen accepted baseline, checking application and source identities before
+and after. `page-group-a1-reconciliation` retains results and decoded RGBA hash
+inventories. Conformance has 572 changed hashes at 512 and 573 at 2048; PDF.js has
+770 and 769, respectively. Render counts and the eighteen PDF.js status changes
+from the original comparison remain unchanged. A1 remains open.
+
+Strict oracle differences remain. A2 has only been sampled on selected changed
+pages, not every shared corpus page. Next: record remaining source-backed
+dispositions and complete the all-shared-page review. The latest page-group
+review is a different subset from the initial 97 cases; its counts must not be
+substituted for a complete A2 result.
 Physical input, assistive technology, display scaling and the other release gates
 remain separate work.

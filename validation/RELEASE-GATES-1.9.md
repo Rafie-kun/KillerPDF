@@ -83,9 +83,9 @@ The earlier prose count of 639 and ten skips below is retained as historical
 wording, not the verified denominator. This reconciliation adds no exclusions.
 
 The October 18 candidate comparison completed at both required sizes. A1 remains
-open: after the stencil-color repair, conformance has 572/573 changed pages at
-512/2048, while PDF.js has 765 at each size, including two additional renders.
-The earlier 512 checkpoint had 764 changed pages. See
+open: after the stencil, profile-cache and page-group repairs, conformance has
+572/573 changed hashes at 512/2048, while PDF.js has 770/769, including two
+additional renders. Source lists and render outcomes remain unchanged. See
 [the accuracy checkpoint](records/release-pixels-20261018.md) for identities,
 status changes and the remaining disposition work. This is not a release pass.
 
