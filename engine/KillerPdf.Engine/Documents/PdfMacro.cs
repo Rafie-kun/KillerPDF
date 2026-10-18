@@ -288,6 +288,8 @@ public enum PdfMacroOperation
 public sealed record PdfMacroOperationResult(ReadOnlyMemory<byte> Data,
     IReadOnlyDictionary<string, string>? Values = null)
 {
+    /// <summary>Gets generated documents that replace this input for subsequent steps.</summary>
+    public IReadOnlyList<PdfMacroOutput>? Outputs { get; init; }
     /// <summary>Gets a host-planned output file name supplied by an output operation.</summary>
     public string? OutputFileName { get; init; }
 }
@@ -493,6 +495,18 @@ public static class PdfMacroRunner
                     if (result.OutputFileName is not null) outputFileName = result.OutputFileName;
                     foreach ((string name, string value) in CheckedValues(result.Values))
                         values[name] = value;
+                    if (result.Outputs is not null)
+                    {
+                        IReadOnlyList<PdfMacroOutput> generated = ContinueOutputs(
+                            macro, stepIndex, result.Outputs, values, operation, cancellationToken);
+                        results.Add(new PdfMacroFileResult(index, null,
+                            generated.Any(output => output.Error is not null)
+                                ? "One or more generated documents failed." : null, false)
+                        {
+                            Outputs = generated
+                        });
+                        goto NextInput;
+                    }
                 }
                 results.Add(new PdfMacroFileResult(index, current.ToArray(), null, false)
                 {
@@ -513,9 +527,54 @@ public static class PdfMacroRunner
                     FailedOperation = failedOperation
                 });
             }
+            NextInput:
             index++;
         }
         return Array.AsReadOnly(results.ToArray());
+    }
+
+    private static IReadOnlyList<PdfMacroOutput> ContinueOutputs(PdfMacro macro, int completedStep,
+        IReadOnlyList<PdfMacroOutput> outputs, Dictionary<string, string> inheritedValues,
+        Func<PdfMacroStep, ReadOnlyMemory<byte>, IReadOnlyDictionary<string, string>,
+            CancellationToken, PdfMacroOperationResult> operation, CancellationToken token)
+    {
+        var completed = new List<PdfMacroOutput>();
+        foreach (PdfMacroOutput output in outputs)
+        {
+            token.ThrowIfCancellationRequested();
+            if (output.Error is not null || output.Data is null)
+            {
+                completed.Add(output with { Error = output.Error ?? "The generated document has no data.",
+                    FailedStepIndex = completedStep, FailedOperation = macro.Steps[completedStep].Operation });
+                continue;
+            }
+            var values = new Dictionary<string, string>(inheritedValues, StringComparer.Ordinal);
+            foreach ((string name, string value) in CheckedValues(output.Values)) values[name] = value;
+            if (output.OutputFileName is not null) values["macro.fileName"] = output.OutputFileName;
+            if (completedStep + 1 == macro.Steps.Count)
+            {
+                completed.Add(output with { Data = output.Data.Value.ToArray() });
+                continue;
+            }
+            var remaining = new PdfMacro(macro.Name, macro.Steps.Skip(completedStep + 1));
+            PdfMacroFileResult result = RunContextual(remaining, [output.Data.Value], values,
+                operation, token).Single();
+            if (result.WasCanceled) throw new OperationCanceledException(token);
+            if (result.Outputs is not null)
+                completed.AddRange(result.Outputs.Select(child => child with
+                {
+                    FailedStepIndex = child.FailedStepIndex + completedStep + 1
+                }));
+            else completed.Add(output with
+            {
+                Data = result.Data,
+                OutputFileName = result.OutputFileName ?? output.OutputFileName,
+                Error = result.Error,
+                FailedStepIndex = result.FailedStepIndex + completedStep + 1,
+                FailedOperation = result.FailedOperation
+            });
+        }
+        return Array.AsReadOnly(completed.ToArray());
     }
 
     private static PdfMacroStep ResolveSettings(PdfMacroStep step,
@@ -601,7 +660,10 @@ public sealed partial record PdfMacroRunReport
         var report = new ReportFile(1, TotalInputCount, SucceededCount, FailedCount,
             CanceledCount, UnprocessedCount, [.. Results.Select(result => new ResultFile(
                 result.InputIndex, result.Succeeded, result.Error, result.WasCanceled,
-                result.FailedStepIndex, result.FailedOperation, result.OutputFileName))]);
+                result.FailedStepIndex, result.FailedOperation, result.OutputFileName,
+                result.Outputs?.Select(output => new OutputFile(output.RecordIndex,
+                    output.OutputFileName, output.Succeeded, output.Error,
+                    output.FailedStepIndex, output.FailedOperation)).ToArray()))]);
         return JsonSerializer.Serialize(report, indented
             ? IndentedJson.ReportFile : CompactJson.ReportFile);
     }
@@ -630,6 +692,20 @@ public sealed partial record PdfMacroRunReport
                     output.Append(": ").Append(result.Error);
                 output.AppendLine();
             }
+            if (result.Outputs is not null)
+                foreach (PdfMacroOutput generated in result.Outputs)
+                {
+                    output.Append("  ");
+                    if (generated.RecordIndex is int record) output.Append("Record ").Append(record + 1).Append(": ");
+                    output.Append(generated.OutputFileName ?? "Unnamed output").Append(": ");
+                    if (generated.Succeeded) output.AppendLine("Succeeded");
+                    else
+                    {
+                        output.Append("Failed");
+                        if (generated.FailedOperation is PdfMacroOperation operation) output.Append(" at ").Append(operation);
+                        output.Append(": ").AppendLine(generated.Error);
+                    }
+                }
         }
         return output.ToString().TrimEnd();
     }
@@ -640,7 +716,11 @@ public sealed partial record PdfMacroRunReport
 
     private sealed record ResultFile(int InputIndex, bool Succeeded, string? Error,
         bool WasCanceled, int? FailedStepIndex, PdfMacroOperation? FailedOperation,
-        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? OutputFileName);
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? OutputFileName,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] OutputFile[]? Outputs);
+
+    private sealed record OutputFile(int? RecordIndex, string? OutputFileName, bool Succeeded,
+        string? Error, int? FailedStepIndex, PdfMacroOperation? FailedOperation);
 
     private static JsonSerializerOptions ReportOptions(bool indented) => new()
     {
@@ -657,6 +737,8 @@ public sealed partial record PdfMacroRunReport
 public sealed record PdfMacroFileResult(int InputIndex, ReadOnlyMemory<byte>? Data,
     string? Error, bool WasCanceled)
 {
+    /// <summary>Gets individual generated documents, including record-specific failures.</summary>
+    public IReadOnlyList<PdfMacroOutput>? Outputs { get; init; }
     /// <summary>Gets the final output file name when an output operation supplied one.</summary>
     public string? OutputFileName { get; init; }
     /// <summary>Gets the zero-based step that failed, when execution reached a step.</summary>
@@ -664,5 +746,17 @@ public sealed record PdfMacroFileResult(int InputIndex, ReadOnlyMemory<byte>? Da
     /// <summary>Gets the operation that failed, when execution reached a step.</summary>
     public PdfMacroOperation? FailedOperation { get; init; }
     /// <summary>Gets whether every step completed.</summary>
-    public bool Succeeded => Data.HasValue && Error is null && !WasCanceled;
+    public bool Succeeded => (Data.HasValue || Outputs is not null) && Error is null && !WasCanceled;
+}
+
+/// <summary>One generated PDF and its isolated values or failure.</summary>
+public sealed record PdfMacroOutput(ReadOnlyMemory<byte>? Data, string? OutputFileName,
+    string? Error = null, int? RecordIndex = null, IReadOnlyDictionary<string, string>? Values = null)
+{
+    /// <summary>Gets the zero-based macro step that failed.</summary>
+    public int? FailedStepIndex { get; init; }
+    /// <summary>Gets the macro operation that failed.</summary>
+    public PdfMacroOperation? FailedOperation { get; init; }
+    /// <summary>Gets whether this generated document completed all remaining steps.</summary>
+    public bool Succeeded => Data.HasValue && Error is null;
 }

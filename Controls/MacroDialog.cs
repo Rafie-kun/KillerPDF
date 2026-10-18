@@ -207,7 +207,8 @@ internal sealed class MacroDialog : Window
             or PdfMacroOperation.ImposeBooklet or PdfMacroOperation.ImposeStepAndRepeat
             or PdfMacroOperation.ImposeCutStack or PdfMacroOperation.ImposeManualSequence or PdfMacroOperation.ImposePoster
             or PdfMacroOperation.EditLayers or PdfMacroOperation.EditPortfolio
-            or PdfMacroOperation.SetPageLabels or PdfMacroOperation.EditAttachments or PdfMacroOperation.Watermark)
+            or PdfMacroOperation.SetPageLabels or PdfMacroOperation.EditAttachments or PdfMacroOperation.Watermark
+            or PdfMacroOperation.Rename or PdfMacroOperation.DataMerge)
         {
             step = MacroStepEditor.Edit(this, step);
             if (step is null) return;

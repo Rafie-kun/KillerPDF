@@ -11,19 +11,20 @@ namespace KillerPDF.Features
 {
     // Macros from the command line: run a saved macro, an exported macro file or one of the
     // starters through the same engine dispatcher the Macros dialog uses, with the OCR, Redact,
-    // Watermark, Rename and Save steps supplied here instead of by the window.
+    // Watermark, Data Merge, Rename and Save steps supplied here instead of by the window.
     internal static partial class CliRunner
     {
         private const string MacroUsage =
             "Usage: KillerPDF.exe --macro <in.pdf> <macro> <out.pdf> [--lang <code>] [--text <phrase>] [--terms <file>]\n"
-            + "                     [--rasterize] [--json]\n"
+            + "                     [--data <records.csv|json|xlsx>] [--rasterize] [--json]\n"
             + "       KillerPDF.exe --macro --list\n"
             + "  <macro> is a saved macro's name, an exported macro .json file, or starter:archival, starter:sharing,\n"
             + "  starter:scanning or starter:privacy. --list shows the saved macros and the starters.\n"
             + "  OCR steps read in --lang (default eng). Redact steps remove --text, each line of --terms and the\n"
             + "  marks saved in the file; pages that can only be redacted by turning them into images are skipped\n"
             + "  unless --rasterize is given.\n"
-            + "  Rename steps use the out.pdf folder and the macro's file name template.";
+            + "  Rename steps use the out.pdf folder and the macro's file name template.\n"
+            + "  Data Merge steps require --data and write one editable PDF per included record into that folder.";
 
         // ============================================================
         // --macro <in.pdf> <macro> <out.pdf> ... | --macro --list
@@ -34,7 +35,25 @@ namespace KillerPDF.Features
             if (pos.Count != 3) { con.WriteLine(MacroUsage); return 2; }
             if (!CliInspectEditInput(pos[0], pos[2], out string source, out string output, out _, con)) return 2;
             if (CliResolveMacro(pos[1], con) is not PdfMacro macro) return 2;
-            bool renames = macro.Steps.Any(step => step.Operation == PdfMacroOperation.Rename);
+            bool merges = macro.Steps.Any(step => step.Operation == PdfMacroOperation.DataMerge);
+            bool renames = !merges && macro.Steps.Any(step => step.Operation == PdfMacroOperation.Rename);
+            PdfDataMergeMacroPlan? mergePlan = null;
+            if (merges)
+            {
+                if (!options.TryGetValue("--data", out string? dataPath) || string.IsNullOrWhiteSpace(dataPath))
+                {
+                    con.WriteLine("Data Merge macro steps require --data <records.csv|json|xlsx>.");
+                    return 2;
+                }
+                try { mergePlan = PdfDataMergeWorkflow.PlanMacro(macro,
+                    PdfDataMergeWorkflow.LoadRecords(dataPath), source, output); }
+                catch (Exception error) when (error is ArgumentException or InvalidOperationException
+                    or IOException or UnauthorizedAccessException or FormatException or JsonException or NotSupportedException)
+                {
+                    con.WriteLine(error.Message);
+                    return 2;
+                }
+            }
             if (renames)
             {
                 try { output = PdfEngineIntegration.PlanMacroOutputs(macro, [source], output).Single(); }
@@ -69,6 +88,10 @@ namespace KillerPDF.Features
                     (_, data, _, token) => CliMacroRedact(data, redaction, token)),
                 new PdfMacroOperationRegistration(PdfMacroOperation.Watermark,
                     PdfEngineBurn.ExecuteWatermarkMacro),
+                new PdfMacroOperationRegistration(PdfMacroOperation.DataMerge,
+                    (step, data, _, token) => PdfDataMergeMacro.Execute(step, data,
+                        mergePlan?.Merge.Records ?? throw new InvalidOperationException("Merge data has not been selected."),
+                        token, PdfDataMergeWorkflow.LoadImage)),
                 new PdfMacroOperationRegistration(PdfMacroOperation.Rename, PdfRenameMacro.Execute)]);
 
             PdfMacroOperation[] unsupported = [.. macro.Steps.Select(step => step.Operation)
@@ -100,9 +123,14 @@ namespace KillerPDF.Features
 
             con.WriteLine($"Running \"{macro.Name}\": " + string.Join(", ", macro.Steps.Select(step => step.Operation)));
             if (renames) con.WriteLine($"Output: {output}");
+            if (mergePlan is not null)
+                foreach (string path in mergePlan.OutputPaths) con.WriteLine($"Output: {path}");
             PdfMacroRunReport report = dispatcher.RunReport(macro, [new ReadOnlyMemory<byte>(File.ReadAllBytes(source))],
-                renames ? PdfRenameMacro.CreateContext(Path.GetFileName(source), 1) : null);
+                renames || merges ? PdfRenameMacro.CreateContext(Path.GetFileName(source), 1) : null);
             PdfMacroFileResult? result = report.Results.Count == 1 ? report.Results[0] : null;
+            bool outputsWritten = true;
+            if (mergePlan is not null && result?.Outputs is not null)
+                outputsWritten = CliWriteMacroOutputs(result.Outputs, mergePlan.OutputPaths, con);
             if (result is { Succeeded: true, Data: ReadOnlyMemory<byte> data })
             {
                 if (renames && result.OutputFileName != Path.GetFileName(output))
@@ -132,9 +160,42 @@ namespace KillerPDF.Features
             if (redaction.Skipped.Count > 0)
                 con.WriteLine($"Skipped redacting pages {string.Join(", ", redaction.Skipped.Order().Select(page => page + 1))}, "
                     + "whose marked content can only go by turning the page into an image; add --rasterize to allow that.");
-            if (result?.Succeeded != true) return 1;
-            con.WriteLine($"Saved -> {output}");
+            if (result?.Succeeded != true || !outputsWritten) return 1;
+            if (!merges) con.WriteLine($"Saved -> {output}");
             return 0;
+        }
+
+        private static bool CliWriteMacroOutputs(IReadOnlyList<PdfMacroOutput> generated,
+            IReadOnlyList<string> planned, TextWriter con)
+        {
+            var targets = planned.ToDictionary(path => Path.GetFileName(path), path => path, StringComparer.OrdinalIgnoreCase);
+            PdfMacroOutput[] successful = [.. generated.Where(result => result.Succeeded)];
+            if (successful.Any(result => result.OutputFileName is null || !targets.ContainsKey(result.OutputFileName))
+                || successful.Select(result => result.OutputFileName).Distinct(StringComparer.OrdinalIgnoreCase).Count() != successful.Length)
+            {
+                con.WriteLine("The macro output names differ from their planned targets.");
+                return false;
+            }
+            bool allWritten = true;
+            foreach (PdfMacroOutput result in successful)
+            {
+                string destination = targets[result.OutputFileName!];
+                string temporary = destination + "." + Guid.NewGuid().ToString("N") + ".tmp";
+                try
+                {
+                    CliEnsureParentDir(destination);
+                    File.WriteAllBytes(temporary, result.Data!.Value.ToArray());
+                    File.Move(temporary, destination, overwrite: true);
+                    con.WriteLine($"Saved -> {destination}");
+                }
+                catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+                {
+                    con.WriteLine(destination + ": " + error.Message);
+                    allWritten = false;
+                }
+                finally { if (File.Exists(temporary)) File.Delete(temporary); }
+            }
+            return allWritten;
         }
 
         private static int CliListMacros(TextWriter con)

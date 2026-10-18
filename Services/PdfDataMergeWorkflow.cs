@@ -11,9 +11,63 @@ internal sealed record PdfDataMergePlan(
     IReadOnlyList<string> OutputFileNames,
     int MatchedFieldCount);
 
+internal sealed record PdfDataMergeMacroPlan(PdfDataMergePlan Merge, IReadOnlyList<string> OutputPaths);
+
 internal static class PdfDataMergeWorkflow
 {
     private const string OutputNameField = "__KillerPDFOutputFileName";
+
+    internal static PdfDataMergeMacroPlan PlanMacro(PdfMacro macro,
+        IReadOnlyList<IReadOnlyDictionary<string, string?>> records, string sourcePath,
+        string firstOutput, int oneBasedInputIndex = 1, IEnumerable<string>? protectedSources = null)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(oneBasedInputIndex);
+        int[] mergeSteps = macro.Steps.Select((step, index) => (step, index))
+            .Where(item => item.step.Operation == PdfMacroOperation.DataMerge).Select(item => item.index).ToArray();
+        if (mergeSteps.Length != 1)
+            throw new ArgumentException("A file-output macro requires exactly one Data Merge step.", nameof(macro));
+        if (records.Count == 0) throw new ArgumentException("Merge data has no records.", nameof(records));
+        PdfDataMergeProfile profile = PdfDataMergeProfile.FromMacroStep(macro.Steps[mergeSteps[0]]);
+        string directory = Path.GetDirectoryName(Path.GetFullPath(firstOutput))!;
+        string stem = Path.GetFileNameWithoutExtension(firstOutput);
+        var prepared = new List<IReadOnlyDictionary<string, string?>>(records.Count);
+        var generatedNames = new List<string>();
+        var outputPaths = new List<string>();
+        var protectedPaths = (protectedSources ?? []).Append(sourcePath)
+            .Select(Path.GetFullPath).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        foreach ((var record, int index) in records.Select((record, index) => (record, index)))
+        {
+            if (record.Keys.Contains(OutputNameField, StringComparer.OrdinalIgnoreCase))
+                throw new ArgumentException("Merge data uses a reserved field name.", nameof(records));
+            var copy = new Dictionary<string, string?>(record, StringComparer.OrdinalIgnoreCase)
+            {
+                [OutputNameField] = stem + (index == 0 ? "" : "-" + (index + 1)) + ".pdf"
+            };
+            prepared.Add(new System.Collections.ObjectModel.ReadOnlyDictionary<string, string?>(copy));
+            if (!profile.Includes(copy)) continue;
+            string name = PdfDataMerge.Expand(profile.OutputFileNameTemplate, copy, profile.MissingValueBehavior);
+            if (name != Path.GetFileName(name) || name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0
+                || !Path.GetExtension(name).Equals(".pdf", StringComparison.OrdinalIgnoreCase))
+                throw new ArgumentException("Every output name must be a PDF filename.", nameof(macro));
+            generatedNames.Add(name);
+            var context = PdfRenameMacro.CreateContext(name, oneBasedInputIndex);
+            foreach (PdfMacroStep rename in macro.Steps.Skip(mergeSteps[0] + 1)
+                .Where(step => step.Operation == PdfMacroOperation.Rename))
+            {
+                PdfMacroOperationResult renamed = PdfRenameMacro.Execute(rename, ReadOnlyMemory<byte>.Empty, context);
+                name = renamed.OutputFileName!;
+                context = PdfRenameMacro.CreateContext(name, oneBasedInputIndex);
+            }
+            string path = Path.GetFullPath(Path.Combine(directory, name));
+            if (protectedPaths.Contains(path)) throw new ArgumentException("Macro output cannot replace a source PDF.", nameof(firstOutput));
+            outputPaths.Add(path);
+        }
+        if (generatedNames.Distinct(StringComparer.OrdinalIgnoreCase).Count() != generatedNames.Count
+            || outputPaths.Distinct(StringComparer.OrdinalIgnoreCase).Count() != outputPaths.Count)
+            throw new ArgumentException("Data-merge output filenames must be unique.", nameof(macro));
+        return new(new(profile, prepared.AsReadOnly(), generatedNames.AsReadOnly(), profile.Mappings.Count),
+            outputPaths.AsReadOnly());
+    }
 
     internal static PdfImage LoadImage(string path)
     {

@@ -8,6 +8,26 @@ namespace KillerPDF.Tests;
 
 public sealed class PdfDataMergeWorkflowTests
 {
+    [Fact]
+    public void MacroPlanUsesGeneratedNamesAndOnlySubsequentRenameSteps()
+    {
+        string folder = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "macro-plan");
+        var profile = new PdfDataMergeProfile("Customers", [new("Name", "name")], "{{Name}}.pdf");
+        var macro = new PdfMacro("Customers", [PdfRenameMacro.RenameStep("ignored"),
+            profile.ToMacroStep(), PdfRenameMacro.RenameStep("{name}-ready-{index}")]);
+        IReadOnlyDictionary<string, string?>[] records = [
+            new Dictionary<string, string?> { ["Name"] = "Ada" },
+            new Dictionary<string, string?> { ["Name"] = "Grace" }];
+
+        var plan = PdfDataMergeWorkflow.PlanMacro(macro, records,
+            System.IO.Path.Combine(folder, "template.pdf"), System.IO.Path.Combine(folder, "output.pdf"), 3);
+
+        Assert.Equal(new[] { System.IO.Path.Combine(folder, "Ada-ready-3.pdf"),
+            System.IO.Path.Combine(folder, "Grace-ready-3.pdf") }, plan.OutputPaths);
+        Assert.Throws<ArgumentException>(() => PdfDataMergeWorkflow.PlanMacro(macro, records,
+            System.IO.Path.Combine(folder, "Ada-ready-3.pdf"), System.IO.Path.Combine(folder, "output.pdf"), 3));
+    }
+
     [Theory]
     [InlineData(PdfDataMergeOutputMode.Editable)]
     [InlineData(PdfDataMergeOutputMode.Flattened)]

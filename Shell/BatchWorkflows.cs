@@ -38,6 +38,11 @@ public partial class MainWindow
 
     private async void RunMacroBatch(PdfMacro macro, PdfMacroDispatcher dispatcher)
     {
+        if (macro.Steps.Any(step => step.Operation == PdfMacroOperation.DataMerge))
+        {
+            RunDataMergeMacro(macro, batch: true);
+            return;
+        }
         string title = Loc("Str_Macro_Batch");
         try
         {

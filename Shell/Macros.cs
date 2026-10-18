@@ -31,6 +31,7 @@ public partial class MainWindow
             PdfMacroOperation.Ocr,
             PdfMacroOperation.Redact,
             PdfMacroOperation.Watermark,
+            PdfMacroOperation.DataMerge,
             PdfMacroOperation.Rename,
             PdfMacroOperation.Save,
             PdfMacroOperation.NumberPages,
@@ -52,6 +53,11 @@ public partial class MainWindow
 
     private async void RunMacro(PdfMacro macro, PdfMacroDispatcher dispatcher)
     {
+        if (macro.Steps.Any(step => step.Operation == PdfMacroOperation.DataMerge))
+        {
+            RunDataMergeMacro(macro, batch: false);
+            return;
+        }
         if (_doc is null || string.IsNullOrWhiteSpace(_currentFile))
         {
             KillerDialog.Show(this, Loc("Str_Msg_OpenFirst"));
@@ -157,7 +163,9 @@ public partial class MainWindow
         }
     }
 
-    private PdfMacroDispatcher CreateMacroDispatcher()
+    private PdfMacroDispatcher CreateMacroDispatcher() => CreateMacroDispatcherForData(null);
+
+    private PdfMacroDispatcher CreateMacroDispatcherForData(IReadOnlyList<IReadOnlyDictionary<string, string?>>? mergeRecords)
     {
         string language = CurrentOcrLanguageString();
         bool formAware = OcrFormAware;
@@ -175,6 +183,10 @@ public partial class MainWindow
                 (_, source, _, cancellationToken) => RedactMacroContent(source, cancellationToken)),
             new PdfMacroOperationRegistration(PdfMacroOperation.Watermark,
                 PdfEngineBurn.ExecuteWatermarkMacro),
+            new PdfMacroOperationRegistration(PdfMacroOperation.DataMerge,
+                (step, source, _, token) => PdfDataMergeMacro.Execute(step, source,
+                    mergeRecords ?? throw new InvalidOperationException("Merge data has not been selected."),
+                    token, PdfDataMergeWorkflow.LoadImage)),
             new PdfMacroOperationRegistration(PdfMacroOperation.Rename, PdfRenameMacro.Execute)]);
     }
 
@@ -280,12 +292,14 @@ public partial class MainWindow
         report.Results.Count == 1 ? report.Results[0]
             : throw new InvalidOperationException("The macro did not produce one file result.");
 
-    private static void WriteMacroOutput(string destination, ReadOnlyMemory<byte> data, bool overwrite = true)
+    private static void WriteMacroOutput(string destination, ReadOnlyMemory<byte> data, bool overwrite = true,
+        CancellationToken cancellationToken = default)
     {
         string temporary = destination + "." + Guid.NewGuid().ToString("N") + ".tmp";
         try
         {
             File.WriteAllBytes(temporary, data.ToArray());
+            cancellationToken.ThrowIfCancellationRequested();
             File.Move(temporary, destination, overwrite);
         }
         catch

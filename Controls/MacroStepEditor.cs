@@ -17,6 +17,7 @@ internal static class MacroStepEditor
         PdfMacroOperation.SetPageLabels => "Str_DocumentTools_PageLabels",
         PdfMacroOperation.Watermark => "Str_Stamp_SecWatermark",
         PdfMacroOperation.Rename => "Str_Ctx_BmRename",
+        PdfMacroOperation.DataMerge => "Str_DocumentTools_DataMerge",
         _ => null
     };
 
@@ -24,6 +25,15 @@ internal static class MacroStepEditor
     {
         try
         {
+            if (step.Operation == PdfMacroOperation.DataMerge)
+            {
+                var picker = new Controls.FileDialog(Controls.FileDialogMode.Open)
+                {
+                    Title = L("Str_Merge_LoadProfile"), Filter = "JSON|*.json"
+                };
+                return picker.ShowDialog(owner) == true
+                    ? PdfDataMergeProfile.FromJson(System.IO.File.ReadAllText(picker.FileName)).ToMacroStep() : null;
+            }
             if (step.Operation == PdfMacroOperation.Rename)
             {
                 string template = step.Settings is null ? "{name}-renamed" : PdfRenameMacro.ReadTemplate(step);

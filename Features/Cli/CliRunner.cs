@@ -61,7 +61,7 @@ namespace KillerPDF.Features
             "--color-mode", "--threshold", "--compression", "--jpeg-quality",
             "--every", "--parts", "--bookmarks", "--max-size", "--name", "--strip",
             "--template", "--edge", "--align", "--number-format", "--font-size",
-            "--start", "--digits", "--prefix", "--suffix", "--profile",
+            "--start", "--digits", "--prefix", "--suffix", "--profile", "--data",
             "--sheet", "--margin", "--gutter", "--creep", "--binding", "--grid",
             "--min-size", "--depth", "--pattern", "--width", "--height", "--images",
             "--direction", "--position",
