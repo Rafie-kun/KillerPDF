@@ -71,6 +71,12 @@ surfaces above were source-reviewed, not rendered in this run.
 4. Export is executable in the engine dispatcher but deliberately excluded from
    desktop macro support. Do not advertise desktop macro export as wired.
 
+These were findings at the audit checkpoint. Subsequent local completion wired
+all listed host operations and settings editors. Export now saves extra files
+alongside editable PDFs in desktop, batch, Data Merge and CLI macros. See
+`macro-export-20261018.md`, `macro-color-20261018.md`,
+`macro-resize-20261018.md` and `macro-data-merge-20261018.md` for verification.
+
 Repeated XFA template paths and the native OCR model/quality gates remain known
 tool gaps in BACKLOG.md. No new disconnected rail icon was found.
 

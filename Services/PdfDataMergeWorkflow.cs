@@ -66,7 +66,7 @@ internal static class PdfDataMergeWorkflow
             || outputPaths.Distinct(StringComparer.OrdinalIgnoreCase).Count() != outputPaths.Count)
             throw new ArgumentException("Data-merge output filenames must be unique.", nameof(macro));
         return new(new(profile, prepared.AsReadOnly(), generatedNames.AsReadOnly(), profile.Mappings.Count),
-            outputPaths.AsReadOnly());
+            PdfMacroExportFiles.Plan(macro, outputPaths, protectedPaths));
     }
 
     internal static PdfImage LoadImage(string path)

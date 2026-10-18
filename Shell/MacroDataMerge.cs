@@ -35,7 +35,7 @@ public partial class MainWindow
                 FileName = Path.GetFileNameWithoutExtension(inputs[0]) + "-" + SafeMacroFileName(macro.Name) + ".pdf"
             };
             if (picker.ShowDialog(this) != true || (!batch && !sourceCurrent())) return;
-            string[] protectedPaths = [.. inputs, .. new[] { _currentFile, _originalFile }.OfType<string>()];
+            string[] protectedPaths = [.. inputs, dataPicker.FileName, .. new[] { _currentFile, _originalFile }.OfType<string>()];
             string[] seeds = PdfEngineIntegration.PlanBatchOutputs(inputs, picker.FileName);
             PdfDataMergeMacroPlan[] plans = inputs.Select((input, index) =>
                 PdfDataMergeWorkflow.PlanMacro(macro, records, input, seeds[index], index + 1, protectedPaths)).ToArray();
@@ -99,14 +99,15 @@ public partial class MainWindow
         finally { if (snapshot is not null) File.Delete(snapshot); }
     }
 
-    private static void WriteGeneratedMacroOutputs(IReadOnlyList<PdfMacroOutput> generated,
+    private static bool WriteGeneratedMacroOutputs(IReadOnlyList<PdfMacroOutput> generated,
         IReadOnlyList<string> planned, IReadOnlySet<string> overwrite, StringBuilder report, CancellationToken token)
     {
         var targets = planned.ToDictionary(path => Path.GetFileName(path), path => path, StringComparer.OrdinalIgnoreCase);
-        PdfMacroOutput[] successful = [.. generated.Where(output => output.Succeeded)];
+        PdfMacroOutput[] successful = [.. generated.Where(output => output.Succeeded).SelectMany(PdfMacroExportFiles.Expand)];
         if (successful.Any(output => output.OutputFileName is null || !targets.ContainsKey(output.OutputFileName))
             || successful.Select(output => output.OutputFileName).Distinct(StringComparer.OrdinalIgnoreCase).Count() != successful.Length)
             throw new InvalidOperationException("The macro output names differ from their approved plan.");
+        bool written = true;
         foreach (PdfMacroOutput output in successful)
         {
             token.ThrowIfCancellationRequested();
@@ -114,11 +115,14 @@ public partial class MainWindow
             try
             {
                 WriteMacroOutput(destination, output.Data!.Value, overwrite.Contains(destination), token);
+                report.AppendLine(destination);
             }
             catch (Exception error) when (error is IOException or UnauthorizedAccessException)
             {
                 report.AppendLine(destination + ": " + error.Message);
+                written = false;
             }
         }
+        return written;
     }
 }

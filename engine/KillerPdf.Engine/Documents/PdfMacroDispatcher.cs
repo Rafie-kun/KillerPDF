@@ -175,8 +175,11 @@ public sealed class PdfMacroDispatcher
             PdfMacroOperation.EditPortfolio => Result(
                 PdfCollectionMacro.Execute(step, source, cancellationToken)),
             PdfMacroOperation.Validate => Validate(step, source),
-            PdfMacroOperation.Export => Result(
-                PdfStructuredExportMacro.Execute(step, source, cancellationToken)),
+            PdfMacroOperation.Export => new(source)
+            {
+                Exports = [new(PdfStructuredExportMacro.ReadFormat(step),
+                    PdfStructuredExportMacro.Execute(step, source, cancellationToken))]
+            },
             _ => throw new NotSupportedException(
                 $"Macro operation '{step.Operation}' requires a host handler.")
         };

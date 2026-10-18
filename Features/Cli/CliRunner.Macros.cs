@@ -24,7 +24,8 @@ namespace KillerPDF.Features
             + "  marks saved in the file; pages that can only be redacted by turning them into images are skipped\n"
             + "  unless --rasterize is given.\n"
             + "  Rename steps use the out.pdf folder and the macro's file name template.\n"
-            + "  Data Merge steps require --data and write one editable PDF per included record into that folder.";
+            + "  Data Merge steps require --data and write one editable PDF per included record into that folder.\n"
+            + "  Export steps save an extra file alongside the editable PDF; multiple exports use numbered suffixes.";
 
         // ============================================================
         // --macro <in.pdf> <macro> <out.pdf> ... | --macro --list
@@ -35,6 +36,8 @@ namespace KillerPDF.Features
             if (pos.Count != 3) { con.WriteLine(MacroUsage); return 2; }
             if (!CliInspectEditInput(pos[0], pos[2], out string source, out string output, out _, con)) return 2;
             if (CliResolveMacro(pos[1], con) is not PdfMacro macro) return 2;
+            string[] protectedPaths = [source, .. new[] { pos[1], options.GetValueOrDefault("--data"),
+                options.GetValueOrDefault("--terms") }.OfType<string>().Where(File.Exists).Select(Path.GetFullPath)];
             bool merges = macro.Steps.Any(step => step.Operation == PdfMacroOperation.DataMerge);
             bool renames = !merges && macro.Steps.Any(step => step.Operation == PdfMacroOperation.Rename);
             PdfDataMergeMacroPlan? mergePlan = null;
@@ -46,7 +49,7 @@ namespace KillerPDF.Features
                     return 2;
                 }
                 try { mergePlan = PdfDataMergeWorkflow.PlanMacro(macro,
-                    PdfDataMergeWorkflow.LoadRecords(dataPath), source, output); }
+                    PdfDataMergeWorkflow.LoadRecords(dataPath), source, output, protectedSources: protectedPaths); }
                 catch (Exception error) when (error is ArgumentException or InvalidOperationException
                     or IOException or UnauthorizedAccessException or FormatException or JsonException or NotSupportedException)
                 {
@@ -60,6 +63,10 @@ namespace KillerPDF.Features
                 catch (ArgumentException error) { con.WriteLine(error.Message); return 2; }
                 if (!CliInspectEditInput(source, output, out source, out output, out _, con)) return 2;
             }
+
+            string[] plannedFiles;
+            try { plannedFiles = PdfMacroExportFiles.Plan(macro, [output], protectedPaths); }
+            catch (ArgumentException error) { con.WriteLine(error.Message); return 2; }
 
             options.TryGetValue("--lang", out string? langRaw);
             string language = string.IsNullOrWhiteSpace(langRaw) ? "eng" : langRaw.Trim().ToLowerInvariant();
@@ -140,17 +147,8 @@ namespace KillerPDF.Features
                     con.WriteLine("The macro output name differs from its planned target.");
                     return 1;
                 }
-                CliEnsureParentDir(output);
-                string temporary = output + "." + Guid.NewGuid().ToString("N") + ".tmp";
-                try
-                {
-                    File.WriteAllBytes(temporary, data.ToArray());
-                    File.Move(temporary, output, overwrite: true);
-                }
-                finally
-                {
-                    if (File.Exists(temporary)) File.Delete(temporary);
-                }
+                outputsWritten = CliWriteMacroOutputs([new(data, Path.GetFileName(output))
+                    { Exports = result.Exports }], plannedFiles, con);
             }
 
             con.WriteLine(options.ContainsKey("--json") ? report.ToJson(indented: true) : report.ToText());
@@ -163,7 +161,6 @@ namespace KillerPDF.Features
                 con.WriteLine($"Skipped redacting pages {string.Join(", ", redaction.Skipped.Order().Select(page => page + 1))}, "
                     + "whose marked content can only go by turning the page into an image; add --rasterize to allow that.");
             if (result?.Succeeded != true || !outputsWritten) return 1;
-            if (!merges) con.WriteLine($"Saved -> {output}");
             return 0;
         }
 
@@ -171,7 +168,7 @@ namespace KillerPDF.Features
             IReadOnlyList<string> planned, TextWriter con)
         {
             var targets = planned.ToDictionary(path => Path.GetFileName(path), path => path, StringComparer.OrdinalIgnoreCase);
-            PdfMacroOutput[] successful = [.. generated.Where(result => result.Succeeded)];
+            PdfMacroOutput[] successful = [.. generated.Where(result => result.Succeeded).SelectMany(PdfMacroExportFiles.Expand)];
             if (successful.Any(result => result.OutputFileName is null || !targets.ContainsKey(result.OutputFileName))
                 || successful.Select(result => result.OutputFileName).Distinct(StringComparer.OrdinalIgnoreCase).Count() != successful.Length)
             {

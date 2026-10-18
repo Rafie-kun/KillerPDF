@@ -34,8 +34,7 @@ internal static class PdfEngineIntegration
         else outputs = PlanBatchOutputs(sources, firstOutput);
         var protectedPaths = sources.Concat(additionalSources ?? [])
             .Select(Path.GetFullPath).ToHashSet(StringComparer.OrdinalIgnoreCase);
-        if (outputs.Any(protectedPaths.Contains))
-            throw new ArgumentException("Macro output cannot replace a source PDF.", nameof(firstOutput));
+        _ = PdfMacroExportFiles.Plan(macro, outputs, protectedPaths);
         return outputs;
     }
 

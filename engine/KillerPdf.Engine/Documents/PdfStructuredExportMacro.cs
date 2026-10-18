@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using KillerPdf.Engine.Editing;
 
 namespace KillerPdf.Engine.Documents;
 
@@ -31,10 +32,50 @@ public static partial class PdfStructuredExportMacro
     public static ReadOnlyMemory<byte> Execute(PdfMacroStep step,
         ReadOnlyMemory<byte> source, CancellationToken cancellationToken = default)
     {
+        if (source.IsEmpty) throw new ArgumentException("The PDF source is empty.", nameof(source));
+        ExportOptions options = ReadOptions(step);
+        cancellationToken.ThrowIfCancellationRequested();
+        PdfDocument document = PdfDocument.Open(source);
+        if (PdfPageInformation.Read(document).Select((_, index) => index)
+            .Any(index => PdfFormWidgetReader.ReadPage(document, index).Count != 0))
+            document = PdfDocument.Open(PdfFormFlattener.Flatten(document));
+        IEnumerable<int>? pages = options.PageIndices;
+        return options.Format switch
+        {
+            PdfStructuredExportFormat.PlainText => Encoding.UTF8.GetBytes(
+                PdfStructuredExport.ToPlainText(document, pages, cancellationToken)),
+            PdfStructuredExportFormat.Html => Encoding.UTF8.GetBytes(
+                PdfStructuredExport.ToHtml(document, pages, cancellationToken: cancellationToken)),
+            PdfStructuredExportFormat.Markdown => Encoding.UTF8.GetBytes(
+                PdfStructuredExport.ToMarkdown(document, pages, cancellationToken)),
+            PdfStructuredExportFormat.Json => Encoding.UTF8.GetBytes(
+                PdfStructuredExport.ToJson(document, pages, cancellationToken)),
+            PdfStructuredExportFormat.WordDocument =>
+                PdfStructuredExport.ToDocx(document, pages, cancellationToken: cancellationToken),
+            PdfStructuredExportFormat.Spreadsheet =>
+                PdfStructuredExport.ToXlsx(document, pages, cancellationToken),
+            PdfStructuredExportFormat.Presentation =>
+                PdfStructuredExport.ToPptx(document, pages, cancellationToken: cancellationToken),
+            _ => throw new ArgumentOutOfRangeException(nameof(step))
+        };
+    }
+
+    /// <summary>Reads the selected export format without opening a document.</summary>
+    public static PdfStructuredExportFormat ReadFormat(PdfMacroStep step) => ReadOptions(step).Format;
+
+    /// <summary>Changes the format while retaining the saved page selection.</summary>
+    public static PdfMacroStep WithFormat(PdfMacroStep step, PdfStructuredExportFormat format) =>
+        Step(format, ReadOptions(step).PageIndices);
+
+    /// <summary>Gets the file extension for an exported artifact.</summary>
+    public static string Extension(PdfStructuredExportFormat format) =>
+        Path.GetExtension(PdfStructuredExportBatchRunner.OutputName("export.pdf", format));
+
+    private static ExportOptions ReadOptions(PdfMacroStep step)
+    {
         ArgumentNullException.ThrowIfNull(step);
         if (step.Operation != PdfMacroOperation.Export)
             throw new ArgumentException("The macro step is not an export operation.", nameof(step));
-        if (source.IsEmpty) throw new ArgumentException("The PDF source is empty.", nameof(source));
         if (step.Settings is null || step.Settings.Count != 1
             || !step.Settings.TryGetValue(OptionsKey, out string? json))
             throw new ArgumentException("The export macro settings are invalid.", nameof(step));
@@ -55,27 +96,7 @@ public static partial class PdfStructuredExportMacro
                 nameof(step), error);
         }
 
-        cancellationToken.ThrowIfCancellationRequested();
-        PdfDocument document = PdfDocument.Open(source);
-        IEnumerable<int>? pages = options.PageIndices;
-        return options.Format switch
-        {
-            PdfStructuredExportFormat.PlainText => Encoding.UTF8.GetBytes(
-                PdfStructuredExport.ToPlainText(document, pages, cancellationToken)),
-            PdfStructuredExportFormat.Html => Encoding.UTF8.GetBytes(
-                PdfStructuredExport.ToHtml(document, pages, cancellationToken: cancellationToken)),
-            PdfStructuredExportFormat.Markdown => Encoding.UTF8.GetBytes(
-                PdfStructuredExport.ToMarkdown(document, pages, cancellationToken)),
-            PdfStructuredExportFormat.Json => Encoding.UTF8.GetBytes(
-                PdfStructuredExport.ToJson(document, pages, cancellationToken)),
-            PdfStructuredExportFormat.WordDocument =>
-                PdfStructuredExport.ToDocx(document, pages, cancellationToken: cancellationToken),
-            PdfStructuredExportFormat.Spreadsheet =>
-                PdfStructuredExport.ToXlsx(document, pages, cancellationToken),
-            PdfStructuredExportFormat.Presentation =>
-                PdfStructuredExport.ToPptx(document, pages, cancellationToken: cancellationToken),
-            _ => throw new ArgumentOutOfRangeException(nameof(step))
-        };
+        return options;
     }
 
     private static JsonSerializerOptions JsonOptions() => new()

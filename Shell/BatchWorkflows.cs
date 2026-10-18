@@ -50,11 +50,13 @@ public partial class MainWindow
             if (inputs is null) return;
             string[]? outputs = SelectBatchOutputs(title, inputs, SafeMacroFileName(macro.Name), macro);
             if (outputs is null) return;
-            var overwrite = outputs.Where(File.Exists).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            string[][] plannedFiles = outputs.Select(output => PdfMacroExportFiles.Plan(macro, [output], inputs)).ToArray();
+            var overwrite = plannedFiles.SelectMany(paths => paths).Where(File.Exists).ToHashSet(StringComparer.OrdinalIgnoreCase);
             string preview = string.Join("\n", macro.Steps.Select((step, index) =>
                 (index + 1) + ". " + MacroOperationName(step.Operation))) + "\n\n"
-                + string.Join("\n", inputs.Select((input, index) => input + "\n  > " + outputs[index]
-                    + (overwrite.Contains(outputs[index]) ? " (" + Loc("Str_Macro_Replace") + ")" : "")));
+                + string.Join("\n", inputs.Select((input, index) => input + "\n"
+                    + string.Join("\n", plannedFiles[index].Select(path => "  > " + path
+                        + (overwrite.Contains(path) ? " (" + Loc("Str_Macro_Replace") + ")" : "")))));
             var review = new ImportReviewDialog(this, title, preview, null, Loc("Str_Btn_Run"));
             if (review.ShowDialog() != true) return;
             if (macro.Steps.Any(step => step.Operation == PdfMacroOperation.Ocr)
@@ -90,8 +92,9 @@ public partial class MainWindow
                             token.ThrowIfCancellationRequested();
                             if (file.OutputFileName is not null && file.OutputFileName != Path.GetFileName(outputs[index]))
                                 throw new InvalidOperationException("The macro output name differs from its approved plan.");
-                            WriteMacroOutput(outputs[index], data, overwrite.Contains(outputs[index]));
-                            report.AppendLine(string.Format(Loc("Str_Macro_Complete"), outputs[index]));
+                            bool written = WriteGeneratedMacroOutputs([new(data, Path.GetFileName(outputs[index]))
+                                { Exports = file.Exports }], plannedFiles[index], overwrite, report, token);
+                            if (written) report.AppendLine(string.Format(Loc("Str_Macro_Complete"), outputs[index]));
                         }
                         else report.AppendLine(result.ToText());
                     }

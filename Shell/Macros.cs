@@ -11,8 +11,7 @@ public partial class MainWindow
     private void OpenMacroDialog()
     {
         PdfMacroDispatcher dispatcher = CreateMacroDispatcher();
-        PdfMacroOperation[] supported = [.. dispatcher.SupportedOperations
-            .Where(operation => operation != PdfMacroOperation.Export)];
+        PdfMacroOperation[] supported = [.. dispatcher.SupportedOperations];
         PdfMacroOperation[] addable =
         [
             PdfMacroOperation.Optimize,
@@ -34,6 +33,7 @@ public partial class MainWindow
             PdfMacroOperation.DataMerge,
             PdfMacroOperation.Resize,
             PdfMacroOperation.ConvertColor,
+            PdfMacroOperation.Export,
             PdfMacroOperation.Rename,
             PdfMacroOperation.Save,
             PdfMacroOperation.NumberPages,
@@ -94,13 +94,17 @@ public partial class MainWindow
             [sourcePath], outputDialog.FileName, [_currentFile, _originalFile ?? _currentFile]).Single(); }
         catch (ArgumentException error) { ShowExchangeError(error); return; }
 
+        string[] plannedFiles = PdfMacroExportFiles.Plan(macro, [outputDialog.FileName],
+            [sourcePath, _currentFile, _originalFile ?? _currentFile]);
+        var overwrite = plannedFiles.Where(File.Exists).ToHashSet(StringComparer.OrdinalIgnoreCase);
         PdfMacroPreview preview = macro.Preview([
             new PdfMacroPreviewFile(sourceName, outputDialog.FileName,
                 File.Exists(outputDialog.FileName))], PdfMacroOverwriteBehavior.Replace);
         string steps = string.Join(Environment.NewLine,
             preview.Steps.Select((step, index) => $"{index + 1}. {MacroOperationName(step.Operation)}"));
         string message = string.Format(Loc("Str_Macro_Preview"), preview.Name,
-            sourceName, outputDialog.FileName, steps);
+            sourceName, string.Join(Environment.NewLine, plannedFiles.Select(path => path
+                + (overwrite.Contains(path) ? " (" + Loc("Str_Macro_Replace") + ")" : ""))), steps);
         if (KillerDialog.Show(this, message, Loc("Str_DocumentTools_Macros"),
                 MessageBoxButton.YesNo, MessageBoxImage.Information) != MessageBoxResult.Yes)
             return;
@@ -127,20 +131,23 @@ public partial class MainWindow
                 macro, [new ReadOnlyMemory<byte>(source)],
                 renames ? PdfRenameMacro.CreateContext(sourceName, 1) : null, token), token);
             PdfMacroFileResult result = AssertSingleResult(report);
+            bool written = true;
+            var writeReport = new StringBuilder();
             if (_macroRedaction.Canceled) throw new OperationCanceledException();
             if (result.Succeeded && result.Data is ReadOnlyMemory<byte> data)
             {
                 token.ThrowIfCancellationRequested();
                 if (renames && result.OutputFileName != Path.GetFileName(outputDialog.FileName))
                     throw new InvalidOperationException("The macro output name differs from its approved plan.");
-                WriteMacroOutput(outputDialog.FileName, data);
+                written = WriteGeneratedMacroOutputs([new(data, Path.GetFileName(outputDialog.FileName))
+                    { Exports = result.Exports }], plannedFiles, overwrite, writeReport, token);
             }
 
             HideBusyOverlay(busy);
-            SetStatus(result.Succeeded
+            SetStatus(result.Succeeded && written
                 ? string.Format(Loc("Str_Macro_Complete"), outputDialog.FileName)
                 : Loc("Str_Macro_Failed"));
-            string reportText = report.ToText();
+            string reportText = report.ToText() + Environment.NewLine + writeReport;
             if (_macroRedaction.Areas > 0)
                 reportText += Environment.NewLine + string.Format(Loc("Str_Macro_Redacted"),
                     _macroRedaction.Areas, _macroRedaction.Pages);

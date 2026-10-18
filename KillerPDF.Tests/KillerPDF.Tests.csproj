@@ -31,6 +31,7 @@
     <Compile Include="..\Services\CommentEdits.cs" Link="Services\CommentEdits.cs" />
     <Compile Include="..\Services\PdfMacroStore.cs" Link="Services\PdfMacroStore.cs" />
     <Compile Include="..\Services\PdfDataMergeWorkflow.cs" Link="Services\PdfDataMergeWorkflow.cs" />
+    <Compile Include="..\Services\PdfMacroExportFiles.cs" Link="Services\PdfMacroExportFiles.cs" />
     <Compile Include="..\Services\ImageAssetStore.cs" Link="Services\ImageAssetStore.cs" />
     <Compile Include="..\Services\SvgSignatureImporter.cs" Link="Services\SvgSignatureImporter.cs" />
     <Compile Include="..\Services\SvgPathData.cs" Link="Services\SvgPathData.cs" />

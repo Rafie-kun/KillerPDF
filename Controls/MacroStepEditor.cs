@@ -20,6 +20,7 @@ internal static class MacroStepEditor
         PdfMacroOperation.DataMerge => "Str_DocumentTools_DataMerge",
         PdfMacroOperation.Resize => "Str_Tf_ResizePage",
         PdfMacroOperation.ConvertColor => "Str_Tf_ColorMode",
+        PdfMacroOperation.Export => "Str_ExportDoc_Suffix",
         _ => null
     };
 
@@ -27,6 +28,22 @@ internal static class MacroStepEditor
     {
         try
         {
+            if (step.Operation == PdfMacroOperation.Export)
+            {
+                PdfStructuredExportFormat[] formats = [PdfStructuredExportFormat.WordDocument,
+                    PdfStructuredExportFormat.Spreadsheet, PdfStructuredExportFormat.Presentation,
+                    PdfStructuredExportFormat.Html, PdfStructuredExportFormat.Markdown,
+                    PdfStructuredExportFormat.PlainText, PdfStructuredExportFormat.Json];
+                var select = new DocumentListDialog(owner, L("Str_ExportDoc_Suffix"),
+                    ["Word (.docx)", "Excel (.xlsx)", "PowerPoint (.pptx)", "HTML (.html)",
+                        "Markdown (.md)", "TXT (.txt)", "JSON (.json)"])
+                { Width = 540, Height = 310, MinHeight = 290 };
+                select.SelectedIndex = step.Settings is null ? 0
+                    : Array.IndexOf(formats, PdfStructuredExportMacro.ReadFormat(step));
+                if (select.ShowDialog() != true) return null;
+                return step.Settings is null ? PdfStructuredExportMacro.Step(formats[select.SelectedIndex])
+                    : PdfStructuredExportMacro.WithFormat(step, formats[select.SelectedIndex]);
+            }
             if (step.Operation == PdfMacroOperation.ConvertColor)
             {
                 PdfMacroColorOptions current = step.Settings is null ? new(PdfMacroColorMode.Grayscale) : PdfColorConversionMacro.ReadOptions(step);
