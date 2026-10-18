@@ -32,7 +32,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Tab no longer stops on hidden links, which screen readers announced as the window.
 - Screen readers and accessibility checkers no longer report empty text or the hidden parts of scroll bars as items on screen.
 - Each group of option buttons is one Tab stop that lands on the selected option, and the arrow keys move between its options.
-- Screen readers name the page list.
+- Screen readers name the page list. File-picker rows announce folder and file names.
 - Screen readers name the Enable keyboard shortcuts check box in the shortcuts card.
 - On the website, text on accent-colored buttons, tabs and highlights switches to white or near-black for contrast, so it is never white on yellow.
 - Theme names and the status, OCR, signing and stamp labels that were still in English are translated in every language.
