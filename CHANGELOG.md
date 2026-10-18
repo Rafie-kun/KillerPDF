@@ -12,6 +12,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - The website's MCP page has a Microsoft Store button for KillerMCP.
 
 ### Changed
+- The website's About page now includes KillerBench and KillerShot alongside the other four apps.
 - Dialog headings use Lacquer, the wordmark's app-name face, in place of Killer Sans. 98SE keeps Killer Sans.
 - The Light theme draws a softer shadow under the toolbars.
 - The website's top bar Download button uses the same font and height as the other top bar buttons.
