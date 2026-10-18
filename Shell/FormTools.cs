@@ -51,6 +51,9 @@ public partial class MainWindow
     private void ConvertXfaForm()
     {
         if (_doc is null || !EnsureEditable()) return;
+        var sourceViewer = ActiveViewer;
+        var sourceSession = sourceViewer.ActiveSessionExt;
+        var sourceDocument = _doc;
         string? snapshot = null;
         try
         {
@@ -59,6 +62,9 @@ public partial class MainWindow
                 Loc("Str_FormTools_XfaConfirm"), Loc("Str_FormTools_FlattenOutput"),
                 Loc("Str_FormTools_ConvertXfa"));
             if (review.ShowDialog() != true) return;
+            if (!ReferenceEquals(ActiveViewer, sourceViewer)
+                || !ReferenceEquals(sourceViewer.ActiveSessionExt, sourceSession)
+                || !ReferenceEquals(_doc, sourceDocument)) return;
             // Validate the chosen conversion before starting the document reload.
             _ = PdfXfaAcroFormConverter.Convert(PdfDocument.Open(File.ReadAllBytes(snapshot)),
                 review.Option ? PdfXfaConversionMode.Flattened : PdfXfaConversionMode.Editable);
@@ -73,8 +79,14 @@ public partial class MainWindow
     private void FlattenFormFields()
     {
         if (_doc is null || !EnsureEditable()) return;
+        var sourceViewer = ActiveViewer;
+        var sourceSession = sourceViewer.ActiveSessionExt;
+        var sourceDocument = _doc;
         if (KillerDialog.Show(this, Loc("Str_FormTools_FlattenConfirm"), Loc("Str_FormTools_Flatten"),
                 MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
+        if (!ReferenceEquals(ActiveViewer, sourceViewer)
+            || !ReferenceEquals(sourceViewer.ActiveSessionExt, sourceSession)
+            || !ReferenceEquals(_doc, sourceDocument)) return;
         string? snapshot = null;
         try
         {

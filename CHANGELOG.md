@@ -88,7 +88,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 ### Fixed
 - Layout export protects its original PDF after a tab switch, macro confirmation stays bound to its source, and finishing older background work preserves the newer operation's cancel control (#343).
-- Recognition and Transform stop if another PDF becomes active, and Transform works on single-page documents (#342).
+- Form recognition, flattening, XFA conversion, form-data import and repair dialogs stay with their original PDF when another file opens (#329, #330, #342).
+- Transform, orientation correction and scan straightening stop when another PDF becomes active, and Transform works on single-page documents (#436).
 - Form-data import accepts checkboxes whose unchecked appearance is omitted, and form flattening generates missing text appearances (#329, #342).
 - XFA conversion explains unsupported repeated field paths instead of failing with a duplicate-key error (#330).
 - The window opens fully on screen on a small or high-scaling display, or when its saved size came from a bigger monitor, instead of running off the edges.

@@ -65,6 +65,35 @@ it. Completion now requires the originating token across every shell caller and
 the OCR host interface. The same fixture now observes the newer token canceled.
 This checks routed key handling, not a physical keyboard.
 
+## Form, repair and scan handoffs
+
+The following actual-shell reproductions failed before correction:
+
+- Accepting form flattening after an external open removed the second PDF's
+  editable field. It now retains the field and its Grace value.
+- Accepting XFA conversion after an external open continued against the second,
+  non-XFA PDF and showed an error. It now leaves that PDF intact without error.
+- Accepting document-language repair after an external open applied the language
+  to the second PDF. Input and final review now retain their originating source.
+- Accepting a form-description edit after an external open changed the second
+  PDF's matching field. Target, input and final repair review now check origin.
+  Reading-order, table-header, metadata and output-intent handoffs use the same
+  origin check; their ordinary workflows remain covered by the combined fixture.
+- Accepting XFDF import after an external open changed the second PDF's matching
+  field value. Import now checks its source after file selection and review.
+- Orientation correction rotated the second PDF. This required checking the
+  actual saved-copy path, because an exchange snapshot omits viewer rotations.
+  The corrected interrupted case leaves its rotation at zero. The ordinary
+  sideways-text case rotates to 90 degrees, undoes to zero and redoes to 90.
+- Straightening replaced the second PDF's synthetic tilted scan. The corrected
+  interrupted case preserves its exact bytes. Ordinary straightening replaces
+  the tilted image; undo restores the original 800-pixel image and redo restores
+  the corrected image.
+
+Source checks use viewer, tab session and document identity. The guarded editing
+paths stop after an external open. Their own annotation-baking reload remains
+the expected source for subsequent processing.
+
 ## Verification and limits
 
 - App build: zero warnings and errors with existing references reused.
@@ -79,5 +108,8 @@ tests added to the suite. A stable public workflow automation seam is still
 needed for permanent shell concurrency coverage. These checks do not establish
 native keyboard behavior, screen-reader support, all themes or display scales.
 Additional isolated cases `--production-race`, `--operation-race` and
-`--macro-race` passed after their respective reproductions failed. Other document
-editing handoffs remain under review.
+`--macro-race` passed after their respective reproductions failed. Further cases
+passed: `--flatten-race`, `--xfa-race`, `--repair-race`, `--repair-input-race`,
+`--description-race`, `--import-race`, `--orientation-race`,
+`--orientation-normal`, `--straighten-race` and `--straighten-normal`.
+OCR and Scan to Text handoffs still need model-backed concurrency checks.

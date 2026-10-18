@@ -63,6 +63,12 @@ namespace KillerPDF
             CommitActiveTextBox();
             int[] pages = PagesForDocumentCommand();
             string label = Loc("Str_Pages_FixOrientation");
+            var sourceViewer = ActiveViewer;
+            var sourceSession = sourceViewer.ActiveSessionExt;
+            var sourceDocument = _doc;
+            bool IsSourceCurrent() => ReferenceEquals(ActiveViewer, sourceViewer)
+                && ReferenceEquals(sourceViewer.ActiveSessionExt, sourceSession)
+                && ReferenceEquals(_doc, sourceDocument);
             var turns = new Dictionary<int, int>();
             int unread = 0;
             Border? busy = null;
@@ -72,10 +78,12 @@ namespace KillerPDF
                 ct = BeginCancellableOp(label);
                 busy = ShowBusyOverlay(label);
                 await Dispatcher.Yield(DispatcherPriority.Background);
+                if (!IsSourceCurrent() || ct.IsCancellationRequested) return;
 
                 string file = _currentFile;
                 Dictionary<int, int?> fromText = await Task.Run(
                     () => PageArrangementService.UprightFromText(file, pages, ct), ct);
+                if (!IsSourceCurrent() || ct.IsCancellationRequested) return;
                 var scans = new List<int>();
                 foreach (int page in pages)
                 {
@@ -90,7 +98,9 @@ namespace KillerPDF
                     // The model download prompt must not sit under the busy overlay.
                     HideBusyOverlay(busy);
                     busy = null;
-                    if (!await EnsureOcrModelsReadyAsync())
+                    bool modelsReady = await EnsureOcrModelsReadyAsync();
+                    if (!IsSourceCurrent() || ct.IsCancellationRequested) return;
+                    if (!modelsReady)
                         unread += scans.Count;
                     else
                     {
@@ -101,6 +111,7 @@ namespace KillerPDF
                             ct.ThrowIfCancellationRequested();
                             SetBusyMessage(busy, $"{label}: {i + 1}/{scans.Count}");
                             await Dispatcher.Yield(DispatcherPriority.Background);
+                            if (!IsSourceCurrent() || ct.IsCancellationRequested) return;
                             var bitmap = RenderPageBitmap(scans[i], 1600);
                             if (bitmap is null) { unread++; continue; }
                             int width = bitmap.PixelWidth, height = bitmap.PixelHeight;
@@ -108,6 +119,7 @@ namespace KillerPDF
                             bitmap.CopyPixels(bgra, width * 4, 0);
                             int? turn = await Task.Run(
                                 () => PageArrangementService.ScanUprightTurn(ocr, bgra, width, height, ct), ct);
+                            if (!IsSourceCurrent() || ct.IsCancellationRequested) return;
                             if (turn is null) unread++;
                             else if (turn != 0) turns[scans[i]] = turn.Value;
                         }
@@ -137,7 +149,11 @@ namespace KillerPDF
                     documentUndo: documentUndo);
                 PageList.SelectedIndex = Math.Min(restore, PageList.Items.Count - 1);
                 FitToPage();
-                _ = Dispatcher.BeginInvoke(DispatcherPriority.Loaded, (Action)(() => FitToPage()));
+                _ = Dispatcher.BeginInvoke(DispatcherPriority.Loaded, (Action)(() =>
+                {
+                    if (ReferenceEquals(ActiveViewer, sourceViewer)
+                        && ReferenceEquals(sourceViewer.ActiveSessionExt, sourceSession)) FitToPage();
+                }));
                 SetStatus(string.Format(Loc("Str_Pages_Oriented"), turns.Count) + skipped);
             }
             catch (OperationCanceledException)
@@ -170,6 +186,7 @@ namespace KillerPDF
             CommitActiveTextBox();
             int[] pages = PagesForDocumentCommand();
             string label = Loc("Str_Pages_Straighten");
+            var isSourceCurrent = CaptureDocumentOrigin();
             Border? busy = null;
             CancellationToken ct = default;
             try
@@ -178,9 +195,11 @@ namespace KillerPDF
                 busy = ShowBusyOverlay(label);
                 await Dispatcher.Yield(DispatcherPriority.Background);
 
+                if (!isSourceCurrent() || ct.IsCancellationRequested) return;
                 string file = _currentFile;
                 var (scans, withText) = await Task.Run(
                     () => PageArrangementService.ScansWithoutText(file, pages, ct), ct);
+                if (!isSourceCurrent() || ct.IsCancellationRequested) return;
                 string skipped = withText > 0 ? " " + string.Format(Loc("Str_Pages_TextLayerSkipped"), withText) : "";
 
                 var tilts = new Dictionary<int, double>();
@@ -189,12 +208,14 @@ namespace KillerPDF
                     ct.ThrowIfCancellationRequested();
                     SetBusyMessage(busy, $"{label}: {i + 1}/{scans.Count}");
                     await Dispatcher.Yield(DispatcherPriority.Background);
+                    if (!isSourceCurrent() || ct.IsCancellationRequested) return;
                     var preview = RenderPageBitmap(scans[i], 1600);
                     if (preview is null) continue;
                     int width = preview.PixelWidth, height = preview.PixelHeight;
                     var bgra = new byte[width * height * 4];
                     preview.CopyPixels(bgra, width * 4, 0);
                     double tilt = await Task.Run(() => PageArrangementService.MeasureTilt(bgra, width, height), ct);
+                    if (!isSourceCurrent() || ct.IsCancellationRequested) return;
                     if (Math.Abs(tilt) >= PageArrangementService.MinimumTilt) tilts[scans[i]] = tilt;
                 }
                 if (tilts.Count == 0)
@@ -213,10 +234,12 @@ namespace KillerPDF
                     ct.ThrowIfCancellationRequested();
                     SetBusyMessage(busy, $"{label}: {++done}/{tilts.Count}");
                     await Dispatcher.Yield(DispatcherPriority.Background);
+                    if (!isSourceCurrent() || ct.IsCancellationRequested) return;
 
                     // Annotations drawn on the page turn with it, the way the Transform tool
                     // bakes them, so they stay where they were placed on the scan.
                     string? burned = BurnPageAnnotationsToTemp(page);
+                    isSourceCurrent = CaptureDocumentOrigin();
                     if (burned is not null) bakedAnnotationPages.Add(page);
                     var (pageWidth, pageHeight) = engineSession.VisualPageSize(page, _pageRotations);
                     int budget = Math.Clamp((int)Math.Ceiling(Math.Max(pageWidth, pageHeight) * 300 / 72.0), 1000, 6000);

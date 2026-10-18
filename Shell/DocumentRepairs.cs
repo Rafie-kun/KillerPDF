@@ -19,14 +19,15 @@ public partial class MainWindow
 
     private void SetPreflightLanguage()
     {
+        var isSourceCurrent = CaptureDocumentOrigin();
         var input = new DocumentValuesDialog(this, Loc("Str_Repair_Language"),
             (Loc("Str_Repair_Language"), ""));
-        if (input.ShowDialog() != true) return;
+        if (input.ShowDialog() != true || !isSourceCurrent()) return;
         ReviewDocumentRepair(Loc("Str_Repair_Language") + ": " + input.Values[0], document =>
             PdfPreflightCorrectionPlan.SetDocumentLanguage(document, input.Values[0]).Apply());
     }
 
-    private void FillMissingMetadata() => WithRepairDocument(document =>
+    private void FillMissingMetadata() => WithRepairDocument((document, isSourceCurrent) =>
     {
         var info = PdfDocumentInformation.Read(document);
         var commands = new[]
@@ -41,7 +42,7 @@ public partial class MainWindow
             (item.Item1, (Action)(() =>
             {
                 var input = new DocumentValuesDialog(this, Loc("Str_Repair_Metadata"), (Loc(item.Item1), ""));
-                if (input.ShowDialog() != true) return;
+                if (input.ShowDialog() != true || !isSourceCurrent()) return;
                 ReviewDocumentRepair(Loc(item.Item1) + ": " + input.Values[0], document =>
                     PdfPreflightCorrectionPlan.SetDocumentMetadata(document, item.Item2, input.Values[0]).Apply());
             }))).ToArray());
@@ -63,14 +64,15 @@ public partial class MainWindow
 
     private void AddOutputIntent()
     {
+        var isSourceCurrent = CaptureDocumentOrigin();
         var picker = new Controls.FileDialog(Controls.FileDialogMode.Open)
         {
             Title = Loc("Str_Repair_OutputIntent"), Filter = "ICC|*.icc;*.icm"
         };
-        if (picker.ShowDialog(this) != true) return;
+        if (picker.ShowDialog(this) != true || !isSourceCurrent()) return;
         var input = new DocumentValuesDialog(this, Loc("Str_Repair_OutputIntent"),
             (Loc("Str_Repair_OutputCondition"), Path.GetFileNameWithoutExtension(picker.FileName)));
-        if (input.ShowDialog() != true) return;
+        if (input.ShowDialog() != true || !isSourceCurrent()) return;
         try
         {
             PdfIccProfile profile = PdfIccProfile.Load(File.ReadAllBytes(picker.FileName));
@@ -83,6 +85,7 @@ public partial class MainWindow
     private void ReviewDocumentRepair(string title, Func<PdfDocument, byte[]> build, bool accessibility = false)
     {
         if (_doc is null || !EnsureEditable()) return;
+        var isSourceCurrent = CaptureDocumentOrigin();
         string? snapshot = null;
         try
         {
@@ -103,7 +106,7 @@ public partial class MainWindow
             var review = new ImportReviewDialog(this, title, title + "\n\n" + Loc("Str_Repair_Before") + "\n" + before
                 + "\n\n" + Loc("Str_Repair_After") + "\n" + report,
                 null, Loc("Str_Repair_Apply"));
-            if (review.ShowDialog() != true) return;
+            if (review.ShowDialog() != true || !isSourceCurrent()) return;
             ApplyFormWorkflow(path => PdfEngineIntegration.ApplyDocumentRepair(path, build), snapshot);
         }
         catch (Exception error) { ShowExchangeError(error); }

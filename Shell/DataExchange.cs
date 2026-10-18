@@ -22,9 +22,10 @@ public partial class MainWindow
     private void OpenExchangeCommands(string titleKey, params (string Label, Action Run)[] commands)
     {
         if (_doc is null) { SetStatus(Loc("Str_Msg_OpenFirst")); return; }
+        var isSourceCurrent = CaptureDocumentOrigin();
         var dialog = new DocumentCommandDialog(this, Loc(titleKey),
             commands.Select(command => (Loc(command.Label), command.Run)).ToArray());
-        if (dialog.ShowDialog() == true) dialog.Command?.Invoke();
+        if (dialog.ShowDialog() == true && isSourceCurrent()) dialog.Command?.Invoke();
     }
 
     private string CreateExchangeSnapshot()
@@ -81,13 +82,14 @@ public partial class MainWindow
     private void ImportExchangeData(bool bookmarks)
     {
         if (_doc is null || !EnsureEditable()) return;
+        var isSourceCurrent = CaptureDocumentOrigin();
         string title = Loc(bookmarks ? "Str_Exchange_ImportBookmarks" : "Str_Exchange_ImportForms");
         var picker = new Controls.FileDialog(Controls.FileDialogMode.Open)
         {
             Title = title,
             Filter = bookmarks ? "JSON|*.json" : "FDF / XFDF|*.fdf;*.xfdf"
         };
-        if (picker.ShowDialog(this) != true) return;
+        if (picker.ShowDialog(this) != true || !isSourceCurrent()) return;
         string? snapshot = null;
         try
         {
@@ -119,7 +121,7 @@ public partial class MainWindow
             }
             var review = new ImportReviewDialog(this, title, report,
                 Loc(bookmarks ? "Str_Exchange_ReplaceBookmarks" : "Str_Exchange_Flatten"));
-            if (review.ShowDialog() != true) return;
+            if (review.ShowDialog() != true || !isSourceCurrent()) return;
             UndoEntry? undo = CaptureDocumentUndo();
             if (!bookmarks && undo is { } captured)
                 undo = captured with { DocBytes = File.ReadAllBytes(snapshot) };

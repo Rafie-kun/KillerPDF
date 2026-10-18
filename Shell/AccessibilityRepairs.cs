@@ -16,14 +16,14 @@ public partial class MainWindow
         ("Str_Repair_ReadingOrder", RepairReadingOrder),
         ("Str_Repair_TableHeader", RepairTableHeader));
 
-    private void WithRepairDocument(Action<PdfDocument> action)
+    private void WithRepairDocument(Action<PdfDocument, Func<bool>> action)
     {
         if (_doc is null || !EnsureEditable()) return;
         string? snapshot = null;
         try
         {
             snapshot = CreateExchangeSnapshot();
-            action(PdfDocument.Open(File.ReadAllBytes(snapshot)));
+            action(PdfDocument.Open(File.ReadAllBytes(snapshot)), CaptureDocumentOrigin());
         }
         catch (Exception error) { ShowExchangeError(error); }
         finally { if (snapshot is not null) File.Delete(snapshot); }
@@ -39,7 +39,7 @@ public partial class MainWindow
 
     private string RepairPageLabel(int page) => Loc("Str_AutoBookmarks_Page") + " " + (page + 1);
 
-    private void RepairAccessibilityDescriptions() => WithRepairDocument(document =>
+    private void RepairAccessibilityDescriptions() => WithRepairDocument((document, isSourceCurrent) =>
     {
         var targets = new List<(string Label, Func<PdfDocument, string, byte[]> Apply)>();
         int pages = PdfDocumentInformation.Read(document).PageCount;
@@ -76,10 +76,10 @@ public partial class MainWindow
                 PdfAccessibilityRepair.PreviewFigureAlternateDescription(doc, number, description)).Document.ToArray()));
         }
         int selected = SelectRepairTarget("Str_Repair_Descriptions", targets.Select(item => item.Label));
-        if (selected < 0) return;
+        if (selected < 0 || !isSourceCurrent()) return;
         var target = targets[selected];
         var input = new DocumentValuesDialog(this, target.Label, (Loc("Str_Attachment_Description"), ""));
-        if (input.ShowDialog() != true) return;
+        if (input.ShowDialog() != true || !isSourceCurrent()) return;
         ReviewDocumentRepair(target.Label + ": " + input.Values[0],
             doc => target.Apply(doc, input.Values[0]), accessibility: true);
     });
@@ -155,18 +155,19 @@ public partial class MainWindow
         }
     }
 
-    private void RepairReadingOrder() => WithRepairDocument(document =>
+    private void RepairReadingOrder() => WithRepairDocument((document, isSourceCurrent) =>
     {
         var nodes = ReadRepairStructure(document);
         var containers = nodes.Where(item => item.Children.Length > 1
             && item.Children.Distinct().Count() == item.Children.Length
             && item.Children.All(number => nodes.Any(node => node.Number == number))).ToArray();
         int selected = SelectRepairTarget("Str_Repair_ReadingOrder", containers.Select(item => item.Label));
-        if (selected < 0) return;
+        if (selected < 0 || !isSourceCurrent()) return;
         var parent = containers[selected];
         var reorder = new DocumentListDialog(this, Loc("Str_Repair_ReadingOrder"), parent.Children.Select(number =>
             nodes.First(item => item.Number == number).Label), reorder: true);
-        if (reorder.ShowDialog() != true || reorder.Order.SequenceEqual(Enumerable.Range(0, parent.Children.Length))) return;
+        if (reorder.ShowDialog() != true || !isSourceCurrent()
+            || reorder.Order.SequenceEqual(Enumerable.Range(0, parent.Children.Length))) return;
         int[] order = reorder.Order.Select(index => parent.Children[index]).ToArray();
         string description = Loc("Str_Repair_ReadingOrder") + ": " + parent.Label + "\n"
             + string.Join("\n", order.Select((number, index) => (index + 1) + ". " + nodes.First(item => item.Number == number).Label));
@@ -175,20 +176,20 @@ public partial class MainWindow
                 PdfAccessibilityRepair.PreviewReadingOrder(doc, parent.Number, order)).Document.ToArray(), accessibility: true);
     });
 
-    private void RepairTableHeader() => WithRepairDocument(document =>
+    private void RepairTableHeader() => WithRepairDocument((document, isSourceCurrent) =>
     {
         var missing = PdfAccessibilityInspector.Inspect(document).Findings.Where(item =>
             item.Code == PdfAccessibilityFindingCode.MissingTableHeader).Select(item => item.ObjectNumber).ToHashSet();
         var cells = ReadRepairStructure(document).Where(item => item.Role == "TD" && item.Table.HasValue
             && missing.Contains(item.Table)).ToArray();
         int selected = SelectRepairTarget("Str_Repair_TableHeader", cells.Select(item => item.Label));
-        if (selected < 0) return;
+        if (selected < 0 || !isSourceCurrent()) return;
         var cell = cells[selected];
         var scopes = new[] { PdfAccessibilityTableHeaderScope.Row, PdfAccessibilityTableHeaderScope.Column,
             PdfAccessibilityTableHeaderScope.Both };
         int scope = SelectRepairTarget("Str_Repair_TableHeader", new[] { Loc("Str_Repair_Row"),
             Loc("Str_Repair_Column"), Loc("Str_Repair_Both") });
-        if (scope < 0) return;
+        if (scope < 0 || !isSourceCurrent()) return;
         string scopeLabel = Loc(new[] { "Str_Repair_Row", "Str_Repair_Column", "Str_Repair_Both" }[scope]);
         ReviewDocumentRepair(Loc("Str_Repair_TableHeader") + ": " + cell.Label + " (" + scopeLabel + ")", doc =>
             PdfAccessibilityRepair.ApplyTableHeader(doc, PdfAccessibilityRepair.PreviewTableHeader(doc,
