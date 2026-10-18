@@ -57,6 +57,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Added Distance, Perimeter, Area and Angle to the Measure tool (Shift+M steps through them), with snapping to page lines and corners, a drawing scale per page set by ratio or by drawing a line, imperial and metric units, and a Measurements report (Ctrl+Shift+D, Y). Measurements are saved as standard PDF measurement annotations that can be moved, adjusted, restyled and deleted, and `--measurements` reports them from the command line.
 - Added Comments, Attachments, Layers and Signatures panels to the sidebar rail beside Pages and Outline. Each loads in the background, and Comments can list comments, measurements or both.
 - Added top and bottom positions for the sidebar, picked from its right-click menu like left and right. At the top or bottom the rail runs along the strip with the open panel's name in it, the page thumbnails sit in a row that scrolls sideways, and Outline and the other panels fill even columns, with long titles cut short and scrolling into view on hover. Ctrl+F9 swaps the rail's two ends, and Shift+F9 steps through left, right, top and bottom.
+- The website's About page lists KillerBench and KillerShot under Also try.
 
 ### Changed
 - Replaced PDFium, Docnet.Core and PdfPig with the engine for rendering, search, selection, copying and text editing, and built the JPEG 2000 decoder from vendored CoreJ2K sources. The engine keeps the previous renderer's page dimensions for viewing and image export.
