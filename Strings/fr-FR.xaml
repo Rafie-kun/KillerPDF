@@ -1660,4 +1660,12 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Exchange_ReplaceBookmarks">Remplacer les signets existants</sys:String>
     <sys:String x:Key="Str_Exchange_Flatten">Aplatir les champs après l’importation</sys:String>
     <sys:String x:Key="Str_Exchange_Preview">Champs correspondants : {0} ; champs ignorés : {1} ; commentaires : {2}.</sys:String>
+    <sys:String x:Key="Str_FormTools_Recognize">Reconnaître les champs de formulaire</sys:String>
+    <sys:String x:Key="Str_FormTools_ConvertXfa">Convertir le formulaire XFA</sys:String>
+    <sys:String x:Key="Str_FormTools_Flatten">Aplatir les champs du formulaire</sys:String>
+    <sys:String x:Key="Str_FormTools_None">Aucun nouveau champ de formulaire trouvé.</sys:String>
+    <sys:String x:Key="Str_FormTools_InvalidNames">Sélectionnez au moins un champ. Les noms sélectionnés doivent être renseignés et uniques.</sys:String>
+    <sys:String x:Key="Str_FormTools_XfaConfirm">Convertir ce formulaire XFA en champs de formulaire standard ?</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenOutput">Aplatir les champs convertis</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenConfirm">Aplatir tous les champs ? Leurs valeurs feront partie du contenu des pages et ne pourront plus être saisies.</sys:String>
 </ResourceDictionary>

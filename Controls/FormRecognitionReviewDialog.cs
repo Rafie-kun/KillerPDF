@@ -1,0 +1,169 @@
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using KillerPdf.Engine.Documents;
+using KillerPdf.Engine.Rendering;
+using KillerPDF.Services;
+
+namespace KillerPDF;
+
+internal sealed class FormRecognitionReviewDialog : Window
+{
+    private readonly PdfDocument _document;
+    private readonly PdfFormRecognitionReview _review;
+    private readonly List<(PdfFormFieldProposal Proposal, CheckBox Include, TextBox Name)> _rows = [];
+    private readonly Canvas _preview = new();
+    private readonly Dictionary<int, BitmapSource> _pages = [];
+    private string? _shownProposalId;
+    internal PdfFormRecognitionReview? Result { get; private set; }
+
+    internal FormRecognitionReviewDialog(Window owner, PdfDocument document, PdfFormRecognitionReview review)
+    {
+        _document = document;
+        _review = review;
+        Title = "KillerPDF - " + L("Str_FormTools_Recognize");
+        Width = 1000;
+        Height = 660;
+        MinWidth = 700;
+        MinHeight = 420;
+        UseLayoutRounding = true;
+        DialogChrome.Configure(this, owner, resizable: true);
+        var body = new DockPanel { Margin = new Thickness(20, 6, 20, 16) };
+        var cancel = UiKit.Make(L("Str_Btn_Cancel"), accent: false);
+        cancel.IsCancel = true;
+        cancel.Click += (_, _) => Close();
+        var apply = UiKit.Make(L("Str_AutoBookmarks_AddSelected"), accent: true);
+        apply.IsDefault = true;
+        apply.Click += (_, _) => Commit();
+        var buttons = UiKit.ButtonRow(cancel, apply);
+        buttons.Margin = new Thickness(0, 12, 0, 0);
+        DockPanel.SetDock(buttons, Dock.Bottom);
+        body.Children.Add(buttons);
+        var columns = new Grid();
+        columns.ColumnDefinitions.Add(new ColumnDefinition());
+        columns.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(16) });
+        columns.ColumnDefinitions.Add(new ColumnDefinition());
+        columns.Children.Add(new Viewbox { Child = _preview, Stretch = Stretch.Uniform });
+        var list = new StackPanel();
+        foreach (PdfFormFieldProposal proposal in review.Proposals)
+        {
+            var row = new Grid { Margin = new Thickness(0, 2, 0, 4) };
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(34) });
+            row.ColumnDefinitions.Add(new ColumnDefinition());
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(64) });
+            var include = UiKit.CheckBox("");
+            include.IsChecked = true;
+            System.Windows.Automation.AutomationProperties.SetName(include,
+                L("Str_AutoBookmarks_Include") + " " + proposal.SuggestedName);
+            var name = UiKit.Field();
+            name.Text = proposal.SuggestedName;
+            System.Windows.Automation.AutomationProperties.SetName(name, L("Str_FieldPreset_Name"));
+            var page = new TextBlock
+            {
+                Text = (proposal.PageIndex + 1).ToString(),
+                Foreground = UiKit.Brush("TextBrush"),
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            page.ToolTip = L("Str_AutoBookmarks_Page");
+            Grid.SetColumn(name, 1);
+            Grid.SetColumn(page, 2);
+            row.Children.Add(include);
+            row.Children.Add(name);
+            row.Children.Add(page);
+            name.GotKeyboardFocus += (_, _) => ShowProposal(proposal);
+            include.GotKeyboardFocus += (_, _) => ShowProposal(proposal);
+            row.MouseEnter += (_, _) => ShowProposal(proposal);
+            list.Children.Add(row);
+            _rows.Add((proposal, include, name));
+        }
+        var scroll = new ScrollViewer { Content = list, VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
+        Grid.SetColumn(scroll, 2);
+        columns.Children.Add(scroll);
+        body.Children.Add(columns);
+        Content = DialogChrome.Frame(this, owner, Title, Close, body);
+        Loaded += (_, _) =>
+        {
+            if (_rows.Count > 0) { _rows[0].Name.Focus(); ShowProposal(_rows[0].Proposal); }
+        };
+    }
+
+    private void ShowProposal(PdfFormFieldProposal proposal)
+    {
+        if (_shownProposalId == proposal.Id) return;
+        try { RenderProposal(proposal); _shownProposalId = proposal.Id; }
+        catch (Exception error)
+        {
+            _preview.Children.Clear();
+            _preview.Children.Add(new TextBlock
+            {
+                Text = L("Str_DocumentTools_Failed") + "\n" + error.Message,
+                TextWrapping = TextWrapping.Wrap, Width = 500,
+                Foreground = UiKit.Brush("TextBrush")
+            });
+        }
+    }
+
+    private void RenderProposal(PdfFormFieldProposal proposal)
+    {
+        PdfPageInformation page = PdfPageInformation.Read(_document)[proposal.PageIndex];
+        PdfPageBoxBounds crop = PdfPageBoxInformation.Read(_document)[proposal.PageIndex].CropBox;
+        if (!_pages.TryGetValue(proposal.PageIndex, out BitmapSource? bitmap))
+        {
+            bool sideways = page.Rotation % 180 != 0;
+            double ratio = sideways ? page.Width / page.Height : page.Height / page.Width;
+            var rendered = new PdfPageRenderer(_document).Render(proposal.PageIndex,
+                new PdfRenderOptions(720, Math.Max(1, (int)Math.Round(720 * ratio))));
+            bitmap = BitmapSource.Create(rendered.Width, rendered.Height, 96, 96, PixelFormats.Bgra32,
+                null, rendered.Pixels.ToArray(), rendered.Width * 4);
+            bitmap.Freeze();
+            if (_pages.Count >= 3) _pages.Clear();
+            _pages[proposal.PageIndex] = bitmap;
+        }
+        _preview.Width = bitmap.PixelWidth;
+        _preview.Height = bitmap.PixelHeight;
+        _preview.Children.Clear();
+        _preview.Children.Add(new Image { Source = bitmap, Width = bitmap.PixelWidth, Height = bitmap.PixelHeight });
+        PdfContentBounds box = proposal.Bounds;
+        Rect rect = RedactionGeometry.PageToCanvas(box.Left - crop.Left, box.Bottom - crop.Bottom,
+            box.Right - crop.Left, box.Top - crop.Bottom, page.Width, page.Height,
+            bitmap.PixelWidth, bitmap.PixelHeight, page.Rotation);
+        var outline = new System.Windows.Shapes.Rectangle
+        {
+            Width = Math.Max(2, rect.Width), Height = Math.Max(2, rect.Height),
+            StrokeThickness = 3
+        };
+        outline.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, "SelectionAccent");
+        Canvas.SetLeft(outline, rect.Left);
+        Canvas.SetTop(outline, rect.Top);
+        _preview.Children.Add(outline);
+    }
+
+    private void Commit()
+    {
+        var selected = _rows.Where(row => row.Include.IsChecked == true).ToArray();
+        if (selected.Length == 0 || selected.Any(row => string.IsNullOrWhiteSpace(row.Name.Text))
+            || selected.Select(row => row.Name.Text.Trim()).Distinct(StringComparer.Ordinal).Count() != selected.Length)
+        {
+            KillerDialog.Show(this, L("Str_FormTools_InvalidNames"), Title,
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+        PdfFormRecognitionReview result = _review;
+        foreach (var row in _rows)
+            result = row.Include.IsChecked == true
+                ? result.Accept(row.Proposal.Id, name: row.Name.Text.Trim()) : result.Reject(row.Proposal.Id);
+        try { _ = result.ApplyAccepted(_document); }
+        catch (Exception error)
+        {
+            KillerDialog.Show(this, L("Str_DocumentTools_Failed") + "\n" + error.Message,
+                Title, MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+        Result = result;
+        DialogResult = true;
+    }
+
+    private static string L(string key) => Application.Current.TryFindResource(key) as string ?? key;
+}

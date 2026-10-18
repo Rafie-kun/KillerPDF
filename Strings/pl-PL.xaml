@@ -1648,4 +1648,12 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Exchange_ReplaceBookmarks">Zastąp istniejące zakładki</sys:String>
     <sys:String x:Key="Str_Exchange_Flatten">Spłaszcz pola formularza po imporcie</sys:String>
     <sys:String x:Key="Str_Exchange_Preview">Pasujące pola: {0}; pominięte pola: {1}; komentarze: {2}.</sys:String>
+    <sys:String x:Key="Str_FormTools_Recognize">Rozpoznaj pola formularza</sys:String>
+    <sys:String x:Key="Str_FormTools_ConvertXfa">Konwertuj formularz XFA</sys:String>
+    <sys:String x:Key="Str_FormTools_Flatten">Spłaszcz pola formularza</sys:String>
+    <sys:String x:Key="Str_FormTools_None">Nie znaleziono nowych pól.</sys:String>
+    <sys:String x:Key="Str_FormTools_InvalidNames">Wybierz co najmniej jedno pole. Nazwy wybranych pól muszą być niepuste i unikatowe.</sys:String>
+    <sys:String x:Key="Str_FormTools_XfaConfirm">Przekonwertować ten formularz XFA na standardowe pola?</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenOutput">Spłaszcz przekonwertowane pola</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenConfirm">Spłaszczyć wszystkie pola? Ich wartości staną się treścią strony i nie będzie można ich wypełniać.</sys:String>
 </ResourceDictionary>

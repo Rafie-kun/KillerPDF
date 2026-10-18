@@ -1644,4 +1644,12 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Exchange_ReplaceBookmarks">替换现有书签</sys:String>
     <sys:String x:Key="Str_Exchange_Flatten">导入后拼合表单字段</sys:String>
     <sys:String x:Key="Str_Exchange_Preview">匹配字段：{0}；跳过字段：{1}；批注：{2}。</sys:String>
+    <sys:String x:Key="Str_FormTools_Recognize">识别表单字段</sys:String>
+    <sys:String x:Key="Str_FormTools_ConvertXfa">转换XFA表单</sys:String>
+    <sys:String x:Key="Str_FormTools_Flatten">拼合表单字段</sys:String>
+    <sys:String x:Key="Str_FormTools_None">未找到新的表单字段。</sys:String>
+    <sys:String x:Key="Str_FormTools_InvalidNames">请至少选择一个字段。所选字段的名称不能为空或重复。</sys:String>
+    <sys:String x:Key="Str_FormTools_XfaConfirm">将此XFA表单转换为标准表单字段？</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenOutput">拼合转换后的字段</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenConfirm">拼合所有表单字段？字段值将成为页面内容，无法再填写。</sys:String>
 </ResourceDictionary>

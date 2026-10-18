@@ -1640,4 +1640,12 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Exchange_ReplaceBookmarks">Mevcut yer imlerini değiştir</sys:String>
     <sys:String x:Key="Str_Exchange_Flatten">İçe aktardıktan sonra form alanlarını düzleştir</sys:String>
     <sys:String x:Key="Str_Exchange_Preview">Eşleşen alanlar: {0}; atlanan alanlar: {1}; yorumlar: {2}.</sys:String>
+    <sys:String x:Key="Str_FormTools_Recognize">Form alanlarını tanı</sys:String>
+    <sys:String x:Key="Str_FormTools_ConvertXfa">XFA formunu dönüştür</sys:String>
+    <sys:String x:Key="Str_FormTools_Flatten">Form alanlarını düzleştir</sys:String>
+    <sys:String x:Key="Str_FormTools_None">Yeni form alanı bulunamadı.</sys:String>
+    <sys:String x:Key="Str_FormTools_InvalidNames">En az bir alan seçin. Seçilen alan adları boş olmamalı ve benzersiz olmalıdır.</sys:String>
+    <sys:String x:Key="Str_FormTools_XfaConfirm">Bu XFA formu standart form alanlarına dönüştürülsün mü?</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenOutput">Dönüştürülen alanları düzleştir</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenConfirm">Tüm form alanları düzleştirilsin mi? Değerler sayfa içeriğine dönüşür ve artık doldurulamaz.</sys:String>
 </ResourceDictionary>

@@ -1660,4 +1660,12 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Exchange_ReplaceBookmarks">Replace existing bookmarks</sys:String>
     <sys:String x:Key="Str_Exchange_Flatten">Flatten form fields after importing</sys:String>
     <sys:String x:Key="Str_Exchange_Preview">Matching fields: {0}; skipped fields: {1}; comments: {2}.</sys:String>
+    <sys:String x:Key="Str_FormTools_Recognize">Recognize form fields</sys:String>
+    <sys:String x:Key="Str_FormTools_ConvertXfa">Convert XFA form</sys:String>
+    <sys:String x:Key="Str_FormTools_Flatten">Flatten form fields</sys:String>
+    <sys:String x:Key="Str_FormTools_None">No new form fields were found.</sys:String>
+    <sys:String x:Key="Str_FormTools_InvalidNames">Select at least one field. Selected field names must be nonempty and unique.</sys:String>
+    <sys:String x:Key="Str_FormTools_XfaConfirm">Convert this XFA form to standard form fields?</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenOutput">Flatten the converted fields</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenConfirm">Flatten all form fields? Their values will become page content and can no longer be filled in.</sys:String>
 </ResourceDictionary>

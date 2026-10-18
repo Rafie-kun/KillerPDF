@@ -1649,4 +1649,12 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Exchange_ReplaceBookmarks">Vorhandene Lesezeichen ersetzen</sys:String>
     <sys:String x:Key="Str_Exchange_Flatten">Formularfelder nach dem Import reduzieren</sys:String>
     <sys:String x:Key="Str_Exchange_Preview">Passende Felder: {0}; übersprungene Felder: {1}; Kommentare: {2}.</sys:String>
+    <sys:String x:Key="Str_FormTools_Recognize">Formularfelder erkennen</sys:String>
+    <sys:String x:Key="Str_FormTools_ConvertXfa">XFA-Formular konvertieren</sys:String>
+    <sys:String x:Key="Str_FormTools_Flatten">Formularfelder reduzieren</sys:String>
+    <sys:String x:Key="Str_FormTools_None">Es wurden keine neuen Formularfelder gefunden.</sys:String>
+    <sys:String x:Key="Str_FormTools_InvalidNames">Wählen Sie mindestens ein Feld. Ausgewählte Feldnamen müssen ausgefüllt und eindeutig sein.</sys:String>
+    <sys:String x:Key="Str_FormTools_XfaConfirm">Dieses XFA-Formular in Standardformularfelder konvertieren?</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenOutput">Konvertierte Felder reduzieren</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenConfirm">Alle Formularfelder reduzieren? Ihre Werte werden zu Seiteninhalt und können nicht mehr ausgefüllt werden.</sys:String>
 </ResourceDictionary>

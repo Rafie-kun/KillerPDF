@@ -1660,4 +1660,12 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Exchange_ReplaceBookmarks">Thay thế dấu trang hiện có</sys:String>
     <sys:String x:Key="Str_Exchange_Flatten">Làm phẳng các trường biểu mẫu sau khi nhập</sys:String>
     <sys:String x:Key="Str_Exchange_Preview">Trường khớp: {0}; trường bỏ qua: {1}; chú thích: {2}.</sys:String>
+    <sys:String x:Key="Str_FormTools_Recognize">Nhận dạng trường biểu mẫu</sys:String>
+    <sys:String x:Key="Str_FormTools_ConvertXfa">Chuyển đổi biểu mẫu XFA</sys:String>
+    <sys:String x:Key="Str_FormTools_Flatten">Làm phẳng trường biểu mẫu</sys:String>
+    <sys:String x:Key="Str_FormTools_None">Không tìm thấy trường mới.</sys:String>
+    <sys:String x:Key="Str_FormTools_InvalidNames">Chọn ít nhất một trường. Tên các trường đã chọn không được trống hoặc trùng nhau.</sys:String>
+    <sys:String x:Key="Str_FormTools_XfaConfirm">Chuyển biểu mẫu XFA này thành các trường tiêu chuẩn?</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenOutput">Làm phẳng các trường đã chuyển đổi</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenConfirm">Làm phẳng mọi trường? Các giá trị sẽ thành nội dung trang và không thể điền nữa.</sys:String>
 </ResourceDictionary>

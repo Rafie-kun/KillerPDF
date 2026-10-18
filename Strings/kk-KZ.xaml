@@ -1663,4 +1663,12 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_Exchange_ReplaceBookmarks">Бар бетбелгілерді ауыстыру</sys:String>
     <sys:String x:Key="Str_Exchange_Flatten">Импорттағаннан кейін пішін өрістерін бет мазмұнымен біріктіру</sys:String>
     <sys:String x:Key="Str_Exchange_Preview">Сәйкес өрістер: {0}; өткізіп жіберілетін өрістер: {1}; түсініктемелер: {2}.</sys:String>
+    <sys:String x:Key="Str_FormTools_Recognize">Пішін өрістерін тану</sys:String>
+    <sys:String x:Key="Str_FormTools_ConvertXfa">XFA пішінін түрлендіру</sys:String>
+    <sys:String x:Key="Str_FormTools_Flatten">Пішін өрістерін бет мазмұнымен біріктіру</sys:String>
+    <sys:String x:Key="Str_FormTools_None">Жаңа пішін өрістері табылмады.</sys:String>
+    <sys:String x:Key="Str_FormTools_InvalidNames">Кемінде бір өрісті таңдаңыз. Таңдалған өрістердің атаулары бос болмауы және бірегей болуы керек.</sys:String>
+    <sys:String x:Key="Str_FormTools_XfaConfirm">Осы XFA пішінін стандартты пішін өрістеріне түрлендіру керек пе?</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenOutput">Түрлендірілген өрістерді бет мазмұнымен біріктіру</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenConfirm">Барлық пішін өрістерін біріктіру керек пе? Олардың мәндері бет мазмұнына айналады және енді толтырылмайды.</sys:String>
 </ResourceDictionary>

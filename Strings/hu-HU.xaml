@@ -1647,4 +1647,12 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Exchange_ReplaceBookmarks">Meglévő könyvjelzők cseréje</sys:String>
     <sys:String x:Key="Str_Exchange_Flatten">Űrlapmezők beolvasztása az importálás után</sys:String>
     <sys:String x:Key="Str_Exchange_Preview">Egyező mezők: {0}; kihagyott mezők: {1}; megjegyzések: {2}.</sys:String>
+    <sys:String x:Key="Str_FormTools_Recognize">Űrlapmezők felismerése</sys:String>
+    <sys:String x:Key="Str_FormTools_ConvertXfa">XFA-űrlap átalakítása</sys:String>
+    <sys:String x:Key="Str_FormTools_Flatten">Űrlapmezők beolvasztása</sys:String>
+    <sys:String x:Key="Str_FormTools_None">Nem találhatók új űrlapmezők.</sys:String>
+    <sys:String x:Key="Str_FormTools_InvalidNames">Válasszon legalább egy mezőt. A kijelölt mezők neve nem lehet üres vagy ismétlődő.</sys:String>
+    <sys:String x:Key="Str_FormTools_XfaConfirm">Átalakítja ezt az XFA-űrlapot szabványos űrlapmezőkké?</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenOutput">Átalakított mezők beolvasztása</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenConfirm">Beolvasztja az összes mezőt? Az értékek az oldal tartalmává válnak, és többé nem tölthetők ki.</sys:String>
 </ResourceDictionary>

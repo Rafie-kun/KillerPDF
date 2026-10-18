@@ -10,7 +10,10 @@ public partial class MainWindow
 {
     private void OpenFormDataTools() => OpenExchangeCommands("Str_DocumentTools_FormData",
         ("Str_Exchange_ExportForms", () => ExportExchangeData(bookmarks: false)),
-        ("Str_Exchange_ImportForms", () => ImportExchangeData(bookmarks: false)));
+        ("Str_Exchange_ImportForms", () => ImportExchangeData(bookmarks: false)),
+        ("Str_FormTools_Recognize", RecognizeFormFields),
+        ("Str_FormTools_ConvertXfa", ConvertXfaForm),
+        ("Str_FormTools_Flatten", FlattenFormFields));
 
     private void OpenBookmarkDataTools() => OpenExchangeCommands("Str_DocumentTools_BookmarkData",
         ("Str_Exchange_ExportBookmarks", () => ExportExchangeData(bookmarks: true)),

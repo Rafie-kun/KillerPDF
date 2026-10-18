@@ -1660,4 +1660,12 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Exchange_ReplaceBookmarks">Замінити наявні закладки</sys:String>
     <sys:String x:Key="Str_Exchange_Flatten">Звести поля форми після імпорту</sys:String>
     <sys:String x:Key="Str_Exchange_Preview">Відповідних полів: {0}; пропущених полів: {1}; коментарів: {2}.</sys:String>
+    <sys:String x:Key="Str_FormTools_Recognize">Розпізнати поля форми</sys:String>
+    <sys:String x:Key="Str_FormTools_ConvertXfa">Перетворити форму XFA</sys:String>
+    <sys:String x:Key="Str_FormTools_Flatten">Звести поля форми</sys:String>
+    <sys:String x:Key="Str_FormTools_None">Нових полів форми не знайдено.</sys:String>
+    <sys:String x:Key="Str_FormTools_InvalidNames">Виберіть принаймні одне поле. Назви вибраних полів мають бути непорожніми й унікальними.</sys:String>
+    <sys:String x:Key="Str_FormTools_XfaConfirm">Перетворити цю форму XFA на стандартні поля форми?</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenOutput">Звести перетворені поля</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenConfirm">Звести всі поля форми? Їхні значення стануть вмістом сторінки, і їх більше не можна буде заповнювати.</sys:String>
 </ResourceDictionary>

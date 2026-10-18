@@ -1660,4 +1660,12 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Exchange_ReplaceBookmarks">既存のしおりを置き換える</sys:String>
     <sys:String x:Key="Str_Exchange_Flatten">インポート後にフォームフィールドを統合する</sys:String>
     <sys:String x:Key="Str_Exchange_Preview">一致するフィールド: {0}、スキップするフィールド: {1}、コメント: {2}。</sys:String>
+    <sys:String x:Key="Str_FormTools_Recognize">フォームフィールドを認識</sys:String>
+    <sys:String x:Key="Str_FormTools_ConvertXfa">XFAフォームを変換</sys:String>
+    <sys:String x:Key="Str_FormTools_Flatten">フォームフィールドを統合</sys:String>
+    <sys:String x:Key="Str_FormTools_None">新しいフォームフィールドは見つかりませんでした。</sys:String>
+    <sys:String x:Key="Str_FormTools_InvalidNames">少なくとも1つのフィールドを選択してください。選択したフィールドの名前は空にせず、重複しないようにしてください。</sys:String>
+    <sys:String x:Key="Str_FormTools_XfaConfirm">このXFAフォームを標準のフォームフィールドに変換しますか？</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenOutput">変換したフィールドを統合する</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenConfirm">すべてのフォームフィールドを統合しますか？値はページの内容になり、入力できなくなります。</sys:String>
 </ResourceDictionary>

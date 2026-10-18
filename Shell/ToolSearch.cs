@@ -99,7 +99,7 @@ namespace KillerPDF
             ["Str_Lbl_Measure"] = "ruler distance area length perimeter angle scale",
             ["Str_KS_NextMeasure"] = "distance perimeter area angle",
             ["Str_DocumentTools_Measurements"] = "measurements report list export csv",
-            ["Str_DocumentTools_FormData"] = "form fields comments import export fdf xfdf json",
+            ["Str_DocumentTools_FormData"] = "form fields comments import export fdf xfdf json recognize detect xfa convert flatten",
             ["Str_DocumentTools_BookmarkData"] = "bookmarks outline import export json",
             ["Str_Lbl_Redact"] = "black out censor hide remove sensitive",
             ["Str_KS_Open"] = "open file browse load",

@@ -1640,4 +1640,12 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Exchange_ReplaceBookmarks">বিদ্যমান বুকমার্ক প্রতিস্থাপন করুন</sys:String>
     <sys:String x:Key="Str_Exchange_Flatten">আমদানির পরে ফর্মের ঘরগুলো পৃষ্ঠার বিষয়বস্তুর সঙ্গে মিশিয়ে দিন</sys:String>
     <sys:String x:Key="Str_Exchange_Preview">মিলে যাওয়া ঘর: {0}; বাদ দেওয়া ঘর: {1}; মন্তব্য: {2}.</sys:String>
+    <sys:String x:Key="Str_FormTools_Recognize">ফর্মের ঘর শনাক্ত করুন</sys:String>
+    <sys:String x:Key="Str_FormTools_ConvertXfa">XFA ফর্ম রূপান্তর করুন</sys:String>
+    <sys:String x:Key="Str_FormTools_Flatten">ফর্মের ঘরগুলো পৃষ্ঠার সঙ্গে মিশিয়ে দিন</sys:String>
+    <sys:String x:Key="Str_FormTools_None">নতুন কোনো ফর্মের ঘর পাওয়া যায়নি।</sys:String>
+    <sys:String x:Key="Str_FormTools_InvalidNames">অন্তত একটি ঘর নির্বাচন করুন। নির্বাচিত ঘরের নাম ফাঁকা বা একই হতে পারবে না।</sys:String>
+    <sys:String x:Key="Str_FormTools_XfaConfirm">এই XFA ফর্মকে সাধারণ ফর্মের ঘরে রূপান্তর করবেন?</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenOutput">রূপান্তরিত ঘরগুলো পৃষ্ঠার সঙ্গে মিশিয়ে দিন</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenConfirm">সব ঘর পৃষ্ঠার সঙ্গে মেশাবেন? মানগুলো পৃষ্ঠার বিষয়বস্তু হবে এবং আর পূরণ করা যাবে না।</sys:String>
 </ResourceDictionary>

@@ -1642,4 +1642,12 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_Exchange_ReplaceBookmarks">取代現有書籤</sys:String>
     <sys:String x:Key="Str_Exchange_Flatten">匯入後平面化表單欄位</sys:String>
     <sys:String x:Key="Str_Exchange_Preview">相符欄位：{0}；略過欄位：{1}；註解：{2}。</sys:String>
+    <sys:String x:Key="Str_FormTools_Recognize">辨識表單欄位</sys:String>
+    <sys:String x:Key="Str_FormTools_ConvertXfa">轉換XFA表單</sys:String>
+    <sys:String x:Key="Str_FormTools_Flatten">平面化表單欄位</sys:String>
+    <sys:String x:Key="Str_FormTools_None">找不到新的表單欄位。</sys:String>
+    <sys:String x:Key="Str_FormTools_InvalidNames">請至少選取一個欄位。所選欄位的名稱不可空白或重複。</sys:String>
+    <sys:String x:Key="Str_FormTools_XfaConfirm">將此XFA表單轉換成標準表單欄位？</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenOutput">平面化轉換後的欄位</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenConfirm">平面化所有表單欄位？欄位值將成為頁面內容，無法再填寫。</sys:String>
 </ResourceDictionary>

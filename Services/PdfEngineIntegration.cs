@@ -21,6 +21,9 @@ namespace KillerPDF.Services;
 /// <summary>Bridges completed application state into The KillerPDF.Engine during migration.</summary>
 internal static class PdfEngineIntegration
 {
+    internal static void ApplyRecognizedFields(string path, PdfFormRecognitionReview review) =>
+        ReplaceWithBuiltResult(path, review.ApplyAccepted(PdfDocument.Open(File.ReadAllBytes(path))));
+
     internal static void WriteExchangeFile(string path, byte[] bytes) => ReplaceWithBuiltResult(path, bytes);
 
     internal static void ApplyBookmarkData(string path, string json, bool replaceExisting) =>

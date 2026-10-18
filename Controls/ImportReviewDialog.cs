@@ -8,7 +8,8 @@ internal sealed class ImportReviewDialog : Window
     private readonly CheckBox _option;
     internal bool Option => _option.IsChecked == true;
 
-    internal ImportReviewDialog(Window owner, string title, string report, string optionLabel)
+    internal ImportReviewDialog(Window owner, string title, string report, string optionLabel,
+        string? actionLabel = null)
     {
         Title = "KillerPDF - " + title;
         Width = 700;
@@ -21,7 +22,7 @@ internal sealed class ImportReviewDialog : Window
         var cancel = UiKit.Make(L("Str_Btn_Cancel"), accent: false);
         cancel.IsCancel = true;
         cancel.Click += (_, _) => Close();
-        var apply = UiKit.Make(L("Str_Exchange_Import"), accent: true);
+        var apply = UiKit.Make(actionLabel ?? L("Str_Exchange_Import"), accent: true);
         apply.IsDefault = true;
         apply.Click += (_, _) => { DialogResult = true; };
         var buttons = UiKit.ButtonRow(cancel, apply);

@@ -1660,4 +1660,12 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Exchange_ReplaceBookmarks">Erstatt eksisterende bokmerker</sys:String>
     <sys:String x:Key="Str_Exchange_Flatten">Slå sammen skjemafelt med sideinnholdet etter import</sys:String>
     <sys:String x:Key="Str_Exchange_Preview">Samsvarende felt: {0}; felt som hoppes over: {1}; kommentarer: {2}.</sys:String>
+    <sys:String x:Key="Str_FormTools_Recognize">Gjenkjenn skjemafelt</sys:String>
+    <sys:String x:Key="Str_FormTools_ConvertXfa">Konverter XFA-skjema</sys:String>
+    <sys:String x:Key="Str_FormTools_Flatten">Slå sammen skjemafelt med sideinnholdet</sys:String>
+    <sys:String x:Key="Str_FormTools_None">Ingen nye skjemafelt ble funnet.</sys:String>
+    <sys:String x:Key="Str_FormTools_InvalidNames">Velg minst ett felt. Valgte feltnavn må være utfylt og unike.</sys:String>
+    <sys:String x:Key="Str_FormTools_XfaConfirm">Konvertere dette XFA-skjemaet til standard skjemafelt?</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenOutput">Slå sammen de konverterte feltene med sideinnholdet</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenConfirm">Slå sammen alle skjemafelt med sideinnholdet? Verdiene blir en del av siden og kan ikke lenger fylles ut.</sys:String>
 </ResourceDictionary>

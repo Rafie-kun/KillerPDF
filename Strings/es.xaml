@@ -1640,4 +1640,12 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Exchange_ReplaceBookmarks">Reemplazar los marcadores existentes</sys:String>
     <sys:String x:Key="Str_Exchange_Flatten">Aplanar los campos después de importar</sys:String>
     <sys:String x:Key="Str_Exchange_Preview">Campos coincidentes: {0}; campos omitidos: {1}; comentarios: {2}.</sys:String>
+    <sys:String x:Key="Str_FormTools_Recognize">Reconocer campos del formulario</sys:String>
+    <sys:String x:Key="Str_FormTools_ConvertXfa">Convertir formulario XFA</sys:String>
+    <sys:String x:Key="Str_FormTools_Flatten">Aplanar campos del formulario</sys:String>
+    <sys:String x:Key="Str_FormTools_None">No se encontraron campos nuevos.</sys:String>
+    <sys:String x:Key="Str_FormTools_InvalidNames">Seleccione al menos un campo. Los nombres seleccionados deben ser únicos y no estar vacíos.</sys:String>
+    <sys:String x:Key="Str_FormTools_XfaConfirm">¿Convertir este formulario XFA en campos de formulario estándar?</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenOutput">Aplanar los campos convertidos</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenConfirm">¿Aplanar todos los campos? Sus valores pasarán al contenido de la página y ya no se podrán rellenar.</sys:String>
 </ResourceDictionary>

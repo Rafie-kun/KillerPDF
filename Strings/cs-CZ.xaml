@@ -1645,4 +1645,12 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Exchange_ReplaceBookmarks">Nahradit stávající záložky</sys:String>
     <sys:String x:Key="Str_Exchange_Flatten">Sloučit pole formuláře s obsahem po importu</sys:String>
     <sys:String x:Key="Str_Exchange_Preview">Odpovídající pole: {0}; přeskočená pole: {1}; komentáře: {2}.</sys:String>
+    <sys:String x:Key="Str_FormTools_Recognize">Rozpoznat pole formuláře</sys:String>
+    <sys:String x:Key="Str_FormTools_ConvertXfa">Převést formulář XFA</sys:String>
+    <sys:String x:Key="Str_FormTools_Flatten">Sloučit pole s obsahem stránky</sys:String>
+    <sys:String x:Key="Str_FormTools_None">Nebyla nalezena žádná nová pole.</sys:String>
+    <sys:String x:Key="Str_FormTools_InvalidNames">Vyberte alespoň jedno pole. Názvy vybraných polí musí být neprázdné a jedinečné.</sys:String>
+    <sys:String x:Key="Str_FormTools_XfaConfirm">Převést tento formulář XFA na standardní formulářová pole?</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenOutput">Sloučit převedená pole s obsahem stránky</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenConfirm">Sloučit všechna pole s obsahem stránky? Jejich hodnoty se stanou obsahem stránky a nebude je možné vyplňovat.</sys:String>
 </ResourceDictionary>

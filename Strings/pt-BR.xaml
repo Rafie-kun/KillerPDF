@@ -1660,4 +1660,12 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Exchange_ReplaceBookmarks">Substituir os marcadores existentes</sys:String>
     <sys:String x:Key="Str_Exchange_Flatten">Achatar os campos após a importação</sys:String>
     <sys:String x:Key="Str_Exchange_Preview">Campos correspondentes: {0}; campos ignorados: {1}; comentários: {2}.</sys:String>
+    <sys:String x:Key="Str_FormTools_Recognize">Reconhecer campos do formulário</sys:String>
+    <sys:String x:Key="Str_FormTools_ConvertXfa">Converter formulário XFA</sys:String>
+    <sys:String x:Key="Str_FormTools_Flatten">Achatar campos do formulário</sys:String>
+    <sys:String x:Key="Str_FormTools_None">Nenhum campo novo foi encontrado.</sys:String>
+    <sys:String x:Key="Str_FormTools_InvalidNames">Selecione pelo menos um campo. Os nomes selecionados devem ser preenchidos e únicos.</sys:String>
+    <sys:String x:Key="Str_FormTools_XfaConfirm">Converter este formulário XFA em campos padrão?</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenOutput">Achatar os campos convertidos</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenConfirm">Achatar todos os campos? Os valores passarão a fazer parte da página e não poderão mais ser preenchidos.</sys:String>
 </ResourceDictionary>

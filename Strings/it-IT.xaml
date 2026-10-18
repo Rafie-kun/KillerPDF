@@ -1660,4 +1660,12 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_Exchange_ReplaceBookmarks">Sostituisci i segnalibri esistenti</sys:String>
     <sys:String x:Key="Str_Exchange_Flatten">Appiattisci i campi dopo l’importazione</sys:String>
     <sys:String x:Key="Str_Exchange_Preview">Campi corrispondenti: {0}; campi ignorati: {1}; commenti: {2}.</sys:String>
+    <sys:String x:Key="Str_FormTools_Recognize">Riconosci campi del modulo</sys:String>
+    <sys:String x:Key="Str_FormTools_ConvertXfa">Converti modulo XFA</sys:String>
+    <sys:String x:Key="Str_FormTools_Flatten">Appiattisci campi del modulo</sys:String>
+    <sys:String x:Key="Str_FormTools_None">Nessun nuovo campo trovato.</sys:String>
+    <sys:String x:Key="Str_FormTools_InvalidNames">Seleziona almeno un campo. I nomi selezionati devono essere compilati e univoci.</sys:String>
+    <sys:String x:Key="Str_FormTools_XfaConfirm">Convertire questo modulo XFA in campi standard?</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenOutput">Appiattisci i campi convertiti</sys:String>
+    <sys:String x:Key="Str_FormTools_FlattenConfirm">Appiattire tutti i campi? I valori diventeranno contenuto della pagina e non saranno più compilabili.</sys:String>
 </ResourceDictionary>
