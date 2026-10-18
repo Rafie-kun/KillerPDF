@@ -8,6 +8,55 @@ namespace KillerPdf.Engine.Tests.Documents;
 public sealed class PdfXfaAcroFormConverterTests
 {
     [Fact]
+    public void ConvertDistinguishesRepeatedStaticFieldsWithExplicitBindings()
+    {
+        PdfDocument source = Document(
+            """<template><subform name="form" layout="position"><field name="name" x="10pt" y="10pt" w="70pt" h="12pt"><bind ref="$record.person.first"/><ui><textEdit/></ui></field><field name="name" x="10pt" y="30pt" w="70pt" h="12pt"><bind ref="$record.person.last"/><ui><textEdit/></ui></field></subform></template>""",
+            """<datasets><data><person><first>Ada</first><last>Lovelace</last></person></data></datasets>""");
+
+        PdfDocument converted = PdfDocument.Open(PdfXfaAcroFormConverter.Convert(source));
+
+        Assert.Null(PdfXfaReader.Read(converted));
+        var fields = PdfFormWidgetReader.ReadPage(converted, 0).ToDictionary(field => field.FieldName);
+        Assert.Equal(2, fields.Count);
+        Assert.Equal("Ada", fields["form.name[0]"].Value);
+        Assert.Equal(78, fields["form.name[0]"].Bottom);
+        Assert.Equal("Lovelace", fields["form.name[1]"].Value);
+        Assert.Equal(58, fields["form.name[1]"].Bottom);
+    }
+
+    [Fact]
+    public void ConvertFlattensDistinctExplicitBindingsWithoutLosingEitherValue()
+    {
+        PdfDocument source = Document(
+            """<template><subform name="form" layout="position"><field name="name" x="10pt" y="10pt" w="70pt" h="12pt"><bind ref="$record.person.first"/><ui><textEdit/></ui></field><field name="name" x="10pt" y="30pt" w="70pt" h="12pt"><bind ref="$record.person.last"/><ui><textEdit/></ui></field></subform></template>""",
+            """<datasets><data><person><first>Ada</first><last>Lovelace</last></person></data></datasets>""");
+
+        PdfDocument converted = PdfDocument.Open(PdfXfaAcroFormConverter.Convert(source, PdfXfaConversionMode.Flattened));
+
+        Assert.Null(PdfXfaReader.Read(converted));
+        Assert.Empty(PdfFormWidgetReader.ReadPage(converted, 0));
+        string text = new PdfPageContentReader(converted).Read(0).Text;
+        Assert.Contains("Ada", text);
+        Assert.Contains("Lovelace", text);
+    }
+
+    [Theory]
+    [InlineData("$record.person.first", "<first>Ada</first><last>Lovelace</last>")]
+    [InlineData("", "<first>Ada</first><last>Lovelace</last>")]
+    [InlineData("$record.person.missing", "<first>Ada</first><last>Lovelace</last>")]
+    [InlineData("$record.person.last", "<first>Ada</first><last>Lovelace</last><last>Byron</last>")]
+    public void ConvertRejectsUnsafeExplicitRepeatedBindings(string secondBinding, string data)
+    {
+        PdfDocument source = Document(
+            "<template><subform name=\"form\" layout=\"position\"><field name=\"name\" x=\"10pt\" y=\"10pt\" w=\"70pt\" h=\"12pt\"><bind ref=\"$record.person.first\"/><ui><textEdit/></ui></field>"
+            + $"<field name=\"name\" x=\"10pt\" y=\"30pt\" w=\"70pt\" h=\"12pt\"><bind ref=\"{secondBinding}\"/><ui><textEdit/></ui></field></subform></template>",
+            $"<datasets><data><person>{data}</person></data></datasets>");
+
+        Assert.Throws<NotSupportedException>(() => PdfXfaAcroFormConverter.Convert(source));
+    }
+
+    [Fact]
     public void ConvertRejectsAmbiguousRepeatedTemplatePathsWithAnExplanation()
     {
         PdfDocument source = Document(

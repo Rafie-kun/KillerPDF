@@ -30,21 +30,27 @@ public static class PdfXfaAcroFormConverter
             ?? throw new InvalidOperationException("The document has no XFA form.");
         info = ExpandCombinedXdp(info);
         PdfXfaTemplateInfo template = PdfXfaTemplate.Read(info);
-        IGrouping<string, PdfXfaTemplateField>? repeated = template.Fields
-            .GroupBy(field => field.Path, StringComparer.Ordinal).FirstOrDefault(group => group.Skip(1).Any());
-        if (repeated is not null)
-            throw new NotSupportedException(
-                $"XFA conversion cannot safely distinguish repeated template field path '{repeated.Key}'.");
-        Dictionary<string, PdfXfaTemplateField> fields = template.Fields.ToDictionary(
-            field => field.Path, StringComparer.Ordinal);
-        PdfXfaTemplateField? unsupported = fields.Values.FirstOrDefault(field =>
+        var fields = template.Fields.GroupBy(field => field.Path, StringComparer.Ordinal)
+            .ToDictionary(group => group.Key, group => group.ToArray(), StringComparer.Ordinal);
+        foreach (var repeated in fields.Where(group => group.Value.Length > 1))
+        {
+            string?[] bindings = repeated.Value.Select(field => BindingName(field.Binding)).ToArray();
+            if (info.FormType == PdfXfaFormType.Dynamic || template.ScriptCount != 0
+                || template.Behaviors.Count != 0
+                || repeated.Value.Any(field => field.ControlType is null || !TextControls.Contains(field.ControlType))
+                || bindings.Any(string.IsNullOrWhiteSpace)
+                || bindings.Distinct(StringComparer.Ordinal).Count() != bindings.Length)
+                throw new NotSupportedException(
+                    $"XFA conversion cannot safely distinguish repeated template field path '{repeated.Key}'.");
+        }
+        PdfXfaTemplateField? unsupported = template.Fields.FirstOrDefault(field =>
             field.ControlType is null || !ConvertibleControls.Contains(field.ControlType));
         if (unsupported is not null)
             throw new NotSupportedException(
                 $"XFA control '{unsupported.ControlType ?? "unknown"}' cannot be converted.");
-        bool hasImages = fields.Values.Any(field =>
+        bool hasImages = template.Fields.Any(field =>
             field.ControlType!.Equals("imageEdit", StringComparison.OrdinalIgnoreCase));
-        bool hasBarcodes = fields.Values.Any(field =>
+        bool hasBarcodes = template.Fields.Any(field =>
             field.ControlType!.Equals("barcode", StringComparison.OrdinalIgnoreCase));
         if ((hasImages || hasBarcodes) && mode != PdfXfaConversionMode.Flattened)
             throw new NotSupportedException(
@@ -53,6 +59,11 @@ public static class PdfXfaAcroFormConverter
             ? PdfXfaImages.Read(info).ToDictionary(image => image.FieldPath, StringComparer.Ordinal)
             : [];
         PdfFormDataSet data = PdfXfaDatasets.Read(info);
+        foreach (var repeated in fields.Where(group => group.Value.Length > 1))
+            foreach (var field in repeated.Value)
+                if (!data.Fields.Any(value => value.Name == BindingName(field.Binding) && value.Values.Count == 1))
+                    throw new NotSupportedException(
+                        $"XFA conversion cannot safely bind repeated template field path '{repeated.Key}'.");
         Dictionary<string, string> values = data.Fields.ToDictionary(
             field => field.Name,
             field => field.Values.Count == 0 ? string.Empty : field.Values[0],
@@ -71,7 +82,7 @@ public static class PdfXfaAcroFormConverter
             editor = new PdfIncrementalPageEditor(expanded);
             foreach (PdfXfaFlowFieldPlacement placement in flow.Placements)
             {
-                PdfXfaTemplateField field = fields[placement.FieldPath];
+                PdfXfaTemplateField field = fields[placement.FieldPath][0];
                 string name = placement.FieldPath + "[" + placement.OccurrenceIndex + "]";
                 double bottom = firstPage.Height - placement.Y - placement.Height;
                 if (field.ControlType!.Equals("imageEdit", StringComparison.OrdinalIgnoreCase))
@@ -99,11 +110,20 @@ public static class PdfXfaAcroFormConverter
         if (layout.UnsupportedFlowedFieldPaths.Count != 0)
             throw new NotSupportedException("Flowed XFA fields require a dynamic form declaration.");
         var pageSizes = new Dictionary<int, PdfPageContent>();
+        var occurrences = new Dictionary<string, int>(StringComparer.Ordinal);
+        var names = new HashSet<string>(StringComparer.Ordinal);
         foreach (PdfXfaFieldPlacement placement in layout.Placements)
         {
             if (placement.PageIndex >= editor.PageCount)
                 throw new InvalidOperationException("An XFA field targets a page outside the document.");
-            PdfXfaTemplateField field = fields[placement.FieldPath];
+            int occurrence = occurrences.GetValueOrDefault(placement.FieldPath);
+            occurrences[placement.FieldPath] = occurrence + 1;
+            PdfXfaTemplateField[] definitions = fields[placement.FieldPath];
+            PdfXfaTemplateField field = definitions[occurrence];
+            string name = definitions.Length == 1 ? placement.FieldPath
+                : placement.FieldPath + "[" + occurrence + "]";
+            if (!names.Add(name))
+                throw new NotSupportedException($"XFA conversion produces a duplicate field name '{name}'.");
             string dataName = BindingName(field.Binding) ?? placement.FieldPath;
             values.TryGetValue(dataName, out string? value);
             if (!pageSizes.TryGetValue(placement.PageIndex, out PdfPageContent? page))
@@ -127,7 +147,7 @@ public static class PdfXfaAcroFormConverter
                     placement.X, bottom, placement.Width, placement.Height, value);
                 continue;
             }
-            AddField(editor, field, placement.FieldPath, placement.PageIndex,
+            AddField(editor, field, name, placement.PageIndex,
                 placement.X, bottom, placement.Width, placement.Height, value);
         }
         return Finish(editor, mode);
