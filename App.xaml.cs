@@ -466,37 +466,7 @@ namespace KillerPDF
         // carries its English text in case the language dictionary has not loaded.
         private static string SetupText(string key, string fallback) => CrashText(key, fallback);
 
-        private static void EnsureCrashPreviewGrain()
-        {
-            const int size = 256;
-            var bitmap = new System.Windows.Media.Imaging.WriteableBitmap(
-                size, size, 96, 96, PixelFormats.Bgra32, null);
-            var pixels = new byte[size * size * 4];
-            var random = new Random(1337);
-            for (int i = 0; i < pixels.Length; i += 4)
-            {
-                if (random.Next(3) != 0) continue;
-                byte value = random.Next(2) == 0
-                    ? (byte)random.Next(190, 255)
-                    : (byte)random.Next(0, 50);
-                pixels[i] = value;
-                pixels[i + 1] = value;
-                pixels[i + 2] = value;
-                pixels[i + 3] = (byte)random.Next(35, 95);
-            }
-            bitmap.WritePixels(new Int32Rect(0, 0, size, size), pixels, size * 4, 0);
-            var source = System.Windows.Media.Imaging.BitmapFrame.Create(bitmap);
-            source.Freeze();
-            var tile = new ImageBrush(source)
-            {
-                TileMode = TileMode.Tile,
-                ViewportUnits = BrushMappingMode.Absolute,
-                Viewport = new Rect(0, 0, size, size),
-                Stretch = Stretch.None
-            };
-            tile.Freeze();
-            Current.Resources["GrainTileBrush"] = tile;
-        }
+        private static void EnsureCrashPreviewGrain() => Controls.GrainTexture.Publish();
 
         private static bool ShowCrashDialog(Exception ex, string logPath, bool isFatal)
         {

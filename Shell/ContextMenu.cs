@@ -24,52 +24,20 @@ namespace KillerPDF
 
         private void ApplyGrainTexture()
         {
-            // Film grain with a mix of bright AND dark specks so the texture reads
-            // on any background - bright specks show on dark themes, dark specks
-            // show on light themes. Denser and a touch stronger than the first pass.
-            const int size = 256;
-            var bmp = new WriteableBitmap(size, size, 96, 96, PixelFormats.Bgra32, null);
-            var pixels = new byte[size * size * 4]; // start fully transparent
-            var rng = new Random(1337);
-            for (int i = 0; i < pixels.Length; i += 4)
-            {
-                if (rng.Next(3) != 0) continue;       // ~33% pixel density
-                bool bright = rng.Next(2) == 0;        // half bright, half dark
-                byte v = bright ? (byte)rng.Next(190, 255) : (byte)rng.Next(0, 50);
-                byte a = (byte)rng.Next(35, 95);       // alpha for subtlety
-                pixels[i] = v;
-                pixels[i + 1] = v;
-                pixels[i + 2] = v;
-                pixels[i + 3] = a;
-            }
-            bmp.WritePixels(new System.Windows.Int32Rect(0, 0, size, size), pixels, size * 4, 0);
+            // The family grain tile (Controls/GrainTexture.cs). Publishing it also replaces the
+            // app-level GrainTileBrush that the flyouts and standalone windows resolve, and every
+            // tracked brush is repainted when the theme or accent changes.
             // BOTH panes by name, not through GrainBrush - that member resolves to ActiveViewer, so
             // only the focused pane ever got the texture and pane B rendered flat.
-            Viewer.Grain.ImageSource  = bmp;
-            ViewerB.Grain.ImageSource = bmp;
+            Controls.GrainTexture.Track(Viewer.Grain);
+            Controls.GrainTexture.Track(ViewerB.Grain);
             // TryFindResource, NOT the Resources indexer: the indexer looks ONLY in this window's
             // own dictionary and returns null without complaint if the key lives higher up.
             // A key defined above this window (GrainBrushShared can be) is invisible to the
             // indexer, and the failure is silent - the grain simply never gets its texture.
             // TryFindResource walks window -> app, so it works wherever the key is defined.
-            if (TryFindResource("GrainBrushShared") is ImageBrush sharedGrain) sharedGrain.ImageSource = bmp;
-            StatusGrainBrush.ImageSource = bmp;
-            // The family flyout standard's grain tile (FlyoutGrain style) shares the same texture.
-            // GrainTileBrush lives at APPLICATION scope so standalone windows (the file picker)
-            // resolve it too - and app-level Freezables are frozen, so it cannot be mutated in
-            // place like the window-scoped brushes above. Build a finished frozen brush and
-            // REPLACE the dictionary entry; the swap retriggers every DynamicResource reference.
-            var tileSource = System.Windows.Media.Imaging.BitmapFrame.Create(bmp);
-            tileSource.Freeze();   // a WriteableBitmap itself cannot freeze; its frame can
-            var tile = new ImageBrush(tileSource)
-            {
-                TileMode = TileMode.Tile,
-                ViewportUnits = BrushMappingMode.Absolute,
-                Viewport = new Rect(0, 0, size, size),
-                Stretch = Stretch.None,
-            };
-            tile.Freeze();
-            Application.Current.Resources["GrainTileBrush"] = tile;
+            if (TryFindResource("GrainBrushShared") is ImageBrush sharedGrain) Controls.GrainTexture.Track(sharedGrain);
+            Controls.GrainTexture.Track(StatusGrainBrush);
         }
 
         /// <summary>Generated film-grain tile, exposed so secondary windows (e.g. the

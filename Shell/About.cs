@@ -221,8 +221,8 @@ namespace KillerPDF
         {
             StartupUpdateCheck.IsChecked = Services.ReleaseUpdateCheck.IsEnabled(
                 App.GetSetting(Services.ReleaseUpdateCheck.Setting));
-            // Reuse the main window's film-grain texture on the About card.
-            if (GrainBrush?.ImageSource != null) AboutGrainBrush.ImageSource = GrainBrush.ImageSource;
+            // The family film-grain texture on the About card, repainted with the theme.
+            Controls.GrainTexture.Track(AboutGrainBrush);
 
             BuildAboutWordmark();
             BuildAboutTagline();
