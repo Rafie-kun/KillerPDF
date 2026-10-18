@@ -8,10 +8,84 @@ namespace KillerPDF;
 
 internal static class MacroStepEditor
 {
+    internal static string? TitleKey(PdfMacroOperation operation) => operation switch
+    {
+        PdfMacroOperation.EditLayers => "Str_DocumentTools_EditLayers",
+        PdfMacroOperation.EditAttachments => "Str_DocumentTools_EditAttachments",
+        PdfMacroOperation.EditPortfolio => "Str_DocumentTools_EditPortfolio",
+        PdfMacroOperation.SetPageLabels => "Str_DocumentTools_PageLabels",
+        _ => null
+    };
+
     internal static PdfMacroStep? Edit(Window owner, PdfMacroStep step)
     {
         try
         {
+            string Current(string key, string fallback = "") => step.Settings?.GetValueOrDefault(key) ?? fallback;
+            if ((step.Operation == PdfMacroOperation.EditLayers && Current("action") is not ("" or "rename" or "visibility" or "lock"))
+                || (step.Operation == PdfMacroOperation.EditAttachments && Current("action") is not ("" or "rename" or "description"))
+                || (step.Operation == PdfMacroOperation.EditPortfolio && Current("action") is not ("" or "presentation" or "clear")))
+            {
+                KillerDialog.Show(owner, L("Str_Macro_NoSettings"));
+                return null;
+            }
+            int ChooseSelected(string title, int selected, params string[] keys)
+            {
+                var choices = new DocumentListDialog(owner, L(title), keys.Select(L).ToArray());
+                choices.SelectedIndex = selected;
+                return choices.ShowDialog() == true ? choices.SelectedIndex : -1;
+            }
+            if (step.Operation == PdfMacroOperation.EditLayers)
+            {
+                int action = ChooseSelected("Str_DocumentTools_EditLayers", Current("action") switch
+                    { "visibility" => 1, "lock" => 2, _ => 0 }, "Str_Ctx_BmRename",
+                    "Str_DocumentTools_LayerVisible", "Str_DocumentTools_LayerLocked");
+                if (action < 0) return null;
+                var fields = new List<(string, string)> { (L("Str_DocumentTools_LayerName"), Current("layer")) };
+                if (action == 0) fields.Add((L("Str_Attachment_Name"), Current("action") == "rename" ? Current("value") : ""));
+                var values = new DocumentValuesDialog(owner, L("Str_DocumentTools_EditLayers"), fields.ToArray());
+                if (values.ShowDialog() != true) return null;
+                if (action == 0) return PdfLayerMacro.RenameStep(values.Values[0], values.Values[1]);
+                int enabled = ChooseSelected(action == 1 ? "Str_DocumentTools_LayerVisible" : "Str_DocumentTools_LayerLocked",
+                    Current("action") == (action == 1 ? "visibility" : "lock") && Current("value") == "false" ? 1 : 0,
+                    "Str_Btn_Yes", "Str_Btn_No");
+                if (enabled < 0) return null;
+                return action == 1 ? PdfLayerMacro.VisibilityStep(values.Values[0], enabled == 0)
+                    : PdfLayerMacro.LockStep(values.Values[0], enabled == 0);
+            }
+            if (step.Operation == PdfMacroOperation.EditAttachments)
+            {
+                int action = ChooseSelected("Str_DocumentTools_EditAttachments", Current("action") == "description" ? 1 : 0,
+                    "Str_Ctx_BmRename", "Str_Attachment_Description");
+                if (action < 0) return null;
+                string key = action == 0 ? "newFileName" : "description";
+                var values = new DocumentValuesDialog(owner, L("Str_DocumentTools_EditAttachments"),
+                    (L("Str_Attachment_Name"), Current("fileName")),
+                    (L(action == 0 ? "Str_Ctx_BmRename" : "Str_Attachment_Description"), Current(key)));
+                if (values.ShowDialog() != true) return null;
+                return action == 0 ? PdfAttachmentMacro.RenameStep(values.Values[0], values.Values[1])
+                    : PdfAttachmentMacro.DescriptionStep(values.Values[0], string.IsNullOrWhiteSpace(values.Values[1]) ? null : values.Values[1]);
+            }
+            if (step.Operation == PdfMacroOperation.EditPortfolio)
+            {
+                int view = ChooseSelected("Str_DocumentTools_EditPortfolio", Current("action") == "clear" ? 3
+                    : Current("view").ToLowerInvariant() switch { "tile" => 1, "hidden" => 2, _ => 0 }, "Str_Portfolio_Details", "Str_Portfolio_Tile",
+                    "Str_Portfolio_Hidden", "Str_Portfolio_RemoveMetadata");
+                if (view < 0) return null;
+                if (view == 3) return PdfCollectionMacro.ClearStep();
+                var values = new DocumentValuesDialog(owner, L("Str_DocumentTools_EditPortfolio"),
+                    (L("Str_Portfolio_InitialDocument"), Current("initialDocument")));
+                if (values.ShowDialog() != true) return null;
+                return PdfCollectionMacro.PresentationStep(new[] { PdfCollectionView.Details, PdfCollectionView.Tile,
+                    PdfCollectionView.Hidden }[view], string.IsNullOrWhiteSpace(values.Values[0]) ? null : values.Values[0]);
+            }
+            if (step.Operation == PdfMacroOperation.SetPageLabels)
+            {
+                var ranges = step.Settings?.TryGetValue("ranges", out string? json) == true
+                    ? JsonSerializer.Deserialize<PdfPageLabelMacroRange[]>(json, JsonOptions) : null;
+                var dialog = new PageLabelsDialog(owner, int.MaxValue, ranges);
+                return dialog.ShowDialog() == true ? PdfNavigationMacro.PageLabelsStep(dialog.Ranges) : null;
+            }
             if (step.Operation is PdfMacroOperation.ImposeNUp or PdfMacroOperation.ImposeBooklet
                 or PdfMacroOperation.ImposeStepAndRepeat or PdfMacroOperation.ImposeCutStack
                 or PdfMacroOperation.ImposeManualSequence or PdfMacroOperation.ImposePoster)
@@ -48,7 +122,6 @@ internal static class MacroStepEditor
             }
             if (step.Operation is PdfMacroOperation.GenerateBookmarks or PdfMacroOperation.GenerateTableOfContents)
             {
-                string Current(string key, string fallback) => step.Settings?.GetValueOrDefault(key) ?? fallback;
                 var fields = new List<(string, string)> { (L("Str_AutoBookmarks_MaximumDepth"), Current("maximumDepth", "6")) };
                 if (step.Operation == PdfMacroOperation.GenerateBookmarks)
                     fields.Add((L("Str_AutoBookmarks_MinimumSize"), Current("minimumPointSize", "12")));

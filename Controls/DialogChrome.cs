@@ -62,7 +62,7 @@ namespace KillerPDF
             bool caption = Value(owner, "UseDialogCaption", false);
             var bar = new Border
             {
-                Background = caption ? Brush(owner, "TitleBarBrush", Brushes.Navy) : Brushes.Transparent,
+                Background = Brush(owner, "DialogTitleBarBrush", Brushes.Transparent),
                 SnapsToDevicePixels = true,
                 UseLayoutRounding = true
             };
@@ -89,9 +89,9 @@ namespace KillerPDF
             StackPanel BuildWordmark(bool shadow)
             {
                 var sp = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
-                Brush primary   = shadow ? Brushes.Black : Brush(owner, "TextBrush", Brushes.White);
+                Brush primary   = shadow ? Brushes.Black : Brush(owner, "ChromeTextBrush", Brushes.White);
                 Brush logo      = shadow ? Brushes.Black : Brush(owner, "AccentLogo", Brushes.LimeGreen);
-                Brush secondary = shadow ? Brushes.Black : Brush(owner, "MutedTextBrush", Brushes.Gray);
+                Brush secondary = shadow ? Brushes.Black : Brush(owner, "ChromeTextBrush", Brushes.White);
                 int kp = fullTitle?.IndexOf("KillerPDF", StringComparison.Ordinal) ?? -1;
                 if (kp >= 0)
                 {
@@ -103,7 +103,7 @@ namespace KillerPDF
                     // wordmark's baseline instead of centring on its own and floating high.
                     string after = fullTitle![(kp + "KillerPDF".Length)..];
                     if (!string.IsNullOrEmpty(after))
-                        logoTb.Inlines.Add(new System.Windows.Documents.Run("  " + after.TrimStart()) { FontFamily = UiKit.BrandSansFont, FontWeight = FontWeights.Normal, FontSize = 18, Foreground = secondary });
+                        logoTb.Inlines.Add(new System.Windows.Documents.Run("  " + after.TrimStart()) { FontFamily = UiKit.BrandSansFont, FontWeight = FontWeights.Normal, FontSize = Value(owner, "TitleSubtitleSize", 18.0), Foreground = secondary });
                     sp.Children.Add(logoTb);
                 }
                 else
@@ -132,6 +132,15 @@ namespace KillerPDF
                 shadowLayer.Effect = new BlurEffect { Radius = 2 };
                 shadowLayer.RenderTransform = new TranslateTransform(0.7, 1.2);
                 title.Children.Add(shadowLayer);
+                var accentShadow = BuildWordmark(true);
+                foreach (var text in accentShadow.Children.OfType<TextBlock>())
+                    foreach (var run in text.Inlines.OfType<System.Windows.Documents.Run>())
+                        if (run.Text != "PDF") run.Foreground = Brushes.Transparent;
+                accentShadow.Opacity = Value(owner, "WordmarkAccentShadowOpacity", 0.0);
+                accentShadow.IsHitTestVisible = false;
+                accentShadow.Effect = new BlurEffect { Radius = 3 };
+                accentShadow.RenderTransform = new TranslateTransform(1, 2);
+                title.Children.Add(accentShadow);
                 title.Children.Add(BuildWordmark(false));
                 // Same lift as the main title bar: Lacquer's deep descent makes the centred line sit low.
                 if (fullTitle?.Contains("KillerPDF", StringComparison.Ordinal) == true)
@@ -202,7 +211,13 @@ namespace KillerPDF
             Grid.SetColumn(close, 1);
             grid.Children.Add(close);
 
-            bar.Child = grid;
+            var captionLayers = new Grid();
+            var titleGrain = new Border { IsHitTestVisible = false };
+            titleGrain.SetResourceReference(Border.BackgroundProperty, "GrainTileBrush");
+            titleGrain.SetResourceReference(UIElement.OpacityProperty, "GrainOpacity");
+            captionLayers.Children.Add(titleGrain);
+            captionLayers.Children.Add(grid);
+            bar.Child = captionLayers;
             Panel.SetZIndex(bar, 1);
             return bar;
         }
@@ -219,6 +234,17 @@ namespace KillerPDF
             win.WindowStartupLocation = owner != null ? WindowStartupLocation.CenterOwner : WindowStartupLocation.CenterScreen;
             win.FontFamily = UiKit.UiFont;
             win.SetResourceReference(Control.ForegroundProperty, "TextBrush");
+            var pickerStyles = new ResourceDictionary
+            {
+                Source = new Uri("pack://application:,,,/Controls/PickerStyles.xaml")
+            };
+            win.Resources[typeof(ListBoxItem)] = pickerStyles["PickerRow"];
+            var listStyle = new Style(typeof(ListBox));
+            listStyle.Setters.Add(new Setter(Control.BackgroundProperty, new DynamicResourceExtension("PaneBrush")));
+            listStyle.Setters.Add(new Setter(Control.ForegroundProperty, new DynamicResourceExtension("TextBrush")));
+            listStyle.Setters.Add(new Setter(Control.BorderBrushProperty, new DynamicResourceExtension("CardBorderBrush")));
+            listStyle.Setters.Add(new Setter(Control.HorizontalContentAlignmentProperty, HorizontalAlignment.Stretch));
+            win.Resources[typeof(ListBox)] = listStyle;
             TextOptions.SetTextFormattingMode(win, TextFormattingMode.Display);
             TextOptions.SetTextRenderingMode(win, TextRenderingMode.Grayscale);
             if (fade) WindowFx.EnableFadeClose(win);

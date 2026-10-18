@@ -14,7 +14,7 @@ internal sealed class PageLabelsDialog : Window
 
     internal IReadOnlyList<PdfPageLabelMacroRange> Ranges { get; private set; } = [];
 
-    internal PageLabelsDialog(Window owner, int pageCount)
+    internal PageLabelsDialog(Window owner, int pageCount, IReadOnlyList<PdfPageLabelMacroRange>? ranges = null)
     {
         Title = "KillerPDF - " + L("Str_DocumentTools_PageLabels");
         // As tall as the ranges need, up to most of the screen, where they start scrolling.
@@ -52,7 +52,8 @@ internal sealed class PageLabelsDialog : Window
         });
         content.Children.Add(Header());
         content.Children.Add(_rowsPanel);
-        AddRow(new PdfPageLabelMacroRange(0, PdfPageLabelStyle.Decimal));
+        foreach (PdfPageLabelMacroRange range in ranges ?? [new(0, PdfPageLabelStyle.Decimal)])
+            AddRow(range);
         body.Children.Add(new ScrollViewer
         {
             Content = content,

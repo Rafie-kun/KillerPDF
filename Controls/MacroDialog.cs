@@ -205,7 +205,9 @@ internal sealed class MacroDialog : Window
         if (choice.Operation is PdfMacroOperation.NumberPages or PdfMacroOperation.GenerateBookmarks
             or PdfMacroOperation.GenerateTableOfContents or PdfMacroOperation.ImposeNUp
             or PdfMacroOperation.ImposeBooklet or PdfMacroOperation.ImposeStepAndRepeat
-            or PdfMacroOperation.ImposeCutStack or PdfMacroOperation.ImposeManualSequence or PdfMacroOperation.ImposePoster)
+            or PdfMacroOperation.ImposeCutStack or PdfMacroOperation.ImposeManualSequence or PdfMacroOperation.ImposePoster
+            or PdfMacroOperation.EditLayers or PdfMacroOperation.EditPortfolio
+            or PdfMacroOperation.SetPageLabels or PdfMacroOperation.EditAttachments)
         {
             step = MacroStepEditor.Edit(this, step);
             if (step is null) return;
@@ -384,6 +386,8 @@ internal sealed class MacroDialog : Window
 
     private static string Display<T>(T value) where T : Enum
     {
+        if (value is PdfMacroOperation named && MacroStepEditor.TitleKey(named) is string key)
+            return L(key);
         if (value is PdfMacroOperation operation && operation is (PdfMacroOperation.ImposeNUp
             or PdfMacroOperation.ImposeBooklet or PdfMacroOperation.ImposeStepAndRepeat or PdfMacroOperation.ImposeCutStack
             or PdfMacroOperation.ImposeManualSequence or PdfMacroOperation.ImposePoster))

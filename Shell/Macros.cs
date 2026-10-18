@@ -21,6 +21,11 @@ public partial class MainWindow
             PdfMacroOperation.AuditAttachments,
             PdfMacroOperation.RemoveAttachments,
             PdfMacroOperation.Flatten,
+            PdfMacroOperation.FlattenLayers,
+            PdfMacroOperation.EditLayers,
+            PdfMacroOperation.EditPortfolio,
+            PdfMacroOperation.SetPageLabels,
+            PdfMacroOperation.EditAttachments,
             PdfMacroOperation.Validate,
             PdfMacroOperation.RemoveUnresolvedLinks,
             PdfMacroOperation.Ocr,
@@ -272,6 +277,7 @@ public partial class MainWindow
 
     private static string MacroOperationName(PdfMacroOperation operation)
     {
+        if (MacroStepEditor.TitleKey(operation) is string key) return Loc(key);
         if (operation is PdfMacroOperation.ImposeNUp or PdfMacroOperation.ImposeBooklet
             or PdfMacroOperation.ImposeStepAndRepeat or PdfMacroOperation.ImposeCutStack
             or PdfMacroOperation.ImposeManualSequence or PdfMacroOperation.ImposePoster)
