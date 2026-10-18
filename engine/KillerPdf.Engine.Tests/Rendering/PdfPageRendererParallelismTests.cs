@@ -1,6 +1,8 @@
 using KillerPdf.Engine.Authoring;
 using KillerPdf.Engine.Documents;
+using KillerPdf.Engine.Objects;
 using KillerPdf.Engine.Rendering;
+using KillerPdf.Engine.Writing;
 using Xunit;
 
 namespace KillerPdf.Engine.Tests.Rendering;
@@ -197,6 +199,56 @@ public sealed class PdfPageRendererParallelismTests
                 .Render(0, sequential with { MaximumParallelism = 4 });
             Assert.Empty(actual.Diagnostics);
             Assert.Equal(expected, actual.Pixels.ToArray());
+        }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Render_ParallelProfiledGroupMatchesSequentialColors(bool cmyk)
+    {
+        var shading = new PdfAxialGradient(0, 0, 512, 512,
+        [
+            new PdfGradientStop(0, new PdfRgbColor(0.1, 0.8, 0.3)),
+            new PdfGradientStop(1, new PdfRgbColor(0.9, 0.1, 0.7))
+        ]);
+        var form = new PdfFormXObject(512, 512,
+            new PdfContentStreamBuilder().PaintShading(shading));
+        var source = PdfDocument.Open(new PdfDocumentBuilder().AddPage(512, 512,
+            new PdfContentStreamBuilder().SetFillRgb(0.8, 0.6, 0.2).Rectangle(0, 0, 512, 512).Fill()
+                .SetGraphicsState(new PdfGraphicsState(blendMode: PdfBlendMode.Difference))
+                .DrawForm(form, 0, 0)).Build());
+        PdfName Name(string name) => new(System.Text.Encoding.ASCII.GetBytes(name));
+        var catalog = (PdfDictionary)source.Resolve((PdfIndirectReference)source.Trailer[Name("Root")]);
+        var pages = (PdfDictionary)source.Resolve((PdfIndirectReference)catalog[Name("Pages")]);
+        var pageReference = (PdfIndirectReference)((PdfArray)pages[Name("Kids")])[0];
+        var page = (PdfDictionary)source.Resolve(pageReference);
+        var resources = (PdfDictionary)page[Name("Resources")];
+        var forms = (PdfDictionary)resources[Name("XObject")];
+        var formReference = (PdfIndirectReference)forms.Values.Single();
+        var stream = (PdfStream)source.Resolve(formReference);
+        var update = new PdfIncrementalUpdateBuilder(source);
+        update.ReplaceObject(formReference.ObjectNumber, new PdfStream(new PdfDictionary(stream.Dictionary.Append(
+            new(Name("Group"), new PdfDictionary([new(Name("S"), Name("Transparency"))])))), stream.EncodedData.Span));
+        PdfArray Values(params double[] values) => new(values.Select(value => (PdfObject)new PdfReal(value)));
+        var profile = cmyk ? new PdfArray([Name("ICCBased"), update.AddObject(new PdfStream(
+            new PdfDictionary([new(Name("N"), new PdfInteger(4))]), PdfBlackPointControlTests.CmykProfile()))])
+            : new PdfArray([Name("CalRGB"), new PdfDictionary([
+            new(Name("WhitePoint"), Values(.9642, 1, .8249)),
+            new(Name("Gamma"), Values(2.2, 2.2, 2.2)),
+            new(Name("Matrix"), Values(.4360747,.2225045,.0139322,.3850649,.7168786,.0971045,.1430604,.0606169,.7138633))])]);
+        update.ReplaceObject(pageReference.ObjectNumber, new PdfDictionary(page.Append(
+            new(Name("Group"), new PdfDictionary([new(Name("S"), Name("Transparency")), new(Name("CS"), profile)])))));
+        byte[] data = update.Build();
+        var options = new PdfRenderOptions(1024, 1024) { CacheResult = false };
+        var expected = new PdfPageRenderer(PdfDocument.Open(data)).Render(0, options);
+        Assert.Empty(expected.Diagnostics);
+        for (int pass = 0; pass < 3; pass++)
+        {
+            var actual = new PdfPageRenderer(PdfDocument.Open(data))
+                .Render(0, options with { MaximumParallelism = 4 });
+            Assert.Empty(actual.Diagnostics);
+            Assert.Equal(expected.Pixels.ToArray(), actual.Pixels.ToArray());
         }
     }
 

@@ -24,6 +24,7 @@ public sealed partial class PdfPageRenderer
         private Color _lastInkColor;
         private uint _lastInk;
         private bool _hasInkColor;
+        private readonly Lock _colorCacheSync = new();
         private readonly Lock _inkAlphaSync = new();
         private readonly Lock _spotSync = new();
         private byte[]? _spotBaseInk;
@@ -282,26 +283,35 @@ public sealed partial class PdfPageRenderer
             if (RgbProfile is null) return _compositeCompensation is { } mapping
                 ? CompensateColor(samples, mapping) : samples;
             uint key = (uint)(samples.Red << 16 | samples.Green << 8 | samples.Blue);
-            if (_hasReadInk && key == _lastReadInk) return _lastReadColor;
-            _lastReadColor = ProfileRgbToDisplay(samples, _compositeProfile ?? RgbProfile);
+            lock (_colorCacheSync)
+                if (_hasReadInk && key == _lastReadInk) return _lastReadColor;
+            Color result = ProfileRgbToDisplay(samples, _compositeProfile ?? RgbProfile);
             if (_compositeCompensation is { } compensation)
-                _lastReadColor = CompensateColor(_lastReadColor, compensation);
-            _lastReadInk = key;
-            _hasReadInk = true;
-            return _lastReadColor;
+                result = CompensateColor(result, compensation);
+            lock (_colorCacheSync)
+            {
+                _lastReadColor = result;
+                _lastReadInk = key;
+                _hasReadInk = true;
+            }
+            return result;
         }
 
         internal Color GetRgb(in Color color)
         {
             if (RgbProfile is null) return color;
-            if (!_hasInkColor || color != _lastInkColor)
+            lock (_colorCacheSync)
+                if (_hasInkColor && color == _lastInkColor)
+                    return new Color((byte)(_lastInk >> 16), (byte)(_lastInk >> 8), (byte)_lastInk);
+            Color samples = ColorRgb(color, _inputProfile ?? RgbProfile);
+            uint ink = (uint)(samples.Red << 16 | samples.Green << 8 | samples.Blue);
+            lock (_colorCacheSync)
             {
-                Color samples = ColorRgb(color, _inputProfile ?? RgbProfile);
-                _lastInk = (uint)(samples.Red << 16 | samples.Green << 8 | samples.Blue);
+                _lastInk = ink;
                 _lastInkColor = color;
                 _hasInkColor = true;
             }
-            return new Color((byte)(_lastInk >> 16), (byte)(_lastInk >> 8), (byte)_lastInk);
+            return new Color((byte)(ink >> 16), (byte)(ink >> 8), (byte)ink);
         }
 
         private uint _lastReadInk;

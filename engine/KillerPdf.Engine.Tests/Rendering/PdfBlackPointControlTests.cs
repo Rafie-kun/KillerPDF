@@ -412,7 +412,7 @@ public sealed class PdfBlackPointControlTests
         Assert.True(native.IsIdentity);
     }
 
-    private static byte[] CmykProfile() => LutProfileCore(false, 4);
+    internal static byte[] CmykProfile() => LutProfileCore(false, 4);
     private static byte[] LutProfile(bool quadratic) => LutProfileCore(quadratic, 3);
 
     private static byte[] LutProfileCore(bool quadratic, int components)
