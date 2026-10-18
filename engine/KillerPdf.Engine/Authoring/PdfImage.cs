@@ -191,9 +191,15 @@ public sealed class PdfImage
     }
 
     /// <summary>Packs black-and-white samples into a one-bit grayscale image.</summary>
+    /// <param name="width">The image width in pixels.</param>
+    /// <param name="height">The image height in pixels.</param>
+    /// <param name="pixels">One sample per pixel; 128 and above is white.</param>
+    /// <param name="compressionLevel">The Flate compression level.</param>
+    /// <param name="allowJbig2">Also tries lossless JBIG2, which needs a PDF 1.4 reader, and
+    /// keeps whichever encoding is smallest.</param>
     public static PdfImage FromBitonal(
         int width, int height, ReadOnlyMemory<byte> pixels,
-        CompressionLevel compressionLevel = CompressionLevel.Optimal)
+        CompressionLevel compressionLevel = CompressionLevel.Optimal, bool allowJbig2 = false)
     {
         ValidateDimensions(width, height);
         int required = RequiredBytes(width, height, 1);
@@ -217,6 +223,13 @@ public sealed class PdfImage
             zlib.Write(packed);
         byte[] flate = output.ToArray();
         byte[] ccitt = PdfCcittGroup4Encoder.Encode(width, height, source);
+        if (allowJbig2)
+        {
+            byte[] jbig2 = PdfJbig2GenericEncoder.Encode(width, height, source);
+            if (jbig2.Length < ccitt.Length && jbig2.Length < flate.Length)
+                return new PdfImage(width, height, 1, PdfImageColorSpace.Gray,
+                    "JBIG2Decode", jbig2, invertComponents: false);
+        }
         if (ccitt.Length < flate.Length)
             return new PdfImage(width, height, 1, PdfImageColorSpace.Gray,
                 "CCITTFaxDecode", ccitt, invertComponents: false);

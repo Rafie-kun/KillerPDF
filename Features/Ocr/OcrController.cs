@@ -438,8 +438,8 @@ namespace KillerPDF.Features
         }
 
         // A black-and-white scan, one bit deep in the source or with next to no middle tones once
-        // rendered, stays one bit deep; anything else is stored as JPEG, in gray when the page has
-        // no color.
+        // rendered, stays one bit deep, as JBIG2 when that is smallest; anything else is stored as
+        // JPEG, in gray when the page has no color.
         private static PdfImage EncodeScanBackground(byte[] bgra, int width, int height, bool bitonal)
         {
             long middle = 0;
@@ -455,7 +455,7 @@ namespace KillerPDF.Features
                 byte[] samples = new byte[width * height];
                 for (int i = 0; i < samples.Length; i++)
                     samples[i] = bgra[i * 4 + 1] < 128 ? (byte)0 : (byte)255;
-                return PdfImage.FromBitonal(width, height, samples);
+                return PdfImage.FromBitonal(width, height, samples, allowJbig2: true);
             }
             // With the text now drawn as text, the remaining paper and pictures keep their look at
             // half the scan resolution, which keeps the file close to the original's size.
