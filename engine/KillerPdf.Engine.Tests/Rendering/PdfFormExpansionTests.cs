@@ -23,13 +23,13 @@ public sealed class PdfFormExpansionTests
     }
 
     [Fact]
-    public void SharedFormsCannotMultiplyLongTextPastThePageWorkLimit()
+    public void SharedFormsCannotMultiplyLongTextPastTheNestedFormLimit()
     {
         PdfDocument document = SharedForms(25, "BT /F1 1 Tf (" + new string('A', 10000) + ") Tj ET");
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
         FormatException error = Assert.Throws<FormatException>(() =>
             new PdfPageRenderer(document).Render(0, new PdfRenderOptions(16, 16), timeout.Token));
-        Assert.Contains("Expanded page rendering work limit exceeded", error.Message, StringComparison.Ordinal);
+        Assert.Contains("Nested Form XObject work limit exceeded", error.Message, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -56,6 +56,31 @@ public sealed class PdfFormExpansionTests
             for (int offset = 0; offset < page.Pixels.Length; offset += 4)
                 Assert.Equal(new byte[] { 0, 0, 255, 255 }, page.Pixels.Span.Slice(offset, 4).ToArray());
         }
+    }
+
+    [Fact]
+    public void AShallowFormDrawnThousandsOfTimesStillRendersCompletely()
+    {
+        // A drawing symbol reused like a CAD block: 600 operators drawn 2,000 times is ordinary
+        // content, well past a million expanded operators, and must not be refused as a bomb.
+        var symbol = new StringBuilder("0.1 w\n");
+        for (int i = 0; i < 200; i++) symbol.Append($"{i % 8} 0 m {i % 8} 8 l S\n");
+        var page = new StringBuilder();
+        for (int i = 0; i < 2000; i++) page.Append($"q 1 0 0 1 {i % 56} {i % 40} cm /B Do Q\n");
+        page.Append("1 0 0 rg 24 24 16 16 re f\n");
+        PdfDocument document = Pdf(
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 64 64] /Resources << /XObject << /B 5 0 R >> >> /Contents 4 0 R >>",
+            Stream(page.ToString()),
+            Stream(symbol.ToString(), "/Type /XObject /Subtype /Form /BBox [0 0 8 8] /Resources << >>"));
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+
+        PdfRenderedPage rendered = new PdfPageRenderer(document)
+            .Render(0, new PdfRenderOptions(64, 64) { CacheResult = false }, timeout.Token);
+
+        int center = (32 * 64 + 32) * 4;
+        Assert.Equal(new byte[] { 0, 0, 255, 255 }, rendered.Pixels.Span.Slice(center, 4).ToArray());
     }
 
     private static PdfDocument SharedForms(int depth, string leaf = "q Q", bool repeat = true)
@@ -85,6 +110,22 @@ public sealed class PdfFormExpansionTests
         pdf.Append($"xref\n0 {objects.Count + 1}\n0000000000 65535 f \n");
         foreach (int offset in offsets) pdf.Append($"{offset:D10} 00000 n \n");
         pdf.Append($"trailer << /Size {objects.Count + 1} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n");
+        return PdfDocument.Open(Encoding.ASCII.GetBytes(pdf.ToString()));
+    }
+
+    private static PdfDocument Pdf(params string[] objects)
+    {
+        var pdf = new StringBuilder("%PDF-1.7\n");
+        var offsets = new List<int>();
+        foreach (string value in objects)
+        {
+            offsets.Add(Encoding.ASCII.GetByteCount(pdf.ToString()));
+            pdf.Append($"{offsets.Count} 0 obj\n{value}\nendobj\n");
+        }
+        int xref = Encoding.ASCII.GetByteCount(pdf.ToString());
+        pdf.Append($"xref\n0 {objects.Length + 1}\n0000000000 65535 f \n");
+        foreach (int offset in offsets) pdf.Append($"{offset:D10} 00000 n \n");
+        pdf.Append($"trailer << /Size {objects.Length + 1} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n");
         return PdfDocument.Open(Encoding.ASCII.GetBytes(pdf.ToString()));
     }
 
