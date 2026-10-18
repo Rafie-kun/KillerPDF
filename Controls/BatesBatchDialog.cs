@@ -14,7 +14,7 @@ internal sealed class BatesBatchDialog : Window
     internal PdfBatesMacroOptions? Options { get; private set; }
     internal BatesBatchDialog(Window owner)
     {
-        Title = "KillerPDF - " + L("Str_Production_Bates"); Width = 580; Height = 680; MinHeight = 400;
+        Title = "KillerPDF - " + L("Str_Production_Bates"); Width = 620; Height = 420; MinWidth = 500; MinHeight = 360;
         MaxHeight = Math.Max(400, SystemParameters.WorkArea.Height - 60);
         UseLayoutRounding = true; DialogChrome.Configure(this, owner);
         var body = new DockPanel { Margin = new Thickness(20, 6, 20, 16) };
@@ -22,16 +22,31 @@ internal sealed class BatesBatchDialog : Window
         cancel.IsCancel = true; cancel.Click += (_, _) => Close();
         var apply = UiKit.Make(L("Str_Tf_Apply"), accent: true);
         apply.IsDefault = true; apply.Click += (_, _) => Apply();
-        var buttons = UiKit.ButtonRow(cancel, apply); DockPanel.SetDock(buttons, Dock.Bottom); body.Children.Add(buttons);
+        var buttons = UiKit.ButtonRow(cancel, apply);
+        buttons.Margin = new Thickness(0, 14, 0, 0);
+        DockPanel.SetDock(buttons, Dock.Bottom); body.Children.Add(buttons);
         var fields = new StackPanel();
+        var pairs = new Grid();
+        pairs.ColumnDefinitions.Add(new ColumnDefinition());
+        pairs.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(20) });
+        pairs.ColumnDefinitions.Add(new ColumnDefinition());
+        fields.Children.Add(pairs);
         foreach (var (key, value) in new[] { ("Str_Stamp_StartAt", "1"), ("Str_Production_Digits", "6"),
             ("Str_PageLabels_Prefix", ""), ("Str_Production_Suffix", ""), ("Str_Stamp_FontSize", "10"),
             ("Str_Print_Margins", "18") })
         {
-            fields.Children.Add(UiKit.GroupLabel(L(key)));
+            int row = _inputs.Count / 2 * 2, column = _inputs.Count % 2 * 2;
+            if (column == 0)
+            {
+                pairs.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                pairs.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            }
+            var label = UiKit.GroupLabel(L(key)); label.TextWrapping = TextWrapping.Wrap;
+            Grid.SetRow(label, row); Grid.SetColumn(label, column); pairs.Children.Add(label);
             var input = UiKit.Field(); input.Text = value; input.Margin = new Thickness(0, 4, 0, 10);
             System.Windows.Automation.AutomationProperties.SetName(input, L(key));
-            _inputs.Add(input); fields.Children.Add(input);
+            Grid.SetRow(input, row + 1); Grid.SetColumn(input, column);
+            _inputs.Add(input); pairs.Children.Add(input);
         }
         fields.Children.Add(UiKit.GroupLabel(L("Str_Stamp_Position")));
         _position.ItemsSource = new[] { "Str_Pos_BottomRight", "Str_Pos_BottomCenter", "Str_Pos_BottomLeft",

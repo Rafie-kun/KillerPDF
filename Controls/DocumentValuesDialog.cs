@@ -16,16 +16,19 @@ internal sealed class DocumentValuesDialog : Window
         SizeToContent = SizeToContent.Height;
         UseLayoutRounding = true;
         DialogChrome.Configure(this, owner);
-        var body = new StackPanel { Margin = new Thickness(20, 6, 20, 16) };
+        var body = new DockPanel { Margin = new Thickness(20, 6, 20, 16) };
+        var fieldsPanel = new StackPanel();
         foreach (var (label, value) in fields)
         {
-            body.Children.Add(UiKit.GroupLabel(label));
+            var caption = UiKit.GroupLabel(label);
+            caption.TextWrapping = TextWrapping.Wrap;
+            fieldsPanel.Children.Add(caption);
             var input = UiKit.Field();
             input.Text = value;
             input.Margin = new Thickness(0, 5, 0, 12);
             System.Windows.Automation.AutomationProperties.SetName(input, label);
             _fields.Add(input);
-            body.Children.Add(input);
+            fieldsPanel.Children.Add(input);
         }
         var cancel = UiKit.Make(L("Str_Btn_Cancel"), accent: false);
         cancel.IsCancel = true;
@@ -33,9 +36,11 @@ internal sealed class DocumentValuesDialog : Window
         var apply = UiKit.Make(L("Str_Btn_Save"), accent: true);
         apply.IsDefault = true;
         apply.Click += (_, _) => { DialogResult = true; };
-        body.Children.Add(UiKit.ButtonRow(cancel, apply));
-        Content = DialogChrome.Frame(this, owner, Title, Close,
-            new ScrollViewer { Content = body, VerticalScrollBarVisibility = ScrollBarVisibility.Auto });
+        var buttons = UiKit.ButtonRow(cancel, apply);
+        buttons.Margin = new Thickness(0, 12, 0, 0);
+        DockPanel.SetDock(buttons, Dock.Bottom); body.Children.Add(buttons);
+        body.Children.Add(new ScrollViewer { Content = fieldsPanel, VerticalScrollBarVisibility = ScrollBarVisibility.Auto });
+        Content = DialogChrome.Frame(this, owner, Title, Close, body);
         Loaded += (_, _) => _fields.FirstOrDefault()?.Focus();
     }
 
