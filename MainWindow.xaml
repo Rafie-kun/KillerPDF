@@ -1822,7 +1822,7 @@
                                     <GradientStop x:Name="PageListFadeBottomOuter" Color="#FF000000" Offset="1"/>
                                 </LinearGradientBrush>
                             </Border.OpacityMask>
-                            <ListBox x:Name="PageList" Style="{StaticResource PageListBox}"
+                            <ListBox x:Name="PageList" Style="{StaticResource PageListBox}" AutomationProperties.Name="{DynamicResource Str_Print_Pages}"
                                  BorderThickness="0" SelectionMode="Extended"
                                  VirtualizingPanel.IsVirtualizing="True"
                                  VirtualizingPanel.VirtualizationMode="Recycling"
