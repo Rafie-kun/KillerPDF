@@ -58,6 +58,11 @@ there is no automatic page-image fallback.
   threshold contact sheets were visually inspected across every theme. All four
   labels exist in all 19 application locale files. This is a KillerPDF dialog check;
   it does not establish family-wide resource parity or every explicit accent state.
+- All 19 locales also restored, saved and canceled settings in Dark and SE98,
+  covering 38 theme/locale states. All four locale contact sheets were visually
+  inspected, including Bengali, Japanese, Chinese and longer European labels.
+  No clipped labels or buttons were observed. This checks layout and the existing
+  translations in these dialogs; it is not a full language-quality review.
 - A seven-file corpus check converted the PDFBox RGB JPEG and qpdf shared-form
   image fixtures, retaining text, field names and values, page counts and gray
   rendered pixels. Four fixtures stopped for known unsupported color spaces,
@@ -83,6 +88,8 @@ Evidence remains under
 `color-profile-engine-final` and `color-profile-app-final` test results.
 `color-mode-all-themes.png` and `color-threshold-all-themes.png` are the rendered
 13-theme contact sheets; the individual captures remain beside them.
+`color-mode-locales-Dark.png`, `color-mode-locales-SE98.png` and matching
+`color-threshold-locales-*.png` show the 19-locale checks in both themes.
 `color-corpus-results-v2.json` records source hashes and the final classifications;
 the earlier `color-corpus-results.json` retains the initial source-reader failure.
 
