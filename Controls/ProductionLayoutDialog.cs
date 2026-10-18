@@ -26,7 +26,9 @@ internal sealed class ProductionLayoutDialog : Window
                 842, 595, margin: 18, gutter: 12, duplex: operation == PdfMacroOperation.ImposeBooklet);
         _presetName = preset.Name;
         Title = "KillerPDF - " + L(TitleKey(operation));
-        Width = 820; Height = 690; MinWidth = 650; MinHeight = 400;
+        Width = 800;
+        Height = operation is PdfMacroOperation.ImposeStepAndRepeat or PdfMacroOperation.ImposePoster ? 490 : 440;
+        MinWidth = 700; MinHeight = 400;
         MaxHeight = Math.Max(400, SystemParameters.WorkArea.Height - 60);
         UseLayoutRounding = true;
         DialogChrome.Configure(this, owner);
@@ -35,13 +37,24 @@ internal sealed class ProductionLayoutDialog : Window
         cancel.IsCancel = true; cancel.Click += (_, _) => Close();
         var apply = UiKit.Make(L("Str_Tf_Apply"), accent: true);
         apply.IsDefault = true; apply.Click += (_, _) => Safely(() => { Step = Build(); DialogResult = true; });
-        var buttons = UiKit.ButtonRow(cancel, apply); DockPanel.SetDock(buttons, Dock.Bottom); body.Children.Add(buttons);
+        var footer = new DockPanel { Margin = new Thickness(0, 16, 0, 0) };
+        var buttons = UiKit.ButtonRow(cancel, apply);
+        DockPanel.SetDock(buttons, Dock.Right); footer.Children.Add(buttons);
+        DockPanel.SetDock(footer, Dock.Bottom); body.Children.Add(footer);
         var grid = new Grid();
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.2, GridUnitType.Star) });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(28) });
         grid.ColumnDefinitions.Add(new ColumnDefinition());
-        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(20) });
-        grid.ColumnDefinitions.Add(new ColumnDefinition());
-        var inputs = new StackPanel(); var flags = new StackPanel();
-        Grid.SetColumn(flags, 2); grid.Children.Add(inputs); grid.Children.Add(flags);
+        var inputPanel = new StackPanel(); var flags = new StackPanel();
+        var inputs = new Grid();
+        inputs.ColumnDefinitions.Add(new ColumnDefinition());
+        inputs.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(16) });
+        inputs.ColumnDefinitions.Add(new ColumnDefinition());
+        var layoutHeading = UiKit.GroupLabel(L("Str_Print_SecLayout"));
+        var outputHeading = UiKit.GroupLabel(L("Str_Print_SecOutput"));
+        layoutHeading.Margin = outputHeading.Margin = new Thickness(0, 0, 0, 14);
+        inputPanel.Children.Add(layoutHeading); inputPanel.Children.Add(inputs); flags.Children.Add(outputHeading);
+        Grid.SetColumn(flags, 2); grid.Children.Add(inputPanel); grid.Children.Add(flags);
         body.Children.Add(new ScrollViewer { Content = grid, VerticalScrollBarVisibility = ScrollBarVisibility.Auto });
         Add("columns", "Str_Production_Columns", preset.Columns);
         Add("rows", "Str_Production_Rows", preset.Rows);
@@ -89,22 +102,34 @@ internal sealed class ProductionLayoutDialog : Window
             if (picker.ShowDialog(this) == true) PdfEngineIntegration.WriteExchangeFile(picker.FileName,
                 System.Text.Encoding.UTF8.GetBytes(value.ToJson(indented: true)));
         });
-        flags.Children.Add(UiKit.ButtonRow(load, save));
+        var profiles = UiKit.ButtonRow(load, save);
+        profiles.HorizontalAlignment = HorizontalAlignment.Left;
+        footer.Children.Add(profiles);
         Content = DialogChrome.Frame(this, owner, Title, Close, body);
 
         string Setting(string key, string fallback) => current?.Settings?.GetValueOrDefault(key) ?? fallback;
         void Add(string key, string labelKey, object value, bool points = false)
         {
             string label = L(labelKey) + (points ? " (pt)" : "");
-            inputs.Children.Add(UiKit.GroupLabel(label));
+            int position = _fields.Count;
+            int row = position / 2 * 2, column = position % 2 * 2;
+            if (column == 0)
+            {
+                inputs.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                inputs.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            }
+            var caption = UiKit.GroupLabel(label);
+            caption.TextWrapping = TextWrapping.Wrap;
+            Grid.SetRow(caption, row); Grid.SetColumn(caption, column); inputs.Children.Add(caption);
             var input = UiKit.Field(); input.Text = Convert.ToString(value, CultureInfo.CurrentCulture) ?? "";
-            input.Margin = new Thickness(0, 4, 0, 10); _fields.Add(key, input);
+            input.Margin = new Thickness(0, 5, 0, 14); _fields.Add(key, input);
+            Grid.SetRow(input, row + 1); Grid.SetColumn(input, column);
             System.Windows.Automation.AutomationProperties.SetName(input, label); inputs.Children.Add(input);
         }
         void Flag(string key, string label, bool value)
         {
             var check = UiKit.CheckBox(L(label)); check.IsChecked = value;
-            check.Margin = new Thickness(0, 0, 0, 14); _flags.Add(key, check); flags.Children.Add(check);
+            check.Margin = new Thickness(0, 0, 0, 10); _flags.Add(key, check); flags.Children.Add(check);
         }
     }
 
