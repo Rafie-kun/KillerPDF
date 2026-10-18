@@ -351,9 +351,12 @@ namespace KillerPDF.Features
 
             try
             {
-                ScanTextSummary summary = await Task.Run(() => BuildScanTextPdf(src, outPath, report, lang, ct));
+                // Every converted word is shown beside its scan before anything is written.
+                bool Review(IReadOnlyList<ScanTextReviewWord> words) => _host.Window.Dispatcher.Invoke(() =>
+                    new KillerPDF.Controls.ScanTextReviewDialog(_host.Window, words).ShowDialog() == true);
+                ScanTextSummary summary = await Task.Run(() => BuildScanTextPdf(src, outPath, report, lang, ct, review: Review));
                 _host.HideBusy();
-                if (ct.IsCancellationRequested) { _host.SetStatus(_host.Loc("Str_St_ScanTextCanceled")); return; }
+                if (ct.IsCancellationRequested || summary.Canceled) { _host.SetStatus(_host.Loc("Str_St_ScanTextCanceled")); return; }
                 if (summary.ScannedPages == 0)
                 {
                     KillerDialog.Show(_host.Window, _host.Loc("Str_Dlg_ScanTextNone"), "KillerPDF",
@@ -384,15 +387,36 @@ namespace KillerPDF.Features
             }
         }
 
-        internal sealed record ScanTextSummary(int ScannedPages, int ConvertedWords, int KeptWords);
+        internal sealed record ScanTextSummary(int ScannedPages, int ConvertedWords, int KeptWords, bool Canceled = false);
+
+        // One word that is about to become text, as scanned and as it will be set, for review
+        // before saving. Pixels are gray, one byte each, over the same box of the page.
+        internal sealed class ScanTextReviewWord(string id, int pageIndex, PdfScanTextWord word,
+            (int Left, int Top, int Right, int Bottom) box, byte[] scan)
+        {
+            // "page:word", both counted from 1, as --keep-scanned takes them.
+            internal string Id { get; } = id;
+            internal int PageIndex { get; } = pageIndex;
+            internal PdfScanTextWord Word { get; } = word;
+            internal (int Left, int Top, int Right, int Bottom) Box { get; } = box;
+            internal int Width => Box.Right - Box.Left;
+            internal int Height => Box.Bottom - Box.Top;
+            internal byte[] Scan { get; } = scan;
+            internal byte[] Typeset { get; set; } = [];
+            internal bool UseText { get; set; } = true;
+        }
 
         // Turns the recognized words of every scanned page into real text, set in the installed
         // face that best matches the print and drawn over the page image with those words erased.
         // Words that do not match their ink closely stay in the image under invisible text. Pages
         // that already have visible text or drawings are left as they are. Runs off the UI
         // thread; also the core of the CLI's --scan-to-text command.
+        // keepScanned names words ("page:word") to keep as scanned. With review, every page is
+        // measured first, the words about to become text are handed over as scanned and as set,
+        // and the pages are written once review returns true; false cancels with nothing written.
         internal static ScanTextSummary BuildScanTextPdf(string src, string outPath,
-            Action<int, int> report, string language, CancellationToken ct)
+            Action<int, int> report, string language, CancellationToken ct,
+            IReadOnlySet<string>? keepScanned = null, Func<IReadOnlyList<ScanTextReviewWord>, bool>? review = null)
         {
             IReadOnlyList<bool> scanned = PdfEngineIntegration.ReadScannedPages(src);
             if (!scanned.Contains(true)) return new ScanTextSummary(0, 0, 0);
@@ -402,6 +426,8 @@ namespace KillerPDF.Features
             IReadOnlyList<PdfScanTextFace> candidates = PdfEngineIntegration.ScanTextFaces();
             bool narrowed = false;
             var pages = new List<PdfScanTextPage>();
+            var measured = new List<(int PageIndex, PdfScanTextPageAnalysis Analysis, PdfScanTextFace Face)>();
+            var reviewWords = new List<ScanTextReviewWord>();
             for (int i = 0; i < scanned.Count; i++)
             {
                 // Cooperative cancel: nothing is written until every page is done.
@@ -427,14 +453,114 @@ namespace KillerPDF.Features
                     narrowed = true;
                 }
                 PdfScanTextWriter.Verify(analysis, face, cancellationToken: ct);
-                PdfScanTextAnalyzer.Erase(bgra, w, h, analysis.Words
-                    .Where(word => word.Replaceable && PdfScanTextWriter.CanSet(face, word)));
-                PdfScanTextAnalyzer.ReleaseMasks(analysis);
-                pages.Add(new PdfScanTextPage(i, analysis, EncodeScanBackground(bgra, w, h, bitonal[i]), face));
+                if (keepScanned is not null)
+                    for (int k = 0; k < analysis.Words.Count; k++)
+                        if (keepScanned.Contains($"{i + 1}:{k + 1}")) analysis.Words[k].KeepScanned();
+                if (review is not null)
+                {
+                    reviewWords.AddRange(ReviewWords(bgra, w, h, i, analysis, face));
+                    measured.Add((i, analysis, face));
+                    continue;
+                }
+                pages.Add(EraseAndEncode(bgra, w, h, i, analysis, face, bitonal[i]));
             }
-            if (ct.IsCancellationRequested || pages.Count == 0) return new ScanTextSummary(pages.Count, 0, 0);
+            if (ct.IsCancellationRequested || pages.Count == 0 && measured.Count == 0)
+                return new ScanTextSummary(pages.Count, 0, 0);
+            if (review is not null)
+            {
+                if (reviewWords.Count > 0)
+                {
+                    AddTypesetPreviews(src, measured, reviewWords, ct);
+                    if (!review(reviewWords)) return new ScanTextSummary(measured.Count, 0, 0, Canceled: true);
+                    foreach (ScanTextReviewWord word in reviewWords)
+                        if (!word.UseText) word.Word.KeepScanned();
+                }
+                foreach (var (pageIndex, analysis, face) in measured)
+                {
+                    if (ct.IsCancellationRequested) return new ScanTextSummary(measured.Count, 0, 0);
+                    report(pageIndex, scanned.Count);
+                    PdfRenderedPage page = renderSession.RenderBasePage(pageIndex, ct);
+                    pages.Add(EraseAndEncode(page.Pixels, page.Width, page.Height, pageIndex, analysis, face, bitonal[pageIndex]));
+                }
+            }
             PdfScanTextResult written = PdfEngineIntegration.WriteScanText(src, outPath, pages);
             return new ScanTextSummary(pages.Count, written.ReplacedWords, written.SearchableWords);
+        }
+
+        private static PdfScanTextPage EraseAndEncode(byte[] bgra, int width, int height, int pageIndex,
+            PdfScanTextPageAnalysis analysis, PdfScanTextFace face, bool bitonal)
+        {
+            PdfScanTextAnalyzer.Erase(bgra, width, height, analysis.Words
+                .Where(word => word.Replaceable && PdfScanTextWriter.CanSet(face, word)));
+            PdfScanTextAnalyzer.ReleaseMasks(analysis);
+            return new PdfScanTextPage(pageIndex, analysis, EncodeScanBackground(bgra, width, height, bitonal), face);
+        }
+
+        // The words of one page that are about to become text, each cut from the scan with a
+        // little paper around it.
+        private static IEnumerable<ScanTextReviewWord> ReviewWords(byte[] bgra, int width, int height,
+            int pageIndex, PdfScanTextPageAnalysis analysis, PdfScanTextFace face)
+        {
+            for (int k = 0; k < analysis.Words.Count; k++)
+            {
+                PdfScanTextWord word = analysis.Words[k];
+                if (!word.Replaceable || !PdfScanTextWriter.CanSet(face, word)) continue;
+                int pad = Math.Max(3, (int)Math.Round(word.XHeight * 0.4));
+                var box = (Left: Math.Max(0, word.Left - pad), Top: Math.Max(0, word.Top - pad),
+                    Right: Math.Min(width, word.Right + pad), Bottom: Math.Min(height, word.Bottom + pad));
+                if (box.Right <= box.Left || box.Bottom <= box.Top) continue;
+                yield return new ScanTextReviewWord($"{pageIndex + 1}:{k + 1}", pageIndex, word, box,
+                    GrayCrop(bgra, width, box));
+            }
+        }
+
+        // Sets the reviewed words on blank pages and cuts each one from that rendering, so the
+        // review shows exactly the text the converted page will carry.
+        private static void AddTypesetPreviews(string src,
+            IReadOnlyList<(int PageIndex, PdfScanTextPageAnalysis Analysis, PdfScanTextFace Face)> measured,
+            IReadOnlyList<ScanTextReviewWord> words, CancellationToken ct)
+        {
+            string preview = App.MakeTempFile("scantextreview");
+            try
+            {
+                PdfImage paper = PdfImage.FromGray(1, 1, new byte[] { 255 });
+                PdfEngineIntegration.WriteScanText(src, preview,
+                    [.. measured.Select(item => new PdfScanTextPage(item.PageIndex, item.Analysis, paper, item.Face))]);
+                using var session = PdfPageRenderSession.OpenEngineFirst(preview, OcrRenderMax, OcrRenderMax);
+                foreach (var group in words.GroupBy(word => word.PageIndex))
+                {
+                    ct.ThrowIfCancellationRequested();
+                    PdfRenderedPage page = session.RenderBasePage(group.Key, ct);
+                    PdfScanTextPageAnalysis analysis = measured.First(item => item.PageIndex == group.Key).Analysis;
+                    double sx = page.Width / (double)analysis.PixelWidth, sy = page.Height / (double)analysis.PixelHeight;
+                    foreach (ScanTextReviewWord word in group)
+                    {
+                        var box = (Left: (int)Math.Round(word.Box.Left * sx), Top: (int)Math.Round(word.Box.Top * sy),
+                            Right: (int)Math.Round(word.Box.Left * sx) + word.Width, Bottom: (int)Math.Round(word.Box.Top * sy) + word.Height);
+                        word.Typeset = box.Right <= page.Width && box.Bottom <= page.Height
+                            ? GrayCrop(page.Pixels, page.Width, box) : Enumerable.Repeat((byte)255, word.Width * word.Height).ToArray();
+                    }
+                }
+            }
+            finally
+            {
+                try { if (File.Exists(preview)) File.Delete(preview); }
+                catch (IOException) { }
+                catch (UnauthorizedAccessException) { }
+            }
+        }
+
+        private static byte[] GrayCrop(byte[] bgra, int width, (int Left, int Top, int Right, int Bottom) box)
+        {
+            int w = box.Right - box.Left, h = box.Bottom - box.Top;
+            byte[] gray = new byte[w * h];
+            for (int y = 0; y < h; y++)
+                for (int x = 0; x < w; x++)
+                {
+                    int p = ((box.Top + y) * width + box.Left + x) * 4;
+                    gray[y * w + x] = (byte)((bgra[p + 2] * 299 + bgra[p + 1] * 587 + bgra[p] * 114 + 500) / 1000);
+                }
+            return gray;
         }
 
         // A black-and-white scan, one bit deep in the source or with next to no middle tones once

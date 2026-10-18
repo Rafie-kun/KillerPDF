@@ -1272,6 +1272,11 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Dlg_SearchableSaved" xml:space="preserve">PDF interrogeable enregistré :&#10;{0}&#10;&#10;{1} pages traitées, {2} mots reconnus.</sys:String>
     <sys:String x:Key="Str_Dlg_ScanTextSaved" xml:space="preserve">PDF converti enregistré :&#10;{0}&#10;&#10;{1} pages numérisées converties, {2} mots sont maintenant du texte. {3} mots qui ne correspondaient pas assez au scan restent numérisés et interrogeables.</sys:String>
     <sys:String x:Key="Str_Dlg_ScanTextNone">Ce document n'a aucune page numérisée à convertir, rien n'a donc été enregistré. Les pages qui contiennent déjà du texte ou des dessins restent telles quelles.</sys:String>
+    <sys:String x:Key="Str_ScanReview_Title">Vérifier les mots convertis</sys:String>
+    <sys:String x:Key="Str_ScanReview_Hint">Chaque mot qui devient du texte est affiché tel que numérisé et en texte, les moins sûrs d'abord. Décochez un mot pour le garder numérisé.</sys:String>
+    <sys:String x:Key="Str_ScanReview_Count">{0} mots sur {1} deviennent du texte</sys:String>
+    <sys:String x:Key="Str_ScanReview_Scan">Numérisé</sys:String>
+    <sys:String x:Key="Str_ScanReview_Text">Texte</sys:String>
     <sys:String x:Key="Str_Dlg_Repaired" xml:space="preserve">« {0} » a été réparé avec succès.&#10;&#10;Les signets, formulaires et autres fonctions interactives ont pu être perdus. Utilisez Enregistrer sous pour écrire le fichier réparé dans un nouvel emplacement.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairedRaster" xml:space="preserve">« {0} » a été réparé par pixellisation de ses pages.&#10;&#10;Le texte n'est pas sélectionnable dans la copie réparée. Utilisez Enregistrer sous pour l'écrire dans un nouvel emplacement.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairAsk" xml:space="preserve">« {0} » a une structure endommagée et n'a pas pu être ajouté.&#10;&#10;Voulez-vous que KillerPDF tente une réparation ? Une copie réparée sera créée. Le fichier original ne sera pas modifié.&#10;&#10;Remarque : les fichiers réparés peuvent manquer de signets, de formulaires et d'autres fonctions interactives.</sys:String>

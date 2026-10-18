@@ -71,7 +71,7 @@ namespace KillerPDF.Features
             "--user-password", "--owner-password", "--allow", "--recipients", "--text", "--terms",
             "--regex", "--find", "--whole-pages", "--fill", "--overlay", "--sanitize",
             "--pfx", "--pfx-password", "--cert", "--reason", "--location", "--contact", "--timestamp-server",
-            "--appearance", "--appearance-text", "--scanned-look", "--scanner",
+            "--appearance", "--appearance-text", "--scanned-look", "--scanner", "--review", "--keep-scanned",
         ];
 
         /// <summary>
@@ -386,8 +386,9 @@ namespace KillerPDF.Features
             "                                           scan through a TWAIN scanner into a PDF; --scan --list shows scanners",
             "  --ocr <in.pdf> <out.pdf> [--lang <code>] add an invisible searchable text layer (default eng;",
             "                                           other languages download on first use)",
-            "  --scan-to-text <in.pdf> <out.pdf> [--lang <code>]",
-            "                                           turn scanned pages into real text in a matching typeface",
+            "  --scan-to-text <in.pdf> <out.pdf> [--lang <code>] [--review <folder>] [--keep-scanned <file>]",
+            "                                           turn scanned pages into real text in a matching typeface;",
+            "                                           --review writes each word as scanned beside it as text",
             "  --rotate-pages <in.pdf> <pages> <degrees> <out.pdf>",
             "                                           rotate selected pages by 90, 180, or 270 degrees",
             "  --delete-pages <in.pdf> <pages> <out.pdf> remove selected pages",
@@ -1897,20 +1898,37 @@ namespace KillerPDF.Features
         }
 
         // ============================================================
-        // --scan-to-text <in.pdf> <out.pdf> [--lang code]
+        // --scan-to-text <in.pdf> <out.pdf> [--lang code] [--review <folder>] [--keep-scanned <file>]
         // ============================================================
         // Reuses the GUI's core (OcrController.BuildScanTextPdf): scanned pages become real
         // text in the best-matching installed typeface, drawn over the page image with the
         // replaced words erased. Pages with existing text or drawings are left as they are.
+        // --review writes each converted word as scanned beside it as text, the way the app's
+        // review shows it, and --keep-scanned keeps the listed words (page:word) as scanned.
         private static int CliScanToText(List<string> pos, Dictionary<string, string> options, TextWriter con)
         {
             if (pos.Count != 2)
             {
-                con.WriteLine("Usage: KillerPDF.exe --scan-to-text <in.pdf> <out.pdf> [--lang <code>]   (default eng)");
+                con.WriteLine("Usage: KillerPDF.exe --scan-to-text <in.pdf> <out.pdf> [--lang <code>] [--review <folder>] [--keep-scanned <file>]");
+                con.WriteLine("  --review writes p<page>-w<word>.png, the word as scanned beside it as text, and review.json listing them,");
+                con.WriteLine("  least certain first. --keep-scanned reads page:word ids, one or more per line, to keep as scanned.");
                 return 2;
             }
             string inPath = Path.GetFullPath(pos[0]), outPath = Path.GetFullPath(pos[1]);
             if (!File.Exists(inPath)) { con.WriteLine($"Input not found: {inPath}"); return 2; }
+            string? reviewFolder = options.TryGetValue("--review", out string? reviewRaw) && reviewRaw.Length > 0
+                ? Path.GetFullPath(reviewRaw) : null;
+            HashSet<string>? keep = null;
+            if (options.TryGetValue("--keep-scanned", out string? keepRaw))
+            {
+                string keepPath = Path.GetFullPath(keepRaw);
+                if (!File.Exists(keepPath)) { con.WriteLine($"Keep list not found: {keepPath}"); return 2; }
+                keep = [.. File.ReadAllLines(keepPath)
+                    .SelectMany(line => line.Split([',', ' ', '\t'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))];
+                string? bad = keep.FirstOrDefault(id => id.Split(':') is not [{ } page, { } word]
+                    || !int.TryParse(page, out int p) || p < 1 || !int.TryParse(word, out int w) || w < 1);
+                if (bad is not null) { con.WriteLine($"--keep-scanned ids look like 3:17 (page 3, word 17), not {bad}."); return 2; }
+            }
             options.TryGetValue("--lang", out var langRaw);
             string lang = string.IsNullOrWhiteSpace(langRaw) ? "eng" : langRaw!.Trim().ToLowerInvariant();
 
@@ -1927,18 +1945,55 @@ namespace KillerPDF.Features
                     .ToDictionary(item => item.pageIndex, item => item.rotation));
 
             CliEnsureParentDir(outPath);
+            int reviewed = 0;
             var summary = OcrController.BuildScanTextPdf(source, outPath,
                 (i, n) => { if (i == 0 || i + 1 == n || (i + 1) % 10 == 0) con.WriteLine($"Page {i + 1}/{n}"); },
-                lang, CancellationToken.None);
+                lang, CancellationToken.None, keep,
+                reviewFolder is null ? null : words =>
+                {
+                    reviewed = CliWriteScanTextReview(reviewFolder, words);
+                    return true;
+                });
             if (summary.ScannedPages == 0)
             {
                 con.WriteLine("No scanned pages to convert; nothing was written.");
                 return 1;
             }
 
+            if (reviewFolder is not null) con.WriteLine($"Wrote {reviewed} word comparisons -> {reviewFolder}");
             con.WriteLine($"Converted {summary.ScannedPages} scanned pages: {summary.ConvertedWords} words are now text, "
                 + $"{summary.KeptWords} kept as scanned -> {outPath}");
             return 0;
+        }
+
+        // Each converted word as scanned, a gap, then as text, in one PNG per word, and an index.
+        private static int CliWriteScanTextReview(string folder, IReadOnlyList<OcrController.ScanTextReviewWord> words)
+        {
+            Directory.CreateDirectory(folder);
+            const int Gap = 12;
+            var index = new List<object>();
+            foreach (OcrController.ScanTextReviewWord word in words
+                .OrderBy(word => double.IsNaN(word.Word.Match) ? 1 : word.Word.Match).ThenBy(word => word.PageIndex))
+            {
+                int width = word.Width * 2 + Gap, height = word.Height;
+                byte[] pixels = Enumerable.Repeat((byte)255, width * height).ToArray();
+                for (int y = 0; y < height; y++)
+                {
+                    Array.Copy(word.Scan, y * word.Width, pixels, y * width, word.Width);
+                    if (word.Typeset.Length == word.Scan.Length)
+                        Array.Copy(word.Typeset, y * word.Width, pixels, y * width + word.Width + Gap, word.Width);
+                }
+                string name = "p" + word.Id.Replace(":", "-w", StringComparison.Ordinal) + ".png";
+                var encoder = new PngBitmapEncoder();
+                encoder.Frames.Add(BitmapFrame.Create(BitmapSource.Create(width, height, 96, 96, PixelFormats.Gray8, null, pixels, width)));
+                using (FileStream file = File.Create(Path.Combine(folder, name)))
+                    encoder.Save(file);
+                index.Add(new { id = word.Id, page = word.PageIndex + 1, text = word.Word.Word.Text,
+                    match = double.IsNaN(word.Word.Match) ? (double?)null : Math.Round(word.Word.Match, 3), image = name });
+            }
+            File.WriteAllText(Path.Combine(folder, "review.json"),
+                JsonSerializer.Serialize(index, new JsonSerializerOptions { WriteIndented = true }));
+            return index.Count;
         }
 
         private static int CliRotatePages(List<string> pos, TextWriter con)

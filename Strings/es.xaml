@@ -1253,6 +1253,11 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Dlg_SearchableSaved" xml:space="preserve">PDF con texto buscable guardado:&#10;{0}&#10;&#10;{1} páginas procesadas, {2} palabras reconocidas.</sys:String>
     <sys:String x:Key="Str_Dlg_ScanTextSaved" xml:space="preserve">PDF convertido guardado:&#10;{0}&#10;&#10;{1} páginas escaneadas convertidas, {2} palabras ahora son texto. {3} palabras que no coincidían bien con el escaneo se quedan escaneadas y siguen siendo buscables.</sys:String>
     <sys:String x:Key="Str_Dlg_ScanTextNone">Este documento no tiene páginas escaneadas que convertir, así que no se guardó nada. Las páginas que ya tienen texto o dibujos se dejan como están.</sys:String>
+    <sys:String x:Key="Str_ScanReview_Title">Revisar las palabras convertidas</sys:String>
+    <sys:String x:Key="Str_ScanReview_Hint">Cada palabra que pasa a ser texto se muestra escaneada y como texto, primero las menos seguras. Desmarque una palabra para mantenerla escaneada.</sys:String>
+    <sys:String x:Key="Str_ScanReview_Count">{0} de {1} palabras pasan a ser texto</sys:String>
+    <sys:String x:Key="Str_ScanReview_Scan">Escaneada</sys:String>
+    <sys:String x:Key="Str_ScanReview_Text">Texto</sys:String>
     <sys:String x:Key="Str_Dlg_Repaired" xml:space="preserve">"{0}" se reparó correctamente.&#10;&#10;Los marcadores, formularios y otras funciones interactivas pueden haberse perdido. Use Guardar como para escribir el archivo reparado en una nueva ubicación.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairedRaster" xml:space="preserve">"{0}" se reparó rasterizando sus páginas.&#10;&#10;El texto no es seleccionable en la copia reparada. Use Guardar como para escribirla en una nueva ubicación.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairAsk" xml:space="preserve">"{0}" tiene una estructura dañada y no se pudo añadir.&#10;&#10;¿Desea que KillerPDF intente repararlo? Se creará una copia reparada. El archivo original no se modificará.&#10;&#10;Nota: los archivos reparados pueden carecer de marcadores, formularios y otras funciones interactivas.</sys:String>

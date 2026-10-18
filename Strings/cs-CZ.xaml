@@ -1258,6 +1258,11 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Dlg_SearchableSaved" xml:space="preserve">Prohledávatelné PDF uloženo:&#10;{0}&#10;&#10;{1} stránek zpracováno, {2} slov rozpoznáno.</sys:String>
     <sys:String x:Key="Str_Dlg_ScanTextSaved" xml:space="preserve">Převedené PDF uloženo:&#10;{0}&#10;&#10;Převedeno naskenovaných stránek: {1}, slov převedených na text: {2}. Slova, která přesně neodpovídala skenu ({3}), zůstávají naskenovaná a lze je prohledávat.</sys:String>
     <sys:String x:Key="Str_Dlg_ScanTextNone">Tento dokument nemá žádné naskenované stránky k převodu, proto nebylo nic uloženo. Stránky, které už obsahují text nebo kresby, zůstávají beze změny.</sys:String>
+    <sys:String x:Key="Str_ScanReview_Title">Kontrola převedených slov</sys:String>
+    <sys:String x:Key="Str_ScanReview_Hint">Každé slovo, které se stane textem, je zobrazeno naskenované i jako text, nejméně jistá jako první. Zrušte zaškrtnutí slova, aby zůstalo naskenované.</sys:String>
+    <sys:String x:Key="Str_ScanReview_Count">{0} z {1} slov se stane textem</sys:String>
+    <sys:String x:Key="Str_ScanReview_Scan">Naskenováno</sys:String>
+    <sys:String x:Key="Str_ScanReview_Text">Text</sys:String>
     <sys:String x:Key="Str_Dlg_Repaired" xml:space="preserve">„{0}" byl úspěšně opraven.&#10;&#10;Záložky, formuláře a další interaktivní funkce mohly být ztraceny. Použijte Uložit jako a zapište opravený soubor na nové místo.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairedRaster" xml:space="preserve">„{0}" byl opraven rastrováním stránek.&#10;&#10;Text v opravené kopii nelze vybírat. Použijte Uložit jako a zapište ji na nové místo.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairAsk" xml:space="preserve">„{0}" má poškozenou strukturu a nepodařilo se jej přidat.&#10;&#10;Má se KillerPDF pokusit o opravu? Vytvoří se opravená kopie. Původní soubor se nezmění.&#10;&#10;Poznámka: opraveným souborům mohou chybět záložky, formuláře a další interaktivní funkce.</sys:String>

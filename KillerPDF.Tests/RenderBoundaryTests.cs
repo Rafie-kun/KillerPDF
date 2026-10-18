@@ -247,7 +247,7 @@ public sealed class RenderBoundaryTests
         string source = File.ReadAllText(
             Path.Combine(root, "Features", "Ocr", "OcrController.cs"));
 
-        Assert.Equal(5, Count(source, "PdfPageRenderSession.OpenEngineFirst("));
+        Assert.Equal(6, Count(source, "PdfPageRenderSession.OpenEngineFirst("));
         Assert.DoesNotContain("PdfPageRenderSession.Open(", source,
             StringComparison.Ordinal);
 

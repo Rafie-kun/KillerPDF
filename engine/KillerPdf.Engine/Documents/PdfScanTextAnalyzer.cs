@@ -75,6 +75,9 @@ public sealed class PdfScanTextWord
     /// <summary>Gets how closely the best lookalike reading's shapes fit the ink.</summary>
     public double LookalikeMatch { get; internal set; } = double.NaN;
 
+    /// <summary>Keeps the word in the page image, under invisible text, instead of setting it as text.</summary>
+    public void KeepScanned() => Replaceable = false;
+
     // Box-local ink mask over [MaskLeft, MaskLeft + MaskWidth) x [MaskTop, MaskTop + MaskHeight).
     internal int MaskLeft { get; set; }
     internal int MaskTop { get; set; }

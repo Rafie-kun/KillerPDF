@@ -1253,6 +1253,11 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Dlg_SearchableSaved" xml:space="preserve">অনুসন্ধানযোগ্য PDF সংরক্ষিত:&#10;{0}&#10;&#10;{1} পাতা প্রক্রিয়া হয়েছে, {2}টি শব্দ শনাক্ত।</sys:String>
     <sys:String x:Key="Str_Dlg_ScanTextSaved" xml:space="preserve">রূপান্তরিত PDF সংরক্ষিত:&#10;{0}&#10;&#10;{1}টি স্ক্যান করা পাতা রূপান্তরিত হয়েছে, {2}টি শব্দ এখন লেখা। স্ক্যানের সাথে ঠিকমতো না মেলা {3}টি শব্দ স্ক্যান করা অবস্থায় থাকে এবং অনুসন্ধানযোগ্য থাকে।</sys:String>
     <sys:String x:Key="Str_Dlg_ScanTextNone">এই নথিতে রূপান্তর করার মতো কোনো স্ক্যান করা পাতা নেই, তাই কিছু সংরক্ষণ করা হয়নি। যেসব পাতায় আগে থেকেই লেখা বা আঁকা আছে সেগুলো যেমন আছে তেমন থাকে।</sys:String>
+    <sys:String x:Key="Str_ScanReview_Title">রূপান্তরিত শব্দ পর্যালোচনা</sys:String>
+    <sys:String x:Key="Str_ScanReview_Hint">যে প্রতিটি শব্দ টেক্সটে পরিণত হবে তা স্ক্যান করা রূপে এবং টেক্সট রূপে দেখানো হয়েছে, সবচেয়ে অনিশ্চিতগুলো আগে। কোনো শব্দ স্ক্যান করা অবস্থায় রাখতে তার টিক সরিয়ে দিন।</sys:String>
+    <sys:String x:Key="Str_ScanReview_Count">{1}টির মধ্যে {0}টি শব্দ টেক্সট হবে</sys:String>
+    <sys:String x:Key="Str_ScanReview_Scan">স্ক্যান করা</sys:String>
+    <sys:String x:Key="Str_ScanReview_Text">টেক্সট</sys:String>
     <sys:String x:Key="Str_Dlg_Repaired" xml:space="preserve">"{0}" সফলভাবে মেরামত হয়েছে।&#10;&#10;বুকমার্ক, ফর্ম ও অন্যান্য ইন্টারঅ্যাক্টিভ বৈশিষ্ট্য হারিয়ে যেতে পারে। মেরামত করা ফাইলটি নতুন জায়গায় লিখতে Save As ব্যবহার করুন।</sys:String>
     <sys:String x:Key="Str_Dlg_RepairedRaster" xml:space="preserve">"{0}" এর পৃষ্ঠাগুলো রাস্টারাইজ করে মেরামত হয়েছে।&#10;&#10;মেরামত করা কপিতে টেক্সট নির্বাচন করা যায় না। নতুন জায়গায় লিখতে Save As ব্যবহার করুন।</sys:String>
     <sys:String x:Key="Str_Dlg_RepairAsk" xml:space="preserve">"{0}"-এর কাঠামো ক্ষতিগ্রস্ত, তাই যোগ করা যায়নি।&#10;&#10;KillerPDF কি মেরামতের চেষ্টা করবে? একটি মেরামত করা কপি তৈরি হবে। মূল ফাইল বদলাবে না।&#10;&#10;দ্রষ্টব্য: মেরামত করা ফাইলে বুকমার্ক, ফর্ম ও অন্যান্য ইন্টারঅ্যাক্টিভ বৈশিষ্ট্য নাও থাকতে পারে।</sys:String>

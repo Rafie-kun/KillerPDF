@@ -1272,6 +1272,11 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_Dlg_SearchableSaved" xml:space="preserve">PDF ricercabile salvato:&#10;{0}&#10;&#10;{1} pagine elaborate, {2} parole riconosciute.</sys:String>
     <sys:String x:Key="Str_Dlg_ScanTextSaved" xml:space="preserve">PDF convertito salvato:&#10;{0}&#10;&#10;{1} pagine scansionate convertite, {2} parole ora sono testo. {3} parole che non corrispondevano bene alla scansione restano scansionate e ricercabili.</sys:String>
     <sys:String x:Key="Str_Dlg_ScanTextNone">Questo documento non ha pagine scansionate da convertire, quindi non è stato salvato nulla. Le pagine che contengono già testo o disegni restano invariate.</sys:String>
+    <sys:String x:Key="Str_ScanReview_Title">Controlla le parole convertite</sys:String>
+    <sys:String x:Key="Str_ScanReview_Hint">Ogni parola che diventa testo è mostrata come scansionata e come testo, prima le meno sicure. Deseleziona una parola per mantenerla scansionata.</sys:String>
+    <sys:String x:Key="Str_ScanReview_Count">{0} di {1} parole diventano testo</sys:String>
+    <sys:String x:Key="Str_ScanReview_Scan">Scansionata</sys:String>
+    <sys:String x:Key="Str_ScanReview_Text">Testo</sys:String>
     <sys:String x:Key="Str_Dlg_Repaired" xml:space="preserve">'{0}' è stato correttamente riparato.&#10;&#10;Segnalibri, moduli, e altre funzionalità interattive potrebbero essere andate perse.&#10;Usa 'Salva con nome' per salvare il file riparato in una nuova posizione.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairedRaster" xml:space="preserve">'{0}' è stato riparato rasterizzandone le pagine.&#10;&#10;Il testo non è selezionabile nella copia riparata.&#10;Usa 'Salva con nome' per salvare il file riparato in una nuova posizione.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairAsk" xml:space="preserve">'{0}' ha una struttura danneggiata e non è stato possibile aggiungerlo.&#10;&#10;Vuoi che KillerPDF tenti una riparazione?&#10;Verrà creata una copia riparata: il file originale non verrà modificato.&#10;&#10;Nota: nei file riparati potrebbero mancare segnalibri, moduli e altre funzionalità interattive.</sys:String>

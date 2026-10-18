@@ -1272,6 +1272,11 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Dlg_SearchableSaved" xml:space="preserve">検索可能な PDF を保存しました：&#10;{0}&#10;&#10;{1} ページを処理、{2} 語を認識。</sys:String>
     <sys:String x:Key="Str_Dlg_ScanTextSaved" xml:space="preserve">変換した PDF を保存しました：&#10;{0}&#10;&#10;{1} ページのスキャンを変換し、{2} 語をテキストにしました。スキャンと十分に一致しなかった {3} 語はスキャンのまま残り、検索できます。</sys:String>
     <sys:String x:Key="Str_Dlg_ScanTextNone">この文書には変換できるスキャンページがないため、何も保存されませんでした。テキストや図形がすでにあるページはそのまま残ります。</sys:String>
+    <sys:String x:Key="Str_ScanReview_Title">変換された単語の確認</sys:String>
+    <sys:String x:Key="Str_ScanReview_Hint">テキストになる各単語を、スキャン画像とテキストで並べて表示します。確信度の低いものから順に並びます。スキャンのまま残す単語はチェックを外してください。</sys:String>
+    <sys:String x:Key="Str_ScanReview_Count">{1} 語中 {0} 語がテキストになります</sys:String>
+    <sys:String x:Key="Str_ScanReview_Scan">スキャン</sys:String>
+    <sys:String x:Key="Str_ScanReview_Text">テキスト</sys:String>
     <sys:String x:Key="Str_Dlg_Repaired" xml:space="preserve">「{0}」の修復に成功しました。&#10;&#10;しおり、フォーム、その他のインタラクティブ機能は失われている可能性があります。名前を付けて保存で修復済みファイルを新しい場所に書き出してください。</sys:String>
     <sys:String x:Key="Str_Dlg_RepairedRaster" xml:space="preserve">「{0}」はページをラスタライズして修復されました。&#10;&#10;修復済みコピーではテキストを選択できません。名前を付けて保存で新しい場所に書き出してください。</sys:String>
     <sys:String x:Key="Str_Dlg_RepairAsk" xml:space="preserve">「{0}」は構造が破損しているため追加できませんでした。&#10;&#10;KillerPDF で修復を試みますか？修復済みコピーが作成されます。元のファイルは変更されません。&#10;&#10;注意 : 修復済みファイルでは、しおり、フォーム、その他のインタラクティブ機能が失われる場合があります。</sys:String>
