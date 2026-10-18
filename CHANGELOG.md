@@ -18,6 +18,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - The keyboard focus outline is a thin solid ring in the theme accent instead of a thick dotted line, and uses the text color where the accent would be too faint to see.
 
 ### Fixed
+- The window opens fully on screen on a small or high-scaling display, or when its saved size came from a bigger monitor, instead of running off the edges.
 - On the Light theme's Yellow accent, buttons, links, tabs and accent icons stay yellow with a thin gray outline around yellow text and icons, instead of turning near-black.
 - On the website's Light theme with the Yellow accent, links, headings and labels stay yellow with a thin gray outline instead of turning olive brown.
 - The exe's file properties show Steve the Killer as the copyright holder instead of leaving it blank.

@@ -747,6 +747,9 @@ namespace KillerPDF
             catch { return null; }
         }
 
+        /// <summary>True once a saved window size was applied, so WorkAreaFit keeps it whole.</summary>
+        private bool _windowSizeRestored;
+
         private void RestoreWindowSettings()
         {
             try
@@ -756,6 +759,7 @@ namespace KillerPDF
                 {
                     Width  = w;
                     Height = h;
+                    _windowSizeRestored = true;
                 }
                 if (int.TryParse(App.GetSetting("WindowTop"),  out int savedTop) &&
                     int.TryParse(App.GetSetting("WindowLeft"), out int savedLeft))
@@ -775,6 +779,9 @@ namespace KillerPDF
                         Top  = savedTop;
                     }
                 }
+                // A default or saved size larger than this monitor's work area is shrunk and moved
+                // onto it. A saved size may use the whole work area; the XAML default keeps a margin.
+                KillerFamily.Windowing.WorkAreaFit.Fit(this, keepMargin: !_windowSizeRestored);
                 if (Enum.TryParse<WindowState>(App.GetSetting("WindowState"), out var ws) &&
                     ws == WindowState.Maximized)
                 {
