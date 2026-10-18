@@ -406,6 +406,10 @@ namespace KillerPDF.Features
             internal bool UseText { get; set; } = true;
         }
 
+        // A face scoring at least this against a page's ink fits it well enough that the page
+        // need not be compared with every installed face.
+        private const double ConfidentFaceScore = 0.78;
+
         // Turns the recognized words of every scanned page into real text, set in the installed
         // face that best matches the print and drawn over the page image with those words erased.
         // Words that do not match their ink closely stay in the image under invisible text. Pages
@@ -423,8 +427,9 @@ namespace KillerPDF.Features
             IReadOnlyList<bool> bitonal = PdfEngineIntegration.ReadBitonalPages(src);
             using var renderSession = PdfPageRenderSession.OpenEngineFirst(src, OcrRenderMax, OcrRenderMax);
             using var ocr = new OcrService(language: language);
-            IReadOnlyList<PdfScanTextFace> candidates = PdfEngineIntegration.ScanTextFaces();
-            bool narrowed = false;
+            IReadOnlyList<PdfScanTextFace> faces = PdfEngineIntegration.ScanTextFaces();
+            HashSet<string> bundled = [.. PdfScanTextWriter.BundledFaces().Select(item => item.Family)];
+            var shortlist = new List<PdfScanTextFace>();
             var pages = new List<PdfScanTextPage>();
             var measured = new List<(int PageIndex, PdfScanTextPageAnalysis Analysis, PdfScanTextFace Face)>();
             var reviewWords = new List<ScanTextReviewWord>();
@@ -442,16 +447,17 @@ namespace KillerPDF.Features
 
                 PdfOcrResult result = ocr.RecognizeBgra(bgra, w, h, cancellationToken: ct);
                 PdfScanTextPageAnalysis analysis = PdfScanTextAnalyzer.Analyze(bgra, w, h, result.Words);
+                // The first page is compared with every face. Later pages choose among the faces
+                // that came close on earlier pages and the bundled Times, Arial and Courier
+                // equivalents, and are compared with every face again when none of those fits
+                // well, since a document can change faces and its first page can be a poor guide.
                 IReadOnlyList<(PdfScanTextFace Face, double Score)> ranked =
-                    PdfScanTextWriter.RankFaces(analysis, candidates, cancellationToken: ct);
-                PdfScanTextFace face = ranked.Count > 0 ? ranked[0].Face : candidates[0];
-                // The first page with enough words settles the likely faces; later pages choose
-                // among the closest few.
-                if (!narrowed && ranked.Count > 0)
-                {
-                    candidates = [.. ranked.Take(4).Select(item => item.Face)];
-                    narrowed = true;
-                }
+                    PdfScanTextWriter.RankFaces(analysis, shortlist.Count > 0 ? shortlist : faces, cancellationToken: ct);
+                if (shortlist.Count > 0 && (ranked.Count == 0 || ranked[0].Score < ConfidentFaceScore))
+                    ranked = PdfScanTextWriter.RankFaces(analysis, faces, cancellationToken: ct);
+                foreach (string family in ranked.Take(4).Select(item => item.Face.Family).Concat(ranked.Count > 0 ? bundled : []))
+                    if (!shortlist.Any(item => item.Family == family)) shortlist.Add(faces.First(item => item.Family == family));
+                PdfScanTextFace face = ranked.Count > 0 ? ranked[0].Face : faces[0];
                 PdfScanTextWriter.Verify(analysis, face, cancellationToken: ct);
                 if (keepScanned is not null)
                     for (int k = 0; k < analysis.Words.Count; k++)
