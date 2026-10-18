@@ -35,7 +35,7 @@ public static class PdfXfaAcroFormConverter
         foreach (var repeated in fields.Where(group => group.Value.Length > 1))
         {
             string?[] bindings = repeated.Value.Select(field => BindingName(field.Binding)).ToArray();
-            if (info.FormType == PdfXfaFormType.Dynamic || template.ScriptCount != 0
+            if (template.ScriptCount != 0
                 || template.Behaviors.Count != 0
                 || repeated.Value.Any(field => field.ControlType is null || !TextControls.Contains(field.ControlType))
                 || bindings.Any(string.IsNullOrWhiteSpace)
@@ -71,6 +71,9 @@ public static class PdfXfaAcroFormConverter
         PdfFormDataSet effectiveData = ApplyBehaviors(info, template, data, values);
 
         var editor = new PdfIncrementalPageEditor(document).RemoveXfa();
+        var authored = new PdfDocumentBuilder();
+        for (int page = 0; page < editor.PageCount; page++) authored.AddBlankPage();
+        bool hasAuthoredFields = false;
         if (info.FormType == PdfXfaFormType.Dynamic)
         {
             PdfPageContent firstPage = new PdfPageContentReader(document).Read(0);
@@ -80,10 +83,14 @@ public static class PdfXfaAcroFormConverter
                 editor.AddBlankPage(firstPage.Width, firstPage.Height);
             PdfDocument expanded = PdfDocument.Open(editor.Build());
             editor = new PdfIncrementalPageEditor(expanded);
+            while (authored.PageCount < editor.PageCount) authored.AddBlankPage();
             foreach (PdfXfaFlowFieldPlacement placement in flow.Placements)
             {
-                PdfXfaTemplateField field = fields[placement.FieldPath][0];
-                string name = placement.FieldPath + "[" + placement.OccurrenceIndex + "]";
+                PdfXfaTemplateField[] definitions = fields[placement.FieldPath];
+                PdfXfaTemplateField field = definitions[placement.TemplateOccurrenceIndex];
+                string name = placement.FieldPath
+                    + (definitions.Length > 1 ? "[" + placement.TemplateOccurrenceIndex + "]" : "")
+                    + "[" + placement.OccurrenceIndex + "]";
                 double bottom = firstPage.Height - placement.Y - placement.Height;
                 if (field.ControlType!.Equals("imageEdit", StringComparison.OrdinalIgnoreCase))
                 {
@@ -99,11 +106,12 @@ public static class PdfXfaAcroFormConverter
                         placement.Width, placement.Height, placement.Value);
                     continue;
                 }
-                AddField(editor, field, name, placement.PageIndex, placement.X,
+                AddField(authored, field, name, placement.PageIndex, placement.X,
                     bottom,
                     placement.Width, placement.Height, placement.Value);
+                hasAuthoredFields = true;
             }
-            return Finish(editor, mode);
+            return Finish(editor, mode, hasAuthoredFields ? authored : null);
         }
 
         PdfXfaStaticLayoutPlan layout = PdfXfaStaticLayout.Plan(info);
@@ -147,10 +155,11 @@ public static class PdfXfaAcroFormConverter
                     placement.X, bottom, placement.Width, placement.Height, value);
                 continue;
             }
-            AddField(editor, field, name, placement.PageIndex,
+            AddField(authored, field, name, placement.PageIndex,
                 placement.X, bottom, placement.Width, placement.Height, value);
+            hasAuthoredFields = true;
         }
-        return Finish(editor, mode);
+        return Finish(editor, mode, hasAuthoredFields ? authored : null);
     }
 
     internal static PdfXfaInfo ExpandCombinedXdp(PdfXfaInfo info)
@@ -339,14 +348,15 @@ public static class PdfXfaAcroFormConverter
             ['%'] = "nnnwnwnwn", ['*'] = "nwnnwnwnn"
         };
 
-    private static byte[] Finish(PdfIncrementalPageEditor editor, PdfXfaConversionMode mode)
+    private static byte[] Finish(PdfIncrementalPageEditor editor, PdfXfaConversionMode mode, PdfDocumentBuilder? authored)
     {
+        if (authored is not null) editor.AddAuthoredFields(PdfDocument.Open(authored.Build()));
         byte[] converted = editor.Build();
         return mode == PdfXfaConversionMode.Flattened
             ? PdfFormFlattener.Flatten(PdfDocument.Open(converted)) : converted;
     }
 
-    private static void AddField(PdfIncrementalPageEditor editor,
+    private static void AddField(PdfDocumentBuilder builder,
         PdfXfaTemplateField field, string name, int pageIndex,
         double x, double bottom, double width, double height, string? value)
     {
@@ -364,18 +374,18 @@ public static class PdfXfaAcroFormConverter
             TextColor = field.Appearance.TextColor ?? new PdfRgbColor(0, 0, 0)
         };
         if (TextControls.Contains(field.ControlType!))
-            editor.AddTextField(pageIndex, name, x, bottom, width, height,
+            builder.AddTextField(pageIndex, name, x, bottom, width, height,
                 value ?? string.Empty, fontSize,
                 options: new PdfTextFieldOptions { Alignment = alignment },
                 fieldMetadata: metadata, appearanceStyle: style);
         else if (field.ControlType!.Equals("checkButton", StringComparison.OrdinalIgnoreCase))
-            editor.AddCheckBox(pageIndex, name, x, bottom, width, height,
+            builder.AddCheckBox(pageIndex, name, x, bottom, width, height,
                 Checked(value), fieldMetadata: metadata, appearanceStyle: style);
         else if (field.ControlType.Equals("choiceList", StringComparison.OrdinalIgnoreCase))
         {
             if (field.ChoiceOptions.Count == 0)
                 throw new NotSupportedException($"XFA choice field '{field.Path}' has no options.");
-            editor.AddComboBoxOptions(pageIndex, name, x, bottom, width, height,
+            builder.AddComboBoxOptions(pageIndex, name, x, bottom, width, height,
                 field.ChoiceOptions.Select(option => new PdfChoiceOption(
                     option.ExportValue, option.DisplayValue)), value,
                 fontSize: fontSize, fieldMetadata: metadata,
@@ -390,7 +400,7 @@ public static class PdfXfaAcroFormConverter
             if (!string.IsNullOrEmpty(value))
                 throw new NotSupportedException(
                     $"Signed XFA field '{field.Path}' cannot be converted safely.");
-            editor.AddSignatureField(pageIndex, name, x, bottom, width, height,
+            builder.AddSignatureField(pageIndex, name, x, bottom, width, height,
                 fieldMetadata: metadata, fontSize: fontSize,
                 appearanceStyle: style, appearanceAlignment: alignment);
         }

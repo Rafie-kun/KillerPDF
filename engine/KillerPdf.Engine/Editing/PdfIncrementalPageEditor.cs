@@ -640,6 +640,16 @@ public sealed class PdfIncrementalPageEditor
         return this;
     }
 
+    internal PdfIncrementalPageEditor AddAuthoredFields(PdfDocument document)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        if (PdfPageTree.Read(document).Pages.Count != _pages.Count)
+            throw new ArgumentException("Authored form pages must match the destination pages.", nameof(document));
+        _authoredForms.Add(new PendingAuthoredForm([.. _pages], document));
+        _catalogPresentationChanged = true;
+        return this;
+    }
+
     /// <summary>Adds a text field and generated widget appearance to a page.</summary>
     public PdfIncrementalPageEditor AddTextField(
         int pageIndex, string name, double x, double y, double width, double height,

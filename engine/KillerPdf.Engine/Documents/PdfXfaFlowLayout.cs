@@ -27,6 +27,12 @@ public static class PdfXfaFlowLayout
         Dictionary<string, PdfFormDataField> values = data.Fields.ToDictionary(
             field => field.Name, StringComparer.Ordinal);
         var placements = new List<PdfXfaFlowFieldPlacement>();
+        var definitions = document.Descendants().Where(element =>
+                element.Name.LocalName.Equals("field", StringComparison.OrdinalIgnoreCase))
+            .GroupBy(field => Path(field, required: false), StringComparer.Ordinal)
+            .Where(group => group.Key.Length != 0)
+            .SelectMany(group => group.Select((field, index) => (Field: field, Index: index)))
+            .ToDictionary(item => item.Field, item => item.Index);
         int pageIndex = 0;
         double cursor = margin;
         bool breakAfterPrevious = false;
@@ -86,7 +92,7 @@ public static class PdfXfaFlowLayout
                             || cellX + cell.Width > pageWidth - margin)
                             throw new InvalidOperationException(
                                 $"XFA table row field '{cell.Path}' does not fit the requested page area.");
-                        Add(cell.Path, occurrence, pageIndex, cellX,
+                        Add(cell.Cell, cell.Path, occurrence, pageIndex, cellX,
                             cursor + rowGap, cell.Width, cell.Height,
                             occurrence < cell.Values.Length ? cell.Values[occurrence] : string.Empty);
                         runningX = cellX + cell.Width;
@@ -122,7 +128,7 @@ public static class PdfXfaFlowLayout
                     cursor = margin;
                 }
                 cursor += gap;
-                Add(path, occurrence, pageIndex, x, cursor, width, height, repeated[occurrence]);
+                Add(field, path, occurrence, pageIndex, x, cursor, width, height, repeated[occurrence]);
                 cursor += height;
             }
             breakAfterPrevious = HasPageBreak(field, "breakAfter");
@@ -130,14 +136,15 @@ public static class PdfXfaFlowLayout
         return new PdfXfaFlowLayoutPlan(pageIndex + 1,
             Array.AsReadOnly(placements.ToArray()));
 
-        void Add(string path, int occurrence, int page, double x, double y,
+        void Add(XElement field, string path, int occurrence, int page, double x, double y,
             double width, double height, string value)
         {
             if (placements.Count >= MaximumPlacements)
                 throw new InvalidOperationException(
                     $"An XFA flow cannot contain more than {MaximumPlacements} placements.");
             placements.Add(new PdfXfaFlowFieldPlacement(
-                path, occurrence, page, x, y, width, height, value));
+                path, occurrence, page, x, y, width, height, value)
+            { TemplateOccurrenceIndex = definitions[field] });
         }
     }
 
@@ -214,14 +221,14 @@ public static class PdfXfaFlowLayout
         return number * scale;
     }
 
-    private static string Path(XElement field)
+    private static string Path(XElement field, bool required = true)
     {
         string path = string.Join('.', field.AncestorsAndSelf().Reverse()
             .Where(element => element == field || element.Name.LocalName.Equals(
                 "subform", StringComparison.OrdinalIgnoreCase))
             .Select(element => Attribute(element, "name"))
             .Where(value => !string.IsNullOrWhiteSpace(value)));
-        return string.IsNullOrWhiteSpace(path)
+        return string.IsNullOrWhiteSpace(path) && required
             ? throw new InvalidOperationException("An XFA template field has no path.") : path;
     }
 
@@ -237,4 +244,8 @@ public sealed record PdfXfaFlowLayoutPlan(
 /// <summary>One repeated flowed field using top-left page coordinates in PDF points.</summary>
 public sealed record PdfXfaFlowFieldPlacement(
     string FieldPath, int OccurrenceIndex, int PageIndex,
-    double X, double Y, double Width, double Height, string Value);
+    double X, double Y, double Width, double Height, string Value)
+{
+    /// <summary>Gets the zero-based template definition among fields sharing this path.</summary>
+    public int TemplateOccurrenceIndex { get; init; }
+}

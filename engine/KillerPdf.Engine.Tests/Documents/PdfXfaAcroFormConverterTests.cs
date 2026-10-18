@@ -7,6 +7,35 @@ namespace KillerPdf.Engine.Tests.Documents;
 
 public sealed class PdfXfaAcroFormConverterTests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ConvertDistinguishesExplicitlyBoundDynamicTemplateOccurrences(bool table)
+    {
+        string fieldsXml = """<field name="name" w="30pt" h="12pt"><bind ref="$record.person.first"/><assist><toolTip>First</toolTip></assist><ui><textEdit/></ui></field><field name="name" w="40pt" h="20pt"><bind ref="$record.person.last"/><assist><toolTip>Last</toolTip></assist><ui><textEdit/></ui></field>""";
+        PdfDocument source = Document(
+            "<template><subform name=\"form\" layout=\"tb\">" + (table ? "<subform layout=\"row\">" : "")
+                + fieldsXml + (table ? "</subform>" : "") + "</subform></template>",
+            """<datasets><data><person><first>Ada</first><last>Lovelace</last></person></data></datasets>""",
+            """<config><present><pdf><dynamicRender>required</dynamicRender></pdf></present></config>""");
+
+        PdfDocument converted = PdfDocument.Open(PdfXfaAcroFormConverter.Convert(source));
+
+        Assert.Null(PdfXfaReader.Read(converted));
+        var fields = PdfFormWidgetReader.ReadPage(converted, 0).ToDictionary(field => field.FieldName);
+        Assert.Equal(2, fields.Count);
+        Assert.Equal("Ada", fields["form.name[0][0]"].Value);
+        Assert.Equal("First", fields["form.name[0][0]"].Tooltip);
+        Assert.Equal(88, fields["form.name[0][0]"].Bottom);
+        Assert.Equal("Lovelace", fields["form.name[1][0]"].Value);
+        Assert.Equal("Last", fields["form.name[1][0]"].Tooltip);
+        Assert.Equal(table ? 80 : 68, fields["form.name[1][0]"].Bottom);
+        Assert.Equal(table ? 30 : 0, fields["form.name[1][0]"].Left);
+        PdfDocument edited = PdfDocument.Open(new KillerPdf.Engine.Editing.PdfIncrementalPageEditor(converted)
+            .SetTextFieldValue("form.name[1][0]", "Byron").Build());
+        Assert.Equal(["Ada", "Byron"], PdfFormWidgetReader.ReadPage(edited, 0).Select(field => field.Value));
+    }
+
     [Fact]
     public void ConvertDistinguishesRepeatedStaticFieldsWithExplicitBindings()
     {
@@ -23,6 +52,9 @@ public sealed class PdfXfaAcroFormConverterTests
         Assert.Equal(78, fields["form.name[0]"].Bottom);
         Assert.Equal("Lovelace", fields["form.name[1]"].Value);
         Assert.Equal(58, fields["form.name[1]"].Bottom);
+        PdfDocument edited = PdfDocument.Open(new KillerPdf.Engine.Editing.PdfIncrementalPageEditor(converted)
+            .SetTextFieldValue("form.name[1]", "Byron").Build());
+        Assert.Equal(["Ada", "Byron"], PdfFormWidgetReader.ReadPage(edited, 0).Select(field => field.Value));
     }
 
     [Fact]

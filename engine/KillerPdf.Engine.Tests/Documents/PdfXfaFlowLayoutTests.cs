@@ -6,6 +6,23 @@ namespace KillerPdf.Engine.Tests.Documents;
 public sealed class PdfXfaFlowLayoutTests
 {
     [Fact]
+    public void PlanStillIgnoresUnnamedFieldsOutsideFlowedContainers()
+    {
+        var info = new PdfXfaInfo
+        {
+            Packets = [new PdfXfaPacket("template", System.Text.Encoding.UTF8.GetBytes("""
+                <template><field/><subform name="form" layout="tb">
+                  <field name="item" w="20pt" h="10pt"/>
+                </subform></template>
+                """))]
+        };
+
+        PdfXfaFlowLayoutPlan plan = PdfXfaFlowLayout.Plan(info, new PdfFormDataSet { Fields = [] }, 100, 100, 10);
+
+        Assert.Equal("form.item", Assert.Single(plan.Placements).FieldPath);
+    }
+
+    [Fact]
     public void PlanRepeatsBoundValuesAndPaginatesTopToBottom()
     {
         PdfXfaInfo info = new()
