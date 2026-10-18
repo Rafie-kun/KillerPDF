@@ -1677,4 +1677,8 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Repair_Link">Link</sys:String>
     <sys:String x:Key="Str_Repair_Figure">Abbildung</sys:String>
     <sys:String x:Key="Str_Repair_Apply">Anwenden</sys:String>
+    <sys:String x:Key="Str_Macro_Current">Für aktuelles Dokument ausführen</sys:String>
+    <sys:String x:Key="Str_Macro_Batch">Für ausgewählte PDFs ausführen</sys:String>
+    <sys:String x:Key="Str_Macro_NoSettings">Dieser Schritt hat hier keine bearbeitbaren Einstellungen.</sys:String>
+    <sys:String x:Key="Str_Macro_Replace">Vorhandene Datei ersetzen</sys:String>
 </ResourceDictionary>

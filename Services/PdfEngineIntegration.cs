@@ -21,6 +21,19 @@ namespace KillerPDF.Services;
 /// <summary>Bridges completed application state into The KillerPDF.Engine during migration.</summary>
 internal static class PdfEngineIntegration
 {
+    internal static string[] PlanBatchOutputs(IEnumerable<string> sources, string firstOutput)
+    {
+        string[] inputs = sources.Select(Path.GetFullPath).ToArray();
+        string full = Path.GetFullPath(firstOutput);
+        string directory = Path.GetDirectoryName(full)!;
+        string stem = Path.GetFileNameWithoutExtension(full);
+        string[] outputs = Enumerable.Range(0, inputs.Length).Select(index => Path.Combine(directory,
+            stem + (index == 0 ? "" : "-" + (index + 1)) + ".pdf")).ToArray();
+        if (outputs.Any(output => inputs.Contains(output, StringComparer.OrdinalIgnoreCase)))
+            throw new ArgumentException("Batch output cannot replace a source PDF.", nameof(firstOutput));
+        return outputs;
+    }
+
     internal static void ApplyDocumentRepair(string path, Func<PdfDocument, byte[]> build) =>
         ReplaceWithBuiltResult(path, build(PdfDocument.Open(File.ReadAllBytes(path))));
 

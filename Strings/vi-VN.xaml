@@ -1688,4 +1688,8 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Repair_Link">Liên kết</sys:String>
     <sys:String x:Key="Str_Repair_Figure">Hình</sys:String>
     <sys:String x:Key="Str_Repair_Apply">Áp dụng</sys:String>
+    <sys:String x:Key="Str_Macro_Current">Chạy trên tài liệu hiện tại</sys:String>
+    <sys:String x:Key="Str_Macro_Batch">Chạy trên các PDF đã chọn</sys:String>
+    <sys:String x:Key="Str_Macro_NoSettings">Bước này không có thiết lập có thể sửa trong hộp thoại này.</sys:String>
+    <sys:String x:Key="Str_Macro_Replace">Thay thế tệp hiện có</sys:String>
 </ResourceDictionary>

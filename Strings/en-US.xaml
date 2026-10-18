@@ -1688,4 +1688,8 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Repair_Link">Link</sys:String>
     <sys:String x:Key="Str_Repair_Figure">Figure</sys:String>
     <sys:String x:Key="Str_Repair_Apply">Apply</sys:String>
+    <sys:String x:Key="Str_Macro_Current">Run on current document</sys:String>
+    <sys:String x:Key="Str_Macro_Batch">Run on selected PDFs</sys:String>
+    <sys:String x:Key="Str_Macro_NoSettings">This step has no editable settings in this dialog.</sys:String>
+    <sys:String x:Key="Str_Macro_Replace">Replace existing file</sys:String>
 </ResourceDictionary>

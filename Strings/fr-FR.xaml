@@ -1688,4 +1688,8 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Repair_Link">Lien</sys:String>
     <sys:String x:Key="Str_Repair_Figure">Figure</sys:String>
     <sys:String x:Key="Str_Repair_Apply">Appliquer</sys:String>
+    <sys:String x:Key="Str_Macro_Current">Exécuter sur le document actuel</sys:String>
+    <sys:String x:Key="Str_Macro_Batch">Exécuter sur les PDF sélectionnés</sys:String>
+    <sys:String x:Key="Str_Macro_NoSettings">Cette étape ne possède aucun réglage modifiable dans cette fenêtre.</sys:String>
+    <sys:String x:Key="Str_Macro_Replace">Remplacer le fichier existant</sys:String>
 </ResourceDictionary>

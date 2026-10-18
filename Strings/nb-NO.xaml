@@ -1688,4 +1688,8 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Repair_Link">Lenke</sys:String>
     <sys:String x:Key="Str_Repair_Figure">Figur</sys:String>
     <sys:String x:Key="Str_Repair_Apply">Bruk</sys:String>
+    <sys:String x:Key="Str_Macro_Current">Kjør på gjeldende dokument</sys:String>
+    <sys:String x:Key="Str_Macro_Batch">Kjør på valgte PDF-er</sys:String>
+    <sys:String x:Key="Str_Macro_NoSettings">Dette trinnet har ingen redigerbare innstillinger i dette vinduet.</sys:String>
+    <sys:String x:Key="Str_Macro_Replace">Erstatt eksisterende fil</sys:String>
 </ResourceDictionary>

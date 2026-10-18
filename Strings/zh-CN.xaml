@@ -1672,4 +1672,8 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Repair_Link">链接</sys:String>
     <sys:String x:Key="Str_Repair_Figure">图形</sys:String>
     <sys:String x:Key="Str_Repair_Apply">应用</sys:String>
+    <sys:String x:Key="Str_Macro_Current">在当前文档上运行</sys:String>
+    <sys:String x:Key="Str_Macro_Batch">在所选 PDF 上运行</sys:String>
+    <sys:String x:Key="Str_Macro_NoSettings">此步骤在此对话框中没有可编辑的设置。</sys:String>
+    <sys:String x:Key="Str_Macro_Replace">替换现有文件</sys:String>
 </ResourceDictionary>

@@ -1668,4 +1668,8 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Repair_Link">Enlace</sys:String>
     <sys:String x:Key="Str_Repair_Figure">Figura</sys:String>
     <sys:String x:Key="Str_Repair_Apply">Aplicar</sys:String>
+    <sys:String x:Key="Str_Macro_Current">Ejecutar en el documento actual</sys:String>
+    <sys:String x:Key="Str_Macro_Batch">Ejecutar en PDF seleccionados</sys:String>
+    <sys:String x:Key="Str_Macro_NoSettings">Este paso no tiene ajustes editables en este diálogo.</sys:String>
+    <sys:String x:Key="Str_Macro_Replace">Reemplazar archivo existente</sys:String>
 </ResourceDictionary>

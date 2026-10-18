@@ -1688,4 +1688,8 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_Repair_Link">Collegamento</sys:String>
     <sys:String x:Key="Str_Repair_Figure">Figura</sys:String>
     <sys:String x:Key="Str_Repair_Apply">Applica</sys:String>
+    <sys:String x:Key="Str_Macro_Current">Esegui sul documento corrente</sys:String>
+    <sys:String x:Key="Str_Macro_Batch">Esegui sui PDF selezionati</sys:String>
+    <sys:String x:Key="Str_Macro_NoSettings">Questo passaggio non ha impostazioni modificabili in questa finestra.</sys:String>
+    <sys:String x:Key="Str_Macro_Replace">Sostituisci file esistente</sys:String>
 </ResourceDictionary>

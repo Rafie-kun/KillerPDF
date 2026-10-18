@@ -1675,4 +1675,8 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Repair_Link">Hivatkozás</sys:String>
     <sys:String x:Key="Str_Repair_Figure">Ábra</sys:String>
     <sys:String x:Key="Str_Repair_Apply">Alkalmaz</sys:String>
+    <sys:String x:Key="Str_Macro_Current">Futtatás az aktuális dokumentumon</sys:String>
+    <sys:String x:Key="Str_Macro_Batch">Futtatás a kijelölt PDF-eken</sys:String>
+    <sys:String x:Key="Str_Macro_NoSettings">Ehhez a lépéshez itt nincsenek szerkeszthető beállítások.</sys:String>
+    <sys:String x:Key="Str_Macro_Replace">Meglévő fájl felülírása</sys:String>
 </ResourceDictionary>

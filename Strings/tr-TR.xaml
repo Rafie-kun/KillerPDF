@@ -1668,4 +1668,8 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Repair_Link">Bağlantı</sys:String>
     <sys:String x:Key="Str_Repair_Figure">Şekil</sys:String>
     <sys:String x:Key="Str_Repair_Apply">Uygula</sys:String>
+    <sys:String x:Key="Str_Macro_Current">Geçerli belgede çalıştır</sys:String>
+    <sys:String x:Key="Str_Macro_Batch">Seçili PDF'lerde çalıştır</sys:String>
+    <sys:String x:Key="Str_Macro_NoSettings">Bu adımın bu pencerede düzenlenebilir ayarı yok.</sys:String>
+    <sys:String x:Key="Str_Macro_Replace">Var olan dosyayı değiştir</sys:String>
 </ResourceDictionary>

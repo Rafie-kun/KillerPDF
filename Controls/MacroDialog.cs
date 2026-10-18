@@ -62,6 +62,7 @@ internal sealed class MacroDialog : Window
         Button delete = Button("Str_Ctx_BmDelete", (_, _) => Delete());
         Button save = Button("Str_DocInfo_Save", (_, _) => SaveCurrent(), accent: true);
         Button add = Button("Str_AutoBookmarks_Include", (_, _) => AddStep());
+        Button settings = Button("Str_Redact_Properties", (_, _) => EditStep());
         Button remove = Button("Str_Portfolio_Remove", (_, _) => RemoveStep());
         Button up = Button("Str_Ctx_BmMoveUp", (_, _) => MoveStep(-1));
         Button down = Button("Str_Ctx_BmMoveDown", (_, _) => MoveStep(1));
@@ -85,7 +86,7 @@ internal sealed class MacroDialog : Window
         UIElement saved = BuildSavedPanel(create, duplicate, import, export, delete);
         Grid.SetColumn(saved, 0);
         columns.Children.Add(saved);
-        UIElement editor = BuildEditorPanel(save, add, remove, up, down);
+        UIElement editor = BuildEditorPanel(save, add, remove, up, down, settings);
         Grid.SetColumn(editor, 2);
         columns.Children.Add(editor);
         body.Children.Add(columns);
@@ -116,11 +117,11 @@ internal sealed class MacroDialog : Window
     }
 
     private DockPanel BuildEditorPanel(Button save, Button add, Button remove,
-        Button up, Button down)
+        Button up, Button down, Button settings)
     {
         var panel = new DockPanel();
         var actions = new WrapPanel { Margin = new Thickness(0, 8, 0, 0) };
-        foreach (Button button in new[] { save, remove, up, down })
+        foreach (Button button in new[] { save, settings, remove, up, down })
         {
             button.Margin = new Thickness(0, 0, 6, 6);
             actions.Children.Add(button);
@@ -200,7 +201,14 @@ internal sealed class MacroDialog : Window
     {
         if (_operation.SelectedItem is not OperationChoice choice) return;
         int index = _steps.SelectedIndex < 0 ? _currentSteps.Count : _steps.SelectedIndex + 1;
-        _currentSteps.Insert(index, new PdfMacroStep(choice.Operation));
+        var step = new PdfMacroStep(choice.Operation);
+        if (choice.Operation is PdfMacroOperation.NumberPages or PdfMacroOperation.GenerateBookmarks
+            or PdfMacroOperation.GenerateTableOfContents)
+        {
+            step = MacroStepEditor.Edit(this, step);
+            if (step is null) return;
+        }
+        _currentSteps.Insert(index, step);
         RefreshSteps(index);
     }
 
@@ -210,6 +218,16 @@ internal sealed class MacroDialog : Window
         if (index < 0 || _currentSteps.Count == 1) return;
         _currentSteps.RemoveAt(index);
         RefreshSteps(Math.Min(index, _currentSteps.Count - 1));
+    }
+
+    private void EditStep()
+    {
+        int index = _steps.SelectedIndex;
+        if (index < 0) return;
+        PdfMacroStep? edited = MacroStepEditor.Edit(this, _currentSteps[index]);
+        if (edited is null) return;
+        _currentSteps[index] = edited;
+        RefreshSteps(index);
     }
 
     private void MoveStep(int offset)

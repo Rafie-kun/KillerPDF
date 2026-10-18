@@ -1673,4 +1673,8 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Repair_Link">Odkaz</sys:String>
     <sys:String x:Key="Str_Repair_Figure">Obrázek</sys:String>
     <sys:String x:Key="Str_Repair_Apply">Použít</sys:String>
+    <sys:String x:Key="Str_Macro_Current">Spustit pro aktuální dokument</sys:String>
+    <sys:String x:Key="Str_Macro_Batch">Spustit pro vybrané soubory PDF</sys:String>
+    <sys:String x:Key="Str_Macro_NoSettings">Tento krok zde nemá upravitelné nastavení.</sys:String>
+    <sys:String x:Key="Str_Macro_Replace">Nahradit existující soubor</sys:String>
 </ResourceDictionary>

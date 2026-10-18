@@ -1691,4 +1691,8 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_Repair_Link">Сілтеме</sys:String>
     <sys:String x:Key="Str_Repair_Figure">Сурет</sys:String>
     <sys:String x:Key="Str_Repair_Apply">Қолдану</sys:String>
+    <sys:String x:Key="Str_Macro_Current">Ағымдағы құжатта орындау</sys:String>
+    <sys:String x:Key="Str_Macro_Batch">Таңдалған PDF файлдарында орындау</sys:String>
+    <sys:String x:Key="Str_Macro_NoSettings">Бұл қадамның осы терезеде өңделетін параметрлері жоқ.</sys:String>
+    <sys:String x:Key="Str_Macro_Replace">Бар файлды ауыстыру</sys:String>
 </ResourceDictionary>

@@ -1691,4 +1691,8 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Repair_Link">Ссылка</sys:String>
     <sys:String x:Key="Str_Repair_Figure">Рисунок</sys:String>
     <sys:String x:Key="Str_Repair_Apply">Применить</sys:String>
+    <sys:String x:Key="Str_Macro_Current">Выполнить для текущего документа</sys:String>
+    <sys:String x:Key="Str_Macro_Batch">Выполнить для выбранных PDF</sys:String>
+    <sys:String x:Key="Str_Macro_NoSettings">У этого шага нет редактируемых настроек в этом окне.</sys:String>
+    <sys:String x:Key="Str_Macro_Replace">Заменить существующий файл</sys:String>
 </ResourceDictionary>

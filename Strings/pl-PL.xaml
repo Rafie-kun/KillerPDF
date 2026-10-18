@@ -1676,4 +1676,8 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Repair_Link">Łącze</sys:String>
     <sys:String x:Key="Str_Repair_Figure">Rysunek</sys:String>
     <sys:String x:Key="Str_Repair_Apply">Zastosuj</sys:String>
+    <sys:String x:Key="Str_Macro_Current">Uruchom dla bieżącego dokumentu</sys:String>
+    <sys:String x:Key="Str_Macro_Batch">Uruchom dla wybranych plików PDF</sys:String>
+    <sys:String x:Key="Str_Macro_NoSettings">Ten krok nie ma ustawień do edycji w tym oknie.</sys:String>
+    <sys:String x:Key="Str_Macro_Replace">Zastąp istniejący plik</sys:String>
 </ResourceDictionary>

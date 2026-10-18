@@ -1688,4 +1688,8 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Repair_Link">リンク</sys:String>
     <sys:String x:Key="Str_Repair_Figure">図</sys:String>
     <sys:String x:Key="Str_Repair_Apply">適用</sys:String>
+    <sys:String x:Key="Str_Macro_Current">現在の文書で実行</sys:String>
+    <sys:String x:Key="Str_Macro_Batch">選択したPDFで実行</sys:String>
+    <sys:String x:Key="Str_Macro_NoSettings">このステップには、この画面で編集できる設定がありません。</sys:String>
+    <sys:String x:Key="Str_Macro_Replace">既存のファイルを置換</sys:String>
 </ResourceDictionary>

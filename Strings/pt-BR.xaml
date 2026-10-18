@@ -1688,4 +1688,8 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Repair_Link">Link</sys:String>
     <sys:String x:Key="Str_Repair_Figure">Figura</sys:String>
     <sys:String x:Key="Str_Repair_Apply">Aplicar</sys:String>
+    <sys:String x:Key="Str_Macro_Current">Executar no documento atual</sys:String>
+    <sys:String x:Key="Str_Macro_Batch">Executar nos PDFs selecionados</sys:String>
+    <sys:String x:Key="Str_Macro_NoSettings">Esta etapa não tem configurações editáveis nesta janela.</sys:String>
+    <sys:String x:Key="Str_Macro_Replace">Substituir arquivo existente</sys:String>
 </ResourceDictionary>

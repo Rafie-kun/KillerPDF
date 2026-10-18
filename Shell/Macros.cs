@@ -25,11 +25,16 @@ public partial class MainWindow
             PdfMacroOperation.RemoveUnresolvedLinks,
             PdfMacroOperation.Ocr,
             PdfMacroOperation.Redact,
-            PdfMacroOperation.Save
+            PdfMacroOperation.Save,
+            PdfMacroOperation.NumberPages,
+            PdfMacroOperation.GenerateBookmarks,
+            PdfMacroOperation.GenerateTableOfContents
         ];
         var dialog = new MacroDialog(this, supported, addable);
         if (dialog.ShowDialog() == true && dialog.MacroToRun is PdfMacro macro)
-            RunMacro(macro, dispatcher);
+            OpenExchangeCommands("Str_DocumentTools_Macros",
+                ("Str_Macro_Current", () => RunMacro(macro, dispatcher)),
+                ("Str_Macro_Batch", () => RunMacroBatch(macro, dispatcher)));
     }
 
     private async void RunMacro(PdfMacro macro, PdfMacroDispatcher dispatcher)
@@ -51,6 +56,8 @@ public partial class MainWindow
             FileName = suggested
         };
         if (outputDialog.ShowDialog(this) != true) return;
+        try { PdfEngineIntegration.PlanBatchOutputs([_currentFile, _originalFile ?? _currentFile], outputDialog.FileName); }
+        catch (ArgumentException error) { ShowExchangeError(error); return; }
 
         PdfMacroPreview preview = macro.Preview([
             new PdfMacroPreviewFile(sourceName, outputDialog.FileName,
@@ -73,9 +80,11 @@ public partial class MainWindow
         CommitActiveTextBox();
         var busy = ShowBusyOverlay(Loc("Str_Macro_Running"));
         CancellationToken token = BeginCancellableOp(Loc("Str_DocumentTools_Macros"));
+        string? snapshot = null;
         try
         {
-            byte[] source = await File.ReadAllBytesAsync(_currentFile, token);
+            snapshot = CreateExchangeSnapshot();
+            byte[] source = await File.ReadAllBytesAsync(snapshot, token);
             PdfMacroRunReport report = await Task.Run(() => dispatcher.RunReport(
                 macro, [new ReadOnlyMemory<byte>(source)], cancellationToken: token), token);
             PdfMacroFileResult result = AssertSingleResult(report);
@@ -107,6 +116,7 @@ public partial class MainWindow
         }
         finally
         {
+            if (snapshot is not null) File.Delete(snapshot);
             EndCancellableOp();
         }
     }
@@ -231,13 +241,13 @@ public partial class MainWindow
         report.Results.Count == 1 ? report.Results[0]
             : throw new InvalidOperationException("The macro did not produce one file result.");
 
-    private static void WriteMacroOutput(string destination, ReadOnlyMemory<byte> data)
+    private static void WriteMacroOutput(string destination, ReadOnlyMemory<byte> data, bool overwrite = true)
     {
         string temporary = destination + "." + Guid.NewGuid().ToString("N") + ".tmp";
         try
         {
             File.WriteAllBytes(temporary, data.ToArray());
-            File.Move(temporary, destination, overwrite: true);
+            File.Move(temporary, destination, overwrite);
         }
         catch
         {

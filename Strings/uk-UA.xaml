@@ -1688,4 +1688,8 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Repair_Link">Посилання</sys:String>
     <sys:String x:Key="Str_Repair_Figure">Рисунок</sys:String>
     <sys:String x:Key="Str_Repair_Apply">Застосувати</sys:String>
+    <sys:String x:Key="Str_Macro_Current">Виконати для поточного документа</sys:String>
+    <sys:String x:Key="Str_Macro_Batch">Виконати для вибраних PDF</sys:String>
+    <sys:String x:Key="Str_Macro_NoSettings">Цей крок не має редагованих налаштувань у цьому вікні.</sys:String>
+    <sys:String x:Key="Str_Macro_Replace">Замінити наявний файл</sys:String>
 </ResourceDictionary>
