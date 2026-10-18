@@ -117,6 +117,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Icon-only buttons give screen readers the name from their tooltip, icon glyphs stay out of what screen readers read, page thumbnails read as their page number instead of a type name, every part of each scroll bar has a name, and controls reached with the keyboard show a thin solid focus ring in the theme accent.
 - Opening the shortcuts or About card moves keyboard focus into it, Tab stays inside the card, and closing it returns focus to where it was.
 - Tab no longer stops on hidden links, which screen readers announced as the window.
+- Screen readers and accessibility checkers no longer report empty text or the hidden parts of scroll bars as items on screen.
 - Screen readers name the Enable keyboard shortcuts check box in the shortcuts card.
 - The page label, initial view, macro, navigation audit, portfolio and attachment dialogs follow the theme, and the longer ones size to their contents.
 - Opening the split pane keeps the window on its own monitor, sliding it left when needed, instead of widening it past the edge of a secondary monitor.
