@@ -1648,4 +1648,24 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_FormTools_XfaConfirm">Bu XFA formu standart form alanlarına dönüştürülsün mü?</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenOutput">Dönüştürülen alanları düzleştir</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenConfirm">Tüm form alanları düzleştirilsin mi? Değerler sayfa içeriğine dönüşür ve artık doldurulamaz.</sys:String>
+    <sys:String x:Key="Str_Repair_Language">Belge dili (BCP 47)</sys:String>
+    <sys:String x:Key="Str_Repair_Metadata">Eksik üst verileri doldur</sys:String>
+    <sys:String x:Key="Str_Repair_PageBox">Üretim sayfa kutusunu kaldır</sys:String>
+    <sys:String x:Key="Str_Repair_OutputIntent">Çıktı amacı ekle</sys:String>
+    <sys:String x:Key="Str_Repair_Bleed">Taşma kutusu</sys:String>
+    <sys:String x:Key="Str_Repair_Trim">Kesim kutusu</sys:String>
+    <sys:String x:Key="Str_Repair_Art">Resim kutusu</sys:String>
+    <sys:String x:Key="Str_Repair_OutputCondition">Çıktı koşulu</sys:String>
+    <sys:String x:Key="Str_Repair_NoChanges">Uygulanabilir değişiklik bulunamadı.</sys:String>
+    <sys:String x:Key="Str_Repair_Before">Önce</sys:String>
+    <sys:String x:Key="Str_Repair_After">Sonra</sys:String>
+    <sys:String x:Key="Str_Repair_Descriptions">Eksik açıklamaları ekle</sys:String>
+    <sys:String x:Key="Str_Repair_ReadingOrder">Okuma sırasını düzenle</sys:String>
+    <sys:String x:Key="Str_Repair_TableHeader">Tablo başlığını ayarla</sys:String>
+    <sys:String x:Key="Str_Repair_Row">Satır</sys:String>
+    <sys:String x:Key="Str_Repair_Column">Sütun</sys:String>
+    <sys:String x:Key="Str_Repair_Both">Satır ve sütun</sys:String>
+    <sys:String x:Key="Str_Repair_Link">Bağlantı</sys:String>
+    <sys:String x:Key="Str_Repair_Figure">Şekil</sys:String>
+    <sys:String x:Key="Str_Repair_Apply">Uygula</sys:String>
 </ResourceDictionary>

@@ -1657,4 +1657,24 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_FormTools_XfaConfirm">Dieses XFA-Formular in Standardformularfelder konvertieren?</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenOutput">Konvertierte Felder reduzieren</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenConfirm">Alle Formularfelder reduzieren? Ihre Werte werden zu Seiteninhalt und können nicht mehr ausgefüllt werden.</sys:String>
+    <sys:String x:Key="Str_Repair_Language">Dokumentsprache (BCP 47)</sys:String>
+    <sys:String x:Key="Str_Repair_Metadata">Fehlende Metadaten ergänzen</sys:String>
+    <sys:String x:Key="Str_Repair_PageBox">Produktionsseitenrahmen entfernen</sys:String>
+    <sys:String x:Key="Str_Repair_OutputIntent">Ausgabebedingung hinzufügen</sys:String>
+    <sys:String x:Key="Str_Repair_Bleed">Anschnittrahmen</sys:String>
+    <sys:String x:Key="Str_Repair_Trim">Endformatrahmen</sys:String>
+    <sys:String x:Key="Str_Repair_Art">Objektrahmen</sys:String>
+    <sys:String x:Key="Str_Repair_OutputCondition">Ausgabebedingung</sys:String>
+    <sys:String x:Key="Str_Repair_NoChanges">Keine anwendbaren Änderungen gefunden.</sys:String>
+    <sys:String x:Key="Str_Repair_Before">Vorher</sys:String>
+    <sys:String x:Key="Str_Repair_After">Nachher</sys:String>
+    <sys:String x:Key="Str_Repair_Descriptions">Fehlende Beschreibungen ergänzen</sys:String>
+    <sys:String x:Key="Str_Repair_ReadingOrder">Lesereihenfolge bearbeiten</sys:String>
+    <sys:String x:Key="Str_Repair_TableHeader">Tabellenkopf festlegen</sys:String>
+    <sys:String x:Key="Str_Repair_Row">Zeile</sys:String>
+    <sys:String x:Key="Str_Repair_Column">Spalte</sys:String>
+    <sys:String x:Key="Str_Repair_Both">Zeile und Spalte</sys:String>
+    <sys:String x:Key="Str_Repair_Link">Link</sys:String>
+    <sys:String x:Key="Str_Repair_Figure">Abbildung</sys:String>
+    <sys:String x:Key="Str_Repair_Apply">Anwenden</sys:String>
 </ResourceDictionary>

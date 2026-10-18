@@ -1668,4 +1668,24 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_FormTools_XfaConfirm">このXFAフォームを標準のフォームフィールドに変換しますか？</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenOutput">変換したフィールドを統合する</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenConfirm">すべてのフォームフィールドを統合しますか？値はページの内容になり、入力できなくなります。</sys:String>
+    <sys:String x:Key="Str_Repair_Language">文書の言語 (BCP 47)</sys:String>
+    <sys:String x:Key="Str_Repair_Metadata">不足するメタデータを入力</sys:String>
+    <sys:String x:Key="Str_Repair_PageBox">製版用ページボックスを削除</sys:String>
+    <sys:String x:Key="Str_Repair_OutputIntent">出力インテントを追加</sys:String>
+    <sys:String x:Key="Str_Repair_Bleed">裁ち落としボックス</sys:String>
+    <sys:String x:Key="Str_Repair_Trim">仕上がりボックス</sys:String>
+    <sys:String x:Key="Str_Repair_Art">アートボックス</sys:String>
+    <sys:String x:Key="Str_Repair_OutputCondition">出力条件</sys:String>
+    <sys:String x:Key="Str_Repair_NoChanges">適用できる変更はありません。</sys:String>
+    <sys:String x:Key="Str_Repair_Before">変更前</sys:String>
+    <sys:String x:Key="Str_Repair_After">変更後</sys:String>
+    <sys:String x:Key="Str_Repair_Descriptions">不足する説明を追加</sys:String>
+    <sys:String x:Key="Str_Repair_ReadingOrder">読み上げ順序を編集</sys:String>
+    <sys:String x:Key="Str_Repair_TableHeader">表の見出しを設定</sys:String>
+    <sys:String x:Key="Str_Repair_Row">行</sys:String>
+    <sys:String x:Key="Str_Repair_Column">列</sys:String>
+    <sys:String x:Key="Str_Repair_Both">行と列</sys:String>
+    <sys:String x:Key="Str_Repair_Link">リンク</sys:String>
+    <sys:String x:Key="Str_Repair_Figure">図</sys:String>
+    <sys:String x:Key="Str_Repair_Apply">適用</sys:String>
 </ResourceDictionary>

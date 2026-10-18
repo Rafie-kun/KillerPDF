@@ -1671,4 +1671,24 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_FormTools_XfaConfirm">Преобразовать эту форму XFA в стандартные поля формы?</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenOutput">Свести преобразованные поля</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenConfirm">Свести все поля формы? Их значения станут содержимым страницы и больше не будут доступны для заполнения.</sys:String>
+    <sys:String x:Key="Str_Repair_Language">Язык документа (BCP 47)</sys:String>
+    <sys:String x:Key="Str_Repair_Metadata">Заполнить недостающие метаданные</sys:String>
+    <sys:String x:Key="Str_Repair_PageBox">Удалить область подготовки к печати</sys:String>
+    <sys:String x:Key="Str_Repair_OutputIntent">Добавить условие вывода</sys:String>
+    <sys:String x:Key="Str_Repair_Bleed">Область выпуска за обрез</sys:String>
+    <sys:String x:Key="Str_Repair_Trim">Область обрезки</sys:String>
+    <sys:String x:Key="Str_Repair_Art">Область иллюстрации</sys:String>
+    <sys:String x:Key="Str_Repair_OutputCondition">Условие вывода</sys:String>
+    <sys:String x:Key="Str_Repair_NoChanges">Подходящих изменений не найдено.</sys:String>
+    <sys:String x:Key="Str_Repair_Before">До</sys:String>
+    <sys:String x:Key="Str_Repair_After">После</sys:String>
+    <sys:String x:Key="Str_Repair_Descriptions">Добавить недостающие описания</sys:String>
+    <sys:String x:Key="Str_Repair_ReadingOrder">Изменить порядок чтения</sys:String>
+    <sys:String x:Key="Str_Repair_TableHeader">Назначить заголовок таблицы</sys:String>
+    <sys:String x:Key="Str_Repair_Row">Строка</sys:String>
+    <sys:String x:Key="Str_Repair_Column">Столбец</sys:String>
+    <sys:String x:Key="Str_Repair_Both">Строка и столбец</sys:String>
+    <sys:String x:Key="Str_Repair_Link">Ссылка</sys:String>
+    <sys:String x:Key="Str_Repair_Figure">Рисунок</sys:String>
+    <sys:String x:Key="Str_Repair_Apply">Применить</sys:String>
 </ResourceDictionary>

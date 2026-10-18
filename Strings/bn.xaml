@@ -1648,4 +1648,24 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_FormTools_XfaConfirm">এই XFA ফর্মকে সাধারণ ফর্মের ঘরে রূপান্তর করবেন?</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenOutput">রূপান্তরিত ঘরগুলো পৃষ্ঠার সঙ্গে মিশিয়ে দিন</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenConfirm">সব ঘর পৃষ্ঠার সঙ্গে মেশাবেন? মানগুলো পৃষ্ঠার বিষয়বস্তু হবে এবং আর পূরণ করা যাবে না।</sys:String>
+    <sys:String x:Key="Str_Repair_Language">নথির ভাষা (BCP 47)</sys:String>
+    <sys:String x:Key="Str_Repair_Metadata">অনুপস্থিত মেটাডেটা পূরণ করুন</sys:String>
+    <sys:String x:Key="Str_Repair_PageBox">মুদ্রণ পৃষ্ঠার বক্স সরান</sys:String>
+    <sys:String x:Key="Str_Repair_OutputIntent">আউটপুট অভিপ্রায় যোগ করুন</sys:String>
+    <sys:String x:Key="Str_Repair_Bleed">ব্লিড বক্স</sys:String>
+    <sys:String x:Key="Str_Repair_Trim">ট্রিম বক্স</sys:String>
+    <sys:String x:Key="Str_Repair_Art">আর্ট বক্স</sys:String>
+    <sys:String x:Key="Str_Repair_OutputCondition">আউটপুট শর্ত</sys:String>
+    <sys:String x:Key="Str_Repair_NoChanges">প্রযোজ্য কোনো পরিবর্তন পাওয়া যায়নি।</sys:String>
+    <sys:String x:Key="Str_Repair_Before">আগে</sys:String>
+    <sys:String x:Key="Str_Repair_After">পরে</sys:String>
+    <sys:String x:Key="Str_Repair_Descriptions">অনুপস্থিত বিবরণ যোগ করুন</sys:String>
+    <sys:String x:Key="Str_Repair_ReadingOrder">পড়ার ক্রম সম্পাদনা করুন</sys:String>
+    <sys:String x:Key="Str_Repair_TableHeader">টেবিলের শিরোনাম নির্ধারণ করুন</sys:String>
+    <sys:String x:Key="Str_Repair_Row">সারি</sys:String>
+    <sys:String x:Key="Str_Repair_Column">কলাম</sys:String>
+    <sys:String x:Key="Str_Repair_Both">সারি ও কলাম</sys:String>
+    <sys:String x:Key="Str_Repair_Link">লিংক</sys:String>
+    <sys:String x:Key="Str_Repair_Figure">চিত্র</sys:String>
+    <sys:String x:Key="Str_Repair_Apply">প্রয়োগ করুন</sys:String>
 </ResourceDictionary>

@@ -1656,4 +1656,24 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_FormTools_XfaConfirm">Przekonwertować ten formularz XFA na standardowe pola?</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenOutput">Spłaszcz przekonwertowane pola</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenConfirm">Spłaszczyć wszystkie pola? Ich wartości staną się treścią strony i nie będzie można ich wypełniać.</sys:String>
+    <sys:String x:Key="Str_Repair_Language">Język dokumentu (BCP 47)</sys:String>
+    <sys:String x:Key="Str_Repair_Metadata">Uzupełnij brakujące metadane</sys:String>
+    <sys:String x:Key="Str_Repair_PageBox">Usuń ramkę produkcyjną</sys:String>
+    <sys:String x:Key="Str_Repair_OutputIntent">Dodaj profil wyjściowy</sys:String>
+    <sys:String x:Key="Str_Repair_Bleed">Ramka spadu</sys:String>
+    <sys:String x:Key="Str_Repair_Trim">Ramka przycięcia</sys:String>
+    <sys:String x:Key="Str_Repair_Art">Ramka grafiki</sys:String>
+    <sys:String x:Key="Str_Repair_OutputCondition">Warunek wyjściowy</sys:String>
+    <sys:String x:Key="Str_Repair_NoChanges">Nie znaleziono odpowiednich zmian.</sys:String>
+    <sys:String x:Key="Str_Repair_Before">Przed</sys:String>
+    <sys:String x:Key="Str_Repair_After">Po</sys:String>
+    <sys:String x:Key="Str_Repair_Descriptions">Dodaj brakujące opisy</sys:String>
+    <sys:String x:Key="Str_Repair_ReadingOrder">Edytuj kolejność czytania</sys:String>
+    <sys:String x:Key="Str_Repair_TableHeader">Ustaw nagłówek tabeli</sys:String>
+    <sys:String x:Key="Str_Repair_Row">Wiersz</sys:String>
+    <sys:String x:Key="Str_Repair_Column">Kolumna</sys:String>
+    <sys:String x:Key="Str_Repair_Both">Wiersz i kolumna</sys:String>
+    <sys:String x:Key="Str_Repair_Link">Łącze</sys:String>
+    <sys:String x:Key="Str_Repair_Figure">Rysunek</sys:String>
+    <sys:String x:Key="Str_Repair_Apply">Zastosuj</sys:String>
 </ResourceDictionary>

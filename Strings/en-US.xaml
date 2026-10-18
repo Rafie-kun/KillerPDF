@@ -1668,4 +1668,24 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_FormTools_XfaConfirm">Convert this XFA form to standard form fields?</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenOutput">Flatten the converted fields</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenConfirm">Flatten all form fields? Their values will become page content and can no longer be filled in.</sys:String>
+    <sys:String x:Key="Str_Repair_Language">Document language (BCP 47)</sys:String>
+    <sys:String x:Key="Str_Repair_Metadata">Fill missing metadata</sys:String>
+    <sys:String x:Key="Str_Repair_PageBox">Remove production page box</sys:String>
+    <sys:String x:Key="Str_Repair_OutputIntent">Add output intent</sys:String>
+    <sys:String x:Key="Str_Repair_Bleed">Bleed box</sys:String>
+    <sys:String x:Key="Str_Repair_Trim">Trim box</sys:String>
+    <sys:String x:Key="Str_Repair_Art">Art box</sys:String>
+    <sys:String x:Key="Str_Repair_OutputCondition">Output condition</sys:String>
+    <sys:String x:Key="Str_Repair_NoChanges">No applicable changes were found.</sys:String>
+    <sys:String x:Key="Str_Repair_Before">Before</sys:String>
+    <sys:String x:Key="Str_Repair_After">After</sys:String>
+    <sys:String x:Key="Str_Repair_Descriptions">Add missing descriptions</sys:String>
+    <sys:String x:Key="Str_Repair_ReadingOrder">Edit reading order</sys:String>
+    <sys:String x:Key="Str_Repair_TableHeader">Set table header</sys:String>
+    <sys:String x:Key="Str_Repair_Row">Row</sys:String>
+    <sys:String x:Key="Str_Repair_Column">Column</sys:String>
+    <sys:String x:Key="Str_Repair_Both">Row and column</sys:String>
+    <sys:String x:Key="Str_Repair_Link">Link</sys:String>
+    <sys:String x:Key="Str_Repair_Figure">Figure</sys:String>
+    <sys:String x:Key="Str_Repair_Apply">Apply</sys:String>
 </ResourceDictionary>

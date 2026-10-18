@@ -1668,4 +1668,24 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_FormTools_XfaConfirm">Chuyển biểu mẫu XFA này thành các trường tiêu chuẩn?</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenOutput">Làm phẳng các trường đã chuyển đổi</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenConfirm">Làm phẳng mọi trường? Các giá trị sẽ thành nội dung trang và không thể điền nữa.</sys:String>
+    <sys:String x:Key="Str_Repair_Language">Ngôn ngữ tài liệu (BCP 47)</sys:String>
+    <sys:String x:Key="Str_Repair_Metadata">Điền siêu dữ liệu còn thiếu</sys:String>
+    <sys:String x:Key="Str_Repair_PageBox">Xóa khung trang chế bản</sys:String>
+    <sys:String x:Key="Str_Repair_OutputIntent">Thêm mục đích đầu ra</sys:String>
+    <sys:String x:Key="Str_Repair_Bleed">Khung tràn lề</sys:String>
+    <sys:String x:Key="Str_Repair_Trim">Khung xén</sys:String>
+    <sys:String x:Key="Str_Repair_Art">Khung hình ảnh</sys:String>
+    <sys:String x:Key="Str_Repair_OutputCondition">Điều kiện đầu ra</sys:String>
+    <sys:String x:Key="Str_Repair_NoChanges">Không tìm thấy thay đổi có thể áp dụng.</sys:String>
+    <sys:String x:Key="Str_Repair_Before">Trước</sys:String>
+    <sys:String x:Key="Str_Repair_After">Sau</sys:String>
+    <sys:String x:Key="Str_Repair_Descriptions">Thêm mô tả còn thiếu</sys:String>
+    <sys:String x:Key="Str_Repair_ReadingOrder">Sửa thứ tự đọc</sys:String>
+    <sys:String x:Key="Str_Repair_TableHeader">Đặt tiêu đề bảng</sys:String>
+    <sys:String x:Key="Str_Repair_Row">Hàng</sys:String>
+    <sys:String x:Key="Str_Repair_Column">Cột</sys:String>
+    <sys:String x:Key="Str_Repair_Both">Hàng và cột</sys:String>
+    <sys:String x:Key="Str_Repair_Link">Liên kết</sys:String>
+    <sys:String x:Key="Str_Repair_Figure">Hình</sys:String>
+    <sys:String x:Key="Str_Repair_Apply">Áp dụng</sys:String>
 </ResourceDictionary>

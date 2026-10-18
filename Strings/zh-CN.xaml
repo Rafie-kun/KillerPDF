@@ -1652,4 +1652,24 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_FormTools_XfaConfirm">将此XFA表单转换为标准表单字段？</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenOutput">拼合转换后的字段</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenConfirm">拼合所有表单字段？字段值将成为页面内容，无法再填写。</sys:String>
+    <sys:String x:Key="Str_Repair_Language">文档语言 (BCP 47)</sys:String>
+    <sys:String x:Key="Str_Repair_Metadata">补全缺失的元数据</sys:String>
+    <sys:String x:Key="Str_Repair_PageBox">移除印刷页面框</sys:String>
+    <sys:String x:Key="Str_Repair_OutputIntent">添加输出意图</sys:String>
+    <sys:String x:Key="Str_Repair_Bleed">出血框</sys:String>
+    <sys:String x:Key="Str_Repair_Trim">裁切框</sys:String>
+    <sys:String x:Key="Str_Repair_Art">作品框</sys:String>
+    <sys:String x:Key="Str_Repair_OutputCondition">输出条件</sys:String>
+    <sys:String x:Key="Str_Repair_NoChanges">未找到可应用的更改。</sys:String>
+    <sys:String x:Key="Str_Repair_Before">更改前</sys:String>
+    <sys:String x:Key="Str_Repair_After">更改后</sys:String>
+    <sys:String x:Key="Str_Repair_Descriptions">添加缺失的描述</sys:String>
+    <sys:String x:Key="Str_Repair_ReadingOrder">编辑阅读顺序</sys:String>
+    <sys:String x:Key="Str_Repair_TableHeader">设置表格标题</sys:String>
+    <sys:String x:Key="Str_Repair_Row">行</sys:String>
+    <sys:String x:Key="Str_Repair_Column">列</sys:String>
+    <sys:String x:Key="Str_Repair_Both">行和列</sys:String>
+    <sys:String x:Key="Str_Repair_Link">链接</sys:String>
+    <sys:String x:Key="Str_Repair_Figure">图形</sys:String>
+    <sys:String x:Key="Str_Repair_Apply">应用</sys:String>
 </ResourceDictionary>

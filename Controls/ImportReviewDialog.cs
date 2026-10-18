@@ -8,7 +8,7 @@ internal sealed class ImportReviewDialog : Window
     private readonly CheckBox _option;
     internal bool Option => _option.IsChecked == true;
 
-    internal ImportReviewDialog(Window owner, string title, string report, string optionLabel,
+    internal ImportReviewDialog(Window owner, string title, string report, string? optionLabel,
         string? actionLabel = null)
     {
         Title = "KillerPDF - " + title;
@@ -29,7 +29,8 @@ internal sealed class ImportReviewDialog : Window
         buttons.Margin = new Thickness(0, 14, 0, 0);
         DockPanel.SetDock(buttons, Dock.Bottom);
         body.Children.Add(buttons);
-        _option = UiKit.CheckBox(optionLabel);
+        _option = UiKit.CheckBox(optionLabel ?? "");
+        if (optionLabel is null) _option.Visibility = Visibility.Collapsed;
         _option.Margin = new Thickness(0, 12, 0, 0);
         DockPanel.SetDock(_option, Dock.Bottom);
         body.Children.Add(_option);

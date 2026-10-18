@@ -1655,4 +1655,24 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_FormTools_XfaConfirm">Átalakítja ezt az XFA-űrlapot szabványos űrlapmezőkké?</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenOutput">Átalakított mezők beolvasztása</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenConfirm">Beolvasztja az összes mezőt? Az értékek az oldal tartalmává válnak, és többé nem tölthetők ki.</sys:String>
+    <sys:String x:Key="Str_Repair_Language">Dokumentum nyelve (BCP 47)</sys:String>
+    <sys:String x:Key="Str_Repair_Metadata">Hiányzó metaadatok kitöltése</sys:String>
+    <sys:String x:Key="Str_Repair_PageBox">Nyomdai oldalkeret eltávolítása</sys:String>
+    <sys:String x:Key="Str_Repair_OutputIntent">Kimeneti szándék hozzáadása</sys:String>
+    <sys:String x:Key="Str_Repair_Bleed">Kifutókeret</sys:String>
+    <sys:String x:Key="Str_Repair_Trim">Vágási keret</sys:String>
+    <sys:String x:Key="Str_Repair_Art">Grafikai keret</sys:String>
+    <sys:String x:Key="Str_Repair_OutputCondition">Kimeneti feltétel</sys:String>
+    <sys:String x:Key="Str_Repair_NoChanges">Nem található alkalmazható módosítás.</sys:String>
+    <sys:String x:Key="Str_Repair_Before">Előtte</sys:String>
+    <sys:String x:Key="Str_Repair_After">Utána</sys:String>
+    <sys:String x:Key="Str_Repair_Descriptions">Hiányzó leírások hozzáadása</sys:String>
+    <sys:String x:Key="Str_Repair_ReadingOrder">Olvasási sorrend szerkesztése</sys:String>
+    <sys:String x:Key="Str_Repair_TableHeader">Táblázatfejléc beállítása</sys:String>
+    <sys:String x:Key="Str_Repair_Row">Sor</sys:String>
+    <sys:String x:Key="Str_Repair_Column">Oszlop</sys:String>
+    <sys:String x:Key="Str_Repair_Both">Sor és oszlop</sys:String>
+    <sys:String x:Key="Str_Repair_Link">Hivatkozás</sys:String>
+    <sys:String x:Key="Str_Repair_Figure">Ábra</sys:String>
+    <sys:String x:Key="Str_Repair_Apply">Alkalmaz</sys:String>
 </ResourceDictionary>

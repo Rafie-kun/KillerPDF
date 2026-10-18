@@ -1671,4 +1671,24 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_FormTools_XfaConfirm">Осы XFA пішінін стандартты пішін өрістеріне түрлендіру керек пе?</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenOutput">Түрлендірілген өрістерді бет мазмұнымен біріктіру</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenConfirm">Барлық пішін өрістерін біріктіру керек пе? Олардың мәндері бет мазмұнына айналады және енді толтырылмайды.</sys:String>
+    <sys:String x:Key="Str_Repair_Language">Құжат тілі (BCP 47)</sys:String>
+    <sys:String x:Key="Str_Repair_Metadata">Жетіспейтін метадеректерді толтыру</sys:String>
+    <sys:String x:Key="Str_Repair_PageBox">Өндірістік бет жақтауын жою</sys:String>
+    <sys:String x:Key="Str_Repair_OutputIntent">Шығару мақсатын қосу</sys:String>
+    <sys:String x:Key="Str_Repair_Bleed">Қиылу сыртындағы жақтау</sys:String>
+    <sys:String x:Key="Str_Repair_Trim">Қию жақтауы</sys:String>
+    <sys:String x:Key="Str_Repair_Art">Сурет жақтауы</sys:String>
+    <sys:String x:Key="Str_Repair_OutputCondition">Шығару шарты</sys:String>
+    <sys:String x:Key="Str_Repair_NoChanges">Қолданылатын өзгерістер табылмады.</sys:String>
+    <sys:String x:Key="Str_Repair_Before">Дейін</sys:String>
+    <sys:String x:Key="Str_Repair_After">Кейін</sys:String>
+    <sys:String x:Key="Str_Repair_Descriptions">Жетіспейтін сипаттамаларды қосу</sys:String>
+    <sys:String x:Key="Str_Repair_ReadingOrder">Оқу ретін өзгерту</sys:String>
+    <sys:String x:Key="Str_Repair_TableHeader">Кесте тақырыбын орнату</sys:String>
+    <sys:String x:Key="Str_Repair_Row">Жол</sys:String>
+    <sys:String x:Key="Str_Repair_Column">Баған</sys:String>
+    <sys:String x:Key="Str_Repair_Both">Жол және баған</sys:String>
+    <sys:String x:Key="Str_Repair_Link">Сілтеме</sys:String>
+    <sys:String x:Key="Str_Repair_Figure">Сурет</sys:String>
+    <sys:String x:Key="Str_Repair_Apply">Қолдану</sys:String>
 </ResourceDictionary>

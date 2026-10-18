@@ -28,13 +28,11 @@ public partial class MainWindow
             && !string.IsNullOrWhiteSpace(ViewerB.CurrentFilePathExt);
         return
         [
-            DocumentToolItem("Str_DocumentTools_Preflight", () => ShowDocumentReport(Loc("Str_DocumentTools_Preflight"),
-                path => PdfEngineIntegration.InspectPreflight(path).ToText()), "\uE9D9"),
+            DocumentToolItem("Str_DocumentTools_Preflight", OpenPreflightTools, "\uE9D9"),
             DocumentToolItem("Str_DocumentTools_PrintProduction", () => ShowDocumentReport(Loc("Str_DocumentTools_PrintProduction"),
                 path => PdfEngineIntegration.InspectPrintProduction(path).ToText()), "\uE7C3"),
             DocumentToolItem("Str_DocumentTools_Separations", ShowSeparationPreview, "\uE790"),
-            DocumentToolItem("Str_DocumentTools_Accessibility", () => ShowDocumentReport(Loc("Str_DocumentTools_Accessibility"),
-                path => PdfEngineIntegration.InspectAccessibility(path).ToText()), "\uE776"),
+            DocumentToolItem("Str_DocumentTools_Accessibility", OpenAccessibilityTools, "\uE776"),
             DocumentToolItem("Str_DocumentTools_Signatures", () => ShowDocumentReport(Loc("Str_DocumentTools_Signatures"),
                 path => PdfEngineIntegration.InspectSignatures(path).ToText()), "\uE8D7"),
             DocumentToolItem("Str_DocumentTools_Layers", () => ShowDocumentReport(Loc("Str_DocumentTools_Layers"),

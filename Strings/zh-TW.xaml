@@ -1650,4 +1650,24 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_FormTools_XfaConfirm">將此XFA表單轉換成標準表單欄位？</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenOutput">平面化轉換後的欄位</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenConfirm">平面化所有表單欄位？欄位值將成為頁面內容，無法再填寫。</sys:String>
+    <sys:String x:Key="Str_Repair_Language">文件語言 (BCP 47)</sys:String>
+    <sys:String x:Key="Str_Repair_Metadata">補齊缺少的中繼資料</sys:String>
+    <sys:String x:Key="Str_Repair_PageBox">移除印刷頁面框</sys:String>
+    <sys:String x:Key="Str_Repair_OutputIntent">新增輸出色彩描述</sys:String>
+    <sys:String x:Key="Str_Repair_Bleed">出血框</sys:String>
+    <sys:String x:Key="Str_Repair_Trim">裁切框</sys:String>
+    <sys:String x:Key="Str_Repair_Art">作品框</sys:String>
+    <sys:String x:Key="Str_Repair_OutputCondition">輸出條件</sys:String>
+    <sys:String x:Key="Str_Repair_NoChanges">找不到可套用的變更。</sys:String>
+    <sys:String x:Key="Str_Repair_Before">變更前</sys:String>
+    <sys:String x:Key="Str_Repair_After">變更後</sys:String>
+    <sys:String x:Key="Str_Repair_Descriptions">新增缺少的描述</sys:String>
+    <sys:String x:Key="Str_Repair_ReadingOrder">編輯閱讀順序</sys:String>
+    <sys:String x:Key="Str_Repair_TableHeader">設定表格標題</sys:String>
+    <sys:String x:Key="Str_Repair_Row">列</sys:String>
+    <sys:String x:Key="Str_Repair_Column">欄</sys:String>
+    <sys:String x:Key="Str_Repair_Both">列與欄</sys:String>
+    <sys:String x:Key="Str_Repair_Link">連結</sys:String>
+    <sys:String x:Key="Str_Repair_Figure">圖形</sys:String>
+    <sys:String x:Key="Str_Repair_Apply">套用</sys:String>
 </ResourceDictionary>

@@ -1668,4 +1668,24 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_FormTools_XfaConfirm">Convertire questo modulo XFA in campi standard?</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenOutput">Appiattisci i campi convertiti</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenConfirm">Appiattire tutti i campi? I valori diventeranno contenuto della pagina e non saranno più compilabili.</sys:String>
+    <sys:String x:Key="Str_Repair_Language">Lingua del documento (BCP 47)</sys:String>
+    <sys:String x:Key="Str_Repair_Metadata">Completa metadati mancanti</sys:String>
+    <sys:String x:Key="Str_Repair_PageBox">Rimuovi riquadro di produzione</sys:String>
+    <sys:String x:Key="Str_Repair_OutputIntent">Aggiungi intento di output</sys:String>
+    <sys:String x:Key="Str_Repair_Bleed">Riquadro al vivo</sys:String>
+    <sys:String x:Key="Str_Repair_Trim">Riquadro di rifilo</sys:String>
+    <sys:String x:Key="Str_Repair_Art">Riquadro grafico</sys:String>
+    <sys:String x:Key="Str_Repair_OutputCondition">Condizione di output</sys:String>
+    <sys:String x:Key="Str_Repair_NoChanges">Nessuna modifica applicabile trovata.</sys:String>
+    <sys:String x:Key="Str_Repair_Before">Prima</sys:String>
+    <sys:String x:Key="Str_Repair_After">Dopo</sys:String>
+    <sys:String x:Key="Str_Repair_Descriptions">Aggiungi descrizioni mancanti</sys:String>
+    <sys:String x:Key="Str_Repair_ReadingOrder">Modifica ordine di lettura</sys:String>
+    <sys:String x:Key="Str_Repair_TableHeader">Imposta intestazione tabella</sys:String>
+    <sys:String x:Key="Str_Repair_Row">Riga</sys:String>
+    <sys:String x:Key="Str_Repair_Column">Colonna</sys:String>
+    <sys:String x:Key="Str_Repair_Both">Riga e colonna</sys:String>
+    <sys:String x:Key="Str_Repair_Link">Collegamento</sys:String>
+    <sys:String x:Key="Str_Repair_Figure">Figura</sys:String>
+    <sys:String x:Key="Str_Repair_Apply">Applica</sys:String>
 </ResourceDictionary>

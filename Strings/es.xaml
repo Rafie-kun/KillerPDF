@@ -1648,4 +1648,24 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_FormTools_XfaConfirm">¿Convertir este formulario XFA en campos de formulario estándar?</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenOutput">Aplanar los campos convertidos</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenConfirm">¿Aplanar todos los campos? Sus valores pasarán al contenido de la página y ya no se podrán rellenar.</sys:String>
+    <sys:String x:Key="Str_Repair_Language">Idioma del documento (BCP 47)</sys:String>
+    <sys:String x:Key="Str_Repair_Metadata">Completar metadatos faltantes</sys:String>
+    <sys:String x:Key="Str_Repair_PageBox">Eliminar cuadro de producción</sys:String>
+    <sys:String x:Key="Str_Repair_OutputIntent">Añadir intención de salida</sys:String>
+    <sys:String x:Key="Str_Repair_Bleed">Cuadro de sangrado</sys:String>
+    <sys:String x:Key="Str_Repair_Trim">Cuadro de corte</sys:String>
+    <sys:String x:Key="Str_Repair_Art">Cuadro de ilustración</sys:String>
+    <sys:String x:Key="Str_Repair_OutputCondition">Condición de salida</sys:String>
+    <sys:String x:Key="Str_Repair_NoChanges">No se encontraron cambios aplicables.</sys:String>
+    <sys:String x:Key="Str_Repair_Before">Antes</sys:String>
+    <sys:String x:Key="Str_Repair_After">Después</sys:String>
+    <sys:String x:Key="Str_Repair_Descriptions">Añadir descripciones faltantes</sys:String>
+    <sys:String x:Key="Str_Repair_ReadingOrder">Editar orden de lectura</sys:String>
+    <sys:String x:Key="Str_Repair_TableHeader">Establecer encabezado de tabla</sys:String>
+    <sys:String x:Key="Str_Repair_Row">Fila</sys:String>
+    <sys:String x:Key="Str_Repair_Column">Columna</sys:String>
+    <sys:String x:Key="Str_Repair_Both">Fila y columna</sys:String>
+    <sys:String x:Key="Str_Repair_Link">Enlace</sys:String>
+    <sys:String x:Key="Str_Repair_Figure">Figura</sys:String>
+    <sys:String x:Key="Str_Repair_Apply">Aplicar</sys:String>
 </ResourceDictionary>

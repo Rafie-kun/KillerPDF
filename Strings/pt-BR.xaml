@@ -1668,4 +1668,24 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_FormTools_XfaConfirm">Converter este formulário XFA em campos padrão?</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenOutput">Achatar os campos convertidos</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenConfirm">Achatar todos os campos? Os valores passarão a fazer parte da página e não poderão mais ser preenchidos.</sys:String>
+    <sys:String x:Key="Str_Repair_Language">Idioma do documento (BCP 47)</sys:String>
+    <sys:String x:Key="Str_Repair_Metadata">Preencher metadados ausentes</sys:String>
+    <sys:String x:Key="Str_Repair_PageBox">Remover caixa de produção</sys:String>
+    <sys:String x:Key="Str_Repair_OutputIntent">Adicionar intenção de saída</sys:String>
+    <sys:String x:Key="Str_Repair_Bleed">Caixa de sangria</sys:String>
+    <sys:String x:Key="Str_Repair_Trim">Caixa de corte</sys:String>
+    <sys:String x:Key="Str_Repair_Art">Caixa de arte</sys:String>
+    <sys:String x:Key="Str_Repair_OutputCondition">Condição de saída</sys:String>
+    <sys:String x:Key="Str_Repair_NoChanges">Nenhuma alteração aplicável encontrada.</sys:String>
+    <sys:String x:Key="Str_Repair_Before">Antes</sys:String>
+    <sys:String x:Key="Str_Repair_After">Depois</sys:String>
+    <sys:String x:Key="Str_Repair_Descriptions">Adicionar descrições ausentes</sys:String>
+    <sys:String x:Key="Str_Repair_ReadingOrder">Editar ordem de leitura</sys:String>
+    <sys:String x:Key="Str_Repair_TableHeader">Definir cabeçalho da tabela</sys:String>
+    <sys:String x:Key="Str_Repair_Row">Linha</sys:String>
+    <sys:String x:Key="Str_Repair_Column">Coluna</sys:String>
+    <sys:String x:Key="Str_Repair_Both">Linha e coluna</sys:String>
+    <sys:String x:Key="Str_Repair_Link">Link</sys:String>
+    <sys:String x:Key="Str_Repair_Figure">Figura</sys:String>
+    <sys:String x:Key="Str_Repair_Apply">Aplicar</sys:String>
 </ResourceDictionary>

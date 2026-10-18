@@ -1653,4 +1653,24 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_FormTools_XfaConfirm">Převést tento formulář XFA na standardní formulářová pole?</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenOutput">Sloučit převedená pole s obsahem stránky</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenConfirm">Sloučit všechna pole s obsahem stránky? Jejich hodnoty se stanou obsahem stránky a nebude je možné vyplňovat.</sys:String>
+    <sys:String x:Key="Str_Repair_Language">Jazyk dokumentu (BCP 47)</sys:String>
+    <sys:String x:Key="Str_Repair_Metadata">Doplnit chybějící metadata</sys:String>
+    <sys:String x:Key="Str_Repair_PageBox">Odstranit produkční rámeček</sys:String>
+    <sys:String x:Key="Str_Repair_OutputIntent">Přidat výstupní záměr</sys:String>
+    <sys:String x:Key="Str_Repair_Bleed">Rámeček spadávky</sys:String>
+    <sys:String x:Key="Str_Repair_Trim">Rámeček ořezu</sys:String>
+    <sys:String x:Key="Str_Repair_Art">Rámeček kresby</sys:String>
+    <sys:String x:Key="Str_Repair_OutputCondition">Výstupní podmínka</sys:String>
+    <sys:String x:Key="Str_Repair_NoChanges">Nebyly nalezeny použitelné změny.</sys:String>
+    <sys:String x:Key="Str_Repair_Before">Před</sys:String>
+    <sys:String x:Key="Str_Repair_After">Po</sys:String>
+    <sys:String x:Key="Str_Repair_Descriptions">Doplnit chybějící popisy</sys:String>
+    <sys:String x:Key="Str_Repair_ReadingOrder">Upravit pořadí čtení</sys:String>
+    <sys:String x:Key="Str_Repair_TableHeader">Nastavit záhlaví tabulky</sys:String>
+    <sys:String x:Key="Str_Repair_Row">Řádek</sys:String>
+    <sys:String x:Key="Str_Repair_Column">Sloupec</sys:String>
+    <sys:String x:Key="Str_Repair_Both">Řádek a sloupec</sys:String>
+    <sys:String x:Key="Str_Repair_Link">Odkaz</sys:String>
+    <sys:String x:Key="Str_Repair_Figure">Obrázek</sys:String>
+    <sys:String x:Key="Str_Repair_Apply">Použít</sys:String>
 </ResourceDictionary>

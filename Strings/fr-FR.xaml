@@ -1668,4 +1668,24 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_FormTools_XfaConfirm">Convertir ce formulaire XFA en champs de formulaire standard ?</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenOutput">Aplatir les champs convertis</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenConfirm">Aplatir tous les champs ? Leurs valeurs feront partie du contenu des pages et ne pourront plus être saisies.</sys:String>
+    <sys:String x:Key="Str_Repair_Language">Langue du document (BCP 47)</sys:String>
+    <sys:String x:Key="Str_Repair_Metadata">Compléter les métadonnées manquantes</sys:String>
+    <sys:String x:Key="Str_Repair_PageBox">Supprimer une zone de production</sys:String>
+    <sys:String x:Key="Str_Repair_OutputIntent">Ajouter une intention de sortie</sys:String>
+    <sys:String x:Key="Str_Repair_Bleed">Zone de fond perdu</sys:String>
+    <sys:String x:Key="Str_Repair_Trim">Zone de rognage</sys:String>
+    <sys:String x:Key="Str_Repair_Art">Zone graphique</sys:String>
+    <sys:String x:Key="Str_Repair_OutputCondition">Condition de sortie</sys:String>
+    <sys:String x:Key="Str_Repair_NoChanges">Aucune modification applicable trouvée.</sys:String>
+    <sys:String x:Key="Str_Repair_Before">Avant</sys:String>
+    <sys:String x:Key="Str_Repair_After">Après</sys:String>
+    <sys:String x:Key="Str_Repair_Descriptions">Ajouter les descriptions manquantes</sys:String>
+    <sys:String x:Key="Str_Repair_ReadingOrder">Modifier l’ordre de lecture</sys:String>
+    <sys:String x:Key="Str_Repair_TableHeader">Définir un en-tête de tableau</sys:String>
+    <sys:String x:Key="Str_Repair_Row">Ligne</sys:String>
+    <sys:String x:Key="Str_Repair_Column">Colonne</sys:String>
+    <sys:String x:Key="Str_Repair_Both">Ligne et colonne</sys:String>
+    <sys:String x:Key="Str_Repair_Link">Lien</sys:String>
+    <sys:String x:Key="Str_Repair_Figure">Figure</sys:String>
+    <sys:String x:Key="Str_Repair_Apply">Appliquer</sys:String>
 </ResourceDictionary>

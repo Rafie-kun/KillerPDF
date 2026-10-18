@@ -1668,4 +1668,24 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_FormTools_XfaConfirm">Konvertere dette XFA-skjemaet til standard skjemafelt?</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenOutput">Slå sammen de konverterte feltene med sideinnholdet</sys:String>
     <sys:String x:Key="Str_FormTools_FlattenConfirm">Slå sammen alle skjemafelt med sideinnholdet? Verdiene blir en del av siden og kan ikke lenger fylles ut.</sys:String>
+    <sys:String x:Key="Str_Repair_Language">Dokumentspråk (BCP 47)</sys:String>
+    <sys:String x:Key="Str_Repair_Metadata">Fyll inn manglende metadata</sys:String>
+    <sys:String x:Key="Str_Repair_PageBox">Fjern produksjonsramme</sys:String>
+    <sys:String x:Key="Str_Repair_OutputIntent">Legg til utdataformål</sys:String>
+    <sys:String x:Key="Str_Repair_Bleed">Utfallende ramme</sys:String>
+    <sys:String x:Key="Str_Repair_Trim">Beskjæringsramme</sys:String>
+    <sys:String x:Key="Str_Repair_Art">Illustrasjonsramme</sys:String>
+    <sys:String x:Key="Str_Repair_OutputCondition">Utdatabetingelse</sys:String>
+    <sys:String x:Key="Str_Repair_NoChanges">Ingen aktuelle endringer ble funnet.</sys:String>
+    <sys:String x:Key="Str_Repair_Before">Før</sys:String>
+    <sys:String x:Key="Str_Repair_After">Etter</sys:String>
+    <sys:String x:Key="Str_Repair_Descriptions">Legg til manglende beskrivelser</sys:String>
+    <sys:String x:Key="Str_Repair_ReadingOrder">Rediger leserekkefølge</sys:String>
+    <sys:String x:Key="Str_Repair_TableHeader">Angi tabelloverskrift</sys:String>
+    <sys:String x:Key="Str_Repair_Row">Rad</sys:String>
+    <sys:String x:Key="Str_Repair_Column">Kolonne</sys:String>
+    <sys:String x:Key="Str_Repair_Both">Rad og kolonne</sys:String>
+    <sys:String x:Key="Str_Repair_Link">Lenke</sys:String>
+    <sys:String x:Key="Str_Repair_Figure">Figur</sys:String>
+    <sys:String x:Key="Str_Repair_Apply">Bruk</sys:String>
 </ResourceDictionary>
