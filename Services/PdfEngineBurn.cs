@@ -13,9 +13,71 @@ using WpfPoint = System.Windows.Point;
 
 namespace KillerPDF.Services;
 
+internal sealed record PdfTextWatermarkOptions(string Text, double FontSize = 64,
+    double Opacity = .25, double RotationDegrees = 45);
+
 /// <summary>Burns KillerPDF markup into typed engine page content.</summary>
 internal static class PdfEngineBurn
 {
+    internal static PdfMacroStep WatermarkStep(PdfTextWatermarkOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        if (string.IsNullOrWhiteSpace(options.Text) || options.Text.Length > 4096
+            || options.Text.Any(char.IsControl))
+            throw new ArgumentException("Watermark text must be a nonempty single line of at most 4096 characters.");
+        if (!double.IsFinite(options.FontSize) || options.FontSize is <= 0 or > 1000
+            || !double.IsFinite(options.Opacity) || options.Opacity is <= 0 or > 1
+            || !double.IsFinite(options.RotationDegrees) || options.RotationDegrees is < -360 or > 360)
+            throw new ArgumentOutOfRangeException(nameof(options), "Watermark size, opacity or rotation is outside its supported range.");
+        return new(PdfMacroOperation.Watermark, new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["text"] = options.Text,
+            ["fontSize"] = options.FontSize.ToString("R", System.Globalization.CultureInfo.InvariantCulture),
+            ["opacity"] = options.Opacity.ToString("R", System.Globalization.CultureInfo.InvariantCulture),
+            ["rotation"] = options.RotationDegrees.ToString("R", System.Globalization.CultureInfo.InvariantCulture)
+        });
+    }
+
+    internal static PdfTextWatermarkOptions ReadWatermarkStep(PdfMacroStep step)
+    {
+        ArgumentNullException.ThrowIfNull(step);
+        if (step.Operation != PdfMacroOperation.Watermark || step.Settings is null
+            || !step.Settings.TryGetValue("text", out string? text)
+            || step.Settings.Keys.Any(key => key is not ("text" or "fontSize" or "opacity" or "rotation")))
+            throw new ArgumentException("The text watermark settings are invalid.", nameof(step));
+        double Number(string key, double fallback) => step.Settings.TryGetValue(key, out string? value)
+            ? double.Parse(value, System.Globalization.NumberStyles.Float,
+                System.Globalization.CultureInfo.InvariantCulture) : fallback;
+        var options = new PdfTextWatermarkOptions(text, Number("fontSize", 64),
+            Number("opacity", .25), Number("rotation", 45));
+        _ = WatermarkStep(options);
+        return options;
+    }
+
+    internal static PdfMacroOperationResult ExecuteWatermarkMacro(PdfMacroStep step,
+        ReadOnlyMemory<byte> source, IReadOnlyDictionary<string, string> values,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        PdfTextWatermarkOptions options = ReadWatermarkStep(step);
+        if (Font(new Dictionary<string, TrueTypeFont>(), "Segoe UI", options.Text, true, false) is null)
+            throw new InvalidOperationException("No usable font is available for the watermark text.");
+        string path = Path.Combine(Path.GetTempPath(), $"killerpdf-watermark-{Guid.NewGuid():N}.pdf");
+        try
+        {
+            File.WriteAllBytes(path, source.ToArray());
+            Burn(path, new Dictionary<int, List<PageAnnotation>>(),
+                new Dictionary<int, (int, int)>(), new StampSpec
+                {
+                    WmEnabled = true, WmText = options.Text, WmFontPt = options.FontSize,
+                    WmOpacity = options.Opacity, WmAngle = options.RotationDegrees
+                }, cancellationToken: cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+            return new PdfMacroOperationResult(File.ReadAllBytes(path));
+        }
+        finally { if (File.Exists(path)) File.Delete(path); }
+    }
+
     internal static void Burn(
         string path,
         IReadOnlyDictionary<int, List<PageAnnotation>> annotations,
@@ -24,8 +86,10 @@ internal static class PdfEngineBurn
         int? onlyPage = null,
         IReadOnlyDictionary<int, int>? rotations = null,
         bool forRasterization = false,
-        bool measurementsAsAnnotations = false)
+        bool measurementsAsAnnotations = false,
+        CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
         if (annotations.Values.Any(items => items.Count > 0))
             PdfEngineIntegration.StripLinkAppearances(path);
@@ -49,6 +113,7 @@ internal static class PdfEngineBurn
 
         for (int pageIndex = 0; pageIndex < pages.Count; pageIndex++)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             if (onlyPage.HasValue && pageIndex != onlyPage.Value) continue;
             bool hasAnnotations = annotations.TryGetValue(pageIndex, out var pageAnnotations)
                 && pageAnnotations.Count > 0;
@@ -100,7 +165,10 @@ internal static class PdfEngineBurn
             }
         }
 
-        Replace(path, editor.Build());
+        cancellationToken.ThrowIfCancellationRequested();
+        byte[] result = editor.Build();
+        cancellationToken.ThrowIfCancellationRequested();
+        Replace(path, result);
     }
 
     // An in-place edit replaces a line of the page's own text: its cover hides the old glyphs and its

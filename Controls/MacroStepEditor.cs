@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Windows;
 using KillerPdf.Engine.Diagnostics;
 using KillerPdf.Engine.Documents;
+using KillerPDF.Services;
 
 namespace KillerPDF;
 
@@ -14,6 +15,7 @@ internal static class MacroStepEditor
         PdfMacroOperation.EditAttachments => "Str_DocumentTools_EditAttachments",
         PdfMacroOperation.EditPortfolio => "Str_DocumentTools_EditPortfolio",
         PdfMacroOperation.SetPageLabels => "Str_DocumentTools_PageLabels",
+        PdfMacroOperation.Watermark => "Str_Stamp_SecWatermark",
         _ => null
     };
 
@@ -21,6 +23,21 @@ internal static class MacroStepEditor
     {
         try
         {
+            if (step.Operation == PdfMacroOperation.Watermark)
+            {
+                PdfTextWatermarkOptions current = step.Settings is null || step.Settings.Count == 0
+                    ? new(L("Str_Stamp_DefaultText")) : PdfEngineBurn.ReadWatermarkStep(step);
+                var dialog = new DocumentValuesDialog(owner, L("Str_Stamp_SecWatermark"),
+                    (L("Str_Stamp_WmTextLabel"), current.Text),
+                    (L("Str_Stamp_FontSize"), current.FontSize.ToString(CultureInfo.CurrentCulture)),
+                    (L("Str_Stamp_Opacity") + " (%)", (current.Opacity * 100).ToString(CultureInfo.CurrentCulture)),
+                    (L("Str_Stamp_Angle") + " (°)", current.RotationDegrees.ToString(CultureInfo.CurrentCulture)));
+                if (dialog.ShowDialog() != true) return null;
+                return PdfEngineBurn.WatermarkStep(new(dialog.Values[0],
+                    double.Parse(dialog.Values[1], CultureInfo.CurrentCulture),
+                    double.Parse(dialog.Values[2], CultureInfo.CurrentCulture) / 100,
+                    double.Parse(dialog.Values[3], CultureInfo.CurrentCulture)));
+            }
             string Current(string key, string fallback = "") => step.Settings?.GetValueOrDefault(key) ?? fallback;
             if ((step.Operation == PdfMacroOperation.EditLayers && Current("action") is not ("" or "rename" or "visibility" or "lock"))
                 || (step.Operation == PdfMacroOperation.EditAttachments && Current("action") is not ("" or "rename" or "description"))

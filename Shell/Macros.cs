@@ -30,6 +30,7 @@ public partial class MainWindow
             PdfMacroOperation.RemoveUnresolvedLinks,
             PdfMacroOperation.Ocr,
             PdfMacroOperation.Redact,
+            PdfMacroOperation.Watermark,
             PdfMacroOperation.Save,
             PdfMacroOperation.NumberPages,
             PdfMacroOperation.GenerateBookmarks,
@@ -147,7 +148,9 @@ public partial class MainWindow
                 (_, source, _, cancellationToken) =>
                     RecognizeMacroText(source, language, formAware, cancellationToken)),
             new PdfMacroOperationRegistration(PdfMacroOperation.Redact,
-                (_, source, _, cancellationToken) => RedactMacroContent(source, cancellationToken))]);
+                (_, source, _, cancellationToken) => RedactMacroContent(source, cancellationToken)),
+            new PdfMacroOperationRegistration(PdfMacroOperation.Watermark,
+                PdfEngineBurn.ExecuteWatermarkMacro)]);
     }
 
     // What the next macro run's Redact step removes: the words asked for at the start of the run

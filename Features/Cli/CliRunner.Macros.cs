@@ -10,8 +10,8 @@ using KillerPDF.Services;
 namespace KillerPDF.Features
 {
     // Macros from the command line: run a saved macro, an exported macro file or one of the
-    // starters through the same engine dispatcher the Macros dialog uses, with the OCR, Redact
-    // and Save steps supplied here instead of by the window.
+    // starters through the same engine dispatcher the Macros dialog uses, with the OCR, Redact,
+    // Watermark and Save steps supplied here instead of by the window.
     internal static partial class CliRunner
     {
         private const string MacroUsage =
@@ -58,7 +58,9 @@ namespace KillerPDF.Features
                 new PdfMacroOperationRegistration(PdfMacroOperation.Ocr,
                     (_, data, _, token) => CliMacroOcr(data, language, con, token)),
                 new PdfMacroOperationRegistration(PdfMacroOperation.Redact,
-                    (_, data, _, token) => CliMacroRedact(data, redaction, token))]);
+                    (_, data, _, token) => CliMacroRedact(data, redaction, token)),
+                new PdfMacroOperationRegistration(PdfMacroOperation.Watermark,
+                    PdfEngineBurn.ExecuteWatermarkMacro)]);
 
             PdfMacroOperation[] unsupported = [.. macro.Steps.Select(step => step.Operation)
                 .Where(operation => !dispatcher.CanExecute(operation)).Distinct()];
