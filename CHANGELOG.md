@@ -89,6 +89,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - The website's top bar Download button uses the same font and height as the other top bar buttons.
 
 ### Fixed
+- Shaded patterns keep their colors when painted through image masks.
 - PDFs with deeply repeated forms stop safely instead of tying up page rendering.
 - Crash report buttons follow the active family theme and keep their captions visible.
 - Windows contrast themes now use system colors for text, icons, panels and selections, without decorative grain or shadows.

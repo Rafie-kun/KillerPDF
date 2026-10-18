@@ -1179,7 +1179,11 @@ public sealed partial class PdfPageRenderer
                     if (paint.Background is not null)
                         contentState = contentState with { Knockout = new KnockoutState(options.Width, bounds, group) };
                     pixels = group;
-                    RenderPatternContents(paint, paintPath, paintClip, parentResources, contentState, patternDepth);
+                    // Composite the pattern before applying the painted object's fractional edge.
+                    // Clipping each member separately lets its background show through the shading.
+                    ClipRegion contentClip = paint.Background is null ? paintClip
+                        : new ClipRegion(CoverageMask.Rectangle(bounds.Left, bounds.Top, bounds.Right, bounds.Bottom));
+                    RenderPatternContents(paint, paintPath, contentClip, parentResources, contentState, patternDepth);
                     pixels = backdrop;
                     parentState.GraphicsSoftMask?.ForBounds(group.Left, group.Top, group.Right, group.Bottom);
                     Span<byte> immediateBackdrop = stackalloc byte[4];
@@ -1189,13 +1193,15 @@ public sealed partial class PdfPageRenderer
                         for (int x = group.Left; x < group.Right; x++)
                         {
                             if (!backdrop.Contains(x, y)) continue;
+                            double coverage = paint.Background is null ? 1 : paintClip.Mask.At(x, y) / 255d;
+                            if (coverage == 0) continue;
                             int offset = group.Offset(x, y);
                             double alpha = group.GroupAlpha![offset / 4] / 255d;
                             if (trackShape)
                             {
                                 double outerAlpha = objectAlpha * (parentState.GraphicsSoftMask?.At(x, y) ?? 255) / 255d;
                                 double shape = group.GroupShape![offset / 4] / 255d
-                                    * (parentState.AlphaIsShape ? outerAlpha : 1);
+                                    * coverage * (parentState.AlphaIsShape ? outerAlpha : 1);
                                 if (shape == 0) continue;
                                 int backdropOffset = backdrop.Offset(x, y);
                                 backdrop.Data.AsSpan(backdropOffset, 4).CopyTo(immediateBackdrop);
@@ -1207,13 +1213,13 @@ public sealed partial class PdfPageRenderer
                                 immediateBackdrop.CopyTo(backdrop.Data.AsSpan(backdropOffset, 4));
                                 backdrop.SetAlpha(backdropOffset, immediateAlpha);
                                 backdrop.GroupAlpha?[backdropOffset / 4] = immediateGroupAlpha;
-                                SetPixel(backdrop, options.Width, x, y, groupSource, alpha * outerAlpha,
+                                SetPixel(backdrop, options.Width, x, y, groupSource, alpha * outerAlpha * coverage,
                                     parentState.BlendMode, knockout: parentState.Knockout, shape: shape);
                                 continue;
                             }
                             if (alpha == 0) continue;
                             Color source = RemoveGroupBackdrop(group, offset, backdrop, backdrop.Offset(x, y), alpha);
-                            SetPixel(backdrop, options.Width, x, y, source, alpha * objectAlpha,
+                            SetPixel(backdrop, options.Width, x, y, source, alpha * objectAlpha * coverage,
                                 parentState.BlendMode, parentState.GraphicsSoftMask, parentState.Knockout);
                         }
                     }

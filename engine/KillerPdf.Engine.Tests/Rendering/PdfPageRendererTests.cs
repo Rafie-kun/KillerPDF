@@ -2112,6 +2112,38 @@ public sealed class PdfPageRendererTests
         Assert.Empty(rendered.Diagnostics);
     }
 
+    [Fact]
+    public void Render_ShadingBackgroundDoesNotTintFractionalStencilCoverage()
+    {
+        byte[] samples = [.. Enumerable.Range(0, 64).SelectMany(row =>
+            Enumerable.Repeat(row % 2 == 0 ? (byte)0x55 : (byte)0xAA, 8))];
+        byte[] content = [.. Encoding.ASCII.GetBytes(
+            "/Pattern cs /P1 scn 100 0 0 100 0 0 cm BI /W 64 /H 64 /IM true ID "),
+            .. samples, .. Encoding.ASCII.GetBytes(" EI")];
+        var source = PdfDocument.Open(new PdfDocumentBuilder().AddPage(100, 100, content).Build());
+        var function = new PdfDictionary([
+            new(Name("FunctionType"), new PdfInteger(2)), new(Name("Domain"), Reals(0, 1)),
+            new(Name("C0"), Reals(1, 0, 0)), new(Name("C1"), Reals(1, 0, 0)),
+            new(Name("N"), new PdfInteger(1))]);
+        var shading = new PdfDictionary([
+            new(Name("ShadingType"), new PdfInteger(2)), new(Name("ColorSpace"), Name("DeviceRGB")),
+            new(Name("Coords"), Reals(0, 0, 100, 0)), new(Name("Function"), function),
+            new(Name("Background"), Reals(0, 1, 1))]);
+        var document = AddShadingPatternResource(source, shading, Reals(1, 0, 0, 1, 0, 0));
+        var page = new PdfPageRenderer(document).Render(0, new PdfRenderOptions(16, 16));
+        bool fractional = false;
+        for (int offset = 0; offset < page.Pixels.Length; offset += 4)
+        {
+            var pixel = page.Pixels.Span.Slice(offset, 4);
+            Assert.Equal(255, pixel[2]);
+            Assert.Equal(pixel[0], pixel[1]);
+            Assert.Equal(255, pixel[3]);
+            fractional |= pixel[1] is > 0 and < 255;
+        }
+        Assert.True(fractional, "The stencil must exercise fractional coverage.");
+        Assert.Empty(page.Diagnostics);
+    }
+
     [Theory]
     [InlineData(false, "ca", 191)]
     [InlineData(true, "ca", 191)]

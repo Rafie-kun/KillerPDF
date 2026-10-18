@@ -33,7 +33,7 @@ interactive equivalence.
 
 | Gate | Requirement |
 | --- | --- |
-| A1 Regression | All 649 conformance inputs and all 976 PDF.js inputs are pixel-exact against the accepted 1.9 baseline at 512 and 2048 after every engine change. The ten documented unrenderable inputs (six password-protected with no published credentials, two missing page objects, one header-only, one non-PDF) stay in the denominator as expected failures. |
+| A1 Regression | All 649 conformance inputs and all 976 PDF.js inputs are pixel-exact against the accepted 1.9 baseline at 512 and 2048 after every engine change. The accepted conformance CSV records fifteen skips: eleven protected inputs without supplied credentials, two missing page objects and two without recoverable indirect objects. They stay in the denominator. |
 | A2 Three-oracle triage | Every shared page is rendered by 1.9, PDFium (the 1.8 payload) and pdftoppm. A page where 1.9 disagrees with both oracles beyond threshold (more than 2% of pixels with any channel delta over 32, after a 256-pixel thumbnail prefilter) is an open item. Each open item gets a source-backed disposition in `validation/records/`: defect fixed with a regression test, or accepted difference citing the PDF specification or the test suite's own documentation. Release requires zero undispositioned items. 1.9 agreeing with one oracle against the other is not an outlier. |
 | A3 Difficult set | All 76 pages of the 41-file difficult set are visually dispositioned at 2048. |
 | A4 Viewer equals headless | For 20 representative documents, the bitmap the viewer displays matches the headless render of the same page at the same size. |
@@ -77,6 +77,17 @@ each version through UI Automation.
 The PDF.js count was corrected on 2026-10-18: the accepted
 `triage-20261009-2153/pdfjs/v19.csv` contains 976 unique file names, exactly matching
 the current source list. The previous 977 count did not represent a missing input.
+The accepted conformance CSV and a fresh render of the hash-verified frozen
+096a2cf application also agree on 634 rendered inputs and fifteen identical skips.
+The earlier prose count of 639 and ten skips below is retained as historical
+wording, not the verified denominator. This reconciliation adds no exclusions.
+
+The October 18 candidate comparison completed at both required sizes. A1 remains
+open: after the stencil-color repair, conformance has 572/573 changed pages at
+512/2048, while PDF.js has 765 at each size, including two additional renders.
+The earlier 512 checkpoint had 764 changed pages. See
+[the accuracy checkpoint](records/release-pixels-20261018.md) for identities,
+status changes and the remaining disposition work. This is not a release pass.
 
 Current gate values are tracked in
 `C:/Users/steve/scratch/kp-bench-render/release-19-baseline/BASELINE.md` and summarized
