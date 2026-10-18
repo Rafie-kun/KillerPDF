@@ -77,6 +77,7 @@
     <Compile Include="..\Controls\SidebarPageBinding.cs" Link="Controls\SidebarPageBinding.cs" />
     <Compile Include="..\Controls\WindowFx.cs" Link="Controls\WindowFx.cs" />
     <Compile Include="..\Controls\AccessibleControls.cs" Link="Controls\AccessibleControls.cs" />
+    <Compile Include="..\Controls\HighContrastResources.cs" Link="Controls\HighContrastResources.cs" />
     <Compile Include="..\Controls\AccessibilityAudit.cs" Link="Controls\AccessibilityAudit.cs" />
     <!-- Data only, by design: OcrLanguages.cs itself reaches App and OcrNativeBootstrap, which a
          catalog check has no business dragging in. See OcrCatalogTests. -->
