@@ -4420,9 +4420,6 @@ public sealed class PdfIncrementalPageEditor
         PdfDictionary states = ResolveDictionary(
             _document, normalValue, $"The checkbox field '{fieldName}' normal appearance");
         PdfName off = Name("Off");
-        if (!states.ContainsKey(off))
-            throw new InvalidOperationException(
-                $"The checkbox field '{fieldName}' has no /Off appearance state.");
         if (!isChecked) return off;
         PdfName[] onStates = [.. states.Keys.Where(name => !name.Equals(off))];
         if (onStates.Length != 1)
