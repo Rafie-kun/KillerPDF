@@ -11,7 +11,7 @@ namespace KillerPDF.Features
 {
     // Macros from the command line: run a saved macro, an exported macro file or one of the
     // starters through the same engine dispatcher the Macros dialog uses, with the OCR, Redact,
-    // Watermark and Save steps supplied here instead of by the window.
+    // Watermark, Rename and Save steps supplied here instead of by the window.
     internal static partial class CliRunner
     {
         private const string MacroUsage =
@@ -22,7 +22,8 @@ namespace KillerPDF.Features
             + "  starter:scanning or starter:privacy. --list shows the saved macros and the starters.\n"
             + "  OCR steps read in --lang (default eng). Redact steps remove --text, each line of --terms and the\n"
             + "  marks saved in the file; pages that can only be redacted by turning them into images are skipped\n"
-            + "  unless --rasterize is given.";
+            + "  unless --rasterize is given.\n"
+            + "  Rename steps use the out.pdf folder and the macro's file name template.";
 
         // ============================================================
         // --macro <in.pdf> <macro> <out.pdf> ... | --macro --list
@@ -33,6 +34,13 @@ namespace KillerPDF.Features
             if (pos.Count != 3) { con.WriteLine(MacroUsage); return 2; }
             if (!CliInspectEditInput(pos[0], pos[2], out string source, out string output, out _, con)) return 2;
             if (CliResolveMacro(pos[1], con) is not PdfMacro macro) return 2;
+            bool renames = macro.Steps.Any(step => step.Operation == PdfMacroOperation.Rename);
+            if (renames)
+            {
+                try { output = PdfEngineIntegration.PlanMacroOutputs(macro, [source], output).Single(); }
+                catch (ArgumentException error) { con.WriteLine(error.Message); return 2; }
+                if (!CliInspectEditInput(source, output, out source, out output, out _, con)) return 2;
+            }
 
             options.TryGetValue("--lang", out string? langRaw);
             string language = string.IsNullOrWhiteSpace(langRaw) ? "eng" : langRaw.Trim().ToLowerInvariant();
@@ -60,7 +68,8 @@ namespace KillerPDF.Features
                 new PdfMacroOperationRegistration(PdfMacroOperation.Redact,
                     (_, data, _, token) => CliMacroRedact(data, redaction, token)),
                 new PdfMacroOperationRegistration(PdfMacroOperation.Watermark,
-                    PdfEngineBurn.ExecuteWatermarkMacro)]);
+                    PdfEngineBurn.ExecuteWatermarkMacro),
+                new PdfMacroOperationRegistration(PdfMacroOperation.Rename, PdfRenameMacro.Execute)]);
 
             PdfMacroOperation[] unsupported = [.. macro.Steps.Select(step => step.Operation)
                 .Where(operation => !dispatcher.CanExecute(operation)).Distinct()];
@@ -90,10 +99,17 @@ namespace KillerPDF.Features
                 return 1;
 
             con.WriteLine($"Running \"{macro.Name}\": " + string.Join(", ", macro.Steps.Select(step => step.Operation)));
-            PdfMacroRunReport report = dispatcher.RunReport(macro, [new ReadOnlyMemory<byte>(File.ReadAllBytes(source))]);
+            if (renames) con.WriteLine($"Output: {output}");
+            PdfMacroRunReport report = dispatcher.RunReport(macro, [new ReadOnlyMemory<byte>(File.ReadAllBytes(source))],
+                renames ? PdfRenameMacro.CreateContext(Path.GetFileName(source), 1) : null);
             PdfMacroFileResult? result = report.Results.Count == 1 ? report.Results[0] : null;
             if (result is { Succeeded: true, Data: ReadOnlyMemory<byte> data })
             {
+                if (renames && result.OutputFileName != Path.GetFileName(output))
+                {
+                    con.WriteLine("The macro output name differs from its planned target.");
+                    return 1;
+                }
                 CliEnsureParentDir(output);
                 string temporary = output + "." + Guid.NewGuid().ToString("N") + ".tmp";
                 try

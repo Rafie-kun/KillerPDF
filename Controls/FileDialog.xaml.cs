@@ -45,6 +45,9 @@ namespace KillerPDF.Controls
         /// <summary>Seeded with a suggested name; on OK, the full chosen path.</summary>
         public string FileName { get; set; } = "";
 
+        /// <summary>Keep a planned save name fixed while choosing its destination folder.</summary>
+        public bool IsFileNameReadOnly { get; set; }
+
         public string InitialDirectory { get; set; } = "";
 
         /// <summary>Appended on save when the typed name has no extension. No leading dot needed.</summary>
@@ -301,6 +304,7 @@ namespace KillerPDF.Controls
             _built = true;
             NavigateTo(startDir);
             FileNameBox.Text = seedName;
+            FileNameBox.IsReadOnly = IsFileNameReadOnly;
 
             // Save: preselect the stem so typing replaces the name but keeps the extension
             // visible. Open: caret at the end.
@@ -360,7 +364,7 @@ namespace KillerPDF.Controls
             // Save mode follows the Win32 dialogs: switching the type swaps the typed name's
             // extension - but only when the current one belongs to another entry of THIS filter.
             // An extension the user typed by hand is theirs and is left alone.
-            if (_mode == FileDialogMode.Save)
+            if (_mode == FileDialogMode.Save && !IsFileNameReadOnly)
             {
                 string? newExt = ActiveFilterExt();
                 string  name   = FileNameBox.Text?.Trim() ?? "";
@@ -997,7 +1001,7 @@ namespace KillerPDF.Controls
                 // Selecting a FILE fills the name box - that is the value being chosen. Selecting
                 // a folder does not: it is a navigation target, and overwriting the typed name
                 // with a folder name would lose what the user was in the middle of typing.
-                if (!en.IsFolder) FileNameBox.Text = en.Name;
+                if (!en.IsFolder && !IsFileNameReadOnly) FileNameBox.Text = en.Name;
                 SelName.Text = en.Name;
                 SelMeta.Text = en.IsFolder ? en.ModifiedLabel : $"{en.SizeLabel}  |  {en.ModifiedLabel}";
                 UpdateImagePreview(en);

@@ -286,7 +286,11 @@ public enum PdfMacroOperation
 
 /// <summary>One contextual macro operation result and its values for later steps.</summary>
 public sealed record PdfMacroOperationResult(ReadOnlyMemory<byte> Data,
-    IReadOnlyDictionary<string, string>? Values = null);
+    IReadOnlyDictionary<string, string>? Values = null)
+{
+    /// <summary>Gets a host-planned output file name supplied by an output operation.</summary>
+    public string? OutputFileName { get; init; }
+}
 
 /// <summary>Runs typed PDF macros with per-file isolation and cancellation.</summary>
 public static class PdfMacroRunner
@@ -472,6 +476,7 @@ public static class PdfMacroRunner
             {
                 ReadOnlyMemory<byte> current = source.ToArray();
                 var values = new Dictionary<string, string>(seed, StringComparer.Ordinal);
+                string? outputFileName = null;
                 foreach ((PdfMacroStep step, int stepIndex) in macro.Steps.Select(
                              (step, stepIndex) => (step, stepIndex)))
                 {
@@ -485,10 +490,14 @@ public static class PdfMacroRunner
                         ?? throw new InvalidOperationException(
                             "The macro operation returned no result.");
                     current = result.Data.ToArray();
+                    if (result.OutputFileName is not null) outputFileName = result.OutputFileName;
                     foreach ((string name, string value) in CheckedValues(result.Values))
                         values[name] = value;
                 }
-                results.Add(new PdfMacroFileResult(index, current.ToArray(), null, false));
+                results.Add(new PdfMacroFileResult(index, current.ToArray(), null, false)
+                {
+                    OutputFileName = outputFileName
+                });
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
@@ -592,7 +601,7 @@ public sealed partial record PdfMacroRunReport
         var report = new ReportFile(1, TotalInputCount, SucceededCount, FailedCount,
             CanceledCount, UnprocessedCount, [.. Results.Select(result => new ResultFile(
                 result.InputIndex, result.Succeeded, result.Error, result.WasCanceled,
-                result.FailedStepIndex, result.FailedOperation))]);
+                result.FailedStepIndex, result.FailedOperation, result.OutputFileName))]);
         return JsonSerializer.Serialize(report, indented
             ? IndentedJson.ReportFile : CompactJson.ReportFile);
     }
@@ -608,7 +617,8 @@ public sealed partial record PdfMacroRunReport
         {
             output.Append("Input ").Append(result.InputIndex + 1).Append(": ");
             if (result.Succeeded)
-                output.AppendLine("Succeeded");
+                output.AppendLine(result.OutputFileName is null ? "Succeeded"
+                    : "Succeeded -> " + result.OutputFileName);
             else if (result.WasCanceled)
                 output.AppendLine("Canceled");
             else
@@ -629,7 +639,8 @@ public sealed partial record PdfMacroRunReport
         ResultFile[] Results);
 
     private sealed record ResultFile(int InputIndex, bool Succeeded, string? Error,
-        bool WasCanceled, int? FailedStepIndex, PdfMacroOperation? FailedOperation);
+        bool WasCanceled, int? FailedStepIndex, PdfMacroOperation? FailedOperation,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? OutputFileName);
 
     private static JsonSerializerOptions ReportOptions(bool indented) => new()
     {
@@ -646,6 +657,8 @@ public sealed partial record PdfMacroRunReport
 public sealed record PdfMacroFileResult(int InputIndex, ReadOnlyMemory<byte>? Data,
     string? Error, bool WasCanceled)
 {
+    /// <summary>Gets the final output file name when an output operation supplied one.</summary>
+    public string? OutputFileName { get; init; }
     /// <summary>Gets the zero-based step that failed, when execution reached a step.</summary>
     public int? FailedStepIndex { get; init; }
     /// <summary>Gets the operation that failed, when execution reached a step.</summary>

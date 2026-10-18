@@ -31,6 +31,7 @@ public partial class MainWindow
             PdfMacroOperation.Ocr,
             PdfMacroOperation.Redact,
             PdfMacroOperation.Watermark,
+            PdfMacroOperation.Rename,
             PdfMacroOperation.Save,
             PdfMacroOperation.NumberPages,
             PdfMacroOperation.GenerateBookmarks,
@@ -64,18 +65,25 @@ public partial class MainWindow
             && ReferenceEquals(sourceViewer.ActiveSessionExt, sourceSession)
             && ReferenceEquals(_doc, sourceDocument);
         string sourceName = Path.GetFileName(_originalFile ?? _currentFile);
+        string sourcePath = _originalFile ?? _currentFile;
+        bool renames = macro.Steps.Any(step => step.Operation == PdfMacroOperation.Rename);
         string suggested = Path.GetFileNameWithoutExtension(sourceName) + "-"
             + SafeMacroFileName(macro.Name) + ".pdf";
+        try { if (renames) suggested = PdfRenameMacro.PlanFileNames(macro, [sourceName]).Single(); }
+        catch (ArgumentException error) { ShowExchangeError(error); return; }
         var outputDialog = new Controls.FileDialog(Controls.FileDialogMode.Save)
         {
             Title = Loc("Str_Macro_SelectOutput"),
             Filter = "PDF|*.pdf",
             DefaultExt = "pdf",
-            FileName = suggested
+            FileName = suggested,
+            InitialDirectory = renames ? Path.GetDirectoryName(sourcePath) ?? "" : "",
+            IsFileNameReadOnly = renames
         };
         if (outputDialog.ShowDialog(this) != true) return;
         if (!IsSourceCurrent()) return;
-        try { PdfEngineIntegration.PlanBatchOutputs([_currentFile, _originalFile ?? _currentFile], outputDialog.FileName); }
+        try { outputDialog.FileName = PdfEngineIntegration.PlanMacroOutputs(macro,
+            [sourcePath], outputDialog.FileName, [_currentFile, _originalFile ?? _currentFile]).Single(); }
         catch (ArgumentException error) { ShowExchangeError(error); return; }
 
         PdfMacroPreview preview = macro.Preview([
@@ -108,12 +116,15 @@ public partial class MainWindow
             snapshot = CreateExchangeSnapshot();
             byte[] source = await File.ReadAllBytesAsync(snapshot, token);
             PdfMacroRunReport report = await Task.Run(() => dispatcher.RunReport(
-                macro, [new ReadOnlyMemory<byte>(source)], cancellationToken: token), token);
+                macro, [new ReadOnlyMemory<byte>(source)],
+                renames ? PdfRenameMacro.CreateContext(sourceName, 1) : null, token), token);
             PdfMacroFileResult result = AssertSingleResult(report);
             if (_macroRedaction.Canceled) throw new OperationCanceledException();
             if (result.Succeeded && result.Data is ReadOnlyMemory<byte> data)
             {
                 token.ThrowIfCancellationRequested();
+                if (renames && result.OutputFileName != Path.GetFileName(outputDialog.FileName))
+                    throw new InvalidOperationException("The macro output name differs from its approved plan.");
                 WriteMacroOutput(outputDialog.FileName, data);
             }
 
@@ -163,7 +174,8 @@ public partial class MainWindow
             new PdfMacroOperationRegistration(PdfMacroOperation.Redact,
                 (_, source, _, cancellationToken) => RedactMacroContent(source, cancellationToken)),
             new PdfMacroOperationRegistration(PdfMacroOperation.Watermark,
-                PdfEngineBurn.ExecuteWatermarkMacro)]);
+                PdfEngineBurn.ExecuteWatermarkMacro),
+            new PdfMacroOperationRegistration(PdfMacroOperation.Rename, PdfRenameMacro.Execute)]);
     }
 
     // What the next macro run's Redact step removes: the words asked for at the start of the run

@@ -21,6 +21,24 @@ namespace KillerPDF.Services;
 /// <summary>Bridges completed application state into The KillerPDF.Engine during migration.</summary>
 internal static class PdfEngineIntegration
 {
+    internal static string[] PlanMacroOutputs(PdfMacro macro, IReadOnlyList<string> sources,
+        string firstOutput, IEnumerable<string>? additionalSources = null)
+    {
+        string[] outputs;
+        if (macro.Steps.Any(step => step.Operation == PdfMacroOperation.Rename))
+        {
+            string directory = Path.GetDirectoryName(Path.GetFullPath(firstOutput))!;
+            outputs = PdfRenameMacro.PlanFileNames(macro, sources)
+                .Select(name => Path.Combine(directory, name)).ToArray();
+        }
+        else outputs = PlanBatchOutputs(sources, firstOutput);
+        var protectedPaths = sources.Concat(additionalSources ?? [])
+            .Select(Path.GetFullPath).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        if (outputs.Any(protectedPaths.Contains))
+            throw new ArgumentException("Macro output cannot replace a source PDF.", nameof(firstOutput));
+        return outputs;
+    }
+
     internal static string[] PlanBatchOutputs(IEnumerable<string> sources, string firstOutput)
     {
         string[] inputs = sources.Select(Path.GetFullPath).ToArray();

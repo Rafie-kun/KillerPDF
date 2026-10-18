@@ -16,6 +16,7 @@ internal static class MacroStepEditor
         PdfMacroOperation.EditPortfolio => "Str_DocumentTools_EditPortfolio",
         PdfMacroOperation.SetPageLabels => "Str_DocumentTools_PageLabels",
         PdfMacroOperation.Watermark => "Str_Stamp_SecWatermark",
+        PdfMacroOperation.Rename => "Str_Ctx_BmRename",
         _ => null
     };
 
@@ -23,6 +24,13 @@ internal static class MacroStepEditor
     {
         try
         {
+            if (step.Operation == PdfMacroOperation.Rename)
+            {
+                string template = step.Settings is null ? "{name}-renamed" : PdfRenameMacro.ReadTemplate(step);
+                var rename = new DocumentValuesDialog(owner, L("Str_Ctx_BmRename"),
+                    (L("Str_Attachment_Name") + " ({name}, {index})", template));
+                return rename.ShowDialog() == true ? PdfRenameMacro.RenameStep(rename.Values[0]) : null;
+            }
             if (step.Operation == PdfMacroOperation.Watermark)
             {
                 PdfTextWatermarkOptions current = step.Settings is null || step.Settings.Count == 0

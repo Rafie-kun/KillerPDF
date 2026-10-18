@@ -19,15 +19,21 @@ public partial class MainWindow
         return order.ShowDialog() == true ? order.Order.Select(index => picker.FileNames[index]).ToArray() : null;
     }
 
-    private string[]? SelectBatchOutputs(string title, string[] inputs, string suffix)
+    private string[]? SelectBatchOutputs(string title, string[] inputs, string suffix, PdfMacro? macro = null)
     {
+        bool renames = macro?.Steps.Any(step => step.Operation == PdfMacroOperation.Rename) == true;
+        string name = renames ? PdfRenameMacro.PlanFileNames(macro!, inputs)[0]
+            : Path.GetFileNameWithoutExtension(inputs[0]) + "-" + suffix + ".pdf";
         var picker = new Controls.FileDialog(Controls.FileDialogMode.Save)
         {
             Title = title, Filter = "PDF|*.pdf", DefaultExt = "pdf",
-            FileName = Path.GetFileNameWithoutExtension(inputs[0]) + "-" + suffix + ".pdf"
+            FileName = name,
+            InitialDirectory = renames ? Path.GetDirectoryName(inputs[0]) ?? "" : "",
+            IsFileNameReadOnly = renames
         };
         if (picker.ShowDialog(this) != true) return null;
-        return PdfEngineIntegration.PlanBatchOutputs(inputs, picker.FileName);
+        return macro is null ? PdfEngineIntegration.PlanBatchOutputs(inputs, picker.FileName)
+            : PdfEngineIntegration.PlanMacroOutputs(macro, inputs, picker.FileName);
     }
 
     private async void RunMacroBatch(PdfMacro macro, PdfMacroDispatcher dispatcher)
@@ -37,7 +43,7 @@ public partial class MainWindow
         {
             string[]? inputs = SelectBatchInputs(title);
             if (inputs is null) return;
-            string[]? outputs = SelectBatchOutputs(title, inputs, SafeMacroFileName(macro.Name));
+            string[]? outputs = SelectBatchOutputs(title, inputs, SafeMacroFileName(macro.Name), macro);
             if (outputs is null) return;
             var overwrite = outputs.Where(File.Exists).ToHashSet(StringComparer.OrdinalIgnoreCase);
             string preview = string.Join("\n", macro.Steps.Select((step, index) =>
@@ -68,12 +74,17 @@ public partial class MainWindow
                     {
                         byte[] source = await File.ReadAllBytesAsync(inputs[index], token);
                         PdfMacroRunReport result = await Task.Run(() => dispatcher.RunReport(macro,
-                            [new ReadOnlyMemory<byte>(source)], cancellationToken: token), token);
+                            [new ReadOnlyMemory<byte>(source)],
+                            macro.Steps.Any(step => step.Operation == PdfMacroOperation.Rename)
+                                ? PdfRenameMacro.CreateContext(Path.GetFileName(inputs[index]), index + 1) : null,
+                            token), token);
                         PdfMacroFileResult file = AssertSingleResult(result);
                         if (file.WasCanceled || _macroRedaction.Canceled) throw new OperationCanceledException(token);
                         if (file.Succeeded && file.Data is ReadOnlyMemory<byte> data)
                         {
                             token.ThrowIfCancellationRequested();
+                            if (file.OutputFileName is not null && file.OutputFileName != Path.GetFileName(outputs[index]))
+                                throw new InvalidOperationException("The macro output name differs from its approved plan.");
                             WriteMacroOutput(outputs[index], data, overwrite.Contains(outputs[index]));
                             report.AppendLine(string.Format(Loc("Str_Macro_Complete"), outputs[index]));
                         }
