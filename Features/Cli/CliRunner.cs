@@ -561,9 +561,10 @@ namespace KillerPDF.Features
         // frame, retaining input order and a leading PDF's original byte prefix.
         private static int CliMerge(List<string> pos, TextWriter con)
         {
-            if (pos.Count < 3)
+            // One input is allowed too, so a single image becomes a PDF.
+            if (pos.Count < 2)
             {
-                con.WriteLine("Usage: KillerPDF.exe --merge <out.pdf> <in1.pdf> <in2.pdf> ...");
+                con.WriteLine("Usage: KillerPDF.exe --merge <out.pdf> <in1> [<in2> ...]   (PDFs and images)");
                 return 2;
             }
             string outPath = Path.GetFullPath(pos[0]);

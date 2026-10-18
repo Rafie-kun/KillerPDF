@@ -27,7 +27,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Added headers, footers, page numbering and Bates stamping (#344), imposition layouts with production marks (#349), and calibrated measurement profiles, annotations, snapping and reports (#348), each also available from the command line.
 - Added a shared image library for the Image tool, image watermarks and imported signatures (#326).
 - Added DPI, color mode, threshold and JPEG compression controls to flattening (#366), and a Printer properties button that applies the driver's own settings to the job.
-- Added command-line splitting by page count, equal parts, page ranges, bookmark level or file size, and a `--batch-render` command with per-page timing.
+- Added command-line splitting by page count, equal parts, page ranges, bookmark level or file size, and a `--batch-render` command with per-page timing. `--merge` also takes a single file, so one image becomes a PDF.
 - Added keyboard shortcuts for every new tool and command, including Ctrl+Shift+D followed by a letter for each document tool, and Alt+Shift+G to turn Film Grain on or off, shown on a new Alt+Shift layer of the keyboard map.
 - Added the Windows 11 snap layouts menu to the maximize button (#374).
 - Added a Sensitivity slider when a signature is imported from an image. It removes the paper behind the ink and makes the signature lighter or darker before it is saved.
