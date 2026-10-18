@@ -324,6 +324,13 @@ public sealed partial class PdfPageRenderer
             diagnostics.Add("Invalid page resources were treated as empty.");
         var activeForms = new HashSet<PdfStream>();
         int recoveredFormExpansions = 0;
+        int deepFormExpansions = 0;
+        int expandedWork = 0;
+        void ConsumeWork()
+        {
+            if (++expandedWork > 1_000_000)
+                throw new FormatException("Expanded page rendering work limit exceeded.");
+        }
         IReadOnlySet<int> hiddenOptionalContentGroups = _hiddenOptionalContentGroups;
         PdfDictionary pageResources = _pageResources[pageIndex];
         bool pageHasGroup = _tree.Pages[pageIndex].Dictionary.TryGetValue(Name("Group"), out _);
@@ -426,6 +433,7 @@ public sealed partial class PdfPageRenderer
             foreach (PdfContentInstruction instruction in instructions)
             {
                 cancellationToken.ThrowIfCancellationRequested();
+                ConsumeWork();
                 using var inputProfile = pixels.PrepareInput(state.RenderingIntent);
                 IReadOnlyList<PdfObject> values = instruction.Operands;
                 double N(int index) => instruction.TryGetNumber(index, out double number)
@@ -1400,6 +1408,7 @@ public sealed partial class PdfPageRenderer
                     diagnostics.Add("Text rendering is not implemented.");
                 foreach (byte code in text.Bytes.Span)
                 {
+                    ConsumeWork();
                     string glyphName = encoding[code];
                     if ((paintsType3 || clipsType3) && glyphName.Length > 0
                         && charProcs.TryGetValue(Name(glyphName), out PdfObject? glyphValue)
@@ -1472,6 +1481,7 @@ public sealed partial class PdfPageRenderer
                             : extractionFont.Decode(text.Bytes);
                     foreach (PdfDecodedCharacter character in characters)
                     {
+                        ConsumeWork();
                         PdfVerticalGlyphMetrics vertical =
                             extractionFont.GetVerticalMetrics(character.Code);
                         double originX = extractionFont.IsVertical
@@ -1808,6 +1818,8 @@ public sealed partial class PdfPageRenderer
         void RenderForm(PdfStream form, PdfDictionary inheritedResources,
             GraphicsState parentState, int depth)
         {
+            if (depth >= PdfPageContentReader.MaximumRecoveredFormDepth && ++deepFormExpansions > 1024)
+                throw new FormatException("Nested Form XObject work limit exceeded.");
             bool addedForm = activeForms.Add(form);
             if (!addedForm)
             {
