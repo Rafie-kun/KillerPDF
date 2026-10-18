@@ -88,6 +88,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 ### Fixed
 - Form-data import accepts checkboxes whose unchecked appearance is omitted, and form flattening generates missing text appearances (#329, #342).
+- XFA conversion explains unsupported repeated field paths instead of failing with a duplicate-key error (#330).
 - The window opens fully on screen on a small or high-scaling display, or when its saved size came from a bigger monitor, instead of running off the edges.
 - The mouse wheel over the title bar wordmark, or the plain title on flat themes, changes the app size, as it already did over the icon.
 - Toolbar, sidebar, tab strip and footer text stays smooth at app sizes other than 100% instead of blurring.

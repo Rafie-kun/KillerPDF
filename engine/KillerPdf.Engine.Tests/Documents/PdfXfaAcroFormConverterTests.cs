@@ -8,6 +8,20 @@ namespace KillerPdf.Engine.Tests.Documents;
 public sealed class PdfXfaAcroFormConverterTests
 {
     [Fact]
+    public void ConvertRejectsAmbiguousRepeatedTemplatePathsWithAnExplanation()
+    {
+        PdfDocument source = Document(
+            """<template><subform name="form" layout="position"><field name="name" x="10pt" y="10pt" w="30pt" h="12pt"><ui><textEdit/></ui></field><field name="name" x="10pt" y="30pt" w="30pt" h="12pt"><ui><textEdit/></ui></field></subform></template>""",
+            """<datasets><data><form><name>Ada</name><name>Grace</name></form></data></datasets>""");
+
+        NotSupportedException error = Assert.Throws<NotSupportedException>(
+            () => PdfXfaAcroFormConverter.Convert(source));
+
+        Assert.Contains("form.name", error.Message);
+        Assert.Contains("repeated", error.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void ConvertReadsTemplateAndDatasetsFromCombinedXdpStream()
     {
         const string xdp = "<xdp><template><subform name=\"form\" layout=\"position\">"

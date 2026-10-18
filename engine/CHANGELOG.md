@@ -121,6 +121,7 @@ The 1.9.0 engine adds page-content extraction and complete engine-owned page ren
 
 ### Fixed
 - Form-data import and checkbox editing accept an omitted optional unchecked appearance, and form flattening generates missing text appearances and handles omitted unchecked appearances (#329, #342).
+- XFA conversion rejects ambiguous repeated template paths with an explicit explanation (#330).
 
 - Shared host font programs across every font resource that resolves to the same installed face and stopped copying programs the CFF probe rejects, cutting live memory by about a third on long OCR'd scans.
 - Improved fractional text placement with finer glyph-mask origins and bounded reuse of glyph geometry.

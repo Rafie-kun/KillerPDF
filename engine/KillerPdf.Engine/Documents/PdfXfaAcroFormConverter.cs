@@ -30,6 +30,11 @@ public static class PdfXfaAcroFormConverter
             ?? throw new InvalidOperationException("The document has no XFA form.");
         info = ExpandCombinedXdp(info);
         PdfXfaTemplateInfo template = PdfXfaTemplate.Read(info);
+        IGrouping<string, PdfXfaTemplateField>? repeated = template.Fields
+            .GroupBy(field => field.Path, StringComparer.Ordinal).FirstOrDefault(group => group.Skip(1).Any());
+        if (repeated is not null)
+            throw new NotSupportedException(
+                $"XFA conversion cannot safely distinguish repeated template field path '{repeated.Key}'.");
         Dictionary<string, PdfXfaTemplateField> fields = template.Fields.ToDictionary(
             field => field.Path, StringComparer.Ordinal);
         PdfXfaTemplateField? unsupported = fields.Values.FirstOrDefault(field =>
