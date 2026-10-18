@@ -19,6 +19,7 @@ internal static class MacroStepEditor
         PdfMacroOperation.Rename => "Str_Ctx_BmRename",
         PdfMacroOperation.DataMerge => "Str_DocumentTools_DataMerge",
         PdfMacroOperation.Resize => "Str_Tf_ResizePage",
+        PdfMacroOperation.ConvertColor => "Str_Tf_ColorMode",
         _ => null
     };
 
@@ -26,6 +27,25 @@ internal static class MacroStepEditor
     {
         try
         {
+            if (step.Operation == PdfMacroOperation.ConvertColor)
+            {
+                PdfMacroColorOptions current = step.Settings is null ? new(PdfMacroColorMode.Grayscale) : PdfColorConversionMacro.ReadOptions(step);
+                var colors = new DocumentListDialog(owner, L("Str_Tf_ColorMode"),
+                    [L("Str_Tf_Grayscale"), L("Str_Tf_BlackWhite")])
+                { Width = 540, Height = 200, MinHeight = 180 };
+                colors.SelectedIndex = current.Mode == PdfMacroColorMode.Grayscale ? 0 : 1;
+                if (colors.ShowDialog() != true) return null;
+                PdfMacroColorMode mode = colors.SelectedIndex == 0 ? PdfMacroColorMode.Grayscale : PdfMacroColorMode.BlackAndWhite;
+                int threshold = current.Threshold;
+                if (mode == PdfMacroColorMode.BlackAndWhite)
+                {
+                    var values = new DocumentValuesDialog(owner, L("Str_Tf_ColorMode"),
+                        (L("Str_Tf_Threshold") + " (0-255)", threshold.ToString(CultureInfo.CurrentCulture)));
+                    if (values.ShowDialog() != true) return null;
+                    threshold = int.Parse(values.Values[0], CultureInfo.CurrentCulture);
+                }
+                return PdfColorConversionMacro.ConvertStep(mode, threshold);
+            }
             if (step.Operation == PdfMacroOperation.Resize)
             {
                 double percent = step.Settings is null ? 100 : PdfResizeMacro.ReadPercent(step);

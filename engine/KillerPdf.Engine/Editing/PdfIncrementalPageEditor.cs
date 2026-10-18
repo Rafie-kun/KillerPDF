@@ -4162,6 +4162,9 @@ public sealed class PdfIncrementalPageEditor
                 && TryUnit(tokens[index - 2], out double green)
                 && TryUnit(tokens[index - 1], out double blue))
                 color = new PdfRgbColor(red, green, blue);
+            if (tokens[index] == "g" && index >= 1
+                && TryUnit(tokens[index - 1], out double gray))
+                color = new PdfRgbColor(gray, gray, gray);
         }
         return (size ?? throw new InvalidOperationException(
             $"The text field '{fieldName}' /DA value has no valid font size."), color);

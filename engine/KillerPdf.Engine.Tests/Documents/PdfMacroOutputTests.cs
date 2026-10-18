@@ -9,7 +9,8 @@ public sealed class PdfMacroOutputTests
     [Fact]
     public void DataMergeKeepsEachFormEditableAndAppliesFollowingRename()
     {
-        byte[] source = new PdfDocumentBuilder().AddBlankPage()
+        byte[] source = new PdfDocumentBuilder().AddPage(612, 792,
+            new PdfContentStreamBuilder().SetFillRgb(1, 0, 0).Rectangle(0, 700, 612, 92).Fill())
             .AddTextField(0, "name", 20, 20, 140, 24).Build();
         var profile = new PdfDataMergeProfile("Customers", [new("Name", "name")], "{{Name}}.pdf");
         IReadOnlyDictionary<string, string?>[] records = [
@@ -18,14 +19,22 @@ public sealed class PdfMacroOutputTests
         var dispatcher = new PdfMacroDispatcher([
             new(PdfMacroOperation.DataMerge, (step, data, _, token) => PdfDataMergeMacro.Execute(step, data, records, token)),
             new(PdfMacroOperation.Resize, PdfResizeMacro.Execute),
+            new(PdfMacroOperation.ConvertColor, PdfColorConversionMacro.Execute),
             new(PdfMacroOperation.Rename, PdfRenameMacro.Execute)]);
 
         PdfMacroRunReport report = dispatcher.RunReport(new("Customers", [profile.ToMacroStep(), PdfResizeMacro.ScaleStep(50),
+            PdfColorConversionMacro.ConvertStep(PdfMacroColorMode.Grayscale),
             PdfRenameMacro.RenameStep("{name}-ready-{index}")]), [source], PdfRenameMacro.CreateContext("template.pdf", 1));
 
         Assert.True(Assert.Single(report.Results).Succeeded);
         Assert.All(report.Results[0].Outputs!, output =>
-            Assert.Equal(306, Assert.Single(PdfPageInformation.Read(PdfDocument.Open(output.Data!.Value))).Width));
+        {
+            PdfDocument document = PdfDocument.Open(output.Data!.Value);
+            Assert.Equal(306, Assert.Single(PdfPageInformation.Read(document)).Width);
+            var bitmap = new KillerPdf.Engine.Rendering.PdfPageRenderer(document).Render(0,
+                new KillerPdf.Engine.Rendering.PdfRenderOptions(306, 396));
+            Assert.Equal(new byte[] { 77, 77, 77, 255 }, bitmap.Pixels.Slice((10 * 306 + 10) * 4, 4).ToArray());
+        });
         Assert.Collection(report.Results[0].Outputs!,
             output => { Assert.Equal("Ada-ready-1.pdf", output.OutputFileName);
                 Assert.Equal("Ada", Assert.Single(PdfFormWidgetReader.ReadPage(PdfDocument.Open(output.Data!.Value), 0)).Value); },
