@@ -37,9 +37,8 @@ public static partial class PdfColorConversionMacro
             }
             if (value is PdfStream stream)
             {
-                string? subtype = stream.Dictionary.GetValueOrDefault(Name("Subtype")) is PdfName type ? type.ValueAsLatin1() : null;
-                if (stream.Dictionary.GetValueOrDefault(Name("Type")) is PdfName objectType
-                    && objectType.ValueAsLatin1() == "XObject" && subtype is not ("Form" or "Image"))
+                string? subtype = Kind(stream.Dictionary, "Subtype");
+                if (Kind(stream.Dictionary, "Type") == "XObject" && subtype is not ("Form" or "Image"))
                     throw new NotSupportedException("Editable color conversion does not yet preserve this XObject type.");
                 var dictionary = (PdfDictionary)Visit(stream.Dictionary, depth + 1);
                 if (subtype == "Image") return ConvertImage(document, stream, dictionary, options, token);
@@ -48,7 +47,8 @@ public static partial class PdfColorConversionMacro
                 var entries = dictionary.ToDictionary(entry => entry.Key, entry => entry.Value);
                 foreach (string key in new[] { "Filter", "DecodeParms", "Length" }) entries.Remove(Name(key));
                 byte[] data = PdfContentStreamWriter.Write(ConvertContent(PdfContentStreamReader.Read(document.DecodeStream(stream),
-                    cancellationToken: token), options, token, inheritColorSpace: true));
+                    cancellationToken: token), options, token, inheritColorSpace: true,
+                    colorSpaces: ReadDeviceColorSpaces(document, stream.Dictionary.GetValueOrDefault(Name("Resources")))));
                 return new PdfStream(new PdfDictionary(entries), data);
             }
             if (value is PdfArray array)
@@ -57,8 +57,8 @@ public static partial class PdfColorConversionMacro
                 return items.Where((item, index) => !ReferenceEquals(item, array[index])).Any() ? new PdfArray(items) : array;
             }
             if (value is not PdfDictionary source) return value;
-            string? subtypeName = source.GetValueOrDefault(Name("Subtype")) is PdfName subtypeValue ? subtypeValue.ValueAsLatin1() : null;
-            bool annotation = source.GetValueOrDefault(Name("Type")) is PdfName annotationType && annotationType.ValueAsLatin1() == "Annot"
+            string? subtypeName = Kind(source, "Subtype");
+            bool annotation = Kind(source, "Type") == "Annot"
                 || subtypeName is "Widget" or "FreeText" or "Text" or "Line" or "Square" or "Circle" or "Ink";
             if (subtypeName == "Type3") throw new NotSupportedException("Color conversion of Type 3 glyphs is not yet supported.");
             if (context == AppearanceContext.AcroForm && source.ContainsKey(Name("XFA")))
@@ -69,8 +69,7 @@ public static partial class PdfColorConversionMacro
             if ((FieldType(source) == "Tx" && (source.ContainsKey(Name("RV")) || source.ContainsKey(Name("DS"))))
                 || (annotation && (source.ContainsKey(Name("RC")) || source.ContainsKey(Name("DS")))))
                 throw new NotSupportedException("Editable color conversion does not yet preserve rich-text colors.");
-            if (context == AppearanceContext.GraphicsState || source.GetValueOrDefault(Name("Type")) is PdfName graphicsType
-                && graphicsType.ValueAsLatin1() == "ExtGState")
+            if (context == AppearanceContext.GraphicsState || Kind(source, "Type") == "ExtGState")
             {
                 if (new[] { "op", "OP" }.Any(key => source.TryGetValue(Name(key), out PdfObject? setting)
                     && Resolve(setting) is PdfBoolean { Value: true }))
@@ -98,8 +97,7 @@ public static partial class PdfColorConversionMacro
                     _ when context == AppearanceContext.GraphicsStates => AppearanceContext.GraphicsState,
                     "ExtGState" => AppearanceContext.GraphicsStates,
                     "ColorSpace" => AppearanceContext.ColorSpaces,
-                    "AcroForm" when source.GetValueOrDefault(Name("Type")) is PdfName catalogType
-                        && catalogType.ValueAsLatin1() == "Catalog" => AppearanceContext.AcroForm,
+                    "AcroForm" when Kind(source, "Type") == "Catalog" => AppearanceContext.AcroForm,
                     "MK" when annotation => AppearanceContext.WidgetColors,
                     _ => AppearanceContext.Document
                 });
@@ -132,6 +130,10 @@ public static partial class PdfColorConversionMacro
             }
             return value;
         }
+
+        string? Kind(PdfDictionary dictionary, string key) =>
+            dictionary.TryGetValue(Name(key), out PdfObject? value) && Resolve(value) is PdfName name
+                ? name.ValueAsLatin1() : null;
 
         string? FieldType(PdfDictionary field)
         {

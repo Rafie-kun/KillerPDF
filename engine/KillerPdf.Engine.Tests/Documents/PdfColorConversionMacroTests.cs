@@ -10,8 +10,46 @@ namespace KillerPdf.Engine.Tests.Documents;
 
 public sealed class PdfColorConversionMacroTests
 {
-    [Fact]
-    public void PostScriptXObjectsFailSafelyRatherThanKeepingColoredPaint()
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    public void NamedDeviceColorsConvertInPagesAndReusableForms(bool form, bool indirectType)
+    {
+        byte[] content = "/Cs1 cs 1 0 0 sc 0 0 1 1 re f"u8.ToArray();
+        PdfDocument document = PdfDocument.Open(new PdfDocumentBuilder().AddPage(1, 1,
+            form ? "/Fm1 Do"u8.ToArray() : content).Build());
+        var root = (PdfDictionary)document.Resolve((PdfIndirectReference)document.Trailer[new PdfName("Root"u8)]);
+        var pages = (PdfDictionary)document.Resolve((PdfIndirectReference)root[new PdfName("Pages"u8)]);
+        var pageReference = (PdfIndirectReference)((PdfArray)pages[new PdfName("Kids"u8)])[0];
+        var page = ((PdfDictionary)document.Resolve(pageReference)).ToDictionary(entry => entry.Key, entry => entry.Value);
+        var update = new PdfIncrementalUpdateBuilder(document);
+        var resources = new PdfDictionary([new(new PdfName("ColorSpace"u8), new PdfDictionary([
+            new(new PdfName("Cs1"u8), update.AddObject(new PdfName("DeviceRGB"u8)))]))]);
+        if (form)
+        {
+            var reusable = update.AddObject(new PdfStream(new PdfDictionary([
+                new(new PdfName("Type"u8), indirectType ? update.AddObject(new PdfName("XObject"u8)) : new PdfName("XObject"u8)),
+                new(new PdfName("Subtype"u8), indirectType ? update.AddObject(new PdfName("Form"u8)) : new PdfName("Form"u8)),
+                new(new PdfName("BBox"u8), new PdfArray([new PdfInteger(0), new PdfInteger(0), new PdfInteger(1), new PdfInteger(1)])),
+                new(new PdfName("Resources"u8), resources)]), content));
+            resources = new PdfDictionary([new(new PdfName("XObject"u8), new PdfDictionary([
+                new(new PdfName("Fm1"u8), reusable)]))]);
+        }
+        page[new PdfName("Resources"u8)] = resources;
+        update.ReplaceObject(pageReference.ObjectNumber, new PdfDictionary(page));
+
+        var result = PdfColorConversionMacro.Execute(PdfColorConversionMacro.ConvertStep(PdfMacroColorMode.Grayscale),
+            update.Build(), new Dictionary<string, string>());
+
+        var rendered = new PdfPageRenderer(PdfDocument.Open(result.Data)).Render(0, new PdfRenderOptions(1, 1));
+        Assert.Equal(new byte[] { 77, 77, 77, 255 }, rendered.Pixels.ToArray());
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void PostScriptXObjectsFailSafelyRatherThanKeepingColoredPaint(bool indirectType)
     {
         PdfDocument document = PdfDocument.Open(new PdfDocumentBuilder().AddBlankPage(100, 100).Build());
         var root = (PdfDictionary)document.Resolve((PdfIndirectReference)document.Trailer[new PdfName("Root"u8)]);
@@ -20,8 +58,8 @@ public sealed class PdfColorConversionMacroTests
         var page = ((PdfDictionary)document.Resolve(pageReference)).ToDictionary(entry => entry.Key, entry => entry.Value);
         var update = new PdfIncrementalUpdateBuilder(document);
         var ps = update.AddObject(new PdfStream(new PdfDictionary([
-            new(new PdfName("Type"u8), new PdfName("XObject"u8)),
-            new(new PdfName("Subtype"u8), new PdfName("PS"u8))]), "1 0 0 setrgbcolor"u8));
+            new(new PdfName("Type"u8), indirectType ? update.AddObject(new PdfName("XObject"u8)) : new PdfName("XObject"u8)),
+            new(new PdfName("Subtype"u8), indirectType ? update.AddObject(new PdfName("PS"u8)) : new PdfName("PS"u8))]), "1 0 0 setrgbcolor"u8));
         page[new PdfName("Resources"u8)] = new PdfDictionary([
             new(new PdfName("XObject"u8), new PdfDictionary([new(new PdfName("PS1"u8), ps)]))]);
         update.ReplaceObject(pageReference.ObjectNumber, new PdfDictionary(page));

@@ -54,12 +54,14 @@ public static partial class PdfColorConversionMacro
         PdfMacroColorOptions options = ReadOptions(step);
         PdfDocument document = PdfDocument.Open(source);
         var reader = new PdfPageContentReader(document);
+        var tree = PdfPageTree.Read(document);
         var editor = new PdfIncrementalPageEditor(document);
         for (int page = 0; page < reader.PageCount; page++)
         {
             cancellationToken.ThrowIfCancellationRequested();
             editor.SetPageContent(page, PdfContentStreamWriter.Write(ConvertContent(
-                reader.ReadInstructions(page, cancellationToken), options, cancellationToken)));
+                reader.ReadInstructions(page, cancellationToken), options, cancellationToken,
+                colorSpaces: ReadDeviceColorSpaces(document, tree.Pages[page].InheritedValues.GetValueOrDefault(Name("Resources"))))));
         }
         byte[] output = editor.Build();
         cancellationToken.ThrowIfCancellationRequested();
@@ -68,7 +70,7 @@ public static partial class PdfColorConversionMacro
 
     private static IReadOnlyList<PdfContentInstruction> ConvertContent(
         IReadOnlyList<PdfContentInstruction> instructions, PdfMacroColorOptions options, CancellationToken token,
-        bool inheritColorSpace = false)
+        bool inheritColorSpace = false, IReadOnlyDictionary<string, int>? colorSpaces = null)
     {
         var output = new List<PdfContentInstruction>(instructions.Count);
         if (!inheritColorSpace && options.Mode == PdfMacroColorMode.BlackAndWhite && options.Threshold == 0)
@@ -98,6 +100,7 @@ public static partial class PdfColorConversionMacro
                 int selected = colorSpace.ValueAsLatin1() switch
                 {
                     "DeviceGray" => 1, "DeviceRGB" => 3, "DeviceCMYK" => 4,
+                    string alias when colorSpaces is not null && colorSpaces.TryGetValue(alias, out int count) => count,
                     _ => throw new NotSupportedException("The selected color space is not yet supported for editable conversion.")
                 };
                 if (instruction.Operator == "CS") strokeComponents = selected;
@@ -143,6 +146,29 @@ public static partial class PdfColorConversionMacro
     }
 
     private static byte Gray(byte red, byte green, byte blue) => (byte)((red * 77 + green * 150 + blue * 29 + 128) >> 8);
+    private static IReadOnlyDictionary<string, int> ReadDeviceColorSpaces(PdfDocument document, PdfObject? resources)
+    {
+        var result = new Dictionary<string, int>(StringComparer.Ordinal);
+        if (Resolve(resources) is PdfDictionary dictionary
+            && Resolve(dictionary.GetValueOrDefault(Name("ColorSpace"))) is PdfDictionary spaces)
+            foreach ((PdfName name, PdfObject value) in spaces)
+                if (Resolve(value) is PdfName device)
+                {
+                    int count = device.ValueAsLatin1() switch { "DeviceGray" => 1, "DeviceRGB" => 3, "DeviceCMYK" => 4, _ => 0 };
+                    if (count != 0) result.Add(name.ValueAsLatin1(), count);
+                }
+        return result;
+
+        PdfObject? Resolve(PdfObject? value)
+        {
+            for (int depth = 0; value is PdfIndirectReference reference; depth++)
+            {
+                if (depth >= 64) throw new InvalidOperationException("A color resource reference chain is too deeply nested.");
+                value = document.Resolve(reference);
+            }
+            return value;
+        }
+    }
     private static byte CmykGray(byte cyan, byte magenta, byte yellow, byte black)
     {
         uint rgb = KillerPdf.Engine.Rendering.PdfDeviceCmyk.ToRgb(cyan | (uint)magenta << 8 | (uint)yellow << 16 | (uint)black << 24);
