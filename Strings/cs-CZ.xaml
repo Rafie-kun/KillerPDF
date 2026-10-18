@@ -1635,4 +1635,14 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Panel_SigIncomplete">Neověřeno úplně</sys:String>
     <sys:String x:Key="Str_Panel_SigUnsigned">Nepodepsáno</sys:String>
     <sys:String x:Key="Str_Panel_SigChanged">změněno po podpisu</sys:String>
+    <sys:String x:Key="Str_DocumentTools_FormData">Data formuláře</sys:String>
+    <sys:String x:Key="Str_DocumentTools_BookmarkData">Data záložek</sys:String>
+    <sys:String x:Key="Str_Exchange_ExportForms">Exportovat data formuláře</sys:String>
+    <sys:String x:Key="Str_Exchange_ImportForms">Importovat data formuláře</sys:String>
+    <sys:String x:Key="Str_Exchange_ExportBookmarks">Exportovat záložky</sys:String>
+    <sys:String x:Key="Str_Exchange_ImportBookmarks">Importovat záložky</sys:String>
+    <sys:String x:Key="Str_Exchange_Import">Importovat</sys:String>
+    <sys:String x:Key="Str_Exchange_ReplaceBookmarks">Nahradit stávající záložky</sys:String>
+    <sys:String x:Key="Str_Exchange_Flatten">Sloučit pole formuláře s obsahem po importu</sys:String>
+    <sys:String x:Key="Str_Exchange_Preview">Odpovídající pole: {0}; přeskočená pole: {1}; komentáře: {2}.</sys:String>
 </ResourceDictionary>

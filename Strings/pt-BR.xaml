@@ -1650,4 +1650,14 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Panel_SigIncomplete">Não totalmente verificada</sys:String>
     <sys:String x:Key="Str_Panel_SigUnsigned">Não assinado</sys:String>
     <sys:String x:Key="Str_Panel_SigChanged">alterado depois da assinatura</sys:String>
+    <sys:String x:Key="Str_DocumentTools_FormData">Dados do formulário</sys:String>
+    <sys:String x:Key="Str_DocumentTools_BookmarkData">Dados dos marcadores</sys:String>
+    <sys:String x:Key="Str_Exchange_ExportForms">Exportar dados do formulário</sys:String>
+    <sys:String x:Key="Str_Exchange_ImportForms">Importar dados do formulário</sys:String>
+    <sys:String x:Key="Str_Exchange_ExportBookmarks">Exportar marcadores</sys:String>
+    <sys:String x:Key="Str_Exchange_ImportBookmarks">Importar marcadores</sys:String>
+    <sys:String x:Key="Str_Exchange_Import">Importar</sys:String>
+    <sys:String x:Key="Str_Exchange_ReplaceBookmarks">Substituir os marcadores existentes</sys:String>
+    <sys:String x:Key="Str_Exchange_Flatten">Achatar os campos após a importação</sys:String>
+    <sys:String x:Key="Str_Exchange_Preview">Campos correspondentes: {0}; campos ignorados: {1}; comentários: {2}.</sys:String>
 </ResourceDictionary>

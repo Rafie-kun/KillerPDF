@@ -20,6 +20,67 @@ namespace KillerPDF.Tests;
 public sealed class PdfEngineIntegrationTests
 {
     [Fact]
+    public void FormDataExchange_RejectsAnInapplicableImportWithoutChangingTheFile()
+    {
+        byte[] source = new PdfDocumentBuilder().AddBlankPage().Build();
+        string path = Path.Combine(Path.GetTempPath(), $"killerpdf-form-exchange-{Guid.NewGuid():N}.pdf");
+        try
+        {
+            File.WriteAllBytes(path, source);
+            var data = new PdfFormDataSet { Fields = [new PdfFormDataField { Name = "Missing", Values = ["Value"] }] };
+            Assert.Throws<InvalidOperationException>(() => PdfEngineIntegration.ApplyFormData(path, data));
+            Assert.Equal(source, File.ReadAllBytes(path));
+        }
+        finally { File.Delete(path); }
+    }
+
+    [Theory]
+    [InlineData(false, 2)]
+    [InlineData(true, 1)]
+    public void BookmarkExchange_AppendsOrReplacesAndRejectsInvalidInputWithoutChangingTheFile(
+        bool replace, int expectedCount)
+    {
+        PdfDocument empty = PdfDocument.Open(new PdfDocumentBuilder().AddBlankPage().Build());
+        byte[] source = new PdfIncrementalPageEditor(empty).AddBookmark("Original", 0).Build();
+        PdfDocument incoming = PdfDocument.Open(new PdfIncrementalPageEditor(empty)
+            .AddBookmark("Imported", 0).Build());
+        string path = Path.Combine(Path.GetTempPath(), $"killerpdf-bookmark-exchange-{Guid.NewGuid():N}.pdf");
+        try
+        {
+            File.WriteAllBytes(path, source);
+            Assert.Throws<InvalidOperationException>(() =>
+                PdfEngineIntegration.ApplyBookmarkData(path, "invalid", replace));
+            Assert.Equal(source, File.ReadAllBytes(path));
+            PdfEngineIntegration.ApplyBookmarkData(path, PdfBookmarkExchange.ToJson(incoming), replace);
+            IReadOnlyList<PdfBookmarkInfo> bookmarks = PdfEngineIntegration.ReadBookmarks(File.ReadAllBytes(path));
+            Assert.Equal(expectedCount, bookmarks.Count);
+            Assert.Contains(bookmarks, bookmark => bookmark.Title == "Imported");
+            if (!replace) Assert.Contains(bookmarks, bookmark => bookmark.Title == "Original");
+        }
+        finally { File.Delete(path); }
+    }
+
+    [Theory]
+    [InlineData(".fdf")]
+    [InlineData(".xfdf")]
+    public void FormDataExchange_RoundTripsValuesIntoMatchingFields(string extension)
+    {
+        PdfDocument empty = PdfDocument.Open(new PdfDocumentBuilder().AddBlankPage().Build());
+        PdfDocument source = PdfDocument.Open(new PdfIncrementalPageEditor(empty)
+            .AddTextField(0, "Name", 20, 200, 100, 20, "Alice").Build());
+        byte[] data = PdfEngineIntegration.ExportFormData(source, extension);
+        PdfFormDataSet parsed = PdfEngineIntegration.ReadFormData(data, extension);
+        PdfDocument target = PdfDocument.Open(new PdfIncrementalPageEditor(empty)
+            .AddTextField(0, "Name", 20, 200, 100, 20, "Before").Build());
+
+        Assert.Equal(1, PdfFormDataImporter.CreateReport(target, parsed).ApplicableFieldCount);
+        PdfDocument imported = PdfDocument.Open(PdfFormDataImporter.Apply(target, parsed));
+        PdfFormDataField field = Assert.Single(PdfFormDataExporter.Export(imported).Fields);
+        Assert.Equal("Alice", Assert.Single(field.Values));
+        Assert.Equal("Before", Assert.Single(Assert.Single(PdfFormDataExporter.Export(target).Fields).Values));
+    }
+
+    [Fact]
     public void AddTextField_CreatesUniquelyNamedEditableWidgets()
     {
         string path = Path.Combine(Path.GetTempPath(), $"killerpdf-field-{Guid.NewGuid():N}.pdf");

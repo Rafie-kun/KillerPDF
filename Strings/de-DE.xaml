@@ -1639,4 +1639,14 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Panel_SigIncomplete">Nicht vollständig geprüft</sys:String>
     <sys:String x:Key="Str_Panel_SigUnsigned">Nicht signiert</sys:String>
     <sys:String x:Key="Str_Panel_SigChanged">nach dem Signieren geändert</sys:String>
+    <sys:String x:Key="Str_DocumentTools_FormData">Formulardaten</sys:String>
+    <sys:String x:Key="Str_DocumentTools_BookmarkData">Lesezeichendaten</sys:String>
+    <sys:String x:Key="Str_Exchange_ExportForms">Formulardaten exportieren</sys:String>
+    <sys:String x:Key="Str_Exchange_ImportForms">Formulardaten importieren</sys:String>
+    <sys:String x:Key="Str_Exchange_ExportBookmarks">Lesezeichen exportieren</sys:String>
+    <sys:String x:Key="Str_Exchange_ImportBookmarks">Lesezeichen importieren</sys:String>
+    <sys:String x:Key="Str_Exchange_Import">Importieren</sys:String>
+    <sys:String x:Key="Str_Exchange_ReplaceBookmarks">Vorhandene Lesezeichen ersetzen</sys:String>
+    <sys:String x:Key="Str_Exchange_Flatten">Formularfelder nach dem Import reduzieren</sys:String>
+    <sys:String x:Key="Str_Exchange_Preview">Passende Felder: {0}; übersprungene Felder: {1}; Kommentare: {2}.</sys:String>
 </ResourceDictionary>

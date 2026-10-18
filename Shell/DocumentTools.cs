@@ -55,6 +55,8 @@ public partial class MainWindow
             new Separator(),
             DocumentToolItem("Str_DocumentTools_Macros", OpenMacroDialog, "\uE945"),
             DocumentToolItem("Str_DocumentTools_DataMerge", RunDataMerge, "\uE8F1"),
+            DocumentToolItem("Str_DocumentTools_FormData", OpenFormDataTools, "\uE8A5"),
+            DocumentToolItem("Str_DocumentTools_BookmarkData", OpenBookmarkDataTools, "\uE8A4"),
             DocumentToolItem("Str_DocumentTools_InsertToc", InsertTableOfContents, "\uE8FD"),
         ];
     }

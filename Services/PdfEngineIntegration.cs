@@ -21,6 +21,40 @@ namespace KillerPDF.Services;
 /// <summary>Bridges completed application state into The KillerPDF.Engine during migration.</summary>
 internal static class PdfEngineIntegration
 {
+    internal static void WriteExchangeFile(string path, byte[] bytes) => ReplaceWithBuiltResult(path, bytes);
+
+    internal static void ApplyBookmarkData(string path, string json, bool replaceExisting) =>
+        ReplaceWithBuiltResult(path, PdfBookmarkExchange.Import(
+            PdfDocument.Open(File.ReadAllBytes(path)), json, replaceExisting));
+
+    internal static byte[] ExportFormData(PdfDocument document, string extension,
+        string? sourceName = null, bool includeComments = true)
+    {
+        PdfFormDataSet data = PdfFormDataExporter.Export(document, sourceName,
+            includeAnnotations: includeComments);
+        return extension.ToLowerInvariant() switch
+        {
+            ".fdf" => PdfFdfFormData.Write(data),
+            ".xfdf" => PdfXfdfFormData.Write(data),
+            ".json" => Encoding.UTF8.GetBytes(System.Text.Json.JsonSerializer.Serialize(data,
+                new System.Text.Json.JsonSerializerOptions { WriteIndented = true })),
+            _ => throw new ArgumentException("Expected FDF, XFDF or JSON.", nameof(extension))
+        };
+    }
+
+    internal static PdfFormDataSet ReadFormData(byte[] bytes, string extension) =>
+        extension.ToLowerInvariant() switch
+        {
+            ".fdf" => PdfFdfFormData.Read(bytes),
+            ".xfdf" => PdfXfdfFormData.Read(bytes),
+            _ => throw new ArgumentException("Expected FDF or XFDF.", nameof(extension))
+        };
+
+    internal static void ApplyFormData(string path, PdfFormDataSet data, bool flatten = false) =>
+        ReplaceWithBuiltResult(path, PdfFormDataImporter.Apply(
+            PdfDocument.Open(File.ReadAllBytes(path)), data, flatten
+                ? PdfFormDataImportOutputMode.Flattened : PdfFormDataImportOutputMode.Editable));
+
     internal sealed record LayerEdit(
         int ObjectNumber, string Name, bool IsVisible, bool IsLocked);
 

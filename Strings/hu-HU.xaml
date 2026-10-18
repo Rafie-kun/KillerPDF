@@ -1637,4 +1637,14 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Panel_SigIncomplete">Nincs teljesen ellenőrizve</sys:String>
     <sys:String x:Key="Str_Panel_SigUnsigned">Nincs aláírva</sys:String>
     <sys:String x:Key="Str_Panel_SigChanged">aláírás után módosítva</sys:String>
+    <sys:String x:Key="Str_DocumentTools_FormData">Űrlapadatok</sys:String>
+    <sys:String x:Key="Str_DocumentTools_BookmarkData">Könyvjelzőadatok</sys:String>
+    <sys:String x:Key="Str_Exchange_ExportForms">Űrlapadatok exportálása</sys:String>
+    <sys:String x:Key="Str_Exchange_ImportForms">Űrlapadatok importálása</sys:String>
+    <sys:String x:Key="Str_Exchange_ExportBookmarks">Könyvjelzők exportálása</sys:String>
+    <sys:String x:Key="Str_Exchange_ImportBookmarks">Könyvjelzők importálása</sys:String>
+    <sys:String x:Key="Str_Exchange_Import">Importálás</sys:String>
+    <sys:String x:Key="Str_Exchange_ReplaceBookmarks">Meglévő könyvjelzők cseréje</sys:String>
+    <sys:String x:Key="Str_Exchange_Flatten">Űrlapmezők beolvasztása az importálás után</sys:String>
+    <sys:String x:Key="Str_Exchange_Preview">Egyező mezők: {0}; kihagyott mezők: {1}; megjegyzések: {2}.</sys:String>
 </ResourceDictionary>

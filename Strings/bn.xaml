@@ -1630,4 +1630,14 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Panel_SigIncomplete">সম্পূর্ণ যাচাই হয়নি</sys:String>
     <sys:String x:Key="Str_Panel_SigUnsigned">স্বাক্ষরিত নয়</sys:String>
     <sys:String x:Key="Str_Panel_SigChanged">স্বাক্ষরের পরে পরিবর্তিত</sys:String>
+    <sys:String x:Key="Str_DocumentTools_FormData">ফর্মের তথ্য</sys:String>
+    <sys:String x:Key="Str_DocumentTools_BookmarkData">বুকমার্কের তথ্য</sys:String>
+    <sys:String x:Key="Str_Exchange_ExportForms">ফর্মের তথ্য রপ্তানি করুন</sys:String>
+    <sys:String x:Key="Str_Exchange_ImportForms">ফর্মের তথ্য আমদানি করুন</sys:String>
+    <sys:String x:Key="Str_Exchange_ExportBookmarks">বুকমার্ক রপ্তানি করুন</sys:String>
+    <sys:String x:Key="Str_Exchange_ImportBookmarks">বুকমার্ক আমদানি করুন</sys:String>
+    <sys:String x:Key="Str_Exchange_Import">আমদানি করুন</sys:String>
+    <sys:String x:Key="Str_Exchange_ReplaceBookmarks">বিদ্যমান বুকমার্ক প্রতিস্থাপন করুন</sys:String>
+    <sys:String x:Key="Str_Exchange_Flatten">আমদানির পরে ফর্মের ঘরগুলো পৃষ্ঠার বিষয়বস্তুর সঙ্গে মিশিয়ে দিন</sys:String>
+    <sys:String x:Key="Str_Exchange_Preview">মিলে যাওয়া ঘর: {0}; বাদ দেওয়া ঘর: {1}; মন্তব্য: {2}.</sys:String>
 </ResourceDictionary>

@@ -1650,4 +1650,14 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_Panel_SigIncomplete">Non verificata del tutto</sys:String>
     <sys:String x:Key="Str_Panel_SigUnsigned">Non firmata</sys:String>
     <sys:String x:Key="Str_Panel_SigChanged">modificato dopo la firma</sys:String>
+    <sys:String x:Key="Str_DocumentTools_FormData">Dati del modulo</sys:String>
+    <sys:String x:Key="Str_DocumentTools_BookmarkData">Dati dei segnalibri</sys:String>
+    <sys:String x:Key="Str_Exchange_ExportForms">Esporta dati del modulo</sys:String>
+    <sys:String x:Key="Str_Exchange_ImportForms">Importa dati del modulo</sys:String>
+    <sys:String x:Key="Str_Exchange_ExportBookmarks">Esporta segnalibri</sys:String>
+    <sys:String x:Key="Str_Exchange_ImportBookmarks">Importa segnalibri</sys:String>
+    <sys:String x:Key="Str_Exchange_Import">Importa</sys:String>
+    <sys:String x:Key="Str_Exchange_ReplaceBookmarks">Sostituisci i segnalibri esistenti</sys:String>
+    <sys:String x:Key="Str_Exchange_Flatten">Appiattisci i campi dopo l’importazione</sys:String>
+    <sys:String x:Key="Str_Exchange_Preview">Campi corrispondenti: {0}; campi ignorati: {1}; commenti: {2}.</sys:String>
 </ResourceDictionary>

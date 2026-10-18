@@ -1650,4 +1650,14 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Panel_SigIncomplete">Перевірено не повністю</sys:String>
     <sys:String x:Key="Str_Panel_SigUnsigned">Не підписано</sys:String>
     <sys:String x:Key="Str_Panel_SigChanged">змінено після підписання</sys:String>
+    <sys:String x:Key="Str_DocumentTools_FormData">Дані форми</sys:String>
+    <sys:String x:Key="Str_DocumentTools_BookmarkData">Дані закладок</sys:String>
+    <sys:String x:Key="Str_Exchange_ExportForms">Експорт даних форми</sys:String>
+    <sys:String x:Key="Str_Exchange_ImportForms">Імпорт даних форми</sys:String>
+    <sys:String x:Key="Str_Exchange_ExportBookmarks">Експорт закладок</sys:String>
+    <sys:String x:Key="Str_Exchange_ImportBookmarks">Імпорт закладок</sys:String>
+    <sys:String x:Key="Str_Exchange_Import">Імпорт</sys:String>
+    <sys:String x:Key="Str_Exchange_ReplaceBookmarks">Замінити наявні закладки</sys:String>
+    <sys:String x:Key="Str_Exchange_Flatten">Звести поля форми після імпорту</sys:String>
+    <sys:String x:Key="Str_Exchange_Preview">Відповідних полів: {0}; пропущених полів: {1}; коментарів: {2}.</sys:String>
 </ResourceDictionary>

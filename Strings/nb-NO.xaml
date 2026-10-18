@@ -1650,4 +1650,14 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Panel_SigIncomplete">Ikke fullt bekreftet</sys:String>
     <sys:String x:Key="Str_Panel_SigUnsigned">Ikke signert</sys:String>
     <sys:String x:Key="Str_Panel_SigChanged">endret etter signering</sys:String>
+    <sys:String x:Key="Str_DocumentTools_FormData">Skjemadata</sys:String>
+    <sys:String x:Key="Str_DocumentTools_BookmarkData">Bokmerkedata</sys:String>
+    <sys:String x:Key="Str_Exchange_ExportForms">Eksporter skjemadata</sys:String>
+    <sys:String x:Key="Str_Exchange_ImportForms">Importer skjemadata</sys:String>
+    <sys:String x:Key="Str_Exchange_ExportBookmarks">Eksporter bokmerker</sys:String>
+    <sys:String x:Key="Str_Exchange_ImportBookmarks">Importer bokmerker</sys:String>
+    <sys:String x:Key="Str_Exchange_Import">Importer</sys:String>
+    <sys:String x:Key="Str_Exchange_ReplaceBookmarks">Erstatt eksisterende bokmerker</sys:String>
+    <sys:String x:Key="Str_Exchange_Flatten">Slå sammen skjemafelt med sideinnholdet etter import</sys:String>
+    <sys:String x:Key="Str_Exchange_Preview">Samsvarende felt: {0}; felt som hoppes over: {1}; kommentarer: {2}.</sys:String>
 </ResourceDictionary>

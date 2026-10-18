@@ -121,6 +121,8 @@ namespace KillerPDF
             ('M', "Str_DocumentTools_Macros"),
             ('D', "Str_DocumentTools_DataMerge"),
             ('I', "Str_DocumentTools_InsertToc"),
+            ('H', "Str_DocumentTools_FormData"),
+            ('J', "Str_DocumentTools_BookmarkData"),
         ];
 
         /// <summary>The letter that runs a document tool from the open Document tools menu.</summary>

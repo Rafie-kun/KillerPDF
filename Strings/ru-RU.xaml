@@ -1653,4 +1653,14 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Panel_SigIncomplete">Проверена не полностью</sys:String>
     <sys:String x:Key="Str_Panel_SigUnsigned">Не подписано</sys:String>
     <sys:String x:Key="Str_Panel_SigChanged">изменён после подписания</sys:String>
+    <sys:String x:Key="Str_DocumentTools_FormData">Данные формы</sys:String>
+    <sys:String x:Key="Str_DocumentTools_BookmarkData">Данные закладок</sys:String>
+    <sys:String x:Key="Str_Exchange_ExportForms">Экспорт данных формы</sys:String>
+    <sys:String x:Key="Str_Exchange_ImportForms">Импорт данных формы</sys:String>
+    <sys:String x:Key="Str_Exchange_ExportBookmarks">Экспорт закладок</sys:String>
+    <sys:String x:Key="Str_Exchange_ImportBookmarks">Импорт закладок</sys:String>
+    <sys:String x:Key="Str_Exchange_Import">Импорт</sys:String>
+    <sys:String x:Key="Str_Exchange_ReplaceBookmarks">Заменить существующие закладки</sys:String>
+    <sys:String x:Key="Str_Exchange_Flatten">Свести поля формы после импорта</sys:String>
+    <sys:String x:Key="Str_Exchange_Preview">Совпадающих полей: {0}; пропущенных полей: {1}; комментариев: {2}.</sys:String>
 </ResourceDictionary>

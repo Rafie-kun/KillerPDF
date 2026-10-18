@@ -1634,4 +1634,14 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Panel_SigIncomplete">未完全验证</sys:String>
     <sys:String x:Key="Str_Panel_SigUnsigned">未签名</sys:String>
     <sys:String x:Key="Str_Panel_SigChanged">签名后已更改</sys:String>
+    <sys:String x:Key="Str_DocumentTools_FormData">表单数据</sys:String>
+    <sys:String x:Key="Str_DocumentTools_BookmarkData">书签数据</sys:String>
+    <sys:String x:Key="Str_Exchange_ExportForms">导出表单数据</sys:String>
+    <sys:String x:Key="Str_Exchange_ImportForms">导入表单数据</sys:String>
+    <sys:String x:Key="Str_Exchange_ExportBookmarks">导出书签</sys:String>
+    <sys:String x:Key="Str_Exchange_ImportBookmarks">导入书签</sys:String>
+    <sys:String x:Key="Str_Exchange_Import">导入</sys:String>
+    <sys:String x:Key="Str_Exchange_ReplaceBookmarks">替换现有书签</sys:String>
+    <sys:String x:Key="Str_Exchange_Flatten">导入后拼合表单字段</sys:String>
+    <sys:String x:Key="Str_Exchange_Preview">匹配字段：{0}；跳过字段：{1}；批注：{2}。</sys:String>
 </ResourceDictionary>

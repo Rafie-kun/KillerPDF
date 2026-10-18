@@ -1650,4 +1650,14 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Panel_SigIncomplete">Not fully verified</sys:String>
     <sys:String x:Key="Str_Panel_SigUnsigned">Not signed</sys:String>
     <sys:String x:Key="Str_Panel_SigChanged">changed after signing</sys:String>
+    <sys:String x:Key="Str_DocumentTools_FormData">Form data</sys:String>
+    <sys:String x:Key="Str_DocumentTools_BookmarkData">Bookmark data</sys:String>
+    <sys:String x:Key="Str_Exchange_ExportForms">Export form data</sys:String>
+    <sys:String x:Key="Str_Exchange_ImportForms">Import form data</sys:String>
+    <sys:String x:Key="Str_Exchange_ExportBookmarks">Export bookmarks</sys:String>
+    <sys:String x:Key="Str_Exchange_ImportBookmarks">Import bookmarks</sys:String>
+    <sys:String x:Key="Str_Exchange_Import">Import</sys:String>
+    <sys:String x:Key="Str_Exchange_ReplaceBookmarks">Replace existing bookmarks</sys:String>
+    <sys:String x:Key="Str_Exchange_Flatten">Flatten form fields after importing</sys:String>
+    <sys:String x:Key="Str_Exchange_Preview">Matching fields: {0}; skipped fields: {1}; comments: {2}.</sys:String>
 </ResourceDictionary>
