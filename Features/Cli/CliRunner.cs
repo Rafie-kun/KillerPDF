@@ -71,7 +71,7 @@ namespace KillerPDF.Features
             "--user-password", "--owner-password", "--allow", "--recipients", "--text", "--terms",
             "--regex", "--find", "--whole-pages", "--fill", "--overlay", "--sanitize",
             "--pfx", "--pfx-password", "--cert", "--reason", "--location", "--contact", "--timestamp-server",
-            "--appearance", "--appearance-text", "--scanned-look",
+            "--appearance", "--appearance-text", "--scanned-look", "--scanner",
         ];
 
         /// <summary>
@@ -113,7 +113,7 @@ namespace KillerPDF.Features
                 Eq(a, "--redact") || Eq(a, "--protect") || Eq(a, "--export") || Eq(a, "--convert-office") ||
                 Eq(a, "--data-merge") || Eq(a, "--replace-text") || Eq(a, "--export-form-data") || Eq(a, "--import-form-data") ||
                 Eq(a, "--recognize-fields") || Eq(a, "--xfa-to-acroform") || Eq(a, "--flatten-forms") ||
-                Eq(a, "--macro") || Eq(a, "--sign"));
+                Eq(a, "--macro") || Eq(a, "--sign") || Eq(a, "--scan"));
             if (command is null) return false;
 
             var con = OpenBatchConsole();
@@ -306,6 +306,9 @@ namespace KillerPDF.Features
                     case "--sign":
                         exitCode = CliSign(positionals, options, con);
                         break;
+                    case "--scan":
+                        exitCode = CliScan(positionals, options, con);
+                        break;
                 }
             }
             catch (Exception ex)
@@ -379,6 +382,8 @@ namespace KillerPDF.Features
             "                                           rasterize into an uneditable PDF, optionally looking scanned",
             "  --print <in.pdf> [--printer <name>] [--pages <range>] [--copies <n>]",
             "                                           print silently (default printer if none named)",
+            "  --scan <out.pdf> [--scanner <name>] [--show-settings]",
+            "                                           scan through a TWAIN scanner into a PDF; --scan --list shows scanners",
             "  --ocr <in.pdf> <out.pdf> [--lang <code>] add an invisible searchable text layer (default eng;",
             "                                           other languages download on first use)",
             "  --scan-to-text <in.pdf> <out.pdf> [--lang <code>]",
