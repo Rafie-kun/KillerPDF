@@ -57,6 +57,12 @@ public partial class MainWindow
             return;
         }
 
+        var sourceViewer = ActiveViewer;
+        var sourceSession = sourceViewer.ActiveSessionExt;
+        var sourceDocument = _doc;
+        bool IsSourceCurrent() => ReferenceEquals(ActiveViewer, sourceViewer)
+            && ReferenceEquals(sourceViewer.ActiveSessionExt, sourceSession)
+            && ReferenceEquals(_doc, sourceDocument);
         string sourceName = Path.GetFileName(_originalFile ?? _currentFile);
         string suggested = Path.GetFileNameWithoutExtension(sourceName) + "-"
             + SafeMacroFileName(macro.Name) + ".pdf";
@@ -68,6 +74,7 @@ public partial class MainWindow
             FileName = suggested
         };
         if (outputDialog.ShowDialog(this) != true) return;
+        if (!IsSourceCurrent()) return;
         try { PdfEngineIntegration.PlanBatchOutputs([_currentFile, _originalFile ?? _currentFile], outputDialog.FileName); }
         catch (ArgumentException error) { ShowExchangeError(error); return; }
 
@@ -81,13 +88,16 @@ public partial class MainWindow
         if (KillerDialog.Show(this, message, Loc("Str_DocumentTools_Macros"),
                 MessageBoxButton.YesNo, MessageBoxImage.Information) != MessageBoxResult.Yes)
             return;
+        if (!IsSourceCurrent()) return;
         if (macro.Steps.Any(step => step.Operation == PdfMacroOperation.Ocr)
             && !await EnsureOcrModelsReadyAsync())
             return;
+        if (!IsSourceCurrent()) return;
         _macroRedaction = new MacroRedaction();
         if (macro.Steps.Any(step => step.Operation == PdfMacroOperation.Redact)
             && !PrepareMacroRedaction())
             return;
+        if (!IsSourceCurrent()) return;
 
         CommitActiveTextBox();
         var busy = ShowBusyOverlay(Loc("Str_Macro_Running"));
@@ -102,7 +112,10 @@ public partial class MainWindow
             PdfMacroFileResult result = AssertSingleResult(report);
             if (_macroRedaction.Canceled) throw new OperationCanceledException();
             if (result.Succeeded && result.Data is ReadOnlyMemory<byte> data)
+            {
+                token.ThrowIfCancellationRequested();
                 WriteMacroOutput(outputDialog.FileName, data);
+            }
 
             HideBusyOverlay(busy);
             SetStatus(result.Succeeded
@@ -129,7 +142,7 @@ public partial class MainWindow
         finally
         {
             if (snapshot is not null) File.Delete(snapshot);
-            EndCancellableOp();
+            EndCancellableOp(token);
         }
     }
 

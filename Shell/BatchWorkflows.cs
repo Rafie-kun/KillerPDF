@@ -86,7 +86,7 @@ public partial class MainWindow
                 }
             }
             catch (OperationCanceledException) { report.AppendLine(Loc("Str_Macro_Canceled")); }
-            finally { HideBusyOverlay(busy); EndCancellableOp(); }
+            finally { HideBusyOverlay(busy); EndCancellableOp(token); }
             new DocumentReportDialog(this, title, report.ToString()).ShowDialog();
         }
         catch (Exception error) { ShowExchangeError(error); }

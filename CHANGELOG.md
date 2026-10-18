@@ -87,6 +87,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - The website's top bar Download button uses the same font and height as the other top bar buttons.
 
 ### Fixed
+- Layout export protects its original PDF after a tab switch, macro confirmation stays bound to its source, and finishing older background work preserves the newer operation's cancel control (#343).
 - Recognition and Transform stop if another PDF becomes active, and Transform works on single-page documents (#342).
 - Form-data import accepts checkboxes whose unchecked appearance is omitted, and form flattening generates missing text appearances (#329, #342).
 - XFA conversion explains unsupported repeated field paths instead of failing with a duplicate-key error (#330).

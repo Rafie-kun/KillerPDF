@@ -32,8 +32,9 @@ namespace KillerPDF
             return _busyCts.Token;
         }
 
-        private void EndCancellableOp()
+        private void EndCancellableOp(CancellationToken expectedToken)
         {
+            if (_busyCts?.Token != expectedToken) return;
             _busyCts?.Dispose();
             _busyCts = null;
         }
@@ -206,7 +207,7 @@ namespace KillerPDF
             }
             finally
             {
-                EndCancellableOp();
+                EndCancellableOp(ct);
             }
         }
 
@@ -273,7 +274,7 @@ namespace KillerPDF
             }
             finally
             {
-                EndCancellableOp();
+                EndCancellableOp(ct);
             }
         }
 
@@ -331,7 +332,7 @@ namespace KillerPDF
             finally
             {
                 HideBusyOverlay(busy);
-                EndCancellableOp();
+                EndCancellableOp(ct);
             }
         }
 
@@ -404,7 +405,7 @@ namespace KillerPDF
             _ocrBusy = null;
         }
 
-        void IOcrHost.EndOp() => EndCancellableOp();
+        void IOcrHost.EndOp(CancellationToken token) => EndCancellableOp(token);
 
         // OCR Region: armed by the menu item; the next box-drag (Select tool) crops that area of the page
         // bitmap and OCRs only it to the clipboard. Works on scans that have no text layer to extract from.

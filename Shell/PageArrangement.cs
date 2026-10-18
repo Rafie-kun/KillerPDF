@@ -66,9 +66,10 @@ namespace KillerPDF
             var turns = new Dictionary<int, int>();
             int unread = 0;
             Border? busy = null;
+            CancellationToken ct = default;
             try
             {
-                var ct = BeginCancellableOp(label);
+                ct = BeginCancellableOp(label);
                 busy = ShowBusyOverlay(label);
                 await Dispatcher.Yield(DispatcherPriority.Background);
 
@@ -151,7 +152,7 @@ namespace KillerPDF
             finally
             {
                 if (busy is not null) HideBusyOverlay(busy);
-                EndCancellableOp();
+                EndCancellableOp(ct);
             }
         }
 
@@ -170,9 +171,10 @@ namespace KillerPDF
             int[] pages = PagesForDocumentCommand();
             string label = Loc("Str_Pages_Straighten");
             Border? busy = null;
+            CancellationToken ct = default;
             try
             {
-                var ct = BeginCancellableOp(label);
+                ct = BeginCancellableOp(label);
                 busy = ShowBusyOverlay(label);
                 await Dispatcher.Yield(DispatcherPriority.Background);
 
@@ -258,7 +260,7 @@ namespace KillerPDF
             finally
             {
                 if (busy is not null) HideBusyOverlay(busy);
-                EndCancellableOp();
+                EndCancellableOp(ct);
             }
         }
     }

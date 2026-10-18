@@ -43,6 +43,28 @@ raster page at 201 by 240 points, allowing the existing one-pixel raster roundin
 The interrupted case retains the blank replacement PDF at 400 by 300 points,
 with no image and no error dialog.
 
+## Export source protection and cancellation ownership
+
+The production layout fixture accepts N-up settings for the first document,
+opens another PDF from the layout preview, then selects the original source as
+the export destination. Before the fix, the original source bytes were replaced.
+The overwrite check had read paths from the newly active tab. It now retains the
+source paths and suggested file name before background work. A source switch
+during the initial settings dialog also stops the export.
+
+The macro fixture switches documents from the confirmation dialog. Before the
+fix, a Save-only macro exported the second document under the first document's
+plan. Source checks now surround the output picker, confirmation, OCR readiness
+and redaction preparation. Cancellation is checked before writing the output.
+
+A separate actual-shell case starts a newer cancellable operation while the
+older layout preview is open, closes that preview, then raises the actual Esc
+key event and accepts its cancellation prompt. Before the fix, the older
+workflow's finally block cleared the newer registration and Esc could not cancel
+it. Completion now requires the originating token across every shell caller and
+the OCR host interface. The same fixture now observes the newer token canceled.
+This checks routed key handling, not a physical keyboard.
+
 ## Verification and limits
 
 - App build: zero warnings and errors with existing references reused.
@@ -56,4 +78,6 @@ The shell race cases are retained diagnostic fixtures, not private-method unit
 tests added to the suite. A stable public workflow automation seam is still
 needed for permanent shell concurrency coverage. These checks do not establish
 native keyboard behavior, screen-reader support, all themes or display scales.
-Cancellation ownership and other export handoffs remain under review.
+Additional isolated cases `--production-race`, `--operation-race` and
+`--macro-race` passed after their respective reproductions failed. Other document
+editing handoffs remain under review.

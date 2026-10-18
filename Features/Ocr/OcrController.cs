@@ -116,7 +116,7 @@ namespace KillerPDF.Features
             }
             finally
             {
-                _host.EndOp();
+                _host.EndOp(ct);
             }
         }
 
@@ -185,7 +185,7 @@ namespace KillerPDF.Features
             }
             finally
             {
-                _host.EndOp();
+                _host.EndOp(ct);
             }
         }
 
@@ -253,7 +253,7 @@ namespace KillerPDF.Features
             }
             finally
             {
-                _host.EndOp();
+                _host.EndOp(ct);
             }
         }
 
@@ -383,7 +383,7 @@ namespace KillerPDF.Features
             }
             finally
             {
-                _host.EndOp();
+                _host.EndOp(ct);
             }
         }
 
@@ -677,7 +677,7 @@ namespace KillerPDF.Features
             }
             finally
             {
-                _host.EndOp();
+                _host.EndOp(ct);
             }
         }
 

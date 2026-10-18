@@ -63,6 +63,6 @@ namespace KillerPDF.Features
         void HideBusy();
 
         /// <summary>Disposes the cancellable-operation registration. Always called from finally.</summary>
-        void EndOp();
+        void EndOp(CancellationToken token);
     }
 }

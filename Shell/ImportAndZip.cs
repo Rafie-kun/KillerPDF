@@ -201,7 +201,7 @@ namespace KillerPDF
             }
             finally
             {
-                EndCancellableOp();
+                EndCancellableOp(ct);
                 CleanupDirs(tempDirs);
             }
         }

@@ -43,7 +43,7 @@ public partial class MainWindow
         finally
         {
             HideBusyOverlay(busy);
-            EndCancellableOp();
+            EndCancellableOp(token);
             if (snapshot is not null) File.Delete(snapshot);
         }
     }

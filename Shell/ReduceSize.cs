@@ -34,10 +34,11 @@ namespace KillerPDF
 
             Border? busy = null;
             bool started = false;
+            CancellationToken ct = default;
             try
             {
                 string source = WriteSavedCopyToTemp();
-                var ct = BeginCancellableOp(Loc("Str_Reduce_Title"));
+                ct = BeginCancellableOp(Loc("Str_Reduce_Title"));
                 started = true;
                 busy = ShowBusyOverlay(Loc("Str_Reduce_Working"));
                 PdfImageDownsampleOptions? images = options.Downsample
@@ -67,7 +68,7 @@ namespace KillerPDF
             finally
             {
                 if (busy is not null) HideBusyOverlay(busy);
-                if (started) EndCancellableOp();
+                if (started) EndCancellableOp(ct);
             }
         }
 

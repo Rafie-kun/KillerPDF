@@ -98,9 +98,10 @@ namespace KillerPDF
                 && ReferenceEquals(sourceViewer.ActiveSessionExt, sourceSession)
                 && ReferenceEquals(_doc, sourceDocument);
             Border? busy = null;
+            CancellationToken ct = default;
             try
             {
-                var ct = BeginCancellableOp(Loc("Str_Tf_Suffix"));
+                ct = BeginCancellableOp(Loc("Str_Tf_Suffix"));
                 busy = ShowBusyOverlay($"{Loc("Str_Tf_Suffix")}: 1/{pages.Length}");
                 await System.Windows.Threading.Dispatcher.Yield(
                     System.Windows.Threading.DispatcherPriority.Background);
@@ -204,7 +205,7 @@ namespace KillerPDF
             finally
             {
                 if (busy is not null) HideBusyOverlay(busy);
-                EndCancellableOp();
+                EndCancellableOp(ct);
             }
         }
 

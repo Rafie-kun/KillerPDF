@@ -339,7 +339,7 @@ namespace KillerPDF
             }
             finally
             {
-                EndCancellableOp();
+                EndCancellableOp(ct);
             }
         }
 
@@ -406,7 +406,7 @@ namespace KillerPDF
                 bool ok = await System.Threading.Tasks.Task.Run(() =>
                     PdfEngineIntegration.TryRemoveEncryptionWithoutPassword(srcPath, repairedPath)
                     || PdfImport.TryImportRepairToPath(srcPath, repairedPath));
-                if (ct.IsCancellationRequested) { HideBusyOverlay(busy); _asyncOpenPending = false; SetStatus(Loc("Str_St_Canceled")); EndCancellableOp(); return; }
+                if (ct.IsCancellationRequested) { HideBusyOverlay(busy); _asyncOpenPending = false; SetStatus(Loc("Str_St_Canceled")); EndCancellableOp(ct); return; }
                 if (!ok)
                 {
                     HideBusyOverlay(busy);
@@ -415,7 +415,7 @@ namespace KillerPDF
                     if (TryOpenProtectedReadOnly(srcPath, displayPath))
                     {
                         FinalizeAsyncOpen();
-                        EndCancellableOp();
+                        EndCancellableOp(ct);
                         return;
                     }
                     TryRepairAndOpen(srcPath);   // re-registers the cancellable op; repair finalizes the tab
@@ -428,7 +428,7 @@ namespace KillerPDF
                 if (markDirty) MarkDirty(true);   // stripped copy lives in temp - user must Save As to keep it
                 HideBusyOverlay(busy);
                 FinalizeAsyncOpen();
-                EndCancellableOp();
+                EndCancellableOp(ct);
             }
             catch (Exception ex)
             {
@@ -436,7 +436,7 @@ namespace KillerPDF
                 _asyncOpenPending = false;
                 KillerDialog.Show(this, Loc("Str_Err_OpenProtected") + "\n" + ex.Message,
                     "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
-                EndCancellableOp();
+                EndCancellableOp(ct);
             }
         }
 
@@ -1368,6 +1368,7 @@ namespace KillerPDF
             PdfRasterize.FlattenOptions flattenOptions = optionsDialog.Options;
             Border? overlay = null;
             bool operationStarted = false;
+            CancellationToken ct = default;
             try
             {
                 CommitActiveTextBox();
@@ -1413,7 +1414,7 @@ namespace KillerPDF
                 overlay = ShowFlattenProgress(pageCount, Loc("Str_Busy_FlattenPage"));
                 string outputPath = dlg.FileName;
 
-                var ct = BeginCancellableOp(Loc("Str_Op_Flatten"));
+                ct = BeginCancellableOp(Loc("Str_Op_Flatten"));
                 operationStarted = true;
                 // Rasterize on a background thread - keeps the UI responsive. The core lives in
                 // Services/PdfRasterize.cs; progress marshals back to the overlay here.
@@ -1433,7 +1434,7 @@ namespace KillerPDF
             finally
             {
                 try { if (overlay is not null) HideFlattenProgress(overlay); } catch { /* ensure overlay never leaks */ }
-                if (operationStarted) EndCancellableOp();
+                if (operationStarted) EndCancellableOp(ct);
             }
         }
 
@@ -1490,6 +1491,7 @@ namespace KillerPDF
             if (save.ShowDialog(this) != true) return;
 
             bool operationStarted = false;
+            CancellationToken cancellation = default;
             try
             {
                 var document = EnsureEngineDocumentSession().Document;
@@ -1501,7 +1503,7 @@ namespace KillerPDF
                         MessageBoxButton.OKCancel, MessageBoxImage.Warning) != MessageBoxResult.OK) return;
                 }
 
-                var cancellation = BeginCancellableOp(Loc("Str_Op_Export"));
+                cancellation = BeginCancellableOp(Loc("Str_Op_Export"));
                 operationStarted = true;
                 byte[] output = await Task.Run(() => PdfStructuredExport.Export(
                     document, options.Format, pages, cancellationToken: cancellation), cancellation);
@@ -1517,7 +1519,7 @@ namespace KillerPDF
             }
             finally
             {
-                if (operationStarted) EndCancellableOp();
+                if (operationStarted) EndCancellableOp(cancellation);
             }
         }
 
@@ -1610,9 +1612,10 @@ namespace KillerPDF
             bool jpeg   = opts.Jpeg;
             double dpi  = opts.Dpi;
             var pages   = selected;
+            CancellationToken ct = default;
             try
             {
-                var ct = BeginCancellableOp(Loc("Str_Op_Export"));
+                ct = BeginCancellableOp(Loc("Str_Op_Export"));
                 // The per-page render/encode/write core lives in Services/PdfRasterize.cs;
                 // progress marshals back to the overlay here.
                 int written = await Task.Run(() => PdfRasterize.ExportPageImages(sourcePath, pages,
@@ -1628,7 +1631,7 @@ namespace KillerPDF
             finally
             {
                 try { HideFlattenProgress(overlay); } catch { /* ensure overlay never leaks */ }
-                EndCancellableOp();
+                EndCancellableOp(ct);
             }
         }
 

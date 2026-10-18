@@ -251,7 +251,7 @@ public partial class MainWindow
         }
         finally
         {
-            EndCancellableOp();
+            EndCancellableOp(token);
         }
     }
 
