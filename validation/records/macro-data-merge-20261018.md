@@ -36,11 +36,10 @@ after implementation. An app planning regression also failed before planning
 was implemented and now verifies later Rename steps and source protection.
 
 - Full engine suite: 6,510 passed, zero failed or skipped on the final run.
-- Full app suite: 834 passed, zero failed or skipped. Unrelated in-progress theme
-  changes currently omit a test dependency on `Controls/SnapLayouts.cs`. These
-  checks used a temporary test-only target that includes that actual source file;
-  the existing project edits were preserved. The ordinary test build remains
-  dependent on completion of those separate changes.
+- Full app suite: 834 passed, zero failed or skipped. Initial checks used a
+  temporary test-only SnapLayouts dependency while unrelated theme work was in
+  progress. The ordinary app test build and all 834 tests subsequently passed
+  after that work completed, without the temporary target.
 - Engine and app builds passed with zero warnings or errors, using existing
   dependency outputs. The final engine build included normal analyzers.
 - Actual-shell current-document execution generated two independently editable

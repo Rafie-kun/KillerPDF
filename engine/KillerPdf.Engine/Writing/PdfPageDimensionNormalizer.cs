@@ -39,6 +39,23 @@ public static class PdfPageDimensionNormalizer
         double minimum, double maximum)
     {
         ValidateRange(document, minimum, maximum);
+        return ScalePagesCore(document, pageIndexes, null, minimum, maximum);
+    }
+
+    /// <summary>Proportionally scales every page while retaining its PDF content and widgets.</summary>
+    public static byte[] ScalePages(PdfDocument document, double scale)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        if (!double.IsFinite(scale) || scale <= 0 || scale > 100)
+            throw new ArgumentOutOfRangeException(nameof(scale));
+        byte[] output = ScalePagesCore(document, Enumerable.Range(0, PdfPageTree.Read(document).Pages.Count).ToArray(),
+            scale, 0, 0);
+        return scale == 1 ? output : PdfPageResizeDetails.Scale(PdfDocument.Open(output), scale);
+    }
+
+    private static byte[] ScalePagesCore(PdfDocument document, IReadOnlyCollection<int> pageIndexes,
+        double? fixedScale, double minimum, double maximum)
+    {
         ArgumentNullException.ThrowIfNull(pageIndexes);
         if (pageIndexes.Count == 0) return document.Source.ToArray();
 
@@ -52,7 +69,7 @@ public static class PdfPageDimensionNormalizer
         foreach (int pageIndex in selected)
         {
             var (Width, Height, Corners) = MediaDimensions(document, tree.Pages[pageIndex]);
-            double scale = ScaleFor(Width, Height, minimum, maximum, Corners);
+            double scale = fixedScale ?? ScaleFor(Width, Height, minimum, maximum, Corners);
             if (Math.Abs(scale - 1) < 1e-12) continue;
             PdfPageTreeEntry page = tree.Pages[pageIndex];
             var entries = page.Dictionary.ToDictionary(item => item.Key, item => item.Value);

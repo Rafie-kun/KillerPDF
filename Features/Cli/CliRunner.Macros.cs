@@ -88,6 +88,7 @@ namespace KillerPDF.Features
                     (_, data, _, token) => CliMacroRedact(data, redaction, token)),
                 new PdfMacroOperationRegistration(PdfMacroOperation.Watermark,
                     PdfEngineBurn.ExecuteWatermarkMacro),
+                new PdfMacroOperationRegistration(PdfMacroOperation.Resize, PdfResizeMacro.Execute),
                 new PdfMacroOperationRegistration(PdfMacroOperation.DataMerge,
                     (step, data, _, token) => PdfDataMergeMacro.Execute(step, data,
                         mergePlan?.Merge.Records ?? throw new InvalidOperationException("Merge data has not been selected."),

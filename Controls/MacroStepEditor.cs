@@ -18,6 +18,7 @@ internal static class MacroStepEditor
         PdfMacroOperation.Watermark => "Str_Stamp_SecWatermark",
         PdfMacroOperation.Rename => "Str_Ctx_BmRename",
         PdfMacroOperation.DataMerge => "Str_DocumentTools_DataMerge",
+        PdfMacroOperation.Resize => "Str_Tf_ResizePage",
         _ => null
     };
 
@@ -25,6 +26,14 @@ internal static class MacroStepEditor
     {
         try
         {
+            if (step.Operation == PdfMacroOperation.Resize)
+            {
+                double percent = step.Settings is null ? 100 : PdfResizeMacro.ReadPercent(step);
+                var resize = new DocumentValuesDialog(owner, L("Str_Tf_ResizePage"),
+                    (L("Str_Tf_Scale") + " (%)", percent.ToString(CultureInfo.CurrentCulture)));
+                return resize.ShowDialog() == true
+                    ? PdfResizeMacro.ScaleStep(double.Parse(resize.Values[0], CultureInfo.CurrentCulture)) : null;
+            }
             if (step.Operation == PdfMacroOperation.DataMerge)
             {
                 var picker = new Controls.FileDialog(Controls.FileDialogMode.Open)

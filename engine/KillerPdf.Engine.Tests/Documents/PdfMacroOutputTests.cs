@@ -17,12 +17,15 @@ public sealed class PdfMacroOutputTests
             new Dictionary<string, string?> { ["Name"] = "Grace" }];
         var dispatcher = new PdfMacroDispatcher([
             new(PdfMacroOperation.DataMerge, (step, data, _, token) => PdfDataMergeMacro.Execute(step, data, records, token)),
+            new(PdfMacroOperation.Resize, PdfResizeMacro.Execute),
             new(PdfMacroOperation.Rename, PdfRenameMacro.Execute)]);
 
-        PdfMacroRunReport report = dispatcher.RunReport(new("Customers", [profile.ToMacroStep(),
+        PdfMacroRunReport report = dispatcher.RunReport(new("Customers", [profile.ToMacroStep(), PdfResizeMacro.ScaleStep(50),
             PdfRenameMacro.RenameStep("{name}-ready-{index}")]), [source], PdfRenameMacro.CreateContext("template.pdf", 1));
 
         Assert.True(Assert.Single(report.Results).Succeeded);
+        Assert.All(report.Results[0].Outputs!, output =>
+            Assert.Equal(306, Assert.Single(PdfPageInformation.Read(PdfDocument.Open(output.Data!.Value))).Width));
         Assert.Collection(report.Results[0].Outputs!,
             output => { Assert.Equal("Ada-ready-1.pdf", output.OutputFileName);
                 Assert.Equal("Ada", Assert.Single(PdfFormWidgetReader.ReadPage(PdfDocument.Open(output.Data!.Value), 0)).Value); },
