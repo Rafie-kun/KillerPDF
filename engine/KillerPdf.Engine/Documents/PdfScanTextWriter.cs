@@ -343,10 +343,10 @@ public static class PdfScanTextWriter
     {
         TrueTypeFont font = FaceFor(face, word);
         double size = PixelSize(font, word);
-        double advance = Advance(font, word.FitText ?? text) * size / 1000;
-        double scale = advance > 0 ? Math.Clamp((word.Right - word.Left) / advance, 0.5, 2) : 1;
+        double width = InkSpan(font, word.FitText ?? text).Ink * size / 1000;
+        double scale = width > 0 ? Math.Clamp((word.Right - word.Left) / width, 0.5, 2) : 1;
         double unit = size / 1000 * scale;
-        double origin = word.Left - word.MaskLeft;
+        double origin = word.Left - word.MaskLeft - InkSpan(font, text).Lead * unit;
         return (origin + Advance(font, text[..first]) * unit, origin + Advance(font, text[..last]) * unit);
     }
 
@@ -392,7 +392,9 @@ public static class PdfScanTextWriter
         // A face that has to be squeezed or stretched far to fit the scan is the wrong design
         // even when its letters happen to overlap the ink.
         double distortion = lineScales.Values.Average(scale => Math.Abs(Math.Log(scale / 100)));
-        return (face with { Weight = regular.Weight }, matches.Average() - 0.5 * distortion);
+        // The text itself is set at the face's own weight. A scan's extra stroke is mostly ink
+        // spread by the scanner or copier, and drawing it back in made clean print look bold.
+        return (face with { Weight = 0 }, matches.Average() - 0.5 * distortion);
     }
 
     private static double Median(IEnumerable<double> values)
@@ -595,7 +597,7 @@ public static class PdfScanTextWriter
                 TrueTypeFont font = FaceFor(face, word);
                 double size = PixelSize(font, word);
                 target += word.Right - word.Left;
-                natural += Advance(font, word.FitText ?? word.Word.Text) * size / 1000;
+                natural += InkSpan(font, word.FitText ?? word.Word.Text).Ink * size / 1000;
             }
             scales[line.Key] = natural > 0 ? Math.Clamp(target / natural * 100, 50, 200) : 100;
         }
@@ -607,10 +609,17 @@ public static class PdfScanTextWriter
         double offsetX = 0, double offsetY = 0, bool inkColor = true)
     {
         TrueTypeFont font = FaceFor(face, word);
-        double size = PixelSize(font, word) * scaleY;
-        double advance = Advance(font, word.FitText ?? word.Word.Text) * size / 1000;
+        // The scan's x-height runs tall by the ink spread on the letters' tops and bottoms, while
+        // its word widths hardly move, so the line's width fit sets the size, within a band, and
+        // the letters keep their own proportions instead of being set tall and squeezed.
+        double fit = Math.Clamp(lineScale / 100, 0.85, 1.05);
+        double size = PixelSize(font, word) * scaleY * fit;
+        lineScale /= fit;
+        // The scan's word box runs from the first letter's ink to the last one's, so the fit is
+        // against the setting's ink too, without the side bearings outside it.
+        double inkWidth = InkSpan(font, word.FitText ?? word.Word.Text).Ink * size / 1000;
         double target = (word.Right - word.Left) * scaleX;
-        double own = advance > 0 ? Math.Clamp(target / advance * 100, 50, 200) : 100;
+        double own = inkWidth > 0 ? Math.Clamp(target / inkWidth * 100, 50, 200) : 100;
         // The line's scale keeps the words uniform; staying near the word's own fit keeps a
         // word from running into its neighbor when the line mixes wide and narrow words.
         double scale = Math.Clamp(lineScale, own * 0.9, own * 1.1);
@@ -639,8 +648,12 @@ public static class PdfScanTextWriter
             }
         }
         SetFontAndScale(content, state, font, size, scale);
+        // The first letter's ink starts its left side bearing after the text origin, so the
+        // origin steps back by that much along the line to put the ink where the scan's begins.
+        double lead = InkSpan(font, word.Word.Text).Lead * size / 1000 * scale / 100;
         content.SetTextMatrix(Round(cos, 5), Round(sin, 5), Round(sin, 5), Round(-cos, 5),
-                Round((word.Left - offsetX) * scaleX, 3), Round((word.Baseline - offsetY) * scaleY, 3))
+                Round((word.Left - offsetX) * scaleX - lead * cos, 3),
+                Round((word.Baseline - offsetY) * scaleY - lead * sin, 3))
             .ShowUnicodeText(space ? word.Word.Text + " " : word.Word.Text);
     }
 
@@ -698,6 +711,25 @@ public static class PdfScanTextWriter
 
     private static double Advance(TrueTypeFont font, string text) =>
         text.EnumerateRunes().Sum(rune => (double)font.GetPdfAdvanceWidth(font.GetGlyphId(rune.Value)));
+
+    // Where a word's ink starts after its text origin and how wide the ink is, in 1,000 PDF text
+    // units: the advance without the first letter's left side bearing and the last letter's right
+    // one. A face whose outlines are not measured here counts its whole advance as ink.
+    private static (double Lead, double Ink) InkSpan(TrueTypeFont font, string text)
+    {
+        double advance = Advance(font, text);
+        Rune[] runes = [.. text.EnumerateRunes()];
+        if (runes.Length == 0) return (0, advance);
+        double unit = 1000d / font.UnitsPerEm;
+        ushort first = font.GetGlyphId(runes[0].Value), last = font.GetGlyphId(runes[^1].Value);
+        if (!font.TryGetGlyphHorizontalExtent(first, out int firstMin, out _)
+            || !font.TryGetGlyphHorizontalExtent(last, out _, out int lastMax))
+            return (0, advance);
+        double lead = firstMin * unit;
+        double trail = font.GetPdfAdvanceWidth(last) - lastMax * unit;
+        double ink = advance - lead - trail;
+        return ink > 0 ? (lead, ink) : (0, advance);
+    }
 
     private static bool Covers(TrueTypeFont font, string text) =>
         text.EnumerateRunes().All(rune => Rune.IsWhiteSpace(rune) || font.GetGlyphId(rune.Value) != 0);

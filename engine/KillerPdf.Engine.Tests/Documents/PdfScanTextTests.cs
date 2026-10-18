@@ -253,6 +253,40 @@ public sealed class PdfScanTextTests
         Assert.InRange(Overlap(scan.Pixels, rendered), 0.6, 1.0);
     }
 
+    // Text set in the very face that printed the scan has to land on the scan's own ink, letter
+    // for letter: the same size, the same width and the same weight, give or take a pixel.
+    [Theory]
+    [InlineData("Times-Roman", 0)]
+    [InlineData("Helvetica", 1)]
+    public void TextInThePrintingFaceCoversTheScansInk(string fontName, int faceIndex)
+    {
+        TrueTypeFont font = PdfStandardFontSubstitutes.Find(fontName);
+        Scan scan = Render(font, "scanned words become real text", "that can be found and copied");
+        PdfDocument document = PdfDocument.Open(new PdfDocumentBuilder()
+            .AddPage(PageWidth, scan.PageHeight, new PdfContentStreamBuilder().DrawImage(
+                PdfImage.FromRgb(scan.Width, scan.Height, Rgb(scan.Pixels)), 0, 0, PageWidth, scan.PageHeight))
+            .Build());
+        PdfScanTextPageAnalysis analysis = Analyze(scan);
+        PdfScanTextFace face = PdfScanTextWriter.RankFaces(analysis, [PdfScanTextWriter.BundledFaces()[faceIndex]])[0].Face;
+        PdfScanTextWriter.Verify(analysis, face);
+        Assert.All(analysis.Words, word => Assert.True(word.Replaceable,
+            $"{word.Word.Text} match {word.Match:0.000} shape {word.ShapeMatch:0.000} rival {word.Lookalike} {word.LookalikeMatch:0.000}"));
+        byte[] background = (byte[])scan.Pixels.Clone();
+        PdfScanTextAnalyzer.Erase(background, scan.Width, scan.Height,
+            analysis.Words.Where(word => word.Replaceable && PdfScanTextWriter.CanSet(face, word)));
+        PdfScanTextAnalyzer.ReleaseMasks(analysis);
+
+        PdfScanTextResult result = PdfScanTextWriter.Write(document,
+            [new PdfScanTextPage(0, analysis, PdfImage.FromRgb(scan.Width, scan.Height, Rgb(background)), face)],
+            _ => font);
+
+        Assert.Equal(scan.Words.Count, result.ReplacedWords);
+        byte[] rendered = new PdfPageRenderer(PdfDocument.Open(result.Document))
+            .Render(0, new PdfRenderOptions(scan.Width, scan.Height)).Pixels.ToArray();
+        Assert.InRange(Covered(rendered, scan.Pixels, scan.Width), 0.95, 1.0);
+        Assert.InRange(Covered(scan.Pixels, rendered, scan.Width), 0.95, 1.0);
+    }
+
     [Fact]
     public void ImagePagesWithAnInvisibleTextLayerAreStillScans()
     {
@@ -327,6 +361,27 @@ public sealed class PdfScanTextTests
         for (int i = 0; i < bgra.Length; i += 4)
             if (bgra[i + 1] < 160) count++;
         return count;
+    }
+
+    // Share of one image's dark pixels that have a dark pixel within a pixel, either way, in the other.
+    private static double Covered(byte[] from, byte[] to, int width)
+    {
+        int height = from.Length / 4 / width, dark = 0, near = 0;
+        for (int y = 0; y < height; y++)
+            for (int x = 0; x < width; x++)
+            {
+                if (from[(y * width + x) * 4 + 1] >= 128) continue;
+                dark++;
+                bool hit = false;
+                for (int dy = -1; dy <= 1 && !hit; dy++)
+                    for (int dx = -1; dx <= 1 && !hit; dx++)
+                    {
+                        int nx = x + dx, ny = y + dy;
+                        hit = (uint)nx < (uint)width && (uint)ny < (uint)height && to[(ny * width + nx) * 4 + 1] < 128;
+                    }
+                if (hit) near++;
+            }
+        return dark == 0 ? 0 : near / (double)dark;
     }
 
     // Share of the scan's dark pixels that are also dark, give or take a pixel, in the rendering.

@@ -740,6 +740,29 @@ public sealed class TrueTypeFont
         TryTable(tag, out Table table) ? table : throw Error($"Required font table {tag} is missing");
     private bool TryTable(string tag, out Table table) => _tables.TryGetValue(Tag(tag), out table);
 
+    /// <summary>
+    /// Gets where a glyph's outline starts and ends horizontally, in font design units, from its
+    /// TrueType glyph header. False for an empty glyph, for CFF outlines and for a face read from
+    /// a collection, whose extents are not read here.
+    /// </summary>
+    internal bool TryGetGlyphHorizontalExtent(ushort glyphId, out int xMin, out int xMax)
+    {
+        (xMin, xMax) = (0, 0);
+        if (HasCffOutlines || _directoryOffset != 0 || glyphId >= GlyphCount
+            || !TryTable("head", out Table head) || head.Length < 54
+            || !TryTable("loca", out Table loca) || !TryTable("glyf", out Table glyf))
+            return false;
+        bool longOffsets = S16(head, 50) != 0;
+        int entry = longOffsets ? 4 : 2;
+        if ((glyphId + 2) * entry > loca.Length) return false;
+        long start = longOffsets ? U32(loca, glyphId * 4) : U16(loca, glyphId * 2) * 2L;
+        long end = longOffsets ? U32(loca, glyphId * 4 + 4) : U16(loca, glyphId * 2 + 2) * 2L;
+        if (end - start < 10 || end > glyf.Length) return false;
+        xMin = S16(glyf, (int)start + 2);
+        xMax = S16(glyf, (int)start + 6);
+        return xMax > xMin;
+    }
+
     /// <summary>Gets the absolute byte range of a table in <see cref="FontData"/>.</summary>
     internal bool TryGetTableRange(string tag, out int offset, out int length)
     {
