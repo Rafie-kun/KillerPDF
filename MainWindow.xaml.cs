@@ -307,6 +307,7 @@ namespace KillerPDF
             _startupTearOutSession = startupTearOutSession;
             InitializeComponent();
             new KillerFamily.Accessibility.OverlayFocus(this).Track(ShortcutOverlay, AboutOverlay);
+            InitRailOrder();
             var titleFrames = BitmapDecoder.Create(
                 new Uri("pack://application:,,,/Resources/kp-icon.ico"),
                 BitmapCreateOptions.None, BitmapCacheOption.OnLoad).Frames;

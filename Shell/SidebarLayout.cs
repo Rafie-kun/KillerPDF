@@ -520,6 +520,21 @@ namespace KillerPDF
             MirrorRailIcons(iconsLeft);
         }
 
+        private const string RailOrderSetting = "SidebarRailOrder";
+
+        // The family rail order (RailOrder): theme, language and shortcuts hold the rail's edge,
+        // and the panel and window buttons can be dragged into any order above them.
+        private void InitRailOrder()
+            => RailOrder.Attach(SidebarRailStack,
+                new FrameworkElement[] { RailThemeBtn, RailLangBtn, ShortcutHelpRailBtn },
+                new FrameworkElement[]
+                {
+                    SidebarPagesTab, SidebarOutlinesTab, SidebarCommentsTab, SidebarAttachmentsTab,
+                    SidebarLayersTab, SidebarSignaturesTab, SplitPaneRailBtn, FullScreenRailBtn,
+                    DocInvertBtn, DocInfoRailBtn,
+                },
+                App.GetSetting(RailOrderSetting), value => App.SetSetting(RailOrderSetting, value));
+
         // Reverses the icons' order, and each gap with it, so a group gap stays between the same
         // two buttons.
         private void MirrorRailIcons(bool mirrored)
