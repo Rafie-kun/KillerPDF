@@ -94,6 +94,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Form recognition, flattening, XFA conversion, form-data import and repair dialogs stay with their original PDF when another file opens (#329, #330, #342).
 - Searchable PDF, Scan to Text and text export keep their source through OCR model prompts and file pickers, and searchable PDF saves successfully when no words are recognized.
 - Transform, orientation correction and scan straightening stop when another PDF becomes active, and Transform works on single-page documents (#436).
+- Fields added separately with a shared name prefix remain editable and accept data imports and calculation-order changes (#329, #342).
 - Form-data import accepts checkboxes whose unchecked appearance is omitted, and form flattening generates missing text appearances (#329, #342).
 - XFA conversion keeps repeated static text fields with distinct explicit data bindings, and explains ambiguous repeated paths without mixing their values (#330).
 - The window opens fully on screen on a small or high-scaling display, or when its saved size came from a bigger monitor, instead of running off the edges.

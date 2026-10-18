@@ -2277,7 +2277,7 @@ public sealed class PdfIncrementalPageEditor
         var namesMatched = new HashSet<string>(StringComparer.Ordinal);
         var actionsMatched = new HashSet<string>(StringComparer.Ordinal);
         var defaultMatched = new HashSet<string>(StringComparer.Ordinal);
-        var resultingNames = new HashSet<string>(StringComparer.Ordinal);
+        var resultingNames = new Dictionary<string, (string Original, bool IsParent)>(StringComparer.Ordinal);
         var fieldReferences = new Dictionary<string, PdfIndirectReference>(
             StringComparer.Ordinal);
         var visited = new HashSet<(int ObjectNumber, int Generation)>();
@@ -2377,6 +2377,7 @@ public sealed class PdfIncrementalPageEditor
                         "An AcroForm field /FT value is not a name.");
             string? qualifiedName = originalParentName;
             string? resultingQualifiedName = resultingParentName;
+            bool hierarchyParent = fieldType is null && field.ContainsKey(KidsName);
             bool hasPartialName = field.TryGetValue(FieldName, out PdfObject? nameValue);
             if (hasPartialName)
             {
@@ -2389,7 +2390,8 @@ public sealed class PdfIncrementalPageEditor
                 qualifiedName = originalParentName is null
                     ? part : $"{originalParentName}.{part}";
                 if (_formCalculationOrder is not null
-                    && !fieldReferences.TryAdd(qualifiedName, reference))
+                    && !fieldReferences.TryAdd(qualifiedName, reference)
+                    && (!hierarchyParent || _formCalculationOrder.Contains(qualifiedName, StringComparer.Ordinal)))
                     throw new InvalidOperationException(
                         $"The AcroForm contains more than one field named '{qualifiedName}'.");
                 string resultingPart = part;
@@ -2402,9 +2404,14 @@ public sealed class PdfIncrementalPageEditor
                 }
                 resultingQualifiedName = resultingParentName is null
                     ? resultingPart : $"{resultingParentName}.{resultingPart}";
-                if (!resultingNames.Add(resultingQualifiedName))
-                    throw new InvalidOperationException(
-                        $"Renaming the AcroForm field '{qualifiedName}' would create the duplicate name '{resultingQualifiedName}'.");
+                if (!resultingNames.TryAdd(resultingQualifiedName, (qualifiedName, hierarchyParent)))
+                {
+                    var previous = resultingNames[resultingQualifiedName];
+                    if (!hierarchyParent || !previous.IsParent
+                        || qualifiedName != resultingQualifiedName || previous.Original != resultingQualifiedName)
+                        throw new InvalidOperationException(
+                            $"Renaming the AcroForm field '{qualifiedName}' would create the duplicate name '{resultingQualifiedName}'.");
+                }
             }
             PdfFormFieldMetadata? metadata = null;
             bool hasMetadataChange = hasPartialName && qualifiedName is not null
