@@ -15,6 +15,9 @@ namespace KillerPDF.Features
         /// <summary>True while a document is open (both the live doc and its backing file).</summary>
         bool HasDocument { get; }
 
+        /// <summary>Captures a check that the originating document is still active.</summary>
+        Func<bool> CaptureDocumentOrigin();
+
         /// <summary>Page count of the open document, 0 when none.</summary>
         int PageCount { get; }
 

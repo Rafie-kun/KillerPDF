@@ -74,7 +74,8 @@ public static class PdfOcrSearchableTextWriter
                 geometry.Left + geometry.Width, geometry.Bottom + geometry.Height), content);
             writtenWords += pageWords;
         }
-        return new PdfOcrSearchableTextResult(editor.Build(), writtenWords);
+        return new PdfOcrSearchableTextResult(
+            writtenWords == 0 ? document.Source.ToArray() : editor.Build(), writtenWords);
     }
 
     private static void ApplyDisplayTransform(

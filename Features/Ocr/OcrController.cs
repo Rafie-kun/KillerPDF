@@ -38,7 +38,8 @@ namespace KillerPDF.Features
             if (!_host.HasDocument) { KillerDialog.Show(_host.Window, _host.Loc("Str_Msg_OpenFirst")); return; }
             int[] pages = [.. pageIndices.Distinct().Where(page => page >= 0 && page < _host.PageCount).OrderBy(page => page)];
             if (pages.Length == 0) return;
-            if (!await _host.EnsureOcrModelsReadyAsync()) return;
+            var isSourceCurrent = _host.CaptureDocumentOrigin();
+            if (!await _host.EnsureOcrModelsReadyAsync() || !isSourceCurrent()) return;
 
             // Capture everything off the live UI state before going async.
             string file = _host.CurrentFile!;
@@ -128,7 +129,8 @@ namespace KillerPDF.Features
             if (pageIdx < 0 || pageIdx >= _host.PageCount) return;
             if (!_host.TryGetRenderDims(pageIdx, out int renderW, out int renderH) || renderW <= 0 || renderH <= 0) return;
             if (canvasBounds.Width < 4 || canvasBounds.Height < 4) { _host.SetStatus(_host.Loc("Str_St_OcrRegionTooSmall")); return; }
-            if (!await _host.EnsureOcrModelsReadyAsync()) return;
+            var isSourceCurrent = _host.CaptureDocumentOrigin();
+            if (!await _host.EnsureOcrModelsReadyAsync() || !isSourceCurrent()) return;
 
             string file = _host.CurrentFile!;
             int rot = _host.RotationFor(pageIdx);
@@ -198,7 +200,8 @@ namespace KillerPDF.Features
         internal async void MakeSearchablePdf()
         {
             if (!_host.HasDocument) { KillerDialog.Show(_host.Window, _host.Loc("Str_Ocr_NoDoc")); return; }
-            if (!await _host.EnsureOcrModelsReadyAsync()) return;
+            var isSourceCurrent = _host.CaptureDocumentOrigin();
+            if (!await _host.EnsureOcrModelsReadyAsync() || !isSourceCurrent()) return;
             _host.CommitActiveTextBox();
 
             var dlg = new KillerPDF.Controls.FileDialog(KillerPDF.Controls.FileDialogMode.Save)
@@ -209,7 +212,7 @@ namespace KillerPDF.Features
                 CheckFileExists = false,
                 CheckPathExists = true
             };
-            if (dlg.ShowDialog(_host.Window) != true) return;
+            if (dlg.ShowDialog(_host.Window) != true || !isSourceCurrent()) return;
             string outPath = dlg.FileName;
 
             // Snapshot the current document to a temp; we render and re-open from this so the live doc
@@ -321,7 +324,8 @@ namespace KillerPDF.Features
         internal async void ConvertScanToText()
         {
             if (!_host.HasDocument) { KillerDialog.Show(_host.Window, _host.Loc("Str_Ocr_NoDoc")); return; }
-            if (!await _host.EnsureOcrModelsReadyAsync()) return;
+            var isSourceCurrent = _host.CaptureDocumentOrigin();
+            if (!await _host.EnsureOcrModelsReadyAsync() || !isSourceCurrent()) return;
             _host.CommitActiveTextBox();
 
             var dlg = new KillerPDF.Controls.FileDialog(KillerPDF.Controls.FileDialogMode.Save)
@@ -332,7 +336,7 @@ namespace KillerPDF.Features
                 CheckFileExists = false,
                 CheckPathExists = true
             };
-            if (dlg.ShowDialog(_host.Window) != true) return;
+            if (dlg.ShowDialog(_host.Window) != true || !isSourceCurrent()) return;
             string outPath = dlg.FileName;
 
             string src = App.MakeTempFile("scantext");
@@ -625,7 +629,8 @@ namespace KillerPDF.Features
         internal async void ExtractAllText()
         {
             if (!_host.HasDocument) { KillerDialog.Show(_host.Window, _host.Loc("Str_Ocr_NoDoc")); return; }
-            if (!await _host.EnsureOcrModelsReadyAsync()) return;
+            var isSourceCurrent = _host.CaptureDocumentOrigin();
+            if (!await _host.EnsureOcrModelsReadyAsync() || !isSourceCurrent()) return;
             _host.CommitActiveTextBox();
 
             var dlg = new KillerPDF.Controls.FileDialog(KillerPDF.Controls.FileDialogMode.Save)
@@ -636,7 +641,7 @@ namespace KillerPDF.Features
                 CheckFileExists = false,
                 CheckPathExists = true
             };
-            if (dlg.ShowDialog(_host.Window) != true) return;
+            if (dlg.ShowDialog(_host.Window) != true || !isSourceCurrent()) return;
             string outPath = dlg.FileName;
             bool markdown = Path.GetExtension(outPath).Equals(".md", StringComparison.OrdinalIgnoreCase);
 

@@ -377,6 +377,7 @@ namespace KillerPDF
 
         string IOcrHost.OcrLanguageString => CurrentOcrLanguageString();
         bool IOcrHost.FormAwareOcr => OcrFormAware;
+        Func<bool> IOcrHost.CaptureDocumentOrigin() => CaptureDocumentOrigin();
         Task<bool> IOcrHost.EnsureOcrModelsReadyAsync() => EnsureOcrModelsReadyAsync();
         void IOcrHost.CommitActiveTextBox() => CommitActiveTextBox();
         void IOcrHost.SaveDocumentTo(string path) => _doc!.Save(path);

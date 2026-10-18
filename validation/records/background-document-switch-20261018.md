@@ -112,4 +112,45 @@ Additional isolated cases `--production-race`, `--operation-race` and
 passed: `--flatten-race`, `--xfa-race`, `--repair-race`, `--repair-input-race`,
 `--description-race`, `--import-race`, `--orientation-race`,
 `--orientation-normal`, `--straighten-race` and `--straighten-normal`.
-OCR and Scan to Text handoffs still need model-backed concurrency checks.
+## Model-backed OCR handoffs
+
+The installed English Tesseract model was copied into the isolated fixture's
+data directory. No model was downloaded and normal application settings were
+not changed.
+
+The first blank-target repro exposed a separate empty-update failure, so it did
+not establish source binding. With readable text in the second PDF, the actual
+Searchable PDF workflow recognized two words and saved the second PDF under the
+first PDF's suggested source name. That failed the expected source geometry.
+
+The OCR host now captures document origin before model readiness and checks it
+after readiness and the output picker. Searchable PDF, Scan to Text and text
+export stop without output when the picker changes the active document. Page
+and region OCR use the same origin check around model readiness.
+
+The zero-word failure was independently reproduced at the public
+PdfOcrSearchableTextWriter.Write seam. A blank page attempted to build an empty
+incremental update. With no written words, the writer now returns the original
+document bytes after validating the inputs.
+
+The following actual-shell checks passed with the real English model:
+
+- `--ocr-source-race`, `--scantext-source-race` and `--extract-source-race`:
+  changing the document in the picker produces no output or completion dialog.
+- `--ocr-normal`: one page and two recognized words saved successfully.
+- `--ocr-empty`: one blank page and zero recognized words saved with exact
+  original bytes.
+- `--ocr-worker-race`: opening another PDF after the worker starts preserves the
+  first PDF's output geometry and the replacement PDF's live geometry.
+- `--ocr-cancel`: a routed Esc event opens the actual cancellation prompt during
+  processing. Accepting it preserves a preexisting destination's exact bytes.
+
+The first cancellation driver ran before the busy operation existed, then a
+revised driver blocked its own modal handling. Those were fixture errors. The
+passing driver waits for the actual busy overlay, posts Esc, and handles the
+prompt on a subsequent dispatcher tick. This is routed key verification, not
+physical keyboard input.
+
+Final regression checks after the zero-word correction: 10 focused OCR writer
+tests, 6,498 full engine tests, and 832 app tests passed. App and engine builds
+reported zero warnings and errors with existing references reused.

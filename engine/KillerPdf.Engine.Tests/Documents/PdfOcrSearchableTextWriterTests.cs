@@ -11,6 +11,18 @@ namespace KillerPdf.Engine.Tests.Documents;
 public sealed class PdfOcrSearchableTextWriterTests
 {
     [Fact]
+    public void WritePreservesTheDocumentWhenNoWordsAreRecognized()
+    {
+        byte[] source = new PdfDocumentBuilder().AddBlankPage(200, 100).Build();
+
+        PdfOcrSearchableTextResult result = PdfOcrSearchableTextWriter.Write(
+            PdfDocument.Open(source), [new PdfOcrPixelPage(400, 200, [])], _ => null);
+
+        Assert.Equal(0, result.WrittenWords);
+        Assert.Equal(source, result.Document);
+    }
+
+    [Fact]
     public void WriterHandlesEveryPageRotationAndPreservesTheSourceRevision()
     {
         PdfDocument authored = PdfDocument.Open(new PdfDocumentBuilder()
