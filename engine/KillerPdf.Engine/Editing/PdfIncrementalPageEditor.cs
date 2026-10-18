@@ -12890,9 +12890,9 @@ public sealed class PdfIncrementalPageEditor
             foreach (PdfObject bound in bounds)
             {
                 double current = Number(bound);
-                if (current <= previous || current >= upper)
+                if (current < previous || current > upper)
                     throw new InvalidOperationException(
-                        $"{description} /Bounds values are not strictly ordered within /Domain.");
+                        $"{description} /Bounds values are not ordered within /Domain.");
                 previous = current;
             }
         }
@@ -14226,19 +14226,21 @@ public sealed class PdfIncrementalPageEditor
                 || Resolve(flags) is not PdfInteger flagValue || flagValue.Value < 0)
                 throw new InvalidOperationException(
                     $"{descriptorDescription} has no nonnegative /Flags integer.");
-            if (!descriptor.TryGetValue(Name("FontBBox"), out PdfObject? boundingBox)
-                || Resolve(boundingBox) is not PdfArray boundingBoxArray
+            // ISO 32000-1 Table 122 makes these descriptor metrics optional for Type 3.
+            bool hasBoundingBox = descriptor.TryGetValue(Name("FontBBox"), out PdfObject? boundingBox);
+            if ((!hasBoundingBox && subtype != "Type3")
+                || hasBoundingBox && (Resolve(boundingBox!) is not PdfArray boundingBoxArray
                 || boundingBoxArray.Count != 4
                 || boundingBoxArray.Any(item =>
                     !TryFontNumber(Resolve(item), out double coordinate)
-                    || !double.IsFinite(coordinate)))
+                    || !double.IsFinite(coordinate))))
                 throw new InvalidOperationException(
                     $"{descriptorDescription} has no four-number /FontBBox array.");
             foreach (string key in new[]
                 { "ItalicAngle", "Ascent", "Descent", "CapHeight", "StemV" })
-                if (!descriptor.TryGetValue(Name(key), out PdfObject? metric)
-                    || !TryFontNumber(Resolve(metric), out double number)
-                    || !double.IsFinite(number))
+                if (descriptor.TryGetValue(Name(key), out PdfObject? metric)
+                    ? !TryFontNumber(Resolve(metric), out double number) || !double.IsFinite(number)
+                    : subtype != "Type3" || key == "ItalicAngle")
                     throw new InvalidOperationException(
                         $"{descriptorDescription} has no finite /{key} number.");
             foreach (string key in new[]
@@ -14257,9 +14259,11 @@ public sealed class PdfIncrementalPageEditor
                 throw new InvalidOperationException(
                     $"{descriptorDescription} /Style value is not a dictionary.");
             if (descriptor.TryGetValue(Name("Lang"), out PdfObject? language)
-                && Resolve(language) is not PdfString)
+                && Resolve(language) is not PdfString
+                && !(subtype is "CIDFontType0" or "CIDFontType2"
+                    && Resolve(language) is PdfName))
                 throw new InvalidOperationException(
-                    $"{descriptorDescription} /Lang value is not a string.");
+                    $"{descriptorDescription} /Lang value is not a supported language name or string.");
             int embeddedPrograms = 0;
             foreach (string key in new[] { "FontFile", "FontFile2", "FontFile3" })
                 if (descriptor.TryGetValue(Name(key), out PdfObject? fontFile))

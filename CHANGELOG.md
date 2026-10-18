@@ -103,6 +103,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - JPEG 2000 images that rendered blank, scrambled or missing, or with stray noise or a false color cast, now render correctly, from updating the built-in JPEG 2000 decoder to CoreJ2K 2.4.1.
 - Restoring a maximized window after Win+D, a taskbar click or a touchpad gesture no longer leaves it black and unresponsive (#437).
 - Opening the theme picker and switching themes or accents no longer crashes the installed or portable app (#452).
+- Merging accepts Type 3 fonts without optional descriptor metrics, CIDFont language names and repeated gradient boundaries (#455).
 - PDFs with a slightly wrong cross-reference size open normally instead of asking for a repair and showing a crash report (#406).
 - PDFs whose owner restrictions block editing open read-only with their real text, bookmarks and document details, instead of a slow, blurry rasterized repair, and command-line image export and document info work on them (#424).
 - The bug report window uses the family text field and scrollbars, with grain clipped to the cards and a transparent scrollbar corner.
