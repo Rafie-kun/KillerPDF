@@ -6,7 +6,7 @@ namespace KillerPDF;
 internal sealed class DocumentListDialog : Window
 {
     private readonly ListBox _list = new();
-    internal int SelectedIndex => _list.SelectedIndex;
+    internal int SelectedIndex { get => _list.SelectedIndex; set => _list.SelectedIndex = value; }
     internal int[] Order => _list.Items.Cast<ListBoxItem>().Select(item => (int)item.Tag).ToArray();
 
     internal DocumentListDialog(Window owner, string title, IEnumerable<string> labels, bool reorder = false)

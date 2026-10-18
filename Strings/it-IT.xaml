@@ -1692,4 +1692,22 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_Macro_Batch">Esegui sui PDF selezionati</sys:String>
     <sys:String x:Key="Str_Macro_NoSettings">Questo passaggio non ha impostazioni modificabili in questa finestra.</sys:String>
     <sys:String x:Key="Str_Macro_Replace">Sostituisci file esistente</sys:String>
+    <sys:String x:Key="Str_Merge_AddField">Aggiungi associazione campo</sys:String>
+    <sys:String x:Key="Str_Merge_AddImage">Aggiungi immagine (percorsi file)</sys:String>
+    <sys:String x:Key="Str_Merge_Profile">Impostazioni profilo</sys:String>
+    <sys:String x:Key="Str_Merge_Source">Colonna dati</sys:String>
+    <sys:String x:Key="Str_Merge_Target">Campo PDF</sys:String>
+    <sys:String x:Key="Str_Merge_Placeholder">Segnaposto di testo</sys:String>
+    <sys:String x:Key="Str_Merge_ValueKind">Tipo di valore</sys:String>
+    <sys:String x:Key="Str_Merge_Number">Numero</sys:String>
+    <sys:String x:Key="Str_Merge_Date">Data</sys:String>
+    <sys:String x:Key="Str_Merge_Default">Valore predefinito</sys:String>
+    <sys:String x:Key="Str_Merge_Format">Formato numero o data (facoltativo)</sys:String>
+    <sys:String x:Key="Str_Merge_Culture">Nome impostazioni cultura (facoltativo)</sys:String>
+    <sys:String x:Key="Str_Merge_ConditionField">Includi se la colonna (facoltativo)</sys:String>
+    <sys:String x:Key="Str_Merge_ConditionValue">È uguale al valore</sys:String>
+    <sys:String x:Key="Str_Merge_OutputTemplate">Modello nome file (vuoto per automatico)</sys:String>
+    <sys:String x:Key="Str_Merge_SourceOutput">Scegli nomi di output che non sostituiscano il PDF originale.</sys:String>
+    <sys:String x:Key="Str_Merge_LoadProfile">Carica profilo</sys:String>
+    <sys:String x:Key="Str_Merge_SaveProfile">Salva profilo</sys:String>
 </ResourceDictionary>

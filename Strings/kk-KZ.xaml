@@ -1695,4 +1695,22 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_Macro_Batch">Таңдалған PDF файлдарында орындау</sys:String>
     <sys:String x:Key="Str_Macro_NoSettings">Бұл қадамның осы терезеде өңделетін параметрлері жоқ.</sys:String>
     <sys:String x:Key="Str_Macro_Replace">Бар файлды ауыстыру</sys:String>
+    <sys:String x:Key="Str_Merge_AddField">Өріс сәйкестігін қосу</sys:String>
+    <sys:String x:Key="Str_Merge_AddImage">Сурет қосу (файл жолдары)</sys:String>
+    <sys:String x:Key="Str_Merge_Profile">Профиль параметрлері</sys:String>
+    <sys:String x:Key="Str_Merge_Source">Деректер бағаны</sys:String>
+    <sys:String x:Key="Str_Merge_Target">PDF өрісі</sys:String>
+    <sys:String x:Key="Str_Merge_Placeholder">Мәтін толтырғышы</sys:String>
+    <sys:String x:Key="Str_Merge_ValueKind">Мән түрі</sys:String>
+    <sys:String x:Key="Str_Merge_Number">Сан</sys:String>
+    <sys:String x:Key="Str_Merge_Date">Күн</sys:String>
+    <sys:String x:Key="Str_Merge_Default">Әдепкі мән</sys:String>
+    <sys:String x:Key="Str_Merge_Format">Сан немесе күн пішімі (міндетті емес)</sys:String>
+    <sys:String x:Key="Str_Merge_Culture">Мәдениет атауы (міндетті емес)</sys:String>
+    <sys:String x:Key="Str_Merge_ConditionField">Баған бойынша қосу (міндетті емес)</sys:String>
+    <sys:String x:Key="Str_Merge_ConditionValue">Мына мәнге тең</sys:String>
+    <sys:String x:Key="Str_Merge_OutputTemplate">Файл атауының үлгісі (автоматты үшін бос)</sys:String>
+    <sys:String x:Key="Str_Merge_SourceOutput">Бастапқы PDF файлын ауыстырмайтын шығыс атауларын таңдаңыз.</sys:String>
+    <sys:String x:Key="Str_Merge_LoadProfile">Профильді жүктеу</sys:String>
+    <sys:String x:Key="Str_Merge_SaveProfile">Профильді сақтау</sys:String>
 </ResourceDictionary>

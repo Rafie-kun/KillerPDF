@@ -1692,4 +1692,22 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Macro_Batch">Chạy trên các PDF đã chọn</sys:String>
     <sys:String x:Key="Str_Macro_NoSettings">Bước này không có thiết lập có thể sửa trong hộp thoại này.</sys:String>
     <sys:String x:Key="Str_Macro_Replace">Thay thế tệp hiện có</sys:String>
+    <sys:String x:Key="Str_Merge_AddField">Thêm ánh xạ trường</sys:String>
+    <sys:String x:Key="Str_Merge_AddImage">Thêm ảnh (đường dẫn tệp)</sys:String>
+    <sys:String x:Key="Str_Merge_Profile">Thiết lập hồ sơ</sys:String>
+    <sys:String x:Key="Str_Merge_Source">Cột dữ liệu</sys:String>
+    <sys:String x:Key="Str_Merge_Target">Trường PDF</sys:String>
+    <sys:String x:Key="Str_Merge_Placeholder">Chỗ giữ chỗ văn bản</sys:String>
+    <sys:String x:Key="Str_Merge_ValueKind">Kiểu giá trị</sys:String>
+    <sys:String x:Key="Str_Merge_Number">Số</sys:String>
+    <sys:String x:Key="Str_Merge_Date">Ngày</sys:String>
+    <sys:String x:Key="Str_Merge_Default">Giá trị mặc định</sys:String>
+    <sys:String x:Key="Str_Merge_Format">Định dạng số hoặc ngày (tùy chọn)</sys:String>
+    <sys:String x:Key="Str_Merge_Culture">Tên văn hóa (tùy chọn)</sys:String>
+    <sys:String x:Key="Str_Merge_ConditionField">Bao gồm khi cột (tùy chọn)</sys:String>
+    <sys:String x:Key="Str_Merge_ConditionValue">Bằng giá trị</sys:String>
+    <sys:String x:Key="Str_Merge_OutputTemplate">Mẫu tên tệp (để trống để tự động)</sys:String>
+    <sys:String x:Key="Str_Merge_SourceOutput">Chọn tên đầu ra không thay thế PDF nguồn.</sys:String>
+    <sys:String x:Key="Str_Merge_LoadProfile">Tải hồ sơ</sys:String>
+    <sys:String x:Key="Str_Merge_SaveProfile">Lưu hồ sơ</sys:String>
 </ResourceDictionary>

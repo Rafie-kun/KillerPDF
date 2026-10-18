@@ -1680,4 +1680,22 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Macro_Batch">Uruchom dla wybranych plików PDF</sys:String>
     <sys:String x:Key="Str_Macro_NoSettings">Ten krok nie ma ustawień do edycji w tym oknie.</sys:String>
     <sys:String x:Key="Str_Macro_Replace">Zastąp istniejący plik</sys:String>
+    <sys:String x:Key="Str_Merge_AddField">Dodaj mapowanie pola</sys:String>
+    <sys:String x:Key="Str_Merge_AddImage">Dodaj obraz (ścieżki plików)</sys:String>
+    <sys:String x:Key="Str_Merge_Profile">Ustawienia profilu</sys:String>
+    <sys:String x:Key="Str_Merge_Source">Kolumna danych</sys:String>
+    <sys:String x:Key="Str_Merge_Target">Pole PDF</sys:String>
+    <sys:String x:Key="Str_Merge_Placeholder">Symbol zastępczy tekstu</sys:String>
+    <sys:String x:Key="Str_Merge_ValueKind">Typ wartości</sys:String>
+    <sys:String x:Key="Str_Merge_Number">Liczba</sys:String>
+    <sys:String x:Key="Str_Merge_Date">Data</sys:String>
+    <sys:String x:Key="Str_Merge_Default">Wartość domyślna</sys:String>
+    <sys:String x:Key="Str_Merge_Format">Format liczby lub daty (opcjonalnie)</sys:String>
+    <sys:String x:Key="Str_Merge_Culture">Nazwa kultury (opcjonalnie)</sys:String>
+    <sys:String x:Key="Str_Merge_ConditionField">Uwzględnij, gdy kolumna (opcjonalnie)</sys:String>
+    <sys:String x:Key="Str_Merge_ConditionValue">Równa się wartości</sys:String>
+    <sys:String x:Key="Str_Merge_OutputTemplate">Szablon nazwy (pusty dla automatycznej)</sys:String>
+    <sys:String x:Key="Str_Merge_SourceOutput">Wybierz nazwy wyjściowe, które nie zastąpią źródłowego pliku PDF.</sys:String>
+    <sys:String x:Key="Str_Merge_LoadProfile">Wczytaj profil</sys:String>
+    <sys:String x:Key="Str_Merge_SaveProfile">Zapisz profil</sys:String>
 </ResourceDictionary>

@@ -1695,4 +1695,22 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Macro_Batch">Выполнить для выбранных PDF</sys:String>
     <sys:String x:Key="Str_Macro_NoSettings">У этого шага нет редактируемых настроек в этом окне.</sys:String>
     <sys:String x:Key="Str_Macro_Replace">Заменить существующий файл</sys:String>
+    <sys:String x:Key="Str_Merge_AddField">Добавить сопоставление поля</sys:String>
+    <sys:String x:Key="Str_Merge_AddImage">Добавить изображение (пути к файлам)</sys:String>
+    <sys:String x:Key="Str_Merge_Profile">Настройки профиля</sys:String>
+    <sys:String x:Key="Str_Merge_Source">Столбец данных</sys:String>
+    <sys:String x:Key="Str_Merge_Target">Поле PDF</sys:String>
+    <sys:String x:Key="Str_Merge_Placeholder">Текстовый заполнитель</sys:String>
+    <sys:String x:Key="Str_Merge_ValueKind">Тип значения</sys:String>
+    <sys:String x:Key="Str_Merge_Number">Число</sys:String>
+    <sys:String x:Key="Str_Merge_Date">Дата</sys:String>
+    <sys:String x:Key="Str_Merge_Default">Значение по умолчанию</sys:String>
+    <sys:String x:Key="Str_Merge_Format">Формат числа или даты (необязательно)</sys:String>
+    <sys:String x:Key="Str_Merge_Culture">Имя культуры (необязательно)</sys:String>
+    <sys:String x:Key="Str_Merge_ConditionField">Включать, если столбец (необязательно)</sys:String>
+    <sys:String x:Key="Str_Merge_ConditionValue">Равен значению</sys:String>
+    <sys:String x:Key="Str_Merge_OutputTemplate">Шаблон имени файла (пусто для автоматического)</sys:String>
+    <sys:String x:Key="Str_Merge_SourceOutput">Выберите имена выходных файлов, не заменяющие исходный PDF.</sys:String>
+    <sys:String x:Key="Str_Merge_LoadProfile">Загрузить профиль</sys:String>
+    <sys:String x:Key="Str_Merge_SaveProfile">Сохранить профиль</sys:String>
 </ResourceDictionary>

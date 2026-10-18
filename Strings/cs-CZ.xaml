@@ -1677,4 +1677,22 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Macro_Batch">Spustit pro vybrané soubory PDF</sys:String>
     <sys:String x:Key="Str_Macro_NoSettings">Tento krok zde nemá upravitelné nastavení.</sys:String>
     <sys:String x:Key="Str_Macro_Replace">Nahradit existující soubor</sys:String>
+    <sys:String x:Key="Str_Merge_AddField">Přidat mapování pole</sys:String>
+    <sys:String x:Key="Str_Merge_AddImage">Přidat obrázek (cesty k souborům)</sys:String>
+    <sys:String x:Key="Str_Merge_Profile">Nastavení profilu</sys:String>
+    <sys:String x:Key="Str_Merge_Source">Datový sloupec</sys:String>
+    <sys:String x:Key="Str_Merge_Target">Pole PDF</sys:String>
+    <sys:String x:Key="Str_Merge_Placeholder">Textový zástupný symbol</sys:String>
+    <sys:String x:Key="Str_Merge_ValueKind">Typ hodnoty</sys:String>
+    <sys:String x:Key="Str_Merge_Number">Číslo</sys:String>
+    <sys:String x:Key="Str_Merge_Date">Datum</sys:String>
+    <sys:String x:Key="Str_Merge_Default">Výchozí hodnota</sys:String>
+    <sys:String x:Key="Str_Merge_Format">Formát čísla nebo data (volitelné)</sys:String>
+    <sys:String x:Key="Str_Merge_Culture">Název kultury (volitelné)</sys:String>
+    <sys:String x:Key="Str_Merge_ConditionField">Zahrnout, když sloupec (volitelné)</sys:String>
+    <sys:String x:Key="Str_Merge_ConditionValue">Se rovná hodnotě</sys:String>
+    <sys:String x:Key="Str_Merge_OutputTemplate">Šablona názvu (prázdné pro automatický název)</sys:String>
+    <sys:String x:Key="Str_Merge_SourceOutput">Vyberte výstupní názvy, které nenahradí zdrojový soubor PDF.</sys:String>
+    <sys:String x:Key="Str_Merge_LoadProfile">Načíst profil</sys:String>
+    <sys:String x:Key="Str_Merge_SaveProfile">Uložit profil</sys:String>
 </ResourceDictionary>

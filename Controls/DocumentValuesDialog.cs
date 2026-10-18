@@ -12,6 +12,7 @@ internal sealed class DocumentValuesDialog : Window
     {
         Title = "KillerPDF - " + title;
         Width = 540;
+        MaxHeight = Math.Max(300, SystemParameters.WorkArea.Height - 80);
         SizeToContent = SizeToContent.Height;
         UseLayoutRounding = true;
         DialogChrome.Configure(this, owner);
@@ -33,7 +34,8 @@ internal sealed class DocumentValuesDialog : Window
         apply.IsDefault = true;
         apply.Click += (_, _) => { DialogResult = true; };
         body.Children.Add(UiKit.ButtonRow(cancel, apply));
-        Content = DialogChrome.Frame(this, owner, Title, Close, body);
+        Content = DialogChrome.Frame(this, owner, Title, Close,
+            new ScrollViewer { Content = body, VerticalScrollBarVisibility = ScrollBarVisibility.Auto });
         Loaded += (_, _) => _fields.FirstOrDefault()?.Focus();
     }
 

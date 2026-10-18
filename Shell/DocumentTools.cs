@@ -177,11 +177,17 @@ public partial class MainWindow
         CommitActiveTextBox();
         byte[] templateBytes;
         PdfDataMergePlan plan;
+        PdfDataMergeOutputMode outputMode;
+        string? snapshot = null;
         try
         {
-            templateBytes = File.ReadAllBytes(_currentFile);
-            plan = PdfDataMergeWorkflow.CreatePlan(
-                PdfDocument.Open(templateBytes), records, Path.GetFileName(outputDialog.FileName));
+            snapshot = CreateExchangeSnapshot();
+            templateBytes = File.ReadAllBytes(snapshot);
+            var template = PdfDocument.Open(templateBytes);
+            var settings = new DataMergeDialog(this, template, records, Path.GetFileName(outputDialog.FileName));
+            if (settings.ShowDialog() != true || settings.Profile is null) return;
+            plan = PdfDataMergeWorkflow.CreatePlan(template, records, Path.GetFileName(outputDialog.FileName), settings.Profile);
+            outputMode = settings.OutputMode;
         }
         catch (Exception ex)
         {
@@ -189,8 +195,17 @@ public partial class MainWindow
                 "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
+        finally { if (snapshot is not null) File.Delete(snapshot); }
 
         string outputDirectory = Path.GetDirectoryName(outputDialog.FileName)!;
+        string[] destinations = plan.OutputFileNames.Select(name => Path.GetFullPath(Path.Combine(outputDirectory, name))).ToArray();
+        if (destinations.Any(path => string.Equals(path, Path.GetFullPath(_currentFile), StringComparison.OrdinalIgnoreCase)
+            || (_originalFile is not null && string.Equals(path, Path.GetFullPath(_originalFile), StringComparison.OrdinalIgnoreCase))))
+        {
+            KillerDialog.Show(this, Loc("Str_Merge_SourceOutput")); return;
+        }
+        if (destinations.Length == 0) { KillerDialog.Show(this, Loc("Str_Repair_NoChanges")); return; }
+        var approvedOverwrites = destinations.Where(File.Exists).ToHashSet(StringComparer.OrdinalIgnoreCase);
         int collisions = plan.OutputFileNames.Count(name =>
             File.Exists(Path.Combine(outputDirectory, name)));
         if (collisions > 0 && KillerDialog.Show(this,
@@ -198,12 +213,21 @@ public partial class MainWindow
                 MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes)
             return;
 
+        string previewText = string.Join("\n", plan.Profile.Mappings.Select(mapping => mapping.SourceField + " > " + mapping.TargetField))
+            + "\n" + string.Join("\n", plan.Profile.ImageMappings.Select(mapping => mapping.SourceField + " > "
+                + Loc("Str_Repair_Figure") + " (" + RepairPageLabel(mapping.PageIndex) + ")"))
+            + "\n\n" + string.Join("\n", destinations);
+        var review = new ImportReviewDialog(this, Loc("Str_DocumentTools_DataMerge"), previewText, null, Loc("Str_Btn_Run"));
+        if (review.ShowDialog() != true) return;
+
         var busy = ShowBusyOverlay(Loc("Str_DataMerge_Processing"));
         CancellationToken token = BeginCancellableOp(Loc("Str_DocumentTools_DataMerge"));
         try
         {
             PdfDataMergeBatchReport report = await Task.Run(() => PdfDataMergeWorkflow.RunToDirectory(
-                templateBytes, plan, outputDirectory, PdfDataMergeOutputMode.Editable, token));
+                templateBytes, plan, outputDirectory, outputMode, token,
+                value => PdfDataMergeWorkflow.LoadImage(Path.GetFullPath(value, Path.GetDirectoryName(dataDialog.FileName)!)),
+                approvedOverwrites));
 
             HideBusyOverlay(busy);
             SetStatus(token.IsCancellationRequested

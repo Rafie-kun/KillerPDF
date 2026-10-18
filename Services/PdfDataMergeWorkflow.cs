@@ -1,4 +1,5 @@
 using System.IO;
+using KillerPdf.Engine.Authoring;
 using KillerPdf.Engine.Documents;
 using KillerPdf.Engine.Parsing;
 
@@ -14,6 +15,22 @@ internal static class PdfDataMergeWorkflow
 {
     private const string OutputNameField = "__KillerPDFOutputFileName";
 
+    internal static PdfImage LoadImage(string path)
+    {
+        using var stream = File.OpenRead(path);
+        var decoder = System.Windows.Media.Imaging.BitmapDecoder.Create(stream,
+            System.Windows.Media.Imaging.BitmapCreateOptions.PreservePixelFormat,
+            System.Windows.Media.Imaging.BitmapCacheOption.OnLoad);
+        var image = new System.Windows.Media.Imaging.FormatConvertedBitmap(decoder.Frames[0],
+            System.Windows.Media.PixelFormats.Bgra32, null, 0);
+        int stride = checked(image.PixelWidth * 4);
+        byte[] rgba = new byte[checked(stride * image.PixelHeight)];
+        image.CopyPixels(rgba, stride, 0);
+        for (int index = 0; index < rgba.Length; index += 4)
+            (rgba[index], rgba[index + 2]) = (rgba[index + 2], rgba[index]);
+        return PdfImage.FromRgba(image.PixelWidth, image.PixelHeight, rgba);
+    }
+
     internal static IReadOnlyList<IReadOnlyDictionary<string, string?>> LoadRecords(string path) =>
         Path.GetExtension(path).ToLowerInvariant() switch
         {
@@ -26,7 +43,7 @@ internal static class PdfDataMergeWorkflow
     internal static PdfDataMergePlan CreatePlan(
         PdfDocument template,
         IReadOnlyList<IReadOnlyDictionary<string, string?>> records,
-        string firstOutputFileName)
+        string firstOutputFileName, PdfDataMergeProfile? configuredProfile = null)
     {
         ArgumentNullException.ThrowIfNull(template);
         ArgumentNullException.ThrowIfNull(records);
@@ -56,7 +73,7 @@ internal static class PdfDataMergeWorkflow
             if (sourceName is not null)
                 mappings.Add(new PdfDataMergeFieldMapping(sourceName, field.Name));
         }
-        if (mappings.Count == 0)
+        if (mappings.Count == 0 && configuredProfile is null)
             throw new InvalidOperationException(
                 "No merge-data columns match the PDF form field names or mapping names.");
 
@@ -80,9 +97,21 @@ internal static class PdfDataMergeWorkflow
             preparedRecords[index] = prepared;
         }
 
-        var profile = new PdfDataMergeProfile(
+        var profile = configuredProfile ?? new PdfDataMergeProfile(
             "Desktop data merge", mappings, "{{" + OutputNameField + "}}");
-        return new PdfDataMergePlan(profile, preparedRecords, outputNames, mappings.Count);
+        string[] plannedNames = preparedRecords.Where(profile.Includes).Select(record => profile.Map(record).OutputFileName).ToArray();
+        if (plannedNames.Any(name => string.IsNullOrWhiteSpace(name) || name != Path.GetFileName(name)
+            || !string.Equals(Path.GetExtension(name), ".pdf", StringComparison.OrdinalIgnoreCase)))
+            throw new ArgumentException("Every output name must be a PDF filename.", nameof(configuredProfile));
+        if (plannedNames.Distinct(StringComparer.OrdinalIgnoreCase).Count() != plannedNames.Length)
+            throw new ArgumentException("Data-merge output filenames must be unique.", nameof(configuredProfile));
+        if (configuredProfile is not null)
+            foreach (var record in preparedRecords.Where(profile.Includes))
+            {
+                var preview = PdfDataMerge.PreviewFormRecord(template, record, profile);
+                if (preview.Error is not null) throw new ArgumentException(preview.Error, nameof(configuredProfile));
+            }
+        return new PdfDataMergePlan(profile, preparedRecords, plannedNames, profile.Mappings.Count);
     }
 
     /// <summary>
@@ -91,13 +120,16 @@ internal static class PdfDataMergeWorkflow
     /// is reported as failed rather than stopping the rest.
     /// </summary>
     internal static PdfDataMergeBatchReport RunToDirectory(byte[] templateBytes, PdfDataMergePlan plan,
-        string outputDirectory, PdfDataMergeOutputMode mode, CancellationToken token)
+        string outputDirectory, PdfDataMergeOutputMode mode, CancellationToken token,
+        Func<string, PdfImage>? imageResolver = null, IReadOnlySet<string>? approvedOverwrites = null)
     {
-        IReadOnlyList<PdfDataMergeDocumentResult> generated = PdfDataMerge.RunFormBatch(
-            PdfDocument.Open(templateBytes), plan.Records, plan.Profile, mode, token);
+        IReadOnlyList<PdfDataMergeDocumentResult> generated = imageResolver is null
+            ? PdfDataMerge.RunFormBatch(PdfDocument.Open(templateBytes), plan.Records, plan.Profile, mode, token)
+            : PdfDataMerge.RunFormBatch(PdfDocument.Open(templateBytes), plan.Records, plan.Profile, imageResolver, mode, token);
         var completed = new List<PdfDataMergeDocumentResult>(generated.Count);
         foreach (PdfDataMergeDocumentResult result in generated)
         {
+            if (token.IsCancellationRequested) break;
             if (!result.Succeeded || result.Data is null || result.OutputFileName is null)
             {
                 completed.Add(result);
@@ -108,7 +140,8 @@ internal static class PdfDataMergeWorkflow
             try
             {
                 File.WriteAllBytes(temporary, result.Data.Value.ToArray());
-                File.Move(temporary, destination, overwrite: true);
+                token.ThrowIfCancellationRequested();
+                File.Move(temporary, destination, overwrite: approvedOverwrites is null || approvedOverwrites.Contains(destination));
                 completed.Add(result);
             }
             catch (Exception ex) when (ex is not OutOfMemoryException

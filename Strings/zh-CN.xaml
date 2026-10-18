@@ -1676,4 +1676,22 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Macro_Batch">在所选 PDF 上运行</sys:String>
     <sys:String x:Key="Str_Macro_NoSettings">此步骤在此对话框中没有可编辑的设置。</sys:String>
     <sys:String x:Key="Str_Macro_Replace">替换现有文件</sys:String>
+    <sys:String x:Key="Str_Merge_AddField">添加字段映射</sys:String>
+    <sys:String x:Key="Str_Merge_AddImage">添加图片映射（文件路径）</sys:String>
+    <sys:String x:Key="Str_Merge_Profile">配置设置</sys:String>
+    <sys:String x:Key="Str_Merge_Source">数据列</sys:String>
+    <sys:String x:Key="Str_Merge_Target">PDF 字段</sys:String>
+    <sys:String x:Key="Str_Merge_Placeholder">文本占位符</sys:String>
+    <sys:String x:Key="Str_Merge_ValueKind">值类型</sys:String>
+    <sys:String x:Key="Str_Merge_Number">数字</sys:String>
+    <sys:String x:Key="Str_Merge_Date">日期</sys:String>
+    <sys:String x:Key="Str_Merge_Default">默认值</sys:String>
+    <sys:String x:Key="Str_Merge_Format">数字或日期格式（可选）</sys:String>
+    <sys:String x:Key="Str_Merge_Culture">区域名称（可选）</sys:String>
+    <sys:String x:Key="Str_Merge_ConditionField">包含条件列（可选）</sys:String>
+    <sys:String x:Key="Str_Merge_ConditionValue">等于值</sys:String>
+    <sys:String x:Key="Str_Merge_OutputTemplate">输出文件名模板（留空自动生成）</sys:String>
+    <sys:String x:Key="Str_Merge_SourceOutput">请选择不会替换源 PDF 的输出文件名。</sys:String>
+    <sys:String x:Key="Str_Merge_LoadProfile">加载配置</sys:String>
+    <sys:String x:Key="Str_Merge_SaveProfile">保存配置</sys:String>
 </ResourceDictionary>

@@ -1679,4 +1679,22 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Macro_Batch">Futtatás a kijelölt PDF-eken</sys:String>
     <sys:String x:Key="Str_Macro_NoSettings">Ehhez a lépéshez itt nincsenek szerkeszthető beállítások.</sys:String>
     <sys:String x:Key="Str_Macro_Replace">Meglévő fájl felülírása</sys:String>
+    <sys:String x:Key="Str_Merge_AddField">Mezőleképezés hozzáadása</sys:String>
+    <sys:String x:Key="Str_Merge_AddImage">Kép hozzáadása (fájlútvonalak)</sys:String>
+    <sys:String x:Key="Str_Merge_Profile">Profilbeállítások</sys:String>
+    <sys:String x:Key="Str_Merge_Source">Adatoszlop</sys:String>
+    <sys:String x:Key="Str_Merge_Target">PDF-mező</sys:String>
+    <sys:String x:Key="Str_Merge_Placeholder">Szöveges helyőrző</sys:String>
+    <sys:String x:Key="Str_Merge_ValueKind">Érték típusa</sys:String>
+    <sys:String x:Key="Str_Merge_Number">Szám</sys:String>
+    <sys:String x:Key="Str_Merge_Date">Dátum</sys:String>
+    <sys:String x:Key="Str_Merge_Default">Alapértelmezett érték</sys:String>
+    <sys:String x:Key="Str_Merge_Format">Szám- vagy dátumformátum (nem kötelező)</sys:String>
+    <sys:String x:Key="Str_Merge_Culture">Kultúra neve (nem kötelező)</sys:String>
+    <sys:String x:Key="Str_Merge_ConditionField">Felvétel, ha az oszlop (nem kötelező)</sys:String>
+    <sys:String x:Key="Str_Merge_ConditionValue">Egyenlő ezzel</sys:String>
+    <sys:String x:Key="Str_Merge_OutputTemplate">Fájlnévsablon (üresen automatikus)</sys:String>
+    <sys:String x:Key="Str_Merge_SourceOutput">Válasszon olyan kimeneti fájlneveket, amelyek nem írják felül a forrás PDF-et.</sys:String>
+    <sys:String x:Key="Str_Merge_LoadProfile">Profil betöltése</sys:String>
+    <sys:String x:Key="Str_Merge_SaveProfile">Profil mentése</sys:String>
 </ResourceDictionary>

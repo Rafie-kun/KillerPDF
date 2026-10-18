@@ -1681,4 +1681,22 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Macro_Batch">Für ausgewählte PDFs ausführen</sys:String>
     <sys:String x:Key="Str_Macro_NoSettings">Dieser Schritt hat hier keine bearbeitbaren Einstellungen.</sys:String>
     <sys:String x:Key="Str_Macro_Replace">Vorhandene Datei ersetzen</sys:String>
+    <sys:String x:Key="Str_Merge_AddField">Feldzuordnung hinzufügen</sys:String>
+    <sys:String x:Key="Str_Merge_AddImage">Bildzuordnung hinzufügen (Dateipfade)</sys:String>
+    <sys:String x:Key="Str_Merge_Profile">Profileinstellungen</sys:String>
+    <sys:String x:Key="Str_Merge_Source">Datenspalte</sys:String>
+    <sys:String x:Key="Str_Merge_Target">PDF-Feld</sys:String>
+    <sys:String x:Key="Str_Merge_Placeholder">Textplatzhalter</sys:String>
+    <sys:String x:Key="Str_Merge_ValueKind">Werttyp</sys:String>
+    <sys:String x:Key="Str_Merge_Number">Zahl</sys:String>
+    <sys:String x:Key="Str_Merge_Date">Datum</sys:String>
+    <sys:String x:Key="Str_Merge_Default">Standardwert</sys:String>
+    <sys:String x:Key="Str_Merge_Format">Zahlen- oder Datumsformat (optional)</sys:String>
+    <sys:String x:Key="Str_Merge_Culture">Kulturkennung (optional)</sys:String>
+    <sys:String x:Key="Str_Merge_ConditionField">Einschließen, wenn Spalte (optional)</sys:String>
+    <sys:String x:Key="Str_Merge_ConditionValue">Gleich Wert</sys:String>
+    <sys:String x:Key="Str_Merge_OutputTemplate">Dateinamenvorlage (leer für automatisch)</sys:String>
+    <sys:String x:Key="Str_Merge_SourceOutput">Wählen Sie Ausgabedateinamen, die die Quell-PDF nicht ersetzen.</sys:String>
+    <sys:String x:Key="Str_Merge_LoadProfile">Profil laden</sys:String>
+    <sys:String x:Key="Str_Merge_SaveProfile">Profil speichern</sys:String>
 </ResourceDictionary>

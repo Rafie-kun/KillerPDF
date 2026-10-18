@@ -1692,4 +1692,22 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Macro_Batch">Виконати для вибраних PDF</sys:String>
     <sys:String x:Key="Str_Macro_NoSettings">Цей крок не має редагованих налаштувань у цьому вікні.</sys:String>
     <sys:String x:Key="Str_Macro_Replace">Замінити наявний файл</sys:String>
+    <sys:String x:Key="Str_Merge_AddField">Додати зіставлення поля</sys:String>
+    <sys:String x:Key="Str_Merge_AddImage">Додати зображення (шляхи до файлів)</sys:String>
+    <sys:String x:Key="Str_Merge_Profile">Налаштування профілю</sys:String>
+    <sys:String x:Key="Str_Merge_Source">Стовпець даних</sys:String>
+    <sys:String x:Key="Str_Merge_Target">Поле PDF</sys:String>
+    <sys:String x:Key="Str_Merge_Placeholder">Текстовий заповнювач</sys:String>
+    <sys:String x:Key="Str_Merge_ValueKind">Тип значення</sys:String>
+    <sys:String x:Key="Str_Merge_Number">Число</sys:String>
+    <sys:String x:Key="Str_Merge_Date">Дата</sys:String>
+    <sys:String x:Key="Str_Merge_Default">Значення за замовчуванням</sys:String>
+    <sys:String x:Key="Str_Merge_Format">Формат числа або дати (необов’язково)</sys:String>
+    <sys:String x:Key="Str_Merge_Culture">Назва культури (необов’язково)</sys:String>
+    <sys:String x:Key="Str_Merge_ConditionField">Включати, якщо стовпець (необов’язково)</sys:String>
+    <sys:String x:Key="Str_Merge_ConditionValue">Дорівнює значенню</sys:String>
+    <sys:String x:Key="Str_Merge_OutputTemplate">Шаблон імені файлу (порожньо для автоматичного)</sys:String>
+    <sys:String x:Key="Str_Merge_SourceOutput">Виберіть вихідні імена, які не замінять початковий PDF.</sys:String>
+    <sys:String x:Key="Str_Merge_LoadProfile">Завантажити профіль</sys:String>
+    <sys:String x:Key="Str_Merge_SaveProfile">Зберегти профіль</sys:String>
 </ResourceDictionary>

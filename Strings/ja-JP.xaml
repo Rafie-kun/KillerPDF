@@ -1692,4 +1692,22 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Macro_Batch">選択したPDFで実行</sys:String>
     <sys:String x:Key="Str_Macro_NoSettings">このステップには、この画面で編集できる設定がありません。</sys:String>
     <sys:String x:Key="Str_Macro_Replace">既存のファイルを置換</sys:String>
+    <sys:String x:Key="Str_Merge_AddField">フィールドの対応を追加</sys:String>
+    <sys:String x:Key="Str_Merge_AddImage">画像の対応を追加 (ファイルパス)</sys:String>
+    <sys:String x:Key="Str_Merge_Profile">プロファイル設定</sys:String>
+    <sys:String x:Key="Str_Merge_Source">データ列</sys:String>
+    <sys:String x:Key="Str_Merge_Target">PDFフィールド</sys:String>
+    <sys:String x:Key="Str_Merge_Placeholder">テキストのプレースホルダー</sys:String>
+    <sys:String x:Key="Str_Merge_ValueKind">値の種類</sys:String>
+    <sys:String x:Key="Str_Merge_Number">数値</sys:String>
+    <sys:String x:Key="Str_Merge_Date">日付</sys:String>
+    <sys:String x:Key="Str_Merge_Default">既定値</sys:String>
+    <sys:String x:Key="Str_Merge_Format">数値または日付の書式 (任意)</sys:String>
+    <sys:String x:Key="Str_Merge_Culture">カルチャ名 (任意)</sys:String>
+    <sys:String x:Key="Str_Merge_ConditionField">含める条件の列 (任意)</sys:String>
+    <sys:String x:Key="Str_Merge_ConditionValue">一致する値</sys:String>
+    <sys:String x:Key="Str_Merge_OutputTemplate">出力ファイル名のテンプレート (空欄で自動)</sys:String>
+    <sys:String x:Key="Str_Merge_SourceOutput">元のPDFを置き換えない出力ファイル名を選択してください。</sys:String>
+    <sys:String x:Key="Str_Merge_LoadProfile">プロファイルを読み込み</sys:String>
+    <sys:String x:Key="Str_Merge_SaveProfile">プロファイルを保存</sys:String>
 </ResourceDictionary>

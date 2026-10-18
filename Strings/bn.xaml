@@ -1672,4 +1672,22 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Macro_Batch">নির্বাচিত PDF-এ চালান</sys:String>
     <sys:String x:Key="Str_Macro_NoSettings">এই ধাপে এই ডায়ালগে সম্পাদনাযোগ্য কোনো সেটিং নেই।</sys:String>
     <sys:String x:Key="Str_Macro_Replace">বিদ্যমান ফাইল প্রতিস্থাপন করুন</sys:String>
+    <sys:String x:Key="Str_Merge_AddField">ফিল্ড ম্যাপিং যোগ করুন</sys:String>
+    <sys:String x:Key="Str_Merge_AddImage">ছবির ম্যাপিং যোগ করুন (ফাইলের পথ)</sys:String>
+    <sys:String x:Key="Str_Merge_Profile">প্রোফাইল সেটিংস</sys:String>
+    <sys:String x:Key="Str_Merge_Source">ডেটা কলাম</sys:String>
+    <sys:String x:Key="Str_Merge_Target">PDF ফিল্ড</sys:String>
+    <sys:String x:Key="Str_Merge_Placeholder">টেক্সট প্লেসহোল্ডার</sys:String>
+    <sys:String x:Key="Str_Merge_ValueKind">মানের ধরন</sys:String>
+    <sys:String x:Key="Str_Merge_Number">সংখ্যা</sys:String>
+    <sys:String x:Key="Str_Merge_Date">তারিখ</sys:String>
+    <sys:String x:Key="Str_Merge_Default">ডিফল্ট মান</sys:String>
+    <sys:String x:Key="Str_Merge_Format">সংখ্যা বা তারিখের বিন্যাস (ঐচ্ছিক)</sys:String>
+    <sys:String x:Key="Str_Merge_Culture">কালচারের নাম (ঐচ্ছিক)</sys:String>
+    <sys:String x:Key="Str_Merge_ConditionField">কলামের শর্তে অন্তর্ভুক্ত করুন (ঐচ্ছিক)</sys:String>
+    <sys:String x:Key="Str_Merge_ConditionValue">এই মানের সমান</sys:String>
+    <sys:String x:Key="Str_Merge_OutputTemplate">আউটপুট ফাইলের নামের টেমপ্লেট (স্বয়ংক্রিয়ের জন্য ফাঁকা)</sys:String>
+    <sys:String x:Key="Str_Merge_SourceOutput">উৎস PDF প্রতিস্থাপন করবে না এমন আউটপুট ফাইলের নাম বেছে নিন।</sys:String>
+    <sys:String x:Key="Str_Merge_LoadProfile">প্রোফাইল লোড করুন</sys:String>
+    <sys:String x:Key="Str_Merge_SaveProfile">প্রোফাইল সংরক্ষণ করুন</sys:String>
 </ResourceDictionary>

@@ -1672,4 +1672,22 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Macro_Batch">Seçili PDF'lerde çalıştır</sys:String>
     <sys:String x:Key="Str_Macro_NoSettings">Bu adımın bu pencerede düzenlenebilir ayarı yok.</sys:String>
     <sys:String x:Key="Str_Macro_Replace">Var olan dosyayı değiştir</sys:String>
+    <sys:String x:Key="Str_Merge_AddField">Alan eşlemesi ekle</sys:String>
+    <sys:String x:Key="Str_Merge_AddImage">Görüntü ekle (dosya yolları)</sys:String>
+    <sys:String x:Key="Str_Merge_Profile">Profil ayarları</sys:String>
+    <sys:String x:Key="Str_Merge_Source">Veri sütunu</sys:String>
+    <sys:String x:Key="Str_Merge_Target">PDF alanı</sys:String>
+    <sys:String x:Key="Str_Merge_Placeholder">Metin yer tutucusu</sys:String>
+    <sys:String x:Key="Str_Merge_ValueKind">Değer türü</sys:String>
+    <sys:String x:Key="Str_Merge_Number">Sayı</sys:String>
+    <sys:String x:Key="Str_Merge_Date">Tarih</sys:String>
+    <sys:String x:Key="Str_Merge_Default">Varsayılan değer</sys:String>
+    <sys:String x:Key="Str_Merge_Format">Sayı veya tarih biçimi (isteğe bağlı)</sys:String>
+    <sys:String x:Key="Str_Merge_Culture">Kültür adı (isteğe bağlı)</sys:String>
+    <sys:String x:Key="Str_Merge_ConditionField">Sütun koşuluyla dahil et (isteğe bağlı)</sys:String>
+    <sys:String x:Key="Str_Merge_ConditionValue">Eşit olduğu değer</sys:String>
+    <sys:String x:Key="Str_Merge_OutputTemplate">Çıktı adı şablonu (otomatik için boş)</sys:String>
+    <sys:String x:Key="Str_Merge_SourceOutput">Kaynak PDF'nin üzerine yazmayan çıktı adları seçin.</sys:String>
+    <sys:String x:Key="Str_Merge_LoadProfile">Profil yükle</sys:String>
+    <sys:String x:Key="Str_Merge_SaveProfile">Profili kaydet</sys:String>
 </ResourceDictionary>

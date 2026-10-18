@@ -1672,4 +1672,22 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Macro_Batch">Ejecutar en PDF seleccionados</sys:String>
     <sys:String x:Key="Str_Macro_NoSettings">Este paso no tiene ajustes editables en este diálogo.</sys:String>
     <sys:String x:Key="Str_Macro_Replace">Reemplazar archivo existente</sys:String>
+    <sys:String x:Key="Str_Merge_AddField">Añadir asignación de campo</sys:String>
+    <sys:String x:Key="Str_Merge_AddImage">Añadir asignación de imagen (rutas)</sys:String>
+    <sys:String x:Key="Str_Merge_Profile">Ajustes del perfil</sys:String>
+    <sys:String x:Key="Str_Merge_Source">Columna de datos</sys:String>
+    <sys:String x:Key="Str_Merge_Target">Campo PDF</sys:String>
+    <sys:String x:Key="Str_Merge_Placeholder">Marcador de texto</sys:String>
+    <sys:String x:Key="Str_Merge_ValueKind">Tipo de valor</sys:String>
+    <sys:String x:Key="Str_Merge_Number">Número</sys:String>
+    <sys:String x:Key="Str_Merge_Date">Fecha</sys:String>
+    <sys:String x:Key="Str_Merge_Default">Valor predeterminado</sys:String>
+    <sys:String x:Key="Str_Merge_Format">Formato de número o fecha (opcional)</sys:String>
+    <sys:String x:Key="Str_Merge_Culture">Nombre de cultura (opcional)</sys:String>
+    <sys:String x:Key="Str_Merge_ConditionField">Incluir cuando la columna (opcional)</sys:String>
+    <sys:String x:Key="Str_Merge_ConditionValue">Sea igual al valor</sys:String>
+    <sys:String x:Key="Str_Merge_OutputTemplate">Plantilla de nombre (vacío para automático)</sys:String>
+    <sys:String x:Key="Str_Merge_SourceOutput">Elija nombres de salida que no reemplacen el PDF original.</sys:String>
+    <sys:String x:Key="Str_Merge_LoadProfile">Cargar perfil</sys:String>
+    <sys:String x:Key="Str_Merge_SaveProfile">Guardar perfil</sys:String>
 </ResourceDictionary>

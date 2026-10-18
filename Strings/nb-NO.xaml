@@ -1692,4 +1692,22 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Macro_Batch">Kjør på valgte PDF-er</sys:String>
     <sys:String x:Key="Str_Macro_NoSettings">Dette trinnet har ingen redigerbare innstillinger i dette vinduet.</sys:String>
     <sys:String x:Key="Str_Macro_Replace">Erstatt eksisterende fil</sys:String>
+    <sys:String x:Key="Str_Merge_AddField">Legg til felttilordning</sys:String>
+    <sys:String x:Key="Str_Merge_AddImage">Legg til bilde (filbaner)</sys:String>
+    <sys:String x:Key="Str_Merge_Profile">Profilinnstillinger</sys:String>
+    <sys:String x:Key="Str_Merge_Source">Datakolonne</sys:String>
+    <sys:String x:Key="Str_Merge_Target">PDF-felt</sys:String>
+    <sys:String x:Key="Str_Merge_Placeholder">Tekstplassholder</sys:String>
+    <sys:String x:Key="Str_Merge_ValueKind">Verditype</sys:String>
+    <sys:String x:Key="Str_Merge_Number">Tall</sys:String>
+    <sys:String x:Key="Str_Merge_Date">Dato</sys:String>
+    <sys:String x:Key="Str_Merge_Default">Standardverdi</sys:String>
+    <sys:String x:Key="Str_Merge_Format">Tall- eller datoformat (valgfritt)</sys:String>
+    <sys:String x:Key="Str_Merge_Culture">Kulturnavn (valgfritt)</sys:String>
+    <sys:String x:Key="Str_Merge_ConditionField">Inkluder når kolonne (valgfritt)</sys:String>
+    <sys:String x:Key="Str_Merge_ConditionValue">Er lik verdi</sys:String>
+    <sys:String x:Key="Str_Merge_OutputTemplate">Filnavnmal (tom for automatisk)</sys:String>
+    <sys:String x:Key="Str_Merge_SourceOutput">Velg utdatafilnavn som ikke erstatter kilde-PDF-en.</sys:String>
+    <sys:String x:Key="Str_Merge_LoadProfile">Last inn profil</sys:String>
+    <sys:String x:Key="Str_Merge_SaveProfile">Lagre profil</sys:String>
 </ResourceDictionary>

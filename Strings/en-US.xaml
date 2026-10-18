@@ -1692,4 +1692,22 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Macro_Batch">Run on selected PDFs</sys:String>
     <sys:String x:Key="Str_Macro_NoSettings">This step has no editable settings in this dialog.</sys:String>
     <sys:String x:Key="Str_Macro_Replace">Replace existing file</sys:String>
+    <sys:String x:Key="Str_Merge_AddField">Add field mapping</sys:String>
+    <sys:String x:Key="Str_Merge_AddImage">Add image mapping (file paths)</sys:String>
+    <sys:String x:Key="Str_Merge_Profile">Profile settings</sys:String>
+    <sys:String x:Key="Str_Merge_Source">Data column</sys:String>
+    <sys:String x:Key="Str_Merge_Target">PDF field</sys:String>
+    <sys:String x:Key="Str_Merge_Placeholder">Text placeholder</sys:String>
+    <sys:String x:Key="Str_Merge_ValueKind">Value type</sys:String>
+    <sys:String x:Key="Str_Merge_Number">Number</sys:String>
+    <sys:String x:Key="Str_Merge_Date">Date</sys:String>
+    <sys:String x:Key="Str_Merge_Default">Default value</sys:String>
+    <sys:String x:Key="Str_Merge_Format">Number or date format (optional)</sys:String>
+    <sys:String x:Key="Str_Merge_Culture">Culture name (optional)</sys:String>
+    <sys:String x:Key="Str_Merge_ConditionField">Include when column (optional)</sys:String>
+    <sys:String x:Key="Str_Merge_ConditionValue">Equals value</sys:String>
+    <sys:String x:Key="Str_Merge_OutputTemplate">Output filename template (blank for automatic)</sys:String>
+    <sys:String x:Key="Str_Merge_SourceOutput">Choose output filenames that do not replace the source PDF.</sys:String>
+    <sys:String x:Key="Str_Merge_LoadProfile">Load profile</sys:String>
+    <sys:String x:Key="Str_Merge_SaveProfile">Save profile</sys:String>
 </ResourceDictionary>
