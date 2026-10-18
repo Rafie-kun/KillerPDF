@@ -766,19 +766,33 @@ namespace KillerPDF
 
         // The sidebar-side picker rides the bottom of the sidebar's own right-click menu (it moved
         // out of the Settings panel, like the toolbar picker moved onto the toolbar). The keyboard
-        // gesture is shown on the side Shift+F9 would switch TO - it is a toggle, so putting it
-        // on the checked row would advertise a press that does nothing.
+        // gesture is shown on the side Shift+F9 would move it TO - each press steps one row down
+        // this list - so putting it on the checked row would advertise a press that does nothing.
         private void AppendSidebarSideSection(ContextMenu menu)
         {
             if (menu.Items.Count > 0) menu.Items.Add(new Separator());
             menu.Items.Add(new MenuItem { Header = Loc("Str_Sidebar"), IsEnabled = false });
-            var left  = new MenuItem { Header = Loc("Str_Sidebar_Left"),  IsCheckable = true, IsChecked = !_sidebarRight };
-            var right = new MenuItem { Header = Loc("Str_Sidebar_Right"), IsCheckable = true, IsChecked = _sidebarRight };
-            (_sidebarRight ? left : right).InputGestureText = GestureFor("Shift:F9");
-            left.Click  += (_, _2) => SelectSidebarSide(false);
-            right.Click += (_, _2) => SelectSidebarSide(true);
-            menu.Items.Add(left);
-            menu.Items.Add(right);
+            foreach (SidebarSide side in new[] { SidebarSide.Left, SidebarSide.Right, SidebarSide.Top, SidebarSide.Bottom })
+            {
+                var item = new MenuItem { Header = Loc(side.StringKey()), IsCheckable = true, IsChecked = side == _sidebarSide };
+                if (side == _sidebarSide.Next()) item.InputGestureText = GestureFor("Shift:F9");
+                item.Click += (_, _2) => SelectSidebarSide(side);
+                menu.Items.Add(item);
+            }
+            // A top or bottom strip's rail can swap its ends: icons left, or icons right.
+            if (_sidebarSide.IsStrip())
+            {
+                var icons = new MenuItem
+                {
+                    Header = Loc("Str_Sidebar_IconsRight"),
+                    IsCheckable = true,
+                    IsChecked = _railIconsAtEnd,
+                    InputGestureText = GestureFor("Ctrl:F9"),
+                };
+                icons.Click += (_, _2) => ToggleRailIconsEnd();
+                menu.Items.Add(new Separator());
+                menu.Items.Add(icons);
+            }
         }
 
         private ContextMenu MakeThemedMenu()

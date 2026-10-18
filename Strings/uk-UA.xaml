@@ -859,9 +859,13 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Sidebar">БІЧНА ПАНЕЛЬ</sys:String>
     <sys:String x:Key="Str_Sidebar_Left">Ліворуч</sys:String>
     <sys:String x:Key="Str_Sidebar_Right">Праворуч</sys:String>
+    <sys:String x:Key="Str_Sidebar_Top">Угорі</sys:String>
+    <sys:String x:Key="Str_Sidebar_Bottom">Унизу</sys:String>
+    <sys:String x:Key="Str_Sidebar_IconsRight">Значки панелі праворуч</sys:String>
     <sys:String x:Key="Str_KS_ToggleSidebar">Показати / сховати бічну панель</sys:String>
     <sys:String x:Key="Str_KS_ToolbarStyle">Вигляд панелі інструментів</sys:String>
-    <sys:String x:Key="Str_KS_SidebarSide">Перемістити бічну панель ліворуч / праворуч</sys:String>
+    <sys:String x:Key="Str_KS_SidebarSide">Перемістити бічну панель до наступного краю</sys:String>
+    <sys:String x:Key="Str_KS_SidebarIcons">Перемістити значки панелі до іншого краю</sys:String>
     <sys:String x:Key="Str_KS_CycleView">Перемкнути режими перегляду</sys:String>
     <sys:String x:Key="Str_TT_ViewMode">Режим перегляду</sys:String>
     <sys:String x:Key="Str_KS_NextTab">Наступна вкладка (Shift: попередня)</sys:String>

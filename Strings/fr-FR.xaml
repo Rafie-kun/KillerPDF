@@ -859,9 +859,13 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Sidebar">PANNEAU LATÉRAL</sys:String>
     <sys:String x:Key="Str_Sidebar_Left">Gauche</sys:String>
     <sys:String x:Key="Str_Sidebar_Right">Droite</sys:String>
+    <sys:String x:Key="Str_Sidebar_Top">En haut</sys:String>
+    <sys:String x:Key="Str_Sidebar_Bottom">En bas</sys:String>
+    <sys:String x:Key="Str_Sidebar_IconsRight">Icônes du rail à droite</sys:String>
     <sys:String x:Key="Str_KS_ToggleSidebar">Afficher/masquer le panneau latéral</sys:String>
     <sys:String x:Key="Str_KS_ToolbarStyle">Apparence de la barre d'outils</sys:String>
-    <sys:String x:Key="Str_KS_SidebarSide">Panneau latéral à gauche / droite</sys:String>
+    <sys:String x:Key="Str_KS_SidebarSide">Déplacer le panneau latéral vers le bord suivant</sys:String>
+    <sys:String x:Key="Str_KS_SidebarIcons">Déplacer les icônes du rail à l'autre extrémité</sys:String>
     <sys:String x:Key="Str_KS_CycleView">Mode d'affichage suivant</sys:String>
     <sys:String x:Key="Str_TT_ViewMode">Mode d'affichage</sys:String>
     <sys:String x:Key="Str_KS_NextTab">Onglet suivant (Maj : précédent)</sys:String>

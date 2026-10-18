@@ -13,7 +13,9 @@ namespace KillerPDF
     ///   - it is ABOVE the footer, so the status bar is never covered;
     ///   - it is clear of the icon rail, so the rail buttons are never covered.
     /// The content pane is the one element bounded by all three at once, so flyouts are positioned
-    /// against it horizontally, with the opening button supplying the vertical center.
+    /// against it horizontally, with the opening button supplying the vertical center. A top or
+    /// bottom rail turns that around: the flyout sits against the pane's top or bottom edge and
+    /// the button supplies the horizontal center.
     ///
     /// WHY NOT PlacementMode.Right / Top / etc: a Popup is its own top-level window, and WPF's
     /// built-in modes only ever avoid the SCREEN edge. They do not know the app window exists, let
@@ -24,7 +26,7 @@ namespace KillerPDF
     /// flyout eight units inside the rail-adjacent edge of the content pane.
     ///
     /// WIRING (once, before the flyouts open):
-    ///     FlyoutPlacement.UsePane(pane, railOnRight);  // the element the document content sits on
+    ///     FlyoutPlacement.UsePane(pane, sidebarSide);  // the element the document content sits on
     /// then, each time a flyout opens:
     ///     FlyoutPlacement.AttachAtButtonHeight(themeMenu, themeButton);
     ///     themeMenu.IsOpen = true;
@@ -36,20 +38,24 @@ namespace KillerPDF
     {
         /// <summary>The content pane. Set once; every flyout positions against it.</summary>
         private static FrameworkElement? _pane;
-        private static bool _alignRight;
+        private static SidebarSide _side;
 
-        internal static void UsePane(FrameworkElement pane, bool alignRight)
+        internal static void UsePane(FrameworkElement pane, SidebarSide side)
         {
             _pane = pane;
-            _alignRight = alignRight;
+            _side = side;
         }
+
+        // A flyout without a button to follow takes the pane's bottom corner on the rail's side.
+        // A top or bottom rail keeps its buttons at its left end unless moved, so that is the left.
+        private static bool AlignRight => _side == SidebarSide.Right;
 
         internal static void Attach(Popup popup, UIElement _)
         {
             popup.PlacementTarget = _pane;
             popup.Placement = PlacementMode.Custom;
             popup.CustomPopupPlacementCallback =
-                (popupSize, targetSize, __) => PaneCorner(popupSize, targetSize, _alignRight);
+                (popupSize, targetSize, __) => PaneCorner(popupSize, targetSize, AlignRight);
         }
 
         internal static void Attach(ContextMenu menu, UIElement _)
@@ -61,7 +67,7 @@ namespace KillerPDF
             menu.HorizontalOffset = 0;
             menu.VerticalOffset = 0;
             menu.CustomPopupPlacementCallback =
-                (popupSize, targetSize, __) => PaneCorner(popupSize, targetSize, _alignRight);
+                (popupSize, targetSize, __) => PaneCorner(popupSize, targetSize, AlignRight);
         }
 
         internal static void AttachAtButtonHeight(ContextMenu menu, FrameworkElement button)
@@ -69,7 +75,8 @@ namespace KillerPDF
             Attach(menu, button);
             menu.PlacementTarget = button;
             var pane = _pane;
-            bool alignRight = _alignRight;
+            var side = _side;
+            bool alignRight = AlignRight;
             menu.CustomPopupPlacementCallback = (popupSize, targetSize, _) =>
             {
                 var placement = PaneCorner(popupSize, targetSize, alignRight);
@@ -78,13 +85,23 @@ namespace KillerPDF
 
                 var halo = pane.TryFindResource("FlyoutCard") is Style style
                     ? new Border { Style = style }.Margin : new Thickness(22, 18, 22, 26);
-                var buttonCenter = button.PointToScreen(new Point(0, button.ActualHeight / 2));
                 var paneOrigin = pane.PointToScreen(new Point());
                 var buttonOrigin = button.PointToScreen(new Point());
                 var paneExtent = pane.PointToScreen(new Point(pane.ActualWidth, pane.ActualHeight));
-                double centerY = target.TransformFromDevice.Transform(buttonCenter - paneOrigin).Y;
                 var paneSize = target.TransformFromDevice.Transform(paneExtent - paneOrigin);
-                placement = AtButtonHeight(popupSize, new Size(paneSize.X, paneSize.Y), alignRight, centerY, halo);
+                if (side.IsStrip())
+                {
+                    var buttonCenter = button.PointToScreen(new Point(button.ActualWidth / 2, 0));
+                    double centerX = target.TransformFromDevice.Transform(buttonCenter - paneOrigin).X;
+                    placement = AtButtonColumn(popupSize, new Size(paneSize.X, paneSize.Y),
+                        side == SidebarSide.Bottom, centerX, halo);
+                }
+                else
+                {
+                    var buttonCenter = button.PointToScreen(new Point(0, button.ActualHeight / 2));
+                    double centerY = target.TransformFromDevice.Transform(buttonCenter - paneOrigin).Y;
+                    placement = AtButtonHeight(popupSize, new Size(paneSize.X, paneSize.Y), alignRight, centerY, halo);
+                }
                 // WPF offsets are relative to the clicked button. Convert both visual origins
                 // through the same device transform, including display DPI and app scaling.
                 var origin = target.TransformFromDevice.Transform(paneOrigin - buttonOrigin);
@@ -103,6 +120,26 @@ namespace KillerPDF
             double x = alignRight
                 ? targetSize.Width - popupSize.Width + halo.Right - inset : inset - halo.Left;
             return [new CustomPopupPlacement(new Point(x, cardTop - halo.Top), PopupPrimaryAxis.None)];
+        }
+
+        /// <summary>
+        /// A top or bottom rail's flyout: the visible card sits eight units inside the pane's
+        /// rail-adjacent edge (its bottom for a bottom rail, its top for a top rail), centered
+        /// under or over the button and kept eight units inside the pane's left and right edges.
+        /// </summary>
+        internal static CustomPopupPlacement[] AtButtonColumn(
+            Size popupSize, Size targetSize, bool alignBottom, double centerX, Thickness halo)
+        {
+            const double inset = 8;
+            double cardWidth = popupSize.Width - halo.Left - halo.Right;
+            double cardLeft = System.Math.Max(inset,
+                System.Math.Min(centerX - cardWidth / 2, targetSize.Width - cardWidth - inset));
+            double y = alignBottom
+                ? targetSize.Height - popupSize.Height + halo.Bottom - inset
+                : inset - halo.Top;
+            // A card taller than the pane would otherwise start above it and run over the toolbar.
+            if (alignBottom && y < 0) y = 0;
+            return [new CustomPopupPlacement(new Point(cardLeft - halo.Left, y), PopupPrimaryAxis.None)];
         }
 
         /// <summary>

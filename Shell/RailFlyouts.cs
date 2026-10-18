@@ -41,12 +41,11 @@ namespace KillerPDF
             // sync the Settings panel runs on open.
             SyncPickerState();
 
-            // SplitHost is the full document region between the rail and the window edge. Its
-            // rail-adjacent edge is left when the sidebar is left and right when the
-            // sidebar is right. Using one viewer pane here stranded the flyouts on the left after
+            // SplitHost is the full document region beside the rail. Its rail-adjacent edge is
+            // whichever edge the sidebar is docked to. Using one viewer pane here stranded the flyouts on the left after
             // the sidebar moved right, and could place them in the middle of a split document.
             if (SplitHost is FrameworkElement pane)
-                FlyoutPlacement.UsePane(pane, _sidebarRight);
+                FlyoutPlacement.UsePane(pane, _sidebarSide);
             FlyoutPlacement.AttachAtButtonHeight(menu, menu == LangFlyout ? RailLangBtn : RailThemeBtn);
 
             menu.IsOpen = true;
@@ -65,15 +64,17 @@ namespace KillerPDF
                 AccentStripDivider is null || AccentStrip is null)
                 return;
 
-            Grid.SetColumn(ThemeSubmenu, _sidebarRight ? 1 : 0);
-            Grid.SetColumn(AccentStripHost, _sidebarRight ? 0 : 1);
-            AccentStripDivider.HorizontalAlignment = _sidebarRight
+            // A top or bottom rail has no side to face, so the strip keeps its left-rail place.
+            bool right = _sidebarSide == SidebarSide.Right;
+            Grid.SetColumn(ThemeSubmenu, right ? 1 : 0);
+            Grid.SetColumn(AccentStripHost, right ? 0 : 1);
+            AccentStripDivider.HorizontalAlignment = right
                 ? HorizontalAlignment.Right
                 : HorizontalAlignment.Left;
-            AccentStrip.Margin = _sidebarRight
+            AccentStrip.Margin = right
                 ? new Thickness(2, 6, 7, 6)
                 : new Thickness(7, 6, 2, 6);
-            ThemePickerLayout.Margin = _sidebarRight
+            ThemePickerLayout.Margin = right
                 ? new Thickness(3, 10, 12, 10)
                 : new Thickness(12, 10, 3, 10);
         }

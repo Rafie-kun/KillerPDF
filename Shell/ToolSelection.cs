@@ -191,7 +191,7 @@ namespace KillerPDF
                 // the shrinking border CLIPS it (thumbnails hold their size), then hide the
                 // border once the strip width is reached. MinWidth drops first so the
                 // animation isn't clamped at the readable floor.
-                BeginSidebarSlide(SidebarContentPanel.ActualWidth);
+                BeginSidebarSlide(_sidebarSide.IsStrip() ? SidebarContentPanel.ActualHeight : SidebarContentPanel.ActualWidth);
                 _sidebarCol.MinWidth = SbPx(24);
                 AnimateSidebarWidth(SbPx(24), () =>
                 {
@@ -219,26 +219,41 @@ namespace KillerPDF
             UpdateSidebarToggleGlyph();
         }
 
-        // Sidebar slide freeze: while the column animates, the content keeps a FIXED width
-        // (anchored at the outer edge) and the border clips it - so thumbnails and labels
-        // hold their size and slide out of view instead of reflowing every frame. Restored
-        // to normal stretch layout when the glide lands.
+        // Sidebar slide freeze: while the track animates, the content keeps a FIXED width (a
+        // fixed height for a top or bottom strip), anchored at the outer edge, and the border
+        // clips it - so thumbnails and labels hold their size and slide out of view instead of
+        // reflowing every frame. Restored to normal stretch layout when the glide lands.
         private double _sbSlideContentW;
 
         private void BeginSidebarSlide(double contentW)
         {
             if (contentW <= 0) return;
             _sbSlideContentW = contentW;
-            SidebarContentPanel.Width = contentW;
-            SidebarContentPanel.HorizontalAlignment =
-                _sidebarRight ? HorizontalAlignment.Right : HorizontalAlignment.Left;
+            switch (_sidebarSide)
+            {
+                case SidebarSide.Top:
+                    SidebarContentPanel.Height = contentW;
+                    SidebarContentPanel.VerticalAlignment = VerticalAlignment.Top;
+                    break;
+                case SidebarSide.Bottom:
+                    SidebarContentPanel.Height = contentW;
+                    SidebarContentPanel.VerticalAlignment = VerticalAlignment.Bottom;
+                    break;
+                default:
+                    SidebarContentPanel.Width = contentW;
+                    SidebarContentPanel.HorizontalAlignment = _sidebarSide == SidebarSide.Right
+                        ? HorizontalAlignment.Right : HorizontalAlignment.Left;
+                    break;
+            }
             _sidebarBorder.ClipToBounds = true;
         }
 
         private void EndSidebarSlide()
         {
             SidebarContentPanel.Width = double.NaN;
+            SidebarContentPanel.Height = double.NaN;
             SidebarContentPanel.HorizontalAlignment = HorizontalAlignment.Stretch;
+            SidebarContentPanel.VerticalAlignment = VerticalAlignment.Stretch;
             _sidebarBorder.ClipToBounds = false;
         }
 
@@ -261,11 +276,11 @@ namespace KillerPDF
             };
             anim.Completed += (_, _) =>
             {
-                _sidebarCol.BeginAnimation(ColumnDefinition.WidthProperty, null);
+                _sidebarCol.BeginAnimation(null);
                 _sidebarCol.Width = new GridLength(target);
                 onDone?.Invoke();
             };
-            _sidebarCol.BeginAnimation(ColumnDefinition.WidthProperty, anim);
+            _sidebarCol.BeginAnimation(anim);
         }
 
         // Pressing the splitter while the sidebar is collapsed begins pulling it open: reveal the page
@@ -304,11 +319,16 @@ namespace KillerPDF
             // The column is clamped at the readable minimum (MinWidth), so it can't clip and the document
             // isn't resized as you pull. Just record intent; the actual close (and its single re-render)
             // happens on release in OnSidebarResized - so dragging the splitter never re-renders the page.
-            double mx = e.GetPosition(MainContentGrid).X;
+            Point mouse = e.GetPosition(MainContentGrid);
             const double closeBuffer = 36;   // pull this far past the minimum edge to close on release
-            _sidebarWantClose = _sidebarRight
-                ? mx > MainContentGrid.ActualWidth - SbPx(SidebarMinOpen) + closeBuffer
-                : mx < SbPx(SidebarMinOpen) - closeBuffer;
+            double edge = SbPx(SidebarMinOpen);
+            _sidebarWantClose = _sidebarSide switch
+            {
+                SidebarSide.Right => mouse.X > MainContentGrid.ActualWidth - edge + closeBuffer,
+                SidebarSide.Top => mouse.Y < edge - closeBuffer,
+                SidebarSide.Bottom => mouse.Y > MainContentGrid.ActualHeight - edge + closeBuffer,
+                _ => mouse.X < edge - closeBuffer,
+            };
         }
 
         // Called when the user finishes dragging the sidebar splitter. If they dragged it narrower than

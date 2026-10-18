@@ -778,9 +778,13 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_Sidebar">側邊欄</sys:String>
     <sys:String x:Key="Str_Sidebar_Left">左側</sys:String>
     <sys:String x:Key="Str_Sidebar_Right">右側</sys:String>
+    <sys:String x:Key="Str_Sidebar_Top">頂部</sys:String>
+    <sys:String x:Key="Str_Sidebar_Bottom">底部</sys:String>
+    <sys:String x:Key="Str_Sidebar_IconsRight">導軌圖示靠右</sys:String>
     <sys:String x:Key="Str_KS_ToggleSidebar">切換側邊欄</sys:String>
     <sys:String x:Key="Str_KS_ToolbarStyle">工具列外觀</sys:String>
-    <sys:String x:Key="Str_KS_SidebarSide">側邊欄移到左 / 右側</sys:String>
+    <sys:String x:Key="Str_KS_SidebarSide">將側邊欄移到下一邊</sys:String>
+    <sys:String x:Key="Str_KS_SidebarIcons">將導軌圖示移到另一端</sys:String>
     <sys:String x:Key="Str_KS_CycleView">下一個檢視模式</sys:String>
     <sys:String x:Key="Str_TT_ViewMode">檢視模式</sys:String>
     <sys:String x:Key="Str_KS_NextTab">下一個分頁（Shift：上一個）</sys:String>

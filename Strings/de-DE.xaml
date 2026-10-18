@@ -776,9 +776,13 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Sidebar">SEITENLEISTE</sys:String>
     <sys:String x:Key="Str_Sidebar_Left">Links</sys:String>
     <sys:String x:Key="Str_Sidebar_Right">Rechts</sys:String>
+    <sys:String x:Key="Str_Sidebar_Top">Oben</sys:String>
+    <sys:String x:Key="Str_Sidebar_Bottom">Unten</sys:String>
+    <sys:String x:Key="Str_Sidebar_IconsRight">Leistensymbole rechts</sys:String>
     <sys:String x:Key="Str_KS_ToggleSidebar">Seitenleiste umschalten</sys:String>
     <sys:String x:Key="Str_KS_ToolbarStyle">Darstellung der Symbolleiste</sys:String>
-    <sys:String x:Key="Str_KS_SidebarSide">Seitenleiste links / rechts</sys:String>
+    <sys:String x:Key="Str_KS_SidebarSide">Seitenleiste an den nächsten Rand verschieben</sys:String>
+    <sys:String x:Key="Str_KS_SidebarIcons">Leistensymbole ans andere Ende verschieben</sys:String>
     <sys:String x:Key="Str_KS_CycleView">Nächster Ansichtsmodus</sys:String>
     <sys:String x:Key="Str_TT_ViewMode">Ansichtsmodus</sys:String>
     <sys:String x:Key="Str_KS_NextTab">Nächster Tab (Umschalt: vorheriger)</sys:String>

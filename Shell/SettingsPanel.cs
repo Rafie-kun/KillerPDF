@@ -232,7 +232,7 @@ namespace KillerPDF
             };
             mi.Click += (_, _2) => ToggleInvertImages(!BitmapHelpers.DocInvertImages);
             menu.Items.Add(mi);
-            FlyoutPlacement.UsePane(SplitHost, _sidebarRight);
+            FlyoutPlacement.UsePane(SplitHost, _sidebarSide);
             FlyoutPlacement.AttachAtButtonHeight(menu, DocInvertBtn);
             menu.IsOpen = true;
             e.Handled = true;

@@ -206,14 +206,14 @@ namespace KillerPDF
 
         // Sidebar + multi-page view
         private bool _sidebarCollapsed;
-        private bool _sidebarRight;   // false = sidebar on the left (default), true = on the right
+        private SidebarSide _sidebarSide;   // the edge the sidebar docks to (left by default)
         private bool   _sidebarShowingOutlines;
         private bool   _outlinesFitted     = false;
         private double _savedPagesWidth    = 180;
         private double _savedOutlinesWidth = 300;
         private readonly Button _sidebarToggleBtn = null!;
         private readonly Border _sidebarBorder = null!;
-        private ColumnDefinition _sidebarCol = null!;   // sized column (left or right per _sidebarRight)
+        private SidebarTrack _sidebarCol = null!;   // the sized column or row (per _sidebarSide)
         private WrapPanel _pageContentPanel { get => _view.PageContentPanel; set => _view.PageContentPanel = value; }
 
         // Text selection
@@ -350,7 +350,7 @@ namespace KillerPDF
             _toolMeasureBtn = (Button)FindName("ToolMeasureBtn")!;
             _sidebarToggleBtn = (Button)FindName("SidebarToggleBtn")!;
             _sidebarBorder = (Border)FindName("SidebarBorder")!;
-            _sidebarCol = (ColumnDefinition)FindName("SidebarCol")!;
+            _sidebarCol = new SidebarTrack((ColumnDefinition)FindName("SidebarCol")!);
             // BuildPrimaryTile + _activeCanvas were here. Both panes now do it for themselves in
             // InitSplitPanes above (PdfViewer.InitTiles) - calling it here as well would build pane
             // A a SECOND tile.
@@ -408,8 +408,7 @@ namespace KillerPDF
             NoRecentCheck.IsChecked = App.GetSetting(App.NoRecentFilesSetting) == "1";
             // Same deal for the link-confirm toggle beside it (default off).
             LinkConfirmCheck.IsChecked = App.GetSetting(ConfirmLinksSetting) == "1";
-            if (string.Equals(App.GetSetting("SidebarSide"), "Right", StringComparison.OrdinalIgnoreCase))
-                _sidebarRight = true;
+            _sidebarSide = SidebarSides.Parse(App.GetSetting(SidebarSides.SettingName));
             RestoreToolSettings();   // Draw + Text tool styles carry across sessions
             Loaded += (_, _) => AdjustZoomBoxWidth();   // fit the zoom box to the longest localized term
             InitToolbarLayout();        // arrange both bars from the saved layout (ToolbarLayout.cs)

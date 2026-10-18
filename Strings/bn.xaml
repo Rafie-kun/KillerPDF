@@ -776,9 +776,13 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Sidebar">সাইডবার</sys:String>
     <sys:String x:Key="Str_Sidebar_Left">বাঁ দিকে</sys:String>
     <sys:String x:Key="Str_Sidebar_Right">ডান দিকে</sys:String>
+    <sys:String x:Key="Str_Sidebar_Top">উপরে</sys:String>
+    <sys:String x:Key="Str_Sidebar_Bottom">নিচে</sys:String>
+    <sys:String x:Key="Str_Sidebar_IconsRight">রেলের আইকন ডানে</sys:String>
     <sys:String x:Key="Str_KS_ToggleSidebar">সাইডবার টগল করুন</sys:String>
     <sys:String x:Key="Str_KS_ToolbarStyle">টুলবারের চেহারা</sys:String>
-    <sys:String x:Key="Str_KS_SidebarSide">সাইডবার বাঁয়ে / ডানে</sys:String>
+    <sys:String x:Key="Str_KS_SidebarSide">সাইডবার পরের প্রান্তে সরান</sys:String>
+    <sys:String x:Key="Str_KS_SidebarIcons">রেলের আইকন অন্য প্রান্তে সরান</sys:String>
     <sys:String x:Key="Str_KS_CycleView">পরবর্তী ভিউ মোড</sys:String>
     <sys:String x:Key="Str_TT_ViewMode">ভিউ মোড</sys:String>
     <sys:String x:Key="Str_KS_NextTab">পরবর্তী ট্যাব (Shift: পূর্ববর্তী)</sys:String>

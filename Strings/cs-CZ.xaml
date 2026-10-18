@@ -849,9 +849,13 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Sidebar">POSTRANNÍ PANEL</sys:String>
     <sys:String x:Key="Str_Sidebar_Left">Vlevo</sys:String>
     <sys:String x:Key="Str_Sidebar_Right">Vpravo</sys:String>
+    <sys:String x:Key="Str_Sidebar_Top">Nahoře</sys:String>
+    <sys:String x:Key="Str_Sidebar_Bottom">Dole</sys:String>
+    <sys:String x:Key="Str_Sidebar_IconsRight">Ikony lišty vpravo</sys:String>
     <sys:String x:Key="Str_KS_ToggleSidebar">Přepnout postranní panel</sys:String>
     <sys:String x:Key="Str_KS_ToolbarStyle">Vzhled panelu nástrojů</sys:String>
-    <sys:String x:Key="Str_KS_SidebarSide">Postranní panel vlevo / vpravo</sys:String>
+    <sys:String x:Key="Str_KS_SidebarSide">Přesunout postranní panel na další okraj</sys:String>
+    <sys:String x:Key="Str_KS_SidebarIcons">Přesunout ikony lišty na druhý konec</sys:String>
     <sys:String x:Key="Str_KS_CycleView">Další režim zobrazení</sys:String>
     <sys:String x:Key="Str_TT_ViewMode">Režim zobrazení</sys:String>
     <sys:String x:Key="Str_KS_NextTab">Další karta (Shift: předchozí)</sys:String>

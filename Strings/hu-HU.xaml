@@ -859,9 +859,13 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Sidebar">OLDALSÁV</sys:String>
     <sys:String x:Key="Str_Sidebar_Left">Bal</sys:String>
     <sys:String x:Key="Str_Sidebar_Right">Jobb</sys:String>
+    <sys:String x:Key="Str_Sidebar_Top">Fent</sys:String>
+    <sys:String x:Key="Str_Sidebar_Bottom">Lent</sys:String>
+    <sys:String x:Key="Str_Sidebar_IconsRight">Sávikonok jobbra</sys:String>
     <sys:String x:Key="Str_KS_ToggleSidebar">Oldalsáv be-/kikapcsolása</sys:String>
     <sys:String x:Key="Str_KS_ToolbarStyle">Eszköztár megjelenése</sys:String>
-    <sys:String x:Key="Str_KS_SidebarSide">Oldalsáv mozgatása balra / jobbra</sys:String>
+    <sys:String x:Key="Str_KS_SidebarSide">Oldalsáv mozgatása a következő szélre</sys:String>
+    <sys:String x:Key="Str_KS_SidebarIcons">Sávikonok áthelyezése a másik végére</sys:String>
     <sys:String x:Key="Str_KS_CycleView">Nézetmódok váltogatása</sys:String>
     <sys:String x:Key="Str_TT_ViewMode">Nézet mód</sys:String>
     <sys:String x:Key="Str_KS_NextTab">Következő lap (Shift: előző)</sys:String>

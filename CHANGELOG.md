@@ -56,6 +56,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Added a Microsoft Store button for KillerMCP to the website's MCP page.
 - Added Distance, Perimeter, Area and Angle to the Measure tool (Shift+M steps through them), with snapping to page lines and corners, a drawing scale per page set by ratio or by drawing a line, imperial and metric units, and a Measurements report (Ctrl+Shift+D, Y). Measurements are saved as standard PDF measurement annotations that can be moved, adjusted, restyled and deleted, and `--measurements` reports them from the command line.
 - Added Comments, Attachments, Layers and Signatures panels to the sidebar rail beside Pages and Outline. Each loads in the background, and Comments can list comments, measurements or both.
+- Added top and bottom positions for the sidebar, picked from its right-click menu like left and right. At the top or bottom the rail runs along the strip with the open panel's name in it, the page thumbnails sit in a row that scrolls sideways, and Outline and the other panels fill even columns, with long titles cut short and scrolling into view on hover. Ctrl+F9 swaps the rail's two ends, and Shift+F9 steps through left, right, top and bottom.
 
 ### Changed
 - Replaced PDFium, Docnet.Core and PdfPig with the engine for rendering, search, selection, copying and text editing, and built the JPEG 2000 decoder from vendored CoreJ2K sources. The engine keeps the previous renderer's page dimensions for viewing and image export.
@@ -77,6 +78,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Check for updates on startup is the first of the About options, as in the other Killer Tools apps.
 - The Light theme draws a softer shadow under the toolbars.
 - Toolbar buttons with text under the icon are 6 pixels shorter, so the selected tool no longer carries extra space above and below.
+- The sidebar's collapse arrow is larger and lights up on hover and when pressed, like the other buttons.
 - Primary, outline and secondary buttons sit raised on a soft shadow that lifts on hover and sets down when pressed. 98SE keeps its flat beveled buttons.
 - Closing KillerPDF, a tab or all tabs with unsaved changes asks Save, Don't Save or Cancel instead of only whether to close without saving. Save writes every unsaved document and then closes, and a cancelled or failed save keeps the window open.
 - Esc no longer closes KillerPDF. It still cancels the open tool, search or overlay, and with nothing to cancel it does nothing, as in other Windows apps.

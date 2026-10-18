@@ -27,7 +27,18 @@ namespace KillerPDF
 
         private const double SidebarMaxPages = 234;   // stops when the 200px-capped thumbnail fills (200 + margins + scrollbar)
         private const double SidebarMaxOutlines = 480;
-        private const double SidebarMinOpen = 120;   // narrowest readable width before labels/header clip
+        private const double SidebarMinColumn = 120;   // narrowest readable width before labels/header clip
+        // A strip's height goes to its rail and the page labels as well as the thumbnails (74px of
+        // it at 100%), so it needs more than a column's 120 to show the same picture: at 142 a
+        // thumbnail is as tall as a column's is at its 120 minimum (68px), and at 297 it is as
+        // large as a column's at its 234 maximum. A strip stops there, so the document keeps most
+        // of the height.
+        private const double SidebarMinStrip = 142;
+        private const double SidebarMaxStrip = 297;
+
+        // The readable floor on the sidebar's current edge. Dragging below it and letting go snaps
+        // shut or back to it, as in a column.
+        private double SidebarMinOpen => _sidebarSide.IsStrip() ? SidebarMinStrip : SidebarMinColumn;
 
         private void SwitchSidebarToPagesTab()
         {
@@ -43,7 +54,7 @@ namespace KillerPDF
             ShowControlPanelHeader(SidebarPanel.Pages);
 
             SidebarSplitter.IsEnabled = true;   // pages are resizable too now (drag the splitter)
-            _sidebarCol.MaxWidth = SbPx(SidebarMaxPages);
+            _sidebarCol.MaxWidth = SbPx(SidebarMaxFor(SidebarPanel.Pages));
             if (!_sidebarCollapsed)
             {
                 double target = _savedPagesWidth;
@@ -67,7 +78,7 @@ namespace KillerPDF
             PageControlsRow.Visibility = Visibility.Collapsed;
             ShowControlPanelHeader(SidebarPanel.Outlines);
             SidebarSplitter.IsEnabled = true;
-            _sidebarCol.MaxWidth = SbPx(SidebarMaxOutlines);
+            _sidebarCol.MaxWidth = SbPx(SidebarMaxFor(SidebarPanel.Outlines));
             if (!_sidebarCollapsed)
             {
                 if (!_outlinesFitted)
@@ -91,6 +102,13 @@ namespace KillerPDF
         private void AutoFitOutlineWidth()
         {
             if (_sidebarCollapsed) return;
+            // A top or bottom strip's size is its height, which the bookmark text says nothing
+            // about: keep the remembered size and leave the fit for when the sidebar is a column.
+            if (_sidebarSide.IsStrip())
+            {
+                _sidebarCol.Width = new GridLength(Math.Min(_savedOutlinesWidth, SbPx(SidebarMaxFor(SidebarPanel.Outlines))));
+                return;
+            }
 
             var typeface = new Typeface(
                 OutlineTree.FontFamily, OutlineTree.FontStyle,
@@ -152,7 +170,7 @@ namespace KillerPDF
         // Outlines list wouldn't scroll. Forward the wheel to the outer scroll viewer.
         private void OutlineScroll_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
-            OutlineScrollViewer.ScrollToVerticalOffset(OutlineScrollViewer.VerticalOffset - e.Delta);
+            ScrollSidebarTree(OutlineScrollViewer, e.Delta);
             e.Handled = true;
         }
 

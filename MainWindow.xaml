@@ -846,6 +846,49 @@
             </Setter>
         </Style>
 
+        <!-- The page list's item when the sidebar is a top or bottom strip (SidebarLayout.cs swaps it
+             in). The column template sizes the thumbnail to the sidebar's WIDTH; in a strip the
+             HEIGHT is the fixed side, so the thumbnail fills the star row and takes the width its
+             page shape gives it, with the label under it as in the column. -->
+        <DataTemplate x:Key="PageThumbStripTemplate" DataType="{x:Type local:PageThumbnailVm}">
+            <Grid Margin="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Border x:Name="ThumbBorder"
+                        Background="White"
+                        BorderBrush="{DynamicResource SurfaceBrush}"
+                        BorderThickness="1"
+                        HorizontalAlignment="Center">
+                    <Image Source="{Binding Thumbnail}"
+                           Stretch="Uniform"
+                           RenderOptions.BitmapScalingMode="HighQuality"/>
+                </Border>
+                <TextBlock Grid.Row="1" Text="{Binding Label}"
+                           FontFamily="{DynamicResource BrandSansFont}"
+                           FontSize="14"
+                           HorizontalAlignment="Center"
+                           Margin="0,2,0,0">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                    <Setter Property="Foreground" Value="{DynamicResource SelectionFg}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Grid>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding Thumbnail}" Value="{x:Null}">
+                    <Setter TargetName="ThumbBorder" Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+
         <!-- Sidebar tab buttons (PAGES / OUTLINES) -->
         <Style x:Key="SidebarTabBtn" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
@@ -877,6 +920,57 @@
              Signatures). The glyph is the Content. Lit in the accent on hover and while the
              button's panel is the one open (Tag="on", set from SyncRailPanelButtons), dimmed
              while there is no document to show. -->
+        <!-- The rail's collapse chevron. A rail glyph that also lights a face on hover and darkens
+             it while pressed, so it reads as the button it is. Grain goes over the fill (family
+             rule) and only while hovered, as on the caption buttons. -->
+        <Style x:Key="RailChevronBtn" TargetType="Button">
+            <Setter Property="AutomationProperties.Name" Value="{Binding RelativeSource={RelativeSource Self}, Path=ToolTip}"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+            <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Width" Value="24"/>
+            <Setter Property="Height" Value="26"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Face" Background="{TemplateBinding Background}"
+                                CornerRadius="{DynamicResource ControlCornerRadius}">
+                            <Grid>
+                                <TextBlock x:Name="Glyph" Text="{TemplateBinding Content}"
+                                           FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}"
+                                           Foreground="{TemplateBinding Foreground}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <TextBlock.Effect>
+                                        <DropShadowEffect Color="Black" BlurRadius="4" ShadowDepth="2" Direction="270" Opacity="{DynamicResource IconShadowOpacity}"/>
+                                    </TextBlock.Effect>
+                                </TextBlock>
+                                <Border x:Name="Grain" IsHitTestVisible="False" Visibility="Collapsed"
+                                        CornerRadius="{DynamicResource ControlCornerRadius}"
+                                        Background="{DynamicResource GrainTileBrush}" Opacity="{DynamicResource GrainOpacity}"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Face" Property="Background" Value="{DynamicResource RowHoverBrush}"/>
+                                <Setter TargetName="Glyph" Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+                                <Setter TargetName="Grain" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Face" Property="Background" Value="{DynamicResource RowSelectedBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Glyph" Property="Opacity" Value="0.35"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="RailPanelBtn" TargetType="Button">
             <Setter Property="Width" Value="24"/>
             <Setter Property="Height" Value="24"/>
@@ -914,12 +1008,26 @@
         </Style>
 
         <!-- Dark TreeView for PDF outline/bookmarks -->
+        <!-- A top or bottom sidebar strip tags its trees (Outline, Comments, Attachments, Layers,
+             Signatures) Tag="strip" (SidebarLayout.cs). Their rows then flow down into columns
+             that run left to right, at every level of the tree, and the strip scrolls sideways. -->
+        <ItemsPanelTemplate x:Key="TreeColumnFlowPanel">
+            <local:ColumnFlowPanel/>
+        </ItemsPanelTemplate>
         <Style x:Key="OutlineTreeStyle" TargetType="TreeView">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
             <Setter Property="FontFamily" Value="{DynamicResource UiFont}"/>
             <Setter Property="FontSize" Value="12"/>
+            <Style.Triggers>
+                <!-- The tree's own scroller must hand the columns the strip's real height, not an
+                     unbounded one, or they would never wrap. -->
+                <Trigger Property="Tag" Value="strip">
+                    <Setter Property="ItemsPanel" Value="{StaticResource TreeColumnFlowPanel}"/>
+                    <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled"/>
+                </Trigger>
+            </Style.Triggers>
         </Style>
         <!-- Outline tree expander triangle: themed (muted at rest, accent on hover), rotates on expand.
              Replaces the stock WPF toggle so no default-blue chrome bleeds through. -->
@@ -991,10 +1099,17 @@
                                                   Style="{DynamicResource OutlineExpander}"
                                                   IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}}"
                                                   ClickMode="Press"/>
-                                    <ContentPresenter x:Name="PART_Header" Grid.Column="1"
-                                                      ContentSource="Header"
-                                                      Margin="{TemplateBinding Padding}"
-                                                      HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                    <!-- In a top or bottom strip a title too long for its column is cut
+                                         with an ellipsis and scrolls into view while the row is
+                                         hovered (HoverTicker). In a sidebar column it does nothing. -->
+                                    <local:HoverTicker x:Name="HeaderTicker" Grid.Column="1"
+                                                       HoverSource="{Binding ElementName=Bd}"
+                                                       HorizontalAlignment="Left" VerticalAlignment="Center">
+                                        <ContentPresenter x:Name="PART_Header"
+                                                          ContentSource="Header"
+                                                          Margin="{TemplateBinding Padding}"
+                                                          HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                    </local:HoverTicker>
                                 </Grid>
                             </Border>
                             <!-- Children indented by one toggle width -->
@@ -1019,6 +1134,12 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+            <Style.Triggers>
+                <!-- An expanded branch in a strip wraps its own rows into columns beside each other. -->
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource AncestorType=TreeView}}" Value="strip">
+                    <Setter Property="ItemsPanel" Value="{StaticResource TreeColumnFlowPanel}"/>
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
 
         <!-- General-purpose themed text button -->
@@ -1725,10 +1846,11 @@
         <Grid Grid.Row="2" Grid.RowSpan="2" x:Name="MainContentGrid"
               Background="{DynamicResource BackgroundBrush}">
             <Grid.ColumnDefinitions>
-                <!-- The sidebar lives in column 0 (left, default) or column 2 (right). ApplySidebarSide
-                     swaps which column is the sized sidebar (24-260px) and which is the star document
-                     area, and repoints _sidebarCol accordingly. SidebarCol never collapses to 0 - it
-                     shrinks to 24px (the toggle strip width). -->
+                <!-- A left or right sidebar lives in column 0 (left, default) or column 2 (right).
+                     ApplySidebarSide swaps which column is the sized sidebar and which is the star
+                     document area, and repoints _sidebarCol accordingly. The sized track never
+                     collapses to 0 - it shrinks to 24px (the toggle strip width). A top or bottom
+                     sidebar spans all three columns and takes a row instead (see the rows below). -->
                 <ColumnDefinition x:Name="SidebarCol" Width="180" MinWidth="24" MaxWidth="234"/>
                 <!-- Was a 6px drag-handle column. The splitter has since moved INSIDE the sidebar
                      (SidebarSplitter, Grid.Column 0, right-aligned, ZIndex 50 - the KillerNotes
@@ -1742,8 +1864,12 @@
                 <ColumnDefinition x:Name="DocCol" Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>   <!-- row 0: tab strip (above the document only) -->
-                <RowDefinition Height="*"/>      <!-- row 1: sidebar / splitter / document -->
+                <!-- With the sidebar left or right, row 0 is the old tab-strip row (empty now that each
+                     pane owns its strip) and the sidebar and document both span rows 0-1. A top
+                     sidebar makes row 0 its sized track and the document row 1; a bottom sidebar
+                     the reverse. ApplySidebarSide sets the heights and spans. -->
+                <RowDefinition Height="Auto"/>   <!-- row 0 -->
+                <RowDefinition Height="*"/>      <!-- row 1 -->
             </Grid.RowDefinitions>
 
             <!-- Grain for the window surface the document card is inset from. The card's 8px gutter
@@ -1754,14 +1880,22 @@
             <Border Grid.ColumnSpan="3" Grid.RowSpan="2" IsHitTestVisible="False"
                     Opacity="{DynamicResource GrainOpacity}" Background="{StaticResource GrainBrushShared}"/>
 
-            <!-- Sidebar column: inner grid splits content from permanent toggle strip. The toggle
-                 strip is kept on the side facing the document (right when the sidebar is on the
-                 left, left when the sidebar is on the right) by ApplySidebarSide. -->
+            <!-- Sidebar: inner grid splits content from permanent toggle strip. The toggle strip is
+                 kept on the side facing the document (right when the sidebar is on the left, left
+                 when it is on the right, below it at the top, above it at the bottom) by
+                 ApplySidebarSide. -->
             <Grid x:Name="SidebarOuterGrid" Grid.Column="0" Grid.Row="0" Grid.RowSpan="2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition x:Name="SbContentCol" Width="*"/>   <!-- page list content -->
                     <ColumnDefinition x:Name="SbToggleCol" Width="24"/>   <!-- toggle strip - always visible -->
                 </Grid.ColumnDefinitions>
+                <!-- A top or bottom sidebar stacks the same two parts in rows instead, sized by
+                     position the same way the columns are. Left or right leaves both parts in row 0
+                     and the second row at zero. -->
+                <Grid.RowDefinitions>
+                    <RowDefinition x:Name="SbContentRow" Height="*"/>
+                    <RowDefinition x:Name="SbToggleRow" Height="0"/>
+                </Grid.RowDefinitions>
 
                 <!-- Page list content (hidden when collapsed) -->
                 <Border x:Name="SidebarBorder" Grid.Column="0"
@@ -1774,7 +1908,10 @@
                     <DockPanel x:Name="SidebarContentPanel">
                         <!-- Sticky header - lives outside the ScrollViewer so it never scrolls away -->
                         <!-- Header row: the open panel's name on the left (the rail buttons pick the
-                             panel), its own actions on the right. -->
+                             panel), its own actions on the right. The header and the page controls
+                             below it stack vertically; a top or bottom strip turns the stack
+                             horizontal so both sit on one line and the thumbnails keep the height. -->
+                        <StackPanel x:Name="SidebarHeaderStack" DockPanel.Dock="Top">
                         <DockPanel DockPanel.Dock="Top" LastChildFill="False" Height="20" Margin="10,6,8,0">
                             <TextBlock x:Name="SidebarPanelTitle" Text="{DynamicResource Str_TabPages}"
                                        DockPanel.Dock="Left"
@@ -1872,6 +2009,7 @@
                                        Foreground="{DynamicResource MutedTextBrush}"
                                        Margin="2,0,0,0"/>
                         </DockPanel><!-- /PageControlsRow -->
+                        </StackPanel><!-- /SidebarHeaderStack -->
                         <!-- Scrollable page list (virtualized). As in KillerShell, the opacity mask
                              fades the list itself so the real themed sidebar and grain remain visible
                              behind it. SyncPageListEdgeFades drives the stops; 98SE makes the mask
@@ -1983,16 +2121,19 @@
                         Background="{DynamicResource SidebarRailBrush}"
                         BorderThickness="0"
                         MouseRightButtonUp="SidebarArea_MouseRightButtonUp">
-                    <Grid>
+                    <Grid x:Name="SidebarRailGrid">
                         <!-- Collapse/expand arrow at top -->
                         <Button x:Name="SidebarToggleBtn"
                                 Content="&#xE76B;" ToolTip="{DynamicResource Str_TT_CollapseSidebar}"
-                                Style="{StaticResource ToolbarButton}"
-                                Width="24" Padding="0" FontSize="10"
+                                Style="{StaticResource RailChevronBtn}"
                                 VerticalAlignment="Top" Margin="0,6,0,0"
                                 Click="SidebarToggle_Click"/>
+                        <!-- A top or bottom strip lays its rail out as one row (SidebarLayout.cs): the
+                             chevron, then the open panel's header lifted out of the panel, then the
+                             icons, or the icons at the far end. Empty while the rail is a column. -->
+                        <DockPanel x:Name="SidebarStripRow" LastChildFill="False" Visibility="Collapsed"/>
                         <!-- Settings and help icons pinned to bottom -->
-                        <StackPanel VerticalAlignment="Bottom" Margin="0,0,0,6">
+                        <StackPanel x:Name="SidebarRailStack" VerticalAlignment="Bottom" Margin="0,0,0,6">
                             <!-- The sidebar's panels, always on the rail. A click opens that panel
                                  (opening the sidebar if it is closed); a click on the open panel's
                                  button closes the sidebar. -->
@@ -2649,7 +2790,8 @@
                     </Grid>
                 </Border>
 
-            <!-- RESIZE GRIP - KillerShell's TreeResizeGrip, verbatim in shape and reasoning.
+            <!-- RESIZE GRIP - KillerShell's TreeResizeGrip, verbatim in shape and reasoning. With the
+                 sidebar at the top or bottom it lies along the content row's inner edge instead.
                  A Thumb rather than a GridSplitter: a splitter resizes the two columns either side
                  of it, and this handle's neighbor is the 24px rail, which must never move. Driving
                  SidebarCol's width by hand lets the document column absorb the change instead, and
@@ -2676,9 +2818,17 @@
                              and the grip would be unusable (KillerShell's note). -->
                         <Border Background="Transparent">
                             <Border x:Name="line" Width="1" HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
+                                    VerticalAlignment="{TemplateBinding VerticalAlignment}"
                                     Background="{DynamicResource CardBorderBrush}" Margin="0,12" Opacity="0"/>
                         </Border>
                         <ControlTemplate.Triggers>
+                            <!-- A top or bottom sidebar lays the grip along its inner edge, stretched
+                                 across the window (ApplySidebarSide), so the line turns with it. -->
+                            <Trigger Property="HorizontalAlignment" Value="Stretch">
+                                <Setter TargetName="line" Property="Width" Value="Auto"/>
+                                <Setter TargetName="line" Property="Height" Value="1"/>
+                                <Setter TargetName="line" Property="Margin" Value="12,0"/>
+                            </Trigger>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="line" Property="Opacity" Value="1"/>
                             </Trigger>

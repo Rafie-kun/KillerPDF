@@ -859,9 +859,13 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Sidebar">БОКОВАЯ ПАНЕЛЬ</sys:String>
     <sys:String x:Key="Str_Sidebar_Left">Слева</sys:String>
     <sys:String x:Key="Str_Sidebar_Right">Справа</sys:String>
+    <sys:String x:Key="Str_Sidebar_Top">Сверху</sys:String>
+    <sys:String x:Key="Str_Sidebar_Bottom">Снизу</sys:String>
+    <sys:String x:Key="Str_Sidebar_IconsRight">Значки панели справа</sys:String>
     <sys:String x:Key="Str_KS_ToggleSidebar">Переключение боковой панели</sys:String>
     <sys:String x:Key="Str_KS_ToolbarStyle">Стиль панели инструментов</sys:String>
-    <sys:String x:Key="Str_KS_SidebarSide">Перемещение боковой панели влево / вправо</sys:String>
+    <sys:String x:Key="Str_KS_SidebarSide">Перемещение боковой панели к следующему краю</sys:String>
+    <sys:String x:Key="Str_KS_SidebarIcons">Переместить значки панели к другому краю</sys:String>
     <sys:String x:Key="Str_KS_CycleView">Переключение Режимов просмотра</sys:String>
     <sys:String x:Key="Str_TT_ViewMode">Режим просмотра</sys:String>
     <sys:String x:Key="Str_KS_NextTab">Следующая вкладка (Shift: предыдущая)</sys:String>

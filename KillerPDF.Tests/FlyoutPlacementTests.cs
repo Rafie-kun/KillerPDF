@@ -32,6 +32,34 @@ namespace KillerPDF.Tests
             Assert.Equal(new Point(-22, -16), placement.Point);
         }
 
+        [Theory]
+        // A bottom rail: the card's visible bottom sits 8 above the pane's bottom edge.
+        [InlineData(true, 1100, 970, 258)]
+        // A top rail: the card's visible top sits 8 below the pane's top edge.
+        [InlineData(false, 1100, 970, -10)]
+        // Centered on the button when there is room, kept 8 inside the left edge when not.
+        [InlineData(true, 600, 478, 258)]
+        [InlineData(false, 40, -14, -10)]
+        public void StripRailCentersCardOnButtonAgainstRailEdge(
+            bool alignBottom, double centerX, double x, double y)
+        {
+            var placement = FlyoutPlacement.AtButtonColumn(
+                new Size(244, 460), new Size(1200, 700), alignBottom, centerX,
+                new Thickness(22, 18, 22, 26))[0];
+
+            Assert.Equal(new Point(x, y), placement.Point);
+        }
+
+        [Fact]
+        public void BottomRailPinsOversizedCardBelowToolbar()
+        {
+            var placement = FlyoutPlacement.AtButtonColumn(
+                new Size(244, 800), new Size(1200, 700), true, 600,
+                new Thickness(22, 18, 22, 26))[0];
+
+            Assert.Equal(0, placement.Point.Y);
+        }
+
         [Fact]
         public void LeftRailUsesBottomLeftContentCorner()
         {

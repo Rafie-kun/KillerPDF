@@ -764,9 +764,13 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Sidebar">БҮЙІРЛІК ПАНЕЛЬ</sys:String>
     <sys:String x:Key="Str_Sidebar_Left">Сол</sys:String>
     <sys:String x:Key="Str_Sidebar_Right">Оң</sys:String>
+    <sys:String x:Key="Str_Sidebar_Top">Жоғары</sys:String>
+    <sys:String x:Key="Str_Sidebar_Bottom">Төмен</sys:String>
+    <sys:String x:Key="Str_Sidebar_IconsRight">Жолақ белгішелері оң жақта</sys:String>
     <sys:String x:Key="Str_KS_ToggleSidebar">Бүйірлік панельді ауыстыру</sys:String>
     <sys:String x:Key="Str_KS_ToolbarStyle">Құралдар тақтасының түрі</sys:String>
-    <sys:String x:Key="Str_KS_SidebarSide">Бүйірлік панельді солға / оңға жылжыту</sys:String>
+    <sys:String x:Key="Str_KS_SidebarSide">Бүйірлік панельді келесі шетке жылжыту</sys:String>
+    <sys:String x:Key="Str_KS_SidebarIcons">Жолақ белгішелерін екінші шетке жылжыту</sys:String>
     <sys:String x:Key="Str_KS_CycleView">Көрініс режимдерін ауыстыру</sys:String>
     <sys:String x:Key="Str_TT_ViewMode">Көрініс режимі</sys:String>
     <sys:String x:Key="Str_KS_NextTab">Келесі қойынды (Shift: алдыңғы)</sys:String>

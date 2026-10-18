@@ -841,9 +841,13 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Sidebar">PASEK BOCZNY</sys:String>
     <sys:String x:Key="Str_Sidebar_Left">Lewa</sys:String>
     <sys:String x:Key="Str_Sidebar_Right">Prawa</sys:String>
+    <sys:String x:Key="Str_Sidebar_Top">Góra</sys:String>
+    <sys:String x:Key="Str_Sidebar_Bottom">Dół</sys:String>
+    <sys:String x:Key="Str_Sidebar_IconsRight">Ikony paska po prawej</sys:String>
     <sys:String x:Key="Str_KS_ToggleSidebar">Przełącz pasek boczny</sys:String>
     <sys:String x:Key="Str_KS_ToolbarStyle">Wygląd paska narzędzi</sys:String>
-    <sys:String x:Key="Str_KS_SidebarSide">Przesuń pasek boczny w lewo/w prawo</sys:String>
+    <sys:String x:Key="Str_KS_SidebarSide">Przesuń pasek boczny do następnej krawędzi</sys:String>
+    <sys:String x:Key="Str_KS_SidebarIcons">Przenieś ikony paska na drugi koniec</sys:String>
     <sys:String x:Key="Str_KS_CycleView">Przełączaj tryby widoku</sys:String>
     <sys:String x:Key="Str_TT_ViewMode">Tryb widoku</sys:String>
     <sys:String x:Key="Str_KS_NextTab">Następna karta (Shift: poprzednia)</sys:String>

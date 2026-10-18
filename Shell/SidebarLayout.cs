@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -6,10 +7,11 @@ using System.Windows.Media;
 
 namespace KillerPDF
 {
-    // Configurable sidebar placement (left or right). The layout uses three columns in
-    // MainContentGrid: one sized sidebar column, a 6px splitter, and a star document column.
-    // ApplySidebarSide swaps which outer column is the sidebar and repoints _sidebarCol so the
-    // existing collapse / resize logic keeps working unchanged.
+    // Configurable sidebar placement: left, right, top or bottom. MainContentGrid has three
+    // columns (a sized sidebar column, an empty zero column, a star document column) and two rows.
+    // A left or right sidebar swaps which outer column is the sized one; a top or bottom sidebar
+    // spans the columns and swaps which row is. Either way _sidebarCol is repointed at the sized
+    // track, so the collapse / resize logic keeps working unchanged.
     public partial class MainWindow
     {
         private void ApplySidebarSide()
@@ -32,49 +34,99 @@ namespace KillerPDF
                 FindName("SidebarToggleStrip") is not Border sbToggle ||
                 SplitHost is not FrameworkElement docPane ||
                 FindName("SbContentCol") is not ColumnDefinition sbContentCol ||
-                FindName("SbToggleCol") is not ColumnDefinition sbToggleCol)
+                FindName("SbToggleCol") is not ColumnDefinition sbToggleCol ||
+                FindName("SbContentRow") is not RowDefinition sbContentRow ||
+                FindName("SbToggleRow") is not RowDefinition sbToggleRow)
                 return;
+            RowDefinition firstRow = MainContentGrid.RowDefinitions[0];
+            RowDefinition secondRow = MainContentGrid.RowDefinitions[1];
 
-            // Carry the sized column's current width across a flip (24px when collapsed, else the
-            // user's width). A star length means it isn't the sized column yet, so fall back.
+            // Carry the sized track's current length across a flip (24px when collapsed, else the
+            // user's size). A star length means it isn't the sized track yet, so fall back.
             GridLength sized = _sidebarCollapsed
                 ? new GridLength(SbPx(24))
                 : (_sidebarCol != null && _sidebarCol.Width.GridUnitType == GridUnitType.Pixel)
                     ? _sidebarCol.Width
                     : new GridLength(SbPx(180));
-            double maxW = SbPx(_sidebarShowingOutlines ? SidebarMaxOutlines : SidebarMaxPages);
+            double maxW = SbPx(SidebarMaxFor(_sidebarPanel));
+            double minW = SbPx(_sidebarCollapsed ? 24 : SidebarMinOpen);
+            // A glide still running belongs to the track being given up; let it go so it cannot
+            // keep writing a length into a track that is about to be the document's.
+            _sidebarCol?.BeginAnimation(null);
 
-            if (!_sidebarRight)
+            // Every track starts neutral; the side below sizes the one it uses.
+            foreach (ColumnDefinition col in new[] { sidebarColDef, docColDef })
+            { col.MinWidth = 0; col.MaxWidth = double.PositiveInfinity; }
+            foreach (RowDefinition row in new[] { firstRow, secondRow })
+            { row.MinHeight = 0; row.MaxHeight = double.PositiveInfinity; }
+            sidebarColDef.Width = new GridLength(1, GridUnitType.Star);
+            docColDef.Width = new GridLength(1, GridUnitType.Star);
+            firstRow.Height = GridLength.Auto;
+            secondRow.Height = new GridLength(1, GridUnitType.Star);
+
+            bool strip = _sidebarSide.IsStrip();
+            switch (_sidebarSide)
             {
-                // Sidebar on the LEFT (column 0); document fills column 2.
-                sidebarColDef.MinWidth = SbPx(_sidebarCollapsed ? 24 : SidebarMinOpen); sidebarColDef.MaxWidth = maxW; sidebarColDef.Width = sized;
-                docColDef.MinWidth = 0; docColDef.MaxWidth = double.PositiveInfinity;
-                docColDef.Width = new GridLength(1, GridUnitType.Star);
-                Grid.SetColumn(sbOuter, 0);
-                Grid.SetColumn(docPane, 2);
-                _sidebarCol = sidebarColDef;
-                // Toggle strip faces the document: right edge of the sidebar.
-                sbContentCol.Width = new GridLength(1, GridUnitType.Star);
-                sbToggleCol.Width  = new GridLength(24, GridUnitType.Pixel);
-                Grid.SetColumn(sbContent, 0);
-                Grid.SetColumn(sbToggle, 1);
+                case SidebarSide.Left:
+                    // Sidebar in column 0; document fills column 2.
+                    sidebarColDef.MinWidth = minW; sidebarColDef.MaxWidth = maxW; sidebarColDef.Width = sized;
+                    _sidebarCol = new SidebarTrack(sidebarColDef);
+                    break;
+                case SidebarSide.Right:
+                    // Sidebar in column 2; document fills column 0.
+                    docColDef.MinWidth = minW; docColDef.MaxWidth = maxW; docColDef.Width = sized;
+                    _sidebarCol = new SidebarTrack(docColDef);
+                    break;
+                case SidebarSide.Top:
+                    // Both span the columns; the sidebar takes row 0 and the document row 1. Column 0
+                    // goes to zero so the star document column is the whole width.
+                    sidebarColDef.Width = new GridLength(0);
+                    firstRow.MinHeight = minW; firstRow.MaxHeight = maxW; firstRow.Height = sized;
+                    _sidebarCol = new SidebarTrack(firstRow);
+                    break;
+                default:
+                    // Bottom: the document takes row 0 and the sidebar row 1.
+                    sidebarColDef.Width = new GridLength(0);
+                    firstRow.Height = new GridLength(1, GridUnitType.Star);
+                    secondRow.MinHeight = minW; secondRow.MaxHeight = maxW; secondRow.Height = sized;
+                    _sidebarCol = new SidebarTrack(secondRow);
+                    break;
+            }
+            Grid.SetColumn(sbOuter, _sidebarSide == SidebarSide.Right ? 2 : 0);
+            Grid.SetColumnSpan(sbOuter, strip ? 3 : 1);
+            Grid.SetRow(sbOuter, _sidebarSide == SidebarSide.Bottom ? 1 : 0);
+            Grid.SetRowSpan(sbOuter, strip ? 1 : 2);
+            Grid.SetColumn(docPane, _sidebarSide == SidebarSide.Left ? 2 : 0);
+            Grid.SetColumnSpan(docPane, strip ? 3 : 1);
+            Grid.SetRow(docPane, _sidebarSide == SidebarSide.Top ? 1 : 0);
+            Grid.SetRowSpan(docPane, strip ? 1 : 2);
+
+            // The toggle strip faces the document. The inner column and row defs are fixed in
+            // position, so they are sized by position, not by name: the first def holds whichever
+            // part comes first.
+            bool railFirst = _sidebarSide.IsTrailing();
+            // A strip's rail also carries the panel's header and a larger chevron, so it is a little
+            // taller than a column's rail is wide.
+            GridLength rail = new(strip ? StripRailHeight : 24, GridUnitType.Pixel), fill = new(1, GridUnitType.Star);
+            if (strip)
+            {
+                sbContentCol.Width = fill;
+                sbToggleCol.Width = new GridLength(0);
+                sbContentRow.Height = railFirst ? rail : fill;
+                sbToggleRow.Height = railFirst ? fill : rail;
             }
             else
             {
-                // Sidebar on the RIGHT (column 2); document fills column 0.
-                docColDef.MinWidth = SbPx(_sidebarCollapsed ? 24 : SidebarMinOpen); docColDef.MaxWidth = maxW; docColDef.Width = sized;
-                sidebarColDef.MinWidth = 0; sidebarColDef.MaxWidth = double.PositiveInfinity;
-                sidebarColDef.Width = new GridLength(1, GridUnitType.Star);
-                Grid.SetColumn(sbOuter, 2);
-                Grid.SetColumn(docPane, 0);
-                _sidebarCol = docColDef;
-                // Toggle strip faces the document: left edge of the sidebar (inner column 0). The
-                // inner column defs are fixed in position, so size them by position, not by name.
-                sbContentCol.Width = new GridLength(24, GridUnitType.Pixel);   // inner col 0 -> toggle
-                sbToggleCol.Width  = new GridLength(1, GridUnitType.Star);     // inner col 1 -> content
-                Grid.SetColumn(sbToggle, 0);
-                Grid.SetColumn(sbContent, 1);
+                sbContentCol.Width = railFirst ? rail : fill;
+                sbToggleCol.Width = railFirst ? fill : rail;
+                sbContentRow.Height = fill;
+                sbToggleRow.Height = new GridLength(0);
             }
+            Grid.SetColumn(sbContent, !strip && railFirst ? 1 : 0);
+            Grid.SetColumn(sbToggle, !strip && !railFirst ? 1 : 0);
+            Grid.SetRow(sbContent, strip && railFirst ? 1 : 0);
+            Grid.SetRow(sbToggle, strip && !railFirst ? 1 : 0);
+            ApplySidebarOrientation(strip);
 
             // The splitter's edge line follows its alignment at the content/rail boundary.
             // The old SidebarShadow gradient is gone; DocPaneBorder casts a real PaneShadow
@@ -88,13 +140,28 @@ namespace KillerPDF
             // from the splitter - so the gap reads as a margin off the window rather than a gutter
             // between the pane and the sidebar. Full screen clears the margin, so leave it alone
             // there; ApplyFullScreen restores it from this same helper on exit.
-            // The grip rides the CONTENT column and faces the rail, so it always sits on the list's
-            // inner lip: right edge with the sidebar on the left, left edge with it on the right.
+            // The grip rides the CONTENT part and faces the rail, so it always sits on the list's
+            // inner lip: right edge with the sidebar on the left, left edge with it on the right,
+            // bottom edge at the top and top edge at the bottom.
             if (FindName("SidebarSplitter") is Thumb grip)
             {
-                Grid.SetColumn(grip, _sidebarRight ? 1 : 0);
-                grip.HorizontalAlignment = _sidebarRight ? HorizontalAlignment.Left
-                                                         : HorizontalAlignment.Right;
+                Grid.SetColumn(grip, Grid.GetColumn(sbContent));
+                Grid.SetRow(grip, Grid.GetRow(sbContent));
+                grip.Width = strip ? double.NaN : 5;
+                grip.Height = strip ? 5 : double.NaN;
+                grip.Cursor = strip ? System.Windows.Input.Cursors.SizeNS : System.Windows.Input.Cursors.SizeWE;
+                grip.HorizontalAlignment = _sidebarSide switch
+                {
+                    SidebarSide.Left => HorizontalAlignment.Right,
+                    SidebarSide.Right => HorizontalAlignment.Left,
+                    _ => HorizontalAlignment.Stretch,
+                };
+                grip.VerticalAlignment = _sidebarSide switch
+                {
+                    SidebarSide.Top => VerticalAlignment.Bottom,
+                    SidebarSide.Bottom => VerticalAlignment.Top,
+                    _ => VerticalAlignment.Stretch,
+                };
             }
 
             // The shadow caster is inside the PdfViewer control, so moving the control moves both -
@@ -118,7 +185,8 @@ namespace KillerPDF
         }
 
         // Document on the right (sidebar left) -> 8px inset on the right; mirrored when the sidebar
-        // moves. Top and bottom stay 0: PaneShadow is Direction 270 and draws outside the element's
+        // moves. With the sidebar at the top or bottom both sides are window edges, so both get the
+        // inset. Top and bottom stay 0: PaneShadow is Direction 270 and draws outside the element's
         // bounds without taking layout space, so a bottom gap would be real padding lifting the
         // card off the footer, not room for the shadow (KillerShell's ResultsPane comment).
         //
@@ -128,20 +196,27 @@ namespace KillerPDF
         // Top is -1, KillerShell's ResultsPane margin verbatim: the card's own top border tucks
         // UNDER the tab band, which is opaque, so the active tab and the pane read as one surface
         // instead of being split by a hairline under the active tab. With no tabs open the band is
-        // collapsed and the -1 just eats a pixel against the toolbar.
+        // collapsed and the -1 just eats a pixel against the toolbar. Below a top sidebar the
+        // card meets the rail instead, which it must not tuck under, so the top is 0 there.
         private Thickness DocPaneInsetMargin()
         {
             // This is layout geometry, not a palette value. Keep the zero-inset exception scoped
             // to 98SE so it cannot leak into the rounded themes after a live theme switch.
             double inset = Services.ThemeManager.Current == Services.Theme.SE98 ? 0 : 8;
-            return _sidebarRight ? new Thickness(inset, -1, 0, 0)
-                                 : new Thickness(0, -1, inset, 0);
+            return _sidebarSide switch
+            {
+                SidebarSide.Right => new Thickness(inset, -1, 0, 0),
+                SidebarSide.Top => new Thickness(inset, 0, inset, 0),
+                SidebarSide.Bottom => new Thickness(inset, -1, inset, 0),
+                _ => new Thickness(0, -1, inset, 0),
+            };
         }
 
-        // The grip drives SidebarCol's width directly (see the XAML comment). Dragging toward the
-        // document grows the sidebar when it is on the left and shrinks it when on the right, so
-        // the delta is signed by side. Clamped to the column's own Min/MaxWidth, which the collapse
-        // and outline/pages modes already maintain, so this cannot drag past a readable minimum.
+        // The grip drives the sized track directly (see the XAML comment). Dragging toward the
+        // document grows the sidebar when it is on the left or top and shrinks it when on the
+        // right or bottom, so the delta is signed by side. Clamped to the track's own Min/Max,
+        // which the collapse and outline/pages modes already maintain, so this cannot drag past a
+        // readable minimum.
         private void SidebarGrip_DragStarted(object sender, DragStartedEventArgs e)
             => OnSidebarSplitterPress();
 
@@ -151,7 +226,8 @@ namespace KillerPDF
         private void SidebarGrip_DragDelta(object sender, DragDeltaEventArgs e)
         {
             if (_sidebarCol == null) return;
-            double w = _sidebarCol.ActualWidth + (_sidebarRight ? -e.HorizontalChange : e.HorizontalChange);
+            double change = _sidebarSide.IsStrip() ? e.VerticalChange : e.HorizontalChange;
+            double w = _sidebarCol.ActualWidth + (_sidebarSide.IsTrailing() ? -change : change);
             double min = _sidebarCol.MinWidth > 0 ? _sidebarCol.MinWidth : SbPx(24);
             double max = double.IsPositiveInfinity(_sidebarCol.MaxWidth) ? double.MaxValue : _sidebarCol.MaxWidth;
             _sidebarCol.Width = new GridLength(Math.Max(min, Math.Min(max, w)));
@@ -196,8 +272,9 @@ namespace KillerPDF
                     // already had; the document-facing side gets a shorter one, enough to kill the
                     // hard line without eating into the strip.
                     double fDoc = Math.Min(0.25, 14.0 / w);
-                    double fNear = _sidebarRight ? fDoc  : f;
-                    double fFar  = _sidebarRight ? f     : fDoc;
+                    bool right = _sidebarSide == SidebarSide.Right;
+                    double fNear = right ? fDoc  : f;
+                    double fFar  = right ? f     : fDoc;
                     mask.GradientStops.Add(new GradientStop(Colors.Transparent, 0));
                     mask.GradientStops.Add(new GradientStop(Colors.White, fNear));
                     mask.GradientStops.Add(new GradientStop(Colors.White, 1 - fFar));
@@ -247,26 +324,248 @@ namespace KillerPDF
 
         private void FooterAnchor_SizeChanged(object sender, SizeChangedEventArgs e) => UpdateFooterFade();
 
-        // The collapse arrow points toward where the page-list content goes when toggled, which
-        // depends on both the side and the collapsed state.
+        // The collapse arrow points toward where the page-list content goes when toggled: toward
+        // the sidebar's own edge while open, away from it while collapsed.
         private void UpdateSidebarToggleGlyph()
         {
             if (_sidebarToggleBtn == null) return;
-            bool pointLeft = _sidebarRight ? _sidebarCollapsed : !_sidebarCollapsed;
-            _sidebarToggleBtn.Content = pointLeft ? "" : "";   // ChevronLeft / ChevronRight
+            // A strip's header rides in the rail, so it hides with the panel it names.
+            SidebarHeaderStack.Visibility = _sidebarStripLayout && _sidebarCollapsed
+                ? Visibility.Hidden : Visibility.Visible;
+            SidebarSide toward = _sidebarCollapsed
+                ? _sidebarSide switch
+                {
+                    SidebarSide.Left => SidebarSide.Right,
+                    SidebarSide.Right => SidebarSide.Left,
+                    SidebarSide.Top => SidebarSide.Bottom,
+                    _ => SidebarSide.Top,
+                }
+                : _sidebarSide;
+            _sidebarToggleBtn.Content = toward switch
+            {
+                SidebarSide.Left => "\uE76B",    // ChevronLeft
+                SidebarSide.Right => "\uE76C",   // ChevronRight
+                SidebarSide.Top => "\uE70E",     // ChevronUp
+                _ => "\uE70D",                   // ChevronDown
+            };
             SyncRailPanelButtons();   // the open panel's rail button is lit only while the sidebar is open
         }
 
-        private void SelectSidebarSide(bool right)
+        private void SelectSidebarSide(SidebarSide side)
         {
-            if (right == _sidebarRight) return;   // no change (e.g. picking the side it's already on)
-            _sidebarRight = right;
-            App.SetSetting("SidebarSide", right ? "Right" : "Left");
+            if (side == _sidebarSide) return;   // no change (e.g. picking the side it's already on)
+            _sidebarSide = side;
+            App.SetSetting(SidebarSides.SettingName, side.ToString());
             ApplySidebarSide();
         }
 
-        // Shift+F9 (pairs with F9, the sidebar collapse toggle).
-        private void ToggleSidebarSide() => SelectSidebarSide(!_sidebarRight);
+        // Shift+F9 (pairs with F9, the sidebar collapse toggle): the next side in the menu's order.
+        private void ToggleSidebarSide() => SelectSidebarSide(_sidebarSide.Next());
+
+        // ── Top and bottom strips: the rail, the header and the page list turn horizontal ──
+
+        private bool _sidebarStripLayout;             // what the rail and page list are laid out for now
+        private Panel? _sidebarHeaderHome;            // where the panel header lives while the rail is a column
+        private int _sidebarHeaderHomeIndex;
+
+        private const double StripRailHeight = 28;
+        // With the header at the left end, ahead of the icons, it keeps at least this width so the
+        // icons stay put when a panel with a shorter name opens.
+        private const double StripHeaderMinWidth = 170;
+        private bool _railIconsMirrored;              // the icons run in reverse, reading outward from the left end
+
+        private const string RailIconsEndSetting = "SidebarRailIconsEnd";
+        private bool _railIconsAtEnd = App.GetSetting(RailIconsEndSetting) == "1";   // Ctrl+F9
+        private DataTemplate? _pageColumnTemplate;    // the page list's own (column) item template
+        private ItemsPanelTemplate? _pageColumnPanel;
+        private ItemsPanelTemplate? _pageStripPanel;
+
+        /// <summary>
+        /// Turns the rail, the panel header and the page list between a column (left or right
+        /// sidebar) and a strip (top or bottom). Only acts on a change, because the rail's spacing
+        /// is turned by transposing each margin, which a second pass would turn straight back.
+        /// </summary>
+        private void ApplySidebarOrientation(bool strip)
+        {
+            if (strip == _sidebarStripLayout) return;
+            _sidebarStripLayout = strip;
+
+            LayOutRail(strip);
+
+            // The page list scrolls sideways, its thumbnails sized by the strip's height.
+            _pageColumnTemplate ??= PageList.ItemTemplate;
+            _pageColumnPanel ??= PageList.ItemsPanel;
+            if (_pageStripPanel is null)
+            {
+                var panel = new FrameworkElementFactory(typeof(VirtualizingStackPanel));
+                panel.SetValue(VirtualizingStackPanel.OrientationProperty, Orientation.Horizontal);
+                _pageStripPanel = new ItemsPanelTemplate(panel);
+            }
+            PageList.ItemTemplate = strip ? (DataTemplate)FindResource("PageThumbStripTemplate") : _pageColumnTemplate;
+            PageList.ItemsPanel = strip ? _pageStripPanel : _pageColumnPanel;
+            ScrollViewer.SetVerticalScrollBarVisibility(PageList, strip ? ScrollBarVisibility.Disabled : ScrollBarVisibility.Auto);
+            ScrollViewer.SetHorizontalScrollBarVisibility(PageList, strip ? ScrollBarVisibility.Auto : ScrollBarVisibility.Disabled);
+            if (PageListFadeHost.OpacityMask is LinearGradientBrush mask)
+                mask.EndPoint = strip ? new Point(1, 0) : new Point(0, 1);
+
+            // The drop marker becomes an upright bar between thumbnails.
+            PageDropIndicator.Width = strip ? 3 : double.NaN;
+            PageDropIndicator.Height = strip ? double.NaN : 3;
+            PageDropIndicator.HorizontalAlignment = strip ? HorizontalAlignment.Left : HorizontalAlignment.Stretch;
+            PageDropIndicator.VerticalAlignment = strip ? VerticalAlignment.Stretch : VerticalAlignment.Top;
+            PageDropIndicator.Margin = strip ? new Thickness(0, 4, 0, 14) : new Thickness(8, 0, 20, 0);
+            if (PageDropIndicator.RenderTransform is TranslateTransform move) { move.X = 0; move.Y = 0; }
+
+            // The tree panels flow their rows into columns and scroll sideways too.
+            ApplyTreeStripLayout(OutlineTree, OutlineScrollViewer, strip);
+            if (_sidebarPanelTree is { Parent: ScrollViewer listScroll } listTree)
+                ApplyTreeStripLayout(listTree, listScroll, strip);
+
+            Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded, (Action)SyncPageListEdgeFades);
+        }
+
+        /// <summary>
+        /// Lays the rail out for a strip or a column. In a strip it is one row with two ends: the
+        /// icons at one, and at the other the chevron with the open panel's header lifted up out of
+        /// the panel beside it (so the thumbnails get its height). Ctrl+F9 swaps the ends
+        /// (ApplyRailIconsEnd). For a column each part goes back where it came from. Only called on
+        /// a change, because the icons' gaps turn by transposing each margin, which a second pass
+        /// would turn straight back.
+        /// </summary>
+        private void LayOutRail(bool strip)
+        {
+            if (!strip) MirrorRailIcons(false);   // back in column order before the gaps turn back
+            SidebarRailStack.Orientation = strip ? Orientation.Horizontal : Orientation.Vertical;
+            foreach (FrameworkElement button in SidebarRailStack.Children.OfType<FrameworkElement>())
+                button.Margin = SidebarSides.Transpose(button.Margin);
+            var titleLine = (FrameworkElement)SidebarHeaderStack.Children[0];
+
+            if (strip)
+            {
+                _sidebarHeaderHome ??= (Panel)SidebarHeaderStack.Parent;
+                _sidebarHeaderHomeIndex = _sidebarHeaderHome.Children.IndexOf(SidebarHeaderStack);
+                SidebarRailGrid.Children.Remove(_sidebarToggleBtn);
+                SidebarRailGrid.Children.Remove(SidebarRailStack);
+                _sidebarHeaderHome.Children.Remove(SidebarHeaderStack);
+                DockPanel.SetDock(_sidebarToggleBtn, Dock.Left);
+                DockPanel.SetDock(SidebarHeaderStack, Dock.Left);
+                SidebarStripRow.Children.Add(_sidebarToggleBtn);
+                SidebarStripRow.Children.Add(SidebarHeaderStack);
+                SidebarStripRow.Children.Add(SidebarRailStack);
+                SidebarStripRow.Visibility = Visibility.Visible;
+
+                _sidebarToggleBtn.VerticalAlignment = VerticalAlignment.Center;
+                _sidebarToggleBtn.Width = 30;
+                _sidebarToggleBtn.Height = 26;
+                _sidebarToggleBtn.FontSize = 14;
+                SidebarHeaderStack.Orientation = Orientation.Horizontal;
+                SidebarHeaderStack.VerticalAlignment = VerticalAlignment.Center;
+                titleLine.Margin = new Thickness(6, 0, 8, 0);
+                PageControlsRow.Margin = new Thickness(0, 0, 8, 0);
+                PageControlsRow.VerticalAlignment = VerticalAlignment.Center;
+                SidebarRailStack.VerticalAlignment = VerticalAlignment.Center;
+                ApplyRailIconsEnd();
+            }
+            else if (_sidebarHeaderHome is not null)
+            {
+                SidebarStripRow.Children.Clear();
+                SidebarStripRow.Visibility = Visibility.Collapsed;
+                SidebarRailGrid.Children.Insert(0, _sidebarToggleBtn);
+                SidebarRailGrid.Children.Add(SidebarRailStack);
+                DockPanel.SetDock(SidebarHeaderStack, Dock.Top);
+                _sidebarHeaderHome.Children.Insert(
+                    Math.Min(_sidebarHeaderHomeIndex, _sidebarHeaderHome.Children.Count), SidebarHeaderStack);
+
+                _sidebarToggleBtn.Margin = new Thickness(0, 6, 0, 0);
+                _sidebarToggleBtn.HorizontalAlignment = HorizontalAlignment.Stretch;
+                _sidebarToggleBtn.VerticalAlignment = VerticalAlignment.Top;
+                _sidebarToggleBtn.ClearValue(WidthProperty);
+                _sidebarToggleBtn.ClearValue(HeightProperty);
+                _sidebarToggleBtn.ClearValue(FontSizeProperty);
+                SidebarHeaderStack.Orientation = Orientation.Vertical;
+                SidebarHeaderStack.ClearValue(VerticalAlignmentProperty);
+                SidebarHeaderStack.ClearValue(MinWidthProperty);
+                SidebarHeaderStack.Visibility = Visibility.Visible;
+                titleLine.Margin = new Thickness(10, 6, 8, 0);
+                PageControlsRow.Margin = new Thickness(12, 2, 8, 4);
+                PageControlsRow.ClearValue(VerticalAlignmentProperty);
+                SidebarRailStack.HorizontalAlignment = HorizontalAlignment.Stretch;
+                SidebarRailStack.VerticalAlignment = VerticalAlignment.Bottom;
+                SidebarRailStack.Margin = new Thickness(0, 0, 0, 6);
+            }
+        }
+
+        // Which end of a strip's rail holds what. By default the icons are at the left end and the
+        // header and chevron at the right end, the chevron outermost; Ctrl+F9 swaps the two ends.
+        // The icons always read outward from the middle, so their order flips with them: the theme
+        // button stays at the window edge, as it sits at the outer end of a column rail.
+        private void ApplyRailIconsEnd()
+        {
+            if (!_sidebarStripLayout) return;
+            bool iconsLeft = !_railIconsAtEnd;
+            Dock headerEnd = iconsLeft ? Dock.Right : Dock.Left;
+            DockPanel.SetDock(_sidebarToggleBtn, headerEnd);   // the first child docked to an end sits outermost
+            DockPanel.SetDock(SidebarHeaderStack, headerEnd);
+            DockPanel.SetDock(SidebarRailStack, iconsLeft ? Dock.Left : Dock.Right);
+            _sidebarToggleBtn.Margin = iconsLeft ? new Thickness(0, 0, 4, 0) : new Thickness(4, 0, 0, 0);
+            // Ahead of the icons the header holds its width so they stay put; at the far end
+            // nothing follows it, and a fixed width would only part it from the chevron.
+            SidebarHeaderStack.MinWidth = iconsLeft ? 0 : StripHeaderMinWidth;
+            SidebarRailStack.Margin = iconsLeft ? new Thickness(4, 0, 0, 0) : new Thickness(0, 0, 4, 0);
+            MirrorRailIcons(iconsLeft);
+        }
+
+        // Reverses the icons' order, and each gap with it, so a group gap stays between the same
+        // two buttons.
+        private void MirrorRailIcons(bool mirrored)
+        {
+            if (mirrored == _railIconsMirrored) return;
+            _railIconsMirrored = mirrored;
+            var icons = SidebarRailStack.Children.OfType<UIElement>().Reverse().ToList();
+            SidebarRailStack.Children.Clear();
+            foreach (UIElement icon in icons)
+            {
+                if (icon is FrameworkElement button)
+                    button.Margin = new Thickness(button.Margin.Right, button.Margin.Top, button.Margin.Left, button.Margin.Bottom);
+                SidebarRailStack.Children.Add(icon);
+            }
+        }
+
+        // Ctrl+F9, and the sidebar menu's item: swaps the ends of a top or bottom strip's rail.
+        // Remembered; a column rail ignores it.
+        private void ToggleRailIconsEnd()
+        {
+            _railIconsAtEnd = !_railIconsAtEnd;
+            App.SetSetting(RailIconsEndSetting, _railIconsAtEnd ? "1" : "0");
+            ApplyRailIconsEnd();
+        }
+
+        /// <summary>
+        /// Lays a sidebar tree out for a strip or a column. In a strip the tree is tagged so
+        /// OutlineTreeStyle flows its rows into columns (ColumnFlowPanel), and its scroller goes
+        /// sideways with the height fixed, which is what gives the columns a bottom to wrap at.
+        /// </summary>
+        private static void ApplyTreeStripLayout(TreeView tree, ScrollViewer scroll, bool strip)
+        {
+            tree.Tag = strip ? "strip" : null;
+            scroll.HorizontalScrollBarVisibility = strip ? ScrollBarVisibility.Auto : ScrollBarVisibility.Disabled;
+            scroll.VerticalScrollBarVisibility = strip ? ScrollBarVisibility.Disabled : ScrollBarVisibility.Auto;
+        }
+
+        /// <summary>The wheel on a sidebar tree: down the column, or along a strip's columns.</summary>
+        private void ScrollSidebarTree(ScrollViewer scroll, double delta)
+        {
+            if (_sidebarStripLayout) scroll.ScrollToHorizontalOffset(scroll.HorizontalOffset - delta);
+            else scroll.ScrollToVerticalOffset(scroll.VerticalOffset - delta);
+        }
+
+        // A mouse wheel has no sideways motion to give a strip, so the wheel scrolls it sideways.
+        private void PageList_StripWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
+        {
+            if (!_sidebarStripLayout || FindSidebarDescendant<ScrollViewer>(PageList) is not { } sv) return;
+            sv.ScrollToHorizontalOffset(sv.HorizontalOffset - e.Delta);
+            e.Handled = true;
+        }
 
         // ── Page-list edge fades - KillerShell's transparent-content mask ──
         // Each edge fades only while there is a row past it. PageList has no horizontal scrollbar,
@@ -282,6 +581,7 @@ namespace KillerPDF
                 new ScrollChangedEventHandler((_, _) => SyncPageListEdgeFades()));
             PageList.SizeChanged += (_, _) => SyncPageListEdgeFades();
             PageList.Loaded      += (_, _) => SyncPageListEdgeFades();
+            PageList.PreviewMouseWheel += PageList_StripWheel;
         }
 
         private const double PageListTopFadePx = 18;
@@ -292,16 +592,19 @@ namespace KillerPDF
             var sv = FindSidebarDescendant<ScrollViewer>(PageList);
             if (sv == null || PageListFadeHost == null) return;
 
-            double height = PageListFadeHost.ActualHeight;
+            // A top or bottom strip scrolls sideways, so its fades run along the left and right
+            // ends; the mask's gradient axis turns with it (ApplySidebarOrientation).
+            bool strip = _sidebarStripLayout;
+            double height = strip ? PageListFadeHost.ActualWidth : PageListFadeHost.ActualHeight;
             if (height <= 1) return;
 
             // Reveal the actual sidebar underneath; never paint a theme-colored strip over it.
             // EdgeFadeOpacity is zero only in 98SE and one in every other theme.
             double fade = TryFindResource("EdgeFadeOpacity") is double value ? value : 1.0;
-            double top = EdgeFadeRamp(sv.VerticalOffset, PageListTopFadePx) * fade;
-            double bottom = EdgeFadeRamp(
-                sv.ExtentHeight - sv.ViewportHeight - sv.VerticalOffset,
-                PageListBottomFadePx) * fade;
+            double offset = strip ? sv.HorizontalOffset : sv.VerticalOffset;
+            double hidden = strip ? sv.ExtentWidth - sv.ViewportWidth : sv.ExtentHeight - sv.ViewportHeight;
+            double top = EdgeFadeRamp(offset, PageListTopFadePx) * fade;
+            double bottom = EdgeFadeRamp(hidden - offset, PageListBottomFadePx) * fade;
 
             PageListFadeTopOuter.Color = FadeMaskAlpha(1 - top);
             PageListFadeBottomOuter.Color = FadeMaskAlpha(1 - bottom);

@@ -859,9 +859,13 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Sidebar">SIDEPANEL</sys:String>
     <sys:String x:Key="Str_Sidebar_Left">Venstre</sys:String>
     <sys:String x:Key="Str_Sidebar_Right">Høyre</sys:String>
+    <sys:String x:Key="Str_Sidebar_Top">Øverst</sys:String>
+    <sys:String x:Key="Str_Sidebar_Bottom">Nederst</sys:String>
+    <sys:String x:Key="Str_Sidebar_IconsRight">Skinneikoner til høyre</sys:String>
     <sys:String x:Key="Str_KS_ToggleSidebar">Vis/skjul sidepanelet</sys:String>
     <sys:String x:Key="Str_KS_ToolbarStyle">Verktøylinjeutseende</sys:String>
-    <sys:String x:Key="Str_KS_SidebarSide">Flytt sidepanelet til venstre / høyre</sys:String>
+    <sys:String x:Key="Str_KS_SidebarSide">Flytt sidepanelet til neste kant</sys:String>
+    <sys:String x:Key="Str_KS_SidebarIcons">Flytt skinneikonene til den andre enden</sys:String>
     <sys:String x:Key="Str_KS_CycleView">Bytt mellom visningsmodi</sys:String>
     <sys:String x:Key="Str_TT_ViewMode">Visningsmodus</sys:String>
     <sys:String x:Key="Str_KS_NextTab">Neste fane (Shift: forrige)</sys:String>

@@ -63,7 +63,8 @@ namespace KillerPDF
         // ── Widths: Pages, Outline and the list panels each remember their own ───────────────
 
         private double SidebarMaxFor(SidebarPanel panel) =>
-            panel == SidebarPanel.Pages ? SidebarMaxPages : SidebarMaxOutlines;
+            _sidebarSide.IsStrip() ? SidebarMaxStrip
+            : panel == SidebarPanel.Pages ? SidebarMaxPages : SidebarMaxOutlines;
 
         /// <summary>Remembers <paramref name="width"/> (screen pixels) for the open panel.</summary>
         private void RememberSidebarWidth(double width)
@@ -113,7 +114,7 @@ namespace KillerPDF
                 _ => "Str_DocumentTools_Signatures",
             });
             SidebarSplitter.IsEnabled = true;
-            _sidebarCol.MaxWidth = SbPx(SidebarMaxOutlines);
+            _sidebarCol.MaxWidth = SbPx(SidebarMaxFor(panel));
             if (!_sidebarCollapsed)
             {
                 double target = _savedListPanelWidth;
@@ -291,10 +292,11 @@ namespace KillerPDF
                 HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
                 Content = tree
             };
+            ApplyTreeStripLayout(tree, scroll, _sidebarStripLayout);
             // The tree's own scroll viewer swallows the wheel, as in the Outline panel.
             tree.PreviewMouseWheel += (_, e) =>
             {
-                scroll.ScrollToVerticalOffset(scroll.VerticalOffset - e.Delta);
+                ScrollSidebarTree(scroll, e.Delta);
                 e.Handled = true;
             };
             SidebarListPanel.Children.Add(scroll);

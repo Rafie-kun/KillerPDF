@@ -503,7 +503,12 @@ namespace KillerPDF
             }
             else if (key == Key.F9 && mods == ModifierKeys.Shift)
             {
-                ToggleSidebarSide();   // left/right, pairing with F9's collapse toggle
+                ToggleSidebarSide();   // the next side, pairing with F9's collapse toggle
+                e.Handled = true;
+            }
+            else if (key == Key.F9 && mods == ModifierKeys.Control)
+            {
+                ToggleRailIconsEnd();   // a top or bottom strip's icons to the other end of its rail
                 e.Handled = true;
             }
             else if (key == Key.N && mods == ModifierKeys.Control)

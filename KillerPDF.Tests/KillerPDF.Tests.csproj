@@ -73,6 +73,7 @@
     <Compile Include="..\Services\Signing\PdfSigner.cs" Link="Services\Signing\PdfSigner.cs" />
     <Compile Include="..\Models\StampModels.cs" Link="Models\StampModels.cs" />
     <Compile Include="..\Controls\FlyoutPlacement.cs" Link="Controls\FlyoutPlacement.cs" />
+    <Compile Include="..\Shell\SidebarSide.cs" Link="Shell\SidebarSide.cs" />
     <Compile Include="..\Controls\SidebarPageBinding.cs" Link="Controls\SidebarPageBinding.cs" />
     <Compile Include="..\Controls\WindowFx.cs" Link="Controls\WindowFx.cs" />
     <Compile Include="..\Controls\AccessibleControls.cs" Link="Controls\AccessibleControls.cs" />

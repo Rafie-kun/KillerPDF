@@ -347,11 +347,14 @@ namespace KillerPDF
         private void UpdatePageDragAutoScroll(Point pointer)
         {
             _pageDragPointer = pointer;
-            double edge = Math.Min(84, PageList.ActualHeight / 3);
-            double ratio = pointer.Y < edge
-                ? -(edge - Math.Max(0, pointer.Y)) / edge
-                : pointer.Y > PageList.ActualHeight - edge
-                    ? (edge - Math.Max(0, PageList.ActualHeight - pointer.Y)) / edge
+            // A top or bottom strip scrolls sideways, so its scroll zones are its two ends.
+            double along = _sidebarStripLayout ? pointer.X : pointer.Y;
+            double length = _sidebarStripLayout ? PageList.ActualWidth : PageList.ActualHeight;
+            double edge = Math.Min(84, length / 3);
+            double ratio = along < edge
+                ? -(edge - Math.Max(0, along)) / edge
+                : along > length - edge
+                    ? (edge - Math.Max(0, length - along)) / edge
                     : 0;
             _pageDragScrollVelocity = Math.Sign(ratio) * ratio * ratio * 32;
             if (_pageDragScrollVelocity == 0)
@@ -368,8 +371,12 @@ namespace KillerPDF
                 (_, _) =>
                 {
                     if (_pageDragScrollViewer is null) return;
-                    _pageDragScrollViewer.ScrollToVerticalOffset(
-                        _pageDragScrollViewer.VerticalOffset + _pageDragScrollVelocity);
+                    if (_sidebarStripLayout)
+                        _pageDragScrollViewer.ScrollToHorizontalOffset(
+                            _pageDragScrollViewer.HorizontalOffset + _pageDragScrollVelocity);
+                    else
+                        _pageDragScrollViewer.ScrollToVerticalOffset(
+                            _pageDragScrollViewer.VerticalOffset + _pageDragScrollVelocity);
                     ShowPageDropIndicator(_pageDragPointer);
                 },
                 Dispatcher);
@@ -394,24 +401,28 @@ namespace KillerPDF
             return null;
         }
 
-        /// <summary>Returns the insertion slot from 0 through Count and the matching visual Y.
-        /// Both the marker and the drop consume this result so what the user sees is authoritative.</summary>
-        private (int Index, double Y)? PageDropSlot(Point position)
+        /// <summary>Returns the insertion slot from 0 through Count and the matching visual offset
+        /// along the list: Y in a column, X in a top or bottom strip. Both the marker and the drop
+        /// consume this result so what the user sees is authoritative.</summary>
+        private (int Index, double Offset)? PageDropSlot(Point position)
         {
+            bool strip = _sidebarStripLayout;
+            double Along(Point p) => strip ? p.X : p.Y;
             ListBoxItem? last = null;
             int lastIndex = -1;
             for (int i = 0; i < PageList.Items.Count; i++)
             {
                 if (PageList.ItemContainerGenerator.ContainerFromIndex(i) is not ListBoxItem item) continue;
-                var top = item.TranslatePoint(new Point(0, 0), PageList);
-                if (position.Y < top.Y + item.ActualHeight / 2)
-                    return (i, item.TranslatePoint(new Point(0, 0), PageListFadeHost).Y);
+                var start = item.TranslatePoint(new Point(0, 0), PageList);
+                double length = strip ? item.ActualWidth : item.ActualHeight;
+                if (Along(position) < Along(start) + length / 2)
+                    return (i, Along(item.TranslatePoint(new Point(0, 0), PageListFadeHost)));
                 last = item;
                 lastIndex = i;
             }
             if (last is null) return null;
-            double bottom = last.TranslatePoint(new Point(0, last.ActualHeight), PageListFadeHost).Y;
-            return (lastIndex + 1, bottom);
+            Point lastEnd = strip ? new Point(last.ActualWidth, 0) : new Point(0, last.ActualHeight);
+            return (lastIndex + 1, Along(last.TranslatePoint(lastEnd, PageListFadeHost)));
         }
 
         private void ShowPageDropIndicator(Point position)
@@ -420,8 +431,12 @@ namespace KillerPDF
             if (slot is null) { HidePageDropIndicator(); return; }
             _pageDropInsertionIndex = slot.Value.Index;
             if (PageDropIndicator.RenderTransform is TranslateTransform move)
-                move.Y = Math.Max(0, Math.Min(PageListFadeHost.ActualHeight - PageDropIndicator.Height,
-                    slot.Value.Y - PageDropIndicator.Height / 2));
+            {
+                const double bar = 3;   // the marker's thickness across the list
+                double room = (_sidebarStripLayout ? PageListFadeHost.ActualWidth : PageListFadeHost.ActualHeight) - bar;
+                double at = Math.Max(0, Math.Min(room, slot.Value.Offset - bar / 2));
+                if (_sidebarStripLayout) move.X = at; else move.Y = at;
+            }
             PageDropIndicator.Visibility = Visibility.Visible;
         }
 
