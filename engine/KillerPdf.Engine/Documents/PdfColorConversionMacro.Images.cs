@@ -13,6 +13,12 @@ public static partial class PdfColorConversionMacro
         if (dictionary.TryGetValue(Name("ImageMask"), out PdfObject? stencil)
             && Resolve(stencil) is PdfBoolean { Value: true })
             return ReferenceEquals(dictionary, image.Dictionary) ? image : PdfStream.FromOwnedData(dictionary, image.EncodedData);
+        PdfObject? imageSpace = dictionary.TryGetValue(Name("ColorSpace"), out PdfObject? sourceSpace)
+            ? Resolve(sourceSpace) : null;
+        if (imageSpace is PdfArray { Count: 1 } singleSpace) imageSpace = Resolve(singleSpace[0]);
+        if (imageSpace is not PdfName deviceSpace
+            || deviceSpace.ValueAsLatin1() is not ("DeviceGray" or "DeviceRGB" or "DeviceCMYK" or "G" or "RGB" or "CMYK"))
+            throw new NotSupportedException("Color conversion does not yet preserve profiled or non-device image colors.");
         if (options.Mode == PdfMacroColorMode.Grayscale
             && dictionary.TryGetValue(Name("ColorSpace"), out PdfObject? space)
             && Resolve(space) is PdfName colorSpace && colorSpace.ValueAsLatin1() == "DeviceGray")

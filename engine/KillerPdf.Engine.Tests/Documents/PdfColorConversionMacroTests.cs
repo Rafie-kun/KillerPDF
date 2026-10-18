@@ -10,6 +10,31 @@ namespace KillerPdf.Engine.Tests.Documents;
 
 public sealed class PdfColorConversionMacroTests
 {
+    [Fact]
+    public void ProfiledImagesFailSafelyInsteadOfTreatingProfileSamplesAsDeviceColors()
+    {
+        var document = PdfDocument.Open(new PdfDocumentBuilder().AddPage(1, 1,
+            new PdfContentStreamBuilder().DrawImage(PdfImage.FromCmyk(1, 1, new byte[] { 255, 0, 0, 0 }), 0, 0, 1, 1)).Build());
+        PdfName Name(string name) => new(System.Text.Encoding.ASCII.GetBytes(name));
+        var catalog = (PdfDictionary)document.Resolve((PdfIndirectReference)document.Trailer[Name("Root")]);
+        var pages = (PdfDictionary)document.Resolve((PdfIndirectReference)catalog[Name("Pages")]);
+        var page = (PdfDictionary)document.Resolve((PdfIndirectReference)((PdfArray)pages[Name("Kids")])[0]);
+        var resources = (PdfDictionary)page[Name("Resources")];
+        var images = (PdfDictionary)resources[Name("XObject")];
+        var reference = (PdfIndirectReference)images.Values.Single();
+        var image = (PdfStream)document.Resolve(reference);
+        var update = new PdfIncrementalUpdateBuilder(document);
+        var profile = update.AddObject(new PdfStream(new PdfDictionary([new(Name("N"), new PdfInteger(4))]),
+            KillerPdf.Engine.Tests.Rendering.PdfBlackPointControlTests.CmykProfile()));
+        var dictionary = image.Dictionary.ToDictionary(entry => entry.Key, entry => entry.Value);
+        dictionary[Name("ColorSpace")] = new PdfArray([Name("ICCBased"), profile]);
+        byte[] source = update.ReplaceObject(reference.ObjectNumber,
+            new PdfStream(new PdfDictionary(dictionary), image.EncodedData.Span)).Build();
+
+        Assert.Throws<NotSupportedException>(() => PdfColorConversionMacro.Execute(
+            PdfColorConversionMacro.ConvertStep(PdfMacroColorMode.Grayscale), source, new Dictionary<string, string>()));
+    }
+
     [Theory]
     [InlineData(PdfTransparencyGroupColorSpace.Rgb)]
     [InlineData(PdfTransparencyGroupColorSpace.Gray)]
