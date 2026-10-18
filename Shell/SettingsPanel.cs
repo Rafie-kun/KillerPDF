@@ -1027,7 +1027,7 @@ namespace KillerPDF
             if (under && withLabel)
             {
                 btn.Width = double.NaN; btn.MinWidth = 0; btn.Height = double.NaN;
-                btn.MinHeight = large ? 56 : 52; btn.Padding = new Thickness(6, 4, 6, 4);
+                btn.MinHeight = large ? 50 : 46; btn.Padding = new Thickness(6, 4, 6, 4);
                 var col = new StackPanel { Orientation = Orientation.Vertical, HorizontalAlignment = HorizontalAlignment.Center };
                 col.Children.Add(MakeToolbarGlyph(glyph, glyphSize));
                 col.Children.Add(new TextBlock

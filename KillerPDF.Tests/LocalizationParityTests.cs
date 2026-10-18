@@ -17,7 +17,7 @@ public sealed class LocalizationParityTests
         string source = File.ReadAllText(Path.Combine(root, "Shell", "SettingsPanel.cs"));
 
         Assert.Contains("btn.Height = double.NaN;", source);
-        Assert.Contains("btn.MinHeight = large ? 56 : 52;", source);
+        Assert.Contains("btn.MinHeight = large ? 50 : 46;", source);
         Assert.Contains("MaxWidth = 96,", source);
         Assert.Contains("TextWrapping = TextWrapping.Wrap", source);
     }
