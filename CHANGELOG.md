@@ -89,6 +89,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - The website's top bar Download button uses the same font and height as the other top bar buttons.
 
 ### Fixed
+- RGB and grayscale page groups blend before the white paper background is added.
 - Profiled RGB transparency groups no longer pick up stray colors during parallel rendering.
 - Shaded patterns keep their colors when painted through image masks.
 - PDFs with deeply repeated forms stop safely instead of tying up page rendering.

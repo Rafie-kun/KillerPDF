@@ -282,7 +282,10 @@ public sealed partial class PdfPageRenderer
         (int Left, int Top, int Right, int Bottom)? region = null)
     {
         using PageGlyphMaskScope pageGlyphMasks = EnterPageGlyphMasks();
-        byte background = options.TransparentBackground ? (byte)0 : (byte)255;
+        bool pageHasGroup = _tree.Pages[pageIndex].Dictionary.TryGetValue(Name("Group"), out _);
+        bool isolatePageGroup = pageHasGroup && options.SeparationPlate is null
+            && !CmykGroup(_tree.Pages[pageIndex].Dictionary, _pageResources[pageIndex], false);
+        byte background = options.TransparentBackground || isolatePageGroup ? (byte)0 : (byte)255;
         var (Left, Top, Right, Bottom) = region ?? (Left: 0, Top: 0, Right: options.Width, Bottom: options.Height);
         int rasterWidth = Right - Left, rasterHeight = Bottom - Top;
         var pixels = new RasterSurface(destination ?? GC.AllocateUninitializedArray<byte>(
@@ -333,7 +336,6 @@ public sealed partial class PdfPageRenderer
         }
         IReadOnlySet<int> hiddenOptionalContentGroups = _hiddenOptionalContentGroups;
         PdfDictionary pageResources = _pageResources[pageIndex];
-        bool pageHasGroup = _tree.Pages[pageIndex].Dictionary.TryGetValue(Name("Group"), out _);
         PdfColorTransform? outputProfile = pageHasGroup ? null : OutputProfile(null);
         PdfColorTransform? pageProfile = ReadGroupProfile(_tree.Pages[pageIndex].Dictionary, pageResources, diagnostics);
         bool considerRgbSpotShadow = false;
@@ -378,6 +380,19 @@ public sealed partial class PdfPageRenderer
             RenderAppearances();
             if (options.SeparationPlate is string plate) pixels.ExtractPlate(plate, cancellationToken);
             else pixels.ConvertToBgra(cancellationToken);
+            if (isolatePageGroup && !options.TransparentBackground)
+            {
+                // The completed page group is imposed on the medium with Normal blending.
+                for (int offset = 0; offset < pixels.Length; offset += 4)
+                {
+                    if ((offset & 4095) == 0) cancellationToken.ThrowIfCancellationRequested();
+                    int alpha = pixels.Data[offset + 3];
+                    for (int channel = 0; channel < 3; channel++)
+                        pixels.Data[offset + channel] = (byte)((pixels.Data[offset + channel] * alpha
+                            + 255 * (255 - alpha) + 127) / 255);
+                    pixels.Data[offset + 3] = 255;
+                }
+            }
             return new PdfRenderedPage(rasterWidth, rasterHeight, pixels.Data, diagnostics);
         }
         finally
