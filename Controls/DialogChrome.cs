@@ -218,6 +218,7 @@ namespace KillerPDF
             win.ResizeMode = resizable ? ResizeMode.CanResize : ResizeMode.NoResize;
             win.WindowStartupLocation = owner != null ? WindowStartupLocation.CenterOwner : WindowStartupLocation.CenterScreen;
             win.FontFamily = UiKit.UiFont;
+            win.SetResourceReference(Control.ForegroundProperty, "TextBrush");
             TextOptions.SetTextFormattingMode(win, TextFormattingMode.Display);
             TextOptions.SetTextRenderingMode(win, TextRenderingMode.Grayscale);
             if (fade) WindowFx.EnableFadeClose(win);
