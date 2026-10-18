@@ -87,3 +87,31 @@ Retain audit.json and theme screenshots as development evidence for this record.
 Native high-DPI, long translations, populated dialog states and complete keyboard
 interaction still need coverage. No product tests were rerun for this read-only
 product audit, and no GitHub issues were changed.
+
+## Populated follow-up
+
+The seven types unavailable to the original generic host now render with actual
+MainWindow resources and typed populated fixtures: attachments, bookmark review,
+toolbar customization, document information, form recognition, layers and field
+presets. All seven rendered in all 13 default themes (91 captures). The Dark,
+Light and SE98 sets were visually inspected. Evidence is `remaining-*.png` under
+`C:\Users\steve\scratch\kp-bench-render\form-workflows-20261018`.
+
+Field recognition now labels its Add, Name and Page columns with existing keys
+present in all 19 locales. Actual cancel, accept/reject, rename, Undo and Redo
+checks passed after the layout change. The preview geometry remains unchanged.
+
+The populated Light preset list exposed a local TextBrush override that defeated
+the standard selected-text color. Its detail also stayed muted while selected.
+A runtime assertion failed before the repair. Rows now inherit the family item
+selection style and details switch to SelectionFg when selected, retaining muted
+unselected details. The retained `--verify-presets` regression checks both rows
+after each selection across all 13 themes, with no private-method assertions.
+It passed against app SHA-256
+`955BC9D93596ACDED790642E66B7554E0C38CD4A3BF7410ABA6B229F1880430E`.
+
+The existing native UI Automation smoke also passed stamp color acceptance,
+cancellation and working-document save/reopen in Dark, Light and SE98. Its
+`native-ui-smoke` evidence is under the same run root. This narrows the native
+gate; physical input, screen-reader operation, display scaling and complete
+interaction coverage remain unverified.

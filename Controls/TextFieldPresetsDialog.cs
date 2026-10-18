@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using KillerPdf.Engine.Authoring;
 using KillerPDF.Services;
@@ -154,12 +155,23 @@ internal sealed class TextFieldPresetsDialog : Window
                 FontFamily = UiKit.UiFont,
                 FontSize = 11
             };
-            detail.SetResourceReference(TextBlock.ForegroundProperty, "MutedTextBrush");
+            var detailStyle = new Style(typeof(TextBlock));
+            detailStyle.Setters.Add(new Setter(TextBlock.ForegroundProperty,
+                new DynamicResourceExtension("MutedTextBrush")));
+            var selectedDetail = new DataTrigger
+            {
+                Binding = new Binding(nameof(ListBoxItem.IsSelected))
+                { RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor, typeof(ListBoxItem), 1) },
+                Value = true
+            };
+            selectedDetail.Setters.Add(new Setter(TextBlock.ForegroundProperty,
+                new DynamicResourceExtension("SelectionFg")));
+            detailStyle.Triggers.Add(selectedDetail);
+            detail.Style = detailStyle;
             var row = new StackPanel();
             row.Children.Add(name);
             row.Children.Add(detail);
             var item = new ListBoxItem { Content = row, Tag = preset, Padding = new Thickness(8, 5, 8, 5) };
-            item.SetResourceReference(Control.ForegroundProperty, "TextBrush");
             _list.Items.Add(item);
             if (string.Equals(preset.Name, select, StringComparison.OrdinalIgnoreCase)) _list.SelectedItem = item;
         }

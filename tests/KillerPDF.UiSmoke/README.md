@@ -42,3 +42,19 @@ build/Test-ColorPickerDialog.ps1 covers all 45 theme/accent resource states and 
 compatible PowerShell runtime. Pass `-Configuration Release` for the same assemblies used above.
 Keep that check as separate evidence. Maintenance uses its actual app PDFium renderer;
 development uses the Overkill engine renderer. This tooling preserves that architecture difference.
+
+## Field preset selection regression
+
+From the development checkout, after building the app and this test project:
+
+```powershell
+dotnet tests/KillerPDF.UiSmoke/bin/Debug/net10.0-windows/KillerPDF.UiSmoke.dll --verify-presets bin/Debug/net10.0-windows/KillerPDF.dll App.xaml C:/Users/steve/scratch/kp-bench-render/preset-selection-check --startup-smoke
+```
+
+Use a fresh evidence directory. This mode loads the actual window resources and
+opens the populated Field Presets dialog in all 13 default themes. It changes
+selection and checks both rows' name and detail colors against the selected and
+unselected semantic brushes. It retains PNGs and a result with the assembly hash.
+Normal app startup is suppressed, preferences remain in memory, and files stay
+under the supplied evidence directory or the process's temporary directory. It
+uses WPF controls directly and does not certify physical input or a screen reader.

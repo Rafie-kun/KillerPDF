@@ -28,4 +28,12 @@ scripts:
     outputs: Assertions and retained fixture diagnostics.
     failure_behavior: Throw on an incorrect runner result.
     mutates: temporary-files-and-test-owned-process-only
+  preset_selection_smoke:
+    path: tests/KillerPDF.UiSmoke/PresetSelectionSmoke.cs
+    purpose: Verify populated preset selected and unselected text through real WPF controls in 13 themes.
+    inputs: Built app DLL, matching App.xaml, fresh evidence directory and --startup-smoke.
+    outputs: PNGs and a result containing the tested assembly hash.
+    failure_behavior: Return nonzero on mismatched colors, missing resources or invalid fixture inputs.
+    mutates: temporary-fixture-files-and-test-owned-windows-only
+
 documentation: docs/startup-packaging.md

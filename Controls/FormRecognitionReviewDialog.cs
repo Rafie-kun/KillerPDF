@@ -79,8 +79,29 @@ internal sealed class FormRecognitionReviewDialog : Window
             _rows.Add((proposal, include, name));
         }
         var scroll = new ScrollViewer { Content = list, VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
-        Grid.SetColumn(scroll, 2);
-        columns.Children.Add(scroll);
+        var reviewPanel = new DockPanel();
+        var header = new Grid { Margin = new Thickness(0, 0, 0, 4) };
+        header.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(34) });
+        header.ColumnDefinitions.Add(new ColumnDefinition());
+        header.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(64) });
+        string[] headingKeys = ["Str_AutoBookmarks_Include", "Str_FieldPreset_Name", "Str_AutoBookmarks_Page"];
+        for (int index = 0; index < headingKeys.Length; index++)
+        {
+            var label = new TextBlock
+            {
+                Text = L(headingKeys[index]), ToolTip = L(headingKeys[index]),
+                FontSize = 10, TextTrimming = TextTrimming.CharacterEllipsis,
+                HorizontalAlignment = index == 2 ? HorizontalAlignment.Center : HorizontalAlignment.Stretch
+            };
+            label.SetResourceReference(TextBlock.ForegroundProperty, "MutedTextBrush");
+            Grid.SetColumn(label, index);
+            header.Children.Add(label);
+        }
+        DockPanel.SetDock(header, Dock.Top);
+        reviewPanel.Children.Add(header);
+        reviewPanel.Children.Add(scroll);
+        Grid.SetColumn(reviewPanel, 2);
+        columns.Children.Add(reviewPanel);
         body.Children.Add(columns);
         Content = DialogChrome.Frame(this, owner, Title, Close, body);
         Loaded += (_, _) =>
