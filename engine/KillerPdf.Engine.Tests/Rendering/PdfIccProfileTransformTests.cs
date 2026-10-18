@@ -12,6 +12,58 @@ namespace KillerPdf.Engine.Tests.Rendering;
 
 public sealed class PdfIccProfileTransformTests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void MacroColorConversionDoesNotReturnColoredPaintFromEmbeddedProfiles(bool transparencyGroup)
+    {
+        byte[] table = Lut(true, true, false, 4);
+        for (int cell = 0; cell < 16; cell++)
+        {
+            int offset = 68 + cell * 6;
+            BinaryPrimitives.WriteUInt16BigEndian(table.AsSpan(offset), 32640);
+            BinaryPrimitives.WriteUInt16BigEndian(table.AsSpan(offset + 2), 53248);
+            BinaryPrimitives.WriteUInt16BigEndian(table.AsSpan(offset + 4), 48128);
+        }
+        PdfDocument source = PdfDocument.Open(new PdfDocumentBuilder().AddPage(1, 1,
+            new PdfContentStreamBuilder().SetFillCmyk(1, 0, 0, 0).Rectangle(0, 0, 1, 1).Fill()).Build());
+        var root = (PdfIndirectReference)source.Trailer[new PdfName("Root"u8)];
+        var catalog = ((PdfDictionary)source.Resolve(root)).ToDictionary(entry => entry.Key, entry => entry.Value);
+        var update = new PdfIncrementalUpdateBuilder(source);
+        var profile = update.AddObject(new PdfStream(new PdfDictionary([
+            new(new PdfName("N"u8), new PdfInteger(4))]),
+            Profile("CMYK", "Lab ", ("A2B0", table), ("B2A0", NeutralReverseLut()))));
+        if (transparencyGroup)
+        {
+            var pages = (PdfDictionary)source.Resolve((PdfIndirectReference)catalog[new PdfName("Pages"u8)]);
+            var pageReference = (PdfIndirectReference)((PdfArray)pages[new PdfName("Kids"u8)])[0];
+            var page = ((PdfDictionary)source.Resolve(pageReference)).ToDictionary(entry => entry.Key, entry => entry.Value);
+            page[new PdfName("Group"u8)] = new PdfDictionary([
+                new(new PdfName("S"u8), new PdfName("Transparency"u8)),
+                new(new PdfName("CS"u8), new PdfArray([new PdfName("ICCBased"u8), profile]))]);
+            update.ReplaceObject(pageReference.ObjectNumber, new PdfDictionary(page));
+        }
+        else catalog[new PdfName("OutputIntents"u8)] = new PdfArray([new PdfDictionary([
+            new(new PdfName("S"u8), new PdfName("GTS_PDFX"u8)),
+            new(new PdfName("DestOutputProfile"u8), profile)])]);
+        update.ReplaceObject(root.ObjectNumber, new PdfDictionary(catalog));
+        byte[] bytes = update.Build();
+        var original = new PdfPageRenderer(PdfDocument.Open(bytes)).Render(0, new PdfRenderOptions(1, 1));
+        Assert.NotEqual(original.Pixels.Span[0], original.Pixels.Span[2]);
+
+        PdfMacroOperationResult result;
+        try
+        {
+            result = PdfColorConversionMacro.Execute(PdfColorConversionMacro.ConvertStep(PdfMacroColorMode.Grayscale),
+                bytes, new Dictionary<string, string>());
+        }
+        catch (NotSupportedException) { return; }
+
+        var converted = new PdfPageRenderer(PdfDocument.Open(result.Data)).Render(0, new PdfRenderOptions(1, 1));
+        Assert.Equal(converted.Pixels.Span[0], converted.Pixels.Span[1]);
+        Assert.Equal(converted.Pixels.Span[1], converted.Pixels.Span[2]);
+    }
+
     [Fact]
     public void SeparateDocumentsRenderCompressedIccProfilesConcurrently()
     {

@@ -11,6 +11,23 @@ namespace KillerPdf.Engine.Tests.Documents;
 public sealed class PdfColorConversionMacroTests
 {
     [Theory]
+    [InlineData(PdfTransparencyGroupColorSpace.Rgb)]
+    [InlineData(PdfTransparencyGroupColorSpace.Gray)]
+    public void OrdinaryRgbAndGrayTransparencyGroupsRemainConvertible(PdfTransparencyGroupColorSpace space)
+    {
+        var form = new PdfFormXObject(1, 1,
+            new PdfContentStreamBuilder().SetFillRgb(1, 0, 0).Rectangle(0, 0, 1, 1).Fill(),
+            isolatedTransparencyGroup: true, transparencyGroupColorSpace: space);
+        byte[] source = new PdfDocumentBuilder().AddPage(1, 1, new PdfContentStreamBuilder().DrawForm(form, 0, 0)).Build();
+
+        var result = PdfColorConversionMacro.Execute(PdfColorConversionMacro.ConvertStep(PdfMacroColorMode.Grayscale),
+            source, new Dictionary<string, string>());
+
+        var rendered = new PdfPageRenderer(PdfDocument.Open(result.Data)).Render(0, new PdfRenderOptions(1, 1));
+        Assert.Equal(new byte[] { 77, 77, 77, 255 }, rendered.Pixels.ToArray());
+    }
+
+    [Theory]
     [InlineData(false, false)]
     [InlineData(true, false)]
     [InlineData(true, true)]

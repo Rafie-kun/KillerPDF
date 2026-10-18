@@ -17,9 +17,16 @@ there is no automatic page-image fallback.
 
 ## Verification
 
-- Eighteen new public-seam tests cover selectable text, later field edits and
+- Twenty-two new public-seam cases cover selectable text, later field edits and
   regenerated widget appearance colors, transparent images, bitonal thresholds,
   CMYK path/image tones, device color-space selection and saved graphics states.
+- Output-profile and transparency-group profile regressions returned colored paint
+  after grayscale conversion. Candidate causes were missed CMYK operators, missed
+  image/appearance paint, and retained profile interpretation. The vector-only
+  fixture eliminated images and appearances, while ordinary CMYK paint already
+  converted correctly. The retained profile reinterpreted the new gray paint.
+  Those unsupported profiles now stop safely; ordinary RGB and gray transparency
+  groups remain convertible. Both profile regressions failed before their guards.
 - Named device-color regressions initially failed on both pages and reusable forms.
   A form with indirectly stored type names then rendered red after conversion.
   Hypotheses were unresolved type references, a lost replacement form reference,
@@ -35,7 +42,7 @@ there is no automatic page-image fallback.
   default-appearance colors. Its parser now preserves them when rebuilding fields.
 - Data Merge integration fills two records, resizes and converts each separately,
   and checks both rendered gray content and distinct editable values after Rename.
-- Full engine suite: 6,536 passed, zero failed or skipped. Ordinary app suite:
+- Full engine suite: 6,551 passed, zero failed or skipped. Ordinary app suite:
   834 passed, zero failed or skipped. Normal analyzer and app builds passed with
   zero warnings or errors.
 - Actual desktop current-document and ordered two-file batch output retained
@@ -44,33 +51,38 @@ there is no automatic page-image fallback.
   Current-document preview cancellation wrote no output.
 - Actual `KillerPDF.exe --macro` returned 0. The saved PDF retained selectable text,
   an editable field and the expected gray paint. A later field edit also succeeded.
-- Settings restored, accepted and canceled in Dark, Light and SE98 using the public
-  ThemeManager.Apply path in isolated startup-smoke mode. Dark and SE98 mode dialogs
-  and Light and SE98 threshold dialogs were visually inspected. All four labels
-  exist in all 19 application locale files.
+- Actual CLI conversion of the OCRmyPDF CMYK corpus sample returned 1 with the
+  output-profile explanation, wrote no output and preserved its source SHA-256.
+- Settings restored, accepted and canceled in all 13 default themes using the
+  public ThemeManager.Apply path in isolated startup-smoke mode. Both mode and
+  threshold contact sheets were visually inspected across every theme. All four
+  labels exist in all 19 application locale files. This is a KillerPDF dialog check;
+  it does not establish family-wide resource parity or every explicit accent state.
 - A seven-file corpus check converted the PDFBox RGB JPEG and qpdf shared-form
   image fixtures, retaining text, field names and values, page counts and gray
   rendered pixels. Four fixtures stopped for known unsupported color spaces,
-  default color replacements or inline images. One source was rejected before
-  conversion: its startxref says 4740 but its xref table begins at byte 5097.
+  default color replacements, output profiles or inline images. One source was
+  rejected before conversion: its startxref says 4740 but its xref table begins at byte 5097.
   All seven source files remained byte-identical. This bounded check is not a
   release corpus review or a renderer-parity claim.
 
 ## Supported limits
 
 Named image color spaces, non-device named paint colors, shading and pattern paint,
-inline images, Type 3
-glyphs, PostScript XObjects, overprinting, transfer functions, group soft masks,
-image matte colors, XFA and rich-text styling are rejected. Images use the existing
-bounded image decoder, which rejects unsupported encodings and color-space or mask
-combinations rather than guessing. Ordinary image soft masks are preserved.
+inline images, Type 3 glyphs, PostScript XObjects, overprinting, transfer functions,
+document output profiles, transparency groups outside device RGB/gray, group soft
+masks, image matte colors, XFA and rich-text styling are rejected. Images use the
+existing bounded image decoder, which rejects unsupported encodings and color-space
+or mask combinations rather than guessing. Ordinary image soft masks are preserved.
 Retaining transparency means overlapping bitonal paint may still render gray.
 
 Evidence remains under
 `C:\Users\steve\scratch\kp-bench-render\form-workflows-20261018`:
 `color-mode-*.png`, `color-threshold-*.png`, `color-macro-preview.png`, unique
 `color-copy-*.pdf` files, `color-cli.json`, `color-cli-output.pdf`, and the
-`color-resources-engine-final` and `color-resources-app-final` test results.
+`color-profile-engine-final` and `color-profile-app-final` test results.
+`color-mode-all-themes.png` and `color-threshold-all-themes.png` are the rendered
+13-theme contact sheets; the individual captures remain beside them.
 `color-corpus-results-v2.json` records source hashes and the final classifications;
 the earlier `color-corpus-results.json` retains the initial source-reader failure.
 

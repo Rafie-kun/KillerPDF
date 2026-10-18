@@ -6,7 +6,7 @@ namespace KillerPdf.Engine.Documents;
 
 public static partial class PdfColorConversionMacro
 {
-    private enum AppearanceContext { Document, AcroForm, WidgetColors, GraphicsStates, GraphicsState, ColorSpaces }
+    private enum AppearanceContext { Document, AcroForm, WidgetColors, GraphicsStates, GraphicsState, ColorSpaces, TransparencyGroup }
 
     private static byte[] ConvertAppearances(PdfDocument document, PdfMacroColorOptions options, CancellationToken token)
     {
@@ -61,6 +61,17 @@ public static partial class PdfColorConversionMacro
             bool annotation = Kind(source, "Type") == "Annot"
                 || subtypeName is "Widget" or "FreeText" or "Text" or "Line" or "Square" or "Circle" or "Ink";
             if (subtypeName == "Type3") throw new NotSupportedException("Color conversion of Type 3 glyphs is not yet supported.");
+            if (Kind(source, "Type") == "Catalog" && source.TryGetValue(Name("OutputIntents"), out PdfObject? intentsValue)
+                && Resolve(intentsValue) is PdfArray intents && intents.Any(value => Resolve(value) is PdfDictionary intent
+                    && intent.ContainsKey(Name("DestOutputProfile"))))
+                throw new NotSupportedException("Editable color conversion does not yet preserve document output profiles.");
+            if (context == AppearanceContext.TransparencyGroup && source.TryGetValue(Name("CS"), out PdfObject? groupSpace))
+            {
+                PdfObject color = Resolve(groupSpace);
+                if (color is PdfArray { Count: 1 } single) color = Resolve(single[0]);
+                if (color is not PdfName groupName || groupName.ValueAsLatin1() is not ("DeviceGray" or "DeviceRGB"))
+                    throw new NotSupportedException("Editable color conversion does not yet preserve this transparency-group color space.");
+            }
             if (context == AppearanceContext.AcroForm && source.ContainsKey(Name("XFA")))
                 throw new NotSupportedException("Editable color conversion does not yet preserve XFA colors.");
             if (context == AppearanceContext.ColorSpaces
@@ -97,6 +108,7 @@ public static partial class PdfColorConversionMacro
                     _ when context == AppearanceContext.GraphicsStates => AppearanceContext.GraphicsState,
                     "ExtGState" => AppearanceContext.GraphicsStates,
                     "ColorSpace" => AppearanceContext.ColorSpaces,
+                    "Group" when Kind(source, "Type") == "Page" || subtypeName == "Form" => AppearanceContext.TransparencyGroup,
                     "AcroForm" when Kind(source, "Type") == "Catalog" => AppearanceContext.AcroForm,
                     "MK" when annotation => AppearanceContext.WidgetColors,
                     _ => AppearanceContext.Document
