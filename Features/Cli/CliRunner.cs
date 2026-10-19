@@ -1391,6 +1391,16 @@ namespace KillerPDF.Features
             foreach (string input in inputs)
                 if (!File.Exists(input)) { con.WriteLine($"Input not found: {input}"); return 2; }
 
+            string[] outputPaths = [.. inputs.Select(input =>
+                Path.GetFullPath(Path.Combine(outDir, Path.GetFileName(input))))];
+            var sourcePaths = new HashSet<string>(inputs, StringComparer.OrdinalIgnoreCase);
+            if (outputPaths.Distinct(StringComparer.OrdinalIgnoreCase).Count() != outputPaths.Length
+                || outputPaths.Any(sourcePaths.Contains))
+            {
+                con.WriteLine("Bates output filenames must be unique and cannot replace an input file.");
+                return 2;
+            }
+
             if (!TryReadFurnitureLayout(options, con,
                 PdfPageFurnitureEdge.Footer, PdfPageFurnitureAlignment.Right,
                 out PdfPageFurnitureEdge edge, out PdfPageFurnitureAlignment align,
@@ -1430,8 +1440,7 @@ namespace KillerPDF.Features
                 return ex is KeyNotFoundException or FormatException ? 2 : 1;
             }
             for (int index = 0; index < stamped.Count; index++)
-                File.WriteAllBytes(
-                    Path.Combine(outDir, Path.GetFileName(inputs[index])), stamped[index]);
+                File.WriteAllBytes(outputPaths[index], stamped[index]);
             con.WriteLine($"Stamped {stamped.Count} files into {outDir}");
             return 0;
         }
