@@ -32,6 +32,7 @@ namespace KillerPDF.Controls
         public PdfViewer()
         {
             InitializeComponent();
+            InitializeRailShadow();
             // ScrollViewer consumes manipulation events for one-finger panning. Listen even when
             // they are already marked handled so a two-finger scale can share that input surface.
             PagePreviewPanel.AddHandler(ManipulationStartingEvent,

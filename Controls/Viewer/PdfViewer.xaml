@@ -367,10 +367,18 @@
         <!-- DynamicResource PaneShadowEffect, built per theme in ThemeManager (null on 98SE) -
              the old app-level StaticResource effect froze with its startup opacity and 98SE's
              zero never applied. -->
+        <Grid x:Name="PaneShadowClip" IsHitTestVisible="False">
         <Border x:Name="PaneShadow" IsHitTestVisible="False" Margin="0,1,0,0"
                 Background="{DynamicResource ContentPaneBrush}"
                 CornerRadius="{DynamicResource RadCard}"
                 Effect="{DynamicResource PaneShadowEffect}"/>
+        </Grid>
+        <Grid x:Name="RailPaneShadowClip" IsHitTestVisible="False" Visibility="Collapsed">
+            <Border x:Name="RailPaneShadow" IsHitTestVisible="False"
+                    Visibility="{Binding Visibility, ElementName=PaneShadow}"
+                    Background="{DynamicResource ContentPaneBrush}"
+                    CornerRadius="{DynamicResource RadCard}"/>
+        </Grid>
         <Border x:Name="PaneBorder" Panel.ZIndex="6"
                 Background="{DynamicResource ContentPaneBrush}"
                 BorderBrush="{DynamicResource PaneBorderBrush}" BorderThickness="1"

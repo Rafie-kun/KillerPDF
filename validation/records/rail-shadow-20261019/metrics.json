@@ -1,0 +1,1392 @@
+{
+  "cycles": [
+    {
+      "name": "Theme98SERadio",
+      "pass": true,
+      "sourceDepth": null,
+      "centeredDepth": null
+    },
+    {
+      "name": "ThemeLightRadio",
+      "pass": true,
+      "sourceDepth": 5,
+      "centeredDepth": 0
+    },
+    {
+      "name": "ThemeDarkRadio",
+      "pass": true,
+      "sourceDepth": 5,
+      "centeredDepth": 0
+    }
+  ],
+  "cases": [
+    {
+      "id": "Dark-Top-single-collapsed",
+      "before": {
+        "side": "Top",
+        "theme": "Dark",
+        "split": false,
+        "open": false,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\baseline2-Dark-Top-single-collapsed\\temp\\KillerPDF-startup-smoke-7bcc466a008349628af6055d8446c05e",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 0,
+        "pane": [
+          8,
+          114,
+          968,
+          554
+        ],
+        "samples": [
+          32.158333333333324,
+          34.3,
+          35.05,
+          34.699999999999996,
+          34.483333333333334,
+          35.61666666666666,
+          33.516666666666666,
+          34.54166666666667
+        ],
+        "footerHash": "AD7E3D6213478246082B3BAF2B630288393C2F27B18B4D73A2C226EC89F470C8"
+      },
+      "after": {
+        "side": "Top",
+        "theme": "Dark",
+        "split": false,
+        "open": false,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\green-Dark-Top-single-collapsed\\temp\\KillerPDF-startup-smoke-8d9f6fb8007e465787ff6c4df7eda9e9",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 0,
+        "pane": [
+          8,
+          114,
+          968,
+          554
+        ],
+        "samples": [
+          24.833333333333332,
+          27.741666666666667,
+          29.241666666666664,
+          30.46666666666667,
+          30.508333333333326,
+          32.516666666666666,
+          31.316666666666674,
+          33.025
+        ],
+        "footerHash": "AD7E3D6213478246082B3BAF2B630288393C2F27B18B4D73A2C226EC89F470C8"
+      }
+    },
+    {
+      "id": "Dark-Top-single-open",
+      "before": {
+        "side": "Top",
+        "theme": "Dark",
+        "split": false,
+        "open": true,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\baseline2-Dark-Top-single-open\\temp\\KillerPDF-startup-smoke-034352641dd24f29b62bf0f798f10f12",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 0,
+        "pane": [
+          8,
+          266,
+          968,
+          402
+        ],
+        "samples": [
+          32.391666666666666,
+          34.15833333333334,
+          34.708333333333336,
+          33.50000000000001,
+          35.34166666666666,
+          35.1,
+          34.8,
+          36.80833333333333
+        ],
+        "footerHash": "AD7E3D6213478246082B3BAF2B630288393C2F27B18B4D73A2C226EC89F470C8"
+      },
+      "after": {
+        "side": "Top",
+        "theme": "Dark",
+        "split": false,
+        "open": true,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\green-Dark-Top-single-open\\temp\\KillerPDF-startup-smoke-ee63bdb534484ad6bf12acd8570cab19",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 0,
+        "pane": [
+          8,
+          266,
+          968,
+          402
+        ],
+        "samples": [
+          25.108333333333334,
+          27.541666666666668,
+          28.924999999999994,
+          29.43333333333333,
+          31.291666666666668,
+          32.00833333333333,
+          32.46666666666667,
+          35.1
+        ],
+        "footerHash": "AD7E3D6213478246082B3BAF2B630288393C2F27B18B4D73A2C226EC89F470C8"
+      }
+    },
+    {
+      "id": "Dark-Top-split-collapsed",
+      "before": {
+        "side": "Top",
+        "theme": "Dark",
+        "split": true,
+        "open": false,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\baseline2-Dark-Top-split-collapsed\\temp\\KillerPDF-startup-smoke-b6bc4b5af9414789b8cb75e55db34f40",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 480,
+        "pane": [
+          8,
+          117,
+          480,
+          551
+        ],
+        "samples": [
+          32.65,
+          31.51666666666666,
+          33.9,
+          33.56666666666666,
+          34.4,
+          35.13333333333334,
+          35.575,
+          34.55833333333334
+        ],
+        "footerHash": "8FEE24B26149E4E6741FF136BF8CF9297CDD920C1E51AF1337E3B4F3FEB2A683"
+      },
+      "after": {
+        "side": "Top",
+        "theme": "Dark",
+        "split": true,
+        "open": false,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\green-Dark-Top-split-collapsed\\temp\\KillerPDF-startup-smoke-0c61730abefd4e4f9d54cfc5b7c2d3f4",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 480,
+        "pane": [
+          8,
+          117,
+          480,
+          551
+        ],
+        "samples": [
+          25.31666666666667,
+          25.366666666666664,
+          28.28333333333333,
+          29.558333333333337,
+          30.341666666666676,
+          32.00833333333334,
+          33.208333333333336,
+          33.083333333333336
+        ],
+        "footerHash": "8FEE24B26149E4E6741FF136BF8CF9297CDD920C1E51AF1337E3B4F3FEB2A683"
+      }
+    },
+    {
+      "id": "Dark-Top-split-open",
+      "before": {
+        "side": "Top",
+        "theme": "Dark",
+        "split": true,
+        "open": true,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\baseline2-Dark-Top-split-open\\temp\\KillerPDF-startup-smoke-ba2e1074f11347ac986ff87c2e5f7d03",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 480,
+        "pane": [
+          8,
+          269,
+          480,
+          399
+        ],
+        "samples": [
+          33.291666666666664,
+          33.96666666666666,
+          32.025000000000006,
+          32.9,
+          34.608333333333334,
+          34.58333333333333,
+          33.925000000000004,
+          34.79166666666667
+        ],
+        "footerHash": "8FEE24B26149E4E6741FF136BF8CF9297CDD920C1E51AF1337E3B4F3FEB2A683"
+      },
+      "after": {
+        "side": "Top",
+        "theme": "Dark",
+        "split": true,
+        "open": true,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\green-Dark-Top-split-open\\temp\\KillerPDF-startup-smoke-dbd0c631a80d4ee3865e0995569fc90e",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 480,
+        "pane": [
+          8,
+          269,
+          480,
+          399
+        ],
+        "samples": [
+          25.725,
+          27.375,
+          26.8,
+          28.916666666666668,
+          30.51666666666667,
+          31.566666666666663,
+          31.65833333333334,
+          33.30833333333334
+        ],
+        "footerHash": "8FEE24B26149E4E6741FF136BF8CF9297CDD920C1E51AF1337E3B4F3FEB2A683"
+      }
+    },
+    {
+      "id": "Dark-Bottom-single-collapsed",
+      "before": {
+        "side": "Bottom",
+        "theme": "Dark",
+        "split": false,
+        "open": false,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\baseline2-Dark-Bottom-single-collapsed\\temp\\KillerPDF-startup-smoke-e1f249a088dd475481d36753c094843b",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 0,
+        "pane": [
+          8,
+          85,
+          968,
+          555
+        ],
+        "samples": [
+          19.35,
+          19.65833333333333,
+          19.65833333333333,
+          22.333333333333332,
+          23.025,
+          26.14166666666667,
+          27.133333333333326,
+          28.15833333333333
+        ],
+        "footerHash": "95A624C192D8DFA2FE8D688E214239FF547AAC0C152AAD3EE196C73614BE03C7"
+      },
+      "after": {
+        "side": "Bottom",
+        "theme": "Dark",
+        "split": false,
+        "open": false,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\green-Dark-Bottom-single-collapsed\\temp\\KillerPDF-startup-smoke-d390b557c06446388d5d788573170cb8",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 0,
+        "pane": [
+          8,
+          85,
+          968,
+          555
+        ],
+        "samples": [
+          26.491666666666667,
+          27.25,
+          26.883333333333326,
+          29.791666666666668,
+          29.75,
+          32.96666666666667,
+          32.81666666666666,
+          33.13333333333334
+        ],
+        "footerHash": "95A624C192D8DFA2FE8D688E214239FF547AAC0C152AAD3EE196C73614BE03C7"
+      }
+    },
+    {
+      "id": "Dark-Bottom-single-open",
+      "before": {
+        "side": "Bottom",
+        "theme": "Dark",
+        "split": false,
+        "open": true,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\baseline2-Dark-Bottom-single-open\\temp\\KillerPDF-startup-smoke-db6027cb297643a2b01c9798a9a8e991",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 0,
+        "pane": [
+          8,
+          85,
+          968,
+          403
+        ],
+        "samples": [
+          18.308333333333334,
+          20.175,
+          21.20833333333333,
+          22.075,
+          23.175,
+          24.591666666666665,
+          26.225,
+          29.275000000000006
+        ],
+        "footerHash": "95A624C192D8DFA2FE8D688E214239FF547AAC0C152AAD3EE196C73614BE03C7"
+      },
+      "after": {
+        "side": "Bottom",
+        "theme": "Dark",
+        "split": false,
+        "open": true,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\green-Dark-Bottom-single-open\\temp\\KillerPDF-startup-smoke-0d121a9c1a7f43bb8515c021c93f94c3",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 0,
+        "pane": [
+          8,
+          85,
+          968,
+          403
+        ],
+        "samples": [
+          25.258333333333333,
+          28.01666666666667,
+          28.96666666666666,
+          29.508333333333333,
+          29.875,
+          30.966666666666676,
+          31.80833333333333,
+          34.533333333333346
+        ],
+        "footerHash": "95A624C192D8DFA2FE8D688E214239FF547AAC0C152AAD3EE196C73614BE03C7"
+      }
+    },
+    {
+      "id": "Dark-Bottom-split-collapsed",
+      "before": {
+        "side": "Bottom",
+        "theme": "Dark",
+        "split": true,
+        "open": false,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\baseline2-Dark-Bottom-split-collapsed\\temp\\KillerPDF-startup-smoke-14532110a9bb4b88ad30cd20b9f8d0da",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 480,
+        "pane": [
+          8,
+          88,
+          480,
+          552
+        ],
+        "samples": [
+          18.933333333333334,
+          19.574999999999996,
+          19.683333333333334,
+          22.208333333333332,
+          22.73333333333333,
+          26.64166666666667,
+          27.26666666666667,
+          28.041666666666675
+        ],
+        "footerHash": "A21D5F409854B497EEF12F1CA05121D86462B0B892EEA0EF44ACAFBB9D83B656"
+      },
+      "after": {
+        "side": "Bottom",
+        "theme": "Dark",
+        "split": true,
+        "open": false,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\green-Dark-Bottom-split-collapsed\\temp\\KillerPDF-startup-smoke-7b3a8c32f5de476fbef1eadaddf71b90",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 480,
+        "pane": [
+          8,
+          88,
+          480,
+          552
+        ],
+        "samples": [
+          25.95,
+          27.15,
+          26.958333333333336,
+          29.525,
+          29.39166666666667,
+          33.58333333333334,
+          32.966666666666676,
+          32.999999999999986
+        ],
+        "footerHash": "A21D5F409854B497EEF12F1CA05121D86462B0B892EEA0EF44ACAFBB9D83B656"
+      }
+    },
+    {
+      "id": "Dark-Bottom-split-open",
+      "before": {
+        "side": "Bottom",
+        "theme": "Dark",
+        "split": true,
+        "open": true,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\baseline2-Dark-Bottom-split-open\\temp\\KillerPDF-startup-smoke-1dcb757efb144649810334677fd000c3",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 480,
+        "pane": [
+          8,
+          88,
+          480,
+          400
+        ],
+        "samples": [
+          18.283333333333335,
+          19.583333333333332,
+          20.875000000000004,
+          22.65,
+          23.708333333333336,
+          24.475,
+          26.899999999999995,
+          28.833333333333325
+        ],
+        "footerHash": "A21D5F409854B497EEF12F1CA05121D86462B0B892EEA0EF44ACAFBB9D83B656"
+      },
+      "after": {
+        "side": "Bottom",
+        "theme": "Dark",
+        "split": true,
+        "open": true,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\green-Dark-Bottom-split-open\\temp\\KillerPDF-startup-smoke-1c409af9461a4aea988ad94a7319e402",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 480,
+        "pane": [
+          8,
+          88,
+          480,
+          400
+        ],
+        "samples": [
+          25.14166666666666,
+          27.241666666666664,
+          28.433333333333337,
+          30.333333333333336,
+          30.60833333333334,
+          30.85833333333333,
+          32.616666666666674,
+          34.074999999999996
+        ],
+        "footerHash": "A21D5F409854B497EEF12F1CA05121D86462B0B892EEA0EF44ACAFBB9D83B656"
+      }
+    },
+    {
+      "id": "Light-Top-single-collapsed",
+      "before": {
+        "side": "Top",
+        "theme": "Light",
+        "split": false,
+        "open": false,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\baseline2-Light-Top-single-collapsed\\temp\\KillerPDF-startup-smoke-98de247312934934a8808dfd49cc4e87",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 0,
+        "pane": [
+          8,
+          114,
+          968,
+          554
+        ],
+        "samples": [
+          196.78333333333336,
+          203.3916666666667,
+          206.05,
+          208.15,
+          207.76666666666665,
+          210.0166666666667,
+          207.475,
+          210.1583333333333
+        ],
+        "footerHash": "5EDBE4346B356B229E74463B86D3FE413D5EDBB867115193D648F3089A4E5C2B"
+      },
+      "after": {
+        "side": "Top",
+        "theme": "Light",
+        "split": false,
+        "open": false,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\green-Light-Top-single-collapsed\\temp\\KillerPDF-startup-smoke-4e24e83696eb4db28b3c973053450f70",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 0,
+        "pane": [
+          8,
+          114,
+          968,
+          554
+        ],
+        "samples": [
+          152.33333333333331,
+          164.12499999999997,
+          172.73333333333335,
+          180.58333333333331,
+          185.5,
+          193.76666666666662,
+          195.42499999999998,
+          201.1333333333333
+        ],
+        "footerHash": "5EDBE4346B356B229E74463B86D3FE413D5EDBB867115193D648F3089A4E5C2B"
+      }
+    },
+    {
+      "id": "Light-Top-single-open",
+      "before": {
+        "side": "Top",
+        "theme": "Light",
+        "split": false,
+        "open": true,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\baseline2-Light-Top-single-open\\temp\\KillerPDF-startup-smoke-4588114a5c6146e3a9e7e00a730a7d93",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 0,
+        "pane": [
+          8,
+          266,
+          968,
+          402
+        ],
+        "samples": [
+          197.12500000000003,
+          202.87500000000006,
+          205.475,
+          206.13333333333335,
+          209.24166666666665,
+          209.13333333333335,
+          209.65,
+          213.93333333333334
+        ],
+        "footerHash": "5EDBE4346B356B229E74463B86D3FE413D5EDBB867115193D648F3089A4E5C2B"
+      },
+      "after": {
+        "side": "Top",
+        "theme": "Light",
+        "split": false,
+        "open": true,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\green-Light-Top-single-open\\temp\\KillerPDF-startup-smoke-ef952035d04a41c588eff7cd8be95610",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 0,
+        "pane": [
+          8,
+          266,
+          968,
+          402
+        ],
+        "samples": [
+          152.60833333333332,
+          163.84999999999997,
+          172.2,
+          178.825,
+          186.94166666666666,
+          192.975,
+          197.50833333333335,
+          204.7416666666667
+        ],
+        "footerHash": "5EDBE4346B356B229E74463B86D3FE413D5EDBB867115193D648F3089A4E5C2B"
+      }
+    },
+    {
+      "id": "Light-Top-split-collapsed",
+      "before": {
+        "side": "Top",
+        "theme": "Light",
+        "split": true,
+        "open": false,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\baseline2-Light-Top-split-collapsed\\temp\\KillerPDF-startup-smoke-c8b34c943e2944598f5302ce7c07607a",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 480,
+        "pane": [
+          8,
+          117,
+          480,
+          551
+        ],
+        "samples": [
+          197.575,
+          198.48333333333332,
+          204.20833333333331,
+          206.24166666666665,
+          207.6083333333333,
+          209.2416666666667,
+          210.90833333333336,
+          210.13333333333335
+        ],
+        "footerHash": "FEC00854C06E27D91F21B63B38458D9875CC4F876ED99F1EA8077C21990A1264"
+      },
+      "after": {
+        "side": "Top",
+        "theme": "Light",
+        "split": true,
+        "open": false,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\green-Light-Top-split-collapsed\\temp\\KillerPDF-startup-smoke-5d2017fd8e6e4232a307e131b34b34a8",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 480,
+        "pane": [
+          8,
+          117,
+          480,
+          551
+        ],
+        "samples": [
+          153.09166666666664,
+          160.31666666666666,
+          171.11666666666667,
+          178.87499999999997,
+          185.32500000000002,
+          193.09166666666664,
+          198.7,
+          201.01666666666665
+        ],
+        "footerHash": "FEC00854C06E27D91F21B63B38458D9875CC4F876ED99F1EA8077C21990A1264"
+      }
+    },
+    {
+      "id": "Light-Top-split-open",
+      "before": {
+        "side": "Top",
+        "theme": "Light",
+        "split": true,
+        "open": true,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\baseline2-Light-Top-split-open\\temp\\KillerPDF-startup-smoke-2863465a34264b0eb134a76b526d6fb4",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 480,
+        "pane": [
+          8,
+          269,
+          480,
+          399
+        ],
+        "samples": [
+          198.54999999999995,
+          202.53333333333333,
+          201.24166666666665,
+          205.075,
+          207.99166666666665,
+          208.375,
+          208.19166666666666,
+          210.66666666666666
+        ],
+        "footerHash": "FEC00854C06E27D91F21B63B38458D9875CC4F876ED99F1EA8077C21990A1264"
+      },
+      "after": {
+        "side": "Top",
+        "theme": "Light",
+        "split": true,
+        "open": true,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\green-Light-Top-split-open\\temp\\KillerPDF-startup-smoke-9140b6278cdb4b1ca8683caa52a9a938",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 480,
+        "pane": [
+          8,
+          269,
+          480,
+          399
+        ],
+        "samples": [
+          153.77499999999998,
+          163.51666666666665,
+          168.65,
+          177.87499999999997,
+          185.65833333333333,
+          192.29166666666663,
+          196.16666666666663,
+          201.45
+        ],
+        "footerHash": "FEC00854C06E27D91F21B63B38458D9875CC4F876ED99F1EA8077C21990A1264"
+      }
+    },
+    {
+      "id": "Light-Bottom-single-collapsed",
+      "before": {
+        "side": "Bottom",
+        "theme": "Light",
+        "split": false,
+        "open": false,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\baseline2-Light-Bottom-single-collapsed\\temp\\KillerPDF-startup-smoke-d4188b64857144c898f041f51f85c4b6",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 0,
+        "pane": [
+          8,
+          85,
+          968,
+          555
+        ],
+        "samples": [
+          112.375,
+          117.71666666666667,
+          123.90833333333335,
+          134.71666666666667,
+          142.63333333333335,
+          154.54166666666666,
+          163.23333333333332,
+          170.75
+        ],
+        "footerHash": "0A601CAD43757E9ADA8FA7AB014710DB13A9C18C4D8DC71EA4E5641493418D47"
+      },
+      "after": {
+        "side": "Bottom",
+        "theme": "Light",
+        "split": false,
+        "open": false,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\green-Light-Bottom-single-collapsed\\temp\\KillerPDF-startup-smoke-2f4774ed1abb4c068544f5c5f74e1f07",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 0,
+        "pane": [
+          8,
+          85,
+          968,
+          555
+        ],
+        "samples": [
+          155.12500000000003,
+          163.38333333333333,
+          168.70000000000007,
+          179.33333333333334,
+          184.49166666666673,
+          194.61666666666667,
+          198,
+          201.25833333333333
+        ],
+        "footerHash": "0A601CAD43757E9ADA8FA7AB014710DB13A9C18C4D8DC71EA4E5641493418D47"
+      }
+    },
+    {
+      "id": "Light-Bottom-single-open",
+      "before": {
+        "side": "Bottom",
+        "theme": "Light",
+        "split": false,
+        "open": true,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\baseline2-Light-Bottom-single-open\\temp\\KillerPDF-startup-smoke-51641e9b3631479c949d9a97904c2407",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 0,
+        "pane": [
+          8,
+          85,
+          968,
+          403
+        ],
+        "samples": [
+          110.65,
+          118.7,
+          126.47500000000002,
+          134.43333333333334,
+          142.6333333333333,
+          151.86666666666665,
+          161.825,
+          172.69166666666666
+        ],
+        "footerHash": "0A601CAD43757E9ADA8FA7AB014710DB13A9C18C4D8DC71EA4E5641493418D47"
+      },
+      "after": {
+        "side": "Bottom",
+        "theme": "Light",
+        "split": false,
+        "open": true,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\green-Light-Bottom-single-open\\temp\\KillerPDF-startup-smoke-fac465e88ce24d8cbeab012e144db036",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 0,
+        "pane": [
+          8,
+          85,
+          968,
+          403
+        ],
+        "samples": [
+          152.8,
+          164.76666666666662,
+          172.15833333333336,
+          179.01666666666665,
+          184.45,
+          191.27499999999998,
+          196.31666666666666,
+          203.44166666666663
+        ],
+        "footerHash": "0A601CAD43757E9ADA8FA7AB014710DB13A9C18C4D8DC71EA4E5641493418D47"
+      }
+    },
+    {
+      "id": "Light-Bottom-split-collapsed",
+      "before": {
+        "side": "Bottom",
+        "theme": "Light",
+        "split": true,
+        "open": false,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\baseline2-Light-Bottom-split-collapsed\\temp\\KillerPDF-startup-smoke-5c6df029945c47e0a3219540a1a5c7ab",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 480,
+        "pane": [
+          8,
+          88,
+          480,
+          552
+        ],
+        "samples": [
+          111.68333333333335,
+          117.60833333333332,
+          124.01666666666668,
+          134.56666666666666,
+          142.19166666666666,
+          155.3416666666667,
+          163.48333333333332,
+          170.59166666666664
+        ],
+        "footerHash": "280FB1C0324D0CC333F21B9F649073D4839D508A78C593B2FD3A2EA17A917758"
+      },
+      "after": {
+        "side": "Bottom",
+        "theme": "Light",
+        "split": true,
+        "open": false,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\green-Light-Bottom-split-collapsed\\temp\\KillerPDF-startup-smoke-00cd6bc6cfdf46a79b2232efcd66d6c3",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 480,
+        "pane": [
+          8,
+          88,
+          480,
+          552
+        ],
+        "samples": [
+          154.17499999999998,
+          163.2,
+          168.84999999999997,
+          179.1333333333333,
+          183.80833333333334,
+          195.64999999999998,
+          198.34166666666664,
+          201.05833333333334
+        ],
+        "footerHash": "280FB1C0324D0CC333F21B9F649073D4839D508A78C593B2FD3A2EA17A917758"
+      }
+    },
+    {
+      "id": "Light-Bottom-split-open",
+      "before": {
+        "side": "Bottom",
+        "theme": "Light",
+        "split": true,
+        "open": true,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\baseline2-Light-Bottom-split-open\\temp\\KillerPDF-startup-smoke-d225209187304457ae487abb40cee599",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 480,
+        "pane": [
+          8,
+          88,
+          480,
+          400
+        ],
+        "samples": [
+          110.575,
+          117.80833333333332,
+          125.90833333333333,
+          135.43333333333334,
+          143.6166666666667,
+          151.75,
+          162.90833333333336,
+          172.01666666666668
+        ],
+        "footerHash": "280FB1C0324D0CC333F21B9F649073D4839D508A78C593B2FD3A2EA17A917758"
+      },
+      "after": {
+        "side": "Bottom",
+        "theme": "Light",
+        "split": true,
+        "open": true,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\green-Light-Bottom-split-open\\temp\\KillerPDF-startup-smoke-88fb2cb30e634f1dbe4cb6853a59ff1c",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 480,
+        "pane": [
+          8,
+          88,
+          480,
+          400
+        ],
+        "samples": [
+          152.64166666666668,
+          163.51666666666668,
+          171.40833333333333,
+          180.25833333333335,
+          185.74166666666673,
+          191.175,
+          197.6,
+          202.675
+        ],
+        "footerHash": "280FB1C0324D0CC333F21B9F649073D4839D508A78C593B2FD3A2EA17A917758"
+      }
+    },
+    {
+      "id": "SE98-Top-single-collapsed",
+      "before": {
+        "side": "Top",
+        "theme": "SE98",
+        "split": false,
+        "open": false,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\baseline2-SE98-Top-single-collapsed\\temp\\KillerPDF-startup-smoke-f657006033f045d080a67376fe98bbf8",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 0,
+        "pane": [
+          5,
+          108,
+          974,
+          555
+        ],
+        "samples": [
+          192,
+          192,
+          192,
+          192,
+          192,
+          192,
+          192,
+          192
+        ],
+        "footerHash": "31F9D38814E95D8B83C27E9D4CB2ACFB0AD784EDFCD1A5EA9F1849A5A7FA3598"
+      },
+      "after": {
+        "side": "Top",
+        "theme": "SE98",
+        "split": false,
+        "open": false,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\green-SE98-Top-single-collapsed\\temp\\KillerPDF-startup-smoke-bd42ac99e50f456c85f6d96b647c4cac",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 0,
+        "pane": [
+          5,
+          108,
+          974,
+          555
+        ],
+        "samples": [
+          192,
+          192,
+          192,
+          192,
+          192,
+          192,
+          192,
+          192
+        ],
+        "footerHash": "31F9D38814E95D8B83C27E9D4CB2ACFB0AD784EDFCD1A5EA9F1849A5A7FA3598"
+      }
+    },
+    {
+      "id": "SE98-Top-single-open",
+      "before": {
+        "side": "Top",
+        "theme": "SE98",
+        "split": false,
+        "open": true,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\baseline2-SE98-Top-single-open\\temp\\KillerPDF-startup-smoke-dfa48c65ebb84fc38175c7ee9d0c13af",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 0,
+        "pane": [
+          5,
+          260,
+          974,
+          403
+        ],
+        "samples": [
+          192,
+          192,
+          192,
+          192,
+          192,
+          192,
+          192,
+          192
+        ],
+        "footerHash": "31F9D38814E95D8B83C27E9D4CB2ACFB0AD784EDFCD1A5EA9F1849A5A7FA3598"
+      },
+      "after": {
+        "side": "Top",
+        "theme": "SE98",
+        "split": false,
+        "open": true,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\green-SE98-Top-single-open\\temp\\KillerPDF-startup-smoke-025149c8c6b741cda9208b9e9ccf56ba",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 0,
+        "pane": [
+          5,
+          260,
+          974,
+          403
+        ],
+        "samples": [
+          192,
+          192,
+          192,
+          192,
+          192,
+          192,
+          192,
+          192
+        ],
+        "footerHash": "31F9D38814E95D8B83C27E9D4CB2ACFB0AD784EDFCD1A5EA9F1849A5A7FA3598"
+      }
+    },
+    {
+      "id": "SE98-Top-split-collapsed",
+      "before": {
+        "side": "Top",
+        "theme": "SE98",
+        "split": true,
+        "open": false,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\baseline2-SE98-Top-split-collapsed\\temp\\KillerPDF-startup-smoke-70938dda189247148227f4d44514b222",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 483,
+        "pane": [
+          5,
+          111,
+          483,
+          552
+        ],
+        "samples": [
+          192,
+          192,
+          192,
+          192,
+          192,
+          192,
+          192,
+          192
+        ],
+        "footerHash": "15E984EE03123D830B8EE153B1F28C01EC8601035517642CC70B00505468506C"
+      },
+      "after": {
+        "side": "Top",
+        "theme": "SE98",
+        "split": true,
+        "open": false,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\green-SE98-Top-split-collapsed\\temp\\KillerPDF-startup-smoke-5bce5e8d7d9b44b2a5b0b6d7968b89c4",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 483,
+        "pane": [
+          5,
+          111,
+          483,
+          552
+        ],
+        "samples": [
+          192,
+          192,
+          192,
+          192,
+          192,
+          192,
+          192,
+          192
+        ],
+        "footerHash": "15E984EE03123D830B8EE153B1F28C01EC8601035517642CC70B00505468506C"
+      }
+    },
+    {
+      "id": "SE98-Top-split-open",
+      "before": {
+        "side": "Top",
+        "theme": "SE98",
+        "split": true,
+        "open": true,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\baseline2-SE98-Top-split-open\\temp\\KillerPDF-startup-smoke-194cdb96e393410d9d0db334f5e4c032",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 483,
+        "pane": [
+          5,
+          263,
+          483,
+          400
+        ],
+        "samples": [
+          192,
+          192,
+          192,
+          192,
+          192,
+          192,
+          192,
+          192
+        ],
+        "footerHash": "15E984EE03123D830B8EE153B1F28C01EC8601035517642CC70B00505468506C"
+      },
+      "after": {
+        "side": "Top",
+        "theme": "SE98",
+        "split": true,
+        "open": true,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\green-SE98-Top-split-open\\temp\\KillerPDF-startup-smoke-fcbab571fe084b81bce4aabca6362b7e",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 483,
+        "pane": [
+          5,
+          263,
+          483,
+          400
+        ],
+        "samples": [
+          192,
+          192,
+          192,
+          192,
+          192,
+          192,
+          192,
+          192
+        ],
+        "footerHash": "15E984EE03123D830B8EE153B1F28C01EC8601035517642CC70B00505468506C"
+      }
+    },
+    {
+      "id": "SE98-Bottom-single-collapsed",
+      "before": {
+        "side": "Bottom",
+        "theme": "SE98",
+        "split": false,
+        "open": false,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\baseline2-SE98-Bottom-single-collapsed\\temp\\KillerPDF-startup-smoke-a7551db269e843fbbbf0e7eeae309b79",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 0,
+        "pane": [
+          5,
+          79,
+          974,
+          556
+        ],
+        "samples": [
+          192,
+          192,
+          192,
+          192,
+          192,
+          192,
+          192,
+          192
+        ],
+        "footerHash": "31F9D38814E95D8B83C27E9D4CB2ACFB0AD784EDFCD1A5EA9F1849A5A7FA3598"
+      },
+      "after": {
+        "side": "Bottom",
+        "theme": "SE98",
+        "split": false,
+        "open": false,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\green-SE98-Bottom-single-collapsed\\temp\\KillerPDF-startup-smoke-2f4e3f62d5924626bca08a1427687c17",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 0,
+        "pane": [
+          5,
+          79,
+          974,
+          556
+        ],
+        "samples": [
+          192,
+          192,
+          192,
+          192,
+          192,
+          192,
+          192,
+          192
+        ],
+        "footerHash": "31F9D38814E95D8B83C27E9D4CB2ACFB0AD784EDFCD1A5EA9F1849A5A7FA3598"
+      }
+    },
+    {
+      "id": "SE98-Bottom-single-open",
+      "before": {
+        "side": "Bottom",
+        "theme": "SE98",
+        "split": false,
+        "open": true,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\baseline2-SE98-Bottom-single-open\\temp\\KillerPDF-startup-smoke-9bc112d026b7440fa9f837cb7d2787e4",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 0,
+        "pane": [
+          5,
+          79,
+          974,
+          404
+        ],
+        "samples": [
+          192,
+          192,
+          192,
+          192,
+          192,
+          192,
+          192,
+          192
+        ],
+        "footerHash": "31F9D38814E95D8B83C27E9D4CB2ACFB0AD784EDFCD1A5EA9F1849A5A7FA3598"
+      },
+      "after": {
+        "side": "Bottom",
+        "theme": "SE98",
+        "split": false,
+        "open": true,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\green-SE98-Bottom-single-open\\temp\\KillerPDF-startup-smoke-b16006eb9b0d47a797c51f85ce4674d9",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 0,
+        "pane": [
+          5,
+          79,
+          974,
+          404
+        ],
+        "samples": [
+          192,
+          192,
+          192,
+          192,
+          192,
+          192,
+          192,
+          192
+        ],
+        "footerHash": "31F9D38814E95D8B83C27E9D4CB2ACFB0AD784EDFCD1A5EA9F1849A5A7FA3598"
+      }
+    },
+    {
+      "id": "SE98-Bottom-split-collapsed",
+      "before": {
+        "side": "Bottom",
+        "theme": "SE98",
+        "split": true,
+        "open": false,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\baseline2-SE98-Bottom-split-collapsed\\temp\\KillerPDF-startup-smoke-e8527ef432ca4acd80b5852beffa34c5",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 483,
+        "pane": [
+          5,
+          82,
+          483,
+          553
+        ],
+        "samples": [
+          192,
+          192,
+          192,
+          192,
+          192,
+          192,
+          192,
+          192
+        ],
+        "footerHash": "15E984EE03123D830B8EE153B1F28C01EC8601035517642CC70B00505468506C"
+      },
+      "after": {
+        "side": "Bottom",
+        "theme": "SE98",
+        "split": true,
+        "open": false,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\green-SE98-Bottom-split-collapsed\\temp\\KillerPDF-startup-smoke-226d89f1bbfa43419ff9f68713b53f06",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 483,
+        "pane": [
+          5,
+          82,
+          483,
+          553
+        ],
+        "samples": [
+          192,
+          192,
+          192,
+          192,
+          192,
+          192,
+          192,
+          192
+        ],
+        "footerHash": "15E984EE03123D830B8EE153B1F28C01EC8601035517642CC70B00505468506C"
+      }
+    },
+    {
+      "id": "SE98-Bottom-split-open",
+      "before": {
+        "side": "Bottom",
+        "theme": "SE98",
+        "split": true,
+        "open": true,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\baseline2-SE98-Bottom-split-open\\temp\\KillerPDF-startup-smoke-2b95026068354ec3b856879f9b9bb7eb",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 483,
+        "pane": [
+          5,
+          82,
+          483,
+          401
+        ],
+        "samples": [
+          192,
+          192,
+          192,
+          192,
+          192,
+          192,
+          192,
+          192
+        ],
+        "footerHash": "15E984EE03123D830B8EE153B1F28C01EC8601035517642CC70B00505468506C"
+      },
+      "after": {
+        "side": "Bottom",
+        "theme": "SE98",
+        "split": true,
+        "open": true,
+        "smokeRoot": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\office\\shadow\\green-SE98-Bottom-split-open\\temp\\KillerPDF-startup-smoke-37432c5276264653b2d0a4374e69bca9",
+        "imageWidth": 1000,
+        "imageHeight": 700,
+        "secondWidth": 483,
+        "pane": [
+          5,
+          82,
+          483,
+          401
+        ],
+        "samples": [
+          192,
+          192,
+          192,
+          192,
+          192,
+          192,
+          192,
+          192
+        ],
+        "footerHash": "15E984EE03123D830B8EE153B1F28C01EC8601035517642CC70B00505468506C"
+      }
+    }
+  ]
+}

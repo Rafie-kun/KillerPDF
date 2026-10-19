@@ -128,6 +128,10 @@ namespace KillerPDF
             Grid.SetRow(sbToggle, strip && !railFirst ? 1 : 0);
             ApplySidebarOrientation(strip);
             ApplyRailIconsEnd();
+            Dock? railEdge = _sidebarSide == SidebarSide.Top ? Dock.Top
+                : _sidebarSide == SidebarSide.Bottom ? Dock.Bottom : null;
+            Viewer.SetRailShadowEdge(railEdge);
+            ViewerB.SetRailShadowEdge(railEdge);
 
             // The splitter's edge line follows its alignment at the content/rail boundary.
             // The old SidebarShadow gradient is gone; DocPaneBorder casts a real PaneShadow

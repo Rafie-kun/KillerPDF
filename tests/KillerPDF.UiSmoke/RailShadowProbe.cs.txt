@@ -1,0 +1,95 @@
+using System.IO;
+using System.Reflection;
+using System.Reflection.Emit;
+using System.Runtime.Loader;
+using System.Text;
+using System.Text.Json;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Security.Cryptography;
+using System.Windows.Threading;
+using System.Xml.Linq;
+
+internal static class Program
+{
+    const BindingFlags M = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
+    [STAThread] static void Main(string[] args)
+    {
+        string assemblyPath = Path.GetFullPath(args[0]), xamlPath = args[1], output = args[2];
+        Directory.CreateDirectory(output);
+        string temporary=Path.Combine(output,"temp"); Directory.CreateDirectory(temporary);
+        Environment.SetEnvironmentVariable("TEMP",temporary); Environment.SetEnvironmentVariable("TMP",temporary);
+        string data = Path.Combine(output,"data"); Directory.CreateDirectory(data);
+        File.WriteAllText(Path.Combine(data,"settings.json"),JsonSerializer.Serialize(new Dictionary<string,string>{{"SidebarSide",args[3]},{"Theme",args[4]},{"AppScale","1"}}));
+        AssemblyLoadContext.Default.Resolving += (_, n) => { string p=Path.Combine(Path.GetDirectoryName(assemblyPath)!,n.Name+".dll"); return File.Exists(p)?AssemblyLoadContext.Default.LoadFromAssemblyPath(p):null; };
+        Assembly asm=Assembly.LoadFrom(assemblyPath);
+        typeof(Application).GetField("_resourceAssembly",M)!.SetValue(null,asm);
+        asm.GetType("KillerPDF.Services.AppDataPaths",true)!.GetProperty("StartupSmokeRoot",M)!.SetValue(null,data);
+        Type appType=asm.GetType("KillerPDF.App",true)!;
+        string smokeRoot=(string)appType.GetProperty("SmokeDataRoot",M)!.GetValue(null)!;
+        File.WriteAllText(Path.Combine(output,"smoke-root.txt"),smokeRoot);
+        var settings=(Dictionary<string,string>)appType.GetField("SmokeSettings",M)!.GetValue(null)!;
+        settings["SidebarSide"]=args[3]; settings["Theme"]=args[4]; settings["AppScale"]="1";
+        var builder=AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("SigningHost"),AssemblyBuilderAccess.Run).DefineDynamicModule("Host").DefineType("IsolatedApp",TypeAttributes.Public,appType);
+        builder.DefineDefaultConstructor(MethodAttributes.Public);
+        var skip=builder.DefineMethod("OnStartup",MethodAttributes.Family|MethodAttributes.Virtual|MethodAttributes.HideBySig,typeof(void),[typeof(StartupEventArgs)]);
+        skip.GetILGenerator().Emit(OpCodes.Ret); builder.DefineMethodOverride(skip,appType.GetMethod("OnStartup",M)!);
+        var app=(Application)Activator.CreateInstance(builder.CreateType()!)!; app.ShutdownMode=ShutdownMode.OnExplicitShutdown;
+        XDocument document=XDocument.Load(xamlPath); XElement resources=document.Descendants().First(e=>e.Name.LocalName=="ResourceDictionary");
+        foreach(var a in document.Root!.Attributes().Where(a=>a.IsNamespaceDeclaration)) resources.SetAttributeValue(a.Name,a.Value);
+        string xaml=resources.ToString(); foreach(string ns in new[]{"KillerPDF","KillerFamily.Layout"}) xaml=xaml.Replace("clr-namespace:"+ns,"clr-namespace:"+ns+";assembly=KillerPDF",StringComparison.Ordinal);
+        app.Resources=(ResourceDictionary)System.Windows.Markup.XamlReader.Parse(xaml,new System.Windows.Markup.ParserContext{BaseUri=new Uri("pack://application:,,,/KillerPDF;component/")});
+        SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext());
+        foreach(string service in new[]{"ThemeManager","LocaleManager","FilmGrain"}) asm.GetType("KillerPDF.Services."+service,true)!.GetMethod("Initialize",M)!.Invoke(null,null);
+        var window=(Window)Activator.CreateInstance(asm.GetType("KillerPDF.MainWindow",true)!)!;
+        window.WindowStartupLocation=WindowStartupLocation.Manual; window.Left=-10000; window.Top=-10000; window.ShowActivated=false; window.ShowInTaskbar=false; window.Width=1000; window.Height=700; window.Show(); Pump(300);
+        if(args.Contains("open")) {
+            var toggle=Descendants<Button>((DependencyObject)window.FindName("SidebarToggleStrip")).First(b=>b.Content is string text && text is "\uE70D" or "\uE70E");
+            toggle.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); Pump(400);
+        }
+        if(args.Contains("split")) { ((Button)window.FindName("SplitPaneRailBtn")).RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); Pump(450); window.Width=1000; Pump(250); }
+        if(args.Contains("cycle"))
+        {
+            var cycle=new List<object>();
+            foreach(string name in new[]{"Theme98SERadio","ThemeLightRadio","ThemeDarkRadio"})
+            {
+                ((RadioButton)window.FindName(name)).IsChecked=true; Pump(350);
+                var actual=(UserControl)window.FindName("Viewer");
+                var original=((Border)actual.FindName("PaneShadow")).Effect as System.Windows.Media.Effects.DropShadowEffect;
+                var centered=((Border)actual.FindName("RailPaneShadow")).Effect as System.Windows.Media.Effects.DropShadowEffect;
+                bool pass=name=="Theme98SERadio"?original is null && centered is null:
+                    original is not null && centered is not null && original.ShadowDepth==5 && centered.ShadowDepth==0 && centered.Opacity==original.Opacity;
+                cycle.Add(new{name,pass,sourceDepth=original?.ShadowDepth,centeredDepth=centered?.ShadowDepth});
+                if(!pass) throw new InvalidOperationException("Shadow did not follow actual theme selector: "+name);
+            }
+            File.WriteAllText(Path.Combine(output,"cycle.json"),JsonSerializer.Serialize(cycle));
+        }
+        window.UpdateLayout(); Pump(150);
+        int imageWidth=(int)window.ActualWidth,imageHeight=(int)window.ActualHeight;
+        var bitmap=new RenderTargetBitmap(imageWidth,imageHeight,96,96,PixelFormats.Pbgra32); bitmap.Render(window);
+        var png=new PngBitmapEncoder();png.Frames.Add(BitmapFrame.Create(bitmap));using(var stream=File.Create(Path.Combine(output,"window.png")))png.Save(stream);
+        Rect Bounds(FrameworkElement e)=>e.TransformToAncestor(window).TransformBounds(new Rect(e.RenderSize));
+        var viewer=(FrameworkElement)window.FindName("Viewer");
+        var card=(FrameworkElement)((System.Windows.Controls.UserControl)viewer).FindName("PaneBorder");
+        Rect rect=Bounds(card);
+        var samples=new List<double>();
+        int center=(int)(rect.Left+rect.Width*.5);
+        for(int d=1;d<=8;d++) {
+            int y=(int)(args[3]=="Top"?rect.Top-d:rect.Bottom+d-1);
+            var pixels=new byte[40*4];bitmap.CopyPixels(new Int32Rect(center-20,y,40,1),pixels,40*4,0);
+            samples.Add(Enumerable.Range(0,40).Average(i=>(pixels[4*i]+pixels[4*i+1]+pixels[4*i+2])/3.0));
+        }
+        var footer=(FrameworkElement)window.FindName("FooterBorder");Rect fr=Bounds(footer);
+        var foot=new byte[imageWidth*24*4];bitmap.CopyPixels(new Int32Rect(0,(int)fr.Top,imageWidth,24),foot,imageWidth*4,0);
+        var other=(FrameworkElement)window.FindName("ViewerB");
+        if(args.Contains("split") && (!other.IsVisible || other.ActualWidth<100)) throw new InvalidOperationException("Second viewer is not visibly laid out.");
+        string result=JsonSerializer.Serialize(new{side=args[3],theme=args[4],split=args.Contains("split"),open=args.Contains("open"),smokeRoot,imageWidth,imageHeight,secondWidth=other.ActualWidth,pane=new[]{rect.X,rect.Y,rect.Width,rect.Height},samples,footerHash=Convert.ToHexString(SHA256.HashData(foot))});
+        File.WriteAllText(Path.Combine(output,"result.json"),result);Console.WriteLine(result);
+        Environment.Exit(0);
+    }
+    static void Pump(int ms){var f=new DispatcherFrame();var t=new DispatcherTimer{Interval=TimeSpan.FromMilliseconds(ms)};t.Tick+=(_,_)=>{t.Stop();f.Continue=false;};t.Start();Dispatcher.PushFrame(f);}
+    static IEnumerable<T> Descendants<T>(DependencyObject root) where T:DependencyObject {for(int i=0;i<VisualTreeHelper.GetChildrenCount(root);i++){var c=VisualTreeHelper.GetChild(root,i);if(c is T v)yield return v;foreach(var n in Descendants<T>(c))yield return n;}}
+}
