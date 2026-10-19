@@ -96,26 +96,9 @@ namespace KillerPDF
             try
             {
                 using var http = new HttpClient { Timeout = System.TimeSpan.FromSeconds(90) };
-                using var response = await http.GetAsync(target, HttpCompletionOption.ResponseHeadersRead);
-                response.EnsureSuccessStatusCode();
                 const long MaxBytes = 256L * 1024 * 1024;
-                if (response.Content.Headers.ContentLength is long length && length > MaxBytes)
-                    throw new BrowserOpenException(BrowserOpenFailure.TooLarge);
-
-                using (var input = await response.Content.ReadAsStreamAsync())
                 using (var output = File.Create(temp))
-                {
-                    var buffer = new byte[81920];
-                    long total = 0;
-                    int read;
-                    while ((read = await input.ReadAsync(buffer)) > 0)
-                    {
-                        total += read;
-                        if (total > MaxBytes)
-                            throw new BrowserOpenException(BrowserOpenFailure.TooLarge);
-                        await output.WriteAsync(buffer.AsMemory(0, read));
-                    }
-                }
+                    await HttpDownload.CopyToAsync(http, target, output, System.TimeSpan.FromSeconds(90), MaxBytes);
 
                 using (var check = File.OpenRead(temp))
                 {
@@ -132,7 +115,8 @@ namespace KillerPDF
                 BrowserOpenFailure failure = ex switch
                 {
                     BrowserOpenException known => known.Failure,
-                    TaskCanceledException => BrowserOpenFailure.TimedOut,
+                    HttpDownloadSizeException => BrowserOpenFailure.TooLarge,
+                    System.OperationCanceledException => BrowserOpenFailure.TimedOut,
                     HttpRequestException => BrowserOpenFailure.DownloadFailed,
                     IOException => BrowserOpenFailure.FileError,
                     _ => BrowserOpenFailure.Unusable,

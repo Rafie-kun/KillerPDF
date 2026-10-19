@@ -2258,12 +2258,9 @@ namespace KillerPDF.Features
                 Task.Run(async () =>
                 {
                     using var http = OcrLanguages.MakeDownloadClient();
-                    using var resp = await http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
-                    resp.EnsureSuccessStatusCode();
                     var part = dest + ".part";
-                    using (var s = await resp.Content.ReadAsStreamAsync().ConfigureAwait(false))
                     using (var f = File.Create(part))
-                        await s.CopyToAsync(f).ConfigureAwait(false);
+                        await HttpDownload.CopyToAsync(http, new Uri(url), f, TimeSpan.FromSeconds(100)).ConfigureAwait(false);
                     if (File.Exists(dest)) File.Delete(dest);
                     File.Move(part, dest);
                 }).GetAwaiter().GetResult();

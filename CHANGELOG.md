@@ -103,6 +103,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Command-line splitting protects the source and requires `--overwrite` to replace existing outputs.
 - Bates stamping rejects colliding output filenames and protects every input file.
 - Installed updates keep custom installation directories.
+- External PDF and OCR model downloads stop when their response bodies exceed the timeout.
 - Signing, flattening, and document export preserve existing outputs when writing fails or is canceled.
 - Raster exports stop on missing rendered content, and the viewer reports affected pages.
 - Malformed JBIG2 images stop before oversized header and symbol allocations.
