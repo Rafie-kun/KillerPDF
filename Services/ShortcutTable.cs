@@ -213,7 +213,6 @@ namespace KillerPDF
             B("%spacedrag%",   "Str_KS_PanView",     "Nav", Cap("Space")),
             B("F9",            "Str_KS_ToggleSidebar","Nav", Cap("F9")),
             B("%shift%+F9",    "Str_KS_SidebarSide", "Nav", Cap("Shift:F9")),
-            B("%ctrl%+F9",     "Str_KS_SidebarIcons", "Nav", Cap("Ctrl:F9")),
             B("%ctrl%+%tab%",  "Str_KS_NextTab",     "Nav", Cap("Ctrl:Tab")),
             B("%ctrl%+%shift%+%tab%", "Str_KS_PrevTab", "Nav", Cap("CtrlShift:Tab")),
             B("%ctrl%+%shift%+N", "Str_Ctx_MoveToNewWindow", "Nav", Cap("CtrlShift:N")),

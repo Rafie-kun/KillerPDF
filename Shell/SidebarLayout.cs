@@ -127,7 +127,7 @@ namespace KillerPDF
             Grid.SetRow(sbContent, strip && railFirst ? 1 : 0);
             Grid.SetRow(sbToggle, strip && !railFirst ? 1 : 0);
             ApplySidebarOrientation(strip);
-            ApplyRailIconsEnd();   // a saved swap of the rail's ends, column or strip
+            ApplyRailIconsEnd();
 
             // The splitter's edge line follows its alignment at the content/rail boundary.
             // The old SidebarShadow gradient is gone; DocPaneBorder casts a real PaneShadow
@@ -378,10 +378,6 @@ namespace KillerPDF
         // With the header at the left end, ahead of the icons, it keeps at least this width so the
         // icons stay put when a panel with a shorter name opens.
         private const double StripHeaderMinWidth = 170;
-        private bool _railIconsMirrored;              // the icons run in reverse, reading outward from the left end
-
-        private const string RailIconsEndSetting = "SidebarRailIconsEnd";
-        private bool _railIconsAtEnd = App.GetSetting(RailIconsEndSetting) == "1";   // Ctrl+F9
         private DataTemplate? _pageColumnTemplate;    // the page list's own (column) item template
         private ItemsPanelTemplate? _pageColumnPanel;
         private ItemsPanelTemplate? _pageStripPanel;
@@ -433,14 +429,13 @@ namespace KillerPDF
         /// <summary>
         /// Lays the rail out for a strip or a column. In a strip it is one row with two ends: the
         /// icons at one, and at the other the chevron with the open panel's header lifted up out of
-        /// the panel beside it (so the thumbnails get its height). Ctrl+F9 swaps the ends
-        /// (ApplyRailIconsEnd). For a column each part goes back where it came from. Only called on
-        /// a change, because the icons' gaps turn by transposing each margin, which a second pass
+        /// the panel beside it (so the thumbnails get its height). For a column each part goes
+        /// back where it came from. Only called on a change, because the icons' gaps turn by
+        /// transposing each margin, which a second pass
         /// would turn straight back.
         /// </summary>
         private void LayOutRail(bool strip)
         {
-            MirrorRailIcons(false);   // back in XAML order, gaps turned along the old axis, before they turn
             SidebarRailStack.Orientation = strip ? Orientation.Horizontal : Orientation.Vertical;
             foreach (FrameworkElement button in SidebarRailStack.Children.OfType<FrameworkElement>())
                 button.Margin = SidebarSides.Transpose(button.Margin);
@@ -502,35 +497,25 @@ namespace KillerPDF
             }
         }
 
-        // Which end of the rail holds what. By default a column has the chevron at the top and the
-        // icons at the bottom, and a strip has the chevron and header at the left end and the icons
-        // at the right end, the chevron outermost. Ctrl+F9 swaps the two ends. The icons always
-        // read outward from the middle, so their order flips with them: theme, language and
-        // shortcuts stay together at the corner.
+        // A column keeps the chevron at the top and icons at the bottom. A strip keeps the
+        // chevron and header at the left and icons at the right, with the chevron outermost.
         private void ApplyRailIconsEnd()
         {
             if (_sidebarToggleBtn == null) return;
             if (!_sidebarStripLayout)
             {
-                bool iconsTop = _railIconsAtEnd;
-                _sidebarToggleBtn.VerticalAlignment = iconsTop ? VerticalAlignment.Bottom : VerticalAlignment.Top;
-                _sidebarToggleBtn.Margin = iconsTop ? new Thickness(0, 0, 0, 6) : new Thickness(0, 6, 0, 0);
-                SidebarRailStack.VerticalAlignment = iconsTop ? VerticalAlignment.Top : VerticalAlignment.Bottom;
-                SidebarRailStack.Margin = iconsTop ? new Thickness(0, 6, 0, 0) : new Thickness(0, 0, 0, 6);
-                MirrorRailIcons(iconsTop);
+                _sidebarToggleBtn.VerticalAlignment = VerticalAlignment.Top;
+                _sidebarToggleBtn.Margin = new Thickness(0, 6, 0, 0);
+                SidebarRailStack.VerticalAlignment = VerticalAlignment.Bottom;
+                SidebarRailStack.Margin = new Thickness(0, 0, 0, 6);
                 return;
             }
-            bool iconsLeft = _railIconsAtEnd;
-            Dock headerEnd = iconsLeft ? Dock.Right : Dock.Left;
-            DockPanel.SetDock(_sidebarToggleBtn, headerEnd);   // the first child docked to an end sits outermost
-            DockPanel.SetDock(SidebarHeaderStack, headerEnd);
-            DockPanel.SetDock(SidebarRailStack, iconsLeft ? Dock.Left : Dock.Right);
-            _sidebarToggleBtn.Margin = iconsLeft ? new Thickness(0, 0, 4, 0) : new Thickness(4, 0, 0, 0);
-            // Ahead of the icons the header holds its width so they stay put; at the far end
-            // nothing follows it, and a fixed width would only part it from the chevron.
-            SidebarHeaderStack.MinWidth = iconsLeft ? 0 : StripHeaderMinWidth;
-            SidebarRailStack.Margin = iconsLeft ? new Thickness(4, 0, 0, 0) : new Thickness(0, 0, 4, 0);
-            MirrorRailIcons(iconsLeft);
+            DockPanel.SetDock(_sidebarToggleBtn, Dock.Left);
+            DockPanel.SetDock(SidebarHeaderStack, Dock.Left);
+            DockPanel.SetDock(SidebarRailStack, Dock.Right);
+            _sidebarToggleBtn.Margin = new Thickness(4, 0, 0, 0);
+            SidebarHeaderStack.MinWidth = StripHeaderMinWidth;
+            SidebarRailStack.Margin = new Thickness(0, 0, 4, 0);
         }
 
         private const string RailOrderSetting = "SidebarRailOrder";
@@ -547,35 +532,6 @@ namespace KillerPDF
                     DocInvertBtn, DocInfoRailBtn,
                 },
                 App.GetSetting(RailOrderSetting), value => App.SetSetting(RailOrderSetting, value));
-
-        // Reverses the icons' order, and each gap with it along the rail, so a group gap stays
-        // between the same two buttons.
-        private void MirrorRailIcons(bool mirrored)
-        {
-            if (mirrored == _railIconsMirrored) return;
-            _railIconsMirrored = mirrored;
-            bool horizontal = SidebarRailStack.Orientation == Orientation.Horizontal;
-            var icons = SidebarRailStack.Children.OfType<UIElement>().Reverse().ToList();
-            SidebarRailStack.Children.Clear();
-            foreach (UIElement icon in icons)
-            {
-                if (icon is FrameworkElement button)
-                {
-                    Thickness m = button.Margin;
-                    button.Margin = horizontal ? new Thickness(m.Right, m.Top, m.Left, m.Bottom)
-                        : new Thickness(m.Left, m.Bottom, m.Right, m.Top);
-                }
-                SidebarRailStack.Children.Add(icon);
-            }
-        }
-
-        // Ctrl+F9, and the sidebar menu's item: swaps the ends of the rail. Remembered.
-        private void ToggleRailIconsEnd()
-        {
-            _railIconsAtEnd = !_railIconsAtEnd;
-            App.SetSetting(RailIconsEndSetting, _railIconsAtEnd ? "1" : "0");
-            ApplyRailIconsEnd();
-        }
 
         /// <summary>
         /// Lays a sidebar tree out for a strip or a column. In a strip the tree is tagged so

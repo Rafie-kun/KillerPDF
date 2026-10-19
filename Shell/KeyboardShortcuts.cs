@@ -506,11 +506,6 @@ namespace KillerPDF
                 ToggleSidebarSide();   // the next side, pairing with F9's collapse toggle
                 e.Handled = true;
             }
-            else if (key == Key.F9 && mods == ModifierKeys.Control)
-            {
-                ToggleRailIconsEnd();   // the rail's icons to its other end
-                e.Handled = true;
-            }
             else if (key == Key.N && mods == ModifierKeys.Control)
             {
                 NewDocument();

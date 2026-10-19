@@ -170,6 +170,7 @@ namespace KillerPDF.Tests
 
             Assert.Equal("Str_KS_ToggleSidebar", map[KbLayer.Base]["F9"].Label);
             Assert.Equal("Str_KS_SidebarSide",   map[KbLayer.Shift]["F9"].Label);
+            Assert.False(map[KbLayer.Ctrl].ContainsKey("F9"));
             Assert.Equal("Str_Lbl_Bold",         map[KbLayer.Ctrl]["B"].Label);
             Assert.False(map[KbLayer.Ctrl].ContainsKey("B") &&
                          map[KbLayer.Ctrl]["B"].Label == "Str_KS_ToggleSidebar",
