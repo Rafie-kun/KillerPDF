@@ -503,7 +503,7 @@ namespace KillerPDF
         }
 
         // Which end of the rail holds what. By default a column has the chevron at the top and the
-        // icons at the bottom, and a strip has the icons at the left end and the header and chevron
+        // icons at the bottom, and a strip has the chevron and header at the left end and the icons
         // at the right end, the chevron outermost. Ctrl+F9 swaps the two ends. The icons always
         // read outward from the middle, so their order flips with them: theme, language and
         // shortcuts stay together at the corner.
@@ -520,7 +520,7 @@ namespace KillerPDF
                 MirrorRailIcons(iconsTop);
                 return;
             }
-            bool iconsLeft = !_railIconsAtEnd;
+            bool iconsLeft = _railIconsAtEnd;
             Dock headerEnd = iconsLeft ? Dock.Right : Dock.Left;
             DockPanel.SetDock(_sidebarToggleBtn, headerEnd);   // the first child docked to an end sits outermost
             DockPanel.SetDock(SidebarHeaderStack, headerEnd);
