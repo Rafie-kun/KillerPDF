@@ -25,7 +25,9 @@ internal static class OfficeConversion
     internal static bool IsSupported(string path) =>
         Extensions.Contains(Path.GetExtension(path), StringComparer.OrdinalIgnoreCase);
 
-    internal static byte[] ToPdf(string path)
+    internal static byte[] ToPdf(string path) => ToPdf(path, CreateApplication);
+
+    internal static byte[] ToPdf(string path, Func<bool, object> createApplication)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
         byte[] bytes = File.ReadAllBytes(path);
@@ -38,16 +40,16 @@ internal static class OfficeConversion
             if (main.StartsWith("word/", StringComparison.OrdinalIgnoreCase)) return DocxConverter.Convert(bytes);
             throw new InvalidDataException("The file is not a Word or Excel document.");
         }
-        return InstalledOffice(path, word: !spreadsheet);
+        return InstalledOffice(path, word: !spreadsheet, createApplication);
     }
 
-    private static byte[] InstalledOffice(string path, bool word)
+    private static byte[] InstalledOffice(string path, bool word, Func<bool, object> createApplication)
     {
         string output = Path.Combine(Path.GetTempPath(), $"KillerPDF-convert-{Guid.NewGuid():N}.pdf");
         Exception? failure = null;
         var thread = new Thread(() =>
         {
-            try { Export(Path.GetFullPath(path), output, word); }
+            try { Export(Path.GetFullPath(path), output, word, createApplication); }
             catch (Exception ex) { failure = ex; }
         }) { IsBackground = true, Name = "KillerPDF Office export" };
         thread.SetApartmentState(ApartmentState.STA);
@@ -67,20 +69,24 @@ internal static class OfficeConversion
         }
     }
 
-    // Late-bound so KillerPDF needs no Office interop assemblies. An instance that was already
-    // open and visible is the user's own: it is left running with its documents.
-    private static void Export(string path, string output, bool word)
+    private static object CreateApplication(bool word)
     {
         string application = word ? "Word" : "Excel";
         Type type = Type.GetTypeFromProgID(word ? "Word.Application" : "Excel.Application")
             ?? throw new OfficeNotInstalledException(application);
+        try { return Activator.CreateInstance(type) ?? throw new OfficeNotInstalledException(application); }
+        catch (COMException) { throw new OfficeNotInstalledException(application); }
+    }
+
+    // Late-bound so KillerPDF needs no Office interop assemblies. An instance that was already
+    // open and visible is the user's own: it is left running with its documents.
+    private static void Export(string path, string output, bool word, Func<bool, object> createApplication)
+    {
         object? app = null, documents = null, document = null;
         bool ours = true;
         try
         {
-            try { app = Activator.CreateInstance(type); }
-            catch (COMException) { throw new OfficeNotInstalledException(application); }
-            if (app is null) throw new OfficeNotInstalledException(application);
+            app = createApplication(word);
             ours = !(Get(app, "Visible") is true);
             if (ours)
             {
@@ -92,7 +98,13 @@ internal static class OfficeConversion
                 documents = Get(app, "Documents");
                 ours &= Get(documents!, "Count") is 0;
                 // FileName, ConfirmConversions, ReadOnly, AddToRecentFiles, PasswordDocument.
-                document = Call(documents!, "Open", path, false, true, false, "");
+                var security = Get(app, "AutomationSecurity")!;
+                try
+                {
+                    Set(app, "AutomationSecurity", 3);
+                    document = Call(documents!, "Open", path, false, true, false, "");
+                }
+                finally { Set(app, "AutomationSecurity", security); }
                 Call(document!, "ExportAsFixedFormat", output, 17);
                 Call(document!, "Close", 0);
             }
@@ -101,7 +113,14 @@ internal static class OfficeConversion
                 documents = Get(app, "Workbooks");
                 ours &= Get(documents!, "Count") is 0;
                 // Filename, UpdateLinks, ReadOnly, Format, Password.
-                document = Call(documents!, "Open", path, 0, true, Type.Missing, "");
+                var security = Get(app, "AutomationSecurity")!;
+                try
+                {
+                    // msoAutomationSecurityForceDisable blocks VBA, but not Excel 4.0 macros.
+                    Set(app, "AutomationSecurity", 3);
+                    document = Call(documents!, "Open", path, 0, true, Type.Missing, "");
+                }
+                finally { Set(app, "AutomationSecurity", security); }
                 Call(document!, "ExportAsFixedFormat", 0, output);
                 Call(document!, "Close", false);
             }
