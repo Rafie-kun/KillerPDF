@@ -118,6 +118,42 @@ public sealed class PdfDocumentSplitterTests
             () => PdfDocumentSplitter.Extract(document, [9]));
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void ExtractPreservesRequestedOrder(bool compact)
+    {
+        PdfDocument document = PdfDocument.Open(new PdfDocumentBuilder()
+            .AddBlankPage(100, 100).AddBlankPage(200, 100).AddBlankPage(300, 100).Build());
+        PdfDocument extracted = PdfDocument.Open(PdfDocumentSplitter.Extract(document, [2, 0], compact));
+        Assert.Equal(new double[] { 300, 100 }, PdfPageInformation.Read(extracted).Select(page => page.Width));
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void ExtractAllPagesCanKeepTheirExistingOrder(bool compact)
+    {
+        PdfDocument document = Pages(1);
+        Assert.Single(PdfPageInformation.Read(PdfDocument.Open(
+            PdfDocumentSplitter.Extract(document, [0], compact))));
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void ExtractReordersBookmarkAndNamedDestinationsWithPages(bool compact)
+    {
+        PdfDocument document = PdfDocument.Open(new PdfDocumentBuilder()
+            .AddBlankPage(100, 100).AddBlankPage(200, 100).AddBlankPage(300, 100)
+            .AddBookmark("First", 0).AddNamedDestination("last", 2)
+            .AddNamedDestinationBookmark("Last", "last").Build());
+        PdfDocument extracted = PdfDocument.Open(PdfDocumentSplitter.Extract(document, [2, 0], compact));
+        IReadOnlyList<PdfBookmarkInfo> bookmarks = PdfBookmarkReader.Read(extracted);
+        Assert.Equal(1, bookmarks.Single(bookmark => bookmark.Title == "First").DestinationPageIndex);
+        Assert.Equal(0, bookmarks.Single(bookmark => bookmark.Title == "Last").DestinationPageIndex);
+    }
+
     [Fact]
     public void SplitBySizeStartsANewPartBeforeTheBudgetIsExceeded()
     {

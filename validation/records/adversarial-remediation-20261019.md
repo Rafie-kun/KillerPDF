@@ -327,6 +327,22 @@ with scientific notation; rounding boundary tests use numeric script literals
 to isolate this repair. That parser limitation remains outside this finding.
 Interactive form presentation remains part of the deferred UI acceptance.
 
+## BF-011: requested extraction order
+
+The accepted contract is caller order, with duplicate selections still rejected.
+Both compact and incremental extraction reproduced widths 100,300 for the
+requested pages [2,0] with widths 300,100. Candidate causes were discarded
+selection order, incorrect page-tree movement, and compaction reordering. The
+first was confirmed: removal used a set without applying the caller's order.
+Extraction now moves retained pages through the existing page editor and the
+API summary explicitly states requested order.
+
+All 15 splitter tests pass, including direct and named bookmark destinations,
+compact and incremental outputs, duplicate rejection, and all-pages selection.
+The latter also reproduced and repaired the empty incremental-edit failure
+when extraction keeps every page unchanged. Evidence: `extract-red01.log`,
+`extract-red02.log` (six failures), and `extract-green01.log` (15 passes).
+
 ## Pending work
 
 BF-016 requires the actual installer reproduction in a disposable VM. At task

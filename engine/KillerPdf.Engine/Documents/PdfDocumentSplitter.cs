@@ -128,7 +128,7 @@ public static class PdfDocumentSplitter
         return Array.AsReadOnly(outputs.ToArray());
     }
 
-    /// <summary>Builds one document holding only the selected source pages, in order.</summary>
+    /// <summary>Builds one document holding the selected source pages in the requested order, without duplicates.</summary>
     public static byte[] Extract(PdfDocument document, IReadOnlyList<int> sourcePageIndices,
         bool compact = true)
     {
@@ -151,7 +151,18 @@ public static class PdfDocumentSplitter
         var editor = new PdfIncrementalPageEditor(document);
         for (int index = pageCount - 1; index >= 0; index--)
             if (!kept.Contains(index)) editor.RemovePage(index);
-        byte[] built = editor.Build();
+        var currentOrder = kept.Order().ToList();
+        bool changed = kept.Count != pageCount;
+        for (int destination = 0; destination < sourcePageIndices.Count; destination++)
+        {
+            int source = currentOrder.IndexOf(sourcePageIndices[destination], destination);
+            if (source == destination) continue;
+            editor.MovePage(source, destination);
+            currentOrder.RemoveAt(source);
+            currentOrder.Insert(destination, sourcePageIndices[destination]);
+            changed = true;
+        }
+        byte[] built = changed ? editor.Build() : document.Source.ToArray();
         return compact ? Compact(built) : built;
     }
 
