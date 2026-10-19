@@ -22,7 +22,8 @@ namespace KillerPDF.Features
             + "  how:  [--fill <#RRGGBB or color name>] [--overlay <text>] [--rasterize]\n"
             + "        [--sanitize all|comments,attachments,forms,layers,scripts,links,bookmarks]\n"
             + "  --rasterize lets pages whose marked content cannot be removed on its own become images;\n"
-            + "  without it those pages are skipped and listed. --dry-run lists what would be redacted.";
+            + "  without it the command fails without saving output and lists the affected pages.\n"
+            + "  --dry-run lists what would be redacted.";
 
         // ============================================================
         // --redact <in.pdf> <out.pdf> ...
@@ -170,12 +171,10 @@ namespace KillerPDF.Features
                 PdfEngineIntegration.OpenForReading(File.ReadAllBytes(source)), regions);
             List<int> approved = options.ContainsKey("--rasterize") ? [.. plan.RasterPages] : [];
             HashSet<int> skipped = [.. plan.RasterPages.Except(approved)];
-            regions.RemoveAll(region => skipped.Contains(region.PageIndex));
-            string skippedNote = skipped.Count == 0 ? string.Empty
-                : $" Skipped pages {string.Join(", ", skipped.Order().Select(page => page + 1))}, whose marked content can only go by turning the page into an image; add --rasterize to allow that.";
-            if (regions.Count == 0)
+            if (skipped.Count > 0)
             {
-                con.WriteLine("Nothing was redacted." + skippedNote);
+                con.WriteLine($"Redaction was not saved. Pages {string.Join(", ", skipped.Order().Select(page => page + 1))} "
+                    + "require rasterization; add --rasterize to allow that.");
                 return 1;
             }
 
@@ -198,7 +197,7 @@ namespace KillerPDF.Features
             con.WriteLine($"Redacted {regions.Count} areas on {pagesTouched} pages"
                 + (approved.Count > 0 ? $", turning {approved.Count} pages into images" : string.Empty)
                 + (sanitize is not null ? ", and removed hidden information" : string.Empty)
-                + $". Verification {(result?.Verification.Succeeded == true ? "passed" : "reported findings")}.{skippedNote} -> {output}");
+                + $". Verification {(result?.Verification.Succeeded == true ? "passed" : "reported findings")}. -> {output}");
             return 0;
         }
 

@@ -99,6 +99,37 @@ Stroke bounds are intentionally conservative and can request rasterization
 when exact subtraction might have preserved editable geometry. These synthetic
 checks do not replace corpus parity, hands-on UI checks, or final release gates.
 
+## BF-003: all-or-nothing automated redaction
+
+The executable regression `build/Test-CliRedactionSafety.ps1` reproduced six
+false-success cases: mixed standalone redaction and mixed or fully blocked
+macros, each with a new and an existing destination. The existing standalone
+all-blocked refusal and explicitly approved raster controls already passed.
+The failing commands returned 0 and published incomplete or unchanged data.
+The source branches confirmed skipped-region filtering as the cause.
+
+Standalone redaction now refuses any unapproved raster page before publication.
+The macro handler throws a step failure instead of filtering regions or
+returning unchanged success. A macro containing Redact also withholds generated
+merge outputs when the run fails. Usage and failure text describe the complete
+output contract and report affected page numbers.
+
+All 16 executable cases pass in Windows PowerShell 5.1 and PowerShell 7. They
+check exit status, source hashes, new-output absence, existing-output hashes,
+and approved success. The final script also checks the macro JSON failure and
+failed-step fields. Independent pypdf extraction confirms both source secrets
+are present in the fixture and absent from all eight approved outputs;
+pypdfium2 renders both pages of every output with black marked centers.
+The final Release build reports zero warnings and errors. Evidence lives in
+`C:/Users/steve/scratch/kp-remediation-20261019/redact-cli-red-01`,
+`redact-cli-green-01`, and `redact-cli-green-02` beneath the same task folder.
+The checked application DLL SHA-256 is
+`18690A8BFD31C12A8565B8BCDB5956C529ED12F7F1432C3DBFAAB69B94E4F318`.
+
+Generated merge publication was reviewed in source; the executable fixtures
+exercise the single-output macro path. Crash recovery and filesystem failure
+after successful redaction remain part of the separate publication work.
+
 ## Pending work
 
 BF-016 requires the actual installer reproduction in a disposable VM. At task

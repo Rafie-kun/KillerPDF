@@ -21,8 +21,8 @@ namespace KillerPDF.Features
             + "  <macro> is a saved macro's name, an exported macro .json file, or starter:archival, starter:sharing,\n"
             + "  starter:scanning or starter:privacy. --list shows the saved macros and the starters.\n"
             + "  OCR steps read in --lang (default eng). Redact steps remove --text, each line of --terms and the\n"
-            + "  marks saved in the file; pages that can only be redacted by turning them into images are skipped\n"
-            + "  unless --rasterize is given.\n"
+            + "  marks saved in the file. If any page requires rasterization, the macro fails without saving\n"
+            + "  output unless --rasterize is given.\n"
             + "  Rename steps use the out.pdf folder and the macro's file name template.\n"
             + "  Data Merge steps require --data and write one editable PDF per included record into that folder.\n"
             + "  Export steps save an extra file alongside the editable PDF; multiple exports use numbered suffixes.";
@@ -138,7 +138,7 @@ namespace KillerPDF.Features
                 renames || merges ? PdfRenameMacro.CreateContext(Path.GetFileName(source), 1) : null);
             PdfMacroFileResult? result = report.Results.Count == 1 ? report.Results[0] : null;
             bool outputsWritten = true;
-            if (mergePlan is not null && result?.Outputs is not null)
+            if (mergePlan is not null && result?.Outputs is not null && (!redacts || result.Succeeded))
                 outputsWritten = CliWriteMacroOutputs(result.Outputs, mergePlan.OutputPaths, con);
             if (result is { Succeeded: true, Data: ReadOnlyMemory<byte> data })
             {
@@ -152,14 +152,14 @@ namespace KillerPDF.Features
             }
 
             con.WriteLine(options.ContainsKey("--json") ? report.ToJson(indented: true) : report.ToText());
-            if (redacts && redaction.Areas > 0)
+            if (redacts && result?.Succeeded == true && redaction.Areas > 0)
                 con.WriteLine($"Redacted {redaction.Areas} areas on {redaction.Pages} pages"
                     + (redaction.Rasterized > 0 ? $", turning {redaction.Rasterized} pages into images." : "."));
-            else if (redacts && redaction.Skipped.Count == 0)
+            else if (redacts && result?.Succeeded == true && redaction.Blocked.Count == 0)
                 con.WriteLine("The Redact step found nothing to remove.");
-            if (redaction.Skipped.Count > 0)
-                con.WriteLine($"Skipped redacting pages {string.Join(", ", redaction.Skipped.Order().Select(page => page + 1))}, "
-                    + "whose marked content can only go by turning the page into an image; add --rasterize to allow that.");
+            if (redaction.Blocked.Count > 0)
+                con.WriteLine($"No macro output was saved. Pages {string.Join(", ", redaction.Blocked.Order().Select(page => page + 1))} "
+                    + "require rasterization; add --rasterize to allow that.");
             if (result?.Succeeded != true || !outputsWritten) return 1;
             return 0;
         }
@@ -281,7 +281,7 @@ namespace KillerPDF.Features
             internal int Areas;
             internal int Pages;
             internal int Rasterized;
-            internal HashSet<int> Skipped = [];
+            internal HashSet<int> Blocked = [];
         }
 
         // The Redact tool's verified engine pass over the terms and saved marks.
@@ -306,9 +306,10 @@ namespace KillerPDF.Features
                     PdfEngineIntegration.OpenForReading(data.ToArray()), regions);
                 List<int> approved = redaction.Rasterize ? [.. plan.RasterPages] : [];
                 HashSet<int> skipped = [.. plan.RasterPages.Except(approved)];
-                redaction.Skipped.UnionWith(skipped);
-                regions.RemoveAll(region => skipped.Contains(region.PageIndex));
-                if (regions.Count == 0) return new PdfMacroOperationResult(data);
+                redaction.Blocked.UnionWith(skipped);
+                if (skipped.Count > 0)
+                    throw new InvalidOperationException($"Redaction requires rasterization on pages "
+                        + $"{string.Join(", ", skipped.Order().Select(page => page + 1))}; add --rasterize to allow that.");
 
                 token.ThrowIfCancellationRequested();
                 PdfEngineIntegration.ApplyRedaction(path, regions, approved);
