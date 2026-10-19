@@ -89,6 +89,13 @@ public sealed class PdfPageContentReader
             output.Write(bytes);
             output.WriteByte((byte)'\n');
         }
+        if (diagnostics is not null)
+        {
+            // Rendering streams a page past the cached instruction limit rather than drop its end.
+            return PdfContentStreamReader.ReadForRendering(output.ToArray(),
+                name => ColorComponents(name, resources, 0), _document.UsesCompatibilityRecovery,
+                cancellationToken) ?? throw new ContentLimitExceededException();
+        }
         return PdfContentStreamReader.Read(output.ToArray(), cancellationToken: cancellationToken,
             resolveColorComponents: name => ColorComponents(name, resources, 0),
             compatibilityRecovery: _document.UsesCompatibilityRecovery);
@@ -103,7 +110,10 @@ public sealed class PdfPageContentReader
         PdfDictionary resources = page.InheritedValues.TryGetValue(Name("Resources"), out var inherited)
             ? Resolve(inherited) as PdfDictionary ?? Empty : Empty;
         using var source = new PdfConcatenatedContentStream(OpenStreams());
+        // Streamed instructions are never held at once, so their count is bounded only by the
+        // decoded content size and the render's cancellation, not by the cached reader's limit.
         using var instructions = PdfContentStreamReader.Enumerate(source,
+            maximumInstructions: int.MaxValue,
             resolveColorComponents: name => ColorComponents(name, resources, 0),
             cancellationToken: cancellationToken,
             compatibilityRecovery: _document.UsesCompatibilityRecovery).GetEnumerator();

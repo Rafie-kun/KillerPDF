@@ -32,7 +32,18 @@ public static class PdfContentStreamReader
         bool compatibilityRecovery = false,
         CancellationToken cancellationToken = default)
         => ReadCore(source, true, out _, maximumInstructions, maximumOperands,
-            resolveColorComponents, compatibilityRecovery, true, cancellationToken);
+            resolveColorComponents, compatibilityRecovery, true, out _, cancellationToken);
+
+    // Reads a complete page for rendering. Past the instruction limit it reports the limit
+    // instead of throwing or keeping a silent prefix, so the renderer can stream the page.
+    internal static IReadOnlyList<PdfContentInstruction>? ReadForRendering(
+        ReadOnlyMemory<byte> source, Func<PdfName, int?>? resolveColorComponents,
+        bool compatibilityRecovery, CancellationToken cancellationToken)
+    {
+        var instructions = ReadCore(source, true, out _, 1_000_000, 4096, resolveColorComponents,
+            compatibilityRecovery, true, out bool limitReached, cancellationToken, stopAtLimit: true);
+        return limitReached ? null : instructions;
+    }
 
     // A non-final buffer commits only complete instructions. Its unconsumed suffix
     // must be retained verbatim, including comments and pending operands.
@@ -43,7 +54,7 @@ public static class PdfContentStreamReader
         bool compatibilityRecovery = false,
         CancellationToken cancellationToken = default)
         => ReadCore(source, isFinal, out consumed, maximumInstructions, maximumOperands,
-            resolveColorComponents, compatibilityRecovery, false, cancellationToken);
+            resolveColorComponents, compatibilityRecovery, false, out _, cancellationToken);
 
     internal static IEnumerable<PdfContentInstruction> Enumerate(
         Stream source, int initialBufferBytes = 64 * 1024,
@@ -111,10 +122,11 @@ public static class PdfContentStreamReader
         ReadOnlyMemory<byte> source, bool isFinal, out int consumed,
         int maximumInstructions, int maximumOperands,
         Func<PdfName, int?>? resolveColorComponents,
-        bool compatibilityRecovery, bool allowInstructionTruncation,
-        CancellationToken cancellationToken)
+        bool compatibilityRecovery, bool allowInstructionTruncation, out bool limitReached,
+        CancellationToken cancellationToken, bool stopAtLimit = false)
     {
         consumed = 0;
+        limitReached = false;
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maximumInstructions);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maximumOperands);
         if (source.Length > MaximumSourceBytes)
@@ -159,7 +171,8 @@ public static class PdfContentStreamReader
 
             if (instructions.Count >= maximumInstructions)
             {
-                if (compatibilityRecovery && allowInstructionTruncation) return instructions.AsReadOnly();
+                limitReached = true;
+                if (stopAtLimit || compatibilityRecovery && allowInstructionTruncation) return instructions.AsReadOnly();
                 throw new PdfSyntaxException("Content instruction limit exceeded", token.Offset);
             }
 
