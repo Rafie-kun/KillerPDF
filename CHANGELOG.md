@@ -177,6 +177,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - The About card marks 1.9 development builds as unreleased.
 - Help shows scroll shadows only when more content is available.
 - Balanced pane shadows along top and bottom rails.
+- Kept horizontal rail commands and header actions reachable in narrow windows and at larger app scales.
 - The installer centers the complete version number on its own line (#440).
 - The repair prompt reads as plain sentences in every language.
 - Link menu items no longer show Ctrl+C and Delete, which never acted on a link, and tool tooltips no longer show their key twice.

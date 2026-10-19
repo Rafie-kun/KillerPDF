@@ -1,0 +1,114 @@
+{
+  "Finding": "BF-L001",
+  "Verdict": "Fixed and verified with isolated real WPF window controls",
+  "Date": "2026-10-19",
+  "Candidate": {
+    "BuildErrors": 0,
+    "EngineSha256": "0CB54D458B54A86BB61B3C2679DAACD03F5FE9F5204D78B57FD5DD6E12D1FAD3",
+    "SidebarLayoutSha256": "1102D4F1DD3223A3BAD6EAF126B9CA8AE59B702693B7A0B85CF5FE70F490D451",
+    "Sha256": "C217C174210AC0CDF4458A49C08206C5EEEC71B2E1B9112E380878CAF1961287",
+    "BuildWarnings": 0,
+    "App": "C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\installer\\combined-green-v6\\KillerPDF.dll"
+  },
+  "Reproductions": [
+    {
+      "Symptom": "Original Top150percent620 clips7 original rail commands",
+      "ExitCode": 1,
+      "Evidence": "rail-original-red-final/result.txt"
+    },
+    {
+      "Symptom": "Outline action below800px window at y832",
+      "ExitCode": 1,
+      "Evidence": "rail-height-red/result.txt"
+    },
+    {
+      "Symptom": "Fullscreen retains70px strip at250percent",
+      "ExitCode": 1,
+      "Evidence": "rail-fullscreen-red/result.txt"
+    },
+    {
+      "Symptom": "Collapsed header reserves viewport and initially hides all13 commands",
+      "ExitCode": 1,
+      "Evidence": "rail-collapsed-header-red/result.txt"
+    }
+  ],
+  "Matrix": {
+    "Height": 800,
+    "Cases": 48,
+    "Sides": [
+      "Top",
+      "Bottom"
+    ],
+    "Themes": [
+      "Dark",
+      "Light",
+      "SE98"
+    ],
+    "Locale": "De",
+    "LocaleVerified": true,
+    "RenderDpi": 96,
+    "Width": 620,
+    "States": [
+      "open",
+      "collapsed"
+    ],
+    "Scales": [
+      0.7,
+      1,
+      1.5,
+      2.5
+    ],
+    "Failed": 0
+  },
+  "AdditionalAcceptance": [
+    "Original command instances/order retained",
+    "Every enabled overflow command focuses and enters viewport",
+    "PageJumpBox, nested-outline expand/collapse and Comments edit are on-screen and reachable",
+    "Next arrow increases offset; final representative previous-arrow assertion decreases offset",
+    "Language and theme flyouts retain original PlacementTarget",
+    "Actual context-menu Top to Left to Bottom to Right to Top passes after final refinement",
+    "Fullscreen original button plus routed F11 leaves zero strip track and restores rail",
+    "Window heights600,1200,800 and actual logo-wheel endpoint scales0.7,2.5 keep header actions on-screen",
+    "Wide open/collapsed1000px rail984x28 with all13 command bounds exactly unchanged"
+  ],
+  "SourceProvenance": {
+    "Mismatches": 0,
+    "Files": 1657,
+    "Manifest": "source-provenance.json"
+  },
+  "Runner": {
+    "MatrixBinarySha256": "DE6F9A6E89BB7F948E35244C841609AEF03F527FFF09078605BED6BD3FB88009",
+    "Source": "tests/KillerPDF.RailSmoke/Program.cs",
+    "FinalBuildCommand": "dotnet build C:/Users/steve/code/KillerPDF/tests/KillerPDF.RailSmoke/KillerPDF.RailSmoke.csproj -c Release -o C:/Users/steve/scratch/kp-fresh-remediation-20261019/installer/rail-runner-final -p:BaseIntermediateOutputPath=C:/Users/steve/scratch/kp-fresh-remediation-20261019/installer/rail-runner-final-obj/ -p:DefaultItemExcludes=obj/** -v quiet -clp:ErrorsOnly",
+    "FinalRepresentativeCommand": "dotnet C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\installer\\rail-runner-final\\KillerPDF.RailSmoke.dll C:\\Users\\steve\\scratch\\kp-fresh-remediation-20261019\\installer\\combined-green-v6\\KillerPDF.dll C:/Users/steve/code/KillerPDF/App.xaml C:/Users/steve/scratch/kp-fresh-remediation-20261019/installer/rail-arrows-final Top 1.5 620 Dark De open --startup-smoke",
+    "SourceSha256": "77DBBF86BC6BE998B7E2C1EE236226037261B137B478F119C9A59F5DBA721041",
+    "FinalBinarySha256": "90828DD00C024F66C8609A5A072959F418D9783649DEE8C9D757B87FE3CE58BC"
+  },
+  "Images": {
+    "Manifest": "images.json",
+    "AllEightVisuallyInspected": true,
+    "CopyVerification": "Decoded dimensions and SHA256 before/after each copy",
+    "Count": 8
+  },
+  "Limitations": [
+    "Synthetic owned WPF windows and routed controls; no physical pointer or hardware-key input certification",
+    "96DPI rendering only; native monitor DPI and multi-monitor behavior remain unverified",
+    "Only three representative themes and German plus English wide checks",
+    "No installer or custom-path update execution"
+  ],
+  "CleanupRejections": [
+    {
+      "Retried": false,
+      "Action": "Delete generated evidence copy",
+      "Reason": "blocked by policy",
+      "Path": "C:/Users/steve/scratch/kp-fresh-remediation-20261019/installer/snapshot/validation/records/adversarial-review-20261019-fresh"
+    },
+    {
+      "Retried": false,
+      "Action": "Delete verified owned generated build intermediates",
+      "Reason": "blocked by policy",
+      "Path": "C:/Users/steve/code/KillerPDF/tests/KillerPDF.RailSmoke/obj"
+    }
+  ],
+  "ProhibitedDashCount": 0
+}

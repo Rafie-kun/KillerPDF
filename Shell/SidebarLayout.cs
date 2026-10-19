@@ -336,7 +336,7 @@ namespace KillerPDF
             if (_sidebarToggleBtn == null) return;
             // A strip's header rides in the rail, so it hides with the panel it names.
             SidebarHeaderStack.Visibility = _sidebarStripLayout && _sidebarCollapsed
-                ? Visibility.Hidden : Visibility.Visible;
+                ? Visibility.Collapsed : Visibility.Visible;
             SidebarSide toward = _sidebarCollapsed
                 ? _sidebarSide switch
                 {
@@ -372,6 +372,11 @@ namespace KillerPDF
         private bool _sidebarStripLayout;             // what the rail and page list are laid out for now
         private Panel? _sidebarHeaderHome;            // where the panel header lives while the rail is a column
         private int _sidebarHeaderHomeIndex;
+        private Grid? _stripRailHost;
+        private DockPanel? _stripRailContent;
+        private ScrollViewer? _stripRailScroll;
+        private Button? _stripRailPrevious;
+        private Button? _stripRailNext;
 
         private const double StripRailHeight = 28;
 
@@ -455,8 +460,11 @@ namespace KillerPDF
                 DockPanel.SetDock(_sidebarToggleBtn, Dock.Left);
                 DockPanel.SetDock(SidebarHeaderStack, Dock.Left);
                 SidebarStripRow.Children.Add(_sidebarToggleBtn);
-                SidebarStripRow.Children.Add(SidebarHeaderStack);
-                SidebarStripRow.Children.Add(SidebarRailStack);
+                _stripRailHost ??= CreateStripRailHost();
+                _stripRailContent!.Children.Add(SidebarHeaderStack);
+                _stripRailContent.Children.Add(SidebarRailStack);
+                SidebarStripRow.LastChildFill = true;
+                SidebarStripRow.Children.Add(_stripRailHost);
                 SidebarStripRow.Visibility = Visibility.Visible;
 
                 _sidebarToggleBtn.VerticalAlignment = VerticalAlignment.Center;
@@ -469,10 +477,12 @@ namespace KillerPDF
                 PageControlsRow.Margin = new Thickness(0, 0, 8, 0);
                 PageControlsRow.VerticalAlignment = VerticalAlignment.Center;
                 SidebarRailStack.VerticalAlignment = VerticalAlignment.Center;
+                SidebarRailStack.HorizontalAlignment = HorizontalAlignment.Right;
                 ApplyRailIconsEnd();
             }
             else if (_sidebarHeaderHome is not null)
             {
+                _stripRailContent?.Children.Clear();
                 SidebarStripRow.Children.Clear();
                 SidebarStripRow.Visibility = Visibility.Collapsed;
                 SidebarRailGrid.Children.Insert(0, _sidebarToggleBtn);
@@ -490,6 +500,8 @@ namespace KillerPDF
                 SidebarHeaderStack.Orientation = Orientation.Vertical;
                 SidebarHeaderStack.ClearValue(VerticalAlignmentProperty);
                 SidebarHeaderStack.ClearValue(MinWidthProperty);
+                SidebarHeaderStack.ClearValue(MaxWidthProperty);
+                SidebarHeaderStack.ClearValue(ClipToBoundsProperty);
                 SidebarHeaderStack.Visibility = Visibility.Visible;
                 titleLine.Margin = new Thickness(10, 6, 8, 0);
                 PageControlsRow.Margin = new Thickness(12, 2, 8, 4);
@@ -520,6 +532,100 @@ namespace KillerPDF
             _sidebarToggleBtn.Margin = new Thickness(4, 0, 0, 0);
             SidebarHeaderStack.MinWidth = StripHeaderMinWidth;
             SidebarRailStack.Margin = new Thickness(0, 0, 4, 0);
+            UpdateStripRailBounds();
+        }
+
+        private Grid CreateStripRailHost()
+        {
+            var host = new Grid();
+            host.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            host.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            host.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            _stripRailContent = new DockPanel { LastChildFill = false };
+            _stripRailScroll = new ScrollViewer
+            {
+                Content = _stripRailContent,
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Hidden,
+                VerticalScrollBarVisibility = ScrollBarVisibility.Disabled,
+                HorizontalContentAlignment = HorizontalAlignment.Right,
+                CanContentScroll = false,
+                Focusable = false,
+                Padding = new Thickness(0),
+                BorderThickness = new Thickness(0),
+            };
+            Grid.SetColumn(_stripRailScroll, 1);
+            host.Children.Add(_stripRailScroll);
+            _stripRailPrevious = OverflowButton("RailOverflowPrevious", "\uE76B", "Str_Scroll_Left", -1);
+            _stripRailNext = OverflowButton("RailOverflowNext", "\uE76C", "Str_Scroll_Right", 1);
+            Grid.SetColumn(_stripRailNext, 2);
+            host.Children.Add(_stripRailPrevious);
+            host.Children.Add(_stripRailNext);
+            host.SizeChanged += (_, _) => UpdateStripRailOverflow();
+            _stripRailScroll.ScrollChanged += (_, _) => UpdateStripRailOverflow();
+            MainContentGrid.SizeChanged += (_, _) => ConstrainStripHeight();
+            SidebarOuterGrid.SizeChanged += (_, _) => ConstrainStripHeight();
+            return host;
+        }
+
+        private Button OverflowButton(string name, string glyph, string label, int direction)
+        {
+            var button = new Button
+            {
+                Name = name, Content = glyph,
+                Style = (Style)FindResource("RailChevronBtn"),
+                VerticalAlignment = VerticalAlignment.Center,
+                Visibility = Visibility.Collapsed,
+            };
+            button.SetResourceReference(ToolTipProperty, label);
+            button.Click += (_, _) =>
+            {
+                if (_stripRailScroll is not { } scroll) return;
+                scroll.ScrollToHorizontalOffset(scroll.HorizontalOffset
+                    + direction * Math.Max(30, scroll.ViewportWidth - 30));
+            };
+            return button;
+        }
+
+        private void UpdateStripRailBounds()
+        {
+            ConstrainStripHeight();
+            UpdateStripRailOverflow();
+        }
+
+        private bool _constrainingStripHeight;
+
+        private void ConstrainStripHeight()
+        {
+            if (_fullScreen || !_sidebarStripLayout || _sidebarCol is null || _constrainingStripHeight
+                || MainContentGrid.ActualHeight <= 0) return;
+            double rail = SbPx(StripRailHeight);
+            double maximum = Math.Max(rail, MainContentGrid.ActualHeight - rail);
+            double minimum = Math.Min(SbPx(_sidebarCollapsed ? SidebarRailSize : SidebarMinOpen), maximum);
+            _constrainingStripHeight = true;
+            try
+            {
+                // Keep the requested size, but leave a rail's height of document visible.
+                // A large accessibility scale cannot force the readable minimum offscreen.
+                _sidebarCol.MinWidth = minimum;
+                _sidebarCol.MaxWidth = Math.Max(minimum, Math.Min(SbPx(SidebarMaxFor(_sidebarPanel)), maximum));
+            }
+            finally { _constrainingStripHeight = false; }
+        }
+
+        private void UpdateStripRailOverflow()
+        {
+            if (!_sidebarStripLayout || _stripRailHost is null || _stripRailScroll is null
+                || _stripRailContent is null || _stripRailPrevious is null || _stripRailNext is null) return;
+            // A full-width content row keeps the header and icons at their established ends.
+            // When it no longer fits, the same viewport reveals every original header action
+            // and rail button instead of clipping the title's neighboring controls.
+            _stripRailContent.MinWidth = Math.Max(0, _stripRailScroll.ViewportWidth);
+            double contentWidth = SidebarHeaderStack.DesiredSize.Width + SidebarRailStack.DesiredSize.Width;
+            bool overflow = contentWidth > _stripRailHost.ActualWidth + 0.5;
+            _stripRailPrevious.Visibility = _stripRailNext.Visibility = overflow
+                ? Visibility.Visible : Visibility.Collapsed;
+            _stripRailPrevious.IsEnabled = _stripRailScroll.HorizontalOffset > 0.5;
+            _stripRailNext.IsEnabled = _stripRailScroll.HorizontalOffset < _stripRailScroll.ScrollableWidth - 0.5;
         }
 
         private const string RailOrderSetting = "SidebarRailOrder";

@@ -1,0 +1,50 @@
+[
+  {
+    "File": "red-top-150.png",
+    "Sha256": "3E961AFB21AEB294B9540907CA1FA61B967CE6D28F873B35BCDBBBCFCFF4BBC4",
+    "Width": 620,
+    "Height": 800
+  },
+  {
+    "File": "green-top-250-collapsed.png",
+    "Sha256": "4634AB82E310201BA52BF73FB5184975F4B17D189736404B18698EF801651DC6",
+    "Width": 620,
+    "Height": 800
+  },
+  {
+    "File": "green-top-250-outline.png",
+    "Sha256": "C224AA6886A86E311CF40DACE4FC9A9AD5B31EFBE383786D0F0AC46E99A11CD6",
+    "Width": 620,
+    "Height": 800
+  },
+  {
+    "File": "green-top-250-short.png",
+    "Sha256": "99F53E5E3249B1B81AF883FA43E99DFDC7354E43EFCC235F10C82F94295AE726",
+    "Width": 620,
+    "Height": 600
+  },
+  {
+    "File": "green-light-bottom-150.png",
+    "Sha256": "583738D7364D15A3DAAD53A37B0260118570FC3B4653C95B8EB07416D68AE07B",
+    "Width": 620,
+    "Height": 800
+  },
+  {
+    "File": "green-98se-bottom-250.png",
+    "Sha256": "5FF035831747D5E6F19851E67EF083C2D7CF74D48368A56BF00B71280CD09E41",
+    "Width": 620,
+    "Height": 800
+  },
+  {
+    "File": "wide-baseline.png",
+    "Sha256": "27F5D007536DEA91C4A7A29AC2DFEE5533020C591F9EFCDBCE8BCB972B196A6E",
+    "Width": 1000,
+    "Height": 800
+  },
+  {
+    "File": "wide-green.png",
+    "Sha256": "A636F5B4E688FE4B84DCF8E653A9FE325A96B51F774E27CE1E03CFEEFD1A630C",
+    "Width": 1000,
+    "Height": 800
+  }
+]
