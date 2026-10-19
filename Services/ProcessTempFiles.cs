@@ -79,6 +79,9 @@ internal sealed class ProcessTempFiles : IDisposable
                     {
                         foreach (string file in Directory.GetFiles(directory, "killerpdf_*.pdf"))
                             try { File.Delete(file); } catch { }
+                        if (Directory.EnumerateFileSystemEntries(directory).Any(entry =>
+                            !string.Equals(Path.GetFileName(entry), LeaseName, StringComparison.OrdinalIgnoreCase)))
+                            continue;
                     }
                     File.Delete(leasePath);
                     // Unknown files prevent removal instead of being recursively deleted.

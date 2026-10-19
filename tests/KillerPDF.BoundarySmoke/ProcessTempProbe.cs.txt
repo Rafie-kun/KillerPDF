@@ -57,6 +57,24 @@ try
         throw new Exception("Abandoned owned directory was not reclaimed.");
     Console.WriteLine("PASS crashed owner working directory is reclaimed");
 
+    using (var retryOwner = new ProcessTempFiles(Path.Combine(root, "private")))
+    {
+        string retryPath = retryOwner.CreatePath("retry");
+        File.WriteAllText(retryPath, "synthetic PDF held by a temporary reader");
+        string lease = Path.Combine(retryOwner.DirectoryPath, "owner.lease");
+        using (var reader = new FileStream(retryPath, FileMode.Open, FileAccess.Read, FileShare.Read))
+        {
+            retryOwner.Dispose();
+            store.CleanupStale();
+            if (!File.Exists(retryPath) || !File.Exists(lease))
+                throw new Exception("Failed stale deletion lost its retry lease.");
+        }
+        store.CleanupStale();
+        if (File.Exists(retryPath) || Directory.Exists(Path.GetDirectoryName(retryPath)))
+            throw new Exception("Released stale PDF could not be reclaimed on retry.");
+        Console.WriteLine("PASS a later sweep reclaims a stale PDF after its temporary lock is released");
+    }
+
     string legacy = Path.Combine(root, "private", "killerpdf_legacy.pdf");
     File.WriteAllText(legacy, "legacy file with unknown owner");
     string unknown = Path.Combine(root, "private", "session-" + Guid.NewGuid().ToString("N"));

@@ -94,7 +94,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Installation refuses to replace folders containing unrelated or unverified files.
 - Disabled VBA macros while Word and Excel open legacy documents for conversion.
 - Batch CSV reports neutralize filenames that spreadsheets could interpret as formulas.
-- Startup cleanup preserves temporary PDFs owned by running processes.
+- Startup cleanup preserves active temporary PDFs and retries files that were temporarily locked.
 - Permanent redaction removes covered vectors, keeps pending marks with page edits and undo, and requires approval to rasterize partly covered drawings (#341).
 - Macro redaction keeps marks and approval with its original document.
 - Command-line and macro redaction fail without saving output when any requested area needs unapproved rasterization (#341, #343).
