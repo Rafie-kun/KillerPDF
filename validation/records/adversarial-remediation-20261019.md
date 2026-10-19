@@ -239,6 +239,23 @@ Evidence: `jbig2-header-red01.log`, `jbig2-header-green02.log` (43 checks),
 `jbig2-bounded02.log` under the task scratch directory. Existing image hash
 regressions passed; independent final-candidate corpus rendering remains open.
 
+## BF-004 and BF-015: current-state flatten source
+
+Source inspection confirmed that Save Flattened serialized the working document
+and overlays but omitted pending form values and whole-page rotation. It now
+uses the existing save-copy snapshot shared with signing and Reduce File Size.
+The snapshot writes all pending field dictionaries and font sizes, annotations,
+stamps, measurements, marks, and page rotations before rendering begins. A
+rasterization option retains the existing raster overlay behavior. The editor's
+ordinary save path and dirty flag are untouched.
+
+The Release app build passes with 11 existing NTwain warnings. All 29 focused
+form-write, rendered print-copy, and annotation-rotation regressions pass. These
+check the reused components, not the Save Flattened UI call itself. Evidence is
+in `flatten-state-tests.log` and `flatten-state-build.log`. Full field-type and
+rotation acceptance through Save Flattened, independently rendered output, and
+editor dirty-state checks remain pending until UI testing is allowed.
+
 ## Pending work
 
 BF-016 requires the actual installer reproduction in a disposable VM. At task

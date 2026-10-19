@@ -78,7 +78,7 @@ namespace KillerPDF
 
         // The bytes Save As would write, in a temp file, without touching the open document's
         // state: annotations and stamps burned in, form values and page rotations applied.
-        private string WriteSavedCopyToTemp()
+        private string WriteSavedCopyToTemp(bool forRasterization = false)
         {
             Dictionary<int, int> rotations = SnapshotPageRotations();
             string clean = App.MakeTempFile("reduceclean");
@@ -91,7 +91,7 @@ namespace KillerPDF
             if (_annotations.Values.Any(list => list.Count > 0) || HasActiveStamps)
             {
                 PdfEngineBurn.Burn(copy, _annotations, _renderDims, _docStampSpec, null, _pageRotations,
-                    measurementsAsAnnotations: true);
+                    forRasterization: forRasterization, measurementsAsAnnotations: true);
                 PdfEngineIntegration.StripLinkAppearances(copy);
             }
             WriteFormValuesToDocument(copy);

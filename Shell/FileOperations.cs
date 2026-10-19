@@ -1375,28 +1375,9 @@ namespace KillerPDF
                 CloseEngineDocumentSession();
                 OfferRescaleOutOfRangePages();   // Adobe page-size guard (pageDims below must be in range)
 
-                // Burn any pending annotations into a temp source for rasterization
-                // (must happen on UI thread before we go async)
-                string sourcePath;
-                bool hasAnnotations = _annotations.Values.Any(list => list.Count > 0);
-                if (hasAnnotations || HasActiveStamps)   // #147: stamps alone must still burn
-                {
-                    var tempClean  = App.MakeTempFile("clean");
-                    var tempBurned = App.MakeTempFile("burned");
-                    _doc.Save(tempClean);
-                    PdfEngineIntegration.RepairHarmlessSaveArtifacts(tempClean);
-                    System.IO.File.Copy(tempClean, tempBurned, true);
-                    PdfEngineBurn.Burn(tempBurned, _annotations, _renderDims,
-                        _docStampSpec, null, _pageRotations, forRasterization: true);
-                    sourcePath = tempBurned;
-                }
-                else
-                {
-                    var temp = App.MakeTempFile("src");
-                    _doc.Save(temp);
-                    PdfEngineIntegration.RepairHarmlessSaveArtifacts(temp);
-                    sourcePath = temp;
-                }
+                // Capture forms, annotations, and complete page rotations before rendering.
+                // Saving this temporary copy leaves the editor's dirty state intact.
+                string sourcePath = WriteSavedCopyToTemp(forRasterization: true);
 
                 PdfEngineDocumentSession engineSession = EnsureEngineDocumentSession();
                 int pageCount = engineSession.PageCount;
