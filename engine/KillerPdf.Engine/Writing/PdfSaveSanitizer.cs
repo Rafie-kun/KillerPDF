@@ -13,7 +13,7 @@ public static class PdfSaveSanitizer
 
     /// <summary>
     /// Removes an empty or dangling outline root and direct crop boxes that are degenerate or
-    /// outside the effective media box. Returns the original bytes when no repair is required.
+    /// wholly outside the effective media box. Returns the original bytes when no repair is required.
     /// </summary>
     public static byte[] RepairHarmlessArtifacts(PdfDocument document)
     {
@@ -34,7 +34,8 @@ public static class PdfSaveSanitizer
             {
                 changes.Add(new PdfSaveRepairChange(PdfSaveRepairKind.RemoveDanglingOutlines,
                     tree.CatalogReference.ObjectNumber, null,
-                    "Remove the empty or dangling document outline root."));
+                    "Remove the empty or dangling document outline root.")
+                    { Generation = tree.CatalogReference.Generation });
             }
         }
 
@@ -44,13 +45,14 @@ public static class PdfSaveSanitizer
                 || !TryBox(document, cropValue, out Box crop)) continue;
             if (!page.InheritedValues.TryGetValue(MediaBoxName, out PdfObject? mediaValue)
                 || !TryBox(document, mediaValue, out Box media)) continue;
-            bool invalid = crop.Width < 1 || crop.Height < 1
-                || crop.Left < media.Left - .01 || crop.Bottom < media.Bottom - .01
-                || crop.Right > media.Right + .01 || crop.Top > media.Top + .01;
+            bool invalid = crop.Width <= 0 || crop.Height <= 0
+                || Math.Min(crop.Right, media.Right) <= Math.Max(crop.Left, media.Left)
+                || Math.Min(crop.Top, media.Top) <= Math.Max(crop.Bottom, media.Bottom);
             if (!invalid) continue;
             changes.Add(new PdfSaveRepairChange(PdfSaveRepairKind.RemoveInvalidCropBox,
                 page.Reference.ObjectNumber, page.Index,
-                "Remove a degenerate crop box or one outside the effective media box."));
+                "Remove a degenerate crop box or one wholly outside the effective media box.")
+                { Generation = page.Reference.Generation });
         }
 
         return new PdfSaveRepairPlan(document, changes);
@@ -63,7 +65,7 @@ public static class PdfSaveSanitizer
         foreach (PdfSaveRepairChange change in changes)
         {
             PdfDictionary dictionary = Resolve(document,
-                new PdfIndirectReference(change.ObjectNumber, 0)) as PdfDictionary
+                new PdfIndirectReference(change.ObjectNumber, change.Generation)) as PdfDictionary
                 ?? throw new InvalidOperationException("A planned repair object is no longer a dictionary.");
             PdfName removedName = change.Kind switch
             {
@@ -131,7 +133,11 @@ public enum PdfSaveRepairKind
 
 /// <summary>Describes one proposed save repair.</summary>
 public sealed record PdfSaveRepairChange(
-    PdfSaveRepairKind Kind, int ObjectNumber, int? PageIndex, string Description);
+    PdfSaveRepairKind Kind, int ObjectNumber, int? PageIndex, string Description)
+{
+    /// <summary>Gets the generation of the existing object targeted by this repair.</summary>
+    public int Generation { get; init; }
+}
 
 /// <summary>An immutable, inspectable set of harmless repairs for one open document.</summary>
 public sealed class PdfSaveRepairPlan
