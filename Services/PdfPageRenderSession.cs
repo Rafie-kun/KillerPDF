@@ -161,8 +161,10 @@ internal sealed class PdfPageRenderSession : IDisposable
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return RenderEnginePage(pageIndex, transparentBackground: false,
+        PdfRenderedPage rendered = RenderEnginePage(pageIndex, transparentBackground: false,
             includeAnnotations: false, includeFormFields: false, cancellationToken);
+        rendered.RequireComplete(pageIndex);
+        return rendered;
     }
 
     internal PdfRenderedPage RenderPage(int pageIndex, bool transparentBackground = false,
@@ -170,8 +172,10 @@ internal sealed class PdfPageRenderSession : IDisposable
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return RenderEnginePage(pageIndex, transparentBackground,
+        PdfRenderedPage rendered = RenderEnginePage(pageIndex, transparentBackground,
             includeAnnotations: true, includeFormFields, cancellationToken);
+        rendered.RequireComplete(pageIndex);
+        return rendered;
     }
 
     private PdfRenderedPage RenderEnginePage(int pageIndex, bool transparentBackground,
@@ -189,7 +193,9 @@ internal sealed class PdfPageRenderSession : IDisposable
     {
         EngineRenderOptions options = CreateRenderOptions(pageIndex, false, true, true)
             with { SeparationPlate = plate, CacheResult = false };
-        return RenderOwnedPage(Renderer, pageIndex, options, cancellationToken);
+        PdfRenderedPage rendered = RenderOwnedPage(Renderer, pageIndex, options, cancellationToken);
+        rendered.RequireComplete(pageIndex);
+        return rendered;
     }
 
     // Pixels remain valid until the next encoding render or session disposal.
@@ -205,6 +211,7 @@ internal sealed class PdfPageRenderSession : IDisposable
             _encodingBuffer = EncodingBuffers.Rent(length);
         }
         var diagnostics = Renderer.RenderInto(pageIndex, options, _encodingBuffer, cancellationToken);
+        PdfRenderCompleteness.RequireComplete(pageIndex, PdfRenderCompleteness.Classify(diagnostics));
         return new PdfPageForEncoding(options.Width, options.Height,
             _encodingBuffer.AsMemory(0, length), diagnostics);
     }
@@ -216,7 +223,8 @@ internal sealed class PdfPageRenderSession : IDisposable
         byte[] pixels = GC.AllocateUninitializedArray<byte>(checked(options.Width * options.Height * 4));
         var diagnostics = renderer.RenderInto(pageIndex, options, pixels, cancellationToken);
         return new PdfRenderedPage(options.Width, options.Height, pixels,
-            PdfRenderBackend.Engine, Diagnostics(diagnostics));
+            PdfRenderBackend.Engine, Diagnostics(diagnostics))
+        { RenderDiagnostics = PdfRenderCompleteness.Classify(diagnostics) };
     }
 
     internal PdfRenderedPage RenderFittedPage(int pageIndex, int maximumWidth, int maximumHeight,
@@ -246,7 +254,8 @@ internal sealed class PdfPageRenderSession : IDisposable
         var diagnostics = Renderer.RenderRegionInto(pageIndex, options, left, top, width, height,
             pixels, cancellationToken);
         return new PdfRenderedPage(width, height, pixels,
-            PdfRenderBackend.Engine, Diagnostics(diagnostics));
+            PdfRenderBackend.Engine, Diagnostics(diagnostics))
+        { RenderDiagnostics = PdfRenderCompleteness.Classify(diagnostics) };
     }
 
     private EngineRenderOptions CreateRenderOptions(int pageIndex, bool transparentBackground,
@@ -305,8 +314,10 @@ internal sealed class PdfPageRenderSession : IDisposable
             EngineDocument document = OpenDocument(path);
             var renderer = new EngineRenderer(document, InstalledPdfFontResolver.Instance,
                 SharedCacheFor(document), WicJpegDecoder.Instance);
-            return RenderOwnedPage(renderer, pageIndex,
+            PdfRenderedPage rendered = RenderOwnedPage(renderer, pageIndex,
                 CreateExactOptions(width, height, transparentBackground, includeFormFields), cancellationToken);
+            rendered.RequireComplete(pageIndex);
+            return rendered;
         }
         catch (Exception exception) when (exception is not OutOfMemoryException
             && exception is not OperationCanceledException)
@@ -487,4 +498,8 @@ internal readonly record struct PdfPageForEncoding(
     int Width, int Height, ReadOnlyMemory<byte> Pixels, IReadOnlyList<string> Diagnostics);
 
 internal readonly record struct PdfRenderedPage(
-    int Width, int Height, byte[] Pixels, PdfRenderBackend Backend, string? EngineFailure);
+    int Width, int Height, byte[] Pixels, PdfRenderBackend Backend, string? EngineFailure)
+{
+    internal IReadOnlyList<PdfRenderDiagnostic> RenderDiagnostics { get; init; } = [];
+    internal void RequireComplete(int pageIndex) => PdfRenderCompleteness.RequireComplete(pageIndex, RenderDiagnostics);
+}

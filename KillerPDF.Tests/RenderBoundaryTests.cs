@@ -373,9 +373,9 @@ public sealed class RenderBoundaryTests
         return count;
     }
 
-    private static string FindRepositoryRoot()
+    private static string FindRepositoryRoot([System.Runtime.CompilerServices.CallerFilePath] string sourceFile = "")
     {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        var directory = new DirectoryInfo(Path.GetDirectoryName(sourceFile) ?? AppContext.BaseDirectory);
         while (directory is not null)
         {
             if (File.Exists(Path.Combine(directory.FullName, "KillerPDF.csproj")))

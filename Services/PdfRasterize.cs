@@ -82,16 +82,6 @@ namespace KillerPDF.Services
             Parallel.For(0, pageCount, po, i =>
             {
                 if (ct.IsCancellationRequested) return;   // cooperative: skip remaining pages' work
-                if (passthrough[i] is PdfImage original)
-                {
-                    rasterPages[i] = new PdfEngineIntegration.RasterPage(
-                        original.Width, original.Height,
-                        pageDims[i].widthPt, pageDims[i].heightPt,
-                        ReadOnlyMemory<byte>.Empty, original.Data);
-                    int passed = System.Threading.Interlocked.Increment(ref done);
-                    progress(passed, pageCount);
-                    return;
-                }
                 byte[] bgra; int rw, rh;
                 lock (docGate)
                 {
@@ -101,9 +91,20 @@ namespace KillerPDF.Services
                     // #141: WithAnnotations, or flattening an annotated PDF silently dropped the
                     // markup the file carried - this path builds a NEW document from the pixels.
                     PdfRenderedPage rendered = renderSession.RenderPage(i, cancellationToken: ct);
+                    rendered.RequireComplete(i);
                     rw = rendered.Width;
                     rh = rendered.Height;
                     bgra = rendered.Pixels;
+                }
+                if (passthrough[i] is PdfImage original)
+                {
+                    rasterPages[i] = new PdfEngineIntegration.RasterPage(
+                        original.Width, original.Height,
+                        pageDims[i].widthPt, pageDims[i].heightPt,
+                        ReadOnlyMemory<byte>.Empty, original.Data);
+                    int passed = System.Threading.Interlocked.Increment(ref done);
+                    progress(passed, pageCount);
+                    return;
                 }
                 // The scanned look goes on before the color mode, so a grayscale copy grays the
                 // warm paper and grain along with the page.
@@ -163,6 +164,7 @@ namespace KillerPDF.Services
                     // #141: WithAnnotations - an exported image should show the markup the file
                     // carries, the same as the page does on screen.
                     PdfRenderedPage rendered = renderSession.RenderPage(idx, cancellationToken: ct);
+                    rendered.RequireComplete(idx);
                     w = rendered.Width;
                     h = rendered.Height;
                     raw = rendered.Pixels;

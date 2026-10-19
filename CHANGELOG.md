@@ -95,6 +95,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Signing uses a snapshot of current edits without requiring the open document to be saved first.
 - Command-line splitting protects the source and requires `--overwrite` to replace existing outputs.
 - Signing, flattening, and document export preserve existing outputs when writing fails or is canceled.
+- Raster exports stop on missing rendered content, and the viewer reports affected pages.
 - Malformed JBIG2 images stop before oversized header and symbol allocations.
 - Save Flattened includes current form edits and page rotations.
 - Flattened JPEG pages retain reflections, rotation, and skew.

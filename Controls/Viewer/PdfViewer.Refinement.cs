@@ -118,9 +118,11 @@ public partial class PdfViewer
                         if (rotation != 0) (pixels, w, h) = BitmapHelpers.RotateBitmap(pixels, w, h, rotation);
                         var bitmap = BitmapSource.Create(w, h, 96, 96, PixelFormats.Bgra32, null, pixels, w * 4);
                         bitmap.Freeze();
+                        RememberRenderWarning(bitmap, rendered);
                         return (bitmap, region);
                     }, token);
                 if (!Current() || !ReferenceEquals(image.Source, source)) return;
+                PresentRenderWarning(image, result.bitmap, page);
                 var detail = new Image
                 {
                     Source = result.bitmap, IsHitTestVisible = false, Stretch = Stretch.Fill,

@@ -281,6 +281,34 @@ Evidence: `jpeg-placement-red01.log`, `jpeg-placement-green02.log`,
 and independent comparison. GUI acceptance still requires the actual Save
 Flattened interaction; its shared eligibility check is covered by engine tests.
 
+## BF-007: render completeness before publication
+
+CLI fixtures with a missing image resource and an unsupported paint operator
+both reproduced exit 0 and replacement of existing outputs. A standard-font
+resource recovery fixture remained usable. After the repair, all six cases
+pass: omissions return exit 1 without creating or replacing output; recovered
+standard-font rendering succeeds. Evidence: `render-omissions-red01.log` and
+`render-omissions-green01.log`.
+
+The application boundary now carries structured information, recovery,
+degradation, and omitted-content diagnostics alongside pixels. Existing engine
+text diagnostics are adapted centrally; unknown messages remain blocking until
+reviewed. Full-page publication, OCR base images, encoding, print preview,
+printing, separation preview, and exact comparison require complete rendering.
+JPEG passthrough is validated by rendering before reusing its encoded payload.
+The fitted viewer path retains pixels and diagnostics. Warning metadata follows
+cached bitmaps into primary, continuous, secondary, and refinement presentation,
+using the existing page-error status and tooltip text.
+
+All 38 focused boundary, completeness, render-dimension, retained-session, and
+rendered form-copy checks pass. The source-boundary tests initially could not
+find the repository from external build artifacts; their root discovery now
+starts from the compiled source file location. The final app build passes with
+no warnings or errors. Evidence: `render-final-tests.log` and
+`render-final-build04.log`. Live viewer/preview warning acceptance and physical
+printing/OCR workflow acceptance remain pending. This does not certify every
+engine recovery message or final-candidate corpus rendering.
+
 ## Pending work
 
 BF-016 requires the actual installer reproduction in a disposable VM. At task

@@ -106,6 +106,7 @@ namespace KillerPDF.Controls
                             96.0 * w / bw, 96.0 * h / bh, PixelFormats.Bgra32, null);
                         wb.WritePixels(new Int32Rect(0, 0, w, h), raw, w * 4, 0);
                         wb.Freeze();
+                        RememberRenderWarning(wb, rendered);
                         int localTarget = target, localRot = rot;
                         _ = Dispatcher.BeginInvoke(new Action(() =>
                         {
@@ -703,6 +704,7 @@ namespace KillerPDF.Controls
                             int ddw = Math.Max(1, (int)Math.Round(targetW));
                             int ddh = Math.Max(1, (int)Math.Round(targetW * fh / fw));
                             var bmp = BitmapHelpers.BuildScaledBitmap(fw, fh, bytes, ddw, ddh);
+                            RememberRenderWarning(bmp, rendered);
                             CacheRender(session, fi, renderW, prot, bmp);
                             SetContinuousSlot(fi, bmp);
                         });
@@ -730,6 +732,7 @@ namespace KillerPDF.Controls
 
             RemoveVisibleDetail(pageImg);
             pageImg.Source  = bmp;
+            PresentRenderWarning(pageImg, bmp, fi);
             pageImg.Width   = dipW;
             pageImg.Height  = dipH;
             slot.Background = Brushes.White;
@@ -954,6 +957,7 @@ namespace KillerPDF.Controls
 
                 var presentationTimer = Stopwatch.StartNew();
                 PageImage.Source = bitmap;
+                PresentRenderWarning(PageImage, bitmap, pageIndex);
                 _annotationCanvas.IsHitTestVisible = true;
                 _annotationCanvas.Width  = dipW;
                 _annotationCanvas.Height = dipH;
@@ -1253,6 +1257,7 @@ namespace KillerPDF.Controls
                                     int ddw = Math.Max(1, (int)Math.Round(primaryDipW));
                                     int ddh = Math.Max(1, (int)Math.Round(primaryDipW * ph / pw));
                                     var bmp = BitmapHelpers.BuildScaledBitmap(pw, ph, bytes, ddw, ddh);
+                                    RememberRenderWarning(bmp, rendered);
                                     CacheRender(session, pi, tileBucket, prot, bmp);
                                     AddSecondaryTile(pi, bmp, primaryDipW);
                                 });
@@ -1307,6 +1312,7 @@ namespace KillerPDF.Controls
                 && exOverlay.Parent is Grid exGrid && exGrid.Children.Count > 0 && exGrid.Children[0] is Image exImg)
             {
                 exImg.Source = bitmap;
+                PresentRenderWarning(exImg, bitmap, pi);
                 // Keep the grid's constant on-screen gap exact across zoom/column changes: the
                 // reused tile's margin was computed at the old zoom, so refresh it here.
                 if (_viewMode == ViewMode.Grid && exGrid.Parent is Border exTile)
@@ -1323,6 +1329,7 @@ namespace KillerPDF.Controls
                 _renderDims[pi] = (pageDipW, pageDipH);
 
             var img = new Image { Source = bitmap, Stretch = Stretch.None };
+            PresentRenderWarning(img, bitmap, pi);
             RenderOptions.SetBitmapScalingMode(img, BitmapScalingMode.HighQuality);
 
             var overlay = BuildPageOverlay(pi, pageDipW, pageDipH, null);

@@ -8,6 +8,24 @@ namespace KillerPDF.Controls;
 
 public partial class PdfViewer
 {
+    private sealed record RenderWarning(string Message);
+    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<BitmapSource, RenderWarning> RenderWarnings = new();
+
+    private static void RememberRenderWarning(BitmapSource bitmap, PdfRenderedPage rendered)
+    {
+        string message = string.Join(" ", rendered.RenderDiagnostics
+            .Where(item => item.BlocksPublication).Select(item => item.Message));
+        if (message.Length > 0) RenderWarnings.GetValue(bitmap, _ => new RenderWarning(message));
+    }
+
+    private void PresentRenderWarning(FrameworkElement image, BitmapSource bitmap, int page)
+    {
+        string? warning = RenderWarnings.TryGetValue(bitmap, out var result)
+            ? string.Format(Loc("Str_PageRenderError"), page + 1) + ": " + result.Message : null;
+        image.ToolTip = warning;
+        if (warning is not null) SetStatus(string.Format(Loc("Str_RenderError"), warning));
+    }
+
     internal RenderMeasurement? LastPrimaryRenderMeasurement { get; private set; }
     internal sealed record RenderMeasurement(int Page, double ParseMilliseconds,
         double RasterMilliseconds, double CopyMilliseconds, double PresentationMilliseconds);
@@ -43,6 +61,7 @@ public partial class PdfViewer
             96.0 * width / dipWidth, 96.0 * height / dipHeight, PixelFormats.Bgra32, null);
         bitmap.WritePixels(new Int32Rect(0, 0, width, height), pixels, width * 4, 0);
         bitmap.Freeze();
+        RememberRenderWarning(bitmap, rendered);
         return (bitmap, new RenderMeasurement(page, parse, raster, timer.Elapsed.TotalMilliseconds, 0));
     }
 }

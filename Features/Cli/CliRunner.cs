@@ -1730,6 +1730,7 @@ namespace KillerPDF.Features
                 // of the rebuilt page images entirely.
                 // #141: WithAnnotations, or the rebuild drops the file's own markup.
                 PdfRenderedPage rendered = renderSession.RenderPage(i);
+                rendered.RequireComplete(i);
                 byte[] raw = rendered.Pixels;
                 int w = rendered.Width, h = rendered.Height;
                 int rot = rotations != null && i < rotations.Length ? rotations[i] : 0;

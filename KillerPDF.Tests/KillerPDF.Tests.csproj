@@ -49,6 +49,7 @@
     <Compile Include="..\Services\PerspectiveWarp.cs" Link="Services\PerspectiveWarp.cs" />
     <Compile Include="..\Services\PdfFontStyle.cs" Link="Services\PdfFontStyle.cs" />
     <Compile Include="..\Services\PdfPageRenderSession.cs" Link="Services\PdfPageRenderSession.cs" />
+    <Compile Include="..\Services\PdfRenderCompleteness.cs" Link="Services\PdfRenderCompleteness.cs" />
     <Compile Include="..\Services\WicJpegDecoder.cs" Link="Services\WicJpegDecoder.cs" />
     <Compile Include="..\Services\NativeWicJpegDecoder.cs" Link="Services\NativeWicJpegDecoder.cs" />
     <Compile Include="..\Services\PdfWorkingDocument.cs" Link="Services\PdfWorkingDocument.cs" />
