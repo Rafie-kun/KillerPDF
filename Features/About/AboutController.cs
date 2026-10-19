@@ -302,8 +302,7 @@ namespace KillerPDF.Features
                 else
                 {
                     bool machineInstall = !CanWriteTo(Path.GetDirectoryName(curExe)!);
-                    string installArg = machineInstall ? "/silent" : "/install-user";
-                    script.AppendLine($"start /wait \"\" \"{newExe}\" {installArg}")
+                    script.AppendLine(InstalledUpdateCommand.Create(newExe, curExe, machineInstall))
                           .AppendLine("if errorlevel 1 goto failed")
                           .AppendLine(needsElevation
                               ? $"start \"\" explorer.exe \"{curExe}\""
