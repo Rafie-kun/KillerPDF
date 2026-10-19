@@ -116,7 +116,7 @@ public partial class MainWindow
         if (!IsSourceCurrent()) return;
         _macroRedaction = new MacroRedaction();
         if (macro.Steps.Any(step => step.Operation == PdfMacroOperation.Redact)
-            && !PrepareMacroRedaction())
+            && !PrepareMacroRedaction(sourceViewer))
             return;
         if (!IsSourceCurrent()) return;
 
@@ -206,6 +206,9 @@ public partial class MainWindow
     // and the areas already marked with the Redact tool on this document.
     private sealed class MacroRedaction
     {
+        internal Controls.PdfViewer? SourceViewer;
+        internal Controls.PdfViewer.DocumentSession? SourceSession;
+        internal PdfWorkingDocument? SourceDocument;
         internal string[] Terms = [];
         internal List<PdfRedactionRegion> Marked = [];
         internal int Areas;
@@ -215,9 +218,16 @@ public partial class MainWindow
 
     private MacroRedaction _macroRedaction = new();
 
-    private bool PrepareMacroRedaction()
+    private bool PrepareMacroRedaction(Controls.PdfViewer? sourceViewer = null)
     {
-        _macroRedaction = new MacroRedaction { Marked = Viewer.PendingRedactionRegions() };
+        sourceViewer ??= ActiveViewer;
+        _macroRedaction = new MacroRedaction
+        {
+            SourceViewer = sourceViewer,
+            SourceSession = sourceViewer.ActiveSessionExt,
+            SourceDocument = sourceViewer.DocumentRef,
+            Marked = sourceViewer.PendingRedactionRegions()
+        };
         string? text = KillerDialog.PromptLines(this, Loc("Str_Lbl_Redact"),
             Loc("Str_Macro_RedactPrompt"), Loc("Str_Btn_OK"));
         if (text is null) return false;
@@ -253,7 +263,14 @@ public partial class MainWindow
             var approved = new List<int>();
             var skipped = new HashSet<int>();
             if (plan.RasterPages.Count > 0
-                && !Dispatcher.Invoke(() => Viewer.ApproveRasterPages(plan.RasterPages, approved, skipped)))
+                && !Dispatcher.Invoke(() =>
+                {
+                    var viewer = _macroRedaction.SourceViewer;
+                    if (viewer is null || !ReferenceEquals(viewer.ActiveSessionExt, _macroRedaction.SourceSession)
+                        || !ReferenceEquals(viewer.DocumentRef, _macroRedaction.SourceDocument))
+                        return false;
+                    return viewer.ApproveRasterPages(plan.RasterPages, approved, skipped);
+                }))
             {
                 _macroRedaction.Canceled = true;
                 throw new OperationCanceledException(cancellationToken);

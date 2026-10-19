@@ -1,0 +1,104 @@
+[RED BF-F001 redaction]
+exit=1
+FAIL System.InvalidOperationException: BF-F001: right-pane SECRET remains extractable after Redact macro.
+   at Program.Redaction() in C:\Users\steve\code\KillerPDF\tests\KillerPDF.DocumentStateSmoke\Program.cs:line 153
+   at Program.Main(String[] args) in C:\Users\steve\code\KillerPDF\tests\KillerPDF.DocumentStateSmoke\Program.cs:line 49
+
+[RED BF-F003 macro-rotation]
+exit=1
+FAIL System.InvalidOperationException: BF-F003: macro output rotation was 0, expected 90.
+   at Program.MacroRotation() in C:\Users\steve\code\KillerPDF\tests\KillerPDF.DocumentStateSmoke\Program.cs:line 181
+   at Program.Main(String[] args) in C:\Users\steve\code\KillerPDF\tests\KillerPDF.DocumentStateSmoke\Program.cs:line 41
+
+[RED BF-F003 merge-rotation]
+exit=1
+FAIL System.InvalidOperationException: BF-F003: macro output rotation was 0, expected 90.
+   at Program.MacroRotation(Boolean merge) in C:\Users\steve\code\KillerPDF\tests\KillerPDF.DocumentStateSmoke\Program.cs:line 189
+   at Program.Main(String[] args) in C:\Users\steve\code\KillerPDF\tests\KillerPDF.DocumentStateSmoke\Program.cs:line 50
+
+[RED BF-F004 extract-form]
+exit=1
+FAIL System.InvalidOperationException: BF-F004: extraction returned Original, expected Updated.
+   at Program.ExtractForm() in C:\Users\steve\code\KillerPDF\tests\KillerPDF.DocumentStateSmoke\Program.cs:line 214
+   at Program.Main(String[] args) in C:\Users\steve\code\KillerPDF\tests\KillerPDF.DocumentStateSmoke\Program.cs:line 42
+
+[RED BF-F002 print-rotation]
+exit=1
+FAIL System.InvalidOperationException: BF-F002: rotated page prints in its original portrait orientation.
+   at Program.PrintRotation() in C:\Users\steve\code\KillerPDF\tests\KillerPDF.DocumentStateSmoke\Program.cs:line 243
+   at Program.Main(String[] args) in C:\Users\steve\code\KillerPDF\tests\KillerPDF.DocumentStateSmoke\Program.cs:line 43
+
+[RED BF-F006 print-switch]
+exit=1
+FAIL System.InvalidOperationException: BF-F006: print preview opened after the source document changed during preparation.
+   at Program.PrintSwitch() in C:\Users\steve\code\KillerPDF\tests\KillerPDF.DocumentStateSmoke\Program.cs:line 337
+   at Program.Main(String[] args) in C:\Users\steve\code\KillerPDF\tests\KillerPDF.DocumentStateSmoke\Program.cs:line 57
+
+[RED macro-source-choice macro-source]
+exit=1
+FAIL System.InvalidOperationException: Macro source choice must be in the macro window, defaulting to the current document.
+   at Program.MacroSource() in C:\Users\steve\code\KillerPDF\tests\KillerPDF.DocumentStateSmoke\Program.cs:line 155
+   at Program.Main(String[] args) in C:\Users\steve\code\KillerPDF\tests\KillerPDF.DocumentStateSmoke\Program.cs:line 40
+
+[GREEN extract-form]
+exit=0
+PASS extract-form
+app=C:\Users\steve\scratch\kp-fresh-remediation-20261019\installer\combined-green-v4\KillerPDF.dll
+appSha256=75AB9CD5AE6E8905CDAA55E5DE52E989C2BB4B764C2973A6B3AAD460D532FED9
+engineSha256=0CB54D458B54A86BB61B3C2679DAACD03F5FE9F5204D78B57FD5DD6E12D1FAD3
+
+[GREEN extract-rotation]
+exit=0
+PASS extract-rotation
+app=C:\Users\steve\scratch\kp-fresh-remediation-20261019\installer\combined-green-v4\KillerPDF.dll
+appSha256=75AB9CD5AE6E8905CDAA55E5DE52E989C2BB4B764C2973A6B3AAD460D532FED9
+engineSha256=0CB54D458B54A86BB61B3C2679DAACD03F5FE9F5204D78B57FD5DD6E12D1FAD3
+
+[GREEN print-rotation]
+exit=0
+PASS print-rotation
+app=C:\Users\steve\scratch\kp-fresh-remediation-20261019\installer\combined-green-v4\KillerPDF.dll
+appSha256=75AB9CD5AE6E8905CDAA55E5DE52E989C2BB4B764C2973A6B3AAD460D532FED9
+engineSha256=0CB54D458B54A86BB61B3C2679DAACD03F5FE9F5204D78B57FD5DD6E12D1FAD3
+
+[GREEN print-switch]
+exit=0
+PASS print-switch
+app=C:\Users\steve\scratch\kp-fresh-remediation-20261019\installer\combined-green-v4\KillerPDF.dll
+appSha256=75AB9CD5AE6E8905CDAA55E5DE52E989C2BB4B764C2973A6B3AAD460D532FED9
+engineSha256=0CB54D458B54A86BB61B3C2679DAACD03F5FE9F5204D78B57FD5DD6E12D1FAD3
+
+[GREEN redaction]
+exit=0
+PASS redaction
+app=C:\Users\steve\scratch\kp-fresh-remediation-20261019\installer\combined-green-v4\KillerPDF.dll
+appSha256=75AB9CD5AE6E8905CDAA55E5DE52E989C2BB4B764C2973A6B3AAD460D532FED9
+engineSha256=0CB54D458B54A86BB61B3C2679DAACD03F5FE9F5204D78B57FD5DD6E12D1FAD3
+
+[GREEN macro-rotation]
+exit=0
+PASS macro-rotation
+app=C:\Users\steve\scratch\kp-fresh-remediation-20261019\installer\combined-green-v4\KillerPDF.dll
+appSha256=75AB9CD5AE6E8905CDAA55E5DE52E989C2BB4B764C2973A6B3AAD460D532FED9
+engineSha256=0CB54D458B54A86BB61B3C2679DAACD03F5FE9F5204D78B57FD5DD6E12D1FAD3
+
+[GREEN merge-rotation]
+exit=0
+PASS merge-rotation
+app=C:\Users\steve\scratch\kp-fresh-remediation-20261019\installer\combined-green-v4\KillerPDF.dll
+appSha256=75AB9CD5AE6E8905CDAA55E5DE52E989C2BB4B764C2973A6B3AAD460D532FED9
+engineSha256=0CB54D458B54A86BB61B3C2679DAACD03F5FE9F5204D78B57FD5DD6E12D1FAD3
+
+[GREEN macro-source]
+exit=0
+PASS macro-source
+app=C:\Users\steve\scratch\kp-fresh-remediation-20261019\installer\combined-green-v4\KillerPDF.dll
+appSha256=75AB9CD5AE6E8905CDAA55E5DE52E989C2BB4B764C2973A6B3AAD460D532FED9
+engineSha256=0CB54D458B54A86BB61B3C2679DAACD03F5FE9F5204D78B57FD5DD6E12D1FAD3
+
+[GREEN macro-batch]
+exit=0
+PASS macro-batch
+app=C:\Users\steve\scratch\kp-fresh-remediation-20261019\installer\combined-green-v4\KillerPDF.dll
+appSha256=75AB9CD5AE6E8905CDAA55E5DE52E989C2BB4B764C2973A6B3AAD460D532FED9
+engineSha256=0CB54D458B54A86BB61B3C2679DAACD03F5FE9F5204D78B57FD5DD6E12D1FAD3
