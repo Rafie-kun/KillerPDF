@@ -55,6 +55,7 @@ namespace KillerPDF
                     },
                     documentUndo => SaveTempAndReload(
                         keepAnnotations: true,
+                        remapRedactionMarks: true,
                         finalizeSavedFile: path =>
                         {
                             if (burn.Count > 0)

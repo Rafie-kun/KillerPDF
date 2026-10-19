@@ -130,6 +130,43 @@ Generated merge publication was reviewed in source; the executable fixtures
 exercise the single-output macro path. Crash recovery and filesystem failure
 after successful redaction remain part of the separate publication work.
 
+## BF-002 and BF-010: pending marks and document history
+
+Structural edits now serialize pending marks into the temporary working copy
+before editing, so the engine moves or copies the same page objects as their
+content. The resulting mark state is published to the viewer only after the
+edited document reopens. Delete, insert, move, reverse, duplicate, import, and
+spread-division command paths opt into this transaction.
+
+The headless service extraction initially preserved the old behavior. Four
+runtime tests then reproduced stale indexes after delete, insert, and move,
+and missing marks on duplicate pages. All four pass with the repair and check
+the reopened redacted content, including preservation of unrelated text.
+Additional tests cover removal of a marked page, unchanged pending state after
+an injected edit failure, and spread division at all four quarter turns.
+
+The first spread implementation clipped stored marks to each half. Content
+extraction exposed selected text still recoverable beyond the crop of its
+other copy. The final implementation retains the full rebased mark on each
+copy, clipping only its displayed overlay. All four spread tests now apply
+redaction and assert that neither selected source word survives on either page.
+
+Document undo and inverse entries capture immutable mark collections, including
+coordinates, labels, and colors. Restoring a document restores marks and their
+count, and mark storage counts toward the history memory budget. Redaction
+failures propagate through the reload instead of recording successful history.
+Two snapshot tests check isolation from later edits and independent inverse
+state. Their initial failure was the absent snapshot API at compilation;
+this is not a runtime reproduction of the viewer's undo workflow.
+
+All 12 new cases and 132 related app tests pass. The Release app builds with
+zero errors and 11 existing third-party NTwain warnings. Evidence logs include
+`remap-red-03.log`, `remap-divide-content.log`, `remap-green-04.log`,
+`remap-related-tests.log`, and `remap-app-build.log` in the task scratch folder.
+Earlier test compile failures were corrected fixture API usage, not product
+regressions. Live UI apply/undo/redo, counts, repaint, and cross-pane behavior
+remain unverified until the UI restriction permits hands-on acceptance.
+
 ## Pending work
 
 BF-016 requires the actual installer reproduction in a disposable VM. At task

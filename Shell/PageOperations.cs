@@ -104,6 +104,7 @@ namespace KillerPDF
                     SaveTempAndReload(
                         keepAnnotations: true,
                         finalizeSavedFile: path => PdfEngineIntegration.RemovePages(path, indices),
+                        remapRedactionMarks: true,
                         remapRotations: rotations =>
                             PdfEngineIntegration.RemapRotationsAfterPageRemoval(rotations, indices),
                         documentUndo: documentUndo);
@@ -151,6 +152,7 @@ namespace KillerPDF
                         finalizeSavedFile: path =>
                             PdfEngineIntegration.InsertBlankPage(path, insertIndex,
                                 sizeDialog.WidthPoints, sizeDialog.HeightPoints),
+                        remapRedactionMarks: true,
                         remapRotations: rotations =>
                             PdfEngineIntegration.RemapRotationsAfterPageInsertion(
                                 rotations, insertIndex),
@@ -196,6 +198,7 @@ namespace KillerPDF
                     finalizeSavedFile: path =>
                         PdfEngineIntegration.InsertBlankPage(path, insertIndex,
                             sizeDialog.WidthPoints, sizeDialog.HeightPoints),
+                    remapRedactionMarks: true,
                     remapRotations: rotations =>
                         PdfEngineIntegration.RemapRotationsAfterPageInsertion(
                             rotations, insertIndex));
@@ -220,6 +223,7 @@ namespace KillerPDF
                 documentUndo => SaveTempAndReload(
                     keepAnnotations: true,
                     finalizeSavedFile: path => PdfEngineIntegration.MovePage(path, idx, idx - 1),
+                    remapRedactionMarks: true,
                     remapRotations: rotations =>
                         PdfEngineIntegration.RemapRotationsAfterPageMove(rotations, idx, idx - 1),
                     documentUndo: documentUndo));
@@ -238,6 +242,7 @@ namespace KillerPDF
                 documentUndo => SaveTempAndReload(
                     keepAnnotations: true,
                     finalizeSavedFile: path => PdfEngineIntegration.MovePage(path, idx, idx + 1),
+                    remapRedactionMarks: true,
                     remapRotations: rotations =>
                         PdfEngineIntegration.RemapRotationsAfterPageMove(rotations, idx, idx + 1),
                     documentUndo: documentUndo));

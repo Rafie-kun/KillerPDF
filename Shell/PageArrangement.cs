@@ -39,6 +39,7 @@ namespace KillerPDF
                     documentUndo => SaveTempAndReload(
                         keepAnnotations: true,
                         finalizeSavedFile: path => PdfEngineIntegration.ReorderPages(path, order),
+                        remapRedactionMarks: true,
                         remapRotations: rotations => PdfEngineIntegration.RemapRotationsAfterReorder(rotations, order),
                         selectedPageAfterReload: Math.Max(0, order.ToList().IndexOf(selected)),
                         documentUndo: documentUndo));

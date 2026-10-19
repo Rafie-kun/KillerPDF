@@ -360,6 +360,7 @@ namespace KillerPDF
                         keepAnnotations: true,
                         finalizeSavedFile: path =>
                             PdfEngineIntegration.DuplicatePage(path, pageIdx),
+                        remapRedactionMarks: true,
                         remapRotations: rotations =>
                             PdfEngineIntegration.RemapRotationsAfterPageDuplication(
                                 rotations, pageIdx),

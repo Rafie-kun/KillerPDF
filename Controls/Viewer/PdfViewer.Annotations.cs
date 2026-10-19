@@ -2666,7 +2666,8 @@ namespace KillerPDF.Controls
         private UndoEntry CreateDocumentUndoEntry(byte[] bytes)
             => new(UndoKind.Document, DocBytes: bytes, WasDirty: _isDirty,
                 AnnotSnapshot: CaptureAllAnnotationState(),
-                PageRotations: new Dictionary<int, int>(_pageRotations));
+                PageRotations: new Dictionary<int, int>(_pageRotations),
+                RedactionSnapshot: new(_redactMarks));
 
         private Dictionary<int, List<PageAnnotation>> CaptureAllAnnotationState()
         {
@@ -2872,6 +2873,7 @@ namespace KillerPDF.Controls
                 if (entry.PageRotations is not null)
                     foreach (var pair in entry.PageRotations)
                         _pageRotations[pair.Key] = pair.Value;
+                RestoreRedactionMarksExt(entry.RedactionSnapshot ?? new([]));
                 _renderDims.Clear();
                 InvalidateRenderCache(_active);
                 ClearSelection();
@@ -2915,6 +2917,8 @@ namespace KillerPDF.Controls
             if (entry.AnnotSnapshot is not null)
                 bytes += entry.AnnotSnapshot.Values.Sum(list => (long)list.Count * 4096);
             if (entry.AnnotGroup is not null) bytes += (long)entry.AnnotGroup.Count * 4096;
+            if (entry.RedactionSnapshot is not null)
+                bytes += entry.RedactionSnapshot.Marks.Sum(mark => 96L + (mark.OverlayText?.Length ?? 0) * 2L);
             return Math.Max(1, bytes);
         }
 

@@ -13,9 +13,6 @@ namespace KillerPDF.Controls
     // survive zoom and view changes. They belong to the document they were drawn on, stay visible
     // after the tool closes, and are saved into the file as /Redact annotations until applied. Each
     // mark carries the overlay text and fill color drawn into its area when it is applied.
-    internal sealed record RedactionMark(int PageIndex, double Left, double Bottom, double Right, double Top,
-        string? OverlayText = null, Color? Fill = null);
-
     public partial class PdfViewer
     {
         private const string RedactMarkTag = "RedactMark";
@@ -25,6 +22,15 @@ namespace KillerPDF.Controls
         private static string? _redactOverlayDefault;
         private static bool _redactDefaultsLoaded;
         private List<RedactionMark> _redactMarks = [];
+
+        internal RedactionMarkSnapshot CaptureRedactionMarksExt() => new(_redactMarks);
+
+        internal void RestoreRedactionMarksExt(RedactionMarkSnapshot snapshot)
+        {
+            _redactMarks = [.. snapshot.Marks];
+            UpdateRedactionCount();
+            RepaintRedactionMarks();
+        }
         private Border? _redactBar;
         private TextBlock? _redactCountText;
         private Rectangle? _redactDrawRect;
@@ -219,7 +225,10 @@ namespace KillerPDF.Controls
         {
             if (!TryPageGeometry(mark.PageIndex, out double pw, out double ph, out double cw, out double ch, out int rot))
                 return null;
-            return RedactionGeometry.PageToCanvas(mark.Left, mark.Bottom, mark.Right, mark.Top, pw, ph, cw, ch, rot);
+            double left = Math.Max(0, mark.Left), bottom = Math.Max(0, mark.Bottom);
+            double right = Math.Min(pw, mark.Right), top = Math.Min(ph, mark.Top);
+            if (right <= left || top <= bottom) return null;
+            return RedactionGeometry.PageToCanvas(left, bottom, right, top, pw, ph, cw, ch, rot);
         }
 
         /// <summary>Repaints this page's marks on its overlay. Called at the end of every annotation re-render.</summary>
@@ -529,8 +538,7 @@ namespace KillerPDF.Controls
             {
                 SaveTempAndReload(keepAnnotations: true, preserveZoom: true, finalizeSavedFile: path =>
                 {
-                    try { result = PdfEngineIntegration.ApplyRedaction(path, regions, approved); }
-                    catch (Exception ex) { failure = ex; }
+                    result = PdfEngineIntegration.ApplyRedaction(path, regions, approved);
                 });
             }
             catch (Exception ex) { failure ??= ex; }
@@ -547,6 +555,7 @@ namespace KillerPDF.Controls
                 if (_annotations.TryGetValue(page, out var list)) list.Remove(annotation);
             // The applied marks are gone with their content; marks on skipped pages stay for later.
             _redactMarks.RemoveAll(mark => !skipped.Contains(mark.PageIndex));
+            UpdateRedactionCount();
             RepaintRedactionMarks();
             int pages = regions.Select(region => region.PageIndex).Distinct().Count();
             string status = approved.Count == 0

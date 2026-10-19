@@ -26,7 +26,8 @@ namespace KillerPDF
             Action<Dictionary<int, int>>? remapRotations = null,
             int? selectedPageAfterReload = null,
             UndoEntry? documentUndo = null,
-            bool preserveRenderedPages = false)
+            bool preserveRenderedPages = false,
+            bool remapRedactionMarks = false)
         {
             if (_doc is null || _currentFile is null) return;
             // Every user command asks for the owner password before it gets here. This catches
@@ -102,7 +103,12 @@ namespace KillerPDF
             // Structural operations can finalize the freshly serialized working file through
             // KillerPDF.Engine before PdfSharpCore reopens it. The callback owns atomic replacement
             // of tempPath and runs only after the base save or repair path has completed.
-            finalizeSavedFile?.Invoke(tempPath);
+            Controls.RedactionMarkSnapshot? remappedMarks = null;
+            if (remapRedactionMarks && finalizeSavedFile is not null)
+                remappedMarks = RedactionPageEdit.Apply(tempPath,
+                    ActiveViewer.CaptureRedactionMarksExt(), finalizeSavedFile);
+            else
+                finalizeSavedFile?.Invoke(tempPath);
 
             // PdfSharpCore sometimes saves a file where one object's xref offset points at the
             // xref table itself (object N offset = xref table position). When PdfSharp then tries
@@ -123,6 +129,7 @@ namespace KillerPDF
                 _doc = PdfWorkingDocument.Open(tempPath);
             }
             _currentFile = tempPath;
+            if (remappedMarks is not null) ActiveViewer.RestoreRedactionMarksExt(remappedMarks);
             if (documentUndo is { } completedUndo)
                 ActiveViewer.PushUndoExt(completedUndo);
 

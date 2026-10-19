@@ -278,6 +278,7 @@ namespace KillerPDF
                         preserveZoom: true,
                         finalizeSavedFile: path =>
                             PdfEngineIntegration.InsertDocuments(path, imports, insertAt),
+                        remapRedactionMarks: true,
                         remapRotations: rotations =>
                             PdfEngineIntegration.RemapRotationsAfterDocumentInsertion(
                                 rotations, imports, insertAt),
@@ -507,6 +508,7 @@ namespace KillerPDF
                 keepAnnotations: true,
                 preserveZoom: true,
                 finalizeSavedFile: path => PdfEngineIntegration.InsertDocuments(path, imports, insertAt),
+                remapRedactionMarks: true,
                 remapRotations: rotations =>
                     PdfEngineIntegration.RemapRotationsAfterDocumentInsertion(rotations, imports, insertAt),
                 selectedPageAfterReload: insertAt,
@@ -599,6 +601,7 @@ namespace KillerPDF
                     keepAnnotations: true,
                     finalizeSavedFile: path =>
                         selectedAfter = PdfEngineIntegration.MovePages(path, fromIndices, insertionIndex),
+                    remapRedactionMarks: true,
                     remapRotations: rotations =>
                         PdfEngineIntegration.RemapRotationsAfterPageMoves(
                             rotations, fromIndices, insertionIndex),

@@ -24,6 +24,9 @@
 
   <ItemGroup>
     <Compile Include="..\Models\EditingTypes.cs" Link="Models\EditingTypes.cs" />
+    <Compile Include="..\Models\UndoTypes.cs" Link="Models\UndoTypes.cs" />
+    <Compile Include="..\Models\RedactionMark.cs" Link="Models\RedactionMark.cs" />
+    <Compile Include="..\Services\RedactionPageEdit.cs" Link="Services\RedactionPageEdit.cs" />
     <Compile Include="..\Services\AppDataPaths.cs" Link="Services\AppDataPaths.cs" />
     <Compile Include="..\Services\SignatureStore.cs" Link="Services\SignatureStore.cs" />
     <Compile Include="..\Services\TextFieldPresetStore.cs" Link="Services\TextFieldPresetStore.cs" />
