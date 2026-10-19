@@ -256,6 +256,31 @@ in `flatten-state-tests.log` and `flatten-state-build.log`. Full field-type and
 rotation acceptance through Save Flattened, independently rendered output, and
 editor dirty-state checks remain pending until UI testing is allowed.
 
+## BF-008: JPEG placement eligibility
+
+Six eligibility regressions reproduced false passthrough for horizontal and
+vertical reflection, half and quarter turns, and skew. Passthrough now requires
+the effective image matrix to match canonical placement relative to the crop
+origin. The CLI additionally rejects passthrough when its separate rotation
+snapshot is nonzero. Upright JPEG payloads remain unchanged, including an image
+placed exactly at a nonzero crop origin. All 13 focused engine checks pass.
+
+A real asymmetric four-color JPEG was flattened through the CLI at matching
+72 DPI, then source and output were independently rendered by PDFium. The old
+app produced mean absolute channel error 191.167 for horizontal reflection.
+With the fix, all 10 fixtures pass the 12/255 error threshold and exact rendered
+dimension comparison. Errors: upright 0; reflections and half-turn about 2.29;
+quarter turns about 2.20; skew 7.459; native 90/180/270 rotations 2.279 to 2.299.
+Quarter-turn native pages retain their 48 by 96 dimensions. Outputs contain no
+interactive form fields. The nonzero differences include JPEG re-encoding and
+renderer sampling; this is a bounded fixture comparison, not corpus parity.
+
+Evidence: `jpeg-placement-red01.log`, `jpeg-placement-green02.log`,
+`jpeg-app-build.log` (11 existing warnings, no errors), and
+`jpeg-external-green01.log`. The scratch `check-jpeg-flatten.py` owns the fixtures
+and independent comparison. GUI acceptance still requires the actual Save
+Flattened interaction; its shared eligibility check is covered by engine tests.
+
 ## Pending work
 
 BF-016 requires the actual installer reproduction in a disposable VM. At task

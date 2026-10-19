@@ -67,6 +67,11 @@ public static class PdfPageRasterInformation
         PdfExtractedImage placement = content.Images[0];
         if (placement.IsInline || string.IsNullOrEmpty(placement.ResourceName)
             || !CoversPage(placement.BoundingBox, content.Width, content.Height)
+            || placement.Placement is not { } matrix
+            || Math.Abs(matrix.A - content.Width) > 0.01
+            || Math.Abs(matrix.D - content.Height) > 0.01
+            || Math.Abs(matrix.B) > 0.01 || Math.Abs(matrix.C) > 0.01
+            || Math.Abs(matrix.E) > 0.01 || Math.Abs(matrix.F) > 0.01
             || content.Instructions.Any(instruction =>
                 instruction.Operator is not ("q" or "Q" or "cm" or "Do"))
             || content.Instructions.Count(instruction => instruction.Operator == "Do") != 1)

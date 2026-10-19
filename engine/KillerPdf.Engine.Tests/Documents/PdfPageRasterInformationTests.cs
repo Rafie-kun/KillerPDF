@@ -88,6 +88,38 @@ public sealed class PdfPageRasterInformationTests
     }
 
     [Fact]
+    public void TryReadFullPageJpeg_AcceptsCanonicalPlacementAtCropOrigin()
+    {
+        byte[] source = new PdfDocumentBuilder()
+            .AddPage(160, 100, new PdfContentStreamBuilder()
+                .DrawImage(PdfImage.FromJpeg(MinimalJpeg(2, 1)), 20, 30, 100, 50))
+            .Build();
+        byte[] cropped = new KillerPdf.Engine.Editing.PdfIncrementalPageEditor(PdfDocument.Open(source))
+            .SetCropBox(0, 20, 30, 100, 50).Build();
+        Assert.True(PdfPageRasterInformation.TryReadFullPageJpeg(PdfDocument.Open(cropped), 0, out _));
+    }
+
+    [Theory]
+    [InlineData(-1, 0, 0, 1, 100, 0)]
+    [InlineData(1, 0, 0, -1, 0, 50)]
+    [InlineData(-1, 0, 0, -1, 100, 50)]
+    [InlineData(0, 0.5, -2, 0, 100, 0)]
+    [InlineData(0, -0.5, 2, 0, 0, 50)]
+    [InlineData(0.9, 0, 0.2, 1, 0, 0)]
+    public void TryReadFullPageJpeg_RejectsNoncanonicalPlacement(
+        double a, double b, double c, double d, double e, double f)
+    {
+        byte[] source = new PdfDocumentBuilder()
+            .AddPage(100, 50, new PdfContentStreamBuilder()
+                .Transform(a, b, c, d, e, f)
+                .DrawImage(PdfImage.FromJpeg(MinimalJpeg(2, 1)), 0, 0, 100, 50))
+            .Build();
+
+        Assert.False(PdfPageRasterInformation.TryReadFullPageJpeg(
+            PdfDocument.Open(source), 0, out _));
+    }
+
+    [Fact]
     public void TryReadFullPageJpeg_RejectsPartialAndMultipleImagePages()
     {
         PdfImage jpeg = PdfImage.FromJpeg(MinimalJpeg(2, 1));

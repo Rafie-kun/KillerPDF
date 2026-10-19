@@ -1748,7 +1748,7 @@ namespace KillerPDF.Features
                     hPt = h * 72.0 / dpi;
                 }
 
-                if (colorMode == PageColorMode.Color && !useJpeg && look is null
+                if (colorMode == PageColorMode.Color && !useJpeg && look is null && rot == 0
                     && PdfPageRasterInformation.TryReadFullPageJpeg(
                         renderDocument, i, out PdfImage? original)
                     && original is not null
