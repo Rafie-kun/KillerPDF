@@ -147,7 +147,7 @@ namespace KillerLauncher
             }
             if (_existing == null && _page < 2) { _page++; RenderPage(); return; }
             string installDirectory;
-            try { installDirectory = Program.ValidateInstallDirectory(InstallFolder.Text); }
+            try { installDirectory = Program.ValidateInstallDestination(InstallFolder.Text); }
             catch (Exception ex)
             {
                 _page = 1;

@@ -161,9 +161,9 @@ namespace KillerLauncher
                 throw new InvalidOperationException(
                     LauncherStrings.Get("AlreadyMachine"));
 
-            string destination = !string.IsNullOrWhiteSpace(testRoot)
-                ? Path.GetFullPath(testRoot)
-                : ValidateInstallDirectory(destinationOverride ?? DefaultInstallDirectory(machine));
+            string destination = ValidateInstallDestination(!string.IsNullOrWhiteSpace(testRoot)
+                ? testRoot
+                : destinationOverride ?? DefaultInstallDirectory(machine));
             if (string.IsNullOrWhiteSpace(testRoot))
                 CloseInstalledCopies(machine
                     ? new[] { destination, UserInstallDirectory }
@@ -178,6 +178,7 @@ namespace KillerLauncher
             {
                 ExtractAndVerify(staging);
 
+                ValidateInstallDestination(destination);
                 if (Directory.Exists(destination))
                 {
                     MoveDirectoryWithRetries(destination, backup);
@@ -388,6 +389,62 @@ namespace KillerLauncher
                     StringComparison.OrdinalIgnoreCase))
                 throw new InvalidOperationException(LauncherStrings.Get("DriveRoot"));
             return path.TrimEnd(Path.DirectorySeparatorChar);
+        }
+
+        internal static string ValidateInstallDestination(string directory)
+        {
+            string path = ValidateInstallDirectory(directory);
+            for (string? ancestor = path; ancestor != null; ancestor = Path.GetDirectoryName(ancestor))
+                if (Directory.Exists(ancestor) &&
+                    (File.GetAttributes(ancestor) & FileAttributes.ReparsePoint) != 0)
+                    throw new InvalidOperationException(LauncherStrings.Get("RequestedDirectoryInvalid"));
+            if (!Directory.Exists(path)) return path;
+            if (!Directory.EnumerateFileSystemEntries(path).Any()) return path;
+
+            string manifestPath = Path.Combine(path, ManifestName);
+            if (!File.Exists(manifestPath) ||
+                (File.GetAttributes(manifestPath) & FileAttributes.ReparsePoint) != 0)
+                throw new InvalidOperationException(LauncherStrings.Get("RequestedDirectoryInvalid"));
+            Dictionary<string, ManifestFile> manifest;
+            using (var reader = File.OpenText(manifestPath)) manifest = ReadManifest(reader);
+            if (!manifest.ContainsKey(InnerExeName) || manifest.ContainsKey(ManifestName))
+                throw new InvalidOperationException(LauncherStrings.Get("RequestedDirectoryInvalid"));
+
+            var pending = new Stack<string>();
+            pending.Push(path);
+            while (pending.Count > 0)
+            {
+                foreach (string entry in Directory.EnumerateFileSystemEntries(pending.Pop()))
+                {
+                    FileAttributes attributes = File.GetAttributes(entry);
+                    if ((attributes & FileAttributes.ReparsePoint) != 0)
+                        throw new InvalidOperationException(LauncherStrings.Get("RequestedDirectoryInvalid"));
+                    string relative = entry.Substring(path.Length + 1).Replace('\\', '/');
+                    if ((attributes & FileAttributes.Directory) != 0)
+                    {
+                        if (!manifest.Keys.Any(k => k.StartsWith(relative + "/", StringComparison.OrdinalIgnoreCase)))
+                            throw new InvalidOperationException(LauncherStrings.Get("RequestedDirectoryInvalid"));
+                        pending.Push(entry);
+                    }
+                    else if (!string.Equals(relative, ManifestName, StringComparison.OrdinalIgnoreCase) &&
+                        !manifest.ContainsKey(relative))
+                    {
+                        // Registration creates this wrapper beside the verified payload.
+                        if (!string.Equals(relative, "KillerPDF.cmd", StringComparison.OrdinalIgnoreCase) ||
+                            File.ReadAllText(entry) != "@\"%~dp0KillerPDF.App.exe\" %*\r\n@exit /b %ERRORLEVEL%\r\n")
+                            throw new InvalidOperationException(LauncherStrings.Get("RequestedDirectoryInvalid"));
+                    }
+                }
+            }
+            foreach (var item in manifest)
+            {
+                string file = Path.Combine(path, item.Key.Replace('/', Path.DirectorySeparatorChar));
+                var info = new FileInfo(file);
+                if (!info.Exists || info.Length != item.Value.Size ||
+                    !string.Equals(HashFile(file), item.Value.Sha256, StringComparison.OrdinalIgnoreCase))
+                    throw new InvalidOperationException(LauncherStrings.Get("RequestedDirectoryInvalid"));
+            }
+            return path;
         }
 
         internal static string InstalledExecutable(string directory) =>

@@ -91,6 +91,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - The website's top bar Download button uses the same font and height as the other top bar buttons.
 
 ### Fixed
+- Installation refuses to replace folders containing unrelated or unverified files.
 - Disabled VBA macros while Word and Excel open legacy documents for conversion.
 - Permanent redaction removes covered vectors, keeps pending marks with page edits and undo, and requires approval to rasterize partly covered drawings (#341).
 - Macro redaction keeps marks and approval with its original document.
