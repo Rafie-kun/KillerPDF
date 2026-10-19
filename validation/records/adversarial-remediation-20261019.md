@@ -343,6 +343,23 @@ The latter also reproduced and repaired the empty incremental-edit failure
 when extraction keeps every page unchanged. Evidence: `extract-red01.log`,
 `extract-red02.log` (six failures), and `extract-green01.log` (15 passes).
 
+## NI-002: embedded intermediate certificates
+
+A fresh synthetic root, intermediate, and signer reproduced failed trust with
+the intermediate embedded in CMS, the root explicitly trusted, and certificate
+downloads disabled. Candidate causes were an omitted chain candidate, an
+invalid synthetic certificate, and stale system-chain state. The missing CMS
+certificates in ExtraStore were confirmed; adding them makes the same case
+pass. Each test creates unique keys and names without writing certificate
+stores or using network issuer downloads.
+
+All 10 signature verification checks pass. Negative cases still reject a
+missing intermediate and an embedded root that has not been explicitly trusted.
+Embedded certificates only enter ExtraStore; trust anchors remain the system
+or caller-selected roots. Revocation policy is unchanged, and these synthetic
+fixtures use NoCheck. Evidence: `certificate-red01.log` (one failure, two
+passes) and `certificate-green01.log` (10 passes).
+
 ## Pending work
 
 BF-016 requires the actual installer reproduction in a disposable VM. At task

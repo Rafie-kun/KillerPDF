@@ -91,6 +91,8 @@ public static class PdfSignatureVerifier
                 chain.ChainPolicy.UrlRetrievalTimeout = policy.UrlRetrievalTimeout;
                 chain.ChainPolicy.DisableCertificateDownloads =
                     policy.DisableCertificateDownloads;
+                // Embedded certificates are chain candidates, never trust anchors.
+                chain.ChainPolicy.ExtraStore.AddRange(cms.Certificates);
                 foreach (X509Certificate2 certificate in policy.ExtraCertificates)
                     chain.ChainPolicy.ExtraStore.Add(certificate);
                 if (policy.CustomTrustRoots.Count > 0)
