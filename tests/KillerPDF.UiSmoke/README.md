@@ -58,3 +58,11 @@ unselected semantic brushes. It retains PNGs and a result with the assembly hash
 Normal app startup is suppressed, preferences remain in memory, and files stay
 under the supplied evidence directory or the process's temporary directory. It
 uses WPF controls directly and does not certify physical input or a screen reader.
+
+## Help overflow regression
+
+Use `--verify-scroll-overlays APP_DLL APP_XAML OUTPUT_DIRECTORY --startup-smoke`
+to measure and render the compiled Help card in Dark, Light, and 98SE. The check
+covers short and normal heights, both scroll ends, fitting content, the keyboard
+view, and separation of the scrollbar from Close. App startup is suppressed and
+the output folder owns all test settings. No desktop input is sent.

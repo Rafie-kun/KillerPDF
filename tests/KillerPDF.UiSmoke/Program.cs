@@ -31,6 +31,8 @@ internal static class Program
     {
         try
         {
+            if (args.Length == 5 && args[0] == "--verify-scroll-overlays" && args[4] == "--startup-smoke")
+                return ScrollOverlaySmoke.Run(Path.GetFullPath(args[1]), Path.GetFullPath(args[2]), Path.GetFullPath(args[3]));
             if (args.Length == 5 && args[0] == "--verify-presets" && args[4] == "--startup-smoke")
                 return PresetSelectionSmoke.Run(Path.GetFullPath(args[1]), Path.GetFullPath(args[2]), Path.GetFullPath(args[3]));
             if (args.Length == 4 && args[0] == "--host")

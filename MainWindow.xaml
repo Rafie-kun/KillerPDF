@@ -30,6 +30,7 @@
                  the footer's Install button uses it below. Already used by the file dialog; merged
                  here too rather than duplicating the style, so the two never drift apart. -->
             <ResourceDictionary Source="pack://application:,,,/Controls/PickerStyles.xaml"/>
+            <ResourceDictionary Source="pack://application:,,,/Controls/OverlayScrollViewer.xaml"/>
         </ResourceDictionary.MergedDictionaries>
         <!-- Brush keys come from Application.Resources (theme dicts) via DynamicResource.
              Only non-color styles live here. -->
@@ -3374,11 +3375,11 @@
                                 Content="{DynamicResource AboutCloseGlyph}" Style="{StaticResource OverlayCloseButton}"/>
                     </Grid>
                 </Border>
-                <ScrollViewer Grid.Row="1"
+                <ScrollViewer x:Name="ShortcutScroll" Grid.Row="1" Style="{StaticResource OverlayScrollViewer}" Padding="18,14,18,18"
                               VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled"
                               CanContentScroll="False">
-                <StackPanel Margin="18,14,18,18">
+                <StackPanel>
                     <Grid Margin="0,0,0,12">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>

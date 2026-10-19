@@ -168,6 +168,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Toolbar buttons return to their normal height after switching away from Text under icons.
 - Button gradients start at the outline color and darken toward the bottom, so a hovered button no longer looks darker than its border.
 - The About card marks 1.9 development builds as unreleased.
+- Help shows scroll shadows only when more content is available.
 - The installer centers the complete version number on its own line (#440).
 - The repair prompt reads as plain sentences in every language.
 - Link menu items no longer show Ctrl+C and Delete, which never acted on a link, and tool tooltips no longer show their key twice.
