@@ -778,7 +778,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Sidebar_Right">Sağ</sys:String>
     <sys:String x:Key="Str_Sidebar_Top">Üst</sys:String>
     <sys:String x:Key="Str_Sidebar_Bottom">Alt</sys:String>
-    <sys:String x:Key="Str_Sidebar_IconsRight">Ray simgeleri sağda</sys:String>
+    <sys:String x:Key="Str_Rail_Flip">Simgeleri diğer tarafa taşı</sys:String>
     <sys:String x:Key="Str_KS_ToggleSidebar">Kenar çubuğunu aç/kapat</sys:String>
     <sys:String x:Key="Str_KS_ToolbarStyle">Araç çubuğu görünümü</sys:String>
     <sys:String x:Key="Str_KS_SidebarSide">Kenar çubuğunu sonraki kenara taşı</sys:String>

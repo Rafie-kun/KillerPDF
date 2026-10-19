@@ -861,7 +861,7 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Sidebar_Right">右</sys:String>
     <sys:String x:Key="Str_Sidebar_Top">上</sys:String>
     <sys:String x:Key="Str_Sidebar_Bottom">下</sys:String>
-    <sys:String x:Key="Str_Sidebar_IconsRight">レールのアイコンを右に</sys:String>
+    <sys:String x:Key="Str_Rail_Flip">アイコンを反対側に移動</sys:String>
     <sys:String x:Key="Str_KS_ToggleSidebar">サイドバーの切り替え</sys:String>
     <sys:String x:Key="Str_KS_ToolbarStyle">ツールバーの外観</sys:String>
     <sys:String x:Key="Str_KS_SidebarSide">サイドバーを次の端へ移動</sys:String>

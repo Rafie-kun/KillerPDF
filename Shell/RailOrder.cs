@@ -16,7 +16,9 @@ namespace KillerPDF
     ///
     /// Each button keeps its own spacing, so a group gap travels with the button it follows.
     /// A strip that mirrors its rail (the icons reading outward from the middle) is read either
-    /// way round.
+    /// way round. Flipping (the rail menu's Move icons to the other side) reverses the buttons
+    /// and turns each gap with them, so the edge buttons stay outermost at the other end; the
+    /// app moves the stack and the chevron to their swapped ends.
     /// Elements on the rail that are not registered stay where they are.
     /// (From KillerUI/Shell/RailOrder.cs.)
     /// </summary>
@@ -29,6 +31,30 @@ namespace KillerPDF
         private FrameworkElement? _pressed;
         private Point _pressPoint;
         private bool _dragging;
+
+        /// <summary>True while the edge buttons sit at the rail's other end.</summary>
+        internal bool Flipped { get; private set; }
+
+        /// <summary>
+        /// Reverses the rail so the edge buttons, still outermost, read from the other end. Each
+        /// registered button's gap turns with it, so a group gap stays between the same two
+        /// buttons. The saved order is unaffected.
+        /// </summary>
+        internal void SetFlipped(bool flipped)
+        {
+            if (flipped == Flipped) return;
+            Flipped = flipped;
+            bool horizontal = Horizontal();
+            var shown = Shown();
+            foreach (FrameworkElement button in shown)
+            {
+                Thickness m = button.Margin;
+                button.Margin = horizontal ? new Thickness(m.Right, m.Top, m.Left, m.Bottom)
+                    : new Thickness(m.Left, m.Bottom, m.Right, m.Top);
+            }
+            shown.Reverse();
+            Place(shown, null);
+        }
 
         /// <summary>Raised after a drag changes the order, once it has been saved.</summary>
         internal event Action? Changed;

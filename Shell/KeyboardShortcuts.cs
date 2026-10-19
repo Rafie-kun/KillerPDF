@@ -508,7 +508,7 @@ namespace KillerPDF
             }
             else if (key == Key.F9 && mods == ModifierKeys.Control)
             {
-                ToggleRailIconsEnd();   // a top or bottom strip's icons to the other end of its rail
+                ToggleRailIconsEnd();   // the rail's icons to its other end
                 e.Handled = true;
             }
             else if (key == Key.N && mods == ModifierKeys.Control)

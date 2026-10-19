@@ -1,4 +1,9 @@
 using System;
+using System.Linq;
+using System.Runtime.ExceptionServices;
+using System.Threading;
+using System.Windows;
+using System.Windows.Controls;
 using Xunit;
 
 namespace KillerPDF.Tests
@@ -61,5 +66,57 @@ namespace KillerPDF.Tests
         [Fact]
         public void ThereIsNoSlotOnAnEmptyRail()
             => Assert.Equal(-1, RailOrder.NearestSlot(Array.Empty<double>(), 10));
+
+        [Fact]
+        public void FlippingPutsTheEdgeButtonsOutermostAtTheOtherEndAndBack() => RunSta(() =>
+        {
+            var rail = new StackPanel();
+            Button Add(string name, double gapBelow)
+            {
+                var button = new Button { Name = name, Margin = new Thickness(0, 0, 0, gapBelow) };
+                rail.Children.Add(button);
+                return button;
+            }
+            Button a = Add("A", 6), b = Add("B", 14), help = Add("Help", 6), lang = Add("Lang", 6), theme = Add("Theme", 0);
+            string[] Names() => rail.Children.OfType<FrameworkElement>().Select(e => e.Name).ToArray();
+            var order = RailOrder.Attach(rail, new FrameworkElement[] { theme, lang, help },
+                new FrameworkElement[] { a, b }, null, _ => { });
+
+            order.SetFlipped(true);
+            Assert.True(order.Flipped);
+            Assert.Equal(new[] { "Theme", "Lang", "Help", "B", "A" }, Names());
+            Assert.Equal(new Thickness(0, 14, 0, 0), b.Margin);   // still the gap between Help and B
+            Assert.Equal(new Thickness(0), theme.Margin);
+
+            order.SetFlipped(false);
+            Assert.Equal(new[] { "A", "B", "Help", "Lang", "Theme" }, Names());
+            Assert.Equal(new Thickness(0, 0, 0, 14), b.Margin);
+        });
+
+        [Fact]
+        public void AHorizontalRailFlipsItsGapsSideways() => RunSta(() =>
+        {
+            var rail = new StackPanel { Orientation = Orientation.Horizontal };
+            var a = new Button { Name = "A", Margin = new Thickness(0, 0, 6, 0) };
+            var theme = new Button { Name = "Theme" };
+            rail.Children.Add(a);
+            rail.Children.Add(theme);
+            var order = RailOrder.Attach(rail, new FrameworkElement[] { theme }, new FrameworkElement[] { a }, null, _ => { });
+
+            order.SetFlipped(true);
+
+            Assert.Same(theme, rail.Children[0]);
+            Assert.Equal(new Thickness(6, 0, 0, 0), a.Margin);
+        });
+
+        private static void RunSta(Action action)
+        {
+            Exception? failure = null;
+            var thread = new Thread(() => { try { action(); } catch (Exception e) { failure = e; } });
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
+            thread.Join();
+            if (failure is not null) ExceptionDispatchInfo.Capture(failure).Throw();
+        }
     }
 }

@@ -766,7 +766,7 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Sidebar_Right">Оң</sys:String>
     <sys:String x:Key="Str_Sidebar_Top">Жоғары</sys:String>
     <sys:String x:Key="Str_Sidebar_Bottom">Төмен</sys:String>
-    <sys:String x:Key="Str_Sidebar_IconsRight">Жолақ белгішелері оң жақта</sys:String>
+    <sys:String x:Key="Str_Rail_Flip">Белгішелерді екінші жаққа жылжыту</sys:String>
     <sys:String x:Key="Str_KS_ToggleSidebar">Бүйірлік панельді ауыстыру</sys:String>
     <sys:String x:Key="Str_KS_ToolbarStyle">Құралдар тақтасының түрі</sys:String>
     <sys:String x:Key="Str_KS_SidebarSide">Бүйірлік панельді келесі шетке жылжыту</sys:String>

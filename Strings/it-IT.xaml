@@ -861,7 +861,7 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_Sidebar_Right">A destra</sys:String>
     <sys:String x:Key="Str_Sidebar_Top">In alto</sys:String>
     <sys:String x:Key="Str_Sidebar_Bottom">In basso</sys:String>
-    <sys:String x:Key="Str_Sidebar_IconsRight">Icone della barra a destra</sys:String>
+    <sys:String x:Key="Str_Rail_Flip">Sposta le icone sull'altro lato</sys:String>
     <sys:String x:Key="Str_KS_ToggleSidebar">Attiva/disattiva barra laterale</sys:String>
     <sys:String x:Key="Str_KS_ToolbarStyle">Aspetto della barra strumenti</sys:String>
     <sys:String x:Key="Str_KS_SidebarSide">Sposta la barra laterale sul bordo successivo</sys:String>

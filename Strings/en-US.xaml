@@ -861,7 +861,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Sidebar_Right">Right</sys:String>
     <sys:String x:Key="Str_Sidebar_Top">Top</sys:String>
     <sys:String x:Key="Str_Sidebar_Bottom">Bottom</sys:String>
-    <sys:String x:Key="Str_Sidebar_IconsRight">Rail icons on the right</sys:String>
+    <sys:String x:Key="Str_Rail_Flip">Move icons to the other side</sys:String>
     <sys:String x:Key="Str_KS_ToggleSidebar">Toggle sidebar</sys:String>
     <sys:String x:Key="Str_KS_ToolbarStyle">Toolbar appearance</sys:String>
     <sys:String x:Key="Str_KS_SidebarSide">Move sidebar to the next side</sys:String>

@@ -861,7 +861,7 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Sidebar_Right">Direita</sys:String>
     <sys:String x:Key="Str_Sidebar_Top">Em cima</sys:String>
     <sys:String x:Key="Str_Sidebar_Bottom">Embaixo</sys:String>
-    <sys:String x:Key="Str_Sidebar_IconsRight">Ícones do trilho à direita</sys:String>
+    <sys:String x:Key="Str_Rail_Flip">Mover os ícones para o outro lado</sys:String>
     <sys:String x:Key="Str_KS_ToggleSidebar">Alternar barra lateral</sys:String>
     <sys:String x:Key="Str_KS_ToolbarStyle">Aparência da barra de ferramentas</sys:String>
     <sys:String x:Key="Str_KS_SidebarSide">Mover barra lateral para a próxima borda</sys:String>

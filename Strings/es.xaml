@@ -778,7 +778,7 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Sidebar_Right">Derecha</sys:String>
     <sys:String x:Key="Str_Sidebar_Top">Arriba</sys:String>
     <sys:String x:Key="Str_Sidebar_Bottom">Abajo</sys:String>
-    <sys:String x:Key="Str_Sidebar_IconsRight">Iconos de la barra a la derecha</sys:String>
+    <sys:String x:Key="Str_Rail_Flip">Mover los iconos al otro lado</sys:String>
     <sys:String x:Key="Str_KS_ToggleSidebar">Mostrar/ocultar barra lateral</sys:String>
     <sys:String x:Key="Str_KS_ToolbarStyle">Apariencia de la barra de herramientas</sys:String>
     <sys:String x:Key="Str_KS_SidebarSide">Mover la barra lateral al siguiente borde</sys:String>

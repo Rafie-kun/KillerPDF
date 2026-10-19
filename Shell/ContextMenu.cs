@@ -747,20 +747,16 @@ namespace KillerPDF
                 item.Click += (_, _2) => SelectSidebarSide(side);
                 menu.Items.Add(item);
             }
-            // A top or bottom strip's rail can swap its ends: icons left, or icons right.
-            if (_sidebarSide.IsStrip())
+            // Every rail can swap its ends: the icons move to the other end, with theme, language
+            // and shortcuts still outermost at their corner, and the chevron takes the old end.
+            var icons = new MenuItem
             {
-                var icons = new MenuItem
-                {
-                    Header = Loc("Str_Sidebar_IconsRight"),
-                    IsCheckable = true,
-                    IsChecked = _railIconsAtEnd,
-                    InputGestureText = GestureFor("Ctrl:F9"),
-                };
-                icons.Click += (_, _2) => ToggleRailIconsEnd();
-                menu.Items.Add(new Separator());
-                menu.Items.Add(icons);
-            }
+                Header = Loc("Str_Rail_Flip"),
+                InputGestureText = GestureFor("Ctrl:F9"),
+            };
+            icons.Click += (_, _2) => ToggleRailIconsEnd();
+            menu.Items.Add(new Separator());
+            menu.Items.Add(icons);
         }
 
         private ContextMenu MakeThemedMenu()
