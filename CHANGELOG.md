@@ -74,6 +74,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Select mode no longer edits, and existing PDF text changes use the Text tool (#411). Arrow keys move selected objects one step instead of scrolling (#368).
 - Edit Text and Find and Replace change the page's own text instead of covering it. The old words leave the page content and the new words take their place in the same font, size and color, or in an embedded font when the original cannot show the new characters, so nothing is drawn over the page. Recognized text over a scan is still edited with a cover.
 - Split Transform and Color Correction into separate tools, and routed OCR provider selection through the engine with complete installed-language checks.
+- The macro window includes a choice of the current document or selected PDFs.
 - Message, confirm, install and uninstall dialogs use the family setup dialog layout, with a notice icon, a larger Lacquer heading, evenly sized buttons and the action button last. Dialog and installer action buttons are hollow in the accent color and fill with the button gradient on hover, instead of showing a solid block with hidden text.
 - Split the installer text into one file per language, with \n marking line breaks inside a value, so translations can be reviewed and compared key by key (#409).
 - The installer sidebar shows the version in Killer Sans under the wordmark, with a translated Setup line below it in Lacquer (#440).

@@ -48,9 +48,10 @@ public partial class MainWindow
         ];
         var dialog = new MacroDialog(this, supported, addable);
         if (dialog.ShowDialog() == true && dialog.MacroToRun is PdfMacro macro)
-            OpenExchangeCommands("Str_DocumentTools_Macros",
-                ("Str_Macro_Current", () => RunMacro(macro, dispatcher)),
-                ("Str_Macro_Batch", () => RunMacroBatch(macro, dispatcher)));
+        {
+            if (dialog.RunOnBatch) RunMacroBatch(macro, dispatcher);
+            else RunMacro(macro, dispatcher);
+        }
     }
 
     private async void RunMacro(PdfMacro macro, PdfMacroDispatcher dispatcher)

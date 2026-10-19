@@ -18,10 +18,13 @@ internal sealed class MacroDialog : Window
     private readonly ComboBox _operation = Combo();
     private readonly TextBlock _availability = new() { TextWrapping = TextWrapping.Wrap };
     private readonly Button _run;
+    private readonly RadioButton _currentDocument = new() { GroupName = "MacroSource", IsChecked = true };
+    private readonly RadioButton _batchFiles = new() { GroupName = "MacroSource" };
     private string? _originalName;
     private List<PdfMacroStep> _currentSteps = [];
 
     internal PdfMacro? MacroToRun { get; private set; }
+    internal bool RunOnBatch => _batchFiles.IsChecked == true;
 
     internal MacroDialog(Window owner, IEnumerable<PdfMacroOperation> supportedOperations,
         IEnumerable<PdfMacroOperation> addableOperations)
@@ -76,6 +79,16 @@ internal sealed class MacroDialog : Window
         DockPanel.SetDock(bottom, Dock.Bottom);
         _availability.Margin = new Thickness(0, 8, 0, 4);
         bottom.Children.Add(_availability);
+        var sourceChoices = new WrapPanel { Margin = new Thickness(0, 4, 0, 8) };
+        _currentDocument.Content = L("Str_Macro_Current");
+        _batchFiles.Content = L("Str_Macro_Batch");
+        foreach (RadioButton choice in new[] { _currentDocument, _batchFiles })
+        {
+            choice.Margin = new Thickness(0, 0, 20, 0);
+            choice.SetResourceReference(Control.ForegroundProperty, "TextBrush");
+            sourceChoices.Children.Add(choice);
+        }
+        bottom.Children.Add(sourceChoices);
         bottom.Children.Add(UiKit.ButtonRow(cancel, _run));
         body.Children.Add(bottom);
 
