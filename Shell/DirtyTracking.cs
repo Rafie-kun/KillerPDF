@@ -59,10 +59,30 @@ namespace KillerPDF
                 KillerDialog.Show(this, Loc("Str_Msg_OpenFirst"));
                 return;
             }
-            // Sign the user's real document, not the temp working copy. Operations like print/crop/repair
-            // repoint _currentFile at a temp (e.g. "...printfixed...") while _originalFile keeps the real
-            // path - which is the name the user expects to see and the file Save targets.
-            new SignDocumentDialog(this, _originalFile ?? _currentFile!).ShowDialog();
+            CommitActiveTextBox();
+            string suggestedSource = _originalFile ?? _currentFile!;
+            string? snapshot = null;
+            try
+            {
+                if (_isDirty)
+                    snapshot = WriteSavedCopyToTemp();
+                else
+                {
+                    // Preserve existing signatures on an unchanged document without rewriting it.
+                    snapshot = App.MakeTempFile("signsource");
+                    File.Copy(_currentFile!, snapshot, overwrite: true);
+                }
+                new SignDocumentDialog(this, snapshot, suggestedSource).ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                KillerDialog.Show(this, Loc("Str_Sign_Failed") + "\n" + ex.Message,
+                    Loc("Str_Sign_Name"), MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                if (snapshot is not null && File.Exists(snapshot)) File.Delete(snapshot);
+            }
         }
 
         // ---- generic busy overlay (indeterminate spinner) for blocking background work ----

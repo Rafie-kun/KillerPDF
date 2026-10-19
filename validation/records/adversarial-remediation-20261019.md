@@ -190,6 +190,24 @@ NTwain warnings and no errors. Logs are `publication-red-01.log`,
 Network shares, unsupported replacement filesystems, process termination, and
 power loss remain unverified. No UI was driven.
 
+## BF-005: current-state signing source
+
+The source-confirmed selection of `_originalFile` as signing input has been
+replaced with an owned temporary snapshot. Edited documents use the existing
+`WriteSavedCopyToTemp` pipeline for current bytes, annotations, forms, pending
+marks, measurements, and rotations. An unchanged document is copied without
+rewriting existing signatures. The displayed filename and suggested output
+location are supplied separately from the byte source. Snapshot failure aborts
+before opening the signing dialog, and closing the dialog removes its snapshot.
+The editor's saved path and dirty state are not reset by this operation.
+
+The combined Release build passes and the signing service's cryptographic
+integrity regression passes through staged publication. This is implementation
+and service evidence only. UI reproduction and signing after unsaved forms,
+annotations, page edits, and applied redaction, plus cancel and snapshot-failure
+acceptance, remain pending until UI work is allowed. No claim of completed
+end-to-end signing acceptance is made here.
+
 ## Pending work
 
 BF-016 requires the actual installer reproduction in a disposable VM. At task

@@ -23,6 +23,7 @@ namespace KillerPDF
     internal sealed class SignDocumentDialog : Window
     {
         private readonly string _sourcePdf;
+        private readonly string _suggestedSource;
 
         private RadioButton _fileRadio = null!;
         private RadioButton _storeRadio = null!;
@@ -55,9 +56,10 @@ namespace KillerPDF
         // Localized string from the active locale dictionary (falls back to the key if missing).
         private static string L(string key) => Application.Current.TryFindResource(key) as string ?? key;
 
-        public SignDocumentDialog(Window? owner, string sourcePdf)
+        public SignDocumentDialog(Window? owner, string sourcePdf, string? suggestedSource = null)
         {
             _sourcePdf = sourcePdf;
+            _suggestedSource = suggestedSource ?? sourcePdf;
             Title = "KillerPDF - " + L("Str_Sign_Name");
             Width = 720;
             MaxHeight = 860;
@@ -73,7 +75,7 @@ namespace KillerPDF
 
             body.Children.Add(new TextBlock
             {
-                Text = string.Format(L("Str_Sign_Desc"), Path.GetFileName(_sourcePdf)),
+                Text = string.Format(L("Str_Sign_Desc"), Path.GetFileName(_suggestedSource)),
                 Foreground = R("MutedTextBrush"), FontSize = 11, TextWrapping = TextWrapping.Wrap,
                 Margin = new Thickness(0, 0, 0, 14)
             });
@@ -274,8 +276,8 @@ namespace KillerPDF
 
         private string DefaultOutputPath()
         {
-            string dir = Path.GetDirectoryName(_sourcePdf) ?? "";
-            string name = Path.GetFileNameWithoutExtension(_sourcePdf);
+            string dir = Path.GetDirectoryName(_suggestedSource) ?? "";
+            string name = Path.GetFileNameWithoutExtension(_suggestedSource);
             return Path.Combine(dir, name + "-signed.pdf");
         }
 
