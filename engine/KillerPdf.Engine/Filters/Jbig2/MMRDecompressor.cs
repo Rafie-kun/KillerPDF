@@ -50,6 +50,7 @@ namespace KillerPdf.Engine.Filters.Jbig2
                 {
                     long length = stream.Length;
                     length = Math.Min(Math.Max(MIN_RUN_DATA_BUFFER, length), MAX_RUN_DATA_BUFFER);
+                    Jbig2Bitmap.ReserveAuxiliary(32 + length);
                     buffer = new byte[(int)length];
                     FillBuffer(0);
                 }
@@ -501,6 +502,7 @@ namespace KillerPdf.Engine.Filters.Jbig2
         {
             Jbig2Bitmap result = new(width, height);
 
+            Jbig2Bitmap.ReserveAuxiliary(64L + ((long)width + 5) * sizeof(int) * 2);
             int[] currentOffsets = new int[width + 5];
             int[] referenceOffsets = new int[width + 5];
             referenceOffsets[0] = width;

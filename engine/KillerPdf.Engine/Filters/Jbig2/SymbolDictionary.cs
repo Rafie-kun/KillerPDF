@@ -352,12 +352,14 @@ namespace KillerPdf.Engine.Filters.Jbig2
                 }
 
                 // 6.5.5 1)
+                Jbig2Bitmap.ReserveAuxiliary(32L + (long)amountOfNewSymbols * IntPtr.Size);
                 newSymbols = new Jbig2Bitmap[amountOfNewSymbols];
 
                 // 6.5.5 2)
                 int[] newSymbolsWidths = null;
                 if (isHuffmanEncoded && !useRefinementAggregation)
                 {
+                    Jbig2Bitmap.ReserveAuxiliary(32L + (long)amountOfNewSymbols * sizeof(int));
                     newSymbolsWidths = new int[amountOfNewSymbols];
                 }
 
@@ -492,6 +494,7 @@ namespace KillerPdf.Engine.Filters.Jbig2
                 var roi = new Jbig2Rectangle(startColumn, 0, newSymbolsWidths[i], heightClassHeight);
                 var symbolBitmap = Jbig2Bitmaps.Extract(roi, heightClassCollectiveBitmap);
                 newSymbols[i] = symbolBitmap;
+                Jbig2Bitmap.ReserveAuxiliary(2 * IntPtr.Size);
                 sbSymbols.Add(symbolBitmap);
             }
         }
@@ -668,6 +671,7 @@ namespace KillerPdf.Engine.Filters.Jbig2
         {
             Jbig2Bitmap symbol = region.GetRegionBitmap();
             newSymbols[amountOfDecodedSymbols] = symbol;
+            Jbig2Bitmap.ReserveAuxiliary(2 * IntPtr.Size);
             sbSymbols.Add(symbol);
         }
 
@@ -767,6 +771,7 @@ namespace KillerPdf.Engine.Filters.Jbig2
 
         private void SetExportedSymbols(int[] toExportFlags)
         {
+            Jbig2Bitmap.ReserveAuxiliary(64L + (long)amountOfExportSymbolss * IntPtr.Size);
             exportSymbols = new List<Jbig2Bitmap>(amountOfExportSymbolss);
 
             for (int i = 0; i < amountOfImportedSymbolss + amountOfNewSymbols; i++)
@@ -788,6 +793,7 @@ namespace KillerPdf.Engine.Filters.Jbig2
         private int[] GetToExportFlags()
         {
             int currentExportFlag = 0;
+            Jbig2Bitmap.ReserveAuxiliary(32L + ((long)amountOfImportedSymbolss + amountOfNewSymbols) * sizeof(int));
             int[] exportFlags = new int[amountOfImportedSymbolss + amountOfNewSymbols];
 
             long exRunLength;
@@ -884,7 +890,9 @@ namespace KillerPdf.Engine.Filters.Jbig2
                 if (referredToSegmentHeader.SegmentType == 0)
                 {
                     var sd = (SymbolDictionary)referredToSegmentHeader.GetSegmentData();
-                    importSymbols.AddRange(sd.GetDictionary());
+                    var imported = sd.GetDictionary();
+                    Jbig2Bitmap.ReserveAuxiliary(64L + (long)imported.Count * IntPtr.Size * 4);
+                    importSymbols.AddRange(imported);
                     amountOfImportedSymbolss += sd.amountOfExportSymbolss;
                 }
             }

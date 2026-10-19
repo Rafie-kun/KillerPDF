@@ -95,6 +95,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Signing uses a snapshot of current edits without requiring the open document to be saved first.
 - Command-line splitting protects the source and requires `--overwrite` to replace existing outputs.
 - Signing, flattening, and document export preserve existing outputs when writing fails or is canceled.
+- Malformed JBIG2 images stop before oversized header and symbol allocations.
 - Pages with more than a million drawing instructions draw all of their content instead of quietly stopping partway.
 - RGB and grayscale page groups blend before the white paper background is added.
 - Profiled RGB transparency groups no longer pick up stray colors during parallel rendering.

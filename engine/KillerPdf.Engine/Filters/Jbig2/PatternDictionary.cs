@@ -133,6 +133,7 @@ namespace KillerPdf.Engine.Filters.Jbig2
         {
             // 3)
             int gray = 0;
+            Jbig2Bitmap.ReserveAuxiliary(64L + ((long)GrayMax + 1) * IntPtr.Size);
             patterns = new List<Jbig2Bitmap>(GrayMax + 1);
 
             // 4)

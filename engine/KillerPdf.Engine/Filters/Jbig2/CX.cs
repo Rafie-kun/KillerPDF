@@ -34,6 +34,7 @@ namespace KillerPdf.Engine.Filters.Jbig2
         public CX(int size, int index)
         {
             Index = index;
+            Jbig2Bitmap.ReserveAuxiliary(size);
             cx = new byte[size];
         }
 
@@ -45,6 +46,7 @@ namespace KillerPdf.Engine.Filters.Jbig2
 
         public CX Copy()
         {
+            Jbig2Bitmap.ReserveAuxiliary(cx.Length);
             return new CX((byte[])cx.Clone(), Index);
         }
 

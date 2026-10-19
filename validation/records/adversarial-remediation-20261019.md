@@ -208,6 +208,37 @@ annotations, page edits, and applied redaction, plus cancel and snapshot-failure
 acceptance, remain pending until UI work is allowed. No claim of completed
 end-to-end signing acceptance is made here.
 
+## BF-013: JBIG2 allocation checks
+
+A nine-byte truncated header reproduced 1,055,144 bytes of allocation before
+rejection with a moderate reference count. The maximal count was not run against
+the unfixed decoder. Retention flags are now skipped without allocation, the
+document uses its actual encoded length, and reference data must fit before
+either reference array is allocated. Reserved count formats are rejected.
+
+Global parsing and page decoding share the cumulative allocation scope. Header
+objects and references, symbol tables and imported lists, arithmetic contexts,
+halftone grids, MMR row buffers, and Huffman tables reserve space before growing.
+Count arithmetic uses wide intermediates before allocation. The per-bitmap
+limit is unchanged; cumulative overhead has a 1 MiB floor for small images and
+the existing 64 MiB ceiling. Nested scopes charge their total consumption back
+to the parent rather than applying the per-bitmap limit to that total.
+
+The original regression now passes. The full engine suite passed 6,604 tests
+with the final production change. Five further header alignment/valid-input
+cases were then added. All 14 header tests passed in a child process with a
+256 MiB managed heap cap and a 30-second deadline. Both page and global maximal
+truncated counts produce PdfFilterException and allocate less than 128 KiB;
+many small headers exhaust the configured budget, while valid long reference
+tables still parse. The first bounded run found missing referenced segments in
+the new positive fixtures; those fixtures were corrected before the passing run.
+This cap covers the managed heap, not total process memory.
+
+Evidence: `jbig2-header-red01.log`, `jbig2-header-green02.log` (43 checks),
+`jbig2-engine-full.log`, `jbig2-final-build02.log` (zero warnings/errors), and
+`jbig2-bounded02.log` under the task scratch directory. Existing image hash
+regressions passed; independent final-candidate corpus rendering remains open.
+
 ## Pending work
 
 BF-016 requires the actual installer reproduction in a disposable VM. At task

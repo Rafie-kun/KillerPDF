@@ -892,7 +892,9 @@ namespace KillerPdf.Engine.Filters.Jbig2
                     SymbolDictionary sd = (SymbolDictionary)segment.GetSegmentData();
 
                     sd.cxIAID = cxIAID;
-                    symbols.AddRange(sd.GetDictionary());
+                    var imported = sd.GetDictionary();
+                    Jbig2Bitmap.ReserveAuxiliary(64L + (long)imported.Count * IntPtr.Size * 2);
+                    symbols.AddRange(imported);
                 }
             }
             amountOfSymbols = symbols.Count;
@@ -946,6 +948,7 @@ namespace KillerPdf.Engine.Filters.Jbig2
                 {
                     if (code > 0)
                     {
+                        Jbig2Bitmap.ReserveAuxiliary(64);
                         sbSymCodes.Add(new Code((int)code, 0, counter, false));
                     }
 
@@ -978,6 +981,7 @@ namespace KillerPdf.Engine.Filters.Jbig2
                     {
                         if (currCodeLength > 0)
                         {
+                            Jbig2Bitmap.ReserveAuxiliary(64);
                             sbSymCodes.Add(new Code((int)currCodeLength, 0, counter, false));
                         }
                         counter++;

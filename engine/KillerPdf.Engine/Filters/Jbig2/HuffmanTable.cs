@@ -41,6 +41,7 @@ namespace KillerPdf.Engine.Filters.Jbig2
 
             foreach (var c in codeTable)
             {
+                Jbig2Bitmap.ReserveAuxiliary(64L * (c.PrefixLength + 1));
                 rootNode.Append(c);
             }
         }

@@ -189,7 +189,9 @@ namespace KillerPdf.Engine.Filters.Jbig2
             foreach (SegmentHeader s in segmentHeader.RtSegments)
             {
                 PatternDictionary patternDictionary = (PatternDictionary)s.GetSegmentData();
-                patterns.AddRange(patternDictionary.GetDictionary());
+                var imported = patternDictionary.GetDictionary();
+                Jbig2Bitmap.ReserveAuxiliary(64L + (long)imported.Count * IntPtr.Size * 2);
+                patterns.AddRange(imported);
             }
 
             return patterns;
@@ -274,6 +276,9 @@ namespace KillerPdf.Engine.Filters.Jbig2
         private int[][] ComputeGrayScaleValues(Jbig2Bitmap[] grayScalePlanes, int bitsPerValue)
         {
             // Gray-scale decoding procedure, page 98
+            if (HGridHeight < 0 || HGridWidth < 0)
+                throw new Jbig2Exception("The JBIG2 halftone grid has invalid dimensions.");
+            Jbig2Bitmap.ReserveAuxiliary(checked(32L + (long)HGridHeight * (IntPtr.Size + 32L + (long)HGridWidth * sizeof(int))));
             int[][] grayScaleValues = new int[HGridHeight][];
             for (int i = 0; i < grayScaleValues.Length; i++)
             {

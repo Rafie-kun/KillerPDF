@@ -115,29 +115,20 @@ namespace KillerPdf.Engine.Filters.Jbig2
         {
             int countOfRTS = (int)(subInputStr.ReadBits(3) & 0xf);
 
-            byte[] retainBit;
-
             if (countOfRTS <= 4)
             {
                 // Short format
-                retainBit = new byte[5];
-                for (int i = 0; i <= 4; i++)
-                {
-                    retainBit[i] = (byte)subInputStr.ReadBit();
-                }
+                subInputStr.ReadBits(5);
             }
             else
             {
+                if (countOfRTS != 7)
+                    throw new Jbig2Exception("The JBIG2 referred segment count uses a reserved format.");
                 // Long format
                 countOfRTS = (int)(subInputStr.ReadBits(29) & 0xffffffff);
-
-                int arrayLength = countOfRTS + 8 >> 3;
-                retainBit = new byte[arrayLength <<= 3];
-
-                for (int i = 0; i < arrayLength; i++)
-                {
-                    retainBit[i] = (byte)subInputStr.ReadBit();
-                }
+                int retentionBytes = (countOfRTS + 8) >> 3;
+                RequireRemaining(subInputStr, retentionBytes);
+                subInputStr.SkipBytes(retentionBytes);
             }
             return countOfRTS;
         }
@@ -152,20 +143,14 @@ namespace KillerPdf.Engine.Filters.Jbig2
         /// <returns>An array with the segment number of all referred - to segments.</returns>
         private int[] ReadReferredToSegmentsNumbers(SubInputStream subInputStr, int countOfReferredToSegments)
         {
+            int rtsSize = (uint)SegmentNumber > 65536 ? 4 : (uint)SegmentNumber > 256 ? 2 : 1;
+            RequireRemaining(subInputStr, (long)countOfReferredToSegments * rtsSize
+                + (pageAssociationFieldSize == 0 ? 1 : 4) + 4);
+            Jbig2Bitmap.ReserveAuxiliary(64L + (long)countOfReferredToSegments * (sizeof(int) + IntPtr.Size));
             int[] result = new int[countOfReferredToSegments];
 
             if (countOfReferredToSegments > 0)
             {
-                short rtsSize = 1;
-                if (SegmentNumber > 256)
-                {
-                    rtsSize = 2;
-                    if (SegmentNumber > 65536)
-                    {
-                        rtsSize = 4;
-                    }
-                }
-
                 RtSegments = new SegmentHeader[countOfReferredToSegments];
 
                 for (int i = 0; i < countOfReferredToSegments; i++)
@@ -175,6 +160,12 @@ namespace KillerPdf.Engine.Filters.Jbig2
             }
 
             return result;
+        }
+
+        private static void RequireRemaining(SubInputStream input, long bytes)
+        {
+            if (bytes > input.Length - input.Position)
+                throw new Jbig2Exception("The JBIG2 segment header is truncated.");
         }
 
         /// <summary>

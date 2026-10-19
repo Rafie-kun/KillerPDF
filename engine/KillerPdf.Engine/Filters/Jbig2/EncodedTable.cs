@@ -36,6 +36,7 @@ namespace KillerPdf.Engine.Filters.Jbig2
                 rangeLen = (int)sis.ReadBits(table.HtRS);
                 rangeLow = curRangeLow;
 
+                Jbig2Bitmap.ReserveAuxiliary(64);
                 codeTable.Add(new Code(prefLen, rangeLen, rangeLow, false));
 
                 curRangeLow += 1 << rangeLen;

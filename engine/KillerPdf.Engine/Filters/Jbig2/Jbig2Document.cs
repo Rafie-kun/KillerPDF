@@ -74,7 +74,7 @@ namespace KillerPdf.Engine.Filters.Jbig2
                 throw new ArgumentNullException(nameof(input), " must not be null");
             }
 
-            subInputStream = new SubInputStream(input, 0, long.MaxValue);
+            subInputStream = new SubInputStream(input, 0, input.Length);
             GlobalSegments = globals;
 
             MapStream();
@@ -152,6 +152,8 @@ namespace KillerPdf.Engine.Filters.Jbig2
             // appears (specified with segment number 51)
             while (segmentType != 51 && !ReachedEndOfStream(offset))
             {
+                // Include segment objects and their page/global lookup entries.
+                Jbig2Bitmap.ReserveAuxiliary(512);
                 var segment = new SegmentHeader(this, subInputStream, offset,
                         organisationType);
 

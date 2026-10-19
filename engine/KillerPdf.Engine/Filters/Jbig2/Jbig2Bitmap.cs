@@ -53,8 +53,15 @@ namespace KillerPdf.Engine.Filters.Jbig2
         internal static System.IDisposable BeginAllocationLimit(int maximumBytes)
         {
             long maximumTotalBytes = maximumBytes
-                + System.Math.Min((long)maximumBytes * 63, 64L * 1024 * 1024);
+                + System.Math.Clamp((long)maximumBytes * 63, 1024 * 1024, 64L * 1024 * 1024);
             return BeginAllocationLimit(maximumBytes, maximumTotalBytes);
+        }
+
+        internal static void ReserveAuxiliary(long byteLength)
+        {
+            if (byteLength < 0 || byteLength > int.MaxValue
+                || ActiveBudget.Value is not null && !ActiveBudget.Value.TryReserve(byteLength, false))
+                throw new Jbig2Exception("The JBIG2 decoder allocations exceed the configured safety limit.");
         }
 
         internal static System.IDisposable BeginAllocationLimit(
@@ -86,7 +93,7 @@ namespace KillerPdf.Engine.Filters.Jbig2
                 if (disposed)
                     return;
 
-                previousBudget?.TryReserve(budget.AllocatedBytes);
+                previousBudget?.TryReserve(budget.AllocatedBytes, false);
                 ActiveBudget.Value = previousBudget;
                 disposed = true;
             }
@@ -98,9 +105,9 @@ namespace KillerPdf.Engine.Filters.Jbig2
             public long MaximumBitmapBytes { get; } = maximumBitmapBytes;
             public long RemainingBytes { get; private set; } = maximumTotalBytes;
 
-            public bool TryReserve(long byteLength)
+            public bool TryReserve(long byteLength, bool bitmap = true)
             {
-                if (byteLength > MaximumBitmapBytes || byteLength > RemainingBytes)
+                if (bitmap && byteLength > MaximumBitmapBytes || byteLength > RemainingBytes)
                     return false;
 
                 RemainingBytes -= byteLength;
