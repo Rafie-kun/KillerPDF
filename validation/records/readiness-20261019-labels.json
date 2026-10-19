@@ -1,0 +1,408 @@
+{
+  "date": "2026-10-19",
+  "repository": "SteveTheKiller/KillerPDF",
+  "totalIssues": 334,
+  "openIssues": 51,
+  "newlyLabeled": 61,
+  "unlabeled": 0,
+  "removedOriginalLabels": 0,
+  "missingPlannedLabels": 0,
+  "changedStates": 0,
+  "assignments": {
+    "1": {
+      "labels": [
+        "enhancement"
+      ],
+      "reason": "Requests a password prompt for opening encrypted PDFs."
+    },
+    "2": {
+      "labels": [
+        "enhancement"
+      ],
+      "reason": "Requests saving a PDF with annotations flattened into the output."
+    },
+    "3": {
+      "labels": [
+        "enhancement",
+        "Installer"
+      ],
+      "reason": "Suggests single-file deployment to avoid separate runtime installation."
+    },
+    "4": {
+      "labels": [
+        "enhancement"
+      ],
+      "reason": "Requests image import for signatures."
+    },
+    "5": {
+      "labels": [
+        "bug",
+        "Installer"
+      ],
+      "reason": "File-association launch opens the app but fails to load the supplied PDF path."
+    },
+    "6": {
+      "labels": [
+        "enhancement"
+      ],
+      "reason": "Requests editing existing PDF text and images."
+    },
+    "8": {
+      "labels": [
+        "question"
+      ],
+      "reason": "Asks how to run the application on Windows 7."
+    },
+    "10": {
+      "labels": [
+        "bug",
+        "Installer"
+      ],
+      "reason": "Reports Windows Defender blocking the distributed file and suggests a different package format."
+    },
+    "11": {
+      "labels": [
+        "enhancement",
+        "UI Issue"
+      ],
+      "reason": "Requests toolbar zoom and page-fit controls."
+    },
+    "12": {
+      "labels": [
+        "enhancement"
+      ],
+      "reason": "Requests cropping pages with preview, dimensions, and undo support."
+    },
+    "13": {
+      "labels": [
+        "enhancement"
+      ],
+      "reason": "Requests importing an image as a signature."
+    },
+    "14": {
+      "labels": [
+        "enhancement"
+      ],
+      "reason": "Requests PDF page cropping with range and geometry controls."
+    },
+    "15": {
+      "labels": [
+        "enhancement",
+        "UI Issue"
+      ],
+      "reason": "Requests zoom buttons, shortcuts, fit modes, and cursor-anchored zoom."
+    },
+    "16": {
+      "labels": [
+        "enhancement",
+        "UI Issue"
+      ],
+      "reason": "Requests native window chrome and light or system-aware themes."
+    },
+    "17": {
+      "labels": [
+        "enhancement"
+      ],
+      "reason": "Requests improved original text editing and embedded image editing in the legacy PDF stack."
+    },
+    "18": {
+      "labels": [
+        "enhancement"
+      ],
+      "reason": "Proposes service extraction and an incremental MVVM architecture refactor."
+    },
+    "19": {
+      "labels": [
+        "enhancement",
+        "Performance"
+      ],
+      "reason": "Requests off-thread document operations, rendering, search, progress, and cancellation."
+    },
+    "20": {
+      "labels": [
+        "enhancement",
+        "Performance",
+        "UI Issue"
+      ],
+      "reason": "Proposes sidebar virtualization and resource optimizations plus responsive overlay layout."
+    },
+    "21": {
+      "labels": [
+        "enhancement",
+        "Performance"
+      ],
+      "reason": "Proposes MVVM toolkit adoption and weak events to prevent retained UI objects and memory leaks."
+    },
+    "22": {
+      "labels": [
+        "enhancement",
+        "Performance"
+      ],
+      "reason": "Requests a nonblocking print pipeline with page ranges, copies, progress, and cancellation."
+    },
+    "23": {
+      "labels": [
+        "enhancement",
+        "UI Issue"
+      ],
+      "reason": "Requests accessible names, keyboard navigation, focus visuals, and contrast improvements."
+    },
+    "24": {
+      "labels": [
+        "enhancement",
+        "UI Issue"
+      ],
+      "reason": "Requests per-monitor DPI awareness and corresponding window and rendering updates."
+    },
+    "25": {
+      "labels": [
+        "enhancement",
+        "Installer"
+      ],
+      "reason": "Proposes signing, installer and update trust verification, and runtime security hardening."
+    },
+    "26": {
+      "labels": [
+        "enhancement"
+      ],
+      "reason": "Requests global crash handling, persistent diagnostic logs, and crash cleanup."
+    },
+    "27": {
+      "labels": [
+        "enhancement",
+        "Installer"
+      ],
+      "reason": "Proposes file-association registration, uninstall, and launch-argument hardening."
+    },
+    "33": {
+      "labels": [
+        "enhancement"
+      ],
+      "reason": "Proposes modernization of the application runtime, project, and publishing toolchain."
+    },
+    "44": {
+      "labels": [
+        "bug"
+      ],
+      "reason": "Printing fails because no application is associated with the requested action."
+    },
+    "46": {
+      "labels": [
+        "enhancement",
+        "Installer"
+      ],
+      "reason": "Requests remembering the portable-run choice instead of repeating the installation prompt."
+    },
+    "47": {
+      "labels": [
+        "bug"
+      ],
+      "reason": "Existing table-of-contents links fail to navigate."
+    },
+    "48": {
+      "labels": [
+        "enhancement"
+      ],
+      "reason": "Requests creating a new document."
+    },
+    "49": {
+      "labels": [
+        "enhancement"
+      ],
+      "reason": "Requests text formatting and signature size controls."
+    },
+    "50": {
+      "labels": [
+        "enhancement"
+      ],
+      "reason": "Requests insertion of blank pages and images."
+    },
+    "51": {
+      "labels": [
+        "bug"
+      ],
+      "reason": "Repeated inline edits act on original text and create overlapping replacements."
+    },
+    "52": {
+      "labels": [
+        "enhancement"
+      ],
+      "reason": "Requests rotation of a page or entire document."
+    },
+    "54": {
+      "labels": [
+        "bug",
+        "Performance"
+      ],
+      "reason": "Reports excessive memory usage and lag on image-heavy PDFs."
+    },
+    "57": {
+      "labels": [
+        "question"
+      ],
+      "reason": "Maintainer explains that the supplied PDF is scanned imagery with no editable text layer."
+    },
+    "58": {
+      "labels": [
+        "bug"
+      ],
+      "reason": "Saved signature position differs from its editing position."
+    },
+    "59": {
+      "labels": [
+        "bug"
+      ],
+      "reason": "Reports a PDF opening failure with an attached screenshot."
+    },
+    "60": {
+      "labels": [
+        "enhancement"
+      ],
+      "reason": "Requests form filling that was absent at report time; comments confirm this was a feature request."
+    },
+    "62": {
+      "labels": [
+        "enhancement",
+        "UI Issue"
+      ],
+      "reason": "Requests rotation in the main document context menu for discoverability."
+    },
+    "63": {
+      "labels": [
+        "enhancement"
+      ],
+      "reason": "Requests reading and editing PDF outlines for document navigation."
+    },
+    "64": {
+      "labels": [
+        "enhancement",
+        "UI Issue"
+      ],
+      "reason": "Requests standard Save and Save As shortcuts and dialog behavior."
+    },
+    "65": {
+      "labels": [
+        "bug"
+      ],
+      "reason": "A second rotation clips half the page; the flip request is secondary."
+    },
+    "66": {
+      "labels": [
+        "bug"
+      ],
+      "reason": "Copied PDF text has incorrect word order."
+    },
+    "67": {
+      "labels": [
+        "bug"
+      ],
+      "reason": "Reports failure to launch and broken right-click behavior on Windows 10."
+    },
+    "70": {
+      "labels": [
+        "bug"
+      ],
+      "reason": "Rotating a PDF fails with an unexpected xref token error in the legacy stack."
+    },
+    "80": {
+      "labels": [
+        "enhancement",
+        "UI Issue"
+      ],
+      "reason": "Requests tabs for multiple open PDFs."
+    },
+    "84": {
+      "labels": [
+        "bug"
+      ],
+      "reason": "Reports a rendering sharpness regression at higher zoom levels."
+    },
+    "91": {
+      "labels": [
+        "question"
+      ],
+      "reason": "Asks how to change the download destination; body and comments provide no additional scope."
+    },
+    "113": {
+      "labels": [
+        "question"
+      ],
+      "reason": "Asks why existing text and vector objects are not edited in place; maintainer explains the annotation model."
+    },
+    "155": {
+      "labels": [
+        "bug"
+      ],
+      "reason": "Odd and even print filters are ignored when printing multiple copies."
+    },
+    "192": {
+      "labels": [
+        "documentation"
+      ],
+      "reason": "Proposes searchable documentation and feature deep links beyond the README."
+    },
+    "195": {
+      "labels": [
+        "enhancement",
+        "UI Issue"
+      ],
+      "reason": "Requests navigation, thumbnail, toolbar, search, and editing interface additions."
+    },
+    "212": {
+      "labels": [
+        "enhancement",
+        "UI Issue"
+      ],
+      "reason": "Requests thumbnail resizing and a wrapping grid in the Pages panel."
+    },
+    "226": {
+      "labels": [
+        "bug",
+        "UI Issue"
+      ],
+      "reason": "Horizontal scrolling gesture does not work in a zoomed view."
+    },
+    "272": {
+      "labels": [
+        "enhancement",
+        "Performance"
+      ],
+      "reason": "Suggests replacing the legacy renderer for faster concurrent rendering."
+    },
+    "283": {
+      "labels": [
+        "enhancement",
+        "UI Issue"
+      ],
+      "reason": "Requests a visible insertion indicator during thumbnail drag and drop."
+    },
+    "303": {
+      "labels": [
+        "enhancement",
+        "UI Issue"
+      ],
+      "reason": "Requests a theme grain toggle."
+    },
+    "306": {
+      "labels": [
+        "bug",
+        "UI Issue"
+      ],
+      "reason": "Split-pane close button disappears and prevents closing the remaining document."
+    },
+    "367": {
+      "labels": [
+        "enhancement",
+        "UI Issue"
+      ],
+      "reason": "Requests configurable border, fill, and transparency for form fields."
+    },
+    "451": {
+      "labels": [
+        "bug",
+        "UI Issue"
+      ],
+      "reason": "Color picker crashes while casting a theme brush."
+    }
+  }
+}
