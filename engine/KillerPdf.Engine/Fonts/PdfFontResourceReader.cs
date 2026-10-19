@@ -418,7 +418,14 @@ public static class PdfFontResourceReader
                 }
             }
             PdfGlyphOutline? BlankOutline(uint code) => !composite
-                && code < glyphNames.Length && glyphNames[code] == "space"
+                && code < glyphNames.Length
+                && (glyphNames[code] == "space"
+                    // Undefined control slots in the original standard Type 1 fonts are
+                    // spacing, nonmarking .notdef glyphs, not unavailable visible outlines.
+                    || code < 32 && glyphNames[code].Length == 0 && subtype == "Type1"
+                        && type1Stream is null && embeddedData is null
+                        && CharacterText(code) is null
+                        && PdfStandardGlyphBounds.Width(standardMetricsName, "space") is not null)
                     ? new PdfGlyphOutline([]) : null;
             return new PdfExtractionFont(unicode, widths,
                 defaultWidth)
