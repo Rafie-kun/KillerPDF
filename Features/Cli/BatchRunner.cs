@@ -248,6 +248,11 @@ namespace KillerPDF.Features
 
         private static string BatchCsvField(string s)
         {
+            // CSV quoting preserves syntax but does not prevent spreadsheet formula evaluation.
+            var trimmed = s.AsSpan().TrimStart();
+            if ((!trimmed.IsEmpty && trimmed[0] is '=' or '+' or '-' or '@') ||
+                (!s.AsSpan().IsEmpty && s[0] is '\t' or '\r' or '\n'))
+                s = "'" + s;
             if (!s.AsSpan().ContainsAny(BatchCsvSpecialCharacters)) return s;
             return "\"" + s.Replace("\"", "\"\"") + "\"";
         }
