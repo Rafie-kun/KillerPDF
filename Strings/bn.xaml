@@ -1442,6 +1442,8 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Scan_NoPages">কিছু স্ক্যান হয়নি।</sys:String>
     <sys:String x:Key="Str_Scan_Done">{0}টি পৃষ্ঠা স্ক্যান হয়েছে</sys:String>
     <sys:String x:Key="Str_Scan_Failed">স্ক্যান ব্যর্থ হয়েছে:</sys:String>
+    <sys:String x:Key="Str_Scan_Partial">স্ক্যান অসম্পূর্ণ। {0}টি পৃষ্ঠা উদ্ধার করা হয়েছে।</sys:String>
+    <sys:String x:Key="Str_Scan_RecoveryFiles">স্ক্যান উদ্ধারের ফোল্ডার: {0}</sys:String>
     <sys:String x:Key="Str_Scan_NoScanners">কোনো TWAIN স্ক্যানার পাওয়া যায়নি। স্ক্যানার সংযুক্ত করুন, এর TWAIN ড্রাইভার ইনস্টল করুন এবং আবার চেষ্টা করুন।</sys:String>
     <sys:String x:Key="Str_Scan_NoManager">স্ক্যান করতে 64-বিট TWAIN ম্যানেজার (TWAINDSM.dll) লাগে, যা TWAIN সমর্থিত স্ক্যানার ড্রাইভার ইনস্টল করে। আপনার স্ক্যানারের TWAIN ড্রাইভার ইনস্টল করে আবার চেষ্টা করুন।</sys:String>
     <sys:String x:Key="Str_Menu_ConvertOffice">Word বা Excel ফাইল রূপান্তর করুন...</sys:String>

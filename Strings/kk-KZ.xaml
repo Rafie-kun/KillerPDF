@@ -1465,6 +1465,8 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_Scan_NoPages">Ештеңе сканерленбеді.</sys:String>
     <sys:String x:Key="Str_Scan_Done">{0} бет сканерленді</sys:String>
     <sys:String x:Key="Str_Scan_Failed">Сканерлеу сәтсіз аяқталды:</sys:String>
+    <sys:String x:Key="Str_Scan_Partial">Сканерлеу аяқталмады. {0} бет қалпына келтірілді.</sys:String>
+    <sys:String x:Key="Str_Scan_RecoveryFiles">Сканерлеуді қалпына келтіру қалтасы: {0}</sys:String>
     <sys:String x:Key="Str_Scan_NoScanners">TWAIN сканерлері табылмады. Сканерді қосып, оның TWAIN драйверін орнатып, қайталап көріңіз.</sys:String>
     <sys:String x:Key="Str_Scan_NoManager">Сканерлеу үшін 64 биттік TWAIN менеджері (TWAINDSM.dll) керек, оны TWAIN қолдайтын сканер драйверлері орнатады. Сканеріңіздің TWAIN драйверін орнатып, қайталап көріңіз.</sys:String>
     <sys:String x:Key="Str_Menu_ConvertOffice">Word немесе Excel файлын түрлендіру...</sys:String>

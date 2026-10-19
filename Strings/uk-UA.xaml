@@ -1462,6 +1462,8 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Scan_NoPages">Нічого не відскановано.</sys:String>
     <sys:String x:Key="Str_Scan_Done">Відскановано сторінок: {0}</sys:String>
     <sys:String x:Key="Str_Scan_Failed">Не вдалося виконати сканування:</sys:String>
+    <sys:String x:Key="Str_Scan_Partial">Сканування не завершено. Відновлено сторінок: {0}.</sys:String>
+    <sys:String x:Key="Str_Scan_RecoveryFiles">Папка відновлення сканування: {0}</sys:String>
     <sys:String x:Key="Str_Scan_NoScanners">Сканери TWAIN не знайдено. Підключіть сканер, установіть його драйвер TWAIN і спробуйте ще раз.</sys:String>
     <sys:String x:Key="Str_Scan_NoManager">Для сканування потрібен 64-розрядний диспетчер TWAIN (TWAINDSM.dll), який установлюють драйвери сканерів із підтримкою TWAIN. Установіть драйвер TWAIN свого сканера й спробуйте ще раз.</sys:String>
     <sys:String x:Key="Str_Menu_ConvertOffice">Перетворити файл Word або Excel...</sys:String>

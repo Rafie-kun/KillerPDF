@@ -1449,6 +1449,8 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Scan_NoPages">Semmi sem lett beolvasva.</sys:String>
     <sys:String x:Key="Str_Scan_Done">{0} oldal beolvasva</sys:String>
     <sys:String x:Key="Str_Scan_Failed">A beolvasás sikertelen:</sys:String>
+    <sys:String x:Key="Str_Scan_Partial">A beolvasás hiányos. Megmentett oldalak száma: {0}.</sys:String>
+    <sys:String x:Key="Str_Scan_RecoveryFiles">Beolvasás helyreállítási mappája: {0}</sys:String>
     <sys:String x:Key="Str_Scan_NoScanners">Nem található TWAIN-lapolvasó. Csatlakoztassa a lapolvasót, telepítse a TWAIN-illesztőprogramját, és próbálja újra.</sys:String>
     <sys:String x:Key="Str_Scan_NoManager">A beolvasáshoz a 64 bites TWAIN-kezelő (TWAINDSM.dll) szükséges, amelyet a TWAIN-t támogató lapolvasó-illesztőprogramok telepítenek. Telepítse a lapolvasó TWAIN-illesztőprogramját, és próbálja újra.</sys:String>
     <sys:String x:Key="Str_Menu_ConvertOffice">Word- vagy Excel-fájl konvertálása...</sys:String>

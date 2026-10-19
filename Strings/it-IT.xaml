@@ -1462,6 +1462,8 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_Scan_NoPages">Non è stato scansionato nulla.</sys:String>
     <sys:String x:Key="Str_Scan_Done">{0} pagine scansionate</sys:String>
     <sys:String x:Key="Str_Scan_Failed">Scansione non riuscita:</sys:String>
+    <sys:String x:Key="Str_Scan_Partial">Scansione incompleta. Recuperate {0} pagine.</sys:String>
+    <sys:String x:Key="Str_Scan_RecoveryFiles">Cartella di recupero della scansione: {0}</sys:String>
     <sys:String x:Key="Str_Scan_NoScanners">Nessuno scanner TWAIN trovato. Collega lo scanner, installa il suo driver TWAIN e riprova.</sys:String>
     <sys:String x:Key="Str_Scan_NoManager">Per la scansione serve il gestore TWAIN a 64 bit (TWAINDSM.dll), installato dai driver di scanner compatibili TWAIN. Installa il driver TWAIN dello scanner e riprova.</sys:String>
     <sys:String x:Key="Str_Menu_ConvertOffice">Converti file Word o Excel...</sys:String>

@@ -6,6 +6,12 @@ using NTwain.Data;
 
 namespace KillerPDF.Services;
 
+internal sealed record TwainScanResult(IReadOnlyList<string> Pages,
+    IReadOnlyList<Exception> Errors, bool Canceled)
+{
+    internal bool Completed => Errors.Count == 0 && !Canceled;
+}
+
 /// <summary>
 /// Scan to PDF (#73): one TWAIN session on the window's message loop. Each page the scanner
 /// hands over is saved as an image, gray and black-and-white pages as PNG and color pages as
@@ -13,13 +19,13 @@ namespace KillerPDF.Services;
 /// </summary>
 internal sealed class TwainScan : IDisposable
 {
-    private readonly TwainSession _session;
+    private readonly ITwainSession _session;
     private readonly IntPtr _window;
 
     /// <summary>False when the 64-bit TWAIN Data Source Manager (TWAINDSM.dll) is not installed.</summary>
     internal static bool ManagerInstalled => PlatformInfo.Current.IsSupported;
 
-    private TwainScan(TwainSession session, IntPtr window)
+    internal TwainScan(ITwainSession session, IntPtr window)
     {
         _session = session;
         _window = window;
@@ -38,54 +44,75 @@ internal sealed class TwainScan : IDisposable
 
     /// <summary>
     /// Scans from <paramref name="source"/> until the scanner is done or the user closes its
-    /// window, and returns the saved page images in order.
+    /// window, and returns saved pages together with any failure or cancellation.
     /// </summary>
-    internal Task<IReadOnlyList<string>> ScanAsync(DataSource source, bool showSettings, string folder)
+    internal Task<TwainScanResult> ScanAsync(IDataSource source, bool showSettings, string folder)
     {
         Directory.CreateDirectory(folder);
         var pages = new List<string>();
-        var done = new TaskCompletionSource<IReadOnlyList<string>>();
-        Exception? failure = null;
+        var done = new TaskCompletionSource<TwainScanResult>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var errors = new List<Exception>();
+        bool canceled = false;
+        TwainSession? nativeSession = _session as TwainSession;
 
         void Transferred(object? sender, DataTransferredEventArgs e)
         {
             try
             {
                 using Stream? image = e.GetNativeImageStream();
-                if (image is not null) pages.Add(SavePage(image, folder, pages.Count + 1));
+                if (image is null) throw new InvalidOperationException("The scanner returned no readable image.");
+                pages.Add(SavePage(image, folder, pages.Count + 1));
             }
             catch (Exception ex) when (ex is IOException or NotSupportedException or InvalidOperationException
-                or ArgumentException or FileFormatException)
+                or ArgumentException or FileFormatException or UnauthorizedAccessException)
             {
-                failure ??= ex;
+                errors.Add(ex);
             }
         }
         void Failed(object? sender, TransferErrorEventArgs e) =>
-            failure ??= e.Exception ?? new InvalidOperationException($"The scanner reported an error ({e.ReturnCode}).");
+            errors.Add(e.Exception ?? new InvalidOperationException($"The scanner reported an error ({e.ReturnCode})."));
+        void Canceled(object? sender, TransferCanceledEventArgs e) => canceled = true;
         void Disabled(object? sender, EventArgs e)
         {
+            canceled |= _session.DisableReason == Message.CloseDSReq;
+            Complete();
+        }
+        void Complete()
+        {
+            if (done.Task.IsCompleted) return;
             _session.DataTransferred -= Transferred;
             _session.TransferError -= Failed;
             _session.SourceDisabled -= Disabled;
-            source.Close();
-            // Pages that did arrive are kept even when a later page failed.
-            if (failure is not null && pages.Count == 0) done.TrySetException(failure);
-            else done.TrySetResult(pages);
+            if (nativeSession is not null) nativeSession.TransferCanceled -= Canceled;
+            try
+            {
+                ReturnCode close = source.Close();
+                if (close != ReturnCode.Success)
+                    errors.Add(new InvalidOperationException($"The scanner did not close ({close})."));
+            }
+            catch (Exception ex) { errors.Add(ex); }
+            done.TrySetResult(new(Array.AsReadOnly(pages.ToArray()), Array.AsReadOnly(errors.ToArray()), canceled));
         }
 
         _session.DataTransferred += Transferred;
         _session.TransferError += Failed;
         _session.SourceDisabled += Disabled;
-        ReturnCode code = source.Open();
-        if (code == ReturnCode.Success)
-            code = source.Enable(showSettings ? SourceEnableMode.ShowUI : SourceEnableMode.NoUI, false, _window);
-        if (code != ReturnCode.Success)
+        if (nativeSession is not null) nativeSession.TransferCanceled += Canceled;
+        try
         {
-            _session.DataTransferred -= Transferred;
-            _session.TransferError -= Failed;
-            _session.SourceDisabled -= Disabled;
-            source.Close();
-            done.TrySetException(new InvalidOperationException($"The scanner did not start ({code})."));
+            ReturnCode code = source.Open();
+            if (code == ReturnCode.Success)
+                code = source.Enable(showSettings ? SourceEnableMode.ShowUI : SourceEnableMode.NoUI, false, _window);
+            if (code != ReturnCode.Success)
+            {
+                errors.Add(new InvalidOperationException($"The scanner did not start ({code})."));
+                Complete();
+            }
+        }
+        catch (Exception ex)
+        {
+            errors.Add(ex);
+            Complete();
         }
         return done.Task;
     }
@@ -103,8 +130,7 @@ internal sealed class TwainScan : IDisposable
         BitmapEncoder encoder = gray ? new PngBitmapEncoder() : new JpegBitmapEncoder { QualityLevel = 90 };
         encoder.Frames.Add(frame);
         string path = Path.Combine(folder, $"scan-{number:000}{(gray ? ".png" : ".jpg")}");
-        using FileStream output = File.Create(path);
-        encoder.Save(output);
+        AtomicFileOutput.Write(path, encoder.Save);
         return path;
     }
 

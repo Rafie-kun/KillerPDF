@@ -1462,6 +1462,8 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Scan_NoPages">Không quét được gì.</sys:String>
     <sys:String x:Key="Str_Scan_Done">Đã quét {0} trang</sys:String>
     <sys:String x:Key="Str_Scan_Failed">Quét thất bại:</sys:String>
+    <sys:String x:Key="Str_Scan_Partial">Quét chưa hoàn tất. Đã khôi phục {0} trang.</sys:String>
+    <sys:String x:Key="Str_Scan_RecoveryFiles">Thư mục khôi phục bản quét: {0}</sys:String>
     <sys:String x:Key="Str_Scan_NoScanners">Không tìm thấy máy quét TWAIN. Hãy kết nối máy quét, cài trình điều khiển TWAIN của nó rồi thử lại.</sys:String>
     <sys:String x:Key="Str_Scan_NoManager">Việc quét cần trình quản lý TWAIN 64 bit (TWAINDSM.dll), do các trình điều khiển máy quét hỗ trợ TWAIN cài đặt. Hãy cài trình điều khiển TWAIN của máy quét rồi thử lại.</sys:String>
     <sys:String x:Key="Str_Menu_ConvertOffice">Chuyển đổi tệp Word hoặc Excel...</sys:String>

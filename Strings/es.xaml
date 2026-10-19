@@ -1442,6 +1442,8 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Scan_NoPages">No se escaneó nada.</sys:String>
     <sys:String x:Key="Str_Scan_Done">{0} página(s) escaneada(s)</sys:String>
     <sys:String x:Key="Str_Scan_Failed">Error al escanear:</sys:String>
+    <sys:String x:Key="Str_Scan_Partial">Escaneo incompleto. Se recuperaron {0} página(s).</sys:String>
+    <sys:String x:Key="Str_Scan_RecoveryFiles">Carpeta de recuperación del escaneo: {0}</sys:String>
     <sys:String x:Key="Str_Scan_NoScanners">No se encontraron escáneres TWAIN. Conecte el escáner, instale su controlador TWAIN e inténtelo de nuevo.</sys:String>
     <sys:String x:Key="Str_Scan_NoManager">Para escanear se necesita el administrador TWAIN de 64 bits (TWAINDSM.dll), que instalan los controladores de escáner compatibles con TWAIN. Instale el controlador TWAIN de su escáner e inténtelo de nuevo.</sys:String>
     <sys:String x:Key="Str_Menu_ConvertOffice">Convertir archivo de Word o Excel...</sys:String>

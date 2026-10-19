@@ -1462,6 +1462,8 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Scan_NoPages">Ingenting ble skannet.</sys:String>
     <sys:String x:Key="Str_Scan_Done">Skannet {0} side(r)</sys:String>
     <sys:String x:Key="Str_Scan_Failed">Skanningen mislyktes:</sys:String>
+    <sys:String x:Key="Str_Scan_Partial">Skanningen er ufullstendig. {0} side(r) ble reddet.</sys:String>
+    <sys:String x:Key="Str_Scan_RecoveryFiles">Gjenopprettingsmappe for skanningen: {0}</sys:String>
     <sys:String x:Key="Str_Scan_NoScanners">Fant ingen TWAIN-skannere. Koble til skanneren, installer TWAIN-driveren og prøv igjen.</sys:String>
     <sys:String x:Key="Str_Scan_NoManager">Skanning krever 64-biters TWAIN-behandleren (TWAINDSM.dll), som skannerdrivere med TWAIN-støtte installerer. Installer TWAIN-driveren til skanneren og prøv igjen.</sys:String>
     <sys:String x:Key="Str_Menu_ConvertOffice">Konverter Word- eller Excel-fil...</sys:String>

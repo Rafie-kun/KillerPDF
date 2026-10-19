@@ -23,7 +23,7 @@ namespace KillerPDF
 
             IntPtr window = new WindowInteropHelper(this).Handle;
             string folder = Path.Combine(Path.GetTempPath(), $"KillerPDF-scan-{DateTime.Now:yyyyMMdd-HHmmss-fff}");
-            IReadOnlyList<string> pages;
+            TwainScanResult result;
             try
             {
                 using TwainScan scan = TwainScan.Open(window);
@@ -42,25 +42,38 @@ namespace KillerPDF
                 App.SetSetting(ScanSourceSetting, chosen.Name);
                 App.SetSetting(ScanSettingsWindowSetting, dialog.ShowSettings ? "1" : "0");
                 SetStatus(Loc("Str_Scan_Scanning"));
-                pages = await scan.ScanAsync(chosen, dialog.ShowSettings, folder);
+                result = await scan.ScanAsync(chosen, dialog.ShowSettings, folder);
             }
             catch (Exception ex)
             {
                 SetStatus("");
-                KillerDialog.Show(this, Loc("Str_Scan_Failed") + "\n" + ex.Message, "KillerPDF",
+                KillerDialog.Show(this, Loc("Str_Scan_Failed") + "\n" + ex.Message + ScanRecoveryMessage(folder), "KillerPDF",
                     MessageBoxButton.OK, MessageBoxImage.Error);
-                DeleteScanFolder(folder);
                 return;
             }
 
+            IReadOnlyList<string> pages = result.Pages;
+            string completion = result.Errors.Count > 0
+                ? string.Format(Loc("Str_Scan_Partial"), pages.Count)
+                : result.Canceled ? Loc("Str_St_Canceled") + ": " + string.Format(Loc("Str_Scan_Done"), pages.Count)
+                : string.Format(Loc("Str_Scan_Done"), pages.Count);
+            if (!result.Completed)
+            {
+                SetStatus(completion);
+                KillerDialog.Show(this, completion + "\n"
+                    + string.Join("\n", result.Errors.Select(error => error.Message))
+                    + ScanRecoveryMessage(folder), "KillerPDF", MessageBoxButton.OK,
+                    result.Errors.Count > 0 ? MessageBoxImage.Warning : MessageBoxImage.Information);
+            }
             if (pages.Count == 0)
             {
-                SetStatus(Loc("Str_Scan_NoPages"));
+                if (result.Completed) SetStatus(Loc("Str_Scan_NoPages"));
                 DeleteScanFolder(folder);
                 return;
             }
 
             var target = BeginTabLoad(out var prev, out bool createdNew);
+            bool opened = false;
             try
             {
                 string tempPath = Path.Combine(Path.GetTempPath(), $"Scanned-{DateTime.Now:yyyyMMdd-HHmmss-fff}.pdf");
@@ -69,22 +82,26 @@ namespace KillerPDF
                 FinishOpenFile("Scanned.pdf", tempPath);
                 _originalFile = null;   // no saved location yet, so Save becomes Save As
                 MarkDirty(true);
-                SetStatus(string.Format(Loc("Str_Scan_Done"), pages.Count));
+                SetStatus(completion);
                 CaptureSessionState(_active!);
                 SetTool(_currentTool);
                 RebuildTabStrip();
+                opened = true;
             }
             catch (Exception ex)
             {
                 AbortTabLoad(target, prev, createdNew);
-                KillerDialog.Show(this, Loc("Str_Scan_Failed") + "\n" + ex.Message, "KillerPDF",
+                KillerDialog.Show(this, Loc("Str_Scan_Failed") + "\n" + ex.Message + ScanRecoveryMessage(folder), "KillerPDF",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
-                DeleteScanFolder(folder);
+                if (opened && result.Completed) DeleteScanFolder(folder);
             }
         }
+
+        private string ScanRecoveryMessage(string folder) => Directory.Exists(folder)
+            ? "\n\n" + string.Format(Loc("Str_Scan_RecoveryFiles"), folder) : string.Empty;
 
         private static void DeleteScanFolder(string folder)
         {

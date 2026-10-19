@@ -1446,6 +1446,8 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Scan_NoPages">没有扫描任何内容。</sys:String>
     <sys:String x:Key="Str_Scan_Done">已扫描 {0} 页</sys:String>
     <sys:String x:Key="Str_Scan_Failed">扫描失败：</sys:String>
+    <sys:String x:Key="Str_Scan_Partial">扫描未完成。已恢复 {0} 页。</sys:String>
+    <sys:String x:Key="Str_Scan_RecoveryFiles">扫描恢复文件夹：{0}</sys:String>
     <sys:String x:Key="Str_Scan_NoScanners">未找到 TWAIN 扫描仪。请连接扫描仪，安装其 TWAIN 驱动程序，然后重试。</sys:String>
     <sys:String x:Key="Str_Scan_NoManager">扫描需要 64 位 TWAIN 管理器 (TWAINDSM.dll)，支持 TWAIN 的扫描仪驱动程序会安装它。请安装扫描仪的 TWAIN 驱动程序，然后重试。</sys:String>
     <sys:String x:Key="Str_Menu_ConvertOffice">转换 Word 或 Excel 文件...</sys:String>

@@ -1462,6 +1462,8 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Scan_NoPages">Nothing was scanned.</sys:String>
     <sys:String x:Key="Str_Scan_Done">Scanned {0} page(s)</sys:String>
     <sys:String x:Key="Str_Scan_Failed">Scanning failed:</sys:String>
+    <sys:String x:Key="Str_Scan_Partial">Scan incomplete. Recovered {0} page(s).</sys:String>
+    <sys:String x:Key="Str_Scan_RecoveryFiles">Scan recovery folder: {0}</sys:String>
     <sys:String x:Key="Str_Scan_NoScanners">No TWAIN scanners were found. Connect the scanner, install its TWAIN driver and try again.</sys:String>
     <sys:String x:Key="Str_Scan_NoManager">Scanning needs the 64-bit TWAIN manager (TWAINDSM.dll), which scanner drivers with TWAIN support install. Install your scanner's TWAIN driver and try again.</sys:String>
     <sys:String x:Key="Str_Menu_ConvertOffice">Convert Word or Excel file...</sys:String>

@@ -1450,6 +1450,8 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Scan_NoPages">Nic nie zostało zeskanowane.</sys:String>
     <sys:String x:Key="Str_Scan_Done">Zeskanowano stron: {0}</sys:String>
     <sys:String x:Key="Str_Scan_Failed">Skanowanie nie powiodło się:</sys:String>
+    <sys:String x:Key="Str_Scan_Partial">Skanowanie niekompletne. Liczba odzyskanych stron: {0}.</sys:String>
+    <sys:String x:Key="Str_Scan_RecoveryFiles">Folder odzyskiwania skanów: {0}</sys:String>
     <sys:String x:Key="Str_Scan_NoScanners">Nie znaleziono skanerów TWAIN. Podłącz skaner, zainstaluj jego sterownik TWAIN i spróbuj ponownie.</sys:String>
     <sys:String x:Key="Str_Scan_NoManager">Skanowanie wymaga 64-bitowego menedżera TWAIN (TWAINDSM.dll), który instalują sterowniki skanerów obsługujące TWAIN. Zainstaluj sterownik TWAIN skanera i spróbuj ponownie.</sys:String>
     <sys:String x:Key="Str_Menu_ConvertOffice">Konwertuj plik Word lub Excel...</sys:String>

@@ -36,6 +36,7 @@ namespace KillerPDF.Features
             // and this thread keeps its messages flowing until the scanner is done.
             using var window = new HwndSource(new HwndSourceParameters("KillerPDF scan") { Width = 0, Height = 0, WindowStyle = 0 });
             string folder = Path.Combine(Path.GetTempPath(), $"KillerPDF-scan-{DateTime.Now:yyyyMMdd-HHmmss-fff}");
+            bool publishedCompleteScan = false;
             try
             {
                 using TwainScan scan = TwainScan.Open(window.Handle);
@@ -67,22 +68,37 @@ namespace KillerPDF.Features
 
                 string output = Path.GetFullPath(pos[0]);
                 con.WriteLine($"Scanning with {chosen.Name}...");
-                Task<IReadOnlyList<string>> scanning = scan.ScanAsync(chosen, options.ContainsKey("--show-settings"), folder);
+                Task<TwainScanResult> scanning = scan.ScanAsync(chosen, options.ContainsKey("--show-settings"), folder);
                 var frame = new DispatcherFrame();
                 Dispatcher dispatcher = Dispatcher.CurrentDispatcher;
                 scanning.ContinueWith(_ => dispatcher.BeginInvoke(() => frame.Continue = false), TaskScheduler.Default);
                 Dispatcher.PushFrame(frame);
-                IReadOnlyList<string> pages = scanning.GetAwaiter().GetResult();
+                TwainScanResult result = scanning.GetAwaiter().GetResult();
+                IReadOnlyList<string> pages = result.Pages;
+                if (!result.Completed)
+                {
+                    con.WriteLine(result.Errors.Count > 0 ? "Scan incomplete." : "Scan canceled.");
+                    foreach (Exception error in result.Errors) con.WriteLine(error.Message);
+                }
                 if (pages.Count == 0) { con.WriteLine("The scanner returned no pages."); return 1; }
 
                 CliEnsureParentDir(output);
-                File.WriteAllBytes(output, PdfEngineIntegration.MergeFiles(pages));
+                AtomicFileOutput.Write(output, PdfEngineIntegration.MergeFiles(pages));
                 con.WriteLine($"Scanned {pages.Count} pages -> {output}");
-                return 0;
+                publishedCompleteScan = result.Completed;
+                return result.Completed ? 0 : 1;
             }
             finally
             {
-                try { if (Directory.Exists(folder)) Directory.Delete(folder, recursive: true); }
+                try
+                {
+                    if (Directory.Exists(folder))
+                    {
+                        if (publishedCompleteScan || !Directory.EnumerateFiles(folder).Any())
+                            Directory.Delete(folder, recursive: true);
+                        else con.WriteLine($"Recovered scan files are kept in: {folder}");
+                    }
+                }
                 catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
             }
         }

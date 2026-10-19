@@ -1462,6 +1462,8 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Scan_NoPages">Nada foi digitalizado.</sys:String>
     <sys:String x:Key="Str_Scan_Done">{0} página(s) digitalizada(s)</sys:String>
     <sys:String x:Key="Str_Scan_Failed">Falha ao digitalizar:</sys:String>
+    <sys:String x:Key="Str_Scan_Partial">Digitalização incompleta. {0} página(s) recuperada(s).</sys:String>
+    <sys:String x:Key="Str_Scan_RecoveryFiles">Pasta de recuperação da digitalização: {0}</sys:String>
     <sys:String x:Key="Str_Scan_NoScanners">Nenhum scanner TWAIN foi encontrado. Conecte o scanner, instale o driver TWAIN dele e tente novamente.</sys:String>
     <sys:String x:Key="Str_Scan_NoManager">A digitalização precisa do gerenciador TWAIN de 64 bits (TWAINDSM.dll), que os drivers de scanner compatíveis com TWAIN instalam. Instale o driver TWAIN do seu scanner e tente novamente.</sys:String>
     <sys:String x:Key="Str_Menu_ConvertOffice">Converter arquivo do Word ou Excel...</sys:String>

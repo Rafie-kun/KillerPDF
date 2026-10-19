@@ -28,6 +28,7 @@
     <Compile Include="..\Models\RedactionMark.cs" Link="Models\RedactionMark.cs" />
     <Compile Include="..\Services\RedactionPageEdit.cs" Link="Services\RedactionPageEdit.cs" />
     <Compile Include="..\Services\AtomicFileOutput.cs" Link="Services\AtomicFileOutput.cs" />
+    <Compile Include="..\Services\TwainScan.cs" Link="Services\TwainScan.cs" />
     <Compile Include="..\Services\AppDataPaths.cs" Link="Services\AppDataPaths.cs" />
     <Compile Include="..\Services\SignatureStore.cs" Link="Services\SignatureStore.cs" />
     <Compile Include="..\Services\TextFieldPresetStore.cs" Link="Services\TextFieldPresetStore.cs" />
@@ -136,6 +137,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\engine\KillerPdf.Engine\KillerPdf.Engine.csproj" />
+    <ProjectReference Include="..\third_party\NTwain\NTwain\NTwain.csproj" />
   </ItemGroup>
 
 </Project>

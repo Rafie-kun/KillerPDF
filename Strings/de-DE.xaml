@@ -1451,6 +1451,8 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Scan_NoPages">Es wurde nichts gescannt.</sys:String>
     <sys:String x:Key="Str_Scan_Done">{0} Seite(n) gescannt</sys:String>
     <sys:String x:Key="Str_Scan_Failed">Scannen fehlgeschlagen:</sys:String>
+    <sys:String x:Key="Str_Scan_Partial">Scan unvollständig. {0} Seite(n) wurden gerettet.</sys:String>
+    <sys:String x:Key="Str_Scan_RecoveryFiles">Ordner zur Scan-Wiederherstellung: {0}</sys:String>
     <sys:String x:Key="Str_Scan_NoScanners">Es wurden keine TWAIN-Scanner gefunden. Schließen Sie den Scanner an, installieren Sie seinen TWAIN-Treiber und versuchen Sie es erneut.</sys:String>
     <sys:String x:Key="Str_Scan_NoManager">Zum Scannen wird der 64-Bit-TWAIN-Manager (TWAINDSM.dll) benötigt, den Scannertreiber mit TWAIN-Unterstützung installieren. Installieren Sie den TWAIN-Treiber Ihres Scanners und versuchen Sie es erneut.</sys:String>
     <sys:String x:Key="Str_Menu_ConvertOffice">Word- oder Excel-Datei konvertieren...</sys:String>

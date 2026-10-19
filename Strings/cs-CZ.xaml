@@ -1447,6 +1447,8 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Scan_NoPages">Nic nebylo naskenováno.</sys:String>
     <sys:String x:Key="Str_Scan_Done">Naskenováno stran: {0}</sys:String>
     <sys:String x:Key="Str_Scan_Failed">Skenování selhalo:</sys:String>
+    <sys:String x:Key="Str_Scan_Partial">Skenování není dokončeno. Počet zachráněných stran: {0}.</sys:String>
+    <sys:String x:Key="Str_Scan_RecoveryFiles">Složka pro obnovení skenu: {0}</sys:String>
     <sys:String x:Key="Str_Scan_NoScanners">Nebyly nalezeny žádné skenery TWAIN. Připojte skener, nainstalujte jeho ovladač TWAIN a zkuste to znovu.</sys:String>
     <sys:String x:Key="Str_Scan_NoManager">Skenování vyžaduje 64bitový správce TWAIN (TWAINDSM.dll), který instalují ovladače skenerů s podporou TWAIN. Nainstalujte ovladač TWAIN svého skeneru a zkuste to znovu.</sys:String>
     <sys:String x:Key="Str_Menu_ConvertOffice">Převést soubor Word nebo Excel...</sys:String>

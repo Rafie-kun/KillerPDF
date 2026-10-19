@@ -1442,6 +1442,8 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Scan_NoPages">Hiçbir şey taranmadı.</sys:String>
     <sys:String x:Key="Str_Scan_Done">{0} sayfa tarandı</sys:String>
     <sys:String x:Key="Str_Scan_Failed">Tarama başarısız oldu:</sys:String>
+    <sys:String x:Key="Str_Scan_Partial">Tarama tamamlanmadı. {0} sayfa kurtarıldı.</sys:String>
+    <sys:String x:Key="Str_Scan_RecoveryFiles">Tarama kurtarma klasörü: {0}</sys:String>
     <sys:String x:Key="Str_Scan_NoScanners">TWAIN tarayıcı bulunamadı. Tarayıcıyı bağlayın, TWAIN sürücüsünü yükleyin ve yeniden deneyin.</sys:String>
     <sys:String x:Key="Str_Scan_NoManager">Tarama için 64 bit TWAIN yöneticisi (TWAINDSM.dll) gerekir; bunu TWAIN destekli tarayıcı sürücüleri yükler. Tarayıcınızın TWAIN sürücüsünü yükleyip yeniden deneyin.</sys:String>
     <sys:String x:Key="Str_Menu_ConvertOffice">Word veya Excel dosyasını dönüştür...</sys:String>

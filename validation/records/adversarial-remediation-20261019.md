@@ -360,6 +360,54 @@ or caller-selected roots. Revocation policy is unchanged, and these synthetic
 fixtures use NoCheck. Evidence: `certificate-red01.log` (one failure, two
 passes) and `certificate-green01.log` (10 passes).
 
+## BF-014: partial scan reporting and recovery
+
+A simulated TWAIN session drove success, transfer failure, success, and source
+disable through the actual scan callback, image decoder, and file writer. The
+original result was an ordinary successful page list despite the feeder error.
+Candidate causes were driver event loss, error state dropped on completion, and
+UI status replacement. Completion dropping the stored error was reproduced.
+The session and source interfaces now provide the hardware boundary for tests;
+no real scanner or window was opened.
+
+Scan results carry recovered pages, errors, and cancellation separately. Native
+transfer cancellation and source close requests mark a stopped scan. Both UI
+and CLI report incomplete results; the CLI returns 1 while preserving its
+partial PDF and recovered images. UI assembly failures and CLI publication
+failures retain the recovery folder. Page images and CLI PDFs are staged before
+publication. Startup/close errors are included in the structured result.
+
+All 15 scanner and atomic-publication checks pass, including full success,
+success/error/success, malformed image decode, locked output, intentional stop,
+no pages, and failure before any page. Evidence: `scan-red01.log`,
+`scan-green01.log`, and `scan-green02.log`. The app build passes with zero
+warnings/errors (`scan-build01.log`). All 19 locales parse, include both new
+strings, and pass key and placeholder parity (`scan-localization.log`). An
+initial ad hoc XML check incorrectly visited comment nodes; the corrected
+element-only check and canonical coverage script both pass.
+
+Actual feeder behavior, native cancellation events, UI warning presentation,
+and the complete CLI hardware workflow remain unverified until appropriate
+hardware/UI access is available. Source review covers recovery-folder retention
+after assembly failure; the full interactive failure path is still pending.
+
+## V-001: form-expansion test stability
+
+The reported historical full-suite failure remains evidence: cancellation won
+over the expected work-limit exception at about 34 seconds, while the isolated
+test then passed at about seven seconds. No timeout or production guard was
+changed for this investigation. Current runs retain the 30-second timeout:
+the seven-test class passes, with the named test at 1.622 seconds; the normal
+parallel full engine suite passes all 6,645 tests in 55 seconds, with that test
+at 11.740 seconds. Evidence: `expansion-isolated.log`,
+`engine-after-correctness.log`, and their TRX files under `test-results`.
+
+The source still rejects after 1,024 deep form expansions. These runs show
+substantial load sensitivity without reproducing a guard bypass. Disposition:
+the current suite passes, but the historical timeout is not erased and no
+universal timing guarantee is claimed. Exact release-candidate verification is
+still required; no timeout was lengthened to obtain a pass.
+
 ## Pending work
 
 BF-016 requires the actual installer reproduction in a disposable VM. At task
@@ -367,5 +415,6 @@ start, no authenticated guest PowerShell session was available, and UI control
 was deferred until 5:00 p.m. Pacific on October 19. No installer was run on the
 development host. Continue this item when guest access is available.
 
-The remaining accepted findings, the three investigation items, V-001, and the
-exact final release gates remain open. Existing unrelated work is preserved.
+Installer and legacy Office repairs still need their required disposable VM
+reproductions. Deferred UI, hardware, network/filesystem, and exact final release
+gates remain open. Existing unrelated work is preserved.

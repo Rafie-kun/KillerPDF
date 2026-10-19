@@ -1462,6 +1462,8 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Scan_NoPages">何もスキャンされませんでした。</sys:String>
     <sys:String x:Key="Str_Scan_Done">{0} ページをスキャンしました</sys:String>
     <sys:String x:Key="Str_Scan_Failed">スキャンに失敗しました:</sys:String>
+    <sys:String x:Key="Str_Scan_Partial">スキャンが完了していません。{0} ページを復元しました。</sys:String>
+    <sys:String x:Key="Str_Scan_RecoveryFiles">スキャンの復元フォルダー: {0}</sys:String>
     <sys:String x:Key="Str_Scan_NoScanners">TWAIN スキャナーが見つかりません。スキャナーを接続し、TWAIN ドライバーをインストールしてもう一度お試しください。</sys:String>
     <sys:String x:Key="Str_Scan_NoManager">スキャンには 64 ビットの TWAIN マネージャー (TWAINDSM.dll) が必要です。これは TWAIN 対応のスキャナー ドライバーがインストールします。スキャナーの TWAIN ドライバーをインストールしてもう一度お試しください。</sys:String>
     <sys:String x:Key="Str_Menu_ConvertOffice">Word または Excel ファイルを変換...</sys:String>
