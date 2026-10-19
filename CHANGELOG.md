@@ -104,6 +104,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Malformed JBIG2 images stop before oversized header and symbol allocations.
 - Save Flattened and current document macros include pending edits and page rotations.
 - Extracted pages retain pending edits and rotation.
+- Printing preserves current edits and rotation, and cancels if its source document changes during preparation.
 - Flattened JPEG pages retain reflections, rotation, and skew.
 - Save repairs preserve partially overlapping crop boxes and nonzero object generations.
 - Incomplete scans report errors and keep recovered pages, including when PDF creation fails (#73).

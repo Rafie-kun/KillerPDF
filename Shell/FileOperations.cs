@@ -1680,87 +1680,67 @@ namespace KillerPDF
         private async void RunPrintFlow()
         {
             if (_doc is null || _currentFile is null) return;
-            string srcFile = _currentFile;
-
-            bool hasAnnotations = _annotations.Values.Any(list => list.Count > 0);
-            var formSnap = ActiveViewer.SnapshotFormValuesForPrint();
-            string printPath;
-            string? tempFlattened = null;
-            if (hasAnnotations || _docStampSpec is not null || PdfPrintSource.HasValues(formSnap))
+            var sourceCurrent = CaptureDocumentOrigin();
+            int sourcePage = _currentPage;
+            string tempClean = App.MakeTempFile("printclean");
+            string printPath = App.MakeTempFile("print");
+            int pageCount;
+            double[] pageDipW, pageDipH;
+            try
             {
-                var tempClean = App.MakeTempFile("clean");
-                // Snapshot the data the burn needs so the background thread reads no live UI state.
-                var annotsSnap = _annotations.ToDictionary(kv => kv.Key, kv => new List<PageAnnotation>(kv.Value));
-                var dimsSnap   = new Dictionary<int, (int w, int h)>(_renderDims);
-                var stampSnap  = _docStampSpec?.Clone();
-                var rotSnap    = new Dictionary<int, int>(_pageRotations);   // #169: the burn needs the visual frame
-                var formPath   = App.MakeTempFile("print");
-                string? burnPath = null;
-                try
+                CommitActiveTextBox();
+                var annotsSnap = _annotations.ToDictionary(kv => kv.Key,
+                    kv => kv.Value.Select(annotation => CloneAnnotation(annotation)
+                        ?? throw new NotSupportedException("The annotation cannot be captured for printing.")).ToList());
+                var dimsSnap = new Dictionary<int, (int w, int h)>(_renderDims);
+                var stampSnap = _docStampSpec?.Clone();
+                var visualRotations = new Dictionary<int, int>(_pageRotations);
+                var finalRotations = SnapshotPageRotations();
+                var formSnap = ActiveViewer.SnapshotFormValuesForPrint();
+                PdfEngineDocumentSession engineSession = EnsureEngineDocumentSession();
+                pageCount = engineSession.PageCount;
+                pageDipW = new double[pageCount];
+                pageDipH = new double[pageCount];
+                for (int i = 0; i < pageCount; i++)
                 {
-                    _doc.Save(tempClean);   // UI-thread serialization, without changing the editing session.
-                    await Task.Run(() => PdfPrintSource.Create(tempClean, formPath, formSnap));
-                    printPath = formPath;
-                    tempFlattened = formPath;
-                    if (hasAnnotations || stampSnap is not null)
-                    {
-                        burnPath = App.MakeTempFile("print");
-                        // Keep the form copy intact if annotation flattening fails.
-                        bool burned = await Task.Run(() =>
-                        {
-                            try
-                            {
-                                System.IO.File.Copy(formPath, burnPath, true);
-                                PdfEngineBurn.Burn(burnPath, annotsSnap, dimsSnap, stampSnap, null, rotSnap);
-                                return true;
-                            }
-                            catch { return false; }
-                        });
-                        if (burned)
-                        {
-                            printPath = burnPath;
-                            tempFlattened = burnPath;
-                            DeletePrintTemp(formPath);
-                        }
-                        else
-                        {
-                            DeletePrintTemp(burnPath);
-                            SetStatus(Loc("Str_St_FlattenPrintFailed"));
-                        }
-                    }
+                    var (pw, ph) = engineSession.VisualPageSize(i, visualRotations);
+                    pageDipW[i] = pw * 96.0 / 72.0;
+                    pageDipH[i] = ph * 96.0 / 72.0;
                 }
-                catch (Exception ex)
-                {
-                    DeletePrintTemp(formPath);
-                    DeletePrintTemp(burnPath);
-                    KillerDialog.Show(this, Loc("Str_Err_PrintFailed") + "\n" + ex.Message,
-                        "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-                finally { DeletePrintTemp(tempClean); }
-            }
-            else
-            {
-                printPath = srcFile;
-            }
 
-            if (_doc is null)
+                // Capture every live editor value before yielding. The worker finishes an owned
+                // saved copy using the same persistence components as Save and Save Flattened.
+                _doc.Save(tempClean);
+                WriteRedactionMarksToDocument(tempClean);
+                WriteMeasurementsToDocument(tempClean);
+                await Task.Run(() =>
+                {
+                    System.IO.File.Copy(tempClean, printPath, true);
+                    PdfEngineIntegration.RepairHarmlessSaveArtifacts(printPath);
+                    PdfEngineIntegration.ClearInvalidatedSignatures(printPath);
+                    PdfEngineIntegration.StripLinkAppearances(printPath);
+                    if (annotsSnap.Values.Any(list => list.Count > 0) || stampSnap is not null)
+                        PdfEngineBurn.Burn(printPath, annotsSnap, dimsSnap, stampSnap, null,
+                            visualRotations, forRasterization: true, measurementsAsAnnotations: true);
+                    PdfEngineIntegration.StripLinkAppearances(printPath);
+                    PdfEngineIntegration.ApplyFormValues(printPath, formSnap);
+                    PdfEngineIntegration.ApplyPageRotations(printPath, finalRotations);
+                });
+            }
+            catch (Exception ex)
             {
-                DeletePrintTemp(tempFlattened);
+                DeletePrintTemp(printPath);
+                KillerDialog.Show(this, Loc("Str_Err_PrintFailed") + "\n" + ex.Message,
+                    "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            PdfEngineDocumentSession engineSession = EnsureEngineDocumentSession();
-            int pageCount = engineSession.PageCount;
+            finally { DeletePrintTemp(tempClean); }
 
-            // Each page's true physical size in DIPs (96/inch) so the dialog can offer an exact
-            // "actual size" / custom scale. Computed on the UI thread (PdfSharp isn't thread-safe).
-            var pageDipW = new double[pageCount];
-            var pageDipH = new double[pageCount];
-            for (int i = 0; i < pageCount; i++)
+            if (!sourceCurrent())
             {
-                var (pw, ph) = engineSession.VisualPageSize(i, _pageRotations);
-                pageDipW[i] = pw * 96.0 / 72.0;
-                pageDipH[i] = ph * 96.0 / 72.0;
+                DeletePrintTemp(printPath);
+                SetStatus(Loc("Str_St_Canceled"));
+                return;
             }
 
             // Open the preview window immediately. Pages rasterize on a background thread and
@@ -1768,14 +1748,14 @@ namespace KillerPDF
             // responsive on large files. WPF's OS PrintDialog can't show a preview, so KillerPDF
             // renders it and drives printing itself.
             string  renderPath = printPath;
-            string? cleanup    = tempFlattened;
+            string? cleanup    = printPath;
             // Preview rasters are display-only (shown fit-to-pane in a Viewbox), so render them at a
             // modest budget that scales DOWN as the document grows - this keeps the preview's resident
             // bitmaps from ballooning on large files. The Print button re-renders the chosen pages at a
             // true 300 DPI on demand (PrintPreviewWindow.DoPrint), so output stays crisp (issue #83).
             int previewBox = pageCount <= 80 ? 1536 : pageCount <= 250 ? 1100 : 800;
             var preview = new PrintPreviewWindow(
-                this, pageCount, pageDipW, pageDipH, _currentPage, renderPath, cleanup);
+                this, pageCount, pageDipW, pageDipH, sourcePage, renderPath, cleanup);
 
             _ = Task.Run(() =>
             {
