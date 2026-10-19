@@ -41,15 +41,17 @@ public sealed class PdfFormScriptTests
     }
 
     [Theory]
-    [InlineData("-1.5", "-1", "-$1.00")]
-    [InlineData("1.5", "2", "$2.00")]
-    public void DocumentCalculationRoundsAndFormatsFieldValues(string input, string expected, string display)
+    [InlineData("-1.5", 1, "-1", "-$1.00")]
+    [InlineData("1.5", 1, "2", "$2.00")]
+    [InlineData("-1.125", 100, "-1.12", "-$1.12")]
+    [InlineData("1.125", 100, "1.13", "$1.13")]
+    public void DocumentCalculationRoundsAndFormatsFieldValues(string input, int scale, string expected, string display)
     {
         PdfDocument document = Document(
             "<< /Fields [5 0 R 6 0 R] /CO [6 0 R] >>",
             $"<< /FT /Tx /T (amount) /V ({input}) >>",
             "<< /FT /Tx /T (rounded) /AA << /C << /S /JavaScript /JS "
-                + "(event.value = Math.round\\(this.getField\\(\"amount\"\\).value\\);) >> "
+                + $"(event.value = Math.round\\(this.getField\\(\"amount\"\\).value * {scale}\\) / {scale};) >> "
                 + "/F << /S /JavaScript /JS (AFNumber_Format\\(2, 0, 0, 0, \"$\", true\\);) >> >> >>");
 
         PdfFormCalculationEntry result = PdfFormCalculation.Evaluate(document).Fields.Single(
@@ -57,6 +59,11 @@ public sealed class PdfFormScriptTests
         Assert.Equal(PdfFormScriptStatus.Evaluated, result.Status);
         Assert.Equal(expected, result.Value);
         Assert.Equal(display, result.DisplayValue);
+        using var json = System.Text.Json.JsonDocument.Parse(PdfFormCalculation.ExportJson(document));
+        var serialized = json.RootElement.GetProperty("Fields").EnumerateArray()
+            .Single(field => field.GetProperty("FieldName").GetString() == "rounded");
+        Assert.Equal(expected, serialized.GetProperty("Value").GetString());
+        Assert.Equal(display, serialized.GetProperty("DisplayValue").GetString());
     }
 
     [Fact]

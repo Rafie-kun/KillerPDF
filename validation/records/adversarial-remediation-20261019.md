@@ -319,9 +319,13 @@ rounding, which would mishandle values immediately below a midpoint. This follow
 the ECMAScript Math.round algorithm at
 https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-math.round.
 
-All 29 script and form-calculation cases pass, including 18 bit-exact rounding
-cases and two actual PDF calculation/formatting cases. Evidence:
-`rounding-red01.log`, `rounding-green01.log`, and `rounding-green02.log`.
+All 31 script and form-calculation cases pass, including 18 bit-exact rounding
+cases and four actual PDF calculation/formatting cases. The currency cases use
+Math.round(amount * 100) / 100 and verify both displayed and exported JSON
+values. Evidence: `rounding-red01.log`, `rounding-green01.log`,
+`rounding-green02.log`, and `rounding-currency-final.log`. The first JSON
+assertion used the wrong property casing; it was corrected to the existing
+export contract before the final passing run.
 The initial maximum-value case also exposed a separate field parser limitation
 with scientific notation; rounding boundary tests use numeric script literals
 to isolate this repair. That parser limitation remains outside this finding.
@@ -414,6 +418,9 @@ BF-016 requires the actual installer reproduction in a disposable VM. At task
 start, no authenticated guest PowerShell session was available, and UI control
 was deferred until 5:00 p.m. Pacific on October 19. No installer was run on the
 development host. Continue this item when guest access is available.
+
+The user confirmed that an Office-equipped disposable VM is not yet available.
+NI-001 therefore remains unimplemented and unvalidated pending that prerequisite.
 
 Installer and legacy Office repairs still need their required disposable VM
 reproductions. Deferred UI, hardware, network/filesystem, and exact final release
