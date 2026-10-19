@@ -29,7 +29,7 @@ Several old runners cannot run unchanged. `Run-Baseline.ps1`, `Run-Triage.py` an
 
 Adapt `C:/Users/steve/scratch/kp-bench-render/form-workflows-20261018/Check-ReleasePixels.py` into a fresh owned run with a pinned candidate and new output root, preserving the accepted page selections. Extend the oracle wrapper to all shared pages using the current strict rule. `Reconcile-CurrentPixels.py` reconciles retained October 18 captures; it does not rerender a new candidate.
 
-The next useful execution packet is therefore candidate freeze plus corrected, pinned accuracy-run configuration. Accuracy disposition comes before performance tuning or release claims.
+The pinned E733 candidate comparison has now completed for both corpora at both sizes. See [the current accuracy checkpoint](current-accuracy-20261019.md). A1 remains open. A subsequent narrow recovery fix restores exports for 20 reviewed inputs and is verified separately. The next useful execution packet is strict three-oracle disposition and verification of subsequent integrated candidates. Accuracy disposition comes before performance tuning or release claims.
 
 ## References
 
