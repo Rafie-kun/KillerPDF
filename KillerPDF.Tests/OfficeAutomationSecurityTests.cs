@@ -7,15 +7,24 @@ namespace KillerPDF.Tests;
 public sealed class OfficeAutomationSecurityTests
 {
     [Theory]
-    [InlineData(".doc", false)]
-    [InlineData(".xls", false)]
-    [InlineData(".doc", true)]
-    [InlineData(".xls", true)]
-    public void BinaryConversionDisablesAutomationMacrosDuringOpenAndRestoresSecurity(string extension, bool failOpen)
+    [InlineData(".doc", false, 1, false)]
+    [InlineData(".xls", false, 1, false)]
+    [InlineData(".doc", true, 1, false)]
+    [InlineData(".xls", true, 1, false)]
+    [InlineData(".doc", false, 2, true)]
+    [InlineData(".xls", false, 2, true)]
+    [InlineData(".doc", true, 2, true)]
+    [InlineData(".xls", true, 2, true)]
+    public void BinaryConversionDisablesAutomationMacrosDuringOpenAndRestoresSecurity(
+        string extension, bool failOpen, int initialSecurity, bool visible)
     {
         string input = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N") + extension);
         File.WriteAllBytes(input, [0xD0, 0xCF, 0x11, 0xE0]);
-        var app = new OfficeApplication(failOpen);
+        var app = new OfficeApplication(failOpen)
+        {
+            AutomationSecurity = initialSecurity,
+            Visible = visible,
+        };
         try
         {
             if (failOpen)
@@ -23,8 +32,8 @@ public sealed class OfficeAutomationSecurityTests
             else
                 Assert.Equal(new byte[] { 37, 80, 68, 70 }, OfficeConversion.ToPdf(input, _ => app));
             Assert.Equal(3, app.Documents.SecurityAtOpen);
-            Assert.Equal(1, app.AutomationSecurity);
-            Assert.True(app.QuitCalled);
+            Assert.Equal(initialSecurity, app.AutomationSecurity);
+            Assert.Equal(!visible, app.QuitCalled);
         }
         finally { File.Delete(input); }
     }

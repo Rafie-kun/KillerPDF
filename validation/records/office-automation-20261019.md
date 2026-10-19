@@ -14,4 +14,6 @@ dotnet test KillerPDF\KillerPDF.Tests\KillerPDF.Tests.csproj --no-restore --filt
 
 Before the fix, all four new cases failed: Word and Excel, successful and throwing Open, each observed security 1 instead of 3. The Excel fake first needed Optional parameter metadata to model Type.Missing correctly; that harness error was corrected before accepting its red verdict. After the fix, all 20 focused tests passed, including existing internal document conversion tests.
 
+The subsequent non-UI followup adds four cases for a visible external application whose initial security setting is 2. Both document formats and successful/throwing Open restore that original setting and leave the visible application running. All 24 focused tests pass. These use the same fake COM boundary; no Office window or process opens.
+
 The disposable VM was running with a clean-install checkpoint and Guest Service Interface enabled, but there were zero authenticated PowerShell sessions. Guest execution is unavailable. Actual Office trust policies, Protected View, VBA execution prevention, and Excel 4.0 behavior still need the disposable Office lab. These automated tests are boundary evidence, not Office acceptance or full macro-safety certification.
