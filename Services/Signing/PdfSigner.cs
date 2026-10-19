@@ -61,7 +61,7 @@ namespace KillerPDF.Services.Signing
                 document,
                 cmsSigner.CreateDetachedCms,
                 options);
-            File.WriteAllBytes(outputPath, signed);
+            AtomicFileOutput.Write(outputPath, signed);
         }
 
         private static string? NullIfWhiteSpace(string? value) =>

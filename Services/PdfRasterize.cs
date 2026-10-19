@@ -134,8 +134,8 @@ namespace KillerPDF.Services
 
             if (ct.IsCancellationRequested) return;   // canceled during render: assemble/save nothing
 
-            File.WriteAllBytes(outputPath,
-                PdfEngineIntegration.CreateRasterDocument(rasterPages));
+            AtomicFileOutput.Write(outputPath,
+                PdfEngineIntegration.CreateRasterDocument(rasterPages), ct);
         }
 
         /// <summary>

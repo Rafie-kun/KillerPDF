@@ -1508,7 +1508,7 @@ namespace KillerPDF
                 byte[] output = await Task.Run(() => PdfStructuredExport.Export(
                     document, options.Format, pages, cancellationToken: cancellation), cancellation);
                 if (cancellation.IsCancellationRequested) return;
-                await System.IO.File.WriteAllBytesAsync(save.FileName, output, cancellation);
+                await AtomicFileOutput.WriteAsync(save.FileName, output, cancellation);
                 SetStatus(string.Format(Loc("Str_ExportDoc_Done"), System.IO.Path.GetFileName(save.FileName)));
             }
             catch (OperationCanceledException) { }

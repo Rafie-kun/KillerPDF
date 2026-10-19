@@ -167,6 +167,29 @@ Earlier test compile failures were corrected fixture API usage, not product
 regressions. Live UI apply/undo/redo, counts, repaint, and cross-pane behavior
 remain unverified until the UI restriction permits hands-on acceptance.
 
+## BF-006: completed-file publication
+
+Signing, flattening, and structured export share `AtomicFileOutput`. It writes
+an owned sibling file, flushes and closes it, checks cancellation, then uses
+replacement or same-volume rename. Its publication policy matches the existing
+replacement helper but consumes the completed sibling directly, avoiding a
+second copy. The unrelated existing edits in PdfEngineIntegration are preserved.
+
+Three real-filesystem tests reproduced old-destination corruption after a
+partial synchronous write, a partial asynchronous write, and cancellation after
+an asynchronous write. All pass after staging. Additional checks cover new and
+existing destinations for both write modes, locked destinations, and staging
+cleanup. The locked-file fixture initially expected IOException specifically;
+Windows returned UnauthorizedAccessException, so the assertion now accepts
+either filesystem failure while still requiring unchanged bytes and cleanup.
+
+All 13 focused publication and signing checks pass, including the existing
+cryptographic signature integrity test. The app build passes with 11 existing
+NTwain warnings and no errors. Logs are `publication-red-01.log`,
+`publication-green-03.log`, and `sign-publication-build.log` in task scratch.
+Network shares, unsupported replacement filesystems, process termination, and
+power loss remain unverified. No UI was driven.
+
 ## Pending work
 
 BF-016 requires the actual installer reproduction in a disposable VM. At task
