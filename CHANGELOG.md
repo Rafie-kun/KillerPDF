@@ -142,6 +142,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Fixed lost pages in parallel PNG exports, and invalid OCR models are ignored with the Tesseract fallback kept.
 - Silent installs return specific Windows error codes and reject a second concurrent install instead of reporting a general failure.
 - A silent install started without admin rights, as the Microsoft Store runs it, installs for the current user with no prompt instead of failing, and the Microsoft Store installer carries its own .NET runtime so it installs on PCs without the .NET 10 Desktop Runtime.
+- Setup finds the .NET 10 Desktop Runtime on Arm64 Windows instead of reporting it missing and refusing a silent install.
 - Icon-only buttons give screen readers the name from their tooltip, icon glyphs stay out of what screen readers read, page thumbnails read as their page number instead of a type name, every part of each scroll bar has a name, and controls reached with the keyboard show a thin solid focus ring in the theme accent. File-picker rows announce folder and file names.
 - Opening the shortcuts or About card moves keyboard focus into it, Tab stays inside the card, and closing it returns focus to where it was.
 - Tab no longer stops on hidden links, which screen readers announced as the window.
