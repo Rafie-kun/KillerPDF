@@ -6,6 +6,59 @@ namespace KillerPdf.Engine.Tests.Documents;
 
 public sealed class PdfFormScriptTests
 {
+    public static IEnumerable<object[]> RoundingCases()
+    {
+        yield return [1.5, 2.0];
+        yield return [-1.5, -1.0];
+        yield return [0.5, 1.0];
+        yield return [-0.5, -0.0];
+        yield return [-0.0, -0.0];
+        yield return [0.0, 0.0];
+        yield return [-0.1, -0.0];
+        yield return [0.1, 0.0];
+        yield return [Math.BitDecrement(0.5), 0.0];
+        yield return [Math.BitIncrement(0.5), 1.0];
+        yield return [Math.BitDecrement(-0.5), -1.0];
+        yield return [Math.BitIncrement(-0.5), -0.0];
+        yield return [Math.BitDecrement(-1.5), -2.0];
+        yield return [Math.BitIncrement(-1.5), -1.0];
+        yield return [4503599627370495.5, 4503599627370496.0];
+        yield return [4503599627370497.0, 4503599627370497.0];
+        yield return [-4503599627370495.5, -4503599627370495.0];
+        yield return [double.MaxValue, double.MaxValue];
+    }
+
+    [Theory]
+    [MemberData(nameof(RoundingCases))]
+    public void MathRoundMatchesJavaScriptTiesAndBoundaries(double input, double expected)
+    {
+        string literal = input.ToString("R", System.Globalization.CultureInfo.InvariantCulture);
+        PdfFormScriptResult result = PdfFormScript.Calculate(
+            $"event.value = Math.round({literal});", new Dictionary<string, string>());
+        Assert.Equal(PdfFormScriptStatus.Evaluated, result.Status);
+        Assert.NotNull(result.Number);
+        Assert.Equal(BitConverter.DoubleToInt64Bits(expected), BitConverter.DoubleToInt64Bits(result.Number.Value));
+    }
+
+    [Theory]
+    [InlineData("-1.5", "-1", "-$1.00")]
+    [InlineData("1.5", "2", "$2.00")]
+    public void DocumentCalculationRoundsAndFormatsFieldValues(string input, string expected, string display)
+    {
+        PdfDocument document = Document(
+            "<< /Fields [5 0 R 6 0 R] /CO [6 0 R] >>",
+            $"<< /FT /Tx /T (amount) /V ({input}) >>",
+            "<< /FT /Tx /T (rounded) /AA << /C << /S /JavaScript /JS "
+                + "(event.value = Math.round\\(this.getField\\(\"amount\"\\).value\\);) >> "
+                + "/F << /S /JavaScript /JS (AFNumber_Format\\(2, 0, 0, 0, \"$\", true\\);) >> >> >>");
+
+        PdfFormCalculationEntry result = PdfFormCalculation.Evaluate(document).Fields.Single(
+            field => field.FieldName == "rounded");
+        Assert.Equal(PdfFormScriptStatus.Evaluated, result.Status);
+        Assert.Equal(expected, result.Value);
+        Assert.Equal(display, result.DisplayValue);
+    }
+
     [Fact]
     public void NumberFormatAppliesSeparatorCurrencyAndNegativeStyles()
     {

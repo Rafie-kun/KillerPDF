@@ -309,6 +309,24 @@ no warnings or errors. Evidence: `render-final-tests.log` and
 printing/OCR workflow acceptance remain pending. This does not certify every
 engine recovery message or final-candidate corpus rendering.
 
+## BF-012: JavaScript rounding
+
+The public script evaluator reproduced incorrect negative-half rounding. The
+confirmed cause was .NET's away-from-zero midpoint rule; alternatives considered
+were field-number parsing and display formatting. Math.round now chooses ties
+toward positive infinity, preserves negative zero, and avoids adding 0.5 before
+rounding, which would mishandle values immediately below a midpoint. This follows
+the ECMAScript Math.round algorithm at
+https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-math.round.
+
+All 29 script and form-calculation cases pass, including 18 bit-exact rounding
+cases and two actual PDF calculation/formatting cases. Evidence:
+`rounding-red01.log`, `rounding-green01.log`, and `rounding-green02.log`.
+The initial maximum-value case also exposed a separate field parser limitation
+with scientific notation; rounding boundary tests use numeric script literals
+to isolate this repair. That parser limitation remains outside this finding.
+Interactive form presentation remains part of the deferred UI acceptance.
+
 ## Pending work
 
 BF-016 requires the actual installer reproduction in a disposable VM. At task

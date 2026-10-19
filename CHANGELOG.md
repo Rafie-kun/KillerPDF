@@ -113,6 +113,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Transform, orientation correction and scan straightening stop when another PDF becomes active, and Transform works on single-page documents (#436).
 - Fields added separately with a shared name prefix remain editable and accept data imports and calculation-order changes (#329, #342).
 - Form-data import accepts checkboxes whose unchecked appearance is omitted, and form flattening generates missing text appearances (#329, #342).
+- Calculated fields round negative half values toward positive infinity, matching JavaScript.
 - XFA conversion keeps repeated static text fields with distinct explicit data bindings, and explains ambiguous repeated paths without mixing their values (#330).
 - The window opens fully on screen on a small or high-scaling display, or when its saved size came from a bigger monitor, instead of running off the edges.
 - The mouse wheel over the title bar wordmark, or the plain title on flat themes, changes the app size, as it already did over the icon.

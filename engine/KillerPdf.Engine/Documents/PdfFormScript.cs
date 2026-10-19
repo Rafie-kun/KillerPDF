@@ -822,7 +822,7 @@ public static class PdfFormScript
                 : throw new FormatException($"Math.{name} requires two arguments.");
             return name switch
             {
-                "round" => Math.Round(First(), MidpointRounding.AwayFromZero),
+                "round" => RoundJavaScript(First()),
                 "floor" => Math.Floor(First()),
                 "ceil" => Math.Ceiling(First()),
                 "abs" => Math.Abs(First()),
@@ -837,6 +837,15 @@ public static class PdfFormScript
                 _ => throw new PdfFormScriptUnsupportedException(
                     $"The calculation calls the unsupported function Math.{name}.")
             };
+        }
+
+        private static double RoundJavaScript(double value)
+        {
+            if (!double.IsFinite(value) || value == Math.Truncate(value)) return value;
+            if (value < 0 && value >= -0.5) return -0.0;
+            // Adding 0.5 first can round a value just below a midpoint up to it.
+            double lower = Math.Floor(value);
+            return value - lower >= 0.5 ? lower + 1 : lower;
         }
 
         private string Identifier()
