@@ -716,6 +716,13 @@ try {
 
     Write-Host "    Preflight OK" -ForegroundColor Green
 
+    # The Microsoft Store listing installs KillerPDF-Store.exe, which the Cloudflare Worker serves
+    # from this release at killerpdf.net/store. Check the Store credentials and that no submission
+    # is in progress now, so a problem stops the release before anything is published.
+    $storeScript = Join-Path $PSScriptRoot 'store\Submit-StoreRelease.ps1'
+    $storeArgs = @{ ProductId = 'XPDCHHP2XLG338'; PackageUrl = "https://killerpdf.net/store/$Version/KillerPDF-Store.exe" }
+    & $storeScript @storeArgs -PreflightOnly
+
     # 9. Release notes from the CHANGELOG section
     Write-Host "`n==> Extracting release notes from CHANGELOG.md..." -ForegroundColor Cyan
     $clLines = Get-Content -Path (Join-Path $PSScriptRoot 'CHANGELOG.md')
@@ -755,6 +762,15 @@ try {
     gh workflow run deploy.yml --repo SteveTheKiller/thekiller-site
     if ($LASTEXITCODE -ne 0) {
         Write-Warning "The release is published, but thekiller.net refresh could not be started. Run: gh workflow run deploy.yml --repo SteveTheKiller/thekiller-site"
+    }
+
+    Write-Host "`n==> Submitting $Tag to the Microsoft Store..." -ForegroundColor Cyan
+    # The GitHub release is already published, so a Store failure is reported with the exact retry
+    # command rather than failing the release.
+    try { & $storeScript @storeArgs }
+    catch {
+        Write-Warning "The Microsoft Store submission did not finish: $($_.Exception.Message)"
+        Write-Warning "Retry only the Store step with: & '$storeScript' -ProductId $($storeArgs.ProductId) -PackageUrl $($storeArgs.PackageUrl)"
     }
 
     Write-Host "`n==> Release $Tag published:" -ForegroundColor Green

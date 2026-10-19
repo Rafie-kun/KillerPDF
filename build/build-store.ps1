@@ -4,8 +4,8 @@
     Builds the signed Microsoft Store installer, KillerPDF-Store.exe.
 .DESCRIPTION
     The Microsoft Store runs an EXE submission silently and installs nothing else first, so this
-    package carries its own .NET runtime. It is built separately from release.ps1, which never
-    uploads it.
+    package carries its own .NET runtime. release.ps1 runs this script, attaches the result to the
+    GitHub release and submits it to the Store; run it alone only to test a Store build.
 
     1. Builds the Store package: the installer launcher with a self-contained payload and no
        preview handler.
