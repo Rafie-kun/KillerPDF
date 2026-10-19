@@ -89,7 +89,6 @@ public sealed class PdfRedactionVerificationException(PdfRedactionVerificationRe
 public static partial class PdfContentRedaction
 {
     internal const string RedactionImageName = "KPRedactImage";
-    private const int MaximumCurvedPartialSegments = 8;
     private static readonly PdfName ContentsName = Name("Contents");
     private static readonly PdfName ResourcesName = Name("Resources");
     private static readonly PdfName AnnotsName = Name("Annots");
@@ -325,7 +324,7 @@ public static partial class PdfContentRedaction
     }
 
     /// <summary>
-    /// Reads a redacted output back and reports any text, image, shading, or annotation that still
+    /// Reads a redacted output back and reports any text, vector, image, shading, or annotation that still
     /// intersects a region, any revision history, and any remaining prohibited text.
     /// </summary>
     public static PdfRedactionVerificationReport Verify(ReadOnlyMemory<byte> output,
@@ -349,11 +348,18 @@ public static partial class PdfContentRedaction
         Dictionary<int, PdfContentBounds[]> byPage = GroupRegions(regionList, tree.Pages.Count);
         Dictionary<int, PdfRedactionRegion[]> covers = GroupCovers(regionList);
         var reader = new PdfPageContentReader(document);
+        var vectorFonts = new Dictionary<PdfDictionary, PdfExtractionFont?>(ReferenceEqualityComparer.Instance);
         foreach ((int pageIndex, PdfContentBounds[] pageRegions) in byPage.OrderBy(item => item.Key))
         {
             cancellationToken.ThrowIfCancellationRequested();
             PdfPageContent content = reader.Read(pageIndex, cancellationToken);
             PageGeometry pageGeometry = Geometry(document, tree.Pages[pageIndex]);
+            var vectors = new ContentRewriter(document, null, pageRegions, textOnly: false, vectorFonts, cancellationToken);
+            vectors.RewritePage(tree.Pages[pageIndex], pageGeometry, covers[pageIndex]);
+            if (vectors.RemovedPaths != 0 || vectors.Reasons.Contains("Vector"))
+                findings.Add(new("VectorInRegion", "Vector geometry remains inside a redacted area.", pageIndex));
+            if (vectors.Reasons.Contains("RedactionCover"))
+                findings.Add(new("RedactionCover", "An expected redaction cover is missing or changed.", pageIndex));
             if (TextRemains(content.Letters, pageRegions, covers[pageIndex], pageGeometry))
                 findings.Add(new("TextInRegion", "Text remains inside a redacted area.", pageIndex));
             bool raster = rasterPages.Contains(pageIndex);
@@ -1025,6 +1031,10 @@ public static partial class PdfContentRedaction
         // The operators that set the current nonstroking color, replayed to restore it.
         internal PdfContentInstruction[] Fill { get; init; } = [];
         internal int RenderMode { get; init; }
+        internal double LineWidth { get; init; } = 1;
+        internal double MiterLimit { get; init; } = 10;
+        internal double LineJoin { get; init; }
+        internal double LineCap { get; init; }
     }
 
     /// <summary>Rewrites page and form content so nothing drawn inside a region survives.</summary>
@@ -1054,12 +1064,28 @@ public static partial class PdfContentRedaction
         internal int RemovedPaths { get; private set; }
         internal ResourceScope? PageScope { get; private set; }
 
-        internal List<PdfContentInstruction> RewritePage(PdfPageTreeEntry page, PageGeometry geometry)
+        internal List<PdfContentInstruction> RewritePage(PdfPageTreeEntry page, PageGeometry geometry,
+            IReadOnlyList<PdfRedactionRegion>? excludedCovers = null)
         {
             PdfDictionary resources = page.InheritedValues.TryGetValue(ResourcesName, out PdfObject? value)
                 && Resolve(document, value) is PdfDictionary dictionary ? dictionary : new PdfDictionary([]);
             PageScope = new ResourceScope(document, resources) { KeepEverything = glyphsOnly };
             byte[] bytes = page.Dictionary.TryGetValue(ContentsName, out PdfObject? contents) ? PageBytes(contents) : [];
+            if (excludedCovers is not null)
+            {
+                // Exempt only the exact appended covers, never an earlier matching source path.
+                var expected = new List<PdfContentInstruction>();
+                foreach (PdfRedactionRegion cover in excludedCovers) AddCover(expected, cover, geometry);
+                IReadOnlyList<PdfContentInstruction> instructions = PdfContentStreamReader.Read(bytes,
+                    resolveColorComponents: name => ColorComponents(PageScope, name),
+                    cancellationToken: cancellationToken, compatibilityRecovery: document.UsesCompatibilityRecovery);
+                int start = instructions.Count - expected.Count;
+                if (start >= 0 && PdfContentStreamWriter.Write(instructions.Skip(start)).AsSpan()
+                        .SequenceEqual(PdfContentStreamWriter.Write(expected)))
+                    bytes = PdfContentStreamWriter.Write(instructions.Take(start));
+                else
+                    Reasons.Add("RedactionCover");
+            }
             var initial = new TextState(new Matrix(1, 0, 0, 1, -geometry.CropLeft, -geometry.CropBottom),
                 new PdfContentBounds(0, 0, geometry.Width, geometry.Height));
             return Rewrite(bytes, PageScope, initial, 0, out _);
@@ -1090,7 +1116,7 @@ public static partial class PdfContentRedaction
             var marked = new Stack<(int OutputIndex, PdfDictionary? Properties, bool Touched, int? Mcid)>();
             var pendingPath = new List<PdfContentInstruction>();
             var pathPoints = new List<PdfPoint>();
-            bool pathHasCurves = false, pendingClip = false;
+            bool pendingClip = false;
             TextState state = initial;
             Matrix text = Matrix.Identity, line = Matrix.Identity;
             bool insideText = false;
@@ -1238,7 +1264,17 @@ public static partial class PdfContentRedaction
                     case "DP":
                         if (args.Count == 2 && args[1] is PdfName point) scope.Use(PropertiesCategory, point);
                         Emit(instruction); break;
-                    case "w": case "J": case "j": case "M": case "d": case "ri": case "i":
+                    case "w": case "J": case "j": case "M":
+                        if (textOnly) { localChanged = true; break; }
+                        if (!glyphsOnly) state = instruction.Operator switch
+                        {
+                            "w" => state with { LineWidth = Arg(args, 0) },
+                            "J" => state with { LineCap = Arg(args, 0) },
+                            "j" => state with { LineJoin = Arg(args, 0) },
+                            _ => state with { MiterLimit = Arg(args, 0) }
+                        };
+                        Emit(instruction); break;
+                    case "d": case "ri": case "i":
                         if (textOnly) { localChanged = true; break; }
                         Emit(instruction); break;
                     case "BX": case "EX": case "d0": case "d1":
@@ -1439,6 +1475,17 @@ public static partial class PdfContentRedaction
                 if (args.Count != 1 || args[0] is not PdfName name) { Emit(instruction); return; }
                 PdfDictionary? gs = scope.Lookup(ExtGStateCategory, name) is { } value
                     ? Resolve(document, value) as PdfDictionary : null;
+                if (gs is not null)
+                {
+                    if (gs.TryGetValue(Name("LW"), out PdfObject? width))
+                        state = state with { LineWidth = Number(document, width) };
+                    if (gs.TryGetValue(Name("ML"), out PdfObject? miter))
+                        state = state with { MiterLimit = Number(document, miter) };
+                    if (gs.TryGetValue(Name("LJ"), out PdfObject? join))
+                        state = state with { LineJoin = Number(document, join) };
+                    if (gs.TryGetValue(Name("LC"), out PdfObject? cap))
+                        state = state with { LineCap = Number(document, cap) };
+                }
                 PdfObject? fontValue = null;
                 if (gs is not null && gs.TryGetValue(Name("Font"), out PdfObject? fontEntry)
                     && Resolve(document, fontEntry) is PdfArray fontArray && fontArray.Count == 2)
@@ -1628,7 +1675,6 @@ public static partial class PdfContentRedaction
                 {
                     for (int index = 0; index + 1 < args.Count; index += 2)
                         pathPoints.Add(state.Ctm.Point(N(args[index]), N(args[index + 1])));
-                    if (instruction.Operator is "c" or "v" or "y") pathHasCurves = true;
                 }
                 pendingPath.Add(instruction);
             }
@@ -1638,24 +1684,24 @@ public static partial class PdfContentRedaction
                 PdfContentBounds bounds = pathPoints.Count == 0 ? default : new PdfContentBounds(
                     pathPoints.Min(point => point.X), pathPoints.Min(point => point.Y),
                     pathPoints.Max(point => point.X), pathPoints.Max(point => point.Y));
-                int segments = pendingPath.Count(item => item.Operator is not ("W" or "W*" or "h"));
+                PdfContentBounds paintedBounds = !textOnly && !glyphsOnly && pathPoints.Count > 0
+                    && paint.Operator is "S" or "s" or "B" or "B*" or "b" or "b*"
+                    ? StrokeBounds(bounds, state) : bounds;
                 if (textOnly)
                 {
                     if (paint.Operator != "n" || pendingPath.Count > 0) localChanged = true;
                 }
-                else if (!glyphsOnly && paint.Operator != "n" && pathPoints.Count > 0
-                    && regions.Any(region => Overlaps(bounds, region)))
+                else if (!glyphsOnly && pathPoints.Count > 0
+                    && regions.Any(region => Overlaps(paintedBounds, region)))
                 {
-                    if (regions.Any(region => Inside(bounds, region)))
+                    if (!pendingClip && (paint.Operator == "n" || regions.Any(region => Inside(paintedBounds, region))))
                     {
-                        output.AddRange(pendingPath);
-                        output.Add(Op("n"));
                         RemovedPaths++;
                         localChanged = true;
                     }
                     else
                     {
-                        if (pathHasCurves && segments > MaximumCurvedPartialSegments) Reasons.Add("Vector");
+                        Reasons.Add("Vector");
                         output.AddRange(pendingPath);
                         output.Add(paint);
                     }
@@ -1668,11 +1714,24 @@ public static partial class PdfContentRedaction
                 if (pendingClip && pathPoints.Count > 0) state = state with { Clip = Intersect(state.Clip, bounds) };
                 pendingPath.Clear();
                 pathPoints.Clear();
-                pathHasCurves = false;
                 pendingClip = false;
             }
 
             PdfContentBounds Visible(PdfContentBounds bounds) => Intersect(bounds, state.Clip);
+        }
+
+        private static PdfContentBounds StrokeBounds(PdfContentBounds bounds, TextState state)
+        {
+            // A device hairline has no fixed extent in page coordinates.
+            if (state.LineWidth == 0) return state.Clip;
+            double extent = Math.Abs(state.LineWidth) * 0.5
+                * Math.Max(state.LineCap == 2 ? Math.Sqrt(2) : 1,
+                    state.LineJoin == 0 ? Math.Max(1, Math.Abs(state.MiterLimit)) : 1);
+            double x = extent * (Math.Abs(state.Ctm.A) + Math.Abs(state.Ctm.C));
+            double y = extent * (Math.Abs(state.Ctm.B) + Math.Abs(state.Ctm.D));
+            if (!double.IsFinite(x) || !double.IsFinite(y))
+                throw new FormatException("The redaction stroke bounds are not finite.");
+            return new PdfContentBounds(bounds.Left - x, bounds.Bottom - y, bounds.Right + x, bounds.Top + y);
         }
 
         private PdfExtractionFont? ReadFont(PdfObject? value)

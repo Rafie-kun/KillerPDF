@@ -68,6 +68,37 @@ Known path collisions are rejected before publication. Disk exhaustion,
 network-share behavior, adversarial concurrent path replacement, and crash
 recovery have not been certified by these local checks.
 
+## BF-001: recoverable vector redaction
+
+The public engine regression reproduced the original rectangle beneath its
+cover. Separate failing tests confirmed that stroke width was ignored, the
+verifier accepted retained vectors, and fully covered paths retained their
+coordinates with a nonpainting operator. Each passed after its bounded repair.
+
+Every partly intersecting path now requires explicit raster approval. Stroke
+bounds include width, cap, join, miter, transforms, and saved graphics state.
+Fully covered paths are removed, including their coordinates. Intersecting
+clipping paths require rasterization. Verification inspects source paths after
+excluding only the exact appended cover instructions.
+
+Acceptance covers straight paths, outlined geometry, short and long curves,
+compound paths, clipping, wide and transformed strokes, restored stroke state,
+and all quarter-turn rotations. Test copies remove only the appended covers:
+the original paths are absent, the selected area remains black, and pixels
+outside a two-pixel boundary margin match the original at 72 dpi. These checks
+inspect content and rendered pixels independently of the production verifier.
+
+All 33 focused engine redaction cases and 25 app redaction geometry tests pass.
+The full engine suite passed all 6,590 cases before the final five acceptance
+cases were added; production code was unchanged afterward. Evidence logs are
+in `C:/Users/steve/scratch/kp-remediation-20261019`, including
+`vector-engine-suite-01.log`, `vector-acceptance-02.log`, and
+`vector-app-tests.log`. No UI interaction was used.
+
+Stroke bounds are intentionally conservative and can request rasterization
+when exact subtraction might have preserved editable geometry. These synthetic
+checks do not replace corpus parity, hands-on UI checks, or final release gates.
+
 ## Pending work
 
 BF-016 requires the actual installer reproduction in a disposable VM. At task

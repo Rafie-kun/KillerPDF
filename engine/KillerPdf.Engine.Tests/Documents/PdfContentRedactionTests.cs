@@ -2,7 +2,9 @@ using KillerPdf.Engine.Authoring;
 using KillerPdf.Engine.CrossReference;
 using KillerPdf.Engine.Documents;
 using KillerPdf.Engine.Objects;
+using KillerPdf.Engine.Parsing;
 using KillerPdf.Engine.Rendering;
+using KillerPdf.Engine.Writing;
 using System.Text;
 using Xunit;
 
@@ -11,6 +13,127 @@ namespace KillerPdf.Engine.Tests.Documents;
 public sealed class PdfContentRedactionTests
 {
     private const string Helvetica = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>";
+
+    [Fact]
+    public void PartialVectorRedactionCannotPublishRecoverableGeometryWithoutRasterApproval()
+    {
+        PdfDocument document = PdfDocument.Open(SinglePage("1 0 0 rg 0 0 100 100 re f",
+            "/MediaBox [0 0 100 100]"));
+        var region = new PdfRedactionRegion(0, new PdfContentBounds(25, 25, 75, 75));
+        PdfContentRedactionResult? result = null;
+
+        Exception? error = Record.Exception(() => result = PdfContentRedaction.Apply(document, [region]));
+
+        if (result is not null)
+        {
+            // Inspect original geometry independently of whether an opaque cover hides it.
+            PdfPageContent output = new PdfPageContentReader(PdfDocument.Open(result.Document)).Read(0);
+            Assert.DoesNotContain(output.Paths, path => path.BoundingBox == new PdfContentBounds(0, 0, 100, 100));
+        }
+        Assert.IsType<InvalidOperationException>(error);
+        Assert.Contains("without replacing them with an image", error.Message);
+    }
+
+    [Fact]
+    public void StrokeWidthCanRequireRasterizationWhenTheCenterlineMissesTheRegion()
+    {
+        PdfDocument document = PdfDocument.Open(SinglePage("20 w 0 20 m 100 20 l S",
+            "/MediaBox [0 0 100 100]"));
+        var region = new PdfRedactionRegion(0, new PdfContentBounds(25, 25, 75, 75));
+        PdfRenderedPage original = new PdfPageRenderer(document).Render(0, new PdfRenderOptions(100, 100));
+        Assert.True(IsBlack(original, 50, 72));
+
+        PdfContentRedactionPlan plan = PdfContentRedaction.Analyze(document, [region]);
+
+        Assert.Equal([0], plan.RasterPages);
+        Assert.Contains("Vector", Assert.Single(plan.Pages).RasterReasons);
+    }
+
+    [Fact]
+    public void VerifierRejectsVectorGeometryHiddenByAnOtherwiseValidCover()
+    {
+        PdfDocument document = PdfDocument.Open(SinglePage(
+            "1 0 0 rg 0 0 100 100 re f q 0 0 0 rg 25 25 50 50 re f Q",
+            "/MediaBox [0 0 100 100]"));
+        var region = new PdfRedactionRegion(0, new PdfContentBounds(25, 25, 75, 75));
+
+        PdfRedactionVerificationReport report = PdfContentRedaction.Verify(document.Source, [region], []);
+
+        Assert.False(report.Succeeded);
+        Assert.Contains(report.Findings, finding => finding.Code == "VectorInRegion");
+    }
+
+    [Fact]
+    public void FullyCoveredVectorCoordinatesAreRemovedRatherThanLeftUnpainted()
+    {
+        PdfDocument document = PdfDocument.Open(SinglePage("35 35 m 65 35 l 50 65 l h f",
+            "/MediaBox [0 0 100 100]"));
+        var region = new PdfRedactionRegion(0, new PdfContentBounds(25, 25, 75, 75));
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, [region]);
+
+        PdfPageContent output = new PdfPageContentReader(PdfDocument.Open(result.Document)).Read(0);
+        Assert.DoesNotContain(output.Paths, path => path.Segments.Any(segment => segment.Operator == "m"));
+        Assert.Equal(PdfRedactionPageMethod.Content, Assert.Single(result.Plan.Pages).Method);
+    }
+
+    [Theory]
+    [InlineData("0 0 100 100 re f")]
+    [InlineData("0 50 m 25 100 75 0 100 50 c f")]
+    [InlineData("0 0 100 100 re 40 40 20 20 re f*")]
+    [InlineData("0 0 100 100 re W n 0 50 m 100 50 l S")]
+    [InlineData("20 w 0 20 m 100 20 l S")]
+    [InlineData("2 0 0 2 0 0 cm 10 w 0 10 m 50 10 l S")]
+    [InlineData("0 0 100 100 re f", 90)]
+    [InlineData("0 0 100 100 re f", 180)]
+    [InlineData("0 0 100 100 re f", 270)]
+    [InlineData("0 0 m 100 0 l 100 100 l 0 100 l h 20 20 m 20 80 l 80 80 l 80 20 l h f")]
+    [InlineData("0 50 m 10 100 20 0 30 50 c 40 100 50 0 60 50 c 70 100 80 0 90 50 c 100 100 100 0 100 50 c 90 0 80 100 70 50 c 60 0 50 100 40 50 c 30 0 20 100 10 50 c 0 0 0 100 0 50 c h f")]
+    public void ApprovedVectorFallbackRemovesOriginalPaths(string content, int rotation = 0)
+    {
+        PdfDocument document = PdfDocument.Open(SinglePage("1 0 0 rg 1 0 0 RG " + content,
+            $"/MediaBox [0 0 100 100] /Rotate {rotation}"));
+        var region = new PdfRedactionRegion(0, new PdfContentBounds(25, 25, 75, 75));
+        Assert.Equal([0], PdfContentRedaction.Analyze(document, [region]).RasterPages);
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, [region],
+            new PdfContentRedactionOptions { ApprovedRasterPages = [0], RasterDpi = 72 });
+
+        PdfDocument output = PdfDocument.Open(result.Document);
+        PdfPageContent page = new PdfPageContentReader(output).Read(0);
+        Assert.All(page.Paths, path => Assert.Equal(region.Bounds, path.BoundingBox));
+        Assert.Single(page.Images);
+        Assert.True(result.Verification.Succeeded);
+
+        // Remove only the appended cover in a test copy before checking the remaining picture.
+        var contents = (PdfIndirectReference)PdfPageTree.Read(output).Pages[0].Dictionary[
+            new PdfName("Contents"u8)];
+        var stream = (PdfStream)output.Resolve(contents);
+        var instructions = PdfContentStreamReader.Read(output.DecodeStream(stream));
+        Assert.Equal(new[] { "q", "rg", "re", "f", "Q" }, instructions.TakeLast(5).Select(op => op.Operator));
+        byte[] uncoveredBytes = new PdfIncrementalUpdateBuilder(output).ReplaceObject(contents.ObjectNumber,
+            new PdfStream(new PdfDictionary([]), PdfContentStreamWriter.Write(instructions.SkipLast(5)))).Build();
+        PdfDocument uncovered = PdfDocument.Open(uncoveredBytes);
+        Assert.Empty(new PdfPageContentReader(uncovered).Read(0).Paths);
+        PdfRenderedPage rendered = new PdfPageRenderer(uncovered).Render(0, new PdfRenderOptions(100, 100));
+        Assert.True(IsBlack(rendered, 50, 50));
+        PdfRenderedPage original = new PdfPageRenderer(document).Render(0, new PdfRenderOptions(100, 100));
+        for (int y = 0; y < 100; y++)
+            for (int x = 0; x < 100; x++)
+                if (x < 23 || x > 77 || y < 23 || y > 77)
+                    Assert.Equal(Pixel(original, x, y), Pixel(rendered, x, y));
+    }
+
+    [Fact]
+    public void RestoredStrokeWidthDoesNotForceUnnecessaryRasterization()
+    {
+        PdfDocument document = PdfDocument.Open(SinglePage("q 100 w Q 0 10 m 100 10 l S",
+            "/MediaBox [0 0 100 100]"));
+        var region = new PdfRedactionRegion(0, new PdfContentBounds(25, 25, 75, 75));
+
+        Assert.Empty(PdfContentRedaction.Analyze(document, [region]).RasterPages);
+        Assert.True(PdfContentRedaction.Apply(document, [region]).Verification.Succeeded);
+    }
 
     [Fact]
     public void RemovesOnlyTheGlyphsUnderTheRegionAndKeepsTheRestInPlace()

@@ -90,6 +90,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - The website's top bar Download button uses the same font and height as the other top bar buttons.
 
 ### Fixed
+- Permanent redaction removes covered vector geometry and requires approval to rasterize partly covered drawings (#341).
 - Command-line splitting protects the source and requires `--overwrite` to replace existing outputs.
 - Pages with more than a million drawing instructions draw all of their content instead of quietly stopping partway.
 - RGB and grayscale page groups blend before the white paper background is added.
