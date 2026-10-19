@@ -1,7 +1,7 @@
 #Requires -Version 5.1
 param(
     [string]$Configuration = "Release",
-    [ValidateSet("Portable", "Installer")]
+    [ValidateSet("Portable", "Installer", "Store")]
     [string]$PackageKind = "Portable",
     [switch]$KeepSymbols,
     [switch]$RepackOnly,
@@ -15,14 +15,18 @@ Set-StrictMode -Version Latest
 $projectDir = Split-Path -Parent $PSScriptRoot
 $appProject = Join-Path $projectDir 'KillerPDF.csproj'
 $launcherProject = Join-Path $projectDir 'Packaging\KillerLauncher\KillerLauncher.csproj'
-$isInstaller = $PackageKind -eq 'Installer'
-$packageSlug = if ($isInstaller) { 'installer-package' } else { 'portable-package' }
+# The Store package is the installer with the portable edition's bundled runtime, because the
+# Microsoft Store installs silently on machines that may not have the .NET 10 Desktop Runtime.
+$isStore = $PackageKind -eq 'Store'
+$isInstaller = $PackageKind -ne 'Portable'
+$bundlesRuntime = $isStore -or -not $isInstaller
+$packageSlug = if ($isStore) { 'store-package' } elseif ($isInstaller) { 'installer-package' } else { 'portable-package' }
 $artifactRoot = Join-Path $projectDir "bin\$Configuration\net10.0-windows\$packageSlug"
 $payloadDir = Join-Path $artifactRoot 'payload'
 $payloadZip = Join-Path $artifactRoot 'payload.zip'
 $launcherOutput = Join-Path $artifactRoot 'launcher'
 $publicDir = Join-Path $projectDir "bin\$Configuration\net10.0-windows\publish"
-$publicExe = Join-Path $publicDir $(if ($isInstaller) { 'KillerPDF.exe' } else { 'KillerPDF-Portable.exe' })
+$publicExe = Join-Path $publicDir $(if ($isStore) { 'KillerPDF-Store.exe' } elseif ($isInstaller) { 'KillerPDF.exe' } else { 'KillerPDF-Portable.exe' })
 
 if (-not $RepackOnly) {
     if ([IO.Directory]::Exists($artifactRoot)) { [IO.Directory]::Delete($artifactRoot, $true) }
@@ -32,7 +36,7 @@ if ([IO.Directory]::Exists($launcherOutput)) { [IO.Directory]::Delete($launcherO
 [IO.Directory]::CreateDirectory($payloadDir) | Out-Null
 [IO.Directory]::CreateDirectory($launcherOutput) | Out-Null
 [IO.Directory]::CreateDirectory($publicDir) | Out-Null
-if ($isInstaller) {
+if ($isInstaller -and -not $isStore) {
     $obsoleteSetupExe = Join-Path $publicDir 'KillerPDF-Setup.exe'
     if ([IO.File]::Exists($obsoleteSetupExe)) { [IO.File]::Delete($obsoleteSetupExe) }
 }
@@ -49,7 +53,7 @@ if (-not $RepackOnly) {
     Write-Host "==> Building loose KillerPDF payload $version..." -ForegroundColor Cyan
     & dotnet publish $appProject -c $Configuration `
         -r win-x64 `
-        --self-contained $(!$isInstaller) `
+        --self-contained $bundlesRuntime `
         -p:PublishReadyToRun=true `
         -p:KillerPayloadBuild=true `
         -p:PublishDir="$payloadDir\"
@@ -80,8 +84,9 @@ if (-not $RepackOnly) {
     [IO.File]::Copy($engineAssembly, (Join-Path $payloadDir 'KillerPdf.Engine.dll'), $true)
 
     # The File Explorer and Outlook preview handler (#410) ships with the installed edition only.
-    # Its own files join the payload; the engine and fonts it needs are already there.
-    if ($isInstaller) {
+    # Its own files join the payload; the engine and fonts it needs are already there. The Store
+    # package leaves it out because the handler loads the shared runtime, not the bundled one.
+    if ($isInstaller -and -not $isStore) {
         $previewProject = Join-Path $projectDir 'PreviewHandler\KillerPDF.PreviewHandler.csproj'
         $previewPublishDir = Join-Path $artifactRoot 'preview-handler'
         & dotnet publish $previewProject -c $Configuration `
@@ -139,7 +144,7 @@ $runtimeVersionedName = '^mscordaccore_amd64_amd64_[0-9]+(\.[0-9]+)+\.dll$'
 $actualPayloadNames = @($payloadFiles | ForEach-Object {
     $_.Substring($payloadDir.Length + 1).Replace('\', '/') -replace $runtimeVersionedName, 'mscordaccore_amd64_amd64_<runtime>.dll'
 })
-$payloadList = if ($isInstaller) { 'installed-payload-files.txt' } else { 'payload-files.txt' }
+$payloadList = if ($isInstaller -and -not $isStore) { 'installed-payload-files.txt' } else { 'payload-files.txt' }
 $expectedPayloadNames = @(Get-Content -LiteralPath (Join-Path $PSScriptRoot $payloadList) |
     Where-Object { $_ -and -not $_.StartsWith('#') } | Sort-Object)
 $payloadDifference = @(Compare-Object $expectedPayloadNames $actualPayloadNames)
@@ -148,7 +153,7 @@ if ($payloadDifference.Count -gt 0) {
     throw "Payload file set changed. Review dependencies and update build\payload-files.txt deliberately:`n$details"
 }
 $requiredFiles = @('KillerPDF.App.exe', 'KillerPdf.Engine.dll')
-if (-not $isInstaller) { $requiredFiles += 'System.Text.Json.dll' }
+if ($bundlesRuntime) { $requiredFiles += 'System.Text.Json.dll' }
 foreach ($required in $requiredFiles) {
     if ($actualPayloadNames -notcontains $required) {
         throw "Required loose payload file is missing ($required). Costura/Fody may have run accidentally."
@@ -190,6 +195,7 @@ $launcherTitle = if ($isInstaller) { 'KillerPDF Installer' } else { 'KillerPDF' 
     -p:LauncherIcon="$(Join-Path $projectDir 'Resources\kp-icon.ico')" `
     -p:PayloadZip="$payloadZip" `
     -p:InstallerPackage="$isInstaller" `
+    -p:StorePackage="$isStore" `
     -p:AllowUnsignedInstall="$(!$RequireSignature)" `
     -p:PublishDir="$launcherOutput\"
 if ($LASTEXITCODE -ne 0) { throw 'Launcher build failed.' }
@@ -208,7 +214,9 @@ $previousSkipRegistration = [Environment]::GetEnvironmentVariable('KILLERPDF_SKI
 if ($isInstaller -and -not $RequireSignature) { try {
     [Environment]::SetEnvironmentVariable('KILLERPDF_TEST_INSTALL_ROOT', $installSmokeRoot)
     [Environment]::SetEnvironmentVariable('KILLERPDF_SKIP_REGISTRATION', '1')
-    $installProcess = Start-Process -FilePath $builtLauncher -ArgumentList '/install-user' -Wait -PassThru
+    # The Store runs the installer with /silent, so that is the path its package is tested on.
+    $smokeArgument = if ($isStore) { '/silent' } else { '/install-user' }
+    $installProcess = Start-Process -FilePath $builtLauncher -ArgumentList $smokeArgument -Wait -PassThru
     if ($installProcess.ExitCode -ne 0) {
         throw "Launcher install smoke test failed with exit code $($installProcess.ExitCode)."
     }

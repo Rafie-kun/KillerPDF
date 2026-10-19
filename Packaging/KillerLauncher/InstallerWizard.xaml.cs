@@ -43,6 +43,11 @@ namespace KillerLauncher
                 DesktopShortcut.IsChecked = _existing.DesktopShortcut;
                 PreviewHandler.IsChecked = _existing.PreviewHandler;
             }
+            if (Program.IsStorePackage)
+            {
+                PreviewHandler.IsChecked = false;
+                PreviewHandler.Visibility = Visibility.Collapsed;
+            }
             ImageBrush grain = CreateGrain();
             GrainLayer.Background = grain;
             SidebarGrain.Background = grain;
@@ -125,6 +130,7 @@ namespace KillerLauncher
 
         private void SetRuntimeStatus()
         {
+            if (Program.IsStorePackage) { RuntimeStatus.Visibility = Visibility.Collapsed; return; }
             bool ready = Program.HasDesktopRuntime10();
             RuntimeStatus.Text = ready ? LauncherStrings.Get("RuntimeDetected") : LauncherStrings.Get("RuntimeRequired");
             RuntimeStatus.Foreground = new SolidColorBrush(ready
@@ -151,7 +157,7 @@ namespace KillerLauncher
                 ShowNotice(LauncherStrings.Get("CheckOptions"), ex.Message, NoticeKind.Warning);
                 return;
             }
-            if (!Program.HasDesktopRuntime10())
+            if (!Program.RuntimeReady())
             {
                 Process.Start(new ProcessStartInfo("https://dotnet.microsoft.com/en-us/download/dotnet/10.0") { UseShellExecute = true });
                 ShowNotice(LauncherStrings.Get("RuntimeRequired"),
@@ -167,7 +173,7 @@ namespace KillerLauncher
                 InstallProgress.Visibility = Visibility.Visible;
                 bool machine = _existing?.Machine ?? AllUsers.IsChecked == true;
                 bool desktop = _existing?.DesktopShortcut ?? DesktopShortcut.IsChecked == true;
-                bool preview = _existing?.PreviewHandler ?? PreviewHandler.IsChecked == true;
+                bool preview = !Program.IsStorePackage && (_existing?.PreviewHandler ?? PreviewHandler.IsChecked == true);
                 Task<int> install = Task.Run(() => machine ? InstallForEveryone(desktop, preview, installDirectory)
                     : Program.Install(false, desktop, installDirectory, preview));
                 await Task.WhenAll(install, Task.Delay(2000));
