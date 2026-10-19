@@ -186,6 +186,7 @@ public sealed class LocalizationParityTests
         return relative.StartsWith("Strings/", StringComparison.OrdinalIgnoreCase)
             || relative.StartsWith("Packaging/", StringComparison.OrdinalIgnoreCase)
             || relative.StartsWith("KillerPDF.Tests/", StringComparison.OrdinalIgnoreCase)
+            || relative.StartsWith("tests/", StringComparison.OrdinalIgnoreCase)
             || relative.StartsWith("engine/", StringComparison.OrdinalIgnoreCase)
             || relative.Contains("/bin/", StringComparison.OrdinalIgnoreCase)
             || relative.Contains("/obj/", StringComparison.OrdinalIgnoreCase);
