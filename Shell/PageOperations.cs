@@ -60,25 +60,32 @@ namespace KillerPDF
         private void Split_Click(object sender, RoutedEventArgs e)
         {
             if (_doc is null || _currentFile is null) { KillerDialog.Show(this, Loc("Str_Msg_OpenFirst")); return; }
-            var currentFile = _currentFile;
-            var selected = PageList.SelectedItems;
-            if (selected.Count == 0) { KillerDialog.Show(this, Loc("Str_Dlg_SelectExtract")); return; }
+            var sourceCurrent = CaptureDocumentOrigin();
+            int[] ordered = [.. PageList.SelectedItems.Cast<PageThumbnailVm>()
+                .Select(vm => vm.PageIndex).OrderBy(index => index)];
+            if (ordered.Length == 0) { KillerDialog.Show(this, Loc("Str_Dlg_SelectExtract")); return; }
             var dlg = new Controls.FileDialog(Controls.FileDialogMode.Save)
                           { Filter = Loc("Str_Filter_Pdf") + "|*.pdf", Title = Loc("Str_Dlg_SaveExtractedAs"),
                             CheckFileExists = false, CheckPathExists = true, RequireFilterExtension = true };
-            if (dlg.ShowDialog(this) != true) return;
+            if (dlg.ShowDialog(this) != true || !sourceCurrent()) return;
+            string? snapshot = null;
             try
             {
-                var indices = new List<int>();
-                foreach (PageThumbnailVm vm in selected) indices.Add(vm.PageIndex);
-                int[] ordered = [.. indices.OrderBy(index => index)];
+                CommitActiveTextBox();
+                var rotations = SnapshotPageRotations();
+                snapshot = WriteSavedCopyToTemp();
                 PdfEngineIntegration.ExtractPages(
-                    currentFile, dlg.FileName, ordered, _pageRotations);
-                SetStatus(string.Format(Loc("Str_Extracted"), indices.Count, System.IO.Path.GetFileName(dlg.FileName)));
+                    snapshot, dlg.FileName, ordered, rotations);
+                SetStatus(string.Format(Loc("Str_Extracted"), ordered.Length, System.IO.Path.GetFileName(dlg.FileName)));
             }
             catch (Exception ex)
             {
                 KillerDialog.Show(this, Loc("Str_Err_SplitFailed") + "\n" + ex.Message, "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                if (snapshot is not null)
+                    try { System.IO.File.Delete(snapshot); } catch (IOException) { } catch (UnauthorizedAccessException) { }
             }
         }
 
