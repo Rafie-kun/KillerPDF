@@ -359,6 +359,7 @@ namespace KillerPDF.Features
             "                                           [--bookmarks <level>] a part per bookmark at that level",
             "                                           [--max-size <n[KB|MB]>] grow parts up to a size budget",
             "                                           [--name <template>] {name} {index} {first} {last} {title}",
+            "                                           [--overwrite] replace existing parts, never the source",
             "  killerpdf optimize <in.pdf> <out.pdf> [--strip <list>] [--images <dpi>] [--jpeg-quality <n>] [--report]",
             "                                           reduce file size; --images resamples images drawn",
             "                                           above 1.5 times that resolution; strip takes any of metadata,",
@@ -637,46 +638,92 @@ namespace KillerPDF.Features
             {
                 con.WriteLine("Usage: KillerPDF.exe --split <in.pdf> <outputFolder> "
                     + "[--every <n> | --parts <n> | --bookmarks <level> | --max-size <n[KB|MB]>] "
-                    + "[--name <template>]");
+                    + "[--name <template>] [--overwrite]");
                 return 2;
             }
             string inPath = Path.GetFullPath(pos[0]), outDir = Path.GetFullPath(pos[1]);
             if (!File.Exists(inPath)) { con.WriteLine($"Input not found: {inPath}"); return 2; }
 
+            // Keep the source protected against replacement through another filesystem alias.
+            using var sourceGuard = new FileStream(inPath, FileMode.Open, FileAccess.Read, FileShare.Read);
             byte[] source = File.ReadAllBytes(inPath);
             string baseName = Path.GetFileNameWithoutExtension(inPath);
             PdfSplitOptions? rule = ParseSplitRule(options, con, out bool invalid);
             if (invalid) return 2;
 
-            Directory.CreateDirectory(outDir);
+            var outputs = new List<(string Path, ReadOnlyMemory<byte> Data)>();
+            string success;
             if (rule is null)
             {
                 // Default, unchanged: one PDF per page.
                 IReadOnlyList<byte[]> pages = PdfEngineIntegration.SplitPages(source);
                 int digits = Math.Max(3, pages.Count.ToString().Length);
                 for (int i = 0; i < pages.Count; i++)
-                {
-                    File.WriteAllBytes(
+                    outputs.Add((
                         Path.Combine(outDir, $"{baseName}-page-{(i + 1).ToString().PadLeft(digits, '0')}.pdf"),
-                        pages[i]);
+                        pages[i]));
+                success = $"Split {pages.Count} pages into {outDir}";
+            }
+            else
+            {
+                IReadOnlyList<PdfSplitOutput> parts;
+                try
+                {
+                    parts = PdfDocumentSplitter.Split(PdfEngineIntegration.OpenForReading(source), rule, baseName);
                 }
-                con.WriteLine($"Split {pages.Count} pages into {outDir}");
-                return 0;
+                catch (Exception ex) when (ex is ArgumentException or InvalidOperationException)
+                {
+                    con.WriteLine(ex.Message);
+                    return 2;
+                }
+                outputs.AddRange(parts.Select(part =>
+                    (Path.GetFullPath(Path.Combine(outDir, part.Name + ".pdf")), part.Document)));
+                success = $"Split into {parts.Count} files in {outDir}";
             }
 
-            IReadOnlyList<PdfSplitOutput> parts;
-            try
+            string[] outputPaths = [.. outputs.Select(output => output.Path)];
+            if (outputPaths.Any(path => string.Equals(path, inPath, StringComparison.OrdinalIgnoreCase))
+                || outputPaths.Distinct(StringComparer.OrdinalIgnoreCase).Count() != outputPaths.Length)
             {
-                parts = PdfDocumentSplitter.Split(PdfEngineIntegration.OpenForReading(source), rule, baseName);
-            }
-            catch (Exception ex) when (ex is ArgumentException or InvalidOperationException)
-            {
-                con.WriteLine(ex.Message);
+                con.WriteLine("Split output filenames must be unique and cannot replace the source file.");
                 return 2;
             }
-            foreach (PdfSplitOutput part in parts)
-                File.WriteAllBytes(Path.Combine(outDir, part.Name + ".pdf"), part.Document.ToArray());
-            con.WriteLine($"Split into {parts.Count} files in {outDir}");
+            bool overwrite = options.ContainsKey("--overwrite");
+            foreach (string path in outputPaths)
+            {
+                if (Directory.Exists(path) || (!overwrite && File.Exists(path)))
+                {
+                    con.WriteLine($"Split output already exists: {path}. Use --overwrite to replace existing files.");
+                    return 2;
+                }
+            }
+
+            Directory.CreateDirectory(outDir);
+            var staged = new List<(string Temporary, string Destination)>();
+            try
+            {
+                foreach (var output in outputs)
+                {
+                    string temporary = Path.Combine(outDir, $".killerpdf-split-{Guid.NewGuid():N}.tmp");
+                    using var stream = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None);
+                    staged.Add((temporary, output.Path));
+                    stream.Write(output.Data.Span);
+                    stream.Flush(flushToDisk: true);
+                }
+                foreach (var file in staged)
+                {
+                    if (overwrite)
+                        PdfEngineIntegration.ReplaceFileAtomically(file.Temporary, file.Destination);
+                    else
+                        File.Move(file.Temporary, file.Destination, overwrite: false);
+                }
+            }
+            finally
+            {
+                foreach (var file in staged)
+                    if (File.Exists(file.Temporary)) File.Delete(file.Temporary);
+            }
+            con.WriteLine(success);
             return 0;
         }
 
