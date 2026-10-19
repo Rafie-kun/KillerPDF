@@ -53,6 +53,8 @@ $proj         = Join-Path $PSScriptRoot "KillerPDF.csproj"
 $publishDir   = Join-Path $PSScriptRoot "bin\Release\net10.0-windows\publish"
 $portableExe   = Join-Path $publishDir "KillerPDF-Portable.exe"
 $installerExe  = Join-Path $publishDir "KillerPDF.exe"
+# The Microsoft Store installer carries its own .NET runtime; the Store downloads it through killerpdf.net/store.
+$storeExe      = Join-Path $publishDir "KillerPDF-Store.exe"
 $packageBuild  = Join-Path $PSScriptRoot "build\build-packages.ps1"
 $portablePayloadDir  = Join-Path $PSScriptRoot "bin\Release\net10.0-windows\portable-package\payload"
 $installerPayloadDir = Join-Path $PSScriptRoot "bin\Release\net10.0-windows\installer-package\payload"
@@ -451,11 +453,21 @@ $releaseBuildVersion = $releaseVersionNode.InnerText
     -ProjectDir $PSScriptRoot -Version $releaseBuildVersion -AppName 'KillerPDF' -PublishDir $publishDir
 if ($LASTEXITCODE -ne 0) { throw "Source bundle failed." }
 
+# 3b. Microsoft Store installer
+Write-Host "`n==> Building the Microsoft Store installer..." -ForegroundColor Cyan
+$storeBuildArguments = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', (Join-Path $PSScriptRoot 'build\build-store.ps1'))
+if ($SkipSign) { $storeBuildArguments += '-SkipSign' }
+elseif ($CertThumbprint) { $storeBuildArguments += @('-CertThumbprint', $CertThumbprint) }
+else { $storeBuildArguments += @('-CertName', $CertName) }
+& powershell @storeBuildArguments
+if ($LASTEXITCODE -ne 0) { throw "Microsoft Store installer build failed." }
+Assert-ReleaseArtifactVersion $storeExe "$releaseBuildVersion.0"
+
 } else {
     # PublishOnly: the artifacts from the last full run are the release.
     Write-Host "`n==> PublishOnly: skipping build and sign, using existing artifacts." -ForegroundColor Yellow
     $expectedAssemblyVersion = "$Version.0"
-    foreach ($artifact in @($portableExe, $installerExe)) {
+    foreach ($artifact in @($portableExe, $installerExe, $storeExe)) {
         Assert-ReleaseArtifactVersion $artifact $expectedAssemblyVersion
     }
     $actualThumb = "(existing signature)"
@@ -721,7 +733,7 @@ try {
 
     if ($DryRun) {
         Write-Host "`n==> DryRun: stopping before tag and release." -ForegroundColor Yellow
-        Write-Host "    Would tag $Tag, push it, and publish Setup, Portable, the source archive, and SHA256SUMS.txt."
+        Write-Host "    Would tag $Tag, push it, and publish Setup, Portable, the Microsoft Store installer, the source archive, and SHA256SUMS.txt."
         exit 0
     }
 
@@ -733,7 +745,7 @@ try {
 
     # 11. GitHub release
     Write-Host "`n==> Creating GitHub release..." -ForegroundColor Cyan
-    $assets = @($installerExe, $portableExe)
+    $assets = @($installerExe, $portableExe, $storeExe)
     if ($srcZip) { $assets += $srcZip.FullName }
     if (Test-Path $sumsPath) { $assets += $sumsPath }
     gh release create $Tag @assets --title "KillerPDF $Tag" --notes-file $notesFile --verify-tag
