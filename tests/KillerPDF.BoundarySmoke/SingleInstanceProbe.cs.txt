@@ -1,0 +1,73 @@
+using System.Diagnostics;
+using System.Security.Principal;
+using System.Text;
+using KillerPDF.Services;
+
+string app = args.Length > 1 ? args[1] : "KillerPDF.BoundarySmoke." + Guid.NewGuid().ToString("N");
+string account = WindowsIdentity.GetCurrent().User!.Value;
+int session = Process.GetCurrentProcess().SessionId;
+var first = new SingleInstanceChannel(app, account, session);
+var second = new SingleInstanceChannel(app, account, session + 1);
+if (args[0] == "serve")
+{
+    var channel = new SingleInstanceChannel(app, account, int.Parse(args[2]));
+    try
+    {
+        using var server = channel.CreateServer();
+        Console.WriteLine("READY");
+        Console.Out.Flush();
+        server.WaitForConnection();
+        using var reader = new StreamReader(server, Encoding.UTF8);
+        Console.WriteLine(reader.ReadLine());
+        return 0;
+    }
+    catch (Exception error)
+    {
+        Console.WriteLine("ERROR " + error.GetType().Name + ": " + error.Message);
+        return 2;
+    }
+}
+if (args[0] == "missing")
+{
+    int exit = first.ForwardLaunch("synthetic.pdf", 100);
+    Console.WriteLine("missing primary forwarding launch exit=" + exit);
+    return exit == 0 ? 1 : 0;
+}
+
+Process Start(int id)
+{
+    var start = new ProcessStartInfo(Environment.ProcessPath!)
+    {
+        UseShellExecute = false,
+        RedirectStandardOutput = true
+    };
+    start.ArgumentList.Add("serve");
+    start.ArgumentList.Add(app);
+    start.ArgumentList.Add(id.ToString());
+    return Process.Start(start)!;
+}
+using Process a = Start(session);
+using Process b = Start(session + 1);
+try
+{
+    string? readyA = a.StandardOutput.ReadLine();
+    string? readyB = b.StandardOutput.ReadLine();
+    Console.WriteLine("logical session A: " + readyA);
+    Console.WriteLine("logical session B: " + readyB);
+    if (readyA != "READY" || readyB != "READY") return 1;
+    if (!first.TrySend("first-session.pdf", 1000) || !second.TrySend("second-session.pdf", 1000))
+        throw new Exception("Forwarding failed.");
+    string? deliveredA = a.StandardOutput.ReadLine();
+    string? deliveredB = b.StandardOutput.ReadLine();
+    if (deliveredA != "first-session.pdf" || deliveredB != "second-session.pdf")
+        throw new Exception("A payload reached the wrong logical session.");
+    Console.WriteLine("PASS two subprocess servers receive only their logical session payload");
+    return 0;
+}
+finally
+{
+    foreach (Process child in new[] { a, b })
+    {
+        if (!child.WaitForExit(1000)) { child.Kill(); child.WaitForExit(); }
+    }
+}
