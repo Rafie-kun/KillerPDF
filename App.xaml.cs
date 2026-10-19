@@ -238,6 +238,15 @@ namespace KillerPDF
             StartupTrace.Mark("MainWindow.Show returned");
         }
 
+        protected override void OnExit(ExitEventArgs e)
+        {
+            try
+            {
+                if (SessionTempFiles.IsValueCreated) SessionTempFiles.Value.Dispose();
+            }
+            finally { base.OnExit(e); }
+        }
+
         // ============================================================
         // Single-instance IPC (mutex + named pipe)
         // ============================================================
@@ -1098,58 +1107,25 @@ namespace KillerPDF
         private static readonly string UserTempDir = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "KillerPDF", "Temp");
-        internal static string TempDir => IsStartupSmoke ? Path.Combine(SmokeDataRoot, "Temp") : UserTempDir;
-
-        private static readonly List<string> _sessionTemps = [];
+        private static readonly Lazy<ProcessTempFiles> SessionTempFiles = new(() => new(
+            IsStartupSmoke ? Path.Combine(SmokeDataRoot, "Temp") : UserTempDir));
+        internal static string TempDir => SessionTempFiles.Value.DirectoryPath;
 
         /// <summary>
         /// Creates a tracked temp path of the form killerpdf_&lt;tag&gt;_&lt;guid&gt;.pdf
-        /// under %LOCALAPPDATA%\KillerPDF\Temp\.
+        /// in a process-owned directory under %LOCALAPPDATA%\KillerPDF\Temp\.
         /// All registered paths are deleted when CleanupSessionTemps() is called.
         /// </summary>
-        internal static string MakeTempFile(string tag)
-        {
-            try { Directory.CreateDirectory(TempDir); } catch { }
-            var path = Path.Combine(TempDir, $"killerpdf_{tag}_{Guid.NewGuid():N}.pdf");
-            lock (_sessionTemps) _sessionTemps.Add(path);
-            return path;
-        }
+        internal static string MakeTempFile(string tag) => SessionTempFiles.Value.CreatePath(tag);
 
         /// <summary>Deletes all temp files registered this session (best-effort).</summary>
-        internal static void CleanupSessionTemps()
-        {
-            lock (_sessionTemps)
-            {
-                foreach (var f in _sessionTemps)
-                    try { if (File.Exists(f)) File.Delete(f); } catch { }
-                _sessionTemps.Clear();
-            }
-        }
+        internal static void CleanupSessionTemps() => SessionTempFiles.Value.CleanupOwned();
 
         /// <summary>
-        /// Deletes killerpdf_*.pdf files left over from previous crashed sessions.
-        /// Sweeps both the current TempDir and the legacy %TEMP% location.
-        /// Locked files (still open by another instance) are silently skipped.
+        /// Reclaims process-owned temporary files only after their owner releases its lease.
+        /// Legacy files have no ownership proof and are left alone.
         /// </summary>
-        internal static void CleanupStaleTemps()
-        {
-            // Current location
-            try
-            {
-                if (Directory.Exists(TempDir))
-                    foreach (var f in Directory.GetFiles(TempDir, "killerpdf_*.pdf"))
-                        try { File.Delete(f); } catch { }
-            }
-            catch { }
-
-            // Legacy %TEMP% location - sweep once for users upgrading from older builds
-            try
-            {
-                foreach (var f in Directory.GetFiles(Path.GetTempPath(), "killerpdf_*.pdf"))
-                    try { File.Delete(f); } catch { }
-            }
-            catch { }
-        }
+        internal static void CleanupStaleTemps() => SessionTempFiles.Value.CleanupStale();
 
         internal static string? GetSetting(string name)
         {

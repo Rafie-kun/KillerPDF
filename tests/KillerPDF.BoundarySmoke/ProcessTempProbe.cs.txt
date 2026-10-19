@@ -1,0 +1,98 @@
+using System.Diagnostics;
+using KillerPDF.Services;
+
+string root = Path.GetFullPath(args[1]);
+Directory.CreateDirectory(root);
+var store = new ProcessTempFiles(Path.Combine(root, "private"));
+if (args[0] == "owner")
+{
+    string path = store.CreatePath("clidec");
+    File.WriteAllText(path, "%PDF-1.7\nactive synthetic CLI working document");
+    Console.WriteLine(path);
+    Console.Out.Flush();
+    Console.ReadLine();
+    return 0;
+}
+
+var start = new ProcessStartInfo(Environment.ProcessPath!)
+{
+    UseShellExecute = false,
+    RedirectStandardOutput = true,
+    RedirectStandardInput = true
+};
+start.ArgumentList.Add("owner");
+start.ArgumentList.Add(root);
+using Process owner = Process.Start(start)!;
+string? active = owner.StandardOutput.ReadLine();
+if (active is null || !File.Exists(active)) throw new Exception("Owner did not publish its working PDF.");
+try
+{
+    store.CleanupStale();
+    bool exists = File.Exists(active);
+    Console.WriteLine($"active process={owner.Id}; working PDF survived startup cleanup={exists}");
+    if (!exists) return 1;
+    Console.WriteLine("PASS startup cleanup preserves an active CLI process working PDF");
+    owner.Kill();
+    owner.WaitForExit();
+    string junction = Path.Combine(root, "junction");
+    var linkStart = new ProcessStartInfo("cmd.exe")
+    {
+        UseShellExecute = false,
+        RedirectStandardOutput = true,
+        RedirectStandardError = true,
+        CreateNoWindow = true
+    };
+    foreach (string argument in new[] { "/c", "mklink", "/J", junction, Path.Combine(root, "private") })
+        linkStart.ArgumentList.Add(argument);
+    using (Process link = Process.Start(linkStart)!)
+    {
+        link.WaitForExit();
+        if (link.ExitCode != 0) throw new Exception("Synthetic junction creation failed: " + link.StandardError.ReadToEnd());
+    }
+    new ProcessTempFiles(junction).CleanupStale();
+    if (!File.Exists(active)) throw new Exception("Cleanup traversed a root junction.");
+    Console.WriteLine("PASS cleanup does not traverse a root junction");
+    store.CleanupStale();
+    if (File.Exists(active) || Directory.Exists(Path.GetDirectoryName(active)))
+        throw new Exception("Abandoned owned directory was not reclaimed.");
+    Console.WriteLine("PASS crashed owner working directory is reclaimed");
+
+    string legacy = Path.Combine(root, "private", "killerpdf_legacy.pdf");
+    File.WriteAllText(legacy, "legacy file with unknown owner");
+    string unknown = Path.Combine(root, "private", "session-" + Guid.NewGuid().ToString("N"));
+    Directory.CreateDirectory(unknown);
+    string unknownFile = Path.Combine(unknown, "killerpdf_unknown.pdf");
+    File.WriteAllText(unknownFile, "no lease, unknown owner");
+    store.CleanupStale();
+    if (!File.Exists(legacy) || !File.Exists(unknownFile))
+        throw new Exception("Unowned files were deleted.");
+    Console.WriteLine("PASS legacy and unowned files are preserved");
+
+    string owned = store.CreatePath("own");
+    File.WriteAllText(owned, "owned file");
+    string unrelated = Path.Combine(store.DirectoryPath, "unrelated.txt");
+    File.WriteAllText(unrelated, "unrelated file");
+    store.CleanupOwned();
+    if (File.Exists(owned) || !File.Exists(unrelated))
+        throw new Exception("Owned cleanup touched unrelated data or retained owned PDF.");
+    Console.WriteLine("PASS session cleanup removes only registered files");
+    string sessionDirectory = store.DirectoryPath;
+    store.Dispose();
+    store.Dispose();
+    try { Directory.Delete(sessionDirectory, true); }
+    catch (IOException)
+    {
+        Console.WriteLine("FAIL lifetime lease blocks shutdown directory cleanup");
+        return 1;
+    }
+    Console.WriteLine("PASS graceful release permits shutdown directory cleanup");
+    return 0;
+}
+finally
+{
+    if (!owner.HasExited)
+    {
+        owner.StandardInput.WriteLine();
+        if (!owner.WaitForExit(5000)) owner.Kill();
+    }
+}

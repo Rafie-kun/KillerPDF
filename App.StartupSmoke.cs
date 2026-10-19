@@ -54,6 +54,7 @@ public partial class App
             }
             finally
             {
+                if (SessionTempFiles.IsValueCreated) SessionTempFiles.Value.Dispose();
                 try { if (Directory.Exists(SmokeDataRoot)) Directory.Delete(SmokeDataRoot, true); }
                 catch { }
             }
