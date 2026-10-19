@@ -31,7 +31,7 @@ The macro window now includes the existing current document and selected PDFs ch
 
 - Seven focused sanitizer checks pass after observed failures.
 - Prior full engine suite: 6,652 passed, zero failed, zero skipped. No engine source changed in this continuation.
-- Final application suite: 896 passed, zero failed, zero skipped.
+- Latest application suite after non-UI followup: 900 passed, zero failed, zero skipped.
 - Initial full application run passed 895 and failed one localization scanner assertion on synthetic smoke-test form values. Commit f80211b excludes test tooling, matching the product source glob; the complete rerun passes.
 - All nine document-state and macro-source control workflows pass.
 - All six signature-picker workflows pass.
@@ -48,6 +48,12 @@ Three standard workers handled network/CSV, session/temp ownership, and Office/i
 The combined Release application build passes. A fresh snapshot build reported 671 warnings and zero errors; the final incremental build after lease lifecycle integration reported zero warnings and errors. Eleven task-owned application sources match the final snapshot byte for byte. Final KillerPDF.dll SHA-256 is BE232EAC0F84918D4C2FD338471EB75EC49553DEA5C33501784C1C76F84FF837. The final combined application also passes the actual CLI/Calc report replay and isolated `--startup-smoke`, including theme picker open and graceful exit. Smoke exit is 0 and its generated temporary root is removed.
 
 Continuation commands and snapshots are under `C:/Users/steve/scratch/kp-boundaries-20261019`. Final test results are `combined/test-results/app-tests-final.trx`; source comparisons are `combined/source-hashes.json`; startup output is `combined/startup-final/result.txt`. These cited artifacts remain for the unfinished lab work. They contain synthetic inputs only. No full installer, adversarial Office fixture, registry cleanup, or second-session creation ran on the host.
+
+## Non-UI followup
+
+Independent review found a stale-cleanup retry regression: deleting an ownership lease while a PDF remained temporarily locked prevented later reclamation. Commit 92228e5 retains that marker while other entries remain; all seven lifecycle checks pass. Commit 45e5a3d adds Office security restoration coverage for visible instances and nondefault settings; all 24 focused tests pass. Thirteen additional manifest-validator cases pass. See [headless review evidence](nonui-followup-20261019.md).
+
+The updated combined application builds with zero warnings and errors and all 900 application tests pass. No windows were opened during this followup. The updated KillerPDF.dll SHA-256 is E7331B0B1DEC048E12A24F315CE85AF036756C85941C0981ADC5FFEBB01D00EE, at `combined/app-headless-final/KillerPDF.dll` under the continuation scratch root. Earlier build hashes and smoke results above remain checkpoint evidence for their named candidate.
 
 The original review evidence includes diagnostic `.cs` recipes under validation. A normal application build included those untracked recipes and failed on duplicate entry points and Shot-only types. Worker builds use isolated source copies excluding the exact historical evidence directory; the product project was not changed to hide source errors. Source manifests record the copied inputs.
 
