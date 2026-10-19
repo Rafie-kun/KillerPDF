@@ -1,0 +1,76 @@
+{
+  "dismiss": {
+    "pass": true,
+    "status": "Click on the page to place your signature",
+    "expected": "Click on the page to place your signature",
+    "mode": "dismiss",
+    "workflow": "Actual field overlay and saved tile clicks. Dismiss closes/reopens picker; switch opens a second document; direct preserves normal field selection. No private business method calls."
+  },
+  "switch": {
+    "pass": true,
+    "status": "Click on the page to place your signature",
+    "expected": "Click on the page to place your signature",
+    "mode": "switch",
+    "workflow": "Actual field overlay and saved tile clicks. Dismiss closes/reopens picker; switch opens a second document; direct preserves normal field selection. No private business method calls."
+  },
+  "direct": {
+    "pass": true,
+    "status": "Field signed",
+    "expected": "Field signed",
+    "mode": "direct",
+    "workflow": "Actual field overlay and saved tile clicks. Dismiss closes/reopens picker; switch opens a second document; direct preserves normal field selection. No private business method calls."
+  },
+  "create-cancel": {
+    "pass": true,
+    "status": "Field signed",
+    "expected": "Field signed",
+    "mode": "create-cancel",
+    "workflow": "Actual field overlay and saved tile clicks. Dismiss closes/reopens picker; switch opens a second document; direct preserves normal field selection. No private business method calls."
+  },
+  "pane": {
+    "pass": true,
+    "status": "Click on the page to place your signature",
+    "expected": "Click on the page to place your signature",
+    "mode": "pane",
+    "workflow": "Actual field overlay and saved tile clicks. Dismiss closes/reopens picker; switch opens a second document; direct preserves normal field selection. No private business method calls."
+  },
+  "orphan": {
+    "pass": true,
+    "remaining": 0,
+    "expected": 0,
+    "mode": "orphan"
+  },
+  "redDismiss": {
+    "pass": false,
+    "status": "Field signed",
+    "expected": "Click on the page to place your signature",
+    "workflow": "Actual field overlay click, picker close, toolbar reopen, saved tile selection. No private business method calls."
+  },
+  "redSwitch": {
+    "pass": false,
+    "status": "Field signed",
+    "expected": "Click on the page to place your signature",
+    "mode": "switch",
+    "workflow": "Actual field overlay and saved tile clicks. Dismiss closes/reopens picker; switch opens a second document; direct preserves normal field selection. No private business method calls."
+  },
+  "redPane": {
+    "pass": false,
+    "status": "Field signed",
+    "expected": "Click on the page to place your signature",
+    "mode": "pane",
+    "workflow": "Actual field overlay and saved tile clicks. Dismiss closes/reopens picker; switch opens a second document; direct preserves normal field selection. No private business method calls."
+  },
+  "redOrphan": {
+    "pass": false,
+    "remaining": 1,
+    "expected": 0,
+    "mode": "orphan"
+  },
+  "redCreateCancel": {
+    "pass": false,
+    "status": "Click on the page to place your signature",
+    "expected": "Field signed",
+    "mode": "create-cancel",
+    "workflow": "Actual field overlay and saved tile clicks. Dismiss closes/reopens picker; switch opens a second document; direct preserves normal field selection. No private business method calls."
+  }
+}

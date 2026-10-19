@@ -1,0 +1,108 @@
+using System.IO;
+using System.Reflection;
+using System.Reflection.Emit;
+using System.Runtime.Loader;
+using System.Text;
+using System.Text.Json;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Threading;
+using System.Xml.Linq;
+
+internal static class Program
+{
+    const BindingFlags M = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
+    [STAThread] static void Main(string[] args)
+    {
+        string assemblyPath = Path.GetFullPath(args[0]), xamlPath = args[1], output = args[2];
+        Directory.CreateDirectory(output);
+        string temporary=Path.Combine(output,"temp"); Directory.CreateDirectory(temporary);
+        Environment.SetEnvironmentVariable("TEMP",temporary); Environment.SetEnvironmentVariable("TMP",temporary);
+        string data = Path.Combine(output,"data"); Directory.CreateDirectory(data);
+        File.WriteAllText(Path.Combine(data,"signatures.json"),"""
+        [{"Id":"inert-fixture","Name":"Inert fixture","Kind":0,"StrokeWidth":2.5,"CanvasWidth":400,"CanvasHeight":150,"Strokes":[[{"X":10,"Y":20},{"X":300,"Y":100}]]}]
+        """);
+        AssemblyLoadContext.Default.Resolving += (_, n) => { string p=Path.Combine(Path.GetDirectoryName(assemblyPath)!,n.Name+".dll"); return File.Exists(p)?AssemblyLoadContext.Default.LoadFromAssemblyPath(p):null; };
+        Assembly asm=Assembly.LoadFrom(assemblyPath);
+        typeof(Application).GetField("_resourceAssembly",M)!.SetValue(null,asm);
+        asm.GetType("KillerPDF.Services.AppDataPaths",true)!.GetProperty("StartupSmokeRoot",M)!.SetValue(null,data);
+        Type appType=asm.GetType("KillerPDF.App",true)!;
+        string smokeRoot=(string)appType.GetProperty("SmokeDataRoot",M)!.GetValue(null)!;
+        File.WriteAllText(Path.Combine(output,"smoke-root.txt"),smokeRoot);
+        var builder=AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("SigningHost"),AssemblyBuilderAccess.Run).DefineDynamicModule("Host").DefineType("IsolatedApp",TypeAttributes.Public,appType);
+        builder.DefineDefaultConstructor(MethodAttributes.Public);
+        var skip=builder.DefineMethod("OnStartup",MethodAttributes.Family|MethodAttributes.Virtual|MethodAttributes.HideBySig,typeof(void),[typeof(StartupEventArgs)]);
+        skip.GetILGenerator().Emit(OpCodes.Ret); builder.DefineMethodOverride(skip,appType.GetMethod("OnStartup",M)!);
+        var app=(Application)Activator.CreateInstance(builder.CreateType()!)!; app.ShutdownMode=ShutdownMode.OnExplicitShutdown;
+        XDocument document=XDocument.Load(xamlPath); XElement resources=document.Descendants().First(e=>e.Name.LocalName=="ResourceDictionary");
+        foreach(var a in document.Root!.Attributes().Where(a=>a.IsNamespaceDeclaration)) resources.SetAttributeValue(a.Name,a.Value);
+        string xaml=resources.ToString(); foreach(string ns in new[]{"KillerPDF","KillerFamily.Layout"}) xaml=xaml.Replace("clr-namespace:"+ns,"clr-namespace:"+ns+";assembly=KillerPDF",StringComparison.Ordinal);
+        app.Resources=(ResourceDictionary)System.Windows.Markup.XamlReader.Parse(xaml,new System.Windows.Markup.ParserContext{BaseUri=new Uri("pack://application:,,,/KillerPDF;component/")});
+        SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext());
+        foreach(string service in new[]{"ThemeManager","LocaleManager","FilmGrain"}) asm.GetType("KillerPDF.Services."+service,true)!.GetMethod("Initialize",M)!.Invoke(null,null);
+        var window=(Window)Activator.CreateInstance(asm.GetType("KillerPDF.MainWindow",true)!)!;
+        window.WindowStartupLocation=WindowStartupLocation.Manual; window.Left=-10000; window.Top=-10000; window.ShowActivated=false; window.ShowInTaskbar=false; window.Width=1000; window.Height=700; window.Show(); Pump(300);
+        string fixture=Path.Combine(output,"field.pdf"); Pdf(fixture);
+        window.GetType().GetMethod("OpenFromExternal",BindingFlags.Public|BindingFlags.Instance)!.Invoke(window,[fixture]); Pump(1800);
+        string mode=args.Length>3 && !args[3].StartsWith("--")?args[3]:"dismiss";
+        if(mode is "pane" or "orphan")
+        {
+            ((Button)window.FindName("SplitPaneRailBtn")).RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); Pump(400);
+            Focus((UIElement)window.FindName("ViewerB"));
+            string second=Path.Combine(output,"second.pdf"); Pdf(second);
+            window.GetType().GetMethod("OpenFromExternal",BindingFlags.Public|BindingFlags.Instance)!.Invoke(window,[second]); Pump(1200);
+            ((Button)window.FindName("ToolSignatureBtn")).RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); Pump(350);
+            Focus((UIElement)window.FindName("Viewer")); Pump(350);
+        }
+        if(mode=="orphan")
+        {
+            int remaining=Descendants<Border>(window).Count(b=>b.Height==60 && b.Child is Canvas c && c.Width==288);
+            string orphanResult=JsonSerializer.Serialize(new{pass=remaining==0,remaining,expected=0,mode});
+            File.WriteAllText(Path.Combine(output,"result.json"),orphanResult); Console.WriteLine(orphanResult); Environment.Exit(remaining==0?0:1);
+        }
+        string signTip=(string)app.FindResource("Str_Form_ClickSign");
+        var zone=Descendants<Border>((DependencyObject)window.FindName("Viewer")).Single(b=>Equals(b.ToolTip,signTip)); Click(zone); Pump(450);
+        if(mode=="dismiss")
+        {
+            var close=Descendants<TextBlock>(window).Single(t=>t.Text=="\uE711" && t.Cursor==Cursors.Hand && t.FontSize==11);
+            Click(close); Pump(450);
+            ((Button)window.FindName("ToolSignatureBtn")).RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); Pump(450);
+        }
+        else if(mode=="switch")
+        {
+            string second=Path.Combine(output,"second.pdf"); Pdf(second);
+            window.GetType().GetMethod("OpenFromExternal",BindingFlags.Public|BindingFlags.Instance)!.Invoke(window,[second]); Pump(1200);
+            ((Button)window.FindName("ToolSignatureBtn")).RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); Pump(450);
+        }
+        else if(mode=="create-cancel")
+        {
+            var timer=new DispatcherTimer{Interval=TimeSpan.FromMilliseconds(50)};
+            timer.Tick+=(_,_)=>{var creator=app.Windows.Cast<Window>().FirstOrDefault(w=>!ReferenceEquals(w,window));if(creator!=null){timer.Stop();creator.Close();}};
+            timer.Start();
+            string label=(string)app.FindResource("Str_Sig_Create");
+            var create=Descendants<Button>(window).First(b=>Equals(b.Content,label)||Descendants<TextBlock>(b).Any(t=>t.Text==label));
+            create.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); Pump(450);
+        }
+        var tile=Descendants<Border>(window).Single(b=>b.Height==60 && b.Child is Canvas c && c.Width==288 && Visible(b));
+        if(mode=="pane") { Focus((UIElement)window.FindName("ViewerB")); Pump(350); }
+        Click(tile); Pump(350);
+        string status=((TextBlock)window.FindName("StatusText")).Text;
+        string expected=(string)app.FindResource(mode is "direct" or "create-cancel"?"Str_St_FieldSigned":"Str_St_PlaceSignature");
+        bool pass=status==expected;
+        string result=JsonSerializer.Serialize(new{pass,status,expected,mode,workflow="Actual field overlay and saved tile clicks. Dismiss closes/reopens picker; switch opens a second document; direct preserves normal field selection. No private business method calls."});
+        File.WriteAllText(Path.Combine(output,"result.json"),result); Console.WriteLine(result);
+        Environment.Exit(pass?0:1);
+    }
+    static void Click(UIElement e)=>e.RaiseEvent(new MouseButtonEventArgs(Mouse.PrimaryDevice,Environment.TickCount,MouseButton.Left){RoutedEvent=UIElement.MouseLeftButtonDownEvent});
+    static void Focus(UIElement e)=>e.RaiseEvent(new MouseButtonEventArgs(Mouse.PrimaryDevice,Environment.TickCount,MouseButton.Left){RoutedEvent=UIElement.PreviewMouseDownEvent});
+    static bool Visible(DependencyObject e) { for(DependencyObject? p=e;p!=null;p=VisualTreeHelper.GetParent(p)) if(p is UIElement u && (!u.IsVisible || u.Opacity<.01)) return false; return true; }
+    static void Pump(int ms){var f=new DispatcherFrame();var t=new DispatcherTimer{Interval=TimeSpan.FromMilliseconds(ms)};t.Tick+=(_,_)=>{t.Stop();f.Continue=false;};t.Start();Dispatcher.PushFrame(f);}
+    static IEnumerable<T> Descendants<T>(DependencyObject root) where T:DependencyObject {for(int i=0;i<VisualTreeHelper.GetChildrenCount(root);i++){var c=VisualTreeHelper.GetChild(root,i);if(c is T v)yield return v;foreach(var n in Descendants<T>(c))yield return n;}}
+    static void Pdf(string path)
+    {
+        string[] objects=["<< /Type /Catalog /Pages 2 0 R /AcroForm << /Fields [6 0 R] >> >>","<< /Type /Pages /Kids [3 0 R] /Count 1 >>","<< /Type /Page /Parent 2 0 R /MediaBox [0 0 300 500] /Resources << >> /Contents 4 0 R /Annots [6 0 R] >>","<< /Length 0 >>\nstream\n\nendstream","<< >>","<< /Type /Annot /Subtype /Widget /FT /Sig /T (Signature) /Rect [40 300 200 350] /P 3 0 R /F 4 >>"];
+        string pdf="%PDF-1.4\n";var offsets=new List<int>();for(int i=0;i<objects.Length;i++){offsets.Add(pdf.Length);pdf+=$"{i+1} 0 obj\n{objects[i]}\nendobj\n";}int xref=pdf.Length;pdf+=$"xref\n0 {objects.Length+1}\n0000000000 65535 f \n";foreach(int offset in offsets)pdf+=offset.ToString("D10")+" 00000 n \n";pdf+=$"trailer\n<< /Size {objects.Length+1} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n";File.WriteAllBytes(path,Encoding.ASCII.GetBytes(pdf));
+    }
+}

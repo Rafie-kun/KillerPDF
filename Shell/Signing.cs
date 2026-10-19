@@ -18,6 +18,9 @@ namespace KillerPDF
 {
     public partial class MainWindow
     {
+        private object? _pendingSignDocument;
+        private Controls.PdfViewer? _pendingSignViewer;
+
         private void LoadSignatures() => _signatureStore.Load();
 
         private void PersistSignatures() => _signatureStore.Persist();
@@ -80,6 +83,8 @@ namespace KillerPDF
             if (choice is null)
             {
                 _pendingSignField = (initials, objNum, pageIndex, x, y, w, h);
+                _pendingSignDocument = _doc;
+                _pendingSignViewer = ActiveViewer;
                 ShowSignaturePopup();
                 SetStatus(initials ? Loc("Str_Sig_Initials") : Loc("Str_Sig_Signatures"));
                 return;
@@ -96,6 +101,8 @@ namespace KillerPDF
             {
                 RemoveSignedField(objNum, pageIndex);
                 _pendingSignField = (initials, objNum, pageIndex, x, y, w, h);
+                _pendingSignDocument = _doc;
+                _pendingSignViewer = ActiveViewer;
                 ShowSignaturePopup();
             }, glyph: ""));
             menu.Items.Add(MakeMenuItem(Loc(initials ? "Str_Sig_RemoveInitials" : "Str_Sig_RemoveSignature"),
@@ -154,12 +161,18 @@ namespace KillerPDF
             SetStatus(Loc("Str_St_FieldSigned"));
         }
 
-        private void HideSignaturePopup()
+        private void HideSignaturePopup(bool cancelPendingField = true)
         {
+            if (cancelPendingField)
+            {
+                _pendingSignField = null;
+                _pendingSignDocument = null;
+                _pendingSignViewer = null;
+            }
             if (_signaturePopup is not null)
             {
-                var previewGrid = PagePreviewPanel.Parent as Grid;
                 var popup = _signaturePopup;
+                var previewGrid = popup.Parent as Panel;
                 _signaturePopup = null;   // detach now so a re-open builds a fresh popup
                 // Fade out (it's a Border, not a Window, so WindowFx doesn't apply) then remove.
                 var fade = new DoubleAnimation(popup.Opacity, 0,
@@ -296,7 +309,7 @@ namespace KillerPDF
             // on the popup's own child elements - no external source subscriptions, so no leak.
             // If SignatureStore.Signatures ever becomes ObservableCollection and this popup
             // subscribes to CollectionChanged, use CollectionChangedEventManager instead of +=.
-            HideSignaturePopup();
+            HideSignaturePopup(cancelPendingField: false);
 
             bool classicCaption = FindResource("UseDialogCaption") is true;
             var stack = new StackPanel { Margin = classicCaption ? new Thickness(0) : new Thickness(4) };
@@ -437,9 +450,14 @@ namespace KillerPDF
 
                 item.MouseLeftButtonDown += (s, e) =>
                 {
+                    var pendingField = _pendingSignField;
+                    var pendingDocument = _pendingSignDocument;
+                    var pendingViewer = _pendingSignViewer;
                     HideSignaturePopup();
                     // If a signature field is waiting, fill it and remember the choice (pick once, reuse).
-                    if (_pendingSignField is { } tgt)
+                    if (pendingField is { } tgt
+                        && ReferenceEquals(pendingDocument, _doc)
+                        && ReferenceEquals(pendingViewer, ActiveViewer))
                     {
                         if (tgt.Initials) _activeInitialsChoice = sigCopy; else _activeSignatureChoice = sigCopy;
                         var t = tgt; _pendingSignField = null;
@@ -533,11 +551,11 @@ namespace KillerPDF
                 var createBtn = UiKit.Make(Loc("Str_Sig_Create"), accent: true);
                 createBtn.HorizontalAlignment = HorizontalAlignment.Stretch;
                 createBtn.Margin = new Thickness(0, 0, 3, 0);
-                createBtn.Click += (s, e) => { HideSignaturePopup(); OpenSignatureCreator(kind); ShowSignaturePopup(); };
+                createBtn.Click += (s, e) => { HideSignaturePopup(cancelPendingField: false); OpenSignatureCreator(kind); ShowSignaturePopup(); };
                 var importBtn = UiKit.Make(Loc("Str_Sig_Import"), accent: false);
                 importBtn.HorizontalAlignment = HorizontalAlignment.Stretch;
                 importBtn.Margin = new Thickness(3, 0, 0, 0);
-                importBtn.Click += (s, e) => { HideSignaturePopup(); ImportImageSignature(kind); ShowSignaturePopup(); };
+                importBtn.Click += (s, e) => { HideSignaturePopup(cancelPendingField: false); ImportImageSignature(kind); ShowSignaturePopup(); };
                 Grid.SetColumn(createBtn, 0);
                 Grid.SetColumn(importBtn, 1);
                 rowBtns.Children.Add(createBtn);

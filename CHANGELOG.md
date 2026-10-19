@@ -93,6 +93,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Permanent redaction removes covered vectors, keeps pending marks with page edits and undo, and requires approval to rasterize partly covered drawings (#341).
 - Command-line and macro redaction fail without saving output when any requested area needs unapproved rasterization (#341, #343).
 - Signing uses a snapshot of current edits without requiring the open document to be saved first.
+- Signature field choices stay with their source document and cancel when the picker is dismissed.
 - Signature verification uses embedded intermediate certificates without treating them as trusted roots.
 - Command-line splitting protects the source and requires `--overwrite` to replace existing outputs.
 - Bates stamping rejects colliding output filenames and protects every input file.
