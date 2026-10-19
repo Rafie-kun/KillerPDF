@@ -102,7 +102,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Signing, flattening, and document export preserve existing outputs when writing fails or is canceled.
 - Raster exports stop on missing rendered content, and the viewer reports affected pages.
 - Malformed JBIG2 images stop before oversized header and symbol allocations.
-- Save Flattened includes current form edits and page rotations.
+- Save Flattened and current document macros include pending edits and page rotations.
 - Flattened JPEG pages retain reflections, rotation, and skew.
 - Save repairs preserve partially overlapping crop boxes and nonzero object generations.
 - Incomplete scans report errors and keep recovered pages, including when PDF creation fails (#73).

@@ -68,7 +68,7 @@ public partial class MainWindow
             if (!batch)
             {
                 CommitActiveTextBox();
-                snapshot = CreateExchangeSnapshot();
+                snapshot = WriteSavedCopyToTemp();
             }
             var busy = ShowBusyOverlay(Loc("Str_Macro_Running"));
             CancellationToken token = BeginCancellableOp(title);

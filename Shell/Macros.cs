@@ -126,7 +126,7 @@ public partial class MainWindow
         string? snapshot = null;
         try
         {
-            snapshot = CreateExchangeSnapshot();
+            snapshot = WriteSavedCopyToTemp();
             byte[] source = await File.ReadAllBytesAsync(snapshot, token);
             PdfMacroRunReport report = await Task.Run(() => dispatcher.RunReport(
                 macro, [new ReadOnlyMemory<byte>(source)],
