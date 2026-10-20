@@ -689,17 +689,25 @@ namespace KillerPDF
 
         private const double PageListTopFadePx = 18;
         private const double PageListBottomFadePx = 22;
+        private LinearGradientBrush? _pageListEdgeMask;
 
         private void SyncPageListEdgeFades()
         {
             var sv = FindSidebarDescendant<ScrollViewer>(PageList);
             if (sv == null || PageListFadeHost == null) return;
+            if (sv.Template.FindName("PART_ScrollContentPresenter", sv)
+                    is not ScrollContentPresenter viewport) return;
+            _pageListEdgeMask ??= PageListFadeHost.OpacityMask as LinearGradientBrush;
+            PageListFadeHost.OpacityMask = null;
+            if (_pageListEdgeMask == null) return;
 
             // A top or bottom strip scrolls sideways, so its fades run along the left and right
-            // ends; the mask's gradient axis turns with it (ApplySidebarOrientation).
+            // ends. Both scrollbars stay outside the masked content viewport.
             bool strip = _sidebarStripLayout;
-            double height = strip ? PageListFadeHost.ActualWidth : PageListFadeHost.ActualHeight;
+            double height = strip ? viewport.ActualWidth : viewport.ActualHeight;
             if (height <= 1) return;
+            _pageListEdgeMask.MappingMode = BrushMappingMode.Absolute;
+            _pageListEdgeMask.EndPoint = strip ? new Point(height, 0) : new Point(0, height);
 
             // Reveal the actual sidebar underneath; never paint a theme-colored strip over it.
             // EdgeFadeOpacity is zero only in 98SE and one in every other theme.
@@ -708,6 +716,7 @@ namespace KillerPDF
             double hidden = strip ? sv.ExtentWidth - sv.ViewportWidth : sv.ExtentHeight - sv.ViewportHeight;
             double top = EdgeFadeRamp(offset, PageListTopFadePx) * fade;
             double bottom = EdgeFadeRamp(hidden - offset, PageListBottomFadePx) * fade;
+            viewport.OpacityMask = top > 0 || bottom > 0 ? _pageListEdgeMask : null;
 
             PageListFadeTopOuter.Color = FadeMaskAlpha(1 - top);
             PageListFadeBottomOuter.Color = FadeMaskAlpha(1 - bottom);
