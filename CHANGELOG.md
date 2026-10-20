@@ -26,7 +26,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 - Saving, flattening, extraction, printing and current-document macros retain pending edits and page rotations. Signing, flattening and export preserve existing outputs when writing fails or is canceled. Failed replacements keep complete recovery copies. Reduce File Size preserves an existing output if a replacement cannot be staged; Save As and Extract Pages enforce the PDF extension (#433, #450).
 - Closing a document or the app offers Save, Don't Save or Cancel. Failed or canceled saves keep the document open, and Esc no longer closes the app.
-- Fixed crashes when switching themes, restoring a maximized window, or selecting mirrored and upside-down text. Search highlights, redaction marks and cropping on that text also use valid bounds (#437, #452, #453).
 - Redaction removes covered vectors, preserves marks through page edits and undo, and keeps macro approvals bound to the original document. Command-line and macro runs refuse output when rasterization still needs approval (#341, #343).
 - Background exports, macros, form tools, OCR, repairs, transforms and printing stay bound to their source document or stop when it changes. Newer operations retain their cancel controls, and OCR with no recognized words can still save a searchable PDF (#329, #330, #342, #343, #436).
 - Signing captures current edits without first saving the open PDF. Signature-field choices honor cancellation and document changes, and verification uses embedded intermediate certificates without trusting them as roots.
@@ -34,17 +33,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Legacy Office conversion disables VBA macros, and timeouts preserve existing Office documents and visible sessions. External PDF and OCR-model downloads stop when response bodies exceed their timeout.
 - Installation refuses to replace folders containing unrelated or unverified files. Updates preserve custom install directories; failed portable updates retain complete executable copies and a recovery report. Forwarded opens stay within their Windows account and session, and startup cleanup preserves active temporary PDFs.
 - Incomplete scans report errors and keep recovered pages, including PDF-creation failures. Parallel PNG export no longer loses pages, and invalid OCR models retain the Tesseract fallback (#73).
+- Fixed crashes when switching themes, restoring a maximized window, or selecting mirrored and upside-down text. Search highlights, redaction marks and cropping on that text also use valid bounds (#437, #452, #453).
 
 ### Rendering, performance and compatibility
 
-- Moved rendering off the UI thread with viewport priority, cancellation and visible-region refinement during zoom. Reduced rendering and batch-resave work across images, fonts, color management, shading and transparency.
-- Precompiled the app and engine, cached installed fonts between launches, and moved font discovery into the background. Batch work releases unused resources sooner and limits default rendering concurrency to reduce peak memory; explicit parallelism remains available.
+- Improved damaged-PDF opening and saving, including cross-reference tables, encryption dictionaries, crop boxes, object generations and unusual dates. Restricted PDFs open with their real text and bookmarks instead of rasterized repair, and merging accepts additional Type 3/CID fonts and gradient boundaries (#406, #424, #455).
+- Pages with very large content streams render completely, while malformed JBIG2 images and deeply repeated forms stop safely. Raster exports retain validated page-tree recovery, reject missing content and report affected pages.
 - Corrected blank, scrambled, noisy and incorrectly colored JPEG 2000 images with CoreJ2K 2.4.1, along with damaged JPEG filters, CCITT markers, JBIG2 refinement and clipped scan columns.
 - Fixed missing, invisible and badly spaced text in unusual or damaged TrueType, Type 1, Type 3, CFF and CJK fonts, and improved installed-font substitution for unembedded text.
 - Corrected transparency groups, masks, gradients, patterns, indexed colors, CMYK and spot inks, transfer functions and JPEG color handling. Comparison colors now match the viewer for YCCK JPEGs.
-- Improved damaged-PDF opening and saving, including cross-reference tables, encryption dictionaries, crop boxes, object generations and unusual dates. Restricted PDFs open with their real text and bookmarks instead of rasterized repair, and merging accepts additional Type 3/CID fonts and gradient boundaries (#406, #424, #455).
-- Pages with very large content streams render completely, while malformed JBIG2 images and deeply repeated forms stop safely. Raster exports retain validated page-tree recovery, reject missing content and report affected pages.
 - Fixed annotation appearances, hidden annotation and form-field visibility, and reflections, rotation and skew in flattened JPEG pages. Supported plain-text form appearances and undefined Type 1 control characters no longer block raster export.
+- Moved rendering off the UI thread with viewport priority, cancellation and visible-region refinement during zoom. Reduced rendering and batch-resave work across images, fonts, color management, shading and transparency.
+- Precompiled the app and engine, cached installed fonts between launches, and moved font discovery into the background. Batch work releases unused resources sooner and limits default rendering concurrency to reduce peak memory; explicit parallelism remains available.
 
 ### Editing and document workflows
 
@@ -70,6 +70,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Windows and split panes stay within the current monitor at small sizes and high app scaling. Text remains sharp away from 100%, and the wordmark mouse wheel adjusts app scale.
 - Added optional File Explorer and Outlook PDF previews to installed copies, with scrolling, zoom and read-only opening. Portable copies register nothing (#410).
 - Silent installation supports per-user installs without elevation, includes the .NET runtime in the Store installer, detects Arm64 runtimes, reports useful error codes and rejects concurrent installs.
+- Chocolatey publishing reports failure when validation is still failing after a retry.
 - Added Close to System Tray in About to keep KillerPDF running after closing the window. Tray Exit retains save prompts.
 - Added Windows 11 snap layouts and docking for the comparison bar (#374, #427).
 
@@ -81,7 +82,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Unified message and setup dialogs, separated installer translations by language, completed missing application and installer translations, and made the full installer version readable (#409, #440).
 - Refined film grain, shadows, accent states, checkbox ticks, radio alignment, crash-report controls and file-picker styling, while preserving classic 98SE controls.
 - Simplified website navigation at narrow widths, localized navigation labels, improved mobile layout and contrast, refreshed branding and Corpus layout, and added Store and related-app links. Updated Help, technical documentation, translations, release facts and application metadata.
-- Chocolatey publishing reports failure when validation is still failing after a retry.
 
 ## [1.8.91] - 2026-10-14
 
