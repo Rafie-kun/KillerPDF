@@ -109,6 +109,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Signing, flattening, and document export preserve existing outputs when writing fails or is canceled.
 - Raster exports preserve validated page-tree recovery and reject missing content, with affected pages reported in the viewer.
 - Undefined control characters in standard Type 1 fonts no longer stop raster exports.
+- Supported plain-text form appearances no longer block raster exports.
 - Malformed JBIG2 images stop before oversized header and symbol allocations.
 - Save Flattened and current document macros include pending edits and page rotations.
 - Extracted pages retain pending edits and rotation.

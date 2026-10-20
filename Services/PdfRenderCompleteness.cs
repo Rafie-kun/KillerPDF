@@ -27,6 +27,7 @@ internal static class PdfRenderCompleteness
         if (message == "The supplied password authenticated a legacy unnormalized Unicode password hash.")
             return PdfRenderDiagnosticKind.Information;
         if (message == "Font selection without a name used the only page font resource."
+            || message == "A supported plain-text form-field appearance was regenerated."
             || message == "Invalid catalog or page-tree links were recovered from intact indirect page objects."
             || message == "Unclosed graphics states were restored at the end of the content stream."
             || message == "A color operator with an invalid component count was recovered."

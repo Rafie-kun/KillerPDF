@@ -364,7 +364,21 @@ public sealed partial class PdfPageRenderer
         dictionary.Remove(Name("DecodeParms"));
         dictionary.Remove(Name("Length"));
         dictionary[Name("Resources")] = new PdfDictionary(resourceEntries);
-        diagnostics.Add("A requested form-field text appearance was regenerated.");
+        bool supportedPlainText = originalSaved is null && kind == "/Tx" && flags == 0
+            && text.Length > 0 && text.All(character => character is >= ' ' and <= '~')
+            && Field("RV") is null && Field("Q") is null or PdfInteger { Value: 0 }
+            && Number(fontInstruction.Operands[1]) > 0 && advance * size <= interiorWidth
+            && (extraction.Ascent - extraction.Descent) * size / 1000 <= interiorHeight
+            && defaultInstructions.Count == 2
+            && defaultInstructions.Any(instruction => instruction.Operator == "g"
+                && instruction.Operands.Count == 1
+                && instruction.Operands[0] is PdfInteger { Value: 0 } or PdfReal { Value: 0 })
+            && !widget.ContainsKey(Name("BS")) && !widget.ContainsKey(Name("Border"))
+            && (!widget.TryGetValue(Name("MK"), out PdfObject? plainCharacteristics)
+                || Resolve(plainCharacteristics) is PdfDictionary { Count: 0 });
+        diagnostics.Add(supportedPlainText
+            ? "A supported plain-text form-field appearance was regenerated."
+            : "A requested form-field text appearance was regenerated.");
         return new PdfStream(new PdfDictionary(dictionary), PdfContentStreamWriter.Write(output));
 
         PdfStream? Unsupported(string reason)
