@@ -609,7 +609,11 @@ namespace KillerPDF.Controls
                 }
                 ReportResult(Loc("Str_RedactFinish_Done"));
             }
-            if (dialog.SaveCopy) Host!.SaveAsWithName(suggested);
+            if (dialog.SaveCopy)
+            {
+                Host!.FocusViewer(this);
+                Host.SaveAsWithName(suggested);
+            }
         }
 
         // Pages whose marked content can't be removed by itself are only turned into an image

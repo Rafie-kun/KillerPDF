@@ -1237,7 +1237,7 @@ namespace KillerPDF
         private void SaveAs_Click(object sender, RoutedEventArgs e) => SaveAsWithName(null);
 
         // Save As, offering the given file name in place of the current one when there is one.
-        internal void SaveAsWithName(string? suggestedName)
+        internal void SaveAsWithName(string? suggestedName, bool openCopy = false)
         {
             if (_doc is null || _currentFile is null) { KillerDialog.Show(this, Loc("Str_Msg_OpenFirst")); return; }
             if (!EnsureEditable()) return;
@@ -1265,6 +1265,16 @@ namespace KillerPDF
             catch { /* malformed seed path - just open the dialog with its defaults */ }
             if (dlg.ShowDialog(this) != true) return;
             if (!ConfirmSignatureRemoval(dlg.FileName)) return;
+            if (openCopy)
+            {
+                try { SaveCopyAndOpen(dlg.FileName); }
+                catch (Exception ex)
+                {
+                    KillerDialog.Show(this, Loc("Str_Err_SaveFailed") + "\n" + ex.Message,
+                        "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                return;
+            }
             CloseEngineDocumentSession();
             OfferRescaleOutOfRangePages();   // Adobe page-size guard
             try
@@ -1346,6 +1356,19 @@ namespace KillerPDF
             {
                 KillerDialog.Show(this, Loc("Str_Err_SaveFailed") + "\n" + ex.Message, "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private void SaveCopyAndOpen(string outputPath)
+        {
+            var source = ActiveViewer;
+            string snapshot = WriteSavedCopyToTemp();
+            PdfEngineIntegration.ReplaceFileAtomically(snapshot, outputPath);
+            var other = ReferenceEquals(source, Viewer) ? ViewerB : Viewer;
+            bool otherEmpty = !other.SessionsRef.Any(session => session.Doc is not null
+                || session.DeferredPath is not null || session.OriginalFile is not null);
+            var target = _isSplit && otherEmpty ? other : source;
+            FocusPane(target);
+            target.OpenInNewTabExt(outputPath);
         }
 
         private Dictionary<int, int> SnapshotPageRotations()
