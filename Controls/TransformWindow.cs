@@ -57,6 +57,8 @@ namespace KillerPDF
             { Color = Colors.Black, BlurRadius = 14, ShadowDepth = 3, Direction = 270, Opacity = 0.45 }
         };
         private readonly Border _previewArea = null!;
+        private readonly MatrixTransform _previewTransform = new();
+        private Point? _previewPanStart;
         private double _srcW;
         private double _srcH;
         private double _pageWpt;
@@ -141,7 +143,7 @@ namespace KillerPDF
             {
                 Width = 288,
                 Background = Brushes.Transparent,
-                Padding = new Thickness(16, 8, 4, 14)
+                Padding = new Thickness(16, 8, 16, 14)
             };
             DockPanel.SetDock(sidebar, Dock.Right);
 
@@ -149,7 +151,7 @@ namespace KillerPDF
 
             // Bottom: a "Reset all" text link on its own line (translations like "Tout reinitialiser" are
             // long), with Cancel / Apply right-aligned beneath it - so nothing crowds or clips.
-            var bottom = new StackPanel { Margin = new Thickness(0, 10, 12, 0) };
+            var bottom = new StackPanel { Margin = new Thickness(0, 10, 0, 0) };
             var resetAll = new TextBlock
             {
                 Text = S("Str_Tf_ResetAll"), FontFamily = UiKit.UiFont, FontSize = 12,
@@ -510,6 +512,44 @@ namespace KillerPDF
 
             previewWrap.Child = previewGrid;
             _previewArea = previewWrap;
+            if (mode == TransformWindowMode.ColorCorrection)
+            {
+                _preview.RenderTransform = _previewTransform;
+                previewGrid.PreviewMouseWheel += (_, e) =>
+                {
+                    ZoomPreview(e.Delta, e.GetPosition(_preview));
+                    e.Handled = true;
+                };
+                previewGrid.MouseLeftButtonDown += (_, e) =>
+                {
+                    if (_previewTransform.Matrix.M11 <= 1) return;
+                    _previewPanStart = e.GetPosition(previewGrid);
+                    previewGrid.CaptureMouse();
+                    previewGrid.Cursor = Cursors.SizeAll;
+                    e.Handled = true;
+                };
+                previewGrid.MouseMove += (_, e) =>
+                {
+                    if (_previewPanStart is not Point start) return;
+                    Point current = e.GetPosition(previewGrid);
+                    Matrix matrix = _previewTransform.Matrix;
+                    matrix.Translate(current.X - start.X, current.Y - start.Y);
+                    _previewTransform.Matrix = matrix;
+                    _previewPanStart = current;
+                    ClampPreviewPan();
+                };
+                previewGrid.MouseLeftButtonUp += (_, e) =>
+                {
+                    if (_previewPanStart is null) return;
+                    previewGrid.ReleaseMouseCapture();
+                    e.Handled = true;
+                };
+                previewGrid.LostMouseCapture += (_, _) =>
+                {
+                    _previewPanStart = null;
+                    previewGrid.Cursor = Cursors.Arrow;
+                };
+            }
             previewWrap.SizeChanged += (_, _2) =>
             {
                 double radius = previewWrap.CornerRadius.TopLeft;
@@ -571,6 +611,37 @@ namespace KillerPDF
         }
 
         private double Total => _quarter * 90 + _fine;
+
+        private void ZoomPreview(int delta, Point imagePoint)
+        {
+            Matrix matrix = _previewTransform.Matrix;
+            double zoom = Math.Clamp(matrix.M11 * Math.Pow(1.2, delta / 120.0), 1, 8);
+            if (zoom == 1) matrix = Matrix.Identity;
+            else
+            {
+                Point anchor = matrix.Transform(imagePoint);
+                double factor = zoom / matrix.M11;
+                matrix.ScaleAt(factor, factor, anchor.X, anchor.Y);
+            }
+            _previewTransform.Matrix = matrix;
+            ClampPreviewPan();
+        }
+
+        private void ClampPreviewPan()
+        {
+            if (_previewArea.Child is not FrameworkElement viewport) return;
+            Matrix matrix = _previewTransform.Matrix;
+            static double Offset(double offset, double image, double viewport, double zoom)
+            {
+                if (image <= 0 || viewport <= 0) return offset;
+                double origin = (viewport - image) / 2;
+                return image * zoom <= viewport ? -image * (zoom - 1) / 2
+                    : Math.Clamp(offset, viewport - origin - image * zoom, -origin);
+            }
+            matrix.OffsetX = Offset(matrix.OffsetX, _preview.ActualWidth, viewport.ActualWidth, matrix.M11);
+            matrix.OffsetY = Offset(matrix.OffsetY, _preview.ActualHeight, viewport.ActualHeight, matrix.M22);
+            _previewTransform.Matrix = matrix;
+        }
 
         private void ShowPreviewPage(int index)
         {
@@ -847,6 +918,7 @@ namespace KillerPDF
             double clamp = Math.Min(1.0, Math.Min(areaW / dispW, areaH / dispH));   // never overflow the box
             _preview.Width = dispW * clamp;
             _preview.Height = dispH * clamp;
+            Dispatcher.BeginInvoke(new Action(ClampPreviewPan), DispatcherPriority.Loaded);
             Dispatcher.BeginInvoke(new Action(UpdatePerspectiveOverlay), DispatcherPriority.Loaded);
         }
 
