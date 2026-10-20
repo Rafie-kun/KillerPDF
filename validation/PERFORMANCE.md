@@ -376,8 +376,8 @@ payload. Successful rendering does not establish visual equivalence.
 
 See the complete follow-up record (archived locally: `C:/Users/steve/scratch/kp-bench-render/repo-cleanup-20260908-final/1.9.0-render-validation/README.md`)
 for raw timings, startup results, build hashes, visual findings, and limitations.
-The [band-parallel rendering plan](../engine/docs/band-parallel-rendering-plan.md)
-is a proposal only. Correctness and memory work take priority over enabling it.
+The band-parallel rendering plan remains a proposal, archived outside this
+repository. Correctness and memory work take priority over enabling it.
 
 ## KillerPDF 1.9.0 engine tuning checkpoint
 
