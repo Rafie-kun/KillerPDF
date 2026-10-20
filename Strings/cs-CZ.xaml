@@ -1552,6 +1552,7 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">Odinstalace nemohla požádat o oprávnění správce:&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallConfirm">Odinstalovat KillerPDF z tohoto počítače?</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF stále běží.&#10;Zavřete ho a zkuste odinstalaci znovu.</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallNotInstalled" xml:space="preserve">Tato kopie KillerPDF zde nebyla nainstalována, takže nebylo nic odstraněno.&#10;Pokud ji už nechcete, smažte složku sami.</sys:String>
     <sys:String x:Key="Str_Btn_Uninstall">Odinstalovat</sys:String>
     <!-- Measure tool: types, scale, units, report -->
     <sys:String x:Key="Str_Measure_Distance">Vzdálenost</sys:String>

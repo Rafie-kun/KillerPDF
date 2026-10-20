@@ -1567,6 +1567,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">Uninstall could not request administrator access:&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallConfirm">Uninstall KillerPDF from this computer?</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF is still running.&#10;Close it, then try uninstalling again.</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallNotInstalled" xml:space="preserve">This KillerPDF was not installed here, so nothing was removed.&#10;Delete the folder yourself if you no longer want it.</sys:String>
     <sys:String x:Key="Str_Btn_Uninstall">Uninstall</sys:String>
     <!-- Measure tool: types, scale, units, report -->
     <sys:String x:Key="Str_Measure_Distance">Distance</sys:String>

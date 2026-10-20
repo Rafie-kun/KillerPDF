@@ -1567,6 +1567,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">Không thể yêu cầu quyền quản trị viên để gỡ cài đặt:&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallConfirm">Gỡ cài đặt KillerPDF khỏi máy tính này?</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF vẫn đang chạy.&#10;Hãy đóng ứng dụng, rồi thử gỡ cài đặt lại.</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallNotInstalled" xml:space="preserve">KillerPDF này không được cài đặt ở đây nên không có gì bị gỡ.&#10;Hãy tự xóa thư mục nếu bạn không còn cần nữa.</sys:String>
     <sys:String x:Key="Str_Btn_Uninstall">Gỡ cài đặt</sys:String>
     <!-- Measure tool: types, scale, units, report -->
     <sys:String x:Key="Str_Measure_Distance">Khoảng cách</sys:String>

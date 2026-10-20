@@ -1570,6 +1570,7 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">Жою үшін әкімші рұқсатын сұрау мүмкін болмады:&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallConfirm">KillerPDF бағдарламасын осы компьютерден жою керек пе?</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF әлі жұмыс істеп тұр.&#10;Оны жауып, жоюды қайталап көріңіз.</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallNotInstalled" xml:space="preserve">Бұл KillerPDF осында орнатылмаған, сондықтан ештеңе жойылмады.&#10;Енді қажет болмаса, қалтаны өзіңіз жойыңыз.</sys:String>
     <sys:String x:Key="Str_Btn_Uninstall">Жою</sys:String>
     <!-- Measure tool: types, scale, units, report -->
     <sys:String x:Key="Str_Measure_Distance">Қашықтық</sys:String>

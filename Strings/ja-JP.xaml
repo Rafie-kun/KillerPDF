@@ -1567,6 +1567,7 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">アンインストールに必要な管理者アクセスを要求できませんでした:&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallConfirm">このコンピューターから KillerPDF をアンインストールしますか？</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF はまだ実行中です。&#10;終了してから、もう一度アンインストールしてください。</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallNotInstalled" xml:space="preserve">この KillerPDF はここにインストールされたものではないため、何も削除されませんでした。&#10;不要であればフォルダーを手動で削除してください。</sys:String>
     <sys:String x:Key="Str_Btn_Uninstall">アンインストール</sys:String>
     <!-- Measure tool: types, scale, units, report -->
     <sys:String x:Key="Str_Measure_Distance">距離</sys:String>

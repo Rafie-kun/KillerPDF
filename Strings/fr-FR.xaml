@@ -1567,6 +1567,7 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">La désinstallation n'a pas pu demander l'accès administrateur :&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallConfirm">Désinstaller KillerPDF de cet ordinateur ?</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF est toujours en cours d'exécution.&#10;Fermez-le, puis réessayez la désinstallation.</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallNotInstalled" xml:space="preserve">Ce KillerPDF n'a pas été installé ici, donc rien n'a été supprimé.&#10;Supprimez le dossier vous-même si vous n'en voulez plus.</sys:String>
     <sys:String x:Key="Str_Btn_Uninstall">Désinstaller</sys:String>
     <!-- Measure tool: types, scale, units, report -->
     <sys:String x:Key="Str_Measure_Distance">Distance</sys:String>

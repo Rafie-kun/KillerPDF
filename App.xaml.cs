@@ -886,7 +886,8 @@ namespace KillerPDF
             string directory = Path.GetDirectoryName(registeredExe ?? MachineInstallExe) ?? MachineInstallDir;
             Services.CommandLinePath.Unregister(directory, machine: true);
             Services.PreviewHandlerRegistration.StopHosts(directory);
-            try { if (Directory.Exists(directory)) Directory.Delete(directory, true); } catch { }
+            // Only the payload the installer wrote is removed; a folder without its manifest is left alone.
+            if (Services.InstallPayloadOwnership.Read(directory) is { } owned) Services.InstallPayloadOwnership.Remove(owned);
             SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, IntPtr.Zero, IntPtr.Zero);
         }
 
@@ -1023,7 +1024,8 @@ namespace KillerPDF
             Services.CommandLinePath.Unregister(directory, machine: false);
             Services.PreviewHandlerRegistration.Unregister(Registry.CurrentUser);
             Services.PreviewHandlerRegistration.StopHosts(directory);
-            try { if (Directory.Exists(directory)) Directory.Delete(directory, true); } catch { }
+            // Only the payload the installer wrote is removed; a folder without its manifest is left alone.
+            if (Services.InstallPayloadOwnership.Read(directory) is { } owned) Services.InstallPayloadOwnership.Remove(owned);
             try
             {
                 using var key = Registry.CurrentUser.OpenSubKey(@"Software\KillerPDF", writable: true);
@@ -2066,6 +2068,23 @@ namespace KillerPDF
             bool machine = IsRegisteredCopy(Registry.LocalMachine, currentExe);
             if (RelaunchMachineUninstallElevatedIfNeeded(machine, silent)) return;
 
+            // Uninstall removes only the payload the installer wrote, found through its manifest,
+            // and only from a registered copy. A portable copy or a loose exe in some other folder
+            // never gets its folder emptied.
+            Services.InstallPayloadOwnership.OwnedPayload? owned =
+                machine || IsRegisteredCopy(Registry.CurrentUser, currentExe)
+                    ? Services.InstallPayloadOwnership.Read(Path.GetDirectoryName(currentExe) ?? string.Empty)
+                    : null;
+            if (owned is null)
+            {
+                if (!silent)
+                    KillerDialog.Show(null,
+                        SetupText("Str_Dlg_UninstallNotInstalled",
+                            "This KillerPDF was not installed here, so nothing was removed.\nDelete the folder yourself if you no longer want it."),
+                        AppName, MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             if (!silent)
             {
                 var res = KillerDialog.Show(
@@ -2123,12 +2142,13 @@ namespace KillerPDF
             // A preview surrogate holding the handler would keep the folder from being removed.
             Services.PreviewHandlerRegistration.StopHosts(installedDirectory);
 
-            // Self-delete: deferred via cmd batch so the EXE can exit first
-            string bat = Path.Combine(Path.GetTempPath(), "killerpdf_uninstall.bat");
+            // Self-delete: deferred via cmd batch so the EXE can exit first. The batch names every
+            // owned file and removes folders only when they are empty, never recursively.
+            string bat = Path.Combine(Path.GetTempPath(), $"killerpdf_uninstall_{Guid.NewGuid():N}.bat");
             File.WriteAllText(bat,
                 "@echo off\r\n" +
                 "ping -n 3 127.0.0.1 >nul\r\n" +
-                $"rmdir /s /q \"{Path.GetDirectoryName(currentExe)}\"\r\n" +
+                Services.InstallPayloadOwnership.RemovalBatch(owned) +
                 "del \"%~f0\"\r\n");
             Process.Start(new ProcessStartInfo("cmd.exe", $"/c \"{bat}\"")
             {

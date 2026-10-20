@@ -1,0 +1,88 @@
+using System.IO;
+
+namespace KillerPDF.Services;
+
+/// <summary>
+/// Names what a KillerPDF payload folder owns, so uninstall and conflict repair remove those
+/// files and nothing else. Ownership comes from the payload manifest the installer wrote, plus
+/// the two files registration adds beside it. A folder without a manifest owns nothing, and no
+/// caller removes it.
+/// </summary>
+internal static class InstallPayloadOwnership
+{
+    private const string ManifestName = "payload.manifest";
+    private const string PortableMarkerName = ".killerpdf-portable";
+
+    /// <summary>Absolute paths of the owned files, and the owned folders deepest first.</summary>
+    internal sealed record OwnedPayload(string Root, IReadOnlyList<string> Files, IReadOnlyList<string> Directories);
+
+    /// <summary>
+    /// Reads the manifest in <paramref name="directory"/>. Null when there is no manifest or it
+    /// names a path outside the folder.
+    /// </summary>
+    internal static OwnedPayload? Read(string directory)
+    {
+        if (string.IsNullOrWhiteSpace(directory)) return null;
+        string root = Path.GetFullPath(directory).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        string manifestPath = Path.Combine(root, ManifestName);
+        if (!File.Exists(manifestPath)) return null;
+        string rootPrefix = root + Path.DirectorySeparatorChar;
+        var files = new List<string>();
+        var directories = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (string line in File.ReadLines(manifestPath))
+        {
+            if (string.IsNullOrWhiteSpace(line) || line.StartsWith('#')) continue;
+            string[] parts = line.Split('\t', 3);
+            if (parts.Length != 3) return null;
+            string relative = parts[2].Replace('/', Path.DirectorySeparatorChar).TrimStart(Path.DirectorySeparatorChar);
+            if (relative.Length == 0 || Path.IsPathRooted(parts[2]) || parts[2].Contains(':')) return null;
+            string path = Path.GetFullPath(Path.Combine(root, relative));
+            if (!path.StartsWith(rootPrefix, StringComparison.OrdinalIgnoreCase)) return null;
+            files.Add(path);
+            for (string? parent = Path.GetDirectoryName(path);
+                parent is not null && parent.Length > root.Length;
+                parent = Path.GetDirectoryName(parent))
+                directories.Add(parent);
+        }
+        foreach (string extra in new[] { ManifestName, PortableMarkerName, CommandLinePath.CommandFileName })
+        {
+            string path = Path.Combine(root, extra);
+            if (File.Exists(path)) files.Add(path);
+        }
+        return new OwnedPayload(root, files,
+            [.. directories.OrderByDescending(path => path.Length).ThenBy(path => path, StringComparer.OrdinalIgnoreCase)]);
+    }
+
+    /// <summary>
+    /// Deletes the owned files and removes the owned folders that are then empty, never anything
+    /// else. Returns true when the root folder itself was empty and removed.
+    /// </summary>
+    internal static bool Remove(OwnedPayload owned)
+    {
+        foreach (string file in owned.Files)
+            try { File.Delete(file); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+        foreach (string directory in owned.Directories)
+            try { if (Directory.Exists(directory)) Directory.Delete(directory, recursive: false); }
+            catch (IOException) { } catch (UnauthorizedAccessException) { }
+        try
+        {
+            Directory.Delete(owned.Root, recursive: false);
+            return true;
+        }
+        catch (IOException) { return false; }
+        catch (UnauthorizedAccessException) { return false; }
+    }
+
+    /// <summary>
+    /// The cmd.exe lines that remove the payload after the process exits. Each file is deleted by
+    /// name and each folder is removed only when empty, so a folder the user shares stays.
+    /// </summary>
+    internal static string RemovalBatch(OwnedPayload owned)
+    {
+        var batch = new System.Text.StringBuilder();
+        foreach (string file in owned.Files) batch.Append("del /q \"").Append(file).Append("\"\r\n");
+        foreach (string directory in owned.Directories) batch.Append("rmdir \"").Append(directory).Append("\"\r\n");
+        batch.Append("rmdir \"").Append(owned.Root).Append("\"\r\n");
+        return batch.ToString();
+    }
+}

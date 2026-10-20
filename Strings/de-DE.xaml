@@ -1556,6 +1556,7 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">Für die Deinstallation konnten keine Administratorrechte angefordert werden:&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallConfirm">KillerPDF von diesem Computer deinstallieren?</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF läuft noch.&#10;Schließen Sie es und versuchen Sie die Deinstallation erneut.</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallNotInstalled" xml:space="preserve">Dieses KillerPDF wurde hier nicht installiert, daher wurde nichts entfernt.&#10;Löschen Sie den Ordner selbst, wenn Sie ihn nicht mehr brauchen.</sys:String>
     <sys:String x:Key="Str_Btn_Uninstall">Deinstallieren</sys:String>
     <!-- Measure tool: types, scale, units, report -->
     <sys:String x:Key="Str_Measure_Distance">Abstand</sys:String>

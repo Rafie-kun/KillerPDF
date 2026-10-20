@@ -1570,6 +1570,7 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">Не удалось запросить права администратора для удаления:&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallConfirm">Удалить KillerPDF с этого компьютера?</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF всё ещё работает.&#10;Закройте его и повторите удаление.</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallNotInstalled" xml:space="preserve">Этот KillerPDF не был установлен здесь, поэтому ничего не удалено.&#10;Если он больше не нужен, удалите папку самостоятельно.</sys:String>
     <sys:String x:Key="Str_Btn_Uninstall">Удалить</sys:String>
     <!-- Measure tool: types, scale, units, report -->
     <sys:String x:Key="Str_Measure_Distance">Расстояние</sys:String>

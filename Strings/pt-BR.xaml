@@ -1567,6 +1567,7 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">A desinstalação não conseguiu solicitar acesso de administrador:&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallConfirm">Desinstalar o KillerPDF deste computador?</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">O KillerPDF ainda está em execução.&#10;Feche-o e tente desinstalar novamente.</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallNotInstalled" xml:space="preserve">Este KillerPDF não foi instalado aqui, então nada foi removido.&#10;Exclua a pasta você mesmo se não a quiser mais.</sys:String>
     <sys:String x:Key="Str_Btn_Uninstall">Desinstalar</sys:String>
     <!-- Measure tool: types, scale, units, report -->
     <sys:String x:Key="Str_Measure_Distance">Distância</sys:String>

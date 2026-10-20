@@ -74,6 +74,20 @@ public sealed class PayloadIntegrityVerifierTests
     }
 
     [Fact]
+    public void Verify_AcceptsTheCommandLineShimRegistrationWrites()
+    {
+        WithPayload((root, file) =>
+        {
+            File.WriteAllText(Path.Combine(root, "KillerPDF.cmd"), "@echo off");
+
+            PayloadIntegrityResult result = PayloadIntegrityVerifier.Verify(root);
+
+            Assert.True(result.Success);
+            Assert.Empty(result.Errors);
+        });
+    }
+
+    [Fact]
     public void Verify_ReportsMissingManifest()
     {
         string root = NewTemporaryDirectory();

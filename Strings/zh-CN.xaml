@@ -1551,6 +1551,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">卸载无法请求管理员权限：&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallConfirm">从此计算机卸载 KillerPDF 吗？</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF 仍在运行。&#10;请关闭它，然后重试卸载。</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallNotInstalled" xml:space="preserve">此 KillerPDF 并非安装于此处，因此未删除任何内容。&#10;如果不再需要，请自行删除该文件夹。</sys:String>
     <sys:String x:Key="Str_Btn_Uninstall">卸载</sys:String>
     <!-- Measure tool: types, scale, units, report -->
     <sys:String x:Key="Str_Measure_Distance">距离</sys:String>

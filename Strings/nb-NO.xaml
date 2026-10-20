@@ -1567,6 +1567,7 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">Avinstalleringen kunne ikke be om administratortilgang:&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallConfirm">Vil du avinstallere KillerPDF fra denne datamaskinen?</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF kjører fortsatt.&#10;Lukk programmet, og prøv å avinstallere på nytt.</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallNotInstalled" xml:space="preserve">Denne KillerPDF ble ikke installert her, så ingenting ble fjernet.&#10;Slett mappen selv hvis du ikke vil ha den lenger.</sys:String>
     <sys:String x:Key="Str_Btn_Uninstall">Avinstaller</sys:String>
     <!-- Measure tool: types, scale, units, report -->
     <sys:String x:Key="Str_Measure_Distance">Avstand</sys:String>

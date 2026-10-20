@@ -1555,6 +1555,7 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">Dezinstalacja nie mogła poprosić o uprawnienia administratora:&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallConfirm">Odinstalować KillerPDF z tego komputera?</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF nadal działa.&#10;Zamknij go i spróbuj odinstalować ponownie.</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallNotInstalled" xml:space="preserve">Ten KillerPDF nie został tutaj zainstalowany, więc nic nie usunięto.&#10;Jeśli już go nie chcesz, usuń folder samodzielnie.</sys:String>
     <sys:String x:Key="Str_Btn_Uninstall">Odinstaluj</sys:String>
     <!-- Measure tool: types, scale, units, report -->
     <sys:String x:Key="Str_Measure_Distance">Odległość</sys:String>

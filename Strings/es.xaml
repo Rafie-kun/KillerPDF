@@ -1547,6 +1547,7 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">La desinstalación no pudo solicitar acceso de administrador:&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallConfirm">¿Desinstalar KillerPDF de este equipo?</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF todavía se está ejecutando.&#10;Ciérrelo y vuelva a intentar la desinstalación.</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallNotInstalled" xml:space="preserve">Este KillerPDF no se instaló aquí, así que no se eliminó nada.&#10;Borre la carpeta usted mismo si ya no la quiere.</sys:String>
     <sys:String x:Key="Str_Btn_Uninstall">Desinstalar</sys:String>
     <!-- Measure tool: types, scale, units, report -->
     <sys:String x:Key="Str_Measure_Distance">Distancia</sys:String>

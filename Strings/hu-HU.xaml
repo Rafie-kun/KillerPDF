@@ -1554,6 +1554,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">Az eltávolítás nem tudott rendszergazdai hozzáférést kérni:&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallConfirm">Eltávolítja a KillerPDF-et erről a számítógépről?</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">A KillerPDF még fut.&#10;Zárja be, majd próbálja újra az eltávolítást.</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallNotInstalled" xml:space="preserve">Ez a KillerPDF nem itt lett telepítve, ezért semmi sem lett eltávolítva.&#10;Ha már nem kell, törölje a mappát saját kezűleg.</sys:String>
     <sys:String x:Key="Str_Btn_Uninstall">Eltávolítás</sys:String>
     <!-- Measure tool: types, scale, units, report -->
     <sys:String x:Key="Str_Measure_Distance">Távolság</sys:String>

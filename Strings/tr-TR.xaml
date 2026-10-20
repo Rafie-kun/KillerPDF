@@ -1547,6 +1547,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">Kaldırma işlemi yönetici erişimi isteyemedi:&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallConfirm">KillerPDF bu bilgisayardan kaldırılsın mı?</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF hâlâ çalışıyor.&#10;Kapatın, ardından kaldırmayı yeniden deneyin.</sys:String>
+    <sys:String x:Key="Str_Dlg_UninstallNotInstalled" xml:space="preserve">Bu KillerPDF buraya kurulmamış, bu yüzden hiçbir şey kaldırılmadı.&#10;Artık istemiyorsanız klasörü kendiniz silin.</sys:String>
     <sys:String x:Key="Str_Btn_Uninstall">Kaldır</sys:String>
     <!-- Measure tool: types, scale, units, report -->
     <sys:String x:Key="Str_Measure_Distance">Mesafe</sys:String>

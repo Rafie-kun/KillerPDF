@@ -93,6 +93,8 @@ internal static class PayloadIntegrityVerifier
             // The portable launcher writes this identity marker after verifying extraction. It is
             // launcher-owned metadata, not an untrusted payload addition (#279).
             if (string.Equals(relative, PortableMarkerName, StringComparison.OrdinalIgnoreCase)) continue;
+            // Registration writes the command-line shim beside the payload; it is not part of it.
+            if (string.Equals(relative, CommandLinePath.CommandFileName, StringComparison.OrdinalIgnoreCase)) continue;
             if (!seen.Contains(relative))
                 errors.Add($"Unexpected file: {relative}");
         }
