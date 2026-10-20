@@ -1724,4 +1724,12 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Production_Digits">Minimální počet číslic</sys:String>
     <sys:String x:Key="Str_Production_Suffix">Přípona</sys:String>
     <sys:String x:Key="Str_Production_AllowOverlap">Povolit číslování přes stávající obsah</sys:String>
+    <sys:String x:Key="Str_Cc_Color">BARVA</sys:String>
+    <sys:String x:Key="Str_Cc_Exposure">Expozice (EV)</sys:String>
+    <sys:String x:Key="Str_Cc_Saturation">Sytost</sys:String>
+    <sys:String x:Key="Str_Cc_WhiteBalance">VYVÁŽENÍ BÍLÉ</sys:String>
+    <sys:String x:Key="Str_Cc_Warmth">Teplota</sys:String>
+    <sys:String x:Key="Str_Cc_Tint">Odstín</sys:String>
+    <sys:String x:Key="Str_Cc_WarmthHint">Studené / teplé</sys:String>
+    <sys:String x:Key="Str_Cc_TintHint">Zelená / purpurová</sys:String>
 </ResourceDictionary>

@@ -37,6 +37,8 @@ namespace KillerPDF
         public int    LevelBlack { get; private set; }
         public int    LevelWhite { get; private set; } = 255;
         public double LevelGamma { get; private set; } = 1.0;
+        public ColorCorrectionSettings ColorAdjustments { get; private set; } = new();
+        private readonly List<Slider> _colorAdjustmentSliders = [];
         public PageColorMode ColorMode { get; private set; }
         public int BlackWhiteThreshold { get; private set; } = 160;
         public int OutputDpi { get; private set; }
@@ -166,6 +168,7 @@ namespace KillerPDF
                 _resizeRadio.IsChecked = true; _flipHCheck.IsChecked = false; _flipVCheck.IsChecked = false;
                 ResetPerspective();
                 ResetLevels();   // #174
+                ResetColorAdjustments();
                 ResetQuality();
             };
             bottom.Children.Add(resetAll);
@@ -320,6 +323,28 @@ namespace KillerPDF
             levelsReset.Click += (_, _2) => ResetLevels();
             stack.Children.Add(levelsReset);
             WrapSection(stack, levelsStart, S("Str_Tf_Levels"), expanded: false);
+
+            stack.Children.Add(Divider());
+            int colorStart = stack.Children.Count;
+            AddColorSlider(stack, darkSlider, "Str_Cc_Exposure", -3, 3, 0, 0.1,
+                value => ColorAdjustments = ColorAdjustments with { Exposure = value },
+                value => value.ToString("+0.0;-0.0;0.0"));
+            AddColorSlider(stack, darkSlider, "Str_Cc_Saturation", 0, 200, 100, 1,
+                value => ColorAdjustments = ColorAdjustments with { Saturation = value / 100 },
+                value => value.ToString("0") + "%");
+            stack.Children.Add(SectionHeader(S("Str_Cc_WhiteBalance")));
+            AddColorSlider(stack, darkSlider, "Str_Cc_Warmth", -100, 100, 0, 1,
+                value => ColorAdjustments = ColorAdjustments with { Warmth = value },
+                value => value.ToString("+0;-0;0"), "Str_Cc_WarmthHint");
+            AddColorSlider(stack, darkSlider, "Str_Cc_Tint", -100, 100, 0, 1,
+                value => ColorAdjustments = ColorAdjustments with { Tint = value },
+                value => value.ToString("+0;-0;0"), "Str_Cc_TintHint");
+            var colorReset = UiKit.Make(S("Str_Tf_Reset"), false);
+            colorReset.Margin = new Thickness(0, 7, 0, 0);
+            colorReset.HorizontalAlignment = HorizontalAlignment.Left;
+            colorReset.Click += (_, _) => ResetColorAdjustments();
+            stack.Children.Add(colorReset);
+            WrapSection(stack, colorStart, S("Str_Cc_Color"), expanded: true);
 
             // #173: output quality applies after geometry and levels. Defaults preserve the
             // existing lossless, automatic-resolution Transform behavior.
@@ -840,6 +865,46 @@ namespace KillerPDF
             _lvlBlack.Value = 0; _lvlWhite.Value = 255; _lvlGamma.Value = 1.0;
         }
 
+        private void AddColorSlider(StackPanel host, Style? style, string labelKey,
+            double minimum, double maximum, double initial, double step,
+            Action<double> changed, Func<double, string> format, string? hintKey = null)
+        {
+            var row = new DockPanel { Margin = new Thickness(0, 6, 0, 0) };
+            var readout = SliderLabel(format(initial));
+            readout.Margin = new Thickness(8, 0, 0, 0);
+            DockPanel.SetDock(readout, Dock.Right);
+            row.Children.Add(readout);
+            var label = SliderLabel(S(labelKey));
+            label.Margin = new Thickness(0);
+            row.Children.Add(label);
+            host.Children.Add(row);
+            var slider = new Slider
+            {
+                Minimum = minimum, Maximum = maximum, Value = initial,
+                SmallChange = step, LargeChange = step * 10, TickFrequency = step,
+                Margin = new Thickness(0, 2, 0, 2), Tag = initial,
+                ToolTip = hintKey is null ? S(labelKey) : S(hintKey)
+            };
+            if (style is not null) slider.Style = style;
+            System.Windows.Automation.AutomationProperties.SetName(slider, S(labelKey));
+            slider.ValueChanged += (_, e) =>
+            {
+                double value = Math.Round(e.NewValue / step) * step;
+                changed(value);
+                readout.Text = format(value);
+                SchedulePreview();
+            };
+            _colorAdjustmentSliders.Add(slider);
+            host.Children.Add(slider);
+        }
+
+        private void ResetColorAdjustments()
+        {
+            foreach (var slider in _colorAdjustmentSliders) slider.Value = (double)slider.Tag;
+            ColorAdjustments = new();
+            SchedulePreview();
+        }
+
         private void ResetQuality()
         {
             _colorMode.SelectedIndex = 0;
@@ -872,6 +937,8 @@ namespace KillerPDF
             // #174: levels ride on top of whatever geometry the preview shows.
             if (_preview.Source is BitmapSource lvlSrc && !LevelsIdentity(LevelBlack, LevelWhite, LevelGamma))
                 _preview.Source = ApplyLevels(lvlSrc, LevelBlack, LevelWhite, LevelGamma);
+            if (_preview.Source is BitmapSource adjustmentSource)
+                _preview.Source = ColorCorrection.Apply(adjustmentSource, ColorAdjustments);
             if (_preview.Source is BitmapSource colorSrc && ColorMode != PageColorMode.Color)
                 _preview.Source = PageQualityConverter.ApplyColorMode(
                     colorSrc, ColorMode, BlackWhiteThreshold);

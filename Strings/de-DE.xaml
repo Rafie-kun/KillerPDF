@@ -1728,4 +1728,12 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Production_Digits">Mindestanzahl Ziffern</sys:String>
     <sys:String x:Key="Str_Production_Suffix">Suffix</sys:String>
     <sys:String x:Key="Str_Production_AllowOverlap">Nummerierung darf vorhandenen Inhalt überlappen</sys:String>
+    <sys:String x:Key="Str_Cc_Color">FARBE</sys:String>
+    <sys:String x:Key="Str_Cc_Exposure">Belichtung (EV)</sys:String>
+    <sys:String x:Key="Str_Cc_Saturation">Sättigung</sys:String>
+    <sys:String x:Key="Str_Cc_WhiteBalance">WEISSABGLEICH</sys:String>
+    <sys:String x:Key="Str_Cc_Warmth">Wärme</sys:String>
+    <sys:String x:Key="Str_Cc_Tint">Tönung</sys:String>
+    <sys:String x:Key="Str_Cc_WarmthHint">Kühl / warm</sys:String>
+    <sys:String x:Key="Str_Cc_TintHint">Grün / Magenta</sys:String>
 </ResourceDictionary>

@@ -1742,4 +1742,12 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Production_Digits">Минимум цифр</sys:String>
     <sys:String x:Key="Str_Production_Suffix">Суффикс</sys:String>
     <sys:String x:Key="Str_Production_AllowOverlap">Разрешить нумерации перекрывать содержимое</sys:String>
+    <sys:String x:Key="Str_Cc_Color">ЦВЕТ</sys:String>
+    <sys:String x:Key="Str_Cc_Exposure">Экспозиция (EV)</sys:String>
+    <sys:String x:Key="Str_Cc_Saturation">Насыщенность</sys:String>
+    <sys:String x:Key="Str_Cc_WhiteBalance">БАЛАНС БЕЛОГО</sys:String>
+    <sys:String x:Key="Str_Cc_Warmth">Теплота</sys:String>
+    <sys:String x:Key="Str_Cc_Tint">Оттенок</sys:String>
+    <sys:String x:Key="Str_Cc_WarmthHint">Холодный / тёплый</sys:String>
+    <sys:String x:Key="Str_Cc_TintHint">Зелёный / пурпурный</sys:String>
 </ResourceDictionary>

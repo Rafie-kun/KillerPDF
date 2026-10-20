@@ -1742,4 +1742,12 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_Production_Digits">Ең аз цифр саны</sys:String>
     <sys:String x:Key="Str_Production_Suffix">Жұрнақ</sys:String>
     <sys:String x:Key="Str_Production_AllowOverlap">Нөмірлеудің бар мазмұнмен қабаттасуына рұқсат ету</sys:String>
+    <sys:String x:Key="Str_Cc_Color">ТҮС</sys:String>
+    <sys:String x:Key="Str_Cc_Exposure">Экспозиция (EV)</sys:String>
+    <sys:String x:Key="Str_Cc_Saturation">Қанықтық</sys:String>
+    <sys:String x:Key="Str_Cc_WhiteBalance">АҚ ТҮС БАЛАНСЫ</sys:String>
+    <sys:String x:Key="Str_Cc_Warmth">Жылылық</sys:String>
+    <sys:String x:Key="Str_Cc_Tint">Реңк</sys:String>
+    <sys:String x:Key="Str_Cc_WarmthHint">Суық / жылы</sys:String>
+    <sys:String x:Key="Str_Cc_TintHint">Жасыл / қызылкүрең</sys:String>
 </ResourceDictionary>

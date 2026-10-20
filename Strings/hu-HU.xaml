@@ -1726,4 +1726,12 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Production_Digits">Legkevesebb számjegy</sys:String>
     <sys:String x:Key="Str_Production_Suffix">Utótag</sys:String>
     <sys:String x:Key="Str_Production_AllowOverlap">A számozás átfedheti a meglévő tartalmat</sys:String>
+    <sys:String x:Key="Str_Cc_Color">SZÍN</sys:String>
+    <sys:String x:Key="Str_Cc_Exposure">Expozíció (EV)</sys:String>
+    <sys:String x:Key="Str_Cc_Saturation">Telítettség</sys:String>
+    <sys:String x:Key="Str_Cc_WhiteBalance">FEHÉREGYENSÚLY</sys:String>
+    <sys:String x:Key="Str_Cc_Warmth">Melegség</sys:String>
+    <sys:String x:Key="Str_Cc_Tint">Árnyalat</sys:String>
+    <sys:String x:Key="Str_Cc_WarmthHint">Hideg / meleg</sys:String>
+    <sys:String x:Key="Str_Cc_TintHint">Zöld / bíbor</sys:String>
 </ResourceDictionary>

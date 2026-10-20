@@ -1739,4 +1739,12 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Production_Digits">Dígitos mínimos</sys:String>
     <sys:String x:Key="Str_Production_Suffix">Sufixo</sys:String>
     <sys:String x:Key="Str_Production_AllowOverlap">Permitir numeração sobre o conteúdo existente</sys:String>
+    <sys:String x:Key="Str_Cc_Color">COR</sys:String>
+    <sys:String x:Key="Str_Cc_Exposure">Exposição (EV)</sys:String>
+    <sys:String x:Key="Str_Cc_Saturation">Saturação</sys:String>
+    <sys:String x:Key="Str_Cc_WhiteBalance">BALANÇO DE BRANCO</sys:String>
+    <sys:String x:Key="Str_Cc_Warmth">Calor</sys:String>
+    <sys:String x:Key="Str_Cc_Tint">Matiz</sys:String>
+    <sys:String x:Key="Str_Cc_WarmthHint">Frio / quente</sys:String>
+    <sys:String x:Key="Str_Cc_TintHint">Verde / magenta</sys:String>
 </ResourceDictionary>

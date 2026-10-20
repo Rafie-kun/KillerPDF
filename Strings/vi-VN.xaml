@@ -1739,4 +1739,12 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Production_Digits">Số chữ số tối thiểu</sys:String>
     <sys:String x:Key="Str_Production_Suffix">Hậu tố</sys:String>
     <sys:String x:Key="Str_Production_AllowOverlap">Cho phép số đè lên nội dung hiện có</sys:String>
+    <sys:String x:Key="Str_Cc_Color">MÀU SẮC</sys:String>
+    <sys:String x:Key="Str_Cc_Exposure">Phơi sáng (EV)</sys:String>
+    <sys:String x:Key="Str_Cc_Saturation">Độ bão hòa</sys:String>
+    <sys:String x:Key="Str_Cc_WhiteBalance">CÂN BẰNG TRẮNG</sys:String>
+    <sys:String x:Key="Str_Cc_Warmth">Độ ấm</sys:String>
+    <sys:String x:Key="Str_Cc_Tint">Sắc độ</sys:String>
+    <sys:String x:Key="Str_Cc_WarmthHint">Lạnh / ấm</sys:String>
+    <sys:String x:Key="Str_Cc_TintHint">Xanh lá / đỏ tía</sys:String>
 </ResourceDictionary>

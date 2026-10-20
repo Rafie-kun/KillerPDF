@@ -1719,4 +1719,12 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Production_Digits">সর্বনিম্ন অঙ্ক</sys:String>
     <sys:String x:Key="Str_Production_Suffix">প্রত্যয়</sys:String>
     <sys:String x:Key="Str_Production_AllowOverlap">নম্বরকে বিদ্যমান বিষয়বস্তুর উপর রাখতে দিন</sys:String>
+    <sys:String x:Key="Str_Cc_Color">রং</sys:String>
+    <sys:String x:Key="Str_Cc_Exposure">এক্সপোজার (EV)</sys:String>
+    <sys:String x:Key="Str_Cc_Saturation">স্যাচুরেশন</sys:String>
+    <sys:String x:Key="Str_Cc_WhiteBalance">হোয়াইট ব্যালান্স</sys:String>
+    <sys:String x:Key="Str_Cc_Warmth">উষ্ণতা</sys:String>
+    <sys:String x:Key="Str_Cc_Tint">টিন্ট</sys:String>
+    <sys:String x:Key="Str_Cc_WarmthHint">শীতল / উষ্ণ</sys:String>
+    <sys:String x:Key="Str_Cc_TintHint">সবুজ / ম্যাজেন্টা</sys:String>
 </ResourceDictionary>

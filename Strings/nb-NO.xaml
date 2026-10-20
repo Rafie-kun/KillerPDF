@@ -1739,4 +1739,12 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Production_Digits">Minste antall sifre</sys:String>
     <sys:String x:Key="Str_Production_Suffix">Suffiks</sys:String>
     <sys:String x:Key="Str_Production_AllowOverlap">Tillat nummerering over eksisterende innhold</sys:String>
+    <sys:String x:Key="Str_Cc_Color">FARGE</sys:String>
+    <sys:String x:Key="Str_Cc_Exposure">Eksponering (EV)</sys:String>
+    <sys:String x:Key="Str_Cc_Saturation">Metning</sys:String>
+    <sys:String x:Key="Str_Cc_WhiteBalance">HVITBALANSE</sys:String>
+    <sys:String x:Key="Str_Cc_Warmth">Varme</sys:String>
+    <sys:String x:Key="Str_Cc_Tint">Fargetone</sys:String>
+    <sys:String x:Key="Str_Cc_WarmthHint">Kald / varm</sys:String>
+    <sys:String x:Key="Str_Cc_TintHint">Grønn / magenta</sys:String>
 </ResourceDictionary>

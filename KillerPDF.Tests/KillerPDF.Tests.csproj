@@ -108,6 +108,7 @@
     <Compile Include="..\Services\PrintOrientationPolicy.cs" Link="Services\PrintOrientationPolicy.cs" />
     <Compile Include="..\Services\PdfTextEditPlacement.cs" Link="Services\PdfTextEditPlacement.cs" />
     <Compile Include="..\Services\PageQualityConverter.cs" Link="Services\PageQualityConverter.cs" />
+    <Compile Include="..\Services\ColorCorrection.cs" Link="Services\ColorCorrection.cs" />
     <Compile Include="..\Services\MeasurementCalculator.cs" Link="Services\MeasurementCalculator.cs" />
     <Compile Include="..\Services\OutputPixelDimensions.cs" Link="Services\OutputPixelDimensions.cs" />
     <Compile Include="..\Services\PageSizeFormatter.cs" Link="Services\PageSizeFormatter.cs" />

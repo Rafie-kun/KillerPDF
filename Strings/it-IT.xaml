@@ -1739,4 +1739,12 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_Production_Digits">Cifre minime</sys:String>
     <sys:String x:Key="Str_Production_Suffix">Suffisso</sys:String>
     <sys:String x:Key="Str_Production_AllowOverlap">Consenti numerazione sul contenuto esistente</sys:String>
+    <sys:String x:Key="Str_Cc_Color">COLORE</sys:String>
+    <sys:String x:Key="Str_Cc_Exposure">Esposizione (EV)</sys:String>
+    <sys:String x:Key="Str_Cc_Saturation">Saturazione</sys:String>
+    <sys:String x:Key="Str_Cc_WhiteBalance">BILANCIAMENTO DEL BIANCO</sys:String>
+    <sys:String x:Key="Str_Cc_Warmth">Calore</sys:String>
+    <sys:String x:Key="Str_Cc_Tint">Tinta</sys:String>
+    <sys:String x:Key="Str_Cc_WarmthHint">Freddo / caldo</sys:String>
+    <sys:String x:Key="Str_Cc_TintHint">Verde / magenta</sys:String>
 </ResourceDictionary>

@@ -74,6 +74,8 @@ to render the toolbar at 1000, 1320, and 1600 pixels with captions beside,
 under, and hidden. The check rejects unused space that can fit an overflow
 tool, verifies the footer display controls sit between view modes and zoom,
 and renders Color Correction to check its right inset and preview zoom.
+Exposure, saturation, warmth and tint must change the preview and reset to neutral.
+An exposure adjustment is applied, saved and reopened to verify the PDF output.
 It also checks document and empty-pane transitions, rail right-click routing,
 and opening saved copies in an empty second pane or a new tab.
 Use a fresh output directory. Startup and user settings remain isolated;

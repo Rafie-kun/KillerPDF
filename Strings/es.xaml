@@ -1719,4 +1719,12 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Production_Digits">Dígitos mínimos</sys:String>
     <sys:String x:Key="Str_Production_Suffix">Sufijo</sys:String>
     <sys:String x:Key="Str_Production_AllowOverlap">Permitir numeración sobre contenido existente</sys:String>
+    <sys:String x:Key="Str_Cc_Color">COLOR</sys:String>
+    <sys:String x:Key="Str_Cc_Exposure">Exposición (EV)</sys:String>
+    <sys:String x:Key="Str_Cc_Saturation">Saturación</sys:String>
+    <sys:String x:Key="Str_Cc_WhiteBalance">BALANCE DE BLANCOS</sys:String>
+    <sys:String x:Key="Str_Cc_Warmth">Calidez</sys:String>
+    <sys:String x:Key="Str_Cc_Tint">Matiz</sys:String>
+    <sys:String x:Key="Str_Cc_WarmthHint">Frío / cálido</sys:String>
+    <sys:String x:Key="Str_Cc_TintHint">Verde / magenta</sys:String>
 </ResourceDictionary>

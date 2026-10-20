@@ -1739,4 +1739,12 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Production_Digits">Мінімум цифр</sys:String>
     <sys:String x:Key="Str_Production_Suffix">Суфікс</sys:String>
     <sys:String x:Key="Str_Production_AllowOverlap">Дозволити нумерації перекривати вміст</sys:String>
+    <sys:String x:Key="Str_Cc_Color">КОЛІР</sys:String>
+    <sys:String x:Key="Str_Cc_Exposure">Експозиція (EV)</sys:String>
+    <sys:String x:Key="Str_Cc_Saturation">Насиченість</sys:String>
+    <sys:String x:Key="Str_Cc_WhiteBalance">БАЛАНС БІЛОГО</sys:String>
+    <sys:String x:Key="Str_Cc_Warmth">Теплота</sys:String>
+    <sys:String x:Key="Str_Cc_Tint">Відтінок</sys:String>
+    <sys:String x:Key="Str_Cc_WarmthHint">Холодний / теплий</sys:String>
+    <sys:String x:Key="Str_Cc_TintHint">Зелений / пурпуровий</sys:String>
 </ResourceDictionary>

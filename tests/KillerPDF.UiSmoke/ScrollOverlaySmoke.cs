@@ -192,6 +192,12 @@ internal static class ScrollOverlaySmoke
         Type transformType = type.Assembly.GetType("KillerPDF.TransformWindow", true)!;
         Type previewType = transformType.GetNestedType("PagePreview", Members)!;
         var pixels = Enumerable.Repeat((byte)255, 100 * 140 * 4).ToArray();
+        for (int i = 0; i < pixels.Length; i += 4)
+        {
+            pixels[i] = 64;
+            pixels[i + 1] = 96;
+            pixels[i + 2] = 160;
+        }
         var bitmap = BitmapSource.Create(100, 140, 96, 96, PixelFormats.Bgra32, null, pixels, 400);
         bitmap.Freeze();
         var previews = Array.CreateInstance(previewType, 1);
@@ -236,6 +242,29 @@ internal static class ScrollOverlaySmoke
                     if (!((MatrixTransform)preview.RenderTransform).Matrix.IsIdentity)
                     { report.Add("FAIL zoom must stop at the fitted preview"); failures++; }
                     report.Add("ColorCorrection pointer anchor, refresh persistence, and minimum zoom checked");
+                    var sliders = ((IEnumerable<Slider>)transformType.GetField("_colorAdjustmentSliders", Members)!
+                        .GetValue(dialog)!).ToArray();
+                    var reset = ((Panel)sliders[0].Parent).Children.OfType<Button>().Single();
+                    double[] values = [-1, 0, 70, -60];
+                    for (int i = 0; i < sliders.Length; i++)
+                    {
+                        sliders[i].Value = values[i];
+                        transformType.GetMethod("UpdatePreview", Members)!.Invoke(dialog, null);
+                        var adjusted = (BitmapSource)preview.Source;
+                        var adjustedPixels = new byte[pixels.Length];
+                        adjusted.CopyPixels(adjustedPixels, 400, 0);
+                        if (adjustedPixels.SequenceEqual(pixels))
+                        { report.Add("FAIL color slider did not change preview: " + i); failures++; }
+                        var encoder = new PngBitmapEncoder();
+                        encoder.Frames.Add(BitmapFrame.Create(adjusted));
+                        using (var stream = File.Create(Path.Combine(folder, "ColorAdjustment-" + i + ".png")))
+                            encoder.Save(stream);
+                        reset.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                        transformType.GetMethod("UpdatePreview", Members)!.Invoke(dialog, null);
+                        if (!ReferenceEquals(preview.Source, bitmap))
+                        { report.Add("FAIL color reset must restore source preview"); failures++; }
+                    }
+                    report.Add("Exposure, saturation, warmth, tint preview changes and reset checked");
                 }
             }
             finally { dialog.Close(); }
@@ -274,6 +303,41 @@ internal static class ScrollOverlaySmoke
         if (sessions.Count != 2 || !ReferenceEquals(type.GetProperty("ActiveViewer", Members)!.GetValue(window), paneB))
         { report.Add("FAIL occupied second pane must use a new tab"); failures++; }
         report.Add("Pane availability transitions, rail right-click, and saved-copy routing checked");
+        var renderPage = type.GetMethod("RenderPageBitmap", Members)!;
+        static double Brightness(BitmapSource source)
+        {
+            var converted = new FormatConvertedBitmap(source, PixelFormats.Bgra32, null, 0);
+            var bytes = new byte[converted.PixelWidth * converted.PixelHeight * 4];
+            converted.CopyPixels(bytes, converted.PixelWidth * 4, 0);
+            double sum = 0;
+            for (int i = 0; i < bytes.Length; i += 4) sum += bytes[i] + bytes[i + 1] + bytes[i + 2];
+            return sum / (bytes.Length / 4 * 3);
+        }
+        double originalBrightness = Brightness((BitmapSource)renderPage.Invoke(window, [0, 100, null])!);
+        Type settingsType = type.Assembly.GetType("KillerPDF.Services.ColorCorrectionSettings", true)!;
+        object settings = Activator.CreateInstance(settingsType, -1d, 1d, 0d, 0d)!;
+        type.GetMethod("ApplyPageTransforms", Members)!.Invoke(window,
+            [new[] { 0 }, 0d, 1d, false, false, false,
+                new Point[] { new(0, 0), new(1, 0), new(1, 1), new(0, 1) }, 0, 255, 1d,
+                Enum.Parse(type.Assembly.GetType("KillerPDF.Services.PageColorMode", true)!, "Color"),
+                160, 72, false, 85, settings]);
+        var frame = new DispatcherFrame();
+        DateTime deadline = DateTime.UtcNow.AddSeconds(15);
+        var timer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(10) };
+        timer.Tick += (_, _) =>
+        {
+            if ((bool)type.GetProperty("_isDirty", Members)!.GetValue(window)! || DateTime.UtcNow >= deadline)
+                frame.Continue = false;
+        };
+        timer.Start();
+        Dispatcher.PushFrame(frame);
+        timer.Stop();
+        string correctedPath = Path.Combine(folder, "color-corrected.pdf");
+        type.GetMethod("SaveCopyAndOpen", Members)!.Invoke(window, [correctedPath]);
+        double savedBrightness = Brightness((BitmapSource)renderPage.Invoke(window, [0, 100, null])!);
+        if (savedBrightness >= originalBrightness - 10)
+        { report.Add("FAIL exposure must survive Apply, saving, and reopening the PDF"); failures++; }
+        report.Add($"Exposure PDF round trip brightness: {originalBrightness:F1} to {savedBrightness:F1}");
         report.Add($"failures={failures}");
         File.WriteAllLines(Path.Combine(folder, "report.txt"), report);
         return failures == 0 ? 0 : 1;

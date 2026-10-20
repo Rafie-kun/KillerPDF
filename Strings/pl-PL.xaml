@@ -1727,4 +1727,12 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Production_Digits">Minimalna liczba cyfr</sys:String>
     <sys:String x:Key="Str_Production_Suffix">Przyrostek</sys:String>
     <sys:String x:Key="Str_Production_AllowOverlap">Zezwalaj na numerację nad istniejącą treścią</sys:String>
+    <sys:String x:Key="Str_Cc_Color">KOLOR</sys:String>
+    <sys:String x:Key="Str_Cc_Exposure">Ekspozycja (EV)</sys:String>
+    <sys:String x:Key="Str_Cc_Saturation">Nasycenie</sys:String>
+    <sys:String x:Key="Str_Cc_WhiteBalance">BALANS BIELI</sys:String>
+    <sys:String x:Key="Str_Cc_Warmth">Ciepło</sys:String>
+    <sys:String x:Key="Str_Cc_Tint">Odcień</sys:String>
+    <sys:String x:Key="Str_Cc_WarmthHint">Chłodny / ciepły</sys:String>
+    <sys:String x:Key="Str_Cc_TintHint">Zielony / magenta</sys:String>
 </ResourceDictionary>

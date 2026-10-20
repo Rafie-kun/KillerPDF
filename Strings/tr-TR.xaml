@@ -1719,4 +1719,12 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Production_Digits">En az basamak</sys:String>
     <sys:String x:Key="Str_Production_Suffix">Son ek</sys:String>
     <sys:String x:Key="Str_Production_AllowOverlap">Numaralandırmanın mevcut içerikle örtüşmesine izin ver</sys:String>
+    <sys:String x:Key="Str_Cc_Color">RENK</sys:String>
+    <sys:String x:Key="Str_Cc_Exposure">Pozlama (EV)</sys:String>
+    <sys:String x:Key="Str_Cc_Saturation">Doygunluk</sys:String>
+    <sys:String x:Key="Str_Cc_WhiteBalance">BEYAZ DENGESİ</sys:String>
+    <sys:String x:Key="Str_Cc_Warmth">Sıcaklık</sys:String>
+    <sys:String x:Key="Str_Cc_Tint">Renk tonu</sys:String>
+    <sys:String x:Key="Str_Cc_WarmthHint">Soğuk / sıcak</sys:String>
+    <sys:String x:Key="Str_Cc_TintHint">Yeşil / macenta</sys:String>
 </ResourceDictionary>

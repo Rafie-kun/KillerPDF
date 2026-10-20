@@ -1739,4 +1739,12 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Production_Digits">最小桁数</sys:String>
     <sys:String x:Key="Str_Production_Suffix">接尾辞</sys:String>
     <sys:String x:Key="Str_Production_AllowOverlap">番号と既存の内容の重なりを許可</sys:String>
+    <sys:String x:Key="Str_Cc_Color">カラー</sys:String>
+    <sys:String x:Key="Str_Cc_Exposure">露出 (EV)</sys:String>
+    <sys:String x:Key="Str_Cc_Saturation">彩度</sys:String>
+    <sys:String x:Key="Str_Cc_WhiteBalance">ホワイトバランス</sys:String>
+    <sys:String x:Key="Str_Cc_Warmth">色温度</sys:String>
+    <sys:String x:Key="Str_Cc_Tint">色かぶり補正</sys:String>
+    <sys:String x:Key="Str_Cc_WarmthHint">寒色 / 暖色</sys:String>
+    <sys:String x:Key="Str_Cc_TintHint">緑 / マゼンタ</sys:String>
 </ResourceDictionary>

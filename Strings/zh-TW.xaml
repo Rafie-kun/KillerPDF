@@ -1721,4 +1721,12 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_Production_Digits">最少位數</sys:String>
     <sys:String x:Key="Str_Production_Suffix">後綴</sys:String>
     <sys:String x:Key="Str_Production_AllowOverlap">允許編號與現有內容重疊</sys:String>
+    <sys:String x:Key="Str_Cc_Color">色彩</sys:String>
+    <sys:String x:Key="Str_Cc_Exposure">曝光 (EV)</sys:String>
+    <sys:String x:Key="Str_Cc_Saturation">飽和度</sys:String>
+    <sys:String x:Key="Str_Cc_WhiteBalance">白平衡</sys:String>
+    <sys:String x:Key="Str_Cc_Warmth">暖度</sys:String>
+    <sys:String x:Key="Str_Cc_Tint">色調</sys:String>
+    <sys:String x:Key="Str_Cc_WarmthHint">冷 / 暖</sys:String>
+    <sys:String x:Key="Str_Cc_TintHint">綠色 / 洋紅</sys:String>
 </ResourceDictionary>

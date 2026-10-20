@@ -69,12 +69,12 @@ namespace KillerPDF
             if (win.Applied && (Math.Abs(win.Angle) > 0.01 || Math.Abs(win.Scale - 1.0) > 0.001 ||
                 win.FlipH || win.FlipV || !PerspectiveWarp.IsIdentity(win.PerspectiveCorners) ||
                 !TransformWindow.LevelsIdentity(win.LevelBlack, win.LevelWhite, win.LevelGamma) ||
-                win.ColorMode != PageColorMode.Color || win.OutputDpi > 0 ||
+                !win.ColorAdjustments.IsIdentity || win.ColorMode != PageColorMode.Color || win.OutputDpi > 0 ||
                 win.UseJpegCompression))
                 ApplyPageTransforms(pageIndices, win.Angle, win.Scale, win.FixedPage, win.FlipH, win.FlipV,
                     win.PerspectiveCorners, win.LevelBlack, win.LevelWhite, win.LevelGamma,
                     win.ColorMode, win.BlackWhiteThreshold, win.OutputDpi,
-                    win.UseJpegCompression, win.JpegQuality);
+                    win.UseJpegCompression, win.JpegQuality, win.ColorAdjustments);
         }
 
         // Rasterizes every selected page with one transform setup and swaps the batch in as one undo step.
@@ -83,7 +83,8 @@ namespace KillerPDF
             int levelBlack = 0, int levelWhite = 255, double levelGamma = 1.0,
             PageColorMode colorMode = PageColorMode.Color,
             int blackWhiteThreshold = 160, int outputDpi = 0,
-            bool useJpegCompression = false, int jpegQuality = 85)
+            bool useJpegCompression = false, int jpegQuality = 85,
+            ColorCorrectionSettings? colorAdjustments = null)
         {
             if (_doc is null || _currentFile is null) return;
             if (!EnsureEditable(continueAfterUnlock: false)) return;
@@ -141,6 +142,7 @@ namespace KillerPDF
                         ? src : PerspectiveWarp.Apply(src, perspectiveCorners);
                     var composed = ComposeTransform(perspective, angleDeg, scale, fixedPage, flipH, flipV);
                     composed = TransformWindow.ApplyLevels(composed, levelBlack, levelWhite, levelGamma);
+                    composed = ColorCorrection.Apply(composed, colorAdjustments ?? new());
                     composed = PageQualityConverter.ApplyColorMode(
                         composed, colorMode, blackWhiteThreshold);
                     double sx = epw / src.PixelWidth;
