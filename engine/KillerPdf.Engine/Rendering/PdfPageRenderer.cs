@@ -2784,11 +2784,24 @@ public sealed partial class PdfPageRenderer
                     {
                         if (TryGetGraphicsState(resources, stateName, out double? _, out double? _,
                                 out RendererBlendMode? blendMode, out bool unsupportedBlend,
-                                out PdfObject? _, out PdfObject? _, out PdfDictionary? _)
+                                out PdfObject? _, out PdfObject? graphicsFont, out PdfDictionary? _)
                             && (unsupportedBlend
-                                || blendMode is not (null or RendererBlendMode.Normal or RendererBlendMode.Compatible)))
+                                || blendMode is not (null or RendererBlendMode.Normal or RendererBlendMode.Compatible)
+                                || (graphicsFont is not null && Resolve(graphicsFont) is PdfArray { Count: 2 } fontArray
+                                    && Resolve(fontArray[0]) is PdfDictionary font
+                                    && IsName(font, "Subtype", "Type3"))))
                             return true;
                     }
+                    // Patterns and Type3 glyphs execute drawing programs with their own
+                    // graphics states. Keep their page group isolated conservatively.
+                    else if (instruction.Operator is "scn" or "SCN"
+                        && values.Count > 0 && values[^1] is PdfName)
+                        return true;
+                    else if (instruction.Operator == "Tf" && values.Count == 2
+                        && values[0] is PdfName fontName
+                        && ResolveFont(resources, fontName) is PdfDictionary selectedFont
+                        && IsName(selectedFont, "Subtype", "Type3"))
+                        return true;
                     else if (instruction.Operator == "Do" && values.Count == 1 && values[0] is PdfName xObjectName
                         && TryGetXObject(resources, xObjectName, out PdfStream? xObject) && xObject is not null
                         && IsName(xObject.Dictionary, "Subtype", "Form")
