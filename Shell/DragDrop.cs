@@ -459,6 +459,8 @@ namespace KillerPDF
             if (_doc is null) return;
             if (!EnsureEditable(continueAfterUnlock: false)) return;
             CommitActiveTextBox();
+            // Repairs below are awaited; the import goes only into the document it was dropped on.
+            var isTargetCurrent = CaptureDocumentOrigin();
             var imports = new List<PdfEngineIntegration.ImportedDocument>();
             foreach (var f in files)
             {
@@ -487,7 +489,7 @@ namespace KillerPDF
                 }
                 catch { /* skip anything still unreadable after repair */ }
             }
-            if (_doc is null) return;
+            if (_doc is null || !isTargetCurrent()) return;
             if (imports.Count == 0) { SetStatus(Loc("Str_Drop_NothingOpenable")); return; }
             UndoEntry? documentUndo = CaptureDocumentUndo();
             int insertAt = Math.Max(0, Math.Min(insertionIndex ?? _doc.PageCount, _doc.PageCount));
@@ -513,7 +515,7 @@ namespace KillerPDF
                     PdfEngineIntegration.RemapRotationsAfterDocumentInsertion(rotations, imports, insertAt),
                 selectedPageAfterReload: insertAt,
                 documentUndo: documentUndo);
-            SetStatus(string.Format(Loc("Str_Status_Merged"), files.Length));
+            SetStatus(string.Format(Loc("Str_Status_Merged"), imports.Count));
         }
 
         /// <summary>
