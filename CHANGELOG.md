@@ -107,6 +107,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Command-line splitting protects the source and requires `--overwrite` to replace existing outputs.
 - Bates stamping rejects colliding output filenames and protects every input file.
 - Installed updates keep custom installation directories.
+- Chocolatey publishing reports failure when validation is still failing after a retry.
 - Forwarded opens stay within their Windows account and session, and report delivery failure.
 - External PDF and OCR model downloads stop when their response bodies exceed the timeout.
 - Signing, flattening, and document export preserve existing outputs when writing fails or is canceled.
