@@ -39,6 +39,8 @@ namespace KillerPDF
         public double LevelGamma { get; private set; } = 1.0;
         public ColorCorrectionSettings ColorAdjustments { get; private set; } = new();
         private readonly List<Slider> _colorAdjustmentSliders = [];
+        private readonly CheckBox _autoExposure = null!;
+        private readonly CheckBox _autoWhiteBalance = null!;
         public PageColorMode ColorMode { get; private set; }
         public int BlackWhiteThreshold { get; private set; } = 160;
         public int OutputDpi { get; private set; }
@@ -145,7 +147,7 @@ namespace KillerPDF
             {
                 Width = 288,
                 Background = Brushes.Transparent,
-                Padding = new Thickness(16, 8, 16, 14)
+                Padding = new Thickness(16, 8, 0, 14)
             };
             DockPanel.SetDock(sidebar, Dock.Right);
 
@@ -153,7 +155,7 @@ namespace KillerPDF
 
             // Bottom: a "Reset all" text link on its own line (translations like "Tout reinitialiser" are
             // long), with Cancel / Apply right-aligned beneath it - so nothing crowds or clips.
-            var bottom = new StackPanel { Margin = new Thickness(0, 10, 0, 0) };
+            var bottom = new StackPanel { Margin = new Thickness(0, 10, 16, 0) };
             var resetAll = new TextBlock
             {
                 Text = S("Str_Tf_ResetAll"), FontFamily = UiKit.UiFont, FontSize = 12,
@@ -329,6 +331,11 @@ namespace KillerPDF
             AddColorSlider(stack, darkSlider, "Str_Cc_Exposure", -3, 3, 0, 0.1,
                 value => ColorAdjustments = ColorAdjustments with { Exposure = value },
                 value => value.ToString("+0.00;-0.00;0.00"), continuous: true);
+            _autoExposure = MakeCheck(S("Str_Cc_AutoExposure"));
+            _autoExposure.Margin = new Thickness(0, 3, 0, 6);
+            _autoExposure.Checked += (_, _) => SetAutoExposure(true);
+            _autoExposure.Unchecked += (_, _) => SetAutoExposure(false);
+            stack.Children.Add(_autoExposure);
             AddColorSlider(stack, darkSlider, "Str_Cc_Saturation", 0, 200, 100, 1,
                 value => ColorAdjustments = ColorAdjustments with { Saturation = value / 100 },
                 value => value.ToString("0") + "%");
@@ -339,6 +346,11 @@ namespace KillerPDF
             AddColorSlider(stack, darkSlider, "Str_Cc_Tint", -100, 100, 0, 1,
                 value => ColorAdjustments = ColorAdjustments with { Tint = value },
                 value => value.ToString("+0;-0;0"), "Str_Cc_TintHint");
+            _autoWhiteBalance = MakeCheck(S("Str_Cc_AutoWhiteBalance"));
+            _autoWhiteBalance.Margin = new Thickness(0, 3, 0, 6);
+            _autoWhiteBalance.Checked += (_, _) => SetAutoWhiteBalance(true);
+            _autoWhiteBalance.Unchecked += (_, _) => SetAutoWhiteBalance(false);
+            stack.Children.Add(_autoWhiteBalance);
             var colorReset = UiKit.Make(S("Str_Tf_Reset"), false);
             colorReset.Margin = new Thickness(0, 7, 0, 0);
             colorReset.HorizontalAlignment = HorizontalAlignment.Left;
@@ -445,10 +457,8 @@ namespace KillerPDF
                 colorControlsStart < stack.Children.Count)
                 stack.Children[colorControlsStart].Visibility = Visibility.Collapsed;
 
-            // The classic scrollbar sits near the window edge to return width to translated
-            // controls, while this small inner gap keeps those controls from touching it.
-            if (ThemeManager.Current == Theme.SE98)
-                stack.Margin = new Thickness(0, 0, 6, 0);
+            // Padding belongs to the controls, leaving the scrollbar at the window edge.
+            stack.Margin = new Thickness(0, 0, 16, 0);
 
             side.Children.Add(new ScrollViewer
             {
@@ -907,8 +917,25 @@ namespace KillerPDF
 
         private void ResetColorAdjustments()
         {
+            _autoExposure.IsChecked = false;
+            _autoWhiteBalance.IsChecked = false;
             foreach (var slider in _colorAdjustmentSliders) slider.Value = (double)slider.Tag;
             ColorAdjustments = new();
+            SchedulePreview();
+        }
+
+        private void SetAutoExposure(bool enabled)
+        {
+            ColorAdjustments = ColorAdjustments with { AutoExposure = enabled };
+            _colorAdjustmentSliders[0].IsEnabled = !enabled;
+            SchedulePreview();
+        }
+
+        private void SetAutoWhiteBalance(bool enabled)
+        {
+            ColorAdjustments = ColorAdjustments with { AutoWhiteBalance = enabled };
+            _colorAdjustmentSliders[2].IsEnabled = !enabled;
+            _colorAdjustmentSliders[3].IsEnabled = !enabled;
             SchedulePreview();
         }
 

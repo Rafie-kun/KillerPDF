@@ -1735,4 +1735,7 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Cc_Tint">Odcień</sys:String>
     <sys:String x:Key="Str_Cc_WarmthHint">Chłodny / ciepły</sys:String>
     <sys:String x:Key="Str_Cc_TintHint">Zielony / magenta</sys:String>
+    <sys:String x:Key="Str_Cc_AutoExposure">Automatyczna ekspozycja</sys:String>
+    <sys:String x:Key="Str_Cc_AutoWhiteBalance">Automatyczny balans bieli</sys:String>
+    <sys:String x:Key="Str_Attachment_Add">Dodaj załącznik</sys:String>
 </ResourceDictionary>

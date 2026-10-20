@@ -11,6 +11,25 @@ namespace KillerPDF.Tests;
 public sealed class AttachmentEditorIntegrationTests
 {
     [Fact]
+    public void AddAttachmentPreservesExistingFilesAndRejectsDuplicateNames()
+    {
+        string path = Path.Combine(Path.GetTempPath(), $"killerpdf-add-attachment-{System.Guid.NewGuid():N}.pdf");
+        try
+        {
+            File.WriteAllBytes(path, new PdfDocumentBuilder().AddBlankPage()
+                .AddAttachment("existing.txt", "existing"u8.ToArray()).Build());
+            PdfEngineIntegration.AddAttachment(path, "new.txt", "new payload"u8.ToArray());
+            byte[] saved = File.ReadAllBytes(path);
+            var files = PdfAttachmentReader.Read(PdfDocument.Open(saved));
+            Assert.Equal(2, files.Count);
+            Assert.Equal("new payload"u8.ToArray(), files.Single(file => file.FileName == "new.txt").Data.ToArray());
+            Assert.Throws<System.ArgumentException>(() => PdfEngineIntegration.AddAttachment(path, "NEW.TXT", [1]));
+            Assert.Equal(saved, File.ReadAllBytes(path));
+        }
+        finally { if (File.Exists(path)) File.Delete(path); }
+    }
+
+    [Fact]
     public void ApplyAttachmentEdits_SwapsNamesUpdatesMetadataAndRemovesSelectedFile()
     {
         string path = Path.Combine(Path.GetTempPath(),

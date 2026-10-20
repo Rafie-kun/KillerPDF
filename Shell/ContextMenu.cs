@@ -740,7 +740,7 @@ namespace KillerPDF
                 return;
             }
             var menu = MakeThemedMenu();
-            if (!rail && _doc is not null) FillPageAgnosticMenu(menu);
+            if (!rail && _doc is not null) FillSidebarPanelMenu(menu, e.OriginalSource as DependencyObject);
             AppendSidebarSideSection(menu);
             FlyoutPlacement.UsePane(SplitHost, _sidebarSide);
             FlyoutPlacement.AttachAtButtonHeight(menu, rail ? SidebarToggleBtn : (FrameworkElement)sender);

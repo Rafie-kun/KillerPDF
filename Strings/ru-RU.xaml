@@ -1750,4 +1750,7 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Cc_Tint">Оттенок</sys:String>
     <sys:String x:Key="Str_Cc_WarmthHint">Холодный / тёплый</sys:String>
     <sys:String x:Key="Str_Cc_TintHint">Зелёный / пурпурный</sys:String>
+    <sys:String x:Key="Str_Cc_AutoExposure">Автоэкспозиция</sys:String>
+    <sys:String x:Key="Str_Cc_AutoWhiteBalance">Автоматический баланс белого</sys:String>
+    <sys:String x:Key="Str_Attachment_Add">Добавить вложение</sys:String>
 </ResourceDictionary>

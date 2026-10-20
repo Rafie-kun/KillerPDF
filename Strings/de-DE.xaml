@@ -1736,4 +1736,7 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Cc_Tint">Tönung</sys:String>
     <sys:String x:Key="Str_Cc_WarmthHint">Kühl / warm</sys:String>
     <sys:String x:Key="Str_Cc_TintHint">Grün / Magenta</sys:String>
+    <sys:String x:Key="Str_Cc_AutoExposure">Automatische Belichtung</sys:String>
+    <sys:String x:Key="Str_Cc_AutoWhiteBalance">Automatischer Weißabgleich</sys:String>
+    <sys:String x:Key="Str_Attachment_Add">Anhang hinzufügen</sys:String>
 </ResourceDictionary>

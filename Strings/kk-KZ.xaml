@@ -1750,4 +1750,7 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_Cc_Tint">Реңк</sys:String>
     <sys:String x:Key="Str_Cc_WarmthHint">Суық / жылы</sys:String>
     <sys:String x:Key="Str_Cc_TintHint">Жасыл / қызылкүрең</sys:String>
+    <sys:String x:Key="Str_Cc_AutoExposure">Автоматты экспозиция</sys:String>
+    <sys:String x:Key="Str_Cc_AutoWhiteBalance">Автоматты ақ түс балансы</sys:String>
+    <sys:String x:Key="Str_Attachment_Add">Тіркеме қосу</sys:String>
 </ResourceDictionary>

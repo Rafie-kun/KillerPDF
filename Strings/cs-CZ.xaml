@@ -1732,4 +1732,7 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Cc_Tint">Odstín</sys:String>
     <sys:String x:Key="Str_Cc_WarmthHint">Studené / teplé</sys:String>
     <sys:String x:Key="Str_Cc_TintHint">Zelená / purpurová</sys:String>
+    <sys:String x:Key="Str_Cc_AutoExposure">Automatická expozice</sys:String>
+    <sys:String x:Key="Str_Cc_AutoWhiteBalance">Automatické vyvážení bílé</sys:String>
+    <sys:String x:Key="Str_Attachment_Add">Přidat přílohu</sys:String>
 </ResourceDictionary>

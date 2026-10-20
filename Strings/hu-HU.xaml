@@ -1734,4 +1734,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Cc_Tint">Árnyalat</sys:String>
     <sys:String x:Key="Str_Cc_WarmthHint">Hideg / meleg</sys:String>
     <sys:String x:Key="Str_Cc_TintHint">Zöld / bíbor</sys:String>
+    <sys:String x:Key="Str_Cc_AutoExposure">Automatikus expozíció</sys:String>
+    <sys:String x:Key="Str_Cc_AutoWhiteBalance">Automatikus fehéregyensúly</sys:String>
+    <sys:String x:Key="Str_Attachment_Add">Melléklet hozzáadása</sys:String>
 </ResourceDictionary>

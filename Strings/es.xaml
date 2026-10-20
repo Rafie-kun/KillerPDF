@@ -1727,4 +1727,7 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Cc_Tint">Matiz</sys:String>
     <sys:String x:Key="Str_Cc_WarmthHint">Frío / cálido</sys:String>
     <sys:String x:Key="Str_Cc_TintHint">Verde / magenta</sys:String>
+    <sys:String x:Key="Str_Cc_AutoExposure">Exposición automática</sys:String>
+    <sys:String x:Key="Str_Cc_AutoWhiteBalance">Balance de blancos automático</sys:String>
+    <sys:String x:Key="Str_Attachment_Add">Añadir archivo adjunto</sys:String>
 </ResourceDictionary>

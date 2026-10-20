@@ -1731,4 +1731,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Cc_Tint">色调</sys:String>
     <sys:String x:Key="Str_Cc_WarmthHint">冷 / 暖</sys:String>
     <sys:String x:Key="Str_Cc_TintHint">绿色 / 洋红</sys:String>
+    <sys:String x:Key="Str_Cc_AutoExposure">自动曝光</sys:String>
+    <sys:String x:Key="Str_Cc_AutoWhiteBalance">自动白平衡</sys:String>
+    <sys:String x:Key="Str_Attachment_Add">添加附件</sys:String>
 </ResourceDictionary>

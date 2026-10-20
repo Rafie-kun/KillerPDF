@@ -1729,4 +1729,7 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_Cc_Tint">色調</sys:String>
     <sys:String x:Key="Str_Cc_WarmthHint">冷 / 暖</sys:String>
     <sys:String x:Key="Str_Cc_TintHint">綠色 / 洋紅</sys:String>
+    <sys:String x:Key="Str_Cc_AutoExposure">自動曝光</sys:String>
+    <sys:String x:Key="Str_Cc_AutoWhiteBalance">自動白平衡</sys:String>
+    <sys:String x:Key="Str_Attachment_Add">新增附件</sys:String>
 </ResourceDictionary>

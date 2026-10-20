@@ -8,7 +8,9 @@ namespace KillerPDF
     // review comments, and add notes to the current page.
     public partial class MainWindow
     {
-        private void EditComments()
+        private void EditComments() => EditComments(addNew: false);
+
+        private void EditComments(bool addNew)
         {
             if (_doc is null || string.IsNullOrWhiteSpace(_currentFile))
             {
@@ -29,6 +31,7 @@ namespace KillerPDF
             string author = Environment.UserName;
             var dialog = new Controls.CommentsDialog(this, threads, _currentPage, author,
                 page => ActiveViewer.NavigateToPageExt(page));
+            if (addNew) dialog.AddComment();
             dialog.ShowDialog();
             if (!dialog.Saved) return;
             IReadOnlyList<CommentEdit> edits = dialog.Edits;

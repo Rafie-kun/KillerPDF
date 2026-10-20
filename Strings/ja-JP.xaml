@@ -1747,4 +1747,7 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Cc_Tint">色かぶり補正</sys:String>
     <sys:String x:Key="Str_Cc_WarmthHint">寒色 / 暖色</sys:String>
     <sys:String x:Key="Str_Cc_TintHint">緑 / マゼンタ</sys:String>
+    <sys:String x:Key="Str_Cc_AutoExposure">自動露出</sys:String>
+    <sys:String x:Key="Str_Cc_AutoWhiteBalance">オートホワイトバランス</sys:String>
+    <sys:String x:Key="Str_Attachment_Add">添付ファイルを追加</sys:String>
 </ResourceDictionary>

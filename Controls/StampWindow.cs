@@ -129,15 +129,15 @@ namespace KillerPDF
             var root = new DockPanel();
 
             // ---- Right sidebar ----
-            // Small right padding so the always-on scrollbar tucks near the window edge; the footer and
+            // No outer right padding keeps the scrollbar at the window edge; the footer and
             // scrolled content get their own right inset so nothing sits under the bar.
-            var sidebar = new Border { Width = 300, Background = Brushes.Transparent, Padding = new Thickness(16, 8, 4, 14) };
+            var sidebar = new Border { Width = 300, Background = Brushes.Transparent, Padding = new Thickness(16, 8, 0, 14) };
             DockPanel.SetDock(sidebar, Dock.Right);
             var side = new DockPanel();
 
             // Docked footer: Reset all link above a right-aligned Cancel / Apply row. Right inset keeps the
             // buttons off the reserved scrollbar gutter.
-            var bottom = new StackPanel { Margin = new Thickness(0, 10, 12, 0) };
+            var bottom = new StackPanel { Margin = new Thickness(0, 10, 16, 0) };
             var resetLink = UiKit.LinkLabel(S("Str_Tf_ResetAll"), ResetAll);
             resetLink.Margin = new Thickness(0, 0, 0, 8);
             bottom.Children.Add(resetLink);
@@ -157,7 +157,7 @@ namespace KillerPDF
             side.Children.Add(bottom);
 
             // Keep fields and section headers clear of the always-reserved scrollbar gutter.
-            var stack = new StackPanel { Margin = new Thickness(0, 0, 8, 0) };
+            var stack = new StackPanel { Margin = new Thickness(0, 0, 16, 0) };
             stack.Children.Add(BuildWatermarkSection());
             stack.Children.Add(Divider());
             stack.Children.Add(BuildNumbersSection());

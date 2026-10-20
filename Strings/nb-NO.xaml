@@ -1747,4 +1747,7 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Cc_Tint">Fargetone</sys:String>
     <sys:String x:Key="Str_Cc_WarmthHint">Kald / varm</sys:String>
     <sys:String x:Key="Str_Cc_TintHint">Grønn / magenta</sys:String>
+    <sys:String x:Key="Str_Cc_AutoExposure">Automatisk eksponering</sys:String>
+    <sys:String x:Key="Str_Cc_AutoWhiteBalance">Automatisk hvitbalanse</sys:String>
+    <sys:String x:Key="Str_Attachment_Add">Legg til vedlegg</sys:String>
 </ResourceDictionary>

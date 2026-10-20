@@ -1747,4 +1747,7 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Cc_Tint">Matiz</sys:String>
     <sys:String x:Key="Str_Cc_WarmthHint">Frio / quente</sys:String>
     <sys:String x:Key="Str_Cc_TintHint">Verde / magenta</sys:String>
+    <sys:String x:Key="Str_Cc_AutoExposure">Exposição automática</sys:String>
+    <sys:String x:Key="Str_Cc_AutoWhiteBalance">Balanço de branco automático</sys:String>
+    <sys:String x:Key="Str_Attachment_Add">Adicionar anexo</sys:String>
 </ResourceDictionary>

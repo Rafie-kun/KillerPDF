@@ -1747,4 +1747,7 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_Cc_Tint">Tinta</sys:String>
     <sys:String x:Key="Str_Cc_WarmthHint">Freddo / caldo</sys:String>
     <sys:String x:Key="Str_Cc_TintHint">Verde / magenta</sys:String>
+    <sys:String x:Key="Str_Cc_AutoExposure">Esposizione automatica</sys:String>
+    <sys:String x:Key="Str_Cc_AutoWhiteBalance">Bilanciamento del bianco automatico</sys:String>
+    <sys:String x:Key="Str_Attachment_Add">Aggiungi allegato</sys:String>
 </ResourceDictionary>

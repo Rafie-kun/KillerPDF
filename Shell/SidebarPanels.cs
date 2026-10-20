@@ -172,6 +172,77 @@ namespace KillerPDF
             }
         }
 
+        private void FillSidebarPanelMenu(ContextMenu menu, DependencyObject? source)
+        {
+            TreeViewItem? clicked = null;
+            for (var node = source; node is not null; node = VisualTreeHelper.GetParent(node))
+                if (node is TreeViewItem item) { clicked = item; break; }
+            if (clicked is not null) clicked.IsSelected = true;
+            void Add(string key, Action action) => menu.Items.Add(MakeMenuItem(Loc(key), (_, _) => action()));
+            switch (_sidebarPanel)
+            {
+                case SidebarPanel.Attachments:
+                    Add("Str_Attachment_Add", AddSidebarAttachment);
+                    if (clicked?.Tag is PdfAttachmentInfo attachment)
+                        Add("Str_Btn_Save", () => SaveAttachmentCopy(attachment));
+                    Add("Str_DocumentTools_EditAttachments", EditAttachments);
+                    break;
+                case SidebarPanel.Comments:
+                    Add("Str_Comments_Add", () => EditComments(addNew: true));
+                    Add("Str_DocumentTools_Comments", () => EditComments());
+                    break;
+                case SidebarPanel.Layers:
+                    Add("Str_DocumentTools_EditLayers", EditLayers);
+                    break;
+                case SidebarPanel.Signatures:
+                    Add("Str_Sign_Name", OpenSignDialog);
+                    Add("Str_DocumentTools_Signatures", ShowSignaturesReport);
+                    break;
+                case SidebarPanel.Outlines:
+                    Add("Str_Ctx_BmAdd", () => AddBookmarkInto(null));
+                    break;
+                default:
+                    FillPageAgnosticMenu(menu);
+                    break;
+            }
+        }
+
+        private void AddSidebarAttachment()
+        {
+            if (_doc is null) return;
+            var source = ActiveViewer;
+            var session = source.ActiveSessionExt;
+            var document = _doc;
+            var picker = new Controls.FileDialog(Controls.FileDialogMode.Open)
+            {
+                Title = Loc("Str_Attachment_Add"), Filter = Loc("Str_Filter_AllFiles") + "|*.*",
+                CheckFileExists = true, CheckPathExists = true
+            };
+            if (picker.ShowDialog(this) != true || !ReferenceEquals(ActiveViewer, source)
+                || !ReferenceEquals(source.ActiveSessionExt, session) || !ReferenceEquals(_doc, document)) return;
+            if (!EnsureEditable(continueAfterUnlock: false)) return;
+            try
+            {
+                CommitActiveTextBox();
+                byte[] bytes = File.ReadAllBytes(picker.FileName);
+                string name = Path.GetFileName(picker.FileName);
+                if (PdfEngineIntegration.ReadAttachmentEditorItems(_currentFile!).Any(item =>
+                    string.Equals(item.FileName, name, StringComparison.OrdinalIgnoreCase)))
+                    throw new InvalidOperationException(Loc("Str_Attachment_Invalid"));
+                UndoEntry? undo = CaptureDocumentUndo();
+                SaveTempAndReload(keepAnnotations: true,
+                    finalizeSavedFile: path => PdfEngineIntegration.AddAttachment(path, name, bytes),
+                    documentUndo: undo);
+                RefreshSidebarPanel();
+                SetStatus(Loc("Str_Attachment_Updated"));
+            }
+            catch (Exception ex)
+            {
+                KillerDialog.Show(this, Loc("Str_Attachment_Failed") + "\n" + ex.Message,
+                    "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private void ShowSignaturesReport() => ShowDocumentReport(Loc("Str_DocumentTools_Signatures"),
             path => PdfEngineIntegration.InspectSignatures(path).ToText());
 

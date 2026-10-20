@@ -222,6 +222,12 @@ internal static class ScrollOverlaySmoke
                 var level = (Slider)transformType.GetField(mode == "ColorCorrection" ? "_lvlWhite" : "_rotSlider", Members)!.GetValue(dialog)!;
                 double edge = Bounds(apply, content).Right;
                 double controlEdge = Bounds(level, content).Right;
+                var optionsScroll = Descendants<ScrollViewer>(content).Single(scroll => scroll.Parent is DockPanel);
+                var verticalBar = (ScrollBar)optionsScroll.Template.FindName("PART_VerticalScrollBar", optionsScroll);
+                var sidebar = (Border)((DockPanel)optionsScroll.Parent).Parent;
+                double barInset = Bounds(sidebar, content).Right - Bounds(verticalBar, content).Right;
+                if (Math.Abs(barInset) > 1)
+                { report.Add($"FAIL sidebar scrollbar is inset {barInset:F1} from its edge"); failures++; }
                 report.Add($"{mode} applyRight={edge:F1} controlRight={controlEdge:F1}");
                 if (controlEdge > edge + 1) { report.Add("FAIL controls extend beyond action buttons"); failures++; }
                 Render(content, Path.Combine(folder, mode + ".png"));
@@ -271,6 +277,23 @@ internal static class ScrollOverlaySmoke
                         { report.Add("FAIL color reset must restore source preview"); failures++; }
                     }
                     report.Add("Exposure, saturation, warmth, tint preview changes and reset checked");
+                    foreach (string field in new[] { "_autoExposure", "_autoWhiteBalance" })
+                    {
+                        var check = (CheckBox)transformType.GetField(field, Members)!.GetValue(dialog)!;
+                        check.IsChecked = true;
+                        bool disabled = field == "_autoExposure" ? !sliders[0].IsEnabled
+                            : !sliders[2].IsEnabled && !sliders[3].IsEnabled;
+                        if (!disabled) { report.Add("FAIL auto mode must disable its manual sliders"); failures++; }
+                        transformType.GetMethod("UpdatePreview", Members)!.Invoke(dialog, null);
+                        var autoPixels = new byte[pixels.Length];
+                        ((BitmapSource)preview.Source).CopyPixels(autoPixels, 400, 0);
+                        if (autoPixels.SequenceEqual(pixels))
+                        { report.Add("FAIL auto mode did not adjust the preview"); failures++; }
+                        reset.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                        if (check.IsChecked == true || sliders.Any(slider => !slider.IsEnabled))
+                        { report.Add("FAIL reset must clear auto mode and enable manual controls"); failures++; }
+                    }
+                    report.Add("Automatic exposure and white balance preview and reset checked");
                 }
             }
             finally { dialog.Close(); }
@@ -309,6 +332,27 @@ internal static class ScrollOverlaySmoke
         if (sessions.Count != 2 || !ReferenceEquals(type.GetProperty("ActiveViewer", Members)!.GetValue(window), paneB))
         { report.Add("FAIL occupied second pane must use a new tab"); failures++; }
         report.Add("Pane availability transitions, rail right-click, and saved-copy routing checked");
+        var panelField = type.GetField("_sidebarPanel", Members)!;
+        object previousPanel = panelField.GetValue(window)!;
+        var expectedMenus = new Dictionary<string, string[]>
+        {
+            ["Attachments"] = ["Str_Attachment_Add", "Str_DocumentTools_EditAttachments"],
+            ["Comments"] = ["Str_Comments_Add", "Str_DocumentTools_Comments"],
+            ["Layers"] = ["Str_DocumentTools_EditLayers"],
+            ["Signatures"] = ["Str_Sign_Name", "Str_DocumentTools_Signatures"]
+        };
+        foreach (var (panelName, keys) in expectedMenus)
+        {
+            panelField.SetValue(window, Enum.Parse(panelField.FieldType, panelName));
+            var menu = new ContextMenu();
+            type.GetMethod("FillSidebarPanelMenu", Members)!.Invoke(window, [menu, null]);
+            string[] headers = menu.Items.OfType<MenuItem>().Select(item => item.Header.ToString()!).ToArray();
+            string[] expected = keys.Select(key => (string)window.FindResource(key)).ToArray();
+            if (!headers.SequenceEqual(expected))
+            { report.Add("FAIL context menu contains unrelated actions: " + panelName); failures++; }
+        }
+        panelField.SetValue(window, previousPanel);
+        report.Add("Attachments, Comments, Layers, and Signatures menus checked");
         var renderPage = type.GetMethod("RenderPageBitmap", Members)!;
         static double Brightness(BitmapSource source)
         {

@@ -1727,4 +1727,7 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Cc_Tint">টিন্ট</sys:String>
     <sys:String x:Key="Str_Cc_WarmthHint">শীতল / উষ্ণ</sys:String>
     <sys:String x:Key="Str_Cc_TintHint">সবুজ / ম্যাজেন্টা</sys:String>
+    <sys:String x:Key="Str_Cc_AutoExposure">স্বয়ংক্রিয় এক্সপোজার</sys:String>
+    <sys:String x:Key="Str_Cc_AutoWhiteBalance">স্বয়ংক্রিয় হোয়াইট ব্যালান্স</sys:String>
+    <sys:String x:Key="Str_Attachment_Add">সংযুক্তি যোগ করুন</sys:String>
 </ResourceDictionary>

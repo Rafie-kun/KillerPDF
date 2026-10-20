@@ -83,4 +83,26 @@ public class ColorCorrectionTests
     public void NonfiniteAdjustmentIsRejected()
         => Assert.Throws<ArgumentOutOfRangeException>(() =>
             ColorCorrection.Apply(Pixel(0, 0, 0), new(Exposure: double.NaN)));
+
+    [Fact]
+    public void AutoExposureBrightensUnderexposedNeutral()
+    {
+        byte[] result = Bytes(ColorCorrection.Apply(Pixel(40, 40, 40), new() { AutoExposure = true }));
+        Assert.True(result[0] > 40);
+        Assert.Equal(result[0], result[1]);
+        Assert.Equal(result[1], result[2]);
+    }
+
+    [Fact]
+    public void AutoWhiteBalanceReducesColorCast()
+    {
+        byte[] result = Bytes(ColorCorrection.Apply(Pixel(160, 130, 110), new() { AutoWhiteBalance = true }));
+        Assert.True(Math.Abs(result[2] - result[0]) < 10);
+    }
+
+    [Fact]
+    public void AutoAdjustmentsLeaveBlankWhiteAlone()
+        => Assert.Equal(new byte[] { 255, 255, 255, 255 },
+            Bytes(ColorCorrection.Apply(Pixel(255, 255, 255),
+                new() { AutoExposure = true, AutoWhiteBalance = true })));
 }

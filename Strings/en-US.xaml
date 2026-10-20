@@ -1747,4 +1747,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Cc_Tint">Tint</sys:String>
     <sys:String x:Key="Str_Cc_WarmthHint">Cool / warm</sys:String>
     <sys:String x:Key="Str_Cc_TintHint">Green / magenta</sys:String>
+    <sys:String x:Key="Str_Cc_AutoExposure">Auto exposure</sys:String>
+    <sys:String x:Key="Str_Cc_AutoWhiteBalance">Auto white balance</sys:String>
+    <sys:String x:Key="Str_Attachment_Add">Add attachment</sys:String>
 </ResourceDictionary>

@@ -320,6 +320,13 @@ internal static class PdfEngineIntegration
                 attachment.MimeType, attachment.Relationship, attachment.Data.Length))];
     }
 
+    internal static void AddAttachment(string path, string fileName, byte[] data)
+    {
+        byte[] result = new PdfIncrementalPageEditor(PdfDocument.Open(File.ReadAllBytes(path)))
+            .AddAttachment(fileName, data, "application/octet-stream").Build();
+        ReplaceWithBuiltResult(path, result);
+    }
+
     internal static void ApplyAttachmentEdits(
         string path, IReadOnlyList<AttachmentEditorItem> edits)
     {

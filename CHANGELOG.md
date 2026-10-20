@@ -140,10 +140,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - The window opens fully on screen on a small or high-scaling display, or when its saved size came from a bigger monitor, instead of running off the edges.
 - The mouse wheel over the title bar wordmark, or the plain title on flat themes, changes the app size, as it already did over the icon.
 - Toolbar, sidebar, tab strip and footer text stays smooth at app sizes other than 100% instead of blurring.
-- The toolbar fills available space before leaving tools in overflow, and Transform and Color Correction controls align with their action buttons.
-- Color Correction supports smooth exposure adjustment, saturation and white balance with live preview, plus pointer-centered wheel zoom and dragging the enlarged preview.
+- The toolbar fills available space before leaving tools in overflow. Transform, Color Correction and Stamp keep scrollbars at the window edge with padding beside their controls.
+- Color Correction supports smooth exposure adjustment, saturation, and manual or automatic white balance and exposure with live preview, plus wheel zoom and dragging the enlarged preview.
 - Saved redacted copies open in an empty second pane or a new tab, preserving the original tab.
-- Sidebar tools follow the active document, hide when unavailable, and use their normal action on right-click.
+- Sidebar tools follow the active document and hide when unavailable. Right-click menus match each panel, including adding attachments and comments, editing layers and signing documents.
 - Page-list fades leave both scrollbars clear and disappear at either end, including in horizontal sidebar layouts.
 - About opens above Transform, Color Correction and other open dialogs instead of behind them, F12 opens it from inside those windows too, and Esc or F12 closes it.
 - Digitally signed fields show their signature instead of a blue Sign box (#425).

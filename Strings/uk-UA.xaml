@@ -1747,4 +1747,7 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Cc_Tint">Відтінок</sys:String>
     <sys:String x:Key="Str_Cc_WarmthHint">Холодний / теплий</sys:String>
     <sys:String x:Key="Str_Cc_TintHint">Зелений / пурпуровий</sys:String>
+    <sys:String x:Key="Str_Cc_AutoExposure">Автоекспозиція</sys:String>
+    <sys:String x:Key="Str_Cc_AutoWhiteBalance">Автоматичний баланс білого</sys:String>
+    <sys:String x:Key="Str_Attachment_Add">Додати вкладення</sys:String>
 </ResourceDictionary>

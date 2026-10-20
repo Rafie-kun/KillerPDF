@@ -1727,4 +1727,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Cc_Tint">Renk tonu</sys:String>
     <sys:String x:Key="Str_Cc_WarmthHint">Soğuk / sıcak</sys:String>
     <sys:String x:Key="Str_Cc_TintHint">Yeşil / macenta</sys:String>
+    <sys:String x:Key="Str_Cc_AutoExposure">Otomatik pozlama</sys:String>
+    <sys:String x:Key="Str_Cc_AutoWhiteBalance">Otomatik beyaz dengesi</sys:String>
+    <sys:String x:Key="Str_Attachment_Add">Ek ekle</sys:String>
 </ResourceDictionary>

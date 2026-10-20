@@ -240,7 +240,7 @@ internal sealed class CommentsDialog : Window
         _reply.ToolTip = node is not null && !canReply ? L("Str_Comments_NoReply") : null;
     }
 
-    private void AddComment()
+    internal void AddComment()
     {
         var node = new Node { Name = NewName(), PageIndex = _currentPage, Author = _author };
         _roots.Add(node);

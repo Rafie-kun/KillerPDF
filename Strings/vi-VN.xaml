@@ -1747,4 +1747,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Cc_Tint">Sắc độ</sys:String>
     <sys:String x:Key="Str_Cc_WarmthHint">Lạnh / ấm</sys:String>
     <sys:String x:Key="Str_Cc_TintHint">Xanh lá / đỏ tía</sys:String>
+    <sys:String x:Key="Str_Cc_AutoExposure">Phơi sáng tự động</sys:String>
+    <sys:String x:Key="Str_Cc_AutoWhiteBalance">Cân bằng trắng tự động</sys:String>
+    <sys:String x:Key="Str_Attachment_Add">Thêm tệp đính kèm</sys:String>
 </ResourceDictionary>
