@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
+using KillerPdf.Engine.Authoring;
 using KillerPdf.Engine.Filters;
 using KillerPdf.Engine.Objects;
 
@@ -11,7 +12,8 @@ namespace KillerPdf.Engine.Documents;
 // dictionary, so its title, author and other fields live here instead.
 internal sealed record PdfXmpDocumentMetadata(
     string? Title, string? Author, string? Subject, string? Keywords, string? Creator,
-    string? Producer, DateTimeOffset? CreationDate, DateTimeOffset? ModificationDate)
+    string? Producer, DateTimeOffset? CreationDate, DateTimeOffset? ModificationDate,
+    PdfTrappedStatus? Trapped)
 {
     private const int MaximumPacketBytes = 64 * 1024 * 1024;
     private static readonly XNamespace Rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
@@ -43,6 +45,7 @@ internal sealed record PdfXmpDocumentMetadata(
         if (present.Keywords is null) AddSimple(description, Pdf + "Keywords", fields.Keywords);
         if (present.Creator is null) AddSimple(description, Xmp + "CreatorTool", fields.Creator);
         if (present.Producer is null) AddSimple(description, Pdf + "Producer", fields.Producer);
+        if (present.Trapped is null) AddSimple(description, Pdf + "Trapped", fields.Trapped?.ToString());
         if (present.CreationDate is null)
             AddSimple(description, Xmp + "CreateDate", XmpDate(fields.CreationDate));
         if (present.ModificationDate is null)
@@ -96,7 +99,14 @@ internal sealed record PdfXmpDocumentMetadata(
             Simple(descriptions, Xmp + "CreatorTool"),
             Simple(descriptions, Pdf + "Producer"),
             Date(Simple(descriptions, Xmp + "CreateDate")),
-            Date(Simple(descriptions, Xmp + "ModifyDate")));
+            Date(Simple(descriptions, Xmp + "ModifyDate")),
+            Simple(descriptions, Pdf + "Trapped") switch
+            {
+                "True" => PdfTrappedStatus.True,
+                "False" => PdfTrappedStatus.False,
+                "Unknown" => PdfTrappedStatus.Unknown,
+                _ => null
+            });
     }
 
     private static bool IsDocumentDescription(XElement description) =>

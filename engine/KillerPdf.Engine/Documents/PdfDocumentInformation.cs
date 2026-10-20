@@ -72,7 +72,7 @@ public sealed record PdfDocumentInformation
             Language = CatalogText(document, "Lang"),
             CreationDate = Date(info, "CreationDate") ?? xmp?.CreationDate,
             ModificationDate = Date(info, "ModDate") ?? xmp?.ModificationDate,
-            Trapped = ReadTrapped(info),
+            Trapped = ReadTrapped(info) ?? xmp?.Trapped,
             Version = document.Header.Version,
             PageCount = pageTree.Pages.Count,
             InitialView = PdfInitialView.Read(document, pageTree)
