@@ -191,7 +191,8 @@ namespace KillerPDF.Features
                         "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
-                if (LaunchSwapAndExit(newExe)) newExe = null;
+                LaunchSwapAndExit(newExe);
+                newExe = null; // Failed helper startup retains the verified download.
             }
             finally
             {
@@ -241,6 +242,7 @@ namespace KillerPDF.Features
 
                 var path = Path.Combine(Path.GetTempPath(), $"KillerPDF_update_{Guid.NewGuid():N}.exe");
                 File.WriteAllBytes(path, exeBytes);
+                Services.UpdateImagePublication.RememberVerified(path, actual);
                 return path;
             }
             catch { return null; }
@@ -259,7 +261,6 @@ namespace KillerPDF.Features
                     ?? throw new InvalidOperationException("The current executable path is unavailable.");
                 var reopen = _host.FileToReopen;
                 var pid    = Environment.ProcessId;
-                var relArg = string.IsNullOrEmpty(reopen) ? "" : $" \"{reopen}\"";
                 var bat    = Path.Combine(Path.GetTempPath(), $"killerpdf_update_{Guid.NewGuid():N}.bat");
                 bool portable = App.IsPortable();
                 string? portableLauncher = Environment.GetEnvironmentVariable("KILLERPDF_LAUNCHER_PATH");
@@ -296,7 +297,8 @@ namespace KillerPDF.Features
                         WorkingDirectory = Path.GetTempPath()
                     };
                     if (needsElevation) installer.Verb = "runas";
-                    Process.Start(installer);
+                    if (Process.Start(installer) is null)
+                        throw new IOException("The update installer did not start. Download retained at: " + newExe);
                     Application.Current.Shutdown();
                     return true;
                 }
@@ -304,46 +306,42 @@ namespace KillerPDF.Features
                 // A portable launcher in a folder this user cannot write is not updated in place.
                 if (needsElevation) return false;
 
-                // When elevated, relaunch through explorer.exe so the app comes back at the user's
-                // normal integrity level rather than inheriting the elevated token. explorer.exe
-                // cannot forward arguments, so the currently-open file is not reopened on that
-                // path - a one-off convenience loss, preferred over leaving KillerPDF running as
-                // administrator for the rest of the session.
+                string system = Environment.GetFolderPath(Environment.SpecialFolder.System);
+                string tasklist = Path.Combine(system, "tasklist.exe").Replace("%", "%%");
+                string find = Path.Combine(system, "find.exe").Replace("%", "%%");
+                string ping = Path.Combine(system, "ping.exe").Replace("%", "%%");
                 var script = new StringBuilder()
                     .AppendLine("@echo off")
+                    .AppendLine("setlocal DisableDelayedExpansion")
                     .AppendLine(":waitapp")
-                    .AppendLine($"tasklist /fi \"PID eq {pid}\" 2>nul | find \"{pid}\" >nul")
-                    .AppendLine("if not errorlevel 1 ( ping -n 2 127.0.0.1 >nul & goto waitapp )");
-
-                if (packagedPortable)
+                    .AppendLine($"\"{tasklist}\" /fi \"PID eq {pid}\" 2>nul | \"{find}\" \"{pid}\" >nul")
+                    .AppendLine($"if not errorlevel 1 ( \"{ping}\" -n 2 127.0.0.1 >nul & goto waitapp )");
+                if (int.TryParse(Environment.GetEnvironmentVariable("KILLERPDF_LAUNCHER_PID"), out int launcherPid))
                 {
-                    if (int.TryParse(Environment.GetEnvironmentVariable("KILLERPDF_LAUNCHER_PID"), out int launcherPid))
-                    {
-                        script.AppendLine(":waitlauncher")
-                              .AppendLine($"tasklist /fi \"PID eq {launcherPid}\" 2>nul | find \"{launcherPid}\" >nul")
-                              .AppendLine("if not errorlevel 1 ( ping -n 2 127.0.0.1 >nul & goto waitlauncher )");
-                    }
-                    script.AppendLine($"attrib -r \"{portableLauncher}\" >nul 2>&1")
-                          .AppendLine($"copy /y \"{newExe}\" \"{portableLauncher}\" >nul 2>&1")
-                          .AppendLine("if errorlevel 1 goto failed")
-                          .AppendLine($"start \"\" \"{portableLauncher}\"{relArg}");
+                    script.AppendLine(":waitlauncher")
+                          .AppendLine($"\"{tasklist}\" /fi \"PID eq {launcherPid}\" 2>nul | \"{find}\" \"{launcherPid}\" >nul")
+                          .AppendLine($"if not errorlevel 1 ( \"{ping}\" -n 2 127.0.0.1 >nul & goto waitlauncher )");
                 }
-
-                script.AppendLine("goto cleanup")
+                script.AppendLine(Services.UpdateImagePublication.Command(newExe, portableLauncher!, false,
+                        $"{Repo}/releases/latest", "KillerPDF", reopen: reopen) + " >\"%~dpn0.helper.log\" 2>&1")
+                      .AppendLine("if errorlevel 1 goto failed")
+                      .AppendLine("goto cleanup")
                       .AppendLine(":failed")
                       .AppendLine($"start \"\" \"{Repo}/releases/latest\"")
                       .AppendLine(":cleanup")
-                      .AppendLine($"del \"{newExe}\" >nul 2>&1")
                       .AppendLine("del \"%~f0\" >nul 2>&1");
                 File.WriteAllText(bat, script.ToString());
 
-                var psi = new ProcessStartInfo("cmd.exe", $"/c \"{bat}\"")
+                var psi = new ProcessStartInfo(
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe"),
+                    $"/d /v:off /c \"{Path.GetFileName(bat)}\"")
                 {
                     WindowStyle     = ProcessWindowStyle.Hidden,
                     WorkingDirectory = Path.GetTempPath(),
                     UseShellExecute = true
                 };
-                Process.Start(psi);
+                if (Process.Start(psi) is null)
+                    throw new IOException("The update helper did not start. Download retained at: " + newExe);
                 Application.Current.Shutdown();
                 return true;
             }

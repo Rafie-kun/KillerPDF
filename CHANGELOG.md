@@ -32,7 +32,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Signing captures current edits without first saving the open PDF. Signature-field choices honor cancellation and document changes, and verification uses embedded intermediate certificates without trusting them as roots.
 - Splitting protects the source and requires explicit overwrite permission; Bates stamping rejects colliding outputs. Batch CSV reports neutralize filenames that spreadsheets could interpret as formulas.
 - Legacy Office conversion disables VBA macros, and timeouts preserve existing Office documents and visible sessions. External PDF and OCR-model downloads stop when response bodies exceed their timeout.
-- Installation refuses to replace folders containing unrelated or unverified files. Updates preserve custom install directories, forwarded opens stay within their Windows account and session, and startup cleanup preserves active temporary PDFs.
+- Installation refuses to replace folders containing unrelated or unverified files. Updates preserve custom install directories; failed portable updates retain complete executable copies and a recovery report. Forwarded opens stay within their Windows account and session, and startup cleanup preserves active temporary PDFs.
 - Incomplete scans report errors and keep recovered pages, including PDF-creation failures. Parallel PNG export no longer loses pages, and invalid OCR models retain the Tesseract fallback (#73).
 
 ### Rendering, performance and compatibility
