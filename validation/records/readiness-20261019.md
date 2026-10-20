@@ -43,3 +43,9 @@ The pinned E733 candidate comparison has now completed for both corpora at both 
 Authenticated final enumeration returned 334 issues, 51 open and zero unlabeled. All 61 planned assignments are present, no original labels were removed, and no issue states changed. Primary classifications added were 39 enhancements, 17 bugs, four questions and one documentation issue. Area labels were added only where supported by the full issue context; the newer Engine label was not retroactively assigned to legacy renderer reports.
 
 The exact assignments, reasons and final counts are retained in [the label audit](readiness-20261019-labels.json). No comments, issue closures, milestone changes, pushes or releases were performed. Temporary intake copies were used only for this audit; durable results are in this record and the linked JSON.
+
+## Subsequent headless accuracy and issue work
+
+The later authorized continuation adds three verified local rendering fixes, a frozen integrated candidate, full engine/app verification and refreshed difficult-set evidence. Strict broad-corpus work remains tracked in [the rendering remediation record](accuracy-remediation-20261019.md). This does not establish release readiness.
+
+Steve subsequently authorized open-issue work and matching post-commit replies. Existing 1.9 fixes for 454 and 455 were verified and one update was posted to each issue; both remain open. See [the issue execution record](issue-triage-20261019.md). The earlier label-audit statement above describes that audit only. No push or release occurred.
