@@ -21,14 +21,14 @@ namespace KillerPDF
         private void RailMenu_Opening(object sender, ContextMenuEventArgs e)
         {
             e.Handled = true;
-            ToggleRailFlyout(sender == RailLangBtn ? LangFlyout : ThemeFlyout);
+            ToggleRailFlyout(sender == RailLangBtn ? LangFlyout : ThemeFlyout, atCursor: true);
         }
 
         private void RailLang_Click(object sender, RoutedEventArgs e) => ToggleRailFlyout(LangFlyout);
 
         private void RailTheme_Click(object sender, RoutedEventArgs e) => ToggleRailFlyout(ThemeFlyout);
 
-        private void ToggleRailFlyout(ContextMenu menu)
+        private void ToggleRailFlyout(ContextMenu menu, bool atCursor = false)
         {
             if (menu.IsOpen) { menu.IsOpen = false; return; }
 
@@ -44,9 +44,20 @@ namespace KillerPDF
             // SplitHost is the full document region beside the rail. Its rail-adjacent edge is
             // whichever edge the sidebar is docked to. Using one viewer pane here stranded the flyouts on the left after
             // the sidebar moved right, and could place them in the middle of a split document.
-            if (SplitHost is FrameworkElement pane)
-                FlyoutPlacement.UsePane(pane, _sidebarSide);
-            FlyoutPlacement.AttachAtButtonHeight(menu, menu == LangFlyout ? RailLangBtn : RailThemeBtn);
+            if (atCursor)
+            {
+                menu.CustomPopupPlacementCallback = null;
+                menu.PlacementTarget = menu == LangFlyout ? RailLangBtn : RailThemeBtn;
+                menu.Placement = System.Windows.Controls.Primitives.PlacementMode.MousePoint;
+                menu.ClearValue(ContextMenu.HorizontalOffsetProperty);
+                menu.ClearValue(ContextMenu.VerticalOffsetProperty);
+            }
+            else
+            {
+                if (SplitHost is FrameworkElement pane)
+                    FlyoutPlacement.UsePane(pane, _sidebarSide);
+                FlyoutPlacement.AttachAtButtonHeight(menu, menu == LangFlyout ? RailLangBtn : RailThemeBtn);
+            }
 
             menu.IsOpen = true;
             // 150ms ease-out, the family fade (the flyout template replaces the implicit

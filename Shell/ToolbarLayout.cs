@@ -83,11 +83,11 @@ namespace KillerPDF
             Add("open", GrpOpen, OpenFileBtn, null, "\uE8DA", "Str_Lbl_Open", "Ctrl:O", Open_Click);
             Add("save", GrpSave, SaveAsBtn, null, "\uE74E", "Str_Lbl_Save", "Ctrl:S", Save_Click);
             Add("ocr", GrpOcr, OcrBtn, null, "\uEE6F", "Str_Lbl_Ocr", "CtrlShift:O", Ocr_Click);
-            Add("flatten", FlattenBtn, FlattenBtn, null, "\uE8B9", "Str_Lbl_Flatten", null, SaveFlattened_Click);
+            Add("flatten", FlattenBtn, FlattenBtn, null, "\uE8B9", "Str_Lbl_Flatten", "AltShift:F", SaveFlattened_Click);
             Add("print", PrintBtn, PrintBtn, null, "\uE749", "Str_Lbl_Print", "Ctrl:P", Print_Click);
-            Add("compare", ComparePdfBtn, ComparePdfBtn, MiCompare, CompareGlyph, "Str_TT_ComparePDFs", null, ComparePdf_Click);
-            Add("merge", MergeBtn, MergeBtn, MiMerge, "\uE710", "Str_Lbl_Merge", null, Merge_Click);
-            Add("extract", ExtractPagesBtn, ExtractPagesBtn, MiExtract, "\uE8B1", "Str_Lbl_Extract", null, Split_Click);
+            Add("compare", ComparePdfBtn, ComparePdfBtn, MiCompare, CompareGlyph, "Str_TT_ComparePDFs", "AltShift:V", ComparePdf_Click);
+            Add("merge", MergeBtn, MergeBtn, MiMerge, "\uE710", "Str_Lbl_Merge", "AltShift:B", Merge_Click);
+            Add("extract", ExtractPagesBtn, ExtractPagesBtn, MiExtract, "\uE8B1", "Str_Lbl_Extract", "AltShift:X", Split_Click);
             Add("delete", DeletePagesBtn, DeletePagesBtn, MiDelete, "\uE8C6", "Str_Lbl_Delete", null, Delete_Click);
             Add("moveup", MovePageUpBtn, MovePageUpBtn, MiMoveUp, "\uE74A", "Str_Lbl_MoveUp", null, MoveUp_Click);
             Add("movedown", MovePageDownBtn, MovePageDownBtn, MiMoveDown, "\uE74B", "Str_Lbl_MoveDown", null, MoveDown_Click);

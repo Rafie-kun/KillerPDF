@@ -28,6 +28,7 @@ namespace KillerPDF
             main.Children.Add(MeasureModeButton(MeasurementKind.Angle, "Str_Measure_TT_Angle", AngleGlyph()));
 
             _measureScaleButton = MeasureBarButton("", "Str_Measure_TT_Scale", () => OpenMeasureScale());
+            _measureScaleButton.ToolTip = ShortcutTip("Str_Measure_TT_Scale", "AltShift:D5");
             _measureScaleButton.Margin = new Thickness(10, 0, 6, 0);
             main.Children.Add(_measureScaleButton);
 
@@ -67,7 +68,9 @@ namespace KillerPDF
             };
             _measurePageSizeText.SetResourceReference(TextBlock.ForegroundProperty, "MutedTextBrush");
             info.Children.Add(_measurePageSizeText);
-            info.Children.Add(MeasureBarButton(Loc("Str_Measure_Report"), "Str_Measure_TT_Report", ShowMeasurementReport));
+            var report = MeasureBarButton(Loc("Str_Measure_Report"), "Str_Measure_TT_Report", ShowMeasurementReport);
+            report.ToolTip = Loc("Str_Measure_TT_Report") + " (" + GestureFor("CtrlShift:D") + ", Y)";
+            info.Children.Add(report);
             RefreshMeasureBar();
             return (main, info);
         }
@@ -108,7 +111,7 @@ namespace KillerPDF
                 Background = Brushes.Transparent,
                 Margin = new Thickness(1, 0, 1, 0),
                 Cursor = Cursors.Hand,
-                ToolTip = ShortcutTip(tipKey, "Shift:M"),
+                ToolTip = ShortcutTip(tipKey, "AltShift:D" + ((int)kind + 1)),
                 Child = glyph
             };
             System.Windows.Automation.AutomationProperties.SetName(button, Loc(tipKey));

@@ -734,18 +734,38 @@ namespace KillerPDF
                     if (ReferenceEquals(n, SidebarRailGrid) || ReferenceEquals(n, SidebarRailStack))
                         rail = true;
                 }
-            if (rail && railButton is not null)
+            if (rail && (railButton == RailLangBtn || railButton == RailThemeBtn))
             {
+                ToggleRailFlyout(railButton == RailLangBtn ? LangFlyout : ThemeFlyout, atCursor: true);
                 e.Handled = true;
-                if (railButton.IsEnabled)
-                    railButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent, railButton));
+                return;
+            }
+            if (rail && railButton?.ContextMenu is ContextMenu custom)
+            {
+                custom.CustomPopupPlacementCallback = null;
+                custom.PlacementTarget = railButton;
+                custom.Placement = System.Windows.Controls.Primitives.PlacementMode.MousePoint;
+                custom.ClearValue(ContextMenu.HorizontalOffsetProperty);
+                custom.ClearValue(ContextMenu.VerticalOffsetProperty);
+                custom.IsOpen = true;
+                e.Handled = true;
                 return;
             }
             var menu = MakeThemedMenu();
-            if (!rail && _doc is not null) FillSidebarPanelMenu(menu, e.OriginalSource as DependencyObject);
+            if (_doc is not null)
+            {
+                if (!rail) FillSidebarPanelMenu(menu, e.OriginalSource as DependencyObject);
+                else
+                    foreach (var (button, panel) in RailPanelButtons())
+                        if (ReferenceEquals(button, railButton))
+                        {
+                            FillSidebarPanelMenu(menu, null, panel);
+                            break;
+                        }
+            }
             AppendSidebarSideSection(menu);
-            FlyoutPlacement.UsePane(SplitHost, _sidebarSide);
-            FlyoutPlacement.AttachAtButtonHeight(menu, rail ? SidebarToggleBtn : (FrameworkElement)sender);
+            menu.PlacementTarget = (FrameworkElement)sender;
+            menu.Placement = System.Windows.Controls.Primitives.PlacementMode.MousePoint;
             menu.IsOpen = true;
             e.Handled = true;
         }
@@ -823,8 +843,9 @@ namespace KillerPDF
 
         // glyph: optional Segoe MDL2 codepoint rendered in the menu's left gutter (the 16px
         // check column doubles as an icon slot - see the MenuItem template in MainWindow.xaml).
-        private static MenuItem MakeMenuItem(string header, RoutedEventHandler click, string? gesture = null, string? glyph = null)
+        private MenuItem MakeMenuItem(string header, RoutedEventHandler click, string? gesture = null, string? glyph = null)
         {
+            gesture ??= MenuShortcutFor(header);
             var item = new MenuItem { Header = header };
             item.Click += click;
             if (gesture != null)
@@ -856,7 +877,7 @@ namespace KillerPDF
             return item;
         }
 
-        private static MenuItem MakeTransformMenuItem(string header, RoutedEventHandler click, string? gesture = null)
+        private MenuItem MakeTransformMenuItem(string header, RoutedEventHandler click, string? gesture = null)
         {
             var item = MakeMenuItem(header, click, gesture);
             var icon = new Grid { Width = 16, Height = 16 };

@@ -18,7 +18,7 @@ internal static class TableExportSmoke
 {
     private const BindingFlags Members = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
 
-    internal static int Run(string appPath, string appXaml, string folder, bool grainThemes = false, bool dialogText = false)
+    internal static int Run(string appPath, string appXaml, string folder, bool grainThemes = false, bool dialogText = false, bool sidebarActions = false)
     {
         if (!Environment.GetCommandLineArgs().Contains("--startup-smoke"))
             throw new InvalidOperationException("Startup smoke isolation is required.");
@@ -65,8 +65,10 @@ internal static class TableExportSmoke
             owner.WindowStartupLocation = WindowStartupLocation.Manual;
             owner.Left = -10000; owner.Top = -10000; owner.ShowInTaskbar = false; owner.ShowActivated = false;
             owner.Show();
+            if (sidebarActions) return SidebarActionsSmoke.Run(owner, folder);
             if (dialogText) return DialogTextSmoke.Run(owner, assembly, folder);
             if (grainThemes) return GrainThemeSmoke.Run(owner, assembly, folder);
+            VerifySidebarContextMenu(owner);
             Assembly engine = Assembly.Load("KillerPdf.Engine");
             byte[] fixture = Fixture();
             string originalHash = Convert.ToHexString(SHA256.HashData(fixture));
@@ -240,6 +242,24 @@ internal static class TableExportSmoke
             try { owner?.Close(); }
             finally { closing.Stop(); app.Shutdown(); }
         }
+    }
+
+    private static void VerifySidebarContextMenu(Window owner)
+    {
+        FrameworkElement sidebar = FindName<FrameworkElement>(owner, "SidebarBorder");
+        sidebar.RaiseEvent(new System.Windows.Input.MouseButtonEventArgs(System.Windows.Input.Mouse.PrimaryDevice,
+            Environment.TickCount, System.Windows.Input.MouseButton.Right)
+        { RoutedEvent = UIElement.MouseRightButtonUpEvent });
+        Pump();
+        ContextMenu menu = PresentationSource.CurrentSources.Cast<PresentationSource>()
+            .Select(source => source.RootVisual).OfType<DependencyObject>()
+            .SelectMany(Descendants<ContextMenu>).Single(candidate => candidate.IsOpen);
+        try
+        {
+            if (menu.Placement != System.Windows.Controls.Primitives.PlacementMode.MousePoint)
+                throw new InvalidOperationException("Sidebar right-click menu is not placed at the cursor.");
+        }
+        finally { menu.IsOpen = false; Pump(); }
     }
 
     private enum FlowMode { Save, CancelReview, CancelPicker, SwitchSource, ProtectSource }
@@ -472,7 +492,7 @@ internal static class TableExportSmoke
         var png = new PngBitmapEncoder(); png.Frames.Add(BitmapFrame.Create(image));
         using var file = File.Create(path); png.Save(file);
     }
-    private static byte[] Fixture()
+    internal static byte[] Fixture()
     {
         const string content = "20 20 160 160 re 100 20 m 100 180 l 20 100 m 180 100 l S\nBT /F1 12 Tf 30 150 Td (0012) Tj ET\nBT /F1 12 Tf 110 150 Td (Name) Tj ET\nBT /F1 12 Tf 30 70 Td (42) Tj ET\nBT /F1 12 Tf 110 70 Td (Test) Tj ET\n";
         string[] objects = ["<< /Type /Catalog /Pages 2 0 R >>", "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",

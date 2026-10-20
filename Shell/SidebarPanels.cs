@@ -50,7 +50,6 @@ namespace KillerPDF
                 var button = RailPanelButtons().First(entry => entry.Panel == panel).Button;
                 var menu = MakeThemedMenu();
                 AppendSidebarSideSection(menu);
-                button.ContextMenu = menu;
                 FlyoutPlacement.UsePane(SplitHost, _sidebarSide);
                 FlyoutPlacement.AttachAtButtonHeight(menu, button);
                 menu.IsOpen = true;
@@ -117,8 +116,10 @@ namespace KillerPDF
                 SidebarPanel.Comments => "Str_DocumentTools_Comments",
                 SidebarPanel.Attachments => "Str_DocumentTools_EditAttachments",
                 SidebarPanel.Layers => "Str_DocumentTools_EditLayers",
-                _ => "Str_DocumentTools_Signatures",
+                _ => "Str_Lbl_DigitalSig",
             });
+            if (panel == SidebarPanel.Signatures)
+                SidebarPanelEditButton.ToolTip = ShortcutTip("Str_Lbl_DigitalSig", "CtrlShift:G");
             SidebarSplitter.IsEnabled = true;
             _sidebarCol.MaxWidth = SbPx(SidebarMaxFor(panel));
             if (!_sidebarCollapsed)
@@ -174,18 +175,18 @@ namespace KillerPDF
                 case SidebarPanel.Comments: EditComments(); break;
                 case SidebarPanel.Attachments: EditAttachments(); break;
                 case SidebarPanel.Layers: EditLayers(); break;
-                case SidebarPanel.Signatures: ShowSignaturesReport(); break;
+                case SidebarPanel.Signatures: OpenSidebarSigning(); break;
             }
         }
 
-        private void FillSidebarPanelMenu(ContextMenu menu, DependencyObject? source)
+        private void FillSidebarPanelMenu(ContextMenu menu, DependencyObject? source, SidebarPanel? panel = null)
         {
             TreeViewItem? clicked = null;
             for (var node = source; node is not null; node = VisualTreeHelper.GetParent(node))
                 if (node is TreeViewItem item) { clicked = item; break; }
             if (clicked is not null) clicked.IsSelected = true;
             void Add(string key, Action action) => menu.Items.Add(MakeMenuItem(Loc(key), (_, _) => action()));
-            switch (_sidebarPanel)
+            switch (panel ?? _sidebarPanel)
             {
                 case SidebarPanel.Attachments:
                     Add("Str_Attachment_Add", AddSidebarAttachment);
@@ -196,12 +197,19 @@ namespace KillerPDF
                 case SidebarPanel.Comments:
                     Add("Str_Comments_Add", () => EditComments(addNew: true));
                     Add("Str_DocumentTools_Comments", () => EditComments());
+                    menu.Items.Add(new Separator());
+                    Add("Str_Measure_Distance", () => SelectMeasurement(MeasurementKind.Distance));
+                    Add("Str_Measure_Perimeter", () => SelectMeasurement(MeasurementKind.Perimeter));
+                    Add("Str_Measure_Area", () => SelectMeasurement(MeasurementKind.Area));
+                    Add("Str_Measure_Angle", () => SelectMeasurement(MeasurementKind.Angle));
+                    Add("Str_Measure_TT_Scale", () => OpenMeasureScale());
+                    Add("Str_DocumentTools_Measurements", ShowMeasurementReport);
                     break;
                 case SidebarPanel.Layers:
                     Add("Str_DocumentTools_EditLayers", EditLayers);
                     break;
                 case SidebarPanel.Signatures:
-                    Add("Str_Sign_Name", OpenSignDialog);
+                    Add("Str_Lbl_DigitalSig", OpenSidebarSigning);
                     Add("Str_DocumentTools_Signatures", ShowSignaturesReport);
                     break;
                 case SidebarPanel.Outlines:
@@ -639,7 +647,12 @@ namespace KillerPDF
                     .Where(part => !string.IsNullOrWhiteSpace(part)));
                 rows.Add(PanelRow("\uEB95", name, status, entry, tooltip));
             }
-            ShowSidebarList(SidebarPanel.Signatures, rows, Loc("Str_Panel_NoSignatures"));
+            var sign = UiKit.Make(Loc("Str_Lbl_DigitalSig"), true);
+            sign.HorizontalAlignment = HorizontalAlignment.Left;
+            sign.Margin = new Thickness(12, 4, 10, 6);
+            sign.ToolTip = ShortcutTip("Str_Lbl_DigitalSig", "CtrlShift:G");
+            sign.Click += (_, _) => OpenSidebarSigning();
+            ShowSidebarList(SidebarPanel.Signatures, rows, Loc("Str_Panel_NoSignatures"), sign);
         }
     }
 }

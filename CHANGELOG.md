@@ -76,11 +76,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 ### Interface and polish
 
-- Added Search Tools (Ctrl+K), customizable shortcuts, one-letter tool keys and shortcut displays that follow customization and language. Added Redo, Full Screen and Invert controls and expanded page, thumbnail and tab menus with navigation, clipboard, text-markup and Close All Tabs actions (#190).
-- Added Comments, Attachments, Layers and Signatures sidebar panels, all four sidebar positions, remembered rail ordering, horizontal scrolling and full bookmark titles. Sidebar actions follow the active document; narrow layouts keep controls reachable. Rail icons keep fixed ends, replacing the end-swapping option.
+- Added Search Tools (Ctrl+K), customizable shortcuts and one-letter tools. Export, signing, page cleanup and measurement shortcuts appear in menus, tooltips, F1 and the website. Expanded view, page, clipboard and tab actions (#190).
+- Added Comments, Attachments, Layers and Signatures panels, four sidebar positions and remembered rail order. Signing and measurements live with their panels. Right-click menus open at the cursor, Pages stays open, and dual pane leads the app icons. Narrow layouts, horizontal scrolling and full bookmark titles keep navigation reachable.
 - Improved toolbar overflow, focus rings, buttons and theme contrast. Table export uses a compact dialog with aligned actions. About opens above dialogs with compact options, longer forms keep their actions visible, and plain messages use readable body text.
 - Unified message and setup dialogs, separated installer translations by language, completed missing application and installer translations, and made the full installer version readable (#409, #440).
-- Refined film grain, shadows, accent states, checkbox ticks, radio alignment, crash-report controls and file-picker styling, while preserving classic 98SE controls.
+- Refined film grain, shadows, accent states, checkbox ticks, radio alignment, crash-report controls and file-picker styling, while preserving classic 98SE controls. Black grain preserves deep blacks and bright highlights. Interface fonts resolve from the embedded files, including menus, tooltips and shortcuts.
 - Simplified website navigation at narrow widths, localized navigation labels, improved mobile layout and contrast, refreshed branding and Corpus layout, and added Store and related-app links. Updated Help, technical documentation, translations, release facts and application metadata.
 
 ## [1.8.91] - 2026-10-14

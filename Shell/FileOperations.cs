@@ -971,7 +971,6 @@ namespace KillerPDF
                 menu.Items.Add(MakeMenuItem(Loc("Str_Menu_ExportDocument"), (s2, e2) => ExportDocument_Click(s2, e2), GestureFor("CtrlShift:E"), ""));
                 menu.Items.Add(MakeMenuItem(Loc("Str_TableExport_Title"), (_, _) => ExportTable(PageList.SelectedIndex)));
                 menu.Items.Add(new Separator());
-                menu.Items.Add(MakeMenuItem(Loc("Str_Lbl_DigitalSig"), (_, _) => OpenSignDialog(), null, ""));
                 // #149: visible always (discoverability, the PDF Viewer Plus way), enabled only when the
                 // open file actually had a password/encryption. Saving in place IS the removal - the
                 // working doc is already decrypted - and the SaveInPlace tail reports it and drops the flag.

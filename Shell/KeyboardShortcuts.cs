@@ -108,6 +108,12 @@ namespace KillerPDF
                 return;
             }
 
+            if (TryRunExpandedShortcut(key == Key.System ? systemKey : key, mods, e.IsRepeat))
+            {
+                e.Handled = true;
+                return;
+            }
+
             if (key == Key.C && mods == ModifierKeys.Control)
             {
                 // An annotation selection copies the annotation(s); otherwise copy page text.

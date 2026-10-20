@@ -22,6 +22,16 @@ namespace KillerPDF
         internal string GestureFor(string cap)
             => KeyText(CapKeys(ShortcutRemaps.Effective(ShortcutTable.Cap(cap))));
 
+        private string? MenuShortcutFor(string header)
+        {
+            foreach (KsBinding binding in ShortcutTable.KsAll)
+                if (binding.Caps.Length > 0 && Loc(binding.LabelKey) == header)
+                    return GestureFor(CapName(binding.Caps[0]));
+            foreach (var (letter, label) in ShortcutTable.DocumentToolKeys)
+                if (Loc(label) == header) return GestureFor("CtrlShift:D") + ", " + letter;
+            return null;
+        }
+
         /// <summary>Several keys for one command, joined the way the overlay joins them: "1 or T".</summary>
         private string GesturesFor(params string[] caps)
             => string.Join(" " + Loc("Str_Key_Or") + " ", caps.Select(GestureFor));
@@ -131,6 +141,16 @@ namespace KillerPDF
             Tip(_toolSearchBtn, "Str_ToolSearch", "Ctrl:K");
 
             Tip(SplitPaneRailBtn, "Str_TT_SplitPane", "F10");
+            Tip(SidebarPagesTab, "Str_Rail_Pages", "Alt:D1");
+            Tip(SidebarOutlinesTab, "Str_Rail_Outline", "Alt:D2");
+            Tip(SidebarCommentsTab, "Str_Rail_Comments", "Alt:D3");
+            Tip(SidebarAttachmentsTab, "Str_Rail_Attachments", "Alt:D4");
+            Tip(SidebarLayersTab, "Str_Rail_Layers", "Alt:D5");
+            Tip(SidebarSignaturesTab, "Str_Rail_Signatures", "Alt:D6");
+            Tip(FlattenBtn, "Str_Lbl_Flatten", "AltShift:F");
+            Tip(MergeBtn, "Str_Lbl_Merge", "AltShift:B");
+            Tip(ExtractPagesBtn, "Str_Lbl_Extract", "AltShift:X");
+            Tip(ComparePdfBtn, "Str_TT_ComparePDFs", "AltShift:V");
             Tip(FullScreenRailBtn, "Str_KS_FullScreen", "F11");
             Tip(DocInvertBtn, "Str_TT_DocInvert", "N");
             Tip(DocInfoRailBtn, "Str_TT_DocInfo", "F4");

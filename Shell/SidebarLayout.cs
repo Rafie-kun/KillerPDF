@@ -644,8 +644,8 @@ namespace KillerPDF
                 new FrameworkElement[] { RailThemeBtn, RailLangBtn, ShortcutHelpRailBtn },
                 new FrameworkElement[]
                 {
-                    SidebarPagesTab, SidebarOutlinesTab, SidebarCommentsTab, SidebarAttachmentsTab,
-                    SidebarLayersTab, SidebarSignaturesTab, SplitPaneRailBtn, DocInfoRailBtn,
+                    SplitPaneRailBtn, SidebarPagesTab, SidebarOutlinesTab, SidebarCommentsTab, SidebarAttachmentsTab,
+                    SidebarLayersTab, SidebarSignaturesTab, DocInfoRailBtn,
                 },
                 App.GetSetting(RailOrderSetting), value => App.SetSetting(RailOrderSetting, value));
         }

@@ -2138,22 +2138,6 @@
                         <DockPanel x:Name="SidebarStripRow" LastChildFill="False" Visibility="Collapsed"/>
                         <!-- Settings and help icons pinned to bottom -->
                         <StackPanel x:Name="SidebarRailStack" VerticalAlignment="Bottom" Margin="0,0,0,6">
-                            <!-- The sidebar's panels, always on the rail. A click opens that panel
-                                 (opening the sidebar if it is closed); a click on the open panel's
-                                 button closes the sidebar. -->
-                            <Button x:Name="SidebarPagesTab" Style="{StaticResource RailPanelBtn}" Content="&#xE8A9;"
-                                    ToolTip="{DynamicResource Str_Rail_Pages}" IsEnabled="False" Click="SidebarPagesTab_Click"/>
-                            <Button x:Name="SidebarOutlinesTab" Style="{StaticResource RailPanelBtn}" Content="&#xE8A4;"
-                                    ToolTip="{DynamicResource Str_Rail_Outline}" IsEnabled="False" Click="SidebarOutlinesTab_Click"/>
-                            <Button x:Name="SidebarCommentsTab" Style="{StaticResource RailPanelBtn}" Content="&#xE90A;"
-                                    ToolTip="{DynamicResource Str_Rail_Comments}" IsEnabled="False" Click="SidebarCommentsTab_Click"/>
-                            <Button x:Name="SidebarAttachmentsTab" Style="{StaticResource RailPanelBtn}" Content="&#xE723;"
-                                    ToolTip="{DynamicResource Str_Rail_Attachments}" IsEnabled="False" Click="SidebarAttachmentsTab_Click"/>
-                            <Button x:Name="SidebarLayersTab" Style="{StaticResource RailPanelBtn}" Content="&#xE81E;"
-                                    ToolTip="{DynamicResource Str_Rail_Layers}" IsEnabled="False" Click="SidebarLayersTab_Click"/>
-                            <Button x:Name="SidebarSignaturesTab" Style="{StaticResource RailPanelBtn}" Content="&#xEB95;"
-                                    ToolTip="{DynamicResource Str_Rail_Signatures}" IsEnabled="False" Click="SidebarSignaturesTab_Click"
-                                    Margin="0,0,0,14"/>
                             <!-- E9A6 (two panes): open or close the second document pane, F10 from
                                  the keyboard. On the rail rather than the toolbar because it acts
                                  on the WINDOW, not on the document the toolbar is editing. Lit in
@@ -2197,6 +2181,20 @@
                                     </ControlTemplate>
                                 </Button.Template>
                             </Button>
+                            <!-- Panel buttons select or open a sidebar without closing it. -->
+                            <Button x:Name="SidebarPagesTab" Style="{StaticResource RailPanelBtn}" Content="&#xE8A9;"
+                                    ToolTip="{DynamicResource Str_Rail_Pages}" IsEnabled="False" Click="SidebarPagesTab_Click"/>
+                            <Button x:Name="SidebarOutlinesTab" Style="{StaticResource RailPanelBtn}" Content="&#xE8A4;"
+                                    ToolTip="{DynamicResource Str_Rail_Outline}" IsEnabled="False" Click="SidebarOutlinesTab_Click"/>
+                            <Button x:Name="SidebarCommentsTab" Style="{StaticResource RailPanelBtn}" Content="&#xE90A;"
+                                    ToolTip="{DynamicResource Str_Rail_Comments}" IsEnabled="False" Click="SidebarCommentsTab_Click"/>
+                            <Button x:Name="SidebarAttachmentsTab" Style="{StaticResource RailPanelBtn}" Content="&#xE723;"
+                                    ToolTip="{DynamicResource Str_Rail_Attachments}" IsEnabled="False" Click="SidebarAttachmentsTab_Click"/>
+                            <Button x:Name="SidebarLayersTab" Style="{StaticResource RailPanelBtn}" Content="&#xE81E;"
+                                    ToolTip="{DynamicResource Str_Rail_Layers}" IsEnabled="False" Click="SidebarLayersTab_Click"/>
+                            <Button x:Name="SidebarSignaturesTab" Style="{StaticResource RailPanelBtn}" Content="&#xEB95;"
+                                    ToolTip="{DynamicResource Str_Rail_Signatures}" IsEnabled="False" Click="SidebarSignaturesTab_Click"
+                                    Margin="0,0,0,14"/>
                             <Button x:Name="DocInfoRailBtn" Click="DocInfo_Click"
                                     Cursor="Hand" FocusVisualStyle="{x:Null}"
                                     ToolTip="{DynamicResource Str_TT_DocInfo}"

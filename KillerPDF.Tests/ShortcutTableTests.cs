@@ -64,6 +64,21 @@ namespace KillerPDF.Tests
                 "these keys are claimed by more than one binding: " + string.Join(", ", duplicates));
         }
 
+        [Theory]
+        [InlineData("Str_Lbl_DigitalSig")]
+        [InlineData("Str_TableExport_Title")]
+        [InlineData("Str_Pages_FixOrientation")]
+        [InlineData("Str_Pages_Straighten")]
+        [InlineData("Str_Pages_DivideSpreads")]
+        [InlineData("Str_Ctx_AddBlankPage")]
+        [InlineData("Str_Pages_Reverse")]
+        [InlineData("Str_Measure_Distance")]
+        [InlineData("Str_Measure_Perimeter")]
+        [InlineData("Str_Measure_Area")]
+        [InlineData("Str_Measure_Angle")]
+        public void ExpandedActionsHaveKeyboardBindings(string label)
+            => Assert.Contains(ShortcutTable.KsAll, binding => binding.LabelKey == label && binding.Caps.Length > 0);
+
         /// <summary>Every cap the table lights has to exist on the drawn board, or the binding is
         /// invisible: the map only renders ids present in KbRows. Alt+M was missing the other way
         /// round, absent from the table while the list advertised it.</summary>

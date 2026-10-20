@@ -59,6 +59,11 @@ jobs:
           if ($env:FRAMEWORK) { $buildArgs += @('--framework', $env:FRAMEWORK) }
           & dotnet @buildArgs 2>&1 | Tee-Object ci-results/build.log
           if ($LASTEXITCODE -ne 0) { throw 'Build failed. See build.log.' }
+      - name: Verify website shortcut data
+        if: matrix.name == 'application'
+        run: |
+          dotnet run --project tools/KillerPDF.ShortcutSite/KillerPDF.ShortcutSite.csproj --configuration Release -- "$env:GITHUB_WORKSPACE" --check 2>&1 | Tee-Object ci-results/shortcuts.log
+          if ($LASTEXITCODE -ne 0) { throw 'Website shortcuts differ from the app. See shortcuts.log.' }
       - name: Run tests
         if: matrix.mode == 'test'
         env:

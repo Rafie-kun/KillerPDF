@@ -74,6 +74,7 @@ namespace KillerPDF
             "Str_Toolbar_SmallIcons", "Str_Toolbar_LargeIcons", "Str_Toolbar_TextNone",
             "Str_Toolbar_TextBeside", "Str_Toolbar_TextUnder", "Str_Toolbar_TextOnly",
             "Str_KS_ToggleSidebar", "Str_KS_SidebarSide", "Str_KS_SplitPane", "Str_Toolbar_Customize",
+            "Str_Watch_Title",
         ];
 
         // Other words people search for, in English whatever the interface language, because the
@@ -442,15 +443,6 @@ namespace KillerPDF
             foreach (var (letter, labelKey) in ShortcutTable.DocumentToolKeys)
                 Add(labelKey, "Docs", GestureFor("CtrlShift:D") + ", " + letter, () => RunDocumentTool(letter));
 
-            var click = new RoutedEventArgs();
-            Add("Str_Menu_ReduceSize", "File", "", () => ReduceFileSize_Click(this, click));
-            Add("Str_Menu_CompressZip", "File", "", () => CompressToZip_Click(this, click));
-            Add("Str_Menu_ExportImages", "File", "", () => ExportImages_Click(this, click));
-            Add("Str_TableExport_Title", "File", "", () => ExportTable(PageList.SelectedIndex));
-            Add("Str_Lbl_DigitalSig", "File", "", OpenSignDialog);
-            Add("Str_Lbl_Merge", "File", "", () => Merge_Click(this, click));
-            Add("Str_Ctx_ExtractPages", "File", "", () => Split_Click(this, click));
-            Add("Str_TT_ComparePDFs", "File", "", () => ComparePdf_Click(this, click));
             Add("Str_Toolbar_Customize", "View", "", OpenCustomizeToolbar);
             return entries;
         }
