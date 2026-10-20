@@ -206,12 +206,20 @@ namespace KillerLauncher
             }
             catch
             {
-                DeleteDirectoryWithRetries(staging);
+                // The previous version comes back first; cleanup of the staging folder is best
+                // effort afterward, so a locked file there can neither strand the backup nor
+                // replace the exception that explains what went wrong.
                 if (movedExisting && Directory.Exists(backup))
                 {
-                    DeleteDirectoryWithRetries(destination);
-                    if (!Directory.Exists(destination)) MoveDirectoryWithRetries(backup, destination);
+                    try
+                    {
+                        if (Directory.Exists(destination)) DeleteDirectoryWithRetries(destination);
+                        if (!Directory.Exists(destination)) MoveDirectoryWithRetries(backup, destination);
+                    }
+                    catch (IOException) { }
+                    catch (UnauthorizedAccessException) { }
                 }
+                PortableDirectoryCleanup.TryDelete(staging);
                 throw;
             }
         }
@@ -364,15 +372,17 @@ namespace KillerLauncher
                 foreach (Process process in running)
                 {
                     if (process.HasExited) continue;
+                    // A copy that is still running is the busy case deployment tools retry on
+                    // (exit 1618), so the exception carries that code with the localized text.
                     if (!process.CloseMainWindow())
-                        throw new InvalidOperationException(
-                            LauncherStrings.Get("StillRunning"));
+                        throw new System.ComponentModel.Win32Exception(
+                            KillerFamily.Deployment.InstallerExitCodes.Busy, LauncherStrings.Get("StillRunning"));
                 }
                 foreach (Process process in running)
                 {
                     if (!process.HasExited && !process.WaitForExit(60000))
-                        throw new InvalidOperationException(
-                            LauncherStrings.Get("StillOpen"));
+                        throw new System.ComponentModel.Win32Exception(
+                            KillerFamily.Deployment.InstallerExitCodes.Busy, LauncherStrings.Get("StillOpen"));
                 }
             }
             finally
