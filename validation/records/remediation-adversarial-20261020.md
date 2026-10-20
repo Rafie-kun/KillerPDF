@@ -65,6 +65,33 @@ investigation. A bounded correction would defer PID registration until all
 ownership checks have passed; actual COM activation and document survival still
 need disposable Office lab verification.
 
+## Office ownership follow-up fix
+
+Following authorization to fix BF-001, ownership now starts false and is
+established only after confirming the application is hidden and its document
+collection is empty. PID registration and changes to visibility and alerts
+follow that decision. A failure while reading ownership properties leaves
+ownership unconfirmed.
+
+The committed `tests/Test-OfficeTimeoutOwnership.ps1` exercises the real
+conversion timeout with synthetic Office objects and test-owned child windows.
+Before the fix, both hidden-existing-document cases failed because their helpers
+were terminated. After the fix, all eight cases passed: hidden and visible
+instances, each with zero or one existing document, on both Word and Excel
+routes. Only hidden, empty instances were terminated. No actual Office process
+was launched or terminated.
+
+Reproduction from the repository root after building KillerPDF.Tests:
+
+```powershell
+pwsh -NoProfile -File tests/Test-OfficeTimeoutOwnership.ps1 -TestAssembly KillerPDF.Tests/bin/Release/net10.0-windows/KillerPDF.Tests.dll -EvidenceRoot C:/Users/steve/scratch/kp-fixes-20261020
+```
+
+The full application suite passed again (964 tests), and the Release application
+build passed with zero warnings and errors. Real Office activation remains a
+lab verification boundary. Sidebar work and preexisting review files were
+preserved, and nothing was pushed.
+
 ## Acceptance limits
 
 Final verification also passed all 964 application tests, the CLI output-safety

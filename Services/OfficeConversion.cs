@@ -132,16 +132,19 @@ internal static class OfficeConversion
     }
 
     // Late-bound so KillerPDF needs no Office interop assemblies. An instance that was already
-    // open and visible is the user's own: it is left running with its documents.
+    // visible or has existing documents is left running with its documents.
     private static void Export(string path, string output, bool word, Func<bool, object> createApplication,
         ExportSession session)
     {
         object? app = null, documents = null, document = null;
-        bool ours = true;
+        bool ours = false;
         try
         {
             app = createApplication(word);
-            ours = !(Get(app, "Visible") is true);
+            bool hidden = Get(app, "Visible") is false;
+            documents = Get(app, word ? "Documents" : "Workbooks");
+            // Establish ownership before registering a PID for timeout cleanup.
+            ours = hidden && Get(documents!, "Count") is 0;
             if (ours)
             {
                 Set(app, "Visible", false);
@@ -150,8 +153,6 @@ internal static class OfficeConversion
             }
             if (word)
             {
-                documents = Get(app, "Documents");
-                ours &= Get(documents!, "Count") is 0;
                 // FileName, ConfirmConversions, ReadOnly, AddToRecentFiles, PasswordDocument.
                 var security = Get(app, "AutomationSecurity")!;
                 try
@@ -165,8 +166,6 @@ internal static class OfficeConversion
             }
             else
             {
-                documents = Get(app, "Workbooks");
-                ours &= Get(documents!, "Count") is 0;
                 // Filename, UpdateLinks, ReadOnly, Format, Password.
                 var security = Get(app, "AutomationSecurity")!;
                 try

@@ -94,6 +94,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 ### Fixed
 - Installation refuses to replace folders containing unrelated or unverified files.
 - Disabled VBA macros while Word and Excel open legacy documents for conversion.
+- Office conversion timeouts preserve visible instances and instances with existing documents.
 - Batch CSV reports neutralize filenames that spreadsheets could interpret as formulas.
 - Startup cleanup preserves active temporary PDFs and retries files that were temporarily locked.
 - Permanent redaction removes covered vectors, keeps pending marks with page edits and undo, and requires approval to rasterize partly covered drawings (#341).
