@@ -74,7 +74,7 @@ namespace KillerPDF
         // picker the first time and route the pick back to this field.
         private void FillSignField(bool initials, int objNum, int pageIndex, double x, double y, double w, double h)
         {
-            if (_signedFields.ContainsKey(objNum))
+            if (IsFieldSigned(objNum, pageIndex))
             {
                 ShowSignedFieldMenu(initials, objNum, pageIndex, x, y, w, h);
                 return;
@@ -110,10 +110,21 @@ namespace KillerPDF
             menu.IsOpen = true;
         }
 
+        // A field counts as signed only while its signature is still on that page of the
+        // document now shown. Object numbers repeat across documents and change after page
+        // edits, so an entry whose annotation is gone is stale and is dropped.
+        private bool IsFieldSigned(int objNum, int pageIndex)
+        {
+            if (!_signedFields.TryGetValue(objNum, out var annot)) return false;
+            if (_annotations.TryGetValue(pageIndex, out var list) && list.Contains(annot)) return true;
+            _signedFields.Remove(objNum);
+            return false;
+        }
+
         // Deletes the signature placed in a field and clears its signed state.
         private void RemoveSignedField(int objNum, int pageIndex)
         {
-            if (!_signedFields.TryGetValue(objNum, out var annot)) return;
+            if (!IsFieldSigned(objNum, pageIndex) || !_signedFields.TryGetValue(objNum, out var annot)) return;
             if (_annotations.TryGetValue(pageIndex, out var list)) list.Remove(annot);
             _signedFields.Remove(objNum);
             RenderAllAnnotations(pageIndex);
