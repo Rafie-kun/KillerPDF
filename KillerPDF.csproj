@@ -62,6 +62,7 @@
     <Compile Remove="tests\**" />
     <Compile Remove="tools\**" />
     <Compile Remove="PreviewHandler\**" />
+    <Compile Remove="validation\**" />
     <EmbeddedResource Remove="engine\**" />
     <EmbeddedResource Remove="third_party\**" />
     <EmbeddedResource Remove="Packaging\**" />
