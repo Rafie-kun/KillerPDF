@@ -118,6 +118,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Flattened JPEG pages retain reflections, rotation, and skew.
 - Save repairs preserve partially overlapping crop boxes and nonzero object generations.
 - Incomplete scans report errors and keep recovered pages, including when PDF creation fails (#73).
+- Reduce File Size leaves the existing output intact when its folder cannot stage a replacement (#433).
 - Pages with more than a million drawing instructions draw all of their content instead of quietly stopping partway.
 - RGB, grayscale and unprofiled DeviceCMYK page groups blend before the white paper background is added.
 - Profiled RGB transparency groups no longer pick up stray colors during parallel rendering.

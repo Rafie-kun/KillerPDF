@@ -2605,16 +2605,7 @@ internal static class PdfEngineIntegration
             $".{Path.GetFileName(destinationPath)}.{Guid.NewGuid():N}.tmp");
         try
         {
-            try
-            {
-                File.Copy(finishedPath, temporaryPath, overwrite: false);
-            }
-            catch (UnauthorizedAccessException)
-            {
-                // The folder allows changing the existing file but not creating one beside it.
-                File.Copy(finishedPath, destinationPath, overwrite: true);
-                return;
-            }
+            File.Copy(finishedPath, temporaryPath, overwrite: false);
             if (File.Exists(destinationPath))
             {
                 // Replace keeps the destination's permissions, creation time, and streams. Some
