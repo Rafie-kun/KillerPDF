@@ -25,9 +25,16 @@ internal static class OfficeConversion
     internal static bool IsSupported(string path) =>
         Extensions.Contains(Path.GetExtension(path), StringComparer.OrdinalIgnoreCase);
 
+    // Word or Excel can sit on a hidden prompt (a password, a repair offer) that no one will
+    // ever answer in an automation instance; the export is abandoned after this long.
+    internal static readonly TimeSpan DefaultTimeout = TimeSpan.FromMinutes(5);
+
     internal static byte[] ToPdf(string path) => ToPdf(path, CreateApplication);
 
-    internal static byte[] ToPdf(string path, Func<bool, object> createApplication)
+    internal static byte[] ToPdf(string path, Func<bool, object> createApplication) =>
+        ToPdf(path, createApplication, DefaultTimeout);
+
+    internal static byte[] ToPdf(string path, Func<bool, object> createApplication, TimeSpan timeout)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
         byte[] bytes = File.ReadAllBytes(path);
@@ -40,21 +47,30 @@ internal static class OfficeConversion
             if (main.StartsWith("word/", StringComparison.OrdinalIgnoreCase)) return DocxConverter.Convert(bytes);
             throw new InvalidDataException("The file is not a Word or Excel document.");
         }
-        return InstalledOffice(path, word: !spreadsheet, createApplication);
+        return InstalledOffice(path, word: !spreadsheet, createApplication, timeout);
     }
 
-    private static byte[] InstalledOffice(string path, bool word, Func<bool, object> createApplication)
+    private static byte[] InstalledOffice(string path, bool word, Func<bool, object> createApplication, TimeSpan timeout)
     {
         string output = Path.Combine(Path.GetTempPath(), $"KillerPDF-convert-{Guid.NewGuid():N}.pdf");
         Exception? failure = null;
+        var session = new ExportSession();
         var thread = new Thread(() =>
         {
-            try { Export(Path.GetFullPath(path), output, word, createApplication); }
+            try { Export(Path.GetFullPath(path), output, word, createApplication, session); }
             catch (Exception ex) { failure = ex; }
         }) { IsBackground = true, Name = "KillerPDF Office export" };
         thread.SetApartmentState(ApartmentState.STA);
         thread.Start();
-        thread.Join();
+        if (!thread.Join(timeout))
+        {
+            // The STA thread is stuck inside Office. An instance this export created is ended by
+            // process, since no call into it will return; a user's own instance is left alone.
+            session.EndOwnedProcess();
+            throw new TimeoutException(word
+                ? "Word did not finish converting the document."
+                : "Excel did not finish converting the workbook.");
+        }
         try
         {
             if (failure is TargetInvocationException { InnerException: Exception inner }) failure = inner;
@@ -78,9 +94,47 @@ internal static class OfficeConversion
         catch (COMException) { throw new OfficeNotInstalledException(application); }
     }
 
+    // What the export thread knows about the instance it is driving, readable from the caller's
+    // thread when the export does not come back.
+    private sealed class ExportSession
+    {
+        private int _ownedProcessId;
+
+        internal void NoteOwnedApplication(object app)
+        {
+            try
+            {
+                if (Get(app, "Hwnd") is { } handle && Convert.ToInt64(handle) is long hwnd && hwnd != 0)
+                {
+                    GetWindowThreadProcessId((IntPtr)hwnd, out uint processId);
+                    Volatile.Write(ref _ownedProcessId, (int)processId);
+                }
+            }
+            catch (Exception ex) when (ex is COMException or TargetInvocationException or MissingMethodException
+                or InvalidCastException or FormatException) { }
+        }
+
+        internal void EndOwnedProcess()
+        {
+            int processId = Volatile.Read(ref _ownedProcessId);
+            if (processId == 0) return;
+            try
+            {
+                using var process = System.Diagnostics.Process.GetProcessById(processId);
+                process.Kill();
+            }
+            catch (Exception ex) when (ex is ArgumentException or InvalidOperationException
+                or System.ComponentModel.Win32Exception) { }
+        }
+
+        [DllImport("user32.dll")]
+        private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
+    }
+
     // Late-bound so KillerPDF needs no Office interop assemblies. An instance that was already
     // open and visible is the user's own: it is left running with its documents.
-    private static void Export(string path, string output, bool word, Func<bool, object> createApplication)
+    private static void Export(string path, string output, bool word, Func<bool, object> createApplication,
+        ExportSession session)
     {
         object? app = null, documents = null, document = null;
         bool ours = true;
@@ -92,6 +146,7 @@ internal static class OfficeConversion
             {
                 Set(app, "Visible", false);
                 Set(app, "DisplayAlerts", word ? (object)0 : false);
+                session.NoteOwnedApplication(app);
             }
             if (word)
             {
@@ -105,8 +160,8 @@ internal static class OfficeConversion
                     document = Call(documents!, "Open", path, false, true, false, "");
                 }
                 finally { Set(app, "AutomationSecurity", security); }
-                Call(document!, "ExportAsFixedFormat", output, 17);
-                Call(document!, "Close", 0);
+                try { Call(document!, "ExportAsFixedFormat", output, 17); }
+                finally { TryClose(document!, 0); }
             }
             else
             {
@@ -121,8 +176,8 @@ internal static class OfficeConversion
                     document = Call(documents!, "Open", path, 0, true, Type.Missing, "");
                 }
                 finally { Set(app, "AutomationSecurity", security); }
-                Call(document!, "ExportAsFixedFormat", 0, output);
-                Call(document!, "Close", false);
+                try { Call(document!, "ExportAsFixedFormat", 0, output); }
+                finally { TryClose(document!, false); }
             }
         }
         finally
@@ -139,6 +194,14 @@ internal static class OfficeConversion
                 Release(app);
             }
         }
+    }
+
+    // The document is closed whether or not the export succeeded, so a failed export never
+    // leaves it open in the user's Word or Excel or holds the file.
+    private static void TryClose(object document, object saveChanges)
+    {
+        try { Call(document, "Close", saveChanges); }
+        catch (Exception ex) when (ex is COMException or TargetInvocationException) { }
     }
 
     private static object? Get(object target, string name) =>
