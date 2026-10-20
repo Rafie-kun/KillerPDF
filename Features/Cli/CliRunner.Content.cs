@@ -133,8 +133,7 @@ namespace KillerPDF.Features
             }
             PdfStructuredExportReport losses = PdfStructuredExport.InspectLosses(document, format.Value, pages);
             byte[] exported = PdfStructuredExport.Export(document, format.Value, pages, cancellationToken: CancellationToken.None);
-            CliEnsureParentDir(outPath);
-            File.WriteAllBytes(outPath, exported);
+            if (!CliPublishOutput(inPath, outPath, exported, con)) return 2;
             con.WriteLine($"Exported -> {outPath}" + (losses.IsLossless ? string.Empty
                 : $" ({losses.Findings.Count} things could not carry over exactly; run with --report to list them)"));
             if (!losses.IsLossless && options.ContainsKey("--report")) con.WriteLine(losses.ToText());
@@ -167,8 +166,7 @@ namespace KillerPDF.Features
                 con.WriteLine("Could not convert the file: " + ex.Message);
                 return 1;
             }
-            CliEnsureParentDir(outPath);
-            File.WriteAllBytes(outPath, pdf);
+            if (!CliPublishOutput(inPath, outPath, pdf, con)) return 2;
             con.WriteLine($"Converted {Path.GetFileName(inPath)} -> {outPath}");
             return 0;
         }
@@ -181,7 +179,7 @@ namespace KillerPDF.Features
         {
             if (pos.Count != 3)
             {
-                con.WriteLine("Usage: KillerPDF.exe --data-merge <template.pdf> <data.csv|.json|.xlsx> <outputFolder> [--name <file name>] [--flatten]");
+                con.WriteLine("Usage: KillerPDF.exe --data-merge <template.pdf> <data.csv|.json|.xlsx> <outputFolder> [--name <file name>] [--flatten] [--overwrite]");
                 return 2;
             }
             string template = Path.GetFullPath(pos[0]), data = Path.GetFullPath(pos[1]), outDir = Path.GetFullPath(pos[2]);
@@ -205,9 +203,13 @@ namespace KillerPDF.Features
                 return 1;
             }
             Directory.CreateDirectory(outDir);
+            // Existing outputs are kept unless --overwrite names them all, matching --split.
+            HashSet<string>? approved = options.ContainsKey("--overwrite")
+                ? [.. plan.OutputFileNames.Select(name => Path.GetFullPath(Path.Combine(outDir, name)))]
+                : null;
             PdfDataMergeBatchReport report = PdfDataMergeWorkflow.RunToDirectory(templateBytes, plan, outDir,
                 options.ContainsKey("--flatten") ? PdfDataMergeOutputMode.Flattened : PdfDataMergeOutputMode.Editable,
-                CancellationToken.None);
+                CancellationToken.None, approvedOverwrites: approved);
             con.WriteLine(report.ToText());
             return report.FailedRecords == 0 ? 0 : 1;
         }
@@ -316,8 +318,7 @@ namespace KillerPDF.Features
                 _ => System.Text.Encoding.UTF8.GetBytes(System.Text.Json.JsonSerializer.Serialize(data,
                     new System.Text.Json.JsonSerializerOptions { WriteIndented = true })),
             };
-            CliEnsureParentDir(outPath);
-            File.WriteAllBytes(outPath, bytes);
+            if (!CliPublishOutput(inPath, outPath, bytes, con)) return 2;
             con.WriteLine($"Exported {data.Fields.Count} fields and {data.Annotations.Count} comments -> {outPath}");
             return 0;
         }

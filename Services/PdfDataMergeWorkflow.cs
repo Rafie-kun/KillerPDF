@@ -195,7 +195,10 @@ internal static class PdfDataMergeWorkflow
             {
                 File.WriteAllBytes(temporary, result.Data.Value.ToArray());
                 token.ThrowIfCancellationRequested();
-                File.Move(temporary, destination, overwrite: approvedOverwrites is null || approvedOverwrites.Contains(destination));
+                // Only outputs the caller approved by name are replaced; without a list, an
+                // existing file stays and the record is reported as failed.
+                File.Move(temporary, destination, overwrite: approvedOverwrites is not null
+                    && (approvedOverwrites.Contains(destination) || approvedOverwrites.Contains(Path.GetFullPath(destination))));
                 completed.Add(result);
             }
             catch (Exception ex) when (ex is not OutOfMemoryException

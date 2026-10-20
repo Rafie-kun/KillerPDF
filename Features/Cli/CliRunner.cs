@@ -477,7 +477,7 @@ namespace KillerPDF.Features
             "                                           export to Office, web and text formats",
             "  killerpdf convert-office <in.docx|.xlsx|.doc|.xls> <out.pdf>",
             "                                           convert a Word or Excel file to PDF",
-            "  killerpdf data-merge <template.pdf> <data.csv|.json|.xlsx> <outDir> [--name <file name>] [--flatten]",
+            "  killerpdf data-merge <template.pdf> <data.csv|.json|.xlsx> <outDir> [--name <file name>] [--flatten] [--overwrite]",
             "                                           fill one copy of the form per record",
             "  killerpdf replace-text <in.pdf> <out.pdf> <find> <replace> [--match-case] [--whole-word]",
             "                                           rewrite matching lines in their own fonts",
@@ -638,8 +638,7 @@ namespace KillerPDF.Features
             var indices = CliParsePageRange(spec, pageCount, out string err);
             if (indices is null) { con.WriteLine(err); return 2; }
 
-            CliEnsureParentDir(outPath);
-            File.WriteAllBytes(outPath, PdfEngineIntegration.ExtractPages(source, indices));
+            if (!CliPublishOutput(inPath, outPath, PdfEngineIntegration.ExtractPages(source, indices), con)) return 2;
             con.WriteLine($"Extracted {indices.Count} pages -> {outPath}");
             return 0;
         }
@@ -933,7 +932,7 @@ namespace KillerPDF.Features
                 con.WriteLine("Could not optimize the document: " + ex.Message);
                 return 1;
             }
-            File.WriteAllBytes(outPath, result.Data.ToArray());
+            if (!CliPublishOutput(inPath, outPath, result.Data.ToArray(), con)) return 2;
             if (options.ContainsKey("--report")) con.WriteLine(result.ToJson(true));
             long saved = originalBytes - result.OutputSize;
             string percent = originalBytes > 0
@@ -1029,7 +1028,7 @@ namespace KillerPDF.Features
             {
                 ReadOnlyMemory<byte> output = PdfImpositionMacro.Execute(
                     step, File.ReadAllBytes(inPath));
-                File.WriteAllBytes(outPath, output.ToArray());
+                if (!CliPublishOutput(inPath, outPath, output.ToArray(), con)) return 2;
             }
             catch (Exception ex) when (ex is InvalidOperationException or NotSupportedException
                 or ArgumentException or FormatException or KeyNotFoundException)
@@ -1085,7 +1084,7 @@ namespace KillerPDF.Features
                     {
                         Decision = PdfBookmarkProposalDecision.Accepted
                     }));
-                File.WriteAllBytes(outPath, output);
+                if (!CliPublishOutput(inPath, outPath, output, con)) return 2;
                 con.WriteLine($"Added {proposals.Count} bookmarks -> {outPath}");
                 return 0;
             }
@@ -1375,7 +1374,7 @@ namespace KillerPDF.Features
             {
                 ReadOnlyMemory<byte> output = PdfPageFurnitureMacro.Execute(
                     PdfPageFurnitureMacro.NumberPagesStep(settings), source);
-                File.WriteAllBytes(outPath, output.ToArray());
+                if (!CliPublishOutput(inPath, outPath, output.ToArray(), con)) return 2;
             }
             catch (Exception ex) when (ex is InvalidOperationException or NotSupportedException
                 or ArgumentException or FormatException or KeyNotFoundException)
@@ -1804,8 +1803,7 @@ namespace KillerPDF.Features
                     w, h, wPt, hPt, raw, jpeg,
                     Bitonal: bitonal, Grayscale: grayscale));
             }
-            CliEnsureParentDir(outPath);
-            File.WriteAllBytes(outPath, PdfEngineIntegration.CreateRasterDocument(pages));
+            if (!CliPublishOutput(inPath, outPath, PdfEngineIntegration.CreateRasterDocument(pages), con)) return 2;
             con.WriteLine($"Flattened {pageCount} pages at {dpi:0} dpi -> {outPath}");
             return 0;
         }
@@ -2222,6 +2220,21 @@ namespace KillerPDF.Features
             if (string.Equals(source, output, StringComparison.OrdinalIgnoreCase))
             { con.WriteLine("Output file cannot also be the input."); return false; }
             pageCount = PdfDocumentInformation.Read(PdfEngineIntegration.OpenForReading(File.ReadAllBytes(source))).PageCount;
+            return true;
+        }
+
+        // Every single-output command publishes through here: the output may not be the input
+        // under any spelling, and the bytes land through a sibling temp file and one move, so a
+        // failure part way leaves either the old file or none, never a truncated one.
+        private static bool CliPublishOutput(string inPath, string outPath, byte[] data, TextWriter con)
+        {
+            if (string.Equals(Path.GetFullPath(inPath), Path.GetFullPath(outPath), StringComparison.OrdinalIgnoreCase))
+            {
+                con.WriteLine("Output file cannot also be the input.");
+                return false;
+            }
+            CliEnsureParentDir(outPath);
+            AtomicFileOutput.Write(outPath, data);
             return true;
         }
 

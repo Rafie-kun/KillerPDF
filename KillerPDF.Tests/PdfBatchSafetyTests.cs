@@ -94,4 +94,29 @@ public sealed class PdfBatchSafetyTests
         }
         finally { Directory.Delete(folder, recursive: true); }
     }
+
+    [Fact]
+    public void DataMergeWithoutAnApprovedListNeverReplacesAnExistingOutput()
+    {
+        string folder = Path.Combine(Path.GetTempPath(), "kpdf-merge-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(folder);
+        try
+        {
+            byte[] template = new PdfDocumentBuilder().AddBlankPage()
+                .AddTextField(0, "Name", 20, 20, 120, 24).Build();
+            var plan = PdfDataMergeWorkflow.CreatePlan(PdfDocument.Open(template),
+                [new Dictionary<string, string?> { ["Name"] = "Ada" }], "letter.pdf");
+            string existing = Path.Combine(folder, "letter.pdf");
+            byte[] original = [1, 2, 3, 4];
+            File.WriteAllBytes(existing, original);
+
+            var report = PdfDataMergeWorkflow.RunToDirectory(template, plan, folder,
+                PdfDataMergeOutputMode.Editable, CancellationToken.None);
+
+            Assert.Equal(1, report.FailedRecords);
+            Assert.Equal(original, File.ReadAllBytes(existing));
+            Assert.Empty(Directory.GetFiles(folder, "*.tmp"));
+        }
+        finally { Directory.Delete(folder, recursive: true); }
+    }
 }
