@@ -245,6 +245,12 @@ internal static class ScrollOverlaySmoke
                     var sliders = ((IEnumerable<Slider>)transformType.GetField("_colorAdjustmentSliders", Members)!
                         .GetValue(dialog)!).ToArray();
                     var reset = ((Panel)sliders[0].Parent).Children.OfType<Button>().Single();
+                    sliders[0].Value = 0.037;
+                    object exposureSettings = transformType.GetProperty("ColorAdjustments", Members)!.GetValue(dialog)!;
+                    double exposure = (double)exposureSettings.GetType().GetProperty("Exposure")!.GetValue(exposureSettings)!;
+                    if (Math.Abs(exposure - 0.037) > 0.000001 || sliders[0].IsSnapToTickEnabled)
+                    { report.Add("FAIL exposure must preserve continuous slider values"); failures++; }
+                    reset.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
                     double[] values = [-1, 0, 70, -60];
                     for (int i = 0; i < sliders.Length; i++)
                     {

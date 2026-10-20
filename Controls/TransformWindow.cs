@@ -328,7 +328,7 @@ namespace KillerPDF
             int colorStart = stack.Children.Count;
             AddColorSlider(stack, darkSlider, "Str_Cc_Exposure", -3, 3, 0, 0.1,
                 value => ColorAdjustments = ColorAdjustments with { Exposure = value },
-                value => value.ToString("+0.0;-0.0;0.0"));
+                value => value.ToString("+0.00;-0.00;0.00"), continuous: true);
             AddColorSlider(stack, darkSlider, "Str_Cc_Saturation", 0, 200, 100, 1,
                 value => ColorAdjustments = ColorAdjustments with { Saturation = value / 100 },
                 value => value.ToString("0") + "%");
@@ -867,7 +867,8 @@ namespace KillerPDF
 
         private void AddColorSlider(StackPanel host, Style? style, string labelKey,
             double minimum, double maximum, double initial, double step,
-            Action<double> changed, Func<double, string> format, string? hintKey = null)
+            Action<double> changed, Func<double, string> format, string? hintKey = null,
+            bool continuous = false)
         {
             var row = new DockPanel { Margin = new Thickness(0, 6, 0, 0) };
             var readout = SliderLabel(format(initial));
@@ -882,6 +883,7 @@ namespace KillerPDF
             {
                 Minimum = minimum, Maximum = maximum, Value = initial,
                 SmallChange = step, LargeChange = step * 10, TickFrequency = step,
+                IsSnapToTickEnabled = false,
                 Margin = new Thickness(0, 2, 0, 2), Tag = initial,
                 ToolTip = hintKey is null ? S(labelKey) : S(hintKey)
             };
@@ -889,10 +891,15 @@ namespace KillerPDF
             System.Windows.Automation.AutomationProperties.SetName(slider, S(labelKey));
             slider.ValueChanged += (_, e) =>
             {
-                double value = Math.Round(e.NewValue / step) * step;
+                double value = continuous ? e.NewValue : Math.Round(e.NewValue / step) * step;
                 changed(value);
                 readout.Text = format(value);
-                SchedulePreview();
+                if (continuous)
+                {
+                    // Keep rendering during a drag instead of postponing every frame.
+                    if (!_previewTimer.IsEnabled) _previewTimer.Start();
+                }
+                else SchedulePreview();
             };
             _colorAdjustmentSliders.Add(slider);
             host.Children.Add(slider);
