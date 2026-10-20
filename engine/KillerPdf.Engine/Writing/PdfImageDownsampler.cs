@@ -84,7 +84,7 @@ public static class PdfImageDownsampler
             PdfStream? replacement;
             try { replacement = Resample(document, image, options.TargetDpi / dpi, options); }
             catch (Exception error) when (error is FormatException or NotSupportedException
-                or PdfFilterException or InvalidOperationException)
+                or PdfFilterException or InvalidOperationException or OverflowException)
             {
                 continue;   // an image that does not decode cleanly is left exactly as it was
             }
@@ -239,7 +239,10 @@ public static class PdfImageDownsampler
         }
         else
         {
-            int expected = checked(width * height * components);
+            // A declared size beyond what a buffer can hold is a malformed image, left as it is.
+            long declared = (long)width * height * components;
+            if (declared > int.MaxValue) return null;
+            int expected = (int)declared;
             samples = document.DecodeImageSamples(image, expected, expected);
             if (samples.Length != expected) return null;
         }

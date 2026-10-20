@@ -100,6 +100,31 @@ public sealed class PdfImageDownsamplerTests
     }
 
     [Fact]
+    public void Downsample_SkipsAnImageWhoseDeclaredSizeOverflows()
+    {
+        // A malformed image that declares more samples than an int can count must be left
+        // alone, not abort the whole operation.
+        PdfDocument document = Sample();
+        PdfPageTreeEntry page = PdfPageTree.Read(document).Pages[0];
+        var resources = (PdfDictionary)Resolve(document, page.InheritedValues[new PdfName("Resources"u8)]);
+        var xObjects = (PdfDictionary)Resolve(document, resources[new PdfName("XObject"u8)]);
+        var reference = (PdfIndirectReference)xObjects.Values.Single();
+        var image = (PdfStream)document.Resolve(reference);
+        PdfName Name(string key) => new(System.Text.Encoding.ASCII.GetBytes(key));
+        var huge = new PdfDictionary(image.Dictionary
+            .Where(entry => !entry.Key.Equals(Name("Width")) && !entry.Key.Equals(Name("Height")))
+            .Append(new(Name("Width"), new PdfInteger(100_000)))
+            .Append(new(Name("Height"), new PdfInteger(100_000))));
+        document = PdfDocument.Open(new PdfIncrementalUpdateBuilder(document)
+            .ReplaceObject(reference.ObjectNumber, new PdfStream(huge, image.EncodedData.ToArray())).Build());
+
+        PdfImageDownsampleResult result = PdfImageDownsampler.Downsample(document,
+            new PdfImageDownsampleOptions { TargetDpi = 150, ThresholdDpi = 225 });
+
+        Assert.Equal(0, result.ImagesResampled);
+    }
+
+    [Fact]
     public void Options_RejectAThresholdBelowTheTarget()
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => PdfImageDownsampler.Downsample(Sample(),
