@@ -61,6 +61,11 @@ internal static class SvgSignatureImporter
                 || attribute.Name.LocalName is "href"))
             throw new InvalidDataException("SVG signatures cannot contain active or external content.");
 
+        // Containers nest a few levels deep in real signatures. Deeper trees are refused up
+        // front, before the recursive walk, since a stack overflow cannot be caught.
+        if (NestsDeeperThan(root, MaxDepth))
+            throw new InvalidDataException("The SVG signature is nested too deeply to import.");
+
         (double minX, double minY, double width, double height) = ViewBox(root);
         string[] paths = [.. root.Descendants()
             .Where(element => element.Name.LocalName == "path")
@@ -82,6 +87,22 @@ internal static class SvgSignatureImporter
     private static bool IsSkipped(string name) => name is "defs" or "clipPath" or "mask" or "symbol"
         or "marker" or "pattern" or "linearGradient" or "radialGradient" or "filter" or "style"
         or "title" or "desc" or "metadata" or "text";
+
+    private const int MaxDepth = 64;
+
+    // Walks the tree with its own stack, so even a hostile file cannot exhaust the thread's.
+    private static bool NestsDeeperThan(XElement root, int limit)
+    {
+        var pending = new Stack<(XElement Element, int Depth)>();
+        pending.Push((root, 0));
+        while (pending.Count > 0)
+        {
+            (XElement element, int depth) = pending.Pop();
+            if (depth > limit) return true;
+            foreach (XElement child in element.Elements()) pending.Push((child, depth + 1));
+        }
+        return false;
+    }
 
     private static void Collect(XElement element, Style parent, (double Width, double Height) canvas,
         List<SignatureVector> shapes, ref int segmentCount)

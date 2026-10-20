@@ -7,6 +7,28 @@ namespace KillerPDF.Tests;
 public sealed class SvgSignatureImporterTests
 {
     [Fact]
+    public void Import_RejectsAbsurdlyDeepNestingInsteadOfOverflowingTheStack()
+    {
+        string root = Path.Combine(Path.GetTempPath(), $"killerpdf-svg-deep-{Guid.NewGuid():N}");
+        try
+        {
+            Directory.CreateDirectory(root);
+            string file = Path.Combine(root, "deep.svg");
+            const int depth = 50_000;
+            File.WriteAllText(file,
+                "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 10 10\">"
+                + string.Concat(Enumerable.Repeat("<g>", depth)) + "<path d=\"M0 0L1 1\"/>"
+                + string.Concat(Enumerable.Repeat("</g>", depth)) + "</svg>");
+
+            Assert.Throws<InvalidDataException>(() => SvgSignatureImporter.Import(file));
+        }
+        finally
+        {
+            if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
     public void Import_ReadsPassiveVectorPathsAndRejectsExternalContent()
     {
         string root = Path.Combine(Path.GetTempPath(), $"killerpdf-svg-{Guid.NewGuid():N}");
