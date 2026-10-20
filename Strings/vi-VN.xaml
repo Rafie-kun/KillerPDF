@@ -1750,4 +1750,13 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Cc_AutoExposure">Phơi sáng tự động</sys:String>
     <sys:String x:Key="Str_Cc_AutoWhiteBalance">Cân bằng trắng tự động</sys:String>
     <sys:String x:Key="Str_Attachment_Add">Thêm tệp đính kèm</sys:String>
+    <sys:String x:Key="Str_TableExport_Title">Xuất bảng</sys:String>
+    <sys:String x:Key="Str_TableExport_Hint">Kéo để vẽ khung quanh một bảng hoặc nhập vùng bên dưới. Hãy bắt đầu với bảng có lưới hoàn chỉnh và văn bản có thể chọn.</sys:String>
+    <sys:String x:Key="Str_TableExport_Area">Vùng (% trang)</sys:String>
+    <sys:String x:Key="Str_TableExport_Detect">Tìm bảng</sys:String>
+    <sys:String x:Key="Str_TableExport_Review">Kiểm tra từng ô trước khi xuất. XLSX giữ các giá trị ở dạng văn bản. Nhập các cột CSV dưới dạng văn bản để giữ nguyên mã định danh.</sys:String>
+    <sys:String x:Key="Str_TableExport_Unsupported">Không tìm thấy bảng được hỗ trợ trong vùng này. Chọn lưới hình chữ nhật hoàn chỉnh có văn bản nằm ngang có thể chọn. Bản quét, ô đã gộp và đường viền bị đứt chưa được hỗ trợ.</sys:String>
+    <sys:String x:Key="Str_TableExport_Cell">Hàng {0}, cột {1}</sys:String>
+    <sys:String x:Key="Str_TableExport_Summary">{0} hàng, {1} cột</sys:String>
+    <sys:String x:Key="Str_TableExport_InvalidArea">Nhập vùng hợp lệ trong phạm vi trang (từ 0 đến 100%).</sys:String>
 </ResourceDictionary>

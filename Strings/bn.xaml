@@ -1730,4 +1730,13 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Cc_AutoExposure">স্বয়ংক্রিয় এক্সপোজার</sys:String>
     <sys:String x:Key="Str_Cc_AutoWhiteBalance">স্বয়ংক্রিয় হোয়াইট ব্যালান্স</sys:String>
     <sys:String x:Key="Str_Attachment_Add">সংযুক্তি যোগ করুন</sys:String>
+    <sys:String x:Key="Str_TableExport_Title">টেবিল এক্সপোর্ট করুন</sys:String>
+    <sys:String x:Key="Str_TableExport_Hint">টেনে একটি টেবিলের চারপাশে একটি বাক্স আঁকুন, অথবা নিচে এলাকার মান লিখুন। শুরুতে সম্পূর্ণ গ্রিড ও নির্বাচনযোগ্য লেখা আছে এমন টেবিল বেছে নিন।</sys:String>
+    <sys:String x:Key="Str_TableExport_Area">এলাকা (পৃষ্ঠার %)</sys:String>
+    <sys:String x:Key="Str_TableExport_Detect">টেবিল খুঁজুন</sys:String>
+    <sys:String x:Key="Str_TableExport_Review">এক্সপোর্ট করার আগে প্রতিটি ঘর পরীক্ষা করুন। XLSX মানগুলো টেক্সট হিসেবে রাখে। শনাক্তকারী অক্ষুণ্ণ রাখতে CSV কলামগুলো টেক্সট হিসেবে ইমপোর্ট করুন।</sys:String>
+    <sys:String x:Key="Str_TableExport_Unsupported">এই এলাকায় সমর্থিত কোনো টেবিল পাওয়া যায়নি। নির্বাচনযোগ্য অনুভূমিক লেখাসহ একটি সম্পূর্ণ আয়তাকার গ্রিড নির্বাচন করুন। স্ক্যান, একত্রিত ঘর ও অসম্পূর্ণ সীমানা এখনও সমর্থিত নয়।</sys:String>
+    <sys:String x:Key="Str_TableExport_Cell">সারি {0}, কলাম {1}</sys:String>
+    <sys:String x:Key="Str_TableExport_Summary">{0}টি সারি, {1}টি কলাম</sys:String>
+    <sys:String x:Key="Str_TableExport_InvalidArea">পৃষ্ঠার মধ্যে একটি বৈধ এলাকা লিখুন (0 থেকে 100%)।</sys:String>
 </ResourceDictionary>

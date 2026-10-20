@@ -5,6 +5,89 @@ It does not reproduce the complete rendered page. Use [rendering](rendering.md)
 for pixel output, [reading](reading.md) for extraction geometry, and
 [editing](editing.md) for saving PDF documents.
 
+## Extract and review a ruled table
+
+`PdfTableExtractor` is a separate, bounded workflow for one complete rectangular
+grid on one page. Select the whole table, including its outer borders, using
+unrotated, crop-relative PDF points with a bottom-left origin:
+
+```csharp
+using KillerPdf.Engine.Documents;
+
+static byte[] ExportReviewedTable(PdfDocument document, PdfContentBounds region,
+    CancellationToken cancellationToken = default)
+{
+    PdfTableExtractionResult result = PdfTableExtractor.Extract(
+        document, 0, region, cancellationToken);
+    if (result.Table is not { } table)
+        throw new NotSupportedException($"Table extraction: {result.Failure}");
+
+    // Apply a correction accepted in the preview before exporting.
+    table = table.WithCellText(0, 0, "0012");
+    return PdfTableExport.Export(table, PdfTableExportFormat.Xlsx, cancellationToken);
+}
+```
+
+`RowCount`, `ColumnCount`, and row-major `Cells` include empty cells. Rows run
+from top to bottom. `GetCell(row, column)` uses zero-based indices. Each cell
+retains `OriginalText`, original `Letters` and their geometry, and its `Bounds`.
+`WithCellText` returns an immutable corrected copy; it changes neither the
+original table nor the PDF. Reconstructed multiline cell text uses LF line breaks.
+
+The first slice accepts axis-aligned stroked rules and filled rectangular rules
+up to two points thick. Divider coverage must be complete, with a 0.75-point
+alignment and gap tolerance. It supports at most 100 rows, 50 columns, and 5,000
+cells. It does not infer unruled, merged, multi-page, or image-only tables.
+Rotated page metadata is supported because coordinates remain unrotated;
+rotated or right-to-left text inside cells is unsupported. Text that crosses a
+cell boundary is rejected rather than silently assigned to an uncertain cell.
+Explicit nonzero character or word spacing is unsupported, including spacing
+set by the combined text-show operator. The glyph model does not retain that
+spacing or text-show boundaries, so it cannot safely distinguish tracking gaps
+from word separators in an identifier.
+
+`Failure` distinguishes missing rules, incomplete grids, scanned regions,
+unsupported text direction, limits, and uncertain content. Source extraction
+diagnostics cause `UncertainContent` and remain available in `Diagnostics`.
+Visibility checks are deliberately conservative: the extracted path model does
+not retain per-path opacity and clipping state. Pages using clipping, extended
+graphics states, XObjects, optional content, resource color spaces, white paint,
+or invisible text are rejected, even when that state occurs outside the selection.
+Explicit stroke widths greater than two points and page content transforms that
+can enlarge stroke extents are also rejected because the path model does not
+retain the painted stroke footprint or paint order. Translation, quarter-turn
+rotation, and transforms that do not enlarge either axis remain supported.
+Intersecting images, shading, and filled shapes other than thin rules are also
+unsupported. These checks are not a substitute for reviewing the selected page
+and editable preview.
+
+Extraction also limits the already-extracted page to 100,000 glyphs, 100,000
+paths, and 100,000 path segments, and the selection to two million text
+characters. Those limits apply after the page reader's own bounded parsing;
+they are not a process-level memory ceiling. Extraction and export check
+cancellation during their grid, text, and output loops.
+
+XLSX writes every cell as an explicit string with a text number format, so
+identifiers such as `0012` survive and formula-like text stays text. Literal
+Office XML escape sequences and control characters are encoded without
+changing their meaning. Both formats reject cells longer than 32,767 UTF-16
+code units, malformed surrogate sequences, and tables exceeding two million
+text characters instead of truncating them or producing an oversized workbook.
+
+CSV uses UTF-8 with a BOM, quotes every cell, and doubles embedded quotes.
+Values beginning with `=`, `+`, `-`, or `@` receive a leading apostrophe, including
+after leading whitespace, control or format characters, or Unicode compatibility
+forms. This intentionally changes those CSV field values to prevent formula
+evaluation. CSV cannot declare column types: import its columns as text to
+preserve identifiers and date-like values. Prefer XLSX when opening directly in
+a spreadsheet application. Do not strip the protective apostrophes before an
+automatic spreadsheet import.
+
+`PdfTableExport.Export` returns complete bytes and never writes a destination.
+The host should write atomically only after review and successful export, and
+honor cancellation before replacing any existing output. The existing
+`PdfStructuredExportFormat.Spreadsheet` Page/Line/Text behavior is unchanged.
+
 ## Inspect representation losses first
 
 Open and authenticate the source, select a format and page indices, and inspect

@@ -245,6 +245,7 @@ namespace KillerPDF
             _ctxMenu.Items.Add(MakeRotateMenuItem(Loc("Str_Ctx_RotateCW"), (s, e) => RotatePages_Click(90), clockwise: true));
             _ctxMenu.Items.Add(MakeRotateMenuItem(Loc("Str_Ctx_RotateCCW"), (s, e) => RotatePages_Click(-90), clockwise: false));
             _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Pages_RasterizeRegion"), (s, e) => RasterizeRegion(pageIdx)));
+            _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_TableExport_Title"), (_, _) => ExportTable(pageIdx)));
             _ctxMenu.Items.Add(new Separator());
 
             _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Ctx_DuplicatePage"), (s, e) => DuplicatePage(pageIdx), glyph: ""));
@@ -684,6 +685,7 @@ namespace KillerPDF
                 menu.Items.Add(MakeMenuItem(Loc("Str_Pages_Straighten"), (s, ev) => StraightenScannedPages()));
                 menu.Items.Add(MakeMenuItem(Loc("Str_Pages_DivideSpreads"), (s, ev) => DivideSpreads()));
                 menu.Items.Add(MakeMenuItem(Loc("Str_Pages_RasterizeRegion"), (s, ev) => RasterizeRegion(clickedPage)));
+                menu.Items.Add(MakeMenuItem(Loc("Str_TableExport_Title"), (_, _) => ExportTable(clickedPage)));
                 // The thumbnails' own Ctrl+Shift+O: every selected page, not only the clicked one.
                 menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_OcrPage"), (s, ev) => OcrSelectedPagesToClipboard(),
                     GestureFor("CtrlShift:O"), ""));

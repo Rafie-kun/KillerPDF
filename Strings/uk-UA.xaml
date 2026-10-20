@@ -1750,4 +1750,13 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Cc_AutoExposure">Автоекспозиція</sys:String>
     <sys:String x:Key="Str_Cc_AutoWhiteBalance">Автоматичний баланс білого</sys:String>
     <sys:String x:Key="Str_Attachment_Add">Додати вкладення</sys:String>
+    <sys:String x:Key="Str_TableExport_Title">Експортувати таблицю</sys:String>
+    <sys:String x:Key="Str_TableExport_Hint">Обведіть одну таблицю прямокутною рамкою або задайте область нижче. Почніть із таблиці з повною сіткою та текстом, який можна виділити.</sys:String>
+    <sys:String x:Key="Str_TableExport_Area">Область (% сторінки)</sys:String>
+    <sys:String x:Key="Str_TableExport_Detect">Знайти таблицю</sys:String>
+    <sys:String x:Key="Str_TableExport_Review">Перевірте кожну клітинку перед експортом. XLSX зберігає значення як текст. Імпортуйте стовпці CSV як текст, щоб зберегти ідентифікатори.</sys:String>
+    <sys:String x:Key="Str_TableExport_Unsupported">У цій області не знайдено підтримуваної таблиці. Виберіть повну прямокутну сітку з горизонтальним текстом, який можна виділити. Скановані сторінки, об’єднані клітинки та розриви меж поки не підтримуються.</sys:String>
+    <sys:String x:Key="Str_TableExport_Cell">Рядок {0}, стовпець {1}</sys:String>
+    <sys:String x:Key="Str_TableExport_Summary">Рядків: {0}, стовпців: {1}</sys:String>
+    <sys:String x:Key="Str_TableExport_InvalidArea">Задайте допустиму область у межах сторінки (від 0 до 100%).</sys:String>
 </ResourceDictionary>

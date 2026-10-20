@@ -1750,4 +1750,13 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Cc_AutoExposure">Exposição automática</sys:String>
     <sys:String x:Key="Str_Cc_AutoWhiteBalance">Balanço de branco automático</sys:String>
     <sys:String x:Key="Str_Attachment_Add">Adicionar anexo</sys:String>
+    <sys:String x:Key="Str_TableExport_Title">Exportar tabela</sys:String>
+    <sys:String x:Key="Str_TableExport_Hint">Arraste para desenhar um retângulo ao redor de uma única tabela ou informe a área abaixo. Comece com uma grade completa e texto selecionável.</sys:String>
+    <sys:String x:Key="Str_TableExport_Area">Área (% da página)</sys:String>
+    <sys:String x:Key="Str_TableExport_Detect">Encontrar tabela</sys:String>
+    <sys:String x:Key="Str_TableExport_Review">Revise cada célula antes de exportar. O XLSX mantém os valores como texto. Importe as colunas CSV como texto para preservar os identificadores.</sys:String>
+    <sys:String x:Key="Str_TableExport_Unsupported">Nenhuma tabela compatível foi encontrada nesta área. Selecione uma grade retangular completa com texto horizontal selecionável. Digitalizações, células mescladas e bordas interrompidas ainda não são compatíveis.</sys:String>
+    <sys:String x:Key="Str_TableExport_Cell">Linha {0}, coluna {1}</sys:String>
+    <sys:String x:Key="Str_TableExport_Summary">{0} linhas, {1} colunas</sys:String>
+    <sys:String x:Key="Str_TableExport_InvalidArea">Informe uma área válida dentro da página (de 0 a 100%).</sys:String>
 </ResourceDictionary>

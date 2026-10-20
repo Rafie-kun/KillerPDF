@@ -80,3 +80,23 @@ It also checks document and empty-pane transitions, rail right-click routing,
 and opening saved copies in an empty second pane or a new tab.
 Use a fresh output directory. Startup and user settings remain isolated;
 the check sends no desktop input.
+
+## Table extraction and export
+
+After building the app and this test project, use
+`--verify-table-export APP_DLL APP_XAML OUTPUT_DIRECTORY --startup-smoke`.
+Use a fresh output directory. The isolated host renders the actual table dialog
+in all 13 themes at 100% and 150% app scaling, checks a 480x360 window at 250%,
+and checks all 19 locales at 640x480 and 150%. It verifies invalid selections,
+editable cells, and access to the scrolling content and save controls.
+
+The workflow cases open an owned synthetic PDF through the public window entry,
+invoke the rendered Save menu, select a table area, edit a cell, and save through
+the real file picker. They inspect XLSX and CSV output, cancel both review and
+save, switch the source during review, and try to overwrite a PDF fixture named
+with a CSV extension. Original bytes must survive each case.
+
+The captures and results identify the compiled app hash. These WPF control
+checks do not certify physical mouse dragging, native display scaling, screen
+readers, or interoperability with Excel and LibreOffice. Keep those checks
+separate from the public engine tests and the existing release gates.

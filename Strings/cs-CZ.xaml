@@ -1735,4 +1735,13 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Cc_AutoExposure">Automatická expozice</sys:String>
     <sys:String x:Key="Str_Cc_AutoWhiteBalance">Automatické vyvážení bílé</sys:String>
     <sys:String x:Key="Str_Attachment_Add">Přidat přílohu</sys:String>
+    <sys:String x:Key="Str_TableExport_Title">Exportovat tabulku</sys:String>
+    <sys:String x:Key="Str_TableExport_Hint">Tažením označte jednu tabulku obdélníkem nebo zadejte oblast níže. Začněte úplnou mřížkou s textem, který lze vybrat.</sys:String>
+    <sys:String x:Key="Str_TableExport_Area">Oblast (% stránky)</sys:String>
+    <sys:String x:Key="Str_TableExport_Detect">Najít tabulku</sys:String>
+    <sys:String x:Key="Str_TableExport_Review">Před exportem zkontrolujte každou buňku. XLSX uchovává hodnoty jako text. Sloupce CSV importujte jako text, aby se zachovaly identifikátory.</sys:String>
+    <sys:String x:Key="Str_TableExport_Unsupported">V této oblasti nebyla nalezena podporovaná tabulka. Vyberte úplnou obdélníkovou mřížku s vodorovným textem, který lze vybrat. Skeny, sloučené buňky a přerušené okraje zatím nejsou podporovány.</sys:String>
+    <sys:String x:Key="Str_TableExport_Cell">Řádek {0}, sloupec {1}</sys:String>
+    <sys:String x:Key="Str_TableExport_Summary">Počet řádků: {0}, počet sloupců: {1}</sys:String>
+    <sys:String x:Key="Str_TableExport_InvalidArea">Zadejte platnou oblast uvnitř stránky (0 až 100 %).</sys:String>
 </ResourceDictionary>

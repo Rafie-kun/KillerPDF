@@ -1753,4 +1753,13 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_Cc_AutoExposure">Автоматты экспозиция</sys:String>
     <sys:String x:Key="Str_Cc_AutoWhiteBalance">Автоматты ақ түс балансы</sys:String>
     <sys:String x:Key="Str_Attachment_Add">Тіркеме қосу</sys:String>
+    <sys:String x:Key="Str_TableExport_Title">Кестені экспорттау</sys:String>
+    <sys:String x:Key="Str_TableExport_Hint">Сүйреп, бір кестенің айналасына жақтау салыңыз немесе төменде аймақты енгізіңіз. Тор сызықтары толық және мәтіні таңдалатын кестеден бастаңыз.</sys:String>
+    <sys:String x:Key="Str_TableExport_Area">Аймақ (беттің %-ы)</sys:String>
+    <sys:String x:Key="Str_TableExport_Detect">Кестені табу</sys:String>
+    <sys:String x:Key="Str_TableExport_Review">Экспорттау алдында әрбір ұяшықты тексеріңіз. XLSX мәндерді мәтін ретінде сақтайды. Идентификаторларды сақтау үшін CSV бағандарын мәтін ретінде импорттаңыз.</sys:String>
+    <sys:String x:Key="Str_TableExport_Unsupported">Бұл аймақта қолдау көрсетілетін кесте табылмады. Көлденең мәтінін таңдауға болатын толық тікбұрышты торды таңдаңыз. Сканерленген беттерге, біріктірілген ұяшықтарға және үзік шекараларға әзірше қолдау көрсетілмейді.</sys:String>
+    <sys:String x:Key="Str_TableExport_Cell">{0}-жол, {1}-баған</sys:String>
+    <sys:String x:Key="Str_TableExport_Summary">{0} жол, {1} баған</sys:String>
+    <sys:String x:Key="Str_TableExport_InvalidArea">Бет шегіндегі жарамды аймақты енгізіңіз (0-ден 100%-ға дейін).</sys:String>
 </ResourceDictionary>

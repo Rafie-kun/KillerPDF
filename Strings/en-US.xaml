@@ -1750,4 +1750,13 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Cc_AutoExposure">Auto exposure</sys:String>
     <sys:String x:Key="Str_Cc_AutoWhiteBalance">Auto white balance</sys:String>
     <sys:String x:Key="Str_Attachment_Add">Add attachment</sys:String>
+    <sys:String x:Key="Str_TableExport_Title">Export table</sys:String>
+    <sys:String x:Key="Str_TableExport_Hint">Drag a box around one table, or enter the area below. Start with a complete grid and selectable text.</sys:String>
+    <sys:String x:Key="Str_TableExport_Area">Area (% of page)</sys:String>
+    <sys:String x:Key="Str_TableExport_Detect">Find table</sys:String>
+    <sys:String x:Key="Str_TableExport_Review">Review every cell before exporting. XLSX keeps values as text. Import CSV columns as text to preserve identifiers.</sys:String>
+    <sys:String x:Key="Str_TableExport_Unsupported">No supported table was found in this area. Select a complete rectangular grid with selectable horizontal text. Scans, merged cells, and broken borders are not supported yet.</sys:String>
+    <sys:String x:Key="Str_TableExport_Cell">Row {0}, column {1}</sys:String>
+    <sys:String x:Key="Str_TableExport_Summary">{0} rows, {1} columns</sys:String>
+    <sys:String x:Key="Str_TableExport_InvalidArea">Enter a valid area within the page (0 to 100%).</sys:String>
 </ResourceDictionary>

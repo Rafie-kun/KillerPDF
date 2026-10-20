@@ -1750,4 +1750,13 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Cc_AutoExposure">Automatisk eksponering</sys:String>
     <sys:String x:Key="Str_Cc_AutoWhiteBalance">Automatisk hvitbalanse</sys:String>
     <sys:String x:Key="Str_Attachment_Add">Legg til vedlegg</sys:String>
+    <sys:String x:Key="Str_TableExport_Title">Eksporter tabell</sys:String>
+    <sys:String x:Key="Str_TableExport_Hint">Dra en ramme rundt én tabell, eller angi området nedenfor. Start med et fullstendig rutenett og tekst som kan markeres.</sys:String>
+    <sys:String x:Key="Str_TableExport_Area">Område (% av siden)</sys:String>
+    <sys:String x:Key="Str_TableExport_Detect">Finn tabell</sys:String>
+    <sys:String x:Key="Str_TableExport_Review">Kontroller hver celle før eksport. XLSX lagrer verdier som tekst. Importer CSV-kolonner som tekst for å bevare identifikatorer.</sys:String>
+    <sys:String x:Key="Str_TableExport_Unsupported">Ingen støttet tabell ble funnet i dette området. Velg et fullstendig rektangulært rutenett med vannrett tekst som kan markeres. Skannede sider, sammenslåtte celler og brutte kantlinjer støttes ikke ennå.</sys:String>
+    <sys:String x:Key="Str_TableExport_Cell">Rad {0}, kolonne {1}</sys:String>
+    <sys:String x:Key="Str_TableExport_Summary">{0} rader, {1} kolonner</sys:String>
+    <sys:String x:Key="Str_TableExport_InvalidArea">Angi et gyldig område innenfor siden (0 til 100 %).</sys:String>
 </ResourceDictionary>

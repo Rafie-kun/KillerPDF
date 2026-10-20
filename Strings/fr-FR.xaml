@@ -1750,4 +1750,13 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Cc_AutoExposure">Exposition automatique</sys:String>
     <sys:String x:Key="Str_Cc_AutoWhiteBalance">Balance des blancs automatique</sys:String>
     <sys:String x:Key="Str_Attachment_Add">Ajouter une pièce jointe</sys:String>
+    <sys:String x:Key="Str_TableExport_Title">Exporter le tableau</sys:String>
+    <sys:String x:Key="Str_TableExport_Hint">Tracez un cadre autour d’un seul tableau ou saisissez la zone ci-dessous. Commencez par une grille complète avec du texte sélectionnable.</sys:String>
+    <sys:String x:Key="Str_TableExport_Area">Zone (% de la page)</sys:String>
+    <sys:String x:Key="Str_TableExport_Detect">Rechercher le tableau</sys:String>
+    <sys:String x:Key="Str_TableExport_Review">Vérifiez chaque cellule avant l’exportation. XLSX conserve les valeurs sous forme de texte. Importez les colonnes CSV comme du texte pour préserver les identifiants.</sys:String>
+    <sys:String x:Key="Str_TableExport_Unsupported">Aucun tableau pris en charge n’a été trouvé dans cette zone. Sélectionnez une grille rectangulaire complète avec du texte horizontal sélectionnable. Les documents numérisés, les cellules fusionnées et les bordures interrompues ne sont pas encore pris en charge.</sys:String>
+    <sys:String x:Key="Str_TableExport_Cell">Ligne {0}, colonne {1}</sys:String>
+    <sys:String x:Key="Str_TableExport_Summary">{0} lignes, {1} colonnes</sys:String>
+    <sys:String x:Key="Str_TableExport_InvalidArea">Saisissez une zone valide à l’intérieur de la page (de 0 à 100 %).</sys:String>
 </ResourceDictionary>

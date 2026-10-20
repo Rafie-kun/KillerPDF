@@ -1738,4 +1738,13 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Cc_AutoExposure">Automatyczna ekspozycja</sys:String>
     <sys:String x:Key="Str_Cc_AutoWhiteBalance">Automatyczny balans bieli</sys:String>
     <sys:String x:Key="Str_Attachment_Add">Dodaj załącznik</sys:String>
+    <sys:String x:Key="Str_TableExport_Title">Eksportuj tabelę</sys:String>
+    <sys:String x:Key="Str_TableExport_Hint">Przeciągnij, aby zaznaczyć prostokąt wokół jednej tabeli, lub wprowadź obszar poniżej. Zacznij od pełnej siatki z tekstem, który można zaznaczyć.</sys:String>
+    <sys:String x:Key="Str_TableExport_Area">Obszar (% strony)</sys:String>
+    <sys:String x:Key="Str_TableExport_Detect">Znajdź tabelę</sys:String>
+    <sys:String x:Key="Str_TableExport_Review">Sprawdź każdą komórkę przed eksportem. XLSX zachowuje wartości jako tekst. Importuj kolumny CSV jako tekst, aby zachować identyfikatory.</sys:String>
+    <sys:String x:Key="Str_TableExport_Unsupported">W tym obszarze nie znaleziono obsługiwanej tabeli. Wybierz pełną prostokątną siatkę z poziomym tekstem, który można zaznaczyć. Skany, scalone komórki i przerwane obramowania nie są jeszcze obsługiwane.</sys:String>
+    <sys:String x:Key="Str_TableExport_Cell">Wiersz {0}, kolumna {1}</sys:String>
+    <sys:String x:Key="Str_TableExport_Summary">Liczba wierszy: {0}, liczba kolumn: {1}</sys:String>
+    <sys:String x:Key="Str_TableExport_InvalidArea">Wprowadź prawidłowy obszar w granicach strony (od 0 do 100%).</sys:String>
 </ResourceDictionary>

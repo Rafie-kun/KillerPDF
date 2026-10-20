@@ -1737,4 +1737,13 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Cc_AutoExposure">Automatikus expozíció</sys:String>
     <sys:String x:Key="Str_Cc_AutoWhiteBalance">Automatikus fehéregyensúly</sys:String>
     <sys:String x:Key="Str_Attachment_Add">Melléklet hozzáadása</sys:String>
+    <sys:String x:Key="Str_TableExport_Title">Táblázat exportálása</sys:String>
+    <sys:String x:Key="Str_TableExport_Hint">Húzással jelöljön ki egy téglalapot egyetlen táblázat körül, vagy adja meg alább a területet. Teljes rácsot és kijelölhető szöveget tartalmazó táblázattal kezdjen.</sys:String>
+    <sys:String x:Key="Str_TableExport_Area">Terület (az oldal %-a)</sys:String>
+    <sys:String x:Key="Str_TableExport_Detect">Táblázat keresése</sys:String>
+    <sys:String x:Key="Str_TableExport_Review">Exportálás előtt ellenőrizzen minden cellát. Az XLSX szövegként tárolja az értékeket. Az azonosítók megőrzéséhez a CSV oszlopait szövegként importálja.</sys:String>
+    <sys:String x:Key="Str_TableExport_Unsupported">Ezen a területen nem található támogatott táblázat. Jelöljön ki egy teljes, téglalap alakú rácsot kijelölhető vízszintes szöveggel. A beolvasott oldalak, az egyesített cellák és a hiányos szegélyek még nem támogatottak.</sys:String>
+    <sys:String x:Key="Str_TableExport_Cell">{0}. sor, {1}. oszlop</sys:String>
+    <sys:String x:Key="Str_TableExport_Summary">{0} sor, {1} oszlop</sys:String>
+    <sys:String x:Key="Str_TableExport_InvalidArea">Adjon meg egy érvényes területet az oldalon belül (0 és 100% között).</sys:String>
 </ResourceDictionary>

@@ -1750,4 +1750,13 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Cc_AutoExposure">自動露出</sys:String>
     <sys:String x:Key="Str_Cc_AutoWhiteBalance">オートホワイトバランス</sys:String>
     <sys:String x:Key="Str_Attachment_Add">添付ファイルを追加</sys:String>
+    <sys:String x:Key="Str_TableExport_Title">表をエクスポート</sys:String>
+    <sys:String x:Key="Str_TableExport_Hint">ドラッグして1つの表を囲むか、下に範囲を入力してください。すべての罫線が揃い、文字を選択できる表を使用してください。</sys:String>
+    <sys:String x:Key="Str_TableExport_Area">範囲（ページに対する割合 %）</sys:String>
+    <sys:String x:Key="Str_TableExport_Detect">表を検出</sys:String>
+    <sys:String x:Key="Str_TableExport_Review">エクスポート前にすべてのセルを確認してください。XLSXでは値が文字列として保存されます。識別子をそのまま保持するには、CSVの列を文字列としてインポートしてください。</sys:String>
+    <sys:String x:Key="Str_TableExport_Unsupported">この範囲に対応する表が見つかりませんでした。すべての罫線が揃った長方形の表で、横書きの文字を選択できるものを選択してください。スキャン画像、結合セル、途切れた罫線にはまだ対応していません。</sys:String>
+    <sys:String x:Key="Str_TableExport_Cell">{0}行、{1}列</sys:String>
+    <sys:String x:Key="Str_TableExport_Summary">{0}行、{1}列</sys:String>
+    <sys:String x:Key="Str_TableExport_InvalidArea">ページ内の有効な範囲を入力してください（0～100%）。</sys:String>
 </ResourceDictionary>

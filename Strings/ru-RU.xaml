@@ -1753,4 +1753,13 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Cc_AutoExposure">Автоэкспозиция</sys:String>
     <sys:String x:Key="Str_Cc_AutoWhiteBalance">Автоматический баланс белого</sys:String>
     <sys:String x:Key="Str_Attachment_Add">Добавить вложение</sys:String>
+    <sys:String x:Key="Str_TableExport_Title">Экспортировать таблицу</sys:String>
+    <sys:String x:Key="Str_TableExport_Hint">Выделите одну таблицу прямоугольной рамкой или задайте область ниже. Начните с таблицы с полной сеткой и выделяемым текстом.</sys:String>
+    <sys:String x:Key="Str_TableExport_Area">Область (% страницы)</sys:String>
+    <sys:String x:Key="Str_TableExport_Detect">Найти таблицу</sys:String>
+    <sys:String x:Key="Str_TableExport_Review">Проверьте каждую ячейку перед экспортом. XLSX сохраняет значения как текст. Импортируйте столбцы CSV как текст, чтобы сохранить идентификаторы.</sys:String>
+    <sys:String x:Key="Str_TableExport_Unsupported">В этой области не найдена поддерживаемая таблица. Выберите полную прямоугольную сетку с выделяемым горизонтальным текстом. Сканированные страницы, объединенные ячейки и разрывы границ пока не поддерживаются.</sys:String>
+    <sys:String x:Key="Str_TableExport_Cell">Строка {0}, столбец {1}</sys:String>
+    <sys:String x:Key="Str_TableExport_Summary">Строк: {0}, столбцов: {1}</sys:String>
+    <sys:String x:Key="Str_TableExport_InvalidArea">Задайте допустимую область в пределах страницы (от 0 до 100%).</sys:String>
 </ResourceDictionary>

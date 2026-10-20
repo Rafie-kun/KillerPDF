@@ -1750,4 +1750,13 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_Cc_AutoExposure">Esposizione automatica</sys:String>
     <sys:String x:Key="Str_Cc_AutoWhiteBalance">Bilanciamento del bianco automatico</sys:String>
     <sys:String x:Key="Str_Attachment_Add">Aggiungi allegato</sys:String>
+    <sys:String x:Key="Str_TableExport_Title">Esporta tabella</sys:String>
+    <sys:String x:Key="Str_TableExport_Hint">Trascina per disegnare un riquadro attorno a una sola tabella oppure inserisci l’area qui sotto. Inizia con una griglia completa e testo selezionabile.</sys:String>
+    <sys:String x:Key="Str_TableExport_Area">Area (% della pagina)</sys:String>
+    <sys:String x:Key="Str_TableExport_Detect">Trova tabella</sys:String>
+    <sys:String x:Key="Str_TableExport_Review">Controlla ogni cella prima di esportare. XLSX conserva i valori come testo. Importa le colonne CSV come testo per preservare gli identificatori.</sys:String>
+    <sys:String x:Key="Str_TableExport_Unsupported">Nessuna tabella supportata trovata in quest’area. Seleziona una griglia rettangolare completa con testo orizzontale selezionabile. Scansioni, celle unite e bordi interrotti non sono ancora supportati.</sys:String>
+    <sys:String x:Key="Str_TableExport_Cell">Riga {0}, colonna {1}</sys:String>
+    <sys:String x:Key="Str_TableExport_Summary">{0} righe, {1} colonne</sys:String>
+    <sys:String x:Key="Str_TableExport_InvalidArea">Inserisci un’area valida all’interno della pagina (da 0 a 100%).</sys:String>
 </ResourceDictionary>

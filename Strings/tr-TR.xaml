@@ -1730,4 +1730,13 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Cc_AutoExposure">Otomatik pozlama</sys:String>
     <sys:String x:Key="Str_Cc_AutoWhiteBalance">Otomatik beyaz dengesi</sys:String>
     <sys:String x:Key="Str_Attachment_Add">Ek ekle</sys:String>
+    <sys:String x:Key="Str_TableExport_Title">Tabloyu dışa aktar</sys:String>
+    <sys:String x:Key="Str_TableExport_Hint">Sürükleyerek tek bir tablonun çevresine bir kutu çizin veya alanı aşağıya girin. Eksiksiz bir ızgara ve seçilebilir metin içeren bir tabloyla başlayın.</sys:String>
+    <sys:String x:Key="Str_TableExport_Area">Alan (sayfanın %'si)</sys:String>
+    <sys:String x:Key="Str_TableExport_Detect">Tabloyu bul</sys:String>
+    <sys:String x:Key="Str_TableExport_Review">Dışa aktarmadan önce her hücreyi kontrol edin. XLSX, değerleri metin olarak saklar. Tanımlayıcıları korumak için CSV sütunlarını metin olarak içe aktarın.</sys:String>
+    <sys:String x:Key="Str_TableExport_Unsupported">Bu alanda desteklenen bir tablo bulunamadı. Seçilebilir yatay metin içeren eksiksiz, dikdörtgen bir ızgara seçin. Taranmış sayfalar, birleştirilmiş hücreler ve kesintili kenarlıklar henüz desteklenmiyor.</sys:String>
+    <sys:String x:Key="Str_TableExport_Cell">Satır {0}, sütun {1}</sys:String>
+    <sys:String x:Key="Str_TableExport_Summary">{0} satır, {1} sütun</sys:String>
+    <sys:String x:Key="Str_TableExport_InvalidArea">Sayfa sınırları içinde geçerli bir alan girin (%0 ile %100 arasında).</sys:String>
 </ResourceDictionary>

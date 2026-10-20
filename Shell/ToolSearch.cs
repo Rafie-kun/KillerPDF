@@ -446,6 +446,7 @@ namespace KillerPDF
             Add("Str_Menu_ReduceSize", "File", "", () => ReduceFileSize_Click(this, click));
             Add("Str_Menu_CompressZip", "File", "", () => CompressToZip_Click(this, click));
             Add("Str_Menu_ExportImages", "File", "", () => ExportImages_Click(this, click));
+            Add("Str_TableExport_Title", "File", "", () => ExportTable(PageList.SelectedIndex));
             Add("Str_Lbl_DigitalSig", "File", "", OpenSignDialog);
             Add("Str_Lbl_Merge", "File", "", () => Merge_Click(this, click));
             Add("Str_Ctx_ExtractPages", "File", "", () => Split_Click(this, click));

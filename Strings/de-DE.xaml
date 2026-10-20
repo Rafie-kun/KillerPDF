@@ -1739,4 +1739,13 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Cc_AutoExposure">Automatische Belichtung</sys:String>
     <sys:String x:Key="Str_Cc_AutoWhiteBalance">Automatischer Weißabgleich</sys:String>
     <sys:String x:Key="Str_Attachment_Add">Anhang hinzufügen</sys:String>
+    <sys:String x:Key="Str_TableExport_Title">Tabelle exportieren</sys:String>
+    <sys:String x:Key="Str_TableExport_Hint">Ziehen Sie einen Rahmen um eine einzelne Tabelle oder geben Sie unten den Bereich ein. Beginnen Sie mit einem vollständigen Raster und auswählbarem Text.</sys:String>
+    <sys:String x:Key="Str_TableExport_Area">Bereich (% der Seite)</sys:String>
+    <sys:String x:Key="Str_TableExport_Detect">Tabelle finden</sys:String>
+    <sys:String x:Key="Str_TableExport_Review">Prüfen Sie vor dem Export jede Zelle. XLSX speichert Werte als Text. Importieren Sie CSV-Spalten als Text, damit Kennungen erhalten bleiben.</sys:String>
+    <sys:String x:Key="Str_TableExport_Unsupported">In diesem Bereich wurde keine unterstützte Tabelle gefunden. Wählen Sie ein vollständiges rechteckiges Raster mit auswählbarem horizontalem Text. Scans, verbundene Zellen und unterbrochene Rahmenlinien werden noch nicht unterstützt.</sys:String>
+    <sys:String x:Key="Str_TableExport_Cell">Zeile {0}, Spalte {1}</sys:String>
+    <sys:String x:Key="Str_TableExport_Summary">{0} Zeilen, {1} Spalten</sys:String>
+    <sys:String x:Key="Str_TableExport_InvalidArea">Geben Sie einen gültigen Bereich innerhalb der Seite ein (0 bis 100 %).</sys:String>
 </ResourceDictionary>

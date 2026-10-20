@@ -1730,4 +1730,13 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Cc_AutoExposure">Exposición automática</sys:String>
     <sys:String x:Key="Str_Cc_AutoWhiteBalance">Balance de blancos automático</sys:String>
     <sys:String x:Key="Str_Attachment_Add">Añadir archivo adjunto</sys:String>
+    <sys:String x:Key="Str_TableExport_Title">Exportar tabla</sys:String>
+    <sys:String x:Key="Str_TableExport_Hint">Dibuje un recuadro alrededor de una sola tabla arrastrando el cursor, o introduzca el área abajo. Empiece con una cuadrícula completa y texto seleccionable.</sys:String>
+    <sys:String x:Key="Str_TableExport_Area">Área (% de la página)</sys:String>
+    <sys:String x:Key="Str_TableExport_Detect">Buscar tabla</sys:String>
+    <sys:String x:Key="Str_TableExport_Review">Revise cada celda antes de exportar. XLSX conserva los valores como texto. Importe las columnas CSV como texto para preservar los identificadores.</sys:String>
+    <sys:String x:Key="Str_TableExport_Unsupported">No se encontró ninguna tabla compatible en esta área. Seleccione una cuadrícula rectangular completa con texto horizontal seleccionable. Los documentos escaneados, las celdas combinadas y los bordes interrumpidos aún no son compatibles.</sys:String>
+    <sys:String x:Key="Str_TableExport_Cell">Fila {0}, columna {1}</sys:String>
+    <sys:String x:Key="Str_TableExport_Summary">{0} filas, {1} columnas</sys:String>
+    <sys:String x:Key="Str_TableExport_InvalidArea">Introduzca un área válida dentro de la página (de 0 a 100 %).</sys:String>
 </ResourceDictionary>

@@ -1732,4 +1732,13 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_Cc_AutoExposure">自動曝光</sys:String>
     <sys:String x:Key="Str_Cc_AutoWhiteBalance">自動白平衡</sys:String>
     <sys:String x:Key="Str_Attachment_Add">新增附件</sys:String>
+    <sys:String x:Key="Str_TableExport_Title">匯出表格</sys:String>
+    <sys:String x:Key="Str_TableExport_Hint">拖曳滑鼠框選一個表格，或在下方輸入區域。請先選擇格線完整且文字可選取的表格。</sys:String>
+    <sys:String x:Key="Str_TableExport_Area">區域（占頁面的百分比）</sys:String>
+    <sys:String x:Key="Str_TableExport_Detect">尋找表格</sys:String>
+    <sys:String x:Key="Str_TableExport_Review">匯出前請檢查每個儲存格。XLSX 將值保留為文字。請將 CSV 欄以文字格式匯入，以保留識別碼。</sys:String>
+    <sys:String x:Key="Str_TableExport_Unsupported">在此區域中找不到支援的表格。請選擇完整的矩形格線，其中的橫排文字應可選取。目前尚不支援掃描文件、合併的儲存格及不完整的框線。</sys:String>
+    <sys:String x:Key="Str_TableExport_Cell">第 {0} 列，第 {1} 欄</sys:String>
+    <sys:String x:Key="Str_TableExport_Summary">{0} 列，{1} 欄</sys:String>
+    <sys:String x:Key="Str_TableExport_InvalidArea">請輸入頁面範圍內的有效區域（0 至 100%）。</sys:String>
 </ResourceDictionary>
