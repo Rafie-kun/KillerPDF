@@ -106,6 +106,7 @@ namespace KillerPDF.Features
             {
                 con.WriteLine("Usage: KillerPDF.exe --export <in.pdf> <out.docx|.xlsx|.pptx|.html|.md|.txt|.json> [--pages <range>]");
                 con.WriteLine("       [--format word|excel|powerpoint|html|markdown|text|json]   (default: from the output extension)");
+                con.WriteLine("       [--layout editable|images]   (Word and PowerPoint; default: editable)");
                 return 2;
             }
             string inPath = Path.GetFullPath(pos[0]), outPath = Path.GetFullPath(pos[1]);
@@ -124,6 +125,13 @@ namespace KillerPDF.Features
                 _ => null,
             };
             if (format is null) { con.WriteLine("Name the format with the output extension or --format."); return 2; }
+            string layout = options.GetValueOrDefault("--layout", "editable").ToLowerInvariant();
+            if (layout is not ("editable" or "images"))
+            { con.WriteLine("Export layout must be editable or images."); return 2; }
+            var officeMode = layout == "images" ? PdfOfficeExportMode.PageImages : PdfOfficeExportMode.Editable;
+            if (officeMode == PdfOfficeExportMode.PageImages
+                && format is not (PdfStructuredExportFormat.WordDocument or PdfStructuredExportFormat.Presentation))
+            { con.WriteLine("Page-image layout is available only for Word and PowerPoint."); return 2; }
             PdfDocument document = PdfEngineIntegration.OpenForReading(File.ReadAllBytes(inPath));
             List<int>? pages = null;
             if (options.ContainsKey("--pages"))
@@ -131,8 +139,8 @@ namespace KillerPDF.Features
                 if (!CliPagesOption(options, PdfDocumentInformation.Read(document).PageCount, out List<int> selected, con)) return 2;
                 pages = selected;
             }
-            PdfStructuredExportReport losses = PdfStructuredExport.InspectLosses(document, format.Value, pages);
-            byte[] exported = PdfStructuredExport.Export(document, format.Value, pages, cancellationToken: CancellationToken.None);
+            PdfStructuredExportReport losses = PdfStructuredExport.InspectLosses(document, format.Value, pages, officeMode: officeMode);
+            byte[] exported = PdfStructuredExport.Export(document, format.Value, pages, cancellationToken: CancellationToken.None, officeMode: officeMode);
             if (!CliPublishOutput(inPath, outPath, exported, con)) return 2;
             con.WriteLine($"Exported -> {outPath}" + (losses.IsLossless ? string.Empty
                 : $" ({losses.Findings.Count} things could not carry over exactly; run with --report to list them)"));

@@ -1805,4 +1805,8 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Watch_AuditAttachments">Verificar anexos</sys:String>
     <sys:String x:Key="Str_Watch_RemoveAttachments">Remover anexos</sys:String>
     <sys:String x:Key="Str_Watch_FlattenLayers">Achatar camadas</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Layout">Layout</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Editable">Conteúdo editável</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImages">Imagens das páginas</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImagesHint">Cada página se torna uma imagem. O texto e as células das tabelas não podem ser editados separadamente.</sys:String>
 </ResourceDictionary>

@@ -1808,4 +1808,8 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_Watch_AuditAttachments">Тіркемелерді тексеру</sys:String>
     <sys:String x:Key="Str_Watch_RemoveAttachments">Тіркемелерді жою</sys:String>
     <sys:String x:Key="Str_Watch_FlattenLayers">Қабаттарды біріктіру</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Layout">Орналасу</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Editable">Өңделетін мазмұн</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImages">Бет суреттері</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImagesHint">Әр бет суретке айналады. Мәтін мен кесте ұяшықтарын бөлек өңдеу мүмкін емес.</sys:String>
 </ResourceDictionary>

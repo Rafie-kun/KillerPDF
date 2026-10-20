@@ -1805,4 +1805,8 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Watch_AuditAttachments">Kiểm tra tệp đính kèm</sys:String>
     <sys:String x:Key="Str_Watch_RemoveAttachments">Xóa tệp đính kèm</sys:String>
     <sys:String x:Key="Str_Watch_FlattenLayers">Hợp nhất các lớp</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Layout">Bố cục</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Editable">Nội dung có thể chỉnh sửa</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImages">Ảnh trang</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImagesHint">Mỗi trang trở thành một ảnh. Không thể chỉnh sửa riêng văn bản và các ô trong bảng.</sys:String>
 </ResourceDictionary>

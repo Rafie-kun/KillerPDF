@@ -1805,4 +1805,8 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Watch_AuditAttachments">Перевірити вкладення</sys:String>
     <sys:String x:Key="Str_Watch_RemoveAttachments">Видалити вкладення</sys:String>
     <sys:String x:Key="Str_Watch_FlattenLayers">Об'єднати шари</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Layout">Макет</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Editable">Редагований вміст</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImages">Зображення сторінок</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImagesHint">Кожна сторінка стає зображенням. Текст і клітинки таблиць не можна редагувати окремо.</sys:String>
 </ResourceDictionary>

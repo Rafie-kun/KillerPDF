@@ -1805,4 +1805,8 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Watch_AuditAttachments">Check attachments</sys:String>
     <sys:String x:Key="Str_Watch_RemoveAttachments">Remove attachments</sys:String>
     <sys:String x:Key="Str_Watch_FlattenLayers">Flatten layers</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Layout">Layout</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Editable">Editable content</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImages">Page pictures</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImagesHint">Each page becomes a picture. Text and table cells cannot be edited separately.</sys:String>
 </ResourceDictionary>

@@ -13,9 +13,10 @@ public static partial class PdfStructuredExportMacro
 
     /// <summary>Creates an export step with an optional zero-based page selection.</summary>
     public static PdfMacroStep Step(PdfStructuredExportFormat format,
-        IEnumerable<int>? pageIndices = null)
+        IEnumerable<int>? pageIndices = null, PdfOfficeExportMode officeMode = PdfOfficeExportMode.Editable)
     {
         if (!Enum.IsDefined(format)) throw new ArgumentOutOfRangeException(nameof(format));
+        PdfStructuredExport.ValidateOfficeMode(format, officeMode);
         int[]? pages = pageIndices?.ToArray();
         if (pages is not null && (pages.Any(page => page < 0)
             || pages.Distinct().Count() != pages.Length))
@@ -23,7 +24,7 @@ public static partial class PdfStructuredExportMacro
         return new PdfMacroStep(PdfMacroOperation.Export,
             new Dictionary<string, string>(StringComparer.Ordinal)
             {
-                [OptionsKey] = JsonSerializer.Serialize(new ExportOptions(1, format, pages),
+                [OptionsKey] = JsonSerializer.Serialize(new ExportOptions(1, format, pages, officeMode),
                     Json.ExportOptions)
             });
     }
@@ -51,11 +52,11 @@ public static partial class PdfStructuredExportMacro
             PdfStructuredExportFormat.Json => Encoding.UTF8.GetBytes(
                 PdfStructuredExport.ToJson(document, pages, cancellationToken)),
             PdfStructuredExportFormat.WordDocument =>
-                PdfStructuredExport.ToDocx(document, pages, cancellationToken: cancellationToken),
+                PdfStructuredExport.ToDocx(document, pages, cancellationToken: cancellationToken, officeMode: options.OfficeMode),
             PdfStructuredExportFormat.Spreadsheet =>
                 PdfStructuredExport.ToXlsx(document, pages, cancellationToken),
             PdfStructuredExportFormat.Presentation =>
-                PdfStructuredExport.ToPptx(document, pages, cancellationToken: cancellationToken),
+                PdfStructuredExport.ToPptx(document, pages, cancellationToken: cancellationToken, officeMode: options.OfficeMode),
             _ => throw new ArgumentOutOfRangeException(nameof(step))
         };
     }
@@ -63,9 +64,21 @@ public static partial class PdfStructuredExportMacro
     /// <summary>Reads the selected export format without opening a document.</summary>
     public static PdfStructuredExportFormat ReadFormat(PdfMacroStep step) => ReadOptions(step).Format;
 
+    /// <summary>Reads the Office layout mode; older saved steps default to editable content.</summary>
+    public static PdfOfficeExportMode ReadOfficeMode(PdfMacroStep step) => ReadOptions(step).OfficeMode;
+
+    /// <summary>Changes the Office layout mode while retaining the format and page selection.</summary>
+    public static PdfMacroStep WithOfficeMode(PdfMacroStep step, PdfOfficeExportMode officeMode)
+    {
+        ExportOptions options = ReadOptions(step);
+        return Step(options.Format, options.PageIndices, officeMode);
+    }
+
     /// <summary>Changes the format while retaining the saved page selection.</summary>
     public static PdfMacroStep WithFormat(PdfMacroStep step, PdfStructuredExportFormat format) =>
-        Step(format, ReadOptions(step).PageIndices);
+        Step(format, ReadOptions(step).PageIndices,
+            format is PdfStructuredExportFormat.WordDocument or PdfStructuredExportFormat.Presentation
+                ? ReadOptions(step).OfficeMode : PdfOfficeExportMode.Editable);
 
     /// <summary>Gets the file extension for an exported artifact.</summary>
     public static string Extension(PdfStructuredExportFormat format) =>
@@ -89,6 +102,7 @@ public static partial class PdfStructuredExportMacro
                     $"Export macro version {options.Version} is not supported.");
             if (!Enum.IsDefined(options.Format))
                 throw new JsonException("The export format is invalid.");
+            PdfStructuredExport.ValidateOfficeMode(options.Format, options.OfficeMode);
         }
         catch (Exception error) when (error is JsonException or NotSupportedException)
         {
@@ -105,12 +119,13 @@ public static partial class PdfStructuredExportMacro
         PropertyNameCaseInsensitive = true,
         Converters =
         {
-            new JsonStringEnumConverter<PdfStructuredExportFormat>(JsonNamingPolicy.CamelCase)
+            new JsonStringEnumConverter<PdfStructuredExportFormat>(JsonNamingPolicy.CamelCase),
+            new JsonStringEnumConverter<PdfOfficeExportMode>(JsonNamingPolicy.CamelCase)
         }
     };
 
     private sealed record ExportOptions(int Version, PdfStructuredExportFormat Format,
-        int[]? PageIndices);
+        int[]? PageIndices, PdfOfficeExportMode OfficeMode = PdfOfficeExportMode.Editable);
 
     [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
     [JsonSerializable(typeof(ExportOptions))]

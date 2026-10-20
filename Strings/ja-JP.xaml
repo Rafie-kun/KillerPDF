@@ -1805,4 +1805,8 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Watch_AuditAttachments">添付ファイルを確認</sys:String>
     <sys:String x:Key="Str_Watch_RemoveAttachments">添付ファイルを削除</sys:String>
     <sys:String x:Key="Str_Watch_FlattenLayers">レイヤーを統合</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Layout">レイアウト</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Editable">編集可能な内容</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImages">ページ画像</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImagesHint">各ページを画像に変換します。テキストや表のセルを個別に編集することはできません。</sys:String>
 </ResourceDictionary>

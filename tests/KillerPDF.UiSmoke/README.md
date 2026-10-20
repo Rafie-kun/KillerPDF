@@ -100,3 +100,10 @@ The captures and results identify the compiled app hash. These WPF control
 checks do not certify physical mouse dragging, native display scaling, screen
 readers, or interoperability with Excel and LibreOffice. Keep those checks
 separate from the public engine tests and the existing release gates.
+
+The same isolated invocation accepts `--verify-office-export`, `--verify-sidebar-actions`,
+`--verify-grain-themes` and `--verify-dialog-text` instead of `--verify-table-export`.
+Office checks include editable and page-image DOCX/PPTX saves, source-change cancellation,
+and command-line layout selection. Sidebar checks cover cursor menus, measurements, signing,
+the F1 list and command dispatch through Search Tools. Grain checks seal a WPF style before
+switching through every theme. Dialog text checks render both save prompts in three themes.

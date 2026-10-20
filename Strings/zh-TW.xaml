@@ -1787,4 +1787,8 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_Watch_AuditAttachments">檢查附件</sys:String>
     <sys:String x:Key="Str_Watch_RemoveAttachments">移除附件</sys:String>
     <sys:String x:Key="Str_Watch_FlattenLayers">合併圖層</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Layout">版面配置</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Editable">可編輯內容</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImages">頁面圖片</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImagesHint">每頁都會轉換為圖片。無法單獨編輯文字和表格儲存格。</sys:String>
 </ResourceDictionary>

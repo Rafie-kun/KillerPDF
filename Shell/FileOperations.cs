@@ -1455,9 +1455,12 @@ namespace KillerPDF
         {
             if (_doc is null) { KillerDialog.Show(this, Loc("Str_Msg_OpenFirst")); return; }
             CommitActiveTextBox();
+            Func<bool> sourceCurrent = CaptureDocumentOrigin();
+            string? currentSource = _currentFile;
+            string? originalSource = _originalFile;
             var options = new ExportDocumentDialog(this);
             options.ShowDialog();
-            if (!options.Confirmed) return;
+            if (!options.Confirmed || !sourceCurrent()) return;
 
             int pageCount = EnsureEngineDocumentSession().PageCount;
             List<int>? pages = null;
@@ -1491,30 +1494,41 @@ namespace KillerPDF
                 Title = Loc("Str_ExportDoc_Suffix"),
                 CheckFileExists = false,
                 CheckPathExists = true,
+                RequireFilterExtension = true,
                 FileName = System.IO.Path.GetFileNameWithoutExtension(_originalFile ?? _currentFile ?? "document") + extension
             };
-            if (save.ShowDialog(this) != true) return;
+            if (save.ShowDialog(this) != true || !sourceCurrent()) return;
+            string destination = System.IO.Path.GetFullPath(save.FileName);
+            if (new[] { currentSource, originalSource }.Any(source => source is not null
+                && string.Equals(System.IO.Path.GetFullPath(source), destination, StringComparison.OrdinalIgnoreCase)))
+            {
+                KillerDialog.Show(this, Loc("Str_Merge_SourceOutput"));
+                return;
+            }
 
             bool operationStarted = false;
             CancellationToken cancellation = default;
+            string? snapshot = null;
             try
             {
-                var document = EnsureEngineDocumentSession().Document;
-                PdfStructuredExportReport losses = PdfStructuredExport.InspectLosses(document, options.Format, pages);
+                snapshot = WriteSavedCopyToTemp(forRasterization: options.OfficeMode == PdfOfficeExportMode.PageImages);
+                var document = PdfEngineIntegration.OpenForReading(System.IO.File.ReadAllBytes(snapshot));
+                PdfStructuredExportReport losses = PdfStructuredExport.InspectLosses(document, options.Format, pages, officeMode: options.OfficeMode);
                 if (!losses.IsLossless)
                 {
                     string warning = string.Format(Loc("Str_ExportDoc_LossWarning"), losses.Findings.Count);
                     if (KillerDialog.Show(this, warning, Loc("Str_ExportDoc_Suffix"),
                         MessageBoxButton.OKCancel, MessageBoxImage.Warning) != MessageBoxResult.OK) return;
                 }
+                if (!sourceCurrent()) return;
 
                 cancellation = BeginCancellableOp(Loc("Str_Op_Export"));
                 operationStarted = true;
                 byte[] output = await Task.Run(() => PdfStructuredExport.Export(
-                    document, options.Format, pages, cancellationToken: cancellation), cancellation);
-                if (cancellation.IsCancellationRequested) return;
-                await AtomicFileOutput.WriteAsync(save.FileName, output, cancellation);
-                SetStatus(string.Format(Loc("Str_ExportDoc_Done"), System.IO.Path.GetFileName(save.FileName)));
+                    document, options.Format, pages, cancellationToken: cancellation, officeMode: options.OfficeMode), cancellation);
+                if (cancellation.IsCancellationRequested || !sourceCurrent()) return;
+                await AtomicFileOutput.WriteAsync(destination, output, cancellation);
+                if (sourceCurrent()) SetStatus(string.Format(Loc("Str_ExportDoc_Done"), System.IO.Path.GetFileName(destination)));
             }
             catch (OperationCanceledException) { }
             catch (Exception ex)
@@ -1525,6 +1539,8 @@ namespace KillerPDF
             finally
             {
                 if (operationStarted) EndCancellableOp(cancellation);
+                if (snapshot is not null)
+                    try { System.IO.File.Delete(snapshot); } catch (System.IO.IOException) { }
             }
         }
 

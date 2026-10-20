@@ -1790,4 +1790,8 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Watch_AuditAttachments">Zkontrolovat přílohy</sys:String>
     <sys:String x:Key="Str_Watch_RemoveAttachments">Odstranit přílohy</sys:String>
     <sys:String x:Key="Str_Watch_FlattenLayers">Sloučit vrstvy</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Layout">Rozvržení</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Editable">Upravitelný obsah</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImages">Obrázky stránek</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImagesHint">Každá stránka se převede na obrázek. Text a buňky tabulek nelze upravovat samostatně.</sys:String>
 </ResourceDictionary>

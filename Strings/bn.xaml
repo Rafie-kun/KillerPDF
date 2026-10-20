@@ -1785,4 +1785,8 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Watch_AuditAttachments">সংযুক্তি পরীক্ষা করুন</sys:String>
     <sys:String x:Key="Str_Watch_RemoveAttachments">সংযুক্তি সরান</sys:String>
     <sys:String x:Key="Str_Watch_FlattenLayers">লেয়ার একত্র করুন</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Layout">বিন্যাস</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Editable">সম্পাদনাযোগ্য বিষয়বস্তু</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImages">পৃষ্ঠার ছবি</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImagesHint">প্রতিটি পৃষ্ঠা একটি ছবিতে পরিণত হয়। লেখা ও টেবিলের ঘর আলাদাভাবে সম্পাদনা করা যাবে না।</sys:String>
 </ResourceDictionary>

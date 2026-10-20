@@ -1805,4 +1805,8 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_Watch_AuditAttachments">Controlla allegati</sys:String>
     <sys:String x:Key="Str_Watch_RemoveAttachments">Rimuovi allegati</sys:String>
     <sys:String x:Key="Str_Watch_FlattenLayers">Appiattisci livelli</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Layout">Layout</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Editable">Contenuto modificabile</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImages">Immagini delle pagine</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImagesHint">Ogni pagina diventa un'immagine. Il testo e le celle delle tabelle non possono essere modificati separatamente.</sys:String>
 </ResourceDictionary>

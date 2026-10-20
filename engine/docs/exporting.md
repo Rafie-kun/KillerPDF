@@ -51,8 +51,9 @@ unsupported text direction, limits, and uncertain content. Source extraction
 diagnostics cause `UncertainContent` and remain available in `Diagnostics`.
 Visibility checks are deliberately conservative: the extracted path model does
 not retain per-path opacity and clipping state. Pages using clipping, extended
-graphics states, XObjects, optional content, resource color spaces, white paint,
+graphics states, unsupported XObjects, optional content, resource color spaces, white paint,
 or invisible text are rejected, even when that state occurs outside the selection.
+Isolated image placements wholly outside the table selection do not block extraction.
 Explicit stroke widths greater than two points and page content transforms that
 can enlarge stroke extents are also rejected because the path model does not
 retain the painted stroke footprint or paint order. Translation, quarter-turn
@@ -122,15 +123,38 @@ automatically by findings. Retain the source and inspect the result.
 | `Html` | Page sections, text paragraphs and font spans, empty image figures, and a separate page-link list. |
 | `Markdown` | Page headings, escaped text, and image placeholders with empty targets. |
 | `Json` | Page dimensions, line/run text and bounds, direction, image placements, links, and extraction diagnostics. |
-| `WordDocument` | DOCX paragraphs and editable text runs, page breaks, and textual image placeholders. |
+| `WordDocument` | DOCX paragraphs, editable text and complete ruled tables, embedded pictures, and page breaks. |
 | `Spreadsheet` | XLSX with one sheet containing Page, Line, and Text columns; it does not reconstruct PDF tables. |
-| `Presentation` | PPTX with one slide per selected page, positioned editable text, and image placeholders. |
+| `Presentation` | PPTX with one slide per selected page, positioned editable text, complete ruled tables, and embedded pictures. |
 
-No format embeds the original image data or vector paths. JSON's geometry is
+Word and PowerPoint embed supported images as PNG pictures. Unsupported images
+retain placeholders and appear in the loss report. Clipping, external graphics
+states, stencil masks and placements outside the page require page-image mode.
+General vector paths are not
+converted to editable shapes. JSON's geometry is
 unrotated, crop-relative PDF points with a bottom-left origin. Its exported
 `page` and link `destinationPage` values are one-based; annotation indices and
 the loss report's `PageIndex` remain zero-based. The JSON output is an array of
 page records, not the loss-report schema.
+
+For Word and PowerPoint, pass `officeMode: PdfOfficeExportMode.PageImages` to
+`Export`, `ToDocx`, or `ToPptx` to render each selected page as a picture instead.
+This explicit mode retains page appearance but removes separate text and cell
+editability. `InspectLosses` accepts the same mode and reports that tradeoff.
+Incomplete page renders stop export. Rendering is bounded to twice the PDF point
+dimensions and a maximum edge of 4096 pixels. Individual editable-mode pictures
+use a maximum edge of 2048 pixels.
+
+The default remains `PdfOfficeExportMode.Editable`, including older saved macros.
+Batch `Run` and `RunReport`, and `PdfStructuredExportMacro.Step`, accept the same
+option. Only complete axis-aligned ruled tables are reconstructed; merged,
+unruled, scanned, and uncertain tables remain outside this slice. Editable export
+reconstructs content and does not guarantee the original page layout or fonts.
+
+The desktop command line accepts `--export input.pdf output.docx --layout images`
+for page pictures, or `--layout editable` for editable text, paragraphs, pictures
+and supported ruled tables. The layout option applies to DOCX and PPTX output;
+other formats reject `images`. `--pages` and `--report` remain available.
 
 ## Export selected pages
 

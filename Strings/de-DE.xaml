@@ -1794,4 +1794,8 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Watch_AuditAttachments">Anhänge prüfen</sys:String>
     <sys:String x:Key="Str_Watch_RemoveAttachments">Anhänge entfernen</sys:String>
     <sys:String x:Key="Str_Watch_FlattenLayers">Ebenen reduzieren</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Layout">Layout</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Editable">Bearbeitbarer Inhalt</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImages">Seitenbilder</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImagesHint">Jede Seite wird zu einem Bild. Text und Tabellenzellen können nicht einzeln bearbeitet werden.</sys:String>
 </ResourceDictionary>

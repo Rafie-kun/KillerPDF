@@ -1793,4 +1793,8 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Watch_AuditAttachments">Sprawdź załączniki</sys:String>
     <sys:String x:Key="Str_Watch_RemoveAttachments">Usuń załączniki</sys:String>
     <sys:String x:Key="Str_Watch_FlattenLayers">Spłaszcz warstwy</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Layout">Układ</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Editable">Edytowalna zawartość</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImages">Obrazy stron</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImagesHint">Każda strona staje się obrazem. Tekstu i komórek tabel nie można edytować oddzielnie.</sys:String>
 </ResourceDictionary>

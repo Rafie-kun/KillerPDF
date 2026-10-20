@@ -18,7 +18,7 @@ internal static class TableExportSmoke
 {
     private const BindingFlags Members = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
 
-    internal static int Run(string appPath, string appXaml, string folder, bool grainThemes = false, bool dialogText = false, bool sidebarActions = false)
+    internal static int Run(string appPath, string appXaml, string folder, bool officeExport = false, bool grainThemes = false, bool dialogText = false, bool sidebarActions = false)
     {
         if (!Environment.GetCommandLineArgs().Contains("--startup-smoke"))
             throw new InvalidOperationException("Startup smoke isolation is required.");
@@ -69,6 +69,7 @@ internal static class TableExportSmoke
             if (dialogText) return DialogTextSmoke.Run(owner, assembly, folder);
             if (grainThemes) return GrainThemeSmoke.Run(owner, assembly, folder);
             VerifySidebarContextMenu(owner);
+            if (officeExport) return OfficeExportSmoke.Run(owner, assembly, appPath, folder);
             Assembly engine = Assembly.Load("KillerPdf.Engine");
             byte[] fixture = Fixture();
             string originalHash = Convert.ToHexString(SHA256.HashData(fixture));

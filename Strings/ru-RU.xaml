@@ -1808,4 +1808,8 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Watch_AuditAttachments">Проверить вложения</sys:String>
     <sys:String x:Key="Str_Watch_RemoveAttachments">Удалить вложения</sys:String>
     <sys:String x:Key="Str_Watch_FlattenLayers">Объединить слои</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Layout">Макет</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Editable">Редактируемое содержимое</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImages">Изображения страниц</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImagesHint">Каждая страница становится изображением. Текст и ячейки таблиц нельзя редактировать отдельно.</sys:String>
 </ResourceDictionary>

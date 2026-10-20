@@ -30,19 +30,13 @@ internal static class MacroStepEditor
         {
             if (step.Operation == PdfMacroOperation.Export)
             {
-                PdfStructuredExportFormat[] formats = [PdfStructuredExportFormat.WordDocument,
-                    PdfStructuredExportFormat.Spreadsheet, PdfStructuredExportFormat.Presentation,
-                    PdfStructuredExportFormat.Html, PdfStructuredExportFormat.Markdown,
-                    PdfStructuredExportFormat.PlainText, PdfStructuredExportFormat.Json];
-                var select = new DocumentListDialog(owner, L("Str_ExportDoc_Suffix"),
-                    ["Word (.docx)", "Excel (.xlsx)", "PowerPoint (.pptx)", "HTML (.html)",
-                        "Markdown (.md)", "TXT (.txt)", "JSON (.json)"])
-                { Width = 540, Height = 310, MinHeight = 290 };
-                select.SelectedIndex = step.Settings is null ? 0
-                    : Array.IndexOf(formats, PdfStructuredExportMacro.ReadFormat(step));
-                if (select.ShowDialog() != true) return null;
-                return step.Settings is null ? PdfStructuredExportMacro.Step(formats[select.SelectedIndex])
-                    : PdfStructuredExportMacro.WithFormat(step, formats[select.SelectedIndex]);
+                var select = new ExportDocumentDialog(owner,
+                    step.Settings is null ? PdfStructuredExportFormat.WordDocument : PdfStructuredExportMacro.ReadFormat(step),
+                    step.Settings is null ? PdfOfficeExportMode.Editable : PdfStructuredExportMacro.ReadOfficeMode(step), false);
+                select.ShowDialog();
+                if (!select.Confirmed) return null;
+                return step.Settings is null ? PdfStructuredExportMacro.Step(select.Format, officeMode: select.OfficeMode)
+                    : PdfStructuredExportMacro.WithOfficeMode(PdfStructuredExportMacro.WithFormat(step, select.Format), select.OfficeMode);
             }
             if (step.Operation == PdfMacroOperation.ConvertColor)
             {

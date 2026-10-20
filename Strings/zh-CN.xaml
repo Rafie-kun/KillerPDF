@@ -1789,4 +1789,8 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Watch_AuditAttachments">检查附件</sys:String>
     <sys:String x:Key="Str_Watch_RemoveAttachments">删除附件</sys:String>
     <sys:String x:Key="Str_Watch_FlattenLayers">合并图层</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Layout">布局</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Editable">可编辑内容</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImages">页面图片</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImagesHint">每页都会转换为图片。无法单独编辑文字和表格单元格。</sys:String>
 </ResourceDictionary>

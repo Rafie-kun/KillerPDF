@@ -1792,4 +1792,8 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Watch_AuditAttachments">Mellékletek ellenőrzése</sys:String>
     <sys:String x:Key="Str_Watch_RemoveAttachments">Mellékletek eltávolítása</sys:String>
     <sys:String x:Key="Str_Watch_FlattenLayers">Rétegek összeolvasztása</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Layout">Elrendezés</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Editable">Szerkeszthető tartalom</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImages">Oldalképek</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImagesHint">Minden oldal képpé alakul. A szöveg és a táblázatcellák külön nem szerkeszthetők.</sys:String>
 </ResourceDictionary>

@@ -1785,4 +1785,8 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Watch_AuditAttachments">Ekleri denetle</sys:String>
     <sys:String x:Key="Str_Watch_RemoveAttachments">Ekleri kaldır</sys:String>
     <sys:String x:Key="Str_Watch_FlattenLayers">Katmanları düzleştir</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Layout">Düzen</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Editable">Düzenlenebilir içerik</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImages">Sayfa resimleri</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImagesHint">Her sayfa bir resme dönüşür. Metin ve tablo hücreleri ayrı ayrı düzenlenemez.</sys:String>
 </ResourceDictionary>

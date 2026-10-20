@@ -243,9 +243,22 @@ public static class PdfTableExtractor
     private static bool HasUncertainPaint(PdfPageContent page, CancellationToken cancellationToken)
     {
         if (page.MarkedContent.Any(mark => mark.IsOptionalContent)) return true;
-        foreach (var instruction in page.Instructions)
+        for (int index = 0; index < page.Instructions.Count; index++)
         {
+            var instruction = page.Instructions[index];
             cancellationToken.ThrowIfCancellationRequested();
+            // An isolated image placement cannot alter the following table's graphics state.
+            // Image overlap with the selected region is checked separately.
+            if (instruction.Operator == "q" && index + 3 < page.Instructions.Count
+                && page.Instructions[index + 1].Operator == "cm"
+                && page.Instructions[index + 2].Operator == "Do"
+                && page.Instructions[index + 3].Operator == "Q"
+                && page.Instructions[index + 2].Operands is [PdfName name]
+                && page.Images.Any(image => !image.IsInline && image.ResourceName == name.ValueAsLatin1()))
+            {
+                index += 3;
+                continue;
+            }
             // The extracted paths do not carry visibility, clipping, or resource state.
             // Reject these states for the whole page rather than infer visible grid lines.
             if (instruction.Operator is "gs" or "W" or "W*" or "Do" or "CS" or "cs"

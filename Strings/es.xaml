@@ -1785,4 +1785,8 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Watch_AuditAttachments">Comprobar archivos adjuntos</sys:String>
     <sys:String x:Key="Str_Watch_RemoveAttachments">Eliminar archivos adjuntos</sys:String>
     <sys:String x:Key="Str_Watch_FlattenLayers">Acoplar capas</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Layout">Diseño</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Editable">Contenido editable</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImages">Imágenes de páginas</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImagesHint">Cada página se convierte en una imagen. El texto y las celdas de las tablas no se pueden editar por separado.</sys:String>
 </ResourceDictionary>

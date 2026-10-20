@@ -338,7 +338,7 @@ public sealed class PdfPageContentReader
                         var subtype = xobject.Dictionary.TryGetValue(Name("Subtype"), out var type) ? Resolve(type) as PdfName : null;
                         if (subtype?.ValueAsLatin1() == "Image")
                         {
-                            Image(ctm, clip, xName.ValueAsLatin1(), false, xobject.Dictionary, xobject);
+                            Image(ctm, clip, xName.ValueAsLatin1(), false, xobject.Dictionary, current, xobject);
                             continue;
                         }
                         if (subtype?.ValueAsLatin1() != "Form") continue;
@@ -378,7 +378,7 @@ public sealed class PdfPageContentReader
                     case "BI":
                         if (args.Count != 1 || args[0] is not PdfDictionary inlineImage)
                             throw new FormatException("Invalid inline image dictionary.");
-                        Image(ctm, clip, null, true, inlineImage);
+                        Image(ctm, clip, null, true, inlineImage, current);
                         continue;
                     case "sh":
                         if (args.Count != 1 || args[0] is not PdfName shadingName
@@ -462,7 +462,7 @@ public sealed class PdfPageContentReader
             };
         }
         void Image(Matrix matrix, PdfContentBounds clip, string? resourceName, bool isInline, PdfDictionary dictionary,
-            PdfStream? source = null)
+            PdfDictionary imageResources, PdfStream? source = null)
         {
             var bounds = Intersect(Transform(new(0, 0, 1, 1), matrix), clip);
             double renderedWidth = Math.Sqrt(matrix.A * matrix.A + matrix.B * matrix.B);
@@ -473,7 +473,8 @@ public sealed class PdfPageContentReader
                 images.Add(new(bounds, resourceName, isInline, pixelWidth, pixelHeight, renderedWidth, renderedHeight)
                 {
                     Source = source,
-                    Placement = matrix
+                    Placement = matrix,
+                    Resources = imageResources
                 });
         }
         int ImageDimension(PdfDictionary dictionary, string key)

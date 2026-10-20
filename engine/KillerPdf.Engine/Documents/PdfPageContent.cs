@@ -85,6 +85,7 @@ public sealed record PdfExtractedImage(
     internal PdfStream? Source { get; init; }
     /// <summary>Gets the matrix that maps the image's unit square onto the page.</summary>
     internal PdfTextContentReader.Matrix? Placement { get; init; }
+    internal PdfDictionary? Resources { get; init; }
 
     /// <summary>Gets the effective horizontal resolution in dots per inch.</summary>
     public double? HorizontalDpi => PixelWidth > 0 && RenderedWidth > 0

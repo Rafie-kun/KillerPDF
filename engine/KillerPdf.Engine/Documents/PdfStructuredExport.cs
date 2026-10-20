@@ -255,21 +255,22 @@ public static class PdfStructuredExportBatchRunner
     /// <summary>Exports a document batch and returns aggregate, data-safe outcomes.</summary>
     public static PdfStructuredExportBatchReport RunReport(
         IEnumerable<PdfStructuredExportBatchItem> items, PdfStructuredExportFormat format,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default, PdfOfficeExportMode officeMode = PdfOfficeExportMode.Editable)
     {
         ArgumentNullException.ThrowIfNull(items);
         PdfStructuredExportBatchItem[] supplied = [.. items];
         return new PdfStructuredExportBatchReport(supplied.Length,
-            Run(supplied, format, cancellationToken));
+            Run(supplied, format, cancellationToken, officeMode));
     }
 
     /// <summary>Exports each document independently.</summary>
     public static IReadOnlyList<PdfStructuredExportBatchResult> Run(
         IEnumerable<PdfStructuredExportBatchItem> items, PdfStructuredExportFormat format,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default, PdfOfficeExportMode officeMode = PdfOfficeExportMode.Editable)
     {
         ArgumentNullException.ThrowIfNull(items);
         if (!Enum.IsDefined(format)) throw new ArgumentOutOfRangeException(nameof(format));
+        PdfStructuredExport.ValidateOfficeMode(format, officeMode);
         PdfStructuredExportBatchItem[] supplied = [.. items];
         string[] outputNames = [.. supplied.Select(item => OutputName(item.SourceName, format))];
         if (outputNames.Distinct(StringComparer.OrdinalIgnoreCase).Count() != outputNames.Length)
@@ -289,9 +290,9 @@ public static class PdfStructuredExportBatchRunner
                     document = PdfDocument.Open(item.OcrReview.WriteSearchableText(
                         document, item.OcrFont!));
                 PdfStructuredExportReport losses = PdfStructuredExport.InspectLosses(
-                    document, format, item.PageIndices, cancellationToken);
+                    document, format, item.PageIndices, cancellationToken, officeMode);
                 byte[] data = PdfStructuredExport.Export(
-                    document, format, item.PageIndices, cancellationToken: cancellationToken);
+                    document, format, item.PageIndices, cancellationToken: cancellationToken, officeMode: officeMode);
                 results.Add(new PdfStructuredExportBatchResult(
                     item, data, null, false, outputNames[itemIndex], losses));
             }
@@ -349,10 +350,11 @@ public static partial class PdfStructuredExport
         IEnumerable<int>? pageIndices = null, PdfOcrReview? ocrReview = null,
         TrueTypeFont? ocrFont = null,
         PdfStructuredExportFontSubstitutions? fontSubstitutions = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default, PdfOfficeExportMode officeMode = PdfOfficeExportMode.Editable)
     {
         ArgumentNullException.ThrowIfNull(document);
         if (!Enum.IsDefined(format)) throw new ArgumentOutOfRangeException(nameof(format));
+        ValidateOfficeMode(format, officeMode);
         if (ocrReview is null && ocrFont is not null)
             throw new ArgumentException(
                 "An OCR font cannot be supplied without a reviewed OCR result.", nameof(ocrFont));
@@ -374,11 +376,11 @@ public static partial class PdfStructuredExport
             PdfStructuredExportFormat.Json => Encoding.UTF8.GetBytes(
                 ToJson(document, pageIndices, cancellationToken)),
             PdfStructuredExportFormat.WordDocument =>
-                ToDocx(document, pageIndices, fontSubstitutions, cancellationToken),
+                ToDocx(document, pageIndices, fontSubstitutions, cancellationToken, officeMode),
             PdfStructuredExportFormat.Spreadsheet =>
                 ToXlsx(document, pageIndices, cancellationToken),
             PdfStructuredExportFormat.Presentation =>
-                ToPptx(document, pageIndices, fontSubstitutions, cancellationToken),
+                ToPptx(document, pageIndices, fontSubstitutions, cancellationToken, officeMode),
             _ => throw new ArgumentOutOfRangeException(nameof(format))
         };
     }
@@ -386,12 +388,19 @@ public static partial class PdfStructuredExport
     /// <summary>Reports source content that the selected export cannot fully represent.</summary>
     public static PdfStructuredExportReport InspectLosses(PdfDocument document,
         PdfStructuredExportFormat format, IEnumerable<int>? pageIndices = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default, PdfOfficeExportMode officeMode = PdfOfficeExportMode.Editable)
     {
         if (!Enum.IsDefined(format)) throw new ArgumentOutOfRangeException(nameof(format));
+        ValidateOfficeMode(format, officeMode);
         var findings = new List<PdfStructuredExportFinding>();
         foreach (Page page in Read(document, pageIndices, cancellationToken))
         {
+            if (officeMode == PdfOfficeExportMode.PageImages)
+            {
+                findings.Add(new("PageImagesNotEditable", page.Index, 1,
+                    "This page is exported as a picture. Text, tables, links, and other objects cannot be edited separately."));
+                continue;
+            }
             if (page.Content.Paths.Count > 0)
                 findings.Add(new PdfStructuredExportFinding("VectorContentNotExported",
                     page.Index, page.Content.Paths.Count,
@@ -405,7 +414,13 @@ public static partial class PdfStructuredExport
                         "TextDirectionNotPreserved", page.Index, directionalTextCount,
                         "Non-horizontal or reversed text direction is not preserved by this export."));
             }
-            if (page.Content.Images.Count > 0)
+            int missingImages = page.Content.Images.Count;
+            if (format is PdfStructuredExportFormat.WordDocument or PdfStructuredExportFormat.Presentation)
+            {
+                var renderer = new KillerPdf.Engine.Rendering.PdfPageRenderer(document);
+                missingImages = page.Content.Images.Count(image => RenderOfficeImage(renderer, page.Content, image, cancellationToken) is null);
+            }
+            if (missingImages > 0)
             {
                 string message = format switch
                 {
@@ -418,15 +433,15 @@ public static partial class PdfStructuredExport
                     PdfStructuredExportFormat.Json =>
                         "JSON export contains image placement without image data.",
                     PdfStructuredExportFormat.WordDocument =>
-                        "Word export contains image placeholders without image data.",
+                        "Unsupported images are replaced with placeholders. Page-image mode can retain their rendered appearance.",
                     PdfStructuredExportFormat.Spreadsheet =>
                         "Spreadsheet export omits image data.",
                     PdfStructuredExportFormat.Presentation =>
-                        "Presentation export contains image placeholders without image data.",
+                        "Unsupported images are replaced with placeholders. Page-image mode can retain their rendered appearance.",
                     _ => throw new ArgumentOutOfRangeException(nameof(format))
                 };
                 findings.Add(new PdfStructuredExportFinding("ImageContentNotExported",
-                    page.Index, page.Content.Images.Count, message));
+                    page.Index, missingImages, message));
             }
             if (format is not (PdfStructuredExportFormat.Html or PdfStructuredExportFormat.Json))
             {
@@ -602,8 +617,9 @@ public static partial class PdfStructuredExport
     /// <summary>Exports selected pages as an editable Office Open XML Word document.</summary>
     public static byte[] ToDocx(PdfDocument document, IEnumerable<int>? pageIndices = null,
         PdfStructuredExportFontSubstitutions? fontSubstitutions = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default, PdfOfficeExportMode officeMode = PdfOfficeExportMode.Editable)
     {
+        ValidateOfficeMode(PdfStructuredExportFormat.WordDocument, officeMode);
         IReadOnlyList<Page> pages = Read(document, pageIndices, cancellationToken);
         using var output = new MemoryStream();
         using (var archive = new ZipArchive(output, ZipArchiveMode.Create, leaveOpen: true))
@@ -614,6 +630,7 @@ public static partial class PdfStructuredExport
                 "<Default Extension=\"rels\" ContentType=\"application/vnd.openxmlformats-package.relationships+xml\"/>" +
                 "<Default Extension=\"xml\" ContentType=\"application/xml\"/>" +
                 "<Override PartName=\"/word/document.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml\"/>" +
+                "<Default Extension=\"png\" ContentType=\"image/png\"/>" +
                 "</Types>");
             WriteEntry(archive, "_rels/.rels",
                 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
@@ -622,29 +639,85 @@ public static partial class PdfStructuredExport
                 "</Relationships>");
 
             var body = new StringBuilder();
+            var imageRelationships = new StringBuilder();
+            var imageRenderer = new KillerPdf.Engine.Rendering.PdfPageRenderer(document);
+            int imageId = 0;
+            string finalSection = "<w:sectPr/>";
             for (int pageIndex = 0; pageIndex < pages.Count; pageIndex++)
             {
-                if (pageIndex > 0) body.Append("<w:p><w:r><w:br w:type=\"page\"/></w:r></w:p>");
-                foreach (PdfExtractedLine line in pages[pageIndex].Content.Lines)
+                if (officeMode == PdfOfficeExportMode.PageImages)
                 {
-                    body.Append("<w:p>");
-                    string runText = string.Concat(line.Runs.Select(run => run.Text));
-                    if (line.Runs.Count == 0 || runText != line.Text)
-                        AppendWordRun(body, line.Text, line.Runs.Count > 0 ? line.Runs[0] : null, fontSubstitutions);
-                    else
-                        foreach (PdfExtractedTextRun run in line.Runs)
-                            AppendWordRun(body, run.Text, run, fontSubstitutions);
-                    body.Append("</w:p>");
+                    var size = OfficePageSize(document, pages[pageIndex].Index);
+                    var bitmap = RenderOfficePage(document, pages[pageIndex].Index, cancellationToken);
+                    imageId++;
+                    using (Stream asset = archive.CreateEntry($"word/media/image{imageId}.png").Open())
+                        asset.Write(PdfOfficeImage.Encode(bitmap, cancellationToken));
+                    imageRelationships.Append("<Relationship Id=\"rId").Append(imageId)
+                        .Append("\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/image\" Target=\"media/image")
+                        .Append(imageId).Append(".png\"/>");
+                    double imageHeight = Math.Max(1, size.Height - 4);
+                    AppendWordImage(body, imageId, size.Width * imageHeight / size.Height, imageHeight);
+                    finalSection = WordPageSection(size.Width, size.Height);
+                    if (pageIndex < pages.Count - 1)
+                        body.Append("<w:p><w:pPr>").Append(finalSection).Append("</w:pPr></w:p>");
+                    continue;
                 }
-                foreach (PdfExtractedImage image in pages[pageIndex].Content.Images)
-                    body.Append("<w:p><w:r><w:t>[Image: ")
+                if (pageIndex > 0) body.Append("<w:p><w:r><w:br w:type=\"page\"/></w:r></w:p>");
+                IReadOnlyList<PdfExtractedTable> tables = FindOfficeTables(document, pages[pageIndex], cancellationToken);
+                var blocks = new List<(double Top, double Left, object Value)>();
+                blocks.AddRange(tables.Select(table => (table.Bounds.Top, table.Bounds.Left, (object)table)));
+                blocks.AddRange(OfficeLines(pages[pageIndex].Content, tables).Select(line => (line.BoundingBox.Top, line.BoundingBox.Left, (object)line)));
+                blocks.AddRange(pages[pageIndex].Content.Images.Select(image => (image.BoundingBox.Top, image.BoundingBox.Left, (object)image)));
+                var paragraph = new List<PdfExtractedLine>();
+                double? previousBottom = null;
+                void FlushParagraph()
+                {
+                    if (paragraph.Count == 0) return;
+                    double gap = previousBottom is double bottom ? Math.Max(0, bottom - paragraph[0].BoundingBox.Top) : 0;
+                    AppendWordParagraph(body, paragraph, gap, fontSubstitutions);
+                    previousBottom = paragraph[^1].BoundingBox.Bottom;
+                    paragraph.Clear();
+                }
+                foreach (var block in blocks.OrderByDescending(block => block.Top).ThenBy(block => block.Left))
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (block.Value is PdfExtractedLine line)
+                    {
+                        if (paragraph.Count > 0 && !ContinuesOfficeParagraph(paragraph[^1], line)) FlushParagraph();
+                        paragraph.Add(line);
+                        continue;
+                    }
+                    FlushParagraph();
+                    if (block.Value is PdfExtractedTable table)
+                    {
+                        AppendWordTable(body, table, fontSubstitutions);
+                        previousBottom = table.Bounds.Bottom;
+                        continue;
+                    }
+                    var image = (PdfExtractedImage)block.Value;
+                    var bitmap = RenderOfficeImage(imageRenderer, pages[pageIndex].Content, image, cancellationToken);
+                    if (bitmap is not null)
+                    {
+                        imageId++;
+                        using (Stream asset = archive.CreateEntry($"word/media/image{imageId}.png").Open())
+                            asset.Write(PdfOfficeImage.Encode(bitmap, cancellationToken));
+                        imageRelationships.Append("<Relationship Id=\"rId").Append(imageId)
+                            .Append("\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/image\" Target=\"media/image")
+                            .Append(imageId).Append(".png\"/>");
+                        AppendWordImage(body, imageId, image.BoundingBox.Width, image.BoundingBox.Height);
+                    }
+                    else body.Append("<w:p><w:r><w:t>[Image: ")
                         .Append(WebUtility.HtmlEncode(image.ResourceName ?? "inline"))
                         .Append("]</w:t></w:r></w:p>");
+                    previousBottom = image.BoundingBox.Bottom;
+                }
+                FlushParagraph();
             }
+            WriteEntry(archive, "word/_rels/document.xml.rels", Relationships(imageRelationships.ToString()));
             WriteEntry(archive, "word/document.xml",
                 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
                 "<w:document xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\">" +
-                "<w:body>" + body + "<w:sectPr/></w:body></w:document>");
+                "<w:body>" + body + finalSection + "</w:body></w:document>");
         }
         return output.ToArray();
     }
@@ -717,12 +790,18 @@ public static partial class PdfStructuredExport
     /// <summary>Exports selected pages as editable Office Open XML presentation slides.</summary>
     public static byte[] ToPptx(PdfDocument document, IEnumerable<int>? pageIndices = null,
         PdfStructuredExportFontSubstitutions? fontSubstitutions = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default, PdfOfficeExportMode officeMode = PdfOfficeExportMode.Editable)
     {
+        ValidateOfficeMode(PdfStructuredExportFormat.Presentation, officeMode);
         IReadOnlyList<Page> pages = Read(document, pageIndices, cancellationToken);
         const long slideWidth = 9_144_000;
         double aspect = pages.Count == 0 || pages[0].Content.Width <= 0
             ? 0.75 : pages[0].Content.Height / pages[0].Content.Width;
+        if (officeMode == PdfOfficeExportMode.PageImages && pages.Count > 0)
+        {
+            var size = OfficePageSize(document, pages[0].Index);
+            aspect = size.Height / size.Width;
+        }
         long slideHeight = Math.Max(1, (long)Math.Round(slideWidth * aspect));
         using var output = new MemoryStream();
         using (var archive = new ZipArchive(output, ZipArchiveMode.Create, leaveOpen: true))
@@ -740,8 +819,11 @@ public static partial class PdfStructuredExport
                 relationships.Append("<Relationship Id=\"rId").Append(number + 1)
                     .Append("\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide\" Target=\"slides/slide")
                     .Append(number).Append(".xml\"/>");
-                WritePresentationSlide(archive, pages[index], number, slideWidth, slideHeight,
-                    fontSubstitutions);
+                if (officeMode == PdfOfficeExportMode.PageImages)
+                    WritePresentationPageImage(archive, document, pages[index].Index, number, slideWidth, slideHeight, cancellationToken);
+                else WritePresentationSlide(archive, pages[index], number, slideWidth, slideHeight,
+                    fontSubstitutions, FindOfficeTables(document, pages[index], cancellationToken),
+                    new KillerPdf.Engine.Rendering.PdfPageRenderer(document), cancellationToken);
             }
             WriteEntry(archive, "[Content_Types].xml",
                 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
@@ -749,6 +831,7 @@ public static partial class PdfStructuredExport
                 "<Default Extension=\"rels\" ContentType=\"application/vnd.openxmlformats-package.relationships+xml\"/>" +
                 "<Default Extension=\"xml\" ContentType=\"application/xml\"/>" +
                 "<Override PartName=\"/ppt/presentation.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml\"/>" +
+                "<Default Extension=\"png\" ContentType=\"image/png\"/>" +
                 "<Override PartName=\"/ppt/slideMasters/slideMaster1.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.presentationml.slideMaster+xml\"/>" +
                 "<Override PartName=\"/ppt/slideLayouts/slideLayout1.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.presentationml.slideLayout+xml\"/>" +
                 "<Override PartName=\"/ppt/theme/theme1.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.theme+xml\"/>" +
@@ -769,24 +852,41 @@ public static partial class PdfStructuredExport
 
     private static void WritePresentationSlide(ZipArchive archive, Page page, int number,
         long slideWidth, long slideHeight,
-        PdfStructuredExportFontSubstitutions? fontSubstitutions)
+        PdfStructuredExportFontSubstitutions? fontSubstitutions,
+        IReadOnlyList<PdfExtractedTable> tables,
+        KillerPdf.Engine.Rendering.PdfPageRenderer imageRenderer, CancellationToken cancellationToken)
     {
         var shapes = new StringBuilder();
+        var images = new StringBuilder();
         PresentationPageLayout layout = FitPresentationPage(
             page.Content.Width, page.Content.Height, slideWidth, slideHeight);
         int id = 2;
-        foreach (PdfExtractedLine line in page.Content.Lines)
+        foreach (PdfExtractedTable table in tables)
+            AppendPresentationTable(shapes, id++, table, page.Content.Height, layout, fontSubstitutions);
+        foreach (PdfExtractedLine line in OfficeLines(page.Content, tables))
             AppendPresentationText(shapes, id++, line.Text, line.BoundingBox,
                 page.Content.Height, layout, line.Runs, fontSubstitutions);
         foreach (PdfExtractedImage image in page.Content.Images)
-            AppendPresentationText(shapes, id++, "[Image: " + (image.ResourceName ?? "inline") + "]",
+        {
+            var bitmap = RenderOfficeImage(imageRenderer, page.Content, image, cancellationToken);
+            if (bitmap is not null)
+            {
+                using (Stream asset = archive.CreateEntry($"ppt/media/image{number}_{id}.png").Open())
+                    asset.Write(PdfOfficeImage.Encode(bitmap, cancellationToken));
+                images.Append("<Relationship Id=\"rId").Append(id)
+                    .Append("\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/image\" Target=\"../media/image")
+                    .Append(number).Append('_').Append(id).Append(".png\"/>");
+                AppendPresentationImage(shapes, id++, image.BoundingBox, page.Content.Height, layout);
+            }
+            else AppendPresentationText(shapes, id++, "[Image: " + (image.ResourceName ?? "inline") + "]",
                 image.BoundingBox, page.Content.Height, layout, null, fontSubstitutions);
+        }
         WriteEntry(archive, $"ppt/slides/slide{number}.xml",
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
             "<p:sld xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:p=\"http://schemas.openxmlformats.org/presentationml/2006/main\"><p:cSld><p:spTree>" +
             GroupShape + shapes + "</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>");
         WriteEntry(archive, $"ppt/slides/_rels/slide{number}.xml.rels",
-            Relationships("<Relationship Id=\"rId1\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout\" Target=\"../slideLayouts/slideLayout1.xml\"/>"));
+            Relationships("<Relationship Id=\"rId1\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout\" Target=\"../slideLayouts/slideLayout1.xml\"/>" + images));
     }
 
     private static void AppendPresentationText(StringBuilder output, int id, string text,
@@ -804,7 +904,7 @@ public static partial class PdfStructuredExport
             .Append("\"/><p:cNvSpPr txBox=\"1\"/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x=\"")
             .Append(x).Append("\" y=\"").Append(y).Append("\"/><a:ext cx=\"")
             .Append(width).Append("\" cy=\"").Append(height)
-            .Append("\"/></a:xfrm><a:prstGeom prst=\"rect\"><a:avLst/></a:prstGeom><a:noFill/><a:ln><a:noFill/></a:ln></p:spPr><p:txBody><a:bodyPr wrap=\"none\"/><a:lstStyle/><a:p>");
+            .Append("\"/></a:xfrm><a:prstGeom prst=\"rect\"><a:avLst/></a:prstGeom><a:noFill/><a:ln><a:noFill/></a:ln></p:spPr><p:txBody><a:bodyPr wrap=\"none\" lIns=\"0\" rIns=\"0\" tIns=\"0\" bIns=\"0\"/><a:lstStyle/><a:p>");
         string runText = runs is null ? string.Empty : string.Concat(runs.Select(run => run.Text));
         if (runs is null || runs.Count == 0 || runText != text)
             AppendRun(text, runs is { Count: > 0 } ? runs[0] : null);
@@ -816,8 +916,8 @@ public static partial class PdfStructuredExport
         {
             string font = fontSubstitutions?.Resolve(run?.FontName, "Arial")
                 ?? (string.IsNullOrWhiteSpace(run?.FontName) ? "Arial" : run.FontName);
-            int size = run is null || !double.IsFinite(run.PointSize) || run.PointSize <= 0
-                ? 1200 : Math.Clamp((int)Math.Round(run.PointSize * 100), 100, 400000);
+            double points = run is null || !double.IsFinite(run.PointSize) || run.PointSize <= 0 ? 12 : run.PointSize;
+            int size = Math.Clamp((int)Math.Round(points * layout.EmuPerPoint / 127), 100, 400000);
             output.Append("<a:r><a:rPr lang=\"en-US\" sz=\"").Append(size)
                 .Append("\"><a:latin typeface=\"")
                 .Append(WebUtility.HtmlEncode(font))

@@ -1805,4 +1805,8 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Watch_AuditAttachments">Kontroller vedlegg</sys:String>
     <sys:String x:Key="Str_Watch_RemoveAttachments">Fjern vedlegg</sys:String>
     <sys:String x:Key="Str_Watch_FlattenLayers">Slå sammen lag</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Layout">Oppsett</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Editable">Redigerbart innhold</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImages">Sidebilder</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImagesHint">Hver side blir et bilde. Tekst og tabellceller kan ikke redigeres hver for seg.</sys:String>
 </ResourceDictionary>

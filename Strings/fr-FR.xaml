@@ -1805,4 +1805,8 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Watch_AuditAttachments">Vérifier les pièces jointes</sys:String>
     <sys:String x:Key="Str_Watch_RemoveAttachments">Supprimer les pièces jointes</sys:String>
     <sys:String x:Key="Str_Watch_FlattenLayers">Aplatir les calques</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Layout">Mise en page</sys:String>
+    <sys:String x:Key="Str_ExportDoc_Editable">Contenu modifiable</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImages">Images des pages</sys:String>
+    <sys:String x:Key="Str_ExportDoc_PageImagesHint">Chaque page devient une image. Le texte et les cellules des tableaux ne peuvent pas être modifiés séparément.</sys:String>
 </ResourceDictionary>
