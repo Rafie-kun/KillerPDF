@@ -132,6 +132,18 @@ namespace KillerPDF.Features
 
             var con = OpenBatchConsole();
             var (positionals, options) = ParseCliArgs(args, command);
+            if (options.ContainsKey(CliSecrets.Option))
+            {
+                // UTF-8, not the console code page, so passwords outside ASCII arrive intact.
+                using var secretInput = new StreamReader(Console.OpenStandardInput(), new UTF8Encoding(false));
+                string? problem = CliSecrets.Read(secretInput, options);
+                if (problem is not null)
+                {
+                    con.WriteLine(problem);
+                    exitCode = 2;
+                    return true;
+                }
+            }
 
             try
             {
@@ -486,6 +498,9 @@ namespace KillerPDF.Features
             "  killerpdf batch-render <in> <outDir> [--size <px>] [--pages <n>] [--log <f.csv>] [--quiet]",
             "                                           render the first pages of a file or tree to PNG",
             "                                           with per-page timings (render benchmark)",
+            "  --secrets-stdin                          read password, user-password, owner-password and",
+            "                                           pfx-password from standard input as one JSON object",
+            "                                           instead of the command line, where other programs can see them",
             "",
             "Exit codes: 0 success, 1 operation failed, 2 bad usage.",
             "Runs headless and works while the KillerPDF window is open.",
