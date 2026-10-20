@@ -28,6 +28,10 @@ internal sealed class MacroDialog : Window
 
     internal MacroDialog(Window owner, IEnumerable<PdfMacroOperation> supportedOperations,
         IEnumerable<PdfMacroOperation> addableOperations)
+        : this(owner, supportedOperations, addableOperations, null) { }
+
+    internal MacroDialog(Window owner, IEnumerable<PdfMacroOperation> supportedOperations,
+        IEnumerable<PdfMacroOperation> addableOperations, Action<Window>? openWatchedFolders)
     {
         ArgumentNullException.ThrowIfNull(supportedOperations);
         ArgumentNullException.ThrowIfNull(addableOperations);
@@ -89,6 +93,13 @@ internal sealed class MacroDialog : Window
             sourceChoices.Children.Add(choice);
         }
         bottom.Children.Add(sourceChoices);
+        if (openWatchedFolders is not null)
+        {
+            Button folders = Button("Str_Watch_Title", (_, _) => openWatchedFolders(this));
+            folders.HorizontalAlignment = HorizontalAlignment.Left;
+            System.Windows.Automation.AutomationProperties.SetAutomationId(folders, "OpenWatchedFolders");
+            bottom.Children.Add(folders);
+        }
         bottom.Children.Add(UiKit.ButtonRow(cancel, _run));
         body.Children.Add(bottom);
 

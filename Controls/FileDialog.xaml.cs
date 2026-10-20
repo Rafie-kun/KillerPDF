@@ -15,7 +15,7 @@ using KillerPDF.Services;
 namespace KillerPDF.Controls
 {
     /// <summary>Open or Save. Picked at construction; changes the accept button and the rules.</summary>
-    public enum FileDialogMode { Open, Save }
+    public enum FileDialogMode { Open, Save, SelectFolder }
 
     /// <summary>
     /// Themed stand-in for Microsoft.Win32.OpenFileDialog / SaveFileDialog. Same chrome, places
@@ -130,7 +130,8 @@ namespace KillerPDF.Controls
         // from the document open/save memory. One shared key meant Insert Image always started
         // wherever the last PDF was opened from, never where the user last picked an image.
         private string LastDirKey =>
-            (_mode == FileDialogMode.Open ? LastOpenKey : LastSaveKey) + (ShowImagePreview ? "Img" : "");
+            (_mode == FileDialogMode.SelectFolder ? "FileDlgLastFolder" : _mode == FileDialogMode.Open ? LastOpenKey : LastSaveKey)
+            + (ShowImagePreview ? "Img" : "");
         private const int    RecentsMax    = 12;
 
         // Guards the fade-then-close re-entry below. Without it OnClosing would cancel forever.
@@ -262,7 +263,10 @@ namespace KillerPDF.Controls
             {
                 CaptionCloseButton.Style = closeStyle;
             }
-            AcceptButton.Content = Loc(_mode == FileDialogMode.Save ? "Str_Btn_Save" : "Str_Btn_Open");
+            AcceptButton.Content = Loc(_mode == FileDialogMode.SelectFolder ? "Str_Btn_OK"
+                : _mode == FileDialogMode.Save ? "Str_Btn_Save" : "Str_Btn_Open");
+            if (_mode == FileDialogMode.SelectFolder && FileNameBox.Parent is FrameworkElement fields)
+                fields.Visibility = Visibility.Collapsed;
             ConfigureImagePreview();
             // Extended, not Multiple: Extended is the Explorer behavior (plain click replaces the
             // selection, Ctrl adds, Shift ranges). Multiple toggles on every click, which feels
@@ -308,7 +312,8 @@ namespace KillerPDF.Controls
 
             // Save: preselect the stem so typing replaces the name but keeps the extension
             // visible. Open: caret at the end.
-            FileNameBox.Focus();
+            if (_mode == FileDialogMode.SelectFolder) FileList.Focus();
+            else FileNameBox.Focus();
             if (_mode == FileDialogMode.Save && seedName.Length > 0)
             {
                 int dot = seedName.LastIndexOf('.');
@@ -407,6 +412,7 @@ namespace KillerPDF.Controls
         private bool PassesFilter(PickerEntry en)
         {
             if (en.IsFolder) return true;
+            if (_mode == FileDialogMode.SelectFolder) return false;
             int i = FilterCombo.SelectedIndex;
             if (i < 0 || i >= _filterPatterns.Count) return true;
             var pats = _filterPatterns[i];
@@ -1280,6 +1286,15 @@ namespace KillerPDF.Controls
         /// </summary>
         private void Accept()
         {
+            if (_mode == FileDialogMode.SelectFolder)
+            {
+                string selected = FileList.SelectedItem is PickerEntry { IsFolder: true } folder
+                    ? folder.FullPath : _currentDir;
+                if (!Directory.Exists(selected)) { SelMeta.Text = Loc("Str_Dlg_NoSuchFolder"); return; }
+                FileName = selected; FileNames = [selected];
+                App.SetSetting(LastDirKey, selected);
+                _pendingResult = true; Close(); return;
+            }
             // Multiselect: several files highlighted wins outright. The name box shows a quoted
             // list in that state and is not worth re-parsing - the selection IS the answer. A
             // single highlighted file falls through to the normal path so every rule below

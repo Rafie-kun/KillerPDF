@@ -3579,6 +3579,12 @@
                                   Click="StartupUpdateCheck_Click">
                             <TextBlock Text="{DynamicResource Str_StartupUpdateCheck}" TextWrapping="Wrap"/>
                         </CheckBox>
+                        <CheckBox x:Name="AboutCloseToTray" Margin="0,6,0,0" Padding="10,0,10,0"
+                                  Style="{StaticResource ThemeCheck}" FontSize="11"
+                                  ToolTip="{DynamicResource Str_About_CloseToTrayHint}"
+                                  Click="AboutCloseToTray_Click">
+                            <TextBlock Text="{DynamicResource Str_About_CloseToTray}" TextWrapping="Wrap"/>
+                        </CheckBox>
                         <CheckBox x:Name="NoRecentCheck" Margin="0,6,0,0" Padding="10,0,10,0"
                                   Content="{DynamicResource Str_NoRecentSetting}"
                                   Style="{StaticResource ThemeCheck}" FontSize="11"

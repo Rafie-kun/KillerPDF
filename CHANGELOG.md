@@ -17,14 +17,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - **Convert Scan to Text:** Replace scanned words with searchable text matched to each page's typeface. Review uncertain matches before saving, keep rejected words as scans, and retain compact lossless black-and-white images where possible. Available from the command line with review controls.
 - **Form authoring:** Create and recognize fields, review proposed changes, calculate values without document JavaScript, flatten forms, convert supported XFA layouts, and exchange FDF/XFDF data and comments. Reusable text-field presets retain size, fonts, colors and borders (#329, #330, #340, #342).
 - **Document and table export:** Export to Word, Excel, PowerPoint, HTML, Markdown, text and JSON with page selection, reviewed OCR, batches and loss warnings. Export selected complete ruled tables through an editable cell preview to XLSX or CSV, preserving identifiers as text and blocking formulas (#345, #346).
-- **Macros and data merge:** Added reusable workflows for the current document or batches, with editable steps, output previews and per-file results. Resize or convert supported pages to grayscale or black and white while retaining editable text and forms. Merge CSV, JSON and XLSX data into editable or flattened PDFs using mappings, conditions and images. Export steps save a separate output alongside each PDF (#343, #347, #350, #351, #352).
+- **Macros, automatic folders and data merge:** Run saved workflows on the current document, selected files or a watched folder, with previews and per-file results. Folder tasks save separate copies, remember completed files, and support pause and retry. Resize or convert colors while retaining editable content, save separate exports, and merge CSV, JSON or XLSX data using mappings, conditions and images (#343, #347, #350, #351, #352).
 - **Office conversion and scanning:** Convert DOCX and XLSX directly to PDF with fonts, tables, images and page setup; legacy DOC/XLS conversion uses installed Word or Excel. Scan pages through TWAIN into a new PDF (#73, #74).
 - **Text editing and replacement:** Edit Text and Find and Replace rewrite page text in its original font, size and color, with an embedded fallback when needed. Rotated text retains its placement, and Replace All is one undo. Recognized text over scans still uses a cover (#422, #431).
 - **Repair, optimization and inspection:** Added reviewed repairs, sanitization, duplicate-resource cleanup, preflight corrections and selected accessibility repairs, plus print-production and structural comparison reports. Reduce File Size can remove unused objects and downsample images into a separate copy (#333, #334, #335, #433).
 
 ### Document safety and reliability
 
-- Window resize minimums stay within the current monitor's work area on small or scaled displays.
 - Saving, flattening, extraction, printing and current-document macros retain pending edits and page rotations. Signing, flattening and export preserve existing outputs when writing fails or is canceled. Failed replacements keep complete recovery copies. Reduce File Size preserves an existing output if a replacement cannot be staged; Save As and Extract Pages enforce the PDF extension (#433, #450).
 - Closing a document or the app offers Save, Don't Save or Cancel. Failed or canceled saves keep the document open, and Esc no longer closes the app.
 - Fixed crashes when switching themes, restoring a maximized window, or selecting mirrored and upside-down text. Search highlights, redaction marks and cropping on that text also use valid bounds (#437, #452, #453).
@@ -71,6 +70,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Windows and split panes stay within the current monitor at small sizes and high app scaling. Text remains sharp away from 100%, and the wordmark mouse wheel adjusts app scale.
 - Added optional File Explorer and Outlook PDF previews to installed copies, with scrolling, zoom and read-only opening. Portable copies register nothing (#410).
 - Silent installation supports per-user installs without elevation, includes the .NET runtime in the Store installer, detects Arm64 runtimes, reports useful error codes and rejects concurrent installs.
+- Added Close to System Tray in About to keep KillerPDF running after closing the window. Tray Exit retains save prompts.
 - Added Windows 11 snap layouts and docking for the comparison bar (#374, #427).
 
 ### Interface and polish
@@ -80,8 +80,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Improved toolbar overflow, dialog scrolling, focus rings, buttons, scroll cues and theme contrast. About opens above other dialogs with compact option spacing, and longer forms keep their actions visible.
 - Unified message and setup dialogs, separated installer translations by language, completed missing application and installer translations, and made the full installer version readable (#409, #440).
 - Refined film grain, shadows, accent states, checkbox ticks, radio alignment, crash-report controls and file-picker styling, while preserving classic 98SE controls.
-- Simplified website navigation at narrow widths, improved mobile layout and contrast, refreshed branding and Corpus layout, and added Store and related-app links. Updated Help, technical documentation, translations, release facts and application metadata.
-- The website's More button uses the selected language for its accessible name.
+- Simplified website navigation at narrow widths, localized navigation labels, improved mobile layout and contrast, refreshed branding and Corpus layout, and added Store and related-app links. Updated Help, technical documentation, translations, release facts and application metadata.
 - Chocolatey publishing reports failure when validation is still failing after a retry.
 
 ## [1.8.91] - 2026-10-14

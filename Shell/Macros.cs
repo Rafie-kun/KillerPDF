@@ -46,7 +46,7 @@ public partial class MainWindow
             PdfMacroOperation.ImposeManualSequence,
             PdfMacroOperation.ImposePoster
         ];
-        var dialog = new MacroDialog(this, supported, addable);
+        var dialog = new MacroDialog(this, supported, addable, OpenWatchedFolders);
         if (dialog.ShowDialog() == true && dialog.MacroToRun is PdfMacro macro)
         {
             if (dialog.RunOnBatch) RunMacroBatch(macro, dispatcher);

@@ -221,6 +221,7 @@ namespace KillerPDF
         {
             StartupUpdateCheck.IsChecked = Services.ReleaseUpdateCheck.IsEnabled(
                 App.GetSetting(Services.ReleaseUpdateCheck.Setting));
+            AboutCloseToTray.IsChecked = App.GetSetting(KillerFamily.Shell.CloseToTray.SettingName) == "1";
             // The family film-grain texture on the About card, repainted with the theme.
             Controls.GrainTexture.Track(AboutGrainBrush);
 
@@ -340,6 +341,10 @@ namespace KillerPDF
             => App.SetSetting(Services.ReleaseUpdateCheck.Setting,
                 StartupUpdateCheck.IsChecked == true ? "1" : "0");
 
+        private void AboutCloseToTray_Click(object sender, RoutedEventArgs e)
+            => App.SetSetting(KillerFamily.Shell.CloseToTray.SettingName,
+                AboutCloseToTray.IsChecked == true ? "1" : "0");
+
         /// <summary>
         /// "Clear all Data" footer link: wipes settings, downloaded OCR language packs, and temp
         /// files after an explicit confirmation. Destructive, so it always warns first; the user's
@@ -353,7 +358,12 @@ namespace KillerPDF
                 Loc("Str_ClearAllData"), MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (res != MessageBoxResult.Yes) return;
 
-            App.ClearAllData();
+            if (!App.ClearAllData())
+            {
+                KillerDialog.Show(owner, Loc("Str_Watch_Busy"), Loc("Str_ClearAllData"),
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             SetStatus(Loc("Str_St_DataCleared"));
             KillerDialog.Show(owner,
                 Loc("Str_ClearDataDone"),

@@ -143,6 +143,7 @@ namespace KillerPDF
 
         public void RestoreAndActivate()
         {
+            _tray.ShowWindow();
             if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
             Activate();
             IntPtr handle = new WindowInteropHelper(this).Handle;

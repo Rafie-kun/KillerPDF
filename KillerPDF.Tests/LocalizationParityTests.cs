@@ -83,8 +83,8 @@ public sealed class LocalizationParityTests
             "en-US", "bn", "cs-CZ", "de-DE", "es", "fr-FR", "hu-HU", "it-IT",
             "ja-JP", "kk-KZ", "nb-NO", "pl-PL", "pt-BR", "ru-RU", "tr-TR", "uk-UA", "vi-VN", "zh-CN", "zh-TW",
             " (F5)", " (F6)", " (F7)", " (F8)", "v1.6.3", "Steve the Killer",
-            "https://killerpdf.net/help.html", "https://killerpdf.net/help.html#shortcuts", "KillerPDF - ", "thekiller.net", "pt",
-            "PNG", "JPEG", "Aa", "ab"
+            "https://killerpdf.net/help.html", "https://killerpdf.net/help.html#shortcuts", "KillerPDF - ", "KillerPDF: ", "thekiller.net", "pt",
+            "PNG", "JPEG", "Aa", "ab", "*.pdf"
         };
 
         foreach (string file in Directory.GetFiles(root, "*.xaml", SearchOption.AllDirectories)

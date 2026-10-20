@@ -783,6 +783,7 @@ namespace KillerPDF
         {
             // Second pass (our own Close after the fade): let it through.
             if (_fadingOut) { base.OnClosing(e); return; }
+            if (_tray.HideInstead(e)) return;
 
             // Fold the live (active-tab) dirty flag back into its session, then prompt once if
             // any open tab has unsaved changes.

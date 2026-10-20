@@ -21,6 +21,8 @@ public partial class MainWindow
     // shortcuts overlay reads too, so the three cannot disagree.
     private List<Control> BuildDocumentToolsItems()
     {
+        if (_doc is null)
+            return [DocumentToolItem("Str_DocumentTools_Macros", OpenMacroDialog, "\uE945")];
         var comparison = DocumentToolItem("Str_DocumentTools_StructuralComparison",
             ShowStructuralComparison, "\uE8AB");
         comparison.IsEnabled = IsSplit
@@ -92,7 +94,6 @@ public partial class MainWindow
     // normally sit under. With that button folded away, the menu centers on the window instead.
     private void OpenDocumentToolsMenu()
     {
-        if (_doc is null) { SetStatus(Loc("Str_Msg_OpenFirst")); return; }
         var menu = MakeThemedMenu();
         foreach (Control item in BuildDocumentToolsItems())
             menu.Items.Add(item);

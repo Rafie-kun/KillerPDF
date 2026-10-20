@@ -959,6 +959,7 @@ namespace KillerPDF
             if (_doc is null)
             {
                 menu.Items.Add(new MenuItem { Header = Loc("Str_Menu_SaveNothing"), IsEnabled = false });
+                menu.Items.Add(BuildDocumentToolsMenu());
             }
             else
             {

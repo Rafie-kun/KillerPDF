@@ -297,6 +297,7 @@ namespace KillerPDF
         // parks and restores them per tab through its AllSearchRects/ResultPages/PageCursor.
 
         private readonly Controls.PdfViewer.DocumentSession? _startupTearOutSession;
+        private readonly KillerFamily.Shell.CloseToTray _tray;
 
         public MainWindow() : this(null)
         {
@@ -306,6 +307,8 @@ namespace KillerPDF
         {
             _startupTearOutSession = startupTearOutSession;
             InitializeComponent();
+            _tray = KillerFamily.Shell.CloseToTray.Attach(this, "KillerPDF", Loc,
+                () => App.GetSetting(KillerFamily.Shell.CloseToTray.SettingName) == "1");
             new KillerFamily.Accessibility.OverlayFocus(this).Track(ShortcutOverlay, AboutOverlay);
             InitRailOrder();
             var titleFrames = BitmapDecoder.Create(

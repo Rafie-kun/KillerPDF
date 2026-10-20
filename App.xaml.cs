@@ -236,12 +236,14 @@ namespace KillerPDF
             StartupTrace.Mark("MainWindow constructed");
             mainWindow.Show();
             StartupTrace.Mark("MainWindow.Show returned");
+            StartFolderAutomationIfConfigured();
         }
 
         protected override void OnExit(ExitEventArgs e)
         {
             try
             {
+                StopFolderAutomation();
                 if (SessionTempFiles.IsValueCreated) SessionTempFiles.Value.Dispose();
             }
             finally { base.OnExit(e); }
@@ -1179,8 +1181,12 @@ namespace KillerPDF
         /// native OCR cache, and temp files. Best-effort - files locked this session (e.g. loaded native
         /// DLLs) are skipped and clear on the next restart. The user's actual PDFs are never touched.
         /// </summary>
-        internal static void ClearAllData()
+        internal static bool ClearAllData()
         {
+            try { _folderAutomation?.Pause(); }
+            catch (Exception error) when (error is IOException or UnauthorizedAccessException or InvalidOperationException) { }
+            if (!StopFolderAutomation()) return false;
+            TryDeleteDir(FolderAutomationDirectory);
             if (Services.AppDataPaths.PortableRoot is not null)
                 TryDeleteDir(Services.AppDataPaths.UserRoot);
             else
@@ -1197,6 +1203,7 @@ namespace KillerPDF
                     try { File.Delete(f); } catch { }
             }
             catch { }
+            return true;
         }
 
         private static void TryDeleteDir(string dir)
