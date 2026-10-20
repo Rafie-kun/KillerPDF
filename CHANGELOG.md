@@ -169,7 +169,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Selecting upside-down or mirrored text no longer crashes with a width and height error, and search highlights, redaction marks and Crop on that text get a real box (#453).
 - OK in the bookmark, table of contents, page label, initial view, layer, macro, navigation, portfolio, attachment and image dialogs is no longer treated as Cancel.
 - Fixed lost pages in parallel PNG exports, and invalid OCR models are ignored with the Tesseract fallback kept.
-- Silent installs return specific Windows error codes and reject a second concurrent install instead of reporting a general failure.
+- Silent installs return specific Windows error codes, including 1618 when KillerPDF is running so deployment tools retry, and reject a second concurrent install instead of reporting a general failure.
 - A silent install started without admin rights, as the Microsoft Store runs it, installs for the current user with no prompt instead of failing, and the Microsoft Store installer carries its own .NET runtime so it installs on PCs without the .NET 10 Desktop Runtime.
 - Setup finds the .NET 10 Desktop Runtime on Arm64 Windows instead of reporting it missing and refusing a silent install.
 - Icon-only buttons give screen readers the name from their tooltip, icon glyphs stay out of what screen readers read, page thumbnails read as their page number instead of a type name, every part of each scroll bar has a name, and controls reached with the keyboard show a thin solid focus ring in the theme accent. File-picker rows announce folder and file names.
