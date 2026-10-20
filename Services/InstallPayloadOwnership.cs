@@ -79,10 +79,15 @@ internal static class InstallPayloadOwnership
     /// </summary>
     internal static string RemovalBatch(OwnedPayload owned)
     {
-        var batch = new System.Text.StringBuilder();
-        foreach (string file in owned.Files) batch.Append("del /q \"").Append(file).Append("\"\r\n");
-        foreach (string directory in owned.Directories) batch.Append("rmdir \"").Append(directory).Append("\"\r\n");
-        batch.Append("rmdir \"").Append(owned.Root).Append("\"\r\n");
+        // Quoting protects spaces and command separators, but not environment expansion.
+        // Batch files require doubled percent signs; delayed expansion must stay disabled
+        // through every deletion, including the caller's final self-delete command.
+        var batch = new System.Text.StringBuilder("setlocal DisableDelayedExpansion\r\n");
+        foreach (string file in owned.Files) batch.Append("del /q \"").Append(Literal(file)).Append("\"\r\n");
+        foreach (string directory in owned.Directories) batch.Append("rmdir \"").Append(Literal(directory)).Append("\"\r\n");
+        batch.Append("rmdir \"").Append(Literal(owned.Root)).Append("\"\r\n");
         return batch.ToString();
+
+        static string Literal(string path) => path.Replace("%", "%%", StringComparison.Ordinal);
     }
 }

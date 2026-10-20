@@ -1,4 +1,5 @@
 using System.IO;
+using System.Diagnostics;
 using KillerPDF.Services;
 using Xunit;
 
@@ -109,6 +110,62 @@ public sealed class InstallPayloadOwnershipTests
                 < batch.IndexOf("rmdir \"" + Path.Combine(root, "runtimes") + "\"", StringComparison.Ordinal));
         }
         finally { Directory.Delete(root, true); }
+    }
+
+    [Theory]
+    [InlineData("%KPDF_UNDEFINED_PATH%")]
+    [InlineData("%KPDF_DEFINED_PATH%")]
+    [InlineData("!KPDF_DEFINED_PATH! & (caret^)")]
+    [InlineData("100% complete")]
+    public async Task RemovalBatch_PreservesLiteralPathsWhenCmdExpandsCommands(string folderName)
+    {
+        string temporary = NewTemporaryDirectory();
+        try
+        {
+            string root = Path.Combine(temporary, folderName, "KillerPDF");
+            string directory = Path.Combine(root, "native");
+            string file = Path.Combine(directory, "app.dll");
+            var owned = new InstallPayloadOwnership.OwnedPayload(root, [file], [directory]);
+            string batch = InstallPayloadOwnership.RemovalBatch(owned);
+            // Exercise cmd's actual expansion rules without executing a deletion command.
+            var probe = new System.Text.StringBuilder("@echo off\r\n");
+            foreach (string line in batch.Split("\r\n", StringSplitOptions.RemoveEmptyEntries))
+            {
+                if (line.StartsWith("del /q \"", StringComparison.Ordinal))
+                    probe.Append("echo(").AppendLine(line["del /q ".Length..]);
+                else if (line.StartsWith("rmdir \"", StringComparison.Ordinal))
+                    probe.Append("echo(").AppendLine(line["rmdir ".Length..]);
+                else
+                {
+                    Assert.Equal("setlocal DisableDelayedExpansion", line);
+                    probe.AppendLine(line);
+                }
+            }
+            string script = Path.Combine(temporary, "probe.cmd");
+            File.WriteAllText(script, probe.ToString(), System.Text.Encoding.ASCII);
+            var start = new ProcessStartInfo(Path.Combine(Environment.SystemDirectory, "cmd.exe"))
+            {
+                Arguments = "/d /v:on /c \"\"" + script + "\"\"",
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
+            };
+            start.Environment.Remove("KPDF_UNDEFINED_PATH");
+            start.Environment["KPDF_DEFINED_PATH"] = "different-directory";
+            using Process process = Process.Start(start)!;
+            Task<string> output = process.StandardOutput.ReadToEndAsync();
+            Task<string> error = process.StandardError.ReadToEndAsync();
+            using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            try { await process.WaitForExitAsync(timeout.Token); }
+            finally { if (!process.HasExited) process.Kill(entireProcessTree: true); }
+
+            Assert.Equal(0, process.ExitCode);
+            Assert.Equal(string.Empty, await error);
+            Assert.Equal([$"\"{file}\"", $"\"{directory}\"", $"\"{root}\""],
+                (await output).Split(["\r\n", "\n"], StringSplitOptions.RemoveEmptyEntries));
+        }
+        finally { Directory.Delete(temporary, true); }
     }
 
     private static string NewPayload()
