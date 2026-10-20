@@ -55,7 +55,10 @@ internal static class AppDataPaths
         if (PortableRoot is null) return;
         lock (SettingsGate)
         {
-            Dictionary<string, string> settings = ReadSettings();
+            // A file that exists but cannot be read right now (half written by another copy,
+            // locked, or damaged) is left alone rather than replaced by a one-entry file.
+            Dictionary<string, string>? settings = TryReadSettings();
+            if (settings is null) return;
             settings[name] = value;
             WriteSettings(settings);
         }
@@ -66,29 +69,45 @@ internal static class AppDataPaths
         if (PortableRoot is null) return;
         lock (SettingsGate)
         {
-            Dictionary<string, string> settings = ReadSettings();
-            if (!settings.Remove(name)) return;
+            Dictionary<string, string>? settings = TryReadSettings();
+            if (settings is null || !settings.Remove(name)) return;
             WriteSettings(settings);
         }
     }
 
-    private static Dictionary<string, string> ReadSettings()
+    private static Dictionary<string, string> ReadSettings() =>
+        TryReadSettings() ?? new Dictionary<string, string>(StringComparer.Ordinal);
+
+    // Null means the file is there but could not be read as settings, which is different from
+    // there being no settings yet.
+    private static Dictionary<string, string>? TryReadSettings()
     {
+        if (!File.Exists(SettingsFile)) return new Dictionary<string, string>(StringComparer.Ordinal);
         try
         {
-            if (!File.Exists(SettingsFile)) return new(StringComparer.Ordinal);
-            return JsonSerializer.Deserialize<Dictionary<string, string>>(
-                    File.ReadAllText(SettingsFile))
+            return JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(SettingsFile))
                 ?? new Dictionary<string, string>(StringComparer.Ordinal);
         }
-        catch { return new Dictionary<string, string>(StringComparer.Ordinal); }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException or JsonException)
+        {
+            return null;
+        }
     }
 
     private static void WriteSettings(Dictionary<string, string> settings)
     {
         Directory.CreateDirectory(UserRoot);
-        string temporary = SettingsFile + ".tmp";
-        File.WriteAllText(temporary, JsonSerializer.Serialize(settings, JsonOptions));
-        File.Move(temporary, SettingsFile, overwrite: true);
+        // A unique temp name keeps two portable copies that share a data folder from racing on
+        // the same intermediate file; the move itself is atomic.
+        string temporary = SettingsFile + "." + Guid.NewGuid().ToString("N") + ".tmp";
+        try
+        {
+            File.WriteAllText(temporary, JsonSerializer.Serialize(settings, JsonOptions));
+            File.Move(temporary, SettingsFile, overwrite: true);
+        }
+        finally
+        {
+            try { if (File.Exists(temporary)) File.Delete(temporary); } catch { }
+        }
     }
 }

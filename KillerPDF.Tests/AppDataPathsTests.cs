@@ -40,6 +40,36 @@ public sealed class AppDataPathsTests
     }
 
     [Fact]
+    public void PortableSettingsAreNotReplacedWhenTheExistingFileCannotBeRead()
+    {
+        string root = Path.Combine(Path.GetTempPath(), $"killerpdf-portable-damaged-{Guid.NewGuid():N}");
+        string launcher = Path.Combine(root, "KillerPDF-Portable.exe");
+        string? previous = Environment.GetEnvironmentVariable("KILLERPDF_LAUNCHER_PATH");
+        try
+        {
+            Directory.CreateDirectory(root);
+            File.WriteAllBytes(launcher, []);
+            Environment.SetEnvironmentVariable("KILLERPDF_LAUNCHER_PATH", launcher);
+            string dataRoot = Path.Combine(root, "KillerPDF-Data");
+            Directory.CreateDirectory(dataRoot);
+            string settingsFile = Path.Combine(dataRoot, "settings.json");
+            // A half-written or locked file reads as garbage; the other settings in it must survive.
+            File.WriteAllText(settingsFile, "{\"Locale\":\"ja-JP\",\"Theme\":\"Dark\"");
+            string damaged = File.ReadAllText(settingsFile);
+
+            AppDataPaths.SetPortableSetting("Accent", "Red");
+
+            Assert.Equal(damaged, File.ReadAllText(settingsFile));
+            Assert.Empty(Directory.GetFiles(dataRoot, "*.tmp"));
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("KILLERPDF_LAUNCHER_PATH", previous);
+            if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
     public void PortableSettingsAreStoredBesideTheLauncher()
     {
         string root = Path.Combine(Path.GetTempPath(), $"killerpdf-portable-data-{Guid.NewGuid():N}");
