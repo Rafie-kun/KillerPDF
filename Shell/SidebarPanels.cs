@@ -20,7 +20,7 @@ namespace KillerPDF
     // Pages and Outline keep their own controls (Shell/SidebarOutline.cs). Comments, Attachments,
     // Layers and Signatures share one list panel built here, styled like the Outline tree. Each
     // reads the working copy in the background, so a large file never stalls the window, and a
-    // newer refresh drops the result of an older one. The rail buttons are always present; the
+    // newer refresh drops the result of an older one. Unavailable rail buttons are hidden; the
     // open panel's button is lit while the sidebar is open.
     // ============================================================
     public partial class MainWindow

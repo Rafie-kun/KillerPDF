@@ -212,7 +212,7 @@ namespace KillerPDF
             if (ActiveViewer.DocInvert == on) return;
             ActiveViewer.DocInvert = on;
             App.SetSetting("DocInvert", on ? "1" : "0");
-            DocInvertBtn.Tag = on ? "on" : null;   // lights the rail icon in the accent while active
+            DocInvertBtn.Tag = on ? "on" : null;   // lights the footer icon while active
             RepaintForInvertChange(bothPanes: false);   // per-pane toggle: the other pane is untouched
         }
 
@@ -232,8 +232,8 @@ namespace KillerPDF
             };
             mi.Click += (_, _2) => ToggleInvertImages(!BitmapHelpers.DocInvertImages);
             menu.Items.Add(mi);
-            FlyoutPlacement.UsePane(SplitHost, _sidebarSide);
-            FlyoutPlacement.AttachAtButtonHeight(menu, DocInvertBtn);
+            menu.PlacementTarget = DocInvertBtn;
+            menu.Placement = System.Windows.Controls.Primitives.PlacementMode.Top;
             menu.IsOpen = true;
             e.Handled = true;
         }
@@ -1316,6 +1316,7 @@ namespace KillerPDF
                         SetToolbarButton(btn, glyph, key, withLabel: true);
                     ToolbarGrid.UpdateLayout();
                 }
+                MeasureToolbarBars();
 
                 // Keep the ACTIVE tool on the bar no matter how narrow, so its selected state stays visible -
                 // otherwise it vanishes into the overflow chevron and there's no way to tell what's active.
@@ -1351,9 +1352,10 @@ namespace KillerPDF
                             moved = true;
                         }
                         if (!moved) continue;
+                        OverflowChevron.Visibility = Visibility.Visible;
                         SyncToolbarSeparators();
                         MeasureToolbarBars();
-                        if (LeftBar.DesiredSize.Width + RightContainer.DesiredSize.Width + 30 <= avail) break;
+                        if (LeftBar.DesiredSize.Width + RightContainer.DesiredSize.Width <= avail) break;
                     }
                 }
 
@@ -1369,7 +1371,28 @@ namespace KillerPDF
                         if (!btn.IsVisible) continue;   // already collapsed into the overflow menu
                         SetToolbarButton(btn, glyph, key, withLabel: false);
                         ToolbarGrid.UpdateLayout();
+                        MeasureToolbarBars();
                     }
+                }
+
+                // Shedding whole groups can leave room for individual tools. Restore every
+                // tool that fits, in priority order, while preserving explicit More choices.
+                foreach (string id in ToolbarShedOrder.Reverse().SelectMany(group => group))
+                {
+                    if (chosen.Contains(id) || !units.TryGetValue(id, out ToolbarUnit? unit)
+                        || unit.Bar.Visibility == Visibility.Visible) continue;
+                    unit.Bar.Visibility = Visibility.Visible;
+                    unit.Overflow.Visibility = Visibility.Collapsed;
+                    OverflowChevron.Visibility = _toolbarUnits.Any(item => item.Overflow.Visibility == Visibility.Visible)
+                        ? Visibility.Visible : Visibility.Collapsed;
+                    SyncToolbarSeparators();
+                    MeasureToolbarBars();
+                    if (LeftBar.DesiredSize.Width + RightContainer.DesiredSize.Width <= avail) continue;
+                    unit.Bar.Visibility = Visibility.Collapsed;
+                    unit.Overflow.Visibility = Visibility.Visible;
+                    OverflowChevron.Visibility = Visibility.Visible;
+                    SyncToolbarSeparators();
+                    MeasureToolbarBars();
                 }
 
                 bool anyCollapsed = _toolbarUnits.Any(unit => unit.Overflow.Visibility == Visibility.Visible);

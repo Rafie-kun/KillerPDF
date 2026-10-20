@@ -294,6 +294,7 @@ namespace KillerPDF
             {
                 SwapActiveViewer(previous);
                 focused.RestoreActiveFieldsOnly();
+                SyncRailPanelAvailability(_doc is not null);
             }
         }
     }

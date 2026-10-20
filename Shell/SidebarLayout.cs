@@ -633,15 +633,22 @@ namespace KillerPDF
         // The family rail order (RailOrder): theme, language and shortcuts hold the rail's edge,
         // and the panel and window buttons can be dragged into any order above them.
         private void InitRailOrder()
-            => RailOrder.Attach(SidebarRailStack,
+        {
+            foreach (var (button, _) in RailPanelButtons())
+                button.SetBinding(VisibilityProperty, new System.Windows.Data.Binding(nameof(IsEnabled))
+                {
+                    Source = button,
+                    Converter = new BooleanToVisibilityConverter()
+                });
+            RailOrder.Attach(SidebarRailStack,
                 new FrameworkElement[] { RailThemeBtn, RailLangBtn, ShortcutHelpRailBtn },
                 new FrameworkElement[]
                 {
                     SidebarPagesTab, SidebarOutlinesTab, SidebarCommentsTab, SidebarAttachmentsTab,
-                    SidebarLayersTab, SidebarSignaturesTab, SplitPaneRailBtn, FullScreenRailBtn,
-                    DocInvertBtn, DocInfoRailBtn,
+                    SidebarLayersTab, SidebarSignaturesTab, SplitPaneRailBtn, DocInfoRailBtn,
                 },
                 App.GetSetting(RailOrderSetting), value => App.SetSetting(RailOrderSetting, value));
+        }
 
         /// <summary>
         /// Lays a sidebar tree out for a strip or a column. In a strip the tree is tagged so

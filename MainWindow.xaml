@@ -2195,71 +2195,6 @@
                                     </ControlTemplate>
                                 </Button.Template>
                             </Button>
-                            <!-- E740 (full screen): F11 from the keyboard. On the rail beside the split
-                                 pane because it also acts on the window. Full screen hides the rail, so
-                                 the way back is F11, Esc or the page menu's Full Screen item. -->
-                            <Button x:Name="FullScreenRailBtn" Click="FullScreenRailBtn_Click"
-                                    Cursor="Hand" FocusVisualStyle="{x:Null}"
-                                    ToolTip="{DynamicResource Str_KS_FullScreen}"
-                                    Width="24" Height="24" Padding="0" Margin="0,0,0,6">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border Background="Transparent">
-                                            <TextBlock kl:GlyphInk.Center="True" Text="&#xE740;"
-                                                       FontFamily="Segoe MDL2 Assets" FontSize="14"
-                                                       Foreground="{DynamicResource TextBrush}"
-                                                       HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                <TextBlock.Effect>
-                                                    <DropShadowEffect Color="Black" BlurRadius="4" ShadowDepth="2" Direction="270" Opacity="{DynamicResource IconShadowOpacity}"/>
-                                                </TextBlock.Effect>
-                                                <TextBlock.Style>
-                                                    <Style TargetType="TextBlock">
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Button}}" Value="True">
-                                                                <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </TextBlock.Style>
-                                            </TextBlock>
-                                        </Border>
-                                    </ControlTemplate>
-                                </Button.Template>
-                            </Button>
-                            <!-- Invert document colors (#135): moon toggle, lit in the accent while
-                                 active (Tag="on", set from ToggleDocInvert). N does the same. -->
-                            <Button x:Name="DocInvertBtn" Click="DocInvertBtn_Click"
-                                    MouseRightButtonUp="DocInvertBtn_RightClick"
-                                    Cursor="Hand" FocusVisualStyle="{x:Null}"
-                                    ToolTip="{DynamicResource Str_TT_DocInvert}"
-                                    Width="24" Height="24" Padding="0" Margin="0,0,0,6">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border Background="Transparent">
-                                            <TextBlock kl:GlyphInk.Center="True" Text="&#xE708;"
-                                                       FontFamily="Segoe MDL2 Assets" FontSize="15"
-                                                       HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                <TextBlock.Effect>
-                                                    <DropShadowEffect Color="Black" BlurRadius="4" ShadowDepth="2" Direction="270" Opacity="{DynamicResource IconShadowOpacity}"/>
-                                                </TextBlock.Effect>
-                                                <TextBlock.Style>
-                                                    <Style TargetType="TextBlock">
-                                                        <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Button}}" Value="True">
-                                                                <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource AncestorType=Button}}" Value="on">
-                                                                <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </TextBlock.Style>
-                                            </TextBlock>
-                                        </Border>
-                                    </ControlTemplate>
-                                </Button.Template>
-                            </Button>
                             <Button x:Name="DocInfoRailBtn" Click="DocInfo_Click"
                                     Cursor="Hand" FocusVisualStyle="{x:Null}"
                                     ToolTip="{DynamicResource Str_TT_DocInfo}"
@@ -3195,6 +3130,23 @@
                             <Border Grid.Row="1" Grid.Column="1" Margin="1,1,0,0" BorderBrush="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" BorderThickness="1"/>
                         </Grid>
                     </RadioButton>
+                    <Border Width="1" Height="14" Background="{DynamicResource CardBorderBrush}" Margin="5,0"/>
+                    <StackPanel x:Name="FooterDisplayControls" Orientation="Horizontal">
+                        <Button x:Name="FullScreenRailBtn" Content="&#xE740;" Style="{StaticResource FooterNavButton}"
+                                Click="FullScreenRailBtn_Click" ToolTip="{DynamicResource Str_KS_FullScreen}"/>
+                        <Button x:Name="DocInvertBtn" Content="&#xE708;" Click="DocInvertBtn_Click"
+                                MouseRightButtonUp="DocInvertBtn_RightClick" ToolTip="{DynamicResource Str_TT_DocInvert}">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource FooterNavButton}">
+                                    <Style.Triggers>
+                                        <Trigger Property="Tag" Value="on">
+                                            <Setter Property="Foreground" Value="{DynamicResource FooterAccentBrush}"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </StackPanel>
                     <Border Width="1" Height="14" Background="{DynamicResource CardBorderBrush}" Margin="5,0"/>
                     <Button x:Name="ZoomOutBtn" Content="&#xECC9;" Style="{StaticResource FooterNavButton}"
                             Click="ZoomOut_Click" ToolTip="{DynamicResource Str_TT_ZoomOut}"/>

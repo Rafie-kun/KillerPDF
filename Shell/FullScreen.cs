@@ -20,7 +20,7 @@ namespace KillerPDF
         private double _fsPrevLeft, _fsPrevTop, _fsPrevW, _fsPrevH;
         private bool _fsAnimating;
 
-        // The sidebar rail's full screen button. The rail hides with the rest of the chrome, so the
+        // The footer's full screen button. The footer hides with the rest of the chrome, so the
         // page menu's Full Screen item, F11 and Esc are the ways back.
         private void FullScreenRailBtn_Click(object sender, RoutedEventArgs e) => ToggleFullScreen();
 

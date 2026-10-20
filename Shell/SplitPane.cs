@@ -517,7 +517,11 @@ namespace KillerPDF
         /// switch inside a pane that is not (yet) ActiveViewer - see the comment there.</summary>
         internal void FocusPane(PdfViewer pane)
         {
-            if (ReferenceEquals(ActiveViewer, pane)) return;
+            if (ReferenceEquals(ActiveViewer, pane))
+            {
+                SyncRailPanelAvailability(_doc is not null);
+                return;
+            }
 
             // _doc, _currentFile, _annotations and the rest are window fields that both panes bridge
             // to, so they describe one pane at a time. A pane's documents live in its session list
@@ -543,6 +547,7 @@ namespace KillerPDF
             // document costs seconds on every click between panes.
             RestorePageListForActivePane();
             LoadOutlines();
+            SyncRailPanelAvailability(_doc is not null);
             SyncZoomBox();
             SyncPickerState();
             UpdatePageSizeDisplay();

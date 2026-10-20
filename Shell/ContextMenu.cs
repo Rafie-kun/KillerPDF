@@ -722,13 +722,28 @@ namespace KillerPDF
         // the Up handled - without the guard this would open a second menu over it.
         private void SidebarArea_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
         {
+            Button? railButton = null;
+            bool rail = false;
             if (e.OriginalSource is DependencyObject d)
                 for (var n = d; n != null; n = VisualTreeHelper.GetParent(n))
+                {
                     if (ReferenceEquals(n, OutlineTree)) return;
+                    if (n is Button button && railButton is null) railButton = button;
+                    if (ReferenceEquals(n, SidebarRailGrid) || ReferenceEquals(n, SidebarRailStack))
+                        rail = true;
+                }
+            if (rail && railButton is not null)
+            {
+                e.Handled = true;
+                if (railButton.IsEnabled)
+                    railButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent, railButton));
+                return;
+            }
             var menu = MakeThemedMenu();
-            if (_doc is not null) FillPageAgnosticMenu(menu);
+            if (!rail && _doc is not null) FillPageAgnosticMenu(menu);
             AppendSidebarSideSection(menu);
-            menu.PlacementTarget = (UIElement)sender;
+            FlyoutPlacement.UsePane(SplitHost, _sidebarSide);
+            FlyoutPlacement.AttachAtButtonHeight(menu, rail ? SidebarToggleBtn : (FrameworkElement)sender);
             menu.IsOpen = true;
             e.Handled = true;
         }
