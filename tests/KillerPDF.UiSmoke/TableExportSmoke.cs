@@ -94,6 +94,19 @@ internal static class TableExportSmoke
                     try
                     {
                         dialog.Show();
+                        Pump();
+                        if (scale == 1)
+                        {
+                            Capture(dialog, Path.Combine(folder, theme + "-initial.png"));
+                            if (dialog.ActualWidth > 700 || dialog.ActualHeight > 650)
+                                throw new InvalidOperationException("Initial table dialog has excessive empty space.");
+                            FrameworkElement[] actions = [Find<ComboBox>(dialog, "TableExportFormat"),
+                                Find<Button>(dialog, "TableExportCancel"), Find<Button>(dialog, "TableExportSave")];
+                            Rect[] bounds = actions.Select(control => control.TransformToAncestor(dialog).TransformBounds(new Rect(control.RenderSize))).ToArray();
+                            if (bounds.Max(rect => rect.Top) - bounds.Min(rect => rect.Top) > 1
+                                || bounds.Max(rect => rect.Bottom) - bounds.Min(rect => rect.Bottom) > 1)
+                                throw new InvalidOperationException("Export format and buttons are not aligned.");
+                        }
                         dialog.Width = scale == 1 ? 900 : 640; dialog.Height = scale == 1 ? 740 : 480;
                         Pump();
                         Button export = Find<Button>(dialog, "TableExportSave");

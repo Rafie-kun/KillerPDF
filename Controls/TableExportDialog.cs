@@ -42,8 +42,9 @@ internal sealed class TableExportDialog : Window
     {
         _document = document; _pageIndex = pageIndex; _preview = preview; _rotation = rotation;
         Title = $"KillerPDF: {L("Str_TableExport_Title")}";
-        Width = Math.Min(900, SystemParameters.WorkArea.Width - 40);
-        Height = Math.Min(740, SystemParameters.WorkArea.Height - 40);
+        Width = Math.Min(620 * Math.Clamp(scale, 0.7, 2.5), SystemParameters.WorkArea.Width - 40);
+        MaxHeight = SystemParameters.WorkArea.Height - 40;
+        SizeToContent = SizeToContent.Height;
         MinWidth = 480; MinHeight = 360; UseLayoutRounding = true;
         DialogChrome.Configure(this, owner, resizable: true);
         AutomationProperties.SetAutomationId(this, "TableExportDialog");
@@ -52,13 +53,15 @@ internal sealed class TableExportDialog : Window
             LayoutTransform = new ScaleTransform(Math.Clamp(scale, 0.7, 2.5), Math.Clamp(scale, 0.7, 2.5)) };
         var footer = new StackPanel { Margin = new Thickness(0, 8, 0, 0) };
         _format = new ComboBox { ItemsSource = new[] { "XLSX", "CSV" }, SelectedIndex = 0,
-            Style = UiKit.DarkComboStyle, MinWidth = 85, Margin = new Thickness(0, 6, 8, 0) };
+            Style = UiKit.DarkComboStyle, MinWidth = 85, Height = 30, Margin = new Thickness(0, 0, 8, 0) };
         AutomationProperties.SetName(_format, L("Str_ExportImg_Format"));
         AutomationProperties.SetAutomationId(_format, "TableExportFormat");
         var cancel = UiKit.Make(L("Str_Btn_Cancel"), false);
+        cancel.Height = 30; cancel.Margin = new Thickness(0, 0, 8, 0);
         cancel.IsCancel = true; cancel.Click += (_, _) => Close();
         AutomationProperties.SetAutomationId(cancel, "TableExportCancel");
         _export = UiKit.Make(L("Str_ExportImg_Export"), true);
+        _export.Height = 30;
         _export.IsEnabled = false; _export.Click += (_, _) => Commit();
         AutomationProperties.SetAutomationId(_export, "TableExportSave");
         var actions = new WrapPanel { HorizontalAlignment = HorizontalAlignment.Right };
