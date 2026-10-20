@@ -80,6 +80,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Unified message and setup dialogs, separated installer translations by language, completed missing application and installer translations, and made the full installer version readable (#409, #440).
 - Refined film grain, shadows, accent states, checkbox ticks, radio alignment, crash-report controls and file-picker styling, while preserving classic 98SE controls.
 - Simplified website navigation at narrow widths, improved mobile layout and contrast, refreshed branding and Corpus layout, and added Store and related-app links. Updated Help, technical documentation, translations, release facts and application metadata.
+- The website's More button uses the selected language for its accessible name.
 - Chocolatey publishing reports failure when validation is still failing after a retry.
 
 ## [1.8.91] - 2026-10-14
