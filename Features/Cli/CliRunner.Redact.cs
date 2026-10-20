@@ -161,9 +161,15 @@ namespace KillerPDF.Features
             }
             if (regions.Count == 0)
             {
-                CliEnsureParentDir(output);
-                File.Copy(source, output, overwrite: true);
-                con.WriteLine($"Nothing matched, so nothing was redacted -> {output}");
+                // Nothing to black out, but a requested cleanup of hidden information still
+                // happens, so a pipeline that trusts the exit code gets the document it asked for.
+                CliWriteEditedCopy(source, output, path =>
+                {
+                    if (sanitize is not null) PdfEngineIntegration.SanitizeFile(path, sanitize);
+                });
+                con.WriteLine(sanitize is not null
+                    ? $"Nothing matched, so nothing was redacted; hidden information was removed -> {output}"
+                    : $"Nothing matched, so nothing was redacted -> {output}");
                 return 0;
             }
 
