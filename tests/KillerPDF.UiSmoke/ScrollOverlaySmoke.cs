@@ -312,14 +312,22 @@ internal static class ScrollOverlaySmoke
         focus.Invoke(window, [paneA]);
         if (!pagesButton.IsEnabled || pagesButton.Visibility != Visibility.Visible)
         { report.Add("FAIL document pane must restore panel buttons"); failures++; }
-        bool beforeRightClick = (bool)type.GetField("_sidebarCollapsed", Members)!.GetValue(window)!;
+        if ((bool)type.GetField("_sidebarCollapsed", Members)!.GetValue(window)!)
+            pagesButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        pagesButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        if ((bool)type.GetField("_sidebarCollapsed", Members)!.GetValue(window)!
+            || pagesButton.ContextMenu?.IsOpen != true
+            || pagesButton.ContextMenu.Items.OfType<MenuItem>().Count(item => item.IsCheckable) != 4)
+        { report.Add("FAIL selected panel click must keep sidebar open and show four positions"); failures++; }
+        if (pagesButton.ContextMenu is { } positionMenu) positionMenu.IsOpen = false;
         var rightClick = new System.Windows.Input.MouseButtonEventArgs(
             System.Windows.Input.Mouse.PrimaryDevice, 0, System.Windows.Input.MouseButton.Right)
             { RoutedEvent = System.Windows.Input.Mouse.MouseUpEvent };
         pagesButton.RaiseEvent(rightClick);
         bool afterRightClick = (bool)type.GetField("_sidebarCollapsed", Members)!.GetValue(window)!;
-        if (!rightClick.Handled || beforeRightClick == afterRightClick)
+        if (!rightClick.Handled || afterRightClick || pagesButton.ContextMenu?.IsOpen != true)
         { report.Add("FAIL rail right-click must invoke its normal panel action"); failures++; }
+        if (pagesButton.ContextMenu is { } rightMenu) rightMenu.IsOpen = false;
         type.GetField("_isSplit", Members)!.SetValue(window, true);
         string copyPath = Path.Combine(folder, "redacted-copy.pdf");
         type.GetMethod("SaveCopyAndOpen", Members)!.Invoke(window, [copyPath]);

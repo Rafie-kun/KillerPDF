@@ -143,7 +143,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - The toolbar fills available space before leaving tools in overflow. Transform, Color Correction and Stamp keep scrollbars at the window edge with padding beside their controls.
 - Color Correction supports smooth exposure adjustment, saturation, and manual or automatic white balance and exposure with live preview, plus wheel zoom and dragging the enlarged preview.
 - Saved redacted copies open in an empty second pane or a new tab, preserving the original tab.
-- Sidebar tools follow the active document and hide when unavailable. Right-click menus match each panel, including adding attachments and comments, editing layers and signing documents.
+- Sidebar tools follow the active document and hide when unavailable. Clicking the selected panel icon opens the sidebar position menu. Right-click menus match each panel, including adding attachments and comments, editing layers and signing documents.
 - Page-list fades leave both scrollbars clear and disappear at either end, including in horizontal sidebar layouts.
 - About opens above Transform, Color Correction and other open dialogs instead of behind them, F12 opens it from inside those windows too, and Esc or F12 closes it.
 - Digitally signed fields show their signature instead of a blue Sign box (#425).

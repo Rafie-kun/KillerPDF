@@ -41,13 +41,19 @@ namespace KillerPDF
 
         /// <summary>
         /// A rail panel button: shows that panel, opening the sidebar when it is closed. The open
-        /// panel's own button closes the sidebar again.
+        /// panel's own button opens the sidebar position menu.
         /// </summary>
         private void OpenSidebarPanel(SidebarPanel panel)
         {
             if (!_sidebarCollapsed && _sidebarPanel == panel)
             {
-                SidebarToggle_Click(this, new RoutedEventArgs());
+                var button = RailPanelButtons().First(entry => entry.Panel == panel).Button;
+                var menu = MakeThemedMenu();
+                AppendSidebarSideSection(menu);
+                button.ContextMenu = menu;
+                FlyoutPlacement.UsePane(SplitHost, _sidebarSide);
+                FlyoutPlacement.AttachAtButtonHeight(menu, button);
+                menu.IsOpen = true;
                 return;
             }
             switch (panel)
