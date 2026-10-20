@@ -241,7 +241,8 @@ namespace KillerPDF
                     // this with the user's own choices once the file has been seen this session.
                     IsExpanded = depth == 0,
                     Tag = new OutlineNodeRef(outline),
-                    ToolTip = pageIdx >= 0 ? string.Format(Loc("Str_PageLabel"), pageIdx + 1) : null,
+                    ToolTip = (string.IsNullOrEmpty(title) ? Loc("Str_Outline_Untitled") : title)
+                        + (pageIdx >= 0 ? "\n" + string.Format(Loc("Str_PageLabel"), pageIdx + 1) : ""),
                     Style = (Style)FindResource("OutlineItemStyle")
                 };
                 item.Expanded += OutlineItemExpansionChanged;

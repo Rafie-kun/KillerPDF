@@ -658,7 +658,7 @@ namespace KillerPDF
         private static void ApplyTreeStripLayout(TreeView tree, ScrollViewer scroll, bool strip)
         {
             tree.Tag = strip ? "strip" : null;
-            scroll.HorizontalScrollBarVisibility = strip ? ScrollBarVisibility.Auto : ScrollBarVisibility.Disabled;
+            scroll.HorizontalScrollBarVisibility = strip ? ScrollBarVisibility.Visible : ScrollBarVisibility.Disabled;
             scroll.VerticalScrollBarVisibility = strip ? ScrollBarVisibility.Disabled : ScrollBarVisibility.Auto;
         }
 

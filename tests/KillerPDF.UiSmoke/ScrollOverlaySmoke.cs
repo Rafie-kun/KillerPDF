@@ -148,6 +148,30 @@ internal static class ScrollOverlaySmoke
                 Bar: (FrameworkElement)unit.GetType().GetProperty("Bar")!.GetValue(unit)!)).ToArray();
         var report = new List<string>();
         int failures = 0;
+        var outlineFixture = new TreeView
+        {
+            Style = (Style)window.FindResource("OutlineTreeStyle"),
+            ItemContainerStyle = (Style)window.FindResource("OutlineItemStyle")
+        };
+        for (int index = 0; index < 24; index++)
+            outlineFixture.Items.Add(new TreeViewItem
+            {
+                Header = "A long outline title describing rendering and document architecture " + index,
+                Style = (Style)window.FindResource("OutlineItemStyle")
+            });
+        var outlineScroll = new ScrollViewer { Content = outlineFixture };
+        type.GetMethod("ApplyTreeStripLayout", Members)!.Invoke(null, [outlineFixture, outlineScroll, true]);
+        Settle(outlineScroll, 600, 160);
+        outlineScroll.ScrollToRightEnd();
+        Settle(outlineScroll, 600, 160);
+        report.Add($"Outline strip extent={outlineScroll.ExtentWidth:F1} viewport={outlineScroll.ViewportWidth:F1} offset={outlineScroll.HorizontalOffset:F1}");
+        if (outlineScroll.ScrollableWidth <= 0 || outlineScroll.HorizontalOffset <= 0
+            || ScrollViewer.GetHorizontalScrollBarVisibility(outlineFixture) != ScrollBarVisibility.Disabled)
+        { report.Add("FAIL outline overflow must be owned by the visible outer scrollbar"); failures++; }
+        var outlineRow = (TreeViewItem)outlineFixture.Items[0];
+        if (outlineRow.ActualWidth < 300)
+        { report.Add("FAIL long outline titles need readable column width"); failures++; }
+        Render(outlineScroll, Path.Combine(folder, "Outline-strip.png"));
         foreach (string mode in new[] { "Beside", "None", "Under" })
         {
             var modeType = type.GetNestedType("ToolbarLabelMode", Members)!;

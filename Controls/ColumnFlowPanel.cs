@@ -34,7 +34,7 @@ namespace KillerPDF
         internal const double ColumnGap = 12;
 
         /// <summary>The widest a column grows, indent and expander included.</summary>
-        internal const double MaxColumnWidth = 240;
+        internal const double MaxColumnWidth = 320;
 
         private double _columnHeight = double.PositiveInfinity;
         private double _rootColumnWidth;   // the outermost panel only: the widest row, indent included

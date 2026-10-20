@@ -1027,6 +1027,7 @@
                      unbounded one, or they would never wrap. -->
                 <Trigger Property="Tag" Value="strip">
                     <Setter Property="ItemsPanel" Value="{StaticResource TreeColumnFlowPanel}"/>
+                    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
                     <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled"/>
                 </Trigger>
             </Style.Triggers>
