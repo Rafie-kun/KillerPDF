@@ -1414,6 +1414,7 @@
             <Setter Property="FontFamily" Value="{DynamicResource UiFont}"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="Padding" Value="10,4,10,4"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="HorizontalAlignment" Value="Stretch"/>
             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
@@ -1421,7 +1422,7 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="CheckBox">
                         <Border x:Name="bd" Background="Transparent" CornerRadius="3"
-                                Margin="-8,0,2,0" Padding="10,4,10,4">
+                                Margin="-8,0,2,0" Padding="{TemplateBinding Padding}">
                             <DockPanel LastChildFill="True" Background="Transparent">
                                 <!-- Centered on the label's capitals for whatever font the theme uses (Controls/CapCenterMargin.cs). A fixed nudge only fits one face. -->
                                 <Grid Width="16" Height="16" VerticalAlignment="Center" DockPanel.Dock="Left"><Grid.Margin><MultiBinding Converter="{x:Static kl:CapCenterMargin.Instance}" ConverterParameter="0,0,8,0"><Binding RelativeSource="{RelativeSource TemplatedParent}" Path="FontFamily"/><Binding RelativeSource="{RelativeSource TemplatedParent}" Path="FontSize"/></MultiBinding></Grid.Margin>
@@ -3573,12 +3574,12 @@
                     <StackPanel DockPanel.Dock="Left" VerticalAlignment="Center">
                         <!-- First, like every Killer Tools About card: the way back after the
                              update prompt's "Always check on startup" box was cleared. -->
-                        <CheckBox x:Name="StartupUpdateCheck" Margin="0"
+                        <CheckBox x:Name="StartupUpdateCheck" Margin="0" Padding="10,0,10,0"
                                   Style="{StaticResource ThemeCheck}" FontSize="11"
                                   Click="StartupUpdateCheck_Click">
                             <TextBlock Text="{DynamicResource Str_StartupUpdateCheck}" TextWrapping="Wrap"/>
                         </CheckBox>
-                        <CheckBox x:Name="NoRecentCheck" Margin="0,6,0,0"
+                        <CheckBox x:Name="NoRecentCheck" Margin="0,6,0,0" Padding="10,0,10,0"
                                   Content="{DynamicResource Str_NoRecentSetting}"
                                   Style="{StaticResource ThemeCheck}" FontSize="11"
                                   Checked="NoRecentCheck_Toggled" Unchecked="NoRecentCheck_Toggled"/>
@@ -3586,7 +3587,7 @@
                              panel and came back here when that panel was dissolved: About is where
                              the data-hygiene and safety controls live. Off by default, so link
                              clicks stay immediate unless you ask for the prompt. -->
-                        <CheckBox x:Name="LinkConfirmCheck" Margin="0,6,0,0"
+                        <CheckBox x:Name="LinkConfirmCheck" Margin="0,6,0,0" Padding="10,0,10,0"
                                   Content="{DynamicResource Str_LinkConfirmSetting}"
                                   Style="{StaticResource ThemeCheck}" FontSize="11"
                                   Checked="LinkConfirmCheck_Toggled" Unchecked="LinkConfirmCheck_Toggled"/>
