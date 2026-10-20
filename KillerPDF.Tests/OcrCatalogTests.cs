@@ -105,4 +105,20 @@ public sealed class OcrCatalogTests
             string.Equals(x.Locale, locale, StringComparison.OrdinalIgnoreCase) && x.Code == code);
         Assert.Contains(OcrCatalog.Languages, x => x.Code == code);
     }
+
+    [Theory]
+    [InlineData("eng", true)]
+    [InlineData("chi_sim", true)]
+    [InlineData("aze_cyrl", true)]
+    [InlineData("deu_latf", true)]
+    [InlineData("..\\..\\x", false)]
+    [InlineData("../eng", false)]
+    [InlineData("ENG", false)]
+    [InlineData("eng.traineddata", false)]
+    [InlineData("", false)]
+    [InlineData("eng+fra", false)]
+    public void OnlyTesseractModelCodesAreAcceptedAsLanguages(string code, bool valid)
+    {
+        Assert.Equal(valid, OcrCatalog.IsModelCode(code));
+    }
 }

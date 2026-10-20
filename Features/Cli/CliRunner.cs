@@ -2272,6 +2272,13 @@ namespace KillerPDF.Features
         /// </summary>
         private static bool CliEnsureOcrLanguage(string lang, TextWriter con)
         {
+            // The code becomes a file name under the models folder and a download URL, so only
+            // a real tessdata model name is accepted.
+            if (!OcrCatalog.IsModelCode(lang))
+            {
+                con.WriteLine($"'{lang}' is not an OCR language code (e.g. eng, spa, fra, deu, jpn, tur, ben, chi_sim, chi_tra).");
+                return false;
+            }
             OcrNativeBootstrap.EnsureLanguageData();
             var dest = Path.Combine(OcrNativeBootstrap.TessDataDir, lang + ".traineddata");
             if (File.Exists(dest)) return true;
@@ -2286,11 +2293,17 @@ namespace KillerPDF.Features
                 Task.Run(async () =>
                 {
                     using var http = OcrLanguages.MakeDownloadClient();
-                    var part = dest + ".part";
-                    using (var f = File.Create(part))
-                        await HttpDownload.CopyToAsync(http, new Uri(url), f, TimeSpan.FromSeconds(100)).ConfigureAwait(false);
-                    if (File.Exists(dest)) File.Delete(dest);
-                    File.Move(part, dest);
+                    var part = dest + "." + Guid.NewGuid().ToString("N") + ".part";
+                    try
+                    {
+                        using (var f = File.Create(part))
+                            await HttpDownload.CopyToAsync(http, new Uri(url), f, TimeSpan.FromSeconds(100)).ConfigureAwait(false);
+                        File.Move(part, dest, overwrite: true);
+                    }
+                    finally
+                    {
+                        try { if (File.Exists(part)) File.Delete(part); } catch { }
+                    }
                 }).GetAwaiter().GetResult();
                 return true;
             }

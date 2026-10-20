@@ -72,30 +72,45 @@ namespace KillerPDF.Services
         internal static async Task DownloadTrainedDataAsync(System.Net.Http.HttpClient http, string url, string destFile,
             string label, string cancelHint, Action<string> progress, CancellationToken ct)
         {
-            string part = destFile + ".part";
-            using (var resp = await http.GetAsync(url, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, ct))
+            // The largest tessdata_best model is well under this; anything bigger is not a model.
+            const long maximumBytes = 256L * 1024 * 1024;
+            // A unique part name keeps two downloads of the same model from racing, and the
+            // whole transfer has a deadline so a stalled server cannot hold the busy overlay open.
+            string part = destFile + "." + Guid.NewGuid().ToString("N") + ".part";
+            using var deadline = CancellationTokenSource.CreateLinkedTokenSource(ct);
+            deadline.CancelAfter(TimeSpan.FromMinutes(15));
+            CancellationToken token = deadline.Token;
+            try
             {
-                resp.EnsureSuccessStatusCode();
-                long? total = resp.Content.Headers.ContentLength;
-                // using-var (not a block): these dispose at the end of the resp block, before the File.Move below.
-                using var netStream = await resp.Content.ReadAsStreamAsync(ct);
-                using var fileStream = new FileStream(part, FileMode.Create, FileAccess.Write, FileShare.None, 81920, useAsync: true);
-
-                var buffer = new byte[81920];
-                long read = 0;
-                int n;
-                while ((n = await netStream.ReadAsync(buffer, ct)) > 0)
+                using (var resp = await http.GetAsync(url, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, token))
                 {
-                    await fileStream.WriteAsync(buffer.AsMemory(0, n), ct);
-                    read += n;
-                    double mb = read / 1048576.0;
-                    progress(total.HasValue
-                        ? $"{label} {mb:F1} / {total.Value / 1048576.0:F1} MB  {cancelHint}"
-                        : $"{label} {mb:F1} MB  {cancelHint}");
+                    resp.EnsureSuccessStatusCode();
+                    long? total = resp.Content.Headers.ContentLength;
+                    if (total is long declared && declared > maximumBytes) throw new HttpDownloadSizeException();
+                    // using-var (not a block): these dispose at the end of the resp block, before the File.Move below.
+                    using var netStream = await resp.Content.ReadAsStreamAsync(token);
+                    using var fileStream = new FileStream(part, FileMode.Create, FileAccess.Write, FileShare.None, 81920, useAsync: true);
+
+                    var buffer = new byte[81920];
+                    long read = 0;
+                    int n;
+                    while ((n = await netStream.ReadAsync(buffer, token)) > 0)
+                    {
+                        if (n > maximumBytes - read) throw new HttpDownloadSizeException();
+                        await fileStream.WriteAsync(buffer.AsMemory(0, n), token);
+                        read += n;
+                        double mb = read / 1048576.0;
+                        progress(total.HasValue
+                            ? $"{label} {mb:F1} / {total.Value / 1048576.0:F1} MB  {cancelHint}"
+                            : $"{label} {mb:F1} MB  {cancelHint}");
+                    }
                 }
+                File.Move(part, destFile, overwrite: true);
             }
-            if (File.Exists(destFile)) File.Delete(destFile);
-            File.Move(part, destFile);
+            finally
+            {
+                TryDeleteFile(part);
+            }
         }
 
         internal static void TryDeleteFile(string path)

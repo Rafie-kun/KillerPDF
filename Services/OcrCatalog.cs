@@ -68,5 +68,18 @@ namespace KillerPDF.Services
             ("zh-CN", "chi_sim"),
             ("zh-TW", "chi_tra"),
         ];
+
+        // A tessdata model name: three lowercase letters, optionally followed by one script or
+        // variant suffix (chi_sim, aze_cyrl, deu_latf). Anything else is not a file name the app
+        // will combine into a path or a download URL.
+        internal static bool IsModelCode(string? code)
+        {
+            if (string.IsNullOrEmpty(code) || code.Length > 12) return false;
+            int underscore = code.IndexOf('_');
+            string language = underscore < 0 ? code : code[..underscore];
+            string suffix = underscore < 0 ? string.Empty : code[(underscore + 1)..];
+            return language.Length == 3 && language.All(c => c is >= 'a' and <= 'z')
+                && (underscore < 0 || (suffix.Length is >= 3 and <= 5 && suffix.All(c => c is >= 'a' and <= 'z')));
+        }
     }
 }
