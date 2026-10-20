@@ -1652,6 +1652,9 @@ public sealed partial class PdfPageRenderer
         {
             // Opaque interiors share bulk ink and alpha writes; partial edges keep the compositor.
             byte[] inkData = pixels.Ink!;
+            if (coverage is null && left == pixels.Left && top == pixels.Top
+                && right == pixels.Right && bottom == pixels.Bottom)
+                pixels.SetAlphaRun(0, pixels.Length / 4, 255);
             int count = right - left;
             for (int y = top; y < bottom; y++)
             {

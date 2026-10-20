@@ -95,6 +95,11 @@ public sealed partial class PdfPageRenderer
                 return;
             }
             byte[]? inkAlpha = InkAlpha;
+            if (inkAlpha is null && offset == 0 && count == Length / 4)
+            {
+                _constantAlpha = alpha;
+                return;
+            }
             if (inkAlpha is null && alpha == _constantAlpha) return;
             (inkAlpha ?? EnsureInkAlpha()).AsSpan(offset / 4, count).Fill(alpha);
         }

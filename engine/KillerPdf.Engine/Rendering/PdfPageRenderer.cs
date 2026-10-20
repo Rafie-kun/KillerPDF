@@ -284,7 +284,9 @@ public sealed partial class PdfPageRenderer
         using PageGlyphMaskScope pageGlyphMasks = EnterPageGlyphMasks();
         bool pageHasGroup = _tree.Pages[pageIndex].Dictionary.TryGetValue(Name("Group"), out _);
         bool isolatePageGroup = pageHasGroup && options.SeparationPlate is null
-            && !CmykGroup(_tree.Pages[pageIndex].Dictionary, _pageResources[pageIndex], false);
+            && (!CmykGroup(_tree.Pages[pageIndex].Dictionary, _pageResources[pageIndex], false)
+                || CmykGroup(_tree.Pages[pageIndex].Dictionary, _pageResources[pageIndex], false,
+                    nativeOnly: true));
         byte background = options.TransparentBackground || isolatePageGroup ? (byte)0 : (byte)255;
         var (Left, Top, Right, Bottom) = region ?? (Left: 0, Top: 0, Right: options.Width, Bottom: options.Height);
         int rasterWidth = Right - Left, rasterHeight = Bottom - Top;
@@ -7322,7 +7324,7 @@ public sealed partial class PdfPageRenderer
                 && pixels.GroupAlpha is null && pixels.GroupShape is null)
                 return;
             if (color.SpotName is not null && sourceAlpha == 1
-                && pixels.Alpha(offset) == 255 && knockout is null
+                && pixels.Alpha(offset) is 0 or 255 && knockout is null
                 && blendMode is RendererBlendMode.Normal or RendererBlendMode.Compatible)
             {
                 if (preparedSpotPaint is not null && color.AdditionalSpot is null

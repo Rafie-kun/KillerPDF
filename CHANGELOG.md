@@ -118,7 +118,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Save repairs preserve partially overlapping crop boxes and nonzero object generations.
 - Incomplete scans report errors and keep recovered pages, including when PDF creation fails (#73).
 - Pages with more than a million drawing instructions draw all of their content instead of quietly stopping partway.
-- RGB and grayscale page groups blend before the white paper background is added.
+- RGB, grayscale and unprofiled DeviceCMYK page groups blend before the white paper background is added.
 - Profiled RGB transparency groups no longer pick up stray colors during parallel rendering.
 - Shaded patterns keep their colors when painted through image masks.
 - PDFs with deeply repeated forms stop safely instead of tying up page rendering.

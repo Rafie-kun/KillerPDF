@@ -7,7 +7,8 @@ namespace KillerPdf.Engine.Rendering;
 
 public sealed partial class PdfPageRenderer
 {
-    private bool CmykGroup(PdfDictionary container, PdfDictionary resources, bool inherited)
+    private bool CmykGroup(PdfDictionary container, PdfDictionary resources, bool inherited,
+        bool nativeOnly = false)
     {
         if (!container.TryGetValue(Name("Group"), out PdfObject? groupValue)
             || Resolve(groupValue) is not PdfDictionary group
@@ -17,7 +18,9 @@ public sealed partial class PdfPageRenderer
             && Resolve(resourcesValue) is PdfDictionary ownResources) resources = ownResources;
         ImageColorSpace space = ReadColorSpace(spaceValue, resources, 0);
         return space.Components == 4 && space.Palette is null
-            && space.Converter is null && space.MultiConverter is null;
+            && space.Converter is null && space.MultiConverter is null
+            && (!nativeOnly || space.IsDeviceCmyk && !space.IsIccBased
+                && !space.HasIccSource && !space.IsDefault && space.Profile is null);
     }
 
     private static uint ReadInk(byte[] ink, int offset) =>
