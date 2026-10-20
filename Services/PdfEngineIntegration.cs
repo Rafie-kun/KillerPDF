@@ -2604,33 +2604,17 @@ internal static class PdfEngineIntegration
     /// first copied beside the destination so the final swap stays on one volume, which leaves
     /// the previous destination intact when the write fails partway.</summary>
     internal static void ReplaceFileAtomically(string finishedPath, string destinationPath)
+        => ReplaceFileAtomically(finishedPath, destinationPath, new AtomicFileOutput.FileOperations());
+
+    internal static void ReplaceFileAtomically(string finishedPath, string destinationPath, AtomicFileOutput.FileOperations files)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(finishedPath);
         ArgumentException.ThrowIfNullOrWhiteSpace(destinationPath);
-        string directory = Path.GetDirectoryName(Path.GetFullPath(destinationPath))!;
-        string temporaryPath = Path.Combine(directory,
-            $".{Path.GetFileName(destinationPath)}.{Guid.NewGuid():N}.tmp");
-        try
+        AtomicFileOutput.Write(destinationPath, output =>
         {
-            File.Copy(finishedPath, temporaryPath, overwrite: false);
-            if (File.Exists(destinationPath))
-            {
-                // Replace keeps the destination's permissions, creation time, and streams. Some
-                // file systems and network shares do not support it, so fall back to a rename.
-                try
-                {
-                    File.Replace(temporaryPath, destinationPath, null, ignoreMetadataErrors: true);
-                    return;
-                }
-                catch (IOException) { }
-                catch (PlatformNotSupportedException) { }
-            }
-            File.Move(temporaryPath, destinationPath, overwrite: true);
-        }
-        finally
-        {
-            if (File.Exists(temporaryPath)) File.Delete(temporaryPath);
-        }
+            using var input = new FileStream(finishedPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            input.CopyTo(output);
+        }, default, files);
     }
 
     private static void ReplaceWithBuiltResult(string path, byte[] result)

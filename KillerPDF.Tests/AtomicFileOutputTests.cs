@@ -100,4 +100,141 @@ public sealed class AtomicFileOutputTests
         }
         finally { File.Delete(path); Directory.Delete(directory); }
     }
+    [Theory]
+    [InlineData(false, 1176)]
+    [InlineData(false, 1177)]
+    [InlineData(true, 1176)]
+    [InlineData(true, 1177)]
+    public async Task PartialReplacementRetainsCompleteRecoveryFilesWhenRestorationFails(bool asynchronous, int nativeError)
+    {
+        string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directory);
+        string destination = Path.Combine(directory, "document.pdf");
+        byte[] original = "Original document"u8.ToArray();
+        byte[] replacement = "Complete edited document"u8.ToArray();
+        File.WriteAllBytes(destination, original);
+        string? staged = null, saved = null;
+        var files = new AtomicFileOutput.FileOperations
+        {
+            Replace = (incoming, target, backup) =>
+            {
+                staged = incoming;
+                Assert.Equal(replacement, File.ReadAllBytes(incoming));
+                if (nativeError == 1177) { saved = backup ?? target + ".native-backup"; File.Move(target, saved); }
+                else File.Delete(target);
+                throw new IOException("Replacement failed after changing the destination name.", unchecked((int)(0x80070000u + nativeError)));
+            },
+            Move = (source, target) => throw new IOException("Publication and restoration are unavailable.")
+        };
+        try
+        {
+            Exception? error = asynchronous
+                ? await Record.ExceptionAsync(() => AtomicFileOutput.WriteAsync(destination, stream => stream.WriteAsync(replacement).AsTask(), default, files))
+                : Record.Exception(() => AtomicFileOutput.Write(destination, stream => stream.Write(replacement), default, files));
+            Assert.IsAssignableFrom<IOException>(error);
+            Assert.NotNull(staged);
+            Assert.True(File.Exists(staged), "The only complete incoming document must remain recoverable.");
+            Assert.Equal(replacement, File.ReadAllBytes(staged!));
+            Assert.Contains(staged!, error!.Message);
+            if (nativeError == 1177) Assert.Equal(original, File.ReadAllBytes(saved!));
+        }
+        finally { Directory.Delete(directory, true); }
+    }
+
+    [Theory]
+    [InlineData(1176)]
+    [InlineData(1177)]
+    public void FailedRenameRestoresACompleteImage(int nativeError)
+    {
+        string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directory);
+        string destination = Path.Combine(directory, "document.pdf");
+        File.WriteAllText(destination, "Original");
+        string? staged = null;
+        var files = new AtomicFileOutput.FileOperations
+        {
+            Replace = (source, target, backup) =>
+            {
+                staged = source;
+                if (nativeError == 1177) File.Move(target, backup ?? target + ".native-backup");
+                else File.Delete(target);
+                throw new IOException("Partial replacement.", unchecked((int)(0x80070000u + nativeError)));
+            },
+            Move = (source, target) => { if (source == staged) throw new IOException("Incoming rename failed."); File.Move(source, target); }
+        };
+        try
+        {
+            Exception? error = Record.Exception(() => AtomicFileOutput.Write(destination, stream => stream.Write("Replacement"u8), default, files));
+            Assert.True(File.Exists(destination));
+            Assert.Equal(nativeError == 1177 ? "Original" : "Replacement", File.ReadAllText(destination));
+            if (nativeError == 1177) { Assert.IsAssignableFrom<IOException>(error); Assert.Equal("Replacement", File.ReadAllText(staged!)); }
+            else Assert.Null(error);
+        }
+        finally { Directory.Delete(directory, true); }
+    }
+
+    [Fact]
+    public void CleanupFailureAfterPublicationDoesNotReportFailure()
+    {
+        string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directory);
+        string destination = Path.Combine(directory, "document.pdf");
+        File.WriteAllText(destination, "Original");
+        var files = new AtomicFileOutput.FileOperations { Delete = path => throw new IOException("Cleanup is unavailable.") };
+        try
+        {
+            AtomicFileOutput.Write(destination, stream => stream.Write("Replacement"u8), default, files);
+            Assert.Equal("Replacement", File.ReadAllText(destination));
+        }
+        finally { Directory.Delete(directory, true); }
+    }
+
+    [Fact]
+    public void CancellationAfterPartialReplacementRestoresTheOriginal()
+    {
+        string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directory);
+        string destination = Path.Combine(directory, "document.pdf");
+        File.WriteAllText(destination, "Original");
+        using var cancellation = new CancellationTokenSource();
+        var files = new AtomicFileOutput.FileOperations
+        {
+            Replace = (source, target, backup) =>
+            {
+                File.Move(target, backup ?? target + ".native-backup");
+                cancellation.Cancel();
+                throw new IOException("Partial replacement.", unchecked((int)0x80070499));
+            }
+        };
+        try
+        {
+            Assert.ThrowsAny<OperationCanceledException>(() => AtomicFileOutput.Write(destination, stream => stream.Write("Replacement"u8), cancellation.Token, files));
+            Assert.Equal("Original", File.ReadAllText(destination));
+        }
+        finally { Directory.Delete(directory, true); }
+    }
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void UnsupportedReplacementUsesAProtectedRenameFallback(bool failIncomingRename)
+    {
+        string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directory);
+        string destination = Path.Combine(directory, "document.pdf");
+        File.WriteAllText(destination, "Original");
+        string? staged = null;
+        var files = new AtomicFileOutput.FileOperations
+        {
+            Replace = (source, target, backup) => { staged = source; throw new PlatformNotSupportedException("Replacement is unsupported."); },
+            Move = (source, target) => { if (failIncomingRename && source == staged) throw new IOException("Incoming rename failed."); File.Move(source, target); }
+        };
+        try
+        {
+            Exception? error = Record.Exception(() => AtomicFileOutput.Write(destination, stream => stream.Write("Replacement"u8), default, files));
+            Assert.Equal(failIncomingRename ? "Original" : "Replacement", File.ReadAllText(destination));
+            if (failIncomingRename) { Assert.IsAssignableFrom<IOException>(error); Assert.Equal("Replacement", File.ReadAllText(staged!)); }
+            else { Assert.Null(error); Assert.Equal(new[] { destination }, Directory.GetFiles(directory)); }
+        }
+        finally { Directory.Delete(directory, true); }
+    }
 }
