@@ -248,8 +248,8 @@ namespace KillerPDF
                 try
                 {
                     var dpi = VisualTreeHelper.GetDpi(this);
-                    if (MinWidth  > 0 && !double.IsInfinity(MinWidth))  mmi.ptMinTrackSize.x = (int)Math.Ceiling(MinWidth  * dpi.DpiScaleX);
-                    if (MinHeight > 0 && !double.IsInfinity(MinHeight)) mmi.ptMinTrackSize.y = (int)Math.Ceiling(MinHeight * dpi.DpiScaleY);
+                    if (MinWidth  > 0 && !double.IsInfinity(MinWidth))  mmi.ptMinTrackSize.x = Math.Min(mmi.ptMaxSize.x, (int)Math.Ceiling(MinWidth  * dpi.DpiScaleX));
+                    if (MinHeight > 0 && !double.IsInfinity(MinHeight)) mmi.ptMinTrackSize.y = Math.Min(mmi.ptMaxSize.y, (int)Math.Ceiling(MinHeight * dpi.DpiScaleY));
                 }
                 catch { /* DPI not available yet; skip min enforcement for this pass */ }
                 Marshal.StructureToPtr(mmi, lParam, true);
