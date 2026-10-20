@@ -1691,10 +1691,12 @@ public static partial class PdfContentRedaction
                 {
                     if (paint.Operator != "n" || pendingPath.Count > 0) localChanged = true;
                 }
-                else if (!glyphsOnly && pathPoints.Count > 0
+                // A clip-only path (W n) paints nothing, so it is neither recoverable geometry
+                // nor a reason to rasterize; it stays so later content keeps its clip.
+                else if (!glyphsOnly && paint.Operator != "n" && pathPoints.Count > 0
                     && regions.Any(region => Overlaps(paintedBounds, region)))
                 {
-                    if (!pendingClip && (paint.Operator == "n" || regions.Any(region => Inside(paintedBounds, region))))
+                    if (!pendingClip && regions.Any(region => Inside(paintedBounds, region)))
                     {
                         RemovedPaths++;
                         localChanged = true;

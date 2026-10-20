@@ -50,6 +50,26 @@ public sealed class PdfContentRedactionTests
     }
 
     [Fact]
+    public void ClipOnlyPathsOverlappingTheRegionDoNotForceRasterization()
+    {
+        // A page-sized clip rectangle (re W n) paints nothing, so it is not recoverable geometry.
+        PdfDocument document = PdfDocument.Open(SinglePage(
+            "q 0 0 100 100 re W n 1 0 0 rg 0 0 20 20 re f Q",
+            "/MediaBox [0 0 100 100]"));
+        var region = new PdfRedactionRegion(0, new PdfContentBounds(25, 25, 75, 75));
+
+        PdfContentRedactionPlan plan = PdfContentRedaction.Analyze(document, [region]);
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, [region]);
+
+        Assert.Empty(plan.RasterPages);
+        Assert.DoesNotContain("Vector", Assert.Single(plan.Pages).RasterReasons);
+        Assert.Equal(PdfRedactionPageMethod.Content, Assert.Single(result.Plan.Pages).Method);
+        Assert.True(result.Verification.Succeeded);
+        PdfRenderedPage rendered = new PdfPageRenderer(PdfDocument.Open(result.Document)).Render(0, new PdfRenderOptions(100, 100));
+        Assert.True(IsBlack(rendered, 50, 50));
+    }
+
+    [Fact]
     public void VerifierRejectsVectorGeometryHiddenByAnOtherwiseValidCover()
     {
         PdfDocument document = PdfDocument.Open(SinglePage(
