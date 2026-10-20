@@ -15,7 +15,7 @@ internal static class ScrollOverlaySmoke
     private const BindingFlags Members = BindingFlags.Public | BindingFlags.NonPublic
         | BindingFlags.Instance | BindingFlags.Static;
 
-    internal static int Run(string appPath, string appXaml, string folder)
+    internal static int Run(string appPath, string appXaml, string folder, bool toolbar = false)
     {
         if (!Environment.GetCommandLineArgs().Contains("--startup-smoke"))
             throw new InvalidOperationException("Startup smoke isolation is required.");
@@ -62,6 +62,7 @@ internal static class ScrollOverlaySmoke
                     .GetMethod("Initialize", Members)!.Invoke(null, null);
             window = (Window)Activator.CreateInstance(assembly.GetType("KillerPDF.MainWindow", true)!)!;
             var root = (FrameworkElement)window.Content;
+            if (toolbar) return VerifyToolbar(window, root, folder);
             var overlay = (FrameworkElement)window.FindName("ShortcutOverlay");
             overlay.Visibility = Visibility.Visible;
             var card = (FrameworkElement)window.FindName("ShortcutCardGrid");
@@ -119,13 +120,163 @@ internal static class ScrollOverlaySmoke
             }
         }
         catch (Exception ex) { failures.Add(ex.ToString()); }
-        finally { window?.Close(); app.Shutdown(); }
+        finally
+        {
+            if (toolbar && window is not null)
+                window.GetType().GetField("_fadingOut", Members)!.SetValue(window, true);
+            window?.Close();
+            app.Shutdown();
+        }
         report.AddRange(failures.Select(f => "FAIL " + f));
         report.Add(failures.Count == 0 ? "result=ok" : "result=error");
         File.WriteAllLines(Path.Combine(folder, "report.txt"), report);
         return failures.Count == 0 ? 0 : 1;
 
         void Check(bool success, string message) { if (!success) failures.Add(message); }
+    }
+
+    private static int VerifyToolbar(Window window, FrameworkElement root, string folder)
+    {
+        Type type = window.GetType();
+        void Call(string name) => type.GetMethod(name, Members)!.Invoke(window, null);
+        var left = (FrameworkElement)window.FindName("LeftBar");
+        var right = (FrameworkElement)window.FindName("RightContainer");
+        var grid = (FrameworkElement)window.FindName("ToolbarGrid");
+        var units = ((System.Collections.IEnumerable)type.GetField("_toolbarUnits", Members)!.GetValue(window)!)
+            .Cast<object>().Select(unit => (
+                Id: (string)unit.GetType().GetProperty("Id")!.GetValue(unit)!,
+                Bar: (FrameworkElement)unit.GetType().GetProperty("Bar")!.GetValue(unit)!)).ToArray();
+        var report = new List<string>();
+        int failures = 0;
+        foreach (string mode in new[] { "Beside", "None", "Under" })
+        {
+            var modeType = type.GetNestedType("ToolbarLabelMode", Members)!;
+            type.GetMethod("SetToolbarLabelMode", Members)!.Invoke(window, [Enum.Parse(modeType, mode)]);
+            foreach (double width in new[] { 1000d, 1320d, 1600d })
+            {
+                Settle(root, width, 800);
+                Call("InvalidateToolbarReflow"); Call("ReflowToolbar");
+                Settle(root, width, 800);
+                report.Add($"{mode} width={width} gap={right.TranslatePoint(new Point(), grid).X - left.ActualWidth:F1}");
+                Render(grid, Path.Combine(folder, $"{mode}-{width}.png"));
+                foreach (var unit in units.Where(unit => unit.Bar.Visibility == Visibility.Collapsed))
+                {
+                    unit.Bar.Visibility = Visibility.Visible;
+                    Call("SyncToolbarSeparators"); Call("MeasureToolbarBars");
+                    if (left.DesiredSize.Width + right.DesiredSize.Width <= grid.ActualWidth)
+                    {
+                        report.Add($"FAIL {mode} width={width}: {unit.Id} fits but is in overflow");
+                        failures++;
+                    }
+                    unit.Bar.Visibility = Visibility.Collapsed;
+                    Call("SyncToolbarSeparators"); Call("MeasureToolbarBars");
+                }
+            }
+        }
+        var footer = (FrameworkElement)window.FindName("FooterBorder");
+        var display = (Panel)window.FindName("FooterDisplayControls");
+        var fullScreen = (Button)window.FindName("FullScreenRailBtn");
+        var invert = (Button)window.FindName("DocInvertBtn");
+        var lastMode = (FrameworkElement)window.FindName("ViewGridRadio");
+        var zoom = (FrameworkElement)window.FindName("ZoomOutBtn");
+        if (fullScreen.Parent != display || invert.Parent != display
+            || Bounds(lastMode, footer).Right > Bounds(display, footer).Left
+            || Bounds(display, footer).Right > Bounds(zoom, footer).Left)
+        {
+            report.Add("FAIL footer display controls must sit between view modes and zoom");
+            failures++;
+        }
+        Render(footer, Path.Combine(folder, "footer.png"));
+        var dialogOwner = new Window { Resources = window.Resources, ShowInTaskbar = false };
+        _ = new System.Windows.Interop.WindowInteropHelper(dialogOwner).EnsureHandle();
+        Type transformType = type.Assembly.GetType("KillerPDF.TransformWindow", true)!;
+        Type previewType = transformType.GetNestedType("PagePreview", Members)!;
+        var pixels = Enumerable.Repeat((byte)255, 100 * 140 * 4).ToArray();
+        var bitmap = BitmapSource.Create(100, 140, 96, 96, PixelFormats.Bgra32, null, pixels, 400);
+        bitmap.Freeze();
+        var previews = Array.CreateInstance(previewType, 1);
+        previews.SetValue(Activator.CreateInstance(previewType, bitmap, 500d, 700d, 1), 0);
+        foreach (string mode in new[] { "ColorCorrection" })
+        {
+            var dialog = (Window)Activator.CreateInstance(transformType, dialogOwner, previews,
+                Enum.Parse(type.Assembly.GetType("KillerPDF.TransformWindowMode", true)!, mode))!;
+            try
+            {
+                var content = (FrameworkElement)dialog.Content;
+                dialog.Content = null;
+                Settle(content, 980, 720);
+                foreach (var header in Descendants<Border>(content).Where(border =>
+                    border.Visibility == Visibility.Visible && border.ActualHeight > 0
+                    && border.Child is StackPanel row && row.Children.OfType<TextBlock>().Any(text => text.Text == "▸")))
+                    header.RaiseEvent(new System.Windows.Input.MouseButtonEventArgs(
+                        System.Windows.Input.Mouse.PrimaryDevice, 0, System.Windows.Input.MouseButton.Left)
+                        { RoutedEvent = UIElement.MouseLeftButtonUpEvent });
+                Settle(content, 980, 720);
+                var apply = Descendants<Button>(content).Single(button => button.IsDefault);
+                var level = (Slider)transformType.GetField(mode == "ColorCorrection" ? "_lvlWhite" : "_rotSlider", Members)!.GetValue(dialog)!;
+                double edge = Bounds(apply, content).Right;
+                double controlEdge = Bounds(level, content).Right;
+                report.Add($"{mode} applyRight={edge:F1} controlRight={controlEdge:F1}");
+                if (controlEdge > edge + 1) { report.Add("FAIL controls extend beyond action buttons"); failures++; }
+                Render(content, Path.Combine(folder, mode + ".png"));
+                if (mode == "ColorCorrection")
+                {
+                    var preview = (Image)transformType.GetField("_preview", Members)!.GetValue(dialog)!;
+                    var zoomMethod = transformType.GetMethod("ZoomPreview", Members)!;
+                    var center = new Point(preview.ActualWidth / 2, preview.ActualHeight / 2);
+                    zoomMethod.Invoke(dialog, [480, center]);
+                    Matrix zoomed = ((MatrixTransform)preview.RenderTransform).Matrix;
+                    if (zoomed.M11 <= 1 || (zoomed.Transform(center) - center).Length > 1)
+                    { report.Add("FAIL preview zoom must preserve the pointer anchor"); failures++; }
+                    transformType.GetMethod("UpdatePreview", Members)!.Invoke(dialog, null);
+                    if (((MatrixTransform)preview.RenderTransform).Matrix.M11 != zoomed.M11)
+                    { report.Add("FAIL correction refresh reset preview zoom"); failures++; }
+                    Render(content, Path.Combine(folder, "ColorCorrection-zoom.png"));
+                    zoomMethod.Invoke(dialog, [-4800, center]);
+                    if (!((MatrixTransform)preview.RenderTransform).Matrix.IsIdentity)
+                    { report.Add("FAIL zoom must stop at the fitted preview"); failures++; }
+                    report.Add("ColorCorrection pointer anchor, refresh persistence, and minimum zoom checked");
+                }
+            }
+            finally { dialog.Close(); }
+        }
+        string sourcePath = Path.Combine(folder, "source.pdf");
+        byte[] sourceBytes = (byte[])typeof(Program).GetMethod("NewPdf", Members)!.Invoke(null, null)!;
+        File.WriteAllBytes(sourcePath, sourceBytes);
+        object paneA = window.FindName("Viewer"), paneB = window.FindName("ViewerB");
+        Type paneType = paneA.GetType();
+        paneType.GetMethod("OpenInNewTabExt", Members)!.Invoke(paneA, [sourcePath]);
+        MethodInfo focus = type.GetMethod("FocusPane", Members)!;
+        focus.Invoke(window, [paneB]);
+        var pagesButton = (Button)window.FindName("SidebarPagesTab");
+        if (pagesButton.IsEnabled || pagesButton.Visibility != Visibility.Collapsed)
+        { report.Add("FAIL empty pane panel buttons must be hidden"); failures++; }
+        focus.Invoke(window, [paneA]);
+        if (!pagesButton.IsEnabled || pagesButton.Visibility != Visibility.Visible)
+        { report.Add("FAIL document pane must restore panel buttons"); failures++; }
+        bool beforeRightClick = (bool)type.GetField("_sidebarCollapsed", Members)!.GetValue(window)!;
+        var rightClick = new System.Windows.Input.MouseButtonEventArgs(
+            System.Windows.Input.Mouse.PrimaryDevice, 0, System.Windows.Input.MouseButton.Right)
+            { RoutedEvent = System.Windows.Input.Mouse.MouseUpEvent };
+        pagesButton.RaiseEvent(rightClick);
+        bool afterRightClick = (bool)type.GetField("_sidebarCollapsed", Members)!.GetValue(window)!;
+        if (!rightClick.Handled || beforeRightClick == afterRightClick)
+        { report.Add("FAIL rail right-click must invoke its normal panel action"); failures++; }
+        type.GetField("_isSplit", Members)!.SetValue(window, true);
+        string copyPath = Path.Combine(folder, "redacted-copy.pdf");
+        type.GetMethod("SaveCopyAndOpen", Members)!.Invoke(window, [copyPath]);
+        if (!ReferenceEquals(type.GetProperty("ActiveViewer", Members)!.GetValue(window), paneB)
+            || !File.Exists(copyPath) || !File.ReadAllBytes(sourcePath).SequenceEqual(sourceBytes))
+        { report.Add("FAIL saved copy must open in empty second pane and preserve source"); failures++; }
+        string nextCopy = Path.Combine(folder, "another-copy.pdf");
+        type.GetMethod("SaveCopyAndOpen", Members)!.Invoke(window, [nextCopy]);
+        var sessions = (System.Collections.ICollection)paneType.GetProperty("SessionsRef", Members)!.GetValue(paneB)!;
+        if (sessions.Count != 2 || !ReferenceEquals(type.GetProperty("ActiveViewer", Members)!.GetValue(window), paneB))
+        { report.Add("FAIL occupied second pane must use a new tab"); failures++; }
+        report.Add("Pane availability transitions, rail right-click, and saved-copy routing checked");
+        report.Add($"failures={failures}");
+        File.WriteAllLines(Path.Combine(folder, "report.txt"), report);
+        return failures == 0 ? 0 : 1;
     }
 
     private static void Settle(FrameworkElement root, double width, double height)

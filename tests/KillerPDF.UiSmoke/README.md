@@ -66,3 +66,15 @@ to measure and render the compiled Help card in Dark, Light, and 98SE. The check
 covers short and normal heights, both scroll ends, fitting content, the keyboard
 view, and separation of the scrollbar from Close. App startup is suppressed and
 the output folder owns all test settings. No desktop input is sent.
+
+## Toolbar and display layout regression
+
+Use `--verify-toolbar APP_DLL APP_XAML OUTPUT_DIRECTORY --startup-smoke`
+to render the toolbar at 1000, 1320, and 1600 pixels with captions beside,
+under, and hidden. The check rejects unused space that can fit an overflow
+tool, verifies the footer display controls sit between view modes and zoom,
+and renders Color Correction to check its right inset and preview zoom.
+It also checks document and empty-pane transitions, rail right-click routing,
+and opening saved copies in an empty second pane or a new tab.
+Use a fresh output directory. Startup and user settings remain isolated;
+the check sends no desktop input.
