@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text;
 using KillerPdf.Engine.Authoring;
+using KillerPdf.Engine.Filters;
 using KillerPdf.Engine.Objects;
 using KillerPdf.Engine.Syntax;
 
@@ -49,17 +50,28 @@ public sealed record PdfDocumentInformation
         }
 
         PdfPageTree pageTree = PdfPageTree.Read(document);
+        // PDF 2.0 deprecates /Info, so a field missing there is read from the XMP packet.
+        PdfXmpDocumentMetadata? xmp;
+        try
+        {
+            xmp = PdfXmpDocumentMetadata.Read(document);
+        }
+        catch (Exception error) when (error is InvalidOperationException or PdfFilterException)
+        {
+            // Optional, damaged metadata must not prevent access to the document's pages or /Info.
+            xmp = null;
+        }
         return new PdfDocumentInformation
         {
-            Title = Text(info, "Title"),
-            Author = Text(info, "Author"),
-            Subject = Text(info, "Subject"),
-            Keywords = Text(info, "Keywords"),
-            Creator = Text(info, "Creator"),
-            Producer = Text(info, "Producer"),
+            Title = Text(info, "Title") ?? xmp?.Title,
+            Author = Text(info, "Author") ?? xmp?.Author,
+            Subject = Text(info, "Subject") ?? xmp?.Subject,
+            Keywords = Text(info, "Keywords") ?? xmp?.Keywords,
+            Creator = Text(info, "Creator") ?? xmp?.Creator,
+            Producer = Text(info, "Producer") ?? xmp?.Producer,
             Language = CatalogText(document, "Lang"),
-            CreationDate = Date(info, "CreationDate"),
-            ModificationDate = Date(info, "ModDate"),
+            CreationDate = Date(info, "CreationDate") ?? xmp?.CreationDate,
+            ModificationDate = Date(info, "ModDate") ?? xmp?.ModificationDate,
             Trapped = ReadTrapped(info),
             Version = document.Header.Version,
             PageCount = pageTree.Pages.Count,

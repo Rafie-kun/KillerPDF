@@ -9,6 +9,36 @@ namespace KillerPdf.Engine.Tests.Documents;
 
 public sealed class PdfDocumentInformationTests
 {
+    [Theory]
+    [InlineData("FlateDecode")]
+    [InlineData("UnsupportedFilter")]
+    public void Read_PreservesInfoAndPagesWhenOptionalXmpCannotBeDecoded(string filter)
+    {
+        PdfDocument source = PdfDocument.Open(new PdfDocumentBuilder()
+            .SetMetadata(new PdfDocumentMetadata { Title = "Valid title", Author = "Valid author" })
+            .AddBlankPage().Build());
+        var root = (PdfIndirectReference)source.Trailer[new PdfName("Root"u8)];
+        var catalog = (PdfDictionary)source.Resolve(root);
+        var update = new PdfIncrementalUpdateBuilder(source);
+        var metadataName = new PdfName("Metadata"u8);
+        PdfIndirectReference metadata = update.AddObject(new PdfStream(new PdfDictionary([
+            new(new PdfName("Type"u8), new PdfName("Metadata"u8)),
+            new(new PdfName("Subtype"u8), new PdfName("XML"u8)),
+            new(new PdfName("Filter"u8), new PdfName(System.Text.Encoding.ASCII.GetBytes(filter)))
+        ]), "broken"u8));
+        update.ReplaceObject(root.ObjectNumber, new PdfDictionary(
+            catalog.Where(entry => !entry.Key.Equals(metadataName))
+                .Append(new(metadataName, metadata))));
+
+        PdfDocumentInformation information = PdfDocumentInformation.Read(
+            PdfDocument.Open(update.Build()));
+
+        Assert.Equal("Valid title", information.Title);
+        Assert.Equal("Valid author", information.Author);
+        Assert.Equal(1, information.PageCount);
+        Assert.NotNull(information.InitialView);
+    }
+
     [Fact]
     public void ReadTreatsANullTrappedEntryAsAbsent()
     {
