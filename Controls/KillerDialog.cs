@@ -35,15 +35,14 @@ namespace KillerPDF
         // modal and UI-thread only, so a shared field is safe and avoids a duplicate dialog body.
         private static bool _lastCheckboxChecked;
 
-        // The family setup dialog body: a notice ring beside a Killer Sans heading with muted
-        // detail under it. The message's first line is the heading and the rest is detail. A
-        // first line longer than a heading should be stays body-sized instead of shouting.
+        // Plain messages use body text. An explicit heading and detail on separate lines
+        // retain the family notice layout.
         private static Grid NoticeBody(string message, MessageBoxImage image, bool confirmation, out StackPanel textStack)
         {
             string heading = message, detail = "";
             int lineBreak = message.IndexOf('\n');
             if (lineBreak >= 0) { heading = message[..lineBreak].TrimEnd('\r'); detail = message[(lineBreak + 1)..].Trim(); }
-            bool large = heading.Length <= 90;
+            bool large = lineBreak >= 0 && detail.Length > 0 && heading.Length <= 90;
 
             var grid = new Grid { Margin = new Thickness(24, 18, 24, 18) };
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(38) });
@@ -76,6 +75,7 @@ namespace KillerPDF
             {
                 Text = large ? heading : message,
                 Foreground = R("TextBrush"),
+                FontFamily = UiKit.UiFont,
                 FontSize = large ? 18 : 13,
                 TextWrapping = TextWrapping.Wrap
             };
