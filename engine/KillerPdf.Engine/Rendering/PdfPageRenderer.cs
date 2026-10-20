@@ -283,10 +283,18 @@ public sealed partial class PdfPageRenderer
     {
         using PageGlyphMaskScope pageGlyphMasks = EnterPageGlyphMasks();
         bool pageHasGroup = _tree.Pages[pageIndex].Dictionary.TryGetValue(Name("Group"), out _);
+        // Compositing an RGB or gray page group on a transparent backdrop and imposing it on
+        // the paper afterward only changes the result when something blends against that
+        // backdrop. Pages that paint with Normal blending composite identically straight onto
+        // white, and the opaque paths are much faster there, so they keep the white backdrop.
+        // Native CMYK groups blend in ink space, where the paper matters even for Normal paint.
+        bool cmykGroup = pageHasGroup
+            && CmykGroup(_tree.Pages[pageIndex].Dictionary, _pageResources[pageIndex], false);
         bool isolatePageGroup = pageHasGroup && options.SeparationPlate is null
-            && (!CmykGroup(_tree.Pages[pageIndex].Dictionary, _pageResources[pageIndex], false)
-                || CmykGroup(_tree.Pages[pageIndex].Dictionary, _pageResources[pageIndex], false,
-                    nativeOnly: true));
+            && (cmykGroup
+                ? CmykGroup(_tree.Pages[pageIndex].Dictionary, _pageResources[pageIndex], false,
+                    nativeOnly: true)
+                : PageBlendsAgainstBackdrop(pageIndex, options, cancellationToken));
         byte background = options.TransparentBackground || isolatePageGroup ? (byte)0 : (byte)255;
         var (Left, Top, Right, Bottom) = region ?? (Left: 0, Top: 0, Right: options.Width, Bottom: options.Height);
         int rasterWidth = Right - Left, rasterHeight = Bottom - Top;
@@ -2706,6 +2714,91 @@ public sealed partial class PdfPageRenderer
     // This distinct empty list marks pages that exceeded the buffered content limit.
     private static readonly IReadOnlyList<PdfContentInstruction> StreamingInstructions =
         Array.AsReadOnly(Array.Empty<PdfContentInstruction>());
+
+    private readonly BoundedCache<int, bool> _backdropBlendCache = new(64);
+
+    // True when the page's content, the forms it draws or its painted annotation appearances
+    // use a blend mode other than Normal or Compatible, or a knockout group, so the result
+    // depends on whether the page group starts transparent or on the white paper. A page that
+    // has to stream its content is treated as blending, because its instructions are not
+    // retained for inspection.
+    private bool PageBlendsAgainstBackdrop(int pageIndex, PdfRenderOptions options,
+        CancellationToken cancellationToken)
+    {
+        bool annotations = options.IncludeAnnotations || options.IncludeFormFields;
+        return _backdropBlendCache.GetOrAdd(pageIndex * 2 + (annotations ? 1 : 0), _ =>
+        {
+            IEnumerable<PdfContentInstruction> pageInstructions = ReadInstructions(pageIndex, [], cancellationToken);
+            if (pageInstructions is not IReadOnlyList<PdfContentInstruction>) return true;
+            var visited = new HashSet<PdfStream>();
+            if (Blends(pageInstructions, _pageResources[pageIndex], 0)) return true;
+            if (!annotations
+                || !_tree.Pages[pageIndex].Dictionary.TryGetValue(Name("Annots"), out PdfObject? annotationsValue)
+                || Resolve(annotationsValue) is not PdfArray annotationArray)
+                return false;
+            foreach (PdfObject annotationValue in annotationArray)
+            {
+                if (Resolve(annotationValue) is not PdfDictionary annotation
+                    || !annotation.TryGetValue(Name("AP"), out PdfObject? appearancesValue)
+                    || Resolve(appearancesValue) is not PdfDictionary appearances
+                    || !appearances.TryGetValue(Name("N"), out PdfObject? normalValue))
+                    continue;
+                PdfObject normal = Resolve(normalValue);
+                IEnumerable<PdfObject> streams = normal is PdfDictionary states ? states.Values : [normal];
+                foreach (PdfObject streamValue in streams)
+                    if (Resolve(streamValue) is PdfStream appearance
+                        && FormBlends(appearance, _pageResources[pageIndex], 0))
+                        return true;
+            }
+            return false;
+
+            bool FormBlends(PdfStream form, PdfDictionary inheritedResources, int depth)
+            {
+                if (depth > PdfPageContentReader.MaximumRecoveredFormDepth || !visited.Add(form)) return false;
+                if (form.Dictionary.TryGetValue(Name("Group"), out PdfObject? groupValue)
+                    && Resolve(groupValue) is PdfDictionary group
+                    && group.TryGetValue(Name("K"), out PdfObject? knockoutValue)
+                    && Resolve(knockoutValue) is PdfBoolean { Value: true })
+                    return true;
+                PdfDictionary resources = form.Dictionary.TryGetValue(Name("Resources"), out PdfObject? resourcesValue)
+                    && Resolve(resourcesValue) is PdfDictionary own ? own : inheritedResources;
+                IReadOnlyList<PdfContentInstruction> instructions;
+                try
+                {
+                    instructions = ReadStreamInstructions(form, cancellationToken);
+                }
+                catch (Exception error) when (error is FormatException or PdfFilterException)
+                {
+                    return false;
+                }
+                return Blends(instructions, resources, depth + 1);
+            }
+
+            bool Blends(IEnumerable<PdfContentInstruction> instructions, PdfDictionary resources, int depth)
+            {
+                foreach (PdfContentInstruction instruction in instructions)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    IReadOnlyList<PdfObject> values = instruction.Operands;
+                    if (instruction.Operator == "gs" && values.Count == 1 && values[0] is PdfName stateName)
+                    {
+                        if (TryGetGraphicsState(resources, stateName, out double? _, out double? _,
+                                out RendererBlendMode? blendMode, out bool unsupportedBlend,
+                                out PdfObject? _, out PdfObject? _, out PdfDictionary? _)
+                            && (unsupportedBlend
+                                || blendMode is not (null or RendererBlendMode.Normal or RendererBlendMode.Compatible)))
+                            return true;
+                    }
+                    else if (instruction.Operator == "Do" && values.Count == 1 && values[0] is PdfName xObjectName
+                        && TryGetXObject(resources, xObjectName, out PdfStream? xObject) && xObject is not null
+                        && IsName(xObject.Dictionary, "Subtype", "Form")
+                        && FormBlends(xObject, resources, depth))
+                        return true;
+                }
+                return false;
+            }
+        });
+    }
 
     private IEnumerable<PdfContentInstruction> ReadInstructions(
         int pageIndex, HashSet<string> diagnostics, CancellationToken cancellationToken)
