@@ -21,10 +21,17 @@ public sealed partial class PdfPageRenderer
         private PdfColorTransform? _compositeProfile;
         private PdfBlackPointCompensation? _compositeCompensation;
         private PdfColorTransform? _inputProfile;
-        private Color _lastInkColor;
-        private uint _lastInk;
-        private bool _hasInkColor;
-        private readonly Lock _colorCacheSync = new();
+        // Single-entry color caches, one per thread. Row workers each keep their own last
+        // color, so no worker can read another worker's key beside its own value, and no lock
+        // or allocation sits in the per-pixel path. An entry is valid only for the surface
+        // and profile generation it was computed under.
+        private struct ReadCache { public RasterSurface? Surface; public int Generation; public uint Ink; public Color Color; }
+        private struct InkCache { public RasterSurface? Surface; public int Generation; public Color Color; public uint Ink; }
+        [ThreadStatic] private static ReadCache t_read;
+        [ThreadStatic] private static InkCache t_ink;
+        private int _colorCacheGeneration;
+        private void InvalidateColorCaches() => Interlocked.Increment(ref _colorCacheGeneration);
+        private int ColorCacheGeneration => Volatile.Read(ref _colorCacheGeneration);
         private readonly Lock _inkAlphaSync = new();
         private readonly Lock _spotSync = new();
         private byte[]? _spotBaseInk;
@@ -133,8 +140,7 @@ public sealed partial class PdfPageRenderer
         internal void EnableInk(Color background, bool preserveAlpha = true, PdfColorTransform? profile = null)
         {
             InkProfile = profile;
-            _hasInkColor = false;
-            _hasReadInk = false;
+            InvalidateColorCaches();
             _constantAlpha = preserveAlpha && Length > 0 ? Data[3] : (byte)0;
             Ink = Data;
             uint ink = ColorInk(background, profile);
@@ -210,7 +216,7 @@ public sealed partial class PdfPageRenderer
             // result uses the rendering intent captured at the invoking Do operator.
             _compositeProfile = null;
             _compositeCompensation = null;
-            _hasReadInk = false;
+            InvalidateColorCaches();
             if (SameProfile(BlendProfile, destination.BlendProfile)) return default;
             if (BlendProfile is PdfIccProfileTransform profile)
             {
@@ -237,7 +243,7 @@ public sealed partial class PdfPageRenderer
             }
             var scope = new InputProfileScope(destination, destination._inputProfile);
             destination._inputProfile = mapped;
-            destination._hasInkColor = false;
+            destination.InvalidateColorCaches();
             ConfigureCompensation();
             return scope;
 
@@ -258,7 +264,7 @@ public sealed partial class PdfPageRenderer
             {
                 if (surface is null) return;
                 surface._inputProfile = previous;
-                surface._hasInkColor = false;
+                surface.InvalidateColorCaches();
             }
         }
 
@@ -275,7 +281,7 @@ public sealed partial class PdfPageRenderer
             if (SameProfile(mapped, InputProfile)) return default;
             var scope = new InputProfileScope(this, _inputProfile);
             _inputProfile = mapped;
-            _hasInkColor = false;
+            InvalidateColorCaches();
             return scope;
         }
 
@@ -288,52 +294,48 @@ public sealed partial class PdfPageRenderer
             if (RgbProfile is null) return _compositeCompensation is { } mapping
                 ? CompensateColor(samples, mapping) : samples;
             uint key = (uint)(samples.Red << 16 | samples.Green << 8 | samples.Blue);
-            lock (_colorCacheSync)
-                if (_hasReadInk && key == _lastReadInk) return _lastReadColor;
+            ref ReadCache cache = ref t_read;
+            int generation = ColorCacheGeneration;
+            if (ReferenceEquals(cache.Surface, this) && cache.Generation == generation
+                && cache.Ink == key) return cache.Color;
             Color result = ProfileRgbToDisplay(samples, _compositeProfile ?? RgbProfile);
             if (_compositeCompensation is { } compensation)
                 result = CompensateColor(result, compensation);
-            lock (_colorCacheSync)
-            {
-                _lastReadColor = result;
-                _lastReadInk = key;
-                _hasReadInk = true;
-            }
+            cache = new ReadCache { Surface = this, Generation = generation, Ink = key, Color = result };
             return result;
         }
 
         internal Color GetRgb(in Color color)
         {
             if (RgbProfile is null) return color;
-            lock (_colorCacheSync)
-                if (_hasInkColor && color == _lastInkColor)
-                    return new Color((byte)(_lastInk >> 16), (byte)(_lastInk >> 8), (byte)_lastInk);
-            Color samples = ColorRgb(color, _inputProfile ?? RgbProfile);
-            uint ink = (uint)(samples.Red << 16 | samples.Green << 8 | samples.Blue);
-            lock (_colorCacheSync)
+            ref InkCache cache = ref t_ink;
+            int generation = ColorCacheGeneration;
+            uint ink;
+            if (ReferenceEquals(cache.Surface, this) && cache.Generation == generation
+                && color == cache.Color) ink = cache.Ink;
+            else
             {
-                _lastInk = ink;
-                _lastInkColor = color;
-                _hasInkColor = true;
+                Color samples = ColorRgb(color, _inputProfile ?? RgbProfile);
+                ink = (uint)(samples.Red << 16 | samples.Green << 8 | samples.Blue);
+                cache = new InkCache { Surface = this, Generation = generation, Color = color, Ink = ink };
             }
             return new Color((byte)(ink >> 16), (byte)(ink >> 8), (byte)ink);
         }
 
-        private uint _lastReadInk;
-        private Color _lastReadColor;
-        private bool _hasReadInk;
         internal Color ColorFromInk(uint ink, RasterSurface? destination = null)
         {
             // A matching native destination consumes the ink directly; display conversion is unnecessary.
             if (InkProfile is null || destination?.Ink is not null
                 && SameProfile(InkProfile, destination.InkProfile)) return InkColor(ink);
-            if (_hasReadInk && ink == _lastReadInk) return _lastReadColor;
-            _lastReadColor = InkColor(ink, _compositeProfile ?? InkProfile);
+            ref ReadCache cache = ref t_read;
+            int generation = ColorCacheGeneration;
+            if (ReferenceEquals(cache.Surface, this) && cache.Generation == generation
+                && cache.Ink == ink) return cache.Color;
+            Color result = InkColor(ink, _compositeProfile ?? InkProfile);
             if (_compositeCompensation is { } compensation)
-                _lastReadColor = CompensateColor(_lastReadColor, compensation);
-            _lastReadInk = ink;
-            _hasReadInk = true;
-            return _lastReadColor;
+                result = CompensateColor(result, compensation);
+            cache = new ReadCache { Surface = this, Generation = generation, Ink = ink, Color = result };
+            return result;
         }
 
         internal uint GetInk(in Color color)
@@ -341,11 +343,13 @@ public sealed partial class PdfPageRenderer
             if (InkProfile is null) return ColorInk(color);
             if (color.Ink is uint ink && (color.InkProfile is null
                 || SameProfile(color.InkProfile, InkProfile))) return ink;
-            if (_hasInkColor && color == _lastInkColor) return _lastInk;
-            _lastInk = ColorInk(color, _inputProfile ?? InkProfile);
-            _lastInkColor = color;
-            _hasInkColor = true;
-            return _lastInk;
+            ref InkCache cache = ref t_ink;
+            int generation = ColorCacheGeneration;
+            if (ReferenceEquals(cache.Surface, this) && cache.Generation == generation
+                && color == cache.Color) return cache.Ink;
+            uint computed = ColorInk(color, _inputProfile ?? InkProfile);
+            cache = new InkCache { Surface = this, Generation = generation, Color = color, Ink = computed };
+            return computed;
         }
 
         internal void EnableRgbSpotShadow()
@@ -971,8 +975,7 @@ public sealed partial class PdfPageRenderer
             Ink = null;
             InkProfile = null;
             RgbProfile = null;
-            _hasInkColor = false;
-            _hasReadInk = false;
+            InvalidateColorCaches();
             _constantAlpha = 0;
         }
 
