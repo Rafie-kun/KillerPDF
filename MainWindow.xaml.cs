@@ -594,13 +594,29 @@ namespace KillerPDF
         {
             try
             {
-                App.SetSetting("WindowState", WindowState.ToString());
-                if (WindowState == WindowState.Normal)
+                // In F11 full screen the window is a Normal window stretched over the monitor,
+                // so the bounds and state to keep are the ones from before it was entered.
+                if (_fullScreen)
                 {
-                    App.SetSetting("WindowWidth",  ((int)ActualWidth).ToString());
-                    App.SetSetting("WindowHeight", ((int)ActualHeight).ToString());
-                    App.SetSetting("WindowTop",  ((int)Top).ToString());
-                    App.SetSetting("WindowLeft", ((int)Left).ToString());
+                    App.SetSetting("WindowState", _fsPrevState.ToString());
+                    if (_fsPrevState == WindowState.Normal && _fsPrevW > 0 && _fsPrevH > 0)
+                    {
+                        App.SetSetting("WindowWidth",  ((int)_fsPrevW).ToString());
+                        App.SetSetting("WindowHeight", ((int)_fsPrevH).ToString());
+                        App.SetSetting("WindowTop",  ((int)_fsPrevTop).ToString());
+                        App.SetSetting("WindowLeft", ((int)_fsPrevLeft).ToString());
+                    }
+                }
+                else
+                {
+                    App.SetSetting("WindowState", WindowState.ToString());
+                    if (WindowState == WindowState.Normal)
+                    {
+                        App.SetSetting("WindowWidth",  ((int)ActualWidth).ToString());
+                        App.SetSetting("WindowHeight", ((int)ActualHeight).ToString());
+                        App.SetSetting("WindowTop",  ((int)Top).ToString());
+                        App.SetSetting("WindowLeft", ((int)Left).ToString());
+                    }
                 }
                 App.SetSetting("FitMode",   _fitMode.ToString());
                 App.SetSetting("ZoomLevel", _zoomLevel.ToString(System.Globalization.CultureInfo.InvariantCulture));
