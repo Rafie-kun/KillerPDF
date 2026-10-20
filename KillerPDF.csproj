@@ -63,6 +63,8 @@
     <Compile Remove="tools\**" />
     <Compile Remove="PreviewHandler\**" />
     <Compile Remove="validation\**" />
+    <!-- The update handoff arguments are parsed by the launcher and produced by the app. -->
+    <Compile Include="Packaging\KillerLauncher\UpdateRelaunchArguments.cs" Link="Services\UpdateRelaunchArguments.cs" />
     <EmbeddedResource Remove="engine\**" />
     <EmbeddedResource Remove="third_party\**" />
     <EmbeddedResource Remove="Packaging\**" />

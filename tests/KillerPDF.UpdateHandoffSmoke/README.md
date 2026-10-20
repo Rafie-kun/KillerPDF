@@ -1,6 +1,6 @@
 # Installed update handoff
 
-This probe runs the production installed-update command through a real batch file and substitutes a capture process for the external installer. It checks both installation scopes, spaces, an ampersand, and Unicode in the custom destination. It never installs software, changes registration, or shuts down KillerPDF.
+This probe runs the production installed-update arguments against a capture process standing in for the installer. It checks both installation scopes, spaces, an ampersand, and Unicode in the custom destination and in the document to reopen. It never installs software, changes registration, or shuts down KillerPDF.
 
 Build with output and intermediates in scratch:
 
@@ -9,4 +9,4 @@ dotnet build tests/KillerPDF.UpdateHandoffSmoke/UpdateHandoffSmoke.csproj -c Rel
 & C:/Users/steve/scratch/kp-boundaries-20261019/update/probe/UpdateHandoffSmoke.exe C:/Users/steve/scratch/kp-boundaries-20261019/update/new-run
 ```
 
-The run directory must not exist. A passing result proves the actual batch handoff preserves the destination in the existing launcher argument format. It does not prove signed payload validation, installation, elevation, registration, rollback, or relaunch after an update.
+The run directory must not exist. A passing result proves the installer receives the destination, the relaunch request and the document to reopen in the launcher argument format, with no batch file in between. It does not prove signed payload validation, installation, elevation, registration, rollback, or the relaunch itself.

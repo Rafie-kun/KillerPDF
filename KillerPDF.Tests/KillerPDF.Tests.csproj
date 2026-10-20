@@ -103,6 +103,7 @@
     <Compile Include="..\Services\ReleaseUpdateCheck.cs" Link="Services\ReleaseUpdateCheck.cs" />
     <Compile Include="..\Services\PayloadIntegrityVerifier.cs" Link="Services\PayloadIntegrityVerifier.cs" />
     <Compile Include="..\Services\InstallPayloadOwnership.cs" Link="Services\InstallPayloadOwnership.cs" />
+    <Compile Include="..\Services\UpdateTrustPolicy.cs" Link="Services\UpdateTrustPolicy.cs" />
     <Compile Include="..\Services\PrintColorConverter.cs" Link="Services\PrintColorConverter.cs" />
     <Compile Include="..\Services\PrintOrientationPolicy.cs" Link="Services\PrintOrientationPolicy.cs" />
     <Compile Include="..\Services\PdfTextEditPlacement.cs" Link="Services\PdfTextEditPlacement.cs" />
@@ -134,6 +135,8 @@
     <Compile Include="..\Packaging\KillerLauncher\PortableProcessIdentity.cs" Link="Packaging\PortableProcessIdentity.cs" />
     <Compile Include="..\Packaging\KillerLauncher\InstallerPrerequisitePolicy.cs" Link="Packaging\InstallerPrerequisitePolicy.cs" />
     <Compile Include="..\Packaging\KillerLauncher\PortableLauncherPolicy.cs" Link="Packaging\PortableLauncherPolicy.cs" />
+    <Compile Include="..\Packaging\KillerLauncher\UpdateRelaunchArguments.cs" Link="Packaging\UpdateRelaunchArguments.cs" />
+    <Compile Include="..\Features\About\InstalledUpdateCommand.cs" Link="Features\InstalledUpdateCommand.cs" />
     <Compile Include="..\Packaging\KillerLauncher\PortableDirectoryCleanup.cs" Link="Packaging\PortableDirectoryCleanup.cs" />
   </ItemGroup>
 

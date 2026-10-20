@@ -246,8 +246,11 @@ namespace KillerPDF.Features
             catch { return null; }
         }
 
-        /// <summary>Writes the swap batch, starts it, and shuts the app down. Returns false if the
-        /// helper could not be started, in which case nothing has been changed.</summary>
+        /// <summary>Hands the downloaded installer the current installation and shuts the app
+        /// down. An installed copy runs the installer directly, so an elevated step never executes
+        /// a script from the temp folder; a packaged portable copy swaps its launcher with an
+        /// unelevated batch. Returns false if the helper could not be started, in which case
+        /// nothing has been changed.</summary>
         private bool LaunchSwapAndExit(string newExe)
         {
             try
@@ -262,8 +265,10 @@ namespace KillerPDF.Features
                 string? portableLauncher = Environment.GetEnvironmentVariable("KILLERPDF_LAUNCHER_PATH");
                 bool packagedPortable = portable && !string.IsNullOrWhiteSpace(portableLauncher) && File.Exists(portableLauncher);
 
-                if (!App.VerifyAuthenticode(newExe).Valid)
-                    throw new InvalidDataException("The downloaded update is not signed by a trusted publisher.");
+                // Only the publisher of the running application may replace it; the elevated
+                // installer verifies its own signature again before it writes anything.
+                if (!Services.UpdateTrustPolicy.Accepts(App.VerifyAuthenticode(newExe), App.GetExeSignerInfo()))
+                    throw new InvalidDataException("The downloaded update is not signed by this application's publisher.");
 
                 // A machine-wide install (Program Files, from winget, choco or an RMM) is not
                 // writable by a normal user, so the swap has to run elevated. This previously ran
@@ -272,6 +277,32 @@ namespace KillerPDF.Features
                 // appeared to "update" to the same version, with no error.
                 string updateTarget = packagedPortable ? portableLauncher! : curExe;
                 bool needsElevation = !CanWriteTo(Path.GetDirectoryName(updateTarget)!);
+
+                if (!packagedPortable)
+                {
+                    // The installer closes this process itself, installs over the current folder
+                    // and starts the new copy. Elevation, when needed, is requested on the signed
+                    // installer, so the UAC prompt names the publisher and there is no script a
+                    // same-user process could edit before approval.
+                    // A machine-wide copy is one registered under HKLM, not merely one in a folder
+                    // this process happens to be unable to write; an administrator running the
+                    // Program Files copy can write there and must still update it machine-wide.
+                    bool machineInstall = needsElevation
+                        || App.IsRegisteredCopy(Microsoft.Win32.Registry.LocalMachine, curExe);
+                    var installer = new ProcessStartInfo(newExe,
+                        InstalledUpdateCommand.Arguments(curExe, machineInstall, needsElevation ? null : reopen))
+                    {
+                        UseShellExecute = true,
+                        WorkingDirectory = Path.GetTempPath()
+                    };
+                    if (needsElevation) installer.Verb = "runas";
+                    Process.Start(installer);
+                    Application.Current.Shutdown();
+                    return true;
+                }
+
+                // A portable launcher in a folder this user cannot write is not updated in place.
+                if (needsElevation) return false;
 
                 // When elevated, relaunch through explorer.exe so the app comes back at the user's
                 // normal integrity level rather than inheriting the elevated token. explorer.exe
@@ -295,18 +326,7 @@ namespace KillerPDF.Features
                     script.AppendLine($"attrib -r \"{portableLauncher}\" >nul 2>&1")
                           .AppendLine($"copy /y \"{newExe}\" \"{portableLauncher}\" >nul 2>&1")
                           .AppendLine("if errorlevel 1 goto failed")
-                          .AppendLine(needsElevation
-                              ? $"start \"\" explorer.exe \"{portableLauncher}\""
-                              : $"start \"\" \"{portableLauncher}\"{relArg}");
-                }
-                else
-                {
-                    bool machineInstall = !CanWriteTo(Path.GetDirectoryName(curExe)!);
-                    script.AppendLine(InstalledUpdateCommand.Create(newExe, curExe, machineInstall))
-                          .AppendLine("if errorlevel 1 goto failed")
-                          .AppendLine(needsElevation
-                              ? $"start \"\" explorer.exe \"{curExe}\""
-                              : $"start \"\" \"{curExe}\"{relArg}");
+                          .AppendLine($"start \"\" \"{portableLauncher}\"{relArg}");
                 }
 
                 script.AppendLine("goto cleanup")
@@ -323,10 +343,6 @@ namespace KillerPDF.Features
                     WorkingDirectory = Path.GetTempPath(),
                     UseShellExecute = true
                 };
-                if (needsElevation) psi.Verb = "runas";   // triggers the UAC prompt
-
-                // Declining UAC throws Win32Exception 1223, so only shut down once the helper is
-                // actually running - otherwise the app would close without updating.
                 Process.Start(psi);
                 Application.Current.Shutdown();
                 return true;

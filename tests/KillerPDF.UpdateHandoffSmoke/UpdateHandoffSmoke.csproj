@@ -7,5 +7,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="../../Features/About/InstalledUpdateCommand.cs" Link="InstalledUpdateCommand.cs" />
+    <Compile Include="../../Packaging/KillerLauncher/UpdateRelaunchArguments.cs" Link="UpdateRelaunchArguments.cs" />
   </ItemGroup>
 </Project>

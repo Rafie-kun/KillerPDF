@@ -825,7 +825,7 @@ namespace KillerPDF
             catch { return null; }
         }
 
-        private static bool IsRegisteredCopy(RegistryKey root, string? executable)
+        internal static bool IsRegisteredCopy(RegistryKey root, string? executable)
         {
             string? registered = ExistingRegisteredExecutable(root);
             return registered != null && !string.IsNullOrWhiteSpace(executable)

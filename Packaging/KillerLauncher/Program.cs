@@ -52,8 +52,8 @@ namespace KillerLauncher
                         Application.SetCompatibleTextRenderingDefault(false);
                         return InstallerWizard.Run(args);
                     }
-                    return Install(machine: false, desktop: args.Any(a => string.Equals(a, "/desktop", StringComparison.OrdinalIgnoreCase)),
-                        destinationOverride: ReadInstallDirectory(args), preview: ReadPreview(args));
+                    return RelaunchAfterInstall(Install(machine: false, desktop: args.Any(a => string.Equals(a, "/desktop", StringComparison.OrdinalIgnoreCase)),
+                        destinationOverride: ReadInstallDirectory(args), preview: ReadPreview(args)), args, machine: false);
                 }
                 if (args.Any(a => string.Equals(a, "/silent", StringComparison.OrdinalIgnoreCase)))
                 {
@@ -65,9 +65,10 @@ namespace KillerLauncher
                     // With admin rights (winget, choco, RMM) the install is machine-wide. Without
                     // them, as the Microsoft Store runs installers, it is the normal per-user
                     // install with no prompt. The app never needs admin rights.
-                    return Install(machine: KillerFamily.Deployment.InstallerExitCodes.IsElevated(), desktop: args.Any(a =>
+                    bool machine = KillerFamily.Deployment.InstallerExitCodes.IsElevated();
+                    return RelaunchAfterInstall(Install(machine: machine, desktop: args.Any(a =>
                         string.Equals(a, "/desktop", StringComparison.OrdinalIgnoreCase)), destinationOverride: ReadInstallDirectory(args),
-                        preview: ReadPreview(args));
+                        preview: ReadPreview(args)), args, machine);
                 }
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
@@ -217,6 +218,35 @@ namespace KillerLauncher
 
         internal static string DefaultInstallDirectory(bool machine) =>
             machine ? MachineInstallDirectory : UserInstallDirectory;
+
+        // The self-update hands off to this installer directly, with no script in between, and
+        // asks it to start the new copy. An elevated installer starts it through explorer.exe so
+        // the application comes back at the user's normal integrity level; explorer cannot pass
+        // arguments, so the document to reopen is lost on that path.
+        private static int RelaunchAfterInstall(int exitCode, string[] args, bool machine)
+        {
+            if (exitCode != 0 || !UpdateRelaunchArguments.Requested(args)) return exitCode;
+            try
+            {
+                string destination = ReadInstallDirectory(args) ?? DefaultInstallDirectory(machine);
+                string executable = Path.Combine(destination, InnerExeName);
+                if (!File.Exists(executable)) return exitCode;
+                string? reopen = UpdateRelaunchArguments.ReopenFile(args);
+                if (KillerFamily.Deployment.InstallerExitCodes.IsElevated())
+                    Process.Start(new ProcessStartInfo("explorer.exe", "\"" + executable + "\"") { UseShellExecute = true });
+                else
+                    Process.Start(new ProcessStartInfo(executable, reopen == null ? string.Empty : "\"" + reopen + "\"")
+                    {
+                        UseShellExecute = true,
+                        WorkingDirectory = destination
+                    });
+            }
+            catch (Exception)
+            {
+                // The installation itself succeeded; the user can start the new copy normally.
+            }
+            return exitCode;
+        }
 
         internal sealed class InstalledCopy
         {
