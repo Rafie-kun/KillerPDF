@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
@@ -33,7 +34,7 @@ namespace KillerPDF.Controls
         private static readonly byte[] Shades = new byte[Size * Size];
         private static readonly bool[] Leaning = new bool[Size * Size];
         private static readonly Dictionary<int, BitmapSource> Cache = new();
-        private static readonly List<WeakReference<ImageBrush>> Layers = new();
+        private static readonly ImageBrush TileSource = new();
         private static BitmapSource? _current;
         private static int _currentKey = int.MinValue;
         private static bool _hooked;
@@ -120,10 +121,10 @@ namespace KillerPDF.Controls
         /// <summary>Paints the tile into a brush and repaints it whenever the tile changes.</summary>
         internal static void Track(ImageBrush brush)
         {
-            brush.ImageSource = Publish();
-            foreach (var layer in Layers)
-                if (layer.TryGetTarget(out var known) && ReferenceEquals(known, brush)) return;
-            Layers.Add(new WeakReference<ImageBrush>(brush));
+            Publish();
+            // A binding keeps WPF from freezing a brush when a style or template seals it.
+            BindingOperations.SetBinding(brush, ImageBrush.ImageSourceProperty,
+                new Binding(nameof(ImageBrush.ImageSource)) { Source = TileSource, Mode = BindingMode.OneWay });
         }
 
         /// <summary>
@@ -164,11 +165,7 @@ namespace KillerPDF.Controls
             tile.Freeze();
             if (Application.Current != null) Application.Current.Resources["GrainTileBrush"] = tile;
 
-            for (int i = Layers.Count - 1; i >= 0; i--)
-            {
-                if (Layers[i].TryGetTarget(out var layer)) layer.ImageSource = bmp;
-                else Layers.RemoveAt(i);
-            }
+            TileSource.ImageSource = bmp;
             return bmp;
         }
 

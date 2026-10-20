@@ -25,6 +25,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 ### Document safety and reliability
 
 - Saving, flattening, extraction, printing and current-document macros retain pending edits and page rotations. Signing, flattening and export preserve existing outputs when writing fails or is canceled. Failed replacements keep complete recovery copies. Reduce File Size preserves an existing output if a replacement cannot be staged; Save As and Extract Pages enforce the PDF extension (#433, #450).
+- Fixed crashes when switching themes after styles load, restoring a maximized window, or selecting mirrored and upside-down text. Search highlights, redaction marks and cropping on that text also use valid bounds (#437, #452, #453).
 - Closing a document or the app offers Save, Don't Save or Cancel. Failed or canceled saves keep the document open, and Esc no longer closes the app.
 - Redaction removes covered vectors, preserves marks through page edits and undo, and keeps macro approvals bound to the original document. Command-line and macro runs refuse output when rasterization still needs approval (#341, #343).
 - Background exports, macros, form tools, OCR, repairs, transforms and printing stay bound to their source document or stop when it changes. Newer operations retain their cancel controls, and OCR with no recognized words can still save a searchable PDF (#329, #330, #342, #343, #436).
@@ -33,7 +34,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Legacy Office conversion disables VBA macros, and timeouts preserve existing Office documents and visible sessions. External PDF and OCR-model downloads stop when response bodies exceed their timeout.
 - Installation refuses to replace folders containing unrelated or unverified files. Updates preserve custom install directories; failed portable updates retain complete executable copies and a recovery report. Forwarded opens stay within their Windows account and session, and startup cleanup preserves active temporary PDFs.
 - Incomplete scans report errors and keep recovered pages, including PDF-creation failures. Parallel PNG export no longer loses pages, and invalid OCR models retain the Tesseract fallback (#73).
-- Fixed crashes when switching themes, restoring a maximized window, or selecting mirrored and upside-down text. Search highlights, redaction marks and cropping on that text also use valid bounds (#437, #452, #453).
 
 ### Rendering, performance and compatibility
 
