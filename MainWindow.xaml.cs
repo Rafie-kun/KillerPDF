@@ -560,6 +560,7 @@ namespace KillerPDF
                     }
                     RestorePaneB();
                 }
+                OpenRenderRecovery();   // #456: no-op unless this launch replaced a failed window
 
                 if (App.IsPortable())
                     _portableBadge.Visibility = Visibility.Visible;

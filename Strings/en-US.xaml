@@ -1889,4 +1889,6 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_CmpRpt_Summary">Changed pages: {0}, missing pages: {1}, matching pages: {2}</sys:String>
     <sys:String x:Key="Str_Read_Comment">Comment: {0}</sys:String>
     <sys:String x:Key="Str_Read_CommentBy">Comment by {0}: {1}</sys:String>
+    <sys:String x:Key="Str_Dlg_RenderRecovered">KillerPDF restarted because the window could no longer display. Your unsaved changes were recovered and are open again, ready to save.&#10;&#10;Copies are also kept in {0}. This session uses software rendering.</sys:String>
+    <sys:String x:Key="Str_Dlg_RenderRestarted">KillerPDF restarted because the window could no longer display. Your open documents were reopened. This session uses software rendering.</sys:String>
 </ResourceDictionary>

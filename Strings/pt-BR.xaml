@@ -1890,4 +1890,6 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_CmpRpt_Summary">Páginas alteradas: {0}, páginas ausentes: {1}, páginas iguais: {2}</sys:String>
     <sys:String x:Key="Str_Read_Comment">Comentário: {0}</sys:String>
     <sys:String x:Key="Str_Read_CommentBy">Comentário de {0}: {1}</sys:String>
+    <sys:String x:Key="Str_Dlg_RenderRecovered">O KillerPDF foi reiniciado porque a janela não conseguia mais exibir nada. Suas alterações não salvas foram recuperadas e estão abertas de novo, prontas para salvar.&#10;&#10;Cópias também ficam em {0}. Esta sessão usa renderização por software.</sys:String>
+    <sys:String x:Key="Str_Dlg_RenderRestarted">O KillerPDF foi reiniciado porque a janela não conseguia mais exibir nada. Seus documentos abertos foram reabertos. Esta sessão usa renderização por software.</sys:String>
 </ResourceDictionary>

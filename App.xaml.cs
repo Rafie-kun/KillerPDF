@@ -188,6 +188,23 @@ namespace KillerPDF
                 return;
             }
 
+            // #456: this process replaces one whose window could no longer draw. Wait for it to
+            // release the single-instance mutex, then render in software for this session, since
+            // the hardware path just failed.
+            int recoveryAt = Array.FindIndex(e.Args, a => string.Equals(a, RenderFailureRecovery.RecoverySwitch, StringComparison.Ordinal));
+            if (recoveryAt >= 0)
+            {
+                RestartedAfterRenderFailure = true;
+                if (recoveryAt + 1 < e.Args.Length && int.TryParse(e.Args[recoveryAt + 1], out int previous))
+                {
+                    try { using var old = Process.GetProcessById(previous); old.WaitForExit(15000); }
+                    catch (ArgumentException) { /* already gone */ }
+                    catch (InvalidOperationException) { }
+                }
+                if (recoveryAt + 2 < e.Args.Length) RenderRecoveryManifest = e.Args[recoveryAt + 2];
+                System.Windows.Media.RenderOptions.ProcessRenderMode = System.Windows.Interop.RenderMode.SoftwareOnly;
+            }
+
             // Single instance: a second launch (e.g. double-clicking another PDF in Explorer)
             // forwards its file path to the already-running instance, which opens it as a new
             // tab, then this process exits. Without this, every launch spawned its own window.
@@ -382,8 +399,51 @@ namespace KillerPDF
 
         private int _recoverableCrashDialogPending;
 
+        // #456: set when this process was started to replace one whose window could no longer draw.
+        internal static bool RestartedAfterRenderFailure { get; set; }
+        internal static string? RenderRecoveryManifest { get; set; }
+        private int _renderRecoveryStarted;
+
+        /// <summary>
+        /// The render thread failed, so this window will stay black. Save unsaved documents aside,
+        /// start a fresh KillerPDF that waits for this one to exit, and leave without prompts that
+        /// could not be drawn. The new process renders in software for that session.
+        /// </summary>
+        private void RestartAfterRenderFailure(string logPath)
+        {
+            if (System.Threading.Interlocked.Exchange(ref _renderRecoveryStarted, 1) != 0) return;
+            string? manifest = null;
+            try { manifest = (MainWindow as MainWindow)?.PrepareRenderFailureRecovery(); }
+            catch (Exception ex) when (ex is not OutOfMemoryException) { CrashReporter.Capture(ex, "Render recovery"); }
+            try
+            {
+                string exe = GetPortableLauncherPath() ?? Environment.ProcessPath
+                    ?? throw new InvalidOperationException("The executable path is unavailable.");
+                var start = new ProcessStartInfo(exe) { UseShellExecute = false };
+                start.ArgumentList.Add(RenderFailureRecovery.RecoverySwitch);
+                start.ArgumentList.Add(Environment.ProcessId.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                if (manifest is not null) start.ArgumentList.Add(manifest);
+                Process.Start(start);
+            }
+            catch (Exception ex) when (ex is not OutOfMemoryException) { CrashReporter.Capture(ex, "Render recovery restart"); }
+            try
+            {
+                StopFolderAutomation();
+                _instanceMutex?.ReleaseMutex();
+            }
+            catch (Exception ex) when (ex is not OutOfMemoryException) { }
+            CleanupSessionTemps();
+            Environment.Exit(1);
+        }
+
         private void OnDispatcherException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
+            if (RenderFailureRecovery.IsRenderThreadFailure(e.Exception))
+            {
+                e.Handled = true;
+                RestartAfterRenderFailure(CrashReporter.Capture(e.Exception, "Dispatcher (render thread)"));
+                return;
+            }
             // Let WPF unwind the failing input/layout callback before creating another window.
             // Opening a modal dialog inside this event re-enters the dispatcher while its visual
             // tree may still be inconsistent, which can turn one recoverable error into a loop.

@@ -682,6 +682,25 @@ namespace KillerPDF.Controls
             return target;
         }
 
+        /// <summary>
+        /// Runs <paramref name="action"/> with another tab's document as the live working set and
+        /// puts the active tab back afterwards, without switching the visible tab or rendering.
+        /// Used when the window can no longer draw, to save each unsaved tab aside (#456).
+        /// </summary>
+        internal void WithSessionLive(DocumentSession session, Action action)
+        {
+            DocumentSession? active = _active;
+            if (active != null) CaptureSessionState(active);
+            if (ReferenceEquals(session, active)) { action(); return; }
+            ApplySessionState(session);
+            try { action(); }
+            finally
+            {
+                CaptureSessionState(session);
+                if (active != null) ApplySessionState(active);
+            }
+        }
+
         // Roll back a failed / canceled load started by BeginTabLoad.
         private void AbortTabLoad(DocumentSession target, DocumentSession? prev, bool createdNew)
         {

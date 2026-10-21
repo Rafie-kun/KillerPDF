@@ -1890,4 +1890,6 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_CmpRpt_Summary">Trang đã thay đổi: {0}, trang bị thiếu: {1}, trang khớp: {2}</sys:String>
     <sys:String x:Key="Str_Read_Comment">Nhận xét: {0}</sys:String>
     <sys:String x:Key="Str_Read_CommentBy">Nhận xét của {0}: {1}</sys:String>
+    <sys:String x:Key="Str_Dlg_RenderRecovered">KillerPDF đã khởi động lại vì cửa sổ không thể hiển thị được nữa. Các thay đổi chưa lưu đã được khôi phục và mở lại, sẵn sàng để lưu.&#10;&#10;Bản sao cũng được giữ trong {0}. Phiên này dùng kết xuất bằng phần mềm.</sys:String>
+    <sys:String x:Key="Str_Dlg_RenderRestarted">KillerPDF đã khởi động lại vì cửa sổ không thể hiển thị được nữa. Các tài liệu đang mở đã được mở lại. Phiên này dùng kết xuất bằng phần mềm.</sys:String>
 </ResourceDictionary>

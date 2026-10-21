@@ -1893,4 +1893,6 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_CmpRpt_Summary">Изменённые страницы: {0}, отсутствующие страницы: {1}, совпадающие страницы: {2}</sys:String>
     <sys:String x:Key="Str_Read_Comment">Комментарий: {0}</sys:String>
     <sys:String x:Key="Str_Read_CommentBy">Комментарий от {0}: {1}</sys:String>
+    <sys:String x:Key="Str_Dlg_RenderRecovered">KillerPDF перезапущен, потому что окно больше не могло ничего отображать. Несохранённые изменения восстановлены и снова открыты, их можно сохранить.&#10;&#10;Копии также сохранены в {0}. В этом сеансе используется программная отрисовка.</sys:String>
+    <sys:String x:Key="Str_Dlg_RenderRestarted">KillerPDF перезапущен, потому что окно больше не могло ничего отображать. Открытые документы снова открыты. В этом сеансе используется программная отрисовка.</sys:String>
 </ResourceDictionary>

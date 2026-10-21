@@ -1870,4 +1870,6 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_CmpRpt_Summary">Páginas cambiadas: {0}, páginas que faltan: {1}, páginas iguales: {2}</sys:String>
     <sys:String x:Key="Str_Read_Comment">Comentario: {0}</sys:String>
     <sys:String x:Key="Str_Read_CommentBy">Comentario de {0}: {1}</sys:String>
+    <sys:String x:Key="Str_Dlg_RenderRecovered">KillerPDF se reinició porque la ventana ya no podía mostrar nada. Sus cambios sin guardar se recuperaron y están abiertos de nuevo, listos para guardar.&#10;&#10;También se guardan copias en {0}. Esta sesión usa renderizado por software.</sys:String>
+    <sys:String x:Key="Str_Dlg_RenderRestarted">KillerPDF se reinició porque la ventana ya no podía mostrar nada. Sus documentos abiertos se volvieron a abrir. Esta sesión usa renderizado por software.</sys:String>
 </ResourceDictionary>

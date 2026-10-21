@@ -1890,4 +1890,6 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_CmpRpt_Summary">Змінені сторінки: {0}, відсутні сторінки: {1}, однакові сторінки: {2}</sys:String>
     <sys:String x:Key="Str_Read_Comment">Коментар: {0}</sys:String>
     <sys:String x:Key="Str_Read_CommentBy">Коментар від {0}: {1}</sys:String>
+    <sys:String x:Key="Str_Dlg_RenderRecovered">KillerPDF перезапущено, бо вікно більше не могло нічого показувати. Незбережені зміни відновлено й знову відкрито, їх можна зберегти.&#10;&#10;Копії також збережено в {0}. Цей сеанс використовує програмне відтворення.</sys:String>
+    <sys:String x:Key="Str_Dlg_RenderRestarted">KillerPDF перезапущено, бо вікно більше не могло нічого показувати. Відкриті документи знову відкрито. Цей сеанс використовує програмне відтворення.</sys:String>
 </ResourceDictionary>
