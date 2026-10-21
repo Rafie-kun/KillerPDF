@@ -1764,4 +1764,5 @@
     <sys:String x:Key="Str_Err_SignatureLibrarySave">Podpisa ni bilo mogoče dodati med shranjene podpise. V ta dokument ga lahko še vedno postavite.</sys:String>
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">Shranjenih podpisov ni bilo mogoče prebrati, zato se seznam začne prazen. Neberljiva datoteka je shranjena kot {0}.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">Ta dokument je podpisan in vsebuje spremembe, zato podpisi v datoteki »{0}« ne bodo več veljavni.&#10;&#10;Izvirna datoteka obdrži svoje podpise.</sys:String>
+    <sys:String x:Key="Str_St_FieldMaxLength">To polje lahko vsebuje največ {0} znakov.</sys:String>
 </ResourceDictionary>

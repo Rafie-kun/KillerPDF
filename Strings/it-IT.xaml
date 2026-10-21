@@ -1877,4 +1877,5 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_Err_SignatureLibrarySave">Non è stato possibile aggiungere la firma alle firme salvate. Puoi comunque inserirla in questo documento.</sys:String>
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">Non è stato possibile leggere le firme salvate, quindi l'elenco parte vuoto. Il file illeggibile è stato conservato come {0}.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">Questo documento è firmato e contiene modifiche, quindi le firme in "{0}" non saranno più valide.&#10;&#10;Il file originale mantiene le sue firme.</sys:String>
+    <sys:String x:Key="Str_St_FieldMaxLength">Questo campo contiene al massimo {0} caratteri.</sys:String>
 </ResourceDictionary>

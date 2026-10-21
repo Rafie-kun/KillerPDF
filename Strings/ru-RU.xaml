@@ -1880,4 +1880,5 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Err_SignatureLibrarySave">Не удалось добавить подпись в сохранённые подписи. Её всё равно можно разместить в этом документе.</sys:String>
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">Не удалось прочитать сохранённые подписи, поэтому список начинается пустым. Нечитаемый файл сохранён как {0}.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">Этот документ подписан и изменён, поэтому подписи в файле "{0}" станут недействительными.&#10;&#10;Исходный файл сохранит свои подписи.</sys:String>
+    <sys:String x:Key="Str_St_FieldMaxLength">В это поле помещается не более {0} символов.</sys:String>
 </ResourceDictionary>

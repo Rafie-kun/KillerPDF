@@ -1857,4 +1857,5 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Err_SignatureLibrarySave">স্বাক্ষরটি আপনার সংরক্ষিত স্বাক্ষরে যোগ করা যায়নি। আপনি এখনও এটি এই ডকুমেন্টে বসাতে পারেন।</sys:String>
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">আপনার সংরক্ষিত স্বাক্ষরগুলো পড়া যায়নি, তাই তালিকাটি খালি থেকে শুরু হচ্ছে। অপঠনযোগ্য ফাইলটি {0} হিসেবে রাখা হয়েছে।</sys:String>
     <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">এই ডকুমেন্টটি স্বাক্ষরিত এবং এতে পরিবর্তন রয়েছে, তাই "{0}"-এর স্বাক্ষরগুলো আর বৈধ থাকবে না।&#10;&#10;মূল ফাইলের স্বাক্ষর অপরিবর্তিত থাকবে।</sys:String>
+    <sys:String x:Key="Str_St_FieldMaxLength">এই ঘরে সর্বোচ্চ {0}টি অক্ষর রাখা যায়।</sys:String>
 </ResourceDictionary>

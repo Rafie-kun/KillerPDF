@@ -1877,4 +1877,5 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Err_SignatureLibrarySave">Não foi possível adicionar a assinatura às assinaturas salvas. Você ainda pode colocá-la neste documento.</sys:String>
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">Não foi possível ler suas assinaturas salvas, então a lista começa vazia. O arquivo ilegível foi mantido como {0}.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">Este documento está assinado e tem alterações, então as assinaturas em “{0}” deixarão de ser válidas.&#10;&#10;O arquivo original mantém suas assinaturas.</sys:String>
+    <sys:String x:Key="Str_St_FieldMaxLength">Este campo aceita no máximo {0} caracteres.</sys:String>
 </ResourceDictionary>

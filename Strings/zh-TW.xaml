@@ -1859,4 +1859,5 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_Err_SignatureLibrarySave">無法將簽名加入已儲存的簽名。你仍可將其放置在此文件中。</sys:String>
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">無法讀取已儲存的簽名，因此清單從空白開始。無法讀取的檔案已保留為 {0}。</sys:String>
     <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">此文件已簽署且有變更，因此「{0}」中的簽章將不再有效。&#10;&#10;原始檔案會保留其簽章。</sys:String>
+    <sys:String x:Key="Str_St_FieldMaxLength">此欄位最多可容納 {0} 個字元。</sys:String>
 </ResourceDictionary>

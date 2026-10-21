@@ -463,9 +463,31 @@ namespace KillerPDF.Controls
                         // Focus also raises the per-field font-size stepper (and hides it on blur).
                         string capturedKey   = f.FieldName;
                         double capturedScale = f.Scale;
-                        tb.GotFocus  += (_, _) => { _selectedFormFieldName = capturedKey; tb.SetResourceReference(Control.BorderBrushProperty, "HeaderLineBrush"); ShowFormSizeBar(tb, capturedKey, capturedScale); };
+                        int maxLen = f.MaxLen;
+                        string lastAccepted = tb.Text;
+                        tb.GotFocus  += (_, _) =>
+                        {
+                            _selectedFormFieldName = capturedKey; tb.SetResourceReference(Control.BorderBrushProperty, "HeaderLineBrush"); ShowFormSizeBar(tb, capturedKey, capturedScale);
+                            // A value that arrived too long is shown whole, never cut, but named.
+                            if (Services.FormTextLimit.IsOver(tb.Text, maxLen))
+                                SetStatus(string.Format(Loc("Str_St_FieldMaxLength"), maxLen));
+                        };
                         tb.LostFocus += (_, _) => { tb.BorderBrush = f.IsComb ? Brushes.Transparent : restingBorder; HideFormSizeBar(); RecalculateFormFields(); };
-                        tb.TextChanged += (_, _) => { _formTextValues[capturedKey] = tb.Text; MarkDirty(true); };
+                        tb.TextChanged += (_, _) =>
+                        {
+                            // Typing, paste and IME composition all land here. Hold the field to the
+                            // character count Save and Print enforce (BF-U007).
+                            if (!Services.FormTextLimit.Accepts(tb.Text, lastAccepted, maxLen))
+                            {
+                                int caret = Math.Min(tb.CaretIndex, lastAccepted.Length);
+                                tb.Text = lastAccepted;
+                                tb.CaretIndex = caret;
+                                SetStatus(string.Format(Loc("Str_St_FieldMaxLength"), maxLen));
+                                return;
+                            }
+                            lastAccepted = tb.Text;
+                            _formTextValues[capturedKey] = tb.Text; MarkDirty(true);
+                        };
                         RegisterFormValueBox(capturedKey, tb);
                         ctrl = f.IsComb ? new CombTextBox(tb, f.MaxLen, fontSize) : tb;
                     }

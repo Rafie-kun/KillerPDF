@@ -1866,4 +1866,5 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Err_SignatureLibrarySave">Die Signatur konnte nicht zu Ihren gespeicherten Signaturen hinzugefügt werden. Sie können sie trotzdem in diesem Dokument platzieren.</sys:String>
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">Ihre gespeicherten Signaturen konnten nicht gelesen werden, daher beginnt die Liste leer. Die unlesbare Datei wurde als {0} aufbewahrt.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">Dieses Dokument ist signiert und wurde geändert, daher sind die Signaturen in „{0}“ nicht mehr gültig.&#10;&#10;Die Originaldatei behält ihre Signaturen.</sys:String>
+    <sys:String x:Key="Str_St_FieldMaxLength">Dieses Feld fasst höchstens {0} Zeichen.</sys:String>
 </ResourceDictionary>
