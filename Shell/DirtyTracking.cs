@@ -54,6 +54,18 @@ namespace KillerPDF
             }
         }
 
+        // The file whose bytes are exactly the document on screen, or null when it has unsaved
+        // changes. After a save the working copy no longer holds what is on screen (burned markup,
+        // form values, rotations), so a clean document is the bytes the save published.
+        private string? UnchangedDocumentBytes()
+        {
+            if (_isDirty || string.IsNullOrEmpty(_currentFile)) return null;
+            Services.PublishedFileStamp? published = _publishedFile is { } stamp
+                && string.Equals(stamp.Path, _originalFile, StringComparison.OrdinalIgnoreCase) ? stamp : null;
+            if (published is null) return _currentFile;
+            return published.Matches() ? published.Path : null;
+        }
+
         // Cryptographic certificate signing (the real digital signature, not the drawn stamp tool).
         private void OpenSignDialog()
         {
@@ -67,17 +79,13 @@ namespace KillerPDF
             string? snapshot = null;
             try
             {
-                // After a save the working copy no longer holds what is on screen (burned markup,
-                // form values, rotations), so a clean document signs the bytes the save published.
-                Services.PublishedFileStamp? published = _publishedFile is { } stamp
-                    && string.Equals(stamp.Path, _originalFile, StringComparison.OrdinalIgnoreCase) ? stamp : null;
-                if (_isDirty || (published is not null && !published.Matches()))
+                if (UnchangedDocumentBytes() is not { } unchanged)
                     snapshot = WriteSavedCopyToTemp();
                 else
                 {
                     // Preserve existing signatures on an unchanged document without rewriting it.
                     snapshot = App.MakeTempFile("signsource");
-                    File.Copy(published?.Path ?? _currentFile!, snapshot, overwrite: true);
+                    File.Copy(unchanged, snapshot, overwrite: true);
                 }
                 new SignDocumentDialog(this, snapshot, suggestedSource).ShowDialog();
             }

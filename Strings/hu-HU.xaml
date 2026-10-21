@@ -1863,4 +1863,5 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Dlg_SaveConflict">A(z) „{0}" megváltozott a lemezen, miután ez a dokumentum beolvasta, valószínűleg egy másik lapról vagy programból.&#10;&#10;Cserélje le erre a dokumentumra, mentse ezt a dokumentumot külön másolatként, vagy szakítsa meg.</sys:String>
     <sys:String x:Key="Str_Err_SignatureLibrarySave">Az aláírást nem sikerült hozzáadni a mentett aláírásokhoz. Ebbe a dokumentumba továbbra is elhelyezheti.</sys:String>
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">A mentett aláírásokat nem sikerült beolvasni, ezért a lista üresen indul. Az olvashatatlan fájl megmaradt ezen a néven: {0}.</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">Ez a dokumentum alá van írva, és módosult, ezért a(z) „{0}" aláírásai már nem lesznek érvényesek.&#10;&#10;Az eredeti fájl megtartja az aláírásait.</sys:String>
 </ResourceDictionary>

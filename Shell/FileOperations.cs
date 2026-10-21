@@ -1331,7 +1331,28 @@ namespace KillerPDF
                     MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            if (!ConfirmSignatureRemoval(dlg.FileName)) return;
+            // A signed document with no changes is copied byte for byte, so the copy keeps valid
+            // signatures. Any rewrite clears them, so say so first even for a new file (BF-A005).
+            string? unchanged = UnchangedDocumentBytes();
+            bool sourceSigned;
+            try { sourceSigned = PdfEngineIntegration.HasSignedSignatures(unchanged ?? _currentFile); }
+            catch (Exception ex) when (ex is not OutOfMemoryException) { sourceSigned = false; }
+            if (sourceSigned && unchanged is not null)
+            {
+                try { SaveExactCopy(unchanged, dlg.FileName, openCopy); }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                {
+                    KillerDialog.Show(this, Loc("Str_Err_SaveFailed") + "\n" + ex.Message, "KillerPDF",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                return;
+            }
+            if (sourceSigned && KillerDialog.Show(this,
+                    string.Format(Loc("Str_Dlg_SaveAsClearsSignature"), System.IO.Path.GetFileName(dlg.FileName)),
+                    Loc("Str_Dlg_AppTitle"), MessageBoxButton.OKCancel, MessageBoxImage.Warning,
+                    defaultResult: MessageBoxResult.Cancel) != MessageBoxResult.OK)
+                return;
+            if (!sourceSigned && !ConfirmSignatureRemoval(dlg.FileName)) return;
             if (openCopy)
             {
                 try { SaveCopyAndOpen(dlg.FileName); }
@@ -1431,6 +1452,31 @@ namespace KillerPDF
             {
                 KillerDialog.Show(this, Loc("Str_Err_SaveFailed") + "\n" + ex.Message, "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        // Publishes the exact bytes of an unchanged document, then treats the copy as this tab's
+        // file (or opens it, for Save Copy). Nothing is rewritten, so signatures stay valid.
+        private void SaveExactCopy(string sourcePath, string outputPath, bool openCopy)
+        {
+            PdfEngineIntegration.ReplaceFileAtomically(sourcePath, outputPath);
+            if (openCopy)
+            {
+                var source = ActiveViewer;
+                var other = ReferenceEquals(source, Viewer) ? ViewerB : Viewer;
+                bool otherEmpty = !other.SessionsRef.Any(session => session.Doc is not null
+                    || session.DeferredPath is not null || session.OriginalFile is not null);
+                var target = _isSplit && otherEmpty ? other : source;
+                FocusPane(target);
+                target.OpenInNewTabExt(outputPath);
+                return;
+            }
+            _originalFile = outputPath;
+            _suggestedName = null;
+            _publishedFile = Services.PublishedFileStamp.Capture(outputPath);
+            _loadedRevision = Services.FileRevision.Capture(outputPath);
+            FileNameLabel.Text = System.IO.Path.GetFileName(outputPath);
+            MarkDirty(false);
+            SetStatus(string.Format(Loc("Str_St_SavedTo"), System.IO.Path.GetFileName(outputPath)));
         }
 
         private void SaveCopyAndOpen(string outputPath)

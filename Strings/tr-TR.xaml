@@ -1856,4 +1856,5 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Dlg_SaveConflict">"{0}", bu belge onu okuduktan sonra diskte değişti; başka bir sekmeden veya programdan olabilir.&#10;&#10;Bu belgeyle değiştirin, bu belgeyi ayrı bir kopya olarak kaydedin veya iptal edin.</sys:String>
     <sys:String x:Key="Str_Err_SignatureLibrarySave">İmza kayıtlı imzalarınıza eklenemedi. Yine de bu belgeye yerleştirebilirsiniz.</sys:String>
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">Kayıtlı imzalarınız okunamadı, bu yüzden liste boş başlıyor. Okunamayan dosya {0} olarak saklandı.</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">Bu belge imzalı ve üzerinde değişiklik var, bu yüzden "{0}" içindeki imzalar artık geçerli olmayacak.&#10;&#10;Özgün dosya imzalarını korur.</sys:String>
 </ResourceDictionary>

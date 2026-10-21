@@ -1858,4 +1858,5 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_Dlg_SaveConflict">此文件讀取「{0}」後，該檔案在磁碟上已被變更，可能來自其他分頁或程式。&#10;&#10;請以此文件取代它、將此文件另存為獨立的副本，或取消。</sys:String>
     <sys:String x:Key="Str_Err_SignatureLibrarySave">無法將簽名加入已儲存的簽名。你仍可將其放置在此文件中。</sys:String>
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">無法讀取已儲存的簽名，因此清單從空白開始。無法讀取的檔案已保留為 {0}。</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">此文件已簽署且有變更，因此「{0}」中的簽章將不再有效。&#10;&#10;原始檔案會保留其簽章。</sys:String>
 </ResourceDictionary>

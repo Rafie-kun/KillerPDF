@@ -1876,4 +1876,5 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Dlg_SaveConflict">« {0} » a été modifié sur le disque après sa lecture par ce document, peut-être depuis un autre onglet ou programme.&#10;&#10;Remplacez-le par ce document, enregistrez ce document comme copie distincte ou annulez.</sys:String>
     <sys:String x:Key="Str_Err_SignatureLibrarySave">La signature n'a pas pu être ajoutée à vos signatures enregistrées. Vous pouvez quand même la placer dans ce document.</sys:String>
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">Vos signatures enregistrées n'ont pas pu être lues : la liste repart donc vide. Le fichier illisible a été conservé sous {0}.</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">Ce document est signé et comporte des modifications : les signatures de « {0} » ne seront donc plus valides.&#10;&#10;Le fichier d'origine conserve ses signatures.</sys:String>
 </ResourceDictionary>

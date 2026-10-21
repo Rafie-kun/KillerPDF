@@ -1876,4 +1876,5 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_Dlg_SaveConflict">"{0}" è cambiato sul disco dopo che questo documento lo ha letto, forse da un'altra scheda o da un altro programma.&#10;&#10;Sostituiscilo con questo documento, salva questo documento come copia separata oppure annulla.</sys:String>
     <sys:String x:Key="Str_Err_SignatureLibrarySave">Non è stato possibile aggiungere la firma alle firme salvate. Puoi comunque inserirla in questo documento.</sys:String>
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">Non è stato possibile leggere le firme salvate, quindi l'elenco parte vuoto. Il file illeggibile è stato conservato come {0}.</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">Questo documento è firmato e contiene modifiche, quindi le firme in "{0}" non saranno più valide.&#10;&#10;Il file originale mantiene le sue firme.</sys:String>
 </ResourceDictionary>

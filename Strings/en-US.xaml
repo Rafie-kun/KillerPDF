@@ -1875,4 +1875,5 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Dlg_SaveConflict">"{0}" changed on disk after this document read it, possibly from another tab or program.&#10;&#10;Replace it with this document, save this document as a separate copy, or cancel.</sys:String>
     <sys:String x:Key="Str_Err_SignatureLibrarySave">The signature could not be added to your saved signatures. You can still place it in this document.</sys:String>
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">Your saved signatures could not be read, so the list starts empty. The unreadable file was kept as {0}.</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">This document is signed, and it has changes, so the signatures in "{0}" will no longer be valid.&#10;&#10;The original file keeps its signatures.</sys:String>
 </ResourceDictionary>

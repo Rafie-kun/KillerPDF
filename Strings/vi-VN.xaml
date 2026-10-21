@@ -1876,4 +1876,5 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Dlg_SaveConflict">"{0}" đã thay đổi trên đĩa sau khi tài liệu này đọc nó, có thể từ một thẻ hoặc chương trình khác.&#10;&#10;Thay thế bằng tài liệu này, lưu tài liệu này thành bản sao riêng, hoặc hủy.</sys:String>
     <sys:String x:Key="Str_Err_SignatureLibrarySave">Không thể thêm chữ ký vào danh sách chữ ký đã lưu. Bạn vẫn có thể đặt nó vào tài liệu này.</sys:String>
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">Không thể đọc các chữ ký đã lưu nên danh sách bắt đầu trống. Tệp không đọc được đã được giữ lại thành {0}.</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">Tài liệu này đã được ký và có thay đổi, nên các chữ ký trong "{0}" sẽ không còn hợp lệ.&#10;&#10;Tệp gốc vẫn giữ nguyên chữ ký.</sys:String>
 </ResourceDictionary>

@@ -1856,4 +1856,5 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveConflict">«{0}» cambió en el disco después de que este documento lo leyera, quizá desde otra pestaña u otro programa.&#10;&#10;Reemplácelo con este documento, guarde este documento como una copia aparte o cancele.</sys:String>
     <sys:String x:Key="Str_Err_SignatureLibrarySave">No se pudo añadir la firma a sus firmas guardadas. Aún puede colocarla en este documento.</sys:String>
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">No se pudieron leer sus firmas guardadas, así que la lista empieza vacía. El archivo ilegible se conservó como {0}.</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">Este documento está firmado y tiene cambios, así que las firmas de «{0}» dejarán de ser válidas.&#10;&#10;El archivo original conserva sus firmas.</sys:String>
 </ResourceDictionary>
