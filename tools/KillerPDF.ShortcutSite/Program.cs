@@ -39,6 +39,6 @@ if (args.Length == 2)
 {
     string current = File.ReadAllText(Path.Combine(root, "pdf-landing", "shortcuts.generated.js")).Replace("\r\n", "\n");
     if (current != output) throw new InvalidDataException("Landing shortcuts are out of date. Regenerate them from the app table.");
-    Console.WriteLine("PASS landing shortcut data matches the app in all 19 languages.");
+    Console.WriteLine($"PASS landing shortcut data matches the app in all {locales.Count} languages.");
 }
 else Console.Write(output);

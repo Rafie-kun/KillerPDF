@@ -252,7 +252,7 @@
     var value = facts && facts[node.getAttribute('data-engine-fact')];
     if (typeof value === 'number') node.textContent = value.toLocaleString('en-US');
   });
-  var LANGS = ['en','es','de','fr','ja','kk','ru','uk','nb','pt','tr','vi','zh','zh-cn','bn','cs','pl','hu','it'];
+  var LANGS = ['en','es','de','fr','ja','kk','ru','uk','nb','pt','tr','vi','zh','zh-cn','bn','cs','pl','hu','it','sl'];
   var FLAGS = {
     en: '<svg viewBox="0 0 24 24"><rect width="24" height="24" fill="#fff"/><g fill="#b22234"><rect width="24" height="1.85"/><rect y="3.7" width="24" height="1.85"/><rect y="7.4" width="24" height="1.85"/><rect y="11.1" width="24" height="1.85"/><rect y="14.8" width="24" height="1.85"/><rect y="18.5" width="24" height="1.85"/><rect y="22.2" width="24" height="1.8"/></g><rect width="11" height="12.95" fill="#3c3b6e"/></svg>',
     es: '<svg viewBox="0 0 24 24"><rect width="24" height="24" fill="#c60b1e"/><rect y="6" width="24" height="12" fill="#ffc400"/></svg>',
@@ -272,6 +272,7 @@
     cs: '<svg viewBox="0 0 24 24"><rect width="24" height="12" fill="#fff"/><rect y="12" width="24" height="12" fill="#d7141a"/><polygon points="0,0 12,12 0,24" fill="#11457e"/></svg>',
     pl: '<svg viewBox="0 0 24 24"><rect width="24" height="12" fill="#fff"/><rect y="12" width="24" height="12" fill="#dc143c"/></svg>',
     hu: '<svg viewBox="0 0 24 24"><rect width="24" height="8" fill="#ce2939"/><rect y="8" width="24" height="8" fill="#fff"/><rect y="16" width="24" height="8" fill="#477050"/></svg>',
+    sl: '<svg viewBox="0 0 24 24"><rect width="24" height="8" fill="#fff"/><rect y="8" width="24" height="8" fill="#005da4"/><rect y="16" width="24" height="8" fill="#ed1c24"/><path d="M4 5h7v5c0 3-3.5 4-3.5 4S4 13 4 10z" fill="#005da4" stroke="#ed1c24" stroke-width=".6"/><path d="M4.8 10l1.5-2 1.2 1 1.2-1 1.5 2z" fill="#fff"/></svg>',
     it: '<svg viewBox="0 0 24 24"><rect width="8" height="24" fill="#009246"/><rect x="8" width="8" height="24" fill="#fff"/><rect x="16" width="8" height="24" fill="#ce2b37"/></svg>'
   };
   var langItems = [].slice.call(document.querySelectorAll('.lang-item'));
@@ -279,6 +280,9 @@
   var langMenu = document.getElementById('langMenu');
 
   var labelKeys = {"Theme":"ui_Theme","Language":"ui_Language","Dark":"ui_Theme_Dark","Light":"ui_Theme_Light","Black":"ui_Theme_Black","Blood":"ui_Theme_Blood","Greed":"ui_Theme_Greed","Cyanotic":"ui_Theme_Cyanotic","98SE":"ui_Theme_98SE","Ectoplasm":"ui_Theme_Ectoplasm","Decay":"ui_Theme_Decay","Mourning":"ui_Theme_Mourning","Sepulchre":"ui_Theme_Sepulchre","Delirium":"ui_Theme_Delirium","Malaise":"ui_Theme_Malaise","Close":"ui_Lbl_Close","Ctrl":"ui_Key_Ctrl","Alt":"ui_Key_Alt","Shift":"ui_Key_Shift","Delete":"ui_Key_Delete","Enter":"ui_Key_Enter","Esc":"ui_Key_Esc","Menu":"ui_Key_Menu","Home":"ui_Key_Home","End":"ui_Key_End","PgUp":"ui_Key_PgUp","PgDn":"ui_Key_PgDn","Tab":"ui_Key_Tab","Scroll":"ui_Key_Scroll","Click":"ui_Key_Click","or":"ui_Key_Or","Wheel on view":"ui_Key_WheelView","Wheel on logo":"ui_Key_WheelLogo","Middle drag":"ui_Key_MiddleDrag","Space + drag":"ui_Key_SpaceDrag","Accent color":"ui_extra_0","Red":"ui_extra_1","Orange":"ui_extra_2","Green":"ui_extra_3","Teal":"ui_extra_4","Blue":"ui_extra_5","Purple":"ui_extra_6","Yellow":"ui_accent_yellow","Magenta":"ui_accent_magenta","click me":"ui_click_me","KillerMCP on GitHub":"mcp_gh","Previous feature":"ui_extra_7","Next feature":"ui_extra_8","Choose a feature":"ui_extra_9","Expanded KillerPDF screenshot":"ui_extra_10","version":"ui_extra_11","released":"ui_extra_12","size":"ui_extra_13","platform":"ui_extra_14","BASE":"ui_extra_15","Choose theme":"ui_Theme","High Contrast":"ui_Theme_Black","KillerPDF features":"features_h"};
+  labelKeys["Get KillerPDF from the Microsoft Store"] = "ui_store";
+  labelKeys["Get KillerMCP from the Microsoft Store"] = "ui_mcp_store";
+  labelKeys["KillerPDF home"] = "ui_home";
   function translateLabels(dict) {
     labelKeys['Corpus figures'] = 'corpus_stats_aria';
     function lookup(text) {
@@ -322,6 +326,8 @@
       n.innerHTML = normalizeCurrentFacts(k, (dict && dict[k] != null) ? dict[k] : EN[k]);
     });
     translateLabels(dict);
+    var mcpVersion = document.querySelector('[data-mcp-version]');
+    if (mcpVersion) mcpVersion.textContent = (dict.ui_extra_11 || 'Version') + ' ' + mcpVersion.dataset.mcpVersion;
     langItems.forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.lang === lang ? 'true' : 'false'); });
     if (langToggle) langToggle.innerHTML = FLAGS[lang] || FLAGS.en;
     try { localStorage.setItem('kpdf-lang', lang); } catch (e) {}

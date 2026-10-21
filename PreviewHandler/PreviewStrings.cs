@@ -51,6 +51,8 @@ internal static class PreviewStrings
         ["ru-RU"] = ["По ширине", "По странице", "Уменьшить", "Увеличить", "Открыть в KillerPDF",
             "Этот PDF защищен паролем. Откройте его в KillerPDF, чтобы ввести пароль.",
             "Не удалось показать предварительный просмотр этого PDF."],
+        ["sl-SI"] = ["Prilagodi širini", "Prilagodi strani", "Pomanjšaj", "Povečaj", "Odpri v KillerPDF",
+            "Ta PDF je zaščiten z geslom. Odprite ga v KillerPDF, da vnesete geslo.", "Predogleda tega PDF-ja ni bilo mogoče prikazati."],
         ["tr-TR"] = ["Genişliğe sığdır", "Sayfaya sığdır", "Uzaklaştır", "Yakınlaştır", "KillerPDF'de aç",
             "Bu PDF parola korumalı. Parolayı girmek için KillerPDF'de açın.", "Bu PDF önizlenemedi."],
         ["uk-UA"] = ["За шириною", "За сторінкою", "Зменшити", "Збільшити", "Відкрити в KillerPDF",

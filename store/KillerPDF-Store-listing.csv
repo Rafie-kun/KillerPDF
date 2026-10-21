@@ -1,5 +1,5 @@
-﻿Field,Type,English,Bangla,Czech,German,Spanish,Hungarian,Italian,Japanese,Kazakh,Turkish,Ukrainian,Vietnamese (Vietnam),Portuguese (Brazil),Polish,Norwegian (Bokmål),Chinese (Simplified),Chinese (Traditional),French,Russian
-ProductName,Text,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF
+﻿Field,Type,English,Bangla,Czech,German,Spanish,Hungarian,Italian,Japanese,Kazakh,Turkish,Ukrainian,Vietnamese (Vietnam),Portuguese (Brazil),Polish,Norwegian (Bokmål),Chinese (Simplified),Chinese (Traditional),French,Russian,Slovenian
+ProductName,Text,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF,KillerPDF
 Description,Text,"View, edit, OCR, organize, compare, fill, sign, and batch process PDFs locally, privately, and without an account.
 
 Install or run portable. Free, open source, GPLv3. No accounts or subscriptions required. No telemetry is sent and no ads... ever.
@@ -47,7 +47,7 @@ Automation & command line
 Merge, split, decrypt, resize, flatten, print, OCR, or batch-resave files from PowerShell or cmd without opening a window. Every command returns a script-friendly exit code.
 
 Themes & languages
-Thirteen themes - Dark, Light, Black, 98SE, Blood, Greed, Cyanotic, Ectoplasm, Decay, Malaise, Sepulchre, Delirium and Mourning - all switchable live. Four of them - Dark, Light, Black and 98SE - each take one of eight accent colors, so 41 looks in all. UI localized in nineteen languages, including Vietnamese, Kazakh, Polish, Hungarian and Russian.","PDF দেখুন, সম্পাদনা করুন, OCR করুন, সাজান, তুলনা করুন, পূরণ করুন, স্বাক্ষর করুন এবং ব্যাচে প্রক্রিয়া করুন স্থানীয়ভাবে, ব্যক্তিগতভাবে এবং কোনো অ্যাকাউন্ট ছাড়াই।
+Thirteen themes - Dark, Light, Black, 98SE, Blood, Greed, Cyanotic, Ectoplasm, Decay, Malaise, Sepulchre, Delirium and Mourning - all switchable live. Four of them - Dark, Light, Black and 98SE - each take one of eight accent colors, so 41 looks in all. UI localized in twenty languages, including Vietnamese, Kazakh, Polish, Hungarian and Russian.","PDF দেখুন, সম্পাদনা করুন, OCR করুন, সাজান, তুলনা করুন, পূরণ করুন, স্বাক্ষর করুন এবং ব্যাচে প্রক্রিয়া করুন স্থানীয়ভাবে, ব্যক্তিগতভাবে এবং কোনো অ্যাকাউন্ট ছাড়াই।
 
 ইনস্টল করুন অথবা পোর্টেবলভাবে চালান। বিনামূল্যে, ওপেন সোর্স, GPLv3। কোনো অ্যাকাউন্ট বা সাবস্ক্রিপশন প্রয়োজন নেই। কোনো টেলিমেট্রি পাঠানো হয় না এবং কোনো বিজ্ঞাপন নেই... কখনোই না।
 
@@ -141,7 +141,7 @@ Automatizace a příkazový řádek
 Slučujte, dělte, dešifrujte, měňte velikost, slučujte vrstvy, tiskněte, provádějte OCR nebo dávkově přeukládejte soubory z PowerShellu či cmd, aniž by se otevřelo okno. Každý příkaz vrací návratový kód vhodný pro skriptování.
 
 Motivy a jazyky
-13 motivů a 41 vzhledů, přepínatelných bez restartu. Rozhraní je dostupné v 19 jazycích, včetně češtiny, ruštiny, kazaštiny, polštiny a maďarštiny.","PDFs anzeigen, bearbeiten, per OCR erkennen, organisieren, vergleichen, ausfüllen, signieren und stapelweise verarbeiten lokal, privat und ohne Konto.
+13 motivů a 41 vzhledů, přepínatelných bez restartu. Rozhraní je dostupné v 20 jazycích, včetně češtiny, ruštiny, kazaštiny, polštiny a maďarštiny.","PDFs anzeigen, bearbeiten, per OCR erkennen, organisieren, vergleichen, ausfüllen, signieren und stapelweise verarbeiten lokal, privat und ohne Konto.
 
 Installieren oder portabel ausführen. Kostenlos, quelloffen, GPLv3. Keine Konten oder Abonnements erforderlich. Es wird keine Telemetrie gesendet und keine Werbung... niemals.
 
@@ -188,7 +188,7 @@ Automatisierung & Befehlszeile
 Zusammenführen, teilen, entschlüsseln, Größe ändern, reduzieren, drucken, OCR oder Dateien stapelweise neu speichern - aus PowerShell oder cmd, ohne ein Fenster zu öffnen. Jeder Befehl liefert einen skriptfreundlichen Exitcode.
 
 Designs und Sprachen
-13 Designs und 41 Erscheinungsbilder, ohne Neustart umschaltbar. Die Oberfläche ist in 19 Sprachen verfügbar, darunter Deutsch, Russisch, Kasachisch, Polnisch und Ungarisch.","Visualiza, edita, aplica OCR, organiza, compara, rellena, firma y procesa PDF por lotes de forma local, privada y sin una cuenta.
+13 Designs und 41 Erscheinungsbilder, ohne Neustart umschaltbar. Die Oberfläche ist in 20 Sprachen verfügbar, darunter Deutsch, Russisch, Kasachisch, Polnisch und Ungarisch.","Visualiza, edita, aplica OCR, organiza, compara, rellena, firma y procesa PDF por lotes de forma local, privada y sin una cuenta.
 
 Instala o ejecuta en modo portátil. Gratis, de código abierto, GPLv3. No se requieren cuentas ni suscripciones. No se envía telemetría y sin anuncios... nunca.
 
@@ -235,7 +235,7 @@ Automatización y línea de comandos
 Combine, divida, descifre, redimensione, aplane, imprima, aplique OCR o vuelva a guardar archivos por lotes desde PowerShell o cmd sin abrir una ventana. Cada comando devuelve un código de salida apto para scripts.
 
 Temas e idiomas
-13 temas y 41 apariencias, seleccionables sin reiniciar. Interfaz disponible en 19 idiomas, incluidos español, ruso, kazajo, polaco y húngaro.","PDF-ek megtekintése, szerkesztése, OCR-ezése, rendezése, összehasonlítása, kitöltése, aláírása és kötegelt feldolgozása helyben, privát módon és fiók nélkül.
+13 temas y 41 apariencias, seleccionables sin reiniciar. Interfaz disponible en 20 idiomas, incluidos español, ruso, kazajo, polaco y húngaro.","PDF-ek megtekintése, szerkesztése, OCR-ezése, rendezése, összehasonlítása, kitöltése, aláírása és kötegelt feldolgozása helyben, privát módon és fiók nélkül.
 
 Telepítse vagy futtassa a hordozható eszközt. Ingyenes, nyílt forráskódú, GPLv3. Nincs szükség fiókra vagy előfizetésre. Nem küldenek telemetriát és nem küldenek hirdetéseket... soha.
 
@@ -282,7 +282,7 @@ Automatizálás és parancssor
 Fájlok egyesítése, felosztása, visszafejtése, átméretezése, laposítása, nyomtatása, OCR vagy kötegelt újramentése a PowerShellből vagy a cmd-ből ablak megnyitása nélkül. Minden parancs egy szkriptbarát kilépési kódot ad vissza.
 
 Témák és nyelvek
-13 téma és 41 megjelenés, újraindítás nélkül vált8ók. A felület 19 nyelven érhető el, köztük magyarul, oroszul, kazahul és lengyelül.","Visualizza, modifica, esegui OCR, organizza, confronta, compila, firma ed elabora in batch i PDF in locale, in privato e senza account.
+13 téma és 41 megjelenés, újraindítás nélkül vált8ók. A felület 20 nyelven érhető el, köztük magyarul, oroszul, kazahul és lengyelül.","Visualizza, modifica, esegui OCR, organizza, confronta, compila, firma ed elabora in batch i PDF in locale, in privato e senza account.
 
 Installalo oppure eseguilo in modo portatile. Gratuito, open source, GPLv3. Nessun account e nessun abbonamento. Nessuna telemetria e nessuna pubblicità... mai.
 
@@ -329,7 +329,7 @@ Automazione e riga di comando
 Unisci, dividi, decifra, ridimensiona, appiattisci, stampa, esegui l'OCR o risalva in blocco i file da PowerShell o cmd senza aprire alcuna finestra. Ogni comando restituisce un codice di uscita adatto agli script.
 
 Temi e lingue
-13 temi e 41 aspetti, selezionabili senza riavviare. Interfaccia disponibile in 19 lingue, tra cui italiano, russo, kazako, polacco e ungherese.","PDF の閲覧、編集、OCR、整理、比較、フォーム入力、署名、一括処理をローカルかつプライベートに、アカウントなしで。
+13 temi e 41 aspetti, selezionabili senza riavviare. Interfaccia disponibile in 20 lingue, tra cui italiano, russo, kazako, polacco e ungherese.","PDF の閲覧、編集、OCR、整理、比較、フォーム入力、署名、一括処理をローカルかつプライベートに、アカウントなしで。
 
 インストールしても、ポータブルでそのまま実行しても OK。無料、オープンソース、GPLv3。アカウントもサブスクリプションも不要。テレメトリーの送信も広告も... 一切ありません。
 
@@ -376,7 +376,7 @@ PDF のタイトル、作成者、件名、キーワード、作成ソフトの�
 PowerShell や cmd から、ウィンドウを開かずに結合、分割、復号、リサイズ、フラット化、印刷、OCR、一括再保存を実行できます。どのコマンドもスクリプトで扱いやすい終了コードを返します。
 
 テーマ & 言語
-再起動せずに切り替えられる 13 種類のテーマと 41 通りの外観。UI は日本語、ロシア語、カザフ語、ポーランド語、ハンガリー語など 19 言語に対応しています。","PDF файлдарын қараңыз, өңдеңіз, OCR жасаңыз, реттеңіз, салыстырыңыз, толтырыңыз, қол қойыңыз және топтамамен өңдеңіз Барлығы жергілікті, құпия және тіркелгісіз орындалады.
+再起動せずに切り替えられる 13 種類のテーマと 41 通りの外観。UI は日本語、ロシア語、カザフ語、ポーランド語、ハンガリー語など 20 言語に対応しています。","PDF файлдарын қараңыз, өңдеңіз, OCR жасаңыз, реттеңіз, салыстырыңыз, толтырыңыз, қол қойыңыз және топтамамен өңдеңіз Барлығы жергілікті, құпия және тіркелгісіз орындалады.
 
 Орнатыңыз немесе портативті нұсқасын іске қосыңыз. Тегін, бастапқы коды ашық, GPLv3. Тіркелгі де, жазылым да қажет емес. Телеметрия жіберілмейді және жарнама ешқашан көрсетілмейді.
 
@@ -423,7 +423,7 @@ PDF файлының атауын, авторын, тақырыбын, кілт 
 Терезе ашпай, PowerShell немесе cmd арқылы файлдарды біріктіріңіз, бөліңіз, шифрын шешіңіз, өлшемін өзгертіңіз, тегістеңіз, басып шығарыңыз, OCR жасаңыз немесе топтап қайта сақтаңыз. Әр пәрмен сценарийлерге ыңғайлы шығу кодын қайтарады.
 
 Тақырыптар және тілдер
-Қайта іске қоспай ауыстырылатын 13 тақырып пен 41 көрініс. Интерфейс қазақ, орыс, поляк және венгр тілдерін қоса алғанда 19 тілде қолжетімді.","PDF'leri görüntüleyin, düzenleyin, OCR uygulayın, organize edin, karşılaştırın, doldurun, imzalayın ve toplu olarak işleyin yerel, gizli ve hesap gerektirmeden.
+Қайта іске қоспай ауыстырылатын 13 тақырып пен 41 көрініс. Интерфейс қазақ, орыс, поляк және венгр тілдерін қоса алғанда 20 тілде қолжетімді.","PDF'leri görüntüleyin, düzenleyin, OCR uygulayın, organize edin, karşılaştırın, doldurun, imzalayın ve toplu olarak işleyin yerel, gizli ve hesap gerektirmeden.
 
 Kurun ya da taşınabilir olarak çalıştırın. Ücretsiz, açık kaynak, GPLv3. Hesap veya abonelik gerekmez. Telemetri gönderilmez ve reklam yoktur... asla.
 
@@ -470,7 +470,7 @@ Otomasyon ve komut satırı
 PowerShell veya cmd üzerinden pencere açmadan dosyaları birleştirin, bölün, şifresini çözün, yeniden boyutlandırın, düzleştirin, yazdırın, OCR uygulayın veya toplu olarak yeniden kaydedin. Her komut, betiklere uygun bir çıkış kodu döndürür.
 
 Temalar ve diller
-Yeniden başlatmadan değiştirilebilen 13 tema ve 41 görünüm. Arayüz Türkçe, Rusça, Kazakça, Lehçe ve Macarca dahil 19 dilde kullanılabilir.","Переглядайте, редагуйте, розпізнавайте (OCR), упорядковуйте, порівнюйте, заповнюйте, підписуйте та пакетно обробляйте PDF локально, приватно й без облікового запису.
+Yeniden başlatmadan değiştirilebilen 13 tema ve 41 görünüm. Arayüz Türkçe, Rusça, Kazakça, Lehçe ve Macarca dahil 20 dilde kullanılabilir.","Переглядайте, редагуйте, розпізнавайте (OCR), упорядковуйте, порівнюйте, заповнюйте, підписуйте та пакетно обробляйте PDF локально, приватно й без облікового запису.
 
 Встановіть або запускайте портативно. Безкоштовно, відкритий код, GPLv3. Облікові записи та підписки не потрібні. Телеметрія не надсилається, реклами немає... ніколи.
 
@@ -517,7 +517,7 @@ F10 показує два документи поруч в одному вікн
 Об'єднуйте, розділяйте, розшифровуйте, змінюйте розмір, зводьте, друкуйте, розпізнавайте (OCR) або пакетно пересохраняйте файли з PowerShell чи cmd без відкриття вікна. Кожна команда повертає код завершення, зручний для скриптів.
 
 Теми & мови
-Тринадцять тем: Dark, Light, Black, 98SE, Blood, Greed, Cyanotic, Ectoplasm, Decay, Malaise, Sepulchre, Delirium і Mourning, і всі перемикаються наживо. Чотири з них (Dark, Light, Black і 98SE) приймають по одному з 8 акцентних кольорів, разом 41 вигляд. Інтерфейс локалізовано дев'ятнадцятьма мовами, зокрема в'єтнамською, казахською, польською, угорською та російською.","Xem, chỉnh sửa, OCR, sắp xếp, so sánh, điền, ký và xử lý hàng loạt tệp PDF ngay trên máy, riêng tư và không cần tài khoản.
+Тринадцять тем: Dark, Light, Black, 98SE, Blood, Greed, Cyanotic, Ectoplasm, Decay, Malaise, Sepulchre, Delirium і Mourning, і всі перемикаються наживо. Чотири з них (Dark, Light, Black і 98SE) приймають по одному з 8 акцентних кольорів, разом 41 вигляд. Інтерфейс локалізовано двадцятьма мовами, зокрема в'єтнамською, казахською, польською, угорською та російською.","Xem, chỉnh sửa, OCR, sắp xếp, so sánh, điền, ký và xử lý hàng loạt tệp PDF ngay trên máy, riêng tư và không cần tài khoản.
 
 Cài đặt hoặc chạy bản portable. Miễn phí, mã nguồn mở, GPLv3. Không cần tài khoản hay đăng ký. Không gửi dữ liệu telemetry và không có quảng cáo... bao giờ.
 
@@ -564,7 +564,7 @@ Tự động hóa & dòng lệnh
 Gộp, tách, giải mã, đổi kích thước, làm phẳng, in, OCR hoặc lưu lại hàng loạt các tệp từ PowerShell hoặc cmd mà không cần mở cửa sổ. Mọi lệnh đều trả về mã thoát thân thiện với script.
 
 Giao diện & ngôn ngữ
-Mười ba giao diện - Dark, Light, Black, 98SE, Blood, Greed, Cyanotic, Ectoplasm, Decay, Malaise, Sepulchre, Delirium và Mourning - đều có thể chuyển đổi ngay lập tức. Bốn giao diện trong số đó - Dark, Light, Black và 98SE - mỗi giao diện nhận một trong tám màu nhấn, tạo nên tổng cộng 41 kiểu hiển thị. Giao diện ứng dụng được bản địa hóa sang mười chín ngôn ngữ, trong đó có tiếng Việt, tiếng Kazakh, tiếng Ba Lan, tiếng Hungary và tiếng Nga.","Visualize, edite, faça OCR, organize, compare, preencha, assine e processe PDFs em lote localmente, com privacidade e sem conta.
+Mười ba giao diện - Dark, Light, Black, 98SE, Blood, Greed, Cyanotic, Ectoplasm, Decay, Malaise, Sepulchre, Delirium và Mourning - đều có thể chuyển đổi ngay lập tức. Bốn giao diện trong số đó - Dark, Light, Black và 98SE - mỗi giao diện nhận một trong tám màu nhấn, tạo nên tổng cộng 41 kiểu hiển thị. Giao diện ứng dụng được bản địa hóa sang hai mươi ngôn ngữ, trong đó có tiếng Việt, tiếng Kazakh, tiếng Ba Lan, tiếng Hungary và tiếng Nga.","Visualize, edite, faça OCR, organize, compare, preencha, assine e processe PDFs em lote localmente, com privacidade e sem conta.
 
 Instale ou execute como portátil. Gratuito, código aberto, GPLv3. Sem contas nem assinaturas. Nenhuma telemetria é enviada e nenhum anúncio... nunca.
 
@@ -611,7 +611,7 @@ Automação & linha de comando
 Mescle, divida, descriptografe, redimensione, nivele, imprima, faça OCR ou salve em lote novamente os arquivos pelo PowerShell ou pelo cmd, sem abrir uma janela. Todo comando retorna um código de saída amigável para scripts.
 
 Temas & idiomas
-Treze temas - Dark, Light, Black, 98SE, Blood, Greed, Cyanotic, Ectoplasm, Decay, Malaise, Sepulchre, Delirium e Mourning - todos alternáveis ao vivo. Quatro deles - Dark, Light, Black e 98SE - aceitam cada um uma de 8 cores de destaque, totalizando 41 visuais. Interface localizada em dezenove idiomas, incluindo vietnamita, cazaque, polonês, húngaro e russo.","Przeglądaj, edytuj, rozpoznawaj tekst, organizuj, porównuj, wypełniaj, podpisuj i przetwarzaj wsadowo pliki PDF lokalnie, prywatnie i bez konta.
+Treze temas - Dark, Light, Black, 98SE, Blood, Greed, Cyanotic, Ectoplasm, Decay, Malaise, Sepulchre, Delirium e Mourning - todos alternáveis ao vivo. Quatro deles - Dark, Light, Black e 98SE - aceitam cada um uma de 8 cores de destaque, totalizando 41 visuais. Interface localizada em vinte idiomas, incluindo vietnamita, cazaque, polonês, húngaro e russo.","Przeglądaj, edytuj, rozpoznawaj tekst, organizuj, porównuj, wypełniaj, podpisuj i przetwarzaj wsadowo pliki PDF lokalnie, prywatnie i bez konta.
 
 Zainstaluj lub uruchom w trybie przenośnym. Bezpłatny, otwartoźródłowy, GPLv3. Bez kont i subskrypcji. Bez telemetrii i reklam - zawsze.
 
@@ -658,7 +658,7 @@ Automatyzacja i wiersz poleceń
 Scalaj, dziel, odszyfrowuj, zmieniaj rozmiar, spłaszczaj, drukuj, wykonuj OCR i seryjnie zapisuj pliki z PowerShell lub cmd - bez otwierania okna. Każde polecenie zwraca kod zakończenia przyjazny dla skryptów.
 
 Motywy i języki
-13 motywów i 41 wyglądów, przełączane bez restartu. Interfejs jest dostępny w 19 językach, w tym polskim, rosyjskim, kazachskim i węgierskim.","Vis, rediger, OCR-behandle, organiser, sammenlign, fyll ut, signer og batchbehandle PDF-er lokalt, privat og uten konto.
+13 motywów i 41 wyglądów, przełączane bez restartu. Interfejs jest dostępny w 20 językach, w tym polskim, rosyjskim, kazachskim i węgierskim.","Vis, rediger, OCR-behandle, organiser, sammenlign, fyll ut, signer og batchbehandle PDF-er lokalt, privat og uten konto.
 
 Installer eller kjør bærbart. Gratis, åpen kildekode, GPLv3. Ingen kontoer eller abonnementer kreves. Ingen telemetri sendes og ingen reklame... aldri.
 
@@ -705,7 +705,7 @@ Automatisering & kommandolinje
 Slå sammen, del, dekrypter, endre størrelse, flat ut, skriv ut, OCR-behandle eller lagre filer på nytt i batch fra PowerShell eller cmd uten å åpne et vindu. Hver kommando returnerer en skriptvennlig avslutningskode.
 
 Temaer & språk
-Tretten temaer - Dark, Light, Black, 98SE, Blood, Greed, Cyanotic, Ectoplasm, Decay, Malaise, Sepulchre, Delirium og Mourning - som alle kan byttes live. Fire av dem - Dark, Light, Black og 98SE - kan hver ta én av 8 aksentfarger, så det blir 41 utseender til sammen. Grensesnittet er lokalisert til nitten språk, blant annet vietnamesisk, kasakhisk, polsk, ungarsk og russisk.","查看、编辑、OCR、整理、比较、填写、签署及批量处理 PDF 全程在本机私密完成，无需账户。
+Tretten temaer - Dark, Light, Black, 98SE, Blood, Greed, Cyanotic, Ectoplasm, Decay, Malaise, Sepulchre, Delirium og Mourning - som alle kan byttes live. Fire av dem - Dark, Light, Black og 98SE - kan hver ta én av 8 aksentfarger, så det blir 41 utseender til sammen. Grensesnittet er lokalisert til tjue språk, blant annet vietnamesisk, kasakhisk, polsk, ungarsk og russisk.","查看、编辑、OCR、整理、比较、填写、签署及批量处理 PDF 全程在本机私密完成，无需账户。
 
 可安装或以便携方式运行。免费、开源、GPLv3。无需账户或订阅。不发送遥测，也没有广告...永远不会。
 
@@ -752,7 +752,7 @@ F10 会在同一个窗口中并排显示两份文档，共用工具栏和侧边�
 可从 PowerShell 或 cmd 合并、拆分、解密、调整大小、平面化、打印、执行 OCR 或批量重新保存文件，完全无需打开窗口。每个命令都会返回便于脚本判断的退出码。
 
 主题与语言
-13 种主题和 41 种外观，无需重启即可切换。界面支持 19 种语言，包括简体中文、繁体中文、俄语、哈萨克语、波兰语和匈牙利语。","檢視、編輯、OCR、整理、比較、填寫、簽署及批次處理 PDF 全程在本機私密完成，無需帳號。
+13 种主题和 41 种外观，无需重启即可切换。界面支持 20 种语言，包括简体中文、繁体中文、俄语、哈萨克语、波兰语和匈牙利语。","檢視、編輯、OCR、整理、比較、填寫、簽署及批次處理 PDF 全程在本機私密完成，無需帳號。
 
 可安裝或以可攜方式執行。免費、開放原始碼、GPLv3。無需帳號或訂閱。不傳送遙測，也沒有廣告...永遠不會。
 
@@ -799,7 +799,7 @@ F10 會在同一個視窗中並排顯示兩份文件，共用工具列與側邊�
 可從 PowerShell 或 cmd 合併、分割、解密、調整大小、平面化、列印、執行 OCR 或批次重新儲存檔案，完全不需開啟視窗。每個命令都會回傳適合指令碼判讀的結束代碼。
 
 佈景主題與語言
-13 種佈景主題和 41 種外觀，無需重新啟動即可切換。介面支援 19 種語言，包含繁體中文、簡體中文、俄文、哈薩克文、波蘭文和匈牙利文。","Affichez, modifiez, OCRisez, organisez, comparez, remplissez, signez et traitez vos PDF par lots en local, en privé et sans compte.
+13 種佈景主題和 41 種外觀，無需重新啟動即可切換。介面支援 20 種語言，包含繁體中文、簡體中文、俄文、哈薩克文、波蘭文和匈牙利文。","Affichez, modifiez, OCRisez, organisez, comparez, remplissez, signez et traitez vos PDF par lots en local, en privé et sans compte.
 
 Installez-le ou exécutez-le en mode portable. Gratuit, open source, GPLv3. Aucun compte ni abonnement requis. Aucune télémétrie n'est envoyée et aucune publicité... jamais.
 
@@ -846,7 +846,7 @@ Automatisation et ligne de commande
 Fusionnez, divisez, déchiffrez, redimensionnez, aplatissez, imprimez, appliquez l'OCR ou réenregistrez des fichiers par lots depuis PowerShell ou cmd, sans ouvrir de fenêtre. Chaque commande renvoie un code de sortie exploitable en script.
 
 Thèmes et langues
-13 thèmes et 41 apparences, modifiables sans redémarrer. Interface disponible en 19 langues, dont le français, le russe, le kazakh, le polonais et le hongrois.","Просматривайте, редактируйте, распознавайте, упорядочивайте, сравнивайте, заполняйте, подписывайте и пакетно обрабатывайте PDF локально, приватно и без учетной записи.
+13 thèmes et 41 apparences, modifiables sans redémarrer. Interface disponible en 20 langues, dont le français, le russe, le kazakh, le polonais et le hongrois.","Просматривайте, редактируйте, распознавайте, упорядочивайте, сравнивайте, заполняйте, подписывайте и пакетно обрабатывайте PDF локально, приватно и без учетной записи.
 
 Установите или запускайте портативно. Бесплатно, с открытым исходным кодом, GPLv3. Не нужны ни учетные записи, ни подписки. Никакой телеметрии и никакой рекламы... никогда.
 
@@ -893,72 +893,134 @@ F10 показывает два документа рядом в одном ок
 Объединяйте, разделяйте, расшифровывайте, изменяйте размер, сводите, печатайте, распознавайте или пакетно пересохраняйте файлы из PowerShell или cmd без открытия окна. Каждая команда возвращает удобный для скриптов код выхода.
 
 Темы & языки
-13 тем и 41 вариант оформления, переключаемые без перезапуска. Интерфейс доступен на 19 языках, включая русский, казахский, польский и венгерский."
-WhatsNew,Text,,,,,,,,,,,,,,,,,,,
-ProductFeatures1,Text,Four view modes across unlimited tabs,সীমাহীন ট্যাব জুড়ে চারটি ভিউ মোড,Čtyři režimy zobrazení v neomezeném počtu karet,Vier Ansichtsmodi über unbegrenzte Tabs,Cuatro modos de vista en pestañas ilimitadas,Négy nézetmód korlátlan számú lapon,Quattro modalità di visualizzazione su schede illimitate,4 つの表示モードと無制限のタブ,Шексіз қойындыда төрт көру режимі,Sınırsız sekmede dört görünüm modu,Чотири режими перегляду та необмежена кількість вкладок,Bốn chế độ xem trên số lượng tab không giới hạn,Quatro modos de exibição em guias ilimitadas,Cztery tryby widoku i dowolna liczba kart,Fire visningsmoduser med ubegrenset antall faner,四种视图模式，可跨无限标签页,四種檢視模式，可跨無限分頁,Quatre modes d'affichage sur un nombre illimité d'onglets,Четыре режима просмотра и неограниченное число вкладок
-ProductFeatures2,Text,Split panes show two documents side by side,বিভক্ত ভিউ - পাশাপাশি দুটি নথি,Rozdělené zobrazení - dva dokumenty vedle sebe,Geteilte Ansicht - zwei Dokumente nebeneinander,Vista dividida - dos documentos lado a lado,Az osztott ablaktáblákon két dokumentum látható egymás mellett,I riquadri divisi mostrano due documenti affiancati,分割ビュー - 2つの文書を左右に並べて表示,Бөлінген панельде екі құжат қатар көрсетіледі,Bölünmüş görünüm - iki belge yan yana,Розділені панелі показують два документи поруч,Chia đôi khung để xem hai tài liệu song song nhau,Painéis divididos mostram dois documentos lado a lado,Dwa dokumenty obok siebie w widoku dzielonym,Delte ruter viser to dokumenter side ved side,拆分视图 - 两份文档并排显示,分割視窗 - 兩份文件並排顯示,Vue partagée - deux documents côte à côte,Разделенные панели показывают два документа рядом
-ProductFeatures3,Text,"Text, highlights, drawing and shapes","টেক্সট, হাইলাইট, অঙ্কন এবং আকৃতি","Text, zvýraznění, kreslení a tvary","Text, Hervorhebungen, Zeichnen und Formen","Texto, resaltados, dibujo y formas","Szöveg, kiemelések, rajzok és formák","Testo, evidenziazioni, disegno e forme",テキスト、ハイライト、描画、図形,"Мәтін, ерекшелеу, сурет салу және пішіндер","Metin, vurgular, çizim ve şekiller","Текст, виділення, малювання та фігури","Văn bản, đánh dấu, vẽ tay và hình vẽ","Texto, realces, desenho e formas","Tekst, podświetlenia, rysunki i kształty","Tekst, utheving, tegning og former",文本、高亮、绘图与形状,文字、螢光標示、繪圖與形狀,"Texte, surlignages, dessin et formes","Текст, выделения, рисование и фигуры"
-ProductFeatures4,Text,Edit text inline and OCR scans,ইনলাইনে টেক্সট সম্পাদনা করুন এবং স্ক্যান OCR করুন,Úprava textu přímo v dokumentu a OCR skenů,Text direkt bearbeiten und Scans per OCR erfassen,Edita texto en línea y aplica OCR a escaneos,Szöveg soron belüli szerkesztése és OCR-beolvasások,Modifica del testo in linea e OCR delle scansioni,テキストのインライン編集とスキャンの OCR,Мәтінді орнында өңдеу және скандарды OCR арқылы тану,Metni satır içinde düzenle ve taramalara OCR uygula,Редагування тексту прямо на сторінці та OCR сканів,Chỉnh sửa văn bản trực tiếp và OCR bản quét,Edite texto direto no PDF e faça OCR de digitalizações,Edycja tekstu w miejscu i OCR skanów,Rediger tekst direkte og OCR-behandle skanninger,就地编辑文本并对扫描件进行 OCR,就地編輯文字並對掃描件進行 OCR,Modifier le texte en ligne et appliquer l'OCR aux numérisations,Правка текста прямо на странице и OCR сканов
-ProductFeatures5,Text,Fill and sign PDF forms,PDF ফর্ম পূরণ করুন এবং স্বাক্ষর করুন,Vyplňování a podepisování PDF formulářů,PDF-Formulare ausfüllen und signieren,Rellena y firma formularios PDF,PDF-űrlapok kitöltése és aláírása,Compilazione e firma dei moduli PDF,PDF フォームの入力と署名,PDF пішіндерін толтыру және қол қою,PDF formlarını doldur ve imzala,Заповнення та підписання PDF-форм,Điền và ký biểu mẫu PDF,Preencha e assine formulários PDF,Wypełnianie i podpisywanie formularzy PDF,Fyll ut og signer PDF-skjemaer,填写并签署 PDF 表单,填寫並簽署 PDF 表單,Remplir et signer des formulaires PDF,Заполнение и подписание PDF-форм
-ProductFeatures6,Text,Stamp page numbers and watermarks,পৃষ্ঠা নম্বর এবং জলছাপ স্ট্যাম্প করুন,Razítka s čísly stránek a vodoznaky,Seitenzahlen und Wasserzeichen stempeln,Estampa números de página y marcas de agua,Oldalszámok és vízjelek bélyegzése,Numeri di pagina e filigrane,ページ番号と透かしのスタンプ,Бет нөмірлері мен сутаңбаларды мөрлеу,Sayfa numaraları ve filigran damgala,Штамп номерів сторінок і водяні знаки,Đóng dấu số trang và hình mờ,Carimbe números de página e marcas d’água,Numery stron i znaki wodne,Legg til sidetall og vannmerker,加盖页码与水印,加蓋頁碼與浮水印,Apposer des numéros de page et des filigranes,Штамп номеров страниц и водяные знаки
-ProductFeatures7,Text,"Crop, transform, merge and split","ক্রপ, রূপান্তর, একত্র এবং বিভক্ত করুন","Oříznutí, transformace, sloučení a rozdělení","Zuschneiden, transformieren, zusammenführen und teilen","Recorta, transforma, combina y divide","Vágás, átalakítás, egyesítés és felosztás","Ritaglio, trasformazione, unione e divisione",トリミング、変換、結合、分割,"Қию, түрлендіру, біріктіру және бөлу","Kırp, dönüştür, birleştir ve böl","Обрізання, трансформація, об'єднання та розділення","Cắt, chuyển đổi, gộp và tách","Corte, transforme, mescle e divida","Przycinanie, przekształcanie, scalanie i dzielenie","Beskjær, transformer, slå sammen og del",裁剪、变换、合并与拆分,裁切、變形、合併與分割,"Recadrer, transformer, fusionner et diviser","Обрезка, трансформация, объединение и разделение"
-ProductFeatures8,Text,Compare PDFs page by page,পৃষ্ঠা ধরে PDF তুলনা করুন,Porovnávání PDF stránku po stránce,PDFs Seite für Seite vergleichen,Compara archivos PDF página por página,PDF-ek összehasonlítása oldalanként,Confronto dei PDF pagina per pagina,PDF をページごとに比較,PDF файлдарын бет бойынша салыстыру,PDF dosyalarını sayfa sayfa karşılaştır,Порівняння PDF посторінково,So sánh PDF từng trang một,Compare PDFs página a página,Porównywanie plików PDF strona po stronie,Sammenlign PDF-er side for side,逐页比较 PDF,逐頁比較 PDF,Comparer les PDF page par page,Сравнение PDF постранично
-ProductFeatures9,Text,"Print with full control, or flatten","সম্পূর্ণ নিয়ন্ত্রণসহ মুদ্রণ করুন, বা সমতল করুন","Tisk s plnou kontrolou, nebo sloučení do jedné vrstvy",Mit voller Kontrolle drucken oder verflachen,"Imprime con control total, o aplana",Nyomtatás teljes vezérléssel vagy lapítás,"Stampa con pieno controllo, oppure appiattimento",細かく制御できる印刷、またはフラット化,Толық басқарумен басып шығару немесе тегістеу,Tam denetimle yazdır veya düzleştir,Друк з повним контролем або зведення,"In với toàn quyền kiểm soát, hoặc làm phẳng",Imprima com controle total ou nivele,Pełna kontrola druku lub spłaszczanie,"Skriv ut med full kontroll, eller flat ut",完全掌控地打印，或进行平面化,完全掌控地列印，或進行平面化,"Imprimer avec un contrôle total, ou aplatir",Печать с полным контролем или сведение
-ProductFeatures10,Text,,,,,,,,,,,,,,,,,,,
-ProductFeatures11,Text,,,,,,,,,,,,,,,,,,,
-ProductFeatures12,Text,,,,,,,,,,,,,,,,,,,
-ProductFeatures13,Text,,,,,,,,,,,,,,,,,,,
-ProductFeatures14,Text,,,,,,,,,,,,,,,,,,,
-ProductFeatures15,Text,,,,,,,,,,,,,,,,,,,
-ProductFeatures16,Text,,,,,,,,,,,,,,,,,,,
-ProductFeatures17,Text,,,,,,,,,,,,,,,,,,,
-ProductFeatures18,Text,,,,,,,,,,,,,,,,,,,
-ProductFeatures19,Text,,,,,,,,,,,,,,,,,,,
-ProductFeatures20,Text,,,,,,,,,,,,,,,,,,,
-ShortDescription,Text,"View, edit, OCR, organize, compare, fill, sign, and batch process PDFs locally, privately, and without an account.","PDF দেখুন, সম্পাদনা করুন, OCR করুন, সাজান, তুলনা করুন, পূরণ করুন, স্বাক্ষর করুন এবং ব্যাচে প্রক্রিয়া করুন স্থানীয়ভাবে, ব্যক্তিগতভাবে এবং কোনো অ্যাকাউন্ট ছাড়াই।","Prohlížejte, upravujte, rozpoznávejte text, organizujte, porovnávejte, vyplňujte, podepisujte a dávkově zpracovávejte PDF lokálně, soukromě a bez účtu.","PDFs anzeigen, bearbeiten, per OCR erkennen, organisieren, vergleichen, ausfüllen, signieren und stapelweise verarbeiten lokal, privat und ohne Konto.","Visualiza, edita, aplica OCR, organiza, compara, rellena, firma y procesa PDF por lotes de forma local, privada y sin una cuenta.","PDF-ek megtekintése, szerkesztése, OCR-ezése, rendezése, összehasonlítása, kitöltése, aláírása és kötegelt feldolgozása helyben, privát módon és fiók nélkül.","Visualizza, modifica, esegui OCR, organizza, confronta, compila, firma ed elabora in batch i PDF in locale, in privato e senza account.",PDF の閲覧、編集、OCR、整理、比較、フォーム入力、署名、一括処理をローカルかつプライベートに、アカウントなしで。,"PDF файлдарын қараңыз, өңдеңіз, OCR жасаңыз, реттеңіз, салыстырыңыз, толтырыңыз, қол қойыңыз және топтамамен өңдеңіз Барлығы жергілікті, құпия және тіркелгісіз орындалады.","PDF'leri görüntüleyin, düzenleyin, OCR uygulayın, organize edin, karşılaştırın, doldurun, imzalayın ve toplu olarak işleyin yerel, gizli ve hesap gerektirmeden.","Переглядайте, редагуйте, розпізнавайте (OCR), упорядковуйте, порівнюйте, заповнюйте, підписуйте та пакетно обробляйте PDF локально, приватно й без облікового запису.","Xem, chỉnh sửa, OCR, sắp xếp, so sánh, điền, ký và xử lý hàng loạt tệp PDF ngay trên máy, riêng tư và không cần tài khoản.","Visualize, edite, faça OCR, organize, compare, preencha, assine e processe PDFs em lote localmente, com privacidade e sem conta.","Przeglądaj, edytuj, rozpoznawaj tekst, organizuj, porównuj, wypełniaj, podpisuj i przetwarzaj wsadowo pliki PDF lokalnie, prywatnie i bez konta.","Vis, rediger, OCR-behandle, organiser, sammenlign, fyll ut, signer og batchbehandle PDF-er lokalt, privat og uten konto.",查看、编辑、OCR、整理、比较、填写、签署及批量处理 PDF 全程在本机私密完成，无需账户。,檢視、編輯、OCR、整理、比較、填寫、簽署及批次處理 PDF 全程在本機私密完成，無需帳號。,"Affichez, modifiez, OCRisez, organisez, comparez, remplissez, signez et traitez vos PDF par lots en local, en privé et sans compte.","Просматривайте, редактируйте, распознавайте, упорядочивайте, сравнивайте, заполняйте, подписывайте и пакетно обрабатывайте PDF локально, приватно и без учетной записи."
-SearchTerms1,Text,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor
-SearchTerms2,Text,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer
-SearchTerms3,Text,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR
-SearchTerms4,Text,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms
-SearchTerms5,Text,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF
-SearchTerms6,Text,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF
-SearchTerms7,Text,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF
-Applicable license terms,Text,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF
-Copyright,Text,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer
-DevelopedBy,Text,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer
-RequirementsMinimum1,Text,Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64)
-RequirementsMinimum2,Text,,,,,,,,,,,,,,,,,,,
-RequirementsMinimum3,Text,,,,,,,,,,,,,,,,,,,
-RequirementsMinimum4,Text,,,,,,,,,,,,,,,,,,,
-RequirementsMinimum5,Text,,,,,,,,,,,,,,,,,,,
-RequirementsMinimum6,Text,,,,,,,,,,,,,,,,,,,
-RequirementsMinimum7,Text,,,,,,,,,,,,,,,,,,,
-RequirementsMinimum8,Text,,,,,,,,,,,,,,,,,,,
-RequirementsMinimum9,Text,,,,,,,,,,,,,,,,,,,
-RequirementsMinimum10,Text,,,,,,,,,,,,,,,,,,,
-RequirementsMinimum11,Text,,,,,,,,,,,,,,,,,,,
-RequirementsRecommended1,Text,,,,,,,,,,,,,,,,,,,
-RequirementsRecommended2,Text,,,,,,,,,,,,,,,,,,,
-RequirementsRecommended3,Text,,,,,,,,,,,,,,,,,,,
-RequirementsRecommended4,Text,,,,,,,,,,,,,,,,,,,
-RequirementsRecommended5,Text,,,,,,,,,,,,,,,,,,,
-RequirementsRecommended6,Text,,,,,,,,,,,,,,,,,,,
-RequirementsRecommended7,Text,,,,,,,,,,,,,,,,,,,
-RequirementsRecommended8,Text,,,,,,,,,,,,,,,,,,,
-RequirementsRecommended9,Text,,,,,,,,,,,,,,,,,,,
-RequirementsRecommended10,Text,,,,,,,,,,,,,,,,,,,
-RequirementsRecommended11,Text,,,,,,,,,,,,,,,,,,,
-StoreLogos1,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png
-StoreLogos2,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,,,,,,,,,,,,,,,,,,,
-Screenshots1,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png
-Screenshots2,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png
-Screenshots3,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png
-Screenshots4,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png
-Screenshots5,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png
-Screenshots6,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png
-Screenshots7,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png
-Screenshots8,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png
-Screenshots9,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png
-Screenshots10,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png
-HeroArts,Text,,,,,,,,,,,,,,,,,,,
-Trailers,Text,,,,,,,,,,,,,,,,,,,
+13 тем и 41 вариант оформления, переключаемые без перезапуска. Интерфейс доступен на 20 языках, включая русский, казахский, польский и венгерский.","Ogledujte, urejajte, prepoznavajte besedilo, razvrščajte, primerjajte, izpolnjujte, podpisujte in paketno obdelujte PDF-je lokalno, zasebno in brez računa.
+
+Namestite ali uporabite prenosno različico. Brezplačno, odprtokodno, GPLv3. Računi in naročnine niso potrebni. Brez pošiljanja telemetrije in brez oglasov. Vedno.
+
+Pogled in krmarjenje
+
+Izris s The KillerPDF.Engine v štirih načinih pogleda: posamezna stran, neprekinjeno drsenje, dve strani z izbirno knjižno postavitvijo in mreža vseh strani. Odprite več PDF-jev v zavihkih z iskanjem, orisi in povezavami, ki jih lahko kliknete.
+
+Razdeljeno podokno
+
+F10 prikaže dva dokumenta drug ob drugem v enem oknu. Uporabljata isto orodno in stransko vrstico, ohranita pa ločene nastavitve pogleda in obrnjenih barv. Zavihek povlecite iz enega podokna v drugega. Ponovni pritisk F10 zapre razdeljeni pogled.
+
+Opombe in urejanje
+
+Neposredno urejanje besedila z ujemanjem pisave, besedilna polja, prostoročno risanje, črte, oblike z izbirnim polnilom in poudarki, ki sledijo besedilu. Vsak element ima svojo barvo, neprosojnost in debelino. Vsak barvni vzorec ima polni izbirnik barv RGB.
+
+Iskanje in izbiranje besedila
+
+Iščite po celotnem dokumentu, pri čemer so med pomikanjem označeni vsi zadetki. Izbiranje besedila sledi stolpcem in vrstnemu redu branja, zato kopiranje enega stolpca ne zajame še sosednjega.
+
+Vgrajen OCR
+
+Prepoznajte besedilo strani ali izbranega območja v odložišče, omogočite iskanje po optično prebranem PDF-ju ali izvlecite vse besedilo v datoteko. Vsi jezikovni modeli OCR, tudi angleški, se prenesejo ob prvi uporabi in ostanejo v predpomnilniku. Izvorne knjižnice Tesseract se razširijo v predpomnilnik OCR za posamezno različico.
+
+Obrazci in podpisovanje
+
+Izpolnite obrazce PDF in jih shranite. Narišite podpise za ponovno uporabo ali podpišite s potrdilom iz sistema Windows ali datoteke .pfx ter s klikom podpišite polja obrazcev.
+
+Urejanje strani
+
+Združujte PDF-je, izločajte strani, povlecite za spremembo vrstnega reda, sukajte, izvažajte in dodajajte številke strani. Spustite mapo ali .zip, da vsebino združite v en PDF ali odprete vsako datoteko posebej.
+
+Primerjaj datoteki PDF
+
+Krmarjenje po straneh, povečava in drsenje ostanejo usklajeni. Območja razlik so označena neposredno na straneh, za vsak par pa je prikazan odstotek sprememb. Rezultati prepoznajo tudi različne mere strani in strani, ki obstajajo samo v enem dokumentu. Poročilo primerjave lahko izvozite, ne da bi spremenili izvorna PDF-ja.
+
+Preoblikuj
+
+Sukajte, spreminjajte merilo, zrcalite, poravnajte z vodoravno črto, popravite perspektivo in prilagodite ravni. Vse s sprotnim predogledom, opombe pa sledijo strani.
+
+Žigi in vodni žigi
+
+Odtisnite številke strani ali besedilni vodni žig na poljuben obseg strani z izbranim položajem, velikostjo in slogom. Opravilo lahko razveljavite v enem koraku.
+
+Tiskanje in združevanje v sliko
+
+Pravi predogled tiskanja v aplikaciji z izbiro papirja in vira, zložljivima razdelkoma za postavitev in izhod, merilom, robovi, več stranmi na list, podmnožicami, obojestranskim tiskom ter sprotnim napredkom priprave in tiskalne vrste pri 300 DPI. Strani lahko tudi združite v sliko ali izvozite kot slike.
+
+Odpiranje in popravljanje PDF-jev
+
+PDF-je, zaščitene z geslom, odpre s pozivom namesto napake. Poškodovane datoteke ali datoteke z okvarjenimi tabelami sklicev popravi, da jih lahko odprete in natisnete.
+
+Informacije o dokumentu
+
+Oglejte si in uredite metapodatke PDF-ja: naslov, avtorja, zadevo, ključne besede in ustvarjalca. Shranijo se nazaj v datoteko.
+
+Avtomatizacija in ukazna vrstica
+
+Združujte, delite, dešifrirajte, spreminjajte velikost, združujte v sliko, tiskajte, izvajajte OCR ali paketno ponovno shranjujte datoteke iz PowerShella ali cmd brez odpiranja okna. Vsak ukaz vrne izhodno kodo, primerno za skripte.
+
+Teme in jeziki
+
+Trinajst tem, Dark, Light, Black, 98SE, Blood, Greed, Cyanotic, Ectoplasm, Decay, Malaise, Sepulchre, Delirium in Mourning, lahko preklapljate sproti. Štiri med njimi, Dark, Light, Black in 98SE, ponujajo po osem poudarjenih barv, kar skupaj pomeni 41 videzov. Vmesnik je preveden v dvajset jezikov, med njimi slovenščino, vietnamščino, kazaščino, poljščino, madžarščino in ruščino."
+WhatsNew,Text,,,,,,,,,,,,,,,,,,,,""
+ProductFeatures1,Text,Four view modes across unlimited tabs,সীমাহীন ট্যাব জুড়ে চারটি ভিউ মোড,Čtyři režimy zobrazení v neomezeném počtu karet,Vier Ansichtsmodi über unbegrenzte Tabs,Cuatro modos de vista en pestañas ilimitadas,Négy nézetmód korlátlan számú lapon,Quattro modalità di visualizzazione su schede illimitate,4 つの表示モードと無制限のタブ,Шексіз қойындыда төрт көру режимі,Sınırsız sekmede dört görünüm modu,Чотири режими перегляду та необмежена кількість вкладок,Bốn chế độ xem trên số lượng tab không giới hạn,Quatro modos de exibição em guias ilimitadas,Cztery tryby widoku i dowolna liczba kart,Fire visningsmoduser med ubegrenset antall faner,四种视图模式，可跨无限标签页,四種檢視模式，可跨無限分頁,Quatre modes d'affichage sur un nombre illimité d'onglets,Четыре режима просмотра и неограниченное число вкладок,Štirje načini pogleda in neomejeno zavihkov
+ProductFeatures2,Text,Split panes show two documents side by side,বিভক্ত ভিউ - পাশাপাশি দুটি নথি,Rozdělené zobrazení - dva dokumenty vedle sebe,Geteilte Ansicht - zwei Dokumente nebeneinander,Vista dividida - dos documentos lado a lado,Az osztott ablaktáblákon két dokumentum látható egymás mellett,I riquadri divisi mostrano due documenti affiancati,分割ビュー - 2つの文書を左右に並べて表示,Бөлінген панельде екі құжат қатар көрсетіледі,Bölünmüş görünüm - iki belge yan yana,Розділені панелі показують два документи поруч,Chia đôi khung để xem hai tài liệu song song nhau,Painéis divididos mostram dois documentos lado a lado,Dwa dokumenty obok siebie w widoku dzielonym,Delte ruter viser to dokumenter side ved side,拆分视图 - 两份文档并排显示,分割視窗 - 兩份文件並排顯示,Vue partagée - deux documents côte à côte,Разделенные панели показывают два документа рядом,Razdeljena podokna za dva dokumenta drug ob drugem
+ProductFeatures3,Text,"Text, highlights, drawing and shapes","টেক্সট, হাইলাইট, অঙ্কন এবং আকৃতি","Text, zvýraznění, kreslení a tvary","Text, Hervorhebungen, Zeichnen und Formen","Texto, resaltados, dibujo y formas","Szöveg, kiemelések, rajzok és formák","Testo, evidenziazioni, disegno e forme",テキスト、ハイライト、描画、図形,"Мәтін, ерекшелеу, сурет салу және пішіндер","Metin, vurgular, çizim ve şekiller","Текст, виділення, малювання та фігури","Văn bản, đánh dấu, vẽ tay và hình vẽ","Texto, realces, desenho e formas","Tekst, podświetlenia, rysunki i kształty","Tekst, utheving, tegning og former",文本、高亮、绘图与形状,文字、螢光標示、繪圖與形狀,"Texte, surlignages, dessin et formes","Текст, выделения, рисование и фигуры","Besedilo, označevanje, risanje in oblike"
+ProductFeatures4,Text,Edit text inline and OCR scans,ইনলাইনে টেক্সট সম্পাদনা করুন এবং স্ক্যান OCR করুন,Úprava textu přímo v dokumentu a OCR skenů,Text direkt bearbeiten und Scans per OCR erfassen,Edita texto en línea y aplica OCR a escaneos,Szöveg soron belüli szerkesztése és OCR-beolvasások,Modifica del testo in linea e OCR delle scansioni,テキストのインライン編集とスキャンの OCR,Мәтінді орнында өңдеу және скандарды OCR арқылы тану,Metni satır içinde düzenle ve taramalara OCR uygula,Редагування тексту прямо на сторінці та OCR сканів,Chỉnh sửa văn bản trực tiếp và OCR bản quét,Edite texto direto no PDF e faça OCR de digitalizações,Edycja tekstu w miejscu i OCR skanów,Rediger tekst direkte og OCR-behandle skanninger,就地编辑文本并对扫描件进行 OCR,就地編輯文字並對掃描件進行 OCR,Modifier le texte en ligne et appliquer l'OCR aux numérisations,Правка текста прямо на странице и OCR сканов,Neposredno urejanje besedila in OCR skenov
+ProductFeatures5,Text,Fill and sign PDF forms,PDF ফর্ম পূরণ করুন এবং স্বাক্ষর করুন,Vyplňování a podepisování PDF formulářů,PDF-Formulare ausfüllen und signieren,Rellena y firma formularios PDF,PDF-űrlapok kitöltése és aláírása,Compilazione e firma dei moduli PDF,PDF フォームの入力と署名,PDF пішіндерін толтыру және қол қою,PDF formlarını doldur ve imzala,Заповнення та підписання PDF-форм,Điền và ký biểu mẫu PDF,Preencha e assine formulários PDF,Wypełnianie i podpisywanie formularzy PDF,Fyll ut og signer PDF-skjemaer,填写并签署 PDF 表单,填寫並簽署 PDF 表單,Remplir et signer des formulaires PDF,Заполнение и подписание PDF-форм,Izpolnjevanje in podpisovanje obrazcev PDF
+ProductFeatures6,Text,Stamp page numbers and watermarks,পৃষ্ঠা নম্বর এবং জলছাপ স্ট্যাম্প করুন,Razítka s čísly stránek a vodoznaky,Seitenzahlen und Wasserzeichen stempeln,Estampa números de página y marcas de agua,Oldalszámok és vízjelek bélyegzése,Numeri di pagina e filigrane,ページ番号と透かしのスタンプ,Бет нөмірлері мен сутаңбаларды мөрлеу,Sayfa numaraları ve filigran damgala,Штамп номерів сторінок і водяні знаки,Đóng dấu số trang và hình mờ,Carimbe números de página e marcas d’água,Numery stron i znaki wodne,Legg til sidetall og vannmerker,加盖页码与水印,加蓋頁碼與浮水印,Apposer des numéros de page et des filigranes,Штамп номеров страниц и водяные знаки,Odtiskovanje številk strani in vodnih žigov
+ProductFeatures7,Text,"Crop, transform, merge and split","ক্রপ, রূপান্তর, একত্র এবং বিভক্ত করুন","Oříznutí, transformace, sloučení a rozdělení","Zuschneiden, transformieren, zusammenführen und teilen","Recorta, transforma, combina y divide","Vágás, átalakítás, egyesítés és felosztás","Ritaglio, trasformazione, unione e divisione",トリミング、変換、結合、分割,"Қию, түрлендіру, біріктіру және бөлу","Kırp, dönüştür, birleştir ve böl","Обрізання, трансформація, об'єднання та розділення","Cắt, chuyển đổi, gộp và tách","Corte, transforme, mescle e divida","Przycinanie, przekształcanie, scalanie i dzielenie","Beskjær, transformer, slå sammen og del",裁剪、变换、合并与拆分,裁切、變形、合併與分割,"Recadrer, transformer, fusionner et diviser","Обрезка, трансформация, объединение и разделение","Obrezovanje, preoblikovanje, združevanje in delitev"
+ProductFeatures8,Text,Compare PDFs page by page,পৃষ্ঠা ধরে PDF তুলনা করুন,Porovnávání PDF stránku po stránce,PDFs Seite für Seite vergleichen,Compara archivos PDF página por página,PDF-ek összehasonlítása oldalanként,Confronto dei PDF pagina per pagina,PDF をページごとに比較,PDF файлдарын бет бойынша салыстыру,PDF dosyalarını sayfa sayfa karşılaştır,Порівняння PDF посторінково,So sánh PDF từng trang một,Compare PDFs página a página,Porównywanie plików PDF strona po stronie,Sammenlign PDF-er side for side,逐页比较 PDF,逐頁比較 PDF,Comparer les PDF page par page,Сравнение PDF постранично,Primerjava PDF-jev po straneh
+ProductFeatures9,Text,"Print with full control, or flatten","সম্পূর্ণ নিয়ন্ত্রণসহ মুদ্রণ করুন, বা সমতল করুন","Tisk s plnou kontrolou, nebo sloučení do jedné vrstvy",Mit voller Kontrolle drucken oder verflachen,"Imprime con control total, o aplana",Nyomtatás teljes vezérléssel vagy lapítás,"Stampa con pieno controllo, oppure appiattimento",細かく制御できる印刷、またはフラット化,Толық басқарумен басып шығару немесе тегістеу,Tam denetimle yazdır veya düzleştir,Друк з повним контролем або зведення,"In với toàn quyền kiểm soát, hoặc làm phẳng",Imprima com controle total ou nivele,Pełna kontrola druku lub spłaszczanie,"Skriv ut med full kontroll, eller flat ut",完全掌控地打印，或进行平面化,完全掌控地列印，或進行平面化,"Imprimer avec un contrôle total, ou aplatir",Печать с полным контролем или сведение,Tiskanje s popolnim nadzorom ali združevanje v sliko
+ProductFeatures10,Text,,,,,,,,,,,,,,,,,,,,""
+ProductFeatures11,Text,,,,,,,,,,,,,,,,,,,,""
+ProductFeatures12,Text,,,,,,,,,,,,,,,,,,,,""
+ProductFeatures13,Text,,,,,,,,,,,,,,,,,,,,""
+ProductFeatures14,Text,,,,,,,,,,,,,,,,,,,,""
+ProductFeatures15,Text,,,,,,,,,,,,,,,,,,,,""
+ProductFeatures16,Text,,,,,,,,,,,,,,,,,,,,""
+ProductFeatures17,Text,,,,,,,,,,,,,,,,,,,,""
+ProductFeatures18,Text,,,,,,,,,,,,,,,,,,,,""
+ProductFeatures19,Text,,,,,,,,,,,,,,,,,,,,""
+ProductFeatures20,Text,,,,,,,,,,,,,,,,,,,,""
+ShortDescription,Text,"View, edit, OCR, organize, compare, fill, sign, and batch process PDFs locally, privately, and without an account.","PDF দেখুন, সম্পাদনা করুন, OCR করুন, সাজান, তুলনা করুন, পূরণ করুন, স্বাক্ষর করুন এবং ব্যাচে প্রক্রিয়া করুন স্থানীয়ভাবে, ব্যক্তিগতভাবে এবং কোনো অ্যাকাউন্ট ছাড়াই।","Prohlížejte, upravujte, rozpoznávejte text, organizujte, porovnávejte, vyplňujte, podepisujte a dávkově zpracovávejte PDF lokálně, soukromě a bez účtu.","PDFs anzeigen, bearbeiten, per OCR erkennen, organisieren, vergleichen, ausfüllen, signieren und stapelweise verarbeiten lokal, privat und ohne Konto.","Visualiza, edita, aplica OCR, organiza, compara, rellena, firma y procesa PDF por lotes de forma local, privada y sin una cuenta.","PDF-ek megtekintése, szerkesztése, OCR-ezése, rendezése, összehasonlítása, kitöltése, aláírása és kötegelt feldolgozása helyben, privát módon és fiók nélkül.","Visualizza, modifica, esegui OCR, organizza, confronta, compila, firma ed elabora in batch i PDF in locale, in privato e senza account.",PDF の閲覧、編集、OCR、整理、比較、フォーム入力、署名、一括処理をローカルかつプライベートに、アカウントなしで。,"PDF файлдарын қараңыз, өңдеңіз, OCR жасаңыз, реттеңіз, салыстырыңыз, толтырыңыз, қол қойыңыз және топтамамен өңдеңіз Барлығы жергілікті, құпия және тіркелгісіз орындалады.","PDF'leri görüntüleyin, düzenleyin, OCR uygulayın, organize edin, karşılaştırın, doldurun, imzalayın ve toplu olarak işleyin yerel, gizli ve hesap gerektirmeden.","Переглядайте, редагуйте, розпізнавайте (OCR), упорядковуйте, порівнюйте, заповнюйте, підписуйте та пакетно обробляйте PDF локально, приватно й без облікового запису.","Xem, chỉnh sửa, OCR, sắp xếp, so sánh, điền, ký và xử lý hàng loạt tệp PDF ngay trên máy, riêng tư và không cần tài khoản.","Visualize, edite, faça OCR, organize, compare, preencha, assine e processe PDFs em lote localmente, com privacidade e sem conta.","Przeglądaj, edytuj, rozpoznawaj tekst, organizuj, porównuj, wypełniaj, podpisuj i przetwarzaj wsadowo pliki PDF lokalnie, prywatnie i bez konta.","Vis, rediger, OCR-behandle, organiser, sammenlign, fyll ut, signer og batchbehandle PDF-er lokalt, privat og uten konto.",查看、编辑、OCR、整理、比较、填写、签署及批量处理 PDF 全程在本机私密完成，无需账户。,檢視、編輯、OCR、整理、比較、填寫、簽署及批次處理 PDF 全程在本機私密完成，無需帳號。,"Affichez, modifiez, OCRisez, organisez, comparez, remplissez, signez et traitez vos PDF par lots en local, en privé et sans compte.","Просматривайте, редактируйте, распознавайте, упорядочивайте, сравнивайте, заполняйте, подписывайте и пакетно обрабатывайте PDF локально, приватно и без учетной записи.","Ogledujte, urejajte, prepoznavajte besedilo, razvrščajte, primerjajte, izpolnjujte, podpisujte in paketno obdelujte PDF-je lokalno, zasebno in brez računa."
+SearchTerms1,Text,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,PDF editor,urejevalnik PDF
+SearchTerms2,Text,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,PDF viewer,pregledovalnik PDF
+SearchTerms3,Text,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR,OCR
+SearchTerms4,Text,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,PDF forms,obrazci PDF
+SearchTerms5,Text,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,sign PDF,podpisovanje PDF
+SearchTerms6,Text,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,merge PDF,združevanje PDF
+SearchTerms7,Text,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,compare PDF,primerjava PDF
+Applicable license terms,Text,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Source code: https://github.com/SteveTheKiller/KillerPDF,GNU General Public License v3.0 (GPLv3). Izvorna koda: https://github.com/SteveTheKiller/KillerPDF
+Copyright,Text,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer,© 2026 Steve the Killer
+DevelopedBy,Text,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer,Steve the Killer
+RequirementsMinimum1,Text,Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64),Microsoft .NET 10 Desktop Runtime (x64)
+RequirementsMinimum2,Text,,,,,,,,,,,,,,,,,,,,""
+RequirementsMinimum3,Text,,,,,,,,,,,,,,,,,,,,""
+RequirementsMinimum4,Text,,,,,,,,,,,,,,,,,,,,""
+RequirementsMinimum5,Text,,,,,,,,,,,,,,,,,,,,""
+RequirementsMinimum6,Text,,,,,,,,,,,,,,,,,,,,""
+RequirementsMinimum7,Text,,,,,,,,,,,,,,,,,,,,""
+RequirementsMinimum8,Text,,,,,,,,,,,,,,,,,,,,""
+RequirementsMinimum9,Text,,,,,,,,,,,,,,,,,,,,""
+RequirementsMinimum10,Text,,,,,,,,,,,,,,,,,,,,""
+RequirementsMinimum11,Text,,,,,,,,,,,,,,,,,,,,""
+RequirementsRecommended1,Text,,,,,,,,,,,,,,,,,,,,""
+RequirementsRecommended2,Text,,,,,,,,,,,,,,,,,,,,""
+RequirementsRecommended3,Text,,,,,,,,,,,,,,,,,,,,""
+RequirementsRecommended4,Text,,,,,,,,,,,,,,,,,,,,""
+RequirementsRecommended5,Text,,,,,,,,,,,,,,,,,,,,""
+RequirementsRecommended6,Text,,,,,,,,,,,,,,,,,,,,""
+RequirementsRecommended7,Text,,,,,,,,,,,,,,,,,,,,""
+RequirementsRecommended8,Text,,,,,,,,,,,,,,,,,,,,""
+RequirementsRecommended9,Text,,,,,,,,,,,,,,,,,,,,""
+RequirementsRecommended10,Text,,,,,,,,,,,,,,,,,,,,""
+RequirementsRecommended11,Text,,,,,,,,,,,,,,,,,,,,""
+StoreLogos1,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png,StoreLogo-1080.png
+StoreLogos2,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,,,,,,,,,,,,,,,,,,,,""
+Screenshots1,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png,screenshots/01.png
+Screenshots2,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png,screenshots/02.png
+Screenshots3,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png,screenshots/03.png
+Screenshots4,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png,screenshots/04.png
+Screenshots5,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png,screenshots/06.png
+Screenshots6,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png,screenshots/07.png
+Screenshots7,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png,screenshots/08.png
+Screenshots8,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png,screenshots/09.png
+Screenshots9,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png,screenshots/10.png
+Screenshots10,Provide the file name only if it is in the same folder. Provide relative path to image starting with the subfolder name otherwise,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png,screenshots/14.png
+HeroArts,Text,,,,,,,,,,,,,,,,,,,,""
+Trailers,Text,,,,,,,,,,,,,,,,,,,,""

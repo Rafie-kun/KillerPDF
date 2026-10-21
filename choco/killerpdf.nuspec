@@ -38,7 +38,7 @@
 - Undo and redo across annotations, page operations, and document edits, plus browser-style jump history (Alt+arrows)
 - Print with a real in-app preview (paper size and source, scale, position, margins, pages-per-sheet, two-sided); Save Flattened to make a page uneditable
 - Opens password-protected PDFs and repairs damaged ones
-- Thirteen themes, live accent colors, and toolbar styles provide 41 looks; localized in nineteen languages
+- Thirteen themes, live accent colors, and toolbar styles provide 41 looks; localized in twenty languages
 - Keyboard shortcut overlay (F1) with list and keyboard views, plus a shortcut toggle and an always-available Ctrl+Shift+K recovery chord
 - Optional startup update checks, enabled by default, with confirmation before downloading or installing
 - Separate compact installer and self-contained portable downloads; the installer supports per-user or machine-wide installation and uses the .NET 10 Desktop Runtime

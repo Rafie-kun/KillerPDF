@@ -268,6 +268,7 @@
       if (ui.titles && ui.titles[page.id]) page.title = ui.titles[page.id];
       if (ui.groups && ui.groups[page.group]) page.group = ui.groups[page.group];
     });
+    if (lang === 'sl' && ui.titles && ui.titles[docId]) document.title = ui.titles[docId] + ' | The KillerPDF.Engine';
     var docsNav = document.querySelector('.docs-nav');
     if (docsNav) docsNav.innerHTML = navigation();
     var sbTab = document.querySelector('.sb-tabs .on');

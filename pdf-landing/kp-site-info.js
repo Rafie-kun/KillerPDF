@@ -1,6 +1,17 @@
 (function () {
   'use strict';
   var copy = {
+  "sl": [
+    "Prenosne kopije shranjujejo nastavitve, shranjene podpise in modele OCR v <code>KillerPDF-Data</code> ob zaganjalniku. Izvorne knjižnice OCR in začasne delovne datoteke še vedno uporabljajo <code>%LOCALAPPDATA%\\KillerPDF</code>.",
+    "Vsi jezikovni modeli OCR, tudi angleški, se prenesejo ob prvi uporabi in ostanejo v predpomnilniku. Izvorne knjižnice Tesseract se razširijo v predpomnilnik OCR za posamezno različico.",
+    "Počisti vse podatke po možnosti odstrani shranjene nastavitve, modele OCR in začasne datoteke. Zaklenjene datoteke lahko ostanejo. Nameščene kopije ohranijo shranjene podpise in dnevnike, prenosne kopije pa odstranijo tudi mapo <code>KillerPDF-Data</code>. Izvorni PDF-ji se ne izbrišejo.",
+    "Strukturne spremembe zapišejo in ponovno odprejo začasni PDF prek The KillerPDF.Engine. Po potrebi se obnovijo zasuki strani in čakajoče opombe. Izvirna datoteka se spremeni šele ob shranjevanju.",
+    "Položaji opomb uporabljajo enote render-dim, merjene od zgornjega levega kota, ki se pri povečavi ne spreminjajo. Koordinate PDF se pretvorijo ob branju in pisanju vsebine. Isti položaji se uporabljajo v vseh načinih pogleda.",
+    "Preteklo preverjanje standardov",
+    "Natančno število izvornih datotek in preizkusov je v Pregledu. Rezultati zbirke določajo preizkušeno gradnjo in vhodne podatke. qpdf, veraPDF in OpenSSL ločeno preverjajo strukturo, standarde in podpise.",
+    "Potrdi besedilo",
+    "Odpiranje in popravljanje PDF-jev"
+  ],
   "en": [
     "Portable copies store settings, saved signatures and OCR models in <code>KillerPDF-Data</code> beside the launcher. Native OCR libraries and temporary working files still use <code>%LOCALAPPDATA%\\KillerPDF</code>.",
     "All OCR language models, including English, download on first use and remain cached. Native Tesseract libraries extract to the versioned OCR cache.",
@@ -220,6 +231,7 @@
     }
   };
   var backend = {
+  "sl": "Razvojna veja 1.9 uporablja The KillerPDF.Engine za izris in izločanje besedila. Tesseract ostaja na voljo kot nadomestna možnost OCR. Trenutni API-ji pogona so opisani v vodniku za razvijalce.",
   "ru": "Ветка разработки 1.9 использует The KillerPDF.Engine для рендеринга и извлечения текста. Tesseract остается резервным движком OCR. Актуальные API движка описаны в руководстве для разработчиков.",
   "it": "Il ramo di sviluppo 1.9 usa The KillerPDF.Engine per il rendering e l’estrazione del testo. Tesseract rimane disponibile come motore OCR di riserva. La guida per sviluppatori descrive le API attuali del motore.",
   "vi": "Nhánh phát triển 1.9 dùng The KillerPDF.Engine để kết xuất và trích xuất văn bản. Tesseract vẫn là bộ máy OCR dự phòng. Hướng dẫn dành cho nhà phát triển mô tả các API hiện tại của bộ máy.",
@@ -241,6 +253,7 @@
   "en": "The 1.9 development branch uses The KillerPDF.Engine for rendering and text extraction. Tesseract remains available as an OCR fallback. See the developer guide for current engine APIs."
 };
   var publicLabels = {
+  "sl": "PDF-jev za prenos",
   "en": "downloadable PDFs",
   "es": "PDF descargables",
   "de": "herunterladbare PDFs",
@@ -262,6 +275,7 @@
   "bn": "ডাউনলোডযোগ্য PDF"
 };
   var coverCopy = {
+  "sl": "Prekrivni pravokotnik vizualno skrije izvirne besede. Ne odstrani spodnjega besedila ali slike. Prilagodite njegovo velikost, da povsem prekrije stare besede.",
   "en": "The cover hides the original words visually. It does not remove the underlying text or image. Resize it until the old words are fully covered.",
   "es": "La cubierta oculta las palabras originales visualmente. No elimina el texto ni la imagen subyacentes. Ajuste su tamaño hasta cubrir todas las palabras.",
   "de": "Die Abdeckung verdeckt die ursprünglichen Wörter optisch. Sie entfernt den darunterliegenden Text oder das Bild nicht. Ändern Sie ihre Größe, bis alle Wörter verdeckt sind.",

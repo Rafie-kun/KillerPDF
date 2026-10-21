@@ -87,7 +87,7 @@ After building the app and this test project, use
 `--verify-table-export APP_DLL APP_XAML OUTPUT_DIRECTORY --startup-smoke`.
 Use a fresh output directory. The isolated host renders the actual table dialog
 in all 13 themes at 100% and 150% app scaling, checks a 480x360 window at 250%,
-and checks all 19 locales at 640x480 and 150%. It verifies invalid selections,
+and checks all 20 locales at 640x480 and 150%. It verifies invalid selections,
 editable cells, and access to the scrolling content and save controls.
 
 The workflow cases open an owned synthetic PDF through the public window entry,
