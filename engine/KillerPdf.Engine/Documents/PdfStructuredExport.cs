@@ -489,14 +489,42 @@ public static partial class PdfStructuredExport
                     string label = link.Description ?? link.Uri ?? (link.DestinationPageIndex.HasValue
                         ? $"Page {link.DestinationPageIndex.Value + 1}"
                         : link.NamedDestination!);
-                    output.Append("<li><a href=\"").Append(WebUtility.HtmlEncode(target))
-                        .Append("\">").Append(WebUtility.HtmlEncode(label)).Append("</a></li>");
+                    // A javascript:, data: or file: target would be live markup in the HTML, so
+                    // anything outside the web and mail schemes is kept as inert, marked text.
+                    if (link.Uri is not null && !IsSafeHtmlLink(link.Uri))
+                        output.Append("<li><span data-rejected-link=\"").Append(WebUtility.HtmlEncode(link.Uri))
+                            .Append("\">").Append(WebUtility.HtmlEncode(label)).Append("</span></li>");
+                    else
+                        output.Append("<li><a href=\"").Append(WebUtility.HtmlEncode(target))
+                            .Append("\">").Append(WebUtility.HtmlEncode(label)).Append("</a></li>");
                 }
                 output.Append("</ul></nav>");
             }
             output.Append("</section>");
         }
         return output.Append("</body></html>").ToString();
+    }
+
+    /// <summary>
+    /// True for http, https and mailto targets and for relative ones. Browsers drop ASCII
+    /// whitespace and control characters inside a scheme and ignore its case, so the scheme is
+    /// read the same way before it is judged.
+    /// </summary>
+    internal static bool IsSafeHtmlLink(string uri)
+    {
+        var scheme = new StringBuilder();
+        foreach (char character in uri)
+        {
+            if (character <= ' ' || character == '\u007f') continue;
+            if (character == ':')
+            {
+                string name = scheme.ToString().ToLowerInvariant();
+                return name is "http" or "https" or "mailto";
+            }
+            if (character is '/' or '?' or '#') return true;   // no scheme: a relative reference
+            scheme.Append(character);
+        }
+        return true;
     }
 
     private static void AppendHtmlLine(StringBuilder output, PdfExtractedLine line,

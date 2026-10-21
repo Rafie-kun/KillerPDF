@@ -91,6 +91,31 @@ public sealed class PdfStructuredExportTests
         Assert.Contains("\\[draft\\] \\*copy\\*", markdown, StringComparison.Ordinal);
     }
 
+    [Theory]
+    [InlineData("javascript:alert(1)")]
+    [InlineData("JavaScript:alert(1)")]
+    [InlineData(" java\tscript:alert(1)")]
+    [InlineData("data:text/html,<script>alert(1)</script>")]
+    [InlineData("vbscript:msgbox(1)")]
+    [InlineData("file:///C:/Windows/win.ini")]
+    public void HtmlRendersUnsafeLinkTargetsAsInertText(string uri)
+    {
+        // Written by hand: the builder itself refuses these schemes, but a received PDF can carry them.
+        string escaped = uri.Replace("\\", "\\\\").Replace("(", "\\(").Replace(")", "\\)");
+        PdfDocument document = PdfDocument.Open(DocumentBytes("BT ET",
+            "/Annots [<< /Type /Annot /Subtype /Link /Rect [10 20 90 35] /Contents (Click me) "
+            + $"/A << /S /URI /URI ({escaped}) >> >> "
+            + "<< /Type /Annot /Subtype /Link /Rect [10 50 90 65] /Contents (Mail) "
+            + "/A << /S /URI /URI (mailto:help@example.test) >> >>] "));
+
+        string html = PdfStructuredExport.ToHtml(document);
+
+        Assert.DoesNotContain("href=\"" + System.Net.WebUtility.HtmlEncode(uri), html, StringComparison.Ordinal);
+        Assert.Contains("data-rejected-link=", html, StringComparison.Ordinal);
+        Assert.Contains(">Click me</span>", html, StringComparison.Ordinal);
+        Assert.Contains("href=\"mailto:help@example.test\">Mail</a>", html, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void HtmlAndJsonPreserveUriAndLocalPageLinks()
     {
@@ -385,12 +410,12 @@ public sealed class PdfStructuredExportTests
     private static PdfDocument Document(string content)
         => PdfDocument.Open(DocumentBytes(content));
 
-    private static byte[] DocumentBytes(string content)
+    private static byte[] DocumentBytes(string content, string pageEntries = "")
     {
         string stream = $"<< /Length {Encoding.Latin1.GetByteCount(content)} >>\nstream\n{content}\nendstream";
         string[] objects = ["<< /Type /Catalog /Pages 2 0 R >>",
             "<< /Type /Pages /Kids [3 0 R] /Count 1 /MediaBox [0 0 300 400] /Resources << /Font << /F1 4 0 R >> >> >>",
-            "<< /Type /Page /Parent 2 0 R /Contents 5 0 R >>",
+            $"<< /Type /Page /Parent 2 0 R /Contents 5 0 R {pageEntries}>>",
             "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>", stream];
         var pdf = new StringBuilder("%PDF-1.7\n");
         var offsets = new List<int>();
