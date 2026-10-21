@@ -609,6 +609,11 @@ public partial class MainWindow
 
     private void ShowStructuralComparison()
     {
+        // A page-text line still open in either pane (focus parked in the text settings bar keeps
+        // it uncommitted) is written to the backing file first, so the report compares what is on
+        // screen rather than the bytes from before the edit (BF-U010).
+        Viewer.CommitActiveTextBoxExt();
+        ViewerB.CommitActiveTextBoxExt();
         string? left = Viewer.CurrentFilePathExt;
         string? right = ViewerB.CurrentFilePathExt;
         if (!IsSplit || string.IsNullOrWhiteSpace(left) || string.IsNullOrWhiteSpace(right))
