@@ -83,6 +83,20 @@ namespace KillerPDF.Tests
             Assert.Equal(true, word.GetAttributeValue(TextPattern.IsReadOnlyAttribute.Id));
         });
 
+        [Fact]
+        public void LinksAreNamedInvokableHyperlinks() => OnSta(() =>
+        {
+            int followed = 0;
+            var link = new LinkOverlay(() => followed++) { ToolTip = "https://example.test" };
+            AutomationPeer peer = UIElementAutomationPeer.CreatePeerForElement(link);
+
+            Assert.Equal(AutomationControlType.Hyperlink, peer.GetAutomationControlType());
+            Assert.Equal("https://example.test", peer.GetName());
+            Assert.True(peer.IsKeyboardFocusable());
+            Assert.IsAssignableFrom<IInvokeProvider>(peer.GetPattern(PatternInterface.Invoke)).Invoke();
+            Assert.Equal(1, followed);
+        });
+
         private static void OnSta(Action test)
         {
             Exception? failure = null;

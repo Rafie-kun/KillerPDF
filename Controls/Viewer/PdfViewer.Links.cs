@@ -287,7 +287,8 @@ namespace KillerPDF.Controls
                 // Grow the overlay by LinkHitPad on every side so the hand cursor, right-click menu, and the
                 // click bounds-check all share the padded hit area the tiled views use - thin one-line link
                 // strips are easy to hit in single-page view too.
-                var overlay = new Canvas
+                object? target = lnk.Tag;
+                var overlay = new LinkOverlay(() => FollowLinkTarget(target))
                 {
                     Width            = lnk.Cw + LinkHitPad * 2,
                     Height           = lnk.Ch + LinkHitPad * 2,
