@@ -50,6 +50,8 @@ public static class PdfSignatureVerifier
         string? digestAlgorithm = null;
         string? signatureAlgorithm = null;
         IReadOnlyList<string> signaturePolicies = [];
+        bool policyImplied = false;
+        string? policyError = null;
         try
         {
             byte[] content = PdfSignatureReader.GetSignedContent(document, signature);
@@ -76,7 +78,8 @@ public static class PdfSignatureVerifier
             signer ??= signerInfo?.Certificate;
             digestAlgorithm = signerInfo?.DigestAlgorithm.Value;
             signatureAlgorithm = signerInfo?.SignatureAlgorithm.Value;
-            signaturePolicies = signerInfo is null ? [] : SignaturePolicies(signerInfo);
+            if (signerInfo is not null)
+                (signaturePolicies, policyImplied, policyError) = SignaturePolicies(signerInfo);
             if (checkCertificateTrust)
             {
                 if (signer is null)
@@ -135,6 +138,8 @@ public static class PdfSignatureVerifier
                     DigestAlgorithmOid = digestAlgorithm,
                     SignatureAlgorithmOid = signatureAlgorithm,
                     SignaturePolicyOids = signaturePolicies,
+                    SignaturePolicyImplied = policyImplied,
+                    SignaturePolicyError = policyError,
                     SignerSubject = signer.Subject,
                     SignerIssuer = signer.Issuer,
                     SignerSerialNumber = signer.SerialNumber,
@@ -153,6 +158,8 @@ public static class PdfSignatureVerifier
                 DigestAlgorithmOid = digestAlgorithm,
                 SignatureAlgorithmOid = signatureAlgorithm,
                 SignaturePolicyOids = signaturePolicies,
+                SignaturePolicyImplied = policyImplied,
+                SignaturePolicyError = policyError,
                 SignerSubject = signer?.Subject,
                 SignerIssuer = signer?.Issuer,
                 SignerSerialNumber = signer?.SerialNumber,
@@ -194,6 +201,8 @@ public static class PdfSignatureVerifier
                 DigestAlgorithmOid = digestAlgorithm,
                 SignatureAlgorithmOid = signatureAlgorithm,
                 SignaturePolicyOids = signaturePolicies,
+                SignaturePolicyImplied = policyImplied,
+                SignaturePolicyError = policyError,
                 SignerSubject = signer?.Subject,
                 SignerIssuer = signer?.Issuer,
                 SignerSerialNumber = signer?.SerialNumber,
@@ -218,24 +227,45 @@ public static class PdfSignatureVerifier
             certificate.NotBefore, certificate.NotAfter, Array.AsReadOnly(status));
     }
 
-    private static System.Collections.ObjectModel.ReadOnlyCollection<string> SignaturePolicies(SignerInfo signer)
+    // SignaturePolicyIdentifier is either a SignaturePolicyId sequence or NULL for an implied
+    // policy (RFC 5126 5.8.1). The attribute is optional metadata, so a value that cannot be read
+    // is reported beside the result instead of failing the integrity check.
+    private static (IReadOnlyList<string> Policies, bool Implied, string? Error) SignaturePolicies(SignerInfo signer)
     {
         const string signaturePolicyAttribute = "1.2.840.113549.1.9.16.2.15";
         var result = new List<string>();
+        bool implied = false;
+        string? error = null;
         foreach (CryptographicAttributeObject attribute in signer.SignedAttributes)
         {
             if (attribute.Oid?.Value != signaturePolicyAttribute) continue;
             foreach (AsnEncodedData value in attribute.Values)
             {
-                var reader = new AsnReader(value.RawData, AsnEncodingRules.DER);
-                AsnReader sequence = reader.ReadSequence();
-                string policy = sequence.ReadObjectIdentifier();
-                if (reader.HasData || string.IsNullOrWhiteSpace(policy))
-                    throw new CryptographicException(
-                        "The CAdES signature policy attribute is malformed.");
-                result.Add(policy);
+                try
+                {
+                    var reader = new AsnReader(value.RawData, AsnEncodingRules.DER);
+                    if (reader.PeekTag().HasSameClassAndValue(Asn1Tag.Null))
+                    {
+                        reader.ReadNull();
+                        implied = true;
+                    }
+                    else
+                    {
+                        AsnReader sequence = reader.ReadSequence();
+                        string policy = sequence.ReadObjectIdentifier();
+                        if (string.IsNullOrWhiteSpace(policy))
+                            throw new AsnContentException("The signature policy identifier is empty.");
+                        result.Add(policy);
+                    }
+                    if (reader.HasData)
+                        throw new AsnContentException("The signature policy value has trailing data.");
+                }
+                catch (Exception exception) when (exception is AsnContentException or CryptographicException)
+                {
+                    error ??= "The CAdES signature policy attribute is malformed: " + exception.Message;
+                }
             }
         }
-        return Array.AsReadOnly(result.Distinct(StringComparer.Ordinal).ToArray());
+        return (Array.AsReadOnly(result.Distinct(StringComparer.Ordinal).ToArray()), implied, error);
     }
 }

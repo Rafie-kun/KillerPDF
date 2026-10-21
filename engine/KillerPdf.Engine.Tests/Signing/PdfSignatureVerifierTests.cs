@@ -129,6 +129,73 @@ public sealed class PdfSignatureVerifierTests
     }
 
     [Fact]
+    public void ImpliedOrMalformedPolicyIsReportedWithoutLosingIntegrity()
+    {
+        using RSA key = RSA.Create(2048);
+        using X509Certificate2 certificate = new CertificateRequest("CN=KillerPDF Policy Shapes", key,
+            HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1).CreateSelfSigned(
+                DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1));
+        var nullWriter = new AsnWriter(AsnEncodingRules.DER);
+        nullWriter.WriteNull();
+        var badWriter = new AsnWriter(AsnEncodingRules.DER);
+        badWriter.PushSequence();
+        badWriter.WriteInteger(7);   // an integer where the policy OID belongs
+        badWriter.PopSequence();
+
+        PdfSignatureVerificationResult implied = VerifyWithAttributes(certificate, nullWriter.Encode(), null).Verification;
+        PdfSignatureVerificationResult malformed = VerifyWithAttributes(certificate, badWriter.Encode(), null).Verification;
+
+        Assert.True(implied.IsCryptographicallyValid);
+        Assert.True(implied.SignaturePolicyImplied);
+        Assert.Null(implied.SignaturePolicyError);
+        Assert.True(malformed.IsCryptographicallyValid);
+        Assert.NotNull(malformed.SignaturePolicyError);
+        Assert.Empty(malformed.SignaturePolicyOids);
+    }
+
+    [Fact]
+    public void TimestampAttributeWithoutAValidTokenIsNotBaselineT()
+    {
+        using RSA key = RSA.Create(2048);
+        using X509Certificate2 certificate = new CertificateRequest("CN=KillerPDF Fake Timestamp", key,
+            HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1).CreateSelfSigned(
+                DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1));
+        var nullWriter = new AsnWriter(AsnEncodingRules.DER);
+        nullWriter.WriteNull();
+
+        PdfSignatureInspectionEntry entry = VerifyWithAttributes(certificate, null, nullWriter.Encode());
+
+        Assert.True(entry.Verification.IsCryptographicallyValid);
+        Assert.Equal(PdfPadesProfile.BaselineB, entry.PadesProfile);
+    }
+
+    // Signs a blank page with raw signed-policy and unsigned-timestamp attribute values.
+    private static PdfSignatureInspectionEntry VerifyWithAttributes(X509Certificate2 certificate,
+        byte[]? policyValue, byte[]? timestampValue)
+    {
+        byte[] signed = PdfDetachedSignatureWriter.Sign(
+            PdfDocument.Open(new PdfDocumentBuilder().AddBlankPage().Build()),
+            content =>
+            {
+                var cms = new SignedCms(new ContentInfo(content.ToArray()), detached: true);
+                var signer = new CmsSigner(certificate)
+                {
+                    IncludeOption = X509IncludeOption.EndCertOnly,
+                    DigestAlgorithm = new Oid("2.16.840.1.101.3.4.2.1")
+                };
+                if (policyValue is not null)
+                    signer.SignedAttributes.Add(new AsnEncodedData("1.2.840.113549.1.9.16.2.15", policyValue));
+                cms.ComputeSignature(signer, silent: true);
+                if (timestampValue is not null)
+                    cms.SignerInfos[0].AddUnsignedAttribute(
+                        new AsnEncodedData(PdfTimestampAuthority.SignatureTimestampTokenOid, timestampValue));
+                return cms.Encode();
+            },
+            new PdfSignatureOptions { ReservedSignatureSize = 4_096 });
+        return Assert.Single(PdfSignatureInspection.Inspect(PdfDocument.Open(signed)).Entries);
+    }
+
+    [Fact]
     public void VerifyTrust_SeparatesValidSignatureFromUntrustedCertificate()
     {
         using RSA key = RSA.Create(2048);

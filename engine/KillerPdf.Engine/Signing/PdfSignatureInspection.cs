@@ -181,7 +181,17 @@ public static class PdfSignatureInspection
     {
         ArgumentNullException.ThrowIfNull(document);
         PdfSignatureInspectionEntry[] entries = [.. PdfSignatureReader.Read(document)
-            .Select(signature => new PdfSignatureInspectionEntry(
+            .Select(signature => InspectOne(document, signature, trustOptions))];
+        return new PdfSignatureInspectionReport(Array.AsReadOnly(entries));
+    }
+
+    // One unreadable signature must not hide the others, so each entry fails on its own.
+    private static PdfSignatureInspectionEntry InspectOne(
+        PdfDocument document, PdfSignatureInfo signature, PdfSignatureTrustOptions? trustOptions)
+    {
+        try
+        {
+            return new PdfSignatureInspectionEntry(
                 signature,
                 trustOptions is null
                     ? PdfSignatureVerifier.VerifyIntegrity(document, signature)
@@ -189,7 +199,18 @@ public static class PdfSignatureInspection
                 signature.HasValidByteRange
                     ? PdfSignedRevisionAnalyzer.Analyze(document, signature)
                     : null,
-                PdfPadesProfileInspector.Inspect(document, signature)))];
-        return new PdfSignatureInspectionReport(Array.AsReadOnly(entries));
+                PdfPadesProfileInspector.Inspect(document, signature));
+        }
+        catch (Exception exception) when (exception is FormatException or InvalidOperationException
+            or NotSupportedException or System.Security.Cryptography.CryptographicException
+            or System.Formats.Asn1.AsnContentException or ArgumentException)
+        {
+            return new PdfSignatureInspectionEntry(signature, new PdfSignatureVerificationResult
+            {
+                IsStructurallyValid = false,
+                CertificateTrustWasChecked = trustOptions is not null,
+                Error = "The signature could not be inspected: " + exception.Message
+            }, null, PdfPadesProfile.None);
+        }
     }
 }

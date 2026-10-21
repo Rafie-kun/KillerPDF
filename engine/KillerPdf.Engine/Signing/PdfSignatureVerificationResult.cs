@@ -58,6 +58,13 @@ public sealed record PdfSignatureVerificationResult
     public string? SignatureAlgorithmOid { get; init; }
     /// <summary>Gets CAdES signature policy identifiers declared by the signer.</summary>
     public IReadOnlyList<string> SignaturePolicyOids { get; init; } = [];
+    /// <summary>Gets whether the signer declared an implied signature policy (a NULL policy value).</summary>
+    public bool SignaturePolicyImplied { get; init; }
+    /// <summary>
+    /// Gets why the signature policy attribute could not be read, or null. It is optional
+    /// metadata, so a bad one is reported here and never changes the integrity result.
+    /// </summary>
+    public string? SignaturePolicyError { get; init; }
     /// <summary>Gets the signing certificate subject.</summary>
     public string? SignerSubject { get; init; }
     /// <summary>Gets the signing certificate issuer.</summary>
