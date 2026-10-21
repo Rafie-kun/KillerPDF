@@ -1161,6 +1161,8 @@ namespace KillerPDF
                     WriteMeasurementsToDocument(tempEdited);
                     PdfEngineIntegration.ApplyPageRotations(tempEdited, finalRotations);
                     PdfEngineIntegration.ReplaceFileAtomically(tempEdited, saveTarget);
+                    // Signing reads these bytes, since the working copy lacks what the save burned in.
+                    _publishedFile = Services.PublishedFileStamp.Capture(saveTarget);
                     _doc.Close();
                     try
                     {
@@ -1191,6 +1193,8 @@ namespace KillerPDF
                     WriteMeasurementsToDocument(tempSaved);
                     PdfEngineIntegration.ApplyPageRotations(tempSaved, finalRotations);
                     PdfEngineIntegration.ReplaceFileAtomically(tempSaved, saveTarget);
+                    // Signing reads these bytes, since the working copy lacks what the save burned in.
+                    _publishedFile = Services.PublishedFileStamp.Capture(saveTarget);
                 }
 
                 MarkDirty(false);
@@ -1299,6 +1303,8 @@ namespace KillerPDF
                     WriteMeasurementsToDocument(tempEdited);
                     PdfEngineIntegration.ApplyPageRotations(tempEdited, finalRotations);
                     PdfEngineIntegration.ReplaceFileAtomically(tempEdited, dlg.FileName);
+                    // Signing reads these bytes, since the working copy lacks what the save burned in.
+                    _publishedFile = Services.PublishedFileStamp.Capture(dlg.FileName);
                     _doc.Close();
                     try
                     {
@@ -1340,6 +1346,8 @@ namespace KillerPDF
                     WriteMeasurementsToDocument(tempSaved);
                     PdfEngineIntegration.ApplyPageRotations(tempSaved, finalRotations);
                     PdfEngineIntegration.ReplaceFileAtomically(tempSaved, dlg.FileName);
+                    // Signing reads these bytes, since the working copy lacks what the save burned in.
+                    _publishedFile = Services.PublishedFileStamp.Capture(dlg.FileName);
                     _originalFile = dlg.FileName;
                     FileNameLabel.Text = System.IO.Path.GetFileName(dlg.FileName);
                     MarkDirty(false);

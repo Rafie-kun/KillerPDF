@@ -298,6 +298,7 @@ namespace KillerPDF.Controls
         internal bool IsDirtyRef { get => _isDirty; set => _isDirty = value; }
         internal string? OriginalFileRef { get => _originalFile; set => _originalFile = value; }
         internal bool OpenedFromProtectedRef { get => _openedFromProtected; set => _openedFromProtected = value; }
+        internal Services.PublishedFileStamp? PublishedFileRef { get => _publishedFile; set => _publishedFile = value; }
         internal bool AsyncOpenPendingRef { get => _asyncOpenPending; set => _asyncOpenPending = value; }
         internal Stack<int> NavBackRef => _navBack;
         internal Stack<int> NavForwardRef => _navForward;

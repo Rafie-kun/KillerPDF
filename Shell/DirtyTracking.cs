@@ -67,13 +67,17 @@ namespace KillerPDF
             string? snapshot = null;
             try
             {
-                if (_isDirty)
+                // After a save the working copy no longer holds what is on screen (burned markup,
+                // form values, rotations), so a clean document signs the bytes the save published.
+                Services.PublishedFileStamp? published = _publishedFile is { } stamp
+                    && string.Equals(stamp.Path, _originalFile, StringComparison.OrdinalIgnoreCase) ? stamp : null;
+                if (_isDirty || (published is not null && !published.Matches()))
                     snapshot = WriteSavedCopyToTemp();
                 else
                 {
                     // Preserve existing signatures on an unchanged document without rewriting it.
                     snapshot = App.MakeTempFile("signsource");
-                    File.Copy(_currentFile!, snapshot, overwrite: true);
+                    File.Copy(published?.Path ?? _currentFile!, snapshot, overwrite: true);
                 }
                 new SignDocumentDialog(this, snapshot, suggestedSource).ShowDialog();
             }

@@ -127,6 +127,7 @@ namespace KillerPDF.Controls
         // ══ What Tabs.cs reaches for, now that it lives here ════════════════════════════════
         private string? _originalFile;
         private bool _openedFromProtected;
+        private Services.PublishedFileStamp? _publishedFile;
         private bool _asyncOpenPending;
         // This pane's own loader token, NOT the window's - see ThumbCts in PdfViewer.TabsApi.cs.
         private System.Threading.CancellationTokenSource? _thumbCts { get => ThumbCts; set => ThumbCts = value; }
