@@ -8,19 +8,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 1.9.0 "Overkill" replaces PDFium with KillerPDF's own engine and expands document editing, conversion, security and automation.
 
-### Document safety and reliability
-
-- Saving, flattening, extraction, printing and current-document macros retain pending edits and page rotations. Signing, flattening and export preserve existing outputs when writing fails or is canceled. Failed replacements keep complete recovery copies. Reduce File Size preserves an existing output if a replacement cannot be staged; Save As and Extract Pages enforce the PDF extension (#433, #450).
-- Fixed crashes when switching themes after styles load, restoring a maximized window, or selecting mirrored and upside-down text. Search highlights, redaction marks and cropping on that text also use valid bounds (#437, #452, #453).
-- Closing a document or the app offers Save, Don't Save or Cancel. Failed or canceled saves keep the document open, and Esc no longer closes the app.
-- Redaction removes covered vectors, preserves marks through page edits and undo, and keeps macro approvals bound to the original document. Command-line and macro runs refuse output when rasterization still needs approval (#341, #343).
-- Background exports, macros, form tools, OCR, repairs, transforms and printing stay bound to their source document or stop when it changes. Newer operations retain their cancel controls, and OCR with no recognized words can still save a searchable PDF (#329, #330, #342, #343, #436).
-- Signing captures current edits without first saving the open PDF. Signature-field choices honor cancellation and document changes, and verification uses embedded intermediate certificates without trusting them as roots.
-- Splitting protects the source and requires explicit overwrite permission; Bates stamping rejects colliding outputs. Batch CSV reports neutralize filenames that spreadsheets could interpret as formulas.
-- Legacy Office conversion disables VBA macros, and timeouts preserve existing Office documents and visible sessions. External PDF and OCR-model downloads stop when response bodies exceed their timeout.
-- Installation refuses to replace folders containing unrelated or unverified files. Updates preserve custom install directories; failed portable updates retain complete executable copies and a recovery report. Forwarded opens stay within their Windows account and session, and startup cleanup preserves active temporary PDFs.
-- Incomplete scans report errors and keep recovered pages, including PDF-creation failures. Parallel PNG export no longer loses pages, and invalid OCR models retain the Tesseract fallback (#73).
-
 ### Major features
 
 - **KillerPDF.Engine:** Replaced PDFium, Docnet.Core and PdfPig across rendering, search, selection, copying, text editing, printing and export. The engine adds text and image extraction, OCR, layout analysis, and support for encrypted documents, forms, transparency, JPEG 2000, JBIG2 and fax images.
@@ -34,6 +21,22 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - **Guided tasks, macros and data merge:** Prepare email copies, clean scans, remove sensitive content or create fillable forms with review steps and separate output. Save compatible tasks as macros, run selected files or watched folders, and pause or retry folder jobs. Workflows support editable resize and color conversion, separate exports, and CSV, JSON or XLSX data merge with mappings, conditions and images (#343, #347, #350, #351, #352).
 - **Office conversion and scanning:** Convert DOCX and XLSX directly to PDF with fonts, tables, images and page setup; legacy DOC/XLS conversion uses installed Word or Excel. Scan pages through TWAIN into a new PDF (#73, #74).
 - **Accessibility, repair and optimization:** Review language and description problems with page previews, guided fixes, rechecking and Undo. Added preflight corrections, sanitization, resource cleanup, print-production and structural reports. Reduce File Size saves optimized copies (#333, #334, #335, #433).
+
+### Document safety and reliability
+
+- Saving, flattening, extraction, printing and current-document macros retain pending edits and page rotations. Signing, flattening and export preserve existing outputs when writing fails or is canceled. Failed replacements keep complete recovery copies. Reduce File Size preserves an existing output if a replacement cannot be staged; Save As and Extract Pages enforce the PDF extension (#433, #450).
+- Fixed crashes when switching themes after styles load, restoring a maximized window, or selecting mirrored and upside-down text. Search highlights, redaction marks and cropping on that text also use valid bounds (#437, #452, #453).
+- Closing a document or the app offers Save, Don't Save or Cancel. Failed or canceled saves keep the document open, and Esc no longer closes the app.
+- Redaction removes covered vectors, preserves marks through page edits and undo, and keeps macro approvals bound to the original document. Command-line and macro runs refuse output when rasterization still needs approval (#341, #343).
+- Background exports, macros, form tools, OCR, repairs, transforms and printing stay bound to their source document or stop when it changes. Newer operations retain their cancel controls, and OCR with no recognized words can still save a searchable PDF (#329, #330, #342, #343, #436).
+- Signing captures current edits without first saving the open PDF. Signature-field choices honor cancellation and document changes, and verification uses embedded intermediate certificates without trusting them as roots.
+- Splitting protects the source and requires explicit overwrite permission; Bates stamping rejects colliding outputs. Batch CSV reports neutralize filenames that spreadsheets could interpret as formulas.
+- Legacy Office conversion disables VBA macros, and timeouts preserve existing Office documents and visible sessions. External PDF and OCR-model downloads stop when response bodies exceed their timeout.
+- Installation refuses to replace folders containing unrelated or unverified files. Updates preserve custom install directories; failed portable updates retain complete executable copies and a recovery report. Forwarded opens stay within their Windows account and session, and startup cleanup preserves active temporary PDFs.
+- Incomplete scans report errors and keep recovered pages, including PDF-creation failures. Parallel PNG export no longer loses pages, and invalid OCR models retain the Tesseract fallback (#73).
+- Redaction refuses output when it cannot prove covered form values or undecodable data are gone. Saving over a file another tab or program changed asks first, browser downloads ask where to save, and background opens stay in their own tab.
+- Signing uses the saved document as shown, Save As keeps an unchanged signed copy valid, and Sign and Protect ask before replacing files. Timestamps are only reported when verified, and the saved-signature library survives write failures.
+- Translation test files load as text only, HTML export keeps unsafe link schemes inert, and command-line outputs and release publishing write nothing partial.
 
 ### Rendering, performance and compatibility
 
@@ -67,6 +70,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Windows contrast themes use system colors without grain or shadows. Improved text, selection and accent readability across themes, including selected field presets (#340).
 - Screen readers receive useful names for icon buttons, thumbnails, scrollbar controls, file-picker rows and shortcut options. Decorative icons, hidden links and empty elements stay out of the accessibility tree.
 - Keyboard focus enters and stays within Shortcuts and About overlays, returns on close, and remains visible. Option groups use one Tab stop with arrow-key navigation.
+- Screen readers can read PDF text page by page, following the tag order in tagged documents, and reach page links. Form checkboxes, radio buttons, password fields, length limits and field descriptions work from the keyboard and with assistive technology, as do the stamp and palette color controls.
 - Windows and split panes stay within the current monitor at small sizes and high app scaling. Text remains sharp away from 100%, and the wordmark mouse wheel adjusts app scale.
 - Added optional File Explorer and Outlook PDF previews to installed copies, with scrolling, zoom and read-only opening. Portable copies register nothing (#410).
 - Silent installation supports per-user installs without elevation, includes the .NET runtime in the Store installer, detects Arm64 runtimes, reports useful error codes and rejects concurrent installs.
@@ -81,7 +85,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Improved toolbar overflow, focus rings, buttons and theme contrast. Table export uses a compact dialog with aligned actions. About opens above dialogs with compact options, longer forms keep their actions visible, and dialog messages use normal body text, including multiline warnings and confirmations.
 - Unified message and setup dialogs, separated installer translations by language, completed missing application and installer translations, and made the full installer version readable (#409, #440).
 - Added Slovenian to the app, installer, PDF previews, OCR language selection, website and engine guides.
-- Refined film grain, shadows, accent states, checkbox ticks, radio alignment, crash-report controls and file-picker styling, while preserving classic 98SE controls. Black grain preserves deep blacks and bright highlights. Interface fonts resolve from the embedded files, including menus, tooltips and shortcuts.
+- Refined film grain, shadows, accent states, checkbox ticks, radio alignment, crash-report controls and file-picker styling, while preserving classic 98SE controls. Grain fades midtones across app and website themes without dimming bright highlights. Interface fonts resolve from the embedded files, including menus, tooltips and shortcuts.
 - Simplified website navigation at narrow widths, localized navigation labels, improved mobile layout and contrast, refreshed branding and Corpus layout, and added Store and related-app links. Updated Help, technical documentation, translations, release facts and application metadata.
 
 ## [1.8.91] - 2026-10-14
