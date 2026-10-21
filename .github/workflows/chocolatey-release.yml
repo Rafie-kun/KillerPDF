@@ -12,15 +12,30 @@ on:
 jobs:
   push:
     runs-on: windows-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
+
+      # The tag reaches the script as data through the environment, never spliced into the
+      # script text, and must be a plain stable-release tag before anything uses it (BF-A010).
+      - name: Validate release tag
+        shell: pwsh
+        env:
+          RELEASE_TAG: ${{ github.event.inputs.tag || github.event.release.tag_name }}
+        run: |
+          # \z, not $: in .NET a $ also matches before a trailing newline.
+          if ($env:RELEASE_TAG -cnotmatch '^v\d{1,4}\.\d{1,4}\.\d{1,6}\z') {
+            throw "The release tag must look like v1.9.0."
+          }
+          "RELEASE_TAG=$env:RELEASE_TAG" >> $env:GITHUB_ENV
 
       - name: Build and push Chocolatey package
         shell: pwsh
         env:
           CHOCO_API_KEY: ${{ secrets.CHOCOLATEY_API_KEY }}
         run: |
-          $releaseTag = if ("${{ github.event_name }}" -eq "workflow_dispatch") { "${{ github.event.inputs.tag }}" } else { "${{ github.event.release.tag_name }}" }
+          $releaseTag = $env:RELEASE_TAG
           $version = $releaseTag.TrimStart('v')
           $exeUrl  = "https://github.com/SteveTheKiller/KillerPDF/releases/download/$releaseTag/KillerPDF.exe"
 
