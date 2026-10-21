@@ -70,7 +70,7 @@ namespace KillerPDF
         /// <summary>Primary headings: Lacquer with Killer Sans UI behind it (ThemeManager; Killer Sans on 98SE).</summary>
         public static FontFamily HeadingFont => Res("HeadingFont", LacquerHeadingStack);
         /// <summary>Killer Sans UI (Killer Sans scaled to Segoe UI proportions) with the Segoe fallback stack.</summary>
-        public static readonly FontFamily KillerSansUiStack = new(new Uri("pack://application:,,,/"), "./Fonts/#Killer Sans UI, Segoe UI, Microsoft JhengHei UI, Nirmala UI");
+        public static readonly FontFamily KillerSansUiStack = new(new Uri($"pack://application:,,,/{typeof(UiKit).Assembly.GetName().Name};component/"), "./Fonts/#Killer Sans UI, Segoe UI, Microsoft JhengHei UI, Nirmala UI");
         public static readonly FontFamily LacquerHeadingStack = new(new Uri("pack://application:,,,/"), "./Fonts/#Lacquer, ./Fonts/#Killer Sans UI, Segoe UI, Microsoft JhengHei UI, Nirmala UI");
         private static readonly FontFamily _uiFallback   = new("Segoe UI, Microsoft JhengHei UI, Nirmala UI");
         private static readonly FontFamily _monoFallback = new("Consolas");
