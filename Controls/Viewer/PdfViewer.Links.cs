@@ -356,7 +356,32 @@ namespace KillerPDF.Controls
         /// </summary>
         internal void AddSecondaryPageLinks(int pageIndex, int bitmapW, int bitmapH)
         {
-            _continuousLinks[pageIndex] = GetPageLinks(pageIndex, bitmapW, bitmapH);
+            var links = GetPageLinks(pageIndex, bitmapW, bitmapH);
+            _continuousLinks[pageIndex] = links;
+
+            // Keyboard and screen-reader access (BF-U001). These overlays ignore the mouse, so
+            // clicks keep resolving through the bounds-test above, but Tab reaches each link,
+            // Enter follows it, and UI Automation sees a named Hyperlink.
+            // Only a page's own live tile; the primary page already gets clickable overlays.
+            if (VisibleCanvasForPage(pageIndex) is not { } canvas || ReferenceEquals(canvas, _annotationCanvas)) return;
+            for (int i = canvas.Children.Count - 1; i >= 0; i--)
+                if (canvas.Children[i] is LinkOverlay { IsHitTestVisible: false }) canvas.Children.RemoveAt(i);
+            foreach (var lnk in links)
+            {
+                object? target = lnk.Tag;
+                var overlay = new LinkOverlay(() => FollowLinkTarget(target))
+                {
+                    Width            = lnk.Cw,
+                    Height           = lnk.Ch,
+                    Background       = Brushes.Transparent,
+                    ToolTip          = lnk.Tip,
+                    Tag              = new LinkAnnotInfo(lnk.Tag, pageIndex, lnk.AnnotIndex),
+                    IsHitTestVisible = false,
+                };
+                Canvas.SetLeft(overlay, lnk.Cx);
+                Canvas.SetTop(overlay, lnk.Cy);
+                canvas.Children.Add(overlay);
+            }
         }
 
     }
