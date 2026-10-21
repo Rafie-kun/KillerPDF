@@ -323,6 +323,9 @@ namespace KillerPDF
 
             string output = _outputBox.Text?.Trim() ?? "";
             if (string.IsNullOrEmpty(output)) { Warn(L("Str_Sign_NeedOutput")); return; }
+            // The default -signed.pdf name repeats, and a typed path skips Browse's prompt, so the
+            // final command asks before it replaces anything (BF-A006).
+            if (!Services.OutputOverwrite.Confirm(this, output, out Services.FileRevision? approved)) return;
 
             X509Certificate2 cert;
             try { cert = provider.GetCertificate(); }
@@ -358,6 +361,7 @@ namespace KillerPDF
                 return;
             }
             // A timestamp waits on the server for up to 30 seconds, so show that work is underway.
+            if (!Services.OutputOverwrite.StillAsApproved(this, output, approved)) return;
             Mouse.OverrideCursor = Cursors.Wait;
             try
             {

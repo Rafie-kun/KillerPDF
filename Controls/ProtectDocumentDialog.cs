@@ -286,6 +286,7 @@ namespace KillerPDF
             { Warn(L("Str_Protect_NeedOutput")); return; }
             if (SamePath(fullOutput, _displayPath) || SamePath(fullOutput, _sourcePdf))
             { Warn(L("Str_Protect_SameFile")); return; }
+            if (!Services.OutputOverwrite.Confirm(this, fullOutput, out Services.FileRevision? approved)) return;
 
             bool signed;
             try { signed = PdfEngineIntegration.HasSignedSignatures(_sourcePdf); }
@@ -297,6 +298,7 @@ namespace KillerPDF
             bool print = _allowPrint.IsChecked == true;
             bool copy = _allowCopy.IsChecked == true;
             bool edit = _allowEdit.IsChecked == true;
+            if (!Services.OutputOverwrite.StillAsApproved(this, fullOutput, approved)) return;
             Mouse.OverrideCursor = Cursors.Wait;
             try
             {
