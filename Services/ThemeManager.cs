@@ -421,7 +421,8 @@ namespace KillerPDF.Services
             Alias("BgRecentPanel", "SurfaceBrush");
             Alias("BgFlyout", "MenuBackgroundBrush");
             Alias("MenuSeparatorBrush", "CardBorderBrush");
-            Alias("AnnotationBarBrush", "BgFlyout");
+            // Bars sitting on the document take the menu tier, like the active tab above them.
+            Alias("AnnotationBarBrush", "MenuBackgroundBrush");
             Alias("AnnotationBarBorderBrush", "PaneBorderBrush");
             // Match KillerNotes: the inner About grouping panel uses the content pane color.
             Alias("AboutPanelBrush", "PaneBrush");
@@ -436,9 +437,11 @@ namespace KillerPDF.Services
             Alias("SliderTrack", "InputBorderBrush");
             Alias("RadioAccent", "PrimaryBrush");
             Alias("BgCanvas", "PaneBrush");
-            Alias("ContentPaneBrush", "BgCanvas");
-            Alias("FocusedPaneBrush", "BgCanvas");
-            Alias("TabActiveBrush", "BgCanvas");
+            // Family surface rule: the document pane is the pane color, and the active tab and the
+            // bars over it are the darker menu tier. BgCanvas stays for dialogs and previews.
+            Alias("ContentPaneBrush", "PaneBrush");
+            Alias("FocusedPaneBrush", "MenuBackgroundBrush");
+            Alias("TabActiveBrush", "MenuBackgroundBrush");
             // Keep a solid fallback for controls that cannot use the full-window gradient.
             if (!d.Contains("SolidBackgroundBrush"))
             {

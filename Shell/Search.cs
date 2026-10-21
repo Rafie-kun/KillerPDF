@@ -274,7 +274,7 @@ namespace KillerPDF
                     Margin = new Thickness(0),
                     Effect = new System.Windows.Media.Effects.DropShadowEffect { Color = Colors.Black, BlurRadius = 16, ShadowDepth = 3, Direction = 270, Opacity = 0.55 }
                 };
-                _searchBar.SetResourceReference(Border.BackgroundProperty, "BgFlyout");
+                _searchBar.SetResourceReference(Border.BackgroundProperty, "MenuBackgroundBrush");
                 // PaneBorderBrush, the same key the annotate settings bars use (AnnotationBars.cs).
                 // The find bar is the same class of floating tool surface, so it takes the same
                 // edge; on MenuBorderBrush the two sat side by side drawing different borders.

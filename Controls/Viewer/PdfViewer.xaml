@@ -16,8 +16,8 @@
         </Grid.RowDefinitions>
 
         <!-- ZIndex above the card: the card's -1 top margin tucks its top border into this band's
-             row, and the active tab - which carries the pane's own BgCanvas - covers that pixel so
-             the two read as one surface. -->
+             row, and the active tab (TabActiveBrush, the menu tier) covers that pixel so the tab
+             sits on the card without a seam. -->
         <Border Grid.Row="0" x:Name="TabStripBorder" Panel.ZIndex="10"
                 Height="{DynamicResource TabBandHeight}"
                 Background="Transparent" Visibility="Collapsed"
@@ -219,9 +219,9 @@
                                             <Setter TargetName="tabBd" Property="Margin" Value="{DynamicResource TabInactiveLastMargin}"/>
                                         </MultiDataTrigger>
                                         <DataTrigger Binding="{Binding IsActive}" Value="True">
-                                            <!-- Front tab takes the card's own canvas color, so the
-                                                 tab and the card read as one surface. -->
-                                            <Setter TargetName="tabBd" Property="Background" Value="{DynamicResource BgCanvas}"/>
+                                            <!-- Front tab takes the menu tier, the same as the bars
+                                                 over the document, above the lighter pane. -->
+                                            <Setter TargetName="tabBd" Property="Background" Value="{DynamicResource TabActiveBrush}"/>
                                             <Setter TargetName="tabGrain" Property="Opacity" Value="{DynamicResource GrainOpacity}"/>
                                             <Setter TargetName="tabBd" Property="BorderThickness" Value="{DynamicResource TabStripeThickness}"/>
                                             <!-- Reaches the foot of the band so its fill breaks the
@@ -310,8 +310,8 @@
                                             <Setter TargetName="tabBd" Property="BorderBrush" Value="{DynamicResource TabActiveRingBrush}"/>
                                         </DataTrigger>
                                         <!-- Pane shading is the 98SE focus cue only. Keeping it behind an
-                                             explicit theme flag preserves every modern palette's original
-                                             active-tab BgCanvas fill. -->
+                                             explicit theme flag preserves every modern palette's
+                                             active-tab TabActiveBrush fill. -->
                                         <MultiDataTrigger>
                                             <MultiDataTrigger.Conditions>
                                                 <Condition Binding="{Binding UseRetroTabChrome}" Value="True"/>

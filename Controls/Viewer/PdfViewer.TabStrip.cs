@@ -399,9 +399,9 @@ namespace KillerPDF.Controls
             }
 
             PaneBorder?.SetResourceReference(Border.BackgroundProperty,
-                    retro ? (paneActive ? "FocusedPaneBrush" : "TabInactiveBrush") : "BgCanvas");
+                    retro ? (paneActive ? "FocusedPaneBrush" : "TabInactiveBrush") : "ContentPaneBrush");
             PaneShadow?.SetResourceReference(Border.BackgroundProperty,
-                    retro ? (paneActive ? "FocusedPaneBrush" : "TabInactiveBrush") : "BgCanvas");
+                    retro ? (paneActive ? "FocusedPaneBrush" : "TabInactiveBrush") : "ContentPaneBrush");
 
         }
 
