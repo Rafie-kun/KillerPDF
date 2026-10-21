@@ -180,7 +180,7 @@ public static class PdfAccessibilityRepair
             .SingleOrDefault(item => item.AnnotationIndex == annotationIndex);
         return new PdfAccessibilityLinkRepair(pageIndex, annotationIndex,
             link?.ObjectNumber, description, before,
-            link is not null && string.IsNullOrWhiteSpace(link.Description));
+            link?.ObjectNumber is not null && string.IsNullOrWhiteSpace(link.Description));
     }
 
     /// <summary>Applies a previewed link description and verifies the saved result.</summary>
@@ -192,7 +192,7 @@ public static class PdfAccessibilityRepair
         PdfAccessibilityReport before = PdfAccessibilityInspector.Inspect(document);
         PdfLinkInfo? link = PdfLinkReader.ReadPage(document, repair.PageIndex)
             .SingleOrDefault(item => item.AnnotationIndex == repair.AnnotationIndex);
-        if (!repair.WillChange || link is null
+        if (!repair.WillChange || link?.ObjectNumber is null
             || !string.IsNullOrWhiteSpace(link.Description)
             || link.ObjectNumber != repair.ObjectNumber)
             throw new InvalidOperationException(
@@ -271,7 +271,7 @@ public static class PdfAccessibilityRepair
         PdfAccessibilityReport before = PdfAccessibilityInspector.Inspect(document);
         bool missing = before.Findings.Any(finding =>
             finding.Code == PdfAccessibilityFindingCode.MissingFigureAlternateDescription
-            && finding.ObjectNumber == objectNumber);
+            && finding.ObjectNumber == objectNumber && finding.ObjectGeneration == 0);
         return new PdfAccessibilityFigureRepair(
             objectNumber, alternateDescription, before, missing);
     }
@@ -285,7 +285,7 @@ public static class PdfAccessibilityRepair
         PdfAccessibilityReport before = PdfAccessibilityInspector.Inspect(document);
         bool missing = before.Findings.Any(finding =>
             finding.Code == PdfAccessibilityFindingCode.MissingFigureAlternateDescription
-            && finding.ObjectNumber == repair.ObjectNumber);
+            && finding.ObjectNumber == repair.ObjectNumber && finding.ObjectGeneration == 0);
         if (!repair.WillChange || !missing)
             throw new InvalidOperationException(
                 "The document does not have the previewed missing figure description.");

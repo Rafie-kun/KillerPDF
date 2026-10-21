@@ -31,6 +31,8 @@ internal static class Program
     {
         try
         {
+            if (args.Length == 5 && args[0] == "--verify-accessibility-review" && args[4] == "--startup-smoke")
+                return TableExportSmoke.Run(Path.GetFullPath(args[1]), Path.GetFullPath(args[2]), Path.GetFullPath(args[3]), accessibilityReview: true);
             if (args.Length == 5 && args[0] == "--verify-paragraph-edit" && args[4] == "--startup-smoke")
                 return TableExportSmoke.Run(Path.GetFullPath(args[1]), Path.GetFullPath(args[2]), Path.GetFullPath(args[3]), paragraphEdit: true);
             if (args.Length == 5 && args[0] == "--verify-sidebar-actions" && args[4] == "--startup-smoke")

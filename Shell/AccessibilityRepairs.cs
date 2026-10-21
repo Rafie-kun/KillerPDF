@@ -8,13 +8,7 @@ namespace KillerPDF;
 
 public partial class MainWindow
 {
-    private void OpenAccessibilityTools() => OpenExchangeCommands("Str_DocumentTools_Accessibility",
-        ("Str_DocumentTools_Accessibility", () => ShowDocumentReport(Loc("Str_DocumentTools_Accessibility"),
-            path => Services.PdfEngineIntegration.InspectAccessibility(path).ToText())),
-        ("Str_Repair_Language", SetPreflightLanguage),
-        ("Str_Repair_Descriptions", RepairAccessibilityDescriptions),
-        ("Str_Repair_ReadingOrder", RepairReadingOrder),
-        ("Str_Repair_TableHeader", RepairTableHeader));
+    private void OpenAccessibilityTools() => ReviewAccessibility();
 
     private void WithRepairDocument(Action<PdfDocument, Func<bool>> action)
     {

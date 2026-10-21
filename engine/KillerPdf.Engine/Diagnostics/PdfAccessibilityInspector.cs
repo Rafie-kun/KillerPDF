@@ -33,7 +33,8 @@ public static class PdfAccessibilityInspector
             else if (!PdfLanguageTag.IsValid(languageTag))
                 findings.Add(Finding(PdfAccessibilityFindingCode.InvalidDocumentLanguage,
                     "The document catalog language is not a valid BCP 47 language tag.",
-                    objectNumber: pageTree.CatalogReference.ObjectNumber));
+                    objectNumber: pageTree.CatalogReference.ObjectNumber,
+                    objectGeneration: pageTree.CatalogReference.Generation));
         }
         if (!catalog.TryGetValue(Name("StructTreeRoot"), out PdfObject? structureRootValue))
             findings.Add(Finding(PdfAccessibilityFindingCode.MissingStructureTree,
@@ -52,12 +53,15 @@ public static class PdfAccessibilityInspector
                 if (string.IsNullOrWhiteSpace(widget.Tooltip))
                     findings.Add(Finding(PdfAccessibilityFindingCode.MissingFormFieldDescription,
                         $"Form field {widget.FieldName} has no user-facing description.",
-                        page.Index, widget.ObjectNumber == 0 ? null : widget.ObjectNumber));
+                        page.Index, widget.ObjectNumber == 0 ? null : widget.ObjectNumber,
+                        widget.AnnotationIndex, widget.FieldName,
+                        widget.ObjectNumber == 0 ? null : widget.Generation));
             foreach (PdfLinkInfo link in PdfLinkReader.ReadPage(document, page.Index))
                 if (string.IsNullOrWhiteSpace(link.Description))
                     findings.Add(Finding(PdfAccessibilityFindingCode.MissingLinkDescription,
                         "A link annotation has no user-facing description.",
-                        page.Index, link.ObjectNumber));
+                        page.Index, link.ObjectNumber, link.AnnotationIndex,
+                        objectGeneration: link.Generation));
         }
         return new PdfAccessibilityReport(findings);
 
@@ -99,14 +103,16 @@ public static class PdfAccessibilityInspector
                     findings.Add(Finding(
                         PdfAccessibilityFindingCode.MissingFigureAlternateDescription,
                         "A figure structure element has no alternate description.",
-                        PageIndex(element), reference?.ObjectNumber));
+                        PageIndex(element), reference?.ObjectNumber,
+                        objectGeneration: reference?.Generation));
                 if (IsName(element, "Type", "StructElem") && IsName(element, "S", "Table"))
                 {
                     (bool hasHeader, bool hasData, int? pageIndex) = TableSummary(element, depth + 1);
                     if (hasData && !hasHeader)
                         findings.Add(Finding(PdfAccessibilityFindingCode.MissingTableHeader,
                             "A table contains data cells but no header cells.",
-                            pageIndex, reference?.ObjectNumber));
+                            pageIndex, reference?.ObjectNumber,
+                            objectGeneration: reference?.Generation));
                 }
                 if (element.TryGetValue(Name("K"), out PdfObject? children))
                     Visit(children, depth + 1);
@@ -168,8 +174,14 @@ public static class PdfAccessibilityInspector
     }
 
     private static PdfAccessibilityFinding Finding(PdfAccessibilityFindingCode code, string message,
-        int? pageIndex = null, int? objectNumber = null) =>
-        new(code, PdfDiagnosticSeverity.Error, message, pageIndex, objectNumber);
+        int? pageIndex = null, int? objectNumber = null, int? annotationIndex = null,
+        string? fieldName = null, int? objectGeneration = null) =>
+        new(code, PdfDiagnosticSeverity.Error, message, pageIndex, objectNumber)
+        {
+            AnnotationIndex = annotationIndex,
+            FieldName = fieldName,
+            ObjectGeneration = objectGeneration
+        };
 
     private static bool IsName(PdfDictionary dictionary, string key, string expected) =>
         dictionary.TryGetValue(Name(key), out PdfObject? value)
@@ -216,7 +228,15 @@ public enum PdfAccessibilityFindingCode
 /// <summary>One accessibility finding with a stable code and severity.</summary>
 public sealed record PdfAccessibilityFinding(
     PdfAccessibilityFindingCode Code, PdfDiagnosticSeverity Severity, string Message,
-    int? PageIndex = null, int? ObjectNumber = null);
+    int? PageIndex = null, int? ObjectNumber = null)
+{
+    /// <summary>Gets the annotation's index in its page annotation array, when applicable.</summary>
+    public int? AnnotationIndex { get; init; }
+    /// <summary>Gets the fully qualified form field name, when applicable.</summary>
+    public string? FieldName { get; init; }
+    /// <summary>Gets the indirect object's generation, when applicable.</summary>
+    public int? ObjectGeneration { get; init; }
+}
 
 /// <summary>Accessibility findings produced for one document.</summary>
 public sealed partial class PdfAccessibilityReport

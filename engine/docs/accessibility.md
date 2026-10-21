@@ -29,6 +29,11 @@ location. Page indices are zero-based. `ToText()` displays one-based page number
 `ToJson(indented: true)` retains API indices and string enum names.
 `PassesImplementedChecks` means no finding has Error severity.
 
+Findings also expose `AnnotationIndex`, `FieldName`, and `ObjectGeneration` when
+available. Use the page and annotation index to locate a link or widget; use the
+field name for a field-wide description repair. Direct objects can lack an object
+number. These identities describe the inspected revision, not later revisions.
+
 Checks cover missing or malformed document language, missing structure trees,
 the catalog's marked-content declaration, unsupported structure traversal,
 missing figure alternate text, missing form and link descriptions, and tables
@@ -158,6 +163,10 @@ target conditions, write an incremental update, reopen it, and return `Document`
 `Before`, and `After`. A successful targeted repair can leave other findings.
 The current reopen steps have no password callback, so these examples are not a
 general encrypted-document repair workflow.
+
+Link repair requires an indirect annotation. Figure repair requires an indirect
+generation-zero structure object. Unsupported targets remain findings for manual
+review; they are not silently replaced with different objects.
 
 Save a separate result, review the before/after findings and logical order, and
 verify the affected pages and interactive descriptions. Incremental preservation

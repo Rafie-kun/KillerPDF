@@ -18,7 +18,7 @@ internal static class TableExportSmoke
 {
     private const BindingFlags Members = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
 
-    internal static int Run(string appPath, string appXaml, string folder, bool officeExport = false, bool grainThemes = false, bool dialogText = false, bool sidebarActions = false, bool paragraphEdit = false)
+    internal static int Run(string appPath, string appXaml, string folder, bool officeExport = false, bool grainThemes = false, bool dialogText = false, bool sidebarActions = false, bool paragraphEdit = false, bool accessibilityReview = false)
     {
         if (!Environment.GetCommandLineArgs().Contains("--startup-smoke"))
             throw new InvalidOperationException("Startup smoke isolation is required.");
@@ -30,10 +30,15 @@ internal static class TableExportSmoke
             return File.Exists(path) ? AssemblyLoadContext.Default.LoadFromAssemblyPath(path) : null;
         };
         Assembly assembly = Assembly.LoadFrom(appPath);
+        if (accessibilityReview)
+        {
+            _ = assembly.GetType("KillerPDF.AccessibilityReviewDialog", true);
+        }
         Type dialogType = assembly.GetType("KillerPDF.TableExportDialog", true)!;
         typeof(Application).GetField("_resourceAssembly", Members)!.SetValue(null, assembly);
         assembly.GetType("KillerPDF.Services.AppDataPaths", true)!
             .GetProperty("StartupSmokeRoot", Members)!.SetValue(null, Path.Combine(folder, "data"));
+        if (accessibilityReview) AccessibilityReviewSmoke.ConfigureOffscreen(assembly);
         Type appType = assembly.GetType("KillerPDF.App", true)!;
         var hostType = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("TableExportSmokeHost"),
             AssemblyBuilderAccess.Run).DefineDynamicModule("Host")
@@ -55,6 +60,14 @@ internal static class TableExportSmoke
             xaml = xaml.Replace("clr-namespace:" + name, "clr-namespace:" + name + ";assembly=KillerPDF", StringComparison.Ordinal);
         app.Resources = (ResourceDictionary)System.Windows.Markup.XamlReader.Parse(xaml,
             new System.Windows.Markup.ParserContext { BaseUri = new Uri("pack://application:,,,/KillerPDF;component/") });
+        if (accessibilityReview)
+        {
+            var hiddenMessages = new Style(typeof(Window));
+            hiddenMessages.Setters.Add(new Setter(Window.ShowActivatedProperty, false));
+            hiddenMessages.Setters.Add(new Setter(Window.ShowInTaskbarProperty, false));
+            hiddenMessages.Setters.Add(new Setter(UIElement.OpacityProperty, 0d));
+            app.Resources[typeof(Window)] = hiddenMessages;
+        }
         SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext());
         Window? owner = null;
         try
@@ -65,6 +78,7 @@ internal static class TableExportSmoke
             owner.WindowStartupLocation = WindowStartupLocation.Manual;
             owner.Left = -10000; owner.Top = -10000; owner.ShowInTaskbar = false; owner.ShowActivated = false;
             owner.Show();
+            if (accessibilityReview) return AccessibilityReviewSmoke.Run(owner, assembly, appPath, folder);
             if (paragraphEdit) return ParagraphEditSmoke.Run(owner, assembly, appPath, folder);
             if (sidebarActions) return SidebarActionsSmoke.Run(owner, folder);
             if (dialogText) return DialogTextSmoke.Run(owner, assembly, folder);
