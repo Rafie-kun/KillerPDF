@@ -1,4 +1,4 @@
-# Changelog
+# KillerPDF Changelog
 
 All notable changes to KillerPDF are documented here.
 

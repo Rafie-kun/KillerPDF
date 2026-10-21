@@ -1,4 +1,4 @@
-# The KillerPDF.Engine changelog
+# The KillerPDF.Engine Changelog
 
 All notable changes to The KillerPDF.Engine are documented here. Application changes remain in the root [KillerPDF changelog](../CHANGELOG.md).
 
