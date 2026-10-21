@@ -472,9 +472,13 @@ public partial class MainWindow
         if (!leftPresent || !rightPresent)
             return (new PageDifferenceResult(false, 0, 1, []), 1, 1, leftPresent, rightPresent, false);
         if (token.IsCancellationRequested) return CanceledComparison();
+        // Both pages render to the left page's normalized size for the pixel comparison; that
+        // size says nothing about physical size, which is judged separately below.
         (int lw, int lh) = ComparisonRenderSize(leftInfo[pageIndex]);
-        (int rw, int rh) = ComparisonRenderSize(rightInfo[pageIndex]);
-        bool pageDimensionsMatch = lw == rw && lh == rh;
+        PdfPageInformation leftPage = leftInfo[pageIndex], rightPage = rightInfo[pageIndex];
+        bool pageDimensionsMatch = Services.ComparisonGeometry.SameDisplayedSize(
+            leftPage.Width, leftPage.Height, leftPage.Rotation,
+            rightPage.Width, rightPage.Height, rightPage.Rotation);
         PdfRenderedPage left = PdfPageRenderSession.RenderExactPage(
             leftPath, pageIndex, lw, lh, cancellationToken: token)
             ?? throw new InvalidOperationException("The original page could not be rendered.");
