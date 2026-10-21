@@ -1,5 +1,8 @@
 using KillerPdf.Engine.Authoring;
 using KillerPdf.Engine.Documents;
+using KillerPdf.Engine.Editing;
+using KillerPdf.Engine.Objects;
+using KillerPdf.Engine.Writing;
 using System.Text.Json;
 using Xunit;
 
@@ -7,6 +10,93 @@ namespace KillerPdf.Engine.Tests.Documents;
 
 public sealed class PdfFormRecognitionTests
 {
+    [Theory]
+    [InlineData(100, 50, 120, 70, 280, 90)]
+    [InlineData(-100, -50, -80, -30, 80, -10)]
+    public void RecognizerPreservesAbsoluteBoundsOnCroppedPages(
+        double cropLeft, double cropBottom, double left, double bottom,
+        double right, double top)
+    {
+        var content = new PdfContentStreamBuilder()
+            .Rectangle(left, bottom, 160, 20).Stroke()
+            .BeginText().SetFont(PdfStandardFont.Helvetica, 12)
+            .MoveText(left, top + 10).ShowLatin1Text("Customer name:").EndText();
+        byte[] source = new PdfIncrementalPageEditor(PdfDocument.Open(
+                new PdfDocumentBuilder().AddPage(600, 800, content).Build()))
+            .SetCropBox(0, cropLeft, cropBottom, 400, 650).Build();
+        byte[] original = (byte[])source.Clone();
+        PdfDocument document = PdfDocument.Open(source);
+
+        PdfFormRecognitionReview review = PdfFormRecognizer.Recognize(document);
+
+        PdfFormFieldProposal proposal = Assert.Single(review.Proposals);
+        Assert.Equal(new PdfContentBounds(left, bottom, right, top), proposal.Bounds);
+        Assert.Equal("customer_name", proposal.SuggestedName);
+        Assert.Equal("Customer name", proposal.SuggestedTooltip);
+        PdfDocument reopened = PdfDocument.Open(review.Accept(proposal.Id).ApplyAccepted(document));
+        PdfFormWidgetInfo widget = Assert.Single(PdfFormWidgetReader.ReadPage(reopened, 0));
+        Assert.Equal(left, widget.Left);
+        Assert.Equal(bottom, widget.Bottom);
+        Assert.Equal(right, widget.Right);
+        Assert.Equal(top, widget.Top);
+        Assert.Empty(PdfFormWidgetReader.ReadPage(document, 0));
+        Assert.Equal(original, source);
+        Assert.Empty(PdfFormRecognizer.Recognize(reopened).Proposals);
+    }
+
+    [Theory]
+    [InlineData(100, 50, 120, 70, 280, 90, true)]
+    [InlineData(-100, -50, -80, -30, 80, -10, true)]
+    [InlineData(100, 50, 120, 70, 280, 90, false)]
+    [InlineData(-100, -50, -80, -30, 80, -10, false)]
+    public void RecognizerUsesInheritedCropOrDefaultMediaBoxOrigin(
+        long boxLeft, long boxBottom, long left, long bottom, long right, long top,
+        bool explicitCrop)
+    {
+        var content = new PdfContentStreamBuilder()
+            .Rectangle(left, bottom, 160, 20).Stroke()
+            .BeginText().SetFont(PdfStandardFont.Helvetica, 12)
+            .MoveText(left, top + 10).ShowLatin1Text("Customer name:").EndText();
+        PdfDocument initial = PdfDocument.Open(new PdfDocumentBuilder()
+            .AddPage(600, 800, content).Build());
+        static PdfName Name(string value) => new(System.Text.Encoding.ASCII.GetBytes(value));
+        var catalog = (PdfDictionary)initial.Resolve((PdfIndirectReference)initial.Trailer[Name("Root")]);
+        var pagesReference = (PdfIndirectReference)catalog[Name("Pages")];
+        var pages = (PdfDictionary)initial.Resolve(pagesReference);
+        var pageReference = (PdfIndirectReference)Assert.Single((PdfArray)pages[Name("Kids")]);
+        var page = (PdfDictionary)initial.Resolve(pageReference);
+        var box = new PdfArray([new PdfInteger(boxLeft), new PdfInteger(boxBottom),
+            new PdfInteger(boxLeft + 400), new PdfInteger(boxBottom + 650)]);
+        var parentEntries = pages.Where(entry => !entry.Key.Equals(Name("MediaBox")))
+            .Append(new KeyValuePair<PdfName, PdfObject>(Name("MediaBox"), box));
+        if (explicitCrop)
+            parentEntries = parentEntries.Append(
+                new KeyValuePair<PdfName, PdfObject>(Name("CropBox"), box));
+        byte[] source = new PdfIncrementalUpdateBuilder(initial)
+            .ReplaceObject(pagesReference.ObjectNumber, new PdfDictionary(parentEntries))
+            .ReplaceObject(pageReference.ObjectNumber, new PdfDictionary(page.Where(entry =>
+                !entry.Key.Equals(Name("MediaBox")) && !entry.Key.Equals(Name("CropBox")))))
+            .Build();
+        byte[] original = (byte[])source.Clone();
+        PdfDocument document = PdfDocument.Open(source);
+
+        PdfFormRecognitionReview review = PdfFormRecognizer.Recognize(document);
+
+        PdfFormFieldProposal proposal = Assert.Single(review.Proposals);
+        Assert.Equal(new PdfContentBounds(left, bottom, right, top), proposal.Bounds);
+        Assert.Equal("customer_name", proposal.SuggestedName);
+        Assert.Equal("Customer name", proposal.SuggestedTooltip);
+        PdfDocument reopened = PdfDocument.Open(review.Accept(proposal.Id).ApplyAccepted(document));
+        PdfFormWidgetInfo widget = Assert.Single(PdfFormWidgetReader.ReadPage(reopened, 0));
+        Assert.Equal(left, widget.Left);
+        Assert.Equal(bottom, widget.Bottom);
+        Assert.Equal(right, widget.Right);
+        Assert.Equal(top, widget.Top);
+        Assert.Empty(PdfFormWidgetReader.ReadPage(document, 0));
+        Assert.Equal(original, source);
+        Assert.Empty(PdfFormRecognizer.Recognize(reopened).Proposals);
+    }
+
     [Fact]
     public void RecognizerProposesDigitalRectanglesWithoutChangingTheDocument()
     {

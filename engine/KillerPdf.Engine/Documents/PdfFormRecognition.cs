@@ -169,11 +169,12 @@ public static class PdfFormRecognizer
             throw new ArgumentOutOfRangeException(nameof(options));
         var reader = new PdfPageContentReader(document);
         var proposals = new List<PdfFormFieldProposal>();
-        int pageCount = PdfPageBoxInformation.Read(document).Count;
-        for (int pageIndex = 0; pageIndex < pageCount; pageIndex++)
+        IReadOnlyList<PdfPageBoxInformation> pages = PdfPageBoxInformation.Read(document);
+        for (int pageIndex = 0; pageIndex < pages.Count; pageIndex++)
         {
             cancellationToken.ThrowIfCancellationRequested();
             PdfPageContent content = reader.Read(pageIndex, cancellationToken);
+            PdfPageBoxBounds crop = pages[pageIndex].CropBox;
             PdfContentBounds[] widgets = [.. PdfFormWidgetReader.ReadPage(document, pageIndex)
                 .Select(widget => new PdfContentBounds(
                     widget.Left, widget.Bottom, widget.Right, widget.Top))];
@@ -186,10 +187,13 @@ public static class PdfFormRecognizer
                     || path.PaintOperator is not ("S" or "s" or "B" or "B*"))
                     continue;
                 PdfContentBounds bounds = path.BoundingBox;
+                var absoluteBounds = new PdfContentBounds(
+                    bounds.Left + crop.Left, bounds.Bottom + crop.Bottom,
+                    bounds.Right + crop.Left, bounds.Top + crop.Bottom);
                 if (bounds.Width < options.MinimumDimension
                     || bounds.Height < options.MinimumDimension
                     || bounds.Height > options.MaximumHeight
-                    || widgets.Any(widget => Intersects(widget, bounds)))
+                    || widgets.Any(widget => Intersects(widget, absoluteBounds)))
                     continue;
                 bool square = Math.Max(bounds.Width, bounds.Height)
                     <= options.MaximumCheckBoxDimension
@@ -202,7 +206,7 @@ public static class PdfFormRecognizer
                     ? $"field_{pageIndex + 1}_{sequence}"
                     : NormalizeName(label, pageIndex, sequence);
                 proposals.Add(new PdfFormFieldProposal(
-                    $"page-{pageIndex + 1}-path-{pathIndex + 1}", pageIndex, bounds,
+                    $"page-{pageIndex + 1}-path-{pathIndex + 1}", pageIndex, absoluteBounds,
                     square ? PdfRecognizedFieldKind.CheckBox : PdfRecognizedFieldKind.Text,
                     (square ? 0.9 : 0.7) + (label is null ? 0 : 0.05),
                     suggestedName, suggestedTooltip: label));
@@ -454,7 +458,7 @@ public sealed record PdfFormFieldProposal
     public string Id { get; }
     /// <summary>Gets the zero-based page index.</summary>
     public int PageIndex { get; }
-    /// <summary>Gets the proposed field bounds in PDF points.</summary>
+    /// <summary>Gets the proposed field bounds in unrotated, absolute PDF page coordinates.</summary>
     public PdfContentBounds Bounds { get; }
     /// <summary>Gets the proposed field type.</summary>
     public PdfRecognizedFieldKind Kind { get; }
