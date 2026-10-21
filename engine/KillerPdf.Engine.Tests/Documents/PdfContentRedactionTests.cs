@@ -413,6 +413,88 @@ public sealed class PdfContentRedactionTests
         Assert.Contains("(keep)", raw);
     }
 
+    [Theory]
+    [InlineData(1)]
+    [InlineData(63)]
+    [InlineData(64)]
+    [InlineData(65)]
+    [InlineData(70)]
+    public void RemovesCoveredWidgetsBeneathDeepFieldHierarchies(int ancestors)
+    {
+        PdfDocument document = PdfDocument.Open(DeepFieldPdf(ancestors));
+        PdfRedactionRegion region = Region(document, 0, "NAMEHERE");
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, [region]);
+
+        string raw = Encoding.Latin1.GetString(PdfDocumentWriterRaw(PdfDocument.Open(result.Document)));
+        Assert.DoesNotContain("DEEPSECRET", raw);
+        Assert.DoesNotContain("(a0)", raw);
+    }
+
+    [Fact]
+    public void RefusesFieldHierarchiesTooDeepToPrune()
+    {
+        PdfDocument document = PdfDocument.Open(DeepFieldPdf(200));
+        PdfRedactionRegion region = Region(document, 0, "NAMEHERE");
+
+        var error = Assert.Throws<NotSupportedException>(() => PdfContentRedaction.Apply(document, [region]));
+        Assert.Contains("too deep", error.Message);
+    }
+
+    [Fact]
+    public void VerifierReportsAFieldWidgetLeftOverARedactedArea()
+    {
+        PdfDocument document = PdfDocument.Open(DeepFieldPdf(1));
+        PdfRedactionRegion region = Region(document, 0, "NAMEHERE");
+
+        PdfRedactionVerificationReport report = PdfContentRedaction.Verify(DeepFieldPdf(1), [region], []);
+
+        Assert.Contains(report.Findings, finding => finding.Code == "FieldInRegion");
+    }
+
+    // A widget holding DEEPSECRET sits beneath a chain of nonterminal fields and over NAMEHERE.
+    private static byte[] DeepFieldPdf(int ancestors)
+    {
+        int widget = 6 + ancestors;
+        var objects = new List<string>
+        {
+            "<< /Type /Catalog /Pages 2 0 R /AcroForm << /Fields [6 0 R] >> >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            $"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R /Annots [{widget} 0 R] >>",
+            Helvetica,
+            Stream("BT /F1 12 Tf 72 700 Td (Patient NAMEHERE) Tj ET")
+        };
+        for (int level = 0; level < ancestors; level++)
+        {
+            string parent = level == 0 ? string.Empty : $"/Parent {5 + level} 0 R ";
+            objects.Add($"<< /T (a{level}) {parent}/Kids [{7 + level} 0 R] >>");
+        }
+        objects.Add($"<< /Type /Annot /Subtype /Widget /FT /Tx /Parent {widget - 1} 0 R /P 3 0 R /V (DEEPSECRET) /Rect [140 690 260 712] >>");
+        return CreatePdf(objects);
+    }
+
+    [Theory]
+    [InlineData("/Filter /KillerUnknownFilter", "HIDDENSECRET")]
+    [InlineData("/Filter /FlateDecode", "HIDDENSECRET is not zlib")]
+    public void ProhibitedTextVerificationFailsWhenARetainedStreamCannotBeInspected(string entries, string data)
+    {
+        var objects = new List<string>
+        {
+            "<< /Type /Catalog /Pages 2 0 R /KillerExtra 6 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
+            Helvetica,
+            Stream("BT /F1 12 Tf 72 700 Td (Patient NAMEHERE) Tj ET"),
+            Stream(data, entries)
+        };
+        PdfDocument document = PdfDocument.Open(CreatePdf(objects));
+        PdfRedactionRegion region = Region(document, 0, "NAMEHERE");
+
+        var error = Assert.Throws<PdfRedactionVerificationException>(() => PdfContentRedaction.Apply(document, [region],
+            new PdfContentRedactionOptions { ProhibitedText = ["HIDDENSECRET"] }));
+        Assert.Contains(error.Report.Findings, finding => finding.Code == "ObjectInspectionFailure");
+    }
+
     private static byte[] PdfDocumentWriterRaw(PdfDocument document) =>
         KillerPdf.Engine.Writing.PdfDocumentWriter.Write(document, new KillerPdf.Engine.Writing.PdfDocumentWriteOptions());
 

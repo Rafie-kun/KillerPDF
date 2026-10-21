@@ -89,6 +89,7 @@ public sealed class PdfRedactionVerificationException(PdfRedactionVerificationRe
 public static partial class PdfContentRedaction
 {
     internal const string RedactionImageName = "KPRedactImage";
+    private const int MaximumFieldDepth = 256;
     private static readonly PdfName ContentsName = Name("Contents");
     private static readonly PdfName ResourcesName = Name("Resources");
     private static readonly PdfName AnnotsName = Name("Annots");
@@ -384,6 +385,8 @@ public static partial class PdfContentRedaction
                 }
             if (IntersectingAnnotations(document, tree.Pages[pageIndex], pageGeometry, pageRegions).Count != 0)
                 findings.Add(new("AnnotationInRegion", "An annotation remains over a redacted area.", pageIndex));
+            if (FieldWidgetRemains(document, tree, pageIndex, pageGeometry, pageRegions))
+                findings.Add(new("FieldInRegion", "A form field widget remains over a redacted area.", pageIndex));
             foreach (PdfName key in RemovedPageKeys)
                 if (tree.Pages[pageIndex].Dictionary.ContainsKey(key))
                     findings.Add(new("PageData", $"The redacted page still contains /{key.ValueAsLatin1()}.", pageIndex));
@@ -441,6 +444,10 @@ public static partial class PdfContentRedaction
                     catch (Exception error) when (error is PdfFilterException or FormatException
                         or InvalidDataException or NotSupportedException)
                     {
+                        // Data that cannot be decoded cannot be shown to be free of the prohibited text.
+                        findings.Add(new("ObjectInspectionFailure",
+                            $"Stream object {objectNumber} could not be inspected: {error.Message}",
+                            ObjectNumber: objectNumber));
                         break;
                     }
                     Check(Encoding.Latin1.GetString(decoded), objectNumber);
@@ -562,6 +569,37 @@ public static partial class PdfContentRedaction
         return result;
     }
 
+    // Walks the whole field tree, since a widget dropped from the page can stay reachable through it.
+    private static bool FieldWidgetRemains(PdfDocument document, PdfPageTree tree, int pageIndex,
+        PageGeometry geometry, PdfContentBounds[] regions)
+    {
+        if (!tree.Catalog.TryGetValue(AcroFormName, out PdfObject? acroFormValue)
+            || Resolve(document, acroFormValue) is not PdfDictionary acroForm
+            || !acroForm.TryGetValue(FieldsName, out PdfObject? fieldsValue)
+            || Resolve(document, fieldsValue) is not PdfArray fields) return false;
+        int pageNumber = tree.Pages[pageIndex].Reference.ObjectNumber;
+        var visited = new HashSet<int>();
+        var pending = new Stack<PdfObject>(fields);
+        while (pending.Count != 0)
+        {
+            PdfObject item = pending.Pop();
+            if (item is PdfIndirectReference reference && !visited.Add(reference.ObjectNumber)) continue;
+            if (Resolve(document, item) is not PdfDictionary field) continue;
+            if (field.TryGetValue(KidsName, out PdfObject? kidsValue) && Resolve(document, kidsValue) is PdfArray kids)
+                foreach (PdfObject kid in kids) pending.Push(kid);
+            if (!field.TryGetValue(Name("P"), out PdfObject? owner)
+                || owner is not PdfIndirectReference { ObjectNumber: var ownerNumber } || ownerNumber != pageNumber
+                || !field.TryGetValue(RectName, out PdfObject? rectValue)
+                || Resolve(document, rectValue) is not PdfArray rect || rect.Count != 4) continue;
+            double x1 = Number(document, rect[0]), y1 = Number(document, rect[1]);
+            double x2 = Number(document, rect[2]), y2 = Number(document, rect[3]);
+            var bounds = new PdfContentBounds(Math.Min(x1, x2) - geometry.CropLeft, Math.Min(y1, y2) - geometry.CropBottom,
+                Math.Max(x1, x2) - geometry.CropLeft, Math.Max(y1, y2) - geometry.CropBottom);
+            if (regions.Any(region => OverlapsOrTouches(bounds, region))) return true;
+        }
+        return false;
+    }
+
     private static PdfArray? RemainingAnnotations(PdfDocument document, PdfPageTreeEntry page,
         List<PdfObject> removed, HashSet<int> removedAnnotations, HashSet<int> removedWidgets)
     {
@@ -627,7 +665,9 @@ public static partial class PdfContentRedaction
 
         PdfArray? PruneKids(PdfArray kids, int depth)
         {
-            if (depth > 64) return null;
+            // Stopping early would leave a removed widget, and its value, reachable from the form.
+            if (depth > MaximumFieldDepth)
+                throw new NotSupportedException("The form field hierarchy is too deep to redact safely.");
             bool changed = false;
             var kept = new List<PdfObject>();
             foreach (PdfObject kid in kids)
