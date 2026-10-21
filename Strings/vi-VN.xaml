@@ -1878,4 +1878,14 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">Không thể đọc các chữ ký đã lưu nên danh sách bắt đầu trống. Tệp không đọc được đã được giữ lại thành {0}.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">Tài liệu này đã được ký và có thay đổi, nên các chữ ký trong "{0}" sẽ không còn hợp lệ.&#10;&#10;Tệp gốc vẫn giữ nguyên chữ ký.</sys:String>
     <sys:String x:Key="Str_St_FieldMaxLength">Trường này chứa tối đa {0} ký tự.</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageCount">{0} — số trang: {1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_OnlyOriginal">Trang {0}: chỉ có trong PDF gốc</sys:String>
+    <sys:String x:Key="Str_CmpRpt_OnlyComparison">Trang {0}: chỉ có trong PDF so sánh</sys:String>
+    <sys:String x:Key="Str_CmpRpt_DimensionsDiffer">kích thước trang khác nhau</sys:String>
+    <sys:String x:Key="Str_CmpRpt_ChangedFraction">{0} đã thay đổi</sys:String>
+    <sys:String x:Key="Str_CmpRpt_Regions">vùng thay đổi: {0}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageLine">Trang {0}: {1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_ListSeparator" xml:space="preserve">, </sys:String>
+    <sys:String x:Key="Str_CmpRpt_NoDifferences">Không tìm thấy khác biệt nào về hình ảnh hoặc cấu trúc giữa các trang.</sys:String>
+    <sys:String x:Key="Str_CmpRpt_Summary">Trang đã thay đổi: {0}, trang bị thiếu: {1}, trang khớp: {2}</sys:String>
 </ResourceDictionary>

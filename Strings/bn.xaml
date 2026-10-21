@@ -1858,4 +1858,14 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">আপনার সংরক্ষিত স্বাক্ষরগুলো পড়া যায়নি, তাই তালিকাটি খালি থেকে শুরু হচ্ছে। অপঠনযোগ্য ফাইলটি {0} হিসেবে রাখা হয়েছে।</sys:String>
     <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">এই ডকুমেন্টটি স্বাক্ষরিত এবং এতে পরিবর্তন রয়েছে, তাই "{0}"-এর স্বাক্ষরগুলো আর বৈধ থাকবে না।&#10;&#10;মূল ফাইলের স্বাক্ষর অপরিবর্তিত থাকবে।</sys:String>
     <sys:String x:Key="Str_St_FieldMaxLength">এই ঘরে সর্বোচ্চ {0}টি অক্ষর রাখা যায়।</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageCount">{0} — পৃষ্ঠা: {1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_OnlyOriginal">পৃষ্ঠা {0}: শুধু মূল PDF-এ আছে</sys:String>
+    <sys:String x:Key="Str_CmpRpt_OnlyComparison">পৃষ্ঠা {0}: শুধু তুলনার PDF-এ আছে</sys:String>
+    <sys:String x:Key="Str_CmpRpt_DimensionsDiffer">পৃষ্ঠার আকার আলাদা</sys:String>
+    <sys:String x:Key="Str_CmpRpt_ChangedFraction">{0} পরিবর্তিত</sys:String>
+    <sys:String x:Key="Str_CmpRpt_Regions">পরিবর্তিত অংশ: {0}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageLine">পৃষ্ঠা {0}: {1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_ListSeparator" xml:space="preserve">, </sys:String>
+    <sys:String x:Key="Str_CmpRpt_NoDifferences">কোনো দৃশ্যমান বা কাঠামোগত পৃষ্ঠা পার্থক্য পাওয়া যায়নি।</sys:String>
+    <sys:String x:Key="Str_CmpRpt_Summary">পরিবর্তিত পৃষ্ঠা: {0}, অনুপস্থিত পৃষ্ঠা: {1}, মিলে যাওয়া পৃষ্ঠা: {2}</sys:String>
 </ResourceDictionary>

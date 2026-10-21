@@ -1862,4 +1862,14 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">无法读取已保存的签名，因此列表从空开始。无法读取的文件已保留为 {0}。</sys:String>
     <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">此文档已签名且有更改，因此“{0}”中的签名将不再有效。&#10;&#10;原始文件保留其签名。</sys:String>
     <sys:String x:Key="Str_St_FieldMaxLength">此字段最多可容纳 {0} 个字符。</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageCount">{0} — 页数：{1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_OnlyOriginal">第 {0} 页：仅存在于原始 PDF</sys:String>
+    <sys:String x:Key="Str_CmpRpt_OnlyComparison">第 {0} 页：仅存在于对比 PDF</sys:String>
+    <sys:String x:Key="Str_CmpRpt_DimensionsDiffer">页面尺寸不同</sys:String>
+    <sys:String x:Key="Str_CmpRpt_ChangedFraction">已更改 {0}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_Regions">更改区域：{0}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageLine">第 {0} 页：{1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_ListSeparator" xml:space="preserve">，</sys:String>
+    <sys:String x:Key="Str_CmpRpt_NoDifferences">未发现页面在外观或结构上的差异。</sys:String>
+    <sys:String x:Key="Str_CmpRpt_Summary">已更改页面：{0}，缺少页面：{1}，相同页面：{2}</sys:String>
 </ResourceDictionary>

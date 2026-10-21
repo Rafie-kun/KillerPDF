@@ -1858,4 +1858,14 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">Kayıtlı imzalarınız okunamadı, bu yüzden liste boş başlıyor. Okunamayan dosya {0} olarak saklandı.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">Bu belge imzalı ve üzerinde değişiklik var, bu yüzden "{0}" içindeki imzalar artık geçerli olmayacak.&#10;&#10;Özgün dosya imzalarını korur.</sys:String>
     <sys:String x:Key="Str_St_FieldMaxLength">Bu alan en fazla {0} karakter alır.</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageCount">{0} — sayfa: {1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_OnlyOriginal">Sayfa {0}: yalnızca özgün PDF&apos;te</sys:String>
+    <sys:String x:Key="Str_CmpRpt_OnlyComparison">Sayfa {0}: yalnızca karşılaştırma PDF&apos;inde</sys:String>
+    <sys:String x:Key="Str_CmpRpt_DimensionsDiffer">sayfa boyutu farklı</sys:String>
+    <sys:String x:Key="Str_CmpRpt_ChangedFraction">{0} değişti</sys:String>
+    <sys:String x:Key="Str_CmpRpt_Regions">değişen bölgeler: {0}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageLine">Sayfa {0}: {1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_ListSeparator" xml:space="preserve">, </sys:String>
+    <sys:String x:Key="Str_CmpRpt_NoDifferences">Sayfalar arasında görsel veya yapısal fark bulunamadı.</sys:String>
+    <sys:String x:Key="Str_CmpRpt_Summary">Değişen sayfalar: {0}, eksik sayfalar: {1}, eşleşen sayfalar: {2}</sys:String>
 </ResourceDictionary>

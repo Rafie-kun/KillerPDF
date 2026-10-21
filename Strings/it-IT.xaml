@@ -1878,4 +1878,14 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">Non è stato possibile leggere le firme salvate, quindi l'elenco parte vuoto. Il file illeggibile è stato conservato come {0}.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">Questo documento è firmato e contiene modifiche, quindi le firme in "{0}" non saranno più valide.&#10;&#10;Il file originale mantiene le sue firme.</sys:String>
     <sys:String x:Key="Str_St_FieldMaxLength">Questo campo contiene al massimo {0} caratteri.</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageCount">{0} — pagine: {1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_OnlyOriginal">Pagina {0}: solo nel PDF originale</sys:String>
+    <sys:String x:Key="Str_CmpRpt_OnlyComparison">Pagina {0}: solo nel PDF di confronto</sys:String>
+    <sys:String x:Key="Str_CmpRpt_DimensionsDiffer">le dimensioni della pagina sono diverse</sys:String>
+    <sys:String x:Key="Str_CmpRpt_ChangedFraction">{0} modificato</sys:String>
+    <sys:String x:Key="Str_CmpRpt_Regions">aree modificate: {0}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageLine">Pagina {0}: {1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_ListSeparator" xml:space="preserve">, </sys:String>
+    <sys:String x:Key="Str_CmpRpt_NoDifferences">Non sono state trovate differenze visive o strutturali tra le pagine.</sys:String>
+    <sys:String x:Key="Str_CmpRpt_Summary">Pagine modificate: {0}, pagine mancanti: {1}, pagine uguali: {2}</sys:String>
 </ResourceDictionary>

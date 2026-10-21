@@ -1867,4 +1867,14 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">Ihre gespeicherten Signaturen konnten nicht gelesen werden, daher beginnt die Liste leer. Die unlesbare Datei wurde als {0} aufbewahrt.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">Dieses Dokument ist signiert und wurde geändert, daher sind die Signaturen in „{0}“ nicht mehr gültig.&#10;&#10;Die Originaldatei behält ihre Signaturen.</sys:String>
     <sys:String x:Key="Str_St_FieldMaxLength">Dieses Feld fasst höchstens {0} Zeichen.</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageCount">{0} — Seiten: {1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_OnlyOriginal">Seite {0}: nur im Original-PDF</sys:String>
+    <sys:String x:Key="Str_CmpRpt_OnlyComparison">Seite {0}: nur im Vergleichs-PDF</sys:String>
+    <sys:String x:Key="Str_CmpRpt_DimensionsDiffer">Seitengröße unterscheidet sich</sys:String>
+    <sys:String x:Key="Str_CmpRpt_ChangedFraction">{0} geändert</sys:String>
+    <sys:String x:Key="Str_CmpRpt_Regions">geänderte Bereiche: {0}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageLine">Seite {0}: {1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_ListSeparator" xml:space="preserve">, </sys:String>
+    <sys:String x:Key="Str_CmpRpt_NoDifferences">Es wurden keine visuellen oder strukturellen Seitenunterschiede gefunden.</sys:String>
+    <sys:String x:Key="Str_CmpRpt_Summary">Geänderte Seiten: {0}, fehlende Seiten: {1}, übereinstimmende Seiten: {2}</sys:String>
 </ResourceDictionary>

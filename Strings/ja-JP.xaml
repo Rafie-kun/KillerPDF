@@ -1878,4 +1878,14 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">保存済みの署名を読み込めなかったため、一覧は空の状態で始まります。読み込めなかったファイルは {0} として保存されています。</sys:String>
     <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">このドキュメントは署名済みで変更が加えられているため、「{0}」の署名は無効になります。&#10;&#10;元のファイルの署名はそのまま残ります。</sys:String>
     <sys:String x:Key="Str_St_FieldMaxLength">このフィールドに入力できるのは最大 {0} 文字です。</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageCount">{0} — ページ数: {1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_OnlyOriginal">{0} ページ: 元の PDF にのみ存在</sys:String>
+    <sys:String x:Key="Str_CmpRpt_OnlyComparison">{0} ページ: 比較 PDF にのみ存在</sys:String>
+    <sys:String x:Key="Str_CmpRpt_DimensionsDiffer">ページサイズが異なります</sys:String>
+    <sys:String x:Key="Str_CmpRpt_ChangedFraction">{0} 変更</sys:String>
+    <sys:String x:Key="Str_CmpRpt_Regions">変更された領域: {0}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageLine">{0} ページ: {1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_ListSeparator" xml:space="preserve">、</sys:String>
+    <sys:String x:Key="Str_CmpRpt_NoDifferences">ページの見た目や構造の違いは見つかりませんでした。</sys:String>
+    <sys:String x:Key="Str_CmpRpt_Summary">変更されたページ: {0}、欠落したページ: {1}、一致したページ: {2}</sys:String>
 </ResourceDictionary>

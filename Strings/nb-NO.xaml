@@ -1878,4 +1878,14 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">De lagrede signaturene dine kunne ikke leses, så listen starter tom. Den uleselige filen ble beholdt som {0}.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">Dette dokumentet er signert og har endringer, så signaturene i «{0}» vil ikke lenger være gyldige.&#10;&#10;Originalfilen beholder signaturene sine.</sys:String>
     <sys:String x:Key="Str_St_FieldMaxLength">Dette feltet kan inneholde høyst {0} tegn.</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageCount">{0} — sider: {1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_OnlyOriginal">Side {0}: bare i den opprinnelige PDF-en</sys:String>
+    <sys:String x:Key="Str_CmpRpt_OnlyComparison">Side {0}: bare i sammenlignings-PDF-en</sys:String>
+    <sys:String x:Key="Str_CmpRpt_DimensionsDiffer">sidestørrelsen er forskjellig</sys:String>
+    <sys:String x:Key="Str_CmpRpt_ChangedFraction">{0} endret</sys:String>
+    <sys:String x:Key="Str_CmpRpt_Regions">endrede områder: {0}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageLine">Side {0}: {1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_ListSeparator" xml:space="preserve">, </sys:String>
+    <sys:String x:Key="Str_CmpRpt_NoDifferences">Fant ingen visuelle eller strukturelle forskjeller mellom sidene.</sys:String>
+    <sys:String x:Key="Str_CmpRpt_Summary">Endrede sider: {0}, manglende sider: {1}, like sider: {2}</sys:String>
 </ResourceDictionary>

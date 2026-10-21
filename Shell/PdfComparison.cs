@@ -429,8 +429,8 @@ public partial class MainWindow
         int missing = 0;
         var lines = new List<string>
         {
-            $"{Path.GetFileName(leftPath)}: {leftInfo.Count} pages",
-            $"{Path.GetFileName(rightPath)}: {rightInfo.Count} pages",
+            string.Format(Loc("Str_CmpRpt_PageCount"), Path.GetFileName(leftPath), leftInfo.Count),
+            string.Format(Loc("Str_CmpRpt_PageCount"), Path.GetFileName(rightPath), rightInfo.Count),
             string.Empty
         };
         for (int page = 0; page < pageCount; page++)
@@ -441,22 +441,22 @@ public partial class MainWindow
             if (!result.LeftPresent || !result.RightPresent)
             {
                 missing++;
-                lines.Add($"Page {page + 1}: exists only in the {(result.LeftPresent ? "original" : "comparison")} PDF");
+                lines.Add(string.Format(Loc(result.LeftPresent ? "Str_CmpRpt_OnlyOriginal" : "Str_CmpRpt_OnlyComparison"), page + 1));
                 continue;
             }
             if (!result.Difference.IsDifferent && result.PageDimensionsMatch) continue;
             changed++;
             var details = new List<string>();
-            if (!result.PageDimensionsMatch) details.Add("page dimensions differ");
+            if (!result.PageDimensionsMatch) details.Add(Loc("Str_CmpRpt_DimensionsDiffer"));
             if (result.Difference.IsDifferent)
             {
-                details.Add($"{result.Difference.ChangedFraction:P2} changed");
-                details.Add($"{result.Difference.Regions.Count} changed region{(result.Difference.Regions.Count == 1 ? "" : "s")}");
+                details.Add(string.Format(Loc("Str_CmpRpt_ChangedFraction"), result.Difference.ChangedFraction.ToString("P2")));
+                details.Add(string.Format(Loc("Str_CmpRpt_Regions"), result.Difference.Regions.Count));
             }
-            lines.Add($"Page {page + 1}: {string.Join(", ", details)}");
+            lines.Add(string.Format(Loc("Str_CmpRpt_PageLine"), page + 1, string.Join(Loc("Str_CmpRpt_ListSeparator"), details)));
         }
-        if (changed == 0 && missing == 0) lines.Add("No visual or structural page differences were found.");
-        lines.Insert(3, $"{changed} changed pages, {missing} missing pages, {pageCount - changed - missing} matching pages");
+        if (changed == 0 && missing == 0) lines.Add(Loc("Str_CmpRpt_NoDifferences"));
+        lines.Insert(3, string.Format(Loc("Str_CmpRpt_Summary"), changed, missing, pageCount - changed - missing));
         lines.Insert(4, string.Empty);
         return string.Join(Environment.NewLine, lines);
     }

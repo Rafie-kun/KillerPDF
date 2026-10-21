@@ -1865,4 +1865,14 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">A mentett aláírásokat nem sikerült beolvasni, ezért a lista üresen indul. Az olvashatatlan fájl megmaradt ezen a néven: {0}.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">Ez a dokumentum alá van írva, és módosult, ezért a(z) „{0}" aláírásai már nem lesznek érvényesek.&#10;&#10;Az eredeti fájl megtartja az aláírásait.</sys:String>
     <sys:String x:Key="Str_St_FieldMaxLength">Ez a mező legfeljebb {0} karaktert tartalmazhat.</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageCount">{0} — oldalak: {1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_OnlyOriginal">{0}. oldal: csak az eredeti PDF-ben</sys:String>
+    <sys:String x:Key="Str_CmpRpt_OnlyComparison">{0}. oldal: csak az összehasonlított PDF-ben</sys:String>
+    <sys:String x:Key="Str_CmpRpt_DimensionsDiffer">eltér az oldalméret</sys:String>
+    <sys:String x:Key="Str_CmpRpt_ChangedFraction">{0} módosult</sys:String>
+    <sys:String x:Key="Str_CmpRpt_Regions">módosult területek: {0}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageLine">{0}. oldal: {1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_ListSeparator" xml:space="preserve">, </sys:String>
+    <sys:String x:Key="Str_CmpRpt_NoDifferences">Nem található vizuális vagy szerkezeti eltérés az oldalak között.</sys:String>
+    <sys:String x:Key="Str_CmpRpt_Summary">Módosult oldalak: {0}, hiányzó oldalak: {1}, egyező oldalak: {2}</sys:String>
 </ResourceDictionary>

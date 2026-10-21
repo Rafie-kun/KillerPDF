@@ -1878,4 +1878,14 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">Не вдалося прочитати збережені підписи, тому список починається порожнім. Нечитабельний файл збережено як {0}.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">Цей документ підписано, і в ньому є зміни, тому підписи в «{0}» більше не будуть дійсними.&#10;&#10;Оригінальний файл зберігає свої підписи.</sys:String>
     <sys:String x:Key="Str_St_FieldMaxLength">Це поле вміщує щонайбільше {0} символів.</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageCount">{0} — сторінок: {1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_OnlyOriginal">Сторінка {0}: лише в початковому PDF</sys:String>
+    <sys:String x:Key="Str_CmpRpt_OnlyComparison">Сторінка {0}: лише в PDF для порівняння</sys:String>
+    <sys:String x:Key="Str_CmpRpt_DimensionsDiffer">розмір сторінки відрізняється</sys:String>
+    <sys:String x:Key="Str_CmpRpt_ChangedFraction">змінено {0}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_Regions">змінені області: {0}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageLine">Сторінка {0}: {1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_ListSeparator" xml:space="preserve">, </sys:String>
+    <sys:String x:Key="Str_CmpRpt_NoDifferences">Візуальних чи структурних відмінностей сторінок не знайдено.</sys:String>
+    <sys:String x:Key="Str_CmpRpt_Summary">Змінені сторінки: {0}, відсутні сторінки: {1}, однакові сторінки: {2}</sys:String>
 </ResourceDictionary>

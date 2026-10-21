@@ -1866,4 +1866,14 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">Nie udało się odczytać zapisanych podpisów, więc lista zaczyna się pusta. Nieczytelny plik zachowano jako {0}.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">Ten dokument jest podpisany i zawiera zmiany, więc podpisy w pliku "{0}" przestaną być ważne.&#10;&#10;Oryginalny plik zachowa swoje podpisy.</sys:String>
     <sys:String x:Key="Str_St_FieldMaxLength">To pole może zawierać najwyżej {0} znaków.</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageCount">{0} — strony: {1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_OnlyOriginal">Strona {0}: tylko w oryginalnym PDF</sys:String>
+    <sys:String x:Key="Str_CmpRpt_OnlyComparison">Strona {0}: tylko w porównywanym PDF</sys:String>
+    <sys:String x:Key="Str_CmpRpt_DimensionsDiffer">rozmiar strony jest inny</sys:String>
+    <sys:String x:Key="Str_CmpRpt_ChangedFraction">zmieniono {0}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_Regions">zmienione obszary: {0}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageLine">Strona {0}: {1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_ListSeparator" xml:space="preserve">, </sys:String>
+    <sys:String x:Key="Str_CmpRpt_NoDifferences">Nie znaleziono różnic wizualnych ani strukturalnych między stronami.</sys:String>
+    <sys:String x:Key="Str_CmpRpt_Summary">Zmienione strony: {0}, brakujące strony: {1}, zgodne strony: {2}</sys:String>
 </ResourceDictionary>

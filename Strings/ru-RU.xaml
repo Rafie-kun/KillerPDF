@@ -1881,4 +1881,14 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">Не удалось прочитать сохранённые подписи, поэтому список начинается пустым. Нечитаемый файл сохранён как {0}.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">Этот документ подписан и изменён, поэтому подписи в файле "{0}" станут недействительными.&#10;&#10;Исходный файл сохранит свои подписи.</sys:String>
     <sys:String x:Key="Str_St_FieldMaxLength">В это поле помещается не более {0} символов.</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageCount">{0} — страниц: {1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_OnlyOriginal">Страница {0}: только в исходном PDF</sys:String>
+    <sys:String x:Key="Str_CmpRpt_OnlyComparison">Страница {0}: только в сравниваемом PDF</sys:String>
+    <sys:String x:Key="Str_CmpRpt_DimensionsDiffer">размер страницы отличается</sys:String>
+    <sys:String x:Key="Str_CmpRpt_ChangedFraction">изменено {0}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_Regions">изменённые области: {0}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageLine">Страница {0}: {1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_ListSeparator" xml:space="preserve">, </sys:String>
+    <sys:String x:Key="Str_CmpRpt_NoDifferences">Визуальных или структурных различий страниц не найдено.</sys:String>
+    <sys:String x:Key="Str_CmpRpt_Summary">Изменённые страницы: {0}, отсутствующие страницы: {1}, совпадающие страницы: {2}</sys:String>
 </ResourceDictionary>

@@ -1858,4 +1858,14 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">No se pudieron leer sus firmas guardadas, así que la lista empieza vacía. El archivo ilegible se conservó como {0}.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">Este documento está firmado y tiene cambios, así que las firmas de «{0}» dejarán de ser válidas.&#10;&#10;El archivo original conserva sus firmas.</sys:String>
     <sys:String x:Key="Str_St_FieldMaxLength">Este campo admite como máximo {0} caracteres.</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageCount">{0} — páginas: {1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_OnlyOriginal">Página {0}: solo en el PDF original</sys:String>
+    <sys:String x:Key="Str_CmpRpt_OnlyComparison">Página {0}: solo en el PDF de comparación</sys:String>
+    <sys:String x:Key="Str_CmpRpt_DimensionsDiffer">el tamaño de página es distinto</sys:String>
+    <sys:String x:Key="Str_CmpRpt_ChangedFraction">{0} cambiado</sys:String>
+    <sys:String x:Key="Str_CmpRpt_Regions">regiones cambiadas: {0}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageLine">Página {0}: {1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_ListSeparator" xml:space="preserve">, </sys:String>
+    <sys:String x:Key="Str_CmpRpt_NoDifferences">No se encontraron diferencias visuales ni estructurales entre páginas.</sys:String>
+    <sys:String x:Key="Str_CmpRpt_Summary">Páginas cambiadas: {0}, páginas que faltan: {1}, páginas iguales: {2}</sys:String>
 </ResourceDictionary>
