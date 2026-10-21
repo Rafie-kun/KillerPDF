@@ -460,7 +460,8 @@ namespace KillerPDF
             var cp = new FrameworkElementFactory(typeof(ContentPresenter));
             var btn = new Button
             {
-                Content = sw, Cursor = Cursors.Hand, Focusable = false,
+                // Focusable (the default) so Tab reaches it and Space/Enter opens the picker (BF-U004).
+                Content = sw, Cursor = Cursors.Hand,
                 Background = Brushes.Transparent, BorderThickness = new Thickness(0), Padding = new Thickness(0),
                 Template = new ControlTemplate(typeof(Button)) { VisualTree = cp }
             };
@@ -476,6 +477,7 @@ namespace KillerPDF
                 // on OK. On Cancel, SelectedColor is still the original color, so this is harmless.
                 sw.Background = new SolidColorBrush(dlg.SelectedColor);
                 onPick(dlg.SelectedColor);
+                btn.Focus();   // keyboard users continue from the button they opened the picker with
             };
 
             swatch = sw;
