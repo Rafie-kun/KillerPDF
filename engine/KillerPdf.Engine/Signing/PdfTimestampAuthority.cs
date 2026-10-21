@@ -86,13 +86,17 @@ public static class PdfTimestampAuthority
     /// <param name="server">An absolute http or https timestamp-server address.</param>
     /// <param name="client">An optional client; a shared client is used when omitted.</param>
     /// <param name="timeout">The time allowed per request; 30 seconds when omitted.</param>
+    /// <param name="maximumResponseBytes">The largest reply accepted; <see cref="DefaultMaximumResponseBytes"/> when omitted.</param>
     public static Func<ReadOnlyMemory<byte>, byte[]> HttpTransport(
-        Uri server, HttpClient? client = null, TimeSpan? timeout = null)
+        Uri server, HttpClient? client = null, TimeSpan? timeout = null, int? maximumResponseBytes = null)
     {
         ValidateServer(server);
         TimeSpan limit = timeout ?? TimeSpan.FromSeconds(30);
         if (limit <= TimeSpan.Zero)
             throw new ArgumentOutOfRangeException(nameof(timeout), "The timeout must be positive.");
+        int cap = maximumResponseBytes ?? DefaultMaximumResponseBytes;
+        if (cap <= 0)
+            throw new ArgumentOutOfRangeException(nameof(maximumResponseBytes), "The response limit must be positive.");
         return request =>
         {
             using var message = new HttpRequestMessage(HttpMethod.Post, server)
@@ -102,8 +106,9 @@ public static class PdfTimestampAuthority
             message.Content.Headers.ContentType = new MediaTypeHeaderValue(QueryMediaType);
             message.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(ReplyMediaType));
             using var cancellation = new CancellationTokenSource(limit);
+            // Headers first, so the status, type and declared size are judged before the body is read.
             using HttpResponseMessage response = (client ?? SharedClient).Send(
-                message, HttpCompletionOption.ResponseContentRead, cancellation.Token);
+                message, HttpCompletionOption.ResponseHeadersRead, cancellation.Token);
             if (!response.IsSuccessStatusCode)
                 throw new PdfTimestampException(
                     $"The timestamp server answered HTTP {(int)response.StatusCode}.");
@@ -111,12 +116,27 @@ public static class PdfTimestampAuthority
             if (mediaType is not null && !mediaType.Equals(ReplyMediaType, StringComparison.OrdinalIgnoreCase))
                 throw new PdfTimestampException(
                     $"The timestamp server answered with {mediaType} instead of a timestamp reply.");
+            if (response.Content.Headers.ContentLength is long declared && declared > cap)
+                throw new PdfTimestampException(TooLarge(cap));
             using Stream body = response.Content.ReadAsStream(cancellation.Token);
             using var copy = new MemoryStream();
-            body.CopyTo(copy);
+            byte[] buffer = new byte[16 * 1024];
+            int read;
+            while ((read = body.Read(buffer)) > 0)
+            {
+                cancellation.Token.ThrowIfCancellationRequested();
+                if (copy.Length + read > cap) throw new PdfTimestampException(TooLarge(cap));
+                copy.Write(buffer, 0, read);
+            }
             return copy.ToArray();
         };
     }
+
+    /// <summary>The largest timestamp reply accepted by default. Real replies are a few kilobytes.</summary>
+    public const int DefaultMaximumResponseBytes = 1024 * 1024;
+
+    private static string TooLarge(int cap) =>
+        $"The timestamp server's reply is larger than the {cap:N0}-byte limit.";
 
     /// <summary>Throws when <paramref name="server"/> is not an absolute http or https address.</summary>
     public static void ValidateServer(Uri server)

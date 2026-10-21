@@ -157,6 +157,31 @@ public sealed class PdfTimestampAuthorityTests : IDisposable
         Assert.Throws<PdfTimestampException>(() => send(new byte[] { 1 }));
     }
 
+    [Theory]
+    [InlineData(false)]   // the reply declares its length
+    [InlineData(true)]    // the reply is streamed without one
+    public void HttpTransport_RefusesRepliesLargerThanTheLimit(bool undeclaredLength)
+    {
+        using var client = new HttpClient(new StubHandler(HttpStatusCode.OK, "application/timestamp-reply",
+            new byte[64], undeclaredLength));
+        Func<ReadOnlyMemory<byte>, byte[]> send = PdfTimestampAuthority.HttpTransport(
+            new Uri("https://timestamp.example.test"), client, maximumResponseBytes: 63);
+
+        var error = Assert.Throws<PdfTimestampException>(() => send(new byte[] { 1 }));
+        Assert.Contains("limit", error.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void HttpTransport_AcceptsAReplyExactlyAtTheLimit()
+    {
+        using var client = new HttpClient(new StubHandler(HttpStatusCode.OK, "application/timestamp-reply",
+            new byte[64], undeclaredLength: true));
+        Func<ReadOnlyMemory<byte>, byte[]> send = PdfTimestampAuthority.HttpTransport(
+            new Uri("https://timestamp.example.test"), client, maximumResponseBytes: 64);
+
+        Assert.Equal(64, send(new byte[] { 1 }).Length);
+    }
+
     [Fact]
     public void HttpTransport_RejectsANonHttpAddress() =>
         Assert.Throws<ArgumentException>(() =>
@@ -232,7 +257,8 @@ public sealed class PdfTimestampAuthorityTests : IDisposable
         return reserved[..length];
     }
 
-    private sealed class StubHandler(HttpStatusCode status, string mediaType, byte[] reply) : HttpMessageHandler
+    private sealed class StubHandler(HttpStatusCode status, string mediaType, byte[] reply,
+        bool undeclaredLength = false) : HttpMessageHandler
     {
         public HttpMethod? Method { get; private set; }
         public string? ContentType { get; private set; }
@@ -243,12 +269,20 @@ public sealed class PdfTimestampAuthorityTests : IDisposable
             Method = request.Method;
             ContentType = request.Content?.Headers.ContentType?.MediaType;
             Body = request.Content?.ReadAsByteArrayAsync(cancellationToken).GetAwaiter().GetResult();
-            var content = new ByteArrayContent(reply);
+            HttpContent content = undeclaredLength
+                ? new StreamContent(new UnseekableStream(reply)) : new ByteArrayContent(reply);
             content.Headers.ContentType = new MediaTypeHeaderValue(mediaType);
             return new HttpResponseMessage(status) { Content = content };
         }
 
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) =>
             Task.FromResult(Send(request, cancellationToken));
+    }
+
+    // A body with no known length, the way a chunked reply arrives.
+    private sealed class UnseekableStream(byte[] data) : MemoryStream(data)
+    {
+        public override bool CanSeek => false;
+        public override long Length => throw new NotSupportedException();
     }
 }
