@@ -169,6 +169,50 @@ public sealed class PdfSignatureVerifierTests
         Assert.Equal(PdfPadesProfile.BaselineB, entry.PadesProfile);
     }
 
+    [Fact]
+    public void OneBadSignatureDoesNotHideTheOtherInTheReport()
+    {
+        using RSA key = RSA.Create(2048);
+        using X509Certificate2 certificate = new CertificateRequest("CN=KillerPDF Two Signatures", key,
+            HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1).CreateSelfSigned(
+                DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1));
+        var bad = new AsnWriter(AsnEncodingRules.DER);
+        bad.PushSequence();
+        bad.WriteInteger(7);
+        bad.PopSequence();
+        byte[] badPolicy = bad.Encode();
+
+        byte[] once = PdfDetachedSignatureWriter.Sign(
+            PdfDocument.Open(new PdfDocumentBuilder().AddBlankPage().Build()),
+            content => Sign(content, certificate),
+            new PdfSignatureOptions { FieldName = "Good", ReservedSignatureSize = 4_096 });
+        byte[] twice = PdfDetachedSignatureWriter.Sign(PdfDocument.Open(once), content =>
+            {
+                var cms = new SignedCms(new ContentInfo(content.ToArray()), detached: true);
+                var signer = new CmsSigner(certificate)
+                {
+                    IncludeOption = X509IncludeOption.EndCertOnly,
+                    DigestAlgorithm = new Oid("2.16.840.1.101.3.4.2.1")
+                };
+                signer.SignedAttributes.Add(new AsnEncodedData("1.2.840.113549.1.9.16.2.15", badPolicy));
+                cms.ComputeSignature(signer, silent: true);
+                return cms.Encode();
+            },
+            new PdfSignatureOptions { FieldName = "BadPolicy", ReservedSignatureSize = 4_096 });
+
+        PdfSignatureInspectionReport report = PdfSignatureInspection.Inspect(PdfDocument.Open(twice));
+
+        Assert.Equal(2, report.Entries.Count);
+        PdfSignatureInspectionEntry good = Assert.Single(report.Entries, e => e.Signature.FieldName == "Good");
+        PdfSignatureInspectionEntry flawed = Assert.Single(report.Entries, e => e.Signature.FieldName == "BadPolicy");
+        Assert.True(good.Verification.IsCryptographicallyValid);
+        Assert.Null(good.Verification.SignaturePolicyError);
+        Assert.True(flawed.Verification.IsCryptographicallyValid);
+        Assert.NotNull(flawed.Verification.SignaturePolicyError);
+        Assert.NotEmpty(report.ToText());
+        Assert.NotEmpty(report.ToJson());
+    }
+
     // Signs a blank page with raw signed-policy and unsigned-timestamp attribute values.
     private static PdfSignatureInspectionEntry VerifyWithAttributes(X509Certificate2 certificate,
         byte[]? policyValue, byte[]? timestampValue)

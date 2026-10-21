@@ -90,6 +90,8 @@ public static partial class PdfContentRedaction
 {
     internal const string RedactionImageName = "KPRedactImage";
     private const int MaximumFieldDepth = 256;
+    /// <summary>The most a retained stream may decode to during prohibited-text inspection.</summary>
+    internal static int InspectionDecodeLimit { get; set; } = 64 * 1024 * 1024;
     private static readonly PdfName ContentsName = Name("Contents");
     private static readonly PdfName ResourcesName = Name("Resources");
     private static readonly PdfName AnnotsName = Name("Annots");
@@ -440,7 +442,7 @@ public static partial class PdfContentRedaction
                     Inspect(stream.Dictionary, objectNumber, depth + 1);
                     if (IsNamed(stream.Dictionary, SubtypeName, "Image")) break;
                     byte[] decoded;
-                    try { decoded = PdfStreamDecoder.Decode(stream, document.Resolve, 64 * 1024 * 1024); }
+                    try { decoded = PdfStreamDecoder.Decode(stream, document.Resolve, InspectionDecodeLimit); }
                     catch (Exception error) when (error is PdfFilterException or FormatException
                         or InvalidDataException or NotSupportedException)
                     {

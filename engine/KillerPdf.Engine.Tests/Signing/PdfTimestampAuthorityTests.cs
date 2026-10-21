@@ -118,6 +118,30 @@ public sealed class PdfTimestampAuthorityTests : IDisposable
     }
 
     [Fact]
+    public void ATokenForAnotherSignatureIsNotBaselineT()
+    {
+        // A genuine token, but its imprint covers a different signature value.
+        var other = new SignedCms();
+        other.Decode(PdfTimestampAuthority.AddTimestamp(SignDetached("other content"u8.ToArray()), Authority));
+        byte[] foreignToken = other.SignerInfos[0].UnsignedAttributes.Cast<CryptographicAttributeObject>()
+            .Single(a => a.Oid.Value == PdfTimestampAuthority.SignatureTimestampTokenOid).Values[0].RawData;
+
+        byte[] signed = PdfDetachedSignatureWriter.Sign(
+            PdfDocument.Open(new PdfDocumentBuilder().AddBlankPage(300, 300).Build()), data =>
+            {
+                var cms = new SignedCms();
+                cms.Decode(SignDetached(data));
+                cms.SignerInfos[0].AddUnsignedAttribute(
+                    new AsnEncodedData(PdfTimestampAuthority.SignatureTimestampTokenOid, foreignToken));
+                return cms.Encode();
+            }, new PdfSignatureOptions { SignerCertificate = _signer.RawDataMemory });
+
+        PdfSignatureInspectionEntry entry = Assert.Single(PdfSignatureInspection.Inspect(PdfDocument.Open(signed)).Entries);
+        Assert.True(entry.Verification.IsCryptographicallyValid);
+        Assert.Equal(PdfPadesProfile.BaselineB, entry.PadesProfile);
+    }
+
+    [Fact]
     public void Sign_RequestedTimestampNeedsAServerOrATransport()
     {
         byte[] source = new PdfDocumentBuilder().AddBlankPage().Build();

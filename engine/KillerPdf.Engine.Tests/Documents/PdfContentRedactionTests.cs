@@ -495,6 +495,37 @@ public sealed class PdfContentRedactionTests
         Assert.Contains(error.Report.Findings, finding => finding.Code == "ObjectInspectionFailure");
     }
 
+    [Fact]
+    public void ProhibitedTextVerificationFailsWhenAStreamExceedsTheDecodeBudget()
+    {
+        byte[] plain = Encoding.Latin1.GetBytes("HIDDENSECRET" + new string(' ', 8192));
+        using var packed = new MemoryStream();
+        using (var zlib = new System.IO.Compression.ZLibStream(packed, System.IO.Compression.CompressionLevel.Optimal, leaveOpen: true))
+            zlib.Write(plain);
+        string data = Encoding.Latin1.GetString(packed.ToArray());
+        var objects = new List<string>
+        {
+            "<< /Type /Catalog /Pages 2 0 R /KillerExtra 6 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
+            Helvetica,
+            Stream("BT /F1 12 Tf 72 700 Td (Patient NAMEHERE) Tj ET"),
+            Stream(data, "/Filter /FlateDecode")
+        };
+        PdfDocument document = PdfDocument.Open(CreatePdf(objects));
+        PdfRedactionRegion region = Region(document, 0, "NAMEHERE");
+        int limit = PdfContentRedaction.InspectionDecodeLimit;
+        PdfContentRedaction.InspectionDecodeLimit = 1024;
+        try
+        {
+            var error = Assert.Throws<PdfRedactionVerificationException>(() => PdfContentRedaction.Apply(document, [region],
+                new PdfContentRedactionOptions { ProhibitedText = ["HIDDENSECRET"] }));
+            Assert.Contains(error.Report.Findings, finding => finding.Code == "ObjectInspectionFailure"
+                && finding.Message.Contains("limit", StringComparison.OrdinalIgnoreCase));
+        }
+        finally { PdfContentRedaction.InspectionDecodeLimit = limit; }
+    }
+
     private static byte[] PdfDocumentWriterRaw(PdfDocument document) =>
         KillerPdf.Engine.Writing.PdfDocumentWriter.Write(document, new KillerPdf.Engine.Writing.PdfDocumentWriteOptions());
 
