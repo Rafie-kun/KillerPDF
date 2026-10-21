@@ -1870,4 +1870,6 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_CmpRpt_ListSeparator" xml:space="preserve">，</sys:String>
     <sys:String x:Key="Str_CmpRpt_NoDifferences">未發現頁面在外觀或結構上的差異。</sys:String>
     <sys:String x:Key="Str_CmpRpt_Summary">已變更頁面：{0}，缺少頁面：{1}，相同頁面：{2}</sys:String>
+    <sys:String x:Key="Str_Read_Comment">註解：{0}</sys:String>
+    <sys:String x:Key="Str_Read_CommentBy">{0} 的註解：{1}</sys:String>
 </ResourceDictionary>

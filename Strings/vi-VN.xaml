@@ -1888,4 +1888,6 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_CmpRpt_ListSeparator" xml:space="preserve">, </sys:String>
     <sys:String x:Key="Str_CmpRpt_NoDifferences">Không tìm thấy khác biệt nào về hình ảnh hoặc cấu trúc giữa các trang.</sys:String>
     <sys:String x:Key="Str_CmpRpt_Summary">Trang đã thay đổi: {0}, trang bị thiếu: {1}, trang khớp: {2}</sys:String>
+    <sys:String x:Key="Str_Read_Comment">Nhận xét: {0}</sys:String>
+    <sys:String x:Key="Str_Read_CommentBy">Nhận xét của {0}: {1}</sys:String>
 </ResourceDictionary>

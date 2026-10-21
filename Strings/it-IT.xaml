@@ -1888,4 +1888,6 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_CmpRpt_ListSeparator" xml:space="preserve">, </sys:String>
     <sys:String x:Key="Str_CmpRpt_NoDifferences">Non sono state trovate differenze visive o strutturali tra le pagine.</sys:String>
     <sys:String x:Key="Str_CmpRpt_Summary">Pagine modificate: {0}, pagine mancanti: {1}, pagine uguali: {2}</sys:String>
+    <sys:String x:Key="Str_Read_Comment">Commento: {0}</sys:String>
+    <sys:String x:Key="Str_Read_CommentBy">Commento di {0}: {1}</sys:String>
 </ResourceDictionary>

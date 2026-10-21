@@ -109,6 +109,18 @@ namespace KillerPDF.Tests
         }
 
         [Fact]
+        public void CommentsReadAfterThePageBodyWithoutPageGeometry()
+        {
+            PageReadingText page = PageReadingText.Build([("H", 0, 0), ("i", 0, 0)])
+                .WithAppendix(["Comment by Ada: Check the total"]);
+
+            Assert.Equal("Hi\nComment by Ada: Check the total", page.Text);
+            Assert.Equal([(0, 2)], page.Segments(0, page.Text.Length));   // only "Hi" has an outline
+            Assert.Empty(page.Segments(3, page.Text.Length));
+            Assert.Equal("Comment: x", PageReadingText.Empty.WithAppendix(["Comment: x"]).Text);
+        }
+
+        [Fact]
         public void EmptyDocumentIsOneEmptyRange()
         {
             var model = Model();

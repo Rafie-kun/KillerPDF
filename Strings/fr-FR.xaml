@@ -1888,4 +1888,6 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_CmpRpt_ListSeparator" xml:space="preserve">, </sys:String>
     <sys:String x:Key="Str_CmpRpt_NoDifferences">Aucune différence visuelle ou structurelle entre les pages n&apos;a été trouvée.</sys:String>
     <sys:String x:Key="Str_CmpRpt_Summary">Pages modifiées : {0}, pages manquantes : {1}, pages identiques : {2}</sys:String>
+    <sys:String x:Key="Str_Read_Comment">Commentaire : {0}</sys:String>
+    <sys:String x:Key="Str_Read_CommentBy">Commentaire de {0} : {1}</sys:String>
 </ResourceDictionary>

@@ -1868,4 +1868,6 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_CmpRpt_ListSeparator" xml:space="preserve">, </sys:String>
     <sys:String x:Key="Str_CmpRpt_NoDifferences">কোনো দৃশ্যমান বা কাঠামোগত পৃষ্ঠা পার্থক্য পাওয়া যায়নি।</sys:String>
     <sys:String x:Key="Str_CmpRpt_Summary">পরিবর্তিত পৃষ্ঠা: {0}, অনুপস্থিত পৃষ্ঠা: {1}, মিলে যাওয়া পৃষ্ঠা: {2}</sys:String>
+    <sys:String x:Key="Str_Read_Comment">মন্তব্য: {0}</sys:String>
+    <sys:String x:Key="Str_Read_CommentBy">{0}-এর মন্তব্য: {1}</sys:String>
 </ResourceDictionary>

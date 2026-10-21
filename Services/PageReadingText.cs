@@ -12,18 +12,22 @@ namespace KillerPDF.Services
     /// </summary>
     internal sealed class PageReadingText
     {
-        private PageReadingText(string text, int[] carets)
+        private PageReadingText(string text, int[] carets, int caretCount)
         {
             Text = text;
             Carets = carets;
+            CaretCount = caretCount;
         }
+
+        /// <summary>The number of on-page characters; carets at or past it have no page geometry.</summary>
+        internal int CaretCount { get; }
 
         internal string Text { get; }
 
         /// <summary>The caret for each text offset, plus one entry for the end of the text.</summary>
         internal int[] Carets { get; }
 
-        internal static readonly PageReadingText Empty = new(string.Empty, [0]);
+        internal static readonly PageReadingText Empty = new(string.Empty, [0], 0);
 
         /// <summary>Reads the characters in the order given (the viewer's visual reading order).</summary>
         internal static PageReadingText Build(IReadOnlyList<(string Value, int Word, int Line)> chars) =>
@@ -62,7 +66,25 @@ namespace KillerPDF.Services
                 foreach (char ch in c.Value) { text.Append(ch); carets.Add(c.Caret); }
             }
             carets.Add(caretCount);
-            return new PageReadingText(text.ToString(), [.. carets]);
+            return new PageReadingText(text.ToString(), [.. carets], caretCount);
+        }
+
+        /// <summary>
+        /// Adds lines read after the page body, such as its comments. They have no place in the
+        /// page text, so they map to the end caret and draw no outline.
+        /// </summary>
+        internal PageReadingText WithAppendix(IReadOnlyList<string> lines)
+        {
+            if (lines.Count == 0) return this;
+            var text = new StringBuilder(Text);
+            var carets = new List<int>(Carets[..^1]);
+            foreach (string line in lines)
+            {
+                if (text.Length > 0) { text.Append('\n'); carets.Add(CaretCount); }
+                foreach (char c in line.Replace('\n', ' ')) { text.Append(c); carets.Add(CaretCount); }
+            }
+            carets.Add(CaretCount);
+            return new PageReadingText(text.ToString(), [.. carets], CaretCount);
         }
 
         /// <summary>The caret at a text offset.</summary>
@@ -86,7 +108,8 @@ namespace KillerPDF.Services
             startOffset = Math.Clamp(startOffset, 0, Text.Length);
             endOffset = Math.Clamp(endOffset, startOffset, Text.Length);
             foreach (int caret in Enumerable.Range(startOffset, endOffset - startOffset)
-                         .Where(offset => !char.IsWhiteSpace(Text[offset])).Select(offset => Carets[offset]).Distinct().Order())
+                         .Where(offset => !char.IsWhiteSpace(Text[offset]) && Carets[offset] < CaretCount)
+                         .Select(offset => Carets[offset]).Distinct().Order())
             {
                 if (result.Count > 0 && result[^1].End == caret) result[^1] = (result[^1].Start, caret + 1);
                 else result.Add((caret, caret + 1));

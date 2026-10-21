@@ -1891,4 +1891,6 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_CmpRpt_ListSeparator" xml:space="preserve">, </sys:String>
     <sys:String x:Key="Str_CmpRpt_NoDifferences">Беттер арасында көрнекі немесе құрылымдық айырмашылық табылмады.</sys:String>
     <sys:String x:Key="Str_CmpRpt_Summary">Өзгерген беттер: {0}, жоқ беттер: {1}, сәйкес беттер: {2}</sys:String>
+    <sys:String x:Key="Str_Read_Comment">Пікір: {0}</sys:String>
+    <sys:String x:Key="Str_Read_CommentBy">{0} пікірі: {1}</sys:String>
 </ResourceDictionary>

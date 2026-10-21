@@ -1888,4 +1888,6 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_CmpRpt_ListSeparator" xml:space="preserve">, </sys:String>
     <sys:String x:Key="Str_CmpRpt_NoDifferences">Візуальних чи структурних відмінностей сторінок не знайдено.</sys:String>
     <sys:String x:Key="Str_CmpRpt_Summary">Змінені сторінки: {0}, відсутні сторінки: {1}, однакові сторінки: {2}</sys:String>
+    <sys:String x:Key="Str_Read_Comment">Коментар: {0}</sys:String>
+    <sys:String x:Key="Str_Read_CommentBy">Коментар від {0}: {1}</sys:String>
 </ResourceDictionary>

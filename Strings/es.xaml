@@ -1868,4 +1868,6 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_CmpRpt_ListSeparator" xml:space="preserve">, </sys:String>
     <sys:String x:Key="Str_CmpRpt_NoDifferences">No se encontraron diferencias visuales ni estructurales entre páginas.</sys:String>
     <sys:String x:Key="Str_CmpRpt_Summary">Páginas cambiadas: {0}, páginas que faltan: {1}, páginas iguales: {2}</sys:String>
+    <sys:String x:Key="Str_Read_Comment">Comentario: {0}</sys:String>
+    <sys:String x:Key="Str_Read_CommentBy">Comentario de {0}: {1}</sys:String>
 </ResourceDictionary>

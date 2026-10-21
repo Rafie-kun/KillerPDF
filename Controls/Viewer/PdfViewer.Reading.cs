@@ -34,11 +34,47 @@ namespace KillerPDF.Controls
             // viewer's visual order instead.
             private Dictionary<int, List<int>>? StructureOrder(string file)
             {
-                if (_structureRead) return _structureOrder;
+                ReadDocumentFacts(file);
+                return _structureOrder;
+            }
+
+            // Each page's comments as readable lines: the PDF's own review comments, read after the
+            // page body so a screen reader reaches them in page order.
+            private readonly Dictionary<int, List<string>> _comments = [];
+
+            private List<string> PageComments(string file, int page)
+            {
+                ReadDocumentFacts(file);
+                var lines = new List<string>(_comments.TryGetValue(page, out List<string>? saved) ? saved : []);
+                // Text boxes added in KillerPDF and not yet saved are on screen too.
+                if (viewer._annotations.TryGetValue(page, out var placed))
+                    foreach (var text in placed.OfType<TextAnnotation>())
+                        if (!string.IsNullOrWhiteSpace(text.Content)) lines.Add(text.Content.Trim());
+                return lines;
+            }
+
+            private void ReadDocumentFacts(string file)
+            {
+                if (_structureRead) return;
                 _structureRead = true;
+                _comments.Clear();
+                KillerPdf.Engine.Documents.PdfDocument document;
+                try { document = KillerPdf.Engine.Documents.PdfDocument.Open(System.IO.File.ReadAllBytes(file)); }
+                catch (Exception ex) when (ex is not OutOfMemoryException) { _structureOrder = null; return; }
                 try
                 {
-                    var document = KillerPdf.Engine.Documents.PdfDocument.Open(System.IO.File.ReadAllBytes(file));
+                    foreach (var comment in KillerPdf.Engine.Documents.PdfCommentReader.Read(document))
+                    {
+                        if (string.IsNullOrWhiteSpace(comment.Contents)) continue;
+                        if (!_comments.TryGetValue(comment.PageIndex, out List<string>? lines)) _comments[comment.PageIndex] = lines = [];
+                        lines.Add(string.IsNullOrWhiteSpace(comment.Author)
+                            ? string.Format(viewer.Loc("Str_Read_Comment"), comment.Contents.Trim())
+                            : string.Format(viewer.Loc("Str_Read_CommentBy"), comment.Author.Trim(), comment.Contents.Trim()));
+                    }
+                }
+                catch (Exception ex) when (ex is not OutOfMemoryException) { _comments.Clear(); }
+                try
+                {
                     var order = new Dictionary<int, List<int>>();
                     foreach (var item in KillerPdf.Engine.Diagnostics.PdfAccessibilityReadingOrder.Read(document)
                                  .Items.OrderBy(item => item.Sequence))
@@ -53,7 +89,6 @@ namespace KillerPDF.Controls
                 {
                     _structureOrder = null;   // no structure tree, or one that cannot be read
                 }
-                return _structureOrder;
             }
 
             public event Action? TextChanged;
@@ -72,7 +107,8 @@ namespace KillerPDF.Controls
                     long ticks = 0;
                     try { if (file is not null && System.IO.File.Exists(file)) ticks = System.IO.File.GetLastWriteTimeUtc(file).Ticks; }
                     catch (Exception ex) when (ex is System.IO.IOException or UnauthorizedAccessException) { }
-                    return (file, ticks, PageCount);
+                    // Placed text boxes are read too, so adding or removing one rebuilds the text.
+                    return (file, ticks, PageCount, viewer._annotations.Values.Sum(list => list.Count));
                 }
             }
 
@@ -98,6 +134,7 @@ namespace KillerPDF.Controls
                             text = StructureOrder(file) is { } order && order.TryGetValue(page, out List<int>? mcids)
                                 ? PageReadingText.BuildTagged([.. runs.Chars.Select(c => (c.Value, c.Word, c.Line, c.MarkedContentId))], mcids)
                                 : PageReadingText.Build([.. runs.Chars.Select(c => (c.Value, c.Word, c.Line))]);
+                        text = text.WithAppendix(PageComments(file, page));
                     }
                     catch (Exception ex) when (ex is not OutOfMemoryException)
                     {

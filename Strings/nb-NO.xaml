@@ -1888,4 +1888,6 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_CmpRpt_ListSeparator" xml:space="preserve">, </sys:String>
     <sys:String x:Key="Str_CmpRpt_NoDifferences">Fant ingen visuelle eller strukturelle forskjeller mellom sidene.</sys:String>
     <sys:String x:Key="Str_CmpRpt_Summary">Endrede sider: {0}, manglende sider: {1}, like sider: {2}</sys:String>
+    <sys:String x:Key="Str_Read_Comment">Kommentar: {0}</sys:String>
+    <sys:String x:Key="Str_Read_CommentBy">Kommentar fra {0}: {1}</sys:String>
 </ResourceDictionary>

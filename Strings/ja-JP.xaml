@@ -1888,4 +1888,6 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_CmpRpt_ListSeparator" xml:space="preserve">、</sys:String>
     <sys:String x:Key="Str_CmpRpt_NoDifferences">ページの見た目や構造の違いは見つかりませんでした。</sys:String>
     <sys:String x:Key="Str_CmpRpt_Summary">変更されたページ: {0}、欠落したページ: {1}、一致したページ: {2}</sys:String>
+    <sys:String x:Key="Str_Read_Comment">コメント: {0}</sys:String>
+    <sys:String x:Key="Str_Read_CommentBy">{0} のコメント: {1}</sys:String>
 </ResourceDictionary>

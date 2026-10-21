@@ -1868,4 +1868,6 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_CmpRpt_ListSeparator" xml:space="preserve">, </sys:String>
     <sys:String x:Key="Str_CmpRpt_NoDifferences">Sayfalar arasında görsel veya yapısal fark bulunamadı.</sys:String>
     <sys:String x:Key="Str_CmpRpt_Summary">Değişen sayfalar: {0}, eksik sayfalar: {1}, eşleşen sayfalar: {2}</sys:String>
+    <sys:String x:Key="Str_Read_Comment">Yorum: {0}</sys:String>
+    <sys:String x:Key="Str_Read_CommentBy">{0} yorumu: {1}</sys:String>
 </ResourceDictionary>

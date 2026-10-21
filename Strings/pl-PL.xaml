@@ -1876,4 +1876,6 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_CmpRpt_ListSeparator" xml:space="preserve">, </sys:String>
     <sys:String x:Key="Str_CmpRpt_NoDifferences">Nie znaleziono różnic wizualnych ani strukturalnych między stronami.</sys:String>
     <sys:String x:Key="Str_CmpRpt_Summary">Zmienione strony: {0}, brakujące strony: {1}, zgodne strony: {2}</sys:String>
+    <sys:String x:Key="Str_Read_Comment">Komentarz: {0}</sys:String>
+    <sys:String x:Key="Str_Read_CommentBy">Komentarz od {0}: {1}</sys:String>
 </ResourceDictionary>

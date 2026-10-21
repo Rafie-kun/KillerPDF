@@ -1873,4 +1873,6 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_CmpRpt_ListSeparator" xml:space="preserve">, </sys:String>
     <sys:String x:Key="Str_CmpRpt_NoDifferences">Nebyly nalezeny žádné vizuální ani strukturální rozdíly stránek.</sys:String>
     <sys:String x:Key="Str_CmpRpt_Summary">Změněné stránky: {0}, chybějící stránky: {1}, shodné stránky: {2}</sys:String>
+    <sys:String x:Key="Str_Read_Comment">Komentář: {0}</sys:String>
+    <sys:String x:Key="Str_Read_CommentBy">Komentář od {0}: {1}</sys:String>
 </ResourceDictionary>

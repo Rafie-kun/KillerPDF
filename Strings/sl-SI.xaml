@@ -1775,4 +1775,6 @@
     <sys:String x:Key="Str_CmpRpt_ListSeparator" xml:space="preserve">, </sys:String>
     <sys:String x:Key="Str_CmpRpt_NoDifferences">Vizualnih ali strukturnih razlik med stranmi ni bilo najdenih.</sys:String>
     <sys:String x:Key="Str_CmpRpt_Summary">Spremenjene strani: {0}, manjkajoče strani: {1}, enake strani: {2}</sys:String>
+    <sys:String x:Key="Str_Read_Comment">Komentar: {0}</sys:String>
+    <sys:String x:Key="Str_Read_CommentBy">Komentar, avtor {0}: {1}</sys:String>
 </ResourceDictionary>

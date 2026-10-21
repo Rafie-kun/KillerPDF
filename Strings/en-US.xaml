@@ -1887,4 +1887,6 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_CmpRpt_ListSeparator" xml:space="preserve">, </sys:String>
     <sys:String x:Key="Str_CmpRpt_NoDifferences">No visual or structural page differences were found.</sys:String>
     <sys:String x:Key="Str_CmpRpt_Summary">Changed pages: {0}, missing pages: {1}, matching pages: {2}</sys:String>
+    <sys:String x:Key="Str_Read_Comment">Comment: {0}</sys:String>
+    <sys:String x:Key="Str_Read_CommentBy">Comment by {0}: {1}</sys:String>
 </ResourceDictionary>

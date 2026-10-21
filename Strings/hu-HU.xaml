@@ -1875,4 +1875,6 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_CmpRpt_ListSeparator" xml:space="preserve">, </sys:String>
     <sys:String x:Key="Str_CmpRpt_NoDifferences">Nem található vizuális vagy szerkezeti eltérés az oldalak között.</sys:String>
     <sys:String x:Key="Str_CmpRpt_Summary">Módosult oldalak: {0}, hiányzó oldalak: {1}, egyező oldalak: {2}</sys:String>
+    <sys:String x:Key="Str_Read_Comment">Megjegyzés: {0}</sys:String>
+    <sys:String x:Key="Str_Read_CommentBy">{0} megjegyzése: {1}</sys:String>
 </ResourceDictionary>
