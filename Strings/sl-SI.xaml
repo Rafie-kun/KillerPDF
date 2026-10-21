@@ -1760,4 +1760,5 @@
     <sys:String x:Key="Str_Guided_NoSelection" xml:space="preserve">Nič ni izbrano. Kopija ni bila shranjena.</sys:String>
     <sys:String x:Key="Str_Guided_Retry" xml:space="preserve">Poskusi znova</sys:String>
     <sys:String x:Key="Str_Guided_Replace" xml:space="preserve">Želite zamenjati obstoječo datoteko?&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveConflict">Datoteka »{0}« se je na disku spremenila, potem ko jo je ta dokument prebral, morda iz drugega zavihka ali programa.&#10;&#10;Zamenjajte jo s tem dokumentom, shranite ta dokument kot ločeno kopijo ali prekličite.</sys:String>
 </ResourceDictionary>

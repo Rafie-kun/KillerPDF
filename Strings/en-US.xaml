@@ -1872,4 +1872,5 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Guided_NoSelection">Nothing was selected. No copy was saved.</sys:String>
     <sys:String x:Key="Str_Guided_Retry">Retry</sys:String>
     <sys:String x:Key="Str_Guided_Replace" xml:space="preserve">Replace the existing file?&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveConflict">"{0}" changed on disk after this document read it, possibly from another tab or program.&#10;&#10;Replace it with this document, save this document as a separate copy, or cancel.</sys:String>
 </ResourceDictionary>

@@ -1853,4 +1853,5 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Guided_NoSelection">No se seleccionó nada. No se guardó ninguna copia.</sys:String>
     <sys:String x:Key="Str_Guided_Retry">Reintentar</sys:String>
     <sys:String x:Key="Str_Guided_Replace" xml:space="preserve">¿Reemplazar el archivo existente?&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveConflict">«{0}» cambió en el disco después de que este documento lo leyera, quizá desde otra pestaña u otro programa.&#10;&#10;Reemplácelo con este documento, guarde este documento como una copia aparte o cancele.</sys:String>
 </ResourceDictionary>

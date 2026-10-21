@@ -1876,4 +1876,5 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_Guided_NoSelection">Ештеңе таңдалмады. Көшірме сақталмады.</sys:String>
     <sys:String x:Key="Str_Guided_Retry">Қайталау</sys:String>
     <sys:String x:Key="Str_Guided_Replace" xml:space="preserve">Бар файл ауыстырылсын ба?&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveConflict">Бұл құжат оқығаннан кейін "{0}" дискіде өзгерді, мүмкін басқа қойындыдан немесе бағдарламадан.&#10;&#10;Оны осы құжатпен алмастырыңыз, осы құжатты бөлек көшірме ретінде сақтаңыз немесе бас тартыңыз.</sys:String>
 </ResourceDictionary>

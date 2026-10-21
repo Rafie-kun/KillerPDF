@@ -1873,4 +1873,5 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Guided_NoSelection">何も選択されていません。コピーは保存されませんでした。</sys:String>
     <sys:String x:Key="Str_Guided_Retry">再試行</sys:String>
     <sys:String x:Key="Str_Guided_Replace" xml:space="preserve">既存のファイルを置き換えますか？&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveConflict">このドキュメントが読み込んだ後に、「{0}」がディスク上で変更されました。別のタブまたは別のプログラムによる可能性があります。&#10;&#10;このドキュメントで置き換えるか、このドキュメントを別のコピーとして保存するか、キャンセルしてください。</sys:String>
 </ResourceDictionary>

@@ -1853,4 +1853,5 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Guided_NoSelection">Hiçbir şey seçilmedi. Kopya kaydedilmedi.</sys:String>
     <sys:String x:Key="Str_Guided_Retry">Yeniden dene</sys:String>
     <sys:String x:Key="Str_Guided_Replace" xml:space="preserve">Mevcut dosya değiştirilsin mi?&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveConflict">"{0}", bu belge onu okuduktan sonra diskte değişti; başka bir sekmeden veya programdan olabilir.&#10;&#10;Bu belgeyle değiştirin, bu belgeyi ayrı bir kopya olarak kaydedin veya iptal edin.</sys:String>
 </ResourceDictionary>

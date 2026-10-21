@@ -1853,4 +1853,5 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Guided_NoSelection">কিছুই নির্বাচন করা হয়নি। কোনো অনুলিপি সংরক্ষিত হয়নি।</sys:String>
     <sys:String x:Key="Str_Guided_Retry">আবার চেষ্টা করুন</sys:String>
     <sys:String x:Key="Str_Guided_Replace" xml:space="preserve">বিদ্যমান ফাইল প্রতিস্থাপন করবেন?&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveConflict">এই ডকুমেন্টটি পড়ার পরে ডিস্কে "{0}" পরিবর্তিত হয়েছে, সম্ভবত অন্য কোনো ট্যাব বা প্রোগ্রাম থেকে।&#10;&#10;এটিকে এই ডকুমেন্ট দিয়ে প্রতিস্থাপন করুন, এই ডকুমেন্টটি আলাদা কপি হিসেবে সংরক্ষণ করুন, অথবা বাতিল করুন।</sys:String>
 </ResourceDictionary>

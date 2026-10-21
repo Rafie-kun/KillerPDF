@@ -1873,4 +1873,5 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_Guided_NoSelection">Nessuna selezione. Nessuna copia salvata.</sys:String>
     <sys:String x:Key="Str_Guided_Retry">Riprova</sys:String>
     <sys:String x:Key="Str_Guided_Replace" xml:space="preserve">Sostituire il file esistente?&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveConflict">"{0}" è cambiato sul disco dopo che questo documento lo ha letto, forse da un'altra scheda o da un altro programma.&#10;&#10;Sostituiscilo con questo documento, salva questo documento come copia separata oppure annulla.</sys:String>
 </ResourceDictionary>

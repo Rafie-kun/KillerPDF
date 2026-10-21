@@ -1873,4 +1873,5 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Guided_NoSelection">Chưa chọn gì. Không có bản sao nào được lưu.</sys:String>
     <sys:String x:Key="Str_Guided_Retry">Thử lại</sys:String>
     <sys:String x:Key="Str_Guided_Replace" xml:space="preserve">Thay thế tệp hiện có?&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveConflict">"{0}" đã thay đổi trên đĩa sau khi tài liệu này đọc nó, có thể từ một thẻ hoặc chương trình khác.&#10;&#10;Thay thế bằng tài liệu này, lưu tài liệu này thành bản sao riêng, hoặc hủy.</sys:String>
 </ResourceDictionary>

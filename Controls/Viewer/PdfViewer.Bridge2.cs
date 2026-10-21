@@ -129,6 +129,7 @@ namespace KillerPDF.Controls
         private bool _openedFromProtected;
         private Services.PublishedFileStamp? _publishedFile;
         private string? _suggestedName;
+        private Services.FileRevision? _loadedRevision;
         private bool _asyncOpenPending;
         // This pane's own loader token, NOT the window's - see ThumbCts in PdfViewer.TabsApi.cs.
         private System.Threading.CancellationTokenSource? _thumbCts { get => ThumbCts; set => ThumbCts = value; }

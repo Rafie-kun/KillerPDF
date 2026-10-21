@@ -1860,4 +1860,5 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Guided_NoSelection">Nincs kijelölés. Nem készült másolat.</sys:String>
     <sys:String x:Key="Str_Guided_Retry">Újrapróbálás</sys:String>
     <sys:String x:Key="Str_Guided_Replace" xml:space="preserve">Lecseréli a meglévő fájlt?&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveConflict">A(z) „{0}" megváltozott a lemezen, miután ez a dokumentum beolvasta, valószínűleg egy másik lapról vagy programból.&#10;&#10;Cserélje le erre a dokumentumra, mentse ezt a dokumentumot külön másolatként, vagy szakítsa meg.</sys:String>
 </ResourceDictionary>

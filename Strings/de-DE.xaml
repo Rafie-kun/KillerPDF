@@ -1862,4 +1862,5 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Guided_NoSelection">Nichts ausgewählt. Es wurde keine Kopie gespeichert.</sys:String>
     <sys:String x:Key="Str_Guided_Retry">Erneut versuchen</sys:String>
     <sys:String x:Key="Str_Guided_Replace" xml:space="preserve">Vorhandene Datei ersetzen?&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveConflict">„{0}“ wurde auf dem Datenträger geändert, nachdem dieses Dokument sie gelesen hat, möglicherweise von einem anderen Tab oder Programm.&#10;&#10;Ersetzen Sie die Datei durch dieses Dokument, speichern Sie dieses Dokument als separate Kopie oder brechen Sie ab.</sys:String>
 </ResourceDictionary>

@@ -293,6 +293,7 @@ namespace KillerPDF
         // Dirty / unsaved-change tracking
         private bool _isDirty { get => ActiveViewer.IsDirtyRef; set => ActiveViewer.IsDirtyRef = value; }
         private Services.PublishedFileStamp? _publishedFile { get => ActiveViewer.PublishedFileRef; set => ActiveViewer.PublishedFileRef = value; }
+        private Services.FileRevision? _loadedRevision { get => ActiveViewer.LoadedRevisionRef; set => ActiveViewer.LoadedRevisionRef = value; }
         private string? _suggestedName { get => ActiveViewer.SuggestedNameRef; set => ActiveViewer.SuggestedNameRef = value; }
 
         // Whole-document search results now live on SearchController (Features/Search); Tabs.cs

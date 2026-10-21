@@ -178,6 +178,7 @@ namespace KillerPDF
             string? suggested = App.TakeSuggestedName(displayPath);
             bool imported = App.IsCleanupOwnedPath(displayPath);
             _originalFile = imported ? null : displayPath;
+            _loadedRevision = imported ? null : Services.FileRevision.Capture(displayPath);
             _suggestedName = imported ? suggested ?? System.IO.Path.GetFileName(displayPath) : null;
             FileNameLabel.Text = _suggestedName ?? System.IO.Path.GetFileName(displayPath);
             _annotations.Clear();
@@ -1137,6 +1138,16 @@ namespace KillerPDF
             // temp working copy, so the real path is kept in _originalFile. If there is no real path
             // (e.g. a repaired temp-backed open), fall back to Save As.
             if (string.IsNullOrEmpty(_originalFile)) { SaveAs_Click(this, new RoutedEventArgs()); return; }
+            // Another tab, pane or program may have saved over the file since this copy read it
+            // (Ctrl+S, the menu, tab close and quit all land here), so never replace that silently.
+            if (Services.FileRevision.ConflictsWith(_loadedRevision, _originalFile!))
+            {
+                var conflict = KillerDialog.AskToSave(this,
+                    string.Format(Loc("Str_Dlg_SaveConflict"), System.IO.Path.GetFileName(_originalFile)),
+                    Loc("Str_Btn_Replace"), Loc("Str_KS_SaveAs"), Loc("Str_Btn_CancelDlg"));
+                if (conflict == MessageBoxResult.No) { SaveAs_Click(this, new RoutedEventArgs()); return; }
+                if (conflict != MessageBoxResult.Yes) return;
+            }
             if (!ConfirmSignatureRemoval(_originalFile!)) return;
             CommitActiveTextBox();
             OfferRescaleOutOfRangePages();   // Adobe page-size guard
@@ -1169,6 +1180,7 @@ namespace KillerPDF
                     PdfEngineIntegration.ReplaceFileAtomically(tempEdited, saveTarget);
                     // Signing reads these bytes, since the working copy lacks what the save burned in.
                     _publishedFile = Services.PublishedFileStamp.Capture(saveTarget);
+                    _loadedRevision = Services.FileRevision.Capture(saveTarget);
                     _doc.Close();
                     try
                     {
@@ -1201,6 +1213,7 @@ namespace KillerPDF
                     PdfEngineIntegration.ReplaceFileAtomically(tempSaved, saveTarget);
                     // Signing reads these bytes, since the working copy lacks what the save burned in.
                     _publishedFile = Services.PublishedFileStamp.Capture(saveTarget);
+                    _loadedRevision = Services.FileRevision.Capture(saveTarget);
                 }
 
                 MarkDirty(false);
@@ -1326,6 +1339,7 @@ namespace KillerPDF
                     PdfEngineIntegration.ReplaceFileAtomically(tempEdited, dlg.FileName);
                     // Signing reads these bytes, since the working copy lacks what the save burned in.
                     _publishedFile = Services.PublishedFileStamp.Capture(dlg.FileName);
+                    _loadedRevision = Services.FileRevision.Capture(dlg.FileName);
                     _doc.Close();
                     try
                     {
@@ -1370,6 +1384,7 @@ namespace KillerPDF
                     PdfEngineIntegration.ReplaceFileAtomically(tempSaved, dlg.FileName);
                     // Signing reads these bytes, since the working copy lacks what the save burned in.
                     _publishedFile = Services.PublishedFileStamp.Capture(dlg.FileName);
+                    _loadedRevision = Services.FileRevision.Capture(dlg.FileName);
                     _originalFile = dlg.FileName;
                     _suggestedName = null;
                     FileNameLabel.Text = System.IO.Path.GetFileName(dlg.FileName);
