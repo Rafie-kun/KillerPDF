@@ -1847,4 +1847,30 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Paragraph_Changed">Le document a changé. Rouvrez la modification de paragraphe pour continuer.</sys:String>
     <sys:String x:Key="Str_Paragraph_Original">Original</sys:String>
     <sys:String x:Key="Str_Paragraph_Result">Aperçu modifié</sys:String>
+
+    <sys:String x:Key="Str_Guided_Title">Tâches guidées</sys:String>
+    <sys:String x:Key="Str_Guided_Email">Préparer pour un e-mail</sys:String>
+    <sys:String x:Key="Str_Guided_Scan">Nettoyer une numérisation</sys:String>
+    <sys:String x:Key="Str_Guided_Privacy">Supprimer des informations sensibles</sys:String>
+    <sys:String x:Key="Str_Guided_Form">Créer un formulaire à remplir</sys:String>
+    <sys:String x:Key="Str_Guided_EmailHint">Optimisez le PDF sans réduire la qualité des images. L’aplatissement facultatif rend les champs de formulaire non modifiables. La taille finale s’affiche après l’enregistrement.</sys:String>
+    <sys:String x:Key="Str_Guided_ScanHint">Ajoutez du texte consultable avec la langue OCR actuelle, puis optimisez le PDF. Désactivez l’OCR pour optimiser une numérisation déjà consultable.</sys:String>
+    <sys:String x:Key="Str_Guided_PrivacyHint">Vérifiez les correspondances de texte et les marques de caviardage existantes avant de supprimer du contenu. Toute conversion de page en image nécessite votre accord. Vérifiez la copie enregistrée avant de la partager.</sys:String>
+    <sys:String x:Key="Str_Guided_FormHint">Vérifiez les champs détectés et leurs noms avant de les ajouter à une copie. Seuls les champs acceptés sont ajoutés.</sys:String>
+    <sys:String x:Key="Str_Guided_CopyHint">Le PDF d’origine et les modifications actuelles restent inchangés. Choisissez un autre fichier PDF pour le résultat.</sys:String>
+    <sys:String x:Key="Str_Guided_Output">Enregistrer la copie dans</sys:String>
+    <sys:String x:Key="Str_Guided_Flatten">Aplatir les champs de formulaire</sys:String>
+    <sys:String x:Key="Str_Guided_Ocr">Rendre la numérisation consultable</sys:String>
+    <sys:String x:Key="Str_Guided_Search">Rechercher d’autres textes à supprimer</sys:String>
+    <sys:String x:Key="Str_Guided_Marks">Marques de caviardage existantes : {0}</sys:String>
+    <sys:String x:Key="Str_Guided_SaveMacro">Enregistrer comme macro</sys:String>
+    <sys:String x:Key="Str_Guided_MacroHint">Les tâches d’e-mail et de numérisation peuvent être enregistrées comme macros. L’OCR utilise la langue sélectionnée lors de l’exécution de la macro. Le caviardage et les formulaires nécessitent une vérification propre au document.</sys:String>
+    <sys:String x:Key="Str_Guided_SavedMacro">Macro enregistrée : {0}</sys:String>
+    <sys:String x:Key="Str_Guided_Complete">{0} enregistré. Taille : de {1} à {2}.</sys:String>
+    <sys:String x:Key="Str_Guided_Changed">Le document source a changé. Fermez les tâches guidées, puis rouvrez-les.</sys:String>
+    <sys:String x:Key="Str_Guided_Unavailable">Les tâches guidées ne peuvent pas modifier les PDF signés ou en lecture seule.</sys:String>
+    <sys:String x:Key="Str_Guided_RedactConfirm">Supprimer définitivement {0} zones sélectionnées sur {1} pages dans la copie enregistrée ?</sys:String>
+    <sys:String x:Key="Str_Guided_NoSelection">Aucune sélection. Aucune copie n’a été enregistrée.</sys:String>
+    <sys:String x:Key="Str_Guided_Retry">Réessayer</sys:String>
+    <sys:String x:Key="Str_Guided_Replace" xml:space="preserve">Remplacer le fichier existant ?&#10;{0}</sys:String>
 </ResourceDictionary>

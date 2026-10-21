@@ -281,8 +281,9 @@ namespace KillerPDF
         // Ensures the language models OCR is about to use are present on disk. Nothing is bundled, so on the
         // first OCR (or after the user adds a new language) the model is downloaded here, behind a heads-up
         // dialog. Returns true only when every required model is installed and OCR may proceed.
-        private async Task<bool> EnsureOcrModelsReadyAsync()
+        private async Task<bool> EnsureOcrModelsReadyAsync(Window? owner = null, CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             // Desired languages from the persisted setting (default English), regardless of install state.
             var desired = new List<string>(
                 (App.GetSetting("OcrLanguages") ?? "eng").Split(['+'], StringSplitOptions.RemoveEmptyEntries));
@@ -292,12 +293,13 @@ namespace KillerPDF
             if (missing.Count == 0) return true;
 
             string names = string.Join(", ", missing.ConvertAll(OcrLanguages.NameForCode));
-            var choice = KillerDialog.Show(this,
+            var choice = KillerDialog.Show(owner ?? this,
                 string.Format(Loc("Str_Dlg_LangDownloadAsk"), names),
                 "KillerPDF", MessageBoxButton.OKCancel, MessageBoxImage.Information);
             if (choice != MessageBoxResult.OK) return false;
 
             var ct = BeginCancellableOp(Loc("Str_Op_LangDownload"));
+            using var linked = CancellationTokenSource.CreateLinkedTokenSource(ct, cancellationToken);
             var busy = ShowBusyOverlay(Loc("Str_Busy_Model"));
             try
             {
@@ -312,9 +314,9 @@ namespace KillerPDF
                         missing.Count == 1 ? string.Format(Loc("Str_Busy_Downloading"), name)
                                            : string.Format(Loc("Str_Busy_DownloadingMany"), name, i + 1, missing.Count),
                         Loc("Str_Busy_CancelHint"),
-                        msg => SetBusyMessage(busy, msg), ct);
+                        msg => SetBusyMessage(busy, msg), linked.Token);
                     OcrLanguages.MarkLanguageHq(code, OcrHighQuality);
-                    if (ct.IsCancellationRequested) return false;
+                    if (linked.IsCancellationRequested) return false;
                 }
                 return OcrLanguages.MissingLanguagesForOcr(desired).Count == 0;
             }
@@ -325,7 +327,7 @@ namespace KillerPDF
             }
             catch (Exception ex)
             {
-                KillerDialog.Show(this, Loc("Str_Err_ModelDownloadFailed") + "\n" + ex.Message,
+                KillerDialog.Show(owner ?? this, Loc("Str_Err_ModelDownloadFailed") + "\n" + ex.Message,
                     "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }

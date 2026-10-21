@@ -53,6 +53,7 @@ public partial class MainWindow
             DocumentToolItem("Str_DocumentTools_InitialView", EditInitialView, "\uE7B3"),
             comparison,
             new Separator(),
+            DocumentToolItem("Str_Guided_Title", OpenGuidedTasks, "\uE945"),
             DocumentToolItem("Str_DocumentTools_Macros", OpenMacroDialog, "\uE945"),
             DocumentToolItem("Str_DocumentTools_DataMerge", RunDataMerge, "\uE8F1"),
             DocumentToolItem("Str_DocumentTools_FormData", OpenFormDataTools, "\uE8A5"),

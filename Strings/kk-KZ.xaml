@@ -1850,4 +1850,30 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_Paragraph_Changed">Құжат өзгерді. Жалғастыру үшін абзацты өңдеуді қайта ашыңыз.</sys:String>
     <sys:String x:Key="Str_Paragraph_Original">Түпнұсқа</sys:String>
     <sys:String x:Key="Str_Paragraph_Result">Өңделген нұсқаны алдын ала қарау</sys:String>
+
+    <sys:String x:Key="Str_Guided_Title">Нұсқаулықпен орындалатын тапсырмалар</sys:String>
+    <sys:String x:Key="Str_Guided_Email">Электрондық поштаға дайындау</sys:String>
+    <sys:String x:Key="Str_Guided_Scan">Сканерленген құжатты тазалау</sys:String>
+    <sys:String x:Key="Str_Guided_Privacy">Құпия ақпаратты жою</sys:String>
+    <sys:String x:Key="Str_Guided_Form">Толтырылатын пішін жасау</sys:String>
+    <sys:String x:Key="Str_Guided_EmailHint">PDF файлын сурет сапасын төмендетпей оңтайландырыңыз. Қаласаңыз, пішін өрістерін біріктіріп, оларды өзгертуге тыйым салуға болады. Соңғы өлшем сақтағаннан кейін көрсетіледі.</sys:String>
+    <sys:String x:Key="Str_Guided_ScanHint">Ағымдағы OCR тілін пайдаланып, іздеуге болатын мәтін қосыңыз, содан кейін PDF файлын оңтайландырыңыз. Сканерленген құжатта іздеу бұрыннан қолжетімді болса, OCR мүмкіндігін өшіруге болады.</sys:String>
+    <sys:String x:Key="Str_Guided_PrivacyHint">Мазмұнды жоймас бұрын мәтін сәйкестіктері мен бар қаралау белгілерін тексеріңіз. Бетті суретке түрлендіру үшін әр жолы келісіміңіз қажет. Бөліспес бұрын сақталған көшірмені тексеріңіз.</sys:String>
+    <sys:String x:Key="Str_Guided_FormHint">Көшірмеге қоспас бұрын анықталған өрістер мен олардың атауларын тексеріңіз. Тек қабылданған өрістер қосылады.</sys:String>
+    <sys:String x:Key="Str_Guided_CopyHint">Бастапқы PDF файлы мен ағымдағы түзетулер өзгеріссіз қалады. Нәтиже үшін басқа PDF файлын таңдаңыз.</sys:String>
+    <sys:String x:Key="Str_Guided_Output">Көшірмені сақтау орны</sys:String>
+    <sys:String x:Key="Str_Guided_Flatten">Пішін өрістерін біріктіру</sys:String>
+    <sys:String x:Key="Str_Guided_Ocr">Сканерленген құжатта іздеуді қосу</sys:String>
+    <sys:String x:Key="Str_Guided_Search">Жойылатын басқа мәтінді табу</sys:String>
+    <sys:String x:Key="Str_Guided_Marks">Бар қаралау белгілері: {0}</sys:String>
+    <sys:String x:Key="Str_Guided_SaveMacro">Макрос ретінде сақтау</sys:String>
+    <sys:String x:Key="Str_Guided_MacroHint">Пошта және сканерлеу тапсырмаларын макрос ретінде сақтауға болады. OCR макрос іске қосылған кезде таңдалған тілді пайдаланады. Қаралау және пішін тапсырмалары әр құжатты жеке тексеруді қажет етеді.</sys:String>
+    <sys:String x:Key="Str_Guided_SavedMacro">Сақталған макрос: {0}</sys:String>
+    <sys:String x:Key="Str_Guided_Complete">{0} сақталды. Өлшемі: {1} мәнінен {2} мәніне өзгерді.</sys:String>
+    <sys:String x:Key="Str_Guided_Changed">Бастапқы құжат өзгерді. Нұсқаулықпен орындалатын тапсырмаларды жауып, қайта ашыңыз.</sys:String>
+    <sys:String x:Key="Str_Guided_Unavailable">Нұсқаулықпен орындалатын тапсырмалар қол қойылған немесе тек оқуға арналған PDF файлдарын өзгерте алмайды.</sys:String>
+    <sys:String x:Key="Str_Guided_RedactConfirm">Сақталған көшірмедегі {1} беттен таңдалған {0} аймақ біржола жойылсын ба?</sys:String>
+    <sys:String x:Key="Str_Guided_NoSelection">Ештеңе таңдалмады. Көшірме сақталмады.</sys:String>
+    <sys:String x:Key="Str_Guided_Retry">Қайталау</sys:String>
+    <sys:String x:Key="Str_Guided_Replace" xml:space="preserve">Бар файл ауыстырылсын ба?&#10;{0}</sys:String>
 </ResourceDictionary>

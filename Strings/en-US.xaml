@@ -1847,4 +1847,29 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Paragraph_Changed">The document changed. Reopen paragraph editing to continue.</sys:String>
     <sys:String x:Key="Str_Paragraph_Original">Original</sys:String>
     <sys:String x:Key="Str_Paragraph_Result">Edited preview</sys:String>
+    <sys:String x:Key="Str_Guided_Title">Guided tasks</sys:String>
+    <sys:String x:Key="Str_Guided_Email">Prepare for email</sys:String>
+    <sys:String x:Key="Str_Guided_Scan">Clean up a scan</sys:String>
+    <sys:String x:Key="Str_Guided_Privacy">Remove sensitive information</sys:String>
+    <sys:String x:Key="Str_Guided_Form">Create a fillable form</sys:String>
+    <sys:String x:Key="Str_Guided_EmailHint">Optimize the PDF without reducing image quality. Optional flattening makes form fields non-editable. The final size is shown after saving.</sys:String>
+    <sys:String x:Key="Str_Guided_ScanHint">Add searchable text using the current OCR language, then optimize the PDF. You can turn off OCR to optimize an already searchable scan.</sys:String>
+    <sys:String x:Key="Str_Guided_PrivacyHint">Review text matches and existing redaction marks before removing content. Any page-image conversion needs your approval. Review the saved copy before sharing.</sys:String>
+    <sys:String x:Key="Str_Guided_FormHint">Review detected fields and their names before adding them to a copy. Only accepted fields are added.</sys:String>
+    <sys:String x:Key="Str_Guided_CopyHint">The original PDF and current edits stay unchanged. Choose a different PDF file for the result.</sys:String>
+    <sys:String x:Key="Str_Guided_Output">Save copy to</sys:String>
+    <sys:String x:Key="Str_Guided_Flatten">Flatten form fields</sys:String>
+    <sys:String x:Key="Str_Guided_Ocr">Make the scan searchable</sys:String>
+    <sys:String x:Key="Str_Guided_Search">Find more text to remove</sys:String>
+    <sys:String x:Key="Str_Guided_Marks">Existing redaction marks: {0}</sys:String>
+    <sys:String x:Key="Str_Guided_SaveMacro">Save as macro</sys:String>
+    <sys:String x:Key="Str_Guided_MacroHint">Email and scan tasks can be saved as macros. OCR uses the language selected when the macro runs. Redaction and form tasks require document-specific review.</sys:String>
+    <sys:String x:Key="Str_Guided_SavedMacro">Saved macro: {0}</sys:String>
+    <sys:String x:Key="Str_Guided_Complete">Saved {0}. Size: {1} to {2}.</sys:String>
+    <sys:String x:Key="Str_Guided_Changed">The source document changed. Close Guided tasks and open it again.</sys:String>
+    <sys:String x:Key="Str_Guided_Unavailable">Guided tasks cannot change signed or read-only PDFs.</sys:String>
+    <sys:String x:Key="Str_Guided_RedactConfirm">Permanently remove {0} selected areas from {1} pages in the saved copy?</sys:String>
+    <sys:String x:Key="Str_Guided_NoSelection">Nothing was selected. No copy was saved.</sys:String>
+    <sys:String x:Key="Str_Guided_Retry">Retry</sys:String>
+    <sys:String x:Key="Str_Guided_Replace" xml:space="preserve">Replace the existing file?&#10;{0}</sys:String>
 </ResourceDictionary>

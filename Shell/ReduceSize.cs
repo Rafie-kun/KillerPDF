@@ -82,23 +82,28 @@ namespace KillerPDF
         {
             Dictionary<int, int> rotations = SnapshotPageRotations();
             string clean = App.MakeTempFile("reduceclean");
-            _doc!.Save(clean);
-            PdfEngineIntegration.RepairHarmlessSaveArtifacts(clean);
-            PdfEngineIntegration.StripLinkAppearances(clean);
             string copy = App.MakeTempFile("reduce");
-            System.IO.File.Copy(clean, copy, true);
-            PdfEngineIntegration.ClearInvalidatedSignatures(copy);
-            if (_annotations.Values.Any(list => list.Count > 0) || HasActiveStamps)
+            try
             {
-                PdfEngineBurn.Burn(copy, _annotations, _renderDims, _docStampSpec, null, _pageRotations,
-                    forRasterization: forRasterization, measurementsAsAnnotations: true);
-                PdfEngineIntegration.StripLinkAppearances(copy);
+                _doc!.Save(clean);
+                PdfEngineIntegration.RepairHarmlessSaveArtifacts(clean);
+                PdfEngineIntegration.StripLinkAppearances(clean);
+                System.IO.File.Copy(clean, copy, true);
+                PdfEngineIntegration.ClearInvalidatedSignatures(copy);
+                if (_annotations.Values.Any(list => list.Count > 0) || HasActiveStamps)
+                {
+                    PdfEngineBurn.Burn(copy, _annotations, _renderDims, _docStampSpec, null, _pageRotations,
+                        forRasterization: forRasterization, measurementsAsAnnotations: true);
+                    PdfEngineIntegration.StripLinkAppearances(copy);
+                }
+                WriteFormValuesToDocument(copy);
+                WriteRedactionMarksToDocument(copy);
+                WriteMeasurementsToDocument(copy);
+                PdfEngineIntegration.ApplyPageRotations(copy, rotations);
+                return copy;
             }
-            WriteFormValuesToDocument(copy);
-            WriteRedactionMarksToDocument(copy);
-            WriteMeasurementsToDocument(copy);
-            PdfEngineIntegration.ApplyPageRotations(copy, rotations);
-            return copy;
+            catch { System.IO.File.Delete(copy); throw; }
+            finally { System.IO.File.Delete(clean); }
         }
     }
 }

@@ -1829,4 +1829,30 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">文件已變更。請重新開啟段落編輯以繼續。</sys:String>
     <sys:String x:Key="Str_Paragraph_Original">原文</sys:String>
     <sys:String x:Key="Str_Paragraph_Result">編輯後預覽</sys:String>
+
+    <sys:String x:Key="Str_Guided_Title">引導式工作</sys:String>
+    <sys:String x:Key="Str_Guided_Email">準備電子郵件附件</sys:String>
+    <sys:String x:Key="Str_Guided_Scan">清理掃描文件</sys:String>
+    <sys:String x:Key="Str_Guided_Privacy">移除敏感資訊</sys:String>
+    <sys:String x:Key="Str_Guided_Form">建立可填寫表單</sys:String>
+    <sys:String x:Key="Str_Guided_EmailHint">最佳化 PDF，而不降低影像品質。可選擇將表單欄位平面化，使其無法編輯。儲存後會顯示最終大小。</sys:String>
+    <sys:String x:Key="Str_Guided_ScanHint">使用目前的 OCR 語言新增可搜尋的文字，然後最佳化 PDF。如果掃描文件已可搜尋，可以關閉 OCR。</sys:String>
+    <sys:String x:Key="Str_Guided_PrivacyHint">移除內容前，請檢查文字比對結果和現有的塗黑標記。任何頁面轉影像操作都需要您的同意。分享前，請檢查已儲存的複本。</sys:String>
+    <sys:String x:Key="Str_Guided_FormHint">將偵測到的欄位加入複本前，請檢查欄位及其名稱。只會加入已接受的欄位。</sys:String>
+    <sys:String x:Key="Str_Guided_CopyHint">原始 PDF 和目前的編輯內容保持不變。請選擇其他 PDF 檔案來儲存結果。</sys:String>
+    <sys:String x:Key="Str_Guided_Output">複本儲存位置</sys:String>
+    <sys:String x:Key="Str_Guided_Flatten">平面化表單欄位</sys:String>
+    <sys:String x:Key="Str_Guided_Ocr">讓掃描文件可供搜尋</sys:String>
+    <sys:String x:Key="Str_Guided_Search">尋找更多要移除的文字</sys:String>
+    <sys:String x:Key="Str_Guided_Marks">現有塗黑標記：{0}</sys:String>
+    <sys:String x:Key="Str_Guided_SaveMacro">儲存為巨集</sys:String>
+    <sys:String x:Key="Str_Guided_MacroHint">電子郵件和掃描工作可以儲存為巨集。OCR 使用執行巨集時選取的語言。塗黑和表單工作需要針對個別文件進行檢查。</sys:String>
+    <sys:String x:Key="Str_Guided_SavedMacro">已儲存巨集：{0}</sys:String>
+    <sys:String x:Key="Str_Guided_Complete">已儲存 {0}。大小：從 {1} 變為 {2}。</sys:String>
+    <sys:String x:Key="Str_Guided_Changed">來源文件已變更。請關閉引導式工作後重新開啟。</sys:String>
+    <sys:String x:Key="Str_Guided_Unavailable">引導式工作無法變更已簽署或唯讀的 PDF。</sys:String>
+    <sys:String x:Key="Str_Guided_RedactConfirm">是否從儲存的複本中永久移除 {1} 頁上選取的 {0} 個區域？</sys:String>
+    <sys:String x:Key="Str_Guided_NoSelection">未選取任何內容。未儲存複本。</sys:String>
+    <sys:String x:Key="Str_Guided_Retry">重試</sys:String>
+    <sys:String x:Key="Str_Guided_Replace" xml:space="preserve">取代現有檔案？&#10;{0}</sys:String>
 </ResourceDictionary>

@@ -1831,4 +1831,30 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">文档已更改。请重新打开段落编辑以继续。</sys:String>
     <sys:String x:Key="Str_Paragraph_Original">原文</sys:String>
     <sys:String x:Key="Str_Paragraph_Result">编辑后预览</sys:String>
+
+    <sys:String x:Key="Str_Guided_Title">引导式任务</sys:String>
+    <sys:String x:Key="Str_Guided_Email">准备邮件附件</sys:String>
+    <sys:String x:Key="Str_Guided_Scan">清理扫描件</sys:String>
+    <sys:String x:Key="Str_Guided_Privacy">删除敏感信息</sys:String>
+    <sys:String x:Key="Str_Guided_Form">创建可填写表单</sys:String>
+    <sys:String x:Key="Str_Guided_EmailHint">优化 PDF，而不降低图像质量。可选择将表单字段扁平化，使其无法编辑。保存后将显示最终大小。</sys:String>
+    <sys:String x:Key="Str_Guided_ScanHint">使用当前 OCR 语言添加可搜索的文本，然后优化 PDF。如果扫描件已支持搜索，可以关闭 OCR。</sys:String>
+    <sys:String x:Key="Str_Guided_PrivacyHint">删除内容前，请检查文本匹配结果和现有的涂黑标记。任何页面转图像操作都需要您的批准。分享前，请检查已保存的副本。</sys:String>
+    <sys:String x:Key="Str_Guided_FormHint">将检测到的字段添加到副本前，请检查字段及其名称。仅添加已接受的字段。</sys:String>
+    <sys:String x:Key="Str_Guided_CopyHint">原始 PDF 和当前编辑保持不变。请选择其他 PDF 文件来保存结果。</sys:String>
+    <sys:String x:Key="Str_Guided_Output">副本保存到</sys:String>
+    <sys:String x:Key="Str_Guided_Flatten">扁平化表单字段</sys:String>
+    <sys:String x:Key="Str_Guided_Ocr">使扫描件支持搜索</sys:String>
+    <sys:String x:Key="Str_Guided_Search">查找更多要删除的文本</sys:String>
+    <sys:String x:Key="Str_Guided_Marks">现有涂黑标记：{0}</sys:String>
+    <sys:String x:Key="Str_Guided_SaveMacro">保存为宏</sys:String>
+    <sys:String x:Key="Str_Guided_MacroHint">邮件和扫描任务可以保存为宏。OCR 使用运行宏时选定的语言。涂黑和表单任务需要针对具体文档进行检查。</sys:String>
+    <sys:String x:Key="Str_Guided_SavedMacro">已保存宏：{0}</sys:String>
+    <sys:String x:Key="Str_Guided_Complete">已保存 {0}。大小：从 {1} 变为 {2}。</sys:String>
+    <sys:String x:Key="Str_Guided_Changed">源文档已更改。请关闭引导式任务后重新打开。</sys:String>
+    <sys:String x:Key="Str_Guided_Unavailable">引导式任务无法更改已签名或只读的 PDF。</sys:String>
+    <sys:String x:Key="Str_Guided_RedactConfirm">是否从保存的副本中永久删除 {1} 页上选定的 {0} 个区域？</sys:String>
+    <sys:String x:Key="Str_Guided_NoSelection">未选择任何内容。未保存副本。</sys:String>
+    <sys:String x:Key="Str_Guided_Retry">重试</sys:String>
+    <sys:String x:Key="Str_Guided_Replace" xml:space="preserve">替换现有文件？&#10;{0}</sys:String>
 </ResourceDictionary>

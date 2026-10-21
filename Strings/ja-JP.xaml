@@ -1847,4 +1847,30 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">ドキュメントが変更されました。段落編集を開き直して続行してください。</sys:String>
     <sys:String x:Key="Str_Paragraph_Original">元の内容</sys:String>
     <sys:String x:Key="Str_Paragraph_Result">編集後のプレビュー</sys:String>
+
+    <sys:String x:Key="Str_Guided_Title">ガイド付きタスク</sys:String>
+    <sys:String x:Key="Str_Guided_Email">メール送信用に準備</sys:String>
+    <sys:String x:Key="Str_Guided_Scan">スキャンを整理</sys:String>
+    <sys:String x:Key="Str_Guided_Privacy">機密情報を削除</sys:String>
+    <sys:String x:Key="Str_Guided_Form">入力可能なフォームを作成</sys:String>
+    <sys:String x:Key="Str_Guided_EmailHint">画像の品質を下げずにPDFを最適化します。必要に応じてフォームフィールドを統合し、編集できなくすることもできます。最終的なサイズは保存後に表示されます。</sys:String>
+    <sys:String x:Key="Str_Guided_ScanHint">現在のOCR言語で検索可能なテキストを追加し、PDFを最適化します。すでに検索可能なスキャンを最適化する場合は、OCRをオフにできます。</sys:String>
+    <sys:String x:Key="Str_Guided_PrivacyHint">内容を削除する前に、テキストの一致箇所と既存の墨消しマークを確認してください。ページを画像に変換するには、その都度承認が必要です。共有する前に保存したコピーを確認してください。</sys:String>
+    <sys:String x:Key="Str_Guided_FormHint">コピーに追加する前に、検出されたフィールドとその名前を確認してください。承認したフィールドのみが追加されます。</sys:String>
+    <sys:String x:Key="Str_Guided_CopyHint">元のPDFと現在の編集内容は変更されません。結果の保存先には別のPDFファイルを選択してください。</sys:String>
+    <sys:String x:Key="Str_Guided_Output">コピーの保存先</sys:String>
+    <sys:String x:Key="Str_Guided_Flatten">フォームフィールドを統合</sys:String>
+    <sys:String x:Key="Str_Guided_Ocr">スキャンを検索可能にする</sys:String>
+    <sys:String x:Key="Str_Guided_Search">削除するテキストをさらに検索</sys:String>
+    <sys:String x:Key="Str_Guided_Marks">既存の墨消しマーク: {0}</sys:String>
+    <sys:String x:Key="Str_Guided_SaveMacro">マクロとして保存</sys:String>
+    <sys:String x:Key="Str_Guided_MacroHint">メールとスキャンのタスクはマクロとして保存できます。OCRにはマクロ実行時に選択されている言語が使用されます。墨消しとフォームのタスクでは、文書ごとの確認が必要です。</sys:String>
+    <sys:String x:Key="Str_Guided_SavedMacro">保存したマクロ: {0}</sys:String>
+    <sys:String x:Key="Str_Guided_Complete">{0} を保存しました。サイズ: {1} から {2}。</sys:String>
+    <sys:String x:Key="Str_Guided_Changed">元の文書が変更されました。ガイド付きタスクを閉じて、もう一度開いてください。</sys:String>
+    <sys:String x:Key="Str_Guided_Unavailable">ガイド付きタスクでは、署名済みまたは読み取り専用のPDFは変更できません。</sys:String>
+    <sys:String x:Key="Str_Guided_RedactConfirm">保存するコピーの {1} ページから、選択した {0} 個の領域を完全に削除しますか？</sys:String>
+    <sys:String x:Key="Str_Guided_NoSelection">何も選択されていません。コピーは保存されませんでした。</sys:String>
+    <sys:String x:Key="Str_Guided_Retry">再試行</sys:String>
+    <sys:String x:Key="Str_Guided_Replace" xml:space="preserve">既存のファイルを置き換えますか？&#10;{0}</sys:String>
 </ResourceDictionary>

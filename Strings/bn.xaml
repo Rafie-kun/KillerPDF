@@ -1827,4 +1827,30 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Paragraph_Changed">নথিটি পরিবর্তিত হয়েছে। চালিয়ে যেতে অনুচ্ছেদ সম্পাদনা আবার খুলুন।</sys:String>
     <sys:String x:Key="Str_Paragraph_Original">মূল</sys:String>
     <sys:String x:Key="Str_Paragraph_Result">সম্পাদিত পূর্বরূপ</sys:String>
+
+    <sys:String x:Key="Str_Guided_Title">নির্দেশিত কাজ</sys:String>
+    <sys:String x:Key="Str_Guided_Email">ইমেইলের জন্য প্রস্তুত করুন</sys:String>
+    <sys:String x:Key="Str_Guided_Scan">স্ক্যান পরিষ্কার করুন</sys:String>
+    <sys:String x:Key="Str_Guided_Privacy">সংবেদনশীল তথ্য সরান</sys:String>
+    <sys:String x:Key="Str_Guided_Form">পূরণযোগ্য ফর্ম তৈরি করুন</sys:String>
+    <sys:String x:Key="Str_Guided_EmailHint">ছবির গুণমান না কমিয়ে PDF অপ্টিমাইজ করুন। চাইলে ফর্মের ঘর সমতল করে সেগুলো সম্পাদনার অযোগ্য করতে পারেন। সংরক্ষণের পর চূড়ান্ত আকার দেখানো হবে।</sys:String>
+    <sys:String x:Key="Str_Guided_ScanHint">বর্তমান OCR ভাষা ব্যবহার করে অনুসন্ধানযোগ্য লেখা যোগ করুন, তারপর PDF অপ্টিমাইজ করুন। স্ক্যানে আগে থেকেই অনুসন্ধান করা গেলে অপ্টিমাইজ করার সময় OCR বন্ধ রাখতে পারেন।</sys:String>
+    <sys:String x:Key="Str_Guided_PrivacyHint">বিষয়বস্তু সরানোর আগে লেখার মিল ও বিদ্যমান রেডাকশন চিহ্নগুলো পর্যালোচনা করুন। প্রতিবার পৃষ্ঠাকে ছবিতে রূপান্তর করতে আপনার অনুমোদন লাগবে। শেয়ার করার আগে সংরক্ষিত অনুলিপি পর্যালোচনা করুন।</sys:String>
+    <sys:String x:Key="Str_Guided_FormHint">অনুলিপিতে যোগ করার আগে শনাক্ত করা ঘর ও সেগুলোর নাম পর্যালোচনা করুন। শুধু গ্রহণ করা ঘরগুলোই যোগ করা হবে।</sys:String>
+    <sys:String x:Key="Str_Guided_CopyHint">মূল PDF ও বর্তমান সম্পাদনা অপরিবর্তিত থাকবে। ফলাফলের জন্য অন্য PDF ফাইল বেছে নিন।</sys:String>
+    <sys:String x:Key="Str_Guided_Output">অনুলিপি সংরক্ষণের স্থান</sys:String>
+    <sys:String x:Key="Str_Guided_Flatten">ফর্মের ঘর সমতল করুন</sys:String>
+    <sys:String x:Key="Str_Guided_Ocr">স্ক্যানে অনুসন্ধান চালু করুন</sys:String>
+    <sys:String x:Key="Str_Guided_Search">সরানোর জন্য আরও লেখা খুঁজুন</sys:String>
+    <sys:String x:Key="Str_Guided_Marks">বিদ্যমান রেডাকশন চিহ্ন: {0}</sys:String>
+    <sys:String x:Key="Str_Guided_SaveMacro">ম্যাক্রো হিসেবে সংরক্ষণ করুন</sys:String>
+    <sys:String x:Key="Str_Guided_MacroHint">ইমেইল ও স্ক্যানের কাজ ম্যাক্রো হিসেবে সংরক্ষণ করা যায়। ম্যাক্রো চালানোর সময় নির্বাচিত ভাষা OCR ব্যবহার করে। রেডাকশন ও ফর্মের কাজে প্রতিটি নথি আলাদাভাবে পর্যালোচনা করতে হয়।</sys:String>
+    <sys:String x:Key="Str_Guided_SavedMacro">সংরক্ষিত ম্যাক্রো: {0}</sys:String>
+    <sys:String x:Key="Str_Guided_Complete">{0} সংরক্ষিত হয়েছে। আকার: {1} থেকে {2}।</sys:String>
+    <sys:String x:Key="Str_Guided_Changed">উৎস নথি বদলে গেছে। নির্দেশিত কাজ বন্ধ করে আবার খুলুন।</sys:String>
+    <sys:String x:Key="Str_Guided_Unavailable">নির্দেশিত কাজ স্বাক্ষরিত বা শুধু পড়ার PDF পরিবর্তন করতে পারে না।</sys:String>
+    <sys:String x:Key="Str_Guided_RedactConfirm">সংরক্ষিত অনুলিপির {1}টি পৃষ্ঠা থেকে নির্বাচিত {0}টি অংশ স্থায়ীভাবে সরাবেন?</sys:String>
+    <sys:String x:Key="Str_Guided_NoSelection">কিছুই নির্বাচন করা হয়নি। কোনো অনুলিপি সংরক্ষিত হয়নি।</sys:String>
+    <sys:String x:Key="Str_Guided_Retry">আবার চেষ্টা করুন</sys:String>
+    <sys:String x:Key="Str_Guided_Replace" xml:space="preserve">বিদ্যমান ফাইল প্রতিস্থাপন করবেন?&#10;{0}</sys:String>
 </ResourceDictionary>

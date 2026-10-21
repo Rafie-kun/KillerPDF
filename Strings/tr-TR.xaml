@@ -1827,4 +1827,30 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Paragraph_Changed">Belge değişti. Devam etmek için paragraf düzenlemeyi yeniden açın.</sys:String>
     <sys:String x:Key="Str_Paragraph_Original">Özgün</sys:String>
     <sys:String x:Key="Str_Paragraph_Result">Düzenlenmiş önizleme</sys:String>
+
+    <sys:String x:Key="Str_Guided_Title">Rehberli görevler</sys:String>
+    <sys:String x:Key="Str_Guided_Email">E-posta için hazırla</sys:String>
+    <sys:String x:Key="Str_Guided_Scan">Taranmış belgeyi temizle</sys:String>
+    <sys:String x:Key="Str_Guided_Privacy">Hassas bilgileri kaldır</sys:String>
+    <sys:String x:Key="Str_Guided_Form">Doldurulabilir form oluştur</sys:String>
+    <sys:String x:Key="Str_Guided_EmailHint">Görüntü kalitesini düşürmeden PDF’yi optimize edin. İsteğe bağlı düzleştirme, form alanlarını düzenlenemez hale getirir. Son boyut kaydettikten sonra gösterilir.</sys:String>
+    <sys:String x:Key="Str_Guided_ScanHint">Geçerli OCR dilini kullanarak aranabilir metin ekleyin, ardından PDF’yi optimize edin. Zaten aranabilir olan bir taramayı optimize etmek için OCR’yi kapatabilirsiniz.</sys:String>
+    <sys:String x:Key="Str_Guided_PrivacyHint">İçeriği kaldırmadan önce metin eşleşmelerini ve mevcut karartma işaretlerini inceleyin. Her sayfa görüntüsü dönüşümü onayınızı gerektirir. Paylaşmadan önce kaydedilen kopyayı inceleyin.</sys:String>
+    <sys:String x:Key="Str_Guided_FormHint">Bir kopyaya eklemeden önce algılanan alanları ve adlarını inceleyin. Yalnızca kabul edilen alanlar eklenir.</sys:String>
+    <sys:String x:Key="Str_Guided_CopyHint">Orijinal PDF ve mevcut düzenlemeler değişmeden kalır. Sonuç için farklı bir PDF dosyası seçin.</sys:String>
+    <sys:String x:Key="Str_Guided_Output">Kopyanın kaydedileceği yer</sys:String>
+    <sys:String x:Key="Str_Guided_Flatten">Form alanlarını düzleştir</sys:String>
+    <sys:String x:Key="Str_Guided_Ocr">Taramayı aranabilir yap</sys:String>
+    <sys:String x:Key="Str_Guided_Search">Kaldırılacak başka metin bul</sys:String>
+    <sys:String x:Key="Str_Guided_Marks">Mevcut karartma işaretleri: {0}</sys:String>
+    <sys:String x:Key="Str_Guided_SaveMacro">Makro olarak kaydet</sys:String>
+    <sys:String x:Key="Str_Guided_MacroHint">E-posta ve tarama görevleri makro olarak kaydedilebilir. OCR, makro çalıştırıldığında seçili olan dili kullanır. Karartma ve form görevleri belgeye özel inceleme gerektirir.</sys:String>
+    <sys:String x:Key="Str_Guided_SavedMacro">Kaydedilen makro: {0}</sys:String>
+    <sys:String x:Key="Str_Guided_Complete">{0} kaydedildi. Boyut: {1} yerine {2}.</sys:String>
+    <sys:String x:Key="Str_Guided_Changed">Kaynak belge değişti. Rehberli görevleri kapatıp yeniden açın.</sys:String>
+    <sys:String x:Key="Str_Guided_Unavailable">Rehberli görevler imzalı veya salt okunur PDF’leri değiştiremez.</sys:String>
+    <sys:String x:Key="Str_Guided_RedactConfirm">Kaydedilen kopyada {1} sayfadaki seçili {0} alan kalıcı olarak kaldırılsın mı?</sys:String>
+    <sys:String x:Key="Str_Guided_NoSelection">Hiçbir şey seçilmedi. Kopya kaydedilmedi.</sys:String>
+    <sys:String x:Key="Str_Guided_Retry">Yeniden dene</sys:String>
+    <sys:String x:Key="Str_Guided_Replace" xml:space="preserve">Mevcut dosya değiştirilsin mi?&#10;{0}</sys:String>
 </ResourceDictionary>

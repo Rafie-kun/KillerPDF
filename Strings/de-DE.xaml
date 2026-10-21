@@ -1836,4 +1836,30 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Paragraph_Changed">Das Dokument wurde geändert. Öffnen Sie die Absatzbearbeitung erneut, um fortzufahren.</sys:String>
     <sys:String x:Key="Str_Paragraph_Original">Original</sys:String>
     <sys:String x:Key="Str_Paragraph_Result">Bearbeitete Vorschau</sys:String>
+
+    <sys:String x:Key="Str_Guided_Title">Geführte Aufgaben</sys:String>
+    <sys:String x:Key="Str_Guided_Email">Für E-Mail vorbereiten</sys:String>
+    <sys:String x:Key="Str_Guided_Scan">Scan bereinigen</sys:String>
+    <sys:String x:Key="Str_Guided_Privacy">Vertrauliche Informationen entfernen</sys:String>
+    <sys:String x:Key="Str_Guided_Form">Ausfüllbares Formular erstellen</sys:String>
+    <sys:String x:Key="Str_Guided_EmailHint">PDF ohne Verlust der Bildqualität optimieren. Optional können Formularfelder eingebettet werden, sodass sie nicht mehr bearbeitbar sind. Die endgültige Größe wird nach dem Speichern angezeigt.</sys:String>
+    <sys:String x:Key="Str_Guided_ScanHint">Mit der aktuellen OCR-Sprache durchsuchbaren Text hinzufügen und dann das PDF optimieren. Deaktivieren Sie OCR, um einen bereits durchsuchbaren Scan zu optimieren.</sys:String>
+    <sys:String x:Key="Str_Guided_PrivacyHint">Prüfen Sie Texttreffer und vorhandene Schwärzungsmarkierungen, bevor Inhalte entfernt werden. Jede Umwandlung einer Seite in ein Bild erfordert Ihre Zustimmung. Prüfen Sie die gespeicherte Kopie vor der Weitergabe.</sys:String>
+    <sys:String x:Key="Str_Guided_FormHint">Prüfen Sie erkannte Felder und ihre Namen, bevor Sie sie einer Kopie hinzufügen. Nur bestätigte Felder werden hinzugefügt.</sys:String>
+    <sys:String x:Key="Str_Guided_CopyHint">Das ursprüngliche PDF und die aktuellen Änderungen bleiben unverändert. Wählen Sie eine andere PDF-Datei für das Ergebnis.</sys:String>
+    <sys:String x:Key="Str_Guided_Output">Kopie speichern unter</sys:String>
+    <sys:String x:Key="Str_Guided_Flatten">Formularfelder einbetten</sys:String>
+    <sys:String x:Key="Str_Guided_Ocr">Scan durchsuchbar machen</sys:String>
+    <sys:String x:Key="Str_Guided_Search">Weiteren zu entfernenden Text suchen</sys:String>
+    <sys:String x:Key="Str_Guided_Marks">Vorhandene Schwärzungsmarkierungen: {0}</sys:String>
+    <sys:String x:Key="Str_Guided_SaveMacro">Als Makro speichern</sys:String>
+    <sys:String x:Key="Str_Guided_MacroHint">E-Mail- und Scanaufgaben können als Makros gespeichert werden. OCR verwendet die beim Ausführen des Makros ausgewählte Sprache. Schwärzungs- und Formularaufgaben erfordern eine Prüfung des jeweiligen Dokuments.</sys:String>
+    <sys:String x:Key="Str_Guided_SavedMacro">Makro gespeichert: {0}</sys:String>
+    <sys:String x:Key="Str_Guided_Complete">{0} gespeichert. Größe: {1} auf {2}.</sys:String>
+    <sys:String x:Key="Str_Guided_Changed">Das Quelldokument wurde geändert. Schließen Sie die geführten Aufgaben und öffnen Sie sie erneut.</sys:String>
+    <sys:String x:Key="Str_Guided_Unavailable">Geführte Aufgaben können signierte oder schreibgeschützte PDFs nicht ändern.</sys:String>
+    <sys:String x:Key="Str_Guided_RedactConfirm">{0} ausgewählte Bereiche auf {1} Seiten dauerhaft aus der gespeicherten Kopie entfernen?</sys:String>
+    <sys:String x:Key="Str_Guided_NoSelection">Nichts ausgewählt. Es wurde keine Kopie gespeichert.</sys:String>
+    <sys:String x:Key="Str_Guided_Retry">Erneut versuchen</sys:String>
+    <sys:String x:Key="Str_Guided_Replace" xml:space="preserve">Vorhandene Datei ersetzen?&#10;{0}</sys:String>
 </ResourceDictionary>

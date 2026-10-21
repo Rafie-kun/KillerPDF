@@ -1847,4 +1847,30 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_Paragraph_Changed">Il documento è cambiato. Riapri la modifica del paragrafo per continuare.</sys:String>
     <sys:String x:Key="Str_Paragraph_Original">Originale</sys:String>
     <sys:String x:Key="Str_Paragraph_Result">Anteprima modificata</sys:String>
+
+    <sys:String x:Key="Str_Guided_Title">Attività guidate</sys:String>
+    <sys:String x:Key="Str_Guided_Email">Prepara per l’invio via e-mail</sys:String>
+    <sys:String x:Key="Str_Guided_Scan">Pulisci una scansione</sys:String>
+    <sys:String x:Key="Str_Guided_Privacy">Rimuovi informazioni sensibili</sys:String>
+    <sys:String x:Key="Str_Guided_Form">Crea un modulo compilabile</sys:String>
+    <sys:String x:Key="Str_Guided_EmailHint">Ottimizza il PDF senza ridurre la qualità delle immagini. L’appiattimento facoltativo rende i campi del modulo non modificabili. La dimensione finale viene mostrata dopo il salvataggio.</sys:String>
+    <sys:String x:Key="Str_Guided_ScanHint">Aggiungi testo ricercabile usando la lingua OCR attuale, poi ottimizza il PDF. Puoi disattivare l’OCR per ottimizzare una scansione già ricercabile.</sys:String>
+    <sys:String x:Key="Str_Guided_PrivacyHint">Controlla le corrispondenze del testo e i segni di oscuramento esistenti prima di rimuovere il contenuto. Ogni conversione di pagina in immagine richiede la tua approvazione. Controlla la copia salvata prima di condividerla.</sys:String>
+    <sys:String x:Key="Str_Guided_FormHint">Controlla i campi rilevati e i loro nomi prima di aggiungerli a una copia. Vengono aggiunti solo i campi accettati.</sys:String>
+    <sys:String x:Key="Str_Guided_CopyHint">Il PDF originale e le modifiche attuali restano invariati. Scegli un file PDF diverso per il risultato.</sys:String>
+    <sys:String x:Key="Str_Guided_Output">Salva copia in</sys:String>
+    <sys:String x:Key="Str_Guided_Flatten">Appiattisci i campi del modulo</sys:String>
+    <sys:String x:Key="Str_Guided_Ocr">Rendi ricercabile la scansione</sys:String>
+    <sys:String x:Key="Str_Guided_Search">Trova altro testo da rimuovere</sys:String>
+    <sys:String x:Key="Str_Guided_Marks">Segni di oscuramento esistenti: {0}</sys:String>
+    <sys:String x:Key="Str_Guided_SaveMacro">Salva come macro</sys:String>
+    <sys:String x:Key="Str_Guided_MacroHint">Le attività di e-mail e scansione possono essere salvate come macro. L’OCR usa la lingua selezionata quando viene eseguita la macro. Le attività di oscuramento e dei moduli richiedono il controllo del singolo documento.</sys:String>
+    <sys:String x:Key="Str_Guided_SavedMacro">Macro salvata: {0}</sys:String>
+    <sys:String x:Key="Str_Guided_Complete">{0} salvato. Dimensione: da {1} a {2}.</sys:String>
+    <sys:String x:Key="Str_Guided_Changed">Il documento di origine è cambiato. Chiudi le attività guidate e riaprile.</sys:String>
+    <sys:String x:Key="Str_Guided_Unavailable">Le attività guidate non possono modificare PDF firmati o di sola lettura.</sys:String>
+    <sys:String x:Key="Str_Guided_RedactConfirm">Rimuovere definitivamente {0} aree selezionate da {1} pagine nella copia salvata?</sys:String>
+    <sys:String x:Key="Str_Guided_NoSelection">Nessuna selezione. Nessuna copia salvata.</sys:String>
+    <sys:String x:Key="Str_Guided_Retry">Riprova</sys:String>
+    <sys:String x:Key="Str_Guided_Replace" xml:space="preserve">Sostituire il file esistente?&#10;{0}</sys:String>
 </ResourceDictionary>

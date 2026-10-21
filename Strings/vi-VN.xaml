@@ -1847,4 +1847,30 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Paragraph_Changed">Tài liệu đã thay đổi. Hãy mở lại công cụ chỉnh sửa đoạn văn để tiếp tục.</sys:String>
     <sys:String x:Key="Str_Paragraph_Original">Bản gốc</sys:String>
     <sys:String x:Key="Str_Paragraph_Result">Bản xem trước sau khi sửa</sys:String>
+
+    <sys:String x:Key="Str_Guided_Title">Tác vụ có hướng dẫn</sys:String>
+    <sys:String x:Key="Str_Guided_Email">Chuẩn bị để gửi email</sys:String>
+    <sys:String x:Key="Str_Guided_Scan">Làm sạch bản quét</sys:String>
+    <sys:String x:Key="Str_Guided_Privacy">Xóa thông tin nhạy cảm</sys:String>
+    <sys:String x:Key="Str_Guided_Form">Tạo biểu mẫu có thể điền</sys:String>
+    <sys:String x:Key="Str_Guided_EmailHint">Tối ưu PDF mà không giảm chất lượng hình ảnh. Tùy chọn làm phẳng sẽ khiến trường biểu mẫu không thể chỉnh sửa. Kích thước cuối cùng được hiển thị sau khi lưu.</sys:String>
+    <sys:String x:Key="Str_Guided_ScanHint">Thêm văn bản có thể tìm kiếm bằng ngôn ngữ OCR hiện tại, sau đó tối ưu PDF. Bạn có thể tắt OCR để tối ưu bản quét đã có thể tìm kiếm.</sys:String>
+    <sys:String x:Key="Str_Guided_PrivacyHint">Kiểm tra các kết quả khớp văn bản và dấu che thông tin hiện có trước khi xóa nội dung. Mọi chuyển đổi trang thành hình ảnh đều cần bạn chấp thuận. Kiểm tra bản sao đã lưu trước khi chia sẻ.</sys:String>
+    <sys:String x:Key="Str_Guided_FormHint">Kiểm tra các trường được phát hiện và tên trường trước khi thêm vào bản sao. Chỉ các trường được chấp nhận mới được thêm.</sys:String>
+    <sys:String x:Key="Str_Guided_CopyHint">PDF gốc và các chỉnh sửa hiện tại được giữ nguyên. Chọn tệp PDF khác để lưu kết quả.</sys:String>
+    <sys:String x:Key="Str_Guided_Output">Lưu bản sao vào</sys:String>
+    <sys:String x:Key="Str_Guided_Flatten">Làm phẳng trường biểu mẫu</sys:String>
+    <sys:String x:Key="Str_Guided_Ocr">Cho phép tìm kiếm trong bản quét</sys:String>
+    <sys:String x:Key="Str_Guided_Search">Tìm thêm văn bản cần xóa</sys:String>
+    <sys:String x:Key="Str_Guided_Marks">Dấu che thông tin hiện có: {0}</sys:String>
+    <sys:String x:Key="Str_Guided_SaveMacro">Lưu thành macro</sys:String>
+    <sys:String x:Key="Str_Guided_MacroHint">Có thể lưu tác vụ email và quét thành macro. OCR dùng ngôn ngữ được chọn khi chạy macro. Tác vụ che thông tin và biểu mẫu cần được kiểm tra theo từng tài liệu.</sys:String>
+    <sys:String x:Key="Str_Guided_SavedMacro">Đã lưu macro: {0}</sys:String>
+    <sys:String x:Key="Str_Guided_Complete">Đã lưu {0}. Kích thước: từ {1} xuống {2}.</sys:String>
+    <sys:String x:Key="Str_Guided_Changed">Tài liệu nguồn đã thay đổi. Hãy đóng tác vụ có hướng dẫn rồi mở lại.</sys:String>
+    <sys:String x:Key="Str_Guided_Unavailable">Tác vụ có hướng dẫn không thể thay đổi PDF đã ký hoặc chỉ đọc.</sys:String>
+    <sys:String x:Key="Str_Guided_RedactConfirm">Xóa vĩnh viễn {0} vùng đã chọn trên {1} trang trong bản sao được lưu?</sys:String>
+    <sys:String x:Key="Str_Guided_NoSelection">Chưa chọn gì. Không có bản sao nào được lưu.</sys:String>
+    <sys:String x:Key="Str_Guided_Retry">Thử lại</sys:String>
+    <sys:String x:Key="Str_Guided_Replace" xml:space="preserve">Thay thế tệp hiện có?&#10;{0}</sys:String>
 </ResourceDictionary>

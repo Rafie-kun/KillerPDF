@@ -1827,4 +1827,30 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">El documento ha cambiado. Vuelve a abrir la edición de párrafos para continuar.</sys:String>
     <sys:String x:Key="Str_Paragraph_Original">Original</sys:String>
     <sys:String x:Key="Str_Paragraph_Result">Vista previa editada</sys:String>
+
+    <sys:String x:Key="Str_Guided_Title">Tareas guiadas</sys:String>
+    <sys:String x:Key="Str_Guided_Email">Preparar para correo electrónico</sys:String>
+    <sys:String x:Key="Str_Guided_Scan">Limpiar un documento escaneado</sys:String>
+    <sys:String x:Key="Str_Guided_Privacy">Eliminar información confidencial</sys:String>
+    <sys:String x:Key="Str_Guided_Form">Crear un formulario rellenable</sys:String>
+    <sys:String x:Key="Str_Guided_EmailHint">Optimice el PDF sin reducir la calidad de las imágenes. El aplanado opcional impide editar los campos de formulario. El tamaño final se muestra después de guardar.</sys:String>
+    <sys:String x:Key="Str_Guided_ScanHint">Agregue texto que se pueda buscar con el idioma de OCR actual y luego optimice el PDF. Puede desactivar el OCR para optimizar un documento escaneado que ya permita búsquedas.</sys:String>
+    <sys:String x:Key="Str_Guided_PrivacyHint">Revise las coincidencias de texto y las marcas de censura existentes antes de eliminar contenido. Toda conversión de páginas a imágenes requiere su aprobación. Revise la copia guardada antes de compartirla.</sys:String>
+    <sys:String x:Key="Str_Guided_FormHint">Revise los campos detectados y sus nombres antes de agregarlos a una copia. Solo se agregan los campos aceptados.</sys:String>
+    <sys:String x:Key="Str_Guided_CopyHint">El PDF original y los cambios actuales se mantienen intactos. Elija un archivo PDF diferente para el resultado.</sys:String>
+    <sys:String x:Key="Str_Guided_Output">Guardar copia en</sys:String>
+    <sys:String x:Key="Str_Guided_Flatten">Aplanar campos de formulario</sys:String>
+    <sys:String x:Key="Str_Guided_Ocr">Permitir búsquedas en el documento escaneado</sys:String>
+    <sys:String x:Key="Str_Guided_Search">Buscar más texto para eliminar</sys:String>
+    <sys:String x:Key="Str_Guided_Marks">Marcas de censura existentes: {0}</sys:String>
+    <sys:String x:Key="Str_Guided_SaveMacro">Guardar como macro</sys:String>
+    <sys:String x:Key="Str_Guided_MacroHint">Las tareas de correo y escaneo se pueden guardar como macros. El OCR usa el idioma seleccionado al ejecutar la macro. Las tareas de censura y formularios requieren revisar cada documento.</sys:String>
+    <sys:String x:Key="Str_Guided_SavedMacro">Macro guardada: {0}</sys:String>
+    <sys:String x:Key="Str_Guided_Complete">Se guardó {0}. Tamaño: de {1} a {2}.</sys:String>
+    <sys:String x:Key="Str_Guided_Changed">El documento de origen cambió. Cierre las tareas guiadas y vuelva a abrirlas.</sys:String>
+    <sys:String x:Key="Str_Guided_Unavailable">Las tareas guiadas no pueden modificar PDF firmados o de solo lectura.</sys:String>
+    <sys:String x:Key="Str_Guided_RedactConfirm">¿Eliminar permanentemente {0} áreas seleccionadas de {1} páginas en la copia guardada?</sys:String>
+    <sys:String x:Key="Str_Guided_NoSelection">No se seleccionó nada. No se guardó ninguna copia.</sys:String>
+    <sys:String x:Key="Str_Guided_Retry">Reintentar</sys:String>
+    <sys:String x:Key="Str_Guided_Replace" xml:space="preserve">¿Reemplazar el archivo existente?&#10;{0}</sys:String>
 </ResourceDictionary>

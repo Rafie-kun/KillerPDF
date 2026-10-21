@@ -1850,4 +1850,30 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Paragraph_Changed">Документ изменился. Снова откройте редактирование абзаца, чтобы продолжить.</sys:String>
     <sys:String x:Key="Str_Paragraph_Original">Оригинал</sys:String>
     <sys:String x:Key="Str_Paragraph_Result">Предпросмотр изменений</sys:String>
+
+    <sys:String x:Key="Str_Guided_Title">Задачи с подсказками</sys:String>
+    <sys:String x:Key="Str_Guided_Email">Подготовить для электронной почты</sys:String>
+    <sys:String x:Key="Str_Guided_Scan">Улучшить скан</sys:String>
+    <sys:String x:Key="Str_Guided_Privacy">Удалить конфиденциальные сведения</sys:String>
+    <sys:String x:Key="Str_Guided_Form">Создать заполняемую форму</sys:String>
+    <sys:String x:Key="Str_Guided_EmailHint">Оптимизируйте PDF без снижения качества изображений. При желании можно свести поля формы, чтобы их нельзя было редактировать. Итоговый размер отображается после сохранения.</sys:String>
+    <sys:String x:Key="Str_Guided_ScanHint">Добавьте текст с возможностью поиска, используя текущий язык OCR, затем оптимизируйте PDF. OCR можно отключить, если поиск в скане уже доступен.</sys:String>
+    <sys:String x:Key="Str_Guided_PrivacyHint">Перед удалением содержимого проверьте совпадения текста и существующие отметки скрытия. Любое преобразование страницы в изображение требует вашего согласия. Проверьте сохраненную копию перед отправкой.</sys:String>
+    <sys:String x:Key="Str_Guided_FormHint">Проверьте обнаруженные поля и их имена, прежде чем добавлять их в копию. Добавляются только подтвержденные поля.</sys:String>
+    <sys:String x:Key="Str_Guided_CopyHint">Исходный PDF и текущие правки останутся без изменений. Выберите другой файл PDF для результата.</sys:String>
+    <sys:String x:Key="Str_Guided_Output">Сохранить копию в</sys:String>
+    <sys:String x:Key="Str_Guided_Flatten">Свести поля формы</sys:String>
+    <sys:String x:Key="Str_Guided_Ocr">Сделать скан доступным для поиска</sys:String>
+    <sys:String x:Key="Str_Guided_Search">Найти другой текст для удаления</sys:String>
+    <sys:String x:Key="Str_Guided_Marks">Существующие отметки скрытия: {0}</sys:String>
+    <sys:String x:Key="Str_Guided_SaveMacro">Сохранить как макрос</sys:String>
+    <sys:String x:Key="Str_Guided_MacroHint">Задачи для почты и сканов можно сохранять как макросы. OCR использует язык, выбранный на момент запуска макроса. Удаление конфиденциальных сведений и создание форм требуют проверки конкретного документа.</sys:String>
+    <sys:String x:Key="Str_Guided_SavedMacro">Сохранен макрос: {0}</sys:String>
+    <sys:String x:Key="Str_Guided_Complete">Сохранено: {0}. Размер: с {1} до {2}.</sys:String>
+    <sys:String x:Key="Str_Guided_Changed">Исходный документ изменился. Закройте задачи с подсказками и откройте их снова.</sys:String>
+    <sys:String x:Key="Str_Guided_Unavailable">Задачи с подсказками не могут изменять подписанные PDF или PDF только для чтения.</sys:String>
+    <sys:String x:Key="Str_Guided_RedactConfirm">Безвозвратно удалить {0} выбранных областей на {1} страницах в сохраненной копии?</sys:String>
+    <sys:String x:Key="Str_Guided_NoSelection">Ничего не выбрано. Копия не сохранена.</sys:String>
+    <sys:String x:Key="Str_Guided_Retry">Повторить</sys:String>
+    <sys:String x:Key="Str_Guided_Replace" xml:space="preserve">Заменить существующий файл?&#10;{0}</sys:String>
 </ResourceDictionary>

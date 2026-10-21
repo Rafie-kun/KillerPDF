@@ -1835,4 +1835,30 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Paragraph_Changed">Dokument został zmieniony. Otwórz ponownie edycję akapitu, aby kontynuować.</sys:String>
     <sys:String x:Key="Str_Paragraph_Original">Oryginał</sys:String>
     <sys:String x:Key="Str_Paragraph_Result">Podgląd po edycji</sys:String>
+
+    <sys:String x:Key="Str_Guided_Title">Zadania z przewodnikiem</sys:String>
+    <sys:String x:Key="Str_Guided_Email">Przygotuj do wysłania e-mailem</sys:String>
+    <sys:String x:Key="Str_Guided_Scan">Oczyść skan</sys:String>
+    <sys:String x:Key="Str_Guided_Privacy">Usuń poufne informacje</sys:String>
+    <sys:String x:Key="Str_Guided_Form">Utwórz formularz do wypełnienia</sys:String>
+    <sys:String x:Key="Str_Guided_EmailHint">Zoptymalizuj PDF bez obniżania jakości obrazów. Opcjonalne spłaszczenie uniemożliwia edycję pól formularza. Końcowy rozmiar pojawi się po zapisaniu.</sys:String>
+    <sys:String x:Key="Str_Guided_ScanHint">Dodaj tekst do wyszukiwania przy użyciu bieżącego języka OCR, a następnie zoptymalizuj PDF. Możesz wyłączyć OCR, jeśli skan już umożliwia wyszukiwanie.</sys:String>
+    <sys:String x:Key="Str_Guided_PrivacyHint">Przed usunięciem treści sprawdź dopasowania tekstu i istniejące oznaczenia redakcji. Każda konwersja strony na obraz wymaga Twojej zgody. Sprawdź zapisaną kopię przed udostępnieniem.</sys:String>
+    <sys:String x:Key="Str_Guided_FormHint">Przed dodaniem do kopii sprawdź wykryte pola i ich nazwy. Dodane zostaną tylko zaakceptowane pola.</sys:String>
+    <sys:String x:Key="Str_Guided_CopyHint">Oryginalny PDF i bieżące zmiany pozostaną nienaruszone. Wybierz inny plik PDF na wynik.</sys:String>
+    <sys:String x:Key="Str_Guided_Output">Zapisz kopię w</sys:String>
+    <sys:String x:Key="Str_Guided_Flatten">Spłaszcz pola formularza</sys:String>
+    <sys:String x:Key="Str_Guided_Ocr">Umożliw wyszukiwanie w skanie</sys:String>
+    <sys:String x:Key="Str_Guided_Search">Znajdź więcej tekstu do usunięcia</sys:String>
+    <sys:String x:Key="Str_Guided_Marks">Istniejące oznaczenia redakcji: {0}</sys:String>
+    <sys:String x:Key="Str_Guided_SaveMacro">Zapisz jako makro</sys:String>
+    <sys:String x:Key="Str_Guided_MacroHint">Zadania dotyczące e-maili i skanów można zapisywać jako makra. OCR używa języka wybranego podczas uruchamiania makra. Redakcja i formularze wymagają sprawdzenia konkretnego dokumentu.</sys:String>
+    <sys:String x:Key="Str_Guided_SavedMacro">Zapisane makro: {0}</sys:String>
+    <sys:String x:Key="Str_Guided_Complete">Zapisano {0}. Rozmiar: z {1} do {2}.</sys:String>
+    <sys:String x:Key="Str_Guided_Changed">Dokument źródłowy się zmienił. Zamknij zadania z przewodnikiem i otwórz je ponownie.</sys:String>
+    <sys:String x:Key="Str_Guided_Unavailable">Zadania z przewodnikiem nie mogą zmieniać podpisanych plików PDF ani plików tylko do odczytu.</sys:String>
+    <sys:String x:Key="Str_Guided_RedactConfirm">Trwale usunąć {0} zaznaczonych obszarów z {1} stron w zapisanej kopii?</sys:String>
+    <sys:String x:Key="Str_Guided_NoSelection">Nic nie zaznaczono. Nie zapisano kopii.</sys:String>
+    <sys:String x:Key="Str_Guided_Retry">Ponów próbę</sys:String>
+    <sys:String x:Key="Str_Guided_Replace" xml:space="preserve">Zastąpić istniejący plik?&#10;{0}</sys:String>
 </ResourceDictionary>

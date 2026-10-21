@@ -21,8 +21,11 @@ namespace KillerPDF
         // Dirty / unsaved-change tracking
         // ============================================================
 
+        private long _documentEditRevision;
+
         private void MarkDirty(bool dirty = true)
         {
+            if (dirty) _documentEditRevision++;
             _isDirty = dirty;
             ScheduleSidebarPanelRefresh();   // measurements listed in the Comments panel may have changed
             if (_saveAsBtnRef != null)

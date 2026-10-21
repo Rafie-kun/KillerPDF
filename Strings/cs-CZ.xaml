@@ -1832,4 +1832,30 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Paragraph_Changed">Dokument se změnil. Pokračujte opětovným otevřením úprav odstavce.</sys:String>
     <sys:String x:Key="Str_Paragraph_Original">Originál</sys:String>
     <sys:String x:Key="Str_Paragraph_Result">Náhled úprav</sys:String>
+
+    <sys:String x:Key="Str_Guided_Title">Průvodci úlohami</sys:String>
+    <sys:String x:Key="Str_Guided_Email">Připravit pro e-mail</sys:String>
+    <sys:String x:Key="Str_Guided_Scan">Vyčistit sken</sys:String>
+    <sys:String x:Key="Str_Guided_Privacy">Odstranit citlivé informace</sys:String>
+    <sys:String x:Key="Str_Guided_Form">Vytvořit vyplnitelný formulář</sys:String>
+    <sys:String x:Key="Str_Guided_EmailHint">Optimalizujte PDF bez snížení kvality obrázků. Volitelné sloučení formulářových polí zabrání jejich úpravám. Konečná velikost se zobrazí po uložení.</sys:String>
+    <sys:String x:Key="Str_Guided_ScanHint">Přidejte prohledávatelný text pomocí aktuálního jazyka OCR a poté PDF optimalizujte. OCR můžete vypnout, pokud už lze ve skenu vyhledávat.</sys:String>
+    <sys:String x:Key="Str_Guided_PrivacyHint">Před odstraněním obsahu zkontrolujte shody textu a stávající značky začernění. Každý převod stránky na obrázek vyžaduje váš souhlas. Před sdílením uloženou kopii zkontrolujte.</sys:String>
+    <sys:String x:Key="Str_Guided_FormHint">Před přidáním do kopie zkontrolujte rozpoznaná pole a jejich názvy. Přidají se pouze přijatá pole.</sys:String>
+    <sys:String x:Key="Str_Guided_CopyHint">Původní PDF a aktuální úpravy zůstanou beze změny. Pro výsledek vyberte jiný soubor PDF.</sys:String>
+    <sys:String x:Key="Str_Guided_Output">Uložit kopii do</sys:String>
+    <sys:String x:Key="Str_Guided_Flatten">Sloučit formulářová pole</sys:String>
+    <sys:String x:Key="Str_Guided_Ocr">Umožnit vyhledávání ve skenu</sys:String>
+    <sys:String x:Key="Str_Guided_Search">Najít další text k odstranění</sys:String>
+    <sys:String x:Key="Str_Guided_Marks">Stávající značky začernění: {0}</sys:String>
+    <sys:String x:Key="Str_Guided_SaveMacro">Uložit jako makro</sys:String>
+    <sys:String x:Key="Str_Guided_MacroHint">Úlohy pro e-mail a skeny lze uložit jako makra. OCR použije jazyk vybraný při spuštění makra. Začernění a formuláře vyžadují kontrolu konkrétního dokumentu.</sys:String>
+    <sys:String x:Key="Str_Guided_SavedMacro">Uložené makro: {0}</sys:String>
+    <sys:String x:Key="Str_Guided_Complete">Uloženo: {0}. Velikost: z {1} na {2}.</sys:String>
+    <sys:String x:Key="Str_Guided_Changed">Zdrojový dokument se změnil. Zavřete průvodce úlohami a znovu je otevřete.</sys:String>
+    <sys:String x:Key="Str_Guided_Unavailable">Průvodci úlohami nemohou měnit podepsané soubory PDF ani soubory pouze pro čtení.</sys:String>
+    <sys:String x:Key="Str_Guided_RedactConfirm">Trvale odstranit {0} vybraných oblastí na {1} stránkách v uložené kopii?</sys:String>
+    <sys:String x:Key="Str_Guided_NoSelection">Nebylo nic vybráno. Žádná kopie se neuložila.</sys:String>
+    <sys:String x:Key="Str_Guided_Retry">Zkusit znovu</sys:String>
+    <sys:String x:Key="Str_Guided_Replace" xml:space="preserve">Nahradit stávající soubor?&#10;{0}</sys:String>
 </ResourceDictionary>

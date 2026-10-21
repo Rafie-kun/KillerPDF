@@ -1847,4 +1847,30 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Paragraph_Changed">Dokumentet er endret. Åpne avsnittsredigeringen på nytt for å fortsette.</sys:String>
     <sys:String x:Key="Str_Paragraph_Original">Original</sys:String>
     <sys:String x:Key="Str_Paragraph_Result">Redigert forhåndsvisning</sys:String>
+
+    <sys:String x:Key="Str_Guided_Title">Veiledede oppgaver</sys:String>
+    <sys:String x:Key="Str_Guided_Email">Klargjør for e-post</sys:String>
+    <sys:String x:Key="Str_Guided_Scan">Rydd opp i en skanning</sys:String>
+    <sys:String x:Key="Str_Guided_Privacy">Fjern sensitive opplysninger</sys:String>
+    <sys:String x:Key="Str_Guided_Form">Opprett et utfyllbart skjema</sys:String>
+    <sys:String x:Key="Str_Guided_EmailHint">Optimaliser PDF-en uten å redusere bildekvaliteten. Valgfri utflating gjør skjemafelt uendrebare. Den endelige størrelsen vises etter lagring.</sys:String>
+    <sys:String x:Key="Str_Guided_ScanHint">Legg til søkbar tekst med gjeldende OCR-språk, og optimaliser deretter PDF-en. Du kan slå av OCR for å optimalisere en skanning som allerede er søkbar.</sys:String>
+    <sys:String x:Key="Str_Guided_PrivacyHint">Se gjennom teksttreff og eksisterende sladdemerker før innhold fjernes. Konvertering av sider til bilder krever godkjenning fra deg. Se gjennom den lagrede kopien før du deler den.</sys:String>
+    <sys:String x:Key="Str_Guided_FormHint">Se gjennom oppdagede felt og navnene deres før du legger dem til i en kopi. Bare godkjente felt legges til.</sys:String>
+    <sys:String x:Key="Str_Guided_CopyHint">Den opprinnelige PDF-en og gjeldende endringer forblir uendret. Velg en annen PDF-fil for resultatet.</sys:String>
+    <sys:String x:Key="Str_Guided_Output">Lagre kopi til</sys:String>
+    <sys:String x:Key="Str_Guided_Flatten">Flat ut skjemafelt</sys:String>
+    <sys:String x:Key="Str_Guided_Ocr">Gjør skanningen søkbar</sys:String>
+    <sys:String x:Key="Str_Guided_Search">Finn mer tekst som skal fjernes</sys:String>
+    <sys:String x:Key="Str_Guided_Marks">Eksisterende sladdemerker: {0}</sys:String>
+    <sys:String x:Key="Str_Guided_SaveMacro">Lagre som makro</sys:String>
+    <sys:String x:Key="Str_Guided_MacroHint">E-post- og skanneoppgaver kan lagres som makroer. OCR bruker språket som er valgt når makroen kjøres. Sladde- og skjemaoppgaver krever gjennomgang av hvert dokument.</sys:String>
+    <sys:String x:Key="Str_Guided_SavedMacro">Lagret makro: {0}</sys:String>
+    <sys:String x:Key="Str_Guided_Complete">Lagret {0}. Størrelse: fra {1} til {2}.</sys:String>
+    <sys:String x:Key="Str_Guided_Changed">Kildedokumentet er endret. Lukk veiledede oppgaver og åpne dem igjen.</sys:String>
+    <sys:String x:Key="Str_Guided_Unavailable">Veiledede oppgaver kan ikke endre signerte eller skrivebeskyttede PDF-er.</sys:String>
+    <sys:String x:Key="Str_Guided_RedactConfirm">Fjerne {0} valgte områder fra {1} sider permanent i den lagrede kopien?</sys:String>
+    <sys:String x:Key="Str_Guided_NoSelection">Ingenting ble valgt. Ingen kopi ble lagret.</sys:String>
+    <sys:String x:Key="Str_Guided_Retry">Prøv igjen</sys:String>
+    <sys:String x:Key="Str_Guided_Replace" xml:space="preserve">Erstatte den eksisterende filen?&#10;{0}</sys:String>
 </ResourceDictionary>

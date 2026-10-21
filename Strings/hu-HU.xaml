@@ -1834,4 +1834,30 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Paragraph_Changed">A dokumentum megváltozott. A folytatáshoz nyissa meg újra a bekezdésszerkesztést.</sys:String>
     <sys:String x:Key="Str_Paragraph_Original">Eredeti</sys:String>
     <sys:String x:Key="Str_Paragraph_Result">Szerkesztett előnézet</sys:String>
+
+    <sys:String x:Key="Str_Guided_Title">Irányított feladatok</sys:String>
+    <sys:String x:Key="Str_Guided_Email">Előkészítés e-mailhez</sys:String>
+    <sys:String x:Key="Str_Guided_Scan">Beolvasott dokumentum tisztítása</sys:String>
+    <sys:String x:Key="Str_Guided_Privacy">Bizalmas adatok eltávolítása</sys:String>
+    <sys:String x:Key="Str_Guided_Form">Kitölthető űrlap létrehozása</sys:String>
+    <sys:String x:Key="Str_Guided_EmailHint">A PDF optimalizálása a képminőség csökkentése nélkül. Az űrlapmezők igény szerint összeolvaszthatók, így többé nem szerkeszthetők. A végleges méret mentés után jelenik meg.</sys:String>
+    <sys:String x:Key="Str_Guided_ScanHint">Kereshető szöveg hozzáadása az aktuális OCR-nyelvvel, majd a PDF optimalizálása. Ha a beolvasott dokumentum már kereshető, az OCR kikapcsolható.</sys:String>
+    <sys:String x:Key="Str_Guided_PrivacyHint">A tartalom eltávolítása előtt ellenőrizze a szövegtalálatokat és a meglévő kitakarási jelöléseket. Minden oldal képpé alakításához a jóváhagyása szükséges. Megosztás előtt ellenőrizze a mentett másolatot.</sys:String>
+    <sys:String x:Key="Str_Guided_FormHint">A másolathoz való hozzáadás előtt ellenőrizze a felismert mezőket és a nevüket. Csak az elfogadott mezők kerülnek bele.</sys:String>
+    <sys:String x:Key="Str_Guided_CopyHint">Az eredeti PDF és a jelenlegi módosítások változatlanok maradnak. Az eredményhez válasszon másik PDF-fájlt.</sys:String>
+    <sys:String x:Key="Str_Guided_Output">Másolat mentési helye</sys:String>
+    <sys:String x:Key="Str_Guided_Flatten">Űrlapmezők összeolvasztása</sys:String>
+    <sys:String x:Key="Str_Guided_Ocr">Beolvasott dokumentum kereshetővé tétele</sys:String>
+    <sys:String x:Key="Str_Guided_Search">További eltávolítandó szöveg keresése</sys:String>
+    <sys:String x:Key="Str_Guided_Marks">Meglévő kitakarási jelölések: {0}</sys:String>
+    <sys:String x:Key="Str_Guided_SaveMacro">Mentés makróként</sys:String>
+    <sys:String x:Key="Str_Guided_MacroHint">Az e-mailes és beolvasási feladatok makróként menthetők. Az OCR a makró futtatásakor kiválasztott nyelvet használja. A kitakarási és űrlapfeladatok a dokumentum egyedi ellenőrzését igénylik.</sys:String>
+    <sys:String x:Key="Str_Guided_SavedMacro">Mentett makró: {0}</sys:String>
+    <sys:String x:Key="Str_Guided_Complete">Mentve: {0}. Méret: {1} helyett {2}.</sys:String>
+    <sys:String x:Key="Str_Guided_Changed">A forrásdokumentum megváltozott. Zárja be az irányított feladatokat, majd nyissa meg újra.</sys:String>
+    <sys:String x:Key="Str_Guided_Unavailable">Az irányított feladatok nem módosíthatnak aláírt vagy írásvédett PDF-fájlokat.</sys:String>
+    <sys:String x:Key="Str_Guided_RedactConfirm">Véglegesen eltávolítja a kijelölt {0} területet {1} oldalról a mentett másolatban?</sys:String>
+    <sys:String x:Key="Str_Guided_NoSelection">Nincs kijelölés. Nem készült másolat.</sys:String>
+    <sys:String x:Key="Str_Guided_Retry">Újrapróbálás</sys:String>
+    <sys:String x:Key="Str_Guided_Replace" xml:space="preserve">Lecseréli a meglévő fájlt?&#10;{0}</sys:String>
 </ResourceDictionary>

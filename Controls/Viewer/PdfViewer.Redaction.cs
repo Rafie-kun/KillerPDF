@@ -618,10 +618,11 @@ namespace KillerPDF.Controls
 
         // Pages whose marked content can't be removed by itself are only turned into an image
         // with the user's say-so, one page at a time. False means the user canceled.
-        internal bool ApproveRasterPages(IReadOnlyList<int> rasterPages, List<int> approved, HashSet<int> skipped)
+        internal bool ApproveRasterPages(IReadOnlyList<int> rasterPages, List<int> approved, HashSet<int> skipped,
+            Window? reviewOwner = null)
         {
             bool approveRest = false;
-            Window? owner = Window.GetWindow(this);
+            Window? owner = reviewOwner ?? Window.GetWindow(this);
             for (int index = 0; index < rasterPages.Count; index++)
             {
                 int page = rasterPages[index];

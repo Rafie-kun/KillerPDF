@@ -118,6 +118,7 @@ namespace KillerPDF
             ('G', "Str_DocumentTools_PageLabels"),
             ('V', "Str_DocumentTools_InitialView"),
             ('C', "Str_DocumentTools_StructuralComparison"),
+            ('X', "Str_Guided_Title"),
             ('M', "Str_DocumentTools_Macros"),
             ('D', "Str_DocumentTools_DataMerge"),
             ('I', "Str_DocumentTools_InsertToc"),

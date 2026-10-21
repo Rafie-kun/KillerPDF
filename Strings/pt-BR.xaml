@@ -1847,4 +1847,30 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Paragraph_Changed">O documento foi alterado. Reabra a edição de parágrafo para continuar.</sys:String>
     <sys:String x:Key="Str_Paragraph_Original">Original</sys:String>
     <sys:String x:Key="Str_Paragraph_Result">Prévia editada</sys:String>
+
+    <sys:String x:Key="Str_Guided_Title">Tarefas guiadas</sys:String>
+    <sys:String x:Key="Str_Guided_Email">Preparar para e-mail</sys:String>
+    <sys:String x:Key="Str_Guided_Scan">Limpar uma digitalização</sys:String>
+    <sys:String x:Key="Str_Guided_Privacy">Remover informações confidenciais</sys:String>
+    <sys:String x:Key="Str_Guided_Form">Criar um formulário preenchível</sys:String>
+    <sys:String x:Key="Str_Guided_EmailHint">Otimize o PDF sem reduzir a qualidade das imagens. O achatamento opcional impede a edição dos campos de formulário. O tamanho final aparece após salvar.</sys:String>
+    <sys:String x:Key="Str_Guided_ScanHint">Adicione texto pesquisável com o idioma atual do OCR e depois otimize o PDF. Você pode desativar o OCR para otimizar uma digitalização que já permita buscas.</sys:String>
+    <sys:String x:Key="Str_Guided_PrivacyHint">Revise as correspondências de texto e as marcações de censura existentes antes de remover o conteúdo. Qualquer conversão de página em imagem exige sua aprovação. Revise a cópia salva antes de compartilhar.</sys:String>
+    <sys:String x:Key="Str_Guided_FormHint">Revise os campos detectados e seus nomes antes de adicioná-los a uma cópia. Somente os campos aceitos são adicionados.</sys:String>
+    <sys:String x:Key="Str_Guided_CopyHint">O PDF original e as alterações atuais permanecem intactos. Escolha outro arquivo PDF para o resultado.</sys:String>
+    <sys:String x:Key="Str_Guided_Output">Salvar cópia em</sys:String>
+    <sys:String x:Key="Str_Guided_Flatten">Achatar campos de formulário</sys:String>
+    <sys:String x:Key="Str_Guided_Ocr">Tornar a digitalização pesquisável</sys:String>
+    <sys:String x:Key="Str_Guided_Search">Buscar mais texto para remover</sys:String>
+    <sys:String x:Key="Str_Guided_Marks">Marcações de censura existentes: {0}</sys:String>
+    <sys:String x:Key="Str_Guided_SaveMacro">Salvar como macro</sys:String>
+    <sys:String x:Key="Str_Guided_MacroHint">As tarefas de e-mail e digitalização podem ser salvas como macros. O OCR usa o idioma selecionado quando a macro é executada. As tarefas de censura e formulários exigem uma revisão específica do documento.</sys:String>
+    <sys:String x:Key="Str_Guided_SavedMacro">Macro salva: {0}</sys:String>
+    <sys:String x:Key="Str_Guided_Complete">{0} salvo. Tamanho: de {1} para {2}.</sys:String>
+    <sys:String x:Key="Str_Guided_Changed">O documento de origem mudou. Feche as tarefas guiadas e abra novamente.</sys:String>
+    <sys:String x:Key="Str_Guided_Unavailable">As tarefas guiadas não podem alterar PDFs assinados ou somente leitura.</sys:String>
+    <sys:String x:Key="Str_Guided_RedactConfirm">Remover permanentemente {0} áreas selecionadas de {1} páginas na cópia salva?</sys:String>
+    <sys:String x:Key="Str_Guided_NoSelection">Nada foi selecionado. Nenhuma cópia foi salva.</sys:String>
+    <sys:String x:Key="Str_Guided_Retry">Tentar novamente</sys:String>
+    <sys:String x:Key="Str_Guided_Replace" xml:space="preserve">Substituir o arquivo existente?&#10;{0}</sys:String>
 </ResourceDictionary>
