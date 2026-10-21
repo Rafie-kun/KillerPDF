@@ -80,6 +80,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Added Windows 11 snap layouts and docking for the comparison bar (#374, #427).
 
 ### Interface and polish
+- Light's background, sidebar and footer are a slightly darker gray (#d4d4d4), and fields a touch lighter, so content stands apart from the chrome.
 
 - Added Search Tools (Ctrl+K), customizable shortcuts and one-letter tools. Export, signing, page cleanup and measurement shortcuts appear in menus, tooltips, F1 and the website. Expanded view, page, clipboard and tab actions (#190).
 - Added Comments, Attachments, Layers and Signatures panels, four sidebar positions and remembered rail order. Signing and measurements live with their panels. Right-click menus open at the cursor, Pages stays open, and dual pane leads the app icons. Narrow layouts, horizontal scrolling and full bookmark titles keep navigation reachable.
