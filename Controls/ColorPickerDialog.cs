@@ -38,6 +38,7 @@ namespace KillerPDF
         private Border _newSwatch = null!;
         private WrapPanel _savedRow = null!;
         private Border _replaceBtn = null!;
+        private System.Windows.Controls.Primitives.ToggleButton _replaceToggle = null!;
         private bool _replaceArmed;            // when on, the next swatch click is overwritten, not selected
         public event Action? SwatchesChanged;  // raised when the shared palette is edited, so the bar can live-update
         private const int SvW = 220, SvH = 170, HueW = 18;
@@ -185,13 +186,17 @@ namespace KillerPDF
             // Swatch header: Replace (assign current color to a slot) on the left, Reset on the far right.
             var swHeader = new Grid { Margin = new Thickness(0, 12, 0, 5), Width = SwatchCols * SwatchCell };
             _replaceBtn = Chip(L("Str_Color_Replace"), L("Str_Color_ReplaceTT"));
-            _replaceBtn.HorizontalAlignment = HorizontalAlignment.Left;
-            _replaceBtn.MouseLeftButtonUp += (_, _) => { _replaceArmed = !_replaceArmed; UpdateReplaceChip(); RebuildSavedRow(); };
+            // Real buttons around the drawn chips, so Tab, Space and Enter reach them and a screen
+            // reader hears Replace as a toggle (BF-U005).
+            _replaceToggle = Pressable(new System.Windows.Controls.Primitives.ToggleButton(), _replaceBtn, L("Str_Color_Replace"),
+                () => { _replaceArmed = !_replaceArmed; UpdateReplaceChip(); RebuildSavedRow(); });
+            _replaceToggle.HorizontalAlignment = HorizontalAlignment.Left;
             var resetBtn = Chip(L("Str_Color_Reset"), L("Str_Color_ResetTT"));
-            resetBtn.HorizontalAlignment = HorizontalAlignment.Right;
-            resetBtn.MouseLeftButtonUp += (_, _) => { StoreSaved([.. DefaultSwatches]); _replaceArmed = false; UpdateReplaceChip(); RebuildSavedRow(); SwatchesChanged?.Invoke(); };
-            swHeader.Children.Add(_replaceBtn);
-            swHeader.Children.Add(resetBtn);
+            var reset = Pressable(new Button(), resetBtn, L("Str_Color_Reset"),
+                () => { StoreSaved([.. DefaultSwatches]); _replaceArmed = false; UpdateReplaceChip(); RebuildSavedRow(); SwatchesChanged?.Invoke(); });
+            reset.HorizontalAlignment = HorizontalAlignment.Right;
+            swHeader.Children.Add(_replaceToggle);
+            swHeader.Children.Add(reset);
             panel.Children.Add(swHeader);
             _savedRow = new WrapPanel { Width = SwatchCols * SwatchCell };
             panel.Children.Add(_savedRow);
@@ -309,6 +314,7 @@ namespace KillerPDF
         private void UpdateReplaceChip()
         {
             if (_replaceBtn is null) return;
+            if (_replaceToggle is not null) _replaceToggle.IsChecked = _replaceArmed;
             _replaceBtn.Background = _replaceArmed ? R("RowSelectedBrush") : R("PaneBrush");
             _replaceBtn.SetResourceReference(Border.BorderBrushProperty, _replaceArmed ? "PrimaryBrush" : "CardBorderBrush");
         }
@@ -320,11 +326,10 @@ namespace KillerPDF
             {
                 var c = saved[i];
                 int idx = i;
-                var sw = new Border { Width = 20, Height = 20, CornerRadius = UiKit.RadControl, Margin = new Thickness(0, 0, 4, 4),
-                    Background = new SolidColorBrush(c), BorderThickness = new Thickness(_replaceArmed ? 2 : 1), Cursor = Cursors.Hand,
-                    ToolTip = _replaceArmed ? L("Str_Color_SwatchSetTT") : L("Str_Color_SwatchUseTT") };
+                var sw = new Border { Width = 20, Height = 20, CornerRadius = UiKit.RadControl,
+                    Background = new SolidColorBrush(c), BorderThickness = new Thickness(_replaceArmed ? 2 : 1) };
                 if (_replaceArmed) sw.SetResourceReference(Border.BorderBrushProperty, "PrimaryBrush"); else sw.BorderBrush = R("CardBorderBrush");
-                sw.MouseLeftButtonUp += (_, _) =>
+                var swatch = Pressable(new Button(), sw, $"#{c.R:X2}{c.G:X2}{c.B:X2}", () =>
                 {
                     if (_replaceArmed)
                     {
@@ -333,8 +338,10 @@ namespace KillerPDF
                         _replaceArmed = false; UpdateReplaceChip(); RebuildSavedRow(); SwatchesChanged?.Invoke();
                     }
                     else SetFromColor(c);
-                };
-                _savedRow.Children.Add(sw);
+                });
+                swatch.Margin = new Thickness(0, 0, 4, 4);
+                swatch.ToolTip = _replaceArmed ? L("Str_Color_SwatchSetTT") : L("Str_Color_SwatchUseTT");
+                _savedRow.Children.Add(swatch);
             }
         }
         // ── Small themed control builders ───────────────────────────────────────
@@ -376,6 +383,22 @@ namespace KillerPDF
                 Fill = Brushes.Transparent });
             return g;
         }
+        // A chrome-free button showing a drawn visual: keyboard focus, Space/Enter, an Invoke (or
+        // Toggle) pattern and an accessible name, with the visual left exactly as it was drawn.
+        private static T Pressable<T>(T button, Border visual, string name, Action click)
+            where T : System.Windows.Controls.Primitives.ButtonBase
+        {
+            button.Content = visual;
+            button.Cursor = Cursors.Hand;
+            button.Background = Brushes.Transparent;
+            button.BorderThickness = new Thickness(0);
+            button.Padding = new Thickness(0);
+            button.Template = new ControlTemplate(typeof(T)) { VisualTree = new FrameworkElementFactory(typeof(ContentPresenter)) };
+            System.Windows.Automation.AutomationProperties.SetName(button, name);
+            button.Click += (_, _) => click();
+            return button;
+        }
+
         private Border Chip(string text, string tip)
         {
             var b = new Border { Height = 20, MinWidth = 22, CornerRadius = UiKit.RadControl, Cursor = Cursors.Hand,
