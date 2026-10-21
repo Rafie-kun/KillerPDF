@@ -314,7 +314,13 @@ namespace KillerPDF.Controls
             int    MaxLen,     // #158: comb cell count (also the input length cap)
             Color? BackgroundColor,
             Color? BorderColor,
-            bool   IsPassword = false);   // /Tx with the Password flag (bit 14): never shown in clear
+            bool   IsPassword = false,   // /Tx with the Password flag (bit 14): never shown in clear
+            string Description = "")     // the field's /TU user name, e.g. "Date of birth"
+        {
+            // What a person reads and a screen reader announces: the /TU description when the
+            // form has one, else the internal field name. Storage and export keep FieldName.
+            public string Label => string.IsNullOrWhiteSpace(Description) ? FieldName : Description;
+        }
 
         /// <summary>
         /// Scans the current page's /Annots for Widget subtypes and overlays interactive
@@ -408,7 +414,7 @@ namespace KillerPDF.Controls
                             FontSize         = fontSize,
                             Padding          = new Thickness(3, 0, 3, 0),
                             VerticalContentAlignment = VerticalAlignment.Center,
-                            ToolTip          = string.IsNullOrEmpty(f.FieldName) ? null : f.FieldName,
+                            ToolTip          = string.IsNullOrEmpty(f.Label) ? null : f.Label,
                         };
                         if (f.MaxLen > 0) pb.MaxLength = f.MaxLen;
                         string passwordKey = f.FieldName;
@@ -451,7 +457,7 @@ namespace KillerPDF.Controls
                                 : new Thickness(3, 0, 3, 0),
                             VerticalContentAlignment = f.IsMultiLine
                                 ? VerticalAlignment.Top : VerticalAlignment.Center,
-                            ToolTip          = string.IsNullOrEmpty(f.FieldName) ? null : f.FieldName,
+                            ToolTip          = string.IsNullOrEmpty(f.Label) ? null : f.Label,
                         };
                         if (f.IsComb) tb.FontFamily = new FontFamily("Consolas");
                         // Focus also raises the per-field font-size stepper (and hides it on blur).
@@ -484,7 +490,7 @@ namespace KillerPDF.Controls
                         Background = fieldBg,
                         FontSize = f.DaFontPt > 0.5 && f.Scale > 0
                             ? f.DaFontPt * f.Scale : Math.Min(Math.Max(10, f.Ch * 0.22), 16),
-                        ToolTip = string.IsNullOrEmpty(f.FieldName) ? null : f.FieldName,
+                        ToolTip = string.IsNullOrEmpty(f.Label) ? null : f.Label,
                     };
                     foreach (FormChoiceItem item in f.Options.Where(item =>
                                  selected.Contains(item.ExportValue, StringComparer.Ordinal)))
@@ -516,7 +522,7 @@ namespace KillerPDF.Controls
                         FontSize  = f.DaFontPt > 0.5 && f.Scale > 0
                             ? f.DaFontPt * f.Scale
                             : Math.Min(Math.Max(10, f.Ch * 0.55), 16),
-                        ToolTip   = string.IsNullOrEmpty(f.FieldName) ? null : f.FieldName,
+                        ToolTip   = string.IsNullOrEmpty(f.Label) ? null : f.Label,
                     };
                     string capturedKey = f.FieldName;
                     combo.SelectionChanged += (_, _) =>
@@ -562,7 +568,7 @@ namespace KillerPDF.Controls
                         CornerRadius    = new CornerRadius(2),
                         Cursor          = f.IsReadOnly ? Cursors.Arrow : Cursors.Hand,
                         Child           = checkMark,
-                        ToolTip         = string.IsNullOrEmpty(f.FieldName) ? null : f.FieldName,
+                        ToolTip         = string.IsNullOrEmpty(f.Label) ? null : f.Label,
                     };
                     if (!f.IsReadOnly)
                     {
@@ -620,7 +626,7 @@ namespace KillerPDF.Controls
                         Background = Brushes.Transparent,
                         Cursor = f.IsReadOnly ? Cursors.Arrow : Cursors.Hand,
                         Child  = grid,
-                        ToolTip = string.IsNullOrEmpty(f.FieldName) ? null : f.FieldName,
+                        ToolTip = string.IsNullOrEmpty(f.Label) ? null : f.Label,
                     };
 
                     // Register dot for mutual-exclusion wiring after the loop.
@@ -647,6 +653,7 @@ namespace KillerPDF.Controls
                 }
 
                 if (ctrl is null) continue;
+                if (!string.IsNullOrEmpty(f.Label)) System.Windows.Automation.AutomationProperties.SetName(ctrl, f.Label);
                 AttachFormDesignDrag(ctrl, f, pageIndex, canvas);
                 Canvas.SetLeft(ctrl, f.Cx);
                 Canvas.SetTop(ctrl, f.Cy);
@@ -760,7 +767,8 @@ namespace KillerPDF.Controls
                                 (byte)Math.Round(border.Green * 255),
                                 (byte)Math.Round(border.Blue * 255))
                             : null,
-                        IsPassword: fieldType == "/Tx" && !isMultiLine && (flags & (1 << 13)) != 0));
+                        IsPassword: fieldType == "/Tx" && !isMultiLine && (flags & (1 << 13)) != 0,
+                        Description: widget.Tooltip ?? string.Empty));
                 }
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"GetPageFormFields (engine): {ex}"); }
