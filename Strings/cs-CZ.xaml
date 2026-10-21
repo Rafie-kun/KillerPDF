@@ -1859,4 +1859,6 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Guided_Retry">Zkusit znovu</sys:String>
     <sys:String x:Key="Str_Guided_Replace" xml:space="preserve">Nahradit stávající soubor?&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_SaveConflict">Soubor „{0}“ se na disku změnil poté, co jej tento dokument načetl, možná z jiné karty nebo programu.&#10;&#10;Nahraďte jej tímto dokumentem, uložte tento dokument jako samostatnou kopii, nebo akci zrušte.</sys:String>
+    <sys:String x:Key="Str_Err_SignatureLibrarySave">Podpis se nepodařilo přidat do uložených podpisů. Do tohoto dokumentu jej stále můžete umístit.</sys:String>
+    <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">Uložené podpisy se nepodařilo načíst, proto seznam začíná prázdný. Nečitelný soubor byl zachován jako {0}.</sys:String>
 </ResourceDictionary>

@@ -21,9 +21,17 @@ namespace KillerPDF
         private object? _pendingSignDocument;
         private Controls.PdfViewer? _pendingSignViewer;
 
-        private void LoadSignatures() => _signatureStore.Load();
+        private void LoadSignatures()
+        {
+            _signatureStore.Load();
+            if (_signatureStore.PreservedDamagedFile is { } kept)
+                Dispatcher.BeginInvoke(() => KillerDialog.Show(this,
+                    string.Format(Loc("Str_Warn_SignatureLibraryDamaged"), kept), Loc("Str_Dlg_AppTitle"),
+                    MessageBoxButton.OK, MessageBoxImage.Warning),
+                    System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+        }
 
-        private void PersistSignatures() => _signatureStore.Persist();
+        private bool PersistSignatures() => _signatureStore.Persist();
 
         // Rebuild the signature popup (if open) so its Loc()-built labels - section headers, pen sizes -
         // switch immediately on a language change rather than only on the next open.
@@ -507,7 +515,7 @@ namespace KillerPDF
                 delBtn.Click += (s, e) =>
                 {
                     _signatureStore.Remove(sigCopy);
-                    PersistSignatures();
+                    if (!PersistSignatures()) SetStatus(Loc("Str_Err_SignatureLibrarySave"));
                     ShowSignaturePopup(); // refresh
                 };
                 itemGrid.Children.Add(delBtn);
@@ -849,12 +857,12 @@ namespace KillerPDF
                     saved.Strokes.Add(sPts);
                 }
                 _signatureStore.Add(saved);
-                PersistSignatures();
+                bool kept = PersistSignatures();
 
                 // Auto-select the new signature for placement
                 _pendingSignature = saved;
                 _annotationCanvas.Cursor = Cursors.Cross;
-                SetStatus(Loc("Str_St_SignatureSaved"));
+                SetStatus(Loc(kept ? "Str_St_SignatureSaved" : "Str_Err_SignatureLibrarySave"));
 
                 win.Close();
             };
@@ -900,11 +908,11 @@ namespace KillerPDF
                     ImageData = Convert.ToBase64String(pngBytes)
                 };
                 _signatureStore.Add(saved);
-                PersistSignatures();
+                bool kept = PersistSignatures();
 
                 _pendingSignature = saved;
                 _annotationCanvas.Cursor = Cursors.Cross;
-                SetStatus(Loc("Str_St_ImageLoaded"));
+                SetStatus(Loc(kept ? "Str_St_ImageLoaded" : "Str_Err_SignatureLibrarySave"));
             }
             catch (Exception ex)
             {
@@ -928,11 +936,11 @@ namespace KillerPDF
                 Vectors = vectors
             };
             _signatureStore.Add(saved);
-            PersistSignatures();
+            bool kept = PersistSignatures();
 
             _pendingSignature = saved;
             _annotationCanvas.Cursor = Cursors.Cross;
-            SetStatus(Loc("Str_St_ImageLoaded"));
+            SetStatus(Loc(kept ? "Str_St_ImageLoaded" : "Str_Err_SignatureLibrarySave"));
         }
 
         // Preview of an imported signature with a Sensitivity slider. Returns the full-size ink on a

@@ -1877,4 +1877,6 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_Guided_Retry">Қайталау</sys:String>
     <sys:String x:Key="Str_Guided_Replace" xml:space="preserve">Бар файл ауыстырылсын ба?&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_SaveConflict">Бұл құжат оқығаннан кейін "{0}" дискіде өзгерді, мүмкін басқа қойындыдан немесе бағдарламадан.&#10;&#10;Оны осы құжатпен алмастырыңыз, осы құжатты бөлек көшірме ретінде сақтаңыз немесе бас тартыңыз.</sys:String>
+    <sys:String x:Key="Str_Err_SignatureLibrarySave">Қолтаңбаны сақталған қолтаңбаларға қосу мүмкін болмады. Оны осы құжатқа әлі де қоюға болады.</sys:String>
+    <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">Сақталған қолтаңбаларды оқу мүмкін болмады, сондықтан тізім бос басталады. Оқылмайтын файл {0} ретінде сақталды.</sys:String>
 </ResourceDictionary>

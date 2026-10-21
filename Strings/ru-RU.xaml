@@ -1877,4 +1877,6 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Guided_Retry">Повторить</sys:String>
     <sys:String x:Key="Str_Guided_Replace" xml:space="preserve">Заменить существующий файл?&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_SaveConflict">Файл "{0}" изменился на диске после того, как этот документ его прочитал, возможно, из другой вкладки или программы.&#10;&#10;Замените его этим документом, сохраните этот документ как отдельную копию или отмените.</sys:String>
+    <sys:String x:Key="Str_Err_SignatureLibrarySave">Не удалось добавить подпись в сохранённые подписи. Её всё равно можно разместить в этом документе.</sys:String>
+    <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">Не удалось прочитать сохранённые подписи, поэтому список начинается пустым. Нечитаемый файл сохранён как {0}.</sys:String>
 </ResourceDictionary>

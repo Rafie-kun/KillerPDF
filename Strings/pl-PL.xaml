@@ -1862,4 +1862,6 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Guided_Retry">Ponów próbę</sys:String>
     <sys:String x:Key="Str_Guided_Replace" xml:space="preserve">Zastąpić istniejący plik?&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_SaveConflict">Plik "{0}" zmienił się na dysku po odczytaniu go przez ten dokument, być może z innej karty lub programu.&#10;&#10;Zastąp go tym dokumentem, zapisz ten dokument jako osobną kopię lub anuluj.</sys:String>
+    <sys:String x:Key="Str_Err_SignatureLibrarySave">Nie udało się dodać podpisu do zapisanych podpisów. Nadal możesz umieścić go w tym dokumencie.</sys:String>
+    <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">Nie udało się odczytać zapisanych podpisów, więc lista zaczyna się pusta. Nieczytelny plik zachowano jako {0}.</sys:String>
 </ResourceDictionary>

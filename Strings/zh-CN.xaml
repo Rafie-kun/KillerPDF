@@ -1858,4 +1858,6 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Guided_Retry">重试</sys:String>
     <sys:String x:Key="Str_Guided_Replace" xml:space="preserve">替换现有文件？&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_SaveConflict">此文档读取“{0}”后，该文件在磁盘上已被更改，可能来自其他标签页或程序。&#10;&#10;请用此文档替换它、将此文档另存为单独的副本，或取消。</sys:String>
+    <sys:String x:Key="Str_Err_SignatureLibrarySave">无法将签名添加到已保存的签名中。你仍可以将其放置在此文档中。</sys:String>
+    <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">无法读取已保存的签名，因此列表从空开始。无法读取的文件已保留为 {0}。</sys:String>
 </ResourceDictionary>
