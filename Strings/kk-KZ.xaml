@@ -1812,4 +1812,20 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_ExportDoc_Editable">Өңделетін мазмұн</sys:String>
     <sys:String x:Key="Str_ExportDoc_PageImages">Бет суреттері</sys:String>
     <sys:String x:Key="Str_ExportDoc_PageImagesHint">Әр бет суретке айналады. Мәтін мен кесте ұяшықтарын бөлек өңдеу мүмкін емес.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Title">Абзацты өңдеу</sys:String>
+    <sys:String x:Key="Str_Paragraph_Hint">Беттегі абзацты таңдаңыз. Бұрыштағы тұтқа немесе өлшем өрістері арқылы оның жақтау өлшемін өзгертіңіз, мәтінді өңдеңіз, содан кейін қолданбас бұрын алдын ала қарап шығыңыз.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Select">Бастау үшін абзацты таңдаңыз.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Leading">Жоларалық интервал (пт)</sys:String>
+    <sys:String x:Key="Str_Paragraph_Alignment">Туралау</sys:String>
+    <sys:String x:Key="Str_Paragraph_Left">Солға</sys:String>
+    <sys:String x:Key="Str_Paragraph_Center">Ортаға</sys:String>
+    <sys:String x:Key="Str_Paragraph_Right">Оңға</sys:String>
+    <sys:String x:Key="Str_Paragraph_Overflow">Мәтін сыймайды. Жақтауды үлкейтіңіз немесе қаріп өлшемін не жоларалық интервалды кішірейтіңіз.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Ready">Алдын ала қарау дайын. Өзгерістерді қолдану бастапқы абзац мәтінін ауыстырады.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Unsupported">Қолдау көрсетілетін абзац табылмады. Бұл алғашқы нұсқа бір стильдегі көлденең мәтінді қолдайды.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Font">Алдын ала қарау қарпі: {0}. Бұл қаріп өңделген PDF файлына ендіріледі.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Preparing">Алдын ала қарау дайындалуда...</sys:String>
+    <sys:String x:Key="Str_Paragraph_Changed">Құжат өзгерді. Жалғастыру үшін абзацты өңдеуді қайта ашыңыз.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Original">Түпнұсқа</sys:String>
+    <sys:String x:Key="Str_Paragraph_Result">Өңделген нұсқаны алдын ала қарау</sys:String>
 </ResourceDictionary>

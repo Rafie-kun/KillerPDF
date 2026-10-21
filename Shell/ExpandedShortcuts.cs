@@ -18,6 +18,7 @@ public partial class MainWindow
         else if (modifiers == (ModifierKeys.Alt | ModifierKeys.Shift))
             run = key switch
             {
+                Key.P => () => EditParagraph(PageList.SelectedIndex),
                 Key.T => () => ExportTable(PageList.SelectedIndex),
                 Key.E => () => ExportImages_Click(this, new RoutedEventArgs()),
                 Key.Z => () => ReduceFileSize_Click(this, new RoutedEventArgs()),

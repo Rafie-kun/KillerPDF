@@ -1793,4 +1793,20 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_ExportDoc_Editable">可编辑内容</sys:String>
     <sys:String x:Key="Str_ExportDoc_PageImages">页面图片</sys:String>
     <sys:String x:Key="Str_ExportDoc_PageImagesHint">每页都会转换为图片。无法单独编辑文字和表格单元格。</sys:String>
+    <sys:String x:Key="Str_Paragraph_Title">编辑段落</sys:String>
+    <sys:String x:Key="Str_Paragraph_Hint">选择页面上的一个段落。使用角部手柄或尺寸字段调整文本框大小，编辑文本，然后在应用前查看预览。</sys:String>
+    <sys:String x:Key="Str_Paragraph_Select">选择一个段落以开始。</sys:String>
+    <sys:String x:Key="Str_Paragraph_Leading">行距 (pt)</sys:String>
+    <sys:String x:Key="Str_Paragraph_Alignment">对齐方式</sys:String>
+    <sys:String x:Key="Str_Paragraph_Left">左对齐</sys:String>
+    <sys:String x:Key="Str_Paragraph_Center">居中</sys:String>
+    <sys:String x:Key="Str_Paragraph_Right">右对齐</sys:String>
+    <sys:String x:Key="Str_Paragraph_Overflow">文本无法容纳。请增大文本框，或减小字号或行距。</sys:String>
+    <sys:String x:Key="Str_Paragraph_Ready">预览已就绪。应用后将替换原段落文本。</sys:String>
+    <sys:String x:Key="Str_Paragraph_Unsupported">未找到支持的段落。此初始版本支持单一样式的横排文本。</sys:String>
+    <sys:String x:Key="Str_Paragraph_Font">预览字体：{0}。此字体将嵌入编辑后的 PDF。</sys:String>
+    <sys:String x:Key="Str_Paragraph_Preparing">正在准备预览...</sys:String>
+    <sys:String x:Key="Str_Paragraph_Changed">文档已更改。请重新打开段落编辑以继续。</sys:String>
+    <sys:String x:Key="Str_Paragraph_Original">原文</sys:String>
+    <sys:String x:Key="Str_Paragraph_Result">编辑后预览</sys:String>
 </ResourceDictionary>

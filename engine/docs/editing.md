@@ -107,10 +107,37 @@ in a tagged destination. It does not reconstruct missing accessibility data.
 `AppendImportedPageContent` imports a page as transformed drawing content and
 does not copy its annotations.
 
+## Edit a simple paragraph
+
+`PdfParagraphEditor.FindParagraphs` identifies conservative paragraph candidates.
+`Inspect` checks a manually selected source region. Coordinates are unrotated
+points relative to the crop box, with a bottom-left origin.
+
+Pass the fixed source region and a separate replacement box to `Plan`, together
+with replacement text, an embeddable `TrueTypeFont`, size, baseline spacing and
+`PdfParagraphAlignment`. The original source color is retained. The chosen font
+is embedded; hosts should identify substitutions before the user accepts them.
+
+`HasOverflow` blocks applying text whose advances or glyph ink exceed the box.
+`GetPreviewDocument` returns the exact PDF bytes that `Apply` returns after
+checking the source fingerprint. Changing text or geometry requires a new plan.
+The host owns cancellation, Undo, saving and source-document lifetime checks.
+
+The first slice supports horizontal, single-style Latin text in a single text
+object on an unrotated page. Encryption, signatures, certification, tags, Form
+XObjects, special graphics states, clipping and unsupported text transforms are
+rejected. Combining marks, contextual scripts and missing replacement glyphs
+are unsupported. It does not move neighboring objects or reflow across pages.
+
+Replacement removes the selected source glyphs from the active page content;
+it does not cover them with a drawing. This is an incremental edit, so previous
+revisions still contain superseded text. Use redaction for sensitive content.
+
 ## Choose the appropriate editor
 
 | Task | API |
 | --- | --- |
+| Preview and replace a simple paragraph | `PdfParagraphEditor` |
 | Pages, boxes, form values, metadata, and typed overlays | `PdfIncrementalPageEditor` |
 | Notes, markup, links, and annotation updates | `PdfIncrementalAnnotationEditor` |
 | Bookmark hierarchy | `PdfBookmarkEditor` |

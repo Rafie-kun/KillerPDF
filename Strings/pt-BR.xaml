@@ -1809,4 +1809,20 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_ExportDoc_Editable">Conteúdo editável</sys:String>
     <sys:String x:Key="Str_ExportDoc_PageImages">Imagens das páginas</sys:String>
     <sys:String x:Key="Str_ExportDoc_PageImagesHint">Cada página se torna uma imagem. O texto e as células das tabelas não podem ser editados separadamente.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Title">Editar parágrafo</sys:String>
+    <sys:String x:Key="Str_Paragraph_Hint">Selecione um parágrafo na página. Redimensione a caixa com a alça do canto ou os campos de tamanho, edite o texto e confira a prévia antes de aplicar.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Select">Selecione um parágrafo para começar.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Leading">Espaçamento entre linhas (pt)</sys:String>
+    <sys:String x:Key="Str_Paragraph_Alignment">Alinhamento</sys:String>
+    <sys:String x:Key="Str_Paragraph_Left">Esquerda</sys:String>
+    <sys:String x:Key="Str_Paragraph_Center">Centro</sys:String>
+    <sys:String x:Key="Str_Paragraph_Right">Direita</sys:String>
+    <sys:String x:Key="Str_Paragraph_Overflow">O texto não cabe. Aumente a caixa ou reduza o tamanho da fonte ou o espaçamento entre linhas.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Ready">Prévia pronta. Aplicar substitui o texto do parágrafo original.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Unsupported">Nenhum parágrafo compatível foi encontrado. Esta primeira versão aceita texto horizontal em um único estilo.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Font">Fonte da prévia: {0}. Esta fonte será incorporada ao PDF editado.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Preparing">Preparando prévia...</sys:String>
+    <sys:String x:Key="Str_Paragraph_Changed">O documento foi alterado. Reabra a edição de parágrafo para continuar.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Original">Original</sys:String>
+    <sys:String x:Key="Str_Paragraph_Result">Prévia editada</sys:String>
 </ResourceDictionary>

@@ -1812,4 +1812,20 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_ExportDoc_Editable">Редактируемое содержимое</sys:String>
     <sys:String x:Key="Str_ExportDoc_PageImages">Изображения страниц</sys:String>
     <sys:String x:Key="Str_ExportDoc_PageImagesHint">Каждая страница становится изображением. Текст и ячейки таблиц нельзя редактировать отдельно.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Title">Редактировать абзац</sys:String>
+    <sys:String x:Key="Str_Paragraph_Hint">Выберите абзац на странице. Измените размер его рамки с помощью углового маркера или полей размеров, отредактируйте текст и проверьте предпросмотр перед применением.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Select">Выберите абзац, чтобы начать.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Leading">Межстрочный интервал (пт)</sys:String>
+    <sys:String x:Key="Str_Paragraph_Alignment">Выравнивание</sys:String>
+    <sys:String x:Key="Str_Paragraph_Left">По левому краю</sys:String>
+    <sys:String x:Key="Str_Paragraph_Center">По центру</sys:String>
+    <sys:String x:Key="Str_Paragraph_Right">По правому краю</sys:String>
+    <sys:String x:Key="Str_Paragraph_Overflow">Текст не помещается. Увеличьте рамку или уменьшите размер шрифта либо межстрочный интервал.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Ready">Предпросмотр готов. Применение заменит исходный текст абзаца.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Unsupported">Поддерживаемый абзац не найден. Эта первая версия поддерживает горизонтальный текст в одном стиле.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Font">Шрифт предпросмотра: {0}. Этот шрифт будет встроен в отредактированный PDF.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Preparing">Подготовка предпросмотра...</sys:String>
+    <sys:String x:Key="Str_Paragraph_Changed">Документ изменился. Снова откройте редактирование абзаца, чтобы продолжить.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Original">Оригинал</sys:String>
+    <sys:String x:Key="Str_Paragraph_Result">Предпросмотр изменений</sys:String>
 </ResourceDictionary>

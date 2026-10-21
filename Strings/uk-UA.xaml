@@ -1809,4 +1809,20 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_ExportDoc_Editable">Редагований вміст</sys:String>
     <sys:String x:Key="Str_ExportDoc_PageImages">Зображення сторінок</sys:String>
     <sys:String x:Key="Str_ExportDoc_PageImagesHint">Кожна сторінка стає зображенням. Текст і клітинки таблиць не можна редагувати окремо.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Title">Редагувати абзац</sys:String>
+    <sys:String x:Key="Str_Paragraph_Hint">Виберіть абзац на сторінці. Змініть розмір його рамки за допомогою кутового маркера або полів розмірів, відредагуйте текст і перевірте попередній перегляд перед застосуванням.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Select">Виберіть абзац, щоб почати.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Leading">Міжрядковий інтервал (пт)</sys:String>
+    <sys:String x:Key="Str_Paragraph_Alignment">Вирівнювання</sys:String>
+    <sys:String x:Key="Str_Paragraph_Left">Ліворуч</sys:String>
+    <sys:String x:Key="Str_Paragraph_Center">По центру</sys:String>
+    <sys:String x:Key="Str_Paragraph_Right">Праворуч</sys:String>
+    <sys:String x:Key="Str_Paragraph_Overflow">Текст не вміщується. Збільште рамку або зменште розмір шрифту чи міжрядковий інтервал.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Ready">Попередній перегляд готовий. Застосування замінить початковий текст абзацу.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Unsupported">Підтримуваний абзац не знайдено. Ця перша версія підтримує горизонтальний текст в одному стилі.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Font">Шрифт попереднього перегляду: {0}. Цей шрифт буде вбудовано у відредагований PDF.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Preparing">Підготовка попереднього перегляду...</sys:String>
+    <sys:String x:Key="Str_Paragraph_Changed">Документ змінився. Знову відкрийте редагування абзацу, щоб продовжити.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Original">Оригінал</sys:String>
+    <sys:String x:Key="Str_Paragraph_Result">Попередній перегляд змін</sys:String>
 </ResourceDictionary>

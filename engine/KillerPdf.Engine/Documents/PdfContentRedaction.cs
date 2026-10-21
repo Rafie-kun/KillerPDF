@@ -1141,6 +1141,7 @@ public static partial class PdfContentRedaction
                             state = state with { Ctm = new Matrix(N(args[0]), N(args[1]), N(args[2]), N(args[3]), N(args[4]), N(args[5])).Then(state.Ctm) };
                         Emit(instruction); break;
                     case "BT":
+                        insertion?.BeginTextObject();
                         insideText = true; text = line = Matrix.Identity; Emit(instruction);
                         if (textOnly) { output.Add(Op("Tr", 3)); localChanged = true; }
                         break;

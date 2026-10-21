@@ -108,3 +108,8 @@ and command-line layout selection. Sidebar checks cover cursor menus, measuremen
 the F1 list and command dispatch through Search Tools. Grain checks seal a WPF style before
 switching through every theme. Dialog text checks render 12 prompt variants across all 13 themes,
 including multiline warnings, errors, choices, confirmations, password and text entry.
+
+`--verify-paragraph-edit` uses the same isolated invocation. It checks paragraph
+selection, resizing, font size, alignment, line spacing, overflow, preview
+invalidation, cancel, Undo/Redo and save/reopen through the actual dialog and
+main-window command. Rendered checks cover all themes, locales and high app scale.

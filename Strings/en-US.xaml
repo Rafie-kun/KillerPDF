@@ -1809,4 +1809,20 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_ExportDoc_Editable">Editable content</sys:String>
     <sys:String x:Key="Str_ExportDoc_PageImages">Page pictures</sys:String>
     <sys:String x:Key="Str_ExportDoc_PageImagesHint">Each page becomes a picture. Text and table cells cannot be edited separately.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Title">Edit paragraph</sys:String>
+    <sys:String x:Key="Str_Paragraph_Hint">Select a paragraph on the page. Resize its box with the corner handle or the size fields, edit the text, then preview before applying.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Select">Select a paragraph to begin.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Leading">Line spacing (pt)</sys:String>
+    <sys:String x:Key="Str_Paragraph_Alignment">Alignment</sys:String>
+    <sys:String x:Key="Str_Paragraph_Left">Left</sys:String>
+    <sys:String x:Key="Str_Paragraph_Center">Center</sys:String>
+    <sys:String x:Key="Str_Paragraph_Right">Right</sys:String>
+    <sys:String x:Key="Str_Paragraph_Overflow">The text does not fit. Enlarge the box or reduce the font size or line spacing.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Ready">Preview ready. Apply replaces the original paragraph text.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Unsupported">No supported paragraph was found. This first version supports horizontal text in one style.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Font">Preview font: {0}. This font will be embedded in the edited PDF.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Preparing">Preparing preview...</sys:String>
+    <sys:String x:Key="Str_Paragraph_Changed">The document changed. Reopen paragraph editing to continue.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Original">Original</sys:String>
+    <sys:String x:Key="Str_Paragraph_Result">Edited preview</sys:String>
 </ResourceDictionary>

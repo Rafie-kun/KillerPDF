@@ -1798,4 +1798,20 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_ExportDoc_Editable">Bearbeitbarer Inhalt</sys:String>
     <sys:String x:Key="Str_ExportDoc_PageImages">Seitenbilder</sys:String>
     <sys:String x:Key="Str_ExportDoc_PageImagesHint">Jede Seite wird zu einem Bild. Text und Tabellenzellen können nicht einzeln bearbeitet werden.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Title">Absatz bearbeiten</sys:String>
+    <sys:String x:Key="Str_Paragraph_Hint">Wählen Sie einen Absatz auf der Seite aus. Ändern Sie die Größe seines Rahmens mit dem Eckgriff oder den Größenfeldern, bearbeiten Sie den Text und prüfen Sie vor dem Anwenden die Vorschau.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Select">Wählen Sie zunächst einen Absatz aus.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Leading">Zeilenabstand (pt)</sys:String>
+    <sys:String x:Key="Str_Paragraph_Alignment">Ausrichtung</sys:String>
+    <sys:String x:Key="Str_Paragraph_Left">Links</sys:String>
+    <sys:String x:Key="Str_Paragraph_Center">Zentriert</sys:String>
+    <sys:String x:Key="Str_Paragraph_Right">Rechts</sys:String>
+    <sys:String x:Key="Str_Paragraph_Overflow">Der Text passt nicht in den Rahmen. Vergrößern Sie ihn oder verringern Sie Schriftgröße oder Zeilenabstand.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Ready">Vorschau bereit. Anwenden ersetzt den ursprünglichen Absatztext.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Unsupported">Kein unterstützter Absatz gefunden. Diese erste Version unterstützt horizontalen Text in einem einheitlichen Stil.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Font">Vorschauschrift: {0}. Diese Schrift wird in die bearbeitete PDF eingebettet.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Preparing">Vorschau wird vorbereitet...</sys:String>
+    <sys:String x:Key="Str_Paragraph_Changed">Das Dokument wurde geändert. Öffnen Sie die Absatzbearbeitung erneut, um fortzufahren.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Original">Original</sys:String>
+    <sys:String x:Key="Str_Paragraph_Result">Bearbeitete Vorschau</sys:String>
 </ResourceDictionary>

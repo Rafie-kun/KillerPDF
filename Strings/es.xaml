@@ -1789,4 +1789,20 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_ExportDoc_Editable">Contenido editable</sys:String>
     <sys:String x:Key="Str_ExportDoc_PageImages">Imágenes de páginas</sys:String>
     <sys:String x:Key="Str_ExportDoc_PageImagesHint">Cada página se convierte en una imagen. El texto y las celdas de las tablas no se pueden editar por separado.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Title">Editar párrafo</sys:String>
+    <sys:String x:Key="Str_Paragraph_Hint">Selecciona un párrafo de la página. Cambia el tamaño de su cuadro con el control de la esquina o los campos de tamaño, edita el texto y revisa la vista previa antes de aplicar.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Select">Selecciona un párrafo para comenzar.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Leading">Interlineado (pt)</sys:String>
+    <sys:String x:Key="Str_Paragraph_Alignment">Alineación</sys:String>
+    <sys:String x:Key="Str_Paragraph_Left">Izquierda</sys:String>
+    <sys:String x:Key="Str_Paragraph_Center">Centro</sys:String>
+    <sys:String x:Key="Str_Paragraph_Right">Derecha</sys:String>
+    <sys:String x:Key="Str_Paragraph_Overflow">El texto no cabe. Amplía el cuadro o reduce el tamaño de fuente o el interlineado.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Ready">Vista previa lista. Aplicar reemplaza el texto del párrafo original.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Unsupported">No se encontró ningún párrafo compatible. Esta primera versión admite texto horizontal con un solo estilo.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Font">Fuente de la vista previa: {0}. Esta fuente se incrustará en el PDF editado.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Preparing">Preparando vista previa...</sys:String>
+    <sys:String x:Key="Str_Paragraph_Changed">El documento ha cambiado. Vuelve a abrir la edición de párrafos para continuar.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Original">Original</sys:String>
+    <sys:String x:Key="Str_Paragraph_Result">Vista previa editada</sys:String>
 </ResourceDictionary>

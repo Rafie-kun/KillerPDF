@@ -1796,4 +1796,20 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_ExportDoc_Editable">Szerkeszthető tartalom</sys:String>
     <sys:String x:Key="Str_ExportDoc_PageImages">Oldalképek</sys:String>
     <sys:String x:Key="Str_ExportDoc_PageImagesHint">Minden oldal képpé alakul. A szöveg és a táblázatcellák külön nem szerkeszthetők.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Title">Bekezdés szerkesztése</sys:String>
+    <sys:String x:Key="Str_Paragraph_Hint">Jelöljön ki egy bekezdést az oldalon. Méretezze át a keretét a sarokfogantyúval vagy a méretmezőkkel, szerkessze a szöveget, majd alkalmazás előtt tekintse meg az előnézetet.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Select">A kezdéshez jelöljön ki egy bekezdést.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Leading">Sortávolság (pt)</sys:String>
+    <sys:String x:Key="Str_Paragraph_Alignment">Igazítás</sys:String>
+    <sys:String x:Key="Str_Paragraph_Left">Balra</sys:String>
+    <sys:String x:Key="Str_Paragraph_Center">Középre</sys:String>
+    <sys:String x:Key="Str_Paragraph_Right">Jobbra</sys:String>
+    <sys:String x:Key="Str_Paragraph_Overflow">A szöveg nem fér el. Növelje a keret méretét, vagy csökkentse a betűméretet vagy a sortávolságot.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Ready">Az előnézet kész. Az alkalmazás lecseréli az eredeti bekezdés szövegét.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Unsupported">Nem található támogatott bekezdés. Ez az első verzió egyetlen stílusú, vízszintes szöveget támogat.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Font">Előnézeti betűtípus: {0}. Ez a betűtípus be lesz ágyazva a szerkesztett PDF-be.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Preparing">Előnézet előkészítése...</sys:String>
+    <sys:String x:Key="Str_Paragraph_Changed">A dokumentum megváltozott. A folytatáshoz nyissa meg újra a bekezdésszerkesztést.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Original">Eredeti</sys:String>
+    <sys:String x:Key="Str_Paragraph_Result">Szerkesztett előnézet</sys:String>
 </ResourceDictionary>

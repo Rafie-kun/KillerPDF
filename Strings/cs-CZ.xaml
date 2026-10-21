@@ -1794,4 +1794,20 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_ExportDoc_Editable">Upravitelný obsah</sys:String>
     <sys:String x:Key="Str_ExportDoc_PageImages">Obrázky stránek</sys:String>
     <sys:String x:Key="Str_ExportDoc_PageImagesHint">Každá stránka se převede na obrázek. Text a buňky tabulek nelze upravovat samostatně.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Title">Upravit odstavec</sys:String>
+    <sys:String x:Key="Str_Paragraph_Hint">Vyberte odstavec na stránce. Změňte velikost jeho rámečku pomocí rohového úchytu nebo polí pro rozměry, upravte text a před použitím zobrazte náhled.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Select">Začněte výběrem odstavce.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Leading">Řádkování (pt)</sys:String>
+    <sys:String x:Key="Str_Paragraph_Alignment">Zarovnání</sys:String>
+    <sys:String x:Key="Str_Paragraph_Left">Vlevo</sys:String>
+    <sys:String x:Key="Str_Paragraph_Center">Na střed</sys:String>
+    <sys:String x:Key="Str_Paragraph_Right">Vpravo</sys:String>
+    <sys:String x:Key="Str_Paragraph_Overflow">Text se nevejde. Zvětšete rámeček nebo zmenšete velikost písma či řádkování.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Ready">Náhled je připraven. Použitím změn nahradíte původní text odstavce.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Unsupported">Nebyl nalezen žádný podporovaný odstavec. Tato první verze podporuje vodorovný text v jednom stylu.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Font">Písmo náhledu: {0}. Toto písmo bude vloženo do upraveného PDF.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Preparing">Příprava náhledu...</sys:String>
+    <sys:String x:Key="Str_Paragraph_Changed">Dokument se změnil. Pokračujte opětovným otevřením úprav odstavce.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Original">Originál</sys:String>
+    <sys:String x:Key="Str_Paragraph_Result">Náhled úprav</sys:String>
 </ResourceDictionary>

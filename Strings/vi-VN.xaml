@@ -1809,4 +1809,20 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_ExportDoc_Editable">Nội dung có thể chỉnh sửa</sys:String>
     <sys:String x:Key="Str_ExportDoc_PageImages">Ảnh trang</sys:String>
     <sys:String x:Key="Str_ExportDoc_PageImagesHint">Mỗi trang trở thành một ảnh. Không thể chỉnh sửa riêng văn bản và các ô trong bảng.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Title">Chỉnh sửa đoạn văn</sys:String>
+    <sys:String x:Key="Str_Paragraph_Hint">Chọn một đoạn văn trên trang. Đổi kích thước khung bằng tay nắm ở góc hoặc các ô kích thước, chỉnh sửa văn bản, rồi xem trước khi áp dụng.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Select">Chọn một đoạn văn để bắt đầu.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Leading">Giãn dòng (pt)</sys:String>
+    <sys:String x:Key="Str_Paragraph_Alignment">Căn chỉnh</sys:String>
+    <sys:String x:Key="Str_Paragraph_Left">Trái</sys:String>
+    <sys:String x:Key="Str_Paragraph_Center">Giữa</sys:String>
+    <sys:String x:Key="Str_Paragraph_Right">Phải</sys:String>
+    <sys:String x:Key="Str_Paragraph_Overflow">Văn bản không vừa khung. Hãy mở rộng khung hoặc giảm cỡ chữ hay khoảng cách dòng.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Ready">Bản xem trước đã sẵn sàng. Thao tác áp dụng sẽ thay thế văn bản của đoạn gốc.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Unsupported">Không tìm thấy đoạn văn được hỗ trợ. Phiên bản đầu tiên này hỗ trợ văn bản nằm ngang với một kiểu định dạng duy nhất.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Font">Phông chữ xem trước: {0}. Phông chữ này sẽ được nhúng vào PDF đã chỉnh sửa.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Preparing">Đang chuẩn bị bản xem trước...</sys:String>
+    <sys:String x:Key="Str_Paragraph_Changed">Tài liệu đã thay đổi. Hãy mở lại công cụ chỉnh sửa đoạn văn để tiếp tục.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Original">Bản gốc</sys:String>
+    <sys:String x:Key="Str_Paragraph_Result">Bản xem trước sau khi sửa</sys:String>
 </ResourceDictionary>

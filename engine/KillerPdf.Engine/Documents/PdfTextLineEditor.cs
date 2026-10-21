@@ -56,6 +56,7 @@ public sealed record PdfTextLineEdit(int PageIndex, PdfContentBounds Region, str
     public bool Underline { get; init; }
     /// <summary>Draws a line through the new text.</summary>
     public bool Strike { get; init; }
+    internal IReadOnlyList<PdfParagraphLine>? ParagraphLines { get; init; }
 }
 
 /// <summary>Which font the new text was written in.</summary>
@@ -192,7 +193,7 @@ public static partial class PdfContentRedaction
             ? tracking / (horizontal * first.Scale) : null;
 
         var writer = new LineWriter(encoded, substituteReference, sizeFactor, edit.FillColor, characterSpacing,
-            edit.Underline, edit.Strike);
+            edit.Underline, edit.Strike, edit.ParagraphLines);
         var insertion = new LineInsertion { Writer = writer };
         PdfPageTreeEntry page = probe.Tree.Pages[edit.PageIndex];
         var rewriter = new ContentRewriter(document, update, [edit.Region], false,
@@ -226,7 +227,8 @@ public static partial class PdfContentRedaction
         PdfPageTree Tree, PageGeometry Geometry);
 
     private static LineProbe Probe(PdfDocument document, int pageIndex, PdfContentBounds region,
-        Dictionary<object, Dictionary<uint, PdfDecodedCharacter>>? used, CancellationToken cancellationToken)
+        Dictionary<object, Dictionary<uint, PdfDecodedCharacter>>? used, CancellationToken cancellationToken,
+        bool paragraph = false)
     {
         if (!double.IsFinite(region.Left) || !double.IsFinite(region.Bottom) || !double.IsFinite(region.Right)
             || !double.IsFinite(region.Top) || region.Right <= region.Left || region.Top <= region.Bottom)
@@ -235,7 +237,7 @@ public static partial class PdfContentRedaction
         if (pageIndex < 0 || pageIndex >= tree.Pages.Count) throw new ArgumentOutOfRangeException(nameof(pageIndex));
         PdfPageTreeEntry page = tree.Pages[pageIndex];
         PageGeometry geometry = Geometry(document, page);
-        var insertion = new LineInsertion();
+        var insertion = new LineInsertion { InspectParagraph = paragraph };
         var rewriter = new ContentRewriter(document, null, [region], false,
             new Dictionary<PdfDictionary, PdfExtractionFont?>(ReferenceEqualityComparer.Instance),
             cancellationToken, glyphsOnly: true, insertion: insertion, usedCodes: used);
@@ -417,7 +419,8 @@ public static partial class PdfContentRedaction
     }
 
     private sealed record LineWriter(IReadOnlyList<EncodedLine> Lines, PdfIndirectReference? Substitute,
-        double? SizeFactor, PdfRgbColor? Fill, double? CharacterSpacing, bool Underline, bool Strike);
+        double? SizeFactor, PdfRgbColor? Fill, double? CharacterSpacing, bool Underline, bool Strike,
+        IReadOnlyList<PdfParagraphLine>? ParagraphLines);
 
     /// <summary>
     /// Follows the glyphs of an edited line through the content. The first one marks where the new
@@ -429,22 +432,43 @@ public static partial class PdfContentRedaction
     {
         private static readonly PdfName FontCategory = Name("Font");
         private bool _pending;
+        private int _textObject;
+        private int? _selectedObject;
 
+        internal bool InspectParagraph { get; init; }
         internal LineWriter? Writer { get; init; }
         internal TextState? State { get; private set; }
         internal Matrix Glyph { get; private set; }
         internal int Glyphs { get; private set; }
         internal bool Invisible { get; private set; }
         internal bool ZeroSize { get; private set; }
+        internal bool ParagraphUnsafe { get; private set; }
         internal bool Written { get; private set; }
         internal List<PdfContentInstruction>? AfterText { get; set; }
         internal int AfterTextDepth { get; private set; }
+
+        internal void BeginTextObject() => _textObject++;
 
         internal void Observe(TextState state, Matrix glyph)
         {
             Glyphs++;
             if (state.RenderMode is 3 or 7) Invisible = true;
             if (state.Size == 0) ZeroSize = true;
+            if (InspectParagraph)
+            {
+                _selectedObject ??= _textObject;
+                if (_selectedObject != _textObject || state.Size <= 0 || state.RenderMode != 0
+                    || state.CharacterSpacing != 0 || state.WordSpacing != 0
+                    || state.Scale != 1 || state.Rise != 0 || state.Font?.IsVertical == true
+                    || Math.Abs(glyph.A - 1) > 1e-8 || Math.Abs(glyph.B) > 1e-8 || Math.Abs(glyph.C) > 1e-8
+                    || Math.Abs(glyph.D - 1) > 1e-8 || Math.Abs(state.Ctm.A - 1) > 1e-8
+                    || Math.Abs(state.Ctm.B) > 1e-8 || Math.Abs(state.Ctm.C) > 1e-8 || Math.Abs(state.Ctm.D - 1) > 1e-8)
+                    ParagraphUnsafe = true;
+                if (State is { } first && (first.FontObject != state.FontObject || first.Size != state.Size
+                    || first.Ctm != state.Ctm || first.Clip != state.Clip
+                    || !PdfContentStreamWriter.Write(first.Fill).AsSpan().SequenceEqual(PdfContentStreamWriter.Write(state.Fill))))
+                    ParagraphUnsafe = true;
+            }
             if (State is not null) return;
             State = state;
             Glyph = glyph;
@@ -475,7 +499,10 @@ public static partial class PdfContentRedaction
             double leading = state.Leading > 0 ? state.Leading * factor : Math.Abs(size) * 1.2;
             for (int index = 0; index < writer.Lines.Count; index++)
             {
-                if (index > 0) output.Add(Op("Td", 0, -leading));
+                if (writer.ParagraphLines is { } positions && index < positions.Count)
+                    output.Add(Op("Tm", 1, 0, 0, 1, positions[index].X - state.Ctm.E,
+                        positions[index].Baseline - state.Ctm.F));
+                else if (index > 0) output.Add(Op("Td", 0, -leading));
                 if (writer.Lines[index].Items.Count > 0)
                     output.Add(new PdfContentInstruction("TJ", 0, [new PdfArray(writer.Lines[index].Items)]));
             }

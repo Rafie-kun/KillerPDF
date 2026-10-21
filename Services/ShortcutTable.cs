@@ -138,6 +138,7 @@ namespace KillerPDF
         // A binding with no caps is a mouse gesture and correctly lights nothing on the board.
         internal static readonly KsBinding[] KsAll =
         [
+            B("%alt%+%shift%+P", "Str_Paragraph_Title", "Edit", Cap("AltShift:P")),
             B("%ctrl%+%shift%+G", "Str_Lbl_DigitalSig", "Docs", Cap("CtrlShift:G")),
             B("%alt%+%shift%+T", "Str_TableExport_Title", "File", Cap("AltShift:T")),
             B("%alt%+%shift%+E", "Str_Menu_ExportImages", "File", Cap("AltShift:E")),

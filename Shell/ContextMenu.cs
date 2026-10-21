@@ -225,6 +225,8 @@ namespace KillerPDF
                 _activeCanvas = CanvasForPage(pageIdx);
                 PlaceTextBox(pt, pageIdx);
             }, GestureFor("T"), ""));
+            _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Paragraph_Title"), (_, _) => EditParagraph(pageIdx, pt),
+                GestureFor("AltShift:P"), ""));
             _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Lbl_Image"), (s, e) =>
             {
                 _activeCanvas = CanvasForPage(pageIdx);
@@ -686,6 +688,8 @@ namespace KillerPDF
                 menu.Items.Add(MakeMenuItem(Loc("Str_Pages_DivideSpreads"), (s, ev) => DivideSpreads()));
                 menu.Items.Add(MakeMenuItem(Loc("Str_Pages_RasterizeRegion"), (s, ev) => RasterizeRegion(clickedPage)));
                 menu.Items.Add(MakeMenuItem(Loc("Str_TableExport_Title"), (_, _) => ExportTable(clickedPage)));
+                menu.Items.Add(MakeMenuItem(Loc("Str_Paragraph_Title"), (_, _) => EditParagraph(clickedPage),
+                    GestureFor("AltShift:P")));
                 // The thumbnails' own Ctrl+Shift+O: every selected page, not only the clicked one.
                 menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_OcrPage"), (s, ev) => OcrSelectedPagesToClipboard(),
                     GestureFor("CtrlShift:O"), ""));

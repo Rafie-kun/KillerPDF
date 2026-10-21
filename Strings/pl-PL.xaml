@@ -1797,4 +1797,20 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_ExportDoc_Editable">Edytowalna zawartość</sys:String>
     <sys:String x:Key="Str_ExportDoc_PageImages">Obrazy stron</sys:String>
     <sys:String x:Key="Str_ExportDoc_PageImagesHint">Każda strona staje się obrazem. Tekstu i komórek tabel nie można edytować oddzielnie.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Title">Edytuj akapit</sys:String>
+    <sys:String x:Key="Str_Paragraph_Hint">Wybierz akapit na stronie. Zmień rozmiar jego ramki za pomocą uchwytu w rogu lub pól rozmiaru, edytuj tekst, a następnie sprawdź podgląd przed zastosowaniem zmian.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Select">Wybierz akapit, aby rozpocząć.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Leading">Interlinia (pt)</sys:String>
+    <sys:String x:Key="Str_Paragraph_Alignment">Wyrównanie</sys:String>
+    <sys:String x:Key="Str_Paragraph_Left">Do lewej</sys:String>
+    <sys:String x:Key="Str_Paragraph_Center">Do środka</sys:String>
+    <sys:String x:Key="Str_Paragraph_Right">Do prawej</sys:String>
+    <sys:String x:Key="Str_Paragraph_Overflow">Tekst się nie mieści. Powiększ ramkę lub zmniejsz rozmiar czcionki albo interlinię.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Ready">Podgląd gotowy. Zastosowanie zmian zastąpi oryginalny tekst akapitu.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Unsupported">Nie znaleziono obsługiwanego akapitu. Ta pierwsza wersja obsługuje tekst poziomy w jednym stylu.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Font">Czcionka podglądu: {0}. Ta czcionka zostanie osadzona w edytowanym pliku PDF.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Preparing">Przygotowywanie podglądu...</sys:String>
+    <sys:String x:Key="Str_Paragraph_Changed">Dokument został zmieniony. Otwórz ponownie edycję akapitu, aby kontynuować.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Original">Oryginał</sys:String>
+    <sys:String x:Key="Str_Paragraph_Result">Podgląd po edycji</sys:String>
 </ResourceDictionary>

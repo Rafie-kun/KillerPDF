@@ -1809,4 +1809,20 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_ExportDoc_Editable">Contenu modifiable</sys:String>
     <sys:String x:Key="Str_ExportDoc_PageImages">Images des pages</sys:String>
     <sys:String x:Key="Str_ExportDoc_PageImagesHint">Chaque page devient une image. Le texte et les cellules des tableaux ne peuvent pas être modifiés séparément.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Title">Modifier le paragraphe</sys:String>
+    <sys:String x:Key="Str_Paragraph_Hint">Sélectionnez un paragraphe sur la page. Redimensionnez son cadre avec la poignée d’angle ou les champs de dimensions, modifiez le texte, puis vérifiez l’aperçu avant d’appliquer.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Select">Sélectionnez un paragraphe pour commencer.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Leading">Interligne (pt)</sys:String>
+    <sys:String x:Key="Str_Paragraph_Alignment">Alignement</sys:String>
+    <sys:String x:Key="Str_Paragraph_Left">Gauche</sys:String>
+    <sys:String x:Key="Str_Paragraph_Center">Centré</sys:String>
+    <sys:String x:Key="Str_Paragraph_Right">Droite</sys:String>
+    <sys:String x:Key="Str_Paragraph_Overflow">Le texte ne tient pas dans le cadre. Agrandissez-le ou réduisez la taille de police ou l’interligne.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Ready">Aperçu prêt. Appliquer remplace le texte du paragraphe d’origine.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Unsupported">Aucun paragraphe compatible trouvé. Cette première version prend en charge le texte horizontal dans un seul style.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Font">Police de l’aperçu : {0}. Cette police sera incorporée au PDF modifié.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Preparing">Préparation de l’aperçu...</sys:String>
+    <sys:String x:Key="Str_Paragraph_Changed">Le document a changé. Rouvrez la modification de paragraphe pour continuer.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Original">Original</sys:String>
+    <sys:String x:Key="Str_Paragraph_Result">Aperçu modifié</sys:String>
 </ResourceDictionary>

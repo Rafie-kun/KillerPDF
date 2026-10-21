@@ -673,6 +673,11 @@ namespace KillerPDF
                 Background = Brushes.Transparent
             };
             pairHost.Children.Add(textGrip);
+            var paragraphButton = UiKit.Make(Loc("Str_Paragraph_Title"), false);
+            paragraphButton.Margin = new Thickness(0, 3, 12, 3);
+            paragraphButton.ToolTip = ShortcutTip("Str_Paragraph_Title", "AltShift:P");
+            paragraphButton.Click += (_, _) => EditParagraph(PageList.SelectedIndex);
+            pairHost.Children.Add(paragraphButton);
             pairHost.Children.Add(fontPair);
             pairHost.Children.Add(colorPair);
             pairHost.Children.Add(opacityPair);

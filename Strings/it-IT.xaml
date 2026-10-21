@@ -1809,4 +1809,20 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_ExportDoc_Editable">Contenuto modificabile</sys:String>
     <sys:String x:Key="Str_ExportDoc_PageImages">Immagini delle pagine</sys:String>
     <sys:String x:Key="Str_ExportDoc_PageImagesHint">Ogni pagina diventa un'immagine. Il testo e le celle delle tabelle non possono essere modificati separatamente.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Title">Modifica paragrafo</sys:String>
+    <sys:String x:Key="Str_Paragraph_Hint">Seleziona un paragrafo nella pagina. Ridimensiona il riquadro con la maniglia nell’angolo o i campi delle dimensioni, modifica il testo e controlla l’anteprima prima di applicare.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Select">Seleziona un paragrafo per iniziare.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Leading">Interlinea (pt)</sys:String>
+    <sys:String x:Key="Str_Paragraph_Alignment">Allineamento</sys:String>
+    <sys:String x:Key="Str_Paragraph_Left">Sinistra</sys:String>
+    <sys:String x:Key="Str_Paragraph_Center">Centro</sys:String>
+    <sys:String x:Key="Str_Paragraph_Right">Destra</sys:String>
+    <sys:String x:Key="Str_Paragraph_Overflow">Il testo non entra nel riquadro. Ingrandiscilo o riduci la dimensione del carattere o l’interlinea.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Ready">Anteprima pronta. Applica sostituisce il testo del paragrafo originale.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Unsupported">Nessun paragrafo supportato trovato. Questa prima versione supporta il testo orizzontale con un unico stile.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Font">Carattere dell’anteprima: {0}. Questo carattere verrà incorporato nel PDF modificato.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Preparing">Preparazione dell’anteprima...</sys:String>
+    <sys:String x:Key="Str_Paragraph_Changed">Il documento è cambiato. Riapri la modifica del paragrafo per continuare.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Original">Originale</sys:String>
+    <sys:String x:Key="Str_Paragraph_Result">Anteprima modificata</sys:String>
 </ResourceDictionary>

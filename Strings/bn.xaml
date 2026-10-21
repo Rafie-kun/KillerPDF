@@ -1789,4 +1789,20 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_ExportDoc_Editable">সম্পাদনাযোগ্য বিষয়বস্তু</sys:String>
     <sys:String x:Key="Str_ExportDoc_PageImages">পৃষ্ঠার ছবি</sys:String>
     <sys:String x:Key="Str_ExportDoc_PageImagesHint">প্রতিটি পৃষ্ঠা একটি ছবিতে পরিণত হয়। লেখা ও টেবিলের ঘর আলাদাভাবে সম্পাদনা করা যাবে না।</sys:String>
+    <sys:String x:Key="Str_Paragraph_Title">অনুচ্ছেদ সম্পাদনা</sys:String>
+    <sys:String x:Key="Str_Paragraph_Hint">পৃষ্ঠায় একটি অনুচ্ছেদ নির্বাচন করুন। কোণের হাতল বা মাপের ঘরগুলো দিয়ে এর বাক্সের আকার বদলান, পাঠ্য সম্পাদনা করুন, তারপর প্রয়োগ করার আগে পূর্বরূপ দেখুন।</sys:String>
+    <sys:String x:Key="Str_Paragraph_Select">শুরু করতে একটি অনুচ্ছেদ নির্বাচন করুন।</sys:String>
+    <sys:String x:Key="Str_Paragraph_Leading">লাইন ব্যবধান (pt)</sys:String>
+    <sys:String x:Key="Str_Paragraph_Alignment">সারিবিন্যাস</sys:String>
+    <sys:String x:Key="Str_Paragraph_Left">বামে</sys:String>
+    <sys:String x:Key="Str_Paragraph_Center">মাঝখানে</sys:String>
+    <sys:String x:Key="Str_Paragraph_Right">ডানে</sys:String>
+    <sys:String x:Key="Str_Paragraph_Overflow">পাঠ্য বাক্সে ধরছে না। বাক্স বড় করুন অথবা ফন্টের আকার বা লাইন ব্যবধান কমান।</sys:String>
+    <sys:String x:Key="Str_Paragraph_Ready">পূর্বরূপ প্রস্তুত। প্রয়োগ করলে মূল অনুচ্ছেদের পাঠ্য প্রতিস্থাপিত হবে।</sys:String>
+    <sys:String x:Key="Str_Paragraph_Unsupported">সমর্থিত কোনো অনুচ্ছেদ পাওয়া যায়নি। এই প্রথম সংস্করণে একটিমাত্র শৈলীর অনুভূমিক পাঠ্য সমর্থিত।</sys:String>
+    <sys:String x:Key="Str_Paragraph_Font">পূর্বরূপের ফন্ট: {0}। এই ফন্টটি সম্পাদিত PDF-এ সংযুক্ত করা হবে।</sys:String>
+    <sys:String x:Key="Str_Paragraph_Preparing">পূর্বরূপ প্রস্তুত হচ্ছে...</sys:String>
+    <sys:String x:Key="Str_Paragraph_Changed">নথিটি পরিবর্তিত হয়েছে। চালিয়ে যেতে অনুচ্ছেদ সম্পাদনা আবার খুলুন।</sys:String>
+    <sys:String x:Key="Str_Paragraph_Original">মূল</sys:String>
+    <sys:String x:Key="Str_Paragraph_Result">সম্পাদিত পূর্বরূপ</sys:String>
 </ResourceDictionary>
