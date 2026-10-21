@@ -313,7 +313,8 @@ namespace KillerPDF.Controls
             bool   IsComb,     // #158: /Tx with the Comb flag (bit 25) and a MaxLen
             int    MaxLen,     // #158: comb cell count (also the input length cap)
             Color? BackgroundColor,
-            Color? BorderColor);
+            Color? BorderColor,
+            bool   IsPassword = false);   // /Tx with the Password flag (bit 14): never shown in clear
 
         /// <summary>
         /// Scans the current page's /Annots for Widget subtypes and overlays interactive
@@ -387,49 +388,81 @@ namespace KillerPDF.Controls
                     double combCellW = f.IsComb ? f.Cw / f.MaxLen : 0;
                     var restingBorder = new SolidColorBrush(
                         f.BorderColor ?? Color.FromRgb(0x88, 0x88, 0x88));
-                    var tb = new TextBox
+                    if (f.IsPassword)
                     {
-                        Tag              = FormOverlayTag,
-                        Width            = f.Cw,
-                        Height           = f.Ch,
-                        Text             = cur,
-                        MaxLength        = f.IsComb ? f.MaxLen : 0,
-                        IsReadOnly       = f.IsReadOnly,
-                        AcceptsReturn    = f.IsMultiLine,
-                        TextWrapping     = f.IsMultiLine ? TextWrapping.Wrap : TextWrapping.NoWrap,
-                        VerticalScrollBarVisibility = f.IsMultiLine
-                            ? ScrollBarVisibility.Auto : ScrollBarVisibility.Hidden,
-                        // A comb field is laid over the PDF's printed cells. An opaque live-field
-                        // fill hides those dividers and makes it look like an ordinary text box.
-                        // Keep the overlay transparent so the cells remain visible while the
-                        // editable characters, selection, and caret stay above the page artwork.
-                        Background       = f.IsComb ? Brushes.Transparent
-                            : new SolidColorBrush(f.BackgroundColor ?? fieldBg.Color),
-                        Foreground       = Brushes.Black,
-                        CaretBrush       = Brushes.Black,
-                        Cursor           = Cursors.IBeam,
-                        ForceCursor      = true,
-                        SelectionBrush   = (System.Windows.Media.Brush)FindResource("HeaderLineBrush"),
-                        Style            = (Style)FindResource("FormFieldTextBox"),
-                        BorderBrush      = f.IsComb ? Brushes.Transparent : restingBorder,
-                        BorderThickness  = new Thickness(1),
-                        FontSize         = fontSize,
-                        Padding          = f.IsComb
-                            ? new Thickness(Math.Max(0, combCellW / 2 - fontSize * 0.275), 0, 0, 0)
-                            : new Thickness(3, 0, 3, 0),
-                        VerticalContentAlignment = f.IsMultiLine
-                            ? VerticalAlignment.Top : VerticalAlignment.Center,
-                        ToolTip          = string.IsNullOrEmpty(f.FieldName) ? null : f.FieldName,
-                    };
-                    if (f.IsComb) tb.FontFamily = new FontFamily("Consolas");
-                    // Focus also raises the per-field font-size stepper (and hides it on blur).
-                    string capturedKey   = f.FieldName;
-                    double capturedScale = f.Scale;
-                    tb.GotFocus  += (_, _) => { _selectedFormFieldName = capturedKey; tb.SetResourceReference(Control.BorderBrushProperty, "HeaderLineBrush"); ShowFormSizeBar(tb, capturedKey, capturedScale); };
-                    tb.LostFocus += (_, _) => { tb.BorderBrush = f.IsComb ? Brushes.Transparent : restingBorder; HideFormSizeBar(); RecalculateFormFields(); };
-                    tb.TextChanged += (_, _) => { _formTextValues[capturedKey] = tb.Text; MarkDirty(true); };
-                    RegisterFormValueBox(capturedKey, tb);
-                    ctrl = f.IsComb ? new CombTextBox(tb, f.MaxLen, fontSize) : tb;
+                        // A password field (flag bit 14) never shows its value: PasswordBox masks it,
+                        // blocks copy and cut, and reports itself as a password to UI Automation
+                        // without exposing the text (BF-U006). The real value is still saved.
+                        var pb = new PasswordBox
+                        {
+                            Tag              = FormOverlayTag,
+                            Width            = f.Cw,
+                            Height           = f.Ch,
+                            Password         = cur,
+                            IsEnabled        = !f.IsReadOnly,
+                            Background       = new SolidColorBrush(f.BackgroundColor ?? fieldBg.Color),
+                            Foreground       = Brushes.Black,
+                            CaretBrush       = Brushes.Black,
+                            BorderBrush      = restingBorder,
+                            BorderThickness  = new Thickness(1),
+                            FontSize         = fontSize,
+                            Padding          = new Thickness(3, 0, 3, 0),
+                            VerticalContentAlignment = VerticalAlignment.Center,
+                            ToolTip          = string.IsNullOrEmpty(f.FieldName) ? null : f.FieldName,
+                        };
+                        if (f.MaxLen > 0) pb.MaxLength = f.MaxLen;
+                        string passwordKey = f.FieldName;
+                        pb.GotFocus  += (_, _) => { _selectedFormFieldName = passwordKey; pb.SetResourceReference(Control.BorderBrushProperty, "HeaderLineBrush"); };
+                        pb.LostFocus += (_, _) => { pb.BorderBrush = restingBorder; RecalculateFormFields(); };
+                        pb.PasswordChanged += (_, _) => { _formTextValues[passwordKey] = pb.Password; MarkDirty(true); };
+                        ctrl = pb;
+                    }
+                    else
+                    {
+                        var tb = new TextBox
+                        {
+                            Tag              = FormOverlayTag,
+                            Width            = f.Cw,
+                            Height           = f.Ch,
+                            Text             = cur,
+                            MaxLength        = f.IsComb ? f.MaxLen : 0,
+                            IsReadOnly       = f.IsReadOnly,
+                            AcceptsReturn    = f.IsMultiLine,
+                            TextWrapping     = f.IsMultiLine ? TextWrapping.Wrap : TextWrapping.NoWrap,
+                            VerticalScrollBarVisibility = f.IsMultiLine
+                                ? ScrollBarVisibility.Auto : ScrollBarVisibility.Hidden,
+                            // A comb field is laid over the PDF's printed cells. An opaque live-field
+                            // fill hides those dividers and makes it look like an ordinary text box.
+                            // Keep the overlay transparent so the cells remain visible while the
+                            // editable characters, selection, and caret stay above the page artwork.
+                            Background       = f.IsComb ? Brushes.Transparent
+                                : new SolidColorBrush(f.BackgroundColor ?? fieldBg.Color),
+                            Foreground       = Brushes.Black,
+                            CaretBrush       = Brushes.Black,
+                            Cursor           = Cursors.IBeam,
+                            ForceCursor      = true,
+                            SelectionBrush   = (System.Windows.Media.Brush)FindResource("HeaderLineBrush"),
+                            Style            = (Style)FindResource("FormFieldTextBox"),
+                            BorderBrush      = f.IsComb ? Brushes.Transparent : restingBorder,
+                            BorderThickness  = new Thickness(1),
+                            FontSize         = fontSize,
+                            Padding          = f.IsComb
+                                ? new Thickness(Math.Max(0, combCellW / 2 - fontSize * 0.275), 0, 0, 0)
+                                : new Thickness(3, 0, 3, 0),
+                            VerticalContentAlignment = f.IsMultiLine
+                                ? VerticalAlignment.Top : VerticalAlignment.Center,
+                            ToolTip          = string.IsNullOrEmpty(f.FieldName) ? null : f.FieldName,
+                        };
+                        if (f.IsComb) tb.FontFamily = new FontFamily("Consolas");
+                        // Focus also raises the per-field font-size stepper (and hides it on blur).
+                        string capturedKey   = f.FieldName;
+                        double capturedScale = f.Scale;
+                        tb.GotFocus  += (_, _) => { _selectedFormFieldName = capturedKey; tb.SetResourceReference(Control.BorderBrushProperty, "HeaderLineBrush"); ShowFormSizeBar(tb, capturedKey, capturedScale); };
+                        tb.LostFocus += (_, _) => { tb.BorderBrush = f.IsComb ? Brushes.Transparent : restingBorder; HideFormSizeBar(); RecalculateFormFields(); };
+                        tb.TextChanged += (_, _) => { _formTextValues[capturedKey] = tb.Text; MarkDirty(true); };
+                        RegisterFormValueBox(capturedKey, tb);
+                        ctrl = f.IsComb ? new CombTextBox(tb, f.MaxLen, fontSize) : tb;
+                    }
                 }
 
                 // Dropdown / choice
@@ -726,7 +759,8 @@ namespace KillerPDF.Controls
                                 (byte)Math.Round(border.Red * 255),
                                 (byte)Math.Round(border.Green * 255),
                                 (byte)Math.Round(border.Blue * 255))
-                            : null));
+                            : null,
+                        IsPassword: fieldType == "/Tx" && !isMultiLine && (flags & (1 << 13)) != 0));
                 }
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"GetPageFormFields (engine): {ex}"); }
