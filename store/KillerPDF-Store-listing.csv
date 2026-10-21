@@ -915,7 +915,7 @@ Iščite po celotnem dokumentu, pri čemer so med pomikanjem označeni vsi zadet
 
 Vgrajen OCR
 
-Prepoznajte besedilo strani ali izbranega območja v odložišče, omogočite iskanje po optično prebranem PDF-ju ali izvlecite vse besedilo v datoteko. Vsi jezikovni modeli OCR, tudi angleški, se prenesejo ob prvi uporabi in ostanejo v predpomnilniku. Izvorne knjižnice Tesseract se razširijo v predpomnilnik OCR za posamezno različico.
+Prepoznajte besedilo strani ali izbranega območja v odložišče, omogočite iskanje po optično prebranem PDF-ju ali izvlecite vse besedilo v datoteko. Vsi jezikovni modeli OCR, tudi angleški, se prenesejo ob prvi uporabi in ostanejo v predpomnilniku. Knjižnice Tesseract se razširijo v predpomnilnik OCR za posamezno različico.
 
 Obrazci in podpisovanje
 
