@@ -301,7 +301,15 @@ namespace KillerPDF.Controls
         internal Services.PublishedFileStamp? PublishedFileRef { get => _publishedFile; set => _publishedFile = value; }
         internal string? SuggestedNameRef { get => _suggestedName; set => _suggestedName = value; }
         internal Services.FileRevision? LoadedRevisionRef { get => _loadedRevision; set => _loadedRevision = value; }
-        internal bool AsyncOpenPendingRef { get => _asyncOpenPending; set => _asyncOpenPending = value; }
+        internal bool AsyncOpenPendingRef
+        {
+            get => _asyncOpenPending;
+            set
+            {
+                _asyncOpenPending = value;
+                if (_active != null) _active.LoadPending = value;
+            }
+        }
         internal Stack<int> NavBackRef => _navBack;
         internal Stack<int> NavForwardRef => _navForward;
         internal bool OcrRegionModeRef { get => _ocrRegionMode; set => _ocrRegionMode = value; }

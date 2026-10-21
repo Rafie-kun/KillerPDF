@@ -53,6 +53,7 @@ namespace KillerPDF.Controls
             public bool ProtectedSource;               // #149: source file had a password/encryption when opened
             public Services.PublishedFileStamp? PublishedFile; // the bytes the last save wrote, when they differ from CurrentFile
             public string? SuggestedName;              // file name offered on the first save of an import with no saved home
+            public bool LoadPending;                   // a background open or merge will fill this tab; never reuse it
             public Services.FileRevision? LoadedRevision; // the version of OriginalFile this document last read or wrote
             public double ScrollH;
             public double ScrollV;
@@ -662,9 +663,9 @@ namespace KillerPDF.Controls
             if (_active != null) CaptureSessionState(_active);
 
             DocumentSession target;
-            if (_active != null && _active.Doc == null && _active.DeferredPath == null)
+            if (_active != null && _active.Doc == null && _active.DeferredPath == null && !_active.LoadPending)
             {
-                target = _active;          // reuse the current empty tab (never a deferred one)
+                target = _active;          // reuse the current empty tab (never a deferred or loading one)
                 createdNew = false;
             }
             else

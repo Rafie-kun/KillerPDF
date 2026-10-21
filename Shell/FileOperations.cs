@@ -274,6 +274,7 @@ namespace KillerPDF
             // file production runs off-thread; opening/rendering the result stays on the UI thread.
             _asyncOpenPending = true;   // the synchronous open caller defers tab finalization to here
             var ct = BeginCancellableOp(Loc("Str_Op_Repair"));
+            var owner = AsyncOwner();
             var busy = ShowBusyOverlay(Loc("Str_Busy_Repairing"));
             try
             {
@@ -294,12 +295,14 @@ namespace KillerPDF
                     return PdfEngineIntegration.TryRemoveEncryptionWithoutPassword(path, p)
                         ? p : null;
                 });
+                if (!ReclaimAsyncOwner(owner)) { HideBusyOverlay(busy); return; }   // its tab was closed meanwhile
                 if (ct.IsCancellationRequested) { HideBusyOverlay(busy); _asyncOpenPending = false; SetStatus(Loc("Str_St_RepairCanceled")); return; }   // canceled during strategy 0
 
                 // Strategy 1: PdfSharpCore Import mode - page-copy, more lenient than Modify/ReadOnly.
                 // Works when the XRef is partially corrupt but the object data is intact. (Returns
                 // null on failure rather than throwing.)
                 repairedPath ??= await System.Threading.Tasks.Task.Run(() => PdfImport.RepairViaImportToFile(path));
+                if (!ReclaimAsyncOwner(owner)) { HideBusyOverlay(busy); return; }   // its tab was closed meanwhile
                 if (ct.IsCancellationRequested) { HideBusyOverlay(busy); _asyncOpenPending = false; SetStatus(Loc("Str_St_RepairCanceled")); return; }   // canceled during strategy 1
 
                 // Strategy 2: engine rasterize. Compatibility recovery handles damage
@@ -309,6 +312,7 @@ namespace KillerPDF
                 {
                     repairedPath = await System.Threading.Tasks.Task.Run(
                         () => PdfImport.RepairViaRasterizeToFile(path));
+                    if (!ReclaimAsyncOwner(owner)) { HideBusyOverlay(busy); return; }   // its tab was closed meanwhile
                     raster = repairedPath is not null;
                 }
                 if (ct.IsCancellationRequested) { HideBusyOverlay(busy); _asyncOpenPending = false; SetStatus(Loc("Str_St_RepairCanceled")); return; }   // canceled during strategy 2
@@ -405,6 +409,7 @@ namespace KillerPDF
         {
             _asyncOpenPending = true;
             var ct = BeginCancellableOp(Loc("Str_Op_Operation"));
+            var owner = AsyncOwner();
             var busy = ShowBusyOverlay(busyMessage ?? Loc("Str_Busy_Opening"));
             try
             {
@@ -413,6 +418,7 @@ namespace KillerPDF
                 bool ok = await System.Threading.Tasks.Task.Run(() =>
                     PdfEngineIntegration.TryRemoveEncryptionWithoutPassword(srcPath, repairedPath)
                     || PdfImport.TryImportRepairToPath(srcPath, repairedPath));
+                if (!ReclaimAsyncOwner(owner)) { HideBusyOverlay(busy); EndCancellableOp(ct); return; }   // its tab was closed meanwhile
                 if (ct.IsCancellationRequested) { HideBusyOverlay(busy); _asyncOpenPending = false; SetStatus(Loc("Str_St_Canceled")); EndCancellableOp(ct); return; }
                 if (!ok)
                 {
@@ -572,6 +578,28 @@ namespace KillerPDF
         // Finalizes a background open (encryption strip / repair) once the document is loaded on the UI
         // thread: stores it into the active tab session and refreshes the tool + tab strip. Mirrors the
         // tail of OpenInNewTab, which is skipped while _asyncOpenPending is set.
+        // A background open belongs to the tab it started in. The user can switch tabs or panes,
+        // or close that tab, while it runs, and _doc/_currentFile follow whatever is active, so
+        // before a result touches them, bring its own tab back. False when that tab is gone and
+        // the result must be dropped.
+        private (Controls.PdfViewer Viewer, Controls.PdfViewer.DocumentSession? Session) AsyncOwner() =>
+            (ActiveViewer, ActiveViewer.ActiveSessionExt);
+
+        private bool ReclaimAsyncOwner((Controls.PdfViewer Viewer, Controls.PdfViewer.DocumentSession? Session) owner)
+        {
+            if (owner.Session is null || !owner.Viewer.SessionsRef.Contains(owner.Session))
+            {
+                // Its tab is gone; stop the pane treating an open as in flight unless another is.
+                if (!owner.Viewer.SessionsRef.Any(session => session.LoadPending))
+                    owner.Viewer.AsyncOpenPendingRef = false;
+                return false;
+            }
+            if (!ReferenceEquals(ActiveViewer, owner.Viewer)) FocusPane(owner.Viewer);
+            if (!ReferenceEquals(owner.Viewer.ActiveSessionExt, owner.Session)) owner.Viewer.SwitchToTabExt(owner.Session);
+            return ReferenceEquals(ActiveViewer, owner.Viewer)
+                && ReferenceEquals(owner.Viewer.ActiveSessionExt, owner.Session);
+        }
+
         private void FinalizeAsyncOpen()
         {
             _asyncOpenPending = false;

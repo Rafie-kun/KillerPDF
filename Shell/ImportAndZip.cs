@@ -167,12 +167,25 @@ namespace KillerPDF
         private async void OpenMerged(List<string> found, List<string> tempDirs)
         {
             var target = BeginTabLoad(out var prev, out bool createdNew);
+            target.LoadPending = true;   // a second open while this builds must not land in this tab
+            var owner = AsyncOwner();
             var busy = ShowBusyOverlay(Loc("Str_Drop_Merging"));
             var ct = BeginCancellableOp(Loc("Str_Op_Merge"));   // Esc cancels; the busy overlay keeps the window draggable
             try
             {
                 // Build off the UI thread so the window stays responsive (and movable) while it works.
                 string? tempPath = await Task.Run(() => BuildCombinedPdf(found, ct));
+                target.LoadPending = false;
+                if (!ReclaimAsyncOwner(owner))
+                {
+                    // Its tab was closed meanwhile.
+                    HideBusyOverlay(busy);
+                    if (tempPath != null) try { File.Delete(tempPath); } catch (IOException) { }
+                    return;
+                }
+                // The tab to fall back to may have been closed while this ran.
+                if (prev != null && !ActiveViewer.SessionsRef.Contains(prev))
+                    prev = ActiveViewer.SessionsRef.FirstOrDefault(session => !ReferenceEquals(session, target));
 
                 if (ct.IsCancellationRequested || tempPath == null)
                 {
@@ -201,6 +214,7 @@ namespace KillerPDF
             }
             finally
             {
+                target.LoadPending = false;
                 EndCancellableOp(ct);
                 CleanupDirs(tempDirs);
             }
