@@ -90,6 +90,16 @@ namespace KillerPDF
             OpenFromExternal(path);
         }
 
+        // The download's own file name when the URL ends in one, so the first Save can offer it.
+        private static string BrowserFileName(System.Uri target)
+        {
+            string name = System.Uri.UnescapeDataString(Path.GetFileName(target.AbsolutePath));
+            foreach (char invalid in Path.GetInvalidFileNameChars()) name = name.Replace(invalid, '_');
+            name = name.Trim().TrimEnd('.');
+            if (name.Length == 0) name = "document";
+            return name.EndsWith(".pdf", System.StringComparison.OrdinalIgnoreCase) ? name : name + ".pdf";
+        }
+
         private async Task OpenProtocolUrlAsync(System.Uri target)
         {
             string temp = App.MakeTempFile("browser");
@@ -107,6 +117,7 @@ namespace KillerPDF
                         System.Text.Encoding.ASCII.GetString(magic) != "%PDF-")
                         throw new BrowserOpenException(BrowserOpenFailure.NotPdf);
                 }
+                App.RememberSuggestedName(temp, BrowserFileName(target));
                 ActiveViewer.OpenInNewTabExt(temp);
             }
             catch (System.Exception ex)

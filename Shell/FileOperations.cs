@@ -172,8 +172,14 @@ namespace KillerPDF
         {
             List<PdfEngineIntegration.MeasurementData> openedMeasurements = TakeMeasurementsFromWorkingCopy(ref workingPath);
             _currentFile = workingPath;
-            _originalFile = displayPath;
-            FileNameLabel.Text = System.IO.Path.GetFileName(displayPath);
+            _publishedFile = null;
+            // A temp-backed import (a browser download) has no saved home: cleanup deletes the
+            // temp file, so the first Save must ask where to keep it.
+            string? suggested = App.TakeSuggestedName(displayPath);
+            bool imported = App.IsCleanupOwnedPath(displayPath);
+            _originalFile = imported ? null : displayPath;
+            _suggestedName = imported ? suggested ?? System.IO.Path.GetFileName(displayPath) : null;
+            FileNameLabel.Text = _suggestedName ?? System.IO.Path.GetFileName(displayPath);
             _annotations.Clear();
             _continuousLinks.Clear();   // drop the previous document's cached link rects
             CloseEngineDocumentSession();
@@ -1258,6 +1264,8 @@ namespace KillerPDF
             {
                 if (!string.IsNullOrWhiteSpace(suggestedName))
                     dlg.FileName = suggestedName;
+                else if (!string.IsNullOrWhiteSpace(_suggestedName))
+                    dlg.FileName = _suggestedName;
                 else if (!string.IsNullOrWhiteSpace(seed))
                     dlg.FileName = System.IO.Path.GetFileName(seed);
                 if (!string.IsNullOrWhiteSpace(_originalFile))
@@ -1266,9 +1274,22 @@ namespace KillerPDF
                     if (!string.IsNullOrEmpty(seedDir) && System.IO.Directory.Exists(seedDir))
                         dlg.InitialDirectory = seedDir;
                 }
+                else if (_suggestedName is not null)
+                {
+                    // An import with no saved home (a browser download) starts in Downloads.
+                    var downloads = System.IO.Path.Combine(
+                        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
+                    if (System.IO.Directory.Exists(downloads)) dlg.InitialDirectory = downloads;
+                }
             }
             catch { /* malformed seed path - just open the dialog with its defaults */ }
             if (dlg.ShowDialog(this) != true) return;
+            if (App.IsCleanupOwnedPath(dlg.FileName))
+            {
+                KillerDialog.Show(this, Loc("Str_Err_SaveFailed") + "\n" + dlg.FileName, "KillerPDF",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
             if (!ConfirmSignatureRemoval(dlg.FileName)) return;
             if (openCopy)
             {
@@ -1322,6 +1343,7 @@ namespace KillerPDF
                     }
                     _currentFile = tempClean;
                     _originalFile = dlg.FileName;
+                    _suggestedName = null;
                     FileNameLabel.Text = System.IO.Path.GetFileName(dlg.FileName);
                     MarkDirty(false);
                     if (_openedFromProtected)
@@ -1349,6 +1371,7 @@ namespace KillerPDF
                     // Signing reads these bytes, since the working copy lacks what the save burned in.
                     _publishedFile = Services.PublishedFileStamp.Capture(dlg.FileName);
                     _originalFile = dlg.FileName;
+                    _suggestedName = null;
                     FileNameLabel.Text = System.IO.Path.GetFileName(dlg.FileName);
                     MarkDirty(false);
                     if (_openedFromProtected)

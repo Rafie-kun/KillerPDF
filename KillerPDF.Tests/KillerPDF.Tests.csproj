@@ -29,6 +29,7 @@
     <Compile Include="..\Services\RedactionPageEdit.cs" Link="Services\RedactionPageEdit.cs" />
     <Compile Include="..\Services\AtomicFileOutput.cs" Link="Services\AtomicFileOutput.cs" />
     <Compile Include="..\Services\PublishedFileStamp.cs" Link="Services\PublishedFileStamp.cs" />
+    <Compile Include="..\Services\ProcessTempFiles.cs" Link="Services\ProcessTempFiles.cs" />
     <Compile Include="..\Services\TwainScan.cs" Link="Services\TwainScan.cs" />
     <Compile Include="..\Services\AppDataPaths.cs" Link="Services\AppDataPaths.cs" />
     <Compile Include="..\Services\SignatureStore.cs" Link="Services\SignatureStore.cs" />

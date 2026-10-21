@@ -45,6 +45,20 @@ internal sealed class ProcessTempFiles : IDisposable
         }
     }
 
+    /// <summary>True for any path under the temp root, which this or a later process deletes.</summary>
+    public bool Owns(string path)
+    {
+        try
+        {
+            string full = Path.GetFullPath(path);
+            return full.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
+        }
+        catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException)
+        {
+            return false;
+        }
+    }
+
     public void CleanupOwned()
     {
         lock (paths)

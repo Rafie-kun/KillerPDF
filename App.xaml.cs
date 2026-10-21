@@ -1122,6 +1122,16 @@ namespace KillerPDF
         /// </summary>
         internal static string MakeTempFile(string tag) => SessionTempFiles.Value.CreatePath(tag);
 
+        /// <summary>True for a temp path that cleanup deletes, which must never be a document's saved home.</summary>
+        internal static bool IsCleanupOwnedPath(string path) => SessionTempFiles.Value.Owns(path);
+
+        // The file name to offer when a temp-backed import (a browser download) is first saved.
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, string> SuggestedNames =
+            new(StringComparer.OrdinalIgnoreCase);
+        internal static void RememberSuggestedName(string tempPath, string fileName) => SuggestedNames[tempPath] = fileName;
+        internal static string? TakeSuggestedName(string tempPath) =>
+            SuggestedNames.TryRemove(tempPath, out string? name) ? name : null;
+
         /// <summary>Deletes all temp files registered this session (best-effort).</summary>
         internal static void CleanupSessionTemps() => SessionTempFiles.Value.CleanupOwned();
 

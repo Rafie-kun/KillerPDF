@@ -52,6 +52,7 @@ namespace KillerPDF.Controls
             public bool IsDirty;
             public bool ProtectedSource;               // #149: source file had a password/encryption when opened
             public Services.PublishedFileStamp? PublishedFile; // the bytes the last save wrote, when they differ from CurrentFile
+            public string? SuggestedName;              // file name offered on the first save of an import with no saved home
             public double ScrollH;
             public double ScrollV;
             public int SearchPageCursor = -1;
@@ -201,6 +202,7 @@ namespace KillerPDF.Controls
             s.IsDirty        = _isDirty;
             s.ProtectedSource = _openedFromProtected;
             s.PublishedFile = _publishedFile;
+            s.SuggestedName = _suggestedName;
             s.SearchPageCursor = Search.PageCursor;
             // State.CurrentPage, not PageList.SelectedIndex: the sidebar is a window singleton
             // that follows the FOCUSED pane, so an unfocused pane capturing (the close path, the
@@ -322,6 +324,7 @@ namespace KillerPDF.Controls
             _isDirty        = s.IsDirty;
             _openedFromProtected = s.ProtectedSource;
             _publishedFile = s.PublishedFile;
+            _suggestedName = s.SuggestedName;
             Search.PageCursor = s.SearchPageCursor;
 
             _annotations      = s.Annotations;
