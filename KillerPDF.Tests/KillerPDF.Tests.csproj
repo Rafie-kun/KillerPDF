@@ -30,6 +30,7 @@
     <Compile Include="..\Services\AtomicFileOutput.cs" Link="Services\AtomicFileOutput.cs" />
     <Compile Include="..\Services\PublishedFileStamp.cs" Link="Services\PublishedFileStamp.cs" />
     <Compile Include="..\Services\FileRevision.cs" Link="Services\FileRevision.cs" />
+    <Compile Include="..\Services\TranslationFileReader.cs" Link="Services\TranslationFileReader.cs" />
     <Compile Include="..\Services\ProcessTempFiles.cs" Link="Services\ProcessTempFiles.cs" />
     <Compile Include="..\Services\TwainScan.cs" Link="Services\TwainScan.cs" />
     <Compile Include="..\Services\AppDataPaths.cs" Link="Services\AppDataPaths.cs" />

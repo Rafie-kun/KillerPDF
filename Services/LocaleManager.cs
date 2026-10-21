@@ -158,9 +158,14 @@ namespace KillerPDF.Services
         {
             try
             {
-                using var fs = new FileStream(ExternalFile!, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                if (System.Windows.Markup.XamlReader.Load(fs) is not ResourceDictionary rd) return false;
                 var merged = Application.Current.Resources.MergedDictionaries;
+                if (merged.Count < 2) return false;
+                // Parsed as data, never as XAML: XamlReader would instantiate whatever the file names.
+                var known = new System.Collections.Generic.HashSet<string>(StringComparer.Ordinal);
+                foreach (object key in merged[1].Keys) if (key is string name) known.Add(name);
+                using var fs = new FileStream(ExternalFile!, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                var rd = new ResourceDictionary();
+                foreach (var entry in TranslationFileReader.Read(fs, known)) rd[entry.Key] = entry.Value;
                 if (merged.Count > 2) merged[2] = rd; else merged.Add(rd);
                 _externalLoadedOnce = true;
                 return true;
