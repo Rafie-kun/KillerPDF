@@ -15,11 +15,39 @@ internal static class DialogTextSmoke
         MethodInfo apply = assembly.GetType("KillerPDF.Services.ThemeManager", true)!
             .GetMethod("Apply", BindingFlags.Public | BindingFlags.Static)!;
         Type dialog = assembly.GetType("KillerPDF.KillerDialog", true)!;
-        string message = (string)Application.Current.FindResource("Str_Dlg_UnsavedExit");
-        foreach (string name in new[] { "Dark", "Greed", "SE98" })
+        string saveMessage = (string)Application.Current.FindResource("Str_Dlg_UnsavedExit");
+        const string message = "The operation could not finish.\nReview the details and try again.";
+        void Invoke(string method, params object?[] arguments)
+            => dialog.GetMethods().Single(candidate => candidate.Name == method
+                && candidate.GetParameters().Length == arguments.Length).Invoke(null, arguments);
+        var cases = new (string Name, string Message, Action Open)[]
+        {
+            ("save", saveMessage, () => Invoke("AskToSave", owner, saveMessage, "Save", "Don't Save", "Cancel", false)),
+            ("save-options", saveMessage, () => Invoke("ShowTwoCheckChoice", owner, saveMessage,
+                "Close my open tabs", false, "Remember my choice", false, "Save", "Don't Save", "Cancel", false)),
+            ("information", message, () => Invoke("Show", owner, message, "KillerPDF", MessageBoxButton.OK,
+                MessageBoxImage.Information, false, null, null, false, null, null)),
+            ("warning", message, () => Invoke("Show", owner, message, "KillerPDF", MessageBoxButton.OKCancel,
+                MessageBoxImage.Warning, false, null, null, false, null, null)),
+            ("error", message, () => Invoke("Show", owner, message, "KillerPDF", MessageBoxButton.OK,
+                MessageBoxImage.Error, false, null, null, false, null, null)),
+            ("confirmation", message, () => Invoke("Show", owner, message, "KillerPDF", MessageBoxButton.YesNoCancel,
+                MessageBoxImage.Question, false, null, null, false, null, null)),
+            ("choices", message, () => Invoke("ShowChoices", owner, message, new[] { "Continue", "Cancel" }, 0, "KillerPDF", false)),
+            ("checkbox", message, () => Invoke("ShowWithCheckbox", owner, message, "Remember my choice", "KillerPDF",
+                MessageBoxButton.OKCancel, null, false)),
+            ("quit", message, () => Invoke("ShowQuitPrompt", owner, message, "Close my open tabs", false,
+                "Remember my choice", "Quit", "Cancel")),
+            ("password", "sample.pdf is password protected.", () => Invoke("PromptPassword", owner,
+                "sample.pdf", "{0} is password protected.", "Open")),
+            ("text", message, () => Invoke("PromptText", owner, "KillerPDF", message, "", "Continue")),
+            ("lines", message, () => Invoke("PromptLines", owner, "KillerPDF", message, "Continue"))
+        };
+        int count = 0;
+        foreach (string name in Enum.GetNames(theme))
         {
             apply.Invoke(null, [Enum.Parse(theme, name)]);
-            foreach (bool withOptions in new[] { false, true })
+            foreach (var test in cases)
             {
                 Exception? failure = null;
                 var clock = Stopwatch.StartNew();
@@ -31,20 +59,26 @@ internal static class DialogTextSmoke
                     if (shown is null)
                     {
                         if (clock.Elapsed > TimeSpan.FromSeconds(10))
-                            throw new TimeoutException("Save prompt did not open.");
+                            throw new TimeoutException($"{test.Name} prompt did not open.");
                         return;
                     }
                     timer.Stop();
                     try
                     {
-                        TextBlock text = Descendants(shown).OfType<TextBlock>().Single(block => block.Text == message);
-                        if (text.FontSize > 13 || text.FontFamily.Source.Contains("Lacquer", StringComparison.OrdinalIgnoreCase))
-                            throw new InvalidOperationException($"{name} save message uses {text.FontSize} DIP {text.FontFamily.Source}.");
+                        TextBlock[] text = Descendants(shown).OfType<TextBlock>().Where(block =>
+                        {
+                            string value = new System.Windows.Documents.TextRange(block.ContentStart, block.ContentEnd).Text;
+                            return value.Length > 0 && (value == test.Message || test.Message.Split('\n').Contains(value));
+                        }).ToArray();
+                        if (text.Length == 0) throw new InvalidOperationException($"{test.Name} message was not visible.");
+                        foreach (TextBlock block in text)
+                            if (block.FontSize > 13 || block.FontFamily.Source.Contains("Lacquer", StringComparison.OrdinalIgnoreCase))
+                                throw new InvalidOperationException($"{name} {test.Name} message uses {block.FontSize} DIP {block.FontFamily.Source}.");
                         var image = new RenderTargetBitmap((int)Math.Ceiling(shown.ActualWidth),
                             (int)Math.Ceiling(shown.ActualHeight), 96, 96, PixelFormats.Pbgra32);
                         image.Render(shown);
                         var png = new PngBitmapEncoder(); png.Frames.Add(BitmapFrame.Create(image));
-                        using var file = File.Create(Path.Combine(folder, name + (withOptions ? "-options" : "") + ".png"));
+                        using var file = File.Create(Path.Combine(folder, name + "-" + test.Name + ".png"));
                         png.Save(file);
                     }
                     catch (Exception error) { failure = error; }
@@ -53,21 +87,16 @@ internal static class DialogTextSmoke
                 timer.Start();
                 try
                 {
-                    if (withOptions)
-                        dialog.GetMethod("ShowTwoCheckChoice")!.Invoke(null,
-                            [owner, message, "Close my open tabs", false, "Remember my choice", false,
-                             "Save", "Don't Save", "Cancel", false]);
-                    else
-                        dialog.GetMethod("AskToSave")!.Invoke(null,
-                            [owner, message, "Save", "Don't Save", "Cancel", false]);
+                    test.Open();
                 }
                 finally { timer.Stop(); }
                 if (failure is not null) throw failure;
+                count++;
             }
         }
         File.WriteAllText(Path.Combine(folder, "result.txt"),
-            "PASS both save prompts use normal body text in Dark, Greed and 98SE.");
-        Console.WriteLine("PASS save prompt typography in 6 rendered cases.");
+            $"PASS {cases.Length} dialog variants use normal body text across {Enum.GetNames(theme).Length} themes ({count} rendered cases).");
+        Console.WriteLine($"PASS dialog typography in {count} rendered cases.");
         return 0;
     }
 

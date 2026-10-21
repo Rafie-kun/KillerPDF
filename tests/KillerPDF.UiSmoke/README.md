@@ -106,4 +106,5 @@ The same isolated invocation accepts `--verify-office-export`, `--verify-sidebar
 Office checks include editable and page-image DOCX/PPTX saves, source-change cancellation,
 and command-line layout selection. Sidebar checks cover cursor menus, measurements, signing,
 the F1 list and command dispatch through Search Tools. Grain checks seal a WPF style before
-switching through every theme. Dialog text checks render both save prompts in three themes.
+switching through every theme. Dialog text checks render 12 prompt variants across all 13 themes,
+including multiline warnings, errors, choices, confirmations, password and text entry.

@@ -35,15 +35,9 @@ namespace KillerPDF
         // modal and UI-thread only, so a shared field is safe and avoids a duplicate dialog body.
         private static bool _lastCheckboxChecked;
 
-        // Plain messages use body text. An explicit heading and detail on separate lines
-        // retain the family notice layout.
+        // Message text stays at body size, including multiline warnings and confirmations.
         private static Grid NoticeBody(string message, MessageBoxImage image, bool confirmation, out StackPanel textStack)
         {
-            string heading = message, detail = "";
-            int lineBreak = message.IndexOf('\n');
-            if (lineBreak >= 0) { heading = message[..lineBreak].TrimEnd('\r'); detail = message[(lineBreak + 1)..].Trim(); }
-            bool large = lineBreak >= 0 && detail.Length > 0 && heading.Length <= 90;
-
             var grid = new Grid { Margin = new Thickness(24, 18, 24, 18) };
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(38) });
             grid.ColumnDefinitions.Add(new ColumnDefinition());
@@ -73,34 +67,14 @@ namespace KillerPDF
             Grid.SetColumn(textStack, 1);
             var head = new TextBlock
             {
-                Text = large ? heading : message,
+                Text = message,
                 Foreground = R("TextBrush"),
                 FontFamily = UiKit.UiFont,
-                FontSize = large ? 18 : 13,
-                TextWrapping = TextWrapping.Wrap
+                FontSize = 13,
+                TextWrapping = TextWrapping.Wrap,
+                Margin = new Thickness(0, 5, 0, 0)
             };
-            if (large)
-            {
-                head.FontFamily = UiKit.HeadingFont;
-                TextOptions.SetTextFormattingMode(head, TextFormattingMode.Ideal);
-            }
-            else
-            {
-                head.Margin = new Thickness(0, 5, 0, 0);
-            }
             textStack.Children.Add(head);
-            if (large && detail.Length > 0)
-            {
-                textStack.Children.Add(new TextBlock
-                {
-                    Text = detail,
-                    Foreground = UiKit.Brush("MutedTextBrush"),
-                    FontSize = 12,
-                    LineHeight = 19,
-                    TextWrapping = TextWrapping.Wrap,
-                    Margin = new Thickness(0, 10, 0, 0)
-                });
-            }
             grid.Children.Add(textStack);
             return grid;
         }
