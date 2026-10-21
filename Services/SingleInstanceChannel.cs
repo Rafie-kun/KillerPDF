@@ -1,18 +1,65 @@
 using System.IO;
 using System.IO.Pipes;
 using System.Globalization;
+using System.Security.AccessControl;
+using System.Security.Principal;
 using System.Text;
 
 namespace KillerPDF.Services;
 
 internal sealed class SingleInstanceChannel(string applicationName, string accountId, int sessionId)
 {
+    /// <summary>The longest forwarded message: a path or URL plus its newline.</summary>
+    internal const int MaximumMessageBytes = 32 * 1024;
+    /// <summary>How long a connected sender has to deliver its whole message.</summary>
+    internal static readonly TimeSpan MessageDeadline = TimeSpan.FromSeconds(2);
+
     private readonly string scope = accountId + "." + sessionId.ToString(CultureInfo.InvariantCulture);
     public string MutexName => @"Local\" + applicationName + ".SingleInstance." + scope;
     public string PipeName => applicationName + ".OpenPipe." + scope;
 
-    public NamedPipeServerStream CreateServer() => new(
-        PipeName, PipeDirection.In, 1, PipeTransmissionMode.Byte, PipeOptions.None);
+    /// <summary>
+    /// The pipe only this user account may open (SYSTEM keeps its usual access), so a forwarded
+    /// open can come from this user's own launches and nothing else.
+    /// </summary>
+    public NamedPipeServerStream CreateServer()
+    {
+        var security = new PipeSecurity();
+        security.AddAccessRule(new PipeAccessRule(new SecurityIdentifier(accountId),
+            PipeAccessRights.ReadWrite | PipeAccessRights.CreateNewInstance, AccessControlType.Allow));
+        security.AddAccessRule(new PipeAccessRule(new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null),
+            PipeAccessRights.FullControl, AccessControlType.Allow));
+        return NamedPipeServerStreamAcl.Create(PipeName, PipeDirection.In, 1, PipeTransmissionMode.Byte,
+            PipeOptions.Asynchronous, 0, 0, security);
+    }
+
+    /// <summary>
+    /// Reads one newline-terminated UTF-8 message, or returns null when the sender stalls past
+    /// <paramref name="deadline"/>, sends more than <paramref name="maximumBytes"/>, or disconnects
+    /// before a newline. A silent or flooding client can no longer hold the only pipe instance.
+    /// </summary>
+    internal static string? ReadMessage(Stream stream, int maximumBytes, TimeSpan deadline)
+    {
+        using var cancel = new CancellationTokenSource(deadline);
+        var received = new MemoryStream();
+        byte[] buffer = new byte[1024];
+        try
+        {
+            while (true)
+            {
+                int read = stream.ReadAsync(buffer, cancel.Token).AsTask().GetAwaiter().GetResult();
+                if (read == 0) return null;
+                int newline = Array.IndexOf(buffer, (byte)'\n', 0, read);
+                int take = newline >= 0 ? newline : read;
+                if (received.Length + take > maximumBytes) return null;
+                received.Write(buffer, 0, take);
+                if (newline >= 0)
+                    return Encoding.UTF8.GetString(received.GetBuffer(), 0, (int)received.Length).TrimEnd('\r');
+            }
+        }
+        catch (OperationCanceledException) { return null; }
+        catch (IOException) { return null; }
+    }
 
     public int ForwardLaunch(string? path, int timeoutMilliseconds = 3000)
     {

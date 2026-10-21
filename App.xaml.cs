@@ -277,10 +277,13 @@ namespace KillerPDF
             {
                 try
                 {
+                    // Disposed before the next accept, so a stalled or oversized sender is dropped
+                    // after the message deadline instead of holding the only instance (BF-A008).
                     using var server = InstanceChannel.Value.CreateServer();
                     server.WaitForConnection();
-                    using var reader = new StreamReader(server, Encoding.UTF8);
-                    string? path = reader.ReadLine();
+                    string? path = SingleInstanceChannel.ReadMessage(server,
+                        SingleInstanceChannel.MaximumMessageBytes, SingleInstanceChannel.MessageDeadline);
+                    if (path is null) continue;
                     Dispatcher.BeginInvoke(new Action(() => DeliverExternalOpen(path)));
                 }
                 catch
