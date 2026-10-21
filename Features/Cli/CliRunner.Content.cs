@@ -357,7 +357,7 @@ namespace KillerPDF.Features
             PdfDocument document = PdfDocument.Open(File.ReadAllBytes(source));
             PdfFormDataImportReport report = PdfFormDataImporter.CreateReport(document, data);
             CliEnsureParentDir(output);
-            File.WriteAllBytes(output, PdfFormDataImporter.Apply(document, data,
+            AtomicFileOutput.Write(output, PdfFormDataImporter.Apply(document, data,
                 options.ContainsKey("--flatten") ? PdfFormDataImportOutputMode.Flattened : PdfFormDataImportOutputMode.Editable));
             con.WriteLine(report.ToText());
             con.WriteLine($"-> {output}");
@@ -443,7 +443,7 @@ namespace KillerPDF.Features
                 byte[] converted = PdfXfaAcroFormConverter.Convert(PdfDocument.Open(File.ReadAllBytes(source)),
                     options.ContainsKey("--flatten") ? PdfXfaConversionMode.Flattened : PdfXfaConversionMode.Editable);
                 CliEnsureParentDir(output);
-                File.WriteAllBytes(output, converted);
+                AtomicFileOutput.Write(output, converted);
             }
             catch (Exception ex) when (ex is InvalidOperationException or NotSupportedException or FormatException)
             {
@@ -463,7 +463,7 @@ namespace KillerPDF.Features
             }
             if (!CliInspectEditInput(pos[0], pos[1], out string source, out string output, out _, con)) return 2;
             CliEnsureParentDir(output);
-            File.WriteAllBytes(output, PdfFormFlattener.Flatten(PdfDocument.Open(File.ReadAllBytes(source))));
+            AtomicFileOutput.Write(output, PdfFormFlattener.Flatten(PdfDocument.Open(File.ReadAllBytes(source))));
             con.WriteLine($"Flattened the form fields -> {output}");
             return 0;
         }

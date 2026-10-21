@@ -610,7 +610,7 @@ namespace KillerPDF.Features
 
             byte[] merged = PdfEngineIntegration.MergeFiles(inputs);
             CliEnsureParentDir(outPath);
-            File.WriteAllBytes(outPath, merged);
+            AtomicFileOutput.Write(outPath, merged);
             int pageCount = KillerPdf.Engine.Documents.PdfDocumentInformation
                 .Read(KillerPdf.Engine.Documents.PdfDocument.Open(merged)).PageCount;
             con.WriteLine($"Merged {inputs.Count} files ({pageCount} pages) -> {outPath}");
@@ -1454,7 +1454,7 @@ namespace KillerPDF.Features
                 return ex is KeyNotFoundException or FormatException ? 2 : 1;
             }
             for (int index = 0; index < stamped.Count; index++)
-                File.WriteAllBytes(outputPaths[index], stamped[index]);
+                AtomicFileOutput.Write(outputPaths[index], stamped[index]);   // each file whole or untouched; the batch is not one transaction
             con.WriteLine($"Stamped {stamped.Count} files into {outDir}");
             return 0;
         }
