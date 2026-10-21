@@ -12,8 +12,8 @@ namespace KillerPDF.Controls
     /// brush, so the pattern lines up across the title bar, the panes and the menus instead of each
     /// surface getting its own noise.
     ///
-    /// Every pixel is a speck of a continuous gray shade, softened into its neighbours, so the grain
-    /// reads as soft film grain on every theme instead of hard dots on Black. A share of the specks
+    /// Every pixel is a speck of a continuous gray shade with distinct dark and bright highlights,
+    /// lightly blended with its neighbours for a fine sandpaper texture. A share of the specks
     /// leans toward the theme's secondary color: the complement of the accent hue (a green accent
     /// leans purple, a blue one leans orange-brown, and reds lean orange-brown too instead of
     /// blue), or of the background hue when the accent has no hue of its own. The tile is
@@ -26,8 +26,8 @@ namespace KillerPDF.Controls
         private const int Seed = 1337;
         private const byte Alpha = 70;
         private const double ShadeSpread = 150;  // standard deviation of a speck's gray around 128
-        private const double Soften = 0.25;      // share of each speck taken from its four neighbours
-        private const double Contrast = 1.2;     // restores the contrast the soften step removes
+        private const double Soften = 0.10;      // share of each speck taken from its four neighbours
+        private const double Contrast = 1.35;    // keeps dark and bright specks distinct after blending
         private const double LeanShare = 0.40;   // share of specks that lean toward the secondary color
         private const double LeanMix = 0.80;     // how far a leaning speck moves toward it
 
@@ -65,7 +65,7 @@ namespace KillerPDF.Controls
         }
 
         /// <summary>Generates the tile, leaning toward <paramref name="lean"/> when given. Frozen.</summary>
-        internal static BitmapSource Generate(Color? lean)
+        internal static BitmapSource Generate(Color? lean, bool highlightsOnly = false)
         {
             var pixels = new byte[Size * Size * 4];
             for (int i = 0; i < Shades.Length; i++)
@@ -83,7 +83,8 @@ namespace KillerPDF.Controls
                 pixels[p] = (byte)Math.Round(b);
                 pixels[p + 1] = (byte)Math.Round(g);
                 pixels[p + 2] = (byte)Math.Round(r);
-                pixels[p + 3] = Alpha;
+                // Fade midtones on near-black surfaces without dimming the brightest specks.
+                pixels[p + 3] = highlightsOnly ? (byte)Math.Round(Alpha * Math.Pow(shade / 255.0, 6)) : Alpha;
             }
 
             var bmp = new WriteableBitmap(Size, Size, 96, 96, PixelFormats.Bgra32, null);
@@ -142,12 +143,14 @@ namespace KillerPDF.Controls
             }
 
             var lean = CurrentLean();
+            bool highlightsOnly = Application.Current?.TryFindResource("GrainHighlightsOnly") is bool enabled ? enabled : true;
             int key = lean is Color c ? (c.R << 16) | (c.G << 8) | c.B : -1;
+            key = (key + 1) * 2 + (highlightsOnly ? 1 : 0);
             if (_current != null && key == _currentKey) return _current;
 
             if (!Cache.TryGetValue(key, out var bmp))
             {
-                bmp = Generate(lean);
+                bmp = Generate(lean, highlightsOnly);
                 Cache[key] = bmp;
             }
             _current = bmp;
