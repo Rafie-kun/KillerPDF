@@ -345,6 +345,19 @@ namespace KillerPDF
             light.SetResourceReference(Border.BorderBrushProperty, "BevelLightBrush");
             light.SetResourceReference(Border.BorderThicknessProperty, "CheckSunkenLightThickness");
             root.AppendChild(light);
+            var innerDark = new FrameworkElementFactory(typeof(Border));
+            innerDark.SetValue(UIElement.IsHitTestVisibleProperty, false);
+            innerDark.SetValue(FrameworkElement.MarginProperty, new Thickness(1));
+            innerDark.SetResourceReference(Border.BorderBrushProperty, "FrameOuterDarkBrush");
+            innerDark.SetResourceReference(Border.BorderThicknessProperty, "CheckSunkenDarkThickness");
+            root.AppendChild(innerDark);
+
+            var innerLight = new FrameworkElementFactory(typeof(Border));
+            innerLight.SetValue(UIElement.IsHitTestVisibleProperty, false);
+            innerLight.SetValue(FrameworkElement.MarginProperty, new Thickness(1));
+            innerLight.SetResourceReference(Border.BorderBrushProperty, "FrameOuterLightBrush");
+            innerLight.SetResourceReference(Border.BorderThicknessProperty, "CheckSunkenLightThickness");
+            root.AppendChild(innerLight);
             var template = new ControlTemplate(typeof(TextBox)) { VisualTree = root };
             AddCompactInputTrigger(template);
             return template;
@@ -396,6 +409,19 @@ namespace KillerPDF
             light.SetResourceReference(Border.BorderBrushProperty, "BevelLightBrush");
             light.SetResourceReference(Border.BorderThicknessProperty, "CheckSunkenLightThickness");
             root.AppendChild(light);
+            var innerDark = new FrameworkElementFactory(typeof(Border));
+            innerDark.SetValue(UIElement.IsHitTestVisibleProperty, false);
+            innerDark.SetValue(FrameworkElement.MarginProperty, new Thickness(1));
+            innerDark.SetResourceReference(Border.BorderBrushProperty, "FrameOuterDarkBrush");
+            innerDark.SetResourceReference(Border.BorderThicknessProperty, "CheckSunkenDarkThickness");
+            root.AppendChild(innerDark);
+
+            var innerLight = new FrameworkElementFactory(typeof(Border));
+            innerLight.SetValue(UIElement.IsHitTestVisibleProperty, false);
+            innerLight.SetValue(FrameworkElement.MarginProperty, new Thickness(1));
+            innerLight.SetResourceReference(Border.BorderBrushProperty, "FrameOuterLightBrush");
+            innerLight.SetResourceReference(Border.BorderThicknessProperty, "CheckSunkenLightThickness");
+            root.AppendChild(innerLight);
             var template = new ControlTemplate(typeof(PasswordBox)) { VisualTree = root };
             AddCompactInputTrigger(template);
             return template;
