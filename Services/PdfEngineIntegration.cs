@@ -813,6 +813,11 @@ internal static class PdfEngineIntegration
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
         ArgumentException.ThrowIfNullOrWhiteSpace(fieldName);
         PdfDocument document = PdfDocument.Open(File.ReadAllBytes(path));
+        document = AttachUnlistedFormFields(document,
+        [
+            .. Enumerable.Range(0, PdfPageInformation.Read(document).Count)
+                .SelectMany(pageIndex => PdfFormWidgetReader.ReadPage(document, pageIndex))
+        ]);
         byte[] result = new PdfIncrementalPageEditor(document)
             .RemoveFormField(fieldName)
             .Build();
