@@ -279,6 +279,13 @@ namespace KillerPDF.Services
             // palette and accent overlay are fully merged so gradient BackgroundBrush values are
             // preserved instead of being flattened or replaced by MenuBackgroundBrush.
             liveResources["OverlayWindowBrush"] = liveResources["BackgroundBrush"];
+            // Their 1px edges. A single border color over a gradient surface reads as one end's
+            // color stuck to the other end (Delirium's red border under its purple side), so a
+            // gradient surface gets a gradient edge: the same stops lifted toward white. A solid
+            // surface keeps the border it always had. AppBorderBrush itself stays solid for DWM.
+            Brush? gradientEdge = liveResources["BackgroundBrush"] is LinearGradientBrush surface ? LiftedEdge(surface) : null;
+            liveResources["OverlayEdgeBrush"] = gradientEdge ?? liveResources["AppBorderBrush"];
+            liveResources["OverlayRuleBrush"] = gradientEdge ?? liveResources["PaneBorderBrush"];
             liveResources["PrimaryFillBrush"] = ButtonFill(fillBase ?? liveResources["PrimaryBrush"], theme == Theme.SE98);
             liveResources["OutlineHoverBrush"] = ButtonFill(liveResources["OutlineHoverBrush"], theme == Theme.SE98);
             appResources["RadWindow"] = liveResources["WindowCornerRadius"];
@@ -289,6 +296,29 @@ namespace KillerPDF.Services
             // One SystemIdle pass to nudge any elements whose effective value didn't auto-update
             // (e.g. ControlTemplate trigger bindings with TargetName that missed the per-key signal).
             Application.Current?.Dispatcher.BeginInvoke(DispatcherPriority.SystemIdle, (Action)RefreshIcons);
+        }
+
+        /// <summary>
+        /// The surface gradient with every stop mixed one fifth of the way to white, which lands
+        /// on each gradient theme's own border tone at that end (Delirium #641d25 to #834a51,
+        /// against its #81423b border).
+        /// </summary>
+        internal static LinearGradientBrush LiftedEdge(LinearGradientBrush surface)
+        {
+            var edge = new LinearGradientBrush
+            {
+                StartPoint = surface.StartPoint,
+                EndPoint = surface.EndPoint,
+                MappingMode = surface.MappingMode,
+                SpreadMethod = surface.SpreadMethod,
+                ColorInterpolationMode = surface.ColorInterpolationMode,
+            };
+            static byte Lift(byte channel) => (byte)(channel + (255 - channel) / 5);
+            foreach (var stop in surface.GradientStops)
+                edge.GradientStops.Add(new GradientStop(
+                    Color.FromArgb(255, Lift(stop.Color.R), Lift(stop.Color.G), Lift(stop.Color.B)), stop.Offset));
+            edge.Freeze();
+            return edge;
         }
 
         private static void ApplyComparisonBarPalette(ResourceDictionary resources, Theme theme)

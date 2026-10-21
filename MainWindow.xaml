@@ -3311,7 +3311,7 @@
                     </Border.Effect>
                 </Border>
                 <Border Background="{DynamicResource OverlayWindowBrush}"
-                        BorderBrush="{DynamicResource AppBorderBrush}"
+                        BorderBrush="{DynamicResource OverlayEdgeBrush}"
                         BorderThickness="1"
                         CornerRadius="{DynamicResource PanelCornerRadius}"
                         Padding="0"
@@ -3341,7 +3341,7 @@
                                 Content="{DynamicResource AboutCloseGlyph}" Style="{StaticResource OverlayCloseButton}"/>
                     </Grid>
                 </Border>
-                <ScrollViewer x:Name="ShortcutScroll" Grid.Row="1" Style="{StaticResource OverlayScrollViewer}" Padding="18,14,18,18"
+                <ScrollViewer x:Name="ShortcutScroll" Grid.Row="1" Style="{StaticResource OverlayScrollViewer}" BorderBrush="{DynamicResource OverlayRuleBrush}" Padding="18,14,18,18"
                               VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled"
                               CanContentScroll="False">
@@ -3429,7 +3429,7 @@
                     </Border.Effect>
                 </Border>
                 <Border Background="{DynamicResource OverlayWindowBrush}"
-                        BorderBrush="{DynamicResource AppBorderBrush}"
+                        BorderBrush="{DynamicResource OverlayEdgeBrush}"
                         BorderThickness="1"
                         CornerRadius="{DynamicResource PanelCornerRadius}"
                         MouseLeftButtonDown="AboutOverlayCard_MouseLeftButtonDown"

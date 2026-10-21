@@ -68,7 +68,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 ### Accessibility and Windows integration
 
-- Windows contrast themes use system colors without grain or shadows. Improved text, selection and accent readability across themes, including selected field presets (#340).
+- Windows contrast themes use system colors without grain or shadows. The About and Keyboard Shortcuts card edges follow gradient themes. Improved text, selection and accent readability across themes, including selected field presets (#340).
 - Screen readers receive useful names for icon buttons, thumbnails, scrollbar controls, file-picker rows and shortcut options. Decorative icons, hidden links and empty elements stay out of the accessibility tree.
 - Keyboard focus enters and stays within Shortcuts and About overlays, returns on close, and remains visible. Option groups use one Tab stop with arrow-key navigation.
 - Screen readers can read PDF text page by page, following the tag order in tagged documents, and reach page links, comments and marked text in every view. Form checkboxes, radio buttons, password fields, length limits and field descriptions work from the keyboard and with assistive technology, as do the stamp and palette color controls.
