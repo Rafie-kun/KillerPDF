@@ -30,6 +30,24 @@ namespace KillerPDF.Tests
             Assert.Contains(@"-cnotmatch '^v\d{1,4}\.\d{1,4}\.\d{1,6}\z'", workflow, StringComparison.Ordinal);
         }
 
+        // BF-A009: every check runs before the first change outside the checkout.
+        [Fact]
+        public void ReleaseScriptWritesNothingRemoteBeforeEveryCheckHasRun()
+        {
+            var dir = new DirectoryInfo(AppContext.BaseDirectory);
+            while (dir != null && !File.Exists(Path.Combine(dir.FullName, "Strings", "en-US.xaml"))) dir = dir.Parent;
+            string script = File.ReadAllText(Path.Combine(dir!.FullName, "release.ps1"));
+
+            int dryRunStop = script.IndexOf("DryRun: stopping before tag and release", StringComparison.Ordinal);
+            Assert.True(dryRunStop > 0, "the DryRun stop marker moved");
+            string beforeStop = script[..dryRunStop];
+            Assert.DoesNotContain("git push", beforeStop, StringComparison.Ordinal);
+            Assert.DoesNotContain("merge-upstream", beforeStop, StringComparison.Ordinal);
+            Assert.DoesNotContain("gh release create", beforeStop, StringComparison.Ordinal);
+            foreach (string check in new[] { "git ls-remote --tags origin", "KillerPDF.Tests.csproj", "-PreflightOnly" })
+                Assert.Contains(check, beforeStop, StringComparison.Ordinal);
+        }
+
         [Fact]
         public void WinGetRunsOnlyAPinnedHashCheckedKomac()
         {

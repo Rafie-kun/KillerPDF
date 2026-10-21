@@ -31,8 +31,9 @@ public sealed class ReleaseScriptSafetyTests
         Assert.DoesNotContain("ArgumentList '--version'", script, StringComparison.Ordinal);
         Assert.Contains("KillerPDF-$Version-src.zip", script, StringComparison.Ordinal);
         Assert.Contains("SHA256SUMS.txt does not match", script, StringComparison.Ordinal);
-        Assert.Contains("DryRun: skipping WinGet fork synchronization", script,
-            StringComparison.Ordinal);
+        // The fork sync now runs only in the publish phase, after DryRun has already stopped.
+        Assert.True(script.IndexOf("merge-upstream", StringComparison.Ordinal)
+            > script.IndexOf("DryRun: stopping before tag and release", StringComparison.Ordinal));
         Assert.Contains("Join-Path ([IO.Path]::GetTempPath()) ('KillerPDF-install-smoke-'", packageScript,
             StringComparison.Ordinal);
         Assert.DoesNotContain("Join-Path $artifactRoot ('install-smoke-'", packageScript,

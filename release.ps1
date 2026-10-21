@@ -221,15 +221,8 @@ try {
     Pop-Location
 }
 
-if ($DryRun) {
-    Write-Host "`n==> DryRun: skipping WinGet fork synchronization." -ForegroundColor Yellow
-} else {
-    Write-Host "`n==> Checking WinGet fork synchronization..." -ForegroundColor Cyan
-    gh api --method POST repos/SteveTheKiller/winget-pkgs/merge-upstream -f branch=master
-    if ($LASTEXITCODE -ne 0) {
-        throw "WinGet fork synchronization failed. Resolve the GitHub API error above before publishing."
-    }
-}
+# Nothing outside this checkout changes until every check has passed: the WinGet fork sync and
+# every push happen in the publish phase at the end (BF-A009).
 
 if (-not $PublishOnly) {
 
@@ -565,6 +558,9 @@ try {
     if ($branch -ne $defaultBranch) { throw "On branch '$branch', expected $defaultBranch" }
     $dirty = git status --porcelain
     if ($dirty) { throw "Working tree is not clean. Commit or stash first:`n$($dirty -join "`n")" }
+    # The README and landing commits below stay local until the publish phase, so the remote is
+    # compared with the commit the release started from, not with HEAD.
+    $releaseBase = (git rev-parse HEAD).Trim()
 
     # Keep the README's GPL3 source link pointed at the current release - it
     # names the versioned -src.zip, so it goes stale on every version bump.
@@ -579,8 +575,7 @@ try {
             Write-Host "    Updating README source link to $Tag"
             [System.IO.File]::WriteAllText($readmePath, $readmeNew)
             git commit README.md -m "v${Version}: point README source link at release" --quiet
-            git push origin $defaultBranch --quiet
-            if ($LASTEXITCODE -ne 0) { throw "README source-link commit failed to push" }
+            if ($LASTEXITCODE -ne 0) { throw "README source-link commit failed" }
         }
     }
 
@@ -650,9 +645,8 @@ try {
         if ($siteDirty) {
             git add pdf-landing
             git commit -m "v${Version}: landing release info" --quiet
-            git push origin $defaultBranch --quiet
-            if ($LASTEXITCODE -ne 0) { throw "Landing page commit failed to push" }
-            Write-Host "    pdf-landing updated to v$Version and pushed"
+            if ($LASTEXITCODE -ne 0) { throw "Landing page commit failed" }
+            Write-Host "    pdf-landing updated to v$Version (pushed with the release)"
             Write-Host "    Remember: killerpdf.net does NOT auto-deploy. Drag pdf-landing/ into Cloudflare Pages." -ForegroundColor Yellow
         } else {
             Write-Host "    pdf-landing already current"
@@ -696,9 +690,9 @@ try {
     }
 
     git fetch origin $defaultBranch --quiet
-    if ((git rev-parse HEAD).Trim() -ne (git rev-parse "origin/$defaultBranch").Trim()) {
+    if ($releaseBase -ne (git rev-parse "origin/$defaultBranch").Trim()) {
         if ($DryRun) { Write-Warning "Local $defaultBranch and origin/$defaultBranch differ. A real release requires pushing or pulling first." }
-        else { throw "Local $defaultBranch and origin/$defaultBranch differ. Push or pull first." }
+        else { throw "origin/$defaultBranch moved while the release ran. Pull, then run the release again. Local release commits were not pushed." }
     }
     if (git tag --list $Tag) { throw "Tag $Tag already exists" }
     if (git ls-remote --tags origin $Tag) { throw "Tag $Tag already exists on origin" }
@@ -744,11 +738,24 @@ try {
         exit 0
     }
 
-    # 10. Tag + push
+    # 10. Publish. Every check above has passed; this is the first change outside this checkout.
+    # Each step says what is already public if it fails, so the release can be finished by hand.
+    Write-Host "`n==> Checking WinGet fork synchronization..." -ForegroundColor Cyan
+    gh api --method POST repos/SteveTheKiller/winget-pkgs/merge-upstream -f branch=master
+    if ($LASTEXITCODE -ne 0) {
+        throw "WinGet fork synchronization failed. Nothing has been pushed or published; resolve the GitHub API error above and run the release again."
+    }
+
+    if ((git rev-parse HEAD).Trim() -ne $releaseBase) {
+        Write-Host "`n==> Pushing the README and landing release commits..." -ForegroundColor Cyan
+        git push origin $defaultBranch --quiet
+        if ($LASTEXITCODE -ne 0) { throw "Pushing the release commits failed. Nothing is tagged or published yet; push $defaultBranch, then run the release again." }
+    }
+
     Write-Host "`n==> Tagging $Tag..." -ForegroundColor Cyan
     git tag -a $Tag -m "KillerPDF $Tag"
     git push origin $Tag
-    if ($LASTEXITCODE -ne 0) { throw "Tag push failed" }
+    if ($LASTEXITCODE -ne 0) { throw "Tag push failed. The release commits are on origin/$defaultBranch but no tag or release exists; push $Tag and create the release, or delete the local tag and run again." }
 
     # 11. GitHub release
     Write-Host "`n==> Creating GitHub release..." -ForegroundColor Cyan
@@ -756,7 +763,7 @@ try {
     if ($srcZip) { $assets += $srcZip.FullName }
     if (Test-Path $sumsPath) { $assets += $sumsPath }
     gh release create $Tag @assets --title "KillerPDF $Tag" --notes-file $notesFile --verify-tag
-    if ($LASTEXITCODE -ne 0) { throw "gh release create failed" }
+    if ($LASTEXITCODE -ne 0) { throw "gh release create failed. $Tag is pushed; create the release for it with the same assets and notes." }
 
     Write-Host "`n==> Refreshing thekiller.net software page..." -ForegroundColor Cyan
     gh workflow run deploy.yml --repo SteveTheKiller/thekiller-site
