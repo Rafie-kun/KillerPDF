@@ -116,4 +116,5 @@
     <sys:Double x:Key="PaneShadowOpacity" xmlns:sys="clr-namespace:System;assembly=mscorlib">0.6</sys:Double>
     <sys:Double x:Key="BarShadowOpacity" xmlns:sys="clr-namespace:System;assembly=mscorlib">0.18</sys:Double>
     <sys:Double x:Key="FlyoutShadowOpacity" xmlns:sys="clr-namespace:System;assembly=mscorlib">0.55</sys:Double>
+    <SolidColorBrush x:Key="FileDialogPaneBrush" Color="#FFB8B8B8" po:Freeze="True"/>
 </ResourceDictionary>

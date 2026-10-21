@@ -114,4 +114,5 @@
     <sys:Double x:Key="TitleWordmarkSize" xmlns:sys="clr-namespace:System;assembly=mscorlib">15</sys:Double>
     <sys:Double x:Key="TitleWordmarkBoldSize" xmlns:sys="clr-namespace:System;assembly=mscorlib">22.52</sys:Double>
     <sys:Double x:Key="WordmarkShadowOpacity" xmlns:sys="clr-namespace:System;assembly=mscorlib">0.45</sys:Double>
+    <SolidColorBrush x:Key="FileDialogPaneBrush" Color="#FF0D0D0D" po:Freeze="True"/>
 </ResourceDictionary>
