@@ -1409,7 +1409,7 @@
 
         <!-- Settings toggle checkbox: mirrors ThemeRadio (same ring/accent language) but square with a
              checkmark, for independent on/off switches rather than exclusive picks. -->
-        <Style x:Key="ThemeCheck" TargetType="CheckBox">
+<Style x:Key="ThemeCheck" TargetType="CheckBox">
             <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
             <Setter Property="FontFamily" Value="{DynamicResource UiFont}"/>
             <Setter Property="FontSize" Value="12"/>
@@ -1438,7 +1438,8 @@
                                     <Border Width="14" Height="14" IsHitTestVisible="False"
                                             BorderBrush="{DynamicResource BevelLightBrush}"
                                             BorderThickness="{DynamicResource CheckSunkenLightThickness}"/>
-                                    <TextBlock x:Name="tick" Text="&#xE73E;" FontFamily="Segoe MDL2 Assets"
+                                    <Grid Width="14" Height="14" IsHitTestVisible="False"><Border IsHitTestVisible="False" Margin="{DynamicResource PaneBevelInnerMargin}" BorderBrush="{DynamicResource PaneBevelDark2Brush}" BorderThickness="{DynamicResource PaneBevel2LightThickness}"/><Border IsHitTestVisible="False" Margin="{DynamicResource PaneBevelInnerMargin}" BorderBrush="{DynamicResource PaneBevelLight2Brush}" BorderThickness="{DynamicResource PaneBevel2DarkThickness}"/></Grid>
+<TextBlock x:Name="tick" Text="&#xE73E;" FontFamily="Segoe MDL2 Assets"
                                                FontSize="10" Foreground="{DynamicResource RadioAccent}"
                                                Visibility="Collapsed"
                                                HorizontalAlignment="Center" VerticalAlignment="Center"/>

@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
@@ -319,13 +320,14 @@ namespace KillerPDF
 
         private static ControlTemplate FieldTemplate()
         {
-            var root = new FrameworkElementFactory(typeof(Grid));
+            var root = new FrameworkElementFactory(typeof(Grid)) { Name = "InputRoot" };
+            root.SetResourceReference(FrameworkElement.TagProperty, "UseDialogCaption");
             var b = new FrameworkElementFactory(typeof(Border));
             b.SetBinding(Border.BackgroundProperty, new Binding("Background") { RelativeSource = new RelativeSource(RelativeSourceMode.TemplatedParent) });
             b.SetBinding(Border.BorderBrushProperty, new Binding("BorderBrush") { RelativeSource = new RelativeSource(RelativeSourceMode.TemplatedParent) });
             b.SetBinding(Border.BorderThicknessProperty, new Binding("BorderThickness") { RelativeSource = new RelativeSource(RelativeSourceMode.TemplatedParent) });
             b.SetValue(Border.CornerRadiusProperty, RadControl);
-            var sv = new FrameworkElementFactory(typeof(ScrollViewer)) { Name = "PART_ContentHost" };
+            var sv = new FrameworkElementFactory(typeof(KillerFamily.Controls.InputContentHost)) { Name = "PART_ContentHost" };
             sv.SetValue(Control.PaddingProperty, new Thickness(0));
             b.AppendChild(sv);
             root.AppendChild(b);
@@ -343,7 +345,9 @@ namespace KillerPDF
             light.SetResourceReference(Border.BorderBrushProperty, "BevelLightBrush");
             light.SetResourceReference(Border.BorderThicknessProperty, "CheckSunkenLightThickness");
             root.AppendChild(light);
-            return new ControlTemplate(typeof(TextBox)) { VisualTree = root };
+            var template = new ControlTemplate(typeof(TextBox)) { VisualTree = root };
+            AddCompactInputTrigger(template);
+            return template;
         }
 
         // Themed PasswordBox matching Field(): our border/fill, no OS white box or blue focus chrome.
@@ -367,13 +371,14 @@ namespace KillerPDF
 
         private static ControlTemplate PasswordFieldTemplate()
         {
-            var root = new FrameworkElementFactory(typeof(Grid));
+            var root = new FrameworkElementFactory(typeof(Grid)) { Name = "InputRoot" };
+            root.SetResourceReference(FrameworkElement.TagProperty, "UseDialogCaption");
             var b = new FrameworkElementFactory(typeof(Border));
             b.SetBinding(Border.BackgroundProperty, new Binding("Background") { RelativeSource = new RelativeSource(RelativeSourceMode.TemplatedParent) });
             b.SetBinding(Border.BorderBrushProperty, new Binding("BorderBrush") { RelativeSource = new RelativeSource(RelativeSourceMode.TemplatedParent) });
             b.SetBinding(Border.BorderThicknessProperty, new Binding("BorderThickness") { RelativeSource = new RelativeSource(RelativeSourceMode.TemplatedParent) });
             b.SetValue(Border.CornerRadiusProperty, RadControl);
-            var sv = new FrameworkElementFactory(typeof(ScrollViewer)) { Name = "PART_ContentHost" };
+            var sv = new FrameworkElementFactory(typeof(KillerFamily.Controls.InputContentHost)) { Name = "PART_ContentHost" };
             sv.SetValue(Control.PaddingProperty, new Thickness(0));
             b.AppendChild(sv);
             root.AppendChild(b);
@@ -391,7 +396,25 @@ namespace KillerPDF
             light.SetResourceReference(Border.BorderBrushProperty, "BevelLightBrush");
             light.SetResourceReference(Border.BorderThicknessProperty, "CheckSunkenLightThickness");
             root.AppendChild(light);
-            return new ControlTemplate(typeof(PasswordBox)) { VisualTree = root };
+            var template = new ControlTemplate(typeof(PasswordBox)) { VisualTree = root };
+            AddCompactInputTrigger(template);
+            return template;
+        }
+
+        private static void AddCompactInputTrigger(ControlTemplate template)
+        {
+            var compact = new MultiDataTrigger();
+            compact.Conditions.Add(new Condition(new Binding("Tag") { ElementName = "InputRoot" }, true));
+            if (template.TargetType == typeof(TextBox))
+                compact.Conditions.Add(new Condition(new Binding("AcceptsReturn")
+                    { RelativeSource = new RelativeSource(RelativeSourceMode.Self) }, false));
+            compact.Setters.Add(new Setter(FrameworkElement.MinHeightProperty,
+                new DynamicResourceExtension("CompactInputMinHeight")) { TargetName = "InputRoot" });
+            compact.Setters.Add(new Setter(KillerFamily.Controls.InputContentHost.CompactPaddingProperty,
+                new DynamicResourceExtension("CompactInputPadding")) { TargetName = "PART_ContentHost" });
+            compact.Setters.Add(new Setter(FrameworkElement.VerticalAlignmentProperty, VerticalAlignment.Center)
+                { TargetName = "PART_ContentHost" });
+            template.Triggers.Add(compact);
         }
 
         // Wraps a dialog's document/preview pane with the family drop shadow: a SEPARATE sibling
