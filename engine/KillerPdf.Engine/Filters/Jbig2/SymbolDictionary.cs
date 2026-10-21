@@ -482,14 +482,13 @@ namespace KillerPdf.Engine.Filters.Jbig2
         private void DecodeHeightClassBitmap(Jbig2Bitmap heightClassCollectiveBitmap,
                 int heightClassFirstSymbol, int heightClassHeight, int[] newSymbolsWidths)
         {
+            // Each symbol starts where the previous one ended. A running sum keeps this linear;
+            // re-adding every earlier width per symbol was quadratic in the class size (BF-E007).
+            int startColumn = 0;
             for (int i = heightClassFirstSymbol; i < amountOfDecodedSymbols; i++)
             {
-                int startColumn = 0;
-
-                for (int j = heightClassFirstSymbol; j <= i - 1; j++)
-                {
-                    startColumn += newSymbolsWidths[j];
-                }
+                if (i > heightClassFirstSymbol)
+                    startColumn = checked(startColumn + newSymbolsWidths[i - 1]);
 
                 var roi = new Jbig2Rectangle(startColumn, 0, newSymbolsWidths[i], heightClassHeight);
                 var symbolBitmap = Jbig2Bitmaps.Extract(roi, heightClassCollectiveBitmap);
