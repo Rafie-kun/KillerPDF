@@ -1877,4 +1877,8 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Read_CommentBy">Komentář od {0}: {1}</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecovered">KillerPDF se restartoval, protože okno už nemohlo nic zobrazit. Neuložené změny byly obnoveny a jsou znovu otevřené, připravené k uložení.&#10;&#10;Kopie jsou uloženy také ve složce {0}. Tato relace používá softwarové vykreslování.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRestarted">KillerPDF se restartoval, protože okno už nemohlo nic zobrazit. Otevřené dokumenty byly znovu otevřeny. Tato relace používá softwarové vykreslování.</sys:String>
+    <sys:String x:Key="Str_Read_MarkedText">Označený text: „{0}“</sys:String>
+    <sys:String x:Key="Str_Read_MarkedNoText">Označený text</sys:String>
+    <sys:String x:Key="Str_Read_Drawing">Kresba</sys:String>
+    <sys:String x:Key="Str_Read_Stamp">Razítko</sys:String>
 </ResourceDictionary>

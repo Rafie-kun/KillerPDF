@@ -1880,4 +1880,8 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Read_CommentBy">Komentarz od {0}: {1}</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecovered">KillerPDF uruchomił się ponownie, ponieważ okno nie mogło już nic wyświetlić. Niezapisane zmiany zostały odzyskane i są ponownie otwarte, gotowe do zapisania.&#10;&#10;Kopie są też przechowywane w {0}. Ta sesja używa renderowania programowego.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRestarted">KillerPDF uruchomił się ponownie, ponieważ okno nie mogło już nic wyświetlić. Otwarte dokumenty zostały ponownie otwarte. Ta sesja używa renderowania programowego.</sys:String>
+    <sys:String x:Key="Str_Read_MarkedText">Zaznaczony tekst: &quot;{0}&quot;</sys:String>
+    <sys:String x:Key="Str_Read_MarkedNoText">Zaznaczony tekst</sys:String>
+    <sys:String x:Key="Str_Read_Drawing">Rysunek</sys:String>
+    <sys:String x:Key="Str_Read_Stamp">Pieczątka</sys:String>
 </ResourceDictionary>

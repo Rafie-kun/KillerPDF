@@ -1892,4 +1892,8 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Read_CommentBy">Commentaire de {0} : {1}</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecovered">KillerPDF a redémarré car la fenêtre ne pouvait plus s'afficher. Vos modifications non enregistrées ont été récupérées et sont de nouveau ouvertes, prêtes à être enregistrées.&#10;&#10;Des copies sont aussi conservées dans {0}. Cette session utilise le rendu logiciel.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRestarted">KillerPDF a redémarré car la fenêtre ne pouvait plus s'afficher. Vos documents ouverts ont été rouverts. Cette session utilise le rendu logiciel.</sys:String>
+    <sys:String x:Key="Str_Read_MarkedText">Texte marqué : « {0} »</sys:String>
+    <sys:String x:Key="Str_Read_MarkedNoText">Texte marqué</sys:String>
+    <sys:String x:Key="Str_Read_Drawing">Dessin</sys:String>
+    <sys:String x:Key="Str_Read_Stamp">Tampon</sys:String>
 </ResourceDictionary>

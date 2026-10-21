@@ -61,6 +61,24 @@ public sealed class PdfCommentReaderTests
     }
 
     [Fact]
+    public void ReadCanIncludeMarkupThatHasNoReviewText()
+    {
+        byte[] source = new PdfDocumentBuilder().AddBlankPage().Build();
+        byte[] reviewed = new PdfIncrementalAnnotationEditor(PdfDocument.Open(source))
+            .AddHighlight(0, 10, 10, 20, 10)
+            .AddTextNote(0, 30, 30, "Keep this")
+            .Build();
+
+        IReadOnlyList<PdfCommentInfo> all = PdfCommentReader.Read(PdfDocument.Open(reviewed), includeMarkupWithoutText: true);
+
+        Assert.Collection(all,
+            bare => { Assert.Equal("Highlight", bare.Subtype); Assert.Equal(string.Empty, bare.Contents); Assert.NotNull(bare.Bounds); },
+            note => Assert.Equal("Keep this", note.Contents));
+        Assert.True(PdfCommentReader.IsMarkup("Ink"));
+        Assert.False(PdfCommentReader.IsMarkup("Link"));
+    }
+
+    [Fact]
     public void ReadThreadsGroupsNestedRepliesAndExportsStableJson()
     {
         byte[] source = new PdfDocumentBuilder().AddBlankPage().Build();

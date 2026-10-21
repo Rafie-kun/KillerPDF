@@ -104,7 +104,14 @@ public static partial class PdfCommentReader
     }
 
     /// <summary>Returns annotations that contain review text, in page annotation order.</summary>
-    public static IReadOnlyList<PdfCommentInfo> Read(PdfDocument document)
+    public static IReadOnlyList<PdfCommentInfo> Read(PdfDocument document) => Read(document, includeMarkupWithoutText: false);
+
+    /// <summary>
+    /// Returns annotations that contain review text, plus, when <paramref name="includeMarkupWithoutText"/>
+    /// is set, text markup, drawings and stamps that carry none (their <see cref="PdfCommentInfo.Contents"/>
+    /// is empty). Screen readers announce those too.
+    /// </summary>
+    public static IReadOnlyList<PdfCommentInfo> Read(PdfDocument document, bool includeMarkupWithoutText)
     {
         ArgumentNullException.ThrowIfNull(document);
         if (!document.IsDecrypted)
@@ -125,7 +132,14 @@ public static partial class PdfCommentReader
                     ?? throw new InvalidOperationException(
                         $"Page {page.Index + 1} annotation {index + 1} is not a dictionary.");
                 string? contents = Text(document, annotation, "Contents");
-                if (string.IsNullOrEmpty(contents)) continue;
+                if (string.IsNullOrEmpty(contents))
+                {
+                    if (!includeMarkupWithoutText
+                        || !(annotation.TryGetValue(Name("Subtype"), out PdfObject? bareSubtype)
+                            && Resolve(document, bareSubtype) is PdfName bareName
+                            && IsMarkup(bareName.ValueAsLatin1()))) continue;
+                    contents = string.Empty;
+                }
                 string subtype = annotation.TryGetValue(Name("Subtype"), out PdfObject? subtypeValue)
                     && Resolve(document, subtypeValue) is PdfName subtypeName
                     ? subtypeName.ValueAsLatin1()
@@ -148,6 +162,10 @@ public static partial class PdfCommentReader
         }
         return Array.AsReadOnly(comments.ToArray());
     }
+
+    /// <summary>Annotation subtypes that mark up the page itself: text markup, drawings and stamps.</summary>
+    public static bool IsMarkup(string subtype) => subtype is "Highlight" or "Underline" or "StrikeOut"
+        or "Squiggly" or "Ink" or "Square" or "Circle" or "Line" or "Polygon" or "PolyLine" or "Stamp";
 
     private static PdfContentBounds? Bounds(PdfDocument document,
         PdfDictionary annotation, int pageIndex, int annotationIndex)

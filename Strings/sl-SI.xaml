@@ -1779,4 +1779,8 @@
     <sys:String x:Key="Str_Read_CommentBy">Komentar, avtor {0}: {1}</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecovered">KillerPDF se je znova zagnal, ker okno ni moglo več ničesar prikazati. Neshranjene spremembe so obnovljene in znova odprte, pripravljene za shranjevanje.&#10;&#10;Kopije so shranjene tudi v {0}. Ta seja uporablja programsko upodabljanje.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRestarted">KillerPDF se je znova zagnal, ker okno ni moglo več ničesar prikazati. Odprti dokumenti so znova odprti. Ta seja uporablja programsko upodabljanje.</sys:String>
+    <sys:String x:Key="Str_Read_MarkedText">Označeno besedilo: »{0}«</sys:String>
+    <sys:String x:Key="Str_Read_MarkedNoText">Označeno besedilo</sys:String>
+    <sys:String x:Key="Str_Read_Drawing">Risba</sys:String>
+    <sys:String x:Key="Str_Read_Stamp">Žig</sys:String>
 </ResourceDictionary>

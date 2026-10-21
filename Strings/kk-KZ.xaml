@@ -1895,4 +1895,8 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_Read_CommentBy">{0} пікірі: {1}</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecovered">Терезе енді көрсете алмағандықтан KillerPDF қайта іске қосылды. Сақталмаған өзгерістер қалпына келтіріліп, сақтауға дайын күйде қайта ашылды.&#10;&#10;Көшірмелер {0} ішінде де сақталды. Бұл сеанста бағдарламалық көрсету қолданылады.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRestarted">Терезе енді көрсете алмағандықтан KillerPDF қайта іске қосылды. Ашық құжаттар қайта ашылды. Бұл сеанста бағдарламалық көрсету қолданылады.</sys:String>
+    <sys:String x:Key="Str_Read_MarkedText">Белгіленген мәтін: &quot;{0}&quot;</sys:String>
+    <sys:String x:Key="Str_Read_MarkedNoText">Белгіленген мәтін</sys:String>
+    <sys:String x:Key="Str_Read_Drawing">Сызба</sys:String>
+    <sys:String x:Key="Str_Read_Stamp">Мөр</sys:String>
 </ResourceDictionary>

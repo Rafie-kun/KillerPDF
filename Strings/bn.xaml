@@ -1872,4 +1872,8 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Read_CommentBy">{0}-এর মন্তব্য: {1}</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecovered">উইন্ডোটি আর দেখাতে না পারায় KillerPDF আবার চালু হয়েছে। আপনার অসংরক্ষিত পরিবর্তনগুলো পুনরুদ্ধার করে আবার খোলা হয়েছে, সংরক্ষণের জন্য প্রস্তুত।&#10;&#10;কপিগুলো {0}-এও রাখা আছে। এই সেশনে সফটওয়্যার রেন্ডারিং ব্যবহৃত হচ্ছে।</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRestarted">উইন্ডোটি আর দেখাতে না পারায় KillerPDF আবার চালু হয়েছে। আপনার খোলা ডকুমেন্টগুলো আবার খোলা হয়েছে। এই সেশনে সফটওয়্যার রেন্ডারিং ব্যবহৃত হচ্ছে।</sys:String>
+    <sys:String x:Key="Str_Read_MarkedText">চিহ্নিত লেখা: &quot;{0}&quot;</sys:String>
+    <sys:String x:Key="Str_Read_MarkedNoText">চিহ্নিত লেখা</sys:String>
+    <sys:String x:Key="Str_Read_Drawing">আঁকা</sys:String>
+    <sys:String x:Key="Str_Read_Stamp">স্ট্যাম্প</sys:String>
 </ResourceDictionary>

@@ -1879,4 +1879,8 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Read_CommentBy">{0} megjegyzése: {1}</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecovered">A KillerPDF újraindult, mert az ablak már nem tudott megjelenni. A nem mentett módosításokat visszaállítottuk, újra meg vannak nyitva, és menthetők.&#10;&#10;Másolatok itt is megmaradtak: {0}. Ez a munkamenet szoftveres megjelenítést használ.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRestarted">A KillerPDF újraindult, mert az ablak már nem tudott megjelenni. A megnyitott dokumentumok újra meg lettek nyitva. Ez a munkamenet szoftveres megjelenítést használ.</sys:String>
+    <sys:String x:Key="Str_Read_MarkedText">Megjelölt szöveg: „{0}&quot;</sys:String>
+    <sys:String x:Key="Str_Read_MarkedNoText">Megjelölt szöveg</sys:String>
+    <sys:String x:Key="Str_Read_Drawing">Rajz</sys:String>
+    <sys:String x:Key="Str_Read_Stamp">Bélyegző</sys:String>
 </ResourceDictionary>
