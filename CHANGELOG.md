@@ -37,6 +37,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Redaction refuses output when it cannot prove covered form values or undecodable data are gone. Saving over a file another tab or program changed asks first, browser downloads ask where to save, and background opens stay in their own tab.
 - Signing uses the saved document as shown, Save As keeps an unchanged signed copy valid, and Sign and Protect ask before replacing files. Timestamps are only reported when verified, and the saved-signature library survives write failures.
 - Translation test files load as text only, HTML export keeps unsafe link schemes inert, and command-line outputs and release publishing write nothing partial.
+- If the display stops responding and leaves the window black, KillerPDF saves unsaved documents, restarts and reopens them ready to save (#456).
 
 ### Rendering, performance and compatibility
 
@@ -70,7 +71,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Windows contrast themes use system colors without grain or shadows. Improved text, selection and accent readability across themes, including selected field presets (#340).
 - Screen readers receive useful names for icon buttons, thumbnails, scrollbar controls, file-picker rows and shortcut options. Decorative icons, hidden links and empty elements stay out of the accessibility tree.
 - Keyboard focus enters and stays within Shortcuts and About overlays, returns on close, and remains visible. Option groups use one Tab stop with arrow-key navigation.
-- Screen readers can read PDF text page by page, following the tag order in tagged documents, and reach page links and comments in every view. Form checkboxes, radio buttons, password fields, length limits and field descriptions work from the keyboard and with assistive technology, as do the stamp and palette color controls.
+- Screen readers can read PDF text page by page, following the tag order in tagged documents, and reach page links, comments and marked text in every view. Form checkboxes, radio buttons, password fields, length limits and field descriptions work from the keyboard and with assistive technology, as do the stamp and palette color controls.
 - Windows and split panes stay within the current monitor at small sizes and high app scaling. Text remains sharp away from 100%, and the wordmark mouse wheel adjusts app scale.
 - Added optional File Explorer and Outlook PDF previews to installed copies, with scrolling, zoom and read-only opening. Portable copies register nothing (#410).
 - Silent installation supports per-user installs without elevation, includes the .NET runtime in the Store installer, detects Arm64 runtimes, reports useful error codes and rejects concurrent installs.

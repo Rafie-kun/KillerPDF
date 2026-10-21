@@ -1,13 +1,18 @@
 name: PR build and tests
 
+# Also runs on pushes to development branches, so a candidate is checked before any PR exists.
+# No secrets are used; the token can only read the repository.
 on:
   pull_request:
     branches: [main, dev/1.9-overkill]
+  push:
+    branches: ['dev/**']
+  workflow_dispatch:
 permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 # Hosted Windows runners do not certify interactive desktop automation.
