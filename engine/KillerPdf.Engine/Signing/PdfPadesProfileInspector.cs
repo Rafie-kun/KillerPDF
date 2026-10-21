@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Security.Cryptography.Pkcs;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using KillerPdf.Engine.Documents;
 using KillerPdf.Engine.Objects;
@@ -37,9 +38,9 @@ public static class PdfPadesProfileInspector
         {
             var cms = new SignedCms();
             cms.Decode(signature.Cms.ToArray());
-            bool timestamped = cms.SignerInfos.Cast<SignerInfo>().Any(signer =>
-                signer.UnsignedAttributes.Cast<CryptographicAttributeObject>()
-                    .Any(attribute => attribute.Oid?.Value == SignatureTimestampTokenOid));
+            // The attribute's presence is not evidence: only an RFC 3161 token whose imprint and
+            // signature verify against this signer's signature value counts toward baseline-T.
+            bool timestamped = cms.SignerInfos.Cast<SignerInfo>().Any(HasVerifiedTimestamp);
             if (!timestamped) return PdfPadesProfile.BaselineB;
             return HasLongTermValidationEvidence(document, signature)
                 ? PdfPadesProfile.BaselineLt : PdfPadesProfile.BaselineT;
@@ -48,6 +49,27 @@ public static class PdfPadesProfileInspector
         {
             return PdfPadesProfile.None;
         }
+    }
+
+    private static bool HasVerifiedTimestamp(SignerInfo signer)
+    {
+        foreach (CryptographicAttributeObject attribute in signer.UnsignedAttributes)
+        {
+            if (attribute.Oid?.Value != SignatureTimestampTokenOid) continue;
+            foreach (AsnEncodedData value in attribute.Values)
+            {
+                if (!Rfc3161TimestampToken.TryDecode(value.RawData, out Rfc3161TimestampToken? token, out int consumed)
+                    || token is null || consumed != value.RawData.Length) continue;
+                try
+                {
+                    if (!token.VerifySignatureForSignerInfo(signer, out X509Certificate2? authority)) continue;
+                    authority?.Dispose();
+                    return true;
+                }
+                catch (CryptographicException) { }
+            }
+        }
+        return false;
     }
 
     private static bool HasLongTermValidationEvidence(

@@ -112,6 +112,9 @@ public sealed class PdfTimestampAuthorityTests : IDisposable
         cms.Decode(contents);
         Assert.Contains(cms.SignerInfos[0].UnsignedAttributes.Cast<CryptographicAttributeObject>(),
             a => a.Oid.Value == PdfTimestampAuthority.SignatureTimestampTokenOid);
+        // A genuine token bound to this signature is what baseline-T evidence means.
+        Assert.Equal(PdfPadesProfile.BaselineT,
+            Assert.Single(PdfSignatureInspection.Inspect(PdfDocument.Open(signed)).Entries).PadesProfile);
     }
 
     [Fact]
