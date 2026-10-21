@@ -153,7 +153,6 @@ namespace KillerPDF
                     // key column also leaves a deliberate gap before longer translated labels.
                     var keys = new TextBlock
                     {
-                        FontFamily = new FontFamily("Consolas"),
                         FontSize   = 11,
                         Margin     = new Thickness(0, 0, 12, 0),
                         VerticalAlignment = VerticalAlignment.Center,

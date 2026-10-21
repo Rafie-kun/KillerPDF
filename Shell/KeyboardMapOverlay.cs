@@ -148,7 +148,7 @@ namespace KillerPDF
                 // Use the shared command-button factory. In 98SE this supplies the raised two-tone
                 // face and inverted pressed bevel; the old hand-built flat template bypassed it.
                 var b = UiKit.Make(KbLayerCaption(layer), accent: false);
-                b.FontFamily = UiKit.MonoFont;
+                b.SetResourceReference(FontFamilyProperty, "UiFont");
                 b.FontSize = 11;
                 b.Padding = new Thickness(10, 4, 10, 4);
                 b.Margin = new Thickness(0, 0, 8, 0);
@@ -181,7 +181,7 @@ namespace KillerPDF
                     if (id.Length == 0) { r.Children.Add(new Border { Width = U * w }); continue; }
                     var capText = new TextBlock
                     {
-                        Text = cap, FontFamily = UiKit.MonoFont,   // symbols render via font fallback
+                        Text = cap, // symbols render via font fallback
                         FontSize = 11, HorizontalAlignment = HorizontalAlignment.Center,
                         VerticalAlignment = VerticalAlignment.Top, Margin = new Thickness(0, 5, 0, 0),
                     };
@@ -252,7 +252,7 @@ namespace KillerPDF
 
             _kbDetail = new TextBlock
             {
-                Text = " ", FontFamily = UiKit.MonoFont, FontSize = 12.5,
+                Text = " ", FontSize = 12.5,
                 Margin = new Thickness(2, 10, 0, 0), Height = 18,
             };
             _kbDetail.SetResourceReference(TextBlock.ForegroundProperty, "PrimaryBrush");
