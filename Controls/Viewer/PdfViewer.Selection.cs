@@ -210,6 +210,7 @@ namespace KillerPDF.Controls
                 return;
             }
             _txtSelHasRange = true;
+            NotifyReadingSelectionChanged();
 
             _selectedText = BuildSelectedText(out int words);
             if (string.IsNullOrWhiteSpace(_selectedText))
@@ -275,6 +276,14 @@ namespace KillerPDF.Controls
             var runs = _textRuns.GetPage(_currentFile, page);
             if (runs is null || runs.Chars.Count == 0) return result;
             var (start, end) = SelectionSliceForPage(page, runs.Chars.Count);
+            return CaretRangeRects(page, runs, start, end, rd);
+        }
+
+        /// <summary>Canvas rects, one per line, covering carets [start, end) of a page. Shared by the
+        /// selection quads and the screen-reader text ranges, so both outline the same text.</summary>
+        private List<Rect> CaretRangeRects(int page, PageTextRuns runs, int start, int end, (int w, int h) rd)
+        {
+            var result = new List<Rect>();
             if (start >= end) return result;
 
             int rotation = EffectiveRotation(page);
@@ -453,6 +462,7 @@ namespace KillerPDF.Controls
             _txtSelDragStarted = false;
             _txtSelCommitTool = null;
             RemoveTextSelQuads();
+            NotifyReadingSelectionChanged();
         }
 
         /// <summary>Marquee fallback: rectangle region copy, used when a drag starts on EMPTY page

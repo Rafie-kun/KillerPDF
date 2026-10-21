@@ -525,7 +525,7 @@
                             </Grid>
                         </ControlTemplate>
                     </ScrollViewer.Template>
-                    <Border x:Name="DocSurfacePad" VerticalAlignment="Top" HorizontalAlignment="Center" Padding="12">
+                    <local:DocumentSurface x:Name="DocSurfacePad" VerticalAlignment="Top" HorizontalAlignment="Center" Padding="12">
                         <!-- Override the window's Display/ClearType text mode for the zoomed
                              document surface. Display + ClearType pixel-snaps and color-fringes
                              when scaled, giving hard-edged text on annotations and form fields;
@@ -549,7 +549,7 @@
                             <!-- Top-most layer for the selection marquee, so a drag can span pages -->
                             <Canvas x:Name="MarqueeLayer" IsHitTestVisible="False"/>
                         </Grid>
-                    </Border>
+                    </local:DocumentSurface>
                 </ScrollViewer>
 
                 <!-- #197: current-page badge. Replaces the cursor-following page tooltips: slides
