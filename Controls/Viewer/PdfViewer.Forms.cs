@@ -581,30 +581,31 @@ namespace KillerPDF.Controls
                     };
                     var box = new Border
                     {
-                        Tag             = FormOverlayTag,
                         Width           = f.Cw,
                         Height          = f.Ch,
                         Background      = fieldBg,
                         BorderBrush     = fieldBorder,
                         BorderThickness = new Thickness(1.5),
                         CornerRadius    = new CornerRadius(2),
-                        Cursor          = f.IsReadOnly ? Cursors.Arrow : Cursors.Hand,
                         Child           = checkMark,
-                        ToolTip         = string.IsNullOrEmpty(f.Label) ? null : f.Label,
                     };
-                    if (!f.IsReadOnly)
-                    {
-                        string capturedKey = f.FieldName;
-                        box.MouseLeftButtonDown += (_, e) =>
+                    string capturedKey = f.FieldName;
+                    bool checkInitial = isChecked;
+                    ctrl = new Controls.FormToggleSurface(box, Controls.FormToggleSurface.ToggleKind.CheckBox,
+                        () => _formCheckValues.TryGetValue(capturedKey, out var v) ? v : checkInitial,
+                        f.IsReadOnly ? null : () =>
                         {
-                            bool now = !(_formCheckValues.TryGetValue(capturedKey, out var v) ? v : isChecked);
+                            bool now = !(_formCheckValues.TryGetValue(capturedKey, out var v) ? v : checkInitial);
                             _formCheckValues[capturedKey] = now;
                             checkMark.Visibility = now ? Visibility.Visible : Visibility.Collapsed;
                             MarkDirty(true);
-                            e.Handled = true;
-                        };
-                    }
-                    ctrl = box;
+                        })
+                    {
+                        Tag     = FormOverlayTag,
+                        Width   = f.Cw,
+                        Height  = f.Ch,
+                        ToolTip = string.IsNullOrEmpty(f.Label) ? null : f.Label,
+                    };
                 }
 
                 // Radio button
@@ -640,27 +641,17 @@ namespace KillerPDF.Controls
                     grid.Children.Add(ring);
                     grid.Children.Add(dot);
 
-                    var radioBorder = new Border
-                    {
-                        Tag    = FormOverlayTag,
-                        Width  = f.Cw,
-                        Height = f.Ch,
-                        Background = Brushes.Transparent,
-                        Cursor = f.IsReadOnly ? Cursors.Arrow : Cursors.Hand,
-                        Child  = grid,
-                        ToolTip = string.IsNullOrEmpty(f.Label) ? null : f.Label,
-                    };
-
                     // Register dot for mutual-exclusion wiring after the loop.
                     if (!radioGroups.TryGetValue(f.FieldName, out var groupList))
                         radioGroups[f.FieldName] = groupList = [];
                     groupList.Add((dot, f.OnValue));
 
-                    if (!f.IsReadOnly)
-                    {
-                        string capturedGroup = f.FieldName;
-                        string capturedOn    = f.OnValue;
-                        radioBorder.MouseLeftButtonDown += (_, e) =>
+                    string capturedGroup = f.FieldName;
+                    string capturedOn    = f.OnValue;
+                    string groupInitial  = groupSelected;
+                    ctrl = new Controls.FormToggleSurface(grid, Controls.FormToggleSurface.ToggleKind.Radio,
+                        () => (_formRadioValues.TryGetValue(capturedGroup, out var sel) ? sel : groupInitial) == capturedOn,
+                        f.IsReadOnly ? null : () =>
                         {
                             _formRadioValues[capturedGroup] = capturedOn;
                             // Deselect all in group, then select this one.
@@ -668,10 +659,13 @@ namespace KillerPDF.Controls
                                 foreach (var (d, ov) in gl)
                                     d.Visibility = ov == capturedOn ? Visibility.Visible : Visibility.Collapsed;
                             MarkDirty(true);
-                            e.Handled = true;
-                        };
-                    }
-                    ctrl = radioBorder;
+                        }, group: capturedGroup)
+                    {
+                        Tag     = FormOverlayTag,
+                        Width   = f.Cw,
+                        Height  = f.Ch,
+                        ToolTip = string.IsNullOrEmpty(f.Label) ? null : f.Label,
+                    };
                 }
 
                 if (ctrl is null) continue;
