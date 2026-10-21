@@ -91,6 +91,24 @@ namespace KillerPDF.Tests
         }
 
         [Fact]
+        public void TaggedPagesReadInStructureOrderAndKeepUntaggedText()
+        {
+            // Visually: "Right" (MCID 1) sits left of "Left" (MCID 0); the tag tree says 0 then 1.
+            var chars = new List<(string, int, int, int?)>
+            {
+                ("R", 0, 0, 1), ("i", 0, 0, 1),
+                ("L", 1, 0, 0), ("e", 1, 0, 0),
+                ("x", 2, 1, null)
+            };
+
+            PageReadingText page = PageReadingText.BuildTagged(chars, [0, 1]);
+
+            Assert.Equal("Le\nRi\nx", page.Text);
+            Assert.Equal([(2, 4)], page.Segments(0, 2));          // "Le" is carets 2..3 on the page
+            Assert.Equal([(0, 4)], page.Segments(0, 5));          // both items cover carets 0..3
+        }
+
+        [Fact]
         public void EmptyDocumentIsOneEmptyRange()
         {
             var model = Model();

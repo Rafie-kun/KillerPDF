@@ -5,13 +5,14 @@ namespace KillerPDF.Services
 {
     /// <summary>One selectable character on a page, in reading order. Coordinates are PDF space
     /// (points, bottom-left origin), matching SearchService and ExtractTextFromRegion.</summary>
-    internal readonly struct RunChar(string value, double left, double right, int word, int line)
+    internal readonly struct RunChar(string value, double left, double right, int word, int line, int? markedContentId = null)
     {
         public readonly string Value = value;   // engine letters can be multi-char (ligatures)
         public readonly double Left = left;
         public readonly double Right = right;
         public readonly int Word = word;       // ordinal of the word this char belongs to (for word counts / spacing)
         public readonly int Line = line;       // ordinal of the line this char belongs to
+        public readonly int? MarkedContentId = markedContentId;   // its tagged-content MCID, for structure reading order
     }
 
     /// <summary>A visual line of text: a contiguous slice of the page's flattened char list plus its
@@ -231,7 +232,7 @@ namespace KillerPDF.Services
                     foreach (var letter in letters)
                     {
                         var g = letter.BoundingBox;
-                        result.Chars.Add(new RunChar(letter.Value, g.Left, g.Right, wordOrdinal, li));
+                        result.Chars.Add(new RunChar(letter.Value, g.Left, g.Right, wordOrdinal, li, letter.MarkedContentId));
                     }
                     wordOrdinal++;
                 }

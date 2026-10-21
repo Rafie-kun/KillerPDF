@@ -26,6 +26,35 @@ namespace KillerPDF.Controls
         {
             private readonly Dictionary<int, PageReadingText> _pages = [];
             private object? _pagesVersion;
+            private Dictionary<int, List<int>>? _structureOrder;
+            private bool _structureRead;
+
+            // A tagged PDF's reading order: for each page, its marked-content IDs in the order the
+            // tag tree reaches them. Null for an untagged or unreadable tree, which reads in the
+            // viewer's visual order instead.
+            private Dictionary<int, List<int>>? StructureOrder(string file)
+            {
+                if (_structureRead) return _structureOrder;
+                _structureRead = true;
+                try
+                {
+                    var document = KillerPdf.Engine.Documents.PdfDocument.Open(System.IO.File.ReadAllBytes(file));
+                    var order = new Dictionary<int, List<int>>();
+                    foreach (var item in KillerPdf.Engine.Diagnostics.PdfAccessibilityReadingOrder.Read(document)
+                                 .Items.OrderBy(item => item.Sequence))
+                    {
+                        if (item.MarkedContentId is not int mcid) continue;
+                        if (!order.TryGetValue(item.PageIndex, out List<int>? list)) order[item.PageIndex] = list = [];
+                        list.Add(mcid);
+                    }
+                    _structureOrder = order.Count == 0 ? null : order;
+                }
+                catch (Exception ex) when (ex is not OutOfMemoryException)
+                {
+                    _structureOrder = null;   // no structure tree, or one that cannot be read
+                }
+                return _structureOrder;
+            }
 
             public event Action? TextChanged;
             public event Action? SelectionChanged;
@@ -50,7 +79,14 @@ namespace KillerPDF.Controls
             public PageReadingText PageText(int page)
             {
                 object version = Version;
-                if (!Equals(version, _pagesVersion)) { _pages.Clear(); _pagesVersion = version; TextChanged?.Invoke(); }
+                if (!Equals(version, _pagesVersion))
+                {
+                    _pages.Clear();
+                    _structureOrder = null;
+                    _structureRead = false;
+                    _pagesVersion = version;
+                    TextChanged?.Invoke();
+                }
                 if (_pages.TryGetValue(page, out PageReadingText? cached)) return cached;
                 PageReadingText text = PageReadingText.Empty;
                 if (viewer._currentFile is { } file && page >= 0 && page < PageCount)
@@ -59,7 +95,9 @@ namespace KillerPDF.Controls
                     {
                         PageTextRuns? runs = viewer._textRuns.GetPage(file, page);
                         if (runs is not null)
-                            text = PageReadingText.Build([.. runs.Chars.Select(c => (c.Value, c.Word, c.Line))]);
+                            text = StructureOrder(file) is { } order && order.TryGetValue(page, out List<int>? mcids)
+                                ? PageReadingText.BuildTagged([.. runs.Chars.Select(c => (c.Value, c.Word, c.Line, c.MarkedContentId))], mcids)
+                                : PageReadingText.Build([.. runs.Chars.Select(c => (c.Value, c.Word, c.Line))]);
                     }
                     catch (Exception ex) when (ex is not OutOfMemoryException)
                     {

@@ -199,11 +199,10 @@ namespace KillerPDF.Controls
                 for (int page = from.Page; page <= to.Page && page < Model.PageCount; page++)
                 {
                     PageReadingText text = source.PageText(page);
-                    int startCaret = text.CaretAt(page == from.Page ? from.Offset : 0);
-                    int endCaret = text.CaretAt(page == to.Page ? to.Offset : text.Text.Length);
-                    if (endCaret <= startCaret) continue;
-                    foreach (Rect rect in source.ScreenRects(page, startCaret, endCaret))
-                        rects.AddRange([rect.X, rect.Y, rect.Width, rect.Height]);
+                    foreach (var (startCaret, endCaret) in text.Segments(page == from.Page ? from.Offset : 0,
+                                 page == to.Page ? to.Offset : text.Text.Length))
+                        foreach (Rect rect in source.ScreenRects(page, startCaret, endCaret))
+                            rects.AddRange([rect.X, rect.Y, rect.Width, rect.Height]);
                 }
                 return [.. rects];
             }
@@ -234,9 +233,15 @@ namespace KillerPDF.Controls
             {
                 IDocumentReadingSource? source = Source;
                 if (source is null) return;
+                // Selection on the page is one caret span per page boundary, so a structure-ordered
+                // range selects from its first to its last character.
                 TextPosition from = Model.Normalize(_start), to = Model.Normalize(_end);
-                source.Select(from.Page, source.PageText(from.Page).CaretAt(from.Offset),
-                    to.Page, source.PageText(to.Page).CaretAt(to.Offset));
+                PageReadingText first = source.PageText(from.Page), last = source.PageText(to.Page);
+                var firstRuns = first.Segments(from.Offset, from.Page == to.Page ? to.Offset : first.Text.Length);
+                var lastRuns = from.Page == to.Page ? firstRuns : last.Segments(0, to.Offset);
+                int startCaret = firstRuns.Count > 0 ? firstRuns.Min(r => r.Start) : first.CaretAt(from.Offset);
+                int endCaret = lastRuns.Count > 0 ? lastRuns.Max(r => r.End) : last.CaretAt(to.Offset);
+                source.Select(from.Page, startCaret, to.Page, Math.Max(endCaret, from.Page == to.Page ? startCaret : 0));
             }
 
             public void AddToSelection() => throw new InvalidOperationException();
