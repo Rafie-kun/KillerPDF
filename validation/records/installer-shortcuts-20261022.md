@@ -34,7 +34,7 @@ This is native Shell Link and application-build evidence, not an end-to-end
 installer pass. Clean per-user and elevated all-users installation, upgrade,
 unchecked desktop choice, launching the resulting shortcuts, uninstall, redirected
 desktop and policy-denied desktop scenarios remain disposable-VM acceptance gates.
-The shared Hyper-V ownership board still assigns KillerShell. SN01/SN02 access is
-not yet configured. Do not run actual installer or host policy changes to replace
-those gates. Windows permissions can prevent creation; setup must report that
-failure rather than claim successful shortcut creation.
+Subsequent SN01/SN02 installation and uninstall evidence is recorded in
+[Installer VM validation](installer-vm-validation-20261022.md). Remaining gates in
+that record still require their named acceptance checks. Windows permissions can
+prevent creation; setup must report failure rather than claim shortcut success.

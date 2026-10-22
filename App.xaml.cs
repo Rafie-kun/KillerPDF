@@ -149,8 +149,7 @@ namespace KillerPDF
                  string.Equals(e.Args[0], "/uninstall-silent", StringComparison.OrdinalIgnoreCase)))
             {
                 TaskbarIdentity.UseUninstall();
-                Uninstall(string.Equals(e.Args[0], "/uninstall-silent", StringComparison.OrdinalIgnoreCase));
-                Shutdown();
+                Shutdown(Uninstall(string.Equals(e.Args[0], "/uninstall-silent", StringComparison.OrdinalIgnoreCase)));
                 return;
             }
 
@@ -346,6 +345,24 @@ namespace KillerPDF
 
         private static bool CloseRunningInstanceForUninstall()
         {
+            using (Process current = Process.GetCurrentProcess())
+            {
+                // Instance channels are session-scoped. An unattended uninstall must not
+                // remove files used by a desktop instance it cannot ask to close.
+                foreach (Process candidate in Process.GetProcessesByName(current.ProcessName))
+                {
+                    using (candidate)
+                    {
+                        try
+                        {
+                            if (candidate.Id != current.Id && candidate.SessionId != current.SessionId)
+                                return false;
+                        }
+                        catch (InvalidOperationException) { } // The process exited during enumeration.
+                        catch (System.ComponentModel.Win32Exception) { return false; }
+                    }
+                }
+            }
             Mutex? running;
             try { running = Mutex.OpenExisting(MutexName); }
             catch (WaitHandleCannotBeOpenedException) { return true; }
@@ -940,6 +957,7 @@ namespace KillerPDF
         private static void RemoveMachineInstallConflict()
         {
             string? registeredExe = ExistingRegisteredExecutable(Registry.LocalMachine);
+            try { File.Delete(InstalledShortcuts.DesktopPath(machine: true)); } catch { }
             try { File.Delete(MachineStartMenuLnk); } catch { }
             try { Directory.Delete(MachineStartMenuDir, recursive: false); } catch { }
             UnregisterFileHandler(Registry.LocalMachine);
@@ -958,7 +976,6 @@ namespace KillerPDF
 
         /// <summary>
         /// Installs KillerPDF, offers to set it as the default PDF handler, then relaunches from
-            try { File.Delete(InstalledShortcuts.DesktopPath(machine: true)); } catch { }
         /// the installed location. Returns false if the install did not happen, so the caller can
         /// put the portable badge back rather than leaving the user with a half-finished state.
         ///
@@ -1912,6 +1929,7 @@ namespace KillerPDF
                 KillerDialog.Show(Current.MainWindow,
                     string.Format(SetupText("Str_Dlg_InstallFailed", "Installation failed:\n{0}"), ex.Message), AppName,
                     MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
             }
         }
 
@@ -1930,7 +1948,6 @@ namespace KillerPDF
                 using var rs = asm.GetManifestResourceStream(rn)!;
                 using var fs = File.Create(iconPath);
                 rs.CopyTo(fs);
-                return false;
             }
             catch { }
         }
@@ -2134,13 +2151,13 @@ namespace KillerPDF
             return (int)Math.Min(int.MaxValue, (bytes + 1023) / 1024);
         }
 
-        private static void Uninstall(bool silent)
+        private static int Uninstall(bool silent)
         {
             Current.ShutdownMode = ShutdownMode.OnExplicitShutdown;
             if (!silent) ThemeManager.InitializeInstallerTheme();
             string currentExe = Path.GetFullPath(Process.GetCurrentProcess().MainModule?.FileName ?? string.Empty);
             bool machine = IsRegisteredCopy(Registry.LocalMachine, currentExe);
-            if (RelaunchMachineUninstallElevatedIfNeeded(machine, silent)) return;
+            if (RelaunchMachineUninstallElevatedIfNeeded(machine, silent)) return 0;
 
             // Uninstall removes only the payload the installer wrote, found through its manifest,
             // and only from a registered copy. A portable copy or a loose exe in some other folder
@@ -2156,7 +2173,7 @@ namespace KillerPDF
                         SetupText("Str_Dlg_UninstallNotInstalled",
                             "This KillerPDF was not installed here, so nothing was removed.\nDelete the folder yourself if you no longer want it."),
                         AppName, MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
+                return 1;
             }
 
             if (!silent)
@@ -2169,7 +2186,7 @@ namespace KillerPDF
                     MessageBoxImage.Question,
                     confirmLabel: Application.Current.TryFindResource("Str_Btn_Uninstall") as string ?? "Uninstall",
                     cancelLabel: Application.Current.TryFindResource("Str_Btn_Cancel") as string ?? "Cancel");
-                if (res != MessageBoxResult.Yes) return;
+                if (res != MessageBoxResult.Yes) return 1223;
             }
 
             if (!CloseRunningInstanceForUninstall())
@@ -2179,7 +2196,7 @@ namespace KillerPDF
                         SetupText("Str_Dlg_UninstallStillRunning",
                             "KillerPDF is still running.\nClose it, then try uninstalling again."),
                         AppName, MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
+                return 1618;
             }
 
             // Shortcuts
@@ -2202,6 +2219,7 @@ namespace KillerPDF
             // succeed there and simply fail harmlessly on a per-user uninstall.
             if (machine)
             {
+                try { File.Delete(InstalledShortcuts.DesktopPath(machine: true)); } catch { }
                 try { File.Delete(MachineStartMenuLnk); } catch { }
                 try { Directory.Delete(MachineStartMenuDir, recursive: false); } catch { }
                 UnregisterFileHandler(Registry.LocalMachine);
@@ -2220,7 +2238,6 @@ namespace KillerPDF
             // owned file and removes folders only when they are empty, never recursively.
             string bat = Path.Combine(Path.GetTempPath(), $"killerpdf_uninstall_{Guid.NewGuid():N}.bat");
             File.WriteAllText(bat,
-                try { File.Delete(InstalledShortcuts.DesktopPath(machine: true)); } catch { }
                 "@echo off\r\n" +
                 "ping -n 3 127.0.0.1 >nul\r\n" +
                 Services.InstallPayloadOwnership.RemovalBatch(owned) +
@@ -2237,6 +2254,7 @@ namespace KillerPDF
                     Application.Current.TryFindResource("Str_Dlg_Uninstalled") as string ?? "KillerPDF has been uninstalled.", AppName,
                     MessageBoxButton.OK, MessageBoxImage.Information);
             }
+            return 0;
         }
     }
 }
