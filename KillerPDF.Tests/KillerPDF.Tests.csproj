@@ -119,6 +119,8 @@
     <Compile Include="..\Services\PayloadIntegrityVerifier.cs" Link="Services\PayloadIntegrityVerifier.cs" />
     <Compile Include="..\Services\InstallPayloadOwnership.cs" Link="Services\InstallPayloadOwnership.cs" />
     <Compile Include="..\Services\UpdateTrustPolicy.cs" Link="Services\UpdateTrustPolicy.cs" />
+    <Compile Include="..\Services\UpdateHelperLaunch.cs" Link="Services\UpdateHelperLaunch.cs" />
+    <Compile Include="..\Services\UpdateImagePublication.cs" Link="Services\UpdateImagePublication.cs" />
     <Compile Include="..\Services\PrintColorConverter.cs" Link="Services\PrintColorConverter.cs" />
     <Compile Include="..\Services\PrintOrientationPolicy.cs" Link="Services\PrintOrientationPolicy.cs" />
     <Compile Include="..\Services\PdfTextEditPlacement.cs" Link="Services\PdfTextEditPlacement.cs" />

@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
 using System.Windows;
 
 namespace KillerPDF.Features
@@ -251,7 +250,7 @@ namespace KillerPDF.Features
         /// <summary>Hands the downloaded installer the current installation and shuts the app
         /// down. An installed copy runs the installer directly, so an elevated step never executes
         /// a script from the temp folder; a packaged portable copy swaps its launcher with an
-        /// unelevated batch. Returns false if the helper could not be started, in which case
+        /// unelevated helper. Returns false if the helper could not be started, in which case
         /// nothing has been changed.</summary>
         private bool LaunchSwapAndExit(string newExe)
         {
@@ -261,7 +260,6 @@ namespace KillerPDF.Features
                     ?? throw new InvalidOperationException("The current executable path is unavailable.");
                 var reopen = _host.FileToReopen;
                 var pid    = Environment.ProcessId;
-                var bat    = Path.Combine(Path.GetTempPath(), $"killerpdf_update_{Guid.NewGuid():N}.bat");
                 bool portable = App.IsPortable();
                 string? portableLauncher = Environment.GetEnvironmentVariable("KILLERPDF_LAUNCHER_PATH");
                 bool packagedPortable = portable && !string.IsNullOrWhiteSpace(portableLauncher) && File.Exists(portableLauncher);
@@ -306,41 +304,13 @@ namespace KillerPDF.Features
                 // A portable launcher in a folder this user cannot write is not updated in place.
                 if (needsElevation) return false;
 
-                string system = Environment.GetFolderPath(Environment.SpecialFolder.System);
-                string tasklist = Path.Combine(system, "tasklist.exe").Replace("%", "%%");
-                string find = Path.Combine(system, "find.exe").Replace("%", "%%");
-                string ping = Path.Combine(system, "ping.exe").Replace("%", "%%");
-                var script = new StringBuilder()
-                    .AppendLine("@echo off")
-                    .AppendLine("setlocal DisableDelayedExpansion")
-                    .AppendLine(":waitapp")
-                    .AppendLine($"\"{tasklist}\" /fi \"PID eq {pid}\" 2>nul | \"{find}\" \"{pid}\" >nul")
-                    .AppendLine($"if not errorlevel 1 ( \"{ping}\" -n 2 127.0.0.1 >nul & goto waitapp )");
-                if (int.TryParse(Environment.GetEnvironmentVariable("KILLERPDF_LAUNCHER_PID"), out int launcherPid))
-                {
-                    script.AppendLine(":waitlauncher")
-                          .AppendLine($"\"{tasklist}\" /fi \"PID eq {launcherPid}\" 2>nul | \"{find}\" \"{launcherPid}\" >nul")
-                          .AppendLine($"if not errorlevel 1 ( \"{ping}\" -n 2 127.0.0.1 >nul & goto waitlauncher )");
-                }
-                script.AppendLine(Services.UpdateImagePublication.Command(newExe, portableLauncher!, false,
-                        $"{Repo}/releases/latest", "KillerPDF", reopen: reopen) + " >\"%~dpn0.helper.log\" 2>&1")
-                      .AppendLine("if errorlevel 1 goto failed")
-                      .AppendLine("goto cleanup")
-                      .AppendLine(":failed")
-                      .AppendLine($"start \"\" \"{Repo}/releases/latest\"")
-                      .AppendLine(":cleanup")
-                      .AppendLine("del \"%~f0\" >nul 2>&1");
-                File.WriteAllText(bat, script.ToString());
-
-                var psi = new ProcessStartInfo(
-                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe"),
-                    $"/d /v:off /c \"{Path.GetFileName(bat)}\"")
-                {
-                    WindowStyle     = ProcessWindowStyle.Hidden,
-                    WorkingDirectory = Path.GetTempPath(),
-                    UseShellExecute = true
-                };
-                if (Process.Start(psi) is null)
+                // The whole helper travels in the process command line, so no file the user
+                // account can write is read after it starts.
+                int launcherPid = int.TryParse(Environment.GetEnvironmentVariable("KILLERPDF_LAUNCHER_PID"), out int parsed) ? parsed : 0;
+                string script = Services.UpdateHelperLaunch.WaitFor(pid, launcherPid) +
+                    Services.UpdateImagePublication.Script(newExe, portableLauncher!, false,
+                        $"{Repo}/releases/latest", "KillerPDF", reopen: reopen);
+                if (Process.Start(Services.UpdateHelperLaunch.StartInfo(script, elevate: false)) is null)
                     throw new IOException("The update helper did not start. Download retained at: " + newExe);
                 Application.Current.Shutdown();
                 return true;
