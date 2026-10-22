@@ -90,6 +90,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Unified message and setup dialogs, separated installer translations by language, completed missing application and installer translations, and made the full installer version readable (#409, #440).
 - Added Slovenian to the app, installer, PDF previews, OCR language selection, website and engine guides.
 - Refined film grain, shadows, accent states, checkbox ticks, radio alignment, crash-report controls and file-picker styling. Dialogs show app icons, and 98SE uses full bevels and compact text fields. The 98SE document pane uses the classic gray workspace so pages stand apart from the window. Grain fades midtones across app and website themes without dimming bright highlights. Interface fonts resolve from the embedded files, including menus, tooltips and shortcuts.
+- Replaced the empty drop-zone outline with corner brackets and aiming marks.
 - Simplified website navigation at narrow widths, localized navigation labels, improved mobile layout and contrast, refreshed branding and Corpus layout, and added Store and related-app links. Updated Help, technical documentation, translations, release facts and application metadata.
 
 ### Changed

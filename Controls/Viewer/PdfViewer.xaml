@@ -415,17 +415,45 @@
                         </Grid.ColumnDefinitions>
 
                         <!-- Drop target, centered in the remaining space -->
-                        <Border Grid.Column="0" BorderBrush="{DynamicResource DropBorder}" BorderThickness="2"
-                                CornerRadius="{DynamicResource PanelCornerRadius}" Padding="40"
-                                HorizontalAlignment="Center" VerticalAlignment="Center"
-                                Background="Transparent" Style="{x:Null}">
-                            <StackPanel HorizontalAlignment="Center">
-                                <TextBlock Text="{DynamicResource Str_Drop_Title}" FontFamily="{DynamicResource UiFont}" FontSize="20"
-                                           Foreground="{DynamicResource MutedTextBrush}" HorizontalAlignment="Center"/>
-                                <TextBlock Text="{DynamicResource Str_Drop_Sub}" FontFamily="{DynamicResource UiFont}" FontSize="13"
-                                           Foreground="{DynamicResource MutedTextBrush}" HorizontalAlignment="Center" Margin="0,8,0,0"/>
-                            </StackPanel>
-                        </Border>
+                        <Grid Grid.Column="0" MinWidth="268" MinHeight="178"
+                              HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Border BorderBrush="Transparent" BorderThickness="2"
+                                    CornerRadius="{DynamicResource PanelCornerRadius}" Padding="40"
+                                    Background="Transparent" Style="{x:Null}">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <TextBlock Text="{DynamicResource Str_Drop_Title}" FontFamily="{DynamicResource UiFont}" FontSize="20"
+                                               TextWrapping="Wrap" TextAlignment="Center"
+                                               Foreground="{DynamicResource MutedTextBrush}" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="{DynamicResource Str_Drop_Sub}" FontFamily="{DynamicResource UiFont}" FontSize="13"
+                                               TextWrapping="Wrap" TextAlignment="Center"
+                                               Foreground="{DynamicResource MutedTextBrush}" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                                </StackPanel>
+                            </Border>
+                            <Path Width="46" Height="46" Data="M45,1 L1,1 L1,45"
+                                  Stroke="{DynamicResource MutedTextBrush}" StrokeThickness="2" IsHitTestVisible="False"
+                                  HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                            <Path Width="46" Height="46" Data="M1,1 L45,1 L45,45"
+                                  Stroke="{DynamicResource MutedTextBrush}" StrokeThickness="2" IsHitTestVisible="False"
+                                  HorizontalAlignment="Right" VerticalAlignment="Top"/>
+                            <Path Width="46" Height="46" Data="M1,1 L1,45 L45,45"
+                                  Stroke="{DynamicResource MutedTextBrush}" StrokeThickness="2" IsHitTestVisible="False"
+                                  HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+                            <Path Width="46" Height="46" Data="M1,45 L45,45 L45,1"
+                                  Stroke="{DynamicResource MutedTextBrush}" StrokeThickness="2" IsHitTestVisible="False"
+                                  HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
+                            <Rectangle Width="1.5" Height="17" Margin="0,3,0,0"
+                                       Fill="{DynamicResource MutedTextBrush}" IsHitTestVisible="False"
+                                       HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                            <Rectangle Width="1.5" Height="17" Margin="0,0,0,3"
+                                       Fill="{DynamicResource MutedTextBrush}" IsHitTestVisible="False"
+                                       HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
+                            <Rectangle Width="17" Height="1.5" Margin="3,0,0,0"
+                                       Fill="{DynamicResource MutedTextBrush}" IsHitTestVisible="False"
+                                       HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                            <Rectangle Width="17" Height="1.5" Margin="0,0,3,0"
+                                       Fill="{DynamicResource MutedTextBrush}" IsHitTestVisible="False"
+                                       HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        </Grid>
 
                         <!-- Recent files sidebar (populated in code-behind; hidden when empty).
                              Width and visibility are driven by SyncRecentBoxWidth: at 340 fixed it
