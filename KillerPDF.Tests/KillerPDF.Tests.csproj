@@ -28,6 +28,7 @@
     <Compile Include="..\Models\RedactionMark.cs" Link="Models\RedactionMark.cs" />
     <Compile Include="..\Services\RedactionPageEdit.cs" Link="Services\RedactionPageEdit.cs" />
     <Compile Include="..\Services\AtomicFileOutput.cs" Link="Services\AtomicFileOutput.cs" />
+    <Compile Include="..\Services\InstalledShortcuts.cs" Link="Services\InstalledShortcuts.cs" />
     <Compile Include="..\Services\PublishedFileStamp.cs" Link="Services\PublishedFileStamp.cs" />
     <Compile Include="..\Services\FileRevision.cs" Link="Services\FileRevision.cs" />
     <Compile Include="..\Services\RenderFailureRecovery.cs" Link="Services\RenderFailureRecovery.cs" />

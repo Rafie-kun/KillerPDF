@@ -958,6 +958,7 @@ namespace KillerPDF
 
         /// <summary>
         /// Installs KillerPDF, offers to set it as the default PDF handler, then relaunches from
+            try { File.Delete(InstalledShortcuts.DesktopPath(machine: true)); } catch { }
         /// the installed location. Returns false if the install did not happen, so the caller can
         /// put the portable badge back rather than leaving the user with a half-finished state.
         ///
@@ -981,7 +982,7 @@ namespace KillerPDF
 
             if (allUsers)
             {
-                if (!RunElevatedSilentInstall(launcher)) return false;
+                if (!RunElevatedSilentInstall(launcher, wantDesktop)) return false;
 
                 // Only ever one install: drop the per-user copy so there is a single Start Menu
                 // entry and a single uninstall entry. This also removes per-user file and protocol
@@ -998,7 +999,7 @@ namespace KillerPDF
                 else
                 {
                     // Compatibility for old woven builds and direct developer runs.
-                    DoInstall(wantDesktop);
+                    if (!DoInstall(wantDesktop)) return false;
                 }
                 if (!File.Exists(InstallExe)) return false;   // trust gate / copy failure already reported
                 targetExe = InstallExe;
@@ -1054,13 +1055,13 @@ namespace KillerPDF
             catch { return false; }
         }
 
-        private static bool RunElevatedSilentInstall(string? launcher = null)
+        private static bool RunElevatedSilentInstall(string? launcher = null, bool desktop = false)
         {
             try
             {
                 string installer = launcher ?? Environment.ProcessPath
                     ?? throw new InvalidOperationException("The current executable path is unavailable.");
-                var psi = new ProcessStartInfo(installer, "/silent")
+                var psi = new ProcessStartInfo(installer, desktop ? "/silent /desktop" : "/silent")
                 {
                     UseShellExecute = true,
                     Verb = "runas",          // triggers the UAC prompt
@@ -1149,7 +1150,9 @@ namespace KillerPDF
                 }
                 File.Copy(src, installExe, overwrite: true);
                 try { File.SetAttributes(installExe, FileAttributes.Normal); } catch { }
-                RegisterInstalledCopy(machine: machine, desktop: false);
+                RegisterInstalledCopy(machine: machine, desktop: Environment.GetCommandLineArgs()
+                    .Any(argument => string.Equals(argument, "/desktop", StringComparison.OrdinalIgnoreCase)),
+                    installedExecutable: installExe);
                 return KillerFamily.Deployment.InstallerExitCodes.Success;
             }
             catch (Exception ex)
@@ -1840,7 +1843,7 @@ namespace KillerPDF
         // Installation
         // ============================================================
 
-        private static void DoInstall(bool wantDesktop)
+        private static bool DoInstall(bool wantDesktop)
         {
             string src = Environment.ProcessPath
                 ?? throw new InvalidOperationException("The current executable path is unavailable.");
@@ -1854,7 +1857,7 @@ namespace KillerPDF
                         "Installation refused: the running EXE does not carry a valid Authenticode " +
                         "signature.\n\nOnly signed builds of KillerPDF can be installed."),
                     AppName, MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
+                return false;
             }
 
             // ── Downgrade guard ────────────────────────────────────────────────────
@@ -1870,7 +1873,7 @@ namespace KillerPDF
                             "over the currently installed version ({1}).\n\n" +
                             "Downgrade anyway?"), runVer, instVer),
                         AppName, MessageBoxButton.YesNo, MessageBoxImage.Warning);
-                    if (res != MessageBoxResult.Yes) return;
+                    if (res != MessageBoxResult.Yes) return false;
                 }
             }
 
@@ -1898,10 +1901,11 @@ namespace KillerPDF
                             "\n\nClose any open KillerPDF window (and check Task Manager for KillerPDF.exe), " +
                             "then run the installer again."), InstallExe),
                         AppName, MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
+                    return false;
                 }
                 try { File.SetAttributes(InstallExe, FileAttributes.Normal); } catch { }
-                RegisterInstalledCopy(machine: false, desktop: wantDesktop);
+                RegisterInstalledCopy(machine: false, desktop: wantDesktop, installedExecutable: InstallExe);
+                return true;
             }
             catch (Exception ex)
             {
@@ -1926,6 +1930,7 @@ namespace KillerPDF
                 using var rs = asm.GetManifestResourceStream(rn)!;
                 using var fs = File.Create(iconPath);
                 rs.CopyTo(fs);
+                return false;
             }
             catch { }
         }
@@ -2018,17 +2023,7 @@ namespace KillerPDF
 
         private static void CreateShortcut(string lnkPath, string targetPath)
         {
-            try
-            {
-                var shellType = Type.GetTypeFromProgID("WScript.Shell");
-                if (shellType is null) return;
-                dynamic shell    = Activator.CreateInstance(shellType)!;
-                dynamic shortcut = shell.CreateShortcut(lnkPath);
-                shortcut.TargetPath       = targetPath;
-                shortcut.WorkingDirectory = Path.GetDirectoryName(targetPath);
-                shortcut.Save();
-            }
-            catch { /* best-effort */ }
+            InstalledShortcuts.Create(lnkPath, targetPath);
         }
 
         // ============================================================
@@ -2069,23 +2064,22 @@ namespace KillerPDF
             return true;
         }
 
-        private static void RegisterInstalledCopy(bool machine, bool desktop, bool? preview = null)
+        private static void RegisterInstalledCopy(bool machine, bool desktop, bool? preview = null,
+            string? installedExecutable = null)
         {
-            string exePath = Path.GetFullPath(Process.GetCurrentProcess().MainModule?.FileName
+            string exePath = Path.GetFullPath(installedExecutable ?? Process.GetCurrentProcess().MainModule?.FileName
                 ?? throw new InvalidOperationException("The installed application path is unavailable."));
             string installDirectory = Path.GetDirectoryName(exePath)
                 ?? throw new InvalidOperationException("The installed application folder is unavailable.");
             string iconPath = Path.Combine(installDirectory, "pdf-file.ico");
-            string startMenuDirectory = machine ? MachineStartMenuDir : StartMenuDir;
             string startMenuShortcut = machine ? MachineStartMenuLnk : StartMenuLnk;
             RegistryKey registryRoot = machine ? Registry.LocalMachine : Registry.CurrentUser;
 
             if (!File.Exists(exePath))
                 throw new FileNotFoundException("The installed application is missing.", exePath);
 
-            Directory.CreateDirectory(startMenuDirectory);
             CreateShortcut(startMenuShortcut, exePath);
-            if (!machine && desktop) CreateShortcut(DesktopLnk, exePath);
+            if (desktop) CreateShortcut(InstalledShortcuts.DesktopPath(machine), exePath);
 
             if (!File.Exists(iconPath)) ExtractFileIcon(iconPath);
             RegisterFileHandler(registryRoot, exePath, iconPath);
@@ -2226,6 +2220,7 @@ namespace KillerPDF
             // owned file and removes folders only when they are empty, never recursively.
             string bat = Path.Combine(Path.GetTempPath(), $"killerpdf_uninstall_{Guid.NewGuid():N}.bat");
             File.WriteAllText(bat,
+                try { File.Delete(InstalledShortcuts.DesktopPath(machine: true)); } catch { }
                 "@echo off\r\n" +
                 "ping -n 3 127.0.0.1 >nul\r\n" +
                 Services.InstallPayloadOwnership.RemovalBatch(owned) +
