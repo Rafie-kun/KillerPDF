@@ -68,6 +68,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 ### Accessibility and Windows integration
 
+- Screen readers name the color picker's Red, Green and Blue fields instead of announcing unnamed boxes.
 - Windows contrast themes use system colors without grain or shadows. The About and Keyboard Shortcuts card edges follow gradient themes. The document pane uses the theme's pane color, and the active tab, annotation bars and search bar use the darker menu color, matching the rest of the family. Menus and bars sit darker than the panes and background in Dark, Decay, Ectoplasm, Malaise and Mourning, where they had blended into one or the other. Improved text, selection and accent readability across themes, including selected field presets (#340).
 - Screen readers receive useful names for icon buttons, thumbnails, scrollbar controls, file-picker rows and shortcut options. Decorative icons, hidden links and empty elements stay out of the accessibility tree.
 - Keyboard focus enters and stays within Shortcuts and About overlays, returns on close, and remains visible. Option groups use one Tab stop with arrow-key navigation.

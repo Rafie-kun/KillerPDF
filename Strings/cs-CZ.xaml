@@ -1881,4 +1881,7 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Read_MarkedNoText">Označený text</sys:String>
     <sys:String x:Key="Str_Read_Drawing">Kresba</sys:String>
     <sys:String x:Key="Str_Read_Stamp">Razítko</sys:String>
+    <sys:String x:Key="Str_Color_Red">Červená</sys:String>
+    <sys:String x:Key="Str_Color_Green">Zelená</sys:String>
+    <sys:String x:Key="Str_Color_Blue">Modrá</sys:String>
 </ResourceDictionary>

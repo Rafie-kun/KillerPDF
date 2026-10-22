@@ -1896,4 +1896,7 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Read_MarkedNoText">Texto marcado</sys:String>
     <sys:String x:Key="Str_Read_Drawing">Desenho</sys:String>
     <sys:String x:Key="Str_Read_Stamp">Carimbo</sys:String>
+    <sys:String x:Key="Str_Color_Red">Vermelho</sys:String>
+    <sys:String x:Key="Str_Color_Green">Verde</sys:String>
+    <sys:String x:Key="Str_Color_Blue">Azul</sys:String>
 </ResourceDictionary>

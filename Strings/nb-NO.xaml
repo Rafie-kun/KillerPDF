@@ -1896,4 +1896,7 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Read_MarkedNoText">Merket tekst</sys:String>
     <sys:String x:Key="Str_Read_Drawing">Tegning</sys:String>
     <sys:String x:Key="Str_Read_Stamp">Stempel</sys:String>
+    <sys:String x:Key="Str_Color_Red">Rød</sys:String>
+    <sys:String x:Key="Str_Color_Green">Grønn</sys:String>
+    <sys:String x:Key="Str_Color_Blue">Blå</sys:String>
 </ResourceDictionary>

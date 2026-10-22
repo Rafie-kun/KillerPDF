@@ -1899,4 +1899,7 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_Read_MarkedNoText">Белгіленген мәтін</sys:String>
     <sys:String x:Key="Str_Read_Drawing">Сызба</sys:String>
     <sys:String x:Key="Str_Read_Stamp">Мөр</sys:String>
+    <sys:String x:Key="Str_Color_Red">Қызыл</sys:String>
+    <sys:String x:Key="Str_Color_Green">Жасыл</sys:String>
+    <sys:String x:Key="Str_Color_Blue">Көк</sys:String>
 </ResourceDictionary>

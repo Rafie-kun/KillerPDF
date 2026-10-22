@@ -1885,4 +1885,7 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Read_MarkedNoText">Markierter Text</sys:String>
     <sys:String x:Key="Str_Read_Drawing">Zeichnung</sys:String>
     <sys:String x:Key="Str_Read_Stamp">Stempel</sys:String>
+    <sys:String x:Key="Str_Color_Red">Rot</sys:String>
+    <sys:String x:Key="Str_Color_Green">Grün</sys:String>
+    <sys:String x:Key="Str_Color_Blue">Blau</sys:String>
 </ResourceDictionary>

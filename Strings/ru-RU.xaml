@@ -1899,4 +1899,7 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Read_MarkedNoText">Отмеченный текст</sys:String>
     <sys:String x:Key="Str_Read_Drawing">Рисунок</sys:String>
     <sys:String x:Key="Str_Read_Stamp">Штамп</sys:String>
+    <sys:String x:Key="Str_Color_Red">Красный</sys:String>
+    <sys:String x:Key="Str_Color_Green">Зелёный</sys:String>
+    <sys:String x:Key="Str_Color_Blue">Синий</sys:String>
 </ResourceDictionary>

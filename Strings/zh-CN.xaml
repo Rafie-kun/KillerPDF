@@ -1880,4 +1880,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Read_MarkedNoText">标记的文本</sys:String>
     <sys:String x:Key="Str_Read_Drawing">绘图</sys:String>
     <sys:String x:Key="Str_Read_Stamp">图章</sys:String>
+    <sys:String x:Key="Str_Color_Red">红色</sys:String>
+    <sys:String x:Key="Str_Color_Green">绿色</sys:String>
+    <sys:String x:Key="Str_Color_Blue">蓝色</sys:String>
 </ResourceDictionary>

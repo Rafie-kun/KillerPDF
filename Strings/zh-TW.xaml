@@ -1878,4 +1878,7 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_Read_MarkedNoText">標記的文字</sys:String>
     <sys:String x:Key="Str_Read_Drawing">繪圖</sys:String>
     <sys:String x:Key="Str_Read_Stamp">印章</sys:String>
+    <sys:String x:Key="Str_Color_Red">紅色</sys:String>
+    <sys:String x:Key="Str_Color_Green">綠色</sys:String>
+    <sys:String x:Key="Str_Color_Blue">藍色</sys:String>
 </ResourceDictionary>

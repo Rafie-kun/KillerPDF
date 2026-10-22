@@ -1896,4 +1896,7 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_Read_MarkedNoText">Testo contrassegnato</sys:String>
     <sys:String x:Key="Str_Read_Drawing">Disegno</sys:String>
     <sys:String x:Key="Str_Read_Stamp">Timbro</sys:String>
+    <sys:String x:Key="Str_Color_Red">Rosso</sys:String>
+    <sys:String x:Key="Str_Color_Green">Verde</sys:String>
+    <sys:String x:Key="Str_Color_Blue">Blu</sys:String>
 </ResourceDictionary>

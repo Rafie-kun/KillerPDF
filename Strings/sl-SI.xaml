@@ -1783,4 +1783,7 @@
     <sys:String x:Key="Str_Read_MarkedNoText">Označeno besedilo</sys:String>
     <sys:String x:Key="Str_Read_Drawing">Risba</sys:String>
     <sys:String x:Key="Str_Read_Stamp">Žig</sys:String>
+    <sys:String x:Key="Str_Color_Red">Rdeča</sys:String>
+    <sys:String x:Key="Str_Color_Green">Zelena</sys:String>
+    <sys:String x:Key="Str_Color_Blue">Modra</sys:String>
 </ResourceDictionary>

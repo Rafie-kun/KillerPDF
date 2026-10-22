@@ -1895,4 +1895,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Read_MarkedNoText">Marked text</sys:String>
     <sys:String x:Key="Str_Read_Drawing">Drawing</sys:String>
     <sys:String x:Key="Str_Read_Stamp">Stamp</sys:String>
+    <sys:String x:Key="Str_Color_Red">Red</sys:String>
+    <sys:String x:Key="Str_Color_Green">Green</sys:String>
+    <sys:String x:Key="Str_Color_Blue">Blue</sys:String>
 </ResourceDictionary>

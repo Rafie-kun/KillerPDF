@@ -153,9 +153,9 @@ namespace KillerPDF
                 BorderBrush = R("CardBorderBrush"), BorderThickness = new Thickness(1), Margin = new Thickness(0, 0, 10, 0) };
             inputRow.Children.Add(_newSwatch);
             _rBox = NumBox(); _gBox = NumBox(); _bBox = NumBox();
-            inputRow.Children.Add(FieldGroup("R", _rBox));
-            inputRow.Children.Add(FieldGroup("G", _gBox));
-            inputRow.Children.Add(FieldGroup("B", _bBox));
+            inputRow.Children.Add(FieldGroup("R", _rBox, L("Str_Color_Red")));
+            inputRow.Children.Add(FieldGroup("G", _gBox, L("Str_Color_Green")));
+            inputRow.Children.Add(FieldGroup("B", _bBox, L("Str_Color_Blue")));
             _eyedropBtn = new Button
             {
                 Width = 28, Height = 22, Margin = new Thickness(8, 14, 0, 0),
@@ -345,8 +345,10 @@ namespace KillerPDF
             }
         }
         // ── Small themed control builders ───────────────────────────────────────
-        private static StackPanel FieldGroup(string label, TextBox box)
+        /// <summary>A short visible label over the box; screen readers get the full name.</summary>
+        private static StackPanel FieldGroup(string label, TextBox box, string name)
         {
+            System.Windows.Automation.AutomationProperties.SetName(box, name);
             var sp = new StackPanel { Margin = new Thickness(0, 0, 6, 0) };
             sp.Children.Add(new TextBlock { Text = label, Foreground = R("MutedTextBrush"), FontSize = 10, HorizontalAlignment = HorizontalAlignment.Center });
             sp.Children.Add(box);

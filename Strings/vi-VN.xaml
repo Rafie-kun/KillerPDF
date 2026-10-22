@@ -1896,4 +1896,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Read_MarkedNoText">Văn bản được đánh dấu</sys:String>
     <sys:String x:Key="Str_Read_Drawing">Hình vẽ</sys:String>
     <sys:String x:Key="Str_Read_Stamp">Con dấu</sys:String>
+    <sys:String x:Key="Str_Color_Red">Đỏ</sys:String>
+    <sys:String x:Key="Str_Color_Green">Xanh lá</sys:String>
+    <sys:String x:Key="Str_Color_Blue">Xanh dương</sys:String>
 </ResourceDictionary>

@@ -1884,4 +1884,7 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Read_MarkedNoText">Zaznaczony tekst</sys:String>
     <sys:String x:Key="Str_Read_Drawing">Rysunek</sys:String>
     <sys:String x:Key="Str_Read_Stamp">Pieczątka</sys:String>
+    <sys:String x:Key="Str_Color_Red">Czerwony</sys:String>
+    <sys:String x:Key="Str_Color_Green">Zielony</sys:String>
+    <sys:String x:Key="Str_Color_Blue">Niebieski</sys:String>
 </ResourceDictionary>

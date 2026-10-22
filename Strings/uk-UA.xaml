@@ -1896,4 +1896,7 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Read_MarkedNoText">Позначений текст</sys:String>
     <sys:String x:Key="Str_Read_Drawing">Малюнок</sys:String>
     <sys:String x:Key="Str_Read_Stamp">Штамп</sys:String>
+    <sys:String x:Key="Str_Color_Red">Червоний</sys:String>
+    <sys:String x:Key="Str_Color_Green">Зелений</sys:String>
+    <sys:String x:Key="Str_Color_Blue">Синій</sys:String>
 </ResourceDictionary>
