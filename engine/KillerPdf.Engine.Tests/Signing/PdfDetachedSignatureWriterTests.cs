@@ -17,6 +17,21 @@ namespace KillerPdf.Engine.Tests.Signing;
 public sealed class PdfDetachedSignatureWriterTests
 {
     [Fact]
+    public void Sign_AvailableFieldNamePreservesAnExistingFieldHierarchy()
+    {
+        PdfDocument source = PdfDocument.Open(new PdfDocumentBuilder().AddBlankPage()
+            .AddTextField(0, "Signature1.child", 20, 20, 100, 30, "Keep this value").Build());
+
+        string fieldName = PdfDetachedSignatureWriter.FindAvailableSignatureFieldName(source);
+        PdfDocument signed = PdfDocument.Open(PdfDetachedSignatureWriter.Sign(source, _ => [1],
+            new PdfSignatureOptions { FieldName = fieldName, ReservedSignatureSize = 16 }));
+
+        Assert.Equal("Signature2", Assert.Single(PdfSignatureReader.Read(signed)).FieldName);
+        Assert.Contains(PdfFormWidgetReader.ReadPage(signed, 0),
+            field => field.FieldName == "Signature1.child" && field.Value == "Keep this value");
+    }
+
+    [Fact]
     public void Sign_WritesEditableVisibleAppearanceForNewField()
     {
         byte[] source = new PdfDocumentBuilder().AddBlankPage(400, 500).Build();

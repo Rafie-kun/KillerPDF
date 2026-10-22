@@ -33,6 +33,27 @@ public static class PdfDetachedSignatureWriter
     private const long RangeSentinel4 = 4_444_444_444;
     private const int MaximumReservedSignatureSize = 1_048_576;
 
+    /// <summary>
+    /// Selects the default unsigned signature field, or an unused numbered name for a new field.
+    /// Signing still enforces certification, field locks, and seed-value restrictions.
+    /// </summary>
+    public static string FindAvailableSignatureFieldName(PdfDocument document)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        var names = new HashSet<string>(StringComparer.Ordinal);
+        ExistingFormField? first = FindField(document, PdfPageTree.Read(document), "Signature1", names);
+        if (first is not null && first.FieldType.Equals(Name("Sig"))
+            && (!first.Dictionary.TryGetValue(Name("V"), out PdfObject? value)
+                || IsUnsignedValue(Resolve(document, value, "The default signature field /V value"))))
+            return "Signature1";
+
+        for (int index = 1; ; index++)
+        {
+            string candidate = "Signature" + index.ToString(CultureInfo.InvariantCulture);
+            if (!names.Contains(candidate)) return candidate;
+        }
+    }
+
     /// <summary>Creates an incremental detached signature using caller-supplied CMS generation.</summary>
     public static byte[] Sign(
         PdfDocument document,
@@ -365,7 +386,7 @@ public static class PdfDetachedSignatureWriter
     }
 
     private static ExistingFormField? FindField(
-        PdfDocument document, PdfPageTree tree, string fieldName)
+        PdfDocument document, PdfPageTree tree, string fieldName, ISet<string>? fieldNames = null)
     {
         if (!tree.Catalog.TryGetValue(AcroFormName, out PdfObject? formValue)) return null;
         PdfDictionary form = ResolveDictionary(document, formValue, "The catalog /AcroForm value");
@@ -414,7 +435,9 @@ public static class PdfDetachedSignatureWriter
                 fullName = string.IsNullOrEmpty(parentName)
                     ? partialName : $"{parentName}.{partialName}";
             }
-            if (definesName && fullName == fieldName)
+            if (definesName && fullName is not null) fieldNames?.Add(fullName);
+            if (definesName && fullName == fieldName
+                && (fieldNames is null || fieldType is not null))
             {
                 if (match is not null)
                     throw new InvalidOperationException(

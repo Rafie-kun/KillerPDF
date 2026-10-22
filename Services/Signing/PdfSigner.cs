@@ -34,6 +34,7 @@ namespace KillerPDF.Services.Signing
             var cmsSigner = new KillerCmsSigner(cert);
             var options = new PdfSignatureOptions
             {
+                FieldName = PdfDetachedSignatureWriter.FindAvailableSignatureFieldName(document),
                 SignerName = cmsSigner.CertificateName,
                 Reason = NullIfWhiteSpace(info.Reason),
                 Location = NullIfWhiteSpace(info.Location),
