@@ -107,7 +107,7 @@
     <CornerRadius x:Key="PanelCornerRadius">6</CornerRadius>
     <SolidColorBrush x:Key="FooterBackgroundBrush" Color="#FFCCCCCC" po:Freeze="True"/>
     <SolidColorBrush x:Key="MenuSeparatorBrush" Color="#FFC0C0C0" po:Freeze="True"/>
-    <SolidColorBrush x:Key="TitleBarBrush" Color="#FFDCDCDC" po:Freeze="True"/>
+    <SolidColorBrush x:Key="TitleBarBrush" Color="#FFCCCCCC" po:Freeze="True"/>
     <sys:Double x:Key="TitleBarHeight" xmlns:sys="clr-namespace:System;assembly=mscorlib">32</sys:Double>
     <!-- Modern wordmark sizes preserve the existing title typography. -->
     <sys:Double x:Key="TitleWordmarkSize" xmlns:sys="clr-namespace:System;assembly=mscorlib">15</sys:Double>
