@@ -157,29 +157,43 @@ public sealed class WatchedFolderServiceTests
     public async Task PauseCancelsAnActiveMacroAndConcurrentReconcilesDoNotDuplicateWork()
     {
         using var fixture = new FolderFixture();
-        var builder = new PdfDocumentBuilder();
-        for (int i = 0; i < 100; i++) builder.AddBlankPage(200, 300);
-        File.WriteAllBytes(Path.Combine(fixture.Input, "document.pdf"), builder.Build());
-        using var service = fixture.Create();
-        service.Configure(fixture.Options(new PdfMacro("Long resize",
-            Enumerable.Repeat(PdfResizeMacro.ScaleStep(100), 100))));
+        File.WriteAllBytes(Path.Combine(fixture.Input, "document.pdf"),
+            new PdfDocumentBuilder().AddBlankPage(200, 300).Build());
+        var enteredResize = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        using var continueResize = new ManualResetEventSlim();
+        int dispatches = 0;
+        var dispatcher = new PdfMacroDispatcher([
+            new(PdfMacroOperation.Resize, (step, bytes, values, token) =>
+            {
+                Interlocked.Increment(ref dispatches);
+                enteredResize.TrySetResult();
+                continueResize.Wait(token);
+                return PdfResizeMacro.Execute(step, bytes, values, token);
+            })]);
+        using var service = new WatchedFolderService(fixture.Storage, dispatcher, fixture.Clock);
+        service.Configure(fixture.Options(new PdfMacro("Resize", [PdfResizeMacro.ScaleStep(100)])));
         service.Resume();
         await service.ReconcileAsync();
         fixture.Clock.Advance(TimeSpan.FromSeconds(3));
         Task running = service.ReconcileAsync();
-        DateTime deadline = DateTime.UtcNow.AddSeconds(10);
-        while (!service.GetSnapshot().Jobs.Any(job => job.Status == WatchedFolderJobStatus.Processing))
+        try
         {
+            await enteredResize.Task.WaitAsync(TimeSpan.FromSeconds(10));
             Assert.False(running.IsCompleted);
-            Assert.True(DateTime.UtcNow < deadline);
-            await Task.Delay(1);
+            Assert.Equal(WatchedFolderJobStatus.Processing, Assert.Single(service.GetSnapshot().Jobs).Status);
+            Task duplicate = service.ReconcileAsync();
+            await duplicate.WaitAsync(TimeSpan.FromSeconds(10));
+            Assert.Equal(1, Volatile.Read(ref dispatches));
+            service.Pause();
+            await running.WaitAsync(TimeSpan.FromSeconds(10));
         }
-        Task duplicate = service.ReconcileAsync();
-        service.Pause();
-        await Task.WhenAll(running, duplicate);
+        finally { continueResize.Set(); }
         Assert.True(service.GetSnapshot().IsPaused);
-        Assert.Equal(WatchedFolderJobStatus.Waiting, Assert.Single(service.GetSnapshot().Jobs).Status);
-        Assert.Equal("Canceled", Assert.Single(service.GetSnapshot().Jobs).ErrorCode);
+        WatchedFolderJob job = Assert.Single(service.GetSnapshot().Jobs);
+        Assert.Equal(WatchedFolderJobStatus.Waiting, job.Status);
+        Assert.Equal("Canceled", job.ErrorCode);
+        Assert.Equal(1, job.Attempts);
+        Assert.Equal(1, Volatile.Read(ref dispatches));
         Assert.Empty(Directory.GetFiles(fixture.Output));
     }
 
