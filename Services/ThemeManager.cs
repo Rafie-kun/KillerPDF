@@ -287,7 +287,7 @@ namespace KillerPDF.Services
             liveResources["OverlayEdgeBrush"] = gradientEdge ?? liveResources["AppBorderBrush"];
             liveResources["OverlayRuleBrush"] = gradientEdge ?? liveResources["PaneBorderBrush"];
             liveResources["PrimaryFillBrush"] = ButtonFill(fillBase ?? liveResources["PrimaryBrush"], theme == Theme.SE98);
-            liveResources["OutlineHoverBrush"] = ButtonFill(liveResources["OutlineHoverBrush"], theme == Theme.SE98);
+            liveResources["OutlineHoverBrush"] = ButtonFill(liveResources.Contains("OutlineHoverFillBaseBrush") ? liveResources["OutlineHoverFillBaseBrush"] : liveResources["OutlineHoverBrush"], theme == Theme.SE98);
             appResources["RadWindow"] = liveResources["WindowCornerRadius"];
             appResources["RadCard"] = liveResources["PanelCornerRadius"];
             appResources["RadControl"] = liveResources["ControlCornerRadius"];
