@@ -1,5 +1,5 @@
 .result-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:16px 0}
-.result{background:var(--modal) url('grain.png?v=2') repeat;background-size:256px 256px;border:1px solid var(--pane-border);border-radius:9px;padding:15px}
+.result{background:var(--modal) var(--grain-img) repeat;background-size:256px 256px;border:1px solid var(--pane-border);border-radius:9px;padding:15px}
 .result h3{margin:0 0 10px;font-family:var(--kt-font-section);font-size:17px;font-weight:normal;color:var(--accent)}
 .result-lead{display:flex;align-items:baseline;gap:7px;margin-bottom:9px}
 .result-lead b{color:var(--accent);font:700 25px "Courier New",monospace}

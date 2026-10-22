@@ -37,6 +37,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Fixed keyboard focus entry, containment and restoration for About and Shortcuts. Added accessible names to icon buttons, thumbnails, scrollbars, file-picker rows, shortcut options and RGB fields; decorative elements stay out of the accessibility tree.
 - Fixed long paths overlapping the recent-locations arrow in 98SE, missing app and installer translations, and truncated installer version text (#409, #440).
 - Release publishing validates artifacts before upload and reports steps needing a retry. Chocolatey publishing reports failure if validation still fails after retrying.
+- The website's film grain is lighter, matching KillerTools, and the theme menu can turn it off (Alt+Shift+G). The top bar no longer leaves extra space above the page on narrower windows, and the release details box lifts with an accent border on hover.
 
 ### Added
 
@@ -79,7 +80,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Updated theme contrast, selection colors and field presets. Light uses gray window surfaces, lighter document panes and white input fields; several dark themes use darker menus and bars to distinguish them from panes (#340).
 - Modern menus and Search Tools results use readable accent-colored hover text; Customize Toolbar button rows have clearer hover contrast. Theme-menu hover fills have equal side insets, and About/Shortcuts edges follow gradient themes.
 - Refined film grain, checkbox ticks, radio alignment and file-picker styling. Popup textures cover their padding, sliders have tighter corners without square surrounds, and 98SE keeps classic bevels, compact fields and a gray document workspace.
-- Wordmarks and headings use a subtle bevel in their own color, retaining shadows where enabled. Dark's red accent uses the brand red; the empty drop target uses corner brackets and aiming marks.
+- Wordmarks and headings use a subtle bevel in their own color, retaining shadows where enabled. Dark's red accent uses the brand red; the empty drop target uses corner brackets and aiming marks at 80% opacity.
 - Simplified mobile website navigation, localized labels, improved contrast and Corpus layout, and added Store and related-app links. Updated Help, technical guides, shortcut references and application metadata.
 
 ## [1.8.91] - 2026-10-14
