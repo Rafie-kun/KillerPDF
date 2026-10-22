@@ -81,6 +81,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Added Windows 11 snap layouts and docking for the comparison bar (#374, #427).
 
 ### Interface and polish
+- In 98SE, long paths in the file dialog no longer run under the recent-locations arrow.
 - Light is shades of gray with nothing white: the background, sidebar and footer are the darkest gray (#cccccc), menus and bars a step lighter, then panes, then fields.
 
 - Added Search Tools (Ctrl+K), customizable shortcuts and one-letter tools. Export, signing, page cleanup and measurement shortcuts appear in menus, tooltips, F1 and the website. Expanded view, page, clipboard and tab actions (#190).
