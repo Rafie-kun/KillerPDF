@@ -85,9 +85,16 @@ namespace KillerPDF
             AccentStrip.Margin = right
                 ? new Thickness(2, 6, 7, 6)
                 : new Thickness(7, 6, 2, 6);
+            // The theme column is the star one on either side, so its hover rows fill the menu.
+            // ThemeRadio rows keep their -8,0,2,0 on both sides, so the list's left inset moves
+            // onto the list itself on a right rail: 2 + 10 - 8 = 4 left, 2 + 2 = 4 right, and the
+            // strip keeps the same 2 + 2 air against the left edge that it has on the right.
+            ThemePickerLayout.ColumnDefinitions[0].Width = right ? GridLength.Auto : new GridLength(1, GridUnitType.Star);
+            ThemePickerLayout.ColumnDefinitions[1].Width = right ? new GridLength(1, GridUnitType.Star) : GridLength.Auto;
+            ThemeSubmenu.Margin = right ? new Thickness(10, 0, 0, 0) : new Thickness(0);
             ThemePickerLayout.Margin = right
-                ? new Thickness(3, 10, 12, 10)
-                : new Thickness(12, 10, 3, 10);
+                ? new Thickness(2, 10, 2, 10)
+                : new Thickness(12, 10, 2, 10);
         }
     }
 }
