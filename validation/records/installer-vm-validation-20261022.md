@@ -76,6 +76,14 @@ Both packaging runs passed GUI startup, payload inventory and staging-install
 checks. Third-party compiler warnings remain in the build logs. This is not a
 zero-warning build claim.
 
+The full application test suite also passed 1,142 of 1,142 with no skips, using the
+snapshot's normal project output layout so source-discovery tests can find their
+repository inputs. TRX: vm-validation-tests/app-suite-native-layout.trx. All 49
+failed test names from the earlier external-artifacts run are present and passing
+in this run; none are unmatched. Individual errors and results are retained in
+prior-49-failure-comparison.json. This resolves the earlier failed-run checkpoint;
+it does not substitute for the remaining interactive or release gates.
+
 ## Limits
 
 Signed artifacts, UAC wizard transitions, upgrade from a released 1.8 build,
