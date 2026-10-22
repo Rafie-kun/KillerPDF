@@ -72,7 +72,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Line editing preserves supported styling and rewrites source text, including rotated text, with a cover fallback for scans. Select handles selection; PDF text editing uses the Text tool, and arrow keys move selected objects (#368, #422, #431).
 - Flattening now offers resolution, color and compression controls plus an optional scanned appearance (#366, #426).
 - Separated Transform and Color Correction, with live exposure, saturation and white-balance adjustments, zoom and pan.
-- Toolbar and overflow actions are dimmed and disabled when unavailable. Exported redacted copies open in an empty second pane or a new tab.
+- Undo and Redo follow Print in the default toolbar. Toolbar and overflow actions are dimmed and disabled when unavailable. Exported redacted copies open in an empty second pane or a new tab.
 - Reorganized navigation with Comments, Attachments, Layers and Signatures panels, four sidebar positions and remembered rail order. Bookmarks and their children can be dragged into order; narrow layouts, horizontal scrolling and full titles keep navigation reachable (#391).
 - Windows and split panes adapt to the current monitor and app scale. Windows contrast themes use system colors without grain or shadows; option groups use a single Tab stop and arrow-key navigation.
 - Silent installation supports per-user installs without elevation, bundles .NET in the Store package, detects Arm64 runtimes and rejects concurrent installs with useful error codes.

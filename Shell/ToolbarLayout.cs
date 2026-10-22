@@ -30,10 +30,10 @@ namespace KillerPDF
         private const string ToolbarLayoutSetting = "ToolbarLayout";
 
         internal static readonly ToolbarLayout DefaultToolbarLayout = new(
-            ["new", "close", "open", "save", "ocr", "flatten", "print", "compare", "-", "merge", "extract",
+            ["new", "close", "open", "save", "ocr", "flatten", "print", "undo", "redo", "compare", "-", "merge", "extract",
              "-", "delete", "moveup", "movedown"],
             ["select", "text", "highlight", "line", "shape", "draw", "image", "signature", "crop", "transform",
-             "colorcorrection", "measure", "redact", "stamp", "-", "formfield", "-", "undo", "redo", "clear",
+             "colorcorrection", "measure", "redact", "stamp", "-", "formfield", "-", "clear",
              "-", "search"],
             []);
 
