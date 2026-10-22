@@ -102,6 +102,8 @@
     <CornerRadius x:Key="AccentSwatchCornerRadius" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">9</CornerRadius>
 
     <SolidColorBrush x:Key="TitleBarBrush" Color="#3b3642" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" />
+    <!-- Close X: brighter red than DangerRed so the X keeps 3:1 on this bar. -->
+    <SolidColorBrush x:Key="CaptionCloseBrush" Color="#FF8A8A" po:Freeze="True"/>
 
     <SolidColorBrush x:Key="FooterAccentBrush" Color="#FF7696"/>
     <SolidColorBrush x:Key="SelectionAccent" Color="#FFFFA9BD" po:Freeze="True"/>

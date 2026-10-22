@@ -108,6 +108,8 @@
     <SolidColorBrush x:Key="FooterBackgroundBrush" Color="#FFCCCCCC" po:Freeze="True"/>
     <SolidColorBrush x:Key="MenuSeparatorBrush" Color="#FFC0C0C0" po:Freeze="True"/>
     <SolidColorBrush x:Key="TitleBarBrush" Color="#FFCCCCCC" po:Freeze="True"/>
+    <!-- Close X: darker red than DangerRed so the X keeps 3:1 on the gray bar. -->
+    <SolidColorBrush x:Key="CaptionCloseBrush" Color="#A81C1C" po:Freeze="True"/>
     <sys:Double x:Key="TitleBarHeight" xmlns:sys="clr-namespace:System;assembly=mscorlib">32</sys:Double>
     <!-- Modern wordmark sizes preserve the existing title typography. -->
     <sys:Double x:Key="TitleWordmarkSize" xmlns:sys="clr-namespace:System;assembly=mscorlib">15</sys:Double>
