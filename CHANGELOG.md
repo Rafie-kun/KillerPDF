@@ -90,6 +90,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Refined film grain, shadows, accent states, checkbox ticks, radio alignment, crash-report controls and file-picker styling. Dialogs show app icons, and 98SE uses full bevels and compact text fields. The 98SE document pane uses the classic gray workspace so pages stand apart from the window. Grain fades midtones across app and website themes without dimming bright highlights. Interface fonts resolve from the embedded files, including menus, tooltips and shortcuts.
 - Simplified website navigation at narrow widths, localized navigation labels, improved mobile layout and contrast, refreshed branding and Corpus layout, and added Store and related-app links. Updated Help, technical documentation, translations, release facts and application metadata.
 
+### Changed
+
+- Wordmarks and headings are raised with a subtle bevel in their own color instead of a dark outline; wordmarks keep their drop shadow. The Dark theme's red accent is the brand red again instead of a pink tint.
+
 ## [1.8.91] - 2026-10-14
 
 1.8.91 fixes a crash when opening the theme picker in the packaged app and updates a vulnerable cryptography dependency.
