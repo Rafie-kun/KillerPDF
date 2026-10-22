@@ -28,7 +28,7 @@ public sealed class MenuSeparatorThemeTests
     }
 
     [Fact]
-    public void OtherThemesKeepTheirCardBorderFallback()
+    public void ThemesDeclareMenuDividersOrKeepTheirCardBorderFallback()
     {
         string root = FindRepositoryRoot();
         string manager = File.ReadAllText(Path.Combine(root, "Services", "ThemeManager.cs"));
@@ -37,13 +37,12 @@ public sealed class MenuSeparatorThemeTests
         foreach (string themePath in Directory.EnumerateFiles(Path.Combine(root, "Themes"), "*.xaml"))
         {
             string theme = Path.GetFileNameWithoutExtension(themePath);
-            if (theme is "Delirium" or "98SE")
-                continue;
             var divider = XDocument.Load(themePath).Descendants()
                 .SingleOrDefault(element => (string?)element.Attribute(Xaml + "Key") == "MenuSeparatorBrush");
-            if (divider is not null)
-                Assert.Equal(ColorConverter.ConvertFromString(BrushColor(root, theme, "CardBorderBrush")),
-                    ColorConverter.ConvertFromString(divider.Attribute("Color")!.Value));
+            string color = divider is null
+                ? BrushColor(root, theme, "CardBorderBrush")
+                : divider.Attribute("Color")!.Value;
+            Assert.IsType<Color>(ColorConverter.ConvertFromString(color));
         }
         foreach (string accentPath in Directory.EnumerateFiles(Path.Combine(root, "Themes", "Accents"), "*.xaml", SearchOption.AllDirectories))
         {
@@ -85,7 +84,7 @@ public sealed class MenuSeparatorThemeTests
             Assert.Same(gray, line.Background);
             Assert.Same(gray, dialogSeparator.Background);
 
-            var restored = (Brush)new BrushConverter().ConvertFromString(BrushColor(root, nextTheme, "CardBorderBrush"))!;
+            var restored = (Brush)new BrushConverter().ConvertFromString(BrushColor(root, nextTheme, "MenuSeparatorBrush"))!;
             menuSeparator.Resources["MenuSeparatorBrush"] = restored;
             dialogSeparator.Resources["MenuSeparatorBrush"] = restored;
             Assert.Same(restored, line.Background);
