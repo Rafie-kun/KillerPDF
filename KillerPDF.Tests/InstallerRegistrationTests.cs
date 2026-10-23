@@ -28,12 +28,23 @@ public sealed class InstallerRegistrationTests
             "CommandLinePath.Register(", "PreviewHandlerRegistration."];
         foreach (string step in steps)
             Assert.True(uninstall < register.IndexOf(step, StringComparison.Ordinal), step + " runs before the uninstall entry.");
-        // A failed upgrade is rolled back by setup, so the advertised version is written only after
-        // every required step, and the entry keeps naming the version that is really installed.
+        // The entry must keep naming the version that is really installed. Setup's launcher rolls a
+        // failed upgrade back, so there the version is written only after every required step; the
+        // app's own installs replace the file without a rollback, so they record it first.
+        int early = register.IndexOf("if (!setupRollsBack) RecordVersion();", StringComparison.Ordinal);
+        int late = register.IndexOf("if (setupRollsBack) RecordVersion();", StringComparison.Ordinal);
+        Assert.True(early > uninstall, "The app's own installs do not record the version after the uninstall entry.");
+        foreach (string step in steps)
+        {
+            Assert.True(early < register.IndexOf(step, StringComparison.Ordinal), step + " runs before the early version.");
+            Assert.True(late > register.LastIndexOf(step, StringComparison.Ordinal), "The setup version is written before " + step);
+        }
         foreach (string version in new[] { "key.SetValue(\"DisplayVersion\"", "key.SetValue(\"Version\"", "key.SetValue(\"EstimatedSize\"" })
-            foreach (string step in steps)
-                Assert.True(register.IndexOf(version, StringComparison.Ordinal) > register.LastIndexOf(step, StringComparison.Ordinal),
-                    version + " is written before " + step);
+            Assert.Equal(1, register.Split(version).Length - 1);
+
+        string source = AppSource();
+        Assert.Contains("RegisterInstalledCopy(machine, desktop, preview, setupRollsBack: true)", source);
+        Assert.Equal(1, source.Split("setupRollsBack: true").Length - 1);
     }
 
     // Owner decision, 2026-10-23: an optional desktop shortcut that Windows refuses no longer fails

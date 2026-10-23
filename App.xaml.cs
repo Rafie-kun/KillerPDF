@@ -107,7 +107,7 @@ namespace KillerPDF
                     : e.Args.Any(a => string.Equals(a, "/no-preview", StringComparison.OrdinalIgnoreCase)) ? false : null;
                 try
                 {
-                    if (RegisterInstalledCopy(machine, desktop, preview) is { } desktopProblem)
+                    if (RegisterInstalledCopy(machine, desktop, preview, setupRollsBack: true) is { } desktopProblem)
                         Console.Error.WriteLine("Installed without the desktop shortcut: " + desktopProblem);
                     Shutdown(0);
                 }
@@ -2135,7 +2135,7 @@ namespace KillerPDF
         // Returns why the optional desktop shortcut could not be created, or null. Every other step
         // is required and throws.
         private static string? RegisterInstalledCopy(bool machine, bool desktop, bool? preview = null,
-            string? installedExecutable = null)
+            string? installedExecutable = null, bool setupRollsBack = false)
         {
             string exePath = Path.GetFullPath(installedExecutable ?? Process.GetCurrentProcess().MainModule?.FileName
                 ?? throw new InvalidOperationException("The installed application path is unavailable."));
@@ -2150,8 +2150,9 @@ namespace KillerPDF
 
             // The copy is registered for uninstall first, so a shortcut or association that fails
             // below still leaves an installation Windows can remove instead of an orphaned payload.
-            // The version and size come last: an upgrade that fails here is rolled back by setup,
-            // and the entry must keep naming the version that is actually installed.
+            // The entry must keep naming the version that is actually installed. Setup's launcher
+            // rolls a failed upgrade back to the old copy, so there the version and size come last;
+            // the app's own installs replace the file without a rollback, so they record it first.
             const string uninstallKey = @"Software\Microsoft\Windows\CurrentVersion\Uninstall\KillerPDF";
             using (var key = registryRoot.CreateSubKey(@"Software\KillerPDF"))
             {
@@ -2170,6 +2171,7 @@ namespace KillerPDF
                 key.SetValue("NoModify", 1);
                 key.SetValue("NoRepair", 1);
             }
+            if (!setupRollsBack) RecordVersion();
 
             CreateShortcut(startMenuShortcut, exePath);
             // The desktop shortcut is optional. When Windows refuses it, for example under
@@ -2195,16 +2197,21 @@ namespace KillerPDF
             else
                 Services.PreviewHandlerRegistration.Unregister(registryRoot);
 
-            using (var key = registryRoot.CreateSubKey(@"Software\KillerPDF"))
-                key.SetValue("Version", AppVersion.Display);
-            using (var key = registryRoot.CreateSubKey(uninstallKey))
-            {
-                key.SetValue("DisplayVersion", AppVersion.Display);
-                key.SetValue("EstimatedSize", GetInstalledSizeKilobytes(installDirectory), RegistryValueKind.DWord);
-            }
+            if (setupRollsBack) RecordVersion();
 
             SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, IntPtr.Zero, IntPtr.Zero);
             return desktopProblem;
+
+            void RecordVersion()
+            {
+                using (var key = registryRoot.CreateSubKey(@"Software\KillerPDF"))
+                    key.SetValue("Version", AppVersion.Display);
+                using (var key = registryRoot.CreateSubKey(uninstallKey))
+                {
+                    key.SetValue("DisplayVersion", AppVersion.Display);
+                    key.SetValue("EstimatedSize", GetInstalledSizeKilobytes(installDirectory), RegistryValueKind.DWord);
+                }
+            }
         }
 
         private static int GetInstalledSizeKilobytes(string installDirectory)
