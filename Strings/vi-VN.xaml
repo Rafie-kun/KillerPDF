@@ -1931,4 +1931,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_CertCatalog_Type">Loại chứng chỉ</sys:String>
     <sys:String x:Key="Str_CertCatalog_CA">Tổ chức phát hành chứng chỉ</sys:String>
     <sys:String x:Key="Str_CertCatalog_Leaf">Thực thể cuối</sys:String>
+    <sys:String x:Key="Str_Layout_TabsTop">Tab ở trên</sys:String>
+    <sys:String x:Key="Str_Layout_TabsBottom">Tab ở dưới</sys:String>
+    <sys:String x:Key="Str_About_ShowShortcutsInMenus">Hiển thị phím tắt trong menu</sys:String>
 </ResourceDictionary>

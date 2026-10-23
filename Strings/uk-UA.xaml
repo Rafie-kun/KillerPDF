@@ -1931,4 +1931,7 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_CertCatalog_Type">Тип сертифіката</sys:String>
     <sys:String x:Key="Str_CertCatalog_CA">Центр сертифікації</sys:String>
     <sys:String x:Key="Str_CertCatalog_Leaf">Кінцевий суб'єкт</sys:String>
+    <sys:String x:Key="Str_Layout_TabsTop">Вкладки зверху</sys:String>
+    <sys:String x:Key="Str_Layout_TabsBottom">Вкладки знизу</sys:String>
+    <sys:String x:Key="Str_About_ShowShortcutsInMenus">Показувати сполучення клавіш у меню</sys:String>
 </ResourceDictionary>

@@ -226,7 +226,11 @@
                                 <ContentPresenter>
                                     <ContentPresenter.Resources>
                                         <DataTemplate DataType="{x:Type sys:String}">
-                                            <TextBlock Text="{Binding Converter={StaticResource TooltipTextConverter}}" MaxWidth="300" TextWrapping="Wrap"/>
+                                            <TextBlock MaxWidth="300" TextWrapping="Wrap">
+                                                <TextBlock.Text><MultiBinding Converter="{StaticResource TooltipTextConverter}">
+                                                    <Binding/><Binding Source="{x:Static kl:ShortcutHints.Current}" Path="Enabled"/>
+                                                </MultiBinding></TextBlock.Text>
+                                            </TextBlock>
                                         </DataTemplate>
                                     </ContentPresenter.Resources>
                                 </ContentPresenter>

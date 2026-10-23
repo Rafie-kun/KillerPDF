@@ -1920,4 +1920,7 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_CertCatalog_Type">Zertifikatstyp</sys:String>
     <sys:String x:Key="Str_CertCatalog_CA">Zertifizierungsstelle</sys:String>
     <sys:String x:Key="Str_CertCatalog_Leaf">Endentität</sys:String>
+    <sys:String x:Key="Str_Layout_TabsTop">Tabs oben</sys:String>
+    <sys:String x:Key="Str_Layout_TabsBottom">Tabs unten</sys:String>
+    <sys:String x:Key="Str_About_ShowShortcutsInMenus">Tastenkürzel in Menüs anzeigen</sys:String>
 </ResourceDictionary>

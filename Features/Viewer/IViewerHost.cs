@@ -166,6 +166,8 @@ namespace KillerPDF.Features
         void ClearRecentFiles(object sender, MouseButtonEventArgs e);
         void ViewerBackgroundRightClick(object sender, MouseButtonEventArgs e);
         void ViewerTabStripMouseDown(object sender, MouseButtonEventArgs e);
+        void NewDocumentTab(PdfViewer viewer);
+        void SetTabPlacement(bool bottom);
 
         bool IsViewerFocused(PdfViewer viewer);
         bool IsSplitView { get; }

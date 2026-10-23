@@ -1913,4 +1913,7 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_CertCatalog_Type">憑證類型</sys:String>
     <sys:String x:Key="Str_CertCatalog_CA">憑證授權單位</sys:String>
     <sys:String x:Key="Str_CertCatalog_Leaf">終端實體</sys:String>
+    <sys:String x:Key="Str_Layout_TabsTop">分頁置頂</sys:String>
+    <sys:String x:Key="Str_Layout_TabsBottom">分頁置底</sys:String>
+    <sys:String x:Key="Str_About_ShowShortcutsInMenus">在功能表中顯示快速鍵</sys:String>
 </ResourceDictionary>

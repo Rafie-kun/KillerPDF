@@ -1930,4 +1930,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_CertCatalog_Type">Certificate type</sys:String>
     <sys:String x:Key="Str_CertCatalog_CA">Certificate authority</sys:String>
     <sys:String x:Key="Str_CertCatalog_Leaf">End entity</sys:String>
+    <sys:String x:Key="Str_Layout_TabsTop">Tabs on top</sys:String>
+    <sys:String x:Key="Str_Layout_TabsBottom">Tabs on bottom</sys:String>
+    <sys:String x:Key="Str_About_ShowShortcutsInMenus">Show Shortcuts in Menus</sys:String>
 </ResourceDictionary>

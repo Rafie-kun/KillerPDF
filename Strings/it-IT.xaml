@@ -1931,4 +1931,7 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_CertCatalog_Type">Tipo di certificato</sys:String>
     <sys:String x:Key="Str_CertCatalog_CA">Autorità di certificazione</sys:String>
     <sys:String x:Key="Str_CertCatalog_Leaf">Entità finale</sys:String>
+    <sys:String x:Key="Str_Layout_TabsTop">Schede in alto</sys:String>
+    <sys:String x:Key="Str_Layout_TabsBottom">Schede in basso</sys:String>
+    <sys:String x:Key="Str_About_ShowShortcutsInMenus">Mostra le scorciatoie nei menu</sys:String>
 </ResourceDictionary>

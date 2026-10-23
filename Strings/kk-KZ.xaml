@@ -1934,4 +1934,7 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_CertCatalog_Type">Сертификат түрі</sys:String>
     <sys:String x:Key="Str_CertCatalog_CA">Куәландыру орталығы</sys:String>
     <sys:String x:Key="Str_CertCatalog_Leaf">Соңғы субъект</sys:String>
+    <sys:String x:Key="Str_Layout_TabsTop">Қойындылар жоғарыда</sys:String>
+    <sys:String x:Key="Str_Layout_TabsBottom">Қойындылар төменде</sys:String>
+    <sys:String x:Key="Str_About_ShowShortcutsInMenus">Мәзірлерде пернелер тіркесімін көрсету</sys:String>
 </ResourceDictionary>

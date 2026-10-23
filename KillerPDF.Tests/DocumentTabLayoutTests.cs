@@ -117,7 +117,7 @@ public sealed class DocumentTabLayoutTests
         XElement ghost = window.Descendants()
             .Single(element => (string?)element.Attribute(x + "Name") == "TabDragGhost");
 
-        Assert.Equal("{DynamicResource TabCornerRadius}", (string?)ghost.Attribute("CornerRadius"));
+        Assert.Equal("2,2,0,0", (string?)ghost.Attribute("CornerRadius"));
         Assert.Equal("{DynamicResource TabActiveBrush}", (string?)ghost.Attribute("Background"));
         Assert.Equal("{DynamicResource TabActivePadding}", (string?)ghost.Attribute("Padding"));
         Assert.Equal("{DynamicResource BarShadowEffect}", (string?)ghost.Attribute("Effect"));
@@ -156,9 +156,9 @@ public sealed class DocumentTabLayoutTests
             Assert.DoesNotContain(activeMutation, inactiveClose, StringComparison.Ordinal);
     }
 
-    private static string FindRepositoryRoot()
+    private static string FindRepositoryRoot([System.Runtime.CompilerServices.CallerFilePath] string source = "")
     {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        var directory = new DirectoryInfo(Path.GetDirectoryName(source)!);
         while (directory is not null)
         {
             if (File.Exists(Path.Combine(directory.FullName, "KillerPDF.csproj")))

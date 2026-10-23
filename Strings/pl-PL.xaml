@@ -1919,4 +1919,7 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_CertCatalog_Type">Typ certyfikatu</sys:String>
     <sys:String x:Key="Str_CertCatalog_CA">Urząd certyfikacji</sys:String>
     <sys:String x:Key="Str_CertCatalog_Leaf">Podmiot końcowy</sys:String>
+    <sys:String x:Key="Str_Layout_TabsTop">Karty u góry</sys:String>
+    <sys:String x:Key="Str_Layout_TabsBottom">Karty u dołu</sys:String>
+    <sys:String x:Key="Str_About_ShowShortcutsInMenus">Pokazuj skróty w menu</sys:String>
 </ResourceDictionary>

@@ -26,13 +26,13 @@ namespace KillerPDF.Tests
         private static readonly string StringsDir =
             Path.Combine(RepoRoot(), "Strings");
 
-        private static string RepoRoot()
+        private static string RepoRoot([System.Runtime.CompilerServices.CallerFilePath] string source = "")
         {
-            // Walk up from the test binary until the folder holding Strings\en-US.xaml appears.
-            var dir = new DirectoryInfo(AppContext.BaseDirectory);
+            // Source-based lookup also supports isolated build outputs outside the checkout.
+            var dir = new DirectoryInfo(Path.GetDirectoryName(source)!);
             while (dir != null && !File.Exists(Path.Combine(dir.FullName, "Strings", "en-US.xaml")))
                 dir = dir.Parent;
-            Assert.True(dir != null, "could not locate the repo root from the test output folder");
+            Assert.True(dir != null, "could not locate the repo root from the test source");
             return dir!.FullName;
         }
 

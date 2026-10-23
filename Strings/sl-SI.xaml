@@ -1818,4 +1818,7 @@
     <sys:String x:Key="Str_CertCatalog_Type">Vrsta potrdila</sys:String>
     <sys:String x:Key="Str_CertCatalog_CA">Overitelj potrdil</sys:String>
     <sys:String x:Key="Str_CertCatalog_Leaf">Končni subjekt</sys:String>
+    <sys:String x:Key="Str_Layout_TabsTop">Zavihki zgoraj</sys:String>
+    <sys:String x:Key="Str_Layout_TabsBottom">Zavihki spodaj</sys:String>
+    <sys:String x:Key="Str_About_ShowShortcutsInMenus">Prikaži bližnjice v menijih</sys:String>
 </ResourceDictionary>

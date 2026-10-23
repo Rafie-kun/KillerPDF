@@ -1931,4 +1931,7 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_CertCatalog_Type">Tipo de certificado</sys:String>
     <sys:String x:Key="Str_CertCatalog_CA">Autoridade de certificação</sys:String>
     <sys:String x:Key="Str_CertCatalog_Leaf">Entidade final</sys:String>
+    <sys:String x:Key="Str_Layout_TabsTop">Guias na parte superior</sys:String>
+    <sys:String x:Key="Str_Layout_TabsBottom">Guias na parte inferior</sys:String>
+    <sys:String x:Key="Str_About_ShowShortcutsInMenus">Mostrar atalhos nos menus</sys:String>
 </ResourceDictionary>

@@ -108,6 +108,14 @@ namespace KillerPDF
                 return;
             }
 
+            if (mods == (ModifierKeys.Alt | ModifierKeys.Shift)
+                && (key == Key.System ? systemKey : key) is Key.Up or Key.Down)
+            {
+                if (!e.IsRepeat) SetTabPlacement((key == Key.System ? systemKey : key) == Key.Down);
+                e.Handled = true;
+                return;
+            }
+
             if (TryRunExpandedShortcut(key == Key.System ? systemKey : key, mods, e.IsRepeat))
             {
                 e.Handled = true;

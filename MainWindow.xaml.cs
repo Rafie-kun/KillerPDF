@@ -338,6 +338,7 @@ namespace KillerPDF
             // Replaces the single `Viewer.Owner = this` - ViewerB exists from startup, collapsed,
             // so its bridge would NullReference the moment anything touched it otherwise.
             InitSplitPanes();
+            InitTabPlacement();
             WirePageListEdgeFades();   // sidebar page-list edge fades (SidebarLayout.cs)
             HookExternalLangReload();  // #211: --lang-file live reload rebuilds code-built captions
             _pageContentGrid  = ActiveViewer.PageGrid;

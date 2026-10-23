@@ -51,7 +51,7 @@ namespace KillerPDF.Controls
             // doesn't need tabs, split or not. (KillerShell forces the band on in both panes whenever
             // either one has 2+ tabs, so the two card tops always line up; the simpler per-pane
             // rule is used here instead, so a lone tab never shows a bar even while split.)
-            bool show = docTabs > 1;
+            bool show = docTabs > 1 && !_fullScreen;
             TabStripBorder.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
 
             // The -1 tucks the card's top border a pixel into the band, so the active tab and the card
@@ -115,7 +115,7 @@ namespace KillerPDF.Controls
             // accent stripe up the far right with nothing under it.
             bool chevron = TabOverflowBtn.Visibility == Visibility.Visible;
             bool hostFillsBand = TabStripHost != null &&
-                                 TabStripHost.Width >= Math.Max(0, TabStripBorder.ActualWidth - (chevron ? TabChevronWidth : 0)) - 0.5;
+                                 TabStripHost.Width >= Math.Max(0, TabStripBorder.ActualWidth - TabNewWidth - (chevron ? TabChevronWidth : 0)) - 0.5;
 
             var strip = _sessions.Where(t => t.IsStripVisible).ToList();
             foreach (var t in _sessions)
@@ -140,6 +140,7 @@ namespace KillerPDF.Controls
             }
 
             SyncPaneLeadingCorner();
+            ApplyTabPlacementChrome(show);
             UpdatePaneFocusRing();
             UpdateTabStripFade();
             Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded, (Action)UpdateRetroTabInnerJoin);
@@ -199,10 +200,12 @@ namespace KillerPDF.Controls
         /// tell two documents apart. Much below a hundred and the ellipsis starts eating the part that
         /// distinguishes them, which is the whole job.
         /// </remarks>
-        private const double TabFloorWidth = 120;
+        private const double TabFloorWidth = 160;
 
         /// <summary>Widest a tab may grow when only a few documents are open.</summary>
-        private const double TabCeilingWidth = 240;
+        private const double TabCeilingWidth = 260;
+
+        private const double TabNewWidth = 26;
 
         /// <summary>What the chevron takes out of the band while it is showing.</summary>
         private const double TabChevronWidth = 26;
@@ -241,6 +244,7 @@ namespace KillerPDF.Controls
             // answer sane instead of capping the strip at one tab and having to be undone by the
             // SizeChanged that follows.
             double avail = TabStripBorder.ActualWidth > 0 ? TabStripBorder.ActualWidth : ActualWidth;
+            avail = Math.Max(0, avail - TabNewWidth);
 
             // Two passes, because the chevron's width changes the answer that decides whether there is
             // a chevron. Asked without it first: if everything fits there is none, and the whole band
@@ -328,7 +332,8 @@ namespace KillerPDF.Controls
                 menu.Items.Add(item);
             }
             menu.PlacementTarget = TabOverflowBtn;
-            menu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+            menu.Placement = TabsAtBottom ? System.Windows.Controls.Primitives.PlacementMode.Top
+                : System.Windows.Controls.Primitives.PlacementMode.Bottom;
             menu.IsOpen = true;
         }
 
@@ -361,7 +366,9 @@ namespace KillerPDF.Controls
             bool firstActive = strip && _active?.IsFirst == true;
             bool lastActive  = strip && _active?.IsLast  == true;
 
-            var cr = new CornerRadius(firstActive ? 0 : r, lastActive ? 0 : r, r, r);
+            var cr = TabsAtBottom
+                ? new CornerRadius(r, r, lastActive ? 0 : r, firstActive ? 0 : r)
+                : new CornerRadius(firstActive ? 0 : r, lastActive ? 0 : r, r, r);
             PaneBorder.CornerRadius = cr;
             PaneShadow?.CornerRadius = cr;
         }
@@ -436,6 +443,7 @@ namespace KillerPDF.Controls
             var newWindow = MakeMenuItem(Loc("Str_Ctx_MoveToNewWindow"), (_, _) => Host?.TearOutTab(this, s), GestureFor("CtrlShift:N"), "\uE8A7");
             newWindow.IsEnabled = s.Doc != null || s.DeferredPath != null;
             menu.Items.Add(newWindow);
+            AddTabPlacementMenuItems(menu);
             menu.PlacementTarget = fe;
             menu.IsOpen = true;
             e.Handled = true;

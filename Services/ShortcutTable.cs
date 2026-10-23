@@ -245,6 +245,8 @@ namespace KillerPDF
             B("%shift%+F9",    "Str_KS_SidebarSide", "Nav", Cap("Shift:F9")),
             B("%ctrl%+%tab%",  "Str_KS_NextTab",     "Nav", Cap("Ctrl:Tab")),
             B("%ctrl%+%shift%+%tab%", "Str_KS_PrevTab", "Nav", Cap("CtrlShift:Tab")),
+            B("%alt%+%shift%+Up", "Str_Layout_TabsTop", "View", Cap("AltShift:Up")),
+            B("%alt%+%shift%+Down", "Str_Layout_TabsBottom", "View", Cap("AltShift:Down")),
             B("%ctrl%+%shift%+N", "Str_Ctx_MoveToNewWindow", "Nav", Cap("CtrlShift:N")),
 
             B("F5",            "Str_View_Continuous", "View", Cap("F5")),

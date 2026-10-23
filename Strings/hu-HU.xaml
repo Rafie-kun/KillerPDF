@@ -1918,4 +1918,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_CertCatalog_Type">Tanúsítvány típusa</sys:String>
     <sys:String x:Key="Str_CertCatalog_CA">Hitelesítésszolgáltató</sys:String>
     <sys:String x:Key="Str_CertCatalog_Leaf">Végentitás</sys:String>
+    <sys:String x:Key="Str_Layout_TabsTop">Lapok felül</sys:String>
+    <sys:String x:Key="Str_Layout_TabsBottom">Lapok alul</sys:String>
+    <sys:String x:Key="Str_About_ShowShortcutsInMenus">Billentyűparancsok megjelenítése a menükben</sys:String>
 </ResourceDictionary>

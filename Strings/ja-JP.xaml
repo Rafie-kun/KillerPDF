@@ -1931,4 +1931,7 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_CertCatalog_Type">証明書の種類</sys:String>
     <sys:String x:Key="Str_CertCatalog_CA">認証局</sys:String>
     <sys:String x:Key="Str_CertCatalog_Leaf">エンドエンティティ</sys:String>
+    <sys:String x:Key="Str_Layout_TabsTop">タブを上に表示</sys:String>
+    <sys:String x:Key="Str_Layout_TabsBottom">タブを下に表示</sys:String>
+    <sys:String x:Key="Str_About_ShowShortcutsInMenus">メニューにショートカットを表示</sys:String>
 </ResourceDictionary>

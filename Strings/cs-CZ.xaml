@@ -1916,4 +1916,7 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_CertCatalog_Type">Typ certifikátu</sys:String>
     <sys:String x:Key="Str_CertCatalog_CA">Certifikační autorita</sys:String>
     <sys:String x:Key="Str_CertCatalog_Leaf">Koncová entita</sys:String>
+    <sys:String x:Key="Str_Layout_TabsTop">Karty nahoře</sys:String>
+    <sys:String x:Key="Str_Layout_TabsBottom">Karty dole</sys:String>
+    <sys:String x:Key="Str_About_ShowShortcutsInMenus">Zobrazovat zkratky v nabídkách</sys:String>
 </ResourceDictionary>

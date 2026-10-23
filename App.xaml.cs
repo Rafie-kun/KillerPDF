@@ -76,6 +76,7 @@ namespace KillerPDF
         {
             KillerFamily.Accessibility.AccessibleControls.Initialize();
             KillerFamily.Theming.AccentShadow.Initialize();
+            KillerFamily.Layout.ShortcutHints.Initialize(GetSetting, SetSetting);
             if (IsStartupSmoke)
             {
                 RunStartupSmoke(e);

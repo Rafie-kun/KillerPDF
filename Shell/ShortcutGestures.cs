@@ -113,6 +113,8 @@ namespace KillerPDF
             }
 
             Tip(NewBlankBtn, "Str_TT_NewBlank", "Ctrl:N");
+            Tip(Viewer.NewTabButtonCtl, "Str_TT_NewBlank", "Ctrl:N");
+            Tip(ViewerB.NewTabButtonCtl, "Str_TT_NewBlank", "Ctrl:N");
             Tip(CloseFileBtn, "Str_TT_CloseFile", "Ctrl:W");
             Tip(OpenFileBtn, "Str_TT_Open", "Ctrl:O");
             Tip(SaveAsBtn, "Str_TT_Save", "Ctrl:S");

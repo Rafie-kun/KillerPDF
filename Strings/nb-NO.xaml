@@ -1931,4 +1931,7 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_CertCatalog_Type">Sertifikattype</sys:String>
     <sys:String x:Key="Str_CertCatalog_CA">Sertifiseringsinstans</sys:String>
     <sys:String x:Key="Str_CertCatalog_Leaf">Sluttenhet</sys:String>
+    <sys:String x:Key="Str_Layout_TabsTop">Faner øverst</sys:String>
+    <sys:String x:Key="Str_Layout_TabsBottom">Faner nederst</sys:String>
+    <sys:String x:Key="Str_About_ShowShortcutsInMenus">Vis hurtigtaster i menyer</sys:String>
 </ResourceDictionary>
