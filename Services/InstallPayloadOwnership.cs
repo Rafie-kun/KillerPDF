@@ -83,9 +83,19 @@ internal static class InstallPayloadOwnership
         // Batch files require doubled percent signs; delayed expansion must stay disabled
         // through every deletion, including the caller's final self-delete command.
         var batch = new System.Text.StringBuilder("setlocal DisableDelayedExpansion\r\n");
+        // A process that is still closing can hold the files for a moment, so the pass repeats
+        // until the folder is gone, for about thirty seconds at most. One statement per line keeps
+        // the counter expanding as it changes without delayed expansion.
+        batch.Append("set /a killerpdf_attempts=0\r\n:killerpdf_remove\r\n");
         foreach (string file in owned.Files) batch.Append("del /q \"").Append(Literal(file)).Append("\"\r\n");
         foreach (string directory in owned.Directories) batch.Append("rmdir \"").Append(Literal(directory)).Append("\"\r\n");
         batch.Append("rmdir \"").Append(Literal(owned.Root)).Append("\"\r\n");
+        batch.Append("if not exist \"").Append(Literal(owned.Root)).Append("\" goto killerpdf_removed\r\n")
+            .Append("set /a killerpdf_attempts+=1\r\n")
+            .Append("if %killerpdf_attempts% geq 30 goto killerpdf_removed\r\n")
+            .Append("ping -n 2 127.0.0.1 >nul\r\n")
+            .Append("goto killerpdf_remove\r\n")
+            .Append(":killerpdf_removed\r\n");
         return batch.ToString();
 
         static string Literal(string path) => path.Replace("%", "%%", StringComparison.Ordinal);

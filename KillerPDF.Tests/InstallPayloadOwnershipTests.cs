@@ -137,7 +137,10 @@ public sealed class InstallPayloadOwnershipTests
                     probe.Append("echo(").AppendLine(line["rmdir ".Length..]);
                 else
                 {
-                    Assert.Equal("setlocal DisableDelayedExpansion", line);
+                    Assert.True(line == "setlocal DisableDelayedExpansion" || line.StartsWith("set /a killerpdf_", StringComparison.Ordinal)
+                        || line.StartsWith(":killerpdf_", StringComparison.Ordinal) || line.StartsWith("if ", StringComparison.Ordinal)
+                        || line.StartsWith("ping ", StringComparison.Ordinal) || line.StartsWith("goto killerpdf_", StringComparison.Ordinal),
+                        "Unexpected removal line: " + line);
                     probe.AppendLine(line);
                 }
             }
@@ -164,6 +167,39 @@ public sealed class InstallPayloadOwnershipTests
             Assert.Equal(string.Empty, await error);
             Assert.Equal([$"\"{file}\"", $"\"{directory}\"", $"\"{root}\""],
                 (await output).Split(["\r\n", "\n"], StringSplitOptions.RemoveEmptyEntries));
+        }
+        finally { Directory.Delete(temporary, true); }
+    }
+
+    // The uninstaller's own copy can still be closing when the removal runs. A single pass used to
+    // leave its files behind; the pass now repeats until the folder is gone.
+    [Fact]
+    public async Task RemovalBatch_RetriesUntilALockedFileIsReleased()
+    {
+        string temporary = NewTemporaryDirectory();
+        try
+        {
+            string root = Path.Combine(temporary, "KillerPDF");
+            Directory.CreateDirectory(root);
+            string exe = Path.Combine(root, "KillerPDF.exe");
+            File.WriteAllText(exe, "exe");
+            string script = Path.Combine(temporary, "remove.cmd");
+            File.WriteAllText(script, "@echo off\r\n" + InstallPayloadOwnership.RemovalBatch(
+                new InstallPayloadOwnership.OwnedPayload(root, [exe], [])), System.Text.Encoding.ASCII);
+            var locked = new FileStream(exe, FileMode.Open, FileAccess.Read, FileShare.None);
+            using Process process = Process.Start(new ProcessStartInfo(Path.Combine(Environment.SystemDirectory, "cmd.exe"))
+            {
+                Arguments = "/d /c \"\"" + script + "\"\"",
+                UseShellExecute = false,
+                CreateNoWindow = true
+            })!;
+            await Task.Delay(TimeSpan.FromSeconds(2));
+            locked.Dispose();
+            using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+            try { await process.WaitForExitAsync(timeout.Token); }
+            finally { if (!process.HasExited) process.Kill(entireProcessTree: true); }
+
+            Assert.False(Directory.Exists(root), "The removal gave up while the file was briefly locked.");
         }
         finally { Directory.Delete(temporary, true); }
     }
