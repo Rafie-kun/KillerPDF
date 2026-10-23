@@ -31,6 +31,29 @@ public sealed class PdfDetachedSignatureWriterTests
             field => field.FieldName == "Signature1.child" && field.Value == "Keep this value");
     }
 
+    // A prepared, empty signature field under any name is signed before a new field is added; a
+    // certified document can only be signed that way.
+    [Fact]
+    public void AvailableFieldNamePrefersAPreparedUnsignedSignatureField()
+    {
+        byte[] prepared = new PdfDocumentBuilder().AddBlankPage()
+            .AddTextField(0, "Name", 20, 80, 100, 20, "Steve")
+            .AddSignatureField(0, "approval", 20, 20, 160, 40)
+            .Build();
+        Assert.Equal("approval", PdfDetachedSignatureWriter.FindAvailableSignatureFieldName(PdfDocument.Open(prepared)));
+
+        PdfDocument certified = PdfDocument.Open(AddCertificationPermission(prepared, 2));
+        string fieldName = PdfDetachedSignatureWriter.FindAvailableSignatureFieldName(certified);
+        PdfDocument signed = PdfDocument.Open(PdfDetachedSignatureWriter.Sign(certified, _ => [1],
+            new PdfSignatureOptions { FieldName = fieldName, ReservedSignatureSize = 8 }));
+        Assert.Equal("approval", Assert.Single(PdfSignatureReader.Read(signed)).FieldName);
+
+        // Once it is signed, the next signature gets a new numbered field.
+        byte[] uncertified = PdfDetachedSignatureWriter.Sign(PdfDocument.Open(prepared), _ => [1],
+            new PdfSignatureOptions { FieldName = "approval", ReservedSignatureSize = 8 });
+        Assert.Equal("Signature1", PdfDetachedSignatureWriter.FindAvailableSignatureFieldName(PdfDocument.Open(uncertified)));
+    }
+
     [Fact]
     public void Sign_WritesEditableVisibleAppearanceForNewField()
     {

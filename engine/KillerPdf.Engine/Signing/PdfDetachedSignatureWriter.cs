@@ -34,18 +34,29 @@ public static class PdfDetachedSignatureWriter
     private const int MaximumReservedSignatureSize = 1_048_576;
 
     /// <summary>
-    /// Selects the default unsigned signature field, or an unused numbered name for a new field.
-    /// Signing still enforces certification, field locks, and seed-value restrictions.
+    /// Selects the default unsigned signature field, then any other prepared unsigned signature
+    /// field in form order, or else an unused numbered name for a new field. Signing still enforces
+    /// certification, field locks, and seed-value restrictions.
     /// </summary>
     public static string FindAvailableSignatureFieldName(PdfDocument document)
     {
         ArgumentNullException.ThrowIfNull(document);
         var names = new HashSet<string>(StringComparer.Ordinal);
-        ExistingFormField? first = FindField(document, PdfPageTree.Read(document), "Signature1", names);
-        if (first is not null && first.FieldType.Equals(Name("Sig"))
-            && (!first.Dictionary.TryGetValue(Name("V"), out PdfObject? value)
-                || IsUnsignedValue(Resolve(document, value, "The default signature field /V value"))))
-            return "Signature1";
+        var order = new List<string>();
+        PdfPageTree tree = PdfPageTree.Read(document);
+        ExistingFormField? first = FindField(document, tree, "Signature1", names, order);
+        if (first is not null && IsPreparedSignatureField(document, first)) return "Signature1";
+
+        // A field the document prepared for signing, such as an approval field, is signed before a
+        // new one is added; a certified document accepts no new fields at all.
+        foreach (string name in order)
+        {
+            if (name == "Signature1") continue;
+            ExistingFormField? field;
+            try { field = FindField(document, tree, name); }
+            catch (InvalidOperationException) { continue; }
+            if (field is not null && IsPreparedSignatureField(document, field)) return name;
+        }
 
         for (int index = 1; ; index++)
         {
@@ -385,8 +396,26 @@ public static class PdfDetachedSignatureWriter
         }
     }
 
+    // An unsigned, writable signature field that holds no named child fields of its own.
+    private static bool IsPreparedSignatureField(PdfDocument document, ExistingFormField field)
+    {
+        if (!field.FieldType.Equals(Name("Sig"))) return false;
+        if (field.Dictionary.TryGetValue(Name("V"), out PdfObject? value)
+            && !IsUnsignedValue(Resolve(document, value, "A signature field /V value")))
+            return false;
+        if (field.Dictionary.TryGetValue(Name("Ff"), out PdfObject? flags)
+            && Resolve(document, flags) is PdfInteger { Value: var bits } && (bits & 1) != 0)
+            return false;
+        if (field.Dictionary.TryGetValue(KidsName, out PdfObject? kidsValue)
+            && Resolve(document, kidsValue) is PdfArray kids
+            && kids.Any(kid => Resolve(document, kid) is PdfDictionary child && child.ContainsKey(FieldNameName)))
+            return false;
+        return true;
+    }
+
     private static ExistingFormField? FindField(
-        PdfDocument document, PdfPageTree tree, string fieldName, ISet<string>? fieldNames = null)
+        PdfDocument document, PdfPageTree tree, string fieldName, ISet<string>? fieldNames = null,
+        List<string>? orderedNames = null)
     {
         if (!tree.Catalog.TryGetValue(AcroFormName, out PdfObject? formValue)) return null;
         PdfDictionary form = ResolveDictionary(document, formValue, "The catalog /AcroForm value");
@@ -435,7 +464,8 @@ public static class PdfDetachedSignatureWriter
                 fullName = string.IsNullOrEmpty(parentName)
                     ? partialName : $"{parentName}.{partialName}";
             }
-            if (definesName && fullName is not null) fieldNames?.Add(fullName);
+            if (definesName && fullName is not null && fieldNames?.Add(fullName) == true)
+                orderedNames?.Add(fullName);
             if (definesName && fullName == fieldName
                 && (fieldNames is null || fieldType is not null))
             {
