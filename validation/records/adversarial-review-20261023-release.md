@@ -1,14 +1,15 @@
 # KillerPDF 1.9 adversarial release review, October 23, 2026
 
-This continues the chained 1.9 release review. [The October 21 review](adversarial-review-20261021-release.md) covered `4df9b86..e0b9c6e`. This record covers everything after it in two rounds, plus the fixes they produced. Each round ran the three isolated stages from the harness contract (bug-finder, defender, referee). The defender received only the bug-finder's structured report, and the referee only the two reports, checking evidence against the pinned head with `git show`. All stages were read-only: no builds, test runs or app launches.
+This continues the chained 1.9 release review. [The October 21 review](adversarial-review-20261021-release.md) covered `4df9b86..e0b9c6e`. This record covers everything after it in four rounds, plus the fixes they produced. Each round ran the three isolated stages from the harness contract (bug-finder, defender, referee). The defender received only the bug-finder's structured report, and the referee only the two reports, checking evidence against the pinned head with `git show`. All stages were read-only: no builds, test runs or app launches.
 
 | Round | Range | Reviewed head | Findings | Valid | Invalid | Needs investigation |
 | --- | --- | --- | ---: | ---: | ---: | ---: |
 | A: 1.9 delta | `e0b9c6e..f8cd0ba` (29 commits, 136 files) | `f8cd0bac61902f66d3f0bfe8db981420b39fe832` | 21 | 19 | 2 | 0 |
 | B: #435 and CLI crash fixes | `f8cd0ba..cb4276a` | `cb4276a` | 8 | 8 | 0 | 0 |
 | C: repairs from A and B | `cb4276a..5250c80` plus `40bd135` | `5250c80`, `40bd135` | 14 | 13 | 1 | 0 |
+| D: repairs from C | `40bd135..7e84b84` | `7e84b84` | 13 | 13 | 0 | 0 |
 
-Two invalid items came from round A. BF-005 is an accurate description of a deliberate, documented trade-off. BF-019 claimed state was never read, but a UI smoke test reads it. In round C, RF-006 was invalid: the comb-overflow message never decides a page's outcome, because every path that emits it also emits a blocking message. Referee health scores: 5 for round A, 6 for round B, 6 for round C.
+Two invalid items came from round A. BF-005 is an accurate description of a deliberate, documented trade-off. BF-019 claimed state was never read, but a UI smoke test reads it. In round C, RF-006 was invalid: the comb-overflow message never decides a page's outcome, because every path that emits it also emits a blocking message. Round D had no invalid items. Referee health scores: 5 for round A, 6 for round B, 6 for round C, 5 for round D.
 
 ## Round A: valid findings and repairs
 
@@ -67,6 +68,26 @@ Two invalid items came from round A. BF-005 is an accurate description of a deli
 
 Also from this round's runs: a load-sensitive cancellation test now has enough work to stay mid-render (8258c28).
 
+## Round D: valid findings and repairs
+
+Round D reviewed the round C repairs. The referee lowered SF-003 from high to medium, because the dispatcher shows a recoverable crash dialog and the temp folder must fail twice. It lowered SF-005 from medium to low. SF-005 and SF-007 predate the 1.9 range; the rest were introduced by round C repairs.
+
+| Item | Severity | Finding | Repair |
+| --- | --- | --- | --- |
+| SF-001 | high | The new incomplete counter split the status chain, so every complete `batch-render` page also counted as failed and a clean run exited 1. | 808e13a: one tally counts OK, skipped, failed and incomplete pages, with behavioral tests. A window-free `batch-render` of two pages exited 1 before the fix and 0 after it. |
+| SF-002 | medium | A page whose PNG could not be written counted as a kept incomplete page, so a run could exit 0 with a missing image. | 808e13a: a failed write counts as failed and the console says FAIL. |
+| SF-003 | medium | Unlocking an owner-restricted PDF with a full temp folder failed again while putting the read-only original back, and that error escaped as a crash. | 7d7e321: the reopen reports the working-copy problem, and restoring the original handles the same failure. |
+| SF-004 | low | A working-copy catch around removing the encryption could never run. | 7d7e321: removed; the source test now counts reachable sites. |
+| SF-005 | low | With no recovery folder anywhere, the lost documents were named only by a manifest written beside the folder that had just refused one. | 4265a73: their names also go to the restarted process on its command line, and a manifest that cannot be written still points at the retained session folder. |
+| SF-006 | low | An untitled lost document was listed by a placeholder file that was never written, and the restart asked to review recovered copies that did not exist. | 4265a73: lost documents are named by file, suggested name or as untitled. A restart that reopened nothing drops the review sentence, in 20 locales. |
+| SF-007 | medium | Uninstall wrote its removal script as UTF-8, which cmd.exe reads in the OEM code page, so a profile folder with accented or non-Latin letters kept the whole payload. | 1215b93: the script switches its hidden console to UTF-8 first, tested with a non-ASCII folder. Changelog updated. |
+| SF-008 | low | The removal retried for about thirty seconds whenever the folder kept a user file. | 1215b93: it stops once every owned file is gone. |
+| SF-009 | low | The app's own silent and direct installs have no rollback, so writing the version last left a new copy named as the old version after a failed registration. | cf63046: those paths record the version first; the launcher, which rolls back, still writes it last. |
+| SF-010 | low | A legacy encrypted OpenSSL key beside a certificate was skipped as outside text, so the file imported without the private-key warning. | c3cdd34: any private key block rejects the file. |
+| SF-011 | low | The co-sign fallback retried failures that happened after signing, asking the signer to sign twice, and hid the first reason. | 9a33293, ed99651: the fallback runs only when nothing was signed, and the prepared field's reason is reported when the new field also fails. |
+| SF-012 | low | A stale comment described a removed overload. | 91fd9cc: removed. |
+| SF-013 | low | Typing a page range announced each intermediate print warning to screen readers. | 6857f93: the announcement waits until typing pauses. |
+
 ## Related work in the same range
 
 - Render completeness: page-list thumbnails no longer go blank for pages that render with warnings (e149280). Twenty-two engine render warnings were reviewed as spec fallbacks or extraction-only, so they no longer block publication ([render diagnostics review](render-diagnostics-review-20261023.md); ad2f9ba, 0c4b63b, 9b919cd).
@@ -91,6 +112,8 @@ Still open:
 
 At `7e84b84`: the window-free app suite passed (1,245 tests). The engine suite passed (6,802 tests), and the app and launcher Release builds have zero errors. The launcher localization check passed for 20 languages. Load-sensitive timestamp and cancellation tests were fixed in this range (5250c80, 8258c28).
 
+At `4265a73`, after round D: the window-free app suite passed (1,256 tests) and the engine suite passed (6,802 tests). The app, launcher and UI smoke Release builds have zero errors; the UI smoke project was compiled, not run. The launcher localization check passed for 20 languages. The uninstall removal tests run the real script through a windowless cmd.exe against a non-ASCII folder and a folder holding a user file. A window-free `batch-render` run confirmed SF-001 before the fix and its repair after it.
+
 Not run, because they open windows: the UI smoke suites (including the render recovery, toolbar and certificate catalog smokes edited here), TabPlacementTests, DocumentTabLayoutTests, ComparisonBarLayoutTests and WindowFxTests. The following are verified by source-boundary tests only and still need a hands-on or VM check:
 
 - the print preview warning and its screen-reader announcement
@@ -98,4 +121,6 @@ Not run, because they open windows: the UI smoke suites (including the render re
 - the certificate dialog
 - the setup wizard's desktop shortcut warning
 - installer registration order
-- render recovery
+- render recovery, including the restart with no recovery folder
+- unlocking an owner-restricted PDF with a full temp folder
+- uninstalling a real install from a profile folder with a non-ASCII name
