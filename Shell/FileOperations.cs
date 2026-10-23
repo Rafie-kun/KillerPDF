@@ -580,10 +580,6 @@ namespace KillerPDF
             {
                 PdfEngineIntegration.RemoveEncryption(sourcePath, unlockedPath, password);
             }
-            catch (WorkingCopyUnavailableException copy)
-            {
-                ShowWorkingCopyProblem(copy);
-            }
             catch (Exception error) when (error is not OutOfMemoryException)
             {
                 KillerDialog.Show(this, Loc("Str_Restricted_WrongPassword"), "KillerPDF",
@@ -622,15 +618,37 @@ namespace KillerPDF
                 SetStatus(string.Format(Loc("Str_Restricted_Unlocked"), System.IO.Path.GetFileName(displayPath)));
                 return true;
             }
-            catch (Exception error) when (error is not OutOfMemoryException)
+            catch (WorkingCopyUnavailableException copy)
             {
-                KillerDialog.Show(this, string.Format(Loc("Str_Dlg_FailedOpen"), error.Message),
-                    Loc("Str_Dlg_AppTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
-                // Put the read-only original back so the tab is not left empty.
-                TryOpenProtectedReadOnly(sourcePath, displayPath);
-                FinalizeAsyncOpen();
+                ShowWorkingCopyProblem(copy);
+                RestoreReadOnlyOriginal(sourcePath, displayPath);
                 return false;
             }
+            catch (Exception error) when (error is not OutOfMemoryException)
+            {
+                _doc?.Close();
+                _doc = null;
+                KillerDialog.Show(this, string.Format(Loc("Str_Dlg_FailedOpen"), error.Message),
+                    Loc("Str_Dlg_AppTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
+                RestoreReadOnlyOriginal(sourcePath, displayPath);
+                return false;
+            }
+        }
+
+        // Puts the read-only original back after a failed unlock so the tab is not left empty. When
+        // there is still no room for a working copy the tab stays empty; that was just reported.
+        private void RestoreReadOnlyOriginal(string sourcePath, string displayPath)
+        {
+            try
+            {
+                TryOpenProtectedReadOnly(sourcePath, displayPath);
+            }
+            catch (WorkingCopyUnavailableException)
+            {
+                _doc?.Close();
+                _doc = null;
+            }
+            FinalizeAsyncOpen();
         }
 
         // Finalizes a background open (encryption strip / repair) once the document is loaded on the UI

@@ -15,11 +15,43 @@ public sealed class PdfWorkingDocumentTests
     [Fact]
     public void EveryOpenPathReportsAWorkingCopyFailureAsSuch()
     {
-        string source = File.ReadAllText(Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(SourcePath()))!,
-            "Shell", "FileOperations.cs"));
-        Assert.Equal(8, source.Split("catch (WorkingCopyUnavailableException").Length - 1);
+        string source = FileOperations();
+        Assert.Equal(9, Count(source, "catch (WorkingCopyUnavailableException"));
         Assert.Contains("when (error is not OutOfMemoryException and not WorkingCopyUnavailableException)", source);
     }
+
+    // Unlocking an owner-restricted PDF reopens it. With no room for a working copy, putting the
+    // read-only original back fails the same way, and that must not escape the failed unlock's
+    // catch as an unhandled exception.
+    [Fact]
+    public void FailedUnlockReportsTheWorkingCopyAndPutsTheOriginalBackSafely()
+    {
+        string source = FileOperations();
+        string unlock = Method(source, "private bool UnlockOwnerRestrictions()");
+        Assert.DoesNotContain("TryOpenProtectedReadOnly(", unlock);
+        Assert.Equal(2, Count(unlock, "RestoreReadOnlyOriginal(sourcePath, displayPath);"));
+        // Only the reopen writes a working copy; removing the encryption never does.
+        Assert.Equal(1, Count(unlock, "catch (WorkingCopyUnavailableException"));
+        string reopen = unlock[unlock.IndexOf("FinishOpenFile(displayPath, unlockedPath);", StringComparison.Ordinal)..];
+        Assert.Contains("catch (WorkingCopyUnavailableException copy)", reopen);
+
+        string restore = Method(source, "private void RestoreReadOnlyOriginal(");
+        Assert.Contains("TryOpenProtectedReadOnly(sourcePath, displayPath);", restore);
+        Assert.Contains("catch (WorkingCopyUnavailableException)", restore);
+    }
+
+    private static string FileOperations() => File.ReadAllText(Path.Combine(
+        Path.GetDirectoryName(Path.GetDirectoryName(SourcePath()))!, "Shell", "FileOperations.cs"));
+
+    private static string Method(string source, string signature)
+    {
+        int start = source.IndexOf(signature, StringComparison.Ordinal);
+        Assert.True(start >= 0, signature + " was not found.");
+        string rest = source[start..];
+        return rest[..System.Text.RegularExpressions.Regex.Match(rest, @"\r?\n        \}\r?\n").Index];
+    }
+
+    private static int Count(string source, string value) => source.Split(value).Length - 1;
 
     private static string SourcePath([System.Runtime.CompilerServices.CallerFilePath] string path = "") => path;
 
