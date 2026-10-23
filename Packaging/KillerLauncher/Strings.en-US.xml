@@ -44,6 +44,8 @@
   <string key="InstallingCopy">Almost there. We're putting everything in place...</string>
   <string key="SetupReturned">Setup returned {0}.</string>
   <string key="InstallFailed">Installation failed</string>
+  <string key="ShortcutSkipped">Desktop shortcut not created</string>
+  <string key="ShortcutSkippedCopy">KillerPDF is installed and ready. Windows did not allow the desktop shortcut, which can happen when Controlled folder access protects the desktop. Open KillerPDF from the Start menu.</string>
   <string key="ChooseFolder">Choose where KillerPDF will be installed</string>
   <string key="PortablePackage">This is the portable package. Use KillerPDF Setup to install the application.</string>
   <string key="StartFailed">KillerPDF could not start.\n\n{0}</string>

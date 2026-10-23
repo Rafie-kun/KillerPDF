@@ -44,6 +44,8 @@
   <string key="InstallingCopy">Quasi fatto. Preparazione...</string>
   <string key="SetupReturned">Il programma di installazione ha restituito {0}.</string>
   <string key="InstallFailed">Installazione non riuscita</string>
+  <string key="ShortcutSkipped">Collegamento sul desktop non creato</string>
+  <string key="ShortcutSkippedCopy">KillerPDF è installato e pronto. Windows non ha consentito il collegamento sul desktop, cosa che può succedere quando l'accesso alle cartelle controllato protegge il desktop. Apri KillerPDF dal menu Start.</string>
   <string key="ChooseFolder">Scegli dove installare KillerPDF</string>
   <string key="PortablePackage">Questo è il pacchetto portatile. Per installare l'applicazione usa il programma di installazione di KillerPDF.</string>
   <string key="StartFailed">Impossibile avviare KillerPDF.\n\n{0}</string>

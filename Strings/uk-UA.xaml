@@ -1589,6 +1589,7 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Dlg_InstallDowngrade" xml:space="preserve">Ви збираєтеся встановити старішу версію ({0}) поверх установленої версії ({1}).&#10;&#10;Усе одно повернутися до старішої версії?</sys:String>
     <sys:String x:Key="Str_Dlg_InstallWriteFailed" xml:space="preserve">Не вдалося записати встановлену копію в:&#10;{0}&#10;&#10;Закрийте всі відкриті вікна KillerPDF (і перевірте KillerPDF.exe у диспетчері завдань), а потім знову запустіть інсталятор.</sys:String>
     <sys:String x:Key="Str_Dlg_InstallFailed" xml:space="preserve">Помилка встановлення:&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallNoDesktopShortcut" xml:space="preserve">KillerPDF встановлено, але Windows не дозволила ярлик на робочому столі:&#10;{0}&#10;&#10;Відкрийте KillerPDF з меню «Пуск».</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">Не вдалося запитати права адміністратора для видалення:&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallConfirm">Видалити KillerPDF із цього комп'ютера?</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF усе ще працює.&#10;Закрийте його та спробуйте видалити знову.</sys:String>

@@ -44,6 +44,8 @@
   <string key="InstallingCopy">Presque terminé. Nous mettons tout en place...</string>
   <string key="SetupReturned">Le programme d'installation a renvoyé {0}.</string>
   <string key="InstallFailed">Échec de l'installation</string>
+  <string key="ShortcutSkipped">Raccourci du Bureau non créé</string>
+  <string key="ShortcutSkippedCopy">KillerPDF est installé et prêt. Windows n'a pas autorisé le raccourci sur le Bureau, ce qui peut arriver quand l'accès contrôlé aux dossiers protège le Bureau. Ouvrez KillerPDF depuis le menu Démarrer.</string>
   <string key="ChooseFolder">Choisissez où installer KillerPDF</string>
   <string key="PortablePackage">Ceci est le paquet portable. Utilisez le programme d'installation de KillerPDF pour installer l'application.</string>
   <string key="StartFailed">KillerPDF n'a pas pu démarrer.\n\n{0}</string>

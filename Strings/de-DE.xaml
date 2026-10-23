@@ -1578,6 +1578,7 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Dlg_InstallDowngrade" xml:space="preserve">Sie installieren gerade eine ältere Version ({0}) über die installierte Version ({1}).&#10;&#10;Trotzdem zur älteren Version wechseln?</sys:String>
     <sys:String x:Key="Str_Dlg_InstallWriteFailed" xml:space="preserve">Die installierte Kopie konnte nicht geschrieben werden:&#10;{0}&#10;&#10;Schließen Sie alle geöffneten KillerPDF-Fenster (und prüfen Sie im Task-Manager, ob KillerPDF.exe noch läuft) und starten Sie die Installation erneut.</sys:String>
     <sys:String x:Key="Str_Dlg_InstallFailed" xml:space="preserve">Installation fehlgeschlagen:&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallNoDesktopShortcut" xml:space="preserve">KillerPDF ist installiert, aber Windows hat die Desktopverknüpfung nicht zugelassen:&#10;{0}&#10;&#10;Öffnen Sie KillerPDF über das Startmenü.</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">Für die Deinstallation konnten keine Administratorrechte angefordert werden:&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallConfirm">KillerPDF von diesem Computer deinstallieren?</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF läuft noch.&#10;Schließen Sie es und versuchen Sie die Deinstallation erneut.</sys:String>

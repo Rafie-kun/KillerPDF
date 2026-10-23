@@ -1576,6 +1576,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Dlg_InstallDowngrade" xml:space="preserve">Egy régebbi verziót ({0}) készül telepíteni a jelenleg telepített verzió ({1}) helyére.&#10;&#10;Mégis visszaáll a régebbi verzióra?</sys:String>
     <sys:String x:Key="Str_Dlg_InstallWriteFailed" xml:space="preserve">Nem sikerült írni a telepített példányt ide:&#10;{0}&#10;&#10;Zárja be a megnyitott KillerPDF-ablakokat (és ellenőrizze a KillerPDF.exe folyamatot a Feladatkezelőben), majd futtassa újra a telepítőt.</sys:String>
     <sys:String x:Key="Str_Dlg_InstallFailed" xml:space="preserve">A telepítés sikertelen:&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallNoDesktopShortcut" xml:space="preserve">A KillerPDF telepítve van, de a Windows nem engedélyezte az asztali parancsikont:&#10;{0}&#10;&#10;Nyissa meg a KillerPDF-et a Start menüből.</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">Az eltávolítás nem tudott rendszergazdai hozzáférést kérni:&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallConfirm">Eltávolítja a KillerPDF-et erről a számítógépről?</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">A KillerPDF még fut.&#10;Zárja be, majd próbálja újra az eltávolítást.</sys:String>

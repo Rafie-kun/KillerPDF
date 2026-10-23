@@ -44,6 +44,8 @@
   <string key="InstallingCopy">Аяқталуға жақын. Барлығын дайындап жатырмыз...</string>
   <string key="SetupReturned">Орнату бағдарламасы {0} кодын қайтарды.</string>
   <string key="InstallFailed">Орнату сәтсіз аяқталды</string>
+  <string key="ShortcutSkipped">Жұмыс үстеліндегі таңбаша жасалмады</string>
+  <string key="ShortcutSkippedCopy">KillerPDF орнатылды және дайын. Windows жұмыс үстеліндегі таңбашаға рұқсат бермеді; бұл басқарылатын қалтаға кіру жұмыс үстелін қорғағанда болуы мүмкін. KillerPDF-ті «Бастау» мәзірінен ашыңыз.</string>
   <string key="ChooseFolder">KillerPDF орнатылатын орынды таңдаңыз</string>
   <string key="PortablePackage">Бұл тасымалды пакет. Қолданбаны орнату үшін KillerPDF орнату бағдарламасын пайдаланыңыз.</string>
   <string key="StartFailed">KillerPDF іске қосылмады.\n\n{0}</string>

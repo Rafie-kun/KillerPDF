@@ -1569,6 +1569,7 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Dlg_InstallDowngrade" xml:space="preserve">Está a punto de instalar una versión anterior ({0}) sobre la versión instalada ({1}).&#10;&#10;¿Volver a la versión anterior de todos modos?</sys:String>
     <sys:String x:Key="Str_Dlg_InstallWriteFailed" xml:space="preserve">No se pudo escribir la copia instalada en:&#10;{0}&#10;&#10;Cierre cualquier ventana de KillerPDF abierta (y busque KillerPDF.exe en el Administrador de tareas) y vuelva a ejecutar el instalador.</sys:String>
     <sys:String x:Key="Str_Dlg_InstallFailed" xml:space="preserve">Error en la instalación:&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallNoDesktopShortcut" xml:space="preserve">KillerPDF está instalado, pero Windows no permitió el acceso directo del escritorio:&#10;{0}&#10;&#10;Abra KillerPDF desde el menú Inicio.</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">La desinstalación no pudo solicitar acceso de administrador:&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallConfirm">¿Desinstalar KillerPDF de este equipo?</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF todavía se está ejecutando.&#10;Ciérrelo y vuelva a intentar la desinstalación.</sys:String>

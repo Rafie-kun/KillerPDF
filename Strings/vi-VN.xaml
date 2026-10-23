@@ -1589,6 +1589,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Dlg_InstallDowngrade" xml:space="preserve">Bạn sắp cài đặt một phiên bản cũ hơn ({0}) đè lên phiên bản đã cài đặt ({1}).&#10;&#10;Vẫn hạ cấp?</sys:String>
     <sys:String x:Key="Str_Dlg_InstallWriteFailed" xml:space="preserve">Không thể ghi bản sao đã cài đặt vào:&#10;{0}&#10;&#10;Hãy đóng mọi cửa sổ KillerPDF đang mở (và kiểm tra KillerPDF.exe trong Trình quản lý tác vụ), rồi chạy lại trình cài đặt.</sys:String>
     <sys:String x:Key="Str_Dlg_InstallFailed" xml:space="preserve">Cài đặt không thành công:&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallNoDesktopShortcut" xml:space="preserve">KillerPDF đã được cài đặt, nhưng Windows không cho phép tạo lối tắt trên màn hình nền:&#10;{0}&#10;&#10;Hãy mở KillerPDF từ menu Start.</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">Không thể yêu cầu quyền quản trị viên để gỡ cài đặt:&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallConfirm">Gỡ cài đặt KillerPDF khỏi máy tính này?</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF vẫn đang chạy.&#10;Hãy đóng ứng dụng, rồi thử gỡ cài đặt lại.</sys:String>

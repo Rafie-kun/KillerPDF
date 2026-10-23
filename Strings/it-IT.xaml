@@ -1589,6 +1589,7 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_Dlg_InstallDowngrade" xml:space="preserve">Stai per installare una versione precedente ({0}) al posto della versione installata ({1}).&#10;&#10;Tornare comunque alla versione precedente?</sys:String>
     <sys:String x:Key="Str_Dlg_InstallWriteFailed" xml:space="preserve">Impossibile scrivere la copia installata in:&#10;{0}&#10;&#10;Chiudi le finestre di KillerPDF aperte (e controlla KillerPDF.exe in Gestione attività), poi esegui di nuovo il programma di installazione.</sys:String>
     <sys:String x:Key="Str_Dlg_InstallFailed" xml:space="preserve">Installazione non riuscita:&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallNoDesktopShortcut" xml:space="preserve">KillerPDF è installato, ma Windows non ha consentito il collegamento sul desktop:&#10;{0}&#10;&#10;Apri KillerPDF dal menu Start.</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">La disinstallazione non ha potuto richiedere l'accesso di amministratore:&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallConfirm">Disinstallare KillerPDF da questo computer?</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF è ancora in esecuzione.&#10;Chiudilo, poi riprova la disinstallazione.</sys:String>

@@ -44,6 +44,8 @@
   <string key="InstallingCopy">即将完成。正在准备所需文件...</string>
   <string key="SetupReturned">安装程序返回了 {0}。</string>
   <string key="InstallFailed">安装失败</string>
+  <string key="ShortcutSkipped">未创建桌面快捷方式</string>
+  <string key="ShortcutSkippedCopy">KillerPDF 已安装并可以使用。Windows 不允许创建桌面快捷方式；当受控文件夹访问保护桌面时可能会这样。请从“开始”菜单打开 KillerPDF。</string>
   <string key="ChooseFolder">选择 KillerPDF 的安装位置</string>
   <string key="PortablePackage">这是便携版软件包。请使用 KillerPDF 安装程序安装应用。</string>
   <string key="StartFailed">无法启动 KillerPDF。\n\n{0}</string>

@@ -44,6 +44,8 @@
   <string key="InstallingCopy">প্রায় শেষ। সবকিছু প্রস্তুত করা হচ্ছে...</string>
   <string key="SetupReturned">সেটআপ {0} কোড ফেরত দিয়েছে।</string>
   <string key="InstallFailed">ইনস্টলেশন ব্যর্থ হয়েছে</string>
+  <string key="ShortcutSkipped">ডেস্কটপ শর্টকাট তৈরি হয়নি</string>
+  <string key="ShortcutSkippedCopy">KillerPDF ইনস্টল হয়েছে এবং প্রস্তুত। Windows ডেস্কটপ শর্টকাট তৈরি করতে দেয়নি; নিয়ন্ত্রিত ফোল্ডার অ্যাক্সেস ডেস্কটপ সুরক্ষিত রাখলে এমন হতে পারে। স্টার্ট মেনু থেকে KillerPDF খুলুন।</string>
   <string key="ChooseFolder">KillerPDF কোথায় ইনস্টল হবে তা বেছে নিন</string>
   <string key="PortablePackage">এটি পোর্টেবল প্যাকেজ। অ্যাপ্লিকেশনটি ইনস্টল করতে KillerPDF সেটআপ ব্যবহার করুন।</string>
   <string key="StartFailed">KillerPDF চালু করা যায়নি।\n\n{0}</string>

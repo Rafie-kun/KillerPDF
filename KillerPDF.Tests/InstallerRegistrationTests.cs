@@ -21,12 +21,35 @@ public sealed class InstallerRegistrationTests
     [Fact]
     public void InstalledCopyIsRegisteredForUninstallBeforeOptionalSteps()
     {
-        string register = Method(AppSource(), "private static void RegisterInstalledCopy(");
+        string register = Method(AppSource(), "private static string? RegisterInstalledCopy(");
         int uninstall = register.IndexOf(@"CurrentVersion\Uninstall\KillerPDF", StringComparison.Ordinal);
         Assert.True(uninstall >= 0);
         foreach (string step in new[] { "CreateShortcut(", "RegisterFileHandler(", "ProtocolRegistrar.Register(",
                      "CommandLinePath.Register(", "PreviewHandlerRegistration." })
             Assert.True(uninstall < register.IndexOf(step, StringComparison.Ordinal), step + " runs before the uninstall entry.");
+    }
+
+    // Owner decision, 2026-10-23: an optional desktop shortcut that Windows refuses no longer fails
+    // setup. The install finishes and reports a warning; a Start menu shortcut failure stays fatal.
+    [Fact]
+    public void DesktopShortcutFailureIsAWarningButStartMenuFailureIsNot()
+    {
+        string source = AppSource();
+        string register = Method(source, "private static string? RegisterInstalledCopy(");
+        int startMenu = register.IndexOf("CreateShortcut(startMenuShortcut, exePath);", StringComparison.Ordinal);
+        Assert.True(startMenu >= 0);
+        Assert.DoesNotContain("try", register[(register.LastIndexOf('\n', startMenu) + 1)..startMenu]);
+        Assert.Contains("try { CreateShortcut(InstalledShortcuts.DesktopPath(machine), exePath); }", register);
+        Assert.Contains("desktopProblem = ex.Message;", register);
+        Assert.Contains("return desktopProblem;", register);
+
+        Assert.Equal(2, source.Split("Console.Error.WriteLine(\"Installed without the desktop shortcut: \" + desktopProblem);").Length - 1);
+        Assert.Contains("SetupText(\"Str_Dlg_InstallNoDesktopShortcut\"", source);
+
+        string wizard = File.ReadAllText(Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(SourcePath()))!,
+            "Packaging", "KillerLauncher", "InstallerWizard.xaml.cs"));
+        Assert.Contains("if (desktop && !File.Exists(Program.DesktopShortcutPath(machine)))", wizard);
+        Assert.Contains("LauncherStrings.Get(\"ShortcutSkipped\")", wizard);
     }
 
     // A declined or failed elevated uninstall used to exit 0.

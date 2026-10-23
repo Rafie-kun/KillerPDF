@@ -44,6 +44,8 @@
   <string key="InstallingCopy">即將完成。正在準備所需檔案...</string>
   <string key="SetupReturned">安裝程式傳回了 {0}。</string>
   <string key="InstallFailed">安裝失敗</string>
+  <string key="ShortcutSkipped">未建立桌面捷徑</string>
+  <string key="ShortcutSkippedCopy">KillerPDF 已安裝並可使用。Windows 不允許建立桌面捷徑；當受控制資料夾存取保護桌面時可能會這樣。請從「開始」功能表開啟 KillerPDF。</string>
   <string key="ChooseFolder">選擇 KillerPDF 的安裝位置</string>
   <string key="PortablePackage">這是可攜式套件。請使用 KillerPDF 安裝程式安裝應用程式。</string>
   <string key="StartFailed">無法啟動 KillerPDF。\n\n{0}</string>

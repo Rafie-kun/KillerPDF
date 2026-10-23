@@ -44,6 +44,8 @@
   <string key="InstallingCopy">Почти готово. Подготавливаем все необходимое...</string>
   <string key="SetupReturned">Программа установки вернула {0}.</string>
   <string key="InstallFailed">Ошибка установки</string>
+  <string key="ShortcutSkipped">Ярлык на рабочем столе не создан</string>
+  <string key="ShortcutSkippedCopy">KillerPDF установлен и готов к работе. Windows не разрешила ярлык на рабочем столе; так бывает, когда контролируемый доступ к папкам защищает рабочий стол. Откройте KillerPDF из меню «Пуск».</string>
   <string key="ChooseFolder">Выберите место установки KillerPDF</string>
   <string key="PortablePackage">Это переносимый пакет. Для установки приложения используйте установщик KillerPDF.</string>
   <string key="StartFailed">Не удалось запустить KillerPDF.\n\n{0}</string>

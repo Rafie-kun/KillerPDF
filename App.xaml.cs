@@ -107,7 +107,8 @@ namespace KillerPDF
                     : e.Args.Any(a => string.Equals(a, "/no-preview", StringComparison.OrdinalIgnoreCase)) ? false : null;
                 try
                 {
-                    RegisterInstalledCopy(machine, desktop, preview);
+                    if (RegisterInstalledCopy(machine, desktop, preview) is { } desktopProblem)
+                        Console.Error.WriteLine("Installed without the desktop shortcut: " + desktopProblem);
                     Shutdown(0);
                 }
                 catch (Exception ex)
@@ -1204,9 +1205,10 @@ namespace KillerPDF
                 }
                 File.Copy(src, installExe, overwrite: true);
                 try { File.SetAttributes(installExe, FileAttributes.Normal); } catch { }
-                RegisterInstalledCopy(machine: machine, desktop: Environment.GetCommandLineArgs()
-                    .Any(argument => string.Equals(argument, "/desktop", StringComparison.OrdinalIgnoreCase)),
-                    installedExecutable: installExe);
+                if (RegisterInstalledCopy(machine: machine, desktop: Environment.GetCommandLineArgs()
+                        .Any(argument => string.Equals(argument, "/desktop", StringComparison.OrdinalIgnoreCase)),
+                        installedExecutable: installExe) is { } desktopProblem)
+                    Console.Error.WriteLine("Installed without the desktop shortcut: " + desktopProblem);
                 return KillerFamily.Deployment.InstallerExitCodes.Success;
             }
             catch (Exception ex)
@@ -1958,7 +1960,13 @@ namespace KillerPDF
                     return false;
                 }
                 try { File.SetAttributes(InstallExe, FileAttributes.Normal); } catch { }
-                RegisterInstalledCopy(machine: false, desktop: wantDesktop, installedExecutable: InstallExe);
+                if (RegisterInstalledCopy(machine: false, desktop: wantDesktop, installedExecutable: InstallExe)
+                    is { } desktopProblem)
+                    KillerDialog.Show(Current.MainWindow,
+                        string.Format(SetupText("Str_Dlg_InstallNoDesktopShortcut",
+                            "KillerPDF is installed, but Windows did not allow the desktop shortcut:\n{0}\n\n" +
+                            "Open KillerPDF from the Start menu."), desktopProblem),
+                        AppName, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return true;
             }
             catch (Exception ex)
@@ -2124,7 +2132,9 @@ namespace KillerPDF
             }
         }
 
-        private static void RegisterInstalledCopy(bool machine, bool desktop, bool? preview = null,
+        // Returns why the optional desktop shortcut could not be created, or null. Every other step
+        // is required and throws.
+        private static string? RegisterInstalledCopy(bool machine, bool desktop, bool? preview = null,
             string? installedExecutable = null)
         {
             string exePath = Path.GetFullPath(installedExecutable ?? Process.GetCurrentProcess().MainModule?.FileName
@@ -2163,7 +2173,14 @@ namespace KillerPDF
             }
 
             CreateShortcut(startMenuShortcut, exePath);
-            if (desktop) CreateShortcut(InstalledShortcuts.DesktopPath(machine), exePath);
+            // The desktop shortcut is optional. When Windows refuses it, for example under
+            // Controlled folder access, the install finishes and the caller reports a warning.
+            string? desktopProblem = null;
+            if (desktop)
+            {
+                try { CreateShortcut(InstalledShortcuts.DesktopPath(machine), exePath); }
+                catch (Exception ex) when (ex is not OutOfMemoryException) { desktopProblem = ex.Message; }
+            }
 
             if (!File.Exists(iconPath)) ExtractFileIcon(iconPath);
             RegisterFileHandler(registryRoot, exePath, iconPath);
@@ -2180,6 +2197,7 @@ namespace KillerPDF
                 Services.PreviewHandlerRegistration.Unregister(registryRoot);
 
             SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, IntPtr.Zero, IntPtr.Zero);
+            return desktopProblem;
         }
 
         private static int GetInstalledSizeKilobytes(string installDirectory)

@@ -44,6 +44,8 @@
   <string key="InstallingCopy">Już prawie gotowe. Przygotowujemy wszystko...</string>
   <string key="SetupReturned">Instalator zwrócił {0}.</string>
   <string key="InstallFailed">Instalacja nie powiodła się</string>
+  <string key="ShortcutSkipped">Nie utworzono skrótu na pulpicie</string>
+  <string key="ShortcutSkippedCopy">KillerPDF jest zainstalowany i gotowy. System Windows nie zezwolił na skrót na pulpicie, co może się zdarzyć, gdy kontrolowany dostęp do folderów chroni pulpit. Otwórz KillerPDF z menu Start.</string>
   <string key="ChooseFolder">Wybierz miejsce instalacji KillerPDF</string>
   <string key="PortablePackage">To jest pakiet przenośny. Użyj instalatora KillerPDF, aby zainstalować aplikację.</string>
   <string key="StartFailed">Nie można uruchomić KillerPDF.\n\n{0}</string>

@@ -44,6 +44,8 @@
   <string key="InstallingCopy">Už to bude. Vše připravujeme...</string>
   <string key="SetupReturned">Instalátor vrátil {0}.</string>
   <string key="InstallFailed">Instalace selhala</string>
+  <string key="ShortcutSkipped">Zástupce na ploše nebyl vytvořen</string>
+  <string key="ShortcutSkippedCopy">KillerPDF je nainstalován a připraven. Windows nepovolil zástupce na ploše, což se může stát, když plochu chrání řízený přístup ke složkám. Otevřete KillerPDF z nabídky Start.</string>
   <string key="ChooseFolder">Vyberte, kam se má KillerPDF nainstalovat</string>
   <string key="PortablePackage">Toto je přenosný balíček. K instalaci aplikace použijte instalátor KillerPDF.</string>
   <string key="StartFailed">KillerPDF se nepodařilo spustit.\n\n{0}</string>

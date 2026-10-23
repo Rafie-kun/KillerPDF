@@ -44,6 +44,8 @@
   <string key="InstallingCopy">Sắp xong rồi. Chúng tôi đang đưa mọi thứ vào đúng chỗ...</string>
   <string key="SetupReturned">Trình thiết lập đã trả về {0}.</string>
   <string key="InstallFailed">Cài đặt thất bại</string>
+  <string key="ShortcutSkipped">Chưa tạo lối tắt trên màn hình nền</string>
+  <string key="ShortcutSkippedCopy">KillerPDF đã được cài đặt và sẵn sàng. Windows không cho phép tạo lối tắt trên màn hình nền, điều này có thể xảy ra khi Quyền truy cập thư mục được kiểm soát bảo vệ màn hình nền. Hãy mở KillerPDF từ menu Start.</string>
   <string key="ChooseFolder">Chọn nơi KillerPDF sẽ được cài đặt</string>
   <string key="PortablePackage">Đây là gói portable. Hãy dùng KillerPDF Setup để cài đặt ứng dụng.</string>
   <string key="StartFailed">Không thể khởi động KillerPDF.\n\n{0}</string>

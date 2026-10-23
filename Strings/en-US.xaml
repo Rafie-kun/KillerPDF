@@ -1589,6 +1589,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Dlg_InstallDowngrade" xml:space="preserve">You are about to install an older version ({0}) over the currently installed version ({1}).&#10;&#10;Downgrade anyway?</sys:String>
     <sys:String x:Key="Str_Dlg_InstallWriteFailed" xml:space="preserve">Couldn't write the installed copy at:&#10;{0}&#10;&#10;Close any open KillerPDF window (and check Task Manager for KillerPDF.exe), then run the installer again.</sys:String>
     <sys:String x:Key="Str_Dlg_InstallFailed" xml:space="preserve">Installation failed:&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallNoDesktopShortcut" xml:space="preserve">KillerPDF is installed, but Windows did not allow the desktop shortcut:&#10;{0}&#10;&#10;Open KillerPDF from the Start menu.</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">Uninstall could not request administrator access:&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallConfirm">Uninstall KillerPDF from this computer?</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF is still running.&#10;Close it, then try uninstalling again.</sys:String>

@@ -44,6 +44,8 @@
   <string key="InstallingCopy">Ya casi está. Estamos poniendo todo en su lugar...</string>
   <string key="SetupReturned">El instalador devolvió {0}.</string>
   <string key="InstallFailed">Error de instalación</string>
+  <string key="ShortcutSkipped">No se creó el acceso directo del escritorio</string>
+  <string key="ShortcutSkippedCopy">KillerPDF está instalado y listo. Windows no permitió el acceso directo del escritorio, lo que puede ocurrir cuando el acceso controlado a carpetas protege el escritorio. Abra KillerPDF desde el menú Inicio.</string>
   <string key="ChooseFolder">Elige dónde se instalará KillerPDF</string>
   <string key="PortablePackage">Este es el paquete portátil. Usa el instalador de KillerPDF para instalar la aplicación.</string>
   <string key="StartFailed">No se pudo iniciar KillerPDF.\n\n{0}</string>

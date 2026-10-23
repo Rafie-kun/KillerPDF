@@ -1574,6 +1574,7 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Dlg_InstallDowngrade" xml:space="preserve">Chystáte se nainstalovat starší verzi ({0}) přes nainstalovanou verzi ({1}).&#10;&#10;Přesto přejít na starší verzi?</sys:String>
     <sys:String x:Key="Str_Dlg_InstallWriteFailed" xml:space="preserve">Nainstalovanou kopii se nepodařilo zapsat do umístění:&#10;{0}&#10;&#10;Zavřete všechna otevřená okna KillerPDF (a ve Správci úloh zkontrolujte KillerPDF.exe) a spusťte instalační program znovu.</sys:String>
     <sys:String x:Key="Str_Dlg_InstallFailed" xml:space="preserve">Instalace se nezdařila:&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallNoDesktopShortcut" xml:space="preserve">KillerPDF je nainstalován, ale Windows nepovolil zástupce na ploše:&#10;{0}&#10;&#10;Otevřete KillerPDF z nabídky Start.</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">Odinstalace nemohla požádat o oprávnění správce:&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallConfirm">Odinstalovat KillerPDF z tohoto počítače?</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF stále běží.&#10;Zavřete ho a zkuste odinstalaci znovu.</sys:String>

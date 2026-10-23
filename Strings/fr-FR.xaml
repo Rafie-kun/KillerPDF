@@ -1589,6 +1589,7 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Dlg_InstallDowngrade" xml:space="preserve">Vous êtes sur le point d'installer une version plus ancienne ({0}) à la place de la version installée ({1}).&#10;&#10;Revenir quand même à la version antérieure ?</sys:String>
     <sys:String x:Key="Str_Dlg_InstallWriteFailed" xml:space="preserve">Impossible d'écrire la copie installée à l'emplacement :&#10;{0}&#10;&#10;Fermez toute fenêtre KillerPDF ouverte (et vérifiez KillerPDF.exe dans le Gestionnaire des tâches), puis relancez le programme d'installation.</sys:String>
     <sys:String x:Key="Str_Dlg_InstallFailed" xml:space="preserve">Échec de l'installation :&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallNoDesktopShortcut" xml:space="preserve">KillerPDF est installé, mais Windows n'a pas autorisé le raccourci sur le Bureau :&#10;{0}&#10;&#10;Ouvrez KillerPDF depuis le menu Démarrer.</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">La désinstallation n'a pas pu demander l'accès administrateur :&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallConfirm">Désinstaller KillerPDF de cet ordinateur ?</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF est toujours en cours d'exécution.&#10;Fermez-le, puis réessayez la désinstallation.</sys:String>

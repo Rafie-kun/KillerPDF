@@ -44,6 +44,8 @@
   <string key="InstallingCopy">まもなく完了します。ファイルを配置しています...</string>
   <string key="SetupReturned">セットアップが {0} を返しました。</string>
   <string key="InstallFailed">インストールに失敗しました</string>
+  <string key="ShortcutSkipped">デスクトップのショートカットは作成されませんでした</string>
+  <string key="ShortcutSkippedCopy">KillerPDF はインストールされ、使用できます。Windows がデスクトップのショートカットを許可しませんでした。コントロールされたフォルダー アクセスがデスクトップを保護していると、このようになることがあります。スタート メニューから KillerPDF を開いてください。</string>
   <string key="ChooseFolder">KillerPDF のインストール先を選択してください</string>
   <string key="PortablePackage">これはポータブル版のパッケージです。アプリをインストールするには KillerPDF セットアップを使用してください。</string>
   <string key="StartFailed">KillerPDF を起動できませんでした。\n\n{0}</string>

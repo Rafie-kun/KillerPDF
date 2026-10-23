@@ -1589,6 +1589,7 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Dlg_InstallDowngrade" xml:space="preserve">Du er i ferd med å installere en eldre versjon ({0}) over den installerte versjonen ({1}).&#10;&#10;Vil du gå tilbake til den eldre versjonen likevel?</sys:String>
     <sys:String x:Key="Str_Dlg_InstallWriteFailed" xml:space="preserve">Kunne ikke skrive den installerte kopien til:&#10;{0}&#10;&#10;Lukk alle åpne KillerPDF-vinduer (og se etter KillerPDF.exe i Oppgavebehandling), og kjør installasjonsprogrammet på nytt.</sys:String>
     <sys:String x:Key="Str_Dlg_InstallFailed" xml:space="preserve">Installasjonen mislyktes:&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallNoDesktopShortcut" xml:space="preserve">KillerPDF er installert, men Windows tillot ikke snarveien på skrivebordet:&#10;{0}&#10;&#10;Åpne KillerPDF fra Start-menyen.</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">Avinstalleringen kunne ikke be om administratortilgang:&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallConfirm">Vil du avinstallere KillerPDF fra denne datamaskinen?</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF kjører fortsatt.&#10;Lukk programmet, og prøv å avinstallere på nytt.</sys:String>

@@ -1589,6 +1589,7 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Dlg_InstallDowngrade" xml:space="preserve">インストール済みのバージョン ({1}) に古いバージョン ({0}) を上書きインストールしようとしています。&#10;&#10;それでも古いバージョンに戻しますか？</sys:String>
     <sys:String x:Key="Str_Dlg_InstallWriteFailed" xml:space="preserve">インストール済みコピーを書き込めませんでした:&#10;{0}&#10;&#10;開いている KillerPDF のウィンドウをすべて閉じて (タスク マネージャーで KillerPDF.exe も確認してください)、インストーラーをもう一度実行してください。</sys:String>
     <sys:String x:Key="Str_Dlg_InstallFailed" xml:space="preserve">インストールに失敗しました:&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallNoDesktopShortcut" xml:space="preserve">KillerPDF はインストールされましたが、Windows がデスクトップのショートカットを許可しませんでした:&#10;{0}&#10;&#10;スタート メニューから KillerPDF を開いてください。</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">アンインストールに必要な管理者アクセスを要求できませんでした:&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallConfirm">このコンピューターから KillerPDF をアンインストールしますか？</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF はまだ実行中です。&#10;終了してから、もう一度アンインストールしてください。</sys:String>

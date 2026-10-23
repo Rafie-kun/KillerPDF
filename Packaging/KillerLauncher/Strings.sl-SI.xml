@@ -44,6 +44,8 @@
   <string key="InstallingCopy">Skoraj končano. Vse postavljamo na svoje mesto...</string>
   <string key="SetupReturned">Namestitveni program je vrnil {0}.</string>
   <string key="InstallFailed">Namestitev ni uspela</string>
+  <string key="ShortcutSkipped">Bližnjica na namizju ni bila ustvarjena</string>
+  <string key="ShortcutSkippedCopy">KillerPDF je nameščen in pripravljen. Windows ni dovolil bližnjice na namizju, kar se lahko zgodi, ko nadzorovan dostop do map ščiti namizje. Odprite KillerPDF v meniju Start.</string>
   <string key="ChooseFolder">Izberite mesto namestitve KillerPDF</string>
   <string key="PortablePackage">To je prenosni paket. Za namestitev aplikacije uporabite namestitveni program KillerPDF.</string>
   <string key="StartFailed">KillerPDF se ni mogel zagnati.\n\n{0}</string>

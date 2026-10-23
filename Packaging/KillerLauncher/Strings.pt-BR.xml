@@ -44,6 +44,8 @@
   <string key="InstallingCopy">Quase lá. Estamos colocando tudo no lugar...</string>
   <string key="SetupReturned">A instalação retornou {0}.</string>
   <string key="InstallFailed">Falha na instalação</string>
+  <string key="ShortcutSkipped">Atalho da área de trabalho não criado</string>
+  <string key="ShortcutSkippedCopy">O KillerPDF está instalado e pronto. O Windows não permitiu o atalho na área de trabalho, o que pode acontecer quando o acesso controlado a pastas protege a área de trabalho. Abra o KillerPDF pelo menu Iniciar.</string>
   <string key="ChooseFolder">Escolha onde o KillerPDF será instalado</string>
   <string key="PortablePackage">Este é o pacote portátil. Use a Instalação do KillerPDF para instalar o aplicativo.</string>
   <string key="StartFailed">Não foi possível iniciar o KillerPDF.\n\n{0}</string>

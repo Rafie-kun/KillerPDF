@@ -1571,6 +1571,7 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_Dlg_InstallDowngrade" xml:space="preserve">您即將在已安裝的版本 ({1}) 上安裝較舊的版本 ({0})。&#10;&#10;仍要降級嗎？</sys:String>
     <sys:String x:Key="Str_Dlg_InstallWriteFailed" xml:space="preserve">無法寫入已安裝的複本：&#10;{0}&#10;&#10;請關閉所有開啟的 KillerPDF 視窗（並在工作管理員中檢查 KillerPDF.exe），然後重新執行安裝程式。</sys:String>
     <sys:String x:Key="Str_Dlg_InstallFailed" xml:space="preserve">安裝失敗：&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallNoDesktopShortcut" xml:space="preserve">KillerPDF 已安裝，但 Windows 不允許建立桌面捷徑:&#10;{0}&#10;&#10;請從「開始」功能表開啟 KillerPDF。</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">解除安裝無法要求系統管理員權限：&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallConfirm">要從這部電腦解除安裝 KillerPDF 嗎？</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF 仍在執行。&#10;請關閉它，然後再試一次解除安裝。</sys:String>

@@ -294,11 +294,13 @@ namespace KillerLauncher
 
             string rawVersion = FileVersionInfo.GetVersionInfo(executable).FileVersion ?? "installed";
             string version = Version.TryParse(rawVersion, out Version? parsed) ? parsed.ToString(3) : rawVersion;
-            string desktop = Path.Combine(Environment.GetFolderPath(machine
-                ? Environment.SpecialFolder.CommonDesktopDirectory
-                : Environment.SpecialFolder.DesktopDirectory), "KillerPDF.lnk");
-            return new InstalledCopy(directory, executable, version, machine, File.Exists(desktop), HasPreviewHandler(machine));
+            return new InstalledCopy(directory, executable, version, machine, File.Exists(DesktopShortcutPath(machine)),
+                HasPreviewHandler(machine));
         }
+
+        internal static string DesktopShortcutPath(bool machine) => Path.Combine(Environment.GetFolderPath(machine
+            ? Environment.SpecialFolder.CommonDesktopDirectory
+            : Environment.SpecialFolder.DesktopDirectory), "KillerPDF.lnk");
 
         // The File Explorer and Outlook preview handler (#410), registered by the app's /preview pass.
         private const string PreviewHandlerServerKey =

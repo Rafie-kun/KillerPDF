@@ -44,6 +44,8 @@
   <string key="InstallingCopy">Nesten ferdig. Vi setter alt på plass...</string>
   <string key="SetupReturned">Installasjonen returnerte {0}.</string>
   <string key="InstallFailed">Installasjonen mislyktes</string>
+  <string key="ShortcutSkipped">Snarvei på skrivebordet ble ikke opprettet</string>
+  <string key="ShortcutSkippedCopy">KillerPDF er installert og klar. Windows tillot ikke snarveien på skrivebordet, noe som kan skje når kontrollert mappetilgang beskytter skrivebordet. Åpne KillerPDF fra Start-menyen.</string>
   <string key="ChooseFolder">Velg hvor KillerPDF skal installeres</string>
   <string key="PortablePackage">Dette er den bærbare pakken. Bruk KillerPDF Setup for å installere programmet.</string>
   <string key="StartFailed">KillerPDF kunne ikke starte.\n\n{0}</string>

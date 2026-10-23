@@ -1479,6 +1479,7 @@
     <sys:String x:Key="Str_Dlg_InstallDowngrade">Namestili boste starejšo različico ({0}) čez trenutno nameščeno različico ({1}).&#10;&#10;Želite vseeno namestiti starejšo različico?</sys:String>
     <sys:String x:Key="Str_Dlg_InstallWriteFailed">Nameščene kopije ni bilo mogoče zapisati v:&#10;{0}&#10;&#10;Zaprite vsa odprta okna KillerPDF (in v upravitelju opravil preverite KillerPDF.exe), nato znova zaženite namestitveni program.</sys:String>
     <sys:String x:Key="Str_Dlg_InstallFailed">Namestitev ni uspela:&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallNoDesktopShortcut" xml:space="preserve">KillerPDF je nameščen, vendar Windows ni dovolil bližnjice na namizju:&#10;{0}&#10;&#10;Odprite KillerPDF v meniju Start.</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallElevationFailed">Odstranitev ni mogla zahtevati skrbniškega dostopa:&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallConfirm">Želite odstraniti KillerPDF iz tega računalnika?</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallStillRunning">KillerPDF še vedno deluje.&#10;Zaprite ga in znova poskusite odstranitev.</sys:String>

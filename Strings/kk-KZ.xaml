@@ -1592,6 +1592,7 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_Dlg_InstallDowngrade" xml:space="preserve">Орнатылған нұсқаның ({1}) үстіне ескі нұсқаны ({0}) орнатқалы жатырсыз.&#10;&#10;Бәрібір ескі нұсқаға қайту керек пе?</sys:String>
     <sys:String x:Key="Str_Dlg_InstallWriteFailed" xml:space="preserve">Орнатылған көшірмені мына жерге жазу мүмкін болмады:&#10;{0}&#10;&#10;Ашық тұрған KillerPDF терезелерін жабыңыз (және Тапсырмалар реттеушісінде KillerPDF.exe бар-жоғын тексеріңіз), содан кейін орнатушыны қайта іске қосыңыз.</sys:String>
     <sys:String x:Key="Str_Dlg_InstallFailed" xml:space="preserve">Орнату сәтсіз аяқталды:&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallNoDesktopShortcut" xml:space="preserve">KillerPDF орнатылды, бірақ Windows жұмыс үстеліндегі таңбашаға рұқсат бермеді:&#10;{0}&#10;&#10;KillerPDF-ті «Бастау» мәзірінен ашыңыз.</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">Жою үшін әкімші рұқсатын сұрау мүмкін болмады:&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallConfirm">KillerPDF бағдарламасын осы компьютерден жою керек пе?</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF әлі жұмыс істеп тұр.&#10;Оны жауып, жоюды қайталап көріңіз.</sys:String>

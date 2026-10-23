@@ -44,6 +44,8 @@
   <string key="InstallingCopy">Neredeyse bitti. Her şeyi hazırlıyoruz...</string>
   <string key="SetupReturned">Kurulum {0} kodunu döndürdü.</string>
   <string key="InstallFailed">Kurulum başarısız oldu</string>
+  <string key="ShortcutSkipped">Masaüstü kısayolu oluşturulmadı</string>
+  <string key="ShortcutSkippedCopy">KillerPDF yüklendi ve hazır. Windows masaüstü kısayoluna izin vermedi; bu, denetimli klasör erişimi masaüstünü koruduğunda olabilir. KillerPDF'yi Başlat menüsünden açın.</string>
   <string key="ChooseFolder">KillerPDF'in yükleneceği yeri seçin</string>
   <string key="PortablePackage">Bu taşınabilir pakettir. Uygulamayı yüklemek için KillerPDF Kurulumu'nu kullanın.</string>
   <string key="StartFailed">KillerPDF başlatılamadı.\n\n{0}</string>

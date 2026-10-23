@@ -1569,6 +1569,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Dlg_InstallDowngrade" xml:space="preserve">Kurulu sürümün ({1}) üzerine daha eski bir sürüm ({0}) kurmak üzeresiniz.&#10;&#10;Yine de eski sürüme dönülsün mü?</sys:String>
     <sys:String x:Key="Str_Dlg_InstallWriteFailed" xml:space="preserve">Kurulu kopya şu konuma yazılamadı:&#10;{0}&#10;&#10;Açık KillerPDF pencerelerini kapatın (ve Görev Yöneticisi'nde KillerPDF.exe olup olmadığını denetleyin), ardından yükleyiciyi yeniden çalıştırın.</sys:String>
     <sys:String x:Key="Str_Dlg_InstallFailed" xml:space="preserve">Kurulum başarısız oldu:&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallNoDesktopShortcut" xml:space="preserve">KillerPDF yüklendi ancak Windows masaüstü kısayoluna izin vermedi:&#10;{0}&#10;&#10;KillerPDF'yi Başlat menüsünden açın.</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">Kaldırma işlemi yönetici erişimi isteyemedi:&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallConfirm">KillerPDF bu bilgisayardan kaldırılsın mı?</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF hâlâ çalışıyor.&#10;Kapatın, ardından kaldırmayı yeniden deneyin.</sys:String>

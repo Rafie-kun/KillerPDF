@@ -1569,6 +1569,7 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Dlg_InstallDowngrade" xml:space="preserve">আপনি ইনস্টল করা সংস্করণের ({1}) ওপর একটি পুরোনো সংস্করণ ({0}) ইনস্টল করতে চলেছেন।&#10;&#10;তবুও পুরোনো সংস্করণে ফিরবেন?</sys:String>
     <sys:String x:Key="Str_Dlg_InstallWriteFailed" xml:space="preserve">ইনস্টল করা কপিটি এখানে লেখা যায়নি:&#10;{0}&#10;&#10;খোলা সব KillerPDF উইন্ডো বন্ধ করুন (এবং টাস্ক ম্যানেজারে KillerPDF.exe আছে কি না দেখুন), তারপর আবার ইনস্টলার চালান।</sys:String>
     <sys:String x:Key="Str_Dlg_InstallFailed" xml:space="preserve">ইনস্টলেশন ব্যর্থ হয়েছে:&#10;{0}</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallNoDesktopShortcut" xml:space="preserve">KillerPDF ইনস্টল হয়েছে, কিন্তু Windows ডেস্কটপ শর্টকাট তৈরি করতে দেয়নি:&#10;{0}&#10;&#10;স্টার্ট মেনু থেকে KillerPDF খুলুন।</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallElevationFailed" xml:space="preserve">আনইনস্টলের জন্য প্রশাসকের অনুমতি চাওয়া যায়নি:&#10;{0}</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallConfirm">এই কম্পিউটার থেকে KillerPDF আনইনস্টল করবেন?</sys:String>
     <sys:String x:Key="Str_Dlg_UninstallStillRunning" xml:space="preserve">KillerPDF এখনও চলছে।&#10;এটি বন্ধ করে আবার আনইনস্টল করার চেষ্টা করুন।</sys:String>

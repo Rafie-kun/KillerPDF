@@ -44,6 +44,8 @@
   <string key="InstallingCopy">Fast geschafft. Alles wird eingerichtet...</string>
   <string key="SetupReturned">Das Setup hat {0} zurückgegeben.</string>
   <string key="InstallFailed">Installation fehlgeschlagen</string>
+  <string key="ShortcutSkipped">Desktopverknüpfung nicht erstellt</string>
+  <string key="ShortcutSkippedCopy">KillerPDF ist installiert und bereit. Windows hat die Desktopverknüpfung nicht zugelassen. Das kann passieren, wenn der überwachte Ordnerzugriff den Desktop schützt. Öffnen Sie KillerPDF über das Startmenü.</string>
   <string key="ChooseFolder">Wählen Sie den Installationsort für KillerPDF</string>
   <string key="PortablePackage">Dies ist das portable Paket. Verwenden Sie KillerPDF-Setup, um die Anwendung zu installieren.</string>
   <string key="StartFailed">KillerPDF konnte nicht gestartet werden.\n\n{0}</string>

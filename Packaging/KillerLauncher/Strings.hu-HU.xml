@@ -44,6 +44,8 @@
   <string key="InstallingCopy">Mindjárt kész. Mindent a helyére teszünk...</string>
   <string key="SetupReturned">A telepítő visszatérési értéke: {0}.</string>
   <string key="InstallFailed">A telepítés sikertelen</string>
+  <string key="ShortcutSkipped">Az asztali parancsikon nem jött létre</string>
+  <string key="ShortcutSkippedCopy">A KillerPDF telepítve van és használatra kész. A Windows nem engedélyezte az asztali parancsikont, ami akkor fordulhat elő, ha a szabályozott mappahozzáférés védi az asztalt. Nyissa meg a KillerPDF-et a Start menüből.</string>
   <string key="ChooseFolder">Válassza ki a KillerPDF telepítési helyét</string>
   <string key="PortablePackage">Ez a hordozható csomag. Az alkalmazás telepítéséhez használja a KillerPDF telepítőjét.</string>
   <string key="StartFailed">A KillerPDF nem indítható el.\n\n{0}</string>
