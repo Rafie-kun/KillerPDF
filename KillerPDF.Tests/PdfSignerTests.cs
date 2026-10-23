@@ -109,6 +109,27 @@ public sealed class PdfSignerTests
         Assert.Contains("reserved", error.Message);
     }
 
+    // When the new field fails as well, the prepared field's own reason is the one the signer can
+    // act on, so it is the error reported.
+    [Fact]
+    public void FailedFallbackReportsThePreparedFieldsReason()
+    {
+        PdfDocument document = PdfDocument.Open(new PdfDocumentBuilder().AddBlankPage(200, 300)
+            .AddSignatureField(0, "approval", 10, 10, 100, 30,
+                seedValue: new PdfSignatureSeedValue { Reasons = ["Reviewed"], RequireReason = true })
+            .Build());
+        var options = new PdfSignatureOptions { FieldName = "approval", Reason = "Approved" };
+        string refusal = Assert.Throws<InvalidOperationException>(() =>
+            PdfDetachedSignatureWriter.Sign(document, _ => new byte[16], options)).Message;
+        int signatures = 0;
+
+        var error = Assert.Throws<InvalidOperationException>(() => PdfSigner.SignWithFallback(document,
+            _ => { signatures++; return new byte[1 << 20]; }, options, newField: "Signature1"));
+
+        Assert.Equal(1, signatures);
+        Assert.Equal(refusal, error.Message);
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]

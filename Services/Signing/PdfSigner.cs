@@ -69,7 +69,8 @@ namespace KillerPDF.Services.Signing
         // An uncertified document's prepared field can demand seed values or carry locks this
         // signature cannot meet; it is then signed in a new field, as before prepared fields were
         // chosen. A certified document has no such fallback, so its error stands. A failure after
-        // the signature was made is not retried, so the signer is asked to sign once.
+        // the signature was made is not retried, so the signer is asked to sign once. When the new
+        // field fails too, the prepared field's reason is reported, since the signer can act on it.
         internal static byte[] SignWithFallback(PdfDocument document, Func<ReadOnlyMemory<byte>, byte[]> createDetachedCms,
             PdfSignatureOptions options, string newField)
         {
@@ -83,9 +84,17 @@ namespace KillerPDF.Services.Signing
             {
                 return PdfDetachedSignatureWriter.Sign(document, SignOnce, options);
             }
-            catch (InvalidOperationException) when (options.FieldName != newField && !signed)
+            catch (InvalidOperationException refused) when (options.FieldName != newField && !signed)
             {
-                return PdfDetachedSignatureWriter.Sign(document, createDetachedCms, options with { FieldName = newField });
+                try
+                {
+                    return PdfDetachedSignatureWriter.Sign(document, createDetachedCms, options with { FieldName = newField });
+                }
+                catch (InvalidOperationException)
+                {
+                    System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw(refused);
+                    throw;
+                }
             }
         }
 
