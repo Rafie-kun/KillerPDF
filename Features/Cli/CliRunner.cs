@@ -504,6 +504,8 @@ namespace KillerPDF.Features
             "  --secrets-stdin                          read password, user-password, owner-password and",
             "                                           pfx-password from standard input as one JSON object",
             "                                           instead of the command line, where other programs can see them",
+            "  --allow-incomplete                       to-image, flatten, print and batch-render keep a page whose",
+            "                                           content cannot be drawn exactly and name it, instead of failing",
             "",
             "Exit codes: 0 success, 1 operation failed, 2 bad usage.",
             "Runs headless and works while the KillerPDF window is open.",
@@ -1628,11 +1630,20 @@ namespace KillerPDF.Features
         // carries a useless full-page alpha channel (issue #148, Ryokoxx).
         // Default is composite-over-white unless transparent PNG output is requested;
         // remover; --transparent keeps the raw alpha for PNG output.
+        // Print and export commands refuse a page whose content cannot be drawn exactly. With
+        // --allow-incomplete they keep it as rendered and name it here, like the desktop does.
+        private static void CliReportIncomplete(IncompletePageLog incomplete, TextWriter con)
+        {
+            IReadOnlyList<int> pages = incomplete.Pages;
+            if (pages.Count > 0)
+                con.WriteLine($"Pages {IncompletePageLog.Describe(pages)} could not be drawn exactly and were kept as rendered.");
+        }
+
         private static int CliToImage(List<string> pos, Dictionary<string, string> options, TextWriter con)
         {
             if (pos.Count != 2)
             {
-                con.WriteLine("Usage: KillerPDF.exe --to-image <in.pdf> <outputFolder> [--dpi <n>] [--format png|jpg] [--pages <range>] [--transparent]");
+                con.WriteLine("Usage: KillerPDF.exe --to-image <in.pdf> <outputFolder> [--dpi <n>] [--format png|jpg] [--pages <range>] [--transparent] [--allow-incomplete]");
                 return 2;
             }
             string inPath = Path.GetFullPath(pos[0]), outDir = Path.GetFullPath(pos[1]);
@@ -1644,6 +1655,8 @@ namespace KillerPDF.Features
             if (fmt != "png" && fmt != "jpg") { con.WriteLine("--format must be png or jpg"); return 2; }
             // JPEG has no alpha channel, so --transparent only means anything for png.
             bool transparent = fmt == "png" && options.ContainsKey("--transparent");
+            bool allowIncomplete = options.ContainsKey("--allow-incomplete");
+            var incomplete = new IncompletePageLog();
             Directory.CreateDirectory(outDir);
 
             options.TryGetValue("--password", out var password);
@@ -1669,7 +1682,9 @@ namespace KillerPDF.Features
             int digits = Math.Max(3, pageCount.ToString().Length);
             foreach (var idx in selected)
             {
-                PdfRenderedPage rendered = renderSession.RenderPage(idx, transparent);
+                PdfRenderedPage rendered = renderSession.RenderPage(idx, transparent,
+                    requireComplete: !allowIncomplete);
+                incomplete.Note(idx, rendered);
                 byte[] raw = rendered.Pixels;
                 int w = rendered.Width, h = rendered.Height;
                 int rot = rotations != null && idx < rotations.Length ? rotations[idx] : 0;
@@ -1678,6 +1693,7 @@ namespace KillerPDF.Features
                 var name = $"{baseName}-page-{(idx + 1).ToString().PadLeft(digits, '0')}.{fmt}";
                 File.WriteAllBytes(Path.Combine(outDir, name), bytes);
             }
+            CliReportIncomplete(incomplete, con);
             con.WriteLine($"Rendered {selected.Count} pages at {dpi:0} dpi ({fmt}) into {outDir}");
             return 0;
         }
@@ -1692,7 +1708,7 @@ namespace KillerPDF.Features
         {
             if (pos.Count != 2)
             {
-                con.WriteLine("Usage: KillerPDF.exe --flatten <in.pdf> <out.pdf> [--dpi <n>] [--color-mode color|grayscale|black-white] [--threshold <0-255>] [--compression lossless|jpeg] [--jpeg-quality <1-100>] [--scanned-look all|tilt,paper,grain,soft-focus,shadow]");
+                con.WriteLine("Usage: KillerPDF.exe --flatten <in.pdf> <out.pdf> [--dpi <n>] [--color-mode color|grayscale|black-white] [--threshold <0-255>] [--compression lossless|jpeg] [--jpeg-quality <1-100>] [--scanned-look all|tilt,paper,grain,soft-focus,shadow] [--allow-incomplete]");
                 return 2;
             }
             string inPath = Path.GetFullPath(pos[0]), outPath = Path.GetFullPath(pos[1]);
@@ -1749,14 +1765,16 @@ namespace KillerPDF.Features
             IReadOnlyList<bool> jpegHints =
                 PdfPageRasterInformation.ReadJpegImagePageHints(renderDocument);
 
+            bool allowIncomplete = options.ContainsKey("--allow-incomplete");
+            var incomplete = new IncompletePageLog();
             var pages = new List<PdfEngineIntegration.RasterPage>(pageCount);
             for (int i = 0; i < pageCount; i++)
             {
                 // Composite over white (#148): keeps the /SMask alpha channel out
                 // of the rebuilt page images entirely.
                 // #141: WithAnnotations, or the rebuild drops the file's own markup.
-                PdfRenderedPage rendered = renderSession.RenderPage(i);
-                rendered.RequireComplete(i);
+                PdfRenderedPage rendered = renderSession.RenderPage(i, requireComplete: !allowIncomplete);
+                incomplete.Note(i, rendered);
                 byte[] raw = rendered.Pixels;
                 int w = rendered.Width, h = rendered.Height;
                 int rot = rotations != null && i < rotations.Length ? rotations[i] : 0;
@@ -1807,6 +1825,7 @@ namespace KillerPDF.Features
                     Bitonal: bitonal, Grayscale: grayscale));
             }
             if (!CliPublishOutput(inPath, outPath, PdfEngineIntegration.CreateRasterDocument(pages), con)) return 2;
+            CliReportIncomplete(incomplete, con);
             con.WriteLine($"Flattened {pageCount} pages at {dpi:0} dpi -> {outPath}");
             return 0;
         }
@@ -1832,7 +1851,7 @@ namespace KillerPDF.Features
         {
             if (pos.Count != 1)
             {
-                con.WriteLine("Usage: KillerPDF.exe --print <in.pdf> [--printer <name>] [--pages <range>] [--copies <n>]");
+                con.WriteLine("Usage: KillerPDF.exe --print <in.pdf> [--printer <name>] [--pages <range>] [--copies <n>] [--allow-incomplete]");
                 return 2;
             }
             string inPath = Path.GetFullPath(pos[0]);
@@ -1842,6 +1861,8 @@ namespace KillerPDF.Features
             if (options.TryGetValue("--copies", out var copiesRaw) &&
                 (!int.TryParse(copiesRaw, out copies) || copies < 1 || copies > 99))
             { con.WriteLine("--copies must be 1-99"); return 2; }
+            bool allowIncomplete = options.ContainsKey("--allow-incomplete");
+            var incomplete = new IncompletePageLog();
 
             options.TryGetValue("--password", out var password);
             var (renderPath, rotations, _) = CliPrepareRenderSource(inPath, password, con);
@@ -1889,7 +1910,8 @@ namespace KillerPDF.Features
                 }
                 foreach (var idx in selected)
                 {
-                    PdfRenderedPage rendered = renderSession.RenderPage(idx);
+                    PdfRenderedPage rendered = renderSession.RenderPage(idx, requireComplete: !allowIncomplete);
+                    incomplete.Note(idx, rendered);
                     byte[] raw = rendered.Pixels;
                     int w = rendered.Width, h = rendered.Height;
                     int rot = rotations != null && idx < rotations.Length ? rotations[idx] : 0;
@@ -1937,6 +1959,7 @@ namespace KillerPDF.Features
             // DoPrint for why. Synchronous Write is fine headless.
             var writer = PrintQueue.CreateXpsDocumentWriter(queue);
             writer.Write(fixedDoc, ticket);
+            CliReportIncomplete(incomplete, con);
             con.WriteLine($"Sent {selected.Count} pages x{copies} to \"{queue.FullName}\".");
             return 0;
         }

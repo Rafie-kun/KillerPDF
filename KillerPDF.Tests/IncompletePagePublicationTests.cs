@@ -68,6 +68,12 @@ public sealed class IncompletePagePublicationTests
 
         foreach (string cli in new[] { "CliRunner.cs", "CliRunner.Pages.cs" })
             Assert.DoesNotContain("requireComplete: false", Read("Features", "Cli", cli));
+        // to-image, flatten and print opt in only through --allow-incomplete, and name the pages.
+        string runner = Read("Features", "Cli", "CliRunner.cs");
+        Assert.Equal(3, Count(runner, "bool allowIncomplete = options.ContainsKey(\"--allow-incomplete\");"));
+        Assert.Equal(3, Count(runner, "requireComplete: !allowIncomplete"));
+        Assert.Equal(3, Count(runner, "CliReportIncomplete(incomplete, con);"));
+        Assert.DoesNotContain("rendered.RequireComplete(", runner);
     }
 
     private static int Count(string source, string value)
