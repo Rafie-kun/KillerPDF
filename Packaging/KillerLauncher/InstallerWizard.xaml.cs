@@ -20,6 +20,15 @@ namespace KillerLauncher
         private InstallerWizard()
         {
             InitializeComponent();
+            new KillerFamily.Accessibility.OverlayFocus(this).Track(NoticeOverlay);
+            Closing += (_, e) =>
+            {
+                if (NoticeOpen && !_closeAfterNotice) { e.Cancel = true; DismissNotice(); }
+            };
+            PreviewKeyDown += (_, e) =>
+            {
+                if (NoticeOpen && e.Key == Key.Escape) { e.Handled = true; NoticeOk_Click(this, new RoutedEventArgs()); }
+            };
             TaskbarIdentity.Track(this);
             SetupVersionLabel.Text = LauncherStrings.Format("SetupVersion",
                 typeof(InstallerWizard).Assembly.GetName().Version!.ToString(3));
@@ -120,6 +129,7 @@ namespace KillerLauncher
 
         private async void Next_Click(object sender, RoutedEventArgs e)
         {
+            if (NoticeOpen) return;
             if (_installed)
             {
                 Process.Start(new ProcessStartInfo(Program.InstalledExecutable(_installedDirectory)) { UseShellExecute = true });
@@ -175,6 +185,7 @@ namespace KillerLauncher
         }
 
         private enum NoticeKind { Information, Warning, Error }
+        private bool NoticeOpen => NoticeOverlay?.Visibility == Visibility.Visible;
 
         private void ShowNotice(string heading, string message, NoticeKind kind)
         {
@@ -186,13 +197,20 @@ namespace KillerLauncher
                 : kind == NoticeKind.Warning ? Color.FromRgb(255, 190, 80) : Color.FromRgb(30, 165, 76));
             NoticeRing.BorderBrush = NoticeGlyph.Foreground;
             NoticeOverlay.Visibility = Visibility.Visible;
+            ContentCard.IsEnabled = SidebarCard.IsEnabled = false;
             NoticeOk.Focus();
         }
 
         private void NoticeOk_Click(object sender, RoutedEventArgs e)
         {
             if (_closeAfterNotice) { DialogResult = false; return; }
+            DismissNotice();
+        }
+
+        private void DismissNotice()
+        {
             NoticeOverlay.Visibility = Visibility.Collapsed;
+            ContentCard.IsEnabled = SidebarCard.IsEnabled = true;
         }
 
         private static int InstallForEveryone(bool desktop, string installDirectory)
@@ -211,6 +229,7 @@ namespace KillerLauncher
 
         private void Scope_Checked(object sender, RoutedEventArgs e)
         {
+            if (NoticeOpen) return;
             if (InstallFolder == null) return;
             string user = Program.DefaultInstallDirectory(false);
             string machine = Program.DefaultInstallDirectory(true);
@@ -222,6 +241,7 @@ namespace KillerLauncher
 
         private void Browse_Click(object sender, RoutedEventArgs e)
         {
+            if (NoticeOpen) return;
             using var dialog = new System.Windows.Forms.FolderBrowserDialog
             {
                 Description = LauncherStrings.Get("ChooseFolder"),
@@ -233,17 +253,19 @@ namespace KillerLauncher
                 InstallFolder.Text = dialog.SelectedPath;
         }
 
-        private void Back_Click(object sender, RoutedEventArgs e) { if (_page > 0) { _page--; RenderPage(); } }
+        private void Back_Click(object sender, RoutedEventArgs e) { if (!NoticeOpen && _page > 0) { _page--; RenderPage(); } }
         private void Uninstall_Click(object sender, RoutedEventArgs e)
         {
-            if (_existing == null) return;
+            if (NoticeOpen || _existing == null) return;
             Process.Start(new ProcessStartInfo(_existing.Executable, "/uninstall") { UseShellExecute = true });
             DialogResult = true;
         }
-        private void Cancel_Click(object sender, RoutedEventArgs e) { DialogResult = false; }
+        private void Cancel_Click(object sender, RoutedEventArgs e) { if (!NoticeOpen) DialogResult = false; }
         private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) { if (e.LeftButton == MouseButtonState.Pressed) DragMove(); }
-        private void Website_Click(object sender, RoutedEventArgs e) =>
-            Process.Start(new ProcessStartInfo("https://thekiller.net") { UseShellExecute = true });
+        private void Website_Click(object sender, RoutedEventArgs e)
+        {
+            if (!NoticeOpen) Process.Start(new ProcessStartInfo("https://thekiller.net") { UseShellExecute = true });
+        }
 
         internal static ImageBrush CreateGrain()
         {
