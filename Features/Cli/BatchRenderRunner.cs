@@ -139,7 +139,7 @@ namespace KillerPDF.Features
             string outRoot = Path.GetFullPath(output).TrimEnd('\\', '/');
             Directory.CreateDirectory(outRoot);
             var log = new List<string> { "File,Page,Status,Milliseconds,Width,Height,Detail,OpenMilliseconds" };
-            int ok = 0, skip = 0, fail = 0;
+            int ok = 0, skip = 0, fail = 0, incomplete = 0;
             long totalMs = 0;
             var total = Stopwatch.StartNew();
 
@@ -184,12 +184,13 @@ namespace KillerPDF.Features
                 foreach (var row in rows)
                 {
                     if (row.Status == "OK") ok++;
+                    if (row.Incomplete) incomplete++;
                     else if (row.Status == "SKIP") skip++;
                     else fail++;
                     totalMs += row.Milliseconds;
                     if (!quiet)
                         con.WriteLine(row.Detail.Length > 0
-                            ? $"{row.Status} {rel} p{row.Page + 1} {row.Milliseconds} ms ({row.Detail})"
+                            ? $"{(row.Incomplete ? "INCOMPLETE" : row.Status)} {rel} p{row.Page + 1} {row.Milliseconds} ms ({row.Detail})"
                             : $"{row.Status} {rel} p{row.Page + 1} {row.Milliseconds} ms");
                     log.Add(string.Join(",", Csv(rel), (row.Page + 1).ToString(CultureInfo.InvariantCulture),
                         row.Status, row.Milliseconds.ToString(CultureInfo.InvariantCulture),
@@ -199,7 +200,10 @@ namespace KillerPDF.Features
                 }
 
             total.Stop();
-            con.WriteLine($"Done. {work.Count} files, {ok} pages OK, {skip} skipped, {fail} failed, {totalMs} ms summed page rendering, {total.ElapsedMilliseconds} ms elapsed.");
+            // Kept incomplete pages stay OK in the log so gate runs compare with their baselines; the
+            // summary and console name them.
+            string kept = incomplete > 0 ? $" ({incomplete} incomplete, kept by --allow-incomplete)" : string.Empty;
+            con.WriteLine($"Done. {work.Count} files, {ok} pages OK{kept}, {skip} skipped, {fail} failed, {totalMs} ms summed page rendering, {total.ElapsedMilliseconds} ms elapsed.");
             if (!string.IsNullOrWhiteSpace(logPath))
             {
                 try
@@ -224,6 +228,7 @@ namespace KillerPDF.Features
             public int Width;
             public int Height;
             public string Detail;
+            public bool Incomplete;
         }
 
         // Fits each page inside a size-by-size box through the engine render session,
@@ -273,6 +278,8 @@ namespace KillerPDF.Features
                         row.Width = rendered.Width;
                         row.Height = rendered.Height;
                         row.Detail = string.Join(" ", rendered.Diagnostics);
+                        row.Incomplete = PdfRenderCompleteness.Classify(rendered.Diagnostics)
+                            .Any(diagnostic => diagnostic.BlocksPublication);
                         using var output = File.Create($"{dstBase}-page-{(idx + 1).ToString(CultureInfo.InvariantCulture).PadLeft(3, '0')}.png");
                         BitmapHelpers.WritePng(output, rendered.Pixels, rendered.Width, rendered.Height);
                     }

@@ -78,6 +78,10 @@ public sealed class IncompletePagePublicationTests
         Assert.Equal(3, Count(runner, "requireComplete: !allowIncomplete"));
         Assert.Equal(3, Count(runner, "CliReportIncomplete(incomplete, con);"));
         Assert.DoesNotContain("rendered.RequireComplete(", runner);
+        // batch-render keeps the page's log row OK for gate baselines but marks and counts it.
+        string batch = Read("Features", "Cli", "BatchRenderRunner.cs");
+        Assert.Contains("row.Incomplete = PdfRenderCompleteness.Classify(rendered.Diagnostics)", batch);
+        Assert.Contains("incomplete, kept by --allow-incomplete", batch);
     }
 
     private static int Count(string source, string value)
