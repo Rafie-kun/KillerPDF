@@ -53,6 +53,28 @@ public sealed class InstallerRegistrationTests
         Assert.Contains("if (!rollsBack) arguments.Add(\"/no-rollback\");", launcher);
     }
 
+    // Setup rolls back only what registration has not yet committed. A backup that could not be
+    // deleted after a successful registration used to restore a half-deleted previous copy under a
+    // registry entry naming the new version. An empty folder, such as one made in the folder picker,
+    // is not a previous copy, so a failed first install there no longer deletes the registered payload.
+    [Fact]
+    public void SetupRollsBackOnlyBeforeRegistrationCommits()
+    {
+        string launcher = File.ReadAllText(Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(SourcePath()))!,
+            "Packaging", "KillerLauncher", "Program.cs"));
+        string install = launcher[launcher.IndexOf("bool movedExisting = false;", StringComparison.Ordinal)..];
+        install = install[..install.IndexOf("internal static string DefaultInstallDirectory(", StringComparison.Ordinal)];
+
+        int empty = install.IndexOf("if (!Directory.EnumerateFileSystemEntries(destination).Any()) Directory.Delete(destination);", StringComparison.Ordinal);
+        Assert.True(empty >= 0 && empty < install.IndexOf("movedExisting = true;", StringComparison.Ordinal));
+        int committed = install.IndexOf("registered = true;", StringComparison.Ordinal);
+        Assert.True(committed > install.IndexOf("RunRegistration(", StringComparison.Ordinal));
+        Assert.True(committed < install.IndexOf("RunMaintenance(destination, \"/remove-user-install\");", StringComparison.Ordinal));
+        Assert.Contains("if (movedExisting) PortableDirectoryCleanup.TryDelete(backup);", install);
+        Assert.DoesNotContain("DeleteDirectoryWithRetries(backup)", install);
+        Assert.Contains("if (!registered && movedExisting && Directory.Exists(backup))", install);
+    }
+
     // Owner decision, 2026-10-23: an optional desktop shortcut that Windows refuses no longer fails
     // setup. The install finishes and reports a warning; a Start menu shortcut failure stays fatal.
     [Fact]

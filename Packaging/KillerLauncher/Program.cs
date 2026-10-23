@@ -175,6 +175,7 @@ namespace KillerLauncher
             string staging = destination + ".staging-" + Guid.NewGuid().ToString("N");
             string backup = destination + ".previous-" + Guid.NewGuid().ToString("N");
             bool movedExisting = false;
+            bool registered = false;
             try
             {
                 ExtractAndVerify(staging);
@@ -182,8 +183,14 @@ namespace KillerLauncher
                 ValidateInstallDestination(destination);
                 if (Directory.Exists(destination))
                 {
-                    MoveDirectoryWithRetries(destination, backup);
-                    movedExisting = true;
+                    // An empty folder, such as one made in the folder picker, holds no previous copy,
+                    // so a failed first install there must not be "restored" to it.
+                    if (!Directory.EnumerateFileSystemEntries(destination).Any()) Directory.Delete(destination);
+                    else
+                    {
+                        MoveDirectoryWithRetries(destination, backup);
+                        movedExisting = true;
+                    }
                 }
                 MoveDirectoryWithRetries(staging, destination);
 
@@ -194,6 +201,8 @@ namespace KillerLauncher
                 if (registrationExit != 0)
                     throw new System.ComponentModel.Win32Exception(registrationExit,
                         LauncherStrings.Format("RegistrationFailed", registrationExit));
+                // Windows now lists the new copy, so nothing after this point rolls it back.
+                registered = true;
 
                 // A machine-wide install supersedes the current account's per-user copy. This
                 // also covers unattended /silent installs that do not return through the portable
@@ -201,7 +210,9 @@ namespace KillerLauncher
                 if (machine && string.IsNullOrWhiteSpace(testRoot))
                     RunMaintenance(destination, "/remove-user-install");
 
-                if (movedExisting) DeleteDirectoryWithRetries(backup);
+                // A previous copy a late reader still holds is left beside the install rather than
+                // failing an install that is already complete.
+                if (movedExisting) PortableDirectoryCleanup.TryDelete(backup);
                 return 0;
             }
             catch
@@ -209,7 +220,7 @@ namespace KillerLauncher
                 // The previous version comes back first; cleanup of the staging folder is best
                 // effort afterward, so a locked file there can neither strand the backup nor
                 // replace the exception that explains what went wrong.
-                if (movedExisting && Directory.Exists(backup))
+                if (!registered && movedExisting && Directory.Exists(backup))
                 {
                     try
                     {
