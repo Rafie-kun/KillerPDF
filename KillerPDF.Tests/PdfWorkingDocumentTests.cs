@@ -10,6 +10,19 @@ namespace KillerPDF.Tests;
 
 public sealed class PdfWorkingDocumentTests
 {
+    // A full or unavailable temp folder must not turn into a repair offer or a "damaged file" or
+    // "wrong password" message on any open path; each reports the working-copy problem.
+    [Fact]
+    public void EveryOpenPathReportsAWorkingCopyFailureAsSuch()
+    {
+        string source = File.ReadAllText(Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(SourcePath()))!,
+            "Shell", "FileOperations.cs"));
+        Assert.Equal(8, source.Split("catch (WorkingCopyUnavailableException").Length - 1);
+        Assert.Contains("when (error is not OutOfMemoryException and not WorkingCopyUnavailableException)", source);
+    }
+
+    private static string SourcePath([System.Runtime.CompilerServices.CallerFilePath] string path = "") => path;
+
     // Opening writes a complete copy that the viewer renders from. Registering it with the parse
     // already made keeps one parse tree instead of parsing the same bytes a second time.
     [Fact]

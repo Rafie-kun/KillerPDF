@@ -85,11 +85,7 @@ namespace KillerPDF
             }
             catch (WorkingCopyUnavailableException ex)
             {
-                // The PDF itself is fine; there was no room for KillerPDF's working copy.
-                _doc?.Close();
-                _doc = null;
-                KillerDialog.Show(this, Loc("Str_Err_WorkingCopy") + "\n" + ex.Message, Loc("Str_Dlg_AppTitle"),
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                ShowWorkingCopyProblem(ex);
             }
             catch (Exception ex) when (PdfImport.IsOwnerPasswordException(ex))
             {
@@ -114,6 +110,10 @@ namespace KillerPDF
                     _currentFile = tempDec;
                     FinishOpenFile(path, tempDec);
                     _openedFromProtected = true;   // #149: unlocked with the user's password
+                }
+                catch (WorkingCopyUnavailableException copy)
+                {
+                    ShowWorkingCopyProblem(copy);
                 }
                 catch (Exception) when (PdfEngineIntegration.IsRestrictedForPassword(srcPath, pw))
                 {
@@ -140,6 +140,10 @@ namespace KillerPDF
                     KillerDialog.Show(this,
                         $"\"{System.IO.Path.GetFileName(path)}\" has a non-standard structure and was opened read-only.\n\nEditing, saving, and some other features may not work correctly.",
                         "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+                catch (WorkingCopyUnavailableException copy)
+                {
+                    ShowWorkingCopyProblem(copy);
                 }
                 catch
                 {
@@ -175,6 +179,16 @@ namespace KillerPDF
 
         // The open-failure classifiers (IsEofParseException, IsXRefException, IsNetworkPath,
         // IsOwnerPasswordException, IsPasswordException) live in Services/PdfImport.cs.
+
+        // The PDF itself is fine; there was no room for KillerPDF's working copy, usually a full or
+        // unavailable temp folder. Every open path reports that instead of offering a repair.
+        private void ShowWorkingCopyProblem(WorkingCopyUnavailableException error)
+        {
+            _doc?.Close();
+            _doc = null;
+            KillerDialog.Show(this, Loc("Str_Err_WorkingCopy") + "\n" + error.Message, Loc("Str_Dlg_AppTitle"),
+                MessageBoxButton.OK, MessageBoxImage.Error);
+        }
 
         private void FinishOpenFile(string displayPath, string workingPath)
         {
@@ -359,6 +373,12 @@ namespace KillerPDF
                         : string.Format(Loc("Str_Dlg_Repaired"), System.IO.Path.GetFileName(path)),
                     "KillerPDF", MessageBoxButton.OK, MessageBoxImage.None);
             }
+            catch (WorkingCopyUnavailableException copy)
+            {
+                HideBusyOverlay(busy);
+                _asyncOpenPending = false;
+                ShowWorkingCopyProblem(copy);
+            }
             catch (Exception ex)
             {
                 HideBusyOverlay(busy);
@@ -393,6 +413,10 @@ namespace KillerPDF
                 _currentFile = tempDec;
                 FinishOpenFile(displayPath, tempDec);
                 _openedFromProtected = true;
+            }
+            catch (WorkingCopyUnavailableException copy)
+            {
+                ShowWorkingCopyProblem(copy);
             }
             catch (Exception ex)
             {
@@ -461,6 +485,13 @@ namespace KillerPDF
                 FinalizeAsyncOpen();
                 EndCancellableOp(ct);
             }
+            catch (WorkingCopyUnavailableException copy)
+            {
+                HideBusyOverlay(busy);
+                _asyncOpenPending = false;
+                ShowWorkingCopyProblem(copy);
+                EndCancellableOp(ct);
+            }
             catch (Exception ex)
             {
                 HideBusyOverlay(busy);
@@ -484,7 +515,8 @@ namespace KillerPDF
                     System.IO.Path.GetFileName(displayPath), _doc.PageCount));
                 return true;
             }
-            catch (Exception error) when (error is not OutOfMemoryException)
+            // A full or unavailable temp folder is reported as such, not answered with a repair.
+            catch (Exception error) when (error is not OutOfMemoryException and not WorkingCopyUnavailableException)
             {
                 _doc?.Close();
                 _doc = null;
@@ -508,6 +540,10 @@ namespace KillerPDF
                 _currentFile = tempDec;
                 FinishOpenFile(displayPath, tempDec);
                 _openedFromProtected = true;   // #149: unlocked with the owner password
+            }
+            catch (WorkingCopyUnavailableException copy)
+            {
+                ShowWorkingCopyProblem(copy);
             }
             catch (Exception error) when (error is not OutOfMemoryException)
             {
@@ -543,6 +579,10 @@ namespace KillerPDF
             try
             {
                 PdfEngineIntegration.RemoveEncryption(sourcePath, unlockedPath, password);
+            }
+            catch (WorkingCopyUnavailableException copy)
+            {
+                ShowWorkingCopyProblem(copy);
             }
             catch (Exception error) when (error is not OutOfMemoryException)
             {
