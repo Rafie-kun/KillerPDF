@@ -6,18 +6,20 @@ namespace KillerPDF.Tests;
 
 public sealed class HighContrastResourceTests
 {
-    // Hovered menu and tool-search text drew a theme accent on the system window color in High
-    // Contrast; it pairs with the overlay's WindowBrush hover fill as window text instead.
+    // A hovered or keyboard-highlighted menu item, and the selected tool-search row, use the
+    // system highlight pair in High Contrast; window colors made them look like every other item.
     [Fact]
-    public void HoveredMenuTextUsesTheSystemWindowTextColor()
+    public void HighlightedMenuItemsUseTheSystemHighlightColors()
     {
         string source = File.ReadAllText(Path.Combine(
             Path.GetDirectoryName(Path.GetDirectoryName(SourcePath()))!, "Controls", "HighContrastResources.cs"));
         string Group(string brush) => string.Concat(Regex.Matches(source,
             @"Brushes\(SystemColors\." + brush + @",([^;]*)\);").Select(match => match.Groups[1].Value));
 
-        Assert.Contains("\"MenuHoverBrush\"", Group("WindowBrush"));
-        Assert.Contains("\"MenuHoverTextBrush\"", Group("WindowTextBrush"));
+        Assert.Contains("\"MenuHoverBrush\"", Group("HighlightBrush"));
+        Assert.Contains("\"MenuHoverTextBrush\"", Group("HighlightTextBrush"));
+        Assert.DoesNotContain("\"MenuHoverBrush\"", Group("WindowBrush"));
+        Assert.DoesNotContain("\"MenuHoverTextBrush\"", Group("WindowTextBrush"));
     }
 
     private static string SourcePath([System.Runtime.CompilerServices.CallerFilePath] string path = "") => path;

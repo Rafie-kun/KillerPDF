@@ -43,7 +43,7 @@ namespace KillerPDF
         private Border? _toolSearchCard;
         private StackPanel? _toolSearchList;
         private List<ToolSearchEntry> _toolSearchEntries = [];
-        private readonly List<(Border Row, TextBlock Name, ToolSearchEntry Entry)> _toolSearchRows = [];
+        private readonly List<(Border Row, TextBlock Name, TextBlock Keys, ToolSearchEntry Entry)> _toolSearchRows = [];
         private int _toolSearchSelected = -1;
         private bool _toolSearchOpen;
 
@@ -631,7 +631,7 @@ namespace KillerPDF
                 e.Handled = true;
                 RunToolSearchEntry(entry);
             };
-            _toolSearchRows.Add((row, name, entry));
+            _toolSearchRows.Add((row, name, keys, entry));
             return row;
         }
 
@@ -642,14 +642,17 @@ namespace KillerPDF
             index = Math.Clamp(index, 0, _toolSearchRows.Count - 1);
             if (_toolSearchSelected >= 0 && _toolSearchSelected < _toolSearchRows.Count)
             {
-                var (oldRow, oldName, _) = _toolSearchRows[_toolSearchSelected];
+                var (oldRow, oldName, oldKeys, _) = _toolSearchRows[_toolSearchSelected];
                 oldRow.Background = Brushes.Transparent;
                 oldName.SetResourceReference(TextBlock.ForegroundProperty, "TextBrush");
+                oldKeys.SetResourceReference(TextBlock.ForegroundProperty, "MutedTextBrush");
             }
             _toolSearchSelected = index;
-            var (row, name, _) = _toolSearchRows[index];
+            var (row, name, keys, _) = _toolSearchRows[index];
             row.SetResourceReference(Border.BackgroundProperty, "MenuHoverBrush");
             name.SetResourceReference(TextBlock.ForegroundProperty, "MenuHoverTextBrush");
+            // The shortcut follows the hover text too, as a highlighted menu item's gesture does.
+            keys.SetResourceReference(TextBlock.ForegroundProperty, "MenuHoverTextBrush");
             row.BringIntoView();
         }
     }

@@ -103,7 +103,7 @@ namespace KillerFamily.Accessibility
                 "OverlayWindowBrush", "MenuBackgroundBrush", "BgFlyout", "SidebarPaneBrush", "FileDialogPaneBrush",
                 "ComboFieldBrush", "ComboFieldHoverBrush", "ComboPopupBrush", "ComboButtonBrush",
                 "ComboButtonHoverBrush", "DropdownArrowBrush", "DialogTitleBarBrush", "RowAltBrush",
-                "RowHoverBrush", "MenuHoverBrush", "SurfaceHoverBrush", "OutlinePressedBrush");
+                "RowHoverBrush", "SurfaceHoverBrush", "OutlinePressedBrush");
             Brushes(SystemColors.WindowBrush, "AboutPanelBrush", "EditorPaneBrush", "InputFieldBrush", "KeyCapBrush",
                 "CalendarEvenColumnBrush", "CalendarOddColumnBrush", "CalendarEvenHeaderBrush", "CalendarOddHeaderBrush",
                 "CalendarOutsideMonthBrush", "CalendarWeekendBrush", "CalendarWeekendHeaderBrush", "CalendarDayHoverBrush",
@@ -128,16 +128,16 @@ namespace KillerFamily.Accessibility
                 "DatabaseActiveTextBrush", "DatabaseMetadataBrush", "InputEdgeBrush", "PaneEdgeBrush", "BarEdgeBrush",
                 "BarSepBrush", "ChipEdgeBrush", "AboutPanelEdgeBrush", "ConsoleTextBrush",
                 "ConsoleBorderBrush", "ReportMetricBrush", "TreeLineBrush", "TopologyNodeTextBrush", "TopologyNodeBorderBrush",
-                "TopologyNodeHoverTextBrush", "MenuHoverTextBrush", "TerminalForegroundBrush", "MonitorTextBrush", "MonitorMutedBrush",
+                "TopologyNodeHoverTextBrush", "TerminalForegroundBrush", "MonitorTextBrush", "MonitorMutedBrush",
                 "ComparisonBarForegroundBrush", "AnnotationBarBorderBrush", "WindowFrameBrush", "FooterAccentBrush", "DropBorder");
             Brushes(SystemColors.HighlightBrush, "PrimaryBrush", "PrimaryHoverBrush", "PrimaryPressedBrush",
                 "PrimaryFillBaseBrush", "PrimaryFillBrush", "SelectionBg", "RowSelectedBrush", "SelectionAccent",
                 "OutlineHoverBrush", "OutlineHoverFillBrush", "CaptionHoverBrush", "CaptionCloseHoverBrush",
-                "CalendarViewSelectedBrush");
+                "CalendarViewSelectedBrush", "MenuHoverBrush");
             Brushes(SystemColors.HighlightBrush, "DatabaseSelectionBrush", "TextSelectionBrush", "TabActiveRingBrush",
                 "CheckBoxCheckedBackgroundBrush", "CheckBoxCheckedBrush", "FocusedPaneBrush", "SettingsOpenRowBg");
             Brushes(SystemColors.HighlightTextBrush, "OnPrimaryBrush", "SelectionFg", "OutlineHoverTextBrush",
-                "ComboHighlightTextBrush", "CaptionHoverTextBrush", "CaptionCloseHoverTextBrush");
+                "ComboHighlightTextBrush", "CaptionHoverTextBrush", "CaptionCloseHoverTextBrush", "MenuHoverTextBrush");
             Brushes(SystemColors.HighlightTextBrush, "CaptionCloseHoverFgBrush", "AboutCloseHoverFg", "CaptionPressedTextBrush",
                 "DatabaseSelectionTextBrush", "TextSelectionTextBrush", "GridSelectedTextBrush", "CheckMarkBrush",
                 "CheckBoxCheckBrush", "OnOutlineBtnBrush");
