@@ -1527,26 +1527,46 @@ internal static class PdfEngineIntegration
     internal static byte[] MergeReadableFiles(IReadOnlyList<string> paths)
     {
         ArgumentNullException.ThrowIfNull(paths);
-        PdfDocument empty = PdfDocument.Open(new PdfDocumentBuilder().Build());
-        var editor = new PdfIncrementalPageEditor(empty);
-        foreach (string path in paths)
+        var rejected = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        while (true)
         {
+            PdfDocument empty = PdfDocument.Open(new PdfDocumentBuilder().Build());
+            var editor = new PdfIncrementalPageEditor(empty);
+            var sourcePaths = new Dictionary<PdfDocument, string>();
+            foreach (string path in paths)
+            {
+                if (rejected.Contains(path)) continue;
+                try
+                {
+                    if (string.Equals(Path.GetExtension(path), ".pdf",
+                            StringComparison.OrdinalIgnoreCase))
+                    {
+                        PdfDocument document = PdfDocument.Open(File.ReadAllBytes(path));
+                        editor.AddImportedDocument(document);
+                        sourcePaths[document] = path;
+                    }
+                    else
+                        AppendImageFrames(editor, path);
+                }
+                catch
+                {
+                    // Folder and archive imports deliberately retain every readable entry.
+                }
+            }
+            if (editor.PageCount == 0)
+                throw new InvalidOperationException("No readable PDF or image pages were found.");
             try
             {
-                if (string.Equals(Path.GetExtension(path), ".pdf",
-                        StringComparison.OrdinalIgnoreCase))
-                    editor.AddImportedDocument(PdfDocument.Open(File.ReadAllBytes(path)));
-                else
-                    AppendImageFrames(editor, path);
+                return editor.Build();
             }
-            catch
+            // A PDF can open and import yet be rejected while its pages are built (#455). It is
+            // skipped like any other unreadable entry and the rest is built again; each pass
+            // rejects one more file, so this ends.
+            catch (Exception ex) when (IsImportFailure(ex) && editor.FailedImportSource is PdfDocument failed
+                && sourcePaths.TryGetValue(failed, out string? failedPath) && rejected.Add(failedPath))
             {
-                // Folder and archive imports deliberately retain every readable entry.
             }
         }
-        if (editor.PageCount == 0)
-            throw new InvalidOperationException("No readable PDF or image pages were found.");
-        return editor.Build();
     }
 
     private static void AppendImageFrames(PdfIncrementalPageEditor editor, string path)

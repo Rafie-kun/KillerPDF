@@ -14,6 +14,20 @@ public sealed class MergeSourceDiagnosticsTests : IDisposable
 {
     private readonly string _directory = Path.Combine(Path.GetTempPath(), "killerpdf-merge-diagnostics-" + Guid.NewGuid().ToString("N"));
 
+    // A folder or archive import keeps every readable entry. A PDF that opens but is rejected while
+    // its pages are built used to abort the whole import instead of being skipped.
+    [Fact]
+    public void MergeReadableFiles_SkipsASourceRejectedWhileBuildingPages()
+    {
+        string first = Write("base.pdf", new PdfDocumentBuilder().AddBlankPage().Build());
+        string rejected = Write("rejected.pdf", ReversedStitchingBounds());
+        string last = Write("last.pdf", new PdfDocumentBuilder().AddBlankPage().AddBlankPage().Build());
+
+        PdfDocument merged = PdfDocument.Open(PdfEngineIntegration.MergeReadableFiles([first, rejected, last]));
+
+        Assert.Equal(3, PdfPageInformation.Read(merged).Count);
+    }
+
     [Fact]
     public void MergeFiles_NamesTheRejectedSourceAndRetainsTheEngineReason()
     {
