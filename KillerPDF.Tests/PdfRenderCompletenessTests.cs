@@ -195,6 +195,7 @@ public sealed class PdfRenderCompletenessTests
     [InlineData("A transfer function could not be read and was ignored.", "Recovery")]
     [InlineData("Invalid Type 1 font lengths were recovered from the embedded program.", "Recovery")]
     [InlineData("A comb field value exceeded MaxLen; only the declared cells were rendered.", "Recovery")]
+    [InlineData("Transparency blend-mode rendering is not implemented.", "Recovery")]
     public void ReviewedRecoveriesRemainPublishable(string message, string expected)
     {
         PdfRenderDiagnostic diagnostic = Assert.Single(PdfRenderCompleteness.Classify([message]));
@@ -208,7 +209,6 @@ public sealed class PdfRenderCompletenessTests
     [InlineData("A requested form-field text appearance was regenerated.")]
     [InlineData("A requested empty form-field appearance was regenerated.")]
     [InlineData("Transfer functions are not applied to process-color output.")]
-    [InlineData("Transparency blend-mode rendering is not implemented.")]
     [InlineData("Cyclic Form XObject expansion limit reached.")]
     [InlineData("Invalid page resources were treated as empty.")]
     [InlineData("Text outlines for font ArialMT are not available.")]

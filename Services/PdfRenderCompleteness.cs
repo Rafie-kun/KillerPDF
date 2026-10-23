@@ -34,6 +34,8 @@ internal static class PdfRenderCompleteness
         ["A transfer function could not be read and was ignored."] = PdfRenderDiagnosticKind.Recovery,
         ["Invalid Type 1 font lengths were recovered from the embedded program."] = PdfRenderDiagnosticKind.Recovery,
         ["A comb field value exceeded MaxLen; only the declared cells were rendered."] = PdfRenderDiagnosticKind.Recovery,
+        // Despite the wording, an unrecognised blend mode is painted as Normal on every path.
+        ["Transparency blend-mode rendering is not implemented."] = PdfRenderDiagnosticKind.Recovery,
     };
 
     // The renderer names only these graphics-state stroke keys when it drops a malformed one.
