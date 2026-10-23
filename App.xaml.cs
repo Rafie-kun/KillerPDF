@@ -474,6 +474,15 @@ namespace KillerPDF
 
         private void OnDispatcherException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
+            if (KillerPDF.Features.CommandLineCrash.Console is not null)
+            {
+                // A command-line run has no window to recover; report it and end the run.
+                e.Handled = true;
+                KillerPDF.Features.CommandLineCrash.TryReport(e.Exception,
+                    CrashReporter.Capture(e.Exception, "Dispatcher (command line)"));
+                Shutdown(1);
+                return;
+            }
             if (RenderFailureRecovery.IsRenderThreadFailure(e.Exception))
             {
                 e.Handled = true;
@@ -493,6 +502,12 @@ namespace KillerPDF
             var ex = e.ExceptionObject as Exception
                      ?? new Exception(e.ExceptionObject?.ToString() ?? "Unknown error");
             var logPath = CrashReporter.Capture(ex, "AppDomain");
+            // A command-line run reports on its console; only a desktop session gets the dialog.
+            if (KillerPDF.Features.CommandLineCrash.TryReport(ex, logPath))
+            {
+                CleanupSessionTemps();
+                return;
+            }
 
             try
             {

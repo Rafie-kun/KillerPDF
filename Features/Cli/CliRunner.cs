@@ -131,6 +131,7 @@ namespace KillerPDF.Features
             if (command is null) return false;
 
             var con = OpenBatchConsole();
+            CommandLineCrash.Console = con;
             var (positionals, options) = ParseCliArgs(args, command);
             if (options.ContainsKey(CliSecrets.Option))
             {

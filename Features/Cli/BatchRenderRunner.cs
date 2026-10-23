@@ -47,6 +47,7 @@ namespace KillerPDF.Features
             if (flagIdx < 0) return false;
 
             var con = BatchRunner.OpenBatchConsole();
+            CommandLineCrash.Console = con;
             string? input = null, output = null, logPath = null;
             int size = DefaultSize, pages = 1;
             int parallelism = 0;

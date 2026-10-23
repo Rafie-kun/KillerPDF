@@ -62,6 +62,7 @@ namespace KillerPDF.Features
             if (flagIdx < 0) return false;
 
             var con = OpenBatchConsole();
+            CommandLineCrash.Console = con;
 
             // Positional args after the flag: input, output. Options anywhere after the flag.
             string? input = null, output = null, logPath = null;

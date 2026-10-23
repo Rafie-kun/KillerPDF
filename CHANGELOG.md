@@ -39,6 +39,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Fixed keyboard focus entry, containment and restoration for About and Shortcuts. Added accessible names to icon buttons, thumbnails, scrollbars, file-picker rows, shortcut options and RGB fields; decorative elements stay out of the accessibility tree.
 - Fixed long paths overlapping the recent-locations arrow in 98SE, missing app and installer translations, and truncated installer version text (#409, #440).
 - Release publishing validates artifacts before upload and reports steps needing a retry. Chocolatey publishing reports failure if validation still fails after retrying.
+- Command-line runs report an unexpected failure on the console and exit instead of opening the crash window, which stalled scripts.
 - The website's film grain is lighter, matching KillerTools, and the theme menu can turn it off (Alt+Shift+G). The top bar no longer leaves extra space above the page on narrower windows, and the release details box lifts with an accent border on hover.
 
 ### Added
