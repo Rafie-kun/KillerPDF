@@ -22,6 +22,7 @@ namespace KillerPDF
             var recovered = new List<RecoveredDocument>();
             string? folder = null;
             bool folderUnavailable = false;
+            var unrecovered = new List<Controls.PdfViewer.DocumentSession>();
             Controls.PdfViewer activeViewer = ActiveViewer;
             try
             {
@@ -44,7 +45,11 @@ namespace KillerPDF
                                 AppDataPaths.UserRoot, AppDataPaths.LocalRoot, Path.GetTempPath()));
                             folderUnavailable = folder is null;
                         }
-                        if (folder is null) break;
+                        if (folder is null)
+                        {
+                            unrecovered.Add(session);
+                            continue;
+                        }
                         string name = session.SuggestedName ?? Path.GetFileName(session.OriginalFile ?? "document.pdf");
                         string copy = RenderFailureRecovery.CopyPath(folder, name, recovered.Count);
                         string working = Path.ChangeExtension(copy, ".working.pdf");
@@ -94,6 +99,18 @@ namespace KillerPDF
             try { SaveWindowSettings(); }
             catch (Exception ex) when (ex is not OutOfMemoryException) { CrashReporter.Capture(ex, "Recovery session settings"); }
 
+            if (unrecovered.Count > 0)
+            {
+                // With nowhere to write copies, the restart must not report that the documents simply
+                // reopened. A manifest in the retained session folder names each one and where the
+                // session's working files are kept.
+                List<RecoveredDocument> lost = [.. unrecovered.Select((session, index) => new RecoveredDocument(
+                    session.OriginalFile, Path.Combine(App.TempDir, $"unrecovered-{index + 1:00}.pdf"),
+                    session.SuggestedName, session.LoadedRevision, Loc("Str_Dlg_RenderRecoveryNoFolder")))];
+                string unavailable = RenderFailureRecovery.WriteManifest(App.TempDir, lost);
+                App.RetainRenderRecoveryTemps(unavailable);
+                return unavailable;
+            }
             if (folder is null || recovered.Count == 0) return null;
             string manifest = RenderFailureRecovery.WriteManifest(folder, recovered);
             if (recovered.Any(document => document.RecoveryError is not null)) App.RetainRenderRecoveryTemps(manifest);

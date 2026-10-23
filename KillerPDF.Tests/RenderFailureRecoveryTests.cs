@@ -185,8 +185,14 @@ namespace KillerPDF.Tests
                 < body.IndexOf("foreach (string key in new[] { \"OpenTabs\", \"OpenTabsB\" })", StringComparison.Ordinal),
                 "Recovered originals are dropped from the restore before the manifest exists.");
             Assert.Contains("RenderFailureRecovery.FolderRoots(", body);
-            Assert.DoesNotContain("App.TempDir", body);
+            Assert.DoesNotContain("CreateFolder(App.TempDir)", body);
             Assert.Contains("foreach (string backup in new[] { working, state })", body);
+            // With no folder anywhere, the restart must name the lost changes instead of reporting that
+            // the documents reopened: a manifest in the retained session folder lists them.
+            int unavailable = body.IndexOf("RenderFailureRecovery.WriteManifest(App.TempDir, lost);", StringComparison.Ordinal);
+            Assert.True(unavailable >= 0 && unavailable < body.IndexOf("if (folder is null || recovered.Count == 0) return null;", StringComparison.Ordinal),
+                "Unrecovered documents can still end in a silent null manifest.");
+            Assert.Contains("Loc(\"Str_Dlg_RenderRecoveryNoFolder\")", body);
 
             // A recovered editor lands where committing it would have: turned boxes re-anchored and
             // the box kept on the page.

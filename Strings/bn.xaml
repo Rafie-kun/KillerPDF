@@ -1876,6 +1876,7 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Read_CommentBy">{0}-এর মন্তব্য: {1}</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecovered">উইন্ডোটি আর দেখাতে না পারায় KillerPDF আবার চালু হয়েছে। আপনার অসংরক্ষিত পরিবর্তনগুলো পুনরুদ্ধার করে আবার খোলা হয়েছে, সংরক্ষণের জন্য প্রস্তুত।&#10;&#10;কপিগুলো {0}-এও রাখা আছে। এই সেশনে সফটওয়্যার রেন্ডারিং ব্যবহৃত হচ্ছে।</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecoveryIncomplete">কিছু নথি সম্পূর্ণ পুনরুদ্ধার করা যায়নি:&#10;{0}&#10;&#10;উপলব্ধ পুনরুদ্ধার ফাইল এখানে রাখা হয়েছে: {1}। সংরক্ষণের আগে পুনরুদ্ধার করা কপিগুলো পর্যালোচনা করুন।</sys:String>
+    <sys:String x:Key="Str_Dlg_RenderRecoveryNoFolder">রিকভারি কপির জন্য কোনো ফোল্ডার পাওয়া যায়নি, তাই অসংরক্ষিত পরিবর্তনগুলো রাখা যায়নি।</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRestarted">উইন্ডোটি আর দেখাতে না পারায় KillerPDF আবার চালু হয়েছে। আপনার খোলা ডকুমেন্টগুলো আবার খোলা হয়েছে। এই সেশনে সফটওয়্যার রেন্ডারিং ব্যবহৃত হচ্ছে।</sys:String>
     <sys:String x:Key="Str_Read_MarkedText">চিহ্নিত লেখা: &quot;{0}&quot;</sys:String>
     <sys:String x:Key="Str_Read_MarkedNoText">চিহ্নিত লেখা</sys:String>

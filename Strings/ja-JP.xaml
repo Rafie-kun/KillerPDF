@@ -1896,6 +1896,7 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Read_CommentBy">{0} のコメント: {1}</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecovered">ウィンドウを表示できなくなったため、KillerPDF を再起動しました。未保存の変更は復元され、保存できる状態で再び開かれています。&#10;&#10;コピーは {0} にも保存されています。このセッションではソフトウェア レンダリングを使用します。</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecoveryIncomplete">一部の文書を完全に復元できませんでした。&#10;{0}&#10;&#10;利用可能な復元ファイルは {1} に保存されています。保存する前に、復元されたコピーを確認してください。</sys:String>
+    <sys:String x:Key="Str_Dlg_RenderRecoveryNoFolder">回復用コピーに使えるフォルダーがなかったため、保存されていない変更を保持できませんでした。</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRestarted">ウィンドウを表示できなくなったため、KillerPDF を再起動しました。開いていたドキュメントを再び開きました。このセッションではソフトウェア レンダリングを使用します。</sys:String>
     <sys:String x:Key="Str_Read_MarkedText">マークされたテキスト:「{0}」</sys:String>
     <sys:String x:Key="Str_Read_MarkedNoText">マークされたテキスト</sys:String>

@@ -1896,6 +1896,7 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Read_CommentBy">Kommentar fra {0}: {1}</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecovered">KillerPDF startet på nytt fordi vinduet ikke lenger kunne vise noe. Endringene som ikke var lagret, ble gjenopprettet og er åpne igjen, klare til lagring.&#10;&#10;Kopier ligger også i {0}. Denne økten bruker programvaregjengivelse.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecoveryIncomplete">Noen dokumenter kunne ikke gjenopprettes fullstendig:&#10;{0}&#10;&#10;Tilgjengelige gjenopprettingsfiler er lagret i {1}. Kontroller de gjenopprettede kopiene før du lagrer.</sys:String>
+    <sys:String x:Key="Str_Dlg_RenderRecoveryNoFolder">Ingen mappe var tilgjengelig for en gjenopprettingskopi, så de ulagrede endringene kunne ikke beholdes.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRestarted">KillerPDF startet på nytt fordi vinduet ikke lenger kunne vise noe. De åpne dokumentene ble åpnet igjen. Denne økten bruker programvaregjengivelse.</sys:String>
     <sys:String x:Key="Str_Read_MarkedText">Merket tekst: «{0}»</sys:String>
     <sys:String x:Key="Str_Read_MarkedNoText">Merket tekst</sys:String>

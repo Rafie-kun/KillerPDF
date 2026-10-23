@@ -1899,6 +1899,7 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Read_CommentBy">Комментарий от {0}: {1}</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecovered">KillerPDF перезапущен, потому что окно больше не могло ничего отображать. Несохранённые изменения восстановлены и снова открыты, их можно сохранить.&#10;&#10;Копии также сохранены в {0}. В этом сеансе используется программная отрисовка.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecoveryIncomplete">Не удалось полностью восстановить некоторые документы:&#10;{0}&#10;&#10;Доступные файлы восстановления находятся в {1}. Проверьте восстановленные копии перед сохранением.</sys:String>
+    <sys:String x:Key="Str_Dlg_RenderRecoveryNoFolder">Не нашлось папки для копии восстановления, поэтому несохранённые изменения сохранить не удалось.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRestarted">KillerPDF перезапущен, потому что окно больше не могло ничего отображать. Открытые документы снова открыты. В этом сеансе используется программная отрисовка.</sys:String>
     <sys:String x:Key="Str_Read_MarkedText">Отмеченный текст: «{0}»</sys:String>
     <sys:String x:Key="Str_Read_MarkedNoText">Отмеченный текст</sys:String>

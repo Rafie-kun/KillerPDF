@@ -1878,6 +1878,7 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_Read_CommentBy">{0} 的註解：{1}</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecovered">視窗無法再顯示內容，KillerPDF 已重新啟動。未儲存的變更已復原並重新開啟，可以儲存。&#10;&#10;副本也保留在 {0}。本次工作階段使用軟體轉譯。</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecoveryIncomplete">部分文件無法完整復原：&#10;{0}&#10;&#10;可用的復原檔案保存在 {1}。請在儲存前檢查已復原的副本。</sys:String>
+    <sys:String x:Key="Str_Dlg_RenderRecoveryNoFolder">沒有可用於復原副本的資料夾，因此無法保留未儲存的變更。</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRestarted">視窗無法再顯示內容，KillerPDF 已重新啟動。已重新開啟你開啟的文件。本次工作階段使用軟體轉譯。</sys:String>
     <sys:String x:Key="Str_Read_MarkedText">標記的文字：「{0}」</sys:String>
     <sys:String x:Key="Str_Read_MarkedNoText">標記的文字</sys:String>
