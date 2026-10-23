@@ -69,6 +69,17 @@ namespace KillerPDF.Services
             return Path.Combine(folder, $"{index + 1:00}-{stem}.pdf");
         }
 
+        /// <summary>
+        /// The name a document with nowhere to be saved is listed under: its file, the name its first
+        /// save would offer, or <paramref name="untitled"/>.
+        /// </summary>
+        internal static string LostName(string? originalFile, string? suggestedName, string untitled) =>
+            originalFile is { Length: > 0 } ? Path.GetFileName(originalFile) : suggestedName ?? untitled;
+
+        /// <summary>The restart's line for a lost document: its name and why it was lost.</summary>
+        internal static string LostNote(string? originalFile, string? suggestedName, string untitled, string reason) =>
+            LostName(originalFile, suggestedName, untitled) + ": " + reason;
+
         internal static string WriteManifest(string folder, IReadOnlyList<RecoveredDocument> documents)
         {
             string path = Path.Combine(folder, "recovery.json");

@@ -108,10 +108,13 @@ namespace KillerPDF
                 // reopened. Their lines go to the restarted process on its command line, which needs no
                 // disk. A manifest in the retained session folder also lists them when it can be
                 // written, and either way the restart points at the session's working files there.
-                RecoveryNotes = [.. unrecovered.Select(session => RecoveryName(session) + ": " + Loc("Str_Dlg_RenderRecoveryNoFolder"))];
+                string untitled = Loc("Str_Outline_Untitled"), noFolder = Loc("Str_Dlg_RenderRecoveryNoFolder");
+                RecoveryNotes = [.. unrecovered.Select(session =>
+                    RenderFailureRecovery.LostNote(session.OriginalFile, session.SuggestedName, untitled, noFolder))];
                 List<RecoveredDocument> lost = [.. unrecovered.Select((session, index) => new RecoveredDocument(
                     session.OriginalFile, Path.Combine(App.TempDir, $"unrecovered-{index + 1:00}.pdf"),
-                    RecoveryName(session), session.LoadedRevision, Loc("Str_Dlg_RenderRecoveryNoFolder")))];
+                    RenderFailureRecovery.LostName(session.OriginalFile, session.SuggestedName, untitled),
+                    session.LoadedRevision, noFolder))];
                 string unavailable = Path.Combine(App.TempDir, "recovery.json");
                 try { unavailable = RenderFailureRecovery.WriteManifest(App.TempDir, lost); }
                 catch (Exception ex) when (ex is not OutOfMemoryException) { CrashReporter.Capture(ex, "Render recovery manifest"); }
@@ -149,11 +152,6 @@ namespace KillerPDF
             catch (Exception ex) when (ex is not OutOfMemoryException) { CrashReporter.Capture(ex, "Recovery session settings"); }
             return manifest;
         }
-
-        // A lost document is listed by its file name, the name its first save would offer, or as untitled.
-        private string RecoveryName(Controls.PdfViewer.DocumentSession session) =>
-            session.OriginalFile is { Length: > 0 } original ? Path.GetFileName(original)
-                : session.SuggestedName ?? Loc("Str_Outline_Untitled");
 
         private void WriteRecoveryState(string path, Controls.PdfViewer.DocumentSession session,
             Controls.PdfViewer.PendingTextRecovery? pending)

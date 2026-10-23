@@ -209,9 +209,9 @@ namespace KillerPDF.Tests
         {
             string root = Path.GetDirectoryName(Path.GetDirectoryName(SourcePath()))!;
             string recovery = File.ReadAllText(Path.Combine(root, "Shell", "RenderRecovery.cs"));
-            Assert.Contains("RecoveryNotes = [.. unrecovered.Select(session => RecoveryName(session) + \": \" + Loc(\"Str_Dlg_RenderRecoveryNoFolder\"))];", recovery);
-            Assert.Contains("RecoveryName(session), session.LoadedRevision, Loc(\"Str_Dlg_RenderRecoveryNoFolder\")", recovery);
-            Assert.Contains("Loc(\"Str_Outline_Untitled\")", recovery);
+            Assert.Contains("string untitled = Loc(\"Str_Outline_Untitled\"), noFolder = Loc(\"Str_Dlg_RenderRecoveryNoFolder\");", recovery);
+            Assert.Contains("RenderFailureRecovery.LostNote(session.OriginalFile, session.SuggestedName, untitled, noFolder))];", recovery);
+            Assert.Contains("RenderFailureRecovery.LostName(session.OriginalFile, session.SuggestedName, untitled),", recovery);
             Assert.Contains("reopened > 0 ? \"Str_Dlg_RenderRecoveryIncomplete\" : \"Str_Dlg_RenderRecoveryNotReopened\"", recovery);
             // A recovery folder whose manifest cannot be written still names its copies and points at it.
             Assert.Contains("RecoveryNotes = [.. recovered.Select(document => Path.GetFileName(document.RecoveredPath))];", recovery);
@@ -239,6 +239,36 @@ namespace KillerPDF.Tests
                 Assert.Contains("{1}", notReopened);
                 Assert.True(notReopened.Length < incomplete.Length, Path.GetFileName(file));
             }
+        }
+
+        // Imports, merges and scans have neither a file nor a suggested name, so two of them lost
+        // together share a name. Each must still come back from the manifest as its own line.
+        [Fact]
+        public void TwoUntitledLostDocumentsStayTwoLines()
+        {
+            const string reason = "No folder was available.";
+            Assert.Equal("report.pdf: " + reason,
+                RenderFailureRecovery.LostNote(@"C:\Docs\report.pdf", "Imported.pdf", "(untitled)", reason));
+            Assert.Equal("Scan.pdf: " + reason, RenderFailureRecovery.LostNote(null, "Scan.pdf", "(untitled)", reason));
+            string untitled = RenderFailureRecovery.LostNote(null, null, "(untitled)", reason);
+            Assert.Equal("(untitled): " + reason, untitled);
+
+            string folder = Path.Combine(Path.GetTempPath(), "kp-lost-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(folder);
+            try
+            {
+                string manifest = RenderFailureRecovery.WriteManifest(folder, [
+                    new RecoveredDocument(null, Path.Combine(folder, "unrecovered-01.pdf"),
+                        RenderFailureRecovery.LostName(null, null, "(untitled)"), RecoveryError: reason),
+                    new RecoveredDocument(null, Path.Combine(folder, "unrecovered-02.pdf"),
+                        RenderFailureRecovery.LostName(null, null, "(untitled)"), RecoveryError: reason)]);
+
+                IReadOnlyList<RecoveredDocument> lost = RenderFailureRecovery.ReadManifest(manifest);
+                Assert.Equal(2, lost.Count);
+                Assert.Equal([untitled, untitled], lost.Select(document =>
+                    RenderFailureRecovery.LostNote(document.OriginalPath, document.SuggestedName, "(untitled)", document.RecoveryError!)));
+            }
+            finally { Directory.Delete(folder, recursive: true); }
         }
 
         private static string Value(string strings, string key)
