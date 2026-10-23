@@ -33,6 +33,35 @@ namespace KillerPDF.Tests
             }
         }
 
+        // A retained session used to be kept forever; it now expires after thirty days.
+        [Fact]
+        public void RecoveryRetentionExpiresAfterThirtyDays()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "kp-retention-expiry-" + Path.GetRandomFileName());
+            var temps = new ProcessTempFiles(root);
+            try
+            {
+                string working = temps.CreatePath("working");
+                File.WriteAllText(working, "unsaved working bytes");
+                string directory = temps.DirectoryPath;
+                temps.RetainForRecovery(null);
+                temps.Dispose();
+
+                using (var nextLaunch = new ProcessTempFiles(root)) nextLaunch.CleanupStale();
+                Assert.True(File.Exists(working), "A fresh retention was cleaned up.");
+
+                File.SetLastWriteTimeUtc(Path.Combine(directory, "recovery-retained.json"),
+                    DateTime.UtcNow.AddDays(-31));
+                using (var monthLater = new ProcessTempFiles(root)) monthLater.CleanupStale();
+                Assert.False(Directory.Exists(directory), "An expired retention kept its session forever.");
+            }
+            finally
+            {
+                temps.Dispose();
+                if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+            }
+        }
+
         [Fact]
         public void OwnsOnlyPathsUnderItsRoot()
         {

@@ -6,6 +6,9 @@ internal sealed class ProcessTempFiles : IDisposable
 {
     private const string LeaseName = "owner.lease";
     private const string RecoveryRetentionName = "recovery-retained.json";
+    // A retained session holds unsaved work after a recovery that did not finish. It is kept for a
+    // month so it can be found by hand, then cleaned up like any other stale session.
+    private static readonly TimeSpan RecoveryRetention = TimeSpan.FromDays(30);
     private readonly string root;
     private readonly List<string> paths = [];
     private readonly Lazy<(string Directory, FileStream Lease)> owned;
@@ -98,7 +101,12 @@ internal sealed class ProcessTempFiles : IDisposable
                     if (!Guid.TryParseExact(name.AsSpan("session-".Length), "N", out _)
                         || (File.GetAttributes(directory) & FileAttributes.ReparsePoint) != 0)
                         continue;
-                    if (File.Exists(Path.Combine(directory, RecoveryRetentionName))) continue;
+                    string retention = Path.Combine(directory, RecoveryRetentionName);
+                    if (File.Exists(retention))
+                    {
+                        if (DateTime.UtcNow - File.GetLastWriteTimeUtc(retention) < RecoveryRetention) continue;
+                        File.Delete(retention);
+                    }
                     string leasePath = Path.Combine(directory, LeaseName);
                     if (!File.Exists(leasePath)
                         || (File.GetAttributes(leasePath) & FileAttributes.ReparsePoint) != 0)

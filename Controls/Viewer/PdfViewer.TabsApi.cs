@@ -13,14 +13,14 @@ namespace KillerPDF.Controls
     public partial class PdfViewer
     {
         /// <summary>Opens the page text editor at a position in the page's canvas coordinates.</summary>
-        public void BeginTextEditAtPosition(System.Windows.Point canvasPosition, int pageIndex)
+        internal void BeginTextEditAtPosition(System.Windows.Point canvasPosition, int pageIndex)
         {
             _activeCanvas = CanvasForPage(pageIndex);
             EditTextAtPosition(canvasPosition, pageIndex);
         }
 
         /// <summary>Places a text editor at a position in the page's canvas coordinates.</summary>
-        public void PlaceTextAtPosition(System.Windows.Point canvasPosition, int pageIndex)
+        internal void PlaceTextAtPosition(System.Windows.Point canvasPosition, int pageIndex)
         {
             _activeCanvas = CanvasForPage(pageIndex);
             PlaceTextBox(canvasPosition, pageIndex);

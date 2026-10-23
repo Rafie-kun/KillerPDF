@@ -563,28 +563,8 @@ namespace KillerPDF.Controls
             if (string.IsNullOrWhiteSpace(box.Text) && _pendingDirectEdit is null
                 && _pendingCover is null && _reeditOriginal is null) return null;
             int page = box.Tag is int index ? index : _currentPage;
-            Size size = EditBoxSize(box);
-            double width = double.IsFinite(size.Width) && size.Width > 0 ? size.Width : TextBoxDefaultWidth;
-            var annotation = new TextAnnotation
-            {
-                PageIndex = page,
-                Content = box.Text.Trim(),
-                Position = new Point(Canvas.GetLeft(box), Canvas.GetTop(box)),
-                Width = width,
-                Height = double.IsFinite(box.Height) && box.Height > 0
-                    ? box.Height : MeasureTextBoxHeight(box.Text.Trim(), width, box.FontSize),
-                Rotation = EditBoxTurn(box),
-                FontSize = box.FontSize,
-                LetterSpacing = CanvasLetterSpacing(page),
-                FontName = _textFontName,
-                Bold = _textBold,
-                Italic = _textItalic,
-                Strike = _textStrike,
-                Underline = _textUnderline,
-                PairId = _pendingCover?.PairId ?? _reeditOriginal?.PairId ?? ""
-            };
-            annotation.SetColor(box.Foreground is SolidColorBrush brush ? brush.Color : _textColor);
-            annotation.SetFill(_pendingCover is null ? _textFillColor : Colors.Transparent);
+            TextAnnotation annotation = BuildCommittedTextAnnotation(box, page, box.Text.Trim(),
+                TurnedEditOrigin(box), _pendingCover?.PairId ?? _reeditOriginal?.PairId ?? "");
             return new PendingTextRecovery(box.Text, annotation, _pendingDirectEdit, _pendingCover,
                 _textFontSize, _textLetterSpacing, _textColor);
         }
@@ -1082,6 +1062,52 @@ namespace KillerPDF.Controls
             return false;
         }
 
+        // A turned box keeps its first line where the editor showed it, even when the committed
+        // height differs from the editor's.
+        private Point TurnedEditOrigin(TextBox tb)
+        {
+            Size editSize = EditBoxSize(tb);
+            return new Point(Canvas.GetLeft(tb), Canvas.GetTop(tb))
+                + TextTurn.OriginOffset(EditBoxTurn(tb), editSize.Width, editSize.Height);
+        }
+
+        // The annotation an editor commits to. Committing and render-failure recovery share it, so a
+        // recovered box lands exactly where committing it would have put it.
+        private TextAnnotation BuildCommittedTextAnnotation(TextBox tb, int pageIdx, string content,
+            Point turnedOrigin, string pairId)
+        {
+            int turn = EditBoxTurn(tb);
+            double boxW = (!double.IsNaN(tb.Width) && tb.Width > 0) ? tb.Width
+                        : (tb.ActualWidth > 0 ? tb.ActualWidth : TextBoxDefaultWidth);
+            var ta = new TextAnnotation
+            {
+                PageIndex = pageIdx,
+                Position = new Point(Canvas.GetLeft(tb), Canvas.GetTop(tb)),
+                Content = content,
+                FontSize = tb.FontSize,
+                LetterSpacing = CanvasLetterSpacing(pageIdx),
+                FontName = _textFontName,
+                Bold = _textBold,
+                Italic = _textItalic,
+                Strike = _textStrike,
+                Underline = _textUnderline,
+                Width = boxW,
+                Rotation = turn,
+                PairId = pairId
+            };
+            ta.SetColor(tb.Foreground is SolidColorBrush scb ? scb.Color : Colors.Black);
+            // A cover-paired edit gets no fill of its own - the opaque cover behind it is the backdrop.
+            ta.SetFill(_pendingCover is not null ? Colors.Transparent : _textFillColor);
+            // Free-form height if the box was manually resized; otherwise fit to the wrapped text.
+            ta.Height = (!double.IsNaN(tb.Height) && tb.Height > 0)
+                ? tb.Height
+                : MeasureTextBoxHeight(content, boxW, tb.FontSize);
+            if (turn != 0) ta.Position = turnedOrigin - TextTurn.OriginOffset(turn, ta.Width, ta.Height);
+            // Keep the placed box fully on-page so its corners (and resize handles) stay reachable.
+            ta.Position = ClampRectToPage(pageIdx, new Rect(ta.Position, ta.FootprintSize)).Location;
+            return ta;
+        }
+
         private void CommitActiveTextBox()
         {
             if (_activeTextBox is null) return;
@@ -1094,13 +1120,7 @@ namespace KillerPDF.Controls
 
             string content = tb.Text.Trim();
             int pageIdx = tb.Tag is int idx ? idx : _currentPage;
-            double x = Canvas.GetLeft(tb);
-            double y = Canvas.GetTop(tb);
-            int turn = EditBoxTurn(tb);
-            // A turned box keeps its first line where the editor showed it, even when the committed
-            // height differs from the editor's.
-            Size editSize = EditBoxSize(tb);
-            Point turnedOrigin = new Point(x, y) + TextTurn.OriginOffset(turn, editSize.Width, editSize.Height);
+            Point turnedOrigin = TurnedEditOrigin(tb);
 
             // Remove the editing box from whatever canvas actually parents it. _activeCanvas may have
             // moved to another page when the user clicked away to commit (continuous/grid), and a
@@ -1120,35 +1140,9 @@ namespace KillerPDF.Controls
 
             if (!string.IsNullOrEmpty(content))
             {
-                double boxW = (!double.IsNaN(tb.Width) && tb.Width > 0) ? tb.Width
-                            : (tb.ActualWidth > 0 ? tb.ActualWidth : TextBoxDefaultWidth);
-                var ta = new TextAnnotation
-                {
-                    PageIndex = pageIdx,
-                    Position = new Point(x, y),
-                    Content = content,
-                    FontSize = tb.FontSize,
-                    LetterSpacing = CanvasLetterSpacing(pageIdx),
-                    FontName = _textFontName,
-                    Bold = _textBold,
-                    Italic = _textItalic,
-                    Strike = _textStrike,
-                    Underline = _textUnderline,
-                    Width = boxW,
-                    Rotation = turn
-                };
-                ta.SetColor(tb.Foreground is SolidColorBrush scb ? scb.Color : Colors.Black);
-                // A cover-paired edit gets no fill of its own - the opaque cover behind it is the backdrop.
-                ta.SetFill(_pendingCover is not null ? Colors.Transparent : _textFillColor);
-                // Free-form height if the box was manually resized; otherwise fit to the wrapped text.
-                ta.Height = (!double.IsNaN(tb.Height) && tb.Height > 0)
-                    ? tb.Height
-                    : MeasureTextBoxHeight(content, boxW, tb.FontSize);
-                if (turn != 0) ta.Position = turnedOrigin - TextTurn.OriginOffset(turn, ta.Width, ta.Height);
-                // Keep the placed box fully on-page so its corners (and resize handles) stay reachable.
-                ta.Position = ClampRectToPage(pageIdx, new Rect(ta.Position, ta.FootprintSize)).Location;
                 // Carry the pairing so the cover knows its partner text exists (renders dashed).
-                ta.PairId = _pendingCover is not null ? _pendingCover.PairId : reeditPair;
+                TextAnnotation ta = BuildCommittedTextAnnotation(tb, pageIdx, content, turnedOrigin,
+                    _pendingCover is not null ? _pendingCover.PairId : reeditPair);
                 if (_pendingCover is not null)
                 {
                     // Existing-text edit: the cover is already in _annotations. Add the text beside it and

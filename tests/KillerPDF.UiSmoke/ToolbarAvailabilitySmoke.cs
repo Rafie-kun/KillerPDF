@@ -50,7 +50,7 @@ internal static class ToolbarAvailabilitySmoke
         var viewer = (FrameworkElement)owner.FindName("Viewer");
         Click(Button(owner, "ToolTextBtn"));
         Canvas page = Children(viewer).OfType<Canvas>().First(canvas => Equals(canvas.Tag, 0) && canvas.Width > 0);
-        viewer.GetType().GetMethod("PlaceTextAtPosition", BindingFlags.Public | BindingFlags.Instance)!
+        viewer.GetType().GetMethod("PlaceTextAtPosition", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!
             .Invoke(viewer, [new Point(page.Width * .2, page.Height * .5), 0]);
         TextBox editor = Children(viewer).OfType<TextBox>().Single(box => box.AcceptsReturn && Equals(box.Tag, 0));
         editor.Text = "TOOLBAR HISTORY"; Pump();
@@ -98,7 +98,7 @@ internal static class ToolbarAvailabilitySmoke
         {
             Click(Button(owner, "ToolTextBtn"));
             Canvas page = Children(viewer).OfType<Canvas>().First(canvas => Equals(canvas.Tag, 0) && canvas.Width > 0);
-            viewer.GetType().GetMethod("BeginTextEditAtPosition", BindingFlags.Public | BindingFlags.Instance)!
+            viewer.GetType().GetMethod("BeginTextEditAtPosition", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!
                 .Invoke(viewer, [new Point(page.Width * .18, page.Height * .15), 0]);
             Pump();
             TextBox editor = Children(viewer).OfType<TextBox>().Single(box => box.AcceptsReturn && Equals(box.Tag, 0));
@@ -118,7 +118,7 @@ internal static class ToolbarAvailabilitySmoke
 
         Click(Button(owner, "ToolTextBtn"));
         Canvas canvas = Children(viewer).OfType<Canvas>().First(candidate => Equals(candidate.Tag, 0) && candidate.Width > 0);
-        viewer.GetType().GetMethod("PlaceTextAtPosition", BindingFlags.Public | BindingFlags.Instance)!
+        viewer.GetType().GetMethod("PlaceTextAtPosition", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!
             .Invoke(viewer, [new Point(canvas.Width * .2, canvas.Height * .5), 0]);
         Children(viewer).OfType<TextBox>().Single(box => box.AcceptsReturn && Equals(box.Tag, 0)).Text = "REDO MARKER";
         Click(Button(owner, "ToolSelectBtn"));
@@ -144,7 +144,7 @@ internal static class ToolbarAvailabilitySmoke
         var viewer = (FrameworkElement)owner.FindName("Viewer");
         Click(Button(owner, "ToolTextBtn"));
         Canvas page = Children(viewer).OfType<Canvas>().First(canvas => Equals(canvas.Tag, 0) && canvas.Width > 0);
-        viewer.GetType().GetMethod("PlaceTextAtPosition", BindingFlags.Public | BindingFlags.Instance)!
+        viewer.GetType().GetMethod("PlaceTextAtPosition", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!
             .Invoke(viewer, [new Point(page.Width * .2, page.Height * .5), 0]);
         TextBox editor = Children(viewer).OfType<TextBox>().Single(box => box.AcceptsReturn && Equals(box.Tag, 0));
         editor.Text = "CACHE BEFORE";

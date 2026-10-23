@@ -17,30 +17,34 @@ namespace KillerPDF
         /// open tabs. Returns the recovery manifest, or null when nothing needed saving.
         /// Nothing here draws, so it still works after the render thread has failed.
         /// </summary>
-        public string? PrepareRenderFailureRecovery()
+        internal string? PrepareRenderFailureRecovery()
         {
             var recovered = new List<RecoveredDocument>();
             string? folder = null;
+            bool folderUnavailable = false;
             Controls.PdfViewer activeViewer = ActiveViewer;
             try
             {
                 foreach (Controls.PdfViewer pane in new[] { Viewer, ViewerB })
                 {
-                    var pending = pane.CapturePendingTextForRecovery();
+                    // One pane that cannot capture its live edits must not stop the other pane's
+                    // unsaved documents from being written.
+                    Controls.PdfViewer.PendingTextRecovery? pending = null;
+                    try { pending = pane.CapturePendingTextForRecovery(); }
+                    catch (Exception ex) when (ex is not OutOfMemoryException) { CrashReporter.Capture(ex, "Recovery pending text"); }
                     var pendingSession = pane.ActiveSessionExt;
-                    pane.CaptureActiveIfAny();
+                    try { pane.CaptureActiveIfAny(); }
+                    catch (Exception ex) when (ex is not OutOfMemoryException) { CrashReporter.Capture(ex, "Recovery tab capture"); }
                     foreach (var session in pane.SessionsRef.Where(s => s.Doc is not null
                         && (s.IsDirty || pending is not null && ReferenceEquals(s, pendingSession))).ToList())
                     {
-                        if (folder is null)
+                        if (folder is null && !folderUnavailable)
                         {
-                            try { folder = RenderFailureRecovery.CreateFolder(AppDataPaths.UserRoot); }
-                            catch (Exception ex) when (ex is not OutOfMemoryException)
-                            {
-                                App.RetainRenderRecoveryTemps(null);
-                                folder = RenderFailureRecovery.CreateFolder(App.TempDir);
-                            }
+                            folder = RenderFailureRecovery.CreateFolder(RenderFailureRecovery.FolderRoots(
+                                AppDataPaths.UserRoot, AppDataPaths.LocalRoot, Path.GetTempPath()));
+                            folderUnavailable = folder is null;
                         }
+                        if (folder is null) break;
                         string name = session.SuggestedName ?? Path.GetFileName(session.OriginalFile ?? "document.pdf");
                         string copy = RenderFailureRecovery.CopyPath(folder, name, recovered.Count);
                         string working = Path.ChangeExtension(copy, ".working.pdf");
@@ -62,6 +66,10 @@ namespace KillerPDF
                             });
                             recovered.Add(new RecoveredDocument(session.OriginalFile, copy, session.SuggestedName,
                                 session.LoadedRevision));
+                            // The unedited working copy and state exist only for a failed copy; beside a
+                            // complete one they could be opened by mistake.
+                            foreach (string backup in new[] { working, state })
+                                try { File.Delete(backup); } catch (Exception ex) when (ex is not OutOfMemoryException) { }
                         }
                         catch (Exception ex) when (ex is not OutOfMemoryException)
                         {
@@ -74,16 +82,26 @@ namespace KillerPDF
                 }
             }
             finally { ActiveViewer = activeViewer; }
+            if (folderUnavailable)
+            {
+                // Nowhere to write copies: keep the session's working files for a manual recovery.
+                App.RetainRenderRecoveryTemps(null);
+                CrashReporter.Capture(new IOException("No recovery folder could be created."), "Render recovery folder");
+            }
+
+            // The open tabs are remembered first, so a restart with only clean tabs reopens them
+            // instead of the set left by the last normal close.
+            try { SaveWindowSettings(); }
+            catch (Exception ex) when (ex is not OutOfMemoryException) { CrashReporter.Capture(ex, "Recovery session settings"); }
 
             if (folder is null || recovered.Count == 0) return null;
             string manifest = RenderFailureRecovery.WriteManifest(folder, recovered);
             if (recovered.Any(document => document.RecoveryError is not null)) App.RetainRenderRecoveryTemps(manifest);
 
-            // Clean tabs reopen through the normal session restore; recovered ones come back from the
-            // manifest instead, so their originals must not also reopen beside them.
+            // Recovered tabs come back from the manifest, so once it is written their originals must
+            // not also reopen beside them through the normal session restore.
             try
             {
-                SaveWindowSettings();
                 var originals = new HashSet<string>(recovered.Select(d => d.OriginalPath ?? string.Empty), StringComparer.OrdinalIgnoreCase);
                 foreach (string key in new[] { "OpenTabs", "OpenTabsB" })
                     if (App.GetSetting(key) is { Length: > 0 } saved)

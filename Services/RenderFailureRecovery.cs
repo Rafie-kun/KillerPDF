@@ -40,6 +40,26 @@ namespace KillerPDF.Services
             return folder;
         }
 
+        /// <summary>
+        /// Where a recovery folder may go, most preferred first: the user's data root, the local data
+        /// root when the user's is portable, then a KillerPDF folder in the system temp. None is the
+        /// session temp root, whose files a restarted session treats as imports, not recoveries.
+        /// </summary>
+        internal static IReadOnlyList<string> FolderRoots(string userRoot, string localRoot, string systemTemp) =>
+            [.. new[] { userRoot, localRoot, Path.Combine(systemTemp, "KillerPDF") }
+                .Select(root => Path.TrimEndingDirectorySeparator(Path.GetFullPath(root)))
+                .Distinct(StringComparer.OrdinalIgnoreCase)];
+
+        /// <summary>A fresh recovery folder under the first root that accepts one, or null when none does.</summary>
+        internal static string? CreateFolder(IEnumerable<string> roots)
+        {
+            foreach (string root in roots)
+                try { return CreateFolder(root); }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException
+                    or NotSupportedException or ArgumentException) { }
+            return null;
+        }
+
         /// <summary>A file name for a recovered copy that cannot collide or escape the folder.</summary>
         internal static string CopyPath(string folder, string? name, int index)
         {

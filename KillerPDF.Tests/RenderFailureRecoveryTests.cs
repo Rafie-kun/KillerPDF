@@ -9,6 +9,31 @@ namespace KillerPDF.Tests
 {
     public class RenderFailureRecoveryTests
     {
+        // The last fallback used to sit under KillerPDF's own temp root, where a restarted session
+        // treats files as imports and so reported a complete recovery as incomplete.
+        [Fact]
+        public void RecoveryFolderFallsBackToRootsOutsideTheSessionTemp()
+        {
+            Assert.Equal([@"D:\Portable\KillerPDF-Data", @"C:\Local\KillerPDF", @"C:\Temp\KillerPDF"],
+                RenderFailureRecovery.FolderRoots(@"D:\Portable\KillerPDF-Data", @"C:\Local\KillerPDF", @"C:\Temp\"));
+            Assert.Equal([@"C:\Local\KillerPDF", @"C:\Temp\KillerPDF"],
+                RenderFailureRecovery.FolderRoots(@"C:\Local\KillerPDF", @"C:\Local\KillerPDF\", @"C:\Temp"));
+
+            string root = Path.Combine(Path.GetTempPath(), "kp-recovery-roots-" + Path.GetRandomFileName());
+            try
+            {
+                Directory.CreateDirectory(root);
+                string blocked = Path.Combine(root, "blocked");
+                File.WriteAllText(blocked, "a file where the folder should be");
+                string fallback = Path.Combine(root, "fallback");
+                string? folder = RenderFailureRecovery.CreateFolder([blocked, fallback]);
+                Assert.NotNull(folder);
+                Assert.StartsWith(Path.Combine(fallback, "Recovery") + Path.DirectorySeparatorChar, folder);
+                Assert.Null(RenderFailureRecovery.CreateFolder([blocked]));
+            }
+            finally { if (Directory.Exists(root)) Directory.Delete(root, recursive: true); }
+        }
+
         [Fact]
         public void RecoveryManifestPreservesTheLoadedRevisionBeforeAnExternalSave()
         {
@@ -139,5 +164,37 @@ namespace KillerPDF.Tests
             }
             finally { if (Directory.Exists(root)) Directory.Delete(root, recursive: true); }
         }
+
+        // A pane whose capture threw used to abort recovery for every tab, and a restart with only
+        // clean tabs reopened the tab set from the last normal close.
+        [Fact]
+        public void RecoveryIsolatesEachPaneAndRemembersTabsBeforeAnyEarlyReturn()
+        {
+            string source = File.ReadAllText(Path.Combine(
+                Path.GetDirectoryName(Path.GetDirectoryName(SourcePath()))!, "Shell", "RenderRecovery.cs"));
+            int start = source.IndexOf("internal string? PrepareRenderFailureRecovery()", StringComparison.Ordinal);
+            Assert.True(start >= 0, "Recovery is no longer internal.");
+            string body = source[start..source.IndexOf("private void WriteRecoveryState(", start, StringComparison.Ordinal)];
+
+            Assert.Contains("try { pending = pane.CapturePendingTextForRecovery(); }", body);
+            Assert.Contains("try { pane.CaptureActiveIfAny(); }", body);
+            Assert.True(body.IndexOf("try { SaveWindowSettings(); }", StringComparison.Ordinal)
+                < body.IndexOf("if (folder is null || recovered.Count == 0) return null;", StringComparison.Ordinal),
+                "Tabs are remembered only after an early return.");
+            Assert.True(body.IndexOf("RenderFailureRecovery.WriteManifest(", StringComparison.Ordinal)
+                < body.IndexOf("foreach (string key in new[] { \"OpenTabs\", \"OpenTabsB\" })", StringComparison.Ordinal),
+                "Recovered originals are dropped from the restore before the manifest exists.");
+            Assert.Contains("RenderFailureRecovery.FolderRoots(", body);
+            Assert.DoesNotContain("App.TempDir", body);
+            Assert.Contains("foreach (string backup in new[] { working, state })", body);
+
+            // A recovered editor lands where committing it would have: turned boxes re-anchored and
+            // the box kept on the page.
+            string editing = File.ReadAllText(Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(SourcePath()))!,
+                "Controls", "Viewer", "PdfViewer.TextEditing.cs"));
+            Assert.Equal(3, editing.Split("BuildCommittedTextAnnotation(").Length - 1);
+        }
+
+        private static string SourcePath([System.Runtime.CompilerServices.CallerFilePath] string path = "") => path;
     }
 }

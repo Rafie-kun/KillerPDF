@@ -30,7 +30,7 @@ internal static class RenderRecoverySmoke
             Canvas page = Children(viewer).OfType<Canvas>().First(canvas => Equals(canvas.Tag, 0) && canvas.Width > 0);
             ((Button)owner.FindName("ToolTextBtn")).RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
             string entry = existing ? "BeginTextEditAtPosition" : "PlaceTextAtPosition";
-            viewer.GetType().GetMethod(entry, BindingFlags.Public | BindingFlags.Instance)!
+            viewer.GetType().GetMethod(entry, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!
                 .Invoke(viewer, [new Point(page.Width * .18, page.Height * (existing ? .15 : .5)), 0]);
             Wait(() => Children(viewer).OfType<TextBox>().Any(box => box.AcceptsReturn && Equals(box.Tag, 0)), "page editor");
             TextBox editor = Children(viewer).OfType<TextBox>().Single(box => box.AcceptsReturn && Equals(box.Tag, 0));
@@ -44,7 +44,7 @@ internal static class RenderRecoverySmoke
             if (editor.Text != expected) throw new InvalidOperationException("The live editor did not accept the pending edit.");
 
             string? manifest = (string?)owner.GetType()
-                .GetMethod("PrepareRenderFailureRecovery", BindingFlags.Public | BindingFlags.Instance)!.Invoke(owner, null);
+                .GetMethod("PrepareRenderFailureRecovery", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!.Invoke(owner, null);
             if (manifest is null) throw new InvalidOperationException(mode + ": recovery skipped the clean tab with pending text.");
             using JsonDocument recovery = JsonDocument.Parse(File.ReadAllBytes(manifest));
             string recovered = recovery.RootElement.EnumerateArray()
@@ -87,14 +87,14 @@ internal static class RenderRecoverySmoke
         var viewer = (FrameworkElement)owner.FindName("Viewer");
         Canvas page = Children(viewer).OfType<Canvas>().First(canvas => Equals(canvas.Tag, 0) && canvas.Width > 0);
         ((Button)owner.FindName("ToolTextBtn")).RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-        viewer.GetType().GetMethod("PlaceTextAtPosition", BindingFlags.Public | BindingFlags.Instance)!
+        viewer.GetType().GetMethod("PlaceTextAtPosition", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!
             .Invoke(viewer, [new Point(page.Width * .2, page.Height * .5), 0]);
         Wait(() => Children(viewer).OfType<TextBox>().Any(box => box.AcceptsReturn && Equals(box.Tag, 0)), "failure fixture editor");
         TextBox editor = Children(viewer).OfType<TextBox>().Single(box => box.AcceptsReturn && Equals(box.Tag, 0));
         editor.Text = "COMMITTED BEFORE FAILED RECOVERY";
         ((Button)owner.FindName("ToolSelectBtn")).RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
         ((Button)owner.FindName("ToolTextBtn")).RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-        viewer.GetType().GetMethod("PlaceTextAtPosition", BindingFlags.Public | BindingFlags.Instance)!
+        viewer.GetType().GetMethod("PlaceTextAtPosition", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!
             .Invoke(viewer, [new Point(page.Width * .2, page.Height * .7), 0]);
         editor = Children(viewer).OfType<TextBox>().Single(box => box.AcceptsReturn && Equals(box.Tag, 0));
         editor.Text = "PENDING BEFORE FAILED RECOVERY";
@@ -118,7 +118,7 @@ internal static class RenderRecoverySmoke
         try
         {
             directory.SetAccessControl(denied);
-            manifest = (string?)owner.GetType().GetMethod("PrepareRenderFailureRecovery", BindingFlags.Public | BindingFlags.Instance)!
+            manifest = (string?)owner.GetType().GetMethod("PrepareRenderFailureRecovery", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!
                 .Invoke(owner, null);
         }
         finally { directory.SetAccessControl(original); }
