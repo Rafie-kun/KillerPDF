@@ -22,11 +22,18 @@ public sealed class InstallerRegistrationTests
     public void InstalledCopyIsRegisteredForUninstallBeforeOptionalSteps()
     {
         string register = Method(AppSource(), "private static string? RegisterInstalledCopy(");
-        int uninstall = register.IndexOf(@"CurrentVersion\Uninstall\KillerPDF", StringComparison.Ordinal);
+        int uninstall = register.IndexOf("key.SetValue(\"UninstallString\"", StringComparison.Ordinal);
         Assert.True(uninstall >= 0);
-        foreach (string step in new[] { "CreateShortcut(", "RegisterFileHandler(", "ProtocolRegistrar.Register(",
-                     "CommandLinePath.Register(", "PreviewHandlerRegistration." })
+        string[] steps = ["CreateShortcut(", "RegisterFileHandler(", "ProtocolRegistrar.Register(",
+            "CommandLinePath.Register(", "PreviewHandlerRegistration."];
+        foreach (string step in steps)
             Assert.True(uninstall < register.IndexOf(step, StringComparison.Ordinal), step + " runs before the uninstall entry.");
+        // A failed upgrade is rolled back by setup, so the advertised version is written only after
+        // every required step, and the entry keeps naming the version that is really installed.
+        foreach (string version in new[] { "key.SetValue(\"DisplayVersion\"", "key.SetValue(\"Version\"", "key.SetValue(\"EstimatedSize\"" })
+            foreach (string step in steps)
+                Assert.True(register.IndexOf(version, StringComparison.Ordinal) > register.LastIndexOf(step, StringComparison.Ordinal),
+                    version + " is written before " + step);
     }
 
     // Owner decision, 2026-10-23: an optional desktop shortcut that Windows refuses no longer fails

@@ -2150,20 +2150,19 @@ namespace KillerPDF
 
             // The copy is registered for uninstall first, so a shortcut or association that fails
             // below still leaves an installation Windows can remove instead of an orphaned payload.
+            // The version and size come last: an upgrade that fails here is rolled back by setup,
+            // and the entry must keep naming the version that is actually installed.
+            const string uninstallKey = @"Software\Microsoft\Windows\CurrentVersion\Uninstall\KillerPDF";
             using (var key = registryRoot.CreateSubKey(@"Software\KillerPDF"))
             {
                 key.SetValue("Installed", 1);
                 key.SetValue("InstallPath", exePath);
-                key.SetValue("Version", AppVersion.Display);
             }
 
-            using (var key = registryRoot.CreateSubKey(
-                @"Software\Microsoft\Windows\CurrentVersion\Uninstall\KillerPDF"))
+            using (var key = registryRoot.CreateSubKey(uninstallKey))
             {
                 key.SetValue("DisplayName", AppName);
-                key.SetValue("DisplayVersion", AppVersion.Display);
                 key.SetValue("Publisher", "Steve the Killer");
-                key.SetValue("EstimatedSize", GetInstalledSizeKilobytes(installDirectory), RegistryValueKind.DWord);
                 key.SetValue("InstallLocation", installDirectory);
                 key.SetValue("DisplayIcon", $"{exePath},0");
                 key.SetValue("UninstallString", $"\"{exePath}\" /uninstall");
@@ -2195,6 +2194,14 @@ namespace KillerPDF
                 Services.PreviewHandlerRegistration.Register(registryRoot, installDirectory);
             else
                 Services.PreviewHandlerRegistration.Unregister(registryRoot);
+
+            using (var key = registryRoot.CreateSubKey(@"Software\KillerPDF"))
+                key.SetValue("Version", AppVersion.Display);
+            using (var key = registryRoot.CreateSubKey(uninstallKey))
+            {
+                key.SetValue("DisplayVersion", AppVersion.Display);
+                key.SetValue("EstimatedSize", GetInstalledSizeKilobytes(installDirectory), RegistryValueKind.DWord);
+            }
 
             SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, IntPtr.Zero, IntPtr.Zero);
             return desktopProblem;
