@@ -1187,6 +1187,7 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Err_DuplicateFailed">Duplizieren fehlgeschlagen:</sys:String>
     <sys:String x:Key="Str_Err_RepairFailed">Reparatur fehlgeschlagen:</sys:String>
     <sys:String x:Key="Str_Err_OpenProtected">Die geschützte PDF konnte nicht geöffnet werden:</sys:String>
+    <sys:String x:Key="Str_Err_WorkingCopy">KillerPDF konnte keine Arbeitskopie dieser PDF schreiben. Prüfen Sie, ob auf dem Datenträger Speicherplatz frei ist:</sys:String>
     <sys:String x:Key="Str_Err_NewDocFailed">Neues Dokument konnte nicht erstellt werden:</sys:String>
     <sys:String x:Key="Str_Err_FileNotFound">Datei nicht gefunden:</sys:String>
     <sys:String x:Key="Str_Err_MergeFailed">Zusammenführen fehlgeschlagen:</sys:String>

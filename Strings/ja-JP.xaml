@@ -1194,6 +1194,7 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Err_DuplicateFailed">複製に失敗しました：</sys:String>
     <sys:String x:Key="Str_Err_RepairFailed">修復に失敗しました：</sys:String>
     <sys:String x:Key="Str_Err_OpenProtected">保護された PDF を開けませんでした：</sys:String>
+    <sys:String x:Key="Str_Err_WorkingCopy">KillerPDF はこの PDF の作業用コピーを書き込めませんでした。ディスクに空き容量があるか確認してください:</sys:String>
     <sys:String x:Key="Str_Err_NewDocFailed">新しい文書を作成できませんでした：</sys:String>
     <sys:String x:Key="Str_Err_FileNotFound">ファイルが見つかりません：</sys:String>
     <sys:String x:Key="Str_Err_MergeFailed">結合に失敗しました：</sys:String>

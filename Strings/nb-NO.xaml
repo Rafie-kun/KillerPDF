@@ -1194,6 +1194,7 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Err_DuplicateFailed">Duplisering mislyktes:</sys:String>
     <sys:String x:Key="Str_Err_RepairFailed">Reparasjonen mislyktes:</sys:String>
     <sys:String x:Key="Str_Err_OpenProtected">Kunne ikke åpne den beskyttede PDF-en:</sys:String>
+    <sys:String x:Key="Str_Err_WorkingCopy">KillerPDF kunne ikke skrive arbeidskopien av denne PDF-en. Kontroller at det er ledig plass på disken:</sys:String>
     <sys:String x:Key="Str_Err_NewDocFailed">Kunne ikke opprette nytt dokument:</sys:String>
     <sys:String x:Key="Str_Err_FileNotFound">Filen ble ikke funnet:</sys:String>
     <sys:String x:Key="Str_Err_MergeFailed">Sammenslåingen mislyktes:</sys:String>

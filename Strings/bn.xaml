@@ -1181,6 +1181,7 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Err_DuplicateFailed">অনুলিপি ব্যর্থ হয়েছে:</sys:String>
     <sys:String x:Key="Str_Err_RepairFailed">মেরামত ব্যর্থ হয়েছে:</sys:String>
     <sys:String x:Key="Str_Err_OpenProtected">সুরক্ষিত PDF খোলা যায়নি:</sys:String>
+    <sys:String x:Key="Str_Err_WorkingCopy">KillerPDF এই PDF-এর কার্যকরী কপি লিখতে পারেনি। ডিস্কে খালি জায়গা আছে কিনা দেখুন:</sys:String>
     <sys:String x:Key="Str_Err_NewDocFailed">নতুন নথি তৈরি করা যায়নি:</sys:String>
     <sys:String x:Key="Str_Err_FileNotFound">ফাইল পাওয়া যায়নি:</sys:String>
     <sys:String x:Key="Str_Err_MergeFailed">একত্রীকরণ ব্যর্থ হয়েছে:</sys:String>

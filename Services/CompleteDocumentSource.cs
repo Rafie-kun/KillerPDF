@@ -2,6 +2,11 @@ using System.IO;
 
 namespace KillerPDF.Services;
 
+/// <summary>The working copy of an opened PDF could not be written, usually because the temp folder is
+/// full or unavailable. Opening reports that instead of offering to repair an undamaged file.</summary>
+internal sealed class WorkingCopyUnavailableException(Exception innerException)
+    : IOException(innerException.Message, innerException);
+
 /// <summary>Owns complete document bytes independently of editable copies and external files.</summary>
 internal sealed class CompleteDocumentSource
 {
@@ -12,7 +17,10 @@ internal sealed class CompleteDocumentSource
     internal static CompleteDocumentSource Capture(PdfWorkingDocument document)
     {
         ArgumentNullException.ThrowIfNull(document);
-        return Capture(document.Save);
+        CompleteDocumentSource source = Capture(document.Save);
+        // The copy holds the same bytes, so the viewer shares the parse made when the file opened.
+        document.RegisterCopy(source.Path);
+        return source;
     }
 
     internal static CompleteDocumentSource Capture(string finishedPath)

@@ -1181,6 +1181,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Err_DuplicateFailed">Çoğaltma başarısız oldu:</sys:String>
     <sys:String x:Key="Str_Err_RepairFailed">Onarım başarısız oldu:</sys:String>
     <sys:String x:Key="Str_Err_OpenProtected">Korumalı PDF açılamadı:</sys:String>
+    <sys:String x:Key="Str_Err_WorkingCopy">KillerPDF bu PDF'nin çalışma kopyasını yazamadı. Diskte boş alan olup olmadığını denetleyin:</sys:String>
     <sys:String x:Key="Str_Err_NewDocFailed">Yeni belge oluşturulamadı:</sys:String>
     <sys:String x:Key="Str_Err_FileNotFound">Dosya bulunamadı:</sys:String>
     <sys:String x:Key="Str_Err_MergeFailed">Birleştirme başarısız oldu:</sys:String>

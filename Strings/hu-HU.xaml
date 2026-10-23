@@ -1188,6 +1188,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Err_DuplicateFailed">A duplikálás nem sikerült:</sys:String>
     <sys:String x:Key="Str_Err_RepairFailed">A javítás nem sikerült:</sys:String>
     <sys:String x:Key="Str_Err_OpenProtected">A védett PDF nem nyitható meg:</sys:String>
+    <sys:String x:Key="Str_Err_WorkingCopy">A KillerPDF nem tudta megírni a PDF munkapéldányát. Ellenőrizze, hogy van-e szabad hely a lemezen:</sys:String>
     <sys:String x:Key="Str_Err_NewDocFailed">Az új dokumentum nem hozható létre:</sys:String>
     <sys:String x:Key="Str_Err_FileNotFound">A fájl nem található:</sys:String>
     <sys:String x:Key="Str_Err_MergeFailed">Az egyesítés nem sikerült:</sys:String>

@@ -10,6 +10,30 @@ namespace KillerPDF.Tests;
 
 public sealed class PdfWorkingDocumentTests
 {
+    // Opening writes a complete copy that the viewer renders from. Registering it with the parse
+    // already made keeps one parse tree instead of parsing the same bytes a second time.
+    [Fact]
+    public void RegisteredCopySharesTheParsedDocument()
+    {
+        string path = Path.Combine(Path.GetTempPath(), $"killerpdf-copy-{Guid.NewGuid():N}.pdf");
+        string copy = Path.ChangeExtension(path, ".complete.pdf");
+        try
+        {
+            File.WriteAllBytes(path, new PdfDocumentBuilder().AddBlankPage().Build());
+            using PdfWorkingDocument document = PdfWorkingDocument.Open(path);
+            PdfDocument parsed = Assert.IsType<PdfDocument>(document.ParsedDocument);
+            document.Save(copy);
+            document.RegisterCopy(copy);
+
+            Assert.Same(parsed, PdfPageRenderSession.OpenDocument(copy));
+            Assert.Null(document.ParsedDocument);
+        }
+        finally
+        {
+            foreach (string file in new[] { path, copy }) if (File.Exists(file)) File.Delete(file);
+        }
+    }
+
     [Fact]
     public void Open_AcceptsValidObjectsBeyondIncorrectTrailerSize()
     {

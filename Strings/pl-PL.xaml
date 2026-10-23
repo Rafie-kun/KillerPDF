@@ -1189,6 +1189,7 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Err_DuplicateFailed">Duplikowanie nie powiodło się:</sys:String>
     <sys:String x:Key="Str_Err_RepairFailed">Naprawa nie powiodła się:</sys:String>
     <sys:String x:Key="Str_Err_OpenProtected">Nie można otworzyć chronionego pliku PDF:</sys:String>
+    <sys:String x:Key="Str_Err_WorkingCopy">KillerPDF nie mógł zapisać kopii roboczej tego pliku PDF. Sprawdź, czy na dysku jest wolne miejsce:</sys:String>
     <sys:String x:Key="Str_Err_NewDocFailed">Nie można utworzyć nowego dokumentu:</sys:String>
     <sys:String x:Key="Str_Err_FileNotFound">Nie znaleziono pliku:</sys:String>
     <sys:String x:Key="Str_Err_MergeFailed">Scalanie nie powiodło się:</sys:String>

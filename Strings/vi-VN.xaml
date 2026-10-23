@@ -1194,6 +1194,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Err_DuplicateFailed">Nhân bản thất bại:</sys:String>
     <sys:String x:Key="Str_Err_RepairFailed">Sửa chữa thất bại:</sys:String>
     <sys:String x:Key="Str_Err_OpenProtected">Không thể mở tệp PDF được bảo vệ:</sys:String>
+    <sys:String x:Key="Str_Err_WorkingCopy">KillerPDF không thể ghi bản sao làm việc của PDF này. Hãy kiểm tra xem ổ đĩa còn dung lượng trống không:</sys:String>
     <sys:String x:Key="Str_Err_NewDocFailed">Không thể tạo tài liệu mới:</sys:String>
     <sys:String x:Key="Str_Err_FileNotFound">Không tìm thấy tệp:</sys:String>
     <sys:String x:Key="Str_Err_MergeFailed">Hợp nhất thất bại:</sys:String>

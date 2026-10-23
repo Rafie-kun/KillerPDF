@@ -1194,6 +1194,7 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Err_DuplicateFailed">Falha ao duplicar:</sys:String>
     <sys:String x:Key="Str_Err_RepairFailed">Falha no reparo:</sys:String>
     <sys:String x:Key="Str_Err_OpenProtected">Não foi possível abrir o PDF protegido:</sys:String>
+    <sys:String x:Key="Str_Err_WorkingCopy">O KillerPDF não conseguiu gravar a cópia de trabalho deste PDF. Verifique se há espaço livre no disco:</sys:String>
     <sys:String x:Key="Str_Err_NewDocFailed">Não foi possível criar o novo documento:</sys:String>
     <sys:String x:Key="Str_Err_FileNotFound">Arquivo não encontrado:</sys:String>
     <sys:String x:Key="Str_Err_MergeFailed">Falha na mesclagem:</sys:String>

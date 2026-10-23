@@ -1186,6 +1186,7 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Err_DuplicateFailed">Duplikace se nezdařila:</sys:String>
     <sys:String x:Key="Str_Err_RepairFailed">Oprava se nezdařila:</sys:String>
     <sys:String x:Key="Str_Err_OpenProtected">Chráněné PDF se nepodařilo otevřít:</sys:String>
+    <sys:String x:Key="Str_Err_WorkingCopy">KillerPDF nemohl zapsat pracovní kopii tohoto PDF. Zkontrolujte, zda je na disku volné místo:</sys:String>
     <sys:String x:Key="Str_Err_NewDocFailed">Nový dokument se nepodařilo vytvořit:</sys:String>
     <sys:String x:Key="Str_Err_FileNotFound">Soubor nenalezen:</sys:String>
     <sys:String x:Key="Str_Err_MergeFailed">Sloučení se nezdařilo:</sys:String>

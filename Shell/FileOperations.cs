@@ -83,6 +83,14 @@ namespace KillerPDF
                 _currentFile = srcPath;
                 FinishOpenFile(path, srcPath);
             }
+            catch (WorkingCopyUnavailableException ex)
+            {
+                // The PDF itself is fine; there was no room for KillerPDF's working copy.
+                _doc?.Close();
+                _doc = null;
+                KillerDialog.Show(this, Loc("Str_Err_WorkingCopy") + "\n" + ex.Message, Loc("Str_Dlg_AppTitle"),
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
             catch (Exception ex) when (PdfImport.IsOwnerPasswordException(ex))
             {
                 // An empty user password can open the file while its owner password still forbids
@@ -170,8 +178,15 @@ namespace KillerPDF
 
         private void FinishOpenFile(string displayPath, string workingPath)
         {
-            _completeDocumentSource = CompleteDocumentSource.Capture(_doc
-                ?? throw new InvalidOperationException("No PDF is open."));
+            try
+            {
+                _completeDocumentSource = CompleteDocumentSource.Capture(_doc
+                    ?? throw new InvalidOperationException("No PDF is open."));
+            }
+            catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+            {
+                throw new WorkingCopyUnavailableException(error);
+            }
             workingPath = _completeDocumentSource.Path;
             List<PdfEngineIntegration.MeasurementData> openedMeasurements = TakeMeasurementsFromWorkingCopy(ref workingPath);
             _currentFile = workingPath;

@@ -1194,6 +1194,7 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_Err_DuplicateFailed">Duplicazione non riuscita:</sys:String>
     <sys:String x:Key="Str_Err_RepairFailed">Riparazione non riuscita:</sys:String>
     <sys:String x:Key="Str_Err_OpenProtected">Impossibile aprire il PDF protetto:</sys:String>
+    <sys:String x:Key="Str_Err_WorkingCopy">KillerPDF non è riuscito a scrivere la copia di lavoro di questo PDF. Verifica che ci sia spazio libero sul disco:</sys:String>
     <sys:String x:Key="Str_Err_NewDocFailed">Impossibile creare un nuovo documento:</sys:String>
     <sys:String x:Key="Str_Err_FileNotFound">File non trovato:</sys:String>
     <sys:String x:Key="Str_Err_MergeFailed">Unione non riuscita:</sys:String>

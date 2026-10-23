@@ -1185,6 +1185,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Err_DuplicateFailed">复制页面失败：</sys:String>
     <sys:String x:Key="Str_Err_RepairFailed">修复失败：</sys:String>
     <sys:String x:Key="Str_Err_OpenProtected">无法打开受保护的 PDF：</sys:String>
+    <sys:String x:Key="Str_Err_WorkingCopy">KillerPDF 无法写入此 PDF 的工作副本。请检查磁盘是否有可用空间:</sys:String>
     <sys:String x:Key="Str_Err_NewDocFailed">无法创建新文档：</sys:String>
     <sys:String x:Key="Str_Err_FileNotFound">找不到文件：</sys:String>
     <sys:String x:Key="Str_Err_MergeFailed">合并失败：</sys:String>

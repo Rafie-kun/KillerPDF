@@ -1181,6 +1181,7 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Err_DuplicateFailed">Error al duplicar:</sys:String>
     <sys:String x:Key="Str_Err_RepairFailed">Error al reparar:</sys:String>
     <sys:String x:Key="Str_Err_OpenProtected">No se pudo abrir el PDF protegido:</sys:String>
+    <sys:String x:Key="Str_Err_WorkingCopy">KillerPDF no pudo escribir su copia de trabajo de este PDF. Compruebe que haya espacio libre en el disco:</sys:String>
     <sys:String x:Key="Str_Err_NewDocFailed">No se pudo crear el documento nuevo:</sys:String>
     <sys:String x:Key="Str_Err_FileNotFound">Archivo no encontrado:</sys:String>
     <sys:String x:Key="Str_Err_MergeFailed">Error al combinar:</sys:String>

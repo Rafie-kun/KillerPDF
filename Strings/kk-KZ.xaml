@@ -1091,6 +1091,7 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Err_DuplicateFailed">Көшірме жасау сәтсіз:</sys:String>
     <sys:String x:Key="Str_Err_RepairFailed">Жөндеу сәтсіз:</sys:String>
     <sys:String x:Key="Str_Err_OpenProtected">Қорғалған PDF ашылмады:</sys:String>
+    <sys:String x:Key="Str_Err_WorkingCopy">KillerPDF бұл PDF жұмыс көшірмесін жаза алмады. Дискіде бос орын бар-жоғын тексеріңіз:</sys:String>
     <sys:String x:Key="Str_Err_NewDocFailed">Жаңа құжат жасау мүмкін болмады:</sys:String>
     <sys:String x:Key="Str_Err_FileNotFound">Файл табылмады:</sys:String>
     <sys:String x:Key="Str_Err_MergeFailed">Біріктіру сәтсіз:</sys:String>

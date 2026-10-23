@@ -1194,6 +1194,7 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Err_DuplicateFailed">Échec de la duplication :</sys:String>
     <sys:String x:Key="Str_Err_RepairFailed">Échec de la réparation :</sys:String>
     <sys:String x:Key="Str_Err_OpenProtected">Impossible d'ouvrir le PDF protégé :</sys:String>
+    <sys:String x:Key="Str_Err_WorkingCopy">KillerPDF n'a pas pu écrire sa copie de travail de ce PDF. Vérifiez qu'il reste de l'espace libre sur le disque :</sys:String>
     <sys:String x:Key="Str_Err_NewDocFailed">Impossible de créer le nouveau document :</sys:String>
     <sys:String x:Key="Str_Err_FileNotFound">Fichier introuvable :</sys:String>
     <sys:String x:Key="Str_Err_MergeFailed">Échec de la fusion :</sys:String>

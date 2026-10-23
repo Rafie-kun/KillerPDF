@@ -1194,6 +1194,7 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Err_DuplicateFailed">Не вдалося дублювати:</sys:String>
     <sys:String x:Key="Str_Err_RepairFailed">Не вдалося відновити:</sys:String>
     <sys:String x:Key="Str_Err_OpenProtected">Не вдалося відкрити захищений PDF:</sys:String>
+    <sys:String x:Key="Str_Err_WorkingCopy">KillerPDF не вдалося записати робочу копію цього PDF. Перевірте, чи є на диску вільне місце:</sys:String>
     <sys:String x:Key="Str_Err_NewDocFailed">Не вдалося створити новий документ:</sys:String>
     <sys:String x:Key="Str_Err_FileNotFound">Файл не знайдено:</sys:String>
     <sys:String x:Key="Str_Err_MergeFailed">Не вдалося об'єднати:</sys:String>

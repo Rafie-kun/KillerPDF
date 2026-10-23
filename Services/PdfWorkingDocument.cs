@@ -76,6 +76,24 @@ internal sealed class PdfWorkingDocument : IDisposable
         destination.Write(_source);
     }
 
+    /// <summary>Registers a byte-identical copy written by <see cref="Save(string)"/> with the parse
+    /// this document already holds, so rendering from the copy does not parse the file again.</summary>
+    internal void RegisterCopy(string path)
+    {
+        if (_parsedDocument is not { CanReadPageContent: true } parsed) return;
+        try
+        {
+            var info = new FileInfo(path);
+            if (info.Exists && info.Length == _source.LongLength)
+                PdfPageRenderSession.RegisterDocument(info.FullName, info.LastWriteTimeUtc.Ticks, info.Length,
+                    this, parsed);
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+        {
+            // An unregistered copy still renders; it is parsed on first use instead.
+        }
+    }
+
     internal void Close() => Interlocked.Exchange(ref _parsedDocument, null);
     public void Dispose() => Close();
 }

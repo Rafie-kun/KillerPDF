@@ -1194,6 +1194,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Err_DuplicateFailed">Duplicate failed:</sys:String>
     <sys:String x:Key="Str_Err_RepairFailed">Repair failed:</sys:String>
     <sys:String x:Key="Str_Err_OpenProtected">Could not open the protected PDF:</sys:String>
+    <sys:String x:Key="Str_Err_WorkingCopy">KillerPDF could not write its working copy of this PDF. Check that the disk has free space:</sys:String>
     <sys:String x:Key="Str_Err_NewDocFailed">Could not create new document:</sys:String>
     <sys:String x:Key="Str_Err_FileNotFound">File not found:</sys:String>
     <sys:String x:Key="Str_Err_MergeFailed">Merge failed:</sys:String>

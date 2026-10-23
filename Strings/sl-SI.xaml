@@ -1095,6 +1095,7 @@
     <sys:String x:Key="Str_Err_DuplicateFailed">Podvajanje ni uspelo:</sys:String>
     <sys:String x:Key="Str_Err_RepairFailed">Popravilo ni uspelo:</sys:String>
     <sys:String x:Key="Str_Err_OpenProtected">Zaščitenega PDF-ja ni bilo mogoče odpreti:</sys:String>
+    <sys:String x:Key="Str_Err_WorkingCopy">KillerPDF ni mogel zapisati delovne kopije tega PDF-ja. Preverite, ali je na disku dovolj prostora:</sys:String>
     <sys:String x:Key="Str_Err_NewDocFailed">Novega dokumenta ni bilo mogoče ustvariti:</sys:String>
     <sys:String x:Key="Str_Err_FileNotFound">Datoteke ni mogoče najti:</sys:String>
     <sys:String x:Key="Str_Err_MergeFailed">Združevanje ni uspelo:</sys:String>
