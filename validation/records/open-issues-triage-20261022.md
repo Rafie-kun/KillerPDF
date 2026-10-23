@@ -6,6 +6,8 @@ Source basis: `dev/1.9-overkill`, starting HEAD `879309406750d859fc50f4f7464d246
 
 Follow-up: #455 now identifies input files for preparation and page import failures, including errors discovered while building the result. Verification and remaining diagnostic limits are recorded in [merge-source-diagnostics-20261022.md](merge-source-diagnostics-20261022.md).
 
+Follow-up, October 23: #435 saves Hebrew lines that contain numbers or Latin words in the order the text box shows them (`Services/BidiLine.cs`, commit 24d8d7c). `KillerPDF.Tests/BidiLineTests.cs` covers run order, number separators, currency signs, mirrored brackets, pointed Hebrew and trailing spaces. `MixedHebrewTextSave_PlacesRunsInTheOrderTheTextBoxShows` reopens the saved file, reads it back through its ToUnicode map, and failed before the fix. A rendered side-by-side with the on-screen box and reporter acceptance are still open. Arabic keeps its existing left-to-right save because the save path does not shape it.
+
 ## Coverage and remaining work
 
 Every open issue is now accounted for. 32 have their accepted scope implemented in source (including two duplicates), 11 are partial, six need an exact reproduction, and four reflect explicit deferral or design decisions. Several implemented paths still need native, hardware, real-document or reporter acceptance. There are no unreviewed issues, but there is unfinished work.
