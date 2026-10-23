@@ -27,7 +27,10 @@ public sealed class PdfIndexedSpotCoverageTests
     public void ClippedIndexedImageRetainsNamedInk(bool mixed, bool overprint, int sourceSize, int coverage)
     {
         string edge = (coverage / 256d).ToString("R", CultureInfo.InvariantCulture);
-        var geometry = Render("1 0 0 rg 0 0 1 1 re f 1 1 1 rg 0 0 " + edge + " 1 re f",
+        // Clips keep their exact coverage, but a filled rectangle thinner than a pixel is painted
+        // one whole pixel wide, so the coverage oracle starts its rectangle off the page.
+        var geometry = Render("1 0 0 rg 0 0 1 1 re f 1 1 1 rg -1 0 "
+            + (1 + coverage / 256d).ToString("R", CultureInfo.InvariantCulture) + " 1 re f",
             mixed, sourceSize, false);
         Assert.Equal(coverage, geometry.Pixels.Span[0]);
         var actual = Render("0 0 0.25 0 k 0 0 1 1 re f /Overprint gs "

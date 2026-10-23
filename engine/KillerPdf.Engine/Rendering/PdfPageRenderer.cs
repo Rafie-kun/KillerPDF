@@ -7195,7 +7195,7 @@ public sealed partial class PdfPageRenderer
         // Identical geometric clips are recognized by whole-mask coverage. Retain
         // that comparison when a single antialiased clip may be idempotent.
         if (geometricClips == 1 && antialiasedClip) bounds = null;
-        CoverageMask mask = RasterizeFill(paths, evenOdd, frame, rent: true,
+        CoverageMask mask = ThinRectangle(paths, frame) ?? RasterizeFill(paths, evenOdd, frame, rent: true,
             bounds: bounds);
         try
         {
@@ -7206,6 +7206,40 @@ public sealed partial class PdfPageRenderer
         {
             mask.Return();
         }
+    }
+
+    // A filled axis-aligned rectangle thinner than a device pixel, typically a table rule, is
+    // painted one whole pixel across its thin side, as PDFium, Poppler and Acrobat's thin-line
+    // enhancement draw it; at exact coverage it came out as a faint gray line. Its long side
+    // snaps to whole pixels too. Wider, rotated and zero-area rectangles keep their geometry.
+    private static CoverageMask? ThinRectangle(IReadOnlyList<List<Point>> paths, RasterFrame frame)
+    {
+        List<Point>? single = null;
+        foreach (List<Point> path in paths)
+        {
+            if (path.Count < 3) continue;
+            if (single is not null) return null;
+            single = path;
+        }
+        if (single is null || single.Count is not (4 or 5)) return null;
+        Point[] p = frame.ToPixels(single);
+        if (p.Length == 5 && p[0] != p[4]) return null;
+        bool aligned = p[0].X == p[1].X && p[1].Y == p[2].Y && p[2].X == p[3].X && p[3].Y == p[0].Y
+            || p[0].Y == p[1].Y && p[1].X == p[2].X && p[2].Y == p[3].Y && p[3].X == p[0].X;
+        if (!aligned) return null;
+        double left = Math.Min(p[0].X, p[2].X), right = Math.Max(p[0].X, p[2].X);
+        double top = Math.Min(p[0].Y, p[2].Y), bottom = Math.Max(p[0].Y, p[2].Y);
+        if (!double.IsFinite(left) || !double.IsFinite(right) || !double.IsFinite(top) || !double.IsFinite(bottom))
+            return null;
+        double wide = right - left, tall = bottom - top;
+        if (!(wide > 0) || !(tall > 0) || wide >= 1 && tall >= 1) return null;
+        (int Start, int End) Span(double start, double end) => end - start < 1
+            ? ((int)Math.Floor((start + end) / 2), (int)Math.Floor((start + end) / 2) + 1)
+            : ((int)Math.Floor(start + 0.5), Math.Max((int)Math.Floor(start + 0.5) + 1, (int)Math.Floor(end + 0.5)));
+        (int x0, int x1) = Span(left, right);
+        (int y0, int y1) = Span(top, bottom);
+        return CoverageMask.Rectangle(Math.Clamp(x0, 0, frame.Width), Math.Clamp(y0, 0, frame.Height),
+            Math.Clamp(x1, 0, frame.Width), Math.Clamp(y1, 0, frame.Height));
     }
 
     private static void StrokePaths(RasterSurface pixels, int width, int height, double scaleX,

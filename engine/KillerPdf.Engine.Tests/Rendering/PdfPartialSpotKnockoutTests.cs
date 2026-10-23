@@ -27,13 +27,15 @@ public sealed class PdfPartialSpotKnockoutTests
     public void PartialProcessKnockoutRetainsNamedInkForFollowingOverprint(
         bool native, bool opacity, bool followingSpot, int coverage)
     {
-        string width = Number(coverage / 256d);
+        // The rectangle starts off the page so only the given share of the pixel is covered;
+        // a rectangle thinner than a pixel would be painted one whole pixel wide.
+        string partial = "-1 0 " + Number(1 + coverage / 256d) + " 1 re f";
         // RGB geometry provides an independent byte-coverage oracle for both surfaces.
         // Native CMYK's RGB conversion cannot be used to measure coverage.
-        var edge = Render("1 0 0 rg 0 0 1 1 re f 1 1 1 rg 0 0 " + width + " 1 re f", false);
+        var edge = Render("1 0 0 rg 0 0 1 1 re f 1 1 1 rg " + partial, false);
         Assert.Equal(coverage, edge.Pixels.Span[0]);
         string knockout = opacity ? "/Partial gs 0 0 0 0 k 0 0 1 1 re f"
-            : "/Knockout gs 0 0 0 0 k 0 0 " + width + " 1 re f";
+            : "/Knockout gs 0 0 0 0 k " + partial;
         string following = followingSpot ? "/Yellow cs 1 scn" : "0 0 0 0 k";
         var actual = Render("/Spot cs 1 scn 0 0 1 1 re f " + knockout
             + " /Overprint gs " + following + " 0 0 1 1 re f", native, coverage);
@@ -53,7 +55,7 @@ public sealed class PdfPartialSpotKnockoutTests
     public void RestoredSpotColorAndOpacityRetainPartialNamedInk(bool native)
     {
         var actual = Render("/Spot cs 1 scn q /Partial gs 0 0 0 0 k Q "
-            + "0 0 1 1 re f /Knockout gs 0 0 0 0 k 0 0 0.5 1 re f "
+            + "0 0 1 1 re f /Knockout gs 0 0 0 0 k -1 0 1.5 1 re f "
             + "/Overprint gs 0 0 0 0 k 0 0 1 1 re f", native, 128);
         var expected = Render("0 " + Number(127 / 255d) + " 0 0 k 0 0 1 1 re f", native);
         Assert.Empty(actual.Diagnostics);
@@ -66,7 +68,7 @@ public sealed class PdfPartialSpotKnockoutTests
     public void SpotElsewherePreservesProcessCoverageWithoutNamedInk(bool opacity)
     {
         string process = opacity ? "/Partial gs 0 0 0 0.5 k 0 0 1 1 re f"
-            : "0 0 0 0.5 k 0 0 0.5 1 re f";
+            : "0 0 0 0.5 k -1 0 1.5 1 re f";
         var expected = Render(process, false, 128, 2);
         var actual = Render(process + " /Overprint gs /Spot cs 1 scn 1 0 1 1 re f",
             false, 128, 2);

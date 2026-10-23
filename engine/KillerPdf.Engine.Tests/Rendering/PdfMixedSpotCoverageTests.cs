@@ -24,12 +24,14 @@ public sealed class PdfMixedSpotCoverageTests
     [InlineData(true, 255)]
     public void MixedDeviceNEdgeRetainsProcessAndNamedInk(bool overprint, int coverage)
     {
-        string edge = (coverage / 256d).ToString("R", CultureInfo.InvariantCulture);
-        var geometry = Render("1 0 0 rg 0 0 1 1 re f 1 1 1 rg 0 0 " + edge + " 1 re f", false);
+        // The rectangle starts off the page so only the given share of the pixel is covered;
+        // a rectangle thinner than a pixel would be painted one whole pixel wide.
+        string edge = "-1 0 " + (1 + coverage / 256d).ToString("R", CultureInfo.InvariantCulture) + " 1 re f";
+        var geometry = Render("1 0 0 rg 0 0 1 1 re f 1 1 1 rg " + edge, false);
         Assert.Equal(coverage, geometry.Pixels.Span[0]);
         var actual = Render("0 0 0.25 0 k 0 0 1 1 re f /Overprint gs "
             + "/Spot cs 1 scn 0 0 1 1 re f /" + (overprint ? "Overprint" : "Knockout")
-            + " gs /Mixed cs 1 1 scn 0 0 " + edge + " 1 re f "
+            + " gs /Mixed cs 1 1 scn " + edge + " "
             + "/Overprint gs /Spot cs 0 scn 0 0 1 1 re f", true);
         // Repainting the same named plate with zero tint removes its ink. The
         // declared Cyan remains, while unrelated Yellow survives only uncovered
