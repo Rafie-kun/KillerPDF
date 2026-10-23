@@ -6,8 +6,9 @@ This continues the chained 1.9 release review. [The October 21 review](adversari
 | --- | --- | --- | ---: | ---: | ---: | ---: |
 | A: 1.9 delta | `e0b9c6e..f8cd0ba` (29 commits, 136 files) | `f8cd0bac61902f66d3f0bfe8db981420b39fe832` | 21 | 19 | 2 | 0 |
 | B: #435 and CLI crash fixes | `f8cd0ba..cb4276a` | `cb4276a` | 8 | 8 | 0 | 0 |
+| C: repairs from A and B | `cb4276a..5250c80` plus `40bd135` | `5250c80`, `40bd135` | 14 | 13 | 1 | 0 |
 
-Both invalid items came from round A. BF-005 is an accurate description of a deliberate, documented trade-off. BF-019 claimed state was never read, but a UI smoke test reads it. Referee health scores: 5 for round A, 6 for round B.
+Two invalid items came from round A. BF-005 is an accurate description of a deliberate, documented trade-off. BF-019 claimed state was never read, but a UI smoke test reads it. In round C, RF-006 was invalid: the comb-overflow message never decides a page's outcome, because every path that emits it also emits a blocking message. Referee health scores: 5 for round A, 6 for round B, 6 for round C.
 
 ## Round A: valid findings and repairs
 
@@ -46,6 +47,26 @@ Both invalid items came from round A. BF-005 is an accurate description of a del
 | NF-007 | medium | A lone surrogate made save, print and export fail. | fef4c53: decoded as U+FFFD. |
 | NF-008 | low | A command-line crash on a background thread exited with the runtime's crash code. | cd46b3a: every reported command-line crash exits 1. |
 
+## Round C: valid findings and repairs
+
+| Item | Severity | Finding | Repair |
+| --- | --- | --- | --- |
+| RF-001 | medium | With no writable recovery folder, the restart said the documents had reopened while their unsaved changes were lost. | 0f4addb: a manifest in the retained session folder names each document, so the restart shows the incomplete-recovery warning. |
+| RF-002 | low | A full temp folder on the encrypted, password, certificate, read-only fallback and repair paths led to a repair offer or a wrong-password message. | 7e84b84: every open path reports the working-copy problem. |
+| RF-003 | medium | Co-signing into a prepared field dropped the page and position the signer chose. Unmet seed values failed signing that used to add a new field. | 572a693, 2742053: a placed visible signature on an uncertified document gets a new field, and certified documents still use their prepared field. A seed or lock refusal falls back to a new field. |
+| RF-004 | medium | A failed upgrade still advertised the new version, because the version was written before steps that can fail. | 80202cf: removability values first, version and size last. |
+| RF-005 | medium | In High Contrast, highlighted menu items and the selected tool-search row looked like every other item. | adb8638: system Highlight and HighlightText; the row's shortcut text follows. |
+| RF-007 | medium | The print warning was a muted label with no announcement and named pages outside the print range. | 5368675: announced as a live region, in the normal text color, naming only pages that will print. |
+| RF-008 | low | Numeric blend names and comma lists such as /2 parsed as real modes. | 8258c28: only the ISO names are accepted. |
+| RF-009 | low | Uninstall's single removal pass could leave files that a closing copy still held. | e69b2ba: the pass repeats for up to about thirty seconds. |
+| RF-010 | low | Each folder-import rebuild re-read and re-parsed every file. | e1bdaa2: each PDF is parsed once. |
+| RF-011 | low | `batch-render --allow-incomplete` gave no sign of incomplete pages. | 63d296b: console rows say INCOMPLETE and the summary counts them; CSV rows stay OK for gate baselines. |
+| RF-012 | low | Public certificate inputs (openssl headers, TRUSTED CERTIFICATE, PKCS#7) were reported as private keys. | 366c039: accurate problem kinds. |
+| RF-013 | low | Field choice walked the form once per field and ignored an inherited read-only flag. | 572a693: one pass with inherited flags. |
+| RF-014 | low | The setup wizard missed a refused desktop shortcut when an older link already existed. | 5b53596: the wizard checks that the link opens the installed copy. |
+
+Also from this round's runs: a load-sensitive cancellation test now has enough work to stay mid-render (8258c28).
+
 ## Related work in the same range
 
 - Render completeness: page-list thumbnails no longer go blank for pages that render with warnings (e149280). Twenty-two engine render warnings were reviewed as spec fallbacks or extraction-only, so they no longer block publication ([render diagnostics review](render-diagnostics-review-20261023.md); ad2f9ba, 0c4b63b, 9b919cd).
@@ -53,16 +74,28 @@ Both invalid items came from round A. BF-005 is an accurate description of a del
 - Command-line crashes report on the console instead of opening the crash window (cb4276a, reviewed in round B).
 - A flaky timestamp test now has fixture windows that survive a full parallel run (5250c80).
 
-## Owner decisions still open
+## Owner decisions
 
-- BF-004: whether a desktop shortcut that cannot be written, for example under Controlled Folder Access, should abort setup or only warn.
+Decided on 2026-10-23:
+
+- Printing and image export continue with a warning that names incomplete pages. The command line refuses them unless `--allow-incomplete` is passed.
+- BF-004: an optional desktop shortcut that Windows refuses finishes setup with a warning (40bd135, 5b53596). A Start menu shortcut failure still fails setup.
+
+Still open:
+
 - BF-005: whether to narrow the cross-session uninstall guard on multi-user hosts.
-- BF-010: whether signing should offer a field picker and a `--field` command-line option.
+- BF-010: whether signing should offer a field picker and a `--field` command-line option. Until then, a visible signature goes where the signer places it and an invisible one fills a prepared field.
+- NF-006: the overlay spaces right-to-left letters by logical column, so the overlay and the save differ when letter spacing is set on Hebrew.
 
 ## Verification
 
-At `5250c80`: the window-free app suite passed (1,238 tests). The engine suite passed (6,798 tests, with the timestamp test fixed for parallel load). The Release build has zero errors.
+At `7e84b84`: the window-free app suite passed (1,245 tests). The engine suite passed (6,802 tests), and the app and launcher Release builds have zero errors. The launcher localization check passed for 20 languages. Load-sensitive timestamp and cancellation tests were fixed in this range (5250c80, 8258c28).
 
-Not run, because they open windows: the UI smoke suites (including the render recovery, toolbar and certificate catalog smokes edited here), TabPlacementTests, DocumentTabLayoutTests, ComparisonBarLayoutTests and WindowFxTests. The print preview warning, the High Contrast hover color, the certificate dialog and the installer paths are verified by source-boundary tests only. They still need a hands-on or VM check.
+Not run, because they open windows: the UI smoke suites (including the render recovery, toolbar and certificate catalog smokes edited here), TabPlacementTests, DocumentTabLayoutTests, ComparisonBarLayoutTests and WindowFxTests. The following are verified by source-boundary tests only and still need a hands-on or VM check:
 
-A third round reviewing these repairs (`cb4276a..5250c80`) is recorded below when it completes.
+- the print preview warning and its screen-reader announcement
+- High Contrast menu highlighting
+- the certificate dialog
+- the setup wizard's desktop shortcut warning
+- installer registration order
+- render recovery
