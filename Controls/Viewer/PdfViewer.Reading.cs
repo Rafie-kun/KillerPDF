@@ -31,7 +31,9 @@ namespace KillerPDF.Controls
             private readonly Dictionary<int, PageReadingText> _pages = [];
             private object? _pagesVersion;
             private Dictionary<int, List<int>>? _structureOrder;
-            private bool _structureRead;
+            // The structure order, comments and crop boxes come from the file alone, so they are
+            // read again only when the working file changes, not after every overlay or form edit.
+            private object? _factsVersion;
             private long _textRevision;
 
             // A tagged PDF's reading order: for each page, its marked-content IDs in the order the
@@ -106,8 +108,9 @@ namespace KillerPDF.Controls
             }
             private void ReadDocumentFacts(string file)
             {
-                if (_structureRead) return;
-                _structureRead = true;
+                object facts = FileStamp();
+                if (Equals(facts, _factsVersion)) return;
+                _factsVersion = facts;
                 _comments.Clear();
                 _cropOrigins.Clear();
                 KillerPdf.Engine.Documents.PdfDocument document;
@@ -151,8 +154,6 @@ namespace KillerPDF.Controls
             {
                 _textRevision++;
                 _pages.Clear();
-                _structureOrder = null;
-                _structureRead = false;
                 _pagesVersion = Version;
                 TextChanged?.Invoke();
             }
@@ -160,14 +161,20 @@ namespace KillerPDF.Controls
             public int PageCount => viewer._doc?.PageCount ?? 0;
             public int CurrentPage => viewer._currentPage;
 
+            private (string? File, long Ticks) FileStamp()
+            {
+                string? file = viewer._currentFile;
+                long ticks = 0;
+                try { if (file is not null && System.IO.File.Exists(file)) ticks = System.IO.File.GetLastWriteTimeUtc(file).Ticks; }
+                catch (Exception ex) when (ex is System.IO.IOException or UnauthorizedAccessException) { }
+                return (file, ticks);
+            }
+
             public object Version
             {
                 get
                 {
-                    string? file = viewer._currentFile;
-                    long ticks = 0;
-                    try { if (file is not null && System.IO.File.Exists(file)) ticks = System.IO.File.GetLastWriteTimeUtc(file).Ticks; }
-                    catch (Exception ex) when (ex is System.IO.IOException or UnauthorizedAccessException) { }
+                    var (file, ticks) = FileStamp();
                     // Placed text boxes are read too, so adding or removing one rebuilds the text.
                     return (file, ticks, PageCount, viewer._annotations.Values.Sum(list => list.Count), _textRevision);
                 }
@@ -179,8 +186,6 @@ namespace KillerPDF.Controls
                 if (!Equals(version, _pagesVersion))
                 {
                     _pages.Clear();
-                    _structureOrder = null;
-                    _structureRead = false;
                     _pagesVersion = version;
                     TextChanged?.Invoke();
                 }
