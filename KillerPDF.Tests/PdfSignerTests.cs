@@ -91,6 +91,24 @@ public sealed class PdfSignerTests
         finally { Directory.Delete(directory, recursive: true); }
     }
 
+    // Falling back to a new field is for a prepared field that refuses this signature before
+    // anything is signed. A failure after the signature was made is not retried: the retry signed
+    // again (a second token PIN prompt and timestamp request) and replaced the first reason.
+    [Fact]
+    public void FailureAfterSigningIsNotRetriedInANewField()
+    {
+        PdfDocument document = PdfDocument.Open(new PdfDocumentBuilder().AddBlankPage(200, 300)
+            .AddSignatureField(0, "approval", 10, 10, 100, 30).Build());
+        int signatures = 0;
+
+        var error = Assert.Throws<InvalidOperationException>(() => PdfSigner.SignWithFallback(document,
+            _ => { signatures++; return new byte[1 << 20]; },
+            new PdfSignatureOptions { FieldName = "approval" }, newField: "Signature1"));
+
+        Assert.Equal(1, signatures);
+        Assert.Contains("reserved", error.Message);
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]

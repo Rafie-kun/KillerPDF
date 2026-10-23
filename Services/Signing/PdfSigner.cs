@@ -63,20 +63,30 @@ namespace KillerPDF.Services.Signing
                     : null,
             };
 
-            byte[] signed;
+            AtomicFileOutput.Write(outputPath, SignWithFallback(document, cmsSigner.CreateDetachedCms, options, newField));
+        }
+
+        // An uncertified document's prepared field can demand seed values or carry locks this
+        // signature cannot meet; it is then signed in a new field, as before prepared fields were
+        // chosen. A certified document has no such fallback, so its error stands. A failure after
+        // the signature was made is not retried, so the signer is asked to sign once.
+        internal static byte[] SignWithFallback(PdfDocument document, Func<ReadOnlyMemory<byte>, byte[]> createDetachedCms,
+            PdfSignatureOptions options, string newField)
+        {
+            bool signed = false;
+            byte[] SignOnce(ReadOnlyMemory<byte> data)
+            {
+                signed = true;
+                return createDetachedCms(data);
+            }
             try
             {
-                signed = PdfDetachedSignatureWriter.Sign(document, cmsSigner.CreateDetachedCms, options);
+                return PdfDetachedSignatureWriter.Sign(document, SignOnce, options);
             }
-            catch (InvalidOperationException) when (fieldName != newField)
+            catch (InvalidOperationException) when (options.FieldName != newField && !signed)
             {
-                // An uncertified document's prepared field can demand seed values or carry locks this
-                // signature cannot meet; it is then signed in a new field, as before prepared fields
-                // were chosen. A certified document has no such fallback, so its error stands.
-                signed = PdfDetachedSignatureWriter.Sign(document, cmsSigner.CreateDetachedCms,
-                    options with { FieldName = newField });
+                return PdfDetachedSignatureWriter.Sign(document, createDetachedCms, options with { FieldName = newField });
             }
-            AtomicFileOutput.Write(outputPath, signed);
         }
 
         private static string? NullIfWhiteSpace(string? value) =>
