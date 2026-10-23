@@ -92,6 +92,92 @@ namespace KillerPDF.Tests
             }
         }
 
+        // On a full disk the marker write fails in the crashed process and again in the restart a
+        // moment later. Renaming the session's lease needs no new space, so the lease becomes the
+        // marker and every later launch keeps the session until the retention expires.
+        [Fact]
+        public void RetentionSurvivesMarkerWritesTheDiskRefuses()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "kp-retained-full-" + Path.GetRandomFileName());
+            static void Full(string path, byte[] bytes) => throw new IOException("There is not enough space on the disk.");
+            var crashed = new ProcessTempFiles(root, Full);
+            try
+            {
+                string working = crashed.CreatePath("working");
+                File.WriteAllText(working, "unsaved working bytes");
+                string directory = crashed.DirectoryPath;
+                crashed.RetainForRecovery(null);
+                crashed.RetainForRecovery("recovery.json");
+                crashed.Dispose();
+
+                using (var restarted = new ProcessTempFiles(root, Full)) restarted.CleanupStale(directory);
+                using (var nextLaunch = new ProcessTempFiles(root, Full)) nextLaunch.CleanupStale();
+                Assert.True(File.Exists(working), "A later launch deleted a session the disk had no room to mark.");
+
+                File.SetLastWriteTimeUtc(Path.Combine(directory, "recovery-retained.json"), DateTime.UtcNow.AddDays(-31));
+                using (var monthLater = new ProcessTempFiles(root)) monthLater.CleanupStale();
+                Assert.False(Directory.Exists(directory), "An expired retention without a lease was kept forever.");
+            }
+            finally
+            {
+                crashed.Dispose();
+                if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+            }
+        }
+
+        // When the crashed process could not mark its session at all, the restart turns the now
+        // free lease into the marker itself.
+        [Fact]
+        public void RestartMarksTheNamedSessionWhenItsOwnWriteFails()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "kp-retained-restart-" + Path.GetRandomFileName());
+            static void Full(string path, byte[] bytes) => throw new IOException("There is not enough space on the disk.");
+            var crashed = new ProcessTempFiles(root);
+            try
+            {
+                string working = crashed.CreatePath("working");
+                File.WriteAllText(working, "unsaved working bytes");
+                string directory = crashed.DirectoryPath;
+                crashed.RetainForRecovery(null);
+                File.Delete(Path.Combine(directory, "recovery-retained.json"));
+                crashed.Dispose();
+
+                using (var restarted = new ProcessTempFiles(root, Full)) restarted.CleanupStale(directory);
+                using (var nextLaunch = new ProcessTempFiles(root, Full)) nextLaunch.CleanupStale();
+                Assert.True(File.Exists(working), "A later launch deleted the session the restart was told to keep.");
+            }
+            finally
+            {
+                crashed.Dispose();
+                if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+            }
+        }
+
+        // The retained session comes from the restart's command line, which anyone can type. A
+        // blank or malformed one is ignored instead of failing startup.
+        [Theory]
+        [InlineData("   ")]
+        [InlineData("C:\\bad\0path")]
+        public void MalformedRetainedSessionIsIgnored(string retained)
+        {
+            string root = Path.Combine(Path.GetTempPath(), "kp-retained-bad-" + Path.GetRandomFileName());
+            var stale = new ProcessTempFiles(root);
+            try
+            {
+                File.WriteAllText(stale.CreatePath("working"), "stale bytes");
+                string directory = stale.DirectoryPath;
+                stale.Dispose();
+
+                using (var next = new ProcessTempFiles(root)) next.CleanupStale(retained);
+                Assert.False(Directory.Exists(directory));
+            }
+            finally
+            {
+                stale.Dispose();
+                if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+            }
+        }
+
         [Fact]
         public void UnretainedSessionNamesNoDirectory()
         {

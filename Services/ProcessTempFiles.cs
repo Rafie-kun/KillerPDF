@@ -14,10 +14,12 @@ internal sealed class ProcessTempFiles : IDisposable
     private readonly Lazy<(string Directory, FileStream Lease)> owned;
     private bool disposed;
     private bool retainedForRecovery;
+    private readonly Action<string, byte[]> writeMarker;
 
-    public ProcessTempFiles(string root)
+    public ProcessTempFiles(string root, Action<string, byte[]>? writeMarker = null)
     {
         this.root = Path.GetFullPath(root);
+        this.writeMarker = writeMarker ?? ((path, bytes) => AtomicFileOutput.Write(path, bytes));
         owned = new(() =>
         {
             string directory = Path.Combine(this.root, "session-" + Guid.NewGuid().ToString("N"));
@@ -79,9 +81,28 @@ internal sealed class ProcessTempFiles : IDisposable
         {
             ObjectDisposedException.ThrowIf(disposed, this);
             retainedForRecovery = true;
-            AtomicFileOutput.Write(Path.Combine(DirectoryPath, RecoveryRetentionName),
-                System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(new { Manifest = manifest }));
+            string marker = Path.Combine(DirectoryPath, RecoveryRetentionName);
+            try
+            {
+                writeMarker(marker, System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(new { Manifest = manifest }));
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                if (File.Exists(marker)) return;
+                // A full disk can refuse even a small marker. Renaming the lease needs no new
+                // space, so the lease becomes the marker and later launches keep the session too.
+                // It is released first because it is held without delete sharing.
+                owned.Value.Lease.Dispose();
+                MarkWithLease(owned.Value.Directory);
+            }
         }
+    }
+
+    private static void MarkWithLease(string directory)
+    {
+        string marker = Path.Combine(directory, RecoveryRetentionName);
+        File.Move(Path.Combine(directory, LeaseName), marker);
+        File.SetLastWriteTimeUtc(marker, DateTime.UtcNow);
     }
 
     public void CleanupOwned()
@@ -107,8 +128,7 @@ internal sealed class ProcessTempFiles : IDisposable
         {
             if (!Directory.Exists(root)
                 || (File.GetAttributes(root) & FileAttributes.ReparsePoint) != 0) return;
-            string? kept = retainedSession is { Length: > 0 }
-                ? Path.TrimEndingDirectorySeparator(Path.GetFullPath(retainedSession)) : null;
+            string? kept = KeptSession(retainedSession);
             foreach (string directory in Directory.GetDirectories(root, "session-*"))
             {
                 try
@@ -118,25 +138,39 @@ internal sealed class ProcessTempFiles : IDisposable
                         || (File.GetAttributes(directory) & FileAttributes.ReparsePoint) != 0)
                         continue;
                     string retention = Path.Combine(directory, RecoveryRetentionName);
+                    string leasePath = Path.Combine(directory, LeaseName);
                     if (string.Equals(Path.GetFullPath(directory), kept, StringComparison.OrdinalIgnoreCase))
                     {
                         if (!File.Exists(retention))
-                            AtomicFileOutput.Write(retention,
-                                System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(new { Manifest = (string?)null }));
+                        {
+                            try
+                            {
+                                writeMarker(retention,
+                                    System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(new { Manifest = (string?)null }));
+                            }
+                            // The replaced process has exited, so its lease is free to become the marker.
+                            catch (Exception ex) when ((ex is IOException or UnauthorizedAccessException)
+                                && File.Exists(leasePath))
+                            {
+                                MarkWithLease(directory);
+                            }
+                        }
                         continue;
                     }
+                    bool expired = false;
                     if (File.Exists(retention))
                     {
                         if (DateTime.UtcNow - File.GetLastWriteTimeUtc(retention) < RecoveryRetention) continue;
                         File.Delete(retention);
+                        expired = true;
                     }
-                    string leasePath = Path.Combine(directory, LeaseName);
-                    if (!File.Exists(leasePath)
-                        || (File.GetAttributes(leasePath) & FileAttributes.ReparsePoint) != 0)
-                        continue;
+                    bool hasLease = File.Exists(leasePath);
+                    if (hasLease && (File.GetAttributes(leasePath) & FileAttributes.ReparsePoint) != 0) continue;
+                    // A session without a lease is skipped, unless its lease became an expired marker.
+                    if (!hasLease && !expired) continue;
                     // An active process holds this handle exclusively for its whole lifetime.
-                    using (var lease = new FileStream(leasePath, FileMode.Open,
-                        FileAccess.ReadWrite, FileShare.None))
+                    using (FileStream? lease = hasLease
+                        ? new FileStream(leasePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None) : null)
                     {
                         foreach (string file in Directory.GetFiles(directory, "killerpdf_*.pdf"))
                             try { File.Delete(file); } catch { }
@@ -144,7 +178,7 @@ internal sealed class ProcessTempFiles : IDisposable
                             !string.Equals(Path.GetFileName(entry), LeaseName, StringComparison.OrdinalIgnoreCase)))
                             continue;
                     }
-                    File.Delete(leasePath);
+                    if (hasLease) File.Delete(leasePath);
                     // Unknown files prevent removal instead of being recursively deleted.
                     Directory.Delete(directory);
                 }
@@ -152,6 +186,17 @@ internal sealed class ProcessTempFiles : IDisposable
             }
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
+    }
+
+    // The retained session named on a restart's command line, or null when it is blank or not a path.
+    private static string? KeptSession(string? retainedSession)
+    {
+        if (string.IsNullOrWhiteSpace(retainedSession)) return null;
+        try { return Path.TrimEndingDirectorySeparator(Path.GetFullPath(retainedSession)); }
+        catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException)
+        {
+            return null;
+        }
     }
 
     public void Dispose()
