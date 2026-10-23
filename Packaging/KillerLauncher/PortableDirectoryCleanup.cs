@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 
@@ -32,6 +33,31 @@ namespace KillerLauncher
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Staging and previous-copy folders an earlier install left beside
+        /// <paramref name="destination"/>, matched by their exact names: the install folder's name,
+        /// ".staging-" or ".previous-", and a 32-digit GUID.
+        /// </summary>
+        internal static IReadOnlyList<string> LeftoverSiblings(string destination)
+        {
+            var found = new List<string>();
+            string? parent = Path.GetDirectoryName(destination);
+            if (parent is null || !Directory.Exists(parent)) return found;
+            string name = Path.GetFileName(destination);
+            foreach (string directory in Directory.GetDirectories(parent, name + ".*"))
+            {
+                string leaf = Path.GetFileName(directory);
+                if (!leaf.StartsWith(name + ".", StringComparison.OrdinalIgnoreCase)) continue;
+                string suffix = leaf.Substring(name.Length);
+                foreach (string kind in new[] { ".staging-", ".previous-" })
+                    if (suffix.StartsWith(kind, StringComparison.OrdinalIgnoreCase)
+                        && Guid.TryParseExact(suffix.Substring(kind.Length), "N", out _)
+                        && (File.GetAttributes(directory) & FileAttributes.ReparsePoint) == 0)
+                        found.Add(directory);
+            }
+            return found;
         }
     }
 }

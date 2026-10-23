@@ -171,6 +171,10 @@ namespace KillerLauncher
                     : new[] { destination });
             string parent = Path.GetDirectoryName(destination) ?? throw new InvalidOperationException(LauncherStrings.Get("InvalidDirectory"));
             Directory.CreateDirectory(parent);
+            // A previous copy a late reader held, or staging a failed install could not remove, is
+            // cleared before this install adds its own.
+            foreach (string leftover in PortableDirectoryCleanup.LeftoverSiblings(destination))
+                PortableDirectoryCleanup.TryDelete(leftover);
 
             string staging = destination + ".staging-" + Guid.NewGuid().ToString("N");
             string backup = destination + ".previous-" + Guid.NewGuid().ToString("N");
@@ -185,7 +189,7 @@ namespace KillerLauncher
                 {
                     // An empty folder, such as one made in the folder picker, holds no previous copy,
                     // so a failed first install there must not be "restored" to it.
-                    if (!Directory.EnumerateFileSystemEntries(destination).Any()) Directory.Delete(destination);
+                    if (!Directory.EnumerateFileSystemEntries(destination).Any()) DeleteEmptyDirectoryWithRetries(destination);
                     else
                     {
                         MoveDirectoryWithRetries(destination, backup);
@@ -206,12 +210,17 @@ namespace KillerLauncher
 
                 // A machine-wide install supersedes the current account's per-user copy. This
                 // also covers unattended /silent installs that do not return through the portable
-                // app's InstallAndRelaunch cleanup path.
+                // app's InstallAndRelaunch cleanup path. Like its exit code, a failure to start it
+                // leaves a per-user copy beside a complete install instead of failing the install.
                 if (machine && string.IsNullOrWhiteSpace(testRoot))
-                    RunMaintenance(destination, "/remove-user-install");
+                {
+                    try { RunMaintenance(destination, "/remove-user-install"); }
+                    catch (Exception ex) when (ex is System.ComponentModel.Win32Exception
+                        or InvalidOperationException or IOException) { }
+                }
 
                 // A previous copy a late reader still holds is left beside the install rather than
-                // failing an install that is already complete.
+                // failing an install that is already complete; the next install removes it.
                 if (movedExisting) PortableDirectoryCleanup.TryDelete(backup);
                 return 0;
             }
@@ -751,6 +760,23 @@ namespace KillerLauncher
                 try
                 {
                     Directory.Move(source, destination);
+                    return;
+                }
+                catch (IOException) when (attempt < 20)
+                {
+                    System.Threading.Thread.Sleep(250);
+                }
+            }
+        }
+
+        // Never recursive: a file that appears in the folder meanwhile stops the delete.
+        private static void DeleteEmptyDirectoryWithRetries(string directory)
+        {
+            for (int attempt = 0; ; attempt++)
+            {
+                try
+                {
+                    Directory.Delete(directory);
                     return;
                 }
                 catch (IOException) when (attempt < 20)

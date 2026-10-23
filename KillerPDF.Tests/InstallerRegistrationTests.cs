@@ -62,17 +62,28 @@ public sealed class InstallerRegistrationTests
     {
         string launcher = File.ReadAllText(Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(SourcePath()))!,
             "Packaging", "KillerLauncher", "Program.cs"));
-        string install = launcher[launcher.IndexOf("bool movedExisting = false;", StringComparison.Ordinal)..];
+        string install = launcher[launcher.IndexOf("Directory.CreateDirectory(parent);", StringComparison.Ordinal)..];
         install = install[..install.IndexOf("internal static string DefaultInstallDirectory(", StringComparison.Ordinal)];
 
-        int empty = install.IndexOf("if (!Directory.EnumerateFileSystemEntries(destination).Any()) Directory.Delete(destination);", StringComparison.Ordinal);
+        // An empty folder is removed, never renamed into a "previous copy", and a lock on it is
+        // waited out the way a rename's is.
+        int empty = install.IndexOf("if (!Directory.EnumerateFileSystemEntries(destination).Any()) DeleteEmptyDirectoryWithRetries(destination);", StringComparison.Ordinal);
         Assert.True(empty >= 0 && empty < install.IndexOf("movedExisting = true;", StringComparison.Ordinal));
+        // The commit point follows the failed-registration throw as its own statement, not inside it.
+        string failed = "LauncherStrings.Format(\"RegistrationFailed\", registrationExit));";
         int committed = install.IndexOf("registered = true;", StringComparison.Ordinal);
-        Assert.True(committed > install.IndexOf("RunRegistration(", StringComparison.Ordinal));
+        int thrown = install.IndexOf(failed, StringComparison.Ordinal);
+        Assert.True(thrown >= 0 && committed > thrown);
+        Assert.DoesNotContain("{", install[(thrown + failed.Length)..committed]);
         Assert.True(committed < install.IndexOf("RunMaintenance(destination, \"/remove-user-install\");", StringComparison.Ordinal));
+        // Nothing after the commit point can report a complete install as failed.
+        Assert.Contains("try { RunMaintenance(destination, \"/remove-user-install\"); }", install);
         Assert.Contains("if (movedExisting) PortableDirectoryCleanup.TryDelete(backup);", install);
         Assert.DoesNotContain("DeleteDirectoryWithRetries(backup)", install);
         Assert.Contains("if (!registered && movedExisting && Directory.Exists(backup))", install);
+        // A previous copy left behind earlier is removed by the next install.
+        int sweep = install.IndexOf("foreach (string leftover in PortableDirectoryCleanup.LeftoverSiblings(destination))", StringComparison.Ordinal);
+        Assert.True(sweep >= 0 && sweep < install.IndexOf("ExtractAndVerify(staging);", StringComparison.Ordinal));
     }
 
     // Owner decision, 2026-10-23: an optional desktop shortcut that Windows refuses no longer fails
