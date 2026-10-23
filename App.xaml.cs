@@ -2307,11 +2307,7 @@ namespace KillerPDF
             // Self-delete: deferred via cmd batch so the EXE can exit first. The batch names every
             // owned file and removes folders only when they are empty, never recursively.
             string bat = Path.Combine(Path.GetTempPath(), $"killerpdf_uninstall_{Guid.NewGuid():N}.bat");
-            File.WriteAllText(bat,
-                "@echo off\r\n" +
-                "ping -n 3 127.0.0.1 >nul\r\n" +
-                Services.InstallPayloadOwnership.RemovalBatch(owned) +
-                "del \"%~f0\"\r\n");
+            Services.InstallPayloadOwnership.WriteRemovalScript(bat, owned);
             Process.Start(new ProcessStartInfo("cmd.exe", $"/c \"{bat}\"")
             {
                 WindowStyle    = ProcessWindowStyle.Hidden,

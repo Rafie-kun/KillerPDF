@@ -84,13 +84,17 @@ internal static class InstallPayloadOwnership
         // through every deletion, including the caller's final self-delete command.
         var batch = new System.Text.StringBuilder("setlocal DisableDelayedExpansion\r\n");
         // A process that is still closing can hold the files for a moment, so the pass repeats
-        // until the folder is gone, for about thirty seconds at most. One statement per line keeps
-        // the counter expanding as it changes without delayed expansion.
+        // while an owned file remains, for about thirty seconds at most. A folder that keeps only
+        // the user's own files ends it. One statement per line keeps the counter expanding as it
+        // changes without delayed expansion.
         batch.Append("set /a killerpdf_attempts=0\r\n:killerpdf_remove\r\n");
         foreach (string file in owned.Files) batch.Append("del /q \"").Append(Literal(file)).Append("\"\r\n");
         foreach (string directory in owned.Directories) batch.Append("rmdir \"").Append(Literal(directory)).Append("\"\r\n");
         batch.Append("rmdir \"").Append(Literal(owned.Root)).Append("\"\r\n");
-        batch.Append("if not exist \"").Append(Literal(owned.Root)).Append("\" goto killerpdf_removed\r\n")
+        batch.Append("if not exist \"").Append(Literal(owned.Root)).Append("\" goto killerpdf_removed\r\n");
+        foreach (string file in owned.Files) batch.Append("if exist \"").Append(Literal(file)).Append("\" goto killerpdf_retry\r\n");
+        batch.Append("goto killerpdf_removed\r\n")
+            .Append(":killerpdf_retry\r\n")
             .Append("set /a killerpdf_attempts+=1\r\n")
             .Append("if %killerpdf_attempts% geq 30 goto killerpdf_removed\r\n")
             .Append("ping -n 2 127.0.0.1 >nul\r\n")
@@ -100,4 +104,18 @@ internal static class InstallPayloadOwnership
 
         static string Literal(string path) => path.Replace("%", "%%", StringComparison.Ordinal);
     }
+
+    // cmd.exe decodes a batch file in its console's code page, not UTF-8, so a folder such as
+    // C:\Users\José would not match. The script's hidden console switches to UTF-8 first; cmd reads
+    // the file a line at a time, so every later line is read as UTF-8.
+    /// <summary>
+    /// Writes the script that removes the payload once this process has exited, then deletes itself.
+    /// </summary>
+    internal static void WriteRemovalScript(string path, OwnedPayload owned) =>
+        File.WriteAllText(path,
+            "@echo off\r\n" +
+            "chcp 65001 >nul\r\n" +
+            "ping -n 3 127.0.0.1 >nul\r\n" +
+            RemovalBatch(owned) +
+            "del \"%~f0\"\r\n");
 }

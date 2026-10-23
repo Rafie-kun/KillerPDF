@@ -204,6 +204,71 @@ public sealed class InstallPayloadOwnershipTests
         finally { Directory.Delete(temporary, true); }
     }
 
+    // cmd.exe decodes a batch file in its console's code page, so a UTF-8 script missed every file
+    // under a non-ASCII profile folder and then took the folder for removed.
+    [Fact]
+    public async Task RemovalScript_RemovesAPayloadUnderANonAsciiFolder()
+    {
+        string temporary = NewTemporaryDirectory();
+        try
+        {
+            string root = Path.Combine(temporary, "José 日本", "KillerPDF");
+            Directory.CreateDirectory(root);
+            string exe = Path.Combine(root, "KillerPDF.exe");
+            File.WriteAllText(exe, "exe");
+            string script = Path.Combine(temporary, "remove.bat");
+            InstallPayloadOwnership.WriteRemovalScript(script, new InstallPayloadOwnership.OwnedPayload(root, [exe], []));
+
+            await RunScript(script, TimeSpan.FromSeconds(20));
+
+            Assert.False(Directory.Exists(root), "The removal missed a payload under a non-ASCII folder.");
+            Assert.False(File.Exists(script), "The removal script did not delete itself.");
+        }
+        finally { Directory.Delete(temporary, true); }
+    }
+
+    // A folder that also holds the user's own file stays. Once every owned file is gone the
+    // removal stops instead of retrying for about thirty seconds.
+    [Fact]
+    public async Task RemovalBatch_StopsOnceOwnedFilesAreGoneAndKeepsTheUserFile()
+    {
+        string temporary = NewTemporaryDirectory();
+        try
+        {
+            string root = Path.Combine(temporary, "KillerPDF");
+            Directory.CreateDirectory(root);
+            string exe = Path.Combine(root, "KillerPDF.exe");
+            string notes = Path.Combine(root, "notes.txt");
+            File.WriteAllText(exe, "exe");
+            File.WriteAllText(notes, "user file");
+            string script = Path.Combine(temporary, "remove.cmd");
+            File.WriteAllText(script, "@echo off\r\n" + InstallPayloadOwnership.RemovalBatch(
+                new InstallPayloadOwnership.OwnedPayload(root, [exe], [])), System.Text.Encoding.ASCII);
+            var clock = Stopwatch.StartNew();
+
+            await RunScript(script, TimeSpan.FromSeconds(45));
+
+            Assert.False(File.Exists(exe));
+            Assert.True(File.Exists(notes));
+            Assert.True(clock.Elapsed < TimeSpan.FromSeconds(10),
+                $"The removal kept retrying for {clock.Elapsed.TotalSeconds:0} seconds.");
+        }
+        finally { Directory.Delete(temporary, true); }
+    }
+
+    private static async Task RunScript(string script, TimeSpan limit)
+    {
+        using Process process = Process.Start(new ProcessStartInfo(Path.Combine(Environment.SystemDirectory, "cmd.exe"))
+        {
+            Arguments = "/d /c \"\"" + script + "\"\"",
+            UseShellExecute = false,
+            CreateNoWindow = true
+        })!;
+        using var timeout = new CancellationTokenSource(limit);
+        try { await process.WaitForExitAsync(timeout.Token); }
+        finally { if (!process.HasExited) process.Kill(entireProcessTree: true); }
+    }
+
     private static string NewPayload()
     {
         string root = NewTemporaryDirectory();
