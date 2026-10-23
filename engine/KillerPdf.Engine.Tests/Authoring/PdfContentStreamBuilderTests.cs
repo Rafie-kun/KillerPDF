@@ -364,6 +364,26 @@ public sealed class PdfContentStreamBuilderTests
         Assert.Contains("<0001> Tj", Encoding.ASCII.GetString(contentStream.EncodedData.Span));
     }
 
+    // A mirrored bracket in right-to-left text draws the partner bracket's glyph but must still copy
+    // and search as the bracket that was typed.
+    [Fact]
+    public void UnicodeText_DrawsASubstituteGlyphThatExtractsAsTheOriginalText()
+    {
+        TrueTypeFont embedded = TrueTypeFont.Load(TrueTypeFontTests.BuildTestFont(format12: false));
+        var content = new PdfContentStreamBuilder()
+            .BeginText().SetFont(embedded, 12).ShowUnicodeText("A", "B").ShowUnicodeText("A")
+            .ShowUnicodeText("A", "B").EndText();
+        PdfDocument document = PdfDocument.Open(
+            new PdfDocumentBuilder().AddPage(100, 100, content).Build());
+        string toUnicode = Encoding.ASCII.GetString(PdfStreamDecoder.Decode(FindToUnicode(document)));
+
+        Assert.Equal("BT\n/F1 12 Tf\n<0001> Tj\n<0002> Tj\n<0001> Tj\nET\n", Encoding.ASCII.GetString(content.Build()));
+        Assert.Contains("<0001> <0042>", toUnicode);
+        Assert.Contains("<0002> <0041>", toUnicode);
+        Assert.Throws<ArgumentException>(() => new PdfContentStreamBuilder()
+            .BeginText().SetFont(embedded, 12).ShowUnicodeText("AA", "B"));
+    }
+
     [Fact]
     public void UnicodeText_WritesSupplementaryCharactersAsUtf16InToUnicodeMap()
     {

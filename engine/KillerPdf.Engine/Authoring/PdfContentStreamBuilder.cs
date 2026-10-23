@@ -966,6 +966,30 @@ public sealed class PdfContentStreamBuilder
         return this;
     }
 
+    /// <summary>
+    /// Draws the single glyph of <paramref name="glyphText"/> but records <paramref name="actualText"/>
+    /// in the ToUnicode map, so copy and search read the original text. Right-to-left text uses this
+    /// to show a mirrored bracket while keeping the bracket that was typed.
+    /// </summary>
+    public PdfContentStreamBuilder ShowUnicodeText(string glyphText, string actualText)
+    {
+        RequireText();
+        ArgumentNullException.ThrowIfNull(glyphText);
+        ArgumentException.ThrowIfNullOrEmpty(actualText);
+        EmbeddedFontUsage usage = _activeEmbeddedFont
+            ?? throw new InvalidOperationException("Select an embedded TrueType font before writing Unicode text.");
+        IReadOnlyList<FontGlyphMapping> glyphs = usage.Font.MapText(glyphText);
+        if (glyphs.Count != 1 || glyphs[0].Glyph == 0)
+            throw new ArgumentException($"Font {usage.Font.PostScriptName} has no single glyph for {glyphText}.", nameof(glyphText));
+        RecordPaintedContent();
+        ushort characterCode = usage.AddSubstituteMapping(glyphs[0].Glyph, actualText);
+        _output.WriteByte((byte)'<');
+        WriteHexByte((byte)(characterCode >> 8));
+        WriteHexByte((byte)characterCode);
+        _output.Write("> Tj\n"u8);
+        return this;
+    }
+
     /// <summary>Writes embedded Unicode text segments separated by PDF text-position adjustments.</summary>
     public PdfContentStreamBuilder ShowPositionedUnicodeText(
         IReadOnlyList<string> segments, IReadOnlyList<double> adjustments)
@@ -1304,6 +1328,7 @@ internal sealed class EmbeddedFontUsage(TrueTypeFont font, PdfName resourceName)
 {
     private readonly SortedDictionary<ushort, EmbeddedCharacterMapping> _mappings = [];
     private readonly Dictionary<string, ushort> _codeByUnicode = new(StringComparer.Ordinal);
+    private readonly Dictionary<(ushort Glyph, string Unicode), ushort> _substituteCodes = [];
 
     public TrueTypeFont Font { get; } = font;
     public PdfName ResourceName { get; } = resourceName;
@@ -1334,6 +1359,27 @@ internal sealed class EmbeddedFontUsage(TrueTypeFont font, PdfName resourceName)
         if (!_codeByUnicode.TryAdd(unicodeSequence, code))
             throw new InvalidOperationException(
                 "The embedded-font Unicode mapping could not be registered.");
+        return code;
+    }
+
+    /// <summary>A code that draws <paramref name="glyph"/> and extracts as
+    /// <paramref name="unicodeSequence"/>, kept apart from the natural mapping of that text.</summary>
+    public ushort AddSubstituteMapping(ushort glyph, string unicodeSequence)
+    {
+        if (_codeByUnicode.TryGetValue(unicodeSequence, out ushort natural) && _mappings[natural].Glyph == glyph)
+            return natural;
+        if (_substituteCodes.TryGetValue((glyph, unicodeSequence), out ushort existing)) return existing;
+        ushort code = glyph;
+        if (_mappings.ContainsKey(code))
+        {
+            int available = Enumerable.Range(1, ushort.MaxValue)
+                .FirstOrDefault(candidate => !_mappings.ContainsKey((ushort)candidate));
+            if (available == 0)
+                throw new InvalidOperationException("The embedded-font character-code range is exhausted.");
+            code = (ushort)available;
+        }
+        _mappings.Add(code, new EmbeddedCharacterMapping(glyph, unicodeSequence));
+        _substituteCodes.Add((glyph, unicodeSequence), code);
         return code;
     }
 }
