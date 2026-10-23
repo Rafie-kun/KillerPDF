@@ -185,8 +185,9 @@ namespace KillerLauncher
                 InstallProgress.Visibility = Visibility.Collapsed;
                 RenderPage();
                 // Windows can refuse the desktop shortcut, for example under Controlled folder
-                // access. That does not fail the install, so it is reported here instead.
-                if (desktop && !File.Exists(Program.DesktopShortcutPath(machine)))
+                // access. That does not fail the install, so it is reported here instead; an older
+                // link that opens some other copy does not hide the refusal.
+                if (desktop && !Program.DesktopShortcutOpensInstalledCopy(machine, installDirectory))
                     ShowNotice(LauncherStrings.Get("ShortcutSkipped"), LauncherStrings.Get("ShortcutSkippedCopy"),
                         NoticeKind.Warning);
             }

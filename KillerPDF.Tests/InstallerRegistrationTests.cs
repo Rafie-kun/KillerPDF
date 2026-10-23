@@ -55,7 +55,7 @@ public sealed class InstallerRegistrationTests
 
         string wizard = File.ReadAllText(Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(SourcePath()))!,
             "Packaging", "KillerLauncher", "InstallerWizard.xaml.cs"));
-        Assert.Contains("if (desktop && !File.Exists(Program.DesktopShortcutPath(machine)))", wizard);
+        Assert.Contains("if (desktop && !Program.DesktopShortcutOpensInstalledCopy(machine, installDirectory))", wizard);
         Assert.Contains("LauncherStrings.Get(\"ShortcutSkipped\")", wizard);
     }
 

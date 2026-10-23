@@ -302,6 +302,41 @@ namespace KillerLauncher
             ? Environment.SpecialFolder.CommonDesktopDirectory
             : Environment.SpecialFolder.DesktopDirectory), "KillerPDF.lnk");
 
+        /// <summary>
+        /// True when the desktop shortcut exists and opens the copy installed in
+        /// <paramref name="installDirectory"/>. A link left by a portable copy or an earlier install
+        /// does not count. When the link's target cannot be read, its presence is taken as success.
+        /// </summary>
+        internal static bool DesktopShortcutOpensInstalledCopy(bool machine, string installDirectory)
+        {
+            string link = DesktopShortcutPath(machine);
+            if (!File.Exists(link)) return false;
+            string? target = ShortcutTarget(link);
+            return target == null || string.Equals(Path.GetFullPath(target),
+                Path.GetFullPath(Path.Combine(installDirectory, InnerExeName)), StringComparison.OrdinalIgnoreCase);
+        }
+
+        // Reads a shortcut's target through the Windows Script Host, or null where it is unavailable.
+        private static string? ShortcutTarget(string linkPath)
+        {
+            object? shell = null, shortcut = null;
+            try
+            {
+                Type? shellType = Type.GetTypeFromProgID("WScript.Shell");
+                if (shellType == null) return null;
+                shell = Activator.CreateInstance(shellType);
+                shortcut = shellType.InvokeMember("CreateShortcut", BindingFlags.InvokeMethod, null, shell, new object[] { linkPath });
+                return shortcut?.GetType().InvokeMember("TargetPath", BindingFlags.GetProperty, null, shortcut, null) as string
+                    is { Length: > 0 } target ? target : null;
+            }
+            catch (Exception) { return null; }
+            finally
+            {
+                if (shortcut != null && Marshal.IsComObject(shortcut)) Marshal.FinalReleaseComObject(shortcut);
+                if (shell != null && Marshal.IsComObject(shell)) Marshal.FinalReleaseComObject(shell);
+            }
+        }
+
         // The File Explorer and Outlook preview handler (#410), registered by the app's /preview pass.
         private const string PreviewHandlerServerKey =
             @"Software\Classes\CLSID\{0EB8F20D-6E18-4B80-9CDF-FF663C52B5BD}\InprocServer32";
