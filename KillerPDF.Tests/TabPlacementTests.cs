@@ -27,6 +27,9 @@ public sealed class TabPlacementTests
                     "PreviewMouseMove", "PreviewMouseLeftButtonUp", "Click"];
                 foreach (var attribute in markup.DescendantsAndSelf().Attributes().Where(item => events.Contains(item.Name.LocalName)).ToList())
                     attribute.Remove();
+                // The face is the app's RetroTabBorder; this assembly reads it as the Border it derives from.
+                markup.Name = XName.Get("Border", "http://schemas.microsoft.com/winfx/2006/xaml/presentation");
+                markup.Attribute("RetroBottomEdges")?.Remove();
                 var context = new ParserContext();
                 context.XmlnsDictionary.Add("", "http://schemas.microsoft.com/winfx/2006/xaml/presentation");
                 context.XmlnsDictionary.Add("x", "http://schemas.microsoft.com/winfx/2006/xaml");

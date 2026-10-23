@@ -155,6 +155,12 @@ namespace KillerPDF.Controls
 
             RetroTabInnerJoinLeft.Width = 0;
             RetroTabInnerJoinRight.Width = 0;
+            RetroTabInnerJoinCorner.Width = 0;
+            RetroTabInnerJoinLeftEdge.Width = 0;
+            RetroTabFootShadeLeft.Width = 0;
+            RetroTabFootShadeRight.Width = 0;
+            RetroTabFootShadeCorner.Width = 0;
+            RetroTabFootShadeLeftEdge.Width = 0;
 
             if (Services.ThemeManager.Current != Services.Theme.SE98 ||
                 TabStripBorder.Visibility != Visibility.Visible || _active == null)
@@ -165,16 +171,54 @@ namespace KillerPDF.Controls
             if (activeTab == null || activeTab.ActualWidth <= 0 || RetroTabInnerJoin.ActualWidth <= 0)
                 return;
 
-            Point activeOrigin = activeTab.TranslatePoint(new Point(0, 0), RetroTabInnerJoin);
-            double joinWidth = RetroTabInnerJoin.ActualWidth;
-            double activeLeft = Math.Max(0, Math.Min(joinWidth, Math.Round(activeOrigin.X)));
-            double activeRight = Math.Max(activeLeft,
-                Math.Min(joinWidth, Math.Round(activeOrigin.X + activeTab.ActualWidth)));
+            if (!TabsAtBottom)
+            {
+                Point activeOrigin = activeTab.TranslatePoint(new Point(0, 0), RetroTabInnerJoin);
+                double joinWidth = RetroTabInnerJoin.ActualWidth;
+                double activeLeft = Math.Max(0, Math.Min(joinWidth, Math.Round(activeOrigin.X)));
+                double activeRight = Math.Max(activeLeft,
+                    Math.Min(joinWidth, Math.Round(activeOrigin.X + activeTab.ActualWidth)));
 
-            RetroTabInnerJoinLeft.Width = activeLeft;
+                RetroTabInnerJoinLeft.Width = activeLeft;
+                Canvas.SetLeft(RetroTabInnerJoinLeft, 0);
+                RetroTabInnerJoinRight.Width = joinWidth - activeRight;
+                Canvas.SetLeft(RetroTabInnerJoinRight, activeRight);
+                return;
+            }
+
+            // Bottom strip: measure the tab face itself (the selected tab overhangs its cell).
+            // Its white left edge is at activeLeft and its #808080 and black right edges at
+            // activeRight - 2 and activeRight - 1 (RetroTabBorder). The foot lines break between
+            // them, and the tab's edges carry on up through both foot rows, so those pixels take
+            // the tab's colors instead of the lines'. The shade starts one pixel in, leaving the
+            // page's white left edge to meet the black foot.
+            if (System.Windows.Media.VisualTreeHelper.GetChildrenCount(activeTab) > 0 &&
+                System.Windows.Media.VisualTreeHelper.GetChild(activeTab, 0) is FrameworkElement face && face.ActualWidth > 0)
+                activeTab = face;
+            Point origin = activeTab.TranslatePoint(new Point(0, 0), RetroTabInnerJoin);
+            double width = RetroTabInnerJoin.ActualWidth;
+            double left = Math.Max(0, Math.Min(width, Math.Round(origin.X)));
+            double right = Math.Max(left, Math.Min(width, Math.Round(origin.X + activeTab.ActualWidth)));
+
+            RetroTabInnerJoinLeft.Width = left;
             Canvas.SetLeft(RetroTabInnerJoinLeft, 0);
-            RetroTabInnerJoinRight.Width = joinWidth - activeRight;
-            Canvas.SetLeft(RetroTabInnerJoinRight, activeRight);
+            RetroTabInnerJoinLeftEdge.Width = 1;
+            Canvas.SetLeft(RetroTabInnerJoinLeftEdge, left);
+            RetroTabInnerJoinCorner.Width = 1;
+            Canvas.SetLeft(RetroTabInnerJoinCorner, right - 2);
+            RetroTabInnerJoinRight.Width = Math.Max(0, width - (right - 1));
+            Canvas.SetLeft(RetroTabInnerJoinRight, right - 1);
+
+            double shadeOffset = Math.Round(RetroTabFootShade.TranslatePoint(new Point(0, 0), RetroTabInnerJoin).X);
+            double shadeWidth = RetroTabFootShade.ActualWidth;
+            RetroTabFootShadeLeft.Width = Math.Max(0, left - 1 - shadeOffset);
+            Canvas.SetLeft(RetroTabFootShadeLeft, 1);
+            RetroTabFootShadeLeftEdge.Width = 1;
+            Canvas.SetLeft(RetroTabFootShadeLeftEdge, left - shadeOffset);
+            RetroTabFootShadeCorner.Width = 1;
+            Canvas.SetLeft(RetroTabFootShadeCorner, right - 1 - shadeOffset);
+            RetroTabFootShadeRight.Width = Math.Max(0, shadeWidth - (right - 2 - shadeOffset));
+            Canvas.SetLeft(RetroTabFootShadeRight, right - 2 - shadeOffset);
         }
 
         // ════════════════════════════════════════════════════════════════════════════════════════

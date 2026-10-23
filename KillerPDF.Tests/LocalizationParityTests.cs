@@ -77,7 +77,8 @@ public sealed class LocalizationParityTests
         var offenders = new List<string>();
         var allowed = new HashSet<string>(StringComparer.Ordinal)
         {
-            "KillerPDF", "Killer Tools", "Killer", "PDF", "T", "English", "Čeština", "Deutsch",
+            // "x" is the tab close glyph shared with KillerShell, not English text.
+            "KillerPDF", "Killer Tools", "Killer", "PDF", "T", "x", "English", "Čeština", "Deutsch",
             "Español", "Français", "Magyar", "Italiano", "Polski", "Tiếng Việt", "Türkçe",
             "Norsk bokmål", "Português (Brasil)", "Slovenščina", "sl-SI",
             "en-US", "bn", "cs-CZ", "de-DE", "es", "fr-FR", "hu-HU", "it-IT",

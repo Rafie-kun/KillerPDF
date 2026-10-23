@@ -56,6 +56,20 @@
                             Background="{DynamicResource BevelLightBrush}"/>
                     <Border x:Name="RetroTabInnerJoinRight" Height="1"
                             Background="{DynamicResource BevelLightBrush}"/>
+                    <Border x:Name="RetroTabInnerJoinCorner" Height="1" Width="0"
+                            Background="{DynamicResource BevelDarkBrush}"/>
+                    <Border x:Name="RetroTabInnerJoinLeftEdge" Height="1" Width="0"
+                            Background="{DynamicResource BevelLightBrush}"/>
+                </Canvas>
+                <!-- 98SE bottom strip only: the page foot's inner #808080 line, one row above the
+                     black join and broken for the selected tab the same way (PdfViewer.TabPlacement.cs). -->
+                <Canvas x:Name="RetroTabFootShade" Height="1" VerticalAlignment="Top"
+                        Margin="0,-2,1,0" Visibility="Collapsed"
+                        IsHitTestVisible="False" SnapsToDevicePixels="True">
+                    <Border x:Name="RetroTabFootShadeLeft" Height="1" Background="{DynamicResource BevelDarkBrush}"/>
+                    <Border x:Name="RetroTabFootShadeRight" Height="1" Background="{DynamicResource BevelDarkBrush}"/>
+                    <Border x:Name="RetroTabFootShadeCorner" Height="1" Width="0" Background="{DynamicResource BevelOuterDarkBrush}"/>
+                    <Border x:Name="RetroTabFootShadeLeftEdge" Height="1" Width="0" Background="{DynamicResource BevelLightBrush}"/>
                 </Canvas>
                 <DockPanel LastChildFill="True">
                     <Button x:Name="NewTabBtn" DockPanel.Dock="Right"
@@ -149,7 +163,8 @@
                                          corner.
                                          The inactive bottom margin and active flush margin keep the
                                          selected tab visually connected to the document pane. -->
-                                    <Border x:Name="tabBd" CornerRadius="0" Margin="{DynamicResource TabMargin}" Padding="{DynamicResource TabPadding}"
+                                    <local:RetroTabBorder x:Name="tabBd" CornerRadius="0" Margin="{DynamicResource TabMargin}" Padding="{DynamicResource TabPadding}"
+                                            RetroBottomEdges="{DynamicResource TabRetroBottomEdges}"
                                             MinWidth="160" MaxWidth="260"
                                             RenderTransform="{DynamicResource TabPlacementTransform}" RenderTransformOrigin="0.5,0.5"
                                             UseLayoutRounding="True" SnapsToDevicePixels="True"
@@ -206,7 +221,7 @@
                                                     BorderThickness="{DynamicResource TabActiveInnerBevelThickness}"
                                                     SnapsToDevicePixels="True" Visibility="Collapsed"/>
                                         </Grid>
-                                    </Border>
+                                    </local:RetroTabBorder>
                                     <DataTemplate.Triggers>
                                         <!-- Last tab drops its right border: that 1px is a divider
                                              BETWEEN tabs, and on the strip's right edge it reads as
@@ -355,6 +370,16 @@
                                             </MultiDataTrigger.Conditions>
                                             <Setter TargetName="tabBd" Property="Background" Value="{DynamicResource TabActiveBrush}"/>
                                         </MultiDataTrigger>
+                                        <!-- 98SE below the page: RetroTabBorder draws the edges by Win98's
+                                             top-left light, so the flipped top-strip bevels stand down.
+                                             Last, so it wins over the retro triggers above. -->
+                                        <DataTrigger Binding="{Binding RetroBottomEdges, ElementName=tabBd}" Value="True">
+                                            <Setter TargetName="tabBevelLight" Property="Visibility" Value="Collapsed"/>
+                                            <Setter TargetName="tabBevelDark" Property="Visibility" Value="Collapsed"/>
+                                            <Setter TargetName="tabActiveRetroOuterOutline" Property="Visibility" Value="Collapsed"/>
+                                            <Setter TargetName="tabInactiveRetroOuterOutline" Property="Visibility" Value="Collapsed"/>
+                                            <Setter TargetName="tabActiveRetroInnerBevel" Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
                                     </DataTemplate.Triggers>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
