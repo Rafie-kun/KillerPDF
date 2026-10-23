@@ -7073,8 +7073,12 @@ public sealed partial class PdfPageRenderer
         return state;
     }
 
+    // Only the ISO 32000 names; Enum.TryParse also accepted numbers and comma lists such as /2.
+    private static readonly Dictionary<string, RendererBlendMode> BlendModeNames =
+        Enum.GetValues<RendererBlendMode>().ToDictionary(mode => mode.ToString(), StringComparer.Ordinal);
+
     private static bool TryReadBlendMode(PdfName name, out RendererBlendMode mode) =>
-        Enum.TryParse(name.ValueAsLatin1(), ignoreCase: false, out mode);
+        BlendModeNames.TryGetValue(name.ValueAsLatin1(), out mode);
 
     private int PositiveInteger(PdfDictionary dictionary, string key)
     {

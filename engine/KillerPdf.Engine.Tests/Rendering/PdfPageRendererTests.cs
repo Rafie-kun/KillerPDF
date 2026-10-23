@@ -709,8 +709,11 @@ public sealed class PdfPageRendererTests
     [Fact]
     public async Task Render_HonorsCancellationDuringRasterization()
     {
+        // Enough full-page fills that the render is still running when the cancellation lands, even
+        // when a loaded test run delays the cancelling thread.
         PdfDocument document = PdfDocument.Open(new PdfDocumentBuilder()
-            .AddPage(100, 100, "0 0 100 100 re f"u8.ToArray()).Build());
+            .AddPage(100, 100, System.Text.Encoding.ASCII.GetBytes(
+                string.Concat(Enumerable.Repeat("0 0 100 100 re f ", 2000)))).Build());
         using var cancellation = new CancellationTokenSource();
         using var started = new ManualResetEventSlim();
         Task render = Task.Factory.StartNew(() =>
@@ -4198,9 +4201,13 @@ public sealed class PdfPageRendererTests
     }
 
     // A blend mode the reader does not recognise is painted as Normal. It used to keep whatever
-    // mode the previous graphics state set, here Difference.
-    [Fact]
-    public void Render_UnrecognisedBlendModePaintsNormal()
+    // mode the previous graphics state set, here Difference, and numbers or comma lists such as
+    // /2 parsed as real modes.
+    [Theory]
+    [InlineData("NotABlendMode")]
+    [InlineData("2")]
+    [InlineData("Multiply,Screen")]
+    public void Render_UnrecognisedBlendModePaintsNormal(string blendMode)
     {
         const string body = "0 0 1 rg 0 0 10 10 re f /Diff gs /Bogus gs 1 0 0 rg 0 0 10 10 re f";
         var objects = new List<string>
@@ -4208,7 +4215,7 @@ public sealed class PdfPageRendererTests
             "<< /Type /Catalog /Pages 2 0 R >>",
             "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
             "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 10 10] /Resources << /ExtGState << " +
-                "/Diff << /BM /Difference >> /Bogus << /BM /NotABlendMode >> >> >> /Contents 4 0 R >>",
+                "/Diff << /BM /Difference >> /Bogus << /BM /" + blendMode + " >> >> >> /Contents 4 0 R >>",
             $"<< /Length {body.Length} >>\nstream\n{body}\nendstream"
         };
         var pdf = new StringBuilder("%PDF-1.7\n");
