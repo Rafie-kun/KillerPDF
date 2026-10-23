@@ -3584,14 +3584,14 @@
                                    FontFamily="{DynamicResource UiFont}" FontSize="12" FontWeight="SemiBold"
                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}"/>
                     </Button>
-                    <!-- Footer row: the recent-files privacy toggle (#146) sits left, the tiny
-                         destructive Clear-all-Data link top-right (red on hover). The About
-                         window is where the data-hygiene controls live. -->
-                    <DockPanel Margin="0,12,0,0" LastChildFill="False">
-                    <!-- Stacked, not side by side: the SHA-256 line is the only thing allowed to
-                         set the card's width (family rule), and two checkboxes on one row would
-                         overrun it. -->
-                    <StackPanel DockPanel.Dock="Left" VerticalAlignment="Center">
+                    <!-- Settings wrap in two equal columns inside the SHA-sized info panel. -->
+                    <Grid Margin="0,12,0,0" Width="{Binding ActualWidth, ElementName=AboutInfoGrid}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
                         <!-- First, like every Killer Tools About card: the way back after the
                              update prompt's "Always check on startup" box was cleared. -->
                         <CheckBox x:Name="StartupUpdateCheck" Margin="0" Padding="10,0,10,0"
@@ -3605,26 +3605,29 @@
                                   Click="AboutCloseToTray_Click">
                             <TextBlock Text="{DynamicResource Str_About_CloseToTray}" TextWrapping="Wrap"/>
                         </CheckBox>
-                        <CheckBox Margin="0,6,0,0" Padding="10,0,10,0"
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <CheckBox Margin="0" Padding="10,0,10,0"
                                   Style="{StaticResource ThemeCheck}" FontSize="11"
                                   IsChecked="{Binding Source={x:Static kl:ShortcutHints.Current}, Path=Enabled, Mode=TwoWay}">
                             <TextBlock Text="{DynamicResource Str_About_ShowShortcutsInMenus}" TextWrapping="Wrap"/>
                         </CheckBox>
                         <CheckBox x:Name="NoRecentCheck" Margin="0,6,0,0" Padding="10,0,10,0"
-                                  Content="{DynamicResource Str_NoRecentSetting}"
                                   Style="{StaticResource ThemeCheck}" FontSize="11"
-                                  Checked="NoRecentCheck_Toggled" Unchecked="NoRecentCheck_Toggled"/>
+                                  Checked="NoRecentCheck_Toggled" Unchecked="NoRecentCheck_Toggled">
+                            <TextBlock Text="{DynamicResource Str_NoRecentSetting}" TextWrapping="Wrap"/>
+                        </CheckBox>
                         <!-- Confirm-before-opening-links. Lived as a hidden row in the Settings
                              panel and came back here when that panel was dissolved: About is where
                              the data-hygiene and safety controls live. Off by default, so link
                              clicks stay immediate unless you ask for the prompt. -->
                         <CheckBox x:Name="LinkConfirmCheck" Margin="0,6,0,0" Padding="10,0,10,0"
-                                  Content="{DynamicResource Str_LinkConfirmSetting}"
                                   Style="{StaticResource ThemeCheck}" FontSize="11"
-                                  Checked="LinkConfirmCheck_Toggled" Unchecked="LinkConfirmCheck_Toggled"/>
-                    </StackPanel>
-                    <TextBlock DockPanel.Dock="Right" FontFamily="{DynamicResource UiFont}" FontSize="10"
-                               VerticalAlignment="Top" Margin="0,6,0,0">
+                                  Checked="LinkConfirmCheck_Toggled" Unchecked="LinkConfirmCheck_Toggled">
+                            <TextBlock Text="{DynamicResource Str_LinkConfirmSetting}" TextWrapping="Wrap"/>
+                        </CheckBox>
+                    <TextBlock FontFamily="{DynamicResource UiFont}" FontSize="10"
+                               HorizontalAlignment="Right" Margin="0,8,0,0" TextWrapping="Wrap">
                         <Hyperlink TextDecorations="None" Cursor="Hand" Click="AboutClearData_Click">
                             <Hyperlink.Style>
                                 <Style TargetType="Hyperlink">
@@ -3639,7 +3642,8 @@
                             <Run Text="{DynamicResource Str_ClearAllData}"/>
                         </Hyperlink>
                     </TextBlock>
-                    </DockPanel>
+                    </StackPanel>
+                    </Grid>
                     </StackPanel>
                 </Grid>
                 <!-- Modern close: anchored to the CARD's corner (root grid), not pushed inward by
