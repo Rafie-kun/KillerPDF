@@ -171,6 +171,54 @@ public sealed class PdfRenderCompletenessTests
 
     private static string SourcePath([System.Runtime.CompilerServices.CallerFilePath] string path = "") => path;
 
+    // Each of these draws what the file specifies or the fallback ISO 32000 defines, so it must
+    // not stop printing, export or OCR. Unknown messages still block until reviewed.
+    [Theory]
+    [InlineData("An unreadable ToUnicode map was ignored; embedded font mappings were used.", "Information")]
+    [InlineData("A cyclic page-tree reference was omitted.", "Recovery")]
+    [InlineData("An invalid line-join operation was ignored.", "Recovery")]
+    [InlineData("An invalid text-position operation was ignored.", "Recovery")]
+    [InlineData("An invalid graphics-state miter limit was clamped to one.", "Recovery")]
+    [InlineData("An invalid graphics-state /LW stroke setting was ignored.", "Recovery")]
+    [InlineData("An invalid graphics-state /D stroke setting was ignored.", "Recovery")]
+    [InlineData("A source ICC profile could not be used; its alternate color space was used.", "Recovery")]
+    [InlineData("The document output profile could not be used for DeviceCMYK color conversion.", "Recovery")]
+    [InlineData("The group ICC profile could not be used; its alternate color space was used.", "Recovery")]
+    [InlineData("The default color profile could not be used for group blending.", "Recovery")]
+    [InlineData("The calibrated group matrix could not be used for blending.", "Recovery")]
+    [InlineData("The group rendering intent could not be used; its blend-profile conversion was used.", "Recovery")]
+    [InlineData("The destination group rendering intent could not be used; its blend-profile conversion was used.", "Recovery")]
+    [InlineData("Black-point compensation could not be applied to this group conversion.", "Recovery")]
+    [InlineData("Black-point compensation could not be applied to this color conversion.", "Recovery")]
+    [InlineData("The black-point compensation policy is invalid; the default policy was used.", "Recovery")]
+    [InlineData("A transfer function array was invalid and was ignored.", "Recovery")]
+    [InlineData("A transfer function could not be read and was ignored.", "Recovery")]
+    [InlineData("Invalid Type 1 font lengths were recovered from the embedded program.", "Recovery")]
+    [InlineData("A comb field value exceeded MaxLen; only the declared cells were rendered.", "Recovery")]
+    public void ReviewedRecoveriesRemainPublishable(string message, string expected)
+    {
+        PdfRenderDiagnostic diagnostic = Assert.Single(PdfRenderCompleteness.Classify([message]));
+        Assert.Equal(expected, diagnostic.Kind.ToString());
+        Assert.False(diagnostic.BlocksPublication);
+    }
+
+    [Theory]
+    [InlineData("Missing font resource /F1 was replaced with Helvetica.")]
+    [InlineData("Missing font resource /Recovered was replaced with Helvetica.")]
+    [InlineData("A requested form-field text appearance was regenerated.")]
+    [InlineData("A requested empty form-field appearance was regenerated.")]
+    [InlineData("Transfer functions are not applied to process-color output.")]
+    [InlineData("Transparency blend-mode rendering is not implemented.")]
+    [InlineData("Cyclic Form XObject expansion limit reached.")]
+    [InlineData("Invalid page resources were treated as empty.")]
+    [InlineData("Text outlines for font ArialMT are not available.")]
+    [InlineData("An invalid graphics-state /XX stroke setting was ignored.")]
+    [InlineData("A source ICC profile could not be used; its alternate color space was used. ")]
+    public void SubstitutionsOmissionsAndUnreviewedMessagesStillBlock(string message)
+    {
+        Assert.True(Assert.Single(PdfRenderCompleteness.Classify([message])).BlocksPublication);
+    }
+
     [Fact]
     public void MixedRecoveryAndOmission_DoesNotHideMaterialFailure()
     {

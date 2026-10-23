@@ -9,6 +9,39 @@ internal sealed record PdfRenderDiagnostic(PdfRenderDiagnosticKind Kind, string 
 
 internal static class PdfRenderCompleteness
 {
+    // Engine messages whose rendering was reviewed against the renderer source on 2026-10-23.
+    // Each draws what the file specifies or the fallback ISO 32000 defines, or affects only text
+    // extraction. They are matched exactly before the wording rules below, so a repair whose
+    // message mentions an omission still publishes.
+    private static readonly Dictionary<string, PdfRenderDiagnosticKind> Reviewed = new(StringComparer.Ordinal)
+    {
+        ["An unreadable ToUnicode map was ignored; embedded font mappings were used."] = PdfRenderDiagnosticKind.Information,
+        ["A cyclic page-tree reference was omitted."] = PdfRenderDiagnosticKind.Recovery,
+        ["An invalid line-join operation was ignored."] = PdfRenderDiagnosticKind.Recovery,
+        ["An invalid text-position operation was ignored."] = PdfRenderDiagnosticKind.Recovery,
+        ["An invalid graphics-state miter limit was clamped to one."] = PdfRenderDiagnosticKind.Recovery,
+        ["A source ICC profile could not be used; its alternate color space was used."] = PdfRenderDiagnosticKind.Recovery,
+        ["The document output profile could not be used for DeviceCMYK color conversion."] = PdfRenderDiagnosticKind.Recovery,
+        ["The group ICC profile could not be used; its alternate color space was used."] = PdfRenderDiagnosticKind.Recovery,
+        ["The default color profile could not be used for group blending."] = PdfRenderDiagnosticKind.Recovery,
+        ["The calibrated group matrix could not be used for blending."] = PdfRenderDiagnosticKind.Recovery,
+        ["The group rendering intent could not be used; its blend-profile conversion was used."] = PdfRenderDiagnosticKind.Recovery,
+        ["The destination group rendering intent could not be used; its blend-profile conversion was used."] = PdfRenderDiagnosticKind.Recovery,
+        ["Black-point compensation could not be applied to this group conversion."] = PdfRenderDiagnosticKind.Recovery,
+        ["Black-point compensation could not be applied to this color conversion."] = PdfRenderDiagnosticKind.Recovery,
+        ["The black-point compensation policy is invalid; the default policy was used."] = PdfRenderDiagnosticKind.Recovery,
+        ["A transfer function array was invalid and was ignored."] = PdfRenderDiagnosticKind.Recovery,
+        ["A transfer function could not be read and was ignored."] = PdfRenderDiagnosticKind.Recovery,
+        ["Invalid Type 1 font lengths were recovered from the embedded program."] = PdfRenderDiagnosticKind.Recovery,
+        ["A comb field value exceeded MaxLen; only the declared cells were rendered."] = PdfRenderDiagnosticKind.Recovery,
+    };
+
+    // The renderer names only these graphics-state stroke keys when it drops a malformed one.
+    private static readonly HashSet<string> IgnoredStrokeSettings = new(StringComparer.Ordinal)
+    {
+        "LW", "LC", "LJ", "ML", "D", "SA"
+    };
+
     // Adapt the engine's compatibility messages at one boundary. Unknown diagnostics
     // remain blocking until their rendering consequences have been reviewed.
     internal static IReadOnlyList<PdfRenderDiagnostic> Classify(IReadOnlyList<string> messages) =>
@@ -16,6 +49,13 @@ internal static class PdfRenderCompleteness
 
     private static PdfRenderDiagnosticKind Kind(string message)
     {
+        if (Reviewed.TryGetValue(message, out PdfRenderDiagnosticKind reviewed)) return reviewed;
+        const string strokePrefix = "An invalid graphics-state /", strokeSuffix = " stroke setting was ignored.";
+        if (message.StartsWith(strokePrefix, StringComparison.Ordinal)
+            && message.EndsWith(strokeSuffix, StringComparison.Ordinal)
+            && message.Length > strokePrefix.Length + strokeSuffix.Length
+            && IgnoredStrokeSettings.Contains(message[strokePrefix.Length..^strokeSuffix.Length]))
+            return PdfRenderDiagnosticKind.Recovery;
         if (message.Contains("omitted", StringComparison.OrdinalIgnoreCase)
             || message.Contains("skipped", StringComparison.OrdinalIgnoreCase)
             || message.Contains("truncated", StringComparison.OrdinalIgnoreCase)
