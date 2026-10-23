@@ -327,40 +327,41 @@ internal static class PdfEngineBurn
         {
             if (baseline > y + height) break;
             double lineWidth = Measure(font, line, size, characterSpacing);
-            if (IsHebrewRightToLeftLine(line))
+            var runs = BidiLine.VisualRuns(line);
+            if (runs.Count == 1 && !runs[0].RightToLeft)
+                content.SetTextMatrix(1, 0, 0, -1, x + padX, baseline).ShowUnicodeText(line);
+            else
             {
-                content.SetCharacterSpacing(0);
-                var elements = new List<string>();
-                var enumerator = System.Globalization.StringInfo.GetTextElementEnumerator(line);
-                while (enumerator.MoveNext()) elements.Add(enumerator.GetTextElement());
-                double cursor = x + padX + lineWidth;
-                for (int index = 0; index < elements.Count; index++)
+                // Hebrew, and any numbers or Latin inside it, lands run by run where the text box shows
+                // it (#435). Right-to-left runs are written in reading order from their right edge, so
+                // copied text still reads correctly.
+                double cursor = x + padX;
+                foreach (BidiRun run in runs)
                 {
-                    string element = elements[index];
-                    cursor -= Measure(font, element, size);
-                    content.SetTextMatrix(1, 0, 0, -1, cursor, baseline).ShowUnicodeText(element);
-                    if (index + 1 < elements.Count) cursor -= characterSpacing;
+                    double runWidth = Measure(font, run.Text, size, characterSpacing);
+                    if (run.RightToLeft)
+                    {
+                        content.SetCharacterSpacing(0);
+                        double right = cursor + runWidth;
+                        var enumerator = System.Globalization.StringInfo.GetTextElementEnumerator(run.Text);
+                        while (enumerator.MoveNext())
+                        {
+                            string element = enumerator.GetTextElement();
+                            right -= Measure(font, element, size);
+                            content.SetTextMatrix(1, 0, 0, -1, right, baseline).ShowUnicodeText(element);
+                            right -= characterSpacing;
+                        }
+                        content.SetCharacterSpacing(characterSpacing);
+                    }
+                    else content.SetTextMatrix(1, 0, 0, -1, cursor, baseline).ShowUnicodeText(run.Text);
+                    cursor += runWidth + characterSpacing;
                 }
-                content.SetCharacterSpacing(characterSpacing);
             }
-            else content.SetTextMatrix(1, 0, 0, -1, x + padX, baseline).ShowUnicodeText(line);
             if (text.Underline) DrawRuleAfterText(content, x + padX, baseline + size * .12, lineWidth, size);
             if (text.Strike) DrawRuleAfterText(content, x + padX, baseline - size * .3, lineWidth, size);
             baseline += lineHeight;
         }
         content.EndText().RestoreState();
-    }
-
-    private static bool IsHebrewRightToLeftLine(string line)
-    {
-        bool hasHebrew = false;
-        foreach (Rune rune in line.EnumerateRunes())
-        {
-            bool hebrew = rune.Value is >= 0x0590 and <= 0x05FF or >= 0xFB1D and <= 0xFB4F;
-            if (hebrew) hasHebrew = true;
-            else if (Rune.IsLetterOrDigit(rune)) return false;
-        }
-        return hasHebrew;
     }
 
     private static void DrawRuleAfterText(PdfContentStreamBuilder content, double x, double y,

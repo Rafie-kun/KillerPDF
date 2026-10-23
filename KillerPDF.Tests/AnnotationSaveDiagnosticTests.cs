@@ -131,6 +131,40 @@ public sealed class AnnotationSaveDiagnosticTests
         finally { if (File.Exists(path)) File.Delete(path); }
     }
 
+    // #435: a Hebrew line holding numbers and Latin used to skip right-to-left placement entirely.
+    [Fact]
+    public void MixedHebrewTextSave_PlacesRunsInTheOrderTheTextBoxShows()
+    {
+        string path = Path.Combine(Path.GetTempPath(), $"killerpdf-hebrew-mixed-{Guid.NewGuid():N}.pdf");
+        try
+        {
+            File.WriteAllBytes(path, new PdfDocumentBuilder().AddBlankPage(200, 200).Build());
+            var annotations = new Dictionary<int, List<PageAnnotation>>
+            {
+                [0] = [new TextAnnotation
+                {
+                    PageIndex = 0, Position = new Point(10, 10), Width = 180, Height = 30,
+                    Content = "שלום 123 abc", FontName = "Segoe UI", FontSize = 12
+                }]
+            };
+            PdfEngineBurn.Burn(path, annotations, new Dictionary<int, (int w, int h)> { [0] = (200, 200) });
+
+            string streams = AllDecodedStreams(PdfDocument.Open(File.ReadAllBytes(path)));
+            // The ToUnicode map turns each two-byte code back into text; ordering the shown pieces by
+            // their x position reads the line the way it lands on the page.
+            var unicode = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (Match match in Regex.Matches(streams, @"<([0-9A-Fa-f]{4})> <([0-9A-Fa-f]+)>\r?\n"))
+                unicode[match.Groups[1].Value] = Encoding.BigEndianUnicode.GetString(
+                    Convert.FromHexString(match.Groups[2].Value));
+            string shown = string.Concat(Regex.Matches(streams, @"1 0 0 -1 ([\d.]+) [\d.]+ Tm\s*<([0-9A-Fa-f]*)> Tj")
+                .Select(match => (X: double.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture),
+                    Text: string.Concat(match.Groups[2].Value.Chunk(4).Select(code => unicode[new string(code)]))))
+                .OrderBy(piece => piece.X).Select(piece => piece.Text));
+            Assert.Equal("123 םולש abc", shown);
+        }
+        finally { if (File.Exists(path)) File.Delete(path); }
+    }
+
     private static Dictionary<int, List<PageAnnotation>> EveryAnnotationKind() => new()
     {
         [0] =
