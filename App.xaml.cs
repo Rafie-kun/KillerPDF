@@ -105,9 +105,11 @@ namespace KillerPDF
                 // #410: setup passes /preview or /no-preview; without either the copy keeps its choice.
                 bool? preview = e.Args.Any(a => string.Equals(a, "/preview", StringComparison.OrdinalIgnoreCase)) ? true
                     : e.Args.Any(a => string.Equals(a, "/no-preview", StringComparison.OrdinalIgnoreCase)) ? false : null;
+                // Setup restores the previous copy when registration fails, unless there was none.
+                bool setupRollsBack = !e.Args.Any(a => string.Equals(a, "/no-rollback", StringComparison.OrdinalIgnoreCase));
                 try
                 {
-                    if (RegisterInstalledCopy(machine, desktop, preview, setupRollsBack: true) is { } desktopProblem)
+                    if (RegisterInstalledCopy(machine, desktop, preview, setupRollsBack: setupRollsBack) is { } desktopProblem)
                         Console.Error.WriteLine("Installed without the desktop shortcut: " + desktopProblem);
                     Shutdown(0);
                 }
@@ -2168,8 +2170,9 @@ namespace KillerPDF
             // The copy is registered for uninstall first, so a shortcut or association that fails
             // below still leaves an installation Windows can remove instead of an orphaned payload.
             // The entry must keep naming the version that is actually installed. Setup's launcher
-            // rolls a failed upgrade back to the old copy, so there the version and size come last;
-            // the app's own installs replace the file without a rollback, so they record it first.
+            // rolls a failed upgrade back to the old copy, so there the version comes last. A fresh
+            // install and the app's own installs have nothing to roll back to, so they record it
+            // first. The size is measured last on every path, once every file is in place.
             const string uninstallKey = @"Software\Microsoft\Windows\CurrentVersion\Uninstall\KillerPDF";
             using (var key = registryRoot.CreateSubKey(@"Software\KillerPDF"))
             {
@@ -2214,7 +2217,7 @@ namespace KillerPDF
             else
                 Services.PreviewHandlerRegistration.Unregister(registryRoot);
 
-            if (setupRollsBack) RecordVersion();
+            RecordVersion();
 
             SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, IntPtr.Zero, IntPtr.Zero);
             return desktopProblem;

@@ -190,7 +190,7 @@ namespace KillerLauncher
                 int registrationExit = string.Equals(
                     Environment.GetEnvironmentVariable(SkipRegistrationEnvironmentVariable), "1", StringComparison.Ordinal)
                     ? 0
-                    : RunRegistration(destination, machine, desktop, preview);
+                    : RunRegistration(destination, machine, desktop, preview, rollsBack: movedExisting);
                 if (registrationExit != 0)
                     throw new System.ComponentModel.Win32Exception(registrationExit,
                         LauncherStrings.Format("RegistrationFailed", registrationExit));
@@ -573,10 +573,12 @@ namespace KillerLauncher
             catch (EntryPointNotFoundException) { return false; }
         }
 
-        private static int RunRegistration(string directory, bool machine, bool desktop, bool? preview)
+        private static int RunRegistration(string directory, bool machine, bool desktop, bool? preview, bool rollsBack)
         {
             var arguments = new List<string> { machine ? "/register-machine" : "/register-user" };
             if (desktop) arguments.Add("/desktop");
+            // Registration writes the version last only when a failure here restores the previous copy.
+            if (!rollsBack) arguments.Add("/no-rollback");
             if (preview.HasValue) arguments.Add(preview.Value ? "/preview" : "/no-preview");
             var start = new ProcessStartInfo(Path.Combine(directory, InnerExeName), QuoteArguments(arguments.ToArray()))
             {

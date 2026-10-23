@@ -29,22 +29,28 @@ public sealed class InstallerRegistrationTests
         foreach (string step in steps)
             Assert.True(uninstall < register.IndexOf(step, StringComparison.Ordinal), step + " runs before the uninstall entry.");
         // The entry must keep naming the version that is really installed. Setup's launcher rolls a
-        // failed upgrade back, so there the version is written only after every required step; the
-        // app's own installs replace the file without a rollback, so they record it first.
+        // failed upgrade back, so there the version is written only after every required step. A
+        // fresh setup install and the app's own installs have nothing to roll back to, so they
+        // record it first. The size is measured last on every path, once every file is in place.
         int early = register.IndexOf("if (!setupRollsBack) RecordVersion();", StringComparison.Ordinal);
-        int late = register.IndexOf("if (setupRollsBack) RecordVersion();", StringComparison.Ordinal);
-        Assert.True(early > uninstall, "The app's own installs do not record the version after the uninstall entry.");
+        int late = register.LastIndexOf("RecordVersion();", StringComparison.Ordinal);
+        Assert.True(early > uninstall, "Installs without a rollback do not record the version after the uninstall entry.");
+        Assert.DoesNotContain("if (setupRollsBack) RecordVersion();", register);
         foreach (string step in steps)
         {
             Assert.True(early < register.IndexOf(step, StringComparison.Ordinal), step + " runs before the early version.");
-            Assert.True(late > register.LastIndexOf(step, StringComparison.Ordinal), "The setup version is written before " + step);
+            Assert.True(late > register.LastIndexOf(step, StringComparison.Ordinal), "The final version and size come before " + step);
         }
         foreach (string version in new[] { "key.SetValue(\"DisplayVersion\"", "key.SetValue(\"Version\"", "key.SetValue(\"EstimatedSize\"" })
             Assert.Equal(1, register.Split(version).Length - 1);
 
         string source = AppSource();
-        Assert.Contains("RegisterInstalledCopy(machine, desktop, preview, setupRollsBack: true)", source);
-        Assert.Equal(1, source.Split("setupRollsBack: true").Length - 1);
+        Assert.Contains("bool setupRollsBack = !e.Args.Any(a => string.Equals(a, \"/no-rollback\", StringComparison.OrdinalIgnoreCase));", source);
+        Assert.Contains("RegisterInstalledCopy(machine, desktop, preview, setupRollsBack: setupRollsBack)", source);
+        string launcher = File.ReadAllText(Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(SourcePath()))!,
+            "Packaging", "KillerLauncher", "Program.cs"));
+        Assert.Contains("RunRegistration(destination, machine, desktop, preview, rollsBack: movedExisting)", launcher);
+        Assert.Contains("if (!rollsBack) arguments.Add(\"/no-rollback\");", launcher);
     }
 
     // Owner decision, 2026-10-23: an optional desktop shortcut that Windows refuses no longer fails
