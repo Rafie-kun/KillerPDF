@@ -81,7 +81,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Unified message and setup dialogs, kept actions visible in long forms, and simplified Table Export and About. Interface fonts now resolve from embedded files, including menus, tooltips and shortcuts.
 - Updated theme contrast, selection colors and field presets. Light uses gray window surfaces, lighter document panes and white input fields; several dark themes use darker menus and bars to distinguish them from panes (#340).
 - Modern menus and Search Tools results use readable accent-colored hover text; Customize Toolbar button rows have clearer hover contrast. Theme-menu hover fills have equal side insets, and About/Shortcuts edges follow gradient themes.
-- Refined film grain, checkbox ticks, radio alignment and file-picker styling. Popup textures cover their padding, sliders have tighter corners without square surrounds, and 98SE keeps classic bevels, compact fields and a gray document workspace.
+- Reduced Black film grain and refined checkbox ticks, radio alignment and file-picker styling. Popup textures cover their padding, sliders have tighter corners without square surrounds, and 98SE keeps classic bevels, compact fields and a gray document workspace.
 - Wordmarks and headings use a subtle bevel in their own color, retaining shadows where enabled. Dark's red accent uses the brand red; the empty drop target uses corner brackets and aiming marks at 80% opacity.
 - Simplified mobile website navigation, localized labels, improved contrast and Corpus layout, and added Store and related-app links. Updated Help, technical guides, shortcut references and application metadata.
 
