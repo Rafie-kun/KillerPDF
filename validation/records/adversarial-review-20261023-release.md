@@ -1,6 +1,6 @@
 # KillerPDF 1.9 adversarial release review, October 23, 2026
 
-This continues the chained 1.9 release review. [The October 21 review](adversarial-review-20261021-release.md) covered `4df9b86..e0b9c6e`. This record covers everything after it in six rounds, plus the fixes they produced. Each round ran the three isolated stages from the harness contract (bug-finder, defender, referee). The defender received only the bug-finder's structured report, and the referee only the two reports, checking evidence against the pinned head with `git show`. All stages were read-only: no builds, test runs or app launches.
+This continues the chained 1.9 release review. [The October 21 review](adversarial-review-20261021-release.md) covered `4df9b86..e0b9c6e`. This record covers everything after it in seven rounds, plus the fixes they produced. Each round ran the three isolated stages from the harness contract (bug-finder, defender, referee). The defender received only the bug-finder's structured report, and the referee only the two reports, checking evidence against the pinned head with `git show`. All stages were read-only: no builds, test runs or app launches.
 
 | Round | Range | Reviewed head | Findings | Valid | Invalid | Needs investigation |
 | --- | --- | --- | ---: | ---: | ---: | ---: |
@@ -10,8 +10,9 @@ This continues the chained 1.9 release review. [The October 21 review](adversari
 | D: repairs from C | `40bd135..7e84b84` | `7e84b84` | 13 | 13 | 0 | 0 |
 | E: repairs from D | `104f047..29cd072` | `29cd072` | 7 | 7 | 0 | 0 |
 | F: repairs from E | `29cd072..e5e4e10` | `e5e4e10` | 5 | 5 | 0 | 0 |
+| G: repairs from F | `e5e4e10..a44cbe1` | `a44cbe1` | 7 | 6 | 1 | 0 |
 
-Two invalid items came from round A. BF-005 is an accurate description of a deliberate, documented trade-off. BF-019 claimed state was never read, but a UI smoke test reads it. In round C, RF-006 was invalid: the comb-overflow message never decides a page's outcome, because every path that emits it also emits a blocking message. Rounds D, E and F had no invalid items. Referee health scores: 5 for round A, 6 for round B, 6 for round C, 5 for round D, 7 for round E, 6 for round F.
+Two invalid items came from round A. BF-005 is an accurate description of a deliberate, documented trade-off. BF-019 claimed state was never read, but a UI smoke test reads it. In round C, RF-006 was invalid: the comb-overflow message never decides a page's outcome, because every path that emits it also emits a blocking message. Rounds D, E and F had no invalid items. In round G, GF-003 was invalid: a failed lease rename leaves the session no worse off than before round F, because the single-instance lock covers the gap and every later retention call and the restart retry the rename. Referee health scores: 5 for round A, 6 for round B, 6 for round C, 5 for round D, 7 for round E, 6 for round F, 8 for round G.
 
 ## Round A: valid findings and repairs
 
@@ -116,6 +117,19 @@ Round F reviewed the round E repairs. XF-001, XF-002 and XF-003 predate the rang
 | XF-004 | low | A blank or malformed retained session on the restart's command line threw out of startup cleanup. | 72ed630: ignored, with tests for blank and invalid paths. |
 | XF-005 | low | The untitled-documents test built its lines with a helper the restart message did not use. | a44cbe1: the restart builds and joins its lines with the tested helpers. |
 
+## Round G: valid findings and repairs
+
+Round G reviewed the round F repairs. Every valid finding is low. GF-001, GF-002, GF-004 and GF-007 came from round F's setup changes; GF-005 and GF-006 predate the range.
+
+| Item | Severity | Finding | Repair |
+| --- | --- | --- | --- |
+| GF-001 | low | A previous copy that could not be deleted after an upgrade was left beside the install with nothing to remove it later. | e815749: the next install removes staging and previous-copy folders found by their exact generated names, with a test that look-alike folders survive. Uninstall does not sweep them. |
+| GF-002 | low | On a machine install, a per-user removal that could not start reported the completed install as failed. | e815749: that step is best effort, like its exit code. |
+| GF-004 | low | An empty destination folder was deleted once, where a rename used to wait out a brief lock. | e815749: the delete is retried the same way and is never recursive. |
+| GF-005 | low | The cross-process temp-cleanup probe no longer built. | 2a64439: it compiles the atomic writer too and passes all seven checks. |
+| GF-006 | low | A copy with several backup errors listed the later ones as separate lines, and a copy that also failed to reopen was listed twice. | a296267: each document is one line, with its errors joined. |
+| GF-007 | low | The setup commit-point test could pass with the commit moved inside the failure branch. | e815749: the test pins the commit as its own statement after the failure throw. Setup's swap and rollback still have no behavioral test; that needs the VM. |
+
 ## Related work in the same range
 
 - Render completeness: page-list thumbnails no longer go blank for pages that render with warnings (e149280). Twenty-two engine render warnings were reviewed as spec fallbacks or extraction-only, so they no longer block publication ([render diagnostics review](render-diagnostics-review-20261023.md); ad2f9ba, 0c4b63b, 9b919cd).
@@ -145,6 +159,10 @@ At `4265a73`, after round D: the window-free app suite passed (1,256 tests) and 
 At `e5e4e10`, after round E: the window-free app suite passed (1,259 tests). The engine is unchanged since `4265a73`, where its suite passed. The app, launcher and UI smoke Release builds have zero errors, and the launcher localization check passed for 20 languages.
 
 At `a44cbe1`, after round F: the window-free app suite passed (1,264 tests), the engine is still unchanged since `4265a73`, the app, launcher and UI smoke Release builds have zero errors, and the launcher localization check passed for 20 languages.
+
+At `a296267`, after round G: the window-free app suite passed (1,266 tests), the cross-process temp-cleanup probe passed all seven checks, the engine is still unchanged since `4265a73`, the app, launcher and UI smoke Release builds have zero errors, and the launcher localization check passed for 20 languages.
+
+The chained review stops at round G. Findings fell from 13 in round D to 6 low ones in round G, and the round G repairs are small and covered by tests or the probe.
 
 Not run, because they open windows: the UI smoke suites (including the render recovery, toolbar and certificate catalog smokes edited here), TabPlacementTests, DocumentTabLayoutTests, ComparisonBarLayoutTests and WindowFxTests. The following are verified by source-boundary tests only and still need a hands-on or VM check:
 
