@@ -80,6 +80,8 @@ namespace KillerPDF
         private readonly TextBlock _pageLabel = new();
         private readonly TextBlock _renderLabel = new();   // "Rendering X / Y" line shown above the page nav
         private IReadOnlyList<int> _incompletePages = [];   // pages that print as shown, named after loading
+        // The warning follows the Pages box at once, but is announced only once the range settles.
+        private readonly System.Windows.Threading.DispatcherTimer _announceWarning = new() { Interval = TimeSpan.FromMilliseconds(600) };
         private Button _previousPage = null!;
         private Button _nextPage = null!;
         private ComboBox _printerCombo = null!;
@@ -156,6 +158,7 @@ namespace KillerPDF
         protected override void OnClosed(EventArgs e)
         {
             Canceled = true;   // stop any in-flight background page rendering
+            _announceWarning.Stop();
             base.OnClosed(e);
             try { _server?.Dispose(); } catch { }
             // We own the flattened temp (kept alive so Print could re-rasterize at 300 DPI); clean it up.
@@ -854,6 +857,13 @@ namespace KillerPDF
             System.Windows.Automation.AutomationProperties.SetLiveSetting(_renderLabel,
                 System.Windows.Automation.AutomationLiveSetting.Polite);
             _renderLabel.Visibility = Visibility.Collapsed;
+            _announceWarning.Tick += (_, _) =>
+            {
+                _announceWarning.Stop();
+                if (_renderLabel.Visibility == Visibility.Visible && !_isLoading
+                    && System.Windows.Automation.Peers.UIElementAutomationPeer.CreatePeerForElement(_renderLabel) is { } peer)
+                    peer.RaiseAutomationEvent(System.Windows.Automation.Peers.AutomationEvents.LiveRegionChanged);
+            };
             var navCenter = new StackPanel
             {
                 HorizontalAlignment = HorizontalAlignment.Center,
@@ -1183,10 +1193,17 @@ namespace KillerPDF
                 _renderLabel.Foreground = R("TextBrush");
                 _renderLabel.Text = warning;
                 _renderLabel.Visibility = Visibility.Visible;
-                if (changed && System.Windows.Automation.Peers.UIElementAutomationPeer.CreatePeerForElement(_renderLabel) is { } peer)
-                    peer.RaiseAutomationEvent(System.Windows.Automation.Peers.AutomationEvents.LiveRegionChanged);
+                if (changed)
+                {
+                    _announceWarning.Stop();
+                    _announceWarning.Start();
+                }
             }
-            else _renderLabel.Visibility = Visibility.Collapsed;
+            else
+            {
+                _announceWarning.Stop();
+                _renderLabel.Visibility = Visibility.Collapsed;
+            }
         }
 
         // Called (on the UI thread) by the background renderer as each page finishes.

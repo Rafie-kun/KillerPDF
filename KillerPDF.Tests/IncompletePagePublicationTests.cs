@@ -69,6 +69,13 @@ public sealed class IncompletePagePublicationTests
         Assert.Contains("_incompletePages.Where(printed.Contains)", preview);
         Assert.Contains("AutomationLiveSetting.Polite", preview);
         Assert.Contains("AutomationEvents.LiveRegionChanged", preview);
+        // Typing a range announces only the settled warning, not each intermediate range.
+        Assert.Equal(1, Count(preview, "AutomationEvents.LiveRegionChanged"));
+        Assert.Contains("_announceWarning.Tick +=", preview);
+        string label = preview[preview.IndexOf("private void UpdateRenderLabel()", StringComparison.Ordinal)..];
+        label = label[..label.IndexOf("\n        }", StringComparison.Ordinal)];
+        Assert.DoesNotContain("RaiseAutomationEvent", label);
+        Assert.Contains("_announceWarning.Start();", label);
 
         foreach (string cli in new[] { "CliRunner.cs", "CliRunner.Pages.cs" })
             Assert.DoesNotContain("requireComplete: false", Read("Features", "Cli", cli));
