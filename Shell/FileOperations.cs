@@ -1069,23 +1069,30 @@ namespace KillerPDF
                 var imports = new List<PdfEngineIntegration.ImportedDocument>();
                 foreach (var file in dlg.FileNames)
                 {
-                    string importPath = file;
                     try
                     {
-                        PdfEngineIntegration.ValidateDocument(importPath);
-                    }
-                    catch
-                    {
-                        string? repaired = await RepairPdfForImportAsync(file);
-                        if (repaired is null) return;
-                        importPath = repaired;
-                        PdfEngineIntegration.ValidateDocument(importPath);
-                    }
+                        string importPath = file;
+                        try
+                        {
+                            PdfEngineIntegration.ValidateDocument(importPath);
+                        }
+                        catch
+                        {
+                            string? repaired = await RepairPdfForImportAsync(file);
+                            if (repaired is null) return;
+                            importPath = repaired;
+                            PdfEngineIntegration.ValidateDocument(importPath);
+                        }
 
-                    IReadOnlyList<KillerPdf.Engine.Documents.PdfPageInformation> pages =
-                        PdfEngineIntegration.ReadPageInformation(importPath);
-                    imports.Add(new PdfEngineIntegration.ImportedDocument(importPath,
-                        [.. pages.Select(page => page.Rotation)]));
+                        IReadOnlyList<KillerPdf.Engine.Documents.PdfPageInformation> pages =
+                            PdfEngineIntegration.ReadPageInformation(importPath);
+                        imports.Add(new PdfEngineIntegration.ImportedDocument(importPath,
+                            [.. pages.Select(page => page.Rotation)], file));
+                    }
+                    catch (Exception ex) when (PdfEngineIntegration.IsImportFailure(ex))
+                    {
+                        throw PdfEngineIntegration.WithImportSource(file, ex);
+                    }
                 }
                 int insertAt = insertionIndex ?? _doc.PageCount;
                 int importedPages = imports.Sum(import => import.PageRotations.Count);

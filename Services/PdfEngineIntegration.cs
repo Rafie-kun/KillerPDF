@@ -1467,22 +1467,60 @@ internal static class PdfEngineIntegration
 
         bool firstIsPdf = string.Equals(Path.GetExtension(paths[0]), ".pdf",
             StringComparison.OrdinalIgnoreCase);
-        PdfDocument target = firstIsPdf
-            ? PdfDocument.Open(File.ReadAllBytes(paths[0]))
-            : PdfDocument.Open(new PdfDocumentBuilder().Build());
-        var editor = new PdfIncrementalPageEditor(target);
+        PdfIncrementalPageEditor editor;
+        try
+        {
+            PdfDocument target = firstIsPdf
+                ? PdfDocument.Open(File.ReadAllBytes(paths[0]))
+                : PdfDocument.Open(new PdfDocumentBuilder().Build());
+            editor = new PdfIncrementalPageEditor(target);
+        }
+        catch (Exception ex) when (firstIsPdf && IsImportFailure(ex))
+        {
+            throw WithImportSource(paths[0], ex);
+        }
+        var sourcePaths = new Dictionary<PdfDocument, string>();
         foreach (string path in paths.Skip(firstIsPdf ? 1 : 0))
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(path);
-            if (string.Equals(Path.GetExtension(path), ".pdf",
-                    StringComparison.OrdinalIgnoreCase))
+            try
             {
-                editor.AddImportedDocument(PdfDocument.Open(File.ReadAllBytes(path)));
-                continue;
+                if (string.Equals(Path.GetExtension(path), ".pdf",
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    PdfDocument source = PdfDocument.Open(File.ReadAllBytes(path));
+                    sourcePaths.Add(source, path);
+                    editor.AddImportedDocument(source);
+                    continue;
+                }
+                AppendImageFrames(editor, path);
             }
-            AppendImageFrames(editor, path);
+            catch (Exception ex) when (IsImportFailure(ex))
+            {
+                throw WithImportSource(path, ex);
+            }
         }
-        return editor.Build();
+        return BuildImportedDocuments(editor, sourcePaths);
+    }
+
+    internal static bool IsImportFailure(Exception exception) =>
+        exception is not OperationCanceledException and not OutOfMemoryException;
+
+    internal static InvalidOperationException WithImportSource(string path, Exception exception) =>
+        new($"\"{path}\": {exception.Message}", exception);
+
+    private static byte[] BuildImportedDocuments(
+        PdfIncrementalPageEditor editor, IReadOnlyDictionary<PdfDocument, string> sourcePaths)
+    {
+        try
+        {
+            return editor.Build();
+        }
+        catch (Exception ex) when (IsImportFailure(ex)
+            && editor.FailedImportSource is PdfDocument source && sourcePaths.ContainsKey(source))
+        {
+            throw WithImportSource(sourcePaths[editor.FailedImportSource!], ex);
+        }
     }
 
     /// <summary>Merges every readable PDF or image input and skips invalid entries.</summary>
@@ -1804,7 +1842,7 @@ internal static class PdfEngineIntegration
         double X, double Y, double Width, double Height);
 
     internal sealed record ImportedDocument(
-        string Path, IReadOnlyList<int> PageRotations);
+        string Path, IReadOnlyList<int> PageRotations, string? OriginalPath = null);
 
     /// <summary>Validates that the engine can open a document for page-copy operations.</summary>
     internal static void ValidateDocument(string path)
@@ -2509,19 +2547,29 @@ internal static class PdfEngineIntegration
         int offset = insertionIndex == int.MaxValue ? editor.PageCount : insertionIndex;
         if (offset < 0 || offset > editor.PageCount)
             throw new ArgumentOutOfRangeException(nameof(insertionIndex));
+        var sourcePaths = new Dictionary<PdfDocument, string>();
         foreach (ImportedDocument import in sources)
         {
-            PdfDocument source = PdfDocument.Open(File.ReadAllBytes(import.Path));
-            int count = new PdfIncrementalPageEditor(source).PageCount;
-            if (import.PageRotations.Count != count)
-                throw new ArgumentException(
-                    "The imported rotation count must match the source page count.", nameof(sources));
-            editor.InsertImportedPages(offset, source, [.. Enumerable.Range(0, count)]);
-            for (int index = 0; index < count; index++)
-                editor.SetRotation(offset + index, 0);
-            offset += count;
+            string sourcePath = import.OriginalPath ?? import.Path;
+            try
+            {
+                PdfDocument source = PdfDocument.Open(File.ReadAllBytes(import.Path));
+                sourcePaths.Add(source, sourcePath);
+                int count = new PdfIncrementalPageEditor(source).PageCount;
+                if (import.PageRotations.Count != count)
+                    throw new ArgumentException(
+                        "The imported rotation count must match the source page count.", nameof(sources));
+                editor.InsertImportedPages(offset, source, [.. Enumerable.Range(0, count)]);
+                for (int index = 0; index < count; index++)
+                    editor.SetRotation(offset + index, 0);
+                offset += count;
+            }
+            catch (Exception ex) when (IsImportFailure(ex))
+            {
+                throw WithImportSource(sourcePath, ex);
+            }
         }
-        ReplaceWithBuiltResult(path, editor.Build());
+        ReplaceWithBuiltResult(path, BuildImportedDocuments(editor, sourcePaths));
     }
 
     /// <summary>Appends imported page rotations to the application rotation map.</summary>

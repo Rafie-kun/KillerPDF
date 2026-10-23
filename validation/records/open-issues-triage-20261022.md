@@ -4,6 +4,8 @@ Scope: all 53 open issues in SteveTheKiller/KillerPDF, including every issue bod
 
 Source basis: `dev/1.9-overkill`, starting HEAD `879309406750d859fc50f4f7464d246afb635f43`, including preserved concurrent working-tree changes. Three independent issue groups were checked against live source/history. Existing tests cited below were inspected, not broadly rerun. Catalog verification is recorded separately in [certificate-catalog-20261022.md](certificate-catalog-20261022.md). Source implementation is not release readiness or reporter acceptance.
 
+Follow-up: #455 now identifies input files for preparation and page import failures, including errors discovered while building the result. Verification and remaining diagnostic limits are recorded in [merge-source-diagnostics-20261022.md](merge-source-diagnostics-20261022.md).
+
 ## Coverage and remaining work
 
 Every open issue is now accounted for. 32 have their accepted scope implemented in source (including two duplicates), 11 are partial, six need an exact reproduction, and four reflect explicit deferral or design decisions. Several implemented paths still need native, hardware, real-document or reporter acceptance. There are no unreviewed issues, but there is unfinished work.
@@ -14,7 +16,7 @@ The existing KillerPDF section of the shared BACKLOG.md was reconciled during th
 
 1. Replay #437, #456 and #415 on appropriate Windows display hardware, including maximized/fullscreen minimize, Win+D, restore and sleep/resume. Recovery is implemented; prevention is not proved by recovery tests.
 2. Use the already supplied PDFs/videos for #413 and #431. Check exact edited text, baseline, styling, saved bytes and reopen. For #424, compare the supplied Microchip PDF at identical output dimensions and zoom. These do not need another generic information request.
-3. Finish or resolve specific source gaps: mixed Hebrew/numbers/Latin in #435; merge input filenames in #455; desktop custom preflight/display ICC scope in #264; general macro parameter/resume scope in #343.
+3. Finish or resolve specific source gaps: mixed Hebrew/numbers/Latin in #435; remaining catalog-level merge diagnostics in #455; desktop custom preflight/display ICC scope in #264; general macro parameter/resume scope in #343.
 4. Verify native packaging and hardware: #454 Canon duplex; #410 preview hosts; #393 association upgrade; #73 scanner; #74 Office conversion. Retain the existing release gates.
 5. Decide the lower-priority remaining layout scope in #440 and #427. Keep #390 and #414 consistent with recorded product decisions. Keep ARM64 #270 and Linux #9 in 2.0.
 6. Track missing reproductions without calling nearby tests exact fixes: #457, #456, #430, #420, #417, #412 and the remaining original file in #406.
@@ -46,7 +48,7 @@ Paths below are relative to C:\Users\steve\code\KillerPDF. Evidence refers to cu
 | --- | --- | --- | --- |
 | [#457 Field clearing/deletion](https://github.com/SteveTheKiller/KillerPDF/issues/457) | Needs reproduction | `Services/PdfEngineIntegration.cs:810`; `KillerPDF.Tests/FormFieldRoundTripTests.cs:15` | Related fixes exist. Need version, exact error and minimal PDF to diagnose the reported file. |
 | [#456 Black window after sleep](https://github.com/SteveTheKiller/KillerPDF/issues/456) | Needs reproduction | `Shell/RenderRecovery.cs:20`; `Services/RenderFailureRecovery.cs:21` | Recovery exists in concurrent WIP. Need GPU/driver, maximized state and frequency, then actual sleep/resume acceptance. |
-| [#455 Merge compatibility](https://github.com/SteveTheKiller/KillerPDF/issues/455) | Partial | `engine/KillerPdf.Engine/Editing/PdfIncrementalPageEditor.cs:12909`; `engine/KillerPdf.Engine.Tests/Editing/PdfMergeCompatibilityTests.cs:16` | Three import checks corrected. Still identify the failing input filename in merge errors and verify private reporter PDFs. |
+| [#455 Merge compatibility](https://github.com/SteveTheKiller/KillerPDF/issues/455) | Partial | `engine/KillerPdf.Engine.Tests/Editing/PdfMergeCompatibilityTests.cs`; `KillerPDF.Tests/MergeSourceDiagnosticsTests.cs`; [diagnostic verification](merge-source-diagnostics-20261022.md) | Three import checks corrected. Preparation and page import failures now identify the original input file. Catalog-level errors remain generic; verify private reporter PDFs. |
 | [#454 Canon duplex](https://github.com/SteveTheKiller/KillerPDF/issues/454) | Implemented | `Services/PrintJobTicket.cs:25`; `Controls/PrintPreviewWindow.cs:452` | Document-level ticket handling and tests exist. Verify the Canon driver and physical 15-copy output. |
 | [#453 Negative selection rectangle](https://github.com/SteveTheKiller/KillerPDF/issues/453) | Implemented | `Services/RedactionGeometry.cs:47`; `KillerPDF.Tests/RedactionGeometryTests.cs:167` | Normalized glyph geometry exists. Confirm against the affected PDF. |
 | [#445 Blocked PdfPig](https://github.com/SteveTheKiller/KillerPDF/issues/445) | Implemented, duplicate | `Services/PdfContentDocument.cs:2`; `KillerPDF.csproj:113` | Same failure as #441. Replacement engine removes that assembly. Verify under the reporter's Application Control policy. |

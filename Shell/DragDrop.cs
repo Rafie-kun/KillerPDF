@@ -485,7 +485,7 @@ namespace KillerPDF
                 {
                     var pages = PdfEngineIntegration.ReadPageInformation(importPath);
                     imports.Add(new PdfEngineIntegration.ImportedDocument(importPath,
-                        [.. pages.Select(page => page.Rotation)]));
+                        [.. pages.Select(page => page.Rotation)], f));
                 }
                 catch { /* skip anything still unreadable after repair */ }
             }

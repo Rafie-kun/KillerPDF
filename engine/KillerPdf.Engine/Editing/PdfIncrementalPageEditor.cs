@@ -230,6 +230,12 @@ public sealed class PdfIncrementalPageEditor
     /// <summary>Gets the number of pages in the pending edited page sequence.</summary>
     public int PageCount => _pages.Count;
 
+    /// <summary>
+    /// The source of a failed imported-page build, or null when the latest build
+    /// did not fail while processing an individual imported page.
+    /// </summary>
+    public PdfDocument? FailedImportSource { get; private set; }
+
     /// <summary>Sets an existing checkbox field to its on or off appearance state.</summary>
     public PdfIncrementalPageEditor SetCheckBoxValue(string fieldName, bool isChecked)
     {
@@ -2163,6 +2169,7 @@ public sealed class PdfIncrementalPageEditor
     /// <summary>Validates all pending edits and appends the required incremental revision or revisions.</summary>
     public byte[] Build(PdfIncrementalUpdateWriteOptions? options = null)
     {
+        FailedImportSource = null;
         if (!_orderChanged && !_rotationChanged && !_pageGeometryChanged
             && !_pagePresentationChanged && !_catalogPresentationChanged)
             throw new InvalidOperationException("The incremental page update is empty.");
@@ -4878,8 +4885,16 @@ public sealed class PdfIncrementalPageEditor
         {
             if (state.ImportedEntry is not null)
             {
-                BuildImportedPage(
-                    update, state, references[state], newRoot, importers[state], images);
+                try
+                {
+                    BuildImportedPage(
+                        update, state, references[state], newRoot, importers[state], images);
+                }
+                catch (Exception ex) when (ex is not OperationCanceledException and not OutOfMemoryException)
+                {
+                    FailedImportSource = state.ImportedDocument;
+                    throw;
+                }
                 continue;
             }
             if (state.Entry is null)

@@ -23,7 +23,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Signing captures current edits and preserves captured bytes for unchanged signed copies. Co-signing uses an available field name; Sign and Protect confirm overwrites. Field choices honor cancellation and document changes, timestamp reads honor the request timeout, and the saved-signature library survives write failures.
 - Fixed crashes when switching themes, restoring a maximized window, and selecting mirrored or upside-down text. Search, redaction and cropping also use corrected bounds for that text (#437, #452, #453).
 - Improved source-document checks, tab ownership and cancellation for background document operations (#329, #330, #342, #343, #436).
-- Improved damaged-PDF opening and saving, including cross-reference tables, encryption dictionaries, crop boxes, object generations and unusual dates. Merging accepts additional Type 3/CID fonts and gradient boundaries (#406, #424, #455).
+- Improved damaged-PDF opening and saving, including cross-reference tables, encryption dictionaries, crop boxes, object generations and unusual dates. Merging accepts additional Type 3/CID fonts and gradient boundaries; page import errors identify the source PDF (#406, #424, #455).
 - Fixed truncated rendering beyond the cached page-content limit, bounded malformed JBIG2 and deeply repeated forms, and improved raster-export recovery and missing-content reports.
 - Corrected JPEG 2000 decoding with CoreJ2K 2.4.1, damaged JPEG filters, CCITT markers, JBIG2 refinement and clipped scan columns.
 - Fixed missing, invisible and badly spaced text in unusual or damaged TrueType, Type 1, Type 3, CFF and CJK fonts, with improved substitution for unembedded fonts.
