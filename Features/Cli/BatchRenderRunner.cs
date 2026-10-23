@@ -106,7 +106,7 @@ namespace KillerPDF.Features
             try
             {
                 if (parallelism == 0) parallelism = DefaultParallelism(size, Environment.ProcessorCount);
-                exitCode = Run(input!, output!, size, pages, parallelism, logPath, quiet, con);
+                exitCode = Run(input!, output!, size, pages, parallelism, logPath, quiet, allowIncomplete, con);
             }
             catch (Exception ex)
             {
@@ -117,7 +117,7 @@ namespace KillerPDF.Features
         }
 
         private static int Run(string input, string output, int size, int pageLimit,
-            int parallelism, string? logPath, bool quiet, TextWriter con)
+            int parallelism, string? logPath, bool quiet, bool allowIncomplete, TextWriter con)
         {
             var work = new List<(string Rel, string Src)>();
             if (File.Exists(input))
