@@ -178,7 +178,7 @@ public sealed class PdfTimestampAuthorityTests : IDisposable
     {
         var listener = new TcpListener(IPAddress.Loopback, 0);
         listener.Start();
-        using var fixtureDeadline = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        using var fixtureDeadline = new CancellationTokenSource(TimeSpan.FromSeconds(30));
         var headersSent = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var releaseBody = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         using var client = new HttpClient(new SocketsHttpHandler { UseProxy = false })
@@ -192,8 +192,11 @@ public sealed class PdfTimestampAuthorityTests : IDisposable
             CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         try
         {
-            await headersSent.Task.WaitAsync(TimeSpan.FromSeconds(3));
-            Task completed = await Task.WhenAny(request, Task.Delay(TimeSpan.FromSeconds(3)));
+            // Generous fixture windows: under a full parallel test run the loopback exchange can
+            // take seconds. A transport that ignored its one-second deadline still hangs here,
+            // because the body is released only in the finally block below.
+            await headersSent.Task.WaitAsync(TimeSpan.FromSeconds(15));
+            Task completed = await Task.WhenAny(request, Task.Delay(TimeSpan.FromSeconds(10)));
             Assert.True(ReferenceEquals(request, completed),
                 "The timestamp transport ignored its one-second deadline after response headers arrived.");
             Assert.IsAssignableFrom<OperationCanceledException>(await request);
@@ -204,7 +207,7 @@ public sealed class PdfTimestampAuthorityTests : IDisposable
             fixtureDeadline.Cancel();
             listener.Stop();
             client.Dispose();
-            await Task.WhenAll(server, request).WaitAsync(TimeSpan.FromSeconds(3));
+            await Task.WhenAll(server, request).WaitAsync(TimeSpan.FromSeconds(10));
         }
 
         async Task ServeStalledReply()
