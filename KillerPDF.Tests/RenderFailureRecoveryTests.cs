@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Text.Json;
 using KillerPDF.Services;
 using Xunit;
 
@@ -8,6 +9,96 @@ namespace KillerPDF.Tests
 {
     public class RenderFailureRecoveryTests
     {
+        [Fact]
+        public void RecoveryManifestPreservesTheLoadedRevisionBeforeAnExternalSave()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "kp-recovery-conflict-" + Path.GetRandomFileName());
+            try
+            {
+                string folder = RenderFailureRecovery.CreateFolder(root);
+                string original = Path.Combine(root, "original.pdf");
+                File.WriteAllText(original, "%PDF-1.7 version A");
+                FileRevision loaded = FileRevision.Capture(original)!.Value;
+                string copy = RenderFailureRecovery.CopyPath(folder, "original.pdf", 0);
+                File.Copy(original, copy);
+                string manifest = Path.Combine(folder, "recovery.json");
+                File.WriteAllText(manifest, JsonSerializer.Serialize(new[]
+                {
+                    new { OriginalPath = original, RecoveredPath = copy,
+                        SuggestedName = (string?)null, LoadedRevision = loaded }
+                }));
+                File.WriteAllText(original, "%PDF-1.7 externally saved version B with different bytes");
+
+                var recovered = RenderFailureRecovery.ReadManifest(manifest);
+                RenderFailureRecovery.WriteManifest(folder, recovered);
+                using JsonDocument saved = JsonDocument.Parse(File.ReadAllBytes(manifest));
+                Assert.True(saved.RootElement[0].TryGetProperty("LoadedRevision", out JsonElement revision),
+                    "Recovery discarded the revision loaded before the external save.");
+                FileRevision restored = revision.Deserialize<FileRevision>();
+                Assert.Equal(loaded, restored);
+                Assert.True(FileRevision.ConflictsWith(restored, original));
+            }
+            finally { if (Directory.Exists(root)) Directory.Delete(root, recursive: true); }
+        }
+
+        [Fact]
+        public void RecoveryManifestRetainsIncompleteDocumentDetailsBesideSuccessfulCopies()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "kp-recovery-partial-" + Path.GetRandomFileName());
+            try
+            {
+                string folder = RenderFailureRecovery.CreateFolder(root);
+                string complete = RenderFailureRecovery.CopyPath(folder, "complete.pdf", 0);
+                string working = RenderFailureRecovery.CopyPath(folder, "incomplete.pdf", 1);
+                string state = Path.ChangeExtension(working, ".json");
+                File.WriteAllText(complete, "complete saved PDF bytes");
+                File.WriteAllText(working, "raw working PDF bytes");
+                File.WriteAllText(state, "{\"PendingText\":\"typed before failure\"}");
+                string manifest = Path.Combine(folder, "recovery.json");
+                File.WriteAllText(manifest, JsonSerializer.Serialize(new[]
+                {
+                    new { OriginalPath = "complete.pdf", RecoveredPath = complete,
+                        SuggestedName = (string?)null, RecoveryError = (string?)null, StatePath = (string?)null },
+                    new { OriginalPath = "incomplete.pdf", RecoveredPath = working,
+                        SuggestedName = (string?)null, RecoveryError = (string?)"Form values could not be saved.", StatePath = (string?)state }
+                }));
+
+                var recovered = RenderFailureRecovery.ReadManifest(manifest);
+                RenderFailureRecovery.WriteManifest(folder, recovered);
+                using JsonDocument saved = JsonDocument.Parse(File.ReadAllBytes(manifest));
+                Assert.Equal(2, saved.RootElement.GetArrayLength());
+                Assert.True(saved.RootElement[1].TryGetProperty("RecoveryError", out JsonElement error),
+                    "Recovery discarded the incomplete document's failure instead of reporting it.");
+                Assert.Equal("Form values could not be saved.", error.GetString());
+                Assert.Equal(state, saved.RootElement[1].GetProperty("StatePath").GetString());
+                Assert.Equal("raw working PDF bytes", File.ReadAllText(working));
+                Assert.Contains("typed before failure", File.ReadAllText(state));
+            }
+            finally { if (Directory.Exists(root)) Directory.Delete(root, recursive: true); }
+        }
+
+        [Fact]
+        public void IncompleteRecoveryKeepsItsFailureWhenOnlyTheStateSurvived()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "kp-recovery-state-only-" + Path.GetRandomFileName());
+            try
+            {
+                string folder = RenderFailureRecovery.CreateFolder(root);
+                string copy = RenderFailureRecovery.CopyPath(folder, "unavailable.pdf", 0);
+                string state = Path.ChangeExtension(copy, ".state.json");
+                File.WriteAllText(state, "{\"PendingText\":\"available edit\"}");
+                string manifest = RenderFailureRecovery.WriteManifest(folder,
+                    [new RecoveredDocument("original.pdf", copy, null, RecoveryError: "Working bytes unavailable.", StatePath: state)]);
+
+                var read = RenderFailureRecovery.ReadManifest(manifest);
+                Assert.Single(read);
+                Assert.Equal("Working bytes unavailable.", read[0].RecoveryError);
+                Assert.Equal(state, read[0].StatePath);
+                Assert.False(File.Exists(read[0].RecoveredPath));
+            }
+            finally { if (Directory.Exists(root)) Directory.Delete(root, recursive: true); }
+        }
+
         [Fact]
         public void RecognizesTheRenderThreadFailureWhereverItIsWrapped()
         {

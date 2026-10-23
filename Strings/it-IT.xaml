@@ -1878,7 +1878,7 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">Non è stato possibile leggere le firme salvate, quindi l'elenco parte vuoto. Il file illeggibile è stato conservato come {0}.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">Questo documento è firmato e contiene modifiche, quindi le firme in "{0}" non saranno più valide.&#10;&#10;Il file originale mantiene le sue firme.</sys:String>
     <sys:String x:Key="Str_St_FieldMaxLength">Questo campo contiene al massimo {0} caratteri.</sys:String>
-    <sys:String x:Key="Str_CmpRpt_PageCount">{0} — pagine: {1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageCount">{0}, pagine: {1}</sys:String>
     <sys:String x:Key="Str_CmpRpt_OnlyOriginal">Pagina {0}: solo nel PDF originale</sys:String>
     <sys:String x:Key="Str_CmpRpt_OnlyComparison">Pagina {0}: solo nel PDF di confronto</sys:String>
     <sys:String x:Key="Str_CmpRpt_DimensionsDiffer">le dimensioni della pagina sono diverse</sys:String>
@@ -1891,6 +1891,7 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_Read_Comment">Commento: {0}</sys:String>
     <sys:String x:Key="Str_Read_CommentBy">Commento di {0}: {1}</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecovered">KillerPDF si è riavviato perché la finestra non riusciva più a visualizzare nulla. Le modifiche non salvate sono state recuperate e sono di nuovo aperte, pronte per essere salvate.&#10;&#10;Le copie sono conservate anche in {0}. Questa sessione usa il rendering software.</sys:String>
+    <sys:String x:Key="Str_Dlg_RenderRecoveryIncomplete">Non è stato possibile recuperare completamente alcuni documenti:&#10;{0}&#10;&#10;I file di recupero disponibili sono conservati in {1}. Controllare le copie recuperate prima di salvarle.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRestarted">KillerPDF si è riavviato perché la finestra non riusciva più a visualizzare nulla. I documenti aperti sono stati riaperti. Questa sessione usa il rendering software.</sys:String>
     <sys:String x:Key="Str_Read_MarkedText">Testo contrassegnato: &quot;{0}&quot;</sys:String>
     <sys:String x:Key="Str_Read_MarkedNoText">Testo contrassegnato</sys:String>

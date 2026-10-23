@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Globalization;
 using KillerPDF.Services;
 using Xunit;
 
@@ -88,6 +89,24 @@ namespace KillerPDF.Tests
             Assert.NotNull(found);
             Assert.Equal(new TextPosition(0, 6), found!.Value.Start);
             Assert.Equal("due\nnow", model.GetText(found.Value.Start, found.Value.End));
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void FindKeepsQueryCharactersInTheSourceMatch(bool backward, bool ignoreCase)
+        {
+            CultureInfo previous = CultureInfo.CurrentCulture;
+            try
+            {
+                CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("en-US");
+                var model = Model("ab");
+
+                Assert.Null(model.Find(model.Start, model.End, "a\u00adb", backward, ignoreCase));
+            }
+            finally { CultureInfo.CurrentCulture = previous; }
         }
 
         [Fact]

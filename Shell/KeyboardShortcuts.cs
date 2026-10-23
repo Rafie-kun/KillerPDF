@@ -28,6 +28,19 @@ namespace KillerPDF
             // The title bar search box keeps its own navigation keys while it has focus.
             if (_syntheticShortcut is null && HandleToolSearchKey(e)) return;
 
+            // Form controls keep their activation and radio navigation keys before shortcut remapping.
+            if (_syntheticShortcut is null && Keyboard.Modifiers == ModifierKeys.None
+                && e.Key is Key.Space or Key.Enter or Key.Left or Key.Right or Key.Up or Key.Down)
+            {
+                for (DependencyObject? source = e.OriginalSource as DependencyObject; source is not null;
+                    source = source is Visual ? VisualTreeHelper.GetParent(source) : (source as FrameworkContentElement)?.Parent)
+                {
+                    if (source is Controls.FormToggleSurface toggle
+                        && (e.Key is Key.Space or Key.Enter || toggle.Kind == Controls.FormToggleSurface.ToggleKind.Radio))
+                        return;
+                }
+            }
+
             if (_syntheticShortcut is null && ShortcutTogglePolicy.IsToggle(e.Key, Keyboard.Modifiers, e.SystemKey))
             {
                 if (!e.IsRepeat) SetKeyboardShortcutsEnabled(!KeyboardShortcutsEnabled);
@@ -88,6 +101,7 @@ namespace KillerPDF
             // shortcut chain even while a form field or typewriter box owns keyboard focus.
             bool editableTextFocused =
                 e.OriginalSource is TextBox tbSrc && !tbSrc.IsReadOnly
+                || e.OriginalSource is PasswordBox
                 || _activeTextBox is not null && _activeTextBox.IsFocused;
             if (editableTextFocused && key == Key.Escape
                 && mods == ModifierKeys.None)
@@ -280,10 +294,10 @@ namespace KillerPDF
                 OpenDocumentInfo();
                 e.Handled = true;
             }
-            else if (key == Key.F5) { SetViewMode(ViewMode.Continuous); e.Handled = true; }
-            else if (key == Key.F6) { SetViewMode(ViewMode.Single);     e.Handled = true; }
-            else if (key == Key.F7) { SetViewMode(ViewMode.TwoPage);    e.Handled = true; }
-            else if (key == Key.F8) { SetViewMode(ViewMode.Grid);       e.Handled = true; }
+            else if (key == Key.F5) { if (_doc is not null) SetViewMode(ViewMode.Continuous); e.Handled = true; }
+            else if (key == Key.F6) { if (_doc is not null) SetViewMode(ViewMode.Single);     e.Handled = true; }
+            else if (key == Key.F7) { if (_doc is not null) SetViewMode(ViewMode.TwoPage);    e.Handled = true; }
+            else if (key == Key.F8) { if (_doc is not null) SetViewMode(ViewMode.Grid);       e.Handled = true; }
             // F10 = split pane. Matched as Key.System + SystemKey == Key.F10, NOT e.Key == Key.F10:
             // F10 is a system key in WPF (it activates the menu bar), so it never arrives as
             // Key.F10 and a plain check silently never fires. The Shift+F10 branch further down has
@@ -801,6 +815,7 @@ namespace KillerPDF
         // the tool without showing the menu).
         private bool TryToolShortcut(Key key)
         {
+            if (_doc is null) return false;
             switch (key)
             {
                 // One letter per tool, so a key keeps its tool however the toolbar grows. Select is

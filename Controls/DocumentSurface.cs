@@ -21,6 +21,8 @@ namespace KillerPDF.Controls
         PageReadingText PageText(int page);
         /// <summary>Screen rectangles (device pixels) for a caret range on a page; empty when it is not on screen.</summary>
         IReadOnlyList<Rect> ScreenRects(int page, int startCaret, int endCaret);
+        (int Page, int Caret)? CaretFromScreenPoint(Point point);
+        IReadOnlyList<(int Page, int Start, int End)> VisibleCaretRanges();
         void Select(int startPage, int startCaret, int endPage, int endCaret);
         /// <summary>The current text selection as page carets, or null.</summary>
         (int StartPage, int StartCaret, int EndPage, int EndCaret)? Selection { get; }
@@ -109,26 +111,43 @@ namespace KillerPDF.Controls
                 DocumentTextModel model = Model;
                 IDocumentReadingSource? source = Surface.Source;
                 if (source?.Selection is { } s)
+                {
+                    PageReadingText first = source.PageText(s.StartPage), last = source.PageText(s.EndPage);
+                    var firstOffsets = first.SelectionOffsets(s.StartCaret,
+                        s.StartPage == s.EndPage ? s.EndCaret : first.CaretCount);
+                    var lastOffsets = s.StartPage == s.EndPage ? firstOffsets : last.SelectionOffsets(0, s.EndCaret);
                     return [new Range(this,
-                        new TextPosition(s.StartPage, source.PageText(s.StartPage).OffsetOf(s.StartCaret)),
-                        new TextPosition(s.EndPage, source.PageText(s.EndPage).OffsetOf(s.EndCaret)))];
+                        new TextPosition(s.StartPage, firstOffsets.Start),
+                        new TextPosition(s.EndPage, lastOffsets.End))];
+                }
                 var caret = model.Normalize(new TextPosition(Math.Max(0, source?.CurrentPage ?? 0), 0));
                 return [new Range(this, caret, caret)];
             }
 
             public ITextRangeProvider[] GetVisibleRanges()
             {
-                DocumentTextModel model = Model;
-                int page = Math.Max(0, Surface.Source?.CurrentPage ?? 0);
-                var (start, end) = model.Enclosing(new TextPosition(page, 0), ReadingUnit.Page);
-                return [new Range(this, start, end)];
+                IDocumentReadingSource? source = Surface.Source;
+                if (source is null) return [];
+                var result = new List<ITextRangeProvider>();
+                foreach (var visible in source.VisibleCaretRanges())
+                {
+                    var offsets = source.PageText(visible.Page).SelectionOffsets(visible.Start, visible.End);
+                    if (offsets.Start < offsets.End)
+                        result.Add(new Range(this, new TextPosition(visible.Page, offsets.Start),
+                            new TextPosition(visible.Page, offsets.End)));
+                }
+                return [.. result];
             }
 
             public ITextRangeProvider RangeFromChild(IRawElementProviderSimple childElement) => DocumentRange;
 
             public ITextRangeProvider RangeFromPoint(Point screenLocation)
             {
-                var start = Model.Normalize(new TextPosition(Math.Max(0, Surface.Source?.CurrentPage ?? 0), 0));
+                IDocumentReadingSource? source = Surface.Source;
+                var position = source?.CaretFromScreenPoint(screenLocation);
+                var start = Model.Normalize(position is { } hit
+                    ? new TextPosition(hit.Page, source!.PageText(hit.Page).OffsetOf(hit.Caret))
+                    : new TextPosition(Math.Max(0, source?.CurrentPage ?? 0), 0));
                 return new Range(this, start, start);
             }
         }

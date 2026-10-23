@@ -166,6 +166,7 @@ namespace KillerPDF
             foreach (var (button, panel) in RailPanelButtons())
                 if (panel != SidebarPanel.Outlines) button.IsEnabled = hasDoc;
             if (!hasDoc) SidebarOutlinesTab.IsEnabled = false;
+            ScheduleToolbarAvailabilityRefresh();
         }
 
         private void SidebarPanelEdit_Click(object sender, RoutedEventArgs e)

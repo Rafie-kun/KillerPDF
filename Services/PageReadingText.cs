@@ -90,12 +90,26 @@ namespace KillerPDF.Services
         /// <summary>The caret at a text offset.</summary>
         internal int CaretAt(int offset) => Carets[Math.Clamp(offset, 0, Carets.Length - 1)];
 
-        /// <summary>The first text offset at or after a caret.</summary>
+        /// <summary>The first character belonging to a visual caret.</summary>
         internal int OffsetOf(int caret)
         {
-            for (int offset = 0; offset < Carets.Length; offset++)
-                if (Carets[offset] >= caret) return offset;
+            for (int offset = 0; offset < Text.Length; offset++)
+                if (Carets[offset] == caret && !char.IsWhiteSpace(Text[offset])) return offset;
             return Text.Length;
+        }
+
+        /// <summary>The reading-order envelope of a visual selection, excluding inserted separators at its edges.</summary>
+        internal (int Start, int End) SelectionOffsets(int startCaret, int endCaret)
+        {
+            int start = Text.Length, end = -1;
+            for (int offset = 0; offset < Text.Length; offset++)
+                if (Carets[offset] >= startCaret && Carets[offset] < endCaret
+                    && Carets[offset] < CaretCount && !char.IsWhiteSpace(Text[offset]))
+                {
+                    start = Math.Min(start, offset);
+                    end = offset + 1;
+                }
+            return end < 0 ? (OffsetOf(startCaret), OffsetOf(startCaret)) : (start, end);
         }
 
         /// <summary>

@@ -1,6 +1,7 @@
 using System.Formats.Asn1;
 using System.Net;
 using System.Net.Http.Headers;
+using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Pkcs;
 using System.Security.Cryptography.X509Certificates;
@@ -170,6 +171,74 @@ public sealed class PdfTimestampAuthorityTests : IDisposable
         Assert.Equal(HttpMethod.Post, handler.Method);
         Assert.Equal("application/timestamp-query", handler.ContentType);
         Assert.Equal(new byte[] { 1, 2, 3 }, handler.Body);
+    }
+
+    [Fact]
+    public async Task HttpTransport_DeadlineCancelsAStalledResponseBody()
+    {
+        var listener = new TcpListener(IPAddress.Loopback, 0);
+        listener.Start();
+        using var fixtureDeadline = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        var headersSent = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var releaseBody = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        using var client = new HttpClient(new SocketsHttpHandler { UseProxy = false })
+            { Timeout = Timeout.InfiniteTimeSpan };
+        int port = ((IPEndPoint)listener.LocalEndpoint).Port;
+        Func<ReadOnlyMemory<byte>, byte[]> send = PdfTimestampAuthority.HttpTransport(
+            new Uri($"http://127.0.0.1:{port}/tsa"), client, timeout: TimeSpan.FromSeconds(1));
+        Task server = ServeStalledReply();
+        Task<Exception?> request = Task.Factory.StartNew<Exception?>(
+            () => Record.Exception(() => send(new byte[] { 1, 2, 3 })),
+            CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        try
+        {
+            await headersSent.Task.WaitAsync(TimeSpan.FromSeconds(3));
+            Task completed = await Task.WhenAny(request, Task.Delay(TimeSpan.FromSeconds(3)));
+            Assert.True(ReferenceEquals(request, completed),
+                "The timestamp transport ignored its one-second deadline after response headers arrived.");
+            Assert.IsAssignableFrom<OperationCanceledException>(await request);
+        }
+        finally
+        {
+            releaseBody.TrySetResult();
+            fixtureDeadline.Cancel();
+            listener.Stop();
+            client.Dispose();
+            await Task.WhenAll(server, request).WaitAsync(TimeSpan.FromSeconds(3));
+        }
+
+        async Task ServeStalledReply()
+        {
+            try
+            {
+                using TcpClient peer = await listener.AcceptTcpClientAsync(fixtureDeadline.Token);
+                using NetworkStream stream = peer.GetStream();
+                byte[] next = new byte[1];
+                uint tail = 0;
+                int headerBytes = 0;
+                do
+                {
+                    await stream.ReadExactlyAsync(next, fixtureDeadline.Token);
+                    tail = (tail << 8) | next[0];
+                    Assert.True(++headerBytes <= 16 * 1024, "The request headers exceeded the fixture limit.");
+                } while (tail != 0x0D0A0D0A);
+                byte[] query = new byte[3];
+                await stream.ReadExactlyAsync(query, fixtureDeadline.Token);
+                Assert.Equal(new byte[] { 1, 2, 3 }, query);
+                await stream.WriteAsync("HTTP/1.1 200 OK\r\nContent-Type: application/timestamp-reply\r\nContent-Length: 3\r\nConnection: close\r\n\r\n"u8.ToArray(),
+                    fixtureDeadline.Token);
+                await stream.FlushAsync(fixtureDeadline.Token);
+                headersSent.TrySetResult();
+                await releaseBody.Task.WaitAsync(fixtureDeadline.Token);
+            }
+            catch (OperationCanceledException) when (fixtureDeadline.IsCancellationRequested) { }
+            catch (SocketException) when (fixtureDeadline.IsCancellationRequested) { }
+            catch (Exception error)
+            {
+                headersSent.TrySetException(error);
+                throw;
+            }
+        }
     }
 
     [Theory]

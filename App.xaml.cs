@@ -432,7 +432,12 @@ namespace KillerPDF
             if (System.Threading.Interlocked.Exchange(ref _renderRecoveryStarted, 1) != 0) return;
             string? manifest = null;
             try { manifest = (MainWindow as MainWindow)?.PrepareRenderFailureRecovery(); }
-            catch (Exception ex) when (ex is not OutOfMemoryException) { CrashReporter.Capture(ex, "Render recovery"); }
+            catch (Exception ex) when (ex is not OutOfMemoryException)
+            {
+                RetainRenderRecoveryTemps(manifest);
+                manifest ??= System.IO.Path.Combine(AppDataPaths.UserRoot, "Recovery", "recovery-unavailable.json");
+                CrashReporter.Capture(ex, "Render recovery");
+            }
             try
             {
                 string exe = GetPortableLauncherPath() ?? Environment.ProcessPath
@@ -441,9 +446,13 @@ namespace KillerPDF
                 start.ArgumentList.Add(RenderFailureRecovery.RecoverySwitch);
                 start.ArgumentList.Add(Environment.ProcessId.ToString(System.Globalization.CultureInfo.InvariantCulture));
                 if (manifest is not null) start.ArgumentList.Add(manifest);
-                Process.Start(start);
+                if (Process.Start(start) is null) throw new InvalidOperationException("The recovery process did not start.");
             }
-            catch (Exception ex) when (ex is not OutOfMemoryException) { CrashReporter.Capture(ex, "Render recovery restart"); }
+            catch (Exception ex) when (ex is not OutOfMemoryException)
+            {
+                RetainRenderRecoveryTemps(manifest);
+                CrashReporter.Capture(ex, "Render recovery restart");
+            }
             try
             {
                 StopFolderAutomation();
@@ -452,6 +461,15 @@ namespace KillerPDF
             catch (Exception ex) when (ex is not OutOfMemoryException) { }
             CleanupSessionTemps();
             Environment.Exit(1);
+        }
+
+        internal static void RetainRenderRecoveryTemps(string? manifest)
+        {
+            try { SessionTempFiles.Value.RetainForRecovery(manifest); }
+            catch (Exception ex) when (ex is not OutOfMemoryException)
+            {
+                CrashReporter.Capture(ex, "Retaining incomplete render recovery");
+            }
         }
 
         private void OnDispatcherException(object sender, DispatcherUnhandledExceptionEventArgs e)

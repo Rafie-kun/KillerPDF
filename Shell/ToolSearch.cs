@@ -216,6 +216,7 @@ namespace KillerPDF
                 HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
                 MaxHeight = 440,
                 Focusable = false,
+                Margin = new Thickness(4),
                 Content = _toolSearchList,
             };
             // Grain goes over the rows, so a highlighted row keeps the texture.
@@ -228,7 +229,6 @@ namespace KillerPDF
             _toolSearchCard = new Border
             {
                 BorderThickness = new Thickness(1),
-                Padding = new Thickness(4),
                 Margin = new Thickness(0, 0, 8, 8),
                 MinWidth = ToolSearchBoxWidth,
                 MaxWidth = 460,
@@ -649,7 +649,7 @@ namespace KillerPDF
             _toolSearchSelected = index;
             var (row, name, _) = _toolSearchRows[index];
             row.SetResourceReference(Border.BackgroundProperty, "MenuHoverBrush");
-            name.SetResourceReference(TextBlock.ForegroundProperty, "ComboHighlightTextBrush");
+            name.SetResourceReference(TextBlock.ForegroundProperty, "MenuHoverTextBrush");
             row.BringIntoView();
         }
     }

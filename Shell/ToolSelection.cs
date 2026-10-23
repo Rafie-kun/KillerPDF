@@ -44,6 +44,7 @@ namespace KillerPDF
 
         private void SetTool(EditTool tool, bool restoringPane = false)
         {
+            if (_doc is null) tool = EditTool.Select;
             // Re-clicking the tool that owns the visible annotate bar tucks the bar away (or brings it
             // back) instead of rebuilding it - no flicker, and a quick way to get it out of the way.
             bool reclickedAnnotTool = !restoringPane && tool == _currentTool && tool == _annotBarTool

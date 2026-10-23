@@ -170,6 +170,9 @@ namespace KillerPDF
 
         private void FinishOpenFile(string displayPath, string workingPath)
         {
+            _completeDocumentSource = CompleteDocumentSource.Capture(_doc
+                ?? throw new InvalidOperationException("No PDF is open."));
+            workingPath = _completeDocumentSource.Path;
             List<PdfEngineIntegration.MeasurementData> openedMeasurements = TakeMeasurementsFromWorkingCopy(ref workingPath);
             _currentFile = workingPath;
             _publishedFile = null;
@@ -632,6 +635,7 @@ namespace KillerPDF
             _doc.Close();
             _doc = null;
             _currentFile = null;
+            _completeDocumentSource = null;
             CloseEngineDocumentSession();
             App.RemoveSetting("LastFile");   // don't reopen a manually-closed file on next launch (Issue #75)
             _activeTextBox = null;   // cancel any in-progress typewriter edit before canvas clear
@@ -1212,7 +1216,9 @@ namespace KillerPDF
                     WriteRedactionMarksToDocument(tempEdited);
                     WriteMeasurementsToDocument(tempEdited);
                     PdfEngineIntegration.ApplyPageRotations(tempEdited, finalRotations);
+                    var completeSource = CompleteDocumentSource.Capture(tempEdited);
                     PdfEngineIntegration.ReplaceFileAtomically(tempEdited, saveTarget);
+                    _completeDocumentSource = completeSource;
                     // Signing reads these bytes, since the working copy lacks what the save burned in.
                     _publishedFile = Services.PublishedFileStamp.Capture(saveTarget);
                     _loadedRevision = Services.FileRevision.Capture(saveTarget);
@@ -1245,7 +1251,9 @@ namespace KillerPDF
                     WriteRedactionMarksToDocument(tempSaved);
                     WriteMeasurementsToDocument(tempSaved);
                     PdfEngineIntegration.ApplyPageRotations(tempSaved, finalRotations);
+                    var completeSource = CompleteDocumentSource.Capture(tempSaved);
                     PdfEngineIntegration.ReplaceFileAtomically(tempSaved, saveTarget);
+                    _completeDocumentSource = completeSource;
                     // Signing reads these bytes, since the working copy lacks what the save burned in.
                     _publishedFile = Services.PublishedFileStamp.Capture(saveTarget);
                     _loadedRevision = Services.FileRevision.Capture(saveTarget);
@@ -1392,7 +1400,9 @@ namespace KillerPDF
                     WriteRedactionMarksToDocument(tempEdited);
                     WriteMeasurementsToDocument(tempEdited);
                     PdfEngineIntegration.ApplyPageRotations(tempEdited, finalRotations);
+                    var completeSource = CompleteDocumentSource.Capture(tempEdited);
                     PdfEngineIntegration.ReplaceFileAtomically(tempEdited, dlg.FileName);
+                    _completeDocumentSource = completeSource;
                     // Signing reads these bytes, since the working copy lacks what the save burned in.
                     _publishedFile = Services.PublishedFileStamp.Capture(dlg.FileName);
                     _loadedRevision = Services.FileRevision.Capture(dlg.FileName);
@@ -1437,7 +1447,9 @@ namespace KillerPDF
                     WriteRedactionMarksToDocument(tempSaved);
                     WriteMeasurementsToDocument(tempSaved);
                     PdfEngineIntegration.ApplyPageRotations(tempSaved, finalRotations);
+                    var completeSource = CompleteDocumentSource.Capture(tempSaved);
                     PdfEngineIntegration.ReplaceFileAtomically(tempSaved, dlg.FileName);
+                    _completeDocumentSource = completeSource;
                     // Signing reads these bytes, since the working copy lacks what the save burned in.
                     _publishedFile = Services.PublishedFileStamp.Capture(dlg.FileName);
                     _loadedRevision = Services.FileRevision.Capture(dlg.FileName);

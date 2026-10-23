@@ -234,6 +234,12 @@ namespace KillerPDF.Controls
         internal Color LineAnnotColorRef { get => _lineAnnotColor; set => _lineAnnotColor = value; }
         internal InkAnnotation? ActiveInkRef { get => _activeInk; set => _activeInk = value; }
         internal TextBox? ActiveTextBoxRef { get => _activeTextBox; set => _activeTextBox = value; }
+        internal bool HasPendingTextEditExt => _activeTextBox is { } box
+            && (_pendingDirectEdit is { } direct
+                ? DescribeDirectTextEdit(direct, box.Text, _textFontName, _textBold, _textItalic,
+                    _textFontSize, _textColor, _textLetterSpacing, _textUnderline, _textStrike).Changed
+                : !string.IsNullOrWhiteSpace(box.Text) || _pendingCover is not null || _reeditOriginal is not null);
+        internal bool HasPendingAnnotationExt => HasPendingTextEditExt && _pendingDirectEdit is null;
         internal double TextFontSizeRef { get => _textFontSize; set => _textFontSize = value; }
         internal double TextLetterSpacingRef { get => _textLetterSpacing; set => _textLetterSpacing = value; }
         internal string TextFontNameRef { get => _textFontName; set => _textFontName = value; }
@@ -299,6 +305,7 @@ namespace KillerPDF.Controls
         internal string? OriginalFileRef { get => _originalFile; set => _originalFile = value; }
         internal bool OpenedFromProtectedRef { get => _openedFromProtected; set => _openedFromProtected = value; }
         internal Services.PublishedFileStamp? PublishedFileRef { get => _publishedFile; set => _publishedFile = value; }
+        internal Services.CompleteDocumentSource? CompleteDocumentSourceRef { get => _completeDocumentSource; set => _completeDocumentSource = value; }
         internal string? SuggestedNameRef { get => _suggestedName; set => _suggestedName = value; }
         internal Services.FileRevision? LoadedRevisionRef { get => _loadedRevision; set => _loadedRevision = value; }
         internal bool AsyncOpenPendingRef

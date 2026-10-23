@@ -1878,7 +1878,7 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">Не вдалося прочитати збережені підписи, тому список починається порожнім. Нечитабельний файл збережено як {0}.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">Цей документ підписано, і в ньому є зміни, тому підписи в «{0}» більше не будуть дійсними.&#10;&#10;Оригінальний файл зберігає свої підписи.</sys:String>
     <sys:String x:Key="Str_St_FieldMaxLength">Це поле вміщує щонайбільше {0} символів.</sys:String>
-    <sys:String x:Key="Str_CmpRpt_PageCount">{0} — сторінок: {1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageCount">{0}, сторінок: {1}</sys:String>
     <sys:String x:Key="Str_CmpRpt_OnlyOriginal">Сторінка {0}: лише в початковому PDF</sys:String>
     <sys:String x:Key="Str_CmpRpt_OnlyComparison">Сторінка {0}: лише в PDF для порівняння</sys:String>
     <sys:String x:Key="Str_CmpRpt_DimensionsDiffer">розмір сторінки відрізняється</sys:String>
@@ -1891,6 +1891,7 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Read_Comment">Коментар: {0}</sys:String>
     <sys:String x:Key="Str_Read_CommentBy">Коментар від {0}: {1}</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecovered">KillerPDF перезапущено, бо вікно більше не могло нічого показувати. Незбережені зміни відновлено й знову відкрито, їх можна зберегти.&#10;&#10;Копії також збережено в {0}. Цей сеанс використовує програмне відтворення.</sys:String>
+    <sys:String x:Key="Str_Dlg_RenderRecoveryIncomplete">Деякі документи не вдалося повністю відновити:&#10;{0}&#10;&#10;Доступні файли відновлення зберігаються в {1}. Перевірте відновлені копії перед збереженням.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRestarted">KillerPDF перезапущено, бо вікно більше не могло нічого показувати. Відкриті документи знову відкрито. Цей сеанс використовує програмне відтворення.</sys:String>
     <sys:String x:Key="Str_Read_MarkedText">Позначений текст: «{0}»</sys:String>
     <sys:String x:Key="Str_Read_MarkedNoText">Позначений текст</sys:String>

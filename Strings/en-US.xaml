@@ -1877,7 +1877,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">Your saved signatures could not be read, so the list starts empty. The unreadable file was kept as {0}.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">This document is signed, and it has changes, so the signatures in "{0}" will no longer be valid.&#10;&#10;The original file keeps its signatures.</sys:String>
     <sys:String x:Key="Str_St_FieldMaxLength">This field holds at most {0} characters.</sys:String>
-    <sys:String x:Key="Str_CmpRpt_PageCount">{0} — pages: {1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageCount">{0}, pages: {1}</sys:String>
     <sys:String x:Key="Str_CmpRpt_OnlyOriginal">Page {0}: only in the original PDF</sys:String>
     <sys:String x:Key="Str_CmpRpt_OnlyComparison">Page {0}: only in the comparison PDF</sys:String>
     <sys:String x:Key="Str_CmpRpt_DimensionsDiffer">page size differs</sys:String>
@@ -1890,6 +1890,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Read_Comment">Comment: {0}</sys:String>
     <sys:String x:Key="Str_Read_CommentBy">Comment by {0}: {1}</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecovered">KillerPDF restarted because the window could no longer display. Your unsaved changes were recovered and are open again, ready to save.&#10;&#10;Copies are also kept in {0}. This session uses software rendering.</sys:String>
+    <sys:String x:Key="Str_Dlg_RenderRecoveryIncomplete">Some documents could not be fully recovered:&#10;{0}&#10;&#10;Available recovery files are kept in {1}. Review the recovered copies before saving.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRestarted">KillerPDF restarted because the window could no longer display. Your open documents were reopened. This session uses software rendering.</sys:String>
     <sys:String x:Key="Str_Read_MarkedText">Marked text: &quot;{0}&quot;</sys:String>
     <sys:String x:Key="Str_Read_MarkedNoText">Marked text</sys:String>

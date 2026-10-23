@@ -128,6 +128,7 @@ namespace KillerPDF.Controls
         private string? _originalFile;
         private bool _openedFromProtected;
         private Services.PublishedFileStamp? _publishedFile;
+        private Services.CompleteDocumentSource? _completeDocumentSource;
         private string? _suggestedName;
         private Services.FileRevision? _loadedRevision;
         private bool _asyncOpenPending;

@@ -5,10 +5,12 @@ namespace KillerPDF.Services;
 internal sealed class ProcessTempFiles : IDisposable
 {
     private const string LeaseName = "owner.lease";
+    private const string RecoveryRetentionName = "recovery-retained.json";
     private readonly string root;
     private readonly List<string> paths = [];
     private readonly Lazy<(string Directory, FileStream Lease)> owned;
     private bool disposed;
+    private bool retainedForRecovery;
 
     public ProcessTempFiles(string root)
     {
@@ -59,10 +61,23 @@ internal sealed class ProcessTempFiles : IDisposable
         }
     }
 
+    internal void RetainForRecovery(string? manifest)
+    {
+        lock (paths)
+        {
+            ObjectDisposedException.ThrowIf(disposed, this);
+            retainedForRecovery = true;
+            AtomicFileOutput.Write(Path.Combine(DirectoryPath, RecoveryRetentionName),
+                System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(new { Manifest = manifest }));
+        }
+    }
+
     public void CleanupOwned()
     {
         lock (paths)
         {
+            if (retainedForRecovery || owned.IsValueCreated
+                && File.Exists(Path.Combine(owned.Value.Directory, RecoveryRetentionName))) return;
             foreach (string path in paths)
                 try { if (File.Exists(path)) File.Delete(path); } catch { }
             paths.Clear();
@@ -83,6 +98,7 @@ internal sealed class ProcessTempFiles : IDisposable
                     if (!Guid.TryParseExact(name.AsSpan("session-".Length), "N", out _)
                         || (File.GetAttributes(directory) & FileAttributes.ReparsePoint) != 0)
                         continue;
+                    if (File.Exists(Path.Combine(directory, RecoveryRetentionName))) continue;
                     string leasePath = Path.Combine(directory, LeaseName);
                     if (!File.Exists(leasePath)
                         || (File.GetAttributes(leasePath) & FileAttributes.ReparsePoint) != 0)

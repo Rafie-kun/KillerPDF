@@ -95,6 +95,10 @@
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter Property="Background" Value="{DynamicResource PaneBrush}"/>
                             </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.4"/>
+                                <Setter Property="Cursor" Value="Arrow"/>
+                            </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
@@ -774,11 +778,11 @@
                             <!-- Hover uses the menu wash and its contrast text brush. -->
                             <Trigger Property="IsHighlighted" Value="True">
                                 <Setter TargetName="MenuBd" Property="Background" Value="{DynamicResource MenuHoverBrush}"/>
-                                <Setter Property="Foreground" Value="{DynamicResource ComboHighlightTextBrush}"/>
-                                <Setter TargetName="Check" Property="Foreground" Value="{DynamicResource ComboHighlightTextBrush}"/>
-                                <Setter TargetName="Gesture" Property="Foreground" Value="{DynamicResource ComboHighlightTextBrush}"/>
-                                <Setter TargetName="SubArrow" Property="Foreground" Value="{DynamicResource ComboHighlightTextBrush}"/>
-                                <Setter TargetName="IconPresenter" Property="TextElement.Foreground" Value="{DynamicResource ComboHighlightTextBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource MenuHoverTextBrush}"/>
+                                <Setter TargetName="Check" Property="Foreground" Value="{DynamicResource MenuHoverTextBrush}"/>
+                                <Setter TargetName="Gesture" Property="Foreground" Value="{DynamicResource MenuHoverTextBrush}"/>
+                                <Setter TargetName="SubArrow" Property="Foreground" Value="{DynamicResource MenuHoverTextBrush}"/>
+                                <Setter TargetName="IconPresenter" Property="TextElement.Foreground" Value="{DynamicResource MenuHoverTextBrush}"/>
                             </Trigger>
                             <!-- Collapse the shortcut column when there is no gesture, so items without a
                                  shortcut do not reserve its 24px left margin as phantom right padding. -->
@@ -1295,13 +1299,13 @@
                                    PopupAnimation="Fade" Placement="Bottom">
                                 <Border Background="{DynamicResource FooterZoomSurfaceBrush}"
                                         BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1"
-                                        CornerRadius="{DynamicResource SmallCornerRadius}" Padding="2" Margin="0,2,6,6"
+                                        CornerRadius="{DynamicResource SmallCornerRadius}" Margin="0,2,6,6"
                                         MinWidth="96" MaxHeight="220">
                                     <Border.Effect>
                                         <DropShadowEffect Color="Black" BlurRadius="12" ShadowDepth="2" Direction="270" Opacity="0.5"/>
                                     </Border.Effect>
                                     <Grid>
-                                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="2">
                                             <ItemsPresenter/>
                                         </ScrollViewer>
                                         <Border IsHitTestVisible="False" Background="{StaticResource GrainBrushShared}"
@@ -1749,13 +1753,13 @@
                     <Popup x:Name="OverflowPopup" PlacementTarget="{Binding ElementName=OverflowChevron}"
                            Placement="Bottom" StaysOpen="False" AllowsTransparency="True">
                         <Border Background="{DynamicResource MenuBackgroundBrush}" BorderBrush="{DynamicResource MenuBorderBrush}"
-                                BorderThickness="1" CornerRadius="{DynamicResource FlyoutCornerRadius}" Padding="4" Margin="0,2,6,6">
+                                BorderThickness="1" CornerRadius="{DynamicResource FlyoutCornerRadius}" Margin="0,2,6,6">
                             <Border.Effect>
                                 <DropShadowEffect Color="Black" BlurRadius="14" ShadowDepth="2" Direction="270" Opacity="{DynamicResource FlyoutShadowOpacity}"/>
                             </Border.Effect>
                             <Grid>
                             <Border CornerRadius="{DynamicResource FlyoutCornerRadius}" IsHitTestVisible="False" Opacity="{DynamicResource GrainOpacity}" Background="{StaticResource GrainBrushShared}"/>
-                            <StackPanel x:Name="OverflowMenuPanel" ButtonBase.Click="OverflowItem_Click" MinWidth="180">
+                            <StackPanel x:Name="OverflowMenuPanel" ButtonBase.Click="OverflowItem_Click" MinWidth="180" Margin="4">
                                 <Button x:Name="MiCompare" Style="{StaticResource OverflowMenuButton}" Visibility="Collapsed" Click="ComparePdf_Click">
                                     <StackPanel Orientation="Horizontal">
                                         <Grid Width="24" Height="18">

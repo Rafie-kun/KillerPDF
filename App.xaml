@@ -50,8 +50,9 @@
                     <Setter.Value>
                         <ControlTemplate TargetType="Thumb">
                             <!-- Keep the scrollbar color while tying the thumb to the active accent. -->
-                            <Border x:Name="tb" Background="{DynamicResource ScrollThumbHoverBrush}"
-                                    BorderBrush="{DynamicResource RadioAccent}" BorderThickness="1.5" CornerRadius="3"/>
+                            <Border Background="{DynamicResource RadioAccent}" Padding="1.5" CornerRadius="2">
+                                <Border x:Name="tb" Background="{DynamicResource ScrollThumbHoverBrush}" CornerRadius="0.5"/>
+                            </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
                                     <Setter TargetName="tb" Property="Background" Value="{DynamicResource PrimaryBrush}"/>

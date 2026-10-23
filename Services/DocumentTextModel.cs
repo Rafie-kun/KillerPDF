@@ -202,7 +202,7 @@ namespace KillerPDF.Services
                 for (int at = start; at < end; at++) { positions.Add(new(page, at)); buffer.Append(pageText[at]); }
             }
             positions.Add(to);
-            StringComparison comparison = ignoreCase ? StringComparison.CurrentCultureIgnoreCase : StringComparison.CurrentCulture;
+            StringComparison comparison = ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
             string haystack = buffer.ToString();
             int index = backward ? haystack.LastIndexOf(text, comparison) : haystack.IndexOf(text, comparison);
             if (index < 0) return null;

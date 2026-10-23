@@ -18,19 +18,24 @@ namespace KillerPDF.Tests
     {
         private sealed class FakeSource(params string[][] pages) : IDocumentReadingSource
         {
+            public PageReadingText? TaggedPage;
             public (int, int, int, int)? Selected;
             public int ScrolledTo = -1;
             public int PageCount => pages.Length;
             public int CurrentPage { get; set; }
             public object Version => PageCount;
-            public PageReadingText PageText(int page) => PageReadingText.Build(
+            public PageReadingText PageText(int page) => TaggedPage ?? PageReadingText.Build(
                 [.. pages[page].SelectMany((line, l) => line.Split(' ').SelectMany((word, w) =>
                     word.Select(c => (c.ToString(), l * 100 + w, l))))]);
             public IReadOnlyList<Rect> ScreenRects(int page, int startCaret, int endCaret) =>
                 [new Rect(page * 1000 + startCaret, 0, endCaret - startCaret, 10)];
+            public (int Page, int Caret)? CaretFromScreenPoint(Point point) =>
+                ((int)(point.X / 1000), (int)(point.X % 1000));
+            public IReadOnlyList<(int Page, int Start, int End)> VisibleCaretRanges() =>
+                [(CurrentPage, 0, PageText(CurrentPage).CaretCount)];
             public void Select(int startPage, int startCaret, int endPage, int endCaret) =>
                 Selected = (startPage, startCaret, endPage, endCaret);
-            public (int StartPage, int StartCaret, int EndPage, int EndCaret)? Selection => null;
+            public (int StartPage, int StartCaret, int EndPage, int EndCaret)? Selection => Selected;
             public void ScrollToPage(int page) => ScrolledTo = page;
             public event Action? TextChanged { add { } remove { } }
             public event Action? SelectionChanged { add { } remove { } }
@@ -81,6 +86,39 @@ namespace KillerPDF.Tests
             Assert.Equal((0, 7, 0, 12), source.Selected);
             Assert.Equal([7, 0, 5, 10], rects);
             Assert.Equal(true, word.GetAttributeValue(TextPattern.IsReadOnlyAttribute.Id));
+        });
+
+        [Fact]
+        public void TaggedSelectionRoundTripsThroughTheProvider() => OnSta(() =>
+        {
+            var source = new FakeSource(["RiLe"])
+            {
+                TaggedPage = PageReadingText.BuildTagged(
+                    [("R", 0, 0, 1), ("i", 0, 0, 1), ("L", 1, 0, 0), ("e", 1, 0, 0)], [0, 1])
+            };
+            var text = (ITextProvider)UIElementAutomationPeer.CreatePeerForElement(
+                new DocumentSurface { Source = source }).GetPattern(PatternInterface.Text);
+            foreach (string expected in new[] { "Le", "Ri", "Le\nRi" })
+            {
+                text.DocumentRange.FindText(expected, false, false)!.Select();
+                Assert.Equal(expected, Assert.Single(text.GetSelection()).GetText(-1));
+            }
+        });
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void FindTextKeepsSourceBoundaries(bool backward, bool ignoreCase) => OnSta(() =>
+        {
+            var source = new FakeSource(["ab"]);
+            var text = (ITextProvider)UIElementAutomationPeer.CreatePeerForElement(
+                new DocumentSurface { Source = source }).GetPattern(PatternInterface.Text);
+            Assert.Null(text.DocumentRange.FindText("a\u00adb", backward, ignoreCase));
+            var found = text.DocumentRange.FindText(ignoreCase ? "AB" : "ab", backward, ignoreCase);
+            Assert.NotNull(found);
+            Assert.Equal("ab", found!.GetText(-1));
         });
 
         [Fact]

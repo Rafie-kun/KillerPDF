@@ -114,6 +114,12 @@ selection, resizing, font size, alignment, line spacing, overflow, preview
 invalidation, cancel, Undo/Redo and save/reopen through the actual dialog and
 main-window command. Rendered checks cover all themes, locales and high app scale.
 
+`--verify-pending-text-recovery` uses the isolated startup-smoke invocation to check
+unsaved annotation text and existing page-text edits through recovery, saved PDF
+contents and the reopened text provider. It sends no desktop input. The separate
+`--verify-render-recovery` mode also injects filesystem permission failures and
+belongs in the disposable lab; the pending-text mode does not run that injection.
+
 ## Certificate catalog
 
 Use `--verify-certificates APP_DLL APP_XAML OUTPUT_DIRECTORY --startup-smoke`

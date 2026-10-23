@@ -1858,7 +1858,7 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">আপনার সংরক্ষিত স্বাক্ষরগুলো পড়া যায়নি, তাই তালিকাটি খালি থেকে শুরু হচ্ছে। অপঠনযোগ্য ফাইলটি {0} হিসেবে রাখা হয়েছে।</sys:String>
     <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">এই ডকুমেন্টটি স্বাক্ষরিত এবং এতে পরিবর্তন রয়েছে, তাই "{0}"-এর স্বাক্ষরগুলো আর বৈধ থাকবে না।&#10;&#10;মূল ফাইলের স্বাক্ষর অপরিবর্তিত থাকবে।</sys:String>
     <sys:String x:Key="Str_St_FieldMaxLength">এই ঘরে সর্বোচ্চ {0}টি অক্ষর রাখা যায়।</sys:String>
-    <sys:String x:Key="Str_CmpRpt_PageCount">{0} — পৃষ্ঠা: {1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageCount">{0}, পৃষ্ঠা: {1}</sys:String>
     <sys:String x:Key="Str_CmpRpt_OnlyOriginal">পৃষ্ঠা {0}: শুধু মূল PDF-এ আছে</sys:String>
     <sys:String x:Key="Str_CmpRpt_OnlyComparison">পৃষ্ঠা {0}: শুধু তুলনার PDF-এ আছে</sys:String>
     <sys:String x:Key="Str_CmpRpt_DimensionsDiffer">পৃষ্ঠার আকার আলাদা</sys:String>
@@ -1871,6 +1871,7 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Read_Comment">মন্তব্য: {0}</sys:String>
     <sys:String x:Key="Str_Read_CommentBy">{0}-এর মন্তব্য: {1}</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecovered">উইন্ডোটি আর দেখাতে না পারায় KillerPDF আবার চালু হয়েছে। আপনার অসংরক্ষিত পরিবর্তনগুলো পুনরুদ্ধার করে আবার খোলা হয়েছে, সংরক্ষণের জন্য প্রস্তুত।&#10;&#10;কপিগুলো {0}-এও রাখা আছে। এই সেশনে সফটওয়্যার রেন্ডারিং ব্যবহৃত হচ্ছে।</sys:String>
+    <sys:String x:Key="Str_Dlg_RenderRecoveryIncomplete">কিছু নথি সম্পূর্ণ পুনরুদ্ধার করা যায়নি:&#10;{0}&#10;&#10;উপলব্ধ পুনরুদ্ধার ফাইল এখানে রাখা হয়েছে: {1}। সংরক্ষণের আগে পুনরুদ্ধার করা কপিগুলো পর্যালোচনা করুন।</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRestarted">উইন্ডোটি আর দেখাতে না পারায় KillerPDF আবার চালু হয়েছে। আপনার খোলা ডকুমেন্টগুলো আবার খোলা হয়েছে। এই সেশনে সফটওয়্যার রেন্ডারিং ব্যবহৃত হচ্ছে।</sys:String>
     <sys:String x:Key="Str_Read_MarkedText">চিহ্নিত লেখা: &quot;{0}&quot;</sys:String>
     <sys:String x:Key="Str_Read_MarkedNoText">চিহ্নিত লেখা</sys:String>

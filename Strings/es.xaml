@@ -1858,7 +1858,7 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">No se pudieron leer sus firmas guardadas, así que la lista empieza vacía. El archivo ilegible se conservó como {0}.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">Este documento está firmado y tiene cambios, así que las firmas de «{0}» dejarán de ser válidas.&#10;&#10;El archivo original conserva sus firmas.</sys:String>
     <sys:String x:Key="Str_St_FieldMaxLength">Este campo admite como máximo {0} caracteres.</sys:String>
-    <sys:String x:Key="Str_CmpRpt_PageCount">{0} — páginas: {1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageCount">{0}, páginas: {1}</sys:String>
     <sys:String x:Key="Str_CmpRpt_OnlyOriginal">Página {0}: solo en el PDF original</sys:String>
     <sys:String x:Key="Str_CmpRpt_OnlyComparison">Página {0}: solo en el PDF de comparación</sys:String>
     <sys:String x:Key="Str_CmpRpt_DimensionsDiffer">el tamaño de página es distinto</sys:String>
@@ -1871,6 +1871,7 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Read_Comment">Comentario: {0}</sys:String>
     <sys:String x:Key="Str_Read_CommentBy">Comentario de {0}: {1}</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecovered">KillerPDF se reinició porque la ventana ya no podía mostrar nada. Sus cambios sin guardar se recuperaron y están abiertos de nuevo, listos para guardar.&#10;&#10;También se guardan copias en {0}. Esta sesión usa renderizado por software.</sys:String>
+    <sys:String x:Key="Str_Dlg_RenderRecoveryIncomplete">No se pudieron recuperar por completo algunos documentos:&#10;{0}&#10;&#10;Los archivos de recuperación disponibles se guardan en {1}. Revise las copias recuperadas antes de guardarlas.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRestarted">KillerPDF se reinició porque la ventana ya no podía mostrar nada. Sus documentos abiertos se volvieron a abrir. Esta sesión usa renderizado por software.</sys:String>
     <sys:String x:Key="Str_Read_MarkedText">Texto marcado: «{0}»</sys:String>
     <sys:String x:Key="Str_Read_MarkedNoText">Texto marcado</sys:String>

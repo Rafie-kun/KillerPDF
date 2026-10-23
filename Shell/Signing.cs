@@ -331,7 +331,7 @@ namespace KillerPDF
             HideSignaturePopup(cancelPendingField: false);
 
             bool classicCaption = FindResource("UseDialogCaption") is true;
-            var stack = new StackPanel { Margin = classicCaption ? new Thickness(0) : new Thickness(4) };
+            var stack = new StackPanel { Margin = classicCaption ? new Thickness(0) : new Thickness(8) };
 
             // Title doubles as a drag handle so the user can move the popup anywhere inside the
             // document area (position is remembered). Wrapped in a transparent Border so the whole
@@ -609,7 +609,6 @@ namespace KillerPDF
             var sigBody = new Border
             {
                 Background = (Brush)FindResource("MenuBackgroundBrush"),
-                Padding = classicCaption ? new Thickness(0) : new Thickness(4),
                 Child = sigContent
             };
             sigBody.SetResourceReference(Border.MarginProperty, "DialogWindowFramePadding");

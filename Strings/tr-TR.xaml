@@ -1858,7 +1858,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">Kayıtlı imzalarınız okunamadı, bu yüzden liste boş başlıyor. Okunamayan dosya {0} olarak saklandı.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">Bu belge imzalı ve üzerinde değişiklik var, bu yüzden "{0}" içindeki imzalar artık geçerli olmayacak.&#10;&#10;Özgün dosya imzalarını korur.</sys:String>
     <sys:String x:Key="Str_St_FieldMaxLength">Bu alan en fazla {0} karakter alır.</sys:String>
-    <sys:String x:Key="Str_CmpRpt_PageCount">{0} — sayfa: {1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageCount">{0}, sayfa: {1}</sys:String>
     <sys:String x:Key="Str_CmpRpt_OnlyOriginal">Sayfa {0}: yalnızca özgün PDF&apos;te</sys:String>
     <sys:String x:Key="Str_CmpRpt_OnlyComparison">Sayfa {0}: yalnızca karşılaştırma PDF&apos;inde</sys:String>
     <sys:String x:Key="Str_CmpRpt_DimensionsDiffer">sayfa boyutu farklı</sys:String>
@@ -1871,6 +1871,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Read_Comment">Yorum: {0}</sys:String>
     <sys:String x:Key="Str_Read_CommentBy">{0} yorumu: {1}</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecovered">Pencere artık görüntüleyemediği için KillerPDF yeniden başlatıldı. Kaydedilmemiş değişiklikleriniz kurtarıldı ve kaydedilmeye hazır olarak yeniden açıldı.&#10;&#10;Kopyalar {0} içinde de saklanıyor. Bu oturum yazılım işlemeyi kullanıyor.</sys:String>
+    <sys:String x:Key="Str_Dlg_RenderRecoveryIncomplete">Bazı belgeler tamamen kurtarılamadı:&#10;{0}&#10;&#10;Kullanılabilir kurtarma dosyaları {1} konumunda saklanır. Kaydetmeden önce kurtarılan kopyaları inceleyin.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRestarted">Pencere artık görüntüleyemediği için KillerPDF yeniden başlatıldı. Açık belgeleriniz yeniden açıldı. Bu oturum yazılım işlemeyi kullanıyor.</sys:String>
     <sys:String x:Key="Str_Read_MarkedText">İşaretli metin: &quot;{0}&quot;</sys:String>
     <sys:String x:Key="Str_Read_MarkedNoText">İşaretli metin</sys:String>

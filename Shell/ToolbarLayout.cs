@@ -1,8 +1,10 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using KillerPDF.Services;
 
 namespace KillerPDF
@@ -63,6 +65,7 @@ namespace KillerPDF
 
         private readonly List<ToolbarUnit> _toolbarUnits = [];
         private ToolbarLayout _toolbarLayout = DefaultToolbarLayout;
+        private bool _toolbarAvailabilityQueued;
 
         internal IReadOnlyList<ToolbarUnit> ToolbarUnits => _toolbarUnits;
         internal ToolbarLayout CurrentToolbarLayout => _toolbarLayout;
@@ -75,7 +78,8 @@ namespace KillerPDF
             void Add(string id, FrameworkElement bar, Button main, Button? overflow, string glyph, string label,
                 string? cap, RoutedEventHandler click)
             {
-                overflow ??= MakeOverflowRow(glyph, label, main, click);
+                overflow ??= MakeOverflowRow(glyph, label, click);
+                overflow.SetBinding(UIElement.IsEnabledProperty, new Binding(nameof(IsEnabled)) { Source = main });
                 _toolbarUnits.Add(new ToolbarUnit(id, bar, main, overflow, glyph, label, cap));
             }
             Add("new", NewBlankBtn, NewBlankBtn, null, "\uE7C3", "Str_Lbl_New", "Ctrl:N", New_Click);
@@ -113,11 +117,68 @@ namespace KillerPDF
 
             _toolbarLayout = NormalizeToolbarLayout(ParseToolbarLayout(App.GetSetting(ToolbarLayoutSetting)));
             ApplyToolbarLayout();
+            PageList.SelectionChanged += (_, _) => ScheduleToolbarAvailabilityRefresh();
+            foreach (var viewer in new[] { Viewer, ViewerB })
+            {
+                viewer.AddHandler(TextBox.TextChangedEvent, new TextChangedEventHandler((_, e) =>
+                {
+                    if (ReferenceEquals(e.OriginalSource, viewer.ActiveTextBoxRef))
+                        ScheduleToolbarAvailabilityRefresh();
+                }), handledEventsToo: true);
+                viewer.AddHandler(Keyboard.LostKeyboardFocusEvent,
+                    new KeyboardFocusChangedEventHandler((_, _) => ScheduleToolbarAvailabilityRefresh()),
+                    handledEventsToo: true);
+            }
+            RefreshToolbarAvailability();
+        }
+
+        private void ScheduleToolbarAvailabilityRefresh()
+        {
+            if (_toolbarAvailabilityQueued || Dispatcher.HasShutdownStarted) return;
+            _toolbarAvailabilityQueued = true;
+            Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() =>
+            {
+                _toolbarAvailabilityQueued = false;
+                RefreshToolbarAvailability();
+            }));
+        }
+
+        private void RefreshToolbarAvailability()
+        {
+            bool hasDoc = _doc is not null;
+            foreach (UIElement control in new UIElement[] { PageSizeLabel, ViewContinuousRadio, ViewSingleRadio,
+                         ViewTwoPageRadio, ViewGridRadio, FooterDisplayControls, ZoomOutBtn, ZoomBox, ZoomInBtn })
+            {
+                control.IsEnabled = hasDoc;
+                control.Opacity = hasDoc ? 1 : .4;
+            }
+            bool pendingText = ActiveViewer.HasPendingTextEditExt;
+            int selectedCount = PageList.SelectedItems.Count;
+            int selectedIndex = PageList.SelectedIndex;
+            int pageCount = _doc?.PageCount ?? 0;
+            foreach (ToolbarUnit unit in _toolbarUnits)
+            {
+                bool enabled = unit.Id switch
+                {
+                    "new" or "open" => true,
+                    "undo" => hasDoc && (_undoStack.Count > 0 || pendingText),
+                    "redo" => hasDoc && _redoStack.Count > 0 && !pendingText,
+                    "clear" => hasDoc && (_annotations.Values.Any(items => items.Count > 0)
+                        || ActiveViewer.HasPendingAnnotationExt),
+                    "extract" => hasDoc && selectedCount > 0,
+                    "delete" => hasDoc && selectedCount > 0 && selectedCount < pageCount,
+                    "moveup" => hasDoc && selectedIndex > 0,
+                    "movedown" => hasDoc && selectedIndex >= 0 && selectedIndex < pageCount - 1,
+                    _ => hasDoc
+                };
+                unit.Bar.IsEnabled = enabled;
+                unit.Main.IsEnabled = enabled;
+            }
         }
 
         /// <summary>A More menu row for a button the XAML gives no row of its own: its icon and
         /// caption, enabled whenever the toolbar button is.</summary>
-        private Button MakeOverflowRow(string glyph, string labelKey, Button main, RoutedEventHandler click)
+        private Button MakeOverflowRow(string glyph, string labelKey, RoutedEventHandler click)
         {
             var icon = MakeToolbarGlyph(glyph, 14);
             var iconHost = new Grid { Width = 24 };
@@ -135,7 +196,6 @@ namespace KillerPDF
                 Content = row
             };
             button.SetResourceReference(Control.ForegroundProperty, "TextBrush");
-            button.SetBinding(UIElement.IsEnabledProperty, new Binding(nameof(IsEnabled)) { Source = main });
             button.Click += click;
             OverflowMenuPanel.Children.Add(button);
             return button;

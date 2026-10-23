@@ -7,7 +7,8 @@ using System.Text.Json;
 namespace KillerPDF.Services
 {
     /// <summary>One document saved aside when the window could no longer draw.</summary>
-    internal sealed record RecoveredDocument(string? OriginalPath, string RecoveredPath, string? SuggestedName);
+    internal sealed record RecoveredDocument(string? OriginalPath, string RecoveredPath, string? SuggestedName,
+        FileRevision? LoadedRevision = null, string? RecoveryError = null, string? StatePath = null);
 
     /// <summary>
     /// WPF's render thread can fail for good (UCEERR_RENDERTHREADFAILURE, often after sleep, a
@@ -64,7 +65,7 @@ namespace KillerPDF.Services
                 var documents = JsonSerializer.Deserialize<List<RecoveredDocument>>(File.ReadAllBytes(path)) ?? [];
                 return documents.FindAll(d => !string.IsNullOrEmpty(d.RecoveredPath)
                     && Path.GetFullPath(d.RecoveredPath).StartsWith(folder, StringComparison.OrdinalIgnoreCase)
-                    && File.Exists(d.RecoveredPath));
+                    && (File.Exists(d.RecoveredPath) || d.RecoveryError is not null));
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException
                 or ArgumentException or NotSupportedException)

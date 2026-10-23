@@ -31,6 +31,7 @@ internal sealed class CustomizeToolbarDialog : Window
     private ListBox _active;
     private Point _dragStart;
     private ListBoxItem? _dragItem;
+    private Brush? _buttonRowHover;
 
     internal MainWindow.ToolbarLayout? Result { get; private set; }
 
@@ -108,6 +109,58 @@ internal sealed class CustomizeToolbarDialog : Window
 
         Content = DialogChrome.Frame(this, owner, Title, () => { DialogResult = false; Close(); }, body);
         Load(layout);
+        ThemeManager.ThemeChanged += UpdateRowHover;
+        Closed += (_, _) => ThemeManager.ThemeChanged -= UpdateRowHover;
+    }
+
+    private void UpdateRowHover()
+    {
+        _buttonRowHover = null;
+        if (ThemeManager.Current != Theme.SE98 && !SystemParameters.HighContrast
+            && TryFindResource("PaneBrush") is SolidColorBrush pane
+            && TryFindResource("TextBrush") is SolidColorBrush text
+            && TryFindResource("RowHoverBrush") is SolidColorBrush hover
+            && pane.Color.A == 255 && text.Color.A == 255 && hover.Color.A == 255)
+        {
+            Color color = VisibleRowHover(pane.Color, text.Color, hover.Color);
+            if (color != hover.Color)
+            {
+                _buttonRowHover = new SolidColorBrush(color);
+                _buttonRowHover.Freeze();
+            }
+        }
+        foreach (ListBox list in new[] { _bar, _more })
+            foreach (ListBoxItem item in list.Items)
+            {
+                item.Resources.Remove("RowHoverBrush");
+                if (_buttonRowHover is not null && item.Tag is Entry { Kind: EntryKind.Button })
+                    item.Resources["RowHoverBrush"] = _buttonRowHover;
+            }
+    }
+
+    // Keep a neutral hover distinguishable from the grained pane without reducing label contrast.
+    private static Color VisibleRowHover(Color pane, Color text, Color hover)
+    {
+        static double Luminance(Color color)
+        {
+            static double Channel(byte value)
+            {
+                double c = value / 255d;
+                return c <= 0.04045 ? c / 12.92 : Math.Pow((c + 0.055) / 1.055, 2.4);
+            }
+            return 0.2126 * Channel(color.R) + 0.7152 * Channel(color.G) + 0.0722 * Channel(color.B);
+        }
+        static double Contrast(Color a, Color b) =>
+            (Math.Max(Luminance(a), Luminance(b)) + 0.05) / (Math.Min(Luminance(a), Luminance(b)) + 0.05);
+        if (Contrast(pane, hover) >= 1.5) return hover;
+        for (double blend = 0.02; blend <= 0.3; blend += 0.02)
+        {
+            byte Mix(byte background, byte foreground) => (byte)Math.Round(background + (foreground - background) * blend);
+            Color candidate = Color.FromRgb(Mix(pane.R, text.R), Mix(pane.G, text.G), Mix(pane.B, text.B));
+            if (Contrast(text, candidate) < 4.5) break;
+            if (Contrast(pane, candidate) >= 1.5) return candidate;
+        }
+        return hover;
     }
 
     private static Button SideButton(string key, Action click)
@@ -241,6 +294,7 @@ internal sealed class CustomizeToolbarDialog : Window
             if (_units.TryGetValue(id, out var unit)) _more.Items.Add(Row(new Entry(EntryKind.Button, unit)));
         _active = _bar;
         SyncButtons();
+        UpdateRowHover();
     }
 
     private void AddBarEntry(string id)
@@ -339,6 +393,8 @@ internal sealed class CustomizeToolbarDialog : Window
             HorizontalContentAlignment = HorizontalAlignment.Stretch
         };
         item.SetResourceReference(Control.ForegroundProperty, "TextBrush");
+        if (_buttonRowHover is not null && entry.Kind == EntryKind.Button)
+            item.Resources["RowHoverBrush"] = _buttonRowHover;
         return item;
     }
 

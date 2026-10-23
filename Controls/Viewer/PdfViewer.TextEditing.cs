@@ -547,10 +547,75 @@ namespace KillerPDF.Controls
 
         // A line of the page's own text being edited in place: where it is, what it said and how it
         // looked when the edit began, so the commit changes only what the user changed.
-        private sealed record DirectTextEdit(int PageIndex, EngineDocs.PdfContentBounds Region, string Original,
+        internal sealed record DirectTextEdit(int PageIndex, EngineDocs.PdfContentBounds Region, string Original,
             string FontName, bool Bold, bool Italic, double FontSize, Color Ink);
 
         private DirectTextEdit? _pendingDirectEdit;
+
+        internal sealed record PendingTextRecovery(string RawText, TextAnnotation Annotation,
+            DirectTextEdit? DirectEdit, CoverAnnotation? PendingCover, double FontSize,
+            double LetterSpacing, Color Ink);
+
+        // Capture before filtering dirty sessions, without committing or redrawing the editor.
+        internal PendingTextRecovery? CapturePendingTextForRecovery()
+        {
+            if (_activeTextBox is not { } box) return null;
+            if (string.IsNullOrWhiteSpace(box.Text) && _pendingDirectEdit is null
+                && _pendingCover is null && _reeditOriginal is null) return null;
+            int page = box.Tag is int index ? index : _currentPage;
+            Size size = EditBoxSize(box);
+            double width = double.IsFinite(size.Width) && size.Width > 0 ? size.Width : TextBoxDefaultWidth;
+            var annotation = new TextAnnotation
+            {
+                PageIndex = page,
+                Content = box.Text.Trim(),
+                Position = new Point(Canvas.GetLeft(box), Canvas.GetTop(box)),
+                Width = width,
+                Height = double.IsFinite(box.Height) && box.Height > 0
+                    ? box.Height : MeasureTextBoxHeight(box.Text.Trim(), width, box.FontSize),
+                Rotation = EditBoxTurn(box),
+                FontSize = box.FontSize,
+                LetterSpacing = CanvasLetterSpacing(page),
+                FontName = _textFontName,
+                Bold = _textBold,
+                Italic = _textItalic,
+                Strike = _textStrike,
+                Underline = _textUnderline,
+                PairId = _pendingCover?.PairId ?? _reeditOriginal?.PairId ?? ""
+            };
+            annotation.SetColor(box.Foreground is SolidColorBrush brush ? brush.Color : _textColor);
+            annotation.SetFill(_pendingCover is null ? _textFillColor : Colors.Transparent);
+            return new PendingTextRecovery(box.Text, annotation, _pendingDirectEdit, _pendingCover,
+                _textFontSize, _textLetterSpacing, _textColor);
+        }
+
+        internal string WriteRecoverySnapshot(PendingTextRecovery? pending, Func<string> writeCopy)
+        {
+            if (pending is null) return writeCopy();
+            var originalAnnotations = _annotations;
+            try
+            {
+                _annotations = originalAnnotations.ToDictionary(pair => pair.Key, pair => pair.Value.ToList());
+                TextAnnotation annotation = pending.Annotation;
+                if (pending.DirectEdit is null)
+                {
+                    if (!_annotations.TryGetValue(annotation.PageIndex, out var list))
+                        _annotations[annotation.PageIndex] = list = [];
+                    if (annotation.Content.Length > 0) list.Add(annotation);
+                    else if (pending.PendingCover is not null) list.Remove(pending.PendingCover);
+                }
+                string copy = writeCopy();
+                if (pending.DirectEdit is { } direct)
+                {
+                    var (request, _, _) = BuildDirectTextEditRequest(direct, pending.RawText, annotation.FontName,
+                        annotation.Bold, annotation.Italic, pending.FontSize, pending.Ink,
+                        pending.LetterSpacing, annotation.Underline, annotation.Strike);
+                    if (request is not null) PdfEngineIntegration.ReplaceTextLine(copy, request);
+                }
+                return copy;
+            }
+            finally { _annotations = originalAnnotations; }
+        }
 
         // Opens the editor for a line that the commit rewrites in the page content. Nothing is added to
         // the page while typing: the box takes the page color so the old line does not show through,
@@ -615,29 +680,52 @@ namespace KillerPDF.Controls
         // new text, and a size, color, spacing, typeface or rule that differs from the line as found.
         private void CommitDirectTextEdit(DirectTextEdit edit, string typed)
         {
+            var (request, restyled, family) = BuildDirectTextEditRequest(edit, typed, _textFontName,
+                _textBold, _textItalic, _textFontSize, _textColor, _textLetterSpacing, _textUnderline, _textStrike);
+            if (request is null) return;
+            ApplyDirectTextEdit(request, restyled, family);
+        }
+
+        private static (string Text, bool Restyled, bool Resized, bool Recolored, bool Spaced, bool Changed)
+            DescribeDirectTextEdit(DirectTextEdit edit, string typed, string fontName, bool bold,
+                bool italic, double fontSize, Color color, double letterSpacing, bool underline, bool strike)
+        {
             string text = string.Join("\n", typed.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n')
                 .Select(line => line.TrimEnd())).Trim('\n');
-            bool restyled = !string.Equals(_textFontName, edit.FontName, StringComparison.OrdinalIgnoreCase)
-                || _textBold != edit.Bold || _textItalic != edit.Italic;
-            bool resized = Math.Abs(_textFontSize - edit.FontSize) > 0.01;
-            bool recolored = _textColor.R != edit.Ink.R || _textColor.G != edit.Ink.G || _textColor.B != edit.Ink.B;
-            bool spaced = Math.Abs(_textLetterSpacing) > 0.001;
-            if (text == edit.Original && !restyled && !resized && !recolored && !spaced && !_textUnderline && !_textStrike)
-                return;
+            bool restyled = !string.Equals(fontName, edit.FontName, StringComparison.OrdinalIgnoreCase)
+                || bold != edit.Bold || italic != edit.Italic;
+            bool resized = Math.Abs(fontSize - edit.FontSize) > 0.01;
+            bool recolored = color.R != edit.Ink.R || color.G != edit.Ink.G || color.B != edit.Ink.B;
+            bool spaced = Math.Abs(letterSpacing) > 0.001;
+            return (text, restyled, resized, recolored, spaced,
+                text != edit.Original || restyled || resized || recolored || spaced || underline || strike);
+        }
 
-            var substitute = PdfEngineIntegration.LoadTextFont(_textFontName, text, _textBold, _textItalic);
-            Color color = _textColor;
+        private static (EngineDocs.PdfTextLineEdit? Request, bool Restyled, string? Family)
+            BuildDirectTextEditRequest(DirectTextEdit edit, string typed, string fontName, bool bold,
+                bool italic, double fontSize, Color color, double letterSpacing, bool underline, bool strike)
+        {
+            var (text, restyled, resized, recolored, spaced, changed) = DescribeDirectTextEdit(edit, typed,
+                fontName, bold, italic, fontSize, color, letterSpacing, underline, strike);
+            if (!changed) return (null, restyled, null);
+
+            var substitute = PdfEngineIntegration.LoadTextFont(fontName, text, bold, italic);
             var request = new EngineDocs.PdfTextLineEdit(edit.PageIndex, edit.Region, text)
             {
                 Substitute = substitute?.Font,
                 UseSubstitute = restyled && substitute is not null,
-                FontSize = resized ? _textFontSize : null,
+                FontSize = resized ? fontSize : null,
                 FillColor = recolored
                     ? new KillerPdf.Engine.Authoring.PdfRgbColor(color.R / 255d, color.G / 255d, color.B / 255d) : null,
-                CharacterSpacing = spaced ? _textLetterSpacing : null,
-                Underline = _textUnderline,
-                Strike = _textStrike
+                CharacterSpacing = spaced ? letterSpacing : null,
+                Underline = underline,
+                Strike = strike
             };
+            return (request, restyled, substitute?.Family);
+        }
+
+        private void ApplyDirectTextEdit(EngineDocs.PdfTextLineEdit request, bool restyled, string? family)
+        {
             EngineDocs.PdfTextLineEditResult? result = null;
             Exception? failure = null;
             Mouse.OverrideCursor = Cursors.Wait;
@@ -661,7 +749,7 @@ namespace KillerPDF.Controls
             string done = result.Font == EngineDocs.PdfTextLineFont.Original
                 ? Loc("Str_St_TextEditedInPage")
                 : string.Format(Loc(restyled ? "Str_St_TextEditedChosenFont" : "Str_St_TextEditedSubstitute"),
-                    substitute?.Family ?? _textFontName);
+                    family ?? _textFontName);
             ReportResult(done);
         }
 

@@ -1881,7 +1881,7 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">Не удалось прочитать сохранённые подписи, поэтому список начинается пустым. Нечитаемый файл сохранён как {0}.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">Этот документ подписан и изменён, поэтому подписи в файле "{0}" станут недействительными.&#10;&#10;Исходный файл сохранит свои подписи.</sys:String>
     <sys:String x:Key="Str_St_FieldMaxLength">В это поле помещается не более {0} символов.</sys:String>
-    <sys:String x:Key="Str_CmpRpt_PageCount">{0} — страниц: {1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageCount">{0}, страниц: {1}</sys:String>
     <sys:String x:Key="Str_CmpRpt_OnlyOriginal">Страница {0}: только в исходном PDF</sys:String>
     <sys:String x:Key="Str_CmpRpt_OnlyComparison">Страница {0}: только в сравниваемом PDF</sys:String>
     <sys:String x:Key="Str_CmpRpt_DimensionsDiffer">размер страницы отличается</sys:String>
@@ -1894,6 +1894,7 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Read_Comment">Комментарий: {0}</sys:String>
     <sys:String x:Key="Str_Read_CommentBy">Комментарий от {0}: {1}</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecovered">KillerPDF перезапущен, потому что окно больше не могло ничего отображать. Несохранённые изменения восстановлены и снова открыты, их можно сохранить.&#10;&#10;Копии также сохранены в {0}. В этом сеансе используется программная отрисовка.</sys:String>
+    <sys:String x:Key="Str_Dlg_RenderRecoveryIncomplete">Не удалось полностью восстановить некоторые документы:&#10;{0}&#10;&#10;Доступные файлы восстановления находятся в {1}. Проверьте восстановленные копии перед сохранением.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRestarted">KillerPDF перезапущен, потому что окно больше не могло ничего отображать. Открытые документы снова открыты. В этом сеансе используется программная отрисовка.</sys:String>
     <sys:String x:Key="Str_Read_MarkedText">Отмеченный текст: «{0}»</sys:String>
     <sys:String x:Key="Str_Read_MarkedNoText">Отмеченный текст</sys:String>

@@ -1765,7 +1765,7 @@
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">Shranjenih podpisov ni bilo mogoče prebrati, zato se seznam začne prazen. Neberljiva datoteka je shranjena kot {0}.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">Ta dokument je podpisan in vsebuje spremembe, zato podpisi v datoteki »{0}« ne bodo več veljavni.&#10;&#10;Izvirna datoteka obdrži svoje podpise.</sys:String>
     <sys:String x:Key="Str_St_FieldMaxLength">To polje lahko vsebuje največ {0} znakov.</sys:String>
-    <sys:String x:Key="Str_CmpRpt_PageCount">{0} — strani: {1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageCount">{0}, strani: {1}</sys:String>
     <sys:String x:Key="Str_CmpRpt_OnlyOriginal">Stran {0}: samo v izvirnem PDF</sys:String>
     <sys:String x:Key="Str_CmpRpt_OnlyComparison">Stran {0}: samo v primerjanem PDF</sys:String>
     <sys:String x:Key="Str_CmpRpt_DimensionsDiffer">velikost strani se razlikuje</sys:String>
@@ -1778,6 +1778,7 @@
     <sys:String x:Key="Str_Read_Comment">Komentar: {0}</sys:String>
     <sys:String x:Key="Str_Read_CommentBy">Komentar, avtor {0}: {1}</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecovered">KillerPDF se je znova zagnal, ker okno ni moglo več ničesar prikazati. Neshranjene spremembe so obnovljene in znova odprte, pripravljene za shranjevanje.&#10;&#10;Kopije so shranjene tudi v {0}. Ta seja uporablja programsko upodabljanje.</sys:String>
+    <sys:String x:Key="Str_Dlg_RenderRecoveryIncomplete">Nekaterih dokumentov ni bilo mogoče v celoti obnoviti:&#10;{0}&#10;&#10;Razpoložljive obnovitvene datoteke so shranjene v {1}. Pred shranjevanjem preglejte obnovljene kopije.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRestarted">KillerPDF se je znova zagnal, ker okno ni moglo več ničesar prikazati. Odprti dokumenti so znova odprti. Ta seja uporablja programsko upodabljanje.</sys:String>
     <sys:String x:Key="Str_Read_MarkedText">Označeno besedilo: »{0}«</sys:String>
     <sys:String x:Key="Str_Read_MarkedNoText">Označeno besedilo</sys:String>

@@ -1881,7 +1881,7 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">Сақталған қолтаңбаларды оқу мүмкін болмады, сондықтан тізім бос басталады. Оқылмайтын файл {0} ретінде сақталды.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">Бұл құжатқа қол қойылған және оған өзгерістер енгізілген, сондықтан "{0}" ішіндегі қолтаңбалар енді жарамсыз болады.&#10;&#10;Бастапқы файл өз қолтаңбаларын сақтайды.</sys:String>
     <sys:String x:Key="Str_St_FieldMaxLength">Бұл өріске ең көбі {0} таңба сияды.</sys:String>
-    <sys:String x:Key="Str_CmpRpt_PageCount">{0} — беттер: {1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageCount">{0}, беттер: {1}</sys:String>
     <sys:String x:Key="Str_CmpRpt_OnlyOriginal">{0}-бет: тек бастапқы PDF-те бар</sys:String>
     <sys:String x:Key="Str_CmpRpt_OnlyComparison">{0}-бет: тек салыстырылатын PDF-те бар</sys:String>
     <sys:String x:Key="Str_CmpRpt_DimensionsDiffer">бет өлшемі әртүрлі</sys:String>
@@ -1894,6 +1894,7 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_Read_Comment">Пікір: {0}</sys:String>
     <sys:String x:Key="Str_Read_CommentBy">{0} пікірі: {1}</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecovered">Терезе енді көрсете алмағандықтан KillerPDF қайта іске қосылды. Сақталмаған өзгерістер қалпына келтіріліп, сақтауға дайын күйде қайта ашылды.&#10;&#10;Көшірмелер {0} ішінде де сақталды. Бұл сеанста бағдарламалық көрсету қолданылады.</sys:String>
+    <sys:String x:Key="Str_Dlg_RenderRecoveryIncomplete">Кейбір құжаттарды толық қалпына келтіру мүмкін болмады:&#10;{0}&#10;&#10;Қолжетімді қалпына келтіру файлдары {1} ішінде сақталған. Сақтамас бұрын қалпына келтірілген көшірмелерді тексеріңіз.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRestarted">Терезе енді көрсете алмағандықтан KillerPDF қайта іске қосылды. Ашық құжаттар қайта ашылды. Бұл сеанста бағдарламалық көрсету қолданылады.</sys:String>
     <sys:String x:Key="Str_Read_MarkedText">Белгіленген мәтін: &quot;{0}&quot;</sys:String>
     <sys:String x:Key="Str_Read_MarkedNoText">Белгіленген мәтін</sys:String>

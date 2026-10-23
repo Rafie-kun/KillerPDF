@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
 using KillerPDF.Services;
 
 namespace KillerPDF.Controls
@@ -22,12 +24,15 @@ namespace KillerPDF.Controls
         /// <summary>Tells a screen reader the selection moved. Called when selection is repainted or cleared.</summary>
         private void NotifyReadingSelectionChanged() => _readingSource?.RaiseSelectionChanged();
 
+        internal void NotifyReadingTextChanged() => _readingSource?.InvalidateText();
+
         private sealed class ReadingSource(PdfViewer viewer) : IDocumentReadingSource
         {
             private readonly Dictionary<int, PageReadingText> _pages = [];
             private object? _pagesVersion;
             private Dictionary<int, List<int>>? _structureOrder;
             private bool _structureRead;
+            private long _textRevision;
 
             // A tagged PDF's reading order: for each page, its marked-content IDs in the order the
             // tag tree reaches them. Null for an untagged or unreadable tree, which reads in the
@@ -142,6 +147,16 @@ namespace KillerPDF.Controls
 
             internal void RaiseSelectionChanged() => SelectionChanged?.Invoke();
 
+            internal void InvalidateText()
+            {
+                _textRevision++;
+                _pages.Clear();
+                _structureOrder = null;
+                _structureRead = false;
+                _pagesVersion = Version;
+                TextChanged?.Invoke();
+            }
+
             public int PageCount => viewer._doc?.PageCount ?? 0;
             public int CurrentPage => viewer._currentPage;
 
@@ -154,7 +169,7 @@ namespace KillerPDF.Controls
                     try { if (file is not null && System.IO.File.Exists(file)) ticks = System.IO.File.GetLastWriteTimeUtc(file).Ticks; }
                     catch (Exception ex) when (ex is System.IO.IOException or UnauthorizedAccessException) { }
                     // Placed text boxes are read too, so adding or removing one rebuilds the text.
-                    return (file, ticks, PageCount, viewer._annotations.Values.Sum(list => list.Count));
+                    return (file, ticks, PageCount, viewer._annotations.Values.Sum(list => list.Count), _textRevision);
                 }
             }
 
@@ -201,9 +216,74 @@ namespace KillerPDF.Controls
                 foreach (Rect rect in viewer.CaretRangeRects(page, runs, startCaret, endCaret, rd))
                 {
                     Point a = canvas.PointToScreen(rect.TopLeft), b = canvas.PointToScreen(rect.BottomRight);
-                    result.Add(new Rect(a, b));
+                    Rect clipped = Rect.Intersect(new Rect(a, b), Viewport(canvas));
+                    if (!clipped.IsEmpty && clipped.Width > 0 && clipped.Height > 0) result.Add(clipped);
                 }
                 return result;
+            }
+
+            private static Rect Viewport(FrameworkElement canvas)
+            {
+                for (DependencyObject? parent = canvas; parent is not null; parent = VisualTreeHelper.GetParent(parent))
+                    if (parent is ScrollContentPresenter viewport)
+                        return new Rect(viewport.PointToScreen(new Point()),
+                            viewport.PointToScreen(new Point(viewport.ActualWidth, viewport.ActualHeight)));
+                return Rect.Empty;
+            }
+
+            public IReadOnlyList<(int Page, int Start, int End)> VisibleCaretRanges()
+            {
+                var result = new List<(int Page, int Start, int End)>();
+                if (viewer._currentFile is not { } file) return result;
+                foreach (var (page, dimensions) in viewer._renderDims.OrderBy(entry => entry.Key))
+                {
+                    if (viewer.VisibleCanvasForPage(page) is not { IsVisible: true } canvas
+                        || PresentationSource.FromVisual(canvas) is null) continue;
+                    Rect viewport = Viewport(canvas);
+                    var pageBounds = new Rect(canvas.PointToScreen(new Point()),
+                        canvas.PointToScreen(new Point(canvas.ActualWidth, canvas.ActualHeight)));
+                    if (!viewport.IntersectsWith(pageBounds) || viewer._textRuns.GetPage(file, page) is not { } runs) continue;
+                    for (int caret = 0; caret < runs.Chars.Count; caret++)
+                    {
+                        RunChar character = runs.Chars[caret];
+                        if (character.Line < 0 || character.Line >= runs.Lines.Count) continue;
+                        RunLine line = runs.Lines[character.Line];
+                        Rect rect = RedactionGeometry.PageToCanvas(character.Left, line.Bottom, character.Right, line.Top,
+                            runs.PdfWidth, runs.PdfHeight, dimensions.w, dimensions.h, viewer.EffectiveRotation(page));
+                        Rect visible = Rect.Intersect(viewport,
+                            new Rect(canvas.PointToScreen(rect.TopLeft), canvas.PointToScreen(rect.BottomRight)));
+                        if (visible.IsEmpty || visible.Width <= 0 || visible.Height <= 0) continue;
+                        if (result.Count > 0 && result[^1].Page == page && result[^1].End == caret)
+                            result[^1] = (page, result[^1].Start, caret + 1);
+                        else result.Add((page, caret, caret + 1));
+                    }
+                }
+                return result;
+            }
+
+            public (int Page, int Caret)? CaretFromScreenPoint(Point point)
+            {
+                if (viewer._currentFile is not { } file) return null;
+                (int Page, int Caret)? closest = null;
+                double distance = double.PositiveInfinity;
+                foreach (var (page, dimensions) in viewer._renderDims)
+                {
+                    if (viewer.VisibleCanvasForPage(page) is not { IsVisible: true } canvas
+                        || PresentationSource.FromVisual(canvas) is null) continue;
+                    var bounds = new Rect(canvas.PointToScreen(new Point()),
+                        canvas.PointToScreen(new Point(canvas.ActualWidth, canvas.ActualHeight)));
+                    bounds.Intersect(Viewport(canvas));
+                    if (bounds.IsEmpty) continue;
+                    double dx = Math.Max(bounds.Left - point.X, Math.Max(0, point.X - bounds.Right));
+                    double dy = Math.Max(bounds.Top - point.Y, Math.Max(0, point.Y - bounds.Bottom));
+                    double candidate = dx * dx + dy * dy;
+                    if (candidate >= distance || viewer._textRuns.GetPage(file, page) is not { } runs
+                        || runs.Chars.Count == 0) continue;
+                    var (x, y) = viewer.CanvasToPdf(page, canvas.PointFromScreen(point), dimensions.w, dimensions.h, runs);
+                    closest = (page, TextRunService.CaretFromPoint(runs, x, y));
+                    distance = candidate;
+                }
+                return closest;
             }
 
             public void Select(int startPage, int startCaret, int endPage, int endCaret)

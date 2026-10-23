@@ -440,28 +440,28 @@
                                                Foreground="{DynamicResource MutedTextBrush}" HorizontalAlignment="Center" Margin="0,8,0,0"/>
                                 </StackPanel>
                             </Border>
-                            <Path Width="46" Height="46" Data="M45,1 L1,1 L1,45"
+                            <Path Width="46" Height="46" Data="M45,1 L1,1 L1,45" Opacity="0.8"
                                   Stroke="{DynamicResource MutedTextBrush}" StrokeThickness="2" IsHitTestVisible="False"
                                   HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                            <Path Width="46" Height="46" Data="M1,1 L45,1 L45,45"
+                            <Path Width="46" Height="46" Data="M1,1 L45,1 L45,45" Opacity="0.8"
                                   Stroke="{DynamicResource MutedTextBrush}" StrokeThickness="2" IsHitTestVisible="False"
                                   HorizontalAlignment="Right" VerticalAlignment="Top"/>
-                            <Path Width="46" Height="46" Data="M1,1 L1,45 L45,45"
+                            <Path Width="46" Height="46" Data="M1,1 L1,45 L45,45" Opacity="0.8"
                                   Stroke="{DynamicResource MutedTextBrush}" StrokeThickness="2" IsHitTestVisible="False"
                                   HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
-                            <Path Width="46" Height="46" Data="M1,45 L45,45 L45,1"
+                            <Path Width="46" Height="46" Data="M1,45 L45,45 L45,1" Opacity="0.8"
                                   Stroke="{DynamicResource MutedTextBrush}" StrokeThickness="2" IsHitTestVisible="False"
                                   HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
-                            <Rectangle Width="1.5" Height="17" Margin="0,3,0,0"
+                            <Rectangle Width="1.5" Height="17" Margin="0,3,0,0" Opacity="0.8"
                                        Fill="{DynamicResource MutedTextBrush}" IsHitTestVisible="False"
                                        HorizontalAlignment="Center" VerticalAlignment="Top"/>
-                            <Rectangle Width="1.5" Height="17" Margin="0,0,0,3"
+                            <Rectangle Width="1.5" Height="17" Margin="0,0,0,3" Opacity="0.8"
                                        Fill="{DynamicResource MutedTextBrush}" IsHitTestVisible="False"
                                        HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
-                            <Rectangle Width="17" Height="1.5" Margin="3,0,0,0"
+                            <Rectangle Width="17" Height="1.5" Margin="3,0,0,0" Opacity="0.8"
                                        Fill="{DynamicResource MutedTextBrush}" IsHitTestVisible="False"
                                        HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                            <Rectangle Width="17" Height="1.5" Margin="0,0,3,0"
+                            <Rectangle Width="17" Height="1.5" Margin="0,0,3,0" Opacity="0.8"
                                        Fill="{DynamicResource MutedTextBrush}" IsHitTestVisible="False"
                                        HorizontalAlignment="Right" VerticalAlignment="Center"/>
                         </Grid>

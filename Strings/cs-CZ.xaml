@@ -1863,7 +1863,7 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">Uložené podpisy se nepodařilo načíst, proto seznam začíná prázdný. Nečitelný soubor byl zachován jako {0}.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">Tento dokument je podepsaný a obsahuje změny, takže podpisy v souboru „{0}“ již nebudou platné.&#10;&#10;Původní soubor si své podpisy ponechá.</sys:String>
     <sys:String x:Key="Str_St_FieldMaxLength">Toto pole pojme nejvýše {0} znaků.</sys:String>
-    <sys:String x:Key="Str_CmpRpt_PageCount">{0} — stránky: {1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageCount">{0}, stránky: {1}</sys:String>
     <sys:String x:Key="Str_CmpRpt_OnlyOriginal">Stránka {0}: jen v původním PDF</sys:String>
     <sys:String x:Key="Str_CmpRpt_OnlyComparison">Stránka {0}: jen v porovnávaném PDF</sys:String>
     <sys:String x:Key="Str_CmpRpt_DimensionsDiffer">velikost stránky se liší</sys:String>
@@ -1876,6 +1876,7 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Read_Comment">Komentář: {0}</sys:String>
     <sys:String x:Key="Str_Read_CommentBy">Komentář od {0}: {1}</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecovered">KillerPDF se restartoval, protože okno už nemohlo nic zobrazit. Neuložené změny byly obnoveny a jsou znovu otevřené, připravené k uložení.&#10;&#10;Kopie jsou uloženy také ve složce {0}. Tato relace používá softwarové vykreslování.</sys:String>
+    <sys:String x:Key="Str_Dlg_RenderRecoveryIncomplete">Některé dokumenty se nepodařilo plně obnovit:&#10;{0}&#10;&#10;Dostupné soubory pro obnovení jsou uloženy v {1}. Před uložením zkontrolujte obnovené kopie.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRestarted">KillerPDF se restartoval, protože okno už nemohlo nic zobrazit. Otevřené dokumenty byly znovu otevřeny. Tato relace používá softwarové vykreslování.</sys:String>
     <sys:String x:Key="Str_Read_MarkedText">Označený text: „{0}“</sys:String>
     <sys:String x:Key="Str_Read_MarkedNoText">Označený text</sys:String>

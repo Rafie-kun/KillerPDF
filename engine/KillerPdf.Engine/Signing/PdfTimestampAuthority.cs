@@ -122,7 +122,8 @@ public static class PdfTimestampAuthority
             using var copy = new MemoryStream();
             byte[] buffer = new byte[16 * 1024];
             int read;
-            while ((read = body.Read(buffer)) > 0)
+            while ((read = body.ReadAsync(buffer.AsMemory(), cancellation.Token)
+                .AsTask().GetAwaiter().GetResult()) > 0)
             {
                 cancellation.Token.ThrowIfCancellationRequested();
                 if (copy.Length + read > cap) throw new PdfTimestampException(TooLarge(cap));

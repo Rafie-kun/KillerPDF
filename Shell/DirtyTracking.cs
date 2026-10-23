@@ -27,6 +27,7 @@ namespace KillerPDF
         {
             if (dirty) _documentEditRevision++;
             _isDirty = dirty;
+            ActiveViewer.NotifyReadingTextChanged();
             ScheduleSidebarPanelRefresh();   // measurements listed in the Comments panel may have changed
             if (_saveAsBtnRef != null)
             {
@@ -52,18 +53,15 @@ namespace KillerPDF
                     _saveAsBtnRef.Effect = null;
                 }
             }
+            ScheduleToolbarAvailabilityRefresh();
         }
 
-        // The file whose bytes are exactly the document on screen, or null when it has unsaved
-        // changes. After a save the working copy no longer holds what is on screen (burned markup,
-        // form values, rotations), so a clean document is the bytes the save published.
+        // Clean copy and signing use complete bytes captured at open or successful save. The
+        // editable copy may omit overlay measurements, and the external file may have changed.
         private string? UnchangedDocumentBytes()
         {
             if (_isDirty || string.IsNullOrEmpty(_currentFile)) return null;
-            Services.PublishedFileStamp? published = _publishedFile is { } stamp
-                && string.Equals(stamp.Path, _originalFile, StringComparison.OrdinalIgnoreCase) ? stamp : null;
-            if (published is null) return _currentFile;
-            return published.Matches() ? published.Path : null;
+            return _completeDocumentSource?.Path;
         }
 
         // Cryptographic certificate signing (the real digital signature, not the drawn stamp tool).

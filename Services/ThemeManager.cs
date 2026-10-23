@@ -32,6 +32,13 @@ namespace KillerPDF.Services
 
         // ── State ─────────────────────────────────────────────────────────
 
+        private static SolidColorBrush Frozen(Color color)
+        {
+            var brush = new SolidColorBrush(color);
+            brush.Freeze();
+            return brush;
+        }
+
         private static Theme _current = Theme.Dark;
         // Dark, Light, and Black each remember their own accent independently.
         private static DarkAccent _darkAccent  = DarkAccent.Green;
@@ -214,6 +221,7 @@ namespace KillerPDF.Services
             // already restored green, so switching back from a colored accent works automatically).
             // Each theme has its own tuned overlay (Dark = bright text on dark; Light = dark text
             // on white), loaded from Accents/<Theme>/<Accent>.xaml.
+            bool accentOwnsMenuHover = false;
             var accent = accentOverride ?? AccentFor(theme);
             if (HasAccents(theme) && accent != DarkAccent.Green)
             {
@@ -226,6 +234,7 @@ namespace KillerPDF.Services
                 var target = merged[0];
                 foreach (object key in accentDict.Keys)
                     target[key] = accentDict[key];
+                accentOwnsMenuHover = accentDict.Contains("MenuHoverBrush");
                 themeOwnsComboHighlightText |= accentDict.Contains("ComboHighlightTextBrush");
                 themeOwnsFooterAccent |= accentDict.Contains("FooterAccentBrush");
                 if (accentDict.Contains("PrimaryFillBaseBrush")) fillBase = accentDict["PrimaryFillBaseBrush"];
@@ -272,6 +281,16 @@ namespace KillerPDF.Services
             var liveResources = merged[0];
             if (!themeOwnsComboHighlightText)
                 liveResources["ComboHighlightTextBrush"] = liveResources["PrimaryBrush"];
+            // Classic menu highlights follow the chosen accent after its overlay is merged.
+            if (theme == Theme.SE98 && !accentOwnsMenuHover) liveResources["MenuHoverBrush"] = liveResources["PrimaryBrush"];
+            // A hovered menu or list item takes the accent for its text, nudged lighter or darker
+            // only as far as it takes to read at 4.5:1 on that theme's hover fill. 98SE keeps its
+            // Win98 highlight text.
+            liveResources["MenuHoverTextBrush"] =
+                liveResources["UseDialogCaption"] is not true && liveResources["PrimaryBrush"] is SolidColorBrush hoverAccent
+                    && liveResources["MenuHoverBrush"] is SolidColorBrush hoverFill
+                ? Frozen(ColorContrast.ReadableOn(hoverAccent.Color, hoverFill.Color, 4.5))
+                : liveResources["ComboHighlightTextBrush"];
             if (!themeOwnsFooterAccent)
                 liveResources["FooterAccentBrush"] = liveResources["PrimaryBrush"];
             ApplyComparisonBarPalette(liveResources, theme);

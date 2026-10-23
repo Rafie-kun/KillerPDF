@@ -1878,7 +1878,7 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Warn_SignatureLibraryDamaged">Vos signatures enregistrées n'ont pas pu être lues : la liste repart donc vide. Le fichier illisible a été conservé sous {0}.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveAsClearsSignature">Ce document est signé et comporte des modifications : les signatures de « {0} » ne seront donc plus valides.&#10;&#10;Le fichier d'origine conserve ses signatures.</sys:String>
     <sys:String x:Key="Str_St_FieldMaxLength">Ce champ contient au maximum {0} caractères.</sys:String>
-    <sys:String x:Key="Str_CmpRpt_PageCount">{0} — pages : {1}</sys:String>
+    <sys:String x:Key="Str_CmpRpt_PageCount">{0}, pages : {1}</sys:String>
     <sys:String x:Key="Str_CmpRpt_OnlyOriginal">Page {0} : uniquement dans le PDF d&apos;origine</sys:String>
     <sys:String x:Key="Str_CmpRpt_OnlyComparison">Page {0} : uniquement dans le PDF de comparaison</sys:String>
     <sys:String x:Key="Str_CmpRpt_DimensionsDiffer">la taille de page diffère</sys:String>
@@ -1891,6 +1891,7 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Read_Comment">Commentaire : {0}</sys:String>
     <sys:String x:Key="Str_Read_CommentBy">Commentaire de {0} : {1}</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecovered">KillerPDF a redémarré car la fenêtre ne pouvait plus s'afficher. Vos modifications non enregistrées ont été récupérées et sont de nouveau ouvertes, prêtes à être enregistrées.&#10;&#10;Des copies sont aussi conservées dans {0}. Cette session utilise le rendu logiciel.</sys:String>
+    <sys:String x:Key="Str_Dlg_RenderRecoveryIncomplete">Certains documents n’ont pas pu être entièrement récupérés :&#10;{0}&#10;&#10;Les fichiers de récupération disponibles sont conservés dans {1}. Vérifiez les copies récupérées avant de les enregistrer.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRestarted">KillerPDF a redémarré car la fenêtre ne pouvait plus s'afficher. Vos documents ouverts ont été rouverts. Cette session utilise le rendu logiciel.</sys:String>
     <sys:String x:Key="Str_Read_MarkedText">Texte marqué : « {0} »</sys:String>
     <sys:String x:Key="Str_Read_MarkedNoText">Texte marqué</sys:String>

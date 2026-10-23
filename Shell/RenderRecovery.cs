@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Windows;
 using KillerPDF.Services;
 
@@ -16,48 +17,107 @@ namespace KillerPDF
         /// open tabs. Returns the recovery manifest, or null when nothing needed saving.
         /// Nothing here draws, so it still works after the render thread has failed.
         /// </summary>
-        internal string? PrepareRenderFailureRecovery()
+        public string? PrepareRenderFailureRecovery()
         {
             var recovered = new List<RecoveredDocument>();
             string? folder = null;
             Controls.PdfViewer activeViewer = ActiveViewer;
-            foreach (Controls.PdfViewer pane in new[] { Viewer, ViewerB })
+            try
             {
-                try { pane.CaptureActiveIfAny(); } catch (Exception ex) when (ex is not OutOfMemoryException) { }
-                foreach (var session in pane.SessionsRef.Where(s => s.IsDirty && s.Doc is not null).ToList())
+                foreach (Controls.PdfViewer pane in new[] { Viewer, ViewerB })
                 {
-                    try
+                    var pending = pane.CapturePendingTextForRecovery();
+                    var pendingSession = pane.ActiveSessionExt;
+                    pane.CaptureActiveIfAny();
+                    foreach (var session in pane.SessionsRef.Where(s => s.Doc is not null
+                        && (s.IsDirty || pending is not null && ReferenceEquals(s, pendingSession))).ToList())
                     {
-                        folder ??= RenderFailureRecovery.CreateFolder(AppDataPaths.UserRoot);
+                        if (folder is null)
+                        {
+                            try { folder = RenderFailureRecovery.CreateFolder(AppDataPaths.UserRoot); }
+                            catch (Exception ex) when (ex is not OutOfMemoryException)
+                            {
+                                App.RetainRenderRecoveryTemps(null);
+                                folder = RenderFailureRecovery.CreateFolder(App.TempDir);
+                            }
+                        }
                         string name = session.SuggestedName ?? Path.GetFileName(session.OriginalFile ?? "document.pdf");
                         string copy = RenderFailureRecovery.CopyPath(folder, name, recovered.Count);
+                        string working = Path.ChangeExtension(copy, ".working.pdf");
+                        string state = Path.ChangeExtension(copy, ".state.json");
+                        var edit = ReferenceEquals(session, pendingSession) ? pending : null;
+                        var backupErrors = new List<string>();
+                        // Preserve what is available before attempting the full save pipeline.
+                        try { session.Doc!.Save(working); }
+                        catch (Exception ex) when (ex is not OutOfMemoryException) { backupErrors.Add(ex.Message); }
                         ActiveViewer = pane;
-                        pane.WithSessionLive(session, () =>
+                        try
                         {
-                            string snapshot = WriteSavedCopyToTemp();
-                            File.Copy(snapshot, copy, overwrite: false);
-                        });
-                        recovered.Add(new RecoveredDocument(session.OriginalFile, copy, session.SuggestedName));
-                    }
-                    catch (Exception ex) when (ex is not OutOfMemoryException)
-                    {
-                        // One document that cannot be written must not stop the others.
+                            pane.WithSessionLive(session, () =>
+                            {
+                                try { WriteRecoveryState(state, session, edit); }
+                                catch (Exception ex) when (ex is not OutOfMemoryException) { backupErrors.Add(ex.Message); }
+                                string snapshot = pane.WriteRecoverySnapshot(edit, () => WriteSavedCopyToTemp());
+                                File.Copy(snapshot, copy, overwrite: false);
+                            });
+                            recovered.Add(new RecoveredDocument(session.OriginalFile, copy, session.SuggestedName,
+                                session.LoadedRevision));
+                        }
+                        catch (Exception ex) when (ex is not OutOfMemoryException)
+                        {
+                            App.RetainRenderRecoveryTemps(null);
+                            backupErrors.Insert(0, ex.Message);
+                            recovered.Add(new RecoveredDocument(session.OriginalFile, working, session.SuggestedName,
+                                session.LoadedRevision, string.Join("\n", backupErrors), File.Exists(state) ? state : null));
+                        }
                     }
                 }
             }
-            ActiveViewer = activeViewer;
+            finally { ActiveViewer = activeViewer; }
+
+            if (folder is null || recovered.Count == 0) return null;
+            string manifest = RenderFailureRecovery.WriteManifest(folder, recovered);
+            if (recovered.Any(document => document.RecoveryError is not null)) App.RetainRenderRecoveryTemps(manifest);
 
             // Clean tabs reopen through the normal session restore; recovered ones come back from the
             // manifest instead, so their originals must not also reopen beside them.
-            SaveWindowSettings();
-            var originals = new HashSet<string>(recovered.Select(d => d.OriginalPath ?? string.Empty), StringComparer.OrdinalIgnoreCase);
-            foreach (string key in new[] { "OpenTabs", "OpenTabsB" })
-                if (App.GetSetting(key) is { Length: > 0 } saved)
+            try
+            {
+                SaveWindowSettings();
+                var originals = new HashSet<string>(recovered.Select(d => d.OriginalPath ?? string.Empty), StringComparer.OrdinalIgnoreCase);
+                foreach (string key in new[] { "OpenTabs", "OpenTabsB" })
+                    if (App.GetSetting(key) is { Length: > 0 } saved)
+                    {
+                        string[] keep = [.. saved.Split('|').Where(path => !originals.Contains(path))];
+                        if (keep.Length > 0) App.SetSetting(key, string.Join("|", keep)); else App.RemoveSetting(key);
+                    }
+            }
+            catch (Exception ex) when (ex is not OutOfMemoryException) { CrashReporter.Capture(ex, "Recovery session settings"); }
+            return manifest;
+        }
+
+        private void WriteRecoveryState(string path, Controls.PdfViewer.DocumentSession session,
+            Controls.PdfViewer.PendingTextRecovery? pending)
+        {
+            var options = new JsonSerializerOptions
+            {
+                NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowNamedFloatingPointLiterals
+            };
+            AtomicFileOutput.Write(path, JsonSerializer.SerializeToUtf8Bytes(new
+            {
+                session.OriginalFile, session.CurrentFile, session.SuggestedName, session.LoadedRevision,
+                PendingText = pending,
+                Annotations = session.Annotations.SelectMany(pair => pair.Value.Select(annotation => new
                 {
-                    string[] keep = [.. saved.Split('|').Where(path => !originals.Contains(path))];
-                    if (keep.Length > 0) App.SetSetting(key, string.Join("|", keep)); else App.RemoveSetting(key);
-                }
-            return folder is null || recovered.Count == 0 ? null : RenderFailureRecovery.WriteManifest(folder, recovered);
+                    Type = annotation.GetType().Name,
+                    Value = JsonSerializer.SerializeToElement(annotation, annotation.GetType(), options)
+                })),
+                RenderDimensions = session.RenderDims.Select(pair => new { Page = pair.Key, Width = pair.Value.w, Height = pair.Value.h }),
+                session.PageRotations, session.FormTextValues, session.FormChoiceValues,
+                session.FormMultiChoiceValues, session.FormCheckValues, session.FormRadioValues,
+                session.FormFontSizes, session.RedactionMarks,
+                Stamps = JsonSerializer.SerializeToElement(_docStampSpec, new JsonSerializerOptions { IncludeFields = true })
+            }, options));
         }
 
         /// <summary>
@@ -87,30 +147,49 @@ namespace KillerPDF
             App.RestartedAfterRenderFailure = false;
             string? manifest = App.RenderRecoveryManifest;
             IReadOnlyList<RecoveredDocument> documents = manifest is null ? [] : RenderFailureRecovery.ReadManifest(manifest);
+            var incomplete = new List<string>();
+            int reopened = 0;
+            if (manifest is not null && documents.Count == 0) incomplete.Add(Path.GetFileName(manifest));
             foreach (RecoveredDocument document in documents)
             {
+                string name = Path.GetFileName(document.OriginalPath ?? document.SuggestedName ?? document.RecoveredPath);
+                if (document.RecoveryError is not null) incomplete.Add(name + ": " + document.RecoveryError);
                 try
                 {
+                    if (!File.Exists(document.RecoveredPath))
+                    {
+                        if (document.RecoveryError is null) incomplete.Add(name);
+                        continue;
+                    }
                     ActiveViewer.OpenInNewTabExt(document.RecoveredPath);
-                    if (_doc is null) continue;
+                    if (_doc is null || !string.Equals(_originalFile, document.RecoveredPath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        incomplete.Add(name);
+                        continue;
+                    }
                     // The copy holds the edits; saving goes back to the file they were made to.
-                    bool hasHome = document.OriginalPath is { Length: > 0 } original
+                    // A partial working copy must be reviewed and saved separately.
+                    bool hasHome = document.RecoveryError is null && document.OriginalPath is { Length: > 0 } original
                         && Directory.Exists(Path.GetDirectoryName(original));
                     _originalFile = hasHome ? document.OriginalPath : null;
                     _suggestedName = hasHome ? null : document.SuggestedName ?? Path.GetFileName(document.RecoveredPath);
-                    _loadedRevision = hasHome ? FileRevision.Capture(document.OriginalPath) : null;
+                    _loadedRevision = hasHome ? document.LoadedRevision : null;
                     _publishedFile = null;
                     FileNameLabel.Text = Path.GetFileName(document.OriginalPath ?? _suggestedName ?? document.RecoveredPath);
                     MarkDirty(true);
                     ActiveViewer.CaptureActiveIfAny();
+                    reopened++;
                 }
-                catch (Exception ex) when (ex is not OutOfMemoryException) { }
+                catch (Exception ex) when (ex is not OutOfMemoryException) { incomplete.Add(name + ": " + ex.Message); }
             }
             RebuildTabStrip();
-            KillerDialog.Show(this, documents.Count > 0
+            KillerDialog.Show(this, incomplete.Count > 0
+                    ? string.Format(Loc("Str_Dlg_RenderRecoveryIncomplete"), string.Join("\n", incomplete.Distinct()), Path.GetDirectoryName(manifest))
+                    : reopened > 0
                     ? string.Format(Loc("Str_Dlg_RenderRecovered"), Path.GetDirectoryName(manifest))
                     : Loc("Str_Dlg_RenderRestarted"),
-                Loc("Str_Dlg_AppTitle"), MessageBoxButton.OK, MessageBoxImage.Information);
+                Loc("Str_Dlg_AppTitle"), MessageBoxButton.OK,
+                incomplete.Count > 0 ? MessageBoxImage.Warning : MessageBoxImage.Information);
         }
     }
 }

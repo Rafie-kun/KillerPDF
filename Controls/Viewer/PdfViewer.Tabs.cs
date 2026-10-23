@@ -52,6 +52,7 @@ namespace KillerPDF.Controls
             public bool IsDirty;
             public bool ProtectedSource;               // #149: source file had a password/encryption when opened
             public Services.PublishedFileStamp? PublishedFile; // the bytes the last save wrote, when they differ from CurrentFile
+            public Services.CompleteDocumentSource? CompleteDocumentSource;
             public string? SuggestedName;              // file name offered on the first save of an import with no saved home
             public bool LoadPending;                   // a background open or merge will fill this tab; never reuse it
             public Services.FileRevision? LoadedRevision; // the version of OriginalFile this document last read or wrote
@@ -204,6 +205,7 @@ namespace KillerPDF.Controls
             s.IsDirty        = _isDirty;
             s.ProtectedSource = _openedFromProtected;
             s.PublishedFile = _publishedFile;
+            s.CompleteDocumentSource = _completeDocumentSource;
             s.SuggestedName = _suggestedName;
             s.LoadedRevision = _loadedRevision;
             s.SearchPageCursor = Search.PageCursor;
@@ -327,6 +329,7 @@ namespace KillerPDF.Controls
             _isDirty        = s.IsDirty;
             _openedFromProtected = s.ProtectedSource;
             _publishedFile = s.PublishedFile;
+            _completeDocumentSource = s.CompleteDocumentSource;
             _suggestedName = s.SuggestedName;
             _loadedRevision = s.LoadedRevision;
             Search.PageCursor = s.SearchPageCursor;

@@ -18,7 +18,7 @@ internal static class TableExportSmoke
 {
     private const BindingFlags Members = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
 
-    internal static int Run(string appPath, string appXaml, string folder, bool officeExport = false, bool grainThemes = false, bool dialogText = false, bool sidebarActions = false, bool paragraphEdit = false, bool accessibilityReview = false, bool formFieldEditing = false, bool guidedTasks = false)
+    internal static int Run(string appPath, string appXaml, string folder, bool officeExport = false, bool grainThemes = false, bool dialogText = false, bool sidebarActions = false, bool paragraphEdit = false, bool accessibilityReview = false, bool formFieldEditing = false, bool guidedTasks = false, bool signedCopy = false, bool renderRecovery = false, bool toolbarAvailability = false)
     {
         if (!Environment.GetCommandLineArgs().Contains("--startup-smoke"))
             throw new InvalidOperationException("Startup smoke isolation is required.");
@@ -38,7 +38,7 @@ internal static class TableExportSmoke
         typeof(Application).GetField("_resourceAssembly", Members)!.SetValue(null, assembly);
         assembly.GetType("KillerPDF.Services.AppDataPaths", true)!
             .GetProperty("StartupSmokeRoot", Members)!.SetValue(null, Path.Combine(folder, "data"));
-        if (accessibilityReview || formFieldEditing || guidedTasks) AccessibilityReviewSmoke.ConfigureOffscreen(assembly);
+        if (accessibilityReview || formFieldEditing || guidedTasks || signedCopy || renderRecovery || toolbarAvailability) AccessibilityReviewSmoke.ConfigureOffscreen(assembly);
         Type appType = assembly.GetType("KillerPDF.App", true)!;
         var hostType = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("TableExportSmokeHost"),
             AssemblyBuilderAccess.Run).DefineDynamicModule("Host")
@@ -60,7 +60,7 @@ internal static class TableExportSmoke
             xaml = xaml.Replace("clr-namespace:" + name, "clr-namespace:" + name + ";assembly=KillerPDF", StringComparison.Ordinal);
         app.Resources = (ResourceDictionary)System.Windows.Markup.XamlReader.Parse(xaml,
             new System.Windows.Markup.ParserContext { BaseUri = new Uri("pack://application:,,,/KillerPDF;component/") });
-        if (accessibilityReview || formFieldEditing || guidedTasks)
+        if (accessibilityReview || formFieldEditing || guidedTasks || signedCopy || renderRecovery || toolbarAvailability)
         {
             var hiddenMessages = new Style(typeof(Window));
             hiddenMessages.Setters.Add(new Setter(Window.ShowActivatedProperty, false));
@@ -78,6 +78,9 @@ internal static class TableExportSmoke
             owner.WindowStartupLocation = WindowStartupLocation.Manual;
             owner.Left = -10000; owner.Top = -10000; owner.ShowInTaskbar = false; owner.ShowActivated = false;
             owner.Show();
+            if (toolbarAvailability) return ToolbarAvailabilitySmoke.Run(owner, appPath, folder);
+            if (renderRecovery) return RenderRecoverySmoke.Run(owner, appPath, folder);
+            if (signedCopy) return SignedCopySmoke.Run(owner, assembly, appPath, folder);
             if (guidedTasks) return GuidedTasksSmoke.Run(owner, assembly, appPath, folder);
             if (formFieldEditing) return FormFieldEditingSmoke.Run(owner, appPath, folder);
             if (accessibilityReview) return AccessibilityReviewSmoke.Run(owner, assembly, appPath, folder);
@@ -254,7 +257,7 @@ internal static class TableExportSmoke
                 foreach (Window window in app.Windows.Cast<Window>().Where(window => window != owner && window.IsVisible).ToArray())
                 {
                     Button? button = Descendants<Button>(window).FirstOrDefault(candidate => Equals(candidate.Content, quit)
-                        || (formFieldEditing || guidedTasks) && Equals(candidate.Content, discard));
+                        || (formFieldEditing || guidedTasks || signedCopy || renderRecovery || toolbarAvailability) && Equals(candidate.Content, discard));
                     if (button is not null && accepted.Add(window)) Click(button);
                 }
             };
