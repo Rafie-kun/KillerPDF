@@ -65,6 +65,10 @@ public sealed class IncompletePagePublicationTests
         string preview = Read("Controls", "PrintPreviewWindow.cs");
         Assert.Contains("renderSession.RenderPage(idx, requireComplete: false)", preview);
         Assert.Contains("Str_Print_IncompletePages", preview);
+        // The print warning names only pages that will print and is announced to screen readers.
+        Assert.Contains("_incompletePages.Where(printed.Contains)", preview);
+        Assert.Contains("AutomationLiveSetting.Polite", preview);
+        Assert.Contains("AutomationEvents.LiveRegionChanged", preview);
 
         foreach (string cli in new[] { "CliRunner.cs", "CliRunner.Pages.cs" })
             Assert.DoesNotContain("requireComplete: false", Read("Features", "Cli", cli));

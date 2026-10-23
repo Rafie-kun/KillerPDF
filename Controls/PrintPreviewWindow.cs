@@ -850,6 +850,9 @@ namespace KillerPDF
             _renderLabel.FontSize = 11;
             _renderLabel.TextWrapping = TextWrapping.Wrap;
             _renderLabel.TextAlignment = TextAlignment.Center;
+            // The incomplete-pages warning is announced, so screen-reader users hear it before Print.
+            System.Windows.Automation.AutomationProperties.SetLiveSetting(_renderLabel,
+                System.Windows.Automation.AutomationLiveSetting.Polite);
             _renderLabel.Visibility = Visibility.Collapsed;
             var navCenter = new StackPanel
             {
@@ -1164,13 +1167,24 @@ namespace KillerPDF
         {
             if (_isLoading)
             {
+                _renderLabel.Foreground = R("MutedTextBrush");
                 _renderLabel.Text = string.Format(S("Str_Print_Rendering"), _loadedCount, _pages.Length);
                 _renderLabel.Visibility = Visibility.Visible;
+                return;
             }
-            else if (_incompletePages.Count > 0)
+            // Only incomplete pages in the current range and subset are named: those are the ones
+            // that will print as shown.
+            var printed = new HashSet<int>(SelectedIndices());
+            List<int> incomplete = [.. _incompletePages.Where(printed.Contains)];
+            if (incomplete.Count > 0)
             {
-                _renderLabel.Text = string.Format(S("Str_Print_IncompletePages"), IncompletePageLog.Describe(_incompletePages));
+                string warning = string.Format(S("Str_Print_IncompletePages"), IncompletePageLog.Describe(incomplete));
+                bool changed = _renderLabel.Text != warning || _renderLabel.Visibility != Visibility.Visible;
+                _renderLabel.Foreground = R("TextBrush");
+                _renderLabel.Text = warning;
                 _renderLabel.Visibility = Visibility.Visible;
+                if (changed && System.Windows.Automation.Peers.UIElementAutomationPeer.CreatePeerForElement(_renderLabel) is { } peer)
+                    peer.RaiseAutomationEvent(System.Windows.Automation.Peers.AutomationEvents.LiveRegionChanged);
             }
             else _renderLabel.Visibility = Visibility.Collapsed;
         }
