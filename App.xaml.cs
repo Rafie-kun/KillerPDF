@@ -2084,28 +2084,34 @@ namespace KillerPDF
         // Uninstall
         // ============================================================
 
-        private static bool RelaunchMachineUninstallElevatedIfNeeded(bool machine, bool silent)
+        // Null when this process may uninstall a machine copy itself. Otherwise the exit code of the
+        // elevated uninstall it started, or why it could not start one, so deployment tools see a
+        // declined or failed uninstall instead of success.
+        private static int? RelaunchMachineUninstallElevatedIfNeeded(bool machine, bool silent)
         {
-            if (!machine) return false;
+            if (!machine) return null;
             try
             {
                 using var identity = System.Security.Principal.WindowsIdentity.GetCurrent();
                 var principal = new System.Security.Principal.WindowsPrincipal(identity);
                 if (principal.IsInRole(System.Security.Principal.WindowsBuiltInRole.Administrator))
-                    return false;
+                    return null;
 
-                Process.Start(new ProcessStartInfo(
+                using Process elevated = Process.Start(new ProcessStartInfo(
                     Environment.ProcessPath
                         ?? throw new InvalidOperationException("The current executable path is unavailable."),
                     silent ? "/uninstall-silent" : "/uninstall")
                 {
                     UseShellExecute = true,
                     Verb = "runas",
-                });
+                }) ?? throw new InvalidOperationException("The elevated uninstall did not start.");
+                elevated.WaitForExit();
+                return elevated.ExitCode;
             }
             catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode == 1223)
             {
                 // UAC was declined. Leave the installation untouched.
+                return 1223;
             }
             catch (Exception ex)
             {
@@ -2114,8 +2120,8 @@ namespace KillerPDF
                         string.Format(SetupText("Str_Dlg_UninstallElevationFailed",
                             "Uninstall could not request administrator access:\n{0}"), ex.Message),
                         AppName, MessageBoxButton.OK, MessageBoxImage.Error);
+                return 1;
             }
-            return true;
         }
 
         private static void RegisterInstalledCopy(bool machine, bool desktop, bool? preview = null,
@@ -2132,23 +2138,8 @@ namespace KillerPDF
             if (!File.Exists(exePath))
                 throw new FileNotFoundException("The installed application is missing.", exePath);
 
-            CreateShortcut(startMenuShortcut, exePath);
-            if (desktop) CreateShortcut(InstalledShortcuts.DesktopPath(machine), exePath);
-
-            if (!File.Exists(iconPath)) ExtractFileIcon(iconPath);
-            RegisterFileHandler(registryRoot, exePath, iconPath);
-            Services.ProtocolRegistrar.Register(registryRoot, exePath);
-            // "killerpdf" from any new terminal runs the command line of this copy.
-            Services.CommandLinePath.Register(installDirectory, Path.GetFileName(exePath), machine);
-
-            // #410: PDF previews in File Explorer and Outlook when setup asked for them. Without a
-            // choice, a copy that already had them keeps them, as long as the handler is present.
-            bool handlerPresent = File.Exists(Path.Combine(installDirectory, Services.PreviewHandlerRegistration.HostFileName));
-            if (preview ?? (handlerPresent && Services.PreviewHandlerRegistration.IsRegistered(registryRoot)))
-                Services.PreviewHandlerRegistration.Register(registryRoot, installDirectory);
-            else
-                Services.PreviewHandlerRegistration.Unregister(registryRoot);
-
+            // The copy is registered for uninstall first, so a shortcut or association that fails
+            // below still leaves an installation Windows can remove instead of an orphaned payload.
             using (var key = registryRoot.CreateSubKey(@"Software\KillerPDF"))
             {
                 key.SetValue("Installed", 1);
@@ -2170,6 +2161,23 @@ namespace KillerPDF
                 key.SetValue("NoModify", 1);
                 key.SetValue("NoRepair", 1);
             }
+
+            CreateShortcut(startMenuShortcut, exePath);
+            if (desktop) CreateShortcut(InstalledShortcuts.DesktopPath(machine), exePath);
+
+            if (!File.Exists(iconPath)) ExtractFileIcon(iconPath);
+            RegisterFileHandler(registryRoot, exePath, iconPath);
+            Services.ProtocolRegistrar.Register(registryRoot, exePath);
+            // "killerpdf" from any new terminal runs the command line of this copy.
+            Services.CommandLinePath.Register(installDirectory, Path.GetFileName(exePath), machine);
+
+            // #410: PDF previews in File Explorer and Outlook when setup asked for them. Without a
+            // choice, a copy that already had them keeps them, as long as the handler is present.
+            bool handlerPresent = File.Exists(Path.Combine(installDirectory, Services.PreviewHandlerRegistration.HostFileName));
+            if (preview ?? (handlerPresent && Services.PreviewHandlerRegistration.IsRegistered(registryRoot)))
+                Services.PreviewHandlerRegistration.Register(registryRoot, installDirectory);
+            else
+                Services.PreviewHandlerRegistration.Unregister(registryRoot);
 
             SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, IntPtr.Zero, IntPtr.Zero);
         }
@@ -2194,7 +2202,7 @@ namespace KillerPDF
             if (!silent) ThemeManager.InitializeInstallerTheme();
             string currentExe = Path.GetFullPath(Process.GetCurrentProcess().MainModule?.FileName ?? string.Empty);
             bool machine = IsRegisteredCopy(Registry.LocalMachine, currentExe);
-            if (RelaunchMachineUninstallElevatedIfNeeded(machine, silent)) return 0;
+            if (RelaunchMachineUninstallElevatedIfNeeded(machine, silent) is int elevatedExit) return elevatedExit;
 
             // Uninstall removes only the payload the installer wrote, found through its manifest,
             // and only from a registered copy. A portable copy or a loose exe in some other folder
