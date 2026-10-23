@@ -426,6 +426,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <!-- ── Print dialog ───────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Print_Title">KillerPDF - 打印</sys:String>
     <sys:String x:Key="Str_Print_Rendering">正在渲染 {0} / {1}</sys:String>
+    <sys:String x:Key="Str_Print_IncompletePages">部分内容无法精确绘制。第 {0} 页将按显示效果打印。</sys:String>
     <sys:String x:Key="Str_Print_Printer">打印机</sys:String>
     <sys:String x:Key="Str_Print_Orientation">方向</sys:String>
     <sys:String x:Key="Str_Print_Portrait">纵向</sys:String>
@@ -1026,6 +1027,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_OutputPixels">{0} x {1} px</sys:String>
     <sys:String x:Key="Str_ExportImg_Export">导出</sys:String>
     <sys:String x:Key="Str_ExportImg_Done">已将 {0} 页导出到 {1}</sys:String>
+    <sys:String x:Key="Str_Export_IncompletePages">部分内容无法精确绘制。第 {0} 页已按屏幕显示效果保存。</sys:String>
     <sys:String x:Key="Str_Print_AllPages">所有页面</sys:String>
     <sys:String x:Key="Str_Print_OddOnly">仅奇数页</sys:String>
     <sys:String x:Key="Str_Print_EvenOnly">仅偶数页</sys:String>

@@ -167,14 +167,16 @@ internal sealed class PdfPageRenderSession : IDisposable
         return rendered;
     }
 
+    // Printing and image export pass requireComplete: false and name the incomplete pages
+    // afterwards through IncompletePageLog; every other caller refuses them.
     internal PdfRenderedPage RenderPage(int pageIndex, bool transparentBackground = false,
-        bool includeFormFields = true,
+        bool includeFormFields = true, bool requireComplete = true,
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         PdfRenderedPage rendered = RenderEnginePage(pageIndex, transparentBackground,
             includeAnnotations: true, includeFormFields, cancellationToken);
-        rendered.RequireComplete(pageIndex);
+        if (requireComplete) rendered.RequireComplete(pageIndex);
         return rendered;
     }
 

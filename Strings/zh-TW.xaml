@@ -428,6 +428,7 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <!-- ── Print dialog ───────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Print_Title">KillerPDF - 列印</sys:String>
     <sys:String x:Key="Str_Print_Rendering">正在轉譯 {0} / {1}</sys:String>
+    <sys:String x:Key="Str_Print_IncompletePages">部分內容無法精確繪製。第 {0} 頁將依顯示效果列印。</sys:String>
     <sys:String x:Key="Str_Print_Printer">印表機</sys:String>
     <sys:String x:Key="Str_Print_Orientation">方向</sys:String>
     <sys:String x:Key="Str_Print_Portrait">直向</sys:String>
@@ -1024,6 +1025,7 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_OutputPixels">{0} x {1} px</sys:String>
     <sys:String x:Key="Str_ExportImg_Export">匯出</sys:String>
     <sys:String x:Key="Str_ExportImg_Done">已將 {0} 頁匯出到 {1}</sys:String>
+    <sys:String x:Key="Str_Export_IncompletePages">部分內容無法精確繪製。第 {0} 頁已依螢幕顯示效果儲存。</sys:String>
     <sys:String x:Key="Str_Print_AllPages">所有頁面</sys:String>
     <sys:String x:Key="Str_Print_OddOnly">僅奇數頁</sys:String>
     <sys:String x:Key="Str_Print_EvenOnly">僅偶數頁</sys:String>

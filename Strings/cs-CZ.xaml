@@ -287,6 +287,7 @@ Stránku lze nahradit jejím obrázkem se začerněnými označenými oblastmi. 
     <sys:String x:Key="Str_OutputPixels">{0} x {1} px</sys:String>
     <sys:String x:Key="Str_ExportImg_Export">Exportovat</sys:String>
     <sys:String x:Key="Str_ExportImg_Done">Exportováno stránek: {0}, do {1}</sys:String>
+    <sys:String x:Key="Str_Export_IncompletePages">Část obsahu nebylo možné vykreslit přesně. Stránky {0} byly uloženy tak, jak vypadají na obrazovce.</sys:String>
     <sys:String x:Key="Str_Print_AllPages">Všechny stránky</sys:String>
     <sys:String x:Key="Str_Print_OddOnly">Pouze liché stránky</sys:String>
     <sys:String x:Key="Str_Print_EvenOnly">Pouze sudé stránky</sys:String>
@@ -498,6 +499,7 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <!-- ── Print dialog ───────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Print_Title">KillerPDF - Tisk</sys:String>
     <sys:String x:Key="Str_Print_Rendering">Vykreslování {0} / {1}</sys:String>
+    <sys:String x:Key="Str_Print_IncompletePages">Část obsahu nebylo možné vykreslit přesně. Stránky {0} se vytisknou tak, jak jsou zobrazeny.</sys:String>
     <sys:String x:Key="Str_Print_Printer">Tiskárna</sys:String>
     <sys:String x:Key="Str_Print_Orientation">Orientace</sys:String>
     <sys:String x:Key="Str_Print_Portrait">Na výšku</sys:String>

@@ -287,6 +287,7 @@ Siden kan erstattes med et bilde av seg selv der de markerte områdene er sverte
     <sys:String x:Key="Str_OutputPixels">{0} x {1} px</sys:String>
     <sys:String x:Key="Str_ExportImg_Export">Eksporter</sys:String>
     <sys:String x:Key="Str_ExportImg_Done">Eksporterte {0} sider til {1}</sys:String>
+    <sys:String x:Key="Str_Export_IncompletePages">Noe innhold kunne ikke tegnes nøyaktig. Sidene {0} ble lagret slik de vises på skjermen.</sys:String>
     <sys:String x:Key="Str_Print_AllPages">Alle sider</sys:String>
     <sys:String x:Key="Str_Print_OddOnly">Bare oddetallssider</sys:String>
     <sys:String x:Key="Str_Print_EvenOnly">Bare partallssider</sys:String>
@@ -498,6 +499,7 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <!-- ── Print dialog ───────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Print_Title">KillerPDF - Skriv ut</sys:String>
     <sys:String x:Key="Str_Print_Rendering">Gjengir {0} / {1}</sys:String>
+    <sys:String x:Key="Str_Print_IncompletePages">Noe innhold kunne ikke tegnes nøyaktig. Sidene {0} skrives ut slik de vises.</sys:String>
     <sys:String x:Key="Str_Print_Printer">Skriver</sys:String>
     <sys:String x:Key="Str_Print_Paper">Papirstørrelse</sys:String>
     <sys:String x:Key="Str_Print_PaperAuto">Tilpass dokumentet</sys:String>

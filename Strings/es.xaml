@@ -426,6 +426,7 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <!-- ── Print dialog ───────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Print_Title">KillerPDF - Imprimir</sys:String>
     <sys:String x:Key="Str_Print_Rendering">Renderizando {0} / {1}</sys:String>
+    <sys:String x:Key="Str_Print_IncompletePages">Parte del contenido no se pudo dibujar con exactitud. Las páginas {0} se imprimen tal como se muestran.</sys:String>
     <sys:String x:Key="Str_Print_Printer">Impresora</sys:String>
     <sys:String x:Key="Str_Print_Orientation">Orientación</sys:String>
     <sys:String x:Key="Str_Print_Portrait">Vertical</sys:String>
@@ -1022,6 +1023,7 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_OutputPixels">{0} x {1} px</sys:String>
     <sys:String x:Key="Str_ExportImg_Export">Exportar</sys:String>
     <sys:String x:Key="Str_ExportImg_Done">Se exportaron {0} páginas a {1}</sys:String>
+    <sys:String x:Key="Str_Export_IncompletePages">Parte del contenido no se pudo dibujar con exactitud. Las páginas {0} se guardaron tal como aparecen en pantalla.</sys:String>
     <sys:String x:Key="Str_Print_AllPages">Todas las páginas</sys:String>
     <sys:String x:Key="Str_Print_OddOnly">Solo páginas impares</sys:String>
     <sys:String x:Key="Str_Print_EvenOnly">Solo páginas pares</sys:String>

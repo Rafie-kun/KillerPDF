@@ -265,6 +265,7 @@
     <sys:String x:Key="Str_OutputPixels">{0} x {1} px</sys:String>
     <sys:String x:Key="Str_ExportImg_Export">Izvozi</sys:String>
     <sys:String x:Key="Str_ExportImg_Done">Izvoženih strani: {0}, v {1}</sys:String>
+    <sys:String x:Key="Str_Export_IncompletePages">Dela vsebine ni bilo mogoče natančno izrisati. Strani {0} so bile shranjene tako, kot so prikazane na zaslonu.</sys:String>
     <sys:String x:Key="Str_Print_AllPages">Vse strani</sys:String>
     <sys:String x:Key="Str_Print_OddOnly">Samo lihe strani</sys:String>
     <sys:String x:Key="Str_Print_EvenOnly">Samo sode strani</sys:String>
@@ -439,6 +440,7 @@
     <sys:String x:Key="Str_Pos_TopLeft">Zgoraj levo</sys:String>
     <sys:String x:Key="Str_Print_Title">KillerPDF: Tiskanje</sys:String>
     <sys:String x:Key="Str_Print_Rendering">Izrisovanje {0} / {1}</sys:String>
+    <sys:String x:Key="Str_Print_IncompletePages">Dela vsebine ni bilo mogoče natančno izrisati. Strani {0} se natisnejo tako, kot so prikazane.</sys:String>
     <sys:String x:Key="Str_Print_Printer">Tiskalnik</sys:String>
     <sys:String x:Key="Str_Print_Paper">Velikost papirja</sys:String>
     <sys:String x:Key="Str_Print_PaperAuto">Ujemanje z dokumentom</sys:String>

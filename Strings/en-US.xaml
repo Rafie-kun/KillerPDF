@@ -287,6 +287,7 @@ The page can be replaced with an image of itself with the marked areas blacked o
     <sys:String x:Key="Str_OutputPixels">{0} x {1} px</sys:String>
     <sys:String x:Key="Str_ExportImg_Export">Export</sys:String>
     <sys:String x:Key="Str_ExportImg_Done">Exported {0} pages to {1}</sys:String>
+    <sys:String x:Key="Str_Export_IncompletePages">Some content could not be drawn exactly. Pages {0} were saved as they appear on screen.</sys:String>
     <sys:String x:Key="Str_Print_AllPages">All pages</sys:String>
     <sys:String x:Key="Str_Print_OddOnly">Odd pages only</sys:String>
     <sys:String x:Key="Str_Print_EvenOnly">Even pages only</sys:String>
@@ -498,6 +499,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <!-- ── Print dialog ───────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Print_Title">KillerPDF: Print</sys:String>
     <sys:String x:Key="Str_Print_Rendering">Rendering {0} / {1}</sys:String>
+    <sys:String x:Key="Str_Print_IncompletePages">Some content could not be drawn exactly. Pages {0} print as shown.</sys:String>
     <sys:String x:Key="Str_Print_Printer">Printer</sys:String>
     <sys:String x:Key="Str_Print_Paper">Paper size</sys:String>
     <sys:String x:Key="Str_Print_PaperAuto">Match document</sys:String>

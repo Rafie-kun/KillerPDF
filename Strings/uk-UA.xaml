@@ -287,6 +287,7 @@
     <sys:String x:Key="Str_OutputPixels">{0} x {1} пікс.</sys:String>
     <sys:String x:Key="Str_ExportImg_Export">Експортувати</sys:String>
     <sys:String x:Key="Str_ExportImg_Done">Експортовано сторінок: {0} до {1}</sys:String>
+    <sys:String x:Key="Str_Export_IncompletePages">Частину вмісту не вдалося відобразити точно. Сторінки {0} збережено так, як вони виглядають на екрані.</sys:String>
     <sys:String x:Key="Str_Print_AllPages">Усі сторінки</sys:String>
     <sys:String x:Key="Str_Print_OddOnly">Лише непарні сторінки</sys:String>
     <sys:String x:Key="Str_Print_EvenOnly">Лише парні сторінки</sys:String>
@@ -498,6 +499,7 @@ KillerPDF не створюватиме двох установлених коп
     <!-- ── Print dialog ───────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Print_Title">KillerPDF - Друк</sys:String>
     <sys:String x:Key="Str_Print_Rendering">Відтворення {0} / {1}</sys:String>
+    <sys:String x:Key="Str_Print_IncompletePages">Частину вмісту не вдалося відобразити точно. Сторінки {0} буде надруковано так, як показано.</sys:String>
     <sys:String x:Key="Str_Print_Printer">Принтер</sys:String>
     <sys:String x:Key="Str_Print_Paper">Розмір паперу</sys:String>
     <sys:String x:Key="Str_Print_PaperAuto">Як у документі</sys:String>

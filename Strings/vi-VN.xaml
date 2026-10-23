@@ -287,6 +287,7 @@ Có thể thay trang bằng hình ảnh của chính nó với các vùng đã �
     <sys:String x:Key="Str_OutputPixels">{0} x {1} px</sys:String>
     <sys:String x:Key="Str_ExportImg_Export">Xuất</sys:String>
     <sys:String x:Key="Str_ExportImg_Done">Đã xuất {0} trang tới {1}</sys:String>
+    <sys:String x:Key="Str_Export_IncompletePages">Không thể vẽ chính xác một số nội dung. Các trang {0} đã được lưu như hiển thị trên màn hình.</sys:String>
     <sys:String x:Key="Str_Print_AllPages">Tất cả trang</sys:String>
     <sys:String x:Key="Str_Print_OddOnly">Chỉ trang lẻ</sys:String>
     <sys:String x:Key="Str_Print_EvenOnly">Chỉ trang chẵn</sys:String>
@@ -498,6 +499,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <!-- ── Hộp thoại In ───────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Print_Title">KillerPDF - In</sys:String>
     <sys:String x:Key="Str_Print_Rendering">Đang kết xuất {0} / {1}</sys:String>
+    <sys:String x:Key="Str_Print_IncompletePages">Không thể vẽ chính xác một số nội dung. Các trang {0} sẽ được in như đang hiển thị.</sys:String>
     <sys:String x:Key="Str_Print_Printer">Máy in</sys:String>
     <sys:String x:Key="Str_Print_Paper">Kích thước giấy</sys:String>
     <sys:String x:Key="Str_Print_PaperAuto">Khớp với tài liệu</sys:String>

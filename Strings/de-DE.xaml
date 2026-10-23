@@ -426,6 +426,7 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <!-- ── Print dialog ───────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Print_Title">KillerPDF - Drucken</sys:String>
     <sys:String x:Key="Str_Print_Rendering">Rendern {0} / {1}</sys:String>
+    <sys:String x:Key="Str_Print_IncompletePages">Einige Inhalte konnten nicht exakt dargestellt werden. Die Seiten {0} werden wie angezeigt gedruckt.</sys:String>
     <sys:String x:Key="Str_Print_Printer">Drucker</sys:String>
     <sys:String x:Key="Str_Print_Orientation">Ausrichtung</sys:String>
     <sys:String x:Key="Str_Print_Portrait">Hochformat</sys:String>
@@ -1028,6 +1029,7 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_OutputPixels">{0} x {1} px</sys:String>
     <sys:String x:Key="Str_ExportImg_Export">Exportieren</sys:String>
     <sys:String x:Key="Str_ExportImg_Done">{0} Seiten nach {1} exportiert</sys:String>
+    <sys:String x:Key="Str_Export_IncompletePages">Einige Inhalte konnten nicht exakt dargestellt werden. Die Seiten {0} wurden so gespeichert, wie sie auf dem Bildschirm erscheinen.</sys:String>
     <sys:String x:Key="Str_Print_AllPages">Alle Seiten</sys:String>
     <sys:String x:Key="Str_Print_OddOnly">Nur ungerade Seiten</sys:String>
     <sys:String x:Key="Str_Print_EvenOnly">Nur gerade Seiten</sys:String>

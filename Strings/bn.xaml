@@ -426,6 +426,7 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <!-- ── Print dialog ───────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Print_Title">KillerPDF - মুদ্রণ</sys:String>
     <sys:String x:Key="Str_Print_Rendering">রেন্ডার হচ্ছে {0} / {1}</sys:String>
+    <sys:String x:Key="Str_Print_IncompletePages">কিছু বিষয়বস্তু হুবহু আঁকা যায়নি। পৃষ্ঠা {0} যেমন দেখা যাচ্ছে তেমনই মুদ্রিত হবে।</sys:String>
     <sys:String x:Key="Str_Print_Printer">প্রিন্টার</sys:String>
     <sys:String x:Key="Str_Print_Orientation">অভিমুখ</sys:String>
     <sys:String x:Key="Str_Print_Portrait">পোর্ট্রেট</sys:String>
@@ -1022,6 +1023,7 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_OutputPixels">{0} x {1} px</sys:String>
     <sys:String x:Key="Str_ExportImg_Export">এক্সপোর্ট</sys:String>
     <sys:String x:Key="Str_ExportImg_Done">{0}টি পৃষ্ঠা {1}-এ এক্সপোর্ট হয়েছে</sys:String>
+    <sys:String x:Key="Str_Export_IncompletePages">কিছু বিষয়বস্তু হুবহু আঁকা যায়নি। পৃষ্ঠা {0} স্ক্রিনে যেমন দেখা যায় তেমনই সংরক্ষিত হয়েছে।</sys:String>
     <sys:String x:Key="Str_Print_AllPages">সব পৃষ্ঠা</sys:String>
     <sys:String x:Key="Str_Print_OddOnly">শুধু বিজোড় পৃষ্ঠা</sys:String>
     <sys:String x:Key="Str_Print_EvenOnly">শুধু জোড় পৃষ্ঠা</sys:String>

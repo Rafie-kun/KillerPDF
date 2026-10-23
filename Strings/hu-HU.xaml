@@ -287,6 +287,7 @@ Az oldal lecserélhető a saját képére, amelyen a megjelölt területek feket
     <sys:String x:Key="Str_OutputPixels">{0} x {1} px</sys:String>
     <sys:String x:Key="Str_ExportImg_Export">Exportálás</sys:String>
     <sys:String x:Key="Str_ExportImg_Done">{0} oldal exportálva ide: {1}</sys:String>
+    <sys:String x:Key="Str_Export_IncompletePages">Bizonyos tartalmakat nem sikerült pontosan megjeleníteni. Az érintett oldalak ({0}) úgy lettek mentve, ahogy a képernyőn látszanak.</sys:String>
     <sys:String x:Key="Str_Print_AllPages">Minden oldal</sys:String>
     <sys:String x:Key="Str_Print_OddOnly">Csak páratlan oldalak</sys:String>
     <sys:String x:Key="Str_Print_EvenOnly">Csak páros oldalak</sys:String>
@@ -498,6 +499,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <!-- ── Print dialog ───────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Print_Title">KillerPDF - Nyomtatás</sys:String>
     <sys:String x:Key="Str_Print_Rendering">Megjelenítés {0} / {1}</sys:String>
+    <sys:String x:Key="Str_Print_IncompletePages">Bizonyos tartalmakat nem sikerült pontosan megjeleníteni. Az érintett oldalak ({0}) a látott módon kerülnek nyomtatásra.</sys:String>
     <sys:String x:Key="Str_Print_Printer">Nyomtató</sys:String>
     <sys:String x:Key="Str_Print_Paper">Papírméret</sys:String>
     <sys:String x:Key="Str_Print_PaperAuto">Dokumentumhoz igazítás</sys:String>

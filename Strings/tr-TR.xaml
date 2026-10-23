@@ -426,6 +426,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <!-- ── Print dialog ───────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Print_Title">KillerPDF - Yazdır</sys:String>
     <sys:String x:Key="Str_Print_Rendering">Oluşturuluyor {0} / {1}</sys:String>
+    <sys:String x:Key="Str_Print_IncompletePages">Bazı içerikler tam olarak çizilemedi. {0} sayfaları gösterildiği gibi yazdırılır.</sys:String>
     <sys:String x:Key="Str_Print_Printer">Yazıcı</sys:String>
     <sys:String x:Key="Str_Print_Orientation">Yönlendirme</sys:String>
     <sys:String x:Key="Str_Print_Portrait">Dikey</sys:String>
@@ -1022,6 +1023,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_OutputPixels">{0} x {1} px</sys:String>
     <sys:String x:Key="Str_ExportImg_Export">Dışa aktar</sys:String>
     <sys:String x:Key="Str_ExportImg_Done">{0} sayfa {1} konumuna aktarıldı</sys:String>
+    <sys:String x:Key="Str_Export_IncompletePages">Bazı içerikler tam olarak çizilemedi. {0} sayfaları ekranda göründüğü gibi kaydedildi.</sys:String>
     <sys:String x:Key="Str_Print_AllPages">Tüm sayfalar</sys:String>
     <sys:String x:Key="Str_Print_OddOnly">Yalnızca tek sayfalar</sys:String>
     <sys:String x:Key="Str_Print_EvenOnly">Yalnızca çift sayfalar</sys:String>

@@ -1562,13 +1562,15 @@ namespace KillerPDF
                 operationStarted = true;
                 // Rasterize on a background thread - keeps the UI responsive. The core lives in
                 // Services/PdfRasterize.cs; progress marshals back to the overlay here.
+                var incomplete = new IncompletePageLog();
                 await Task.Run(() => PdfRasterize.FlattenToPdf(sourcePath, pageCount, pageDims, outputPath,
                     flattenOptions,
                     (n, total) => Dispatcher.BeginInvoke(new Action(() => UpdateFlattenProgress(overlay, n, total))),
-                    ct));
+                    ct, incomplete));
 
                 if (ct.IsCancellationRequested) { SetStatus(Loc("Str_St_FlattenCanceled")); return; }
                 SetStatus(string.Format(Loc("Str_St_FlattenedSaved"), System.IO.Path.GetFileName(outputPath)));
+                WarnIncompletePages(incomplete);
             }
             catch (Exception ex)
             {
@@ -1778,11 +1780,13 @@ namespace KillerPDF
                 ct = BeginCancellableOp(Loc("Str_Op_Export"));
                 // The per-page render/encode/write core lives in Services/PdfRasterize.cs;
                 // progress marshals back to the overlay here.
+                var incomplete = new IncompletePageLog();
                 int written = await Task.Run(() => PdfRasterize.ExportPageImages(sourcePath, pages,
                     rotSnapshot, dpi, jpeg, outDir, baseName, digits,
                     (n, total) => Dispatcher.BeginInvoke(new Action(() => UpdateFlattenProgress(overlay, n, total))),
-                    ct));
+                    ct, incomplete));
                 SetStatus(string.Format(Loc("Str_ExportImg_Done"), written, outDir));
+                WarnIncompletePages(incomplete);
             }
             catch (Exception ex)
             {
@@ -1793,6 +1797,16 @@ namespace KillerPDF
                 try { HideFlattenProgress(overlay); } catch { /* ensure overlay never leaks */ }
                 EndCancellableOp(ct);
             }
+        }
+
+        // A page whose content could not all be drawn is exported as it appears on screen; the
+        // finished job names those pages instead of refusing the whole export.
+        private void WarnIncompletePages(IncompletePageLog incomplete)
+        {
+            IReadOnlyList<int> pages = incomplete.Pages;
+            if (pages.Count == 0) return;
+            KillerDialog.Show(this, string.Format(Loc("Str_Export_IncompletePages"), IncompletePageLog.Describe(pages)),
+                "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
 
         // ---- flatten progress overlay helpers ----
@@ -1942,10 +1956,13 @@ namespace KillerPDF
                 {
                     using var renderSession = PdfPageRenderSession.OpenEngineFirst(
                         renderPath, previewBox, previewBox);
+                    // A page that cannot be drawn exactly still prints as shown; the preview names it.
+                    var incomplete = new IncompletePageLog();
                     for (int i = 0; i < pageCount; i++)
                     {
                         if (preview.Canceled) return;
-                        PdfRenderedPage page = renderSession.RenderPage(i);
+                        PdfRenderedPage page = renderSession.RenderPage(i, requireComplete: false);
+                        incomplete.Note(i, page);
                         int w = page.Width;
                         int h = page.Height;
                         byte[] raw = page.Pixels;
@@ -1959,7 +1976,7 @@ namespace KillerPDF
                         catch { return; }   // window closed mid-render
                     }
                     if (!preview.Canceled)
-                        try { preview.Dispatcher.Invoke(preview.FinishLoading); } catch { }
+                        try { preview.Dispatcher.Invoke(() => preview.FinishLoading(incomplete.Pages)); } catch { }
                 }
                 catch (Exception ex)
                 {

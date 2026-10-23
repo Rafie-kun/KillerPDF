@@ -37,7 +37,9 @@ namespace KillerPDF.Services
         /// <summary>
         /// Rasterizes every page of <paramref name="sourcePath"/> at 150 DPI and assembles them
         /// into a new PDF at <paramref name="outputPath"/>, each page at its original point size.
-        /// Cancellable - nothing is saved if canceled. Runs entirely off the UI thread.
+        /// Cancellable - nothing is saved if canceled. Runs entirely off the UI thread. With
+        /// <paramref name="incomplete"/> a page that cannot be drawn exactly is kept as rendered and
+        /// noted there; without it such a page fails the flatten.
         /// </summary>
         internal static void FlattenToPdf(string sourcePath, int pageCount,
             (double widthPt, double heightPt)[] pageDims, string outputPath,
@@ -47,7 +49,8 @@ namespace KillerPDF.Services
 
         internal static void FlattenToPdf(string sourcePath, int pageCount,
             (double widthPt, double heightPt)[] pageDims, string outputPath,
-            FlattenOptions options, Action<int, int> progress, CancellationToken ct)
+            FlattenOptions options, Action<int, int> progress, CancellationToken ct,
+            IncompletePageLog? incomplete = null)
         {
             options.Validate();
             // Rasterize pages across CPU cores. Pages are authored by the
@@ -90,8 +93,9 @@ namespace KillerPDF.Services
                     // /SMask alpha channel in the flattened output.
                     // #141: WithAnnotations, or flattening an annotated PDF silently dropped the
                     // markup the file carried - this path builds a NEW document from the pixels.
-                    PdfRenderedPage rendered = renderSession.RenderPage(i, cancellationToken: ct);
-                    rendered.RequireComplete(i);
+                    PdfRenderedPage rendered = renderSession.RenderPage(i,
+                        requireComplete: incomplete is null, cancellationToken: ct);
+                    incomplete?.Note(i, rendered);
                     rw = rendered.Width;
                     rh = rendered.Height;
                     bgra = rendered.Pixels;
@@ -143,11 +147,13 @@ namespace KillerPDF.Services
         /// Renders each selected page of <paramref name="sourcePath"/> at <paramref name="dpi"/>
         /// and writes base-page-NNN.png/.jpg files into <paramref name="outDir"/>. In-app
         /// rotations arrive as a snapshot array (the working file has /Rotate stripped). Returns
-        /// how many files were written; cancellation stops after the current page.
+        /// how many files were written; cancellation stops after the current page. With
+        /// <paramref name="incomplete"/> a page that cannot be drawn exactly is written as rendered
+        /// and noted there; without it such a page fails the export.
         /// </summary>
         internal static int ExportPageImages(string sourcePath, IReadOnlyList<int> pages,
             int[] rotSnapshot, double dpi, bool jpeg, string outDir, string baseName, int digits,
-            Action<int, int> progress, CancellationToken ct)
+            Action<int, int> progress, CancellationToken ct, IncompletePageLog? incomplete = null)
         {
             int written = 0;
             using var renderSession = PdfPageRenderSession.OpenEngineFirst(
@@ -163,8 +169,9 @@ namespace KillerPDF.Services
                     // alpha and produced black pages, PNG came out transparent.
                     // #141: WithAnnotations - an exported image should show the markup the file
                     // carries, the same as the page does on screen.
-                    PdfRenderedPage rendered = renderSession.RenderPage(idx, cancellationToken: ct);
-                    rendered.RequireComplete(idx);
+                    PdfRenderedPage rendered = renderSession.RenderPage(idx,
+                        requireComplete: incomplete is null, cancellationToken: ct);
+                    incomplete?.Note(idx, rendered);
                     w = rendered.Width;
                     h = rendered.Height;
                     raw = rendered.Pixels;

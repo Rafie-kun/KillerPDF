@@ -287,6 +287,7 @@
     <sys:String x:Key="Str_OutputPixels">{0} x {1} px</sys:String>
     <sys:String x:Key="Str_ExportImg_Export">エクスポート</sys:String>
     <sys:String x:Key="Str_ExportImg_Done">{0} ページを {1} にエクスポートしました</sys:String>
+    <sys:String x:Key="Str_Export_IncompletePages">一部の内容を正確に描画できませんでした。{0} ページは画面の表示どおりに保存されました。</sys:String>
     <sys:String x:Key="Str_Print_AllPages">すべてのページ</sys:String>
     <sys:String x:Key="Str_Print_OddOnly">奇数ページのみ</sys:String>
     <sys:String x:Key="Str_Print_EvenOnly">偶数ページのみ</sys:String>
@@ -498,6 +499,7 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <!-- ── 印刷ダイアログ ────────────────────────────────────────── -->
     <sys:String x:Key="Str_Print_Title">KillerPDF - 印刷</sys:String>
     <sys:String x:Key="Str_Print_Rendering">レンダリング中 {0} / {1}</sys:String>
+    <sys:String x:Key="Str_Print_IncompletePages">一部の内容を正確に描画できませんでした。{0} ページは表示どおりに印刷されます。</sys:String>
     <sys:String x:Key="Str_Print_Printer">プリンター</sys:String>
     <sys:String x:Key="Str_Print_Paper">用紙サイズ</sys:String>
     <sys:String x:Key="Str_Print_PaperAuto">文書に合わせる</sys:String>

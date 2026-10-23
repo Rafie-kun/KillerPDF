@@ -287,6 +287,7 @@ La pagina può essere sostituita da un'immagine di sé stessa con le aree contra
     <sys:String x:Key="Str_OutputPixels">{0} x {1} px</sys:String>
     <sys:String x:Key="Str_ExportImg_Export">Esporta</sys:String>
     <sys:String x:Key="Str_ExportImg_Done">Esportate {0} pagine in {1}</sys:String>
+    <sys:String x:Key="Str_Export_IncompletePages">Alcuni contenuti non sono stati disegnati con esattezza. Le pagine {0} sono state salvate come appaiono sullo schermo.</sys:String>
     <sys:String x:Key="Str_Print_AllPages">Tutte le pagine</sys:String>
     <sys:String x:Key="Str_Print_OddOnly">Solo pagine dispari</sys:String>
     <sys:String x:Key="Str_Print_EvenOnly">Solo pagine pari</sys:String>
@@ -498,6 +499,7 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <!-- ── Print dialog ───────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Print_Title">KillerPDF - Stampa</sys:String>
     <sys:String x:Key="Str_Print_Rendering">Elaborazione {0} / {1}</sys:String>
+    <sys:String x:Key="Str_Print_IncompletePages">Alcuni contenuti non sono stati disegnati con esattezza. Le pagine {0} vengono stampate come visualizzate.</sys:String>
     <sys:String x:Key="Str_Print_Printer">Stampante</sys:String>
     <sys:String x:Key="Str_Print_Paper">Formato carta</sys:String>
     <sys:String x:Key="Str_Print_PaperAuto">Corrisponde al documento</sys:String>

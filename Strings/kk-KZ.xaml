@@ -209,6 +209,7 @@
     <sys:String x:Key="Str_OutputPixels">{0} x {1} px</sys:String>
     <sys:String x:Key="Str_ExportImg_Export">Экспорттау</sys:String>
     <sys:String x:Key="Str_ExportImg_Done">{0} бет {1} ішіне экспортталды</sys:String>
+    <sys:String x:Key="Str_Export_IncompletePages">Кейбір мазмұнды дәл салу мүмкін болмады. {0} беттер экранда көрінгендей сақталды.</sys:String>
     <sys:String x:Key="Str_Print_AllPages">Барлық беттер</sys:String>
     <sys:String x:Key="Str_Print_OddOnly">Тек тақ беттер</sys:String>
     <sys:String x:Key="Str_Print_EvenOnly">Тек жұп беттер</sys:String>
@@ -418,6 +419,7 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <!-- ── Print dialog ───────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Print_Title">KillerPDF - Басып шығару</sys:String>
     <sys:String x:Key="Str_Print_Rendering">Көрсету {0} / {1}</sys:String>
+    <sys:String x:Key="Str_Print_IncompletePages">Кейбір мазмұнды дәл салу мүмкін болмады. {0} беттер көрсетілгендей басып шығарылады.</sys:String>
     <sys:String x:Key="Str_Print_Printer">Принтер</sys:String>
     <sys:String x:Key="Str_Print_Paper">Қағаз өлшемі</sys:String>
     <sys:String x:Key="Str_Print_PaperAuto">Құжатқа сәйкес</sys:String>

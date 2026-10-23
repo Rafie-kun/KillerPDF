@@ -287,6 +287,7 @@
     <sys:String x:Key="Str_OutputPixels">{0} x {1} px</sys:String>
     <sys:String x:Key="Str_ExportImg_Export">Экспорт</sys:String>
     <sys:String x:Key="Str_ExportImg_Done">Экспортировано {0} страниц в {1}</sys:String>
+    <sys:String x:Key="Str_Export_IncompletePages">Часть содержимого не удалось отрисовать точно. Страницы {0} сохранены так, как они выглядят на экране.</sys:String>
     <sys:String x:Key="Str_Print_AllPages">Все страницы</sys:String>
     <sys:String x:Key="Str_Print_OddOnly">Только нечетные страницы</sys:String>
     <sys:String x:Key="Str_Print_EvenOnly">Только четные страницы</sys:String>
@@ -498,6 +499,7 @@ KillerPDF не будет создавать две установленные �
     <!-- ── Print dialog ───────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Print_Title">KillerPDF - Печать</sys:String>
     <sys:String x:Key="Str_Print_Rendering">Отрисовка {0} / {1}</sys:String>
+    <sys:String x:Key="Str_Print_IncompletePages">Часть содержимого не удалось отрисовать точно. Страницы {0} будут напечатаны так, как показаны.</sys:String>
     <sys:String x:Key="Str_Print_Printer">Принтер</sys:String>
     <sys:String x:Key="Str_Print_Paper">Размер бумаги</sys:String>
     <sys:String x:Key="Str_Print_PaperAuto">В соответствии с документом</sys:String>

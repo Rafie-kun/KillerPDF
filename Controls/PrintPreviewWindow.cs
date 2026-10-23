@@ -79,6 +79,7 @@ namespace KillerPDF
         private readonly Grid _previewHost = new();
         private readonly TextBlock _pageLabel = new();
         private readonly TextBlock _renderLabel = new();   // "Rendering X / Y" line shown above the page nav
+        private IReadOnlyList<int> _incompletePages = [];   // pages that print as shown, named after loading
         private Button _previousPage = null!;
         private Button _nextPage = null!;
         private ComboBox _printerCombo = null!;
@@ -847,6 +848,8 @@ namespace KillerPDF
             _renderLabel.Foreground = R("MutedTextBrush");
             _renderLabel.HorizontalAlignment = HorizontalAlignment.Center;
             _renderLabel.FontSize = 11;
+            _renderLabel.TextWrapping = TextWrapping.Wrap;
+            _renderLabel.TextAlignment = TextAlignment.Center;
             _renderLabel.Visibility = Visibility.Collapsed;
             var navCenter = new StackPanel
             {
@@ -1164,6 +1167,11 @@ namespace KillerPDF
                 _renderLabel.Text = string.Format(S("Str_Print_Rendering"), _loadedCount, _pages.Length);
                 _renderLabel.Visibility = Visibility.Visible;
             }
+            else if (_incompletePages.Count > 0)
+            {
+                _renderLabel.Text = string.Format(S("Str_Print_IncompletePages"), IncompletePageLog.Describe(_incompletePages));
+                _renderLabel.Visibility = Visibility.Visible;
+            }
             else _renderLabel.Visibility = Visibility.Collapsed;
         }
 
@@ -1184,10 +1192,12 @@ namespace KillerPDF
                 UpdateRenderLabel();
         }
 
-        // Called once every page has rendered: enables Print and finalizes the preview.
-        public void FinishLoading()
+        // Called once every page has rendered: enables Print and finalizes the preview. Pages whose
+        // content could not all be drawn still print as shown, and the counter strip names them.
+        public void FinishLoading(IReadOnlyList<int> incompletePages)
         {
             _isLoading = false;
+            _incompletePages = incompletePages;
             _printBtn?.IsEnabled = true;
             UpdatePreview();
         }
@@ -1418,7 +1428,7 @@ namespace KillerPDF
                     {
                         done++;
                         if (idx < 0 || idx >= _pages.Length) continue;
-                        PdfRenderedPage page = renderSession.RenderPage(idx);
+                        PdfRenderedPage page = renderSession.RenderPage(idx, requireComplete: false);
                         int w = page.Width, h = page.Height;
                         byte[] pixels = page.Pixels;
                         var bs = BitmapSource.Create(w, h, 96, 96, PixelFormats.Bgra32, null, pixels, w * 4);   // #141
