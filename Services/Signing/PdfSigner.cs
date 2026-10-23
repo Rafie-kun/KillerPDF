@@ -32,9 +32,14 @@ namespace KillerPDF.Services.Signing
 
             PdfDocument document = PdfDocument.Open(File.ReadAllBytes(inputPath));
             var cmsSigner = new KillerCmsSigner(cert);
+            // A visible signature goes where the signer placed it, so an uncertified document gets a
+            // new field there. Otherwise a prepared field the document carries is signed first.
+            string newField = PdfDetachedSignatureWriter.FindAvailableSignatureFieldName(document, preferNewField: true);
+            string fieldName = info.VisibleAppearance is null
+                ? PdfDetachedSignatureWriter.FindAvailableSignatureFieldName(document) : newField;
             var options = new PdfSignatureOptions
             {
-                FieldName = PdfDetachedSignatureWriter.FindAvailableSignatureFieldName(document),
+                FieldName = fieldName,
                 SignerName = cmsSigner.CertificateName,
                 Reason = NullIfWhiteSpace(info.Reason),
                 Location = NullIfWhiteSpace(info.Location),
@@ -58,10 +63,19 @@ namespace KillerPDF.Services.Signing
                     : null,
             };
 
-            byte[] signed = PdfDetachedSignatureWriter.Sign(
-                document,
-                cmsSigner.CreateDetachedCms,
-                options);
+            byte[] signed;
+            try
+            {
+                signed = PdfDetachedSignatureWriter.Sign(document, cmsSigner.CreateDetachedCms, options);
+            }
+            catch (InvalidOperationException) when (fieldName != newField)
+            {
+                // An uncertified document's prepared field can demand seed values or carry locks this
+                // signature cannot meet; it is then signed in a new field, as before prepared fields
+                // were chosen. A certified document has no such fallback, so its error stands.
+                signed = PdfDetachedSignatureWriter.Sign(document, cmsSigner.CreateDetachedCms,
+                    options with { FieldName = newField });
+            }
             AtomicFileOutput.Write(outputPath, signed);
         }
 

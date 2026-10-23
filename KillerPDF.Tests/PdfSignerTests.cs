@@ -57,6 +57,40 @@ public sealed class PdfSignerTests
         }
     }
 
+    // A visible signature lands where the signer placed it, in a new field, instead of being
+    // redirected into a prepared field on another page; an invisible signature fills the prepared
+    // field, and a prepared field whose seed values the signature cannot meet falls back to a new one.
+    [Theory]
+    [InlineData("placed", "Signature1")]
+    [InlineData("invisible", "approval")]
+    [InlineData("seed", "Signature1")]
+    public void Sign_ChoosesThePreparedFieldOnlyWhenItFitsTheSignature(string kind, string expectedField)
+    {
+        using RSA key = RSA.Create(2048);
+        using X509Certificate2 certificate = new CertificateRequest("CN=KillerPDF Field Choice Test", key,
+            HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1)
+            .CreateSelfSigned(DateTimeOffset.UtcNow.AddMinutes(-1), DateTimeOffset.UtcNow.AddDays(1));
+        string directory = Path.Combine(Path.GetTempPath(), $"killerpdf-sign-field-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(directory);
+        string input = Path.Combine(directory, "input.pdf");
+        string output = Path.Combine(directory, "signed.pdf");
+        try
+        {
+            File.WriteAllBytes(input, new PdfDocumentBuilder().AddBlankPage(200, 300).AddBlankPage(200, 300)
+                .AddSignatureField(1, "approval", 10, 10, 100, 30,
+                    seedValue: kind == "seed" ? new PdfSignatureSeedValue { Reasons = ["Reviewed"], RequireReason = true } : null)
+                .Build());
+            var info = new PdfSigner.SignInfo("Approved", "Seattle", "steve@example.test",
+                kind == "placed" ? new PdfSigner.VisibleSignatureInfo(0, 20, 20, 120, 40, 10, "Signed") : null);
+
+            new PdfSigner().Sign(input, output, certificate, info);
+
+            PdfDocument signed = PdfDocument.Open(File.ReadAllBytes(output));
+            Assert.Equal(expectedField, Assert.Single(PdfSignatureReader.Read(signed), item => item.IsSigned).FieldName);
+        }
+        finally { Directory.Delete(directory, recursive: true); }
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
