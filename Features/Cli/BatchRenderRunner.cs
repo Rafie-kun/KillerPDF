@@ -139,7 +139,7 @@ namespace KillerPDF.Features
             string outRoot = Path.GetFullPath(output).TrimEnd('\\', '/');
             Directory.CreateDirectory(outRoot);
             var log = new List<string> { "File,Page,Status,Milliseconds,Width,Height,Detail,OpenMilliseconds" };
-            int ok = 0, skip = 0, fail = 0, incomplete = 0;
+            var tally = new BatchRenderTally();
             long totalMs = 0;
             var total = Stopwatch.StartNew();
 
@@ -183,15 +183,13 @@ namespace KillerPDF.Features
             foreach (var (rel, _, rows) in perFile)
                 foreach (var row in rows)
                 {
-                    if (row.Status == "OK") ok++;
-                    if (row.Incomplete) incomplete++;
-                    else if (row.Status == "SKIP") skip++;
-                    else fail++;
+                    tally.Add(row.Status, row.Incomplete);
                     totalMs += row.Milliseconds;
+                    string status = BatchRenderTally.ConsoleStatus(row.Status, row.Incomplete);
                     if (!quiet)
                         con.WriteLine(row.Detail.Length > 0
-                            ? $"{(row.Incomplete ? "INCOMPLETE" : row.Status)} {rel} p{row.Page + 1} {row.Milliseconds} ms ({row.Detail})"
-                            : $"{row.Status} {rel} p{row.Page + 1} {row.Milliseconds} ms");
+                            ? $"{status} {rel} p{row.Page + 1} {row.Milliseconds} ms ({row.Detail})"
+                            : $"{status} {rel} p{row.Page + 1} {row.Milliseconds} ms");
                     log.Add(string.Join(",", Csv(rel), (row.Page + 1).ToString(CultureInfo.InvariantCulture),
                         row.Status, row.Milliseconds.ToString(CultureInfo.InvariantCulture),
                         row.Width.ToString(CultureInfo.InvariantCulture),
@@ -200,10 +198,7 @@ namespace KillerPDF.Features
                 }
 
             total.Stop();
-            // Kept incomplete pages stay OK in the log so gate runs compare with their baselines; the
-            // summary and console name them.
-            string kept = incomplete > 0 ? $" ({incomplete} incomplete, kept by --allow-incomplete)" : string.Empty;
-            con.WriteLine($"Done. {work.Count} files, {ok} pages OK{kept}, {skip} skipped, {fail} failed, {totalMs} ms summed page rendering, {total.ElapsedMilliseconds} ms elapsed.");
+            con.WriteLine(tally.Summary(work.Count, totalMs, total.ElapsedMilliseconds));
             if (!string.IsNullOrWhiteSpace(logPath))
             {
                 try
@@ -216,7 +211,7 @@ namespace KillerPDF.Features
                     con.WriteLine("Could not write log: " + BatchRunner.FlattenBatchDetail(ex.Message));
                 }
             }
-            return work.Count == 0 || fail > 0 || skip > 0 ? 1 : 0;
+            return tally.ExitCode(work.Count);
         }
 
         private struct RenderRow

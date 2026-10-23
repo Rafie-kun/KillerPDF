@@ -81,7 +81,8 @@ public sealed class IncompletePagePublicationTests
         // batch-render keeps the page's log row OK for gate baselines but marks and counts it.
         string batch = Read("Features", "Cli", "BatchRenderRunner.cs");
         Assert.Contains("row.Incomplete = PdfRenderCompleteness.Classify(rendered.Diagnostics)", batch);
-        Assert.Contains("incomplete, kept by --allow-incomplete", batch);
+        Assert.Contains("tally.Add(row.Status, row.Incomplete);", batch);
+        Assert.Contains("BatchRenderTally.ConsoleStatus(row.Status, row.Incomplete)", batch);
     }
 
     private static int Count(string source, string value)

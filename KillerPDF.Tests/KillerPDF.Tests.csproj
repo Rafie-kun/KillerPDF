@@ -81,6 +81,7 @@
     <Compile Include="..\Services\CmapCoverage.cs" Link="Services\CmapCoverage.cs" />
     <Compile Include="..\Services\BidiLine.cs" Link="Services\BidiLine.cs" />
     <Compile Include="..\Features\Cli\CommandLineCrash.cs" Link="Features\Cli\CommandLineCrash.cs" />
+    <Compile Include="..\Features\Cli\BatchRenderTally.cs" Link="Features\Cli\BatchRenderTally.cs" />
     <Compile Include="..\Services\PdfFonts.cs" Link="Services\PdfFonts.cs" />
     <Compile Include="..\Services\PdfEngineIntegration.cs" Link="Services\PdfEngineIntegration.cs" />
     <Compile Include="..\Services\PrintJobTicket.cs" Link="Services\PrintJobTicket.cs" />
