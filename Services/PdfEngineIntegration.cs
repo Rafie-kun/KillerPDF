@@ -1528,6 +1528,9 @@ internal static class PdfEngineIntegration
     {
         ArgumentNullException.ThrowIfNull(paths);
         var rejected = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        // Each PDF is read and parsed once; a retry only rebuilds the editor without the rejected one.
+        var opened = new Dictionary<string, PdfDocument>(StringComparer.OrdinalIgnoreCase);
+        var unreadable = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         while (true)
         {
             PdfDocument empty = PdfDocument.Open(new PdfDocumentBuilder().Build());
@@ -1535,13 +1538,14 @@ internal static class PdfEngineIntegration
             var sourcePaths = new Dictionary<PdfDocument, string>();
             foreach (string path in paths)
             {
-                if (rejected.Contains(path)) continue;
+                if (rejected.Contains(path) || unreadable.Contains(path)) continue;
                 try
                 {
                     if (string.Equals(Path.GetExtension(path), ".pdf",
                             StringComparison.OrdinalIgnoreCase))
                     {
-                        PdfDocument document = PdfDocument.Open(File.ReadAllBytes(path));
+                        if (!opened.TryGetValue(path, out PdfDocument? document))
+                            opened[path] = document = PdfDocument.Open(File.ReadAllBytes(path));
                         editor.AddImportedDocument(document);
                         sourcePaths[document] = path;
                     }
@@ -1551,6 +1555,7 @@ internal static class PdfEngineIntegration
                 catch
                 {
                     // Folder and archive imports deliberately retain every readable entry.
+                    unreadable.Add(path);
                 }
             }
             if (editor.PageCount == 0)
