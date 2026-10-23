@@ -394,7 +394,6 @@ public static class PdfDetachedSignatureWriter
         }
     }
 
-    // An unsigned, writable signature field that holds no named child fields of its own.
     // A terminal signature field and its effective (inherited) field flags.
     private sealed record SignatureFieldCandidate(string Name, PdfDictionary Dictionary, long Flags);
 
