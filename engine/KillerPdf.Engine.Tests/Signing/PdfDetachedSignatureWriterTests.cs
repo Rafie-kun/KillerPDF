@@ -54,6 +54,56 @@ public sealed class PdfDetachedSignatureWriterTests
         Assert.Equal("Signature1", PdfDetachedSignatureWriter.FindAvailableSignatureFieldName(PdfDocument.Open(uncertified)));
     }
 
+    // A visible signature the signer placed used to be redirected into a prepared field elsewhere,
+    // dropping the chosen page and position. Only a certified document, which accepts no new
+    // fields, still uses its prepared field then.
+    [Fact]
+    public void PlacedSignatureGetsANewFieldUnlessTheDocumentIsCertified()
+    {
+        byte[] prepared = new PdfDocumentBuilder().AddBlankPage().AddBlankPage()
+            .AddSignatureField(1, "approval", 20, 20, 160, 40)
+            .Build();
+        Assert.Equal("Signature1", PdfDetachedSignatureWriter.FindAvailableSignatureFieldName(
+            PdfDocument.Open(prepared), preferNewField: true));
+        Assert.Equal("approval", PdfDetachedSignatureWriter.FindAvailableSignatureFieldName(
+            PdfDocument.Open(AddCertificationPermission(prepared, 2)), preferNewField: true));
+    }
+
+    // Field flags are inherited, so a signature field under a read-only parent is not offered.
+    [Fact]
+    public void AvailableFieldNameSkipsAFieldWhoseParentIsReadOnly()
+    {
+        PdfDocument source = PdfDocument.Open(new PdfDocumentBuilder().AddBlankPage()
+            .AddSignatureField(0, "approval", 20, 20, 160, 40).Build());
+        PdfDictionary catalog = ResolveDictionary(source, source.Trailer[Name("Root")]);
+        PdfDictionary Direct(PdfObject value) => Assert.IsType<PdfDictionary>(
+            value is PdfIndirectReference reference ? source.Resolve(reference) : value);
+        PdfDictionary form = Direct(catalog[Name("AcroForm")]);
+        PdfObject fieldValue = Assert.Single(Assert.IsType<PdfArray>(form[Name("Fields")]));
+        PdfDictionary field = Direct(fieldValue);
+        var update = new PdfIncrementalUpdateBuilder(source);
+        PdfIndirectReference parent = update.ReserveObject();
+        var withParent = new PdfDictionary(field.Where(entry => !entry.Key.Equals(Name("Parent")))
+            .Append(new KeyValuePair<PdfName, PdfObject>(Name("Parent"), parent)));
+        PdfIndirectReference fieldReference = fieldValue is PdfIndirectReference existing ? existing : update.AddObject(withParent);
+        if (fieldValue is PdfIndirectReference) update.ReplaceObject(fieldReference.ObjectNumber, withParent);
+        update.SetObject(parent, Dictionary(
+            ("T", new PdfString(System.Text.Encoding.ASCII.GetBytes("group"), PdfStringForm.Literal)),
+            ("Ff", new PdfInteger(1)),
+            ("Kids", new PdfArray([fieldReference]))));
+        PdfDictionary updatedForm = new(form.Where(entry => !entry.Key.Equals(Name("Fields")))
+            .Append(new KeyValuePair<PdfName, PdfObject>(Name("Fields"), new PdfArray([parent]))));
+        if (catalog[Name("AcroForm")] is PdfIndirectReference formReference)
+            update.ReplaceObject(formReference.ObjectNumber, updatedForm);
+        else
+            update.ReplaceObject(Assert.IsType<PdfIndirectReference>(source.Trailer[Name("Root")]).ObjectNumber,
+                new PdfDictionary(catalog.Where(entry => !entry.Key.Equals(Name("AcroForm")))
+                    .Append(new KeyValuePair<PdfName, PdfObject>(Name("AcroForm"), updatedForm))));
+
+        Assert.Equal("Signature1", PdfDetachedSignatureWriter.FindAvailableSignatureFieldName(
+            PdfDocument.Open(update.Build())));
+    }
+
     [Fact]
     public void Sign_WritesEditableVisibleAppearanceForNewField()
     {

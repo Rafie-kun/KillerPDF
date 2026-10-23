@@ -35,28 +35,26 @@ public static class PdfDetachedSignatureWriter
 
     /// <summary>
     /// Selects the default unsigned signature field, then any other prepared unsigned signature
-    /// field in form order, or else an unused numbered name for a new field. Signing still enforces
-    /// certification, field locks, and seed-value restrictions.
+    /// field in form order, or else an unused numbered name for a new field. With
+    /// <paramref name="preferNewField"/>, for a visible signature the signer placed, an uncertified
+    /// document gets a new field at that place; a certified document still uses a prepared field,
+    /// the only kind it accepts. Signing still enforces certification, field locks, and seed values.
     /// </summary>
-    public static string FindAvailableSignatureFieldName(PdfDocument document)
+    public static string FindAvailableSignatureFieldName(PdfDocument document, bool preferNewField = false)
     {
         ArgumentNullException.ThrowIfNull(document);
         var names = new HashSet<string>(StringComparer.Ordinal);
-        var order = new List<string>();
+        var candidates = new List<SignatureFieldCandidate>();
         PdfPageTree tree = PdfPageTree.Read(document);
-        ExistingFormField? first = FindField(document, tree, "Signature1", names, order);
-        if (first is not null && IsPreparedSignatureField(document, first)) return "Signature1";
+        FindField(document, tree, "Signature1", names, candidates);
 
         // A field the document prepared for signing, such as an approval field, is signed before a
-        // new one is added; a certified document accepts no new fields at all.
-        foreach (string name in order)
-        {
-            if (name == "Signature1") continue;
-            ExistingFormField? field;
-            try { field = FindField(document, tree, name); }
-            catch (InvalidOperationException) { continue; }
-            if (field is not null && IsPreparedSignatureField(document, field)) return name;
-        }
+        // new one is added. Signature1 keeps its place as the default; the rest follow form order.
+        if (!preferNewField || ReadCertificationPermission(document).HasValue)
+            foreach (SignatureFieldCandidate candidate in candidates.OrderBy(item => item.Name == "Signature1" ? 0 : 1))
+                if (candidates.Count(item => item.Name == candidate.Name) == 1
+                    && IsPreparedSignatureField(document, candidate))
+                    return candidate.Name;
 
         for (int index = 1; ; index++)
         {
@@ -397,25 +395,18 @@ public static class PdfDetachedSignatureWriter
     }
 
     // An unsigned, writable signature field that holds no named child fields of its own.
-    private static bool IsPreparedSignatureField(PdfDocument document, ExistingFormField field)
-    {
-        if (!field.FieldType.Equals(Name("Sig"))) return false;
-        if (field.Dictionary.TryGetValue(Name("V"), out PdfObject? value)
-            && !IsUnsignedValue(Resolve(document, value, "A signature field /V value")))
-            return false;
-        if (field.Dictionary.TryGetValue(Name("Ff"), out PdfObject? flags)
-            && Resolve(document, flags) is PdfInteger { Value: var bits } && (bits & 1) != 0)
-            return false;
-        if (field.Dictionary.TryGetValue(KidsName, out PdfObject? kidsValue)
-            && Resolve(document, kidsValue) is PdfArray kids
-            && kids.Any(kid => Resolve(document, kid) is PdfDictionary child && child.ContainsKey(FieldNameName)))
-            return false;
-        return true;
-    }
+    // A terminal signature field and its effective (inherited) field flags.
+    private sealed record SignatureFieldCandidate(string Name, PdfDictionary Dictionary, long Flags);
+
+    // An unsigned signature field that neither it nor a parent marks read-only.
+    private static bool IsPreparedSignatureField(PdfDocument document, SignatureFieldCandidate field) =>
+        (field.Flags & 1) == 0
+        && (!field.Dictionary.TryGetValue(Name("V"), out PdfObject? value)
+            || IsUnsignedValue(Resolve(document, value, "A signature field /V value")));
 
     private static ExistingFormField? FindField(
         PdfDocument document, PdfPageTree tree, string fieldName, ISet<string>? fieldNames = null,
-        List<string>? orderedNames = null)
+        List<SignatureFieldCandidate>? signatureFields = null)
     {
         if (!tree.Catalog.TryGetValue(AcroFormName, out PdfObject? formValue)) return null;
         PdfDictionary form = ResolveDictionary(document, formValue, "The catalog /AcroForm value");
@@ -425,10 +416,10 @@ public static class PdfDetachedSignatureWriter
         var visited = new HashSet<(int ObjectNumber, int Generation)>();
         int fieldCount = 0;
         ExistingFormField? match = null;
-        foreach (PdfObject value in fields) Visit(value, null, null, 0);
+        foreach (PdfObject value in fields) Visit(value, null, null, 0, 0);
         return match;
 
-        void Visit(PdfObject value, string? parentName, PdfName? inheritedType, int depth)
+        void Visit(PdfObject value, string? parentName, PdfName? inheritedType, long inheritedFlags, int depth)
         {
             if (depth >= PdfObjectWriter.MaximumNestingDepth)
                 throw new InvalidOperationException("The AcroForm field tree is too deeply nested.");
@@ -464,8 +455,9 @@ public static class PdfDetachedSignatureWriter
                 fullName = string.IsNullOrEmpty(parentName)
                     ? partialName : $"{parentName}.{partialName}";
             }
-            if (definesName && fullName is not null && fieldNames?.Add(fullName) == true)
-                orderedNames?.Add(fullName);
+            if (definesName && fullName is not null) fieldNames?.Add(fullName);
+            long flags = field.TryGetValue(Name("Ff"), out PdfObject? flagsValue)
+                && Resolve(document, flagsValue) is PdfInteger { Value: var ownFlags } ? ownFlags : inheritedFlags;
             if (definesName && fullName == fieldName
                 && (fieldNames is null || fieldType is not null))
             {
@@ -476,11 +468,16 @@ public static class PdfDetachedSignatureWriter
                     ?? throw new InvalidOperationException(
                         $"The AcroForm field '{fieldName}' has no field type."));
             }
-            if (field.TryGetValue(KidsName, out PdfObject? kidsValue))
-            {
-                PdfArray kids = ResolveArray(document, kidsValue, "An AcroForm field /Kids value");
-                foreach (PdfObject kid in kids) Visit(kid, fullName, fieldType, depth + 1);
-            }
+            PdfArray? kids = field.TryGetValue(KidsName, out PdfObject? kidsValue)
+                ? ResolveArray(document, kidsValue, "An AcroForm field /Kids value") : null;
+            // Only a terminal field (whose kids, if any, are widgets without names) can be signed.
+            if (signatureFields is not null && definesName && fullName is not null
+                && fieldType is not null && fieldType.Equals(Name("Sig"))
+                && (kids is null || !kids.Any(kid => Resolve(document, kid) is PdfDictionary child
+                    && child.ContainsKey(FieldNameName))))
+                signatureFields.Add(new SignatureFieldCandidate(fullName, field, flags));
+            if (kids is not null)
+                foreach (PdfObject kid in kids) Visit(kid, fullName, fieldType, flags, depth + 1);
             if (reference is not null)
                 active.Remove((reference.ObjectNumber, reference.Generation));
         }
