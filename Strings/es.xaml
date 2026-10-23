@@ -1876,6 +1876,7 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Read_CommentBy">Comentario de {0}: {1}</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecovered">KillerPDF se reinició porque la ventana ya no podía mostrar nada. Sus cambios sin guardar se recuperaron y están abiertos de nuevo, listos para guardar.&#10;&#10;También se guardan copias en {0}. Esta sesión usa renderizado por software.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecoveryIncomplete">No se pudieron recuperar por completo algunos documentos:&#10;{0}&#10;&#10;Los archivos de recuperación disponibles se guardan en {1}. Revise las copias recuperadas antes de guardarlas.</sys:String>
+    <sys:String x:Key="Str_Dlg_RenderRecoveryNotReopened">No se pudieron recuperar por completo algunos documentos:&#10;{0}&#10;&#10;Los archivos de recuperación disponibles se guardan en {1}.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecoveryNoFolder">No había ninguna carpeta disponible para una copia de recuperación, por lo que no se pudieron conservar los cambios sin guardar.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRestarted">KillerPDF se reinició porque la ventana ya no podía mostrar nada. Sus documentos abiertos se volvieron a abrir. Esta sesión usa renderizado por software.</sys:String>
     <sys:String x:Key="Str_Read_MarkedText">Texto marcado: «{0}»</sys:String>

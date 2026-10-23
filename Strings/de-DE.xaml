@@ -1885,6 +1885,7 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Read_CommentBy">Kommentar von {0}: {1}</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecovered">KillerPDF wurde neu gestartet, weil das Fenster nichts mehr anzeigen konnte. Ihre ungespeicherten Änderungen wurden wiederhergestellt und sind wieder geöffnet, bereit zum Speichern.&#10;&#10;Kopien liegen außerdem in {0}. Diese Sitzung verwendet Software-Rendering.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecoveryIncomplete">Einige Dokumente konnten nicht vollständig wiederhergestellt werden:&#10;{0}&#10;&#10;Verfügbare Wiederherstellungsdateien befinden sich in {1}. Prüfen Sie die wiederhergestellten Kopien vor dem Speichern.</sys:String>
+    <sys:String x:Key="Str_Dlg_RenderRecoveryNotReopened">Einige Dokumente konnten nicht vollständig wiederhergestellt werden:&#10;{0}&#10;&#10;Verfügbare Wiederherstellungsdateien befinden sich in {1}.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecoveryNoFolder">Für eine Wiederherstellungskopie war kein Ordner verfügbar, daher konnten die nicht gespeicherten Änderungen nicht erhalten werden.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRestarted">KillerPDF wurde neu gestartet, weil das Fenster nichts mehr anzeigen konnte. Ihre geöffneten Dokumente wurden wieder geöffnet. Diese Sitzung verwendet Software-Rendering.</sys:String>
     <sys:String x:Key="Str_Read_MarkedText">Markierter Text: „{0}“</sys:String>

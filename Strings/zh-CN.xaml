@@ -1880,6 +1880,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Read_CommentBy">{0} 的批注：{1}</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecovered">窗口无法再显示内容，KillerPDF 已重新启动。未保存的更改已恢复并重新打开，可以保存。&#10;&#10;副本也保存在 {0}。本次会话使用软件渲染。</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecoveryIncomplete">部分文档未能完全恢复：&#10;{0}&#10;&#10;可用的恢复文件保存在 {1}。请在保存前检查恢复的副本。</sys:String>
+    <sys:String x:Key="Str_Dlg_RenderRecoveryNotReopened">部分文档未能完全恢复：&#10;{0}&#10;&#10;可用的恢复文件保存在 {1}。</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecoveryNoFolder">没有可用于恢复副本的文件夹，因此无法保留未保存的更改。</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRestarted">窗口无法再显示内容，KillerPDF 已重新启动。已重新打开你打开的文档。本次会话使用软件渲染。</sys:String>
     <sys:String x:Key="Str_Read_MarkedText">标记的文本：“{0}”</sys:String>

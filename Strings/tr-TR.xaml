@@ -1876,6 +1876,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Read_CommentBy">{0} yorumu: {1}</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecovered">Pencere artık görüntüleyemediği için KillerPDF yeniden başlatıldı. Kaydedilmemiş değişiklikleriniz kurtarıldı ve kaydedilmeye hazır olarak yeniden açıldı.&#10;&#10;Kopyalar {0} içinde de saklanıyor. Bu oturum yazılım işlemeyi kullanıyor.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecoveryIncomplete">Bazı belgeler tamamen kurtarılamadı:&#10;{0}&#10;&#10;Kullanılabilir kurtarma dosyaları {1} konumunda saklanır. Kaydetmeden önce kurtarılan kopyaları inceleyin.</sys:String>
+    <sys:String x:Key="Str_Dlg_RenderRecoveryNotReopened">Bazı belgeler tamamen kurtarılamadı:&#10;{0}&#10;&#10;Kullanılabilir kurtarma dosyaları {1} konumunda saklanır.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecoveryNoFolder">Kurtarma kopyası için kullanılabilir bir klasör yoktu, bu nedenle kaydedilmemiş değişiklikler korunamadı.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRestarted">Pencere artık görüntüleyemediği için KillerPDF yeniden başlatıldı. Açık belgeleriniz yeniden açıldı. Bu oturum yazılım işlemeyi kullanıyor.</sys:String>
     <sys:String x:Key="Str_Read_MarkedText">İşaretli metin: &quot;{0}&quot;</sys:String>

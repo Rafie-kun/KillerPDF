@@ -1881,6 +1881,7 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Read_CommentBy">Komentář od {0}: {1}</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecovered">KillerPDF se restartoval, protože okno už nemohlo nic zobrazit. Neuložené změny byly obnoveny a jsou znovu otevřené, připravené k uložení.&#10;&#10;Kopie jsou uloženy také ve složce {0}. Tato relace používá softwarové vykreslování.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecoveryIncomplete">Některé dokumenty se nepodařilo plně obnovit:&#10;{0}&#10;&#10;Dostupné soubory pro obnovení jsou uloženy v {1}. Před uložením zkontrolujte obnovené kopie.</sys:String>
+    <sys:String x:Key="Str_Dlg_RenderRecoveryNotReopened">Některé dokumenty se nepodařilo plně obnovit:&#10;{0}&#10;&#10;Dostupné soubory pro obnovení jsou uloženy v {1}.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecoveryNoFolder">Pro kopii k obnovení nebyla k dispozici žádná složka, takže neuložené změny nebylo možné zachovat.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRestarted">KillerPDF se restartoval, protože okno už nemohlo nic zobrazit. Otevřené dokumenty byly znovu otevřeny. Tato relace používá softwarové vykreslování.</sys:String>
     <sys:String x:Key="Str_Read_MarkedText">Označený text: „{0}“</sys:String>

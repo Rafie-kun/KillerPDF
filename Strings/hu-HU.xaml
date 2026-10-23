@@ -1883,6 +1883,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Read_CommentBy">{0} megjegyzése: {1}</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecovered">A KillerPDF újraindult, mert az ablak már nem tudott megjelenni. A nem mentett módosításokat visszaállítottuk, újra meg vannak nyitva, és menthetők.&#10;&#10;Másolatok itt is megmaradtak: {0}. Ez a munkamenet szoftveres megjelenítést használ.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecoveryIncomplete">Néhány dokumentumot nem sikerült teljesen helyreállítani:&#10;{0}&#10;&#10;Az elérhető helyreállítási fájlok itt találhatók: {1}. Mentés előtt ellenőrizze a helyreállított másolatokat.</sys:String>
+    <sys:String x:Key="Str_Dlg_RenderRecoveryNotReopened">Néhány dokumentumot nem sikerült teljesen helyreállítani:&#10;{0}&#10;&#10;Az elérhető helyreállítási fájlok itt találhatók: {1}.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecoveryNoFolder">Nem állt rendelkezésre mappa a helyreállítási másolathoz, ezért a nem mentett módosításokat nem sikerült megőrizni.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRestarted">A KillerPDF újraindult, mert az ablak már nem tudott megjelenni. A megnyitott dokumentumok újra meg lettek nyitva. Ez a munkamenet szoftveres megjelenítést használ.</sys:String>
     <sys:String x:Key="Str_Read_MarkedText">Megjelölt szöveg: „{0}&quot;</sys:String>

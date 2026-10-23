@@ -201,6 +201,47 @@ namespace KillerPDF.Tests
             Assert.Equal(3, editing.Split("BuildCommittedTextAnnotation(").Length - 1);
         }
 
+        // With no recovery folder, the restart named an untitled document by a placeholder file that
+        // was never written, asked the user to review recovered copies that did not exist, and named
+        // nothing when the session folder refused the manifest too.
+        [Fact]
+        public void LostDocumentsAreNamedEvenWhenTheirManifestCannotBeWritten()
+        {
+            string root = Path.GetDirectoryName(Path.GetDirectoryName(SourcePath()))!;
+            string recovery = File.ReadAllText(Path.Combine(root, "Shell", "RenderRecovery.cs"));
+            Assert.Contains("LostRecoveryNames = [.. unrecovered.Select(RecoveryName)];", recovery);
+            Assert.Contains("LostRecoveryNames[index], session.LoadedRevision, Loc(\"Str_Dlg_RenderRecoveryNoFolder\")", recovery);
+            Assert.Contains("Loc(\"Str_Outline_Untitled\")", recovery);
+            Assert.Contains("CrashReporter.Capture(ex, \"Render recovery manifest\");", recovery);
+            Assert.Contains("App.RenderRecoveryLostNames", recovery);
+            Assert.Contains("reopened > 0 ? \"Str_Dlg_RenderRecoveryIncomplete\" : \"Str_Dlg_RenderRecoveryNotReopened\"", recovery);
+
+            // The names travel on the restart's command line, which needs no disk.
+            string app = File.ReadAllText(Path.Combine(root, "App.xaml.cs"));
+            Assert.Contains("foreach (string name in window?.LostRecoveryNames ?? []) start.ArgumentList.Add(name);", app);
+            Assert.Contains("RenderRecoveryLostNames = e.Args[(recoveryAt + 3)..];", app);
+
+            // With nothing reopened, each locale keeps its message up to the folder it names.
+            foreach (string file in Directory.GetFiles(Path.Combine(root, "Strings"), "*.xaml"))
+            {
+                string strings = File.ReadAllText(file);
+                string incomplete = Value(strings, "Str_Dlg_RenderRecoveryIncomplete");
+                string notReopened = Value(strings, "Str_Dlg_RenderRecoveryNotReopened");
+                Assert.StartsWith(notReopened, incomplete);
+                Assert.Contains("{1}", notReopened);
+                Assert.True(notReopened.Length < incomplete.Length, Path.GetFileName(file));
+            }
+        }
+
+        private static string Value(string strings, string key)
+        {
+            string open = "x:Key=\"" + key + "\">";
+            int start = strings.IndexOf(open, StringComparison.Ordinal);
+            Assert.True(start >= 0, key + " is missing.");
+            start += open.Length;
+            return strings[start..strings.IndexOf("</sys:String>", start, StringComparison.Ordinal)];
+        }
+
         private static string SourcePath([System.Runtime.CompilerServices.CallerFilePath] string path = "") => path;
     }
 }

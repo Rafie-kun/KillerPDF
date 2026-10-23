@@ -1896,6 +1896,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Read_CommentBy">Nhận xét của {0}: {1}</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecovered">KillerPDF đã khởi động lại vì cửa sổ không thể hiển thị được nữa. Các thay đổi chưa lưu đã được khôi phục và mở lại, sẵn sàng để lưu.&#10;&#10;Bản sao cũng được giữ trong {0}. Phiên này dùng kết xuất bằng phần mềm.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecoveryIncomplete">Không thể khôi phục hoàn toàn một số tài liệu:&#10;{0}&#10;&#10;Các tệp khôi phục hiện có được lưu trong {1}. Hãy kiểm tra các bản sao đã khôi phục trước khi lưu.</sys:String>
+    <sys:String x:Key="Str_Dlg_RenderRecoveryNotReopened">Không thể khôi phục hoàn toàn một số tài liệu:&#10;{0}&#10;&#10;Các tệp khôi phục hiện có được lưu trong {1}.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRecoveryNoFolder">Không có thư mục nào để lưu bản sao khôi phục, vì vậy không thể giữ lại các thay đổi chưa lưu.</sys:String>
     <sys:String x:Key="Str_Dlg_RenderRestarted">KillerPDF đã khởi động lại vì cửa sổ không thể hiển thị được nữa. Các tài liệu đang mở đã được mở lại. Phiên này dùng kết xuất bằng phần mềm.</sys:String>
     <sys:String x:Key="Str_Read_MarkedText">Văn bản được đánh dấu: &quot;{0}&quot;</sys:String>

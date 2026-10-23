@@ -203,6 +203,7 @@ namespace KillerPDF
                     catch (InvalidOperationException) { }
                 }
                 if (recoveryAt + 2 < e.Args.Length) RenderRecoveryManifest = e.Args[recoveryAt + 2];
+                if (recoveryAt + 3 < e.Args.Length) RenderRecoveryLostNames = e.Args[(recoveryAt + 3)..];
                 System.Windows.Media.RenderOptions.ProcessRenderMode = System.Windows.Interop.RenderMode.SoftwareOnly;
             }
 
@@ -421,6 +422,7 @@ namespace KillerPDF
         // #456: set when this process was started to replace one whose window could no longer draw.
         internal static bool RestartedAfterRenderFailure { get; set; }
         internal static string? RenderRecoveryManifest { get; set; }
+        internal static IReadOnlyList<string> RenderRecoveryLostNames { get; set; } = [];
         private int _renderRecoveryStarted;
 
         /// <summary>
@@ -432,7 +434,12 @@ namespace KillerPDF
         {
             if (System.Threading.Interlocked.Exchange(ref _renderRecoveryStarted, 1) != 0) return;
             string? manifest = null;
-            try { manifest = (MainWindow as MainWindow)?.PrepareRenderFailureRecovery(); }
+            KillerPDF.MainWindow? window = null;
+            try
+            {
+                window = MainWindow as MainWindow;
+                manifest = window?.PrepareRenderFailureRecovery();
+            }
             catch (Exception ex) when (ex is not OutOfMemoryException)
             {
                 RetainRenderRecoveryTemps(manifest);
@@ -446,7 +453,13 @@ namespace KillerPDF
                 var start = new ProcessStartInfo(exe) { UseShellExecute = false };
                 start.ArgumentList.Add(RenderFailureRecovery.RecoverySwitch);
                 start.ArgumentList.Add(Environment.ProcessId.ToString(System.Globalization.CultureInfo.InvariantCulture));
-                if (manifest is not null) start.ArgumentList.Add(manifest);
+                if (manifest is not null)
+                {
+                    start.ArgumentList.Add(manifest);
+                    // Documents with nowhere to be saved are named here too, in case their manifest
+                    // could not be written.
+                    foreach (string name in window?.LostRecoveryNames ?? []) start.ArgumentList.Add(name);
+                }
                 if (Process.Start(start) is null) throw new InvalidOperationException("The recovery process did not start.");
             }
             catch (Exception ex) when (ex is not OutOfMemoryException)
