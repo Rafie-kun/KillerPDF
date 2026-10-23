@@ -20,5 +20,19 @@ public sealed class ReadingTextCacheTests
         Assert.DoesNotContain("_factsVersion", invalidate);
     }
 
+    // Screen readers ask for the visible ranges often; mapping each character to the screen walked
+    // the visual tree twice per character.
+    [Fact]
+    public void VisibleRangesMapCharactersWithOneTransformPerPage()
+    {
+        string source = File.ReadAllText(Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(SourcePath()))!,
+            "Controls", "Viewer", "PdfViewer.Reading.cs"));
+        string method = source[source.IndexOf("public IReadOnlyList<(int Page, int Start, int End)> VisibleCaretRanges()", StringComparison.Ordinal)..];
+        method = method[..method.IndexOf("public (int Page, int Caret)? CaretFromScreenPoint(", StringComparison.Ordinal)];
+        string loop = method[method.IndexOf("for (int caret = 0;", StringComparison.Ordinal)..];
+        Assert.DoesNotContain("PointToScreen(", loop);
+        Assert.Contains("Rect.Transform(rect, toScreen)", loop);
+    }
+
     private static string SourcePath([System.Runtime.CompilerServices.CallerFilePath] string path = "") => path;
 }
