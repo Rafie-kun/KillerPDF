@@ -2,31 +2,27 @@
 
 KillerPDF welcomes focused fixes, tests, translations, documentation, and carefully scoped features.
 
-The project moves quickly. Small, reviewable contributions are much easier to integrate than large speculative rewrites. If you find a bug and understand the fix, I would rather see a focused pull request while the issue is current than hold a release open waiting for a larger redesign.
+I handle most development myself. Feature requests belong in [issues](https://github.com/SteveTheKiller/KillerPDF/issues). Please wait for me to approve the scope and invite implementation before starting feature work or opening a feature PR.
 
 ## Before you start
 
-Check the existing [issues](https://github.com/SteveTheKiller/KillerPDF/issues) and [discussions](https://github.com/SteveTheKiller/KillerPDF/discussions) first.
+Search the existing issues first. An open issue is not an assignment or permission to implement it.
 
-You do not need permission to submit:
+You do not need advance permission to submit:
 
 - A focused bug fix
 - A regression test
-- Any translation work
+- Translation work
 - A documentation correction
-- A small theme or layout fix that preserves the established design
+- A small theme, layout, or accessibility fix that preserves the established design
 
-Please open an issue or discussion before starting:
+Open an issue and wait for approval before starting a feature, architectural change, new dependency, substantial UI rewrite, change to PDF preservation or compatibility policy, or work intended for a future milestone. A draft PR is still a PR; discuss the proposal first. Large speculative rewrites and chains of dependent PRs may be declined without a full code review.
 
-- A large feature
-- An architectural change
-- A new external dependency
-- A substantial UI rewrite
-- A change to PDF preservation or compatibility policy
-- Work intended for a future milestone
-- Anything that would take weeks to complete
+Keep each contribution focused on one coherent problem. Approval to work on an issue does not guarantee that a PR will be merged.
 
-This is not bureaucracy. It prevents someone from spending a month on an approach that conflicts with work already underway.
+## KillerPDF 1.9 exception
+
+The public [dev/1.9-overkill](https://github.com/SteveTheKiller/KillerPDF/tree/dev/1.9-overkill) branch has its own open contribution policy, including feature and experimental PRs without advance permission. Read that branch's contributing guide and target it for 1.9 work. The approval requirements above apply to this maintenance line.
 
 ## Keep changes focused
 
