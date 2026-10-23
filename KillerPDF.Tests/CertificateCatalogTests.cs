@@ -197,7 +197,7 @@ public sealed class CertificateCatalogTests : IDisposable
             CertificateCatalog.ProblemOf(Assert.Throws<InvalidDataException>(() => catalog.Import(input))));
         string bundle = Path.Combine(_directory, "many.pem");
         File.WriteAllText(bundle, string.Join("\n", Enumerable.Repeat(root.ExportCertificatePem(), 257)));
-        Assert.Equal(CertificateCatalogProblem.TooLarge,
+        Assert.Equal(CertificateCatalogProblem.CatalogFull,
             CertificateCatalog.ProblemOf(Assert.Throws<InvalidDataException>(() => catalog.Import(bundle))));
         Assert.Equal(original, File.ReadAllBytes(stored));
     }
@@ -225,6 +225,27 @@ public sealed class CertificateCatalogTests : IDisposable
         Assert.Equal(9, entries.Count);
         Assert.True(entries.Single(entry => entry.Fingerprint == fingerprint).IsTrustedRoot);
         Assert.Empty(Directory.EnumerateFiles(_directory, "*.tmp"));
+    }
+
+    // Public-only inputs were reported as private keys. An openssl export with header text imports;
+    // other public formats are named as not being a certificate file.
+    [Fact]
+    public void PublicInputsAreNeverReportedAsPrivateKeys()
+    {
+        using X509Certificate2 root = CreateAuthority();
+        var catalog = new CertificateCatalog(_directory);
+        Directory.CreateDirectory(_directory);
+        string withHeaders = Path.Combine(_directory, "openssl.pem");
+        File.WriteAllText(withHeaders, "Bag Attributes\n    friendlyName: root\nsubject=CN=root\n" + root.ExportCertificatePem());
+        Assert.Equal(1, catalog.Import(withHeaders));
+
+        string trusted = Path.Combine(_directory, "trusted.pem");
+        File.WriteAllText(trusted, root.ExportCertificatePem().Replace("CERTIFICATE", "TRUSTED CERTIFICATE"));
+        string pkcs7 = Path.Combine(_directory, "bundle.cer");
+        File.WriteAllBytes(pkcs7, new X509Certificate2Collection(root).Export(X509ContentType.Pkcs7)!);
+        foreach (string path in new[] { trusted, pkcs7 })
+            Assert.Equal(CertificateCatalogProblem.NotACertificate,
+                CertificateCatalog.ProblemOf(Assert.Throws<InvalidDataException>(() => catalog.Import(path))));
     }
 
     // One unreadable certificate in a Windows store used to empty the whole list.

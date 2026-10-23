@@ -346,14 +346,21 @@ internal sealed class CertificateCatalog
         ReadOnlySpan<char> pending = text.AsSpan();
         if (!pending.IsEmpty && pending[0] == '\uFEFF') pending = pending[1..];
         var entries = new List<CertificateCatalogEntry>();
-        while (!(pending = pending.Trim()).IsEmpty)
+        // Text outside the blocks, such as the headers openssl writes, is ignored. Every block must
+        // be a public certificate; a key anywhere rejects the whole file.
+        while (PemEncoding.TryFind(pending, out PemFields fields))
         {
-            if (!PemEncoding.TryFind(pending, out PemFields fields)
-                || !pending[..fields.Location.Start].Trim().IsEmpty
-                || !pending[fields.Label].SequenceEqual("CERTIFICATE"))
+            ReadOnlySpan<char> label = pending[fields.Label];
+            if (label.EndsWith("PRIVATE KEY", StringComparison.Ordinal))
                 throw Problem(CertificateCatalogProblem.PrivateKey,
                     "PEM files may contain only public CERTIFICATE blocks. Private keys are not accepted.");
-            if (entries.Count >= MaximumCertificates || fields.DecodedDataLength > MaximumCertificateBytes)
+            if (!label.SequenceEqual("CERTIFICATE"))
+                throw Problem(CertificateCatalogProblem.NotACertificate,
+                    "PEM files may contain only public CERTIFICATE blocks.");
+            if (entries.Count >= MaximumCertificates)
+                throw Problem(CertificateCatalogProblem.CatalogFull,
+                    $"KillerPDF can store up to {MaximumCertificates} imported certificates.");
+            if (fields.DecodedDataLength > MaximumCertificateBytes)
                 throw Problem(CertificateCatalogProblem.TooLarge,
                     "The certificate file exceeds the import limits.");
             byte[] der = Convert.FromBase64String(pending[fields.Base64Data].ToString());
@@ -373,9 +380,13 @@ internal sealed class CertificateCatalog
                 "A certificate is empty or exceeds the size limit.");
         try
         {
-            if (X509Certificate2.GetCertContentType(data) != X509ContentType.Cert)
+            X509ContentType contentType = X509Certificate2.GetCertContentType(data);
+            if (contentType == X509ContentType.Pfx)
                 throw Problem(CertificateCatalogProblem.PrivateKey,
                     "Only public certificates can be imported. Private keys and PFX files are not accepted.");
+            if (contentType != X509ContentType.Cert)
+                throw Problem(CertificateCatalogProblem.NotACertificate,
+                    "The file must contain a single public certificate, not a certificate bundle.");
             using X509Certificate2 certificate = X509CertificateLoader.LoadCertificate(data);
             if (certificate.HasPrivateKey)
                 throw Problem(CertificateCatalogProblem.PrivateKey,
