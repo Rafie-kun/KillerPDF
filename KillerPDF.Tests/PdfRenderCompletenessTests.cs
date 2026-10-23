@@ -108,6 +108,43 @@ public sealed class PdfRenderCompletenessTests
         finally { File.Delete(path); }
     }
 
+    // Thumbnails are for display, like the viewer. A page that cannot be published still shows
+    // what rendered instead of leaving the page list with a label-only tile.
+    [Theory]
+    [InlineData("q /Missing Do Q")]
+    [InlineData("q UnsupportedPaint Q")]
+    public void PreviewKeepsThePixelsOfAPageThatCannotBePublished(string content)
+    {
+        string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".pdf");
+        try
+        {
+            File.WriteAllBytes(path, new PdfDocumentBuilder().AddPage(120, 80,
+                Encoding.ASCII.GetBytes("1 0 0 rg 4 4 60 40 re f " + content)).Build());
+            using var session = PdfPageRenderSession.OpenEngineFirst(path, 60, 40);
+            PdfRenderedPage preview = session.RenderPreview(0);
+            Assert.Equal((60, 40), (preview.Width, preview.Height));
+            Assert.Contains(preview.RenderDiagnostics, item => item.Kind == PdfRenderDiagnosticKind.OmittedContent);
+            Assert.Contains(Enumerable.Range(0, preview.Pixels.Length / 4), pixel =>
+                preview.Pixels[pixel * 4 + 2] > 200 && preview.Pixels[pixel * 4 + 1] < 60);
+            Assert.Throws<InvalidOperationException>(() => session.RenderPage(0));
+        }
+        finally { File.Delete(path); }
+    }
+
+    [Fact]
+    public void PageThumbnailsRenderThroughThePreview()
+    {
+        string root = Path.GetDirectoryName(Path.GetDirectoryName(SourcePath()))!;
+        foreach (string file in new[] { Path.Combine("Models", "PageThumbnailVm.cs"), Path.Combine("Shell", "PageOperations.cs") })
+        {
+            string source = File.ReadAllText(Path.Combine(root, file));
+            Assert.Contains("renderSession.RenderPreview(", source);
+            Assert.DoesNotContain("renderSession.RenderPage(", source);
+        }
+    }
+
+    private static string SourcePath([System.Runtime.CompilerServices.CallerFilePath] string path = "") => path;
+
     [Fact]
     public void MixedRecoveryAndOmission_DoesNotHideMaterialFailure()
     {

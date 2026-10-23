@@ -388,7 +388,7 @@ namespace KillerPDF
                         if (ct.IsCancellationRequested) return;
                         try
                         {
-                            PdfRenderedPage page = renderSession.RenderPage(i);
+                            PdfRenderedPage page = renderSession.RenderPreview(i);
                             int tw = page.Width;
                             int th = page.Height;
                             byte[] raw = page.Pixels;

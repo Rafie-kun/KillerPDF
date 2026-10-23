@@ -178,6 +178,16 @@ internal sealed class PdfPageRenderSession : IDisposable
         return rendered;
     }
 
+    /// <summary>A page for display only, at the session's fitted size with annotations and form
+    /// fields. Like the viewer it keeps the pixels and their diagnostics, so a page that cannot be
+    /// published still gets its thumbnail instead of a label-only tile.</summary>
+    internal PdfRenderedPage RenderPreview(int pageIndex, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return RenderEnginePage(pageIndex, transparentBackground: false,
+            includeAnnotations: true, includeFormFields: true, cancellationToken);
+    }
+
     private PdfRenderedPage RenderEnginePage(int pageIndex, bool transparentBackground,
         bool includeAnnotations, bool includeFormFields,
         CancellationToken cancellationToken)

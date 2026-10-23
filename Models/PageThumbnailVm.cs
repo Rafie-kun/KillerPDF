@@ -93,7 +93,7 @@ namespace KillerPDF
                 // lower to save memory (each loaded thumbnail is kept in RAM).
                 using var renderSession =
                     PdfPageRenderSession.OpenEngineFirst(filePath, 288, 576);
-                PdfRenderedPage page = renderSession.RenderPage(pageIndex);
+                PdfRenderedPage page = renderSession.RenderPreview(pageIndex);
                 int tw = page.Width;
                 int th = page.Height;
                 byte[] raw = page.Pixels;
