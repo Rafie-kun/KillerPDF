@@ -208,8 +208,9 @@ internal sealed class PdfPageRenderSession : IDisposable
         return rendered;
     }
 
-    // Pixels remain valid until the next encoding render or session disposal.
-    internal PdfPageForEncoding RenderPageForEncoding(int pageIndex,
+    // Pixels remain valid until the next encoding render or session disposal. Only validation
+    // runs that asked for incomplete pages pass requireComplete: false.
+    internal PdfPageForEncoding RenderPageForEncoding(int pageIndex, bool requireComplete = true,
         CancellationToken cancellationToken = default)
     {
         EngineRenderOptions options = CreateRenderOptions(pageIndex, false, true, true);
@@ -221,7 +222,8 @@ internal sealed class PdfPageRenderSession : IDisposable
             _encodingBuffer = EncodingBuffers.Rent(length);
         }
         var diagnostics = Renderer.RenderInto(pageIndex, options, _encodingBuffer, cancellationToken);
-        PdfRenderCompleteness.RequireComplete(pageIndex, PdfRenderCompleteness.Classify(diagnostics));
+        if (requireComplete)
+            PdfRenderCompleteness.RequireComplete(pageIndex, PdfRenderCompleteness.Classify(diagnostics));
         return new PdfPageForEncoding(options.Width, options.Height,
             _encodingBuffer.AsMemory(0, length), diagnostics);
     }

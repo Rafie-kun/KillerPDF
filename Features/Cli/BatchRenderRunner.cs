@@ -14,7 +14,7 @@ namespace KillerPDF.Features
     // Headless CLI render benchmark
     // ============================================================
     //
-    // KillerPDF.exe --batch-render <input.pdf|inputDir> <outputDir> [--size <px>] [--pages <n>] [--parallel <n>] [--log <file.csv>] [--quiet]
+    // KillerPDF.exe --batch-render <input.pdf|inputDir> <outputDir> [--size <px>] [--pages <n>] [--parallel <n>] [--log <file.csv>] [--quiet] [--allow-incomplete]
     //
     // Renders the first N pages of one PDF (or every *.pdf under a folder tree)
     // through the same page-render path the viewer, print, flatten, and image
@@ -51,7 +51,7 @@ namespace KillerPDF.Features
             string? input = null, output = null, logPath = null;
             int size = DefaultSize, pages = 1;
             int parallelism = 0;
-            bool quiet = false, badUsage = false;
+            bool quiet = false, badUsage = false, allowIncomplete = false;
             for (int i = flagIdx + 1; i < args.Length; i++)
             {
                 var a = args[i];
@@ -85,6 +85,12 @@ namespace KillerPDF.Features
                 {
                     quiet = true;
                 }
+                else if (string.Equals(a, "--allow-incomplete", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Release-gate corpus runs compare every page with its baseline, including pages
+                    // with omitted content; their diagnostics stay in the log's Detail column.
+                    allowIncomplete = true;
+                }
                 else if (input is null) input = a;
                 else if (output is null) output = a;
                 else badUsage = true;
@@ -92,7 +98,7 @@ namespace KillerPDF.Features
 
             if (badUsage || string.IsNullOrWhiteSpace(input) || string.IsNullOrWhiteSpace(output))
             {
-                con.WriteLine("Usage: KillerPDF.exe --batch-render <input.pdf|inputDir> <outputDir> [--size <px>] [--pages <n>] [--parallel <n>] [--log <file.csv>] [--quiet]");
+                con.WriteLine("Usage: KillerPDF.exe --batch-render <input.pdf|inputDir> <outputDir> [--size <px>] [--pages <n>] [--parallel <n>] [--log <file.csv>] [--quiet] [--allow-incomplete]");
                 exitCode = 2;
                 return true;
             }
@@ -167,7 +173,7 @@ namespace KillerPDF.Features
                 string rel = perFile[index].Rel;
                 string src = perFile[index].Src;
                 string dstBase = Path.Combine(outRoot, rel);
-                foreach (var row in RenderFile(src, dstBase, size, pageLimit))
+                foreach (var row in RenderFile(src, dstBase, size, pageLimit, allowIncomplete))
                     perFile[index].Rows.Add(row);
                 // A finished document's source bytes and decoded images stay in the large-object
                 // heap until a full collection; collect now so they do not add to the next file's peak.
@@ -222,7 +228,8 @@ namespace KillerPDF.Features
 
         // Fits each page inside a size-by-size box through the engine render session,
         // the same as the image export path (annotations and form fields painted).
-        private static List<RenderRow> RenderFile(string src, string dstBase, int size, int pageLimit)
+        private static List<RenderRow> RenderFile(string src, string dstBase, int size, int pageLimit,
+            bool allowIncomplete)
         {
             var rows = new List<RenderRow>();
             PdfPageRenderSession session;
@@ -261,7 +268,7 @@ namespace KillerPDF.Features
                     var sw = Stopwatch.StartNew();
                     try
                     {
-                        var rendered = session.RenderPageForEncoding(idx);
+                        var rendered = session.RenderPageForEncoding(idx, requireComplete: !allowIncomplete);
                         sw.Stop();
                         row.Width = rendered.Width;
                         row.Height = rendered.Height;

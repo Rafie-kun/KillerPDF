@@ -499,6 +499,8 @@ namespace KillerPDF.Features
             "  killerpdf batch-render <in> <outDir> [--size <px>] [--pages <n>] [--log <f.csv>] [--quiet]",
             "                                           render the first pages of a file or tree to PNG",
             "                                           with per-page timings (render benchmark)",
+            "                                           --allow-incomplete also writes pages with omitted",
+            "                                           content (release-gate comparisons)",
             "  --secrets-stdin                          read password, user-password, owner-password and",
             "                                           pfx-password from standard input as one JSON object",
             "                                           instead of the command line, where other programs can see them",

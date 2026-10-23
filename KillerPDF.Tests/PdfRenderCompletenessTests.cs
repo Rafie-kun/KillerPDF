@@ -143,6 +143,32 @@ public sealed class PdfRenderCompletenessTests
         }
     }
 
+    // Release-gate corpus runs compare every page against the accepted baseline, so batch render
+    // can be told explicitly to write a page that cannot be published. Without the option it
+    // still refuses.
+    [Fact]
+    public void EncodingRenderWritesAnIncompletePageOnlyWhenAsked()
+    {
+        string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".pdf");
+        try
+        {
+            File.WriteAllBytes(path, new PdfDocumentBuilder().AddPage(120, 80,
+                "1 0 0 rg 4 4 60 40 re f q /Missing Do Q"u8.ToArray()).Build());
+            using var session = PdfPageRenderSession.OpenEngineFirst(path, 120, 120);
+            Assert.Throws<InvalidOperationException>(() => session.RenderPageForEncoding(0));
+            PdfPageForEncoding page = session.RenderPageForEncoding(0, requireComplete: false);
+            Assert.Equal(session.RenderPreview(0).Pixels, page.Pixels.ToArray());
+            Assert.NotEmpty(page.Diagnostics);
+        }
+        finally { File.Delete(path); }
+
+        string root = Path.GetDirectoryName(Path.GetDirectoryName(SourcePath()))!;
+        string runner = File.ReadAllText(Path.Combine(root, "Features", "Cli", "BatchRenderRunner.cs"));
+        Assert.Contains("\"--allow-incomplete\"", runner);
+        Assert.Contains("RenderPageForEncoding(idx, requireComplete: !allowIncomplete)", runner);
+        Assert.Contains("[--allow-incomplete]", runner);
+    }
+
     private static string SourcePath([System.Runtime.CompilerServices.CallerFilePath] string path = "") => path;
 
     [Fact]
