@@ -1,0 +1,405 @@
+using System.ComponentModel;
+using System.Globalization;
+using System.Text;
+using System.Windows;
+using System.Windows.Automation;
+using System.Windows.Controls;
+using System.Windows.Data;
+using KillerPDF.Services.Signing;
+
+namespace KillerPDF.Controls;
+
+internal sealed class CertificateCatalogDialog : Window
+{
+    private readonly CertificateCatalog _catalog;
+    private readonly TextBox _search = UiKit.Field();
+    private readonly ListBox _list = new();
+    private readonly TextBox _details = UiKit.Field();
+    private readonly TextBlock _empty;
+    private readonly TextBlock _message;
+    private readonly ProgressBar _progress;
+    private readonly Button _import;
+    private readonly Button _trust;
+    private readonly Button _untrust;
+    private readonly Button _remove;
+    private readonly Button _refresh;
+    private readonly Button _close;
+    private IReadOnlyList<CertificateCatalogEntry> _entries = [];
+    private bool _busy;
+    private bool _mutating;
+    private bool _closed;
+
+    internal bool Changed { get; private set; }
+
+    internal CertificateCatalogDialog(Window owner, CertificateCatalog? catalog = null)
+    {
+        _catalog = catalog ?? new CertificateCatalog();
+        Title = "KillerPDF: " + L("Str_CertCatalog_Title");
+        Width = 900;
+        Height = 650;
+        MinWidth = 650;
+        MinHeight = 440;
+        UseLayoutRounding = true;
+        DialogChrome.Configure(this, owner, resizable: true);
+        AutomationProperties.SetAutomationId(this, "CertificateCatalogDialog");
+
+        var body = new Grid { Margin = new Thickness(20, 6, 20, 16) };
+        body.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        body.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        body.RowDefinitions.Add(new RowDefinition());
+        body.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        body.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+        var hint = Label(L("Str_CertCatalog_Hint"), muted: true);
+        hint.Margin = new Thickness(0, 0, 0, 12);
+        body.Children.Add(hint);
+
+        var searchRow = new Grid { Margin = new Thickness(0, 0, 0, 12) };
+        searchRow.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        searchRow.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        var searchLabel = Label(L("Str_CertCatalog_Search"));
+        searchLabel.Margin = new Thickness(0, 0, 0, 4);
+        searchRow.Children.Add(searchLabel);
+        AutomationProperties.SetName(_search, L("Str_CertCatalog_Search"));
+        AutomationProperties.SetAutomationId(_search, "CertificateCatalogSearch");
+        _search.TextChanged += (_, _) => ApplyFilter(SelectedKey);
+        Grid.SetRow(_search, 1);
+        searchRow.Children.Add(_search);
+        Grid.SetRow(searchRow, 1);
+        body.Children.Add(searchRow);
+
+        var panes = new Grid();
+        panes.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        panes.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(16) });
+        panes.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+        _list.SetResourceReference(Control.BackgroundProperty, "PaneBrush");
+        _list.SetResourceReference(Control.ForegroundProperty, "TextBrush");
+        _list.SetResourceReference(Control.BorderBrushProperty, "CardBorderBrush");
+        _list.HorizontalContentAlignment = HorizontalAlignment.Stretch;
+        ScrollViewer.SetHorizontalScrollBarVisibility(_list, ScrollBarVisibility.Disabled);
+        ScrollViewer.SetVerticalScrollBarVisibility(_list, ScrollBarVisibility.Auto);
+        AutomationProperties.SetName(_list, L("Str_CertCatalog_Title"));
+        AutomationProperties.SetAutomationId(_list, "CertificateCatalogList");
+        _list.SelectionChanged += (_, _) => UpdateSelection();
+        _empty = Label(L("Str_CertCatalog_Empty"), muted: true);
+        _empty.Margin = new Thickness(12);
+        _empty.IsHitTestVisible = false;
+        var listHost = new Grid();
+        listHost.Children.Add(_list);
+        listHost.Children.Add(_empty);
+        panes.Children.Add(listHost);
+
+        var detailsHost = new Grid();
+        detailsHost.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        detailsHost.RowDefinitions.Add(new RowDefinition());
+        var detailsLabel = Label(L("Str_Portfolio_Details"));
+        detailsLabel.Margin = new Thickness(0, 0, 0, 6);
+        detailsHost.Children.Add(detailsLabel);
+        _details.IsReadOnly = true;
+        _details.AcceptsReturn = true;
+        _details.AcceptsTab = false;
+        _details.TextWrapping = TextWrapping.Wrap;
+        _details.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
+        _details.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+        AutomationProperties.SetName(_details, L("Str_Portfolio_Details"));
+        AutomationProperties.SetAutomationId(_details, "CertificateCatalogDetails");
+        Grid.SetRow(_details, 1);
+        detailsHost.Children.Add(_details);
+        Grid.SetColumn(detailsHost, 2);
+        panes.Children.Add(detailsHost);
+        Grid.SetRow(panes, 2);
+        body.Children.Add(panes);
+
+        var feedback = new StackPanel { Margin = new Thickness(0, 8, 0, 0) };
+        _progress = new ProgressBar { Height = 3, IsIndeterminate = true, Visibility = Visibility.Collapsed };
+        _progress.SetResourceReference(Control.ForegroundProperty, "PrimaryBrush");
+        AutomationProperties.SetName(_progress, L("Str_CertCatalog_Refresh"));
+        feedback.Children.Add(_progress);
+        _message = Label(string.Empty, muted: true);
+        _message.Margin = new Thickness(0, 6, 0, 0);
+        _message.Visibility = Visibility.Collapsed;
+        AutomationProperties.SetLiveSetting(_message, AutomationLiveSetting.Polite);
+        feedback.Children.Add(_message);
+        Grid.SetRow(feedback, 3);
+        body.Children.Add(feedback);
+
+        _import = ActionButton("Str_CertCatalog_Import", "CertificateCatalogImport");
+        _import.Click += async (_, _) => await ImportAsync();
+        _trust = ActionButton("Str_CertCatalog_Trust", "CertificateCatalogTrust");
+        _trust.Click += async (_, _) => await SetTrustAsync(true);
+        _untrust = ActionButton("Str_CertCatalog_Untrust", "CertificateCatalogUntrust");
+        _untrust.Click += async (_, _) => await SetTrustAsync(false);
+        _remove = ActionButton("Str_Protect_Remove", "CertificateCatalogRemove");
+        _remove.Click += async (_, _) => await RemoveAsync();
+        _refresh = ActionButton("Str_CertCatalog_Refresh", "CertificateCatalogRefresh");
+        _refresh.Click += async (_, _) => await ReloadAsync();
+        _close = ActionButton("Str_DocumentTools_Close", "CertificateCatalogClose", accent: true);
+        _close.IsCancel = true;
+        _close.Click += (_, _) => RequestClose();
+
+        var buttons = new WrapPanel { Margin = new Thickness(0, 8, 0, 0) };
+        foreach (var button in new[] { _import, _trust, _untrust, _remove, _refresh, _close })
+        {
+            button.Margin = new Thickness(0, 4, 8, 0);
+            buttons.Children.Add(button);
+        }
+        Grid.SetRow(buttons, 4);
+        body.Children.Add(buttons);
+
+        Content = DialogChrome.Frame(this, owner, Title, RequestClose, body);
+        Closed += (_, _) => _closed = true;
+        Loaded += async (_, _) =>
+        {
+            _search.Focus();
+            await ReloadAsync();
+        };
+        UpdateSelection();
+    }
+
+    private readonly record struct EntryKey(string Fingerprint, CertificateCatalogSource Source);
+
+    private CertificateCatalogEntry? Selected => (_list.SelectedItem as ListBoxItem)?.Tag as CertificateCatalogEntry;
+    private EntryKey? SelectedKey => Selected is { } entry ? new EntryKey(entry.Fingerprint, entry.Source) : null;
+
+    private async Task ReloadAsync()
+    {
+        if (_busy || _closed) return;
+        var selected = SelectedKey;
+        SetBusy(true);
+        ShowMessage(string.Empty);
+        try
+        {
+            var entries = await Task.Run(() => _catalog.Read());
+            if (_closed) return;
+            _entries = entries;
+            ApplyFilter(selected);
+        }
+        catch (Exception ex)
+        {
+            if (!_closed)
+            {
+                _entries = [];
+                ApplyFilter(null);
+                ShowError(ex);
+            }
+        }
+        finally
+        {
+            if (!_closed) SetBusy(false);
+        }
+    }
+
+    private void ApplyFilter(EntryKey? selected)
+    {
+        string search = _search.Text.Trim();
+        string fingerprintSearch = string.Concat(search.Where(c => !char.IsWhiteSpace(c) && c != ':' && c != '-'));
+        _list.Items.Clear();
+        foreach (var entry in _entries.Where(entry => search.Length == 0
+                     || entry.Subject.Contains(search, StringComparison.CurrentCultureIgnoreCase)
+                     || entry.Issuer.Contains(search, StringComparison.CurrentCultureIgnoreCase)
+                     || (fingerprintSearch.Length > 0 && entry.Fingerprint.Contains(fingerprintSearch, StringComparison.OrdinalIgnoreCase))))
+        {
+            var name = Label(entry.Subject.Length == 0 ? entry.Fingerprint : entry.Subject);
+            name.TextWrapping = TextWrapping.NoWrap;
+            name.TextTrimming = TextTrimming.CharacterEllipsis;
+            name.ToolTip = entry.Subject;
+            name.ClearValue(TextBlock.ForegroundProperty);
+            var detail = Label(SourceLabel(entry.Source) + "\n" + Status(entry), muted: true);
+            detail.FontSize = 11;
+            detail.ClearValue(TextBlock.ForegroundProperty);
+            var style = new Style(typeof(TextBlock));
+            style.Setters.Add(new Setter(TextBlock.ForegroundProperty, new DynamicResourceExtension("MutedTextBrush")));
+            var selectedDetail = new DataTrigger
+            {
+                Binding = new Binding(nameof(ListBoxItem.IsSelected))
+                {
+                    RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor, typeof(ListBoxItem), 1)
+                },
+                Value = true
+            };
+            selectedDetail.Setters.Add(new Setter(TextBlock.ForegroundProperty, new DynamicResourceExtension("SelectionFg")));
+            style.Triggers.Add(selectedDetail);
+            detail.Style = style;
+            var row = new StackPanel();
+            row.Children.Add(name);
+            row.Children.Add(detail);
+            var item = new ListBoxItem { Content = row, Tag = entry, Padding = new Thickness(8, 6, 8, 6) };
+            AutomationProperties.SetName(item, name.Text + ", " + SourceLabel(entry.Source) + ", " + Status(entry));
+            _list.Items.Add(item);
+            if (selected == new EntryKey(entry.Fingerprint, entry.Source)) _list.SelectedItem = item;
+        }
+        if (_list.SelectedIndex < 0 && _list.Items.Count > 0) _list.SelectedIndex = 0;
+        _empty.Visibility = _list.Items.Count == 0 && !_busy ? Visibility.Visible : Visibility.Collapsed;
+        UpdateSelection();
+    }
+
+    private void UpdateSelection()
+    {
+        var entry = Selected;
+        bool local = entry is { IsReadOnly: false };
+        _trust.IsEnabled = !_busy && local && entry!.IsCertificateAuthority && !entry.IsTrustedRoot;
+        _untrust.IsEnabled = !_busy && local && entry!.IsTrustedRoot;
+        _remove.IsEnabled = !_busy && local;
+        _trust.Visibility = entry?.IsTrustedRoot == true ? Visibility.Collapsed : Visibility.Visible;
+        _untrust.Visibility = entry?.IsTrustedRoot == true ? Visibility.Visible : Visibility.Collapsed;
+        _details.Text = entry is null ? string.Empty : Details(entry);
+    }
+
+    private static string Details(CertificateCatalogEntry entry)
+    {
+        var text = new StringBuilder();
+        void Add(string key, string value) => text.AppendLine(L(key) + ":").AppendLine(value).AppendLine();
+        Add("Str_CertCatalog_Subject", entry.Subject);
+        Add("Str_CertCatalog_Issuer", entry.Issuer);
+        Add("Str_CertCatalog_Type", L(entry.IsCertificateAuthority ? "Str_CertCatalog_CA" : "Str_CertCatalog_Leaf"));
+        Add("Str_CertCatalog_ValidFrom", entry.NotBefore.ToLocalTime().ToString("g", CultureInfo.CurrentCulture));
+        Add("Str_CertCatalog_ValidUntil", entry.NotAfter.ToLocalTime().ToString("g", CultureInfo.CurrentCulture));
+        Add("Str_CertCatalog_Fingerprint", entry.Fingerprint);
+        Add("Str_CertCatalog_Source", SourceLabel(entry.Source));
+        Add("Str_CertCatalog_Status", Status(entry));
+        if (entry.IsReadOnly) text.AppendLine(L("Str_CertCatalog_ReadOnly"));
+        return text.ToString().TrimEnd();
+    }
+
+    private static string Status(CertificateCatalogEntry entry)
+    {
+        string status = L(entry.IsTrustedRoot ? "Str_CertCatalog_Trusted" : "Str_CertCatalog_Untrusted");
+        DateTime now = DateTime.UtcNow;
+        if (entry.NotAfter.ToUniversalTime() < now) status += ", " + L("Str_CertCatalog_Expired");
+        else if (entry.NotBefore.ToUniversalTime() > now) status += ", " + L("Str_CertCatalog_NotYetValid");
+        return status;
+    }
+
+    private static string SourceLabel(CertificateCatalogSource source) => L(source switch
+    {
+        CertificateCatalogSource.WindowsCurrentUserRoot => "Str_CertCatalog_WindowsUserRoots",
+        CertificateCatalogSource.WindowsLocalMachineRoot => "Str_CertCatalog_WindowsMachineRoots",
+        CertificateCatalogSource.WindowsCurrentUserIntermediate => "Str_CertCatalog_WindowsUserIntermediates",
+        CertificateCatalogSource.WindowsLocalMachineIntermediate => "Str_CertCatalog_WindowsMachineIntermediates",
+        _ => "Str_CertCatalog_Local"
+    });
+
+    private async Task ImportAsync()
+    {
+        if (_busy || _closed) return;
+        var picker = new FileDialog(FileDialogMode.Open)
+        {
+            Title = L("Str_CertCatalog_Import"),
+            Filter = L("Str_Filter_Cert") + "|*.cer;*.crt;*.pem",
+            CheckFileExists = true
+        };
+        if (picker.ShowDialog(this) != true) return;
+        int imported = 0;
+        await UpdateCatalogAsync(() => imported = _catalog.Import(picker.FileName),
+            () => string.Format(CultureInfo.CurrentCulture, L("Str_CertCatalog_Imported"), imported));
+    }
+
+    private async Task SetTrustAsync(bool trusted)
+    {
+        if (_busy || Selected is not { IsReadOnly: false } entry) return;
+        if (trusted && !entry.IsCertificateAuthority) return;
+        if (trusted && KillerDialog.Show(this,
+                string.Format(CultureInfo.CurrentCulture, L("Str_CertCatalog_TrustPrompt"), entry.Subject),
+                Title, MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+        await UpdateCatalogAsync(() => _catalog.SetTrusted(entry.Fingerprint, trusted));
+    }
+
+    private async Task RemoveAsync()
+    {
+        if (_busy || Selected is not { IsReadOnly: false } entry) return;
+        if (KillerDialog.Show(this,
+                string.Format(CultureInfo.CurrentCulture, L("Str_CertCatalog_RemovePrompt"), entry.Subject),
+                Title, MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
+        await UpdateCatalogAsync(() => _catalog.Remove(entry.Fingerprint));
+    }
+
+    private async Task UpdateCatalogAsync(Action update, Func<string>? successMessage = null)
+    {
+        if (_busy || _closed) return;
+        var selected = SelectedKey;
+        _mutating = true;
+        SetBusy(true);
+        ShowMessage(string.Empty);
+        try
+        {
+            await Task.Run(update);
+            Changed = true;
+            _entries = await Task.Run(() => _catalog.Read());
+            ApplyFilter(selected);
+            if (successMessage is not null) ShowMessage(successMessage());
+        }
+        catch (Exception ex)
+        {
+            _entries = [];
+            ApplyFilter(null);
+            ShowError(ex);
+        }
+        finally
+        {
+            _mutating = false;
+            SetBusy(false);
+        }
+    }
+
+    private void SetBusy(bool busy)
+    {
+        _busy = busy;
+        _import.IsEnabled = _refresh.IsEnabled = !busy;
+        _close.IsEnabled = !_mutating;
+        _progress.Visibility = busy ? Visibility.Visible : Visibility.Collapsed;
+        _empty.Visibility = _list.Items.Count == 0 && !busy ? Visibility.Visible : Visibility.Collapsed;
+        UpdateSelection();
+    }
+
+    private void ShowMessage(string message)
+    {
+        _message.Text = message;
+        _message.Visibility = message.Length == 0 ? Visibility.Collapsed : Visibility.Visible;
+    }
+
+    private void ShowError(Exception exception)
+    {
+        string message = L("Str_CertCatalog_Error") + "\n" + exception.Message;
+        ShowMessage(message);
+        KillerDialog.Show(this, message, Title, MessageBoxButton.OK, MessageBoxImage.Error);
+    }
+
+    private void RequestClose()
+    {
+        if (!_mutating) Close();
+    }
+
+    protected override void OnClosing(CancelEventArgs e)
+    {
+        if (_mutating)
+        {
+            e.Cancel = true;
+            return;
+        }
+        _closed = true;
+        SetBusy(true);
+        base.OnClosing(e);
+    }
+
+    private static TextBlock Label(string text, bool muted = false)
+    {
+        var label = new TextBlock { Text = text, TextWrapping = TextWrapping.Wrap, FontSize = 12 };
+        label.SetResourceReference(TextBlock.FontFamilyProperty, "UiFont");
+        label.SetResourceReference(TextBlock.ForegroundProperty, muted ? "MutedTextBrush" : "TextBrush");
+        return label;
+    }
+
+    private static Button ActionButton(string key, string automationId, bool accent = false)
+    {
+        var label = new TextBlock { Text = L(key), TextWrapping = TextWrapping.Wrap, TextAlignment = TextAlignment.Center };
+        var button = UiKit.Make(label, accent);
+        button.MaxWidth = 190;
+        button.SetResourceReference(Control.FontFamilyProperty, "UiFont");
+        AutomationProperties.SetName(button, L(key));
+        AutomationProperties.SetAutomationId(button, automationId);
+        return button;
+    }
+
+    private static string L(string key) => Application.Current?.TryFindResource(key) as string ?? key;
+}

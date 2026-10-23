@@ -22,7 +22,11 @@ public partial class MainWindow
     private List<Control> BuildDocumentToolsItems()
     {
         if (_doc is null)
-            return [DocumentToolItem("Str_DocumentTools_Macros", OpenMacroDialog, "\uE945")];
+            return
+            [
+                DocumentToolItem("Str_DocumentTools_Macros", OpenMacroDialog, "\uE945"),
+                DocumentToolItem("Str_CertCatalog_Title", OpenCertificateCatalog, "\uEB95"),
+            ];
         var comparison = DocumentToolItem("Str_DocumentTools_StructuralComparison",
             ShowStructuralComparison, "\uE8AB");
         comparison.IsEnabled = IsSplit
@@ -37,6 +41,7 @@ public partial class MainWindow
             DocumentToolItem("Str_DocumentTools_Accessibility", OpenAccessibilityTools, "\uE776"),
             DocumentToolItem("Str_DocumentTools_Signatures", () => ShowDocumentReport(Loc("Str_DocumentTools_Signatures"),
                 path => PdfEngineIntegration.InspectSignatures(path).ToText()), "\uE8D7"),
+            DocumentToolItem("Str_CertCatalog_Title", OpenCertificateCatalog, "\uEB95"),
             DocumentToolItem("Str_DocumentTools_Layers", () => ShowDocumentReport(Loc("Str_DocumentTools_Layers"),
                 path => PdfEngineIntegration.InspectLayers(path).ToText()), "\uE8A1"),
             DocumentToolItem("Str_DocumentTools_EditLayers", EditLayers, "\uE70F"),

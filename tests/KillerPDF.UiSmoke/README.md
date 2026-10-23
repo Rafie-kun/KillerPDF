@@ -113,3 +113,15 @@ including multiline warnings, errors, choices, confirmations, password and text 
 selection, resizing, font size, alignment, line spacing, overflow, preview
 invalidation, cancel, Undo/Redo and save/reopen through the actual dialog and
 main-window command. Rendered checks cover all themes, locales and high app scale.
+
+## Certificate catalog
+
+Use `--verify-certificates APP_DLL APP_XAML OUTPUT_DIRECTORY --startup-smoke`
+with a fresh output directory. The isolated host imports a generated public CA
+certificate, verifies search, untrusted import, trust removal and cancellation,
+certificate removal and read-only Windows controls,
+and renders Dark, Light, 98SE and all 20 locales at the minimum dialog size.
+The result identifies the compiled assembly hash. Settings and imported
+certificates stay in the supplied directory; Windows trust stores are read-only.
+These WPF checks do not certify physical input, a screen reader, or signature
+verification against a certificate already trusted by Windows.

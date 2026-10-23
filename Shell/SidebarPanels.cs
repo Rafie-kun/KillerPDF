@@ -211,6 +211,8 @@ namespace KillerPDF
                 case SidebarPanel.Signatures:
                     Add("Str_Lbl_DigitalSig", OpenSidebarSigning);
                     Add("Str_DocumentTools_Signatures", ShowSignaturesReport);
+                    menu.Items.Add(MakeMenuItem(Loc("Str_CertCatalog_Title"), (_, _) => OpenCertificateCatalog(),
+                        GestureFor("CtrlShift:D") + ", " + ShortcutTable.DocumentToolKey("Str_CertCatalog_Title")));
                     break;
                 case SidebarPanel.Outlines:
                     Add("Str_Ctx_BmAdd", () => AddBookmarkInto(null));

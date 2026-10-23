@@ -105,6 +105,7 @@ namespace KillerPDF
             ('S', "Str_DocumentTools_Separations"),
             ('A', "Str_DocumentTools_Accessibility"),
             ('W', "Str_DocumentTools_Signatures"),
+            ('Z', "Str_CertCatalog_Title"),
             ('L', "Str_DocumentTools_Layers"),
             ('E', "Str_DocumentTools_EditLayers"),
             ('F', "Str_DocumentTools_Portfolio"),

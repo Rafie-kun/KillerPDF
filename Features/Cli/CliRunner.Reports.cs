@@ -35,8 +35,8 @@ namespace KillerPDF.Features
                         con.WriteLine(json ? production.ToJson(true) : production.ToText());
                         return 0;
                     case "--signatures":
-                        PdfSignatureInspectionReport signatures = PdfSignatureInspection.Inspect(document,
-                            new PdfSignatureTrustOptions { DisableCertificateDownloads = true });
+                        PdfSignatureInspectionReport signatures =
+                            new Services.Signing.CertificateCatalog().Inspect(document);
                         con.WriteLine(json ? signatures.ToJson(true) : signatures.ToText());
                         return 0;
                     case "--layers":
@@ -55,7 +55,8 @@ namespace KillerPDF.Features
                 }
             }
             catch (Exception ex) when (ex is InvalidOperationException
-                or NotSupportedException or ArgumentException or FormatException)
+                or NotSupportedException or ArgumentException or FormatException
+                or IOException or UnauthorizedAccessException or System.Security.Cryptography.CryptographicException)
             {
                 con.WriteLine("Could not read the document: " + ex.Message);
                 return 1;

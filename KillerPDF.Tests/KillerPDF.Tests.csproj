@@ -89,6 +89,7 @@
     <Compile Include="..\Services\PdfEngineDocumentSession.cs" Link="Services\PdfEngineDocumentSession.cs" />
     <Compile Include="..\Services\RuntimeEncodingBootstrap.cs" Link="Services\RuntimeEncodingBootstrap.cs" />
     <Compile Include="..\Services\Signing\KillerCmsSigner.cs" Link="Services\Signing\KillerCmsSigner.cs" />
+    <Compile Include="..\Services\Signing\CertificateCatalog.cs" Link="Services\Signing\CertificateCatalog.cs" />
     <Compile Include="..\Services\Signing\PdfSigner.cs" Link="Services\Signing\PdfSigner.cs" />
     <Compile Include="..\Models\StampModels.cs" Link="Models\StampModels.cs" />
     <Compile Include="..\Controls\FlyoutPlacement.cs" Link="Controls\FlyoutPlacement.cs" />
