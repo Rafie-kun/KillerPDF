@@ -84,9 +84,13 @@ namespace KillerPDF.Services
         internal static string DocumentName(RecoveredDocument document) =>
             Path.GetFileName(document.OriginalPath ?? document.SuggestedName ?? document.RecoveredPath);
 
-        /// <summary>The restart's line for a document that did not fully recover.</summary>
+        /// <summary>
+        /// The restart's line for a document that did not fully recover. Several errors share the
+        /// line, so none of them reads like another document.
+        /// </summary>
         internal static string ProblemNote(RecoveredDocument document) =>
-            DocumentName(document) + ": " + document.RecoveryError;
+            DocumentName(document) + ": " + string.Join("; ",
+                (document.RecoveryError ?? string.Empty).Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries));
 
         /// <summary>The restart's list: one line per note, in order, even when two read the same.</summary>
         internal static string JoinNotes(IEnumerable<string> notes) => string.Join("\n", notes);

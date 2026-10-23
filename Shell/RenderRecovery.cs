@@ -214,6 +214,7 @@ namespace KillerPDF
             }
             foreach (RecoveredDocument document in documents)
             {
+                // One line per document: a copy already listed with its errors is not listed again.
                 string name = RenderFailureRecovery.DocumentName(document);
                 if (document.RecoveryError is not null) incomplete.Add(RenderFailureRecovery.ProblemNote(document));
                 try
@@ -226,7 +227,7 @@ namespace KillerPDF
                     ActiveViewer.OpenInNewTabExt(document.RecoveredPath);
                     if (_doc is null || !string.Equals(_originalFile, document.RecoveredPath, StringComparison.OrdinalIgnoreCase))
                     {
-                        incomplete.Add(name);
+                        if (document.RecoveryError is null) incomplete.Add(name);
                         continue;
                     }
                     // The copy holds the edits; saving goes back to the file they were made to.
@@ -242,7 +243,10 @@ namespace KillerPDF
                     ActiveViewer.CaptureActiveIfAny();
                     reopened++;
                 }
-                catch (Exception ex) when (ex is not OutOfMemoryException) { incomplete.Add(name + ": " + ex.Message); }
+                catch (Exception ex) when (ex is not OutOfMemoryException)
+                {
+                    if (document.RecoveryError is null) incomplete.Add(name + ": " + ex.Message);
+                }
             }
             RebuildTabStrip();
             // With nothing reopened there are no recovered copies to review. Each document keeps its

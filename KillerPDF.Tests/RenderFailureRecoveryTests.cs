@@ -280,6 +280,24 @@ namespace KillerPDF.Tests
             Assert.DoesNotContain("string.Join(\"\\n\", incomplete", recovery);
         }
 
+        // A copy whose backup steps failed more than once used to list its later errors on lines of
+        // their own, reading like other documents, and a copy that also failed to reopen was listed
+        // twice.
+        [Fact]
+        public void EachDocumentIsOneLineOfTheRestartList()
+        {
+            var document = new RecoveredDocument(@"C:\Docs\a.pdf", @"C:\Recovery\01-a.pdf", null,
+                RecoveryError: "The copy could not be written.\nThe state could not be saved.");
+            Assert.Equal("a.pdf: The copy could not be written.; The state could not be saved.",
+                RenderFailureRecovery.ProblemNote(document));
+
+            string recovery = File.ReadAllText(Path.Combine(
+                Path.GetDirectoryName(Path.GetDirectoryName(SourcePath()))!, "Shell", "RenderRecovery.cs"));
+            string open = recovery[recovery.IndexOf("private void OpenRenderRecovery()", StringComparison.Ordinal)..];
+            Assert.Equal(1, open.Split("incomplete.Add(RenderFailureRecovery.ProblemNote(document));").Length - 1);
+            Assert.Equal(3, open.Split("if (document.RecoveryError is null) incomplete.Add(").Length - 1);
+        }
+
         private static string Value(string strings, string key)
         {
             string open = "x:Key=\"" + key + "\">";
