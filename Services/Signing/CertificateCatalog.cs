@@ -346,14 +346,16 @@ internal sealed class CertificateCatalog
         ReadOnlySpan<char> pending = text.AsSpan();
         if (!pending.IsEmpty && pending[0] == '\uFEFF') pending = pending[1..];
         var entries = new List<CertificateCatalogEntry>();
+        // A key anywhere rejects the whole file, including a legacy encrypted key whose Proc-Type
+        // headers keep it from parsing as a block.
+        if (HasPrivateKeyBlock(pending))
+            throw Problem(CertificateCatalogProblem.PrivateKey,
+                "PEM files may contain only public CERTIFICATE blocks. Private keys are not accepted.");
         // Text outside the blocks, such as the headers openssl writes, is ignored. Every block must
-        // be a public certificate; a key anywhere rejects the whole file.
+        // be a public certificate.
         while (PemEncoding.TryFind(pending, out PemFields fields))
         {
             ReadOnlySpan<char> label = pending[fields.Label];
-            if (label.EndsWith("PRIVATE KEY", StringComparison.Ordinal))
-                throw Problem(CertificateCatalogProblem.PrivateKey,
-                    "PEM files may contain only public CERTIFICATE blocks. Private keys are not accepted.");
             if (!label.SequenceEqual("CERTIFICATE"))
                 throw Problem(CertificateCatalogProblem.NotACertificate,
                     "PEM files may contain only public CERTIFICATE blocks.");
@@ -371,6 +373,21 @@ internal sealed class CertificateCatalog
             throw Problem(CertificateCatalogProblem.NotACertificate,
                 "The PEM file contains no public certificates.");
         return entries;
+    }
+
+    private static bool HasPrivateKeyBlock(ReadOnlySpan<char> text)
+    {
+        const string begin = "-----BEGIN ";
+        for (int at = text.IndexOf(begin, StringComparison.Ordinal); at >= 0;
+             at = text.IndexOf(begin, StringComparison.Ordinal))
+        {
+            text = text[(at + begin.Length)..];
+            int end = text.IndexOf("-----", StringComparison.Ordinal);
+            if (end < 0) return false;
+            if (text[..end].EndsWith("PRIVATE KEY", StringComparison.Ordinal)) return true;
+            text = text[end..];
+        }
+        return false;
     }
 
     private static CertificateCatalogEntry FromDer(byte[] data, bool trusted, CertificateCatalogSource source)

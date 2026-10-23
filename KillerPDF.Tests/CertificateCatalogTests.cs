@@ -154,6 +154,7 @@ public sealed class CertificateCatalogTests : IDisposable
     [InlineData("renamed-pfx")]
     [InlineData("private-pem")]
     [InlineData("mixed-pem")]
+    [InlineData("legacy-encrypted-pem")]
     public void PrivateKeyMaterialCannotBeImportedEvenWhenRenamedOrBundled(string kind)
     {
         using X509Certificate2 kept = CreateAuthority();
@@ -168,6 +169,17 @@ public sealed class CertificateCatalogTests : IDisposable
             : kind == "renamed-pfx" ? "rejected.cer" : "rejected.pem");
         if (kind is "pfx" or "renamed-pfx")
             File.WriteAllBytes(path, rejected.Export(X509ContentType.Pkcs12));
+        else if (kind == "legacy-encrypted-pem")
+        {
+            // OpenSSL's traditional encrypted key carries Proc-Type and DEK-Info headers inside the
+            // block, which RFC 7468 parsing does not recognize as a block at all.
+            using RSA key = rejected.GetRSAPrivateKey()!;
+            File.WriteAllText(path, rejected.ExportCertificatePem()
+                + "\n-----BEGIN RSA PRIVATE KEY-----\nProc-Type: 4,ENCRYPTED\n"
+                + "DEK-Info: AES-128-CBC,00112233445566778899AABBCCDDEEFF\n\n"
+                + Convert.ToBase64String(key.ExportRSAPrivateKey(), Base64FormattingOptions.InsertLineBreaks)
+                + "\n-----END RSA PRIVATE KEY-----\n");
+        }
         else
         {
             using RSA key = rejected.GetRSAPrivateKey()!;
