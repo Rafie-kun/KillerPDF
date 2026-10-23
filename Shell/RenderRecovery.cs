@@ -12,8 +12,8 @@ namespace KillerPDF
     // unsaved tab aside through here, restarts, and the new window reopens them unsaved.
     public partial class MainWindow
     {
-        /// <summary>Names of unsaved documents that had nowhere to be written in the last recovery.</summary>
-        internal IReadOnlyList<string> LostRecoveryNames { get; private set; } = [];
+        /// <summary>Lines the restart lists when it cannot read the recovery manifest.</summary>
+        internal IReadOnlyList<string> RecoveryNotes { get; private set; } = [];
 
         /// <summary>
         /// Writes each unsaved document, as it is on screen, to a recovery folder and remembers the
@@ -105,13 +105,13 @@ namespace KillerPDF
             if (unrecovered.Count > 0)
             {
                 // With nowhere to write copies, the restart must not report that the documents simply
-                // reopened. Their names go to the restarted process on its command line, which needs no
+                // reopened. Their lines go to the restarted process on its command line, which needs no
                 // disk. A manifest in the retained session folder also lists them when it can be
                 // written, and either way the restart points at the session's working files there.
-                LostRecoveryNames = [.. unrecovered.Select(RecoveryName)];
+                RecoveryNotes = [.. unrecovered.Select(session => RecoveryName(session) + ": " + Loc("Str_Dlg_RenderRecoveryNoFolder"))];
                 List<RecoveredDocument> lost = [.. unrecovered.Select((session, index) => new RecoveredDocument(
                     session.OriginalFile, Path.Combine(App.TempDir, $"unrecovered-{index + 1:00}.pdf"),
-                    LostRecoveryNames[index], session.LoadedRevision, Loc("Str_Dlg_RenderRecoveryNoFolder")))];
+                    RecoveryName(session), session.LoadedRevision, Loc("Str_Dlg_RenderRecoveryNoFolder")))];
                 string unavailable = Path.Combine(App.TempDir, "recovery.json");
                 try { unavailable = RenderFailureRecovery.WriteManifest(App.TempDir, lost); }
                 catch (Exception ex) when (ex is not OutOfMemoryException) { CrashReporter.Capture(ex, "Render recovery manifest"); }
@@ -119,7 +119,19 @@ namespace KillerPDF
                 return unavailable;
             }
             if (folder is null || recovered.Count == 0) return null;
-            string manifest = RenderFailureRecovery.WriteManifest(folder, recovered);
+            // If the manifest cannot be written, for example because the copies filled the disk, the
+            // restart still names the copies and points at the folder that holds them. They cannot
+            // reopen without it, so their originals stay in the restored tabs.
+            RecoveryNotes = [.. recovered.Select(document => Path.GetFileName(document.RecoveredPath))];
+            string manifest;
+            try { manifest = RenderFailureRecovery.WriteManifest(folder, recovered); }
+            catch (Exception ex) when (ex is not OutOfMemoryException)
+            {
+                CrashReporter.Capture(ex, "Render recovery manifest");
+                string missing = Path.Combine(folder, "recovery.json");
+                App.RetainRenderRecoveryTemps(missing);
+                return missing;
+            }
             if (recovered.Any(document => document.RecoveryError is not null)) App.RetainRenderRecoveryTemps(manifest);
 
             // Recovered tabs come back from the manifest, so once it is written their originals must
@@ -198,9 +210,8 @@ namespace KillerPDF
             int reopened = 0;
             if (manifest is not null && documents.Count == 0)
             {
-                // Without a readable manifest, lost documents are still named from the command line.
-                if (App.RenderRecoveryLostNames.Count > 0)
-                    incomplete.AddRange(App.RenderRecoveryLostNames.Select(name => name + ": " + Loc("Str_Dlg_RenderRecoveryNoFolder")));
+                // Without a readable manifest, the documents are still listed from the command line.
+                if (App.RenderRecoveryNotes.Count > 0) incomplete.AddRange(App.RenderRecoveryNotes);
                 else incomplete.Add(Path.GetFileName(manifest));
             }
             foreach (RecoveredDocument document in documents)
@@ -236,10 +247,11 @@ namespace KillerPDF
                 catch (Exception ex) when (ex is not OutOfMemoryException) { incomplete.Add(name + ": " + ex.Message); }
             }
             RebuildTabStrip();
-            // With nothing reopened there are no recovered copies to review.
+            // With nothing reopened there are no recovered copies to review. Each document keeps its
+            // own line, even when two share a name.
             KillerDialog.Show(this, incomplete.Count > 0
                     ? string.Format(Loc(reopened > 0 ? "Str_Dlg_RenderRecoveryIncomplete" : "Str_Dlg_RenderRecoveryNotReopened"),
-                        string.Join("\n", incomplete.Distinct()), Path.GetDirectoryName(manifest))
+                        string.Join("\n", incomplete), Path.GetDirectoryName(manifest))
                     : reopened > 0
                     ? string.Format(Loc("Str_Dlg_RenderRecovered"), Path.GetDirectoryName(manifest))
                     : Loc("Str_Dlg_RenderRestarted"),

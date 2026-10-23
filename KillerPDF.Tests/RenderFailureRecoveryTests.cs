@@ -209,17 +209,25 @@ namespace KillerPDF.Tests
         {
             string root = Path.GetDirectoryName(Path.GetDirectoryName(SourcePath()))!;
             string recovery = File.ReadAllText(Path.Combine(root, "Shell", "RenderRecovery.cs"));
-            Assert.Contains("LostRecoveryNames = [.. unrecovered.Select(RecoveryName)];", recovery);
-            Assert.Contains("LostRecoveryNames[index], session.LoadedRevision, Loc(\"Str_Dlg_RenderRecoveryNoFolder\")", recovery);
+            Assert.Contains("RecoveryNotes = [.. unrecovered.Select(session => RecoveryName(session) + \": \" + Loc(\"Str_Dlg_RenderRecoveryNoFolder\"))];", recovery);
+            Assert.Contains("RecoveryName(session), session.LoadedRevision, Loc(\"Str_Dlg_RenderRecoveryNoFolder\")", recovery);
             Assert.Contains("Loc(\"Str_Outline_Untitled\")", recovery);
-            Assert.Contains("CrashReporter.Capture(ex, \"Render recovery manifest\");", recovery);
-            Assert.Contains("App.RenderRecoveryLostNames", recovery);
             Assert.Contains("reopened > 0 ? \"Str_Dlg_RenderRecoveryIncomplete\" : \"Str_Dlg_RenderRecoveryNotReopened\"", recovery);
+            // A recovery folder whose manifest cannot be written still names its copies and points at it.
+            Assert.Contains("RecoveryNotes = [.. recovered.Select(document => Path.GetFileName(document.RecoveredPath))];", recovery);
+            Assert.Contains("string missing = Path.Combine(folder, \"recovery.json\");", recovery);
+            Assert.Equal(2, recovery.Split("CrashReporter.Capture(ex, \"Render recovery manifest\");").Length - 1);
+            Assert.Contains("incomplete.AddRange(App.RenderRecoveryNotes);", recovery);
+            // Two lost documents with the same name are two lines, not one.
+            Assert.DoesNotContain("incomplete.Distinct()", recovery);
 
-            // The names travel on the restart's command line, which needs no disk.
+            // The notes and the kept session folder travel on the restart's command line, which needs
+            // no disk; the restart keeps that folder even when its marker could not be written.
             string app = File.ReadAllText(Path.Combine(root, "App.xaml.cs"));
-            Assert.Contains("foreach (string name in window?.LostRecoveryNames ?? []) start.ArgumentList.Add(name);", app);
-            Assert.Contains("RenderRecoveryLostNames = e.Args[(recoveryAt + 3)..];", app);
+            Assert.Contains("start.ArgumentList.Add(SessionTempFiles.Value.RetainedDirectory ?? string.Empty);", app);
+            Assert.Contains("foreach (string note in window?.RecoveryNotes ?? []) start.ArgumentList.Add(note);", app);
+            Assert.Contains("RenderRecoveryNotes = e.Args[(recoveryAt + 4)..];", app);
+            Assert.Contains("SessionTempFiles.Value.CleanupStale(RenderRecoveryRetainedSession)", app);
 
             // With nothing reopened, each locale keeps its message up to the folder it names.
             foreach (string file in Directory.GetFiles(Path.Combine(root, "Strings"), "*.xaml"))

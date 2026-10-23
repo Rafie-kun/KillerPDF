@@ -62,6 +62,53 @@ namespace KillerPDF.Tests
             }
         }
 
+        // A full disk can refuse the retention marker as well as the recovery copies. The restarted
+        // process is then told which session it replaces, keeps that folder and marks it for later
+        // launches, instead of deleting the working files its recovery message points at.
+        [Fact]
+        public void NamedRetainedSessionSurvivesWithoutItsMarker()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "kp-retained-named-" + Path.GetRandomFileName());
+            var temps = new ProcessTempFiles(root);
+            try
+            {
+                string working = temps.CreatePath("working");
+                File.WriteAllText(working, "unsaved working bytes");
+                string directory = temps.DirectoryPath;
+                temps.RetainForRecovery(null);
+                File.Delete(Path.Combine(directory, "recovery-retained.json"));
+                Assert.Equal(directory, temps.RetainedDirectory);
+                temps.Dispose();
+
+                using (var restarted = new ProcessTempFiles(root)) restarted.CleanupStale(directory);
+                Assert.True(File.Exists(working), "The restart deleted the session it was told to keep.");
+                using (var nextLaunch = new ProcessTempFiles(root)) nextLaunch.CleanupStale();
+                Assert.True(File.Exists(working), "The kept session was not marked for later launches.");
+            }
+            finally
+            {
+                temps.Dispose();
+                if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+            }
+        }
+
+        [Fact]
+        public void UnretainedSessionNamesNoDirectory()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "kp-unretained-" + Path.GetRandomFileName());
+            using var temps = new ProcessTempFiles(root);
+            try
+            {
+                _ = temps.CreatePath("working");
+                Assert.Null(temps.RetainedDirectory);
+            }
+            finally
+            {
+                temps.Dispose();
+                if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+            }
+        }
+
         [Fact]
         public void OwnsOnlyPathsUnderItsRoot()
         {

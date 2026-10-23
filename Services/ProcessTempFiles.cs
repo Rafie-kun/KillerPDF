@@ -64,6 +64,15 @@ internal sealed class ProcessTempFiles : IDisposable
         }
     }
 
+    /// <summary>This session's folder when it is kept for a recovery, so a restart can be told to keep it.</summary>
+    internal string? RetainedDirectory
+    {
+        get
+        {
+            lock (paths) return retainedForRecovery && owned.IsValueCreated ? owned.Value.Directory : null;
+        }
+    }
+
     internal void RetainForRecovery(string? manifest)
     {
         lock (paths)
@@ -87,12 +96,19 @@ internal sealed class ProcessTempFiles : IDisposable
         }
     }
 
-    public void CleanupStale()
+    /// <summary>
+    /// Removes sessions no running process holds. <paramref name="retainedSession"/> is the folder of
+    /// the process a render-failure restart replaces: it is kept and marked even when that process
+    /// could not write its own marker, for example on a full disk.
+    /// </summary>
+    public void CleanupStale(string? retainedSession = null)
     {
         try
         {
             if (!Directory.Exists(root)
                 || (File.GetAttributes(root) & FileAttributes.ReparsePoint) != 0) return;
+            string? kept = retainedSession is { Length: > 0 }
+                ? Path.TrimEndingDirectorySeparator(Path.GetFullPath(retainedSession)) : null;
             foreach (string directory in Directory.GetDirectories(root, "session-*"))
             {
                 try
@@ -102,6 +118,13 @@ internal sealed class ProcessTempFiles : IDisposable
                         || (File.GetAttributes(directory) & FileAttributes.ReparsePoint) != 0)
                         continue;
                     string retention = Path.Combine(directory, RecoveryRetentionName);
+                    if (string.Equals(Path.GetFullPath(directory), kept, StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (!File.Exists(retention))
+                            AtomicFileOutput.Write(retention,
+                                System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(new { Manifest = (string?)null }));
+                        continue;
+                    }
                     if (File.Exists(retention))
                     {
                         if (DateTime.UtcNow - File.GetLastWriteTimeUtc(retention) < RecoveryRetention) continue;

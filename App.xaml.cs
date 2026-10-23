@@ -203,7 +203,9 @@ namespace KillerPDF
                     catch (InvalidOperationException) { }
                 }
                 if (recoveryAt + 2 < e.Args.Length) RenderRecoveryManifest = e.Args[recoveryAt + 2];
-                if (recoveryAt + 3 < e.Args.Length) RenderRecoveryLostNames = e.Args[(recoveryAt + 3)..];
+                if (recoveryAt + 3 < e.Args.Length && e.Args[recoveryAt + 3].Length > 0)
+                    RenderRecoveryRetainedSession = e.Args[recoveryAt + 3];
+                if (recoveryAt + 4 < e.Args.Length) RenderRecoveryNotes = e.Args[(recoveryAt + 4)..];
                 System.Windows.Media.RenderOptions.ProcessRenderMode = System.Windows.Interop.RenderMode.SoftwareOnly;
             }
 
@@ -422,7 +424,8 @@ namespace KillerPDF
         // #456: set when this process was started to replace one whose window could no longer draw.
         internal static bool RestartedAfterRenderFailure { get; set; }
         internal static string? RenderRecoveryManifest { get; set; }
-        internal static IReadOnlyList<string> RenderRecoveryLostNames { get; set; } = [];
+        internal static string? RenderRecoveryRetainedSession { get; set; }
+        internal static IReadOnlyList<string> RenderRecoveryNotes { get; set; } = [];
         private int _renderRecoveryStarted;
 
         /// <summary>
@@ -456,9 +459,10 @@ namespace KillerPDF
                 if (manifest is not null)
                 {
                     start.ArgumentList.Add(manifest);
-                    // Documents with nowhere to be saved are named here too, in case their manifest
-                    // could not be written.
-                    foreach (string name in window?.LostRecoveryNames ?? []) start.ArgumentList.Add(name);
+                    // The session folder kept for this recovery, which the restart keeps even when its
+                    // marker could not be written, then the lines to list if the manifest cannot be read.
+                    start.ArgumentList.Add(SessionTempFiles.Value.RetainedDirectory ?? string.Empty);
+                    foreach (string note in window?.RecoveryNotes ?? []) start.ArgumentList.Add(note);
                 }
                 if (Process.Start(start) is null) throw new InvalidOperationException("The recovery process did not start.");
             }
@@ -1274,7 +1278,7 @@ namespace KillerPDF
         /// Reclaims process-owned temporary files only after their owner releases its lease.
         /// Legacy files have no ownership proof and are left alone.
         /// </summary>
-        internal static void CleanupStaleTemps() => SessionTempFiles.Value.CleanupStale();
+        internal static void CleanupStaleTemps() => SessionTempFiles.Value.CleanupStale(RenderRecoveryRetainedSession);
 
         internal static string? GetSetting(string name)
         {
