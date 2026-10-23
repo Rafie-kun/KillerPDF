@@ -214,8 +214,8 @@ namespace KillerPDF
             }
             foreach (RecoveredDocument document in documents)
             {
-                string name = Path.GetFileName(document.OriginalPath ?? document.SuggestedName ?? document.RecoveredPath);
-                if (document.RecoveryError is not null) incomplete.Add(name + ": " + document.RecoveryError);
+                string name = RenderFailureRecovery.DocumentName(document);
+                if (document.RecoveryError is not null) incomplete.Add(RenderFailureRecovery.ProblemNote(document));
                 try
                 {
                     if (!File.Exists(document.RecoveredPath))
@@ -249,7 +249,7 @@ namespace KillerPDF
             // own line, even when two share a name.
             KillerDialog.Show(this, incomplete.Count > 0
                     ? string.Format(Loc(reopened > 0 ? "Str_Dlg_RenderRecoveryIncomplete" : "Str_Dlg_RenderRecoveryNotReopened"),
-                        string.Join("\n", incomplete), Path.GetDirectoryName(manifest))
+                        RenderFailureRecovery.JoinNotes(incomplete), Path.GetDirectoryName(manifest))
                     : reopened > 0
                     ? string.Format(Loc("Str_Dlg_RenderRecovered"), Path.GetDirectoryName(manifest))
                     : Loc("Str_Dlg_RenderRestarted"),

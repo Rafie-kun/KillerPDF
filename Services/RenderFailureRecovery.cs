@@ -80,6 +80,17 @@ namespace KillerPDF.Services
         internal static string LostNote(string? originalFile, string? suggestedName, string untitled, string reason) =>
             LostName(originalFile, suggestedName, untitled) + ": " + reason;
 
+        /// <summary>The name the restart lists a recovered or lost document under.</summary>
+        internal static string DocumentName(RecoveredDocument document) =>
+            Path.GetFileName(document.OriginalPath ?? document.SuggestedName ?? document.RecoveredPath);
+
+        /// <summary>The restart's line for a document that did not fully recover.</summary>
+        internal static string ProblemNote(RecoveredDocument document) =>
+            DocumentName(document) + ": " + document.RecoveryError;
+
+        /// <summary>The restart's list: one line per note, in order, even when two read the same.</summary>
+        internal static string JoinNotes(IEnumerable<string> notes) => string.Join("\n", notes);
+
         internal static string WriteManifest(string folder, IReadOnlyList<RecoveredDocument> documents)
         {
             string path = Path.Combine(folder, "recovery.json");

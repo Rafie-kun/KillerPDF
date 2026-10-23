@@ -242,7 +242,8 @@ namespace KillerPDF.Tests
         }
 
         // Imports, merges and scans have neither a file nor a suggested name, so two of them lost
-        // together share a name. Each must still come back from the manifest as its own line.
+        // together share a name. Each must still come back from the manifest as its own line, built
+        // by the same helpers the restart's message uses.
         [Fact]
         public void TwoUntitledLostDocumentsStayTwoLines()
         {
@@ -265,10 +266,18 @@ namespace KillerPDF.Tests
 
                 IReadOnlyList<RecoveredDocument> lost = RenderFailureRecovery.ReadManifest(manifest);
                 Assert.Equal(2, lost.Count);
-                Assert.Equal([untitled, untitled], lost.Select(document =>
-                    RenderFailureRecovery.LostNote(document.OriginalPath, document.SuggestedName, "(untitled)", document.RecoveryError!)));
+                // The restart builds its list with these same helpers.
+                Assert.Equal(untitled + "\n" + untitled,
+                    RenderFailureRecovery.JoinNotes(lost.Select(RenderFailureRecovery.ProblemNote)));
             }
             finally { Directory.Delete(folder, recursive: true); }
+
+            string recovery = File.ReadAllText(Path.Combine(
+                Path.GetDirectoryName(Path.GetDirectoryName(SourcePath()))!, "Shell", "RenderRecovery.cs"));
+            Assert.Contains("string name = RenderFailureRecovery.DocumentName(document);", recovery);
+            Assert.Contains("incomplete.Add(RenderFailureRecovery.ProblemNote(document));", recovery);
+            Assert.Contains("RenderFailureRecovery.JoinNotes(incomplete)", recovery);
+            Assert.DoesNotContain("string.Join(\"\\n\", incomplete", recovery);
         }
 
         private static string Value(string strings, string key)
