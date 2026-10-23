@@ -1,6 +1,6 @@
 # KillerPDF 1.9 adversarial release review, October 23, 2026
 
-This continues the chained 1.9 release review. [The October 21 review](adversarial-review-20261021-release.md) covered `4df9b86..e0b9c6e`. This record covers everything after it in five rounds, plus the fixes they produced. Each round ran the three isolated stages from the harness contract (bug-finder, defender, referee). The defender received only the bug-finder's structured report, and the referee only the two reports, checking evidence against the pinned head with `git show`. All stages were read-only: no builds, test runs or app launches.
+This continues the chained 1.9 release review. [The October 21 review](adversarial-review-20261021-release.md) covered `4df9b86..e0b9c6e`. This record covers everything after it in six rounds, plus the fixes they produced. Each round ran the three isolated stages from the harness contract (bug-finder, defender, referee). The defender received only the bug-finder's structured report, and the referee only the two reports, checking evidence against the pinned head with `git show`. All stages were read-only: no builds, test runs or app launches.
 
 | Round | Range | Reviewed head | Findings | Valid | Invalid | Needs investigation |
 | --- | --- | --- | ---: | ---: | ---: | ---: |
@@ -9,8 +9,9 @@ This continues the chained 1.9 release review. [The October 21 review](adversari
 | C: repairs from A and B | `cb4276a..5250c80` plus `40bd135` | `5250c80`, `40bd135` | 14 | 13 | 1 | 0 |
 | D: repairs from C | `40bd135..7e84b84` | `7e84b84` | 13 | 13 | 0 | 0 |
 | E: repairs from D | `104f047..29cd072` | `29cd072` | 7 | 7 | 0 | 0 |
+| F: repairs from E | `29cd072..e5e4e10` | `e5e4e10` | 5 | 5 | 0 | 0 |
 
-Two invalid items came from round A. BF-005 is an accurate description of a deliberate, documented trade-off. BF-019 claimed state was never read, but a UI smoke test reads it. In round C, RF-006 was invalid: the comb-overflow message never decides a page's outcome, because every path that emits it also emits a blocking message. Rounds D and E had no invalid items. Referee health scores: 5 for round A, 6 for round B, 6 for round C, 5 for round D, 7 for round E.
+Two invalid items came from round A. BF-005 is an accurate description of a deliberate, documented trade-off. BF-019 claimed state was never read, but a UI smoke test reads it. In round C, RF-006 was invalid: the comb-overflow message never decides a page's outcome, because every path that emits it also emits a blocking message. Rounds D, E and F had no invalid items. Referee health scores: 5 for round A, 6 for round B, 6 for round C, 5 for round D, 7 for round E, 6 for round F.
 
 ## Round A: valid findings and repairs
 
@@ -103,6 +104,18 @@ Round E reviewed the round D repairs. Four findings predate the range and were l
 | TF-006 | low | The app's own installs measured their size before the icon and command shim were written. | ecdb589: version and size are written again once every file is in place. |
 | TF-007 | low | The new recovery and unlock tests only scanned source, so they passed with TF-003 present. | e5e4e10: lost-document naming moved into the recovery service with a headless round-trip test; TF-001 has a behavioral test. The unlock path is window code and keeps a source test. |
 
+## Round F: valid findings and repairs
+
+Round F reviewed the round E repairs. XF-001, XF-002 and XF-003 predate the range: TF-001's repair narrowed XF-001 without closing it, and the two setup defects date from 1.8. XF-004 and XF-005 were introduced by round E.
+
+| Item | Severity | Finding | Repair |
+| --- | --- | --- | --- |
+| XF-001 | high | The restart's retention marker needs new disk space, so on the full disk TF-001 targets it failed as well, and the next ordinary launch deleted the working files the recovery message pointed at. | 72ed630: when a marker cannot be written, the session's lease is renamed into the marker, which needs no new space; an expired one is cleaned up without a lease. Behavioral tests make every marker write fail. |
+| XF-002 | medium | After a successful upgrade registration, a previous copy that could not be deleted threw into the rollback, which deleted the registered new copy and restored a partly removed old one. In 1.8.91 too. | 5c44049: nothing rolls back once registration commits, and the old copy's removal is best effort. Changelog updated. |
+| XF-003 | medium | An empty destination folder was treated as a previous copy, so a failed first install there deleted the payload its uninstall entry named. In 1.8.91 too. | 5c44049: an empty folder is replaced, not backed up, so registration gets `/no-rollback` and the payload stays. Changelog updated. |
+| XF-004 | low | A blank or malformed retained session on the restart's command line threw out of startup cleanup. | 72ed630: ignored, with tests for blank and invalid paths. |
+| XF-005 | low | The untitled-documents test built its lines with a helper the restart message did not use. | a44cbe1: the restart builds and joins its lines with the tested helpers. |
+
 ## Related work in the same range
 
 - Render completeness: page-list thumbnails no longer go blank for pages that render with warnings (e149280). Twenty-two engine render warnings were reviewed as spec fallbacks or extraction-only, so they no longer block publication ([render diagnostics review](render-diagnostics-review-20261023.md); ad2f9ba, 0c4b63b, 9b919cd).
@@ -131,6 +144,8 @@ At `4265a73`, after round D: the window-free app suite passed (1,256 tests) and 
 
 At `e5e4e10`, after round E: the window-free app suite passed (1,259 tests). The engine is unchanged since `4265a73`, where its suite passed. The app, launcher and UI smoke Release builds have zero errors, and the launcher localization check passed for 20 languages.
 
+At `a44cbe1`, after round F: the window-free app suite passed (1,264 tests), the engine is still unchanged since `4265a73`, the app, launcher and UI smoke Release builds have zero errors, and the launcher localization check passed for 20 languages.
+
 Not run, because they open windows: the UI smoke suites (including the render recovery, toolbar and certificate catalog smokes edited here), TabPlacementTests, DocumentTabLayoutTests, ComparisonBarLayoutTests and WindowFxTests. The following are verified by source-boundary tests only and still need a hands-on or VM check:
 
 - the print preview warning and its screen-reader announcement
@@ -141,4 +156,5 @@ Not run, because they open windows: the UI smoke suites (including the render re
 - render recovery, including the restart with no recovery folder
 - unlocking an owner-restricted PDF with a full temp folder, including keeping read-only form entries
 - a fresh setup install whose registration fails, which should list the new version in Apps and features
+- a first install into an empty folder made in the setup folder picker, and an upgrade while a file of the old copy is held open
 - uninstalling a real install from a profile folder with a non-ASCII name
