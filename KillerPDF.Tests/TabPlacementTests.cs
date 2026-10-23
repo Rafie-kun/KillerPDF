@@ -3,6 +3,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Markup;
+using System.Windows.Media;
 using System.Windows.Threading;
 using System.Xml.Linq;
 using KillerFamily.Layout;
@@ -12,6 +13,60 @@ namespace KillerPDF.Tests;
 
 public sealed class TabPlacementTests
 {
+    [Fact]
+    public void BottomTabFaceFlipsWhileItsLabelAndCloseTargetStayUpright()
+    {
+        Exception? failure = null;
+        var thread = new Thread(() =>
+        {
+            Window? window = null;
+            try
+            {
+                var markup = new XElement(Named(ViewerMarkup(), "tabBd"));
+                string[] events = ["MouseDown", "MouseRightButtonUp", "PreviewMouseLeftButtonDown",
+                    "PreviewMouseMove", "PreviewMouseLeftButtonUp", "Click"];
+                foreach (var attribute in markup.DescendantsAndSelf().Attributes().Where(item => events.Contains(item.Name.LocalName)).ToList())
+                    attribute.Remove();
+                var context = new ParserContext();
+                context.XmlnsDictionary.Add("", "http://schemas.microsoft.com/winfx/2006/xaml/presentation");
+                context.XmlnsDictionary.Add("x", "http://schemas.microsoft.com/winfx/2006/xaml");
+                var face = (Border)XamlReader.Parse(markup.ToString(), context);
+                face.DataContext = new { TabLabel = "Example.pdf", TabTip = "Example.pdf" };
+                face.Width = 200;
+                face.Height = 36;
+                var host = new Grid { Width = 220, Height = 48 };
+                host.Children.Add(face);
+                window = new Window { Content = host, Width = 240, Height = 80,
+                    Opacity = 0, ShowInTaskbar = false, ShowActivated = false };
+                window.Show();
+                foreach (bool bottom in new[] { false, true, false })
+                {
+                    host.Resources["TabPlacementTransform"] = bottom ? new ScaleTransform(1, -1) : Transform.Identity;
+                    host.Measure(new Size(220, 48));
+                    host.Arrange(new Rect(0, 0, 220, 48));
+                    host.UpdateLayout();
+                    Assert.Equal(bottom, face.TranslatePoint(new Point(), host).Y
+                        > face.TranslatePoint(new Point(0, face.ActualHeight), host).Y);
+                    var contents = (DockPanel)((Grid)face.Child).Children.OfType<DockPanel>().Single();
+                    foreach (var item in contents.Children.OfType<FrameworkElement>())
+                        Assert.True(item.TranslatePoint(new Point(0, item.ActualHeight), host).Y
+                            > item.TranslatePoint(new Point(), host).Y);
+                    var close = contents.Children.OfType<Button>().Single();
+                    var hit = host.InputHitTest(close.TranslatePoint(new Point(close.ActualWidth / 2, close.ActualHeight / 2), host))
+                        as DependencyObject;
+                    while (hit != null && !ReferenceEquals(hit, close)) hit = VisualTreeHelper.GetParent(hit);
+                    Assert.Same(close, hit);
+                }
+            }
+            catch (Exception error) { failure = error; }
+            finally { window?.Close(); }
+        });
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        Assert.True(thread.Join(TimeSpan.FromSeconds(15)), "Tab geometry check timed out.");
+        if (failure != null) System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(failure).Throw();
+    }
+
     [Fact]
     public void AboutPreferenceRemovesMenuShortcutSpaceAndRestoresTheSavedChoice()
     {

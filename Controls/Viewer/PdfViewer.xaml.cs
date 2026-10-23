@@ -65,10 +65,8 @@ namespace KillerPDF.Controls
         /// SetResourceReference, not a brush snapshot, on both states: an assigned brush would not
         /// follow a live theme switch.
         ///
-        /// "SelectionAccent", not "AccentBrush". KillerPDF uses the older family resource set
-        /// (BgCanvas / AccentLogo / TextPrimary) and has no AccentBrush key in any theme.
-        /// SetResourceReference to a missing key does not throw, it silently leaves the property
-        /// unset, which blanks the border instead of accenting it.
+        /// The pane uses the active tab's ring brush so the outline stays continuous in
+        /// fixed-accent themes as well as the configurable neutral themes.
         ///
         /// The brush moves, never the thickness - a thickness change would reflow the pane on every
         /// click between panes.
@@ -81,7 +79,7 @@ namespace KillerPDF.Controls
         {
             PaneHasFocus = focused;
             bool retro = Services.ThemeManager.Current == Services.Theme.SE98;
-            string key = focused && !retro ? "SelectionAccent" : "PaneBorderBrush";
+            string key = focused && !retro ? "TabActiveRingBrush" : "PaneBorderBrush";
             PaneBorder.SetResourceReference(Border.BorderBrushProperty, key);
             UpdatePaneFocusRing();
         }

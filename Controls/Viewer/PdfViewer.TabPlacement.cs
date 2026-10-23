@@ -7,6 +7,7 @@ namespace KillerPDF.Controls;
 public partial class PdfViewer
 {
     private static readonly object TabPlacementMenuTag = new();
+    private static readonly Transform BottomTabTransform = (Transform)new ScaleTransform(1, -1).GetAsFrozen();
     private static readonly string[] TabPlacementMargins =
     [
         "TabMargin", "TabActiveMargin", "TabInactiveFirstMargin", "TabInactiveLastMargin",
@@ -51,8 +52,11 @@ public partial class PdfViewer
     private void ApplyTabPlacementChrome(bool show)
     {
         bool bottom = TabsAtBottom && show;
+        Transform tabTransform = bottom ? BottomTabTransform : Transform.Identity;
+        if (!ReferenceEquals(TabStripBorder.Resources["TabPlacementTransform"], tabTransform))
+            TabStripBorder.Resources["TabPlacementTransform"] = tabTransform;
         CardRow.Margin = new Thickness(0, bottom ? 3 : show ? -1 : 3, 0, bottom ? -1 : 0);
-        TabStripFade.RenderTransform = bottom ? new ScaleTransform(1, -1) : Transform.Identity;
+        TabStripFade.RenderTransform = tabTransform;
         RetroTabJoinLine.VerticalAlignment = bottom ? VerticalAlignment.Top : VerticalAlignment.Bottom;
         RetroTabInnerJoin.VerticalAlignment = bottom ? VerticalAlignment.Top : VerticalAlignment.Bottom;
         RetroTabInnerJoin.Margin = bottom ? new Thickness(1, -1, 2, 0) : new Thickness(1, 0, 2, -1);

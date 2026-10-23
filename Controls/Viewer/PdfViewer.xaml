@@ -151,6 +151,7 @@
                                          selected tab visually connected to the document pane. -->
                                     <Border x:Name="tabBd" CornerRadius="0" Margin="{DynamicResource TabMargin}" Padding="{DynamicResource TabPadding}"
                                             MinWidth="160" MaxWidth="260"
+                                            RenderTransform="{DynamicResource TabPlacementTransform}" RenderTransformOrigin="0.5,0.5"
                                             UseLayoutRounding="True" SnapsToDevicePixels="True"
                                             Cursor="Hand" Background="Transparent"
                                             BorderThickness="0,0,1,0" BorderBrush="{DynamicResource PaneEdgeBrush}"
@@ -166,7 +167,8 @@
                                             <Border x:Name="tabGrain" IsHitTestVisible="False"
                                                     CornerRadius="{Binding CornerRadius, ElementName=tabBd}" Margin="-12,-4,-5,-5"
                                                     Background="{DynamicResource GrainTileBrush}" Opacity="0"/>
-                                            <DockPanel LastChildFill="True">
+                                            <DockPanel x:Name="tabContents" LastChildFill="True"
+                                                       RenderTransform="{DynamicResource TabPlacementTransform}" RenderTransformOrigin="0.5,0.5">
                                                 <Button DockPanel.Dock="Right" Content="x"
                                                         Style="{DynamicResource ToolbarButtonDanger}"
                                                         FontFamily="{DynamicResource UiFont}" FontSize="14"
