@@ -1929,6 +1929,13 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_CertCatalog_TrustPrompt">Klarer "{0}" som rot i KillerPDF? Sertifikater det utsteder, kan da godtas ved signaturverifisering. Klareringsinnstillingene i Windows forblir uendret.</sys:String>
     <sys:String x:Key="Str_CertCatalog_RemovePrompt">Fjerne "{0}" fra sertifikatkatalogen i KillerPDF?</sys:String>
     <sys:String x:Key="Str_CertCatalog_Error">Kunne ikke oppdatere sertifikatkatalogen:</sys:String>
+    <sys:String x:Key="Str_CertCatalog_LoadError">Kunne ikke lese sertifikatlisten:</sys:String>
+    <sys:String x:Key="Str_CertCatalog_WrongFileType">Velg en offentlig sertifikatfil (.cer, .crt eller .pem).</sys:String>
+    <sys:String x:Key="Str_CertCatalog_NotACertificate">Filen inneholder ikke et lesbart offentlig sertifikat.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_PrivateKey">Private nøkler og PFX-filer godtas ikke. Importer bare offentlige sertifikater.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_TooLarge">Sertifikatfilen er tom eller for stor.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Full">KillerPDF kan lagre opptil {0} importerte sertifikater.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Damaged">Sertifikatkatalogen til KillerPDF kan ikke leses og ble ikke endret. Signaturer kontrolleres bare mot Windows-klarering. Slett {0} for å begynne på nytt.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Imported">Importerte {0} sertifikater. Gjennomgå et rotsertifikat før du velger Klarer som rot.</sys:String>
     <sys:String x:Key="Str_CertCatalog_ReadOnly">Administreres av Windows.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Type">Sertifikattype</sys:String>

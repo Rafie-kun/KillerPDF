@@ -181,7 +181,7 @@ internal sealed class CertificateCatalogDialog : Window
             {
                 _entries = [];
                 ApplyFilter(null);
-                ShowError(ex);
+                ShowError(ex, "Str_CertCatalog_LoadError");
             }
         }
         finally
@@ -323,17 +323,26 @@ internal sealed class CertificateCatalogDialog : Window
         ShowMessage(string.Empty);
         try
         {
-            await Task.Run(update);
+            // A change that is refused leaves the catalog as it was, so the list stays as shown.
+            try { await Task.Run(update); }
+            catch (Exception ex)
+            {
+                ShowError(ex, "Str_CertCatalog_Error");
+                return;
+            }
             Changed = true;
-            _entries = await Task.Run(() => _catalog.Read());
-            ApplyFilter(selected);
-            if (successMessage is not null) ShowMessage(successMessage());
-        }
-        catch (Exception ex)
-        {
-            _entries = [];
-            ApplyFilter(null);
-            ShowError(ex);
+            try
+            {
+                _entries = await Task.Run(() => _catalog.Read());
+                ApplyFilter(selected);
+                if (successMessage is not null) ShowMessage(successMessage());
+            }
+            catch (Exception ex)
+            {
+                _entries = [];
+                ApplyFilter(null);
+                ShowError(ex, "Str_CertCatalog_LoadError");
+            }
         }
         finally
         {
@@ -358,9 +367,9 @@ internal sealed class CertificateCatalogDialog : Window
         _message.Visibility = message.Length == 0 ? Visibility.Collapsed : Visibility.Visible;
     }
 
-    private void ShowError(Exception exception)
+    private void ShowError(Exception exception, string prefixKey)
     {
-        string message = L("Str_CertCatalog_Error") + "\n" + exception.Message;
+        string message = L(prefixKey) + "\n" + Describe(exception);
         ShowMessage(message);
         KillerDialog.Show(this, message, Title, MessageBoxButton.OK, MessageBoxImage.Error);
     }
@@ -402,4 +411,18 @@ internal sealed class CertificateCatalogDialog : Window
     }
 
     private static string L(string key) => Application.Current?.TryFindResource(key) as string ?? key;
+
+    // Expected import and catalog problems in the user's language; anything else keeps its own text.
+    private string Describe(Exception exception) => CertificateCatalog.ProblemOf(exception) is { } problem
+        ? problem switch
+        {
+            CertificateCatalogProblem.WrongFileType => L("Str_CertCatalog_WrongFileType"),
+            CertificateCatalogProblem.NotACertificate => L("Str_CertCatalog_NotACertificate"),
+            CertificateCatalogProblem.PrivateKey => L("Str_CertCatalog_PrivateKey"),
+            CertificateCatalogProblem.TooLarge => L("Str_CertCatalog_TooLarge"),
+            CertificateCatalogProblem.CatalogFull => string.Format(CultureInfo.CurrentCulture,
+                L("Str_CertCatalog_Full"), CertificateCatalog.MaximumCertificates),
+            _ => string.Format(CultureInfo.CurrentCulture, L("Str_CertCatalog_Damaged"), _catalog.CatalogPath)
+        }
+        : exception.Message;
 }

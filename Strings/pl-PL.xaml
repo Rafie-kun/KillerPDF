@@ -1917,6 +1917,13 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_CertCatalog_TrustPrompt">Ufać certyfikatowi "{0}" jako głównemu w KillerPDF? Wystawione przez niego certyfikaty będą mogły być akceptowane podczas weryfikacji podpisów. Ustawienia zaufania systemu Windows pozostaną bez zmian.</sys:String>
     <sys:String x:Key="Str_CertCatalog_RemovePrompt">Usunąć "{0}" z katalogu certyfikatów KillerPDF?</sys:String>
     <sys:String x:Key="Str_CertCatalog_Error">Nie udało się zaktualizować katalogu certyfikatów:</sys:String>
+    <sys:String x:Key="Str_CertCatalog_LoadError">Nie można odczytać listy certyfikatów:</sys:String>
+    <sys:String x:Key="Str_CertCatalog_WrongFileType">Wybierz plik certyfikatu publicznego (.cer, .crt lub .pem).</sys:String>
+    <sys:String x:Key="Str_CertCatalog_NotACertificate">Plik nie zawiera czytelnego certyfikatu publicznego.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_PrivateKey">Klucze prywatne i pliki PFX nie są akceptowane. Importuj tylko certyfikaty publiczne.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_TooLarge">Plik certyfikatu jest pusty lub zbyt duży.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Full">KillerPDF może przechowywać do {0} zaimportowanych certyfikatów.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Damaged">Nie można odczytać katalogu certyfikatów KillerPDF, więc pozostawiono go bez zmian. Podpisy są sprawdzane tylko względem zaufania systemu Windows. Aby zacząć od nowa, usuń {0}.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Imported">Liczba zaimportowanych certyfikatów: {0}. Sprawdź certyfikat główny przed wybraniem opcji Zaufaj jako głównemu.</sys:String>
     <sys:String x:Key="Str_CertCatalog_ReadOnly">Zarządzany przez system Windows.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Type">Typ certyfikatu</sys:String>

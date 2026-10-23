@@ -1909,6 +1909,13 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_CertCatalog_TrustPrompt">KillerPDF-এ "{0}"-কে রুট হিসেবে বিশ্বাস করবেন? তাহলে এর ইস্যু করা সার্টিফিকেটগুলো স্বাক্ষর যাচাইয়ের জন্য গ্রহণ করা যেতে পারে। Windows-এর বিশ্বাসের সেটিংস অপরিবর্তিত থাকবে।</sys:String>
     <sys:String x:Key="Str_CertCatalog_RemovePrompt">KillerPDF সার্টিফিকেট ক্যাটালগ থেকে "{0}" সরাবেন?</sys:String>
     <sys:String x:Key="Str_CertCatalog_Error">সার্টিফিকেট ক্যাটালগ হালনাগাদ করা যায়নি:</sys:String>
+    <sys:String x:Key="Str_CertCatalog_LoadError">সার্টিফিকেট তালিকা পড়া যায়নি:</sys:String>
+    <sys:String x:Key="Str_CertCatalog_WrongFileType">একটি পাবলিক সার্টিফিকেট ফাইল বেছে নিন (.cer, .crt বা .pem)।</sys:String>
+    <sys:String x:Key="Str_CertCatalog_NotACertificate">ফাইলটিতে পড়ার যোগ্য কোনো পাবলিক সার্টিফিকেট নেই।</sys:String>
+    <sys:String x:Key="Str_CertCatalog_PrivateKey">প্রাইভেট কী ও PFX ফাইল গ্রহণযোগ্য নয়। শুধু পাবলিক সার্টিফিকেট ইমপোর্ট করুন।</sys:String>
+    <sys:String x:Key="Str_CertCatalog_TooLarge">সার্টিফিকেট ফাইলটি খালি বা খুব বড়।</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Full">KillerPDF সর্বোচ্চ {0}টি ইমপোর্ট করা সার্টিফিকেট রাখতে পারে।</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Damaged">KillerPDF সার্টিফিকেট ক্যাটালগ পড়া যায়নি এবং এটি অপরিবর্তিত রাখা হয়েছে। স্বাক্ষর শুধু Windows ট্রাস্ট দিয়ে যাচাই করা হচ্ছে। নতুন করে শুরু করতে {0} মুছে ফেলুন।</sys:String>
     <sys:String x:Key="Str_CertCatalog_Imported">{0}টি সার্টিফিকেট আমদানি করা হয়েছে। রুট হিসেবে বিশ্বাস করুন বেছে নেওয়ার আগে রুট সার্টিফিকেটটি পর্যালোচনা করুন।</sys:String>
     <sys:String x:Key="Str_CertCatalog_ReadOnly">Windows দ্বারা পরিচালিত।</sys:String>
     <sys:String x:Key="Str_CertCatalog_Type">সার্টিফিকেটের ধরন</sys:String>

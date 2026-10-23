@@ -1816,6 +1816,13 @@
     <sys:String x:Key="Str_CertCatalog_TrustPrompt">Ali želite potrdilu "{0}" v KillerPDF zaupati kot korenskemu? Potrdila, ki jih izdaja, bodo lahko sprejeta pri preverjanju podpisov. Nastavitve zaupanja v sistemu Windows bodo ostale nespremenjene.</sys:String>
     <sys:String x:Key="Str_CertCatalog_RemovePrompt">Ali želite odstraniti "{0}" iz kataloga potrdil KillerPDF?</sys:String>
     <sys:String x:Key="Str_CertCatalog_Error">Kataloga potrdil ni bilo mogoče posodobiti:</sys:String>
+    <sys:String x:Key="Str_CertCatalog_LoadError">Seznama potrdil ni bilo mogoče prebrati:</sys:String>
+    <sys:String x:Key="Str_CertCatalog_WrongFileType">Izberite datoteko javnega potrdila (.cer, .crt ali .pem).</sys:String>
+    <sys:String x:Key="Str_CertCatalog_NotACertificate">Datoteka ne vsebuje berljivega javnega potrdila.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_PrivateKey">Zasebni ključi in datoteke PFX niso sprejeti. Uvozite samo javna potrdila.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_TooLarge">Datoteka potrdila je prazna ali prevelika.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Full">KillerPDF lahko shrani največ {0} uvoženih potrdil.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Damaged">Kataloga potrdil KillerPDF ni mogoče prebrati, zato je ostal nespremenjen. Podpisi se preverjajo samo glede na zaupanje sistema Windows. Če želite začeti znova, izbrišite {0}.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Imported">Število uvoženih potrdil: {0}. Preglejte korensko potrdilo, preden izberete Zaupaj kot korenskemu.</sys:String>
     <sys:String x:Key="Str_CertCatalog_ReadOnly">Upravlja Windows.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Type">Vrsta potrdila</sys:String>

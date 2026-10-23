@@ -1911,6 +1911,13 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_CertCatalog_TrustPrompt">要在 KillerPDF 中將「{0}」信任為根憑證嗎？此憑證簽發的憑證之後可被接受用於簽章驗證。Windows 的信任設定將維持不變。</sys:String>
     <sys:String x:Key="Str_CertCatalog_RemovePrompt">要從 KillerPDF 憑證目錄中移除「{0}」嗎？</sys:String>
     <sys:String x:Key="Str_CertCatalog_Error">無法更新憑證目錄：</sys:String>
+    <sys:String x:Key="Str_CertCatalog_LoadError">無法讀取憑證清單:</sys:String>
+    <sys:String x:Key="Str_CertCatalog_WrongFileType">請選擇公開憑證檔案 (.cer、.crt 或 .pem)。</sys:String>
+    <sys:String x:Key="Str_CertCatalog_NotACertificate">此檔案不包含可讀取的公開憑證。</sys:String>
+    <sys:String x:Key="Str_CertCatalog_PrivateKey">不接受私密金鑰和 PFX 檔案。請只匯入公開憑證。</sys:String>
+    <sys:String x:Key="Str_CertCatalog_TooLarge">憑證檔案是空的或太大。</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Full">KillerPDF 最多可儲存 {0} 個匯入的憑證。</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Damaged">無法讀取 KillerPDF 憑證目錄，已保持不變。簽章僅依 Windows 信任進行檢查。若要重新開始，請刪除 {0}。</sys:String>
     <sys:String x:Key="Str_CertCatalog_Imported">已匯入 {0} 個憑證。選擇「信任為根憑證」之前，請先檢查該根憑證。</sys:String>
     <sys:String x:Key="Str_CertCatalog_ReadOnly">由 Windows 管理。</sys:String>
     <sys:String x:Key="Str_CertCatalog_Type">憑證類型</sys:String>

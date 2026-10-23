@@ -37,9 +37,21 @@ internal sealed record CertificateCatalogEntry(
     public string DisplayName => Subject;
 }
 
+/// <summary>What went wrong with an import or the stored catalog, so the dialog can say it in
+/// the user's language; the message stays English for the command line and logs.</summary>
+internal enum CertificateCatalogProblem
+{
+    WrongFileType,
+    NotACertificate,
+    PrivateKey,
+    TooLarge,
+    CatalogFull,
+    CatalogDamaged
+}
+
 internal sealed class CertificateCatalog
 {
-    private const int MaximumCertificates = 256;
+    internal const int MaximumCertificates = 256;
     private const int MaximumCertificateBytes = 128 * 1024;
     private const int MaximumImportBytes = 4 * 1024 * 1024;
     private const int MaximumCatalogBytes = 8 * 1024 * 1024;
@@ -51,6 +63,24 @@ internal sealed class CertificateCatalog
         _directory = Path.GetFullPath(directory ?? AppDataPaths.UserRoot);
         _catalogPath = Path.Combine(_directory, "certificates.json");
     }
+
+    private const string ProblemKey = "KillerPDF.CertificateCatalogProblem";
+
+    // InvalidDataException is sealed, so the problem rides in its Data for the dialog to localize.
+    private static InvalidDataException Problem(CertificateCatalogProblem problem, string message,
+        Exception? innerException = null)
+    {
+        var error = new InvalidDataException(message, innerException);
+        error.Data[ProblemKey] = problem;
+        return error;
+    }
+
+    /// <summary>The import or catalog problem an exception reports, if it is one of the expected ones.</summary>
+    public static CertificateCatalogProblem? ProblemOf(Exception exception) =>
+        exception.Data[ProblemKey] is CertificateCatalogProblem problem ? problem : null;
+
+    /// <summary>The stored catalog file; deleting it starts an empty catalog.</summary>
+    public string CatalogPath => _catalogPath;
 
     public IReadOnlyList<CertificateCatalogEntry> Read(bool includeWindows = true)
     {
@@ -71,11 +101,21 @@ internal sealed class CertificateCatalog
         void ReadWindows(StoreName name, StoreLocation location, CertificateCatalogSource source)
         {
             using var store = new X509Store(name, location);
-            store.Open(OpenFlags.ReadOnly | OpenFlags.OpenExistingOnly);
+            try { store.Open(OpenFlags.ReadOnly | OpenFlags.OpenExistingOnly); }
+            catch (CryptographicException) { return; }
             foreach (X509Certificate2 certificate in store.Certificates)
                 using (certificate)
-                    entries.Add(FromDer(certificate.RawData, name == StoreName.Root, source));
+                    AddWindowsCertificate(entries, certificate.RawData, name == StoreName.Root, source);
         }
+    }
+
+    /// <summary>Lists a Windows store certificate, skipping one KillerPDF cannot read. The store is
+    /// managed by Windows, and one odd entry must not hide the rest of the list.</summary>
+    internal static void AddWindowsCertificate(List<CertificateCatalogEntry> entries, byte[] rawData,
+        bool trusted, CertificateCatalogSource source)
+    {
+        try { entries.Add(FromDer(rawData, trusted, source)); }
+        catch (InvalidDataException) { }
     }
 
     public int Import(string path)
@@ -85,7 +125,8 @@ internal sealed class CertificateCatalog
         if (!extension.Equals(".cer", StringComparison.OrdinalIgnoreCase)
             && !extension.Equals(".crt", StringComparison.OrdinalIgnoreCase)
             && !extension.Equals(".pem", StringComparison.OrdinalIgnoreCase))
-            throw new InvalidDataException("Choose a public certificate file (.cer, .crt, or .pem).");
+            throw Problem(CertificateCatalogProblem.WrongFileType,
+                "Choose a public certificate file (.cer, .crt, or .pem).");
         byte[] data = ReadBoundedFile(path, MaximumImportBytes);
         List<CertificateCatalogEntry> imported = ReadImport(data);
         using FileStream writeLock = AcquireWriteLock();
@@ -96,7 +137,8 @@ internal sealed class CertificateCatalog
             if (fingerprints.Add(entry.Fingerprint)) { entries.Add(entry); added++; }
         if (added == 0) return 0;
         if (entries.Count > MaximumCertificates)
-            throw new InvalidDataException($"KillerPDF can store up to {MaximumCertificates} imported certificates.");
+            throw Problem(CertificateCatalogProblem.CatalogFull,
+                $"KillerPDF can store up to {MaximumCertificates} imported certificates.");
         Save(entries);
         return added;
     }
@@ -127,7 +169,14 @@ internal sealed class CertificateCatalog
     public PdfSignatureInspectionReport Inspect(PdfDocument document)
     {
         ArgumentNullException.ThrowIfNull(document);
-        List<CertificateCatalogEntry> entries = ReadPrivate();
+        List<CertificateCatalogEntry> entries;
+        // A catalog that cannot be read adds no certificates and no trust, so signatures are
+        // checked against Windows trust alone instead of failing outright.
+        try { entries = ReadPrivate(); }
+        catch (Exception error) when (error is InvalidDataException or IOException or UnauthorizedAccessException)
+        {
+            entries = [];
+        }
         var certificates = new List<X509Certificate2>();
         var roots = new List<X509Certificate2>();
         try
@@ -193,6 +242,11 @@ internal sealed class CertificateCatalog
         try { bytes = ReadBoundedFile(_catalogPath, MaximumCatalogBytes); }
         catch (FileNotFoundException) { return []; }
         catch (DirectoryNotFoundException) { return []; }
+        catch (InvalidDataException error)
+        {
+            throw Problem(CertificateCatalogProblem.CatalogDamaged,
+                "The certificate catalog cannot be read. It has been left unchanged.", error);
+        }
         try
         {
             using JsonDocument json = JsonDocument.Parse(bytes, new JsonDocumentOptions { MaxDepth = 8 });
@@ -218,9 +272,10 @@ internal sealed class CertificateCatalog
             return entries;
         }
         catch (Exception error) when (error is JsonException or FormatException
-            or InvalidOperationException or CryptographicException)
+            or InvalidOperationException or CryptographicException or InvalidDataException)
         {
-            throw new InvalidDataException("The certificate catalog cannot be read. It has been left unchanged.", error);
+            throw Problem(CertificateCatalogProblem.CatalogDamaged,
+                "The certificate catalog cannot be read. It has been left unchanged.", error);
         }
     }
 
@@ -243,7 +298,8 @@ internal sealed class CertificateCatalog
             json.WriteEndObject();
         }
         if (output.Length > MaximumCatalogBytes)
-            throw new InvalidDataException("The certificate catalog has reached its storage limit.");
+            throw Problem(CertificateCatalogProblem.CatalogFull,
+                "The certificate catalog has reached its storage limit.");
         AtomicFileOutput.Write(_catalogPath, output.ToArray());
     }
 
@@ -269,7 +325,8 @@ internal sealed class CertificateCatalog
     {
         using var input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete);
         if (input.Length is <= 0 || input.Length > maximumBytes)
-            throw new InvalidDataException("The certificate file is empty or exceeds the size limit.");
+            throw Problem(CertificateCatalogProblem.TooLarge,
+                "The certificate file is empty or exceeds the size limit.");
         var bytes = new byte[checked((int)input.Length)];
         input.ReadExactly(bytes);
         return bytes;
@@ -283,7 +340,8 @@ internal sealed class CertificateCatalog
         try { text = new UTF8Encoding(false, true).GetString(data); }
         catch (DecoderFallbackException error)
         {
-            throw new InvalidDataException("The file does not contain a public DER or PEM certificate.", error);
+            throw Problem(CertificateCatalogProblem.NotACertificate,
+                "The file does not contain a public DER or PEM certificate.", error);
         }
         ReadOnlySpan<char> pending = text.AsSpan();
         if (!pending.IsEmpty && pending[0] == '\uFEFF') pending = pending[1..];
@@ -293,28 +351,38 @@ internal sealed class CertificateCatalog
             if (!PemEncoding.TryFind(pending, out PemFields fields)
                 || !pending[..fields.Location.Start].Trim().IsEmpty
                 || !pending[fields.Label].SequenceEqual("CERTIFICATE"))
-                throw new InvalidDataException("PEM files may contain only public CERTIFICATE blocks. Private keys are not accepted.");
+                throw Problem(CertificateCatalogProblem.PrivateKey,
+                    "PEM files may contain only public CERTIFICATE blocks. Private keys are not accepted.");
             if (entries.Count >= MaximumCertificates || fields.DecodedDataLength > MaximumCertificateBytes)
-                throw new InvalidDataException("The certificate file exceeds the import limits.");
+                throw Problem(CertificateCatalogProblem.TooLarge,
+                    "The certificate file exceeds the import limits.");
             byte[] der = Convert.FromBase64String(pending[fields.Base64Data].ToString());
             entries.Add(FromDer(der, false, CertificateCatalogSource.KillerPdf));
             pending = pending[fields.Location.End..];
         }
-        if (entries.Count == 0) throw new InvalidDataException("The PEM file contains no public certificates.");
+        if (entries.Count == 0)
+            throw Problem(CertificateCatalogProblem.NotACertificate,
+                "The PEM file contains no public certificates.");
         return entries;
     }
 
     private static CertificateCatalogEntry FromDer(byte[] data, bool trusted, CertificateCatalogSource source)
     {
         if (data.Length is <= 0 or > MaximumCertificateBytes)
-            throw new InvalidDataException("A certificate is empty or exceeds the size limit.");
+            throw Problem(CertificateCatalogProblem.TooLarge,
+                "A certificate is empty or exceeds the size limit.");
         try
         {
             if (X509Certificate2.GetCertContentType(data) != X509ContentType.Cert)
-                throw new InvalidDataException("Only public certificates can be imported. Private keys and PFX files are not accepted.");
+                throw Problem(CertificateCatalogProblem.PrivateKey,
+                    "Only public certificates can be imported. Private keys and PFX files are not accepted.");
             using X509Certificate2 certificate = X509CertificateLoader.LoadCertificate(data);
-            if (certificate.HasPrivateKey || !data.AsSpan().SequenceEqual(certificate.RawData))
-                throw new InvalidDataException("The file must contain only a public DER certificate.");
+            if (certificate.HasPrivateKey)
+                throw Problem(CertificateCatalogProblem.PrivateKey,
+                    "Only public certificates can be imported. Private keys and PFX files are not accepted.");
+            if (!data.AsSpan().SequenceEqual(certificate.RawData))
+                throw Problem(CertificateCatalogProblem.NotACertificate,
+                    "The file must contain only a public DER certificate.");
             bool authority = certificate.Extensions["2.5.29.19"] is X509BasicConstraintsExtension constraints
                 && constraints.CertificateAuthority;
             return new CertificateCatalogEntry(certificate.GetCertHashString(HashAlgorithmName.SHA256),
@@ -323,7 +391,8 @@ internal sealed class CertificateCatalog
         }
         catch (CryptographicException error)
         {
-            throw new InvalidDataException("The file does not contain a readable public certificate.", error);
+            throw Problem(CertificateCatalogProblem.NotACertificate,
+                "The file does not contain a readable public certificate.", error);
         }
     }
 

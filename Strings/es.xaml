@@ -1909,6 +1909,13 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_CertCatalog_TrustPrompt">¿Confiar en "{0}" como raíz en KillerPDF? Los certificados que emita podrán aceptarse para verificar firmas. La configuración de confianza de Windows no cambiará.</sys:String>
     <sys:String x:Key="Str_CertCatalog_RemovePrompt">¿Eliminar "{0}" del catálogo de certificados de KillerPDF?</sys:String>
     <sys:String x:Key="Str_CertCatalog_Error">No se pudo actualizar el catálogo de certificados:</sys:String>
+    <sys:String x:Key="Str_CertCatalog_LoadError">No se pudo leer la lista de certificados:</sys:String>
+    <sys:String x:Key="Str_CertCatalog_WrongFileType">Elija un archivo de certificado público (.cer, .crt o .pem).</sys:String>
+    <sys:String x:Key="Str_CertCatalog_NotACertificate">El archivo no contiene un certificado público legible.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_PrivateKey">No se aceptan claves privadas ni archivos PFX. Importe solo certificados públicos.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_TooLarge">El archivo de certificado está vacío o es demasiado grande.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Full">KillerPDF puede almacenar hasta {0} certificados importados.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Damaged">El catálogo de certificados de KillerPDF no se puede leer y se dejó sin cambios. Las firmas se comprueban solo con la confianza de Windows. Para empezar de nuevo, elimine {0}.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Imported">Se importaron {0} certificados. Revise una raíz antes de elegir Confiar como raíz.</sys:String>
     <sys:String x:Key="Str_CertCatalog_ReadOnly">Administrado por Windows.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Type">Tipo de certificado</sys:String>

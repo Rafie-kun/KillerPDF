@@ -1929,6 +1929,13 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_CertCatalog_TrustPrompt">KillerPDF で「{0}」をルートとして信頼しますか？ この証明書が発行した証明書は、署名の検証時に受け入れられるようになります。Windows の信頼設定は変更されません。</sys:String>
     <sys:String x:Key="Str_CertCatalog_RemovePrompt">KillerPDF の証明書カタログから「{0}」を削除しますか？</sys:String>
     <sys:String x:Key="Str_CertCatalog_Error">証明書カタログを更新できませんでした:</sys:String>
+    <sys:String x:Key="Str_CertCatalog_LoadError">証明書の一覧を読み込めませんでした:</sys:String>
+    <sys:String x:Key="Str_CertCatalog_WrongFileType">公開証明書ファイル (.cer、.crt、.pem) を選択してください。</sys:String>
+    <sys:String x:Key="Str_CertCatalog_NotACertificate">このファイルには読み取り可能な公開証明書が含まれていません。</sys:String>
+    <sys:String x:Key="Str_CertCatalog_PrivateKey">秘密キーと PFX ファイルは受け付けません。公開証明書のみをインポートしてください。</sys:String>
+    <sys:String x:Key="Str_CertCatalog_TooLarge">証明書ファイルが空か、大きすぎます。</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Full">KillerPDF に保存できるインポート済み証明書は {0} 件までです。</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Damaged">KillerPDF の証明書カタログを読み取れないため、変更せずに残しました。署名は Windows の信頼のみで検証されます。最初からやり直すには {0} を削除してください。</sys:String>
     <sys:String x:Key="Str_CertCatalog_Imported">{0} 件の証明書をインポートしました。「ルートとして信頼」を選ぶ前にルート証明書を確認してください。</sys:String>
     <sys:String x:Key="Str_CertCatalog_ReadOnly">Windows によって管理されています。</sys:String>
     <sys:String x:Key="Str_CertCatalog_Type">証明書の種類</sys:String>

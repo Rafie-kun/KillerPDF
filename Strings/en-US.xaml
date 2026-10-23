@@ -1928,6 +1928,13 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_CertCatalog_TrustPrompt">Trust "{0}" as a root in KillerPDF? Certificates it issues can then be accepted for signature verification. Windows trust will stay unchanged.</sys:String>
     <sys:String x:Key="Str_CertCatalog_RemovePrompt">Remove "{0}" from the KillerPDF certificate catalog?</sys:String>
     <sys:String x:Key="Str_CertCatalog_Error">Could not update the certificate catalog:</sys:String>
+    <sys:String x:Key="Str_CertCatalog_LoadError">Could not read the certificate list:</sys:String>
+    <sys:String x:Key="Str_CertCatalog_WrongFileType">Choose a public certificate file (.cer, .crt, or .pem).</sys:String>
+    <sys:String x:Key="Str_CertCatalog_NotACertificate">The file does not contain a readable public certificate.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_PrivateKey">Private keys and PFX files are not accepted. Import only public certificates.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_TooLarge">The certificate file is empty or too large.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Full">KillerPDF can store up to {0} imported certificates.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Damaged">The KillerPDF certificate catalog cannot be read and was left unchanged. Signatures are checked against Windows trust only. To start over, delete {0}.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Imported">Imported {0} certificate(s). Review a root before choosing Trust as Root.</sys:String>
     <sys:String x:Key="Str_CertCatalog_ReadOnly">Managed by Windows.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Type">Certificate type</sys:String>

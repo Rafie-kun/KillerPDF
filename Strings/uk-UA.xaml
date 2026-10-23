@@ -1929,6 +1929,13 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_CertCatalog_TrustPrompt">Довіряти сертифікату "{0}" як кореневому в KillerPDF? Видані ним сертифікати зможуть прийматися під час перевірки підписів. Налаштування довіри Windows залишаться без змін.</sys:String>
     <sys:String x:Key="Str_CertCatalog_RemovePrompt">Видалити "{0}" з каталогу сертифікатів KillerPDF?</sys:String>
     <sys:String x:Key="Str_CertCatalog_Error">Не вдалося оновити каталог сертифікатів:</sys:String>
+    <sys:String x:Key="Str_CertCatalog_LoadError">Не вдалося прочитати список сертифікатів:</sys:String>
+    <sys:String x:Key="Str_CertCatalog_WrongFileType">Виберіть файл відкритого сертифіката (.cer, .crt або .pem).</sys:String>
+    <sys:String x:Key="Str_CertCatalog_NotACertificate">Файл не містить придатного для читання відкритого сертифіката.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_PrivateKey">Закриті ключі та файли PFX не приймаються. Імпортуйте лише відкриті сертифікати.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_TooLarge">Файл сертифіката порожній або завеликий.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Full">KillerPDF може зберігати до {0} імпортованих сертифікатів.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Damaged">Каталог сертифікатів KillerPDF не вдається прочитати, тому його залишено без змін. Підписи перевіряються лише за довірою Windows. Щоб почати спочатку, видаліть {0}.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Imported">Імпортовано сертифікатів: {0}. Перевірте кореневий сертифікат, перш ніж вибрати «Довіряти як кореневому».</sys:String>
     <sys:String x:Key="Str_CertCatalog_ReadOnly">Керується Windows.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Type">Тип сертифіката</sys:String>

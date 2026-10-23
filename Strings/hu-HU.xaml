@@ -1916,6 +1916,13 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_CertCatalog_TrustPrompt">Megbízható gyökértanúsítványként kezeli a(z) "{0}" tanúsítványt a KillerPDF-ben? Az általa kibocsátott tanúsítványok ezután elfogadhatók az aláírások ellenőrzésekor. A Windows megbízhatósági beállításai nem változnak.</sys:String>
     <sys:String x:Key="Str_CertCatalog_RemovePrompt">Eltávolítja a(z) "{0}" tanúsítványt a KillerPDF tanúsítványkatalógusából?</sys:String>
     <sys:String x:Key="Str_CertCatalog_Error">Nem sikerült frissíteni a tanúsítványkatalógust:</sys:String>
+    <sys:String x:Key="Str_CertCatalog_LoadError">A tanúsítványlista nem olvasható:</sys:String>
+    <sys:String x:Key="Str_CertCatalog_WrongFileType">Válasszon nyilvános tanúsítványfájlt (.cer, .crt vagy .pem).</sys:String>
+    <sys:String x:Key="Str_CertCatalog_NotACertificate">A fájl nem tartalmaz olvasható nyilvános tanúsítványt.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_PrivateKey">Privát kulcsok és PFX-fájlok nem fogadhatók el. Csak nyilvános tanúsítványokat importáljon.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_TooLarge">A tanúsítványfájl üres vagy túl nagy.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Full">A KillerPDF legfeljebb {0} importált tanúsítványt tárolhat.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Damaged">A KillerPDF tanúsítványkatalógusa nem olvasható, ezért változatlanul maradt. Az aláírások ellenőrzése csak a Windows megbízhatósága alapján történik. Az újrakezdéshez törölje ezt: {0}.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Imported">{0} tanúsítvány importálva. Ellenőrizze a gyökértanúsítványt, mielőtt megbízhatóvá teszi.</sys:String>
     <sys:String x:Key="Str_CertCatalog_ReadOnly">A Windows kezeli.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Type">Tanúsítvány típusa</sys:String>

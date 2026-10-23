@@ -1913,6 +1913,13 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_CertCatalog_TrustPrompt">要在 KillerPDF 中将“{0}”信任为根证书吗？此证书颁发的证书随后可被接受用于签名验证。Windows 的信任设置将保持不变。</sys:String>
     <sys:String x:Key="Str_CertCatalog_RemovePrompt">要从 KillerPDF 证书目录中移除“{0}”吗？</sys:String>
     <sys:String x:Key="Str_CertCatalog_Error">无法更新证书目录：</sys:String>
+    <sys:String x:Key="Str_CertCatalog_LoadError">无法读取证书列表:</sys:String>
+    <sys:String x:Key="Str_CertCatalog_WrongFileType">请选择公共证书文件 (.cer、.crt 或 .pem)。</sys:String>
+    <sys:String x:Key="Str_CertCatalog_NotACertificate">该文件不包含可读取的公共证书。</sys:String>
+    <sys:String x:Key="Str_CertCatalog_PrivateKey">不接受私钥和 PFX 文件。请仅导入公共证书。</sys:String>
+    <sys:String x:Key="Str_CertCatalog_TooLarge">证书文件为空或过大。</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Full">KillerPDF 最多可存储 {0} 个导入的证书。</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Damaged">无法读取 KillerPDF 证书目录，已保持不变。签名仅按 Windows 信任进行检查。若要重新开始，请删除 {0}。</sys:String>
     <sys:String x:Key="Str_CertCatalog_Imported">已导入 {0} 个证书。选择“信任为根证书”之前，请先检查该根证书。</sys:String>
     <sys:String x:Key="Str_CertCatalog_ReadOnly">由 Windows 管理。</sys:String>
     <sys:String x:Key="Str_CertCatalog_Type">证书类型</sys:String>

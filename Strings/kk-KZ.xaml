@@ -1932,6 +1932,13 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_CertCatalog_TrustPrompt">KillerPDF ішінде "{0}" сертификатына түбірлік сертификат ретінде сену керек пе? Ол берген сертификаттар қолтаңбаларды тексеру кезінде қабылдануы мүмкін. Windows сенімділік параметрлері өзгермейді.</sys:String>
     <sys:String x:Key="Str_CertCatalog_RemovePrompt">"{0}" сертификатын KillerPDF сертификаттар каталогынан жою керек пе?</sys:String>
     <sys:String x:Key="Str_CertCatalog_Error">Сертификаттар каталогын жаңарту мүмкін болмады:</sys:String>
+    <sys:String x:Key="Str_CertCatalog_LoadError">Сертификаттар тізімін оқу мүмкін болмады:</sys:String>
+    <sys:String x:Key="Str_CertCatalog_WrongFileType">Ашық сертификат файлын таңдаңыз (.cer, .crt немесе .pem).</sys:String>
+    <sys:String x:Key="Str_CertCatalog_NotACertificate">Файлда оқылатын ашық сертификат жоқ.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_PrivateKey">Жабық кілттер мен PFX файлдары қабылданбайды. Тек ашық сертификаттарды импорттаңыз.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_TooLarge">Сертификат файлы бос немесе тым үлкен.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Full">KillerPDF ең көбі {0} импортталған сертификатты сақтай алады.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Damaged">KillerPDF сертификаттар каталогын оқу мүмкін емес, ол өзгертілмей қалдырылды. Қолтаңбалар тек Windows сеніміне қарай тексеріледі. Қайта бастау үшін {0} жойыңыз.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Imported">{0} сертификат импортталды. Түбірлік сертификатқа сенім білдірмес бұрын оны тексеріңіз.</sys:String>
     <sys:String x:Key="Str_CertCatalog_ReadOnly">Windows басқарады.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Type">Сертификат түрі</sys:String>

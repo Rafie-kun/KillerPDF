@@ -1914,6 +1914,13 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_CertCatalog_TrustPrompt">Důvěřovat certifikátu "{0}" jako kořenovému v KillerPDF? Certifikáty, které vydá, pak mohou být přijaty při ověřování podpisů. Nastavení důvěry ve Windows zůstane beze změny.</sys:String>
     <sys:String x:Key="Str_CertCatalog_RemovePrompt">Odebrat "{0}" z katalogu certifikátů KillerPDF?</sys:String>
     <sys:String x:Key="Str_CertCatalog_Error">Katalog certifikátů se nepodařilo aktualizovat:</sys:String>
+    <sys:String x:Key="Str_CertCatalog_LoadError">Seznam certifikátů nelze načíst:</sys:String>
+    <sys:String x:Key="Str_CertCatalog_WrongFileType">Vyberte soubor veřejného certifikátu (.cer, .crt nebo .pem).</sys:String>
+    <sys:String x:Key="Str_CertCatalog_NotACertificate">Soubor neobsahuje čitelný veřejný certifikát.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_PrivateKey">Soukromé klíče a soubory PFX nejsou přijímány. Importujte pouze veřejné certifikáty.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_TooLarge">Soubor certifikátu je prázdný nebo příliš velký.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Full">KillerPDF může uložit nejvýše {0} importovaných certifikátů.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Damaged">Katalog certifikátů KillerPDF nelze přečíst a zůstal beze změny. Podpisy se ověřují pouze proti důvěře Windows. Chcete-li začít znovu, odstraňte {0}.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Imported">Počet importovaných certifikátů: {0}. Před volbou Důvěřovat jako kořenovému si kořenový certifikát zkontrolujte.</sys:String>
     <sys:String x:Key="Str_CertCatalog_ReadOnly">Spravováno systémem Windows.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Type">Typ certifikátu</sys:String>

@@ -1929,6 +1929,13 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_CertCatalog_TrustPrompt">Approuver "{0}" comme racine dans KillerPDF ? Les certificats qu'il émet pourront alors être acceptés pour la vérification des signatures. Les paramètres de confiance de Windows resteront inchangés.</sys:String>
     <sys:String x:Key="Str_CertCatalog_RemovePrompt">Supprimer "{0}" du catalogue de certificats de KillerPDF ?</sys:String>
     <sys:String x:Key="Str_CertCatalog_Error">Impossible de mettre à jour le catalogue de certificats :</sys:String>
+    <sys:String x:Key="Str_CertCatalog_LoadError">Impossible de lire la liste des certificats :</sys:String>
+    <sys:String x:Key="Str_CertCatalog_WrongFileType">Choisissez un fichier de certificat public (.cer, .crt ou .pem).</sys:String>
+    <sys:String x:Key="Str_CertCatalog_NotACertificate">Le fichier ne contient aucun certificat public lisible.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_PrivateKey">Les clés privées et les fichiers PFX ne sont pas acceptés. Importez uniquement des certificats publics.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_TooLarge">Le fichier de certificat est vide ou trop volumineux.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Full">KillerPDF peut stocker jusqu'à {0} certificats importés.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Damaged">Le catalogue de certificats de KillerPDF est illisible et n'a pas été modifié. Les signatures sont vérifiées uniquement avec la confiance de Windows. Pour repartir de zéro, supprimez {0}.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Imported">{0} certificat(s) importé(s). Examinez une racine avant de choisir Approuver comme racine.</sys:String>
     <sys:String x:Key="Str_CertCatalog_ReadOnly">Géré par Windows.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Type">Type de certificat</sys:String>

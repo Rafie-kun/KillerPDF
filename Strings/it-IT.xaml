@@ -1929,6 +1929,13 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_CertCatalog_TrustPrompt">Considerare "{0}" attendibile come radice in KillerPDF? I certificati che emette potranno essere accettati per la verifica delle firme. Le impostazioni di attendibilità di Windows resteranno invariate.</sys:String>
     <sys:String x:Key="Str_CertCatalog_RemovePrompt">Rimuovere "{0}" dal catalogo dei certificati di KillerPDF?</sys:String>
     <sys:String x:Key="Str_CertCatalog_Error">Impossibile aggiornare il catalogo dei certificati:</sys:String>
+    <sys:String x:Key="Str_CertCatalog_LoadError">Impossibile leggere l'elenco dei certificati:</sys:String>
+    <sys:String x:Key="Str_CertCatalog_WrongFileType">Scegli un file di certificato pubblico (.cer, .crt o .pem).</sys:String>
+    <sys:String x:Key="Str_CertCatalog_NotACertificate">Il file non contiene un certificato pubblico leggibile.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_PrivateKey">Chiavi private e file PFX non sono accettati. Importa solo certificati pubblici.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_TooLarge">Il file del certificato è vuoto o troppo grande.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Full">KillerPDF può archiviare fino a {0} certificati importati.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Damaged">Il catalogo dei certificati di KillerPDF non è leggibile ed è stato lasciato invariato. Le firme vengono verificate solo con l'attendibilità di Windows. Per ricominciare, elimina {0}.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Imported">Importati {0} certificati. Esamina una radice prima di scegliere Considera attendibile come radice.</sys:String>
     <sys:String x:Key="Str_CertCatalog_ReadOnly">Gestito da Windows.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Type">Tipo di certificato</sys:String>

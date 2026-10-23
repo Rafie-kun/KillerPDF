@@ -1929,6 +1929,13 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_CertCatalog_TrustPrompt">Tin cậy "{0}" làm chứng chỉ gốc trong KillerPDF? Các chứng chỉ do chứng chỉ này cấp sau đó có thể được chấp nhận khi xác minh chữ ký. Cài đặt tin cậy của Windows sẽ không thay đổi.</sys:String>
     <sys:String x:Key="Str_CertCatalog_RemovePrompt">Xóa "{0}" khỏi danh mục chứng chỉ của KillerPDF?</sys:String>
     <sys:String x:Key="Str_CertCatalog_Error">Không thể cập nhật danh mục chứng chỉ:</sys:String>
+    <sys:String x:Key="Str_CertCatalog_LoadError">Không thể đọc danh sách chứng chỉ:</sys:String>
+    <sys:String x:Key="Str_CertCatalog_WrongFileType">Hãy chọn một tệp chứng chỉ công khai (.cer, .crt hoặc .pem).</sys:String>
+    <sys:String x:Key="Str_CertCatalog_NotACertificate">Tệp không chứa chứng chỉ công khai có thể đọc được.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_PrivateKey">Không chấp nhận khóa riêng và tệp PFX. Chỉ nhập chứng chỉ công khai.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_TooLarge">Tệp chứng chỉ trống hoặc quá lớn.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Full">KillerPDF có thể lưu tối đa {0} chứng chỉ đã nhập.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Damaged">Không thể đọc danh mục chứng chỉ của KillerPDF nên danh mục được giữ nguyên. Chữ ký chỉ được kiểm tra theo độ tin cậy của Windows. Để bắt đầu lại, hãy xóa {0}.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Imported">Đã nhập {0} chứng chỉ. Hãy xem xét chứng chỉ gốc trước khi chọn Tin cậy làm gốc.</sys:String>
     <sys:String x:Key="Str_CertCatalog_ReadOnly">Do Windows quản lý.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Type">Loại chứng chỉ</sys:String>

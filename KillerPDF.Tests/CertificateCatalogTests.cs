@@ -137,10 +137,14 @@ public sealed class CertificateCatalogTests : IDisposable
         File.WriteAllText(stored, damaged);
         byte[] original = File.ReadAllBytes(stored);
 
-        Assert.Throws<InvalidDataException>(() => catalog.Read(false));
-        Assert.Throws<InvalidDataException>(() => catalog.Import(input));
-        Assert.Throws<InvalidDataException>(() => catalog.SetTrusted(fingerprint, true));
-        Assert.Throws<InvalidDataException>(() => catalog.Remove(fingerprint));
+        foreach (Action mutation in new Action[] { () => catalog.Read(false), () => catalog.Import(input),
+                     () => catalog.SetTrusted(fingerprint, true), () => catalog.Remove(fingerprint) })
+            Assert.Equal(CertificateCatalogProblem.CatalogDamaged,
+                CertificateCatalog.ProblemOf(Assert.Throws<InvalidDataException>(mutation)));
+        // Verification still runs, against Windows trust only, instead of failing every signature.
+        PdfSignatureVerificationResult verified = Assert.Single(catalog.Inspect(SignedDocument(root)).Entries).Verification;
+        Assert.True(verified.IsCryptographicallyValid);
+        Assert.False(verified.IsCertificateTrusted);
 
         Assert.Equal(original, File.ReadAllBytes(stored));
     }
@@ -171,7 +175,8 @@ public sealed class CertificateCatalogTests : IDisposable
                 + key.ExportPkcs8PrivateKeyPem());
         }
 
-        Assert.Throws<InvalidDataException>(() => catalog.Import(path));
+        Assert.Equal(kind == "pfx" ? CertificateCatalogProblem.WrongFileType : CertificateCatalogProblem.PrivateKey,
+            CertificateCatalog.ProblemOf(Assert.Throws<InvalidDataException>(() => catalog.Import(path))));
 
         Assert.Equal(original, File.ReadAllBytes(stored));
         Assert.Equal(fingerprint, Assert.Single(catalog.Read(false)).Fingerprint);
@@ -188,10 +193,12 @@ public sealed class CertificateCatalogTests : IDisposable
         string input = Path.Combine(_directory, "oversized.cer");
         using (var oversized = new FileStream(input, FileMode.Create, FileAccess.Write))
             oversized.SetLength(4 * 1024 * 1024 + 1);
-        Assert.Throws<InvalidDataException>(() => catalog.Import(input));
+        Assert.Equal(CertificateCatalogProblem.TooLarge,
+            CertificateCatalog.ProblemOf(Assert.Throws<InvalidDataException>(() => catalog.Import(input))));
         string bundle = Path.Combine(_directory, "many.pem");
         File.WriteAllText(bundle, string.Join("\n", Enumerable.Repeat(root.ExportCertificatePem(), 257)));
-        Assert.Throws<InvalidDataException>(() => catalog.Import(bundle));
+        Assert.Equal(CertificateCatalogProblem.TooLarge,
+            CertificateCatalog.ProblemOf(Assert.Throws<InvalidDataException>(() => catalog.Import(bundle))));
         Assert.Equal(original, File.ReadAllBytes(stored));
     }
 
@@ -219,6 +226,33 @@ public sealed class CertificateCatalogTests : IDisposable
         Assert.True(entries.Single(entry => entry.Fingerprint == fingerprint).IsTrustedRoot);
         Assert.Empty(Directory.EnumerateFiles(_directory, "*.tmp"));
     }
+
+    // One unreadable certificate in a Windows store used to empty the whole list.
+    [Fact]
+    public void UnreadableWindowsCertificateIsSkipped()
+    {
+        using X509Certificate2 root = CreateAuthority();
+        var entries = new List<CertificateCatalogEntry>();
+        foreach (byte[] raw in new[] { root.RawData, [0x30, 0x03, 0x02, 0x01], new byte[200 * 1024] })
+            CertificateCatalog.AddWindowsCertificate(entries, raw, true, CertificateCatalogSource.WindowsLocalMachineRoot);
+        Assert.Equal(root.GetCertHashString(HashAlgorithmName.SHA256), Assert.Single(entries).Fingerprint);
+    }
+
+    // A refused import used to empty the list, Windows entries included, until Refresh.
+    [Fact]
+    public void RefusedChangeKeepsTheListAndLoadFailuresSayLoad()
+    {
+        string source = File.ReadAllText(Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(SourcePath()))!,
+            "Controls", "CertificateCatalogDialog.cs"));
+        string update = source[source.IndexOf("private async Task UpdateCatalogAsync(", StringComparison.Ordinal)..];
+        update = update[..update.IndexOf("private void SetBusy(", StringComparison.Ordinal)];
+        int refused = update.IndexOf("ShowError(ex, \"Str_CertCatalog_Error\");", StringComparison.Ordinal);
+        Assert.True(refused >= 0);
+        Assert.DoesNotContain("_entries = [];", update[..refused]);
+        Assert.Equal(2, source.Split("ShowError(ex, \"Str_CertCatalog_LoadError\");").Length - 1);
+    }
+
+    private static string SourcePath([System.Runtime.CompilerServices.CallerFilePath] string path = "") => path;
 
     [Fact]
     public void LockedCatalogKeepsItsPreviousBytesAndTrustDecision()

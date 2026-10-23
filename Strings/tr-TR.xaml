@@ -1909,6 +1909,13 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_CertCatalog_TrustPrompt">KillerPDF'de "{0}" sertifikasına kök olarak güvenilsin mi? Verdiği sertifikalar daha sonra imza doğrulaması için kabul edilebilir. Windows güven ayarları değişmez.</sys:String>
     <sys:String x:Key="Str_CertCatalog_RemovePrompt">"{0}" KillerPDF sertifika kataloğundan kaldırılsın mı?</sys:String>
     <sys:String x:Key="Str_CertCatalog_Error">Sertifika kataloğu güncellenemedi:</sys:String>
+    <sys:String x:Key="Str_CertCatalog_LoadError">Sertifika listesi okunamadı:</sys:String>
+    <sys:String x:Key="Str_CertCatalog_WrongFileType">Ortak bir sertifika dosyası seçin (.cer, .crt veya .pem).</sys:String>
+    <sys:String x:Key="Str_CertCatalog_NotACertificate">Dosya okunabilir bir ortak sertifika içermiyor.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_PrivateKey">Özel anahtarlar ve PFX dosyaları kabul edilmez. Yalnızca ortak sertifikaları içe aktarın.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_TooLarge">Sertifika dosyası boş veya çok büyük.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Full">KillerPDF en fazla {0} içe aktarılmış sertifika saklayabilir.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Damaged">KillerPDF sertifika kataloğu okunamıyor ve değiştirilmeden bırakıldı. İmzalar yalnızca Windows güvenine göre denetleniyor. Baştan başlamak için {0} dosyasını silin.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Imported">{0} sertifika içe aktarıldı. Kök Olarak Güven seçeneğini kullanmadan önce kök sertifikayı inceleyin.</sys:String>
     <sys:String x:Key="Str_CertCatalog_ReadOnly">Windows tarafından yönetilir.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Type">Sertifika türü</sys:String>

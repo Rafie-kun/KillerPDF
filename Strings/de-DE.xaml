@@ -1918,6 +1918,13 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_CertCatalog_TrustPrompt">"{0}" in KillerPDF als Stammzertifikat vertrauen? Von diesem Zertifikat ausgestellte Zertifikate können dann zur Signaturprüfung akzeptiert werden. Die Vertrauenseinstellungen von Windows bleiben unverändert.</sys:String>
     <sys:String x:Key="Str_CertCatalog_RemovePrompt">"{0}" aus dem KillerPDF-Zertifikatskatalog entfernen?</sys:String>
     <sys:String x:Key="Str_CertCatalog_Error">Der Zertifikatskatalog konnte nicht aktualisiert werden:</sys:String>
+    <sys:String x:Key="Str_CertCatalog_LoadError">Die Zertifikatliste konnte nicht gelesen werden:</sys:String>
+    <sys:String x:Key="Str_CertCatalog_WrongFileType">Wählen Sie eine öffentliche Zertifikatdatei (.cer, .crt oder .pem).</sys:String>
+    <sys:String x:Key="Str_CertCatalog_NotACertificate">Die Datei enthält kein lesbares öffentliches Zertifikat.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_PrivateKey">Private Schlüssel und PFX-Dateien werden nicht akzeptiert. Importieren Sie nur öffentliche Zertifikate.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_TooLarge">Die Zertifikatdatei ist leer oder zu groß.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Full">KillerPDF kann bis zu {0} importierte Zertifikate speichern.</sys:String>
+    <sys:String x:Key="Str_CertCatalog_Damaged">Der KillerPDF-Zertifikatkatalog kann nicht gelesen werden und wurde unverändert gelassen. Signaturen werden nur gegen das Windows-Vertrauen geprüft. Um neu zu beginnen, löschen Sie {0}.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Imported">{0} Zertifikat(e) importiert. Prüfen Sie ein Stammzertifikat, bevor Sie ihm vertrauen.</sys:String>
     <sys:String x:Key="Str_CertCatalog_ReadOnly">Von Windows verwaltet.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Type">Zertifikatstyp</sys:String>
