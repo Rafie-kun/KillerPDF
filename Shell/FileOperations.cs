@@ -588,7 +588,8 @@ namespace KillerPDF
             }
 
             // The unlocked copy has the same pages, so overlay work made while read-only (form
-            // entries, pasted annotations) carries over instead of being lost to the reopen.
+            // entries, pasted annotations) carries over instead of being lost to the reopen. A failed
+            // unlock puts it back on the read-only original the same way.
             bool wasDirty = _isDirty;
             var annotations = _annotations.ToDictionary(pair => pair.Key, pair => pair.Value);
             var rotations = new Dictionary<int, int>(_pageRotations);
@@ -605,6 +606,29 @@ namespace KillerPDF
                 _currentFile = unlockedPath;
                 FinishOpenFile(displayPath, unlockedPath);
                 _openedFromProtected = true;   // #149: the source still carries its encryption
+                CarryOverlays();
+                FinalizeAsyncOpen();
+                SetStatus(string.Format(Loc("Str_Restricted_Unlocked"), System.IO.Path.GetFileName(displayPath)));
+                return true;
+            }
+            catch (WorkingCopyUnavailableException copy)
+            {
+                ShowWorkingCopyProblem(copy);
+                RestoreReadOnlyOriginal(sourcePath, displayPath, CarryOverlays);
+                return false;
+            }
+            catch (Exception error) when (error is not OutOfMemoryException)
+            {
+                _doc?.Close();
+                _doc = null;
+                KillerDialog.Show(this, string.Format(Loc("Str_Dlg_FailedOpen"), error.Message),
+                    Loc("Str_Dlg_AppTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
+                RestoreReadOnlyOriginal(sourcePath, displayPath, CarryOverlays);
+                return false;
+            }
+
+            void CarryOverlays()
+            {
                 foreach (var pair in annotations) _annotations[pair.Key] = pair.Value;
                 foreach (var pair in rotations) _pageRotations[pair.Key] = pair.Value;
                 foreach (var pair in textValues) _formTextValues[pair.Key] = pair.Value;
@@ -614,34 +638,16 @@ namespace KillerPDF
                 foreach (var pair in fontSizes) _formFontSizes[pair.Key] = pair.Value;
                 foreach (int page in annotations.Keys) RenderAllAnnotations(page);
                 if (wasDirty) MarkDirty(true);
-                FinalizeAsyncOpen();
-                SetStatus(string.Format(Loc("Str_Restricted_Unlocked"), System.IO.Path.GetFileName(displayPath)));
-                return true;
-            }
-            catch (WorkingCopyUnavailableException copy)
-            {
-                ShowWorkingCopyProblem(copy);
-                RestoreReadOnlyOriginal(sourcePath, displayPath);
-                return false;
-            }
-            catch (Exception error) when (error is not OutOfMemoryException)
-            {
-                _doc?.Close();
-                _doc = null;
-                KillerDialog.Show(this, string.Format(Loc("Str_Dlg_FailedOpen"), error.Message),
-                    Loc("Str_Dlg_AppTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
-                RestoreReadOnlyOriginal(sourcePath, displayPath);
-                return false;
             }
         }
 
         // Puts the read-only original back after a failed unlock so the tab is not left empty. When
         // there is still no room for a working copy the tab stays empty; that was just reported.
-        private void RestoreReadOnlyOriginal(string sourcePath, string displayPath)
+        private void RestoreReadOnlyOriginal(string sourcePath, string displayPath, Action carryOverlays)
         {
             try
             {
-                TryOpenProtectedReadOnly(sourcePath, displayPath);
+                if (TryOpenProtectedReadOnly(sourcePath, displayPath)) carryOverlays();
             }
             catch (WorkingCopyUnavailableException)
             {

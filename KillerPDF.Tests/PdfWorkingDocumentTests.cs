@@ -29,14 +29,17 @@ public sealed class PdfWorkingDocumentTests
         string source = FileOperations();
         string unlock = Method(source, "private bool UnlockOwnerRestrictions()");
         Assert.DoesNotContain("TryOpenProtectedReadOnly(", unlock);
-        Assert.Equal(2, Count(unlock, "RestoreReadOnlyOriginal(sourcePath, displayPath);"));
+        // Form entries and annotations made while read-only come back with the original too, not
+        // only with the unlocked copy.
+        Assert.Equal(2, Count(unlock, "RestoreReadOnlyOriginal(sourcePath, displayPath, CarryOverlays);"));
+        Assert.Contains("CarryOverlays();", unlock[..unlock.IndexOf("catch (WorkingCopyUnavailableException copy)", StringComparison.Ordinal)]);
         // Only the reopen writes a working copy; removing the encryption never does.
         Assert.Equal(1, Count(unlock, "catch (WorkingCopyUnavailableException"));
         string reopen = unlock[unlock.IndexOf("FinishOpenFile(displayPath, unlockedPath);", StringComparison.Ordinal)..];
         Assert.Contains("catch (WorkingCopyUnavailableException copy)", reopen);
 
         string restore = Method(source, "private void RestoreReadOnlyOriginal(");
-        Assert.Contains("TryOpenProtectedReadOnly(sourcePath, displayPath);", restore);
+        Assert.Contains("if (TryOpenProtectedReadOnly(sourcePath, displayPath)) carryOverlays();", restore);
         Assert.Contains("catch (WorkingCopyUnavailableException)", restore);
     }
 
