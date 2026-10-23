@@ -128,7 +128,7 @@ namespace KillerFamily.Accessibility
                 "DatabaseActiveTextBrush", "DatabaseMetadataBrush", "InputEdgeBrush", "PaneEdgeBrush", "BarEdgeBrush",
                 "BarSepBrush", "ChipEdgeBrush", "AboutPanelEdgeBrush", "ConsoleTextBrush",
                 "ConsoleBorderBrush", "ReportMetricBrush", "TreeLineBrush", "TopologyNodeTextBrush", "TopologyNodeBorderBrush",
-                "TopologyNodeHoverTextBrush", "TerminalForegroundBrush", "MonitorTextBrush", "MonitorMutedBrush",
+                "TopologyNodeHoverTextBrush", "MenuHoverTextBrush", "TerminalForegroundBrush", "MonitorTextBrush", "MonitorMutedBrush",
                 "ComparisonBarForegroundBrush", "AnnotationBarBorderBrush", "WindowFrameBrush", "FooterAccentBrush", "DropBorder");
             Brushes(SystemColors.HighlightBrush, "PrimaryBrush", "PrimaryHoverBrush", "PrimaryPressedBrush",
                 "PrimaryFillBaseBrush", "PrimaryFillBrush", "SelectionBg", "RowSelectedBrush", "SelectionAccent",
