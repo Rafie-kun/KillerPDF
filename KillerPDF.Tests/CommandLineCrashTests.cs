@@ -58,6 +58,10 @@ public sealed class CommandLineCrashTests
         Assert.True(report >= 0, handler + " does not report command-line crashes.");
         Assert.True(report < body.IndexOf(window, StringComparison.Ordinal),
             handler + " can reach " + window + " before reporting a command-line crash.");
+        // A reported crash always ends the run with exit code 1, the command line's failure code.
+        int exit = body.IndexOf("Environment.Exit(1);", report, StringComparison.Ordinal);
+        Assert.True(exit > report && exit < body.IndexOf(window, StringComparison.Ordinal),
+            handler + " does not exit with code 1 after reporting.");
     }
 
     private static string Root() => Directory.GetParent(Path.GetDirectoryName(SourcePath())!)!.FullName;

@@ -480,7 +480,9 @@ namespace KillerPDF
                 e.Handled = true;
                 KillerPDF.Features.CommandLineCrash.TryReport(e.Exception,
                     CrashReporter.Capture(e.Exception, "Dispatcher (command line)"));
-                Shutdown(1);
+                // Exit now: a Shutdown already requested with the command's own code would keep it.
+                CleanupSessionTemps();
+                Environment.Exit(1);
                 return;
             }
             if (RenderFailureRecovery.IsRenderThreadFailure(e.Exception))
@@ -505,8 +507,9 @@ namespace KillerPDF
             // A command-line run reports on its console; only a desktop session gets the dialog.
             if (KillerPDF.Features.CommandLineCrash.TryReport(ex, logPath))
             {
+                // Exit with the documented failure code instead of the runtime's crash code.
                 CleanupSessionTemps();
-                return;
+                Environment.Exit(1);
             }
 
             try
