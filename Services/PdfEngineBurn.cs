@@ -323,38 +323,50 @@ internal static class PdfEngineBurn
         // the top of the TextBlock. Assuming a full em here made saved text jump vertically even
         // though the overlay looked correctly placed before save (#273).
         double baseline = y + padY + BaselineRatio(text.FontName, text.Bold, text.Italic) * size;
-        foreach (string line in lines)
+        foreach ((string paragraph, int start, string line) in lines)
         {
             if (baseline > y + height) break;
             double lineWidth = Measure(font, line, size, characterSpacing);
-            var runs = BidiLine.VisualRuns(line);
+            var runs = BidiLine.VisualRuns(paragraph, start, line.Length);
             if (runs.Count == 1 && !runs[0].RightToLeft)
                 content.SetTextMatrix(1, 0, 0, -1, x + padX, baseline).ShowUnicodeText(line);
             else
             {
                 // Hebrew, and any numbers or Latin inside it, lands run by run where the text box shows
-                // it (#435). Right-to-left runs are written in reading order from their right edge, so
-                // copied text still reads correctly.
+                // it (#435). Right-to-left runs are written in reading order from their right edge, and
+                // a mirrored bracket still copies as the bracket that was typed.
                 double cursor = x + padX;
                 foreach (BidiRun run in runs)
                 {
-                    double runWidth = Measure(font, run.Text, size, characterSpacing);
                     if (run.RightToLeft)
                     {
+                        // Each text element is placed on its own, so spacing falls between elements,
+                        // not between a letter and its marks.
+                        var elements = new List<string>();
+                        var enumerator = System.Globalization.StringInfo.GetTextElementEnumerator(run.Text);
+                        while (enumerator.MoveNext()) elements.Add(enumerator.GetTextElement());
+                        var glyphs = elements.Select(element => BidiLine.Mirrored(element) is var mirrored
+                            && mirrored != element && font.GetGlyphId(mirrored[0]) != 0 ? mirrored : element).ToList();
+                        double runWidth = glyphs.Sum(glyph => Measure(font, glyph, size))
+                            + Math.Max(0, glyphs.Count - 1) * characterSpacing;
                         content.SetCharacterSpacing(0);
                         double right = cursor + runWidth;
-                        var enumerator = System.Globalization.StringInfo.GetTextElementEnumerator(run.Text);
-                        while (enumerator.MoveNext())
+                        for (int index = 0; index < elements.Count; index++)
                         {
-                            string element = enumerator.GetTextElement();
-                            right -= Measure(font, element, size);
-                            content.SetTextMatrix(1, 0, 0, -1, right, baseline).ShowUnicodeText(element);
+                            right -= Measure(font, glyphs[index], size);
+                            content.SetTextMatrix(1, 0, 0, -1, right, baseline);
+                            if (ReferenceEquals(glyphs[index], elements[index])) content.ShowUnicodeText(elements[index]);
+                            else content.ShowUnicodeText(glyphs[index], elements[index]);
                             right -= characterSpacing;
                         }
                         content.SetCharacterSpacing(characterSpacing);
+                        cursor += runWidth + characterSpacing;
                     }
-                    else content.SetTextMatrix(1, 0, 0, -1, cursor, baseline).ShowUnicodeText(run.Text);
-                    cursor += runWidth + characterSpacing;
+                    else
+                    {
+                        content.SetTextMatrix(1, 0, 0, -1, cursor, baseline).ShowUnicodeText(run.Text);
+                        cursor += Measure(font, run.Text, size, characterSpacing) + characterSpacing;
+                    }
                 }
             }
             if (text.Underline) DrawRuleAfterText(content, x + padX, baseline + size * .12, lineWidth, size);
@@ -599,40 +611,47 @@ internal static class PdfEngineBurn
         return found;
     }
 
-    private static List<string> Wrap(string text, TrueTypeFont font, double size, double width,
-        double characterSpacing = 0)
+    // Each wrapped line with its hard paragraph and where it starts there: bidi directions are
+    // resolved over the whole paragraph, as the text box does, and only reordering is per line.
+    private static List<(string Paragraph, int Start, string Line)> Wrap(string text, TrueTypeFont font,
+        double size, double width, double characterSpacing = 0)
     {
-        var result = new List<string>();
+        var result = new List<(string, int, string)>();
         foreach (string paragraph in text.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n'))
         {
             string line = "";
+            int lineStart = 0, wordStart = 0;
             foreach (string word in paragraph.Split(' '))
             {
                 string candidate = line.Length == 0 ? word : line + " " + word;
                 if (line.Length > 0 && Measure(font, candidate, size, characterSpacing) > width)
                 {
-                    result.Add(line);
+                    result.Add((paragraph, lineStart, line));
                     line = "";
                 }
                 if (line.Length == 0 && Measure(font, word, size, characterSpacing) > width)
                 {
                     var fragment = new StringBuilder();
+                    int fragmentStart = wordStart;
                     foreach (Rune rune in word.EnumerateRunes())
                     {
                         string next = fragment + rune.ToString();
                         if (fragment.Length > 0 && Measure(font, next, size, characterSpacing) > width)
                         {
-                            result.Add(fragment.ToString());
+                            result.Add((paragraph, fragmentStart, fragment.ToString()));
+                            fragmentStart += fragment.Length;
                             fragment.Clear();
                         }
                         fragment.Append(rune.ToString());
                     }
                     line = fragment.ToString();
+                    lineStart = fragmentStart;
                 }
-                else if (line.Length == 0) line = word;
+                else if (line.Length == 0) { line = word; lineStart = wordStart; }
                 else line = candidate;
+                wordStart += word.Length + 1;
             }
-            result.Add(line);
+            result.Add((paragraph, lineStart, line));
         }
         return result;
     }
