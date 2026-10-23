@@ -4197,6 +4197,39 @@ public sealed class PdfPageRendererTests
         Assert.Equal(255, Pixel(rendered, 5, 5)[3]);
     }
 
+    // A blend mode the reader does not recognise is painted as Normal. It used to keep whatever
+    // mode the previous graphics state set, here Difference.
+    [Fact]
+    public void Render_UnrecognisedBlendModePaintsNormal()
+    {
+        const string body = "0 0 1 rg 0 0 10 10 re f /Diff gs /Bogus gs 1 0 0 rg 0 0 10 10 re f";
+        var objects = new List<string>
+        {
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 10 10] /Resources << /ExtGState << " +
+                "/Diff << /BM /Difference >> /Bogus << /BM /NotABlendMode >> >> >> /Contents 4 0 R >>",
+            $"<< /Length {body.Length} >>\nstream\n{body}\nendstream"
+        };
+        var pdf = new StringBuilder("%PDF-1.7\n");
+        var offsets = new List<int>();
+        foreach (string item in objects)
+        {
+            offsets.Add(pdf.Length);
+            pdf.Append($"{offsets.Count} 0 obj\n{item}\nendobj\n");
+        }
+        int xref = pdf.Length;
+        pdf.Append($"xref\n0 {objects.Count + 1}\n0000000000 65535 f \n");
+        foreach (int offset in offsets) pdf.Append($"{offset:0000000000} 00000 n \n");
+        pdf.Append($"trailer << /Size {objects.Count + 1} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n");
+
+        PdfRenderedPage rendered = new PdfPageRenderer(PdfDocument.Open(Encoding.ASCII.GetBytes(pdf.ToString())))
+            .Render(0, new PdfRenderOptions(10, 10, includeAnnotations: false, includeFormFields: false));
+
+        Assert.Equal([0, 0, 255, 255], Pixel(rendered, 5, 5));
+        Assert.Contains("Transparency blend-mode rendering is not implemented.", rendered.Diagnostics);
+    }
+
     [Theory]
     [InlineData(PdfBlendMode.ColorDodge, false, 1)]
     [InlineData(PdfBlendMode.ColorDodge, true, 1)]

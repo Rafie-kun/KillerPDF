@@ -727,7 +727,8 @@ public sealed partial class PdfPageRenderer
                         {
                             FillAlpha = fillAlpha ?? state.FillAlpha,
                             StrokeAlpha = strokeAlpha ?? state.StrokeAlpha,
-                            BlendMode = blendMode ?? state.BlendMode,
+                            // ISO 32000 paints a blend mode the reader does not recognise as Normal.
+                            BlendMode = unsupportedBlend ? RendererBlendMode.Normal : blendMode ?? state.BlendMode,
                             AlphaIsShape = strokeSettings.TryGetValue(Name("AIS"), out PdfObject? alphaShapeValue)
                                 && Resolve(alphaShapeValue) is PdfBoolean alphaShape
                                     ? alphaShape.Value : state.AlphaIsShape,
