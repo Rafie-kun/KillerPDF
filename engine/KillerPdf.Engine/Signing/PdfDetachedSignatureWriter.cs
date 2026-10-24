@@ -52,10 +52,15 @@ public static class PdfDetachedSignatureWriter
         // A field the document prepared for signing, such as an approval field, is signed before a
         // new one is added. Signature1 keeps its place as the default; the rest follow form order.
         if (!preferNewField || ReadCertificationPermission(document).HasValue)
+        {
+            var nameCounts = new Dictionary<string, int>(StringComparer.Ordinal);
+            foreach (SignatureFieldCandidate candidate in candidates)
+                nameCounts[candidate.Name] = nameCounts.GetValueOrDefault(candidate.Name) + 1;
             foreach (SignatureFieldCandidate candidate in candidates.OrderBy(item => item.Name == "Signature1" ? 0 : 1))
-                if (candidates.Count(item => item.Name == candidate.Name) == 1
+                if (nameCounts[candidate.Name] == 1
                     && IsPreparedSignatureField(document, candidate))
                     return candidate.Name;
+        }
 
         for (int index = 1; ; index++)
         {

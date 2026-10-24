@@ -17,6 +17,26 @@ namespace KillerPdf.Engine.Tests.Signing;
 public sealed class PdfDetachedSignatureWriterTests
 {
     [Fact]
+    public void AvailableFieldNameHandlesALargeReadOnlyTreeAndDuplicatePreparedNames()
+    {
+        PdfDocument source = PdfDocument.Open(new PdfDocumentBuilder().AddBlankPage().Build());
+        var update = new PdfIncrementalUpdateBuilder(source);
+        var fields = new List<PdfObject>();
+        for (int index = 0; index < 4096; index++)
+            fields.Add(update.AddObject(Dictionary(("FT", Name("Sig")), ("Ff", new PdfInteger(1)),
+                ("T", new PdfString(Encoding.ASCII.GetBytes(index == 0 ? "Signature1" : "approval" + index), PdfStringForm.Literal)))));
+        for (int index = 0; index < 2; index++)
+            fields.Add(update.AddObject(Dictionary(("FT", Name("Sig")),
+                ("T", new PdfString("duplicate"u8.ToArray(), PdfStringForm.Literal)))));
+        var root = Assert.IsType<PdfIndirectReference>(source.Trailer[Name("Root")]);
+        PdfDictionary catalog = ResolveDictionary(source, root);
+        update.ReplaceObject(root.ObjectNumber, new PdfDictionary(catalog.Append(
+            new KeyValuePair<PdfName, PdfObject>(Name("AcroForm"), Dictionary(("Fields", new PdfArray(fields)))))));
+
+        Assert.Equal("Signature2", PdfDetachedSignatureWriter.FindAvailableSignatureFieldName(PdfDocument.Open(update.Build())));
+    }
+
+    [Fact]
     public void Sign_FinalizesRequestedAppearancesWithoutLosingPasswordAuthentication()
     {
         byte[] encrypted = new PdfDocumentBuilder().AddBlankPage()
