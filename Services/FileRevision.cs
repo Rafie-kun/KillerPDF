@@ -13,10 +13,12 @@ namespace KillerPDF.Services
         internal static FileRevision? Capture(string? path)
         {
             if (string.IsNullOrEmpty(path)) return null;
+            FileRevision? metadata = null;
             try
             {
                 var info = new FileInfo(path);
                 if (!info.Exists) return null;
+                metadata = new FileRevision(info.Length, info.LastWriteTimeUtc);
                 using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
                 string hash = Convert.ToHexString(SHA256.HashData(stream));
                 return new FileRevision(stream.Length, File.GetLastWriteTimeUtc(path), hash);
@@ -24,7 +26,7 @@ namespace KillerPDF.Services
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException
                 or NotSupportedException)
             {
-                return null;
+                return metadata;
             }
         }
 
@@ -35,7 +37,9 @@ namespace KillerPDF.Services
         internal static bool ConflictsWith(FileRevision? baseline, string path)
         {
             FileRevision? current = Capture(path);
-            return current is not null ? current != baseline : File.Exists(path);
+            return current is not null
+                ? current.Value.Sha256 is null || current != baseline
+                : File.Exists(path);
         }
     }
 }

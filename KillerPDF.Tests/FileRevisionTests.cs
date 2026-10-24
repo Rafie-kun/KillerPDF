@@ -9,6 +9,43 @@ namespace KillerPDF.Tests
     public class FileRevisionTests
     {
         [Fact]
+        public void AnOpenWriterDoesNotMakeAReplaceableDestinationAppearMissing()
+        {
+            string path = Path.Combine(Path.GetTempPath(), "kp-revision-" + Path.GetRandomFileName() + ".pdf");
+            try
+            {
+                File.WriteAllBytes(path, [1, 2, 3]);
+                using var writer = new FileStream(path, FileMode.Open, FileAccess.ReadWrite,
+                    FileShare.ReadWrite | FileShare.Delete);
+                FileRevision? existing = FileRevision.Capture(path);
+
+                AtomicFileOutput.Write(path, new byte[] { 3, 2, 1 });
+                Assert.Equal(new byte[] { 3, 2, 1 }, File.ReadAllBytes(path));
+                Assert.NotNull(existing);
+            }
+            finally { File.Delete(path); }
+        }
+
+        [Fact]
+        public void TwoUnreadableSnapshotsStillRequireConfirmation()
+        {
+            string path = Path.Combine(Path.GetTempPath(), "kp-revision-" + Path.GetRandomFileName() + ".pdf");
+            try
+            {
+                File.WriteAllBytes(path, [1, 2, 3]);
+                using var writer = new FileStream(path, FileMode.Open, FileAccess.ReadWrite,
+                    FileShare.ReadWrite | FileShare.Delete);
+                FileRevision? approved = FileRevision.Capture(path);
+
+                Assert.NotNull(approved);
+                Assert.Null(approved.Value.Sha256);
+                Assert.Equal(approved, FileRevision.Capture(path));
+                Assert.True(FileRevision.ConflictsWith(approved, path));
+            }
+            finally { File.Delete(path); }
+        }
+
+        [Fact]
         public void LegacyRecoveryRevisionRequiresConfirmationForAnExistingFile()
         {
             string path = Path.Combine(Path.GetTempPath(), "kp-revision-" + Path.GetRandomFileName() + ".pdf");
@@ -37,7 +74,8 @@ namespace KillerPDF.Tests
                 FileRevision loaded = Assert.IsType<FileRevision>(FileRevision.Capture(path));
                 using var busy = new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
 
-                Assert.Null(FileRevision.Capture(path));
+                FileRevision unreadable = Assert.IsType<FileRevision>(FileRevision.Capture(path));
+                Assert.Null(unreadable.Sha256);
                 Assert.True(FileRevision.ConflictsWith(loaded, path));
             }
             finally { File.Delete(path); }
