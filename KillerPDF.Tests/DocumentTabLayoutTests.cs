@@ -116,11 +116,77 @@ public sealed class DocumentTabLayoutTests
         XNamespace x = "http://schemas.microsoft.com/winfx/2006/xaml";
         XElement ghost = window.Descendants()
             .Single(element => (string?)element.Attribute(x + "Name") == "TabDragGhost");
+        XElement ghostText = window.Descendants()
+            .Single(element => (string?)element.Attribute(x + "Name") == "TabDragGhostText");
 
-        Assert.Equal("2,2,0,0", (string?)ghost.Attribute("CornerRadius"));
+        // The same face as the active tab, its rounded face and corner included.
+        Assert.Equal("RetroTabBorder", ghost.Name.LocalName);
+        Assert.Equal("{DynamicResource TabActiveCornerRadius}", (string?)ghost.Attribute("CornerRadius"));
         Assert.Equal("{DynamicResource TabActiveBrush}", (string?)ghost.Attribute("Background"));
         Assert.Equal("{DynamicResource TabActivePadding}", (string?)ghost.Attribute("Padding"));
         Assert.Equal("{DynamicResource BarShadowEffect}", (string?)ghost.Attribute("Effect"));
+        Assert.Equal("{DynamicResource TabTitleFontSize}", (string?)ghostText.Attribute("FontSize"));
+    }
+
+    [Fact]
+    public void OrdinaryTabsMatchKillerShellsTabGeometry()
+    {
+        string root = FindRepositoryRoot();
+        string theme = File.ReadAllText(Path.Combine(root, "Services", "ThemeManager.cs"));
+        var document = XDocument.Load(Path.Combine(root, "Controls", "Viewer", "PdfViewer.xaml"));
+        XNamespace x = "http://schemas.microsoft.com/winfx/2006/xaml";
+        XElement Named(string name) => document.Descendants()
+            .Single(element => (string?)element.Attribute(x + "Name") == name);
+
+        // Every ordinary-theme padding carries 2px more above and 2px less below, so the title sits
+        // level in the tab. The stripe's 3px plus the active padding still meets the inactive top.
+        foreach (string padding in new[]
+        {
+            "d[\"TabPadding\"] = new Thickness(12, 6, 5, 3);",
+            "d[\"TabActivePadding\"] = new Thickness(12, 3, 5, 3);",
+            "d[\"TabFocusPadding\"] = new Thickness(11, 3, 4, 3);",
+            "d[\"TabFocusFirstPadding\"] = new Thickness(12, 3, 4, 3);",
+            "d[\"TabFocusLastPadding\"] = new Thickness(11, 3, 5, 3);",
+            "d[\"TabFocusOnlyPadding\"] = new Thickness(12, 3, 5, 3);",
+        })
+            Assert.Contains(padding, theme, StringComparison.Ordinal);
+        // 98SE keeps its classic corner, title and close x.
+        Assert.Contains("d[\"TabActiveCornerRadius\"] = compactDialogCaption ? new CornerRadius(2, 2, 0, 0) : new CornerRadius(3, 3, 0, 0);",
+            theme, StringComparison.Ordinal);
+        Assert.Contains("d[\"TabTitleFontSize\"] = compactDialogCaption ? 11.0 : 12.0;", theme, StringComparison.Ordinal);
+        Assert.Contains("d[\"TabCloseFontSize\"] = compactDialogCaption ? 14.0 : 17.0;", theme, StringComparison.Ordinal);
+        Assert.Contains("liveResources[\"TabActiveRingFadeBrush\"] = FadedRing(liveResources[\"TabActiveRingBrush\"]);",
+            theme, StringComparison.Ordinal);
+
+        XElement tab = Named("tabBd");
+        Assert.Equal("{DynamicResource PaneBorderBrush}", (string?)tab.Attribute("DividerBrush"));
+        Assert.Equal("Center", (string?)Named("tabContents").Attribute("VerticalAlignment"));
+        Assert.Equal("{DynamicResource TabTitleFontSize}", (string?)Named("tabLbl").Attribute("FontSize"));
+        Assert.Equal("{DynamicResource TabCloseFontSize}", (string?)Named("tabClose").Attribute("FontSize"));
+        Assert.Contains(document.Descendants(), element => element.Name.LocalName == "Setter"
+            && (string?)element.Attribute("TargetName") == "tabBd"
+            && (string?)element.Attribute("Property") == "CornerRadius"
+            && (string?)element.Attribute("Value") == "{DynamicResource TabActiveCornerRadius}");
+
+        // One pane open: the active tab's sides fade toward its foot.
+        XElement lone = document.Descendants().Single(element => element.Name.LocalName == "MultiDataTrigger"
+            && element.Descendants().Any(setter => (string?)setter.Attribute("Value") == "{DynamicResource TabActiveRingFadeBrush}"));
+        string[] conditions = lone.Descendants().Where(element => element.Name.LocalName == "Condition")
+            .Select(condition => $"{(string?)condition.Attribute("Binding")}={(string?)condition.Attribute("Value")}").ToArray();
+        Assert.Equal(new[] { "{Binding IsActive}=True", "{Binding PaneFocused}=False", "{Binding PaneDimmed}=False" }, conditions);
+        string[] setters = lone.Descendants().Where(element => element.Name.LocalName == "Setter")
+            .Select(setter => $"{(string?)setter.Attribute("Property")}={(string?)setter.Attribute("Value")}").ToArray();
+        Assert.Equal(new[]
+        {
+            "BorderThickness={DynamicResource TabFocusThickness}",
+            "Padding={DynamicResource TabFocusPadding}",
+            "BorderBrush={DynamicResource TabActiveRingFadeBrush}",
+        }, setters);
+
+        // The card's corners at the band and the content clip under them follow the tab.
+        string strip = File.ReadAllText(Path.Combine(root, "Controls", "Viewer", "PdfViewer.TabStrip.cs"));
+        Assert.Contains("CardCorners.AtTabBand(r, tabRadius, firstActive, lastActive, TabsAtBottom)", strip, StringComparison.Ordinal);
+        Assert.Contains("ClipToCard(DocPaneContent);", strip, StringComparison.Ordinal);
     }
 
     [Fact]

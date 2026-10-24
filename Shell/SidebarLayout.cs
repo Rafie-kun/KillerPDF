@@ -242,15 +242,13 @@ namespace KillerPDF
         }
 
         // A Border with a CornerRadius does not clip its child, so the canvas, the grain and the
-        // page itself all square the card's corners straight back off. Radius 5 = the card's 6
-        // less its 1px border, which is where the inner edge of the curve actually falls.
+        // page itself all square the card's corners straight back off. Each corner of the clip is
+        // the card's own less its 1px border, which is where the inner edge of the curve actually
+        // falls; the card's corners at the tab band differ from the rest (PdfViewer.ClipToCard).
         // internal: PdfViewer's XAML binds this and forwards to it.
         internal void DocPane_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (sender is not FrameworkElement el) return;
-            double outer = TryFindResource("PanelCornerRadius") is CornerRadius cr ? cr.TopLeft : 6;
-            double inner = Math.Max(0, outer - 1);
-            el.Clip = new RectangleGeometry(new Rect(0, 0, el.ActualWidth, el.ActualHeight), inner, inner);
+            if (sender is FrameworkElement el) Controls.PdfViewer.ClipToCard(el);
         }
 
 

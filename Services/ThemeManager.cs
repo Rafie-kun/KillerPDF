@@ -293,6 +293,10 @@ namespace KillerPDF.Services
                 : liveResources["ComboHighlightTextBrush"];
             if (!themeOwnsFooterAccent)
                 liveResources["FooterAccentBrush"] = liveResources["PrimaryBrush"];
+            // One pane open: the active tab's outline has no pane ring to join below it, so its sides
+            // fade from the ring's full color at the top to clear at the foot. Derived here, after the
+            // accent overlay, so it follows the picked accent like the ring itself.
+            liveResources["TabActiveRingFadeBrush"] = FadedRing(liveResources["TabActiveRingBrush"]);
             ApplyComparisonBarPalette(liveResources, theme);
             // One semantic role for the two window-like overlays. This is assigned after the
             // palette and accent overlay are fully merged so gradient BackgroundBrush values are
@@ -338,6 +342,22 @@ namespace KillerPDF.Services
                     Color.FromArgb(255, Lift(stop.Color.R), Lift(stop.Color.G), Lift(stop.Color.B)), stop.Offset));
             edge.Freeze();
             return edge;
+        }
+
+        /// <summary>
+        /// The active tab's ring, full strength over its top 30% and clear at its foot. A ring that is
+        /// not a solid color (98SE's is transparent anyway) is used as it is.
+        /// </summary>
+        private static object FadedRing(object ring)
+        {
+            if (ring is not SolidColorBrush solid) return ring;
+            Color c = solid.Color;
+            var fade = new LinearGradientBrush { StartPoint = new Point(0, 0), EndPoint = new Point(0, 1) };
+            fade.GradientStops.Add(new GradientStop(c, 0));
+            fade.GradientStops.Add(new GradientStop(c, 0.3));
+            fade.GradientStops.Add(new GradientStop(Color.FromArgb(0, c.R, c.G, c.B), 1));
+            fade.Freeze();
+            return fade;
         }
 
         private static void ApplyComparisonBarPalette(ResourceDictionary resources, Theme theme)
@@ -732,20 +752,30 @@ namespace KillerPDF.Services
             if (!d.Contains("TabActiveFirstMargin")) d["TabActiveFirstMargin"] = new Thickness(0, 3, 0, 0);
             if (!d.Contains("TabActiveLastMargin")) d["TabActiveLastMargin"] = new Thickness(0, 3, 0, 0);
             if (!d.Contains("TabActiveOnlyMargin")) d["TabActiveOnlyMargin"] = new Thickness(0, 3, 0, 0);
-            if (!d.Contains("TabPadding")) d["TabPadding"] = new Thickness(12, 4, 5, 5);
+            // Every tab padding here carries 2px more on top and 2px less below than the band needs,
+            // so the title sits level in the tab, as in KillerShell: Killer Sans rides high in its
+            // box. Same total height, and the same top in every state (the active tab's 3px stripe
+            // plus its padding), so nothing jumps when a tab becomes active. 98SE states its own.
+            if (!d.Contains("TabPadding")) d["TabPadding"] = new Thickness(12, 6, 5, 3);
             if (!d.Contains("TabActiveBevelDarkMargin")) d["TabActiveBevelDarkMargin"] = d["TabBevelMargin"];
-            if (!d.Contains("TabActivePadding")) d["TabActivePadding"] = new Thickness(12, 1, 5, 5);
+            if (!d.Contains("TabActivePadding")) d["TabActivePadding"] = new Thickness(12, 3, 5, 3);
             if (!d.Contains("TabStripeThickness")) d["TabStripeThickness"] = new Thickness(0, 3, 0, 0);
             if (!d.Contains("TabSeamPatchBrush")) d["TabSeamPatchBrush"] = Brushes.Transparent;
             if (!d.Contains("TabActiveRingBrush")) d["TabActiveRingBrush"] = Pick("SelectionAccent", "PrimaryBrush");
             if (!d.Contains("TabFocusThickness")) d["TabFocusThickness"] = new Thickness(1, 3, 1, 0);
-            if (!d.Contains("TabFocusPadding")) d["TabFocusPadding"] = new Thickness(11, 1, 4, 5);
+            if (!d.Contains("TabFocusPadding")) d["TabFocusPadding"] = new Thickness(11, 3, 4, 3);
             if (!d.Contains("TabFocusFirstThickness")) d["TabFocusFirstThickness"] = new Thickness(0, 3, 1, 0);
-            if (!d.Contains("TabFocusFirstPadding")) d["TabFocusFirstPadding"] = new Thickness(12, 1, 4, 5);
+            if (!d.Contains("TabFocusFirstPadding")) d["TabFocusFirstPadding"] = new Thickness(12, 3, 4, 3);
             if (!d.Contains("TabFocusLastThickness")) d["TabFocusLastThickness"] = new Thickness(1, 3, 0, 0);
-            if (!d.Contains("TabFocusLastPadding")) d["TabFocusLastPadding"] = new Thickness(11, 1, 5, 5);
+            if (!d.Contains("TabFocusLastPadding")) d["TabFocusLastPadding"] = new Thickness(11, 3, 5, 3);
             if (!d.Contains("TabFocusOnlyThickness")) d["TabFocusOnlyThickness"] = new Thickness(0, 3, 0, 0);
-            if (!d.Contains("TabFocusOnlyPadding")) d["TabFocusOnlyPadding"] = new Thickness(12, 1, 5, 5);
+            if (!d.Contains("TabFocusOnlyPadding")) d["TabFocusOnlyPadding"] = new Thickness(12, 3, 5, 3);
+            // The active tab's corner (matched by the card's corners at each end of the band), the
+            // title and the close x, as KillerShell has them. 98SE keeps its classic sizes.
+            if (!d.Contains("TabActiveCornerRadius"))
+                d["TabActiveCornerRadius"] = compactDialogCaption ? new CornerRadius(2, 2, 0, 0) : new CornerRadius(3, 3, 0, 0);
+            if (!d.Contains("TabTitleFontSize")) d["TabTitleFontSize"] = compactDialogCaption ? 11.0 : 12.0;
+            if (!d.Contains("TabCloseFontSize")) d["TabCloseFontSize"] = compactDialogCaption ? 14.0 : 17.0;
             if (!d.Contains("FlyoutCornerRadius")) d["FlyoutCornerRadius"] = new CornerRadius(6);
             // Annotation bars attach directly beneath the main toolbar: their top edge is always
             // square, while the exposed bottom corners follow the theme. 98SE's flyout radius is

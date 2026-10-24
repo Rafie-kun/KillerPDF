@@ -30,6 +30,7 @@ public sealed class TabPlacementTests
                 // The face is the app's RetroTabBorder; this assembly reads it as the Border it derives from.
                 markup.Name = XName.Get("Border", "http://schemas.microsoft.com/winfx/2006/xaml/presentation");
                 markup.Attribute("RetroBottomEdges")?.Remove();
+                markup.Attribute("DividerBrush")?.Remove();
                 var context = new ParserContext();
                 context.XmlnsDictionary.Add("", "http://schemas.microsoft.com/winfx/2006/xaml/presentation");
                 context.XmlnsDictionary.Add("x", "http://schemas.microsoft.com/winfx/2006/xaml");
@@ -139,7 +140,7 @@ public sealed class TabPlacementTests
         var document = ViewerMarkup();
         var label = Named(document, "tabLbl");
         Assert.Equal("{DynamicResource MonoFont}", (string?)label.Attribute("FontFamily"));
-        Assert.Equal("11", (string?)label.Attribute("FontSize"));
+        Assert.Equal("{DynamicResource TabTitleFontSize}", (string?)label.Attribute("FontSize"));
         Assert.DoesNotContain(document.Descendants(), item => item.Name.LocalName == "Setter"
             && (string?)item.Attribute("TargetName") == "tabLbl"
             && (string?)item.Attribute("Property") is "FontSize" or "FontWeight");

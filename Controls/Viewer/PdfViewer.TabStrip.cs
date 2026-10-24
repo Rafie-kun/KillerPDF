@@ -386,14 +386,15 @@ namespace KillerPDF.Controls
         // ════════════════════════════════════════════════════════════════════════════════════════
 
         /// <summary>
-        /// Square off the card's top corners under a flush active tab.
+        /// The card's corners at the tab band: the tabs' own 3px, square under a flush active tab.
         /// </summary>
         /// <remarks>
-        /// Each top corner squares only when the tab sitting on it is the ACTIVE one: the first tab
-        /// owns the top-left, the last owns the top-right. That tab's outer edge is flat and flush
-        /// with the card's, so a curve underneath cuts a notch out from under a square tab. An
-        /// inactive tab is window-colored and so a different surface anyway, and the card keeps its
-        /// rounding under it; no strip at all and the card takes its full radius back.
+        /// Each tab-side corner squares only when the tab sitting on it is the ACTIVE one: the first
+        /// tab owns the leading corner, the last the trailing one. That tab's outer edge is flat and
+        /// flush with the card's, so a curve underneath cuts a notch out from under a square tab.
+        /// Otherwise the corner takes the active tab's own radius rather than the card's full one, so
+        /// each end of the band softens the way the tab does (CardCorners.AtTabBand, as KillerShell's
+        /// TabSideCorners); no strip at all and the card takes its full radius back.
         ///
         /// Read off the MODEL, never re-measured from the visual tree. Skipped in full screen, where
         /// ApplyFullScreen owns the radius and squares all four.
@@ -405,16 +406,28 @@ namespace KillerPDF.Controls
             // changed. Using them here squares pane A's corners when pane B's tabs move.
             if (PaneBorder == null || _fullScreen) return;
             double r = TryFindResource("RadCard") is CornerRadius rc ? rc.TopLeft : 6;
+            double tabRadius = TryFindResource("TabActiveCornerRadius") is CornerRadius tc ? tc.TopLeft : 3;
 
             bool strip = TabStripBorder != null && TabStripBorder.Visibility == Visibility.Visible;
             bool firstActive = strip && _active?.IsFirst == true;
             bool lastActive  = strip && _active?.IsLast  == true;
 
-            var cr = TabsAtBottom
-                ? new CornerRadius(r, r, lastActive ? 0 : r, firstActive ? 0 : r)
-                : new CornerRadius(firstActive ? 0 : r, lastActive ? 0 : r, r, r);
+            var cr = strip ? CardCorners.AtTabBand(r, tabRadius, firstActive, lastActive, TabsAtBottom) : new CornerRadius(r);
             PaneBorder.CornerRadius = cr;
             PaneShadow?.CornerRadius = cr;
+            RailPaneShadow?.CornerRadius = cr;
+            // The content clip follows the corners, or it keeps rounding where the card just squared.
+            ClipToCard(DocPaneContent);
+        }
+
+        /// <summary>Clip the card's content to the card's own corners, each 1px inside.</summary>
+        /// <remarks>Also run from the window's DocPane_SizeChanged as the card resizes.</remarks>
+        internal static void ClipToCard(FrameworkElement? content)
+        {
+            if (content == null) return;
+            CornerRadius card = content.Parent is Border border ? border.CornerRadius
+                : content.TryFindResource("PanelCornerRadius") is CornerRadius panel ? panel : new CornerRadius(6);
+            content.Clip = CardCorners.ContentClip(new Size(content.ActualWidth, content.ActualHeight), card);
         }
 
         /// <summary>

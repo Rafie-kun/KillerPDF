@@ -6,8 +6,9 @@ using System.Windows.Media;
 namespace KillerPDF.Controls
 {
     /// <summary>
-    /// A document tab's face. On 98SE with the strip below the page it also draws the tab's Win98
-    /// edges, the same way KillerShell's tabs do.
+    /// A document tab's face, drawn the way KillerShell's tabs are (its TabSurfaceBorder). The
+    /// active tab draws its own outline and face; on 98SE with the strip below the page it also
+    /// draws the tab's Win98 edges.
     /// </summary>
     /// <remarks>
     /// The template flips a bottom strip's tabs upside down, and flipping the top-strip bevels
@@ -28,10 +29,93 @@ namespace KillerPDF.Controls
             set => SetValue(RetroBottomEdgesProperty, value);
         }
 
+        /// <summary>The card's edge color, run up the active tab's sides beneath a fading outline.</summary>
+        public static readonly DependencyProperty DividerBrushProperty = DependencyProperty.Register(
+            nameof(DividerBrush), typeof(Brush), typeof(RetroTabBorder),
+            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender));
+
+        public Brush? DividerBrush
+        {
+            get => (Brush?)GetValue(DividerBrushProperty);
+            set => SetValue(DividerBrushProperty, value);
+        }
+
         protected override void OnRender(DrawingContext drawingContext)
         {
-            base.OnRender(drawingContext);
+            if (RetroBottomEdges || !DrawRoundedTop(drawingContext)) base.OnRender(drawingContext);
             if (RetroBottomEdges) DrawRetroBottomEdges(drawingContext);
+        }
+
+        /// <summary>
+        /// The active tab: its outline rounds the top corners at CornerRadius and the face inside
+        /// rounds them 1px less, so the face nests in the outline. A plain Border works the inner
+        /// curve out from each side's thickness, which under the 3px top stripe flattened the
+        /// face's corners almost square. False for any other tab, which Border draws as before.
+        /// </summary>
+        private bool DrawRoundedTop(DrawingContext dc)
+        {
+            CornerRadius r = CornerRadius;
+            Thickness b = BorderThickness;
+            if ((r.TopLeft <= 0 && r.TopRight <= 0) || r.BottomLeft > 0 || r.BottomRight > 0 || b.Top <= 0) return false;
+            var outer = new Rect(RenderSize);
+            if (outer.Width <= b.Left + b.Right || outer.Height <= b.Top + b.Bottom) return false;
+            var inner = new Rect(b.Left, b.Top, outer.Width - b.Left - b.Right, outer.Height - b.Top - b.Bottom);
+            Geometry outerShape = TopRounded(outer, r.TopLeft, r.TopRight);
+            Geometry face = TopRounded(inner, Math.Max(0, r.TopLeft - 1), Math.Max(0, r.TopRight - 1));
+            // On a single pane the outline's sides fade out toward the tab's foot, and the card's
+            // own edge only starts below the tab, which left a gap between the two. The card's
+            // edge runs on up the sides beneath the outline, so the accent fades into it.
+            if (DividerBrush is Brush edge && BorderBrush is not SolidColorBrush)
+            {
+                if (b.Left > 0) dc.DrawRectangle(edge, null, new Rect(0, r.TopLeft, b.Left, outer.Height - r.TopLeft));
+                if (b.Right > 0)
+                    dc.DrawRectangle(edge, null, new Rect(outer.Width - b.Right, r.TopRight, b.Right, outer.Height - r.TopRight));
+            }
+            if (BorderBrush != null)
+                dc.DrawGeometry(BorderBrush, null, new CombinedGeometry(GeometryCombineMode.Exclude, outerShape, face));
+            if (Background != null) dc.DrawGeometry(Background, null, face);
+            return true;
+        }
+
+        /// <summary>
+        /// The active tab's grain sits in the child and reaches past the padding to cover the
+        /// whole face, so it kept square corners over the rounded face. Clipping the child to the
+        /// face (in the child's own coordinates) rounds the grain with it; the title and close
+        /// button sit inside the padding and are untouched.
+        /// </summary>
+        protected override Size ArrangeOverride(Size arrangeSize)
+        {
+            Size arranged = base.ArrangeOverride(arrangeSize);
+            if (Child is UIElement child)
+            {
+                CornerRadius r = CornerRadius;
+                Thickness b = BorderThickness, p = Padding;
+                bool rounded = !RetroBottomEdges && (r.TopLeft > 0 || r.TopRight > 0) &&
+                               r.BottomLeft <= 0 && r.BottomRight <= 0 && b.Top > 0;
+                double w = arranged.Width - b.Left - b.Right, h = arranged.Height - b.Top - b.Bottom;
+                child.Clip = rounded && w > 0 && h > 0
+                    ? TopRounded(new Rect(-p.Left, -p.Top, w, h), Math.Max(0, r.TopLeft - 1), Math.Max(0, r.TopRight - 1))
+                    : null;
+            }
+            return arranged;
+        }
+
+        private static Geometry TopRounded(Rect rect, double left, double right)
+        {
+            left = Math.Min(left, Math.Min(rect.Width / 2, rect.Height));
+            right = Math.Min(right, Math.Min(rect.Width / 2, rect.Height));
+            var shape = new StreamGeometry();
+            using (StreamGeometryContext c = shape.Open())
+            {
+                c.BeginFigure(new Point(rect.Left, rect.Bottom), isFilled: true, isClosed: true);
+                c.LineTo(new Point(rect.Left, rect.Top + left), true, false);
+                if (left > 0) c.ArcTo(new Point(rect.Left + left, rect.Top), new Size(left, left), 0, false, SweepDirection.Clockwise, true, false);
+                c.LineTo(new Point(rect.Right - right, rect.Top), true, false);
+                if (right > 0) c.ArcTo(new Point(rect.Right, rect.Top + right), new Size(right, right), 0, false, SweepDirection.Clockwise, true, false);
+                c.LineTo(new Point(rect.Right, rect.Bottom), true, false);
+            }
+            shape.Freeze();
+            return shape;
         }
 
         private void DrawRetroBottomEdges(DrawingContext dc)
