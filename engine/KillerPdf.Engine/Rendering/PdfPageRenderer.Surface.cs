@@ -497,10 +497,12 @@ public sealed partial class PdfPageRenderer
             if (compose) ComposeSpotPixel(offset);
         }
 
-        internal bool TryPaintRgbSpot(int offset, in Color color, bool overprint, uint sourceInk)
+        internal bool TryPaintRgbSpot(int offset, in Color color, bool overprint, uint sourceInk,
+            PreparedSpotPaint? prepared = null)
         {
             if (!_rgbSpotShadow || _rgbSpotValid![offset / 4] == 0) return false;
-            PaintSpot(offset, color, overprint, sourceInk);
+            if (Prepares(prepared, color)) PaintSpotPrepared(offset, color, overprint, sourceInk, prepared!);
+            else PaintSpot(offset, color, overprint, sourceInk);
             return true;
         }
 
@@ -531,9 +533,12 @@ public sealed partial class PdfPageRenderer
         internal bool CanPaintSpot(int offset) => Ink is not null
             || _rgbSpotShadow && _rgbSpotValid![offset / 4] != 0;
 
-        internal sealed record PreparedSpotPaint(string Name, byte[] Plate);
+        // A paint's plates, created up front so its pixels can write them without the plate lock.
+        // A second name covers colors that carry an additional spot.
+        internal sealed record PreparedSpotPaint(string Name, byte[] Plate,
+            string? SecondName = null, byte[]? SecondPlate = null);
 
-        internal PreparedSpotPaint PrepareSpotPaint(string name)
+        internal PreparedSpotPaint PrepareSpotPaint(string name, string? secondName = null)
         {
             lock (_spotSync)
             {
@@ -543,16 +548,26 @@ public sealed partial class PdfPageRenderer
                     Data.AsSpan(0, Length).CopyTo(_spotBaseInk);
                     _spotPlates = new Dictionary<string, byte[]>(StringComparer.Ordinal);
                 }
-                if (!_spotPlates!.TryGetValue(name, out byte[]? plate))
+                byte[] Plate(string plateName)
                 {
-                    plate = RasterBuffers.Rent(Length);
-                    Array.Clear(plate, 0, Length);
-                    _spotPlates.Add(name, plate);
-                    _spotPlateValues = [.. _spotPlates.Values];
+                    if (!_spotPlates!.TryGetValue(plateName, out byte[]? plate))
+                    {
+                        plate = RasterBuffers.Rent(Length);
+                        Array.Clear(plate, 0, Length);
+                        _spotPlates.Add(plateName, plate);
+                        _spotPlateValues = [.. _spotPlates.Values];
+                    }
+                    return plate;
                 }
-                return new PreparedSpotPaint(name, plate);
+                return new PreparedSpotPaint(name, Plate(name), secondName,
+                    secondName is null ? null : Plate(secondName));
             }
         }
+
+        /// <summary>True when a prepared paint holds exactly the plates this color paints.</summary>
+        internal static bool Prepares(PreparedSpotPaint? prepared, in Color color) =>
+            prepared is not null && string.Equals(color.SpotName, prepared.Name, StringComparison.Ordinal)
+            && string.Equals(color.AdditionalSpot?.Name, prepared.SecondName, StringComparison.Ordinal);
 
         internal void PaintSpotPrepared(int offset, in Color color, bool overprint,
             uint sourceInk, PreparedSpotPaint prepared)
@@ -574,6 +589,8 @@ public sealed partial class PdfPageRenderer
                 WriteInk(_spotBaseInk!, offset, baseInk & ~mask | processInk & mask);
             }
             WriteInk(prepared.Plate, offset, color.SpotTint <= 0 ? 0 : color.SpotInk ?? sourceInk);
+            if (color.AdditionalSpot is { } additional)
+                WriteInk(prepared.SecondPlate!, offset, additional.Tint <= 0 ? 0 : additional.Ink);
             ComposeSpotPixel(offset);
         }
 

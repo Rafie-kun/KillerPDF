@@ -3824,8 +3824,7 @@ public sealed partial class PdfPageRenderer
                 ProcessChannels: supported ? channels : null, SuppressPainting: channels.All(channel => channel == -1),
                 Initial: InitialColor.FullTint, HasIccSource: alternate.HasIccSource,
                 HasSpotColorants: singleSpot is not null || mixedSpot || twoSpots,
-                BlackPointAlternate: mixedSpot || twoSpots ? null : alternate,
-                DerivedSpotPair: derivedSpots);
+                BlackPointAlternate: mixedSpot || twoSpots ? null : alternate);
         }
         if (kind.ValueAsLatin1() != "Indexed" || array.Count != 4
             || Resolve(array[2]) is not PdfInteger highValue
@@ -3833,15 +3832,6 @@ public sealed partial class PdfPageRenderer
             throw new NotSupportedException();
         ImageColorSpace baseSpace = ReadColorSpace(array[1], resources, depth + 1, useDefaults, diagnostics, intent);
         if (baseSpace.Palette is not null) throw new NotSupportedException();
-        // Image palettes carry one spot per entry, so a two-spot base derived from its tint
-        // transform keeps painting its alternate colors in images, as before.
-        if (baseSpace is { DerivedSpotPair: true, MultiConverter: { } spotPair })
-            baseSpace = baseSpace with
-            {
-                MultiConverter = values => spotPair(values) with
-                    { SpotName = null, SpotTint = 0, SpotInk = null, AdditionalSpot = null },
-                HasSpotColorants = false, DerivedSpotPair = false
-            };
         int baseComponents = baseSpace.Components;
         int entryCount = (int)highValue.Value + 1;
         int expected = checked(entryCount * baseComponents);
@@ -5796,8 +5786,11 @@ public sealed partial class PdfPageRenderer
             || target.HasRgbSpotShadow && (deviceCmykImage || colorSpace.NativeProcessMask.HasValue);
         Color[]? spotPalette = (target.Ink is not null || preserveRgbSpots)
             && colorSpace.PaletteBase?.HasSpotColorants == true ? colorSpace.Palette : null;
+        // A reduced palette over one spot keeps that spot's averaged ink in the color plane; a
+        // second spot needs plane cells of its own.
         string? reducedPaletteSpotName = spotPalette is { Length: > 0 }
-            && spotPalette[0].ProcessInk is null ? spotPalette[0].SpotName : null;
+            && spotPalette[0].ProcessInk is null && spotPalette[0].AdditionalSpot is null
+            ? spotPalette[0].SpotName : null;
         // The array overload supports the named-spot converter; the span overload rejects it.
         string? imageSpotName = (target.Ink is not null || preserveRgbSpots)
             && (factor == 1 || opaqueInkImage || opaqueRgbSpotImage) && !imageMask
@@ -5865,9 +5858,25 @@ public sealed partial class PdfPageRenderer
             alignedPlane && planeWidth == centerColumns);
         var rowAxis = new PlaneAxis(firstCenterRow, planeHeight, inverse.D < 0,
             alignedPlane && planeHeight == centerRows);
-        SpotInkSample[]? spotPlane = averagePlane && spotPalette is { Length: > 0 }
-            && (spotPalette[0].ProcessInk is not null || target.HasRgbSpotShadow)
+        // Spot data the color plane cannot carry gets plane cells of its own: a reduced palette
+        // over process and spot, or over two spots, and, at full opacity, any other image whose
+        // spot is not read back from its source samples below. Unreduced palettes and
+        // single-component spots read their samples per pixel instead.
+        Color? spotProbe = spotPalette is { Length: > 0 } ? spotPalette[0]
+            : (target.Ink is not null || preserveRgbSpots) && !imageMask
+                && colorSpace.ContainsSpotColorants && !colorSpace.DoesNotPaint
+                ? colorSpace.Convert(Enumerable.Repeat(1d, colorSpace.Components).ToArray()) : null;
+        bool paletteSpotPlane = averagePlane && spotPalette is { Length: > 0 }
+            && (spotPalette[0].ProcessInk is not null || target.HasRgbSpotShadow);
+        bool sampledSpotPlane = (target.Ink is not null || preserveRgbSpots) && !imageMask
+            && preblendMatte is null && bits is > 0 and <= 16 && spotProbe?.SpotName is not null
+            && Math.Clamp(stencilAlpha, 0, 1) == 1 && !preserveReducedSpot
+            && !(factor == 1 && (spotPalette is not null || imageSpotName is not null));
+        SpotInkSample[]? spotPlane = paletteSpotPlane || sampledSpotPlane
             ? new SpotInkSample[checked(planeWidth * planeHeight)] : null;
+        string? spotPlaneName = spotPlane is null ? null : spotProbe!.Value.SpotName;
+        string? spotPlaneSecondName = spotPlane is null ? null : spotProbe!.Value.AdditionalSpot?.Name;
+        byte spotPlaneProcessMask = spotPlane is null ? (byte)0 : spotProbe!.Value.SpotProcessMask;
         bool binaryAverage = averagePlane && !pixelAlignedPlane && bits == 1 && components == 1;
         // Small masks keep the cheaper per-pixel path.
         bool binaryRowAverage = binaryAverage && (long)sourceWidth * sourceHeight >= 10_000_000;
@@ -5908,8 +5917,8 @@ public sealed partial class PdfPageRenderer
         ImageSampleConverter.AreaSpan[]? converterAreaRows = averagePlane && !binaryAverage
             ? rowRanges?.Select(range => ImageSampleConverter.AreaSpan.FromRange(range.Start, range.End, sourceHeight)).ToArray()
                 ?? ImageSampleConverter.CreateAreaSpans(sourceHeight, planeHeight) : null;
-        // A palette's spot samples average the same source as the color plane, whichever sampler
-        // builds that plane: a 1-bit palette's color goes through the binary sampler.
+        // Averaged spot samples cover the same source as the color plane, whichever sampler builds
+        // that plane: a 1-bit palette's color goes through the binary sampler.
         ImageSampleConverter.AreaSpan[]? spotAreaColumns = spotPlane is null ? null : converterAreaColumns
             ?? columnRanges?.Select(range => ImageSampleConverter.AreaSpan.FromRange(range.Start, range.End, sourceWidth)).ToArray();
         ImageSampleConverter.AreaSpan[]? spotAreaRows = spotPlane is null ? null : converterAreaRows
@@ -5958,8 +5967,8 @@ public sealed partial class PdfPageRenderer
             ? null : RasterBuffers.Rent(checked(planeWidth * planeHeight * 4));
         // Images the device fast path does not take are smoothed from their converted plane, so
         // every color space and both RGB and ink pages are smoothed alike. Spot palettes and
-        // color-key masks keep their exact samples.
-        bool smoothPlane = smoothImage && plane is not null && !averagePlane && spotPlane is null
+        // color-key masks keep their exact samples. Other spot samples blend with their colors.
+        bool smoothPlane = smoothImage && plane is not null && !averagePlane
             && spotPalette is null && !preserveReducedSpot && colorKeyMask is null && matteConverter is null;
         byte[]? alphaPlane = null;
         try
@@ -5970,6 +5979,18 @@ public sealed partial class PdfPageRenderer
             Color paintedStencil = imageMask && target.Ink is not null
                 ? InkColor(target.GetInk(stencilColor)) with
                 { OverprintComponents = stencilColor.OverprintComponents } : stencilColor;
+            // A stencil filled with a spot color at full opacity keeps its spot, so it paints that
+            // spot's plate as a vector fill of the same color does. Below full opacity it paints
+            // its converted ink, which knocks the plates under it out by its opacity and keeps
+            // them.
+            bool spotStencil = imageMask && stencilColor.SpotName is not null
+                && Math.Clamp(stencilAlpha, 0, 1) == 1 && (target.Ink is not null || target.HasRgbSpotShadow);
+            Color spotStencilColor = spotStencil && target.Ink is not null ? paintedStencil with
+            {
+                SpotName = stencilColor.SpotName, SpotTint = stencilColor.SpotTint,
+                SpotInk = stencilColor.SpotInk, ProcessInk = stencilColor.ProcessInk,
+                SpotProcessMask = stencilColor.SpotProcessMask, AdditionalSpot = stencilColor.AdditionalSpot
+            } : paintedStencil;
             if (averageStencil)
             {
                 alphaPlane = RasterBuffers.Rent(checked(planeWidth * planeHeight));
@@ -6006,6 +6027,8 @@ public sealed partial class PdfPageRenderer
                         areaColumns: converterAreaColumns, areaRows: converterAreaRows,
                         binaryColumns: binaryColumns, binaryRows: binaryRows, preserveSpotZero: preserveReducedSpot,
                         sharedColors: sharedColors);
+                    var spots = spotPlane is null ? null : new ImageSpotSampler(samples, rowBytes,
+                        components, bits, decode, colorSpace, blendProfile, spotPalette);
                     long[]? binaryCoverage = binaryRowAverage ? new long[planeWidth] : null;
                     uint[]? binaryColors = binaryRowAverage ? new uint[planeWidth] : null;
                     for (int py = rowStart; py < rowEnd; py++)
@@ -6047,9 +6070,10 @@ public sealed partial class PdfPageRenderer
                                 ? converter.ConvertArea(px, py, planeWidth, planeHeight,
                                     sourceWidth, sourceHeight, cancellationToken)
                                 : converter.Convert(sx, sy);
-                            spotPlane?[py * planeWidth + px] = AverageSpotPalette(samples,
-                                    rowBytes, bits, sourceWidth, sourceHeight, px, py,
-                                    planeWidth, planeHeight, spotPalette!, spotAreaColumns, spotAreaRows);
+                            spotPlane?[py * planeWidth + px] = averagePlane
+                                ? spots!.Average(px, py, sourceWidth, sourceHeight, planeWidth,
+                                    planeHeight, spotAreaColumns, spotAreaRows)
+                                : spots!.At(sx, sy);
                             int alpha = colorKeyMask is not null && converter.MatchesColorKey(sx, sy, colorKeyMask)
                                 ? 0 : 255;
                             if (targetInk)
@@ -6083,6 +6107,16 @@ public sealed partial class PdfPageRenderer
                 && target.GroupShape is null
                 && blendMode is RendererBlendMode.Normal or RendererBlendMode.Compatible;
             bool perPixelClip = !rectangularClips;
+            // A spot pixel the image covers only partly, through its soft mask, a stencil's edge
+            // or an antialiased clip, blends its plates by that coverage over an opaque backdrop,
+            // as a vector fill's antialiased edge does, instead of clearing them. Group alpha is
+            // tracked the same way; shape groups, knockout groups and lower opacity keep the
+            // compositor.
+            bool spotCoverage = (target.Ink is not null || target.HasRgbSpotShadow)
+                && Math.Clamp(stencilAlpha, 0, 1) == 1 && imageOpacity == 1
+                && knockout is null && target.GroupShape is null && graphicsSoftMask is null
+                && blendMode is RendererBlendMode.Normal or RendererBlendMode.Compatible;
+            bool spotOverprint = imageMask ? (stencilColor.OverprintComponents & 16) != 0 : overprint;
             byte[]? directGroupAlpha = target.GroupAlpha;
             double pageStepX = 1 / scaleX;
             double unitStepX = inverse.A * pageStepX;
@@ -6222,7 +6256,7 @@ public sealed partial class PdfPageRenderer
             bool directInk = target.Ink is not null && !target.HasSpotPlates && imageOpacity == 1
                 && target.GroupShape is null
                 && graphicsSoftMask is null && knockout is null
-                && imageSpotName is null && spotPalette is null && !preserveReducedSpot
+                && imageSpotName is null && spotPalette is null && !preserveReducedSpot && spotPlane is null
                 && !(overprint && colorSpace.ContainsSpotColorants)
                 && (imageMask || !colorSpace.NativeProcessMask.HasValue)
                 && blendMode is RendererBlendMode.Normal or RendererBlendMode.Compatible;
@@ -6266,21 +6300,31 @@ public sealed partial class PdfPageRenderer
                 && blendMode is RendererBlendMode.Normal or RendererBlendMode.Compatible
                 && (long)(paintRight - paintLeft) * (paintBottom - paintTop) >= ParallelPaintThreshold)
             {
-                string? spotName = null;
+                string? spotName = null, secondSpotName = null;
                 if (spotPalette is { Length: > 0 } && (spotPlane is not null || factor == 1))
                 {
                     spotName = spotPalette[0].SpotName;
+                    secondSpotName = spotPalette[0].AdditionalSpot?.Name;
                     for (int index = 1; spotName is not null && index < spotPalette.Length; index++)
-                        if (!string.Equals(spotName, spotPalette[index].SpotName, StringComparison.Ordinal))
+                        if (!string.Equals(spotName, spotPalette[index].SpotName, StringComparison.Ordinal)
+                            || !string.Equals(secondSpotName, spotPalette[index].AdditionalSpot?.Name, StringComparison.Ordinal))
                             spotName = null;
                 }
+                // Spot plane cells name the same spots on every pixel.
+                else if (spotPlane is not null)
+                    (spotName, secondSpotName) = (spotPlaneName, spotPlaneSecondName);
                 // A reduced palette over one spot paints that spot's name on every pixel, so it can
                 // use the prepared plate write too instead of locking the plates per pixel.
                 else if (factor == 1 || preserveReducedSpot)
                     spotName = imageSpotName ?? (preserveReducedSpot ? reducedPaletteSpotName : null);
                 if (spotName is not null)
-                    preparedSpotPaint = target.PrepareSpotPaint(spotName);
+                    preparedSpotPaint = target.PrepareSpotPaint(spotName, secondSpotName);
             }
+            // A spot stencil's covered pixels write its plates without the plate lock, however
+            // small the stencil: Type 3 bitmap glyphs paint one small stencil each.
+            else if (spotStencil && knockout is null
+                && blendMode is RendererBlendMode.Normal or RendererBlendMode.Compatible)
+                preparedSpotPaint = target.PrepareSpotPaint(stencilColor.SpotName!, stencilColor.AdditionalSpot?.Name);
             void PaintRows(int rowStart, int rowEnd)
             {
                 for (int y = rowStart; y < rowEnd; y++)
@@ -6300,6 +6344,7 @@ public sealed partial class PdfPageRenderer
                         int alpha;
                         Color color;
                         double smoothedSpotTint = double.NaN;
+                        SpotInkSample? smoothedSpot = null;
                         // Full clip coverage leaves the compositor's opacity at exactly one, so the
                         // direct ink write applies under antialiased clips as well.
                         int clipCoverage = rectangularClips ? 255 : ClipCoverage(clips, x, y);
@@ -6386,7 +6431,7 @@ public sealed partial class PdfPageRenderer
                                 if (one != stencilPaintsOne) continue;
                                 alpha = stencilCoverageByte;
                             }
-                            color = paintedStencil;
+                            color = spotStencilColor;
                         }
                         else if (smoothPlane)
                         {
@@ -6428,6 +6473,9 @@ public sealed partial class PdfPageRenderer
                             }
                             double Mixed(int channel) => (a00 * plane![o00 + channel] + a10 * plane[o10 + channel]
                                 + a01 * plane[o01 + channel] + a11 * plane[o11 + channel]) / total;
+                            if (spotPlane is not null)
+                                smoothedSpot = BlendSpotSamples(spotPlane, o00 / 4, o10 / 4, o01 / 4, o11 / 4,
+                                    a00, a10, a01, a11, total);
                             // A Separation image's plate blends with its ink, so a blank sample
                             // cannot clear the plate on its side of an edge. Cells are source
                             // samples here because the plane is not reduced.
@@ -6462,12 +6510,14 @@ public sealed partial class PdfPageRenderer
                         if (alpha == 0) continue;
                         if (spotPlane is not null)
                         {
-                            SpotInkSample spot = spotPlane[py * planeWidth + px];
+                            SpotInkSample spot = smoothedSpot ?? spotPlane[py * planeWidth + px];
                             color = color with
                             {
-                                SpotName = spotPalette![0].SpotName, SpotTint = spot.Tint / 255d,
+                                SpotName = spotPlaneName, SpotTint = spot.Tint / 255d,
                                 SpotInk = spot.SpotInk, ProcessInk = spot.ProcessInk,
-                                SpotProcessMask = spotPalette[0].SpotProcessMask
+                                SpotProcessMask = spotPlaneProcessMask,
+                                AdditionalSpot = spotPlaneSecondName is null ? null
+                                    : new SpotColorant(spotPlaneSecondName, spot.SecondTint / 255d, spot.SecondInk)
                             };
                         }
                         else if (preserveReducedSpot)
@@ -6491,7 +6541,7 @@ public sealed partial class PdfPageRenderer
                                 {
                                     SpotName = spot.SpotName, SpotTint = spot.SpotTint,
                                     SpotInk = spot.SpotInk ?? spot.Ink, ProcessInk = spot.ProcessInk,
-                                    SpotProcessMask = spot.SpotProcessMask
+                                    SpotProcessMask = spot.SpotProcessMask, AdditionalSpot = spot.AdditionalSpot
                                 };
                             }
                             else
@@ -6506,7 +6556,9 @@ public sealed partial class PdfPageRenderer
                             alpha = (alpha * imageMaskSample + 127) / 255;
                         }
                         if (alpha == 0) continue;
-                        if (direct && alpha == 255 && clipCoverage == 255)
+                        // A page that simulates overprint on RGB keeps a spot shadow, which the
+                        // compositor updates; a straight RGB write would leave it stale.
+                        if (direct && alpha == 255 && clipCoverage == 255 && !target.HasRgbSpotShadow)
                         {
                             int targetOffset = target.Offset(x, y);
                             target[targetOffset] = color.Blue;
@@ -6518,18 +6570,25 @@ public sealed partial class PdfPageRenderer
                         }
                         double clipAlpha = rectangularClips ? 1 : clipCoverage / 255d;
                         if (clipAlpha <= 0) continue;
-                        if ((opaqueInkImage || opaqueRgbSpotImage) && color.SpotName is not null
-                            && clipCoverage < 255 && alpha == 255
-                            && target.Contains(x, y))
+                        if (spotCoverage && color.SpotName is not null
+                            && (alpha < 255 || clipCoverage < 255) && target.Contains(x, y))
                         {
                             int offset = target.Offset(x, y);
                             if (target.Alpha(offset) == 255 && target.CanPaintSpot(offset))
                             {
-                                target.PaintSpotCoverage(offset, color, color.Ink ?? target.GetInk(color),
-                                    (byte)clipCoverage, overprint);
+                                byte cover = (byte)((alpha * clipCoverage + 127) / 255);
+                                uint ink = color.Ink ?? target.GetInk(color);
+                                if (RasterSurface.Prepares(preparedSpotPaint, color))
+                                    target.PaintSpotCoveragePrepared(offset, color, ink, cover, spotOverprint,
+                                        preparedSpotPaint!.Plate, preparedSpotPaint.SecondPlate);
+                                else target.PaintSpotCoverage(offset, color, ink, cover, spotOverprint);
+                                target.GroupAlpha?[offset / 4] = (byte)Math.Round(cover
+                                    + target.GroupAlpha[offset / 4] * (1 - cover / 255d));
                                 continue;
                             }
                         }
+                        // Elsewhere a spot stencil's partly covered pixels paint its converted ink.
+                        if (spotStencil && (alpha < 255 || clipCoverage < 255)) color = paintedStencil;
                         if (preserveProcessImageSpots)
                         {
                             // Clip edges blend the process plate without erasing the underlying spot.
@@ -6568,40 +6627,156 @@ public sealed partial class PdfPageRenderer
         }
     }
 
-    private readonly record struct SpotInkSample(uint SpotInk, uint ProcessInk, byte Tint);
+    // One plane cell's spot data: the spot's ink and tint, the process ink painted with it, and a
+    // second spot's ink and tint.
+    private readonly record struct SpotInkSample(uint SpotInk, uint ProcessInk, uint SecondInk,
+        byte Tint, byte SecondTint);
 
-    // Averages a palette's spot ink over the same source as the color plane's cell, so the
-    // plates and the process ink of an aligned plane stay in phase.
-    private static SpotInkSample AverageSpotPalette(byte[] samples, int rowBytes, int bits,
-        int sourceWidth, int sourceHeight, int px, int py, int planeWidth, int planeHeight,
-        Color[] palette, ImageSampleConverter.AreaSpan[]? columns, ImageSampleConverter.AreaSpan[]? rows)
+    /// <summary>
+    /// Reads the spot data an image's colors carry, which its ink plane cannot hold. A palette
+    /// supplies it per entry; any other spot color space converts each sample. Each instance
+    /// keeps a small cache, so row ranges each own one.
+    /// </summary>
+    private sealed class ImageSpotSampler
     {
-        var column = columns?[px] ?? ImageSampleConverter.AreaSpan.Create(px, sourceWidth, planeWidth);
-        var row = rows?[py] ?? ImageSampleConverter.AreaSpan.Create(py, sourceHeight, planeHeight);
-        Span<double> channels = stackalloc double[9];
-        for (int y = row.First; y < row.End; y++)
-            for (int x = column.First; x < column.End; x++)
-            {
-                int bitOffset = checked(y * rowBytes * 8 + x * bits);
-                int sample = checked((int)ReadPackedSample(samples, bitOffset, bits));
-                Color color = palette[Math.Min(sample, palette.Length - 1)];
-                double weight = row.Weight(y) * column.Weight(x) / (row.Length * column.Length);
-                uint spot = color.SpotInk ?? color.Ink ?? 0;
-                uint process = color.ProcessInk ?? 0;
-                for (int channel = 0; channel < 4; channel++)
-                {
-                    channels[channel] += (byte)(spot >> (channel * 8)) * weight;
-                    channels[channel + 4] += (byte)(process >> (channel * 8)) * weight;
-                }
-                channels[8] += color.SpotTint * 255 * weight;
-            }
-        uint spotInk = 0, processInk = 0;
-        for (int channel = 0; channel < 4; channel++)
+        private const int CacheSlots = 4096;
+        private readonly byte[] _samples;
+        private readonly int _rowBytes;
+        private readonly int _components;
+        private readonly int _bits;
+        private readonly double[] _decode;
+        private readonly ImageColorSpace _colorSpace;
+        private readonly PdfColorTransform? _profile;
+        private readonly Color[]? _palette;
+        private readonly double[] _values;
+        private readonly bool _cacheable;
+        private readonly uint[] _cacheKeys = new uint[CacheSlots];
+        private readonly bool[] _cacheValid = new bool[CacheSlots];
+        private readonly Color[] _cacheColors = new Color[CacheSlots];
+
+        internal ImageSpotSampler(byte[] samples, int rowBytes, int components, int bits,
+            double[] decode, ImageColorSpace colorSpace, PdfColorTransform? profile, Color[]? palette)
         {
-            spotInk |= (uint)(byte)Math.Round(channels[channel]) << (channel * 8);
-            processInk |= (uint)(byte)Math.Round(channels[channel + 4]) << (channel * 8);
+            _samples = samples;
+            _rowBytes = rowBytes;
+            _components = components;
+            _bits = bits;
+            _decode = decode;
+            _colorSpace = colorSpace;
+            _profile = profile;
+            _palette = palette;
+            _values = new double[components];
+            _cacheable = components * bits <= 32;
         }
-        return new SpotInkSample(spotInk, processInk, (byte)Math.Round(channels[8]));
+
+        // The spot data of one source sample, kept at full precision for averaging.
+        private void Read(int x, int y, out uint spot, out uint process, out uint second,
+            out double tint, out double secondTint)
+        {
+            Color color = _palette is not null
+                ? _palette[Math.Min(Raw(x, y, 0), _palette.Length - 1)] : Convert(x, y);
+            spot = color.SpotInk ?? (_palette is not null ? color.Ink ?? 0 : ColorInk(color, _profile));
+            process = color.ProcessInk ?? 0;
+            second = color.AdditionalSpot?.Ink ?? 0;
+            tint = color.SpotTint;
+            secondTint = color.AdditionalSpot?.Tint ?? 0;
+        }
+
+        private Color Convert(int x, int y)
+        {
+            uint key = 0;
+            int slot = 0;
+            if (_cacheable)
+            {
+                for (int component = 0; component < _components; component++)
+                    key = key << _bits | (uint)Raw(x, y, component);
+                slot = (int)((key * 2654435761u) >> 20);
+                if (_cacheValid[slot] && _cacheKeys[slot] == key) return _cacheColors[slot];
+            }
+            int maximum = (1 << _bits) - 1;
+            for (int component = 0; component < _components; component++)
+                _values[component] = _decode[component * 2] + Raw(x, y, component) / (double)maximum
+                    * (_decode[component * 2 + 1] - _decode[component * 2]);
+            Color color = _colorSpace.Convert(_values);
+            if (_cacheable)
+            {
+                _cacheKeys[slot] = key;
+                _cacheColors[slot] = color;
+                _cacheValid[slot] = true;
+            }
+            return color;
+        }
+
+        private int Raw(int x, int y, int component) => checked((int)ReadPackedSample(_samples,
+            checked(y * _rowBytes * 8 + (x * _components + component) * _bits), _bits));
+
+        /// <summary>The spot data of the one source sample a nearest-sampled cell holds.</summary>
+        internal SpotInkSample At(int x, int y)
+        {
+            Read(x, y, out uint spot, out uint process, out uint second, out double tint, out double secondTint);
+            return new SpotInkSample(spot, process, second, TintByte(tint), TintByte(secondTint));
+        }
+
+        private static byte TintByte(double tint) => (byte)Math.Round(Math.Clamp(tint, 0, 1) * 255);
+
+        /// <summary>
+        /// Averages the spot data over the same source as the color plane's cell, so the plates and
+        /// the process ink of an aligned plane stay in phase.
+        /// </summary>
+        internal SpotInkSample Average(int px, int py, int sourceWidth, int sourceHeight,
+            int planeWidth, int planeHeight, ImageSampleConverter.AreaSpan[]? columns,
+            ImageSampleConverter.AreaSpan[]? rows)
+        {
+            var column = columns?[px] ?? ImageSampleConverter.AreaSpan.Create(px, sourceWidth, planeWidth);
+            var row = rows?[py] ?? ImageSampleConverter.AreaSpan.Create(py, sourceHeight, planeHeight);
+            Span<double> channels = stackalloc double[14];
+            for (int y = row.First; y < row.End; y++)
+                for (int x = column.First; x < column.End; x++)
+                {
+                    Read(x, y, out uint spot, out uint process, out uint second,
+                        out double tint, out double secondTint);
+                    double weight = row.Weight(y) * column.Weight(x) / (row.Length * column.Length);
+                    for (int channel = 0; channel < 4; channel++)
+                    {
+                        channels[channel] += (byte)(spot >> (channel * 8)) * weight;
+                        channels[channel + 4] += (byte)(process >> (channel * 8)) * weight;
+                        channels[channel + 9] += (byte)(second >> (channel * 8)) * weight;
+                    }
+                    channels[8] += tint * 255 * weight;
+                    channels[13] += secondTint * 255 * weight;
+                }
+            uint spotInk = 0, processInk = 0, secondInk = 0;
+            for (int channel = 0; channel < 4; channel++)
+            {
+                spotInk |= (uint)(byte)Math.Round(channels[channel]) << (channel * 8);
+                processInk |= (uint)(byte)Math.Round(channels[channel + 4]) << (channel * 8);
+                secondInk |= (uint)(byte)Math.Round(channels[channel + 9]) << (channel * 8);
+            }
+            return new SpotInkSample(spotInk, processInk, secondInk,
+                (byte)Math.Round(channels[8]), (byte)Math.Round(channels[13]));
+        }
+    }
+
+    // Blends four spot cells with the smoothing weights of their color cells.
+    private static SpotInkSample BlendSpotSamples(SpotInkSample[] plane, int i00, int i10, int i01,
+        int i11, double a00, double a10, double a01, double a11, double total)
+    {
+        SpotInkSample s00 = plane[i00], s10 = plane[i10], s01 = plane[i01], s11 = plane[i11];
+        byte Mixed(byte v00, byte v10, byte v01, byte v11) =>
+            (byte)Math.Round((a00 * v00 + a10 * v10 + a01 * v01 + a11 * v11) / total);
+        uint Ink(uint v00, uint v10, uint v01, uint v11)
+        {
+            uint ink = 0;
+            for (int shift = 0; shift < 32; shift += 8)
+                ink |= (uint)Mixed((byte)(v00 >> shift), (byte)(v10 >> shift),
+                    (byte)(v01 >> shift), (byte)(v11 >> shift)) << shift;
+            return ink;
+        }
+        return new SpotInkSample(Ink(s00.SpotInk, s10.SpotInk, s01.SpotInk, s11.SpotInk),
+            Ink(s00.ProcessInk, s10.ProcessInk, s01.ProcessInk, s11.ProcessInk),
+            Ink(s00.SecondInk, s10.SecondInk, s01.SecondInk, s11.SecondInk),
+            Mixed(s00.Tint, s10.Tint, s01.Tint, s11.Tint),
+            Mixed(s00.SecondTint, s10.SecondTint, s01.SecondTint, s11.SecondTint));
     }
 
     /// <summary>Reads packed image samples and converts them to device colors with a small cache.</summary>
@@ -7706,10 +7881,9 @@ public sealed partial class PdfPageRenderer
                 && pixels.Alpha(offset) is 0 or 255 && knockout is null
                 && blendMode is RendererBlendMode.Normal or RendererBlendMode.Compatible)
             {
-                if (preparedSpotPaint is not null && color.AdditionalSpot is null
-                    && string.Equals(color.SpotName, preparedSpotPaint.Name, StringComparison.Ordinal))
+                if (RasterSurface.Prepares(preparedSpotPaint, color))
                     pixels.PaintSpotPrepared(offset, color, (color.OverprintComponents & 16) != 0,
-                        resolvedInk ?? pixels.GetInk(color), preparedSpotPaint);
+                        resolvedInk ?? pixels.GetInk(color), preparedSpotPaint!);
                 else
                     pixels.PaintSpot(offset, color, (color.OverprintComponents & 16) != 0,
                         resolvedInk ?? pixels.GetInk(color));
@@ -7755,7 +7929,7 @@ public sealed partial class PdfPageRenderer
             bool supported = sourceAlpha == 1 && opaqueBackdrop;
             if (supported && color.SpotName is not null
                 && pixels.TryPaintRgbSpot(offset, color, (color.OverprintComponents & 16) != 0,
-                    resolvedInk ?? pixels.GetInk(color))) return;
+                    resolvedInk ?? pixels.GetInk(color), preparedSpotPaint)) return;
             if (sourceAlpha > 0 && opaqueBackdrop
                 && (sourceAlpha == 1 || pixels.GroupAlpha is null)
                 && (color.SpotName is not null && sourceAlpha < 1
@@ -8678,7 +8852,7 @@ public sealed partial class PdfPageRenderer
         bool IsLab = false, bool IsDefault = false, bool HasIccSource = false, bool HasSpotColorants = false,
         PdfObject? Definition = null, PdfDictionary? SourceResources = null, int Intent = 1,
         bool IsDeviceCmyk = false, BlackPointBinding? BlackPointControl = null,
-        ImageColorSpace? BlackPointAlternate = null, bool DerivedSpotPair = false)
+        ImageColorSpace? BlackPointAlternate = null)
     {
         internal bool BlackPointCompensationEnabled => BlackPointControl is not null;
         internal ImageColorSpace? BlackPointSource => BlackPointControl?.Source;
