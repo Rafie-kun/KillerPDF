@@ -147,10 +147,10 @@ public sealed class PdfSpotImagePlateTests
 
     // A spot stencil's partly covered pixels inside a transparency group keep the group's alpha
     // and shape bookkeeping. A first repair painted them straight onto the plates and skipped it,
-    // so the group composite dropped them (round K, KF-001). Both groups sit on opaque paper, where
-    // partly covered spot pixels blend their plates: a non-isolated group drawn with Multiply,
-    // which composites by group alpha, and a knockout group at half opacity, which composites the
-    // pixels its objects touched. Pixel 11 is three quarters covered.
+    // so the group composite dropped them (round K, KF-001). Both groups sit on opaque paper. In the
+    // non-isolated group drawn with Multiply, which composites by group alpha, partly covered spot
+    // pixels blend their plates. The knockout group at half opacity composites the pixels its
+    // objects touched, and there they paint their converted ink. Pixel 11 is three quarters covered.
     [Theory]
     [InlineData("/Multiply gs /Fm Do", false)]
     [InlineData("/Half gs /Fm Do", true)]
@@ -232,7 +232,9 @@ public sealed class PdfSpotImagePlateTests
     }
 
     // A spot stencil large enough to paint from parallel rows fills its plate through the prepared
-    // plate write, which takes no lock per pixel (round K, KF-003).
+    // plate write, which takes no lock per pixel (round K, KF-003). The plate values are what the
+    // locked write would produce too, so this checks the prepared write's output under parallel
+    // rows, not that it took no lock.
     [Fact]
     public void ALargeSpotStencilFillsItsPlateFromParallelRows()
     {
@@ -242,7 +244,7 @@ public sealed class PdfSpotImagePlateTests
             for (int x = size / 2; x < size; x++) samples[y * (size / 8) + x / 8] |= (byte)(0x80 >> (x % 8));
         byte[] content = [.. Encoding.ASCII.GetBytes($"/Red cs 1 scn q 512 0 0 512 0 0 cm BI /W {size} /H {size} /IM true /BPC 1 ID "),
             .. samples, .. Encoding.ASCII.GetBytes("\nEI Q")];
-        PdfRenderedPage plate = Render(content, "MyRed", 512, 512, parallelism: Environment.ProcessorCount);
+        PdfRenderedPage plate = Render(content, "MyRed", 512, 512, parallelism: 4);
         for (int y = 0; y < 512; y += 37)
         {
             Assert.True(Gray(plate, 100, y) < 5, $"Row {y} has no spot ink on the left half.");
@@ -284,8 +286,7 @@ public sealed class PdfSpotImagePlateTests
 
     // An inline image covering the page, 16 by 8 samples per reduction step: the left half at full
     // tint in every component (or the given palette index), the right half blank.
-    private static byte[] HalfInkedImage(string space, double reduction, int components, string extra = "",
-        byte paletteIndex = 255)
+    private static byte[] HalfInkedImage(string space, double reduction, int components, byte paletteIndex = 255)
     {
         int width = (int)(16 * reduction), height = (int)(8 * reduction);
         var samples = new byte[width * height * components];
@@ -293,7 +294,7 @@ public sealed class PdfSpotImagePlateTests
             for (int x = 0; x < width / 2; x++)
                 for (int component = 0; component < components; component++)
                     samples[(y * width + x) * components + component] = paletteIndex;
-        return [.. Encoding.ASCII.GetBytes($"q 16 0 0 8 0 0 cm BI /W {width} /H {height} /BPC 8 /CS /{space} {extra} ID "),
+        return [.. Encoding.ASCII.GetBytes($"q 16 0 0 8 0 0 cm BI /W {width} /H {height} /BPC 8 /CS /{space} ID "),
             .. samples, .. Encoding.ASCII.GetBytes("\nEI Q")];
     }
 
