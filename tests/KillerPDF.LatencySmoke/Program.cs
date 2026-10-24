@@ -63,6 +63,12 @@ internal static class Program
                         results.Add(result);
                         File.AppendAllText(csvPath, result.ToCsv() + Environment.NewLine);
                         Console.WriteLine(result.ToConsole());
+                        if (!string.IsNullOrEmpty(result.Error))
+                        {
+                            File.WriteAllText(Path.Combine(options.OutputDirectory, "summary.md"), Summary.Build(results, options));
+                            Console.Error.WriteLine("Measurement phase stopped after an invalid sample. All completed rows are retained.");
+                            return 1;
+                        }
                     }
                 }
             }
@@ -152,6 +158,7 @@ internal static class Program
         var clock = Stopwatch.StartNew();
         using var process = Process.Start(start) ?? throw new InvalidOperationException("Process did not start.");
         var sampler = new WorkingSetSampler(process);
+        FrameCapture? capture = null;
         try
         {
             IntPtr hwnd = WaitForMainWindow(process, clock);
@@ -159,7 +166,7 @@ internal static class Program
             Native.MoveWindow(hwnd, 0, 0, WindowWidth, WindowHeight, true);
             Native.SetForegroundWindow(hwnd);
 
-            var capture = new FrameCapture(hwnd);
+            capture = new FrameCapture(hwnd);
             var paint = capture.WaitForContentThenStable(clock, ScenarioTimeoutMs);
             result.FirstPaintMs = paint.FirstContentMs;
             result.PaintStableMs = paint.StableMs;
@@ -199,6 +206,7 @@ internal static class Program
         catch (TimeoutException ex)
         {
             result.Error = ex.Message;
+            capture?.Save(Path.Combine(options.OutputDirectory, "frames", $"{version.Label}-{result.Document}-{run}-error.png"));
         }
         finally
         {

@@ -65,3 +65,8 @@ for every intermediate page, so it cannot alone certify S2. Per-document working
 set does not implement M3's five-document live-viewer scenario. Inspect captured
 page content and zoom state before accepting S1 or S3 results; successful exit
 alone does not prove the requested actions occurred.
+
+A timed-out sample retains its error row and last captured frame (when a window
+was captured), writes the partial summary, and stops the phase with exit 1.
+Unstarted samples remain unmeasured. Inspect raw errors before using statistics;
+the summary's means describe only completed valid measurements.
