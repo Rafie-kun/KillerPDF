@@ -81,6 +81,35 @@ public sealed class PdfImageSmoothingTests
                 $"Pixel {x} is darker than the visible gray: the hidden black bled in.");
     }
 
+    // The plane that smooths images on CMYK pages holds at most four million samples; a larger
+    // image is averaged down to fit before it is read. An enlarged large scan there must keep
+    // every sample, as it did before smoothing, not be drawn from a half-resolution average
+    // (round H, HF-001). Alternate black and white columns enlarged twice: full resolution draws
+    // two-pixel stripes, a half-resolution average draws gray.
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void EnlargedImageTooLargeForThePlaneKeepsEverySample(bool interpolate)
+    {
+        const int width = 2050, height = 2000;
+        byte[] row = [.. Enumerable.Range(0, width).Select(x => x % 2 == 0 ? (byte)0 : (byte)255)];
+        byte[] samples = [.. Enumerable.Repeat(row, height).SelectMany(bytes => bytes)];
+        string hint = interpolate ? " /I true" : "";
+        byte[] content = [.. Encoding.ASCII.GetBytes($"q {width} 0 0 {height} 0 0 cm BI /W {width} /H {height} /BPC 8 /CS /G{hint} ID "),
+            .. samples, .. Encoding.ASCII.GetBytes("\nEI Q")];
+        PdfDocument document = CmykPage(PdfDocument.Open(new PdfDocumentBuilder().AddPage(width, height, content).Build()));
+        PdfRenderedPage region = new PdfPageRenderer(document).RenderRegion(0,
+            new PdfRenderOptions(2 * width, 2 * height, includeAnnotations: false, includeFormFields: false), 1000, 1000, 40, 4);
+        int dark = 0, light = 0;
+        for (int index = 0; index < region.Pixels.Length; index += 4)
+        {
+            int value = region.Pixels.Span[index];
+            Assert.True(value <= 60 || value >= 215, $"Pixel {index / 4} is {value}: drawn from an averaged plane.");
+            if (value <= 60) dark++; else light++;
+        }
+        Assert.True(dark > 0 && light > 0);
+    }
+
     // One image row: four dark samples, then four light ones.
     private static byte[] Halves(byte[] dark, byte[] light) =>
         [.. Enumerable.Repeat(dark, 4).SelectMany(sample => sample), .. Enumerable.Repeat(light, 4).SelectMany(sample => sample)];
@@ -111,21 +140,21 @@ public sealed class PdfImageSmoothingTests
         return Render(PdfDocument.Open(new PdfDocumentBuilder().AddPage(20, 10, content).Build()), cmykPage);
     }
 
-    private static PdfRenderedPage Render(PdfDocument document, bool cmykPage)
-    {
-        if (cmykPage)
-        {
-            PdfPageTreeEntry page = PdfPageTree.Read(document).Pages[0];
-            var original = Assert.IsType<PdfDictionary>(document.Resolve(page.Reference));
-            var update = new PdfIncrementalUpdateBuilder(document);
-            update.ReplaceObject(page.Reference.ObjectNumber, new PdfDictionary(original
-                .Where(entry => !entry.Key.Equals(Name("Group")))
-                .Append(new(Name("Group"), new PdfDictionary([
-                    new(Name("S"), Name("Transparency")), new(Name("CS"), Name("DeviceCMYK"))])))));
-            document = PdfDocument.Open(update.Build());
-        }
-        return new PdfPageRenderer(document)
+    private static PdfRenderedPage Render(PdfDocument document, bool cmykPage) =>
+        new PdfPageRenderer(cmykPage ? CmykPage(document) : document)
             .Render(0, new PdfRenderOptions(20, 10, includeAnnotations: false, includeFormFields: false));
+
+    // The first page gets a CMYK page group, so the page is drawn in ink.
+    private static PdfDocument CmykPage(PdfDocument document)
+    {
+        PdfPageTreeEntry page = PdfPageTree.Read(document).Pages[0];
+        var original = Assert.IsType<PdfDictionary>(document.Resolve(page.Reference));
+        var update = new PdfIncrementalUpdateBuilder(document);
+        update.ReplaceObject(page.Reference.ObjectNumber, new PdfDictionary(original
+            .Where(entry => !entry.Key.Equals(Name("Group")))
+            .Append(new(Name("Group"), new PdfDictionary([
+                new(Name("S"), Name("Transparency")), new(Name("CS"), Name("DeviceCMYK"))])))));
+        return PdfDocument.Open(update.Build());
     }
 
     private static PdfName Name(string name) => new(Encoding.ASCII.GetBytes(name));

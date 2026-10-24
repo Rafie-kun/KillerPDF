@@ -18,6 +18,8 @@ public sealed partial class PdfPageRenderer
     private const long MaximumFlattenedGlyphCacheBytes = 16L * 1024 * 1024;
     private const long MaximumRenderedPageCacheBytes = 64L * 1024 * 1024;
     private const int MaximumMeshVerticesPerRow = 65_536;
+    // An image's converted plane holds at most this many cells; larger images are averaged down.
+    private const long MaximumImagePlaneCells = 4_000_000L;
     private const int MaximumIsolatedGroupTilePixels = 2 * 1024 * 1024;
     private const int MaximumTransparencyTileWidth = 4096;
     private static readonly ArrayPool<byte> RasterBuffers = PdfScratchBuffers.Bytes;
@@ -5488,6 +5490,10 @@ public sealed partial class PdfPageRenderer
             && (interpolate ? Math.Max(sampleStepX, sampleStepY) <= 1 && Math.Min(sampleStepX, sampleStepY) < 1
                 : bits != 1 && Math.Max(sampleStepX, sampleStepY) <= 1 / 1.5
                     && deviceHeight / 8 < (long)sourceWidth * sourceHeight / deviceWidth);
+        // Images the device path below does not smooth are smoothed from the converted plane,
+        // which holds every source sample only up to its size limit. A larger image would be
+        // averaged down to fit first, so it keeps the full-resolution nearest-sample copies.
+        bool smoothThroughPlane = smoothImage && (long)sourceWidth * sourceHeight <= MaximumImagePlaneCells;
         // A rectangular clip is fully applied by shrinking the painted bounds, so it does not
         // disqualify the direct paths; only antialiased clip masks need per-pixel coverage.
         // The plane resolution below still derives from the unclipped bounds so clipping
@@ -5570,9 +5576,9 @@ public sealed partial class PdfPageRenderer
                 }, null, cancellationToken);
             return;
         }
-        // Smoothed images skip the nearest-sample copies; on ink pages the interpolating device
-        // path above declines them and the plane smooths them instead.
-        bool directRgb = !smoothImage && !preserveProcessColorImageSpots && target.RgbProfile is null && !imageMask && bits == 8 && components == 3
+        // Images the plane can smooth skip the nearest-sample copies; on ink pages the
+        // interpolating device path above declines them and the plane smooths them instead.
+        bool directRgb = !smoothThroughPlane && !preserveProcessColorImageSpots && target.RgbProfile is null && !imageMask && bits == 8 && components == 3
             && target.GroupShape is null
             && softMask is null && colorKeyMask is null && rectangularClips
             && graphicsSoftMask is null && knockout is null
@@ -5580,7 +5586,7 @@ public sealed partial class PdfPageRenderer
             && colorSpace.MultiConverter is null
             && decode is [0, 1, 0, 1, 0, 1]
             && blendMode is RendererBlendMode.Normal or RendererBlendMode.Compatible;
-        bool directGray = !smoothImage && !preserveProcessColorImageSpots && target.RgbProfile is null && !imageMask && bits == 8 && components == 1
+        bool directGray = !smoothThroughPlane && !preserveProcessColorImageSpots && target.RgbProfile is null && !imageMask && bits == 8 && components == 1
             && target.GroupShape is null
             && softMask is null && colorKeyMask is null && rectangularClips
             && graphicsSoftMask is null && knockout is null
@@ -5767,7 +5773,7 @@ public sealed partial class PdfPageRenderer
         int factor = Math.Max(1, (int)Math.Floor(Math.Min(
             samplingWidth / (double)fullDestinationWidth, samplingHeight / (double)fullDestinationHeight)));
         while (((long)samplingWidth + factor - 1) / factor * (((long)samplingHeight + factor - 1) / factor)
-            > 4_000_000L) factor++;
+            > MaximumImagePlaneCells) factor++;
         int planeWidth = (int)(((long)samplingWidth + factor - 1) / factor);
         int planeHeight = (int)(((long)samplingHeight + factor - 1) / factor);
         // Opaque page painting can retain separate inks through sampling and clip coverage.
@@ -5812,13 +5818,13 @@ public sealed partial class PdfPageRenderer
         // A rotated or sheared mask's bounding box is wider than its footprint along the source
         // axes, so it is supersampled per pixel instead of read from an averaged plane.
         bool averageStencil = imageMask && reducedPlane && inverse.B == 0 && inverse.C == 0;
-        bool directInkSamples = !smoothImage && !averagePlane && nativeImageSamples && !imageMask && preblendMatte is null
+        bool directInkSamples = !smoothThroughPlane && !averagePlane && nativeImageSamples && !imageMask && preblendMatte is null
             && colorKeyMask is null && bits == 8 && components == 4 && colorSpace.Components == 4
             && !colorSpace.DoesNotPaint && colorSpace.Palette is null && colorSpace.Converter is null
             && colorSpace.MultiConverter is null && colorSpace.ComponentRange is null
             && (colorSpace.Profile is null || SameProfile(colorSpace.Profile, target.BlendProfile))
             && decode is [0, 1, 0, 1, 0, 1, 0, 1];
-        bool directDeviceSamples = !smoothImage && !averagePlane && target.Ink is null && target.RgbProfile is null
+        bool directDeviceSamples = !smoothThroughPlane && !averagePlane && target.Ink is null && target.RgbProfile is null
             && !imageMask && preblendMatte is null && colorKeyMask is null && bits == 8
             && components == colorSpace.Components && colorSpace.Palette is null
             && colorSpace.Converter is null && colorSpace.MultiConverter is null
