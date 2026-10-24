@@ -34,8 +34,9 @@ internal static class WatchedFolderNavigationSmoke
             documentTools.IsSubmenuOpen = true;
             Pump();
             MenuItem[] tools = documentTools.Items.OfType<MenuItem>().ToArray();
-            if (tools.Length != 1 || !Equals(tools[0].Header, app.FindResource("Str_DocumentTools_Macros")))
-                throw new InvalidOperationException("The no-document Document tools menu must offer only Macros.");
+            if (tools.Length != 2 || !Equals(tools[0].Header, app.FindResource("Str_DocumentTools_Macros"))
+                || !Equals(tools[1].Header, app.FindResource("Str_CertCatalog_Title")))
+                throw new InvalidOperationException("The no-document Document tools menu must offer only Macros and the certificate catalog.");
             MenuItem macros = tools[0];
             RequireUsable(macros);
             Capture(macros, Path.Combine(folder, "macros-menu-no-document.png"));

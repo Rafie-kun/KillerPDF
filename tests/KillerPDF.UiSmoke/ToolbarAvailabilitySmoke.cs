@@ -224,9 +224,10 @@ internal static class ToolbarAvailabilitySmoke
         Pump();
         if (((RadioButton)owner.FindName("ViewSingleRadio")).IsChecked != singleBefore)
             throw new InvalidOperationException("F6 changes the view without a PDF.");
-        Enabled(owner, false, DocumentButtons);
+        // The Save menu still opens without a PDF: it offers Document tools (Macros, certificates).
+        Enabled(owner, false, [.. DocumentButtons.Where(name => name != "SaveMenuBtn")]);
         Enabled(owner, false, "UndoBtn", "RedoBtn", "ClearAllBtn", "ExtractPagesBtn", "DeletePagesBtn", "MovePageUpBtn", "MovePageDownBtn");
-        Enabled(owner, true, "NewBlankBtn", "OpenFileBtn", "OpenRecentBtn");
+        Enabled(owner, true, "NewBlankBtn", "OpenFileBtn", "OpenRecentBtn", "SaveMenuBtn");
         if (Button(owner, "SaveAsBtn").Opacity >= 1 || Button(owner, "MiText").Opacity >= 1)
             throw new InvalidOperationException("Disabled toolbar or overflow action was not dimmed.");
         Overflow(owner);
