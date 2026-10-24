@@ -80,6 +80,23 @@ namespace KillerPDF.Tests
             Assert.Equal("Invoice total\ndue now\nPage two", text.DocumentRange.GetText(-1));
         });
 
+        [Theory]
+        [InlineData("A")]
+        [InlineData("😀")]
+        public void CollapsedMoveReachesTheFinalInsertionPoint(string value) => OnSta(() =>
+        {
+            var text = (ITextProvider)UIElementAutomationPeer.CreatePeerForElement(
+                new DocumentSurface { Source = new FakeSource([value]) }).GetPattern(PatternInterface.Text);
+            var caret = text.GetSelection()[0];
+            Assert.Equal(1, caret.Move(TextUnit.Character, 1));
+            Assert.Equal(0, caret.CompareEndpoints(TextPatternRangeEndpoint.Start, text.DocumentRange,
+                TextPatternRangeEndpoint.End));
+            Assert.Equal("", caret.GetText(-1));
+            Assert.Equal(-1, caret.Move(TextUnit.Character, -1));
+            Assert.Equal(0, caret.CompareEndpoints(TextPatternRangeEndpoint.Start, text.DocumentRange,
+                TextPatternRangeEndpoint.Start));
+        });
+
         [Fact]
         public void ReadsLineByLineAndPageByPage() => OnSta(() =>
         {
@@ -96,6 +113,18 @@ namespace KillerPDF.Tests
             Assert.Equal("Page two", range.GetText(-1));
             range.ScrollIntoView(true);
             Assert.Equal(1, source.ScrolledTo);
+        });
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(-1)]
+        public void FailedNonemptyMovePreservesTheRequestedText(int direction) => OnSta(() =>
+        {
+            var text = (ITextProvider)UIElementAutomationPeer.CreatePeerForElement(
+                new DocumentSurface { Source = new FakeSource(["cat"]) }).GetPattern(PatternInterface.Text);
+            var range = text.DocumentRange.FindText("at", false, false)!;
+            Assert.Equal(0, range.Move(TextUnit.Word, direction));
+            Assert.Equal("at", range.GetText(-1));
         });
 
         [Fact]

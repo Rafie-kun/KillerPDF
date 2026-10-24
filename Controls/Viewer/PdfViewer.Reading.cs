@@ -25,6 +25,7 @@ namespace KillerPDF.Controls
         private void NotifyReadingSelectionChanged() => _readingSource?.RaiseSelectionChanged();
 
         internal void NotifyReadingTextChanged() => _readingSource?.InvalidateText();
+        private void NotifyReadingPageReady(int page) => _readingSource?.PageReady(page);
 
         private sealed class ReadingSource(PdfViewer viewer) : IDocumentReadingSource
         {
@@ -35,6 +36,8 @@ namespace KillerPDF.Controls
             // read again only when the working file changes, not after every overlay or form edit.
             private object? _factsVersion;
             private long _textRevision;
+            private long _scrollRequest;
+            private (long Request, object Version, long Generation, int Page, int Caret, bool? AlignToTop)? _pendingScroll;
 
             // A tagged PDF's reading order: for each page, its marked-content IDs in the order the
             // tag tree reaches them. Null for an untagged or unreadable tree, which reads in the
@@ -306,6 +309,69 @@ namespace KillerPDF.Controls
             public void ScrollToPage(int page)
             {
                 if (page >= 0 && page < PageCount && page != viewer._currentPage) viewer.NavigateToPageExt(page);
+            }
+
+            public void ScrollToCaret(int page, int caret, bool? alignToTop = null)
+            {
+                if (page < 0 || page >= PageCount) return;
+                ScrollToPage(page);
+                long request = ++_scrollRequest;
+                _pendingScroll = (request, Version, viewer._primaryRenderGeneration, page, caret, alignToTop);
+                viewer.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded, new Action(async () =>
+                {
+                    try
+                    {
+                        await viewer.PrimaryRenderTask;
+                        RevealScroll(request);
+                    }
+                    catch (Exception ex) when (ex is not OutOfMemoryException)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Reading caret scroll: {ex}");
+                    }
+                }));
+            }
+
+            internal void PageReady(int page)
+            {
+                if (_pendingScroll is not { } scroll || scroll.Page != page) return;
+                viewer.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded,
+                    new Action(() => RevealScroll(scroll.Request)));
+            }
+
+            private void RevealScroll(long request)
+            {
+                try { RevealScrollCore(request); }
+                catch (Exception ex) when (ex is not OutOfMemoryException)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Reading caret scroll: {ex}");
+                }
+            }
+
+            private void RevealScrollCore(long request)
+            {
+                if (_pendingScroll is not { } scroll || scroll.Request != request) return;
+                if (!Equals(scroll.Version, Version) || scroll.Generation != viewer._primaryRenderGeneration)
+                {
+                    _pendingScroll = null;
+                    return;
+                }
+                if (viewer._currentFile is not { } file
+                    || !viewer._renderDims.TryGetValue(scroll.Page, out var dimensions)
+                    || viewer.VisibleCanvasForPage(scroll.Page) is not { IsVisible: true } canvas) return;
+                _pendingScroll = null;
+                if (viewer._textRuns.GetPage(file, scroll.Page) is not { Chars.Count: > 0 } runs) return;
+                int start = Math.Clamp(scroll.Caret, 0, runs.Chars.Count - 1);
+                foreach (Rect rectangle in viewer.CaretRangeRects(scroll.Page, runs, start, start + 1, dimensions))
+                {
+                    canvas.BringIntoView(rectangle);
+                    if (scroll.AlignToTop is bool top && viewer.PagePreviewPanel.Content is Visual content)
+                    {
+                        Rect bounds = canvas.TransformToVisual(content).TransformBounds(rectangle);
+                        viewer.PagePreviewPanel.ScrollToVerticalOffset(top ? bounds.Top
+                            : bounds.Bottom - viewer.PagePreviewPanel.ViewportHeight);
+                    }
+                    break;
+                }
             }
         }
     }

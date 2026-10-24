@@ -33,7 +33,13 @@ Cases:
 | `merge-failure-pane` | Drop two unreadable owned PDFs through the actual routed event, choose Merge, switch panes while its worker is pending, and require the other pane's unsaved form value to survive failure. |
 | `merge-close-success` | Merge valid owned inputs in pane B, close the split while the worker is pending, and require the completed document to have a visible owning pane while pane A retains its pending edit. |
 | `radio-accessibility` | Open generated Alpha/Beta radio widgets, require distinct option names on their actual automation peers, select Beta, and verify mutual exclusion. |
+| `radio-name-boundary` | Require /Alpha and Alpha export values to retain distinct names on actual rendered radio peers. |
 | `keyboard-pane-owner` | Tab from pane A's document into pane B's document, route F6, and require only pane B to change view mode. |
+| `reading-caret` | Select a collapsed range inside the actual document, require exact caret round trip, and reject leaking that position after opening another file. |
+| `reading-keyboard` | Route WPF keyboard events through the actual window, require line, character and page caret movement, and preserve text-provider positions. |
+| `reading-terminal-home` | Start at the final insertion point and require Home, Up and PageUp to reach the expected line or page. |
+| `reading-scroll` | Navigate 35 lines in a zoomed tall page, require a visible reading range, and verify actual UIA ScrollIntoView reveals that range again. |
+| `reading-scroll-spread` | Move from a settled spread to a cold spread and require the requested reading line to become visible after its right-hand tile is created. |
 
 Reflection is limited to isolated host setup, service initialization, constructing WPF's internal
 drag-event arguments, and calling the public OpenFromExternal entry point on the dynamically loaded application. Tests do not invoke private

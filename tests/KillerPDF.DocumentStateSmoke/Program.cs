@@ -66,7 +66,13 @@ internal static class Program
             else if (args[3] == "merge-failure-pane") MergeFailurePane();
             else if (args[3] == "merge-close-success") MergeFailurePane(closeOwner: true);
             else if (args[3] == "radio-accessibility") RadioAccessibility();
+            else if (args[3] == "radio-name-boundary") RadioAccessibility(slashOption: true);
             else if (args[3] == "keyboard-pane-owner") KeyboardPaneOwner();
+            else if (args[3] == "reading-caret") ReadingCaret();
+            else if (args[3] == "reading-keyboard") ReadingCaret(keyboard: true);
+            else if (args[3] == "reading-terminal-home") ReadingCaret(terminalHome: true);
+            else if (args[3] == "reading-scroll") ReadingScroll();
+            else if (args[3] == "reading-scroll-spread") ReadingScroll(spread: true);
             else throw new ArgumentException("Unknown case.");
             Console.WriteLine("PASS " + args[3]);
             File.WriteAllText(Path.Combine(Folder, "result.txt"), "PASS " + args[3]);
@@ -141,6 +147,184 @@ internal static class Program
         Pump(300);
     }
 
+    private static void ReadingScroll(bool spread = false)
+    {
+        string input = Path.Combine(Folder, "tall-reading.pdf");
+        var stream = new PdfContentStreamBuilder().BeginText().SetFont(PdfStandardFont.Helvetica, 12)
+            .MoveText(20, 2940).ShowLatin1Text("Line 00");
+        for (int line = 1; line < 40; line++)
+            stream.MoveText(0, -45).ShowLatin1Text("Line " + line.ToString("D2", System.Globalization.CultureInfo.InvariantCulture));
+        stream.EndText();
+        var document = new PdfDocumentBuilder();
+        if (spread)
+            for (int page = 0; page < 3; page++) document.AddBlankPage(600, 3000);
+        File.WriteAllBytes(input, document.AddPage(600, 3000, stream).Build());
+        Open(input);
+        var viewer = (FrameworkElement)Owner.FindName("Viewer");
+        var surface = (FrameworkElement)viewer.FindName("DocSurfacePad");
+        Owner.Activate();
+        if (!surface.Focus()) throw new InvalidOperationException("Reading surface could not receive focus.");
+        void Press(Key key)
+        {
+            var input = new KeyEventArgs(Keyboard.PrimaryDevice, PresentationSource.FromVisual(Owner),
+                Environment.TickCount, key) { RoutedEvent = Keyboard.PreviewKeyDownEvent };
+            surface.RaiseEvent(input);
+            if (!input.Handled) { input.RoutedEvent = Keyboard.KeyDownEvent; surface.RaiseEvent(input); }
+        }
+        Press(Key.F6);
+        Pump(600);
+        var zoom = (ComboBox)Owner.FindName("ZoomBox");
+        zoom.SelectedItem = zoom.Items.OfType<ComboBoxItem>().Single(item => item.Tag?.ToString() == "2.0");
+        Pump(600);
+        var viewport = (ScrollViewer)viewer.FindName("PagePreviewPanel");
+        var ready = System.Diagnostics.Stopwatch.StartNew();
+        while (viewport.ScrollableHeight < viewport.ViewportHeight && ready.Elapsed < TimeSpan.FromSeconds(8)) Pump(100);
+        File.WriteAllText(Path.Combine(Folder, "viewport-setup.txt"),
+            $"Extent={viewport.ExtentHeight}; viewport={viewport.ViewportHeight}; scrollable={viewport.ScrollableHeight}; zoom={zoom.Text}; surface={surface.ActualHeight}");
+        viewport.ScrollToTop();
+        Pump(100);
+        if (viewport.ScrollableHeight < viewport.ViewportHeight)
+            throw new InvalidOperationException("The owned page did not exceed the reading viewport.");
+        surface.Focus();
+        if (spread)
+        {
+            Press(Key.F7);
+            Pump(600);
+            zoom.SelectedItem = zoom.Items.OfType<ComboBoxItem>().Single(item => item.Tag?.ToString() == "2.0");
+            Pump(600);
+            viewport.ScrollToTop();
+            Pump(100);
+            surface.Focus();
+            var spreadPeer = System.Windows.Automation.Peers.UIElementAutomationPeer.CreatePeerForElement(surface);
+            var spreadText = (System.Windows.Automation.Provider.ITextProvider)spreadPeer.GetPattern(System.Windows.Automation.Peers.PatternInterface.Text);
+            var target = spreadText.DocumentRange.FindText("Line 35", false, false)!;
+            var heading = spreadText.DocumentRange.FindText("Line 00", false, false)!;
+            target.Select();
+            target.ScrollIntoView(true);
+            var wait = System.Diagnostics.Stopwatch.StartNew();
+            while (target.GetBoundingRectangles().Length == 0 && heading.GetBoundingRectangles().Length == 0
+                && wait.Elapsed < TimeSpan.FromSeconds(8)) Pump(100);
+            Pump(300);
+            File.WriteAllText(Path.Combine(Folder, "spread-result-state.txt"), $"offset={viewport.VerticalOffset}; target={target.GetBoundingRectangles().Length}; heading={heading.GetBoundingRectangles().Length}; extent={viewport.ExtentHeight}; zoom={zoom.Text}");
+            if (viewport.VerticalOffset <= 0 || target.GetBoundingRectangles().Length == 0)
+                throw new InvalidOperationException("The cold spread dropped its right-page reading scroll.");
+            File.WriteAllText(Path.Combine(Folder, "reading-spread-scroll.txt"), "Right-page Line 35 visible; vertical offset=" + viewport.VerticalOffset);
+            return;
+        }
+        for (int line = 0; line < 35; line++) Press(Key.Down);
+        Pump(600);
+        var peer = System.Windows.Automation.Peers.UIElementAutomationPeer.CreatePeerForElement(surface);
+        var text = (System.Windows.Automation.Provider.ITextProvider)peer.GetPattern(System.Windows.Automation.Peers.PatternInterface.Text);
+        var selected = text.GetSelection().Single();
+        selected.ExpandToEnclosingUnit(System.Windows.Automation.Text.TextUnit.Line);
+        if (selected.GetText(-1).TrimEnd('\n') != "Line 35")
+            throw new InvalidOperationException("Reading navigation did not reach the expected line.");
+        if (viewport.VerticalOffset <= 0 || selected.GetBoundingRectangles().Length == 0)
+            throw new InvalidOperationException("Reading movement left its caret outside the viewport.");
+        viewport.ScrollToTop();
+        Pump(100);
+        selected.ScrollIntoView(true);
+        Pump(300);
+        if (viewport.VerticalOffset <= 0 || selected.GetBoundingRectangles().Length == 0)
+            throw new InvalidOperationException("UIA ScrollIntoView did not reveal the reading position.");
+        File.WriteAllText(Path.Combine(Folder, "reading-scroll.txt"), "Line 35 visible; vertical offset=" + viewport.VerticalOffset);
+    }
+
+    private static void ReadingCaret(bool keyboard = false, bool terminalHome = false)
+    {
+        string input = Path.Combine(Folder, "reading.pdf");
+        var stream = new PdfContentStreamBuilder().BeginText().SetFont(PdfStandardFont.Helvetica, 12)
+            .MoveText(20, 420).ShowLatin1Text("Reading order check")
+            .MoveText(0, -25).ShowLatin1Text("First, the cedar tree stands beside the path.")
+            .MoveText(0, -25).ShowLatin1Text("Second, the blue bicycle rests near the gate.").EndText();
+        var secondPage = new PdfContentStreamBuilder().BeginText().SetFont(PdfStandardFont.Helvetica, 12)
+            .MoveText(20, 420).ShowLatin1Text("Page two check").EndText();
+        File.WriteAllBytes(input, new PdfDocumentBuilder().AddPage(300, 500, stream).AddPage(300, 500, secondPage).Build());
+        Open(input);
+        var viewer = (FrameworkElement)Owner.FindName("Viewer");
+        var surface = (FrameworkElement)viewer.FindName("DocSurfacePad");
+        var peer = System.Windows.Automation.Peers.UIElementAutomationPeer.CreatePeerForElement(surface);
+        var text = (System.Windows.Automation.Provider.ITextProvider)
+            peer.GetPattern(System.Windows.Automation.Peers.PatternInterface.Text);
+        if (keyboard || terminalHome)
+        {
+            Owner.Activate();
+            if (!surface.Focus()) throw new InvalidOperationException("Reading surface could not receive keyboard focus.");
+            void Press(Key key)
+            {
+                var input = new KeyEventArgs(Keyboard.PrimaryDevice, PresentationSource.FromVisual(Owner),
+                    Environment.TickCount, key) { RoutedEvent = Keyboard.PreviewKeyDownEvent };
+                surface.RaiseEvent(input);
+                if (!input.Handled)
+                {
+                    input.RoutedEvent = Keyboard.KeyDownEvent;
+                    surface.RaiseEvent(input);
+                }
+            }
+            if (terminalHome)
+            {
+                foreach (var (key, expectedText) in new[] { (Key.Home, "Page two check"),
+                             (Key.Up, "Second, the blue"), (Key.PageUp, "Reading order check") })
+                {
+                    var end = text.DocumentRange.Clone();
+                    end.MoveEndpointByRange(System.Windows.Automation.Text.TextPatternRangeEndpoint.Start, end,
+                        System.Windows.Automation.Text.TextPatternRangeEndpoint.End);
+                    end.Select();
+                    Press(key);
+                    var expected = text.DocumentRange.FindText(expectedText, false, false)!;
+                    if (text.GetSelection().Single().CompareEndpoints(System.Windows.Automation.Text.TextPatternRangeEndpoint.Start,
+                        expected, System.Windows.Automation.Text.TextPatternRangeEndpoint.Start) != 0)
+                        throw new InvalidOperationException(key + " left the caret at the final insertion point.");
+                }
+                return;
+            }
+            foreach (string expected in new[] { "First, the cedar tree stands beside the path.",
+                         "Second, the blue bicycle rests near the gate." })
+            {
+                Press(Key.Down);
+                var line = text.GetSelection().Single();
+                line.ExpandToEnclosingUnit(System.Windows.Automation.Text.TextUnit.Line);
+                if (line.GetText(-1).TrimEnd('\n') != expected)
+                    throw new InvalidOperationException("Down did not move the actual reading caret to: " + expected);
+            }
+            Press(Key.Home);
+            Press(Key.Right);
+            var character = text.GetSelection().Single();
+            character.ExpandToEnclosingUnit(System.Windows.Automation.Text.TextUnit.Character);
+            if (character.GetText(-1) != "e") throw new InvalidOperationException("Character movement lost its logical offset.");
+            foreach (var (key, expected) in new[] { (Key.PageDown, "Page two check"), (Key.PageUp, "Reading order check") })
+            {
+                Press(key);
+                Pump(300);
+                var line = text.GetSelection().Single();
+                line.ExpandToEnclosingUnit(System.Windows.Automation.Text.TextUnit.Line);
+                if (line.GetText(-1).TrimEnd('\n') != expected)
+                    throw new InvalidOperationException("Page movement lost its reading caret: " + expected);
+            }
+            return;
+        }
+        foreach (bool afterWord in new[] { false, true })
+        {
+            var caret = text.DocumentRange.FindText("cedar", false, false)
+                ?? throw new InvalidOperationException("Reading fixture text is unavailable.");
+            caret.MoveEndpointByRange(afterWord ? System.Windows.Automation.Text.TextPatternRangeEndpoint.Start
+                : System.Windows.Automation.Text.TextPatternRangeEndpoint.End, caret,
+                afterWord ? System.Windows.Automation.Text.TextPatternRangeEndpoint.End
+                    : System.Windows.Automation.Text.TextPatternRangeEndpoint.Start);
+            caret.Select();
+            var actual = text.GetSelection().Single();
+            if (actual.CompareEndpoints(System.Windows.Automation.Text.TextPatternRangeEndpoint.Start, caret,
+                System.Windows.Automation.Text.TextPatternRangeEndpoint.Start) != 0 || actual.GetText(-1) != "")
+                throw new InvalidOperationException("The actual viewer lost its collapsed reading caret.");
+        }
+        string other = Path.Combine(Folder, "other.pdf");
+        File.WriteAllBytes(other, new PdfDocumentBuilder().AddBlankPage(300, 500).Build());
+        Open(other);
+        if (text.GetSelection().Single().CompareEndpoints(System.Windows.Automation.Text.TextPatternRangeEndpoint.Start,
+            text.DocumentRange, System.Windows.Automation.Text.TextPatternRangeEndpoint.Start) != 0)
+            throw new InvalidOperationException("Reading caret leaked into another document.");
+    }
+
     private static void KeyboardPaneOwner()
     {
         string left = Path.Combine(Folder, "left.pdf"), right = Path.Combine(Folder, "right.pdf");
@@ -178,11 +362,12 @@ internal static class Program
         File.WriteAllText(Path.Combine(Folder, "focus-route.txt"), "Tab steps=" + steps + "; F6 changed pane B only.");
     }
 
-    private static void RadioAccessibility()
+    private static void RadioAccessibility(bool slashOption = false)
     {
         string input = Path.Combine(Folder, "radio-options.pdf");
         File.WriteAllBytes(input, new PdfDocumentBuilder().AddBlankPage(300, 500)
-            .AddRadioGroup("choice", [new(0, 30, 300, 22, 22, "Alpha"), new(0, 30, 250, 22, 22, "Beta")],
+            .AddRadioGroup("choice", [new(0, 30, 300, 22, 22, slashOption ? "/Alpha" : "Alpha"),
+                new(0, 30, 250, 22, 22, slashOption ? "Alpha" : "Beta")],
                 selectedValue: "Alpha", fieldMetadata: new() { Tooltip = "Choose Alpha or Beta" }).Build());
         Open(input);
         var watch = System.Diagnostics.Stopwatch.StartNew();
@@ -196,13 +381,14 @@ internal static class Program
         if (radios.Length != 2) throw new InvalidOperationException("Expected two rendered radio widgets; found " + radios.Length);
         string[] names = radios.Select(peer => peer!.GetName()).ToArray();
         File.WriteAllLines(Path.Combine(Folder, "radio-names.txt"), names);
-        if (names.Distinct(StringComparer.Ordinal).Count() != 2
-            || !names.Any(name => name == "Choose Alpha or Beta: Alpha")
-            || !names.Any(name => name == "Choose Alpha or Beta: Beta"))
+        string[] expected = slashOption
+            ? ["Choose Alpha or Beta: /Alpha", "Choose Alpha or Beta: Alpha"]
+            : ["Choose Alpha or Beta: Alpha", "Choose Alpha or Beta: Beta"];
+        if (names.Distinct(StringComparer.Ordinal).Count() != 2 || expected.Any(name => !names.Contains(name)))
             throw new InvalidOperationException("Radio widgets do not identify their individual options: " + string.Join(" | ", names));
         var selections = radios.Select(peer => (System.Windows.Automation.Provider.ISelectionItemProvider)
             peer!.GetPattern(System.Windows.Automation.Peers.PatternInterface.SelectionItem)).ToArray();
-        int beta = Array.FindIndex(names, name => name.EndsWith(": Beta", StringComparison.Ordinal));
+        int beta = Array.IndexOf(names, expected[1]);
         selections[beta].Select();
         if (!selections[beta].IsSelected || selections.Where((_, index) => index != beta).Any(item => item.IsSelected))
             throw new InvalidOperationException("Selecting Beta did not preserve radio exclusivity.");

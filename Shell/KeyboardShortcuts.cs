@@ -28,6 +28,10 @@ namespace KillerPDF
             // The title bar search box keeps its own navigation keys while it has focus.
             if (_syntheticShortcut is null && HandleToolSearchKey(e)) return;
 
+            if (_syntheticShortcut is null && e.OriginalSource is Controls.DocumentSurface reading
+                && reading.IsKeyboardFocused && Controls.DocumentSurface.IsReadingNavigation(e.Key, Keyboard.Modifiers))
+                return;
+
             // Form controls keep their activation and radio navigation keys before shortcut remapping.
             if (_syntheticShortcut is null && Keyboard.Modifiers == ModifierKeys.None
                 && e.Key is Key.Space or Key.Enter or Key.Left or Key.Right or Key.Up or Key.Down)

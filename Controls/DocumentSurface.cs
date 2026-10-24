@@ -7,6 +7,7 @@ using System.Windows.Automation.Peers;
 using System.Windows.Automation.Provider;
 using System.Windows.Automation.Text;
 using System.Windows.Controls;
+using System.Windows.Input;
 using KillerPDF.Services;
 
 namespace KillerPDF.Controls
@@ -27,6 +28,7 @@ namespace KillerPDF.Controls
         /// <summary>The current text selection as page carets, or null.</summary>
         (int StartPage, int StartCaret, int EndPage, int EndCaret)? Selection { get; }
         void ScrollToPage(int page);
+        void ScrollToCaret(int page, int caret, bool? alignToTop = null) => ScrollToPage(page);
         /// <summary>Raised when the document, its text or the selection changes.</summary>
         event Action? TextChanged;
         event Action? SelectionChanged;
@@ -42,6 +44,10 @@ namespace KillerPDF.Controls
         private IDocumentReadingSource? _source;
         private DocumentTextModel? _model;
         private object? _modelVersion;
+        private (TextPosition Start, TextPosition End, object Version)? _logicalSelection;
+        private bool _selectingRange;
+        private TextPosition? _keyboardAnchor;
+        private TextPosition? _keyboardCaret;
 
         public DocumentSurface()
         {
@@ -69,6 +75,8 @@ namespace KillerPDF.Controls
                 object version = _source.Version;
                 if (_model is null || !Equals(version, _modelVersion))
                 {
+                    _logicalSelection = null;
+                    _keyboardAnchor = _keyboardCaret = null;
                     IDocumentReadingSource source = _source;
                     _model = new DocumentTextModel(source.PageCount, page => source.PageText(page).Text);
                     _modelVersion = version;
@@ -80,14 +88,64 @@ namespace KillerPDF.Controls
         private void Reset()
         {
             _model = null;
+            _logicalSelection = null;
+            _keyboardAnchor = _keyboardCaret = null;
             if (UIElementAutomationPeer.FromElement(this) is DocumentPeer peer)
                 peer.RaiseAutomationEvent(AutomationEvents.TextPatternOnTextChanged);
         }
 
         private void OnSelection()
         {
+            if (!_selectingRange)
+            {
+                _logicalSelection = null;
+                _keyboardAnchor = _keyboardCaret = null;
+            }
             if (UIElementAutomationPeer.FromElement(this) is DocumentPeer peer)
                 peer.RaiseAutomationEvent(AutomationEvents.TextPatternOnTextSelectionChanged);
+        }
+
+        internal static bool IsReadingNavigation(Key key, ModifierKeys modifiers) =>
+            (modifiers & (ModifierKeys.Alt | ModifierKeys.Windows)) == 0
+            && key is Key.Left or Key.Right or Key.Up or Key.Down or Key.Home or Key.End or Key.PageUp or Key.PageDown
+            && (!modifiers.HasFlag(ModifierKeys.Control) || key is not (Key.PageUp or Key.PageDown));
+
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            base.OnKeyDown(e);
+            ModifierKeys modifiers = Keyboard.Modifiers;
+            if (e.Handled || !IsKeyboardFocused || !IsReadingNavigation(e.Key, modifiers)
+                || Source is not { PageCount: > 0 } source || Model is not { } model) return;
+            var peer = (DocumentPeer)UIElementAutomationPeer.CreatePeerForElement(this);
+            var current = (Range)peer.GetSelection()[0];
+            TextPosition caret = _keyboardCaret ?? current.EndPosition;
+            bool extend = modifiers.HasFlag(ModifierKeys.Shift);
+            TextPosition anchor = extend ? _keyboardAnchor ?? current.StartPosition : caret;
+            TextPosition target = caret;
+            bool control = modifiers.HasFlag(ModifierKeys.Control);
+            if (!extend && current.StartPosition != current.EndPosition && e.Key is Key.Left or Key.Right)
+                target = e.Key == Key.Left ? current.StartPosition : current.EndPosition;
+            else if (e.Key == Key.Home)
+                target = control ? model.Start : model.Enclosing(caret, ReadingUnit.Line).Start;
+            else if (e.Key == Key.End)
+            {
+                target = control ? model.End : model.Enclosing(caret, ReadingUnit.Line).End;
+                if (!control && target != model.End) target = model.Previous(target, ReadingUnit.Character);
+            }
+            else
+            {
+                ReadingUnit unit = e.Key is Key.PageUp or Key.PageDown ? ReadingUnit.Page
+                    : e.Key is Key.Up or Key.Down ? ReadingUnit.Line
+                    : control ? ReadingUnit.Word : ReadingUnit.Character;
+                if (unit is ReadingUnit.Line or ReadingUnit.Page) target = model.Enclosing(target, unit).Start;
+                model.MoveEndpoint(ref target, unit, e.Key is Key.Left or Key.Up or Key.PageUp ? -1 : 1);
+            }
+            if (!extend) anchor = target;
+            source.ScrollToCaret(target.Page, source.PageText(target.Page).CaretAt(target.Offset));
+            new Range(peer, anchor <= target ? anchor : target, anchor <= target ? target : anchor).Select();
+            _keyboardAnchor = anchor;
+            _keyboardCaret = target;
+            e.Handled = true;
         }
 
         protected override AutomationPeer OnCreateAutomationPeer() => new DocumentPeer(this);
@@ -116,6 +174,8 @@ namespace KillerPDF.Controls
             {
                 DocumentTextModel model = Model;
                 IDocumentReadingSource? source = Surface.Source;
+                if (Surface._logicalSelection is { } selected && Equals(selected.Version, source?.Version))
+                    return [new Range(this, model.Normalize(selected.Start), model.Normalize(selected.End))];
                 if (source?.Selection is { } s)
                 {
                     PageReadingText first = source.PageText(s.StartPage), last = source.PageText(s.EndPage);
@@ -163,6 +223,8 @@ namespace KillerPDF.Controls
         {
             private TextPosition _start = start;
             private TextPosition _end = end;
+            internal TextPosition StartPosition => _start;
+            internal TextPosition EndPosition => _end;
 
             private DocumentTextModel Model => peer.Surface.Model ?? new DocumentTextModel(0, _ => string.Empty);
             private IDocumentReadingSource? Source => peer.Surface.Source;
@@ -266,14 +328,24 @@ namespace KillerPDF.Controls
                 var lastRuns = from.Page == to.Page ? firstRuns : last.Segments(0, to.Offset);
                 int startCaret = firstRuns.Count > 0 ? firstRuns.Min(r => r.Start) : first.CaretAt(from.Offset);
                 int endCaret = lastRuns.Count > 0 ? lastRuns.Max(r => r.End) : last.CaretAt(to.Offset);
-                source.Select(from.Page, startCaret, to.Page, Math.Max(endCaret, from.Page == to.Page ? startCaret : 0));
+                peer.Surface._logicalSelection = (from, to, source.Version);
+                peer.Surface._keyboardAnchor = peer.Surface._keyboardCaret = null;
+                bool selecting = peer.Surface._selectingRange;
+                peer.Surface._selectingRange = true;
+                try { source.Select(from.Page, startCaret, to.Page, Math.Max(endCaret, from.Page == to.Page ? startCaret : 0)); }
+                catch { peer.Surface._logicalSelection = null; throw; }
+                finally { peer.Surface._selectingRange = selecting; }
             }
 
             public void AddToSelection() => throw new InvalidOperationException();
             public void RemoveFromSelection() => throw new InvalidOperationException();
 
-            public void ScrollIntoView(bool alignToTop) =>
-                Source?.ScrollToPage(Model.Normalize(alignToTop ? _start : _end).Page);
+            public void ScrollIntoView(bool alignToTop)
+            {
+                if (Source is not { } source) return;
+                TextPosition position = Model.Normalize(alignToTop ? _start : _end);
+                source.ScrollToCaret(position.Page, source.PageText(position.Page).CaretAt(position.Offset), alignToTop);
+            }
 
             public IRawElementProviderSimple[] GetChildren() => [];
         }

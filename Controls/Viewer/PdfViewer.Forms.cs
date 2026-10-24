@@ -671,7 +671,7 @@ namespace KillerPDF.Controls
                 if (ctrl is null) continue;
                 if (!string.IsNullOrEmpty(f.Label))
                     System.Windows.Automation.AutomationProperties.SetName(ctrl,
-                        f.IsRadio ? f.Label + ": " + f.OnValue.TrimStart('/') : f.Label);
+                        f.IsRadio ? f.Label + ": " + f.OnValue[1..] : f.Label);
                 AttachFormDesignDrag(ctrl, f, pageIndex, canvas);
                 Canvas.SetLeft(ctrl, f.Cx);
                 Canvas.SetTop(ctrl, f.Cy);

@@ -51,10 +51,10 @@ namespace KillerPDF.Tests
             TextPosition start = model.Start, end = model.Start;
             model.Move(ref start, ref end, ReadingUnit.Line, 0);
 
-            Assert.Equal(2, model.Move(ref start, ref end, ReadingUnit.Line, 5));
-            Assert.Equal(new TextPosition(1, 0), start);
+            Assert.Equal(3, model.Move(ref start, ref end, ReadingUnit.Line, 5));
+            Assert.Equal(model.End, start);
             Assert.Equal(start, end);   // a degenerate range stays degenerate
-            Assert.Equal(-2, model.Move(ref start, ref end, ReadingUnit.Line, -9));
+            Assert.Equal(-3, model.Move(ref start, ref end, ReadingUnit.Line, -9));
             Assert.Equal(model.Start, start);
         }
 

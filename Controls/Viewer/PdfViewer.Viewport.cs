@@ -420,6 +420,7 @@ namespace KillerPDF.Controls
             };
             _continuousCanvases[page] = overlay;
             _pages[page] = overlay;
+            NotifyReadingPageReady(page);
         }
 
         // Builds a page's annotation overlay. Size/transform differ by mode (continuous = render-dim + scale;

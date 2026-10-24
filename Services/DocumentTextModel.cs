@@ -154,6 +154,13 @@ namespace KillerPDF.Services
         internal int Move(ref TextPosition start, ref TextPosition end, ReadingUnit unit, int count)
         {
             bool degenerate = Normalize(start) == Normalize(end);
+            if (degenerate)
+            {
+                start = Normalize(start);
+                int steps = MoveEndpoint(ref start, unit, count);
+                end = start;
+                return steps;
+            }
             TextPosition at = Floor(start, unit);
             int moved = 0;
             while (moved < count)
@@ -169,8 +176,9 @@ namespace KillerPDF.Services
                 at = Previous(at, unit);
                 moved--;
             }
+            if (moved == 0) return 0;
             start = at;
-            end = degenerate ? at : Next(at, unit);
+            end = Next(at, unit);
             return moved;
         }
 
