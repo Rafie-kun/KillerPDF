@@ -78,9 +78,8 @@ public sealed class PdfReducedImagePlaneTests
     }
 
     // An indexed image over a process-and-spot DeviceN on a CMYK page is averaged into the color
-    // plane and, separately, a plane of spot samples (round H, HF-003: both now average the same
-    // source under each pixel). The process plate must cover each pixel by the share of the
-    // rectangle inside it.
+    // plane and, separately, a plane of spot samples. Both must average the same source under each
+    // pixel, or the spot plate lands up to half a pixel off the process ink (round H, HF-003).
     [Theory]
     [InlineData("20 0 0 8 4.5 5.25")]
     [InlineData("-20 0 0 8 24.5 5.25")]
@@ -94,14 +93,19 @@ public sealed class PdfReducedImagePlaneTests
         double[] m = [.. matrix.Split(' ').Select(double.Parse)];
         (double left, double right) = (Math.Min(m[4] + m[0] * 0.25, m[4] + m[0] * 0.5), Math.Max(m[4] + m[0] * 0.25, m[4] + m[0] * 0.5));
         (double top, double bottom) = (20 - (m[5] + m[3] * 0.75), 20 - (m[5] + m[3] * 0.5));
-        // A plate render shows its ink as gray.
-        PdfRenderedPage page = RenderSpotPlate(content, "Cyan");
-        for (int y = 0; y < 20; y++)
-        for (int x = 0; x < 32; x++)
+        // A plate render shows its ink as gray. The process plate comes from the color plane, the
+        // spot plate from the spot samples; both must cover each pixel by the share inside it.
+        foreach (string plate in new[] { "Cyan", "CustomMagenta" })
         {
-            double expected = Overlap(x, left, right) * Overlap(y, top, bottom);
-            double actual = (255 - page.Pixels.Span[(y * 32 + x) * 4]) / 255d;
-            Assert.True(Math.Abs(actual - expected) <= 0.04, $"Pixel {x},{y} covers {actual:F2}, expected {expected:F2}.");
+            PdfRenderedPage page = RenderSpotPlate(content, plate);
+            for (int y = 0; y < 20; y++)
+            for (int x = 0; x < 32; x++)
+            {
+                double expected = Overlap(x, left, right) * Overlap(y, top, bottom);
+                double actual = (255 - page.Pixels.Span[(y * 32 + x) * 4]) / 255d;
+                Assert.True(Math.Abs(actual - expected) <= 0.04,
+                    $"{plate} pixel {x},{y} covers {actual:F2}, expected {expected:F2}.");
+            }
         }
 
         static double Overlap(int pixel, double start, double end) =>
