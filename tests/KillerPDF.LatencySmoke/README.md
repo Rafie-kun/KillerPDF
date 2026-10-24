@@ -27,11 +27,16 @@ copy of the seed, so the saved zoom or window state of one run never leaks into 
 recorded and flagged in results.csv, never discarded.
 
 How events are detected: the window client area is captured every 33 ms and reduced to a
-hash and a central-region variance. First paint is the first frame whose center has page
-content and differs from the empty shell. Painted, scrolled and zoomed are the time of the
+hash and variance over the central 20% of width and 40% of height. That region stays
+inside the page for the five gate fixtures at the fixed window size, so a white page
+edge against the dark surround cannot count as content. First paint is the first
+captured frame with content there, and content must remain present at acceptance.
+Painted, scrolled and zoomed are the time of the
 last pixel change once no change has been seen for 700 ms. Scroll sends Page Down nineteen
-times from page one; zoom sends Ctrl+0 then Ctrl+Plus seven times (seven 0.15 steps from
-100% reach 205%). Both key sets are handled identically by 1.8 and 1.9. Working set is
+times from page one; zoom resets with Ctrl+0, then uses UI Automation to select the
+actual 200% preset in the measured process's ZoomBox and verifies its selection.
+Timing includes opening, selecting and closing that dropdown. The earlier seven-key
+procedure reached 205% and is diagnostic only for the strict 200% gate. Working set is
 sampled every 20 ms for peak and final values.
 
 Outputs: results.csv (every run), summary.md (mean and median per version and document,
@@ -48,6 +53,12 @@ setup steps allow unchanged frames. A missed action must time out rather than
 become a zero-latency result. On an unlocked disposable test desktop, run
 `KillerPDF.LatencySmoke.exe --verify-capture-stability` to verify this with a real
 test-owned static window. It sends no keyboard input and opens no PDF.
+
+`--verify-content-frame FRAME.png blank` checks a retained blank capture through
+the real content classifier; use `present` for a painted control. It performs no
+desktop capture or input. This protects against the observed blank Altona page
+passing the earlier wide-region variance check. Other document layouts require
+their own content-region review before this heuristic can certify a paint event.
 
 Scroll timing does not assert fit-width, final page index or final-quality pixels
 for every intermediate page, so it cannot alone certify S2. Per-document working

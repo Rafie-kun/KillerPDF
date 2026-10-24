@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -20,12 +21,13 @@ internal static class Program
     private const int WindowWidth = 1600;
     private const int WindowHeight = 1000;
     private const int ScrollPages = 19;
-    private const int ZoomSteps = 7; // 1.00 plus seven 0.15 steps lands at 2.05
 
     private static int Main(string[] args)
     {
         try
         {
+            if (args is ["--verify-content-frame", var framePath, var expected])
+                return FrameCapture.VerifyContentFrame(framePath, expected);
             var options = Options.Parse(args);
             if (options.VerifyCaptureStability)
                 return CaptureStabilityProbe.Run();
@@ -185,11 +187,7 @@ internal static class Program
                 Native.Chord(Native.VK_CONTROL, Native.VK_0);
                 capture.WaitForStable(clock, ScenarioTimeoutMs, requireChange: false);
                 double t0 = clock.Elapsed.TotalMilliseconds;
-                for (int i = 0; i < ZoomSteps; i++)
-                {
-                    Native.Chord(Native.VK_CONTROL, Native.VK_OEM_PLUS);
-                    Thread.Sleep(60);
-                }
+                ZoomPreset.Select200Percent(hwnd, process.Id);
                 var zoom = capture.WaitForStable(clock, ScenarioTimeoutMs);
                 result.ZoomMs = zoom.StableMs - t0;
                 capture.Save(Path.Combine(options.OutputDirectory, "frames", $"{version.Label}-{result.Document}-{run}-zoom.png"));
@@ -423,16 +421,14 @@ internal sealed class FrameCapture
         double deadline = clock.Elapsed.TotalMilliseconds + timeoutMs;
         double firstContent = -1;
         double lastChange = clock.Elapsed.TotalMilliseconds;
-        ulong baselineHash = 0;
-        bool haveBaseline = false;
         while (clock.Elapsed.TotalMilliseconds < deadline)
         {
             var (hash, content) = Grab();
             double now = clock.Elapsed.TotalMilliseconds;
-            if (!haveBaseline) { baselineHash = hash; haveBaseline = true; }
             if (hash != _lastHash) { lastChange = now; _lastHash = hash; }
-            if (firstContent < 0 && content && hash != baselineHash) firstContent = now;
-            if (firstContent >= 0 && now - lastChange >= StableMs) return new StableResult(firstContent, lastChange);
+            if (firstContent < 0 && content) firstContent = now;
+            if (content && firstContent >= 0 && now - lastChange >= StableMs)
+                return new StableResult(firstContent, lastChange);
             Thread.Sleep(IntervalMs);
         }
         throw new TimeoutException("Page did not reach a stable painted state.");
@@ -479,12 +475,31 @@ internal sealed class FrameCapture
         using (var g = Graphics.FromImage(_last))
             g.CopyFromScreen(origin.X, origin.Y, 0, 0, new Size(w, h), CopyPixelOperation.SourceCopy);
 
-        var data = _last.LockBits(new Rectangle(0, 0, w, h), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+        return Signature(_last);
+    }
+
+    internal static int VerifyContentFrame(string path, string expected)
+    {
+        if (expected is not ("present" or "blank"))
+            throw new ArgumentException("Expected content must be present or blank.");
+        using var input = new Bitmap(path);
+        using var bitmap = new Bitmap(input.Width, input.Height, PixelFormat.Format32bppArgb);
+        using (var graphics = Graphics.FromImage(bitmap)) graphics.DrawImageUnscaled(input, 0, 0);
+        bool content = Signature(bitmap).Content;
+        bool matches = content == (expected == "present");
+        Console.WriteLine($"{(matches ? "PASS" : "FAIL")} page content: {content}; expected {expected}; {path}");
+        return matches ? 0 : 1;
+    }
+
+    private static unsafe (ulong Hash, bool Content) Signature(Bitmap bitmap)
+    {
+        int w = bitmap.Width, h = bitmap.Height;
+        var data = bitmap.LockBits(new Rectangle(0, 0, w, h), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
         try
         {
             ulong hash = 1469598103934665603UL;
             long sum = 0, sumSq = 0; int n = 0;
-            int x0 = w / 5, x1 = w * 4 / 5, y0 = h / 5, y1 = h * 4 / 5;
+            int x0 = w * 2 / 5, x1 = w * 3 / 5, y0 = h * 3 / 10, y1 = h * 7 / 10;
             byte* basePtr = (byte*)data.Scan0;
             for (int y = 0; y < h; y += 2)
             {
@@ -502,10 +517,11 @@ internal sealed class FrameCapture
             }
             double mean = n > 0 ? (double)sum / n : 0;
             double variance = n > 0 ? (double)sumSq / n - mean * mean : 0;
-            // A blank viewer (any theme) has near-zero variance; rendered page content does not.
+            // Stay inside the page for the five gate fixtures at the fixed window size.
+            // Including its white edge against the dark surround falsely accepts blank placeholders.
             return (hash, variance > 40);
         }
-        finally { _last.UnlockBits(data); }
+        finally { bitmap.UnlockBits(data); }
     }
 }
 
