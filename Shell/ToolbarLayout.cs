@@ -153,26 +153,15 @@ namespace KillerPDF
                 control.Opacity = hasDoc ? 1 : .4;
             }
             bool pendingText = ActiveViewer.HasPendingTextEditExt;
-            int selectedCount = PageList.SelectedItems.Count;
-            int selectedIndex = PageList.SelectedIndex;
-            int pageCount = _doc?.PageCount ?? 0;
+            var state = new ToolbarAvailability.State(hasDoc,
+                CanUndo: _undoStack.Count > 0 || pendingText,
+                CanRedo: _redoStack.Count > 0 && !pendingText,
+                CanClear: hasDoc && (_annotations.Values.Any(items => items.Count > 0) || ActiveViewer.HasPendingAnnotationExt),
+                PageList.SelectedItems.Count, PageList.SelectedIndex, _doc?.PageCount ?? 0);
             foreach (ToolbarUnit unit in _toolbarUnits)
             {
-                bool enabled = unit.Id switch
-                {
-                    "new" or "open" => true,
-                    "undo" => hasDoc && (_undoStack.Count > 0 || pendingText),
-                    "redo" => hasDoc && _redoStack.Count > 0 && !pendingText,
-                    "clear" => hasDoc && (_annotations.Values.Any(items => items.Count > 0)
-                        || ActiveViewer.HasPendingAnnotationExt),
-                    "extract" => hasDoc && selectedCount > 0,
-                    "delete" => hasDoc && selectedCount > 0 && selectedCount < pageCount,
-                    "moveup" => hasDoc && selectedIndex > 0,
-                    "movedown" => hasDoc && selectedIndex >= 0 && selectedIndex < pageCount - 1,
-                    _ => hasDoc
-                };
-                unit.Bar.IsEnabled = enabled;
-                unit.Main.IsEnabled = enabled;
+                unit.Bar.IsEnabled = ToolbarAvailability.GroupEnabled(unit.Id, state);
+                unit.Main.IsEnabled = ToolbarAvailability.MainEnabled(unit.Id, state);
             }
         }
 
