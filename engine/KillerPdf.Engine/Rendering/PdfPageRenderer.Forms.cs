@@ -29,6 +29,7 @@ public sealed partial class PdfPageRenderer
                     diagnostics, CancellationToken.None);
                 if (diagnostics.Any(message => message is not
                     "A requested form-field text appearance was regenerated." and not
+                    "A requested empty form-field appearance was regenerated." and not
                     "A supported plain-text form-field appearance was regenerated."))
                     throw new InvalidOperationException(
                         "Form appearances cannot be finalized safely before signing: " + string.Join(" ", diagnostics));

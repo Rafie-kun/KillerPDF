@@ -12,7 +12,8 @@ using KillerPdf.Engine.Authoring;
 using KillerPdf.Engine.Documents;
 
 // This process owns every window, PDF, and setting it creates. Reflection is limited to
-// startup isolation and service initialization; workflow actions use actual controls.
+// startup isolation, service initialization, and constructing WPF drag-event data;
+// workflow actions use actual controls and routed events.
 internal static class Program
 {
     private const BindingFlags Members = BindingFlags.Public | BindingFlags.NonPublic
@@ -62,6 +63,8 @@ internal static class Program
             else if (args[3] == "extract-rotation") ExtractForm(rotate: true);
             else if (args[3] == "print-rotation") PrintRotation();
             else if (args[3] == "print-switch") PrintSwitch();
+            else if (args[3] == "merge-failure-pane") MergeFailurePane();
+            else if (args[3] == "merge-close-success") MergeFailurePane(closeOwner: true);
             else throw new ArgumentException("Unknown case.");
             Console.WriteLine("PASS " + args[3]);
             File.WriteAllText(Path.Combine(Folder, "result.txt"), "PASS " + args[3]);
@@ -117,11 +120,12 @@ internal static class Program
         foreach (var declaration in source.Root!.Attributes().Where(a => a.IsNamespaceDeclaration))
             resources.SetAttributeValue(declaration.Name, declaration.Value);
         string xaml = resources.ToString();
+        string assemblyName = assembly.GetName().Name!;
         foreach (string name in new[] { "KillerPDF", "KillerFamily.Layout" })
             xaml = xaml.Replace("clr-namespace:" + name, "clr-namespace:" + name
-                + ";assembly=KillerPDF", StringComparison.Ordinal);
+                + ";assembly=" + assemblyName, StringComparison.Ordinal);
         App.Resources = (ResourceDictionary)System.Windows.Markup.XamlReader.Parse(xaml,
-            new System.Windows.Markup.ParserContext { BaseUri = new Uri("pack://application:,,,/KillerPDF;component/") });
+            new System.Windows.Markup.ParserContext { BaseUri = new Uri($"pack://application:,,,/{assemblyName};component/") });
         SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext());
         foreach (string service in new[] { "ThemeManager", "LocaleManager", "FilmGrain" })
             assembly.GetType("KillerPDF.Services." + service, true)!
@@ -133,6 +137,119 @@ internal static class Program
         Owner.Show();
         Console.WriteLine("Window shown");
         Pump(300);
+    }
+
+    private static void MergeFailurePane(bool closeOwner = false)
+    {
+        string left = Path.Combine(Folder, "left.pdf");
+        string right = Path.Combine(Folder, "right.pdf");
+        File.WriteAllBytes(left, new PdfDocumentBuilder().AddBlankPage(300, 500)
+            .AddTextField(0, "customer", 20, 200, 150, 25, "LEFT").Build());
+        File.WriteAllBytes(right, new PdfDocumentBuilder().AddBlankPage(300, 500)
+            .AddTextField(0, "customer", 20, 200, 150, 25, "RIGHT").Build());
+        Open(left);
+        Click((Button)Owner.FindName("SplitPaneRailBtn"));
+        Pump(350);
+        var leftViewer = (FrameworkElement)Owner.FindName("Viewer");
+        var rightViewer = (FrameworkElement)Owner.FindName("ViewerB");
+        void Focus(FrameworkElement viewer) => viewer.RaiseEvent(new MouseButtonEventArgs(
+            Mouse.PrimaryDevice, Environment.TickCount, MouseButton.Left)
+            { RoutedEvent = Mouse.PreviewMouseDownEvent });
+        Focus(rightViewer);
+        Open(right);
+        if (closeOwner)
+        {
+            Focus(leftViewer);
+            Descendants<TextBox>(leftViewer).Single(input => input.Text == "LEFT").Text = "LEFT-EDIT";
+            Focus(rightViewer);
+        }
+        else
+        {
+            Descendants<TextBox>(rightViewer).Single(input => input.Text == "RIGHT").Text = "RIGHT-EDIT";
+            Focus(leftViewer);
+        }
+        string[] inputs = [Path.Combine(Folder, "merge-one.pdf"), Path.Combine(Folder, "merge-two.pdf")];
+        foreach (string path in inputs)
+            if (closeOwner) File.WriteAllBytes(path, new PdfDocumentBuilder().AddBlankPage(300, 500).Build());
+            else File.WriteAllText(path, "%PDF-2.0\nUnreadable owned merge fixture\n");
+        int stage = 0;
+        bool switchedDuringWorker = false;
+        bool finished = false;
+        var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(80) };
+        timer.Tick += (_, _) =>
+        {
+            Window? dialog = App.Windows.Cast<Window>().LastOrDefault(window => !ReferenceEquals(window, Owner) && window.IsVisible);
+            if (dialog is null) return;
+            try
+            {
+                if (stage == 0)
+                {
+                    Button? merge = Descendants<Button>(dialog).FirstOrDefault(button =>
+                        Text(button) == (string)Owner.FindResource("Str_Drop_Merge"));
+                    if (merge is null) return;
+                    stage = 1;
+                    dialog.Closed += (_, _) => Owner.Dispatcher.BeginInvoke(DispatcherPriority.Send, new Action(() =>
+                    {
+                        switchedDuringWorker = Descendants<TextBlock>(Owner).Any(text => text.IsVisible
+                            && text.Text == (string)Owner.FindResource("Str_Drop_Merging"));
+                        if (closeOwner) Click((Button)Owner.FindName("SplitPaneRailBtn"));
+                        else Focus(rightViewer);
+                    }));
+                    Click(merge);
+                    return;
+                }
+                if (!Descendants<Button>(dialog).Any(button => button.IsVisible && button.IsEnabled && Text(button).Trim() == "OK")) return;
+                if (closeOwner) throw new InvalidOperationException("The merge failed when successful completion was required: "
+                    + string.Join(" ", Descendants<TextBlock>(dialog).Select(text => text.Text)));
+                string[] values = Descendants<TextBox>(rightViewer).Select(input => input.Text).ToArray();
+                File.WriteAllLines(Path.Combine(Folder, "right-fields-after-merge-failure.txt"), values);
+                if (!switchedDuringWorker) throw new InvalidOperationException("The pane switch did not occur while the merge was pending.");
+                if (!values.Contains("RIGHT-EDIT"))
+                    throw new InvalidOperationException("A failed merge replaced the other pane's pending form state.");
+            }
+            catch (Exception error) { Failure = error; }
+            finished = true;
+            timer.Stop();
+            dialog.Close();
+        };
+        timer.Start();
+        var data = new DataObject(DataFormats.FileDrop, inputs);
+        ScrollViewer dropTarget = Descendants<ScrollViewer>(closeOwner ? rightViewer : leftViewer).First(view => view.AllowDrop);
+        ConstructorInfo constructor = typeof(DragEventArgs).GetConstructors(Members)
+            .Single(item => item.GetParameters().Length == 5);
+        object Argument(ParameterInfo parameter)
+        {
+            if (typeof(IDataObject).IsAssignableFrom(parameter.ParameterType)) return data;
+            if (parameter.ParameterType == typeof(int)) return 0;
+            if (parameter.ParameterType == typeof(DragDropKeyStates)) return DragDropKeyStates.None;
+            if (parameter.ParameterType == typeof(DependencyObject)) return dropTarget;
+            if (parameter.ParameterType == typeof(Point)) return new Point(10, 10);
+            if (parameter.ParameterType == typeof(DragDropEffects)) return DragDropEffects.Copy;
+            throw new InvalidOperationException("Unsupported drag-event argument: " + parameter.ParameterType);
+        }
+        var drop = (DragEventArgs)constructor.Invoke(constructor.GetParameters().Select(Argument).ToArray());
+        drop.RoutedEvent = DragDrop.DropEvent;
+        dropTarget.RaiseEvent(drop);
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        while (!finished && watch.Elapsed < TimeSpan.FromSeconds(20))
+        {
+            Pump(80);
+            if (!closeOwner || !switchedDuringWorker || Descendants<TextBlock>(Owner).Any(text => text.IsVisible
+                && text.Text == (string)Owner.FindResource("Str_Drop_Merging"))) continue;
+            if (!Directory.EnumerateFiles(Path.Combine(Folder, "temp"), "Combined-*.pdf").Any()) continue;
+            Pump(600);
+            string name = ((TextBlock)Owner.FindName("FileNameLabel")).Text;
+            File.WriteAllText(Path.Combine(Folder, "completed-merge-pane.txt"),
+                $"Document={name}\nSecondPaneVisible={rightViewer.IsVisible}\n");
+            if (name != "Combined.pdf") throw new InvalidOperationException("The expected merged document did not become active.");
+            if (!rightViewer.IsVisible) throw new InvalidOperationException("The completed merge activated a collapsed pane.");
+            if (!Descendants<TextBox>(leftViewer).Any(input => input.Text == "LEFT-EDIT"))
+                throw new InvalidOperationException("The completed merge lost the visible pane's pending form edit.");
+            finished = true;
+        }
+        timer.Stop();
+        if (Failure is not null) throw Failure;
+        if (!finished) throw new TimeoutException("The owned merge did not reach the expected completion state.");
     }
 
     private static void Redaction()

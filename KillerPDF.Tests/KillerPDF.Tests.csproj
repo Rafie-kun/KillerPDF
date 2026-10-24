@@ -95,6 +95,7 @@
     <Compile Include="..\Services\Signing\KillerCmsSigner.cs" Link="Services\Signing\KillerCmsSigner.cs" />
     <Compile Include="..\Services\Signing\CertificateCatalog.cs" Link="Services\Signing\CertificateCatalog.cs" />
     <Compile Include="..\Services\Signing\PdfSigner.cs" Link="Services\Signing\PdfSigner.cs" />
+    <Compile Include="..\Services\Signing\SigningOutputPath.cs" Link="Services\Signing\SigningOutputPath.cs" />
     <Compile Include="..\Models\StampModels.cs" Link="Models\StampModels.cs" />
     <Compile Include="..\Controls\FlyoutPlacement.cs" Link="Controls\FlyoutPlacement.cs" />
     <Compile Include="..\Shell\SidebarSide.cs" Link="Shell\SidebarSide.cs" />

@@ -30,9 +30,11 @@ Cases:
 | `extract-rotation` | Repeat extraction after rotation and require both the pending form value and exactly 90 degrees. |
 | `print-rotation` | Open actual print preview after rotation and require a landscape preview raster. |
 | `print-switch` | Queue a document switch during real form-print preparation, require a visible canceled status, and reject any stale preview. |
+| `merge-failure-pane` | Drop two unreadable owned PDFs through the actual routed event, choose Merge, switch panes while its worker is pending, and require the other pane's unsaved form value to survive failure. |
+| `merge-close-success` | Merge valid owned inputs in pane B, close the split while the worker is pending, and require the completed document to have a visible owning pane while pane A retains its pending edit. |
 
-Reflection is limited to isolated host setup, service initialization, and calling the public
-OpenFromExternal entry point on the dynamically loaded application. Tests do not invoke private
+Reflection is limited to isolated host setup, service initialization, constructing WPF's internal
+drag-event arguments, and calling the public OpenFromExternal entry point on the dynamically loaded application. Tests do not invoke private
 workflow methods or inject private editor collections. Workflow actions use actual WPF controls,
 routed events, textboxes and dialogs. Assertions inspect generated PDFs or public UI properties.
 The runner exits its own process after the verdict; a 45-second process deadline prevents hangs.

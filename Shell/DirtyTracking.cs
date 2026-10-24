@@ -85,7 +85,7 @@ namespace KillerPDF
                     snapshot = App.MakeTempFile("signsource");
                     File.Copy(unchanged, snapshot, overwrite: true);
                 }
-                new SignDocumentDialog(this, snapshot, suggestedSource).ShowDialog();
+                new SignDocumentDialog(this, snapshot, suggestedSource, _suggestedName).ShowDialog();
             }
             catch (Exception ex)
             {

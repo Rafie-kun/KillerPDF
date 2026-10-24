@@ -15,6 +15,41 @@ namespace KillerPDF.Tests;
 public sealed class PdfSignerTests
 {
     [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Sign_DefaultOutputSurvivesTemporarySourceCleanup(bool imported)
+    {
+        string directory = Path.Combine(Path.GetTempPath(), $"killerpdf-sign-home-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(directory);
+        try
+        {
+            string downloads = Path.Combine(directory, "Downloads");
+            Directory.CreateDirectory(downloads);
+            string tempRoot = Path.Combine(directory, "sessions");
+            using var temps = new KillerPDF.Services.ProcessTempFiles(tempRoot);
+            string source = imported ? temps.CreatePath("browser") : Path.Combine(directory, "original.pdf");
+            File.WriteAllBytes(source, new PdfDocumentBuilder().AddBlankPage().Build());
+            string output = SigningOutputPath.Create(source, temps.Owns(source), downloads, "invoice.pdf");
+            using RSA key = RSA.Create(2048);
+            using X509Certificate2 certificate = new CertificateRequest("CN=KillerPDF Durable Output Test", key,
+                HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1)
+                .CreateSelfSigned(DateTimeOffset.UtcNow.AddMinutes(-1), DateTimeOffset.UtcNow.AddDays(1));
+            new PdfSigner().Sign(source, output, certificate, new PdfSigner.SignInfo("Approved", "", ""));
+            byte[] signed = File.ReadAllBytes(output);
+
+            temps.Dispose();
+            using var nextLaunch = new KillerPDF.Services.ProcessTempFiles(tempRoot);
+            nextLaunch.CleanupStale();
+
+            Assert.True(File.Exists(output), "Session cleanup deleted the default signed output.");
+            Assert.Equal(signed, File.ReadAllBytes(output));
+            Assert.Equal(imported ? Path.Combine(downloads, "invoice-signed.pdf")
+                : Path.Combine(directory, "original-signed.pdf"), output);
+        }
+        finally { Directory.Delete(directory, recursive: true); }
+    }
+
+    [Theory]
     [InlineData("en-US")]
     [InlineData("th-TH")]
     [InlineData("ar-SA")]

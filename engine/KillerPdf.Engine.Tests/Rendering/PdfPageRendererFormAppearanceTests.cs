@@ -30,6 +30,20 @@ public sealed class PdfPageRendererFormAppearanceTests
     }
 
     [Fact]
+    public void SigningPreservesAnEmptyRequestedFieldWithoutASavedAppearance()
+    {
+        PdfDocument source = Create(true, "", false, false, textValue: "", missingAppearance: true);
+        var options = new PdfRenderOptions(120, 40);
+        byte[] expected = new PdfPageRenderer(source).Render(0, options).Pixels.ToArray();
+
+        PdfDocument signed = PdfDocument.Open(PdfDetachedSignatureWriter.Sign(source, _ => [1],
+            new PdfSignatureOptions { ReservedSignatureSize = 16 }));
+
+        Assert.True(Assert.Single(PdfSignatureReader.Read(signed)).IsSigned);
+        Assert.Equal(expected, new PdfPageRenderer(signed).Render(0, options).Pixels.ToArray());
+    }
+
+    [Fact]
     public void SigningRefusesAnUnsupportedRequestedAppearanceBeforeUsingTheKey()
     {
         PdfDocument source = Create(true, "BT /F1 10 Tf 3 3 Td (OLD) Tj ET", false, false,

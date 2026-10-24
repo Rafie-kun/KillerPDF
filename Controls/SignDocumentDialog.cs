@@ -24,6 +24,7 @@ namespace KillerPDF
     {
         private readonly string _sourcePdf;
         private readonly string _suggestedSource;
+        private readonly string? _suggestedName;
 
         private RadioButton _fileRadio = null!;
         private RadioButton _storeRadio = null!;
@@ -56,10 +57,12 @@ namespace KillerPDF
         // Localized string from the active locale dictionary (falls back to the key if missing).
         private static string L(string key) => Application.Current.TryFindResource(key) as string ?? key;
 
-        public SignDocumentDialog(Window? owner, string sourcePdf, string? suggestedSource = null)
+        public SignDocumentDialog(Window? owner, string sourcePdf, string? suggestedSource = null,
+            string? suggestedName = null)
         {
             _sourcePdf = sourcePdf;
             _suggestedSource = suggestedSource ?? sourcePdf;
+            _suggestedName = suggestedName;
             Title = "KillerPDF - " + L("Str_Sign_Name");
             Width = 720;
             MaxHeight = 860;
@@ -276,9 +279,10 @@ namespace KillerPDF
 
         private string DefaultOutputPath()
         {
-            string dir = Path.GetDirectoryName(_suggestedSource) ?? "";
-            string name = Path.GetFileNameWithoutExtension(_suggestedSource);
-            return Path.Combine(dir, name + "-signed.pdf");
+            string downloads = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
+            if (!Directory.Exists(downloads)) downloads = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            if (!Directory.Exists(downloads)) downloads = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            return SigningOutputPath.Create(_suggestedSource, App.IsCleanupOwnedPath(_suggestedSource), downloads, _suggestedName);
         }
 
         private void SyncTimestamp() => _timestampServer.IsEnabled = _timestamp.IsChecked == true;
@@ -302,6 +306,8 @@ namespace KillerPDF
         {
             var dlg = new KillerPDF.Controls.FileDialog(KillerPDF.Controls.FileDialogMode.Save)
                           { Filter = L("Str_Filter_Pdf") + "|*.pdf", Title = L("Str_Sign_SaveAs"), FileName = Path.GetFileName(_outputBox.Text) };
+            string? directory = Path.GetDirectoryName(_outputBox.Text);
+            if (Directory.Exists(directory)) dlg.InitialDirectory = directory;
             if (dlg.ShowDialog(this) == true) _outputBox.Text = dlg.FileName;
         }
 
@@ -323,6 +329,12 @@ namespace KillerPDF
 
             string output = _outputBox.Text?.Trim() ?? "";
             if (string.IsNullOrEmpty(output)) { Warn(L("Str_Sign_NeedOutput")); return; }
+            if (App.IsCleanupOwnedPath(output))
+            {
+                _outputBox.Text = DefaultOutputPath();
+                BrowseOutput();
+                return;
+            }
             // The default -signed.pdf name repeats, and a typed path skips Browse's prompt, so the
             // final command asks before it replaces anything (BF-A006).
             if (!Services.OutputOverwrite.Confirm(this, output, out Services.FileRevision? approved)) return;

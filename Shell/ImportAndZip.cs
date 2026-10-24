@@ -208,6 +208,9 @@ namespace KillerPDF
             catch (Exception ex)
             {
                 HideBusyOverlay(busy);
+                if (!ReclaimAsyncOwner(owner)) return;
+                if (prev != null && !owner.Viewer.SessionsRef.Contains(prev))
+                    prev = owner.Viewer.SessionsRef.FirstOrDefault(session => !ReferenceEquals(session, target));
                 AbortTabLoad(target, prev, createdNew);
                 KillerDialog.Show(this, Loc("Str_Err_ImportFailed") + "\n" + ex.Message,
                     "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);

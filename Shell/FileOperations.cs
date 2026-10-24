@@ -376,15 +376,21 @@ namespace KillerPDF
             catch (WorkingCopyUnavailableException copy)
             {
                 HideBusyOverlay(busy);
-                _asyncOpenPending = false;
-                ShowWorkingCopyProblem(copy);
+                if (ReclaimAsyncOwner(owner))
+                {
+                    _asyncOpenPending = false;
+                    ShowWorkingCopyProblem(copy);
+                }
             }
             catch (Exception ex)
             {
                 HideBusyOverlay(busy);
-                _asyncOpenPending = false;
-                KillerDialog.Show(this, Loc("Str_Err_RepairFailed") + "\n" + ex.Message, "KillerPDF",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                if (ReclaimAsyncOwner(owner))
+                {
+                    _asyncOpenPending = false;
+                    KillerDialog.Show(this, Loc("Str_Err_RepairFailed") + "\n" + ex.Message, "KillerPDF",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
             finally
             {
@@ -488,16 +494,22 @@ namespace KillerPDF
             catch (WorkingCopyUnavailableException copy)
             {
                 HideBusyOverlay(busy);
-                _asyncOpenPending = false;
-                ShowWorkingCopyProblem(copy);
+                if (ReclaimAsyncOwner(owner))
+                {
+                    _asyncOpenPending = false;
+                    ShowWorkingCopyProblem(copy);
+                }
                 EndCancellableOp(ct);
             }
             catch (Exception ex)
             {
                 HideBusyOverlay(busy);
-                _asyncOpenPending = false;
-                KillerDialog.Show(this, Loc("Str_Err_OpenProtected") + "\n" + ex.Message,
-                    "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
+                if (ReclaimAsyncOwner(owner))
+                {
+                    _asyncOpenPending = false;
+                    KillerDialog.Show(this, Loc("Str_Err_OpenProtected") + "\n" + ex.Message,
+                        "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
                 EndCancellableOp(ct);
             }
         }
@@ -676,6 +688,7 @@ namespace KillerPDF
                     owner.Viewer.AsyncOpenPendingRef = false;
                 return false;
             }
+            if (ReferenceEquals(owner.Viewer, ViewerB) && !_isSplit) OpenSplit();
             if (!ReferenceEquals(ActiveViewer, owner.Viewer)) FocusPane(owner.Viewer);
             if (!ReferenceEquals(owner.Viewer.ActiveSessionExt, owner.Session)) owner.Viewer.SwitchToTabExt(owner.Session);
             return ReferenceEquals(ActiveViewer, owner.Viewer)
