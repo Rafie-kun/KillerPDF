@@ -48,7 +48,7 @@ internal static class WatchedFolderNavigationSmoke
             File.WriteAllLines(Path.Combine(folder, "results.txt"),
             [
                 "PASS real Save menu offers Document tools with no PDF open",
-                "PASS no-document Document tools contains only Macros",
+                "PASS no-document Document tools contains only Macros and the certificate catalog",
                 "PASS rendered Macros and Automatic folders buttons open the real owned dialogs",
                 "PASS both dialogs close through their rendered buttons without opening a PDF",
                 "Evidence uses WPF routed control events, not native keyboard or mouse input"
