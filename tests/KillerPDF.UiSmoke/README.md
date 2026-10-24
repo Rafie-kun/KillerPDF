@@ -131,3 +131,25 @@ The result identifies the compiled assembly hash. Settings and imported
 certificates stay in the supplied directory; Windows trust stores are read-only.
 These WPF checks do not certify physical input, a screen reader, or signature
 verification against a certificate already trusted by Windows.
+
+## Viewer and headless bitmap parity
+
+Use `--verify-viewer-parity APP_DLL MANIFEST_JSON NEW_OUTPUT_DIRECTORY --startup-smoke`.
+The manifest has a corpus `Root`, `AppXaml` and `AppXamlSha256` identifying the
+unchanged App.xaml from the tested application's frozen source snapshot, and
+`Documents` entries with relative `Path`,
+`Sha256` and descriptive `Category` fields. Inputs must remain under that root
+and retain their hashes. Use an owned, unlocked test desktop and serialize this
+check after timing runs because it creates offscreen WPF windows and renders PDFs.
+The isolated smoke settings lock the quit choice and disable tray hiding so
+closing test windows cannot wait on an unrelated quit-preference prompt.
+
+The isolated host loads those verified resources and the compiled application window, opens each PDF through
+the public window entry, selects single-page mode through its routed shortcut,
+and reads the primary page image's bitmap. A separate process runs that same
+application's headless CLI at the observed pixel size. Exact BGRA pixels and
+dimensions must match; every input and result is retained in `result.json`.
+Supply twenty representative documents for the release A4 matrix. A smaller
+manifest is a diagnostic check. This verifies primary viewer bitmap delivery;
+annotation/form overlays, zoom detail composition and physical display output
+need their own checks. It does not establish cross-renderer accuracy.

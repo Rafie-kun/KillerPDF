@@ -31,6 +31,8 @@ internal static class Program
     {
         try
         {
+            if (args.Length == 5 && args[0] == "--verify-viewer-parity" && args[4] == "--startup-smoke")
+                return ViewerParitySmoke.Run(Path.GetFullPath(args[1]), Path.GetFullPath(args[2]), Path.GetFullPath(args[3]));
             if (args.Length == 5 && args[0] == "--verify-certificates" && args[4] == "--startup-smoke")
                 return CertificateCatalogSmoke.Run(Path.GetFullPath(args[1]), Path.GetFullPath(args[2]), Path.GetFullPath(args[3]));
             if (args.Length == 5 && args[0] == "--verify-toolbar-availability" && args[4] == "--startup-smoke")
