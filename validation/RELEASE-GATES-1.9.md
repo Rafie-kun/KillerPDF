@@ -4,7 +4,9 @@ Adopted 2026-10-10. Priority order: accuracy, then speed, then memory. A memory
 increase of up to 10% on one workload is acceptable when it buys 5% or more on a
 user-facing speed gate (S1 to S3).
 
-Reference: the last published 1.8 release, currently v1.8.80 (3e090fa). The
+Reference: the last published 1.8 release. The October 24 SN01 work verifies
+v1.8.91 and pins its package and assembly hashes in [the SN01 record](records/release-sn01-20261024.md).
+The adopted historical measurements below used v1.8.80 (3e090fa). The
 frozen reference and candidate payloads, their hashes, the third-party oracle,
 and every measured value live under `C:/Users/steve/scratch/kp-bench-render/release-19-baseline/`.
 Working material for experiments stays under `C:/Users/steve/scratch/kp-bench-render/`;
