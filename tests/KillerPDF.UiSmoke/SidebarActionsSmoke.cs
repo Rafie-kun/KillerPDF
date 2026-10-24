@@ -48,8 +48,14 @@ internal static class SidebarActionsSmoke
                 if (buttonName == "SidebarSignaturesTab" && !menu.Items.OfType<MenuItem>().Any(item =>
                     Equals(item.Header, Application.Current.FindResource("Str_Lbl_DigitalSig")) && item.InputGestureText == "Ctrl+Shift+G"))
                     throw new InvalidOperationException("Signatures rail menu lacks signing and its shortcut.");
-                if (buttonName == "SidebarPagesTab" && menu.Items.OfType<MenuItem>().Count(item => item.IsCheckable) != 4)
-                    throw new InvalidOperationException("Pages rail menu lacks the four sidebar positions.");
+                if (buttonName == "SidebarPagesTab")
+                {
+                    // The page menu's own view items are checkable too, so match the four sides by name.
+                    MenuItem[] sides = [.. menu.Items.OfType<MenuItem>().Where(item => new[] { "Left", "Right", "Top", "Bottom" }
+                        .Any(side => Equals(item.Header, Application.Current.FindResource("Str_Sidebar_" + side))))];
+                    if (sides.Length != 4 || sides.Count(item => item.IsChecked) != 1)
+                        throw new InvalidOperationException("Pages rail menu lacks the four sidebar positions.");
+                }
             }
             finally { CloseMenus(); }
         }

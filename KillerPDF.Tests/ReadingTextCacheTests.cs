@@ -30,7 +30,8 @@ public sealed class ReadingTextCacheTests
         string method = viewer[viewer.IndexOf("public IReadOnlyList<(int Page, int Start, int End)> VisibleCaretRanges()", StringComparison.Ordinal)..];
         method = method[..method.IndexOf("public (int Page, int Caret)? CaretFromScreenPoint(", StringComparison.Ordinal)];
         Assert.Contains("VisibleTextGeometry.VisibleCarets(", method);
-        Assert.DoesNotContain("for (int caret", method);
+        // Only the page's own bounds are mapped here; the characters go through the helper.
+        Assert.Equal(2, method.Split("PointToScreen(").Length - 1);
         string geometry = File.ReadAllText(Path.Combine(root, "Services", "VisibleTextGeometry.cs"));
         string loop = geometry[geometry.IndexOf("for (int caret = 0;", StringComparison.Ordinal)..];
         Assert.DoesNotContain("toScreen(", loop);

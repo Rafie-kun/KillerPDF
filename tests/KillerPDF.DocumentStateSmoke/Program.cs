@@ -318,8 +318,14 @@ internal static class Program
         File.WriteAllBytes(other, new PdfDocumentBuilder().AddBlankPage(500, 300)
             .AddBlankPage(500, 300).AddBlankPage(500, 300).Build());
         Open(original);
-        Descendants<TextBox>((DependencyObject)Owner.FindName("Viewer"))
-            .First(t => t.Text.StartsWith("Original", StringComparison.Ordinal)).Text = "Updated";
+        // The 350 field editors appear once the page has rendered, which can trail the open.
+        TextBox? field = null;
+        var appear = System.Diagnostics.Stopwatch.StartNew();
+        while ((field = Descendants<TextBox>((DependencyObject)Owner.FindName("Viewer"))
+                   .FirstOrDefault(t => t.Text.StartsWith("Original", StringComparison.Ordinal))) is null
+               && appear.Elapsed < TimeSpan.FromSeconds(20)) Pump(100);
+        if (field is null) throw new TimeoutException("The form fields did not appear after opening.");
+        field.Text = "Updated";
         bool switched = false;
         bool previewShown = false;
         bool cancellationReported = false;
