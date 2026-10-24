@@ -5468,16 +5468,26 @@ public sealed partial class PdfPageRenderer
         int bottom = Math.Clamp(targetHeight - (int)fullBottom, 0, targetHeight);
         if (!transform.TryInverse(out Matrix inverse)) return;
         // Enlarged continuous-tone images are smoothed, as 1.8 and most viewers show them, once
-        // each source sample covers about one and a half pixels. 1-bit images and image masks
-        // stay crisp because their edges are the content (text scans, barcodes). An explicit
-        // /Interpolate true is honored at any enlargement.
+        // each source sample covers about one and a half pixels, and until the image covers
+        // about eight pixels per sample, where 1.8 (in its own integer arithmetic) and Poppler
+        // stop smoothing: images enlarged that far are swatches, QR codes and pixel art whose
+        // hard edges are the content. 1-bit images and image masks stay crisp for the same
+        // reason. An explicit /Interpolate true is honored at any enlargement.
         double sampleStepX = Math.Sqrt(Math.Pow(inverse.A * sourceWidth, 2)
             + Math.Pow(inverse.B * sourceHeight, 2)) / scaleX;
         double sampleStepY = Math.Sqrt(Math.Pow(inverse.C * sourceWidth, 2)
             + Math.Pow(inverse.D * sourceHeight, 2)) / scaleY;
+        static long DeviceLength(double x, double y)
+        {
+            double length = Math.Ceiling(Math.Sqrt(x * x + y * y) - 1e-9);
+            return double.IsFinite(length) ? (long)Math.Clamp(length, 1, int.MaxValue) : int.MaxValue;
+        }
+        long deviceWidth = DeviceLength(transform.A * scaleX, transform.B * scaleY);
+        long deviceHeight = DeviceLength(transform.C * scaleX, transform.D * scaleY);
         bool smoothImage = !imageMask && double.IsFinite(sampleStepX) && double.IsFinite(sampleStepY)
             && (interpolate ? Math.Max(sampleStepX, sampleStepY) <= 1 && Math.Min(sampleStepX, sampleStepY) < 1
-                : bits != 1 && Math.Max(sampleStepX, sampleStepY) <= 1 / 1.5);
+                : bits != 1 && Math.Max(sampleStepX, sampleStepY) <= 1 / 1.5
+                    && deviceHeight / 8 < (long)sourceWidth * sourceHeight / deviceWidth);
         // A rectangular clip is fully applied by shrinking the painted bounds, so it does not
         // disqualify the direct paths; only antialiased clip masks need per-pixel coverage.
         // The plane resolution below still derives from the unclipped bounds so clipping
@@ -5560,7 +5570,9 @@ public sealed partial class PdfPageRenderer
                 }, null, cancellationToken);
             return;
         }
-        bool directRgb = !preserveProcessColorImageSpots && target.RgbProfile is null && !imageMask && bits == 8 && components == 3
+        // Smoothed images skip the nearest-sample copies; on ink pages the interpolating device
+        // path above declines them and the plane smooths them instead.
+        bool directRgb = !smoothImage && !preserveProcessColorImageSpots && target.RgbProfile is null && !imageMask && bits == 8 && components == 3
             && target.GroupShape is null
             && softMask is null && colorKeyMask is null && rectangularClips
             && graphicsSoftMask is null && knockout is null
@@ -5568,7 +5580,7 @@ public sealed partial class PdfPageRenderer
             && colorSpace.MultiConverter is null
             && decode is [0, 1, 0, 1, 0, 1]
             && blendMode is RendererBlendMode.Normal or RendererBlendMode.Compatible;
-        bool directGray = !preserveProcessColorImageSpots && target.RgbProfile is null && !imageMask && bits == 8 && components == 1
+        bool directGray = !smoothImage && !preserveProcessColorImageSpots && target.RgbProfile is null && !imageMask && bits == 8 && components == 1
             && target.GroupShape is null
             && softMask is null && colorKeyMask is null && rectangularClips
             && graphicsSoftMask is null && knockout is null

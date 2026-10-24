@@ -11,18 +11,24 @@ namespace KillerPdf.Engine.Tests.Rendering;
 // Owner decision, 2026-10-23: enlarged continuous-tone images are smoothed, as 1.8 and most
 // viewers show them, once they are enlarged about one and a half times; 1-bit images and image
 // masks stay crisp because their edges are the content (text scans, barcodes). An explicit
-// /Interpolate true is honored at any enlargement.
+// /Interpolate true is honored at any enlargement. Like 1.8 and Poppler, smoothing stops once an
+// image covers about eight pixels per sample (swatches, QR codes, pixel art).
 public sealed class PdfImageSmoothingTests
 {
-    // A black and a white sample drawn 20 pixels wide: smoothing ramps between them.
+    // Eight by five samples, dark on the left half, drawn 2.5 times wider and twice as tall:
+    // smoothing ramps across the middle.
     [Theory]
-    [InlineData("/BPC 8 /CS /G", new byte[] { 0x00, 0xFF }, false)]
-    [InlineData("/BPC 8 /CS [/I /RGB 1 <000000FFFFFF>]", new byte[] { 0x00, 0x01 }, false)]
-    [InlineData("/BPC 8 /CS /CMYK", new byte[] { 0, 0, 0, 255, 0, 0, 0, 0 }, false)]
-    [InlineData("/BPC 8 /CS /CMYK", new byte[] { 0, 0, 0, 255, 0, 0, 0, 0 }, true)]
-    public void EnlargedContinuousToneImagesAreSmoothed(string header, byte[] samples, bool cmykPage)
+    [InlineData("/BPC 8 /CS /G", new byte[] { 0x00 }, new byte[] { 0xFF }, false)]
+    [InlineData("/BPC 8 /CS /G", new byte[] { 0x00 }, new byte[] { 0xFF }, true)]
+    [InlineData("/BPC 8 /CS /RGB", new byte[] { 0, 0, 0 }, new byte[] { 255, 255, 255 }, false)]
+    [InlineData("/BPC 8 /CS /RGB", new byte[] { 0, 0, 0 }, new byte[] { 255, 255, 255 }, true)]
+    [InlineData("/BPC 8 /CS [/I /RGB 1 <000000FFFFFF>]", new byte[] { 0x00 }, new byte[] { 0x01 }, false)]
+    [InlineData("/BPC 8 /CS /CMYK", new byte[] { 0, 0, 0, 255 }, new byte[] { 0, 0, 0, 0 }, false)]
+    [InlineData("/BPC 8 /CS /CMYK", new byte[] { 0, 0, 0, 255 }, new byte[] { 0, 0, 0, 0 }, true)]
+    public void EnlargedContinuousToneImagesAreSmoothed(string header, byte[] dark, byte[] light, bool cmykPage)
     {
-        Assert.True(Ramp(Render($"q 20 0 0 4 0 3 cm BI /W 2 /H 1 {header} ID ", samples, cmykPage)) >= 6);
+        byte[] samples = [.. Enumerable.Repeat(Halves(dark, light), 5).SelectMany(row => row)];
+        Assert.True(Ramp(Render($"q 20 0 0 10 0 0 cm BI /W 8 /H 5 {header} ID ", samples, cmykPage)) >= 2);
     }
 
     [Theory]
@@ -30,27 +36,42 @@ public sealed class PdfImageSmoothingTests
     [InlineData("/IM true")]
     public void EnlargedOneBitImagesAndMasksStayCrisp(string header)
     {
-        // Bits 0 then 1: black then white for the gray image, painted then clear for the mask.
-        Assert.Equal(0, Ramp(Render($"0 g q 20 0 0 4 0 3 cm BI /W 2 /H 1 {header} ID ", [0x40], false)));
+        // Bits 0 then 1 on every row: black then white for the gray image, painted then clear
+        // for the mask.
+        Assert.Equal(0, Ramp(Render($"0 g q 20 0 0 10 0 0 cm BI /W 8 /H 5 {header} ID ",
+            [0x0F, 0x0F, 0x0F, 0x0F, 0x0F], false)));
     }
 
     // Ten alternating samples drawn twelve pixels wide are enlarged only 1.2 times.
     [Fact]
     public void SlightEnlargementStaysCrispUnlessInterpolationIsRequested()
     {
-        byte[] stripes = [0, 255, 0, 255, 0, 255, 0, 255, 0, 255];
-        Assert.Equal(0, Ramp(Render("q 12 0 0 4 4 3 cm BI /W 10 /H 1 /BPC 8 /CS /G ID ", stripes, false)));
-        Assert.True(Ramp(Render("q 12 0 0 4 4 3 cm BI /W 10 /H 1 /BPC 8 /CS /G /I true ID ", stripes, false)) >= 4);
+        byte[] stripes = [.. Enumerable.Repeat<byte[]>([0, 255, 0, 255, 0, 255, 0, 255, 0, 255], 8)
+            .SelectMany(row => row)];
+        Assert.Equal(0, Ramp(Render("q 12 0 0 10 4 0 cm BI /W 10 /H 8 /BPC 8 /CS /G ID ", stripes, false)));
+        Assert.True(Ramp(Render("q 12 0 0 10 4 0 cm BI /W 10 /H 8 /BPC 8 /CS /G /I true ID ", stripes, false)) >= 4);
     }
 
-    // A soft mask hides the black sample. Smoothing must fade the visible gray into the page,
+    // Two samples drawn 20 by 10 pixels cover a hundred pixels each, far past 1.8's limit.
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void HugelyEnlargedImageStaysCrispUnlessInterpolationIsRequested(bool cmykPage)
+    {
+        Assert.Equal(0, Ramp(Render("q 20 0 0 10 0 0 cm BI /W 2 /H 1 /BPC 8 /CS /G ID ", [0x00, 0xFF], cmykPage)));
+        Assert.True(Ramp(Render("q 20 0 0 10 0 0 cm BI /W 2 /H 1 /BPC 8 /CS /G /I true ID ",
+            [0x00, 0xFF], cmykPage)) >= 6);
+    }
+
+    // A soft mask hides the black right half. Smoothing must fade the visible gray into the page,
     // never blend in the hidden black, which drew a dark outline around masked images (GWG169).
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
     public void SmoothedMaskedImageDoesNotShowItsHiddenColor(bool cmykPage)
     {
-        PdfImage image = PdfImage.FromRgba(2, 1, new byte[] { 128, 128, 128, 255, 0, 0, 0, 0 });
+        byte[] rgba = [.. Enumerable.Repeat(Halves([128, 128, 128, 255], [0, 0, 0, 0]), 5).SelectMany(row => row)];
+        PdfImage image = PdfImage.FromRgba(8, 5, rgba);
         PdfRenderedPage rendered = Render(PdfDocument.Open(new PdfDocumentBuilder()
             .AddPage(20, 10, new PdfContentStreamBuilder().DrawImage(image, 0, 0, 20, 10)).Build()), cmykPage);
         int gray = rendered.Pixels.Span[(5 * 20 + 1) * 4];
@@ -59,6 +80,10 @@ public sealed class PdfImageSmoothingTests
             Assert.True(rendered.Pixels.Span[(5 * 20 + x) * 4] >= gray - 3,
                 $"Pixel {x} is darker than the visible gray: the hidden black bled in.");
     }
+
+    // One image row: four dark samples, then four light ones.
+    private static byte[] Halves(byte[] dark, byte[] light) =>
+        [.. Enumerable.Repeat(dark, 4).SelectMany(sample => sample), .. Enumerable.Repeat(light, 4).SelectMany(sample => sample)];
 
     // Pixels on the middle row strictly between that row's darkest and lightest values, so a
     // CMYK black that converts to a dark gray still counts as the dark end.
