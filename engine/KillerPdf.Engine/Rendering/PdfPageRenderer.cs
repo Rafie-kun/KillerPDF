@@ -5832,9 +5832,14 @@ public sealed partial class PdfPageRenderer
         double exactLeft = corners.Min(p => p.X) * scaleX, exactRight = corners.Max(p => p.X) * scaleX;
         double exactTop = targetHeight - corners.Max(p => p.Y) * scaleY;
         double exactBottom = targetHeight - corners.Min(p => p.Y) * scaleY;
-        int firstCenterColumn = (int)Math.Ceiling(exactLeft - 0.5), firstCenterRow = (int)Math.Ceiling(exactTop - 0.5);
-        int centerColumns = (int)Math.Floor(exactRight - 0.5) - firstCenterColumn + 1;
-        int centerRows = (int)Math.Floor(exactBottom - 0.5) - firstCenterRow + 1;
+        // A center exactly on an image edge is left out: the paint loops' half-open test may skip
+        // that pixel, and an end cell no pixel reads would drop the edge content folded into it.
+        // If the pixel is painted after all, it reads the end cell again.
+        const double onEdge = 1e-9;
+        int firstCenterColumn = (int)Math.Ceiling(exactLeft - 0.5 + onEdge);
+        int firstCenterRow = (int)Math.Ceiling(exactTop - 0.5 + onEdge);
+        int centerColumns = (int)Math.Floor(exactRight - 0.5 - onEdge) - firstCenterColumn + 1;
+        int centerRows = (int)Math.Floor(exactBottom - 0.5 - onEdge) - firstCenterRow + 1;
         bool alignedPlane = !pixelAlignedPlane && (averagePlane || averageStencil)
             && inverse.B == 0 && inverse.C == 0 && centerColumns >= 1 && centerRows >= 1;
         if (averagePlane || averageStencil)

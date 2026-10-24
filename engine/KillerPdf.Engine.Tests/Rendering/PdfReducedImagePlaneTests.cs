@@ -133,6 +133,32 @@ public sealed class PdfReducedImagePlaneTests
             .Render(0, new PdfRenderOptions(32, 20, includeAnnotations: false, includeFormFields: false) { SeparationPlate = plate });
     }
 
+    // An image edge exactly on a pixel center: that pixel is not painted, so the source under it
+    // must fold into the last painted pixel. The plane once counted it as a cell of its own,
+    // which no pixel read, and the edge content vanished (round H, HF-005).
+    [Theory]
+    [InlineData("/BPC 1 /CS /G", true)]
+    [InlineData("/BPC 1 /CS /G", false)]
+    [InlineData("/IM true", true)]
+    [InlineData("/IM true", false)]
+    public void ContentAtAnEdgeOnAPixelCenterIsKept(string header, bool rightEdge)
+    {
+        // 400 by 40 samples drawn from x 10.5 to 110.5 and rows 5.5 to 15.5: ink only in the last
+        // two columns, or only in the top two rows.
+        var samples = new byte[50 * 40];
+        Array.Fill(samples, (byte)0xFF);
+        for (int y = 0; y < 40; y++)
+        for (int x = 0; x < 400; x++)
+            if (rightEdge ? x >= 398 : y < 2) samples[y * 50 + x / 8] &= (byte)~(0x80 >> (x % 8));
+        byte[] content = [.. Encoding.ASCII.GetBytes($"0 g q 100 0 0 10 10.5 4.5 cm BI /W 400 /H 40 {header} ID "),
+            .. samples, .. Encoding.ASCII.GetBytes("\nEI Q")];
+        PdfRenderedPage page = new PdfPageRenderer(PdfDocument.Open(new PdfDocumentBuilder().AddPage(120, 20, content).Build()))
+            .Render(0, new PdfRenderOptions(120, 20, includeAnnotations: false, includeFormFields: false));
+        (int x0, int y0) = rightEdge ? (109, 10) : (50, 6);
+        Assert.True(page.Pixels.Span[(y0 * 120 + x0) * 4] < 230,
+            $"The edge ink vanished: pixel {x0},{y0} is {page.Pixels.Span[(y0 * 120 + x0) * 4]}.");
+    }
+
     // A 1-bit gray image where 1 is white: all white except one black column.
     private static byte[] ScanWithColumn(int column)
     {
