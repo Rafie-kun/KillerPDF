@@ -189,6 +189,23 @@ public sealed class PdfSpotImagePlateTests
         Assert.InRange(Gray(Render(content, "MyBlue", 24, 16), 10, 8), 120, 136);
     }
 
+    // A spot image painted at an opacity below 1 follows the same rule as a spot stencil: it knocks
+    // the plates under it out by that opacity and keeps them. Its palette entries or samples named
+    // their spot at any opacity, which sent each pixel to the path that clears every plate, so the
+    // MyBlue plate under a half-opaque image went blank (round L, BF-002; a two-spot palette defined
+    // by its tint transform only reached that path once its spots were kept).
+    [Theory]
+    [InlineData("PairPalette", 1)]
+    [InlineData("Red", 255)]
+    public void ASpotImageBelowFullOpacityKeepsThePlatesUnderIt(string space, byte sample)
+    {
+        byte[] content = [.. Encoding.ASCII.GetBytes("/Blue cs 1 scn 0 0 16 8 re f /Half gs "),
+            .. HalfInkedImage(space, 1, components: 1, paletteIndex: sample)];
+        PdfRenderedPage plate = Render(content, "MyBlue");
+        Assert.InRange(Gray(plate, 4, 4), 120, 136);
+        Assert.InRange(Gray(plate, 12, 4), 120, 136);
+    }
+
     // A spot stencil large enough to paint from parallel rows fills its plate through the prepared
     // plate write, which takes no lock per pixel (round K, KF-003).
     [Fact]

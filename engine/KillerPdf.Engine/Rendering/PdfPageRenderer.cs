@@ -5859,15 +5859,17 @@ public sealed partial class PdfPageRenderer
         var rowAxis = new PlaneAxis(firstCenterRow, planeHeight, inverse.D < 0,
             alignedPlane && planeHeight == centerRows);
         // Spot data the color plane cannot carry gets plane cells of its own: a reduced palette
-        // over process and spot, or over two spots, and, at full opacity, any other image whose
-        // spot is not read back from its source samples below. Unreduced palettes and
-        // single-component spots read their samples per pixel instead.
+        // over process and spot, or over two spots, and any other image whose spot is not read
+        // back from its source samples below. Unreduced palettes and single-component spots read
+        // their samples per pixel instead. Like a spot stencil, an image below full opacity paints
+        // its converted ink, which knocks the plates under it out by its opacity and keeps them.
         Color? spotProbe = spotPalette is { Length: > 0 } ? spotPalette[0]
             : (target.Ink is not null || preserveRgbSpots) && !imageMask
                 && colorSpace.ContainsSpotColorants && !colorSpace.DoesNotPaint
                 ? colorSpace.Convert(Enumerable.Repeat(1d, colorSpace.Components).ToArray()) : null;
         bool paletteSpotPlane = averagePlane && spotPalette is { Length: > 0 }
-            && (spotPalette[0].ProcessInk is not null || target.HasRgbSpotShadow);
+            && (spotPalette[0].ProcessInk is not null || target.HasRgbSpotShadow)
+            && Math.Clamp(stencilAlpha, 0, 1) == 1;
         bool sampledSpotPlane = (target.Ink is not null || preserveRgbSpots) && !imageMask
             && preblendMatte is null && bits is > 0 and <= 16 && spotProbe?.SpotName is not null
             && Math.Clamp(stencilAlpha, 0, 1) == 1 && !preserveReducedSpot
@@ -6527,7 +6529,7 @@ public sealed partial class PdfPageRenderer
                             color = color with
                             { SpotName = imageSpotName ?? reducedPaletteSpotName, SpotTint = 1, SpotInk = color.Ink };
                         }
-                        else if (factor == 1 && plane is not null && bits is > 0 and <= 16
+                        else if (factor == 1 && plane is not null && bits is > 0 and <= 16 && imageOpacity == 1
                             && (spotPalette is not null || imageSpotName is not null))
                         {
                             int sx = Math.Min(px, sourceWidth - 1);
