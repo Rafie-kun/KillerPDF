@@ -54,6 +54,55 @@ public sealed class PdfSeparationPlateRenderTests
         Assert.NotEqual(Gray(before, 2), Blue(before, 2));
     }
 
+    // An image mask filled with a spot color paints that spot's plate, as a vector fill of the
+    // same color does. On CMYK pages its color used to lose the spot when converted to ink, so
+    // the mask put the alternate's yellow on the Yellow plate and left its own plate blank
+    // (round J, JF-002). The second mask is reduced, so its edges are partly covered.
+    [Theory]
+    [InlineData("/Green cs 1 scn 4 4 16 8 re f")]
+    [InlineData("/Green cs 1 scn q 16 0 0 8 4 4 cm BI /W 16 /H 8 /IM true /BPC 1 ID ")]
+    [InlineData("/Green cs 1 scn q 16 0 0 8 4 4 cm BI /W 64 /H 32 /IM true /BPC 1 ID ")]
+    public void SpotFilledStencil_PaintsItsSpotPlate(string prefix)
+    {
+        bool image = prefix.Contains("BI");
+        int bytes = prefix.Contains("/W 64") ? 8 * 32 : 2 * 8;
+        byte[] content = image
+            ? [.. Encoding.ASCII.GetBytes(prefix), .. new byte[bytes], .. Encoding.ASCII.GetBytes("\nEI Q")]
+            : Encoding.ASCII.GetBytes(prefix);
+        PdfPageRenderer renderer = Renderer(content, 24, 16);
+        PdfRenderedPage spot = RenderPlate(renderer, "GWG Green", 24, 16);
+        PdfRenderedPage yellow = RenderPlate(renderer, "Yellow", 24, 16);
+        int Plate(PdfRenderedPage page, int x, int y) => page.Pixels.Span[(y * 24 + x) * 4 + 2];
+        Assert.InRange(Plate(spot, 10, 8), 0, 5);
+        Assert.Equal(255, Plate(yellow, 10, 8));
+        Assert.Equal(255, Plate(spot, 1, 1));
+    }
+
+    // A reduced spot stencil whose ink ends partway through a pixel puts that share of the spot on
+    // the plate there.
+    [Fact]
+    public void SpotFilledStencil_PartlyCoveredPixelGetsItsShareOfThePlate()
+    {
+        // 64 by 32 samples drawn 16 by 8: ink in columns 0 to 30, which end three quarters of the
+        // way through pixel 11.
+        var samples = new byte[8 * 32];
+        for (int y = 0; y < 32; y++)
+            for (int x = 31; x < 64; x++) samples[y * 8 + x / 8] |= (byte)(0x80 >> (x % 8));
+        byte[] content = [.. Encoding.ASCII.GetBytes("/Green cs 1 scn q 16 0 0 8 4 4 cm BI /W 64 /H 32 /IM true /BPC 1 ID "),
+            .. samples, .. Encoding.ASCII.GetBytes("\nEI Q")];
+        PdfRenderedPage spot = RenderPlate(Renderer(content, 24, 16), "GWG Green", 24, 16);
+        int Plate(int x) => spot.Pixels.Span[(8 * 24 + x) * 4 + 2];
+        Assert.InRange(Plate(10), 0, 5);
+        Assert.InRange(Plate(11), 255 - 191 - 8, 255 - 191 + 8);
+        Assert.Equal(255, Plate(12));
+    }
+
+    private static PdfRenderedPage RenderPlate(PdfPageRenderer renderer, string plate, int width, int height) =>
+        renderer.Render(0, new PdfRenderOptions(width, height, includeAnnotations: false, includeFormFields: false)
+        {
+            SeparationPlate = plate
+        });
+
     private static PdfRenderedPage Render(PdfPageRenderer renderer, string plate) =>
         renderer.Render(0, new PdfRenderOptions(3, 1, includeAnnotations: false, includeFormFields: false)
         {
@@ -64,10 +113,12 @@ public sealed class PdfSeparationPlateRenderTests
 
     private static int Blue(PdfRenderedPage page, int x) => page.Pixels.Span[x * 4];
 
-    private static PdfPageRenderer Renderer()
+    private static PdfPageRenderer Renderer() => Renderer(Encoding.ASCII.GetBytes(Content), 3, 1);
+
+    private static PdfPageRenderer Renderer(byte[] content, int width, int height)
     {
         PdfDocument source = PdfDocument.Open(new PdfDocumentBuilder()
-            .AddPage(3, 1, Encoding.ASCII.GetBytes(Content)).Build());
+            .AddPage(width, height, content).Build());
         PdfPageTreeEntry page = PdfPageTree.Read(source).Pages[0];
         PdfDictionary originalPage = Assert.IsType<PdfDictionary>(source.Resolve(page.Reference));
         var update = new PdfIncrementalUpdateBuilder(source);
