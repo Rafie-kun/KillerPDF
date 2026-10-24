@@ -115,6 +115,12 @@ here only at release checkpoints.
 
 The other gates keep their 096a2cf status above.
 
+Window tests (2026-10-24): every UI smoke and document-state run passes on the SN01 and SN02 lab
+guests at cf3caf1 and d9c0713, and KillerPDF.Tests fails there only on its symbolic-link test,
+which needs Developer Mode. The runs found two product defects, fixed in 228a195 (Save menu with
+no PDF) and 38d0bcf (screen-reader visible text). See
+[the window test record](records/window-tests-steevnet-20261024.md).
+
 Measurement detail, noise floor and per-file contributors:
 `C:/Users/steve/scratch/kp-bench-render/release-19-baseline/BASELINE.md`.
 
