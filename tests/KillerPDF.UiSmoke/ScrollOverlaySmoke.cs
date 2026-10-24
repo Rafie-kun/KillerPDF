@@ -338,20 +338,17 @@ internal static class ScrollOverlaySmoke
         { report.Add("FAIL document pane must restore panel buttons"); failures++; }
         if ((bool)type.GetField("_sidebarCollapsed", Members)!.GetValue(window)!)
             pagesButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        // This window is never shown, so the menus these clicks open cannot appear here.
+        // SidebarActionsSmoke checks them in a shown window.
         pagesButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-        if ((bool)type.GetField("_sidebarCollapsed", Members)!.GetValue(window)!
-            || pagesButton.ContextMenu?.IsOpen != true
-            || pagesButton.ContextMenu.Items.OfType<MenuItem>().Count(item => item.IsCheckable) != 4)
-        { report.Add("FAIL selected panel click must keep sidebar open and show four positions"); failures++; }
-        if (pagesButton.ContextMenu is { } positionMenu) positionMenu.IsOpen = false;
+        if ((bool)type.GetField("_sidebarCollapsed", Members)!.GetValue(window)!)
+        { report.Add("FAIL selected panel click must keep sidebar open"); failures++; }
         var rightClick = new System.Windows.Input.MouseButtonEventArgs(
             System.Windows.Input.Mouse.PrimaryDevice, 0, System.Windows.Input.MouseButton.Right)
             { RoutedEvent = System.Windows.Input.Mouse.MouseUpEvent };
         pagesButton.RaiseEvent(rightClick);
-        bool afterRightClick = (bool)type.GetField("_sidebarCollapsed", Members)!.GetValue(window)!;
-        if (!rightClick.Handled || afterRightClick || pagesButton.ContextMenu?.IsOpen != true)
-        { report.Add("FAIL rail right-click must invoke its normal panel action"); failures++; }
-        if (pagesButton.ContextMenu is { } rightMenu) rightMenu.IsOpen = false;
+        if (!rightClick.Handled || (bool)type.GetField("_sidebarCollapsed", Members)!.GetValue(window)!)
+        { report.Add("FAIL rail right-click must be handled and keep the sidebar open"); failures++; }
         type.GetField("_isSplit", Members)!.SetValue(window, true);
         string copyPath = Path.Combine(folder, "redacted-copy.pdf");
         type.GetMethod("SaveCopyAndOpen", Members)!.Invoke(window, [copyPath]);
@@ -369,9 +366,10 @@ internal static class ScrollOverlaySmoke
         var expectedMenus = new Dictionary<string, string[]>
         {
             ["Attachments"] = ["Str_Attachment_Add", "Str_DocumentTools_EditAttachments"],
-            ["Comments"] = ["Str_Comments_Add", "Str_DocumentTools_Comments"],
+            ["Comments"] = ["Str_Comments_Add", "Str_DocumentTools_Comments", "Str_Measure_Distance", "Str_Measure_Perimeter",
+                "Str_Measure_Area", "Str_Measure_Angle", "Str_Measure_TT_Scale", "Str_DocumentTools_Measurements"],
             ["Layers"] = ["Str_DocumentTools_EditLayers"],
-            ["Signatures"] = ["Str_Sign_Name", "Str_DocumentTools_Signatures"]
+            ["Signatures"] = ["Str_Lbl_DigitalSig", "Str_DocumentTools_Signatures", "Str_CertCatalog_Title"]
         };
         foreach (var (panelName, keys) in expectedMenus)
         {

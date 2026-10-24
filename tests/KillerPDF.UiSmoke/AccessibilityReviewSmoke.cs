@@ -434,19 +434,21 @@ internal static class AccessibilityReviewSmoke
                 Wait(() => findings.Items.Cast<ComboBoxItem>().Any(item => Equals(item.Tag, "MissingDocumentLanguage")), "dialog Undo restores finding");
                 if (Find<Button>(dialog, "A11yUndo").IsEnabled) throw new InvalidOperationException("Dialog Undo escaped its own fix history.");
             }
-            else if (mode is "source-changed" or "source-switched")
+            else if (mode == "source-changed")
             {
-                if (mode == "source-changed")
-                {
-                    if (!File.ReadAllBytes(source).AsSpan().SequenceEqual(original)) throw new InvalidOperationException("Owned stale-source fixture changed unexpectedly.");
-                    expectedSource = original.Concat(Encoding.ASCII.GetBytes("\n% owned external change\n")).ToArray();
-                    File.WriteAllBytes(source, expectedSource);
-                }
-                else
-                {
-                    string replacement = Path.Combine(folder, "replacement-source.pdf");
-                    File.WriteAllBytes(replacement, DescriptionFixture()); Open(owner, replacement);
-                }
+                // KillerPDF reviews its own complete copy of the document, so another program
+                // changing the user's file meanwhile does not make the review stale. The fix still
+                // applies, and the outside change survives, since saving over it asks first.
+                if (!File.ReadAllBytes(source).AsSpan().SequenceEqual(original)) throw new InvalidOperationException("Owned stale-source fixture changed unexpectedly.");
+                expectedSource = original.Concat(Encoding.ASCII.GetBytes("\n% owned external change\n")).ToArray();
+                File.WriteAllBytes(source, expectedSource);
+                Click(Find<Button>(dialog, "A11yApply"));
+                Wait(() => !findings.Items.Cast<ComboBoxItem>().Any(item => Equals(item.Tag, "MissingDocumentLanguage")), "fix applied after an outside change");
+            }
+            else if (mode == "source-switched")
+            {
+                string replacement = Path.Combine(folder, "replacement-source.pdf");
+                File.WriteAllBytes(replacement, DescriptionFixture()); Open(owner, replacement);
                 Click(Find<Button>(dialog, "A11yApply"));
                 string expected = (string)Application.Current.FindResource("Str_A11y_Changed");
                 Wait(() => Find<TextBlock>(dialog, "A11yStatus").Text == expected, "external source change rejected");
@@ -457,7 +459,7 @@ internal static class AccessibilityReviewSmoke
         });
         string saved = Path.Combine(folder, "safety-" + mode + "-saved.pdf"); SaveAs(owner, saved);
         HashSet<string> savedFindings = FindingCodes(engine, File.ReadAllBytes(saved));
-        if (savedFindings.Contains("MissingDocumentLanguage") == (mode == "source-switched"))
+        if (savedFindings.Contains("MissingDocumentLanguage") == (mode is "source-switched" or "source-changed"))
             throw new InvalidOperationException("Safety case changed the saved document: " + mode);
         if (mode == "source-switched" && (!savedFindings.SetEquals(["MissingFigureAlternateDescription", "MissingLinkDescription", "MissingFormFieldDescription"])
             || !File.ReadAllBytes(Path.Combine(folder, "replacement-source.pdf")).AsSpan().SequenceEqual(DescriptionFixture())))

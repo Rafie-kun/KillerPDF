@@ -257,7 +257,8 @@ internal static class TableExportSmoke
                 foreach (Window window in app.Windows.Cast<Window>().Where(window => window != owner && window.IsVisible).ToArray())
                 {
                     Button? button = Descendants<Button>(window).FirstOrDefault(candidate => Equals(candidate.Content, quit)
-                        || (formFieldEditing || guidedTasks || signedCopy || renderRecovery || toolbarAvailability) && Equals(candidate.Content, discard));
+                        || (formFieldEditing || guidedTasks || signedCopy || renderRecovery || toolbarAvailability
+                            || accessibilityReview || paragraphEdit) && Equals(candidate.Content, discard));
                     if (button is not null && accepted.Add(window)) Click(button);
                 }
             };

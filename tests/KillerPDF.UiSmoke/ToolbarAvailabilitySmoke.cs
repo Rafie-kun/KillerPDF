@@ -35,7 +35,11 @@ internal static class ToolbarAvailabilitySmoke
         Loaded(owner);
         History(owner, undo: false, redo: false, clear: false);
         var pages = (ListBox)owner.FindName("PageList");
-        pages.UnselectAll(); Pump();
+        // Opening finishes in the background and can select the current page again, so clear the
+        // selection until it stays clear.
+        var unselect = Stopwatch.StartNew();
+        do { pages.UnselectAll(); Pump(); Thread.Sleep(50); Pump(); }
+        while (pages.SelectedItems.Count != 0 && unselect.Elapsed.TotalSeconds < 10);
         Enabled(owner, false, "ExtractPagesBtn", "DeletePagesBtn", "MovePageUpBtn", "MovePageDownBtn");
         pages.SelectedIndex = 0; Pump();
         Enabled(owner, true, "ExtractPagesBtn", "DeletePagesBtn", "MovePageDownBtn");
@@ -203,7 +207,7 @@ internal static class ToolbarAvailabilitySmoke
                 throw new InvalidOperationException("GetVisibleRanges omitted the visible body line. Offset "
                     + scroll.VerticalOffset.ToString(CultureInfo.InvariantCulture) + " of "
                     + scroll.ScrollableHeight.ToString(CultureInfo.InvariantCulture) + ", ranges: ["
-                    + string.Join(" | ", text.GetVisibleRanges().Select(range => range.GetText(80))) + "]");
+                    + string.Join(" | ", text.GetVisibleRanges().Select(range => range.GetText(80))) + "]; " + ViewerState(viewer));
             Pump(); Thread.Sleep(10);
         }
         owner.Height = oldHeight;
@@ -300,6 +304,61 @@ internal static class ToolbarAvailabilitySmoke
         try { Click(Button(owner, "CloseFileBtn")); if (failure is not null) throw failure; }
         finally { timer.Stop(); }
     }
+    // The pages the viewer holds and where they sit, for a reading-provider failure message.
+    private static string ViewerState(FrameworkElement viewer)
+    {
+        const BindingFlags Fields = BindingFlags.NonPublic | BindingFlags.Instance;
+        Type type = viewer.GetType();
+        var dims = (System.Collections.IDictionary)type.GetField("_renderDims", Fields)!.GetValue(viewer)!;
+        var pages = (System.Collections.IDictionary)type.GetProperty("_pages", Fields)!.GetValue(viewer)!;
+        var parts = new List<string> { "renderDims=[" + string.Join(",", dims.Keys.Cast<object>()) + "]" };
+        foreach (System.Collections.DictionaryEntry entry in pages)
+        {
+            var canvas = (FrameworkElement)entry.Value!;
+            bool shown = PresentationSource.FromVisual(canvas) is not null;
+            parts.Add($"page {entry.Key} visible={canvas.IsVisible} inTree={shown} size={canvas.ActualWidth}x{canvas.ActualHeight}"
+                + (shown ? " at " + canvas.PointToScreen(new Point()) : ""));
+        }
+        // The scroll area the reading provider clips page 1 to: the nearest one above its canvas.
+        if (pages.Contains(0) && pages[0] is DependencyObject first)
+            for (DependencyObject? node = first; node is not null; node = VisualTreeHelper.GetParent(node))
+                if (node is ScrollContentPresenter clip)
+                {
+                    string owner = (clip.TemplatedParent as FrameworkElement)?.Name ?? "?";
+                    parts.Add($"page 0 clip ({owner}) at " + clip.PointToScreen(new Point()) + " size " + clip.ActualWidth + "x" + clip.ActualHeight);
+                    break;
+                }
+        ScrollViewer preview = Children(viewer).OfType<ScrollViewer>().Single(control => control.Name == "PagePreviewPanel");
+        parts.Add($"PagePreviewPanel offset {preview.HorizontalOffset},{preview.VerticalOffset} viewport {preview.ViewportWidth}x{preview.ViewportHeight}"
+            + $" extent {preview.ExtentWidth}x{preview.ExtentHeight} at " + preview.PointToScreen(new Point()));
+        Window window = Window.GetWindow(viewer);
+        parts.Add($"window {window.Left},{window.Top} {window.ActualWidth}x{window.ActualHeight}");
+        if (dims.Contains(0)) parts.Add("renderDims[0]=" + dims[0]);
+        parts.Add("rotation=" + type.GetMethod("EffectiveRotation", Fields)?.Invoke(viewer, [0]));
+        // The text geometry the provider reads for page 1, and the visible character runs it finds.
+        object textRuns = type.GetField("_textRuns", Fields)!.GetValue(viewer)!;
+        object? runs = textRuns.GetType().GetMethod("GetPage", BindingFlags.Public | BindingFlags.Instance)!
+            .Invoke(textRuns, [type.GetField("_currentFile", Fields)!.GetValue(viewer)!, 0]);
+        if (runs is null) parts.Add("runs[0]=null");
+        else
+        {
+            Type runsType = runs.GetType();
+            var chars = (System.Collections.IList)runsType.GetField("Chars")!.GetValue(runs)!;
+            var lines = (System.Collections.IList)runsType.GetField("Lines")!.GetValue(runs)!;
+            string Field(object item, string name) => Convert.ToString(item.GetType().GetField(name)!.GetValue(item), CultureInfo.InvariantCulture)!;
+            parts.Add($"runs[0] pdf {Field(runs, "PdfWidth")}x{Field(runs, "PdfHeight")} chars={chars.Count} lines={lines.Count}"
+                + (chars.Count > 0 ? $" first '{Field(chars[0]!, "Value")}' x {Field(chars[0]!, "Left")}-{Field(chars[0]!, "Right")} line {Field(chars[0]!, "Line")}" : "")
+                + (lines.Count > 0 ? $" line0 y {Field(lines[0]!, "Bottom")}-{Field(lines[0]!, "Top")}" : ""));
+        }
+        FrameworkElement surface = Children(viewer).OfType<FrameworkElement>().Single(element => element.GetType().Name == "DocumentSurface");
+        object? source = surface.GetType().GetProperty("Source", Fields)!.GetValue(surface);
+        if (source is not null)
+            parts.Add("visibleCarets=[" + string.Join(",", ((System.Collections.IEnumerable)source.GetType()
+                .GetMethod("VisibleCaretRanges", BindingFlags.Public | BindingFlags.Instance)!.Invoke(source, null)!).Cast<object>()) + "]");
+        parts.Add("file=" + type.GetField("_currentFile", Fields)!.GetValue(viewer));
+        return string.Join("; ", parts);
+    }
+
     private static void Pump() => Application.Current.Dispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
     private static IEnumerable<DependencyObject> Children(DependencyObject root)
     {

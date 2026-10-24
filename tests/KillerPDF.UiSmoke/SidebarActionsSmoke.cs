@@ -20,8 +20,12 @@ internal static class SidebarActionsSmoke
         Button pages = Find("SidebarPagesTab");
         pages.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); Pump(); CloseMenus();
         string? original = pages.Tag as string;
-        pages.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); Pump(); CloseMenus();
+        pages.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); Pump();
+        // Clicking the open panel's icon offers the four sidebar positions instead of closing it.
+        int positions = Menus().SingleOrDefault()?.Items.OfType<MenuItem>().Count(item => item.IsCheckable) ?? 0;
+        CloseMenus();
         if (original != "on" || !Equals(pages.Tag, "on")) throw new InvalidOperationException("Pages click closed its panel.");
+        if (positions != 4) throw new InvalidOperationException("Pages click did not offer the four sidebar positions.");
         foreach (string buttonName in new[] { "SidebarCommentsTab", "SidebarSignaturesTab", "SplitPaneRailBtn" })
         {
             Button button = Find(buttonName);
