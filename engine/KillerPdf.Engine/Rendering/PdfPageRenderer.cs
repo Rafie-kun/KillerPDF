@@ -6233,7 +6233,7 @@ public sealed partial class PdfPageRenderer
                         // direct ink write applies under antialiased clips as well.
                         int clipCoverage = rectangularClips ? 255 : ClipCoverage(clips, x, y);
                         byte imageMaskSample = softMask is null ? (byte)255
-                            : interpolateSoftMask ? softMask.SampleBilinear(unitX, 1 - unitY)
+                            : interpolateSoftMask || smoothPlane ? softMask.SampleBilinear(unitX, 1 - unitY)
                             : softMask.Sample(
                                 Math.Min((int)(unitX * softMask.Width), softMask.Width - 1),
                                 Math.Min((int)((1 - unitY) * softMask.Height), softMask.Height - 1));
@@ -6319,8 +6319,9 @@ public sealed partial class PdfPageRenderer
                         }
                         else if (smoothPlane)
                         {
-                            // Bilinear between the four nearest converted samples; RGB planes
-                            // weight by alpha so a transparent sample cannot tint an edge.
+                            // Bilinear between the four nearest converted samples. Colors weight
+                            // by alpha and soft mask, so a sample the mask hides cannot tint the
+                            // visible edge; the mask itself is interpolated above.
                             double sampleX = Math.Clamp(unitX * planeWidth - 0.5, 0, planeWidth - 1d);
                             double sampleY = Math.Clamp((1 - unitY) * planeHeight - 0.5, 0, planeHeight - 1d);
                             int x0 = (int)sampleX, y0 = (int)sampleY;
@@ -6329,27 +6330,40 @@ public sealed partial class PdfPageRenderer
                             int o00 = (y0 * planeWidth + x0) * 4, o10 = (y0 * planeWidth + x1) * 4;
                             int o01 = (y1 * planeWidth + x0) * 4, o11 = (y1 * planeWidth + x1) * 4;
                             double w00 = (1 - wx) * (1 - wy), w10 = wx * (1 - wy), w01 = (1 - wx) * wy, w11 = wx * wy;
+                            double a00 = w00 * (nativeImageSamples ? 255 : plane![o00 + 3]);
+                            double a10 = w10 * (nativeImageSamples ? 255 : plane![o10 + 3]);
+                            double a01 = w01 * (nativeImageSamples ? 255 : plane![o01 + 3]);
+                            double a11 = w11 * (nativeImageSamples ? 255 : plane![o11 + 3]);
+                            double total = a00 + a10 + a01 + a11;
+                            if (total <= 0) continue;
+                            alpha = nativeImageSamples ? 255 : (int)Math.Round(total);
+                            if (softMask is not null)
+                            {
+                                double Masked(double weight, int column, int row) => weight * softMask.Sample(
+                                    Math.Min((int)((column + 0.5) / planeWidth * softMask.Width), softMask.Width - 1),
+                                    Math.Min((int)((row + 0.5) / planeHeight * softMask.Height), softMask.Height - 1));
+                                double m00 = Masked(a00, x0, y0), m10 = Masked(a10, x1, y0);
+                                double m01 = Masked(a01, x0, y1), m11 = Masked(a11, x1, y1);
+                                // A finer mask can show a pixel whose four samples it hides;
+                                // keep the unmasked blend there.
+                                if (m00 + m10 + m01 + m11 > 0)
+                                {
+                                    (a00, a10, a01, a11) = (m00, m10, m01, m11);
+                                    total = m00 + m10 + m01 + m11;
+                                }
+                            }
+                            double Mixed(int channel) => (a00 * plane![o00 + channel] + a10 * plane[o10 + channel]
+                                + a01 * plane[o01 + channel] + a11 * plane[o11 + channel]) / total;
                             if (nativeImageSamples)
                             {
                                 uint packed = 0;
                                 for (int channel = 0; channel < 4; channel++)
-                                    packed |= (uint)Math.Round(w00 * plane![o00 + channel] + w10 * plane[o10 + channel]
-                                        + w01 * plane[o01 + channel] + w11 * plane[o11 + channel]) << (channel * 8);
-                                alpha = 255;
+                                    packed |= (uint)Math.Round(Mixed(channel)) << (channel * 8);
                                 color = InkColor(packed);
                             }
                             else
-                            {
-                                double a00 = w00 * plane![o00 + 3], a10 = w10 * plane[o10 + 3];
-                                double a01 = w01 * plane[o01 + 3], a11 = w11 * plane[o11 + 3];
-                                double total = a00 + a10 + a01 + a11;
-                                if (total <= 0) continue;
-                                byte Mixed(int channel) => (byte)Math.Round((a00 * plane[o00 + channel]
-                                    + a10 * plane[o10 + channel] + a01 * plane[o01 + channel]
-                                    + a11 * plane[o11 + channel]) / total);
-                                alpha = (int)Math.Round(total);
-                                color = target.ColorFromRgb(new(Mixed(2), Mixed(1), Mixed(0)));
-                            }
+                                color = target.ColorFromRgb(new((byte)Math.Round(Mixed(2)),
+                                    (byte)Math.Round(Mixed(1)), (byte)Math.Round(Mixed(0))));
                         }
                         else
                         {

@@ -43,6 +43,23 @@ public sealed class PdfImageSmoothingTests
         Assert.True(Ramp(Render("q 12 0 0 4 4 3 cm BI /W 10 /H 1 /BPC 8 /CS /G /I true ID ", stripes, false)) >= 4);
     }
 
+    // A soft mask hides the black sample. Smoothing must fade the visible gray into the page,
+    // never blend in the hidden black, which drew a dark outline around masked images (GWG169).
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void SmoothedMaskedImageDoesNotShowItsHiddenColor(bool cmykPage)
+    {
+        PdfImage image = PdfImage.FromRgba(2, 1, new byte[] { 128, 128, 128, 255, 0, 0, 0, 0 });
+        PdfRenderedPage rendered = Render(PdfDocument.Open(new PdfDocumentBuilder()
+            .AddPage(20, 10, new PdfContentStreamBuilder().DrawImage(image, 0, 0, 20, 10)).Build()), cmykPage);
+        int gray = rendered.Pixels.Span[(5 * 20 + 1) * 4];
+        Assert.InRange(gray, 100, 160);
+        for (int x = 0; x < 20; x++)
+            Assert.True(rendered.Pixels.Span[(5 * 20 + x) * 4] >= gray - 3,
+                $"Pixel {x} is darker than the visible gray: the hidden black bled in.");
+    }
+
     // Pixels on the middle row strictly between that row's darkest and lightest values, so a
     // CMYK black that converts to a dark gray still counts as the dark end.
     private static int Ramp(PdfRenderedPage page)
@@ -66,7 +83,11 @@ public sealed class PdfImageSmoothingTests
     private static PdfRenderedPage Render(string prefix, byte[] samples, bool cmykPage)
     {
         byte[] content = [.. Encoding.ASCII.GetBytes(prefix), .. samples, .. Encoding.ASCII.GetBytes("\nEI Q")];
-        PdfDocument document = PdfDocument.Open(new PdfDocumentBuilder().AddPage(20, 10, content).Build());
+        return Render(PdfDocument.Open(new PdfDocumentBuilder().AddPage(20, 10, content).Build()), cmykPage);
+    }
+
+    private static PdfRenderedPage Render(PdfDocument document, bool cmykPage)
+    {
         if (cmykPage)
         {
             PdfPageTreeEntry page = PdfPageTree.Read(document).Pages[0];
