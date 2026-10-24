@@ -5491,8 +5491,10 @@ public sealed partial class PdfPageRenderer
                 : bits != 1 && Math.Max(sampleStepX, sampleStepY) <= 1 / 1.5
                     && deviceHeight / 8 < (long)sourceWidth * sourceHeight / deviceWidth);
         // Images the device path below does not smooth are smoothed from the converted plane,
-        // which holds every source sample only up to its size limit. A larger image would be
-        // averaged down to fit first, so it keeps the full-resolution nearest-sample copies.
+        // which holds every source sample only up to its size limit. A larger 8-bit gray or RGB
+        // image would be averaged down to fit first, so it keeps the full-resolution copies that
+        // read every sample. The sampled copies of larger images read the plane's reduced grid,
+        // so they gain nothing over smoothing from the plane and stay closed to smoothed images.
         bool smoothThroughPlane = smoothImage && (long)sourceWidth * sourceHeight <= MaximumImagePlaneCells;
         // A rectangular clip is fully applied by shrinking the painted bounds, so it does not
         // disqualify the direct paths; only antialiased clip masks need per-pixel coverage.
@@ -5818,13 +5820,13 @@ public sealed partial class PdfPageRenderer
         // A rotated or sheared mask's bounding box is wider than its footprint along the source
         // axes, so it is supersampled per pixel instead of read from an averaged plane.
         bool averageStencil = imageMask && reducedPlane && inverse.B == 0 && inverse.C == 0;
-        bool directInkSamples = !smoothThroughPlane && !averagePlane && nativeImageSamples && !imageMask && preblendMatte is null
+        bool directInkSamples = !smoothImage && !averagePlane && nativeImageSamples && !imageMask && preblendMatte is null
             && colorKeyMask is null && bits == 8 && components == 4 && colorSpace.Components == 4
             && !colorSpace.DoesNotPaint && colorSpace.Palette is null && colorSpace.Converter is null
             && colorSpace.MultiConverter is null && colorSpace.ComponentRange is null
             && (colorSpace.Profile is null || SameProfile(colorSpace.Profile, target.BlendProfile))
             && decode is [0, 1, 0, 1, 0, 1, 0, 1];
-        bool directDeviceSamples = !smoothThroughPlane && !averagePlane && target.Ink is null && target.RgbProfile is null
+        bool directDeviceSamples = !smoothImage && !averagePlane && target.Ink is null && target.RgbProfile is null
             && !imageMask && preblendMatte is null && colorKeyMask is null && bits == 8
             && components == colorSpace.Components && colorSpace.Palette is null
             && colorSpace.Converter is null && colorSpace.MultiConverter is null

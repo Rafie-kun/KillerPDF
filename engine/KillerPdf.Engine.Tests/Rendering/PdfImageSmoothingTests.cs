@@ -110,6 +110,41 @@ public sealed class PdfImageSmoothingTests
         Assert.True(dark > 0 && light > 0);
     }
 
+    // An image too large for the plane that has a soft mask cannot take the full-resolution
+    // copies, and the sampled copies read only every second sample, like the plane. It must be
+    // smoothed from that plane, not drawn from those samples unsmoothed (round I, IF-001). A 4 by 4
+    // mask, opaque except its far corner, keeps the interpolating device path from taking it on an
+    // RGB page.
+    [Fact]
+    public void LargeMaskedImageIsStillSmoothedFromTheReducedPlane()
+    {
+        const int width = 2050, height = 2000;
+        // Bands four samples wide survive the twofold plane; smoothing ramps between them.
+        byte[] row = [.. Enumerable.Range(0, width).Select(x => x / 4 % 2 == 0 ? (byte)0 : (byte)255)];
+        PdfDocument document = PdfDocument.Open(new PdfDocumentBuilder()
+            .AddPage(width, height, Encoding.ASCII.GetBytes($"q {width} 0 0 {height} 0 0 cm /Im Do Q")).Build());
+        PdfPageTreeEntry page = PdfPageTree.Read(document).Pages[0];
+        var original = Assert.IsType<PdfDictionary>(document.Resolve(page.Reference));
+        var update = new PdfIncrementalUpdateBuilder(document);
+        var mask = update.AddObject(new PdfStream(new PdfDictionary([
+            new(Name("Subtype"), Name("Image")), new(Name("Width"), new PdfInteger(4)), new(Name("Height"), new PdfInteger(4)),
+            new(Name("BitsPerComponent"), new PdfInteger(8)), new(Name("ColorSpace"), Name("DeviceGray"))]),
+            [.. Enumerable.Repeat((byte)255, 15), 0]));
+        var image = update.AddObject(new PdfStream(new PdfDictionary([
+            new(Name("Subtype"), Name("Image")), new(Name("Width"), new PdfInteger(width)), new(Name("Height"), new PdfInteger(height)),
+            new(Name("BitsPerComponent"), new PdfInteger(8)), new(Name("ColorSpace"), Name("DeviceGray")), new(Name("SMask"), mask)]),
+            Enumerable.Repeat(row, height).SelectMany(bytes => bytes).ToArray()));
+        update.ReplaceObject(page.Reference.ObjectNumber, new PdfDictionary(original
+            .Where(entry => !entry.Key.Equals(Name("Resources")))
+            .Append(new(Name("Resources"), new PdfDictionary([new(Name("XObject"), new PdfDictionary([new(Name("Im"), image)]))])))));
+        PdfRenderedPage region = new PdfPageRenderer(PdfDocument.Open(update.Build())).RenderRegion(0,
+            new PdfRenderOptions(2 * width, 2 * height, includeAnnotations: false, includeFormFields: false), 1000, 1000, 40, 4);
+        int ramp = 0;
+        for (int index = 0; index < region.Pixels.Length; index += 4)
+            if (region.Pixels.Span[index] is > 40 and < 215) ramp++;
+        Assert.True(ramp >= 16, $"Only {ramp} of 160 pixels lie between the bands: the image was not smoothed.");
+    }
+
     // A smoothed Separation image on a CMYK page must ramp its spot plate with its ink. The plate
     // took its tint from the nearest sample, so a pixel whose nearest sample was blank cleared it
     // and the ramp was cut on that side (round H, HF-004).
