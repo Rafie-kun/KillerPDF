@@ -171,7 +171,7 @@ namespace KillerPDF.Controls
             _mode = mode;
             InitializeComponent();
             Closed += (_, _) => CloseDirectoryListing();
-            TitleIcon.Source = BitmapDecoder.Create(new Uri("pack://application:,,,/KillerPDF;component/Resources/kp-icon.ico"),
+            TitleIcon.Source = BitmapDecoder.Create(new Uri("pack://application:,,,/Resources/kp-icon.ico"),
                 BitmapCreateOptions.None, BitmapCacheOption.OnLoad).Frames[0];
             Loaded += (_, _) => Anim.FadeIn(RootFade);
 
