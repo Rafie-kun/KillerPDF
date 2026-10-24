@@ -245,7 +245,8 @@ public sealed class PdfColorConversionMacroTests
         PdfDocument converted = PdfDocument.Open(result.Data);
         var rendered = new PdfPageRenderer(converted).Render(0, new PdfRenderOptions(40, 20, transparentBackground: true));
 
-        foreach ((int x, byte alpha) in new[] { (10, (byte)128), (30, (byte)64) })
+        // Away from the smoothed blend between the image's two samples.
+        foreach ((int x, byte alpha) in new[] { (5, (byte)128), (30, (byte)64) })
         {
             byte[] pixel = rendered.Pixels.Slice((10 * 40 + x) * 4, 4).ToArray();
             Assert.Equal(pixel[0], pixel[1]);

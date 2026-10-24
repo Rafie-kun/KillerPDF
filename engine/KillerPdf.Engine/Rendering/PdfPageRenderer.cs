@@ -5467,6 +5467,17 @@ public sealed partial class PdfPageRenderer
         int top = Math.Clamp(targetHeight - (int)fullTop, 0, targetHeight);
         int bottom = Math.Clamp(targetHeight - (int)fullBottom, 0, targetHeight);
         if (!transform.TryInverse(out Matrix inverse)) return;
+        // Enlarged continuous-tone images are smoothed, as 1.8 and most viewers show them, once
+        // each source sample covers about one and a half pixels. 1-bit images and image masks
+        // stay crisp because their edges are the content (text scans, barcodes). An explicit
+        // /Interpolate true is honored at any enlargement.
+        double sampleStepX = Math.Sqrt(Math.Pow(inverse.A * sourceWidth, 2)
+            + Math.Pow(inverse.B * sourceHeight, 2)) / scaleX;
+        double sampleStepY = Math.Sqrt(Math.Pow(inverse.C * sourceWidth, 2)
+            + Math.Pow(inverse.D * sourceHeight, 2)) / scaleY;
+        bool smoothImage = !imageMask && double.IsFinite(sampleStepX) && double.IsFinite(sampleStepY)
+            && (interpolate ? Math.Max(sampleStepX, sampleStepY) <= 1 && Math.Min(sampleStepX, sampleStepY) < 1
+                : bits != 1 && Math.Max(sampleStepX, sampleStepY) <= 1 / 1.5);
         // A rectangular clip is fully applied by shrinking the painted bounds, so it does not
         // disqualify the direct paths; only antialiased clip masks need per-pixel coverage.
         // The plane resolution below still derives from the unclipped bounds so clipping
@@ -5486,7 +5497,7 @@ public sealed partial class PdfPageRenderer
         if (paintRight <= paintLeft || paintBottom <= paintTop) return;
         graphicsSoftMask = graphicsSoftMask?.ForBounds(paintLeft, paintTop, paintRight, paintBottom);
         int rowBytes = (sourceWidth * components * bits + 7) / 8;
-        if (interpolate && !imageMask && colorKeyMask is null && preblendMatte is null
+        if (smoothImage && colorKeyMask is null && preblendMatte is null
             && TryPaintInterpolatedDeviceImage(target, targetWidth, targetHeight, scaleX, scaleY,
                 inverse, samples, sourceWidth, sourceHeight, components, bits, decode,
                 colorSpace, softMask, clips, stencilAlpha, blendMode, graphicsSoftMask,
@@ -5789,13 +5800,13 @@ public sealed partial class PdfPageRenderer
         // A rotated or sheared mask's bounding box is wider than its footprint along the source
         // axes, so it is supersampled per pixel instead of read from an averaged plane.
         bool averageStencil = imageMask && reducedPlane && inverse.B == 0 && inverse.C == 0;
-        bool directInkSamples = !averagePlane && nativeImageSamples && !imageMask && preblendMatte is null
+        bool directInkSamples = !smoothImage && !averagePlane && nativeImageSamples && !imageMask && preblendMatte is null
             && colorKeyMask is null && bits == 8 && components == 4 && colorSpace.Components == 4
             && !colorSpace.DoesNotPaint && colorSpace.Palette is null && colorSpace.Converter is null
             && colorSpace.MultiConverter is null && colorSpace.ComponentRange is null
             && (colorSpace.Profile is null || SameProfile(colorSpace.Profile, target.BlendProfile))
             && decode is [0, 1, 0, 1, 0, 1, 0, 1];
-        bool directDeviceSamples = !averagePlane && target.Ink is null && target.RgbProfile is null
+        bool directDeviceSamples = !smoothImage && !averagePlane && target.Ink is null && target.RgbProfile is null
             && !imageMask && preblendMatte is null && colorKeyMask is null && bits == 8
             && components == colorSpace.Components && colorSpace.Palette is null
             && colorSpace.Converter is null && colorSpace.MultiConverter is null
@@ -5879,6 +5890,11 @@ public sealed partial class PdfPageRenderer
                 bits, decode, colorSpace, target.Ink is not null, target.InputProfile, matte: true) : null;
         byte[]? plane = imageMask || preblendMatte is not null || directInkSamples || directDeviceSamples
             ? null : RasterBuffers.Rent(checked(planeWidth * planeHeight * 4));
+        // Images the device fast path does not take are smoothed from their converted plane, so
+        // every color space and both RGB and ink pages are smoothed alike. Spot palettes and
+        // color-key masks keep their exact samples.
+        bool smoothPlane = smoothImage && plane is not null && !averagePlane && spotPlane is null
+            && !preserveReducedSpot && colorKeyMask is null && matteConverter is null;
         byte[]? alphaPlane = null;
         try
         {
@@ -6017,7 +6033,7 @@ public sealed partial class PdfPageRenderer
                 (Math.Abs(unitStepY) + Math.Abs(unitRowStepY)) * sourceHeight);
             bool supersampleStencil = imageMask && alphaPlane is null && stencilFootprint > 1;
             int stencilSamples = supersampleStencil ? Math.Clamp((int)Math.Ceiling(stencilFootprint), 4, 8) : 0;
-            if (direct && (plane is not null || directDeviceSamples) && alphaPlane is null && matteConverter is null
+            if (!smoothPlane && direct && (plane is not null || directDeviceSamples) && alphaPlane is null && matteConverter is null
                 && !colorSpace.NativeProcessMask.HasValue)
             {
                 // Plain RGB destination with an opaque or color-keyed plane: opaque samples copy
@@ -6229,7 +6245,7 @@ public sealed partial class PdfPageRenderer
                                     knockout: knockout, shape: clipCoverage / 255d);
                             continue;
                         }
-                        if (directInk && clipCoverage == 255 && matteConverter is null && imageMaskSample == 255
+                        if (!smoothPlane && directInk && clipCoverage == 255 && matteConverter is null && imageMaskSample == 255
                             && (plane is not null || directInkSamples)
                             && (alphaPlane is null || alphaPlane[py * planeWidth + px] == 255)
                             && target.Contains(x, y))
@@ -6300,6 +6316,40 @@ public sealed partial class PdfPageRenderer
                                 alpha = stencilCoverageByte;
                             }
                             color = paintedStencil;
+                        }
+                        else if (smoothPlane)
+                        {
+                            // Bilinear between the four nearest converted samples; RGB planes
+                            // weight by alpha so a transparent sample cannot tint an edge.
+                            double sampleX = Math.Clamp(unitX * planeWidth - 0.5, 0, planeWidth - 1d);
+                            double sampleY = Math.Clamp((1 - unitY) * planeHeight - 0.5, 0, planeHeight - 1d);
+                            int x0 = (int)sampleX, y0 = (int)sampleY;
+                            int x1 = Math.Min(x0 + 1, planeWidth - 1), y1 = Math.Min(y0 + 1, planeHeight - 1);
+                            double wx = sampleX - x0, wy = sampleY - y0;
+                            int o00 = (y0 * planeWidth + x0) * 4, o10 = (y0 * planeWidth + x1) * 4;
+                            int o01 = (y1 * planeWidth + x0) * 4, o11 = (y1 * planeWidth + x1) * 4;
+                            double w00 = (1 - wx) * (1 - wy), w10 = wx * (1 - wy), w01 = (1 - wx) * wy, w11 = wx * wy;
+                            if (nativeImageSamples)
+                            {
+                                uint packed = 0;
+                                for (int channel = 0; channel < 4; channel++)
+                                    packed |= (uint)Math.Round(w00 * plane![o00 + channel] + w10 * plane[o10 + channel]
+                                        + w01 * plane[o01 + channel] + w11 * plane[o11 + channel]) << (channel * 8);
+                                alpha = 255;
+                                color = InkColor(packed);
+                            }
+                            else
+                            {
+                                double a00 = w00 * plane![o00 + 3], a10 = w10 * plane[o10 + 3];
+                                double a01 = w01 * plane[o01 + 3], a11 = w11 * plane[o11 + 3];
+                                double total = a00 + a10 + a01 + a11;
+                                if (total <= 0) continue;
+                                byte Mixed(int channel) => (byte)Math.Round((a00 * plane[o00 + channel]
+                                    + a10 * plane[o10 + channel] + a01 * plane[o01 + channel]
+                                    + a11 * plane[o11 + channel]) / total);
+                                alpha = (int)Math.Round(total);
+                                color = target.ColorFromRgb(new(Mixed(2), Mixed(1), Mixed(0)));
+                            }
                         }
                         else
                         {

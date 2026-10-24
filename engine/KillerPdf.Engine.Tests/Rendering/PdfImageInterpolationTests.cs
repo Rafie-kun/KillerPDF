@@ -73,16 +73,12 @@ public sealed class PdfImageInterpolationTests
     [InlineData("integer")]
     [InlineData("dangling")]
     [InlineData("cycle")]
-    public void MissingFalseOrInvalidHint_KeepsOrdinaryImagePainting(string hint)
+    // Owner decision, 2026-10-23: an enlarged 8-bit image is smoothed whether or not it asks to
+    // be, as 1.8 showed it, so a missing, false or invalid hint paints like a true one.
+    public void MissingFalseOrInvalidHint_SmoothsAnEnlargedImageLikeATrueHint(string hint)
     {
-        PdfRenderedPage page = Render(Build(3, false, 0, false, hint), 8);
-        for (int x = 0; x < 8; x++)
-        {
-            int offset = (3 * 8 + x) * 4;
-            Assert.Equal(x < 4 ? 0 : 255, page.Pixels.Span[offset]);
-            Assert.Equal(0, page.Pixels.Span[offset + 1]);
-            Assert.Equal(x < 4 ? 255 : 0, page.Pixels.Span[offset + 2]);
-        }
+        Assert.True(Render(Build(3, false, 0, false, hint), 8).Pixels.Span.SequenceEqual(
+            Render(Build(3, false, 0, false), 8).Pixels.Span));
     }
 
     [Fact]
