@@ -6205,10 +6205,12 @@ public sealed partial class PdfPageRenderer
             }
             // Opaque native ink samples on an ink destination take the same direct write the
             // compositor performs for full opacity, without building a color per pixel.
+            // The direct write skips spot bookkeeping, which a page without spot plates needs only
+            // for an image that carries a spot itself: such an image must create its plate.
             bool directInk = target.Ink is not null && !target.HasSpotPlates && imageOpacity == 1
                 && target.GroupShape is null
                 && graphicsSoftMask is null && knockout is null
-                && !(opaqueInkImage && imageSpotName is not null)
+                && imageSpotName is null && spotPalette is null && !preserveReducedSpot
                 && !(overprint && colorSpace.ContainsSpotColorants)
                 && (imageMask || !colorSpace.NativeProcessMask.HasValue)
                 && blendMode is RendererBlendMode.Normal or RendererBlendMode.Compatible;

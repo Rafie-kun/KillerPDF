@@ -108,9 +108,33 @@ public sealed class PdfReducedImagePlaneTests
             Math.Max(0, Math.Min(pixel + 1, end) - Math.Max(pixel, start));
     }
 
+    // A page's first spot-palette image must create its spot plate. The direct ink write, which
+    // skips spot bookkeeping while a page has no spot plates yet, took these images too, so their
+    // spot never reached a plate and later overprints could not see it (found testing HF-003).
+    [Theory]
+    [InlineData(false, "64 0 0 32 -20 -8")]
+    [InlineData(false, "20 0 0 8 4.5 5.25")]
+    [InlineData(true, "64 0 0 32 -20 -8")]
+    [InlineData(true, "20 0 0 8 4.5 5.25")]
+    public void ASpotPaletteImageShowsOnItsSpotPlate(bool separationBase, string matrix)
+    {
+        var samples = new byte[64 * 32];
+        for (int y = 8; y < 16; y++)
+            for (int x = 16; x < 32; x++) samples[y * 64 + x] = 1;
+        byte[] content = [.. Encoding.ASCII.GetBytes($"q {matrix} cm BI /W 64 /H 32 /BPC 8 /CS /Palette ID "),
+            .. samples, .. Encoding.ASCII.GetBytes("\nEI Q")];
+        double[] m = [.. matrix.Split(' ').Select(double.Parse)];
+        // A pixel inside the inked rectangle, and one well outside it.
+        int x0 = (int)Math.Floor(m[4] + m[0] * 0.375), y0 = (int)Math.Floor(20 - (m[5] + m[3] * 0.625));
+        PdfRenderedPage page = RenderSpotPlate(content, "CustomMagenta", separationBase);
+        Assert.True(page.Pixels.Span[(y0 * 32 + x0) * 4] < 30, $"Pixel {x0},{y0} shows no spot ink ({page.Pixels.Span[(y0 * 32 + x0) * 4]}).");
+        Assert.Equal(255, page.Pixels.Span[(1 * 32 + 30) * 4]);
+    }
+
     // One plate of a 32 by 20 CMYK-group page whose /Palette indexes Cyan plus a custom spot
     // (whose alternate is the same amount of magenta): entry 0 is no ink, entry 1 full ink of both.
-    private static PdfRenderedPage RenderSpotPlate(byte[] content, string plate)
+    // With a Separation base, the palette indexes the custom spot alone.
+    private static PdfRenderedPage RenderSpotPlate(byte[] content, string plate, bool separationBase = false)
     {
         static PdfName Name(string value) => new(Encoding.ASCII.GetBytes(value));
         static KeyValuePair<PdfName, PdfObject> Entry(string key, PdfObject value) => new(Name(key), value);
@@ -123,8 +147,12 @@ public sealed class PdfReducedImagePlaneTests
             Entry("FunctionType", new PdfInteger(4)), Entry("Domain", Numbers(0, 1, 0, 1)),
             Entry("Range", Numbers(0, 1, 0, 1, 0, 1, 0, 1))]), Encoding.ASCII.GetBytes("{ 0 0 }")));
         var mixed = new PdfArray([Name("DeviceN"), new PdfArray([Name("Cyan"), Name("CustomMagenta")]), Name("DeviceCMYK"), tint]);
-        var palette = new PdfArray([Name("Indexed"), mixed, new PdfInteger(1),
-            new PdfString(new byte[] { 0, 0, 255, 255 }, PdfStringForm.Hexadecimal)]);
+        var separation = new PdfArray([Name("Separation"), Name("CustomMagenta"), Name("DeviceCMYK"), new PdfDictionary([
+            Entry("FunctionType", new PdfInteger(2)), Entry("Domain", Numbers(0, 1)),
+            Entry("C0", Numbers(0, 0, 0, 0)), Entry("C1", Numbers(0, 1, 0, 0)), Entry("N", new PdfInteger(1))])]);
+        var palette = separationBase
+            ? new PdfArray([Name("Indexed"), separation, new PdfInteger(1), new PdfString(new byte[] { 0, 255 }, PdfStringForm.Hexadecimal)])
+            : new PdfArray([Name("Indexed"), mixed, new PdfInteger(1), new PdfString(new byte[] { 0, 0, 255, 255 }, PdfStringForm.Hexadecimal)]);
         update.ReplaceObject(entry.Reference.ObjectNumber, new PdfDictionary(original
             .Where(item => !item.Key.Equals(Name("Resources")) && !item.Key.Equals(Name("Group")))
             .Append(Entry("Resources", new PdfDictionary([Entry("ColorSpace", new PdfDictionary([Entry("Palette", palette)]))])))
