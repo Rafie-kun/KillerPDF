@@ -2,6 +2,16 @@ namespace KillerPdf.Engine.Rendering;
 
 public sealed partial class PdfPageRenderer
 {
+    // How a reduced plane's cells map to device pixels along one axis. An aligned plane has one
+    // cell per pixel whose center lies inside the image, read by pixel position (counted from
+    // the far edge when the image is mirrored); other planes are read through unit coordinates.
+    private readonly struct PlaneAxis(int first, int count, bool mirrored, bool aligned)
+    {
+        internal int Cell(int pixel, double unit) => aligned
+            ? Math.Clamp(mirrored ? first + count - 1 - pixel : pixel - first, 0, count - 1)
+            : Math.Min((int)(unit * count), count - 1);
+    }
+
     // Axis-aligned opaque RGB or process-ink output consumes one source row at a time.
     // Keep the original plane grid and accumulation order; only its storage lifetime
     // changes. Each row worker owns its converter/cache and returns its scratch row.
@@ -11,7 +21,8 @@ public sealed partial class PdfPageRenderer
         double[] decode, ImageColorSpace colorSpace,
         ImageSampleConverter.AreaSpan[]? columns, ImageSampleConverter.AreaSpan[]? rows,
         PdfBinaryAreaSampler.Column[]? binaryColumns, int planeWidth, int planeHeight,
-        bool pixelAlignedPlane, IReadOnlyList<ClipRegion> clips, bool rectangularClips,
+        bool pixelAlignedPlane, PlaneAxis columnAxis, PlaneAxis rowAxis,
+        IReadOnlyList<ClipRegion> clips, bool rectangularClips,
         int left, int top, int paintLeft, int paintTop, int paintRight, int paintBottom,
         CancellationToken cancellationToken)
     {
@@ -32,7 +43,7 @@ public sealed partial class PdfPageRenderer
             {
                 if ((x & 4095) == 0) cancellationToken.ThrowIfCancellationRequested();
                 if (x < paintLeft || unitX < 0 || unitX >= 1) continue;
-                int px = Math.Min((int)(unitX * planeWidth), planeWidth - 1);
+                int px = columnAxis.Cell(x, unitX);
                 firstColumn = Math.Min(firstColumn, px);
                 endColumn = Math.Max(endColumn, px + 1);
             }
@@ -59,7 +70,7 @@ public sealed partial class PdfPageRenderer
                         (targetHeight - y - .5) / scaleY);
                     if (first.Y < 0 || first.Y >= 1) continue;
                     int py = pixelAlignedPlane ? y - top
-                        : Math.Min((int)((1 - first.Y) * planeHeight), planeHeight - 1);
+                        : rowAxis.Cell(y, 1 - first.Y);
                     if (convertedRow != py)
                     {
                         for (int px = firstColumn; px < endColumn; px++)
@@ -76,7 +87,7 @@ public sealed partial class PdfPageRenderer
                     {
                         if (x < paintLeft || unitX < 0 || unitX >= 1) continue;
                         int px = pixelAlignedPlane ? x - left
-                            : Math.Min((int)(unitX * planeWidth), planeWidth - 1);
+                            : columnAxis.Cell(x, unitX);
                         int sourceOffset = (px - firstColumn) * 4;
                         int coverage = rectangularClips ? 255 : ClipCoverage(clips, x, y);
                         if (coverage == 0) continue;

@@ -5759,7 +5759,11 @@ public sealed partial class PdfPageRenderer
         bool preserveReducedSpot = averagePlane && (opaqueInkImage || opaqueRgbSpotImage)
             && (imageSpotName is not null || reducedPaletteSpotName is not null);
         bool pixelAlignedPlane = averagePlane && factor == 1;
-        bool averageStencil = factor > 1 && imageMask;
+        // Stencil masks average too below twofold reduction: Type 3 bitmap glyphs are reduced
+        // by less than half on screen, and nearest sampling there skipped one-sample strokes.
+        // A rotated or sheared mask's bounding box is wider than its footprint along the source
+        // axes, so it is supersampled per pixel instead of read from an averaged plane.
+        bool averageStencil = imageMask && reducedPlane && inverse.B == 0 && inverse.C == 0;
         bool directInkSamples = !averagePlane && nativeImageSamples && !imageMask && preblendMatte is null
             && colorKeyMask is null && bits == 8 && components == 4 && colorSpace.Components == 4
             && !colorSpace.DoesNotPaint && colorSpace.Palette is null && colorSpace.Converter is null
@@ -5772,11 +5776,30 @@ public sealed partial class PdfPageRenderer
             && colorSpace.Converter is null && colorSpace.MultiConverter is null
             && colorSpace.Profile is null && colorSpace.ComponentRange is null
             && (components == 1 && decode is [0, 1] || components == 3 && decode is [0, 1, 0, 1, 0, 1]);
+        // An axis-aligned reduced plane has one cell per pixel whose center lies inside the
+        // image, the pixels the paint loops draw, and is read by pixel position. Read through
+        // the image's fractional extent, a plane sized to the outward-rounded bounds drifted
+        // against the pixels and skipped a cell where they parted by one: a page scan lost a
+        // column and shifted a pixel from there on, and small mask glyphs lost strokes.
+        double exactLeft = corners.Min(p => p.X) * scaleX, exactRight = corners.Max(p => p.X) * scaleX;
+        double exactTop = targetHeight - corners.Max(p => p.Y) * scaleY;
+        double exactBottom = targetHeight - corners.Min(p => p.Y) * scaleY;
+        int firstCenterColumn = (int)Math.Ceiling(exactLeft - 0.5), firstCenterRow = (int)Math.Ceiling(exactTop - 0.5);
+        int centerColumns = (int)Math.Floor(exactRight - 0.5) - firstCenterColumn + 1;
+        int centerRows = (int)Math.Floor(exactBottom - 0.5) - firstCenterRow + 1;
+        bool alignedPlane = !pixelAlignedPlane && (averagePlane || averageStencil)
+            && inverse.B == 0 && inverse.C == 0 && centerColumns >= 1 && centerRows >= 1;
         if (averagePlane || averageStencil)
         {
-            planeWidth = Math.Min(planeWidth, pixelAlignedPlane ? destinationWidth : fullDestinationWidth);
-            planeHeight = Math.Min(planeHeight, pixelAlignedPlane ? destinationHeight : fullDestinationHeight);
+            planeWidth = Math.Min(planeWidth, pixelAlignedPlane ? destinationWidth
+                : alignedPlane ? centerColumns : fullDestinationWidth);
+            planeHeight = Math.Min(planeHeight, pixelAlignedPlane ? destinationHeight
+                : alignedPlane ? centerRows : fullDestinationHeight);
         }
+        var columnAxis = new PlaneAxis(firstCenterColumn, planeWidth, inverse.A < 0,
+            alignedPlane && planeWidth == centerColumns);
+        var rowAxis = new PlaneAxis(firstCenterRow, planeHeight, inverse.D < 0,
+            alignedPlane && planeHeight == centerRows);
         SpotInkSample[]? spotPlane = averagePlane && spotPalette is { Length: > 0 }
             && (spotPalette[0].ProcessInk is not null || target.HasRgbSpotShadow)
             ? new SpotInkSample[checked(planeWidth * planeHeight)] : null;
@@ -5821,7 +5844,7 @@ public sealed partial class PdfPageRenderer
             PaintReducedImageRows(target, targetWidth, targetHeight, scaleX, scaleY,
                 inverse, samples, rowBytes, sourceWidth, sourceHeight, components,
                 bits, decode, colorSpace, converterAreaColumns, converterAreaRows,
-                binaryColumns, planeWidth, planeHeight, pixelAlignedPlane,
+                binaryColumns, planeWidth, planeHeight, pixelAlignedPlane, columnAxis, rowAxis,
                 clips, rectangularClips, left, top, paintLeft, paintTop, paintRight,
                 paintBottom, cancellationToken);
             return;
@@ -5958,6 +5981,17 @@ public sealed partial class PdfPageRenderer
             double pageStepX = 1 / scaleX;
             double unitStepX = inverse.A * pageStepX;
             double unitStepY = inverse.B * pageStepX;
+            // One device row down moves the unit position by the inverse's second column.
+            double unitRowStepX = -inverse.C / scaleY, unitRowStepY = -inverse.D / scaleY;
+            // A reduced stencil that cannot use the averaged plane, because it is rotated or
+            // sheared, is supersampled per pixel so strokes one source sample wide are not
+            // skipped; stronger reductions take more samples. Magnified masks keep their
+            // crisp nearest lookup.
+            double stencilFootprint = Math.Max(
+                (Math.Abs(unitStepX) + Math.Abs(unitRowStepX)) * sourceWidth,
+                (Math.Abs(unitStepY) + Math.Abs(unitRowStepY)) * sourceHeight);
+            bool supersampleStencil = imageMask && alphaPlane is null && stencilFootprint > 1;
+            int stencilSamples = supersampleStencil ? Math.Clamp((int)Math.Ceiling(stencilFootprint), 4, 8) : 0;
             if (direct && (plane is not null || directDeviceSamples) && alphaPlane is null && matteConverter is null
                 && !colorSpace.NativeProcessMask.HasValue)
             {
@@ -5984,7 +6018,7 @@ public sealed partial class PdfPageRenderer
                         if (x < paintLeft) continue;
                         planeColumns[x - paintLeft] = unitX < 0 || unitX >= 1 ? -1
                             : pixelAlignedPlane ? x - left
-                            : Math.Min((int)(unitX * planeWidth), planeWidth - 1);
+                            : columnAxis.Cell(x, unitX);
                     }
                 }
                 ForEachRow(paintTop, paintBottom, (long)(paintRight - paintLeft) * (paintBottom - paintTop),
@@ -6000,7 +6034,7 @@ public sealed partial class PdfPageRenderer
                         {
                             if (unitY < 0 || unitY >= 1) continue;
                             int planeRow = (pixelAlignedPlane ? y - top
-                                : Math.Min((int)((1 - unitY) * planeHeight), planeHeight - 1)) * planeWidth;
+                                : rowAxis.Cell(y, 1 - unitY)) * planeWidth;
                             ReadOnlySpan<uint> planePixels = System.Runtime.InteropServices.MemoryMarshal
                                 .Cast<byte, uint>(planeData.AsSpan(0, planeWidth * planeHeight * 4));
                             Span<uint> targetPixels = System.Runtime.InteropServices.MemoryMarshal
@@ -6031,9 +6065,9 @@ public sealed partial class PdfPageRenderer
                             if (x < paintLeft) continue;
                             if (unitX < 0 || unitX >= 1 || unitY < 0 || unitY >= 1) continue;
                             int px = pixelAlignedPlane ? x - left
-                                : Math.Min((int)(unitX * planeWidth), planeWidth - 1);
+                                : columnAxis.Cell(x, unitX);
                             int py = pixelAlignedPlane ? y - top
-                                : Math.Min((int)((1 - unitY) * planeHeight), planeHeight - 1);
+                                : rowAxis.Cell(y, 1 - unitY);
                             int planeOffset = directDeviceSamples
                                 ? py * factor * rowBytes + px * factor * components
                                 : (py * planeWidth + px) * 4;
@@ -6102,8 +6136,8 @@ public sealed partial class PdfPageRenderer
                             {
                                 if (x < paintLeft) continue;
                                 if (unitX < 0 || unitX >= 1 || unitY < 0 || unitY >= 1) continue;
-                                int px = Math.Min((int)(unitX * planeWidth), planeWidth - 1);
-                                int py = Math.Min((int)((1 - unitY) * planeHeight), planeHeight - 1);
+                                int px = columnAxis.Cell(x, unitX);
+                                int py = rowAxis.Cell(y, 1 - unitY);
                                 if (!target.Contains(x, y)) continue;
                                 int targetOffset = target.Offset(x, y);
                                 int sourceOffset = Math.Min(py * factor, sourceHeight - 1) * rowBytes
@@ -6149,9 +6183,9 @@ public sealed partial class PdfPageRenderer
                         if (x < paintLeft) continue;
                         if (unitX < 0 || unitX >= 1 || unitY < 0 || unitY >= 1) continue;
                         int px = pixelAlignedPlane ? x - left
-                            : Math.Min((int)(unitX * planeWidth), planeWidth - 1);
+                            : columnAxis.Cell(x, unitX);
                         int py = pixelAlignedPlane ? y - top
-                            : Math.Min((int)((1 - unitY) * planeHeight), planeHeight - 1);
+                            : rowAxis.Cell(y, 1 - unitY);
                         int alpha;
                         Color color;
                         // Full clip coverage leaves the compositor's opacity at exactly one, so the
@@ -6213,6 +6247,25 @@ public sealed partial class PdfPageRenderer
                         {
                             if (alphaPlane is not null)
                                 alpha = alphaPlane[py * planeWidth + px];
+                            else if (supersampleStencil)
+                            {
+                                int painted = 0, count = stencilSamples;
+                                for (int sampleY = 0; sampleY < count; sampleY++)
+                                    for (int sampleX = 0; sampleX < count; sampleX++)
+                                    {
+                                        double offsetX = (sampleX + 0.5) / count - 0.5;
+                                        double offsetY = (sampleY + 0.5) / count - 0.5;
+                                        double u = unitX + offsetX * unitStepX + offsetY * unitRowStepX;
+                                        double v = unitY + offsetX * unitStepY + offsetY * unitRowStepY;
+                                        if (u < 0 || u >= 1 || v < 0 || v >= 1) continue;
+                                        int column = Math.Min((int)(u * sourceWidth), sourceWidth - 1);
+                                        int row = Math.Min((int)((1 - v) * sourceHeight), sourceHeight - 1);
+                                        bool sample = (samples[row * rowBytes + column / 8] & (0x80 >> (column & 7))) != 0;
+                                        if (sample == stencilPaintsOne) painted++;
+                                    }
+                                if (painted == 0) continue;
+                                alpha = (stencilCoverageByte * painted + count * count / 2) / (count * count);
+                            }
                             else
                             {
                                 int sx = Math.Min(px * factor, sourceWidth - 1);
