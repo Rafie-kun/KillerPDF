@@ -33,7 +33,7 @@ namespace KillerPDF.Services
         private static readonly string[] ChainIndic     = ["Nirmala UI"];
         private static readonly string[] ChainThai      = ["Leelawadee UI", "Tahoma"];
         private static readonly string[] ChainArabic    = ["Segoe UI", "Tahoma", "Traditional Arabic"];
-        private static readonly string[] ChainDefault   = ["Segoe UI", "Arial", "Tahoma"];
+        private static readonly string[] ChainDefault   = ["Segoe UI", "Arial", "Tahoma", "Segoe UI Symbol", "Segoe UI Emoji"];
 
         /// <summary>The family to draw <paramref name="text"/> with: the user's choice when it
         /// covers everything, otherwise the first family in the script's chain that does. Falls

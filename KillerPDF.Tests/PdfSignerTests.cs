@@ -1,5 +1,8 @@
 using System.IO;
+using System.Formats.Asn1;
+using System.Globalization;
 using System.Security.Cryptography;
+using System.Security.Cryptography.Pkcs;
 using System.Security.Cryptography.X509Certificates;
 using KillerPdf.Engine.Authoring;
 using KillerPdf.Engine.Documents;
@@ -11,6 +14,59 @@ namespace KillerPDF.Tests;
 
 public sealed class PdfSignerTests
 {
+    [Theory]
+    [InlineData("en-US")]
+    [InlineData("th-TH")]
+    [InlineData("ar-SA")]
+    public void Sign_BindsTheSigningCertificateInTheDeclaredCadesProfile(string culture)
+    {
+        using RSA key = RSA.Create(2048);
+        using X509Certificate2 certificate = new CertificateRequest("CN=KillerPDF Signature Binding Test", key,
+            HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1)
+            .CreateSelfSigned(DateTimeOffset.UtcNow.AddMinutes(-1), DateTimeOffset.UtcNow.AddDays(1));
+        string directory = Path.Combine(Path.GetTempPath(), $"killerpdf-sign-binding-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(directory);
+        CultureInfo previousCulture = CultureInfo.CurrentCulture;
+        try
+        {
+            CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo(culture);
+            string input = Path.Combine(directory, "input.pdf");
+            string output = Path.Combine(directory, "signed.pdf");
+            File.WriteAllBytes(input, new PdfDocumentBuilder().AddBlankPage().Build());
+            DateTimeOffset started = DateTimeOffset.UtcNow;
+            new PdfSigner().Sign(input, output, certificate, new PdfSigner.SignInfo("Approved", "", ""));
+
+            byte[] bytes = File.ReadAllBytes(output);
+            PdfSignatureInfo signature = Assert.Single(PdfSignatureReader.Read(PdfDocument.Open(bytes)));
+            Assert.Equal("ETSI.CAdES.detached", signature.SubFilter);
+            Assert.NotNull(signature.SigningTime);
+            Assert.InRange(signature.SigningTime.Value, started.AddSeconds(-1), DateTimeOffset.UtcNow.AddSeconds(1));
+            byte[] signedBytes = signature.ByteRange!.Chunk(2).SelectMany(range =>
+                bytes.AsSpan(checked((int)range[0]), checked((int)range[1])).ToArray()).ToArray();
+            var cms = new SignedCms(new ContentInfo(signedBytes), detached: true);
+            cms.Decode(signature.Cms.ToArray());
+            cms.CheckSignature(verifySignatureOnly: true);
+            SignerInfo signer = Assert.Single(cms.SignerInfos.Cast<SignerInfo>());
+            var attributes = signer.SignedAttributes.Cast<CryptographicAttributeObject>().ToArray();
+            Assert.Contains(attributes, item => item.Oid.Value == "1.2.840.113549.1.9.3");
+            Assert.Contains(attributes, item => item.Oid.Value == "1.2.840.113549.1.9.4");
+            CryptographicAttributeObject binding = Assert.Single(attributes,
+                item => item.Oid.Value == "1.2.840.113549.1.9.16.2.47");
+            AsnEncodedData encoded = Assert.Single(binding.Values.Cast<AsnEncodedData>());
+            AsnReader certificateId = new AsnReader(encoded.RawData, AsnEncodingRules.DER)
+                .ReadSequence().ReadSequence().ReadSequence();
+            if (certificateId.PeekTag().HasSameClassAndValue(Asn1Tag.Sequence))
+                Assert.Equal("2.16.840.1.101.3.4.2.1", certificateId.ReadSequence().ReadObjectIdentifier());
+            Assert.Equal(SHA256.HashData(certificate.RawData), certificateId.ReadOctetString());
+            Assert.DoesNotContain(attributes, item => item.Oid.Value == "1.2.840.113549.1.9.5");
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = previousCulture;
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]

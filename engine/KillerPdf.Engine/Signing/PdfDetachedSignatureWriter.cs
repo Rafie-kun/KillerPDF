@@ -8,6 +8,7 @@ using KillerPdf.Engine.Authoring;
 using KillerPdf.Engine.CrossReference;
 using KillerPdf.Engine.Objects;
 using KillerPdf.Engine.Security;
+using KillerPdf.Engine.Rendering;
 using KillerPdf.Engine.Writing;
 
 namespace KillerPdf.Engine.Signing;
@@ -73,6 +74,15 @@ public static class PdfDetachedSignatureWriter
         ArgumentNullException.ThrowIfNull(createDetachedCms);
         options ??= new PdfSignatureOptions();
         ValidateOptions(options);
+        PdfPageTree tree = PdfPageTree.Read(document);
+        bool finalizeAppearances = tree.Catalog.TryGetValue(AcroFormName, out PdfObject? appearanceFormValue)
+            && Resolve(document, appearanceFormValue) is PdfDictionary appearanceForm
+            && appearanceForm.TryGetValue(Name("NeedAppearances"), out PdfObject? requestedValue)
+            && Resolve(document, requestedValue) is PdfBoolean { Value: true };
+        if (finalizeAppearances
+            && (ReadCertificationPermission(document).HasValue || HasSignedSignatureField(document, tree)))
+            throw new InvalidOperationException(
+                "Form appearances must be finalized before adding another signature.");
         if (options.RequestTimestamp)
         {
             // The token covers the finished signature value, so it is requested after the CMS
@@ -84,7 +94,6 @@ public static class PdfDetachedSignatureWriter
                 signWithoutTimestamp(data), sendRequest);
         }
 
-        PdfPageTree tree = PdfPageTree.Read(document);
         ExistingFormField? existingField = FindField(document, tree, options.FieldName);
         if (existingField is not null)
         {
@@ -129,6 +138,7 @@ public static class PdfDetachedSignatureWriter
             ? null : ReadFieldMdpParameters(document, existingField);
 
         var update = new PdfIncrementalUpdateBuilder(document);
+        if (finalizeAppearances) new PdfPageRenderer(document).PersistRequestedFormAppearances(update);
         PdfIndirectReference? appearanceReference = options.VisibleAppearance is null
             ? null : update.AddObject(BuildVisibleAppearance(options.VisibleAppearance));
         PdfIndirectReference signatureReference = update.ReserveObject();
@@ -329,7 +339,8 @@ public static class PdfDetachedSignatureWriter
         PdfDictionary replacement = ReplaceMany(form, new Dictionary<PdfName, PdfObject>
         {
             [FieldsName] = new PdfArray(fields.Append(fieldReference)),
-            [SignatureFlagsName] = new PdfInteger(signatureFlags | 3)
+            [SignatureFlagsName] = new PdfInteger(signatureFlags | 3),
+            [Name("NeedAppearances")] = new PdfBoolean(false)
         });
         if (formReference is not null)
         {
@@ -1212,7 +1223,8 @@ public static class PdfDetachedSignatureWriter
                     "The AcroForm /SigFlags value is not a non-negative integer.");
         PdfDictionary replacement = ReplaceMany(form, new Dictionary<PdfName, PdfObject>
         {
-            [SignatureFlagsName] = new PdfInteger(flags | 3)
+            [SignatureFlagsName] = new PdfInteger(flags | 3),
+            [Name("NeedAppearances")] = new PdfBoolean(false)
         });
         if (formReference is not null)
         {
@@ -1435,7 +1447,8 @@ public static class PdfDetachedSignatureWriter
                     "The AcroForm /SigFlags value is not a non-negative integer.");
         return ReplaceMany(form, new Dictionary<PdfName, PdfObject>
         {
-            [SignatureFlagsName] = new PdfInteger(flags | 3)
+            [SignatureFlagsName] = new PdfInteger(flags | 3),
+            [Name("NeedAppearances")] = new PdfBoolean(false)
         });
     }
 
@@ -1863,7 +1876,8 @@ public static class PdfDetachedSignatureWriter
         TimeSpan offset = value.Offset;
         char sign = offset < TimeSpan.Zero ? '-' : '+';
         offset = offset.Duration();
-        return $"D:{value:yyyyMMddHHmmss}{sign}{offset.Hours:00}'{offset.Minutes:00}'";
+        return string.Create(CultureInfo.InvariantCulture,
+            $"D:{value:yyyyMMddHHmmss}{sign}{offset.Hours:00}'{offset.Minutes:00}'");
     }
     private static void AddOptionalText(
         List<(string Name, PdfObject Value)> entries, string name, string? value)

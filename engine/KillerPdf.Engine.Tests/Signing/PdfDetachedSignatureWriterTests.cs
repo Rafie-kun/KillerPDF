@@ -17,6 +17,76 @@ namespace KillerPdf.Engine.Tests.Signing;
 public sealed class PdfDetachedSignatureWriterTests
 {
     [Fact]
+    public void Sign_FinalizesRequestedAppearancesWithoutLosingPasswordAuthentication()
+    {
+        byte[] encrypted = new PdfDocumentBuilder().AddBlankPage()
+            .AddTextField(0, "customer", 20, 80, 120, 30, "ALPHA")
+            .AddSignatureField(0, "approval", 20, 20, 160, 40)
+            .SetPasswordEncryption(new PdfPasswordEncryptionOptions
+            {
+                UserPassword = "user", OwnerPassword = "owner", AllowFormFilling = true
+            }).Build();
+        PdfDocument original = PdfDocument.Open(encrypted, "user");
+        PdfDictionary catalog = ResolveDictionary(original, original.Trailer[Name("Root")]);
+        PdfDictionary form = Assert.IsType<PdfDictionary>(catalog[Name("AcroForm")]);
+        var update = new PdfIncrementalUpdateBuilder(original);
+        update.ReplaceObject(Assert.IsType<PdfIndirectReference>(original.Trailer[Name("Root")]).ObjectNumber,
+            new PdfDictionary(catalog.Where(entry => !entry.Key.Equals(Name("AcroForm")))
+                .Append(new KeyValuePair<PdfName, PdfObject>(Name("AcroForm"), new PdfDictionary(form
+                    .Where(entry => !entry.Key.Equals(Name("NeedAppearances")))
+                    .Append(new KeyValuePair<PdfName, PdfObject>(Name("NeedAppearances"), new PdfBoolean(true))))))));
+        byte[] input = update.Build();
+
+        byte[] output = PdfDetachedSignatureWriter.Sign(PdfDocument.Open(input, "user"), _ => [1],
+            new PdfSignatureOptions { FieldName = "approval", ReservedSignatureSize = 16 });
+
+        Assert.True(output.AsSpan().StartsWith(input));
+        PdfDocument signed = PdfDocument.Open(output, "user");
+        Assert.True(signed.IsEncrypted);
+        Assert.True(signed.IsDecrypted);
+        Assert.True(Assert.Single(PdfSignatureReader.Read(signed)).IsSigned);
+        Assert.Contains(PdfFormWidgetReader.ReadPage(signed, 0),
+            field => field.FieldName == "customer" && field.Value == "ALPHA");
+    }
+
+    [Theory]
+    [InlineData("new")]
+    [InlineData("indirect")]
+    [InlineData("direct")]
+    public void Sign_FreezesFormAppearancesBeforeSigning(string fieldKind)
+    {
+        var builder = new PdfDocumentBuilder().AddBlankPage()
+            .AddTextField(0, "customer", 20, 80, 120, 30, "ALPHA");
+        if (fieldKind == "indirect") builder.AddSignatureField(0, "approval", 20, 20, 160, 40);
+        PdfDocument original = PdfDocument.Open(fieldKind == "direct"
+            ? BuildDirectSignatureFieldDocument(false) : builder.Build());
+        PdfDictionary catalog = ResolveDictionary(original, original.Trailer[Name("Root")]);
+        PdfDictionary form = catalog[Name("AcroForm")] is PdfDictionary directForm
+            ? directForm : ResolveDictionary(original, catalog[Name("AcroForm")]);
+        var requested = new PdfDictionary(form.Where(entry => !entry.Key.Equals(Name("NeedAppearances")))
+            .Append(new KeyValuePair<PdfName, PdfObject>(Name("NeedAppearances"), new PdfBoolean(true))));
+        var update = new PdfIncrementalUpdateBuilder(original);
+        update.ReplaceObject(Assert.IsType<PdfIndirectReference>(original.Trailer[Name("Root")]).ObjectNumber,
+            new PdfDictionary(catalog.Where(entry => !entry.Key.Equals(Name("AcroForm")))
+                .Append(new KeyValuePair<PdfName, PdfObject>(Name("AcroForm"), requested))));
+        byte[] input = update.Build();
+
+        byte[] output = PdfDetachedSignatureWriter.Sign(PdfDocument.Open(input), _ => [1],
+            new PdfSignatureOptions { FieldName = fieldKind == "new" ? "Signature1" : "approval", ReservedSignatureSize = 16 });
+
+        Assert.True(output.AsSpan().StartsWith(input));
+        PdfDocument signed = PdfDocument.Open(output);
+        PdfDictionary signedCatalog = ResolveDictionary(signed, signed.Trailer[Name("Root")]);
+        PdfDictionary signedForm = signedCatalog[Name("AcroForm")] is PdfDictionary directSignedForm
+            ? directSignedForm : ResolveDictionary(signed, signedCatalog[Name("AcroForm")]);
+        Assert.False(Assert.IsType<PdfBoolean>(signedForm[Name("NeedAppearances")]).Value);
+        Assert.True(Assert.Single(PdfSignatureReader.Read(signed)).IsSigned);
+        if (fieldKind != "direct")
+            Assert.Contains(PdfFormWidgetReader.ReadPage(signed, 0),
+                field => field.FieldName == "customer" && field.Value == "ALPHA");
+    }
+
+    [Fact]
     public void Sign_AvailableFieldNamePreservesAnExistingFieldHierarchy()
     {
         PdfDocument source = PdfDocument.Open(new PdfDocumentBuilder().AddBlankPage()

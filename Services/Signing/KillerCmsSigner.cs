@@ -1,4 +1,5 @@
 using System;
+using System.Formats.Asn1;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Pkcs;
 using System.Security.Cryptography.X509Certificates;
@@ -26,6 +27,18 @@ namespace KillerPDF.Services.Signing
                 DigestAlgorithm = Sha256,
                 IncludeOption = X509IncludeOption.WholeChain,
             };
+
+            // RFC 5035 defaults ESSCertIDv2 to SHA-256 and binds the certificate as a signed attribute.
+            var binding = new AsnWriter(AsnEncodingRules.DER);
+            binding.PushSequence();
+            binding.PushSequence();
+            binding.PushSequence();
+            binding.WriteOctetString(SHA256.HashData(cert.RawData));
+            binding.PopSequence();
+            binding.PopSequence();
+            binding.PopSequence();
+            signer.SignedAttributes.Add(new AsnEncodedData(
+                new Oid("1.2.840.113549.1.9.16.2.47"), binding.Encode()));
 
             // Allow a token or cloud KSP to display its PIN or confirmation prompt when required.
             signedCms.ComputeSignature(signer, silent: false);

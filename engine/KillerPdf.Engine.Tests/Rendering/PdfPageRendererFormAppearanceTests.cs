@@ -3,6 +3,7 @@ using KillerPdf.Engine.Authoring;
 using KillerPdf.Engine.Documents;
 using KillerPdf.Engine.Objects;
 using KillerPdf.Engine.Rendering;
+using KillerPdf.Engine.Signing;
 using KillerPdf.Engine.Writing;
 using Xunit;
 
@@ -10,6 +11,39 @@ namespace KillerPdf.Engine.Tests.Rendering;
 
 public sealed class PdfPageRendererFormAppearanceTests
 {
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(true, true)]
+    public void SigningPreservesTheRequestedCurrentFieldAppearance(bool choice, bool missing)
+    {
+        PdfDocument source = Create(true, "BT /F1 10 Tf 3 3 Td (OLD) Tj ET", false, choice,
+            missingAppearance: missing);
+        var options = new PdfRenderOptions(120, 40);
+        byte[] expected = new PdfPageRenderer(source).Render(0, options).Pixels.ToArray();
+
+        PdfDocument signed = PdfDocument.Open(PdfDetachedSignatureWriter.Sign(source, _ => [1],
+            new PdfSignatureOptions { ReservedSignatureSize = 16 }));
+
+        Assert.Equal(expected, new PdfPageRenderer(signed).Render(0, options).Pixels.ToArray());
+    }
+
+    [Fact]
+    public void SigningRefusesAnUnsupportedRequestedAppearanceBeforeUsingTheKey()
+    {
+        PdfDocument source = Create(true, "BT /F1 10 Tf 3 3 Td (OLD) Tj ET", false, false,
+            defaultAppearance: "0 g /MissingFont 10 Tf");
+        byte[] original = PdfDocumentWriter.Write(source);
+        int calls = 0;
+
+        Assert.Throws<InvalidOperationException>(() => PdfDetachedSignatureWriter.Sign(source,
+            _ => { calls++; return [1]; }, new PdfSignatureOptions { ReservedSignatureSize = 16 }));
+
+        Assert.Equal(0, calls);
+        Assert.Equal(original, PdfDocumentWriter.Write(source));
+    }
+
     [Theory]
     [InlineData(false, false)]
     [InlineData(true, false)]

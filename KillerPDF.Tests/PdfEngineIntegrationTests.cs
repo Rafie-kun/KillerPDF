@@ -848,6 +848,7 @@ public sealed class PdfEngineIntegrationTests
     [InlineData("don’t")]
     [InlineData("a—b")]
     [InlineData("€50")]
+    [InlineData("A\U0001F600B")]
     [InlineData("日本")]
     public void ApplyFormValues_EmbedsFontForUnicodeTextValues(string value)
     {

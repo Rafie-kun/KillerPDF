@@ -2,11 +2,52 @@ using System.Text;
 using KillerPdf.Engine.Objects;
 using KillerPdf.Engine.Parsing;
 using KillerPdf.Engine.Syntax;
+using KillerPdf.Engine.Writing;
 
 namespace KillerPdf.Engine.Rendering;
 
 public sealed partial class PdfPageRenderer
 {
+    internal void PersistRequestedFormAppearances(PdfIncrementalUpdateBuilder update)
+    {
+        var visited = new HashSet<int>();
+        for (int pageIndex = 0; pageIndex < _tree.Pages.Count; pageIndex++)
+        {
+            PdfDictionary page = _tree.Pages[pageIndex].Dictionary;
+            if (!page.TryGetValue(Name("Annots"), out PdfObject? annotationsValue)
+                || Resolve(annotationsValue) is not PdfArray annotations) continue;
+            foreach (PdfObject annotationValue in annotations)
+            {
+                if (Resolve(annotationValue) is not PdfDictionary widget
+                    || !IsName(widget, "Subtype", "Widget")) continue;
+                PdfDictionary appearances = widget.TryGetValue(Name("AP"), out PdfObject? appearanceValue)
+                    && Resolve(appearanceValue) is PdfDictionary existing ? existing : new PdfDictionary([]);
+                PdfStream? saved = appearances.TryGetValue(Name("N"), out PdfObject? normalValue)
+                    ? Resolve(normalValue) as PdfStream : null;
+                var diagnostics = new HashSet<string>();
+                PdfStream? current = RequestedFieldAppearance(widget, saved, _pageResources[pageIndex],
+                    diagnostics, CancellationToken.None);
+                if (diagnostics.Any(message => message is not
+                    "A requested form-field text appearance was regenerated." and not
+                    "A supported plain-text form-field appearance was regenerated."))
+                    throw new InvalidOperationException(
+                        "Form appearances cannot be finalized safely before signing: " + string.Join(" ", diagnostics));
+                if (current is null || ReferenceEquals(current, saved)) continue;
+                if (annotationValue is not PdfIndirectReference reference)
+                    throw new InvalidOperationException(
+                        "A form widget requiring a new appearance must be an indirect object before signing.");
+                if (!visited.Add(reference.ObjectNumber)) continue;
+                PdfIndirectReference stream = update.AddObject(current);
+                var replacementAppearances = new PdfDictionary(appearances
+                    .Where(entry => !entry.Key.Equals(Name("N")))
+                    .Append(new KeyValuePair<PdfName, PdfObject>(Name("N"), stream)));
+                update.ReplaceObject(reference.ObjectNumber, new PdfDictionary(widget
+                    .Where(entry => !entry.Key.Equals(Name("AP")))
+                    .Append(new KeyValuePair<PdfName, PdfObject>(Name("AP"), replacementAppearances))));
+            }
+        }
+    }
+
     private PdfStream? RequestedFieldAppearance(PdfDictionary widget, PdfStream? saved,
         PdfDictionary pageResources, HashSet<string> diagnostics, CancellationToken cancellationToken)
     {

@@ -2,6 +2,8 @@ using System.Text.Json;
 using System.Xml.Linq;
 using KillerPDF;
 
+Console.OutputEncoding = new System.Text.UTF8Encoding(false);
+
 // Emits the app's shortcut data for the landing page without maintaining another binding table.
 if (args.Length is < 1 or > 2 || args.Length == 2 && args[1] != "--check")
     throw new ArgumentException("Usage: KillerPDF.ShortcutSite REPOSITORY [--check]");

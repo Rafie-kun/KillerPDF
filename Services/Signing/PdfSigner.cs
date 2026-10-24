@@ -41,6 +41,7 @@ namespace KillerPDF.Services.Signing
             {
                 FieldName = fieldName,
                 SignerName = cmsSigner.CertificateName,
+                SigningTime = DateTimeOffset.UtcNow,
                 Reason = NullIfWhiteSpace(info.Reason),
                 Location = NullIfWhiteSpace(info.Location),
                 ContactInformation = NullIfWhiteSpace(info.Contact),
