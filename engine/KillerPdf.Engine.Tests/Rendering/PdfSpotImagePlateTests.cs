@@ -189,6 +189,31 @@ public sealed class PdfSpotImagePlateTests
         Assert.InRange(Gray(Render(content, "MyBlue", 24, 16), 10, 8), 120, 136);
     }
 
+    // A spot image whose samples pass 256 MiB still paints its plate. Its spot samples were
+    // addressed by an int bit offset, which overflows past 2^31 bits, and the exception failed the
+    // whole page where the color plane, addressed by byte, had rendered (round L, BF-001). This one
+    // is 16384 by 8200 two-component 8-bit samples, 268.7 MB, compressed to a small stream. Its
+    // color key, which no sample matches, keeps the plane nearest-sampled, so only one sample per
+    // plane cell is read and the test stays quick; averaged planes read through the same address.
+    [Fact]
+    public void ASpotImageLargerThan256MiBPaintsItsPlate()
+    {
+        const int width = 16384, height = 8200;
+        var samples = new byte[(long)width * height * 2];
+        Array.Fill(samples, (byte)255);
+        using var compressed = new MemoryStream();
+        using (var zlib = new System.IO.Compression.ZLibStream(compressed, System.IO.Compression.CompressionLevel.Fastest, leaveOpen: true))
+            zlib.Write(samples);
+        samples = [];
+        PdfRenderedPage page = Render(Encoding.ASCII.GetBytes("q 16 0 0 8 0 0 cm /Im Do Q"), "CustomMagenta",
+            xObjects: update => [Entry("Im", update.AddObject(new PdfStream(new PdfDictionary([
+                Entry("Type", Name("XObject")), Entry("Subtype", Name("Image")), Entry("Width", new PdfInteger(width)),
+                Entry("Height", new PdfInteger(height)), Entry("BitsPerComponent", new PdfInteger(8)),
+                Entry("ColorSpace", Name("Mixed")), Entry("Mask", Numbers(0, 0, 0, 0)),
+                Entry("Filter", Name("FlateDecode"))]), compressed.ToArray())))]);
+        Assert.InRange(Gray(page, 4, 7), 0, 5);
+    }
+
     // A spot image painted at an opacity below 1 follows the same rule as a spot stencil: it knocks
     // the plates under it out by that opacity and keeps them. Its palette entries or samples named
     // their spot at any opacity, which sent each pixel to the path that clears every plate, so the

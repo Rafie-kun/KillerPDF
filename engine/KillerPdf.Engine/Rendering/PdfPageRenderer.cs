@@ -4369,6 +4369,25 @@ public sealed partial class PdfPageRenderer
         return value;
     }
 
+    // The same read at a bit offset past 2^31, which an image over 256 MiB of samples reaches.
+    private static uint ReadPackedSample(byte[] source, long bitOffset, int bits)
+    {
+        if (bitOffset <= int.MaxValue) return ReadPackedSample(source, (int)bitOffset, bits);
+        int bitInByte = (int)(bitOffset & 7);
+        long index = bitOffset >> 3;
+        if (bits > 0 && bits <= 8 && bitInByte + bits <= 8)
+            return (uint)(source[index] >> (8 - bits - bitInByte)) & ((1u << bits) - 1);
+        if (bits == 16 && bitInByte == 0)
+            return (uint)(source[index] << 8 | source[index + 1]);
+        uint value = 0;
+        for (int bit = 0; bit < bits; bit++)
+        {
+            long offset = bitOffset + bit;
+            value = (value << 1) | (uint)((source[offset >> 3] >> (7 - (int)(offset & 7))) & 1);
+        }
+        return value;
+    }
+
     private Func<double, Color> ReadStitchingFunction(
         PdfDictionary dictionary, ImageColorSpace colorSpace, string description)
     {
@@ -6484,7 +6503,7 @@ public sealed partial class PdfPageRenderer
                             if (imageSpotName is not null && factor == 1 && bits is > 0 and <= 16)
                             {
                                 double Sample(int column, int row) =>
-                                    ReadPackedSample(samples, checked(row * rowBytes * 8 + column * bits), bits);
+                                    ReadPackedSample(samples, (long)row * rowBytes * 8 + (long)column * bits, bits);
                                 double blended = (a00 * Sample(x0, y0) + a10 * Sample(x1, y0)
                                     + a01 * Sample(x0, y1) + a11 * Sample(x1, y1)) / total;
                                 smoothedSpotTint = decode[0] + blended / ((1 << bits) - 1) * (decode[1] - decode[0]);
@@ -6534,7 +6553,7 @@ public sealed partial class PdfPageRenderer
                         {
                             int sx = Math.Min(px, sourceWidth - 1);
                             int sy = Math.Min(py, sourceHeight - 1);
-                            int bitOffset = checked(sy * rowBytes * 8 + sx * bits);
+                            long bitOffset = (long)sy * rowBytes * 8 + (long)sx * bits;
                             int sample = checked((int)ReadPackedSample(samples, bitOffset, bits));
                             if (spotPalette is not null)
                             {
@@ -6709,8 +6728,8 @@ public sealed partial class PdfPageRenderer
             return color;
         }
 
-        private int Raw(int x, int y, int component) => checked((int)ReadPackedSample(_samples,
-            checked(y * _rowBytes * 8 + (x * _components + component) * _bits), _bits));
+        private int Raw(int x, int y, int component) => (int)ReadPackedSample(_samples,
+            (long)y * _rowBytes * 8 + ((long)x * _components + component) * _bits, _bits);
 
         /// <summary>The spot data of the one source sample a nearest-sampled cell holds.</summary>
         internal SpotInkSample At(int x, int y)
