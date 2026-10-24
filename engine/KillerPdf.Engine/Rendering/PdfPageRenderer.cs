@@ -6393,8 +6393,10 @@ public sealed partial class PdfPageRenderer
                             // Bilinear between the four nearest converted samples. Colors weight
                             // by alpha and soft mask, so a sample the mask hides cannot tint the
                             // visible edge; the mask itself is interpolated above.
-                            double sampleX = Math.Clamp(unitX * planeWidth - 0.5, 0, planeWidth - 1d);
-                            double sampleY = Math.Clamp((1 - unitY) * planeHeight - 0.5, 0, planeHeight - 1d);
+                            // A plane reduced to fit holds every factor-th sample, so cell c sits at
+                            // source sample c * factor rather than at an even share of the image.
+                            double sampleX = Math.Clamp((unitX * sourceWidth - 0.5) / factor, 0, planeWidth - 1d);
+                            double sampleY = Math.Clamp(((1 - unitY) * sourceHeight - 0.5) / factor, 0, planeHeight - 1d);
                             int x0 = (int)sampleX, y0 = (int)sampleY;
                             int x1 = Math.Min(x0 + 1, planeWidth - 1), y1 = Math.Min(y0 + 1, planeHeight - 1);
                             double wx = sampleX - x0, wy = sampleY - y0;
@@ -6410,9 +6412,10 @@ public sealed partial class PdfPageRenderer
                             alpha = nativeImageSamples ? 255 : (int)Math.Round(total);
                             if (softMask is not null)
                             {
+                                // Each cell weighs by the mask where its own source sample lies.
                                 double Masked(double weight, int column, int row) => weight * softMask.Sample(
-                                    Math.Min((int)((column + 0.5) / planeWidth * softMask.Width), softMask.Width - 1),
-                                    Math.Min((int)((row + 0.5) / planeHeight * softMask.Height), softMask.Height - 1));
+                                    Math.Min((int)((Math.Min(column * factor, sourceWidth - 1) + 0.5) / sourceWidth * softMask.Width), softMask.Width - 1),
+                                    Math.Min((int)((Math.Min(row * factor, sourceHeight - 1) + 0.5) / sourceHeight * softMask.Height), softMask.Height - 1));
                                 double m00 = Masked(a00, x0, y0), m10 = Masked(a10, x1, y0);
                                 double m01 = Masked(a01, x0, y1), m11 = Masked(a11, x1, y1);
                                 // A finer mask can show a pixel whose four samples it hides;

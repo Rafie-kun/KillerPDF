@@ -145,6 +145,46 @@ public sealed class PdfImageSmoothingTests
         Assert.True(ramp >= 16, $"Only {ramp} of 160 pixels lie between the bands: the image was not smoothed.");
     }
 
+    // A large image with a soft mask is smoothed from a plane holding every second sample. Each
+    // cell must be placed at the sample it holds, and weighted by that sample's own mask value,
+    // or the hidden black half of this image bleeds into the visible white half as a dark fringe
+    // (round J, JF-004). Everything drawn here is white over the white page.
+    [Theory]
+    [InlineData(1)]
+    [InlineData(4)]
+    public void LargeMaskedImageSmoothedFromAStridedPlaneShowsNoHiddenColor(int components)
+    {
+        const int width = 2050, height = 2000;
+        byte Black(int channel) => components == 1 ? (byte)0 : channel == 3 ? (byte)255 : (byte)0;
+        byte White(int channel) => components == 1 ? (byte)255 : (byte)0;
+        byte[] row = [.. Enumerable.Range(0, width * components).Select(index =>
+            index / components < width / 2 ? Black(index % components) : White(index % components))];
+        byte[] maskRow = [.. Enumerable.Range(0, width).Select(x => x < width / 2 ? (byte)0 : (byte)255)];
+        PdfDocument document = PdfDocument.Open(new PdfDocumentBuilder()
+            .AddPage(width, height, Encoding.ASCII.GetBytes($"q {width} 0 0 {height} 0 0 cm /Im Do Q")).Build());
+        PdfPageTreeEntry page = PdfPageTree.Read(document).Pages[0];
+        var original = Assert.IsType<PdfDictionary>(document.Resolve(page.Reference));
+        var update = new PdfIncrementalUpdateBuilder(document);
+        var mask = update.AddObject(new PdfStream(new PdfDictionary([
+            new(Name("Subtype"), Name("Image")), new(Name("Width"), new PdfInteger(width)), new(Name("Height"), new PdfInteger(height)),
+            new(Name("BitsPerComponent"), new PdfInteger(8)), new(Name("ColorSpace"), Name("DeviceGray"))]),
+            Enumerable.Repeat(maskRow, height).SelectMany(bytes => bytes).ToArray()));
+        var image = update.AddObject(new PdfStream(new PdfDictionary([
+            new(Name("Subtype"), Name("Image")), new(Name("Width"), new PdfInteger(width)), new(Name("Height"), new PdfInteger(height)),
+            new(Name("BitsPerComponent"), new PdfInteger(8)), new(Name("ColorSpace"), Name(components == 1 ? "DeviceGray" : "DeviceCMYK")),
+            new(Name("SMask"), mask)]), Enumerable.Repeat(row, height).SelectMany(bytes => bytes).ToArray()));
+        update.ReplaceObject(page.Reference.ObjectNumber, new PdfDictionary(original
+            .Where(entry => !entry.Key.Equals(Name("Resources")) && !entry.Key.Equals(Name("Group")))
+            .Append(new(Name("Resources"), new PdfDictionary([new(Name("XObject"), new PdfDictionary([new(Name("Im"), image)]))])))
+            .Append(new(Name("Group"), new PdfDictionary([
+                new(Name("S"), Name("Transparency")), new(Name("CS"), Name("DeviceCMYK"))])))));
+        PdfRenderedPage region = new PdfPageRenderer(PdfDocument.Open(update.Build())).RenderRegion(0,
+            new PdfRenderOptions(2 * width, 2 * height, includeAnnotations: false, includeFormFields: false), 2030, 1000, 40, 2);
+        for (int index = 0; index < region.Pixels.Length; index += 4)
+            Assert.True(region.Pixels.Span[index] >= 240,
+                $"Pixel {2030 + index / 4 % 40} is {region.Pixels.Span[index]}: the hidden black bled in.");
+    }
+
     // A smoothed Separation image on a CMYK page must ramp its spot plate with its ink. The plate
     // took its tint from the nearest sample, so a pixel whose nearest sample was blank cleared it
     // and the ramp was cut on that side (round H, HF-004).
