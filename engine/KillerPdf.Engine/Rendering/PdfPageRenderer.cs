@@ -5848,6 +5848,10 @@ public sealed partial class PdfPageRenderer
         int firstCenterRow = (int)Math.Ceiling(exactTop - 0.5 + onEdge);
         int centerColumns = (int)Math.Floor(exactRight - 0.5 - onEdge) - firstCenterColumn + 1;
         int centerRows = (int)Math.Floor(exactBottom - 0.5 - onEdge) - firstCenterRow + 1;
+        // An image one pixel across with both edges on pixel centers keeps one cell, the whole
+        // source: the paint loops draw one of those two pixels, and it reads that cell.
+        if (centerColumns < 1 && Math.Floor(exactRight - 0.5) >= Math.Ceiling(exactLeft - 0.5)) centerColumns = 1;
+        if (centerRows < 1 && Math.Floor(exactBottom - 0.5) >= Math.Ceiling(exactTop - 0.5)) centerRows = 1;
         bool alignedPlane = !pixelAlignedPlane && (averagePlane || averageStencil)
             && inverse.B == 0 && inverse.C == 0 && centerColumns >= 1 && centerRows >= 1;
         if (averagePlane || averageStencil)

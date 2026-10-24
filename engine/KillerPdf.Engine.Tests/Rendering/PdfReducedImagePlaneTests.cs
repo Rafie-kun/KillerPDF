@@ -198,6 +198,34 @@ public sealed class PdfReducedImagePlaneTests
             $"The edge ink vanished: pixel {x0},{y0} is {page.Pixels.Span[(y0 * 120 + x0) * 4]}.");
     }
 
+    // An image exactly one pixel wide with both edges on pixel centers: one of the two pixels is
+    // painted, and it must hold the whole width. Leaving out both on-edge centers left no cell, so
+    // the plane fell back to the even split on both axes and lost content (round I, IF-003).
+    [Theory]
+    [InlineData("/BPC 1 /CS /G", true)]
+    [InlineData("/BPC 1 /CS /G", false)]
+    [InlineData("/IM true", true)]
+    [InlineData("/IM true", false)]
+    public void AnImageOnePixelWideBetweenPixelCentersKeepsItsContent(string header, bool rightHalf)
+    {
+        // 400 by 40 samples drawn over x 10.5 to 11.5 and rows 5.5 to 15.5: ink only in the right
+        // half of the columns, or only in the top three rows.
+        var samples = new byte[50 * 40];
+        Array.Fill(samples, (byte)0xFF);
+        for (int y = 0; y < 40; y++)
+        for (int x = 0; x < 400; x++)
+            if (rightHalf ? x >= 200 : y < 3) samples[y * 50 + x / 8] &= (byte)~(0x80 >> (x % 8));
+        byte[] content = [.. Encoding.ASCII.GetBytes($"0 g q 1 0 0 10 10.5 4.5 cm BI /W 400 /H 40 {header} ID "),
+            .. samples, .. Encoding.ASCII.GetBytes("\nEI Q")];
+        PdfRenderedPage page = new PdfPageRenderer(PdfDocument.Open(new PdfDocumentBuilder().AddPage(120, 20, content).Build()))
+            .Render(0, new PdfRenderOptions(120, 20, includeAnnotations: false, includeFormFields: false));
+        // Pixel 10's center is the image's left edge (unit 0, painted); pixel 11's is its right
+        // edge (unit 1, skipped). Row 6 is the first painted row.
+        (int x0, int y0) = rightHalf ? (10, 10) : (10, 6);
+        Assert.True(page.Pixels.Span[(y0 * 120 + x0) * 4] < 230,
+            $"The ink vanished: pixel {x0},{y0} is {page.Pixels.Span[(y0 * 120 + x0) * 4]}.");
+    }
+
     // A 1-bit gray image where 1 is white: all white except one black column.
     private static byte[] ScanWithColumn(int column)
     {
