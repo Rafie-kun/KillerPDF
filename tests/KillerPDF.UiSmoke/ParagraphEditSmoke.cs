@@ -294,9 +294,12 @@ internal static class ParagraphEditSmoke
         Click(Children(host).OfType<Button>().Single()); Pump();
         string label = (string)Application.Current.FindResource(key);
         Children(host).OfType<TextBox>().Single().Text = label; Pump();
-        Border row = PresentationSource.CurrentSources.Cast<PresentationSource>().Select(source => source.RootVisual)
-            .OfType<DependencyObject>().SelectMany(Children).OfType<Border>().Single(border =>
-                AutomationProperties.GetName(border) == label + " (" + shortcut + ")");
+        // The results drop down once the search box has finished growing, so wait for the row.
+        Border[] Rows() => [.. PresentationSource.CurrentSources.Cast<PresentationSource>().Select(source => source.RootVisual)
+            .OfType<DependencyObject>().SelectMany(Children).OfType<Border>().Where(border =>
+                AutomationProperties.GetName(border) == label + " (" + shortcut + ")")];
+        Wait(() => Rows().Length != 0);
+        Border row = Rows().Single();
         row.RaiseEvent(new MouseButtonEventArgs(Mouse.PrimaryDevice, Environment.TickCount, MouseButton.Left)
             { RoutedEvent = UIElement.MouseLeftButtonUpEvent }); Pump();
     }

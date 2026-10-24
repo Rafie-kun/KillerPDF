@@ -607,9 +607,12 @@ internal static class AccessibilityReviewSmoke
         Click(Children(host).OfType<Button>().Single()); Pump();
         string label = (string)Application.Current.FindResource("Str_DocumentTools_Accessibility");
         Children(host).OfType<TextBox>().Single().Text = label; Pump();
-        Border row = PresentationSource.CurrentSources.Cast<PresentationSource>().Select(source => source.RootVisual)
-            .OfType<DependencyObject>().SelectMany(Children).OfType<Border>().Single(border =>
-                AutomationProperties.GetName(border) == label || AutomationProperties.GetName(border).StartsWith(label + " (", StringComparison.Ordinal));
+        // The results drop down once the search box has finished growing, so wait for the row.
+        Border[] Rows() => [.. PresentationSource.CurrentSources.Cast<PresentationSource>().Select(source => source.RootVisual)
+            .OfType<DependencyObject>().SelectMany(Children).OfType<Border>().Where(border =>
+                AutomationProperties.GetName(border) == label || AutomationProperties.GetName(border).StartsWith(label + " (", StringComparison.Ordinal))];
+        Wait(() => Rows().Length != 0, "showing the search result");
+        Border row = Rows().Single();
         row.RaiseEvent(new MouseButtonEventArgs(Mouse.PrimaryDevice, Environment.TickCount, MouseButton.Left)
             { RoutedEvent = UIElement.MouseLeftButtonUpEvent }); Pump();
     }

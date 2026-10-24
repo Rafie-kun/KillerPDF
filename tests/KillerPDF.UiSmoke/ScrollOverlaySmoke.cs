@@ -377,7 +377,7 @@ internal static class ScrollOverlaySmoke
         {
             panelField.SetValue(window, Enum.Parse(panelField.FieldType, panelName));
             var menu = new ContextMenu();
-            type.GetMethod("FillSidebarPanelMenu", Members)!.Invoke(window, [menu, null]);
+            type.GetMethod("FillSidebarPanelMenu", Members)!.Invoke(window, [menu, null, null]);
             string[] headers = menu.Items.OfType<MenuItem>().Select(item => item.Header.ToString()!).ToArray();
             string[] expected = keys.Select(key => (string)window.FindResource(key)).ToArray();
             if (!headers.SequenceEqual(expected))

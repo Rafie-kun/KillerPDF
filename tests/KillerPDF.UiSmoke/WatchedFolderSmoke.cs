@@ -291,7 +291,7 @@ internal static class WatchedFolderSmoke
     {
         TextBox field = Find<TextBox>(dialog, fieldId);
         string previous = field.Text;
-        bool answered = false;
+        bool answered = false, navigated = false;
         Exception? failure = null;
         var clock = Stopwatch.StartNew();
         var timer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(25) };
@@ -299,13 +299,23 @@ internal static class WatchedFolderSmoke
         {
             try
             {
-                if (clock.Elapsed > TimeSpan.FromSeconds(20)) throw new TimeoutException("The folder picker did not open.");
+                if (clock.Elapsed > TimeSpan.FromSeconds(20))
+                    throw new TimeoutException(navigated ? "The folder picker did not list the folder." : "The folder picker did not open.");
                 Window? picker = app.Windows.Cast<Window>().FirstOrDefault(window => window.GetType().FullName == "KillerPDF.Controls.FileDialog" && window.IsVisible);
                 if (picker is null || !picker.IsLoaded) return;
                 TextBox path = (TextBox)picker.FindName("PathBox");
-                path.Text = target;
-                path.RaiseEvent(new KeyEventArgs(Keyboard.PrimaryDevice, PresentationSource.FromVisual(picker), Environment.TickCount, Key.Enter)
-                    { RoutedEvent = Keyboard.KeyDownEvent });
+                if (!navigated)
+                {
+                    path.Text = target;
+                    path.RaiseEvent(new KeyEventArgs(Keyboard.PrimaryDevice, PresentationSource.FromVisual(picker), Environment.TickCount, Key.Enter)
+                        { RoutedEvent = Keyboard.KeyDownEvent });
+                    navigated = true;
+                    return;
+                }
+                // The folder is listed off the UI thread, and OK does nothing until it has been.
+                Type pickerType = picker.GetType();
+                if ((bool)pickerType.GetProperty("IsDirectoryListingBusy")!.GetValue(picker)!
+                    || !(bool)pickerType.GetProperty("IsDirectoryListingAvailable")!.GetValue(picker)!) return;
                 picker.UpdateLayout();
                 Capture(picker, Path.Combine(evidence, fieldId + (accept ? "-picker-accept.png" : "-picker-cancel.png")));
                 Button button = accept ? (Button)picker.FindName("AcceptButton")

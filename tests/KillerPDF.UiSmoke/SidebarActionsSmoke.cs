@@ -95,9 +95,17 @@ internal static class SidebarActionsSmoke
         Children(host).OfType<Button>().Single().RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); Pump();
         string label = (string)Application.Current.FindResource(key);
         Children(host).OfType<TextBox>().Single().Text = label; Pump();
-        Border row = PresentationSource.CurrentSources.Cast<PresentationSource>().Select(source => source.RootVisual)
-            .OfType<DependencyObject>().SelectMany(Children).OfType<Border>().Single(border =>
-                AutomationProperties.GetName(border) == label + " (" + shortcut + ")");
+        // The results drop down once the search box has finished growing, so wait for the row.
+        Border[] Rows() => [.. PresentationSource.CurrentSources.Cast<PresentationSource>().Select(source => source.RootVisual)
+            .OfType<DependencyObject>().SelectMany(Children).OfType<Border>().Where(border =>
+                AutomationProperties.GetName(border) == label + " (" + shortcut + ")")];
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        while (Rows().Length == 0)
+        {
+            if (watch.Elapsed.TotalSeconds > 10) throw new TimeoutException("The search result did not appear: " + label);
+            Pump(); Thread.Sleep(10);
+        }
+        Border row = Rows().Single();
         row.RaiseEvent(new MouseButtonEventArgs(Mouse.PrimaryDevice, Environment.TickCount, MouseButton.Left)
             { RoutedEvent = UIElement.MouseLeftButtonUpEvent }); Pump();
     }

@@ -109,19 +109,25 @@ internal static class RenderRecoverySmoke
             || directory.Parent.Parent?.Name.StartsWith("KillerPDF-startup-smoke-", StringComparison.Ordinal) != true
             || !Path.GetFullPath(temp).StartsWith(Path.GetFullPath(Path.GetTempPath()), StringComparison.OrdinalIgnoreCase))
             throw new InvalidOperationException("The failure fixture is outside the isolated smoke directory.");
-        DirectorySecurity original = directory.GetAccessControl(AccessControlSections.Access);
-        var denied = new DirectorySecurity();
-        denied.SetSecurityDescriptorBinaryForm(original.GetSecurityDescriptorBinaryForm());
-        denied.AddAccessRule(new FileSystemAccessRule(WindowsIdentity.GetCurrent().User!, FileSystemRights.CreateFiles,
-            InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+        // Only the access list changes: rewriting the whole descriptor would also write the audit
+        // list, which needs a privilege a standard user does not hold, and an unmodified copy
+        // persists nothing, so the rule is removed from the same object afterwards.
+        DirectorySecurity security = directory.GetAccessControl(AccessControlSections.Access);
+        var deny = new FileSystemAccessRule(WindowsIdentity.GetCurrent().User!, FileSystemRights.CreateFiles,
+            InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny);
+        security.AddAccessRule(deny);
         string? manifest;
         try
         {
-            directory.SetAccessControl(denied);
+            directory.SetAccessControl(security);
             manifest = (string?)owner.GetType().GetMethod("PrepareRenderFailureRecovery", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!
                 .Invoke(owner, null);
         }
-        finally { directory.SetAccessControl(original); }
+        finally
+        {
+            security.RemoveAccessRuleSpecific(deny);
+            directory.SetAccessControl(security);
+        }
         if (manifest is null) throw new InvalidOperationException("Failed save discarded the document instead of reporting incomplete recovery.");
         using JsonDocument recovery = JsonDocument.Parse(File.ReadAllBytes(manifest));
         JsonElement record = recovery.RootElement.EnumerateArray()

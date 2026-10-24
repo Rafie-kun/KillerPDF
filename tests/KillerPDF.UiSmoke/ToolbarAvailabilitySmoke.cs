@@ -194,8 +194,18 @@ internal static class ToolbarAvailabilitySmoke
         if (body.GetBoundingRectangles().Length != 0)
             throw new InvalidOperationException("Scrolled-out text still has screen rectangles.");
         scroll.ScrollToTop(); owner.UpdateLayout(); Pump();
-        if (!text.GetVisibleRanges().Any(range => range.GetText(-1).Contains("BODY", StringComparison.Ordinal)))
-            throw new InvalidOperationException("GetVisibleRanges omitted the visible body line.");
+        // The page comes back into view once the viewer has caught up with the scroll, which on a
+        // slow machine can take longer than one idle pass.
+        var settle = Stopwatch.StartNew();
+        while (!text.GetVisibleRanges().Any(range => range.GetText(-1).Contains("BODY", StringComparison.Ordinal)))
+        {
+            if (settle.Elapsed.TotalSeconds > 10)
+                throw new InvalidOperationException("GetVisibleRanges omitted the visible body line. Offset "
+                    + scroll.VerticalOffset.ToString(CultureInfo.InvariantCulture) + " of "
+                    + scroll.ScrollableHeight.ToString(CultureInfo.InvariantCulture) + ", ranges: ["
+                    + string.Join(" | ", text.GetVisibleRanges().Select(range => range.GetText(80))) + "]");
+            Pump(); Thread.Sleep(10);
+        }
         owner.Height = oldHeight;
         Close(owner);
         Console.WriteLine("PASS reading provider refresh after same-count replacement, Undo and Redo.");

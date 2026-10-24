@@ -418,8 +418,11 @@ internal static class GuidedTasksSmoke
         FrameworkElement search = (FrameworkElement)owner.FindName("ToolSearchHost");
         Click(Children(search).OfType<Button>().Single()); Pump();
         Children(search).OfType<TextBox>().Single().Text = label; Pump();
-        Border row = PresentationSource.CurrentSources.Cast<PresentationSource>().Select(source => source.RootVisual).OfType<DependencyObject>().SelectMany(Children).OfType<Border>()
-            .Single(border => AutomationProperties.GetName(border) == label || AutomationProperties.GetName(border).StartsWith(label + " (", StringComparison.Ordinal));
+        // The results drop down once the search box has finished growing, so wait for the row.
+        Border[] Rows() => [.. PresentationSource.CurrentSources.Cast<PresentationSource>().Select(source => source.RootVisual).OfType<DependencyObject>().SelectMany(Children).OfType<Border>()
+            .Where(border => AutomationProperties.GetName(border) == label || AutomationProperties.GetName(border).StartsWith(label + " (", StringComparison.Ordinal))];
+        Wait(() => Rows().Length != 0, "search result");
+        Border row = Rows().Single();
         bool done = false; Exception? failure = null;
         var timer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(20) };
         timer.Tick += (_, _) =>
