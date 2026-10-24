@@ -34,9 +34,8 @@ Twenty-three pages. Most are cases where 1.9 follows the file or the test's own 
 
 ## Owner decisions, 2026-10-23
 
-- Image smoothing (d1d2ee6, refined in 7e16e97 and 52c32c4). Enlarged continuous-tone images are smoothed as 1.8 shows them, from about 1.5 times enlargement, and an explicit /Interpolate true is always honored. 1-bit images and image masks stay crisp. Measured cost on the difficult set: +3.4% in total render time (11,397 to 11,785 ms mean of three runs), concentrated on pages with enlarged images (+35 to 80 ms each).
+- Image smoothing (d1d2ee6, refined in 7e16e97 and 52c32c4, threshold revised in 21676b2). Enlarged continuous-tone images are smoothed as 1.8 shows them, from any enlargement, and an explicit /Interpolate true is always honored. The first decision started smoothing at about 1.5 times; Steve revised it the same day to match 1.8, because three difficult-set images enlarged 1.24 to 1.4 times looked jagged where both oracles smooth them. 1-bit images and image masks stay crisp. Measured cost on the difficult set: +3.4% in total render time (11,397 to 11,785 ms mean of three runs), concentrated on pages with enlarged images (+35 to 80 ms each).
   - Like 1.8 (PDFium) and Poppler, smoothing stops once an image covers about eight device pixels per sample. 1.8 uses bilinear only while `dest_height / 8 < src_width * src_height / dest_width`; Poppler stops at four times on either axis. The first smoothing build smoothed without that limit and turned pdf.js issue11124, a 4 by 4 swatch filling the page, into a wash. It now stays crisp (52c32c4).
-  - UMURF p3's photo is enlarged 1.38 times, under the 1.5 threshold, so it keeps sample replication where both oracles smooth. This follows the decision and stays an accepted difference.
 - Thin rules (7117c1f): a filled rectangle thinner than a pixel draws at least one solid pixel wide.
 
 ## Regressions found by the rerun, fixed
@@ -56,7 +55,11 @@ Pages whose pixels changed since the reviewed renders were checked again: 28 dif
 - The soft-mask pages (GWG1610, GWG168) show no edge fringe.
 - 382252, 4387ba and GWG130 p1 and p2 change by under 0.7% of pixels, with no visible difference.
 
-Every one of the 76 pages keeps its review verdict, except the defects, which are fixed, and 210260 p1, now equivalent. 495712 p1 and p2 and UMURF p3 stay accepted differences: their images are enlarged 1.24 to 1.4 times, under the 1.5 threshold, so 1.9 keeps sample replication where both oracles smooth.
+Every one of the 76 pages keeps its review verdict, except the defects, which are fixed, and 210260 p1, now equivalent.
+
+At 21676b2, with smoothing from any enlargement, 495712 p1 (the swoosh logo, 1.4 times) and p2 (the fleur-de-lis photo, 1.24 times) and UMURF p3 (the race-car photo, 1.38 times) are smoothed as PDFium smooths them; a before, after and PDFium crop of each is in `C:/Users/steve/scratch/kp-bench-render/a3-20261023-21676b2/`. They move from accepted difference to equivalent, and every score that changed moved toward the oracles. They stay strict outliers on glyph and photo edges, as the review found for the rest of each page. emi15514 p1 and p2 also change, with unchanged scores. 44 strict outliers, none missing.
+
+With all five smoothing pages now equivalent (210260 p1 and UMURF p1 since 4d82d0c, these three since 21676b2), the 76 pages stand at 53 equivalent, 18 accepted differences and 5 defects fixed.
 
 The interim runs at d1d2ee6 and 52c32c4 found the GWG169 fringe and, through A2, the issue11124 wash; both are fixed above.
 
