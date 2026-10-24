@@ -437,8 +437,8 @@ internal static class AccessibilityReviewSmoke
             else if (mode == "source-changed")
             {
                 // KillerPDF reviews its own complete copy of the document, so another program
-                // changing the user's file meanwhile does not make the review stale. The fix still
-                // applies, and the outside change survives, since saving over it asks first.
+                // changing the user's file meanwhile does not make the review stale. The fix applies
+                // to KillerPDF's copy and leaves the user's file as the other program wrote it.
                 if (!File.ReadAllBytes(source).AsSpan().SequenceEqual(original)) throw new InvalidOperationException("Owned stale-source fixture changed unexpectedly.");
                 expectedSource = original.Concat(Encoding.ASCII.GetBytes("\n% owned external change\n")).ToArray();
                 File.WriteAllBytes(source, expectedSource);

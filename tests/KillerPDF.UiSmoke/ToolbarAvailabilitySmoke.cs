@@ -36,10 +36,11 @@ internal static class ToolbarAvailabilitySmoke
         History(owner, undo: false, redo: false, clear: false);
         var pages = (ListBox)owner.FindName("PageList");
         // Opening finishes in the background and can select the current page again, so clear the
-        // selection until it stays clear.
+        // selection until it stays clear for a moment.
         var unselect = Stopwatch.StartNew();
-        do { pages.UnselectAll(); Pump(); Thread.Sleep(50); Pump(); }
+        do { pages.UnselectAll(); Pump(); Thread.Sleep(200); Pump(); }
         while (pages.SelectedItems.Count != 0 && unselect.Elapsed.TotalSeconds < 10);
+        if (pages.SelectedItems.Count != 0) throw new InvalidOperationException("The page selection would not stay clear after opening.");
         Enabled(owner, false, "ExtractPagesBtn", "DeletePagesBtn", "MovePageUpBtn", "MovePageDownBtn");
         pages.SelectedIndex = 0; Pump();
         Enabled(owner, true, "ExtractPagesBtn", "DeletePagesBtn", "MovePageDownBtn");

@@ -26,7 +26,7 @@ internal static class SidebarActionsSmoke
         CloseMenus();
         if (original != "on" || !Equals(pages.Tag, "on")) throw new InvalidOperationException("Pages click closed its panel.");
         if (positions != 4) throw new InvalidOperationException("Pages click did not offer the four sidebar positions.");
-        foreach (string buttonName in new[] { "SidebarCommentsTab", "SidebarSignaturesTab", "SplitPaneRailBtn" })
+        foreach (string buttonName in new[] { "SidebarPagesTab", "SidebarCommentsTab", "SidebarSignaturesTab", "SplitPaneRailBtn" })
         {
             Button button = Find(buttonName);
             button.RaiseEvent(new MouseButtonEventArgs(Mouse.PrimaryDevice, Environment.TickCount, MouseButton.Right)
@@ -48,6 +48,8 @@ internal static class SidebarActionsSmoke
                 if (buttonName == "SidebarSignaturesTab" && !menu.Items.OfType<MenuItem>().Any(item =>
                     Equals(item.Header, Application.Current.FindResource("Str_Lbl_DigitalSig")) && item.InputGestureText == "Ctrl+Shift+G"))
                     throw new InvalidOperationException("Signatures rail menu lacks signing and its shortcut.");
+                if (buttonName == "SidebarPagesTab" && menu.Items.OfType<MenuItem>().Count(item => item.IsCheckable) != 4)
+                    throw new InvalidOperationException("Pages rail menu lacks the four sidebar positions.");
             }
             finally { CloseMenus(); }
         }

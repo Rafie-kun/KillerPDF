@@ -44,9 +44,18 @@ public sealed class VisibleTextGeometryTests
     public void AViewportEdgeSplitsTheLine()
     {
         // Characters start at canvas x 208 (screen 316) and step 38 canvas units (15 pixels).
+        // The fourth starts at screen x 361 and the fifth at 376, so the edge at 363 keeps four.
         var carets = VisibleTextGeometry.VisibleCarets(BodyLine(), CanvasWidth, CanvasHeight, 0, ToScreen, new Rect(33, 89, 330, 358));
-        Assert.Single(carets);
-        Assert.Equal(0, carets[0].Start);
-        Assert.InRange(carets[0].End, 1, 15);
+        Assert.Equal(new[] { (0, 4) }, carets);
+    }
+
+    [Fact]
+    public void AQuarterTurnedPageMapsTheLineToItsTurnedPlace()
+    {
+        // Turned a quarter, the 200 by 300 page lies on a 2048 by 1365 canvas with its top edge on
+        // the right, so the line near the top runs down the right side: screen x 901 to 925, y 182
+        // to 419. Unturned it would sit at x 316 to 553, y 211 to 235, inside the second viewport.
+        Assert.Equal(new[] { (0, 16) }, VisibleTextGeometry.VisibleCarets(BodyLine(), CanvasHeight, CanvasWidth, 90, ToScreen, new Rect(880, 150, 60, 300)));
+        Assert.Empty(VisibleTextGeometry.VisibleCarets(BodyLine(), CanvasHeight, CanvasWidth, 90, ToScreen, new Rect(235, 101, 600, 533)));
     }
 }
