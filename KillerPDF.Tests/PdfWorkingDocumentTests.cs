@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using KillerPdf.Engine.Authoring;
 using KillerPdf.Engine.Documents;
+using KillerPdf.Engine.Security;
 using KillerPdf.Engine.Syntax;
 using KillerPDF.Services;
 using Xunit;
@@ -10,6 +11,48 @@ namespace KillerPDF.Tests;
 
 public sealed class PdfWorkingDocumentTests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void AnOpeningPasswordIsRequiredBeforePublishingAWorkingDocument(bool readOnly)
+    {
+        string path = Path.Combine(Path.GetTempPath(), $"killerpdf-password-{Guid.NewGuid():N}.pdf");
+        byte[] protectedBytes = new PdfDocumentBuilder()
+            .SetPasswordEncryption(new PdfPasswordEncryptionOptions
+                { UserPassword = "opening-password", OwnerPassword = "owner-password" })
+            .AddBlankPage(320, 480).Build();
+        try
+        {
+            File.WriteAllBytes(path, protectedBytes);
+            InvalidOperationException error = Assert.Throws<InvalidOperationException>(
+                () => PdfWorkingDocument.Open(path, readOnly));
+            Assert.Contains("password", error.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Equal(protectedBytes, File.ReadAllBytes(path));
+        }
+        finally { File.Delete(path); }
+    }
+
+    [Fact]
+    public void OwnerRestrictedWorkingDocumentsAuthenticateTheEmptyOpeningPassword()
+    {
+        string path = Path.Combine(Path.GetTempPath(), $"killerpdf-owner-working-{Guid.NewGuid():N}.pdf");
+        try
+        {
+            File.WriteAllBytes(path, new PdfDocumentBuilder()
+                .SetPasswordEncryption(new PdfPasswordEncryptionOptions
+                    { UserPassword = "", OwnerPassword = "owner", AllowDocumentModification = false })
+                .AddBlankPage(320, 480).Build());
+
+            using PdfWorkingDocument working = PdfWorkingDocument.Open(path, isReadOnly: true);
+            PdfDocument parsed = Assert.IsType<PdfDocument>(working.ParsedDocument);
+            Assert.True(parsed.IsDecrypted);
+            Assert.Equal(PdfPasswordAuthenticationRole.User, parsed.PasswordAuthenticationRole);
+            Assert.True(working.IsReadOnly);
+            Assert.Equal(1, working.PageCount);
+        }
+        finally { File.Delete(path); }
+    }
+
     // A full or unavailable temp folder must not turn into a repair offer or a "damaged file" or
     // "wrong password" message on any open path; each reports the working-copy problem.
     [Fact]

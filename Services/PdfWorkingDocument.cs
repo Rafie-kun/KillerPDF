@@ -11,7 +11,9 @@ internal sealed class PdfWorkingDocument : IDisposable
 
     private PdfWorkingDocument(byte[] source, bool isReadOnly)
     {
-        PdfDocument parsed = PdfDocument.OpenWithCompatibilityRecovery(source);
+        PdfDocument parsed = PdfEngineIntegration.OpenForReading(source);
+        if (!parsed.CanReadPageContent)
+            throw new InvalidOperationException("This encrypted PDF requires a password.");
         _parsedDocument = parsed;
         _source = source;
         PageCount = PdfPageInformation.Read(parsed).Count;
