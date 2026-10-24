@@ -73,6 +73,7 @@ internal static class Program
             else if (args[3] == "reading-terminal-home") ReadingCaret(terminalHome: true);
             else if (args[3] == "reading-scroll") ReadingScroll();
             else if (args[3] == "reading-scroll-spread") ReadingScroll(spread: true);
+            else if (args[3] == "reading-scroll-wide") ReadingScroll(wide: true);
             else throw new ArgumentException("Unknown case.");
             Console.WriteLine("PASS " + args[3]);
             File.WriteAllText(Path.Combine(Folder, "result.txt"), "PASS " + args[3]);
@@ -147,11 +148,11 @@ internal static class Program
         Pump(300);
     }
 
-    private static void ReadingScroll(bool spread = false)
+    private static void ReadingScroll(bool spread = false, bool wide = false)
     {
         string input = Path.Combine(Folder, "tall-reading.pdf");
         var stream = new PdfContentStreamBuilder().BeginText().SetFont(PdfStandardFont.Helvetica, 12)
-            .MoveText(20, 2940).ShowLatin1Text("Line 00");
+            .MoveText(20, 2940).ShowLatin1Text("Line 00" + (wide ? " " + new string('W', 45) + "Z" : ""));
         for (int line = 1; line < 40; line++)
             stream.MoveText(0, -45).ShowLatin1Text("Line " + line.ToString("D2", System.Globalization.CultureInfo.InvariantCulture));
         stream.EndText();
@@ -208,7 +209,26 @@ internal static class Program
             File.WriteAllText(Path.Combine(Folder, "spread-result-state.txt"), $"offset={viewport.VerticalOffset}; target={target.GetBoundingRectangles().Length}; heading={heading.GetBoundingRectangles().Length}; extent={viewport.ExtentHeight}; zoom={zoom.Text}");
             if (viewport.VerticalOffset <= 0 || target.GetBoundingRectangles().Length == 0)
                 throw new InvalidOperationException("The cold spread dropped its right-page reading scroll.");
+            string visibleText = string.Join("\n", spreadText.GetVisibleRanges().Select(range => range.GetText(-1)));
+            File.WriteAllText(Path.Combine(Folder, "spread-visible-text.txt"), visibleText);
+            if (!visibleText.Contains("Line 35", StringComparison.Ordinal))
+                throw new InvalidOperationException("The cold spread clipped the requested reading line at the horizontal edge.");
             File.WriteAllText(Path.Combine(Folder, "reading-spread-scroll.txt"), "Right-page Line 35 visible; vertical offset=" + viewport.VerticalOffset);
+            return;
+        }
+        if (wide)
+        {
+            var widePeer = System.Windows.Automation.Peers.UIElementAutomationPeer.CreatePeerForElement(surface);
+            var wideText = (System.Windows.Automation.Provider.ITextProvider)widePeer.GetPattern(System.Windows.Automation.Peers.PatternInterface.Text);
+            var terminal = wideText.DocumentRange.FindText("Z", false, false)!;
+            terminal.Select();
+            terminal.ScrollIntoView(true);
+            Pump(600);
+            File.WriteAllText(Path.Combine(Folder, "wide-visible-text.txt"),
+                string.Join("\n", wideText.GetVisibleRanges().Select(range => range.GetText(-1))));
+            if (terminal.GetBoundingRectangles().Length == 0)
+                throw new InvalidOperationException("Reading scroll lost the requested caret in an oversized zoomed line.");
+            File.WriteAllText(Path.Combine(Folder, "reading-wide-scroll.txt"), "Terminal Z visible; horizontal offset=" + viewport.HorizontalOffset);
             return;
         }
         for (int line = 0; line < 35; line++) Press(Key.Down);

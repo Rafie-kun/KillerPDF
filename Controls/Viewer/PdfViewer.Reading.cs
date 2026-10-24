@@ -363,8 +363,20 @@ namespace KillerPDF.Controls
                 int start = Math.Clamp(scroll.Caret, 0, runs.Chars.Count - 1);
                 foreach (Rect rectangle in viewer.CaretRangeRects(scroll.Page, runs, start, start + 1, dimensions))
                 {
-                    canvas.BringIntoView(rectangle);
-                    if (scroll.AlignToTop is bool top && viewer.PagePreviewPanel.Content is Visual content)
+                    Rect target = rectangle;
+                    var line = runs.Lines[runs.Chars[start].Line];
+                    var lineBounds = viewer.CaretRangeRects(scroll.Page, runs, line.Start, line.End, dimensions);
+                    Visual? content = viewer.PagePreviewPanel.Content as Visual;
+                    // Reveal readable context when it fits instead of leaving one glyph at the edge.
+                    if (lineBounds.Count > 0 && content is not null)
+                    {
+                        Rect displayed = canvas.TransformToVisual(content).TransformBounds(lineBounds[0]);
+                        if (displayed.Width <= viewer.PagePreviewPanel.ViewportWidth
+                            && displayed.Height <= viewer.PagePreviewPanel.ViewportHeight)
+                            target = lineBounds[0];
+                    }
+                    canvas.BringIntoView(target);
+                    if (scroll.AlignToTop is bool top && content is not null)
                     {
                         Rect bounds = canvas.TransformToVisual(content).TransformBounds(rectangle);
                         viewer.PagePreviewPanel.ScrollToVerticalOffset(top ? bounds.Top

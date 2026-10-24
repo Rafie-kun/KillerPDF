@@ -115,13 +115,25 @@ here only at release checkpoints.
 | A2 | No undispositioned items on either corpus; no new outlier since the dispositioned 8065c4e run. See [the A2 record](records/A2-triage-2026-10-23.md). |
 | A3 | All 76 pages visually dispositioned at 2048: 53 equivalent, 18 accepted differences, 5 defects fixed. 44 strict outliers, each dispositioned. Spot data now reaches the spot plates through image painting (8d94c1d). See [the A3 record](records/A3-difficult-2026-10-23.md). |
 
-The other gates keep their 096a2cf status above.
+All twenty A4 primary-bitmap cases subsequently pass at `e514661`. That pinned
+result and its limits are in [the SN01 record](records/release-sn01-20261024.md).
+The other measurement gates retain the older values above; they do not certify
+the current candidate. A1 and valid current speed/memory acceptance remain open.
 
 Window tests (2026-10-24): every UI smoke and document-state run passes on the SN01 and SN02 lab
 guests at cf3caf1 and d9c0713, and KillerPDF.Tests fails there only on its symbolic-link test,
 which needs Developer Mode. The runs found two product defects, fixed in 228a195 (Save menu with
 no PDF) and 38d0bcf (screen-reader visible text). See
 [the window test record](records/window-tests-steevnet-20261024.md).
+
+Later functional repairs pass 1,332 application tests and five focused reading
+checks on the current line-visibility source. Unchanged engine source retains
+the previous 6,919-pass result. Native save/sign, forms, pane ownership and reading
+results have separately pinned packages. Full continuous-reader, installer and
+adverse-state acceptance remain incomplete. See [the current readiness
+record](records/release-readiness-20261024.md). The canceled corpus and timing
+loops remain stopped; no benchmark gate is waived or marked passed by these
+functional checks.
 
 Measurement detail, noise floor and per-file contributors:
 `C:/Users/steve/scratch/kp-bench-render/release-19-baseline/BASELINE.md`.

@@ -39,7 +39,8 @@ Cases:
 | `reading-keyboard` | Route WPF keyboard events through the actual window, require line, character and page caret movement, and preserve text-provider positions. |
 | `reading-terminal-home` | Start at the final insertion point and require Home, Up and PageUp to reach the expected line or page. |
 | `reading-scroll` | Navigate 35 lines in a zoomed tall page, require a visible reading range, and verify actual UIA ScrollIntoView reveals that range again. |
-| `reading-scroll-spread` | Move from a settled spread to a cold spread and require the requested reading line to become visible after its right-hand tile is created. |
+| `reading-scroll-spread` | Move from a settled spread to a cold spread and require the complete short target line in the public visible ranges after its right-hand tile is created. |
+| `reading-scroll-wide` | Request the last glyph of a line wider than the zoomed viewport and require that caret to remain visible. |
 
 Reflection is limited to isolated host setup, service initialization, constructing WPF's internal
 drag-event arguments, and calling the public OpenFromExternal entry point on the dynamically loaded application. Tests do not invoke private
