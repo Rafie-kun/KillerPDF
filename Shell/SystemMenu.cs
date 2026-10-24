@@ -78,7 +78,9 @@ namespace KillerPDF
 
             bool maximized = WindowState == WindowState.Maximized;
             // Windows grays out what does not apply: you cannot Restore a normal window, cannot
-            // Maximize an already-maximized one, and cannot Move or Size while maximized.
+            // Maximize an already-maximized one, and cannot Move or Size while maximized. It also
+            // bolds the default item: Restore when maximized, Close otherwise.
+            int defaultCommand = maximized ? SC_RESTORE : SC_CLOSE;
             foreach (object o in _sysMenu.Items)
             {
                 if (o is not MenuItem mi || mi.Tag is not int cmd) continue;
@@ -89,6 +91,7 @@ namespace KillerPDF
                     SC_MOVE or SC_SIZE => !maximized,
                     _ => true,
                 };
+                mi.FontWeight = cmd == defaultCommand ? FontWeights.Bold : FontWeights.Normal;
             }
 
             // KillerPDF keeps its implicit ContextMenu/MenuItem styles in MainWindow.xaml's
@@ -161,7 +164,7 @@ namespace KillerPDF
             Add("Str_Sys_Minimize", "Minimize", SC_MINIMIZE, 0xE921);
             Add("Str_Sys_Maximize", "Maximize", SC_MAXIMIZE, 0xE922);
             menu.Items.Add(new Separator());
-            Add("Str_Sys_Close",    "Close",    SC_CLOSE,    0xE8BB, danger: true);
+            Add("Str_Sys_Close",    "Close",    SC_CLOSE,    0xE8BB, danger: true).InputGestureText = "Alt+F4";
             return menu;
         }
 
