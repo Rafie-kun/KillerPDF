@@ -1371,8 +1371,21 @@ public sealed partial class PdfPageRenderer
             coordinates[index - 1] |= flag;
             coordinates[index] |= flag;
         }
-        // A duplicated closing vertex shares both adjacent normal constraints.
-        if (points[0] == points[^1]) coordinates[0] = coordinates[^1] = (byte)(coordinates[0] | coordinates[^1]);
+        // Repeated vertices are one vertex and share every adjacent normal constraint, so they
+        // snap to one point; a closed path's last vertex is its first. A line back to the start
+        // followed by closepath repeats the start, and snapping its copies separately parted
+        // them into a short diagonal whose miter spiked.
+        bool closedPath = points[0] == points[^1];
+        for (int pass = 0; pass < 2; pass++)
+        {
+            for (int index = 1; index < points.Length; index++)
+                if (points[index] == points[index - 1])
+                    coordinates[index] = coordinates[index - 1] = (byte)(coordinates[index] | coordinates[index - 1]);
+            for (int index = points.Length - 2; index >= 0; index--)
+                if (points[index] == points[index + 1])
+                    coordinates[index] = coordinates[index + 1] = (byte)(coordinates[index] | coordinates[index + 1]);
+            if (closedPath) coordinates[0] = coordinates[^1] = (byte)(coordinates[0] | coordinates[^1]);
+        }
         double pixels = Math.Max(1, Math.Floor(width + 0.5));
         double offset = pixels % 2 == 1 ? 0.5 : 0;
         for (int index = 1; index < points.Length; index++)
@@ -1392,13 +1405,17 @@ public sealed partial class PdfPageRenderer
     private static void StrokeOutline(Point[] input, double radius, RendererLineCap lineCap,
         RendererLineJoin lineJoin, double miterLimit, List<Point[]> output)
     {
+        // A segment shorter than a thousandth of a pixel has no visible length and no reliable
+        // direction; joined, it drew a miter spike, as when a line back to the start ends a
+        // hair away from it before closepath. Such points merge with their neighbor.
+        const double minimumSegment = 1e-3;
         var points = new List<Point>(input.Length);
         foreach (Point point in input)
         {
             if (!double.IsFinite(point.X) || !double.IsFinite(point.Y)) continue;
-            if (points.Count == 0 || Distance(points[^1], point) > 1e-9) points.Add(point);
+            if (points.Count == 0 || Distance(points[^1], point) > minimumSegment) points.Add(point);
         }
-        bool closed = points.Count > 2 && Distance(points[0], points[^1]) <= 1e-9;
+        bool closed = points.Count > 2 && Distance(points[0], points[^1]) <= minimumSegment;
         if (closed) points.RemoveAt(points.Count - 1);
         if (points.Count == 1)
         {
