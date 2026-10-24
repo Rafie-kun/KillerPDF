@@ -43,6 +43,12 @@ namespace KillerPDF.Controls
         private DocumentTextModel? _model;
         private object? _modelVersion;
 
+        public DocumentSurface()
+        {
+            Focusable = true;
+            System.Windows.Input.KeyboardNavigation.SetIsTabStop(this, true);
+        }
+
         internal IDocumentReadingSource? Source
         {
             get => _source;

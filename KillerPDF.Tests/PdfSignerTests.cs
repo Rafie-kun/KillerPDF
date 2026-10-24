@@ -15,9 +15,10 @@ namespace KillerPDF.Tests;
 public sealed class PdfSignerTests
 {
     [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public void Sign_DefaultOutputSurvivesTemporarySourceCleanup(bool imported)
+    [InlineData(false, false)]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    public void Sign_DefaultOutputSurvivesTemporarySourceCleanup(bool imported, bool unsaved)
     {
         string directory = Path.Combine(Path.GetTempPath(), $"killerpdf-sign-home-{Guid.NewGuid():N}");
         Directory.CreateDirectory(directory);
@@ -29,7 +30,9 @@ public sealed class PdfSignerTests
             using var temps = new KillerPDF.Services.ProcessTempFiles(tempRoot);
             string source = imported ? temps.CreatePath("browser") : Path.Combine(directory, "original.pdf");
             File.WriteAllBytes(source, new PdfDocumentBuilder().AddBlankPage().Build());
-            string output = SigningOutputPath.Create(source, temps.Owns(source), downloads, "invoice.pdf");
+            string suggestion = unsaved ? "Untitled.pdf" : source;
+            string output = SigningOutputPath.Create(suggestion, temps.Owns(suggestion), downloads, "invoice.pdf");
+            Assert.True(Path.IsPathFullyQualified(output), "The default signed destination depends on the process working directory.");
             using RSA key = RSA.Create(2048);
             using X509Certificate2 certificate = new CertificateRequest("CN=KillerPDF Durable Output Test", key,
                 HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1)
@@ -43,7 +46,8 @@ public sealed class PdfSignerTests
 
             Assert.True(File.Exists(output), "Session cleanup deleted the default signed output.");
             Assert.Equal(signed, File.ReadAllBytes(output));
-            Assert.Equal(imported ? Path.Combine(downloads, "invoice-signed.pdf")
+            Assert.Equal(unsaved ? Path.Combine(downloads, "Untitled-signed.pdf")
+                : imported ? Path.Combine(downloads, "invoice-signed.pdf")
                 : Path.Combine(directory, "original-signed.pdf"), output);
         }
         finally { Directory.Delete(directory, recursive: true); }

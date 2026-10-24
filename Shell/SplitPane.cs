@@ -83,6 +83,11 @@ namespace KillerPDF
             Viewer.PreviewMouseDown  += (_, _) => FocusPane(Viewer);
             ViewerB.PreviewMouseDown += (_, _) => FocusPane(ViewerB);
 
+            Viewer.AddHandler(Keyboard.GotKeyboardFocusEvent,
+                new KeyboardFocusChangedEventHandler((_, _) => FocusPane(Viewer)), handledEventsToo: true);
+            ViewerB.AddHandler(Keyboard.GotKeyboardFocusEvent,
+                new KeyboardFocusChangedEventHandler((_, _) => FocusPane(ViewerB)), handledEventsToo: true);
+
             // The wheel focuses too. The zoom toolbar, the zoom box and Ctrl+wheel all act on the
             // FOCUSED pane, so wheeling over a pane you had not clicked was zooming and scrolling
             // the other one - which reads as "zooming pane B zoomed pane A". Preview, so focus has

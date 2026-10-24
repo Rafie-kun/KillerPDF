@@ -65,6 +65,8 @@ internal static class Program
             else if (args[3] == "print-switch") PrintSwitch();
             else if (args[3] == "merge-failure-pane") MergeFailurePane();
             else if (args[3] == "merge-close-success") MergeFailurePane(closeOwner: true);
+            else if (args[3] == "radio-accessibility") RadioAccessibility();
+            else if (args[3] == "keyboard-pane-owner") KeyboardPaneOwner();
             else throw new ArgumentException("Unknown case.");
             Console.WriteLine("PASS " + args[3]);
             File.WriteAllText(Path.Combine(Folder, "result.txt"), "PASS " + args[3]);
@@ -137,6 +139,73 @@ internal static class Program
         Owner.Show();
         Console.WriteLine("Window shown");
         Pump(300);
+    }
+
+    private static void KeyboardPaneOwner()
+    {
+        string left = Path.Combine(Folder, "left.pdf"), right = Path.Combine(Folder, "right.pdf");
+        File.WriteAllBytes(left, new PdfDocumentBuilder().AddBlankPage(300, 500).Build());
+        File.WriteAllBytes(right, new PdfDocumentBuilder().AddBlankPage(300, 500).Build());
+        Open(left);
+        Click((Button)Owner.FindName("SplitPaneRailBtn"));
+        Pump(350);
+        var a = (FrameworkElement)Owner.FindName("Viewer");
+        var b = (FrameworkElement)Owner.FindName("ViewerB");
+        void FocusPane(FrameworkElement viewer) => viewer.RaiseEvent(new MouseButtonEventArgs(
+            Mouse.PrimaryDevice, Environment.TickCount, MouseButton.Left) { RoutedEvent = Mouse.PreviewMouseDownEvent });
+        FocusPane(b);
+        Open(right);
+        FocusPane(a);
+        var first = (FrameworkElement)a.FindName("DocSurfacePad");
+        var second = (FrameworkElement)b.FindName("DocSurfacePad");
+        Owner.Activate();
+        if (!first.Focus()) throw new InvalidOperationException("Could not focus the first reading surface.");
+        int steps = 0;
+        while (!ReferenceEquals(Keyboard.FocusedElement, second) && steps++ < 200)
+        {
+            if (Keyboard.FocusedElement is not UIElement current
+                || !current.MoveFocus(new(FocusNavigationDirection.Next))) break;
+        }
+        if (!ReferenceEquals(Keyboard.FocusedElement, second))
+            throw new InvalidOperationException("Tab traversal did not enter the second reading surface.");
+        second.RaiseEvent(new KeyEventArgs(Keyboard.PrimaryDevice, PresentationSource.FromVisual(Owner),
+            Environment.TickCount, Key.F6) { RoutedEvent = Keyboard.PreviewKeyDownEvent });
+        Pump(400);
+        var leftPages = (FrameworkElement)a.FindName("ContinuousPanel");
+        var rightPages = (FrameworkElement)b.FindName("ContinuousPanel");
+        if (leftPages.Visibility != Visibility.Visible || rightPages.Visibility != Visibility.Collapsed)
+            throw new InvalidOperationException("F6 after Tab into pane B changed the wrong document pane.");
+        File.WriteAllText(Path.Combine(Folder, "focus-route.txt"), "Tab steps=" + steps + "; F6 changed pane B only.");
+    }
+
+    private static void RadioAccessibility()
+    {
+        string input = Path.Combine(Folder, "radio-options.pdf");
+        File.WriteAllBytes(input, new PdfDocumentBuilder().AddBlankPage(300, 500)
+            .AddRadioGroup("choice", [new(0, 30, 300, 22, 22, "Alpha"), new(0, 30, 250, 22, 22, "Beta")],
+                selectedValue: "Alpha", fieldMetadata: new() { Tooltip = "Choose Alpha or Beta" }).Build());
+        Open(input);
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        while (Descendants<FrameworkElement>(Owner).Count(element => element.GetType().Name == "FormToggleSurface") < 2
+            && watch.Elapsed < TimeSpan.FromSeconds(8)) Pump(100);
+        var radios = Descendants<FrameworkElement>(Owner)
+            .Where(element => element.GetType().Name == "FormToggleSurface")
+            .Select(System.Windows.Automation.Peers.UIElementAutomationPeer.CreatePeerForElement)
+            .Where(peer => peer?.GetAutomationControlType() == System.Windows.Automation.Peers.AutomationControlType.RadioButton)
+            .ToArray();
+        if (radios.Length != 2) throw new InvalidOperationException("Expected two rendered radio widgets; found " + radios.Length);
+        string[] names = radios.Select(peer => peer!.GetName()).ToArray();
+        File.WriteAllLines(Path.Combine(Folder, "radio-names.txt"), names);
+        if (names.Distinct(StringComparer.Ordinal).Count() != 2
+            || !names.Any(name => name == "Choose Alpha or Beta: Alpha")
+            || !names.Any(name => name == "Choose Alpha or Beta: Beta"))
+            throw new InvalidOperationException("Radio widgets do not identify their individual options: " + string.Join(" | ", names));
+        var selections = radios.Select(peer => (System.Windows.Automation.Provider.ISelectionItemProvider)
+            peer!.GetPattern(System.Windows.Automation.Peers.PatternInterface.SelectionItem)).ToArray();
+        int beta = Array.FindIndex(names, name => name.EndsWith(": Beta", StringComparison.Ordinal));
+        selections[beta].Select();
+        if (!selections[beta].IsSelected || selections.Where((_, index) => index != beta).Any(item => item.IsSelected))
+            throw new InvalidOperationException("Selecting Beta did not preserve radio exclusivity.");
     }
 
     private static void MergeFailurePane(bool closeOwner = false)

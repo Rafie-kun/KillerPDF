@@ -42,6 +42,33 @@ namespace KillerPDF.Tests
         }
 
         [Fact]
+        public void TabTraversalEntersAndLeavesTheReadingDocument() => OnSta(() =>
+        {
+            var before = new System.Windows.Controls.Button { Content = "Before" };
+            var surface = new DocumentSurface { Source = new FakeSource(["Reading order check"]), Height = 40 };
+            var after = new System.Windows.Controls.Button { Content = "After" };
+            var panel = new System.Windows.Controls.StackPanel();
+            panel.Children.Add(before);
+            panel.Children.Add(surface);
+            panel.Children.Add(after);
+            var window = new Window { Content = panel, Width = 200, Height = 150,
+                Left = -10000, Top = -10000, ShowInTaskbar = false };
+            try
+            {
+                window.Show();
+                Assert.True(before.Focus(), "The traversal starting control could not receive focus.");
+                Assert.True(before.MoveFocus(new(System.Windows.Input.FocusNavigationDirection.Next)));
+                Assert.Same(surface, System.Windows.Input.Keyboard.FocusedElement);
+                var peer = UIElementAutomationPeer.CreatePeerForElement(surface);
+                Assert.True(peer.IsKeyboardFocusable());
+                Assert.Equal("Reading order check", ((ITextProvider)peer.GetPattern(PatternInterface.Text)).DocumentRange.GetText(-1));
+                Assert.True(surface.MoveFocus(new(System.Windows.Input.FocusNavigationDirection.Next)));
+                Assert.Same(after, System.Windows.Input.Keyboard.FocusedElement);
+            }
+            finally { window.Close(); }
+        });
+
+        [Fact]
         public void ExposesADocumentWithTheTextPattern() => OnSta(() =>
         {
             var source = new FakeSource(["Invoice total", "due now"], ["Page two"]);

@@ -32,6 +32,8 @@ Cases:
 | `print-switch` | Queue a document switch during real form-print preparation, require a visible canceled status, and reject any stale preview. |
 | `merge-failure-pane` | Drop two unreadable owned PDFs through the actual routed event, choose Merge, switch panes while its worker is pending, and require the other pane's unsaved form value to survive failure. |
 | `merge-close-success` | Merge valid owned inputs in pane B, close the split while the worker is pending, and require the completed document to have a visible owning pane while pane A retains its pending edit. |
+| `radio-accessibility` | Open generated Alpha/Beta radio widgets, require distinct option names on their actual automation peers, select Beta, and verify mutual exclusion. |
+| `keyboard-pane-owner` | Tab from pane A's document into pane B's document, route F6, and require only pane B to change view mode. |
 
 Reflection is limited to isolated host setup, service initialization, constructing WPF's internal
 drag-event arguments, and calling the public OpenFromExternal entry point on the dynamically loaded application. Tests do not invoke private
