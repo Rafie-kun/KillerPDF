@@ -5967,16 +5967,9 @@ public sealed partial class PdfPageRenderer
             byte stencilAlphaByte = (byte)Math.Round(Math.Clamp(stencilAlpha, 0, 1) * 255);
             bool separateStencilShape = imageMask && (knockout is not null || target.GroupShape is not null);
             byte stencilCoverageByte = separateStencilShape ? (byte)255 : stencilAlphaByte;
-            // A stencil filled with a spot color keeps its spot, so it paints that spot's plate as
-            // a vector fill of the same color does.
             Color paintedStencil = imageMask && target.Ink is not null
                 ? InkColor(target.GetInk(stencilColor)) with
-                {
-                    OverprintComponents = stencilColor.OverprintComponents,
-                    SpotName = stencilColor.SpotName, SpotTint = stencilColor.SpotTint,
-                    SpotInk = stencilColor.SpotInk, ProcessInk = stencilColor.ProcessInk,
-                    SpotProcessMask = stencilColor.SpotProcessMask, AdditionalSpot = stencilColor.AdditionalSpot
-                } : stencilColor;
+                { OverprintComponents = stencilColor.OverprintComponents } : stencilColor;
             if (averageStencil)
             {
                 alphaPlane = RasterBuffers.Rent(checked(planeWidth * planeHeight));
@@ -6525,22 +6518,6 @@ public sealed partial class PdfPageRenderer
                         }
                         double clipAlpha = rectangularClips ? 1 : clipCoverage / 255d;
                         if (clipAlpha <= 0) continue;
-                        // A spot stencil's partly covered pixels blend its plate by coverage, as a
-                        // vector fill's antialiased edge does, instead of clearing the plate.
-                        if (imageMask && color.SpotName is not null && stencilAlphaByte == 255
-                            && imageOpacity == 1 && (alpha < 255 || clipCoverage < 255)
-                            && graphicsSoftMask is null && knockout is null
-                            && blendMode is RendererBlendMode.Normal or RendererBlendMode.Compatible
-                            && target.Contains(x, y))
-                        {
-                            int offset = target.Offset(x, y);
-                            if (target.Alpha(offset) == 255 && target.CanPaintSpot(offset))
-                            {
-                                target.PaintSpotCoverage(offset, color, color.Ink ?? target.GetInk(color),
-                                    (byte)((alpha * clipCoverage + 127) / 255), (color.OverprintComponents & 16) != 0);
-                                continue;
-                            }
-                        }
                         if ((opaqueInkImage || opaqueRgbSpotImage) && color.SpotName is not null
                             && clipCoverage < 255 && alpha == 255
                             && target.Contains(x, y))
