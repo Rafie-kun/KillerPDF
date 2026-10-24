@@ -9,7 +9,7 @@ using Xunit;
 namespace KillerPdf.Engine.Tests.Rendering;
 
 // Owner decision, 2026-10-23: enlarged continuous-tone images are smoothed, as 1.8 and most
-// viewers show them, once they are enlarged about one and a half times; 1-bit images and image
+// viewers show them, from any enlargement (first set at about 1.5 times); 1-bit images and image
 // masks stay crisp because their edges are the content (text scans, barcodes). An explicit
 // /Interpolate true is honored at any enlargement. Like 1.8 and Poppler, smoothing stops once an
 // image covers about eight pixels per sample (swatches, QR codes, pixel art).
@@ -42,14 +42,19 @@ public sealed class PdfImageSmoothingTests
             [0x0F, 0x0F, 0x0F, 0x0F, 0x0F], false)));
     }
 
-    // Ten alternating samples drawn twelve pixels wide are enlarged only 1.2 times.
+    // Owner decision, revised 2026-10-23: smoothing starts at any enlargement, as in 1.8. Ten
+    // alternating samples drawn twelve pixels wide are enlarged only 1.2 times and are smoothed
+    // just as when the file asks for it; drawn at their own size they stay exact.
     [Fact]
-    public void SlightEnlargementStaysCrispUnlessInterpolationIsRequested()
+    public void SlightEnlargementIsSmoothedAsIn18()
     {
         byte[] stripes = [.. Enumerable.Repeat<byte[]>([0, 255, 0, 255, 0, 255, 0, 255, 0, 255], 8)
             .SelectMany(row => row)];
-        Assert.Equal(0, Ramp(Render("q 12 0 0 10 4 0 cm BI /W 10 /H 8 /BPC 8 /CS /G ID ", stripes, false)));
-        Assert.True(Ramp(Render("q 12 0 0 10 4 0 cm BI /W 10 /H 8 /BPC 8 /CS /G /I true ID ", stripes, false)) >= 4);
+        PdfRenderedPage plain = Render("q 12 0 0 10 4 0 cm BI /W 10 /H 8 /BPC 8 /CS /G ID ", stripes, false);
+        PdfRenderedPage asked = Render("q 12 0 0 10 4 0 cm BI /W 10 /H 8 /BPC 8 /CS /G /I true ID ", stripes, false);
+        Assert.True(Ramp(plain) >= 4);
+        Assert.Equal(asked.Pixels.ToArray(), plain.Pixels.ToArray());
+        Assert.Equal(0, Ramp(Render("q 10 0 0 8 4 1 cm BI /W 10 /H 8 /BPC 8 /CS /G ID ", stripes, false)));
     }
 
     // Two samples drawn 20 by 10 pixels cover a hundred pixels each, far past 1.8's limit.

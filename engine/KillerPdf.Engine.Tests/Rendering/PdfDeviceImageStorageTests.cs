@@ -116,7 +116,13 @@ public sealed class PdfDeviceImageStorageTests
         var converted = new PdfPageRenderer(Create(components, true, opacity, rotated)).Render(0, options);
         Assert.Empty(direct.Diagnostics);
         Assert.Empty(converted.Diagnostics);
-        Assert.Equal(converted.Pixels.ToArray(), direct.Pixels.ToArray());
+        // Enlarged, both are smoothed: 8-bit samples by the device path, 16-bit ones from the
+        // converted plane, whose rounding can differ by one level. Reduced, they match exactly.
+        byte[] expected = converted.Pixels.ToArray(), actual = direct.Pixels.ToArray();
+        int tolerance = size > 17 ? 1 : 0;
+        for (int index = 0; index < expected.Length; index++)
+            Assert.True(Math.Abs(expected[index] - actual[index]) <= tolerance,
+                $"Byte {index} is {actual[index]}, expected {expected[index]}.");
     }
 
     private static PdfDocument Create(int components, bool wideSamples, double opacity, bool rotated)

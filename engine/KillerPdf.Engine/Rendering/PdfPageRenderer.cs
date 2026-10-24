@@ -5469,9 +5469,9 @@ public sealed partial class PdfPageRenderer
         int top = Math.Clamp(targetHeight - (int)fullTop, 0, targetHeight);
         int bottom = Math.Clamp(targetHeight - (int)fullBottom, 0, targetHeight);
         if (!transform.TryInverse(out Matrix inverse)) return;
-        // Enlarged continuous-tone images are smoothed, as 1.8 and most viewers show them, once
-        // each source sample covers about one and a half pixels, and until the image covers
-        // about eight pixels per sample, where 1.8 (in its own integer arithmetic) and Poppler
+        // Enlarged continuous-tone images are smoothed, as 1.8 and most viewers show them, from
+        // any enlargement until the image covers about eight pixels per sample, where 1.8 (in its
+        // own integer arithmetic) and Poppler
         // stop smoothing: images enlarged that far are swatches, QR codes and pixel art whose
         // hard edges are the content. 1-bit images and image masks stay crisp for the same
         // reason. An explicit /Interpolate true is honored at any enlargement.
@@ -5488,7 +5488,7 @@ public sealed partial class PdfPageRenderer
         long deviceHeight = DeviceLength(transform.C * scaleX, transform.D * scaleY);
         bool smoothImage = !imageMask && double.IsFinite(sampleStepX) && double.IsFinite(sampleStepY)
             && (interpolate ? Math.Max(sampleStepX, sampleStepY) <= 1 && Math.Min(sampleStepX, sampleStepY) < 1
-                : bits != 1 && Math.Max(sampleStepX, sampleStepY) <= 1 / 1.5
+                : bits != 1 && Math.Max(sampleStepX, sampleStepY) <= 1 && Math.Min(sampleStepX, sampleStepY) < 1
                     && deviceHeight / 8 < (long)sourceWidth * sourceHeight / deviceWidth);
         // Images the device path below does not smooth are smoothed from the converted plane,
         // which holds every source sample only up to its size limit. A larger 8-bit gray or RGB
