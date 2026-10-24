@@ -5904,6 +5904,12 @@ public sealed partial class PdfPageRenderer
         ImageSampleConverter.AreaSpan[]? converterAreaRows = averagePlane && !binaryAverage
             ? rowRanges?.Select(range => ImageSampleConverter.AreaSpan.FromRange(range.Start, range.End, sourceHeight)).ToArray()
                 ?? ImageSampleConverter.CreateAreaSpans(sourceHeight, planeHeight) : null;
+        // A palette's spot samples average the same source as the color plane, whichever sampler
+        // builds that plane: a 1-bit palette's color goes through the binary sampler.
+        ImageSampleConverter.AreaSpan[]? spotAreaColumns = spotPlane is null ? null : converterAreaColumns
+            ?? columnRanges?.Select(range => ImageSampleConverter.AreaSpan.FromRange(range.Start, range.End, sourceWidth)).ToArray();
+        ImageSampleConverter.AreaSpan[]? spotAreaRows = spotPlane is null ? null : converterAreaRows
+            ?? rowRanges?.Select(range => ImageSampleConverter.AreaSpan.FromRange(range.Start, range.End, sourceHeight)).ToArray();
         if (pixelAlignedPlane)
         {
             double footprintWidth = Math.Abs(inverse.A / scaleX) * sourceWidth;
@@ -6039,7 +6045,7 @@ public sealed partial class PdfPageRenderer
                                 : converter.Convert(sx, sy);
                             spotPlane?[py * planeWidth + px] = AverageSpotPalette(samples,
                                     rowBytes, bits, sourceWidth, sourceHeight, px, py,
-                                    planeWidth, planeHeight, spotPalette!, converterAreaColumns, converterAreaRows);
+                                    planeWidth, planeHeight, spotPalette!, spotAreaColumns, spotAreaRows);
                             int alpha = colorKeyMask is not null && converter.MatchesColorKey(sx, sy, colorKeyMask)
                                 ? 0 : 255;
                             if (targetInk)

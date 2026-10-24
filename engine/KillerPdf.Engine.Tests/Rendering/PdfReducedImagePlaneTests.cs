@@ -80,15 +80,22 @@ public sealed class PdfReducedImagePlaneTests
     // An indexed image over a process-and-spot DeviceN on a CMYK page is averaged into the color
     // plane and, separately, a plane of spot samples. Both must average the same source under each
     // pixel, or the spot plate lands up to half a pixel off the process ink (round H, HF-003).
+    // A 1-bit palette is averaged through the binary sampler, which once left the spot samples on
+    // the even split (round I, IF-002).
     [Theory]
-    [InlineData("20 0 0 8 4.5 5.25")]
-    [InlineData("-20 0 0 8 24.5 5.25")]
-    public void AReducedSpotPaletteImageKeepsItsPhase(string matrix)
+    [InlineData("20 0 0 8 4.5 5.25", 8)]
+    [InlineData("-20 0 0 8 24.5 5.25", 8)]
+    [InlineData("20 0 0 8 4.5 5.25", 1)]
+    [InlineData("-20 0 0 8 24.5 5.25", 1)]
+    public void AReducedSpotPaletteImageKeepsItsPhase(string matrix, int bits)
     {
-        var samples = new byte[64 * 32];
+        int rowBytes = bits == 8 ? 64 : 8;
+        var samples = new byte[rowBytes * 32];
         for (int y = 8; y < 16; y++)
-            for (int x = 16; x < 32; x++) samples[y * 64 + x] = 1;
-        byte[] content = [.. Encoding.ASCII.GetBytes($"q {matrix} cm BI /W 64 /H 32 /BPC 8 /CS /Palette ID "),
+            for (int x = 16; x < 32; x++)
+                if (bits == 8) samples[y * rowBytes + x] = 1;
+                else samples[y * rowBytes + x / 8] |= (byte)(0x80 >> (x % 8));
+        byte[] content = [.. Encoding.ASCII.GetBytes($"q {matrix} cm BI /W 64 /H 32 /BPC {bits} /CS /Palette ID "),
             .. samples, .. Encoding.ASCII.GetBytes("\nEI Q")];
         double[] m = [.. matrix.Split(' ').Select(double.Parse)];
         (double left, double right) = (Math.Min(m[4] + m[0] * 0.25, m[4] + m[0] * 0.5), Math.Max(m[4] + m[0] * 0.25, m[4] + m[0] * 0.5));
