@@ -3723,9 +3723,12 @@ public sealed partial class PdfPageRenderer
             int activeChannels = channels.Count(channel => channel >= 0);
             bool supported = activeChannels > 0 && channels.All(channel => channel >= -1)
                 && channels.Where(channel => channel >= 0).Distinct().Count() == activeChannels;
-            string? singleSpot = channels is [-2]
-                ? ((PdfName)Resolve(names[0])).ValueAsLatin1() : null;
             int spotIndex = Array.IndexOf(channels, -2);
+            // One spot among None colorants paints like a Separation of that spot, so it
+            // overprints the process plates instead of knocking them out.
+            string? singleSpot = spotIndex >= 0 && channels.Count(channel => channel == -2) == 1
+                && channels.All(channel => channel is -1 or -2)
+                ? ((PdfName)Resolve(names[spotIndex])).ValueAsLatin1() : null;
             string? spotName = spotIndex >= 0 ? ((PdfName)Resolve(names[spotIndex])).ValueAsLatin1() : null;
             ImageColorSpace? definedSpot = null;
             if (array.Count == 5 && alternate.IsLab && channels.Contains(-1)
@@ -3777,7 +3780,17 @@ public sealed partial class PdfPageRenderer
                     }
                 }
             }
-            bool twoSpots = firstDefinedSpot is not null && secondDefinedSpot is not null;
+            // Two spots without colorant definitions take each spot's appearance from the tint
+            // transform with the other colorant at zero, so they still paint as spot inks.
+            bool derivedSpots = false;
+            if (firstDefinedSpot is null && alternate.Components == 4 && channels is [-2, -2])
+            {
+                firstSpotName ??= ((PdfName)Resolve(names[0])).ValueAsLatin1();
+                secondSpotName ??= ((PdfName)Resolve(names[1])).ValueAsLatin1();
+                derivedSpots = firstSpotName != secondSpotName
+                    && tintTransform([1, 0]).Ink is not null && tintTransform([0, 1]).Ink is not null;
+            }
+            bool twoSpots = firstDefinedSpot is not null && secondDefinedSpot is not null || derivedSpots;
             byte processMask = (byte)channels.Where(channel => channel >= 0)
                 .Aggregate(0, (mask, channel) => mask | (1 << channel));
             string? mixedSpotName = mixedSpot ? spotName : null;
@@ -3785,9 +3798,11 @@ public sealed partial class PdfPageRenderer
                 MultiConverter: twoSpots ? values => tintTransform(values) with
                 {
                     SpotName = firstSpotName, SpotTint = values[0],
-                    SpotInk = firstDefinedSpot!.Convert(values[0], 0, 0, 0).Ink,
+                    SpotInk = derivedSpots ? tintTransform([values[0], 0]).Ink
+                        : firstDefinedSpot!.Convert(values[0], 0, 0, 0).Ink,
                     AdditionalSpot = new SpotColorant(secondSpotName!, values[1],
-                        secondDefinedSpot!.Convert(values[1], 0, 0, 0).Ink!.Value)
+                        (derivedSpots ? tintTransform([0, values[1]]).Ink
+                            : secondDefinedSpot!.Convert(values[1], 0, 0, 0).Ink)!.Value)
                 } : mixedSpot ? values =>
                 {
                     var spotValues = new double[values.Length];
@@ -3803,11 +3818,12 @@ public sealed partial class PdfPageRenderer
                     };
                 } : singleSpot is null ? tintTransform
                     : values => tintTransform(values) with
-                    { SpotName = singleSpot, SpotTint = values[0] },
+                    { SpotName = singleSpot, SpotTint = values[spotIndex] },
                 ProcessChannels: supported ? channels : null, SuppressPainting: channels.All(channel => channel == -1),
                 Initial: InitialColor.FullTint, HasIccSource: alternate.HasIccSource,
-                HasSpotColorants: channels is [-2] || mixedSpot || twoSpots,
-                BlackPointAlternate: mixedSpot || twoSpots ? null : alternate);
+                HasSpotColorants: singleSpot is not null || mixedSpot || twoSpots,
+                BlackPointAlternate: mixedSpot || twoSpots ? null : alternate,
+                DerivedSpotPair: derivedSpots);
         }
         if (kind.ValueAsLatin1() != "Indexed" || array.Count != 4
             || Resolve(array[2]) is not PdfInteger highValue
@@ -3815,6 +3831,15 @@ public sealed partial class PdfPageRenderer
             throw new NotSupportedException();
         ImageColorSpace baseSpace = ReadColorSpace(array[1], resources, depth + 1, useDefaults, diagnostics, intent);
         if (baseSpace.Palette is not null) throw new NotSupportedException();
+        // Image palettes carry one spot per entry, so a two-spot base derived from its tint
+        // transform keeps painting its alternate colors in images, as before.
+        if (baseSpace is { DerivedSpotPair: true, MultiConverter: { } spotPair })
+            baseSpace = baseSpace with
+            {
+                MultiConverter = values => spotPair(values) with
+                    { SpotName = null, SpotTint = 0, SpotInk = null, AdditionalSpot = null },
+                HasSpotColorants = false, DerivedSpotPair = false
+            };
         int baseComponents = baseSpace.Components;
         int entryCount = (int)highValue.Value + 1;
         int expected = checked(entryCount * baseComponents);
@@ -8497,7 +8522,7 @@ public sealed partial class PdfPageRenderer
         bool IsLab = false, bool IsDefault = false, bool HasIccSource = false, bool HasSpotColorants = false,
         PdfObject? Definition = null, PdfDictionary? SourceResources = null, int Intent = 1,
         bool IsDeviceCmyk = false, BlackPointBinding? BlackPointControl = null,
-        ImageColorSpace? BlackPointAlternate = null)
+        ImageColorSpace? BlackPointAlternate = null, bool DerivedSpotPair = false)
     {
         internal bool BlackPointCompensationEnabled => BlackPointControl is not null;
         internal ImageColorSpace? BlackPointSource => BlackPointControl?.Source;
