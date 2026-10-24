@@ -35,11 +35,14 @@ namespace KillerPDF.Tests
             var channel = new SingleInstanceChannel("KillerPDF.Test." + Guid.NewGuid().ToString("N"),
                 WindowsIdentity.GetCurrent().User!.Value, 0);
             string? second = null;
+            // The first pipe exists before the client connects, so a slow start of the server
+            // thread on a busy machine cannot time the client out.
+            var first = channel.CreateServer();
             var server = Task.Run(() =>
             {
                 for (int connection = 0; connection < 2; connection++)
                 {
-                    using var pipe = channel.CreateServer();
+                    using var pipe = connection == 0 ? first : channel.CreateServer();
                     pipe.WaitForConnection();
                     string? message = SingleInstanceChannel.ReadMessage(pipe, 1024, TimeSpan.FromMilliseconds(300));
                     if (connection == 1) second = message;
