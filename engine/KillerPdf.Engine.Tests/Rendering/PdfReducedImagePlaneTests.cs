@@ -28,6 +28,53 @@ public sealed class PdfReducedImagePlaneTests
         }
     }
 
+    // Each cell must average the source under its own pixel. Dividing the source evenly among the
+    // cells assumed the image starts on a pixel edge; this one starts half a pixel into a column
+    // and a quarter into a row, and the even split moved edges by up to half a pixel (scan strips
+    // in PDF-HUL-164, a placed mask in PDF-HUL-85).
+    [Theory]
+    [InlineData("/BPC 1 /CS /G", "20 0 0 8 4.5 5.25")]
+    [InlineData("/BPC 1 /CS /G", "-20 0 0 8 24.5 5.25")]
+    [InlineData("/BPC 1 /CS /G", "20 0 0 -8 4.5 13.25")]
+    [InlineData("/BPC 8 /CS [/I /G 1 <FF00>]", "20 0 0 8 4.5 5.25")]
+    [InlineData("/BPC 8 /CS [/I /G 1 <FF00>]", "-20 0 0 8 24.5 5.25")]
+    [InlineData("/IM true", "20 0 0 8 4.5 5.25")]
+    [InlineData("/IM true", "20 0 0 -8 4.5 13.25")]
+    public void AReducedImageKeepsItsPhaseOffThePixelGrid(string header, string matrix)
+    {
+        // 64 by 32 samples, black in columns 16 to 31 and rows 8 to 15, drawn 20 by 8 pixels.
+        bool indexed = header.Contains("/I ");
+        int rowBytes = indexed ? 64 : 8;
+        var samples = new byte[rowBytes * 32];
+        for (int y = 0; y < 32; y++)
+        for (int x = 0; x < 64; x++)
+        {
+            bool black = x is >= 16 and < 32 && y is >= 8 and < 16;
+            if (indexed) samples[y * rowBytes + x] = black ? (byte)1 : (byte)0;
+            else if (!black) samples[y * rowBytes + x / 8] |= (byte)(0x80 >> (x % 8));
+        }
+        byte[] content = [.. Encoding.ASCII.GetBytes($"0 g q {matrix} cm BI /W 64 /H 32 {header} ID "),
+            .. samples, .. Encoding.ASCII.GetBytes("\nEI Q")];
+        PdfRenderedPage page = new PdfPageRenderer(PdfDocument.Open(new PdfDocumentBuilder().AddPage(32, 20, content).Build()))
+            .Render(0, new PdfRenderOptions(32, 20, includeAnnotations: false, includeFormFields: false));
+
+        double[] m = [.. matrix.Split(' ').Select(double.Parse)];
+        (double left, double right) = Sorted(m[4] + m[0] * 0.25, m[4] + m[0] * 0.5);
+        (double top, double bottom) = Sorted(20 - (m[5] + m[3] * 0.75), 20 - (m[5] + m[3] * 0.5));
+        for (int y = 0; y < 20; y++)
+        for (int x = 0; x < 32; x++)
+        {
+            double coverage = Overlap(x, left, right) * Overlap(y, top, bottom);
+            int expected = (int)Math.Round(255 * (1 - coverage));
+            int actual = page.Pixels.Span[(y * 32 + x) * 4];
+            Assert.True(Math.Abs(actual - expected) <= 4, $"Pixel {x},{y} is {actual}, expected {expected}.");
+        }
+
+        static (double, double) Sorted(double a, double b) => (Math.Min(a, b), Math.Max(a, b));
+        static double Overlap(int pixel, double start, double end) =>
+            Math.Max(0, Math.Min(pixel + 1, end) - Math.Max(pixel, start));
+    }
+
     // A 1-bit gray image where 1 is white: all white except one black column.
     private static byte[] ScanWithColumn(int column)
     {

@@ -5854,12 +5854,43 @@ public sealed partial class PdfPageRenderer
         bool binaryAverage = averagePlane && !pixelAlignedPlane && bits == 1 && components == 1;
         // Small masks keep the cheaper per-pixel path.
         bool binaryRowAverage = binaryAverage && (long)sourceWidth * sourceHeight >= 10_000_000;
+        // An aligned cell averages the source under its own pixel. Dividing the source evenly
+        // among the cells assumed the image starts on a pixel edge, and shifted content up to
+        // half a pixel where it does not, such as stacked scan strips and placed masks. The end
+        // cells reach the image's edges: a pixel only partly covered by the image is not painted,
+        // and the source under it folds into its neighbor instead of vanishing.
+        (double Start, double End)[]? columnRanges = alignedPlane && planeWidth == centerColumns
+            ? new (double, double)[planeWidth] : null;
+        (double Start, double End)[]? rowRanges = alignedPlane && planeHeight == centerRows
+            ? new (double, double)[planeHeight] : null;
+        for (int cell = 0; cell < (columnRanges?.Length ?? 0); cell++)
+        {
+            int pixel = inverse.A < 0 ? firstCenterColumn + planeWidth - 1 - cell : firstCenterColumn + cell;
+            double start = inverse.Apply(pixel / scaleX, 0).X * sourceWidth;
+            double end = inverse.Apply((pixel + 1) / scaleX, 0).X * sourceWidth;
+            columnRanges![cell] = (cell == 0 ? 0 : Math.Min(start, end),
+                cell == planeWidth - 1 ? sourceWidth : Math.Max(start, end));
+        }
+        for (int cell = 0; cell < (rowRanges?.Length ?? 0); cell++)
+        {
+            int pixel = inverse.D < 0 ? firstCenterRow + planeHeight - 1 - cell : firstCenterRow + cell;
+            double start = (1 - inverse.Apply(0, (targetHeight - pixel) / scaleY).Y) * sourceHeight;
+            double end = (1 - inverse.Apply(0, (targetHeight - pixel - 1) / scaleY).Y) * sourceHeight;
+            rowRanges![cell] = (cell == 0 ? 0 : Math.Min(start, end),
+                cell == planeHeight - 1 ? sourceHeight : Math.Max(start, end));
+        }
         PdfBinaryAreaSampler.Column[]? binaryColumns = binaryAverage || averageStencil
-            ? PdfBinaryAreaSampler.CreateColumns(sourceWidth, planeWidth) : null;
+            ? columnRanges?.Select(range => PdfBinaryAreaSampler.Column.FromRange(range.Start, range.End, sourceWidth)).ToArray()
+                ?? PdfBinaryAreaSampler.CreateColumns(sourceWidth, planeWidth) : null;
+        PdfBinaryAreaSampler.Row[]? binaryRows = binaryAverage || averageStencil
+            ? rowRanges?.Select(range => PdfBinaryAreaSampler.Row.FromRange(range.Start, range.End, sourceHeight)).ToArray()
+            : null;
         ImageSampleConverter.AreaSpan[]? converterAreaColumns = averagePlane && !binaryAverage
-            ? ImageSampleConverter.CreateAreaSpans(sourceWidth, planeWidth) : null;
+            ? columnRanges?.Select(range => ImageSampleConverter.AreaSpan.FromRange(range.Start, range.End, sourceWidth)).ToArray()
+                ?? ImageSampleConverter.CreateAreaSpans(sourceWidth, planeWidth) : null;
         ImageSampleConverter.AreaSpan[]? converterAreaRows = averagePlane && !binaryAverage
-            ? ImageSampleConverter.CreateAreaSpans(sourceHeight, planeHeight) : null;
+            ? rowRanges?.Select(range => ImageSampleConverter.AreaSpan.FromRange(range.Start, range.End, sourceHeight)).ToArray()
+                ?? ImageSampleConverter.CreateAreaSpans(sourceHeight, planeHeight) : null;
         if (pixelAlignedPlane)
         {
             double footprintWidth = Math.Abs(inverse.A / scaleX) * sourceWidth;
@@ -5892,7 +5923,7 @@ public sealed partial class PdfPageRenderer
             PaintReducedImageRows(target, targetWidth, targetHeight, scaleX, scaleY,
                 inverse, samples, rowBytes, sourceWidth, sourceHeight, components,
                 bits, decode, colorSpace, converterAreaColumns, converterAreaRows,
-                binaryColumns, planeWidth, planeHeight, pixelAlignedPlane, columnAxis, rowAxis,
+                binaryColumns, binaryRows, planeWidth, planeHeight, pixelAlignedPlane, columnAxis, rowAxis,
                 clips, rectangularClips, left, top, paintLeft, paintTop, paintRight,
                 paintBottom, cancellationToken);
             return;
@@ -5922,11 +5953,10 @@ public sealed partial class PdfPageRenderer
                 for (int py = 0; py < planeHeight; py++)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    var row = PdfBinaryAreaSampler.Row.Create(py, sourceHeight, planeHeight);
+                    var row = binaryRows?[py] ?? PdfBinaryAreaSampler.Row.Create(py, sourceHeight, planeHeight);
                     for (int px = 0; px < planeWidth; px++)
                         alphaPlane[py * planeWidth + px] = (byte)PdfBinaryAreaSampler.Sample(
-                            samples, rowBytes, sourceWidth, sourceHeight,
-                            binaryColumns![px], row, planeWidth, planeHeight,
+                            samples, rowBytes, binaryColumns![px], row,
                             stencilPaintsOne ? 0u : stencilCoverageByte,
                             stencilPaintsOne ? stencilCoverageByte : 0u, cancellationToken);
                 }
@@ -5951,7 +5981,7 @@ public sealed partial class PdfPageRenderer
                     var converter = new ImageSampleConverter(samples, rowBytes, components,
                         bits, decode, colorSpace, targetInk, blendProfile,
                         areaColumns: converterAreaColumns, areaRows: converterAreaRows,
-                        binaryColumns: binaryColumns, preserveSpotZero: preserveReducedSpot,
+                        binaryColumns: binaryColumns, binaryRows: binaryRows, preserveSpotZero: preserveReducedSpot,
                         sharedColors: sharedColors);
                     long[]? binaryCoverage = binaryRowAverage ? new long[planeWidth] : null;
                     uint[]? binaryColors = binaryRowAverage ? new uint[planeWidth] : null;
@@ -5960,8 +5990,8 @@ public sealed partial class PdfPageRenderer
                         cancellationToken.ThrowIfCancellationRequested();
                         if (binaryAverage && py > rowStart)
                         {
-                            int firstRow = (int)((long)(py - 1) * sourceHeight / planeHeight);
-                            int lastRow = (int)(((long)(py + 1) * sourceHeight - 1) / planeHeight);
+                            int firstRow = binaryRows?[py - 1].First ?? (int)((long)(py - 1) * sourceHeight / planeHeight);
+                            int lastRow = binaryRows?[py].Last ?? (int)(((long)(py + 1) * sourceHeight - 1) / planeHeight);
                             bool identical = true;
                             for (int sourceRow = firstRow + 1; sourceRow <= lastRow; sourceRow++)
                             {
@@ -6552,6 +6582,7 @@ public sealed partial class PdfPageRenderer
         private readonly AreaSpan[]? _areaColumns;
         private readonly AreaSpan[]? _areaRows;
         private readonly PdfBinaryAreaSampler.Column[]? _binaryColumns;
+        private readonly PdfBinaryAreaSampler.Row[]? _binaryRows;
         private readonly bool _directRgb;
         private readonly bool _directRgbInk;
         private readonly bool _directGray;
@@ -6568,8 +6599,8 @@ public sealed partial class PdfPageRenderer
             int components, int bits, double[] decode, ImageColorSpace colorSpace,
             bool targetInk, PdfColorTransform? targetProfile, bool matte = false,
             AreaSpan[]? areaColumns = null, AreaSpan[]? areaRows = null,
-            PdfBinaryAreaSampler.Column[]? binaryColumns = null, bool preserveSpotZero = false,
-            ulong[]? sharedColors = null)
+            PdfBinaryAreaSampler.Column[]? binaryColumns = null, PdfBinaryAreaSampler.Row[]? binaryRows = null,
+            bool preserveSpotZero = false, ulong[]? sharedColors = null)
         {
             _samples = samples;
             _rowBytes = rowBytes;
@@ -6582,6 +6613,7 @@ public sealed partial class PdfPageRenderer
             _areaColumns = areaColumns;
             _areaRows = areaRows;
             _binaryColumns = binaryColumns;
+            _binaryRows = binaryRows;
             _preserveSpotZero = preserveSpotZero;
             _values = new double[(colorSpace.PaletteBase ?? colorSpace).Components];
             _maximum = bits >= 31 ? int.MaxValue : (1 << bits) - 1;
@@ -6786,9 +6818,9 @@ public sealed partial class PdfPageRenderer
                 _lookup![sample] = ConvertRaw(sample, 0, 0, 0);
                 _lookupSet[sample] = true;
             }
-            PdfBinaryAreaSampler.SampleRow(_samples, _rowBytes, sourceWidth, sourceHeight,
-                PdfBinaryAreaSampler.Row.Create(py, sourceHeight, planeHeight), _binaryColumns!,
-                planeHeight, _lookup![0], _lookup[1], coverage, destination, cancellationToken);
+            PdfBinaryAreaSampler.SampleRow(_samples, _rowBytes,
+                _binaryRows?[py] ?? PdfBinaryAreaSampler.Row.Create(py, sourceHeight, planeHeight), _binaryColumns!,
+                _lookup![0], _lookup[1], coverage, destination, cancellationToken);
         }
 
         internal uint ConvertArea(int px, int py, int planeWidth, int planeHeight,
@@ -6805,12 +6837,11 @@ public sealed partial class PdfPageRenderer
                 // Each converter serves one fixed output grid and owns its row range.
                 if (_binaryRowIndex != py)
                 {
-                    _binaryRow = PdfBinaryAreaSampler.Row.Create(py, sourceHeight, planeHeight);
+                    _binaryRow = _binaryRows?[py] ?? PdfBinaryAreaSampler.Row.Create(py, sourceHeight, planeHeight);
                     _binaryRowIndex = py;
                 }
-                return PdfBinaryAreaSampler.Sample(_samples, _rowBytes, sourceWidth, sourceHeight,
-                    _binaryColumns![px], _binaryRow, planeWidth, planeHeight,
-                    _lookup![0], _lookup[1], cancellationToken);
+                return PdfBinaryAreaSampler.Sample(_samples, _rowBytes,
+                    _binaryColumns![px], _binaryRow, _lookup![0], _lookup[1], cancellationToken);
             }
             AreaSpan column = _areaColumns?[px] ?? AreaSpan.Create(px, sourceWidth, planeWidth);
             AreaSpan row = _areaRows?[py] ?? AreaSpan.Create(py, sourceHeight, planeHeight);
@@ -6990,8 +7021,10 @@ public sealed partial class PdfPageRenderer
             }
 
             internal static AreaSpan FromFootprint(double center, double length, int sourceLength)
-                => new(Math.Clamp(center - length / 2, 0, sourceLength),
-                    Math.Clamp(center + length / 2, 0, sourceLength));
+                => FromRange(center - length / 2, center + length / 2, sourceLength);
+
+            internal static AreaSpan FromRange(double start, double end, int sourceLength)
+                => new(Math.Clamp(start, 0, sourceLength), Math.Clamp(end, 0, sourceLength));
 
             internal double Weight(int index) => index == First
                 ? _firstWeight : index == End - 1 ? _lastWeight : 1;

@@ -22,8 +22,8 @@ public sealed class PdfBinaryAreaSamplerTests
         for (int y = 0; y < outputHeight; y++)
         {
             PdfBinaryAreaSampler.Row row = PdfBinaryAreaSampler.Row.Create(y, height, outputHeight);
-            PdfBinaryAreaSampler.SampleRow(samples, rowBytes, width, height, row, columns,
-                outputHeight, zero, one, coverage, rowColors, default);
+            PdfBinaryAreaSampler.SampleRow(samples, rowBytes, row, columns,
+                zero, one, coverage, rowColors, default);
             for (int x = 0; x < outputWidth; x++)
             {
                 // Expand each footprint onto an exact integer coverage grid as a scalar oracle.
@@ -43,8 +43,8 @@ public sealed class PdfBinaryAreaSamplerTests
                 }
                 Assert.Equal(expected, PdfBinaryAreaSampler.Sample(samples, rowBytes, width, height,
                     x, y, outputWidth, outputHeight, zero, one, default));
-                Assert.Equal(expected, PdfBinaryAreaSampler.Sample(samples, rowBytes, width, height,
-                    columns[x], row, outputWidth, outputHeight, zero, one, default));
+                Assert.Equal(expected, PdfBinaryAreaSampler.Sample(samples, rowBytes,
+                    columns[x], row, zero, one, default));
                 Assert.Equal(expected, rowColors[x]);
             }
         }
@@ -61,12 +61,33 @@ public sealed class PdfBinaryAreaSamplerTests
         PdfBinaryAreaSampler.Row row = PdfBinaryAreaSampler.Row.Create(0, 1, 1);
         long[] coverage = new long[1];
         uint[] result = new uint[1];
-        PdfBinaryAreaSampler.SampleRow([0x80], 1, 2, 1, row, columns, 1,
+        PdfBinaryAreaSampler.SampleRow([0x80], 1, row, columns,
             0xFF000000, 0xFFFFFFFF, coverage, result, default);
         Assert.Equal(0xFF808080u, result[0]);
-        PdfBinaryAreaSampler.SampleRow([0x80], 1, 2, 1, row, columns, 1,
+        PdfBinaryAreaSampler.SampleRow([0x80], 1, row, columns,
             0xFFFFFFFF, 0xFF000000, coverage, result, default);
         Assert.Equal(0xFF808080u, result[0]);
+    }
+
+    // A range off the even grid, as an aligned plane cell under a pixel that does not start on a
+    // sample edge, weighs its end samples by the part it covers.
+    [Fact]
+    public void RangesOffTheEvenGridWeighPartialSamples()
+    {
+        // Samples 0 to 3 are 0, 1, 1, 1: half of sample 0, all of 1 and 2, a quarter of 3.
+        PdfBinaryAreaSampler.Column column = PdfBinaryAreaSampler.Column.FromRange(0.5, 3.25, 8);
+        PdfBinaryAreaSampler.Row row = PdfBinaryAreaSampler.Row.FromRange(0, 1, 1);
+        // 2.25 of 2.75 samples set: 255 * 9 / 11 = 208.6.
+        Assert.Equal(0xFFD1D1D1u, PdfBinaryAreaSampler.Sample([0x70], 1, column, row, 0xFF000000, 0xFFFFFFFF, default));
+        long[] coverage = new long[1];
+        uint[] result = new uint[1];
+        PdfBinaryAreaSampler.SampleRow([0x70], 1, row, [column], 0xFF000000, 0xFFFFFFFF, coverage, result, default);
+        Assert.Equal(0xFFD1D1D1u, result[0]);
+
+        // Half of a clear row and half of a set one: exactly half, rounded to even.
+        Assert.Equal(0xFF808080u, PdfBinaryAreaSampler.Sample([0x00, 0xFF], 1,
+            PdfBinaryAreaSampler.Column.FromRange(0, 8, 8), PdfBinaryAreaSampler.Row.FromRange(0.5, 1.5, 2),
+            0xFF000000, 0xFFFFFFFF, default));
     }
 
     [Fact]
@@ -81,8 +102,8 @@ public sealed class PdfBinaryAreaSamplerTests
         PdfBinaryAreaSampler.Row row = PdfBinaryAreaSampler.Row.Create(0, 1, 1);
         long[] coverage = [42];
         uint[] destination = [0xDEADBEEFu];
-        Assert.Throws<OperationCanceledException>(() => PdfBinaryAreaSampler.SampleRow([0x80], 1, 1, 1,
-            row, columns, 1, 0xFF000000, 0xFFFFFFFF, coverage, destination, source.Token));
+        Assert.Throws<OperationCanceledException>(() => PdfBinaryAreaSampler.SampleRow([0x80], 1,
+            row, columns, 0xFF000000, 0xFFFFFFFF, coverage, destination, source.Token));
         Assert.Equal(42, coverage[0]);
         Assert.Equal(0xDEADBEEFu, destination[0]);
     }

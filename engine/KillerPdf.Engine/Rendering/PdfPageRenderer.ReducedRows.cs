@@ -20,7 +20,8 @@ public sealed partial class PdfPageRenderer
         int rowBytes, int sourceWidth, int sourceHeight, int components, int bits,
         double[] decode, ImageColorSpace colorSpace,
         ImageSampleConverter.AreaSpan[]? columns, ImageSampleConverter.AreaSpan[]? rows,
-        PdfBinaryAreaSampler.Column[]? binaryColumns, int planeWidth, int planeHeight,
+        PdfBinaryAreaSampler.Column[]? binaryColumns, PdfBinaryAreaSampler.Row[]? binaryRows,
+        int planeWidth, int planeHeight,
         bool pixelAlignedPlane, PlaneAxis columnAxis, PlaneAxis rowAxis,
         IReadOnlyList<ClipRegion> clips, bool rectangularClips,
         int left, int top, int paintLeft, int paintTop, int paintRight, int paintBottom,
@@ -61,7 +62,7 @@ public sealed partial class PdfPageRenderer
             {
                 var converter = new ImageSampleConverter(samples, rowBytes, components,
                     bits, decode, colorSpace, targetInk, profile,
-                    areaColumns: columns, areaRows: rows, binaryColumns: binaryColumns);
+                    areaColumns: columns, areaRows: rows, binaryColumns: binaryColumns, binaryRows: binaryRows);
                 int convertedRow = -1;
                 for (int y = rowStart; y < rowEnd; y++)
                 {
