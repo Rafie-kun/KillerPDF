@@ -108,10 +108,10 @@ here only at release checkpoints.
 | M2 | Fails: +61% at 512 (246 vs 153 MiB), +18% at 2048 (322 vs 274 MiB). |
 | M3 | Fails on the JBIG2 scan (+87%, 1208 vs 646 MiB) and altona (+21%); +5% to +8% on the other three. |
 
-| Gate | Status at 21676b2 (2026-10-23) |
+| Gate | Status at 5a6ef60 (2026-10-24) |
 | --- | --- |
 | A2 | No undispositioned items on either corpus; no new outlier since the dispositioned 8065c4e run. See [the A2 record](records/A2-triage-2026-10-23.md). |
-| A3 | All 76 pages visually dispositioned at 2048: 53 equivalent, 18 accepted differences, 5 defects fixed. 44 strict outliers, each dispositioned. Open: spot data through image painting (two-spot palettes, DeviceN images and spot-colored image masks reaching their spot plates). See [the A3 record](records/A3-difficult-2026-10-23.md). |
+| A3 | All 76 pages visually dispositioned at 2048: 53 equivalent, 18 accepted differences, 5 defects fixed. 44 strict outliers, each dispositioned. Spot data now reaches the spot plates through image painting (8d94c1d). See [the A3 record](records/A3-difficult-2026-10-23.md). |
 
 The other gates keep their 096a2cf status above.
 

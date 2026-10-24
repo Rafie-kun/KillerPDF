@@ -1,6 +1,6 @@
 # KillerPDF 1.9 adversarial release review, October 23, 2026
 
-This continues the chained 1.9 release review. [The October 21 review](adversarial-review-20261021-release.md) covered `4df9b86..e0b9c6e`. This record covers everything after it in seven rounds, plus the fixes they produced, and four more rounds (H to K) on the engine changes made for the A3 gate. Each round ran the three isolated stages from the harness contract (bug-finder, defender, referee). The defender received only the bug-finder's structured report, and the referee only the two reports, checking evidence against the pinned head with `git show`. All stages were read-only: no builds, test runs or app launches.
+This continues the chained 1.9 release review. [The October 21 review](adversarial-review-20261021-release.md) covered `4df9b86..e0b9c6e`. This record covers everything after it in seven rounds, plus the fixes they produced, and five more rounds (H to L) on the engine changes made for the A3 gate. Each round ran the three isolated stages from the harness contract (bug-finder, defender, referee). The defender received only the bug-finder's structured report, and the referee only the two reports, checking evidence against the pinned head with `git show`. All stages were read-only: no builds, test runs or app launches.
 
 | Round | Range | Reviewed head | Findings | Valid | Invalid | Needs investigation |
 | --- | --- | --- | ---: | ---: | ---: | ---: |
@@ -15,6 +15,7 @@ This continues the chained 1.9 release review. [The October 21 review](adversari
 | I: repairs from H | `4d82d0c..0ba31e0` | `0ba31e0` | 3 | 3 | 0 | 0 |
 | J: repairs from I, and cc4c502 | `0ba31e0..7e04a4b` | `7e04a4b` | 4 | 4 | 0 | 0 |
 | K: repairs from J | `7e04a4b..28216a5` | `28216a5` | 4 | not adjudicated | | |
+| L: spot data through image painting | `7c5173f..8d94c1d` | `8d94c1d` | 10 | 9 | 1 | 0 |
 
 Two invalid items came from round A. BF-005 is an accurate description of a deliberate, documented trade-off. BF-019 claimed state was never read, but a UI smoke test reads it. In round C, RF-006 was invalid: the comb-overflow message never decides a page's outcome, because every path that emits it also emits a blocking message. Rounds D, E and F had no invalid items. In round G, GF-003 was invalid: a failed lease rename leaves the session no worse off than before round F, because the single-instance lock covers the gap and every later retention call and the restart retry the rename. Referee health scores: 5 for round A, 6 for round B, 6 for round C, 5 for round D, 7 for round E, 6 for round F, 8 for round G.
 
@@ -180,7 +181,32 @@ Round K's bug-finder reviewed the round J repairs. It found JF-003 (bf6ff79) and
 - KF-003 (low): every fully covered spot-stencil pixel locked the spot plates, where it had been lock-free.
 - KF-004 (low): on RGB pages with a spot shadow, a spot stencil's fully covered pixels are written straight to RGB and skip the shadow. That part predates the repair.
 
-Each repair of the spot-plate machinery in rounds H to K surfaced new interactions with groups, opacity, the RGB shadow and threading. 28216a5 was therefore reverted (8a93ac5) instead of extended, and its findings were not sent to the defender and referee, since the code they concern is gone. Spot-colored image masks return to their behavior before round J. JF-001, JF-002 and KF-004's earlier part stay open as one piece of work: carrying spot data through image painting (DeviceN images, two-spot palettes, spot stencils, the RGB shadow), with its own tests and review.
+Each repair of the spot-plate machinery in rounds H to K surfaced new interactions with groups, opacity, the RGB shadow and threading. 28216a5 was therefore reverted (8a93ac5) instead of extended, and its findings were not sent to the defender and referee, since the code they concern is gone. Spot-colored image masks return to their behavior before round J. JF-001, JF-002 and KF-004's earlier part stay open as one piece of work: carrying spot data through image painting (DeviceN images, two-spot palettes, spot stencils, the RGB shadow), with its own tests and review. Round L below closes it.
+
+## Round L: spot data through image painting
+
+8d94c1d carries spot data through image painting, the open item from rounds J and K (JF-001, JF-002 and KF-004) and the A3 gate. DeviceN images with a named spot, indexed images over two spots (altona technical row T), reduced Separation images that are not opaque, and image masks and Type 3 bitmap glyphs filled with a spot color now paint their spot plates. Each case has a test in PdfSpotImagePlateTests that fails without it. It keeps round K's constraints. KF-001, KF-002 and KF-004 each have a test that fails if the 28216a5 behavior returns; no test can observe KF-003's missing lock (BF-007 below):
+
+- KF-001: a partly covered spot pixel blends its plates by its coverage only over an opaque backdrop outside knockout and shape groups, and records group alpha the way a vector fill's antialiased edge does. Elsewhere it paints its converted ink through the compositor.
+- KF-002: a spot stencil below full opacity paints its converted ink, which knocks the plates under it out by its opacity and keeps them.
+- KF-003: covered spot-stencil pixels take the prepared plate write, with no plate lock per pixel.
+- KF-004: on RGB pages with a spot shadow, spot stencil pixels go through the compositor, which keeps the shadow current, instead of a straight RGB write.
+
+Round L reviewed `7c5173f..8d94c1d`, engine only. All three stages ran on the session's model and effort, as the review profile requires. The defender confirmed eight findings and disputed two; the referee ruled nine valid and BF-008 invalid. BF-008 noted that one two-spot palette composite case passes on the code before the range; the referee found that the case still guards the second spot reaching the composite. Health score 6.
+
+| Item | Severity | Scope | Finding | Repair |
+| --- | --- | --- | --- | --- |
+| BF-001 | high | Introduced | Spot samples were addressed by an int bit offset, which overflows once an image holds more than 256 MiB of samples. An 8-bit DeviceN spot image that large, or a reduced Separation image that is not opaque, failed the whole page, where the color plane, addressed by byte, had rendered. Palette images that large failed before the range too. | 36f3c41: a long offset for every spot sample read, including the unreduced palette and Separation reads. The test draws a 268.7 MB image. |
+| BF-002 | medium | Made reachable | A spot image below full opacity cleared the plates under it. A palette over two spots defined only by their tint transform reached that path once it kept its spots. | 02bb25a: an image below full opacity paints its converted ink, as a stencil does, and keeps the plates under it. Single-spot palettes and Separation images at their own size, which already cleared the plates, change the same way. |
+| BF-003 | medium | Introduced | On RGB pages with a spot shadow, every directly written image pixel went through the compositor, which takes the plate lock per pixel. | 911feb7: only spot colors and stencil colors with ink do; others are written straight to RGB and mark the shadow pixel stale, which takes no lock. |
+| BF-004 | low | Introduced | Spot planes were built inside knockout groups and for blend modes other than Normal, where the spot is never painted. | 911feb7 |
+| BF-005 | medium | Introduced | Each spot sampler allocated a cache of about 400 KB per row range, palettes included, and CMYK-plus-spot DeviceN images had no cache at all. | 911feb7: a compact cache made on first use, none for palettes, with a 64-bit key. |
+| BF-006 | low | Introduced | Every painted pixel of a two-spot plane allocated its second colorant. | 911feb7: equal colorants are shared per row range. |
+| BF-007 | low | Introduced | The large spot-stencil test claimed to cover the lock-free write, which no plate value can show, and ran serially on one core. | 5a6ef60: its comment says what it checks, and it paints from four rows at once. |
+| BF-009 | low | Introduced | The group test's comment claimed plate blending inside the knockout group, where the converted ink is painted. | 5a6ef60 |
+| BF-010 | low | Introduced | A test helper had a parameter no caller passed. | 5a6ef60 |
+
+BF-001 and BF-002 each have a test that fails without the repair. BF-003 to BF-006 change no output, so no test can fail first; the plate, palette and glyph tests cover what they draw. No seam can observe that a write took no lock, which BF-007 records. The round L repairs have not been through a further round.
 
 ## Related work in the same range
 
@@ -217,6 +243,8 @@ At `a296267`, after round G: the window-free app suite passed (1,266 tests), the
 The chained review stopped at round G for the app and installer work. Findings fell from 13 in round D to 6 low ones in round G, and the round G repairs are small and covered by tests or the probe.
 
 The engine chain (rounds H to K) stops at round K with its last repair reverted. Round H found five valid findings, round I three, and round J four, two of them older than the range. Round K found the JF-003 and JF-004 repairs sound. At 8a93ac5 the engine is the round J state without JF-002's repair; the engine suite passed on that code (6,871 tests, with the known load-sensitive timestamp test passing alone), and the window-free app suite passed at 8a93ac5 (1,289 tests).
+
+Round L closes the open spot item. At 8d94c1d the engine suite passed (6,904 tests) and the window-free app suite passed (1,289 tests). At 5a6ef60, after the round L repairs, the engine suite passed 6,906 of 6,907 tests: the load-sensitive timestamp test HttpTransport_DeadlineCancelsAStalledResponseBody timed out while the A2 and A3 renders ran beside it, and its class passes alone (15 tests). The window-free app suite passed at 5a6ef60 (1,289 tests). The A2 and A3 gates at 8d94c1d and 5a6ef60 are in their records.
 
 Not run, because they open windows: the UI smoke suites (including the render recovery, toolbar and certificate catalog smokes edited here), TabPlacementTests, DocumentTabLayoutTests, ComparisonBarLayoutTests and WindowFxTests. The following are verified by source-boundary tests only and still need a hands-on or VM check:
 
