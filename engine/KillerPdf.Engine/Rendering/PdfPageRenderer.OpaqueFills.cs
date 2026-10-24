@@ -108,7 +108,7 @@ public sealed partial class PdfPageRenderer
             if (nativeProcess) return false;
 
             Flush();
-            CoverageMask mask = RasterizeFill(path, evenOdd, frame, rent: true);
+            CoverageMask mask = ThinRectangle(path, frame) ?? RasterizeFill(path, evenOdd, frame, rent: true);
             try
             {
                 // Integer rectangles need pending state only when a fractional clip

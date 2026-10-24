@@ -1059,7 +1059,7 @@ public sealed partial class PdfPageRenderer
                         cancellationToken, state.AlphaIsShape);
                     return;
                 }
-                var fillClip = new ClipRegion(RasterizeFill(fillPath, evenOdd, frame));
+                var fillClip = new ClipRegion(ThinRectangle(fillPath, frame) ?? RasterizeFill(fillPath, evenOdd, frame));
                 RenderPattern(state.FillPattern, fillPath, fillClip, resources, state, depth, state.FillAlpha);
             }
 
@@ -7399,6 +7399,8 @@ public sealed partial class PdfPageRenderer
     // painted one whole pixel across its thin side, as PDFium, Poppler and Acrobat's thin-line
     // enhancement draw it; at exact coverage it came out as a faint gray line. Its long side
     // snaps to whole pixels too. Wider, rotated and zero-area rectangles keep their geometry.
+    // Every fill route uses it: ordinary fills, combined opaque process fills on ink pages, and
+    // the clip a pattern fill is painted through.
     private static CoverageMask? ThinRectangle(IReadOnlyList<List<Point>> paths, RasterFrame frame)
     {
         List<Point>? single = null;
