@@ -5892,7 +5892,9 @@ public sealed partial class PdfPageRenderer
         bool sampledSpotPlane = (target.Ink is not null || preserveRgbSpots) && !imageMask
             && preblendMatte is null && bits is > 0 and <= 16 && spotProbe?.SpotName is not null
             && Math.Clamp(stencilAlpha, 0, 1) == 1 && !preserveReducedSpot
-            && !(factor == 1 && (spotPalette is not null || imageSpotName is not null));
+            && !(factor == 1 && (spotPalette is not null || imageSpotName is not null))
+            // Knockout groups and other blend modes paint a spot pixel's converted ink anyway.
+            && knockout is null && blendMode is RendererBlendMode.Normal or RendererBlendMode.Compatible;
         SpotInkSample[]? spotPlane = paletteSpotPlane || sampledSpotPlane
             ? new SpotInkSample[checked(planeWidth * planeHeight)] : null;
         string? spotPlaneName = spotPlane is null ? null : spotProbe!.Value.SpotName;
@@ -6348,6 +6350,8 @@ public sealed partial class PdfPageRenderer
                 preparedSpotPaint = target.PrepareSpotPaint(stencilColor.SpotName!, stencilColor.AdditionalSpot?.Name);
             void PaintRows(int rowStart, int rowEnd)
             {
+                // A second spot's colorant is an object; equal tints and inks share one per range.
+                SpotColorant?[]? secondSpots = spotPlaneSecondName is null ? null : new SpotColorant?[256];
                 for (int y = rowStart; y < rowEnd; y++)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
@@ -6532,13 +6536,20 @@ public sealed partial class PdfPageRenderer
                         if (spotPlane is not null)
                         {
                             SpotInkSample spot = smoothedSpot ?? spotPlane[py * planeWidth + px];
+                            SpotColorant? second = null;
+                            if (secondSpots is not null)
+                            {
+                                int slot = (int)((spot.SecondInk ^ (uint)spot.SecondTint << 24) * 2654435761u >> 24);
+                                second = secondSpots[slot];
+                                if (second is null || second.Ink != spot.SecondInk || second.Tint != spot.SecondTint / 255d)
+                                    secondSpots[slot] = second = new SpotColorant(spotPlaneSecondName!,
+                                        spot.SecondTint / 255d, spot.SecondInk);
+                            }
                             color = color with
                             {
                                 SpotName = spotPlaneName, SpotTint = spot.Tint / 255d,
                                 SpotInk = spot.SpotInk, ProcessInk = spot.ProcessInk,
-                                SpotProcessMask = spotPlaneProcessMask,
-                                AdditionalSpot = spotPlaneSecondName is null ? null
-                                    : new SpotColorant(spotPlaneSecondName, spot.SecondTint / 255d, spot.SecondInk)
+                                SpotProcessMask = spotPlaneProcessMask, AdditionalSpot = second
                             };
                         }
                         else if (preserveReducedSpot)
@@ -6577,15 +6588,19 @@ public sealed partial class PdfPageRenderer
                             alpha = (alpha * imageMaskSample + 127) / 255;
                         }
                         if (alpha == 0) continue;
-                        // A page that simulates overprint on RGB keeps a spot shadow, which the
-                        // compositor updates; a straight RGB write would leave it stale.
-                        if (direct && alpha == 255 && clipCoverage == 255 && !target.HasRgbSpotShadow)
+                        // A page that simulates overprint on RGB keeps a spot shadow. A spot color, or
+                        // a stencil color with ink, goes through the compositor, which paints or
+                        // tracks it there; any other color is written straight to RGB and only marks
+                        // its shadow pixel stale, which takes no lock.
+                        if (direct && alpha == 255 && clipCoverage == 255
+                            && !(target.HasRgbSpotShadow && (color.SpotName is not null || color.Ink is not null)))
                         {
                             int targetOffset = target.Offset(x, y);
                             target[targetOffset] = color.Blue;
                             target[targetOffset + 1] = color.Green;
                             target[targetOffset + 2] = color.Red;
                             target[targetOffset + 3] = 255;
+                            target.InvalidateRgbSpotPixel(targetOffset);
                             directGroupAlpha?[targetOffset / 4] = 255;
                             continue;
                         }
@@ -6655,8 +6670,8 @@ public sealed partial class PdfPageRenderer
 
     /// <summary>
     /// Reads the spot data an image's colors carry, which its ink plane cannot hold. A palette
-    /// supplies it per entry; any other spot color space converts each sample. Each instance
-    /// keeps a small cache, so row ranges each own one.
+    /// supplies it per entry; any other spot color space converts each sample, through a small
+    /// cache of converted samples, so row ranges each own an instance.
     /// </summary>
     private sealed class ImageSpotSampler
     {
@@ -6668,12 +6683,16 @@ public sealed partial class PdfPageRenderer
         private readonly double[] _decode;
         private readonly ImageColorSpace _colorSpace;
         private readonly PdfColorTransform? _profile;
-        private readonly Color[]? _palette;
+        private readonly SpotRead[]? _palette;
         private readonly double[] _values;
         private readonly bool _cacheable;
-        private readonly uint[] _cacheKeys = new uint[CacheSlots];
-        private readonly bool[] _cacheValid = new bool[CacheSlots];
-        private readonly Color[] _cacheColors = new Color[CacheSlots];
+        private ulong[]? _cacheKeys;
+        private bool[]? _cacheValid;
+        private SpotRead[]? _cacheReads;
+
+        // One sample's spot data at full precision, so an averaged cell rounds once.
+        private readonly record struct SpotRead(uint Spot, uint Process, uint Second, double Tint,
+            double SecondTint);
 
         internal ImageSpotSampler(byte[] samples, int rowBytes, int components, int bits,
             double[] decode, ImageColorSpace colorSpace, PdfColorTransform? profile, Color[]? palette)
@@ -6685,47 +6704,45 @@ public sealed partial class PdfPageRenderer
             _decode = decode;
             _colorSpace = colorSpace;
             _profile = profile;
-            _palette = palette;
+            // A palette entry's spot ink falls back to its ink as the palette's spot plane always has.
+            _palette = palette?.Select(entry => new SpotRead(entry.SpotInk ?? entry.Ink ?? 0,
+                entry.ProcessInk ?? 0, entry.AdditionalSpot?.Ink ?? 0, entry.SpotTint,
+                entry.AdditionalSpot?.Tint ?? 0)).ToArray();
             _values = new double[components];
-            _cacheable = components * bits <= 32;
+            // A 64-bit key holds every sample of the common layouts, CMYK plus a spot at 8 bits
+            // among them.
+            _cacheable = palette is null && components * bits <= 64;
         }
 
-        // The spot data of one source sample, kept at full precision for averaging.
-        private void Read(int x, int y, out uint spot, out uint process, out uint second,
-            out double tint, out double secondTint)
+        private SpotRead Read(int x, int y)
         {
-            Color color = _palette is not null
-                ? _palette[Math.Min(Raw(x, y, 0), _palette.Length - 1)] : Convert(x, y);
-            spot = color.SpotInk ?? (_palette is not null ? color.Ink ?? 0 : ColorInk(color, _profile));
-            process = color.ProcessInk ?? 0;
-            second = color.AdditionalSpot?.Ink ?? 0;
-            tint = color.SpotTint;
-            secondTint = color.AdditionalSpot?.Tint ?? 0;
-        }
-
-        private Color Convert(int x, int y)
-        {
-            uint key = 0;
+            if (_palette is not null) return _palette[Math.Min(Raw(x, y, 0), _palette.Length - 1)];
+            ulong key = 0;
             int slot = 0;
             if (_cacheable)
             {
                 for (int component = 0; component < _components; component++)
                     key = key << _bits | (uint)Raw(x, y, component);
-                slot = (int)((key * 2654435761u) >> 20);
-                if (_cacheValid[slot] && _cacheKeys[slot] == key) return _cacheColors[slot];
+                slot = (int)((key * 11400714819323198485UL) >> 52);
+                _cacheKeys ??= new ulong[CacheSlots];
+                _cacheValid ??= new bool[CacheSlots];
+                _cacheReads ??= new SpotRead[CacheSlots];
+                if (_cacheValid[slot] && _cacheKeys[slot] == key) return _cacheReads[slot];
             }
             int maximum = (1 << _bits) - 1;
             for (int component = 0; component < _components; component++)
                 _values[component] = _decode[component * 2] + Raw(x, y, component) / (double)maximum
                     * (_decode[component * 2 + 1] - _decode[component * 2]);
             Color color = _colorSpace.Convert(_values);
+            var read = new SpotRead(color.SpotInk ?? ColorInk(color, _profile), color.ProcessInk ?? 0,
+                color.AdditionalSpot?.Ink ?? 0, color.SpotTint, color.AdditionalSpot?.Tint ?? 0);
             if (_cacheable)
             {
-                _cacheKeys[slot] = key;
-                _cacheColors[slot] = color;
-                _cacheValid[slot] = true;
+                _cacheKeys![slot] = key;
+                _cacheReads![slot] = read;
+                _cacheValid![slot] = true;
             }
-            return color;
+            return read;
         }
 
         private int Raw(int x, int y, int component) => (int)ReadPackedSample(_samples,
@@ -6734,8 +6751,9 @@ public sealed partial class PdfPageRenderer
         /// <summary>The spot data of the one source sample a nearest-sampled cell holds.</summary>
         internal SpotInkSample At(int x, int y)
         {
-            Read(x, y, out uint spot, out uint process, out uint second, out double tint, out double secondTint);
-            return new SpotInkSample(spot, process, second, TintByte(tint), TintByte(secondTint));
+            SpotRead read = Read(x, y);
+            return new SpotInkSample(read.Spot, read.Process, read.Second, TintByte(read.Tint),
+                TintByte(read.SecondTint));
         }
 
         private static byte TintByte(double tint) => (byte)Math.Round(Math.Clamp(tint, 0, 1) * 255);
@@ -6754,17 +6772,16 @@ public sealed partial class PdfPageRenderer
             for (int y = row.First; y < row.End; y++)
                 for (int x = column.First; x < column.End; x++)
                 {
-                    Read(x, y, out uint spot, out uint process, out uint second,
-                        out double tint, out double secondTint);
+                    SpotRead read = Read(x, y);
                     double weight = row.Weight(y) * column.Weight(x) / (row.Length * column.Length);
                     for (int channel = 0; channel < 4; channel++)
                     {
-                        channels[channel] += (byte)(spot >> (channel * 8)) * weight;
-                        channels[channel + 4] += (byte)(process >> (channel * 8)) * weight;
-                        channels[channel + 9] += (byte)(second >> (channel * 8)) * weight;
+                        channels[channel] += (byte)(read.Spot >> (channel * 8)) * weight;
+                        channels[channel + 4] += (byte)(read.Process >> (channel * 8)) * weight;
+                        channels[channel + 9] += (byte)(read.Second >> (channel * 8)) * weight;
                     }
-                    channels[8] += tint * 255 * weight;
-                    channels[13] += secondTint * 255 * weight;
+                    channels[8] += read.Tint * 255 * weight;
+                    channels[13] += read.SecondTint * 255 * weight;
                 }
             uint spotInk = 0, processInk = 0, secondInk = 0;
             for (int channel = 0; channel < 4; channel++)
