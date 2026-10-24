@@ -1,8 +1,8 @@
 # Interactive latency measurement
 
-Black-box timing of the built application for release gates S1 (cold launch to first
-paint), S2 (scroll to final quality), S3 (zoom to refined output) and M3 (live working
-set). The same procedure runs against every version passed in, so the PDFium pipeline in
+Black-box timing of the built application for S1 (cold launch to first paint),
+scrolling, S3 (zoom to refined output) and per-document working set. The same
+procedure runs against every version passed in, so the PDFium pipeline in
 1.8 and the managed engine in 1.9 are measured identically. Neither application is
 instrumented or modified.
 
@@ -41,3 +41,16 @@ evidence. These frames are not approved pixel baselines.
 Limits: capture resolution is 33 ms. Frame stability cannot distinguish a slow final
 refinement from an animation, so documents with animated content are unsuitable. The zoom
 scenario assumes the default view mode. Hosted CI compiles this project and does not run it.
+
+Measured scroll and zoom actions require a captured change before they can settle.
+Returning Home or resetting to 100% may already be at its target, so those unmeasured
+setup steps allow unchanged frames. A missed action must time out rather than
+become a zero-latency result. On an unlocked disposable test desktop, run
+`KillerPDF.LatencySmoke.exe --verify-capture-stability` to verify this with a real
+test-owned static window. It sends no keyboard input and opens no PDF.
+
+Scroll timing does not assert fit-width, final page index or final-quality pixels
+for every intermediate page, so it cannot alone certify S2. Per-document working
+set does not implement M3's five-document live-viewer scenario. Inspect captured
+page content and zoom state before accepting S1 or S3 results; successful exit
+alone does not prove the requested actions occurred.

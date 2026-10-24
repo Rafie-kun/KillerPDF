@@ -27,6 +27,8 @@ internal static class Program
         try
         {
             var options = Options.Parse(args);
+            if (options.VerifyCaptureStability)
+                return CaptureStabilityProbe.Run();
             if (options.SelfCheck)
             {
                 Console.WriteLine("Self-check: argument parsing and capture backend OK.");
@@ -174,14 +176,14 @@ internal static class Program
                 result.ScrollMs = scroll.StableMs - t0;
                 capture.Save(Path.Combine(options.OutputDirectory, "frames", $"{version.Label}-{result.Document}-{run}-scroll.png"));
                 Native.Tap(Native.VK_HOME);
-                capture.WaitForStable(clock, ScenarioTimeoutMs);
+                capture.WaitForStable(clock, ScenarioTimeoutMs, requireChange: false);
             }
 
             if (options.Zoom)
             {
                 Native.SetForegroundWindow(hwnd);
                 Native.Chord(Native.VK_CONTROL, Native.VK_0);
-                capture.WaitForStable(clock, ScenarioTimeoutMs);
+                capture.WaitForStable(clock, ScenarioTimeoutMs, requireChange: false);
                 double t0 = clock.Elapsed.TotalMilliseconds;
                 for (int i = 0; i < ZoomSteps; i++)
                 {
@@ -240,6 +242,7 @@ internal sealed class Options
     public bool Scroll { get; private set; } = true;
     public bool Zoom { get; private set; } = true;
     public bool SelfCheck { get; private set; }
+    public bool VerifyCaptureStability { get; private set; }
 
     public static Options Parse(string[] args)
     {
@@ -273,10 +276,11 @@ internal sealed class Options
                 case "--no-scroll": o.Scroll = false; break;
                 case "--no-zoom": o.Zoom = false; break;
                 case "--self-check": o.SelfCheck = true; break;
+                case "--verify-capture-stability": o.VerifyCaptureStability = true; break;
                 default: throw new ArgumentException($"Unknown argument {a}");
             }
         }
-        if (o.SelfCheck) return o;
+        if (o.SelfCheck || o.VerifyCaptureStability) return o;
         if (o.Versions.Count == 0) throw new ArgumentException("At least one --version label=exe is required.");
         if (o.Documents.Count == 0) throw new ArgumentException("At least one --doc is required.");
         if (o.OutputDirectory.Length == 0) throw new ArgumentException("--out is required.");
@@ -434,7 +438,7 @@ internal sealed class FrameCapture
         throw new TimeoutException("Page did not reach a stable painted state.");
     }
 
-    public StableResult WaitForStable(Stopwatch clock, int timeoutMs)
+    public StableResult WaitForStable(Stopwatch clock, int timeoutMs, bool requireChange = true)
     {
         double deadline = clock.Elapsed.TotalMilliseconds + timeoutMs;
         double lastChange = clock.Elapsed.TotalMilliseconds;
@@ -446,10 +450,12 @@ internal sealed class FrameCapture
             var (hash, _) = Grab();
             double now = clock.Elapsed.TotalMilliseconds;
             if (hash != _lastHash) { lastChange = now; _lastHash = hash; changed = true; }
-            if ((changed || now - began > 3000) && now - lastChange >= StableMs) return new StableResult(began, lastChange);
+            if ((changed || !requireChange) && now - lastChange >= StableMs) return new StableResult(began, lastChange);
             Thread.Sleep(IntervalMs);
         }
-        throw new TimeoutException("View did not reach a stable state.");
+        throw new TimeoutException(requireChange
+            ? "View did not change and reach a stable state."
+            : "View did not reach a stable state.");
     }
 
     public void Save(string path)
