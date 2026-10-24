@@ -248,25 +248,9 @@ namespace KillerPDF.Controls
                     var pageBounds = new Rect(canvas.PointToScreen(new Point()),
                         canvas.PointToScreen(new Point(canvas.ActualWidth, canvas.ActualHeight)));
                     if (!viewport.IntersectsWith(pageBounds) || viewer._textRuns.GetPage(file, page) is not { } runs) continue;
-                    // One canvas-to-screen mapping per page instead of two visual-tree walks per
-                    // character; the mapping is affine, so three points define it exactly.
-                    Point origin = canvas.PointToScreen(new Point());
-                    Vector unitX = canvas.PointToScreen(new Point(1, 0)) - origin;
-                    Vector unitY = canvas.PointToScreen(new Point(0, 1)) - origin;
-                    var toScreen = new Matrix(unitX.X, unitX.Y, unitY.X, unitY.Y, origin.X, origin.Y);
-                    for (int caret = 0; caret < runs.Chars.Count; caret++)
-                    {
-                        RunChar character = runs.Chars[caret];
-                        if (character.Line < 0 || character.Line >= runs.Lines.Count) continue;
-                        RunLine line = runs.Lines[character.Line];
-                        Rect rect = RedactionGeometry.PageToCanvas(character.Left, line.Bottom, character.Right, line.Top,
-                            runs.PdfWidth, runs.PdfHeight, dimensions.w, dimensions.h, viewer.EffectiveRotation(page));
-                        Rect visible = Rect.Intersect(viewport, Rect.Transform(rect, toScreen));
-                        if (visible.IsEmpty || visible.Width <= 0 || visible.Height <= 0) continue;
-                        if (result.Count > 0 && result[^1].Page == page && result[^1].End == caret)
-                            result[^1] = (page, result[^1].Start, caret + 1);
-                        else result.Add((page, caret, caret + 1));
-                    }
+                    foreach (var (start, end) in VisibleTextGeometry.VisibleCarets(runs, dimensions.w, dimensions.h,
+                                 viewer.EffectiveRotation(page), canvas.PointToScreen, viewport))
+                        result.Add((page, start, end));
                 }
                 return result;
             }
