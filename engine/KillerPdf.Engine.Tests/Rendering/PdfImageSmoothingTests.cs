@@ -110,6 +110,44 @@ public sealed class PdfImageSmoothingTests
         Assert.True(dark > 0 && light > 0);
     }
 
+    // A smoothed Separation image on a CMYK page must ramp its spot plate with its ink. The plate
+    // took its tint from the nearest sample, so a pixel whose nearest sample was blank cleared it
+    // and the ramp was cut on that side (round H, HF-004).
+    [Fact]
+    public void SmoothedSeparationImageRampsItsSpotPlate()
+    {
+        byte[] samples = [.. Enumerable.Repeat(Halves([0], [255]), 5).SelectMany(row => row)];
+        byte[] content = [.. Encoding.ASCII.GetBytes("q 20 0 0 10 0 0 cm BI /W 8 /H 5 /BPC 8 /CS /Spot ID "),
+            .. samples, .. Encoding.ASCII.GetBytes("\nEI Q")];
+        PdfDocument document = PdfDocument.Open(new PdfDocumentBuilder().AddPage(20, 10, content).Build());
+        PdfPageTreeEntry page = PdfPageTree.Read(document).Pages[0];
+        var original = Assert.IsType<PdfDictionary>(document.Resolve(page.Reference));
+        var update = new PdfIncrementalUpdateBuilder(document);
+        static PdfArray Numbers(params int[] values) => new(values.Select(value => (PdfObject)new PdfInteger(value)));
+        var separation = new PdfArray([Name("Separation"), Name("Spot"), Name("DeviceCMYK"), new PdfDictionary([
+            new(Name("FunctionType"), new PdfInteger(2)), new(Name("Domain"), Numbers(0, 1)),
+            new(Name("C0"), Numbers(0, 0, 0, 0)), new(Name("C1"), Numbers(0, 1, 0, 0)), new(Name("N"), new PdfInteger(1))])]);
+        update.ReplaceObject(page.Reference.ObjectNumber, new PdfDictionary(original
+            .Where(entry => !entry.Key.Equals(Name("Group")) && !entry.Key.Equals(Name("Resources")))
+            .Append(new(Name("Resources"), new PdfDictionary([new(Name("ColorSpace"), new PdfDictionary([new(Name("Spot"), separation)]))])))
+            .Append(new(Name("Group"), new PdfDictionary([
+                new(Name("S"), Name("Transparency")), new(Name("CS"), Name("DeviceCMYK"))])))));
+        PdfRenderedPage plate = new PdfPageRenderer(PdfDocument.Open(update.Build())).Render(0,
+            new PdfRenderOptions(20, 10, includeAnnotations: false, includeFormFields: false) { SeparationPlate = "Spot" });
+
+        double full = 255 - plate.Pixels.Span[(5 * 20 + 19) * 4];
+        Assert.True(full > 200, $"The spot plate shows no ink ({full}).");
+        double[] row = [0, 0, 0, 0, 1, 1, 1, 1];
+        for (int x = 0; x < 20; x++)
+        {
+            double sampleX = Math.Clamp((x + 0.5) / 20 * 8 - 0.5, 0, 7);
+            int x0 = (int)sampleX, x1 = Math.Min(x0 + 1, 7);
+            double expected = row[x0] + (row[x1] - row[x0]) * (sampleX - x0);
+            double actual = (255 - plate.Pixels.Span[(5 * 20 + x) * 4]) / full;
+            Assert.True(Math.Abs(actual - expected) <= 0.04, $"Pixel {x} has tint {actual:F2}, expected {expected:F2}.");
+        }
+    }
+
     // One image row: four dark samples, then four light ones.
     private static byte[] Halves(byte[] dark, byte[] light) =>
         [.. Enumerable.Repeat(dark, 4).SelectMany(sample => sample), .. Enumerable.Repeat(light, 4).SelectMany(sample => sample)];

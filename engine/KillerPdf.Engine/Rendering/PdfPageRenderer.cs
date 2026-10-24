@@ -5948,7 +5948,7 @@ public sealed partial class PdfPageRenderer
         // every color space and both RGB and ink pages are smoothed alike. Spot palettes and
         // color-key masks keep their exact samples.
         bool smoothPlane = smoothImage && plane is not null && !averagePlane && spotPlane is null
-            && !preserveReducedSpot && colorKeyMask is null && matteConverter is null;
+            && spotPalette is null && !preserveReducedSpot && colorKeyMask is null && matteConverter is null;
         byte[]? alphaPlane = null;
         try
         {
@@ -6282,6 +6282,7 @@ public sealed partial class PdfPageRenderer
                             : rowAxis.Cell(y, 1 - unitY);
                         int alpha;
                         Color color;
+                        double smoothedSpotTint = double.NaN;
                         // Full clip coverage leaves the compositor's opacity at exactly one, so the
                         // direct ink write applies under antialiased clips as well.
                         int clipCoverage = rectangularClips ? 255 : ClipCoverage(clips, x, y);
@@ -6407,6 +6408,17 @@ public sealed partial class PdfPageRenderer
                             }
                             double Mixed(int channel) => (a00 * plane![o00 + channel] + a10 * plane[o10 + channel]
                                 + a01 * plane[o01 + channel] + a11 * plane[o11 + channel]) / total;
+                            // A Separation image's plate blends with its ink, so a blank sample
+                            // cannot clear the plate on its side of an edge. Cells are source
+                            // samples here because the plane is not reduced.
+                            if (imageSpotName is not null && factor == 1 && bits is > 0 and <= 16)
+                            {
+                                double Sample(int column, int row) =>
+                                    ReadPackedSample(samples, checked(row * rowBytes * 8 + column * bits), bits);
+                                double blended = (a00 * Sample(x0, y0) + a10 * Sample(x1, y0)
+                                    + a01 * Sample(x0, y1) + a11 * Sample(x1, y1)) / total;
+                                smoothedSpotTint = decode[0] + blended / ((1 << bits) - 1) * (decode[1] - decode[0]);
+                            }
                             if (nativeImageSamples)
                             {
                                 uint packed = 0;
@@ -6464,8 +6476,8 @@ public sealed partial class PdfPageRenderer
                             }
                             else
                             {
-                                double tint = decode[0] + sample / (double)((1 << bits) - 1)
-                                    * (decode[1] - decode[0]);
+                                double tint = !double.IsNaN(smoothedSpotTint) ? smoothedSpotTint
+                                    : decode[0] + sample / (double)((1 << bits) - 1) * (decode[1] - decode[0]);
                                 color = color with { SpotName = imageSpotName, SpotTint = tint };
                             }
                         }
