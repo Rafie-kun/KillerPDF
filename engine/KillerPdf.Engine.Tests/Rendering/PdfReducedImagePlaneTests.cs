@@ -1,7 +1,9 @@
 using System.Text;
 using KillerPdf.Engine.Authoring;
 using KillerPdf.Engine.Documents;
+using KillerPdf.Engine.Objects;
 using KillerPdf.Engine.Rendering;
+using KillerPdf.Engine.Writing;
 using Xunit;
 
 namespace KillerPdf.Engine.Tests.Rendering;
@@ -73,6 +75,62 @@ public sealed class PdfReducedImagePlaneTests
         static (double, double) Sorted(double a, double b) => (Math.Min(a, b), Math.Max(a, b));
         static double Overlap(int pixel, double start, double end) =>
             Math.Max(0, Math.Min(pixel + 1, end) - Math.Max(pixel, start));
+    }
+
+    // An indexed image over a process-and-spot DeviceN on a CMYK page is averaged into the color
+    // plane and, separately, a plane of spot samples (round H, HF-003: both now average the same
+    // source under each pixel). The process plate must cover each pixel by the share of the
+    // rectangle inside it.
+    [Theory]
+    [InlineData("20 0 0 8 4.5 5.25")]
+    [InlineData("-20 0 0 8 24.5 5.25")]
+    public void AReducedSpotPaletteImageKeepsItsPhase(string matrix)
+    {
+        var samples = new byte[64 * 32];
+        for (int y = 8; y < 16; y++)
+            for (int x = 16; x < 32; x++) samples[y * 64 + x] = 1;
+        byte[] content = [.. Encoding.ASCII.GetBytes($"q {matrix} cm BI /W 64 /H 32 /BPC 8 /CS /Palette ID "),
+            .. samples, .. Encoding.ASCII.GetBytes("\nEI Q")];
+        double[] m = [.. matrix.Split(' ').Select(double.Parse)];
+        (double left, double right) = (Math.Min(m[4] + m[0] * 0.25, m[4] + m[0] * 0.5), Math.Max(m[4] + m[0] * 0.25, m[4] + m[0] * 0.5));
+        (double top, double bottom) = (20 - (m[5] + m[3] * 0.75), 20 - (m[5] + m[3] * 0.5));
+        // A plate render shows its ink as gray.
+        PdfRenderedPage page = RenderSpotPlate(content, "Cyan");
+        for (int y = 0; y < 20; y++)
+        for (int x = 0; x < 32; x++)
+        {
+            double expected = Overlap(x, left, right) * Overlap(y, top, bottom);
+            double actual = (255 - page.Pixels.Span[(y * 32 + x) * 4]) / 255d;
+            Assert.True(Math.Abs(actual - expected) <= 0.04, $"Pixel {x},{y} covers {actual:F2}, expected {expected:F2}.");
+        }
+
+        static double Overlap(int pixel, double start, double end) =>
+            Math.Max(0, Math.Min(pixel + 1, end) - Math.Max(pixel, start));
+    }
+
+    // One plate of a 32 by 20 CMYK-group page whose /Palette indexes Cyan plus a custom spot
+    // (whose alternate is the same amount of magenta): entry 0 is no ink, entry 1 full ink of both.
+    private static PdfRenderedPage RenderSpotPlate(byte[] content, string plate)
+    {
+        static PdfName Name(string value) => new(Encoding.ASCII.GetBytes(value));
+        static KeyValuePair<PdfName, PdfObject> Entry(string key, PdfObject value) => new(Name(key), value);
+        static PdfArray Numbers(params int[] values) => new(values.Select(value => (PdfObject)new PdfInteger(value)));
+        PdfDocument document = PdfDocument.Open(new PdfDocumentBuilder().AddPage(32, 20, content).Build());
+        PdfPageTreeEntry entry = PdfPageTree.Read(document).Pages[0];
+        var original = Assert.IsType<PdfDictionary>(document.Resolve(entry.Reference));
+        var update = new PdfIncrementalUpdateBuilder(document);
+        var tint = update.AddObject(new PdfStream(new PdfDictionary([
+            Entry("FunctionType", new PdfInteger(4)), Entry("Domain", Numbers(0, 1, 0, 1)),
+            Entry("Range", Numbers(0, 1, 0, 1, 0, 1, 0, 1))]), Encoding.ASCII.GetBytes("{ 0 0 }")));
+        var mixed = new PdfArray([Name("DeviceN"), new PdfArray([Name("Cyan"), Name("CustomMagenta")]), Name("DeviceCMYK"), tint]);
+        var palette = new PdfArray([Name("Indexed"), mixed, new PdfInteger(1),
+            new PdfString(new byte[] { 0, 0, 255, 255 }, PdfStringForm.Hexadecimal)]);
+        update.ReplaceObject(entry.Reference.ObjectNumber, new PdfDictionary(original
+            .Where(item => !item.Key.Equals(Name("Resources")) && !item.Key.Equals(Name("Group")))
+            .Append(Entry("Resources", new PdfDictionary([Entry("ColorSpace", new PdfDictionary([Entry("Palette", palette)]))])))
+            .Append(Entry("Group", new PdfDictionary([Entry("S", Name("Transparency")), Entry("CS", Name("DeviceCMYK"))])))));
+        return new PdfPageRenderer(PdfDocument.Open(update.Build()))
+            .Render(0, new PdfRenderOptions(32, 20, includeAnnotations: false, includeFormFields: false) { SeparationPlate = plate });
     }
 
     // A 1-bit gray image where 1 is white: all white except one black column.

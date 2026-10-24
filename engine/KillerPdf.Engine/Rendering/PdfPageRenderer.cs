@@ -6026,7 +6026,7 @@ public sealed partial class PdfPageRenderer
                                 : converter.Convert(sx, sy);
                             spotPlane?[py * planeWidth + px] = AverageSpotPalette(samples,
                                     rowBytes, bits, sourceWidth, sourceHeight, px, py,
-                                    planeWidth, planeHeight, spotPalette!);
+                                    planeWidth, planeHeight, spotPalette!, converterAreaColumns, converterAreaRows);
                             int alpha = colorKeyMask is not null && converter.MatchesColorKey(sx, sy, colorKeyMask)
                                 ? 0 : 255;
                             if (targetInk)
@@ -6527,12 +6527,14 @@ public sealed partial class PdfPageRenderer
 
     private readonly record struct SpotInkSample(uint SpotInk, uint ProcessInk, byte Tint);
 
+    // Averages a palette's spot ink over the same source as the color plane's cell, so the
+    // plates and the process ink of an aligned plane stay in phase.
     private static SpotInkSample AverageSpotPalette(byte[] samples, int rowBytes, int bits,
         int sourceWidth, int sourceHeight, int px, int py, int planeWidth, int planeHeight,
-        Color[] palette)
+        Color[] palette, ImageSampleConverter.AreaSpan[]? columns, ImageSampleConverter.AreaSpan[]? rows)
     {
-        var column = ImageSampleConverter.AreaSpan.Create(px, sourceWidth, planeWidth);
-        var row = ImageSampleConverter.AreaSpan.Create(py, sourceHeight, planeHeight);
+        var column = columns?[px] ?? ImageSampleConverter.AreaSpan.Create(px, sourceWidth, planeWidth);
+        var row = rows?[py] ?? ImageSampleConverter.AreaSpan.Create(py, sourceHeight, planeHeight);
         Span<double> channels = stackalloc double[9];
         for (int y = row.First; y < row.End; y++)
             for (int x = column.First; x < column.End; x++)
