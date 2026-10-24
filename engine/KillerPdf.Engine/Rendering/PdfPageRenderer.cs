@@ -6274,7 +6274,10 @@ public sealed partial class PdfPageRenderer
                         if (!string.Equals(spotName, spotPalette[index].SpotName, StringComparison.Ordinal))
                             spotName = null;
                 }
-                else if (factor == 1 || preserveReducedSpot) spotName = imageSpotName;
+                // A reduced palette over one spot paints that spot's name on every pixel, so it can
+                // use the prepared plate write too instead of locking the plates per pixel.
+                else if (factor == 1 || preserveReducedSpot)
+                    spotName = imageSpotName ?? (preserveReducedSpot ? reducedPaletteSpotName : null);
                 if (spotName is not null)
                     preparedSpotPaint = target.PrepareSpotPaint(spotName);
             }

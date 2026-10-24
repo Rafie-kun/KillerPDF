@@ -142,15 +142,37 @@ public sealed class PdfReducedImagePlaneTests
         Assert.Equal(255, page.Pixels.Span[(1 * 32 + 30) * 4]);
     }
 
-    // One plate of a 32 by 20 CMYK-group page whose /Palette indexes Cyan plus a custom spot
+    // A reduced spot-palette image large enough for the prepared, lock-free spot plate write (round
+    // J, JF-003: it used to lock the plates per pixel) must fill its plate from parallel rows the
+    // same as smaller images do.
+    [Fact]
+    public void ALargeReducedSpotPaletteImageFillsItsSpotPlate()
+    {
+        const int size = 1536;
+        var samples = new byte[size / 8 * size];
+        for (int y = 0; y < size; y++)
+            for (int x = 0; x < size / 2; x++) samples[y * (size / 8) + x / 8] |= (byte)(0x80 >> (x % 8));
+        byte[] content = [.. Encoding.ASCII.GetBytes($"q 512 0 0 512 0 0 cm BI /W {size} /H {size} /BPC 1 /CS /Palette ID "),
+            .. samples, .. Encoding.ASCII.GetBytes("\nEI Q")];
+        PdfRenderedPage plate = RenderSpotPlate(content, "CustomMagenta", separationBase: true,
+            width: 512, height: 512, parallelism: Environment.ProcessorCount);
+        for (int y = 0; y < 512; y += 37)
+        {
+            Assert.True(plate.Pixels.Span[(y * 512 + 100) * 4] < 30, $"Row {y} has no spot ink on the left half.");
+            Assert.Equal(255, plate.Pixels.Span[(y * 512 + 400) * 4]);
+        }
+    }
+
+    // One plate of a CMYK-group page (32 by 20 unless given) whose /Palette indexes Cyan plus a custom spot
     // (whose alternate is the same amount of magenta): entry 0 is no ink, entry 1 full ink of both.
     // With a Separation base, the palette indexes the custom spot alone.
-    private static PdfRenderedPage RenderSpotPlate(byte[] content, string plate, bool separationBase = false)
+    private static PdfRenderedPage RenderSpotPlate(byte[] content, string plate, bool separationBase = false,
+        int width = 32, int height = 20, int parallelism = 1)
     {
         static PdfName Name(string value) => new(Encoding.ASCII.GetBytes(value));
         static KeyValuePair<PdfName, PdfObject> Entry(string key, PdfObject value) => new(Name(key), value);
         static PdfArray Numbers(params int[] values) => new(values.Select(value => (PdfObject)new PdfInteger(value)));
-        PdfDocument document = PdfDocument.Open(new PdfDocumentBuilder().AddPage(32, 20, content).Build());
+        PdfDocument document = PdfDocument.Open(new PdfDocumentBuilder().AddPage(width, height, content).Build());
         PdfPageTreeEntry entry = PdfPageTree.Read(document).Pages[0];
         var original = Assert.IsType<PdfDictionary>(document.Resolve(entry.Reference));
         var update = new PdfIncrementalUpdateBuilder(document);
@@ -169,7 +191,7 @@ public sealed class PdfReducedImagePlaneTests
             .Append(Entry("Resources", new PdfDictionary([Entry("ColorSpace", new PdfDictionary([Entry("Palette", palette)]))])))
             .Append(Entry("Group", new PdfDictionary([Entry("S", Name("Transparency")), Entry("CS", Name("DeviceCMYK"))])))));
         return new PdfPageRenderer(PdfDocument.Open(update.Build()))
-            .Render(0, new PdfRenderOptions(32, 20, includeAnnotations: false, includeFormFields: false) { SeparationPlate = plate });
+            .Render(0, new PdfRenderOptions(width, height, includeAnnotations: false, includeFormFields: false) { SeparationPlate = plate, MaximumParallelism = parallelism });
     }
 
     // An image edge exactly on a pixel center: that pixel is not painted, so the source under it
