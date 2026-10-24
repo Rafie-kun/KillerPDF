@@ -1,6 +1,6 @@
 # KillerPDF 1.9 adversarial release review, October 23, 2026
 
-This continues the chained 1.9 release review. [The October 21 review](adversarial-review-20261021-release.md) covered `4df9b86..e0b9c6e`. This record covers everything after it in seven rounds, plus the fixes they produced. Each round ran the three isolated stages from the harness contract (bug-finder, defender, referee). The defender received only the bug-finder's structured report, and the referee only the two reports, checking evidence against the pinned head with `git show`. All stages were read-only: no builds, test runs or app launches.
+This continues the chained 1.9 release review. [The October 21 review](adversarial-review-20261021-release.md) covered `4df9b86..e0b9c6e`. This record covers everything after it in seven rounds, plus the fixes they produced, and four more rounds (H to K) on the engine changes made for the A3 gate. Each round ran the three isolated stages from the harness contract (bug-finder, defender, referee). The defender received only the bug-finder's structured report, and the referee only the two reports, checking evidence against the pinned head with `git show`. All stages were read-only: no builds, test runs or app launches.
 
 | Round | Range | Reviewed head | Findings | Valid | Invalid | Needs investigation |
 | --- | --- | --- | ---: | ---: | ---: | ---: |
@@ -11,6 +11,10 @@ This continues the chained 1.9 release review. [The October 21 review](adversari
 | E: repairs from D | `104f047..29cd072` | `29cd072` | 7 | 7 | 0 | 0 |
 | F: repairs from E | `29cd072..e5e4e10` | `e5e4e10` | 5 | 5 | 0 | 0 |
 | G: repairs from F | `e5e4e10..a44cbe1` | `a44cbe1` | 7 | 6 | 1 | 0 |
+| H: A3 rendering fixes (engine only) | `c6e13fd..4d82d0c` | `4d82d0c` | 5 | 5 | 0 | 0 |
+| I: repairs from H | `4d82d0c..0ba31e0` | `0ba31e0` | 3 | 3 | 0 | 0 |
+| J: repairs from I, and cc4c502 | `0ba31e0..7e04a4b` | `7e04a4b` | 4 | 4 | 0 | 0 |
+| K: repairs from J | `7e04a4b..28216a5` | `28216a5` | 4 | not adjudicated | | |
 
 Two invalid items came from round A. BF-005 is an accurate description of a deliberate, documented trade-off. BF-019 claimed state was never read, but a UI smoke test reads it. In round C, RF-006 was invalid: the comb-overflow message never decides a page's outcome, because every path that emits it also emits a blocking message. Rounds D, E and F had no invalid items. In round G, GF-003 was invalid: a failed lease rename leaves the session no worse off than before round F, because the single-instance lock covers the gap and every later retention call and the restart retry the rename. Referee health scores: 5 for round A, 6 for round B, 6 for round C, 5 for round D, 7 for round E, 6 for round F, 8 for round G.
 
@@ -130,6 +134,54 @@ Round G reviewed the round F repairs. Every valid finding is low. GF-001, GF-002
 | GF-006 | low | A copy with several backup errors listed the later ones as separate lines, and a copy that also failed to reopen was listed twice. | a296267: each document is one line, with its errors joined. |
 | GF-007 | low | The setup commit-point test could pass with the commit moved inside the failure branch. | e815749: the test pins the commit as its own statement after the failure throw. Setup's swap and rollback still have no behavioral test; that needs the VM. |
 
+## Round H: valid findings and repairs
+
+Round H reviewed the engine changes made for the A3 difficult-set gate ([A3 record](A3-difficult-2026-10-23.md)): `c6e13fd..4d82d0c`, limited to `engine/`, which excludes another session's tab styling commit 40e88a5. The defender confirmed all five findings; the referee ruled all five valid, lowered HF-003 to low, and corrected HF-003's trigger. Health score 6. Each repair has a test that fails without it.
+
+| Item | Severity | Finding | Repair |
+| --- | --- | --- | --- |
+| HF-001 | medium | Smoothing sent enlarged 8-bit gray, RGB and CMYK images on CMYK pages to the converted plane, which holds at most four million cells. A larger image, such as a full-page scan printed at 600 dpi, was averaged to half resolution and drawn unsmoothed, blockier than before the range. | 8e543d4: gray and RGB images keep their full-resolution copies unless the plane can hold every sample. Narrowed in round I (IF-001). |
+| HF-002 | medium | The one-pixel minimum for thin filled rules applied only to ordinary fills. Opaque DeviceCMYK fills on CMYK pages and pattern fills rasterized the rule at exact coverage, so CMYK rules on PDF/X pages stayed faint beside solid gray ones. | 1e39a5a: every fill route uses the rule. |
+| HF-003 | low | For indexed spot palettes on CMYK pages (over a process-and-spot DeviceN) or on RGB spot-shadow pages, the plane of spot samples still divided the source evenly while 4d82d0c aligned the color plane, so the two disagreed by up to half a pixel. | 62f47ef: both planes use the same spans. The difference only reached the page once cc4c502 (below) let these images create their spot plates; with that in place, the test fails without the repair on both the Cyan and the spot plate. |
+| HF-004 | low | A smoothed Separation image took its spot tint from the nearest sample while its ink blended four, so a blank nearest sample cleared the spot plate and cut the ramp on that side of each edge. | 0ba31e0: the tint blends from the same samples and weights. Indexed spot palettes are not smoothed. |
+| HF-005 | low | An image edge exactly on a pixel center: the plane counted that pixel as a cell, the paint loops skip it, and the edge content folded into it vanished. | cc403cc: centers on the edge are left out of the count, so the content lands in the last painted pixel. |
+
+Found while testing HF-003, and fixed in cc4c502: on a CMYK page with no spot plates yet, images took a direct ink write that skips spot bookkeeping. Only opaque single-spot images were kept out of it, so an image whose indexed palette uses a spot, over a Separation or a process-and-spot DeviceN, or a reduced spot image, painted its process ink but never created its spot plate. The separation preview showed nothing for it, and later overprints could not see that spot. The composite was right. The test fails without the fix for both palette kinds, reduced and unreduced. This is also why HF-003 first showed no effect: its spot samples were dropped before they reached a plate.
+
+## Round I: valid findings and repairs
+
+Round I reviewed the round H repairs. The defender confirmed all three; the referee ruled all three valid. Health score 7. Each repair has a test that fails without it.
+
+| Item | Severity | Finding | Repair |
+| --- | --- | --- | --- |
+| IF-001 | medium | 8e543d4 opened all four direct image copies to enlarged images too large for the plane, but only the gray and RGB copies read every sample. The sampled copies read the plane's reduced grid, so a large image with a soft mask lost its smoothing and was drawn from every second sample. | b11951b: the sampled copies are closed to smoothed images again. |
+| IF-002 | low | A 1-bit indexed spot palette builds its color plane through the binary sampler, which has no area spans, so 62f47ef left its spot samples on the even split. | d7e82d2: the spot samples take spans from the aligned ranges whichever sampler builds the color plane. |
+| IF-003 | low | cc403cc left on-edge centers out of the cell count, so an image exactly one pixel across with both edges on centers had no cell: both axes fell back to the even split, the painted pixel showed half the width, and the other axis lost its first rows. | 7e04a4b: such an axis keeps one cell holding the whole source. |
+
+The referee also noted, as before the range: an 8-bit CMYK image too large for the plane, without a soft mask, on a CMYK page is drawn from the half-resolution averaged plane. 8e543d4's message claimed full resolution for CMYK images too; that holds for gray and RGB only. Open, not a regression.
+
+## Round J: valid findings and repairs
+
+Round J reviewed the round I repairs and cc4c502, which no earlier round covered. The defender disputed all four as predating the range; the referee ruled all four valid and recorded the scope of each. Health score 8 for the range itself.
+
+| Item | Severity | Scope | Finding | Repair |
+| --- | --- | --- | --- | --- |
+| JF-001 | medium | Predates the range | A non-indexed DeviceN image with a named spot (process plus spot, or two spots), or a reduced Separation image that is not opaque, never reaches its spot plate: the image pipeline carries no spot data for them. cc4c502's message overstated its reach ("any image that carries a spot"); it covers spot palettes and single-spot images. | Open. It needs per-sample spot data through the image plane, the same work as two-spot palettes (A3 open item). |
+| JF-002 | medium | Predates the range | On CMYK pages an image mask's fill color lost its spot when converted to ink, so spot-colored stencils and Type 3 bitmap glyphs put the alternate on the process plates, left their plate blank and cleared any spot under them. | 28216a5, reverted in 8a93ac5 after round K (below). Open, with JF-001. |
+| JF-003 | low | Made reachable by cc4c502 | A reduced palette over one spot took the full path but never got the prepared, lock-free plate write. | bf6ff79: the spot name comes from the palette. Output unchanged; no speed-up was measurable on a 512 by 512 render. |
+| JF-004 | low | Made reachable by b11951b | Smoothing from a plane reduced to fit placed each cell at an even share of the image and weighted it by a neighbor's mask value: hidden colors bled into soft-mask edges as a fringe. | 8592911: each cell sits at the source sample it holds and weighs by that sample's mask value. |
+
+## Round K: the JF-002 repair, reverted
+
+Round K's bug-finder reviewed the round J repairs. It found JF-003 (bf6ff79) and JF-004 (8592911) correct and complete. All four of its findings concern JF-002's repair (28216a5):
+
+- KF-001 (medium): partly covered spot-stencil pixels took a new branch that skipped the transparency group's alpha and shape bookkeeping, so inside a non-isolated or knockout group they were dropped. Introduced by the repair.
+- KF-002 (medium): a spot stencil painted with an opacity below 1 now kept its spot, which moved it off the path that preserves existing spot plates, so it cleared them. Introduced by the repair.
+- KF-003 (low): every fully covered spot-stencil pixel locked the spot plates, where it had been lock-free.
+- KF-004 (low): on RGB pages with a spot shadow, a spot stencil's fully covered pixels are written straight to RGB and skip the shadow. That part predates the repair.
+
+Each repair of the spot-plate machinery in rounds H to K surfaced new interactions with groups, opacity, the RGB shadow and threading. 28216a5 was therefore reverted (8a93ac5) instead of extended, and its findings were not sent to the defender and referee, since the code they concern is gone. Spot-colored image masks return to their behavior before round J. JF-001, JF-002 and KF-004's earlier part stay open as one piece of work: carrying spot data through image painting (DeviceN images, two-spot palettes, spot stencils, the RGB shadow), with its own tests and review.
+
 ## Related work in the same range
 
 - Render completeness: page-list thumbnails no longer go blank for pages that render with warnings (e149280). Twenty-two engine render warnings were reviewed as spec fallbacks or extraction-only, so they no longer block publication ([render diagnostics review](render-diagnostics-review-20261023.md); ad2f9ba, 0c4b63b, 9b919cd).
@@ -162,7 +214,9 @@ At `a44cbe1`, after round F: the window-free app suite passed (1,264 tests), the
 
 At `a296267`, after round G: the window-free app suite passed (1,266 tests), the cross-process temp-cleanup probe passed all seven checks, the engine is still unchanged since `4265a73`, the app, launcher and UI smoke Release builds have zero errors, and the launcher localization check passed for 20 languages.
 
-The chained review stops at round G. Findings fell from 13 in round D to 6 low ones in round G, and the round G repairs are small and covered by tests or the probe.
+The chained review stopped at round G for the app and installer work. Findings fell from 13 in round D to 6 low ones in round G, and the round G repairs are small and covered by tests or the probe.
+
+The engine chain (rounds H to K) stops at round K with its last repair reverted. Round H found five valid findings, round I three, and round J four, two of them older than the range. Round K found the JF-003 and JF-004 repairs sound. At 8a93ac5 the engine is the round J state without JF-002's repair; the engine suite passed on that code (6,871 tests, with the known load-sensitive timestamp test passing alone), and the window-free app suite passed at 8a93ac5 (1,289 tests).
 
 Not run, because they open windows: the UI smoke suites (including the render recovery, toolbar and certificate catalog smokes edited here), TabPlacementTests, DocumentTabLayoutTests, ComparisonBarLayoutTests and WindowFxTests. The following are verified by source-boundary tests only and still need a hands-on or VM check:
 

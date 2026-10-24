@@ -37,7 +37,7 @@ Status values: defect (1.9 wrong, fix with regression test), accepted (1.9 right
 | conformance 512/2048 | GWG173_JBIG2_compression_X4.pdf | 4.5% | 7.9% | 0.5% | accepted | Ghent 17.3 says no X must be visible; 1.9 shows none, oracles show a bold X. |
 | conformance 512 | iep-as-published.pdf | 3.5% | 3.1% | 1.4% | minor | Text density; 1.9 slightly heavier than PDFium, poppler lightest. |
 | conformance 512 | GWG220, GWG221 | 10% | 12% | 2% | accepted | Known: 1.9 avoids the error crosses PDFium paints (prior disposition in PERFORMANCE.md). |
-| conformance 512 | CompactedPDFSyntaxMatrix.pdf | 18.6% | 18.0% | 4.8% | accepted | Known: source-defined 0.33/0.66 opacity; oracles paint opaque (prior disposition). |
+| conformance 512 | CompactedPDFSyntaxMatrix.pdf | 18.6% | 18.0% | 4.8% | defect, fixed | Corrected 2026-10-23 by the A3 review: the table rules are 0.34 pt filled rectangles that 1.9 painted at area coverage (gray) where both oracles paint one solid pixel. Fixed in 7117c1f (owner decision: rules thinner than a pixel draw at least one solid pixel); at 1024 it now agrees (2.9% against PDFium, where the two oracles differ by 7.2%). The earlier "source-defined 0.33/0.66 opacity" note belongs to CompactedPDFSyntaxTest.pdf, which 1.9 and poppler render as the source asks and PDFium paints opaque (accepted). |
 | conformance 512 | Ghent overprint and spot patches (GWG010, 011, 020, 030, 031, 040, 041, 080, 081, 082, 120, 190 to 192) | 2% to 11% | | | review | 1.9 simulates overprint; PDFium and poppler mostly do not. Each needs its Ghent README reading. |
 
 Remaining outlier and all-disagree rows in each set's `outliers.md` are not yet dispositioned.
