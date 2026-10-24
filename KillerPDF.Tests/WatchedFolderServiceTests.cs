@@ -767,7 +767,8 @@ public sealed class WatchedFolderServiceTests
 
     private sealed class FolderFixture : IDisposable
     {
-        public string Root { get; } = Path.Combine(@"C:\Users\steve\scratch\killerpdf-watched-folders-20261020",
+        // The system temp folder, so the tests run on any machine and account.
+        public string Root { get; } = Path.Combine(Path.GetTempPath(), "killerpdf-watched-folders",
             "service-tests-" + Guid.NewGuid().ToString("N"));
         public string Input => Path.Combine(Root, "input");
         public string Output => Path.Combine(Root, "output");
