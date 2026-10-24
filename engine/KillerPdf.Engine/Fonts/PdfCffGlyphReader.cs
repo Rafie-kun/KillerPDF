@@ -15,6 +15,8 @@ public sealed class PdfCffGlyphReader
     private readonly double[][] _matrices;
     private readonly string[] _strings;
     private readonly bool _cid;
+    // Sibling renderers share this reader; active glyphs describe recursion in one lookup.
+    private readonly Lock _cacheGate = new();
     private readonly Dictionary<int, PdfGlyphBounds?> _cache = [];
     private readonly Dictionary<int, PdfGlyphOutline?> _outlineCache = [];
     private readonly HashSet<int> _activeOutlines = [];
@@ -45,6 +47,7 @@ public sealed class PdfCffGlyphReader
     public PdfGlyphBounds? GetBounds(int glyph)
     {
         if (glyph < 0 || glyph >= _glyphs.Length) return null;
+        using var scope = _cacheGate.EnterScope();
         if (_cache.TryGetValue(glyph, out var cached)) return cached;
         PdfGlyphBounds? result;
         try { result = new Interpreter(_global, _local[_fd[glyph]], _matrices[_fd[glyph]],
@@ -59,6 +62,7 @@ public sealed class PdfCffGlyphReader
     public PdfGlyphOutline? GetOutline(int glyph)
     {
         if (glyph < 0 || glyph >= _glyphs.Length) return null;
+        using var scope = _cacheGate.EnterScope();
         if (_outlineCache.TryGetValue(glyph, out var cached)) return cached;
         if (!_activeOutlines.Add(glyph)) return null;
         PdfGlyphOutline? result;

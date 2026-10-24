@@ -15,6 +15,35 @@ public sealed class PdfCffGlyphReaderTests
     }
 
     [Fact]
+    public async Task ConcurrentColdGlyphLookupsKeepOutlineAndBounds()
+    {
+        var program = new List<byte>([.. Numbers(0, 0), 21]);
+        for (int segment = 0; segment < 20_000; segment++)
+            program.AddRange([.. Numbers(1, 1), 5]);
+        program.Add(14);
+        var serial = Assert.IsType<PdfCffGlyphReader>(PdfCffGlyphReader.TryRead(Build([.. program])));
+        Assert.Equal(20_001, Assert.Single(Assert.IsType<PdfGlyphOutline>(serial.GetOutline(1)).Contours).Points.Count);
+        Assert.Equal(new PdfGlyphBounds(0, 0, 20_000, 20_000), serial.GetBounds(1));
+        var font = Assert.IsType<PdfCffGlyphReader>(PdfCffGlyphReader.TryRead(Build([.. program])));
+        using var start = new Barrier(8);
+        Task<(PdfGlyphOutline? Outline, PdfGlyphBounds? Bounds)>[] requests = [.. Enumerable.Range(0, 8)
+            .Select(_ => Task.Factory.StartNew(() =>
+            {
+                if (!start.SignalAndWait(TimeSpan.FromSeconds(10)))
+                    throw new TimeoutException("Concurrent glyph readers did not start.");
+                return (font.GetOutline(1), font.GetBounds(1));
+            }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default))];
+
+        foreach (var result in await Task.WhenAll(requests))
+        {
+            PdfGlyphContour contour = Assert.Single(Assert.IsType<PdfGlyphOutline>(result.Outline).Contours);
+            Assert.Equal(20_001, contour.Points.Count);
+            Assert.Equal(new PdfGlyphPoint(20_000, 20_000, true), contour.Points[^1]);
+            Assert.Equal(new PdfGlyphBounds(0, 0, 20_000, 20_000), result.Bounds);
+        }
+    }
+
+    [Fact]
     public void ReadsNamedLineOutlineAndDoesNotIncludeUnusedMove()
     {
         byte[] program = [.. Numbers(10, 20), 21, .. Numbers(100, 0, 0, 200, -100, 0), 5,
