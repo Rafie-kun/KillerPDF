@@ -730,10 +730,5 @@ internal static class PdfEngineBurn
     private static int NormalizeRotation(int rotation) => ((rotation % 360) + 360) % 360;
 
     private static void Replace(string path, byte[] result)
-    {
-        string fullPath = Path.GetFullPath(path);
-        string temporary = Path.Combine(Path.GetDirectoryName(fullPath)!, $".{Path.GetFileName(path)}.{Guid.NewGuid():N}.tmp");
-        try { File.WriteAllBytes(temporary, result); File.Move(temporary, fullPath, true); }
-        finally { if (File.Exists(temporary)) File.Delete(temporary); }
-    }
+        => AtomicFileOutput.Write(path, result);
 }

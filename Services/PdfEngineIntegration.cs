@@ -2695,17 +2695,5 @@ internal static class PdfEngineIntegration
     }
 
     private static void ReplaceWithBuiltResult(string path, byte[] result)
-    {
-        string directory = Path.GetDirectoryName(Path.GetFullPath(path))!;
-        string temporaryPath = Path.Combine(directory, $".{Path.GetFileName(path)}.{Guid.NewGuid():N}.tmp");
-        try
-        {
-            File.WriteAllBytes(temporaryPath, result);
-            File.Move(temporaryPath, path, overwrite: true);
-        }
-        finally
-        {
-            if (File.Exists(temporaryPath)) File.Delete(temporaryPath);
-        }
-    }
+        => AtomicFileOutput.Write(path, result);
 }
