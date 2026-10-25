@@ -195,6 +195,13 @@ not actual process restart, physical tab dragging or Windows sign-out.
 
 ## Windows session-ending protection
 
+The updater state regression uses
+`--verify-update-window-state APP_DLL APP_XAML OUTPUT_DIRECTORY --session-isolation`.
+It opens a synthetic PDF in a secondary document window, rotates it through the actual
+thumbnail menu, and verifies that the primary window's existing update-host contract
+detects those unsaved edits. The source bytes must remain unchanged. This is an isolated
+WPF runtime check; it does not install an update or certify relaunch behavior.
+
 Use an owned UI VM and a fresh output directory with
 `--verify-session-ending APP_DLL APP_XAML OUTPUT_DIRECTORY --session-isolation`.
 The isolated host exposes WPF's protected session-ending extension through a public

@@ -102,6 +102,8 @@ internal static class TableExportSmoke
                 return SessionEndingControlsSmoke.Run(owner, assembly, appPath, folder);
             if (windowSessionCase.StartsWith("--verify-session-ending", StringComparison.Ordinal))
                 return SessionEndingSmoke.Run(owner, assembly, appPath, folder, windowSessionCase);
+            if (windowSessionCase == "--verify-update-window-state")
+                return UpdateWindowSmoke.Run(owner, assembly, appPath, folder);
             if (windowSession) return WindowSessionSmoke.Run(owner, assembly, appPath, folder, windowSessionCase);
             if (windowLifecycle) return WindowLifecycleSmoke.Run(owner, assembly, appPath, folder);
             if (toolbarAvailability) return ToolbarAvailabilitySmoke.Run(owner, appPath, folder);

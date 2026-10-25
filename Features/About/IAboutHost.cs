@@ -42,7 +42,7 @@ namespace KillerPDF.Features
         bool UpdateVisible { set; }
         bool UpdateEnabled { set; }
 
-        /// <summary>Blocks a self-update while there are unsaved changes.</summary>
+        /// <summary>Blocks a self-update while any document window has unsaved changes.</summary>
         bool IsDirty { get; }
 
         /// <summary>The document to reopen after the update relaunches, if any.</summary>

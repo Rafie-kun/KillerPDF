@@ -179,8 +179,9 @@ namespace KillerPDF
 
         bool IAboutHost.UpdateEnabled { set => AboutUpdateButton.IsEnabled = value; }
 
-        bool IAboutHost.IsDirty => Viewer.IsDirtyRef || ViewerB.IsDirtyRef
-            || AllSessions().Any(session => session.IsDirty);
+        bool IAboutHost.IsDirty => Application.Current.Windows.OfType<MainWindow>().Any(window =>
+            window.Viewer.IsDirtyRef || window.ViewerB.IsDirtyRef
+                || window.AllSessions().Any(session => session.IsDirty));
 
         string? IAboutHost.FileToReopen => _originalFile ?? _currentFile;
 
