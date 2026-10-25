@@ -2419,74 +2419,82 @@ public sealed partial class PdfPageRenderer
             foreach (PdfObject annotationValue in annotations)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                if (Resolve(annotationValue) is not PdfDictionary annotation) continue;
-                if (annotation.TryGetValue(Name("OC"), out PdfObject? optionalContent)
-                    && !EvaluateOptionalContent(optionalContent,
-                        hiddenOptionalContentGroups, 0)) continue;
-                bool widget = IsName(annotation, "Subtype", "Widget");
-                if (widget ? !options.IncludeFormFields : !options.IncludeAnnotations) continue;
-                if (!options.IncludeRedactionMarks && IsName(annotation, "Subtype", "Redact")) continue;
-                if (!options.IncludeMeasurementAnnotations && IsMeasurementAnnotation(annotation)) continue;
-                // ISO 32000-2 12.5.3: a Hidden annotation is neither displayed nor printed,
-                // whatever its other flags say.
-                if (annotation.TryGetValue(Name("F"), out PdfObject? flagsValue)
-                    && Resolve(flagsValue) is PdfInteger flags && (flags.Value & 2) != 0) continue;
-                TryGetAppearance(annotation, out PdfStream? appearance);
-                if (widget)
+                try
                 {
-                    try
+                    if (Resolve(annotationValue) is not PdfDictionary annotation) continue;
+                    if (annotation.TryGetValue(Name("OC"), out PdfObject? optionalContent)
+                        && !EvaluateOptionalContent(optionalContent,
+                            hiddenOptionalContentGroups, 0)) continue;
+                    bool widget = IsName(annotation, "Subtype", "Widget");
+                    if (widget ? !options.IncludeFormFields : !options.IncludeAnnotations) continue;
+                    if (!options.IncludeRedactionMarks && IsName(annotation, "Subtype", "Redact")) continue;
+                    if (!options.IncludeMeasurementAnnotations && IsMeasurementAnnotation(annotation)) continue;
+                    // ISO 32000-2 12.5.3: a Hidden annotation is neither displayed nor printed,
+                    // whatever its other flags say.
+                    if (annotation.TryGetValue(Name("F"), out PdfObject? flagsValue)
+                        && Resolve(flagsValue) is PdfInteger flags && (flags.Value & 2) != 0) continue;
+                    TryGetAppearance(annotation, out PdfStream? appearance);
+                    if (widget)
                     {
-                        appearance = RequestedFieldAppearance(annotation, appearance,
-                            pageResources, diagnostics, cancellationToken);
+                        try
+                        {
+                            appearance = RequestedFieldAppearance(annotation, appearance,
+                                pageResources, diagnostics, cancellationToken);
+                        }
+                        catch (Exception error) when (_document.UsesCompatibilityRecovery
+                            && error is FormatException or InvalidOperationException or NotSupportedException)
+                        {
+                            diagnostics.Add("Invalid form-field regeneration data retained the saved appearance.");
+                        }
                     }
-                    catch (Exception error) when (_document.UsesCompatibilityRecovery
-                        && error is FormatException or InvalidOperationException or NotSupportedException)
-                    {
-                        diagnostics.Add("Invalid form-field regeneration data retained the saved appearance.");
-                    }
+                    if (appearance is null && !widget) appearance = SynthesizedAppearance(annotation);
+                    if (appearance is null) continue;
+                    if (!annotation.TryGetValue(Name("Rect"), out PdfObject? rectangleValue)) continue;
+                    PdfArray rectangle = ResolveArray(rectangleValue, 4, "Annotation rectangle");
+                    double rectangleLeft = Number(Resolve(rectangle[0]));
+                    double rectangleBottom = Number(Resolve(rectangle[1]));
+                    double rectangleRight = Number(Resolve(rectangle[2]));
+                    double rectangleTop = Number(Resolve(rectangle[3]));
+                    if (rectangleLeft > rectangleRight)
+                        (rectangleLeft, rectangleRight) = (rectangleRight, rectangleLeft);
+                    if (rectangleBottom > rectangleTop)
+                        (rectangleBottom, rectangleTop) = (rectangleTop, rectangleBottom);
+                    if (!appearance.Dictionary.TryGetValue(Name("BBox"), out PdfObject? boundsValue))
+                        continue;
+                    PdfArray bounds = ResolveArray(boundsValue, 4, "Appearance bounding box");
+                    double boundsLeft = Number(Resolve(bounds[0]));
+                    double boundsBottom = Number(Resolve(bounds[1]));
+                    double boundsRight = Number(Resolve(bounds[2]));
+                    double boundsTop = Number(Resolve(bounds[3]));
+                    Matrix appearanceMatrix = appearance.Dictionary.TryGetValue(
+                        Name("Matrix"), out PdfObject? matrixValue)
+                        ? Matrix.From(ResolveArray(matrixValue, 6, "Appearance matrix"))
+                        : Matrix.Identity;
+                    Point[] transformed =
+                    [
+                        appearanceMatrix.Apply(boundsLeft, boundsBottom),
+                        appearanceMatrix.Apply(boundsRight, boundsBottom),
+                        appearanceMatrix.Apply(boundsRight, boundsTop),
+                        appearanceMatrix.Apply(boundsLeft, boundsTop)
+                    ];
+                    double left = transformed.Min(point => point.X);
+                    double bottom = transformed.Min(point => point.Y);
+                    double width = transformed.Max(point => point.X) - left;
+                    double height = transformed.Max(point => point.Y) - bottom;
+                    if (width <= 0 || height <= 0) continue;
+                    double scaleWidth = (rectangleRight - rectangleLeft) / width;
+                    double scaleHeight = (rectangleTop - rectangleBottom) / height;
+                    var placement = new Matrix(scaleWidth, 0, 0, scaleHeight,
+                        rectangleLeft - left * scaleWidth,
+                        rectangleBottom - bottom * scaleHeight);
+                    RenderForm(appearance, pageResources,
+                        initialState with { Transform = placement.Then(initialState.Transform) }, 0);
                 }
-                if (appearance is null && !widget) appearance = SynthesizedAppearance(annotation);
-                if (appearance is null) continue;
-                if (!annotation.TryGetValue(Name("Rect"), out PdfObject? rectangleValue)) continue;
-                PdfArray rectangle = ResolveArray(rectangleValue, 4, "Annotation rectangle");
-                double rectangleLeft = Number(Resolve(rectangle[0]));
-                double rectangleBottom = Number(Resolve(rectangle[1]));
-                double rectangleRight = Number(Resolve(rectangle[2]));
-                double rectangleTop = Number(Resolve(rectangle[3]));
-                if (rectangleLeft > rectangleRight)
-                    (rectangleLeft, rectangleRight) = (rectangleRight, rectangleLeft);
-                if (rectangleBottom > rectangleTop)
-                    (rectangleBottom, rectangleTop) = (rectangleTop, rectangleBottom);
-                if (!appearance.Dictionary.TryGetValue(Name("BBox"), out PdfObject? boundsValue))
-                    continue;
-                PdfArray bounds = ResolveArray(boundsValue, 4, "Appearance bounding box");
-                double boundsLeft = Number(Resolve(bounds[0]));
-                double boundsBottom = Number(Resolve(bounds[1]));
-                double boundsRight = Number(Resolve(bounds[2]));
-                double boundsTop = Number(Resolve(bounds[3]));
-                Matrix appearanceMatrix = appearance.Dictionary.TryGetValue(
-                    Name("Matrix"), out PdfObject? matrixValue)
-                    ? Matrix.From(ResolveArray(matrixValue, 6, "Appearance matrix"))
-                    : Matrix.Identity;
-                Point[] transformed =
-                [
-                    appearanceMatrix.Apply(boundsLeft, boundsBottom),
-                    appearanceMatrix.Apply(boundsRight, boundsBottom),
-                    appearanceMatrix.Apply(boundsRight, boundsTop),
-                    appearanceMatrix.Apply(boundsLeft, boundsTop)
-                ];
-                double left = transformed.Min(point => point.X);
-                double bottom = transformed.Min(point => point.Y);
-                double width = transformed.Max(point => point.X) - left;
-                double height = transformed.Max(point => point.Y) - bottom;
-                if (width <= 0 || height <= 0) continue;
-                double scaleWidth = (rectangleRight - rectangleLeft) / width;
-                double scaleHeight = (rectangleTop - rectangleBottom) / height;
-                var placement = new Matrix(scaleWidth, 0, 0, scaleHeight,
-                    rectangleLeft - left * scaleWidth,
-                    rectangleBottom - bottom * scaleHeight);
-                RenderForm(appearance, pageResources,
-                    initialState with { Transform = placement.Then(initialState.Transform) }, 0);
+                catch (Exception error) when (_document.UsesCompatibilityRecovery
+                    && error is FormatException or InvalidOperationException or NotSupportedException)
+                {
+                    diagnostics.Add("An invalid annotation was skipped.");
+                }
             }
         }
 
