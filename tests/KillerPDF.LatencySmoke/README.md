@@ -70,3 +70,21 @@ A timed-out sample retains its error row and last captured frame (when a window
 was captured), writes the partial summary, and stops the phase with exit 1.
 Unstarted samples remain unmeasured. Inspect raw errors before using statistics;
 the summary's means describe only completed valid measurements.
+
+## Five-document live memory
+
+Add `--live-viewer-memory` with exactly five distinct `--doc` inputs, version
+labels and the normal warmup/run counts. Use an English, unlocked test desktop.
+This separate M3 workflow keeps one measured application process open, forwards
+the other four files through its ordinary single-instance entry, selects Fit
+Width, and sends Page Down until UI Automation reports the last page of each
+document. It records title, page count, key count and a settled final frame for
+every document, then requires all five tab titles to remain visible.
+
+Final working set and Windows peak working set are sampled after the five
+documents, with no forced collection. JSON retains every document and sample;
+CSV retains warmups, memory and errors. Inputs are hashed before and after.
+Any missing title, incorrect page state, foreground loss or timeout invalidates
+the phase. This traversal does not certify S2's final-quality output on every
+intermediate page. Use the existing runner for S1/S3; this mode has its own
+preflight and must not overlap other measurements.

@@ -31,12 +31,16 @@ internal static class Program
             var options = Options.Parse(args);
             if (options.VerifyCaptureStability)
                 return CaptureStabilityProbe.Run();
+            if (options.VerifyForegroundCapture)
+                return ForegroundCaptureProbe.Run();
             if (options.SelfCheck)
             {
                 Console.WriteLine("Self-check: argument parsing and capture backend OK.");
                 using var probe = new Bitmap(8, 8, PixelFormat.Format32bppArgb);
                 return 0;
             }
+            if (options.LiveViewerMemory)
+                return LiveViewerMemory.Run(options);
 
             if (Process.GetProcessesByName("KillerPDF").Length > 0)
             {
@@ -249,6 +253,8 @@ internal sealed class Options
     public bool Zoom { get; private set; } = true;
     public bool SelfCheck { get; private set; }
     public bool VerifyCaptureStability { get; private set; }
+    public bool VerifyForegroundCapture { get; private set; }
+    public bool LiveViewerMemory { get; private set; }
 
     public static Options Parse(string[] args)
     {
@@ -283,10 +289,12 @@ internal sealed class Options
                 case "--no-zoom": o.Zoom = false; break;
                 case "--self-check": o.SelfCheck = true; break;
                 case "--verify-capture-stability": o.VerifyCaptureStability = true; break;
+                case "--verify-foreground-capture": o.VerifyForegroundCapture = true; break;
+                case "--live-viewer-memory": o.LiveViewerMemory = true; break;
                 default: throw new ArgumentException($"Unknown argument {a}");
             }
         }
-        if (o.SelfCheck || o.VerifyCaptureStability) return o;
+        if (o.SelfCheck || o.VerifyCaptureStability || o.VerifyForegroundCapture) return o;
         if (o.Versions.Count == 0) throw new ArgumentException("At least one --version label=exe is required.");
         if (o.Documents.Count == 0) throw new ArgumentException("At least one --doc is required.");
         if (o.OutputDirectory.Length == 0) throw new ArgumentException("--out is required.");
@@ -542,6 +550,7 @@ internal static class Native
     [DllImport("user32.dll")] public static extern bool ClientToScreen(IntPtr hWnd, ref POINT lpPoint);
     [DllImport("user32.dll")] public static extern bool MoveWindow(IntPtr hWnd, int x, int y, int w, int h, bool repaint);
     [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hWnd);
+    [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
     [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr hWnd);
     [DllImport("user32.dll")] private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);
 
