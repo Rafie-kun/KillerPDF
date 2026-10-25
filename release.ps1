@@ -98,6 +98,12 @@ function Assert-ReleaseReadme([string]$Text) {
     }
 }
 
+function Assert-ReleaseStoreListing([string]$Text) {
+    if ($Text -match 'PDFium') {
+        throw 'The Store listing still contains a stale PDFium reference.'
+    }
+}
+
 function Assert-ReleaseArtifactVersion([string]$Path, [string]$ExpectedVersion) {
     if (-not [IO.File]::Exists($Path)) { throw "Release artifact not found at: $Path" }
     $actualVersion = [Reflection.AssemblyName]::GetAssemblyName($Path).Version.ToString()
@@ -156,6 +162,7 @@ function Test-ReleaseArtifacts(
 
 Write-Host "`n==> Release metadata preflight..." -ForegroundColor Cyan
 Assert-ReleaseReadme ([IO.File]::ReadAllText((Join-Path $PSScriptRoot 'README.md')))
+Assert-ReleaseStoreListing ([IO.File]::ReadAllText((Join-Path $PSScriptRoot 'store\KillerPDF-Store-listing.csv')))
 $csprojRaw = Get-Content -Path $proj -Raw
 if ($csprojRaw -notmatch '<Version>([0-9]+\.[0-9]+\.[0-9]+)</Version>') {
     throw "No <Version>x.y.z</Version> found in KillerPDF.csproj"

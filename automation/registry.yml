@@ -1,5 +1,12 @@
 version: 1
 scripts:
+  release_store_listing_tests:
+    path: build/Test-ReleaseStoreListing.ps1
+    purpose: Exercise the stale-renderer listing guard without release or Store actions.
+    inputs: Current release script and Store CSV, plus synthetic text fixtures.
+    outputs: Assertions and exit status.
+    failure_behavior: Throw when stale PDFium text is accepted or current listing text is refused.
+    mutates: none
   release_readme_tests:
     path: build/Test-ReleaseReadme.ps1
     purpose: Exercise the release README guard without invoking release actions.
