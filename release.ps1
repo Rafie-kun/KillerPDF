@@ -88,6 +88,16 @@ function Get-DefaultBranch {
     return $null
 }
 
+function Assert-ReleaseReadme([string]$Text) {
+    if ($Text -match 'Development\s+build') {
+        throw 'README still contains Development build text.'
+    }
+    $sourceLink = 'https://github\.com/SteveTheKiller/KillerPDF/releases/download/v(?<sourceVersion>[0-9]+\.[0-9]+\.[0-9]+)/KillerPDF-\k<sourceVersion>-src\.zip'
+    if ($Text -notmatch $sourceLink) {
+        throw 'README is missing a versioned KillerPDF corresponding-source archive link.'
+    }
+}
+
 function Assert-ReleaseArtifactVersion([string]$Path, [string]$ExpectedVersion) {
     if (-not [IO.File]::Exists($Path)) { throw "Release artifact not found at: $Path" }
     $actualVersion = [Reflection.AssemblyName]::GetAssemblyName($Path).Version.ToString()
@@ -145,6 +155,7 @@ function Test-ReleaseArtifacts(
 }
 
 Write-Host "`n==> Release metadata preflight..." -ForegroundColor Cyan
+Assert-ReleaseReadme ([IO.File]::ReadAllText((Join-Path $PSScriptRoot 'README.md')))
 $csprojRaw = Get-Content -Path $proj -Raw
 if ($csprojRaw -notmatch '<Version>([0-9]+\.[0-9]+\.[0-9]+)</Version>') {
     throw "No <Version>x.y.z</Version> found in KillerPDF.csproj"

@@ -117,4 +117,10 @@ The independent source investigator confirms a no-progress symbol-dictionary loo
 
 Working evidence remains under `C:/Users/steve/scratch/kp-release-plan-20261025` while execution is active. Summarize durable results here before task cleanup; raw logs and binaries do not belong in validation.
 
+## Release README
+
+E-004/F-003 now has a feature-oriented README with editing limits, setup/help links, build and test prerequisites, GPLv3 licensing and the exact versioned corresponding-source URL expected by release automation. Counts are checked against the current 13 theme and 20 locale files; local links resolve. No speed, memory or rendering-parity claim is introduced. The source archive URL is prepared for release, not claimed as an already published asset.
+
+The release metadata preflight invokes a public README guard before build/sign/publish phases. Its negative fixture first fails because stale development text is accepted, then passes after enforcement. The fixtures reject case variants of development text, missing source links and inconsistent version pairs, while preserving the existing future-version source-link rewrite format. The same fixture script passes in Windows PowerShell 5.1 and PowerShell 7. Only the function is loaded through the parsed script definition; the release script itself is never executed. This closes the bounded README/preflight item, not the separate Store, help or technical-page work.
+
 Worker cleanup of `C:/Users/steve/scratch/kp-release-plan-20261025/macro` was rejected before execution as `blocked by policy`. The worker had resolved the target and checked containment before `Remove-Item -LiteralPath ... -Recurse -Force`. No retry or alternative deletion route is attempted. This temporary folder remains preserved.

@@ -1,5 +1,12 @@
 version: 1
 scripts:
+  release_readme_tests:
+    path: build/Test-ReleaseReadme.ps1
+    purpose: Exercise the release README guard without invoking release actions.
+    inputs: Current release script and README, plus synthetic text fixtures.
+    outputs: Assertions and exit status.
+    failure_behavior: Throw on stale development text or an absent or inconsistent source archive link.
+    mutates: none
   payload_security:
     path: build/payload-security.ps1
     purpose: Select exact owned binaries, validate Authenticode, and generate final-byte manifests.
