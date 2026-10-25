@@ -30,6 +30,55 @@ public sealed class PdfType1GlyphReaderTests
     }
 
     [Fact]
+    public async Task ConcurrentColdGlyphLookupsKeepType1BoundsAndOutlines()
+    {
+        const int horizontalSegments = 5000;
+        byte[] Program(int height)
+        {
+            var program = new List<byte>([.. Number(0), .. Number(600), 13,
+                .. Number(0), .. Number(0), 21]);
+            for (int segment = 0; segment < horizontalSegments; segment++)
+                program.AddRange([.. Number(1), .. Number(0), 5]);
+            program.AddRange([.. Number(0), .. Number(height), 5,
+                .. Number(-horizontalSegments), .. Number(0), 5,
+                .. Number(0), .. Number(-height), 5, 9, 14]);
+            return [.. program];
+        }
+
+        var glyphs = new[]
+        {
+            (Name: "A", Program: Program(200), Bounds: new PdfGlyphBounds(0, 0, horizontalSegments, 200)),
+            (Name: "B", Program: Program(210), Bounds: new PdfGlyphBounds(0, 0, horizontalSegments, 210)),
+            (Name: "C", Program: Program(220), Bounds: new PdfGlyphBounds(0, 0, horizontalSegments, 220)),
+            (Name: "D", Program: Program(230), Bounds: new PdfGlyphBounds(0, 0, horizontalSegments, 230)),
+            (Name: "E", Program: Program(240), Bounds: new PdfGlyphBounds(0, 0, horizontalSegments, 240)),
+            (Name: "F", Program: Program(250), Bounds: new PdfGlyphBounds(0, 0, horizontalSegments, 250)),
+            (Name: "G", Program: Program(260), Bounds: new PdfGlyphBounds(0, 0, horizontalSegments, 260)),
+            (Name: "H", Program: Program(270), Bounds: new PdfGlyphBounds(0, 0, horizontalSegments, 270))
+        };
+        PdfExtractionFont font = Font(glyphs[0].Program, glyphName: glyphs[0].Name,
+            additionalGlyphs: glyphs[1..].Select(glyph => (glyph.Name, glyph.Program)).ToArray());
+        using var start = new Barrier(glyphs.Length);
+        Task<(int Index, PdfGlyphBounds? Bounds, PdfGlyphOutline? Outline)>[] requests =
+            [.. glyphs.Select((_, index) => Task.Factory.StartNew(() =>
+            {
+                if (!start.SignalAndWait(TimeSpan.FromSeconds(10)))
+                    throw new TimeoutException("Concurrent Type1 glyph readers did not start.");
+                uint code = (uint)(65 + index);
+                return (index, font.GetGlyphBounds(code), font.GetGlyphOutline(code));
+            }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default))];
+
+        foreach (var result in await Task.WhenAll(requests))
+        {
+            Assert.Equal(glyphs[result.Index].Bounds, result.Bounds);
+            PdfGlyphContour contour = Assert.Single(Assert.IsType<PdfGlyphOutline>(result.Outline).Contours);
+            Assert.Equal(horizontalSegments + 4, contour.Points.Count);
+            Assert.Equal(new PdfGlyphPoint(0, 0, true), contour.Points[0]);
+            Assert.Equal(new PdfGlyphPoint(0, 0, true), contour.Points[^1]);
+        }
+    }
+
+    [Fact]
     public void FindsActualBezierExtremaInsteadOfControlPointBounds()
     {
         byte[] program = [.. Number(0), .. Number(600), 13, .. Number(0), .. Number(0), 21,

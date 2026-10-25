@@ -13,6 +13,7 @@ internal sealed class PdfType1GlyphReader
     private readonly Dictionary<int, byte[]> _subrs = [];
     private readonly Dictionary<string, PdfGlyphBounds?> _bounds = new(StringComparer.Ordinal);
     private readonly Dictionary<string, PdfGlyphOutline?> _outlines = new(StringComparer.Ordinal);
+    private readonly Lock _cacheGate = new();
     private readonly string[] _standardNames = PdfFontTables.EncodingNames("StandardEncoding")!;
     private int _lenIv = 4;
     private double _xx = 1, _xy, _yx, _yy = 1, _tx, _ty;
@@ -84,6 +85,7 @@ internal sealed class PdfType1GlyphReader
 
     private PdfGlyphOutline? GlyphOutline(string name, int depth)
     {
+        using var scope = _cacheGate.EnterScope();
         if (_outlines.TryGetValue(name, out var cached)) return cached;
         if (depth >= 16 || !_glyphs.TryGetValue(name, out byte[]? program)) return null;
         try
@@ -104,6 +106,7 @@ internal sealed class PdfType1GlyphReader
 
     private PdfGlyphBounds? Bounds(string name, int depth)
     {
+        using var scope = _cacheGate.EnterScope();
         if (_bounds.TryGetValue(name, out var cached)) return cached;
         if (depth >= 16 || !_glyphs.TryGetValue(name, out byte[]? program)) return null;
         try
