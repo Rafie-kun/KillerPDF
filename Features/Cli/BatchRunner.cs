@@ -25,7 +25,7 @@ namespace KillerPDF.Features
     //
     // Built for the veraPDF validation harness (validation/): baseline the
     // corpus, --batch-resave it, validate the output tree, then diff with
-    // validation/Compare-VeraPDF.ps1. The claim being tested is "a KillerPDF
+    // tools/validation/Compare-VeraPDF.ps1. The claim being tested is "a KillerPDF
     // save does not degrade standards conformance".
     //
     // Exit codes: 0 = every file OK or SKIP, 1 = at least one FAIL
