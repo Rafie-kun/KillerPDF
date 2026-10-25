@@ -224,6 +224,80 @@ public sealed class PdfContentRedactionTests
     }
 
     [Fact]
+    public void RedactionDoesNotRetainOriginalFormBytesThroughInheritedResources()
+    {
+        PdfDocument document = PdfDocument.Open(CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 /Resources << /XObject << /Fm1 6 0 R >> >> >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 5 0 R >>",
+            Helvetica,
+            Stream("q 1 0 0 1 100 500 cm /Fm1 Do Q"),
+            Stream("BT /F1 12 Tf 10 10 Td (Inherited FORMSECRET text) Tj ET",
+                "/Type /XObject /Subtype /Form /BBox [0 0 400 100] /Resources << /Font << /F1 4 0 R >> >>")
+        ]));
+        PdfRedactionRegion region = Region(document, 0, "FORMSECRET");
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, [region]);
+
+        Assert.True(result.Verification.Succeeded);
+        PdfDocument output = PdfDocument.Open(result.Document);
+        Assert.DoesNotContain("FORMSECRET", Letters(output, 0));
+        Assert.Contains("Inherited", Letters(output, 0));
+        PdfRedactionVerificationReport objectReport = PdfContentRedaction.Verify(
+            result.Document, [region], [], ["FORMSECRET"]);
+        Assert.True(objectReport.Succeeded, string.Join("; ", objectReport.Findings.Select(finding => finding.Message)));
+    }
+
+    [Fact]
+    public void RefusesOriginalFormsRetainedOnlyByAnUnusedSiblingResource()
+    {
+        PdfDocument document = PdfDocument.Open(CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R 4 0 R] /Count 2 /Resources << /XObject << /Fm1 6 0 R >> >> >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 5 0 R >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 400 500] /Contents 7 0 R >>",
+            Stream("q 1 0 0 1 100 500 cm /Fm1 Do Q"),
+            Stream("BT /F1 12 Tf 10 10 Td (Inherited FORMSECRET text) Tj ET",
+                "/Type /XObject /Subtype /Form /BBox [0 0 400 100] /Resources << /Font << /F1 8 0 R >> >>"),
+            Stream(""),
+            Helvetica
+        ]));
+        PdfRedactionRegion region = Region(document, 0, "FORMSECRET");
+
+        PdfRedactionVerificationException error = Assert.Throws<PdfRedactionVerificationException>(() =>
+            PdfContentRedaction.Apply(document, [region]));
+
+        Assert.Contains(error.Report.Findings, finding => finding.Code == "RetainedSourceStream");
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void PreservesAnInvokedInheritedFormOnAnUntouchedSibling(bool softMask)
+    {
+        PdfDocument document = PdfDocument.Open(CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R 4 0 R] /Count 2 /Resources << /XObject << /Fm1 6 0 R >> /ExtGState << /GS1 << /SMask << /S /Luminosity /G 6 0 R >> >> >> >> >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 5 0 R >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 400 500] /Contents 7 0 R >>",
+            Stream("q 1 0 0 1 100 500 cm /Fm1 Do Q"),
+            Stream("BT /F1 12 Tf 10 10 Td (Inherited FORMSECRET text) Tj ET",
+                "/Type /XObject /Subtype /Form /BBox [0 0 400 100] /Group << /S /Transparency /CS /DeviceGray >> /Resources << /Font << /F1 8 0 R >> >>"),
+            Stream(softMask ? "q /GS1 gs 0 0 400 500 re f Q" : "q 1 0 0 1 40 200 cm /Fm1 Do Q"),
+            Helvetica
+        ]));
+        PdfRedactionRegion region = Region(document, 0, "FORMSECRET");
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, [region]);
+
+        PdfDocument output = PdfDocument.Open(result.Document);
+        Assert.DoesNotContain("FORMSECRET", Letters(output, 0));
+        if (!softMask) Assert.Contains("FORMSECRET", Letters(output, 1));
+        Assert.Equal(PdfPageInformation.Read(document)[1], PdfPageInformation.Read(output)[1]);
+        AssertKeptLettersUnmoved(document, output, 1, []);
+    }
+
+    [Fact]
     public void RewritesSharedFormsOnlyForTheRedactedPage()
     {
         var objects = new List<string>

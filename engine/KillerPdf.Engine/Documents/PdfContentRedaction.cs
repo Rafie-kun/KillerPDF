@@ -248,7 +248,9 @@ public static partial class PdfContentRedaction
         var fonts = new Dictionary<PdfDictionary, PdfExtractionFont?>(ReferenceEqualityComparer.Instance);
         var removedAnnotations = new HashSet<int>();
         var removedWidgets = new HashSet<int>();
+        var retiredStreams = new HashSet<int>();
         var touchedContent = new Dictionary<int, (HashSet<int> Mcids, bool Whole)>();
+        MaterializeInheritedResources(document, tree, update, byPage.Keys.ToHashSet(), cancellationToken);
         foreach ((int pageIndex, PdfContentBounds[] pageRegions) in byPage.OrderBy(item => item.Key))
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -258,6 +260,9 @@ public static partial class PdfContentRedaction
             var rewriter = new ContentRewriter(document, update, pageRegions, raster, fonts, cancellationToken,
                 fills: [.. covers[pageIndex].Select(cover => cover.FillColor ?? DefaultFill)]);
             List<PdfContentInstruction> content = rewriter.RewritePage(page, geometry);
+            if (page.Dictionary.TryGetValue(ContentsName, out PdfObject? originalContents))
+                CollectSourceStreams(document, originalContents, retiredStreams);
+            retiredStreams.UnionWith(rewriter.RetiredSourceStreams);
             if (!raster && rewriter.Reasons.Count != 0)
                 throw new InvalidOperationException($"Page {pageIndex + 1} changed while it was being redacted.");
             var instructions = new List<PdfContentInstruction>(content.Count + 16) { Op("q") };
@@ -314,7 +319,7 @@ public static partial class PdfContentRedaction
             update.ReplaceObject(tree.CatalogReference.ObjectNumber, new PdfDictionary(catalogEntries));
 
         PdfDocument edited = PdfDocument.Open(update.Build());
-        return PdfDocumentWriter.Write(edited, new PdfDocumentWriteOptions
+        byte[] output = PdfDocumentWriter.Write(edited, new PdfDocumentWriteOptions
         {
             PruneUnreachableObjects = true,
             AllowSignatureInvalidation = options.AllowSignatureInvalidation,
@@ -324,6 +329,8 @@ public static partial class PdfContentRedaction
             PreserveDocumentIdentifiers = !options.ClearDocumentMetadata,
             CompressUnfilteredStreams = true
         });
+        VerifyRetiredStreams(PdfDocument.Open(output), retiredStreams, cancellationToken);
+        return output;
     }
 
     /// <summary>
@@ -1098,6 +1105,7 @@ public static partial class PdfContentRedaction
         private int _instructions;
 
         internal HashSet<string> Reasons { get; } = new(StringComparer.Ordinal);
+        internal HashSet<int> RetiredSourceStreams { get; } = [];
         internal HashSet<int> TouchedMcids { get; } = [];
         internal bool FormMarkedContentTouched { get; private set; }
         internal int RemovedGlyphs { get; private set; }
@@ -1649,6 +1657,7 @@ public static partial class PdfContentRedaction
                     }
                     localChanged = true;
                     if (update is null) return;
+                    CollectSourceStreams(document, value, RetiredSourceStreams);
                     var entries = xobject.Dictionary
                         .Where(entry => entry.Key.ValueAsLatin1() is not ("Length" or "Filter" or "DecodeParms"))
                         .ToDictionary(entry => entry.Key, entry => entry.Value);
@@ -1794,7 +1803,7 @@ public static partial class PdfContentRedaction
             return font;
         }
 
-        private int? ColorComponents(ResourceScope scope, PdfName name)
+        internal int? ColorComponents(ResourceScope scope, PdfName name)
         {
             string value = name.ValueAsLatin1();
             int? standard = value switch
