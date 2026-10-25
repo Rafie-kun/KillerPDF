@@ -171,3 +171,24 @@ isolated settings. It does not bypass dirty-document prompts, launch normal app
 startup, register a protocol, change installed settings or use personal files.
 It verifies shared process/window lifetime, not the physical tab-drag gesture or
 external-open IPC routing.
+
+## Document-window session restoration
+
+Use an owned UI VM and a fresh output directory. Run
+`--verify-window-session APP_DLL APP_XAML OUTPUT_DIRECTORY --session-isolation`.
+The host isolates portable settings and working PDFs before services initialize,
+suppresses process startup and registration, and lets normal window restoration run.
+It opens two synthetic PDFs in separate windows, closes them and constructs a new
+window from saved settings. Both documents must return together, with the original
+window's size and position and unchanged source files.
+
+Use `--verify-window-session-secondary-first` for the reverse close order,
+`--verify-window-session-manual-close` to verify a manually closed tab stays closed,
+`--verify-window-session-forget` to check disabling remembered files restores an
+empty window, or `--verify-window-session-close-all` to exercise the tab menu's
+Close All action after a previous document window closes.
+These modes require `--session-isolation`, not `--startup-smoke`,
+because startup-smoke skips normal restoration. Single-document windows hide the
+tab strip; the manual-close assertion checks the remaining filename and absence of
+a visible strip. The fixture verifies window reconstruction in one isolated process,
+not actual process restart, physical tab dragging or Windows sign-out.

@@ -316,6 +316,38 @@ namespace KillerPDF
             }
         }
 
+        private static readonly HashSet<string> ClosedWindowFiles = new(StringComparer.OrdinalIgnoreCase);
+        internal static bool HadMultipleDocumentWindows { get; private set; }
+
+        internal static bool RegisterDocumentWindow(MainWindow window)
+        {
+            bool first = !Current.Windows.OfType<MainWindow>().Any(other => !ReferenceEquals(other, window));
+            if (first)
+            {
+                ClosedWindowFiles.Clear();
+                HadMultipleDocumentWindows = false;
+            }
+            else HadMultipleDocumentWindows = true;
+            return first;
+        }
+
+        internal static string[] RestorableWindowFiles() => [.. Current.Windows.OfType<MainWindow>()
+            .SelectMany(window => window.FilesForSessionRestore()).Concat(ClosedWindowFiles)
+            .Where(File.Exists).Distinct(StringComparer.OrdinalIgnoreCase)];
+
+        internal static void RememberClosedWindow(MainWindow window)
+        {
+            if (GetSetting("RememberOpenFiles") == "0") ClosedWindowFiles.Clear();
+            else ClosedWindowFiles.UnionWith(window.FilesForSessionRestore());
+        }
+
+        internal static void ForgetClosedWindowFile(string? path)
+        {
+            if (path is not null) ClosedWindowFiles.Remove(path);
+        }
+
+        internal static void ForgetClosedWindowFiles() => ClosedWindowFiles.Clear();
+
         internal static MainWindow? PrimaryWindow(MainWindow? excluded = null)
         {
             MainWindow[] windows = Current?.Windows.OfType<MainWindow>()
@@ -1260,7 +1292,8 @@ namespace KillerPDF
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "KillerPDF", "Temp");
         private static readonly Lazy<ProcessTempFiles> SessionTempFiles = new(() => new(
-            IsStartupSmoke ? Path.Combine(SmokeDataRoot, "Temp") : UserTempDir));
+            AppDataPaths.StartupSmokeRoot is { } isolatedRoot ? Path.Combine(isolatedRoot, "Temp")
+                : IsStartupSmoke ? Path.Combine(SmokeDataRoot, "Temp") : UserTempDir));
         internal static string TempDir => SessionTempFiles.Value.DirectoryPath;
 
         /// <summary>

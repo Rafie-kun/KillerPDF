@@ -65,6 +65,13 @@ scripts:
     outputs: Stage diagnostics and a result containing the tested assembly hash.
     failure_behavior: Return nonzero on an incorrect primary window, missing working files, wrong saved page identity or changed source files.
     mutates: temporary-fixture-files-and-test-owned-windows-only
+  window_session_smoke:
+    path: tests/KillerPDF.UiSmoke/WindowSessionSmoke.cs
+    purpose: Verify combined document restoration, original-window geometry, manually closed tabs and remembered-file privacy across document windows.
+    inputs: Built app DLL, matching App.xaml, fresh evidence directory and --session-isolation on an owned UI VM.
+    outputs: Stage diagnostics and a result containing the tested assembly hash.
+    failure_behavior: Return nonzero on incorrect restored documents, geometry, privacy or changed source files.
+    mutates: temporary-fixture-files-and-test-owned-windows-only
   print_cancellation_smoke:
     path: tests/KillerPDF.DocumentStateSmoke/Program.cs
     purpose: Exercise real print cancellation before preparation, during rendering and at the virtual printer output picker.

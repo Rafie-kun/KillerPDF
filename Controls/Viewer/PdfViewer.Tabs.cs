@@ -924,6 +924,7 @@ namespace KillerPDF.Controls
                 s.ThumbCts = null;
                 try { s.Doc?.Close(); } catch { }
                 _sessions.Remove(s);
+                App.ForgetClosedWindowFile(s.OriginalFile);
                 _renderLru.Remove(s);
                 s.RenderCache.Clear();
                 s.RenderCacheSize.Clear();
@@ -958,6 +959,7 @@ namespace KillerPDF.Controls
             _doc = null;
 
             _sessions.Remove(s);
+            App.ForgetClosedWindowFile(s.OriginalFile);
             _renderLru.Remove(s);    // don't pin a closed tab's render cache in the LRU list
             s.RenderCache.Clear();
             s.RenderCacheSize.Clear();
@@ -1008,7 +1010,11 @@ namespace KillerPDF.Controls
             }
 
             CancelRenderWork();
-            foreach (var s in docTabs) { try { s.Doc?.Close(); } catch { } }
+            foreach (var s in docTabs)
+            {
+                App.ForgetClosedWindowFile(s.OriginalFile);
+                try { s.Doc?.Close(); } catch { }
+            }
             try { _doc?.Close(); } catch { }
             _doc = null;
 

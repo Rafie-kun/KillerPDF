@@ -18,9 +18,10 @@ internal static class TableExportSmoke
 {
     private const BindingFlags Members = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
 
-    internal static int Run(string appPath, string appXaml, string folder, bool officeExport = false, bool grainThemes = false, bool dialogText = false, bool sidebarActions = false, bool paragraphEdit = false, bool accessibilityReview = false, bool formFieldEditing = false, bool guidedTasks = false, bool signedCopy = false, bool renderRecovery = false, bool toolbarAvailability = false, bool windowLifecycle = false)
+    internal static int Run(string appPath, string appXaml, string folder, bool officeExport = false, bool grainThemes = false, bool dialogText = false, bool sidebarActions = false, bool paragraphEdit = false, bool accessibilityReview = false, bool formFieldEditing = false, bool guidedTasks = false, bool signedCopy = false, bool renderRecovery = false, bool toolbarAvailability = false, bool windowLifecycle = false, bool windowSession = false, string windowSessionCase = "--verify-window-session")
     {
-        if (!Environment.GetCommandLineArgs().Contains("--startup-smoke"))
+        if (!Environment.GetCommandLineArgs().Contains("--startup-smoke")
+            && !(windowSession && Environment.GetCommandLineArgs().Contains("--session-isolation")))
             throw new InvalidOperationException("Startup smoke isolation is required.");
         if (Directory.Exists(folder)) throw new IOException("Use a fresh evidence directory.");
         Directory.CreateDirectory(folder);
@@ -38,7 +39,7 @@ internal static class TableExportSmoke
         typeof(Application).GetField("_resourceAssembly", Members)!.SetValue(null, assembly);
         assembly.GetType("KillerPDF.Services.AppDataPaths", true)!
             .GetProperty("StartupSmokeRoot", Members)!.SetValue(null, Path.Combine(folder, "data"));
-        if (accessibilityReview || formFieldEditing || guidedTasks || signedCopy || renderRecovery || toolbarAvailability || windowLifecycle) AccessibilityReviewSmoke.ConfigureOffscreen(assembly);
+        if (accessibilityReview || formFieldEditing || guidedTasks || signedCopy || renderRecovery || toolbarAvailability || windowLifecycle || windowSession) AccessibilityReviewSmoke.ConfigureOffscreen(assembly);
         Type appType = assembly.GetType("KillerPDF.App", true)!;
         var hostType = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("TableExportSmokeHost"),
             AssemblyBuilderAccess.Run).DefineDynamicModule("Host")
@@ -61,7 +62,7 @@ internal static class TableExportSmoke
             xaml = xaml.Replace("clr-namespace:" + name, "clr-namespace:" + name + ";assembly=" + assemblyName, StringComparison.Ordinal);
         app.Resources = (ResourceDictionary)System.Windows.Markup.XamlReader.Parse(xaml,
             new System.Windows.Markup.ParserContext { BaseUri = new Uri("pack://application:,,,/" + assemblyName + ";component/") });
-        if (accessibilityReview || formFieldEditing || guidedTasks || signedCopy || renderRecovery || toolbarAvailability || windowLifecycle)
+        if (accessibilityReview || formFieldEditing || guidedTasks || signedCopy || renderRecovery || toolbarAvailability || windowLifecycle || windowSession)
         {
             var hiddenMessages = new Style(typeof(Window));
             hiddenMessages.Setters.Add(new Setter(Window.ShowActivatedProperty, false));
@@ -75,10 +76,19 @@ internal static class TableExportSmoke
         {
             foreach (string service in new[] { "ThemeManager", "LocaleManager", "FilmGrain" })
                 assembly.GetType("KillerPDF.Services." + service, true)!.GetMethod("Initialize", Members)!.Invoke(null, null);
+            if (windowSession)
+            {
+                MethodInfo setting = appType.GetMethod("SetSetting", Members)!;
+                setting.Invoke(null, ["RememberChoiceLocked", "1"]);
+                setting.Invoke(null, ["RememberOpenFiles", "1"]);
+                setting.Invoke(null, ["CheckForUpdatesOnStartup", "0"]);
+                setting.Invoke(null, ["CloseToTray", "0"]);
+            }
             owner = (Window)Activator.CreateInstance(assembly.GetType("KillerPDF.MainWindow", true)!)!;
             owner.WindowStartupLocation = WindowStartupLocation.Manual;
             owner.Left = -10000; owner.Top = -10000; owner.ShowInTaskbar = false; owner.ShowActivated = false;
             owner.Show();
+            if (windowSession) return WindowSessionSmoke.Run(owner, assembly, appPath, folder, windowSessionCase);
             if (windowLifecycle) return WindowLifecycleSmoke.Run(owner, assembly, appPath, folder);
             if (toolbarAvailability) return ToolbarAvailabilitySmoke.Run(owner, appPath, folder);
             if (renderRecovery) return RenderRecoverySmoke.Run(owner, appPath, folder);

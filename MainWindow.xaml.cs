@@ -302,6 +302,7 @@ namespace KillerPDF
 
         private readonly Controls.PdfViewer.DocumentSession? _startupTearOutSession;
         private readonly KillerFamily.Shell.CloseToTray _tray;
+        private readonly bool _ownsWindowGeometry;
 
         public MainWindow() : this(null)
         {
@@ -311,6 +312,7 @@ namespace KillerPDF
         {
             _startupTearOutSession = startupTearOutSession;
             InitializeComponent();
+            _ownsWindowGeometry = App.RegisterDocumentWindow(this);
             _tray = KillerFamily.Shell.CloseToTray.Attach(this, "KillerPDF", Loc,
                 () => App.GetSetting(KillerFamily.Shell.CloseToTray.SettingName) == "1");
             new KillerFamily.Accessibility.OverlayFocus(this).Track(ShortcutOverlay, AboutOverlay);
@@ -433,6 +435,7 @@ namespace KillerPDF
             SourceInitialized += MainWindow_SourceInitialized;
             Closed += (_, _) =>
             {
+                App.RememberClosedWindow(this);
                 if (Application.Current.MainWindow is null || ReferenceEquals(Application.Current.MainWindow, this))
                     Application.Current.MainWindow = App.PrimaryWindow(this);
                 _continuousRenderCts?.Cancel();
@@ -600,13 +603,21 @@ namespace KillerPDF
         // Settings persistence (window size, zoom, last file)
         // ============================================================
 
+        internal string[] FilesForSessionRestore()
+        {
+            Viewer.CaptureActiveIfAny();
+            ViewerB.CaptureActiveIfAny();
+            return [.. AllSessions().Select(session => session.OriginalFile)
+                .Where(path => !string.IsNullOrEmpty(path) && File.Exists(path)).Select(path => path!)];
+        }
+
         private void SaveWindowSettings()
         {
             try
             {
                 // In F11 full screen the window is a Normal window stretched over the monitor,
                 // so the bounds and state to keep are the ones from before it was entered.
-                if (_fullScreen)
+                if (_ownsWindowGeometry && _fullScreen)
                 {
                     App.SetSetting("WindowState", _fsPrevState.ToString());
                     if (_fsPrevState == WindowState.Normal && _fsPrevW > 0 && _fsPrevH > 0)
@@ -617,7 +628,7 @@ namespace KillerPDF
                         App.SetSetting("WindowLeft", ((int)_fsPrevLeft).ToString());
                     }
                 }
-                else
+                else if (_ownsWindowGeometry)
                 {
                     App.SetSetting("WindowState", WindowState.ToString());
                     if (WindowState == WindowState.Normal)
@@ -635,8 +646,8 @@ namespace KillerPDF
                 bool rememberFiles = App.GetSetting("RememberOpenFiles") != "0";
                 if (rememberFiles)
                 {
-                    if (_currentFile is not null)
-                        App.SetSetting("LastFile", _currentFile);
+                    if (_originalFile is not null)
+                        App.SetSetting("LastFile", _originalFile);
                     else
                         App.RemoveSetting("LastFile");
                     // Remember every open tab so the whole session restores next launch. Manually-closed
@@ -662,10 +673,17 @@ namespace KillerPDF
                         else                              App.RemoveSetting(activeKey);
                     }
 
-                    SavePane("OpenTabs",  "ActiveTab",  FilesOf(Viewer),  Viewer);
-                    SavePane("OpenTabsB", "ActiveTabB", FilesOf(ViewerB), ViewerB);
+                    bool combined = App.HadMultipleDocumentWindows;
+                    SavePane("OpenTabs", "ActiveTab",
+                        combined ? [.. App.RestorableWindowFiles()] : FilesOf(Viewer), Viewer);
+                    if (combined)
+                    {
+                        App.RemoveSetting("OpenTabsB");
+                        App.RemoveSetting("ActiveTabB");
+                    }
+                    else SavePane("OpenTabsB", "ActiveTabB", FilesOf(ViewerB), ViewerB);
 
-                    if (IsSplit)
+                    if (!combined && IsSplit)
                     {
                         App.SetSetting("SplitOpen", "1");
                         // The pixel width of pane A - the fixed column; pane B is star-sized and
@@ -686,6 +704,7 @@ namespace KillerPDF
                 else
                 {
                     // Privacy: drop any remembered session so no file paths linger on disk.
+                    App.ForgetClosedWindowFiles();
                     App.RemoveSetting("LastFile");
                     App.RemoveSetting("OpenTabs");
                     App.RemoveSetting("ActiveTab");
