@@ -496,6 +496,12 @@ public sealed partial class PdfPageRenderer
                     ClearPath();
                     break;
                 case "cm" when values.Count == 6:
+                    if (_document.UsesCompatibilityRecovery
+                        && values.Any(value => value is not (PdfInteger or PdfReal)))
+                    {
+                        diagnostics.Add("An invalid transformation operation was ignored.");
+                        break;
+                    }
                     state = state with
                     {
                         Transform = new Matrix(N(0), N(1), N(2), N(3), N(4), N(5)).Then(state.Transform)
@@ -689,6 +695,14 @@ public sealed partial class PdfPageRenderer
                     state = state with { LineWidth = Math.Max(0, N(0)) };
                     break;
                 case "J" when values.Count == 1:
+                    if (_document.UsesCompatibilityRecovery
+                        && (values[0] is not (PdfInteger or PdfReal)
+                            || !double.IsFinite(N(0)) || N(0) != Math.Truncate(N(0))
+                            || N(0) is < 0 or > 2))
+                    {
+                        diagnostics.Add("An invalid line-cap operation was ignored.");
+                        break;
+                    }
                     double capValue = N(0);
                     if (capValue != Math.Truncate(capValue) || capValue is < 0 or > 2)
                         throw new FormatException("A line cap style is invalid.");
@@ -696,8 +710,9 @@ public sealed partial class PdfPageRenderer
                     break;
                 case "j" when values.Count == 1:
                     if (_document.UsesCompatibilityRecovery
-                        && !instruction.TryGetNumber(0, out _)
-                        && Resolve(values[0]) is not (PdfInteger or PdfReal))
+                        && (values[0] is not (PdfInteger or PdfReal)
+                            || !double.IsFinite(N(0)) || N(0) != Math.Truncate(N(0))
+                            || N(0) is < 0 or > 2))
                     {
                         diagnostics.Add("An invalid line-join operation was ignored.");
                         break;
@@ -708,6 +723,13 @@ public sealed partial class PdfPageRenderer
                     state = state with { LineJoin = (RendererLineJoin)(int)joinValue };
                     break;
                 case "M" when values.Count == 1:
+                    if (_document.UsesCompatibilityRecovery
+                        && (values[0] is not (PdfInteger or PdfReal)
+                            || !double.IsFinite(N(0)) || N(0) < 1))
+                    {
+                        diagnostics.Add("An invalid miter-limit operation was ignored.");
+                        break;
+                    }
                     double miterLimit = N(0);
                     if (!double.IsFinite(miterLimit) || miterLimit < 1)
                         throw new FormatException("A miter limit is invalid.");
@@ -719,7 +741,14 @@ public sealed partial class PdfPageRenderer
                     if (dashPattern.Any(length => !double.IsFinite(length) || length < 0)
                         || dashPattern.Length > 0 && dashPattern.All(length => length == 0)
                         || !double.IsFinite(dashPhase))
+                    {
+                        if (_document.UsesCompatibilityRecovery)
+                        {
+                            diagnostics.Add("An invalid line-dash operation was ignored.");
+                            break;
+                        }
                         throw new FormatException("A line dash pattern is invalid.");
+                    }
                     if (dashPhase < 0 && dashPattern.Length > 0)
                     {
                         double cycle = dashPattern.Sum()
@@ -873,6 +902,12 @@ public sealed partial class PdfPageRenderer
                     }
                     break;
                 case "Tf" when values.Count == 2 && values[0] is PdfName fontName:
+                    if (_document.UsesCompatibilityRecovery
+                        && values[1] is not (PdfInteger or PdfReal))
+                    {
+                        diagnostics.Add("An invalid font-selection operation was ignored.");
+                        break;
+                    }
                     textFont = ResolveFont(resources, fontName);
                     if (textFont is null)
                     {
@@ -898,6 +933,12 @@ public sealed partial class PdfPageRenderer
                     }
                     break;
                 case "Tm" when values.Count == 6:
+                    if (_document.UsesCompatibilityRecovery
+                        && values.Any(value => value is not (PdfInteger or PdfReal)))
+                    {
+                        diagnostics.Add("An invalid text-matrix operation was ignored.");
+                        break;
+                    }
                     textMatrix = textLineMatrix = new Matrix(
                         N(0), N(1), N(2), N(3), N(4), N(5));
                     break;
