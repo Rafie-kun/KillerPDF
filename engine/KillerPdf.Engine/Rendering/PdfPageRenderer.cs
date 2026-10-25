@@ -3330,8 +3330,7 @@ public sealed partial class PdfPageRenderer
                             "JPEG image metadata does not match its PDF dictionary.");
                     return new DecodedImage(decoded.Samples, decoded.Width, decoded.Height);
                 }
-                int rowBytes = checked((width * encodedComponents * bits + 7) / 8);
-                int expected = checked(rowBytes * height);
+                int expected = RawImageLayout(width, height, encodedComponents, bits, out int rowBytes);
                 int limit = _document.UsesCompatibilityRecovery
                     ? Math.Max(expected, PdfStreamDecoder.DefaultMaximumDecodedBytes)
                     : expected;
@@ -3405,6 +3404,11 @@ public sealed partial class PdfPageRenderer
             diagnostic = CompressionDiagnostic(error);
             return false;
         }
+        catch (ImageLayoutSizeException)
+        {
+            diagnostic = "An image larger than the supported size was skipped.";
+            return false;
+        }
         catch (NotSupportedException)
         {
             diagnostic = explicitMask is null
@@ -3426,6 +3430,23 @@ public sealed partial class PdfPageRenderer
             explicitMask is not null, jpeg2000Shape is not null,
             ReadImageInterpolation(stream.Dictionary), cancellationToken);
         return true;
+    }
+
+    private sealed class ImageLayoutSizeException : Exception;
+
+    private static int RawImageLayout(int width, int height, int components, int bits,
+        out int rowBytes)
+    {
+        if (width <= 0 || height <= 0 || components <= 0 || bits <= 0)
+            throw new ImageLayoutSizeException();
+        // Keep the bit-row arithmetic representable for the sample readers as well as decoding.
+        long rowSamples = (long)width * components;
+        if (rowSamples > (int.MaxValue - 7) / bits)
+            throw new ImageLayoutSizeException();
+        rowBytes = (int)(rowSamples * bits + 7) / 8;
+        if (height > int.MaxValue / rowBytes)
+            throw new ImageLayoutSizeException();
+        return rowBytes * height;
     }
 
     private static string CompressionDiagnostic(PdfFilterException error) =>
@@ -5389,8 +5410,7 @@ public sealed partial class PdfPageRenderer
 
         DecodedImage DecodeMask()
         {
-            int rowBytes = checked((width * bits + 7) / 8);
-            int expected = checked(rowBytes * height);
+            int expected = RawImageLayout(width, height, 1, bits, out _);
             byte[] packed = _document.DecodeStream(stream, expected);
             if (packed.Length != expected)
                 throw new FormatException("Image soft-mask sample data has an invalid length.");
@@ -5430,8 +5450,7 @@ public sealed partial class PdfPageRenderer
 
         DecodedImage DecodeMask()
         {
-            int rowBytes = checked((width + 7) / 8);
-            int expected = checked(rowBytes * height);
+            int expected = RawImageLayout(width, height, 1, 1, out _);
             byte[] packed = _document.DecodeStream(stream, expected);
             if (packed.Length != expected)
                 throw new FormatException("Image mask sample data has an invalid length.");
