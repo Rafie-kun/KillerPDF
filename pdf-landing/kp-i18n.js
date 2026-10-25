@@ -16472,6 +16472,22 @@ if (I18N["uk"]) Object.assign(I18N["uk"], {"ph_customize_toolbar": "Налашт
 if (I18N["vi"]) Object.assign(I18N["vi"], {"ph_customize_toolbar": "Tùy chỉnh thanh công cụ<span class=\"chev\">&#9656;</span>", "ph_customize_toolbar_body": "Nhấp chuột phải vào thanh công cụ và chọn <b>Tùy chỉnh thanh công cụ...</b>, hoặc tìm lệnh này trong Tìm công cụ. Sắp xếp lại các nút, chuyển bất kỳ nút nào giữa bên trái và bên phải thanh công cụ hoặc vào menu <b>Thêm</b> dưới mũi tên, và thêm hoặc xóa dấu phân cách. Kéo một nút, nhấp đúp vào nó hoặc dùng các nút bên cạnh danh sách; <b>Đặt lại</b> khôi phục bố cục mặc định. Các nút bạn đặt vào menu Thêm sẽ ở lại đó với mọi độ rộng cửa sổ, và khi cửa sổ quá hẹp, các nút khác vẫn chuyển vào đó như trước."});
 if (I18N["zh-cn"]) Object.assign(I18N["zh-cn"], {"ph_customize_toolbar": "自定义工具栏<span class=\"chev\">&#9656;</span>", "ph_customize_toolbar_body": "右键单击工具栏并选择<b>自定义工具栏...</b>，或在“搜索工具”中找到它。可以重新排列按钮，将任意按钮在工具栏左右两侧之间移动或移到箭头下的<b>“更多”</b>菜单，还可以添加或删除分隔符。拖动按钮、双击按钮或使用列表旁边的按钮即可；<b>重置</b>会恢复默认布局。放入“更多”菜单的按钮在任何窗口宽度下都留在那里，窗口太窄时，其他按钮仍会像以前一样移入其中。"});
 if (I18N["zh"]) Object.assign(I18N["zh"], {"ph_customize_toolbar": "自訂工具列<span class=\"chev\">&#9656;</span>", "ph_customize_toolbar_body": "以滑鼠右鍵按一下工具列並選擇<b>自訂工具列...</b>，或在「搜尋工具」中找到它。可以重新排列按鈕，將任何按鈕在工具列左右兩側之間移動或移到箭頭下的<b>「更多」</b>功能表，也可以新增或移除分隔線。拖曳按鈕、按兩下按鈕或使用清單旁的按鈕即可；<b>重設</b>會還原預設配置。放進「更多」功能表的按鈕在任何視窗寬度下都會留在那裡，視窗太窄時，其他按鈕仍會像以前一樣移入其中。"});
+// Labels used by the landing page navigation and release status.
+if (I18N["ru"]) Object.assign(I18N["ru"], {"nav_engine":"Движок","nav_corpus":"Тестовый корпус","mcp_release_loading":"Проверка последней версии"});
+if (I18N["it"]) Object.assign(I18N["it"], {"nav_engine":"Motore","nav_corpus":"Corpus di benchmark","mcp_release_loading":"Verifica dell'ultima versione"});
+if (I18N["vi"]) Object.assign(I18N["vi"], {"nav_engine":"Bộ máy","nav_corpus":"Bộ tài liệu kiểm thử","mcp_release_loading":"Đang kiểm tra bản phát hành mới nhất"});
+if (I18N["hu"]) Object.assign(I18N["hu"], {"nav_engine":"Motor","nav_corpus":"Benchmark korpusz","mcp_release_loading":"A legújabb kiadás ellenőrzése"});
+if (I18N["pl"]) Object.assign(I18N["pl"], {"nav_engine":"Silnik","nav_corpus":"Korpus testowy","mcp_release_loading":"Sprawdzanie najnowszego wydania"});
+if (I18N["cs"]) Object.assign(I18N["cs"], {"nav_engine":"Jádro","nav_corpus":"Korpus testovacích dokumentů","mcp_release_loading":"Kontrola nejnovější verze"});
+if (I18N["es"]) Object.assign(I18N["es"], {"nav_engine":"Motor","nav_corpus":"Corpus de pruebas","mcp_release_loading":"Comprobando la versión más reciente"});
+if (I18N["de"]) Object.assign(I18N["de"], {"nav_engine":"Engine","nav_corpus":"Benchmark-Korpus","mcp_release_loading":"Suche nach der neuesten Version"});
+if (I18N["fr"]) Object.assign(I18N["fr"], {"nav_engine":"Moteur","nav_corpus":"Corpus de référence","mcp_release_loading":"Vérification de la dernière version"});
+if (I18N["tr"]) Object.assign(I18N["tr"], {"nav_engine":"Motor","nav_corpus":"Karşılaştırma veri kümesi","mcp_release_loading":"En yeni sürüm kontrol ediliyor"});
+if (I18N["zh"]) Object.assign(I18N["zh"], {"nav_engine":"引擎","nav_corpus":"基準測試語料庫","mcp_release_loading":"正在檢查最新版本"});
+if (I18N["zh-cn"]) Object.assign(I18N["zh-cn"], {"nav_engine":"引擎","nav_corpus":"基准测试语料库","mcp_release_loading":"正在检查最新版本"});
+if (I18N["bn"]) Object.assign(I18N["bn"], {"nav_engine":"ইঞ্জিন","nav_corpus":"বেঞ্চমার্ক কর্পাস","mcp_release_loading":"সর্বশেষ রিলিজ পরীক্ষা করা হচ্ছে"});
+if (I18N["ja"]) Object.assign(I18N["ja"], {"nav_engine":"エンジン","nav_corpus":"ベンチマークコーパス","mcp_release_loading":"最新リリースを確認中"});
+if (I18N["kk"]) Object.assign(I18N["kk"], {"nav_engine":"Қозғалтқыш","nav_corpus":"Бенчмарк корпусы","mcp_release_loading":"Соңғы шығарылым тексерілуде"});
 // Accessible name for the dynamically created navigation overflow button.
 (function () {
   var moreLabels = {"hu":"Továbbiak","pl":"Więcej","es":"Más","de":"Mehr","fr":"Plus","tr":"Daha fazla","vi":"Thêm","zh-cn":"更多","zh":"更多","cs":"Další","ja":"その他","bn":"আরও","it":"Altro","ru":"Ещё","kk":"Қосымша","uk":"Більше","nb":"Mer","pt":"Mais"};
