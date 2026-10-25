@@ -245,3 +245,7 @@ mode without another prompt or source changes. Keep each process under an extern
 watchdog and retain its exit code and streams. A result file alone does not replace
 the process receipt. These checks exercise application lifecycle policy, not native
 Windows message delivery or another application's shutdown cancellation.
+
+## Print-only annotation visibility
+
+On an owned UI VM, use `--verify-print-visibility APP_DLL APP_XAML OUTPUT_DIRECTORY --session-isolation` with a fresh output directory. The isolated host opens a synthetic PDF through the real window entry, requires the visible field control, rejects the print-only field control and blue viewer appearance, then clicks Print and requires the blue appearance in the actual preview image. It closes the preview without submitting a printer job and checks unchanged source bytes. This covers native WPF integration, not physical input, printer output, or the normal startup/registration route.
