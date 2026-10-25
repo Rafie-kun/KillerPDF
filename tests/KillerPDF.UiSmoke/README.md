@@ -192,3 +192,22 @@ because startup-smoke skips normal restoration. Single-document windows hide the
 tab strip; the manual-close assertion checks the remaining filename and absence of
 a visible strip. The fixture verifies window reconstruction in one isolated process,
 not actual process restart, physical tab dragging or Windows sign-out.
+
+## Windows session-ending protection
+
+Use an owned UI VM and a fresh output directory with
+`--verify-session-ending APP_DLL APP_XAML OUTPUT_DIRECTORY --session-isolation`.
+The isolated host exposes WPF's protected session-ending extension through a public
+wrapper and supplies framework logoff arguments. It makes the secondary window
+dirty through the real thumbnail Rotate menu, chooses Cancel in the existing save
+prompt, and requires the cancellation flag, both windows, unsaved edits and source
+bytes to survive. It does not send an actual Windows shutdown or logoff command.
+
+`--verify-session-ending-save` chooses Save and reopens the synthetic output to
+require its 90-degree rotation, a cleared dirty indicator and shutdown permission.
+`--verify-session-ending-controls` edits two windows, cancels the later prompt after
+the first approval, then checks both Don't Save choices permit closure despite tray
+mode without another prompt or source changes. Keep each process under an external
+watchdog and retain its exit code and streams. A result file alone does not replace
+the process receipt. These checks exercise application lifecycle policy, not native
+Windows message delivery or another application's shutdown cancellation.

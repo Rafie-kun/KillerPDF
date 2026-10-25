@@ -779,8 +779,41 @@ namespace KillerPDF
             return true;
         }
 
+        internal long SessionEndingEditRevision
+        {
+            get
+            {
+                Viewer.CommitActiveTextBoxExt();
+                ViewerB.CommitActiveTextBoxExt();
+                Viewer.CaptureActiveIfAny();
+                ViewerB.CaptureActiveIfAny();
+                return _documentEditRevision;
+            }
+        }
+
+        internal bool ConfirmSessionEnding(out long revision)
+        {
+            revision = SessionEndingEditRevision;
+            if (_isDirty || AllSessions().Any(session => session.IsDirty))
+            {
+                var result = KillerDialog.AskToSave(this, Loc("Str_Dlg_UnsavedExit"),
+                    Loc("Str_Btn_Save"), Loc("Str_Btn_DontSave"), Loc("Str_Btn_CancelDlg"), fadeClose: false);
+                if (result == MessageBoxResult.Cancel
+                    || (result == MessageBoxResult.Yes && !SaveAllDirtyDocuments())) return false;
+            }
+            revision = SessionEndingEditRevision;
+            return true;
+        }
+
+        internal void SaveSessionEndingSettings() => SaveWindowSettings();
+
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
+            if (Application.Current is App { SessionEndingConfirmed: true })
+            {
+                base.OnClosing(e);
+                return;
+            }
             // Second pass (our own Close after the fade): let it through.
             if (_fadingOut) { base.OnClosing(e); return; }
             if (_tray.HideInstead(e)) return;

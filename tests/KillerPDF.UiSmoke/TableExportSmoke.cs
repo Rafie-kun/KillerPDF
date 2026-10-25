@@ -50,6 +50,16 @@ internal static class TableExportSmoke
             typeof(void), [typeof(StartupEventArgs)]);
         startup.GetILGenerator().Emit(OpCodes.Ret);
         hostType.DefineMethodOverride(startup, appType.GetMethod("OnStartup", Members)!);
+        if (windowSessionCase.StartsWith("--verify-session-ending", StringComparison.Ordinal))
+        {
+            MethodBuilder sessionEnding = hostType.DefineMethod("SimulateSessionEnding", MethodAttributes.Public,
+                typeof(void), [typeof(SessionEndingCancelEventArgs)]);
+            ILGenerator body = sessionEnding.GetILGenerator();
+            body.Emit(OpCodes.Ldarg_0);
+            body.Emit(OpCodes.Ldarg_1);
+            body.Emit(OpCodes.Call, appType.GetMethod("OnSessionEnding", Members)!);
+            body.Emit(OpCodes.Ret);
+        }
         var app = (Application)Activator.CreateInstance(hostType.CreateType()!)!;
         app.ShutdownMode = ShutdownMode.OnExplicitShutdown;
         XDocument source = XDocument.Load(appXaml);
@@ -88,6 +98,10 @@ internal static class TableExportSmoke
             owner.WindowStartupLocation = WindowStartupLocation.Manual;
             owner.Left = -10000; owner.Top = -10000; owner.ShowInTaskbar = false; owner.ShowActivated = false;
             owner.Show();
+            if (windowSessionCase == "--verify-session-ending-controls")
+                return SessionEndingControlsSmoke.Run(owner, assembly, appPath, folder);
+            if (windowSessionCase.StartsWith("--verify-session-ending", StringComparison.Ordinal))
+                return SessionEndingSmoke.Run(owner, assembly, appPath, folder, windowSessionCase);
             if (windowSession) return WindowSessionSmoke.Run(owner, assembly, appPath, folder, windowSessionCase);
             if (windowLifecycle) return WindowLifecycleSmoke.Run(owner, assembly, appPath, folder);
             if (toolbarAvailability) return ToolbarAvailabilitySmoke.Run(owner, appPath, folder);

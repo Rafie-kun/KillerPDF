@@ -262,6 +262,34 @@ namespace KillerPDF
             StartFolderAutomationIfConfigured();
         }
 
+        internal bool SessionEndingConfirmed { get; private set; }
+
+        protected override void OnSessionEnding(SessionEndingCancelEventArgs e)
+        {
+            SessionEndingConfirmed = false;
+            base.OnSessionEnding(e);
+            if (e.Cancel) return;
+
+            // Keep the request canceled until every document window has approved it.
+            e.Cancel = true;
+            var approvals = new List<(MainWindow Window, long Revision)>();
+            foreach (MainWindow window in Windows.OfType<MainWindow>().ToArray())
+            {
+                if (!window.ConfirmSessionEnding(out long revision)) return;
+                approvals.Add((window, revision));
+            }
+
+            MainWindow[] remaining = Windows.OfType<MainWindow>().ToArray();
+            if (remaining.Length != approvals.Count
+                || remaining.Any(window => !approvals.Any(approval => ReferenceEquals(approval.Window, window)))
+                || approvals.Any(approval => approval.Window.SessionEndingEditRevision != approval.Revision))
+                return;
+
+            foreach (var approval in approvals) approval.Window.SaveSessionEndingSettings();
+            SessionEndingConfirmed = true;
+            e.Cancel = false;
+        }
+
         protected override void OnExit(ExitEventArgs e)
         {
             try

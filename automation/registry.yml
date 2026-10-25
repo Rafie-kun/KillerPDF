@@ -80,4 +80,12 @@ scripts:
     failure_behavior: Return nonzero on progress after close request, an error dialog, missing trigger or deadline (45 seconds automated, 120 seconds for the native picker).
     mutates: temporary-fixture-files-test-owned-windows-processes-and-virtual-print-job-only
 
+  session_ending_smoke:
+    path: tests/KillerPDF.UiSmoke/SessionEndingSmoke.cs
+    purpose: Verify dirty secondary-window Cancel and Save behavior plus later-window cancellation and tray-safe approved closure.
+    inputs: Built app DLL, matching App.xaml, fresh evidence directory and --session-isolation on an owned UI VM.
+    outputs: Stage diagnostics, result.txt with app hash, and the external runner process receipt.
+    failure_behavior: Return nonzero on missing prompts, wrong cancellation, lost edits, incorrect saved rotation or changed discarded sources.
+    mutates: temporary-fixture-files-and-test-owned-windows-only
+
 documentation: docs/startup-packaging.md
