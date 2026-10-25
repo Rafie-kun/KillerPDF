@@ -54,8 +54,8 @@ out more conformant than they went in.**
 | veraPDF | 1.30.2 | PDF/A + PDF/UA validation (the industry reference validator) |
 | qpdf | 12.3.2 | Structural check (`--check` exit codes) |
 | KillerPDF | 1.8.1 | `--batch-resave` through the standard open/save pipeline |
-| Compare-VeraPDF.ps1 | this folder | Diffs the two veraPDF reports file by file |
-| QpdfSweep.ps1 | this folder | Structural before/after sweep (`qpdf --check` exit codes) |
+| Compare-VeraPDF.ps1 | `tools/validation` | Diffs the two veraPDF reports file by file |
+| QpdfSweep.ps1 | `tools/validation` | Structural before/after sweep (`qpdf --check` exit codes) |
 
 ## Corpus
 
@@ -131,10 +131,10 @@ corpora). On a tree containing the corpus:
 verapdf --recurse --format json C:\pdf-corpus > baseline.json
 Start-Process -Wait KillerPDF.exe -ArgumentList '--batch-resave','C:\pdf-corpus','C:\pdf-corpus-resaved','--log','resave.csv'
 verapdf --recurse --format json C:\pdf-corpus-resaved > after.json
-.\Compare-VeraPDF.ps1 -Baseline baseline.json -After after.json `
+..\tools\validation\Compare-VeraPDF.ps1 -Baseline baseline.json -After after.json `
     -BaselineRoot C:\pdf-corpus -AfterRoot C:\pdf-corpus-resaved `
     -ResaveLog resave.csv -CsvOut compare.csv
-.\QpdfSweep.ps1 -Corpus C:\pdf-corpus -Resaved C:\pdf-corpus-resaved `
+..\tools\validation\QpdfSweep.ps1 -Corpus C:\pdf-corpus -Resaved C:\pdf-corpus-resaved `
     -ResaveLog resave.csv -CsvOut qpdf-results.csv
 ```
 

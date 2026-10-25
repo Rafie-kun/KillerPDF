@@ -600,12 +600,12 @@ with the calculated medians in
 
 ## Reproducing the benchmark
 
-[`Benchmark-Versions.ps1`](Benchmark-Versions.ps1) runs the complete warmup,
+[`Benchmark-Versions.ps1`](../tools/validation/Benchmark-Versions.ps1) runs the complete warmup,
 alternating measurement, logging, cleanup, and summary process. Run it from
 PowerShell with two KillerPDF executables and one shared input tree:
 
 ```powershell
-.\Benchmark-Versions.ps1 `
+..\tools\validation\Benchmark-Versions.ps1 `
     -BaselineExe 'C:\path\to\KillerPDF-previous.exe' `
     -CandidateExe 'C:\path\to\KillerPDF-current.exe' `
     -InputDirectory 'C:\path\to\shared-corpus' `
