@@ -133,7 +133,8 @@ namespace KillerPDF.Controls
                 foreach (var mark in PdfEngineIntegration.ReadRedactionMarks(EnsureEngineDocumentSession().Document))
                     _redactMarks.Add(new RedactionMark(mark.PageIndex, mark.Left, mark.Bottom, mark.Right, mark.Top,
                         mark.OverlayText, mark.FillColor is { } fill
-                            ? Color.FromRgb(ToByte(fill.Red), ToByte(fill.Green), ToByte(fill.Blue)) : null));
+                            ? Color.FromRgb(ToByte(fill.Red), ToByte(fill.Green), ToByte(fill.Blue)) : null,
+                        mark.AnnotationFlags));
             }
             catch (Exception ex) when (ex is FormatException or InvalidOperationException or NotSupportedException)
             {
@@ -146,7 +147,7 @@ namespace KillerPDF.Controls
         internal void WriteRedactionMarksToDocument(string path) =>
             PdfEngineIntegration.WriteRedactionMarks(path, [.. _redactMarks.Select(mark =>
                 new PdfEngineIntegration.RedactionMarkData(mark.PageIndex, mark.Left, mark.Bottom, mark.Right, mark.Top,
-                    mark.OverlayText, PdfFill(mark.Fill)))]);
+                    mark.OverlayText, PdfFill(mark.Fill), mark.AnnotationFlags))]);
 
         private static byte ToByte(double component) => (byte)Math.Round(Math.Clamp(component, 0, 1) * 255);
 
@@ -237,7 +238,7 @@ namespace KillerPDF.Controls
             if (canvas is null) return;
             foreach (var old in canvas.Children.OfType<Rectangle>().Where(r => r.Tag is RedactionMark).ToList())
                 canvas.Children.Remove(old);
-            foreach (RedactionMark mark in _redactMarks.Where(mark => mark.PageIndex == pageIndex))
+            foreach (RedactionMark mark in _redactMarks.Where(mark => mark.PageIndex == pageIndex && mark.IsVisibleOnScreen))
             {
                 if (MarkCanvasRect(mark) is not Rect rect) continue;
                 var visual = new Rectangle
@@ -316,7 +317,7 @@ namespace KillerPDF.Controls
             if (drawn.Width < 4 || drawn.Height < 4)
             {
                 // A click removes the mark under it.
-                RedactionMark? hit = _redactMarks.LastOrDefault(mark => mark.PageIndex == pageIndex
+                RedactionMark? hit = _redactMarks.LastOrDefault(mark => mark.PageIndex == pageIndex && mark.IsVisibleOnScreen
                     && MarkCanvasRect(mark) is Rect rect && rect.Contains(end));
                 if (hit is not null && _redactMarks.Remove(hit)) MarkDirty();
             }

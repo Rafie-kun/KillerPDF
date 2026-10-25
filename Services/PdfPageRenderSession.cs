@@ -295,8 +295,8 @@ internal sealed class PdfPageRenderSession : IDisposable
             includeAnnotations, includeFormFields)
         {
             ForPrinting = _forPrinting,
-            // The viewer draws redaction marks on its own overlay.
-            IncludeRedactionMarks = false,
+            // The viewer draws marks on its overlay; print previews and jobs use engine appearances.
+            IncludeRedactionMarks = _forPrinting,
             MaximumParallelism = RenderParallelism(engineWidth, engineHeight),
             Jpeg2000PaintParallelism = Math.Clamp(Environment.ProcessorCount / 2, 1, 4)
         };

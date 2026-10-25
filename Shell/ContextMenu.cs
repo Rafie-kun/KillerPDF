@@ -477,6 +477,7 @@ namespace KillerPDF
             MeasurementAnnotation m => new MeasurementAnnotation
             {
                 PageIndex = m.PageIndex,
+                AnnotationFlags = m.AnnotationFlags,
                 PairId = m.PairId,
                 GroupId = m.GroupId,
                 Kind = m.Kind,

@@ -11,6 +11,8 @@ public sealed record PdfRedactionMarkInfo
     public required int PageIndex { get; init; }
     /// <summary>Gets the zero-based position in the page /Annots array.</summary>
     public required int AnnotationIndex { get; init; }
+    /// <summary>Gets the annotation visibility and interaction flags.</summary>
+    public long AnnotationFlags { get; init; }
     /// <summary>
     /// Gets the marked areas in default user space, one per QuadPoints quadrilateral, or the
     /// annotation rectangle when the mark has no quadrilaterals.
@@ -53,6 +55,8 @@ public static class PdfRedactionMarkReader
                 {
                     PageIndex = page.Index,
                     AnnotationIndex = index,
+                    AnnotationFlags = annotation.TryGetValue(Name("F"), out PdfObject? flagsValue)
+                        && Resolve(document, flagsValue) is PdfInteger flags ? flags.Value : 0,
                     Areas = areas,
                     OverlayText = Text(document, annotation, "OverlayText"),
                     Contents = Text(document, annotation, "Contents"),

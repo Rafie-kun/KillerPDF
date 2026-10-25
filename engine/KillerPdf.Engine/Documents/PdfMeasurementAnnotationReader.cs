@@ -25,6 +25,8 @@ public sealed record PdfMeasurementAnnotationInfo
     public required int PageIndex { get; init; }
     /// <summary>Gets the zero-based position in the page /Annots array.</summary>
     public required int AnnotationIndex { get; init; }
+    /// <summary>Gets the annotation visibility and interaction flags.</summary>
+    public long AnnotationFlags { get; init; }
     /// <summary>Gets what the annotation measures.</summary>
     public required PdfMeasurementKind Kind { get; init; }
     /// <summary>
@@ -181,6 +183,8 @@ public static class PdfMeasurementAnnotationReader
         {
             PageIndex = pageIndex,
             AnnotationIndex = annotationIndex,
+            AnnotationFlags = annotation.TryGetValue(Name("F"), out PdfObject? flagsValue)
+                && Resolve(document, flagsValue) is PdfInteger flags ? flags.Value : 0,
             Kind = kind,
             Points = Array.AsReadOnly(points.ToArray()),
             Closed = closed,

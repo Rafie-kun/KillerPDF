@@ -14,7 +14,8 @@ internal static class RedactionPageEdit
         PdfEngineIntegration.WriteRedactionMarks(workingPath, marks.Marks.Select(mark =>
             new PdfEngineIntegration.RedactionMarkData(mark.PageIndex, mark.Left, mark.Bottom, mark.Right, mark.Top,
                 mark.OverlayText, mark.Fill is Color color
-                    ? new PdfRgbColor(color.R / 255d, color.G / 255d, color.B / 255d) : null)).ToArray());
+                    ? new PdfRgbColor(color.R / 255d, color.G / 255d, color.B / 255d) : null,
+                mark.AnnotationFlags)).ToArray());
         edit(workingPath);
         PdfDocument output = PdfEngineIntegration.OpenForReading(File.ReadAllBytes(workingPath));
         var mapped = new List<RedactionMark>();
@@ -23,7 +24,8 @@ internal static class RedactionPageEdit
             // Dividing a spread crops copies of its content. Keep the full extent so applying
             // either copy's mark also removes selected content hidden beyond its crop box.
             mapped.Add(new(mark.PageIndex, mark.Left, mark.Bottom, mark.Right, mark.Top, mark.OverlayText,
-                mark.FillColor is { } fill ? Color.FromRgb(Component(fill.Red), Component(fill.Green), Component(fill.Blue)) : null));
+                mark.FillColor is { } fill ? Color.FromRgb(Component(fill.Red), Component(fill.Green), Component(fill.Blue)) : null,
+                mark.AnnotationFlags));
         }
         return new(mapped);
     }

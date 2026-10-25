@@ -595,6 +595,7 @@ public partial class PdfViewer
         {
             foreach (MeasurementAnnotation other in list.OfType<MeasurementAnnotation>())
             {
+                if (!other.IsVisibleOnScreen) continue;
                 PdfMeasurementPoint? previous = null;
                 foreach (Point point in other.Points)
                 {
@@ -716,6 +717,7 @@ public partial class PdfViewer
     /// <summary>Draws one measurement and its label on the page overlay.</summary>
     private void DrawMeasurementOverlay(MeasurementAnnotation measurement)
     {
+        if (!measurement.IsVisibleOnScreen) return;
         if (!MeasurementGeometry.IsUsable(measurement)) return;
         var brush = new SolidColorBrush(measurement.GetColor());
         brush.Freeze();
@@ -798,6 +800,7 @@ public partial class PdfViewer
 
     internal static bool HitTestMeasurement(MeasurementAnnotation measurement, Point position)
     {
+        if (!measurement.IsVisibleOnScreen) return false;
         var points = measurement.Points;
         if (points.Count == 0) return false;
         if (!measurement.LabelBounds.IsEmpty && measurement.LabelBounds.Contains(position)) return true;
@@ -1007,6 +1010,7 @@ public partial class PdfViewer
             var measurement = new MeasurementAnnotation
             {
                 PageIndex = data.PageIndex,
+                AnnotationFlags = data.AnnotationFlags,
                 Kind = (MeasurementKind)(int)data.Kind,
                 Points = [.. data.Points.Select(Canvas)],
                 Closed = data.Closed,
@@ -1073,7 +1077,8 @@ public partial class PdfViewer
                         measurement.ColorB / 255.0),
                     Math.Max(0.1, measurement.StrokeWidth * perUnit), measurement.ColorA / 255.0, Page(label),
                     Math.Clamp(measurement.LabelSize * perUnit, 1, 144),
-                    measurement.Kind == MeasurementKind.Angle ? MeasurementGeometry.ArcRadius(measurement) * perUnit : null));
+                    measurement.Kind == MeasurementKind.Angle ? MeasurementGeometry.ArcRadius(measurement) * perUnit : null,
+                    measurement.AnnotationFlags));
             }
         }
         return result;

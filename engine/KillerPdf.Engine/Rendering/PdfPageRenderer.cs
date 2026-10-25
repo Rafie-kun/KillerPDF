@@ -2472,10 +2472,10 @@ public sealed partial class PdfPageRenderer
                     if (!options.IncludeMeasurementAnnotations && IsMeasurementAnnotation(annotation)) continue;
                     // ISO 32000-2 12.5.3: a Hidden annotation is neither displayed nor printed,
                     // whatever its other flags say.
-                    if (annotation.TryGetValue(Name("F"), out PdfObject? flagsValue)
-                        && Resolve(flagsValue) is PdfInteger flags
-                        && ((flags.Value & 2) != 0
-                            || (!options.ForPrinting && (flags.Value & 32) != 0))) continue;
+                    long flags = annotation.TryGetValue(Name("F"), out PdfObject? flagsValue)
+                        && Resolve(flagsValue) is PdfInteger integerFlags ? integerFlags.Value : 0;
+                    if ((flags & 2) != 0 || (options.ForPrinting
+                        ? (flags & 4) == 0 : (flags & 32) != 0)) continue;
                     TryGetAppearance(annotation, out PdfStream? appearance);
                     if (widget)
                     {

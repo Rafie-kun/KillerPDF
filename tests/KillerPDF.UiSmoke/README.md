@@ -248,4 +248,15 @@ Windows message delivery or another application's shutdown cancellation.
 
 ## Print-only annotation visibility
 
-On an owned UI VM, use `--verify-print-visibility APP_DLL APP_XAML OUTPUT_DIRECTORY --session-isolation` with a fresh output directory. The isolated host opens a synthetic PDF through the real window entry, requires the visible field control, rejects the print-only field control and blue viewer appearance, then clicks Print and requires the blue appearance in the actual preview image. It closes the preview without submitting a printer job and checks unchanged source bytes. This covers native WPF integration, not physical input, printer output, or the normal startup/registration route.
+On an owned UI VM, use `--verify-print-visibility APP_DLL APP_XAML OUTPUT_DIRECTORY --session-isolation`
+with a fresh output directory. Independent positive and negative controls run before product assertions.
+The isolated host opens a synthetic PDF through the real window entry, requires visible fields,
+measurements and redaction marks, and rejects their print-only counterparts on screen. It clicks Print
+and requires the annotation, measurement and redaction review ink at distinct preview locations.
+It closes the preview without submitting a printer job and checks unchanged source bytes.
+This covers native WPF integration, not physical input, printer output or normal startup/registration.
+
+The Windows-only `--verify-print-color-probe` mode checks the same bitmap probes without opening
+windows or loading the app. It rejects pale-blue edge pixels mistaken for cyan and independently
+removes each required preview signal. Redaction checks use the review appearance's ink and position;
+the annotation's IC entry describes its applied fill, which can have a different color.

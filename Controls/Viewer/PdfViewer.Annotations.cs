@@ -747,8 +747,9 @@ namespace KillerPDF.Controls
             }
         }
 
-        private static bool IsDraggable(PageAnnotation a) => a is PlacedAnnotation or TextAnnotation or HighlightAnnotation or InkAnnotation
-            or MeasurementAnnotation;
+        private static bool IsDraggable(PageAnnotation a) =>
+            (a is PlacedAnnotation or TextAnnotation or HighlightAnnotation or InkAnnotation or MeasurementAnnotation)
+            && a is not MeasurementAnnotation { IsVisibleOnScreen: false };
 
         // Shortest distance from point p to the segment a-b. Used to hit-test straight lines and ink
         // strokes along their length, not just at their sample points.
@@ -2445,7 +2446,7 @@ namespace KillerPDF.Controls
             }
             if (lead.GroupId.Length > 0 && _annotations.TryGetValue(pg, out var list))
                 foreach (var m in list)
-                    if (!ReferenceEquals(m, lead) && m.GroupId == lead.GroupId)
+                    if (!ReferenceEquals(m, lead) && m.GroupId == lead.GroupId && IsDraggable(m))
                     {
                         _selectedSet.Add(m);
                         AddSelectionOutline(AnnotBounds(m), _activeCanvas);

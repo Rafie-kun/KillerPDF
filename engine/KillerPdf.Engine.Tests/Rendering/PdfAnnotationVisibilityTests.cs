@@ -43,8 +43,8 @@ public sealed class PdfAnnotationVisibilityTests
     [InlineData(4, false, true)]
     [InlineData(4, true, true)]
     [InlineData(0, false, true)]
-    [InlineData(0, true, true)]
-    public void ExistingHiddenAndOrdinaryAppearanceBehaviorIsPreserved(int flags, bool printing, bool visible)
+    [InlineData(0, true, false)]
+    public void HiddenAndOrdinaryAppearancesFollowScreenAndPrintVisibility(int flags, bool printing, bool visible)
     {
         var renderer = new PdfPageRenderer(PdfDocument.Open(CreatePdf(flags)));
         PdfRenderedPage page = renderer.Render(0,
@@ -58,7 +58,20 @@ public sealed class PdfAnnotationVisibilityTests
     private static byte[] Pixel(PdfRenderedPage page, int x, int y) =>
         page.Pixels.Span.Slice((y * page.Width + x) * 4, 4).ToArray();
 
-    private static byte[] CreatePdf(int flags)
+    [Theory]
+    [InlineData(0)]
+    [InlineData(32)]
+    [InlineData(null)]
+    public void PrintingOmitsAppearancesWithoutThePrintFlag(int? flags)
+    {
+        var renderer = new PdfPageRenderer(PdfDocument.Open(CreatePdf(flags)));
+        PdfRenderedPage page = renderer.Render(0, new PdfRenderOptions(100, 100) { ForPrinting = true });
+
+        Assert.Equal(new byte[] { 255, 255, 255, 255 }, Pixel(page, 50, 50));
+        Assert.Equal(new byte[] { 0, 255, 0, 255 }, Pixel(page, 5, 95));
+    }
+
+    private static byte[] CreatePdf(int? flags)
     {
         const string appearance = "0 0 1 rg 0 0 60 60 re f";
         const string content = "0 1 0 rg 0 0 10 10 re f";
@@ -67,7 +80,7 @@ public sealed class PdfAnnotationVisibilityTests
             "<< /Type /Catalog /Pages 2 0 R >>",
             "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
             "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 100 100] /Contents 6 0 R /Annots [4 0 R] >>",
-            $"<< /Type /Annot /Subtype /Square /F {flags} /Rect [20 20 80 80] /AP << /N 5 0 R >> >>",
+            $"<< /Type /Annot /Subtype /Square {(flags is int value ? $"/F {value}" : "")} /Rect [20 20 80 80] /AP << /N 5 0 R >> >>",
             $"<< /Type /XObject /Subtype /Form /BBox [0 0 60 60] /Resources << >> /Length {appearance.Length} >>\nstream\n{appearance}\nendstream",
             $"<< /Length {content.Length} >>\nstream\n{content}\nendstream"
         ];

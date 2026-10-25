@@ -31,6 +31,8 @@ internal static class Program
     {
         try
         {
+            if (args.Length == 1 && args[0] == "--verify-print-color-probe")
+                return PrintVisibilitySmoke.VerifyColorProbe();
             if (args.Length == 2 && args[0] == "--request-process-close")
             {
                 using var target = Process.GetProcessById(int.Parse(args[1]));

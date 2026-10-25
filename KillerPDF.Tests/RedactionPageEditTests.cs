@@ -26,7 +26,7 @@ public sealed class RedactionPageEditTests
                 .AddPage(100, 100, new PdfContentStreamBuilder().BeginText().SetFont(PdfStandardFont.Helvetica, 10)
                     .MoveText(10, 50).ShowLatin1Text("SECRET").EndText()).Build();
             File.WriteAllBytes(path, source);
-            var mark = new RedactionMark(1, 5, 40, 80, 65, "Hidden", Colors.Black);
+            var mark = new RedactionMark(1, 5, 40, 80, 65, "Hidden", Colors.Black, AnnotationFlags: 36);
             var marks = new RedactionMarkSnapshot([mark]);
             RedactionMarkSnapshot mapped = RedactionPageEdit.Apply(path, marks, file =>
             {

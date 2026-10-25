@@ -1204,7 +1204,7 @@ internal static class PdfEngineIntegration
     /// and fill color drawn into the area when it is applied.
     /// </summary>
     internal sealed record RedactionMarkData(int PageIndex, double Left, double Bottom, double Right, double Top,
-        string? OverlayText = null, PdfRgbColor? FillColor = null);
+        string? OverlayText = null, PdfRgbColor? FillColor = null, long AnnotationFlags = 4);
 
     /// <summary>Reads the redaction marks saved in a document as crop-relative page areas.</summary>
     internal static List<RedactionMarkData> ReadRedactionMarks(PdfDocument document)
@@ -1219,7 +1219,8 @@ internal static class PdfEngineIntegration
             foreach (PdfContentBounds area in mark.Areas)
                 marks.Add(new RedactionMarkData(mark.PageIndex, area.Left - page.Left,
                     area.Bottom - page.Bottom, area.Right - page.Left, area.Top - page.Bottom,
-                    string.IsNullOrWhiteSpace(mark.OverlayText) ? null : mark.OverlayText, mark.FillColor));
+                    string.IsNullOrWhiteSpace(mark.OverlayText) ? null : mark.OverlayText, mark.FillColor,
+                    mark.AnnotationFlags));
         }
         return marks;
     }
@@ -1252,7 +1253,8 @@ internal static class PdfEngineIntegration
             [
                 new PdfTextQuad(new PdfPoint(left, top), new PdfPoint(right, top),
                     new PdfPoint(left, bottom), new PdfPoint(right, bottom))
-            ], fillColor: mark.FillColor, overlayText: overlay);
+            ], fillColor: mark.FillColor, overlayText: overlay,
+                annotationMetadata: new PdfAnnotationMetadata { Flags = checked((PdfAnnotationFlags)mark.AnnotationFlags) });
         }
         ReplaceWithBuiltResult(path, editor.Build());
     }
@@ -1264,7 +1266,8 @@ internal static class PdfEngineIntegration
     internal sealed record MeasurementData(
         int PageIndex, PdfMeasurementKind Kind, IReadOnlyList<PdfPoint> Points, bool Closed,
         PdfMeasurementProfile? Profile, string? Contents, PdfRgbColor Color, double LineWidth,
-        double Opacity, PdfPoint? LabelCenter, double? LabelSize, double? ArcRadius = null);
+        double Opacity, PdfPoint? LabelCenter, double? LabelSize, double? ArcRadius = null,
+        long AnnotationFlags = 4);
 
     /// <summary>The scale written when a measurement carries none of its own.</summary>
     internal static readonly PdfMeasurementProfile ActualSizeProfile = new("1 in = 1 in", 1.0 / 72.0, "in", 2);
@@ -1284,7 +1287,7 @@ internal static class PdfEngineIntegration
                 [.. info.Points.Select(Local)], info.Closed, info.Profile, info.Contents,
                 info.Color ?? new PdfRgbColor(1, 0, 0), info.LineWidth > 0 ? info.LineWidth : 1,
                 info.Opacity, info.CaptionCenter is { } center ? Local(center) : null,
-                info.CaptionFontSize));
+                info.CaptionFontSize, AnnotationFlags: info.AnnotationFlags));
         }
         return measurements;
     }
@@ -1318,28 +1321,29 @@ internal static class PdfEngineIntegration
             double width = double.IsFinite(measurement.LineWidth) && measurement.LineWidth > 0
                 ? measurement.LineWidth : 1;
             double opacity = Math.Clamp(double.IsFinite(measurement.Opacity) ? measurement.Opacity : 1, 0, 1);
+            var metadata = new PdfAnnotationMetadata { Flags = checked((PdfAnnotationFlags)measurement.AnnotationFlags) };
             try
             {
                 switch (measurement.Kind)
                 {
                     case PdfMeasurementKind.Distance when points.Length >= 2:
                         editor.AddDistanceMeasurement(measurement.PageIndex, points[0], points[1], profile,
-                            measurement.Color, width, opacity, contents, caption: caption);
+                            measurement.Color, width, opacity, contents, annotationMetadata: metadata, caption: caption);
                         break;
                     case PdfMeasurementKind.Perimeter when points.Length >= 2:
                         PdfPoint[] vertices = measurement.Closed && points.Length > 2 ? [.. points, points[0]] : points;
                         editor.AddPolyline(measurement.PageIndex, vertices, measurement.Color, width, opacity,
-                            contents, intent: PdfVertexAnnotationIntent.Dimension, measurement: profile,
+                            contents, annotationMetadata: metadata, intent: PdfVertexAnnotationIntent.Dimension, measurement: profile,
                             caption: caption);
                         break;
                     case PdfMeasurementKind.Area when points.Length >= 3:
                         editor.AddPolygon(measurement.PageIndex, points, measurement.Color, null, width,
-                            opacity, contents, intent: PdfVertexAnnotationIntent.Dimension,
+                            opacity, contents, annotationMetadata: metadata, intent: PdfVertexAnnotationIntent.Dimension,
                             measurement: profile, caption: caption);
                         break;
                     case PdfMeasurementKind.Angle when points.Length >= 3:
                         editor.AddAngleMeasurement(measurement.PageIndex, points[0], points[1], points[2],
-                            measurement.Color, width, opacity, 1, contents, caption: caption,
+                            measurement.Color, width, opacity, 1, contents, annotationMetadata: metadata, caption: caption,
                             arcRadius: measurement.ArcRadius is > 0 and var arc && double.IsFinite(arc) ? arc : null);
                         break;
                 }

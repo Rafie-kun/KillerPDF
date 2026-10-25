@@ -188,6 +188,9 @@ namespace KillerPDF
     /// </summary>
     public class MeasurementAnnotation : PageAnnotation
     {
+        public long AnnotationFlags { get; set; } = 4;
+        [System.Text.Json.Serialization.JsonIgnore]
+        public bool IsVisibleOnScreen => (AnnotationFlags & 34) == 0;
         public MeasurementKind Kind { get; set; }
         /// <summary>The measured points. An angle is first arm end, corner, second arm end. A closed
         /// perimeter does not repeat its first point.</summary>
