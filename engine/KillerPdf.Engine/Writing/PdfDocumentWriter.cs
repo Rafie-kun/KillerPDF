@@ -142,7 +142,11 @@ public static class PdfDocumentWriter
         if (options.DeduplicatePageResources)
             DeduplicatePageResources(document, objects);
         if (options.CompressUnfilteredStreams)
-            CompressUnfilteredStreams(objects);
+        {
+            HashSet<(int ObjectNumber, int Generation)> metadataIdentities =
+                CatalogMetadataIdentities(document, rootCatalog);
+            CompressUnfilteredStreams(objects, metadataIdentities);
+        }
         if (options.RemoveEncryption
             && document.CrossReferences.TryGetTrailerValue(EncryptName, out PdfObject encryptionValue))
         {
@@ -497,9 +501,26 @@ public static class PdfDocumentWriter
     internal static IReadOnlyList<int> CompressibleStreamObjectNumbers(PdfDocument document)
     {
         ArgumentNullException.ThrowIfNull(document);
+        PdfObject root = document.CrossReferences.TryGetTrailerValue(RootName, out PdfObject value)
+            ? ResolveValue(document, value, "The trailer /Root value")
+            : throw new InvalidOperationException("A full rewrite requires a trailer /Root reference.");
+        PdfDictionary catalog = root as PdfDictionary
+            ?? throw new InvalidOperationException("The trailer /Root value is not a catalog dictionary.");
+        HashSet<(int ObjectNumber, int Generation)> metadataIdentities =
+            CatalogMetadataIdentities(document, catalog);
         return Array.AsReadOnly(ReadCurrentObjects(document)
-            .Where(item => TryCompressStream(item.Value, out _))
+            .Where(item => TryCompressStream(item.Value,
+                metadataIdentities.Contains((item.ObjectNumber, item.Generation)), out _))
             .Select(item => item.ObjectNumber).OrderBy(number => number).ToArray());
+    }
+
+    private static HashSet<(int ObjectNumber, int Generation)> CatalogMetadataIdentities(
+        PdfDocument document, PdfDictionary catalog)
+    {
+        if (!catalog.TryGetValue(MetadataName, out PdfObject metadataValue))
+            return [];
+        return [.. ResolveChain(document, metadataValue,
+            "The catalog /Metadata value").Identities];
     }
 
     internal static int CountDuplicatePageResourceObjects(PdfDocument document)
@@ -604,17 +625,29 @@ public static class PdfDocumentWriter
             ? new PdfStream(rewritten, streamValue.EncodedData.Span) : rewritten;
     }
 
-    private static void CompressUnfilteredStreams(List<WritableObject> objects)
+    private static void CompressUnfilteredStreams(
+        List<WritableObject> objects,
+        IReadOnlySet<(int ObjectNumber, int Generation)> metadataIdentities)
     {
         for (int index = 0; index < objects.Count; index++)
-            if (TryCompressStream(objects[index].Value, out PdfStream compressed))
+        {
+            WritableObject item = objects[index];
+            bool isCatalogMetadata = metadataIdentities.Contains(
+                (item.ObjectNumber, item.Generation));
+            if (TryCompressStream(item.Value, isCatalogMetadata,
+                    out PdfStream compressed))
                 objects[index] = objects[index] with { Value = compressed };
+        }
     }
 
-    private static bool TryCompressStream(PdfObject value, out PdfStream compressed)
+    private static bool TryCompressStream(
+        PdfObject value, bool isCatalogMetadata, out PdfStream compressed)
     {
         compressed = null!;
         if (value is not PdfStream stream
+            || isCatalogMetadata
+            || stream.Dictionary.TryGetValue(TypeName, out PdfObject typeValue)
+                && typeValue is PdfName typeName && typeName.Equals(MetadataName)
             || stream.EncodedData.Length == 0
             || stream.Dictionary.ContainsKey(FilterName)
             || stream.Dictionary.ContainsKey(DecodeParmsName)
