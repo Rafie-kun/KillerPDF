@@ -214,6 +214,8 @@ public sealed class PdfMacroDispatcher
             throw new ArgumentException(
                 $"Validate does not support setting '{unknown[0]}'.", nameof(step));
         PdfPreflightReport report = PdfPreflightRunner.Run(source, profile);
+        if (!report.Passed)
+            throw new InvalidOperationException(report.ToText());
         return new PdfMacroOperationResult(source,
             new Dictionary<string, string>(StringComparer.Ordinal)
             {

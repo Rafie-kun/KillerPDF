@@ -1,5 +1,6 @@
 using KillerPdf.Engine.Documents;
 using KillerPdf.Engine.Authoring;
+using KillerPdf.Engine.Diagnostics;
 using KillerPdf.Engine.Syntax;
 using System.Text.Json;
 using Xunit;
@@ -313,6 +314,85 @@ public sealed class PdfMacroTests
         Assert.Equal("True", result.Values["validationComplete"]);
         Assert.Contains("\"profileName\":\"General PDF\"",
             result.Values["validationReport"], StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void DispatcherRunReportStopsFailedPreflightBeforeSaveAndKeepsOtherInputs()
+    {
+        byte[] source = new PdfDocumentBuilder(PdfVersion.Pdf17)
+            .AddBlankPage().Build();
+        byte[] original = source.ToArray();
+        byte[] validSource = new PdfDocumentBuilder(PdfVersion.Pdf17)
+            .SetMetadata(new PdfDocumentMetadata { Language = "en-US" })
+            .AddBlankPage().Build();
+        byte[] validOriginal = validSource.ToArray();
+        var profile = new PdfPreflightProfile("Language required",
+            [PdfPreflightCheck.DocumentLanguage]);
+        var macro = new PdfMacro("Validate before save", [
+            new(PdfMacroOperation.Validate,
+                new Dictionary<string, string> { ["profileJson"] = profile.ToJson() }),
+            new(PdfMacroOperation.Save)]);
+        int saveCalls = 0;
+        var dispatcher = new PdfMacroDispatcher([
+            new(PdfMacroOperation.Save, (_, input, _, _) =>
+            {
+                saveCalls++;
+                return new PdfMacroOperationResult(input);
+            })]);
+
+        PdfMacroRunReport report = dispatcher.RunReport(macro, [source, validSource]);
+        Assert.Equal(2, report.Results.Count);
+        PdfMacroFileResult result = report.Results[0];
+        PdfMacroFileResult validResult = report.Results[1];
+
+        Assert.Equal(1, report.SucceededCount);
+        Assert.Equal(1, report.FailedCount);
+        Assert.Equal(0, result.FailedStepIndex);
+        Assert.Equal(PdfMacroOperation.Validate, result.FailedOperation);
+        Assert.Contains("Preflight profile: Language required", result.Error,
+            StringComparison.Ordinal);
+        Assert.Contains("Accessibility.MissingDocumentLanguage", result.Error,
+            StringComparison.Ordinal);
+        Assert.True(validResult.Succeeded);
+        Assert.Equal(validOriginal, validResult.Data!.Value.ToArray());
+        Assert.Equal(1, saveCalls);
+        Assert.Equal(original, source);
+        Assert.Equal(validOriginal, validSource);
+    }
+
+    [Fact]
+    public void DispatcherRunReportAllowsPassingPreflightAndPreservesValidationMetadata()
+    {
+        byte[] source = new PdfDocumentBuilder(PdfVersion.Pdf17)
+            .AddBlankPage().Build();
+        byte[] original = source.ToArray();
+        var warningProfile = new PdfPreflightProfile("Metadata review",
+            [PdfPreflightCheck.DocumentMetadata]);
+        var macro = new PdfMacro("Validate before save", [
+            new(PdfMacroOperation.Validate,
+                new Dictionary<string, string> { ["profileJson"] = warningProfile.ToJson() }),
+            new(PdfMacroOperation.Save)]);
+        IReadOnlyDictionary<string, string>? savedValues = null;
+        var dispatcher = new PdfMacroDispatcher([
+            new(PdfMacroOperation.Save, (_, input, values, _) =>
+            {
+                savedValues = values;
+                return new PdfMacroOperationResult(input);
+            })]);
+
+        PdfMacroRunReport report = dispatcher.RunReport(macro, [source]);
+        PdfMacroFileResult result = Assert.Single(report.Results);
+
+        Assert.Equal(1, report.SucceededCount);
+        Assert.True(result.Succeeded);
+        Assert.Equal(original, result.Data!.Value.ToArray());
+        Assert.Equal("True", savedValues!["validationPassed"]);
+        Assert.Equal("True", savedValues["validationComplete"]);
+        Assert.Contains("\"profileName\":\"Metadata review\"", savedValues["validationReport"],
+            StringComparison.Ordinal);
+        Assert.Contains("\"severity\":\"warning\"", savedValues["validationReport"],
+            StringComparison.Ordinal);
+        Assert.Equal(original, source);
     }
 
     [Fact]
