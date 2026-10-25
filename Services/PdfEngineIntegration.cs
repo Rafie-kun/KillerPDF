@@ -155,10 +155,12 @@ internal static class PdfEngineIntegration
 
     /// <summary>Reads interactive form widgets from an already parsed engine document.</summary>
     internal static IReadOnlyList<PdfFormWidgetInfo> ReadPageFormWidgets(
-        PdfDocument document, int pageIndex)
+        PdfDocument document, int pageIndex, bool forDisplay = false)
     {
         ArgumentNullException.ThrowIfNull(document);
-        return PdfFormWidgetReader.ReadPage(document, pageIndex);
+        IReadOnlyList<PdfFormWidgetInfo> widgets = PdfFormWidgetReader.ReadPage(document, pageIndex);
+        // Hidden and NoView apply to interactive controls as well as saved appearances.
+        return forDisplay ? [.. widgets.Where(widget => (widget.AnnotationFlags & 34) == 0)] : widgets;
     }
 
     internal static IReadOnlyList<PdfFormWidgetInfo> ReadPageFormWidgets(

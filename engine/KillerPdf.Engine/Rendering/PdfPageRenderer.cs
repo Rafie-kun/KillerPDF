@@ -220,7 +220,7 @@ public sealed partial class PdfPageRenderer
         var key = new RenderCacheKey(pageIndex, options.Width, options.Height,
             options.TransparentBackground, options.IncludeAnnotations,
             options.IncludeFormFields, options.IncludeRedactionMarks,
-            options.IncludeMeasurementAnnotations);
+            options.IncludeMeasurementAnnotations, options.ForPrinting);
         return _renderCache.GetOrAdd(key,
             _ => RenderUncached(pageIndex, options, cancellationToken));
     }
@@ -2473,7 +2473,9 @@ public sealed partial class PdfPageRenderer
                     // ISO 32000-2 12.5.3: a Hidden annotation is neither displayed nor printed,
                     // whatever its other flags say.
                     if (annotation.TryGetValue(Name("F"), out PdfObject? flagsValue)
-                        && Resolve(flagsValue) is PdfInteger flags && (flags.Value & 2) != 0) continue;
+                        && Resolve(flagsValue) is PdfInteger flags
+                        && ((flags.Value & 2) != 0
+                            || (!options.ForPrinting && (flags.Value & 32) != 0))) continue;
                     TryGetAppearance(annotation, out PdfStream? appearance);
                     if (widget)
                     {
@@ -9248,7 +9250,7 @@ public sealed partial class PdfPageRenderer
     private readonly record struct RenderCacheKey(
         int PageIndex, int Width, int Height, bool TransparentBackground,
         bool IncludeAnnotations, bool IncludeFormFields, bool IncludeRedactionMarks,
-        bool IncludeMeasurementAnnotations);
+        bool IncludeMeasurementAnnotations, bool ForPrinting);
 
     // A dimension line, polyline, or polygon, or one of those carrying a /Measure dictionary:
     // what PdfMeasurementAnnotationReader reads back as a measurement.

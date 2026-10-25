@@ -703,7 +703,7 @@ namespace KillerPDF.Controls
             {
                 KillerPdf.Engine.Documents.PdfDocument engineDocument = EnsureEngineDocumentSession().Document;
                 foreach (KillerPdf.Engine.Documents.PdfFormWidgetInfo widget in
-                    PdfEngineIntegration.ReadPageFormWidgets(engineDocument, pageIndex))
+                    PdfEngineIntegration.ReadPageFormWidgets(engineDocument, pageIndex, forDisplay: true))
                 {
                     double fx1 = widget.Left - widget.PageBoxLeft;
                     double fy1 = widget.Bottom - widget.PageBoxBottom;

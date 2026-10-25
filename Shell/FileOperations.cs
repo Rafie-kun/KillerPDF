@@ -2047,7 +2047,7 @@ namespace KillerPDF
                 try
                 {
                     using var renderSession = PdfPageRenderSession.OpenEngineFirst(
-                        renderPath, previewBox, previewBox);
+                        renderPath, previewBox, previewBox, forPrinting: true);
                     // A page that cannot be drawn exactly still prints as shown; the preview names it.
                     var incomplete = new IncompletePageLog();
                     for (int i = 0; i < pageCount; i++)

@@ -1465,7 +1465,7 @@ namespace KillerPDF
                 await Task.Run(() =>
                 {
                     using var renderSession = PdfPageRenderSession.OpenEngineFirst(
-                        _renderPath, 300.0 / 72.0);
+                        _renderPath, 300.0 / 72.0, forPrinting: true);
                     int done = 0;
                     foreach (int idx in indices)
                     {

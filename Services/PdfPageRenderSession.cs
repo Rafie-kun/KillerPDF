@@ -21,6 +21,7 @@ internal sealed class PdfPageRenderSession : IDisposable
     private readonly int _maximumWidth;
     private readonly int _maximumHeight;
     private readonly double _scale;
+    private readonly bool _forPrinting;
     // One shared cache per parsed document. Attached via a ConditionalWeakTable so the cache
     // is reclaimed automatically when the document itself becomes unreachable. Passing it to
     // every PdfPageRenderer built for the same document means viewer, sidebar-thumbnail,
@@ -34,7 +35,7 @@ internal sealed class PdfPageRenderSession : IDisposable
 
     private PdfPageRenderSession(EngineDocument document,
         IReadOnlyList<EnginePageInformation> pages, int maximumWidth, int maximumHeight,
-        double scale)
+        double scale, bool forPrinting = false)
     {
         _engineRenderer = new EngineRenderer(document, InstalledPdfFontResolver.Instance,
             SharedCacheFor(document), WicJpegDecoder.Instance);
@@ -43,10 +44,11 @@ internal sealed class PdfPageRenderSession : IDisposable
         _maximumWidth = maximumWidth;
         _maximumHeight = maximumHeight;
         _scale = scale;
+        _forPrinting = forPrinting;
     }
 
     internal static PdfPageRenderSession OpenEngineFirst(
-        string path, int maximumWidth, int maximumHeight)
+        string path, int maximumWidth, int maximumHeight, bool forPrinting = false)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maximumWidth);
@@ -55,7 +57,7 @@ internal sealed class PdfPageRenderSession : IDisposable
         if (!document.CanReadPageContent)
             throw new InvalidOperationException("Authenticate the document before rendering page content.");
         IReadOnlyList<EnginePageInformation> pages = EnginePageInformation.Read(document);
-        return new PdfPageRenderSession(document, pages, maximumWidth, maximumHeight, 0);
+        return new PdfPageRenderSession(document, pages, maximumWidth, maximumHeight, 0, forPrinting);
     }
 
     internal static PdfPageRenderSession OpenEngineFirst(
@@ -145,14 +147,14 @@ internal sealed class PdfPageRenderSession : IDisposable
         return document;
     }
 
-    internal static PdfPageRenderSession OpenEngineFirst(string path, double scale)
+    internal static PdfPageRenderSession OpenEngineFirst(string path, double scale, bool forPrinting = false)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
         if (!double.IsFinite(scale) || scale <= 0)
             throw new ArgumentOutOfRangeException(nameof(scale));
         EngineDocument document = OpenDocument(path);
         IReadOnlyList<EnginePageInformation> pages = EnginePageInformation.Read(document);
-        return new PdfPageRenderSession(document, pages, 0, 0, scale);
+        return new PdfPageRenderSession(document, pages, 0, 0, scale, forPrinting);
     }
 
     internal int PageCount => _enginePages.Count;
@@ -292,6 +294,7 @@ internal sealed class PdfPageRenderSession : IDisposable
         return new EngineRenderOptions(engineWidth, engineHeight, transparentBackground,
             includeAnnotations, includeFormFields)
         {
+            ForPrinting = _forPrinting,
             // The viewer draws redaction marks on its own overlay.
             IncludeRedactionMarks = false,
             MaximumParallelism = RenderParallelism(engineWidth, engineHeight),
