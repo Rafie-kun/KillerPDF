@@ -2440,6 +2440,10 @@ public sealed partial class PdfPageRenderer
                 double rectangleBottom = Number(Resolve(rectangle[1]));
                 double rectangleRight = Number(Resolve(rectangle[2]));
                 double rectangleTop = Number(Resolve(rectangle[3]));
+                if (rectangleLeft > rectangleRight)
+                    (rectangleLeft, rectangleRight) = (rectangleRight, rectangleLeft);
+                if (rectangleBottom > rectangleTop)
+                    (rectangleBottom, rectangleTop) = (rectangleTop, rectangleBottom);
                 if (!appearance.Dictionary.TryGetValue(Name("BBox"), out PdfObject? boundsValue))
                     continue;
                 PdfArray bounds = ResolveArray(boundsValue, 4, "Appearance bounding box");
