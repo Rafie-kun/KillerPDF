@@ -71,6 +71,7 @@ namespace KillerPDF.Features
                 }
                 certificate = matches[0];
             }
+            using X509Certificate2? importedCertificate = fromFile ? certificate : null;
             if (!certificate.HasPrivateKey) { con.WriteLine("The certificate has no private key, so it cannot sign."); return 2; }
 
             string? timestampServer = null;

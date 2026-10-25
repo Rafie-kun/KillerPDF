@@ -350,6 +350,8 @@ namespace KillerPDF
             }
             catch (Exception ex) { Warn(L("Str_Sign_CertLoadFailed") + "\n\n" + ex.Message); return; }
 
+            using X509Certificate2? importedCertificate = provider is PfxFileCertificateProvider ? cert : null;
+
             string? timestampServer = null;
             if (_timestamp.IsChecked == true)
             {
