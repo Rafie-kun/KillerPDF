@@ -129,8 +129,16 @@ no PDF) and 38d0bcf (screen-reader visible text). See
 Later functional repairs pass 1,332 application tests and five focused reading
 checks on the current line-visibility source. Unchanged engine source retains
 the previous 6,919-pass result. Native save/sign, forms, pane ownership and reading
-results have separately pinned packages. Full continuous-reader, installer and
-adverse-state acceptance remain incomplete. See [the current readiness
+results have separately pinned packages. Fresh disposable Sandbox checks also
+pass unsigned development per-user install, replacement, bundled startup,
+uninstall, native CLI disk-full preservation and installer insufficient space (112).
+Strict unsigned Store rejection (1625) passes. Signing is deferred after SimplySign
+private-key access fails. These results and their limits are in [the installer
+record](records/release-installer-20261024.md). Current ordinary portable launches
+also pass complete tagged and untagged continuous reading with actual NVDA/eSpeak
+and Narrator. See [the reader record](records/release-reader-20261024.md) for
+output, identities and cleanup limits. Signed installer and remaining adverse-state
+acceptance stay open. See [the current readiness
 record](records/release-readiness-20261024.md). The canceled corpus and timing
 loops remain stopped; no benchmark gate is waived or marked passed by these
 functional checks.
