@@ -44,4 +44,12 @@ scripts:
     failure_behavior: Throw on preference isolation, layout, palette, hover, scrolling or recovery failure.
     mutates: temporary-fixture-files-and-test-owned-windows-only
 
+  window_lifecycle_smoke:
+    path: tests/KillerPDF.UiSmoke/WindowLifecycleSmoke.cs
+    purpose: Verify closing one document window preserves the survivor's real Save As workflow and document identity.
+    inputs: Built app DLL, matching App.xaml, fresh evidence directory and --startup-smoke.
+    outputs: Stage diagnostics and a result containing the tested assembly hash.
+    failure_behavior: Return nonzero on missing working files, wrong saved page identity or changed source files.
+    mutates: temporary-fixture-files-and-test-owned-windows-only
+
 documentation: docs/startup-packaging.md

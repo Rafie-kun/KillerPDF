@@ -145,7 +145,7 @@ internal static class SignedCopySmoke
         Pump();
     }
 
-    private static void SaveAs(Window owner, Assembly app, string destination, bool copy = false)
+    internal static void SaveAs(Window owner, Assembly app, string destination, bool copy = false)
     {
         Exception? failure = null;
         var seen = new HashSet<Window>();
@@ -203,7 +203,7 @@ internal static class SignedCopySmoke
             foreach (DependencyObject child in Children(VisualTreeHelper.GetChild(root, index))) yield return child;
     }
 
-    private static byte[] Fixture(bool measurement = true, int pageWidth = 200)
+    internal static byte[] Fixture(bool measurement = true, int pageWidth = 200)
     {
         string annotations = measurement ? " /Annots [4 0 R]" : "";
         string[] objects = [

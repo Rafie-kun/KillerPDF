@@ -436,7 +436,6 @@ namespace KillerPDF
                 _continuousRenderCts?.Cancel();
                 _doc?.Close();
                 CloseEngineDocumentSession();
-                if (Application.Current.Windows.Count <= 1) App.CleanupSessionTemps();
             };
 
             // Open a file passed via command-line / file association (e.g. double-clicking a .pdf)

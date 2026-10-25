@@ -1,5 +1,21 @@
 # Interactive PDF smoke checks
 
+## Document-window lifetime regression
+
+Use `--verify-window-lifecycle APP_DLL APP_XAML OUTPUT_DIRECTORY --startup-smoke`
+with a fresh output directory. The isolated host opens two synthetic documents in
+actual MainWindows, waits for the first window to finish closing, and uses the
+survivor's real Save menu and file picker. The saved PDF must reopen as the
+survivor's one 300 by 200 point page, and both input files must remain unchanged.
+Ordinary unsigned Save As may add an incremental rotation update, so saved output
+is checked as a document rather than requiring byte identity with its input.
+
+The fixture locks only the optional clean-document quit confirmation in its
+isolated settings. It does not bypass dirty-document prompts, launch normal app
+startup, register a protocol, change installed settings or use personal files.
+Run it on an owned UI VM. It verifies shared process/window lifetime, not the
+physical tab-drag gesture or external-open IPC routing.
+
 Prerequisites: Windows with .NET SDK selected by the repository's global.json, an unlocked
 interactive desktop, and no running KillerPDF user session. Build commands write only build
 output and use the official NuGet registry. Run one repository at a time.

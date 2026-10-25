@@ -18,7 +18,7 @@ internal static class TableExportSmoke
 {
     private const BindingFlags Members = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
 
-    internal static int Run(string appPath, string appXaml, string folder, bool officeExport = false, bool grainThemes = false, bool dialogText = false, bool sidebarActions = false, bool paragraphEdit = false, bool accessibilityReview = false, bool formFieldEditing = false, bool guidedTasks = false, bool signedCopy = false, bool renderRecovery = false, bool toolbarAvailability = false)
+    internal static int Run(string appPath, string appXaml, string folder, bool officeExport = false, bool grainThemes = false, bool dialogText = false, bool sidebarActions = false, bool paragraphEdit = false, bool accessibilityReview = false, bool formFieldEditing = false, bool guidedTasks = false, bool signedCopy = false, bool renderRecovery = false, bool toolbarAvailability = false, bool windowLifecycle = false)
     {
         if (!Environment.GetCommandLineArgs().Contains("--startup-smoke"))
             throw new InvalidOperationException("Startup smoke isolation is required.");
@@ -38,7 +38,7 @@ internal static class TableExportSmoke
         typeof(Application).GetField("_resourceAssembly", Members)!.SetValue(null, assembly);
         assembly.GetType("KillerPDF.Services.AppDataPaths", true)!
             .GetProperty("StartupSmokeRoot", Members)!.SetValue(null, Path.Combine(folder, "data"));
-        if (accessibilityReview || formFieldEditing || guidedTasks || signedCopy || renderRecovery || toolbarAvailability) AccessibilityReviewSmoke.ConfigureOffscreen(assembly);
+        if (accessibilityReview || formFieldEditing || guidedTasks || signedCopy || renderRecovery || toolbarAvailability || windowLifecycle) AccessibilityReviewSmoke.ConfigureOffscreen(assembly);
         Type appType = assembly.GetType("KillerPDF.App", true)!;
         var hostType = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("TableExportSmokeHost"),
             AssemblyBuilderAccess.Run).DefineDynamicModule("Host")
@@ -60,7 +60,7 @@ internal static class TableExportSmoke
             xaml = xaml.Replace("clr-namespace:" + name, "clr-namespace:" + name + ";assembly=KillerPDF", StringComparison.Ordinal);
         app.Resources = (ResourceDictionary)System.Windows.Markup.XamlReader.Parse(xaml,
             new System.Windows.Markup.ParserContext { BaseUri = new Uri("pack://application:,,,/KillerPDF;component/") });
-        if (accessibilityReview || formFieldEditing || guidedTasks || signedCopy || renderRecovery || toolbarAvailability)
+        if (accessibilityReview || formFieldEditing || guidedTasks || signedCopy || renderRecovery || toolbarAvailability || windowLifecycle)
         {
             var hiddenMessages = new Style(typeof(Window));
             hiddenMessages.Setters.Add(new Setter(Window.ShowActivatedProperty, false));
@@ -78,6 +78,7 @@ internal static class TableExportSmoke
             owner.WindowStartupLocation = WindowStartupLocation.Manual;
             owner.Left = -10000; owner.Top = -10000; owner.ShowInTaskbar = false; owner.ShowActivated = false;
             owner.Show();
+            if (windowLifecycle) return WindowLifecycleSmoke.Run(owner, assembly, appPath, folder);
             if (toolbarAvailability) return ToolbarAvailabilitySmoke.Run(owner, appPath, folder);
             if (renderRecovery) return RenderRecoverySmoke.Run(owner, appPath, folder);
             if (signedCopy) return SignedCopySmoke.Run(owner, assembly, appPath, folder);
