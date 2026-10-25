@@ -809,6 +809,12 @@ namespace KillerPDF
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
+            if (App.UpdateRestartPrepared)
+            {
+                base.OnClosing(e);
+                if (!App.TryCloseForUpdate(this, e)) e.Cancel = true;
+                return;
+            }
             if (Application.Current is App { SessionEndingConfirmed: true })
             {
                 base.OnClosing(e);

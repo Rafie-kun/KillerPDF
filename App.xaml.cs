@@ -255,6 +255,7 @@ namespace KillerPDF
             LocaleManager.Initialize();
             StartupTrace.Mark("Locale initialized");
             OfferInstallConflictRepair();
+            LoadPendingUpdateRestart();
             var mainWindow = new MainWindow();
             StartupTrace.Mark("MainWindow constructed");
             mainWindow.Show();
@@ -294,6 +295,8 @@ namespace KillerPDF
         {
             try
             {
+                // The installer can close us while shell activation is still returning.
+                RetainUpdateRestartForExit();
                 StopFolderAutomation();
                 if (SessionTempFiles.IsValueCreated) SessionTempFiles.Value.Dispose();
             }
@@ -1413,6 +1416,7 @@ namespace KillerPDF
 
             TryDeleteDir(Services.AppDataPaths.TessDataDirectory);
             TryDeleteDir(Path.Combine(Services.AppDataPaths.LocalRoot, "ocr"));
+            TryDeleteDir(Path.Combine(Services.AppDataPaths.LocalRoot, "UpdateRestart"));
             TryDeleteDir(TempDir);                              // temp working files
 
             // Legacy temp PDFs that may linger in %TEMP%.

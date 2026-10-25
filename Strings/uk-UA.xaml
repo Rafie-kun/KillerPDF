@@ -1326,6 +1326,8 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_UpdateAvailable">Доступне оновлення: {0}</sys:String>
     <sys:String x:Key="Str_UpdatePrompt" xml:space="preserve">Завантажити та встановити KillerPDF {0}?&#10;&#10;Програма закриється та відкриється знову автоматично.</sys:String>
     <sys:String x:Key="Str_UpdateDownloading">Завантаження...</sys:String>
+    <sys:String x:Key="Str_UpdateRestartPrepareFailed">Не вдалося підготувати оновлення. Ваші збережені PDF-файли не змінено. Спробуйте ще раз.</sys:String>
+    <sys:String x:Key="Str_UpdateRestartRestoreFailed">KillerPDF не вдалося знову відкрити попередній сеанс роботи. Ваші збережені PDF-файли не змінено.</sys:String>
     <sys:String x:Key="Str_ClearAllData">Очистити всі дані</sys:String>
     <sys:String x:Key="Str_ClearDataConfirm" xml:space="preserve">Буде видалено всі збережені параметри, завантажені мовні пакети OCR і тимчасові файли.&#10;&#10;Ваші файли PDF не постраждають. Продовжити?</sys:String>
     <sys:String x:Key="Str_ClearDataDone" xml:space="preserve">Параметри, мовні пакети й тимчасові файли очищено.&#10;&#10;Перезапустіть KillerPDF, щоб завершити очищення файлів, які ще використовуються в цьому сеансі.</sys:String>

@@ -520,6 +520,26 @@ namespace KillerPDF
                     RebuildTabStrip();
                     RenderActiveSession();
                 }
+                else if (App.TakeUpdateRestart() is { } updateRestart)
+                {
+                    var restored = updateRestart.Files.Where(File.Exists)
+                        .Select(Controls.PdfViewer.MakeDeferredSession).ToList();
+                    var active = restored.FirstOrDefault(session => string.Equals(session.OriginalFile,
+                        updateRestart.ActiveFile, StringComparison.OrdinalIgnoreCase)) ?? restored.FirstOrDefault();
+                    SetRestoredSessions(restored, active);
+                    if (active is not null)
+                    {
+                        ApplySessionState(active);
+                        MaterializeDeferred(active);
+                    }
+                    else EnsureInitialSession();
+                    RebuildTabStrip();
+                    if (args.Length > 1 && (File.Exists(args[1]) || Services.ProtocolRegistrar.IsHandoffLaunch(args[1]))
+                        && !updateRestart.Files.Contains(args[1], StringComparer.OrdinalIgnoreCase))
+                        OpenFromExternal(args[1]);
+                    if (restored.Count != updateRestart.Files.Length)
+                        SetStatus(Loc("Str_UpdateRestartRestoreFailed"));
+                }
                 else if (args.Length > 1 && (System.IO.File.Exists(args[1]) ||
                     Services.ProtocolRegistrar.IsHandoffLaunch(args[1])))
                 {
@@ -567,6 +587,8 @@ namespace KillerPDF
                     RestorePaneB();
                 }
                 OpenRenderRecovery();   // #456: no-op unless this launch replaced a failed window
+                if (App.TakeUpdateRestartReadFailure())
+                    SetStatus(Loc("Str_UpdateRestartRestoreFailed"));
 
                 if (App.IsPortable())
                     _portableBadge.Visibility = Visibility.Visible;

@@ -185,6 +185,34 @@ namespace KillerPDF
 
         string? IAboutHost.FileToReopen => _originalFile ?? _currentFile;
 
+        IUpdateRestartHandoff? IAboutHost.PrepareUpdateRestart() => App.PrepareUpdateRestart(this);
+
+        internal string? UpdateRestartActiveFile => _originalFile ?? _currentFile;
+        internal bool UpdateRestartEditingEnabled { get => RootBorder.IsEnabled; set => RootBorder.IsEnabled = value; }
+
+        internal bool TryCaptureUpdateRestart(out long revision, out string[] files)
+        {
+            revision = SessionEndingEditRevision;
+            files = [];
+            if (_busyCts is not null || _externalOpenInFlight != 0 || _pendingExternalPath is not null
+                || OwnedWindows.Cast<Window>().Any(window => window.IsVisible)
+                || Viewer.IsDirtyRef || ViewerB.IsDirtyRef) return false;
+            var paths = new List<string>();
+            foreach (var session in AllSessions())
+            {
+                if (session.IsDirty || session.LoadPending) return false;
+                if (session.Doc is null && string.IsNullOrEmpty(session.CurrentFile)
+                    && string.IsNullOrEmpty(session.DeferredPath)) continue;
+                string? path = session.OriginalFile ?? session.DeferredPath;
+                if (string.IsNullOrWhiteSpace(path) || !System.IO.File.Exists(path)) return false;
+                path = System.IO.Path.GetFullPath(path);
+                if (App.IsCleanupOwnedPath(path)) return false;
+                paths.Add(path);
+            }
+            files = paths.ToArray();
+            return true;
+        }
+
         /// <summary>Version line, as a hyperlink through to that release tag.</summary>
         void IAboutHost.SetVersion(string version)
         {

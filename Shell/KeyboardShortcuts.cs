@@ -23,6 +23,11 @@ namespace KillerPDF
 
         protected override void OnPreviewKeyDown(KeyEventArgs e)
         {
+            if (App.UpdateRestartPrepared)
+            {
+                e.Handled = true;
+                return;
+            }
             base.OnPreviewKeyDown(e);
 
             // The title bar search box keeps its own navigation keys while it has focus.

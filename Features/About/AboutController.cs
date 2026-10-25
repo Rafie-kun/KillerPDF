@@ -190,7 +190,9 @@ namespace KillerPDF.Features
                         "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
-                LaunchSwapAndExit(newExe);
+                if (!LaunchSwapAndExit(newExe))
+                    KillerDialog.Show(_host.Window, _host.Loc("Str_UpdateRestartPrepareFailed"),
+                        "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Warning);
                 newExe = null; // Failed helper startup retains the verified download.
             }
             finally
@@ -258,7 +260,6 @@ namespace KillerPDF.Features
             {
                 var curExe = Environment.ProcessPath
                     ?? throw new InvalidOperationException("The current executable path is unavailable.");
-                var reopen = _host.FileToReopen;
                 var pid    = Environment.ProcessId;
                 bool portable = App.IsPortable();
                 string? portableLauncher = Environment.GetEnvironmentVariable("KILLERPDF_LAUNCHER_PATH");
@@ -276,6 +277,9 @@ namespace KillerPDF.Features
                 // appeared to "update" to the same version, with no error.
                 string updateTarget = packagedPortable ? portableLauncher! : curExe;
                 bool needsElevation = !CanWriteTo(Path.GetDirectoryName(updateTarget)!);
+                if (packagedPortable && needsElevation) return false;
+                using var restart = _host.PrepareUpdateRestart();
+                if (restart is null) return false;
 
                 if (!packagedPortable)
                 {
@@ -289,7 +293,7 @@ namespace KillerPDF.Features
                     bool machineInstall = needsElevation
                         || App.IsRegisteredCopy(Microsoft.Win32.Registry.LocalMachine, curExe);
                     var installer = new ProcessStartInfo(newExe,
-                        InstalledUpdateCommand.Arguments(curExe, machineInstall, needsElevation ? null : reopen))
+                        InstalledUpdateCommand.Arguments(curExe, machineInstall, null))
                     {
                         UseShellExecute = true,
                         WorkingDirectory = Path.GetTempPath()
@@ -297,21 +301,22 @@ namespace KillerPDF.Features
                     if (needsElevation) installer.Verb = "runas";
                     if (Process.Start(installer) is null)
                         throw new IOException("The update installer did not start. Download retained at: " + newExe);
+                    restart.Started();
+                    restart.Commit();
                     Application.Current.Shutdown();
                     return true;
                 }
-
-                // A portable launcher in a folder this user cannot write is not updated in place.
-                if (needsElevation) return false;
 
                 // The whole helper travels in the process command line, so no file the user
                 // account can write is read after it starts.
                 int launcherPid = int.TryParse(Environment.GetEnvironmentVariable("KILLERPDF_LAUNCHER_PID"), out int parsed) ? parsed : 0;
                 string script = Services.UpdateHelperLaunch.WaitFor(pid, launcherPid) +
                     Services.UpdateImagePublication.Script(newExe, portableLauncher!, false,
-                        $"{Repo}/releases/latest", "KillerPDF", reopen: reopen);
+                        $"{Repo}/releases/latest", "KillerPDF", reopen: null);
                 if (Process.Start(Services.UpdateHelperLaunch.StartInfo(script, elevate: false)) is null)
                     throw new IOException("The update helper did not start. Download retained at: " + newExe);
+                restart.Started();
+                restart.Commit();
                 Application.Current.Shutdown();
                 return true;
             }

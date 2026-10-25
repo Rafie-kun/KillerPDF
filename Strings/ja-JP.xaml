@@ -1326,6 +1326,8 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_UpdateAvailable">更新があります: {0}</sys:String>
     <sys:String x:Key="Str_UpdatePrompt" xml:space="preserve">KillerPDF {0} をダウンロードしてインストールしますか？&#10;&#10;アプリは終了し、自動的に再起動します。</sys:String>
     <sys:String x:Key="Str_UpdateDownloading">ダウンロード中...</sys:String>
+    <sys:String x:Key="Str_UpdateRestartPrepareFailed">更新を準備できませんでした。保存済みのPDFファイルは変更されていません。もう一度お試しください。</sys:String>
+    <sys:String x:Key="Str_UpdateRestartRestoreFailed">KillerPDFは前回の作業セッションを再度開けませんでした。保存済みのPDFファイルは変更されていません。</sys:String>
     <sys:String x:Key="Str_ClearAllData">すべてのデータを消去</sys:String>
     <sys:String x:Key="Str_ClearDataConfirm" xml:space="preserve">保存されたすべての設定、ダウンロード済みの OCR 言語パック、一時ファイルを削除します。&#10;&#10;PDF ファイルには影響しません。続行しますか？</sys:String>
     <sys:String x:Key="Str_ClearDataDone" xml:space="preserve">設定、言語パック、一時ファイルを消去しました。&#10;&#10;このセッションで使用中のファイルの消去を完了するには、KillerPDF を再起動してください。</sys:String>

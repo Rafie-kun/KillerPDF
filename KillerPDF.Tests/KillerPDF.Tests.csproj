@@ -130,6 +130,7 @@
     <Compile Include="..\Services\EditableTextShortcutPolicy.cs" Link="Services\EditableTextShortcutPolicy.cs" />
     <Compile Include="..\Services\ShortcutTogglePolicy.cs" Link="Services\ShortcutTogglePolicy.cs" />
     <Compile Include="..\Services\ReleaseUpdateCheck.cs" Link="Services\ReleaseUpdateCheck.cs" />
+    <Compile Include="..\Services\UpdateRestartStore.cs" Link="Services\UpdateRestartStore.cs" />
     <Compile Include="..\Services\PayloadIntegrityVerifier.cs" Link="Services\PayloadIntegrityVerifier.cs" />
     <Compile Include="..\Services\InstallPayloadOwnership.cs" Link="Services\InstallPayloadOwnership.cs" />
     <Compile Include="..\Services\UpdateTrustPolicy.cs" Link="Services\UpdateTrustPolicy.cs" />

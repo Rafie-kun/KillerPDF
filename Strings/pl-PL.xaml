@@ -1315,6 +1315,8 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_UpdateAvailable">Dostępna aktualizacja: {0}</sys:String>
     <sys:String x:Key="Str_UpdatePrompt" xml:space="preserve">Pobrać i zainstalować KillerPDF {0}?&#10;&#10;Aplikacja zamknie się i otworzy ponownie automatycznie.</sys:String>
     <sys:String x:Key="Str_UpdateDownloading">Pobieranie...</sys:String>
+    <sys:String x:Key="Str_UpdateRestartPrepareFailed">Nie udało się przygotować aktualizacji. Twoje zapisane pliki PDF pozostają bez zmian. Spróbuj ponownie.</sys:String>
+    <sys:String x:Key="Str_UpdateRestartRestoreFailed">KillerPDF nie mógł ponownie otworzyć poprzedniej sesji. Twoje zapisane pliki PDF pozostają bez zmian.</sys:String>
     <sys:String x:Key="Str_ClearAllData">Wyczyść wszystkie dane</sys:String>
     <sys:String x:Key="Str_ClearDataConfirm" xml:space="preserve">Spowoduje to usunięcie wszystkich zapisanych ustawień, pobranych pakietów językowych OCR i plików tymczasowych.&#10;&#10;Twoje pliki PDF pozostaną nienaruszone. Kontynuować?</sys:String>
     <sys:String x:Key="Str_ClearDataDone" xml:space="preserve">Ustawienia, pakiety językowe i pliki tymczasowe zostały wyczyszczone.&#10;&#10;Uruchom ponownie KillerPDF, aby dokończyć usuwanie plików nadal używanych w tej sesji.</sys:String>

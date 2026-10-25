@@ -31,6 +31,20 @@ internal static class Program
     {
         try
         {
+            if (args.Length == 2 && args[0] == "--request-process-close")
+            {
+                using var target = Process.GetProcessById(int.Parse(args[1]));
+                Console.WriteLine("Native close target HWND=" + target.MainWindowHandle);
+                if (target.MainWindowHandle == IntPtr.Zero)
+                    throw new InvalidOperationException("The fixture process has no eligible native main window.");
+                if (!target.CloseMainWindow()) throw new InvalidOperationException("The prepared native window refused CloseMainWindow.");
+                Console.WriteLine("PASS native updater close request");
+                return 0;
+            }
+            if (args.Length == 6 && args[0] is "--verify-update-restart-stage" or "--verify-update-restart-consume" or "--verify-update-restart-early-exit"
+                && args[5] == "--session-isolation")
+                return TableExportSmoke.Run(Path.GetFullPath(args[1]), Path.GetFullPath(args[2]), Path.GetFullPath(args[3]),
+                    windowSession: true, windowSessionCase: args[0], updateRestartState: Path.GetFullPath(args[4]));
             if (args.Length == 5 && args[0] is "--verify-window-session" or "--verify-window-session-secondary-first"
                     or "--verify-window-session-manual-close" or "--verify-window-session-forget" or "--verify-window-session-close-all"
                     or "--verify-session-ending" or "--verify-session-ending-save" or "--verify-session-ending-controls"

@@ -193,7 +193,7 @@ tab strip; the manual-close assertion checks the remaining filename and absence 
 a visible strip. The fixture verifies window reconstruction in one isolated process,
 not actual process restart, physical tab dragging or Windows sign-out.
 
-## Windows session-ending protection
+## Update document-window state
 
 The updater state regression uses
 `--verify-update-window-state APP_DLL APP_XAML OUTPUT_DIRECTORY --session-isolation`.
@@ -201,6 +201,33 @@ It opens a synthetic PDF in a secondary document window, rotates it through the 
 thumbnail menu, and verifies that the primary window's existing update-host contract
 detects those unsaved edits. The source bytes must remain unchanged. This is an isolated
 WPF runtime check; it does not install an update or certify relaunch behavior.
+
+## Saved-file update restart
+
+On an owned UI VM, run `--verify-update-restart-stage APP_DLL APP_XAML OUTPUT_DIRECTORY SHARED_STATE --session-isolation`
+with a fresh shared-state directory. The isolated host opens three saved synthetic PDFs across
+two windows, closes a fourth document window, and disables remembered files. Preparation must
+freeze editing while leaving native windows enabled. Canceling must restore editing and remove
+the pending record. Committing must survive scope disposal, accept a separate process's native
+close request, and close all captured windows despite tray mode without changing the preference.
+The F11 check first requires normal shortcut transitions to work, then requires no transition
+while the handoff is prepared. Each check waits through the fullscreen animation.
+
+After that process exits successfully, run `--verify-update-restart-consume` with the same
+arguments and shared state but a fresh output directory. The second isolated process calls the
+same claim seam as eligible app startup before constructing its first window. Exactly the three
+live files must return together, with the active file and original geometry retained. The closed
+file stays excluded, source hashes and preferences remain unchanged, and a later window cannot
+replay the handoff. Keep actual exit codes, bounded process receipts and both streams for each
+phase. This does not run a real installer or normal startup registration.
+
+Use `--verify-update-restart-early-exit` in place of the stage mode to exercise
+application exit before updater activation returns. It requests native closure,
+executes public application shutdown, and disposes the prepared handoff from the
+Exit event before the caller can report a started updater. The same separate
+consumer must still restore the saved session exactly once.
+
+## Windows session-ending protection
 
 Use an owned UI VM and a fresh output directory with
 `--verify-session-ending APP_DLL APP_XAML OUTPUT_DIRECTORY --session-isolation`.

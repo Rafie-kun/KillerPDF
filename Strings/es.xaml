@@ -1307,6 +1307,8 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_UpdateAvailable">Actualización disponible: {0}</sys:String>
     <sys:String x:Key="Str_UpdatePrompt" xml:space="preserve">¿Descargar e instalar KillerPDF {0}?&#10;&#10;La aplicación se cerrará y volverá a abrirse automáticamente.</sys:String>
     <sys:String x:Key="Str_UpdateDownloading">Descargando...</sys:String>
+    <sys:String x:Key="Str_UpdateRestartPrepareFailed">No se pudo preparar la actualización. Tus archivos PDF guardados no han cambiado. Inténtalo de nuevo.</sys:String>
+    <sys:String x:Key="Str_UpdateRestartRestoreFailed">KillerPDF no pudo volver a abrir tu sesión anterior. Tus archivos PDF guardados no han cambiado.</sys:String>
     <sys:String x:Key="Str_ClearAllData">Borrar todos los datos</sys:String>
     <sys:String x:Key="Str_ClearDataConfirm" xml:space="preserve">Esto borrará todos los ajustes guardados, los paquetes de idioma de OCR descargados y los archivos temporales.&#10;&#10;Tus archivos PDF no se ven afectados. ¿Continuar?</sys:String>
     <sys:String x:Key="Str_ClearDataDone" xml:space="preserve">Se borraron los ajustes, los paquetes de idioma y los archivos temporales.&#10;&#10;Reinicia KillerPDF para terminar de borrar los archivos que sigan en uso en esta sesión.</sys:String>

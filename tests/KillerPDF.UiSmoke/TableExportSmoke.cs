@@ -18,7 +18,7 @@ internal static class TableExportSmoke
 {
     private const BindingFlags Members = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
 
-    internal static int Run(string appPath, string appXaml, string folder, bool officeExport = false, bool grainThemes = false, bool dialogText = false, bool sidebarActions = false, bool paragraphEdit = false, bool accessibilityReview = false, bool formFieldEditing = false, bool guidedTasks = false, bool signedCopy = false, bool renderRecovery = false, bool toolbarAvailability = false, bool windowLifecycle = false, bool windowSession = false, string windowSessionCase = "--verify-window-session")
+    internal static int Run(string appPath, string appXaml, string folder, bool officeExport = false, bool grainThemes = false, bool dialogText = false, bool sidebarActions = false, bool paragraphEdit = false, bool accessibilityReview = false, bool formFieldEditing = false, bool guidedTasks = false, bool signedCopy = false, bool renderRecovery = false, bool toolbarAvailability = false, bool windowLifecycle = false, bool windowSession = false, string windowSessionCase = "--verify-window-session", string? updateRestartState = null)
     {
         if (!Environment.GetCommandLineArgs().Contains("--startup-smoke")
             && !(windowSession && Environment.GetCommandLineArgs().Contains("--session-isolation")))
@@ -38,7 +38,7 @@ internal static class TableExportSmoke
         Type dialogType = assembly.GetType("KillerPDF.TableExportDialog", true)!;
         typeof(Application).GetField("_resourceAssembly", Members)!.SetValue(null, assembly);
         assembly.GetType("KillerPDF.Services.AppDataPaths", true)!
-            .GetProperty("StartupSmokeRoot", Members)!.SetValue(null, Path.Combine(folder, "data"));
+            .GetProperty("StartupSmokeRoot", Members)!.SetValue(null, updateRestartState ?? Path.Combine(folder, "data"));
         if (accessibilityReview || formFieldEditing || guidedTasks || signedCopy || renderRecovery || toolbarAvailability || windowLifecycle || windowSession) AccessibilityReviewSmoke.ConfigureOffscreen(assembly);
         Type appType = assembly.GetType("KillerPDF.App", true)!;
         var hostType = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("TableExportSmokeHost"),
@@ -86,7 +86,10 @@ internal static class TableExportSmoke
         {
             foreach (string service in new[] { "ThemeManager", "LocaleManager", "FilmGrain" })
                 assembly.GetType("KillerPDF.Services." + service, true)!.GetMethod("Initialize", Members)!.Invoke(null, null);
-            if (windowSession)
+            bool consumeUpdate = windowSessionCase == "--verify-update-restart-consume";
+            if (consumeUpdate)
+                appType.GetMethod("LoadPendingUpdateRestart", Members)!.Invoke(null, null);
+            if (windowSession && !consumeUpdate)
             {
                 MethodInfo setting = appType.GetMethod("SetSetting", Members)!;
                 setting.Invoke(null, ["RememberChoiceLocked", "1"]);
@@ -96,8 +99,15 @@ internal static class TableExportSmoke
             }
             owner = (Window)Activator.CreateInstance(assembly.GetType("KillerPDF.MainWindow", true)!)!;
             owner.WindowStartupLocation = WindowStartupLocation.Manual;
-            owner.Left = -10000; owner.Top = -10000; owner.ShowInTaskbar = false; owner.ShowActivated = false;
+            if (!consumeUpdate) { owner.Left = -10000; owner.Top = -10000; }
+            owner.ShowInTaskbar = false; owner.ShowActivated = false;
             owner.Show();
+            if (windowSessionCase == "--verify-update-restart-stage")
+                return UpdateRestartSmoke.Stage(owner, assembly, appPath, folder, updateRestartState!);
+            if (windowSessionCase == "--verify-update-restart-early-exit")
+                return UpdateRestartSmoke.Stage(owner, assembly, appPath, folder, updateRestartState!, earlyExit: true);
+            if (consumeUpdate)
+                return UpdateRestartSmoke.Consume(owner, assembly, appPath, folder, updateRestartState!);
             if (windowSessionCase == "--verify-session-ending-controls")
                 return SessionEndingControlsSmoke.Run(owner, assembly, appPath, folder);
             if (windowSessionCase.StartsWith("--verify-session-ending", StringComparison.Ordinal))
@@ -276,23 +286,26 @@ internal static class TableExportSmoke
         }
         finally
         {
-            var closing = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(25) };
-            var accepted = new HashSet<Window>();
-            closing.Tick += (_, _) =>
+            if (!app.Dispatcher.HasShutdownStarted)
             {
-                string quit = (string)app.FindResource("Str_Btn_Quit");
-                string discard = (string)app.FindResource("Str_Btn_DontSave");
-                foreach (Window window in app.Windows.Cast<Window>().Where(window => window != owner && window.IsVisible).ToArray())
+                var closing = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(25) };
+                var accepted = new HashSet<Window>();
+                closing.Tick += (_, _) =>
                 {
-                    Button? button = Descendants<Button>(window).FirstOrDefault(candidate => Equals(candidate.Content, quit)
-                        || (formFieldEditing || guidedTasks || signedCopy || renderRecovery || toolbarAvailability
-                            || accessibilityReview || paragraphEdit) && Equals(candidate.Content, discard));
-                    if (button is not null && accepted.Add(window)) Click(button);
-                }
-            };
-            closing.Start();
-            try { owner?.Close(); }
-            finally { closing.Stop(); app.Shutdown(); }
+                    string quit = (string)app.FindResource("Str_Btn_Quit");
+                    string discard = (string)app.FindResource("Str_Btn_DontSave");
+                    foreach (Window window in app.Windows.Cast<Window>().Where(window => window != owner && window.IsVisible).ToArray())
+                    {
+                        Button? button = Descendants<Button>(window).FirstOrDefault(candidate => Equals(candidate.Content, quit)
+                            || (formFieldEditing || guidedTasks || signedCopy || renderRecovery || toolbarAvailability
+                                || accessibilityReview || paragraphEdit) && Equals(candidate.Content, discard));
+                        if (button is not null && accepted.Add(window)) Click(button);
+                    }
+                };
+                closing.Start();
+                try { owner?.Close(); }
+                finally { closing.Stop(); app.Shutdown(); }
+            }
         }
     }
 

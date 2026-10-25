@@ -48,6 +48,9 @@ namespace KillerPDF.Features
         /// <summary>The document to reopen after the update relaunches, if any.</summary>
         string? FileToReopen { get; }
 
+        /// <summary>Captures all saved documents for the next normal startup, or refuses an unstable session.</summary>
+        IUpdateRestartHandoff? PrepareUpdateRestart();
+
         /// <summary>Dismisses any other full-window overlay, then fades the About card in.
         /// The overlays are mutually exclusive rather than stacking.</summary>
         void ShowCard();

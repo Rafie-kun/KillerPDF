@@ -20,6 +20,7 @@ namespace KillerPDF
     {
         /// <summary>A forwarded path that arrived before the panes existed, replayed from Loaded.</summary>
         private string? _pendingExternalPath;
+        private int _externalOpenInFlight;
 
         private enum BrowserOpenFailure
         {
@@ -38,6 +39,7 @@ namespace KillerPDF
 
         public async void OpenFromExternal(string? path)
         {
+            App.InvalidateUpdateRestart();
             // A second launch is forwarded here off the pipe thread, and Application.MainWindow is
             // already set while this window's constructor is still running - so ActiveViewer can
             // still be null (it is assigned by InitSplitPanes). Hold the path and let Loaded
@@ -55,7 +57,9 @@ namespace KillerPDF
             }
             if (ProtocolRegistrar.TryGetTargetUrl(path, out var target, out var rejection) && target != null)
             {
-                await OpenProtocolUrlAsync(target);
+                _externalOpenInFlight++;
+                try { await OpenProtocolUrlAsync(target); }
+                finally { _externalOpenInFlight--; }
                 return;
             }
             // #267 follow-up: say why a killerpdf: launch was refused. Without this the browser

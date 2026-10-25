@@ -1309,6 +1309,8 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_UpdateAvailable">有可用更新: {0}</sys:String>
     <sys:String x:Key="Str_UpdatePrompt" xml:space="preserve">要下載並安裝 KillerPDF {0} 嗎?&#10;&#10;應用程式將關閉並自動重新開啟。</sys:String>
     <sys:String x:Key="Str_UpdateDownloading">正在下載...</sys:String>
+    <sys:String x:Key="Str_UpdateRestartPrepareFailed">無法準備更新。已儲存的 PDF 檔案未變更。請再試一次。</sys:String>
+    <sys:String x:Key="Str_UpdateRestartRestoreFailed">KillerPDF 無法重新開啟上次的工作階段。已儲存的 PDF 檔案未變更。</sys:String>
     <sys:String x:Key="Str_ClearAllData">清除所有資料</sys:String>
     <sys:String x:Key="Str_ClearDataConfirm" xml:space="preserve">這會刪除所有已儲存的設定、已下載的 OCR 語言包和暫存檔案。&#10;&#10;您的 PDF 檔案不受影響。要繼續嗎?</sys:String>
     <sys:String x:Key="Str_ClearDataDone" xml:space="preserve">設定、語言包和暫存檔案已清除。&#10;&#10;請重新啟動 KillerPDF，以完成清除本次工作階段中仍在使用的檔案。</sys:String>
