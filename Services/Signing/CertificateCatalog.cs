@@ -190,37 +190,12 @@ internal sealed class CertificateCatalog
             var policy = new PdfSignatureTrustOptions
             {
                 ExtraCertificates = certificates,
+                AdditionalTrustRoots = roots,
+                RevocationMode = X509RevocationMode.Offline,
+                UseTrustedSignatureTimestamp = true,
                 DisableCertificateDownloads = true
             };
-            PdfSignatureInspectionReport system = PdfSignatureInspection.Inspect(document, policy);
-            if (roots.Count == 0) return system;
-            var customPolicy = policy with { CustomTrustRoots = roots };
-            return new PdfSignatureInspectionReport(Array.AsReadOnly(system.Entries.Select(entry =>
-            {
-                PdfSignatureVerificationResult original = entry.Verification;
-                // System trust remains authoritative when it succeeds. A local trust decision
-                // cannot repair changed bytes, expired certificates, or failed revocation.
-                if (original.CertificateTrustStatus != PdfCertificateTrustStatus.Untrusted
-                    || !original.IsStructurallyValid || !original.IsCryptographicallyValid
-                    || original.IsCertificateTimeValid != true
-                    || original.RevocationStatus is PdfCertificateRevocationStatus.Revoked
-                        or PdfCertificateRevocationStatus.Indeterminate)
-                    return entry;
-                try
-                {
-                    PdfSignatureVerificationResult alternative = PdfSignatureVerifier.VerifyTrust(
-                        document, entry.Signature, customPolicy);
-                    return alternative.IsCertificateTrusted && alternative.IsStructurallyValid
-                        && alternative.IsCryptographicallyValid && alternative.IsCertificateTimeValid == true
-                        && alternative.RevocationStatus == original.RevocationStatus
-                        ? entry with { Verification = alternative } : entry;
-                }
-                catch (Exception error) when (error is CryptographicException or InvalidOperationException
-                    or FormatException or ArgumentException or NotSupportedException)
-                {
-                    return entry;
-                }
-            }).ToArray()));
+            return PdfSignatureInspection.Inspect(document, policy);
         }
         finally
         {

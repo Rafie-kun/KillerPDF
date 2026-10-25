@@ -7,7 +7,7 @@ using KillerPdf.Engine.Documents;
 namespace KillerPdf.Engine.Signing;
 
 /// <summary>Verifies detached CMS signatures over bytes reconstructed from PDF byte ranges.</summary>
-public static class PdfSignatureVerifier
+public static partial class PdfSignatureVerifier
 {
     /// <summary>Verifies signature structure and cryptographic integrity without checking trust.</summary>
     public static PdfSignatureVerificationResult VerifyIntegrity(
@@ -87,54 +87,53 @@ public static class PdfSignatureVerifier
                         PdfCertificateTrustStatus.Indeterminate, null,
                         PdfCertificateRevocationStatus.Indeterminate, []);
                 PdfSignatureTrustOptions policy = trustOptions ?? new();
-                using var chain = new X509Chain();
-                chain.ChainPolicy.RevocationMode = policy.RevocationMode;
-                chain.ChainPolicy.RevocationFlag = X509RevocationFlag.ExcludeRoot;
-                chain.ChainPolicy.VerificationTime = policy.VerificationTime;
-                chain.ChainPolicy.UrlRetrievalTimeout = policy.UrlRetrievalTimeout;
-                chain.ChainPolicy.DisableCertificateDownloads =
-                    policy.DisableCertificateDownloads;
-                // Embedded certificates are chain candidates, never trust anchors.
-                chain.ChainPolicy.ExtraStore.AddRange(cms.Certificates);
-                foreach (X509Certificate2 certificate in policy.ExtraCertificates)
-                    chain.ChainPolicy.ExtraStore.Add(certificate);
-                if (policy.CustomTrustRoots.Count > 0)
+                DateTime evaluatedTime = policy.VerificationTime;
+                ChainEvaluation evaluation = EvaluateChain(signer, cms.Certificates, policy, evaluatedTime);
+                TimestampEvaluation timestamp = new(PdfSignatureTimestampStatus.NotChecked);
+                bool timestampUsed = false;
+                if (policy.UseTrustedSignatureTimestamp && !signature.IsDocumentTimestamp
+                    && signerInfo is not null && !HasDefiniteTrustFailure(evaluation.Flags))
                 {
-                    chain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
-                    foreach (X509Certificate2 certificate in policy.CustomTrustRoots)
-                        chain.ChainPolicy.CustomTrustStore.Add(certificate);
+                    timestamp = EvaluateTimestamp(signerInfo, cms, signer, policy);
+                    if (timestamp.Status == PdfSignatureTimestampStatus.Trusted && timestamp.Time is { } time)
+                    {
+                        ChainEvaluation historical = EvaluateChain(signer, cms.Certificates, policy, time.UtcDateTime);
+                        if (historical.Revocation == PdfCertificateRevocationStatus.Revoked
+                            || (historical.Trust == PdfCertificateTrustStatus.Trusted && historical.TimeValid
+                                && CoversTimestamp(historical.Elements, timestamp.Earliest, timestamp.Latest)))
+                        {
+                            evaluation = historical;
+                            evaluatedTime = time.UtcDateTime;
+                            timestampUsed = true;
+                        }
+                        else timestamp = timestamp with
+                        {
+                            Status = PdfSignatureTimestampStatus.Rejected,
+                            Error = "The timestamp does not establish a valid signing-certificate chain at that time."
+                        };
+                    }
                 }
-                bool trusted = chain.Build(signer);
-                X509ChainStatusFlags flags = chain.ChainStatus.Aggregate(
-                    X509ChainStatusFlags.NoError, (current, status) => current | status.Status);
-                bool timeValid = (flags & X509ChainStatusFlags.NotTimeValid) == 0;
-                PdfCertificateRevocationStatus revocation = policy.RevocationMode == X509RevocationMode.NoCheck
-                    ? PdfCertificateRevocationStatus.NotChecked
-                    : (flags & X509ChainStatusFlags.Revoked) != 0
-                        ? PdfCertificateRevocationStatus.Revoked
-                        : (flags & (X509ChainStatusFlags.RevocationStatusUnknown | X509ChainStatusFlags.OfflineRevocation)) != 0
-                            ? PdfCertificateRevocationStatus.Indeterminate
-                            : PdfCertificateRevocationStatus.Good;
-                string[] errors = [.. chain.ChainStatus.Select(status => status.StatusInformation.Trim()).Where(message => message.Length > 0)];
-                PdfCertificateChainElement[] chainElements = [.. chain.ChainElements
-                    .Select(element => ChainElement(element))];
-                if (!trusted)
-                    return TrustFailure(errors.FirstOrDefault() ?? "The signing certificate is not trusted.",
-                        revocation == PdfCertificateRevocationStatus.Indeterminate
-                            ? PdfCertificateTrustStatus.Indeterminate : PdfCertificateTrustStatus.Untrusted,
-                        timeValid, revocation, errors, chainElements);
                 return new PdfSignatureVerificationResult
                 {
                     IsStructurallyValid = true,
                     IsCryptographicallyValid = true,
                     CertificateTrustWasChecked = true,
-                    CertificateTrustStatus = PdfCertificateTrustStatus.Trusted,
-                    IsCertificateTimeValid = true,
-                    RevocationStatus = revocation,
+                    CertificateTrustStatus = evaluation.Trust,
+                    IsCertificateTimeValid = evaluation.TimeValid,
+                    CertificateTimeStatus = evaluation.TimeStatus,
+                    RevocationStatus = evaluation.Revocation,
                     RequestedRevocationMode = policy.RevocationMode,
                     RequestedVerificationTime = policy.VerificationTime,
+                    EvaluatedVerificationTime = evaluatedTime,
+                    SignatureTimestampStatus = timestamp.Status,
+                    TrustedTimestampTime = timestampUsed ? timestamp.Time : null,
+                    TimestampRevocationStatus = timestamp.Revocation,
+                    TimestampAuthoritySubject = timestamp.AuthoritySubject,
+                    TimestampAuthorityCertificateSha256 = timestamp.AuthorityCertificateSha256,
+                    TimestampError = timestamp.Error,
                     CertificateDownloadsDisabled = policy.DisableCertificateDownloads,
-                    CertificateChain = Array.AsReadOnly(chainElements),
+                    CertificateChain = Array.AsReadOnly(evaluation.Elements),
+                    CertificateChainErrors = Array.AsReadOnly(evaluation.Errors),
                     DigestAlgorithmOid = digestAlgorithm,
                     SignatureAlgorithmOid = signatureAlgorithm,
                     SignaturePolicyOids = signaturePolicies,
@@ -145,7 +144,8 @@ public static class PdfSignatureVerifier
                     SignerSerialNumber = signer.SerialNumber,
                     SignerCertificateSha256 = CertificateFingerprint(signer),
                     CertificateNotBefore = signer.NotBefore,
-                    CertificateNotAfter = signer.NotAfter
+                    CertificateNotAfter = signer.NotAfter,
+                    Error = evaluation.Built ? null : evaluation.Errors.FirstOrDefault()
                 };
             }
             return new PdfSignatureVerificationResult
@@ -184,7 +184,8 @@ public static class PdfSignatureVerifier
         PdfSignatureVerificationResult TrustFailure(string error,
             PdfCertificateTrustStatus trustStatus, bool? timeValid,
             PdfCertificateRevocationStatus revocationStatus, IReadOnlyList<string> chainErrors,
-            IReadOnlyList<PdfCertificateChainElement>? certificateChain = null) =>
+            IReadOnlyList<PdfCertificateChainElement>? certificateChain = null,
+            PdfCertificateTimeStatus timeStatus = PdfCertificateTimeStatus.Indeterminate) =>
             new()
             {
                 IsStructurallyValid = true,
@@ -192,6 +193,7 @@ public static class PdfSignatureVerifier
                 CertificateTrustWasChecked = true,
                 CertificateTrustStatus = trustStatus,
                 IsCertificateTimeValid = timeValid,
+                CertificateTimeStatus = timeStatus,
                 RevocationStatus = revocationStatus,
                 RequestedRevocationMode = trustOptions?.RevocationMode,
                 RequestedVerificationTime = trustOptions?.VerificationTime,
@@ -211,6 +213,22 @@ public static class PdfSignatureVerifier
                 CertificateNotAfter = signer?.NotAfter,
                 Error = error
             };
+    }
+
+    private static PdfCertificateTimeStatus ClassifyCertificateTime(X509Chain chain,
+        DateTime evaluationTime, bool timeValid)
+    {
+        if (timeValid) return PdfCertificateTimeStatus.Valid;
+        X509Certificate2[] failures = [.. chain.ChainElements.Cast<X509ChainElement>()
+            .Where(element => element.ChainElementStatus.Any(status =>
+                (status.Status & X509ChainStatusFlags.NotTimeValid) != 0))
+            .Select(element => element.Certificate)];
+        if (failures.Length == 0) return PdfCertificateTimeStatus.Indeterminate;
+        DateTime utc = evaluationTime.ToUniversalTime();
+        if (failures.Any(certificate => certificate.NotBefore.ToUniversalTime() > utc))
+            return PdfCertificateTimeStatus.NotYetValid;
+        return failures.All(certificate => certificate.NotAfter.ToUniversalTime() < utc)
+            ? PdfCertificateTimeStatus.Expired : PdfCertificateTimeStatus.Indeterminate;
     }
 
     private static string? CertificateFingerprint(X509Certificate2? certificate) =>

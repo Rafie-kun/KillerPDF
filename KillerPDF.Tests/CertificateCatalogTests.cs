@@ -51,8 +51,9 @@ public sealed class CertificateCatalogTests : IDisposable
         PdfSignatureVerificationResult trusted = Assert.Single(reloaded.Inspect(document).Entries).Verification;
         Assert.True(trusted.IsCryptographicallyValid);
         Assert.True(trusted.IsCertificateTrusted);
-        Assert.Equal(PdfCertificateRevocationStatus.NotChecked, trusted.RevocationStatus);
-        Assert.Equal(PdfSignatureValidationStatus.Incomplete, trusted.ValidationStatus);
+        Assert.Equal(X509RevocationMode.Offline, trusted.RequestedRevocationMode);
+        Assert.Equal(PdfCertificateRevocationStatus.Good, trusted.RevocationStatus);
+        Assert.Equal(PdfSignatureValidationStatus.Valid, trusted.ValidationStatus);
         Assert.True(trusted.CertificateDownloadsDisabled);
 
         reloaded.SetTrusted(fingerprint, false);
@@ -87,6 +88,9 @@ public sealed class CertificateCatalogTests : IDisposable
         Assert.True(result.IsCertificateTrusted);
         Assert.Equal(3, result.CertificateChain.Count);
         Assert.Equal(intermediate.Subject, result.CertificateChain[1].Subject);
+        Assert.Equal(X509RevocationMode.Offline, result.RequestedRevocationMode);
+        Assert.Equal(PdfCertificateRevocationStatus.Indeterminate, result.RevocationStatus);
+        Assert.Equal(PdfSignatureValidationStatus.Incomplete, result.ValidationStatus);
         Assert.False(catalog.Read(false).Single(entry => entry.Subject == intermediate.Subject).IsTrustedRoot);
         Assert.Equal(0, catalog.Import(bundle));
         Assert.True(catalog.Read(false).Single(entry => entry.Fingerprint == rootFingerprint).IsTrustedRoot);
@@ -305,7 +309,7 @@ public sealed class CertificateCatalogTests : IDisposable
     }
 
     [Fact]
-    public void ExplicitTrustDoesNotClearExpiredCertificateFailure()
+    public void ExplicitTrustKeepsExpirySeparateFromIdentityAndUsesOfflineRevocation()
     {
         using X509Certificate2 root = CreateAuthority(expired: true);
         var catalog = new CertificateCatalog(_directory);
@@ -316,8 +320,11 @@ public sealed class CertificateCatalogTests : IDisposable
 
         Assert.True(result.IsCryptographicallyValid);
         Assert.False(result.IsCertificateTimeValid);
-        Assert.False(result.IsCertificateTrusted);
-        Assert.Equal(PdfSignatureValidationStatus.Invalid, result.ValidationStatus);
+        Assert.True(result.IsCertificateTrusted);
+        Assert.Equal(PdfCertificateTimeStatus.Expired, result.CertificateTimeStatus);
+        Assert.Equal(X509RevocationMode.Offline, result.RequestedRevocationMode);
+        Assert.Equal(PdfSignatureTimestampStatus.Missing, result.SignatureTimestampStatus);
+        Assert.Equal(PdfSignatureValidationStatus.Incomplete, result.ValidationStatus);
     }
 
     [Fact]

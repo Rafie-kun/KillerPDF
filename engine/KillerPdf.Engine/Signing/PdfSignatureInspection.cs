@@ -59,6 +59,18 @@ public sealed partial record PdfSignatureInspectionReport(IReadOnlyList<PdfSigna
             if (entry.Verification.RequestedVerificationTime is DateTime verificationTime)
                 output.Append("  Requested verification time: ")
                     .AppendLine(verificationTime.ToString("O"));
+            if (entry.Verification.EvaluatedVerificationTime is DateTime evaluatedTime)
+                output.Append("  Evaluated verification time: ").AppendLine(evaluatedTime.ToString("O"));
+            if (entry.Verification.SignatureTimestampStatus != PdfSignatureTimestampStatus.NotChecked)
+            {
+                output.Append("  Signature timestamp: ").AppendLine(entry.Verification.SignatureTimestampStatus.ToString());
+                output.Append("  Timestamp authority revocation: ").AppendLine(entry.Verification.TimestampRevocationStatus.ToString());
+            }
+            if (entry.Verification.TrustedTimestampTime is DateTimeOffset timestampTime)
+                output.Append("  Trusted signature timestamp: ").AppendLine(timestampTime.ToString("O"));
+            Add("  Timestamp evidence: ", entry.Verification.TimestampError);
+            Add("  Timestamp authority subject: ", entry.Verification.TimestampAuthoritySubject);
+            Add("  Timestamp authority certificate SHA-256: ", entry.Verification.TimestampAuthorityCertificateSha256);
             if (entry.Verification.CertificateDownloadsDisabled is bool downloadsDisabled)
                 output.Append("  Network certificate retrieval: ")
                     .AppendLine(downloadsDisabled ? "Disabled" : "Allowed");
@@ -76,8 +88,12 @@ public sealed partial record PdfSignatureInspectionReport(IReadOnlyList<PdfSigna
                 output.Append("  Certificate valid until: ")
                     .AppendLine(notAfter.ToString("O"));
             if (entry.Verification.IsCertificateTimeValid is bool timeValid)
+            {
+                string certificateTimeLabel = entry.Verification.CertificateTimeStatus == PdfCertificateTimeStatus.NotChecked
+                    ? timeValid ? "Valid" : "Invalid" : entry.Verification.CertificateTimeStatus.ToString();
                 output.Append("  Certificate time validity: ")
-                    .AppendLine(timeValid ? "Valid" : "Invalid");
+                    .AppendLine(certificateTimeLabel);
+            }
             foreach (string error in entry.Verification.CertificateChainErrors)
                 output.Append("  Certificate chain: ").AppendLine(error);
             foreach ((PdfCertificateChainElement certificate, int index) in

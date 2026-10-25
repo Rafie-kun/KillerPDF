@@ -11,7 +11,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 ### Security
 
 - Redaction removes covered vectors and refuses output when covered form values or undecodable content cannot be safely removed. Marks survive page edits and Undo; macro approvals remain tied to the source document, and unattended runs stop when rasterization needs approval (#341, #343).
-- Signature verification uses embedded intermediate certificates without trusting them as roots and reports timestamp verification failures separately.
+- Signature verification separates expiry from failed trust, checks trusted timestamps for historical validity, and reports authority identity and offline revocation evidence. Embedded certificates never become trust anchors.
 - Legacy Office conversion disables VBA macros. Translation test files load as text, unsafe HTML-export links stay inert, and scripts can supply PDF passwords through standard input.
 - Table exports and batch CSV reports prevent document values and filenames from becoming spreadsheet formulas.
 - Forwarded file opens are restricted to the same Windows account and session. Installation rejects folders containing unrelated or unverified files, and portable updates no longer run a helper script from the temp folder.

@@ -265,6 +265,48 @@ public sealed class PdfSignatureVerifierTests
         Assert.NotNull(result.Error);
     }
 
+    [Theory]
+    [InlineData(2026, PdfSignatureValidationStatus.Incomplete, PdfCertificateTimeStatus.Expired)]
+    [InlineData(2023, PdfSignatureValidationStatus.Invalid, PdfCertificateTimeStatus.NotYetValid)]
+    public void VerifyTrustSeparatesExpiredAndNotYetValidTrustedSigners(int year,
+        PdfSignatureValidationStatus expectedStatus, PdfCertificateTimeStatus expectedTime)
+    {
+        using RSA key = RSA.Create(2048);
+        var request = new CertificateRequest("CN=Expired Explicit KillerPDF Trust", key,
+            HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+        request.CertificateExtensions.Add(new X509BasicConstraintsExtension(true, false, 0, true));
+        using X509Certificate2 certificate = request.CreateSelfSigned(
+            new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero),
+            new DateTimeOffset(2025, 1, 1, 0, 0, 0, TimeSpan.Zero));
+        byte[] signed = PdfDetachedSignatureWriter.Sign(
+            PdfDocument.Open(new PdfDocumentBuilder().AddBlankPage().Build()),
+            content => Sign(content, certificate),
+            new PdfSignatureOptions { ReservedSignatureSize = 4_096 });
+        PdfDocument document = PdfDocument.Open(signed);
+        DateTime verificationTime = new(year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        var options = new PdfSignatureTrustOptions
+        {
+            CustomTrustRoots = [certificate],
+            VerificationTime = verificationTime,
+            RevocationMode = X509RevocationMode.NoCheck,
+            DisableCertificateDownloads = true
+        };
+
+        PdfSignatureVerificationResult result = PdfSignatureVerifier.VerifyTrust(document,
+            Assert.Single(PdfSignatureReader.Read(document)), options);
+
+        Assert.True(result.IsStructurallyValid);
+        Assert.True(result.IsCryptographicallyValid);
+        Assert.Equal(expectedStatus, result.ValidationStatus);
+        Assert.Equal(expectedTime, result.CertificateTimeStatus);
+        Assert.Equal(PdfCertificateTrustStatus.Trusted, result.CertificateTrustStatus);
+        Assert.False(result.IsCertificateTimeValid);
+        Assert.Equal(verificationTime, result.RequestedVerificationTime);
+        Assert.Equal(PdfCertificateRevocationStatus.NotChecked, result.RevocationStatus);
+        Assert.Contains("Certificate time validity: " + expectedTime,
+            PdfSignatureInspection.Inspect(document, options).ToText());
+    }
+
     [Fact]
     public void VerifyTrustAcceptsExplicitTrustRootAndSeparatesRevocationPolicy()
     {
