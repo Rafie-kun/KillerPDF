@@ -1417,11 +1417,24 @@ public sealed partial class PdfPageRenderer
             void AdvanceTextVector(double x, double y) =>
                 textMatrix = new Matrix(1, 0, 0, 1, x, y).Then(textMatrix);
 
+            PdfExtractionFont ReadCurrentFont()
+            {
+                try { return ReadFont(textFont!); }
+                catch (FormatException) when (_document.UsesCompatibilityRecovery)
+                {
+                    PdfDictionary? recoveredFont = RecoverFont(Name("Helvetica"));
+                    if (recoveredFont is null) throw;
+                    textFont = recoveredFont;
+                    diagnostics.Add("An invalid font dictionary was replaced with Helvetica.");
+                    return ReadFont(recoveredFont);
+                }
+            }
+
             bool IsVerticalText()
             {
                 if (textFont is null || NameValue(textFont, "Subtype") == "Type3")
                     return false;
-                extractionFont ??= ReadFont(textFont);
+                extractionFont ??= ReadCurrentFont();
                 return extractionFont.IsVertical;
             }
 
@@ -1518,7 +1531,7 @@ public sealed partial class PdfPageRenderer
             {
                 try
                 {
-                    extractionFont ??= ReadFont(textFont!);
+                    extractionFont ??= ReadCurrentFont();
                     diagnostics.UnionWith(extractionFont.Diagnostics);
                     if (textRenderingMode is < 0 or > 7)
                     {

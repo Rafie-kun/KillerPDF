@@ -28,8 +28,14 @@ public static class PdfFontResourceReader
     {
         private bool _ignoredUnicodeMap;
         private bool _recoveredType1Lengths;
+        private bool _ignoredInvalidDifferences;
+        private bool _clampedSimpleWidths;
+        private bool _recoveredNullMetric;
         private static readonly string[] array = ["Invalid Type 1 font lengths were recovered from the embedded program."];
         private static readonly string[] array0 = ["An unreadable ToUnicode map was ignored; embedded font mappings were used."];
+        private static readonly string[] invalidDifferencesDiagnostic = ["Invalid simple-font differences were ignored."];
+        private static readonly string[] simpleWidthsDiagnostic = ["Simple-font widths beyond code 255 were ignored."];
+        private static readonly string[] nullMetricDiagnostic = ["Null font metrics used their default values."];
 
         internal PdfExtractionFont Read(PdfDictionary font)
         {
@@ -151,13 +157,24 @@ public static class PdfFontResourceReader
                 if (encodingDictionary is not null && Get(encodingDictionary, "Differences") is PdfArray differences)
                 {
                     int index = -1;
+                    string[] changedGlyphNames = [.. glyphNames];
                     foreach (PdfObject raw in differences)
                     {
                         PdfObject value = Resolve(raw);
-                        if (value is PdfInteger number) index = checked((int)number.Value);
-                        else if (value is PdfName name && index is >= 0 and < 256) glyphNames[index++] = name.ValueAsLatin1();
-                        else throw new FormatException("Invalid simple-font encoding difference.");
+                        if (value is PdfInteger number && number.Value is >= 0 and < 256)
+                            index = (int)number.Value;
+                        else if (value is PdfName name && index is >= 0 and < 256)
+                            changedGlyphNames[index++] = name.ValueAsLatin1();
+                        else if (document.UsesCompatibilityRecovery)
+                        {
+                            _ignoredInvalidDifferences = true;
+                            index = -1;
+                            break;
+                        }
+                        else
+                            throw new FormatException("Invalid simple-font encoding difference.");
                     }
+                    if (!_ignoredInvalidDifferences) glyphNames = changedGlyphNames;
                 }
                 for (uint code = 0; code < 256; code++)
                 {
@@ -170,9 +187,33 @@ public static class PdfFontResourceReader
                 }
                 if (Get(font, "Widths") is PdfArray values)
                 {
-                    int first = checked((int)Number(Get(font, "FirstChar"), 0));
-                    if (first < 0 || first + (long)values.Count > 256) throw new FormatException("Invalid simple-font width range.");
-                    for (int i = 0; i < values.Count; i++) widths[(uint)(first + i)] = Number(Resolve(values[i]));
+                    int first = checked((int)Metric(Get(font, "FirstChar"), 0));
+                    if (first < 0 || first >= 256)
+                    {
+                        if (!document.UsesCompatibilityRecovery)
+                            throw new FormatException("Invalid simple-font width range.");
+                        _clampedSimpleWidths = true;
+                    }
+                    else
+                    {
+                        int count = Math.Min(values.Count, 256 - first);
+                        if (count != values.Count)
+                        {
+                            if (!document.UsesCompatibilityRecovery)
+                                throw new FormatException("Invalid simple-font width range.");
+                            _clampedSimpleWidths = true;
+                        }
+                        for (int i = 0; i < count; i++)
+                        {
+                            PdfObject width = Resolve(values[i]);
+                            if (document.UsesCompatibilityRecovery && width is PdfNull)
+                            {
+                                _recoveredNullMetric = true;
+                                continue;
+                            }
+                            widths[(uint)(first + i)] = Number(width);
+                        }
+                    }
                 }
             }
 
@@ -307,18 +348,18 @@ public static class PdfFontResourceReader
             var verticalMetrics = new Dictionary<uint, PdfVerticalGlyphMetrics>();
             ReadVerticalWidths(Get(metrics, "W2") as PdfArray, verticalMetrics);
             var defaultVertical = Get(metrics, "DW2") as PdfArray;
-            double originY = defaultVertical is { Count: >= 2 } ? Number(Resolve(defaultVertical[0])) : 880;
-            double advanceY = defaultVertical is { Count: >= 2 } ? Number(Resolve(defaultVertical[1])) : -1000;
-            double defaultWidth = composite ? Number(Get(metrics, "DW"), 1000) : Number(Get(descriptor, "MissingWidth"), 0);
+            double originY = defaultVertical is { Count: >= 2 } ? Metric(Resolve(defaultVertical[0]), 880) : 880;
+            double advanceY = defaultVertical is { Count: >= 2 } ? Metric(Resolve(defaultVertical[1]), -1000) : -1000;
+            double defaultWidth = composite ? Metric(Get(metrics, "DW"), 1000) : Metric(Get(descriptor, "MissingWidth"), 0);
             TrueTypeFont? metricFont = embedded ?? (cff is null && type1 is null ? substitute : null);
-            double ascent = Number(Get(descriptor, "Ascent"), metricFont is null ? 800 : metricFont.Ascender * 1000d / metricFont.UnitsPerEm);
-            double descent = Number(Get(descriptor, "Descent"), metricFont is null ? -200 : metricFont.Descender * 1000d / metricFont.UnitsPerEm);
+            double ascent = Metric(Get(descriptor, "Ascent"), metricFont is null ? 800 : metricFont.Ascender * 1000d / metricFont.UnitsPerEm);
+            double descent = Metric(Get(descriptor, "Descent"), metricFont is null ? -200 : metricFont.Descender * 1000d / metricFont.UnitsPerEm);
             if (ascent <= descent)
             {
                 if (Get(descriptor, "FontBBox") is PdfArray { Count: 4 } box)
                 {
-                    ascent = Number(Resolve(box[3]));
-                    descent = Number(Resolve(box[1]));
+                    ascent = Metric(Resolve(box[3]), 800);
+                    descent = Metric(Resolve(box[1]), -200);
                 }
                 if (ascent <= descent) { ascent = 800; descent = -200; }
             }
@@ -431,11 +472,7 @@ public static class PdfFontResourceReader
                 defaultWidth)
             {
                 FontName = fontName,
-                Diagnostics = _recoveredType1Lengths
-                    ? Array.AsReadOnly(array)
-                    : _ignoredUnicodeMap
-                    ? Array.AsReadOnly(array0)
-                    : Array.Empty<string>(),
+                Diagnostics = RecoveryDiagnostics(),
                 Ascent = ascent,
                 Descent = descent,
                 IsVertical = vertical,
@@ -492,8 +529,8 @@ public static class PdfFontResourceReader
 
         private PdfType1GlyphReader? ReadType1(PdfStream stream, byte[] data)
         {
-            double length1 = Number(Get(stream.Dictionary, "Length1"), 0);
-            double length2 = Number(Get(stream.Dictionary, "Length2"), 0);
+            double length1 = Metric(Get(stream.Dictionary, "Length1"), 0);
+            double length2 = Metric(Get(stream.Dictionary, "Length2"), 0);
             if (document.UsesCompatibilityRecovery
                 && (length1 <= 0 || length1 >= data.Length || length1 != Math.Truncate(length1)
                     || length2 < 0 || length2 > data.Length - length1 || length2 != Math.Truncate(length2)))
@@ -641,14 +678,14 @@ public static class PdfFontResourceReader
                 {
                     if (first + (long)values.Count > 65536) throw new FormatException("CID width range exceeds 65535.");
                     if ((expanded += values.Count) > 1_000_000) throw new FormatException("CID width expansion limit exceeded.");
-                    for (int j = 0; j < values.Count; j++) widths[first + (uint)j] = Number(Resolve(values[j]));
+                    for (int j = 0; j < values.Count; j++) widths[first + (uint)j] = Metric(Resolve(values[j]), 1000);
                 }
                 else
                 {
                     uint last = Cid(second);
                     if (last < first || i >= array.Count) throw new FormatException("Invalid CID width range.");
                     if ((expanded += last - first + 1L) > 1_000_000) throw new FormatException("CID width expansion limit exceeded.");
-                    double width = Number(Resolve(array[i++]));
+                    double width = Metric(Resolve(array[i++]), 1000);
                     for (uint cid = first; cid <= last; cid++) widths[cid] = width;
                 }
             }
@@ -695,6 +732,25 @@ public static class PdfFontResourceReader
 
         private PdfObject? Get(PdfDictionary? dictionary, string key) => dictionary is not null
             && dictionary.TryGetValue(new PdfName(Encoding.ASCII.GetBytes(key)), out var value) ? Resolve(value) : null;
+        private double Metric(PdfObject? value, double fallback)
+        {
+            if (document.UsesCompatibilityRecovery && value is PdfNull)
+            {
+                _recoveredNullMetric = true;
+                return fallback;
+            }
+            return Number(value, fallback);
+        }
+        private IReadOnlyList<string> RecoveryDiagnostics()
+        {
+            var diagnostics = new List<string>();
+            if (_recoveredType1Lengths) diagnostics.AddRange(array);
+            if (_ignoredUnicodeMap) diagnostics.AddRange(array0);
+            if (_ignoredInvalidDifferences) diagnostics.AddRange(invalidDifferencesDiagnostic);
+            if (_clampedSimpleWidths) diagnostics.AddRange(simpleWidthsDiagnostic);
+            if (_recoveredNullMetric) diagnostics.AddRange(nullMetricDiagnostic);
+            return diagnostics.AsReadOnly();
+        }
         private byte[] DecodeEmbeddedFont(PdfStream stream)
         {
             if (stream.Dictionary.TryGetValue(new PdfName("Length1"u8), out PdfObject hint)
