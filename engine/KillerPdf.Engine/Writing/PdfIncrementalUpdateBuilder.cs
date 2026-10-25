@@ -161,7 +161,11 @@ public sealed class PdfIncrementalUpdateBuilder
     /// <summary>Serializes the registered changes as one incremental revision.</summary>
     public byte[] Build(PdfIncrementalUpdateWriteOptions? options = null)
     {
-        options ??= new PdfIncrementalUpdateWriteOptions();
+        options ??= new PdfIncrementalUpdateWriteOptions
+        {
+            CrossReferenceFormat = RequiresCrossReferenceStream
+                ? PdfCrossReferenceFormat.Stream : PdfCrossReferenceFormat.Table
+        };
         if (!Enum.IsDefined(options.CrossReferenceFormat))
             throw new ArgumentOutOfRangeException(nameof(options),
                 "The cross-reference format is not defined.");
@@ -195,6 +199,9 @@ public sealed class PdfIncrementalUpdateBuilder
             throw new InvalidOperationException(
                 "The document catalog or encryption dictionary cannot be freed.");
         ValidateApplicationTrailerGraphs();
+        if (RequiresCrossReferenceStream && options.CrossReferenceFormat == PdfCrossReferenceFormat.Table)
+            throw new NotSupportedException(
+                "A recovered PDF with compressed or unknown cross-reference entries requires cross-reference stream output.");
 
         using var output = new MemoryStream();
         output.Write(_document.Source.Span);
@@ -216,6 +223,8 @@ public sealed class PdfIncrementalUpdateBuilder
             == PdfCrossReferenceFormat.Stream
                 ? (long)_objects.Count + chunks.Count + _freed.Count + 2
                 : (long)_objects.Count + _freed.Count + 1;
+        if (NeedsCompleteCrossReference)
+            crossReferenceEntryCount += InheritedEntries().Count(entry => entry.ObjectNumber != 0);
         if (crossReferenceEntryCount > PdfCrossReferenceReader.MaximumEntriesPerSection)
             throw new NotSupportedException(
                 "The incremental cross-reference section would contain too many entries.");
@@ -270,11 +279,23 @@ public sealed class PdfIncrementalUpdateBuilder
         else
         {
             output.Write("xref\n"u8);
-            WriteClassicFreeEntries(output);
-            foreach (WrittenObject item in written)
+            if (NeedsCompleteCrossReference)
             {
-                WriteAscii(output, $"{item.ObjectNumber} 1\n");
-                WriteAscii(output, $"{item.Offset:0000000000} {item.Generation:00000} n \n");
+                foreach (PdfCrossReferenceEntry item in CompleteEntries(written, []))
+                {
+                    WriteAscii(output, $"{item.ObjectNumber} 1\n");
+                    WriteAscii(output, $"{item.Field1:0000000000} {item.Field2:00000} "
+                        + (item.Type == PdfCrossReferenceEntryType.Free ? "f \n" : "n \n"));
+                }
+            }
+            else
+            {
+                WriteClassicFreeEntries(output);
+                foreach (WrittenObject item in written)
+                {
+                    WriteAscii(output, $"{item.ObjectNumber} 1\n");
+                    WriteAscii(output, $"{item.Offset:0000000000} {item.Generation:00000} n \n");
+                }
             }
 
             output.Write("trailer\n"u8);
@@ -294,7 +315,12 @@ public sealed class PdfIncrementalUpdateBuilder
         byte[] revisionIdentifier, bool compress)
     {
         int size = checked(objectNumber + 1);
-        int[] numbers = [.. written.Select(item => item.ObjectNumber)
+        PdfCrossReferenceEntry[]? complete = NeedsCompleteCrossReference
+            ? CompleteEntries(written, compressed).Append(new PdfCrossReferenceEntry(
+                objectNumber, PdfCrossReferenceEntryType.InUse, xrefOffset, 0)).OrderBy(entry => entry.ObjectNumber).ToArray()
+            : null;
+        int[] numbers = complete is not null ? [.. complete.Select(entry => entry.ObjectNumber)]
+            : [.. written.Select(item => item.ObjectNumber)
             .Concat(compressed.Select(item => item.ObjectNumber))
             .Concat(_freed.Keys)
             .Append(0)
@@ -306,7 +332,19 @@ public sealed class PdfIncrementalUpdateBuilder
         for (int index = 0; index < numbers.Length; index++)
         {
             int number = numbers[index];
-            if (number == 0)
+            if (complete is not null)
+            {
+                PdfCrossReferenceEntry entry = complete[index];
+                byte type = entry.Type switch
+                {
+                    PdfCrossReferenceEntryType.Free => 0,
+                    PdfCrossReferenceEntryType.InUse => 1,
+                    PdfCrossReferenceEntryType.Compressed => 2,
+                    _ => 3
+                };
+                WriteXrefRow(rows, index, type, checked((int)entry.Field1), entry.Field2);
+            }
+            else if (number == 0)
                 WriteXrefRow(rows, index, 0, nextFree[0], 65_535);
             else if (_freed.TryGetValue(number, out FreedObject? freed))
                 WriteXrefRow(rows, index, 0, nextFree[number], freed.Generation);
@@ -332,6 +370,51 @@ public sealed class PdfIncrementalUpdateBuilder
         entries.Add(new(LengthName, new PdfInteger(encoded.Length)));
         PdfObjectWriter.Write(output, new PdfIndirectObject(
             objectNumber, 0, new PdfStream(new PdfDictionary(entries), encoded), xrefOffset));
+    }
+
+    internal bool RequiresCrossReferenceStream => NeedsCompleteCrossReference
+        && InheritedEntries().Any(entry => entry.Type is
+            PdfCrossReferenceEntryType.Compressed or PdfCrossReferenceEntryType.Null);
+
+    private bool NeedsCompleteCrossReference
+    {
+        get
+        {
+            // Scans use the header as a synthetic startxref; nearby-section recovery can
+            // retain a stale declaration. Neither is a valid predecessor for a new revision.
+            IReadOnlyList<PdfCrossReferenceSection> sections = _document.CrossReferences.Sections;
+            if (_document.CrossReferences.StartXref.Offset == _document.Header.Offset
+                || _document.CrossReferences.StartXref.Offset != sections[0].Offset)
+                return true;
+            for (int index = 0; index < sections.Count; index++)
+                if (sections[index].PreviousOffset != (index + 1 < sections.Count
+                    ? sections[index + 1].Offset : (long?)null))
+                    return true;
+            return false;
+        }
+    }
+
+    private IEnumerable<PdfCrossReferenceEntry> InheritedEntries() =>
+        _document.CrossReferences.Values.Where(entry => !_objects.ContainsKey(entry.ObjectNumber)
+            && !_freed.ContainsKey(entry.ObjectNumber));
+
+    private PdfCrossReferenceEntry[] CompleteEntries(
+        IReadOnlyList<WrittenObject> written, IReadOnlyList<CompressedObject> compressed)
+    {
+        var entries = InheritedEntries().ToDictionary(entry => entry.ObjectNumber);
+        foreach (WrittenObject item in written)
+            entries[item.ObjectNumber] = new(item.ObjectNumber,
+                PdfCrossReferenceEntryType.InUse, item.Offset, item.Generation);
+        foreach (CompressedObject item in compressed)
+            entries[item.ObjectNumber] = new(item.ObjectNumber,
+                PdfCrossReferenceEntryType.Compressed, item.ObjectStreamNumber, item.Index);
+        Dictionary<int, int> nextFree = BuildNextFreeChain();
+        foreach (FreedObject item in _freed.Values)
+            entries[item.ObjectNumber] = new(item.ObjectNumber,
+                PdfCrossReferenceEntryType.Free, nextFree[item.ObjectNumber], item.Generation);
+        if (_freed.Count > 0 || !entries.ContainsKey(0))
+            entries[0] = new(0, PdfCrossReferenceEntryType.Free, nextFree[0], 65_535);
+        return [.. entries.Values.OrderBy(entry => entry.ObjectNumber)];
     }
 
     private void WriteClassicFreeEntries(Stream output)
@@ -475,8 +558,9 @@ public sealed class PdfIncrementalUpdateBuilder
             AddInheritedIfMissing(entries, InfoName);
         AddUpdatedIdentifier(entries, revisionIdentifier);
         entries.Add(new KeyValuePair<PdfName, PdfObject>(SizeName, new PdfInteger(size)));
-        entries.Add(new KeyValuePair<PdfName, PdfObject>(
-            PrevName, new PdfInteger(_document.CrossReferences.StartXref.Offset)));
+        if (!NeedsCompleteCrossReference)
+            entries.Add(new KeyValuePair<PdfName, PdfObject>(
+                PrevName, new PdfInteger(_document.CrossReferences.StartXref.Offset)));
         return new PdfDictionary(entries);
     }
 

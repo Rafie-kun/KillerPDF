@@ -237,7 +237,7 @@ public static class PdfDetachedSignatureWriter
         byte[] prepared = update.Build(options.IncrementalWriteOptions
             ?? new PdfIncrementalUpdateWriteOptions
             {
-                CrossReferenceFormat = document.CrossReferences.Sections[0].IsStream
+                CrossReferenceFormat = document.CrossReferences.Sections[0].IsStream || update.RequiresCrossReferenceStream
                     ? PdfCrossReferenceFormat.Stream : PdfCrossReferenceFormat.Table
             });
         FillSignature(prepared, document.Source.Length,
