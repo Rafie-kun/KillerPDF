@@ -1,5 +1,6 @@
 using System.IO;
 using System.Text;
+using System.Text.Json;
 using KillerPdf.Engine.Documents;
 
 namespace KillerPDF.Services;
@@ -16,9 +17,19 @@ internal sealed class PdfMacroStore
     internal IReadOnlyList<PdfMacro> LoadAll()
     {
         if (!Directory.Exists(_directory)) return [];
-        return [.. Directory.EnumerateFiles(_directory, "*.json")
-            .Select(file => PdfMacro.FromJson(File.ReadAllText(file)))
-            .OrderBy(macro => macro.Name, StringComparer.OrdinalIgnoreCase)];
+        var macros = new List<PdfMacro>();
+        foreach (string file in Directory.EnumerateFiles(_directory, "*.json"))
+        {
+            try
+            {
+                macros.Add(PdfMacro.FromJson(File.ReadAllText(file)));
+            }
+            catch (Exception error) when (error is JsonException or ArgumentException or NotSupportedException)
+            {
+                // Leave the file in place so it can be inspected or repaired.
+            }
+        }
+        return [.. macros.OrderBy(macro => macro.Name, StringComparer.OrdinalIgnoreCase)];
     }
 
     internal void Save(PdfMacro macro)
