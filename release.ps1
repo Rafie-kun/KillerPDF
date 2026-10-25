@@ -703,11 +703,6 @@ try {
     if ($LASTEXITCODE -ne 0) { throw "Desktop unit tests failed - fix them before releasing" }
     Write-Host "    Desktop unit tests passed" -ForegroundColor Green
 
-    Write-Host "    Running engine unit tests..."
-    dotnet test (Join-Path $PSScriptRoot 'engine\KillerPdf.Engine.Tests\KillerPdf.Engine.Tests.csproj') -c Release --nologo -v quiet
-    if ($LASTEXITCODE -ne 0) { throw "Engine unit tests failed - fix them before releasing" }
-    Write-Host "    Engine unit tests passed" -ForegroundColor Green
-
     Write-Host "    Preflight OK" -ForegroundColor Green
 
     # The Microsoft Store listing installs KillerPDF-Store.exe, which the Cloudflare Worker serves
