@@ -1,0 +1,110 @@
+# KillerPDF 1.9 fresh-plan execution, October 25, 2026
+
+This is an active execution record, not release approval. The source plan is [the fresh review](adversarial-review-20261025-fresh.md). Work started at `b009eb0` on `dev/1.9-overkill`. Preserve the untracked `KillerPDF_Redacted.pdf`.
+
+## Decisions and boundaries
+
+- Measure the final candidate against 1.8.91 before asking for any performance waiver. No waiver is approved.
+- Retain the preview handler and require low-integrity VM acceptance.
+- Rerun A1 and reconcile changed output against A2/A3 before proposing a new baseline.
+- Signing is local rehearsal only. No push, tag, merge, upload, publication or Store submission is authorized.
+- Preserve the prior held preview crash investigation and rejected A003 browser/server action. Do not retry rejected content through another route.
+- SHREDDER owns source integration and headless checks. SN01 owns benchmark preparation and candidate measurement. SN02 owns interactive acceptance. Fresh exclusive leases precede guest writes.
+
+## Repairs verified so far
+
+| Finding | Change | Evidence | Status |
+| --- | --- | --- | --- |
+| B-007 | Both built-result publishers use `AtomicFileOutput.Write`, including the annotation-burn path. | Real exchange and annotation-burn operations lose existing NTFS stream metadata before repair and preserve it after repair. Existing helper tests exercise failed replacement recovery, cancellation and metadata. 113 focused tests pass. | Local commit `f5c7f70` |
+| B-004 | PFX import uses ephemeral keys; dialog and CLI dispose certificates imported from files on every post-load exit. Store-selected certificates retain their prior ownership. | Generated P12 signs a PDF whose detached CMS verifies, but runtime CNG reports the old imported key persisted. After repair, protected P12 and unprotected PFX both sign and verify with ephemeral keys. Independent source reviewer finds no surviving bypass or regression in this scope. | Local commit `f8079b4` |
+| C-001 | One reentrant gate protects Type 1 bounds and outline cache lookup, computation and publication. | Eight simultaneous cold glyph lookups reproduce `Dictionary.TryInsert` corruption before repair. Focused regression passes after repair. Full engine suite passes 6,920 tests; final assertion-table refinement then passes its focused test. | Local commit `23c0b79` |
+| F-026 / B-008 | Macro loading isolates malformed, unsupported or invalid macro files while preserving their bytes and the sorted valid library. | Real malformed JSON reproduces a whole-library `JsonException` before repair. Two focused tests pass after repair. File access and unexpected failures still propagate. | Local commit `a650e37` |
+| E-001 | Add 45 missing navigation/release-status translations, preserving Traditional Chinese for `zh`. | The actual release gate block reports 618 used keys across 16 locales, with no missing or empty values. JavaScript syntax check passes. No release script execution or publication. | Local commit `08c792d` |
+| C-002 | Compatibility-mode `cs` and `CS` recover missing or malformed color spaces to DeviceGray and report the fallback. Strict-mode errors still propagate. | Three new public-render pixel/strictness checks pass, followed by 123 integrated color-space tests. | Local commit `e1a0fc9` |
+| A-001 | Per-window close no longer deletes process-wide session files; existing app-exit disposal remains responsible for cleanup. | Exact runner04 fails with a missing survivor working PDF on the old DLL, then passes real Save As, one 300x200 point output and unchanged inputs on the fixed DLL. Tray12 and signed-copy3 scenarios pass on the fixed DLL. | Local commit `187216c` |
+| E-022 | Remove the second engine-suite invocation from the release script, retaining the first run, fatal failure gate and TRX used by site facts. | Before: two invocations. After: PowerShell parses and AST inspection finds one engine invocation. No release script execution. | Local commit `36383d9` |
+| E-023 | Remove unsupported nb, pt and uk choices from the five language menus. | Each changed menu has 17 unique choices matching English plus the actual 16 locale dictionaries. Family landing-page parity passes across five sites. No rendered or published-site claim. | Local commit `809ea4b` |
+| E-010 | Include the shipped OCR, native image, font, ONNX, Toolkit and Tensors dependency notices and missing copyright identities. | Exact source blocks compared against installed packages and upstream licenses. Three typography-only transformations preserve the words and rights while complying with the dash rule. Final notices hash is verified in an isolated loose app payload. | Local commit `e6ca29b` |
+| A-016 | Cancel printing on the preview close request, thread cancellation through preparation and spooling, and guard callbacks after closure. | Real old-build failure after Closing, fixed-build pass with unchanged runner, four print regression modes, final binary preparation pass and actual native virtual-printer picker cancellation. | Local commit `c493661` |
+
+The B-007 regression tests the real publication entry points, rather than source text. Competing explanations were final replacement semantics, the PDF rewrite and temporary-file cleanup. Changing only the publisher makes the metadata-preservation regression pass. The preexisting helper separately establishes recovery behavior under injected filesystem-boundary failures. No physical power-loss claim is made.
+
+The B-004 check uses only newly generated fixture certificates. Its failure cleanup removes only the key imported by that fixture, never a personal-store certificate. The runtime property used is [CngKey.IsEphemeral](https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.cngkey.isephemeral?view=net-10.0). The actual key-persistence assertion fails before repair while the signing control succeeds. No real user certificate is imported or removed by this regression. The independent investigator traces both GUI and CLI imports; a separate fresh reviewer checks the candidate without the investigator report or passing-test claims.
+
+## Automated checks
+
+| Check | Result | Exact scope |
+| --- | --- | --- |
+| Focused publication/integration/annotation tests | 113 passed, zero failed or skipped | B-007 final production change |
+| Focused PFX and signer tests | 16 passed before the additional extension/password case | B-004 initial green |
+| Window-free app suite | 1,324 passed, zero failed or skipped, 12 seconds | B-004 and B-007 final source, including both PFX cases |
+| Release app build | Zero errors; 671 existing vendored CoreJ2K warnings | B-004 and B-007 production source |
+| Full engine suite | 6,920 passed, zero failed or skipped, 2 minutes 25 seconds | C-001 production fix and initial regression assertions |
+| Final C-001 focused regression | One passed after explicit expected-bounds table refinement | Final two-file C-001 patch |
+| UI smoke runner Release build | Zero warnings and errors | Existing runner, no new acceptance claim |
+
+The window-free filter excludes `ComparisonBarLayoutTests`, `WindowFxTests`, `BottomTabFaceFlipsWhileItsLabelAndCloseTargetStayUpright` and `TabTraversalEntersAndLeavesTheReadingDocument`. Those still require a VM run. A build is not rendered, native input, installer or release evidence.
+
+## Signing access
+
+After SimplySign was signed in, one disposable local copy of the Release apphost was signed with the configured certificate ending `3E0FD` and the DigiCert timestamp service. SignTool sign and `verify /pa /v` both exit zero with one success, zero warnings and zero errors. The original build output is not signed or changed by that diagnostic. No release script is invoked. This proves current signing access; the signed installer and Store acceptance gates still need their own candidate rehearsal.
+
+## Machines
+
+SN01 and SN02 are purpose-built UI VMs. Display-mode changes are explicitly authorized whenever assigned UI work needs them. This is recorded in the authoritative Steevnet lab rules and sent to both existing workers. Keep exclusive ownership and record the actual mode used in evidence.
+
+Both existing remote workers verified live hostname/account, no owned active jobs or product processes, and bootstrap SHA-256 `BA6532BE73E31269A6D01D7CA07F88BDC0D60F5D408E3114B272BD0B6778BEF2`. SN01 has a staged SDK 10.0.402 and runtime 10.0.13. SN02 has runtime 10.0.13 without an installed SDK. Installed app baselines and earlier evidence remain preserved.
+
+SN01 verifies all 415 files of the 1.8.91 reference and the selected five benchmark fixtures. Its preparation report is copied and hash-verified on SHREDDER: `379EED15EF5A6BE4304E7209AA2F4BA2F7033B83A3FF0A0B7BB5A20FAC31BB43`. The retained `210260.pdf` manual actually has 233 pages. Keep that exact hashed fixture and report its real page count. The current 1280x768/96-DPI display is unchanged; 1920x1080 is supported for the eventual 1600x1000 benchmark window.
+
+SN02 verifies every one of the 889 intermediate packet entries. Against app DLL `BD2265D58D106622D7D019921BDB946A8E780D6AC28902E4D26DC73DB7E9A529` (B-004/B-007 production source, prior to C-001), the tray mode passes 12 checks and signed-copy passes three scenarios plus its aggregate check, both exit zero. These are isolated WPF host workflows, not native PFX-dialog or certificate-trust acceptance. The first lifecycle run times out at 180 seconds with no output. Diagnostic runner 02 times out at 60 seconds after the first-window-close stage, with no completed close or Save As. Both remain inconclusive. Source inspection identifies the fixture left the ordinary open-tab quit prompt enabled; runner 03 locks that optional clean-document confirmation only inside the isolated test profile. No product lifecycle fix has been made at this checkpoint.
+
+Fresh central leases belong to chat `01a17328-5b3b-7960-a69f-3266b3f0d526`: SN01 token `94225c6b-f9ed-4eaa-b4c0-88368207e7cd`, SN02 token `df3cd8eb-4816-4f96-816a-d7f4b0ffb338`. Release requires copied evidence, fresh cleanup checks and removal of only the matching claim.
+
+## Remaining work
+
+The remaining app lifecycle and uninstall blockers, broader printing acceptance, further engine compatibility/redaction/trust work, release pipeline and public-text batches, wiring and should-fix batches, candidate performance and accuracy gates, signed package acceptance and final independent three-stage review remain open. The overall plan is active.
+
+The controlled SN02 lifecycle04 handback is copied and hash-verified: `5ED5232CF58F0DD465FE07CF246C8267D432CD975D47F7F6BEF98339F85C4314`. The green01 regression handback is copied and hash-verified: `732461F37DA0E22A82A9FED216ED83CCBF298DAC511773FA4424588BA999AB76`. The first green03 byte-identity assertion is superseded: the saved unsigned PDF preserves its original revision and appends a normal `/Rotate 0` update. Runner04 checks output semantics and unchanged input bytes instead, and runs unchanged on both old and fixed app DLLs. This evidence covers two real MainWindows and the real Save menu/picker; physical tab dragging and external-open IPC are separate checks.
+
+## Print cancellation candidate
+
+The first two probes watched actual `Closed`, which is delayed by the existing fade. Both pass on the old build but do not establish cancellation. Runner03 records the public `Closing` request instead. The old build then fails: first-page progress, close requested, preparation of pages2 through8, then sending status. Its handback is copied and hash-verified on SHREDDER: `5B914F4FD696B5881E6536ABE514EB630A125FB1BF3220E1449FB3298238403C`.
+
+The candidate cancels at the close request, passes a token through page rendering and sheet composition, marshals `CancelAsync` to the writer's own STA dispatcher, and suppresses callbacks into a canceled or unloaded window. The ordinary writer-canceled result remains false rather than becoming a print-error dialog. The cancellation API and both completion events follow [the WPF writer contract](https://learn.microsoft.com/en-us/dotnet/api/system.windows.xps.xpsdocumentwriter?view=windowsdesktop-10.0).
+
+With unchanged runner03, the first fixed candidate passes preparation cancellation, cancellation before preparation, rotated preview and source-switch cancellation. Its handback is copied and hash-verified: `B4F5A9923E3C6F441D81B4AEB647FBF853575B87A5519DDD866365C24BBD0E98`. Final binary `DEB6F0F355076071BB53F37F810212033EFFFAA4E27A8C807B44753A402CC529` also passes preparation cancellation. The native picker appears, but the first attempt misses its 45-second operator deadline, so that control remains unproven in handback `0E0CBF3AD522819598F37CAB7EB17DC438A5EC4B521B024E1A8C71DDECF6109B`.
+
+Runner05 gives only the operator-driven native case 120 seconds; automated cases keep 45 seconds and every success assertion stays unchanged. On that same final product binary, SN02 observes the native picker, actuates Cancel, observes clean Print Preview closure, and gets runner exit zero with no error dialog or print job. This handback is copied and hash-verified: `3656519C30D98066FCA099BA063253B09415DECFB86B25D52A099697678AC441`. Zero owned jobs/processes remain and the captured VM baseline matches. No physical-printer or busy-spooler result is claimed. The isolated final loose app build passes with zero warnings and errors; current window-free app tests pass 1,325 cases. An existing source-string policy assertion needed its call punctuation updated for the new cancellation argument; the real UI regression is the primary cancellation evidence. The source repair and public smoke modes are committed as `c493661`.
+
+## Timestamp trust investigation
+
+D-014 begins with a generated expired fixture certificate, an explicit test-owned trust anchor and a fixed requested evaluation date. Ranked explanations are: (1) a time-only chain failure is conflated with identity rejection; (2) an available timestamp is not used; (3) the PDF signature itself fails integrity; (4) catalog retry/revocation policy prevents the intended alternate evaluation. The first public regression omits timestamp evidence and checks integrity before requiring expiry alone to be Incomplete. No real certificate or signing access is used.
+
+A fresh read-only advisor confirms that historical time requires a completely decoded token bound to this CMS signer, independently trusted TSA evidence, strict validity bounds and unchanged caller trust/revocation policy. Embedded certificates remain candidates rather than anchors. Not-yet-valid certificates and definite identity/revocation failures must remain Invalid. The catalog's Offline requirement and its existing custom-root retry guard are part of this same boundary.
+
+The first fixture fails on the original implementation with expected Incomplete, actual Invalid after its integrity assertions pass. The initial repair separates certificate time into Valid, Expired, NotYetValid and Indeterminate without relaxing X509 verification flags. A future-validity control remains Invalid. Two further fixtures against an independently confirmed pre-D014 verifier reproduce hard untrusted-issuer status being hidden as Indeterminate when offline revocation is also unknown. Both now remain Untrusted and Invalid. Fourteen focused current signature tests pass. This source is uncommitted: trusted timestamp recovery, policy metadata, catalog integration, the full fixture matrix and a fresh final reviewer remain required before D-014 can close.
+
+## Dependency notice sources
+
+Parent verification compares the complete installed ONNX, Toolkit and Tensors license/notice blocks and the complete upstream [Tesseract wrapper license](https://raw.githubusercontent.com/charlesw/tesseract/5.2.0/LICENSE.txt), [native Tesseract license](https://raw.githubusercontent.com/tesseract-ocr/tesseract/5.2.0/LICENSE), [Leptonica license](https://raw.githubusercontent.com/DanBloomberg/leptonica/1.82.0/leptonica-license.txt), [Fonts license at the package revision](https://raw.githubusercontent.com/SixLabors/Fonts/eb8742818d6c5d85e5e3ea442cc3ae355375ef7b/LICENSE) and [InteropDotNet license](https://raw.githubusercontent.com/AndreyAkinshin/InteropDotNet/master/LICENSE.md). A manually transcribed MIT block is corrected to the retrieved text before commit. The native engine's Google copyright is added from its upstream API header.
+
+The ONNX copyright year range uses an unspaced ASCII hyphen, its standalone double-dash divider becomes equals signs, and the Tensors explanatory parenthetical becomes two sentences. These are the only substantive-text comparison exceptions besides line endings. Source package files are untouched. The combined file contains zero prohibited dashes, and its SHA-256 is `E2DB5A9C02849EA8FD335467F655ACC5D858FD47E263A034FEE025698D32EC51`, matching the isolated built payload. This verifies the bounded missing-package notice repair, not a legal audit of every native dependency.
+
+## Redaction resource closure
+
+Independent read-only advice identifies a resource-reachability gap beyond the plan's two operator-drop changes. A public `Apply` regression confirms it: one redacted page inherits a Form resource from its `/Pages` node. Normal verification reports success and page extraction no longer contains `FORMSECRET`, but independent prohibited-text inspection of output objects finds the original marker in object6. The regression fails in238ms before repair. This is real returned-output byte retention, not merely intermediate rewritten content.
+
+The repair materializes each untouched leaf's nearest effective resources, gives redacted leaves their rebuilt resources, and removes stale ancestor resource dictionaries. A second public regression shows that an untouched empty sibling can still retain the original through unused resources. It fails before the output guard because no exception is thrown. The guard now refuses retained original page-content or rewritten Form streams unless actual page content, Form invocations or transparency-mask invocations establish an unredacted use. It checks the compact output before returning from `Apply`, without requiring callers to supply prohibited text.
+
+A fresh read-only candidate reviewer identifies a false rejection for a Form used as a soft-mask group on an untouched sibling. The public regression confirms that failure, then passes after the verifier follows the invoked mask group. All 48 focused content-redaction cases pass, including shared direct Form use, inherited Form use, soft-mask use, unchanged sibling geometry/text and refusal of unused retained originals. Final full-engine verification passes 6,927 tests, zero failed or skipped, in 2 minutes 2 seconds. The repair is local commit `5365848`. One attempted focused build overlapped the active full-suite test process and failed to copy its locked test DLL. That is a scheduling failure, not a product failure. Subsequent builds wait for the shared lane to become free.
+
+This is a bounded repair of a separately reproduced resource-retention route. It does not close the entire D-002 raster-fallback finding. Broken-font/deep-Form cases still need individual classification, since some already throw before `Apply` returns. Unsupported retained-use representations are conservatively refused rather than silently returned.
+
+## Held JBIG2 investigation
+
+The independent source investigator confirms a no-progress symbol-dictionary loop and a render-cancellation gap. It also identifies legitimate virtual arithmetic EOF padding, so the review's unconditional first-EOF-throw proposal must not be applied blindly. The subsequent bounded regression/repair worker is blocked by a security safeguard with the message `This content was flagged for possible cybersecurity risk` and the Daybreak-access link. That worker returns no implementation or runtime result. C-014 remains held, with no retry, reworded task, alternate model or alternate execution route. This block does not establish that the reported finding is invalid or fixed.
+
+Working evidence remains under `C:/Users/steve/scratch/kp-release-plan-20261025` while execution is active. Summarize durable results here before task cleanup; raw logs and binaries do not belong in validation.
+
+Worker cleanup of `C:/Users/steve/scratch/kp-release-plan-20261025/macro` was rejected before execution as `blocked by policy`. The worker had resolved the target and checked containment before `Remove-Item -LiteralPath ... -Recurse -Force`. No retry or alternative deletion route is attempted. This temporary folder remains preserved.
