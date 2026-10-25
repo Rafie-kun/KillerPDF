@@ -38,6 +38,7 @@ namespace KillerPDF
         // UpdatePreview mid-job; without this it would re-enable Print and Enter (IsDefault) would
         // spool a second copy behind the scrim. Only the failure path clears it - success closes.
         private bool _printing;
+        private readonly CancellationTokenSource _printCancellation = new();
         public volatile bool Canceled;        // set on close so the background render stops
 
         private readonly List<PrintQueue> _queues = [];
@@ -155,11 +156,19 @@ namespace KillerPDF
             UpdatePreview();
         }
 
+        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+        {
+            Canceled = true;
+            _printCancellation.Cancel();
+            base.OnClosing(e);
+        }
+
         protected override void OnClosed(EventArgs e)
         {
             Canceled = true;   // stop any in-flight background page rendering
             _announceWarning.Stop();
             base.OnClosed(e);
+            _printCancellation.Dispose();
             try { _server?.Dispose(); } catch { }
             // We own the flattened temp (kept alive so Print could re-rasterize at 300 DPI); clean it up.
             if (_cleanupPath != null) try { System.IO.File.Delete(_cleanupPath); } catch { }
@@ -1385,6 +1394,8 @@ namespace KillerPDF
 
         private async void DoPrint()
         {
+            if (_printing || Canceled || !IsLoaded) return;
+            CancellationToken cancellationToken = _printCancellation.Token;
             if (_queue == null)
             {
                 KillerDialog.Show(this, S("Str_Dlg_NoPrinter"), "KillerPDF",
@@ -1421,6 +1432,7 @@ namespace KillerPDF
                 // on screen, so the click-to-scrim change looks laggy. Resuming at Background priority
                 // (below Render) guarantees the scrim's render pass has run first.
                 await System.Windows.Threading.Dispatcher.Yield(System.Windows.Threading.DispatcherPriority.Background);
+                cancellationToken.ThrowIfCancellationRequested();
 
                 SavePrintPrefs();   // remember printer / orientation / color / two-sided for next time
 
@@ -1457,20 +1469,27 @@ namespace KillerPDF
                     int done = 0;
                     foreach (int idx in indices)
                     {
+                        cancellationToken.ThrowIfCancellationRequested();
                         done++;
                         if (idx < 0 || idx >= _pages.Length) continue;
-                        PdfRenderedPage page = renderSession.RenderPage(idx, requireComplete: false);
+                        PdfRenderedPage page = renderSession.RenderPage(idx, requireComplete: false,
+                            cancellationToken: cancellationToken);
                         int w = page.Width, h = page.Height;
                         byte[] pixels = page.Pixels;
                         var bs = BitmapSource.Create(w, h, 96, 96, PixelFormats.Bgra32, null, pixels, w * 4);   // #141
                         bs.Freeze();
                         hiPages[idx] = bs; hiW[idx] = w; hiH[idx] = h;
                         int shown = done;
-                        try { statusText.Dispatcher.Invoke(() => statusText.Text = string.Format(S("Str_Print_Preparing"), shown, total)); }
-                        catch { /* window closing */ }
+                        cancellationToken.ThrowIfCancellationRequested();
+                        statusText.Dispatcher.Invoke(() =>
+                        {
+                            cancellationToken.ThrowIfCancellationRequested();
+                            statusText.Text = string.Format(S("Str_Print_Preparing"), shown, total);
+                        });
                     }
-                });
+                }, cancellationToken);
 
+                cancellationToken.ThrowIfCancellationRequested();
                 statusText.Text = S("Str_Print_Sending");
 
                 // Compose the sheets and spool them from a dedicated print thread - see
@@ -1479,14 +1498,17 @@ namespace KillerPDF
                 // duplex, so the output is identical to the old path (issue #83 copy handling
                 // unchanged - ticket.CopyCount stays 1).
                 bool ok = await SpoolOnPrintThreadAsync(
-                    indices, copies, aw, ah, hiPages, hiW, hiH, ticket, _queue.FullName, layout);
+                    indices, copies, aw, ah, hiPages, hiW, hiH, ticket, _queue.FullName, layout, cancellationToken);
 
+                if (cancellationToken.IsCancellationRequested || !IsLoaded) return;
                 PrintedPageCount = ok ? indices.Count : 0;
                 DialogResult = ok;
                 Close();
             }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
             catch (Exception ex)
             {
+                if (Canceled || !IsLoaded) return;
                 RemoveOverlay(overlay);   // drop the scrim so the error dialog isn't stuck behind it
                 _printing = false;
                 // Re-derive Print rather than switching it straight back on: the Pages box could have
@@ -1524,7 +1546,7 @@ namespace KillerPDF
         private Task<bool> SpoolOnPrintThreadAsync(
             List<int> indices, int copies, double aw, double ah,
             BitmapSource?[] hiPages, int[] hiW, int[] hiH, PrintTicket ticket, string queueName,
-            PrintLayout layout)
+            PrintLayout layout, CancellationToken cancellationToken)
         {
             var done = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
             var thread = new System.Threading.Thread(() =>
@@ -1537,7 +1559,7 @@ namespace KillerPDF
                     try
                     {
                         done.TrySetResult(await ComposeAndSpool(
-                            indices, copies, aw, ah, hiPages, hiW, hiH, ticket, queueName, layout));
+                            indices, copies, aw, ah, hiPages, hiW, hiH, ticket, queueName, layout, cancellationToken));
                     }
                     catch (Exception ex) { done.TrySetException(ex); }
                     finally { dispatcher.InvokeShutdown(); }
@@ -1558,8 +1580,9 @@ namespace KillerPDF
         private async Task<bool> ComposeAndSpool(
             List<int> indices, int copies, double aw, double ah,
             BitmapSource?[] hiPages, int[] hiW, int[] hiH, PrintTicket ticket, string queueName,
-            PrintLayout layout)
+            PrintLayout layout, CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var fixedDoc = new FixedDocument();
             // Group the selected pages into sheets of layout.NUp and compose each sheet (margins +
             // alignment + scale are all handled inside ComposeSheet, shared with the preview).
@@ -1574,6 +1597,7 @@ namespace KillerPDF
             {
                 for (int start = 0; start < indices.Count; start += layout.NUp)
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
                     var chunk = indices.Skip(start).Take(layout.NUp).ToList();
 
                     var fp = new FixedPage { Width = aw, Height = ah };
@@ -1602,6 +1626,7 @@ namespace KillerPDF
 
             // A PrintQueue holds a spooler handle opened by whichever thread created it, so this
             // thread opens its own by name rather than borrowing the one the dialog is holding.
+            cancellationToken.ThrowIfCancellationRequested();
             using var server = new LocalPrintServer();
             using var queue  = ResolveQueue(server, queueName);
 
@@ -1613,12 +1638,26 @@ namespace KillerPDF
                 else if (ev.Cancelled)     spooled.TrySetResult(false);
                 else                       spooled.TrySetResult(true);
             };
+            writer.WritingCancelled += (_, _) => spooled.TrySetResult(false);
+            var dispatcher = System.Windows.Threading.Dispatcher.CurrentDispatcher;
+            bool writing = false;
+            using CancellationTokenRegistration cancel = cancellationToken.Register(() =>
+                dispatcher.BeginInvoke(new Action(() =>
+                {
+                    if (writing && !spooled.Task.IsCompleted) writer.CancelAsync();
+                })));
             // Write the FixedDocument itself, NOT its DocumentPaginator: the paginator path makes the
             // XPS serializer wrap each page's Visual in a fresh FixedPage, but the Visual already IS a
             // FixedPage - "FixedPage cannot contain another FixedPage". The FixedDocument overload
             // serializes the existing FixedPages directly.
-            writer.WriteAsync(fixedDoc, ticket);
-            return await spooled.Task;
+            cancellationToken.ThrowIfCancellationRequested();
+            writing = true;
+            try
+            {
+                writer.WriteAsync(fixedDoc, ticket);
+                return await spooled.Task;
+            }
+            finally { writing = false; }
         }
 
         /// <summary>

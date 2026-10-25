@@ -30,6 +30,9 @@ Cases:
 | `extract-rotation` | Repeat extraction after rotation and require both the pending form value and exactly 90 degrees. |
 | `print-rotation` | Open actual print preview after rotation and require a landscape preview raster. |
 | `print-switch` | Queue a document switch during real form-print preparation, require a visible canceled status, and reject any stale preview. |
+| `print-cancel-before-prepare` | Select the existing Microsoft Print to PDF queue, request close during the preparation yield, and reject progress after the close request. |
+| `print-cancel-preparing` | Request close when the first of eight small pages reports preparation progress. Require preparation to stop before the next page or sending status, even while the window fades closed. |
+| `print-cancel-native` | On a leased UI VM with Microsoft Print to PDF installed, let the real print job open its native output picker. The operator cancels that picker; require the app to close Print Preview without an error dialog. |
 | `merge-failure-pane` | Drop two unreadable owned PDFs through the actual routed event, choose Merge, switch panes while its worker is pending, and require the other pane's unsaved form value to survive failure. |
 | `merge-close-success` | Merge valid owned inputs in pane B, close the split while the worker is pending, and require the completed document to have a visible owning pane while pane A retains its pending edit. |
 | `radio-accessibility` | Open generated Alpha/Beta radio widgets, require distinct option names on their actual automation peers, select Beta, and verify mutual exclusion. |
@@ -46,7 +49,9 @@ Reflection is limited to isolated host setup, service initialization, constructi
 drag-event arguments, and calling the public OpenFromExternal entry point on the dynamically loaded application. Tests do not invoke private
 workflow methods or inject private editor collections. Workflow actions use actual WPF controls,
 routed events, textboxes and dialogs. Assertions inspect generated PDFs or public UI properties.
-The runner exits its own process after the verdict; a 45-second process deadline prevents hangs.
+The runner exits its own process after the verdict. Its deadline is 45 seconds for automated
+cases. `print-cancel-native` allows 120 seconds for the operator to identify and cancel the
+native picker; its success assertions are unchanged.
 
 These checks establish synthetic application behavior. They do not prove physical mouse/keyboard
 input, full locale/theme coverage, raster-redaction fallback, or hardware printing.

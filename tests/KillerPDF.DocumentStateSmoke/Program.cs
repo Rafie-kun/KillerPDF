@@ -39,13 +39,14 @@ internal static class Program
             Directory.CreateDirectory(temporary);
             Environment.SetEnvironmentVariable("TEMP", temporary);
             Environment.SetEnvironmentVariable("TMP", temporary);
+            TimeSpan processLimit = TimeSpan.FromSeconds(args[3] == "print-cancel-native" ? 120 : 45);
             Deadline = new System.Threading.Timer(_ =>
             {
                 Console.Error.WriteLine("FAIL isolated process deadline");
                 Environment.Exit(1);
-            }, null, TimeSpan.FromSeconds(45), Timeout.InfiniteTimeSpan);
+            }, null, processLimit, Timeout.InfiniteTimeSpan);
             Console.WriteLine("Initializing isolated host");
-            Bootstrap(appPath, Path.GetFullPath(args[1]));
+            Bootstrap(appPath, Path.GetFullPath(args[1]), processLimit);
             string loadedEngine = typeof(PdfDocument).Assembly.Location;
             string EngineHash(string path) => Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(File.ReadAllBytes(path)));
             string expectedEngineHash = EngineHash(Path.Combine(Path.GetDirectoryName(appPath)!, "KillerPdf.Engine.dll"));
@@ -63,6 +64,9 @@ internal static class Program
             else if (args[3] == "extract-rotation") ExtractForm(rotate: true);
             else if (args[3] == "print-rotation") PrintRotation();
             else if (args[3] == "print-switch") PrintSwitch();
+            else if (args[3] == "print-cancel-before-prepare") PrintCancelBeforePrepare();
+            else if (args[3] == "print-cancel-preparing") PrintCancelBeforePrepare(duringPreparation: true);
+            else if (args[3] == "print-cancel-native") PrintCancelBeforePrepare(nativePrompt: true);
             else if (args[3] == "merge-failure-pane") MergeFailurePane();
             else if (args[3] == "merge-close-success") MergeFailurePane(closeOwner: true);
             else if (args[3] == "radio-accessibility") RadioAccessibility();
@@ -88,7 +92,7 @@ internal static class Program
         return 1;
     }
 
-    private static void Bootstrap(string appPath, string appXaml)
+    private static void Bootstrap(string appPath, string appXaml, TimeSpan processLimit)
     {
         AssemblyLoadContext.Default.Resolving += (_, name) =>
         {
@@ -113,7 +117,7 @@ internal static class Program
         host.DefineMethodOverride(startup, appType.GetMethod("OnStartup", Members)!);
         App = (Application)Activator.CreateInstance(host.CreateType()!)!;
         App.DispatcherUnhandledException += (_, e) => { Console.Error.WriteLine(e.Exception); Environment.Exit(1); };
-        var deadline = new DispatcherTimer { Interval = TimeSpan.FromSeconds(40) };
+        var deadline = new DispatcherTimer { Interval = processLimit - TimeSpan.FromSeconds(5) };
         deadline.Tick += (_, _) =>
         {
             foreach (Window window in App.Windows)
@@ -668,6 +672,57 @@ internal static class Program
         if (value != "Updated") throw new InvalidOperationException("BF-F004: extraction returned " + value + ", expected Updated.");
         if (rotate && PdfPageInformation.Read(PdfDocument.Open(File.ReadAllBytes(output)))[0].Rotation != 90)
             throw new InvalidOperationException("Extraction must apply the pending 90-degree rotation exactly once.");
+    }
+
+    private static void PrintCancelBeforePrepare(bool duringPreparation = false, bool nativePrompt = false)
+    {
+        string path = Path.Combine(Folder, "cancel-print.pdf");
+        int count = duringPreparation ? 8 : 1;
+        var document = new PdfDocumentBuilder();
+        for (int index = 0; index < count; index++) document.AddBlankPage(300, 500);
+        File.WriteAllBytes(path, document.Build());
+        Open(path);
+        bool started = false, closeRequested = false, closed = false;
+        int updatesAfterClose = 0;
+        var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(80) };
+        timer.Tick += (_, _) =>
+        {
+            Window? preview = App.Windows.Cast<Window>().FirstOrDefault(w => w.GetType().Name == "PrintPreviewWindow");
+            if (preview is null) return;
+            Button? print = Descendants<Button>(preview).FirstOrDefault(button => button.IsDefault && button.IsEnabled);
+            if (print is null) return;
+            timer.Stop();
+            ComboBox queues = Descendants<ComboBox>(preview)
+                .Single(combo => combo.Items.Contains("Microsoft Print to PDF"));
+            queues.SelectedItem = "Microsoft Print to PDF";
+            preview.Closing += (_, _) => { closeRequested = true; Console.WriteLine("Print preview close requested"); };
+            preview.Closed += (_, _) => { closed = true; Console.WriteLine("Print preview closed at assigned cancellation point"); };
+            if (!duringPreparation && !nativePrompt)
+                preview.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(preview.Close));
+            started = true;
+            Click(print);
+            TextBlock status = Descendants<TextBlock>(preview).Single(text =>
+                text.Text == (string)preview.FindResource("Str_Print_PreparingToPrint"));
+            string firstPage = string.Format((string)preview.FindResource("Str_Print_Preparing"), 1, count);
+            System.ComponentModel.DependencyPropertyDescriptor.FromProperty(TextBlock.TextProperty, typeof(TextBlock))
+                .AddValueChanged(status, (_, _) =>
+                {
+                    Console.WriteLine("Print progress: " + status.Text);
+                    if (closeRequested) updatesAfterClose++;
+                    else if (duringPreparation && status.Text == firstPage) preview.Close();
+                });
+        };
+        timer.Start();
+        Click((Button)Owner.FindName("PrintBtn"));
+        var wait = System.Diagnostics.Stopwatch.StartNew();
+        while (!closed && wait.Elapsed < TimeSpan.FromSeconds(20)) Pump(100);
+        timer.Stop();
+        if (!started || !closed) throw new TimeoutException("The owned print cancellation did not execute.");
+        Pump(1500);
+        if (updatesAfterClose != 0)
+            throw new InvalidOperationException("Print preparation continued after the preview close request.");
+        if (App.Windows.Cast<Window>().Any(window => window != Owner))
+            throw new InvalidOperationException("Closing Print Preview left a print or error dialog open.");
     }
 
     private static void PrintRotation()

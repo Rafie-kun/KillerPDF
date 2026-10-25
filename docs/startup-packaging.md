@@ -36,3 +36,9 @@ Fixtures validate target selection, failure cases, regenerated hashes, and scrip
 without signing. They do not prove Authenticode trust for a future release. Steve runs
 the actual signing/release workflow and checks the final packages. GUI startup does not
 prove compatibility with a reporter's Application Control policy or establish #444's cause.
+
+Print cancellation has separate [document-state smoke cases](../tests/KillerPDF.DocumentStateSmoke/README.md).
+Use a leased UI VM with an existing Microsoft Print to PDF queue and a test-owned loose
+payload. The preparation cases request close through the actual preview and reject
+later progress. The native cancellation case requires the operator to cancel the virtual
+printer's output picker. These checks do not print to physical hardware.

@@ -51,5 +51,12 @@ scripts:
     outputs: Stage diagnostics and a result containing the tested assembly hash.
     failure_behavior: Return nonzero on missing working files, wrong saved page identity or changed source files.
     mutates: temporary-fixture-files-and-test-owned-windows-only
+  print_cancellation_smoke:
+    path: tests/KillerPDF.DocumentStateSmoke/Program.cs
+    purpose: Exercise real print cancellation before preparation, during rendering and at the virtual printer output picker.
+    inputs: Test-owned loose app DLL and matching engine, App.xaml, fresh evidence folder, print-cancel case and --startup-smoke; native case also requires an interactive VM operator.
+    outputs: Console milestones, result.txt and tested app identity.
+    failure_behavior: Return nonzero on progress after close request, an error dialog, missing trigger or deadline (45 seconds automated, 120 seconds for the native picker).
+    mutates: temporary-fixture-files-test-owned-windows-processes-and-virtual-print-job-only
 
 documentation: docs/startup-packaging.md
