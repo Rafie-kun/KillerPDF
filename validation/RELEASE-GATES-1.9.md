@@ -131,14 +131,20 @@ checks on the current line-visibility source. Unchanged engine source retains
 the previous 6,919-pass result. Native save/sign, forms, pane ownership and reading
 results have separately pinned packages. Fresh disposable Sandbox checks also
 pass unsigned development per-user install, replacement, bundled startup,
-uninstall, native CLI disk-full preservation and installer insufficient space (112).
+uninstall, published 1.8.91 upgrade, native CLI and GUI Save As disk-full
+preservation, native process interruption before publication and installer
+insufficient space (112). Regular development installation with real shared
+Core/Desktop 10.0.13, native Windows default selection, fresh Explorer double-click
+opening and uninstall also pass. Actual Explorer PreviewHandler acceptance fails
+with a CoreCLR crash. Its source cause remains unproved; further investigation
+is held after a reported Daybreak content block, with existing evidence preserved.
 Strict unsigned Store rejection (1625) passes. Signing is deferred after SimplySign
 private-key access fails. These results and their limits are in [the installer
 record](records/release-installer-20261024.md). Current ordinary portable launches
 also pass complete tagged and untagged continuous reading with actual NVDA/eSpeak
 and Narrator. See [the reader record](records/release-reader-20261024.md) for
-output, identities and cleanup limits. Signed installer and remaining adverse-state
-acceptance stay open. See [the current readiness
+output, identities and cleanup limits. Signed installer, sleep/resume and persistent
+power-loss acceptance stay open. See [the current readiness
 record](records/release-readiness-20261024.md). The canceled corpus and timing
 loops remain stopped; no benchmark gate is waived or marked passed by these
 functional checks.
