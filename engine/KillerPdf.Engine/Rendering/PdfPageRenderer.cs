@@ -556,8 +556,20 @@ public sealed partial class PdfPageRenderer
                     }
                     else
                     {
-                        ImageColorSpace fillSpace = ReadColorSpace(values[0], resources, 0, diagnostics: diagnostics, intent: state.RenderingIntent)
-                            .ForDestination(pixels, state.BlackPointCompensation, diagnostics);
+                        ImageColorSpace fillSpace;
+                        try
+                        {
+                            fillSpace = ReadColorSpace(values[0], resources, 0,
+                                diagnostics: diagnostics, intent: state.RenderingIntent)
+                                .ForDestination(pixels, state.BlackPointCompensation, diagnostics);
+                        }
+                        catch (Exception exception) when (_document.UsesCompatibilityRecovery
+                            && (exception is NotSupportedException or FormatException))
+                        {
+                            diagnostics.Add("An invalid fill color space was replaced with DeviceGray.");
+                            fillSpace = new ImageColorSpace(1, null)
+                                .ForDestination(pixels, state.BlackPointCompensation, diagnostics);
+                        }
                         state = state with
                         {
                             FillColorSpace = fillSpace,
@@ -612,8 +624,20 @@ public sealed partial class PdfPageRenderer
                     }
                     else
                     {
-                        ImageColorSpace strokeSpace = ReadColorSpace(values[0], resources, 0, diagnostics: diagnostics, intent: state.RenderingIntent)
-                            .ForDestination(pixels, state.BlackPointCompensation, diagnostics);
+                        ImageColorSpace strokeSpace;
+                        try
+                        {
+                            strokeSpace = ReadColorSpace(values[0], resources, 0,
+                                diagnostics: diagnostics, intent: state.RenderingIntent)
+                                .ForDestination(pixels, state.BlackPointCompensation, diagnostics);
+                        }
+                        catch (Exception exception) when (_document.UsesCompatibilityRecovery
+                            && (exception is NotSupportedException or FormatException))
+                        {
+                            diagnostics.Add("An invalid stroke color space was replaced with DeviceGray.");
+                            strokeSpace = new ImageColorSpace(1, null)
+                                .ForDestination(pixels, state.BlackPointCompensation, diagnostics);
+                        }
                         state = state with
                         {
                             StrokeColorSpace = strokeSpace,
