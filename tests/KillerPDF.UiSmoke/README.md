@@ -159,7 +159,8 @@ need their own checks. It does not establish cross-renderer accuracy.
 Use an owned UI VM and a fresh output directory. Run
 `--verify-window-lifecycle APP_DLL APP_XAML OUTPUT_DIRECTORY --startup-smoke`.
 The isolated host opens two synthetic documents in actual MainWindows, waits for
-the first window to finish closing, and uses the survivor's real Save menu and
+the first window to finish closing, requires the application to designate the
+survivor as its primary window, and uses the survivor's real Save menu and
 file picker. The saved PDF must reopen as the survivor's one 300 by 200 point
 page, and both input files must remain unchanged. Ordinary unsigned Save As may
 add an incremental rotation update, so saved output is checked as a document

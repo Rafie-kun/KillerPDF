@@ -46,6 +46,8 @@ internal static class WindowLifecycleSmoke
                 Thread.Sleep(15);
             }
             if (!firstClosed) throw new TimeoutException("The first document window did not finish closing.");
+            if (!ReferenceEquals(Application.Current.MainWindow, survivor))
+                throw new InvalidOperationException("The application still targets a closed document window instead of the survivor.");
 
             string saved = Path.Combine(folder, "survivor-saved.pdf");
             Console.WriteLine("Lifecycle: invoke survivor Save As");

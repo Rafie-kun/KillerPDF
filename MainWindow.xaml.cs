@@ -433,6 +433,8 @@ namespace KillerPDF
             SourceInitialized += MainWindow_SourceInitialized;
             Closed += (_, _) =>
             {
+                if (Application.Current.MainWindow is null || ReferenceEquals(Application.Current.MainWindow, this))
+                    Application.Current.MainWindow = App.PrimaryWindow(this);
                 _continuousRenderCts?.Cancel();
                 _doc?.Close();
                 CloseEngineDocumentSession();

@@ -56,10 +56,11 @@ internal static class TableExportSmoke
         foreach (XAttribute declaration in source.Root!.Attributes().Where(attribute => attribute.IsNamespaceDeclaration))
             resources.SetAttributeValue(declaration.Name, declaration.Value);
         string xaml = resources.ToString();
+        string assemblyName = assembly.GetName().Name!;
         foreach (string name in new[] { "KillerPDF", "KillerFamily.Layout" })
-            xaml = xaml.Replace("clr-namespace:" + name, "clr-namespace:" + name + ";assembly=KillerPDF", StringComparison.Ordinal);
+            xaml = xaml.Replace("clr-namespace:" + name, "clr-namespace:" + name + ";assembly=" + assemblyName, StringComparison.Ordinal);
         app.Resources = (ResourceDictionary)System.Windows.Markup.XamlReader.Parse(xaml,
-            new System.Windows.Markup.ParserContext { BaseUri = new Uri("pack://application:,,,/KillerPDF;component/") });
+            new System.Windows.Markup.ParserContext { BaseUri = new Uri("pack://application:,,,/" + assemblyName + ";component/") });
         if (accessibilityReview || formFieldEditing || guidedTasks || signedCopy || renderRecovery || toolbarAvailability || windowLifecycle)
         {
             var hiddenMessages = new Style(typeof(Window));

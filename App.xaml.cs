@@ -316,9 +316,16 @@ namespace KillerPDF
             }
         }
 
+        internal static MainWindow? PrimaryWindow(MainWindow? excluded = null)
+        {
+            MainWindow[] windows = Current?.Windows.OfType<MainWindow>()
+                .Where(window => !ReferenceEquals(window, excluded)).ToArray() ?? [];
+            return windows.FirstOrDefault(window => window.IsActive) ?? windows.FirstOrDefault();
+        }
+
         private static void DeliverExternalOpen(string? path)
         {
-            if (Current?.MainWindow is MainWindow mw)
+            if (PrimaryWindow() is { } mw)
             {
                 if (string.Equals(path, UninstallCloseCommand, StringComparison.Ordinal))
                 {
