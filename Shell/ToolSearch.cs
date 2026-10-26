@@ -74,7 +74,7 @@ namespace KillerPDF
             "Str_Toolbar_SmallIcons", "Str_Toolbar_LargeIcons", "Str_Toolbar_TextNone",
             "Str_Toolbar_TextBeside", "Str_Toolbar_TextUnder", "Str_Toolbar_TextOnly",
             "Str_KS_ToggleSidebar", "Str_KS_SidebarSide", "Str_KS_SplitPane", "Str_Toolbar_Customize",
-            "Str_Watch_Title",
+            "Str_Watch_Title", "Str_DocumentTools_Macros",
         ];
 
         // Other words people search for, in English whatever the interface language, because the
@@ -500,11 +500,6 @@ namespace KillerPDF
         // A Document tool runs the way its letter does in the open Document tools menu.
         private void RunDocumentTool(char letter)
         {
-            if (_doc is null)
-            {
-                SetStatus(Loc("Str_Msg_OpenFirst"));
-                return;
-            }
             MenuItem? item = BuildDocumentToolsItems().OfType<MenuItem>()
                 .FirstOrDefault(menuItem => menuItem.Tag is char tag && tag == letter);
             if (item is { IsEnabled: true })
