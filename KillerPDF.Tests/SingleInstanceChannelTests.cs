@@ -30,7 +30,7 @@ namespace KillerPDF.Tests
         }
 
         [Fact]
-        public void SilentClientIsDroppedAndTheNextOneIsServed()
+        public async Task SilentClientIsDroppedAndTheNextOneIsServed()
         {
             var channel = new SingleInstanceChannel("KillerPDF.Test." + Guid.NewGuid().ToString("N"),
                 WindowsIdentity.GetCurrent().User!.Value, 0);
@@ -55,7 +55,7 @@ namespace KillerPDF.Tests
                 Thread.Sleep(600);   // say nothing past the deadline
             }
             Assert.True(SpinWait.SpinUntil(() => channel.TrySend("C:\\next.pdf", 500), TimeSpan.FromSeconds(5)));
-            Assert.True(server.Wait(TimeSpan.FromSeconds(5)));
+            await server.WaitAsync(TimeSpan.FromSeconds(5));
             Assert.Equal("C:\\next.pdf", second);
         }
     }
