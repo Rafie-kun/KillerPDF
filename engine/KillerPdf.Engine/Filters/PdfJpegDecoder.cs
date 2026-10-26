@@ -136,6 +136,7 @@ internal static class PdfJpegDecoder
                     DecodeProgressiveScan();
                 }
             }
+            if (compatibilityRecovery && _progressive && _sawScan) return BuildProgressiveOutput();
             throw Error("The JPEG is missing its EOI marker.");
         }
 
@@ -322,9 +323,11 @@ internal static class PdfJpegDecoder
                 if (temporarySampleBytes > MaximumTemporarySampleBytes)
                     throw Error("JPEG temporary samples exceed the configured safety limit.");
                 component.Samples = new byte[sampleCount];
+                if (compatibilityRecovery && !rowSamples) Array.Fill(component.Samples, (byte)128);
             }
             var bits = new BitReader(source, _position);
             byte[]? output = rowSamples ? new byte[(int)outputLength] : null;
+            if (compatibilityRecovery && output is not null) Array.Fill(output, (byte)128);
             int mcu = 0;
             if (_scanComponents.Count == 1)
             {
@@ -336,15 +339,23 @@ internal static class PdfJpegDecoder
                     + maxVertical * 8 - 1) / (maxVertical * 8));
                 for (int row = 0; row < blockRows; row++)
                 {
-                    for (int column = 0; column < blockColumns; column++, mcu++)
+                    try
                     {
-                        if (_restartInterval > 0 && mcu > 0 && mcu % _restartInterval == 0)
+                        for (int column = 0; column < blockColumns; column++, mcu++)
                         {
-                            bits.ConsumeRestart();
-                            component.DcPredictor = 0;
+                            if (_restartInterval > 0 && mcu > 0 && mcu % _restartInterval == 0)
+                            {
+                                bits.ConsumeRestart();
+                                component.DcPredictor = 0;
+                            }
+                            DecodeBlock(bits, component,
+                                column * blockSize, rowSamples ? 0 : row * blockSize);
                         }
-                        DecodeBlock(bits, component,
-                            column * blockSize, rowSamples ? 0 : row * blockSize);
+                    }
+                    catch (PdfFilterException error) when (compatibilityRecovery && error.Message is
+                        "The JPEG scan data is truncated." or "A JPEG marker interrupted scan data.")
+                    {
+                        return RecoveredOutput();
                     }
                     if (output is not null)
                         WriteRows(row * blockSize, blockSize);
@@ -357,25 +368,37 @@ internal static class PdfJpegDecoder
             }
             for (int row = 0; row < mcuRows; row++)
             {
-                for (int column = 0; column < mcuColumns; column++, mcu++)
+                try
                 {
-                    if (_restartInterval > 0 && mcu > 0 && mcu % _restartInterval == 0)
+                    for (int column = 0; column < mcuColumns; column++, mcu++)
                     {
-                        bits.ConsumeRestart();
-                        foreach (Component component in _components) component.DcPredictor = 0;
+                        if (_restartInterval > 0 && mcu > 0 && mcu % _restartInterval == 0)
+                        {
+                            bits.ConsumeRestart();
+                            foreach (Component component in _components) component.DcPredictor = 0;
+                        }
+                        foreach (Component component in _scanComponents)
+                            for (int vertical = 0; vertical < component.VerticalSampling; vertical++)
+                                for (int horizontal = 0; horizontal < component.HorizontalSampling; horizontal++)
+                                    DecodeBlock(bits, component,
+                                        (column * component.HorizontalSampling + horizontal)
+                                            * (8 / reduction),
+                                        vertical * (8 / reduction));
                     }
-                    foreach (Component component in _scanComponents)
-                        for (int vertical = 0; vertical < component.VerticalSampling; vertical++)
-                            for (int horizontal = 0; horizontal < component.HorizontalSampling; horizontal++)
-                                DecodeBlock(bits, component,
-                                    (column * component.HorizontalSampling + horizontal)
-                                        * (8 / reduction),
-                                    vertical * (8 / reduction));
+                }
+                catch (PdfFilterException error) when (compatibilityRecovery && error.Message is
+                    "The JPEG scan data is truncated." or "A JPEG marker interrupted scan data.")
+                {
+                    return RecoveredOutput();
                 }
                 WriteRows(row * maxVertical * (8 / reduction), maxVertical * (8 / reduction));
             }
             return new JpegDecodedImage(output!, outputWidth, outputHeight,
                 components, _width, _height);
+
+            JpegDecodedImage RecoveredOutput() => output is not null
+                ? new JpegDecodedImage(output, outputWidth, outputHeight, components, _width, _height)
+                : BuildOutput(maxHorizontal, maxVertical, outputWidth, outputHeight, (int)outputLength);
 
             void WriteRows(int firstRow, int rowCount)
             {
@@ -569,7 +592,8 @@ internal static class PdfJpegDecoder
                                             goto RecoverScan;
                                     }
                                     catch (PdfFilterException error) when (
-                                        error.Message == "A JPEG marker interrupted scan data.")
+                                        error.Message == "A JPEG marker interrupted scan data."
+                                        || compatibilityRecovery && error.Message == "The JPEG scan data is truncated.")
                                     {
                                         goto RecoverScan;
                                     }
@@ -589,7 +613,8 @@ internal static class PdfJpegDecoder
                                 goto RecoverScan;
                         }
                         catch (PdfFilterException error) when (
-                            error.Message == "A JPEG marker interrupted scan data.")
+                            error.Message == "A JPEG marker interrupted scan data."
+                            || compatibilityRecovery && error.Message == "The JPEG scan data is truncated.")
                         {
                             goto RecoverScan;
                         }
