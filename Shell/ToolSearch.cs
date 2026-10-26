@@ -74,7 +74,7 @@ namespace KillerPDF
             "Str_Toolbar_SmallIcons", "Str_Toolbar_LargeIcons", "Str_Toolbar_TextNone",
             "Str_Toolbar_TextBeside", "Str_Toolbar_TextUnder", "Str_Toolbar_TextOnly",
             "Str_KS_ToggleSidebar", "Str_KS_SidebarSide", "Str_KS_SplitPane", "Str_Toolbar_Customize",
-            "Str_Watch_Title", "Str_DocumentTools_Macros",
+            "Str_Watch_Title", "Str_DocumentTools_Macros", "Str_CertCatalog_Title",
         ];
 
         // Other words people search for, in English whatever the interface language, because the
