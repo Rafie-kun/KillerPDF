@@ -1178,9 +1178,15 @@ public sealed partial class PdfPageRenderer
             void PaintStroke(IReadOnlyList<List<Point>> strokePath)
             {
                 double lineWidth = state.LineWidth * state.Transform.StrokeScale;
-                IReadOnlyList<List<Point>> paintedPath = state.DashPattern.Count == 0
+                IReadOnlyList<List<Point>>? paintedPath = state.DashPattern.Count == 0
                     ? strokePath : CreateDashedPaths(strokePath, state.Transform,
-                        state.DashPattern, state.DashPhase, cancellationToken);
+                        state.DashPattern, state.DashPhase, cancellationToken,
+                        _document.UsesCompatibilityRecovery);
+                if (paintedPath is null)
+                {
+                    diagnostics.Add("A line-dash pattern exceeded the expansion limit and was rendered as a solid stroke.");
+                    paintedPath = strokePath;
+                }
                 if (state.StrokePattern is null)
                 {
                     StrokePaths(pixels, options.Width, options.Height,
@@ -8306,10 +8312,10 @@ public sealed partial class PdfPageRenderer
         return state with { Clips = clips };
     }
 
-    private static IReadOnlyList<List<Point>> CreateDashedPaths(
+    private static IReadOnlyList<List<Point>>? CreateDashedPaths(
         IReadOnlyList<List<Point>> paths, Matrix transform,
         System.Collections.ObjectModel.ReadOnlyCollection<double> suppliedPattern,
-        double suppliedPhase, CancellationToken cancellationToken)
+        double suppliedPhase, CancellationToken cancellationToken, bool compatibilityRecovery)
     {
         if (!transform.TryInverse(out Matrix inverse)) return paths;
         double[] pattern = suppliedPattern.Count % 2 == 0
@@ -8326,7 +8332,7 @@ public sealed partial class PdfPageRenderer
             double phase = suppliedPhase % cycle;
             while (phase > 0)
             {
-                CheckProgress();
+                if (!CheckProgress()) return null;
                 if (phase < remaining)
                 {
                     remaining -= phase;
@@ -8349,13 +8355,19 @@ public sealed partial class PdfPageRenderer
                 double userY = userEnd.Y - userStart.Y;
                 double userLength = Math.Sqrt(userX * userX + userY * userY);
                 if (userLength <= 0) continue;
+                cancellationToken.ThrowIfCancellationRequested();
+                // Full cycles give a conservative lower bound regardless of the current phase.
+                // Reject only work guaranteed to exceed the remaining expansion budget.
+                if (compatibilityRecovery
+                    && (Math.Floor(userLength / cycle) - 1) * pattern.Length > 1_000_000 - steps)
+                    return null;
                 double used = 0;
                 while (used < userLength)
                 {
-                    CheckProgress();
+                    if (!CheckProgress()) return null;
                     while (remaining <= 0)
                     {
-                        CheckProgress();
+                        if (!CheckProgress()) return null;
                         if (paints && pattern[patternIndex] == 0)
                             result.Add(new ZeroLengthDash(Lerp(pageStart, pageEnd, used / userLength),
                                 new Point(pageEnd.X - pageStart.X, pageEnd.Y - pageStart.Y)));
@@ -8393,11 +8405,15 @@ public sealed partial class PdfPageRenderer
         }
         return result;
 
-        void CheckProgress()
+        bool CheckProgress()
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (++steps > 1_000_000)
+            {
+                if (compatibilityRecovery) return false;
                 throw new NotSupportedException("Line dash expansion limit exceeded.");
+            }
+            return true;
         }
 
         static Point Lerp(Point from, Point to, double amount) => new(
