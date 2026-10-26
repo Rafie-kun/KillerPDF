@@ -467,6 +467,15 @@ namespace KillerPDF.Controls
                         string lastAccepted = tb.Text;
                         tb.GotFocus  += (_, _) =>
                         {
+                            bool wasRecalculating = _formRecalculating;
+                            _formRecalculating = true;
+                            try
+                            {
+                                tb.Text = _formTextValues.TryGetValue(capturedKey, out string? raw) ? raw : cur;
+                                lastAccepted = tb.Text;
+                                tb.Foreground = Brushes.Black;
+                            }
+                            finally { _formRecalculating = wasRecalculating; }
                             _selectedFormFieldName = capturedKey; tb.SetResourceReference(Control.BorderBrushProperty, "HeaderLineBrush"); ShowFormSizeBar(tb, capturedKey, capturedScale);
                             // A value that arrived too long is shown whole, never cut, but named.
                             if (Services.FormTextLimit.IsOver(tb.Text, maxLen))
@@ -475,6 +484,7 @@ namespace KillerPDF.Controls
                         tb.LostFocus += (_, _) => { tb.BorderBrush = f.IsComb ? Brushes.Transparent : restingBorder; HideFormSizeBar(); RecalculateFormFields(); };
                         tb.TextChanged += (_, _) =>
                         {
+                            if (_formRecalculating) return;
                             // Typing, paste and IME composition all land here. Hold the field to the
                             // character count Save and Print enforce (BF-U007).
                             if (!Services.FormTextLimit.Accepts(tb.Text, lastAccepted, maxLen))

@@ -1,5 +1,6 @@
 using System.IO;
 using System.Windows.Controls;
+using System.Windows.Media;
 using KillerPdf.Engine.Documents;
 
 namespace KillerPDF.Controls
@@ -48,12 +49,18 @@ namespace KillerPDF.Controls
                 foreach (PdfFormCalculationEntry entry in report.Fields)
                 {
                     if (entry.Status != PdfFormScriptStatus.Evaluated) continue;
-                    if (!values.TryGetValue(entry.FieldName, out string? previous)
-                        || previous == entry.Value) continue;
-                    _formTextValues[entry.FieldName] = entry.Value;
-                    changed = true;
+                    if (values.TryGetValue(entry.FieldName, out string? previous)
+                        && previous != entry.Value)
+                    {
+                        _formTextValues[entry.FieldName] = entry.Value;
+                        changed = true;
+                    }
                     if (_formValueBoxes.TryGetValue(entry.FieldName, out TextBox? box)
-                        && !box.IsKeyboardFocusWithin) box.Text = entry.Value;
+                        && !box.IsKeyboardFocusWithin)
+                    {
+                        box.Text = entry.DisplayValue;
+                        box.Foreground = entry.IsRed ? Brushes.Red : Brushes.Black;
+                    }
                 }
                 if (changed) MarkDirty(true);
             }
