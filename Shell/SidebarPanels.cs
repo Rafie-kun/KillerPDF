@@ -585,7 +585,7 @@ namespace KillerPDF
             foreach (PdfOptionalContentGroupInfo group in layers.Groups)
             {
                 var check = UiKit.CheckBox("");
-                check.IsChecked = group.IsInitiallyVisible;
+                check.IsChecked = layers.ViewVisibleGroupObjectNumbers.Contains(group.ObjectNumber);
                 check.IsEnabled = !group.IsLocked;
                 check.Margin = new Thickness(0, 0, 4, 0);
                 check.VerticalAlignment = VerticalAlignment.Center;
@@ -606,10 +606,8 @@ namespace KillerPDF
                 return;
             }
             CommitActiveTextBox();
-            PdfEngineIntegration.LayerEdit[] edits = [.. layers.Groups.Select(group => new PdfEngineIntegration.LayerEdit(
-                group.ObjectNumber, group.Name,
-                group.ObjectNumber == target.ObjectNumber ? visible : group.IsInitiallyVisible,
-                group.IsLocked))];
+            PdfEngineIntegration.LayerEdit[] edits = [new(
+                target.ObjectNumber, target.Name, visible, target.IsLocked)];
             try
             {
                 UndoEntry? documentUndo = CaptureDocumentUndo();
