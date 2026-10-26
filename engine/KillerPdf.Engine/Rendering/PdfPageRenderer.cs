@@ -34,6 +34,7 @@ public sealed partial class PdfPageRenderer
     private readonly IReadOnlyList<PdfDictionary> _pageResources;
     private readonly HashSet<int> _recoveredPageResources = [];
     private readonly IReadOnlySet<int> _hiddenOptionalContentGroups;
+    private readonly IReadOnlySet<int> _printHiddenOptionalContentGroups;
     private readonly BoundedCache<int, (IReadOnlyList<PdfContentInstruction> Instructions,
         IReadOnlySet<string> Diagnostics)> _instructionCache;
     private readonly BoundedCache<PdfName, PdfDictionary> _recoveredFontCache = new(14);
@@ -153,6 +154,9 @@ public sealed partial class PdfPageRenderer
         PdfOptionalContentInfo optionalContent = PdfOptionalContentReader.Read(_document);
         _hiddenOptionalContentGroups = optionalContent.Groups
             .Where(group => !optionalContent.ViewVisibleGroupObjectNumbers.Contains(group.ObjectNumber))
+            .Select(group => group.ObjectNumber).ToHashSet();
+        _printHiddenOptionalContentGroups = optionalContent.Groups
+            .Where(group => !(group.IsVisibleWhenPrinting ?? group.IsInitiallyVisible))
             .Select(group => group.ObjectNumber).ToHashSet();
         _fontCache = sharedCache?.FontCache ?? CreateFontCache();
         _instructionCache = sharedCache?.InstructionCache ?? CreateInstructionCache();
@@ -340,7 +344,8 @@ public sealed partial class PdfPageRenderer
         var activeForms = new HashSet<PdfStream>();
         int recoveredFormExpansions = 0;
         int deepFormExpansions = 0;
-        IReadOnlySet<int> hiddenOptionalContentGroups = _hiddenOptionalContentGroups;
+        IReadOnlySet<int> hiddenOptionalContentGroups = options.ForPrinting
+            ? _printHiddenOptionalContentGroups : _hiddenOptionalContentGroups;
         PdfDictionary pageResources = _pageResources[pageIndex];
         PdfColorTransform? outputProfile = pageHasGroup ? null : OutputProfile(null);
         PdfColorTransform? pageProfile = ReadGroupProfile(_tree.Pages[pageIndex].Dictionary, pageResources, diagnostics);

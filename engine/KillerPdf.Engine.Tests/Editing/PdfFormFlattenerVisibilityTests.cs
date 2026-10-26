@@ -11,6 +11,105 @@ namespace KillerPdf.Engine.Tests.Editing;
 public sealed class PdfFormFlattenerVisibilityTests
 {
     [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    [InlineData(false, true)]
+    [InlineData(true, true)]
+    [InlineData(false, true, false)]
+    [InlineData(true, true, false)]
+    public void FlattenPreservesWidgetLayerMembership(bool visible, bool appearanceLayer = false, bool annotationLayer = true)
+    {
+        PdfDocument source = PdfDocument.Open(CreatePdf(4, layerVisible: visible, appearanceLayer: appearanceLayer,
+            annotationLayer: annotationLayer));
+        AssertControls(Render(source, false), visible);
+
+        PdfDocument flattened = PdfDocument.Open(PdfFormFlattener.Flatten(source));
+
+        Assert.Empty(PdfFormWidgetReader.ReadPage(flattened, 0));
+        AssertControls(Render(flattened, false), visible);
+        int group = Assert.Single(PdfOptionalContentReader.Read(flattened).Groups).ObjectNumber;
+        PdfDocument toggled = PdfDocument.Open(PdfOptionalContentEditor.SetInitialVisibility(flattened, group, !visible));
+        AssertControls(Render(toggled, false), !visible);
+    }
+
+    [Theory]
+    [InlineData("1 0 0 1 100 0 cm")]
+    [InlineData("0 0 10 10 re W n")]
+    [InlineData("/G gs")]
+    [InlineData("", true)]
+    [InlineData("1 0 0 1 100 0 cm", true)]
+    [InlineData("0 0 10 10 re W n", true)]
+    public void FlattenPreservesArtworkAfterTrailingPageGraphicsState(string trailingContent, bool splitStreams = false)
+    {
+        PdfDocument source = PdfDocument.Open(CreatePdf(4, trailingContent: trailingContent, splitStreams: splitStreams));
+        AssertControls(Render(source, false), true);
+
+        PdfDocument flattened = PdfDocument.Open(PdfFormFlattener.Flatten(source));
+
+        Assert.Empty(PdfFormWidgetReader.ReadPage(flattened, 0));
+        AssertControls(Render(flattened, false), true);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void FlattenPreservesLayerScreenAndPrintConfigurations(bool screenVisible)
+    {
+        PdfDocument source = PdfDocument.Open(CreatePdf(4, layerVisible: screenVisible));
+        source = PdfDocument.Open(PdfOptionalContentEditor.SetPrintVisibility(source, 8, !screenVisible));
+        AssertControls(Render(source, false), screenVisible);
+        AssertControls(Render(source, true), !screenVisible);
+
+        PdfDocument flattened = PdfDocument.Open(PdfFormFlattener.Flatten(source));
+
+        AssertControls(Render(flattened, false), screenVisible);
+        AssertControls(Render(flattened, true), !screenVisible);
+    }
+
+    [Fact]
+    public void FlattenPreservesArtworkOnAPageWithoutContents()
+    {
+        PdfDocument source = PdfDocument.Open(CreatePdf(4));
+        var page = (PdfDictionary)source.Resolve(new PdfIndirectReference(3, 0));
+        var update = new PdfIncrementalUpdateBuilder(source);
+        update.ReplaceObject(3, new PdfDictionary(page.Where(entry => entry.Key.ValueAsLatin1() != "Contents")));
+        source = PdfDocument.Open(update.Build());
+        Assert.Equal(new byte[] { 255, 0, 0, 255 }, Pixel(Render(source, false), 50, 50));
+
+        PdfDocument flattened = PdfDocument.Open(PdfFormFlattener.Flatten(source));
+
+        Assert.Empty(PdfFormWidgetReader.ReadPage(flattened, 0));
+        Assert.Equal(new byte[] { 255, 0, 0, 255 }, Pixel(Render(flattened, false), 50, 50));
+        Assert.Equal(new byte[] { 255, 255, 255, 255 }, Pixel(Render(flattened, false), 5, 95));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void FlattenPreservesMembershipVisibilityExpressions(bool groupVisible)
+    {
+        PdfDocument source = PdfDocument.Open(CreatePdf(4, layerVisible: groupVisible));
+        var update = new PdfIncrementalUpdateBuilder(source);
+        var widget = (PdfDictionary)source.Resolve(new PdfIndirectReference(4, 0));
+        var entries = widget.ToDictionary(item => item.Key, item => item.Value);
+        entries[new PdfName("OC"u8)] = new PdfDictionary(new Dictionary<PdfName, PdfObject>
+        {
+            [new PdfName("Type"u8)] = new PdfName("OCMD"u8),
+            [new PdfName("OCGs"u8)] = new PdfArray([new PdfIndirectReference(8, 0)]),
+            [new PdfName("VE"u8)] = new PdfArray([new PdfName("Not"u8), new PdfIndirectReference(8, 0)])
+        });
+        update.ReplaceObject(4, new PdfDictionary(entries));
+        source = PdfDocument.Open(update.Build());
+        AssertControls(Render(source, false), !groupVisible);
+
+        PdfDocument flattened = PdfDocument.Open(PdfFormFlattener.Flatten(source));
+
+        AssertControls(Render(flattened, false), !groupVisible);
+        flattened = PdfDocument.Open(PdfOptionalContentEditor.SetInitialVisibility(flattened, 8, !groupVisible));
+        AssertControls(Render(flattened, false), groupVisible);
+    }
+
+    [Theory]
     [InlineData(0, false, true)]
     [InlineData(0, true, false)]
     [InlineData(2, false, false)]
@@ -175,20 +274,31 @@ public sealed class PdfFormFlattenerVisibilityTests
     private static byte[] Pixel(PdfRenderedPage page, int x, int y) =>
         page.Pixels.Slice((y * page.Width + x) * 4, 4).ToArray();
 
-    private static byte[] CreatePdf(int flags, bool includeTarget = true)
+    private static byte[] CreatePdf(int flags, bool includeTarget = true, string trailingContent = "", bool splitStreams = false,
+        bool? layerVisible = null, bool appearanceLayer = false, bool annotationLayer = true)
     {
-        const string appearance = "0 0 1 rg 0 0 60 60 re f";
-        const string content = "0 1 0 rg 0 0 10 10 re f";
+        string appearance = appearanceLayer
+            ? "/OC /Layer BDC 0 0 1 rg 0 0 60 60 re f EMC" : "0 0 1 rg 0 0 60 60 re f";
+        string content = splitStreams ? "0 1 0 rg" : "0 1 0 rg 0 0 10 10 re f " + trailingContent;
+        string secondContent = "0 0 10 10 re f " + trailingContent;
         string[] objects =
         [
             "<< /Type /Catalog /Pages 2 0 R "
+                + (layerVisible.HasValue ? "/OCProperties << /OCGs [8 0 R] /D << /BaseState /ON /OFF "
+                    + (layerVisible.Value ? "[]" : "[8 0 R]") + " >> >> " : "")
                 + (includeTarget ? "/AcroForm << /Fields [4 0 R] >> " : "") + ">>",
             "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
-            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 100 100] /Resources << >> /Contents 6 0 R "
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 100 100] /Resources << /ExtGState << /G << /ca 0 >> >> >> /Contents "
+                + (splitStreams ? "[6 0 R 7 0 R] " : "6 0 R ")
                 + (includeTarget ? "/Annots [4 0 R] " : "") + ">>",
-            $"<< /Type /Annot /Subtype /Widget /FT /Tx /T (target) /V () /F {flags} /Rect [20 20 80 80] /P 3 0 R /AP << /N 5 0 R >> >>",
-            $"<< /Type /XObject /Subtype /Form /BBox [0 0 60 60] /Resources << >> /Length {appearance.Length} >>\nstream\n{appearance}\nendstream",
-            $"<< /Length {content.Length} >>\nstream\n{content}\nendstream"
+            $"<< /Type /Annot /Subtype /Widget /FT /Tx /T (target) /V () /F {flags} /Rect [20 20 80 80] /P 3 0 R /AP << /N 5 0 R >> "
+                + (layerVisible.HasValue && annotationLayer ? "/OC 8 0 R " : "") + ">>",
+            $"<< /Type /XObject /Subtype /Form /BBox [0 0 60 60] /Resources "
+                + (appearanceLayer ? "<< /Properties << /Layer 8 0 R >> >> " : "<< >> ")
+                + $"/Length {appearance.Length} >>\nstream\n{appearance}\nendstream",
+            $"<< /Length {content.Length} >>\nstream\n{content}\nendstream",
+            $"<< /Length {secondContent.Length} >>\nstream\n{secondContent}\nendstream",
+            "<< /Type /OCG /Name (Field layer) >>"
         ];
         var pdf = new StringBuilder("%PDF-1.7\n");
         var offsets = new List<int>();

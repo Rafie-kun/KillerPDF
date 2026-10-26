@@ -45,6 +45,11 @@ public static class PdfFormFlattener
 
         var update = new PdfIncrementalUpdateBuilder(document);
         var importer = new PdfObjectGraphImporter(document, update, []);
+        foreach (PdfOptionalContentGroupInfo group in PdfOptionalContentReader.Read(document).Groups)
+        {
+            var reference = new PdfIndirectReference(group.ObjectNumber, group.Generation);
+            importer.SeedReference(reference, reference);
+        }
         int resourceNumber = 1;
         foreach (IGrouping<int, PdfFormWidgetInfo> pageWidgets in widgets
             .GroupBy(widget => widget.PageIndex))
@@ -58,8 +63,13 @@ public static class PdfFormFlattener
                     ?? throw new InvalidOperationException("A page /XObject resource is not a dictionary.")
                 : new PdfDictionary([]);
             var xObjects = existingXObjects.ToDictionary(item => item.Key, item => item.Value);
+            var properties = resourceEntries.TryGetValue(Name("Properties"), out PdfObject? propertiesValue)
+                ? (Resolve(document, propertiesValue) as PdfDictionary
+                    ?? throw new InvalidOperationException("A page /Properties resource is not a dictionary."))
+                    .ToDictionary(item => item.Key, item => item.Value)
+                : new Dictionary<PdfName, PdfObject>();
             var retainedAppearances = new List<PdfObject>();
-            var commands = new StringBuilder("/Artifact BMC\n");
+            var commands = new StringBuilder("Q\n/Artifact BMC\n");
             foreach (PdfFormWidgetInfo widget in pageWidgets)
             {
                 if ((widget.AnnotationFlags & 2) != 0
@@ -110,23 +120,36 @@ public static class PdfFormFlattener
                 do resource = Name("KpfFlat" + resourceNumber++);
                 while (xObjects.ContainsKey(resource));
                 xObjects[resource] = importer.Import(appearanceValue);
+                bool layered = dictionary.TryGetValue(Name("OC"), out PdfObject? layer);
+                if (layered)
+                {
+                    PdfName property;
+                    do property = Name("KpfFlatOc" + resourceNumber++);
+                    while (properties.ContainsKey(property));
+                    properties[property] = layer!;
+                    commands.Append("/OC /").Append(property.ValueAsLatin1()).Append(" BDC\n");
+                }
                 commands.Append("q ")
                     .Append(Number(scaleX)).Append(" 0 0 ")
                     .Append(Number(scaleY)).Append(' ')
                     .Append(Number(translateX)).Append(' ')
                     .Append(Number(translateY)).Append(" cm /")
                     .Append(resource.ValueAsLatin1()).Append(" Do Q\n");
+                if (layered) commands.Append("EMC\n");
             }
             commands.Append("EMC\n");
             resourceEntries[XObjectName] = new PdfDictionary(xObjects);
+            if (properties.Count > 0) resourceEntries[Name("Properties")] = new PdfDictionary(properties);
             PdfIndirectReference overlay = update.AddObject(new PdfStream(
                 new PdfDictionary([]), Encoding.ASCII.GetBytes(commands.ToString())));
+            PdfIndirectReference saveState = update.AddObject(new PdfStream(
+                new PdfDictionary([]), "q\n"u8));
             PdfObject contents = page.Dictionary.TryGetValue(
                     ContentsName, out PdfObject? existingContents)
                 ? Resolve(document, existingContents) is PdfArray array
-                    ? new PdfArray(array.Append(overlay))
-                    : new PdfArray([existingContents, overlay])
-                : overlay;
+                    ? new PdfArray(new PdfObject[] { saveState }.Concat(array).Append(overlay))
+                    : new PdfArray([saveState, existingContents, overlay])
+                : new PdfArray([saveState, overlay]);
             var pageEntries = page.Dictionary.ToDictionary(item => item.Key, item => item.Value);
             pageEntries[ResourcesName] = new PdfDictionary(resourceEntries);
             pageEntries[ContentsName] = contents;
