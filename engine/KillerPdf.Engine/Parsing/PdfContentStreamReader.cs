@@ -38,11 +38,27 @@ public static class PdfContentStreamReader
     // instead of throwing or keeping a silent prefix, so the renderer can stream the page.
     internal static IReadOnlyList<PdfContentInstruction>? ReadForRendering(
         ReadOnlyMemory<byte> source, Func<PdfName, int?>? resolveColorComponents,
-        bool compatibilityRecovery, CancellationToken cancellationToken)
+        bool compatibilityRecovery, CancellationToken cancellationToken,
+        ISet<string> diagnostics)
     {
         var instructions = ReadCore(source, true, out _, 1_000_000, 4096, resolveColorComponents,
-            compatibilityRecovery, true, out bool limitReached, cancellationToken, stopAtLimit: true);
+            compatibilityRecovery, true, out bool limitReached, cancellationToken, stopAtLimit: true,
+            diagnostics: diagnostics);
         return limitReached ? null : instructions;
+    }
+
+    // Partial recovery is permitted only when the caller can report incomplete content.
+    // Public instruction readers used by rewriting and verification remain fail-closed.
+    internal static IReadOnlyList<PdfContentInstruction> ReadWithDiagnostics(
+        ReadOnlyMemory<byte> source, Func<PdfName, int?>? resolveColorComponents,
+        bool compatibilityRecovery, CancellationToken cancellationToken, ISet<string> diagnostics)
+        => ReadCore(source, true, out _, 1_000_000, 4096, resolveColorComponents,
+            compatibilityRecovery, true, out _, cancellationToken, diagnostics: diagnostics);
+
+    private sealed class RecoveryBudget
+    {
+        internal int Count;
+        internal bool Exhausted;
     }
 
     // A non-final buffer commits only complete instructions. Its unconsumed suffix
@@ -62,7 +78,8 @@ public static class PdfContentStreamReader
         int maximumInstructions = 1_000_000,
         Func<PdfName, int?>? resolveColorComponents = null,
         bool compatibilityRecovery = false,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        ISet<string>? diagnostics = null)
     {
         ArgumentNullException.ThrowIfNull(source);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(initialBufferBytes);
@@ -72,6 +89,7 @@ public static class PdfContentStreamReader
         byte[] buffer = new byte[initialBufferBytes];
         int count = 0, offset = 0, instructionCount = 0;
         bool final = false;
+        var recoveryBudget = new RecoveryBudget();
         while (true)
         {
             while (count < buffer.Length && !final)
@@ -82,10 +100,9 @@ public static class PdfContentStreamReader
                 count += read;
             }
 
-            var instructions = ReadPrefix(buffer.AsMemory(0, count), final, out int consumed,
-                resolveColorComponents: resolveColorComponents,
-                cancellationToken: cancellationToken,
-                compatibilityRecovery: compatibilityRecovery);
+            var instructions = ReadCore(buffer.AsMemory(0, count), final, out int consumed,
+                1_000_000, 4096, resolveColorComponents, compatibilityRecovery, false, out _,
+                cancellationToken, diagnostics: diagnostics, recoveryBudget: recoveryBudget);
             foreach (var instruction in instructions)
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -94,7 +111,7 @@ public static class PdfContentStreamReader
                 yield return offset == 0 ? instruction
                     : instruction.WithOffset(checked(offset + instruction.Offset));
             }
-            if (final) yield break;
+            if (final || recoveryBudget.Exhausted) yield break;
             if (consumed > 0)
             {
                 offset = checked(offset + consumed);
@@ -123,7 +140,8 @@ public static class PdfContentStreamReader
         int maximumInstructions, int maximumOperands,
         Func<PdfName, int?>? resolveColorComponents,
         bool compatibilityRecovery, bool allowInstructionTruncation, out bool limitReached,
-        CancellationToken cancellationToken, bool stopAtLimit = false)
+        CancellationToken cancellationToken, bool stopAtLimit = false,
+        ISet<string>? diagnostics = null, RecoveryBudget? recoveryBudget = null)
     {
         consumed = 0;
         limitReached = false;
@@ -136,10 +154,11 @@ public static class PdfContentStreamReader
         var instructions = new List<PdfContentInstruction>();
         var operands = new List<PdfObject>();
         var numericOperands = new List<PdfContentNumber>(6);
-        int recoveries = 0;
+        recoveryBudget ??= new RecoveryBudget();
         while (true)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            if (recoveryBudget.Exhausted) return instructions.AsReadOnly();
             PdfToken token;
             try
             {
@@ -260,8 +279,14 @@ public static class PdfContentStreamReader
         // content. Drop the pending operands and continue after the next delimiter.
         void Resynchronize(int failureOffset)
         {
-            if (++recoveries > 10_000)
-                throw new PdfSyntaxException("Content recovery limit exceeded", failureOffset);
+            if (++recoveryBudget.Count > 10_000)
+            {
+                if (diagnostics is null)
+                    throw new PdfSyntaxException("Content recovery limit exceeded", failureOffset);
+                diagnostics.Add("Page content after 10,000 malformed tokens was ignored.");
+                recoveryBudget.Exhausted = true;
+                return;
+            }
             ReadOnlySpan<byte> bytes = source.Span;
             int position = Math.Clamp(failureOffset, 0, bytes.Length);
             if (position < bytes.Length) position++;

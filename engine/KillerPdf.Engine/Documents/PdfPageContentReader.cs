@@ -94,7 +94,7 @@ public sealed class PdfPageContentReader
             // Rendering streams a page past the cached instruction limit rather than drop its end.
             return PdfContentStreamReader.ReadForRendering(output.ToArray(),
                 name => ColorComponents(name, resources, 0), _document.UsesCompatibilityRecovery,
-                cancellationToken) ?? throw new ContentLimitExceededException();
+                cancellationToken, diagnostics) ?? throw new ContentLimitExceededException();
         }
         return PdfContentStreamReader.Read(output.ToArray(), cancellationToken: cancellationToken,
             resolveColorComponents: name => ColorComponents(name, resources, 0),
@@ -116,7 +116,8 @@ public sealed class PdfPageContentReader
             maximumInstructions: int.MaxValue,
             resolveColorComponents: name => ColorComponents(name, resources, 0),
             cancellationToken: cancellationToken,
-            compatibilityRecovery: _document.UsesCompatibilityRecovery).GetEnumerator();
+            compatibilityRecovery: _document.UsesCompatibilityRecovery,
+            diagnostics: diagnostics).GetEnumerator();
         while (true)
         {
             bool available;
@@ -296,9 +297,9 @@ public sealed class PdfPageContentReader
             var path = new List<PdfContentBounds>();
             var pathSegments = new List<PdfExtractedPathSegment>();
             bool pendingClip = false;
-            foreach (var instruction in PdfContentStreamReader.Read(bytes, cancellationToken: cancellationToken,
-                resolveColorComponents: name => ColorComponents(Resource(current, "ColorSpace", name), current, 0),
-                compatibilityRecovery: _document.UsesCompatibilityRecovery))
+            foreach (var instruction in PdfContentStreamReader.ReadWithDiagnostics(bytes,
+                name => ColorComponents(Resource(current, "ColorSpace", name), current, 0),
+                _document.UsesCompatibilityRecovery, cancellationToken, diagnostics))
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 interpretedInstructions.Add(instruction);
