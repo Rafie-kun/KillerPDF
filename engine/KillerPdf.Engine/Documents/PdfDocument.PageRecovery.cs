@@ -99,9 +99,12 @@ public sealed partial class PdfDocument
             catalog.Dictionary = Set(catalog.Dictionary, "Pages", root.Reference);
             replacements[catalog.Reference.ObjectNumber] = catalog.Dictionary;
             Apply();
+            bool duplicateRecoveryRefused = false;
+            bool duplicateOccurrencesRecovered = false;
             PdfPageTree? tree = ReadCandidate();
             if (tree is null || tree.Pages.Count == 0)
             {
+                if (duplicateRecoveryRefused) return false;
                 // Only one leaf plus a declared count of one is unambiguous. Count zero
                 // is an intentionally empty tree, even when old orphan pages remain.
                 if (leaves.Count != 1
@@ -123,7 +126,9 @@ public sealed partial class PdfDocument
             _objectStreams.Clear();
             foreach (var pair in candidate._objectStreams) _objectStreams.Add(pair.Key, pair.Value);
             _recoveredPageObjects = replacements;
-            _pageRecoveryDiagnostics = Array.AsReadOnly(PageRecoveryDiagnostics);
+            _pageRecoveryDiagnostics = Array.AsReadOnly(duplicateOccurrencesRecovered
+                ? PageRecoveryDiagnostics.Append("Repeated page references were expanded with separate owned objects. Incoming navigation targets the first occurrence; copied explicit self-destinations target their own occurrence.").ToArray()
+                : PageRecoveryDiagnostics);
             return true;
 
             void Apply()
@@ -136,7 +141,33 @@ public sealed partial class PdfDocument
             {
                 try { return PdfPageTree.Read(candidate); }
                 catch (Exception error) when (error is InvalidOperationException or FormatException or NotSupportedException)
-                { return null; }
+                {
+                    var normalizer = new PdfDuplicatePageNormalizer(candidate);
+                    try
+                    {
+                        IReadOnlyDictionary<int, PdfObject>? delta = normalizer.Normalize(root.Reference, catalog.Dictionary);
+                        if (delta is null) return null;
+                        var staged = new Dictionary<int, PdfObject>(replacements);
+                        foreach (var pair in delta) staged[pair.Key] = pair.Value;
+                        var verified = new PdfDocument(_source,
+                            candidate.CrossReferences.WithRecoveredPageObjects(staged, catalog.Reference),
+                            compatibilityRecovery: true) { _pageRecoveryAttempted = true };
+                        foreach (var pair in staged) verified._objects[pair.Key] = pair.Value;
+                        PdfPageTree recovered = PdfPageTree.Read(verified);
+                        if (recovered.Pages.Count == 0 || recovered.RecoveredCycle) return null;
+                        new PdfRecoveredOwnershipValidator(verified).Validate();
+                        candidate = verified;
+                        replacements = staged;
+                        duplicateOccurrencesRecovered = true;
+                        return recovered;
+                    }
+                    catch (Exception refused) when (refused is InvalidOperationException or FormatException
+                        or NotSupportedException or OverflowException)
+                    {
+                        duplicateRecoveryRefused |= normalizer.HasDuplicateOccurrences;
+                        return null;
+                    }
+                }
             }
         }
         catch (Exception error) when (error is InvalidOperationException or FormatException
