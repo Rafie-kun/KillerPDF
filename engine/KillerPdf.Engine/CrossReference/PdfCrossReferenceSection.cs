@@ -69,7 +69,10 @@ public sealed class PdfCrossReferenceSection : IReadOnlyDictionary<int, PdfCross
             && value is PdfIndirectReference { Generation: 0 } reference)
             return reference.ObjectNumber;
         if (value is not PdfInteger integer || integer.Value < 0)
+        {
+            if (compatibilityRecovery) return null;
             throw new ArgumentException($"Trailer {name} must be a non-negative integer.", nameof(trailer));
+        }
         return integer.Value;
     }
 }
