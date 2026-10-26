@@ -447,7 +447,6 @@ public sealed class PdfStreamDecoderTests
     }
 
     [Theory]
-    [InlineData("!")]
     [InlineData("z~")]
     public void Decode_RecoveryPreservesAscii85TupleValidation(string encoded)
     {

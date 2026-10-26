@@ -209,9 +209,10 @@ public static class PdfStreamDecoder
                 "BrotliDecode" => DecodeBrotli(current, filterLimit),
                 "ASCIIHexDecode" or "AHx" => DecodeAsciiHex(current.Span, filterLimit, compatibilityRecovery),
                 "ASCII85Decode" or "A85" => DecodeAscii85(current.Span, filterLimit, compatibilityRecovery),
-                "RunLengthDecode" or "RL" => DecodeRunLength(current.Span, filterLimit),
+                "RunLengthDecode" or "RL" => DecodeRunLength(
+                    current.Span, filterLimit, compatibilityRecovery),
                 "LZWDecode" or "LZW" => DecodeLzw(
-                    current.Span, parameters[i], resolve, filterLimit),
+                    current.Span, parameters[i], resolve, filterLimit, compatibilityRecovery),
                 "DCTDecode" or "DCT" => PdfJpegDecoder.Decode(current, filterLimit,
                     GetDctColorTransform(parameters[i], resolve), compatibilityRecovery),
                 "JPXDecode" or "JPX" => PdfJpeg2000Decoder.Decode(current, filterLimit),
@@ -399,7 +400,7 @@ public static class PdfStreamDecoder
         }
         if (!ended && !compatibilityRecovery)
             throw new PdfFilterException("ASCII85 data has no end marker.");
-        if (count == 1)
+        if (count == 1 && (!compatibilityRecovery || damagedTuple))
             throw new PdfFilterException("ASCII85 data ends with an incomplete tuple.");
         if (count > 1)
         {
@@ -429,7 +430,8 @@ public static class PdfStreamDecoder
             AddBounded(output, (byte)(value >> shift), maximumDecodedBytes);
     }
 
-    private static byte[] DecodeRunLength(ReadOnlySpan<byte> encoded, int maximumDecodedBytes)
+    private static byte[] DecodeRunLength(
+        ReadOnlySpan<byte> encoded, int maximumDecodedBytes, bool compatibilityRecovery)
     {
         int offset = 0, decodedLength = 0;
         bool ended = false;
@@ -452,12 +454,13 @@ public static class PdfStreamDecoder
             decodedLength += count;
             offset += encodedCount;
         }
-        if (!ended) throw new PdfFilterException("RunLength data has no end marker.");
+        if (!ended && !compatibilityRecovery)
+            throw new PdfFilterException("RunLength data has no end marker.");
 
         var output = new byte[decodedLength];
         offset = 0;
         int destination = 0;
-        while (encoded[offset] != 128)
+        while (offset < encoded.Length && encoded[offset] != 128)
         {
             int length = encoded[offset++];
             int count = length < 128 ? length + 1 : 257 - length;
@@ -475,7 +478,8 @@ public static class PdfStreamDecoder
 
     private static byte[] DecodeLzw(
         ReadOnlySpan<byte> encoded, PdfDictionary? parameters,
-        Func<PdfIndirectReference, PdfObject>? resolve, int maximumDecodedBytes)
+        Func<PdfIndirectReference, PdfObject>? resolve, int maximumDecodedBytes,
+        bool compatibilityRecovery)
     {
         int earlyChange = GetOptionalInteger(
             parameters, new PdfName("EarlyChange"u8), 1, resolve);
@@ -507,6 +511,7 @@ public static class PdfStreamDecoder
             }
             previous = current;
         }
+        if (compatibilityRecovery) return [.. output];
         throw new PdfFilterException("LZW data has no end-of-data code.");
 
         void Reset()
