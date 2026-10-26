@@ -189,7 +189,7 @@ public partial class MainWindow
         string? snapshot = null;
         try
         {
-            snapshot = CreateExchangeSnapshot();
+            snapshot = CreateOutputSnapshot();
             templateBytes = File.ReadAllBytes(snapshot);
             var template = PdfDocument.Open(templateBytes);
             var settings = new DataMergeDialog(this, template, records, Path.GetFileName(outputDialog.FileName));

@@ -28,6 +28,14 @@ public partial class MainWindow
         if (dialog.ShowDialog() == true && isSourceCurrent()) dialog.Command?.Invoke();
     }
 
+    // Output copies compose editable overlays and document side state. Structural edits keep
+    // those separate through CreateExchangeSnapshot so reloading cannot burn them twice.
+    private string CreateOutputSnapshot()
+    {
+        CommitActiveTextBox();
+        return WriteSavedCopyToTemp();
+    }
+
     private string CreateExchangeSnapshot()
     {
         CommitActiveTextBox();

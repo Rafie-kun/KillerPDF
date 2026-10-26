@@ -34,7 +34,7 @@ public partial class MainWindow
         CancellationToken token = BeginCancellableOp(title);
         try
         {
-            snapshot = CreateExchangeSnapshot();
+            snapshot = CreateOutputSnapshot();
             byte[] source = File.ReadAllBytes(snapshot);
             byte[] result = await Task.Run(() => PdfImpositionMacro.Execute(settings.Step, source, token).ToArray(), token);
             HideBusyOverlay(busy); EndCancellableOp(token);
