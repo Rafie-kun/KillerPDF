@@ -19,6 +19,7 @@ public sealed partial class PdfDocument
 {
     /// <summary>Maximum number of compressed members accepted in one object stream.</summary>
     public const int MaximumObjectsPerObjectStream = 1_000_000;
+    private const int MaximumCachedAbsentObjectHeaders = 4096;
 
     private static readonly PdfName TypeName = new("Type"u8);
     private static readonly PdfName ObjectStreamTypeName = new("ObjStm"u8);
@@ -33,6 +34,7 @@ public sealed partial class PdfDocument
     private readonly Dictionary<int, PdfObject> _objects = [];
     private readonly Dictionary<int, ObjectStreamContents> _objectStreams = [];
     private readonly HashSet<int> _resolving = [];
+    private readonly HashSet<(int Number, int Generation)> _absentObjectHeaders = [];
     private PdfStandardSecurityHandler? _security;
     private PdfStandardSecurityHandler? _unencryptedPageGuard;
     private bool _checkedPageEncryption;
@@ -413,6 +415,10 @@ public sealed partial class PdfDocument
         if (!_compatibilityRecovery)
             return PdfNull.Instance;
 
+        using var scope = _objectResolutionSync.EnterScope();
+        var identity = (reference.ObjectNumber, reference.Generation);
+        if (_absentObjectHeaders.Contains(identity)) return PdfNull.Instance;
+
         byte[] header = Encoding.ASCII.GetBytes(
             $"{reference.ObjectNumber} {reference.Generation} obj");
         ReadOnlySpan<byte> source = _source.Span;
@@ -430,6 +436,11 @@ public sealed partial class PdfDocument
                 candidates.Add(candidate);
             searchStart = candidate + 1;
         }
+
+        // Missing headers cannot appear later in the owned immutable source. Parse failures
+        // remain retryable because authentication and page recovery can change resolution.
+        if (candidates.Count == 0 && _absentObjectHeaders.Count < MaximumCachedAbsentObjectHeaders)
+            _absentObjectHeaders.Add(identity);
 
         for (int index = candidates.Count - 1; index >= 0; index--)
         {
