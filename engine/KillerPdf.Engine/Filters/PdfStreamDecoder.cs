@@ -265,19 +265,19 @@ public static class PdfStreamDecoder
                     options with { EndOfLine = true },
                     options with { EndOfLine = true, EncodedByteAlign = false }]
                 : [options, options with { EndOfLine = true }];
-        PdfFilterException? failure = null;
         foreach (PdfCcittFaxOptions candidate in candidates)
         {
             try
             {
                 return PdfCcittFaxDecoder.Decode(encoded, candidate, maximumDecodedBytes);
             }
-            catch (PdfFilterException error)
+            catch (PdfFilterException)
             {
-                failure = error;
+                // Try complete decodes before accepting a truncated original layout.
             }
         }
-        throw failure!;
+        return PdfCcittFaxDecoder.Decode(encoded, options, maximumDecodedBytes,
+            compatibilityRecovery: true);
     }
 
     private static int PredictorEncodedLimit(
@@ -589,15 +589,18 @@ public static class PdfStreamDecoder
         int columns = parameters is not null && parameters.ContainsKey(ColumnsName)
             ? GetPositiveInteger(parameters, ColumnsName, 1728, resolve)
             : GetPositiveInteger(stream, WidthName, 1728, resolve);
-        int rows = parameters is not null && parameters.ContainsKey(new PdfName("Rows"u8))
-            ? GetPositiveInteger(parameters, new PdfName("Rows"u8), 1, resolve)
-            : GetPositiveInteger(stream, HeightName, 1, resolve);
+        int rows = GetOptionalInteger(parameters, new PdfName("Rows"u8), 0, resolve);
+        if (rows < 0)
+            throw new PdfFilterException("DecodeParms /Rows must not be negative.");
+        if (rows == 0)
+            rows = GetPositiveInteger(stream, HeightName, 1, resolve);
         return new PdfCcittFaxOptions(
             GetOptionalInteger(parameters, new PdfName("K"u8), 0, resolve),
             columns, rows,
             GetOptionalBoolean(parameters, new PdfName("EndOfLine"u8), false, resolve),
             GetOptionalBoolean(parameters, new PdfName("EncodedByteAlign"u8), false, resolve),
-            GetOptionalBoolean(parameters, new PdfName("BlackIs1"u8), false, resolve));
+            GetOptionalBoolean(parameters, new PdfName("BlackIs1"u8), false, resolve),
+            GetOptionalBoolean(parameters, new PdfName("EndOfBlock"u8), true, resolve));
     }
 
     private static bool GetOptionalBoolean(

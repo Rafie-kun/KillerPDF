@@ -1,7 +1,8 @@
 namespace KillerPdf.Engine.Filters;
 
 internal sealed record PdfCcittFaxOptions(
-    int K, int Columns, int Rows, bool EndOfLine, bool EncodedByteAlign, bool BlackIs1);
+    int K, int Columns, int Rows, bool EndOfLine, bool EncodedByteAlign, bool BlackIs1,
+    bool EndOfBlock = true);
 
 internal static class PdfCcittFaxDecoder
 {
@@ -60,7 +61,8 @@ internal static class PdfCcittFaxDecoder
         "000000011111:2560";
 
     internal static byte[] Decode(
-        ReadOnlySpan<byte> encoded, PdfCcittFaxOptions options, int maximumDecodedBytes)
+        ReadOnlySpan<byte> encoded, PdfCcittFaxOptions options, int maximumDecodedBytes,
+        bool compatibilityRecovery = false)
     {
         if (options.Columns <= 0 || options.Rows <= 0)
             throw new PdfFilterException("CCITT dimensions must be positive.");
@@ -85,12 +87,23 @@ internal static class PdfCcittFaxDecoder
         IReadOnlyList<int> reference = [options.Columns];
         for (int row = 0; row < options.Rows; row++)
         {
-            if (options.EncodedByteAlign) bits.Align();
-            if (options.EndOfLine) bits.ReadEndOfLine();
-            bool oneDimensional = options.K == 0 || options.K > 0 && bits.Read() != 0;
-            reference = oneDimensional
-                ? DecodeOneDimensional(ref bits, output, row * stride, options)
-                : DecodeTwoDimensional(ref bits, output, row * stride, options, reference);
+            try
+            {
+                if (options.EncodedByteAlign) bits.Align();
+                if (compatibilityRecovery && row > 0 && options.EndOfBlock && options.K <= 0
+                    && bits.IsEndOfBlock(options.K < 0 ? 2 : 6))
+                    return output;
+                if (options.EndOfLine) bits.ReadEndOfLine();
+                bool oneDimensional = options.K == 0 || options.K > 0 && bits.Read() != 0;
+                reference = oneDimensional
+                    ? DecodeOneDimensional(ref bits, output, row * stride, options)
+                    : DecodeTwoDimensional(ref bits, output, row * stride, options, reference);
+            }
+            catch (PdfFilterException) when (compatibilityRecovery && row > 0 && bits.Truncated)
+            {
+                output.AsSpan(row * stride, stride).Fill(white);
+                return output;
+            }
         }
         return output;
     }
@@ -292,8 +305,20 @@ internal static class PdfCcittFaxDecoder
     {
         private readonly ReadOnlySpan<byte> _source;
         private int _position;
+        internal bool Truncated { get; private set; }
 
         internal BitReader(ReadOnlySpan<byte> source) => _source = source;
+
+        internal readonly bool IsEndOfBlock(int endOfLineCount)
+        {
+            BitReader probe = this;
+            for (int index = 0; index < endOfLineCount; index++)
+            {
+                if (!probe.TryPeek(12, out int value) || value != 1) return false;
+                probe.Skip(12);
+            }
+            return true;
+        }
 
         internal readonly bool TryPeek(int count, out int value)
         {
@@ -312,7 +337,10 @@ internal static class PdfCcittFaxDecoder
         internal int Read()
         {
             if (_position >= _source.Length * 8)
+            {
+                Truncated = true;
                 throw new PdfFilterException("CCITT data is truncated.");
+            }
             int bit = _source[_position / 8] >> (7 - _position % 8) & 1;
             _position++;
             return bit;
