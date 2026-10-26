@@ -433,15 +433,7 @@ namespace KillerPDF
             ApplyShortcutTooltips();     // every tooltip that names a key, from the live bindings
             BuildShortcutsOverlay();     // generate the shortcuts card from the single-source table (ShortcutsOverlay.cs)
             SourceInitialized += MainWindow_SourceInitialized;
-            Closed += (_, _) =>
-            {
-                App.RememberClosedWindow(this);
-                if (Application.Current.MainWindow is null || ReferenceEquals(Application.Current.MainWindow, this))
-                    Application.Current.MainWindow = App.PrimaryWindow(this);
-                _continuousRenderCts?.Cancel();
-                _doc?.Close();
-                CloseEngineDocumentSession();
-            };
+            Closed += MainWindow_Closed;
 
             // Open a file passed via command-line / file association (e.g. double-clicking a .pdf)
             // Also show the portable badge when running outside the install location.

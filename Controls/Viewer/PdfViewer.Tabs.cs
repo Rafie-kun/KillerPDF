@@ -526,6 +526,28 @@ namespace KillerPDF.Controls
             _thumbCts = null;
         }
 
+        private bool _windowResourcesReleased;
+
+        internal void ReleaseWindowResourcesExt()
+        {
+            if (_windowResourcesReleased) return;
+            _windowResourcesReleased = true;
+            CancelRenderWork();
+            CloseEngineDocumentSession();
+            foreach (var document in _sessions.Select(session => session.Doc).Append(_doc).OfType<PdfWorkingDocument>().Distinct())
+                document.Close();
+            _doc = null;
+            _active = null;
+            _sessions.Clear();
+            _annotations.Clear();
+            _undoStack.Clear();
+            _redoStack.Clear();
+            _stamps.Clear();
+            _stampHitRects.Clear();
+            _docStampSpec = null;
+            _stampSession = null;
+        }
+
         private static void CancelAndRelease(System.Threading.CancellationTokenSource? source)
         {
             source?.Cancel();

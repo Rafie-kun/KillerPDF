@@ -597,14 +597,16 @@ namespace KillerPDF
         // DynamicResource strings. Called once from the window ctor; the event only ever fires
         // when the app was started with --lang-file.
         internal void HookExternalLangReload()
-            => KillerPDF.Services.LocaleManager.ExternalReloaded += () =>
-            {
-                ApplyShortcutTooltips();
-                BuildToolbarMenu();
-                BuildContextMenu();
-                ApplyToolbarAppearance();
-                RefreshOpenAnnotationBars();
-            };
+            => KillerPDF.Services.LocaleManager.ExternalReloaded += OnExternalLangReload;
+
+        private void OnExternalLangReload()
+        {
+            ApplyShortcutTooltips();
+            BuildToolbarMenu();
+            BuildContextMenu();
+            ApplyToolbarAppearance();
+            RefreshOpenAnnotationBars();
+        }
 
         private void LangEnRadio_Checked(object sender, RoutedEventArgs e)   => SelectLocale(KillerPDF.Services.Locale.EnUS);
         private void LangCsRadio_Checked(object sender, RoutedEventArgs e)   => SelectLocale(KillerPDF.Services.Locale.CsCZ);
