@@ -18,6 +18,13 @@ namespace KillerPDF
     public partial class MainWindow : IViewerHost
     {
         void IViewerHost.MarkDirty(bool dirty) => MarkDirty(dirty);
+        void IViewerHost.ReconcileHistoryDirty(PdfViewer viewer)
+            => ((IViewerHost)this).RunWithViewerContext(viewer,
+                () =>
+                {
+                    MarkDirty(!viewer.MatchesSavedCheckpoint(_docStampSpec));
+                    viewer.CaptureActiveIfAny();
+                });
 
         void IViewerHost.SetTool(EditTool tool) => SetTool(tool);
         bool IViewerHost.SidebarShowingOutlines => _sidebarShowingOutlines;
@@ -53,9 +60,22 @@ namespace KillerPDF
                 remapRotations, selectedPageAfterReload, documentUndo, preserveRenderedPages);
         void IViewerHost.RecordNavJump() => RecordNavJump();
         PageAnnotation? IViewerHost.PairPartner(PageAnnotation annotation) => PairPartner(annotation);
-        void IViewerHost.RenderStamps(int page) => RenderStamps(page);
-        void IViewerHost.OpenStampTool() => OpenStampTool();
-        bool IViewerHost.StampHitTest(int page, Point position) => StampHitTest(page, position);
+        void IViewerHost.RenderStamps(PdfViewer viewer, int page)
+        {
+            if (ReferenceEquals(ActiveViewer, viewer)) RenderStamps(page);
+            else ((IViewerHost)this).RunWithViewerContext(viewer, () => RenderStamps(page));
+        }
+        void IViewerHost.OpenStampTool(PdfViewer viewer)
+        {
+            if (ReferenceEquals(ActiveViewer, viewer)) OpenStampTool();
+            else ((IViewerHost)this).RunWithViewerContext(viewer, () =>
+            {
+                OpenStampTool();
+                viewer.CaptureActiveIfAny();
+            });
+            UpdateStampIndicator();
+        }
+        bool IViewerHost.StampHitTest(PdfViewer viewer, int page, Point position) => viewer.StampHitTestExt(page, position);
         void IViewerHost.ApplySearchHighlights(int page, System.Windows.Controls.Canvas canvas)
             => ApplySearchHighlights(page, canvas);
         void IViewerHost.HighlightSearchResultsOnCurrentPage() => HighlightSearchResultsOnCurrentPage();

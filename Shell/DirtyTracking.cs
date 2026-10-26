@@ -23,10 +23,17 @@ namespace KillerPDF
 
         private long _documentEditRevision;
 
+        private void AcceptSavedCheckpoint()
+        {
+            ActiveViewer.CaptureSavedCheckpoint(_docStampSpec);
+            MarkDirty(false);
+        }
+
         private void MarkDirty(bool dirty = true)
         {
             if (dirty) _documentEditRevision++;
             _isDirty = dirty;
+            UpdateStampIndicator();
             ActiveViewer.NotifyReadingTextChanged();
             ScheduleSidebarPanelRefresh();   // measurements listed in the Comments panel may have changed
             if (_saveAsBtnRef != null)
@@ -60,7 +67,8 @@ namespace KillerPDF
         // editable copy may omit overlay measurements, and the external file may have changed.
         private string? UnchangedDocumentBytes()
         {
-            if (_isDirty || string.IsNullOrEmpty(_currentFile)) return null;
+            if (_isDirty || string.IsNullOrEmpty(_currentFile)
+                || !ActiveViewer.MatchesSavedCheckpoint(_docStampSpec)) return null;
             return _completeDocumentSource?.Path;
         }
 

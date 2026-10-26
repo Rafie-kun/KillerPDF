@@ -19,6 +19,8 @@ namespace KillerPDF
 
     public abstract class PageAnnotation
     {
+        // History snapshots retain identity; independent copies receive a new identity.
+        internal Guid HistoryId { get; set; } = Guid.NewGuid();
         public int PageIndex { get; set; }
         // Links a text-edit cover to its replacement text (same non-empty id on both). A cover with a
         // PairId renders dashed (it's "paired"); when the partner text is deleted the cover's PairId is

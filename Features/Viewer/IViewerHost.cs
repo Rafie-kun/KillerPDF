@@ -43,6 +43,7 @@ namespace KillerPDF.Features
         /// service even though dirtiness is per-document, because it also drives window chrome -
         /// the tab's dirty dot and the title bar.</summary>
         void MarkDirty(bool dirty = true);
+        void ReconcileHistoryDirty(PdfViewer viewer);
 
         // PushUndo is deliberately NOT here, despite 9 uses. Undo is per-document state (group B):
         // _undoStack rides in DocumentSession, so the viewer pushes onto the session it is showing
@@ -87,9 +88,9 @@ namespace KillerPDF.Features
             bool preserveRenderedPages = false);
         void RecordNavJump();
         PageAnnotation? PairPartner(PageAnnotation annotation);
-        void RenderStamps(int page);
-        void OpenStampTool();
-        bool StampHitTest(int page, Point position);
+        void RenderStamps(PdfViewer viewer, int page);
+        void OpenStampTool(PdfViewer viewer);
+        bool StampHitTest(PdfViewer viewer, int page, Point position);
         void ApplySearchHighlights(int page, Canvas canvas);
         void HighlightSearchResultsOnCurrentPage();
         void ShowTextSettings();

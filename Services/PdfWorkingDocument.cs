@@ -16,11 +16,13 @@ internal sealed class PdfWorkingDocument : IDisposable
             throw new InvalidOperationException("This encrypted PDF requires a password.");
         _parsedDocument = parsed;
         _source = source;
+        ContentIdentity = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(source));
         PageCount = PdfPageInformation.Read(parsed).Count;
         IsReadOnly = isReadOnly;
     }
 
     internal int PageCount { get; }
+    internal string ContentIdentity { get; }
     internal bool IsReadOnly { get; }
     internal PdfDocument? ParsedDocument => _parsedDocument;
 

@@ -50,6 +50,8 @@ namespace KillerPDF.Controls
             public EditTool Tool = EditTool.Select;   // active editing tool, remembered per document
             public int PageIndex;
             public bool IsDirty;
+            public string? SavedStateIdentity;
+            public StampSpec? StampSpec;
             public bool ProtectedSource;               // #149: source file had a password/encryption when opened
             public Services.PublishedFileStamp? PublishedFile; // the bytes the last save wrote, when they differ from CurrentFile
             public Services.CompleteDocumentSource? CompleteDocumentSource;
@@ -203,6 +205,8 @@ namespace KillerPDF.Controls
             s.GridColumns    = _gridColumns;
             s.Tool           = _currentTool;
             s.IsDirty        = _isDirty;
+            s.SavedStateIdentity = _savedStateIdentity;
+            s.StampSpec = _docStampSpec;
             s.ProtectedSource = _openedFromProtected;
             s.PublishedFile = _publishedFile;
             s.CompleteDocumentSource = _completeDocumentSource;
@@ -327,6 +331,8 @@ namespace KillerPDF.Controls
             _gridColumns    = s.GridColumns;
             _currentTool    = s.Tool;
             _isDirty        = s.IsDirty;
+            _savedStateIdentity = s.SavedStateIdentity;
+            ApplyStampSession(s);
             _openedFromProtected = s.ProtectedSource;
             _publishedFile = s.PublishedFile;
             _completeDocumentSource = s.CompleteDocumentSource;

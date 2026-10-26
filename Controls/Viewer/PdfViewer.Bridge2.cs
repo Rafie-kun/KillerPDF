@@ -172,9 +172,9 @@ namespace KillerPDF.Controls
         private void RecordNavJump() => Host!.RecordNavJump();
         private PageAnnotation? CloneAnnotation(PageAnnotation a) => Host!.CloneAnnotation(a);
         private PageAnnotation? PairPartner(PageAnnotation a) => Host!.PairPartner(a);
-        private void RenderStamps(int page) => Host!.RenderStamps(page);
-        private void OpenStampTool() => Host!.OpenStampTool();
-        private bool StampHitTest(int page, Point pos) => Host!.StampHitTest(page, pos);
+        private void RenderStamps(int page) => Host!.RenderStamps(this, page);
+        private void OpenStampTool() => Host!.OpenStampTool(this);
+        private bool StampHitTest(int page, Point pos) => Host!.StampHitTest(this, page, pos);
         private void ApplySearchHighlights(int page, Canvas canvas) => Host!.ApplySearchHighlights(page, canvas);
         private void HighlightSearchResultsOnCurrentPage() => Host!.HighlightSearchResultsOnCurrentPage();
         private void ShowTextSettings() => Host!.ShowTextSettings();

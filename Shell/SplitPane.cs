@@ -557,6 +557,7 @@ namespace KillerPDF
             SyncPickerState();
             UpdatePageSizeDisplay();
             SetTool(_currentTool, restoringPane: true);
+            UpdateStampIndicator();
 
             // No render here. Each pane keeps its own tile tree, so its document stays painted
             // whether or not it has focus - focus moves the chrome, not the pixels. A

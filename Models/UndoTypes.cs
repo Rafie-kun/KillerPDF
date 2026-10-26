@@ -14,7 +14,7 @@ namespace KillerPDF
     // had to be internal for the render cache, its UndoStack field is Stack<UndoEntry>, and a field
     // cannot be more accessible than its type.
 
-    internal enum UndoKind { Annotation, Document, StampBatch, ClearAnnotations, AnnotationGroup, PageSnapshot }
+    internal enum UndoKind { Annotation, Document, StampBatch, ClearAnnotations, AnnotationGroup, PageSnapshot, StampSpecification }
 
     internal readonly record struct UndoEntry(
         UndoKind Kind,
@@ -26,5 +26,6 @@ namespace KillerPDF
         Dictionary<int, List<PageAnnotation>>? AnnotSnapshot = null,
         List<PageAnnotation>? AnnotGroup = null,
         Dictionary<int, int>? PageRotations = null,
-        Controls.RedactionMarkSnapshot? RedactionSnapshot = null);
+        Controls.RedactionMarkSnapshot? RedactionSnapshot = null,
+        StampSpec? StampSnapshot = null);
 }

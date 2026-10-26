@@ -13,11 +13,11 @@ namespace KillerPDF
         // The document's current stamp configuration (one spec drives page numbers and/or a watermark).
         // Reopening the Stamp tool edits this; Apply rebuilds _stamps from it. Stamps live on their own
         // layer, painted BELOW annotations in RenderAllAnnotations.
-        private StampSpec? _docStampSpec;
-        private readonly Dictionary<int, List<StampInstance>> _stamps = [];
+        private StampSpec? _docStampSpec { get => ActiveViewer.StampSpecRef; set => ActiveViewer.StampSpecRef = value; }
+        private Dictionary<int, List<StampInstance>> _stamps => ActiveViewer.StampInstancesRef;
         // Per-page rendered stamp bounds (render-dim/canvas space) so a double-click can hit-test a stamp and
         // reopen the editor. Repopulated every RenderStamps; the stamp visuals themselves stay non-hit-testable.
-        private readonly Dictionary<int, List<Rect>> _stampHitRects = [];
+        private Dictionary<int, List<Rect>> _stampHitRects => ActiveViewer.StampHitRectsRef;
 
         private void ToolStamp_Click(object sender, RoutedEventArgs e)
         {
@@ -48,6 +48,7 @@ namespace KillerPDF
 
         private void ApplyStampSpec(StampSpec spec)
         {
+            ActiveViewer.PushUndoExt(new UndoEntry(UndoKind.StampSpecification, StampSnapshot: _docStampSpec?.Clone()));
             _docStampSpec = (spec.NumbersEnabled || spec.WmEnabled) ? spec : null;
             UpdateStampIndicator();
             RebuildStamps();
@@ -59,36 +60,17 @@ namespace KillerPDF
         }
 
         // Regenerates the per-page stamp instances from the active spec.
-        private void RebuildStamps()
-        {
-            _stamps.Clear();
-            if (_docStampSpec is null || _doc is null) return;
-            int n = EnsureEngineDocumentSession().PageCount;
-
-            if (_docStampSpec.NumbersEnabled)
-                foreach (int p in PdfBurn.StampPageRange(_docStampSpec.NumRange, n))
-                    AddStamp(p, StampKind.PageNumber);
-
-            if (_docStampSpec.WmEnabled)
-                foreach (int p in PdfBurn.StampPageRange(_docStampSpec.WmRange, n))
-                    AddStamp(p, StampKind.Watermark);
-        }
+        private void RebuildStamps() => ActiveViewer.RebuildStampInstancesExt();
 
         // Keeps the Stamp toolbar button showing a persistent "hovered" (gray) background while the document
         // has active stamps, as a subtle indicator. Cleared when there are no stamps.
         private void UpdateStampIndicator()
         {
             if (ToolStampBtn is null) return;
-            if (_docStampSpec is not null)
+            if (_doc is not null && _docStampSpec is not null)
                 ToolStampBtn.SetResourceReference(Control.BackgroundProperty, "RowHoverBrush");
             else
                 ToolStampBtn.ClearValue(Control.BackgroundProperty);
-        }
-
-        private void AddStamp(int page, StampKind kind)
-        {
-            if (!_stamps.TryGetValue(page, out var list)) { list = []; _stamps[page] = list; }
-            list.Add(new StampInstance { PageIndex = page, Kind = kind, Spec = _docStampSpec! });
         }
 
         private void RerenderAllVisiblePages()
@@ -104,6 +86,7 @@ namespace KillerPDF
         // numbers used originally, so placement matches the rest of the annotation layer.
         private void RenderStamps(int pageIndex)
         {
+            ActiveViewer.EnsureStampInstancesExt();
             _stampHitRects[pageIndex] = [];   // reset; repopulated below as stamps render
             if (_docStampSpec is null || _doc is null) return;
             if (!_stamps.TryGetValue(pageIndex, out var list) || list.Count == 0) return;
@@ -198,15 +181,6 @@ namespace KillerPDF
             Canvas.SetTop(el, y);
             _activeCanvas.Children.Add(el);
             if (_stampHitRects.TryGetValue(pageIndex, out var rects)) rects.Add(new Rect(x, y, w, h));
-        }
-
-        // True if a point (render-dim/canvas space) falls on a rendered stamp on this page - used to reopen
-        // the Stamp Pages editor on double-click.
-        private bool StampHitTest(int pageIndex, Point pos)
-        {
-            if (_stampHitRects.TryGetValue(pageIndex, out var rects))
-                foreach (var r in rects) if (r.Contains(pos)) return true;
-            return false;
         }
 
         // (rdW, rdH) in the 2048-based render-dim space; phpt/pwpt the page size in points (rotation-aware).

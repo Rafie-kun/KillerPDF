@@ -2670,11 +2670,18 @@ namespace KillerPDF.Controls
                 PageRotations: new Dictionary<int, int>(_pageRotations),
                 RedactionSnapshot: new(_redactMarks));
 
+        private PageAnnotation? CloneHistoryAnnotation(PageAnnotation annotation)
+        {
+            var clone = CloneAnnotation(annotation);
+            if (clone is not null) clone.HistoryId = annotation.HistoryId;
+            return clone;
+        }
+
         private Dictionary<int, List<PageAnnotation>> CaptureAllAnnotationState()
         {
             var snapshot = new Dictionary<int, List<PageAnnotation>>();
             foreach (var pair in _annotations)
-                snapshot[pair.Key] = [.. pair.Value.Select(CloneAnnotation)
+                snapshot[pair.Key] = [.. pair.Value.Select(CloneHistoryAnnotation)
                     .Where(annotation => annotation is not null).Cast<PageAnnotation>()];
             return snapshot;
         }
@@ -2689,7 +2696,7 @@ namespace KillerPDF.Controls
             var snap = new Dictionary<int, List<PageAnnotation>>();
             foreach (int p in pages.Distinct())
                 if (_annotations.TryGetValue(p, out var list))
-                    snap[p] = [.. list.Select(CloneAnnotation).Where(c => c is not null).Cast<PageAnnotation>()];
+                    snap[p] = [.. list.Select(CloneHistoryAnnotation).Where(c => c is not null).Cast<PageAnnotation>()];
             if (snap.Count > 0)
                 PushUndo(new UndoEntry(UndoKind.PageSnapshot, WasDirty: _isDirty, AnnotSnapshot: snap));
         }
@@ -2745,6 +2752,8 @@ namespace KillerPDF.Controls
         {
             try
             {
+                if (entry.Kind == UndoKind.StampSpecification)
+                    return new UndoEntry(UndoKind.StampSpecification, StampSnapshot: _docStampSpec?.Clone());
                 if (entry.Kind == UndoKind.Document)
                 {
                     if (_doc is null) return null;
@@ -2761,7 +2770,7 @@ namespace KillerPDF.Controls
                 var snap = new Dictionary<int, List<PageAnnotation>>();
                 foreach (int p in pages.Distinct())
                     snap[p] = _annotations.TryGetValue(p, out var list)
-                        ? [.. list.Select(CloneAnnotation).Where(c => c is not null).Cast<PageAnnotation>()]
+                        ? [.. list.Select(CloneHistoryAnnotation).Where(c => c is not null).Cast<PageAnnotation>()]
                         : [];
                 return new UndoEntry(UndoKind.PageSnapshot, WasDirty: _isDirty, AnnotSnapshot: snap);
             }
@@ -2772,7 +2781,15 @@ namespace KillerPDF.Controls
         // entry cannot be applied (missing document bytes) so the caller skips pushing its inverse.
         private bool ApplyHistoryEntry(UndoEntry entry)
         {
-            if (entry.Kind == UndoKind.Annotation)
+            if (entry.Kind == UndoKind.StampSpecification)
+            {
+                _docStampSpec = entry.StampSnapshot?.Clone();
+                RebuildStampInstancesExt();
+                RenderAnnotationsOnAllVisiblePages();
+                Host!.ReconcileHistoryDirty(this);
+                SetStatus(Loc("Str_St_Undone"));
+            }
+            else if (entry.Kind == UndoKind.Annotation)
             {
                 int pageIdx = entry.PageIdx;
                 if (_annotations.TryGetValue(pageIdx, out var pageList) && pageList.Count > 0)
@@ -2780,13 +2797,13 @@ namespace KillerPDF.Controls
                     // Remove the exact annotation this entry recorded (not just the last one in the
                     // list), so undo stays correct even when annotations were re-edited or reordered.
                     if (entry.Annot is not null)
-                        pageList.Remove(entry.Annot);
+                        pageList.RemoveAll(annotation => annotation.HistoryId == entry.Annot.HistoryId);
                     else
                         pageList.RemoveAt(pageList.Count - 1);
                 }
                 ClearSelection();
                 RenderAllAnnotations(pageIdx);
-                MarkDirty(entry.WasDirty);
+                Host!.ReconcileHistoryDirty(this);
                 SetStatus(Loc("Str_St_UndidAnnotation"));
             }
             else if (entry.Kind == UndoKind.AnnotationGroup && entry.AnnotGroup is not null)
@@ -2795,10 +2812,11 @@ namespace KillerPDF.Controls
                 // so one Ctrl+Z cancels the whole edit.
                 int pageIdx = entry.PageIdx;
                 if (_annotations.TryGetValue(pageIdx, out var pageList))
-                    foreach (var a in entry.AnnotGroup) pageList.Remove(a);
+                    foreach (var a in entry.AnnotGroup)
+                        pageList.RemoveAll(annotation => annotation.HistoryId == a.HistoryId);
                 ClearSelection();
                 RenderAllAnnotations(pageIdx);
-                MarkDirty(entry.WasDirty);
+                Host!.ReconcileHistoryDirty(this);
                 SetStatus(Loc("Str_St_UndidTextEdit"));
             }
             else if (entry.Kind == UndoKind.StampBatch && entry.Pages is not null)
@@ -2812,7 +2830,7 @@ namespace KillerPDF.Controls
                 foreach (int p in entry.Pages)
                     if (_pages.ContainsKey(p))   // authoritative map: covers the primary tile in Grid/Two-Page too
                         RenderAllAnnotations(p);
-                MarkDirty(entry.WasDirty);
+                Host!.ReconcileHistoryDirty(this);
                 SetStatus(Loc("Str_St_RemovedStamps"));
             }
             else if (entry.Kind == UndoKind.ClearAnnotations && entry.AnnotSnapshot is not null)
@@ -2822,7 +2840,7 @@ namespace KillerPDF.Controls
                     _annotations[kv.Key] = [.. kv.Value];
                 ClearSelection();
                 RenderAnnotationsOnAllVisiblePages();
-                MarkDirty(entry.WasDirty);
+                Host!.ReconcileHistoryDirty(this);
                 SetStatus(Loc("Str_St_RestoredAnnotations"));
             }
             else if (entry.Kind == UndoKind.PageSnapshot && entry.AnnotSnapshot is not null)
@@ -2833,7 +2851,7 @@ namespace KillerPDF.Controls
                     _annotations[kv.Key] = [.. kv.Value];
                 ClearSelection();
                 RenderAnnotationsOnAllVisiblePages();
-                MarkDirty(entry.WasDirty);
+                Host!.ReconcileHistoryDirty(this);
                 SetStatus(Loc("Str_St_Undone"));
             }
             else // Document snapshot
@@ -2868,7 +2886,7 @@ namespace KillerPDF.Controls
                 _annotations.Clear();
                 if (entry.AnnotSnapshot is not null)
                     foreach (var pair in entry.AnnotSnapshot)
-                        _annotations[pair.Key] = [.. pair.Value.Select(CloneAnnotation)
+                        _annotations[pair.Key] = [.. pair.Value.Select(CloneHistoryAnnotation)
                             .Where(annotation => annotation is not null).Cast<PageAnnotation>()];
                 _pageRotations.Clear();
                 if (entry.PageRotations is not null)
@@ -2878,7 +2896,7 @@ namespace KillerPDF.Controls
                 _renderDims.Clear();
                 InvalidateRenderCache(_active);
                 ClearSelection();
-                MarkDirty(entry.WasDirty);
+                Host!.ReconcileHistoryDirty(this);
                 RefreshPageList();
                 LoadOutlines();   // #133: bookmark edits ride this undo path, and page-level undos can change the outline too
                 if (selectedIdx >= 0 && selectedIdx < _doc!.PageCount)
@@ -2915,6 +2933,9 @@ namespace KillerPDF.Controls
         private static long EstimateHistoryBytes(UndoEntry entry)
         {
             long bytes = entry.DocBytes?.LongLength ?? 0;
+            if (entry.StampSnapshot is { } stamp)
+                bytes += 1024L + 2L * ((stamp.Format?.Length ?? 0) + (stamp.WmText?.Length ?? 0)
+                    + (stamp.WmImagePath?.Length ?? 0));
             if (entry.AnnotSnapshot is not null)
                 bytes += entry.AnnotSnapshot.Values.Sum(list => (long)list.Count * 4096);
             if (entry.AnnotGroup is not null) bytes += (long)entry.AnnotGroup.Count * 4096;

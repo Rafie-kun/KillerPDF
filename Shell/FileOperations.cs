@@ -213,6 +213,7 @@ namespace KillerPDF
             _loadedRevision = imported ? null : Services.FileRevision.Capture(displayPath);
             _suggestedName = imported ? suggested ?? System.IO.Path.GetFileName(displayPath) : null;
             FileNameLabel.Text = _suggestedName ?? System.IO.Path.GetFileName(displayPath);
+            _docStampSpec = null;
             _annotations.Clear();
             _continuousLinks.Clear();   // drop the previous document's cached link rects
             CloseEngineDocumentSession();
@@ -237,7 +238,7 @@ namespace KillerPDF
             ActiveViewer.LoadMeasurements(openedMeasurements);
             Search.ClearPageResults();
             _gridScrollToPage = -1;
-            MarkDirty(false);
+            AcceptSavedCheckpoint();
             _openedFromProtected = false;   // #149: set true by the two protected-open paths after this returns
             // Restore this file's last page and zoom if we've seen it before. View mode is global:
             // the last mode selected with the footer controls becomes the default for every PDF.
@@ -1351,7 +1352,7 @@ namespace KillerPDF
                     _loadedRevision = Services.FileRevision.Capture(saveTarget);
                 }
 
-                MarkDirty(false);
+                AcceptSavedCheckpoint();
                 if (_openedFromProtected)
                 {
                     // #149: the file on disk no longer carries its password - say so instead of the
@@ -1517,7 +1518,7 @@ namespace KillerPDF
                     _originalFile = dlg.FileName;
                     _suggestedName = null;
                     FileNameLabel.Text = System.IO.Path.GetFileName(dlg.FileName);
-                    MarkDirty(false);
+                    AcceptSavedCheckpoint();
                     if (_openedFromProtected)
                     {
                         // #149: the saved copy is now this tab's file, and it has no password.
@@ -1548,7 +1549,7 @@ namespace KillerPDF
                     _originalFile = dlg.FileName;
                     _suggestedName = null;
                     FileNameLabel.Text = System.IO.Path.GetFileName(dlg.FileName);
-                    MarkDirty(false);
+                    AcceptSavedCheckpoint();
                     if (_openedFromProtected)
                     {
                         // #149: the saved copy is now this tab's file, and it has no password.
@@ -1586,7 +1587,7 @@ namespace KillerPDF
             _publishedFile = Services.PublishedFileStamp.Capture(outputPath);
             _loadedRevision = Services.FileRevision.Capture(outputPath);
             FileNameLabel.Text = System.IO.Path.GetFileName(outputPath);
-            MarkDirty(false);
+            AcceptSavedCheckpoint();
             SetStatus(string.Format(Loc("Str_St_SavedTo"), System.IO.Path.GetFileName(outputPath)));
         }
 
