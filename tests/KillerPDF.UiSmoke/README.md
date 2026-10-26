@@ -260,3 +260,16 @@ The Windows-only `--verify-print-color-probe` mode checks the same bitmap probes
 windows or loading the app. It rejects pale-blue edge pixels mistaken for cyan and independently
 removes each required preview signal. Redaction checks use the review appearance's ink and position;
 the annotation's IC entry describes its applied fill, which can have a different color.
+
+## Reference-repair completion notice
+
+On an owned UI VM, run `--verify-reference-repair-notice APP_DLL APP_XAML OUTPUT_DIRECTORY --startup-smoke`
+with a fresh output directory. The isolated English host clicks the real Protect button for pristine
+and damaged synthetic PDFs. Both outputs must reject an incorrect password, reopen with known live
+text, and leave their source bytes unchanged. The success modal must include its exact output path,
+omit the repair notice for pristine input, and include it for repaired input.
+
+Independent present and removed text controls validate the notice detector first. A dispatcher timer
+queues the Protect click so it can observe and dismiss the nested success modal. Retain the process
+receipt, both output streams, modal text and result file. This checks the native WPF workflow;
+keyboard, screen-reader and other-language acceptance remain separate.

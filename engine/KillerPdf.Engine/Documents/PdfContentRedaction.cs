@@ -163,8 +163,9 @@ public static partial class PdfContentRedaction
         var rasterPages = new HashSet<int>(approved.Where(byPage.ContainsKey));
         Dictionary<int, PdfRedactionRegion[]> covers = GroupCovers(regionList);
 
-        byte[] output;
-        try { output = Rewrite(document, tree, byPage, covers, rasterPages, options, cancellationToken); }
+        PdfDocumentWriteResult written;
+        IReadOnlyList<PdfReferenceRepair> preflightRepairs = [];
+        try { written = Rewrite(document, tree, byPage, covers, rasterPages, options, cancellationToken); }
         catch (Exception error) when (error is InvalidOperationException or FormatException
             or NotSupportedException)
         {
@@ -172,16 +173,23 @@ public static partial class PdfContentRedaction
             // Normalize the source with a full rewrite and redact that copy instead.
             PdfDocument source = document.IsEncrypted ? document
                 : PdfDocument.OpenWithCompatibilityRecovery(document.Source);
-            PdfDocument normalized = PdfDocument.Open(PdfDocumentWriter.Write(source, new PdfDocumentWriteOptions
+            PdfDocumentWriteResult normalizedWrite = PdfDocumentWriter.WriteWithReport(source, new PdfDocumentWriteOptions
             {
                 PruneUnreachableObjects = true,
                 AllowSignatureInvalidation = options.AllowSignatureInvalidation,
-                RemoveEncryption = options.RemoveEncryption
-            }));
-            output = Rewrite(normalized, PdfPageTree.Read(normalized), byPage, covers, rasterPages, options, cancellationToken);
+                RemoveEncryption = options.RemoveEncryption,
+                ReplaceDanglingReferences = true
+            });
+            preflightRepairs = normalizedWrite.ReferenceRepairs;
+            PdfDocument normalized = PdfDocument.Open(normalizedWrite.Data);
+            written = Rewrite(normalized, PdfPageTree.Read(normalized), byPage, covers, rasterPages, options, cancellationToken);
         }
+        byte[] output = written.Bytes;
         PdfRedactionVerificationReport verification = Verify(output, regionList, rasterPages,
-            options.ProhibitedText, options.ClearDocumentMetadata, cancellationToken);
+            options.ProhibitedText, options.ClearDocumentMetadata, cancellationToken) with
+        {
+            ReferenceRepairs = Array.AsReadOnly(preflightRepairs.Concat(written.ReferenceRepairs).ToArray())
+        };
         if (!verification.Succeeded) throw new PdfRedactionVerificationException(verification);
         return new PdfContentRedactionResult(output, plan, verification);
     }
@@ -236,7 +244,7 @@ public static partial class PdfContentRedaction
         return changed ? update.Build() : null;
     }
 
-    private static byte[] Rewrite(PdfDocument document, PdfPageTree tree,
+    private static PdfDocumentWriteResult Rewrite(PdfDocument document, PdfPageTree tree,
         Dictionary<int, PdfContentBounds[]> byPage, Dictionary<int, PdfRedactionRegion[]> covers,
         HashSet<int> rasterPages, PdfContentRedactionOptions options, CancellationToken cancellationToken)
     {
@@ -319,9 +327,10 @@ public static partial class PdfContentRedaction
             update.ReplaceObject(tree.CatalogReference.ObjectNumber, new PdfDictionary(catalogEntries));
 
         PdfDocument edited = PdfDocument.Open(update.Build());
-        byte[] output = PdfDocumentWriter.Write(edited, new PdfDocumentWriteOptions
+        PdfDocumentWriteResult output = PdfDocumentWriter.WriteWithReport(edited, new PdfDocumentWriteOptions
         {
             PruneUnreachableObjects = true,
+            ReplaceDanglingReferences = true,
             AllowSignatureInvalidation = options.AllowSignatureInvalidation,
             RemoveEncryption = options.RemoveEncryption,
             MetadataPolicy = options.ClearDocumentMetadata
@@ -329,7 +338,7 @@ public static partial class PdfContentRedaction
             PreserveDocumentIdentifiers = !options.ClearDocumentMetadata,
             CompressUnfilteredStreams = true
         });
-        VerifyRetiredStreams(PdfDocument.Open(output), retiredStreams, cancellationToken);
+        VerifyRetiredStreams(PdfDocument.Open(output.Data), retiredStreams, cancellationToken);
         return output;
     }
 

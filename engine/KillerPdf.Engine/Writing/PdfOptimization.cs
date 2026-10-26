@@ -51,6 +51,8 @@ public enum PdfOptimizationChangeKind
 /// <summary>Explicit lossless optimization and sanitization choices.</summary>
 public sealed record PdfOptimizationOptions
 {
+    /// <summary>Gets whether source-null references may be repaired with reported locations.</summary>
+    public bool ReplaceDanglingReferences { get; init; }
     /// <summary>Gets whether previewed nonvisual structural repairs are applied.</summary>
     public bool RepairHarmlessArtifacts { get; init; }
     /// <summary>Gets whether descriptive document information and XMP are removed.</summary>
@@ -126,11 +128,14 @@ public sealed partial record PdfOptimizationResult(ReadOnlyMemory<byte> Data, in
     /// <summary>Gets the structural repairs applied before optimization.</summary>
     public IReadOnlyList<PdfSaveRepairChange> Repairs { get; init; } = [];
 
+    /// <summary>Gets reference replacements applied before or during optimization.</summary>
+    public IReadOnlyList<PdfReferenceRepair> ReferenceRepairs { get; init; } = [];
+
     /// <summary>Serializes measured results without embedding the output PDF bytes.</summary>
     public string ToJson(bool indented = false) => JsonSerializer.Serialize(
         new ReportFile(OriginalSize, OutputSize, SizeDifference,
             OriginalObjectCount, OutputObjectCount, ObjectCountDifference,
-            Changes, VerifiedRemovals, Repairs),
+            Changes, VerifiedRemovals, Repairs, ReferenceRepairs),
         indented ? IndentedJson.ReportFile : CompactJson.ReportFile);
 
     private sealed record ReportFile(
@@ -138,7 +143,8 @@ public sealed partial record PdfOptimizationResult(ReadOnlyMemory<byte> Data, in
         int OriginalObjectCount, int OutputObjectCount, int ObjectCountDifference,
         IReadOnlyList<PdfOptimizationChangeKind> Changes,
         IReadOnlyList<PdfOptimizationChangeKind> VerifiedRemovals,
-        IReadOnlyList<PdfSaveRepairChange> Repairs);
+        IReadOnlyList<PdfSaveRepairChange> Repairs,
+        IReadOnlyList<PdfReferenceRepair> ReferenceRepairs);
 
     private static JsonSerializerOptions JsonOptions(bool indented) => new()
     {
@@ -147,7 +153,9 @@ public sealed partial record PdfOptimizationResult(ReadOnlyMemory<byte> Data, in
         Converters =
         {
             new JsonStringEnumConverter<PdfOptimizationChangeKind>(JsonNamingPolicy.CamelCase),
-            new JsonStringEnumConverter<PdfSaveRepairKind>(JsonNamingPolicy.CamelCase)
+            new JsonStringEnumConverter<PdfSaveRepairKind>(JsonNamingPolicy.CamelCase),
+            new JsonStringEnumConverter<PdfReferenceRepairReason>(JsonNamingPolicy.CamelCase),
+            new JsonStringEnumConverter<PdfReferenceRepairAction>(JsonNamingPolicy.CamelCase)
         }
     };
 
@@ -170,7 +178,20 @@ public sealed partial record PdfOptimizationResult(ReadOnlyMemory<byte> Data, in
         AppendList(output, "Changes", Changes);
         AppendList(output, "Verified removals", VerifiedRemovals);
         AppendList(output, "Repairs", Repairs.Select(repair => repair.Kind));
+        AppendReferenceRepairs(output, ReferenceRepairs);
         return output.ToString().TrimEnd();
+    }
+
+    internal static void AppendReferenceRepairs(StringBuilder output, IReadOnlyList<PdfReferenceRepair> repairs)
+    {
+        output.Append("Reference repairs: ").AppendLine(repairs.Count.ToString(CultureInfo.InvariantCulture));
+        foreach (PdfReferenceRepair repair in repairs)
+        {
+            string owner = repair.OwnerObjectNumber is int number
+                ? FormattableString.Invariant($"object {number} {repair.OwnerGeneration}") : "trailer";
+            output.AppendLine(FormattableString.Invariant(
+                $"{owner} {repair.Path}: {repair.TargetObjectNumber} {repair.TargetGeneration}, {repair.Reason}, {repair.Action}"));
+        }
     }
 
     private static void AppendList<T>(StringBuilder output, string label, IEnumerable<T> values)
@@ -188,6 +209,8 @@ public sealed partial class PdfOptimizationPlan
     private static readonly PdfOptimizationPlanJsonContext IndentedJson = new(JsonOptions(true));
 
     private readonly PdfDocument _document;
+    private readonly PdfDocument _originalDocument;
+    private readonly PdfReferenceRepair[] _referenceRepairs;
     private readonly PdfOptimizationOptions _options;
     private readonly string[] _attachmentNames;
     private readonly string[] _formFieldNames;
@@ -207,9 +230,13 @@ public sealed partial class PdfOptimizationPlan
         IEnumerable<string> hiddenOptionalContentGroupNames,
         IEnumerable<PdfSaveRepairChange> repairs, int commentCount,
         IEnumerable<int> unreachableObjectNumbers,
-        IEnumerable<int> compressedStreamObjectNumbers)
+        IEnumerable<int> compressedStreamObjectNumbers,
+        PdfDocument? originalDocument = null,
+        IEnumerable<PdfReferenceRepair>? referenceRepairs = null)
     {
         _document = document;
+        _originalDocument = originalDocument ?? document;
+        _referenceRepairs = referenceRepairs?.ToArray() ?? [];
         _options = options;
         _attachmentNames = [.. attachmentNames];
         _formFieldNames = [.. formFieldNames];
@@ -225,7 +252,7 @@ public sealed partial class PdfOptimizationPlan
     }
 
     /// <summary>Gets the original byte count.</summary>
-    public int OriginalSize => _document.Source.Length;
+    public int OriginalSize => _originalDocument.Source.Length;
     /// <summary>Gets every material change in application order.</summary>
     public IReadOnlyList<PdfOptimizationChangeKind> Changes { get; }
     /// <summary>Gets embedded-file names that the plan will remove.</summary>
@@ -253,12 +280,15 @@ public sealed partial class PdfOptimizationPlan
     /// <summary>Gets structural repairs that the plan will apply.</summary>
     public IReadOnlyList<PdfSaveRepairChange> Repairs => Array.AsReadOnly(_repairs);
 
+    /// <summary>Gets source-null references the plan will repair.</summary>
+    public IReadOnlyList<PdfReferenceRepair> ReferenceRepairs => Array.AsReadOnly(_referenceRepairs);
+
     /// <summary>Serializes the complete preview without changing the document.</summary>
     public string ToJson(bool indented = false) => JsonSerializer.Serialize(
         new ReportFile(OriginalSize, Changes, AttachmentNames, FormFieldNames,
             CommentCount, ResourcePageIndexes, ThumbnailPageIndexes,
             UnreachableObjectNumbers, CompressedStreamObjectNumbers,
-            OptionalContentGroupNames, HiddenOptionalContentGroupNames, Repairs),
+            OptionalContentGroupNames, HiddenOptionalContentGroupNames, Repairs, ReferenceRepairs),
         indented ? IndentedJson.ReportFile : CompactJson.ReportFile);
 
     private sealed record ReportFile(
@@ -273,7 +303,8 @@ public sealed partial class PdfOptimizationPlan
         IReadOnlyList<int> CompressedStreamObjectNumbers,
         IReadOnlyList<string> OptionalContentGroupNames,
         IReadOnlyList<string> HiddenOptionalContentGroupNames,
-        IReadOnlyList<PdfSaveRepairChange> Repairs);
+        IReadOnlyList<PdfSaveRepairChange> Repairs,
+        IReadOnlyList<PdfReferenceRepair> ReferenceRepairs);
 
     private static JsonSerializerOptions JsonOptions(bool indented) => new()
     {
@@ -282,7 +313,9 @@ public sealed partial class PdfOptimizationPlan
         Converters =
         {
             new JsonStringEnumConverter<PdfOptimizationChangeKind>(JsonNamingPolicy.CamelCase),
-            new JsonStringEnumConverter<PdfSaveRepairKind>(JsonNamingPolicy.CamelCase)
+            new JsonStringEnumConverter<PdfSaveRepairKind>(JsonNamingPolicy.CamelCase),
+            new JsonStringEnumConverter<PdfReferenceRepairReason>(JsonNamingPolicy.CamelCase),
+            new JsonStringEnumConverter<PdfReferenceRepairAction>(JsonNamingPolicy.CamelCase)
         }
     };
 
@@ -313,6 +346,7 @@ public sealed partial class PdfOptimizationPlan
             ? "none" : string.Join(", ", _optionalContentGroupNames));
         output.Append("Hidden layers removed: ").AppendLine(_hiddenOptionalContentGroupNames.Length == 0
             ? "none" : string.Join(", ", _hiddenOptionalContentGroupNames));
+        PdfOptimizationResult.AppendReferenceRepairs(output, ReferenceRepairs);
         return output.ToString().TrimEnd();
     }
 
@@ -339,7 +373,7 @@ public sealed partial class PdfOptimizationPlan
         source = ApplySelectiveSanitization(source);
         if (Changes.Contains(PdfOptimizationChangeKind.RemoveDocumentJavaScript))
             source = PdfOptimizer.RemoveJavaScriptActions(source);
-        byte[] output = PdfDocumentWriter.Write(source, new PdfDocumentWriteOptions
+        PdfDocumentWriteResult written = PdfDocumentWriter.WriteWithReport(source, new PdfDocumentWriteOptions
         {
             MetadataPolicy = _options.RemoveMetadata
                 ? PdfMetadataPolicy.RemoveDocumentInformationAndXmp : PdfMetadataPolicy.Preserve,
@@ -350,8 +384,10 @@ public sealed partial class PdfOptimizationPlan
             PruneUnreachableObjects = _options.PruneUnreachableObjects,
             CompressUnfilteredStreams = _options.CompressUnfilteredStreams,
             DeduplicatePageResources = _options.PruneUnusedPageResources,
-            AllowSignatureInvalidation = _options.AllowSignatureInvalidation
+            AllowSignatureInvalidation = _options.AllowSignatureInvalidation,
+            ReplaceDanglingReferences = _options.ReplaceDanglingReferences
         });
+        byte[] output = written.Bytes;
         PdfDocument reopened = PdfDocument.Open(output);
         if (PdfPageTree.Read(reopened).Pages.Count != pageCount)
             throw new InvalidOperationException("The optimized document did not preserve its page count.");
@@ -362,7 +398,8 @@ public sealed partial class PdfOptimizationPlan
         {
             VerifiedRemovals = verified,
             Repairs = Array.AsReadOnly(_repairs),
-            OriginalObjectCount = ActiveObjectCount(_document),
+            ReferenceRepairs = Array.AsReadOnly(_referenceRepairs.Concat(written.ReferenceRepairs).ToArray()),
+            OriginalObjectCount = ActiveObjectCount(_originalDocument),
             OutputObjectCount = ActiveObjectCount(reopened)
         };
     }
@@ -527,6 +564,21 @@ public static class PdfOptimizer
     {
         ArgumentNullException.ThrowIfNull(document);
         options ??= new PdfOptimizationOptions();
+        PdfDocument original = document;
+        IReadOnlyList<PdfReferenceRepair> referenceRepairs = [];
+        if (options.ReplaceDanglingReferences && PdfDocumentWriter.FindReferenceRepairs(document).Count > 0)
+        {
+            if (document.IsEncrypted)
+                throw new NotSupportedException("Repairing references before optimization requires a decrypted working copy.");
+            PdfDocumentWriteResult normalized = PdfDocumentWriter.WriteWithReport(document,
+                new PdfDocumentWriteOptions
+                {
+                    ReplaceDanglingReferences = true,
+                    AllowSignatureInvalidation = options.AllowSignatureInvalidation
+                });
+            referenceRepairs = normalized.ReferenceRepairs;
+            document = PdfDocument.Open(normalized.Data);
+        }
         var changes = new List<PdfOptimizationChangeKind> { PdfOptimizationChangeKind.ConsolidateRevisions };
         PdfSaveRepairChange[] repairs = options.RepairHarmlessArtifacts
             ? [.. PdfSaveSanitizer.CreateRepairPlan(document).Changes] : [];
@@ -598,7 +650,7 @@ public static class PdfOptimizer
             optionalContentGroups.Where(group => !group.IsInitiallyVisible)
                 .Select(group => group.Name),
             repairs, comments.Length, unreachableObjectNumbers,
-            compressedStreamObjectNumbers);
+            compressedStreamObjectNumbers, original, referenceRepairs);
     }
 
     internal static IReadOnlyList<int> UnusedResourcePages(PdfDocument document)

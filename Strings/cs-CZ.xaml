@@ -245,6 +245,7 @@ Stránku lze nahradit jejím obrázkem se začerněnými označenými oblastmi. 
     <sys:String x:Key="Str_Restricted_OwnerRequired">Soubor „{0}“ omezuje úpravy, proto KillerPDF k jeho otevření potřebuje heslo vlastníka.</sys:String>
     <sys:String x:Key="Str_OpenedReadOnlyXRef">Otevřeno {0} (jen pro čtení - nestandardní tabulka XRef) - stránek: {1}</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">Otevřeno {0} (opravená kopie - změny zachováte uložením) - stránek: {1}</sys:String>
+    <sys:String x:Key="Str_Save_ReferenceRepairs">Uloženo s opravami neplatných referencí. Chybějící obsah nebyl obnoven.</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">Otevřeno {0} (rastrová oprava - změny zachováte uložením) - stránek: {1}</sys:String>
     <sys:String x:Key="Str_PageOf">Stránka {0} z {1}</sys:String>
     <sys:String x:Key="Str_PageOfLinks">Stránka {0} z {1}  (odkazů: {2})</sys:String>

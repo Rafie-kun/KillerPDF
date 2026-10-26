@@ -245,6 +245,7 @@ Có thể thay trang bằng hình ảnh của chính nó với các vùng đã �
     <sys:String x:Key="Str_Restricted_OwnerRequired">“{0}” hạn chế chỉnh sửa, nên KillerPDF cần mật khẩu chủ sở hữu để mở.</sys:String>
     <sys:String x:Key="Str_OpenedReadOnlyXRef">Đã mở {0} (chỉ đọc - bảng XRef không chuẩn) - {1} trang</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">Đã mở {0} (bản sao đã sửa chữa - hãy lưu lại để giữ các thay đổi) - {1} trang</sys:String>
+    <sys:String x:Key="Str_Save_ReferenceRepairs">Đã lưu sau khi sửa các tham chiếu bị hỏng. Nội dung bị thiếu không được khôi phục.</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">Đã mở {0} (đã sửa bằng cách rasterize - hãy lưu lại để giữ các thay đổi) - {1} trang</sys:String>
     <sys:String x:Key="Str_PageOf">Trang {0} / {1}</sys:String>
     <sys:String x:Key="Str_PageOfLinks">Trang {0} / {1}  ({2} liên kết)</sys:String>

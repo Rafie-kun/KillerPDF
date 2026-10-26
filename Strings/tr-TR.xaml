@@ -228,6 +228,7 @@ Sayfa, işaretli alanları karartılmış kendi görüntüsüyle değiştirilebi
     <sys:String x:Key="Str_Restricted_OwnerRequired">“{0}” düzenlemeyi kısıtlıyor, bu yüzden KillerPDF’nin açmak için sahip parolasına ihtiyacı var.</sys:String>
     <sys:String x:Key="Str_OpenedReadOnlyXRef">Açıldı {0} (salt okunur - standart dışı XRef tablosu) - {1} sayfa</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">Açıldı {0} (onarılmış kopya - değişiklikleri korumak için kaydedin) - {1} sayfa</sys:String>
+    <sys:String x:Key="Str_Save_ReferenceRepairs">Bozuk başvurular onarılarak kaydedildi. Eksik içerik kurtarılmadı.</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">Açıldı {0} (rasterize edilerek onarıldı - değişiklikleri korumak için kaydedin) - {1} sayfa</sys:String>
     <sys:String x:Key="Str_PageOf">Sayfa {0} / {1}</sys:String>
     <sys:String x:Key="Str_PageOfLinks">Sayfa {0} / {1}  ({2} bağlantı)</sys:String>

@@ -228,6 +228,7 @@
     <sys:String x:Key="Str_Restricted_OwnerRequired">“{0}” সম্পাদনা সীমিত করে, তাই এটি খুলতে KillerPDF-এর মালিকের পাসওয়ার্ড প্রয়োজন।</sys:String>
     <sys:String x:Key="Str_OpenedReadOnlyXRef">{0} খোলা হয়েছে (শুধুমাত্র পঠনযোগ্য - অ-মানক XRef টেবিল) - {1} পৃষ্ঠা</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">{0} খোলা হয়েছে (মেরামত করা কপি - পরিবর্তন রাখতে সংরক্ষণ করুন) - {1} পৃষ্ঠা</sys:String>
+    <sys:String x:Key="Str_Save_ReferenceRepairs">অকার্যকর রেফারেন্স মেরামত করে সংরক্ষণ করা হয়েছে। অনুপস্থিত বিষয়বস্তু পুনরুদ্ধার করা হয়নি।</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">{0} খোলা হয়েছে (রাস্টারাইজড মেরামত - পরিবর্তন রাখতে সংরক্ষণ করুন) - {1} পৃষ্ঠা</sys:String>
     <sys:String x:Key="Str_PageOf">{1}-এর মধ্যে {0} পৃষ্ঠা</sys:String>
     <sys:String x:Key="Str_PageOfLinks">{1}-এর মধ্যে {0} পৃষ্ঠা  ({2}টি লিংক)</sys:String>

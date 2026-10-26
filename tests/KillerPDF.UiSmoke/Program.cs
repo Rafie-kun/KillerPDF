@@ -63,6 +63,8 @@ internal static class Program
                 return TableExportSmoke.Run(Path.GetFullPath(args[1]), Path.GetFullPath(args[2]), Path.GetFullPath(args[3]), toolbarAvailability: true);
             if (args.Length == 5 && (args[0] is "--verify-render-recovery" or "--verify-pending-text-recovery") && args[4] == "--startup-smoke")
                 return TableExportSmoke.Run(Path.GetFullPath(args[1]), Path.GetFullPath(args[2]), Path.GetFullPath(args[3]), renderRecovery: true);
+            if (args.Length == 5 && args[0] == "--verify-reference-repair-notice" && args[4] == "--startup-smoke")
+                return TableExportSmoke.Run(Path.GetFullPath(args[1]), Path.GetFullPath(args[2]), Path.GetFullPath(args[3]), referenceRepairNotice: true);
             if (args.Length == 5 && args[0] == "--verify-signed-copy" && args[4] == "--startup-smoke")
                 return TableExportSmoke.Run(Path.GetFullPath(args[1]), Path.GetFullPath(args[2]), Path.GetFullPath(args[3]), signedCopy: true);
             if (args.Length == 5 && args[0] == "--verify-guided-tasks" && args[4] == "--startup-smoke")

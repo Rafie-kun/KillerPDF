@@ -44,18 +44,33 @@ public sealed partial record PdfRedactionVerificationReport(IReadOnlyList<PdfRed
     /// <summary>Gets whether the output passed every redaction safety check.</summary>
     public bool Succeeded => Findings.Count == 0;
 
+    private IReadOnlyList<PdfReferenceRepair> referenceRepairs = [];
+    /// <summary>Gets source-null references repaired while producing the verified output.</summary>
+    public IReadOnlyList<PdfReferenceRepair> ReferenceRepairs
+    {
+        get => referenceRepairs;
+        init => referenceRepairs = Array.AsReadOnly(value.ToArray());
+    }
+
     /// <summary>Exports the verification result as stable machine-readable JSON.</summary>
     public string ToJson(bool indented = false)
-        => JsonSerializer.Serialize(new ReportFile(1, Succeeded, Findings),
+        => JsonSerializer.Serialize(new ReportFile(1, Succeeded, Findings,
+            PdfRedactionRepairDetail.From(ReferenceRepairs)),
             indented ? IndentedJson.ReportFile : CompactJson.ReportFile);
 
     private sealed record ReportFile(
-        int Version, bool Succeeded, IReadOnlyList<PdfRedactionVerificationFinding> Findings);
+        int Version, bool Succeeded, IReadOnlyList<PdfRedactionVerificationFinding> Findings,
+        IReadOnlyList<PdfRedactionRepairDetail> ReferenceRepairs);
 
     private static JsonSerializerOptions JsonOptions(bool indented) => new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        WriteIndented = indented
+        WriteIndented = indented,
+        Converters =
+        {
+            new JsonStringEnumConverter<PdfReferenceRepairReason>(JsonNamingPolicy.CamelCase),
+            new JsonStringEnumConverter<PdfReferenceRepairAction>(JsonNamingPolicy.CamelCase)
+        }
     };
 
     [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
@@ -68,7 +83,7 @@ public sealed partial record PdfRedactionVerificationReport(IReadOnlyList<PdfRed
         var output = new StringBuilder()
             .Append("Redaction verification: ")
             .AppendLine(Succeeded ? "Passed" : "Failed");
-        if (Findings.Count == 0) return output.AppendLine("No findings.").ToString();
+        if (Findings.Count == 0) output.AppendLine("No findings.");
         foreach (PdfRedactionVerificationFinding finding in Findings)
         {
             output.Append(finding.Code);
@@ -78,8 +93,25 @@ public sealed partial record PdfRedactionVerificationReport(IReadOnlyList<PdfRed
                 output.Append(" | Object ").Append(objectNumber);
             output.Append(": ").AppendLine(finding.Message);
         }
+        foreach (PdfReferenceRepair repair in ReferenceRepairs)
+            output.Append("Reference repair | Owner ").Append(repair.OwnerObjectNumber?.ToString() ?? "Trailer")
+                .Append(" | Generation ").Append(repair.OwnerGeneration?.ToString() ?? "None")
+                .Append(" | Target ").Append(repair.TargetObjectNumber).Append(' ')
+                .Append(repair.TargetGeneration).Append(" | ").Append(repair.Reason)
+                .Append(" | ").AppendLine(repair.Action.ToString());
         return output.ToString();
     }
+}
+
+// Container paths can contain sensitive dictionary keys, so reports export identities only.
+internal sealed record PdfRedactionRepairDetail(int? OwnerObjectNumber, int? OwnerGeneration,
+    int TargetObjectNumber, int TargetGeneration, PdfReferenceRepairReason Reason,
+    PdfReferenceRepairAction Action)
+{
+    internal static IReadOnlyList<PdfRedactionRepairDetail> From(IReadOnlyList<PdfReferenceRepair> repairs)
+        => Array.AsReadOnly(repairs.Select(repair => new PdfRedactionRepairDetail(
+            repair.OwnerObjectNumber, repair.OwnerGeneration, repair.TargetObjectNumber,
+            repair.TargetGeneration, repair.Reason, repair.Action)).ToArray());
 }
 
 /// <summary>One named set of fully sanitized raster pages for isolated batch rebuilding.</summary>
@@ -104,19 +136,33 @@ public sealed partial record PdfCommentRedactionResult(
     private static readonly PdfCommentRedactionJsonContext CompactJson = new(JsonOptions(false));
     private static readonly PdfCommentRedactionJsonContext IndentedJson = new(JsonOptions(true));
 
+    private IReadOnlyList<PdfReferenceRepair> referenceRepairs = [];
+    /// <summary>Gets source-null references repaired while removing the selected comments.</summary>
+    public IReadOnlyList<PdfReferenceRepair> ReferenceRepairs
+    {
+        get => referenceRepairs;
+        init => referenceRepairs = Array.AsReadOnly(value.ToArray());
+    }
+
     /// <summary>Exports a data-safe result without document bytes or comment text.</summary>
     public string ToJson(bool indented = false) => JsonSerializer.Serialize(
-        new ReportFile(1, RemovedIds.Count, RemovedIds, RemainingComments),
+        new ReportFile(1, RemovedIds.Count, RemovedIds, RemainingComments,
+            PdfRedactionRepairDetail.From(ReferenceRepairs)),
         indented ? IndentedJson.ReportFile : CompactJson.ReportFile);
 
     private sealed record ReportFile(
         int Version, int RemovedCount, IReadOnlyList<string> RemovedIds,
-        int RemainingComments);
+        int RemainingComments, IReadOnlyList<PdfRedactionRepairDetail> ReferenceRepairs);
 
     private static JsonSerializerOptions JsonOptions(bool indented) => new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        WriteIndented = indented
+        WriteIndented = indented,
+        Converters =
+        {
+            new JsonStringEnumConverter<PdfReferenceRepairReason>(JsonNamingPolicy.CamelCase),
+            new JsonStringEnumConverter<PdfReferenceRepairAction>(JsonNamingPolicy.CamelCase)
+        }
     };
 
     [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
@@ -132,19 +178,34 @@ public sealed partial record PdfAttachmentRedactionResult(
     private static readonly PdfAttachmentRedactionJsonContext CompactJson = new(JsonOptions(false));
     private static readonly PdfAttachmentRedactionJsonContext IndentedJson = new(JsonOptions(true));
 
+    private IReadOnlyList<PdfReferenceRepair> referenceRepairs = [];
+    /// <summary>Gets source-null references repaired while removing the selected attachments.</summary>
+    public IReadOnlyList<PdfReferenceRepair> ReferenceRepairs
+    {
+        get => referenceRepairs;
+        init => referenceRepairs = Array.AsReadOnly(value.ToArray());
+    }
+
     /// <summary>Exports a data-safe result without document bytes or attachment payloads.</summary>
     public string ToJson(bool indented = false) => JsonSerializer.Serialize(
-        new ReportFile(1, RemovedIds.Count, RemovedIds, RemainingAttachmentNames),
+        new ReportFile(1, RemovedIds.Count, RemovedIds, RemainingAttachmentNames,
+            PdfRedactionRepairDetail.From(ReferenceRepairs)),
         indented ? IndentedJson.ReportFile : CompactJson.ReportFile);
 
     private sealed record ReportFile(
         int Version, int RemovedCount, IReadOnlyList<string> RemovedIds,
-        IReadOnlyList<string> RemainingAttachmentNames);
+        IReadOnlyList<string> RemainingAttachmentNames,
+        IReadOnlyList<PdfRedactionRepairDetail> ReferenceRepairs);
 
     private static JsonSerializerOptions JsonOptions(bool indented) => new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        WriteIndented = indented
+        WriteIndented = indented,
+        Converters =
+        {
+            new JsonStringEnumConverter<PdfReferenceRepairReason>(JsonNamingPolicy.CamelCase),
+            new JsonStringEnumConverter<PdfReferenceRepairAction>(JsonNamingPolicy.CamelCase)
+        }
     };
 
     [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
@@ -206,15 +267,19 @@ public static class PdfPermanentRedaction
             return new PdfAttachmentRedactionResult(document.Source, [],
                 Array.AsReadOnly(current.Select(item => item.FileName).ToArray()));
 
-        var editor = new PdfIncrementalPageEditor(document);
+        (PdfDocument editingSource, IReadOnlyList<PdfReferenceRepair> preflightRepairs) =
+            PrepareRemoval(document, allowSignatureInvalidation);
+        var editor = new PdfIncrementalPageEditor(editingSource);
         foreach (var (Match, Attachment) in targets)
             editor.RemoveAttachment(Attachment.FileName);
-        byte[] output = PdfDocumentWriter.Write(PdfDocument.Open(editor.Build()),
+        PdfDocumentWriteResult written = PdfDocumentWriter.WriteWithReport(PdfDocument.Open(editor.Build()),
             new PdfDocumentWriteOptions
             {
                 PruneUnreachableObjects = true,
+                ReplaceDanglingReferences = true,
                 AllowSignatureInvalidation = allowSignatureInvalidation
             });
+        byte[] output = written.Bytes;
         PdfDocument reopened = PdfDocument.Open(output);
         string[] remaining = [.. PdfAttachmentReader.Read(reopened)
             .Select(item => item.FileName)];
@@ -226,7 +291,10 @@ public static class PdfPermanentRedaction
                 "The saved document did not preserve the reviewed attachment-removal result.");
         return new PdfAttachmentRedactionResult(output,
             Array.AsReadOnly(selected.Select(match => match.Id).ToArray()),
-            Array.AsReadOnly(remaining));
+            Array.AsReadOnly(remaining))
+        {
+            ReferenceRepairs = Array.AsReadOnly(preflightRepairs.Concat(written.ReferenceRepairs).ToArray())
+        };
 
         static bool TryAttachmentIndex(string id, out int index)
         {
@@ -269,17 +337,21 @@ public static class PdfPermanentRedaction
             targets.Add((match, comment));
         }
 
-        var editor = new PdfIncrementalAnnotationEditor(document);
+        (PdfDocument editingSource, IReadOnlyList<PdfReferenceRepair> preflightRepairs) =
+            PrepareRemoval(document, allowSignatureInvalidation);
+        var editor = new PdfIncrementalAnnotationEditor(editingSource);
         foreach (var (Match, Comment) in targets.OrderByDescending(item => item.Comment.PageIndex)
                      .ThenByDescending(item => item.Comment.AnnotationIndex))
             editor.RemoveAnnotationAt(
                 Comment.PageIndex, Comment.AnnotationIndex);
         PdfDocument edited = PdfDocument.Open(editor.Build());
-        byte[] output = PdfDocumentWriter.Write(edited, new PdfDocumentWriteOptions
+        PdfDocumentWriteResult written = PdfDocumentWriter.WriteWithReport(edited, new PdfDocumentWriteOptions
         {
             PruneUnreachableObjects = true,
+            ReplaceDanglingReferences = true,
             AllowSignatureInvalidation = allowSignatureInvalidation
         });
+        byte[] output = written.Bytes;
         PdfDocument reopened = PdfDocument.Open(output);
         PdfCommentInfo[] remaining = [.. PdfCommentReader.Read(reopened)];
         string[] expected = [.. current.Except(targets.Select(item => item.Comment))
@@ -291,7 +363,26 @@ public static class PdfPermanentRedaction
             throw new InvalidOperationException(
                 "The saved document did not preserve the reviewed comment-removal result.");
         return new PdfCommentRedactionResult(output,
-            Array.AsReadOnly(selected.Select(match => match.Id).ToArray()), remaining.Length);
+            Array.AsReadOnly(selected.Select(match => match.Id).ToArray()), remaining.Length)
+        {
+            ReferenceRepairs = Array.AsReadOnly(preflightRepairs.Concat(written.ReferenceRepairs).ToArray())
+        };
+    }
+
+    private static (PdfDocument Document, IReadOnlyList<PdfReferenceRepair> Repairs) PrepareRemoval(
+        PdfDocument document, bool allowSignatureInvalidation)
+    {
+        if (PdfDocumentWriter.FindReferenceRepairs(document).Count == 0) return (document, []);
+        if (document.IsEncrypted)
+            throw new NotSupportedException(
+                "Repairing an encrypted document before reviewed removal requires reopening it with credentials. Encryption was not removed.");
+        PdfDocumentWriteResult normalized = PdfDocumentWriter.WriteWithReport(document,
+            new PdfDocumentWriteOptions
+            {
+                ReplaceDanglingReferences = true,
+                AllowSignatureInvalidation = allowSignatureInvalidation
+            });
+        return (PdfDocument.Open(normalized.Data), normalized.ReferenceRepairs);
     }
 
     /// <summary>Builds a new PDF without copying any object or revision from the source document.</summary>

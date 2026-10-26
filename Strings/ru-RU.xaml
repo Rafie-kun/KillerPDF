@@ -245,6 +245,7 @@
     <sys:String x:Key="Str_Restricted_OwnerRequired">«{0}» ограничивает редактирование, поэтому KillerPDF нужен пароль владельца, чтобы открыть его.</sys:String>
     <sys:String x:Key="Str_OpenedReadOnlyXRef">Открыто {0} (только-для-чтения - не-стандартная XRef таблица) - {1} страница(ы)</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">Открыто {0} (восстановленная копия - сохраните, чтобы сохранить изменения) - {1} страница(ы)</sys:String>
+    <sys:String x:Key="Str_Save_ReferenceRepairs">Сохранено с исправлением некорректных ссылок на объекты. Отсутствующее содержимое не восстановлено.</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">Открыто {0} (растрированный ремонт - сохранить, чтобы сохранить изменения) - {1} страница(ы)</sys:String>
     <sys:String x:Key="Str_PageOf">Страница {0} из {1}</sys:String>
     <sys:String x:Key="Str_PageOfLinks">Страница {0} из {1}  ({2} ссылка(и))</sys:String>

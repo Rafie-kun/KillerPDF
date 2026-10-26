@@ -245,6 +245,7 @@ The page can be replaced with an image of itself with the marked areas blacked o
     <sys:String x:Key="Str_Restricted_OwnerRequired">“{0}” restricts editing, so KillerPDF needs its owner password to open it.</sys:String>
     <sys:String x:Key="Str_OpenedReadOnlyXRef">Opened {0} read-only because of a non-standard XRef table ({1} page(s))</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">Opened a repaired copy of {0}; save to keep changes ({1} page(s))</sys:String>
+    <sys:String x:Key="Str_Save_ReferenceRepairs">Saved with repairs to broken references. Missing content was not recovered.</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">Opened a rasterized repair of {0}; save to keep changes ({1} page(s))</sys:String>
     <sys:String x:Key="Str_PageOf">Page {0} of {1}</sys:String>
     <sys:String x:Key="Str_PageOfLinks">Page {0} of {1}  ({2} link(s))</sys:String>

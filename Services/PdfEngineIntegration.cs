@@ -1026,25 +1026,29 @@ internal static class PdfEngineIntegration
     }
 
     /// <summary>Writes a copy of an unencrypted PDF protected with Standard Security passwords.</summary>
-    internal static void ProtectWithPasswords(string sourcePath, string destinationPath,
+    internal static IReadOnlyList<PdfReferenceRepair> ProtectWithPasswords(string sourcePath, string destinationPath,
         KillerPdf.Engine.Security.PdfPasswordEncryptionOptions options, bool allowSignatureInvalidation)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(sourcePath);
         ArgumentException.ThrowIfNullOrWhiteSpace(destinationPath);
         PdfDocument document = PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(sourcePath));
-        ReplaceWithBuiltResult(destinationPath, PdfDocumentEncryptionWriter.EncryptWithPasswords(
-            document, options, allowSignatureInvalidation));
+        PdfDocumentWriteResult result = PdfDocumentEncryptionWriter.EncryptWithPasswordsWithReport(
+            document, options, allowSignatureInvalidation, replaceDanglingReferences: true);
+        AtomicFileOutput.Write(destinationPath, result.Data);
+        return result.ReferenceRepairs;
     }
 
     /// <summary>Writes a copy of an unencrypted PDF that only the listed certificate holders can open.</summary>
-    internal static void ProtectForRecipients(string sourcePath, string destinationPath,
+    internal static IReadOnlyList<PdfReferenceRepair> ProtectForRecipients(string sourcePath, string destinationPath,
         KillerPdf.Engine.Security.PdfCertificateEncryptionOptions options, bool allowSignatureInvalidation)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(sourcePath);
         ArgumentException.ThrowIfNullOrWhiteSpace(destinationPath);
         PdfDocument document = PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(sourcePath));
-        ReplaceWithBuiltResult(destinationPath, PdfDocumentEncryptionWriter.EncryptForRecipients(
-            document, options, allowSignatureInvalidation));
+        PdfDocumentWriteResult result = PdfDocumentEncryptionWriter.EncryptForRecipientsWithReport(
+            document, options, allowSignatureInvalidation, replaceDanglingReferences: true);
+        AtomicFileOutput.Write(destinationPath, result.Data);
+        return result.ReferenceRepairs;
     }
 
     /// <summary>
@@ -1161,30 +1165,33 @@ internal static class PdfEngineIntegration
     }
 
     /// <summary>Performs a deterministic full-document resave through the engine writer.</summary>
-    internal static void ResaveDocument(
+    internal static IReadOnlyList<PdfReferenceRepair> ResaveDocument(
         string sourcePath,
         string destinationPath,
         bool allowSignatureInvalidation = false)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(sourcePath);
-        ResaveDocument(PdfDocument.Open(File.ReadAllBytes(sourcePath)), destinationPath,
+        return ResaveDocument(PdfDocument.Open(File.ReadAllBytes(sourcePath)), destinationPath,
             allowSignatureInvalidation);
     }
 
     /// <summary>Rewrites a document the caller has already opened, so a batch that opens each
     /// file to classify it does not read and parse the same file twice.</summary>
-    internal static void ResaveDocument(
+    internal static IReadOnlyList<PdfReferenceRepair> ResaveDocument(
         PdfDocument source,
         string destinationPath,
         bool allowSignatureInvalidation = false)
     {
         ArgumentNullException.ThrowIfNull(source);
         ArgumentException.ThrowIfNullOrWhiteSpace(destinationPath);
-        ReplaceWithBuiltResult(destinationPath, PdfDocumentWriter.Write(source,
+        PdfDocumentWriteResult result = PdfDocumentWriter.WriteWithReport(source,
             new PdfDocumentWriteOptions
             {
-                AllowSignatureInvalidation = allowSignatureInvalidation
-            }));
+                AllowSignatureInvalidation = allowSignatureInvalidation,
+                ReplaceDanglingReferences = true
+            });
+        AtomicFileOutput.Write(destinationPath, result.Data);
+        return result.ReferenceRepairs;
     }
 
     /// <summary>Removes one native PDF annotation by its page-array index.</summary>
@@ -2108,6 +2115,7 @@ internal static class PdfEngineIntegration
         PdfOptimizationOptions settings = PdfOptimizationOptions.ForDocument(document) with
         {
             RepairHarmlessArtifacts = true,
+            ReplaceDanglingReferences = true,
             RemoveMetadata = true,
             RemovePageThumbnails = true,
             RemoveComments = choices.Comments,

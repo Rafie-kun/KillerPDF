@@ -230,6 +230,7 @@
     <sys:String x:Key="Str_Restricted_OwnerRequired">「{0}」限制了編輯，因此 KillerPDF 需要擁有者密碼才能開啟。</sys:String>
     <sys:String x:Key="Str_OpenedReadOnlyXRef">已開啟 {0}（唯讀 - 非標準 XRef 表）- {1} 頁</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">已開啟 {0}（已修復副本 - 請儲存以保留變更）- {1} 頁</sys:String>
+    <sys:String x:Key="Str_Save_ReferenceRepairs">已修復損壞的參照並儲存。遺失的內容並未復原。</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">已開啟 {0}（點陣化修復 - 請儲存以保留變更）- {1} 頁</sys:String>
     <sys:String x:Key="Str_PageOf">第 {0} 頁，共 {1} 頁</sys:String>
     <sys:String x:Key="Str_PageOfLinks">第 {0} 頁，共 {1} 頁（{2} 個連結）</sys:String>

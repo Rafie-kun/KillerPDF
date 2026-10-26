@@ -245,6 +245,7 @@
     <sys:String x:Key="Str_Restricted_OwnerRequired">「{0}」は編集が制限されているため、KillerPDF で開くには所有者パスワードが必要です。</sys:String>
     <sys:String x:Key="Str_OpenedReadOnlyXRef">{0} を開きました (読み取り専用 - 非標準 XRef テーブル) - {1} ページ</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">{0} を開きました (修復済みコピー - 変更を保存するには保存が必要) - {1} ページ</sys:String>
+    <sys:String x:Key="Str_Save_ReferenceRepairs">壊れた参照を修復して保存しました。欠落した内容は復元されていません。</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">{0} を開きました (ラスタライズ修復 - 変更を保存するには保存が必要) - {1} ページ</sys:String>
     <sys:String x:Key="Str_PageOf">{0} / {1} ページ</sys:String>
     <sys:String x:Key="Str_PageOfLinks">{0} / {1} ページ  ({2} リンク)</sys:String>

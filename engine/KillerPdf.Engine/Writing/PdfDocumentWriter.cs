@@ -57,6 +57,12 @@ public static class PdfDocumentWriter
         PdfDocument document, PdfDocumentWriteOptions? options = null) =>
         WriteWithReport(document, options).Bytes;
 
+    internal static IReadOnlyList<PdfReferenceRepair> FindReferenceRepairs(PdfDocument document)
+    {
+        document.PreparePageStructureForWriting();
+        return Array.AsReadOnly(new RewriteContext(document).Repairs.ToArray());
+    }
+
     /// <summary>Rewrites a document and returns its reference normalization records.</summary>
     public static PdfDocumentWriteResult WriteWithReport(
         PdfDocument document, PdfDocumentWriteOptions? options = null)

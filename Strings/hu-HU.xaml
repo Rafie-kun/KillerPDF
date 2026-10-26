@@ -245,6 +245,7 @@ Az oldal lecserélhető a saját képére, amelyen a megjelölt területek feket
     <sys:String x:Key="Str_Restricted_OwnerRequired">A(z) „{0}” korlátozza a szerkesztést, ezért a KillerPDF-nek a megnyitásához a tulajdonosi jelszó kell.</sys:String>
     <sys:String x:Key="Str_OpenedReadOnlyXRef">Megnyitva: {0} (csak olvasható - nem szabványos XRef tábla) - {1} oldal</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">Megnyitva: {0} (javított másolat - mentse a változások megtartásához) - {1} oldal</sys:String>
+    <sys:String x:Key="Str_Save_ReferenceRepairs">Mentve a hibás hivatkozások javításával. A hiányzó tartalom nem lett helyreállítva.</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">Megnyitva: {0} (raszterizált javítás - mentse a változások megtartásához) - {1} oldal</sys:String>
     <sys:String x:Key="Str_PageOf">{0}. oldal / {1}</sys:String>
     <sys:String x:Key="Str_PageOfLinks">{0}. oldal / {1}  ({2} hivatkozás)</sys:String>

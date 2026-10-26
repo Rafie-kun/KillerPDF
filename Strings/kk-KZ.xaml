@@ -167,6 +167,7 @@
     <sys:String x:Key="Str_Restricted_OwnerRequired">«{0}» өңдеуді шектейді, сондықтан KillerPDF оны ашу үшін иесінің құпиясөзін қажет етеді.</sys:String>
     <sys:String x:Key="Str_OpenedReadOnlyXRef">{0} ашылды (тек оқу - стандартты емес XRef кестесі) - {1} бет</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">{0} ашылды (жөнделген көшірме - өзгерістерді сақтаңыз) - {1} бет</sys:String>
+    <sys:String x:Key="Str_Save_ReferenceRepairs">Жарамсыз ішкі сілтемелер түзетіліп сақталды. Жетіспейтін мазмұн қалпына келтірілмеді.</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">{0} ашылды (растрленген жөндеу - өзгерістерді сақтаңыз) - {1} бет</sys:String>
     <sys:String x:Key="Str_PageOf">{0} / {1} бет</sys:String>
     <sys:String x:Key="Str_PageOfLinks">{0} / {1} бет  ({2} сілтеме)</sys:String>

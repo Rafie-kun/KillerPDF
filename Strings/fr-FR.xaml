@@ -245,6 +245,7 @@ La page peut être remplacée par une image d'elle-même avec les zones marquée
     <sys:String x:Key="Str_Restricted_OwnerRequired">« {0} » restreint la modification, KillerPDF a donc besoin du mot de passe propriétaire pour l’ouvrir.</sys:String>
     <sys:String x:Key="Str_OpenedReadOnlyXRef">Ouvert : {0} (lecture seule - table XRef non standard) - {1} page(s)</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">Ouvert : {0} (copie réparée - enregistrer pour conserver les modifications) - {1} page(s)</sys:String>
+    <sys:String x:Key="Str_Save_ReferenceRepairs">Enregistré après réparation des références défectueuses. Le contenu manquant n’a pas été récupéré.</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">Ouvert : {0} (réparation raster - enregistrer pour conserver les modifications) - {1} page(s)</sys:String>
     <sys:String x:Key="Str_PageOf">Page {0} sur {1}</sys:String>
     <sys:String x:Key="Str_PageOfLinks">Page {0} sur {1} ({2} lien(s))</sys:String>

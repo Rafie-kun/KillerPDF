@@ -88,4 +88,12 @@ scripts:
     failure_behavior: Return nonzero on missing prompts, wrong cancellation, lost edits, incorrect saved rotation or changed discarded sources.
     mutates: temporary-fixture-files-and-test-owned-windows-only
 
+  reference_repair_notice_smoke:
+    path: tests/KillerPDF.UiSmoke/ReferenceRepairNoticeSmoke.cs
+    purpose: Verify that successful protection reports broken-reference repairs and omits the notice for pristine input.
+    inputs: Built app DLL, matching App.xaml, fresh evidence directory and --startup-smoke on an owned UI VM.
+    outputs: Detector controls, modal text, result.txt with app hash and external process receipt.
+    failure_behavior: Return nonzero on missing controls, incorrect notice, failed encryption, lost live text, changed sources or deadline.
+    mutates: temporary-fixture-files-and-test-owned-windows-only
+
 documentation: docs/startup-packaging.md

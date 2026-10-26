@@ -223,6 +223,7 @@
     <sys:String x:Key="Str_Restricted_OwnerRequired">Dokument »{0}« omejuje urejanje, zato KillerPDF za odpiranje potrebuje geslo lastnika.</sys:String>
     <sys:String x:Key="Str_OpenedReadOnlyXRef">Odprto samo za branje zaradi nestandardne tabele XRef: {0} (strani: {1})</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">Odprta je popravljena kopija datoteke {0}; shranite za ohranitev sprememb (strani: {1})</sys:String>
+    <sys:String x:Key="Str_Save_ReferenceRepairs">Shranjeno s popravljenimi neveljavnimi sklici. Manjkajoča vsebina ni bila obnovljena.</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">Odprta je rastrirana popravljena kopija datoteke {0}; shranite za ohranitev sprememb (strani: {1})</sys:String>
     <sys:String x:Key="Str_PageOf">Stran {0} od {1}</sys:String>
     <sys:String x:Key="Str_PageOfLinks">Stran {0} od {1}  (povezave: {2})</sys:String>

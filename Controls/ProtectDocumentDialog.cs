@@ -299,6 +299,7 @@ namespace KillerPDF
             bool copy = _allowCopy.IsChecked == true;
             bool edit = _allowEdit.IsChecked == true;
             if (!Services.OutputOverwrite.StillAsApproved(this, fullOutput, approved)) return;
+            int referenceRepairCount;
             Mouse.OverrideCursor = Cursors.Wait;
             try
             {
@@ -309,7 +310,7 @@ namespace KillerPDF
                     string owner = _ownerBox.Password.Length > 0
                         ? _ownerBox.Password
                         : Convert.ToBase64String(RandomNumberGenerator.GetBytes(24));
-                    PdfEngineIntegration.ProtectWithPasswords(_sourcePdf, fullOutput,
+                    referenceRepairCount = PdfEngineIntegration.ProtectWithPasswords(_sourcePdf, fullOutput,
                         new PdfPasswordEncryptionOptions
                         {
                             UserPassword = _passwordBox.Password,
@@ -321,11 +322,11 @@ namespace KillerPDF
                             AllowAnnotationModification = edit,
                             AllowFormFilling = edit,
                             AllowDocumentAssembly = edit
-                        }, signed);
+                        }, signed).Count;
                 }
                 else
                 {
-                    PdfEngineIntegration.ProtectForRecipients(_sourcePdf, fullOutput,
+                    referenceRepairCount = PdfEngineIntegration.ProtectForRecipients(_sourcePdf, fullOutput,
                         new PdfCertificateEncryptionOptions
                         {
                             Recipients = [.. _recipients],
@@ -336,7 +337,7 @@ namespace KillerPDF
                             AllowAnnotationModification = edit,
                             AllowFormFilling = edit,
                             AllowDocumentAssembly = edit
-                        }, signed);
+                        }, signed).Count;
                 }
             }
             catch (Exception ex) when (ex is not OutOfMemoryException)
@@ -350,7 +351,9 @@ namespace KillerPDF
                 Mouse.OverrideCursor = null;
             }
 
-            KillerDialog.Show(this, L("Str_Protect_SavedTo") + "\n" + fullOutput, L("Str_Protect_Name"), MessageBoxButton.OK, MessageBoxImage.Information);
+            string savedMessage = L("Str_Protect_SavedTo") + "\n" + fullOutput;
+            if (referenceRepairCount > 0) savedMessage += "\n\n" + L("Str_Save_ReferenceRepairs");
+            KillerDialog.Show(this, savedMessage, L("Str_Protect_Name"), MessageBoxButton.OK, MessageBoxImage.Information);
             DialogResult = true;
             Close();
         }

@@ -245,6 +245,7 @@ Stronę można zastąpić jej obrazem z zaczernionymi zaznaczonymi obszarami. Te
     <sys:String x:Key="Str_Restricted_OwnerRequired">Plik „{0}” ogranicza edycję, więc KillerPDF potrzebuje hasła właściciela, aby go otworzyć.</sys:String>
     <sys:String x:Key="Str_OpenedReadOnlyXRef">Otwarto {0} (tylko do odczytu - niestandardowa tabela XRef) - {1} stronę(y)</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">Otwarto naprawioną kopię {0} (zapisz, aby zachować zmiany) - {1} stronę(y)</sys:String>
+    <sys:String x:Key="Str_Save_ReferenceRepairs">Zapisano z naprawionymi nieprawidłowymi odwołaniami. Brakująca zawartość nie została odzyskana.</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">Otwarto rasteryzowaną naprawioną kopię {0} (zapisz, aby zachować zmiany) - {1} stronę(y)</sys:String>
     <sys:String x:Key="Str_PageOf">Strona {0} z {1}</sys:String>
     <sys:String x:Key="Str_PageOfLinks">Strona {0} z {1} (linki: {2})</sys:String>
