@@ -109,6 +109,8 @@ namespace KillerPDF
             ["Str_DocumentTools_BookmarkData"] = "bookmarks outline import export json",
             ["Str_Lbl_Redact"] = "black out censor hide remove sensitive",
             ["Str_KS_Open"] = "open file browse load",
+            ["Str_Menu_Scan"] = "scanner scanning acquire twain paper create pdf",
+            ["Str_Menu_ConvertOffice"] = "microsoft office word excel document spreadsheet doc docx xls xlsx convert create pdf",
             ["Str_KS_SaveAs"] = "save copy rename",
             ["Str_KS_Print"] = "printer paper",
             ["Str_KS_DocInfo"] = "properties metadata title author info",
@@ -417,10 +419,10 @@ namespace KillerPDF
             var entries = new List<ToolSearchEntry>();
             var seen = new HashSet<string>(StringComparer.Ordinal);
 
-            void Add(string labelKey, string cat, string gesture, Action run)
+            void Add(string labelKey, string cat, string gesture, Action run, bool? requiresDocument = null)
             {
                 if (!seen.Add(labelKey)) return;
-                if (!hasDocument && !ToolSearchWithoutDocument.Contains(labelKey)) return;
+                if (!hasDocument && (requiresDocument ?? !ToolSearchWithoutDocument.Contains(labelKey))) return;
                 entries.Add(new ToolSearchEntry(WithoutShortcut(Loc(labelKey)), EnglishText(labelKey),
                     ToolSearchKeywords.GetValueOrDefault(labelKey, ""), cat, gesture, run));
             }
@@ -443,6 +445,9 @@ namespace KillerPDF
 
             foreach (var (letter, labelKey) in ShortcutTable.DocumentToolKeys)
                 Add(labelKey, "Docs", GestureFor("CtrlShift:D") + ", " + letter, () => RunDocumentTool(letter));
+
+            foreach (OpenMenuCommand command in DocumentCreationCommands())
+                Add(command.LabelKey, "File", "", command.Run, command.RequiresDocument);
 
             Add("Str_Toolbar_Customize", "View", "", OpenCustomizeToolbar);
             return entries;

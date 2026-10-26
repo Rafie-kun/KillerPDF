@@ -814,6 +814,14 @@ namespace KillerPDF
             if (dlg.ShowDialog(this) == true) OpenInNewTab(dlg.FileName);
         }
 
+        private sealed record OpenMenuCommand(string LabelKey, string Icon, bool RequiresDocument, Action Run);
+
+        private OpenMenuCommand[] DocumentCreationCommands() =>
+        [
+            new("Str_Menu_Scan", "\uE8FE", false, ScanToPdf),
+            new("Str_Menu_ConvertOffice", "\uE8A5", false, ConvertOfficeDocument),
+        ];
+
         // Dropdown next to the Open button: the recent-files list.
         private void OpenRecent_Click(object sender, RoutedEventArgs e)
         {
@@ -821,8 +829,12 @@ namespace KillerPDF
             var menu = MakeThemedMenu();
 
             menu.Items.Add(MakeMenuItem(Loc("Str_Menu_Import") + "...", (s2, e2) => ImportImages_Click(s2, e2), null, ""));
-            menu.Items.Add(MakeMenuItem(Loc("Str_Menu_Scan"), (s2, e2) => ScanToPdf(), null, "\uE8FE"));
-            menu.Items.Add(MakeMenuItem(Loc("Str_Menu_ConvertOffice"), (s2, e2) => ConvertOfficeDocument(), null, "\uE8A5"));
+            foreach (OpenMenuCommand command in DocumentCreationCommands())
+            {
+                MenuItem item = MakeMenuItem(Loc(command.LabelKey), (_, _) => command.Run(), null, command.Icon);
+                item.IsEnabled = !command.RequiresDocument || _doc is not null;
+                menu.Items.Add(item);
+            }
             menu.Items.Add(new Separator());
 
             var recents = App.GetRecentFiles();

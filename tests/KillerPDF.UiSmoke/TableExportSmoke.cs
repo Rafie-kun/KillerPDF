@@ -144,6 +144,10 @@ internal static class TableExportSmoke
                 return ToolSearchPrerequisitesSmoke.Run(owner, folder);
             if (windowSessionCase == "--verify-search-certificates")
                 return ToolSearchPrerequisitesSmoke.Run(owner, folder, certificates: true);
+            if (windowSessionCase == "--verify-search-scan")
+                return ToolSearchPrerequisitesSmoke.Run(owner, folder, creation: "scan");
+            if (windowSessionCase == "--verify-search-office")
+                return ToolSearchPrerequisitesSmoke.Run(owner, folder, creation: "office");
             if (windowSessionCase is "--verify-export-loss-review" or "--verify-export-loss-mixed" or "--verify-export-loss-continue" or "--verify-export-lossless")
                 return ExportLossReviewSmoke.Run(owner, folder, windowSessionCase);
             if (windowSessionCase is "--verify-save-history" or "--verify-active-editor-close" or "--verify-annotation-history" or "--verify-form-history" or "--verify-stamp-isolation" or "--verify-failed-save-history" or "--verify-stamp-history" or "--verify-stamp-tabs" or "--verify-stamp-panes" or "--verify-stamp-tearout" or "--verify-page-edit-failure" or "--verify-layout-pending" or "--verify-merge-pending" or "--verify-layouts-pending" or "--verify-stamp-saveall" or "--verify-active-editor-close-b")

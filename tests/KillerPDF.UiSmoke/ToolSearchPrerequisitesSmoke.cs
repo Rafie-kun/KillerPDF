@@ -8,9 +8,15 @@ using static DocumentStateSmoke;
 
 internal static class ToolSearchPrerequisitesSmoke
 {
-    internal static int Run(Window owner, string folder, bool certificates = false)
+    internal static int Run(Window owner, string folder, bool certificates = false, string? creation = null)
     {
-        string commandKey = certificates ? "Str_CertCatalog_Title" : "Str_DocumentTools_Macros";
+        string commandKey = creation switch
+        {
+            "scan" => "Str_Menu_Scan",
+            "office" => "Str_Menu_ConvertOffice",
+            null => certificates ? "Str_CertCatalog_Title" : "Str_DocumentTools_Macros",
+            _ => throw new ArgumentOutOfRangeException(nameof(creation))
+        };
         string commandName = (string)owner.FindResource(commandKey);
         var pages = (ListBox)owner.FindName("PageList");
         if (pages.Items.Count != 0) throw new InvalidOperationException("Search prerequisite fixture must have no document.");
@@ -18,11 +24,13 @@ internal static class ToolSearchPrerequisitesSmoke
             .Select(source => source.RootVisual).OfType<DependencyObject>();
         ContextMenu? Menu() => Roots().OfType<ContextMenu>().Concat(Roots().SelectMany(Descendants<ContextMenu>))
             .Distinct().SingleOrDefault(menu => menu.IsOpen);
-        Click(owner, "SaveMenuBtn");
-        Wait(() => Menu() is not null, "empty-window Save menu");
+        Click(owner, creation is null ? "SaveMenuBtn" : "OpenRecentBtn");
+        Wait(() => Menu() is not null, "empty-window source menu");
         ContextMenu menu = Menu()!;
-        MenuItem tools = menu.Items.OfType<MenuItem>().Single(item => Equals(item.Header, owner.FindResource("Str_DocumentTools")));
-        MenuItem command = tools.Items.OfType<MenuItem>().Single(item => Equals(item.Header, commandName));
+        IEnumerable<MenuItem> commands = creation is null
+            ? menu.Items.OfType<MenuItem>().Single(item => Equals(item.Header, owner.FindResource("Str_DocumentTools"))).Items.OfType<MenuItem>()
+            : menu.Items.OfType<MenuItem>();
+        MenuItem command = commands.Single(item => Equals(item.Header, commandName));
         if (!command.IsEnabled) throw new InvalidOperationException("The real " + commandName + " menu is disabled without a document.");
         menu.IsOpen = false;
         var host = (FrameworkElement)owner.FindName("ToolSearchHost");
@@ -56,10 +64,18 @@ internal static class ToolSearchPrerequisitesSmoke
                 if (!seen.Add(dialog)) continue;
                 try
                 {
-                    if (dialog.GetType().Name != (certificates ? "CertificateCatalogDialog" : "MacroDialog"))
-                        throw new InvalidOperationException("Search opened an unexpected dialog: " + dialog.GetType().Name);
+                    string expectedType = creation == "office" ? "FileDialog"
+                        : creation == "scan" ? "ScanDialog" : certificates ? "CertificateCatalogDialog" : "MacroDialog";
+                    string message = string.Join(" ", Descendants<TextBlock>(dialog).Select(text => text.Text));
+                    bool scanInformation = creation == "scan"
+                        && new[] { "Str_Scan_NoManager", "Str_Scan_NoScanners" }.Any(key =>
+                            message.Contains((string)owner.FindResource(key), StringComparison.Ordinal));
+                    if (dialog.GetType().Name != expectedType && !scanInformation)
+                        throw new InvalidOperationException("Search opened an unexpected dialog: " + dialog.GetType().Name + ": " + message);
                     opened = true;
-                    Button cancel = Descendants<Button>(dialog).Single(button => button.IsCancel);
+                    Button cancel = Descendants<Button>(dialog).Single(button => creation == "office"
+                        ? Equals(button.Content, owner.FindResource("Str_Btn_Cancel"))
+                        : scanInformation ? button.IsDefault : button.IsCancel);
                     dialog.Dispatcher.BeginInvoke(DispatcherPriority.Input,
                         (Action)(() => cancel.RaiseEvent(new RoutedEventArgs(Button.ClickEvent))));
                 }
@@ -77,7 +93,9 @@ internal static class ToolSearchPrerequisitesSmoke
         }
         finally { timer.Stop(); }
         if (!opened || pages.Items.Count != 0) throw new InvalidOperationException("Empty-window search changed document state or failed to open " + commandName + ".");
-        string result = "PASS " + (certificates ? "verify-search-certificates" : "verify-search-prerequisites")
+        string mode = creation is not null ? "verify-search-" + creation
+            : certificates ? "verify-search-certificates" : "verify-search-prerequisites";
+        string result = "PASS " + mode
             + ": " + commandName + " opens from empty-window search while document-only Text stays unavailable.";
         File.WriteAllText(Path.Combine(folder, "result.txt"), result); Console.WriteLine(result);
         return 0;

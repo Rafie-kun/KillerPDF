@@ -64,7 +64,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - **Document organization:** Added comment threads and replies, attachment and portfolio editing, layer controls, bookmark/link audits, table-of-contents generation, page labels and initial-view settings (#288, #347, #350, #351).
 - Added vector SVG signatures, a shared image library for images, watermarks and signatures, and adjustable paper-background removal for imported signatures (#326, #398).
 - Added optional File Explorer and Outlook PDF previews to installed copies, with scrolling, zoom and read-only opening (#410).
-- Added Search Tools (Ctrl+K), customizable shortcuts and one-letter tools, with expanded view, page, clipboard and tab actions. Macros and Certificates are searchable before opening a PDF (#190).
+- Added Search Tools (Ctrl+K), customizable shortcuts and one-letter tools, with expanded view, page, clipboard and tab actions. Scan, Office conversion, Macros and Certificates are searchable before opening a PDF (#190).
 - Added Windows 11 snap layouts, comparison-bar docking and Close to System Tray. Tray Exit retains save prompts (#374, #427).
 - Added Slovenian across the app, installer, previews, OCR language selection, website and engine guides.
 
