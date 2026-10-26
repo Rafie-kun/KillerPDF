@@ -47,7 +47,8 @@ internal sealed class ParagraphEditDialog : Window
         _document = document; _pageIndex = pageIndex;
         _page = PdfPageInformation.Read(document)[pageIndex];
         _pixelsPerPoint = Math.Min(1000 / _page.Width, 1000 / _page.Height);
-        _candidates = PdfParagraphEditor.FindParagraphs(document, pageIndex);
+        PdfParagraphCandidateInspection inspection = PdfParagraphEditor.InspectCandidates(document, pageIndex);
+        _candidates = inspection.Candidates;
         Title = "KillerPDF: " + L("Str_Paragraph_Title");
         scale = Math.Clamp(scale, .7, 2.5);
         Width = Math.Min(760 * scale, SystemParameters.WorkArea.Width - 40);
@@ -155,7 +156,8 @@ internal sealed class ParagraphEditDialog : Window
         _alignment.SelectionChanged += (_, _) => { if (!_setting) Invalidate(); };
         _candidateBox.SelectedIndex = _candidates.Count > 0 ? 0 : -1;
         if (pagePoint is Point pointOnPage) SelectAt(pointOnPage);
-        _status.Text = _candidates.Count == 0 ? L("Str_Paragraph_Unsupported") : "";
+        _status.Text = _candidates.Count == 0 ? string.Join("\n", inspection.Refusals.Select(item =>
+            RefusalText(item.RefusalCode)).Distinct()) : "";
         _preview.IsEnabled = _candidates.Count > 0;
         _text.IsEnabled = _candidates.Count > 0;
         Loaded += async (_, _) =>
@@ -285,5 +287,10 @@ internal sealed class ParagraphEditDialog : Window
     }
     private static void Id(DependencyObject element, string id, string? label = null)
     { AutomationProperties.SetAutomationId(element, id); if (label is not null) AutomationProperties.SetName(element, L(label)); }
+    internal static string RefusalText(PdfParagraphRefusalCode? code) => L(code switch
+    {
+        PdfParagraphRefusalCode.RotatedPage => "Str_Paragraph_Rotated",
+        _ => "Str_Paragraph_Unsupported"
+    });
     private static string L(string key) => Application.Current.TryFindResource(key) as string ?? key;
 }

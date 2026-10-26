@@ -1942,4 +1942,5 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_ExportLoss_Image">Bu dışa aktarmada görüntü verileri atlanır veya yer tutucularla değiştirilir.</sys:String>
     <sys:String x:Key="Str_ExportLoss_Unknown">Bazı içerikler bu dışa aktarmada tam olarak temsil edilemez.</sys:String>
     <sys:String x:Key="Str_Watch_MissingOcrModels">{0}. adım için OCR dil modelleri gerekiyor: {1}. Başlatmadan önce bunları OCR dil menüsünden yükleyin.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Rotated">Döndürülmüş sayfalarda paragraf düzenlenemez. Önce sayfa döndürmesini 0° olarak ayarlayın.</sys:String>
 </ResourceDictionary>

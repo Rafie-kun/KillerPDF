@@ -1849,4 +1849,5 @@
     <sys:String x:Key="Str_ExportLoss_Image">Podatki slik se pri tem izvozu izpustijo ali nadomestijo z ogradami.</sys:String>
     <sys:String x:Key="Str_ExportLoss_Unknown">Nekatere vsebine v tem izvozu ni mogoče v celoti predstaviti.</sys:String>
     <sys:String x:Key="Str_Watch_MissingOcrModels">Korak {0} potrebuje jezikovne modele OCR: {1}. Pred začetkom jih namestite v meniju jezikov OCR.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Rotated">Na zasukanih straneh ni mogoče urejati odstavkov. Najprej nastavite zasuk strani na 0°.</sys:String>
 </ResourceDictionary>

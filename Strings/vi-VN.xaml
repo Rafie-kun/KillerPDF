@@ -1962,4 +1962,5 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_ExportLoss_Image">Dữ liệu hình ảnh bị bỏ qua hoặc thay bằng phần giữ chỗ trong bản xuất này.</sys:String>
     <sys:String x:Key="Str_ExportLoss_Unknown">Một số nội dung không thể được thể hiện đầy đủ trong bản xuất này.</sys:String>
     <sys:String x:Key="Str_Watch_MissingOcrModels">Bước {0} cần các mô hình ngôn ngữ OCR: {1}. Hãy cài đặt chúng từ menu ngôn ngữ OCR trước khi bắt đầu.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Rotated">Không thể chỉnh sửa đoạn văn trên trang đã xoay. Trước tiên, hãy đặt góc xoay của trang về 0°.</sys:String>
 </ResourceDictionary>

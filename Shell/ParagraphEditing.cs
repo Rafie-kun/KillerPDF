@@ -22,9 +22,15 @@ public partial class MainWindow
             var session = EnsureEngineDocumentSession();
             PdfPageInformation page = session.Pages[pageIndex];
             int rotation = ((_pageRotations.TryGetValue(pageIndex, out int turn) ? turn : page.Rotation) % 360 + 360) % 360;
-            if (rotation != 0 || PdfParagraphEditor.FindParagraphs(session.Document, pageIndex).Count == 0)
+            if (rotation != 0)
             {
-                KillerDialog.Show(this, Loc("Str_Paragraph_Unsupported")); return;
+                KillerDialog.Show(this, ParagraphEditDialog.RefusalText(PdfParagraphRefusalCode.RotatedPage)); return;
+            }
+            PdfParagraphCandidateInspection inspection = PdfParagraphEditor.InspectCandidates(session.Document, pageIndex);
+            if (inspection.Candidates.Count == 0)
+            {
+                KillerDialog.Show(this, string.Join("\n", inspection.Refusals.Select(item =>
+                    ParagraphEditDialog.RefusalText(item.RefusalCode)).Distinct())); return;
             }
             // Capture the working model before opening the modal editor. Editable overlays remain
             // in their existing side state and survive the normal reload path.

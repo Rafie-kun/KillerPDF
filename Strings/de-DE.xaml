@@ -1951,4 +1951,5 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_ExportLoss_Image">Bilddaten werden bei diesem Export ausgelassen oder durch Platzhalter ersetzt.</sys:String>
     <sys:String x:Key="Str_ExportLoss_Unknown">Einige Inhalte können in diesem Export nicht vollständig dargestellt werden.</sys:String>
     <sys:String x:Key="Str_Watch_MissingOcrModels">Schritt {0} benötigt OCR-Sprachmodelle: {1}. Installieren Sie diese vor dem Start über das OCR-Sprachmenü.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Rotated">Auf gedrehten Seiten können keine Absätze bearbeitet werden. Stellen Sie die Seitendrehung zuerst auf 0°.</sys:String>
 </ResourceDictionary>

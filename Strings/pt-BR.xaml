@@ -1962,4 +1962,5 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_ExportLoss_Image">Os dados de imagem são omitidos ou substituídos por espaços reservados nesta exportação.</sys:String>
     <sys:String x:Key="Str_ExportLoss_Unknown">Alguns conteúdos não podem ser representados por completo nesta exportação.</sys:String>
     <sys:String x:Key="Str_Watch_MissingOcrModels">A etapa {0} precisa de modelos de idioma de OCR: {1}. Instale-os pelo menu de idiomas de OCR antes de iniciar.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Rotated">A edição de parágrafos não está disponível em páginas giradas. Primeiro defina a rotação da página como 0°.</sys:String>
 </ResourceDictionary>

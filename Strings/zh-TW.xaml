@@ -1944,4 +1944,5 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_ExportLoss_Image">此匯出會省略影像資料或將其取代為預留位置。</sys:String>
     <sys:String x:Key="Str_ExportLoss_Unknown">此匯出無法完整表示部分內容。</sys:String>
     <sys:String x:Key="Str_Watch_MissingOcrModels">步驟 {0} 需要 OCR 語言模型：{1}。請先從 OCR 語言選單安裝，再啟動。</sys:String>
+    <sys:String x:Key="Str_Paragraph_Rotated">無法在已旋轉的頁面上編輯段落。請先將頁面旋轉角度設為 0°。</sys:String>
 </ResourceDictionary>

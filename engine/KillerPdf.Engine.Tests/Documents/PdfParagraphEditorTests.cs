@@ -14,6 +14,22 @@ public sealed class PdfParagraphEditorTests
     private static TrueTypeFont Font() => PdfStandardFontSubstitutes.OcrTrainingFonts()[0];
 
     [Fact]
+    public void CandidateInspectionRetainsRotationRefusalAndSupportedCandidates()
+    {
+        PdfDocument ordinary = Raw("BT /F1 10 Tf 30 250 Td (OLD) Tj ET");
+        var supported = PdfParagraphEditor.InspectCandidates(ordinary, 0);
+        Assert.Single(supported.Candidates);
+        Assert.Empty(supported.Refusals);
+        PdfDocument rotated = Raw("BT /F1 10 Tf 30 250 Td (OLD) Tj ET", "/Rotate 90");
+        byte[] before = rotated.Source.ToArray();
+        var rejected = PdfParagraphEditor.InspectCandidates(rotated, 0);
+        Assert.Empty(rejected.Candidates);
+        Assert.All(rejected.Refusals, item => Assert.Equal(PdfParagraphRefusalCode.RotatedPage, item.RefusalCode));
+        Assert.NotEmpty(rejected.Refusals);
+        Assert.Equal(before, rotated.Source.ToArray());
+    }
+
+    [Fact]
     public void PreviewAndApplyMatchAndReplaceOnlyTheSelectedParagraph()
     {
         PdfDocument source = Document();

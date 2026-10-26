@@ -1962,4 +1962,5 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_ExportLoss_Image">このエクスポートでは画像データが省略されるか、プレースホルダーに置き換えられます。</sys:String>
     <sys:String x:Key="Str_ExportLoss_Unknown">このエクスポートでは一部の内容を完全に表現できません。</sys:String>
     <sys:String x:Key="Str_Watch_MissingOcrModels">手順 {0} には OCR 言語モデルが必要です: {1}。開始する前に OCR 言語メニューからインストールしてください。</sys:String>
+    <sys:String x:Key="Str_Paragraph_Rotated">回転したページでは段落を編集できません。先にページの回転を 0° に設定してください。</sys:String>
 </ResourceDictionary>

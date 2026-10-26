@@ -25,7 +25,24 @@ public sealed record PdfParagraphCandidate(int PageIndex, PdfContentBounds Sourc
     string FontName, double FontSize, double Leading, PdfRgbColor Color);
 
 /// <summary>The eligibility of the complete source lines inside a selected area.</summary>
-public sealed record PdfParagraphInspection(bool CanEdit, string Reason, PdfParagraphCandidate? Candidate);
+public sealed record PdfParagraphInspection(bool CanEdit, string Reason, PdfParagraphCandidate? Candidate)
+{
+    /// <summary>Gets a stable refusal code, or null for an eligible paragraph.</summary>
+    public PdfParagraphRefusalCode? RefusalCode { get; init; } = CanEdit ? null : PdfParagraphRefusalCode.Unsupported;
+}
+
+/// <summary>Stable reasons why source paragraphs cannot be edited.</summary>
+public enum PdfParagraphRefusalCode
+{
+    /// <summary>The source does not meet the supported paragraph constraints.</summary>
+    Unsupported,
+    /// <summary>The page has a nonzero rotation.</summary>
+    RotatedPage
+}
+
+/// <summary>Supported candidates and retained refusals from page inspection.</summary>
+public sealed record PdfParagraphCandidateInspection(IReadOnlyList<PdfParagraphCandidate> Candidates,
+    IReadOnlyList<PdfParagraphInspection> Refusals);
 
 /// <summary>A line laid out in crop-relative page points.</summary>
 public sealed record PdfParagraphLine(string Text, double X, double Baseline, double Width);
@@ -87,10 +104,15 @@ public static class PdfParagraphEditor
 {
     /// <summary>Finds conservative groups of complete, aligned source lines.</summary>
     public static IReadOnlyList<PdfParagraphCandidate> FindParagraphs(PdfDocument document, int pageIndex)
+        => InspectCandidates(document, pageIndex).Candidates;
+
+    /// <summary>Finds candidates while retaining reasons for rejected source groups.</summary>
+    public static PdfParagraphCandidateInspection InspectCandidates(PdfDocument document, int pageIndex)
     {
         ArgumentNullException.ThrowIfNull(document);
         PdfPageContent page = new PdfPageContentReader(document).Read(pageIndex);
         var result = new List<PdfParagraphCandidate>();
+        var refusals = new List<PdfParagraphInspection>();
         var group = new List<PdfExtractedLine>();
         foreach (PdfExtractedLine line in page.Lines)
         {
@@ -108,7 +130,12 @@ public static class PdfParagraphEditor
             group.Add(line);
         }
         Flush();
-        return Array.AsReadOnly(result.ToArray());
+        if (result.Count == 0 && refusals.Count == 0)
+        {
+            PdfParagraphInspection emptyPage = Inspect(document, pageIndex, new PdfContentBounds(0, 0, page.Width, page.Height));
+            if (!emptyPage.CanEdit) refusals.Add(emptyPage);
+        }
+        return new(Array.AsReadOnly(result.ToArray()), Array.AsReadOnly(refusals.ToArray()));
 
         void Flush()
         {
@@ -118,6 +145,7 @@ public static class PdfParagraphEditor
                 group.Max(line => line.BoundingBox.Top));
             PdfParagraphInspection inspection = Inspect(document, pageIndex, bounds);
             if (inspection.Candidate is { } candidate) result.Add(candidate);
+            else refusals.Add(inspection);
             group.Clear();
         }
     }
@@ -147,7 +175,8 @@ public static class PdfParagraphEditor
         PdfPageTreeEntry entry = tree.Pages[pageIndex];
         if (entry.InheritedValues.TryGetValue(Name("Rotate"), out PdfObject? rotation)
             && Number(document, rotation) % 360 != 0)
-            throw new NotSupportedException("Paragraph editing is not supported on rotated pages.");
+            return new PdfParagraphInspection(false, "Paragraph editing is not supported on rotated pages.", null)
+                { RefusalCode = PdfParagraphRefusalCode.RotatedPage };
         PdfPageContent page = new PdfPageContentReader(document).Read(pageIndex);
         ValidateBounds(region, page.Width, page.Height);
         if (page.Diagnostics.Count != 0)
