@@ -125,7 +125,14 @@ public sealed class PdfTokenizer
             }
 
             if (i + 2 >= raw.Length || !TryHex(raw[i + 1], out int high) || !TryHex(raw[i + 2], out int low))
+            {
+                if (CompatibilityRecovery)
+                {
+                    decoded[written++] = (byte)'#';
+                    continue;
+                }
                 throw Error("A name escape must contain two hexadecimal digits", valueStart + i);
+            }
 
             decoded[written++] = (byte)((high << 4) | low);
             i += 2;
@@ -249,7 +256,11 @@ public sealed class PdfTokenizer
                 continue;
 
             if (!TryHex(current, out int nibble))
+            {
+                if (CompatibilityRecovery)
+                    continue;
                 throw Error("A hexadecimal string contains a non-hexadecimal character", _position - 1);
+            }
 
             if (high.HasValue)
             {
@@ -280,8 +291,8 @@ public sealed class PdfTokenizer
     }
 
     /// <summary>
-    /// Gets or sets whether a lone greater-than sign closes a dictionary, as mainstream
-    /// viewers accept.
+    /// Gets or sets whether to accept a lone dictionary closer, skip non-hexadecimal
+    /// string bytes, and preserve malformed name escapes.
     /// </summary>
     internal bool CompatibilityRecovery { get; set; }
 
