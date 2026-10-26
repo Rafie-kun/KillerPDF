@@ -53,7 +53,13 @@ public static class PdfDocumentWriter
     ];
 
     /// <summary>Performs a deterministic full rewrite using the selected preservation policies.</summary>
-    public static byte[] Write(PdfDocument document, PdfDocumentWriteOptions? options = null)
+    public static byte[] Write(
+        PdfDocument document, PdfDocumentWriteOptions? options = null) =>
+        WriteWithReport(document, options).Bytes;
+
+    /// <summary>Rewrites a document and returns its reference normalization records.</summary>
+    public static PdfDocumentWriteResult WriteWithReport(
+        PdfDocument document, PdfDocumentWriteOptions? options = null)
     {
         ArgumentNullException.ThrowIfNull(document);
         document.PreparePageStructureForWriting();
@@ -95,20 +101,34 @@ public static class PdfDocumentWriter
             PdfSignatureReader.ReadCertificationPermission(document).HasValue;
         bool hasSignedFields =
             PdfSignatureReader.Read(document).Any(signature => signature.IsSigned);
+        Dictionary<int, PdfObject>? signatureReplacements = null;
         if (options.AllowSignatureInvalidation && (hasCertification || hasSignedFields))
         {
-            byte[] cleared = PdfSignatureInvalidationWriter.ClearSignatureValues(document);
-            return Write(PdfDocument.Open(cleared), options);
+            if (!options.ReplaceDanglingReferences)
+            {
+                byte[] cleared = PdfSignatureInvalidationWriter.ClearSignatureValues(document);
+                return WriteWithReport(PdfDocument.Open(cleared), options);
+            }
+            signatureReplacements = [];
+            PdfSignatureInvalidationWriter.RewriteSignatureValues(document,
+                (number, value) => signatureReplacements[number] = value);
         }
+        if (options.ReplaceDanglingReferences && !options.AllowSignatureInvalidation
+            && (hasCertification || hasSignedFields))
+            throw new InvalidOperationException(
+                "A full rewrite invalidates existing signatures. Set AllowSignatureInvalidation explicitly to proceed.");
+        RewriteContext? context = options.ReplaceDanglingReferences
+            ? new RewriteContext(document, signatureReplacements) : null;
+        PdfDictionary sourceTrailer = context?.Trailer ?? document.CrossReferences.MergedTrailer;
         if (options.MetadataPolicy == PdfMetadataPolicy.Preserve
-            && document.CrossReferences.TryGetTrailerValue(InfoName, out PdfObject info))
+            && sourceTrailer.TryGetValue(InfoName, out PdfObject info))
         {
             if (info is not PdfIndirectReference infoReference)
                 throw new InvalidOperationException(
                     "A full rewrite requires trailer /Info to be an indirect reference.");
             if (ResolveValue(document, infoReference,
-                    "The trailer /Info value") is PdfDictionary informationDictionary)
-                ValidateDocumentInformationGraph(document, informationDictionary);
+                    "The trailer /Info value", context) is PdfDictionary informationDictionary)
+                ValidateDocumentInformationGraph(document, informationDictionary, context);
         }
         bool outputIsEncrypted = document.IsEncrypted && !options.RemoveEncryption;
         bool preservesIdentifiers = options.PreserveDocumentIdentifiers || outputIsEncrypted;
@@ -123,7 +143,7 @@ public static class PdfDocumentWriter
         if (outputIsEncrypted && !hasIdentifiers)
             throw new InvalidOperationException(
                 "An encrypted full rewrite requires trailer /ID document identifiers.");
-        ValidateApplicationTrailerGraphs(document);
+        ValidateApplicationTrailerGraphs(document, context);
         if (!options.AllowSignatureInvalidation)
         {
             if (hasCertification || hasSignedFields)
@@ -138,13 +158,13 @@ public static class PdfDocumentWriter
             throw new InvalidOperationException(
                 "Structural-stream compression requires the cross-reference-stream format.");
 
-        List<WritableObject> objects = ReadCurrentObjects(document);
+        List<WritableObject> objects = context?.Objects ?? ReadCurrentObjects(document);
         if (options.DeduplicatePageResources)
-            DeduplicatePageResources(document, objects);
+            DeduplicatePageResources(document, objects, context);
         if (options.CompressUnfilteredStreams)
         {
             HashSet<(int ObjectNumber, int Generation)> metadataIdentities =
-                CatalogMetadataIdentities(document, rootCatalog);
+                CatalogMetadataIdentities(root, objects);
             CompressUnfilteredStreams(objects, metadataIdentities);
         }
         if (options.RemoveEncryption
@@ -154,13 +174,13 @@ public static class PdfDocumentWriter
                 document, encryptionValue, "The trailer /Encrypt value").Identities];
             objects.RemoveAll(item => encryptionObjects.Contains((item.ObjectNumber, item.Generation)));
         }
-        root = RemoveCatalogMetadata(document, root, objects, options.MetadataPolicy);
-        RemoveDocumentInformationObject(document, root, objects, options.MetadataPolicy);
+        root = RemoveCatalogMetadata(document, root, objects, options.MetadataPolicy, context);
+        RemoveDocumentInformationObject(document, root, objects, options.MetadataPolicy, context);
         ValidateCatalogGraph(root, objects);
-        ValidateOutputTrailerGraphs(document, objects, options);
+        ValidateOutputTrailerGraphs(document, objects, options, context);
         ValidateWritableObjectGraphs(objects);
         if (options.PruneUnreachableObjects)
-            PruneUnreachableObjects(document, root, objects, options);
+            PruneUnreachableObjects(document, root, objects, options, context);
         int maximumObjectNumber = Math.Max(
             Math.Max(
                 objects.Select(item => item.ObjectNumber).DefaultIfEmpty(0).Max(),
@@ -227,7 +247,7 @@ public static class PdfDocumentWriter
                 throw new InvalidOperationException("Cross-reference streams require PDF 1.5 or later.");
             WriteCrossReferenceStream(output, document, offsets,
                 xrefObjectNumber, xrefOffset, root, options,
-                objectStreams);
+                objectStreams, context);
         }
         else
         {
@@ -235,13 +255,13 @@ public static class PdfDocumentWriter
                 output, document, offsets, maximumObjectNumber + 1);
 
             output.Write("trailer\n"u8);
-            PdfObjectWriter.Write(output, BuildTrailer(document, maximumObjectNumber + 1, root, options));
+            PdfObjectWriter.Write(output, BuildTrailer(document, maximumObjectNumber + 1, root, options, context));
             output.WriteByte((byte)'\n');
         }
         output.Write("startxref\n"u8);
         WriteAscii(output, xrefOffset.ToString(CultureInfo.InvariantCulture));
         output.Write("\n%%EOF\n"u8);
-        return output.ToArray();
+        return new PdfDocumentWriteResult(output.ToArray(), context?.Repairs ?? []);
     }
 
     private static void WriteClassicCrossReferenceTable(
@@ -296,7 +316,7 @@ public static class PdfDocumentWriter
     private static void WriteCrossReferenceStream(Stream output, PdfDocument document,
         IReadOnlyList<WrittenOffset> offsets, int objectNumber, int xrefOffset,
         PdfObject root, PdfDocumentWriteOptions options,
-        IReadOnlyList<ObjectStreamChunk> objectStreams)
+        IReadOnlyList<ObjectStreamChunk> objectStreams, RewriteContext? context = null)
     {
         int size = checked(objectNumber + 1);
         var occupied = new HashSet<int> { objectNumber };
@@ -351,7 +371,7 @@ public static class PdfDocumentWriter
             }
         }
 
-        var entries = BuildTrailer(document, size, root, options).ToList();
+        var entries = BuildTrailer(document, size, root, options, context).ToList();
         entries.Add(new(TypeName, XRefName));
         entries.Add(new(WName, new PdfArray([
             new PdfInteger(1), new PdfInteger(4), new PdfInteger(4)])));
@@ -523,6 +543,34 @@ public static class PdfDocumentWriter
             "The catalog /Metadata value").Identities];
     }
 
+    private static HashSet<(int ObjectNumber, int Generation)> CatalogMetadataIdentities(
+        PdfObject root, IReadOnlyList<WritableObject> objects)
+    {
+        var current = objects.ToDictionary(item => (item.ObjectNumber, item.Generation), item => item.Value);
+        if (Resolve(root, out _) is not PdfDictionary catalog
+            || !catalog.TryGetValue(MetadataName, out PdfObject metadata)) return [];
+        Resolve(metadata, out HashSet<(int ObjectNumber, int Generation)> identities);
+        return identities;
+
+        PdfObject Resolve(PdfObject value, out HashSet<(int ObjectNumber, int Generation)> visited)
+        {
+            visited = [];
+            for (int depth = 0; value is PdfIndirectReference reference; depth++)
+            {
+                if (depth >= 32)
+                    throw new InvalidOperationException("The catalog /Metadata value is too deeply indirect.");
+                var identity = (reference.ObjectNumber, reference.Generation);
+                if (!visited.Add(identity))
+                    throw new InvalidOperationException("The catalog /Metadata value contains an indirect-reference cycle.");
+                if (!current.TryGetValue(identity, out PdfObject? resolved))
+                    throw new InvalidOperationException(
+                        "The catalog /Metadata value contains a reference to an object omitted from the full rewrite.");
+                value = resolved;
+            }
+            return value;
+        }
+    }
+
     internal static int CountDuplicatePageResourceObjects(PdfDocument document)
     {
         ArgumentNullException.ThrowIfNull(document);
@@ -533,7 +581,7 @@ public static class PdfDocumentWriter
     }
 
     private static void DeduplicatePageResources(
-        PdfDocument document, List<WritableObject> objects)
+        PdfDocument document, List<WritableObject> objects, RewriteContext? context = null)
     {
         string[] categories =
         [
@@ -547,22 +595,23 @@ public static class PdfDocumentWriter
         {
             if (!page.InheritedValues.TryGetValue(new PdfName("Resources"u8),
                     out PdfObject? resourcesValue)
-                || ResolveValue(document, resourcesValue,
-                    "A page /Resources value") is not PdfDictionary resources)
+                || ResolveValue(document, context?.Container(resourcesValue) ?? resourcesValue,
+                    "A page /Resources value", context) is not PdfDictionary resources)
                 continue;
             foreach (string category in categories)
             {
                 PdfName categoryName = new(Encoding.ASCII.GetBytes(category));
                 if (!resources.TryGetValue(categoryName, out PdfObject? categoryValue)
                     || ResolveValue(document, categoryValue,
-                        $"A page /Resources /{category} value") is not PdfDictionary entries)
+                        $"A page /Resources /{category} value", context) is not PdfDictionary entries)
                     continue;
                 foreach (PdfObject value in entries.Values)
                 {
                     if (value is not PdfIndirectReference reference) continue;
                     var identity = (reference.ObjectNumber, reference.Generation);
                     if (replacements.ContainsKey(identity)) continue;
-                    string key = category + ":" + ResourceFingerprint(document.Resolve(reference));
+                    string key = category + ":" + ResourceFingerprint(
+                        context?.Resolve(reference) ?? document.Resolve(reference));
                     if (canonical.TryGetValue(key, out var retained)
                         && retained != identity)
                         replacements[identity] = retained;
@@ -572,7 +621,7 @@ public static class PdfDocumentWriter
             }
         }
         foreach (var identity in replacements.Keys.Where(identity =>
-                     document.CrossReferences.MergedTrailer.Any(entry =>
+                     (context?.Trailer ?? document.CrossReferences.MergedTrailer).Any(entry =>
                          ReferencesObject(entry.Value, identity))).ToArray())
             replacements.Remove(identity);
         if (replacements.Count == 0) return;
@@ -665,13 +714,13 @@ public static class PdfDocumentWriter
 
     private static void PruneUnreachableObjects(
         PdfDocument document, PdfObject root, List<WritableObject> objects,
-        PdfDocumentWriteOptions options)
+        PdfDocumentWriteOptions options, RewriteContext? context = null)
     {
         Dictionary<(int ObjectNumber, int Generation), PdfObject> currentObjects =
             objects.ToDictionary(
                 item => (item.ObjectNumber, item.Generation), item => item.Value);
         var reachable = new HashSet<(int ObjectNumber, int Generation)>();
-        PdfDictionary trailer = BuildTrailer(document, 1, root, options);
+        PdfDictionary trailer = BuildTrailer(document, 1, root, options, context);
         Visit(trailer, 0);
         objects.RemoveAll(item => !reachable.Contains(
             (item.ObjectNumber, item.Generation)));
@@ -710,29 +759,29 @@ public static class PdfDocumentWriter
 
     private static void RemoveDocumentInformationObject(
         PdfDocument document, PdfObject _, List<WritableObject> objects,
-        PdfMetadataPolicy policy)
+        PdfMetadataPolicy policy, RewriteContext? context = null)
     {
+        PdfDictionary sourceTrailer = context?.Trailer ?? document.CrossReferences.MergedTrailer;
         if (policy == PdfMetadataPolicy.Preserve
-            || !document.CrossReferences.TryGetTrailerValue(InfoName, out PdfObject infoValue)
+            || !sourceTrailer.TryGetValue(InfoName, out PdfObject infoValue)
             || infoValue is not PdfIndirectReference infoReference)
             return;
         ResolvedChain infoChain = ResolveChain(
-            document, infoReference, "The trailer /Info value");
+            document, infoReference, "The trailer /Info value", context);
         var infoIdentities = infoChain.Identities.ToHashSet();
         foreach (PdfName protectedName in new[] { RootName, EncryptName })
         {
-            if (!document.CrossReferences.TryGetTrailerValue(
-                    protectedName, out PdfObject protectedValue))
+            if (!sourceTrailer.TryGetValue(protectedName, out PdfObject protectedValue))
                 continue;
             ResolvedChain protectedChain = ResolveChain(document, protectedValue,
-                $"The trailer /{protectedName.ValueAsLatin1()} value");
+                $"The trailer /{protectedName.ValueAsLatin1()} value", context);
             if (protectedChain.Identities.Any(infoIdentities.Contains))
                 return;
         }
         if (objects.Any(item => !infoIdentities.Contains(
                     (item.ObjectNumber, item.Generation))
                 && infoIdentities.Any(identity => ReferencesObject(item.Value, identity)))
-            || document.CrossReferences.MergedTrailer.Any(entry => !entry.Key.Equals(InfoName)
+            || sourceTrailer.Any(entry => !entry.Key.Equals(InfoName)
                 && infoIdentities.Any(identity => ReferencesObject(entry.Value, identity))))
             throw new NotSupportedException(
                 "The document information object is shared outside trailer /Info and cannot be removed safely.");
@@ -742,12 +791,12 @@ public static class PdfDocumentWriter
 
     private static PdfObject RemoveCatalogMetadata(
         PdfDocument document, PdfObject root, List<WritableObject> objects,
-        PdfMetadataPolicy policy)
+        PdfMetadataPolicy policy, RewriteContext? context = null)
     {
         if (policy != PdfMetadataPolicy.RemoveDocumentInformationAndXmp)
             return root;
         ResolvedChain rootChain = ResolveChain(
-            document, root, "The trailer /Root value");
+            document, root, "The trailer /Root value", context);
         PdfDictionary catalog = rootChain.Value as PdfDictionary
             ?? throw new InvalidOperationException(
                 "The trailer /Root value is not a catalog dictionary.");
@@ -758,7 +807,7 @@ public static class PdfDocumentWriter
         if (metadataValue is PdfIndirectReference metadataReference)
         {
             ResolvedChain metadataChain = ResolveChain(
-                document, metadataReference, "The catalog /Metadata value");
+                document, metadataReference, "The catalog /Metadata value", context);
             var metadataIdentities = metadataChain.Identities.ToHashSet();
             var catalogIdentity = rootChain.FinalReference is PdfIndirectReference catalogReference
                 ? (catalogReference.ObjectNumber, catalogReference.Generation)
@@ -772,7 +821,7 @@ public static class PdfDocumentWriter
                     && (!catalogIdentity.HasValue
                         || (item.ObjectNumber, item.Generation) != catalogIdentity.Value)
                     && metadataIdentities.Any(identity => ReferencesObject(item.Value, identity)))
-                || document.CrossReferences.MergedTrailer.Any(entry => !entry.Key.Equals(RootName)
+                || (context?.Trailer ?? document.CrossReferences.MergedTrailer).Any(entry => !entry.Key.Equals(RootName)
                     && metadataIdentities.Any(identity => ReferencesObject(entry.Value, identity))))
                 throw new NotSupportedException(
                     "The catalog metadata object is shared and cannot be removed safely.");
@@ -842,11 +891,11 @@ public static class PdfDocumentWriter
     }
 
     private static PdfObject ResolveValue(
-        PdfDocument document, PdfObject value, string description)
-        => ResolveChain(document, value, description).Value;
+        PdfDocument document, PdfObject value, string description, RewriteContext? context = null)
+        => ResolveChain(document, value, description, context).Value;
 
     private static ResolvedChain ResolveChain(
-        PdfDocument document, PdfObject value, string description)
+        PdfDocument document, PdfObject value, string description, RewriteContext? context = null)
     {
         var visited = new HashSet<(int ObjectNumber, int Generation)>();
         var identities = new List<(int ObjectNumber, int Generation)>();
@@ -862,7 +911,7 @@ public static class PdfDocumentWriter
                     $"{description} contains an indirect-reference cycle.");
             identities.Add(identity);
             finalReference = reference;
-            value = document.Resolve(reference);
+            value = context?.Resolve(reference) ?? document.Resolve(reference);
         }
         return new ResolvedChain(value, identities, finalReference);
     }
@@ -871,20 +920,21 @@ public static class PdfDocumentWriter
         PdfDocument document,
         int size,
         PdfObject root,
-        PdfDocumentWriteOptions options)
+        PdfDocumentWriteOptions options, RewriteContext? context = null)
     {
         var entries = new List<KeyValuePair<PdfName, PdfObject>>
         {
             new(SizeName, new PdfInteger(size)),
             new(RootName, root)
         };
-        foreach ((PdfName name, PdfObject value) in document.CrossReferences.MergedTrailer)
+        PdfDictionary sourceTrailer = context?.Trailer ?? document.CrossReferences.MergedTrailer;
+        foreach ((PdfName name, PdfObject value) in sourceTrailer)
             if (!StructuralTrailerNames.Contains(name))
                 entries.Add(new KeyValuePair<PdfName, PdfObject>(name, value));
         if (options.MetadataPolicy == PdfMetadataPolicy.Preserve
-            && document.CrossReferences.TryGetTrailerValue(InfoName, out PdfObject info)
+            && sourceTrailer.TryGetValue(InfoName, out PdfObject info)
             && info is PdfIndirectReference
-            && ResolveValue(document, info, "The trailer /Info value") is PdfDictionary)
+            && ResolveValue(document, info, "The trailer /Info value", context) is PdfDictionary)
             entries.Add(new KeyValuePair<PdfName, PdfObject>(InfoName, info));
         if (options.PreserveDocumentIdentifiers)
             AddInherited(document, entries, IdName);
@@ -906,10 +956,10 @@ public static class PdfDocumentWriter
             entries.Add(new KeyValuePair<PdfName, PdfObject>(name, value));
     }
 
-    private static void ValidateApplicationTrailerGraphs(PdfDocument document)
+    private static void ValidateApplicationTrailerGraphs(PdfDocument document, RewriteContext? context = null)
     {
         var visited = new HashSet<(int ObjectNumber, int Generation)>();
-        foreach ((PdfName name, PdfObject value) in document.CrossReferences.MergedTrailer)
+        foreach ((PdfName name, PdfObject value) in context?.Trailer ?? document.CrossReferences.MergedTrailer)
             if (!StructuralTrailerNames.Contains(name))
                 Validate(value, $"Trailer /{name.ValueAsLatin1()} value", 0,
                     maximumDepth: 64);
@@ -926,7 +976,7 @@ public static class PdfDocumentWriter
                     throw new InvalidOperationException(
                         $"{description} contains a stale indirect reference.");
                 if (!visited.Add((reference.ObjectNumber, reference.Generation))) return;
-                Validate(document.Resolve(reference), description, depth + 1,
+                Validate(context?.Resolve(reference) ?? document.Resolve(reference), description, depth + 1,
                     maximumDepth);
                 return;
             }
@@ -1009,22 +1059,25 @@ public static class PdfDocumentWriter
 
     private static void ValidateOutputTrailerGraphs(
         PdfDocument document, IReadOnlyList<WritableObject> objects,
-        PdfDocumentWriteOptions options)
+        PdfDocumentWriteOptions options, RewriteContext? context = null)
     {
         var visited = new HashSet<(int ObjectNumber, int Generation)>();
         Dictionary<(int ObjectNumber, int Generation), PdfObject> currentObjects =
             objects.ToDictionary(
                 item => (item.ObjectNumber, item.Generation), item => item.Value);
-        foreach ((PdfName name, PdfObject value) in document.CrossReferences.MergedTrailer)
+        PdfDictionary sourceTrailer = context?.Trailer ?? document.CrossReferences.MergedTrailer;
+        foreach ((PdfName name, PdfObject value) in sourceTrailer)
             if (!StructuralTrailerNames.Contains(name))
                 Validate(value, $"Trailer /{name.ValueAsLatin1()} value", 0);
         if (options.MetadataPolicy == PdfMetadataPolicy.Preserve
-            && document.CrossReferences.TryGetTrailerValue(InfoName, out PdfObject info)
+            && sourceTrailer.TryGetValue(InfoName, out PdfObject info)
             && info is PdfIndirectReference infoReference
-            && currentObjects.TryGetValue(
+            && (currentObjects.TryGetValue(
                 (infoReference.ObjectNumber, infoReference.Generation),
                 out PdfObject? information)
-            && information is PdfDictionary)
+                && information is PdfDictionary
+                || context is not null && ResolveValue(document, infoReference,
+                    "The trailer /Info value", context) is PdfDictionary))
             Validate(info, "Trailer /Info value", 0);
         if (document.IsEncrypted && !options.RemoveEncryption
             && document.CrossReferences.TryGetTrailerValue(
@@ -1138,7 +1191,7 @@ public static class PdfDocumentWriter
     }
 
     private static void ValidateDocumentInformationGraph(
-        PdfDocument document, PdfDictionary information)
+        PdfDocument document, PdfDictionary information, RewriteContext? context = null)
     {
         var visited = new HashSet<(int ObjectNumber, int Generation)>();
         Validate(information, 0);
@@ -1161,7 +1214,7 @@ public static class PdfDocumentWriter
                     throw new InvalidOperationException(
                         "Trailer /Info value contains a stale indirect reference.");
                 if (!visited.Add((reference.ObjectNumber, reference.Generation))) return;
-                Validate(document.Resolve(reference), depth + 1);
+                Validate(context?.Resolve(reference) ?? document.Resolve(reference), depth + 1);
                 return;
             }
             if (value is PdfArray array)
@@ -1184,6 +1237,136 @@ public static class PdfDocumentWriter
     {
         foreach (char character in value)
             output.WriteByte(checked((byte)character));
+    }
+
+    private sealed class RewriteContext
+    {
+        private readonly Dictionary<(int Number, int Generation), PdfObject> _source = [];
+        private readonly Dictionary<PdfObject, PdfObject> _containers = new(ReferenceEqualityComparer.Instance);
+        internal List<WritableObject> Objects { get; } = [];
+        internal List<PdfReferenceRepair> Repairs { get; } = [];
+        internal PdfDictionary Trailer { get; }
+
+        internal RewriteContext(PdfDocument document,
+            IReadOnlyDictionary<int, PdfObject>? replacements = null)
+        {
+            foreach (PdfCrossReferenceEntry entry in document.CrossReferences.Values
+                .Where(entry => entry.Type is PdfCrossReferenceEntryType.InUse or PdfCrossReferenceEntryType.Compressed)
+                .OrderBy(entry => entry.ObjectNumber))
+            {
+                int generation = entry.Type == PdfCrossReferenceEntryType.InUse ? entry.Field2 : 0;
+                PdfObject original = document.Resolve(entry.ObjectNumber);
+                if (IsObsoleteStructuralObject(document, original))
+                {
+                    _source.Add((entry.ObjectNumber, generation), original);
+                    continue;
+                }
+                PdfObject replacement = replacements?.GetValueOrDefault(entry.ObjectNumber) ?? original;
+                PdfObject normalized = Normalize(replacement, entry.ObjectNumber, generation, "", 0);
+                if (!ReferenceEquals(original, normalized)) _containers[original] = normalized;
+                _source.Add((entry.ObjectNumber, generation), normalized);
+                Objects.Add(new WritableObject(entry.ObjectNumber, generation, normalized));
+            }
+            var trailer = new List<KeyValuePair<PdfName, PdfObject>>();
+            foreach (var entry in document.CrossReferences.MergedTrailer)
+            {
+                if (entry.Key.Equals(RootName) || entry.Key.Equals(EncryptName) || entry.Key.Equals(IdName))
+                {
+                    trailer.Add(entry);
+                    continue;
+                }
+                string path = Encoding.Latin1.GetString(PdfObjectWriter.Write(entry.Key));
+                if (IsNullReference(entry.Value, out PdfReferenceRepairReason reason))
+                {
+                    Record(entry.Value, null, null, path, reason, PdfReferenceRepairAction.RemoveDictionaryEntry);
+                    continue;
+                }
+                trailer.Add(new(entry.Key, Normalize(entry.Value, null, null, path, 0)));
+            }
+            Trailer = new PdfDictionary(trailer);
+
+            PdfObject Normalize(PdfObject value, int? owner, int? generation, string path, int depth)
+            {
+                if (depth > 256)
+                    throw new NotSupportedException("The reference normalization graph is too deeply nested.");
+                if (IsNullReference(value, out PdfReferenceRepairReason reason))
+                {
+                    Record(value, owner, generation, path, reason, PdfReferenceRepairAction.ReplaceWithNull);
+                    return PdfNull.Instance;
+                }
+                if (value is PdfArray array)
+                {
+                    PdfObject[] items = array.Select((item, index) =>
+                        Normalize(item, owner, generation, path + "[" + index.ToString(CultureInfo.InvariantCulture) + "]", depth + 1)).ToArray();
+                    return items.Where((item, index) => !ReferenceEquals(item, array[index])).Any()
+                        ? Remember(value, new PdfArray(items)) : value;
+                }
+                if (value is PdfStream stream)
+                {
+                    var streamDictionary = (PdfDictionary)Normalize(stream.Dictionary, owner, generation, path, depth + 1);
+                    return ReferenceEquals(streamDictionary, stream.Dictionary) ? value
+                        : Remember(value, PdfStream.FromOwnedData(streamDictionary, stream.EncodedData));
+                }
+                if (value is not PdfDictionary dictionary) return value;
+                var entries = new List<KeyValuePair<PdfName, PdfObject>>();
+                bool changed = false;
+                foreach (var entry in dictionary)
+                {
+                    string child = path + Encoding.Latin1.GetString(PdfObjectWriter.Write(entry.Key));
+                    if (IsNullReference(entry.Value, out reason))
+                    {
+                        Record(entry.Value, owner, generation, child, reason, PdfReferenceRepairAction.RemoveDictionaryEntry);
+                        changed = true;
+                    }
+                    else
+                    {
+                        PdfObject normalized = Normalize(entry.Value, owner, generation, child, depth + 1);
+                        changed |= !ReferenceEquals(normalized, entry.Value);
+                        entries.Add(new(entry.Key, normalized));
+                    }
+                }
+                return changed ? Remember(value, new PdfDictionary(entries)) : value;
+            }
+
+            PdfObject Remember(PdfObject original, PdfObject normalized)
+            {
+                _containers[original] = normalized;
+                return normalized;
+            }
+
+            bool IsNullReference(PdfObject value, out PdfReferenceRepairReason reason)
+            {
+                reason = PdfReferenceRepairReason.Missing;
+                if (value is not PdfIndirectReference reference) return false;
+                if (document.CrossReferences.TryGetValue(reference.ObjectNumber, out PdfCrossReferenceEntry entry))
+                {
+                    if (entry.Type is PdfCrossReferenceEntryType.InUse or PdfCrossReferenceEntryType.Compressed)
+                    {
+                        int current = entry.Type == PdfCrossReferenceEntryType.InUse ? entry.Field2 : 0;
+                        if (reference.Generation == current) return false;
+                        reason = PdfReferenceRepairReason.StaleGeneration;
+                    }
+                    else reason = PdfReferenceRepairReason.Free;
+                }
+                if (document.UsesCompatibilityRecovery && document.Resolve(reference) is not PdfNull)
+                    throw new InvalidOperationException(
+                        "A dangling reference resolves to recovered content and cannot be replaced safely.");
+                return true;
+            }
+
+            void Record(PdfObject value, int? owner, int? generation, string path,
+                PdfReferenceRepairReason reason, PdfReferenceRepairAction action)
+            {
+                var reference = (PdfIndirectReference)value;
+                Repairs.Add(new(owner, generation, path, reference.ObjectNumber, reference.Generation, reason, action));
+            }
+        }
+
+        internal PdfObject Resolve(PdfIndirectReference reference) =>
+            _source.TryGetValue((reference.ObjectNumber, reference.Generation), out PdfObject? value)
+                ? value : throw new InvalidOperationException("The normalized source graph contains a stale reference.");
+
+        internal PdfObject Container(PdfObject value) => _containers.GetValueOrDefault(value, value);
     }
 
     private sealed record WritableObject(int ObjectNumber, int Generation, PdfObject Value);

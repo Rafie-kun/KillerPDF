@@ -25,6 +25,17 @@ public static class PdfSignatureInvalidationWriter
         ArgumentNullException.ThrowIfNull(document);
         PdfPageTree tree = PdfPageTree.Read(document);
         var update = new PdfIncrementalUpdateBuilder(document);
+        bool changed = RewriteSignatureValues(document,
+            (number, value) => update.ReplaceObject(number, value), tree);
+        return changed ? update.Build() : document.Source.ToArray();
+    }
+
+    internal static bool RewriteSignatureValues(
+        PdfDocument document, Action<int, PdfObject> replaceObject, PdfPageTree? parsedTree = null)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        ArgumentNullException.ThrowIfNull(replaceObject);
+        PdfPageTree tree = parsedTree ?? PdfPageTree.Read(document);
         bool changed = false;
         var catalogEntries = tree.Catalog.ToDictionary(entry => entry.Key, entry => entry.Value);
         if (catalogEntries.Remove(PermissionsName)) changed = true;
@@ -47,7 +58,7 @@ public static class PdfSignatureInvalidationWriter
                     PdfObject replacementFields = rewrittenFields;
                     if (fieldsResolved.Reference is PdfIndirectReference fieldsReference)
                     {
-                        update.ReplaceObject(fieldsReference.ObjectNumber, rewrittenFields);
+                        replaceObject(fieldsReference.ObjectNumber, rewrittenFields);
                         replacementFields = fieldsValue;
                     }
                     rewrittenForm = Replace(form, FieldsName, replacementFields);
@@ -56,16 +67,16 @@ public static class PdfSignatureInvalidationWriter
             if (!ReferenceEquals(rewrittenForm, form))
             {
                 if (formResolved.Reference is PdfIndirectReference formReference)
-                    update.ReplaceObject(formReference.ObjectNumber, rewrittenForm);
+                    replaceObject(formReference.ObjectNumber, rewrittenForm);
                 else
                     catalogEntries[AcroFormName] = rewrittenForm;
             }
         }
 
-        if (!changed) return document.Source.ToArray();
-        update.ReplaceObject(tree.CatalogReference.ObjectNumber,
+        if (!changed) return false;
+        replaceObject(tree.CatalogReference.ObjectNumber,
             new PdfDictionary(catalogEntries));
-        return update.Build();
+        return true;
 
         PdfArray RewriteArray(PdfArray fields, PdfName? inheritedType, int depth)
         {
@@ -98,7 +109,7 @@ public static class PdfSignatureInvalidationWriter
                         PdfObject replacementKids = rewrittenKids;
                         if (kidsResolved.Reference is PdfIndirectReference kidsReference)
                         {
-                            update.ReplaceObject(kidsReference.ObjectNumber, rewrittenKids);
+                            replaceObject(kidsReference.ObjectNumber, rewrittenKids);
                             replacementKids = kidsValue;
                         }
                         entries[KidsName] = replacementKids;
@@ -110,7 +121,7 @@ public static class PdfSignatureInvalidationWriter
                 var rewritten = new PdfDictionary(entries);
                 if (resolved.Reference is PdfIndirectReference reference)
                 {
-                    update.ReplaceObject(reference.ObjectNumber, rewritten);
+                    replaceObject(reference.ObjectNumber, rewritten);
                     values[index] = original;
                 }
                 else

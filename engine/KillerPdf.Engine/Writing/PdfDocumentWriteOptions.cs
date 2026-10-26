@@ -34,6 +34,9 @@ public sealed class PdfDocumentWriteOptions
     /// </summary>
     public bool AllowSignatureInvalidation { get; init; }
 
+    /// <summary>Normalizes source-null indirect references and records the replacements.</summary>
+    public bool ReplaceDanglingReferences { get; init; }
+
     /// <summary>Null preserves the source header version. Rewrites may upgrade but not downgrade.</summary>
     public PdfVersion? TargetVersion { get; init; }
 
