@@ -33,6 +33,36 @@ public sealed class PdfFormFlattenerVisibilityTests
     }
 
     [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void FlattenKeepsAppearanceAndOrdinaryXObjectLayerVisibilitySeparate(bool groupVisible)
+    {
+        PdfDocument original = PdfDocument.Open(CreatePdf(4, layerVisible: groupVisible, annotationLayer: false));
+        var update = new PdfIncrementalUpdateBuilder(original);
+        var appearance = Assert.IsType<PdfStream>(original.Resolve(new PdfIndirectReference(5, 0)));
+        update.ReplaceObject(5, new PdfStream(new PdfDictionary(appearance.Dictionary.Append(
+            new KeyValuePair<PdfName, PdfObject>(new PdfName("OC"u8), new PdfIndirectReference(8, 0)))), appearance.EncodedData.Span));
+        PdfPageTreeEntry page = PdfPageTree.Read(original).Pages[0];
+        var resources = Assert.IsType<PdfDictionary>(page.Dictionary[new PdfName("Resources"u8)]).ToDictionary(pair => pair.Key, pair => pair.Value);
+        resources[new PdfName("XObject"u8)] = new PdfDictionary([
+            new(new PdfName("Shared"u8), new PdfIndirectReference(5, 0))]);
+        var pageEntries = page.Dictionary.ToDictionary(pair => pair.Key, pair => pair.Value);
+        pageEntries[new PdfName("Resources"u8)] = new PdfDictionary(resources);
+        update.ReplaceObject(page.Reference.ObjectNumber, new PdfDictionary(pageEntries));
+        update.ReplaceObject(6, new PdfStream(new PdfDictionary([]),
+            "0 1 0 rg 0 0 10 10 re f q .2 0 0 .2 85 5 cm /Shared Do Q"u8));
+        PdfDocument source = PdfDocument.Open(update.Build());
+        PdfRenderedPage before = Render(source, false);
+        AssertControls(before, true);
+        Assert.Equal(groupVisible ? new byte[] { 255, 0, 0, 255 } : new byte[] { 255, 255, 255, 255 }, Pixel(before, 90, 90));
+        PdfDocument flattened = PdfDocument.Open(PdfFormFlattener.Flatten(source));
+        Assert.Empty(PdfFormWidgetReader.ReadPage(flattened, 0));
+        PdfRenderedPage after = Render(flattened, false);
+        AssertControls(after, true);
+        Assert.Equal(before.Pixels.ToArray(), after.Pixels.ToArray());
+    }
+
+    [Theory]
     [InlineData("1 0 0 1 100 0 cm")]
     [InlineData("0 0 10 10 re W n")]
     [InlineData("/G gs")]

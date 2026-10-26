@@ -45,6 +45,7 @@ public static class PdfFormFlattener
 
         var update = new PdfIncrementalUpdateBuilder(document);
         var importer = new PdfObjectGraphImporter(document, update, []);
+        var contentAppearances = new Dictionary<PdfStream, PdfIndirectReference>(ReferenceEqualityComparer.Instance);
         foreach (PdfOptionalContentGroupInfo group in PdfOptionalContentReader.Read(document).Groups)
         {
             var reference = new PdfIndirectReference(group.ObjectNumber, group.Generation);
@@ -119,7 +120,7 @@ public static class PdfFormFlattener
                 PdfName resource;
                 do resource = Name("KpfFlat" + resourceNumber++);
                 while (xObjects.ContainsKey(resource));
-                xObjects[resource] = importer.Import(appearanceValue);
+                xObjects[resource] = ImportContentAppearance(appearanceValue, appearance);
                 bool layered = dictionary.TryGetValue(Name("OC"), out PdfObject? layer);
                 if (layered)
                 {
@@ -170,6 +171,20 @@ public static class PdfFormFlattener
             .Distinct(StringComparer.Ordinal))
             editor.RemoveFormField(fieldName);
         return editor.Build();
+
+        PdfObject ImportContentAppearance(PdfObject value, PdfStream appearance)
+        {
+            PdfName optionalContentName = Name("OC");
+            if (!appearance.Dictionary.ContainsKey(optionalContentName)) return importer.Import(value);
+            if (contentAppearances.TryGetValue(appearance, out PdfIndirectReference? existing)) return existing;
+            // The annotation appearance did not invoke its root through Do. Baking it through Do
+            // must not introduce a new outer layer condition. Ordinary uses keep their original
+            // XObject identity, while layers inside the appearance and on the annotation remain.
+            var dictionary = new PdfDictionary(appearance.Dictionary.Where(pair => !pair.Key.Equals(optionalContentName)));
+            PdfIndirectReference reference = update.AddObject(importer.Import(new PdfStream(dictionary, appearance.EncodedData.Span)));
+            contentAppearances.Add(appearance, reference);
+            return reference;
+        }
     }
 
     private static PdfObject? SelectedAppearance(PdfDocument document,
