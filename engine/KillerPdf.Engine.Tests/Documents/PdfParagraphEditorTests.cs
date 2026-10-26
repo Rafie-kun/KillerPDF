@@ -14,6 +14,19 @@ public sealed class PdfParagraphEditorTests
     private static TrueTypeFont Font() => PdfStandardFontSubstitutes.OcrTrainingFonts()[0];
 
     [Fact]
+    public void CandidateInspectionRetainsTaggedDocumentRefusalWithoutChangingSource()
+    {
+        PdfDocument tagged = Raw("BT /F1 10 Tf 30 250 Td (OLD) Tj ET", catalogExtra:
+            "/StructTreeRoot << /Type /StructTreeRoot /K [] >>");
+        byte[] before = tagged.Source.ToArray();
+        var inspection = PdfParagraphEditor.InspectCandidates(tagged, 0);
+        Assert.Empty(inspection.Candidates);
+        Assert.NotEmpty(inspection.Refusals);
+        Assert.All(inspection.Refusals, item => Assert.Equal("TaggedDocument", item.RefusalCode.ToString()));
+        Assert.Equal(before, tagged.Source.ToArray());
+    }
+
+    [Fact]
     public void CandidateInspectionRetainsRotationRefusalAndSupportedCandidates()
     {
         PdfDocument ordinary = Raw("BT /F1 10 Tf 30 250 Td (OLD) Tj ET");

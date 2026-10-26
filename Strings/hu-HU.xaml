@@ -1950,4 +1950,5 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_ExportLoss_Unknown">Egyes tartalmak nem jeleníthetők meg teljesen ebben az exportban.</sys:String>
     <sys:String x:Key="Str_Watch_MissingOcrModels">A(z) {0}. lépéshez OCR nyelvi modellek szükségesek: {1}. Indítás előtt telepítse őket az OCR nyelvi menüjéből.</sys:String>
     <sys:String x:Key="Str_Paragraph_Rotated">Elforgatott oldalakon nem szerkeszthetők bekezdések. Először állítsa az oldal elforgatását 0°-ra.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Tagged">Címkézett dokumentumokban nem szerkeszthetők bekezdések, mert a művelet nem tudja megőrizni a dokumentum szerkezetét.</sys:String>
 </ResourceDictionary>

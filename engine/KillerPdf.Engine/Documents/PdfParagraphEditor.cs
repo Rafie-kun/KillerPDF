@@ -37,7 +37,9 @@ public enum PdfParagraphRefusalCode
     /// <summary>The source does not meet the supported paragraph constraints.</summary>
     Unsupported,
     /// <summary>The page has a nonzero rotation.</summary>
-    RotatedPage
+    RotatedPage,
+    /// <summary>The document contains tagged structure that paragraph editing cannot preserve.</summary>
+    TaggedDocument
 }
 
 /// <summary>Supported candidates and retained refusals from page inspection.</summary>
@@ -167,7 +169,8 @@ public static class PdfParagraphEditor
         if (document.IsEncrypted)
             throw new NotSupportedException("Remove document encryption before editing paragraphs.");
         if (tree.Catalog.ContainsKey(Name("StructTreeRoot")))
-            throw new NotSupportedException("Paragraph editing is not supported in tagged documents.");
+            return new PdfParagraphInspection(false, "Paragraph editing is not supported in tagged documents.", null)
+                { RefusalCode = PdfParagraphRefusalCode.TaggedDocument };
         if (tree.Catalog.ContainsKey(Name("Perms")))
             throw new NotSupportedException("Paragraph editing is not supported in documents with certification or usage rights.");
         if (PdfSignatureReader.Read(document).Any(signature => signature.IsSigned))

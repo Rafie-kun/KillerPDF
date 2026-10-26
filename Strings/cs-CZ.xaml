@@ -1948,4 +1948,5 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_ExportLoss_Unknown">Část obsahu nelze v tomto exportu plně zachovat.</sys:String>
     <sys:String x:Key="Str_Watch_MissingOcrModels">Krok {0} vyžaduje jazykové modely OCR: {1}. Před spuštěním je nainstalujte z nabídky jazyků OCR.</sys:String>
     <sys:String x:Key="Str_Paragraph_Rotated">Na otočených stránkách nelze upravovat odstavce. Nejprve nastavte otočení stránky na 0°.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Tagged">V dokumentech se značkami nelze upravovat odstavce, protože nelze zachovat jejich strukturu.</sys:String>
 </ResourceDictionary>

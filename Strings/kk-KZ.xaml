@@ -1966,4 +1966,5 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_ExportLoss_Unknown">Бұл экспортта кейбір мазмұн толық көрсетілмейді.</sys:String>
     <sys:String x:Key="Str_Watch_MissingOcrModels">{0}-қадамға OCR тіл үлгілері қажет: {1}. Бастамас бұрын оларды OCR тіл мәзірінен орнатыңыз.</sys:String>
     <sys:String x:Key="Str_Paragraph_Rotated">Бұрылған беттерде абзацтарды өңдеу мүмкін емес. Алдымен беттің бұрылуын 0° етіп орнатыңыз.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Tagged">Тегтелген құжаттарда абзацтарды өңдеу мүмкін емес, себебі олардың құрылымын сақтау мүмкін болмайды.</sys:String>
 </ResourceDictionary>

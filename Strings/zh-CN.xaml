@@ -1947,4 +1947,5 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_ExportLoss_Unknown">此导出无法完整表示部分内容。</sys:String>
     <sys:String x:Key="Str_Watch_MissingOcrModels">步骤 {0} 需要 OCR 语言模型：{1}。请先从 OCR 语言菜单安装，再启动。</sys:String>
     <sys:String x:Key="Str_Paragraph_Rotated">无法在已旋转的页面上编辑段落。请先将页面旋转角度设为 0°。</sys:String>
+    <sys:String x:Key="Str_Paragraph_Tagged">无法在带标签的文档中编辑段落，因为此操作无法保留文档结构。</sys:String>
 </ResourceDictionary>
