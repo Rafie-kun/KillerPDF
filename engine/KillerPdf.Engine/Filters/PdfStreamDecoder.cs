@@ -906,7 +906,7 @@ public static class PdfStreamDecoder
 
         if (predictor == 2)
             return ReverseTiffPredictor(
-                data, rowLength, colors, columns, bitsPerComponent);
+                data, rowLength, colors, columns, bitsPerComponent, compatibilityRecovery);
         if (predictor is >= 10 and <= 15)
             return ReversePngPredictor(
                 data, rowLength, bytesPerPixel, predictor, maximumDecodedBytes,
@@ -916,12 +916,13 @@ public static class PdfStreamDecoder
     }
 
     private static byte[] ReverseTiffPredictor(
-        byte[] data, int rowLength, int colors, int columns, int bitsPerComponent)
+        byte[] data, int rowLength, int colors, int columns, int bitsPerComponent,
+        bool compatibilityRecovery)
     {
-        if (rowLength == 0 || data.Length % rowLength != 0)
+        if (rowLength == 0 || (!compatibilityRecovery && data.Length % rowLength != 0))
             throw new PdfFilterException("TIFF predictor data does not contain complete rows.");
 
-        byte[] decoded = (byte[])data.Clone();
+        byte[] decoded = data.AsSpan(0, data.Length / rowLength * rowLength).ToArray();
         int samplesPerRow = checked(colors * columns);
         if (bitsPerComponent == 8)
         {
@@ -1004,7 +1005,7 @@ public static class PdfStreamDecoder
         {
             throw new PdfFilterException("PNG predictor dimensions exceed the supported range.", ex);
         }
-        if (data.Length % encodedRowLength != 0)
+        if (!compatibilityRecovery && data.Length % encodedRowLength != 0)
             throw new PdfFilterException("PNG predictor data does not contain complete rows.");
 
         int rowCount = data.Length / encodedRowLength;
