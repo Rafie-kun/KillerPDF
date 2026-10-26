@@ -105,6 +105,16 @@ namespace KillerPDF
             {
                 var indices = new List<int>();
                 foreach (PageThumbnailVm vm in selected) indices.Add(vm.PageIndex);
+                var removed = indices.ToHashSet();
+                int originalPage = Math.Clamp(_currentPage, 0, _doc.PageCount - 1);
+                int survivingPage = originalPage;
+                while (survivingPage < _doc.PageCount && removed.Contains(survivingPage)) survivingPage++;
+                if (survivingPage >= _doc.PageCount)
+                {
+                    survivingPage = originalPage - 1;
+                    while (survivingPage >= 0 && removed.Contains(survivingPage)) survivingPage--;
+                }
+                int selectedAfterRemoval = Math.Max(0, survivingPage - indices.Count(index => index < survivingPage));
                 UndoEntry? documentUndo = CaptureDocumentUndo();
                 var annotationBackup = _annotations.ToDictionary(
                     pair => pair.Key, pair => pair.Value);
@@ -114,6 +124,7 @@ namespace KillerPDF
                     SaveTempAndReload(
                         keepAnnotations: true,
                         finalizeSavedFile: path => PdfEngineIntegration.RemovePages(path, indices),
+                        selectedPageAfterReload: selectedAfterRemoval,
                         remapRedactionMarks: true,
                         remapRotations: rotations =>
                             PdfEngineIntegration.RemapRotationsAfterPageRemoval(rotations, indices),
