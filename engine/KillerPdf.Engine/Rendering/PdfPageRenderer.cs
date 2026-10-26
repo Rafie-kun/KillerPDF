@@ -414,6 +414,17 @@ public sealed partial class PdfPageRenderer
             bool beginKnockoutObjects = true)
         {
             if (depth > 32) throw new FormatException("Form XObject nesting limit exceeded.");
+            if (!RuntimeHelpers.TryEnsureSufficientExecutionStack())
+                throw new InsufficientExecutionStackException(
+                    "Nested PDF rendering exceeds the available execution stack.");
+            ProcessCore(instructions, resources, initial, depth, beginKnockoutObjects);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        void ProcessCore(IEnumerable<PdfContentInstruction> instructions,
+            PdfDictionary resources, GraphicsState initial, int depth,
+            bool beginKnockoutObjects)
+        {
             using var clipScratch = new ClipScratchScope();
             using var opaqueFills = new OpaqueFillSequence(pixels, frame, cancellationToken);
             clipScratch.PendingFills = opaqueFills;
