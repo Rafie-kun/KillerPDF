@@ -109,7 +109,10 @@ internal sealed class PdfStandardSecurityHandler
         if (!aesGcm && (version != 5 || revision is not (5 or 6)))
             throw new NotSupportedException(
                 $"Standard security handler V={version}, R={revision} is not supported.");
-        if (RequireInteger(encryption, "Length") != 256)
+        bool recoverLength = compatibilityRecovery && !aesGcm;
+        long lengthBits = recoverLength && !encryption.ContainsKey(Name("Length"))
+            ? 256 : RequireInteger(encryption, "Length");
+        if (lengthBits != 256 && !(recoverLength && lengthBits == 32))
             throw new InvalidOperationException(
                 "AES-256 encryption requires a 256-bit encryption key.");
         byte[] owner = RequireBytes(encryption, "O", 48, compatibilityRecovery);
