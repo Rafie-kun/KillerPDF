@@ -1957,4 +1957,11 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_FormEvaluation_Invalid">Значение не соответствует правилам проверки этого поля.</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Unsupported">Это поле использует неподдерживаемый сценарий. Он не был выполнен.</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Failed">Не удалось завершить вычисление этого поля.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Summary">Найдено ограничений экспорта: {0}. Перед продолжением проверьте затронутые страницы и содержимое.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Row">{0}. Количество: {1}. {2}</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Vector">Векторные контуры не представлены в этом структурированном экспорте.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Direction">Этот экспорт не сохраняет негоризонтальное или обратное направление текста.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Link">Ссылки не представлены в этом структурированном экспорте.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Image">Данные изображений пропускаются или заменяются заполнителями при этом экспорте.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Unknown">Некоторое содержимое невозможно полностью представить в этом экспорте.</sys:String>
 </ResourceDictionary>

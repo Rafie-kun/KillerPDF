@@ -1934,4 +1934,11 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_FormEvaluation_Invalid">মানটি এই ক্ষেত্রের যাচাইকরণ নিয়ম পূরণ করে না।</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Unsupported">এই ক্ষেত্রে একটি অসমর্থিত স্ক্রিপ্ট আছে। এটি চালানো হয়নি।</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Failed">এই ক্ষেত্রের গণনা সম্পূর্ণ করা যায়নি।</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Summary">রপ্তানির {0}টি সীমাবদ্ধতা পাওয়া গেছে। চালিয়ে যাওয়ার আগে প্রভাবিত পৃষ্ঠা ও বিষয়বস্তু পর্যালোচনা করুন।</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Row">{0}। সংখ্যা: {1}। {2}</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Vector">এই কাঠামোবদ্ধ রপ্তানিতে ভেক্টর পাথ উপস্থাপিত হয় না।</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Direction">এই রপ্তানিতে অনুভূমিক নয় এমন বা বিপরীত পাঠ্যের দিক সংরক্ষিত হয় না।</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Link">এই কাঠামোবদ্ধ রপ্তানিতে লিঙ্ক উপস্থাপিত হয় না।</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Image">এই রপ্তানিতে ছবির ডেটা বাদ দেওয়া হয় বা স্থানধারক দিয়ে প্রতিস্থাপন করা হয়।</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Unknown">কিছু বিষয়বস্তু এই রপ্তানিতে সম্পূর্ণভাবে উপস্থাপন করা যায় না।</sys:String>
 </ResourceDictionary>

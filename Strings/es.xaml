@@ -1934,4 +1934,11 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Invalid">El valor no cumple las reglas de validación de este campo.</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Unsupported">Este campo usa un script no compatible. No se ha ejecutado.</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Failed">No se ha podido completar el cálculo de este campo.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Summary">Se han encontrado {0} limitaciones de exportación. Revise las páginas y el contenido afectados antes de continuar.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Row">{0}. Cantidad: {1}. {2}</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Vector">Las rutas vectoriales no se representan en esta exportación estructurada.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Direction">Esta exportación no conserva la dirección del texto no horizontal o invertido.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Link">Los enlaces no se representan en esta exportación estructurada.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Image">En esta exportación, los datos de imagen se omiten o se sustituyen por marcadores de posición.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Unknown">Parte del contenido no se puede representar por completo en esta exportación.</sys:String>
 </ResourceDictionary>

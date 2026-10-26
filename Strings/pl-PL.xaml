@@ -1942,4 +1942,11 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_FormEvaluation_Invalid">Wartość nie spełnia reguł sprawdzania poprawności tego pola.</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Unsupported">To pole używa nieobsługiwanego skryptu. Nie został uruchomiony.</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Failed">Nie można było ukończyć obliczenia tego pola.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Summary">Znaleziono ograniczenia eksportu: {0}. Przed kontynuowaniem sprawdź odpowiednie strony i zawartość.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Row">{0}. Liczba: {1}. {2}</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Vector">Ścieżki wektorowe nie są odwzorowywane w tym eksporcie strukturalnym.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Direction">Ten eksport nie zachowuje niepoziomego ani odwróconego kierunku tekstu.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Link">Łącza nie są odwzorowywane w tym eksporcie strukturalnym.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Image">Dane obrazów są pomijane lub zastępowane symbolami zastępczymi w tym eksporcie.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Unknown">Niektórych treści nie można w pełni odwzorować w tym eksporcie.</sys:String>
 </ResourceDictionary>

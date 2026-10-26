@@ -1938,4 +1938,11 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Invalid">此值不符合该字段的验证规则。</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Unsupported">此字段使用不受支持的脚本。该脚本未运行。</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Failed">无法完成此字段的计算。</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Summary">发现 {0} 项导出限制。继续之前，请查看受影响的页面和内容。</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Row">{0}。数量：{1}。{2}</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Vector">此结构化导出不表示矢量路径。</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Direction">此导出不保留非水平或反向的文字方向。</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Link">此结构化导出不表示链接。</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Image">此导出会省略图像数据或将其替换为占位符。</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Unknown">此导出无法完整表示部分内容。</sys:String>
 </ResourceDictionary>

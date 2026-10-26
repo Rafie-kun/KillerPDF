@@ -1750,9 +1750,7 @@ namespace KillerPDF
                 PdfStructuredExportReport losses = PdfStructuredExport.InspectLosses(document, options.Format, pages, officeMode: options.OfficeMode);
                 if (!losses.IsLossless)
                 {
-                    string warning = string.Format(Loc("Str_ExportDoc_LossWarning"), losses.Findings.Count);
-                    if (KillerDialog.Show(this, warning, Loc("Str_ExportDoc_Suffix"),
-                        MessageBoxButton.OKCancel, MessageBoxImage.Warning) != MessageBoxResult.OK) return;
+                    if (!ConfirmExportLosses(losses)) return;
                 }
                 if (!sourceCurrent()) return;
 

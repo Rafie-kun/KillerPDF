@@ -1941,4 +1941,11 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_FormEvaluation_Invalid">Az érték nem felel meg a mező érvényesítési szabályainak.</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Unsupported">Ez a mező nem támogatott szkriptet használ. A szkript nem futott le.</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Failed">A mező számítását nem sikerült befejezni.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Summary">Exportálási korlátozások száma: {0}. A folytatás előtt ellenőrizze az érintett oldalakat és tartalmakat.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Row">{0}. Darabszám: {1}. {2}</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Vector">A vektorgörbék nem jelennek meg ebben a strukturált exportban.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Direction">Ez az export nem őrzi meg a nem vízszintes vagy fordított szövegirányt.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Link">A hivatkozások nem jelennek meg ebben a strukturált exportban.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Image">A képadatok kimaradnak ebből az exportból, vagy helyőrzők váltják fel őket.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Unknown">Egyes tartalmak nem jeleníthetők meg teljesen ebben az exportban.</sys:String>
 </ResourceDictionary>

@@ -1936,4 +1936,11 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Invalid">此值不符合此欄位的驗證規則。</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Unsupported">此欄位使用不支援的指令碼。該指令碼未執行。</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Failed">無法完成此欄位的計算。</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Summary">發現 {0} 項匯出限制。繼續之前，請檢視受影響的頁面和內容。</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Row">{0}。數量：{1}。{2}</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Vector">此結構化匯出不表示向量路徑。</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Direction">此匯出不保留非水平或反向的文字方向。</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Link">此結構化匯出不表示連結。</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Image">此匯出會省略影像資料或將其取代為預留位置。</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Unknown">此匯出無法完整表示部分內容。</sys:String>
 </ResourceDictionary>

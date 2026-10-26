@@ -1953,4 +1953,11 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_FormEvaluation_Invalid">The value does not meet this field's validation rules.</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Unsupported">This field uses an unsupported script. It was not run.</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Failed">This field's calculation could not be completed.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Summary">{0} export limitation(s) found. Review the affected pages and content before continuing.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Row">{0}. Count: {1}. {2}</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Vector">Vector paths are not represented by this structured export.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Direction">Non-horizontal or reversed text direction is not preserved by this export.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Link">Links are not represented by this structured export.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Image">Image data is omitted or replaced with placeholders in this export.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Unknown">Some content cannot be fully represented by this export.</sys:String>
 </ResourceDictionary>

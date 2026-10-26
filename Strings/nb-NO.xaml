@@ -1954,4 +1954,11 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_FormEvaluation_Invalid">Verdien oppfyller ikke valideringsreglene for dette feltet.</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Unsupported">Dette feltet bruker et skript som ikke støttes. Det ble ikke kjørt.</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Failed">Beregningen for dette feltet kunne ikke fullføres.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Summary">Fant {0} eksportbegrensning(er). Se gjennom berørte sider og innhold før du fortsetter.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Row">{0}. Antall: {1}. {2}</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Vector">Vektorbaner gjengis ikke i denne strukturerte eksporten.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Direction">Denne eksporten bevarer ikke tekstretning som er omvendt eller ikke vannrett.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Link">Lenker gjengis ikke i denne strukturerte eksporten.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Image">Bildedata utelates eller erstattes med plassholdere i denne eksporten.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Unknown">Noe innhold kan ikke gjengis fullstendig i denne eksporten.</sys:String>
 </ResourceDictionary>

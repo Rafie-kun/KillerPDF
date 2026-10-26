@@ -1954,4 +1954,11 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_FormEvaluation_Invalid">Giá trị không đáp ứng quy tắc xác thực của trường này.</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Unsupported">Trường này sử dụng tập lệnh không được hỗ trợ. Tập lệnh chưa được chạy.</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Failed">Không thể hoàn tất phép tính của trường này.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Summary">Tìm thấy {0} hạn chế xuất. Hãy xem các trang và nội dung bị ảnh hưởng trước khi tiếp tục.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Row">{0}. Số lượng: {1}. {2}</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Vector">Các đường dẫn vectơ không được thể hiện trong bản xuất có cấu trúc này.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Direction">Bản xuất này không giữ hướng văn bản không nằm ngang hoặc bị đảo ngược.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Link">Các liên kết không được thể hiện trong bản xuất có cấu trúc này.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Image">Dữ liệu hình ảnh bị bỏ qua hoặc thay bằng phần giữ chỗ trong bản xuất này.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Unknown">Một số nội dung không thể được thể hiện đầy đủ trong bản xuất này.</sys:String>
 </ResourceDictionary>

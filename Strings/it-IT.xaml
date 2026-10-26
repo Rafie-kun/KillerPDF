@@ -1954,4 +1954,11 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_FormEvaluation_Invalid">Il valore non rispetta le regole di convalida di questo campo.</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Unsupported">Questo campo usa uno script non supportato. Lo script non è stato eseguito.</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Failed">Non è stato possibile completare il calcolo di questo campo.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Summary">Rilevate {0} limitazioni di esportazione. Controlla le pagine e i contenuti interessati prima di continuare.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Row">{0}. Quantità: {1}. {2}</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Vector">I tracciati vettoriali non sono rappresentati in questa esportazione strutturata.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Direction">Questa esportazione non conserva la direzione del testo non orizzontale o invertito.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Link">I collegamenti non sono rappresentati in questa esportazione strutturata.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Image">I dati delle immagini vengono omessi o sostituiti con segnaposto in questa esportazione.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Unknown">Alcuni contenuti non possono essere rappresentati completamente in questa esportazione.</sys:String>
 </ResourceDictionary>

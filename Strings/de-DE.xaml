@@ -1943,4 +1943,11 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_FormEvaluation_Invalid">Der Wert entspricht nicht den Validierungsregeln dieses Feldes.</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Unsupported">Dieses Feld verwendet ein nicht unterstütztes Skript. Es wurde nicht ausgeführt.</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Failed">Die Berechnung dieses Feldes konnte nicht abgeschlossen werden.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Summary">{0} Exporteinschränkung(en) gefunden. Prüfen Sie die betroffenen Seiten und Inhalte, bevor Sie fortfahren.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Row">{0}. Anzahl: {1}. {2}</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Vector">Vektorpfade werden in diesem strukturierten Export nicht dargestellt.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Direction">Eine nicht horizontale oder umgekehrte Textrichtung bleibt bei diesem Export nicht erhalten.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Link">Links werden in diesem strukturierten Export nicht dargestellt.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Image">Bilddaten werden bei diesem Export ausgelassen oder durch Platzhalter ersetzt.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Unknown">Einige Inhalte können in diesem Export nicht vollständig dargestellt werden.</sys:String>
 </ResourceDictionary>

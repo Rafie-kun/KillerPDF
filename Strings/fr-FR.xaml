@@ -1954,4 +1954,11 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_FormEvaluation_Invalid">La valeur ne respecte pas les règles de validation de ce champ.</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Unsupported">Ce champ utilise un script non pris en charge. Il n'a pas été exécuté.</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Failed">Le calcul de ce champ n'a pas pu être terminé.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Summary">{0} limitation(s) d'exportation détectée(s). Vérifiez les pages et le contenu concernés avant de continuer.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Row">{0}. Nombre : {1}. {2}</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Vector">Les tracés vectoriels ne sont pas représentés dans cette exportation structurée.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Direction">Cette exportation ne conserve pas le sens du texte non horizontal ou inversé.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Link">Les liens ne sont pas représentés dans cette exportation structurée.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Image">Les données d'image sont omises ou remplacées par des espaces réservés dans cette exportation.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Unknown">Certains contenus ne peuvent pas être entièrement représentés dans cette exportation.</sys:String>
 </ResourceDictionary>

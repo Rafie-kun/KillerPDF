@@ -1954,4 +1954,11 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Invalid">値がこのフィールドの検証ルールを満たしていません。</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Unsupported">このフィールドは未対応のスクリプトを使用しています。実行されませんでした。</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Failed">このフィールドの計算を完了できませんでした。</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Summary">エクスポートの制限が{0}件見つかりました。続行する前に、該当するページと内容を確認してください。</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Row">{0}。件数: {1}。{2}</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Vector">この構造化エクスポートではベクターパスは表現されません。</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Direction">このエクスポートでは、水平方向以外または逆方向のテキストの向きは保持されません。</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Link">この構造化エクスポートではリンクは表現されません。</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Image">このエクスポートでは画像データが省略されるか、プレースホルダーに置き換えられます。</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Unknown">このエクスポートでは一部の内容を完全に表現できません。</sys:String>
 </ResourceDictionary>

@@ -1934,4 +1934,11 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_FormEvaluation_Invalid">Değer, bu alanın doğrulama kurallarını karşılamıyor.</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Unsupported">Bu alan desteklenmeyen bir betik kullanıyor. Betik çalıştırılmadı.</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Failed">Bu alanın hesaplaması tamamlanamadı.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Summary">{0} dışa aktarma sınırlaması bulundu. Devam etmeden önce etkilenen sayfaları ve içeriği inceleyin.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Row">{0}. Sayı: {1}. {2}</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Vector">Vektör yolları bu yapılandırılmış dışa aktarmada temsil edilmez.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Direction">Bu dışa aktarma, yatay olmayan veya ters metin yönünü korumaz.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Link">Bağlantılar bu yapılandırılmış dışa aktarmada temsil edilmez.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Image">Bu dışa aktarmada görüntü verileri atlanır veya yer tutucularla değiştirilir.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Unknown">Bazı içerikler bu dışa aktarmada tam olarak temsil edilemez.</sys:String>
 </ResourceDictionary>

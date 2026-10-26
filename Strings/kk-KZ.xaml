@@ -1957,4 +1957,11 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_FormEvaluation_Invalid">Мән осы өрістің тексеру ережелеріне сәйкес келмейді.</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Unsupported">Бұл өріс қолдау көрсетілмейтін сценарийді пайдаланады. Ол орындалмады.</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Failed">Бұл өрістің есептеуін аяқтау мүмкін болмады.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Summary">Экспорттың {0} шектеуі табылды. Жалғастырмас бұрын тиісті беттер мен мазмұнды тексеріңіз.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Row">{0}. Саны: {1}. {2}</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Vector">Бұл құрылымдық экспортта векторлық жолдар көрсетілмейді.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Direction">Бұл экспорт көлденең емес немесе кері мәтін бағытын сақтамайды.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Link">Бұл құрылымдық экспортта сілтемелер көрсетілмейді.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Image">Бұл экспортта кескін деректері алынып тасталады немесе толтырғыштармен ауыстырылады.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Unknown">Бұл экспортта кейбір мазмұн толық көрсетілмейді.</sys:String>
 </ResourceDictionary>

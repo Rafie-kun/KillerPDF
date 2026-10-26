@@ -1954,4 +1954,11 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_FormEvaluation_Invalid">O valor não atende às regras de validação deste campo.</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Unsupported">Este campo usa um script sem suporte. Ele não foi executado.</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Failed">Não foi possível concluir o cálculo deste campo.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Summary">Foram encontradas {0} limitações de exportação. Revise as páginas e o conteúdo afetados antes de continuar.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Row">{0}. Quantidade: {1}. {2}</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Vector">Os caminhos vetoriais não são representados nesta exportação estruturada.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Direction">Esta exportação não preserva a direção de texto não horizontal ou invertida.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Link">Os links não são representados nesta exportação estruturada.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Image">Os dados de imagem são omitidos ou substituídos por espaços reservados nesta exportação.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Unknown">Alguns conteúdos não podem ser representados por completo nesta exportação.</sys:String>
 </ResourceDictionary>

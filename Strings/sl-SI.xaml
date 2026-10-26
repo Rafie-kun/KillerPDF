@@ -1841,4 +1841,11 @@
     <sys:String x:Key="Str_FormEvaluation_Invalid">Vrednost ne ustreza pravilom preverjanja tega polja.</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Unsupported">To polje uporablja nepodprt skript. Skript ni bil izveden.</sys:String>
     <sys:String x:Key="Str_FormEvaluation_Failed">Izračuna tega polja ni bilo mogoče dokončati.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Summary">Najdene omejitve izvoza: {0}. Pred nadaljevanjem preglejte prizadete strani in vsebino.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Row">{0}. Število: {1}. {2}</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Vector">Vektorske poti niso predstavljene v tem strukturiranem izvozu.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Direction">Ta izvoz ne ohrani nevodoravne ali obrnjene smeri besedila.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Link">Povezave niso predstavljene v tem strukturiranem izvozu.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Image">Podatki slik se pri tem izvozu izpustijo ali nadomestijo z ogradami.</sys:String>
+    <sys:String x:Key="Str_ExportLoss_Unknown">Nekatere vsebine v tem izvozu ni mogoče v celoti predstaviti.</sys:String>
 </ResourceDictionary>
