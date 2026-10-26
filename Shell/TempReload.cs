@@ -27,7 +27,8 @@ namespace KillerPDF
             int? selectedPageAfterReload = null,
             UndoEntry? documentUndo = null,
             bool preserveRenderedPages = false,
-            bool remapRedactionMarks = false)
+            bool remapRedactionMarks = false,
+            Action<Dictionary<int, List<PageAnnotation>>>? remapAnnotations = null)
         {
             if (_doc is null || _currentFile is null) return;
             // Every user command asks for the owner password before it gets here. This catches
@@ -43,45 +44,28 @@ namespace KillerPDF
             // arriving here pass an explicit pre-mutation entry. Push only after every save,
             // rewrite and reopen step succeeds so a failed operation creates no phantom history.
             documentUndo ??= ActiveViewer.CaptureSerializedDocumentUndoExt(_currentFile);
-            // The serialized working file is about to change, so discard its immutable engine view.
-            CloseEngineDocumentSession();
-            // Stop render workers tied to the outgoing file before clearing the cache. Without this,
-            // an already-running Grid or Continuous task can finish after the clear and put an old
-            // page bitmap straight back into the active session.
-            if (!preserveRenderedPages)
-            {
-                _secondaryRenderCts?.Cancel();
-                _continuousRenderCts?.Cancel();
-                _continuousSharpenCts?.Cancel();
-            }
-            // Overlay annotations are unsaved, still-editable user work. Callers that don't change
-            // page identity (crop) pass keepAnnotations:true so annotations on other pages survive
-            // the reload and stay selectable/movable; they are re-rendered after the doc reopens.
-            if (!keepAnnotations) _annotations.Clear();
-            if (!preserveRenderedPages)
-            {
-                _renderDims.Clear();
-                Controls.PdfViewer.InvalidateRenderCacheExt(_active);   // pages changed pixels / order: drop this tab's cached bitmaps
-                _renderedPrimaryPage = -1;        // force a re-render after reload even if the same page stays selected (e.g. rotate)
-                ClearSelection();
-            }
-            MarkDirty();
             var doc = _doc;
             int selectedIdx = selectedPageAfterReload ?? PageList.SelectedIndex;
+            var candidateRotations = new Dictionary<int, int>(_pageRotations);
+            Dictionary<int, List<PageAnnotation>>? candidateAnnotations = null;
+            if (remapAnnotations is not null)
+            {
+                candidateAnnotations = ActiveViewer.CaptureAnnotationStateExt();
+                remapAnnotations(candidateAnnotations);
+            }
 
             // Capture page rotations, then strip them from the serialized working copy.
             // The working copy uses unrotated MediaBox dimensions for page operations.
             // Stripping /Rotate to 0 before saving means the engine renders unrotated content
             // that fits the bitmap; RotateBitmap is applied in each render path instead.
-            EnsureEngineDocumentSession().CaptureRotations(_pageRotations);
-            remapRotations?.Invoke(_pageRotations);
+            EnsureEngineDocumentSession().CaptureRotations(candidateRotations);
+            remapRotations?.Invoke(candidateRotations);
 
             var tempPath = App.MakeTempFile("temp");
             var serializedPath = App.MakeTempFile("serialized");
             try
             {
                 doc.Save(serializedPath);
-                doc.Close();
                 PdfEngineIntegration.RepairHarmlessSaveArtifacts(serializedPath);
                 PdfEngineIntegration.CreateZeroRotationCopy(serializedPath, tempPath);
             }
@@ -92,8 +76,6 @@ namespace KillerPDF
                 // Primary fallback: use the engine to load the source, strip all /Rotate values,
                 // remove encryption, and save. Secondary fallback: Import mode for some xref
                 // issues but fails on encrypted files; kept as a last resort).
-                doc.Close();
-                _doc = null;
                 if (!PdfEngineIntegration.TryCreateZeroRotationCopy(
                         _currentFile!, tempPath) &&
                     !PdfImport.TryImportRepairToPath(_currentFile!, tempPath, stripRotations: true))
@@ -116,9 +98,10 @@ namespace KillerPDF
             // "xref" as a token in an object context, and throws "Unexpected token 'xref'".
             // Fix: catch the reopen failure, rewrite the saved file through engine compatibility
             // recovery, then retry the open.
+            PdfWorkingDocument candidateDocument;
             try
             {
-                _doc = PdfWorkingDocument.Open(tempPath);
+                candidateDocument = PdfWorkingDocument.Open(tempPath);
             }
             catch (Exception openEx) when (PdfImport.IsXRefException(openEx))
             {
@@ -126,10 +109,34 @@ namespace KillerPDF
                 if (!PdfEngineIntegration.TryCreateZeroRotationCopy(tempPath, fixedPath))
                     throw; // Engine recovery also failed; rethrow the original reopen error.
                 tempPath = fixedPath;
-                _doc = PdfWorkingDocument.Open(tempPath);
+                candidateDocument = PdfWorkingDocument.Open(tempPath);
             }
+            // Preparation has succeeded. Publish the replacement and side state together before
+            // notifying the UI or recording history; failures above leave the live document usable.
+            CloseEngineDocumentSession();
+            if (!preserveRenderedPages)
+            {
+                _secondaryRenderCts?.Cancel();
+                _continuousRenderCts?.Cancel();
+                _continuousSharpenCts?.Cancel();
+            }
+            _doc = candidateDocument;
             _currentFile = tempPath;
+            doc.Close();
+            _pageRotations.Clear();
+            foreach (var pair in candidateRotations) _pageRotations[pair.Key] = pair.Value;
+            if (!keepAnnotations || candidateAnnotations is not null) _annotations.Clear();
+            if (candidateAnnotations is not null)
+                foreach (var pair in candidateAnnotations) _annotations[pair.Key] = pair.Value;
             if (remappedMarks is not null) ActiveViewer.RestoreRedactionMarksExt(remappedMarks);
+            if (!preserveRenderedPages)
+            {
+                _renderDims.Clear();
+                Controls.PdfViewer.InvalidateRenderCacheExt(_active);
+                _renderedPrimaryPage = -1;
+                ClearSelection();
+            }
+            MarkDirty();
             if (documentUndo is { } completedUndo)
                 ActiveViewer.PushUndoExt(completedUndo);
 

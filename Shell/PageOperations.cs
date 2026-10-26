@@ -34,12 +34,15 @@ namespace KillerPDF
                 // the turn (render dims are still the pre-turn frame here; the reload clears them)
                 // and keep everything through the reload. A page with no cached render dims keeps
                 // its annotations unmapped - recoverable beats deleted.
-                foreach (var idx in indices)
-                    if (_annotations.TryGetValue(idx, out var anns) && _renderDims.TryGetValue(idx, out var dims))
-                        Services.AnnotationRotate.Remap(anns, delta, dims.w, dims.h);
                 int restoreIdx = PageList.SelectedIndex;
                 SaveTempAndReload(
                     keepAnnotations: true,
+                    remapAnnotations: annotations =>
+                    {
+                        foreach (var idx in indices)
+                            if (annotations.TryGetValue(idx, out var anns) && _renderDims.TryGetValue(idx, out var dims))
+                                Services.AnnotationRotate.Remap(anns, delta, dims.w, dims.h);
+                    },
                     remapRotations: rotations =>
                         PdfEngineIntegration.RemapRotationsAfterPageTurns(
                             rotations, indices, delta),

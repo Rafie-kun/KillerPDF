@@ -2677,6 +2677,8 @@ namespace KillerPDF.Controls
             return clone;
         }
 
+        internal Dictionary<int, List<PageAnnotation>> CaptureAnnotationStateExt() => CaptureAllAnnotationState();
+
         private Dictionary<int, List<PageAnnotation>> CaptureAllAnnotationState()
         {
             var snapshot = new Dictionary<int, List<PageAnnotation>>();
