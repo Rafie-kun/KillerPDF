@@ -69,6 +69,17 @@ jobs:
         run: |
           dotnet run --project tools/KillerPDF.ShortcutSite/KillerPDF.ShortcutSite.csproj --configuration Release -- "$env:GITHUB_WORKSPACE" --check 2>&1 | Tee-Object ci-results/shortcuts.log
           if ($LASTEXITCODE -ne 0) { throw 'Website shortcuts differ from the app. See shortcuts.log.' }
+      - name: Verify final release artifact gates offline
+        if: matrix.name == 'application'
+        run: |
+          foreach ($mode in @('unsigned-store', 'missing-store-payload', 'unsigned-store-inner', 'mismatched-store-version', 'valid-store', 'checksum-create', 'checksum-replaced-store', 'checksum-missing-store', 'checksum-unchanged-store')) {
+            $evidence = Join-Path $env:RUNNER_TEMP ('killerpdf-artifact-' + $mode + '-' + [guid]::NewGuid().ToString('N'))
+            try {
+              & ./build/Test-ReleaseArtifactVerification.ps1 -Mode $mode -EvidenceRoot $evidence 2>&1 | Tee-Object ("ci-results/release-artifacts-$mode.log")
+            } finally {
+              if (Test-Path -LiteralPath $evidence) { Copy-Item -LiteralPath $evidence -Destination ("ci-results/release-artifacts-$mode") -Recurse }
+            }
+          }
       - name: Run tests
         if: matrix.mode == 'test'
         env:

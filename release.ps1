@@ -115,11 +115,12 @@ function Assert-ReleaseArtifactVersion([string]$Path, [string]$ExpectedVersion) 
 function Test-ReleaseArtifacts(
     [string]$InstallerPath,
     [string]$PortablePath,
+    [string]$StorePath,
     [string]$ExpectedVersion,
     [bool]$RequireValidSignature
 ) {
     Write-Host "`n==> Testing final release artifacts..." -ForegroundColor Cyan
-    foreach ($artifact in @($InstallerPath, $PortablePath)) {
+    foreach ($artifact in @($InstallerPath, $PortablePath, $StorePath)) {
         Assert-ReleaseArtifactVersion $artifact $ExpectedVersion
         if ($RequireValidSignature) {
             $signature = Get-AuthenticodeSignature -LiteralPath $artifact
@@ -487,13 +488,16 @@ Assert-ReleaseArtifactVersion $storeExe "$releaseBuildVersion.0"
 
 # 4. SHA256 (final EXEs)
 $expectedAssemblyVersion = "$Version.0"
-Test-ReleaseArtifacts $installerExe $portableExe $expectedAssemblyVersion (-not $SkipSign)
+Test-ReleaseArtifacts -InstallerPath $installerExe -PortablePath $portableExe -StorePath $storeExe `
+    -ExpectedVersion $expectedAssemblyVersion -RequireValidSignature (-not $SkipSign)
 
 Write-Host "`n==> Computing final EXE SHA256 values..." -ForegroundColor Cyan
 $portableHash  = (Get-FileHash $portableExe -Algorithm SHA256).Hash
 $installerHash = (Get-FileHash $installerExe -Algorithm SHA256).Hash
+$storeHash     = (Get-FileHash $storeExe -Algorithm SHA256).Hash
 Write-Host "    KillerPDF-Portable.exe : $portableHash" -ForegroundColor Green
 Write-Host "    KillerPDF.exe          : $installerHash" -ForegroundColor Green
+Write-Host "    KillerPDF-Store.exe    : $storeHash" -ForegroundColor Green
 
 # 5. Source zip
 $srcZipPath = Join-Path $publishDir "KillerPDF-$Version-src.zip"
@@ -504,7 +508,7 @@ $srcZip = Get-Item -LiteralPath $srcZipPath
 Write-Host "`n==> Source zip: $($srcZip.FullName)" -ForegroundColor Green
 
 # 6. Write SHA256SUMS.txt
-# Written into the publish folder next to both public executables and the source archive, so every file you
+# Written into the publish folder next to all public executables and the source archive, so every file you
 # upload to the GitHub release is in one place. The updater reads this from the release assets.
 $sumsPath = Join-Path $publishDir "SHA256SUMS.txt"
 if ($PublishOnly -and (Test-Path $sumsPath)) {
@@ -514,6 +518,7 @@ if ($PublishOnly -and (Test-Path $sumsPath)) {
     foreach ($expected in @(
         @{ Name = 'KillerPDF.exe'; Hash = $installerHash },
         @{ Name = 'KillerPDF-Portable.exe'; Hash = $portableHash },
+        @{ Name = 'KillerPDF-Store.exe'; Hash = $storeHash },
         @{ Name = $srcZip.Name; Hash = $srcHash }
     )) {
         $pattern = '(?im)^' + [regex]::Escape($expected.Name) + '\s+' + [regex]::Escape($expected.Hash) + '\s*$'
@@ -526,6 +531,7 @@ if ($PublishOnly -and (Test-Path $sumsPath)) {
 $lines    = [System.Collections.Generic.List[string]]::new()
 $lines.Add("KillerPDF.exe           $installerHash")
 $lines.Add("KillerPDF-Portable.exe  $portableHash")
+$lines.Add("KillerPDF-Store.exe     $storeHash")
 if ($srcZip) {
     $srcHash = (Get-FileHash $srcZip.FullName -Algorithm SHA256).Hash
     $lines.Add("$($srcZip.Name.PadRight(23)) $srcHash")
