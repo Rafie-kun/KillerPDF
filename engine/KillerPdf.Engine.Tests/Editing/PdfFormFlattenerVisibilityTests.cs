@@ -1,0 +1,206 @@
+using System.Text;
+using KillerPdf.Engine.Documents;
+using KillerPdf.Engine.Editing;
+using KillerPdf.Engine.Objects;
+using KillerPdf.Engine.Rendering;
+using KillerPdf.Engine.Writing;
+using Xunit;
+
+namespace KillerPdf.Engine.Tests.Editing;
+
+public sealed class PdfFormFlattenerVisibilityTests
+{
+    [Theory]
+    [InlineData(0, false, true)]
+    [InlineData(0, true, false)]
+    [InlineData(2, false, false)]
+    [InlineData(2, true, false)]
+    [InlineData(6, false, false)]
+    [InlineData(6, true, false)]
+    [InlineData(38, false, false)]
+    [InlineData(38, true, false)]
+    [InlineData(4, false, true)]
+    [InlineData(4, true, true)]
+    [InlineData(32, false, false)]
+    [InlineData(32, true, false)]
+    [InlineData(36, false, false)]
+    [InlineData(36, true, true)]
+    public void OriginalWidgetVisibilityHasLiteralAndRemovedTargetControls(
+        int flags, bool printing, bool visible)
+    {
+        PdfDocument source = PdfDocument.Open(CreatePdf(flags));
+        Assert.Single(PdfFormWidgetReader.ReadPage(source, 0));
+        var editor = new PdfIncrementalPageEditor(source);
+        editor.RemoveFormField("target");
+        PdfDocument removed = PdfDocument.Open(editor.Build());
+        Assert.Empty(PdfFormWidgetReader.ReadPage(removed, 0));
+        PdfRenderedPage original = Render(source, printing);
+        PdfRenderedPage removedPage = Render(removed, printing);
+        PdfRenderedPage absentPage = Render(PdfDocument.Open(CreatePdf(flags, false)), printing);
+
+        AssertControls(original, visible);
+        AssertControls(removedPage, false);
+        AssertControls(absentPage, false);
+        Assert.Equal(absentPage.Pixels.ToArray(), removedPage.Pixels.ToArray());
+        if (!visible) Assert.Equal(removedPage.Pixels.ToArray(), original.Pixels.ToArray());
+        else Assert.False(removedPage.Pixels.Span.SequenceEqual(original.Pixels.Span));
+    }
+
+    [Theory]
+    [InlineData(0, false, true)]
+    [InlineData(0, true, true)]
+    [InlineData(2, false, false)]
+    [InlineData(2, true, false)]
+    [InlineData(6, false, false)]
+    [InlineData(6, true, false)]
+    [InlineData(38, false, false)]
+    [InlineData(38, true, false)]
+    [InlineData(4, false, true)]
+    [InlineData(4, true, true)]
+    [InlineData(32, false, false)]
+    [InlineData(32, true, false)]
+    [InlineData(36, false, false)]
+    [InlineData(36, true, true)]
+    public void FlattenPreservesHiddenAndPrintOnlyVisibility(int flags, bool printing, bool visible)
+    {
+        byte[] original = CreatePdf(flags);
+        byte[] flattened = PdfFormFlattener.Flatten(PdfDocument.Open(original));
+        PdfDocument reopened = PdfDocument.Open(flattened);
+        Assert.Empty(PdfFormWidgetReader.ReadPage(reopened, 0));
+        AssertControls(Render(reopened, printing), visible);
+        AssertControls(new PdfPageRenderer(reopened).Render(0,
+            new PdfRenderOptions(100, 100, includeFormFields: false)
+            { ForPrinting = printing }), visible);
+    }
+
+    [Theory]
+    [InlineData(2, false)]
+    [InlineData(2, true)]
+    [InlineData(32, false)]
+    [InlineData(32, true)]
+    public void FlattenMustNotExposeAWidgetInvisibleInBothModes(int flags, bool printing)
+    {
+        PdfDocument source = PdfDocument.Open(CreatePdf(flags));
+        AssertControls(Render(source, printing), false);
+        PdfDocument reopened = PdfDocument.Open(PdfFormFlattener.Flatten(source));
+        Assert.Empty(PdfFormWidgetReader.ReadPage(reopened, 0));
+
+        AssertControls(Render(reopened, printing), false);
+    }
+
+    [Fact]
+    public void PrintOnlyWidgetHasDifferentScreenAndPrintArtworkBeforeFlattening()
+    {
+        PdfDocument source = PdfDocument.Open(CreatePdf(36));
+        AssertControls(Render(source, false), false);
+        AssertControls(Render(source, true), true);
+        PdfDocument reopened = PdfDocument.Open(PdfFormFlattener.Flatten(source));
+        Assert.Empty(PdfFormWidgetReader.ReadPage(reopened, 0));
+        AssertControls(Render(reopened, false), false);
+        AssertControls(Render(reopened, true), true);
+    }
+
+    [Fact]
+    public void PrintOnlyAppearanceIsASeparateAnnotationWithoutFieldDataOrActions()
+    {
+        PdfDocument source = PdfDocument.Open(CreatePdf(36));
+        var update = new PdfIncrementalUpdateBuilder(source);
+        var widget = Assert.IsType<PdfDictionary>(source.Resolve(new PdfIndirectReference(4, 0)));
+        var entries = widget.ToDictionary(item => item.Key, item => item.Value);
+        entries[new PdfName("AA"u8)] = new PdfDictionary(new Dictionary<PdfName, PdfObject>
+        {
+            [new PdfName("K"u8)] = new PdfDictionary(new Dictionary<PdfName, PdfObject>
+            {
+                [new PdfName("S"u8)] = new PdfName("JavaScript"u8),
+                [new PdfName("JS"u8)] = new PdfString("event.value = 'changed'"u8, PdfStringForm.Literal)
+            })
+        });
+        update.ReplaceObject(4, new PdfDictionary(entries));
+        var existing = update.AddObject(new PdfDictionary(new Dictionary<PdfName, PdfObject>
+        {
+            [new PdfName("Type"u8)] = new PdfName("Annot"u8),
+            [new PdfName("Subtype"u8)] = new PdfName("Text"u8),
+            [new PdfName("F"u8)] = new PdfInteger(2),
+            [new PdfName("Rect"u8)] = new PdfArray([new PdfInteger(0), new PdfInteger(0),
+                new PdfInteger(10), new PdfInteger(10)])
+        }));
+        var page = PdfPageTree.Read(source).Pages[0];
+        var pageEntries = page.Dictionary.ToDictionary(item => item.Key, item => item.Value);
+        pageEntries[new PdfName("Annots"u8)] = new PdfArray([new PdfIndirectReference(4, 0), existing]);
+        update.ReplaceObject(page.Reference.ObjectNumber, new PdfDictionary(pageEntries));
+        byte[] sourceBytes = update.Build();
+        byte[] flattened = PdfFormFlattener.Flatten(PdfDocument.Open(sourceBytes));
+        PdfDocument reopened = PdfDocument.Open(flattened);
+
+        Assert.True(flattened.AsSpan(0, sourceBytes.Length).SequenceEqual(sourceBytes));
+        Assert.Empty(PdfFormWidgetReader.ReadPage(reopened, 0));
+        var annotations = Assert.IsType<PdfArray>(PdfPageTree.Read(reopened).Pages[0]
+            .Dictionary[new PdfName("Annots"u8)]);
+        Assert.Equal(2, annotations.Count);
+        Assert.Contains(annotations, value => value is PdfIndirectReference reference
+            && reference.ObjectNumber == existing.ObjectNumber);
+        var stampReference = Assert.IsType<PdfIndirectReference>(annotations.Single(value =>
+            value is PdfIndirectReference reference && reference.ObjectNumber != existing.ObjectNumber));
+        Assert.NotEqual(4, stampReference.ObjectNumber);
+        var stamp = Assert.IsType<PdfDictionary>(reopened.Resolve(stampReference));
+        Assert.Equal("Stamp", Assert.IsType<PdfName>(stamp[new PdfName("Subtype"u8)]).ValueAsLatin1());
+        Assert.Equal(740, Assert.IsType<PdfInteger>(stamp[new PdfName("F"u8)]).Value);
+        Assert.False(stamp.ContainsKey(new PdfName("FT"u8)));
+        Assert.False(stamp.ContainsKey(new PdfName("V"u8)));
+        Assert.False(stamp.ContainsKey(new PdfName("AA"u8)));
+        Assert.False(stamp.ContainsKey(new PdfName("A"u8)));
+        AssertControls(Render(reopened, false), false);
+        AssertControls(Render(reopened, true), true);
+        AssertControls(new PdfPageRenderer(reopened).Render(0,
+            new PdfRenderOptions(100, 100, includeAnnotations: false)
+            { ForPrinting = true }), false);
+        Assert.Equal(flattened, PdfFormFlattener.Flatten(reopened));
+    }
+
+    private static PdfRenderedPage Render(PdfDocument document, bool printing) =>
+        new PdfPageRenderer(document).Render(0,
+            new PdfRenderOptions(100, 100) { ForPrinting = printing });
+
+    private static void AssertControls(PdfRenderedPage page, bool visible)
+    {
+        Assert.Equal(100, page.Width);
+        Assert.Equal(100, page.Height);
+        Assert.Empty(page.Diagnostics);
+        Assert.Equal(new byte[] { 0, 255, 0, 255 }, Pixel(page, 5, 95));
+        Assert.Equal(new byte[] { 255, 255, 255, 255 }, Pixel(page, 95, 5));
+        Assert.Equal(visible ? new byte[] { 255, 0, 0, 255 }
+            : new byte[] { 255, 255, 255, 255 }, Pixel(page, 50, 50));
+    }
+
+    private static byte[] Pixel(PdfRenderedPage page, int x, int y) =>
+        page.Pixels.Slice((y * page.Width + x) * 4, 4).ToArray();
+
+    private static byte[] CreatePdf(int flags, bool includeTarget = true)
+    {
+        const string appearance = "0 0 1 rg 0 0 60 60 re f";
+        const string content = "0 1 0 rg 0 0 10 10 re f";
+        string[] objects =
+        [
+            "<< /Type /Catalog /Pages 2 0 R "
+                + (includeTarget ? "/AcroForm << /Fields [4 0 R] >> " : "") + ">>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 100 100] /Resources << >> /Contents 6 0 R "
+                + (includeTarget ? "/Annots [4 0 R] " : "") + ">>",
+            $"<< /Type /Annot /Subtype /Widget /FT /Tx /T (target) /V () /F {flags} /Rect [20 20 80 80] /P 3 0 R /AP << /N 5 0 R >> >>",
+            $"<< /Type /XObject /Subtype /Form /BBox [0 0 60 60] /Resources << >> /Length {appearance.Length} >>\nstream\n{appearance}\nendstream",
+            $"<< /Length {content.Length} >>\nstream\n{content}\nendstream"
+        ];
+        var pdf = new StringBuilder("%PDF-1.7\n");
+        var offsets = new List<int>();
+        for (int index = 0; index < objects.Length; index++)
+        {
+            offsets.Add(Encoding.ASCII.GetByteCount(pdf.ToString()));
+            pdf.Append($"{index + 1} 0 obj\n{objects[index]}\nendobj\n");
+        }
+        int xref = Encoding.ASCII.GetByteCount(pdf.ToString());
+        pdf.Append($"xref\n0 {objects.Length + 1}\n0000000000 65535 f \n");
+        foreach (int offset in offsets) pdf.Append($"{offset:D10} 00000 n \n");
+        pdf.Append($"trailer\n<< /Size {objects.Length + 1} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n");
+        return Encoding.ASCII.GetBytes(pdf.ToString());
+    }
+}

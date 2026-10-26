@@ -6,7 +6,7 @@ using KillerPdf.Engine.Writing;
 
 namespace KillerPdf.Engine.Editing;
 
-/// <summary>Paints widget appearances into page content and removes their editable fields.</summary>
+/// <summary>Removes editable fields, painting visible appearances and retaining print-only annotations.</summary>
 public static class PdfFormFlattener
 {
     private static readonly PdfName AppearanceName = Name("AP");
@@ -58,9 +58,12 @@ public static class PdfFormFlattener
                     ?? throw new InvalidOperationException("A page /XObject resource is not a dictionary.")
                 : new PdfDictionary([]);
             var xObjects = existingXObjects.ToDictionary(item => item.Key, item => item.Value);
+            var retainedAppearances = new List<PdfObject>();
             var commands = new StringBuilder("/Artifact BMC\n");
             foreach (PdfFormWidgetInfo widget in pageWidgets)
             {
+                if ((widget.AnnotationFlags & 2) != 0
+                    || (widget.AnnotationFlags & 36) == 32) continue;
                 var reference = new PdfIndirectReference(widget.ObjectNumber, widget.Generation);
                 PdfDictionary dictionary = Resolve(document, reference) as PdfDictionary
                     ?? throw new InvalidOperationException("A form widget is not a dictionary.");
@@ -80,6 +83,25 @@ public static class PdfFormFlattener
                     || targetWidth <= 0 || targetHeight <= 0)
                     throw new InvalidOperationException(
                         $"Form field '{widget.FieldName}' has invalid appearance geometry.");
+                if ((widget.AnnotationFlags & 36) == 36)
+                {
+                    var stamp = new Dictionary<PdfName, PdfObject>
+                    {
+                        [Name("Type")] = Name("Annot"),
+                        [Name("Subtype")] = Name("Stamp"),
+                        [Name("Rect")] = dictionary[Name("Rect")],
+                        [Name("P")] = page.Reference,
+                        [Name("F")] = new PdfInteger(widget.AnnotationFlags | 64 | 128 | 512),
+                        [AppearanceName] = new PdfDictionary(new Dictionary<PdfName, PdfObject>
+                        {
+                            [NormalName] = importer.Import(appearanceValue)
+                        })
+                    };
+                    if (dictionary.TryGetValue(Name("OC"), out PdfObject? optionalContent))
+                        stamp[Name("OC")] = optionalContent;
+                    retainedAppearances.Add(update.AddObject(new PdfDictionary(stamp)));
+                    continue;
+                }
                 double scaleX = targetWidth / sourceWidth;
                 double scaleY = targetHeight / sourceHeight;
                 double translateX = widget.Left - left * scaleX;
@@ -108,6 +130,15 @@ public static class PdfFormFlattener
             var pageEntries = page.Dictionary.ToDictionary(item => item.Key, item => item.Value);
             pageEntries[ResourcesName] = new PdfDictionary(resourceEntries);
             pageEntries[ContentsName] = contents;
+            if (retainedAppearances.Count > 0)
+            {
+                PdfName annotationsName = Name("Annots");
+                PdfArray annotations = page.Dictionary.TryGetValue(annotationsName, out PdfObject? value)
+                    ? Resolve(document, value) as PdfArray
+                        ?? throw new InvalidOperationException("A page /Annots value is not an array.")
+                    : new PdfArray([]);
+                pageEntries[annotationsName] = new PdfArray(annotations.Concat(retainedAppearances));
+            }
             update.ReplaceObject(page.Reference.ObjectNumber, new PdfDictionary(pageEntries));
         }
         PdfDocument painted = PdfDocument.Open(update.Build());
