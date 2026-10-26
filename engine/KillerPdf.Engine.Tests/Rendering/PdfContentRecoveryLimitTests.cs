@@ -115,6 +115,28 @@ public sealed class PdfContentRecoveryLimitTests
         Assert.Contains("Content recovery limit exceeded", error.Message);
     }
 
+    [Fact]
+    public void RedactionNeverDropsUncoveredContentAfterTheInstructionLimit()
+    {
+        string padding = string.Concat(Enumerable.Repeat("q Q\n", 500_001));
+        byte[] source = Pdf(Prefix + padding + Suffix);
+        PdfDocument document = PdfDocument.OpenWithCompatibilityRecovery(source);
+        var region = new PdfRedactionRegion(0, new PdfContentBounds(0, 0, 1, 1));
+        Assert.Equal(new byte[] { 255, 0, 0, 255 }, Pixel(
+            new PdfPageRenderer(document).Render(0, new PdfRenderOptions(64, 64)), 50, 22));
+        PdfContentRedactionResult? result = null;
+        Exception? error = Record.Exception(() => result = PdfContentRedaction.Apply(document, [region]));
+        if (error is not null)
+        {
+            Assert.IsType<PdfSyntaxException>(error);
+            Assert.Contains("instruction limit", error.Message);
+            return;
+        }
+        PdfDocument reopened = PdfDocument.Open(Assert.IsType<PdfContentRedactionResult>(result).Document);
+        Assert.Equal(new byte[] { 255, 0, 0, 255 }, Pixel(
+            new PdfPageRenderer(reopened).Render(0, new PdfRenderOptions(64, 64)), 50, 22));
+    }
+
     private static byte[] Pixel(PdfRenderedPage page, int x, int y)
         => page.Pixels.Span.Slice((y * 64 + x) * 4, 4).ToArray();
 
