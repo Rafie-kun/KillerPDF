@@ -29,6 +29,7 @@ public sealed class WatchedFolderService : IDisposable
     private bool _paused = true;
     private Guid _setupId = Guid.NewGuid();
     private readonly PdfMacroDispatcher _dispatcher;
+    private readonly Func<PdfMacro, WatchedFolderReadinessIssue?>? _readiness;
     private readonly TimeProvider _clock;
     private readonly string _statePath;
     private readonly List<JobState> _jobs = [];
@@ -37,10 +38,11 @@ public sealed class WatchedFolderService : IDisposable
     private int _observationCursor;
 
     public WatchedFolderService(string storageDirectory, PdfMacroDispatcher? dispatcher = null,
-        TimeProvider? clock = null)
+        TimeProvider? clock = null, Func<PdfMacro, WatchedFolderReadinessIssue?>? readiness = null)
     {
         _statePath = Path.Combine(Path.GetFullPath(storageDirectory), "queue.json");
         _clock = clock ?? TimeProvider.System;
+        _readiness = readiness;
         _dispatcher = dispatcher ?? new PdfMacroDispatcher([
             new(PdfMacroOperation.Resize, PdfResizeMacro.Execute),
             new(PdfMacroOperation.ConvertColor, PdfColorConversionMacro.Execute),
@@ -79,6 +81,7 @@ public sealed class WatchedFolderService : IDisposable
             EnsureWritable();
             if (!_paused || _running) throw new InvalidOperationException("ConfigurationBusy");
             WatchedFolderOptions validated = ValidateOptions(options);
+            RequireReadiness(validated.MacroJson);
             if (_options is not null && !SameSetup(_options, validated))
             {
                 ArchiveState();
@@ -105,6 +108,7 @@ public sealed class WatchedFolderService : IDisposable
             EnsureWritable();
             if (_options is null) throw new InvalidOperationException("NotConfigured");
             if (_running) throw new InvalidOperationException("ConfigurationBusy");
+            RequireReadiness(_options.MacroJson);
             _errorCode = null;
             _paused = false;
             SaveState();
@@ -116,6 +120,7 @@ public sealed class WatchedFolderService : IDisposable
         {
             EnsureWritable();
             if (_running) throw new InvalidOperationException("ConfigurationBusy");
+            if (_options is not null) RequireReadiness(_options.MacroJson);
             foreach (JobState job in _jobs.Where(job => job.Status == WatchedFolderJobStatus.Failed))
             {
                 job.Status = WatchedFolderJobStatus.Waiting;
@@ -124,6 +129,14 @@ public sealed class WatchedFolderService : IDisposable
             SaveState();
         }
     }
+    public WatchedFolderReadinessIssue? InspectReadiness(PdfMacro macro) => _readiness?.Invoke(macro);
+
+    private void RequireReadiness(string macroJson)
+    {
+        if (InspectReadiness(PdfMacro.FromJson(macroJson)) is not null)
+            throw new InvalidOperationException("OcrModelsMissing");
+    }
+
     public WatchedFolderSnapshot GetSnapshot()
     {
         lock (_gate) return new(_options, _paused,
@@ -136,6 +149,13 @@ public sealed class WatchedFolderService : IDisposable
         lock (_gate)
         {
             if (_disposed || _paused || _running || _blocked || _options is null) return Task.CompletedTask;
+            if (InspectReadiness(PdfMacro.FromJson(_options.MacroJson)) is not null)
+            {
+                _paused = true;
+                _errorCode = "OcrModelsMissing";
+                SaveState();
+                return Task.CompletedTask;
+            }
             _running = true;
             _idle.Reset();
             _active = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);

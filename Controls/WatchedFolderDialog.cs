@@ -190,12 +190,26 @@ internal sealed class WatchedFolderDialog : Window
     private void Refresh()
     {
         WatchedFolderSnapshot snapshot = _service.GetSnapshot();
+        string readinessError = "";
+        if (_macro.SelectedItem is MacroChoice choice)
+        {
+            try
+            {
+                if (_service.InspectReadiness(choice.Macro) is { } issue)
+                    readinessError = string.Format(L("Str_Watch_MissingOcrModels"), issue.StepIndex + 1,
+                        string.Join(", ", issue.MissingOcrLanguages));
+            }
+            catch (Exception error) when (error is IOException or UnauthorizedAccessException or InvalidOperationException)
+            { readinessError = L("Str_Watch_Unavailable"); }
+        }
+        _start.IsEnabled = _macro.SelectedItem is MacroChoice && readinessError.Length == 0;
         _status.Text = L(snapshot.IsPaused ? "Str_Watch_Paused" : "Str_Watch_Running");
         _pause.IsEnabled = !snapshot.IsPaused;
-        _resume.IsEnabled = snapshot.IsPaused && MatchesSavedSetup(snapshot.Options);
-        _retry.IsEnabled = snapshot.Jobs.Any(job => job.Status == WatchedFolderJobStatus.Failed);
+        _resume.IsEnabled = snapshot.IsPaused && readinessError.Length == 0 && MatchesSavedSetup(snapshot.Options);
+        _retry.IsEnabled = readinessError.Length == 0 && snapshot.Jobs.Any(job => job.Status == WatchedFolderJobStatus.Failed);
         _settings.IsEnabled = snapshot.IsPaused && !snapshot.Jobs.Any(job => job.Status == WatchedFolderJobStatus.Processing);
-        _error.Text = snapshot.ErrorCode is null ? _actionError : ErrorText(snapshot.ErrorCode);
+        _error.Text = readinessError.Length > 0 ? readinessError
+            : snapshot.ErrorCode is null ? _actionError : ErrorText(snapshot.ErrorCode);
         if (_lastJobs.SequenceEqual(snapshot.Jobs) && _results.Items.Count > 0) return;
         _lastJobs = snapshot.Jobs;
         _results.ItemsSource = snapshot.Jobs.Count == 0 ? [L("Str_Watch_Empty")]

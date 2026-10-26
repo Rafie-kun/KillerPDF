@@ -15,7 +15,7 @@ public partial class App
     {
         if (_folderAutomation is not null) return _folderAutomation;
         _folderAutomation = new WatchedFolderService(FolderAutomationDirectory,
-            WatchedFolderHost.CreateDispatcher(FolderAutomationDirectory));
+            WatchedFolderHost.CreateDispatcher(FolderAutomationDirectory), readiness: WatchedFolderHost.InspectReadiness);
         _folderAutomationCancellation = new CancellationTokenSource();
         WatchedFolderService service = _folderAutomation;
         CancellationToken token = _folderAutomationCancellation.Token;

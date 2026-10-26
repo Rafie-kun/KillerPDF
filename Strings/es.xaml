@@ -1941,4 +1941,5 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_ExportLoss_Link">Los enlaces no se representan en esta exportación estructurada.</sys:String>
     <sys:String x:Key="Str_ExportLoss_Image">En esta exportación, los datos de imagen se omiten o se sustituyen por marcadores de posición.</sys:String>
     <sys:String x:Key="Str_ExportLoss_Unknown">Parte del contenido no se puede representar por completo en esta exportación.</sys:String>
+    <sys:String x:Key="Str_Watch_MissingOcrModels">El paso {0} necesita modelos de idioma de OCR: {1}. Instálelos desde el menú de idiomas de OCR antes de iniciar.</sys:String>
 </ResourceDictionary>

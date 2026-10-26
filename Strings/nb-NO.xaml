@@ -1961,4 +1961,5 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_ExportLoss_Link">Lenker gjengis ikke i denne strukturerte eksporten.</sys:String>
     <sys:String x:Key="Str_ExportLoss_Image">Bildedata utelates eller erstattes med plassholdere i denne eksporten.</sys:String>
     <sys:String x:Key="Str_ExportLoss_Unknown">Noe innhold kan ikke gjengis fullstendig i denne eksporten.</sys:String>
+    <sys:String x:Key="Str_Watch_MissingOcrModels">Trinn {0} trenger OCR-språkmodeller: {1}. Installer dem fra OCR-språkmenyen før du starter.</sys:String>
 </ResourceDictionary>

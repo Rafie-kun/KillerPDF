@@ -1946,4 +1946,5 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_ExportLoss_Link">Odkazy nejsou v tomto strukturovaném exportu zachovány.</sys:String>
     <sys:String x:Key="Str_ExportLoss_Image">Obrazová data jsou při tomto exportu vynechána nebo nahrazena zástupnými symboly.</sys:String>
     <sys:String x:Key="Str_ExportLoss_Unknown">Část obsahu nelze v tomto exportu plně zachovat.</sys:String>
+    <sys:String x:Key="Str_Watch_MissingOcrModels">Krok {0} vyžaduje jazykové modely OCR: {1}. Před spuštěním je nainstalujte z nabídky jazyků OCR.</sys:String>
 </ResourceDictionary>

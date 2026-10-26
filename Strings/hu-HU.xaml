@@ -1948,4 +1948,5 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_ExportLoss_Link">A hivatkozások nem jelennek meg ebben a strukturált exportban.</sys:String>
     <sys:String x:Key="Str_ExportLoss_Image">A képadatok kimaradnak ebből az exportból, vagy helyőrzők váltják fel őket.</sys:String>
     <sys:String x:Key="Str_ExportLoss_Unknown">Egyes tartalmak nem jeleníthetők meg teljesen ebben az exportban.</sys:String>
+    <sys:String x:Key="Str_Watch_MissingOcrModels">A(z) {0}. lépéshez OCR nyelvi modellek szükségesek: {1}. Indítás előtt telepítse őket az OCR nyelvi menüjéből.</sys:String>
 </ResourceDictionary>

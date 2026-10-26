@@ -1961,4 +1961,5 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_ExportLoss_Link">Посилання не представлені в цьому структурованому експорті.</sys:String>
     <sys:String x:Key="Str_ExportLoss_Image">Дані зображень пропускаються або замінюються заповнювачами під час цього експорту.</sys:String>
     <sys:String x:Key="Str_ExportLoss_Unknown">Деякий вміст неможливо повністю представити в цьому експорті.</sys:String>
+    <sys:String x:Key="Str_Watch_MissingOcrModels">Для кроку {0} потрібні мовні моделі OCR: {1}. Установіть їх через меню мов OCR перед запуском.</sys:String>
 </ResourceDictionary>

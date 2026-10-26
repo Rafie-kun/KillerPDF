@@ -1960,4 +1960,5 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_ExportLoss_Link">Links are not represented by this structured export.</sys:String>
     <sys:String x:Key="Str_ExportLoss_Image">Image data is omitted or replaced with placeholders in this export.</sys:String>
     <sys:String x:Key="Str_ExportLoss_Unknown">Some content cannot be fully represented by this export.</sys:String>
+    <sys:String x:Key="Str_Watch_MissingOcrModels">Step {0} needs OCR language models: {1}. Install them from the OCR language menu before starting.</sys:String>
 </ResourceDictionary>

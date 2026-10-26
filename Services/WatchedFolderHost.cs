@@ -5,6 +5,20 @@ namespace KillerPDF.Services;
 
 internal static class WatchedFolderHost
 {
+    internal static WatchedFolderReadinessIssue? InspectReadiness(PdfMacro macro)
+    {
+        for (int index = 0; index < macro.Steps.Count; index++)
+        {
+            PdfMacroStep step = macro.Steps[index];
+            if (step.Operation != PdfMacroOperation.Ocr) continue;
+            string language = step.Settings?.GetValueOrDefault("language") ?? "eng";
+            IReadOnlyList<string> missing = OcrModelFiles.MissingForCommonBackend(
+                OcrNativeBootstrap.EnsureLanguageData(), language.Split('+'));
+            if (missing.Count > 0) return new(index, missing);
+        }
+        return null;
+    }
+
     internal static PdfMacroDispatcher CreateDispatcher(string storageDirectory) => new([
         new(PdfMacroOperation.Save, (_, bytes, _, token) => { token.ThrowIfCancellationRequested(); return new(bytes); }),
         new(PdfMacroOperation.Resize, PdfResizeMacro.Execute),

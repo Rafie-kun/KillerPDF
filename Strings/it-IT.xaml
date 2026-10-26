@@ -1961,4 +1961,5 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_ExportLoss_Link">I collegamenti non sono rappresentati in questa esportazione strutturata.</sys:String>
     <sys:String x:Key="Str_ExportLoss_Image">I dati delle immagini vengono omessi o sostituiti con segnaposto in questa esportazione.</sys:String>
     <sys:String x:Key="Str_ExportLoss_Unknown">Alcuni contenuti non possono essere rappresentati completamente in questa esportazione.</sys:String>
+    <sys:String x:Key="Str_Watch_MissingOcrModels">Il passaggio {0} richiede modelli linguistici OCR: {1}. Installarli dal menu delle lingue OCR prima di avviare.</sys:String>
 </ResourceDictionary>
