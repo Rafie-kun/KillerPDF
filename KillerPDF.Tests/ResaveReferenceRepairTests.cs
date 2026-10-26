@@ -103,8 +103,10 @@ public sealed class ResaveReferenceRepairTests
         }
         finally { Directory.Delete(folder, recursive: true); }
     }
-    [Fact]
-    public void SanitizationReportsOptionalReferenceRepairsAndKeepsPageContent()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void SanitizationReportsOptionalReferenceRepairsAndKeepsPageContent(bool removeLinks)
     {
         string folder = Path.Combine(Path.GetTempPath(), "killerpdf-sanitize-repair-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(folder);
@@ -112,7 +114,8 @@ public sealed class ResaveReferenceRepairTests
         {
             PdfDocument healthy = PdfDocument.Open(new PdfDocumentBuilder().AddPage(100, 100,
                 new PdfContentStreamBuilder().BeginText().SetFont(PdfStandardFont.Helvetica, 12)
-                    .MoveText(10, 50).ShowLatin1Text("Keep").EndText()).Build());
+                    .MoveText(10, 50).ShowLatin1Text("Keep").EndText())
+                .AddUriLink(0, 10, 20, 50, 10, "https://example.com/").Build());
             PdfIndirectReference root = Assert.IsType<PdfIndirectReference>(healthy.Trailer[new PdfName("Root"u8)]);
             PdfDictionary catalog = Assert.IsType<PdfDictionary>(healthy.Resolve(root));
             byte[] damaged = new PdfIncrementalUpdateBuilder(healthy).ReplaceObject(root.ObjectNumber,
@@ -122,11 +125,45 @@ public sealed class ResaveReferenceRepairTests
             File.WriteAllBytes(path, damaged);
 
             PdfOptimizationResult result = PdfEngineIntegration.SanitizeFile(path,
-                new PdfEngineIntegration.SanitizeChoices(false, false, false, false, false, false, false));
+                new PdfEngineIntegration.SanitizeChoices(false, false, false, false, false, removeLinks, false));
 
             Assert.Equal(99, Assert.Single(result.ReferenceRepairs).TargetObjectNumber);
             Assert.Equal(damaged.Length, result.OriginalSize);
             Assert.Equal("Keep", new PdfPageContentReader(PdfDocument.Open(File.ReadAllBytes(path))).Read(0).Text);
+            Assert.Equal(removeLinks ? 0 : 1, PdfLinkReader.ReadPage(PdfDocument.Open(File.ReadAllBytes(path)), 0).Count);
+        }
+        finally { Directory.Delete(folder, recursive: true); }
+    }
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ReductionKeepsLiveContentAndPreservesSource(bool needsRepair)
+    {
+        string folder = Path.Combine(Path.GetTempPath(), "killerpdf-reduction-repair-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(folder);
+        try
+        {
+            byte[] healthyBytes = new PdfDocumentBuilder().AddPage(100, 100,
+                new PdfContentStreamBuilder().BeginText().SetFont(PdfStandardFont.Helvetica, 12)
+                    .MoveText(10, 50).ShowLatin1Text("Keep").EndText()).Build();
+            PdfDocument healthy = PdfDocument.Open(healthyBytes);
+            PdfIndirectReference root = Assert.IsType<PdfIndirectReference>(healthy.Trailer[new PdfName("Root"u8)]);
+            PdfDictionary catalog = Assert.IsType<PdfDictionary>(healthy.Resolve(root));
+            byte[] sourceBytes = needsRepair ? new PdfIncrementalUpdateBuilder(healthy).ReplaceObject(root.ObjectNumber,
+                new PdfDictionary(catalog.Append(new KeyValuePair<PdfName, PdfObject>(new PdfName("Optional"u8),
+                    new PdfIndirectReference(99, 0))))).Build() : healthyBytes;
+            string source = Path.Combine(folder, "source.pdf");
+            string output = Path.Combine(folder, "reduced.pdf");
+            File.WriteAllBytes(source, sourceBytes);
+
+            var result = PdfEngineIntegration.ReduceFileSize(source, output, null, CancellationToken.None);
+
+            Assert.Equal(sourceBytes.Length, result.Before);
+            if (needsRepair) Assert.Equal(99, Assert.Single(result.ReferenceRepairs).TargetObjectNumber);
+            else Assert.Empty(result.ReferenceRepairs);
+            Assert.Equal(new FileInfo(output).Length, result.After);
+            Assert.Equal("Keep", new PdfPageContentReader(PdfDocument.Open(File.ReadAllBytes(output))).Read(0).Text);
+            Assert.Equal(sourceBytes, File.ReadAllBytes(source));
         }
         finally { Directory.Delete(folder, recursive: true); }
     }

@@ -18,7 +18,7 @@ internal static class TableExportSmoke
 {
     private const BindingFlags Members = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
 
-    internal static int Run(string appPath, string appXaml, string folder, bool officeExport = false, bool grainThemes = false, bool dialogText = false, bool sidebarActions = false, bool paragraphEdit = false, bool accessibilityReview = false, bool formFieldEditing = false, bool guidedTasks = false, bool signedCopy = false, bool renderRecovery = false, bool toolbarAvailability = false, bool windowLifecycle = false, bool windowSession = false, string windowSessionCase = "--verify-window-session", string? updateRestartState = null, bool referenceRepairNotice = false)
+    internal static int Run(string appPath, string appXaml, string folder, bool officeExport = false, bool grainThemes = false, bool dialogText = false, bool sidebarActions = false, bool paragraphEdit = false, bool accessibilityReview = false, bool formFieldEditing = false, bool guidedTasks = false, bool signedCopy = false, bool renderRecovery = false, bool toolbarAvailability = false, bool windowLifecycle = false, bool windowSession = false, string windowSessionCase = "--verify-window-session", string? updateRestartState = null, bool referenceRepairNotice = false, bool reductionRepairNotice = false)
     {
         if (!Environment.GetCommandLineArgs().Contains("--startup-smoke")
             && !(windowSession && Environment.GetCommandLineArgs().Contains("--session-isolation")))
@@ -121,6 +121,7 @@ internal static class TableExportSmoke
             if (toolbarAvailability) return ToolbarAvailabilitySmoke.Run(owner, appPath, folder);
             if (renderRecovery) return RenderRecoverySmoke.Run(owner, appPath, folder);
             if (referenceRepairNotice) return ReferenceRepairNoticeSmoke.Run(owner, assembly, appPath, folder);
+            if (reductionRepairNotice) return ReductionRepairNoticeSmoke.Run(owner, assembly, appPath, folder);
             if (signedCopy) return SignedCopySmoke.Run(owner, assembly, appPath, folder);
             if (guidedTasks) return GuidedTasksSmoke.Run(owner, assembly, appPath, folder);
             if (formFieldEditing) return FormFieldEditingSmoke.Run(owner, appPath, folder);

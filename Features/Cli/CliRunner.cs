@@ -925,7 +925,7 @@ namespace KillerPDF.Features
                     }
                 }
             }
-            settings = settings with { RepairHarmlessArtifacts = true };
+            settings = settings with { RepairHarmlessArtifacts = true, ReplaceDanglingReferences = true };
 
             PdfOptimizationResult result;
             try
@@ -940,6 +940,8 @@ namespace KillerPDF.Features
             }
             if (!CliPublishOutput(inPath, outPath, result.Data.ToArray(), con)) return 2;
             if (options.ContainsKey("--report")) con.WriteLine(result.ToJson(true));
+            if (result.ReferenceRepairs.Count > 0)
+                con.WriteLine("Saved with repairs to broken references. Missing content was not recovered.");
             long saved = originalBytes - result.OutputSize;
             string percent = originalBytes > 0
                 ? (saved * 100.0 / originalBytes).ToString("0.0", CultureInfo.InvariantCulture)

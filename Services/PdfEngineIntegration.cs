@@ -2097,7 +2097,8 @@ internal static class PdfEngineIntegration
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
         ArgumentNullException.ThrowIfNull(choices);
-        PdfDocument document = PdfDocument.Open(File.ReadAllBytes(path));
+        byte[] original = File.ReadAllBytes(path);
+        PdfDocument document = PdfDocument.Open(original);
         if (choices.Links)
         {
             var reader = new PdfLinkReader(document);
@@ -2130,7 +2131,8 @@ internal static class PdfEngineIntegration
             PruneUnreachableObjects = true,
             AllowSignatureInvalidation = true
         };
-        PdfOptimizationResult result = PdfOptimizer.CreatePlan(document, settings).Apply();
+        PdfOptimizationResult result = PdfOptimizer.CreatePlan(document, settings).Apply()
+            with { OriginalSize = original.Length };
         ReplaceWithBuiltResult(path, result.Data.ToArray());
         return result;
     }
@@ -2656,7 +2658,8 @@ internal static class PdfEngineIntegration
     /// optimizer, and writes the result to <paramref name="outputPath"/>. Returns the size before
     /// and after and how many images were resampled.
     /// </summary>
-    internal static (long Before, long After, int ImagesResampled) ReduceFileSize(string sourcePath,
+    internal static (long Before, long After, int ImagesResampled,
+        IReadOnlyList<PdfReferenceRepair> ReferenceRepairs) ReduceFileSize(string sourcePath,
         string outputPath, PdfImageDownsampleOptions? images, System.Threading.CancellationToken cancellationToken)
     {
         byte[] original = File.ReadAllBytes(sourcePath);
@@ -2674,7 +2677,8 @@ internal static class PdfEngineIntegration
         cancellationToken.ThrowIfCancellationRequested();
         PdfOptimizationOptions settings = PdfOptimizationOptions.ForDocument(document) with
         {
-            RepairHarmlessArtifacts = true
+            RepairHarmlessArtifacts = true,
+            ReplaceDanglingReferences = true
         };
         PdfOptimizationResult optimized = PdfOptimizer.CreatePlan(document, settings).Apply();
         cancellationToken.ThrowIfCancellationRequested();
@@ -2688,7 +2692,7 @@ internal static class PdfEngineIntegration
         {
             if (File.Exists(finished)) File.Delete(finished);
         }
-        return (original.Length, optimized.OutputSize, resampled);
+        return (original.Length, optimized.OutputSize, resampled, optimized.ReferenceRepairs);
     }
 
     /// <summary>Replaces a destination with a finished file in one step. The finished bytes are

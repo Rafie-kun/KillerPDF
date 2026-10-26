@@ -96,4 +96,12 @@ scripts:
     failure_behavior: Return nonzero on missing controls, incorrect notice, failed encryption, lost live text, changed sources or deadline.
     mutates: temporary-fixture-files-and-test-owned-windows-only
 
+  reduction_repair_notice_smoke:
+    path: tests/KillerPDF.UiSmoke/ReductionRepairNoticeSmoke.cs
+    purpose: Verify repair notices through the real Reduce File Size menu, options, picker and success status.
+    inputs: Built app DLL, matching App.xaml, fresh evidence directory and --startup-smoke on an owned UI VM.
+    outputs: Detector controls, workflow logs, status text, result.txt with app hash and external process receipt.
+    failure_behavior: Return nonzero on incorrect notice, size, saved text, source preservation, controls or deadline.
+    mutates: temporary-fixture-files-and-test-owned-windows-only
+
 documentation: docs/startup-packaging.md

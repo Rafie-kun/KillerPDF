@@ -273,3 +273,9 @@ Independent present and removed text controls validate the notice detector first
 queues the Protect click so it can observe and dismiss the nested success modal. Retain the process
 receipt, both output streams, modal text and result file. This checks the native WPF workflow;
 keyboard, screen-reader and other-language acceptance remain separate.
+
+For Reduce File Size, use `--verify-reduction-repair-notice APP_DLL APP_XAML OUTPUT_DIRECTORY --startup-smoke`
+on an owned UI VM. The runner uses the actual Save menu, default downsampling options and save picker.
+Pristine and damaged text-only inputs must keep their source bytes and live text. The visible success
+status must name the output, report its actual size and include the notice only when repairs occurred.
+Retain the process receipt, streams and per-case workflow logs. This does not assess image quality.

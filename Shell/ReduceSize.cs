@@ -51,10 +51,11 @@ namespace KillerPDF
                     }
                     : null;
                 string output = dlg.FileName;
-                var (before, after, resampled) = await Task.Run(
+                var (before, after, resampled, repairs) = await Task.Run(
                     () => PdfEngineIntegration.ReduceFileSize(source, output, images, ct), ct);
                 SetStatus(string.Format(Loc("Str_Reduce_Done"), System.IO.Path.GetFileName(output),
-                    Megabytes(before), Megabytes(after), resampled));
+                    Megabytes(before), Megabytes(after), resampled)
+                    + (repairs.Count > 0 ? " " + Loc("Str_Save_ReferenceRepairs") : ""));
             }
             catch (OperationCanceledException)
             {
