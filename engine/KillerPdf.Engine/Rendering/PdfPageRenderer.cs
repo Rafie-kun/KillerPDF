@@ -3363,9 +3363,19 @@ public sealed partial class PdfPageRenderer
                     throw new FormatException("Image sample data has an invalid length.");
                 return new DecodedImage(decodedSamples, width, decodedHeight);
             }
-            softMask ??= ReadSoftMask(stream.Dictionary,
-                transform, scaleX, scaleY, cancellationToken);
-            if (softMask is null && stream.Dictionary.TryGetValue(Name("Mask"), out PdfObject? colorKeyValue))
+            bool ignoredSoftMask = false;
+            try
+            {
+                softMask ??= ReadSoftMask(stream.Dictionary, resources, diagnostics,
+                    transform, scaleX, scaleY, cancellationToken);
+            }
+            catch (NotSupportedException) when (_document.UsesCompatibilityRecovery)
+            {
+                ignoredSoftMask = true;
+                diagnostics?.Add("An unsupported image soft mask was ignored; the base image was retained.");
+            }
+            if (softMask is null && !ignoredSoftMask
+                && stream.Dictionary.TryGetValue(Name("Mask"), out PdfObject? colorKeyValue))
             {
                 PdfObject resolvedMask = Resolve(colorKeyValue);
                 if (resolvedMask is PdfStream maskStream && !imageMask)
@@ -5339,7 +5349,8 @@ public sealed partial class PdfPageRenderer
         return [.. array.Select(item => Number(Resolve(item)))];
     }
 
-    private SoftMask? ReadSoftMask(PdfDictionary dictionary,
+    private SoftMask? ReadSoftMask(PdfDictionary dictionary, PdfDictionary resources,
+        HashSet<string>? diagnostics,
         Matrix transform, double scaleX, double scaleY, CancellationToken cancellationToken)
     {
         if (!dictionary.TryGetValue(Name("SMask"), out PdfObject? value)) return null;
@@ -5347,10 +5358,24 @@ public sealed partial class PdfPageRenderer
         if (resolved is PdfName name && name.ValueAsLatin1() == "None") return null;
         if (resolved is not PdfStream stream
             || NameValue(stream.Dictionary, "Subtype") != "Image"
-            || NameValue(stream.Dictionary, "ColorSpace") != "DeviceGray"
             || stream.Dictionary.ContainsKey(Name("Mask"))
             || stream.Dictionary.ContainsKey(Name("SMask")))
             throw new NotSupportedException();
+        if (!stream.Dictionary.TryGetValue(Name("ColorSpace"), out PdfObject? colorSpaceValue))
+            throw new NotSupportedException();
+        PdfObject maskSpace = Resolve(colorSpaceValue);
+        if (maskSpace is not PdfName gray || gray.ValueAsLatin1() != "DeviceGray")
+        {
+            if (!_document.UsesCompatibilityRecovery
+                || maskSpace is not PdfArray { Count: >= 2 } array
+                || Resolve(array[0]) is not PdfName kind
+                || kind.ValueAsLatin1() is not ("CalGray" or "ICCBased"))
+                throw new NotSupportedException();
+            ImageColorSpace colorSpace = ReadColorSpace(maskSpace, resources, 0, diagnostics: diagnostics);
+            if (colorSpace.Components != 1 || colorSpace.Palette is not null)
+                throw new NotSupportedException();
+            diagnostics?.Add("A non-DeviceGray image soft mask was interpreted as raw opacity samples during compatibility recovery.");
+        }
         int bits = PositiveInteger(stream.Dictionary, "BitsPerComponent");
         if (bits is not (1 or 2 or 4 or 8 or 16)) throw new NotSupportedException();
         int width = PositiveInteger(stream.Dictionary, "Width");
