@@ -14,6 +14,335 @@ public sealed class PdfContentRedactionTests
 {
     private const string Helvetica = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>";
 
+    [Theory]
+    [InlineData("ActualText", false)]
+    [InlineData("Alt", false)]
+    [InlineData("E", false)]
+    [InlineData("ActualText", true)]
+    [InlineData("Alt", true)]
+    [InlineData("E", true)]
+    public void RedactionRemovesAffectedNamedPropertyDescriptions(string key, bool direct)
+    {
+        string property = $"<< /{key} (NAMEDPROPERTYSECRET) /MCID 0 >>";
+        PdfDocument document = PdfDocument.Open(CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            $"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 200] /Resources << /Font << /F1 4 0 R >> /Properties << /Sensitive {(direct ? property : "6 0 R")} >> >> /Contents 5 0 R >>",
+            Helvetica,
+            Stream("BT /F1 12 Tf 20 100 Td /Span /Sensitive BDC (VISIBLESECRET) Tj EMC ET"),
+            property
+        ]));
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document,
+            [new PdfRedactionRegion(0, new PdfContentBounds(0, 80, 199, 130))]);
+
+        PdfDocument output = PdfDocument.Open(result.Document);
+        Assert.True(result.Verification.Succeeded);
+        Assert.DoesNotContain("VISIBLESECRET", new PdfPageContentReader(output).Read(0).Text);
+        AssertDescriptionAbsent(output, "NAMEDPROPERTYSECRET");
+    }
+
+    [Fact]
+    public void OpaqueResourceConsumersRequireRasterApprovalWhenNamedDescriptionsAreRedacted()
+    {
+        PdfDocument document = PdfDocument.Open(CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 200] /Resources << /Font << /F1 4 0 R >> /Properties << /Sensitive 6 0 R >> >> /Contents 5 0 R >>",
+            Helvetica,
+            Stream("/Opaque unknown BT /F1 12 Tf 20 100 Td /Span /Sensitive BDC (SECRET) Tj EMC ET"),
+            "<< /ActualText (NAMEDPROPERTYSECRET) >>"
+        ]));
+        var region = new PdfRedactionRegion(0, new PdfContentBounds(0, 80, 199, 130));
+
+        Assert.Equal([0], PdfContentRedaction.Analyze(document, [region]).RasterPages);
+        Assert.Throws<InvalidOperationException>(() => PdfContentRedaction.Apply(document, [region]));
+    }
+
+    [Theory]
+    [InlineData("ActualText", false)]
+    [InlineData("Alt", false)]
+    [InlineData("E", false)]
+    [InlineData("ActualText", true)]
+    [InlineData("Alt", true)]
+    [InlineData("E", true)]
+    public void RedactionRemovesDescriptionsOfRemovedVectors(string key, bool raster)
+    {
+        PdfDocument document = PdfDocument.Open(SinglePage(
+            $"/Figure << /{key} (VECTORSECRET) >> BDC 0 0 1 rg 20 20 10 10 re f EMC",
+            "/MediaBox [0 0 100 100]"));
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document,
+            [new PdfRedactionRegion(0, new PdfContentBounds(10, 10, 40, 40))],
+            new PdfContentRedactionOptions { ApprovedRasterPages = raster ? [0] : [], RasterDpi = 72 });
+
+        PdfDocument output = PdfDocument.Open(result.Document);
+        Assert.True(result.Verification.Succeeded);
+        Assert.DoesNotContain(new PdfPageContentReader(output).Read(0).Paths,
+            path => path.BoundingBox == new PdfContentBounds(20, 20, 30, 30));
+        AssertDescriptionAbsent(output, "VECTORSECRET");
+    }
+
+    private static void AssertDescriptionAbsent(PdfDocument document, string secret)
+    {
+        foreach (var entry in document.CrossReferences.Values)
+        {
+            if (entry.Type is not (PdfCrossReferenceEntryType.InUse or PdfCrossReferenceEntryType.Compressed))
+                continue;
+            Inspect(document.Resolve(entry.ObjectNumber));
+        }
+
+        void Inspect(PdfObject value)
+        {
+            switch (value)
+            {
+                case PdfString text:
+                    Assert.DoesNotContain(secret, Encoding.Latin1.GetString(text.Bytes.Span));
+                    break;
+                case PdfDictionary dictionary:
+                    foreach (PdfObject child in dictionary.Values) Inspect(child);
+                    break;
+                case PdfArray array:
+                    foreach (PdfObject child in array) Inspect(child);
+                    break;
+                case PdfStream stream:
+                    Inspect(stream.Dictionary);
+                    Assert.DoesNotContain(secret, Encoding.Latin1.GetString(
+                        KillerPdf.Engine.Filters.PdfStreamDecoder.Decode(stream, document.Resolve)));
+                    break;
+            }
+        }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    [InlineData(false, true)]
+    [InlineData(true, true)]
+    public void RedactionRemovesDescriptionsOfRemovedOrPaintedImages(bool partial, bool raster = false)
+    {
+        PdfDocument document = PdfDocument.Open(ImagePage(
+            "/Figure << /Alt (IMAGESECRET) >> BDC q 100 0 0 100 20 20 cm /Im1 Do Q EMC", 0));
+        var bounds = partial ? new PdfContentBounds(20, 20, 70, 120)
+            : new PdfContentBounds(10, 10, 130, 130);
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document,
+            [new PdfRedactionRegion(0, bounds)],
+            new PdfContentRedactionOptions { ApprovedRasterPages = raster ? [0] : [], RasterDpi = 72 });
+
+        Assert.True(result.Verification.Succeeded);
+        PdfDocument output = PdfDocument.Open(result.Document);
+        AssertDescriptionAbsent(output, "IMAGESECRET");
+        Assert.Equal(raster || partial ? 1 : 0, new PdfPageContentReader(output).Read(0).Images.Count);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void RedactionRemovesDescriptionsOfRemovedInlineImages(bool raster)
+    {
+        PdfDocument document = PdfDocument.Open(SinglePage(
+            "/Figure << /Alt (INLINESECRET) >> BDC q 10 0 0 10 20 20 cm "
+            + "BI /W 1 /H 1 /CS /RGB /BPC 8 ID abc EI Q EMC",
+            "/MediaBox [0 0 100 100]"));
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document,
+            [new PdfRedactionRegion(0, new PdfContentBounds(10, 10, 40, 40))],
+            new PdfContentRedactionOptions { ApprovedRasterPages = raster ? [0] : [], RasterDpi = 72 });
+
+        Assert.True(result.Verification.Succeeded);
+        AssertDescriptionAbsent(PdfDocument.Open(result.Document), "INLINESECRET");
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void RedactionPropagatesChangedFormContentToEnclosingDescriptions(bool ownResources)
+    {
+        const string resources = "/Font << /F1 4 0 R >> /Properties << /Sensitive 7 0 R >>";
+        PdfDocument document = PdfDocument.Open(CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            $"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 200] /Resources << {resources} /XObject << /Fm 5 0 R >> >> /Contents 6 0 R >>",
+            Helvetica,
+            Stream("BT /F1 12 Tf 20 100 Td /Span /Sensitive BDC (VISIBLESECRET) Tj EMC ET",
+                "/Type /XObject /Subtype /Form /BBox [0 0 200 200] "
+                + (ownResources ? $"/Resources << {resources} >>" : "")),
+            Stream("/Figure << /Alt (PARENTSECRET) >> BDC /Fm Do EMC"),
+            "<< /ActualText (CHILDSECRET) >>"
+        ]));
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document,
+            [new PdfRedactionRegion(0, new PdfContentBounds(0, 80, 199, 130))]);
+
+        Assert.True(result.Verification.Succeeded);
+        PdfDocument output = PdfDocument.Open(result.Document);
+        AssertDescriptionAbsent(output, "CHILDSECRET");
+        AssertDescriptionAbsent(output, "PARENTSECRET");
+    }
+
+    [Fact]
+    public void DefaultVerificationRejectsRetiredDescriptionsRetainedOutsideResources()
+    {
+        PdfDocument document = PdfDocument.Open(CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R /RetainedDescription 6 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 200] /Resources << /Font << /F1 4 0 R >> /Properties << /Sensitive 6 0 R >> >> /Contents 5 0 R >>",
+            Helvetica,
+            Stream("BT /F1 12 Tf 20 100 Td /Span /Sensitive BDC (SECRET) Tj EMC ET"),
+            "<< /ActualText (NAMEDPROPERTYSECRET) >>"
+        ]));
+
+        var error = Assert.Throws<PdfRedactionVerificationException>(() => PdfContentRedaction.Apply(document,
+            [new PdfRedactionRegion(0, new PdfContentBounds(0, 80, 199, 130))]));
+
+        Assert.Contains(error.Report.Findings, finding => finding.Code == "RetainedDescription");
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void SharedNamedDescriptionsSurviveOnlyForUnaffectedUses(bool affectedFirst)
+    {
+        const string affected = "/Span /Shared BDC BT /F1 12 Tf 20 100 Td (REMOVE) Tj ET EMC ";
+        const string unaffected = "/Span /Shared BDC BT /F1 12 Tf 20 20 Td (KEEP) Tj ET EMC ";
+        PdfDocument document = PdfDocument.Open(CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 200] /Resources << /Font << /F1 4 0 R >> /Properties << /Shared 6 0 R >> >> /Contents 5 0 R >>",
+            Helvetica,
+            Stream(affectedFirst ? affected + unaffected : unaffected + affected),
+            "<< /ActualText (SHAREDDESCRIPTION) >>"
+        ]));
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document,
+            [new PdfRedactionRegion(0, new PdfContentBounds(0, 80, 199, 130))]);
+
+        PdfDocument output = PdfDocument.Open(result.Document);
+        PdfObject ResolveOutput(PdfObject value) => value is PdfIndirectReference reference
+            ? output.Resolve(reference) : value;
+        var catalog = (PdfDictionary)ResolveOutput(output.Trailer[new PdfName("Root"u8)]);
+        var pages = (PdfDictionary)ResolveOutput(catalog[new PdfName("Pages"u8)]);
+        var kids = (PdfArray)ResolveOutput(pages[new PdfName("Kids"u8)]);
+        var page = (PdfDictionary)ResolveOutput(kids[0]);
+        var stream = (PdfStream)ResolveOutput(page[new PdfName("Contents"u8)]);
+        var instructions = PdfContentStreamReader.Read(KillerPdf.Engine.Filters.PdfStreamDecoder.Decode(stream));
+        var marked = instructions.Where(instruction => instruction.Operator == "BDC").ToArray();
+        Assert.Equal(2, marked.Length);
+        Assert.Single(marked, instruction => instruction.Operands[1] is PdfName);
+        var sanitized = Assert.IsType<PdfDictionary>(Assert.Single(marked,
+            instruction => instruction.Operands[1] is PdfDictionary).Operands[1]);
+        Assert.False(sanitized.ContainsKey(new PdfName("ActualText"u8)));
+        var resources = (PdfDictionary)ResolveOutput(page[new PdfName("Resources"u8)]);
+        var properties = (PdfDictionary)ResolveOutput(resources[new PdfName("Properties"u8)]);
+        var description = (PdfDictionary)ResolveOutput(properties[new PdfName("Shared"u8)]);
+        Assert.Equal("SHAREDDESCRIPTION", Encoding.Latin1.GetString(
+            ((PdfString)description[new PdfName("ActualText"u8)]).Bytes.Span));
+        Assert.Equal("SHAREDDESCRIPTION", new PdfPageContentReader(output).Read(0).Text.Trim());
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void RedactionRemovesDescriptionsOfRemovedShadings(bool raster)
+    {
+        PdfDocument document = PdfDocument.Open(CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 100 100] /Resources << /Shading << /S1 5 0 R >> >> /Contents 4 0 R >>",
+            Stream("/Figure << /Alt (SHADINGSECRET) >> BDC /S1 sh EMC"),
+            "<< /ShadingType 2 /ColorSpace /DeviceRGB /Coords [0 0 100 0] /Extend [true true] /Function << /FunctionType 2 /Domain [0 1] /C0 [1 0 0] /C1 [0 0 1] /N 1 >> >>"
+        ]));
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document,
+            [new PdfRedactionRegion(0, new PdfContentBounds(0, 0, 100, 100))],
+            new PdfContentRedactionOptions { ApprovedRasterPages = raster ? [0] : [], RasterDpi = 72 });
+
+        Assert.True(result.Verification.Succeeded);
+        AssertDescriptionAbsent(PdfDocument.Open(result.Document), "SHADINGSECRET");
+    }
+
+    [Fact]
+    public void RasterRedactionPreservesIndirectPropertyValuesWithoutKeepingDescriptions()
+    {
+        PdfDocument document = PdfDocument.Open(CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 200] /Resources << /Font << /F1 4 0 R >> /Properties << /Sensitive 6 0 R >> >> /Contents 5 0 R >>",
+            Helvetica,
+            Stream("BT /F1 12 Tf 20 100 Td /Span /Sensitive BDC (SECRET) Tj EMC ET"),
+            "<< /ActualText (REFERENCESECRET) /Lang 7 0 R >>",
+            "(en-US)"
+        ]));
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document,
+            [new PdfRedactionRegion(0, new PdfContentBounds(0, 80, 199, 130))],
+            new PdfContentRedactionOptions { ApprovedRasterPages = [0], RasterDpi = 72 });
+
+        Assert.True(result.Verification.Succeeded);
+        AssertDescriptionAbsent(PdfDocument.Open(result.Document), "REFERENCESECRET");
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void DefaultVerificationRequiresUnaffectedUseForInheritedDirectDescriptions(bool used)
+    {
+        PdfDocument document = PdfDocument.Open(CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R 6 0 R] /Count 2 /Resources << /Font << /F1 4 0 R >> /Properties << /Sensitive << /Alt (INHERITEDSECRET) >> >> >> >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 200] /Contents 5 0 R >>",
+            Helvetica,
+            Stream("BT /F1 12 Tf 20 100 Td /Span /Sensitive BDC (SECRET) Tj EMC ET"),
+            $"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 200] {(used ? "/Contents 7 0 R" : "")} >>",
+            Stream("/Figure << /Alt (INHERITEDSECRET) >> BDC BT /F1 12 Tf 20 20 Td (KEEP) Tj ET EMC")
+        ]));
+
+        if (used)
+        {
+            PdfContentRedactionResult result = PdfContentRedaction.Apply(document,
+                [new PdfRedactionRegion(0, new PdfContentBounds(0, 80, 199, 130))]);
+            Assert.True(result.Verification.Succeeded);
+            Assert.Equal("KEEP", new PdfPageContentReader(PdfDocument.Open(result.Document)).Read(1).Text.Trim());
+            return;
+        }
+        var error = Assert.Throws<PdfRedactionVerificationException>(() => PdfContentRedaction.Apply(document,
+            [new PdfRedactionRegion(0, new PdfContentBounds(0, 80, 199, 130))]));
+
+        Assert.Contains(error.Report.Findings, finding => finding.Code == "RetainedDescription");
+    }
+
+    [Theory]
+    [InlineData("ActualText")]
+    [InlineData("Alt")]
+    [InlineData("E")]
+    public void RemovedVectorsLoseStructureDescriptionsWhileUnaffectedSiblingsKeepTheirs(string key)
+    {
+        PdfDocument document = PdfDocument.Open(CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R /StructTreeRoot 5 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 100 100] /Resources << >> /Contents 4 0 R >>",
+            Stream("/Figure << /MCID 0 >> BDC 20 20 10 10 re f EMC /Figure << /MCID 1 >> BDC 70 70 10 10 re f EMC"),
+            "<< /Type /StructTreeRoot /K [6 0 R 7 0 R] >>",
+            $"<< /Type /StructElem /S /Figure /P 5 0 R /Pg 3 0 R /{key} (STRUCTURESECRET) /K 0 >>",
+            "<< /Type /StructElem /S /Figure /P 5 0 R /Pg 3 0 R /Alt (KEPTDESCRIPTION) /K 1 >>"
+        ]));
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document,
+            [new PdfRedactionRegion(0, new PdfContentBounds(10, 10, 40, 40))]);
+
+        PdfDocument output = PdfDocument.Open(result.Document);
+        AssertDescriptionAbsent(output, "STRUCTURESECRET");
+        PdfObject ResolveOutput(PdfObject value) => value is PdfIndirectReference reference
+            ? output.Resolve(reference) : value;
+        var catalog = (PdfDictionary)ResolveOutput(output.Trailer[new PdfName("Root"u8)]);
+        var structure = (PdfDictionary)ResolveOutput(catalog[new PdfName("StructTreeRoot"u8)]);
+        var kids = (PdfArray)ResolveOutput(structure[new PdfName("K"u8)]);
+        var kept = (PdfDictionary)ResolveOutput(kids[1]);
+        Assert.Equal("KEPTDESCRIPTION", Encoding.Latin1.GetString(
+            ((PdfString)kept[new PdfName("Alt"u8)]).Bytes.Span));
+    }
+
     [Fact]
     public void PartialVectorRedactionCannotPublishRecoverableGeometryWithoutRasterApproval()
     {

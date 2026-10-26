@@ -6,6 +6,9 @@ namespace KillerPdf.Engine.Documents;
 
 public static partial class PdfContentRedaction
 {
+    private static string DescriptionIdentity(PdfDictionary dictionary) =>
+        Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(PdfObjectWriter.Write(dictionary)));
+
     private static void CollectSourceStreams(PdfDocument document, PdfObject value, HashSet<int> numbers,
         int depth = 0)
     {
@@ -21,6 +24,7 @@ public static partial class PdfContentRedaction
     }
 
     private static void VerifyRetiredStreams(PdfDocument document, HashSet<int> retired,
+        HashSet<string> retiredDescriptions,
         CancellationToken cancellationToken)
     {
         // Object numbers are preserved by the compact writer. A resource entry alone is
@@ -29,8 +33,18 @@ public static partial class PdfContentRedaction
             && entry.Type is CrossReference.PdfCrossReferenceEntryType.InUse
                 or CrossReference.PdfCrossReferenceEntryType.Compressed
             && document.Resolve(number) is PdfStream).ToHashSet();
-        if (retained.Count == 0) return;
+        var descriptions = new HashSet<string>(StringComparer.Ordinal);
+        if (retiredDescriptions.Count != 0)
+            foreach (var entry in document.CrossReferences.Values)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                if (entry.Type is CrossReference.PdfCrossReferenceEntryType.InUse
+                    or CrossReference.PdfCrossReferenceEntryType.Compressed)
+                    InspectDescriptions(document.Resolve(entry.ObjectNumber), 0);
+            }
+        if (retained.Count == 0 && descriptions.Count == 0) return;
         var used = new HashSet<int>();
+        var usedDescriptions = new HashSet<string>(StringComparer.Ordinal);
         var active = new HashSet<PdfStream>(ReferenceEqualityComparer.Instance);
         var context = new ContentRewriter(document, null, [], false, [], cancellationToken);
         int instructionCount = 0;
@@ -56,7 +70,9 @@ public static partial class PdfContentRedaction
         }
         var findings = retained.Except(used).Select(number => new PdfRedactionVerificationFinding(
             "RetainedSourceStream", "An original redacted stream remains without a verified unredacted use.",
-            ObjectNumber: number)).ToArray();
+            ObjectNumber: number)).Concat(descriptions.Except(usedDescriptions).Select(identity =>
+                new PdfRedactionVerificationFinding("RetainedDescription",
+                    "An affected description remains without a verified unaffected content use."))).ToArray();
         if (findings.Length != 0)
             throw new PdfRedactionVerificationException(new PdfRedactionVerificationReport(Array.AsReadOnly(findings)));
 
@@ -71,6 +87,13 @@ public static partial class PdfContentRedaction
                 cancellationToken.ThrowIfCancellationRequested();
                 if (++instructionCount > 2_000_000)
                     throw new FormatException("Redaction verification instruction limit exceeded.");
+                if (instruction.Operator is "BDC" or "DP" && instruction.Operands.Count == 2)
+                {
+                    PdfObject? property = instruction.Operands[1] is PdfName propertyName
+                        ? scope.Lookup(Name("Properties"), propertyName) : instruction.Operands[1];
+                    if (property is not null && Resolve(document, property) is PdfDictionary dictionary)
+                        usedDescriptions.Add(DescriptionIdentity(dictionary));
+                }
                 if (instruction.Operands.Count != 1 || instruction.Operands[0] is not PdfName name) continue;
                 PdfObject? value = null;
                 if (instruction.Operator == "Do") value = scope.Lookup(Name("XObject"), name);
@@ -92,6 +115,25 @@ public static partial class PdfContentRedaction
                 }
                 finally { active.Remove(stream); }
             }
+        }
+
+        void InspectDescriptions(PdfObject value, int depth)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (depth > PdfObjectWriter.MaximumNestingDepth)
+                throw new FormatException("Description inspection nesting limit exceeded.");
+            if (value is PdfStream stream) value = stream.Dictionary;
+            if (value is PdfDictionary dictionary)
+            {
+                if (ReplacementTextKeys.Any(dictionary.ContainsKey))
+                {
+                    string identity = DescriptionIdentity(dictionary);
+                    if (retiredDescriptions.Contains(identity)) descriptions.Add(identity);
+                }
+                foreach (PdfObject child in dictionary.Values) InspectDescriptions(child, depth + 1);
+            }
+            else if (value is PdfArray array)
+                foreach (PdfObject child in array) InspectDescriptions(child, depth + 1);
         }
     }
 

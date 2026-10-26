@@ -257,6 +257,7 @@ public static partial class PdfContentRedaction
         var removedAnnotations = new HashSet<int>();
         var removedWidgets = new HashSet<int>();
         var retiredStreams = new HashSet<int>();
+        var retiredDescriptions = new HashSet<string>(StringComparer.Ordinal);
         var touchedContent = new Dictionary<int, (HashSet<int> Mcids, bool Whole)>();
         MaterializeInheritedResources(document, tree, update, byPage.Keys.ToHashSet(), cancellationToken);
         foreach ((int pageIndex, PdfContentBounds[] pageRegions) in byPage.OrderBy(item => item.Key))
@@ -271,6 +272,7 @@ public static partial class PdfContentRedaction
             if (page.Dictionary.TryGetValue(ContentsName, out PdfObject? originalContents))
                 CollectSourceStreams(document, originalContents, retiredStreams);
             retiredStreams.UnionWith(rewriter.RetiredSourceStreams);
+            retiredDescriptions.UnionWith(rewriter.RetiredDescriptions);
             if (!raster && rewriter.Reasons.Count != 0)
                 throw new InvalidOperationException($"Page {pageIndex + 1} changed while it was being redacted.");
             var instructions = new List<PdfContentInstruction>(content.Count + 16) { Op("q") };
@@ -338,7 +340,7 @@ public static partial class PdfContentRedaction
             PreserveDocumentIdentifiers = !options.ClearDocumentMetadata,
             CompressUnfilteredStreams = true
         });
-        VerifyRetiredStreams(PdfDocument.Open(output.Data), retiredStreams, cancellationToken);
+        VerifyRetiredStreams(PdfDocument.Open(output.Data), retiredStreams, retiredDescriptions, cancellationToken);
         return output;
     }
 
@@ -1030,6 +1032,7 @@ public static partial class PdfContentRedaction
 
         internal PdfDictionary Resources { get; } = resources;
         internal bool KeepEverything { get; set; }
+        internal bool ReplacedNamedDescription { get; set; }
 
         internal PdfObject? Lookup(PdfName category, PdfName key) =>
             Resources.TryGetValue(category, out PdfObject? value) && Resolve(document, value) is PdfDictionary items
@@ -1115,6 +1118,7 @@ public static partial class PdfContentRedaction
 
         internal HashSet<string> Reasons { get; } = new(StringComparer.Ordinal);
         internal HashSet<int> RetiredSourceStreams { get; } = [];
+        internal HashSet<string> RetiredDescriptions { get; } = new(StringComparer.Ordinal);
         internal HashSet<int> TouchedMcids { get; } = [];
         internal bool FormMarkedContentTouched { get; private set; }
         internal int RemovedGlyphs { get; private set; }
@@ -1281,10 +1285,10 @@ public static partial class PdfContentRedaction
                     case "sh":
                         if (args.Count == 1 && args[0] is PdfName shadingName)
                         {
-                            if (textOnly) { localChanged = true; break; }
+                            if (textOnly) { MarkRemoved(); break; }
                             if (!glyphsOnly && regions.Any(region => Overlaps(state.Clip, region)))
                             {
-                                if (regions.Any(region => Inside(state.Clip, region))) { localChanged = true; RemovedPaths++; break; }
+                                if (regions.Any(region => Inside(state.Clip, region))) { MarkRemoved(); RemovedPaths++; break; }
                                 Reasons.Add("Shading");
                             }
                             scope.Use(ShadingCategory, shadingName);
@@ -1345,6 +1349,8 @@ public static partial class PdfContentRedaction
                 }
             }
             while (marked.Count > 0) EndMarkedContent();
+            if (!glyphsOnly && scope.KeepEverything && scope.ReplacedNamedDescription)
+                Reasons.Add("MarkedContentResource");
             changed = localChanged;
             return output;
 
@@ -1385,7 +1391,6 @@ public static partial class PdfContentRedaction
                 if (args.Count == 2 && args[1] is PdfDictionary inline) properties = inline;
                 else if (args.Count == 2 && args[1] is PdfName propertyName)
                 {
-                    scope.Use(PropertiesCategory, propertyName);
                     properties = scope.Lookup(PropertiesCategory, propertyName) is { } found
                         ? Resolve(document, found) as PdfDictionary : null;
                 }
@@ -1398,19 +1403,32 @@ public static partial class PdfContentRedaction
             void EndMarkedContent()
             {
                 if (!marked.TryPop(out var frame)) return;
+                PdfContentInstruction original = output[frame.OutputIndex];
                 if (!frame.Touched || frame.Properties is null
-                    || !ReplacementTextKeys.Any(frame.Properties.ContainsKey)) return;
-                var stripped = frame.Properties.Where(entry => !ReplacementTextKeys.Contains(entry.Key))
-                    .ToDictionary(entry => entry.Key, entry => entry.Value);
-                if (stripped.Values.Any(ContainsReference))
+                    || !ReplacementTextKeys.Any(frame.Properties.ContainsKey))
                 {
-                    Reasons.Add("MarkedContentReference");
+                    KeepNamedProperty();
                     return;
                 }
-                PdfContentInstruction original = output[frame.OutputIndex];
+                var stripped = frame.Properties.Where(entry => !ReplacementTextKeys.Contains(entry.Key))
+                    .ToDictionary(entry => entry.Key, entry => entry.Value);
+                PdfObject sanitized = stripped.Values.Any(ContainsReference)
+                    ? scope.Add(PropertiesCategory, "KPRP", new PdfDictionary(stripped))
+                    : new PdfDictionary(stripped);
                 output[frame.OutputIndex] = new PdfContentInstruction("BDC", 0,
-                    [original.Operands[0], new PdfDictionary(stripped)]);
+                    [original.Operands[0], sanitized]);
+                RetiredDescriptions.Add(DescriptionIdentity(frame.Properties));
+                if (original.Operands.Count == 2 && original.Operands[1] is PdfName)
+                {
+                    scope.ReplacedNamedDescription = true;
+                }
                 localChanged = true;
+
+                void KeepNamedProperty()
+                {
+                    if (original.Operands.Count == 2 && original.Operands[1] is PdfName name)
+                        scope.Use(PropertiesCategory, name);
+                }
             }
 
             void ShowAndEmit(PdfContentInstruction instruction, PdfContentInstruction[] prefix, PdfObject value)
@@ -1600,14 +1618,14 @@ public static partial class PdfContentRedaction
                 if (IsNamed(xobject.Dictionary, SubtypeName, "Image"))
                 {
                     PdfContentBounds bounds = Visible(Transform(new PdfContentBounds(0, 0, 1, 1), state.Ctm));
-                    if (textOnly) { localChanged = true; return; }
+                    if (textOnly) { MarkRemoved(); return; }
                     if (!glyphsOnly && bounds.Width > 0 && bounds.Height > 0
                         && regions.Any(region => Overlaps(bounds, region)))
                     {
                         if (regions.Any(region => Inside(bounds, region)))
                         {
                             RemovedImages++;
-                            localChanged = true;
+                            MarkRemoved();
                             return;
                         }
                         if (PaintImage(xobject)) return;
@@ -1664,7 +1682,7 @@ public static partial class PdfContentRedaction
                         Emit(instruction);
                         return;
                     }
-                    localChanged = true;
+                    MarkRemoved();
                     if (update is null) return;
                     CollectSourceStreams(document, value, RetiredSourceStreams);
                     var entries = xobject.Dictionary
@@ -1689,7 +1707,7 @@ public static partial class PdfContentRedaction
                         ? fills[index] : DefaultFill)));
                 if (plan is null || plan.Image.Count == 0) return false;
                 RedactedImages++;
-                localChanged = true;
+                MarkRemoved();
                 if (update is null) return true;
                 PdfImageRedaction.Paint(samples, plan);
                 PdfIndirectReference? mask = samples.Mask is PdfImageRedaction.Samples alpha
@@ -1702,7 +1720,7 @@ public static partial class PdfContentRedaction
 
             void InlineImage(PdfContentInstruction instruction)
             {
-                if (textOnly) { localChanged = true; return; }
+                if (textOnly) { MarkRemoved(); return; }
                 PdfContentBounds bounds = Visible(Transform(new PdfContentBounds(0, 0, 1, 1), state.Ctm));
                 if (!glyphsOnly && bounds.Width > 0 && bounds.Height > 0
                     && regions.Any(region => Overlaps(bounds, region)))
@@ -1710,7 +1728,7 @@ public static partial class PdfContentRedaction
                     if (regions.Any(region => Inside(bounds, region)))
                     {
                         RemovedImages++;
-                        localChanged = true;
+                        MarkRemoved();
                         return;
                     }
                     Reasons.Add("Image");
@@ -1750,7 +1768,7 @@ public static partial class PdfContentRedaction
                     ? StrokeBounds(bounds, state) : bounds;
                 if (textOnly)
                 {
-                    if (paint.Operator != "n" || pendingPath.Count > 0) localChanged = true;
+                    if (paint.Operator != "n" || pendingPath.Count > 0) MarkRemoved();
                 }
                 // A clip-only path (W n) paints nothing, so it is neither recoverable geometry
                 // nor a reason to rasterize; it stays so later content keeps its clip.
@@ -1760,7 +1778,7 @@ public static partial class PdfContentRedaction
                     if (!pendingClip && regions.Any(region => Inside(paintedBounds, region)))
                     {
                         RemovedPaths++;
-                        localChanged = true;
+                        MarkRemoved();
                     }
                     else
                     {
