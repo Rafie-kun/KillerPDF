@@ -116,6 +116,22 @@ internal static class TableExportSmoke
                 return UpdateWindowSmoke.Run(owner, assembly, appPath, folder);
             if (windowSessionCase == "--verify-print-visibility")
                 return PrintVisibilitySmoke.Run(owner, appPath, folder);
+            if (windowSessionCase == "--verify-window-collection")
+                return WindowCollectionSmoke.Run(owner, folder);
+            if (windowSessionCase == "--verify-layer-isolation")
+                return LayerStateSmoke.Run(owner, folder);
+            if (windowSessionCase == "--verify-validate-profile")
+                return MacroProfileSmoke.Run(owner, folder);
+            if (windowSessionCase.StartsWith("--verify-validate-profile-case-", StringComparison.Ordinal))
+                return MacroProfileSmoke.RunCase(owner, folder, windowSessionCase);
+            if (windowSessionCase == "--verify-form-format")
+                return FormCalculationSmoke.Run(owner, folder);
+            if (windowSessionCase == "--verify-form-status")
+                return FormCalculationSmoke.RunStatus(owner, folder);
+            if (windowSessionCase == "--verify-form-total")
+                return FormCalculationSmoke.RunTotal(owner, folder);
+            if (windowSessionCase is "--verify-save-history" or "--verify-active-editor-close" or "--verify-annotation-history" or "--verify-form-history" or "--verify-stamp-isolation" or "--verify-failed-save-history" or "--verify-stamp-history" or "--verify-stamp-tabs" or "--verify-stamp-panes" or "--verify-stamp-tearout" or "--verify-page-edit-failure" or "--verify-layout-pending" or "--verify-merge-pending" or "--verify-layouts-pending" or "--verify-stamp-saveall" or "--verify-active-editor-close-b")
+                return DocumentStateSmoke.Run(owner, assembly, appPath, folder, windowSessionCase);
             if (windowSession) return WindowSessionSmoke.Run(owner, assembly, appPath, folder, windowSessionCase);
             if (windowLifecycle) return WindowLifecycleSmoke.Run(owner, assembly, appPath, folder);
             if (toolbarAvailability) return ToolbarAvailabilitySmoke.Run(owner, appPath, folder);

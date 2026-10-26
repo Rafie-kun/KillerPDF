@@ -279,3 +279,49 @@ on an owned UI VM. The runner uses the actual Save menu, default downsampling op
 Pristine and damaged text-only inputs must keep their source bytes and live text. The visible success
 status must name the output, report its actual size and include the notice only when repairs occurred.
 Retain the process receipt, streams and per-case workflow logs. This does not assess image quality.
+## Document state regressions
+
+On an owned UI VM, use `MODE APP_DLL APP_XAML OUTPUT_DIRECTORY --session-isolation`
+with a fresh output directory. Modes include `--verify-save-history`,
+`--verify-annotation-history`, `--verify-form-history`, `--verify-failed-save-history`,
+`--verify-active-editor-close`, `--verify-stamp-isolation`, `--verify-stamp-history`,
+`--verify-stamp-tabs`, `--verify-stamp-panes`, `--verify-stamp-tearout`,
+`--verify-page-edit-failure`, `--verify-window-collection`, `--verify-layout-pending`,
+`--verify-layouts-pending`, `--verify-merge-pending`, `--verify-layer-isolation`,
+`--verify-stamp-saveall` and `--verify-validate-profile`.
+They open synthetic PDFs through the public window entry and use real toolbar,
+editor and dialog controls. Normal startup and user settings remain isolated.
+
+Text placement uses native pointer input and close uses native Alt+F4. Annotation
+nudge uses the public WPF Right-key route and checks canvas geometry, where a
+one-unit move remains observable at small zoom levels. It does not certify physical
+arrow-key input. Save checks strictly reopen output. The failed-save case locks
+only its synthetic destination, verifies the expected error and unchanged source,
+then releases the lock and retries through Save. These modes open windows and must
+not run on the main PC. Stamp checks cover distinct documents, Undo/Redo, fresh
+background-pane rendering, transfer of pending stamps to a new window and saving
+distinct pending stamps from multiple documents during close.
+
+The page-edit failure case denies file creation only in its newly created isolated
+session folder, retains the original access descriptor and restores it in a finally
+block. It verifies the error, unchanged saved state, a successful retry and saved
+rotation through Undo/Redo. Window collection checks an ordinary WPF control first,
+then requires three closed PDF windows to become collectible while a sibling stays
+alive and changes themes. Output checks use actual production-layout or direct
+Data Merge dialogs and synthetic pickers. They require visible pending text in
+strictly reopened output while preserving source bytes and live dirty state.
+The layer check exercises effective View overrides, sibling preservation and
+strict saved Undo/Redo. The Validate profile check imports and exports macro JSON
+through real controls and compares public preflight outcomes without running macros.
+
+Profile matrix cases run in separate processes with
+`--verify-validate-profile-case-KIND-ACTION`, where KIND is `general`, `print`,
+`attachments` or `custom`, and ACTION is `apply` or `cancel`. Use
+`--verify-validate-profile-case-invalid-apply` for malformed JSON. These retain
+unrelated step settings and compare public preflight reports. The isolated owner
+may stay hidden for these public-control tests; they do not certify visible layout.
+`--verify-form-format` checks blur formatting/color, raw editing and strict saved
+values. `--verify-form-status` checks accessible invalid/unsupported/failed feedback,
+correction, and saved raw values without executing arbitrary scripts. Screen-reader
+speech and other-language runtime acceptance remain separate. `--verify-form-total`
+checks an edited input, recalculated total and strict saved values for both fields.

@@ -364,18 +364,24 @@ internal static class FormFieldEditingSmoke
         encoder.Frames.Add(BitmapFrame.Create(BitmapSource.Create(width, height, 96, 96, PixelFormats.Bgra32, null, pixels, width * 4)));
         using Stream file = File.Create(path); encoder.Save(file);
     }
-    private static byte[] Fixture(string value, bool unlisted = false, bool password = false, bool toggles = false)
+    internal static byte[] Fixture(string value, bool unlisted = false, bool password = false, bool toggles = false,
+        string? formatScript = null, string? validationScript = null, string? calculationScript = null, string? siblingValue = null)
     {
         static string Appearance(string text) => $"q 1 1 1 rg 0 0 160 24 re f 0 g BT /Helv 12 Tf 4 8 Td ({text}) Tj ET Q\n";
-        string first = Appearance(value), second = Appearance(Sibling);
+        siblingValue ??= Sibling;
+        string first = Appearance(value), second = Appearance(siblingValue);
+        string Action(string trigger, string? script) => script is null ? "" : "/" + trigger + " << /S /JavaScript /JS ("
+            + script.Replace("\\", "\\\\").Replace("(", "\\(").Replace(")", "\\)") + ") >> ";
+        string actions = Action("F", formatScript) + Action("V", validationScript) + Action("C", calculationScript);
+        string format = actions.Length == 0 ? "" : "/AA << " + actions + ">>";
         string extraFields = toggles ? " 9 0 R 10 0 R" : "", extraWidgets = toggles ? " 9 0 R 11 0 R 12 0 R" : "";
         List<string> objects = [
             unlisted ? "<< /Type /Catalog /Pages 2 0 R >>" : $"<< /Type /Catalog /Pages 2 0 R /AcroForm << /Fields [5 0 R 6 0 R{extraFields}] /DA (/Helv 12 Tf 0 g) /DR << /Font << /Helv 4 0 R >> >> >> >>",
             "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
             $"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 200] /Resources << >> /Annots [5 0 R 6 0 R{extraWidgets}] >>",
             "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
-            $"<< /Type /Annot /Subtype /Widget /FT /Tx /T (existing.text) /Ff {(password ? 8192 : 0)} /V ({value}) /DV ({Original}) /Rect [20 126 180 150] /P 3 0 R /F 4 /DA (/Helv 12 Tf 0 g) /AP << /N 7 0 R >> >>",
-            $"<< /Type /Annot /Subtype /Widget /FT /Tx /T (untouched.sibling) /V ({Sibling}) /Rect [20 70 180 94] /P 3 0 R /F 4 /DA (/Helv 12 Tf 0 g) /AP << /N 8 0 R >> >>",
+            $"<< /Type /Annot /Subtype /Widget /FT /Tx /T (existing.text) /Ff {(password ? 8192 : 0)} /V ({value}) /DV ({Original}) /Rect [20 126 180 150] /P 3 0 R /F 4 /DA (/Helv 12 Tf 0 g) /AP << /N 7 0 R >> {format} >>",
+            $"<< /Type /Annot /Subtype /Widget /FT /Tx /T (untouched.sibling) /V ({siblingValue}) /Rect [20 70 180 94] /P 3 0 R /F 4 /DA (/Helv 12 Tf 0 g) /AP << /N 8 0 R >> >>",
             $"<< /Type /XObject /Subtype /Form /BBox [0 0 160 24] /Resources << /Font << /Helv 4 0 R >> >> /Length {first.Length} >>\nstream\n{first}endstream",
             $"<< /Type /XObject /Subtype /Form /BBox [0 0 160 24] /Resources << /Font << /Helv 4 0 R >> >> /Length {second.Length} >>\nstream\n{second}endstream"];
         if (toggles)

@@ -47,10 +47,16 @@ internal static class Program
                 && args[5] == "--session-isolation")
                 return TableExportSmoke.Run(Path.GetFullPath(args[1]), Path.GetFullPath(args[2]), Path.GetFullPath(args[3]),
                     windowSession: true, windowSessionCase: args[0], updateRestartState: Path.GetFullPath(args[4]));
+            if (args.Length == 5 && args[0].StartsWith("--verify-validate-profile-case-", StringComparison.Ordinal)
+                && args[4] == "--session-isolation")
+                return TableExportSmoke.Run(Path.GetFullPath(args[1]), Path.GetFullPath(args[2]), Path.GetFullPath(args[3]),
+                    windowSession: true, windowSessionCase: args[0]);
             if (args.Length == 5 && args[0] is "--verify-window-session" or "--verify-window-session-secondary-first"
                     or "--verify-window-session-manual-close" or "--verify-window-session-forget" or "--verify-window-session-close-all"
                     or "--verify-session-ending" or "--verify-session-ending-save" or "--verify-session-ending-controls"
                     or "--verify-update-window-state" or "--verify-print-visibility"
+                    or "--verify-save-history" or "--verify-active-editor-close" or "--verify-annotation-history" or "--verify-page-edit-failure" or "--verify-window-collection" or "--verify-layout-pending" or "--verify-merge-pending" or "--verify-layouts-pending" or "--verify-layer-isolation" or "--verify-validate-profile" or "--verify-form-format"
+                    or "--verify-form-history" or "--verify-stamp-isolation" or "--verify-failed-save-history" or "--verify-stamp-history" or "--verify-stamp-tabs" or "--verify-stamp-panes" or "--verify-stamp-tearout" or "--verify-stamp-saveall" or "--verify-active-editor-close-b" or "--verify-form-status" or "--verify-form-total"
                 && args[4] == "--session-isolation")
                 return TableExportSmoke.Run(Path.GetFullPath(args[1]), Path.GetFullPath(args[2]), Path.GetFullPath(args[3]), windowSession: true, windowSessionCase: args[0]);
             if (args.Length == 5 && args[0] == "--verify-window-lifecycle" && args[4] == "--startup-smoke")
