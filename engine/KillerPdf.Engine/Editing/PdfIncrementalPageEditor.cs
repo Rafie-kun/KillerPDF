@@ -17715,6 +17715,8 @@ public sealed class PdfIncrementalPageEditor
         PdfDictionary resources = ResolveCatalogValue(
             _document, resourcesValue, "A page /Resources value") as PdfDictionary
             ?? throw new InvalidOperationException("A page /Resources value is not a dictionary.");
+        if (PdfOptimizer.HasIndirectResourceConsumers(_document, resources, instructions))
+            return resources;
         var entries = resources.ToDictionary(item => item.Key, item => item.Value);
         PruneCategory("Font", usedFonts);
         PruneCategory("XObject", usedXObjects);

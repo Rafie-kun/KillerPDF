@@ -613,6 +613,7 @@ public static class PdfOptimizer
                 continue;
             IReadOnlyList<KillerPdf.Engine.Parsing.PdfContentInstruction> instructions =
                 reader.ReadInstructions(page.Index);
+            if (HasIndirectResourceConsumers(document, resources, instructions)) continue;
             HashSet<PdfName> fonts = [.. instructions
                 .Where(item => item.Operator == "Tf" && item.Operands.Count > 0)
                 .Select(item => item.Operands[0]).OfType<PdfName>()];
@@ -646,6 +647,36 @@ public static class PdfOptimizer
                     || DuplicateAliases(document, dictionary).Count > 0);
         }
         return Array.AsReadOnly(result.ToArray());
+    }
+
+    internal static bool HasIndirectResourceConsumers(PdfDocument document,
+        PdfDictionary resources,
+        IReadOnlyList<KillerPdf.Engine.Parsing.PdfContentInstruction> instructions)
+    {
+        // Forms can inherit page resources, and inline image dictionaries can name
+        // them without a separate cs operator. Preserve names the page-only scan
+        // and alias rewriter cannot track, including those used in nested forms.
+        return instructions.Any(instruction => UsesNamedInlineColorSpace(instruction)
+            || instruction.Operator == "Do"
+            && instruction.Operands.Count > 0
+            && instruction.Operands[0] is PdfName name
+            && resources.TryGetValue(Name("XObject"), out PdfObject? category)
+            && Resolve(document, category) is PdfDictionary xObjects
+            && xObjects.TryGetValue(name, out PdfObject? value)
+            && Resolve(document, value) is PdfStream stream
+            && stream.Dictionary.TryGetValue(Name("Subtype"), out PdfObject? subtype)
+            && Resolve(document, subtype).Equals(Name("Form")));
+
+        static bool UsesNamedInlineColorSpace(
+            KillerPdf.Engine.Parsing.PdfContentInstruction instruction)
+        {
+            if (instruction.Operator != "BI" || instruction.Operands.Count == 0
+                || instruction.Operands[0] is not PdfDictionary dictionary) return false;
+            if (!dictionary.TryGetValue(Name("ColorSpace"), out PdfObject? value))
+                dictionary.TryGetValue(Name("CS"), out value);
+            return value is PdfArray || value is PdfName name && name.ValueAsLatin1() is not
+                ("DeviceGray" or "G" or "DeviceRGB" or "RGB" or "DeviceCMYK" or "CMYK");
+        }
     }
 
     internal static bool HasJavaScriptActions(PdfDocument document)
