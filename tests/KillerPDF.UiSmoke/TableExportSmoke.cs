@@ -20,6 +20,9 @@ internal static class TableExportSmoke
 
     internal static int Run(string appPath, string appXaml, string folder, bool officeExport = false, bool grainThemes = false, bool dialogText = false, bool sidebarActions = false, bool paragraphEdit = false, bool accessibilityReview = false, bool formFieldEditing = false, bool guidedTasks = false, bool signedCopy = false, bool renderRecovery = false, bool toolbarAvailability = false, bool windowLifecycle = false, bool windowSession = false, string windowSessionCase = "--verify-window-session", string? updateRestartState = null, bool referenceRepairNotice = false, bool reductionRepairNotice = false)
     {
+        bool visibleNative = windowSession && windowSessionCase == "--verify-shortcut-hints";
+        if (visibleNative && !new[] { "SN01", "SN02" }.Contains(Environment.MachineName, StringComparer.OrdinalIgnoreCase))
+            throw new InvalidOperationException("Visible native hint acceptance may run only on SN01 or SN02.");
         if (!Environment.GetCommandLineArgs().Contains("--startup-smoke")
             && !(windowSession && Environment.GetCommandLineArgs().Contains("--session-isolation")))
             throw new InvalidOperationException("Startup smoke isolation is required.");
@@ -39,7 +42,8 @@ internal static class TableExportSmoke
         typeof(Application).GetField("_resourceAssembly", Members)!.SetValue(null, assembly);
         assembly.GetType("KillerPDF.Services.AppDataPaths", true)!
             .GetProperty("StartupSmokeRoot", Members)!.SetValue(null, updateRestartState ?? Path.Combine(folder, "data"));
-        if (accessibilityReview || formFieldEditing || guidedTasks || signedCopy || renderRecovery || toolbarAvailability || windowLifecycle || windowSession) AccessibilityReviewSmoke.ConfigureOffscreen(assembly);
+        if (!visibleNative && (accessibilityReview || formFieldEditing || guidedTasks || signedCopy || renderRecovery || toolbarAvailability || windowLifecycle || windowSession))
+            AccessibilityReviewSmoke.ConfigureOffscreen(assembly);
         Type appType = assembly.GetType("KillerPDF.App", true)!;
         var hostType = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("TableExportSmokeHost"),
             AssemblyBuilderAccess.Run).DefineDynamicModule("Host")
@@ -72,7 +76,7 @@ internal static class TableExportSmoke
             xaml = xaml.Replace("clr-namespace:" + name, "clr-namespace:" + name + ";assembly=" + assemblyName, StringComparison.Ordinal);
         app.Resources = (ResourceDictionary)System.Windows.Markup.XamlReader.Parse(xaml,
             new System.Windows.Markup.ParserContext { BaseUri = new Uri("pack://application:,,,/" + assemblyName + ";component/") });
-        if (accessibilityReview || formFieldEditing || guidedTasks || signedCopy || renderRecovery || toolbarAvailability || windowLifecycle || windowSession)
+        if (!visibleNative && (accessibilityReview || formFieldEditing || guidedTasks || signedCopy || renderRecovery || toolbarAvailability || windowLifecycle || windowSession))
         {
             var hiddenMessages = new Style(typeof(Window));
             hiddenMessages.Setters.Add(new Setter(Window.ShowActivatedProperty, false));
@@ -86,6 +90,13 @@ internal static class TableExportSmoke
         {
             foreach (string service in new[] { "ThemeManager", "LocaleManager", "FilmGrain" })
                 assembly.GetType("KillerPDF.Services." + service, true)!.GetMethod("Initialize", Members)!.Invoke(null, null);
+            if (visibleNative)
+            {
+                // This isolated host suppresses startup. Initialize the real presentation preference as startup does.
+                var read = appType.GetMethod("GetSetting", Members)!.CreateDelegate<Func<string, string?>>();
+                var save = appType.GetMethod("SetSetting", Members)!.CreateDelegate<Action<string, string>>();
+                assembly.GetType("KillerFamily.Layout.ShortcutHints", true)!.GetMethod("Initialize")!.Invoke(null, [read, save]);
+            }
             bool consumeUpdate = windowSessionCase == "--verify-update-restart-consume";
             if (consumeUpdate)
                 appType.GetMethod("LoadPendingUpdateRestart", Members)!.Invoke(null, null);
@@ -99,8 +110,15 @@ internal static class TableExportSmoke
             }
             owner = (Window)Activator.CreateInstance(assembly.GetType("KillerPDF.MainWindow", true)!)!;
             owner.WindowStartupLocation = WindowStartupLocation.Manual;
-            if (!consumeUpdate) { owner.Left = -10000; owner.Top = -10000; }
-            owner.ShowInTaskbar = false; owner.ShowActivated = false;
+            if (visibleNative)
+            {
+                owner.Left = SystemParameters.WorkArea.Left + 32;
+                owner.Top = SystemParameters.WorkArea.Top + 32;
+                owner.Width = Math.Min(1100, SystemParameters.WorkArea.Width - 64);
+                owner.Height = Math.Min(760, SystemParameters.WorkArea.Height - 64);
+            }
+            else if (!consumeUpdate) { owner.Left = -10000; owner.Top = -10000; }
+            owner.ShowInTaskbar = false; owner.ShowActivated = visibleNative;
             owner.Show();
             if (windowSessionCase == "--verify-update-restart-stage")
                 return UpdateRestartSmoke.Stage(owner, assembly, appPath, folder, updateRestartState!);
@@ -148,6 +166,8 @@ internal static class TableExportSmoke
                 return ToolSearchPrerequisitesSmoke.Run(owner, folder, creation: "scan");
             if (windowSessionCase == "--verify-search-office")
                 return ToolSearchPrerequisitesSmoke.Run(owner, folder, creation: "office");
+            if (windowSessionCase == "--verify-shortcut-hints")
+                return ShortcutHintsSmoke.Run(owner, folder);
             if (windowSessionCase is "--verify-export-loss-review" or "--verify-export-loss-mixed" or "--verify-export-loss-continue" or "--verify-export-lossless")
                 return ExportLossReviewSmoke.Run(owner, folder, windowSessionCase);
             if (windowSessionCase is "--verify-save-history" or "--verify-active-editor-close" or "--verify-annotation-history" or "--verify-form-history" or "--verify-stamp-isolation" or "--verify-failed-save-history" or "--verify-stamp-history" or "--verify-stamp-tabs" or "--verify-stamp-panes" or "--verify-stamp-tearout" or "--verify-page-edit-failure" or "--verify-layout-pending" or "--verify-merge-pending" or "--verify-layouts-pending" or "--verify-stamp-saveall" or "--verify-active-editor-close-b")
