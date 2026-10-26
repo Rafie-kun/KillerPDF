@@ -783,10 +783,7 @@ namespace KillerPDF
         {
             get
             {
-                Viewer.CommitActiveTextBoxExt();
-                ViewerB.CommitActiveTextBoxExt();
-                Viewer.CaptureActiveIfAny();
-                ViewerB.CaptureActiveIfAny();
+                CommitEditorsForClose();
                 return _documentEditRevision;
             }
         }
@@ -806,6 +803,16 @@ namespace KillerPDF
         }
 
         internal void SaveSessionEndingSettings() => SaveWindowSettings();
+
+        private void CommitEditorsForClose()
+        {
+            foreach (var pane in new[] { Viewer, ViewerB })
+                ((Features.IViewerHost)this).RunWithViewerContext(pane, () =>
+                {
+                    pane.CommitActiveTextBoxExt();
+                    pane.CaptureActiveIfAny();
+                });
+        }
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
@@ -829,8 +836,7 @@ namespace KillerPDF
             // Capture BOTH panes' live state, then ask across BOTH. `_sessions` is only the focused
             // pane, so testing it alone quits without a word while the other pane holds unsaved
             // edits - a data-loss bug.
-            Viewer.CaptureActiveIfAny();
-            ViewerB.CaptureActiveIfAny();
+            CommitEditorsForClose();
             bool anyDirty = _isDirty || AllSessions().Any(s => s.IsDirty);
             bool anyOpenDoc = AllSessions().Any(s =>
                 s.Doc != null || !string.IsNullOrEmpty(s.CurrentFile) || !string.IsNullOrEmpty(s.DeferredPath));
@@ -894,6 +900,7 @@ namespace KillerPDF
             // Fade the whole app out before it really closes (matches the dialog fade-out).
             e.Cancel = true;
             _fadingOut = true;
+            IsEnabled = false;
             var anim = new System.Windows.Media.Animation.DoubleAnimation(
                 Opacity, 0, new Duration(TimeSpan.FromMilliseconds(WindowFx.FadeMs)))
             {
