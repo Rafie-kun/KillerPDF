@@ -325,3 +325,29 @@ values. `--verify-form-status` checks accessible invalid/unsupported/failed feed
 correction, and saved raw values without executing arbitrary scripts. Screen-reader
 speech and other-language runtime acceptance remain separate. `--verify-form-total`
 checks an edited input, recalculated total and strict saved values for both fields.
+
+`--verify-delete-nearest` selects the final page of a numbered five-page synthetic
+PDF and confirms Delete. It checks the surviving selection and page counter, then
+strictly reopens Save/Undo/Redo page sets. Failure cleanup dismisses only this
+process's synthetic Don't Save/Quit prompt.
+Use `--verify-delete-nearest-case-KIND` for `first`, `middle`, `last`, `tail-block`,
+`disjoint` or `cancel`. The loop distinguishes independently colored page bitmaps,
+waits for the expected rendered survivor and checks every saved page label.
+Cancel clicks No and requires unchanged content, viewport and clean history.
+`--verify-export-loss-review` checks actual page/content loss details and Cancel.
+`--verify-export-loss-mixed` adds independent vector/image/link controls;
+`--verify-export-loss-continue` checks accepted plain-text output, and
+`--verify-export-lossless` checks valid JSON output without an unnecessary review.
+Each mode needs its own process and fresh output directory. The synthetic link is
+parsed only and must never be opened. These are public-control workflow checks,
+with separate visible-layout and screen-reader acceptance.
+
+`--verify-watch-readiness` imports and saves a synthetic OCR macro requiring German,
+then checks missing-model feedback before Start in Watched folders. Its input must
+contain no matching PDFs. It never runs a macro or OCR job, loads native OCR,
+downloads a model or writes output. Bundled English extraction is confined to the
+isolated data root.
+`--verify-paragraph-refusal` checks rotated-page guidance through actual tool search;
+`--verify-paragraph-refusal-tagged` checks tagged-document guidance. Both require
+ordinary fixture candidates, refusal for the unsupported fixture and unchanged
+source bytes. Each case uses a fresh process and evidence directory.

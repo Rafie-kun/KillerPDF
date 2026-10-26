@@ -130,6 +130,18 @@ internal static class TableExportSmoke
                 return FormCalculationSmoke.RunStatus(owner, folder);
             if (windowSessionCase == "--verify-form-total")
                 return FormCalculationSmoke.RunTotal(owner, folder);
+            if (windowSessionCase == "--verify-delete-nearest")
+                return PageDeletionSmoke.Run(owner, folder);
+            if (windowSessionCase.StartsWith("--verify-delete-nearest-case-", StringComparison.Ordinal))
+                return PageDeletionSmoke.Run(owner, folder, windowSessionCase["--verify-delete-nearest-case-".Length..]);
+            if (windowSessionCase == "--verify-watch-readiness")
+                return WatchReadinessSmoke.Run(owner, folder);
+            if (windowSessionCase == "--verify-paragraph-refusal")
+                return ParagraphRefusalSmoke.Run(owner, folder);
+            if (windowSessionCase == "--verify-paragraph-refusal-tagged")
+                return ParagraphRefusalSmoke.Run(owner, folder, tagged: true);
+            if (windowSessionCase is "--verify-export-loss-review" or "--verify-export-loss-mixed" or "--verify-export-loss-continue" or "--verify-export-lossless")
+                return ExportLossReviewSmoke.Run(owner, folder, windowSessionCase);
             if (windowSessionCase is "--verify-save-history" or "--verify-active-editor-close" or "--verify-annotation-history" or "--verify-form-history" or "--verify-stamp-isolation" or "--verify-failed-save-history" or "--verify-stamp-history" or "--verify-stamp-tabs" or "--verify-stamp-panes" or "--verify-stamp-tearout" or "--verify-page-edit-failure" or "--verify-layout-pending" or "--verify-merge-pending" or "--verify-layouts-pending" or "--verify-stamp-saveall" or "--verify-active-editor-close-b")
                 return DocumentStateSmoke.Run(owner, assembly, appPath, folder, windowSessionCase);
             if (windowSession) return WindowSessionSmoke.Run(owner, assembly, appPath, folder, windowSessionCase);

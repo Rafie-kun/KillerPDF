@@ -877,7 +877,7 @@ internal static class DocumentStateSmoke
 
     private static bool IsPageCanvas(Canvas canvas) => canvas.IsVisible && canvas.ActualWidth > 100
         && canvas.ActualHeight > 100 && canvas.GetType().Name == "SafeCanvas";
-    private static bool Dirty(Window owner) => ((Button)owner.FindName("SaveAsBtn")).Foreground
+    internal static bool Dirty(Window owner) => ((Button)owner.FindName("SaveAsBtn")).Foreground
         is SolidColorBrush brush && brush.Color == Color.FromRgb(0xE0, 0x73, 0);
     internal static void Click(Window owner, string name)
     {
