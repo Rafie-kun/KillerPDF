@@ -1954,4 +1954,5 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Paragraph_Rotated">Auf gedrehten Seiten können keine Absätze bearbeitet werden. Stellen Sie die Seitendrehung zuerst auf 0°.</sys:String>
     <sys:String x:Key="Str_Paragraph_Tagged">In getaggten Dokumenten können keine Absätze bearbeitet werden, da ihre Dokumentstruktur dabei nicht erhalten werden kann.</sys:String>
     <sys:String x:Key="Str_Dlg_KeepOnePage">Lassen Sie mindestens eine Seite im Dokument.</sys:String>
+    <sys:String x:Key="Str_Dlg_PageRange">Seitenzahlen oder Bereiche (1 bis {0})</sys:String>
 </ResourceDictionary>

@@ -1965,4 +1965,5 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Paragraph_Rotated">A edição de parágrafos não está disponível em páginas giradas. Primeiro defina a rotação da página como 0°.</sys:String>
     <sys:String x:Key="Str_Paragraph_Tagged">A edição de parágrafos não está disponível em documentos com marcas porque não consegue preservar a estrutura do documento.</sys:String>
     <sys:String x:Key="Str_Dlg_KeepOnePage">Mantenha pelo menos uma página no documento.</sys:String>
+    <sys:String x:Key="Str_Dlg_PageRange">Números de página ou intervalos (1 a {0})</sys:String>
 </ResourceDictionary>

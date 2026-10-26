@@ -9,6 +9,9 @@ internal sealed class DocumentValuesDialog : Window
     internal string[] Values => _fields.Select(input => input.Text.Trim()).ToArray();
 
     internal DocumentValuesDialog(Window owner, string title, params (string Label, string Value)[] fields)
+        : this(owner, title, L("Str_Btn_Save"), fields) { }
+
+    internal DocumentValuesDialog(Window owner, string title, string confirmText, params (string Label, string Value)[] fields)
     {
         Title = "KillerPDF - " + title;
         Width = 540;
@@ -33,7 +36,7 @@ internal sealed class DocumentValuesDialog : Window
         var cancel = UiKit.Make(L("Str_Btn_Cancel"), accent: false);
         cancel.IsCancel = true;
         cancel.Click += (_, _) => Close();
-        var apply = UiKit.Make(L("Str_Btn_Save"), accent: true);
+        var apply = UiKit.Make(confirmText, accent: true);
         apply.IsDefault = true;
         apply.Click += (_, _) => { DialogResult = true; };
         var buttons = UiKit.ButtonRow(cancel, apply);

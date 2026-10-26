@@ -530,6 +530,15 @@ internal static class DocumentStateSmoke
         {
             foreach (Window dialog in Application.Current.Windows.Cast<Window>().Where(window => window != owner && window.IsVisible).ToArray())
             {
+                if (delete && dialog.GetType().Name == "DocumentValuesDialog" && seen.Add(dialog))
+                {
+                    if (Descendants<TextBox>(dialog).Single().Text != "1")
+                        throw new InvalidOperationException("Annotated Delete did not prefill the current page.");
+                    Button apply = Descendants<Button>(dialog).Single(button => button.IsDefault);
+                    owner.Dispatcher.BeginInvoke(DispatcherPriority.Input,
+                        (Action)(() => apply.RaiseEvent(new RoutedEventArgs(Button.ClickEvent))));
+                    continue;
+                }
                 Button? yes = delete ? Descendants<Button>(dialog).FirstOrDefault(button =>
                     Equals(button.Content, Application.Current.FindResource("Str_Btn_Yes"))) : null;
                 if (yes is not null && seen.Add(dialog))

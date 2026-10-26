@@ -1950,4 +1950,5 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Paragraph_Rotated">Na otočených stránkách nelze upravovat odstavce. Nejprve nastavte otočení stránky na 0°.</sys:String>
     <sys:String x:Key="Str_Paragraph_Tagged">V dokumentech se značkami nelze upravovat odstavce, protože nelze zachovat jejich strukturu.</sys:String>
     <sys:String x:Key="Str_Dlg_KeepOnePage">V dokumentu ponechte alespoň jednu stránku.</sys:String>
+    <sys:String x:Key="Str_Dlg_PageRange">Čísla stránek nebo rozsahy (1 až {0})</sys:String>
 </ResourceDictionary>

@@ -1945,4 +1945,5 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Paragraph_Rotated">Döndürülmüş sayfalarda paragraf düzenlenemez. Önce sayfa döndürmesini 0° olarak ayarlayın.</sys:String>
     <sys:String x:Key="Str_Paragraph_Tagged">Belge yapısı korunamadığı için etiketli belgelerde paragraf düzenlenemez.</sys:String>
     <sys:String x:Key="Str_Dlg_KeepOnePage">Belgede en az bir sayfa bırakın.</sys:String>
+    <sys:String x:Key="Str_Dlg_PageRange">Sayfa numaraları veya aralıkları (1 ile {0} arası)</sys:String>
 </ResourceDictionary>

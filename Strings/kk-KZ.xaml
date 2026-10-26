@@ -1968,4 +1968,5 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_Paragraph_Rotated">Бұрылған беттерде абзацтарды өңдеу мүмкін емес. Алдымен беттің бұрылуын 0° етіп орнатыңыз.</sys:String>
     <sys:String x:Key="Str_Paragraph_Tagged">Тегтелген құжаттарда абзацтарды өңдеу мүмкін емес, себебі олардың құрылымын сақтау мүмкін болмайды.</sys:String>
     <sys:String x:Key="Str_Dlg_KeepOnePage">Құжатта кемінде бір бетті қалдырыңыз.</sys:String>
+    <sys:String x:Key="Str_Dlg_PageRange">Бет нөмірлері немесе ауқымдары (1 мен {0} аралығы)</sys:String>
 </ResourceDictionary>

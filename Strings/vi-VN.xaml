@@ -1965,4 +1965,5 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Paragraph_Rotated">Không thể chỉnh sửa đoạn văn trên trang đã xoay. Trước tiên, hãy đặt góc xoay của trang về 0°.</sys:String>
     <sys:String x:Key="Str_Paragraph_Tagged">Không thể chỉnh sửa đoạn văn trong tài liệu có thẻ vì không thể giữ nguyên cấu trúc tài liệu.</sys:String>
     <sys:String x:Key="Str_Dlg_KeepOnePage">Giữ lại ít nhất một trang trong tài liệu.</sys:String>
+    <sys:String x:Key="Str_Dlg_PageRange">Số trang hoặc phạm vi (từ 1 đến {0})</sys:String>
 </ResourceDictionary>

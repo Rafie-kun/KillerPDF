@@ -1945,4 +1945,5 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Paragraph_Rotated">No se pueden editar párrafos en páginas giradas. Primero ajuste la rotación de la página a 0°.</sys:String>
     <sys:String x:Key="Str_Paragraph_Tagged">No se pueden editar párrafos en documentos etiquetados porque no se puede conservar su estructura.</sys:String>
     <sys:String x:Key="Str_Dlg_KeepOnePage">Conserve al menos una página en el documento.</sys:String>
+    <sys:String x:Key="Str_Dlg_PageRange">Números de página o intervalos (1 a {0})</sys:String>
 </ResourceDictionary>

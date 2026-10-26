@@ -1949,4 +1949,5 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Paragraph_Rotated">无法在已旋转的页面上编辑段落。请先将页面旋转角度设为 0°。</sys:String>
     <sys:String x:Key="Str_Paragraph_Tagged">无法在带标签的文档中编辑段落，因为此操作无法保留文档结构。</sys:String>
     <sys:String x:Key="Str_Dlg_KeepOnePage">请在文档中至少保留一页。</sys:String>
+    <sys:String x:Key="Str_Dlg_PageRange">页码或范围（1至{0}）</sys:String>
 </ResourceDictionary>

@@ -64,9 +64,8 @@ namespace KillerPDF
         {
             if (_doc is null || _currentFile is null) { KillerDialog.Show(this, Loc("Str_Msg_OpenFirst")); return; }
             var sourceCurrent = CaptureDocumentOrigin();
-            int[] ordered = [.. PageList.SelectedItems.Cast<PageThumbnailVm>()
-                .Select(vm => vm.PageIndex).OrderBy(index => index)];
-            if (ordered.Length == 0) { KillerDialog.Show(this, Loc("Str_Dlg_SelectExtract")); return; }
+            int[]? ordered = PromptPageOperationRange("Str_Lbl_Extract", _doc.PageCount);
+            if (ordered is null || !sourceCurrent()) return;
             var dlg = new Controls.FileDialog(Controls.FileDialogMode.Save)
                           { Filter = Loc("Str_Filter_Pdf") + "|*.pdf", Title = Loc("Str_Dlg_SaveExtractedAs"),
                             CheckFileExists = false, CheckPathExists = true, RequireFilterExtension = true };
@@ -96,20 +95,20 @@ namespace KillerPDF
         {
             if (_doc is null) { KillerDialog.Show(this, Loc("Str_Msg_OpenFirst")); return; }
             if (!EnsureEditable(continueAfterUnlock: false)) return;
-            var selected = PageList.SelectedItems;
-            if (selected.Count == 0) { KillerDialog.Show(this, Loc("Str_Dlg_SelectDelete")); return; }
-            if (selected.Count >= _doc.PageCount)
+            var sourceCurrent = CaptureDocumentOrigin();
+            int[]? selected = PromptPageOperationRange("Str_Lbl_Delete", _doc.PageCount);
+            if (selected is null || !sourceCurrent()) return;
+            if (selected.Length >= _doc.PageCount)
             {
                 KillerDialog.Show(this, Loc("Str_Dlg_KeepOnePage"));
                 return;
             }
-            var result = KillerDialog.Show(this, selected.Count == 1 ? Loc("Str_Dlg_DeletePage1") : string.Format(Loc("Str_Dlg_DeletePagesN"), selected.Count), "KillerPDF",
+            var result = KillerDialog.Show(this, selected.Length == 1 ? Loc("Str_Dlg_DeletePage1") : string.Format(Loc("Str_Dlg_DeletePagesN"), selected.Length), "KillerPDF",
                 MessageBoxButton.YesNo, MessageBoxImage.Warning);
-            if (result != MessageBoxResult.Yes) return;
+            if (result != MessageBoxResult.Yes || !sourceCurrent()) return;
             try
             {
-                var indices = new List<int>();
-                foreach (PageThumbnailVm vm in selected) indices.Add(vm.PageIndex);
+                var indices = selected.ToList();
                 var removed = indices.ToHashSet();
                 int originalPage = Math.Clamp(_currentPage, 0, _doc.PageCount - 1);
                 int survivingPage = originalPage;
@@ -152,6 +151,25 @@ namespace KillerPDF
             {
                 KillerDialog.Show(this, Loc("Str_Err_DeleteFailed") + "\n" + ex.Message, "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private int[]? PromptPageOperationRange(string titleKey, int pageCount)
+        {
+            string initial = string.Join(",", PageList.SelectedItems.Cast<PageThumbnailVm>()
+                .Select(page => page.PageIndex + 1).Distinct().Order());
+            if (initial.Length == 0)
+                initial = (Math.Clamp(_currentPage, 0, Math.Max(0, pageCount - 1)) + 1)
+                    .ToString(System.Globalization.CultureInfo.CurrentCulture);
+            var dialog = new DocumentValuesDialog(this, Loc(titleKey), Loc("Str_Btn_OK"),
+                (string.Format(Loc("Str_Dlg_PageRange"), pageCount), initial));
+            if (dialog.ShowDialog() != true) return null;
+            List<int>? pages = Features.CliRunner.CliParsePageRange(dialog.Values[0], pageCount, out _);
+            if (pages is null)
+            {
+                KillerDialog.Show(this, Loc("Str_InvalidRange"), "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return null;
+            }
+            return [.. pages];
         }
 
         private void InsertBlankPage_Click(object sender, RoutedEventArgs e)

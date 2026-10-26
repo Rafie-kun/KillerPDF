@@ -48,6 +48,10 @@ internal static class PageDeletionSmoke
             "tail-block" => ([3, 4], 3, 2, 2, "PAGE_1|PAGE_2|PAGE_3"),
             "disjoint" => ([0, 2, 4], 0, 0, 1, "PAGE_2|PAGE_4"),
             "write-failure" => ([0, 2, 4], 0, 0, 1, "PAGE_2|PAGE_4"),
+            "typed-range" => ([1, 3], 1, 1, 2, "PAGE_1|PAGE_3|PAGE_5"),
+            "extract-range" => ([1, 3], 1, 1, 2, "PAGE_1|PAGE_3|PAGE_5"),
+            "range-reversed" => ([1, 2, 3], 1, 1, 4, "PAGE_1|PAGE_5"),
+            "range-empty" or "range-outside" or "range-cancel" or "range-switch" => ([1, 3], 1, 1, 1, "PAGE_1|PAGE_2|PAGE_3|PAGE_4|PAGE_5"),
             "all" => ([0, 1, 2, 3, 4], 0, 0, 0, "PAGE_1|PAGE_2|PAGE_3|PAGE_4|PAGE_5"),
             "last" => ([4], 4, 3, 3, "PAGE_1|PAGE_2|PAGE_3|PAGE_4"),
             "cancel" => ([4], 4, 4, 4, "PAGE_1|PAGE_2|PAGE_3|PAGE_4|PAGE_5"),
@@ -57,6 +61,9 @@ internal static class PageDeletionSmoke
         string source = Path.Combine(folder, "delete-last-page.pdf");
         byte[] bytes = Fixture();
         File.WriteAllBytes(source, bytes);
+        string switchedSource = Path.Combine(folder, "range-switched-source.pdf");
+        byte[] switchedBytes = TableExportSmoke.Fixture();
+        if (scenario == "range-switch") File.WriteAllBytes(switchedSource, switchedBytes);
         if (Read(source) != (5, "PAGE_1|PAGE_2|PAGE_3|PAGE_4|PAGE_5")) throw new InvalidOperationException("Public five-page fixture control failed.");
         owner.GetType().GetMethod("OpenFromExternal", BindingFlags.Public | BindingFlags.Instance)!.Invoke(owner, [source]);
         owner.Left = 32; owner.Top = 32; owner.Width = 950; owner.Height = 700; owner.Opacity = 1; owner.Activate();
@@ -91,6 +98,10 @@ internal static class PageDeletionSmoke
             && ((Button)owner.FindName("DeletePagesBtn")).IsEnabled, "rendered target, exact selected set and Delete availability");
         Console.WriteLine($"CONTROL case={scenario}, active={expected.Active}, selected={string.Join(',', expected.Removed)}; initial rendered color controls passed.");
         int confirmations = 0;
+        int rangePrompts = 0;
+        bool typedRange = scenario is "typed-range" or "extract-range" || scenario.StartsWith("range-", StringComparison.Ordinal);
+        bool rejectedRange = scenario is "range-empty" or "range-outside";
+        string extracted = Path.Combine(folder, "extracted-range.pdf");
         int failures = 0;
         bool denyWrite = scenario == "write-failure";
         DirectoryInfo? sessionDirectory = null;
@@ -118,8 +129,39 @@ internal static class PageDeletionSmoke
         {
             foreach (Window dialog in Application.Current.Windows.Cast<Window>().Where(window => window != owner && window.IsVisible).ToArray())
             {
+                if (scenario == "extract-range" && dialog.GetType().Name == "FileDialog")
+                {
+                    if (!seen.Add(dialog)) continue;
+                    if (rangePrompts == 0) { dialog.Close(); continue; }
+                    ((TextBox)dialog.FindName("FileNameBox")).Text = extracted;
+                    Button accept = (Button)dialog.FindName("AcceptButton");
+                    owner.Dispatcher.BeginInvoke(DispatcherPriority.Input,
+                        (Action)(() => accept.RaiseEvent(new RoutedEventArgs(Button.ClickEvent))));
+                    continue;
+                }
+                TextBox? range = dialog.GetType().Name == "DocumentValuesDialog" ? Descendants<TextBox>(dialog).SingleOrDefault() : null;
+                if (range is not null && seen.Add(dialog))
+                {
+                    rangePrompts++;
+                    string expectedPrefill = string.Join(',', expected.Removed.Select(index => index + 1));
+                    if (range.Text != expectedPrefill) throw new InvalidOperationException("The page range prompt did not prefill the selected pages.");
+                    if (typedRange) range.Text = scenario switch
+                    {
+                        "range-reversed" => "4-2,2",
+                        "range-empty" => "",
+                        "range-outside" => "6",
+                        _ => "4,2,2"
+                    };
+                    if (scenario == "range-switch")
+                        owner.GetType().GetMethod("OpenFromExternal", BindingFlags.Public | BindingFlags.Instance)!
+                            .Invoke(owner, [switchedSource]);
+                    Button apply = Descendants<Button>(dialog).Single(button => scenario == "range-cancel" ? button.IsCancel : button.IsDefault);
+                    owner.Dispatcher.BeginInvoke(DispatcherPriority.Input,
+                        (Action)(() => apply.RaiseEvent(new RoutedEventArgs(Button.ClickEvent))));
+                    continue;
+                }
                 Button? ok = Descendants<Button>(dialog).FirstOrDefault(button => Equals(button.Content, owner.FindResource("Str_Btn_OK")));
-                if ((denyWrite || scenario == "all") && ok is not null && seen.Add(dialog))
+                if ((denyWrite || scenario == "all" || rejectedRange) && ok is not null && seen.Add(dialog))
                 {
                     failures++;
                     Console.WriteLine("CONTROL Delete failure: " + string.Join(" ", Descendants<TextBlock>(dialog).Select(text => text.Text)));
@@ -143,8 +185,41 @@ internal static class PageDeletionSmoke
             }
         };
         timer.Start();
-        try { Click(owner, "DeletePagesBtn"); }
+        try { Click(owner, scenario == "extract-range" ? "ExtractPagesBtn" : "DeletePagesBtn"); }
         finally { timer.Stop(); RestoreAccess(); }
+        if (typedRange && rangePrompts != 1)
+            throw new InvalidOperationException("USER-004: " + (scenario == "extract-range" ? "Extract" : "Delete") + " did not offer a typed page range before confirmation.");
+        if (scenario == "range-switch")
+        {
+            Wait(() => pages.Items.Count == 1 && ((TextBlock)owner.FindName("FileNameLabel")).Text == Path.GetFileName(switchedSource), "replacement document after range dialog");
+            if (confirmations != 0 || failures != 0 || Dirty(owner) || ((Button)owner.FindName("UndoBtn")).IsEnabled
+                || !File.ReadAllBytes(source).AsSpan().SequenceEqual(bytes)
+                || !File.ReadAllBytes(switchedSource).AsSpan().SequenceEqual(switchedBytes))
+                throw new InvalidOperationException("USER-004: an old range confirmation changed a replacement document.");
+            const string switchedResult = "PASS verify-delete-nearest: switching documents during range entry prevents deletion and preserves both source files and clean history.";
+            File.WriteAllText(Path.Combine(folder, "result.txt"), switchedResult); Console.WriteLine(switchedResult);
+            return 0;
+        }
+        if (rejectedRange || scenario == "range-cancel")
+        {
+            if (confirmations != 0 || failures != (rejectedRange ? 1 : 0) || pages.Items.Count != 5
+                || pages.SelectedIndex != expected.Active || !PageColor(0, 255, 0) || Dirty(owner)
+                || ((Button)owner.FindName("UndoBtn")).IsEnabled || !File.ReadAllBytes(source).AsSpan().SequenceEqual(bytes))
+                throw new InvalidOperationException("USER-004: rejected or canceled range changed document state or reached deletion confirmation.");
+            string refusedRange = "PASS verify-delete-nearest: " + scenario + " preserves the document, visible page, source and clean history without deletion confirmation.";
+            File.WriteAllText(Path.Combine(folder, "result.txt"), refusedRange); Console.WriteLine(refusedRange);
+            return 0;
+        }
+        if (scenario == "extract-range")
+        {
+            if (!File.Exists(extracted) || Read(extracted) != (2, "PAGE_2|PAGE_4") || pages.Items.Count != 5
+                || Dirty(owner) || ((Button)owner.FindName("UndoBtn")).IsEnabled
+                || !File.ReadAllBytes(source).AsSpan().SequenceEqual(bytes))
+                throw new InvalidOperationException("USER-004: typed extraction lost page order or changed source content/history.");
+            const string extractedResult = "PASS verify-delete-nearest: typed Extract normalizes duplicate and out-of-order input into source order and preserves the original document and history.";
+            File.WriteAllText(Path.Combine(folder, "result.txt"), extractedResult); Console.WriteLine(extractedResult);
+            return 0;
+        }
         if (scenario == "all")
         {
             Console.WriteLine($"CONTROL all-page Delete: confirmations={confirmations}, notices={failures}, pages={pages.Items.Count}, dirty={Dirty(owner)}.");
