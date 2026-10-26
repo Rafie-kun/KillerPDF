@@ -64,7 +64,7 @@
     <SolidColorBrush x:Key="SliderTrack"    Color="#8c8c8c" po:Freeze="True"/>
     <SolidColorBrush x:Key="RadioAccent"    Color="#1b5e20" po:Freeze="True"/>
     <SolidColorBrush x:Key="BgOverlay"      Color="#99000000" po:Freeze="True"/>
-    <sys:Double x:Key="GrainOpacity">0.4</sys:Double>
+    <sys:Double x:Key="GrainOpacity">0.30</sys:Double>
     <!-- Black icon shadow: invisible under the dark inactive glyphs, but shows under the SELECTED tool's
          white glyph on its accent background - so in practice only the active tool icon gets a shadow. -->
     <sys:Double x:Key="IconShadowOpacity">0.35</sys:Double>
