@@ -70,7 +70,7 @@ public static class PdfStreamDecoder
             List<PdfName> filters = ReadFilters(stream.Dictionary, resolve);
             if (filters.Count == 1 && filters[0].ValueAsLatin1() is "FlateDecode" or "Fl")
             {
-                PdfDictionary?[] parameters = ReadParameters(stream.Dictionary, 1, resolve,
+                PdfDictionary?[] parameters = ReadParameters(stream.Dictionary, filters, resolve,
                     compatibilityRecovery);
                 if (parameters[0] is not { } predictor
                     || GetInteger(predictor, PredictorName, 1, resolve) == 1)
@@ -110,7 +110,7 @@ public static class PdfStreamDecoder
             || filters[^1].ValueAsLatin1() is not ("DCTDecode" or "DCT"))
             throw new PdfFilterException("Reduced JPEG decoding requires a final DCTDecode filter.");
         PdfDictionary?[] parameters = ReadParameters(
-            stream.Dictionary, filters.Count, resolve, compatibilityRecovery);
+            stream.Dictionary, filters, resolve, compatibilityRecovery);
         ReadOnlyMemory<byte> encoded = stream.EncodedData;
         if (filters.Count > 1)
         {
@@ -159,7 +159,7 @@ public static class PdfStreamDecoder
         List<PdfName> filters = ReadFilters(stream.Dictionary, resolve);
         if (filters.Count == 0) return ReadEncodedStream(stream.EncodedData);
         PdfDictionary?[] parameters = ReadParameters(
-            stream.Dictionary, filters.Count, resolve, compatibilityRecovery);
+            stream.Dictionary, filters, resolve, compatibilityRecovery);
         if (filters.Count == 1 && filters[0].ValueAsLatin1() is "FlateDecode" or "Fl"
             && (parameters[0] is not { } predictor || GetInteger(predictor, PredictorName, 1, resolve) == 1))
             return new ZLibStream(ReadEncodedStream(stream.EncodedData), CompressionMode.Decompress);
@@ -188,7 +188,7 @@ public static class PdfStreamDecoder
             return stream.EncodedData.ToArray();
         }
         PdfDictionary?[] parameters = ReadParameters(
-            stream.Dictionary, filters.Count, resolve, compatibilityRecovery);
+            stream.Dictionary, filters, resolve, compatibilityRecovery);
 
         ReadOnlyMemory<byte> current = stream.EncodedData;
         byte[]? result = null;
@@ -650,10 +650,11 @@ public static class PdfStreamDecoder
     }
 
     private static PdfDictionary?[] ReadParameters(
-        PdfDictionary dictionary, int filterCount,
+        PdfDictionary dictionary, IReadOnlyList<PdfName> filters,
         Func<PdfIndirectReference, PdfObject>? resolve,
         bool compatibilityRecovery = false)
     {
+        int filterCount = filters.Count;
         var result = new PdfDictionary?[filterCount];
         if (!dictionary.TryGetValue(DecodeParmsName, out PdfObject parameters))
             return result;
@@ -666,7 +667,31 @@ public static class PdfStreamDecoder
         if (parameters is PdfDictionary single)
         {
             if (filterCount != 1)
-                throw new PdfFilterException("A single DecodeParms dictionary requires exactly one stream filter.");
+            {
+                if (!compatibilityRecovery || filterCount == 0
+                    || !single.ContainsKey(PredictorName)
+                    || single.Any(entry => !entry.Key.Equals(PredictorName)
+                        && !entry.Key.Equals(ColumnsName) && !entry.Key.Equals(ColorsName)
+                        && !entry.Key.Equals(BitsPerComponentName))
+                    || filters.Any(filter => filter.ValueAsLatin1() is not
+                        ("FlateDecode" or "Fl" or "LZWDecode" or "LZW"
+                        or "ASCIIHexDecode" or "AHx" or "ASCII85Decode" or "A85"
+                        or "RunLengthDecode" or "RL")))
+                    throw new PdfFilterException("A single DecodeParms dictionary requires exactly one stream filter.");
+                int target = -1;
+                for (int index = 0; index < filterCount; index++)
+                {
+                    if (filters[index].ValueAsLatin1() is not ("FlateDecode" or "Fl" or "LZWDecode" or "LZW"))
+                        continue;
+                    if (target >= 0)
+                        throw new PdfFilterException("A single DecodeParms dictionary matches multiple predictor filters.");
+                    target = index;
+                }
+                if (target < 0)
+                    throw new PdfFilterException("A single DecodeParms dictionary has no matching predictor filter.");
+                result[target] = single;
+                return result;
+            }
             result[0] = single;
             return result;
         }
