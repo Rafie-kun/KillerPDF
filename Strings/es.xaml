@@ -1931,4 +1931,7 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Layout_TabsTop">Pestañas arriba</sys:String>
     <sys:String x:Key="Str_Layout_TabsBottom">Pestañas abajo</sys:String>
     <sys:String x:Key="Str_About_ShowShortcutsInMenus">Mostrar atajos en los menús</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Invalid">El valor no cumple las reglas de validación de este campo.</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Unsupported">Este campo usa un script no compatible. No se ha ejecutado.</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Failed">No se ha podido completar el cálculo de este campo.</sys:String>
 </ResourceDictionary>

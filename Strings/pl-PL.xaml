@@ -1939,4 +1939,7 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Layout_TabsTop">Karty u góry</sys:String>
     <sys:String x:Key="Str_Layout_TabsBottom">Karty u dołu</sys:String>
     <sys:String x:Key="Str_About_ShowShortcutsInMenus">Pokazuj skróty w menu</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Invalid">Wartość nie spełnia reguł sprawdzania poprawności tego pola.</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Unsupported">To pole używa nieobsługiwanego skryptu. Nie został uruchomiony.</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Failed">Nie można było ukończyć obliczenia tego pola.</sys:String>
 </ResourceDictionary>

@@ -1933,4 +1933,7 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_Layout_TabsTop">分頁置頂</sys:String>
     <sys:String x:Key="Str_Layout_TabsBottom">分頁置底</sys:String>
     <sys:String x:Key="Str_About_ShowShortcutsInMenus">在功能表中顯示快速鍵</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Invalid">此值不符合此欄位的驗證規則。</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Unsupported">此欄位使用不支援的指令碼。該指令碼未執行。</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Failed">無法完成此欄位的計算。</sys:String>
 </ResourceDictionary>

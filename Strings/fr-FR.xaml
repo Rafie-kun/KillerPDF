@@ -1951,4 +1951,7 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Layout_TabsTop">Onglets en haut</sys:String>
     <sys:String x:Key="Str_Layout_TabsBottom">Onglets en bas</sys:String>
     <sys:String x:Key="Str_About_ShowShortcutsInMenus">Afficher les raccourcis dans les menus</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Invalid">La valeur ne respecte pas les règles de validation de ce champ.</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Unsupported">Ce champ utilise un script non pris en charge. Il n'a pas été exécuté.</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Failed">Le calcul de ce champ n'a pas pu être terminé.</sys:String>
 </ResourceDictionary>

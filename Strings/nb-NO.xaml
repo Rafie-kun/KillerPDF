@@ -1951,4 +1951,7 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Layout_TabsTop">Faner øverst</sys:String>
     <sys:String x:Key="Str_Layout_TabsBottom">Faner nederst</sys:String>
     <sys:String x:Key="Str_About_ShowShortcutsInMenus">Vis hurtigtaster i menyer</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Invalid">Verdien oppfyller ikke valideringsreglene for dette feltet.</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Unsupported">Dette feltet bruker et skript som ikke støttes. Det ble ikke kjørt.</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Failed">Beregningen for dette feltet kunne ikke fullføres.</sys:String>
 </ResourceDictionary>

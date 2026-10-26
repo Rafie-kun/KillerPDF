@@ -1954,4 +1954,7 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Layout_TabsTop">Вкладки сверху</sys:String>
     <sys:String x:Key="Str_Layout_TabsBottom">Вкладки снизу</sys:String>
     <sys:String x:Key="Str_About_ShowShortcutsInMenus">Показывать сочетания клавиш в меню</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Invalid">Значение не соответствует правилам проверки этого поля.</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Unsupported">Это поле использует неподдерживаемый сценарий. Он не был выполнен.</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Failed">Не удалось завершить вычисление этого поля.</sys:String>
 </ResourceDictionary>

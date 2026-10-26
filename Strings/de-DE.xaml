@@ -1940,4 +1940,7 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Layout_TabsTop">Tabs oben</sys:String>
     <sys:String x:Key="Str_Layout_TabsBottom">Tabs unten</sys:String>
     <sys:String x:Key="Str_About_ShowShortcutsInMenus">Tastenkürzel in Menüs anzeigen</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Invalid">Der Wert entspricht nicht den Validierungsregeln dieses Feldes.</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Unsupported">Dieses Feld verwendet ein nicht unterstütztes Skript. Es wurde nicht ausgeführt.</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Failed">Die Berechnung dieses Feldes konnte nicht abgeschlossen werden.</sys:String>
 </ResourceDictionary>

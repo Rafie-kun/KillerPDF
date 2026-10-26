@@ -1931,4 +1931,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Layout_TabsTop">Sekmeler üstte</sys:String>
     <sys:String x:Key="Str_Layout_TabsBottom">Sekmeler altta</sys:String>
     <sys:String x:Key="Str_About_ShowShortcutsInMenus">Menülerde kısayolları göster</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Invalid">Değer, bu alanın doğrulama kurallarını karşılamıyor.</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Unsupported">Bu alan desteklenmeyen bir betik kullanıyor. Betik çalıştırılmadı.</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Failed">Bu alanın hesaplaması tamamlanamadı.</sys:String>
 </ResourceDictionary>

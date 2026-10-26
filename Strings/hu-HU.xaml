@@ -1938,4 +1938,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Layout_TabsTop">Lapok felül</sys:String>
     <sys:String x:Key="Str_Layout_TabsBottom">Lapok alul</sys:String>
     <sys:String x:Key="Str_About_ShowShortcutsInMenus">Billentyűparancsok megjelenítése a menükben</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Invalid">Az érték nem felel meg a mező érvényesítési szabályainak.</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Unsupported">Ez a mező nem támogatott szkriptet használ. A szkript nem futott le.</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Failed">A mező számítását nem sikerült befejezni.</sys:String>
 </ResourceDictionary>

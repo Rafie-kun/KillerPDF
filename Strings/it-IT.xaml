@@ -1951,4 +1951,7 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_Layout_TabsTop">Schede in alto</sys:String>
     <sys:String x:Key="Str_Layout_TabsBottom">Schede in basso</sys:String>
     <sys:String x:Key="Str_About_ShowShortcutsInMenus">Mostra le scorciatoie nei menu</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Invalid">Il valore non rispetta le regole di convalida di questo campo.</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Unsupported">Questo campo usa uno script non supportato. Lo script non è stato eseguito.</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Failed">Non è stato possibile completare il calcolo di questo campo.</sys:String>
 </ResourceDictionary>

@@ -1,4 +1,5 @@
 using System.IO;
+using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Media;
 using KillerPdf.Engine.Documents;
@@ -48,6 +49,16 @@ namespace KillerPDF.Controls
                 bool changed = false;
                 foreach (PdfFormCalculationEntry entry in report.Fields)
                 {
+                    _formValueBoxes.TryGetValue(entry.FieldName, out TextBox? box);
+                    string feedback = entry.Status == PdfFormScriptStatus.Unsupported ? Loc("Str_FormEvaluation_Unsupported")
+                        : entry.Status == PdfFormScriptStatus.Failed ? Loc("Str_FormEvaluation_Failed")
+                        : !entry.IsValid ? Loc("Str_FormEvaluation_Invalid") : string.Empty;
+                    if (box is not null)
+                    {
+                        AutomationProperties.SetItemStatus(box, feedback);
+                        AutomationProperties.SetHelpText(box, feedback);
+                        if (feedback.Length > 0) SetStatus((box.ToolTip as string ?? entry.FieldName) + ": " + feedback);
+                    }
                     if (entry.Status != PdfFormScriptStatus.Evaluated) continue;
                     if (values.TryGetValue(entry.FieldName, out string? previous)
                         && previous != entry.Value)
@@ -55,8 +66,7 @@ namespace KillerPDF.Controls
                         _formTextValues[entry.FieldName] = entry.Value;
                         changed = true;
                     }
-                    if (_formValueBoxes.TryGetValue(entry.FieldName, out TextBox? box)
-                        && !box.IsKeyboardFocusWithin)
+                    if (box is not null && !box.IsKeyboardFocusWithin)
                     {
                         box.Text = entry.DisplayValue;
                         box.Foreground = entry.IsRed ? Brushes.Red : Brushes.Black;

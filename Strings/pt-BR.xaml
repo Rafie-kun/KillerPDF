@@ -1951,4 +1951,7 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Layout_TabsTop">Guias na parte superior</sys:String>
     <sys:String x:Key="Str_Layout_TabsBottom">Guias na parte inferior</sys:String>
     <sys:String x:Key="Str_About_ShowShortcutsInMenus">Mostrar atalhos nos menus</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Invalid">O valor não atende às regras de validação deste campo.</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Unsupported">Este campo usa um script sem suporte. Ele não foi executado.</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Failed">Não foi possível concluir o cálculo deste campo.</sys:String>
 </ResourceDictionary>

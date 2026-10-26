@@ -1951,4 +1951,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Layout_TabsTop">Tab ở trên</sys:String>
     <sys:String x:Key="Str_Layout_TabsBottom">Tab ở dưới</sys:String>
     <sys:String x:Key="Str_About_ShowShortcutsInMenus">Hiển thị phím tắt trong menu</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Invalid">Giá trị không đáp ứng quy tắc xác thực của trường này.</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Unsupported">Trường này sử dụng tập lệnh không được hỗ trợ. Tập lệnh chưa được chạy.</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Failed">Không thể hoàn tất phép tính của trường này.</sys:String>
 </ResourceDictionary>

@@ -1951,4 +1951,7 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Layout_TabsTop">タブを上に表示</sys:String>
     <sys:String x:Key="Str_Layout_TabsBottom">タブを下に表示</sys:String>
     <sys:String x:Key="Str_About_ShowShortcutsInMenus">メニューにショートカットを表示</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Invalid">値がこのフィールドの検証ルールを満たしていません。</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Unsupported">このフィールドは未対応のスクリプトを使用しています。実行されませんでした。</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Failed">このフィールドの計算を完了できませんでした。</sys:String>
 </ResourceDictionary>

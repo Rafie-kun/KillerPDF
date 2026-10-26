@@ -1936,4 +1936,7 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Layout_TabsTop">Karty nahoře</sys:String>
     <sys:String x:Key="Str_Layout_TabsBottom">Karty dole</sys:String>
     <sys:String x:Key="Str_About_ShowShortcutsInMenus">Zobrazovat zkratky v nabídkách</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Invalid">Hodnota nesplňuje ověřovací pravidla tohoto pole.</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Unsupported">Toto pole používá nepodporovaný skript. Nebyl spuštěn.</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Failed">Výpočet tohoto pole se nepodařilo dokončit.</sys:String>
 </ResourceDictionary>

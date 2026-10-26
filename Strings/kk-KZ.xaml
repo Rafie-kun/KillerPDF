@@ -1954,4 +1954,7 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_Layout_TabsTop">Қойындылар жоғарыда</sys:String>
     <sys:String x:Key="Str_Layout_TabsBottom">Қойындылар төменде</sys:String>
     <sys:String x:Key="Str_About_ShowShortcutsInMenus">Мәзірлерде пернелер тіркесімін көрсету</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Invalid">Мән осы өрістің тексеру ережелеріне сәйкес келмейді.</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Unsupported">Бұл өріс қолдау көрсетілмейтін сценарийді пайдаланады. Ол орындалмады.</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Failed">Бұл өрістің есептеуін аяқтау мүмкін болмады.</sys:String>
 </ResourceDictionary>

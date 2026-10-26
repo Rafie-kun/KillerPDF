@@ -1838,4 +1838,7 @@
     <sys:String x:Key="Str_Layout_TabsTop">Zavihki zgoraj</sys:String>
     <sys:String x:Key="Str_Layout_TabsBottom">Zavihki spodaj</sys:String>
     <sys:String x:Key="Str_About_ShowShortcutsInMenus">Prikaži bližnjice v menijih</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Invalid">Vrednost ne ustreza pravilom preverjanja tega polja.</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Unsupported">To polje uporablja nepodprt skript. Skript ni bil izveden.</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Failed">Izračuna tega polja ni bilo mogoče dokončati.</sys:String>
 </ResourceDictionary>

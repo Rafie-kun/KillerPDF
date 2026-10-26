@@ -1931,4 +1931,7 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Layout_TabsTop">ট্যাব উপরে</sys:String>
     <sys:String x:Key="Str_Layout_TabsBottom">ট্যাব নিচে</sys:String>
     <sys:String x:Key="Str_About_ShowShortcutsInMenus">মেনুতে শর্টকাট দেখান</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Invalid">মানটি এই ক্ষেত্রের যাচাইকরণ নিয়ম পূরণ করে না।</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Unsupported">এই ক্ষেত্রে একটি অসমর্থিত স্ক্রিপ্ট আছে। এটি চালানো হয়নি।</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Failed">এই ক্ষেত্রের গণনা সম্পূর্ণ করা যায়নি।</sys:String>
 </ResourceDictionary>

@@ -1951,4 +1951,7 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Layout_TabsTop">Вкладки зверху</sys:String>
     <sys:String x:Key="Str_Layout_TabsBottom">Вкладки знизу</sys:String>
     <sys:String x:Key="Str_About_ShowShortcutsInMenus">Показувати сполучення клавіш у меню</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Invalid">Значення не відповідає правилам перевірки цього поля.</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Unsupported">Це поле використовує непідтримуваний сценарій. Його не було виконано.</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Failed">Не вдалося завершити обчислення цього поля.</sys:String>
 </ResourceDictionary>

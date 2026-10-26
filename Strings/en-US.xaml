@@ -1950,4 +1950,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Layout_TabsTop">Tabs on top</sys:String>
     <sys:String x:Key="Str_Layout_TabsBottom">Tabs on bottom</sys:String>
     <sys:String x:Key="Str_About_ShowShortcutsInMenus">Show Shortcuts in Menus</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Invalid">The value does not meet this field's validation rules.</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Unsupported">This field uses an unsupported script. It was not run.</sys:String>
+    <sys:String x:Key="Str_FormEvaluation_Failed">This field's calculation could not be completed.</sys:String>
 </ResourceDictionary>
