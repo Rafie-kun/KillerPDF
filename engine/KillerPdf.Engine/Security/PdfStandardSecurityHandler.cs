@@ -36,17 +36,18 @@ internal sealed class PdfStandardSecurityHandler
     private readonly CryptMethod _embeddedFileMethod;
     private readonly IReadOnlyDictionary<string, CryptMethod> _cryptFilters;
     private readonly bool _encryptMetadata;
-    private readonly bool _recoverIvOnlyStreams;
+    private readonly bool _compatibilityRecovery;
 
     internal PdfPasswordAuthenticationRole AuthenticationRole { get; }
     internal bool RecoveredUnnormalizedPassword { get; private init; }
+    internal bool RecoveredEmptyAesString { get; private set; }
     internal PdfDocumentPermissions Permissions { get; }
 
     private PdfStandardSecurityHandler(
         byte[] fileKey, CryptMethod stringMethod, CryptMethod streamMethod,
         CryptMethod embeddedFileMethod, bool encryptMetadata,
         int permissions, long revision, PdfPasswordAuthenticationRole authenticationRole,
-        IReadOnlyDictionary<string, CryptMethod>? cryptFilters = null, bool recoverIvOnlyStreams = false)
+        IReadOnlyDictionary<string, CryptMethod>? cryptFilters = null, bool compatibilityRecovery = false)
     {
         _fileKey = fileKey;
         _stringMethod = stringMethod;
@@ -54,7 +55,7 @@ internal sealed class PdfStandardSecurityHandler
         _embeddedFileMethod = embeddedFileMethod;
         _cryptFilters = cryptFilters ?? new Dictionary<string, CryptMethod>();
         _encryptMetadata = encryptMetadata;
-        _recoverIvOnlyStreams = recoverIvOnlyStreams;
+        _compatibilityRecovery = compatibilityRecovery;
         Permissions = PdfDocumentPermissions.FromFlags(permissions, revision);
         AuthenticationRole = authenticationRole;
     }
@@ -393,8 +394,7 @@ internal sealed class PdfStandardSecurityHandler
         return value switch
         {
             PdfString text when _stringMethod != CryptMethod.Identity =>
-                new PdfString(DecryptBytes(
-                    text.Bytes.Span, _stringMethod, objectNumber, generation), text.Form),
+                DecryptString(text, objectNumber, generation),
             PdfArray array => new PdfArray(array.Select(item =>
                 Decrypt(item, objectNumber, generation, resolve))),
             PdfDictionary dictionary => TransformDictionary(
@@ -403,6 +403,17 @@ internal sealed class PdfStandardSecurityHandler
                 stream, objectNumber, generation, resolve),
             _ => value
         };
+    }
+
+    private PdfString DecryptString(PdfString text, int objectNumber, int generation)
+    {
+        if (_compatibilityRecovery && _stringMethod is CryptMethod.Aes128 or CryptMethod.Aes256
+            && text.Bytes.Length is 0 or 16)
+        {
+            RecoveredEmptyAesString = true;
+            return new PdfString([], text.Form);
+        }
+        return new PdfString(DecryptBytes(text.Bytes.Span, _stringMethod, objectNumber, generation), text.Form);
     }
 
     internal PdfObject Encrypt(
@@ -460,7 +471,7 @@ internal sealed class PdfStandardSecurityHandler
         CryptMethod method = ExplicitStreamMethod(stream.Dictionary, resolve)
             ?? (isEmbeddedFile ? _embeddedFileMethod : _streamMethod);
         ReadOnlySpan<byte> data = stream.EncodedData.Span;
-        if (_recoverIvOnlyStreams && method == CryptMethod.Aes256 && data.Length == 16
+        if (_compatibilityRecovery && method == CryptMethod.Aes256 && data.Length == 16
             && (_encryptMetadata || !isMetadata))
             return new PdfStream(dictionary, []);
         return new PdfStream(dictionary,
@@ -634,7 +645,7 @@ internal sealed class PdfStandardSecurityHandler
         return new PdfStandardSecurityHandler(
             fileKey, stringMethod, streamMethod, embeddedFileMethod, encryptMetadata,
             permissions, revision, authenticationRole,
-            version == 4 ? ReadCryptFilters(encryption, null) : null);
+            version == 4 ? ReadCryptFilters(encryption, null) : null, compatibilityRecovery);
     }
 
     private static byte[]? TryLegacyUserPassword(

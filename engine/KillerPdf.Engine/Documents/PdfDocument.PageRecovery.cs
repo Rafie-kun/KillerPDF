@@ -8,12 +8,18 @@ public sealed partial class PdfDocument
 {
     private static readonly string[] PageRecoveryDiagnostics =
         ["Invalid catalog or page-tree links were recovered from intact indirect page objects."];
+    private static readonly IReadOnlyList<string> EmptyAesStringDiagnostics = Array.AsReadOnly(new[]
+        { "An empty or IV-only AES string was recovered as empty in compatibility mode." });
+    private IReadOnlyList<string> _pageRecoveryDiagnostics = [];
     private bool _pageRecoveryAttempted;
     private volatile bool _pageStructureRead;
     private IReadOnlyDictionary<int, PdfObject> _recoveredPageObjects = new Dictionary<int, PdfObject>();
 
-    /// <summary>Gets structural repairs applied by bounded compatibility recovery.</summary>
-    public IReadOnlyList<string> RecoveryDiagnostics { get; private set; } = [];
+    /// <summary>Gets repairs applied by bounded compatibility recovery to objects read so far.</summary>
+    public IReadOnlyList<string> RecoveryDiagnostics => _security?.RecoveredEmptyAesString == true
+        ? _pageRecoveryDiagnostics.Count == 0 ? EmptyAesStringDiagnostics
+            : Array.AsReadOnly(_pageRecoveryDiagnostics.Concat(EmptyAesStringDiagnostics).ToArray())
+        : _pageRecoveryDiagnostics;
     internal IReadOnlyDictionary<int, PdfObject> RecoveredPageObjects => _recoveredPageObjects;
 
     internal void MarkPageStructureRead() => _pageStructureRead = true;
@@ -117,7 +123,7 @@ public sealed partial class PdfDocument
             _objectStreams.Clear();
             foreach (var pair in candidate._objectStreams) _objectStreams.Add(pair.Key, pair.Value);
             _recoveredPageObjects = replacements;
-            RecoveryDiagnostics = Array.AsReadOnly(PageRecoveryDiagnostics);
+            _pageRecoveryDiagnostics = Array.AsReadOnly(PageRecoveryDiagnostics);
             return true;
 
             void Apply()
