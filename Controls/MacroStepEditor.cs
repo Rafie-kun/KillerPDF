@@ -170,12 +170,26 @@ internal static class MacroStepEditor
             }
             if (step.Operation == PdfMacroOperation.Validate)
             {
-                PdfPreflightProfile[] profiles = [PdfPreflightProfile.General, PdfPreflightProfile.PrintProduction,
+                List<PdfPreflightProfile> profiles = [PdfPreflightProfile.General, PdfPreflightProfile.PrintProduction,
                     PdfPreflightProfile.Attachments];
+                PdfPreflightProfile current = step.Settings?.TryGetValue("profileJson", out string? json) == true
+                    ? PdfPreflightProfile.FromJson(json) : PdfPreflightProfile.General;
+                string currentJson = current.ToJson();
+                int selected = profiles.FindIndex(profile => profile.ToJson() == currentJson);
+                List<string> labels = [L("Str_DocumentTools_Preflight"), L("Str_DocumentTools_PrintProduction"),
+                    L("Str_DocumentTools_EditAttachments")];
+                if (selected < 0)
+                {
+                    selected = profiles.Count;
+                    profiles.Add(current);
+                    labels.Add(L("Str_Blank_Custom") + ": " + current.Name);
+                }
                 var select = new DocumentListDialog(owner, L("Str_DocumentTools_Preflight"),
-                    new[] { L("Str_DocumentTools_Preflight"), L("Str_DocumentTools_PrintProduction"), L("Str_DocumentTools_EditAttachments") });
-                return select.ShowDialog() == true ? new PdfMacroStep(step.Operation,
-                    new Dictionary<string, string> { ["profileJson"] = profiles[select.SelectedIndex].ToJson() }) : null;
+                    labels) { SelectedIndex = selected };
+                if (select.ShowDialog() != true) return null;
+                var settings = step.Settings is null ? new Dictionary<string, string>() : new(step.Settings);
+                settings["profileJson"] = profiles[select.SelectedIndex].ToJson();
+                return new PdfMacroStep(step.Operation, settings);
             }
             if (step.Operation == PdfMacroOperation.NumberPages)
             {
