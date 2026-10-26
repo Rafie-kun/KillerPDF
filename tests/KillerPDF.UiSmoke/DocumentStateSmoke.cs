@@ -29,7 +29,8 @@ internal static class DocumentStateSmoke
         bool closeInOtherPane = scenario == "--verify-active-editor-close-b";
         string otherSource = Path.Combine(folder, "other-pane.pdf");
         byte[] original = scenario is "--verify-form-history" or "--verify-merge-pending"
-            ? FormFieldEditingSmoke.Fixture("ORIGINAL") : TableExportSmoke.Fixture();
+            ? FormFieldEditingSmoke.Fixture("ORIGINAL") : scenario == "--verify-page-delete-failure"
+                ? PageDeletionSmoke.Fixture() : TableExportSmoke.Fixture();
         File.WriteAllBytes(source, original);
         if (closeInOtherPane) File.WriteAllBytes(otherSource, original);
         owner.GetType().GetMethod("OpenFromExternal", BindingFlags.Public | BindingFlags.Instance)!
@@ -85,6 +86,8 @@ internal static class DocumentStateSmoke
                 VerifyFailedSaveHistory(owner, source, original, editor);
             else if (scenario == "--verify-page-edit-failure")
                 VerifyPageEditFailure(owner, source, original, editor, folder);
+            else if (scenario == "--verify-page-delete-failure")
+                VerifyPageEditFailure(owner, source, original, editor, folder, delete: true);
             else if (scenario == "--verify-layout-pending")
                 VerifyLayoutPending(owner, source, original, editor, folder);
             else if (scenario == "--verify-merge-pending")
@@ -497,7 +500,7 @@ internal static class DocumentStateSmoke
         if (layoutKey is not null) Console.WriteLine("CONTROL completed layout: " + layoutKey);
     }
 
-    private static void VerifyPageEditFailure(Window owner, string source, byte[] original, TextBox editor, string folder)
+    private static void VerifyPageEditFailure(Window owner, string source, byte[] original, TextBox editor, string folder, bool delete = false)
     {
         Stroke(0x0D, 0x11);
         Wait(() => !editor.IsVisible && Dirty(owner), "annotation before page-edit failure");
@@ -520,12 +523,22 @@ internal static class DocumentStateSmoke
         denied.AddAccessRule(new FileSystemAccessRule(WindowsIdentity.GetCurrent().User!,
             FileSystemRights.CreateFiles, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
         int errors = 0;
+        int confirmations = 0;
         var seen = new HashSet<Window>();
         var timer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(20) };
         timer.Tick += (_, _) =>
         {
             foreach (Window dialog in Application.Current.Windows.Cast<Window>().Where(window => window != owner && window.IsVisible).ToArray())
             {
+                Button? yes = delete ? Descendants<Button>(dialog).FirstOrDefault(button =>
+                    Equals(button.Content, Application.Current.FindResource("Str_Btn_Yes"))) : null;
+                if (yes is not null && seen.Add(dialog))
+                {
+                    confirmations++;
+                    owner.Dispatcher.BeginInvoke(DispatcherPriority.Input,
+                        (Action)(() => yes.RaiseEvent(new RoutedEventArgs(Button.ClickEvent))));
+                    continue;
+                }
                 Button? ok = Descendants<Button>(dialog).FirstOrDefault(button =>
                     Equals(button.Content, Application.Current.FindResource("Str_Btn_OK")));
                 if (ok is null || !seen.Add(dialog)) continue;
@@ -542,7 +555,11 @@ internal static class DocumentStateSmoke
             catch (UnauthorizedAccessException) { blocked = true; }
             if (!blocked) throw new InvalidOperationException("Synthetic temporary-write denial was not effective.");
             timer.Start();
-            try { RotateFromThumbnail(owner); }
+            try
+            {
+                if (delete) Click(owner, "DeletePagesBtn");
+                else RotateFromThumbnail(owner);
+            }
             finally { timer.Stop(); }
         }
         finally
@@ -554,15 +571,37 @@ internal static class DocumentStateSmoke
                 throw new InvalidOperationException("Synthetic temporary-directory permissions were not restored exactly.");
         }
         Pump();
-        Console.WriteLine($"CONTROL failed rotation: errors={errors}, dirty={Dirty(owner)}, sourceUnchanged={File.ReadAllBytes(source).AsSpan().SequenceEqual(savedBefore)}, undoUnchanged={((Button)owner.FindName("UndoBtn")).IsEnabled == undoEnabled}, left={Canvas.GetLeft(visible)}, top={Canvas.GetTop(visible)}, previousLeft={left}, previousTop={top}.");
+        Console.WriteLine($"CONTROL failed page operation: errors={errors}, dirty={Dirty(owner)}, sourceUnchanged={File.ReadAllBytes(source).AsSpan().SequenceEqual(savedBefore)}, undoUnchanged={((Button)owner.FindName("UndoBtn")).IsEnabled == undoEnabled}, left={Canvas.GetLeft(visible)}, top={Canvas.GetTop(visible)}, previousLeft={left}, previousTop={top}.");
         if (errors != 1 || Dirty(owner) || !File.ReadAllBytes(source).AsSpan().SequenceEqual(savedBefore)
             || ((Button)owner.FindName("UndoBtn")).IsEnabled != undoEnabled
             || Math.Abs(Canvas.GetLeft(visible) - left) > 0.01 || Math.Abs(Canvas.GetTop(visible) - top) > 0.01)
-            throw new InvalidOperationException("APP-004: failed page rotation changed annotations, dirty state, history or original bytes.");
+            throw new InvalidOperationException("APP-004: failed page operation changed annotations, dirty state, history or original bytes.");
+        if (delete && (confirmations != 1 || ((ListBox)owner.FindName("PageList")).Items.Count != 5))
+            throw new InvalidOperationException("APP-004: annotated Delete did not fail after its confirmation while preserving all five pages.");
         Save(owner);
         if (!ReadText(source).Contains(Marker, StringComparison.Ordinal))
-            throw new InvalidOperationException("Failed page rotation lost the annotation on subsequent Save.");
+            throw new InvalidOperationException("Failed page operation lost the annotation on subsequent Save.");
         Console.WriteLine("CONTROL denied page edit retained geometry, dirty/history state and strict saved annotation.");
+        if (delete)
+        {
+            timer.Start();
+            try { Click(owner, "DeletePagesBtn"); }
+            finally { timer.Stop(); }
+            Wait(() => ((ListBox)owner.FindName("PageList")).Items.Count == 4 && Dirty(owner), "annotated Delete retry");
+            Save(owner);
+            if (ReadText(source).Contains(Marker, StringComparison.Ordinal) || ReadText(source).Contains("PAGE_1", StringComparison.Ordinal))
+                throw new InvalidOperationException("Successful Delete retained content from the removed annotated page.");
+            Click(owner, "UndoBtn");
+            Save(owner);
+            if (((ListBox)owner.FindName("PageList")).Items.Count != 5 || !ReadText(source).Contains(Marker, StringComparison.Ordinal))
+                throw new InvalidOperationException("Delete Undo lost the restored page or its annotation.");
+            Click(owner, "RedoBtn");
+            Save(owner);
+            if (((ListBox)owner.FindName("PageList")).Items.Count != 4 || ReadText(source).Contains(Marker, StringComparison.Ordinal))
+                throw new InvalidOperationException("Delete Redo restored removed annotation content.");
+            Console.WriteLine("CONTROL annotated Delete failure, retry and strict Save/Undo/Redo preserved the expected page and annotation content.");
+            return;
+        }
         RotateFromThumbnail(owner);
         Wait(() => Dirty(owner), "successful rotation after write failure");
         Save(owner);

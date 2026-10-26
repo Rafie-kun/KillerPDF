@@ -98,6 +98,11 @@ namespace KillerPDF
             if (!EnsureEditable(continueAfterUnlock: false)) return;
             var selected = PageList.SelectedItems;
             if (selected.Count == 0) { KillerDialog.Show(this, Loc("Str_Dlg_SelectDelete")); return; }
+            if (selected.Count >= _doc.PageCount)
+            {
+                KillerDialog.Show(this, Loc("Str_Dlg_KeepOnePage"));
+                return;
+            }
             var result = KillerDialog.Show(this, selected.Count == 1 ? Loc("Str_Dlg_DeletePage1") : string.Format(Loc("Str_Dlg_DeletePagesN"), selected.Count), "KillerPDF",
                 MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (result != MessageBoxResult.Yes) return;

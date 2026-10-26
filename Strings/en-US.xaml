@@ -1963,4 +1963,5 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Watch_MissingOcrModels">Step {0} needs OCR language models: {1}. Install them from the OCR language menu before starting.</sys:String>
     <sys:String x:Key="Str_Paragraph_Rotated">Paragraph editing is unavailable on rotated pages. Set the page rotation to 0° first.</sys:String>
     <sys:String x:Key="Str_Paragraph_Tagged">Paragraph editing is unavailable in tagged documents because it cannot preserve their document structure.</sys:String>
+    <sys:String x:Key="Str_Dlg_KeepOnePage">Keep at least one page in the document.</sys:String>
 </ResourceDictionary>

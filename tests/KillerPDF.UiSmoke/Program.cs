@@ -49,7 +49,8 @@ internal static class Program
                 return TableExportSmoke.Run(Path.GetFullPath(args[1]), Path.GetFullPath(args[2]), Path.GetFullPath(args[3]),
                     windowSession: true, windowSessionCase: args[0], updateRestartState: Path.GetFullPath(args[4]));
             if (args.Length == 5 && (args[0].StartsWith("--verify-validate-profile-case-", StringComparison.Ordinal)
-                || args[0].StartsWith("--verify-delete-nearest-case-", StringComparison.Ordinal))
+                || args[0].StartsWith("--verify-delete-nearest-case-", StringComparison.Ordinal)
+                || args[0] == "--verify-page-delete-failure")
                 && args[4] == "--session-isolation")
                 return TableExportSmoke.Run(Path.GetFullPath(args[1]), Path.GetFullPath(args[2]), Path.GetFullPath(args[3]),
                     windowSession: true, windowSessionCase: args[0]);

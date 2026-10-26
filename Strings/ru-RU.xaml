@@ -1967,4 +1967,5 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Watch_MissingOcrModels">Для шага {0} нужны языковые модели OCR: {1}. Установите их через меню языков OCR перед запуском.</sys:String>
     <sys:String x:Key="Str_Paragraph_Rotated">На повернутых страницах нельзя редактировать абзацы. Сначала установите поворот страницы на 0°.</sys:String>
     <sys:String x:Key="Str_Paragraph_Tagged">В документах с тегами нельзя редактировать абзацы, поскольку их структуру невозможно сохранить.</sys:String>
+    <sys:String x:Key="Str_Dlg_KeepOnePage">Оставьте в документе хотя бы одну страницу.</sys:String>
 </ResourceDictionary>

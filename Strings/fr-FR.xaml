@@ -1964,4 +1964,5 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Watch_MissingOcrModels">L’étape {0} nécessite des modèles de langue OCR : {1}. Installez-les depuis le menu des langues OCR avant de démarrer.</sys:String>
     <sys:String x:Key="Str_Paragraph_Rotated">La modification des paragraphes est indisponible sur les pages pivotées. Réglez d’abord la rotation de la page sur 0°.</sys:String>
     <sys:String x:Key="Str_Paragraph_Tagged">La modification des paragraphes est indisponible dans les documents balisés, car elle ne peut pas préserver leur structure.</sys:String>
+    <sys:String x:Key="Str_Dlg_KeepOnePage">Conservez au moins une page dans le document.</sys:String>
 </ResourceDictionary>

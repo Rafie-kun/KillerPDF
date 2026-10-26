@@ -1964,4 +1964,5 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Watch_MissingOcrModels">Trinn {0} trenger OCR-språkmodeller: {1}. Installer dem fra OCR-språkmenyen før du starter.</sys:String>
     <sys:String x:Key="Str_Paragraph_Rotated">Avsnitt kan ikke redigeres på roterte sider. Sett siderotasjonen til 0° først.</sys:String>
     <sys:String x:Key="Str_Paragraph_Tagged">Avsnitt kan ikke redigeres i kodede dokumenter fordi dokumentstrukturen ikke kan bevares.</sys:String>
+    <sys:String x:Key="Str_Dlg_KeepOnePage">Behold minst én side i dokumentet.</sys:String>
 </ResourceDictionary>

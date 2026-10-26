@@ -1946,4 +1946,5 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_Watch_MissingOcrModels">步驟 {0} 需要 OCR 語言模型：{1}。請先從 OCR 語言選單安裝，再啟動。</sys:String>
     <sys:String x:Key="Str_Paragraph_Rotated">無法在已旋轉的頁面上編輯段落。請先將頁面旋轉角度設為 0°。</sys:String>
     <sys:String x:Key="Str_Paragraph_Tagged">無法在含有標籤的文件中編輯段落，因為此操作無法保留文件結構。</sys:String>
+    <sys:String x:Key="Str_Dlg_KeepOnePage">請在文件中至少保留一頁。</sys:String>
 </ResourceDictionary>

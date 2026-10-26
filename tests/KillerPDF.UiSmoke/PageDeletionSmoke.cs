@@ -1,6 +1,8 @@
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Security.AccessControl;
+using System.Security.Principal;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -45,6 +47,8 @@ internal static class PageDeletionSmoke
             "middle" => ([2], 2, 2, 3, "PAGE_1|PAGE_2|PAGE_4|PAGE_5"),
             "tail-block" => ([3, 4], 3, 2, 2, "PAGE_1|PAGE_2|PAGE_3"),
             "disjoint" => ([0, 2, 4], 0, 0, 1, "PAGE_2|PAGE_4"),
+            "write-failure" => ([0, 2, 4], 0, 0, 1, "PAGE_2|PAGE_4"),
+            "all" => ([0, 1, 2, 3, 4], 0, 0, 0, "PAGE_1|PAGE_2|PAGE_3|PAGE_4|PAGE_5"),
             "last" => ([4], 4, 3, 3, "PAGE_1|PAGE_2|PAGE_3|PAGE_4"),
             "cancel" => ([4], 4, 4, 4, "PAGE_1|PAGE_2|PAGE_3|PAGE_4|PAGE_5"),
             _ => throw new ArgumentException("Unknown deletion case: " + scenario)
@@ -87,23 +91,86 @@ internal static class PageDeletionSmoke
             && ((Button)owner.FindName("DeletePagesBtn")).IsEnabled, "rendered target, exact selected set and Delete availability");
         Console.WriteLine($"CONTROL case={scenario}, active={expected.Active}, selected={string.Join(',', expected.Removed)}; initial rendered color controls passed.");
         int confirmations = 0;
+        int failures = 0;
+        bool denyWrite = scenario == "write-failure";
+        DirectoryInfo? sessionDirectory = null;
+        string? originalSddl = null;
+        if (denyWrite)
+        {
+            string tempRoot = Path.Combine(folder, "data", "Temp");
+            sessionDirectory = new DirectoryInfo(Directory.GetDirectories(tempRoot, "session-*").Single());
+            originalSddl = sessionDirectory.GetAccessControl(AccessControlSections.Access)
+                .GetSecurityDescriptorSddlForm(AccessControlSections.Access);
+        }
+        void RestoreAccess()
+        {
+            if (sessionDirectory is null || originalSddl is null) return;
+            var restored = new DirectorySecurity();
+            restored.SetSecurityDescriptorSddlForm(originalSddl, AccessControlSections.Access);
+            sessionDirectory.SetAccessControl(restored);
+            if (sessionDirectory.GetAccessControl(AccessControlSections.Access)
+                    .GetSecurityDescriptorSddlForm(AccessControlSections.Access) != originalSddl)
+                throw new InvalidOperationException("Delete failure fixture did not restore its exact temporary-directory permissions.");
+        }
         var seen = new HashSet<Window>();
         var timer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(20) };
         timer.Tick += (_, _) =>
         {
             foreach (Window dialog in Application.Current.Windows.Cast<Window>().Where(window => window != owner && window.IsVisible).ToArray())
             {
+                Button? ok = Descendants<Button>(dialog).FirstOrDefault(button => Equals(button.Content, owner.FindResource("Str_Btn_OK")));
+                if ((denyWrite || scenario == "all") && ok is not null && seen.Add(dialog))
+                {
+                    failures++;
+                    Console.WriteLine("CONTROL Delete failure: " + string.Join(" ", Descendants<TextBlock>(dialog).Select(text => text.Text)));
+                    owner.Dispatcher.BeginInvoke(DispatcherPriority.Input,
+                        (Action)(() => ok.RaiseEvent(new RoutedEventArgs(Button.ClickEvent))));
+                    continue;
+                }
                 Button? yes = Descendants<Button>(dialog).FirstOrDefault(button => Equals(button.Content,
                     owner.FindResource(scenario == "cancel" ? "Str_Btn_No" : "Str_Btn_Yes")));
                 if (yes is null || !seen.Add(dialog)) continue;
                 confirmations++;
+                if (denyWrite)
+                {
+                    DirectorySecurity denied = sessionDirectory!.GetAccessControl(AccessControlSections.Access);
+                    denied.AddAccessRule(new FileSystemAccessRule(WindowsIdentity.GetCurrent().User!,
+                        FileSystemRights.CreateFiles, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                    sessionDirectory!.SetAccessControl(denied);
+                }
                 Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Input,
                     (Action)(() => yes.RaiseEvent(new RoutedEventArgs(Button.ClickEvent))));
             }
         };
         timer.Start();
         try { Click(owner, "DeletePagesBtn"); }
-        finally { timer.Stop(); }
+        finally { timer.Stop(); RestoreAccess(); }
+        if (scenario == "all")
+        {
+            Console.WriteLine($"CONTROL all-page Delete: confirmations={confirmations}, notices={failures}, pages={pages.Items.Count}, dirty={Dirty(owner)}.");
+            if (pages.Items.Count != 5 || pages.SelectedIndex != expected.Active || Dirty(owner)
+                || ((Button)owner.FindName("UndoBtn")).IsEnabled || !PageColor(255, 0, 0)
+                || !File.ReadAllBytes(source).AsSpan().SequenceEqual(bytes)
+                || Read(source) != (5, "PAGE_1|PAGE_2|PAGE_3|PAGE_4|PAGE_5"))
+                throw new InvalidOperationException("USER-004: deleting every page discarded the usable document or changed its clean history.");
+            const string refused = "PASS verify-delete-nearest: all-page Delete preserves the usable document, rendered page, original bytes and clean history.";
+            File.WriteAllText(Path.Combine(folder, "result.txt"), refused); Console.WriteLine(refused);
+            return 0;
+        }
+        if (denyWrite)
+        {
+            if (confirmations != 1 || failures != 1 || pages.Items.Count != 5 || pages.SelectedIndex != expected.Active
+                || Dirty(owner) || ((Button)owner.FindName("UndoBtn")).IsEnabled
+                || !PageColor(255, 0, 0) || !File.ReadAllBytes(source).AsSpan().SequenceEqual(bytes)
+                || Read(source) != (5, "PAGE_1|PAGE_2|PAGE_3|PAGE_4|PAGE_5"))
+                throw new InvalidOperationException("APP-004: failed Delete changed the usable page set, selection, source, dirty state or history.");
+            Console.WriteLine("CONTROL confirmed Delete failed once and preserved all pages, rendered selection, source bytes and clean history; exact permissions restored.");
+            denyWrite = false;
+            confirmations = 0;
+            timer.Start();
+            try { Click(owner, "DeletePagesBtn"); }
+            finally { timer.Stop(); }
+        }
         int remaining = expected.Labels.Split('|').Length;
         Wait(() => pages.Items.Count == remaining && pages.SelectedIndex >= 0, "completed page deletion");
         Console.WriteLine($"CONTROL deletion: confirmations={confirmations}, selectedIndex={pages.SelectedIndex}, pageCounter={jump.Text}, remaining={pages.Items.Count}.");
@@ -160,7 +227,7 @@ internal static class PageDeletionSmoke
         return (count, string.Join('|', labels));
     }
 
-    private static byte[] Fixture()
+    internal static byte[] Fixture()
     {
         List<string> objects = ["<< /Type /Catalog /Pages 2 0 R >>",
             "<< /Type /Pages /Kids [4 0 R 6 0 R 8 0 R 10 0 R 12 0 R] /Count 5 >>",

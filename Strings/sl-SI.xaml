@@ -1851,4 +1851,5 @@
     <sys:String x:Key="Str_Watch_MissingOcrModels">Korak {0} potrebuje jezikovne modele OCR: {1}. Pred začetkom jih namestite v meniju jezikov OCR.</sys:String>
     <sys:String x:Key="Str_Paragraph_Rotated">Na zasukanih straneh ni mogoče urejati odstavkov. Najprej nastavite zasuk strani na 0°.</sys:String>
     <sys:String x:Key="Str_Paragraph_Tagged">V označenih dokumentih ni mogoče urejati odstavkov, ker pri tem ni mogoče ohraniti njihove strukture.</sys:String>
+    <sys:String x:Key="Str_Dlg_KeepOnePage">V dokumentu ohranite vsaj eno stran.</sys:String>
 </ResourceDictionary>
