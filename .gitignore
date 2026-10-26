@@ -13,6 +13,7 @@ publish/
 
 # Generated artifacts
 /artifacts/
+/TestResults/
 
 # Local notes / scratch
 *.odt
@@ -36,8 +37,7 @@ obj/
 # (the small web logos the landing site links to).
 /brand/
 
-# Validation run artifacts (the veraPDF/qpdf release checks write these into the repo root;
-# RESULTS.md is the record, the raw reports and logs stay local - baseline.json alone is ~5 MB).
+# Legacy validation outputs stay untracked. New diagnostics belong in external scratch.
 /baseline.json
 /after.json
 /resave.csv
