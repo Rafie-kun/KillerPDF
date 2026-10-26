@@ -25,6 +25,12 @@ public static class PdfDocumentEncryptionWriter
     /// <summary>Returns the document rewritten under Standard Security password encryption.</summary>
     public static byte[] EncryptWithPasswords(PdfDocument document, PdfPasswordEncryptionOptions options,
         bool allowSignatureInvalidation = false)
+        => EncryptWithPasswordsWithReport(document, options, allowSignatureInvalidation).Bytes;
+
+    /// <summary>Returns password-encrypted bytes and reference repairs from the plaintext rewrite.</summary>
+    public static PdfDocumentWriteResult EncryptWithPasswordsWithReport(PdfDocument document,
+        PdfPasswordEncryptionOptions options, bool allowSignatureInvalidation = false,
+        bool replaceDanglingReferences = false)
     {
         ArgumentNullException.ThrowIfNull(options);
         if (string.IsNullOrEmpty(options.UserPassword) && string.IsNullOrEmpty(options.OwnerPassword))
@@ -35,38 +41,46 @@ public static class PdfDocumentEncryptionWriter
             throw new ArgumentException("A user password needs a non-empty owner password.", nameof(options));
         PdfVersion minimum = options.Algorithm == PdfPasswordEncryptionAlgorithm.Aes256Gcm
             ? PdfVersion.Pdf20 : new PdfVersion(1, 7);
-        return Encrypt(document, minimum, allowSignatureInvalidation,
+        return Encrypt(document, minimum, allowSignatureInvalidation, replaceDanglingReferences,
             () => PdfStandardSecurityHandler.CreateModernPassword(options));
     }
 
     /// <summary>Returns the document rewritten so that only the given certificate holders can open it.</summary>
     public static byte[] EncryptForRecipients(PdfDocument document, PdfCertificateEncryptionOptions options,
         bool allowSignatureInvalidation = false)
+        => EncryptForRecipientsWithReport(document, options, allowSignatureInvalidation).Bytes;
+
+    /// <summary>Returns recipient-encrypted bytes and reference repairs from the plaintext rewrite.</summary>
+    public static PdfDocumentWriteResult EncryptForRecipientsWithReport(PdfDocument document,
+        PdfCertificateEncryptionOptions options, bool allowSignatureInvalidation = false,
+        bool replaceDanglingReferences = false)
     {
         ArgumentNullException.ThrowIfNull(options);
         if (options.Recipients is null || options.Recipients.Count == 0)
             throw new ArgumentException("Certificate encryption needs at least one recipient.", nameof(options));
-        return Encrypt(document, new PdfVersion(1, 7), allowSignatureInvalidation,
+        return Encrypt(document, new PdfVersion(1, 7), allowSignatureInvalidation, replaceDanglingReferences,
             () => PdfStandardSecurityHandler.CreateCertificate(options));
     }
 
-    private static byte[] Encrypt(PdfDocument document, PdfVersion minimumVersion,
-        bool allowSignatureInvalidation,
+    private static PdfDocumentWriteResult Encrypt(PdfDocument document, PdfVersion minimumVersion,
+        bool allowSignatureInvalidation, bool replaceDanglingReferences,
         Func<(PdfStandardSecurityHandler Handler, PdfDictionary Dictionary)> createSecurity)
     {
         ArgumentNullException.ThrowIfNull(document);
         PdfVersion sourceVersion = document.Header.Version;
         // Normalize first: a decrypted rewrite with a classic table and every object at the top
         // level, so each object can be encrypted under its own number and generation.
-        byte[] plain = PdfDocumentWriter.Write(document, new PdfDocumentWriteOptions
+        PdfDocumentWriteResult plainResult = PdfDocumentWriter.WriteWithReport(document, new PdfDocumentWriteOptions
         {
             RemoveEncryption = document.IsEncrypted,
             AllowSignatureInvalidation = allowSignatureInvalidation,
+            ReplaceDanglingReferences = replaceDanglingReferences,
             CrossReferenceFormat = PdfCrossReferenceFormat.Table,
             UseObjectStreams = false,
             PreserveDocumentIdentifiers = true,
             TargetVersion = sourceVersion.CompareTo(minimumVersion) < 0 ? minimumVersion : (PdfVersion?)null,
         });
+        byte[] plain = plainResult.Bytes;
         PdfDocument source = PdfDocument.Open(plain);
         (PdfStandardSecurityHandler security, PdfDictionary encryption) = createSecurity();
 
@@ -114,7 +128,7 @@ public static class PdfDocumentEncryptionWriter
         output.Write("\nstartxref\n"u8);
         Ascii(output, xrefOffset.ToString(CultureInfo.InvariantCulture));
         output.Write("\n%%EOF\n"u8);
-        return output.ToArray();
+        return new PdfDocumentWriteResult(output.ToArray(), plainResult.ReferenceRepairs);
     }
 
     // Encrypted documents need a trailer /ID. The source pair is kept so links to the document
