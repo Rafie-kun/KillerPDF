@@ -154,6 +154,10 @@ internal static class TableExportSmoke
                 return PageDeletionSmoke.Run(owner, folder, windowSessionCase["--verify-delete-nearest-case-".Length..]);
             if (windowSessionCase == "--verify-watch-readiness")
                 return WatchReadinessSmoke.Run(owner, folder);
+            if (windowSessionCase == "--verify-watch-job-failure")
+                return WatchReadinessSmoke.Run(owner, folder, failedJob: true);
+            if (windowSessionCase == "--verify-watch-unsupported-step")
+                return WatchReadinessSmoke.Run(owner, folder, unsupportedStep: true);
             if (windowSessionCase == "--verify-paragraph-refusal")
                 return ParagraphRefusalSmoke.Run(owner, folder);
             if (windowSessionCase == "--verify-paragraph-refusal-tagged")

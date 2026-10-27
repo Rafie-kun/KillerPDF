@@ -1853,4 +1853,5 @@
     <sys:String x:Key="Str_Paragraph_Tagged">V označenih dokumentih ni mogoče urejati odstavkov, ker pri tem ni mogoče ohraniti njihove strukture.</sys:String>
     <sys:String x:Key="Str_Dlg_KeepOnePage">V dokumentu ohranite vsaj eno stran.</sys:String>
     <sys:String x:Key="Str_Dlg_PageRange">Številke strani ali obsegi (od 1 do {0})</sys:String>
+    <sys:String x:Key="Str_Watch_FailedStep">Korak {0}: {1}</sys:String>
 </ResourceDictionary>

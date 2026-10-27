@@ -174,7 +174,12 @@ internal sealed class WatchedFolderDialog : Window
         try { action(); _actionError = ""; }
         catch (Exception error) when (error is InvalidOperationException or ArgumentException or IOException
             or UnauthorizedAccessException or System.Text.Json.JsonException)
-        { _actionError = ErrorText(error.Message); }
+        {
+            _actionError = ErrorText(error.Message);
+            if (WatchedFolderService.ConfigurationIssueOf(error) is { } issue)
+                _actionError += "\n" + string.Format(L("Str_Watch_FailedStep"),
+                    issue.StepIndex + 1, OperationName(issue.Operation));
+        }
         Refresh();
     }
 
@@ -216,6 +221,8 @@ internal sealed class WatchedFolderDialog : Window
             : snapshot.Jobs.Reverse().Select(job => Path.GetFileName(job.InputPath) + "\n"
                 + L("Str_Watch_" + (job.Status == WatchedFolderJobStatus.Failed ? "Failed" : job.Status.ToString()))
                 + (job.ErrorCode is null ? "" : ": " + ErrorText(job.ErrorCode))
+                + (job.FailedStepIndex is int step && job.FailedOperation is PdfMacroOperation operation
+                    ? "\n" + string.Format(L("Str_Watch_FailedStep"), step + 1, OperationName(operation)) : "")
                 + (string.IsNullOrEmpty(job.OutputPath) ? "" : "\n" + job.OutputPath)).ToArray();
     }
 

@@ -1966,4 +1966,5 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Paragraph_Tagged">У документах із тегами не можна редагувати абзаци, оскільки неможливо зберегти їхню структуру.</sys:String>
     <sys:String x:Key="Str_Dlg_KeepOnePage">Залиште в документі принаймні одну сторінку.</sys:String>
     <sys:String x:Key="Str_Dlg_PageRange">Номери сторінок або діапазони (від 1 до {0})</sys:String>
+    <sys:String x:Key="Str_Watch_FailedStep">Крок {0}: {1}</sys:String>
 </ResourceDictionary>

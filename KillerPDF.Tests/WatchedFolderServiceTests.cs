@@ -8,6 +8,80 @@ namespace KillerPDF.Tests;
 
 public sealed class WatchedFolderServiceTests
 {
+    [Theory]
+    [InlineData("unsupported", "UnsupportedOperation", PdfMacroOperation.Redact)]
+    [InlineData("prompt", "InteractiveParameter", PdfMacroOperation.Resize)]
+    [InlineData("secret", "InteractiveParameter", PdfMacroOperation.Save)]
+    public void UnsupportedConfigurationIdentifiesItsStepWithoutReplacingTheSavedSetup(
+        string kind, string code, PdfMacroOperation operation)
+    {
+        using var fixture = new FolderFixture();
+        using var service = fixture.Create();
+        service.Configure(fixture.Options());
+        string journal = Path.Combine(fixture.Storage, "queue.json");
+        byte[] saved = File.ReadAllBytes(journal);
+        PdfMacroStep rejectedStep = kind switch
+        {
+            "prompt" => new(PdfMacroOperation.Resize, new Dictionary<string, string> { ["percent"] = "${size}" }),
+            "secret" => new(PdfMacroOperation.Save, new Dictionary<string, string> { ["password"] = "not-for-storage" }),
+            _ => new(PdfMacroOperation.Redact)
+        };
+        var rejected = new PdfMacro("Unsupported", [new(PdfMacroOperation.Save), rejectedStep]);
+        InvalidOperationException error = Assert.Throws<InvalidOperationException>(() => service.Configure(fixture.Options(rejected)));
+        Assert.Equal(code, error.Message);
+        Assert.True(error.Data.Contains("KillerPDF.WatchedFolderStepIssue"),
+            "UI-005: unsupported watched configuration discarded the offending step.");
+        object issue = error.Data["KillerPDF.WatchedFolderStepIssue"]!;
+        Assert.Equal(1, issue.GetType().GetProperty("StepIndex")!.GetValue(issue));
+        Assert.Equal(operation, issue.GetType().GetProperty("Operation")!.GetValue(issue));
+        Assert.Equal(saved, File.ReadAllBytes(journal));
+        Assert.Equal(fixture.Options().MacroJson, service.GetSnapshot().Options!.MacroJson);
+    }
+
+    [Fact]
+    public async Task FailedMacroIdentifiesItsStepAndOperationAfterRestart()
+    {
+        using var fixture = new FolderFixture();
+        byte[] original = new PdfDocumentBuilder().AddPage(200, 300, new PdfContentStreamBuilder()
+            .SetFillLabColor(new PdfLabColorSpace(), 50, 20, 10).Rectangle(10, 10, 50, 50).Fill()).Build();
+        string input = Path.Combine(fixture.Input, "document.pdf");
+        File.WriteAllBytes(input, original);
+        var macro = new PdfMacro("Color conversion", [PdfResizeMacro.ScaleStep(100),
+            PdfColorConversionMacro.ConvertStep(PdfMacroColorMode.Grayscale), new(PdfMacroOperation.Save)]);
+        var dispatcher = new PdfMacroDispatcher([
+            new(PdfMacroOperation.Resize, PdfResizeMacro.Execute),
+            new(PdfMacroOperation.ConvertColor, PdfColorConversionMacro.Execute)]);
+        PdfMacroFileResult control = Assert.Single(dispatcher.RunReport(macro,
+            [new ReadOnlyMemory<byte>(original)]).Results);
+        Assert.False(control.Succeeded);
+        Assert.Equal(1, control.FailedStepIndex);
+        Assert.Equal(PdfMacroOperation.ConvertColor, control.FailedOperation);
+        using (var service = fixture.Create())
+        {
+            service.Configure(fixture.Options(macro));
+            service.Resume();
+            await service.ReconcileAsync();
+            fixture.Clock.Advance(TimeSpan.FromSeconds(3));
+            await service.ReconcileAsync();
+            AssertFailure(Assert.Single(service.GetSnapshot().Jobs));
+        }
+        using var restarted = fixture.Create();
+        AssertFailure(Assert.Single(restarted.GetSnapshot().Jobs));
+        Assert.Equal(original, File.ReadAllBytes(input));
+        Assert.Empty(Directory.GetFiles(fixture.Output));
+
+        static void AssertFailure(WatchedFolderJob job)
+        {
+            Assert.Equal(WatchedFolderJobStatus.Failed, job.Status);
+            Assert.Equal("MacroFailed", job.ErrorCode);
+            using var json = System.Text.Json.JsonDocument.Parse(System.Text.Json.JsonSerializer.Serialize(job));
+            Assert.True(json.RootElement.TryGetProperty("FailedStepIndex", out var step),
+                "UI-005: the watched-folder snapshot discarded the failed macro step.");
+            Assert.Equal(1, step.GetInt32());
+            Assert.Equal((int)PdfMacroOperation.ConvertColor, json.RootElement.GetProperty("FailedOperation").GetInt32());
+        }
+    }
+
     [Fact]
     public async Task StablePdfIsProcessedAsANewCopyThroughTheSavedMacro()
     {
@@ -33,6 +107,31 @@ public sealed class WatchedFolderServiceTests
         PdfPageInformation page = Assert.Single(PdfPageInformation.Read(PdfDocument.Open(File.ReadAllBytes(job.OutputPath))));
         Assert.Equal(100, page.Width);
         Assert.Equal(150, page.Height);
+    }
+
+    [Fact]
+    public async Task CompletedJournalJobCannotClaimAFailedMacroStep()
+    {
+        using var fixture = new FolderFixture();
+        File.WriteAllBytes(Path.Combine(fixture.Input, "document.pdf"), new PdfDocumentBuilder().AddBlankPage().Build());
+        using (var service = fixture.Create())
+        {
+            service.Configure(fixture.Options());
+            service.Resume();
+            await service.ReconcileAsync();
+            fixture.Clock.Advance(TimeSpan.FromSeconds(3));
+            await service.ReconcileAsync();
+            Assert.Equal(WatchedFolderJobStatus.Completed, Assert.Single(service.GetSnapshot().Jobs).Status);
+        }
+        string statePath = Path.Combine(fixture.Storage, "queue.json");
+        var state = System.Text.Json.Nodes.JsonNode.Parse(File.ReadAllText(statePath))!;
+        state["Jobs"]![0]!["FailedStepIndex"] = 0;
+        state["Jobs"]![0]!["FailedOperation"] = (int)PdfMacroOperation.Save;
+        File.WriteAllText(statePath, state.ToJsonString());
+        byte[] journal = File.ReadAllBytes(statePath);
+        using var restarted = fixture.Create();
+        Assert.Equal("QueueInvalid", restarted.GetSnapshot().ErrorCode);
+        Assert.Equal(journal, File.ReadAllBytes(statePath));
     }
 
     [Fact]

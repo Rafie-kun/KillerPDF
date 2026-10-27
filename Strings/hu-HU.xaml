@@ -1953,4 +1953,5 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Paragraph_Tagged">Címkézett dokumentumokban nem szerkeszthetők bekezdések, mert a művelet nem tudja megőrizni a dokumentum szerkezetét.</sys:String>
     <sys:String x:Key="Str_Dlg_KeepOnePage">Legalább egy oldalnak meg kell maradnia a dokumentumban.</sys:String>
     <sys:String x:Key="Str_Dlg_PageRange">Oldalszámok vagy tartományok (1 és {0} között)</sys:String>
+    <sys:String x:Key="Str_Watch_FailedStep">{0}. lépés: {1}</sys:String>
 </ResourceDictionary>

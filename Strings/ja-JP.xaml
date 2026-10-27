@@ -1966,4 +1966,5 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Paragraph_Tagged">タグ付き文書では文書構造を保持できないため、段落を編集できません。</sys:String>
     <sys:String x:Key="Str_Dlg_KeepOnePage">文書には少なくとも1ページを残してください。</sys:String>
     <sys:String x:Key="Str_Dlg_PageRange">ページ番号または範囲（1から{0}）</sys:String>
+    <sys:String x:Key="Str_Watch_FailedStep">手順 {0}: {1}</sys:String>
 </ResourceDictionary>

@@ -125,6 +125,8 @@ public sealed class WatchedFolderService : IDisposable
             {
                 job.Status = WatchedFolderJobStatus.Waiting;
                 job.ErrorCode = null;
+                job.FailedStepIndex = null;
+                job.FailedOperation = null;
             }
             SaveState();
         }
@@ -141,7 +143,8 @@ public sealed class WatchedFolderService : IDisposable
     {
         lock (_gate) return new(_options, _paused,
             _jobs.Select(job => new WatchedFolderJob(job.Id, job.InputPath, job.OutputPath,
-                job.Status, job.Attempts, job.ErrorCode)).ToArray(), _errorCode);
+                job.Status, job.Attempts, job.ErrorCode)
+                { FailedStepIndex = job.FailedStepIndex, FailedOperation = job.FailedOperation }).ToArray(), _errorCode);
     }
     public Task ReconcileAsync(CancellationToken cancellationToken = default)
     {
@@ -245,6 +248,8 @@ public sealed class WatchedFolderService : IDisposable
                 job.InputPath = path;
                 job.Status = WatchedFolderJobStatus.Processing;
                 job.ErrorCode = null;
+                job.FailedStepIndex = null;
+                job.FailedOperation = null;
                 job.Attempts++;
                 SaveState();
             }
@@ -268,7 +273,10 @@ public sealed class WatchedFolderService : IDisposable
             PdfMacroFileResult result = report.Results.Single();
             if (!result.Succeeded || result.Data is not ReadOnlyMemory<byte> data)
             {
-                Fail(job, "MacroFailed");
+                int? failedStep = result.FailedStepIndex is int index && index >= 0 && index < macro.Steps.Count
+                    ? index : null;
+                Fail(job, "MacroFailed", failedStep,
+                    failedStep is int step ? macro.Steps[step].Operation : null);
                 return;
             }
             if (data.Length > MaximumFileBytes) { Fail(job, "OutputWriteFailed"); return; }
@@ -498,17 +506,23 @@ public sealed class WatchedFolderService : IDisposable
         try
         {
             using JsonDocument content = JsonDocument.Parse(json);
-            if (ContainsSecretField(content.RootElement)) throw new InvalidOperationException("InteractiveParameter");
+            if (ContainsSecretField(content.RootElement))
+            {
+                if (SecretStepIssue(content.RootElement) is { } issue)
+                    throw StepProblem("InteractiveParameter", issue.StepIndex, issue.Operation);
+                throw new InvalidOperationException("InteractiveParameter");
+            }
             ValidateMacroShape(content.RootElement);
             PdfMacro macro = PdfMacro.FromJson(json);
             if (macro.Steps.Count > 100) throw new InvalidOperationException("InvalidMacro");
-            foreach (PdfMacroStep step in macro.Steps)
+            for (int index = 0; index < macro.Steps.Count; index++)
             {
+                PdfMacroStep step = macro.Steps[index];
                 if (step.Operation is PdfMacroOperation.Redact or PdfMacroOperation.DataMerge or PdfMacroOperation.Export
                     || !_dispatcher.CanExecute(step.Operation))
-                    throw new InvalidOperationException("UnsupportedOperation");
+                    throw StepProblem("UnsupportedOperation", index, step.Operation);
                 if (step.Settings?.Values.Any(value => value.Contains("${", StringComparison.Ordinal)) == true)
-                    throw new InvalidOperationException("InteractiveParameter");
+                    throw StepProblem("InteractiveParameter", index, step.Operation);
                 switch (step.Operation)
                 {
                     case PdfMacroOperation.Resize: _ = PdfResizeMacro.ReadPercent(step); break;
@@ -572,6 +586,41 @@ public sealed class WatchedFolderService : IDisposable
             throw new InvalidOperationException("InvalidMacro");
     }
 
+    private const string StepIssueKey = "KillerPDF.WatchedFolderStepIssue";
+
+    private static InvalidOperationException StepProblem(string code, int index, PdfMacroOperation operation)
+    {
+        var error = new InvalidOperationException(code);
+        error.Data[StepIssueKey] = new WatchedFolderStepIssue(index, operation);
+        return error;
+    }
+
+    public static WatchedFolderStepIssue? ConfigurationIssueOf(Exception error) =>
+        error.Data[StepIssueKey] is WatchedFolderStepIssue issue ? issue : null;
+
+    private static WatchedFolderStepIssue? SecretStepIssue(JsonElement root)
+    {
+        if (root.ValueKind != JsonValueKind.Object) return null;
+        foreach (JsonProperty property in root.EnumerateObject())
+        {
+            if (!property.Name.Equals("steps", StringComparison.OrdinalIgnoreCase)
+                || property.Value.ValueKind != JsonValueKind.Array) continue;
+            int index = 0;
+            foreach (JsonElement step in property.Value.EnumerateArray())
+            {
+                if (index >= 100) return null;
+                if (step.ValueKind == JsonValueKind.Object && ContainsSecretField(step))
+                    foreach (JsonProperty field in step.EnumerateObject())
+                        if (field.Name.Equals("operation", StringComparison.OrdinalIgnoreCase)
+                            && field.Value.ValueKind == JsonValueKind.String
+                            && Enum.TryParse(field.Value.GetString(), true, out PdfMacroOperation operation)
+                            && Enum.IsDefined(operation)) return new(index, operation);
+                index++;
+            }
+        }
+        return null;
+    }
+
     private static bool ContainsSecretField(JsonElement item)
     {
         if (item.ValueKind == JsonValueKind.Array) return item.EnumerateArray().Any(ContainsSecretField);
@@ -581,13 +630,15 @@ public sealed class WatchedFolderService : IDisposable
                 property.Name.Contains(word, StringComparison.OrdinalIgnoreCase)) || ContainsSecretField(property.Value));
     }
 
-    private void Fail(JobState job, string code)
+    private void Fail(JobState job, string code, int? failedStepIndex = null, PdfMacroOperation? failedOperation = null)
     {
         lock (_gate)
         {
             job.Status = WatchedFolderJobStatus.Failed;
             job.PublicationPending = false;
             job.ErrorCode = code;
+            job.FailedStepIndex = failedStepIndex;
+            job.FailedOperation = failedOperation;
             if (_options?.PauseOnError == true) _paused = true;
             SaveState();
         }
@@ -708,7 +759,18 @@ public sealed class WatchedFolderService : IDisposable
         && (!job.PublicationPending || (job.OutputPath.Length != 0 && ValidHash(job.OutputHash)))
         && (job.ErrorCode is null or "InputTooLarge" or "InvalidPdf" or "EncryptedPdf" or "MacroFailed"
             or "OutputExists" or "OutputWriteFailed" or "Canceled" or "RecoveryMismatch")
+        && ValidFailureDetail(job, options)
         && (job.Status != WatchedFolderJobStatus.Completed || (job.OutputPath.Length != 0 && ValidHash(job.OutputHash)));
+
+    private static bool ValidFailureDetail(JobState job, WatchedFolderOptions options)
+    {
+        if (job.FailedStepIndex is null && job.FailedOperation is null) return true;
+        if (job.Status != WatchedFolderJobStatus.Failed || job.ErrorCode != "MacroFailed"
+            || job.FailedStepIndex is not int index || index < 0 || index >= 100
+            || job.FailedOperation is not PdfMacroOperation operation || !Enum.IsDefined(operation)) return false;
+        PdfMacro macro = PdfMacro.FromJson(options.MacroJson);
+        return index < macro.Steps.Count && macro.Steps[index].Operation == operation;
+    }
 
     private sealed record PersistedState([property: JsonRequired] int Version,
         [property: JsonRequired] Guid SetupId, [property: JsonRequired] WatchedFolderOptions? Options,
@@ -828,5 +890,7 @@ public sealed class WatchedFolderService : IDisposable
         [JsonRequired] public WatchedFolderJobStatus Status { get; set; } = WatchedFolderJobStatus.Waiting;
         [JsonRequired] public int Attempts { get; set; }
         public string? ErrorCode { get; set; }
+        public int? FailedStepIndex { get; set; }
+        public PdfMacroOperation? FailedOperation { get; set; }
     }
 }

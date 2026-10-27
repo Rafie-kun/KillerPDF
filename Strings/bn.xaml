@@ -1946,4 +1946,5 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Paragraph_Tagged">ট্যাগযুক্ত নথিতে অনুচ্ছেদ সম্পাদনা করা যায় না, কারণ এতে নথির কাঠামো সংরক্ষণ করা সম্ভব নয়।</sys:String>
     <sys:String x:Key="Str_Dlg_KeepOnePage">নথিতে অন্তত একটি পৃষ্ঠা রাখুন।</sys:String>
     <sys:String x:Key="Str_Dlg_PageRange">পৃষ্ঠা নম্বর বা পরিসর (1 থেকে {0})</sys:String>
+    <sys:String x:Key="Str_Watch_FailedStep">ধাপ {0}: {1}</sys:String>
 </ResourceDictionary>
