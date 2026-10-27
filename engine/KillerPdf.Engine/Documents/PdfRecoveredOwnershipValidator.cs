@@ -9,7 +9,7 @@ internal sealed class PdfRecoveredOwnershipValidator(PdfDocument document)
     private readonly Dictionary<int, (PdfIndirectReference Page, PdfDictionary Dictionary)> _annotations = [];
     private readonly Dictionary<(int Page, long Mcid), PdfIndirectReference> _content = [];
     private readonly Dictionary<int, PdfIndirectReference> _objects = [];
-    private readonly HashSet<int> _structure = [];
+    private readonly Dictionary<int, PdfIndirectReference> _structure = [];
     private int _edges;
 
     internal void Validate()
@@ -50,6 +50,17 @@ internal sealed class PdfRecoveredOwnershipValidator(PdfDocument document)
         PdfIndirectReference root = Reference(structureValue);
         PdfDictionary structure = Dictionary(root);
         if (Get(structure, "K") is PdfObject children) Visit(children, root, null, null, 0);
+        foreach (PdfIndirectReference reference in _structure.Values)
+        {
+            if (Get(Dictionary(reference), "Ref") is not PdfObject relationships) continue;
+            foreach (PdfObject item in Array(relationships))
+            {
+                Bound(0);
+                PdfIndirectReference target = Reference(item);
+                if (!_structure.TryGetValue(target.ObjectNumber, out PdfIndirectReference? owner) || !Same(target, owner))
+                    throw Refuse("A recovered structure relationship points outside the structure hierarchy.");
+            }
+        }
         if (Get(structure, "ParentTree") is not PdfObject parentValue)
             throw Refuse("Recovered structure has no parent tree.");
         var parents = PdfNumberTree.Read(document, parentValue).ToDictionary(entry => entry.Key, entry => entry.Value);
@@ -171,7 +182,7 @@ internal sealed class PdfRecoveredOwnershipValidator(PdfDocument document)
         if (IsName(Get(node, "Type"), "StructElem") || Get(node, "S") is not null)
         {
             PdfIndirectReference reference = Reference(value);
-            if (!_structure.Add(reference.ObjectNumber)) throw Refuse("Recovered structure has repeated element ownership or a cycle.");
+            if (!_structure.TryAdd(reference.ObjectNumber, reference)) throw Refuse("Recovered structure has repeated element ownership or a cycle.");
             if (Get(node, "P") is not PdfObject parentValue || !Same(Reference(parentValue), parent))
                 throw Refuse("A recovered structure element has no reciprocal parent.");
             if (Get(node, "K") is PdfObject kids) Visit(kids, reference, page, reference, depth + 1);

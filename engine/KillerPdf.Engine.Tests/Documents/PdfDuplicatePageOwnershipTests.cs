@@ -383,6 +383,35 @@ public sealed class PdfDuplicatePageOwnershipTests
         Assert.Equal(ObjectNumber(collisionTag), ObjectNumber(Assert.Single(collisionIds, entry => String(entry.Key) == collisionCopyId).Value));
     }
 
+    [Fact]
+    public void RecoveryKeepsStructureRelationshipsWithinEachOccurrence()
+    {
+        PdfDocument healthy = PdfDocument.Open(Fixture(tagged: true, damage: "tag-relationships", repeated: false));
+        Assert.Single(PdfPageInformation.Read(healthy));
+        PdfDocument saved = PdfDocument.Open(PdfDocumentWriter.Write(PdfDocument.OpenWithCompatibilityRecovery(
+            Fixture(tagged: true, damage: "tag-relationships"))));
+        PdfPageTree tree = PdfPageTree.Read(saved);
+        Assert.Equal(2, tree.Pages.Count);
+        PdfDictionary structure = Dictionary(saved, tree.Catalog[N("StructTreeRoot")]);
+        var parents = PdfNumberTree.Read(saved, structure[N("ParentTree")]).ToDictionary(entry => entry.Key, entry => entry.Value);
+        foreach (PdfPageTreeEntry page in tree.Pages)
+        {
+            long key = Assert.IsType<PdfInteger>(page.Dictionary[N("StructParents")]).Value;
+            PdfObject paragraph = Assert.Single(Assert.IsType<PdfArray>(parents[key]));
+            PdfDictionary widget = Assert.Single(Assert.IsType<PdfArray>(page.Dictionary[N("Annots")])
+                .Select(value => Dictionary(saved, value)), annotation =>
+                    annotation.TryGetValue(N("Subtype"), out PdfObject? subtype)
+                    && subtype is PdfName name && name.ValueAsLatin1() == "Widget");
+            long widgetKey = Assert.IsType<PdfInteger>(widget[N("StructParent")]).Value;
+            PdfObject form = parents[widgetKey];
+            Assert.Equal(ObjectNumber(form), ObjectNumber(Assert.Single(Assert.IsType<PdfArray>(Dictionary(saved, paragraph)[N("Ref")]))));
+            Assert.Equal(ObjectNumber(paragraph), ObjectNumber(Assert.Single(Assert.IsType<PdfArray>(Dictionary(saved, form)[N("Ref")]))));
+        }
+        PdfDictionary container = Dictionary(saved, Assert.Single(Assert.IsType<PdfArray>(structure[N("K")])));
+        Assert.Equal(ObjectNumber(Assert.Single(Assert.IsType<PdfArray>(parents[0]))),
+            ObjectNumber(Assert.Single(Assert.IsType<PdfArray>(container[N("Ref")]))));
+    }
+
     [Theory]
     [InlineData("cycle")]
     [InlineData("expansion")]
@@ -395,6 +424,7 @@ public sealed class PdfDuplicatePageOwnershipTests
     [InlineData("tag-merged-extension")]
     [InlineData("tag-independent-cycle")]
     [InlineData("tag-independent-foreign-object")]
+    [InlineData("tag-relationships-invalid")]
     [InlineData("radio-direct-kid")]
     public void AmbiguousOrExcessiveRecoveryLeavesTheOriginalObjectModelIntact(string damage)
     {
@@ -512,6 +542,14 @@ public sealed class PdfDuplicatePageOwnershipTests
         }
         if (damage == "tag-id-count-one")
             objects[1] = "<< /Type /Pages /Kids [10 0 R 10 0 R] /Count 1 /MediaBox [0 0 100 100] /Resources << >> >>";
+        if (damage is "tag-relationships" or "tag-relationships-invalid")
+        {
+            objects[12] = objects[12][..^2] + " /Ref [14 0 R] >>";
+            objects[13] = objects[13][..^2] + " /Ref [16 0 R] >>";
+            objects[15] = objects[15][..^2] + " /Ref [14 0 R] >>";
+            if (damage == "tag-relationships-invalid")
+                objects[13] = "<< /Type /StructElem /S /P /P 13 0 R /Pg 3 0 R /K 0 /Ref [5 0 R] >>";
+        }
         if (damage is "collision-utf16" or "collision-latin")
         {
             objects[1] = "<< /Type /Pages /Kids [10 0 R 10 0 R 11 0 R] /Count 3 /MediaBox [0 0 100 100] /Resources << >> >>";

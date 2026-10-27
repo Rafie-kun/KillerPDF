@@ -367,6 +367,22 @@ internal sealed class PdfDuplicatePageNormalizer(PdfDocument document)
         }
         if (Get(structure, "K") is PdfObject children)
             structure = Set(structure, "K", Expand(children, root, new HashSet<int>(), 0));
+        foreach (Occurrence page in _pages.Where(page => page.Index > 0))
+            foreach (var tag in page.Tags)
+            {
+                PdfDictionary copied = (PdfDictionary)_delta[tag.Value.ObjectNumber];
+                if (Get(copied, "Ref") is not PdfObject relationships) continue;
+                var mapped = new List<PdfObject>();
+                foreach (PdfObject item in Array(relationships))
+                {
+                    Bound(0);
+                    if (item is not PdfIndirectReference relationship)
+                        throw Refuse("A structure relationship has no indirect identity.");
+                    PdfIndirectReference original = FinalReference(relationship);
+                    mapped.Add(page.Tags.TryGetValue(original.ObjectNumber, out PdfIndirectReference? target) ? target : original);
+                }
+                Put(tag.Value, Set(copied, "Ref", new PdfArray(mapped)));
+            }
         if (_tagIdentities.Count != originalIdentityCount)
             structure = Set(structure, "IDTree", new PdfDictionary([
                 new(Name("Names"), new PdfArray(_tagIdentities.Values.SelectMany(entry =>
@@ -442,8 +458,6 @@ internal sealed class PdfDuplicatePageNormalizer(PdfDocument document)
             if (resolved is not PdfDictionary node) throw Refuse("A page-owned structure child has an unsupported representation.");
             if (Get(node, "Pg") is PdfIndirectReference owner && FinalReference(owner).ObjectNumber != page.Source.ObjectNumber)
                 throw Refuse("A page-owned structure branch crosses another page.");
-            if (clone && Get(node, "Ref") is not null)
-                throw Refuse("A duplicated structure branch has identity links requiring separate repair.");
             PdfDictionary result = node;
             bool element = IsName(Get(node, "Type"), "StructElem") || Get(node, "S") is not null;
             PdfIndirectReference target = parent;
