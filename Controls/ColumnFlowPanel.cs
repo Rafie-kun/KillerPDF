@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
-namespace KillerPDF
+namespace KillerPDF.Controls
 {
     /// <summary>
     /// Lays its children out top to bottom in columns that run left to right, starting a new
@@ -26,7 +26,6 @@ namespace KillerPDF
     /// moves it to the top of a fresh column. Its children wrap into sub-columns beside each
     /// other on the same pitch, each ending where an outer column ends, so the outer columns
     /// after the branch stay on the grid too.
-    /// (From KillerUI/Controls/ColumnFlowPanel.cs.)
     /// </summary>
     internal sealed class ColumnFlowPanel : Panel
     {

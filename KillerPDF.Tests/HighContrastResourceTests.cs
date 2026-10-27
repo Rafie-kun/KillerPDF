@@ -13,8 +13,11 @@ public sealed class HighContrastResourceTests
     {
         string source = File.ReadAllText(Path.Combine(
             Path.GetDirectoryName(Path.GetDirectoryName(SourcePath()))!, "Controls", "HighContrastResources.cs"));
+        // Refresh takes the system pair as parameters named after SystemColors (highlightBrush for
+        // SystemColors.HighlightBrush), so match either spelling.
         string Group(string brush) => string.Concat(Regex.Matches(source,
-            @"Brushes\(SystemColors\." + brush + @",([^;]*)\);").Select(match => match.Groups[1].Value));
+            @"Brushes\((?:SystemColors\." + brush + "|" + char.ToLowerInvariant(brush[0]) + brush[1..]
+            + @"),([^;]*)\);").Select(match => match.Groups[1].Value));
 
         Assert.Contains("\"MenuHoverBrush\"", Group("HighlightBrush"));
         Assert.Contains("\"MenuHoverTextBrush\"", Group("HighlightTextBrush"));

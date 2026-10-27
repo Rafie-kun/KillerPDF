@@ -1029,7 +1029,7 @@
              Signatures) Tag="strip" (SidebarLayout.cs). Their rows then flow down into columns
              that run left to right, at every level of the tree, and the strip scrolls sideways. -->
         <ItemsPanelTemplate x:Key="TreeColumnFlowPanel">
-            <local:ColumnFlowPanel/>
+            <ctrl:ColumnFlowPanel/>
         </ItemsPanelTemplate>
         <Style x:Key="OutlineTreeStyle" TargetType="TreeView">
             <Setter Property="Background" Value="Transparent"/>
