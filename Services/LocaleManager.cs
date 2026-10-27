@@ -5,62 +5,106 @@ using System.Windows;
 
 namespace KillerPDF.Services
 {
+    // The family's 20 UI languages, KillerPDF's set and names. en-US is always the base layer, so a
+    // locale that omits a key falls back to English; the chosen locale's file layers on top.
+    //
+    // The choice is saved by NAME, not ordinal, so members can be reordered freely - but keep these
+    // names, because they are the "Locale" setting every app already has stored.
     internal enum Locale { EnUS, Bn, CsCZ, De, Es, Fr, HuHU, ItIT, JaJP, KkKZ, PlPL, RuRU, NbNO, PtBR, TrTR, UkUA, ViVN, ZhCN, ZhTW, SlSI }
 
+    /// <summary>
+    /// Hot-swaps the string dictionaries at runtime. Persistence goes through the same
+    /// ThemeManager.GetSetting / SetSetting hooks as everything else in the kit ("Locale").
+    ///
+    /// REQUIRES the App.xaml merged-dictionary layout from the README:
+    ///   [0] theme palette (ThemeManager swaps it)
+    ///   [1] Controls/Controls.xaml
+    ///   [2] Strings/en-US.xaml   (the BASE - always present)
+    ///   [3] the chosen locale's overrides (added here at runtime; absent for English)
+    /// and Strings/&lt;code&gt;.xaml files built as Resource for each language the app ships. A file
+    /// that is missing leaves the app on English instead of crashing.
+    /// </summary>
     internal static class LocaleManager
     {
         private static Locale _current = Locale.EnUS;
-
         public static Locale Current => _current;
+
+        /// <summary>The BCP 47 tag of the language actually in use, such as "de-DE", for reports.</summary>
+        public static string LanguageTag { get; private set; } = "en-US";
+
+        /// <summary>
+        /// Fired after the string dictionary has been swapped. Anything bound with DynamicResource
+        /// follows the swap on its own; this is for text resolved once in code and stored, which
+        /// otherwise keeps the language it was created in.
+        /// </summary>
+        public static event Action? LocaleChanged;
+
+        // The override dictionary this class merged, found again by reference. A fixed slot is
+        // not safe: an app merges its own dictionaries after the strings (KillerScan's App.xaml
+        // does), and replacing or removing "slot 3" overwrote or dropped them on a language switch.
+        private static ResourceDictionary? _override;
 
         /// <summary>Localized string for a Str_ key. Falls back to the key itself when it is
         /// missing, so a translation gap shows up as itself instead of as blank UI.</summary>
         public static string Loc(string key) =>
             Application.Current.TryFindResource(key) as string ?? key;
 
-        // ── Translator test mode (#211, thanks bovirus) ─────────────────────────
-        // --lang-file <path> loads an external translation xaml as the language override, winning
-        // over the saved locale, and re-applies it on every save of the file - so a translation
-        // can be checked for string length and context in the live app before it is built in.
-        // Untranslated keys fall back to the en-US base like any partial locale.
+        // ---- Translator test mode (KillerPDF #211) ----
+        // --lang-file <path> reads an external translation file into the override slot, winning
+        // over the saved locale, and re-applies it on every save of the file, so a translator can
+        // check string length and context in the live app before the file is built in. Keys the
+        // file leaves out fall back to the en-US base like any partial locale.
 
-        /// <summary>Full path of the external translation file, or null. Set from the
+        /// <summary>Full path of the external translation file, or null. Set it from the
         /// --lang-file switch before <see cref="Initialize"/> runs.</summary>
         internal static string? ExternalFile;
 
-        /// <summary>Raised on the UI thread after a successful live re-apply, so the window can
-        /// rebuild its code-built captions (toolbar, context menu) the way a language switch does.</summary>
+        /// <summary>Raised on the UI thread after a successful live re-apply of the external file,
+        /// so the window can rebuild its code-built captions the way a language switch does.</summary>
         internal static event Action? ExternalReloaded;
 
         private static FileSystemWatcher? _watcher;
         private static System.Windows.Threading.DispatcherTimer? _reloadDebounce;
         private static bool _externalLoadedOnce;
 
-        /// <summary>
-        /// Call once at startup (after ThemeManager.Initialize) to restore the saved locale.
-        /// </summary>
+        /// <summary>Call once at startup, after ThemeManager.Initialize, to restore the saved locale,
+        /// or on first run the one matching the Windows display language.</summary>
         public static void Initialize()
         {
-            var saved = App.GetSetting("Locale");
-            if (Enum.TryParse<Locale>(saved, out var locale))
+            if (ParseSaved(ThemeManager.GetSetting("Locale")) is { } saved)
             {
-                _current = locale;
+                _current = saved;
             }
             else
             {
                 _current = LocaleForCulture(CultureInfo.CurrentUICulture);
-                App.SetSetting("Locale", _current.ToString());
+                ThemeManager.SetSetting("Locale", _current.ToString());
             }
             ApplyInternal(_current);
+        }
+
+        /// <summary>
+        /// The saved "Locale" setting, including names an app stored before the enum was unified:
+        /// KillerScan saved Japanese as "Ja" where the family name is "JaJP", and Killendar,
+        /// KillerShell and KillerShot saved Czech and Italian as "Cs" and "It".
+        /// </summary>
+        private static Locale? ParseSaved(string? saved)
+        {
+            switch (saved)
+            {
+                case "Ja": return Locale.JaJP;
+                case "Cs": return Locale.CsCZ;
+                case "It": return Locale.ItIT;
+            }
+            return Enum.TryParse<Locale>(saved, out var locale) && Enum.IsDefined(typeof(Locale), locale) ? locale : null;
         }
 
         internal static Locale LocaleForCulture(CultureInfo culture)
         {
             string name = culture.Name;
             string language = culture.TwoLetterISOLanguageName;
-
             if (language == "zh")
-                return name.Contains("Hant", StringComparison.OrdinalIgnoreCase) ||
+                return name.IndexOf("Hant", StringComparison.OrdinalIgnoreCase) >= 0 ||
                        name.EndsWith("-TW", StringComparison.OrdinalIgnoreCase) ||
                        name.EndsWith("-HK", StringComparison.OrdinalIgnoreCase) ||
                        name.EndsWith("-MO", StringComparison.OrdinalIgnoreCase)
@@ -90,27 +134,91 @@ namespace KillerPDF.Services
             };
         }
 
-        /// <summary>
-        /// Switch locale, persist choice, and hot-swap the string ResourceDictionary.
-        /// </summary>
+        /// <summary>Switch locale, persist the choice, and hot-swap the string dictionary.</summary>
         public static void Apply(Locale locale)
         {
             _current = locale;
-            App.SetSetting("Locale", locale.ToString());
+            ThemeManager.SetSetting("Locale", locale.ToString());
             ApplyInternal(locale);
+            LocaleChanged?.Invoke();
         }
 
-        // ── Internal ─────────────────────────────────────────────────────
+        /// <summary>The Strings/ file for a locale, or null for English (base only).</summary>
+        internal static string? FileFor(Locale locale) => locale switch
+        {
+            Locale.Bn   => "bn",
+            Locale.CsCZ => "cs-CZ",
+            Locale.De   => "de-DE",
+            Locale.Es   => "es",
+            Locale.Fr   => "fr-FR",
+            Locale.HuHU => "hu-HU",
+            Locale.ItIT => "it-IT",
+            Locale.JaJP => "ja-JP",
+            Locale.KkKZ => "kk-KZ",
+            Locale.PlPL => "pl-PL",
+            Locale.RuRU => "ru-RU",
+            Locale.SlSI => "sl-SI",
+            Locale.NbNO => "nb-NO",
+            Locale.PtBR => "pt-BR",
+            Locale.TrTR => "tr-TR",
+            Locale.UkUA => "uk-UA",
+            Locale.ViVN => "vi-VN",
+            Locale.ZhCN => "zh-CN",
+            Locale.ZhTW => "zh-TW",
+            _           => null,
+        };
+
+        /// <summary>The .NET culture for a locale. Resource dictionaries translate the fixed
+        /// interface strings; the culture supplies the generated ones (dates, month and day names,
+        /// number formats). Applied only when <see cref="KeepRegionFormats"/> is false; by default
+        /// dates and numbers follow the Windows region instead.</summary>
+        internal static CultureInfo CultureFor(Locale locale) => new(locale switch
+        {
+            Locale.Bn   => "bn-BD",
+            Locale.Es   => "es-ES",
+            Locale.CsCZ => "cs-CZ",
+            Locale.De   => "de-DE",
+            Locale.Fr   => "fr-FR",
+            Locale.HuHU => "hu-HU",
+            Locale.ItIT => "it-IT",
+            Locale.JaJP => "ja-JP",
+            Locale.KkKZ => "kk-KZ",
+            Locale.PlPL => "pl-PL",
+            Locale.RuRU => "ru-RU",
+            Locale.SlSI => "sl-SI",
+            Locale.NbNO => "nb-NO",
+            Locale.PtBR => "pt-BR",
+            Locale.TrTR => "tr-TR",
+            Locale.UkUA => "uk-UA",
+            Locale.ViVN => "vi-VN",
+            Locale.ZhCN => "zh-CN",
+            Locale.ZhTW => "zh-TW",
+            _           => "en-US",
+        });
+
+        // ---- Internal ----
+
+        /// <summary>Leave the thread cultures alone, so dates and numbers keep the Windows region
+        /// format whatever the interface language. On by default for every app (Steve,
+        /// 2026-10-27); set it to false before <see cref="Initialize"/> to make the cultures follow
+        /// the chosen language instead.</summary>
+        internal static bool KeepRegionFormats { get; set; } = true;
 
         private static void ApplyInternal(Locale locale)
         {
-            var merged = Application.Current.Resources.MergedDictionaries;
+            if (!KeepRegionFormats)
+            {
+                var culture = CultureFor(locale);
+                CultureInfo.CurrentCulture = culture;
+                CultureInfo.CurrentUICulture = culture;
+                CultureInfo.DefaultThreadCurrentCulture = culture;
+                CultureInfo.DefaultThreadCurrentUICulture = culture;
+            }
 
-            // [0] theme, [1] the family Controls.xaml, then the en-US BASE - always present so any
-            // partial locale falls back to English for keys it doesn't translate - and directly
-            // after it the chosen locale's overrides (absent for English). The base is found by its
-            // source and the override by reference, the way KillerUI's LocaleManager does it, so a
-            // dictionary merged elsewhere in the list is never overwritten or removed.
+            var merged = Application.Current.Resources.MergedDictionaries;
+            LanguageTag = "en-US";
+
+            // Re-assert the English base so a partial locale falls back to English for missing keys.
             int baseIndex = StringsBaseIndex(merged);
             if (merged.Count > baseIndex)
                 merged[baseIndex] = new ResourceDictionary { Source = new Uri("pack://application:,,,/Strings/en-US.xaml") };
@@ -120,40 +228,27 @@ namespace KillerPDF.Services
             {
                 if (TryApplyExternal()) { EnsureWatcher(); return; }
                 if (!_externalLoadedOnce)
-                    MessageBox.Show($"Could not load the translation file:\n{ExternalFile}\n\nCheck the path and the file's XML, then start KillerPDF again.",
-                                    "KillerPDF --lang-file", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show($"Could not load the translation file:\n{ExternalFile}\n\nCheck the path and the file's XML, then start {AppInfo.DisplayName} again.",
+                                    $"{AppInfo.DisplayName} --lang-file", MessageBoxButton.OK, MessageBoxImage.Warning);
                 // Fall through to the normal locale so the app still comes up usable.
             }
 
-            Uri? overrideUri = locale switch
+            string? file = FileFor(locale);
+            if (file is not null)
             {
-                Locale.Bn   => new Uri("pack://application:,,,/Strings/bn.xaml"),
-                Locale.CsCZ => new Uri("pack://application:,,,/Strings/cs-CZ.xaml"),
-                Locale.De   => new Uri("pack://application:,,,/Strings/de-DE.xaml"),
-                Locale.Es   => new Uri("pack://application:,,,/Strings/es.xaml"),
-                Locale.Fr   => new Uri("pack://application:,,,/Strings/fr-FR.xaml"),
-                Locale.HuHU => new Uri("pack://application:,,,/Strings/hu-HU.xaml"),
-                Locale.ItIT => new Uri("pack://application:,,,/Strings/it-IT.xaml"),
-                Locale.JaJP => new Uri("pack://application:,,,/Strings/ja-JP.xaml"),
-                Locale.KkKZ => new Uri("pack://application:,,,/Strings/kk-KZ.xaml"),
-                Locale.PlPL => new Uri("pack://application:,,,/Strings/pl-PL.xaml"),
-                Locale.RuRU => new Uri("pack://application:,,,/Strings/ru-RU.xaml"),
-                Locale.TrTR => new Uri("pack://application:,,,/Strings/tr-TR.xaml"),
-                Locale.ViVN => new Uri("pack://application:,,,/Strings/vi-VN.xaml"),
-                Locale.UkUA => new Uri("pack://application:,,,/Strings/uk-UA.xaml"),
-                Locale.NbNO => new Uri("pack://application:,,,/Strings/nb-NO.xaml"),
-                Locale.PtBR => new Uri("pack://application:,,,/Strings/pt-BR.xaml"),
-                Locale.ZhCN => new Uri("pack://application:,,,/Strings/zh-CN.xaml"),
-                Locale.ZhTW => new Uri("pack://application:,,,/Strings/zh-TW.xaml"),
-                Locale.SlSI => new Uri("pack://application:,,,/Strings/sl-SI.xaml"),
-                _           => null,   // English: base only
-            };
-
-            SetOverride(overrideUri is null ? null : new ResourceDictionary { Source = overrideUri });
+                try
+                {
+                    SetOverride(new ResourceDictionary { Source = new Uri($"pack://application:,,,/Strings/{file}.xaml") });
+                    LanguageTag = file;
+                    return;
+                }
+                catch
+                {
+                    // Locale file not shipped yet: stay on the English base instead of crashing.
+                }
+            }
+            SetOverride(null);
         }
-
-        // The override dictionary this class merged, found again by reference.
-        private static ResourceDictionary? _override;
 
         /// <summary>Puts the chosen locale's dictionary directly after the English base, replacing
         /// the one this class merged before, or removes it (null) for English. Never touches a
@@ -174,7 +269,7 @@ namespace KillerPDF.Services
         }
 
         /// <summary>Where the English string base is merged, found by its source. Slot 2, the
-        /// App.xaml layout, if it cannot be found.</summary>
+        /// README layout, if it cannot be found.</summary>
         private static int StringsBaseIndex(System.Collections.ObjectModel.Collection<ResourceDictionary> merged)
         {
             for (int i = 0; i < merged.Count; i++)
@@ -184,7 +279,7 @@ namespace KillerPDF.Services
         }
 
         /// <summary>Loads <see cref="ExternalFile"/> into the override slot. False on any parse or
-        /// IO failure - during live reload the last good version simply stays applied, since a
+        /// IO failure; during live reload the last good version simply stays applied, since a
         /// text editor mid-save routinely produces momentarily unreadable or invalid XML.</summary>
         private static bool TryApplyExternal()
         {
@@ -193,7 +288,8 @@ namespace KillerPDF.Services
                 var merged = Application.Current.Resources.MergedDictionaries;
                 int baseIndex = StringsBaseIndex(merged);
                 if (merged.Count <= baseIndex) return false;
-                // Parsed as data, never as XAML: XamlReader would instantiate whatever the file names.
+                // Parsed as data, never as XAML: XamlReader would instantiate whatever the file
+                // names. Only keys the English base already has are accepted (TranslationFileReader).
                 var known = new System.Collections.Generic.HashSet<string>(StringComparer.Ordinal);
                 foreach (object key in merged[baseIndex].Keys) if (key is string name) known.Add(name);
                 using var fs = new FileStream(ExternalFile!, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
@@ -213,7 +309,7 @@ namespace KillerPDF.Services
             string name = Path.GetFileName(ExternalFile!);
             _watcher = new FileSystemWatcher(dir, name) { EnableRaisingEvents = true };
             // Editors save as write, replace, or delete-and-rename depending on the editor, so
-            // watch every shape. Events arrive on a worker thread and usually several per save -
+            // watch every shape. Events arrive on a worker thread and usually several per save:
             // marshal to the UI thread and debounce into one re-apply.
             _watcher.Changed += (_, _) => QueueExternalReload();
             _watcher.Created += (_, _) => QueueExternalReload();

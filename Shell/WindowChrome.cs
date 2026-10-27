@@ -23,8 +23,6 @@ namespace KillerPDF.Shell
 
         private const int  WM_DPICHANGED      = 0x02E0;
         private const int  WM_MOUSEHWHEEL     = 0x020E;
-        private const int  WM_ENTERSIZEMOVE   = 0x0231;
-        private const int  WM_EXITSIZEMOVE    = 0x0232;
         private const int  WM_SETICON          = 0x0080;
         private const int  ICON_SMALL          = 0;
         private const int  ICON_BIG            = 1;
@@ -34,11 +32,13 @@ namespace KillerPDF.Shell
         private const uint SWP_NOZORDER       = 0x0004;
         private const uint SWP_NOACTIVATE     = 0x0010;
 
-        // KillerPDF answers every frame message itself: the kit's Chrome.cs hands each one here
-        // first, and KillerPDF's own erase, maximize clamp, caption and DPI handling stay in force.
+        // KillerPDF answers its own frame messages: the kit's Chrome.cs hands each one here first.
+        // The background erase, the live move/resize bracket and the maximize clamp stay with the
+        // kit, which took them from here; F11 reaches its clamp through CoverWholeMonitor.
         partial void FilterWindowMessage(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam,
             ref bool handled, ref IntPtr result, ref bool owned)
         {
+            if (msg is WM_ERASEBKGND or WM_GETMINMAXINFO or WM_ENTERSIZEMOVE or WM_EXITSIZEMOVE) return;
             owned = true;
             result = FrameWndProc(hwnd, msg, wParam, lParam, ref handled);
         }
@@ -59,22 +59,7 @@ namespace KillerPDF.Shell
                 handled = true;
                 return new IntPtr(WmNcHitTest(hwnd, msg, wParam, lParam));
             }
-            if (msg == WM_ERASEBKGND && _inWindowSizeMove)
-            {
-                // WPF paints the whole client area itself, so let nothing erase the background to a flat
-                // fill underneath it during a live resize. Outside that loop, Windows must retain its
-                // normal repaint path so a restored or reactivated window cannot keep a black surface.
-                handled = true;
-                return new IntPtr(1);
-            }
-            if (msg == WM_GETMINMAXINFO)
-            {
-                WmGetMinMaxInfoExtras(hwnd, lParam);
-                handled = true;
-            }
-            else if (msg == 0x0231) _inWindowSizeMove = true;    // WM_ENTERSIZEMOVE
-            else if (msg == 0x0232) _inWindowSizeMove = false;   // WM_EXITSIZEMOVE
-            else if (msg == WM_MOUSEHWHEEL)
+            if (msg == WM_MOUSEHWHEEL)
             {
                 // #196: WPF has no MouseHWheel event, so a precision touchpad's two-finger
                 // horizontal scroll (and a mouse's tilt wheel) died at the HwndSource and the
@@ -224,53 +209,10 @@ namespace KillerPDF.Shell
             catch { return false; }   // not laid out yet; treat as client
         }
 
-        private void WmGetMinMaxInfoExtras(IntPtr hwnd, IntPtr lParam)
-        {
-            var mmi = Marshal.PtrToStructure<MINMAXINFO>(lParam);
-            // During a cross-monitor drag the HWND can still belong to the source monitor when
-            // Windows requests the final maximize bounds. The pointer is already on the target
-            // monitor, so use it for this live move and keep the HWND path for ordinary requests.
-            IntPtr monitor = _inWindowSizeMove && GetCursorPos(out POINT cursor)
-                ? MonitorFromPoint(cursor, MONITOR_DEFAULTTONEAREST)
-                : MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
-            if (monitor != IntPtr.Zero)
-            {
-                var info = new MONITORINFO { cbSize = Marshal.SizeOf<MONITORINFO>() };
-                GetMonitorInfo(monitor, ref info);
-                RECT work = info.rcWork;
-                RECT mon = info.rcMonitor;
-                // Normal maximize respects the taskbar; F11 uses the whole monitor.
-                RECT bounds = _fullScreen ? mon : work;
-                mmi.ptMaxPosition.x = Math.Abs(bounds.left - mon.left);
-                mmi.ptMaxPosition.y = Math.Abs(bounds.top - mon.top);
-                mmi.ptMaxSize.x = Math.Abs(bounds.right - bounds.left);
-                mmi.ptMaxSize.y = Math.Abs(bounds.bottom - bounds.top);
-                // Windows supplies desktop-wide tracking limits. Do not shrink them to the
-                // source monitor: a drag can maximize onto a larger monitor in the same move.
-                mmi.ptMaxTrackSize.x = Math.Max(mmi.ptMaxTrackSize.x, mmi.ptMaxSize.x);
-                mmi.ptMaxTrackSize.y = Math.Max(mmi.ptMaxTrackSize.y, mmi.ptMaxSize.y);
-                // Enforce the window's MinWidth/MinHeight during user resize. The custom chrome
-                // marks WM_GETMINMAXINFO handled, so WPF's own minimum enforcement is bypassed.
-                try
-                {
-                    var dpi = VisualTreeHelper.GetDpi(this);
-                    if (MinWidth  > 0 && !double.IsInfinity(MinWidth))  mmi.ptMinTrackSize.x = Math.Min(mmi.ptMaxSize.x, (int)Math.Ceiling(MinWidth  * dpi.DpiScaleX));
-                    if (MinHeight > 0 && !double.IsInfinity(MinHeight)) mmi.ptMinTrackSize.y = Math.Min(mmi.ptMaxSize.y, (int)Math.Ceiling(MinHeight * dpi.DpiScaleY));
-                }
-                catch { /* DPI not available yet; skip min enforcement for this pass */ }
-                Marshal.StructureToPtr(mmi, lParam, true);
-            }
-        }
+        partial void CoverWholeMonitor(ref bool whole) => whole = _fullScreen;   // F11 covers the taskbar
 
         [LibraryImport("user32.dll", EntryPoint = "MonitorFromRect")]
         private static partial IntPtr MonitorFromRect(ref RECT rect, uint flags);
-
-        [LibraryImport("user32.dll", EntryPoint = "MonitorFromPoint")]
-        private static partial IntPtr MonitorFromPoint(POINT point, uint flags);
-
-        [LibraryImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static partial bool GetCursorPos(out POINT point);
 
         [LibraryImport("kernel32.dll", EntryPoint = "GetModuleHandleW", StringMarshalling = StringMarshalling.Utf16)]
         private static partial IntPtr GetModuleHandle(string? moduleName);

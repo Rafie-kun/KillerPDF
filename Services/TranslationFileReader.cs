@@ -10,7 +10,7 @@ namespace KillerPDF.Services
     /// Reads an external translation file (--lang-file) as data only. XamlReader would build any
     /// object the markup names, so a translation is parsed as plain XML and accepted only when it is
     /// the locale file shape: a ResourceDictionary of keyed sys:String and sys:Double entries whose
-    /// keys already exist in the built-in English strings (BF-U011).
+    /// keys already exist in the built-in English strings.
     /// </summary>
     internal static class TranslationFileReader
     {
@@ -59,15 +59,15 @@ namespace KillerPDF.Services
                         throw new FormatException($"The attribute {reader.Name} is not allowed.");
                 }
                 reader.MoveToElement();
-                if (string.IsNullOrEmpty(key)) throw new FormatException("Every entry needs an x:Key.");
-                if (!knownKeys.Contains(key)) throw new FormatException($"The key {key} is not a KillerPDF string.");
+                if (key is null || key.Length == 0) throw new FormatException("Every entry needs an x:Key.");
+                if (!knownKeys.Contains(key)) throw new FormatException($"The key {key} is not in the English strings.");
                 if (entries.ContainsKey(key)) throw new FormatException($"The key {key} appears twice.");
                 string text;
                 if (reader.IsEmptyElement) { text = string.Empty; reader.Read(); }
                 else text = ReadText(reader, key);
                 entries[key] = isString ? text
                     : double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out double number)
-                        && double.IsFinite(number) ? number
+                        && !double.IsNaN(number) && !double.IsInfinity(number) ? number
                     : throw new FormatException($"The entry {key} is not a number.");
             }
             return entries;

@@ -54,12 +54,8 @@ namespace KillerPDF.Shell
         /// <summary>Pane A's share of the host at the last layout. Window-state JUMPS (snap,
         /// maximize, unmaximize, full screen) re-derive <see cref="_paneAWidth"/> from this so the
         /// panes keep their proportions; an interactive edge drag keeps A fixed as documented
-        /// above. WM_ENTER/EXITSIZEMOVE (<see cref="_inWindowSizeMove"/>) tells the two apart.</summary>
+        /// above. WM_ENTER/EXITSIZEMOVE (<see cref="_inWindowSizeMove"/>, tracked in the kit's Chrome.cs) tells the two apart.</summary>
         private double _paneARatio;
-
-        /// <summary>True while the user is interactively moving or resizing the window
-        /// (WM_ENTERSIZEMOVE..WM_EXITSIZEMOVE, tracked in WndProc).</summary>
-        private bool _inWindowSizeMove;
 
         /// <summary>Wire both panes up. Called from the constructor.</summary>
         private void InitSplitPanes()

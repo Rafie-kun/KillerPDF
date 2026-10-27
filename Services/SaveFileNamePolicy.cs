@@ -9,7 +9,7 @@ internal static class SaveFileNamePolicy
     {
         if (!addExtension || string.IsNullOrWhiteSpace(extension)) return path;
 
-        string normalized = extension.StartsWith('.') ? extension : "." + extension;
+        string normalized = extension!.StartsWith(".") ? extension : "." + extension;
         string current = Path.GetExtension(path);
         if (current.Equals(normalized, StringComparison.OrdinalIgnoreCase)) return path;
         if (current.Length == 0 || requireExtension) return path + normalized;
