@@ -19,9 +19,9 @@
     <SolidColorBrush x:Key="MenuBackgroundBrush" Color="#00140c" po:Freeze="True"/>
     <SolidColorBrush x:Key="CardBorderBrush" Color="#0f4a30" po:Freeze="True"/>
     <!-- The RGB themes take white as the accent and carry the hue in HeaderLineBrush. -->
-    <SolidColorBrush x:Key="PrimaryBrush"    Color="#ffffff" po:Freeze="True"/>
-    <SolidColorBrush x:Key="PrimaryHoverBrush"   Color="#ffffff" po:Freeze="True"/>
-    <SolidColorBrush x:Key="PrimaryPressedBrush" Color="#ffffff" po:Freeze="True"/>
+    <SolidColorBrush x:Key="PrimaryBrush"    Color="#e0d49a" po:Freeze="True"/>
+    <SolidColorBrush x:Key="PrimaryHoverBrush"   Color="#e0d49a" po:Freeze="True"/>
+    <SolidColorBrush x:Key="PrimaryPressedBrush" Color="#e0d49a" po:Freeze="True"/>
     <SolidColorBrush x:Key="OnPrimaryBrush"  Color="#002e1c" po:Freeze="True"/>
     <SolidColorBrush x:Key="OutlineBtnBrush" Color="#3fbf6f" po:Freeze="True"/>
     <SolidColorBrush x:Key="HeaderLineBrush" Color="#3fbf6f" po:Freeze="True"/>
