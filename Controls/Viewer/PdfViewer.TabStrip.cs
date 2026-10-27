@@ -493,7 +493,7 @@ namespace KillerPDF.Controls
             var others = MakeMenuItem(Loc("Str_Ctx_CloseOthers"), (_, _) => CloseOtherTabs(s), GestureFor("CtrlShift:W"), "");
             others.IsEnabled = _sessions.Count(z => z.Doc != null || z.DeferredPath != null) > 1;
             menu.Items.Add(others);
-            var closeAll = MakeMenuItem(Loc("Str_Ctx_CloseAllTabs"), (_, _) => CloseAllTabs(), GestureFor("Ctrl:Q"));
+            var closeAll = MakeMenuItem(Loc("Str_Ctx_CloseAllTabs"), (_, _) => CloseAllTabs(), GestureFor("CtrlShift:Q"));
             closeAll.IsEnabled = _sessions.Any(z => z.Doc != null || z.DeferredPath != null);
             menu.Items.Add(closeAll);
             // Ctrl+Shift+N moves the active tab the same way; dragging a tab out of the window does too.

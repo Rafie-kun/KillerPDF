@@ -1013,7 +1013,7 @@ namespace KillerPDF.Controls
             RebuildTabStrip();
         }
 
-        // Ctrl+Q: close every open document and reset to a single blank tab, with one combined warning
+        // Ctrl+Shift+Q: close every open document and reset to a single blank tab, with one combined warning
         // if anything is unsaved (rather than a prompt per tab).
         private void CloseAllTabs()
         {

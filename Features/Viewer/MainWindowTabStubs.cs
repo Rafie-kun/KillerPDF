@@ -8,7 +8,7 @@ namespace KillerPDF.Shell
     /// KeyboardShortcuts, ImportAndZip, TempReload, WindowChrome and SettingsPanel unchanged while
     /// making them act on whichever pane has focus.
     ///
-    /// Ctrl+W, Ctrl+Tab, Ctrl+Q and CloseFile_Click are keyboard- or XAML-bound, so these
+    /// Ctrl+W, Ctrl+Tab, Ctrl+Shift+Q and CloseFile_Click are keyboard- or XAML-bound, so these
     /// declarations are load-bearing rather than convenience.
     /// </summary>
     public partial class MainWindow

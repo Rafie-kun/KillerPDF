@@ -405,9 +405,15 @@ namespace KillerPDF.Shell
                 CloseOtherTabs(_active);
                 e.Handled = true;
             }
-            else if (key == Key.Q && mods == ModifierKeys.Control)
+            else if (key == Key.Q && mods == (ModifierKeys.Control | ModifierKeys.Shift))
             {
                 CloseAllTabs();
+                e.Handled = true;
+            }
+            else if (key == Key.Q && mods == ModifierKeys.Control)
+            {
+                // The family quit: the same command QuitShortcut binds, so a moved key still quits.
+                KillerFamily.Shell.QuitShortcut.Command.Execute(null, this);
                 e.Handled = true;
             }
             else if (key == Key.Tab && mods == (ModifierKeys.Control | ModifierKeys.Shift))
