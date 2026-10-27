@@ -365,7 +365,8 @@ internal static class FormFieldEditingSmoke
         using Stream file = File.Create(path); encoder.Save(file);
     }
     internal static byte[] Fixture(string value, bool unlisted = false, bool password = false, bool toggles = false,
-        string? formatScript = null, string? validationScript = null, string? calculationScript = null, string? siblingValue = null)
+        string? formatScript = null, string? validationScript = null, string? calculationScript = null, string? siblingValue = null,
+        bool malformedDate = false)
     {
         static string Appearance(string text) => $"q 1 1 1 rg 0 0 160 24 re f 0 g BT /Helv 12 Tf 4 8 Td ({text}) Tj ET Q\n";
         siblingValue ??= Sibling;
@@ -395,11 +396,17 @@ internal static class FormFieldEditingSmoke
                 $"<< /Type /XObject /Subtype /Form /BBox [0 0 14 14] /Length {off.Length} >>\nstream\n{off}endstream",
                 $"<< /Type /XObject /Subtype /Form /BBox [0 0 14 14] /Length {on.Length} >>\nstream\n{on}endstream"]);
         }
+        string info = "";
+        if (malformedDate)
+        {
+            objects.Add("<< /CreationDate (NOT_A_DATE) >>");
+            info = " /Info " + objects.Count + " 0 R";
+        }
         var pdf = new StringBuilder("%PDF-1.7\n"); var offsets = new List<int> { 0 };
         for (int index = 0; index < objects.Count; index++) { offsets.Add(pdf.Length); pdf.Append($"{index + 1} 0 obj\n{objects[index]}\nendobj\n"); }
         int xref = pdf.Length; pdf.Append($"xref\n0 {offsets.Count}\n0000000000 65535 f \n");
         foreach (int offset in offsets.Skip(1)) pdf.Append(offset.ToString("D10", CultureInfo.InvariantCulture)).Append(" 00000 n \n");
-        pdf.Append($"trailer\n<< /Size {offsets.Count} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n");
+        pdf.Append($"trailer\n<< /Size {offsets.Count} /Root 1 0 R{info} >>\nstartxref\n{xref}\n%%EOF\n");
         return Encoding.ASCII.GetBytes(pdf.ToString());
     }
 }

@@ -214,7 +214,7 @@ internal static class TableExportSmoke
                 return DocumentStateSmoke.Run(owner, assembly, appPath, folder, windowSessionCase);
             if (windowSessionCase.StartsWith("--verify-file-insertion-", StringComparison.Ordinal))
                 return DocumentStateSmoke.Run(owner, assembly, appPath, folder, windowSessionCase);
-            if (windowSessionCase == "--verify-page-reorder-failure")
+            if (windowSessionCase is "--verify-page-reorder-failure" or "--verify-page-transform-form-failure")
                 return DocumentStateSmoke.Run(owner, assembly, appPath, folder, windowSessionCase);
             if (windowSessionCase is "--verify-page-delete-failure" or "--verify-page-transform-failure" or "--verify-page-transform-cancel" or "--verify-page-transform-save-control" or "--verify-page-transform-success" or "--verify-range-extract-pending" or "--verify-page-straighten-failure")
                 return DocumentStateSmoke.Run(owner, assembly, appPath, folder, windowSessionCase);

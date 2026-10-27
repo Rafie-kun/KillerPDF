@@ -33,6 +33,8 @@ internal static class DocumentStateSmoke
                 ? PageDeletionSmoke.Fixture() : TableExportSmoke.Fixture();
         if (scenario is "--verify-page-transform-failure" or "--verify-page-transform-cancel" or "--verify-page-transform-save-control")
             original = TableExportSmoke.Fixture(malformedDate: true);
+        if (scenario == "--verify-page-transform-form-failure")
+            original = FormFieldEditingSmoke.Fixture("ORIGINAL", malformedDate: true);
         if (scenario.StartsWith("--verify-page-straighten-", StringComparison.Ordinal))
             original = TiltedScanFixture(healthy: scenario == "--verify-page-straighten-success");
         File.WriteAllBytes(source, original);
@@ -96,6 +98,8 @@ internal static class DocumentStateSmoke
                 VerifyPageEditFailure(owner, source, original, editor, folder, reorder: true);
             else if (scenario == "--verify-page-transform-failure")
                 VerifyTransformFailure(owner, source, original, editor);
+            else if (scenario == "--verify-page-transform-form-failure")
+                VerifyTransformFailure(owner, source, original, editor, forms: true);
             else if (scenario is "--verify-file-insertion-failure" or "--verify-file-insertion-success")
                 VerifyFileInsertion(owner, source, original, editor, folder, success: scenario == "--verify-file-insertion-success");
             else if (scenario == "--verify-page-straighten-failure")
@@ -917,7 +921,7 @@ internal static class DocumentStateSmoke
         Console.WriteLine("CONTROL native file insertion preserved source ownership and strict Save/Undo/Redo annotation content.");
     }
 
-    private static void VerifyTransformFailure(Window owner, string source, byte[] original, TextBox editor, bool cancel = false, bool saveOnly = false, bool success = false, bool straighten = false)
+    private static void VerifyTransformFailure(Window owner, string source, byte[] original, TextBox editor, bool cancel = false, bool saveOnly = false, bool success = false, bool straighten = false, bool forms = false)
     {
         Assembly engine = Assembly.Load("KillerPdf.Engine");
         object document = engine.GetType("KillerPdf.Engine.Documents.PdfDocument", true)!
@@ -929,6 +933,15 @@ internal static class DocumentStateSmoke
         if (refused == success) throw new InvalidOperationException("The synthetic Transform metadata control did not match its expected healthy or malformed state.");
         Stroke(0x0D, 0x11);
         Wait(() => !editor.IsVisible && Dirty(owner), "pending annotation before Transform failure");
+        if (forms)
+        {
+            VerifyFields("ORIGINAL");
+            TextBox field = Descendants<TextBox>(owner).Single(box => Equals(box.ToolTip, "existing.text"));
+            field.Focus(); field.SelectAll(); field.SelectedText = "CHANGED";
+            Pump();
+            if (!Dirty(owner) || field.Text != "CHANGED") throw new InvalidOperationException("The independent pending form edit was not established.");
+            Console.WriteLine("CONTROL independent pending form edit CHANGED and untouched sibling established before Transform.");
+        }
         var visible = Descendants<Border>(owner).Single(border => border.IsVisible
             && Descendants<TextBlock>(border).Any(text => text.Text == Marker) && border.Parent is Canvas);
         double left = Canvas.GetLeft(visible), top = Canvas.GetTop(visible);
@@ -982,7 +995,10 @@ internal static class DocumentStateSmoke
             || ((Button)owner.FindName("UndoBtn")).IsEnabled != undoEnabled
             || (!success && (!visible.IsVisible || Math.Abs(Canvas.GetLeft(visible) - left) > 0.01 || Math.Abs(Canvas.GetTop(visible) - top) > 0.01)))
             throw new InvalidOperationException("APP-004: late Transform failure changed pending geometry, dirty/history state or source bytes.");
+        if (forms && Descendants<TextBox>(owner).Single(box => Equals(box.ToolTip, "existing.text")).Text != "CHANGED")
+            throw new InvalidOperationException("APP-004: failed Transform discarded the live form value.");
         Save(owner);
+        if (forms) VerifyFields("CHANGED");
         if (ReadText(source).Contains(Marker, StringComparison.Ordinal) == success || ReadRotation(source) != 0
             || (success && ReadRasterImageCount(source) == 0))
             throw new InvalidOperationException(success ? "Successful Transform did not publish raster data without an editable text overlay."
@@ -990,10 +1006,12 @@ internal static class DocumentStateSmoke
                 : cancel ? "Transform Cancel control lost the pending annotation."
                 : "APP-004: late Transform failure lost the pending annotation on subsequent Save.");
         Click(owner, "UndoBtn"); Save(owner);
+        if (forms) VerifyFields("CHANGED");
         if (ReadText(source).Contains(Marker, StringComparison.Ordinal) != success)
             throw new InvalidOperationException(success ? "Transform Undo did not restore the original annotation."
                 : "Undo after failed Transform did not remove the original annotation.");
         Click(owner, "RedoBtn"); Save(owner);
+        if (forms) VerifyFields("CHANGED");
         if (ReadText(source).Contains(Marker, StringComparison.Ordinal) == success
             || (success && ReadRasterImageCount(source) == 0))
             throw new InvalidOperationException(success ? "Transform Redo did not restore raster data without editable text."
@@ -1002,6 +1020,21 @@ internal static class DocumentStateSmoke
             ? "CONTROL successful Transform published a raster page without an editable overlay; strict Save/Undo/Redo restored the expected image and text states."
             : "CONTROL " + (saveOnly ? "metadata Save without Transform" : cancel ? "Transform Cancel" : "late Transform metadata failure")
                 + " preserved pending annotation, source, rotation, dirty/history and strict Save/Undo/Redo content.");
+
+        void VerifyFields(string expected)
+        {
+            object saved = engine.GetType("KillerPdf.Engine.Documents.PdfDocument", true)!
+                .GetMethod("Open", [typeof(ReadOnlyMemory<byte>)])!.Invoke(null, [new ReadOnlyMemory<byte>(File.ReadAllBytes(source))])!;
+            object[] widgets = ((System.Collections.IEnumerable)engine.GetType("KillerPdf.Engine.Documents.PdfFormWidgetReader", true)!
+                .GetMethod("ReadPage")!.Invoke(null, [saved, 0])!).Cast<object>().ToArray();
+            string? Value(string name)
+            {
+                object widget = widgets.Single(item => Equals(item.GetType().GetProperty("FieldName")!.GetValue(item), name));
+                return widget.GetType().GetProperty("Value")!.GetValue(widget) as string;
+            }
+            if (widgets.Length != 2 || Value("existing.text") != expected || Value("untouched.sibling") != "PRESERVED SIBLING")
+                throw new InvalidOperationException("Failed Transform or annotation history replay changed independent form values.");
+        }
     }
 
     private static int ReadRasterImageCount(string source)
