@@ -335,6 +335,12 @@ namespace KillerPDF.Controls
         // it here. Moving them without that would throw XamlParseException at startup.
         internal void PageJumpBoxKeyDownExt(object sender, KeyEventArgs e) => PageJumpBox_KeyDown(sender, e);
         internal void PageJumpBoxGotFocusExt(object sender, RoutedEventArgs e) => PageJumpBox_GotFocus(sender, e);
+        internal void FocusReadingSurfaceExt()
+        {
+            if (IsKeyboardFocusWithin) return;
+            if (PagePreviewPanel.IsVisible) PagePreviewPanel.Focus();
+            else Focus();
+        }
         internal void PageListSelectionChangedExt(object sender, SelectionChangedEventArgs e)
             => PageList_SelectionChanged(sender, e);
         internal void ShortcutHelpClickExt(object sender, RoutedEventArgs e) => ShortcutHelp_Click(sender, e);

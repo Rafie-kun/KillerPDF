@@ -80,8 +80,8 @@ namespace KillerPDF
 
             // PreviewMouseDown, not MouseDown: the page overlays and annotation tools handle the
             // bubbling event and would swallow it.
-            Viewer.PreviewMouseDown  += (_, _) => FocusPane(Viewer);
-            ViewerB.PreviewMouseDown += (_, _) => FocusPane(ViewerB);
+            Viewer.PreviewMouseDown  += (_, _) => FocusPaneFromPointer(Viewer);
+            ViewerB.PreviewMouseDown += (_, _) => FocusPaneFromPointer(ViewerB);
 
             Viewer.AddHandler(Keyboard.GotKeyboardFocusEvent,
                 new KeyboardFocusChangedEventHandler((_, _) => FocusPane(Viewer)), handledEventsToo: true);
@@ -92,8 +92,8 @@ namespace KillerPDF
             // FOCUSED pane, so wheeling over a pane you had not clicked was zooming and scrolling
             // the other one - which reads as "zooming pane B zoomed pane A". Preview, so focus has
             // moved before the pane's own wheel handler runs.
-            Viewer.PreviewMouseWheel  += (_, _) => FocusPane(Viewer);
-            ViewerB.PreviewMouseWheel += (_, _) => FocusPane(ViewerB);
+            Viewer.PreviewMouseWheel  += (_, _) => FocusPaneFromPointer(Viewer);
+            ViewerB.PreviewMouseWheel += (_, _) => FocusPaneFromPointer(ViewerB);
 
             // Re-lay the columns whenever the host resizes, so the window's own edge takes width
             // out of pane B first. Without this A, being the fixed column, would simply keep its
@@ -514,6 +514,14 @@ namespace KillerPDF
             ApplyFocusHalo();
             SyncSplitRailButton();
             SetStatus(Loc("Str_St_SplitOff"));
+        }
+
+        private void FocusPaneFromPointer(PdfViewer pane)
+        {
+            FocusPane(pane);
+            // Modal dialogs restore keyboard focus. Keep that restoration in the pane the
+            // pointer selected, while leaving an editor already focused inside it alone.
+            pane.FocusReadingSurfaceExt();
         }
 
         /// <summary>Point the window's chrome at a pane and move the halo. Cheap and idempotent, so

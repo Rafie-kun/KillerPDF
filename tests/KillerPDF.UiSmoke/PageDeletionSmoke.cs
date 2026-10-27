@@ -6,6 +6,7 @@ using System.Security.Principal;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -41,6 +42,10 @@ internal static class PageDeletionSmoke
 
     private static int RunCore(Window owner, string folder, string scenario)
     {
+        string[] options = scenario.Split(':');
+        scenario = options[0];
+        string mode = options.Length > 1 ? options[1] : "ViewSingleRadio";
+        bool secondPane = options.Length > 2 && options[2] == "pane-b";
         (int[] Removed, int Active, int Target, int SurvivingOriginal, string Labels) expected = scenario switch
         {
             "first" => ([0], 0, 0, 1, "PAGE_2|PAGE_3|PAGE_4|PAGE_5"),
@@ -61,18 +66,36 @@ internal static class PageDeletionSmoke
         string source = Path.Combine(folder, "delete-last-page.pdf");
         byte[] bytes = Fixture();
         File.WriteAllBytes(source, bytes);
+        string otherSource = Path.Combine(folder, "untouched-pane-a.pdf");
+        Rect work = SystemParameters.WorkArea;
+        owner.Left = work.Left + 8; owner.Top = work.Top + 8;
+        owner.Width = Math.Min(950, work.Width - 16); owner.Height = Math.Min(700, work.Height - 16);
+        owner.Opacity = 1; owner.Activate();
+        var pane = (FrameworkElement)owner.FindName("Viewer");
+        var paneA = pane;
+        using var focusTrace = options.Length > 1 ? new FocusTrace(owner) : null;
+        if (secondPane)
+        {
+            File.WriteAllBytes(otherSource, bytes);
+            owner.GetType().GetMethod("OpenFromExternal", BindingFlags.Public | BindingFlags.Instance)!.Invoke(owner, [otherSource]);
+            Wait(() => PageNavigationModesSmoke.ColorPresent(paneA, 255, 0, 0), "untouched pane A source");
+            ShortcutHintsSmoke.Key(owner, 0x79);
+            pane = (FrameworkElement)owner.FindName("ViewerB");
+            Wait(() => pane.IsVisible && pane.ActualWidth > 100, "deletion pane B");
+            ShortcutHintsSmoke.ClickAt(owner, PageNavigationFocusProbe.NeutralPaneFocusPoint(owner, pane), expectedPane: pane);
+        }
         string switchedSource = Path.Combine(folder, "range-switched-source.pdf");
         byte[] switchedBytes = TableExportSmoke.Fixture();
         if (scenario == "range-switch") File.WriteAllBytes(switchedSource, switchedBytes);
         if (Read(source) != (5, "PAGE_1|PAGE_2|PAGE_3|PAGE_4|PAGE_5")) throw new InvalidOperationException("Public five-page fixture control failed.");
         owner.GetType().GetMethod("OpenFromExternal", BindingFlags.Public | BindingFlags.Instance)!.Invoke(owner, [source]);
-        owner.Left = 32; owner.Top = 32; owner.Width = 950; owner.Height = 700; owner.Opacity = 1; owner.Activate();
         var pages = (ListBox)owner.FindName("PageList");
         var jump = (TextBox)owner.FindName("PageJumpBox");
         Wait(() => owner.IsActive && pages.Items.Count == 5, "five-page sidebar");
         ((RadioButton)owner.FindName("ViewSingleRadio")).IsChecked = true;
         bool PageColor(byte red, byte green, byte blue)
         {
+            if (options.Length > 1) return PageNavigationModesSmoke.ColorPresent(pane, red, green, blue);
             ScrollViewer? viewport = Descendants<ScrollViewer>(owner).SingleOrDefault(view => view.Name == "PagePreviewPanel" && view.IsVisible);
             if (viewport is null) return false;
             foreach (Image image in Descendants<Image>(viewport).Where(image => image.IsVisible))
@@ -88,6 +111,11 @@ internal static class PageDeletionSmoke
         }
         Wait(() => pages.SelectedIndex == 0 && PageColor(255, 0, 0), "first-page rendered presence control");
         if (PageColor(255, 0, 255)) throw new InvalidOperationException("Page-color absence control confused the first and final page.");
+        ((RadioButton)owner.FindName(mode)).IsChecked = true;
+        long modeStart = Environment.TickCount64;
+        Wait(() => ((RadioButton)owner.FindName(mode)).IsChecked == true
+            && Descendants<ScrollViewer>(pane).Any(view => view.Name == "PagePreviewPanel" && view.IsVisible && view.Opacity > .99)
+            && Environment.TickCount64 - modeStart >= 200, "requested deletion view mode settled");
         pages.SelectedIndex = expected.Active;
         Wait(() => pages.SelectedIndex == expected.Active && jump.Text == (expected.Active + 1).ToString(CultureInfo.InvariantCulture)
             && PageColor(colors[expected.Active].R, colors[expected.Active].G, colors[expected.Active].B), "displayed target page");
@@ -96,7 +124,7 @@ internal static class PageDeletionSmoke
             && jump.Text == (expected.Active + 1).ToString(CultureInfo.InvariantCulture)
             && PageColor(colors[expected.Active].R, colors[expected.Active].G, colors[expected.Active].B)
             && ((Button)owner.FindName("DeletePagesBtn")).IsEnabled, "rendered target, exact selected set and Delete availability");
-        Console.WriteLine($"CONTROL case={scenario}, active={expected.Active}, selected={string.Join(',', expected.Removed)}; initial rendered color controls passed.");
+        Console.WriteLine($"CONTROL case={scenario}, mode={mode}, pane={pane.Name}, active={expected.Active}, selected={string.Join(',', expected.Removed)}; initial rendered color controls passed.");
         int confirmations = 0;
         int rangePrompts = 0;
         bool typedRange = scenario is "typed-range" or "extract-range" || scenario.StartsWith("range-", StringComparison.Ordinal);
@@ -187,6 +215,7 @@ internal static class PageDeletionSmoke
         timer.Start();
         try { Click(owner, scenario == "extract-range" ? "ExtractPagesBtn" : "DeletePagesBtn"); }
         finally { timer.Stop(); RestoreAccess(); }
+        Console.WriteLine($"CONTROL page action returned: ranges={rangePrompts}, confirmations={confirmations}, errors={failures}, file={((TextBlock)owner.FindName("FileNameLabel")).Text}, count={pages.Items.Count}, selected={pages.SelectedIndex}, counter={jump.Text}, dirty={Dirty(owner)}.");
         if (typedRange && rangePrompts != 1)
             throw new InvalidOperationException("USER-004: " + (scenario == "extract-range" ? "Extract" : "Delete") + " did not offer a typed page range before confirmation.");
         if (scenario == "range-switch")
@@ -247,7 +276,21 @@ internal static class PageDeletionSmoke
             finally { timer.Stop(); }
         }
         int remaining = expected.Labels.Split('|').Length;
-        Wait(() => pages.Items.Count == remaining && pages.SelectedIndex >= 0, "completed page deletion");
+        try { Wait(() => pages.Items.Count == remaining && pages.SelectedIndex >= 0, "completed page deletion"); }
+        catch
+        {
+            Console.WriteLine($"CONTROL incomplete deletion: file={((TextBlock)owner.FindName("FileNameLabel")).Text}, count={pages.Items.Count}, selected={pages.SelectedIndex}, counter={jump.Text}, dirty={Dirty(owner)}, expectedCount={remaining}, sourceUnchanged={File.ReadAllBytes(source).AsSpan().SequenceEqual(bytes)}.");
+            try
+            {
+                owner.UpdateLayout();
+                var bitmap = new RenderTargetBitmap((int)Math.Ceiling(owner.ActualWidth), (int)Math.Ceiling(owner.ActualHeight), 96, 96, PixelFormats.Pbgra32);
+                bitmap.Render(owner);
+                var encoder = new PngBitmapEncoder(); encoder.Frames.Add(BitmapFrame.Create(bitmap));
+                using var output = File.Create(Path.Combine(folder, "delete-incomplete.png")); encoder.Save(output);
+            }
+            catch (Exception evidenceError) { Console.Error.WriteLine("Deletion evidence capture also failed: " + evidenceError); }
+            throw;
+        }
         Console.WriteLine($"CONTROL deletion: confirmations={confirmations}, selectedIndex={pages.SelectedIndex}, pageCounter={jump.Text}, remaining={pages.Items.Count}.");
         if (confirmations != 1) throw new InvalidOperationException("Expected one real Delete confirmation.");
         if (!File.ReadAllBytes(source).AsSpan().SequenceEqual(bytes)) throw new InvalidOperationException("Delete changed the source before Save.");
@@ -279,10 +322,52 @@ internal static class PageDeletionSmoke
         Wait(() => pages.Items.Count == remaining, "Delete Redo page set");
         Save(owner);
         if (Read(source) != (remaining, expected.Labels)) throw new InvalidOperationException("Delete Redo did not restore the surviving page set.");
+        if (options.Length > 1 && ((RadioButton)owner.FindName(mode)).IsChecked != true)
+            throw new InvalidOperationException("Delete or history replay changed the requested view mode.");
+        if (secondPane)
+        {
+            ShortcutHintsSmoke.ClickAt(owner, PageNavigationFocusProbe.NeutralPaneFocusPoint(owner, paneA), expectedPane: paneA);
+            Wait(() => pages.Items.Count == 5 && jump.Text == "1" && !Dirty(owner)
+                && PageNavigationModesSmoke.ColorPresent(paneA, 255, 0, 0), "pane A unchanged after pane B Delete and history replay");
+            if (!File.ReadAllBytes(otherSource).AsSpan().SequenceEqual(bytes)
+                || ((Button)owner.FindName("UndoBtn")).IsEnabled)
+                throw new InvalidOperationException("Pane B deletion changed pane A source or history.");
+            ShortcutHintsSmoke.ClickAt(owner, PageNavigationFocusProbe.NeutralPaneFocusPoint(owner, pane), expectedPane: pane);
+            Wait(() => pages.Items.Count == remaining && !Dirty(owner)
+                && ((RadioButton)owner.FindName(mode)).IsChecked == true, "pane B saved state restored after focus switch");
+            Console.WriteLine("CONTROL pane B Delete, Save, Undo and Redo preserved independent pane A source, visible page, clean state and history.");
+        }
         string result = "PASS verify-delete-nearest: " + scenario + " retains the nearest survivor; strict Save, Undo and Redo preserve every expected page label.";
         File.WriteAllText(Path.Combine(folder, "result.txt"), result);
         Console.WriteLine(result);
         return 0;
+    }
+
+    private sealed class FocusTrace : IDisposable
+    {
+        private readonly Window _owner;
+        private readonly KeyboardFocusChangedEventHandler _handler;
+        internal FocusTrace(Window owner)
+        {
+            _owner = owner;
+            _handler = (_, args) =>
+            {
+                string Describe(IInputElement? value)
+                {
+                    var path = new List<string>();
+                    for (DependencyObject? node = value as DependencyObject; node is not null; node = node is Visual
+                        ? VisualTreeHelper.GetParent(node) : LogicalTreeHelper.GetParent(node))
+                    {
+                        if (node is FrameworkElement { Name.Length: > 0 } element) path.Add(element.GetType().Name + ":" + element.Name);
+                        if (ReferenceEquals(node, owner)) break;
+                    }
+                    return string.Join('>', path);
+                }
+                Console.WriteLine($"CONTROL deletion keyboard focus: old={Describe(args.OldFocus)}, new={Describe(args.NewFocus)}, file={((TextBlock)owner.FindName("FileNameLabel")).Text}.");
+            };
+            owner.AddHandler(Keyboard.GotKeyboardFocusEvent, _handler, handledEventsToo: true);
+        }
+        public void Dispose() => _owner.RemoveHandler(Keyboard.GotKeyboardFocusEvent, _handler);
     }
 
     internal static (int Count, string Labels) Read(string path)
