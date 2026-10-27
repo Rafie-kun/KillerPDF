@@ -23,7 +23,7 @@
     <SolidColorBrush x:Key="PrimaryHoverBrush"   Color="#e0d49a" po:Freeze="True"/>
     <SolidColorBrush x:Key="PrimaryPressedBrush" Color="#e0d49a" po:Freeze="True"/>
     <SolidColorBrush x:Key="OnPrimaryBrush"  Color="#002e1c" po:Freeze="True"/>
-    <SolidColorBrush x:Key="OutlineBtnBrush" Color="#3fbf6f" po:Freeze="True"/>
+    <SolidColorBrush x:Key="OutlineBtnBrush" Color="#e0d49a" po:Freeze="True"/>
     <SolidColorBrush x:Key="HeaderLineBrush" Color="#3fbf6f" po:Freeze="True"/>
     <SolidColorBrush x:Key="SelectionAccent" Color="#138a42" po:Freeze="True"/>
     <SolidColorBrush x:Key="AccentLogo"     Color="#e0d49a" po:Freeze="True"/>
@@ -33,10 +33,11 @@
     <SolidColorBrush x:Key="DropBorder"     Color="#07371f" po:Freeze="True"/>
     <SolidColorBrush x:Key="PaneBorderBrush" Color="#0d3f29" po:Freeze="True"/>
     <SolidColorBrush x:Key="AppBorderBrush"  Color="#0f4a30" po:Freeze="True"/>
-    <SolidColorBrush x:Key="RowSelectedBrush"    Color="#44ffffff" po:Freeze="True"/>
+    <LinearGradientBrush x:Key="RowSelectedBrush" StartPoint="0,0" EndPoint="0,1" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"><GradientStop Color="#FFE0D49A" Offset="0"/><GradientStop Color="#FFBCB281" Offset="1"/></LinearGradientBrush>
     <SolidColorBrush x:Key="OutlinePressedBrush" Color="#44ffffff" po:Freeze="True"/>
-    <LinearGradientBrush x:Key="SelectionBg" po:Freeze="True" StartPoint="0,0" EndPoint="0,1"><GradientStop Color="#57FFFFFF" Offset="0"/><GradientStop Color="#30FFFFFF" Offset="1"/></LinearGradientBrush>
-    <SolidColorBrush x:Key="SelectionFg" Color="#ffffff" po:Freeze="True"/>
+    <LinearGradientBrush x:Key="SelectionBg" po:Freeze="True" StartPoint="0,0" EndPoint="0,1"><GradientStop Color="#FFE0D49A" Offset="0"/><GradientStop Color="#FFBCB281" Offset="1"/></LinearGradientBrush>
+    <SolidColorBrush x:Key="SelectionFg" Color="#002e1c" po:Freeze="True"/>
+    <SolidColorBrush x:Key="GridSelectedTextBrush" Color="#002e1c" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" />
     <!-- Open settings row uses the translucent-white SelectionBg (matches selected page/tool). -->
     <SolidColorBrush x:Key="SettingsOpenRowBg" Color="#44ffffff" po:Freeze="True"/>
     <SolidColorBrush x:Key="TextBrush"      Color="#fffde8" po:Freeze="True"/>

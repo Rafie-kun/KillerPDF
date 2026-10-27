@@ -33,10 +33,11 @@
     <SolidColorBrush x:Key="DropBorder"     Color="#39191c" po:Freeze="True"/>
     <SolidColorBrush x:Key="PaneBorderBrush" Color="#542929" po:Freeze="True"/>
     <SolidColorBrush x:Key="AppBorderBrush"  Color="#401d1d" po:Freeze="True"/>
-    <SolidColorBrush x:Key="RowSelectedBrush"    Color="#44f8c99e" po:Freeze="True"/>
+    <LinearGradientBrush x:Key="RowSelectedBrush" StartPoint="0,0" EndPoint="0,1" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"><GradientStop Color="#FFF8C99E" Offset="0"/><GradientStop Color="#FFD0A884" Offset="1"/></LinearGradientBrush>
     <SolidColorBrush x:Key="OutlinePressedBrush" Color="#44ffffff" po:Freeze="True"/>
-    <LinearGradientBrush x:Key="SelectionBg" po:Freeze="True" StartPoint="0,0" EndPoint="0,1"><GradientStop Color="#60F8C99E" Offset="0"/><GradientStop Color="#30F8C99E" Offset="1"/></LinearGradientBrush>
-    <SolidColorBrush x:Key="SelectionFg" Color="#ffffff" po:Freeze="True"/>
+    <LinearGradientBrush x:Key="SelectionBg" po:Freeze="True" StartPoint="0,0" EndPoint="0,1"><GradientStop Color="#FFF8C99E" Offset="0"/><GradientStop Color="#FFD0A884" Offset="1"/></LinearGradientBrush>
+    <SolidColorBrush x:Key="SelectionFg" Color="#2c1012" po:Freeze="True"/>
+    <SolidColorBrush x:Key="GridSelectedTextBrush" Color="#2c1012" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" />
     <!-- Open settings row uses the translucent-white SelectionBg (matches selected page/tool). -->
     <SolidColorBrush x:Key="SettingsOpenRowBg" Color="#44f8c99e" po:Freeze="True"/>
     <SolidColorBrush x:Key="TextBrush"      Color="#fffde8" po:Freeze="True"/>
