@@ -425,6 +425,8 @@ public sealed class PdfDuplicatePageOwnershipTests
     [InlineData("tag-independent-cycle")]
     [InlineData("tag-independent-foreign-object")]
     [InlineData("tag-relationships-invalid")]
+    [InlineData("tag-form-key-collision")]
+    [InlineData("tag-form-foreign-stream")]
     [InlineData("radio-direct-kid")]
     public void AmbiguousOrExcessiveRecoveryLeavesTheOriginalObjectModelIntact(string damage)
     {
@@ -441,6 +443,59 @@ public sealed class PdfDuplicatePageOwnershipTests
             Assert.Equal("shared", String(widget[N("T")]));
             Assert.Equal("Widget", Assert.IsType<PdfName>(widget[N("Subtype")]).ValueAsLatin1());
         }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void RecoveryKeepsTaggedFormStreamsOwnedByTheirPageOccurrences(bool nested)
+    {
+        string fixture = nested ? "tag-form-nested" : "tag-form-stream";
+        PdfDocument healthy = PdfDocument.Open(Fixture(tagged: true, damage: fixture, repeated: false));
+        byte[] expected = new PdfPageRenderer(healthy).Render(0, new PdfRenderOptions(100, 100)).Pixels.ToArray();
+        Assert.Equal(new byte[] { 255, 0, 0, 255 }, expected.AsSpan((30 * 100 + 65) * 4, 4).ToArray());
+        PdfDocument saved = PdfDocument.Open(PdfDocumentWriter.Write(PdfDocument.OpenWithCompatibilityRecovery(
+            Fixture(tagged: true, damage: fixture))));
+        PdfPageTree tree = PdfPageTree.Read(saved);
+        Assert.Equal(2, tree.Pages.Count);
+        PdfDictionary structure = Dictionary(saved, tree.Catalog[N("StructTreeRoot")]);
+        var parents = PdfNumberTree.Read(saved, structure[N("ParentTree")]).ToDictionary(entry => entry.Key, entry => entry.Value);
+        var streams = new HashSet<int>();
+        var keys = new HashSet<long>();
+        for (int index = 0; index < 2; index++)
+        {
+            PdfPageTreeEntry page = tree.Pages[index];
+            PdfObject streamValue = Dictionary(saved, Dictionary(saved, page.Dictionary[N("Resources")])[N("XObject")])[N("Fm")];
+            if (nested)
+            {
+                PdfStream outer = Assert.IsType<PdfStream>(saved.Resolve(Assert.IsType<PdfIndirectReference>(streamValue)));
+                PdfDictionary innerResources = Dictionary(saved, Dictionary(saved, outer.Dictionary[N("Resources")])[N("XObject")]);
+                streamValue = innerResources[N("Inner")];
+                Assert.Equal(ObjectNumber(streamValue), ObjectNumber(innerResources[N("Alias")]));
+            }
+            Assert.True(streams.Add(ObjectNumber(streamValue)));
+            PdfStream stream = Assert.IsType<PdfStream>(saved.Resolve(Assert.IsType<PdfIndirectReference>(streamValue)));
+            PdfObject layer = Assert.Single(Assert.IsType<PdfArray>(Dictionary(saved, tree.Catalog[N("OCProperties")])[N("OCGs")]));
+            Assert.Equal(ObjectNumber(layer), ObjectNumber(stream.Dictionary[N("OC")]));
+            long key = Assert.IsType<PdfInteger>(stream.Dictionary[N("StructParents")]).Value;
+            Assert.True(keys.Add(key));
+            PdfObject tag = Assert.Single(Assert.IsType<PdfArray>(parents[key]));
+            PdfDictionary mcr = Dictionary(saved, Dictionary(saved, tag)[N("K")]);
+            Assert.Equal(ObjectNumber(streamValue), ObjectNumber(mcr[N("Stm")]));
+            Assert.Equal(page.Reference.ObjectNumber, ObjectNumber(mcr[N("Pg")]));
+            Assert.Equal(0, Assert.IsType<PdfInteger>(mcr[N("MCID")]).Value);
+            Assert.Equal("/P << /MCID 0 >> BDC 0 0 1 rg 60 60 20 20 re f EMC", Encoding.ASCII.GetString(stream.EncodedData.Span));
+            Assert.Equal(expected, new PdfPageRenderer(saved).Render(index, new PdfRenderOptions(100, 100)).Pixels.ToArray());
+            Assert.Equal("Ada", Assert.Single(PdfFormWidgetReader.ReadPage(saved, index)).Value);
+        }
+        int layerNumber = Assert.Single(PdfOptionalContentReader.Read(saved).Groups).ObjectNumber;
+        PdfDocument hidden = PdfDocument.Open(PdfOptionalContentEditor.SetInitialVisibility(saved, layerNumber, false));
+        for (int index = 0; index < 2; index++)
+        {
+            byte[] pixels = new PdfPageRenderer(hidden).Render(index, new PdfRenderOptions(100, 100)).Pixels.ToArray();
+            Assert.Equal(new byte[] { 255, 255, 255, 255 }, pixels.AsSpan((30 * 100 + 65) * 4, 4).ToArray());
+        }
+        Assert.Empty(saved.RecoveryDiagnostics);
     }
 
     private static PdfDictionary Annotation(PdfDocument document, int page, int index) =>
@@ -460,6 +515,7 @@ public sealed class PdfDuplicatePageOwnershipTests
     private static byte[] Fixture(bool tagged = false, string? damage = null, bool repeated = true, string? reservedTagId = null)
     {
         string content = tagged ? "/P << /MCID 0 >> BDC 1 0 0 rg 5 5 25 30 re f EMC" : "1 0 0 rg 5 5 25 30 re f";
+        if (damage?.StartsWith("tag-form-", StringComparison.Ordinal) == true) content += " /Fm Do";
         string[] objects =
         [
             "<< /Type /Catalog /Pages 2 0 R /Names << /Dests << /Names [(first) [3 0 R /Fit]] >> >> >>",
@@ -549,6 +605,30 @@ public sealed class PdfDuplicatePageOwnershipTests
             objects[15] = objects[15][..^2] + " /Ref [14 0 R] >>";
             if (damage == "tag-relationships-invalid")
                 objects[13] = "<< /Type /StructElem /S /P /P 13 0 R /Pg 3 0 R /K 0 /Ref [5 0 R] >>";
+        }
+        if (damage?.StartsWith("tag-form-", StringComparison.Ordinal) == true)
+        {
+            const string form = "/P << /MCID 0 >> BDC 0 0 1 rg 60 60 20 20 re f EMC";
+            objects[2] = objects[2][..^2] + " /Resources << /XObject << /Fm 20 0 R >> >> >>";
+            objects[12] = "<< /Type /StructElem /S /Document /P 12 0 R /K [14 0 R 15 0 R 16 0 R 21 0 R] >>";
+            objects[16] = "<< /Nums [0 [14 0 R] 1 16 0 R 2 15 0 R 3 [21 0 R]] >>";
+            objects = [.. objects,
+                $"<< /Type /XObject /Subtype /Form /BBox [0 0 100 100] /Resources << >> /StructParents 3 /Length {form.Length} >>\nstream\n{form}\nendstream",
+                "<< /Type /StructElem /S /Figure /P 13 0 R /Pg 3 0 R /K << /Type /MCR /Pg 3 0 R /Stm 20 0 R /MCID 0 >> >>"];
+            if (damage == "tag-form-nested")
+            {
+                const string outer = "/Inner Do";
+                objects[2] = "<< /Type /Page /Parent 10 0 R /Contents 4 0 R /StructParents 0 /Annots [5 0 R 6 0 R 7 0 R 8 0 R 9 0 R 11 0 R] /Resources << /XObject << /Fm 22 0 R >> >> >>";
+                objects = [.. objects, $"<< /Type /XObject /Subtype /Form /BBox [0 0 100 100] /Resources << /XObject << /Inner 20 0 R /Alias 20 0 R >> >> /Length {outer.Length} >>\nstream\n{outer}\nendstream"];
+            }
+            if (damage == "tag-form-key-collision")
+                objects[19] = $"<< /Type /XObject /Subtype /Form /BBox [0 0 100 100] /Resources << >> /StructParents 0 /Length {form.Length} >>\nstream\n{form}\nendstream";
+            if (damage == "tag-form-foreign-stream")
+                objects[20] = "<< /Type /StructElem /S /Figure /P 13 0 R /Pg 3 0 R /K << /Type /MCR /Pg 3 0 R /Stm 19 0 R /MCID 0 >> >>";
+            int layer = objects.Length + 1;
+            objects[0] = objects[0][..^2] + $" /OCProperties << /OCGs [{layer} 0 R] /D << /BaseState /ON /Order [{layer} 0 R] >> >> >>";
+            objects[19] = objects[19].Replace("/Subtype /Form", $"/Subtype /Form /OC {layer} 0 R", StringComparison.Ordinal);
+            objects = [.. objects, "<< /Type /OCG /Name (Tagged graphic) >>"];
         }
         if (damage is "collision-utf16" or "collision-latin")
         {

@@ -10,6 +10,7 @@ internal sealed class PdfRecoveredOwnershipValidator(PdfDocument document)
     private readonly Dictionary<(int Page, long Mcid), PdfIndirectReference> _content = [];
     private readonly Dictionary<int, PdfIndirectReference> _objects = [];
     private readonly Dictionary<int, PdfIndirectReference> _structure = [];
+    private readonly Dictionary<int, (PdfIndirectReference Reference, PdfIndirectReference Page, PdfDictionary Dictionary)> _streams = [];
     private int _edges;
 
     internal void Validate()
@@ -19,6 +20,8 @@ internal sealed class PdfRecoveredOwnershipValidator(PdfDocument document)
         var widgets = new HashSet<int>();
         foreach (PdfPageTreeEntry page in tree.Pages)
         {
+            if (Get(page.Dictionary, "Resources") is PdfObject resources)
+                CollectTaggedStreams(resources, page.Reference, new HashSet<int>(), 0);
             if (Get(page.Dictionary, "Annots") is not PdfObject value) continue;
             foreach (PdfObject item in Array(value))
             {
@@ -43,7 +46,7 @@ internal sealed class PdfRecoveredOwnershipValidator(PdfDocument document)
         if (Get(tree.Catalog, "StructTreeRoot") is not PdfObject structureValue)
         {
             if (tree.Pages.Any(page => Get(page.Dictionary, "StructParents") is not null)
-                || _annotations.Values.Any(owner => Get(owner.Dictionary, "StructParent") is not null))
+                || _annotations.Values.Any(owner => Get(owner.Dictionary, "StructParent") is not null) || _streams.Count > 0)
                 throw Refuse("Recovered tagged owners have no structure tree.");
             return;
         }
@@ -68,7 +71,9 @@ internal sealed class PdfRecoveredOwnershipValidator(PdfDocument document)
         var keys = new HashSet<long>();
         var checkedContent = new HashSet<(int Page, long Mcid)>();
         var checkedObjects = new HashSet<int>();
-        foreach (PdfPageTreeEntry page in tree.Pages)
+        var contentOwners = tree.Pages.Select(page => (page.Reference, page.Dictionary))
+            .Concat(_streams.Values.Select(stream => (stream.Reference, stream.Dictionary)));
+        foreach (var page in contentOwners)
         {
             if (Get(page.Dictionary, "StructParents") is not PdfObject keyValue) continue;
             long key = Integer(keyValue);
@@ -188,13 +193,23 @@ internal sealed class PdfRecoveredOwnershipValidator(PdfDocument document)
             if (Get(node, "K") is PdfObject kids) Visit(kids, reference, page, reference, depth + 1);
             return;
         }
-        if (Get(node, "Stm") is not null) throw Refuse("Recovered structure references separately owned stream content.");
         if (IsName(Get(node, "Type"), "MCR"))
         {
             if (Get(node, "MCID") is not PdfObject id) throw Refuse("A recovered marked-content reference has no identifier.");
-            AddContent(Integer(id), page, element);
+            PdfIndirectReference? contentOwner = page;
+            if (Get(node, "Stm") is PdfObject streamValue)
+            {
+                PdfIndirectReference streamReference = Reference(streamValue);
+                if (page is null || Get(node, "StmOwn") is not null
+                    || !_streams.TryGetValue(streamReference.ObjectNumber, out var stream)
+                    || !Same(streamReference, stream.Reference) || !Same(page, stream.Page))
+                    throw Refuse("Recovered marked content references a stream outside its page resources.");
+                contentOwner = streamReference;
+            }
+            AddContent(Integer(id), contentOwner, element);
             return;
         }
+        if (Get(node, "Stm") is not null) throw Refuse("Recovered structure has an unsupported stream reference.");
         if (IsName(Get(node, "Type"), "OBJR"))
         {
             if (Get(node, "Obj") is not PdfObject objectValue || page is null || element is null)
@@ -206,6 +221,29 @@ internal sealed class PdfRecoveredOwnershipValidator(PdfDocument document)
             return;
         }
         throw Refuse("Recovered structure has an unidentified ownership child.");
+    }
+
+    private void CollectTaggedStreams(PdfObject value, PdfIndirectReference page, HashSet<int> seen, int depth)
+    {
+        Bound(depth);
+        PdfIndirectReference? reference = value is PdfIndirectReference ? Reference(value) : null;
+        if (reference is not null && !seen.Add(reference.ObjectNumber)) return;
+        PdfObject resolved = Resolve(value);
+        PdfDictionary? dictionary = resolved switch { PdfDictionary item => item, PdfStream stream => stream.Dictionary, _ => null };
+        if (dictionary is not null)
+        {
+            if (Get(dictionary, "StructParents") is not null)
+            {
+                if (reference is null || resolved is not PdfStream || !IsName(Get(dictionary, "Subtype"), "Form"))
+                    throw Refuse("A recovered tagged resource has no supported stream identity.");
+                if (_streams.TryGetValue(reference.ObjectNumber, out var existing) && !Same(existing.Page, page))
+                    throw Refuse("A recovered tagged stream belongs to more than one page.");
+                _streams[reference.ObjectNumber] = (reference, page, dictionary);
+            }
+            foreach (var pair in dictionary) CollectTaggedStreams(pair.Value, page, seen, depth + 1);
+        }
+        else if (resolved is PdfArray array)
+            foreach (PdfObject child in array) CollectTaggedStreams(child, page, seen, depth + 1);
     }
 
     private void AddContent(long mcid, PdfIndirectReference? page, PdfIndirectReference? element)

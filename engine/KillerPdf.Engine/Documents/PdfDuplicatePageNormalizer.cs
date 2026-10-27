@@ -13,6 +13,7 @@ internal sealed class PdfDuplicatePageNormalizer(PdfDocument document)
     private readonly Dictionary<int, List<PdfIndirectReference>> _fieldWidgets = [];
     private readonly Dictionary<int, List<PdfIndirectReference>> _widgetCopies = [];
     private readonly Dictionary<int, int> _annotationOwners = [];
+    private readonly Dictionary<int, int> _streamOwners = [];
     private readonly HashSet<int> _mergedFields = [];
     private readonly HashSet<string> _names = new(StringComparer.Ordinal);
     private readonly HashSet<int> _visitedNodes = [];
@@ -31,6 +32,10 @@ internal sealed class PdfDuplicatePageNormalizer(PdfDocument document)
         internal int Index { get; } = index;
         internal Dictionary<int, PdfIndirectReference> Annotations { get; } = [];
         internal Dictionary<int, PdfIndirectReference> Tags { get; } = [];
+        internal Dictionary<int, PdfIndirectReference> Streams { get; } = [];
+        internal Dictionary<int, PdfIndirectReference> Resources { get; } = [];
+        internal Dictionary<int, HashSet<int>> ResourceParents { get; } = [];
+        internal HashSet<int> ResourceBranches { get; } = [];
         internal Dictionary<long, long> ParentKeys { get; } = [];
     }
 
@@ -41,10 +46,24 @@ internal sealed class PdfDuplicatePageNormalizer(PdfDocument document)
         if (!_groups.Values.Any(group => group.Count > 1)) return null;
         ValidateAnnotationOwners();
         foreach (Occurrence page in _pages)
+            CheckResourceOwnership(Get(page.Page, "Resources"), page, new HashSet<int>(), 0);
+        foreach (Occurrence page in _pages)
         {
             if (_groups[page.Source.ObjectNumber].Count > 1)
             {
-                CheckResourceOwnership(Get(page.Page, "Resources"), new HashSet<int>(), 0);
+                if (page.Index > 0 && page.Streams.Count > 0 && Get(page.Page, "Resources") is PdfObject resources)
+                {
+                    var pending = new Queue<int>(page.Streams.Keys);
+                    while (pending.TryDequeue(out int number))
+                    {
+                        Bound(0);
+                        if (!page.ResourceBranches.Add(number)) continue;
+                        if (page.ResourceParents.TryGetValue(number, out HashSet<int>? parents))
+                            foreach (int parent in parents) pending.Enqueue(parent);
+                    }
+                    page.Page = Set(page.Page, "Resources", CopyResources(resources, page, 0));
+                    foreach (int number in page.Streams.Keys.ToArray()) page.Streams[number] = page.Resources[number];
+                }
                 PrepareAnnotations(page);
             }
         }
@@ -364,6 +383,15 @@ internal sealed class PdfDuplicatePageNormalizer(PdfDocument document)
                 Put(annotation.Value, Set((PdfDictionary)_delta[annotation.Value.ObjectNumber],
                     "StructParent", new PdfInteger(page.ParentKeys[old])));
             }
+            foreach (var stream in page.Streams)
+            {
+                PdfStream original = (PdfStream)Resolve(Reference(stream.Key));
+                long old = Integer(original.Dictionary[Name("StructParents")]);
+                if (!page.ParentKeys.TryAdd(old, next++)) throw Refuse("Tagged owners share a parent-tree key.");
+                PdfStream copied = (PdfStream)_delta[stream.Value.ObjectNumber];
+                Put(stream.Value, PdfStream.FromOwnedData(Set(copied.Dictionary, "StructParents",
+                    new PdfInteger(page.ParentKeys[old])), copied.EncodedData));
+            }
         }
         if (Get(structure, "K") is PdfObject children)
             structure = Set(structure, "K", Expand(children, root, new HashSet<int>(), 0));
@@ -490,7 +518,13 @@ internal sealed class PdfDuplicatePageNormalizer(PdfDocument document)
                 }
             }
             if (Get(node, "Pg") is not null) result = Set(result, "Pg", page.Target);
-            if (Get(node, "Stm") is not null) throw Refuse("A duplicated structure branch owns a tagged content stream.");
+            if (Get(node, "Stm") is PdfObject streamValue)
+            {
+                if (streamValue is not PdfIndirectReference stream || Get(node, "StmOwn") is not null
+                    || !page.Streams.TryGetValue(FinalReference(stream).ObjectNumber, out PdfIndirectReference? mappedStream))
+                    throw Refuse("A structure stream reference leaves the supported page resource ownership set.");
+                result = Set(result, "Stm", mappedStream);
+            }
             if (Get(node, "Obj") is PdfIndirectReference obj)
             {
                 PdfIndirectReference original = FinalReference(obj);
@@ -525,21 +559,64 @@ internal sealed class PdfDuplicatePageNormalizer(PdfDocument document)
         throw Refuse("A parent-tree entry has no matching projected structure element.");
     }
 
-    private void CheckResourceOwnership(PdfObject? value, HashSet<int> seen, int depth)
+    private void CheckResourceOwnership(PdfObject? value, Occurrence page, HashSet<int> seen, int depth, int? parent = null)
     {
         if (value is null) return;
         Bound(depth);
-        if (value is PdfIndirectReference reference && !seen.Add(reference.ObjectNumber)) return;
+        PdfIndirectReference? reference = value is PdfIndirectReference indirect ? FinalReference(indirect) : null;
+        if (reference is not null)
+        {
+            if (parent is int owner)
+            {
+                if (!page.ResourceParents.TryGetValue(reference.ObjectNumber, out HashSet<int>? parents))
+                    page.ResourceParents.Add(reference.ObjectNumber, parents = []);
+                parents.Add(owner);
+            }
+            parent = reference.ObjectNumber;
+        }
+        if (reference is not null && !seen.Add(reference.ObjectNumber)) return;
         PdfObject resolved = Resolve(value);
         PdfDictionary? dictionary = resolved switch { PdfDictionary item => item, PdfStream stream => stream.Dictionary, _ => null };
         if (dictionary is not null)
         {
-            if (Get(dictionary, "StructParents") is not null || Get(dictionary, "StructParent") is not null)
+            if (Get(dictionary, "StructParent") is not null)
                 throw Refuse("Duplicated page resources contain separately owned tagged content.");
-            foreach (var pair in dictionary) CheckResourceOwnership(pair.Value, seen, depth + 1);
+            if (Get(dictionary, "StructParents") is PdfObject parentKey)
+            {
+                if (reference is null || resolved is not PdfStream || !IsName(Get(dictionary, "Subtype"), "Form"))
+                    throw Refuse("Tagged resource content has no supported stream identity.");
+                Integer(parentKey);
+                if (_streamOwners.TryGetValue(reference.ObjectNumber, out int owner) && owner != page.Source.ObjectNumber)
+                    throw Refuse("A tagged resource stream belongs to more than one original page.");
+                _streamOwners[reference.ObjectNumber] = page.Source.ObjectNumber;
+                page.Streams[reference.ObjectNumber] = reference;
+            }
+            foreach (var pair in dictionary) CheckResourceOwnership(pair.Value, page, seen, depth + 1, parent);
         }
         else if (resolved is PdfArray array)
-            foreach (PdfObject child in array) CheckResourceOwnership(child, seen, depth + 1);
+            foreach (PdfObject child in array) CheckResourceOwnership(child, page, seen, depth + 1, parent);
+    }
+
+    private PdfObject CopyResources(PdfObject value, Occurrence page, int depth)
+    {
+        Bound(depth);
+        if (value is PdfIndirectReference reference)
+        {
+            reference = FinalReference(reference);
+            if (!page.ResourceBranches.Contains(reference.ObjectNumber)) return reference;
+            if (page.Resources.TryGetValue(reference.ObjectNumber, out PdfIndirectReference? existing)) return existing;
+            PdfIndirectReference target = Reserve();
+            page.Resources.Add(reference.ObjectNumber, target);
+            Put(target, CopyResources(Resolve(reference), page, depth + 1));
+            return target;
+        }
+        if (value is PdfStream stream)
+            return PdfStream.FromOwnedData((PdfDictionary)CopyResources(stream.Dictionary, page, depth + 1), stream.EncodedData);
+        if (value is PdfDictionary dictionary)
+            return new PdfDictionary(dictionary.Select(pair => new KeyValuePair<PdfName, PdfObject>(
+                pair.Key, CopyResources(pair.Value, page, depth + 1))));
+        if (value is PdfArray array) return new PdfArray(array.Select(child => CopyResources(child, page, depth + 1)));
+        return value;
     }
 
     private PdfIndirectReference Reserve()
