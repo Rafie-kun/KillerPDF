@@ -256,41 +256,36 @@ namespace KillerPDF
         }
 
         private void MoveUp_Click(object sender, RoutedEventArgs e)
-        {
-            if (_doc is null || PageList.SelectedIndex <= 0) return;
-            if (!EnsureEditable(continueAfterUnlock: false)) return;
-            int idx = PageList.SelectedIndex;
-            IReadOnlyList<int> order = PdfEngineIntegration.PageOrderAfterMove(
-                _doc.PageCount, [idx], idx - 1);
-            ReloadWithRemappedAnnotations(
-                annotations => PageAnnotationInsertion.Reorder(annotations, order),
-                documentUndo => SaveTempAndReload(
-                    keepAnnotations: true,
-                    finalizeSavedFile: path => PdfEngineIntegration.MovePage(path, idx, idx - 1),
-                    remapRedactionMarks: true,
-                    remapRotations: rotations =>
-                        PdfEngineIntegration.RemapRotationsAfterPageMove(rotations, idx, idx - 1),
-                    documentUndo: documentUndo));
-            PageList.SelectedIndex = idx - 1;
-        }
+            => MoveSelectedPage(-1);
 
         private void MoveDown_Click(object sender, RoutedEventArgs e)
+            => MoveSelectedPage(1);
+
+        private void MoveSelectedPage(int delta)
         {
-            if (_doc is null || PageList.SelectedIndex < 0 || PageList.SelectedIndex >= _doc.PageCount - 1) return;
-            if (!EnsureEditable(continueAfterUnlock: false)) return;
+            if (_doc is null || PageList.SelectedIndex < 0) return;
             int idx = PageList.SelectedIndex;
-            IReadOnlyList<int> order = PdfEngineIntegration.PageOrderAfterMove(
-                _doc.PageCount, [idx], idx + 2);
-            ReloadWithRemappedAnnotations(
-                annotations => PageAnnotationInsertion.Reorder(annotations, order),
-                documentUndo => SaveTempAndReload(
+            int target = idx + delta;
+            if (target < 0 || target >= _doc.PageCount) return;
+            if (!EnsureEditable(continueAfterUnlock: false)) return;
+            try
+            {
+                IReadOnlyList<int> order = PdfEngineIntegration.PageOrderAfterMove(
+                    _doc.PageCount, [idx], delta > 0 ? target + 1 : target);
+                SaveTempAndReload(
                     keepAnnotations: true,
-                    finalizeSavedFile: path => PdfEngineIntegration.MovePage(path, idx, idx + 1),
+                    finalizeSavedFile: path => PdfEngineIntegration.MovePage(path, idx, target),
+                    remapAnnotations: annotations => PageAnnotationInsertion.Reorder(annotations, order),
                     remapRedactionMarks: true,
                     remapRotations: rotations =>
-                        PdfEngineIntegration.RemapRotationsAfterPageMove(rotations, idx, idx + 1),
-                    documentUndo: documentUndo));
-            PageList.SelectedIndex = idx + 1;
+                        PdfEngineIntegration.RemapRotationsAfterPageMove(rotations, idx, target),
+                    selectedPageAfterReload: target);
+            }
+            catch (Exception ex)
+            {
+                KillerDialog.Show(this, string.Format(Loc("Str_Pages_Failed"), ex.Message),
+                    Loc("Str_Dlg_AppTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         // Page operations that renumber pages without changing their content keep the unsaved

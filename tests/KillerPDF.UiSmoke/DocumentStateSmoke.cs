@@ -29,7 +29,7 @@ internal static class DocumentStateSmoke
         bool closeInOtherPane = scenario == "--verify-active-editor-close-b";
         string otherSource = Path.Combine(folder, "other-pane.pdf");
         byte[] original = scenario is "--verify-form-history" or "--verify-merge-pending"
-            ? FormFieldEditingSmoke.Fixture("ORIGINAL") : scenario == "--verify-page-delete-failure"
+            ? FormFieldEditingSmoke.Fixture("ORIGINAL") : scenario is "--verify-page-delete-failure" or "--verify-page-reorder-failure"
                 ? PageDeletionSmoke.Fixture() : TableExportSmoke.Fixture();
         if (scenario is "--verify-page-transform-failure" or "--verify-page-transform-cancel" or "--verify-page-transform-save-control")
             original = TableExportSmoke.Fixture(malformedDate: true);
@@ -92,6 +92,8 @@ internal static class DocumentStateSmoke
                 VerifyPageEditFailure(owner, source, original, editor, folder);
             else if (scenario == "--verify-page-delete-failure")
                 VerifyPageEditFailure(owner, source, original, editor, folder, delete: true);
+            else if (scenario == "--verify-page-reorder-failure")
+                VerifyPageEditFailure(owner, source, original, editor, folder, reorder: true);
             else if (scenario == "--verify-page-transform-failure")
                 VerifyTransformFailure(owner, source, original, editor);
             else if (scenario is "--verify-file-insertion-failure" or "--verify-file-insertion-success")
@@ -522,7 +524,7 @@ internal static class DocumentStateSmoke
         if (layoutKey is not null) Console.WriteLine("CONTROL completed layout: " + layoutKey);
     }
 
-    private static void VerifyPageEditFailure(Window owner, string source, byte[] original, TextBox editor, string folder, bool delete = false)
+    private static void VerifyPageEditFailure(Window owner, string source, byte[] original, TextBox editor, string folder, bool delete = false, bool reorder = false)
     {
         Stroke(0x0D, 0x11);
         Wait(() => !editor.IsVisible && Dirty(owner), "annotation before page-edit failure");
@@ -545,6 +547,7 @@ internal static class DocumentStateSmoke
         denied.AddAccessRule(new FileSystemAccessRule(WindowsIdentity.GetCurrent().User!,
             FileSystemRights.CreateFiles, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
         int errors = 0;
+        int escaped = 0;
         int confirmations = 0;
         var seen = new HashSet<Window>();
         var timer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(20) };
@@ -589,6 +592,15 @@ internal static class DocumentStateSmoke
             try
             {
                 if (delete) Click(owner, "DeletePagesBtn");
+                else if (reorder)
+                {
+                    try { Click(owner, "MovePageDownBtn"); }
+                    catch (UnauthorizedAccessException error) when (error.Message.Contains(session, StringComparison.OrdinalIgnoreCase))
+                    {
+                        escaped++; errors++;
+                        Console.WriteLine("CONTROL scoped write error escaped the public Move Page Down command.");
+                    }
+                }
                 else RotateFromThumbnail(owner);
             }
             finally { timer.Stop(); }
@@ -613,6 +625,35 @@ internal static class DocumentStateSmoke
         if (!ReadText(source).Contains(Marker, StringComparison.Ordinal))
             throw new InvalidOperationException("Failed page operation lost the annotation on subsequent Save.");
         Console.WriteLine("CONTROL denied page edit retained geometry, dirty/history state and strict saved annotation.");
+        if (reorder)
+        {
+            if (escaped != 0) throw new InvalidOperationException("APP-004: failed page reorder escaped its command error boundary after preserving Save state.");
+            Click(owner, "MovePageDownBtn");
+            Wait(() => Dirty(owner), "successful page reorder retry");
+            Save(owner);
+            if (ReadText(source).Contains(Marker, StringComparison.Ordinal) || !ReadText(source, 1).Contains(Marker, StringComparison.Ordinal)
+                || !ReadText(source).Contains("PAGE_2", StringComparison.Ordinal))
+                throw new InvalidOperationException("Page reorder retry misplaced its original page or annotation.");
+            Click(owner, "UndoBtn"); Save(owner);
+            if (!ReadText(source).Contains(Marker, StringComparison.Ordinal) || !ReadText(source).Contains("PAGE_1", StringComparison.Ordinal))
+                throw new InvalidOperationException("Page reorder Undo lost its original page or annotation.");
+            Click(owner, "RedoBtn"); Save(owner);
+            if (!ReadText(source, 1).Contains(Marker, StringComparison.Ordinal) || !ReadText(source).Contains("PAGE_2", StringComparison.Ordinal))
+                throw new InvalidOperationException("Page reorder Redo lost the moved page or annotation.");
+            ((ListBox)owner.FindName("PageList")).SelectedIndex = 1;
+            Click(owner, "MovePageUpBtn"); Save(owner);
+            if (!ReadText(source).Contains(Marker, StringComparison.Ordinal) || !ReadText(source).Contains("PAGE_1", StringComparison.Ordinal))
+                throw new InvalidOperationException("Move Page Up lost its original page or annotation.");
+            Click(owner, "UndoBtn"); Save(owner);
+            if (!ReadText(source, 1).Contains(Marker, StringComparison.Ordinal) || !ReadText(source).Contains("PAGE_2", StringComparison.Ordinal))
+                throw new InvalidOperationException("Move Page Up Undo lost the moved page or annotation.");
+            Click(owner, "RedoBtn"); Save(owner);
+            if (!ReadText(source).Contains(Marker, StringComparison.Ordinal) || !ReadText(source).Contains("PAGE_1", StringComparison.Ordinal))
+                throw new InvalidOperationException("Move Page Up Redo lost its original page or annotation.");
+            Console.WriteLine("CONTROL Move Page Up preserves strict page ownership and Save/Undo/Redo.");
+            Console.WriteLine("CONTROL failed reorder and successful retry preserve strict page ownership and Save/Undo/Redo.");
+            return;
+        }
         if (delete)
         {
             timer.Start();
