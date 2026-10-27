@@ -16,6 +16,7 @@ internal sealed class PdfDuplicatePageNormalizer(PdfDocument document)
     private readonly HashSet<int> _mergedFields = [];
     private readonly HashSet<string> _names = new(StringComparer.Ordinal);
     private readonly HashSet<int> _visitedNodes = [];
+    private readonly SortedDictionary<string, (PdfString Key, PdfIndirectReference Owner)> _tagIdentities = new(StringComparer.Ordinal);
     private readonly int _firstNewObject = checked(document.CrossReferences.Keys.Max() + 1);
     private int _next = checked(document.CrossReferences.Keys.Max() + 1);
     private int _edges;
@@ -328,6 +329,19 @@ internal sealed class PdfDuplicatePageNormalizer(PdfDocument document)
         }
         if (rootValue is not PdfIndirectReference root) throw Refuse("The structure root is not indirect.");
         PdfDictionary structure = Dictionary(root);
+        if (Get(structure, "IDTree") is PdfObject identityTree)
+        {
+            foreach (PdfNameTreeEntry entry in PdfNameTree.Read(document, identityTree))
+            {
+                Bound(0);
+                if (_tagIdentities.Count >= MaximumObjects || entry.Value is not PdfIndirectReference identityOwner
+                    || Get(Dictionary(identityOwner), "ID") is not PdfObject identifier
+                    || Resolve(identifier) is not PdfString id || !id.Bytes.Span.SequenceEqual(entry.Key.Bytes.Span))
+                    throw Refuse("A structure identity tree has an invalid owner or exceeds the recovery budget.");
+                _tagIdentities.Add(Convert.ToHexString(entry.Key.Bytes.Span), (entry.Key, FinalReference(identityOwner)));
+            }
+        }
+        int originalIdentityCount = _tagIdentities.Count;
         if (Get(structure, "ParentTree") is not PdfObject parentTree)
             throw Refuse("The structure root has no parent tree.");
         var entries = PdfNumberTree.Read(document, parentTree).ToDictionary(entry => entry.Key, entry => entry.Value);
@@ -353,6 +367,10 @@ internal sealed class PdfDuplicatePageNormalizer(PdfDocument document)
         }
         if (Get(structure, "K") is PdfObject children)
             structure = Set(structure, "K", Expand(children, root, new HashSet<int>(), 0));
+        if (_tagIdentities.Count != originalIdentityCount)
+            structure = Set(structure, "IDTree", new PdfDictionary([
+                new(Name("Names"), new PdfArray(_tagIdentities.Values.SelectMany(entry =>
+                    new PdfObject[] { entry.Key, entry.Owner })))]));
         foreach (Occurrence page in _pages.Where(page => page.Index > 0))
             foreach (var key in page.ParentKeys)
             {
@@ -424,7 +442,7 @@ internal sealed class PdfDuplicatePageNormalizer(PdfDocument document)
             if (resolved is not PdfDictionary node) throw Refuse("A page-owned structure child has an unsupported representation.");
             if (Get(node, "Pg") is PdfIndirectReference owner && FinalReference(owner).ObjectNumber != page.Source.ObjectNumber)
                 throw Refuse("A page-owned structure branch crosses another page.");
-            if (clone && new[] { "ID", "Ref" }.Any(key => Get(node, key) is not null))
+            if (clone && Get(node, "Ref") is not null)
                 throw Refuse("A duplicated structure branch has identity links requiring separate repair.");
             PdfDictionary result = node;
             bool element = IsName(Get(node, "Type"), "StructElem") || Get(node, "S") is not null;
@@ -436,6 +454,26 @@ internal sealed class PdfDuplicatePageNormalizer(PdfDocument document)
                 else if (!page.Tags.TryGetValue(reference.ObjectNumber, out target!))
                     page.Tags.Add(reference.ObjectNumber, target = Reserve());
                 result = Set(result, "P", parent);
+                if (clone && Get(node, "ID") is PdfObject identifier)
+                {
+                    if (Resolve(identifier) is not PdfString id
+                        || !_tagIdentities.TryGetValue(Convert.ToHexString(id.Bytes.Span), out var identity)
+                        || identity.Owner.ObjectNumber != reference.ObjectNumber)
+                        throw Refuse("A copied structure identifier has no matching registered owner.");
+                    PdfString copiedId;
+                    string key;
+                    int suffix = 0;
+                    do
+                    {
+                        Bound(0);
+                        copiedId = new PdfString(Encoding.ASCII.GetBytes(FormattableString.Invariant(
+                            $"recovered-structure-{target.ObjectNumber}-{suffix++}")), PdfStringForm.Hexadecimal);
+                        key = Convert.ToHexString(copiedId.Bytes.Span);
+                    } while (_tagIdentities.ContainsKey(key));
+                    if (_tagIdentities.Count >= MaximumObjects) throw Refuse("The projected structure identity tree exceeds the recovery budget.");
+                    _tagIdentities.Add(key, (copiedId, target));
+                    result = Set(result, "ID", copiedId);
+                }
             }
             if (Get(node, "Pg") is not null) result = Set(result, "Pg", page.Target);
             if (Get(node, "Stm") is not null) throw Refuse("A duplicated structure branch owns a tagged content stream.");

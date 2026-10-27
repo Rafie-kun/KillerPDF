@@ -341,12 +341,55 @@ public sealed class PdfDuplicatePageOwnershipTests
         Assert.Empty(PdfFormWidgetReader.ReadPage(saved, 2));
     }
 
+    [Fact]
+    public void RecoveryAssignsUniqueRegisteredIdentitiesToCopiedTags()
+    {
+        PdfDocument healthy = PdfDocument.Open(Fixture(tagged: true, damage: "tag-id-registered", repeated: false));
+        Assert.Single(PdfPageInformation.Read(healthy));
+        PdfDocument source = PdfDocument.OpenWithCompatibilityRecovery(Fixture(tagged: true, damage: "tag-id-registered"));
+        PdfDocument saved = PdfDocument.Open(PdfDocumentWriter.Write(source));
+        Assert.Equal(2, PdfPageInformation.Read(saved).Count);
+        PdfPageTree tree = PdfPageTree.Read(saved);
+        PdfDictionary structure = Dictionary(saved, tree.Catalog[N("StructTreeRoot")]);
+        var parents = PdfNumberTree.Read(saved, structure[N("ParentTree")]).ToDictionary(entry => entry.Key, entry => entry.Value);
+        PdfObject first = Assert.Single(Assert.IsType<PdfArray>(parents[0]));
+        long copyKey = Assert.IsType<PdfInteger>(tree.Pages[1].Dictionary[N("StructParents")]).Value;
+        PdfObject copy = Assert.Single(Assert.IsType<PdfArray>(parents[copyKey]));
+        Assert.Equal("identity", String(Dictionary(saved, first)[N("ID")]));
+        string copiedId = String(Dictionary(saved, copy)[N("ID")]);
+        Assert.NotEqual("identity", copiedId);
+        var identities = PdfNameTree.Read(saved, structure[N("IDTree")]);
+        Assert.Equal(2, identities.Count);
+        Assert.Equal(ObjectNumber(first), ObjectNumber(Assert.Single(identities, entry => String(entry.Key) == "identity").Value));
+        Assert.Equal(ObjectNumber(copy), ObjectNumber(Assert.Single(identities, entry => String(entry.Key) == copiedId).Value));
+        Assert.Equal(tree.Pages[1].Reference.ObjectNumber, ObjectNumber(Dictionary(saved, copy)[N("Pg")]));
+        Assert.Equal(new PdfPageRenderer(healthy).Render(0, new PdfRenderOptions(100, 100)).Pixels.ToArray(),
+            new PdfPageRenderer(saved).Render(1, new PdfRenderOptions(100, 100)).Pixels.ToArray());
+        PdfDocument collision = PdfDocument.Open(PdfDocumentWriter.Write(PdfDocument.OpenWithCompatibilityRecovery(
+            Fixture(tagged: true, damage: "tag-id-registered", reservedTagId: copiedId))));
+        PdfPageTree collisionPages = PdfPageTree.Read(collision);
+        Assert.Equal(2, collisionPages.Pages.Count);
+        PdfDictionary collisionRoot = Dictionary(collision, collisionPages.Catalog[N("StructTreeRoot")]);
+        var collisionIds = PdfNameTree.Read(collision, collisionRoot[N("IDTree")]);
+        Assert.Equal(3, collisionIds.Count);
+        Assert.Equal(ObjectNumber(Assert.Single(Assert.IsType<PdfArray>(collisionRoot[N("K")]))),
+            ObjectNumber(Assert.Single(collisionIds, entry => String(entry.Key) == copiedId).Value));
+        var collisionParents = PdfNumberTree.Read(collision, collisionRoot[N("ParentTree")]).ToDictionary(entry => entry.Key, entry => entry.Value);
+        long collisionKey = Assert.IsType<PdfInteger>(collisionPages.Pages[1].Dictionary[N("StructParents")]).Value;
+        PdfObject collisionTag = Assert.Single(Assert.IsType<PdfArray>(collisionParents[collisionKey]));
+        string collisionCopyId = String(Dictionary(collision, collisionTag)[N("ID")]);
+        Assert.NotEqual(copiedId, collisionCopyId);
+        Assert.NotEqual("identity", collisionCopyId);
+        Assert.Equal(ObjectNumber(collisionTag), ObjectNumber(Assert.Single(collisionIds, entry => String(entry.Key) == collisionCopyId).Value));
+    }
+
     [Theory]
     [InlineData("cycle")]
     [InlineData("expansion")]
     [InlineData("foreign-owner")]
     [InlineData("tag-id")]
     [InlineData("tag-id-count-one")]
+    [InlineData("tag-id-wrong-owner")]
     [InlineData("tag-parent-swap")]
     [InlineData("tag-parent-cycle")]
     [InlineData("tag-merged-extension")]
@@ -384,7 +427,7 @@ public sealed class PdfDuplicatePageOwnershipTests
     private static PdfName N(string value) => new(Encoding.ASCII.GetBytes(value));
     private static PdfString Text(string value) => new(Encoding.ASCII.GetBytes(value), PdfStringForm.Literal);
 
-    private static byte[] Fixture(bool tagged = false, string? damage = null, bool repeated = true)
+    private static byte[] Fixture(bool tagged = false, string? damage = null, bool repeated = true, string? reservedTagId = null)
     {
         string content = tagged ? "/P << /MCID 0 >> BDC 1 0 0 rg 5 5 25 30 re f EMC" : "1 0 0 rg 5 5 25 30 re f";
         string[] objects =
@@ -457,6 +500,16 @@ public sealed class PdfDuplicatePageOwnershipTests
         if (damage == "cycle") objects[9] = "<< /Type /Pages /Parent 2 0 R /Kids [10 0 R] /Count 1 >>";
         if (damage?.StartsWith("tag-id", StringComparison.Ordinal) == true)
             objects[13] = "<< /Type /StructElem /S /P /P 13 0 R /Pg 3 0 R /ID (identity) /K 0 >>";
+        if (damage == "tag-id-registered")
+            objects[11] = objects[11][..^2] + " /IDTree << /Names [(identity) 14 0 R] >> >>";
+        if (damage == "tag-id-wrong-owner")
+            objects[11] = objects[11][..^2] + " /IDTree << /Names [(identity) 16 0 R] >> >>";
+        if (reservedTagId is not null)
+        {
+            string reserved = "<" + Convert.ToHexString(Encoding.ASCII.GetBytes(reservedTagId)) + ">";
+            objects[12] = objects[12][..^2] + $" /ID {reserved} >>";
+            objects[11] = "<< /Type /StructTreeRoot /K [13 0 R] /ParentTree 17 0 R /ParentTreeNextKey 3 /IDTree << /Names [(identity) 14 0 R " + reserved + " 13 0 R] >> >>";
+        }
         if (damage == "tag-id-count-one")
             objects[1] = "<< /Type /Pages /Kids [10 0 R 10 0 R] /Count 1 /MediaBox [0 0 100 100] /Resources << >> >>";
         if (damage is "collision-utf16" or "collision-latin")
