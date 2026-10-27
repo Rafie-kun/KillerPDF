@@ -8,7 +8,7 @@ namespace KillerPDF.Shell
     // ============================================================
     // Keyboard-shortcuts overlay: the LIST view.
     //
-    // The overlay card (ShortcutOverlay in MainWindow.xaml) is generated from ShortcutTable.KsAll
+    // The overlay card (ShortcutsOverlay in MainWindow.xaml) is generated from ShortcutTable.KsAll
     // rather than hand-authored row by row, so adding or changing a shortcut is a one-line edit
     // there and can't drift out of sync with a parallel block of XAML - or with the keyboard map,
     // which is built from the same array. The two empty hosts ShortcutLeftColumn /

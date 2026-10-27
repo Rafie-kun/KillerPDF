@@ -24,54 +24,12 @@ namespace KillerPDF.Shell
         // rail flyouts, toolbar onto the bar's right-click menu, sidebar side onto the sidebar's.)
         // ============================================================
 
-        // Syncs every picker's radios and accent dots to live state before a flyout shows -
-        // exactly ONE sync implementation, shared by all the rail flyouts (Shell/RailFlyouts.cs).
+        // Syncs the view-mode radios and page navigation buttons to live state. The theme and
+        // language menus are the kit's (Controls/ThemePicker.cs, Controls/LanguageMenu.cs) and
+        // build their checked rows on every open.
         private void SyncPickerState()
         {
             SyncPageNavigationButtons();
-            var cur = ThemeManager.Current;
-            ThemeDarkRadio.IsChecked  = cur == Theme.Dark;
-            ThemeLightRadio.IsChecked = cur == Theme.Light;
-            ThemeHCRadio.IsChecked    = cur == Theme.Black;
-            Theme98SERadio.IsChecked  = cur == Theme.SE98;
-            ThemeBloodRadio.IsChecked = cur == Theme.Blood;
-            ThemeGreedRadio.IsChecked    = cur == Theme.Greed;
-            ThemeCyanoticRadio.IsChecked = cur == Theme.Cyanotic;
-            ThemeEctoplasmRadio.IsChecked = cur == Theme.Ectoplasm;
-            ThemeDecayRadio.IsChecked = cur == Theme.Decay;
-            ThemeMourningRadio.IsChecked = cur == Theme.Mourning;
-            ThemeSepulchreRadio.IsChecked = cur == Theme.Sepulchre;
-            ThemeDeliriumRadio.IsChecked = cur == Theme.Delirium;
-            ThemeMalaiseRadio.IsChecked = cur == Theme.Malaise;
-            FilmGrainCheck.IsChecked = FilmGrain.Enabled;
-            UpdateAccentStrip(animate: false);
-            // Sync language picker
-            var curLoc = KillerPDF.Services.LocaleManager.Current;
-            LangEnRadio.IsChecked   = curLoc == KillerPDF.Services.Locale.EnUS;
-            LangCsRadio.IsChecked   = curLoc == KillerPDF.Services.Locale.CsCZ;
-            LangEsRadio.IsChecked   = curLoc == KillerPDF.Services.Locale.Es;
-            LangFrRadio.IsChecked   = curLoc == KillerPDF.Services.Locale.Fr;
-            LangZhTWRadio.IsChecked = curLoc == KillerPDF.Services.Locale.ZhTW;
-            LangSlRadio.IsChecked   = curLoc == KillerPDF.Services.Locale.SlSI;
-            LangZhCNRadio.IsChecked = curLoc == KillerPDF.Services.Locale.ZhCN;
-            LangBnRadio.IsChecked   = curLoc == KillerPDF.Services.Locale.Bn;
-            LangTrRadio.IsChecked   = curLoc == KillerPDF.Services.Locale.TrTR;
-            LangNbRadio.IsChecked   = curLoc == KillerPDF.Services.Locale.NbNO;
-            LangPtRadio.IsChecked   = curLoc == KillerPDF.Services.Locale.PtBR;
-            LangUkRadio.IsChecked   = curLoc == KillerPDF.Services.Locale.UkUA;
-            LangViRadio.IsChecked   = curLoc == KillerPDF.Services.Locale.ViVN;
-            LangDeRadio.IsChecked   = curLoc == KillerPDF.Services.Locale.De;
-            LangJaRadio.IsChecked   = curLoc == KillerPDF.Services.Locale.JaJP;
-            LangPlRadio.IsChecked   = curLoc == KillerPDF.Services.Locale.PlPL;
-            LangHuRadio.IsChecked   = curLoc == KillerPDF.Services.Locale.HuHU;
-            // Visual Studio can retain an older design-time XAML field name in MainWindow.g.i.cs
-            // after this picker changes. Resolve the radio through the stable submenu namescope so
-            // both a fresh build and a stale design-time pass remain valid.
-            var italianRadio = LangSubmenu.FindName("LangItalianRadio") as RadioButton
-                ?? LangSubmenu.FindName("LangItRadio") as RadioButton;
-            italianRadio?.IsChecked = curLoc == KillerPDF.Services.Locale.ItIT;
-            LangKkRadio.IsChecked   = curLoc == KillerPDF.Services.Locale.KkKZ;
-            LangRuRadio.IsChecked   = curLoc == KillerPDF.Services.Locale.RuRU;
             // Sync view mode radios. Against the PENDING mode while a fade-wrapped switch is in
             // flight (_viewMode lags until the fade-out lands), so wheel-cycling with the flyout
             // open moves the checkmark in step instead of one notch behind.
@@ -353,287 +311,12 @@ namespace KillerPDF.Shell
             RefreshOpenAnnotationBars();
         }
 
-        private void ThemeDarkRadio_Checked(object sender, RoutedEventArgs e)     => SelectTheme(Theme.Dark);
-        private void ThemeLightRadio_Checked(object sender, RoutedEventArgs e)    => SelectTheme(Theme.Light);
-        private void ThemeHCRadio_Checked(object sender, RoutedEventArgs e)       => SelectTheme(Theme.Black);
-        private void Theme98SERadio_Checked(object sender, RoutedEventArgs e)     => SelectTheme(Theme.SE98);
-        private void ThemeBloodRadio_Checked(object sender, RoutedEventArgs e)    => SelectTheme(Theme.Blood);
-        private void ThemeGreedRadio_Checked(object sender, RoutedEventArgs e)    => SelectTheme(Theme.Greed);
-        private void ThemeCyanoticRadio_Checked(object sender, RoutedEventArgs e) => SelectTheme(Theme.Cyanotic);
-        private void ThemeEctoplasmRadio_Checked(object sender, RoutedEventArgs e) => SelectTheme(Theme.Ectoplasm);
-        private void ThemeDecayRadio_Checked(object sender, RoutedEventArgs e)     => SelectTheme(Theme.Decay);
-        private void ThemeMourningRadio_Checked(object sender, RoutedEventArgs e)  => SelectTheme(Theme.Mourning);
-        private void ThemeSepulchreRadio_Checked(object sender, RoutedEventArgs e) => SelectTheme(Theme.Sepulchre);
-        private void ThemeDeliriumRadio_Checked(object sender, RoutedEventArgs e)  => SelectTheme(Theme.Delirium);
-        private void ThemeMalaiseRadio_Checked(object sender, RoutedEventArgs e)   => SelectTheme(Theme.Malaise);
-
-        // Film Grain on or off for every surface (Services/FilmGrain.cs). The flyout stays open,
-        // the same as a theme pick, so the change can be compared straight away.
-        private void FilmGrainCheck_Click(object sender, RoutedEventArgs e)
+        // The rest of a language switch, after the kit's RelocalizeDynamicUi (Shell/Language.cs)
+        // has rebuilt the toolbar and the shortcuts card. It also runs when a --lang-file
+        // translation reloads.
+        partial void RelocalizeAppUi()
         {
-            bool wasOpen = ThemeFlyout is not null && ThemeFlyout.IsOpen;
-            FilmGrain.Set(FilmGrainCheck.IsChecked == true);
-            if (wasOpen)
-                Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background,
-                    (Action)(() => { if (ThemeFlyout is not null && !ThemeFlyout.IsOpen) ThemeFlyout.IsOpen = true; }));
-        }
-
-        private void SelectTheme(Theme theme)
-        {
-            bool wasOpen = ThemeFlyout is not null && ThemeFlyout.IsOpen;
-            ThemeManager.Apply(theme);
-            UpdateAccentStrip(animate: true);
-            // Intentionally leave the flyout open so the user can try another theme right away
-            // without reopening the submenu. The theme swap's side effects (tab strip rebuild,
-            // tool re-select) can still knock the popup closed behind our back, so check once
-            // layout has settled and quietly reopen it in place if that happened.
-            if (wasOpen)
-                Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background,
-                    (Action)(() => { if (ThemeFlyout is not null && !ThemeFlyout.IsOpen) ThemeFlyout.IsOpen = true; }));
-        }
-
-        // #199 (Ryokoxx's design): ONE vertical strip of six swatches beside the theme list,
-        // repainted per family, instead of a row under each accented theme. The list height is
-        // identical for every theme, so the bottom-pinned card never moves; only the strip's
-        // width animates, growing rightward from the pinned left edge. Per-family accent memory
-        // in ThemeManager is untouched.
-        private void AccentStripDot_Click(object sender, MouseButtonEventArgs e) => HandleAccentDot(sender, _stripFamily);
-
-        private void HandleAccentDot(object sender, Theme family)
-        {
-            if (sender is not FrameworkElement fe || fe.Tag is not string tag) return;
-            if (!Enum.TryParse<Accent>(tag, out var accent)) return;
-            ThemeManager.ApplyAccent(family, accent);   // persists for that family; reapplies if active
-            RingAccentStrip();
-        }
-
-        // Per-family swatch colors, in each family's display order (moved here from the four
-        // retired XAML accent rows; the strip repaints these onto its eight shared dots).
-        private static readonly (Accent Accent, string Hex)[] DarkStripColors =
-            [(Accent.Red, "#DD504B"), (Accent.Orange, "#E8962C"), (Accent.Yellow, "#EAD900"), (Accent.Green, "#1EA54C"),
-             (Accent.Teal, "#1FB8A8"), (Accent.Blue, "#4580D9"), (Accent.Purple, "#B982E3"), (Accent.Magenta, "#FF52C9")];
-        private static readonly (Accent Accent, string Hex)[] LightStripColors =
-            [(Accent.Red, "#931A1A"), (Accent.Orange, "#C7710F"), (Accent.Yellow, "#EAD900"), (Accent.Green, "#1B5E20"),
-             (Accent.Teal, "#0D827E"), (Accent.Blue, "#18608E"), (Accent.Purple, "#5A1690"), (Accent.Magenta, "#A60070")];
-        private static readonly (Accent Accent, string Hex)[] BlackStripColors =
-            [(Accent.Red, "#FF2929"), (Accent.Orange, "#FF910A"), (Accent.Yellow, "#FFEB00"), (Accent.Green, "#00FF66"),
-             (Accent.Teal, "#0AFFE7"), (Accent.Blue, "#298DFF"), (Accent.Purple, "#B829FF"), (Accent.Magenta, "#FF2BBD")];
-        private static readonly (Accent Accent, string Hex)[] SE98StripColors =
-            [(Accent.Red, "#800000"), (Accent.Orange, "#A05000"), (Accent.Yellow, "#EAD900"), (Accent.Green, "#006000"),
-             (Accent.Teal, "#008080"), (Accent.Blue, "#000080"), (Accent.Purple, "#5A376E"), (Accent.Magenta, "#750052")];
-
-        private static (Accent Accent, string Hex)[] StripColorsFor(Theme family) => family switch
-        {
-            Theme.Light => LightStripColors,
-            Theme.Black => BlackStripColors,
-            Theme.SE98  => SE98StripColors,
-            _           => DarkStripColors,
-        };
-
-        private Theme _stripFamily = Theme.Dark;   // the family the strip's dots currently show
-        private bool  _stripOpen;
-        private const double AccentStripWidth   = 39;    // 1px rule + 10 gap + 26 swatch + 2 air
-        private const double AccentStripSlideMs = 180;
-
-        private Border[] StripDots =>
-            [AccentStripDot0, AccentStripDot1, AccentStripDot2, AccentStripDot3, AccentStripDot4, AccentStripDot5, AccentStripDot6, AccentStripDot7];
-
-        // Each pill shows its accent the way a selection does: the palette's own SelectionBg
-        // gradient, read from that accent's theme file. 98SE keeps its flat Win98 swatches.
-        private static readonly Dictionary<(Theme, Accent), System.Windows.Media.Brush> AccentStripBrushes = [];
-
-        private static System.Windows.Media.Brush AccentStripBrush(Theme family, Accent accent, string flatHex)
-        {
-            if (AccentStripBrushes.TryGetValue((family, accent), out var cached)) return cached;
-            System.Windows.Media.Brush brush;
-            if (family == Theme.SE98)
-                brush = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(flatHex));
-            else
-            {
-                string path = accent == Accent.Green
-                    ? $"Themes/{family}.xaml"
-                    : $"Themes/Accents/{family}/{accent}.xaml";
-                var palette = new ResourceDictionary
-                {
-                    // Release payloads use KillerPDF.App; normal builds use KillerPDF.
-                    Source = new Uri($"/{typeof(MainWindow).Assembly.GetName().Name};component/{path}", UriKind.Relative)
-                };
-                brush = ((System.Windows.Media.Brush)palette["SelectionBg"]).CloneCurrentValue();
-            }
-            brush.Freeze();
-            AccentStripBrushes[(family, accent)] = brush;
-            return brush;
-        }
-
-        private bool _stripHoverWired;
-
-        // The pills lift a little under the mouse (KillerNotes). The dots are declared in
-        // MainWindow.xaml, so the transform and the hover hooks are attached once, here.
-        private void WireAccentStripHover()
-        {
-            if (_stripHoverWired) return;
-            _stripHoverWired = true;
-            foreach (var dot in StripDots)
-            {
-                dot.RenderTransformOrigin = new Point(0.5, 0.5);
-                dot.RenderTransform = new ScaleTransform();
-                dot.MouseEnter += (_, _) => RingAccentStrip();
-                dot.MouseLeave += (_, _) => RingAccentStrip();
-            }
-        }
-
-        private void PopulateAccentStrip(Theme family)
-        {
-            WireAccentStripHover();
-            var colors = StripColorsFor(family);
-            var dots = StripDots;
-            for (int i = 0; i < dots.Length; i++)
-            {
-                dots[i].Background = AccentStripBrush(family, colors[i].Accent, colors[i].Hex);
-                dots[i].Tag = colors[i].Accent.ToString();
-            }
-            _stripFamily = family;
-            RingAccentStrip();
-        }
-
-        // Ring the strip's selected swatch for the family it is showing.
-        private void RingAccentStrip()
-        {
-            if (AccentStrip is null) return;
-            var ring = (System.Windows.Media.Brush)FindResource("TextBrush");
-            var chosen = ThemeManager.AccentChoiceFor(_stripFamily);
-            foreach (var dot in StripDots)
-            {
-                bool sel = dot.Tag is string t && Enum.TryParse<Accent>(t, out var a) && a == chosen;
-                dot.BorderBrush = dot.IsMouseOver || sel ? ring : System.Windows.Media.Brushes.Transparent;
-                bool pop = dot.IsMouseOver && _stripFamily != Theme.SE98;
-                if (dot.RenderTransform is ScaleTransform scale)
-                {
-                    scale.BeginAnimation(ScaleTransform.ScaleXProperty,
-                        new DoubleAnimation(pop ? 1.06 : 1, TimeSpan.FromMilliseconds(100)));
-                    scale.BeginAnimation(ScaleTransform.ScaleYProperty,
-                        new DoubleAnimation(pop ? 1.03 : 1, TimeSpan.FromMilliseconds(100)));
-                }
-                dot.Effect = pop
-                    ? new System.Windows.Media.Effects.DropShadowEffect
-                    { Color = System.Windows.Media.Colors.Black, BlurRadius = 4, ShadowDepth = 1, Opacity = 0.25 }
-                    : null;
-            }
-        }
-
-        private void UpdateAccentStrip(bool animate)
-        {
-            var cur = ThemeManager.Current;
-            bool show = cur is Theme.Dark or Theme.Light or Theme.Black or Theme.SE98;
-            if (show)
-            {
-                if (animate && _stripOpen && _stripFamily != cur)
-                {
-                    // Accented -> accented: the strip stays open and the swatches CROSSFADE.
-                    // Re-running the open animation here snapped the strip shut and back.
-                    var target = cur;
-                    var fadeOut = new System.Windows.Media.Animation.DoubleAnimation(1, 0, TimeSpan.FromMilliseconds(90));
-                    fadeOut.Completed += (_, __) =>
-                    {
-                        PopulateAccentStrip(target);
-                        AccentStrip.BeginAnimation(OpacityProperty,
-                            new System.Windows.Media.Animation.DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(90)));
-                    };
-                    AccentStrip.BeginAnimation(OpacityProperty, fadeOut);
-                }
-                else PopulateAccentStrip(cur);
-            }
-            SlideAccentStrip(show, animate);
-        }
-
-        // Width slide, eased - one element animates now, so the old linear lockstep constraint
-        // that kept two rows summing to a constant height no longer applies.
-        private void SlideAccentStrip(bool show, bool animate)
-        {
-            if (show == _stripOpen && animate) return;   // already there; crossfade handles content
-            _stripOpen = show;
-            AccentStripHost.BeginAnimation(WidthProperty, null);   // drop any in-flight slide
-            if (!animate) { AccentStripHost.Width = show ? AccentStripWidth : 0; return; }
-            double from = double.IsNaN(AccentStripHost.Width) ? AccentStripHost.ActualWidth : AccentStripHost.Width;
-            var anim = new System.Windows.Media.Animation.DoubleAnimation(from, show ? AccentStripWidth : 0,
-                TimeSpan.FromMilliseconds(AccentStripSlideMs))
-            {
-                EasingFunction = new System.Windows.Media.Animation.QuadraticEase
-                    { EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut }
-            };
-            anim.Completed += (_, __) =>
-            {
-                AccentStripHost.BeginAnimation(WidthProperty, null);
-                AccentStripHost.Width = _stripOpen ? AccentStripWidth : 0;
-            };
-            AccentStripHost.BeginAnimation(WidthProperty, anim);
-        }
-
-        // Localized display name for each theme, shown on the picker row.
-        private static string ThemeDisplayName(Theme t) => t switch
-        {
-            Theme.Light        => Loc("Str_Theme_Light"),
-            Theme.Black        => Loc("Str_Theme_Black"),
-            Theme.SE98         => Loc("Str_Theme_98SE"),
-            Theme.Blood        => Loc("Str_Theme_Blood"),
-            Theme.Greed        => Loc("Str_Theme_Greed"),
-            Theme.Cyanotic     => Loc("Str_Theme_Cyanotic"),
-            Theme.Ectoplasm    => Loc("Str_Theme_Ectoplasm"),
-            Theme.Decay        => Loc("Str_Theme_Decay"),
-            Theme.Mourning     => Loc("Str_Theme_Mourning"),
-            Theme.Sepulchre    => Loc("Str_Theme_Sepulchre"),
-            Theme.Delirium     => Loc("Str_Theme_Delirium"),
-            Theme.Malaise      => Loc("Str_Theme_Malaise"),
-            _                  => Loc("Str_Theme_Dark"),
-        };
-
-        // #211: translator test mode - when the external translation file live-reloads, re-run the
-        // same rebuilds a language switch does, so code-built captions update alongside the
-        // DynamicResource strings. Called once from the window ctor; the event only ever fires
-        // when the app was started with --lang-file.
-        internal void HookExternalLangReload()
-            => KillerPDF.Services.LocaleManager.ExternalReloaded += OnExternalLangReload;
-
-        private void OnExternalLangReload()
-        {
-            ApplyShortcutTooltips();
-            BuildToolbarMenu();
-            BuildContextMenu();
-            ApplyToolbarAppearance();
-            RefreshOpenAnnotationBars();
-        }
-
-        private void LangEnRadio_Checked(object sender, RoutedEventArgs e)   => SelectLocale(KillerPDF.Services.Locale.EnUS);
-        private void LangCsRadio_Checked(object sender, RoutedEventArgs e)   => SelectLocale(KillerPDF.Services.Locale.CsCZ);
-        private void LangEsRadio_Checked(object sender, RoutedEventArgs e)   => SelectLocale(KillerPDF.Services.Locale.Es);
-        private void LangFrRadio_Checked(object sender, RoutedEventArgs e)   => SelectLocale(KillerPDF.Services.Locale.Fr);
-        private void LangZhTWRadio_Checked(object sender, RoutedEventArgs e) => SelectLocale(KillerPDF.Services.Locale.ZhTW);
-        private void LangSlRadio_Checked(object sender, RoutedEventArgs e) => SelectLocale(KillerPDF.Services.Locale.SlSI);
-        private void LangZhCNRadio_Checked(object sender, RoutedEventArgs e) => SelectLocale(KillerPDF.Services.Locale.ZhCN);
-        private void LangBnRadio_Checked(object sender, RoutedEventArgs e)   => SelectLocale(KillerPDF.Services.Locale.Bn);
-        private void LangTrRadio_Checked(object sender, RoutedEventArgs e)   => SelectLocale(KillerPDF.Services.Locale.TrTR);
-        private void LangNbRadio_Checked(object sender, RoutedEventArgs e)   => SelectLocale(KillerPDF.Services.Locale.NbNO);
-        private void LangPtRadio_Checked(object sender, RoutedEventArgs e)   => SelectLocale(KillerPDF.Services.Locale.PtBR);
-        private void LangUkRadio_Checked(object sender, RoutedEventArgs e)   => SelectLocale(KillerPDF.Services.Locale.UkUA);
-        private void LangViRadio_Checked(object sender, RoutedEventArgs e)   => SelectLocale(KillerPDF.Services.Locale.ViVN);
-        private void LangDeRadio_Checked(object sender, RoutedEventArgs e)   => SelectLocale(KillerPDF.Services.Locale.De);
-        private void LangJaRadio_Checked(object sender, RoutedEventArgs e)   => SelectLocale(KillerPDF.Services.Locale.JaJP);
-        private void LangPlRadio_Checked(object sender, RoutedEventArgs e)   => SelectLocale(KillerPDF.Services.Locale.PlPL);
-        private void LangHuRadio_Checked(object sender, RoutedEventArgs e)   => SelectLocale(KillerPDF.Services.Locale.HuHU);
-        private void LangItalianRadio_Checked(object sender, RoutedEventArgs e) => SelectLocale(KillerPDF.Services.Locale.ItIT);
-
-        // Compatibility for Visual Studio's stale design-time MainWindow.g.i.cs. The real XAML
-        // uses LangItalianRadio_Checked, but an older generated file may still bind this name.
-        private void LangItRadio_Checked(object sender, RoutedEventArgs e) => SelectLocale(KillerPDF.Services.Locale.ItIT);
-        private void LangKkRadio_Checked(object sender, RoutedEventArgs e)   => SelectLocale(KillerPDF.Services.Locale.KkKZ);
-        private void LangRuRadio_Checked(object sender, RoutedEventArgs e)   => SelectLocale(KillerPDF.Services.Locale.RuRU);
-
-        private void SelectLocale(KillerPDF.Services.Locale loc)
-        {
-            KillerPDF.Services.LocaleManager.Apply(loc);
             ApplyShortcutTooltips();     // tooltips carry key names, which differ per language
-            BuildToolbarMenu();   // the toolbar right-click picker's items carry Loc() captions
-            LangFlyout.IsOpen = false;   // a pick closes the rail flyout, like the accordion used to collapse
 
             // The status bar text is a formatted string (not a DynamicResource), so it keeps the
             // language it was last set in. Re-set it in the new locale instead of leaving it stale.
@@ -645,11 +328,6 @@ namespace KillerPDF.Shell
             // The canvas right-click menu is built once with Loc() values captured at build time,
             // so rebuild it in the new language. (The sidebar menu is rebuilt on each open.)
             BuildContextMenu();
-
-            // Toolbar captions are built with Loc() at apply time (they don't auto-update like a
-            // DynamicResource), so rebuild the toolbar on every language change. Harmless for the
-            // icon-only modes; refreshes the captions for Text-beside / Text-under / Text-only.
-            ApplyToolbarAppearance();
 
             // Refresh code-built annotate bars in both panes. A language change comes from a
             // window flyout, so the pane containing the visible bar is not guaranteed to be the
@@ -728,31 +406,6 @@ namespace KillerPDF.Shell
             }
             catch { /* best-effort; leave the XAML default width */ }
         }
-
-        // Native name (autonym) for each language, shown in the picker regardless of UI locale.
-        private static string LangDisplayName(KillerPDF.Services.Locale loc) => loc switch
-        {
-            KillerPDF.Services.Locale.CsCZ => "Čeština",
-            KillerPDF.Services.Locale.Es   => "Español",
-            KillerPDF.Services.Locale.Fr   => "Français",
-            KillerPDF.Services.Locale.ZhTW => "中文 (繁體)",
-            KillerPDF.Services.Locale.SlSI => "Slovenščina",
-            KillerPDF.Services.Locale.ZhCN => "中文 (简体)",
-            KillerPDF.Services.Locale.Bn   => "বাংলা",
-            KillerPDF.Services.Locale.TrTR => "Türkçe",
-            KillerPDF.Services.Locale.NbNO => "Norsk bokmål",
-            KillerPDF.Services.Locale.PtBR => "Português (Brasil)",
-            KillerPDF.Services.Locale.UkUA => "Українська",
-            KillerPDF.Services.Locale.ViVN => "Tiếng Việt",
-            KillerPDF.Services.Locale.De   => "Deutsch",
-            KillerPDF.Services.Locale.HuHU => "Magyar",
-            KillerPDF.Services.Locale.ItIT => "Italiano",
-            KillerPDF.Services.Locale.JaJP => "日本語",
-            KillerPDF.Services.Locale.PlPL => "Polski",
-            KillerPDF.Services.Locale.KkKZ => "Қазақша",
-            KillerPDF.Services.Locale.RuRU => "Русский",
-            _                              => "English",
-        };
 
         private void ViewContinuousRadio_Checked(object sender, RoutedEventArgs e) => SelectViewMode(ViewMode.Continuous);
         private void ViewSingleRadio_Checked(object sender, RoutedEventArgs e)     => SelectViewMode(ViewMode.Single);

@@ -167,7 +167,7 @@ namespace KillerPDF.Shell
                 DragCursors.BeginDrag();
                 try { DragMove(); } catch { } finally { DragCursors.EndDrag(); }
             };
-            if (ShortcutOverlay?.Parent is Grid host)
+            if (ShortcutsOverlay?.Parent is Grid host)
             {
                 if (host.RowDefinitions.Count > 0) Grid.SetRowSpan(overlay, host.RowDefinitions.Count);
                 host.Children.Add(overlay);

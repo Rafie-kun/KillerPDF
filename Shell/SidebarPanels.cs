@@ -52,7 +52,7 @@ namespace KillerPDF.Shell
                 var button = RailPanelButtons().First(entry => entry.Panel == panel).Button;
                 var menu = MakeThemedMenu();
                 AppendSidebarSideSection(menu);
-                FlyoutPlacement.UsePane(SplitHost, _sidebarSide);
+                FlyoutPlacement.UsePane(ContentPane, _sidebarSide);
                 FlyoutPlacement.Attach(menu, button);
                 menu.IsOpen = true;
                 return;

@@ -175,7 +175,6 @@ namespace KillerPDF.Shell
             LogoBar.ToolTip = WithoutShortcut(Loc("Str_TT_AppSize")) + " (" + GestureFor("CtrlShift:Equals")
                 + " / " + GestureFor("CtrlShift:Minus") + " / " + GestureFor("CtrlShift:D0") + ")";
 
-            FilmGrainCheck.ToolTip = WithGesture(Loc("Str_Theme_FilmGrain"), "AltShift:G");
             _replaceToggleBtn?.ToolTip = ShortcutTip("Str_Replace_ToggleTT", "Ctrl:H");
 
             ApplyOverflowGestures();

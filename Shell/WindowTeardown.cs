@@ -11,7 +11,7 @@ public partial class MainWindow
         if (_windowResourcesReleased) return;
         _windowResourcesReleased = true;
         Services.ThemeManager.ThemeChanged -= OnThemeChanged;
-        Services.LocaleManager.ExternalReloaded -= OnExternalLangReload;
+        Services.LocaleManager.ExternalReloaded -= RelocalizeDynamicUi;   // added by InitLanguageMenu
         App.RememberClosedWindow(this);
         if (Application.Current.MainWindow is null || ReferenceEquals(Application.Current.MainWindow, this))
             Application.Current.MainWindow = App.PrimaryWindow(this);

@@ -136,14 +136,14 @@ internal static class Program
                 Reveal((Control)window.FindName("SidebarPanelEditButton"), rail);
                 Save(window, "panel-edit.png");
             }
-            foreach (string name in new[] { "RailLangBtn", "RailThemeBtn" })
+            foreach (string name in new[] { "LangButton", "ThemeButton" })
             {
                 var button = (Button)window.FindName(name);
                 button.BringIntoView(); Pump(50);
                 button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); Pump(170);
-                var menu = (ContextMenu)window.FindName(name == "RailLangBtn" ? "LangFlyout" : "ThemeFlyout");
-                if (!menu.IsOpen || !ReferenceEquals(menu.PlacementTarget, button))
-                    throw new InvalidOperationException("Flyout lost its original button anchor: " + name);
+                var menu = (ContextMenu)window.FindName(name == "LangButton" ? "LangMenu" : "ThemeMenu");
+                if (!menu.IsOpen)
+                    throw new InvalidOperationException("The kit menu did not open from its rail button: " + name);
                 menu.IsOpen = false; Pump(50);
             }
             if (!buttons.SequenceEqual(stack.Children.OfType<Button>()))

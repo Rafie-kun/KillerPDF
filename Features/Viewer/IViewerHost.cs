@@ -75,7 +75,7 @@ namespace KillerPDF.Features
         TreeView OutlineTree { get; }
         Button SidebarOutlinesTab { get; }
         TextBlock StatusText { get; }
-        FrameworkElement ShortcutOverlay { get; }
+        FrameworkElement ShortcutsOverlay { get; }
         CheckBox LinkConfirmCheck { get; }
         ContextMenu MakeThemedMenu();
         void CloseSearchBar();

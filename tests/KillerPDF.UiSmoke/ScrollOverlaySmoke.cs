@@ -63,7 +63,7 @@ internal static class ScrollOverlaySmoke
             window = (Window)Activator.CreateInstance(assembly.GetType("KillerPDF.Shell.MainWindow", true)!)!;
             var root = (FrameworkElement)window.Content;
             if (toolbar) return VerifyToolbar(window, root, folder);
-            var overlay = (FrameworkElement)window.FindName("ShortcutOverlay");
+            var overlay = (FrameworkElement)window.FindName("ShortcutsOverlay");
             overlay.Visibility = Visibility.Visible;
             var card = (FrameworkElement)window.FindName("ShortcutCardGrid");
             var scroll = Descendants<ScrollViewer>(card).Single();

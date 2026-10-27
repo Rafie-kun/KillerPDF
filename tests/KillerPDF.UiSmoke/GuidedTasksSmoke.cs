@@ -410,7 +410,7 @@ internal static class GuidedTasksSmoke
     {
         owner.Focus(); Pump();
         owner.RaiseEvent(new KeyEventArgs(Keyboard.PrimaryDevice, PresentationSource.FromVisual(owner), Environment.TickCount, Key.F1) { RoutedEvent = Keyboard.PreviewKeyDownEvent }); Pump();
-        FrameworkElement overlay = (FrameworkElement)owner.FindName("ShortcutOverlay");
+        FrameworkElement overlay = (FrameworkElement)owner.FindName("ShortcutsOverlay");
         string label = (string)Application.Current.FindResource("Str_Guided_Title");
         if (!overlay.IsVisible || !Children(overlay).OfType<TextBlock>().Any(block => block.Text.Contains(label, StringComparison.Ordinal)))
             throw new InvalidOperationException("F1 shortcuts did not expose Guided tasks.");

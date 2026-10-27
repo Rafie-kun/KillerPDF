@@ -119,9 +119,9 @@ public partial class App
                     phase = "theme picker first open";
                     // Opening the picker synchronizes its radio buttons and loads the accent swatches.
                     // Exercise this on the actual payload, whose assembly name differs from an IDE build.
-                    var button = (System.Windows.Controls.Button)window.FindName("RailThemeBtn");
+                    var button = (System.Windows.Controls.Button)window.FindName("ThemeButton");
                     button.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Button.ClickEvent));
-                    var picker = (System.Windows.Controls.ContextMenu)window.FindName("ThemeFlyout");
+                    var picker = (System.Windows.Controls.ContextMenu)window.FindName("ThemeMenu");
                     if (!picker.IsOpen) { Finish(new InvalidOperationException("Theme picker did not open.")); return; }
                     picker.IsOpen = false;
                     Record("Theme picker opened");

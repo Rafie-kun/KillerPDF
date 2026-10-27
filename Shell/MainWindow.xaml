@@ -2293,7 +2293,7 @@
                                     </ControlTemplate>
                                 </Button.Template>
                             </Button>
-                            <Button x:Name="RailLangBtn" Click="RailLang_Click" ContextMenuOpening="RailMenu_Opening"
+                            <Button x:Name="LangButton" Click="LangButton_Click"
                                     Cursor="Hand" FocusVisualStyle="{x:Null}"
                                     ToolTip="{DynamicResource Str_Language}"
                                     Width="24" Height="24" Padding="0" Margin="0,0,0,6">
@@ -2321,7 +2321,7 @@
                                     </ControlTemplate>
                                 </Button.Template>
                                 <Button.ContextMenu>
-                                    <ContextMenu x:Name="LangFlyout">
+                                    <ContextMenu x:Name="LangMenu">
                                         <!-- Family flyout standard: chrome ONLY from FlyoutCard/FlyoutGrain, grain LAST. -->
                                         <ContextMenu.Template>
                                             <ControlTemplate TargetType="ContextMenu">
@@ -2338,287 +2338,11 @@
                                         <ContextMenu.ItemContainerStyle>
                                             <Style TargetType="MenuItem" BasedOn="{StaticResource PanelMenuItem}"/>
                                         </ContextMenu.ItemContainerStyle>
-                        <StackPanel x:Name="LangSubmenu" Orientation="Horizontal" Margin="12,10,14,10">
-                            <StackPanel Width="200">
-                                    <RadioButton x:Name="LangEnRadio" GroupName="LangGroup" Style="{StaticResource ThemeRadio}"
-                                                 Checked="LangEnRadio_Checked">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="English" VerticalAlignment="Center"
-                                                       FontFamily="{DynamicResource UiFont}"/>
-                                            <TextBlock Grid.Column="1" Text="en-US" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
-                                                       Foreground="{DynamicResource MutedTextBrush}"/>
-                                        </Grid>
-                                    </RadioButton>
-                                    <RadioButton x:Name="LangBnRadio" GroupName="LangGroup" Style="{StaticResource ThemeRadio}"
-                                                 Checked="LangBnRadio_Checked">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="বাংলা" VerticalAlignment="Center"
-                                                       FontFamily="{DynamicResource UiFont}"/>
-                                            <TextBlock Grid.Column="1" Text="bn" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
-                                                       Foreground="{DynamicResource MutedTextBrush}"/>
-                                        </Grid>
-                                    </RadioButton>
-                                    <RadioButton x:Name="LangCsRadio" GroupName="LangGroup" Style="{StaticResource ThemeRadio}"
-                                                 Checked="LangCsRadio_Checked">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="Čeština" VerticalAlignment="Center"
-                                                       FontFamily="{DynamicResource UiFont}"/>
-                                            <TextBlock Grid.Column="1" Text="cs-CZ" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
-                                                       Foreground="{DynamicResource MutedTextBrush}"/>
-                                        </Grid>
-                                    </RadioButton>
-                                    <RadioButton x:Name="LangDeRadio" GroupName="LangGroup" Style="{StaticResource ThemeRadio}"
-                                                 Checked="LangDeRadio_Checked">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="Deutsch" VerticalAlignment="Center"
-                                                       FontFamily="{DynamicResource UiFont}"/>
-                                            <TextBlock Grid.Column="1" Text="de-DE" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
-                                                       Foreground="{DynamicResource MutedTextBrush}"/>
-                                        </Grid>
-                                    </RadioButton>
-                                    <RadioButton x:Name="LangEsRadio" GroupName="LangGroup" Style="{StaticResource ThemeRadio}"
-                                                 Checked="LangEsRadio_Checked">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="Español" VerticalAlignment="Center"
-                                                       FontFamily="{DynamicResource UiFont}"/>
-                                            <TextBlock Grid.Column="1" Text="es" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
-                                                       Foreground="{DynamicResource MutedTextBrush}"/>
-                                        </Grid>
-                                    </RadioButton>
-                                    <RadioButton x:Name="LangFrRadio" GroupName="LangGroup" Style="{StaticResource ThemeRadio}"
-                                                 Checked="LangFrRadio_Checked">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="Français" VerticalAlignment="Center"
-                                                       FontFamily="{DynamicResource UiFont}"/>
-                                            <TextBlock Grid.Column="1" Text="fr-FR" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
-                                                       Foreground="{DynamicResource MutedTextBrush}"/>
-                                        </Grid>
-                                    </RadioButton>
-                                    <RadioButton x:Name="LangHuRadio" GroupName="LangGroup" Style="{StaticResource ThemeRadio}"
-                                                 Checked="LangHuRadio_Checked">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="Magyar" VerticalAlignment="Center"
-                                                       FontFamily="{DynamicResource UiFont}"/>
-                                            <TextBlock Grid.Column="1" Text="hu-HU" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
-                                                       Foreground="{DynamicResource MutedTextBrush}"/>
-                                        </Grid>
-                                    </RadioButton>
-                                    <RadioButton x:Name="LangItalianRadio" GroupName="LangGroup" Style="{StaticResource ThemeRadio}"
-                                                 Checked="LangItalianRadio_Checked">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="Italiano" VerticalAlignment="Center"
-                                                       FontFamily="{DynamicResource UiFont}"/>
-                                            <TextBlock Grid.Column="1" Text="it-IT" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
-                                                       Foreground="{DynamicResource MutedTextBrush}"/>
-                                        </Grid>
-                                    </RadioButton>
-                                    <RadioButton x:Name="LangJaRadio" GroupName="LangGroup" Style="{StaticResource ThemeRadio}"
-                                                 Checked="LangJaRadio_Checked">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="日本語" VerticalAlignment="Center"
-                                                       FontFamily="{DynamicResource UiFont}"/>
-                                            <TextBlock Grid.Column="1" Text="ja-JP" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
-                                                       Foreground="{DynamicResource MutedTextBrush}"/>
-                                        </Grid>
-                                    </RadioButton>
-                                    <RadioButton x:Name="LangKkRadio" GroupName="LangGroup" Style="{StaticResource ThemeRadio}"
-                                                 Checked="LangKkRadio_Checked">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="Қазақша" VerticalAlignment="Center"
-                                                       FontFamily="{DynamicResource UiFont}"/>
-                                            <TextBlock Grid.Column="1" Text="kk-KZ" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
-                                                       Foreground="{DynamicResource MutedTextBrush}"/>
-                                        </Grid>
-                                    </RadioButton>
-                            </StackPanel>
-                            <Border Width="1" Margin="6,8,7,8" Opacity="0.18" IsHitTestVisible="False"
-                                    Background="{DynamicResource TextBrush}">
-                                <Border.OpacityMask>
-                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                        <GradientStop Color="Transparent" Offset="0"/>
-                                        <GradientStop Color="Black" Offset="0.15"/>
-                                        <GradientStop Color="Black" Offset="0.85"/>
-                                        <GradientStop Color="Transparent" Offset="1"/>
-                                    </LinearGradientBrush>
-                                </Border.OpacityMask>
-                            </Border>
-                            <StackPanel Width="200">
-                                    <RadioButton x:Name="LangNbRadio" GroupName="LangGroup" Style="{StaticResource ThemeRadio}"
-                                                 Checked="LangNbRadio_Checked">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="Norsk bokmål" VerticalAlignment="Center"
-                                                       FontFamily="{DynamicResource UiFont}"/>
-                                            <TextBlock Grid.Column="1" Text="nb-NO" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
-                                                       Foreground="{DynamicResource MutedTextBrush}"/>
-                                        </Grid>
-                                    </RadioButton>
-                                    <RadioButton x:Name="LangPlRadio" GroupName="LangGroup" Style="{StaticResource ThemeRadio}"
-                                                 Checked="LangPlRadio_Checked">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="Polski" VerticalAlignment="Center"
-                                                       FontFamily="{DynamicResource UiFont}"/>
-                                            <TextBlock Grid.Column="1" Text="pl-PL" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
-                                                       Foreground="{DynamicResource MutedTextBrush}"/>
-                                        </Grid>
-                                    </RadioButton>
-                                    <RadioButton x:Name="LangPtRadio" GroupName="LangGroup" Style="{StaticResource ThemeRadio}"
-                                                 Checked="LangPtRadio_Checked">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="Português (Brasil)" VerticalAlignment="Center"
-                                                       FontFamily="{DynamicResource UiFont}"/>
-                                            <TextBlock Grid.Column="1" Text="pt-BR" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
-                                                       Foreground="{DynamicResource MutedTextBrush}"/>
-                                        </Grid>
-                                    </RadioButton>
-                                    <RadioButton x:Name="LangRuRadio" GroupName="LangGroup" Style="{StaticResource ThemeRadio}"
-                                                 Checked="LangRuRadio_Checked">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="Русский" VerticalAlignment="Center"
-                                                       FontFamily="{DynamicResource UiFont}"/>
-                                            <TextBlock Grid.Column="1" Text="ru-RU" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
-                                                       Foreground="{DynamicResource MutedTextBrush}"/>
-                                        </Grid>
-                                    </RadioButton>
-                                    <RadioButton x:Name="LangSlRadio" GroupName="LangGroup" Style="{StaticResource ThemeRadio}"
-                                                 Checked="LangSlRadio_Checked">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="Slovenščina" VerticalAlignment="Center"
-                                                       FontFamily="{DynamicResource UiFont}"/>
-                                            <TextBlock Grid.Column="1" Text="sl-SI" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
-                                                       Foreground="{DynamicResource MutedTextBrush}"/>
-                                        </Grid>
-                                    </RadioButton>
-                                    <RadioButton x:Name="LangTrRadio" GroupName="LangGroup" Style="{StaticResource ThemeRadio}"
-                                                 Checked="LangTrRadio_Checked">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="Türkçe" VerticalAlignment="Center"
-                                                       FontFamily="{DynamicResource UiFont}"/>
-                                            <TextBlock Grid.Column="1" Text="tr-TR" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
-                                                       Foreground="{DynamicResource MutedTextBrush}"/>
-                                        </Grid>
-                                    </RadioButton>
-                                    <RadioButton x:Name="LangUkRadio" GroupName="LangGroup" Style="{StaticResource ThemeRadio}"
-                                                 Checked="LangUkRadio_Checked">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="Українська" VerticalAlignment="Center"
-                                                       FontFamily="{DynamicResource UiFont}"/>
-                                            <TextBlock Grid.Column="1" Text="uk-UA" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
-                                                       Foreground="{DynamicResource MutedTextBrush}"/>
-                                        </Grid>
-                                    </RadioButton>
-                                    <RadioButton x:Name="LangViRadio" GroupName="LangGroup" Style="{StaticResource ThemeRadio}"
-                                                 Checked="LangViRadio_Checked">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="Tiếng Việt" VerticalAlignment="Center"
-                                                       FontFamily="{DynamicResource UiFont}"/>
-                                            <TextBlock Grid.Column="1" Text="vi-VN" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
-                                                       Foreground="{DynamicResource MutedTextBrush}"/>
-                                        </Grid>
-                                    </RadioButton>
-                                    <RadioButton x:Name="LangZhCNRadio" GroupName="LangGroup" Style="{StaticResource ThemeRadio}"
-                                                 Checked="LangZhCNRadio_Checked">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="中文 (简体)" VerticalAlignment="Center"
-                                                       FontFamily="{DynamicResource UiFont}"/>
-                                            <TextBlock Grid.Column="1" Text="zh-CN" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
-                                                       Foreground="{DynamicResource MutedTextBrush}"/>
-                                        </Grid>
-                                    </RadioButton>
-                                    <RadioButton x:Name="LangZhTWRadio" GroupName="LangGroup" Style="{StaticResource ThemeRadio}"
-                                                 Checked="LangZhTWRadio_Checked">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="中文 (繁體)" VerticalAlignment="Center"
-                                                       FontFamily="{DynamicResource UiFont}"/>
-                                            <TextBlock Grid.Column="1" Text="zh-TW" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"
-                                                       Foreground="{DynamicResource MutedTextBrush}"/>
-                                        </Grid>
-                                    </RadioButton>
-                            </StackPanel>
-                        </StackPanel>
+                                        <!-- Items are built in code by the kit's LanguageMenu (Controls/LanguageMenu.cs) each time it opens. -->
                                     </ContextMenu>
                                 </Button.ContextMenu>
                             </Button>
-                            <Button x:Name="RailThemeBtn" Click="RailTheme_Click" ContextMenuOpening="RailMenu_Opening"
+                            <Button x:Name="ThemeButton" Click="ThemeButton_Click"
                                     Cursor="Hand" FocusVisualStyle="{x:Null}"
                                     ToolTip="{DynamicResource Str_Theme}"
                                     Width="24" Height="24" Padding="0">
@@ -2646,7 +2370,7 @@
                                     </ControlTemplate>
                                 </Button.Template>
                                 <Button.ContextMenu>
-                                    <ContextMenu x:Name="ThemeFlyout">
+                                    <ContextMenu x:Name="ThemeMenu">
                                         <!-- Family flyout standard: chrome ONLY from FlyoutCard/FlyoutGrain, grain LAST. -->
                                         <ContextMenu.Template>
                                             <ControlTemplate TargetType="ContextMenu">
@@ -2663,116 +2387,7 @@
                                         <ContextMenu.ItemContainerStyle>
                                             <Style TargetType="MenuItem" BasedOn="{StaticResource PanelMenuItem}"/>
                                         </ContextMenu.ItemContainerStyle>
-                        <!-- #199 (Ryokoxx's design): the accent picker is a vertical STRIP beside the
-                             list, not rows inside it. The list is the same height on every theme, so
-                             the bottom-pinned card never moves; the strip animates its WIDTH toward
-                             the document side. Swatch colors are painted per family in code
-                             (PopulateAccentStrip). -->
-                        <!-- Hover rows sit 4px in from both menu edges: 12 left less the row's -8,
-                             and 2 right plus the row's own 2. The theme column fills the menu (*)
-                             so the hover reaches across when the menu is wider than the list.
-                             SyncThemeFlyoutSide mirrors the columns for a right-hand rail. -->
-                        <Grid x:Name="ThemePickerLayout" Margin="12,10,2,10">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                        <StackPanel x:Name="ThemeSubmenu" MinWidth="120" Grid.Column="0">
-                                    <RadioButton x:Name="ThemeDarkRadio"
-                                                 Content="{DynamicResource Str_Theme_Dark}"
-                                                 GroupName="ThemeGroup"
-                                                 Style="{StaticResource ThemeRadio}"
-                                                 Checked="ThemeDarkRadio_Checked"/>
-                                    <!-- Each family's picker sits under its own theme. The rows animate their HEIGHT
-                                         (clipped), so when you switch, the old row shrinks while the new one grows by
-                                         the same amount: the picker slides to the selected theme and the total menu
-                                         height never changes. ROYGBIV order. -->
-                                    <RadioButton x:Name="ThemeLightRadio"
-                                                 Content="{DynamicResource Str_Theme_Light}"
-                                                 GroupName="ThemeGroup"
-                                                 Style="{StaticResource ThemeRadio}"
-                                                 Checked="ThemeLightRadio_Checked"/>
-                                    <RadioButton x:Name="ThemeHCRadio"
-                                                 Content="{DynamicResource Str_Theme_Black}"
-                                                 GroupName="ThemeGroup"
-                                                 Style="{StaticResource ThemeRadio}"
-                                                 Checked="ThemeHCRadio_Checked"/>
-                                    <RadioButton x:Name="Theme98SERadio" Content="{DynamicResource Str_Theme_98SE}" GroupName="ThemeGroup" Style="{StaticResource ThemeRadio}" Checked="Theme98SERadio_Checked"/>
-                                    <RadioButton x:Name="ThemeBloodRadio"
-                                                 Content="{DynamicResource Str_Theme_Blood}"
-                                                 GroupName="ThemeGroup"
-                                                 Style="{StaticResource ThemeRadio}"
-                                                 Checked="ThemeBloodRadio_Checked"/>
-                                    <RadioButton x:Name="ThemeGreedRadio"
-                                                 Content="{DynamicResource Str_Theme_Greed}"
-                                                 GroupName="ThemeGroup"
-                                                 Style="{StaticResource ThemeRadio}"
-                                                 Checked="ThemeGreedRadio_Checked"/>
-                                    <RadioButton x:Name="ThemeCyanoticRadio"
-                                                 Content="{DynamicResource Str_Theme_Cyanotic}"
-                                                 GroupName="ThemeGroup"
-                                                 Style="{StaticResource ThemeRadio}"
-                                                 Checked="ThemeCyanoticRadio_Checked"/>
-                                    <RadioButton x:Name="ThemeEctoplasmRadio" Content="{DynamicResource Str_Theme_Ectoplasm}" GroupName="ThemeGroup" Style="{StaticResource ThemeRadio}" Checked="ThemeEctoplasmRadio_Checked"/>
-                                    <RadioButton x:Name="ThemeDecayRadio" Content="{DynamicResource Str_Theme_Decay}" GroupName="ThemeGroup" Style="{StaticResource ThemeRadio}" Checked="ThemeDecayRadio_Checked"/>
-                                    <RadioButton x:Name="ThemeMalaiseRadio" Content="{DynamicResource Str_Theme_Malaise}" GroupName="ThemeGroup" Style="{StaticResource ThemeRadio}" Checked="ThemeMalaiseRadio_Checked"/>
-                                    <RadioButton x:Name="ThemeSepulchreRadio" Content="{DynamicResource Str_Theme_Sepulchre}" GroupName="ThemeGroup" Style="{StaticResource ThemeRadio}" Checked="ThemeSepulchreRadio_Checked"/>
-                                    <RadioButton x:Name="ThemeDeliriumRadio" Content="{DynamicResource Str_Theme_Delirium}" GroupName="ThemeGroup" Style="{StaticResource ThemeRadio}" Checked="ThemeDeliriumRadio_Checked"/>
-                                    <RadioButton x:Name="ThemeMourningRadio" Content="{DynamicResource Str_Theme_Mourning}" GroupName="ThemeGroup" Style="{StaticResource ThemeRadio}" Checked="ThemeMourningRadio_Checked"/>
-                        </StackPanel>
-                            <Grid x:Name="AccentStripHost" Grid.Column="1" Width="0" ClipToBounds="True">
-                                <Border x:Name="AccentStripDivider" Width="1" HorizontalAlignment="Left" Margin="0,6"
-                                        Background="{DynamicResource MenuBorderBrush}"/>
-                                <!-- Eight equal rows stretched over the list's full height: the swatches
-                                     are tall pills, not dots, filling the vertical room the strip has.
-                                     Height="Auto" clears the AccentDot style's fixed 18 so the rows
-                                     size them; the 9px radius caps the 18px width into capsule ends
-                                     (98SE's 0 keeps them square). -->
-                                <Grid x:Name="AccentStrip" Margin="7,6,2,6">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="*"/>
-                                        <RowDefinition Height="*"/>
-                                        <RowDefinition Height="*"/>
-                                        <RowDefinition Height="*"/>
-                                        <RowDefinition Height="*"/>
-                                        <RowDefinition Height="*"/>
-                                        <RowDefinition Height="*"/>
-                                        <RowDefinition Height="*"/>
-                                    </Grid.RowDefinitions>
-                                    <Border x:Name="AccentStripDot0" Grid.Row="0" Style="{StaticResource AccentDot}" Width="26" Height="Auto" VerticalAlignment="Stretch" Margin="0,0,0,8" MouseLeftButtonUp="AccentStripDot_Click"/>
-                                    <Border x:Name="AccentStripDot1" Grid.Row="1" Style="{StaticResource AccentDot}" Width="26" Height="Auto" VerticalAlignment="Stretch" Margin="0,0,0,8" MouseLeftButtonUp="AccentStripDot_Click"/>
-                                    <Border x:Name="AccentStripDot2" Grid.Row="2" Style="{StaticResource AccentDot}" Width="26" Height="Auto" VerticalAlignment="Stretch" Margin="0,0,0,8" MouseLeftButtonUp="AccentStripDot_Click"/>
-                                    <Border x:Name="AccentStripDot3" Grid.Row="3" Style="{StaticResource AccentDot}" Width="26" Height="Auto" VerticalAlignment="Stretch" Margin="0,0,0,8" MouseLeftButtonUp="AccentStripDot_Click"/>
-                                    <Border x:Name="AccentStripDot4" Grid.Row="4" Style="{StaticResource AccentDot}" Width="26" Height="Auto" VerticalAlignment="Stretch" Margin="0,0,0,8" MouseLeftButtonUp="AccentStripDot_Click"/>
-                                    <Border x:Name="AccentStripDot5" Grid.Row="5" Style="{StaticResource AccentDot}" Width="26" Height="Auto" VerticalAlignment="Stretch" Margin="0,0,0,8" MouseLeftButtonUp="AccentStripDot_Click"/>
-                                    <Border x:Name="AccentStripDot6" Grid.Row="6" Style="{StaticResource AccentDot}" Width="26" Height="Auto" VerticalAlignment="Stretch" Margin="0,0,0,8" MouseLeftButtonUp="AccentStripDot_Click"/>
-                                    <Border x:Name="AccentStripDot7" Grid.Row="7" Style="{StaticResource AccentDot}" Width="26" Height="Auto" VerticalAlignment="Stretch" Margin="0" MouseLeftButtonUp="AccentStripDot_Click"/>
-                                </Grid>
-                            </Grid>
-                            <!-- Film Grain: one switch for the grain texture on every surface
-                                 (Services/FilmGrain.cs). Its own row under both columns, so the
-                                 accent strip still runs the height of the theme list only. -->
-                            <StackPanel Grid.Row="1" Grid.ColumnSpan="2">
-                                <Border Height="1" Margin="0,0,9,8" Opacity="0.18" IsHitTestVisible="False"
-                                        Background="{DynamicResource TextBrush}">
-                                    <Border.OpacityMask>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                            <GradientStop Color="Transparent" Offset="0"/>
-                                            <GradientStop Color="Black" Offset="0.15"/>
-                                            <GradientStop Color="Black" Offset="0.85"/>
-                                            <GradientStop Color="Transparent" Offset="1"/>
-                                        </LinearGradientBrush>
-                                    </Border.OpacityMask>
-                                </Border>
-                                <CheckBox x:Name="FilmGrainCheck" Content="{DynamicResource Str_Theme_FilmGrain}"
-                                          Style="{StaticResource ThemeCheck}" Margin="0"
-                                          Click="FilmGrainCheck_Click"/>
-                            </StackPanel>
-                        </Grid>
+                                        <!-- Items are built in code by the kit's ThemePicker (Controls/ThemePicker.cs) each time it opens. -->
                                     </ContextMenu>
                                 </Button.ContextMenu>
                             </Button>
@@ -2857,7 +2472,7 @@
                  pane's tab above the FIRST pane, because there is one strip and it belongs to the
                  window rather than to a pane. Each pane owns its own, so it tracks that pane's
                  width and position for free - including through a boundary drag, which a
-                 window-owned strip would have to chase by hand. SplitHost below spans rows 0-1 so
+                 window-owned strip would have to chase by hand. ContentPane below spans rows 0-1 so
                  both panes reach up into what would be the band's row. The 8px right margin and the
                  WindowChrome.IsHitTestVisibleInChrome on TabScroll live in the control too; inside
                  it the strip simply spans the pane, so the alignment that margin compensated for is
@@ -2902,7 +2517,7 @@
             <!-- RowSpan 2: each pane contains its own tab strip in its first row, so the panes have
                  to occupy the row a window-level tab band would use. The -1 top margin lives on the
                  card INSIDE the control, since it tucks the card under that pane's own strip. -->
-            <Grid x:Name="SplitHost" Grid.Row="0" Grid.RowSpan="2" Grid.Column="2" Margin="{DynamicResource SplitHostMargin}">
+            <Grid x:Name="ContentPane" Grid.Row="0" Grid.RowSpan="2" Grid.Column="2" Margin="{DynamicResource SplitHostMargin}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
@@ -3342,7 +2957,7 @@
         </Canvas>
 
         <!-- Keyboard shortcut overlay - neutral dark dim regardless of theme -->
-        <Grid x:Name="ShortcutOverlay"
+        <Grid x:Name="ShortcutsOverlay"
               Grid.RowSpan="5"
               Panel.ZIndex="10000"
               Visibility="Collapsed"

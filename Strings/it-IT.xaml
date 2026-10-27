@@ -230,6 +230,7 @@ La pagina può essere sostituita da un'immagine di sé stessa con le aree contra
 
     <!-- ── Status bar ────────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Ready">Pronto</sys:String>
+    <sys:String x:Key="Str_Status_Ready">Pronto</sys:String>
     <sys:String x:Key="Str_Portable">PORTATILE</sys:String>
     <sys:String x:Key="Str_InstallBtn">Installa KillerPDF</sys:String>
 

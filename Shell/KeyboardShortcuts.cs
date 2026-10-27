@@ -244,9 +244,9 @@ namespace KillerPDF.Shell
                 HideCropConfirmBar();
                 e.Handled = true;
             }
-            else if (key == Key.Escape && ShortcutOverlay.Visibility == Visibility.Visible)
+            else if (key == Key.Escape && ShortcutsOverlay.Visibility == Visibility.Visible)
             {
-                FadeOverlayOut(ShortcutOverlay);
+                FadeOverlayOut(ShortcutsOverlay);
                 e.Handled = true;
             }
             else if (key == Key.Escape && AboutOverlay.Visibility == Visibility.Visible)
@@ -275,14 +275,14 @@ namespace KillerPDF.Shell
             else if (Services.KeyLayout.IsCtrlChar(key, '?')
                      || (key == Key.OemQuestion && mods == ModifierKeys.Control))
             {
-                if (ShortcutOverlay.Visibility == Visibility.Visible) FadeOverlayOut(ShortcutOverlay);
+                if (ShortcutsOverlay.Visibility == Visibility.Visible) FadeOverlayOut(ShortcutsOverlay);
                 else ShowShortcutsOverlayExclusive();
                 e.Handled = true;
             }
             else if (key == Key.F1)
             {
                 // Toggle the shortcuts overlay (conventional Help key, alongside Ctrl+?).
-                if (ShortcutOverlay.Visibility == Visibility.Visible) FadeOverlayOut(ShortcutOverlay);
+                if (ShortcutsOverlay.Visibility == Visibility.Visible) FadeOverlayOut(ShortcutsOverlay);
                 else ShowShortcutsOverlayExclusive();
                 e.Handled = true;
             }
@@ -299,14 +299,14 @@ namespace KillerPDF.Shell
                 // Document Info - the advertised single-key shortcut (F1 help, F4 info, F5-F8 views,
                 // F11 full screen, F12 about). Looked it up on the shortcuts overlay and pressed it?
                 // The cheat sheet gets out of the way first.
-                if (ShortcutOverlay.Visibility == Visibility.Visible) FadeOverlayOut(ShortcutOverlay);
+                if (ShortcutsOverlay.Visibility == Visibility.Visible) FadeOverlayOut(ShortcutsOverlay);
                 OpenDocumentInfo();
                 e.Handled = true;
             }
             else if (key == Key.D && mods == ModifierKeys.Control)
             {
                 // Compatibility alias: Ctrl+D is Document Properties in Acrobat, Foxit, and SumatraPDF.
-                if (ShortcutOverlay.Visibility == Visibility.Visible) FadeOverlayOut(ShortcutOverlay);
+                if (ShortcutsOverlay.Visibility == Visibility.Visible) FadeOverlayOut(ShortcutsOverlay);
                 OpenDocumentInfo();
                 e.Handled = true;
             }
@@ -475,7 +475,7 @@ namespace KillerPDF.Shell
             }
             else if (key == Key.B && mods == ModifierKeys.None && _doc is not null
                      && _viewMode == ViewMode.TwoPage
-                     && ShortcutOverlay.Visibility != Visibility.Visible
+                     && ShortcutsOverlay.Visibility != Visibility.Visible
                      && AboutOverlay.Visibility != Visibility.Visible)
             {
                 // #193: bare B = book layout toggle, only while Two-Page is active (single-key
@@ -484,7 +484,7 @@ namespace KillerPDF.Shell
                 e.Handled = true;
             }
             else if (key == Key.N && mods == ModifierKeys.None && _doc is not null
-                     && ShortcutOverlay.Visibility != Visibility.Visible
+                     && ShortcutsOverlay.Visibility != Visibility.Visible
                      && AboutOverlay.Visibility != Visibility.Visible)
             {
                 // Bare N = invert document colors (night mode), #135. Moved off Ctrl+I in 1.6.6 so
@@ -494,7 +494,7 @@ namespace KillerPDF.Shell
                 e.Handled = true;
             }
             else if (key == Key.N && mods == ModifierKeys.Shift && _doc is not null
-                     && ShortcutOverlay.Visibility != Visibility.Visible
+                     && ShortcutsOverlay.Visibility != Visibility.Visible
                      && AboutOverlay.Visibility != Visibility.Visible)
             {
                 // Shift+N pairs with bare N: toggles whether night mode inverts pictures too
@@ -503,7 +503,7 @@ namespace KillerPDF.Shell
                 e.Handled = true;
             }
             else if (key == Key.O && mods == ModifierKeys.Shift && _doc is not null
-                     && ShortcutOverlay.Visibility != Visibility.Visible
+                     && ShortcutsOverlay.Visibility != Visibility.Visible
                      && AboutOverlay.Visibility != Visibility.Visible)
             {
                 // Shift+O pairs with the Shapes key O: steps to the next shape type.
@@ -511,7 +511,7 @@ namespace KillerPDF.Shell
                 e.Handled = true;
             }
             else if (key == Key.M && mods == ModifierKeys.Shift && _doc is not null
-                     && ShortcutOverlay.Visibility != Visibility.Visible
+                     && ShortcutsOverlay.Visibility != Visibility.Visible
                      && AboutOverlay.Visibility != Visibility.Visible)
             {
                 // Shift+M pairs with the Measure key M: steps to the next measurement type.
@@ -644,7 +644,7 @@ namespace KillerPDF.Shell
             // Bare-key tool switches. Only when a document is open, no modifier is held, and no
             // overlay is up (and not while typing - guarded at the top of this handler).
             else if (mods == ModifierKeys.None && _doc is not null
-                     && ShortcutOverlay.Visibility != Visibility.Visible
+                     && ShortcutsOverlay.Visibility != Visibility.Visible
                      && AboutOverlay.Visibility != Visibility.Visible
                      && TryToolShortcut(key))
             {
@@ -716,7 +716,7 @@ namespace KillerPDF.Shell
         {
             if (AboutOverlay.Visibility == Visibility.Visible) FadeOverlayOut(AboutOverlay);
             ApplyPersistedShortcutView();
-            FadeOverlayIn(ShortcutOverlay);
+            FadeOverlayIn(ShortcutsOverlay);
         }
 
         // ── Jump history (Alt+Left / Alt+Right / mouse back-forward buttons) ─────────────────────
@@ -889,11 +889,7 @@ namespace KillerPDF.Shell
         }
 
         // Alt+Shift+G: Film Grain on or off, kept in step with the theme menu's check box.
-        private void ToggleFilmGrain()
-        {
-            FilmGrain.Set(!FilmGrain.Enabled);
-            FilmGrainCheck.IsChecked = FilmGrain.Enabled;
-        }
+        private void ToggleFilmGrain() => _themePicker.ToggleFilmGrain();
 
         // Ctrl+Shift+N: the keyboard twin of dragging the active tab out of the window.
         private void MoveActiveTabToNewWindow()

@@ -154,7 +154,7 @@ namespace KillerPDF.Controls
 
         // ── Chrome ───────────────────────────────────────────────────────────────────────────
         private TextBlock StatusText => Host!.StatusText;
-        private FrameworkElement ShortcutOverlay => Host!.ShortcutOverlay;
+        private FrameworkElement ShortcutsOverlay => Host!.ShortcutsOverlay;
         private CheckBox LinkConfirmCheck => Host!.LinkConfirmCheck;
 
         // ── Methods still on the window ──────────────────────────────────────────────────────

@@ -107,7 +107,7 @@ namespace KillerPDF.Shell
             // Queued, never run inline. ApplyPaneWidths writes the column widths, which is itself a
             // layout change - assigning straight from the handler re-enters the layout pass it was
             // raised by. At Background priority it runs after that pass has finished.
-            SplitHost.SizeChanged += (_, _) =>
+            ContentPane.SizeChanged += (_, _) =>
                 Dispatcher.BeginInvoke(new Action(OnSplitHostResized),
                                        System.Windows.Threading.DispatcherPriority.Background);
 
@@ -285,7 +285,7 @@ namespace KillerPDF.Shell
             {
                 PaneGutterCol.Width = new GridLength(SplitGutter);
                 // NOT called synchronously here. RestoreWindowSettings ran moments ago in the same
-                // Loaded handler, but WPF layout is asynchronous - SplitHost.ActualWidth at this
+                // Loaded handler, but WPF layout is asynchronous - ContentPane.ActualWidth at this
                 // point still reflects the window's PRE-restore size (or 0), not the size just
                 // assigned. Calling ApplyPaneWidths against that stale/zero width is what clamped
                 // pane A down and left pane B with whatever tiny remainder fell out - the saved
@@ -295,7 +295,7 @@ namespace KillerPDF.Shell
                 // hidden behind RootGrid's opacity hold at this point (see ContentRendered),
                 // so there is nothing to see between the temporary zero-width column set two lines
                 // up and this correcting it.
-                // SyncSplitMinWidth reads SplitHost.ActualWidth too (via its "chrome" measurement),
+                // SyncSplitMinWidth reads ContentPane.ActualWidth too (via its "chrome" measurement),
                 // so it rides along in the same deferred call rather than running synchronously
                 // below against the same stale width.
                 Dispatcher.BeginInvoke(new Action(() =>
@@ -364,7 +364,7 @@ namespace KillerPDF.Shell
         private System.Windows.Threading.DispatcherTimer? _splitAnim;
 
         /// <summary>True while the open/close slide is running. ApplyPaneWidths sits it out - it is
-        /// driven from SplitHost's SizeChanged, which fires on every frame of the slide, and it
+        /// driven from ContentPane's SizeChanged, which fires on every frame of the slide, and it
         /// would put pane B straight back on the star column and undo the animation.</summary>
         private bool _splitAnimating;
 
@@ -592,7 +592,7 @@ namespace KillerPDF.Shell
         /// B is the star that takes what is left. Run on every split-host resize as well as on the
         /// gutter drag, so narrowing the window comes out of B until B is at the minimum, then out
         /// of A until A is too. Neither pane can be squeezed below MinPaneWidth from any direction.</summary>
-        /// <summary>SplitHost.SizeChanged lands here. A size change OUTSIDE an interactive
+        /// <summary>ContentPane.SizeChanged lands here. A size change OUTSIDE an interactive
         /// move/resize is a window-state jump - snap, maximize, unmaximize, full screen - and those
         /// keep the panes' RATIO; a 50/50 split must not come out of maximize as 75/25. An edge
         /// drag keeps pane A fixed so the window edge eats pane B only (see _paneAWidth).</summary>
@@ -600,7 +600,7 @@ namespace KillerPDF.Shell
         {
             if (_isSplit && !_inWindowSizeMove && !_draggingSplit && _paneARatio > 0)
             {
-                double avail = SplitHost.ActualWidth - SplitGutter;
+                double avail = ContentPane.ActualWidth - SplitGutter;
                 if (avail > 0) _paneAWidth = Math.Max(MinPaneWidth, avail * _paneARatio);
             }
             ApplyPaneWidths();
@@ -609,7 +609,7 @@ namespace KillerPDF.Shell
         private void ApplyPaneWidths()
         {
             if (!_isSplit || _splitAnimating) return;   // the slide owns the columns while it runs
-            double avail = SplitHost.ActualWidth - SplitGutter;
+            double avail = ContentPane.ActualWidth - SplitGutter;
             if (avail <= 0) return;
 
             double aW = _paneAWidth > 0 ? _paneAWidth : avail / 2;
@@ -698,7 +698,7 @@ namespace KillerPDF.Shell
         /// overflow arrows. Sidebar and footer geometry are measured in the current layout.</summary>
         private void SyncSplitMinWidth()
         {
-            double chrome = Math.Max(0, ActualWidth - SplitHost.ActualWidth);
+            double chrome = Math.Max(0, ActualWidth - ContentPane.ActualWidth);
             double floor = _isSplit
                 ? chrome + SplitGutter + MinPaneWidth * 2
                 : chrome + MinPaneWidth;
@@ -717,7 +717,7 @@ namespace KillerPDF.Shell
         {
             if (!_isSplit || sender is not Border h) return;
             _draggingSplit        = true;
-            _splitDragStartX      = e.GetPosition(SplitHost).X;
+            _splitDragStartX      = e.GetPosition(ContentPane).X;
             _splitDragStartAWidth = Viewer.ActualWidth;
             h.CaptureMouse();
             e.Handled = true;
@@ -733,8 +733,8 @@ namespace KillerPDF.Shell
             // steals capture. Checking the real button state on every move ends the drag anyway.
             if (e.LeftButton != MouseButtonState.Pressed) { EndSplitDrag(h); return; }
 
-            double dx    = e.GetPosition(SplitHost).X - _splitDragStartX;
-            double total = SplitHost.ActualWidth;
+            double dx    = e.GetPosition(ContentPane).X - _splitDragStartX;
+            double total = ContentPane.ActualWidth;
             double aimA  = _splitDragStartAWidth + dx;
 
             double maxA = total - SplitGutter - MinPaneWidth;

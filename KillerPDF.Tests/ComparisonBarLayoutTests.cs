@@ -175,7 +175,7 @@ public sealed class ComparisonBarLayoutTests
         XNamespace x = "http://schemas.microsoft.com/winfx/2006/xaml";
 
         XElement splitHost = document.Descendants()
-            .Single(element => (string?)element.Attribute(x + "Name") == "SplitHost");
+            .Single(element => (string?)element.Attribute(x + "Name") == "ContentPane");
         XElement rowDefinitions = splitHost.Elements()
             .Single(element => element.Name.LocalName == "Grid.RowDefinitions");
         Assert.Equal(new[] { "*", "Auto" }, rowDefinitions.Elements()

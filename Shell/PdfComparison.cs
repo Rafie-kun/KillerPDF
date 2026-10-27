@@ -206,10 +206,10 @@ public partial class MainWindow
     private void BalanceComparisonPanes()
     {
         if (!_comparisonActive || !_isSplit || _splitAnimating) return;
-        SplitHost.UpdateLayout();
-        _paneAWidth = (SplitHost.ActualWidth - SplitGutter) / 2;
+        ContentPane.UpdateLayout();
+        _paneAWidth = (ContentPane.ActualWidth - SplitGutter) / 2;
         ApplyPaneWidths();
-        SplitHost.UpdateLayout();
+        ContentPane.UpdateLayout();
     }
 
     private void ComparisonClose_Click(object sender, RoutedEventArgs e)

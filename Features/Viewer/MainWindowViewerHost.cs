@@ -48,7 +48,7 @@ namespace KillerPDF.Shell
         System.Windows.Controls.TreeView IViewerHost.OutlineTree => OutlineTree;
         System.Windows.Controls.Button IViewerHost.SidebarOutlinesTab => SidebarOutlinesTab;
         System.Windows.Controls.TextBlock IViewerHost.StatusText => StatusText;
-        FrameworkElement IViewerHost.ShortcutOverlay => ShortcutOverlay;
+        FrameworkElement IViewerHost.ShortcutsOverlay => ShortcutsOverlay;
         System.Windows.Controls.CheckBox IViewerHost.LinkConfirmCheck => LinkConfirmCheck;
         System.Windows.Controls.ContextMenu IViewerHost.MakeThemedMenu() => MakeThemedMenu();
         void IViewerHost.CloseSearchBar() => CloseSearchBar();

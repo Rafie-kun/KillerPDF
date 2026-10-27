@@ -227,7 +227,7 @@ namespace KillerPDF.Shell
         /// are mutually exclusive rather than stacking on top of one another.</summary>
         void IAboutHost.ShowCard()
         {
-            if (ShortcutOverlay.Visibility == Visibility.Visible) FadeOverlayOut(ShortcutOverlay);
+            if (ShortcutsOverlay.Visibility == Visibility.Visible) FadeOverlayOut(ShortcutsOverlay);
 
             BuildAboutStaticContent();
             if (_aboutHost is null && AboutFrontWindow() is { } front) HostAboutAbove(front);

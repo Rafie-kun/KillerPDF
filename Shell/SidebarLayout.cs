@@ -18,9 +18,9 @@ namespace KillerPDF.Shell
     {
         private void ApplySidebarSide()
         {
-            // SplitHost, NOT Viewer. Since the split landed, the element that sits in
+            // ContentPane, NOT Viewer. Since the split landed, the element that sits in
             // MainContentGrid is the SPLIT HOST - Viewer is one of its children. Setting
-            // Grid.Column on Viewer therefore moved pane A into SplitHost's column 2, which is
+            // Grid.Column on Viewer therefore moved pane A into ContentPane's column 2, which is
             // PaneBCol and is ZERO WIDTH while unsplit, so the document rendered into a pane with
             // no width and the whole content area went blank. Same for the margin below: the 8px
             // gutter to the window edge belongs to the host, not to one pane.
@@ -34,7 +34,7 @@ namespace KillerPDF.Shell
                 FindName("SidebarOuterGrid") is not Grid sbOuter ||
                 FindName("SidebarBorder") is not Border sbContent ||
                 FindName("SidebarToggleStrip") is not Border sbToggle ||
-                SplitHost is not FrameworkElement docPane ||
+                ContentPane is not FrameworkElement docPane ||
                 FindName("SbContentCol") is not ColumnDefinition sbContentCol ||
                 FindName("SbToggleCol") is not ColumnDefinition sbToggleCol ||
                 FindName("SbContentRow") is not RowDefinition sbContentRow ||
@@ -176,7 +176,7 @@ namespace KillerPDF.Shell
             // be moved in step with the pane.
             if (!_fullScreen)
             {
-                // docPane is SplitHost, so this one margin now insets BOTH panes from the window
+                // docPane is ContentPane, so this one margin now insets BOTH panes from the window
                 // edge together, which is what the 8px gutter always meant.
                 docPane.Margin = DocPaneInsetMargin();
                 // No separate tab-band margins here. Each strip is inside its own pane, so the band
@@ -184,7 +184,6 @@ namespace KillerPDF.Shell
             }
 
             UpdateSidebarToggleGlyph();
-            SyncThemeFlyoutSide();
             UpdateTabStripFade();
             // The column swap repositions the document pane; re-anchor the footer shadow once layout
             // settles (TransformToVisual needs the final positions).
@@ -687,7 +686,7 @@ namespace KillerPDF.Shell
                     Converter = new BooleanToVisibilityConverter()
                 });
             RailOrder.Attach(SidebarRailStack,
-                new FrameworkElement[] { RailThemeBtn, RailLangBtn, ShortcutHelpRailBtn },
+                new FrameworkElement[] { ThemeButton, LangButton, ShortcutHelpRailBtn },
                 new FrameworkElement[]
                 {
                     SplitPaneRailBtn, SidebarPagesTab, SidebarOutlinesTab, SidebarCommentsTab, SidebarAttachmentsTab,

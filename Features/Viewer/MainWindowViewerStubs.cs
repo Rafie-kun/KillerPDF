@@ -115,13 +115,13 @@ namespace KillerPDF.Shell
         }
         private void ShortcutHelp_Click(object sender, RoutedEventArgs e) => ActiveViewer.ShortcutHelpClickExt(sender, e);
         private void ShortcutOverlay_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-            => FadeOverlayOut(ShortcutOverlay);
+            => FadeOverlayOut(ShortcutsOverlay);
         private void ShortcutOverlayCard_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
             => e.Handled = true;
         private void ShortcutOverlayClose_Click(object sender, RoutedEventArgs e)
         {
             e.Handled = true;
-            FadeOverlayOut(ShortcutOverlay);
+            FadeOverlayOut(ShortcutsOverlay);
         }
     }
 }

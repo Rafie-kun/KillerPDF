@@ -319,7 +319,7 @@ namespace KillerPDF.Shell
                 () => App.GetSetting(KillerFamily.Shell.CloseToTray.SettingName) == "1");
             // Ctrl+Q quits the app through the tray's Exit, so the save and quit prompts still run.
             KillerFamily.Shell.QuitShortcut.Attach(this, _tray.Exit);
-            new KillerFamily.Accessibility.OverlayFocus(this).Track(ShortcutOverlay, AboutOverlay);
+            new KillerFamily.Accessibility.OverlayFocus(this).Track(ShortcutsOverlay, AboutOverlay);
             InitRailOrder();
             var titleFrames = BitmapDecoder.Create(
                 new Uri("pack://application:,,,/Resources/kp-icon.ico"),
@@ -347,7 +347,6 @@ namespace KillerPDF.Shell
             InitSplitPanes();
             InitTabPlacement();
             WirePageListEdgeFades();   // sidebar page-list edge fades (SidebarLayout.cs)
-            HookExternalLangReload();  // #211: --lang-file live reload rebuilds code-built captions
             _pageContentGrid  = ActiveViewer.PageGrid;
             _pageContentPanel = ActiveViewer.PageHost;
             _continuousPanel  = ActiveViewer.ContinuousHost;
@@ -436,6 +435,8 @@ namespace KillerPDF.Shell
             BuildToolSearch();           // the title bar's magnifier and search box (ToolSearch.cs)
             ApplyShortcutTooltips();     // every tooltip that names a key, from the live bindings
             BuildShortcutsOverlay();     // generate the shortcuts card from the single-source table (ShortcutsOverlay.cs)
+            InitThemePicker();           // ThemeFlyout.cs: the kit's theme menu on the rail's theme button
+            InitLanguageMenu();          // Language.cs: the kit's language menu on the rail's language button
             SourceInitialized += MainWindow_SourceInitialized;   // Chrome.cs: hook, snap layouts, corners
             SourceInitialized += ChromeExtras_SourceInitialized;
             Closed += MainWindow_Closed;

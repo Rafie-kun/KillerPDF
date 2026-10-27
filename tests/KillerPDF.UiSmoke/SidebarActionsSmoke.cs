@@ -63,7 +63,7 @@ internal static class SidebarActionsSmoke
         if (split.TranslatePoint(new Point(), owner).Y >= pages.TranslatePoint(new Point(), owner).Y)
             throw new InvalidOperationException("Split pane is not first in the app rail group.");
         Find("ShortcutHelpRailBtn").RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); Pump();
-        var overlay = (FrameworkElement)owner.FindName("ShortcutOverlay");
+        var overlay = (FrameworkElement)owner.FindName("ShortcutsOverlay");
         if (!overlay.IsVisible) throw new InvalidOperationException("Shortcut overlay did not open.");
         foreach (var (key, shortcut) in new[] { ("Str_Lbl_DigitalSig", "Ctrl+Shift+G"),
             ("Str_TableExport_Title", "Alt+Shift+T"), ("Str_Measure_Distance", "Alt+Shift+1") })

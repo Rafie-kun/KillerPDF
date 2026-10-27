@@ -230,6 +230,7 @@ Siden kan erstattes med et bilde av seg selv der de markerte områdene er sverte
 
     <!-- ── Status bar ────────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Ready">Klar</sys:String>
+    <sys:String x:Key="Str_Status_Ready">Klar</sys:String>
     <sys:String x:Key="Str_Portable">BÆRBAR</sys:String>
     <sys:String x:Key="Str_InstallBtn">Installer KillerPDF</sys:String>
 

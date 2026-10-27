@@ -741,9 +741,10 @@ namespace KillerPDF.Shell
                     if (ReferenceEquals(n, SidebarRailGrid) || ReferenceEquals(n, SidebarRailStack))
                         rail = true;
                 }
-            if (rail && (railButton == RailLangBtn || railButton == RailThemeBtn))
+            if (rail && (railButton == LangButton || railButton == ThemeButton))
             {
-                ToggleRailFlyout(railButton == RailLangBtn ? LangFlyout : ThemeFlyout, atCursor: true);
+                if (railButton == LangButton) _languageMenu.Open();
+                else _themePicker.Toggle();
                 e.Handled = true;
                 return;
             }

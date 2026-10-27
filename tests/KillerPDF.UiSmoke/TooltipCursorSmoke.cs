@@ -90,12 +90,12 @@ internal static class TooltipCursorSmoke
         owner.Opacity = 1; owner.Activate();
         if (themeRadio is not null)
         {
-            Click(owner, "RailThemeBtn");
-            var radio = (RadioButton)owner.FindName(themeRadio);
+            Click(owner, "ThemeButton");
+            var radio = ThemeMenuRadios.Find(owner, themeRadio);
             Wait(() => radio.IsVisible && radio.IsEnabled, "actual tooltip theme picker");
             ((ISelectionItemProvider)new RadioButtonAutomationPeer(radio).GetPattern(PatternInterface.SelectionItem)!).Select();
             Wait(() => radio.IsChecked == true, "tooltip theme selected");
-            ((ContextMenu)owner.FindName("ThemeFlyout")).IsOpen = false;
+            ((ContextMenu)owner.FindName("ThemeMenu")).IsOpen = false;
         }
         if (maximumScale)
         {

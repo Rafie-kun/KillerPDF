@@ -148,14 +148,14 @@ namespace KillerPDF.Controls
 
         private void ShortcutHelp_Click(object sender, RoutedEventArgs e)
         {
-            if (ShortcutOverlay.Visibility == Visibility.Visible) FadeOverlayOut(ShortcutOverlay);
+            if (ShortcutsOverlay.Visibility == Visibility.Visible) FadeOverlayOut(ShortcutsOverlay);
             else ShowShortcutsOverlayExclusive();
         }
 
         private void ShortcutOverlay_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             // Click on the dim backdrop closes the overlay.
-            FadeOverlayOut(ShortcutOverlay);
+            FadeOverlayOut(ShortcutsOverlay);
         }
 
         private void ShortcutOverlayCard_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -166,7 +166,7 @@ namespace KillerPDF.Controls
 
         private void ShortcutOverlayClose_Click(object sender, RoutedEventArgs e)
         {
-            FadeOverlayOut(ShortcutOverlay);
+            FadeOverlayOut(ShortcutsOverlay);
         }
 
         private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
