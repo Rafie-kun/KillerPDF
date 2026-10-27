@@ -89,6 +89,7 @@ public partial class App
             }, null, TimeSpan.FromSeconds(30), Timeout.InfiniteTimeSpan);
             base.OnStartup(e);
             phase = "theme and locale";
+            AppTheme.Configure();
             ThemeManager.Initialize();
             FilmGrain.Initialize();
             LocaleManager.Initialize();

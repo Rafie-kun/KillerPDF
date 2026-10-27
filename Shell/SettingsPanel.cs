@@ -402,27 +402,27 @@ namespace KillerPDF
         private void HandleAccentDot(object sender, Theme family)
         {
             if (sender is not FrameworkElement fe || fe.Tag is not string tag) return;
-            if (!Enum.TryParse<DarkAccent>(tag, out var accent)) return;
+            if (!Enum.TryParse<Accent>(tag, out var accent)) return;
             ThemeManager.ApplyAccent(family, accent);   // persists for that family; reapplies if active
             RingAccentStrip();
         }
 
         // Per-family swatch colors, in each family's display order (moved here from the four
         // retired XAML accent rows; the strip repaints these onto its eight shared dots).
-        private static readonly (DarkAccent Accent, string Hex)[] DarkStripColors =
-            [(DarkAccent.Red, "#DD504B"), (DarkAccent.Orange, "#E8962C"), (DarkAccent.Yellow, "#EAD900"), (DarkAccent.Green, "#1EA54C"),
-             (DarkAccent.Teal, "#1FB8A8"), (DarkAccent.Blue, "#4580D9"), (DarkAccent.Purple, "#B982E3"), (DarkAccent.Magenta, "#FF52C9")];
-        private static readonly (DarkAccent Accent, string Hex)[] LightStripColors =
-            [(DarkAccent.Red, "#931A1A"), (DarkAccent.Orange, "#C7710F"), (DarkAccent.Yellow, "#EAD900"), (DarkAccent.Green, "#1B5E20"),
-             (DarkAccent.Teal, "#0D827E"), (DarkAccent.Blue, "#18608E"), (DarkAccent.Purple, "#5A1690"), (DarkAccent.Magenta, "#A60070")];
-        private static readonly (DarkAccent Accent, string Hex)[] BlackStripColors =
-            [(DarkAccent.Red, "#FF2929"), (DarkAccent.Orange, "#FF910A"), (DarkAccent.Yellow, "#FFEB00"), (DarkAccent.Green, "#00FF66"),
-             (DarkAccent.Teal, "#0AFFE7"), (DarkAccent.Blue, "#298DFF"), (DarkAccent.Purple, "#B829FF"), (DarkAccent.Magenta, "#FF2BBD")];
-        private static readonly (DarkAccent Accent, string Hex)[] SE98StripColors =
-            [(DarkAccent.Red, "#800000"), (DarkAccent.Orange, "#A05000"), (DarkAccent.Yellow, "#EAD900"), (DarkAccent.Green, "#006000"),
-             (DarkAccent.Teal, "#008080"), (DarkAccent.Blue, "#000080"), (DarkAccent.Purple, "#5A376E"), (DarkAccent.Magenta, "#750052")];
+        private static readonly (Accent Accent, string Hex)[] DarkStripColors =
+            [(Accent.Red, "#DD504B"), (Accent.Orange, "#E8962C"), (Accent.Yellow, "#EAD900"), (Accent.Green, "#1EA54C"),
+             (Accent.Teal, "#1FB8A8"), (Accent.Blue, "#4580D9"), (Accent.Purple, "#B982E3"), (Accent.Magenta, "#FF52C9")];
+        private static readonly (Accent Accent, string Hex)[] LightStripColors =
+            [(Accent.Red, "#931A1A"), (Accent.Orange, "#C7710F"), (Accent.Yellow, "#EAD900"), (Accent.Green, "#1B5E20"),
+             (Accent.Teal, "#0D827E"), (Accent.Blue, "#18608E"), (Accent.Purple, "#5A1690"), (Accent.Magenta, "#A60070")];
+        private static readonly (Accent Accent, string Hex)[] BlackStripColors =
+            [(Accent.Red, "#FF2929"), (Accent.Orange, "#FF910A"), (Accent.Yellow, "#FFEB00"), (Accent.Green, "#00FF66"),
+             (Accent.Teal, "#0AFFE7"), (Accent.Blue, "#298DFF"), (Accent.Purple, "#B829FF"), (Accent.Magenta, "#FF2BBD")];
+        private static readonly (Accent Accent, string Hex)[] SE98StripColors =
+            [(Accent.Red, "#800000"), (Accent.Orange, "#A05000"), (Accent.Yellow, "#EAD900"), (Accent.Green, "#006000"),
+             (Accent.Teal, "#008080"), (Accent.Blue, "#000080"), (Accent.Purple, "#5A376E"), (Accent.Magenta, "#750052")];
 
-        private static (DarkAccent Accent, string Hex)[] StripColorsFor(Theme family) => family switch
+        private static (Accent Accent, string Hex)[] StripColorsFor(Theme family) => family switch
         {
             Theme.Light => LightStripColors,
             Theme.Black => BlackStripColors,
@@ -440,9 +440,9 @@ namespace KillerPDF
 
         // Each pill shows its accent the way a selection does: the palette's own SelectionBg
         // gradient, read from that accent's theme file. 98SE keeps its flat Win98 swatches.
-        private static readonly Dictionary<(Theme, DarkAccent), System.Windows.Media.Brush> AccentStripBrushes = [];
+        private static readonly Dictionary<(Theme, Accent), System.Windows.Media.Brush> AccentStripBrushes = [];
 
-        private static System.Windows.Media.Brush AccentStripBrush(Theme family, DarkAccent accent, string flatHex)
+        private static System.Windows.Media.Brush AccentStripBrush(Theme family, Accent accent, string flatHex)
         {
             if (AccentStripBrushes.TryGetValue((family, accent), out var cached)) return cached;
             System.Windows.Media.Brush brush;
@@ -450,7 +450,7 @@ namespace KillerPDF
                 brush = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(flatHex));
             else
             {
-                string path = accent == DarkAccent.Green
+                string path = accent == Accent.Green
                     ? $"Themes/{family}.xaml"
                     : $"Themes/Accents/{family}/{accent}.xaml";
                 var palette = new ResourceDictionary
@@ -501,16 +501,10 @@ namespace KillerPDF
         {
             if (AccentStrip is null) return;
             var ring = (System.Windows.Media.Brush)FindResource("TextBrush");
-            var chosen = _stripFamily switch
-            {
-                Theme.Light => ThemeManager.LightAccentChoice,
-                Theme.Black => ThemeManager.BlackAccentChoice,
-                Theme.SE98  => ThemeManager.SE98AccentChoice,
-                _           => ThemeManager.DarkAccentChoice,
-            };
+            var chosen = ThemeManager.AccentChoiceFor(_stripFamily);
             foreach (var dot in StripDots)
             {
-                bool sel = dot.Tag is string t && Enum.TryParse<DarkAccent>(t, out var a) && a == chosen;
+                bool sel = dot.Tag is string t && Enum.TryParse<Accent>(t, out var a) && a == chosen;
                 dot.BorderBrush = dot.IsMouseOver || sel ? ring : System.Windows.Media.Brushes.Transparent;
                 bool pop = dot.IsMouseOver && _stripFamily != Theme.SE98;
                 if (dot.RenderTransform is ScaleTransform scale)

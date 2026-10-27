@@ -172,6 +172,7 @@ namespace KillerPDF
                     a, "--crash-dialog-preview", StringComparison.OrdinalIgnoreCase)))
             {
                 ShutdownMode = ShutdownMode.OnExplicitShutdown;
+                AppTheme.Configure();
                 ThemeManager.Initialize();
                 LocaleManager.Initialize();
                 EnsureCrashPreviewGrain();
@@ -243,6 +244,7 @@ namespace KillerPDF
             ShutdownMode = ShutdownMode.OnLastWindowClose;
             CleanupStaleTemps();
             StartupTrace.Mark("Stale temporary-file cleanup complete");
+            AppTheme.Configure();
             ThemeManager.Initialize();
             FilmGrain.Initialize();   // Services/FilmGrain.cs - after the theme, before any window
             StartupTrace.Mark("Theme initialized");
@@ -2323,7 +2325,7 @@ namespace KillerPDF
         private static int Uninstall(bool silent)
         {
             Current.ShutdownMode = ShutdownMode.OnExplicitShutdown;
-            if (!silent) ThemeManager.InitializeInstallerTheme();
+            if (!silent) { AppTheme.Configure(); ThemeManager.InitializeInstaller(); }
             string currentExe = Path.GetFullPath(Process.GetCurrentProcess().MainModule?.FileName ?? string.Empty);
             bool machine = IsRegisteredCopy(Registry.LocalMachine, currentExe);
             if (RelaunchMachineUninstallElevatedIfNeeded(machine, silent) is int elevatedExit) return elevatedExit;

@@ -34,12 +34,14 @@ public sealed class DocumentTabLayoutTests
         string root = FindRepositoryRoot();
         string source = File.ReadAllText(Path.Combine(root, "Controls", "Viewer", "PdfViewer.TabStrip.cs"));
         var document = XDocument.Load(Path.Combine(root, "Controls", "Viewer", "PdfViewer.xaml"));
-        var theme = XDocument.Load(Path.Combine(root, "Themes", "98SE.xaml"));
+        // KillerPDF's own 98SE values (Themes/App) win over the family palette.
+        var themes = new[] { Path.Combine(root, "Themes", "App", "98SE.xaml"), Path.Combine(root, "Themes", "98SE.xaml") }
+            .Select(XDocument.Load).ToArray();
         XNamespace x = "http://schemas.microsoft.com/winfx/2006/xaml";
 
-        string BrushColor(string key) => (string)theme.Descendants()
-            .Single(element => element.Name.LocalName == "SolidColorBrush" &&
-                (string?)element.Attribute(x + "Key") == key)
+        string BrushColor(string key) => (string)themes.Select(theme => theme.Descendants()
+            .SingleOrDefault(element => element.Name.LocalName == "SolidColorBrush" &&
+                (string?)element.Attribute(x + "Key") == key)).First(element => element != null)!
             .Attribute("Color")!;
 
         Assert.Equal("#c0c0c0", BrushColor("TabActiveBrush"), ignoreCase: true);
@@ -81,9 +83,9 @@ public sealed class DocumentTabLayoutTests
         Assert.Equal("{DynamicResource PaneBorderBrush}", (string?)inactiveOutline.Attribute("BorderBrush"));
         Assert.Equal("1,1,1,0", (string?)inactiveOutline.Attribute("BorderThickness"));
 
-        string ThicknessValue(string key) => theme.Descendants()
-            .Single(element => element.Name.LocalName == "Thickness" &&
-                (string?)element.Attribute(x + "Key") == key).Value;
+        string ThicknessValue(string key) => themes.Select(theme => theme.Descendants()
+            .SingleOrDefault(element => element.Name.LocalName == "Thickness" &&
+                (string?)element.Attribute(x + "Key") == key)).First(element => element != null)!.Value;
         Assert.Equal("-13,-5,-7,-2", ThicknessValue("TabActiveOuterOutlineMargin"));
         Assert.Equal("-13,-5,-7,-3", ThicknessValue("TabInactiveOuterOutlineMargin"));
         Assert.Equal("12,6,5,2", ThicknessValue("TabPadding"));
@@ -132,7 +134,7 @@ public sealed class DocumentTabLayoutTests
     public void OrdinaryTabsMatchKillerShellsTabGeometry()
     {
         string root = FindRepositoryRoot();
-        string theme = File.ReadAllText(Path.Combine(root, "Services", "ThemeManager.cs"));
+        string theme = File.ReadAllText(Path.Combine(root, "Services", "AppTheme.cs"));
         var document = XDocument.Load(Path.Combine(root, "Controls", "Viewer", "PdfViewer.xaml"));
         XNamespace x = "http://schemas.microsoft.com/winfx/2006/xaml";
         XElement Named(string name) => document.Descendants()

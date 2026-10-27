@@ -1,0 +1,32 @@
+<!-- KillerPDF's own Cyanotic theme values: keys only KillerPDF uses, and KillerPDF's own value
+     where the family palette states a different one. ThemeManager.AppTokens
+     (Services/AppTheme.cs) merges them over the family palette. -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:po="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+    <SolidColorBrush x:Key="BgRecentPanel"  Color="#053c5b" po:Freeze="True"/>
+    <SolidColorBrush x:Key="BgFlyout"       Color="#02293e" po:Freeze="True"/>
+    <LinearGradientBrush x:Key="TabStripFadeBrush" StartPoint="0,0" EndPoint="0,1" po:Freeze="True">
+        <GradientStop Offset="0.0" Color="#00000000"/>
+        <GradientStop Offset="0.55" Color="#1f000000"/>
+        <GradientStop Offset="1.0" Color="#82000000"/>
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="InstallBtnBg"   Color="#1ea54c" po:Freeze="True"/>
+    <SolidColorBrush x:Key="DropBorder"     Color="#093250" po:Freeze="True"/>
+    <SolidColorBrush x:Key="SettingsOpenRowBg" Color="#44ffffff" po:Freeze="True"/>
+    <SolidColorBrush x:Key="FilenameBrush"  Color="#9ba3ac" po:Freeze="True"/>
+    <SolidColorBrush x:Key="DangerRed"      Color="#ff6666" po:Freeze="True"/>
+    <SolidColorBrush x:Key="BgDragHandle"   Color="#4a7ea8" po:Freeze="True"/>
+    <SolidColorBrush x:Key="DragLine"       Color="#113a58" po:Freeze="True"/>
+    <SolidColorBrush x:Key="SliderTrack"    Color="#000d15" po:Freeze="True"/>
+    <SolidColorBrush x:Key="BgOverlay"      Color="#CC002d42" po:Freeze="True"/>
+    <sys:Double x:Key="HeaderShadowOpacity">0.95</sys:Double>
+    <SolidColorBrush x:Key="BgCanvas"                                                       Color="#0a4a6e" po:Freeze="True"/>
+    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"                      Color="#44ffffff" po:Freeze="True"/>
+    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}"                  Color="#ffffff" po:Freeze="True"/>
+    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}"     Color="#44ffffff" po:Freeze="True"/>
+    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="#ffffff" po:Freeze="True"/>
+    <SolidColorBrush x:Key="KsCatTools"     Color="#ffd319" po:Freeze="True"/>
+    <SolidColorBrush x:Key="KsCatOcr"       Color="#ff901f" po:Freeze="True"/>
+</ResourceDictionary>

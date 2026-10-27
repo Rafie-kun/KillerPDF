@@ -31,7 +31,7 @@ public sealed class MenuSeparatorThemeTests
     public void ThemesDeclareMenuDividersOrKeepTheirCardBorderFallback()
     {
         string root = FindRepositoryRoot();
-        string manager = File.ReadAllText(Path.Combine(root, "Services", "ThemeManager.cs"));
+        string manager = File.ReadAllText(Path.Combine(root, "Services", "AppTheme.cs"));
         Assert.Contains("Alias(\"MenuSeparatorBrush\", \"CardBorderBrush\");", manager);
         Assert.Equal("#FF808080", BrushColor(root, "98SE", "MenuSeparatorBrush"));
         foreach (string themePath in Directory.EnumerateFiles(Path.Combine(root, "Themes"), "*.xaml"))

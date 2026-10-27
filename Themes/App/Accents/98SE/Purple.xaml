@@ -1,0 +1,5 @@
+<!-- KillerPDF's own 98SE Purple accent values: keys the kit accent overlay does not carry.
+     ThemeManager.AppTokens (Services/AppTheme.cs) merges them over the family overlay. -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:po="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options">
+    <SolidColorBrush x:Key="RadioAccentText" Color="#4b286d"/>
+</ResourceDictionary>

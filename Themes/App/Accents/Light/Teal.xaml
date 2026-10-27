@@ -1,0 +1,12 @@
+<!-- KillerPDF's own Light Teal accent values: keys the kit accent overlay does not carry.
+     ThemeManager.AppTokens (Services/AppTheme.cs) merges them over the family overlay. -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:po="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options">
+    <SolidColorBrush x:Key="RadioAccentText" Color="#0B6C69" po:Freeze="True"/>
+    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"                      Color="#D5F1F0" po:Freeze="True"/>
+    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}"                  Color="#0B6C69" po:Freeze="True"/>
+    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}"     Color="#D5F1F0" po:Freeze="True"/>
+    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="#0B6C69" po:Freeze="True"/>
+    <SolidColorBrush x:Key="FooterAccentBrush" Color="#0B6B68"/>
+</ResourceDictionary>
