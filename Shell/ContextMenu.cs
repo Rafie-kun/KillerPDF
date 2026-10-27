@@ -24,7 +24,7 @@ namespace KillerPDF.Shell
         // Context menu
         // ============================================================
 
-        private void ApplyGrainTexture()
+        private void TrackGrainBrushes()
         {
             // The family grain tile (Controls/GrainTexture.cs). Publishing it also replaces the
             // app-level GrainTileBrush that the flyouts and standalone windows resolve, and every
@@ -44,7 +44,7 @@ namespace KillerPDF.Shell
 
         /// <summary>Generated film-grain tile, exposed so secondary windows (e.g. the
         /// print preview) can paint the same texture over their document area.</summary>
-        public ImageSource? GrainTexture => GrainBrush?.ImageSource;
+        public ImageSource? GrainTextureSource => GrainBrush?.ImageSource;
 
         // One shared ContextMenu instance; its items are rebuilt on every open to match whatever is
         // under the cursor (a specific annotation -> per-type actions; empty page -> page-level actions).

@@ -292,7 +292,7 @@ namespace KillerPDF.Shell
                 // split came back on every launch no matter what it was saved at (#161). Deferred to
                 // Loaded priority, same as the re-fit below and in RestorePaneBCore's tail, so it
                 // runs once the restored window size has actually been laid out. The window is still
-                // hidden behind RootClipGrid's opacity hold at this point (see ContentRendered),
+                // hidden behind RootGrid's opacity hold at this point (see ContentRendered),
                 // so there is nothing to see between the temporary zero-width column set two lines
                 // up and this correcting it.
                 // SyncSplitMinWidth reads SplitHost.ActualWidth too (via its "chrome" measurement),

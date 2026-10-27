@@ -204,7 +204,7 @@ internal static class PageNavigationModesSmoke
         Rect Bounds(FrameworkElement element) => element.TransformToAncestor(owner).TransformBounds(new Rect(element.RenderSize));
         void Capture(string name)
         {
-            var root = (FrameworkElement)owner.FindName("RootClipGrid");
+            var root = (FrameworkElement)owner.FindName("RootGrid");
             Wait(() => root.IsVisible && root.Opacity > .99 && owner.ActualWidth >= owner.MinWidth - .5
                 && ColorPresent(paneA, 255, 0, 0), "visible first page before navigation layout capture " + name);
             owner.UpdateLayout();

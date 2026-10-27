@@ -123,7 +123,5 @@ namespace KillerPDF.Shell
             e.Handled = true;
             FadeOverlayOut(ShortcutOverlay);
         }
-        private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
-            => ActiveViewer.HyperlinkRequestNavigateExt(sender, e);
     }
 }

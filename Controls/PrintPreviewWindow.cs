@@ -323,7 +323,7 @@ namespace KillerPDF
         // opacity, or null if the owner hasn't generated a grain tile yet.
         private Border? MakeGrainLayer()
         {
-            if ((Owner as MainWindow)?.GrainTexture is not ImageSource grain) return null;
+            if ((Owner as MainWindow)?.GrainTextureSource is not ImageSource grain) return null;
             double op = Application.Current.TryFindResource("GrainOpacity") is double g ? g : 0.30;
             return new Border
             {

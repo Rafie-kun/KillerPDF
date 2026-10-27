@@ -432,11 +432,12 @@ namespace KillerPDF.Shell
             LoadSignatures();
             BuildContextMenu();
             SetTool(EditTool.Select);
-            ApplyGrainTexture();
+            TrackGrainBrushes();
             BuildToolSearch();           // the title bar's magnifier and search box (ToolSearch.cs)
             ApplyShortcutTooltips();     // every tooltip that names a key, from the live bindings
             BuildShortcutsOverlay();     // generate the shortcuts card from the single-source table (ShortcutsOverlay.cs)
-            SourceInitialized += MainWindow_SourceInitialized;
+            SourceInitialized += MainWindow_SourceInitialized;   // Chrome.cs: hook, snap layouts, corners
+            SourceInitialized += ChromeExtras_SourceInitialized;
             Closed += MainWindow_Closed;
 
             // Open a file passed via command-line / file association (e.g. double-clicking a .pdf)
@@ -466,7 +467,7 @@ namespace KillerPDF.Shell
                 // before the sidebar column had measured), and only a manual sidebar tweak forced a
                 // correct re-layout. Re-running it here reproduces that fix automatically.
                 UpdateTabStripFade();
-                // The content is held invisible (RootClipGrid.Opacity=0 in XAML) until this final
+                // The content is held invisible (RootGrid.Opacity=0 in XAML) until this final
                 // positioning pass has run; fade it in once so the brief unpositioned first frame
                 // (the "load deform" - shadows/toolbars snapping into place) is never visible.
                 if (!contentRevealed)
@@ -474,11 +475,11 @@ namespace KillerPDF.Shell
                     contentRevealed = true;
                     Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded, (Action)(() =>
                     {
-                        RootClipGrid.Opacity = 1;
+                        RootGrid.Opacity = 1;
                         var reveal = new System.Windows.Media.Animation.DoubleAnimation(0, 1,
                             new Duration(TimeSpan.FromMilliseconds(140)))
                         { FillBehavior = FillBehavior.Stop };
-                        RootClipGrid.BeginAnimation(OpacityProperty, reveal);
+                        RootGrid.BeginAnimation(OpacityProperty, reveal);
                         Services.StartupTrace.Mark("MainWindow ready");
                     }));
                 }
@@ -601,14 +602,11 @@ namespace KillerPDF.Shell
         // Maximize-respects-taskbar fix (WindowStyle=None needs WM_GETMINMAXINFO)
         // ============================================================
 
-        private void MainWindow_SourceInitialized(object? sender, EventArgs e)
+        // Runs after the kit's MainWindow_SourceInitialized (Chrome.cs), which adds the window hook
+        // that hands every message to FrameWndProc and attaches snap layouts after it.
+        private void ChromeExtras_SourceInitialized(object? sender, EventArgs e)
         {
             var hwnd = new WindowInteropHelper(this).Handle;
-            HwndSource.FromHwnd(hwnd)?.AddHook(WndProc);
-            // Windows 11 snap layouts on the maximize button. Added after WndProc, so it answers
-            // WM_NCHITTEST over the button first, ahead of the top resize grip like the other
-            // caption controls.
-            SnapLayouts.Attach(this, MaximizeBtn);
             InitializeTaskbarIcons(hwnd);
             AppTheme.ApplyDwm(hwnd);
             // Snapping moves the window without changing WindowState, so re-evaluate the rounded vs

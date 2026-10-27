@@ -484,7 +484,7 @@ namespace KillerPDF
             previewWrap.SetResourceReference(Border.BorderBrushProperty, "PaneBorderBrush");
 
             var previewGrid = new Grid();
-            var pgGrain = (owner as MainWindow)?.GrainTexture;
+            var pgGrain = (owner as MainWindow)?.GrainTextureSource;
             if (pgGrain != null)
             {
                 double pop = Application.Current.Resources["GrainOpacity"] is double pgo ? pgo : 0.05;

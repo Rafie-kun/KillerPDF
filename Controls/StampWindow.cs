@@ -225,7 +225,7 @@ namespace KillerPDF
 
         private static void AddGrain(Grid host, Window owner, double fallback, double cornerRadius)
         {
-            var grain = (owner as MainWindow)?.GrainTexture;
+            var grain = (owner as MainWindow)?.GrainTextureSource;
             if (grain == null) return;
             double op = Application.Current.Resources["GrainOpacity"] is double go ? go : fallback;
             host.Children.Add(new Border

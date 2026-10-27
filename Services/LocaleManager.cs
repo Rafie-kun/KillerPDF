@@ -13,6 +13,11 @@ namespace KillerPDF.Services
 
         public static Locale Current => _current;
 
+        /// <summary>Localized string for a Str_ key. Falls back to the key itself when it is
+        /// missing, so a translation gap shows up as itself instead of as blank UI.</summary>
+        public static string Loc(string key) =>
+            Application.Current.TryFindResource(key) as string ?? key;
+
         // ── Translator test mode (#211, thanks bovirus) ─────────────────────────
         // --lang-file <path> loads an external translation xaml as the language override, winning
         // over the saved locale, and re-applies it on every save of the file - so a translation

@@ -154,16 +154,6 @@ namespace KillerPDF.Shell
             if (front.IsVisible) front.Activate();
         }
 
-        // ---- IShellServices ------------------------------------------------------------------
-
-        Window IShellServices.Window => this;
-
-        // MainWindow's own Loc and SetStatus are private, and a private member cannot implement an
-        // interface. Forwarding explicitly satisfies IShellServices without widening either of them
-        // to public, which would be a change nobody asked for.
-        string IShellServices.Loc(string key) => Loc(key);
-        void IShellServices.SetStatus(string text) => SetStatus(text);
-
         // ---- IAboutHost ----------------------------------------------------------------------
 
         string IAboutHost.Publisher   { set => AboutPublisherBlock.Text  = value; }

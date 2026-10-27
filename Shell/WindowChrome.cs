@@ -21,23 +21,29 @@ namespace KillerPDF.Shell
         // Window proc / Win32 interop (custom chrome, resize, DPI)
         // ============================================================
 
-        private const int  WM_GETMINMAXINFO   = 0x0024;
         private const int  WM_DPICHANGED      = 0x02E0;
         private const int  WM_MOUSEHWHEEL     = 0x020E;
         private const int  WM_ENTERSIZEMOVE   = 0x0231;
         private const int  WM_EXITSIZEMOVE    = 0x0232;
-        private const int  WM_ERASEBKGND      = 0x0014;
         private const int  WM_SETICON          = 0x0080;
         private const int  ICON_SMALL          = 0;
         private const int  ICON_BIG            = 1;
         private const int  APPLICATION_ICON_RESOURCE_ID = 32512;
         private const uint IMAGE_ICON           = 1;
         private const uint LR_SHARED            = 0x00008000;
-        private const uint MONITOR_DEFAULTTONEAREST = 0x00000002;
         private const uint SWP_NOZORDER       = 0x0004;
         private const uint SWP_NOACTIVATE     = 0x0010;
 
-        private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        // KillerPDF answers every frame message itself: the kit's Chrome.cs hands each one here
+        // first, and KillerPDF's own erase, maximize clamp, caption and DPI handling stay in force.
+        partial void FilterWindowMessage(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam,
+            ref bool handled, ref IntPtr result, ref bool owned)
+        {
+            owned = true;
+            result = FrameWndProc(hwnd, msg, wParam, lParam, ref handled);
+        }
+
+        private IntPtr FrameWndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
         {
             // Themed system menu (Shell/SystemMenu.cs): swallow the caption right-click and
             // Alt+Space before anything else, or Windows draws its stock white HMENU.
@@ -63,7 +69,7 @@ namespace KillerPDF.Shell
             }
             if (msg == WM_GETMINMAXINFO)
             {
-                WmGetMinMaxInfo(hwnd, lParam);
+                WmGetMinMaxInfoExtras(hwnd, lParam);
                 handled = true;
             }
             else if (msg == 0x0231) _inWindowSizeMove = true;    // WM_ENTERSIZEMOVE
@@ -218,7 +224,7 @@ namespace KillerPDF.Shell
             catch { return false; }   // not laid out yet; treat as client
         }
 
-        private void WmGetMinMaxInfo(IntPtr hwnd, IntPtr lParam)
+        private void WmGetMinMaxInfoExtras(IntPtr hwnd, IntPtr lParam)
         {
             var mmi = Marshal.PtrToStructure<MINMAXINFO>(lParam);
             // During a cross-monitor drag the HWND can still belong to the source monitor when
@@ -256,9 +262,6 @@ namespace KillerPDF.Shell
             }
         }
 
-        [LibraryImport("user32.dll", EntryPoint = "MonitorFromWindow")]
-        private static partial IntPtr MonitorFromWindow(IntPtr handle, uint flags);
-
         [LibraryImport("user32.dll", EntryPoint = "MonitorFromRect")]
         private static partial IntPtr MonitorFromRect(ref RECT rect, uint flags);
 
@@ -268,13 +271,6 @@ namespace KillerPDF.Shell
         [LibraryImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static partial bool GetCursorPos(out POINT point);
-
-        [LibraryImport("user32.dll", EntryPoint = "GetMonitorInfoW")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static partial bool GetMonitorInfo(IntPtr hMonitor, ref MONITORINFO lpmi);
-
-        [LibraryImport("user32.dll", EntryPoint = "SendMessageW")]
-        private static partial IntPtr SendMessage(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam);
 
         [LibraryImport("kernel32.dll", EntryPoint = "GetModuleHandleW", StringMarshalling = StringMarshalling.Utf16)]
         private static partial IntPtr GetModuleHandle(string? moduleName);
@@ -337,11 +333,9 @@ namespace KillerPDF.Shell
         [LibraryImport("user32.dll", EntryPoint = "DefWindowProcW")]
         private static partial IntPtr DefWindowProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam);
 
-        private const int WM_NCLBUTTONDOWN = 0x00A1;
         private const int WM_NCHITTEST     = 0x0084;
         private const int WM_NCCALCSIZE    = 0x0083;
         private const int HTCLIENT         = 1;
-        private const int HTCAPTION        = 2;
         private const int HTLEFT           = 10;
         private const int HTRIGHT          = 11;
         private const int HTTOP            = 12;
@@ -349,33 +343,7 @@ namespace KillerPDF.Shell
         private const int HTTOPRIGHT       = 14;
         private const int HTBOTTOM         = 15;
         private const int HTBOTTOMLEFT     = 16;
-        private const int HTBOTTOMRIGHT    = 17;
         private const int ResizeBorder     = 12;
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct POINT { public int x; public int y; }
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct RECT { public int left, top, right, bottom; }
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct MINMAXINFO
-        {
-            public POINT ptReserved;
-            public POINT ptMaxSize;
-            public POINT ptMaxPosition;
-            public POINT ptMinTrackSize;
-            public POINT ptMaxTrackSize;
-        }
-
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
-        private struct MONITORINFO
-        {
-            public int cbSize;
-            public RECT rcMonitor;
-            public RECT rcWork;
-            public uint dwFlags;
-        }
 
         // ============================================================
         // Window chrome
@@ -398,16 +366,6 @@ namespace KillerPDF.Shell
             SendMessage(hwnd, WM_NCLBUTTONDOWN, new IntPtr(HTCAPTION), IntPtr.Zero);
         }
 
-        // Custom bottom-right grip: forward a native bottom-right resize so it behaves exactly like the OS
-        // border resize (and stays smooth). Only when floating; maximized/snapped don't resize.
-        private void ResizeGrip_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (WindowState != WindowState.Normal) return;
-            e.Handled = true;
-            var hwnd = new WindowInteropHelper(this).Handle;
-            SendMessage(hwnd, WM_NCLBUTTONDOWN, new IntPtr(HTBOTTOMRIGHT), IntPtr.Zero);
-        }
-
         private void Install_Click(object sender, RoutedEventArgs e)
         {
             Process.Start(new ProcessStartInfo(
@@ -415,22 +373,23 @@ namespace KillerPDF.Shell
                 { UseShellExecute = true });
         }
 
-        private void MinimizeBtn_Click(object sender, RoutedEventArgs e) =>
-            WindowState = WindowState.Minimized;
-
-        private void MaximizeBtn_Click(object sender, RoutedEventArgs e) =>
-            WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
-
-        private void CloseBtn_Click(object sender, RoutedEventArgs e) => Close();
-
         // Rounded window corners look right only when floating; a maximized OR snapped window must
         // square off or the rounded corners reveal the desktop / adjacent window behind them.
-        protected override void OnStateChanged(EventArgs e)
+        // Runs after the kit's own state-change work in Chrome.cs.
+        partial void AfterWindowStateChanged()
         {
-            base.OnStateChanged(e);
             UpdateWindowChrome();
             RepositionAnnotationBars();
         }
+
+        // The kit's corner call on a state change gives the same answer as UpdateWindowChrome.
+        partial void AdjustRoundedCorners(ref bool rounded)
+        {
+            if (_fullScreen || IsSnapped() || ThemeManager.Current == Theme.SE98) rounded = false;
+        }
+
+        // KillerPDF saves its own window bounds (SaveWindowSettings), not the kit's WindowPlacement.
+        partial void AdjustSaveWindowPlacement(ref bool save) => save = false;
 
         protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
         {
@@ -724,8 +683,8 @@ namespace KillerPDF.Shell
         // against the now-square frame.) Kept as a no-op hook so existing call sites stay valid.
         private void UpdateRootClip()
         {
-            if (RootClipGrid is null) return;
-            RootClipGrid.Clip = null;
+            if (RootGrid is null) return;
+            RootGrid.Clip = null;
         }
 
         // True when the window is Aero-Snapped (half/quarter screen). Snapping leaves WindowState

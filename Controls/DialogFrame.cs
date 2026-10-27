@@ -48,8 +48,8 @@ namespace KillerPDF
         internal static ImageSource? GrainTexture(Window? owner)
         {
             for (Window? window = owner; window is not null; window = window.Owner)
-                if (window is MainWindow main && main.GrainTexture is not null)
-                    return main.GrainTexture;
+                if (window is MainWindow main && main.GrainTextureSource is not null)
+                    return main.GrainTextureSource;
             if (Application.Current?.TryFindResource("GrainTileBrush") is ImageBrush tile)
                 return tile.ImageSource;
             return null;

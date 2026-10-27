@@ -174,7 +174,7 @@ namespace KillerPDF.Shell
             }
             else
             {
-                RootClipGrid?.Children.Add(overlay);
+                RootGrid?.Children.Add(overlay);
             }
             return overlay;
         }

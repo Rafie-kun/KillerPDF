@@ -35,9 +35,9 @@ namespace KillerPDF.Shell
 
             var cover = new Border { Background = Brushes.Black, Opacity = 0, IsHitTestVisible = false };
             Grid.SetRow(cover, 0);
-            Grid.SetRowSpan(cover, RootClipGrid.RowDefinitions.Count);
+            Grid.SetRowSpan(cover, RootGrid.RowDefinitions.Count);
             Panel.SetZIndex(cover, 99998);
-            RootClipGrid.Children.Add(cover);
+            RootGrid.Children.Add(cover);
 
             var fadeIn = new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(150))
             { EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn } };
@@ -51,7 +51,7 @@ namespace KillerPDF.Shell
                     { EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut } };
                     fadeOut.Completed += (_, _3) =>
                     {
-                        RootClipGrid.Children.Remove(cover);
+                        RootGrid.Children.Remove(cover);
                         _fsAnimating = false;
                         if (entering) ShowFullScreenHint();
                     };
@@ -97,13 +97,13 @@ namespace KillerPDF.Shell
 
             if (entering)
             {
-                _fsTitleRow   = RootClipGrid.RowDefinitions[0].Height;
-                _fsFooterRow  = RootClipGrid.RowDefinitions[4].Height;
+                _fsTitleRow   = RootGrid.RowDefinitions[0].Height;
+                _fsFooterRow  = RootGrid.RowDefinitions[4].Height;
                 _fsSidebarCol  = _sidebarCol.Width;
                 _fsSidebarMin  = _sidebarCol.MinWidth;
                 _fsSplitterCol = MainContentGrid.ColumnDefinitions[1].Width;
-                RootClipGrid.RowDefinitions[0].Height = new GridLength(0);
-                RootClipGrid.RowDefinitions[4].Height = new GridLength(0);
+                RootGrid.RowDefinitions[0].Height = new GridLength(0);
+                RootGrid.RowDefinitions[4].Height = new GridLength(0);
                 // Collapse the ACTUAL sidebar column (_sidebarCol), which ApplySidebarSide repoints to DocCol
                 // when the sidebar is on the right. MinWidth must drop to 0 too (it floors the width to 24
                 // otherwise) and the splitter column (col 1) collapses, so the document fills the whole screen
@@ -154,8 +154,8 @@ namespace KillerPDF.Shell
             }
             else
             {
-                RootClipGrid.RowDefinitions[0].Height = _fsTitleRow;
-                RootClipGrid.RowDefinitions[4].Height = _fsFooterRow;
+                RootGrid.RowDefinitions[0].Height = _fsTitleRow;
+                RootGrid.RowDefinitions[4].Height = _fsFooterRow;
                 _sidebarCol.MinWidth = _fsSidebarMin;
                 _sidebarCol.Width = _fsSidebarCol;
                 MainContentGrid.ColumnDefinitions[1].Width = _fsSplitterCol;
@@ -224,9 +224,9 @@ namespace KillerPDF.Shell
                 }
             };
             Grid.SetRow(toast, 0);
-            Grid.SetRowSpan(toast, RootClipGrid.RowDefinitions.Count);
+            Grid.SetRowSpan(toast, RootGrid.RowDefinitions.Count);
             Panel.SetZIndex(toast, 99999);
-            RootClipGrid.Children.Add(toast);
+            RootGrid.Children.Add(toast);
 
             toast.BeginAnimation(UIElement.OpacityProperty, new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(200)));
             var t = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2.2) };
@@ -234,7 +234,7 @@ namespace KillerPDF.Shell
             {
                 t.Stop();
                 var fade = new DoubleAnimation(1, 0, TimeSpan.FromMilliseconds(400));
-                fade.Completed += (_, _3) => RootClipGrid.Children.Remove(toast);
+                fade.Completed += (_, _3) => RootGrid.Children.Remove(toast);
                 toast.BeginAnimation(UIElement.OpacityProperty, fade);
             };
             t.Start();

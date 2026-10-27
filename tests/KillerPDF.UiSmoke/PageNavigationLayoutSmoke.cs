@@ -93,7 +93,7 @@ internal static class PageNavigationLayoutSmoke
         Rect Bounds(FrameworkElement element) => element.TransformToAncestor(owner).TransformBounds(new Rect(element.RenderSize));
         void Capture(string name)
         {
-            var content = (FrameworkElement)owner.FindName("RootClipGrid");
+            var content = (FrameworkElement)owner.FindName("RootGrid");
             Wait(() => content.IsVisible && content.Opacity > .99, "actual window content reveal before layout capture");
             owner.UpdateLayout();
             double[]? previousGeometry = null;

@@ -1561,7 +1561,7 @@
     <Border Panel.ZIndex="1" IsHitTestVisible="False" Margin="{DynamicResource FrameInnerMargin}" BorderBrush="{DynamicResource FrameInnerDarkBrush}" BorderThickness="{DynamicResource FrameInnerDarkThickness}"/>
     <!-- Starts invisible; revealed (fade-in) only after the final shadow/fade positioning pass in
          ContentRendered, so the unpositioned first frame (the "load deform") is never shown. -->
-    <Grid x:Name="RootClipGrid" Opacity="0" Panel.ZIndex="2" Margin="{DynamicResource WindowFramePadding}">
+    <Grid x:Name="RootGrid" Opacity="0" Panel.ZIndex="2" Margin="{DynamicResource WindowFramePadding}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>   <!-- 0: title bar -->
             <RowDefinition Height="Auto"/>   <!-- 1: toolbar -->
