@@ -252,12 +252,15 @@ namespace KillerPDF
                     replacements[page] = tmp;
                 }
 
-                foreach (int page in bakedAnnotationPages)
-                    if (_annotations.TryGetValue(page, out var pageAnnotations)) pageAnnotations.Clear();
                 int[] changed = [.. replacements.Keys.OrderBy(index => index)];
                 int restore = Math.Max(0, PageList.SelectedIndex);
                 SaveTempAndReload(
                     keepAnnotations: true,
+                    remapAnnotations: annotations =>
+                    {
+                        foreach (int page in bakedAnnotationPages)
+                            if (annotations.TryGetValue(page, out var pageAnnotations)) pageAnnotations.Clear();
+                    },
                     finalizeSavedFile: path =>
                     {
                         if (changed.Length == engineSession.PageCount)

@@ -33,6 +33,8 @@ internal static class DocumentStateSmoke
                 ? PageDeletionSmoke.Fixture() : TableExportSmoke.Fixture();
         if (scenario is "--verify-page-transform-failure" or "--verify-page-transform-cancel" or "--verify-page-transform-save-control")
             original = TableExportSmoke.Fixture(malformedDate: true);
+        if (scenario.StartsWith("--verify-page-straighten-", StringComparison.Ordinal))
+            original = TiltedScanFixture(healthy: scenario == "--verify-page-straighten-success");
         File.WriteAllBytes(source, original);
         if (closeInOtherPane) File.WriteAllBytes(otherSource, original);
         owner.GetType().GetMethod("OpenFromExternal", BindingFlags.Public | BindingFlags.Instance)!
@@ -92,6 +94,12 @@ internal static class DocumentStateSmoke
                 VerifyPageEditFailure(owner, source, original, editor, folder, delete: true);
             else if (scenario == "--verify-page-transform-failure")
                 VerifyTransformFailure(owner, source, original, editor);
+            else if (scenario == "--verify-page-straighten-failure")
+                VerifyTransformFailure(owner, source, original, editor, straighten: true);
+            else if (scenario == "--verify-page-straighten-save-control")
+                VerifyTransformFailure(owner, source, original, editor, straighten: true, saveOnly: true);
+            else if (scenario == "--verify-page-straighten-success")
+                VerifyTransformFailure(owner, source, original, editor, straighten: true, success: true);
             else if (scenario == "--verify-page-transform-cancel")
                 VerifyTransformFailure(owner, source, original, editor, cancel: true);
             else if (scenario == "--verify-page-transform-save-control")
@@ -685,7 +693,37 @@ internal static class DocumentStateSmoke
         Console.WriteLine("CONTROL typed Extract retained the active text editor in strict output while preserving original source bytes, dirty checkpoint and Undo/Redo history.");
     }
 
-    private static void VerifyTransformFailure(Window owner, string source, byte[] original, TextBox editor, bool cancel = false, bool saveOnly = false, bool success = false)
+    private static byte[] TiltedScanFixture(bool healthy = false)
+    {
+        const int size = 400;
+        var pixels = Enumerable.Repeat((byte)255, size * size).ToArray();
+        for (int row = 45; row < 355; row += 24)
+            for (int x = 30; x < 370; x++)
+                for (int thickness = 0; thickness < 3; thickness++)
+                    pixels[(row + (int)Math.Round((x - 200) * 0.05) + thickness) * size + x] = 0;
+        string image = Convert.ToHexString(pixels) + ">";
+        const string content = "q 200 0 0 200 0 0 cm /Scan Do Q\n";
+        string[] objects = ["<< /Type /Catalog /Pages 2 0 R >>", "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 200] /Resources << /XObject << /Scan 5 0 R >> >> /Contents 4 0 R >>",
+            $"<< /Length {content.Length} >>\nstream\n{content}endstream",
+            $"<< /Type /XObject /Subtype /Image /Width {size} /Height {size} /ColorSpace /DeviceGray /BitsPerComponent 8 /Filter /ASCIIHexDecode /Length {image.Length} >>\nstream\n{image}\nendstream",
+            healthy ? "<< /CreationDate (D:20261026120000Z) >>" : "<< /CreationDate (NOT_A_DATE) >>"];
+        var pdf = new System.Text.StringBuilder("%PDF-1.7\n");
+        var offsets = new List<int> { 0 };
+        for (int i = 0; i < objects.Length; i++)
+        {
+            offsets.Add(pdf.Length);
+            pdf.Append($"{i + 1} 0 obj\n{objects[i]}\nendobj\n");
+        }
+        int xref = pdf.Length;
+        pdf.Append($"xref\n0 {offsets.Count}\n0000000000 65535 f \n");
+        foreach (int offset in offsets.Skip(1))
+            pdf.Append(offset.ToString("D10", System.Globalization.CultureInfo.InvariantCulture)).Append(" 00000 n \n");
+        pdf.Append($"trailer\n<< /Size {offsets.Count} /Root 1 0 R /Info 6 0 R >>\nstartxref\n{xref}\n%%EOF\n");
+        return System.Text.Encoding.ASCII.GetBytes(pdf.ToString());
+    }
+
+    private static void VerifyTransformFailure(Window owner, string source, byte[] original, TextBox editor, bool cancel = false, bool saveOnly = false, bool success = false, bool straighten = false)
     {
         Assembly engine = Assembly.Load("KillerPdf.Engine");
         object document = engine.GetType("KillerPdf.Engine.Documents.PdfDocument", true)!
@@ -738,14 +776,15 @@ internal static class DocumentStateSmoke
             if (!saveOnly)
             {
                 timer.Start();
-                Click(owner, "ToolRotateBtn");
+                if (straighten) ParagraphEditSmoke.RunSearchAction(owner, "Str_Pages_Straighten", "Alt+Shift+S");
+                else Click(owner, "ToolRotateBtn");
                 if (success) Wait(() => !visible.IsVisible, "successful Transform replaces the editable annotation layer");
                 else if (!cancel) Wait(() => errors == 1, "late Transform metadata failure");
                 Wait(() => !Application.Current.Windows.Cast<Window>().Any(window => window != owner && window.IsVisible), "Transform dialog dismissed");
             }
         }
         finally { timer.Stop(); }
-        if (transforms != (saveOnly ? 0 : 1) || errors != (saveOnly || cancel || success ? 0 : 1) || !Dirty(owner) || !File.ReadAllBytes(source).AsSpan().SequenceEqual(original)
+        if (transforms != (saveOnly || straighten ? 0 : 1) || errors != (saveOnly || cancel || success ? 0 : 1) || !Dirty(owner) || !File.ReadAllBytes(source).AsSpan().SequenceEqual(original)
             || ((Button)owner.FindName("UndoBtn")).IsEnabled != undoEnabled
             || (!success && (!visible.IsVisible || Math.Abs(Canvas.GetLeft(visible) - left) > 0.01 || Math.Abs(Canvas.GetTop(visible) - top) > 0.01)))
             throw new InvalidOperationException("APP-004: late Transform failure changed pending geometry, dirty/history state or source bytes.");

@@ -168,7 +168,9 @@ internal static class TableExportSmoke
                 return ToolSearchPrerequisitesSmoke.Run(owner, folder, creation: "office");
             if (windowSessionCase == "--verify-shortcut-hints")
                 return ShortcutHintsSmoke.Run(owner, folder);
-            if (windowSessionCase is "--verify-page-delete-failure" or "--verify-page-transform-failure" or "--verify-page-transform-cancel" or "--verify-page-transform-save-control" or "--verify-page-transform-success" or "--verify-range-extract-pending")
+            if (windowSessionCase.StartsWith("--verify-page-straighten-", StringComparison.Ordinal))
+                return DocumentStateSmoke.Run(owner, assembly, appPath, folder, windowSessionCase);
+            if (windowSessionCase is "--verify-page-delete-failure" or "--verify-page-transform-failure" or "--verify-page-transform-cancel" or "--verify-page-transform-save-control" or "--verify-page-transform-success" or "--verify-range-extract-pending" or "--verify-page-straighten-failure")
                 return DocumentStateSmoke.Run(owner, assembly, appPath, folder, windowSessionCase);
             if (windowSessionCase is "--verify-export-loss-review" or "--verify-export-loss-mixed" or "--verify-export-loss-continue" or "--verify-export-lossless")
                 return ExportLossReviewSmoke.Run(owner, folder, windowSessionCase);
