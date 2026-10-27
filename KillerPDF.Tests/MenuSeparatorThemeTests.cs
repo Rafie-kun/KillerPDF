@@ -31,8 +31,10 @@ public sealed class MenuSeparatorThemeTests
     public void ThemesDeclareMenuDividersOrKeepTheirCardBorderFallback()
     {
         string root = FindRepositoryRoot();
-        string manager = File.ReadAllText(Path.Combine(root, "Services", "AppTheme.cs"));
-        Assert.Contains("Alias(\"MenuSeparatorBrush\", \"CardBorderBrush\");", manager);
+        // The kit owns the divider's fallback; KillerPDF no longer states its own.
+        string manager = File.ReadAllText(Path.Combine(root, "Services", "ThemeManager.cs"));
+        Assert.Contains("Mirror(\"MenuSeparatorBrush\", \"MenuBorderBrush\");", manager);
+        Assert.DoesNotContain("MenuSeparatorBrush", File.ReadAllText(Path.Combine(root, "Services", "AppTheme.cs")));
         Assert.Equal("#FF808080", BrushColor(root, "98SE", "MenuSeparatorBrush"));
         foreach (string themePath in Directory.EnumerateFiles(Path.Combine(root, "Themes"), "*.xaml"))
         {
@@ -40,7 +42,7 @@ public sealed class MenuSeparatorThemeTests
             var divider = XDocument.Load(themePath).Descendants()
                 .SingleOrDefault(element => (string?)element.Attribute(Xaml + "Key") == "MenuSeparatorBrush");
             string color = divider is null
-                ? BrushColor(root, theme, "CardBorderBrush")
+                ? BrushColor(root, theme, "MenuBorderBrush")
                 : divider.Attribute("Color")!.Value;
             Assert.IsType<Color>(ColorConverter.ConvertFromString(color));
         }

@@ -34,7 +34,7 @@ public sealed class DocumentTabLayoutTests
         string root = FindRepositoryRoot();
         string source = File.ReadAllText(Path.Combine(root, "Controls", "Viewer", "PdfViewer.TabStrip.cs"));
         var document = XDocument.Load(Path.Combine(root, "Controls", "Viewer", "PdfViewer.xaml"));
-        // KillerPDF's own 98SE values (Themes/App) win over the family palette.
+        // KillerPDF's own 98SE keys (Themes/App) sit beside the kit palette, which owns every key it defines.
         var themes = new[] { Path.Combine(root, "Themes", "App", "98SE.xaml"), Path.Combine(root, "Themes", "98SE.xaml") }
             .Select(XDocument.Load).ToArray();
         XNamespace x = "http://schemas.microsoft.com/winfx/2006/xaml";
@@ -86,13 +86,13 @@ public sealed class DocumentTabLayoutTests
         string ThicknessValue(string key) => themes.Select(theme => theme.Descendants()
             .SingleOrDefault(element => element.Name.LocalName == "Thickness" &&
                 (string?)element.Attribute(x + "Key") == key)).First(element => element != null)!.Value;
-        Assert.Equal("-13,-5,-7,-2", ThicknessValue("TabActiveOuterOutlineMargin"));
-        Assert.Equal("-13,-5,-7,-3", ThicknessValue("TabInactiveOuterOutlineMargin"));
-        Assert.Equal("12,6,5,2", ThicknessValue("TabPadding"));
-        Assert.Equal("0,3,0,-3", ThicknessValue("TabActiveMargin"));
-        Assert.Equal("-1,3,0,-3", ThicknessValue("TabActiveFirstMargin"));
-        Assert.Equal("0,3,1,-3", ThicknessValue("TabActiveLastMargin"));
-        Assert.Equal("-1,3,1,-3", ThicknessValue("TabActiveOnlyMargin"));
+        Assert.Equal("-8,-4,-5,-4", ThicknessValue("TabActiveOuterOutlineMargin"));
+        Assert.Equal("-8,-6,-6,-2", ThicknessValue("TabInactiveOuterOutlineMargin"));
+        Assert.Equal("8,6,5,2", ThicknessValue("TabPadding"));
+        Assert.Equal("-2,3,0,0", ThicknessValue("TabActiveMargin"));
+        Assert.Equal("0,3,0,0", ThicknessValue("TabActiveFirstMargin"));
+        Assert.Equal("-2,3,0,0", ThicknessValue("TabActiveLastMargin"));
+        Assert.Equal("0,3,0,0", ThicknessValue("TabActiveOnlyMargin"));
     }
 
     [Fact]
@@ -140,25 +140,15 @@ public sealed class DocumentTabLayoutTests
         XElement Named(string name) => document.Descendants()
             .Single(element => (string?)element.Attribute(x + "Name") == name);
 
-        // Every ordinary-theme padding carries 2px more above and 2px less below, so the title sits
-        // level in the tab. The stripe's 3px plus the active padding still meets the inactive top.
-        foreach (string padding in new[]
-        {
-            "d[\"TabPadding\"] = new Thickness(12, 6, 5, 3);",
-            "d[\"TabActivePadding\"] = new Thickness(12, 3, 5, 3);",
-            "d[\"TabFocusPadding\"] = new Thickness(11, 3, 4, 3);",
-            "d[\"TabFocusFirstPadding\"] = new Thickness(12, 3, 4, 3);",
-            "d[\"TabFocusLastPadding\"] = new Thickness(11, 3, 5, 3);",
-            "d[\"TabFocusOnlyPadding\"] = new Thickness(12, 3, 5, 3);",
-        })
-            Assert.Contains(padding, theme, StringComparison.Ordinal);
+        // The tab paddings, margins and active ring are the kit's: KillerPDF no longer states them.
+        foreach (string kitKey in new[] { "TabPadding", "TabActivePadding", "TabFocusPadding", "TabFocusFirstPadding",
+            "TabFocusLastPadding", "TabFocusOnlyPadding", "TabActiveRingFadeBrush", "TabActiveRingBrush" })
+            Assert.DoesNotContain($"\"{kitKey}\"", theme, StringComparison.Ordinal);
         // 98SE keeps its classic corner, title and close x.
-        Assert.Contains("d[\"TabActiveCornerRadius\"] = compactDialogCaption ? new CornerRadius(2, 2, 0, 0) : new CornerRadius(3, 3, 0, 0);",
+        Assert.Contains("Default(\"TabActiveCornerRadius\", compactDialogCaption ? new CornerRadius(2, 2, 0, 0) : new CornerRadius(3, 3, 0, 0));",
             theme, StringComparison.Ordinal);
-        Assert.Contains("d[\"TabTitleFontSize\"] = compactDialogCaption ? 11.0 : 12.0;", theme, StringComparison.Ordinal);
-        Assert.Contains("d[\"TabCloseFontSize\"] = compactDialogCaption ? 14.0 : 17.0;", theme, StringComparison.Ordinal);
-        Assert.Contains("liveResources[\"TabActiveRingFadeBrush\"] = FadedRing(liveResources[\"TabActiveRingBrush\"]);",
-            theme, StringComparison.Ordinal);
+        Assert.Contains("Default(\"TabTitleFontSize\", compactDialogCaption ? 11.0 : 12.0);", theme, StringComparison.Ordinal);
+        Assert.Contains("Default(\"TabCloseFontSize\", compactDialogCaption ? 14.0 : 17.0);", theme, StringComparison.Ordinal);
 
         XElement tab = Named("tabBd");
         Assert.Equal("{DynamicResource PaneBorderBrush}", (string?)tab.Attribute("DividerBrush"));

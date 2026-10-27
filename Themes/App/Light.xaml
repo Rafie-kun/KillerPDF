@@ -1,16 +1,11 @@
-<!-- KillerPDF's own Light theme values: keys only KillerPDF uses, and KillerPDF's own value
-     where the family palette states a different one. ThemeManager.AppTokens
-     (Services/AppTheme.cs) merges them over the family palette. -->
+<!-- KillerPDF's own Light theme values: keys the kit palette does not define. AppTheme's
+     AppDerivedTokens (Services/AppTheme.cs) adds them; kit keys always keep the kit's value. -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:po="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
     <SolidColorBrush x:Key="BgRecentPanel"  Color="#d4d4d4" po:Freeze="True"/>
-    <SolidColorBrush x:Key="BgFlyout"       Color="#cacaca" po:Freeze="True"/>
     <SolidColorBrush x:Key="AnnotationBarBrush" Color="#cacaca" po:Freeze="True"/>
-    <SolidColorBrush x:Key="TextFieldBrush" Color="#ffffff" po:Freeze="True"/>
-    <SolidColorBrush x:Key="ComboFieldBrush" Color="#ffffff" po:Freeze="True"/>
-    <SolidColorBrush x:Key="ComboFieldHoverBrush" Color="#f7f7f7" po:Freeze="True"/>
     <LinearGradientBrush x:Key="TabStripFadeBrush" StartPoint="0,0" EndPoint="0,1" po:Freeze="True">
         <GradientStop Offset="0.0" Color="#00000000"/>
         <GradientStop Offset="0.55" Color="#12000000"/>
@@ -19,21 +14,11 @@
     <SolidColorBrush x:Key="InstallBtnBg"   Color="#1b5e20" po:Freeze="True"/>
     <SolidColorBrush x:Key="DropBorder"     Color="#a8a8a8" po:Freeze="True"/>
     <SolidColorBrush x:Key="SettingsOpenRowBg" Color="#b2b2b2" po:Freeze="True"/>
-    <SolidColorBrush x:Key="FilenameBrush"  Color="#555555" po:Freeze="True"/>
     <SolidColorBrush x:Key="DangerRed"      Color="#dc2626" po:Freeze="True"/>
     <SolidColorBrush x:Key="BgDragHandle"   Color="#707070" po:Freeze="True"/>
     <SolidColorBrush x:Key="DragLine"       Color="#a0a0a0" po:Freeze="True"/>
-    <SolidColorBrush x:Key="SliderTrack"    Color="#8c8c8c" po:Freeze="True"/>
     <SolidColorBrush x:Key="BgOverlay"      Color="#99000000" po:Freeze="True"/>
-    <sys:Double x:Key="IconShadowOpacity">0.35</sys:Double>
     <sys:Double x:Key="HeaderShadowOpacity">0</sys:Double>
     <SolidColorBrush x:Key="BgCanvas"                                                       Color="#b8b8b8" po:Freeze="True"/>
-    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"                      Color="#c8f5d8" po:Freeze="True"/>
-    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}"                  Color="#1b5e20" po:Freeze="True"/>
-    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}"     Color="#c8f5d8" po:Freeze="True"/>
-    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="#1b5e20" po:Freeze="True"/>
-    <SolidColorBrush x:Key="KsCatTools"     Color="#a67c00" po:Freeze="True"/>
-    <SolidColorBrush x:Key="KsCatOcr"       Color="#cc6a00" po:Freeze="True"/>
-    <DropShadowEffect x:Key="TextStroke" Color="Black" BlurRadius="2" ShadowDepth="0.6" Direction="270" Opacity="0.45"/>
     <SolidColorBrush x:Key="SelectionButtonBorderBrush" Color="#777777" po:Freeze="True"/>
 </ResourceDictionary>

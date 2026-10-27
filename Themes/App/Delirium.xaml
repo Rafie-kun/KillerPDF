@@ -1,6 +1,5 @@
-<!-- KillerPDF's own Delirium theme values: keys only KillerPDF uses, and KillerPDF's own value
-     where the family palette states a different one. ThemeManager.AppTokens
-     (Services/AppTheme.cs) merges them over the family palette. -->
+<!-- KillerPDF's own Delirium theme values: keys the kit palette does not define. AppTheme's
+     AppDerivedTokens (Services/AppTheme.cs) adds them; kit keys always keep the kit's value. -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:po="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"

@@ -256,7 +256,7 @@ public sealed class ComparisonBarLayoutTests
             (string?)element.Attribute("Foreground") == "{StaticResource ComparisonBarForegroundBrush}");
 
         string themeManager = File.ReadAllText(Path.Combine(root, "Services", "AppTheme.cs"));
-        Assert.Contains("ApplyComparisonBarPalette(liveResources, theme, accent);", themeManager);
+        Assert.Contains("ApplyComparisonBarPalette(palette, theme, accent);", themeManager);
         Assert.Contains("case Theme.Dark:", themeManager);
         Assert.Contains("case Theme.Light:", themeManager);
         Assert.Contains("case Theme.Black:", themeManager);

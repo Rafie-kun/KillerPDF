@@ -1,5 +1,5 @@
 <!-- KillerPDF's own Light Blue accent values: keys the kit accent overlay does not carry.
-     ThemeManager.AppTokens (Services/AppTheme.cs) merges them over the family overlay. -->
+     AppDerivedTokens (Services/AppTheme.cs) adds them; kit keys keep the kit's value. -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:po="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options">
