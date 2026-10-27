@@ -198,6 +198,7 @@ namespace KillerPDF
 
         void IViewerHost.EnsureSidebarPageVisible(PdfViewer viewer, int pageIndex)
         {
+            if (_pageBoxApplying) return;
             if (!ReferenceEquals(ActiveViewer, viewer) || pageIndex < 0 || pageIndex >= PageList.Items.Count) return;
             PageList.ScrollIntoView(PageList.Items[pageIndex]);
         }

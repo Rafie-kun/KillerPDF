@@ -182,6 +182,24 @@ internal static class TableExportSmoke
                 return PageNavigationModesSmoke.Run(owner, folder);
             if (windowSessionCase == "--verify-page-navigation-sidebar")
                 return PageNavigationSidebarSmoke.Run(owner, folder);
+            if (windowSessionCase == "--verify-page-navigation-box-selection")
+                return ThumbnailBoxSelectionSmoke.Run(owner, folder);
+            if (windowSessionCase == "--verify-page-navigation-box-controls")
+                return ThumbnailBoxSelectionSmoke.Run(owner, folder, controls: true);
+            if (windowSessionCase == "--verify-page-navigation-box-gutter")
+                return ThumbnailBoxGutterSmoke.Run(owner, folder);
+            if (windowSessionCase == "--verify-page-navigation-box-scroll")
+                return ThumbnailBoxGutterSmoke.Run(owner, folder, scroll: true);
+            if (windowSessionCase == "--verify-page-navigation-box-strip")
+                return ThumbnailBoxGutterSmoke.Run(owner, folder, scroll: true, strip: true);
+            if (windowSessionCase == "--verify-page-navigation-box-scale")
+                return ThumbnailBoxGutterSmoke.Run(owner, folder, scroll: true, maximumScale: true);
+            if (windowSessionCase == "--verify-page-navigation-box-actions")
+                return ThumbnailBoxGutterSmoke.Run(owner, folder, scroll: true, actions: true);
+            if (windowSessionCase == "--verify-page-navigation-box-switch")
+                return ThumbnailBoxGutterSmoke.Run(owner, folder, scroll: true, strip: true, switchDocument: true);
+            if (windowSessionCase == "--verify-page-navigation-drag-controls")
+                return ThumbnailDragControlsSmoke.Run(owner, folder);
             if (windowSessionCase == "--verify-page-navigation-transitions")
                 return PageNavigationTransitionsSmoke.Run(owner, folder);
             if (windowSessionCase == "--verify-page-navigation-layout")

@@ -48,7 +48,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 ### Added
 
-- Optional title-bar Previous and Next page buttons stay off by default. Toggle them from the title-bar menu or with Alt+Shift+N; the choice is saved and follows the focused document.
 - **Permanent redaction:** Remove content by area, text search or sensitive-data pattern, with verification, batches, optional sanitization and separate output. Content rewriting retains unaffected searchable text and uncovered image pixels; whole-page raster fallback requires approval (#341).
 - **Document protection:** Save AES-256 encrypted copies with passwords, permissions or certificate recipients, and open certificate-encrypted PDFs using a matching Windows certificate.
 - Added recovery snapshots and restart handling for display failures (#456).
@@ -61,9 +60,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - **Accessibility review:** Inspect language and description problems with page previews, guided repairs, rechecking and Undo. Added document-reading support for page text, tagged reading order, links, comments and marked text, plus keyboard and accessibility support for form, stamp and palette controls (#335).
 - **Repair and optimization:** Added preflight corrections, sanitization, resource cleanup, print-production and structural reports, plus Reduce File Size for optimized copies. Optimization preserves uncompressed XMP metadata and resources used by forms and inline images (#333, #334, #433).
 - **Office conversion and scanning:** Convert DOCX/XLSX directly to PDF; legacy DOC/XLS conversion uses installed Word or Excel. Scan pages through TWAIN into a new PDF (#73, #74).
-- **Page tools:** Reverse pages, correct orientation, straighten scans and divide scanned spreads into separate pages in reading order. Delete and Extract accept typed page ranges. Rasterize Region previews affected content while preserving text and vectors outside the selection (#369, #382, #436).
+- **Page tools:** Reverse pages, correct orientation, straighten scans and divide scanned spreads into separate pages in reading order. Delete and Extract accept typed page ranges and sidebar box selections, with Ctrl/Shift modifiers and edge scrolling. Rasterize Region previews affected content while preserving text and vectors outside the selection (#369, #382, #436).
 - **Production tools:** Add headers, footers, page numbers and continuous Bates batches; preview N-up, booklet, repeat, cut-stack, manual and poster layouts. Separations previews individual process and spot-ink plates (#264, #344, #349).
 - **Document organization:** Added comment threads and replies, attachment and portfolio editing, layer controls, bookmark/link audits, table-of-contents generation, page labels and initial-view settings (#288, #347, #350, #351).
+- Optional title-bar Previous and Next page buttons stay off by default. Toggle them from the title-bar menu or with Alt+Shift+N; the choice is saved and follows the focused document.
 - Added vector SVG signatures, a shared image library for images, watermarks and signatures, and adjustable paper-background removal for imported signatures (#326, #398).
 - Added optional File Explorer and Outlook PDF previews to installed copies, with scrolling, zoom and read-only opening (#410).
 - Added Search Tools (Ctrl+K), customizable shortcuts and one-letter tools, with expanded view, page, clipboard and tab actions. Scan, Office conversion, Macros and Certificates are searchable before opening a PDF (#190).

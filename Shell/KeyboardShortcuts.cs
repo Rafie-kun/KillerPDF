@@ -23,6 +23,11 @@ namespace KillerPDF
 
         protected override void OnPreviewKeyDown(KeyEventArgs e)
         {
+            if (_pageBoxActive && e.Key is not (Key.LeftCtrl or Key.RightCtrl or Key.LeftShift or Key.RightShift))
+            {
+                EndPageBoxSelection(cancel: true);
+                if (e.Key == Key.Escape) { e.Handled = true; return; }
+            }
             if (App.UpdateRestartPrepared)
             {
                 e.Handled = true;

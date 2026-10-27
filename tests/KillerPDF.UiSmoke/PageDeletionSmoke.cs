@@ -285,7 +285,7 @@ internal static class PageDeletionSmoke
         return 0;
     }
 
-    private static (int Count, string Labels) Read(string path)
+    internal static (int Count, string Labels) Read(string path)
     {
         Assembly engine = Assembly.Load("KillerPdf.Engine");
         object document = engine.GetType("KillerPdf.Engine.Documents.PdfDocument", true)!

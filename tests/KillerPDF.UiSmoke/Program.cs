@@ -32,6 +32,30 @@ internal static class Program
         Console.OutputEncoding = new UTF8Encoding(false);
         try
         {
+            if (args.Length == 2 && args[0] == "--verify-thumbnail-fixture")
+            {
+                string enginePath = Path.GetFullPath(args[1]);
+                Assembly? ResolveFixtureAssembly(AssemblyLoadContext context, AssemblyName name)
+                {
+                    string dependency = Path.Combine(Path.GetDirectoryName(enginePath)!, name.Name + ".dll");
+                    return File.Exists(dependency) ? context.LoadFromAssemblyPath(dependency) : null;
+                }
+                AssemblyLoadContext.Default.Resolving += ResolveFixtureAssembly;
+                try
+                {
+                    Assembly engine = AssemblyLoadContext.Default.LoadFromAssemblyPath(enginePath);
+                    Type documentType = engine.GetType("KillerPdf.Engine.Documents.PdfDocument", throwOnError: true)!;
+                    object document = documentType.GetMethod("Open", [typeof(ReadOnlyMemory<byte>)])!
+                        .Invoke(null, [new ReadOnlyMemory<byte>(ThumbnailBoxGutterSmoke.LongFixture())])!;
+                    var pages = (System.Collections.IEnumerable)engine.GetType("KillerPdf.Engine.Documents.PdfPageInformation", true)!
+                        .GetMethod("Read", [documentType])!.Invoke(null, [document])!;
+                    int count = pages.Cast<object>().Count();
+                    if (count != 80) throw new InvalidOperationException("The thumbnail fixture did not strictly reopen with eighty pages.");
+                    Console.WriteLine("PASS thumbnail fixture: strict public engine reopened eighty pages without creating a Window.");
+                    return 0;
+                }
+                finally { AssemblyLoadContext.Default.Resolving -= ResolveFixtureAssembly; }
+            }
             if (args.Length == 1 && args[0] == "--verify-print-color-probe")
                 return PrintVisibilitySmoke.VerifyColorProbe();
             if (args.Length == 2 && args[0] == "--request-process-close")

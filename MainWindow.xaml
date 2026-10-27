@@ -2117,6 +2117,10 @@
                             </ListBox.ItemTemplate>
                             </ListBox>
                         </Border>
+                        <Canvas x:Name="PageSelectionCanvas" IsHitTestVisible="False" Panel.ZIndex="4" ClipToBounds="True">
+                            <Rectangle x:Name="PageSelectionBox" Visibility="Collapsed" IsHitTestVisible="False"
+                                       Stroke="{DynamicResource SelectionAccent}" StrokeThickness="1.5" Fill="Transparent"/>
+                        </Canvas>
                         <!-- Page reorder insertion marker. Its Y translation is driven from the same
                              thumbnail midpoint calculation used by the eventual drop. -->
                         <Border x:Name="PageDropIndicator" Height="3" Margin="8,0,20,0"

@@ -126,11 +126,15 @@ namespace KillerPDF
             // scrollbar - otherwise grabbing the scrollbar starts a page-move drag (the "insert"
             // cursor) instead of scrolling.
             _pageDragArmed = false;
+            bool thumbnailContent = false;
             for (var d = e.OriginalSource as DependencyObject; d != null; d = VisualTreeHelper.GetParent(d))
             {
-                if (d is System.Windows.Controls.Primitives.ScrollBar) break;
+                if (d is System.Windows.Controls.Primitives.ScrollBar) return;
+                if (d is System.Windows.Controls.Primitives.ButtonBase) return;
+                if (d is TextBlock || d is Border { Name: "ThumbBorder" }) thumbnailContent = true;
                 if (d is ListBoxItem pressed)
                 {
+                    if (!thumbnailContent) break;
                     _pageDragArmed = true;
                     if (pressed.IsSelected && PageList.SelectedItems.Count > 1
                         && (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) == ModifierKeys.None)
@@ -147,10 +151,12 @@ namespace KillerPDF
                     break;
                 }
             }
+            if (!_pageDragArmed) BeginPageBoxSelection(e);
         }
 
         private void PageList_PreviewMouseMove(object sender, MouseEventArgs e)
         {
+            if (UpdatePageBoxSelection(e)) return;
             if (!_pageDragArmed || e.LeftButton != MouseButtonState.Pressed) return;
             var diff = _dragStartPoint - e.GetPosition(null);
             if (Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
