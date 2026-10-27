@@ -2,12 +2,12 @@ using System;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Interop;
-using System.Windows.Media.Animation;
 using KillerFamily.Accessibility;
 
 // ============================================================
-// THEMED WINDOWS SYSTEM MENU (from KillerUI/Shell/SystemMenu.cs)
+// THEMED WINDOWS SYSTEM MENU
 //
 // WindowChrome turns the title bar into a real native caption, which is what buys free snap,
 // drag and double-click-maximize - but it also means Windows answers a caption right-click
@@ -20,9 +20,42 @@ using KillerFamily.Accessibility;
 // WM_SYSCOMMAND the native menu would have sent, so behavior is identical - including Move and
 // Size, which hand off to Windows' own modal drag loops.
 //
-// KillerPDF adaptations: HTCAPTION already lives in Shell/WindowChrome.cs (not redeclared
-// here), the menu comes from MakeThemedMenu() so its TextOptions match the app's other
-// code-built menus, and the kit's Anim.FadeIn is inlined (KillerPDF carries no Anim class).
+// ---- Wiring it up -------------------------------------------------------------------------
+//   1. Drop this file in as a MainWindow partial and fix the namespace.
+//   2. The window needs an HwndSource hook. If Chrome.cs already has a WndProc, add this as the
+//      FIRST thing it does:
+//
+//          if (TryHandleSystemMenu(msg, wParam, lParam)) { handled = true; return IntPtr.Zero; }
+//
+//   3. Chrome.cs must define `private const int HTCAPTION = 2;` (most already do).
+//   4. Add the six Str_Sys_* keys to en-US.xaml at minimum. Missing keys fall back to English
+//      rather than rendering the key name, so a half-translated locale still reads correctly.
+//
+// TRAP (KillerPDF, 2026-07-31): an Absolute-placement ContextMenu with no PlacementTarget has
+// NO inheritance context, so it only sees APP-level implicit styles. An app that keeps its
+// ContextMenu/MenuItem styles in the window's resources (KillerPDF does) gets the stock white
+// menu. ShowSystemMenu below therefore sets PlacementTarget = this - harmless with
+// PlacementMode.Absolute (it supplies the resource context without affecting position). Do not
+// remove it when porting.
+//
+// Originally written for KillerScan; KillerShell's older Minimize/Maximize/Close-only copy in
+// Chrome.cs was replaced with this file on 2026-10-23, when Close gained Windows' Alt+F4 hint and
+// the default item its bold. Ported into
+// the kit 2026-07-30 because three of five apps were still showing the stock white menu.
+//
+// ---- App hooks (optional partial methods; leave them out to keep the kit menu) -----------
+//   CustomizeSystemMenuItem(item, icon, command, danger): runs once per item after the kit
+//      builds it. An app that styles menu icons through its own MenuIcon style clears the
+//      icon's local font, size and alignment and sets that style here, and may clear the item's
+//      Padding to use its implicit MenuItem padding.
+//   UseSystemMenuAccessKeys(ref use): set true to show and handle Windows' access letters
+//      (R, M, S, N, X and C, with Close labeled "Alt+F4 / C") while the menu is open.
+//   CustomizeSystemMenu(menu): runs once on the new menu before any item is added, for an app
+//      that builds its code-made menus with its own style or text options.
+//   AddSystemMenuItems(menu): runs once after the separator above Close, for the app's own
+//      rows; an app that adds any ends them with its own Separator.
+//   SystemMenuOpening(): runs each time the menu opens, before the kit enables its items, so
+//      the app's own rows can show their current state.
 // ============================================================
 namespace KillerPDF.Shell
 {
@@ -48,7 +81,7 @@ namespace KillerPDF.Shell
         private bool TryHandleSystemMenu(int msg, IntPtr wParam, IntPtr lParam)
         {
             // Right-click on the caption.
-            if (msg == WM_NCRBUTTONUP && wParam.ToInt32() == HTCAPTION)
+            if (msg == WM_NCRBUTTONUP && wParam.ToInt64() == HTCAPTION)
             {
                 ShowSystemMenu(ScreenPointFromLParam(lParam));
                 return true;
@@ -68,14 +101,14 @@ namespace KillerPDF.Shell
         /// <summary>lParam of a non-client mouse message packs screen coords as two shorts.</summary>
         private static Point ScreenPointFromLParam(IntPtr lParam)
         {
-            int v = lParam.ToInt32();
+            int v = unchecked((int)lParam.ToInt64());   // ToInt32 throws on a 64-bit value
             return new Point((short)(v & 0xFFFF), (short)((v >> 16) & 0xFFFF));
         }
 
         private void ShowSystemMenu(Point? screenPoint)
         {
             _sysMenu ??= BuildSystemMenu();
-            SyncPageNavigationButtons();
+            SystemMenuOpening();
 
             bool maximized = WindowState == WindowState.Maximized;
             // Windows grays out what does not apply: you cannot Restore a normal window, cannot
@@ -95,10 +128,8 @@ namespace KillerPDF.Shell
                 mi.FontWeight = cmd == defaultCommand ? FontWeights.Bold : FontWeights.Normal;
             }
 
-            // KillerPDF keeps its implicit ContextMenu/MenuItem styles in MainWindow.xaml's
-            // WINDOW resources (not App.xaml), and an Absolute-placement menu has no inheritance
-            // context to find them through - it rendered stock white. PlacementTarget supplies
-            // that context; with PlacementMode.Absolute it does not affect position.
+            // See the TRAP note in the header: without a PlacementTarget an Absolute-placement
+            // menu has no inheritance context and misses window-level implicit styles.
             _sysMenu.PlacementTarget = this;
             _sysMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Absolute;
             if (screenPoint is { } p)
@@ -112,31 +143,49 @@ namespace KillerPDF.Shell
             else
             {
                 // Keyboard route: hang it under the top-left of the window, like Windows does.
-                _sysMenu.HorizontalOffset = Left + 8;
-                _sysMenu.VerticalOffset = Top + 36;
+                // While maximized Left/Top keep the RESTORE position, which put the menu where the
+                // restored window would sit, possibly on another monitor, so the real screen
+                // position is used there. A normal window keeps Left/Top, the same point.
+                if (maximized)
+                {
+                    Point corner = PointToScreen(new Point(8, 36));
+                    if (PresentationSource.FromVisual(this)?.CompositionTarget is { } target)
+                        corner = target.TransformFromDevice.Transform(corner);
+                    _sysMenu.HorizontalOffset = corner.X;
+                    _sysMenu.VerticalOffset = corner.Y;
+                }
+                else
+                {
+                    _sysMenu.HorizontalOffset = Left + 8;
+                    _sysMenu.VerticalOffset = Top + 36;
+                }
             }
 
             _sysMenu.IsOpen = true;
-            // Inline of the kit's Anim.FadeIn: 150ms opacity ease-out.
-            _sysMenu.BeginAnimation(UIElement.OpacityProperty,
-                new DoubleAnimation(0, 1, new Duration(TimeSpan.FromMilliseconds(150)))
-                {
-                    EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
-                });
+            Controls.Anim.FadeIn(_sysMenu);
         }
+
+        partial void CustomizeSystemMenuItem(MenuItem item, Glyph icon, int command, bool danger);
+        partial void UseSystemMenuAccessKeys(ref bool use);
+        partial void CustomizeSystemMenu(ContextMenu menu);
+        partial void AddSystemMenuItems(ContextMenu menu);
+        partial void SystemMenuOpening();
 
         private ContextMenu BuildSystemMenu()
         {
-            var menu = MakeThemedMenu();
+            var menu = new ContextMenu();
+            CustomizeSystemMenu(menu);
+            bool accessKeys = false;
+            UseSystemMenuAccessKeys(ref accessKeys);
 
             // Every codepoint below was verified present in segmdl2.ttf by RENDERING it, not
             // trusted from documentation - this repo has shipped a missing-glyph box before.
             // E923/E921/E922/E8BB are the same four the title-bar caption buttons draw, so the
             // menu and the caption agree. E7C2 is the four-way move arrow, E740 the diagonal
             // resize arrow.
-            MenuItem Add(string key, string fallback, int cmd, int glyph, bool danger = false)
+            MenuItem Add(string key, string fallback, int cmd, int glyph, string gesture = "", bool danger = false)
             {
-                var mi = new MenuItem { Tag = cmd, Padding = new Thickness(12, 7, 24, 7) };
+                var mi = new MenuItem { Tag = cmd, Padding = new Thickness(12, 7, 24, 7), InputGestureText = gesture };
                 mi.SetResourceReference(HeaderedItemsControl.HeaderProperty, key);
                 // Loc() returns the key itself when a string is missing; fall back to English so a
                 // half-translated locale never shows "Str_Sys_Move" in the menu.
@@ -154,6 +203,25 @@ namespace KillerPDF.Shell
                                          danger ? "DangerRed" : "MutedTextBrush");
                 mi.Icon = ico;
 
+                if (accessKeys)
+                {
+                    string letter = cmd switch
+                    {
+                        SC_RESTORE => "R", SC_MOVE => "M", SC_SIZE => "S",
+                        SC_MINIMIZE => "N", SC_MAXIMIZE => "X", _ => "C",
+                    };
+                    if (cmd == SC_CLOSE) mi.InputGestureText = "Alt+F4 / C";
+                    else if (gesture.Length == 0) mi.InputGestureText = letter;
+                    menu.KeyDown += (_, e) =>
+                    {
+                        if (Keyboard.Modifiers != ModifierKeys.None || e.Key.ToString() != letter || !mi.IsEnabled) return;
+                        menu.IsOpen = false;
+                        SendSysCommand(cmd);
+                        e.Handled = true;
+                    };
+                }
+
+                CustomizeSystemMenuItem(mi, ico, cmd, danger);
                 mi.Click += (_, _) => SendSysCommand(cmd);
                 menu.Items.Add(mi);
                 return mi;
@@ -165,12 +233,8 @@ namespace KillerPDF.Shell
             Add("Str_Sys_Minimize", "Minimize", SC_MINIMIZE, 0xE921);
             Add("Str_Sys_Maximize", "Maximize", SC_MAXIMIZE, 0xE922);
             menu.Items.Add(new Separator());
-            _pageNavigationMenuItem = new MenuItem { IsCheckable = true, Padding = new Thickness(12, 7, 24, 7) };
-            _pageNavigationMenuItem.SetResourceReference(HeaderedItemsControl.HeaderProperty, "Str_NavigationButtons_Show");
-            _pageNavigationMenuItem.Click += (_, _) => TogglePageNavigationButtons();
-            menu.Items.Add(_pageNavigationMenuItem);
-            menu.Items.Add(new Separator());
-            Add("Str_Sys_Close",    "Close",    SC_CLOSE,    0xE8BB, danger: true).InputGestureText = "Alt+F4";
+            AddSystemMenuItems(menu);
+            Add("Str_Sys_Close",    "Close",    SC_CLOSE,    0xE8BB, gesture: "Alt+F4", danger: true);
             return menu;
         }
 
@@ -183,8 +247,7 @@ namespace KillerPDF.Shell
             PostMessage(hwnd, WM_SYSCOMMAND, new IntPtr(cmd), IntPtr.Zero);
         }
 
-        [LibraryImport("user32.dll", EntryPoint = "PostMessageW")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static partial bool PostMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
+        [DllImport("user32.dll")]
+        private static extern bool PostMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
     }
 }

@@ -34,7 +34,7 @@ internal sealed class ExportDocumentDialog : Window
         var body = new StackPanel { Margin = new Thickness(20, 6, 20, 16) };
         Window? scaleOwner = owner;
         while (scaleOwner is not null && scaleOwner is not MainWindow) scaleOwner = scaleOwner.Owner;
-        double scale = scaleOwner is MainWindow main ? main._appScale : 1;
+        double scale = scaleOwner is MainWindow main ? main.AppScale : 1;
         body.LayoutTransform = new ScaleTransform(scale, scale);
         body.Children.Add(UiKit.GroupLabel(L("Str_ExportImg_Format")));
         _format = new ComboBox
