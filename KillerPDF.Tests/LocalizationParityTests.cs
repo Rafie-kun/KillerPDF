@@ -98,12 +98,16 @@ public sealed class LocalizationParityTests
                     offenders.Add($"{Path.GetRelativePath(root, file)}: {match.Groups[1].Value}");
         }
 
+        var csharpUiLiteral = new Regex(
+            @"\b(?:Text|Content|Header|ToolTip|Title)\s*=(?!=)\s*(?:[^;\r\n]*\?[^:\r\n]*:\s*)?\$?""([^""\r\n]*[A-Za-z][^""\r\n]*)""");
+        Assert.Single(csharpUiLiteral.Matches("new TextBlock { Text = \"Untranslated label\" };"));
+        Assert.Empty(csharpUiLiteral.Matches("run.Text == \"PDF\" ? \"AccentLogo\" : \"ChromeTextBrush\""));
+
         foreach (string file in Directory.GetFiles(root, "*.cs", SearchOption.AllDirectories)
                      .Where(path => !ExcludedSourcePath(root, path)))
         {
             string source = File.ReadAllText(file);
-            foreach (Match match in Regex.Matches(source,
-                         @"\b(?:Text|Content|Header|ToolTip|Title)\s*=\s*(?:[^;\r\n]*\?[^:\r\n]*:\s*)?\$?""([^""\r\n]*[A-Za-z][^""\r\n]*)"""))
+            foreach (Match match in csharpUiLiteral.Matches(source))
                 if (!IsAllowedUiLiteral(match.Groups[1].Value, allowed))
                     offenders.Add($"{Path.GetRelativePath(root, file)}: {match.Groups[1].Value}");
             foreach (Match match in Regex.Matches(source,
