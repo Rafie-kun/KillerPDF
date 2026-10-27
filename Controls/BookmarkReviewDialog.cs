@@ -22,7 +22,7 @@ internal sealed class BookmarkReviewDialog : Window
         SizeToContent = SizeToContent.Height;
         MaxHeight = Math.Max(360, SystemParameters.WorkArea.Height * 0.85);
         UseLayoutRounding = true;
-        DialogChrome.Configure(this, owner);
+        DialogFrame.Configure(this, owner);
 
         var body = new DockPanel { Margin = new Thickness(20, 6, 20, 16) };
         var buttonsPanel = new StackPanel();
@@ -97,7 +97,7 @@ internal sealed class BookmarkReviewDialog : Window
         });
         body.Children.Add(center);
 
-        Content = DialogChrome.Frame(this, owner, Title,
+        Content = DialogFrame.Frame(this, owner, Title,
             () => { DialogResult = false; Close(); }, body);
         Loaded += (_, _) => _rows[0].Title.Focus();
     }

@@ -43,7 +43,7 @@ internal sealed class RedactionPropertiesDialog : Window
         Width = 440;
         SizeToContent = SizeToContent.Height;
         UseLayoutRounding = true;
-        DialogChrome.Configure(this, owner);
+        DialogFrame.Configure(this, owner);
 
         var body = new StackPanel { Margin = new Thickness(20, 6, 20, 16) };
         body.Children.Add(UiKit.GroupLabel(L("Str_RedactProps_Fill")));
@@ -167,7 +167,7 @@ internal sealed class RedactionPropertiesDialog : Window
         _ok.Click += (_, _) => Commit();
         body.Children.Add(UiKit.ButtonRow(cancel, _ok));
 
-        Content = DialogChrome.Frame(this, owner, Title, () => { DialogResult = false; Close(); }, body);
+        Content = DialogFrame.Frame(this, owner, Title, () => { DialogResult = false; Close(); }, body);
         SelectCode();
         UpdatePreview();
         Loaded += (_, _) => _overlay.Focus();

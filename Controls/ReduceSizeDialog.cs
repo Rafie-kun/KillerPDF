@@ -23,7 +23,7 @@ internal sealed class ReduceSizeDialog : Window
         Width = 420;
         SizeToContent = SizeToContent.Height;
         UseLayoutRounding = true;
-        DialogChrome.Configure(this, owner);
+        DialogFrame.Configure(this, owner);
 
         Style? sliderStyle = owner.TryFindResource("DarkSlider") as Style;
         var body = new StackPanel { Margin = new Thickness(20, 6, 20, 16) };
@@ -93,7 +93,7 @@ internal sealed class ReduceSizeDialog : Window
         buttons.Margin = new Thickness(0, 12, 0, 0);
         body.Children.Add(buttons);
 
-        Content = DialogChrome.Frame(this, owner, Title, Close, body);
+        Content = DialogFrame.Frame(this, owner, Title, Close, body);
     }
 
     private void Commit()

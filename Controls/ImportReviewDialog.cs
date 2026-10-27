@@ -17,7 +17,7 @@ internal sealed class ImportReviewDialog : Window
         MinWidth = 460;
         MinHeight = 320;
         UseLayoutRounding = true;
-        DialogChrome.Configure(this, owner);
+        DialogFrame.Configure(this, owner);
         var body = new DockPanel { Margin = new Thickness(20, 6, 20, 16) };
         var cancel = UiKit.Make(L("Str_Btn_Cancel"), accent: false);
         cancel.IsCancel = true;
@@ -42,7 +42,7 @@ internal sealed class ImportReviewDialog : Window
         text.TextWrapping = TextWrapping.Wrap;
         text.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
         body.Children.Add(text);
-        Content = DialogChrome.Frame(this, owner, Title, Close, body);
+        Content = DialogFrame.Frame(this, owner, Title, Close, body);
         Loaded += (_, _) => text.Focus();
     }
 

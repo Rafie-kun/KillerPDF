@@ -28,7 +28,7 @@ internal sealed class FlattenOptionsDialog : Window
         Width = 420;
         SizeToContent = SizeToContent.Height;
         UseLayoutRounding = true;
-        DialogChrome.Configure(this, owner);
+        DialogFrame.Configure(this, owner);
 
         Style? comboStyle = owner.TryFindResource("DarkComboBox") as Style;
         Style? sliderStyle = owner.TryFindResource("DarkSlider") as Style;
@@ -125,7 +125,7 @@ internal sealed class FlattenOptionsDialog : Window
         buttons.Margin = new Thickness(0, 12, 0, 0);
         body.Children.Add(buttons);
 
-        Content = DialogChrome.Frame(this, owner, Title, Close, body);
+        Content = DialogFrame.Frame(this, owner, Title, Close, body);
         Loaded += (_, _) => _dpi.Focus();
     }
 

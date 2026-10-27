@@ -1,6 +1,7 @@
 using System;
 using System.Windows;
 using Xunit;
+using KillerPDF.Shell;
 
 namespace KillerPDF.Tests
 {

@@ -1,4 +1,6 @@
 using System.Windows;
+using KillerPDF.Controls;
+using KillerPDF.Shell;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;

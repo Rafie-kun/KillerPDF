@@ -16,7 +16,7 @@ internal sealed class BatesBatchDialog : Window
     {
         Title = "KillerPDF - " + L("Str_Production_Bates"); Width = 620; Height = 420; MinWidth = 500; MinHeight = 360;
         MaxHeight = Math.Max(400, SystemParameters.WorkArea.Height - 60);
-        UseLayoutRounding = true; DialogChrome.Configure(this, owner);
+        UseLayoutRounding = true; DialogFrame.Configure(this, owner);
         var body = new DockPanel { Margin = new Thickness(20, 6, 20, 16) };
         var cancel = UiKit.Make(L("Str_Btn_Cancel"), accent: false);
         cancel.IsCancel = true; cancel.Click += (_, _) => Close();
@@ -54,7 +54,7 @@ internal sealed class BatesBatchDialog : Window
         _position.SelectedIndex = 0; _position.Margin = new Thickness(0, 5, 0, 14); fields.Children.Add(_position);
         _overlap = UiKit.CheckBox(L("Str_Production_AllowOverlap")); fields.Children.Add(_overlap);
         body.Children.Add(new ScrollViewer { Content = fields, VerticalScrollBarVisibility = ScrollBarVisibility.Auto });
-        Content = DialogChrome.Frame(this, owner, Title, Close, body);
+        Content = DialogFrame.Frame(this, owner, Title, Close, body);
     }
 
     private void Apply()

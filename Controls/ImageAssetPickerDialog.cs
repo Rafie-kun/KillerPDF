@@ -35,7 +35,7 @@ internal sealed class ImageAssetPickerDialog : Window
         Height = 480;
         MinWidth = 560;
         MinHeight = 400;
-        DialogChrome.Configure(this, owner, resizable: true);
+        DialogFrame.Configure(this, owner, resizable: true);
 
         _assets.SelectionChanged += (_, _) => SelectionChanged();
         _assets.MouseDoubleClick += (_, e) =>
@@ -128,7 +128,7 @@ internal sealed class ImageAssetPickerDialog : Window
         DockPanel.SetDock(actions, Dock.Bottom);
         body.Children.Add(actions);
         body.Children.Add(content);
-        Content = DialogChrome.Frame(this, owner, Title, CloseCanceled, body);
+        Content = DialogFrame.Frame(this, owner, Title, CloseCanceled, body);
 
         Reload(null);
     }

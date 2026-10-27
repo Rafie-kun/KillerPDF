@@ -23,7 +23,7 @@ internal sealed class BookmarkDetectionDialog : Window
         Width = 470;
         SizeToContent = SizeToContent.Height;
         UseLayoutRounding = true;
-        DialogChrome.Configure(this, owner);
+        DialogFrame.Configure(this, owner);
 
         var body = new StackPanel { Margin = new Thickness(20, 6, 20, 16) };
         _minimumSize = AddField(body, "Str_AutoBookmarks_MinimumSize", "14");
@@ -44,7 +44,7 @@ internal sealed class BookmarkDetectionDialog : Window
         buttons.Margin = new Thickness(0, 14, 0, 0);
         body.Children.Add(buttons);
 
-        Content = DialogChrome.Frame(this, owner, Title,
+        Content = DialogFrame.Frame(this, owner, Title,
             () => { DialogResult = false; Close(); }, body);
         Loaded += (_, _) => _minimumSize.Focus();
     }

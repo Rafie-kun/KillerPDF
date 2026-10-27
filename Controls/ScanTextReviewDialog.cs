@@ -23,7 +23,7 @@ internal sealed class ScanTextReviewDialog : Window
         Height = 560;
         MinWidth = 480;
         MinHeight = 360;
-        DialogChrome.Configure(this, owner, resizable: true);
+        DialogFrame.Configure(this, owner, resizable: true);
 
         _rows = [.. words.OrderBy(word => double.IsNaN(word.Word.Match) ? 1 : word.Word.Match)
             .ThenBy(word => word.PageIndex).Select(word => new Row(word))];
@@ -98,7 +98,7 @@ internal sealed class ScanTextReviewDialog : Window
         body.Children.Add(tools);
         body.Children.Add(list);
 
-        Content = DialogChrome.Frame(this, owner, Title, () => DialogResult = false, body);
+        Content = DialogFrame.Frame(this, owner, Title, () => DialogResult = false, body);
         UpdateCount();
     }
 

@@ -21,7 +21,7 @@ internal sealed class PortfolioEditorDialog : Window
         Width = 470;
         SizeToContent = SizeToContent.Height;
         UseLayoutRounding = true;
-        DialogChrome.Configure(this, owner);
+        DialogFrame.Configure(this, owner);
 
         var body = new StackPanel { Margin = new Thickness(20, 6, 20, 16) };
         body.Children.Add(UiKit.GroupLabel(L("Str_Portfolio_View")));
@@ -62,7 +62,7 @@ internal sealed class PortfolioEditorDialog : Window
         buttons.Margin = new Thickness(0, 14, 0, 0);
         body.Children.Add(buttons);
 
-        Content = DialogChrome.Frame(this, owner, Title,
+        Content = DialogFrame.Frame(this, owner, Title,
             () => { DialogResult = false; Close(); }, body);
         Loaded += (_, _) => _view.Focus();
     }

@@ -99,7 +99,6 @@
     <Compile Include="..\Services\Signing\PfxFileCertificateProvider.cs" Link="Services\Signing\PfxFileCertificateProvider.cs" />
     <Compile Include="..\Services\Signing\SigningOutputPath.cs" Link="Services\Signing\SigningOutputPath.cs" />
     <Compile Include="..\Models\StampModels.cs" Link="Models\StampModels.cs" />
-    <Compile Include="..\Controls\FlyoutPlacement.cs" Link="Controls\FlyoutPlacement.cs" />
     <Compile Include="..\Shell\SidebarSide.cs" Link="Shell\SidebarSide.cs" />
     <Compile Include="..\Shell\RailOrder.cs" Link="Shell\RailOrder.cs" />
     <Compile Include="..\Controls\SidebarPageBinding.cs" Link="Controls\SidebarPageBinding.cs" />

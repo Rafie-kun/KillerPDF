@@ -1,4 +1,6 @@
 using System;
+using KillerPDF.Controls;
+using KillerPDF.Shell;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -125,7 +127,7 @@ namespace KillerPDF
             Height = 720;
             MinWidth = 640;
             MinHeight = 460;
-            DialogChrome.Configure(this, owner, resizable: true);
+            DialogFrame.Configure(this, owner, resizable: true);
 
             Style? darkSlider = owner?.TryFindResource("DarkSlider") is Style sliderStyle
                 ? sliderStyle : null;
@@ -629,11 +631,11 @@ namespace KillerPDF
             previewColumn.Children.Add(UiKit.PaneWithShadow(previewWrap));
             root.Children.Add(previewColumn);
 
-            Content = DialogChrome.Frame(this, Owner, "KillerPDF - " + toolName, () => { Applied = false; Close(); }, root);
+            Content = DialogFrame.Frame(this, Owner, "KillerPDF - " + toolName, () => { Applied = false; Close(); }, root);
             UpdatePreview();   // populate the output-size readout at the original dimensions
             UpdatePageNavigation();
 
-            // Esc-to-close is wired by DialogChrome.Frame; Enter commits. Arrow keys flip through
+            // Esc-to-close is wired by DialogFrame.Frame; Enter commits. Arrow keys flip through
             // batch previews unless a slider currently owns the key press.
             KeyDown += (_, e) =>
             {

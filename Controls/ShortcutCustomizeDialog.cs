@@ -25,7 +25,7 @@ internal sealed class ShortcutCustomizeDialog : Window
         Width = 560;
         Height = 640;
         UseLayoutRounding = true;
-        DialogChrome.Configure(this, owner);
+        DialogFrame.Configure(this, owner);
 
         var body = new DockPanel { Margin = new Thickness(20, 6, 20, 16), LastChildFill = true };
 
@@ -98,7 +98,7 @@ internal sealed class ShortcutCustomizeDialog : Window
         body.Children.Add(scroll);
 
         PreviewKeyDown += CaptureKey;
-        Content = DialogChrome.Frame(this, owner, Title, Close, body);
+        Content = DialogFrame.Frame(this, owner, Title, Close, body);
         RefreshKeys();
     }
 

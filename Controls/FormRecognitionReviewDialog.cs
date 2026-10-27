@@ -28,7 +28,7 @@ internal sealed class FormRecognitionReviewDialog : Window
         MinWidth = 700;
         MinHeight = 420;
         UseLayoutRounding = true;
-        DialogChrome.Configure(this, owner, resizable: true);
+        DialogFrame.Configure(this, owner, resizable: true);
         var body = new DockPanel { Margin = new Thickness(20, 6, 20, 16) };
         var cancel = UiKit.Make(L("Str_Btn_Cancel"), accent: false);
         cancel.IsCancel = true;
@@ -103,7 +103,7 @@ internal sealed class FormRecognitionReviewDialog : Window
         Grid.SetColumn(reviewPanel, 2);
         columns.Children.Add(reviewPanel);
         body.Children.Add(columns);
-        Content = DialogChrome.Frame(this, owner, Title, Close, body);
+        Content = DialogFrame.Frame(this, owner, Title, Close, body);
         Loaded += (_, _) =>
         {
             if (_rows.Count > 0) { _rows[0].Name.Focus(); ShowProposal(_rows[0].Proposal); }

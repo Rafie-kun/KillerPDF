@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using KillerPDF.Controls;
+using KillerPDF.Shell;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.Json;

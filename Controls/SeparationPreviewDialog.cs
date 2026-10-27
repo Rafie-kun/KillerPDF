@@ -36,7 +36,7 @@ internal sealed class SeparationPreviewDialog : Window
         Height = 620;
         MinWidth = 560;
         MinHeight = 460;
-        DialogChrome.Configure(this, owner, resizable: true);
+        DialogFrame.Configure(this, owner, resizable: true);
         Closed += (_, _) => _session.Dispose();
 
         var body = new DockPanel { Margin = new Thickness(20, 6, 20, 16), LastChildFill = true };
@@ -106,7 +106,7 @@ internal sealed class SeparationPreviewDialog : Window
         paper.SetResourceReference(Border.BorderBrushProperty, "CardBorderBrush");
         body.Children.Add(paper);
 
-        Content = DialogChrome.Frame(this, owner, Title, Close, body);
+        Content = DialogFrame.Frame(this, owner, Title, Close, body);
         ShowPage(_page);
     }
 

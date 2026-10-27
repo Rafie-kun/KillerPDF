@@ -94,12 +94,12 @@ namespace KillerPDF.Controls
 
             var clock = System.Diagnostics.Stopwatch.StartNew();
             double from = window.Opacity;
-            void tick(object? _1, EventArgs _2)
+            void Tick(object? sender, EventArgs e)
             {
                 double t = clock.Elapsed.TotalMilliseconds / FadeMs;
                 if (t >= 1)
                 {
-                    CompositionTarget.Rendering -= tick;
+                    CompositionTarget.Rendering -= Tick;
                     window.Opacity = 0;
                     // Off the render callback before closing: tearing the window down inside a
                     // Rendering handler reenters composition.
@@ -125,8 +125,7 @@ namespace KillerPDF.Controls
                 }
                 window.Opacity = from * (1 - t * t);   // quadratic ease-in, mirrors FadeIn
             }
-
-            CompositionTarget.Rendering += tick;
+            CompositionTarget.Rendering += Tick;
             return true;
         }
 

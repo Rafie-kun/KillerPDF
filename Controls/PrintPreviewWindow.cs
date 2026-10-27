@@ -129,7 +129,7 @@ namespace KillerPDF
             Height = 716;
             MinWidth  = 720;
             MinHeight = 480;
-            DialogChrome.Configure(this, owner, resizable: true);
+            DialogFrame.Configure(this, owner, resizable: true);
             UseLayoutRounding = true;
 
             // Borderless windows (WindowStyle.None) have no native resize border, so
@@ -494,7 +494,7 @@ namespace KillerPDF
 
             _rootGrid = new Grid();
             _rootGrid.Children.Add(body);
-            Content = DialogChrome.Frame(this, Owner, S("Str_Print_Title"),
+            Content = DialogFrame.Frame(this, Owner, S("Str_Print_Title"),
                 () => { DialogResult = false; Close(); }, _rootGrid);
         }
 

@@ -20,7 +20,7 @@ internal sealed class LayerEditorDialog : Window
         SizeToContent = SizeToContent.Height;
         MaxHeight = 640;
         UseLayoutRounding = true;
-        DialogChrome.Configure(this, owner);
+        DialogFrame.Configure(this, owner);
 
         var body = new StackPanel { Margin = new Thickness(20, 6, 20, 16) };
         var header = CreateGrid();
@@ -68,7 +68,7 @@ internal sealed class LayerEditorDialog : Window
         buttons.Margin = new Thickness(0, 16, 0, 0);
         body.Children.Add(buttons);
 
-        Content = DialogChrome.Frame(this, owner, Title,
+        Content = DialogFrame.Frame(this, owner, Title,
             () => { DialogResult = false; Close(); }, body);
         Loaded += (_, _) => _rows[0].Name.Focus();
     }

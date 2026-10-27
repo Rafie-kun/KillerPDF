@@ -22,7 +22,7 @@ internal sealed class NavigationRepairDialog : Window
         MaxHeight = Math.Max(360, SystemParameters.WorkArea.Height * 0.85);
         MinWidth = 520;
         UseLayoutRounding = true;
-        DialogChrome.Configure(this, owner);
+        DialogFrame.Configure(this, owner);
 
         var body = new Grid { Margin = new Thickness(20, 6, 20, 16) };
         body.RowDefinitions.Add(new RowDefinition());
@@ -70,7 +70,7 @@ internal sealed class NavigationRepairDialog : Window
         Grid.SetRow(buttons, 2);
         body.Children.Add(buttons);
 
-        Content = DialogChrome.Frame(this, owner, Title,
+        Content = DialogFrame.Frame(this, owner, Title,
             () => { DialogResult = false; Close(); }, body);
         Loaded += (_, _) => reportBox.Focus();
         UpdateRepairButton();

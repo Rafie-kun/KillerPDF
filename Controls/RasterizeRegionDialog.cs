@@ -35,7 +35,7 @@ internal sealed class RasterizeRegionDialog : Window
         Width = 560;
         SizeToContent = SizeToContent.Height;
         UseLayoutRounding = true;
-        DialogChrome.Configure(this, owner);
+        DialogFrame.Configure(this, owner);
 
         var body = new StackPanel { Margin = new Thickness(20, 6, 20, 16) };
         var hint = new TextBlock
@@ -118,7 +118,7 @@ internal sealed class RasterizeRegionDialog : Window
         buttons.Margin = new Thickness(0, 12, 0, 0);
         body.Children.Add(buttons);
 
-        Content = DialogChrome.Frame(this, owner, Title, Close, body);
+        Content = DialogFrame.Frame(this, owner, Title, Close, body);
     }
 
     private Point Clamp(Point point) => new(

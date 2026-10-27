@@ -58,7 +58,7 @@ namespace KillerPDF
             MaxHeight = 860;
             SizeToContent = SizeToContent.Height;
             UseLayoutRounding = true;
-            DialogChrome.Configure(this, owner);
+            DialogFrame.Configure(this, owner);
             BuildUi();
         }
 
@@ -185,7 +185,7 @@ namespace KillerPDF
                 VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
                 HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled
             };
-            Content = DialogChrome.Frame(this, Owner, "KillerPDF - " + L("Str_Protect_Name"),
+            Content = DialogFrame.Frame(this, Owner, "KillerPDF - " + L("Str_Protect_Name"),
                 () => { DialogResult = false; Close(); }, scroll);
         }
 

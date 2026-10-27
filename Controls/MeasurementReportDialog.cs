@@ -27,7 +27,7 @@ internal sealed class MeasurementReportDialog : Window
         MaxWidth = 900;
         MaxHeight = Math.Min(720, SystemParameters.WorkArea.Height * 0.8);
         UseLayoutRounding = true;
-        DialogChrome.Configure(this, owner);
+        DialogFrame.Configure(this, owner);
 
         var body = new Grid { Margin = new Thickness(20, 6, 20, 16) };
         body.RowDefinitions.Add(new RowDefinition());
@@ -85,7 +85,7 @@ internal sealed class MeasurementReportDialog : Window
         Grid.SetRow(buttons, 1);
         body.Children.Add(buttons);
 
-        Content = DialogChrome.Frame(this, owner, Title, Close, body);
+        Content = DialogFrame.Frame(this, owner, Title, Close, body);
     }
 
     // The count, then a header per page over its measurements: type, value, and scale.

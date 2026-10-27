@@ -31,7 +31,7 @@ internal sealed class ProductionLayoutDialog : Window
         MinWidth = 700; MinHeight = 400;
         MaxHeight = Math.Max(400, SystemParameters.WorkArea.Height - 60);
         UseLayoutRounding = true;
-        DialogChrome.Configure(this, owner);
+        DialogFrame.Configure(this, owner);
         var body = new DockPanel { Margin = new Thickness(20, 6, 20, 16) };
         var cancel = UiKit.Make(L("Str_Btn_Cancel"), accent: false);
         cancel.IsCancel = true; cancel.Click += (_, _) => Close();
@@ -105,7 +105,7 @@ internal sealed class ProductionLayoutDialog : Window
         var profiles = UiKit.ButtonRow(load, save);
         profiles.HorizontalAlignment = HorizontalAlignment.Left;
         footer.Children.Add(profiles);
-        Content = DialogChrome.Frame(this, owner, Title, Close, body);
+        Content = DialogFrame.Frame(this, owner, Title, Close, body);
 
         string Setting(string key, string fallback) => current?.Settings?.GetValueOrDefault(key) ?? fallback;
         void Add(string key, string labelKey, object value, bool points = false)

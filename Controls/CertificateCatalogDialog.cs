@@ -40,7 +40,7 @@ internal sealed class CertificateCatalogDialog : Window
         MinWidth = 650;
         MinHeight = 440;
         UseLayoutRounding = true;
-        DialogChrome.Configure(this, owner, resizable: true);
+        DialogFrame.Configure(this, owner, resizable: true);
         AutomationProperties.SetAutomationId(this, "CertificateCatalogDialog");
 
         var body = new Grid { Margin = new Thickness(20, 6, 20, 16) };
@@ -147,7 +147,7 @@ internal sealed class CertificateCatalogDialog : Window
         Grid.SetRow(buttons, 4);
         body.Children.Add(buttons);
 
-        Content = DialogChrome.Frame(this, owner, Title, RequestClose, body);
+        Content = DialogFrame.Frame(this, owner, Title, RequestClose, body);
         Closed += (_, _) => _closed = true;
         Loaded += async (_, _) =>
         {

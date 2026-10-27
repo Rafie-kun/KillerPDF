@@ -38,7 +38,7 @@ internal sealed class TextFieldPresetsDialog : Window
         Height = 460;
         MinWidth = 440;
         MinHeight = 360;
-        DialogChrome.Configure(this, owner, resizable: true);
+        DialogFrame.Configure(this, owner, resizable: true);
 
         var body = new DockPanel { Margin = new Thickness(20, 6, 20, 16), LastChildFill = true };
 
@@ -128,7 +128,7 @@ internal sealed class TextFieldPresetsDialog : Window
         listHost.Children.Add(_empty);
         body.Children.Add(listHost);
 
-        Content = DialogChrome.Frame(this, owner, Title, Close, body);
+        Content = DialogFrame.Frame(this, owner, Title, Close, body);
         if (pending is not null)
             _name.Text = TextFieldPresetCapture.NextName(L("Str_FieldPreset_DefaultName"),
                 presets.Presets.Select(preset => preset.Name));

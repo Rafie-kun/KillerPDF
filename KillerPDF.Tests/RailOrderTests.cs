@@ -5,6 +5,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using Xunit;
+using KillerPDF.Shell;
 
 namespace KillerPDF.Tests
 {

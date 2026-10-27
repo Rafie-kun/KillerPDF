@@ -2,7 +2,7 @@ using System;
 using System.Windows;
 using System.Windows.Input;
 
-namespace KillerPDF
+namespace KillerPDF.Controls
 {
     // ============================================================
     // The family grab cursors: an open hand while hovering something
@@ -14,6 +14,9 @@ namespace KillerPDF
     // These replace Cursors.SizeAll everywhere a surface is grabbed and
     // MOVED. A resize (splitter, corner handle) keeps its directional
     // cursor: the hand says "carry this", not "stretch this".
+    //
+    // Needs Resources/open_hand.cur and Resources/closed_hand.cur built
+    // as Resource in the csproj.
     // ============================================================
     internal static class DragCursors
     {

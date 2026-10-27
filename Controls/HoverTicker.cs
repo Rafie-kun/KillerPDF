@@ -5,7 +5,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 
-namespace KillerPDF
+namespace KillerPDF.Controls
 {
     /// <summary>
     /// Wraps a tree row's header so that, inside a ColumnFlowPanel, a title too long for its
@@ -16,7 +16,6 @@ namespace KillerPDF
     /// The width it gets is the panel's column cap, less the panel's indent and whatever sits
     /// between this host and the row's left edge (the expander column, the row border).
     /// Text in a TextBlock is trimmed with an ellipsis; any other content is clipped.
-    /// (From KillerUI/Controls/HoverTicker.cs.)
     /// </summary>
     internal sealed class HoverTicker : Decorator
     {

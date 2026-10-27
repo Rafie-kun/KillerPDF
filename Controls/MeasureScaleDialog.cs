@@ -53,7 +53,7 @@ internal sealed class MeasureScaleDialog : Window
         Width = 520;
         SizeToContent = SizeToContent.Height;
         UseLayoutRounding = true;
-        DialogChrome.Configure(this, owner);
+        DialogFrame.Configure(this, owner);
         CultureInfo culture = CultureInfo.CurrentCulture;
 
         // Start from what the page has: a typed ratio reads back from the scale name when it can,
@@ -204,7 +204,7 @@ internal sealed class MeasureScaleDialog : Window
         _ratio.IsChecked = !previous.Calibrate && linePoints is null;
         _calibrate.IsChecked = previous.Calibrate || linePoints is not null;
         UpdateLineText();
-        Content = DialogChrome.Frame(this, owner, Title, () => { DialogResult = false; Close(); }, body);
+        Content = DialogFrame.Frame(this, owner, Title, () => { DialogResult = false; Close(); }, body);
         Loaded += (_, _) => (_calibrate.IsChecked == true ? _knownLength : _realLength).Focus();
         _knownLength.GotFocus += (_, _) => _calibrate.IsChecked = true;
         _paperLength.GotFocus += (_, _) => _ratio.IsChecked = true;

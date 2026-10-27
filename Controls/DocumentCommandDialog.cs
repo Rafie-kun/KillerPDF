@@ -14,7 +14,7 @@ internal sealed class DocumentCommandDialog : Window
         MaxHeight = Math.Max(300, SystemParameters.WorkArea.Height - 80);
         SizeToContent = SizeToContent.Height;
         UseLayoutRounding = true;
-        DialogChrome.Configure(this, owner);
+        DialogFrame.Configure(this, owner);
         var body = new DockPanel { Margin = new Thickness(20, 6, 20, 16) };
         var choices = new StackPanel();
         foreach (var (label, run) in commands)
@@ -32,7 +32,7 @@ internal sealed class DocumentCommandDialog : Window
         footer.Margin = new Thickness(0, 8, 0, 0);
         DockPanel.SetDock(footer, Dock.Bottom); body.Children.Add(footer);
         body.Children.Add(new ScrollViewer { Content = choices, VerticalScrollBarVisibility = ScrollBarVisibility.Auto });
-        Content = DialogChrome.Frame(this, owner, Title, Close, body);
+        Content = DialogFrame.Frame(this, owner, Title, Close, body);
         Loaded += (_, _) => (choices.Children.Cast<Control>().FirstOrDefault() ?? close).Focus();
     }
 

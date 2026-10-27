@@ -6,7 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace KillerPDF
+namespace KillerPDF.Shell
 {
     /// <summary>
     /// The family rail order. Theme, language, shortcuts (?) and, in an app that has one, the
@@ -20,7 +20,6 @@ namespace KillerPDF
     /// and turns each gap with them, so the edge buttons stay outermost at the other end; the
     /// app moves the stack and the chevron to their swapped ends.
     /// Elements on the rail that are not registered stay where they are.
-    /// (From KillerUI/Shell/RailOrder.cs.)
     /// </summary>
     internal sealed class RailOrder
     {

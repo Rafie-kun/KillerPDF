@@ -55,7 +55,7 @@ namespace KillerPDF
             System.Windows.Automation.AutomationProperties.SetAutomationId(this, "ColorPickerDialog");
             Width = 300;
             SizeToContent = SizeToContent.Height;
-            DialogChrome.Configure(this, owner);
+            DialogFrame.Configure(this, owner);
             UseLayoutRounding = true;
             SelectedColor = initial;
             (_h, _s, _v) = RgbToHsv(initial);
@@ -68,12 +68,12 @@ namespace KillerPDF
         {
             var panel = new StackPanel { Margin = new Thickness(18, 14, 18, 16) };
             // 98SE: the hand-rolled card (black outline + 1px AddBevels ring) never read as a
-            // classic window. Use the shared DialogChrome.Frame instead - the same classic caption
+            // classic window. Use the shared DialogFrame.Frame instead - the same classic caption
             // bar and five-ring raised frame KillerDialog gets - and let the caption carry the
             // title, so the in-panel accent heading is skipped.
             if (Services.ThemeManager.Current == Services.Theme.SE98)
             {
-                Content = DialogChrome.Frame(this, Owner, L("Str_Color_Pick"),
+                Content = DialogFrame.Frame(this, Owner, L("Str_Color_Pick"),
                     () => { DialogResult = false; Close(); }, panel);
             }
             else
@@ -96,7 +96,7 @@ namespace KillerPDF
                 double grainOp = Owner?.TryFindResource("GrainOpacity") is double go ? go : 0.12;
                 root.Children.Add(new Border { Background = grain, Opacity = grainOp, CornerRadius = UiKit.RadWindow, IsHitTestVisible = false });
             }
-            DialogChrome.AddBevels(root, Owner);
+            DialogFrame.AddBevels(root, Owner);
             root.Children.Add(panel);
             card.Child = root;
             Content = card;

@@ -22,7 +22,7 @@ internal sealed class PageLabelsDialog : Window
         SizeToContent = SizeToContent.Height;
         MaxHeight = Math.Max(360, SystemParameters.WorkArea.Height * 0.85);
         UseLayoutRounding = true;
-        DialogChrome.Configure(this, owner);
+        DialogFrame.Configure(this, owner);
         _pageCount = pageCount;
 
         var body = new DockPanel { Margin = new Thickness(20, 6, 20, 16) };
@@ -60,7 +60,7 @@ internal sealed class PageLabelsDialog : Window
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto
         });
 
-        Content = DialogChrome.Frame(this, owner, Title,
+        Content = DialogFrame.Frame(this, owner, Title,
             () => { DialogResult = false; Close(); }, body);
     }
 

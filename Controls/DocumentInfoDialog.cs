@@ -27,7 +27,7 @@ namespace KillerPDF
             Width = 460;
             SizeToContent = SizeToContent.Height;
             UseLayoutRounding = true;
-            DialogChrome.Configure(this, owner);
+            DialogFrame.Configure(this, owner);
             BuildUi(owner, filePath);
         }
 
@@ -60,7 +60,7 @@ namespace KillerPDF
             row.Margin = new Thickness(0, 16, 0, 0);
             body.Children.Add(row);
 
-            Content = DialogChrome.Frame(this, Owner, "KillerPDF - " + L("Str_DocInfo_Suffix"),
+            Content = DialogFrame.Frame(this, Owner, "KillerPDF - " + L("Str_DocInfo_Suffix"),
                 () => { DialogResult = false; Close(); }, body);
 
             Loaded += (_, _2) => _title.Focus();

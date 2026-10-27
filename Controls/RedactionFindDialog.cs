@@ -34,7 +34,7 @@ internal sealed class RedactionFindDialog : Window
         SizeToContent = SizeToContent.Height;
         MaxHeight = Math.Max(420, SystemParameters.WorkArea.Height * 0.85);
         UseLayoutRounding = true;
-        DialogChrome.Configure(this, owner);
+        DialogFrame.Configure(this, owner);
 
         var body = new StackPanel { Margin = new Thickness(20, 6, 20, 16) };
         body.Children.Add(UiKit.GroupLabel(L("Str_RedactFind_Kind")));
@@ -126,7 +126,7 @@ internal sealed class RedactionFindDialog : Window
         _mark.Click += (_, _) => Commit();
         body.Children.Add(UiKit.ButtonRow(cancel, _mark));
 
-        Content = DialogChrome.Frame(this, owner, Title,
+        Content = DialogFrame.Frame(this, owner, Title,
             () => { DialogResult = false; Close(); }, body);
         UpdateQueryState();
         Loaded += (_, _) => _query.Focus();

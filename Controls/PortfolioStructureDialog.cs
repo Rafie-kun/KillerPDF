@@ -37,7 +37,7 @@ internal sealed class PortfolioStructureDialog : Window
         SizeToContent = SizeToContent.Height;
         MaxHeight = Math.Max(360, SystemParameters.WorkArea.Height * 0.85);
         UseLayoutRounding = true;
-        DialogChrome.Configure(this, owner);
+        DialogFrame.Configure(this, owner);
         _attachmentNames = [.. attachments.Select(item => item.FileName)];
 
         var content = new StackPanel();
@@ -78,7 +78,7 @@ internal sealed class PortfolioStructureDialog : Window
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto
         });
 
-        Content = DialogChrome.Frame(this, owner, Title,
+        Content = DialogFrame.Frame(this, owner, Title,
             () => { DialogResult = false; Close(); }, body);
     }
 

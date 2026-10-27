@@ -14,7 +14,7 @@ internal sealed class DocumentListDialog : Window
         Title = "KillerPDF - " + title;
         Width = 650; Height = 480; MinWidth = 400; MinHeight = 300;
         UseLayoutRounding = true;
-        DialogChrome.Configure(this, owner);
+        DialogFrame.Configure(this, owner);
         var body = new DockPanel { Margin = new Thickness(20, 6, 20, 16) };
         int index = 0;
         foreach (string label in labels)
@@ -37,7 +37,7 @@ internal sealed class DocumentListDialog : Window
             DockPanel.SetDock(moves, Dock.Bottom); body.Children.Add(moves);
         }
         body.Children.Add(_list);
-        Content = DialogChrome.Frame(this, owner, Title, Close, body);
+        Content = DialogFrame.Frame(this, owner, Title, Close, body);
         Loaded += (_, _) => _list.Focus();
     }
 

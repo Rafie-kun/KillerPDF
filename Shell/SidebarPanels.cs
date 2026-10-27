@@ -1,4 +1,6 @@
 using System.Globalization;
+using KillerPDF.Controls;
+using KillerPDF.Shell;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -51,7 +53,7 @@ namespace KillerPDF
                 var menu = MakeThemedMenu();
                 AppendSidebarSideSection(menu);
                 FlyoutPlacement.UsePane(SplitHost, _sidebarSide);
-                FlyoutPlacement.AttachAtButtonHeight(menu, button);
+                FlyoutPlacement.Attach(menu, button);
                 menu.IsOpen = true;
                 return;
             }

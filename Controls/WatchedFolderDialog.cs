@@ -37,7 +37,7 @@ internal sealed class WatchedFolderDialog : Window
         Width = Math.Min(820, SystemParameters.WorkArea.Width - 40);
         Height = Math.Min(760, SystemParameters.WorkArea.Height - 40);
         MinWidth = 480; MinHeight = 380; UseLayoutRounding = true;
-        DialogChrome.Configure(this, owner, resizable: true);
+        DialogFrame.Configure(this, owner, resizable: true);
         AutomationProperties.SetAutomationId(this, "WatchedFolderDialog");
         var body = new DockPanel { Margin = new Thickness(20, 6, 20, 16),
             LayoutTransform = new ScaleTransform(Math.Clamp(scale, .7, 2.5), Math.Clamp(scale, .7, 2.5)) };
@@ -98,7 +98,7 @@ internal sealed class WatchedFolderDialog : Window
         content.Children.Add(Note("Str_Watch_QueueLimit"));
         body.Children.Add(new ScrollViewer { Content = content, VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
             HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled, CanContentScroll = false });
-        Content = DialogChrome.Frame(this, owner, Title, Close, body);
+        Content = DialogFrame.Frame(this, owner, Title, Close, body);
 
         WatchedFolderSnapshot snapshot = service.GetSnapshot();
         var available = macros.Select(macro => new MacroChoice(macro.Name, macro)).ToList();

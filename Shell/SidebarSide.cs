@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Animation;
 
-namespace KillerPDF
+namespace KillerPDF.Shell
 {
     /// <summary>The edge of the content area a sidebar docks to.</summary>
     internal enum SidebarSide { Left, Right, Top, Bottom }
@@ -19,9 +19,8 @@ namespace KillerPDF
     /// content keeps the strip's height. The ends can swap; the buttons then run in reverse, so
     /// they always read outward from the middle. Each button's spacing turns with it (Transpose).
     ///
-    /// The side is saved under "SidebarSide" as Left, Right, Top or Bottom, so a setting written
-    /// when only Left and Right existed reads back unchanged.
-    /// (From KillerUI/Shell/SidebarSide.cs.)
+    /// The side is saved under "SidebarSide" as Left, Right, Top or Bottom, so an app that only
+    /// ever wrote Left or Right reads its old setting unchanged.
     /// </summary>
     internal static class SidebarSides
     {

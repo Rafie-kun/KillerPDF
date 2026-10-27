@@ -15,7 +15,7 @@ namespace KillerPDF.Controls
         private const string MasterUri = "pack://application:,,,/Resources/app-icon-master.png";
         private static BitmapSource? master;
         private static readonly ConditionalWeakTable<BitmapSource, RasterCache> rasters =
-            [];
+            new();
         private Rect lastPixels = Rect.Empty;
 
         private sealed class RasterCache

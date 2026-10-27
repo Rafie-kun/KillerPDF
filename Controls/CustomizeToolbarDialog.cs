@@ -48,7 +48,7 @@ internal sealed class CustomizeToolbarDialog : Window
         Height = 560;
         MinWidth = 560;
         MinHeight = 420;
-        DialogChrome.Configure(this, owner, resizable: true);
+        DialogFrame.Configure(this, owner, resizable: true);
 
         var body = new DockPanel { Margin = new Thickness(20, 6, 20, 16), LastChildFill = true };
 
@@ -107,7 +107,7 @@ internal sealed class CustomizeToolbarDialog : Window
         lists.Children.Add(moreColumn);
         body.Children.Add(lists);
 
-        Content = DialogChrome.Frame(this, owner, Title, () => { DialogResult = false; Close(); }, body);
+        Content = DialogFrame.Frame(this, owner, Title, () => { DialogResult = false; Close(); }, body);
         Load(layout);
         ThemeManager.ThemeChanged += UpdateRowHover;
         Closed += (_, _) => ThemeManager.ThemeChanged -= UpdateRowHover;

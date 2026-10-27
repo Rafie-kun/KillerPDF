@@ -1,4 +1,6 @@
 using System;
+using KillerPDF.Controls;
+using KillerPDF.Shell;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Animation;
@@ -56,7 +58,7 @@ namespace KillerPDF
             {
                 if (SplitHost is FrameworkElement pane)
                     FlyoutPlacement.UsePane(pane, _sidebarSide);
-                FlyoutPlacement.AttachAtButtonHeight(menu, menu == LangFlyout ? RailLangBtn : RailThemeBtn);
+                FlyoutPlacement.Attach(menu, menu == LangFlyout ? RailLangBtn : RailThemeBtn);
             }
 
             menu.IsOpen = true;

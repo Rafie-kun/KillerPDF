@@ -38,6 +38,7 @@ namespace KillerPDF.Services
             };
             ThemeManager.SetSetting = App.SetSetting;
             ConfigureTokens();
+            ConfigureKit();
             ThemeManager.ThemeChanged -= OnThemeChanged;
             ThemeManager.ThemeChanged += OnThemeChanged;
         }
@@ -48,6 +49,15 @@ namespace KillerPDF.Services
             ThemeManager.SetDefaults(Theme.Dark, dark: Accent.Green, light: Accent.Green, black: Accent.Green, se98: Accent.Blue);
             ThemeManager.AppTokens = AppTokens;
             ThemeManager.AppDerivedTokens = AppDerivedTokens;
+        }
+
+        /// <summary>KillerPDF's settings for the shared UI kit files in Controls and Shell.</summary>
+        internal static void ConfigureKit()
+        {
+            // Kit dialog captions (Controls/DialogChrome.cs): title icon and wordmark.
+            Controls.DialogChrome.AppName = "KillerPDF";
+            Controls.DialogChrome.WordmarkSplit = 6;
+            Controls.DialogChrome.IconUri = new Uri("pack://application:,,,/Resources/kp-icon.ico");
         }
 
         /// <summary>Called from Window.SourceInitialized to set the native title bar color.</summary>

@@ -23,7 +23,7 @@ internal static class CaptionThemeSmoke
         Type themes = assembly.GetType("KillerPDF.Services.Theme", true)!;
         MethodInfo apply = assembly.GetType("KillerPDF.Services.ThemeManager", true)!.GetMethod("Apply")!;
         MethodInfo make = assembly.GetType("KillerPDF.UiKit", true)!.GetMethod("Make", [typeof(object), typeof(bool)])!;
-        MethodInfo build = assembly.GetType("KillerPDF.DialogChrome", true)!.GetMethod("Frame")!;
+        MethodInfo build = assembly.GetType("KillerPDF.DialogFrame", true)!.GetMethod("Frame")!;
         var windows = new List<Window>();
         var clicks = new Dictionary<Button, int>();
         void Theme(string name) => apply.Invoke(null, [Enum.Parse(themes, name)]);
@@ -139,7 +139,7 @@ internal static class CaptionThemeSmoke
         Assembly assembly = owner.GetType().Assembly;
         Type themes = assembly.GetType("KillerPDF.Services.Theme", true)!;
         MethodInfo apply = assembly.GetType("KillerPDF.Services.ThemeManager", true)!.GetMethod("Apply")!;
-        MethodInfo build = assembly.GetType("KillerPDF.DialogChrome", true)!.GetMethod("Frame")!;
+        MethodInfo build = assembly.GetType("KillerPDF.DialogFrame", true)!.GetMethod("Frame")!;
         void Theme(string name) => apply.Invoke(null, [Enum.Parse(themes, name)]);
         void Invoke(Button button) => ((IInvokeProvider)new ButtonAutomationPeer(button).GetPattern(PatternInterface.Invoke)!).Invoke();
         try
@@ -253,7 +253,7 @@ internal static class CaptionThemeSmoke
         Assembly assembly = owner.GetType().Assembly;
         Type themes = assembly.GetType("KillerPDF.Services.Theme", true)!;
         MethodInfo apply = assembly.GetType("KillerPDF.Services.ThemeManager", true)!.GetMethod("Apply")!;
-        MethodInfo build = assembly.GetType("KillerPDF.DialogChrome", true)!.GetMethod("Frame")!;
+        MethodInfo build = assembly.GetType("KillerPDF.DialogFrame", true)!.GetMethod("Frame")!;
         const string title = "KillerPDF - Caption control";
         var windows = new List<Window>();
         void Theme(string name) => apply.Invoke(null, [Enum.Parse(themes, name)]);

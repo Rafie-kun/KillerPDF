@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using KillerPDF.Controls;
+using KillerPDF.Shell;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.Json;
@@ -686,7 +688,7 @@ namespace KillerPDF
                 Width = 460,
                 SizeToContent = SizeToContent.Height   // size to content so there's no empty padding below
             };
-            DialogChrome.Configure(win, this);
+            DialogFrame.Configure(win, this);
             // This separate window can't see MainWindow's ChromeCloseCorner, so the close button's
             // {DynamicResource ChromeCloseCorner} fell back to 0 (square hover). Provide it here so the
             // hover rounds the top-right corner to match the window.
@@ -875,7 +877,7 @@ namespace KillerPDF
             btnPanel.Margin = new Thickness(12, 4, 12, 12);
             contentArea.Children.Add(btnPanel);
 
-            win.Content = DialogChrome.Frame(win, this, "KillerPDF - " + Loc("Str_Sig_Create"), () => win.Close(), contentArea);
+            win.Content = DialogFrame.Frame(win, this, "KillerPDF - " + Loc("Str_Sig_Create"), () => win.Close(), contentArea);
             win.ShowDialog();
         }
 
@@ -953,7 +955,7 @@ namespace KillerPDF
                 Width = 460,
                 SizeToContent = SizeToContent.Height
             };
-            DialogChrome.Configure(win, this);
+            DialogFrame.Configure(win, this);
             win.Resources["ChromeCloseCorner"] = new CornerRadius(0, UiKit.RadWindow.TopRight, 0, 0);
 
             var contentArea = new StackPanel();
@@ -1030,7 +1032,7 @@ namespace KillerPDF
             btnPanel.Children.Add(saveBtn);
             contentArea.Children.Add(btnPanel);
 
-            win.Content = DialogChrome.Frame(win, this, "KillerPDF - " + Loc("Str_Sig_AdjustImage"), () => win.Close(), contentArea);
+            win.Content = DialogFrame.Frame(win, this, "KillerPDF - " + Loc("Str_Sig_AdjustImage"), () => win.Close(), contentArea);
             win.Loaded += (s, e) => sensitivitySlider.Focus();
             win.ShowDialog();
             return result;

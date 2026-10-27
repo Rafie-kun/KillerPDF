@@ -34,7 +34,7 @@ namespace KillerPDF
             MinWidth = 380;
             SizeToContent = SizeToContent.WidthAndHeight;
             UseLayoutRounding = true;
-            DialogChrome.Configure(this, owner);
+            DialogFrame.Configure(this, owner);
             BuildUi();
             _range.Text = presetRange;
         }
@@ -84,7 +84,7 @@ namespace KillerPDF
             row.Margin = new Thickness(0, 8, 0, 0);
             body.Children.Add(row);
 
-            Content = DialogChrome.Frame(this, Owner, "KillerPDF - " + L("Str_ExportImg_Suffix"),
+            Content = DialogFrame.Frame(this, Owner, "KillerPDF - " + L("Str_ExportImg_Suffix"),
                 () => { Confirmed = false; Close(); }, body);
 
             Loaded += (_, _2) => _dpi.Focus();

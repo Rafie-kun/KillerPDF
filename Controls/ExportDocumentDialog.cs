@@ -27,7 +27,7 @@ internal sealed class ExportDocumentDialog : Window
         MaxHeight = Math.Max(260, SystemParameters.WorkArea.Height - 40);
         SizeToContent = SizeToContent.WidthAndHeight;
         UseLayoutRounding = true;
-        DialogChrome.Configure(this, owner, resizable: true);
+        DialogFrame.Configure(this, owner, resizable: true);
         AutomationProperties.SetAutomationId(this, "ExportDocumentDialog");
 
         var body = new StackPanel { Margin = new Thickness(20, 6, 20, 16) };
@@ -103,7 +103,7 @@ internal sealed class ExportDocumentDialog : Window
         export.Click += (_, _) => Commit();
         body.Children.Add(UiKit.ButtonRow(cancel, export));
 
-        Content = DialogChrome.Frame(this, owner, Title, Close, new ScrollViewer
+        Content = DialogFrame.Frame(this, owner, Title, Close, new ScrollViewer
             { Content = body, VerticalScrollBarVisibility = ScrollBarVisibility.Auto, HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled });
         Loaded += (_, _) => _format.Focus();
     }

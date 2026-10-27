@@ -35,7 +35,7 @@ internal sealed class DataMergeDialog : Window
         Title = "KillerPDF - " + L("Str_DocumentTools_DataMerge");
         Width = 850; Height = 560; MinWidth = 650; MinHeight = 380;
         UseLayoutRounding = true;
-        DialogChrome.Configure(this, owner);
+        DialogFrame.Configure(this, owner);
         var body = new DockPanel { Margin = new Thickness(20, 6, 20, 16) };
         var buttons = new WrapPanel();
         AddButton("Str_Merge_AddField", () => AddField());
@@ -66,7 +66,7 @@ internal sealed class DataMergeDialog : Window
         _list.SetResourceReference(Control.BorderBrushProperty, "CardBorderBrush");
         System.Windows.Automation.AutomationProperties.SetName(_list, L("Str_DocumentTools_DataMerge"));
         body.Children.Add(_list); Refresh();
-        Content = DialogChrome.Frame(this, owner, Title, Close, body);
+        Content = DialogFrame.Frame(this, owner, Title, Close, body);
 
         void AddButton(string key, Action action)
         {

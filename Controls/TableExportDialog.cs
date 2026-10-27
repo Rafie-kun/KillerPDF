@@ -46,7 +46,7 @@ internal sealed class TableExportDialog : Window
         MaxHeight = SystemParameters.WorkArea.Height - 40;
         SizeToContent = SizeToContent.Height;
         MinWidth = 480; MinHeight = 360; UseLayoutRounding = true;
-        DialogChrome.Configure(this, owner, resizable: true);
+        DialogFrame.Configure(this, owner, resizable: true);
         AutomationProperties.SetAutomationId(this, "TableExportDialog");
 
         var body = new DockPanel { Margin = new Thickness(20, 6, 20, 16),
@@ -129,7 +129,7 @@ internal sealed class TableExportDialog : Window
             VerticalScrollBarVisibility = ScrollBarVisibility.Disabled });
         body.Children.Add(new ScrollViewer { Content = content, VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
             HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled, CanContentScroll = false });
-        Content = DialogChrome.Frame(this, owner, Title, Close, body);
+        Content = DialogFrame.Frame(this, owner, Title, Close, body);
         Draw(new Rect(0, 0, preview.PixelWidth, preview.PixelHeight));
         Loaded += (_, _) => _detect.Focus();
         Closed += (_, _) => { _closed = true; _operation?.Cancel(); };

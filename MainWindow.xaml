@@ -1120,14 +1120,14 @@
                                     <!-- In a top or bottom strip a title too long for its column is cut
                                          with an ellipsis and scrolls into view while the row is
                                          hovered (HoverTicker). In a sidebar column it does nothing. -->
-                                    <local:HoverTicker x:Name="HeaderTicker" Grid.Column="1"
+                                    <ctrl:HoverTicker x:Name="HeaderTicker" Grid.Column="1"
                                                        HoverSource="{Binding ElementName=Bd}"
                                                        HorizontalAlignment="Left" VerticalAlignment="Center">
                                         <ContentPresenter x:Name="PART_Header"
                                                           ContentSource="Header"
                                                           Margin="{TemplateBinding Padding}"
                                                           HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                    </local:HoverTicker>
+                                    </ctrl:HoverTicker>
                                 </Grid>
                             </Border>
                             <!-- Children indented by one toggle width -->

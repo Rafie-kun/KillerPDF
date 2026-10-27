@@ -42,7 +42,7 @@ internal sealed class MacroDialog : Window
         MinWidth = 760;
         MinHeight = 480;
         UseLayoutRounding = true;
-        DialogChrome.Configure(this, owner);
+        DialogFrame.Configure(this, owner);
 
         _starter.ItemsSource = Enum.GetValues<PdfMacroStarterKind>()
             .Select(kind => new StarterChoice(Display(kind), kind));
@@ -115,7 +115,7 @@ internal sealed class MacroDialog : Window
         columns.Children.Add(editor);
         body.Children.Add(columns);
 
-        Content = DialogChrome.Frame(this, owner, Title, Close, body);
+        Content = DialogFrame.Frame(this, owner, Title, Close, body);
         Reload();
     }
 

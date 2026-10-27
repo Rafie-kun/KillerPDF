@@ -1,4 +1,6 @@
 using System;
+using KillerPDF.Controls;
+using KillerPDF.Shell;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -706,7 +708,7 @@ namespace KillerPDF
                 MinHeight = 430,
                 ShowInTaskbar = owner is null
             };
-            DialogChrome.Configure(win, owner, resizable: true, fade: false);
+            DialogFrame.Configure(win, owner, resizable: true, fade: false);
             win.Resources.MergedDictionaries.Add(new ResourceDictionary
             {
                 Source = new Uri("pack://application:,,,/Controls/PickerStyles.xaml")
@@ -917,7 +919,7 @@ namespace KillerPDF
             Grid.SetRow(footer, 2);
             root.Children.Add(footer);
 
-            win.Content = DialogChrome.Frame(win, owner, title,
+            win.Content = DialogFrame.Frame(win, owner, title,
                 () => { complete(false); win.Close(); }, root,
                 new Thickness(20, 20, 20, 24));
             return win;

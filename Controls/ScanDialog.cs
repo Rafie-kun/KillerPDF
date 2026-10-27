@@ -19,7 +19,7 @@ internal sealed class ScanDialog : Window
         Width = 440;
         SizeToContent = SizeToContent.Height;
         UseLayoutRounding = true;
-        DialogChrome.Configure(this, owner);
+        DialogFrame.Configure(this, owner);
 
         var body = new StackPanel { Margin = new Thickness(20, 6, 20, 16) };
         var hint = new TextBlock
@@ -55,7 +55,7 @@ internal sealed class ScanDialog : Window
         buttons.Margin = new Thickness(0, 14, 0, 0);
         body.Children.Add(buttons);
 
-        Content = DialogChrome.Frame(this, owner, Title, Close, body);
+        Content = DialogFrame.Frame(this, owner, Title, Close, body);
     }
 
     private static string L(string key) =>

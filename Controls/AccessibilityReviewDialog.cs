@@ -48,7 +48,7 @@ internal sealed class AccessibilityReviewDialog : Window
         Width = Math.Min(720 * scale, SystemParameters.WorkArea.Width - 40);
         MaxHeight = SystemParameters.WorkArea.Height - 40; SizeToContent = SizeToContent.Height;
         MinWidth = 460; MinHeight = 360; UseLayoutRounding = true;
-        DialogChrome.Configure(this, owner, resizable: true);
+        DialogFrame.Configure(this, owner, resizable: true);
         Id(this, "AccessibilityReviewDialog");
         var body = new DockPanel { Margin = new Thickness(16, 4, 16, 14),
             LayoutTransform = new ScaleTransform(scale, scale) };
@@ -103,7 +103,7 @@ internal sealed class AccessibilityReviewDialog : Window
             _pageView.MaxHeight = Math.Clamp(scroll.ActualHeight - 8, 40, 230);
         };
         body.Children.Add(scroll);
-        Content = DialogChrome.Frame(this, owner, Title, Close, body);
+        Content = DialogFrame.Frame(this, owner, Title, Close, body);
         _findings.SelectionChanged += async (_, _) => await SelectFinding();
         _input.TextChanged += (_, _) => UpdateButtons();
         Closing += (_, _) => { _closed = true; _preview?.Cancel(); };

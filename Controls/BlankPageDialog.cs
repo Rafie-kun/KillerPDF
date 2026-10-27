@@ -24,7 +24,7 @@ internal sealed class BlankPageDialog : Window
         Width = 380;
         SizeToContent = SizeToContent.Height;
         UseLayoutRounding = true;
-        DialogChrome.Configure(this, owner);
+        DialogFrame.Configure(this, owner);
 
         var body = new StackPanel { Margin = new Thickness(20, 6, 20, 16) };
         _preset = new ComboBox
@@ -56,7 +56,7 @@ internal sealed class BlankPageDialog : Window
         add.Click += (_, _) => Commit();
         body.Children.Add(UiKit.ButtonRow(cancel, add));
 
-        Content = DialogChrome.Frame(this, owner, Title,
+        Content = DialogFrame.Frame(this, owner, Title,
             () => { DialogResult = false; Close(); }, body);
         ApplyPreset();
         Loaded += (_, _) => _preset.Focus();

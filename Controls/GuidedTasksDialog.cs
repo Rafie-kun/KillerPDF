@@ -38,7 +38,7 @@ internal sealed class GuidedTasksDialog : Window
         Width = Math.Min(620 * scale, SystemParameters.WorkArea.Width - 40);
         Height = Math.Min(430 * scale, SystemParameters.WorkArea.Height - 40);
         MinWidth = 400; MinHeight = 300; UseLayoutRounding = true;
-        DialogChrome.Configure(this, owner, resizable: true);
+        DialogFrame.Configure(this, owner, resizable: true);
         Id(this, "GuidedTasksDialog", "Str_Guided_Title");
         var body = new DockPanel { Margin = new Thickness(14, 4, 14, 12), LayoutTransform = new ScaleTransform(scale, scale) };
         _run = Button("Str_Btn_Run", "GuidedRun", true); _run.IsDefault = true;
@@ -73,7 +73,7 @@ internal sealed class GuidedTasksDialog : Window
         var scroll = new ScrollViewer { Content = content, VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
             HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled, Margin = new Thickness(0, 0, 0, 4) };
         body.Children.Add(scroll);
-        Content = DialogChrome.Frame(this, owner, Title, Close, body);
+        Content = DialogFrame.Frame(this, owner, Title, Close, body);
         _choice.SelectionChanged += (_, _) => { _hint.Text = L(Hints[_choice.SelectedIndex]); ResetResult(); Update(); };
         _choice.SelectedIndex = 0;
         foreach (CheckBox option in new[] { _flatten, _ocr, _search })

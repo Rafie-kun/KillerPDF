@@ -28,7 +28,7 @@ internal sealed class RedactionFinishDialog : Window
         Width = 460;
         SizeToContent = SizeToContent.Height;
         UseLayoutRounding = true;
-        DialogChrome.Configure(this, owner);
+        DialogFrame.Configure(this, owner);
 
         var body = new StackPanel { Margin = new Thickness(20, 6, 20, 16) };
         body.Children.Add(new TextBlock
@@ -86,7 +86,7 @@ internal sealed class RedactionFinishDialog : Window
         proceed.Click += (_, _) => Commit();
         body.Children.Add(UiKit.ButtonRow(skip, proceed));
 
-        Content = DialogChrome.Frame(this, owner, Title, () => { DialogResult = false; Close(); }, body);
+        Content = DialogFrame.Frame(this, owner, Title, () => { DialogResult = false; Close(); }, body);
     }
 
     private void Commit()

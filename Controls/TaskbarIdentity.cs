@@ -1,20 +1,19 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.Marshalling;
 using System.Windows;
 using System.Windows.Interop;
 
-namespace KillerPDF
+namespace KillerPDF.Controls
 {
     /// <summary>
     /// Gives the standalone install and uninstall windows their own taskbar button, labeled
     /// "KillerPDF Installer" or "Uninstall KillerPDF" with the app icon, instead of grouping them
     /// under the exe name. The taskbar takes the label from the window's relaunch display name.
     /// </summary>
-    internal static partial class TaskbarIdentity
+    internal static class TaskbarIdentity
     {
-        private const string AppName = "KillerPDF";
+        private const string AppName = Services.AppInfo.DisplayName;
         private const int WmDestroy = 0x0002;
 
         private static string? _label;
@@ -61,11 +60,9 @@ namespace KillerPDF
             try
             {
                 Guid iid = typeof(IPropertyStore).GUID;
-                if (SHGetPropertyStoreForWindow(handle, in iid, out nint pointer) != 0) return false;
+                if (SHGetPropertyStoreForWindow(handle, ref iid, out IPropertyStore store) != 0) return false;
                 try
                 {
-                    var wrappers = new StrategyBasedComWrappers();
-                    var store = (IPropertyStore)wrappers.GetOrCreateObjectForComInstance(pointer, CreateObjectFlags.UniqueInstance);
                     Set(store, RelaunchCommandKey, command);
                     Set(store, RelaunchIconKey, icon);
                     Set(store, RelaunchNameKey, label);
@@ -73,7 +70,7 @@ namespace KillerPDF
                     store.Commit();
                     return true;
                 }
-                finally { Marshal.Release(pointer); }
+                finally { Marshal.ReleaseComObject(store); }
             }
             catch (Exception)
             {
@@ -101,21 +98,21 @@ namespace KillerPDF
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        internal struct PropertyKey(Guid formatId, uint propertyId)
+        private struct PropertyKey(Guid formatId, uint propertyId)
         {
             public Guid FormatId = formatId;
             public uint PropertyId = propertyId;
         }
 
         [StructLayout(LayoutKind.Explicit, Size = 24)]
-        internal struct PropVariant
+        private struct PropVariant
         {
             [FieldOffset(0)] public ushort Type;
             [FieldOffset(8)] public IntPtr Pointer;
         }
 
-        [GeneratedComInterface, Guid("886D8EEB-8CF2-4446-8D02-CDBA1DBDCF99"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-        internal partial interface IPropertyStore
+        [ComImport, Guid("886D8EEB-8CF2-4446-8D02-CDBA1DBDCF99"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+        private interface IPropertyStore
         {
             void GetCount(out uint count);
             void GetAt(uint index, out PropertyKey key);
@@ -124,7 +121,7 @@ namespace KillerPDF
             void Commit();
         }
 
-        [LibraryImport("shell32.dll")]
-        private static partial int SHGetPropertyStoreForWindow(nint _, in Guid _1, out nint _2);
+        [DllImport("shell32.dll")]
+        private static extern int SHGetPropertyStoreForWindow(IntPtr handle, ref Guid iid, out IPropertyStore store);
     }
 }

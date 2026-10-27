@@ -1,4 +1,6 @@
 using System;
+using KillerPDF.Controls;
+using KillerPDF.Shell;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Windows;
@@ -100,7 +102,7 @@ namespace KillerPDF
             Height = 720;
             MinWidth = 680;
             MinHeight = 480;
-            DialogChrome.Configure(this, owner, resizable: true);
+            DialogFrame.Configure(this, owner, resizable: true);
 
             _darkSlider = owner.TryFindResource("DarkSlider") as Style;
             _darkCombo  = owner.TryFindResource("DarkComboBox") as Style;
@@ -215,9 +217,9 @@ namespace KillerPDF
             // Family shadow under the content pane, like the main window (flat on 98SE).
             root.Children.Add(UiKit.PaneWithShadow(previewWrap));
 
-            Content = DialogChrome.Frame(this, Owner, "KillerPDF - " + S("Str_Stamp_Suffix"), () => { Applied = false; Close(); }, root);
+            Content = DialogFrame.Frame(this, Owner, "KillerPDF - " + S("Str_Stamp_Suffix"), () => { Applied = false; Close(); }, root);
 
-            // Esc-to-close is wired by DialogChrome.Frame; Enter commits.
+            // Esc-to-close is wired by DialogFrame.Frame; Enter commits.
             KeyDown += (_, e) => { if (e.Key == Key.Enter) CommitAndClose(); };
         }
 

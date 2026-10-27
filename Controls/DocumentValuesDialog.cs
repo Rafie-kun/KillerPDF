@@ -18,7 +18,7 @@ internal sealed class DocumentValuesDialog : Window
         MaxHeight = Math.Max(300, SystemParameters.WorkArea.Height - 80);
         SizeToContent = SizeToContent.Height;
         UseLayoutRounding = true;
-        DialogChrome.Configure(this, owner);
+        DialogFrame.Configure(this, owner);
         var body = new DockPanel { Margin = new Thickness(20, 6, 20, 16) };
         var fieldsPanel = new StackPanel();
         foreach (var (label, value) in fields)
@@ -43,7 +43,7 @@ internal sealed class DocumentValuesDialog : Window
         buttons.Margin = new Thickness(0, 12, 0, 0);
         DockPanel.SetDock(buttons, Dock.Bottom); body.Children.Add(buttons);
         body.Children.Add(new ScrollViewer { Content = fieldsPanel, VerticalScrollBarVisibility = ScrollBarVisibility.Auto });
-        Content = DialogChrome.Frame(this, owner, Title, Close, body);
+        Content = DialogFrame.Frame(this, owner, Title, Close, body);
         Loaded += (_, _) => _fields.FirstOrDefault()?.Focus();
     }
 

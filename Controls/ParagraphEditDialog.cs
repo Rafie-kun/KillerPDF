@@ -55,7 +55,7 @@ internal sealed class ParagraphEditDialog : Window
         MaxHeight = SystemParameters.WorkArea.Height - 40;
         MinWidth = 460; MinHeight = 380; SizeToContent = SizeToContent.Height;
         UseLayoutRounding = true;
-        DialogChrome.Configure(this, owner, resizable: true);
+        DialogFrame.Configure(this, owner, resizable: true);
         Id(this, "ParagraphEditDialog");
         var body = new DockPanel { Margin = new Thickness(16, 4, 16, 14),
             LayoutTransform = new ScaleTransform(scale, scale) };
@@ -150,7 +150,7 @@ internal sealed class ParagraphEditDialog : Window
             pageViewport.MaxHeight = Math.Clamp(scroll.ActualHeight - 4, 40, 240);
         };
         body.Children.Add(scroll);
-        Content = DialogChrome.Frame(this, owner, Title, Close, body);
+        Content = DialogFrame.Frame(this, owner, Title, Close, body);
         _candidateBox.SelectionChanged += (_, _) => SelectCandidate();
         _text.TextChanged += (_, _) => { if (!_setting) Invalidate(); };
         _alignment.SelectionChanged += (_, _) => { if (!_setting) Invalidate(); };

@@ -29,7 +29,7 @@ namespace KillerPDF
 
         // The app icon that leads the wordmark, at the main title bar's size and spacing.
         private static Image TitleIcon()
-            => DialogChrome.TitleIcon();
+            => DialogFrame.TitleIcon();
 
         // Carries the checkbox state of the last Show() call back to ShowWithCheckbox. Dialogs are
         // modal and UI-thread only, so a shared field is safe and avoids a duplicate dialog body.
@@ -124,7 +124,7 @@ namespace KillerPDF
                 Width = 390,
                 SizeToContent = SizeToContent.Height
             };
-            DialogChrome.Configure(win, owner, fade: fadeClose);
+            DialogFrame.Configure(win, owner, fade: fadeClose);
 
             var outerBorder = new Border
             {
@@ -141,7 +141,7 @@ namespace KillerPDF
 
             // Every dialog title bar is the shared family chrome: wordmark, qualifier on its baseline,
             // the same lift as the main window, and the family close X.
-            var titleBar = DialogChrome.BuildTitleBar(win, owner, title, () => { result = MessageBoxResult.Cancel; win.Close(); });
+            var titleBar = DialogFrame.BuildTitleBar(win, owner, title, () => { result = MessageBoxResult.Cancel; win.Close(); });
             titleBar.Height = Application.Current.TryFindResource("DialogTitleBarHeight") is double titleHeight ? titleHeight : double.NaN;
             root.Children.Add(titleBar);
 
@@ -213,7 +213,7 @@ namespace KillerPDF
             // Paint the same film-grain texture the app's panels use, behind the content, so the
             // dialog reads as part of the same surface family instead of a flat box.
             var contentGrid = new Grid();
-            var grain = DialogChrome.GrainTexture(owner);
+            var grain = DialogFrame.GrainTexture(owner);
             if (grain is not null)
             {
                 double grainOpacity = Application.Current.Resources["GrainOpacity"] is double go ? go : 0.05;
@@ -232,7 +232,7 @@ namespace KillerPDF
                 });
             }
             contentGrid.Children.Add(root);
-            win.Content = DialogChrome.WrapContent(owner, contentGrid);
+            win.Content = DialogFrame.WrapContent(owner, contentGrid);
             win.ShowDialog();
             _lastCheckboxChecked = boxChecked;
             return result;
@@ -254,7 +254,7 @@ namespace KillerPDF
             int result = -1;
 
             var win = new Window { Title = title, MinWidth = 380, MaxWidth = 760, SizeToContent = SizeToContent.WidthAndHeight };
-            DialogChrome.Configure(win, owner, fade: fadeClose);
+            DialogFrame.Configure(win, owner, fade: fadeClose);
 
             var outerBorder = new Border
             {
@@ -271,7 +271,7 @@ namespace KillerPDF
 
             // Every dialog title bar is the shared family chrome: wordmark, qualifier on its baseline,
             // the same lift as the main window, and the family close X.
-            var titleBar = DialogChrome.BuildTitleBar(win, owner, title, () => win.Close());
+            var titleBar = DialogFrame.BuildTitleBar(win, owner, title, () => win.Close());
             titleBar.Height = Application.Current.TryFindResource("DialogTitleBarHeight") is double titleHeight ? titleHeight : double.NaN;
             root.Children.Add(titleBar);
 
@@ -294,7 +294,7 @@ namespace KillerPDF
             root.Children.Add(new Border { Padding = new Thickness(16, 0, 24, 20), Child = btnPanel });
 
             var contentGrid = new Grid();
-            var grain = DialogChrome.GrainTexture(owner);
+            var grain = DialogFrame.GrainTexture(owner);
             if (grain is not null)
             {
                 double grainOpacity = Application.Current.Resources["GrainOpacity"] is double go ? go : 0.05;
@@ -313,7 +313,7 @@ namespace KillerPDF
                 });
             }
             contentGrid.Children.Add(root);
-            win.Content = DialogChrome.WrapContent(owner, contentGrid);
+            win.Content = DialogFrame.WrapContent(owner, contentGrid);
             win.ShowDialog();
             return result;
         }
@@ -426,7 +426,7 @@ namespace KillerPDF
             var win = new Window { Title = "KillerPDF", Width = secondaryLabel is null ? 390 : 440, SizeToContent = SizeToContent.Height };
             // fade:false - the app's own fade-out follows immediately on confirm; two fades
             // back-to-back read as lag (same reasoning as the unsaved-changes prompt).
-            DialogChrome.Configure(win, owner, fade: false);
+            DialogFrame.Configure(win, owner, fade: false);
 
             var outerBorder = new Border
             {
@@ -443,7 +443,7 @@ namespace KillerPDF
 
             // Every dialog title bar is the shared family chrome: wordmark, qualifier on its baseline,
             // the same lift as the main window, and the family close X.
-            var titleBar = DialogChrome.BuildTitleBar(win, owner, "KillerPDF", () => win.Close());
+            var titleBar = DialogFrame.BuildTitleBar(win, owner, "KillerPDF", () => win.Close());
             titleBar.Height = Application.Current.TryFindResource("DialogTitleBarHeight") is double titleHeight ? titleHeight : double.NaN;
             root.Children.Add(titleBar);
 
@@ -494,7 +494,7 @@ namespace KillerPDF
 
             // Film grain across the whole card, same as Show().
             var contentGrid = new Grid();
-            var grain = DialogChrome.GrainTexture(owner);
+            var grain = DialogFrame.GrainTexture(owner);
             if (grain is not null)
             {
                 double grainOpacity = Application.Current.Resources["GrainOpacity"] is double go ? go : 0.05;
@@ -513,7 +513,7 @@ namespace KillerPDF
                 });
             }
             contentGrid.Children.Add(root);
-            win.Content = DialogChrome.WrapContent(owner, contentGrid);
+            win.Content = DialogFrame.WrapContent(owner, contentGrid);
             win.ShowDialog();
             return (choice, closeTabs, remember);
         }
@@ -534,7 +534,7 @@ namespace KillerPDF
             string? result = null;
 
             var win = new Window { Width = 380, SizeToContent = SizeToContent.Height };
-            DialogChrome.Configure(win, owner, fade: true);
+            DialogFrame.Configure(win, owner, fade: true);
 
             void CloseCancel() { result = null; win.Close(); }
 
@@ -562,7 +562,7 @@ namespace KillerPDF
             // Enter anywhere in the field submits.
             pw.KeyDown += (_, e) => { if (e.Key == Key.Enter) { result = pw.Password; win.Close(); } };
 
-            win.Content = DialogChrome.Frame(win, owner, "KillerPDF", CloseCancel, body);
+            win.Content = DialogFrame.Frame(win, owner, "KillerPDF", CloseCancel, body);
             win.Loaded += (_, _2) => pw.Focus();
             win.ShowDialog();
             return result;
@@ -574,7 +574,7 @@ namespace KillerPDF
             string? result = null;
 
             var win = new Window { Width = 420, SizeToContent = SizeToContent.Height };
-            DialogChrome.Configure(win, owner, fade: true);
+            DialogFrame.Configure(win, owner, fade: true);
 
             void CloseCancel() { result = null; win.Close(); }
 
@@ -597,7 +597,7 @@ namespace KillerPDF
             cancelBtn.Click += (_, _2) => CloseCancel();
             body.Children.Add(new Border { Padding = new Thickness(16, 12, 16, 16), Child = UiKit.ButtonRow(okBtn, cancelBtn) });
 
-            win.Content = DialogChrome.Frame(win, owner, title, CloseCancel, body);
+            win.Content = DialogFrame.Frame(win, owner, title, CloseCancel, body);
             win.Loaded += (_, _2) => { box.Focus(); box.SelectAll(); };
             win.ShowDialog();
             return result;
@@ -609,7 +609,7 @@ namespace KillerPDF
             string? result = null;
 
             var win = new Window { Width = 420, SizeToContent = SizeToContent.Height };
-            DialogChrome.Configure(win, owner, fade: true);
+            DialogFrame.Configure(win, owner, fade: true);
 
             void CloseCancel() { result = null; win.Close(); }
 
@@ -635,7 +635,7 @@ namespace KillerPDF
             cancelBtn.Click += (_, _2) => CloseCancel();
             body.Children.Add(new Border { Padding = new Thickness(16, 12, 16, 16), Child = UiKit.ButtonRow(okBtn, cancelBtn) });
 
-            win.Content = DialogChrome.Frame(win, owner, title, CloseCancel, body);
+            win.Content = DialogFrame.Frame(win, owner, title, CloseCancel, body);
             win.Loaded += (_, _2) => box.Focus();
             win.ShowDialog();
             return result;
