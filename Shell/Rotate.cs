@@ -108,13 +108,13 @@ namespace KillerPDF
                     System.Windows.Threading.DispatcherPriority.Background);
                 if (!IsSourceCurrent() || ct.IsCancellationRequested) return;
 
-                // This operation adjusts overlay annotations before SaveTempAndReload, so retain
-                // the complete pre-transform state for the central history push.
+                // Retain the complete pre-transform state for the central history push.
                 UndoEntry? documentUndo = CaptureDocumentUndo();
 
                 // If the page carries annotations, bake just that page's annotations into the PDF so they
                 // rotate/scale with the page (it is being rasterized anyway, and the user was warned). The
-                // helper is non-destructive (restores _doc); we then drop the now-baked annotations.
+                // helper is non-destructive (restores _doc); baked annotations are removed only
+                // when the replacement document succeeds.
                 var replacements = new Dictionary<int, string>();
                 var bakedAnnotationPages = new List<int>();
                 for (int i = 0; i < pages.Length; i++)
@@ -168,11 +168,13 @@ namespace KillerPDF
                     SetStatus(Loc("Str_St_Canceled"));
                     return;
                 }
-                foreach (int pageIdx in bakedAnnotationPages)
-                    if (_annotations.TryGetValue(pageIdx, out var pageAnns)) pageAnns.Clear();
-
                 SaveTempAndReload(
                     keepAnnotations: true,
+                    remapAnnotations: annotations =>
+                    {
+                        foreach (int pageIdx in bakedAnnotationPages)
+                            if (annotations.TryGetValue(pageIdx, out var pageAnns)) pageAnns.Clear();
+                    },
                     finalizeSavedFile: path =>
                     {
                         if (pages.Length == engineSession.PageCount)

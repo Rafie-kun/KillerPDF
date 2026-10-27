@@ -31,6 +31,8 @@ internal static class DocumentStateSmoke
         byte[] original = scenario is "--verify-form-history" or "--verify-merge-pending"
             ? FormFieldEditingSmoke.Fixture("ORIGINAL") : scenario == "--verify-page-delete-failure"
                 ? PageDeletionSmoke.Fixture() : TableExportSmoke.Fixture();
+        if (scenario is "--verify-page-transform-failure" or "--verify-page-transform-cancel" or "--verify-page-transform-save-control")
+            original = TableExportSmoke.Fixture(malformedDate: true);
         File.WriteAllBytes(source, original);
         if (closeInOtherPane) File.WriteAllBytes(otherSource, original);
         owner.GetType().GetMethod("OpenFromExternal", BindingFlags.Public | BindingFlags.Instance)!
@@ -88,6 +90,16 @@ internal static class DocumentStateSmoke
                 VerifyPageEditFailure(owner, source, original, editor, folder);
             else if (scenario == "--verify-page-delete-failure")
                 VerifyPageEditFailure(owner, source, original, editor, folder, delete: true);
+            else if (scenario == "--verify-page-transform-failure")
+                VerifyTransformFailure(owner, source, original, editor);
+            else if (scenario == "--verify-page-transform-cancel")
+                VerifyTransformFailure(owner, source, original, editor, cancel: true);
+            else if (scenario == "--verify-page-transform-save-control")
+                VerifyTransformFailure(owner, source, original, editor, saveOnly: true);
+            else if (scenario == "--verify-page-transform-success")
+                VerifyTransformFailure(owner, source, original, editor, success: true);
+            else if (scenario == "--verify-range-extract-pending")
+                VerifyPendingRangeExtraction(owner, source, original, folder);
             else if (scenario == "--verify-layout-pending")
                 VerifyLayoutPending(owner, source, original, editor, folder);
             else if (scenario == "--verify-merge-pending")
@@ -626,6 +638,147 @@ internal static class DocumentStateSmoke
         if (ReadRotation(source) != 90 || !ReadText(source).Contains(Marker, StringComparison.Ordinal))
             throw new InvalidOperationException("Redo after the successful retry did not restore the saved page turn and annotation.");
         Console.WriteLine("CONTROL successful retry and Undo/Redo strictly reopened with expected rotation and annotation.");
+    }
+
+    private static void VerifyPendingRangeExtraction(Window owner, string source, byte[] original, string folder)
+    {
+        string destination = Path.Combine(folder, "extracted-pending-text.pdf");
+        int ranges = 0, pickers = 0;
+        var seen = new HashSet<Window>();
+        var timer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(20) };
+        timer.Tick += (_, _) =>
+        {
+            foreach (Window dialog in Application.Current.Windows.Cast<Window>().Where(window => window != owner && window.IsVisible).ToArray())
+            {
+                if (!seen.Add(dialog)) continue;
+                if (dialog.GetType().Name == "DocumentValuesDialog")
+                {
+                    ranges++;
+                    if (Descendants<TextBox>(dialog).Single().Text != "1")
+                        throw new InvalidOperationException("Pending extraction did not prefill its selected page.");
+                    Button apply = Descendants<Button>(dialog).Single(button => button.IsDefault);
+                    owner.Dispatcher.BeginInvoke(DispatcherPriority.Input,
+                        (Action)(() => apply.RaiseEvent(new RoutedEventArgs(Button.ClickEvent))));
+                }
+                else if (dialog.GetType().Name == "FileDialog")
+                {
+                    pickers++;
+                    ((TextBox)dialog.FindName("FileNameBox")).Text = destination;
+                    Button accept = (Button)dialog.FindName("AcceptButton");
+                    owner.Dispatcher.BeginInvoke(DispatcherPriority.Input,
+                        (Action)(() => accept.RaiseEvent(new RoutedEventArgs(Button.ClickEvent))));
+                }
+            }
+        };
+        timer.Start();
+        try { Click(owner, "ExtractPagesBtn"); }
+        finally { timer.Stop(); }
+        if (ranges != 1 || pickers != 1 || !File.Exists(destination) || !ReadText(destination).Contains(Marker, StringComparison.Ordinal)
+            || !File.ReadAllBytes(source).AsSpan().SequenceEqual(original) || !Dirty(owner))
+            throw new InvalidOperationException("USER-004: typed extraction omitted pending text, changed the source or accepted a saved checkpoint.");
+        Click(owner, "UndoBtn");
+        if (Dirty(owner)) throw new InvalidOperationException("Extraction added history beyond the pending text edit.");
+        Click(owner, "RedoBtn");
+        if (!Dirty(owner) || !File.ReadAllBytes(source).AsSpan().SequenceEqual(original)
+            || !ReadText(destination).Contains(Marker, StringComparison.Ordinal))
+            throw new InvalidOperationException("Extraction changed the source or lost pending edit history after Undo/Redo.");
+        Console.WriteLine("CONTROL typed Extract retained the active text editor in strict output while preserving original source bytes, dirty checkpoint and Undo/Redo history.");
+    }
+
+    private static void VerifyTransformFailure(Window owner, string source, byte[] original, TextBox editor, bool cancel = false, bool saveOnly = false, bool success = false)
+    {
+        Assembly engine = Assembly.Load("KillerPdf.Engine");
+        object document = engine.GetType("KillerPdf.Engine.Documents.PdfDocument", true)!
+            .GetMethod("Open", [typeof(ReadOnlyMemory<byte>)])!.Invoke(null, [new ReadOnlyMemory<byte>(original)])!;
+        bool refused = false;
+        try { engine.GetType("KillerPdf.Engine.Documents.PdfDocumentInformation", true)!.GetMethod("Read")!.Invoke(null, [document]); }
+        catch (TargetInvocationException error) when (error.InnerException is InvalidOperationException inner
+            && inner.Message.Contains("not a valid PDF date", StringComparison.Ordinal)) { refused = true; }
+        if (refused == success) throw new InvalidOperationException("The synthetic Transform metadata control did not match its expected healthy or malformed state.");
+        Stroke(0x0D, 0x11);
+        Wait(() => !editor.IsVisible && Dirty(owner), "pending annotation before Transform failure");
+        var visible = Descendants<Border>(owner).Single(border => border.IsVisible
+            && Descendants<TextBlock>(border).Any(text => text.Text == Marker) && border.Parent is Canvas);
+        double left = Canvas.GetLeft(visible), top = Canvas.GetTop(visible);
+        bool undoEnabled = ((Button)owner.FindName("UndoBtn")).IsEnabled;
+        if (!undoEnabled) throw new InvalidOperationException("The pending annotation has no Undo control.");
+        Console.WriteLine("CONTROL rendered source and pending annotation are usable; public metadata reading independently "
+            + (success ? "accepts the healthy document." : "refuses NOT_A_DATE."));
+        int errors = 0, transforms = 0;
+        var seen = new HashSet<Window>();
+        var timer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(20) };
+        timer.Tick += (_, _) =>
+        {
+            foreach (Window dialog in Application.Current.Windows.Cast<Window>().Where(window => window != owner && window.IsVisible).ToArray())
+            {
+                if (!seen.Add(dialog)) continue;
+                if (dialog.GetType().Name == "TransformWindow")
+                {
+                    transforms++;
+                    Button turn = Descendants<Button>(dialog).Single(button => Equals(button.Content, "90° ↻"));
+                    Button apply = Descendants<Button>(dialog).Single(button => cancel ? button.IsCancel : button.IsDefault);
+                    owner.Dispatcher.BeginInvoke(DispatcherPriority.Input, (Action)(() =>
+                    {
+                        turn.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                        apply.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                    }));
+                    continue;
+                }
+                Button? ok = Descendants<Button>(dialog).FirstOrDefault(button => Equals(button.Content, owner.FindResource("Str_Btn_OK")));
+                if (ok is null) continue;
+                string message = string.Join(" ", Descendants<TextBlock>(dialog).Select(text => text.Text));
+                Console.WriteLine("CONTROL Transform notice: " + message);
+                if (message.Contains("not a valid PDF date", StringComparison.Ordinal)) errors++;
+                owner.Dispatcher.BeginInvoke(DispatcherPriority.Input,
+                    (Action)(() => ok.RaiseEvent(new RoutedEventArgs(Button.ClickEvent))));
+            }
+        };
+        try
+        {
+            if (!saveOnly)
+            {
+                timer.Start();
+                Click(owner, "ToolRotateBtn");
+                if (success) Wait(() => !visible.IsVisible, "successful Transform replaces the editable annotation layer");
+                else if (!cancel) Wait(() => errors == 1, "late Transform metadata failure");
+                Wait(() => !Application.Current.Windows.Cast<Window>().Any(window => window != owner && window.IsVisible), "Transform dialog dismissed");
+            }
+        }
+        finally { timer.Stop(); }
+        if (transforms != (saveOnly ? 0 : 1) || errors != (saveOnly || cancel || success ? 0 : 1) || !Dirty(owner) || !File.ReadAllBytes(source).AsSpan().SequenceEqual(original)
+            || ((Button)owner.FindName("UndoBtn")).IsEnabled != undoEnabled
+            || (!success && (!visible.IsVisible || Math.Abs(Canvas.GetLeft(visible) - left) > 0.01 || Math.Abs(Canvas.GetTop(visible) - top) > 0.01)))
+            throw new InvalidOperationException("APP-004: late Transform failure changed pending geometry, dirty/history state or source bytes.");
+        Save(owner);
+        if (ReadText(source).Contains(Marker, StringComparison.Ordinal) == success || ReadRotation(source) != 0
+            || (success && ReadRasterImageCount(source) == 0))
+            throw new InvalidOperationException(success ? "Successful Transform did not publish raster data without an editable text overlay."
+                : saveOnly ? "Metadata Save control lost the pending annotation."
+                : cancel ? "Transform Cancel control lost the pending annotation."
+                : "APP-004: late Transform failure lost the pending annotation on subsequent Save.");
+        Click(owner, "UndoBtn"); Save(owner);
+        if (ReadText(source).Contains(Marker, StringComparison.Ordinal) != success)
+            throw new InvalidOperationException(success ? "Transform Undo did not restore the original annotation."
+                : "Undo after failed Transform did not remove the original annotation.");
+        Click(owner, "RedoBtn"); Save(owner);
+        if (ReadText(source).Contains(Marker, StringComparison.Ordinal) == success
+            || (success && ReadRasterImageCount(source) == 0))
+            throw new InvalidOperationException(success ? "Transform Redo did not restore raster data without editable text."
+                : "Redo after failed Transform lost the original annotation.");
+        Console.WriteLine(success
+            ? "CONTROL successful Transform published a raster page without an editable overlay; strict Save/Undo/Redo restored the expected image and text states."
+            : "CONTROL " + (saveOnly ? "metadata Save without Transform" : cancel ? "Transform Cancel" : "late Transform metadata failure")
+                + " preserved pending annotation, source, rotation, dirty/history and strict Save/Undo/Redo content.");
+    }
+
+    private static int ReadRasterImageCount(string source)
+    {
+        Assembly engine = Assembly.Load("KillerPdf.Engine");
+        object document = engine.GetType("KillerPdf.Engine.Documents.PdfDocument", true)!
+            .GetMethod("Open", [typeof(ReadOnlyMemory<byte>)])!.Invoke(null, [new ReadOnlyMemory<byte>(File.ReadAllBytes(source))])!;
+        object reader = Activator.CreateInstance(engine.GetType("KillerPdf.Engine.Documents.PdfPageContentReader", true)!, [document])!;
+        object content = reader.GetType().GetMethod("Read", [typeof(int), typeof(CancellationToken)])!.Invoke(reader, [0, CancellationToken.None])!;
+        return ((System.Collections.IEnumerable)content.GetType().GetProperty("Images")!.GetValue(content)!).Cast<object>().Count();
     }
 
     private static void RotateFromThumbnail(Window owner)

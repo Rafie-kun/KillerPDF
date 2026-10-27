@@ -50,7 +50,7 @@ internal static class Program
                     windowSession: true, windowSessionCase: args[0], updateRestartState: Path.GetFullPath(args[4]));
             if (args.Length == 5 && (args[0].StartsWith("--verify-validate-profile-case-", StringComparison.Ordinal)
                 || args[0].StartsWith("--verify-delete-nearest-case-", StringComparison.Ordinal)
-                || args[0] == "--verify-page-delete-failure")
+                || args[0] is "--verify-page-delete-failure" or "--verify-page-transform-failure" or "--verify-page-transform-cancel" or "--verify-page-transform-save-control" or "--verify-page-transform-success" or "--verify-range-extract-pending")
                 && args[4] == "--session-isolation")
                 return TableExportSmoke.Run(Path.GetFullPath(args[1]), Path.GetFullPath(args[2]), Path.GetFullPath(args[3]),
                     windowSession: true, windowSessionCase: args[0]);

@@ -168,7 +168,7 @@ internal static class TableExportSmoke
                 return ToolSearchPrerequisitesSmoke.Run(owner, folder, creation: "office");
             if (windowSessionCase == "--verify-shortcut-hints")
                 return ShortcutHintsSmoke.Run(owner, folder);
-            if (windowSessionCase == "--verify-page-delete-failure")
+            if (windowSessionCase is "--verify-page-delete-failure" or "--verify-page-transform-failure" or "--verify-page-transform-cancel" or "--verify-page-transform-save-control" or "--verify-page-transform-success" or "--verify-range-extract-pending")
                 return DocumentStateSmoke.Run(owner, assembly, appPath, folder, windowSessionCase);
             if (windowSessionCase is "--verify-export-loss-review" or "--verify-export-loss-mixed" or "--verify-export-loss-continue" or "--verify-export-lossless")
                 return ExportLossReviewSmoke.Run(owner, folder, windowSessionCase);
@@ -619,17 +619,19 @@ internal static class TableExportSmoke
         var png = new PngBitmapEncoder(); png.Frames.Add(BitmapFrame.Create(image));
         using var file = File.Create(path); png.Save(file);
     }
-    internal static byte[] Fixture()
+    internal static byte[] Fixture(bool malformedDate = false)
     {
         const string content = "20 20 160 160 re 100 20 m 100 180 l 20 100 m 180 100 l S\nBT /F1 12 Tf 30 150 Td (0012) Tj ET\nBT /F1 12 Tf 110 150 Td (Name) Tj ET\nBT /F1 12 Tf 30 70 Td (42) Tj ET\nBT /F1 12 Tf 110 70 Td (Test) Tj ET\n";
-        string[] objects = ["<< /Type /Catalog /Pages 2 0 R >>", "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        List<string> objects = ["<< /Type /Catalog /Pages 2 0 R >>", "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
             "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 200] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
             "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>", $"<< /Length {content.Length} >>\nstream\n{content}endstream"];
+        if (malformedDate) objects.Add("<< /CreationDate (NOT_A_DATE) >>");
+        string info = malformedDate ? $" /Info {objects.Count} 0 R" : "";
         var pdf = new StringBuilder("%PDF-1.7\n"); var offsets = new List<int> { 0 };
-        for (int i = 0; i < objects.Length; i++) { offsets.Add(pdf.Length); pdf.Append($"{i + 1} 0 obj\n{objects[i]}\nendobj\n"); }
+        for (int i = 0; i < objects.Count; i++) { offsets.Add(pdf.Length); pdf.Append($"{i + 1} 0 obj\n{objects[i]}\nendobj\n"); }
         int xref = pdf.Length; pdf.Append($"xref\n0 {offsets.Count}\n0000000000 65535 f \n");
         foreach (int offset in offsets.Skip(1)) pdf.Append(offset.ToString("D10", System.Globalization.CultureInfo.InvariantCulture)).Append(" 00000 n \n");
-        pdf.Append($"trailer\n<< /Size {offsets.Count} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n");
+        pdf.Append($"trailer\n<< /Size {offsets.Count} /Root 1 0 R{info} >>\nstartxref\n{xref}\n%%EOF\n");
         return Encoding.ASCII.GetBytes(pdf.ToString());
     }
 }
