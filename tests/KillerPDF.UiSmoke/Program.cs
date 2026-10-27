@@ -32,7 +32,7 @@ internal static class Program
         Console.OutputEncoding = new UTF8Encoding(false);
         try
         {
-            if (args.Length == 2 && args[0] == "--verify-thumbnail-fixture")
+            if (args.Length == 2 && args[0] is "--verify-thumbnail-fixture" or "--verify-orientation-fixture")
             {
                 string enginePath = Path.GetFullPath(args[1]);
                 Assembly? ResolveFixtureAssembly(AssemblyLoadContext context, AssemblyName name)
@@ -44,6 +44,7 @@ internal static class Program
                 try
                 {
                     Assembly engine = AssemblyLoadContext.Default.LoadFromAssemblyPath(enginePath);
+                    if (args[0] == "--verify-orientation-fixture") return OrientationFailureSmoke.VerifyFixture(engine);
                     Type documentType = engine.GetType("KillerPdf.Engine.Documents.PdfDocument", throwOnError: true)!;
                     object document = documentType.GetMethod("Open", [typeof(ReadOnlyMemory<byte>)])!
                         .Invoke(null, [new ReadOnlyMemory<byte>(ThumbnailBoxGutterSmoke.LongFixture())])!;

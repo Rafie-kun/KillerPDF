@@ -1063,7 +1063,7 @@ internal static class DocumentStateSmoke
         finally { foreach (ContextMenu menu in menus) menu.IsOpen = false; }
     }
 
-    private static int ReadRotation(string source)
+    internal static int ReadRotation(string source)
     {
         Assembly engine = Assembly.Load("KillerPdf.Engine");
         object document = engine.GetType("KillerPdf.Engine.Documents.PdfDocument", true)!
@@ -1320,7 +1320,7 @@ internal static class DocumentStateSmoke
         return (string?)widget.GetType().GetProperty("Value")!.GetValue(widget);
     }
 
-    private static string ReadText(string source, int page = 0)
+    internal static string ReadText(string source, int page = 0)
     {
         Assembly engine = Assembly.Load("KillerPdf.Engine");
         Type documentType = engine.GetType("KillerPdf.Engine.Documents.PdfDocument", true)!;
@@ -1333,7 +1333,7 @@ internal static class DocumentStateSmoke
         return (string)content.GetType().GetProperty("Text")!.GetValue(content)!;
     }
 
-    private static void CaptureOwnedWindow(Window owner, string path)
+    internal static void CaptureOwnedWindow(Window owner, string path)
     {
         owner.UpdateLayout();
         var bitmap = new RenderTargetBitmap((int)Math.Ceiling(owner.ActualWidth), (int)Math.Ceiling(owner.ActualHeight), 96, 96, PixelFormats.Pbgra32);
@@ -1344,7 +1344,7 @@ internal static class DocumentStateSmoke
         png.Save(output);
     }
 
-    private static bool IsPageCanvas(Canvas canvas) => canvas.IsVisible && canvas.ActualWidth > 100
+    internal static bool IsPageCanvas(Canvas canvas) => canvas.IsVisible && canvas.ActualWidth > 100
         && canvas.ActualHeight > 100 && canvas.GetType().Name == "SafeCanvas";
     internal static bool Dirty(Window owner) => ((Button)owner.FindName("SaveAsBtn")).Foreground
         is SolidColorBrush brush && brush.Color == Color.FromRgb(0xE0, 0x73, 0);
@@ -1372,7 +1372,7 @@ internal static class DocumentStateSmoke
             Thread.Sleep(10);
         }
     }
-    private static void Pump() => Application.Current.Dispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
+    internal static void Pump() => Application.Current.Dispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
     internal static IEnumerable<T> Descendants<T>(DependencyObject root) where T : DependencyObject
     {
         for (int index = 0; index < VisualTreeHelper.GetChildrenCount(root); index++)

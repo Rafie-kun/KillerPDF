@@ -214,6 +214,8 @@ internal static class TableExportSmoke
                 return TooltipCursorSmoke.RunPlacementControls(owner, folder);
             if (windowSessionCase == "--verify-page-navigation-caption-theme")
                 return CaptionThemeSmoke.Run(owner, folder);
+            if (windowSessionCase == "--verify-page-navigation-orientation-write-failure")
+                return OrientationFailureSmoke.Run(owner, folder);
             if (windowSessionCase == "--verify-page-navigation-dialog-buttons-theme")
                 return CaptionThemeSmoke.RunButtonTransitions(owner, folder);
             if (windowSessionCase == "--verify-page-navigation-dialog-button-actions")
@@ -697,9 +699,10 @@ internal static class TableExportSmoke
         var png = new PngBitmapEncoder(); png.Frames.Add(BitmapFrame.Create(image));
         using var file = File.Create(path); png.Save(file);
     }
-    internal static byte[] Fixture(bool malformedDate = false)
+    internal static byte[] Fixture(bool malformedDate = false, bool sidewaysText = false)
     {
-        const string content = "20 20 160 160 re 100 20 m 100 180 l 20 100 m 180 100 l S\nBT /F1 12 Tf 30 150 Td (0012) Tj ET\nBT /F1 12 Tf 110 150 Td (Name) Tj ET\nBT /F1 12 Tf 30 70 Td (42) Tj ET\nBT /F1 12 Tf 110 70 Td (Test) Tj ET\n";
+        string content = sidewaysText ? "BT /F1 12 Tf 0 1 -1 0 150 25 Tm (SIDEWAYS ORIENTATION CONTROL) Tj ET\n"
+            : "20 20 160 160 re 100 20 m 100 180 l 20 100 m 180 100 l S\nBT /F1 12 Tf 30 150 Td (0012) Tj ET\nBT /F1 12 Tf 110 150 Td (Name) Tj ET\nBT /F1 12 Tf 30 70 Td (42) Tj ET\nBT /F1 12 Tf 110 70 Td (Test) Tj ET\n";
         List<string> objects = ["<< /Type /Catalog /Pages 2 0 R >>", "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
             "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 200] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
             "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>", $"<< /Length {content.Length} >>\nstream\n{content}endstream"];
