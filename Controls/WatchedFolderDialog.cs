@@ -128,8 +128,8 @@ internal sealed class WatchedFolderDialog : Window
         var row = new DockPanel { Margin = new Thickness(0, 2, 0, 8) };
         Button browse = Button("Str_Sign_Browse", id + "Browse", () =>
         {
-            var picker = new Controls.FileDialog(Controls.FileDialogMode.SelectFolder)
-                { Title = L(key), InitialDirectory = field.Text };
+            var picker = new Controls.FileDialog(Controls.FileDialogMode.Folder)
+                { Title = L(key), InitialDirectory = field.Text, HideFilesInFolderMode = true, AcceptHighlightedFolder = true };
             if (picker.ShowDialog(this) == true) field.Text = picker.FileName;
         });
         DockPanel.SetDock(browse, Dock.Right); row.Children.Add(browse); row.Children.Add(field);

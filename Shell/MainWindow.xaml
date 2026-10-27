@@ -27,10 +27,6 @@
     <Window.Resources>
         <ResourceDictionary>
         <ResourceDictionary.MergedDictionaries>
-            <!-- OutlineButton (accent outline at rest, fills solid on hover - the family standard):
-                 the footer's Install button uses it below. Already used by the file dialog; merged
-                 here too rather than duplicating the style, so the two never drift apart. -->
-            <ResourceDictionary Source="pack://application:,,,/Controls/PickerStyles.xaml"/>
             <ResourceDictionary Source="pack://application:,,,/Controls/OverlayScrollViewer.xaml"/>
         </ResourceDictionary.MergedDictionaries>
         <!-- Brush keys come from Application.Resources (theme dicts) via DynamicResource.

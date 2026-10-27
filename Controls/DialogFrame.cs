@@ -282,11 +282,7 @@ namespace KillerPDF
             win.WindowStartupLocation = owner != null ? WindowStartupLocation.CenterOwner : WindowStartupLocation.CenterScreen;
             win.FontFamily = UiKit.UiFont;
             win.SetResourceReference(Control.ForegroundProperty, "TextBrush");
-            var pickerStyles = new ResourceDictionary
-            {
-                Source = new Uri("pack://application:,,,/Controls/PickerStyles.xaml")
-            };
-            win.Resources[typeof(ListBoxItem)] = pickerStyles["PickerRow"];
+            win.Resources[typeof(ListBoxItem)] = Application.Current.FindResource("PickerRow");
             var listStyle = new Style(typeof(ListBox));
             listStyle.Setters.Add(new Setter(Control.BackgroundProperty, new DynamicResourceExtension("PaneBrush")));
             listStyle.Setters.Add(new Setter(Control.ForegroundProperty, new DynamicResourceExtension("TextBrush")));

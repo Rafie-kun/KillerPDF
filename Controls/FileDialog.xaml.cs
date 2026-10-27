@@ -14,8 +14,10 @@ using KillerPDF.Services;
 
 namespace KillerPDF.Controls
 {
-    /// <summary>Open or Save. Picked at construction; changes the accept button and the rules.</summary>
-    public enum FileDialogMode { Open, Save, SelectFolder }
+    /// <summary>Open, Save or Folder. Picked at construction; changes the accept button and the
+    /// rules. Folder hides the name and type fields, labels the button Select, and returns a
+    /// folder as FileName.</summary>
+    public enum FileDialogMode { Open, Save, Folder }
 
     /// <summary>
     /// Themed stand-in for Microsoft.Win32.OpenFileDialog / SaveFileDialog. Same chrome, places
@@ -29,8 +31,7 @@ namespace KillerPDF.Controls
     ///     var dlg = new FileDialog(FileDialogMode.Save) { Title = ..., Filter = ..., FileName = ... };
     ///     if (dlg.ShowDialog(owner) == true) Use(dlg.FileName);
     ///
-    /// Multiselect is deliberately NOT implemented yet - nothing in the app needs it, and
-    /// a half-working Multiselect is worse than an absent one. Add it when something wants it.
+    /// Multiselect matches Explorer's Ctrl and Shift selection behavior in Open mode.
     /// </summary>
     public partial class FileDialog : Window
     {
@@ -45,15 +46,17 @@ namespace KillerPDF.Controls
         /// <summary>Seeded with a suggested name; on OK, the full chosen path.</summary>
         public string FileName { get; set; } = "";
 
-        /// <summary>Keep a planned save name fixed while choosing its destination folder.</summary>
-        public bool IsFileNameReadOnly { get; set; }
-
         public string InitialDirectory { get; set; } = "";
 
         /// <summary>Appended on save when the typed name has no extension. No leading dot needed.</summary>
         public string DefaultExt { get; set; } = "";
 
         public bool AddExtension { get; set; } = true;
+
+        /// <summary>Keeps the seeded name fixed while the user picks only the folder: the name box
+        /// is read only, picking a file does not replace it, and a type switch leaves it alone.
+        /// Off by default.</summary>
+        public bool IsFileNameReadOnly { get; set; }
         /// <summary>
         /// Append the active filter's extension even when the typed name contains another dot.
         /// Use this for format-locked exports such as flattened PDF output.
@@ -76,9 +79,22 @@ namespace KillerPDF.Controls
         /// Set it BEFORE ShowDialog - the list's selection mode is applied there.</summary>
         public bool Multiselect { get; set; }
 
+        /// <summary>Folder mode only: list folders alone instead of folders and the files that
+        /// pass the filter. Off by default.</summary>
+        public bool HideFilesInFolderMode { get; set; }
+
+        /// <summary>Folder mode only: Explorer-style picking. A highlighted subfolder is the answer
+        /// (otherwise the folder being shown), Enter anywhere accepts, and the chosen folder is
+        /// remembered as the next starting point. Off by default: the folder being shown is the
+        /// answer and nothing is remembered.</summary>
+        public bool AcceptHighlightedFolder { get; set; }
+
         /// <summary>Show a live preview pane for image-selection workflows. The pane is opt-in so
         /// ordinary Open and Save dialogs keep their compact layout.</summary>
         public bool ShowImagePreview { get; set; }
+
+        /// <summary>The kit's older name for <see cref="ShowImagePreview"/>, kept for its callers.</summary>
+        public bool ShowPreview { get => ShowImagePreview; set => ShowImagePreview = value; }
 
         /// <summary>Every path chosen. Always populated on success, so a caller can read this
         /// whether or not it asked for Multiselect - single selection yields one entry, matching
@@ -155,8 +171,7 @@ namespace KillerPDF.Controls
         // from the document open/save memory. One shared key meant Insert Image always started
         // wherever the last PDF was opened from, never where the user last picked an image.
         private string LastDirKey =>
-            (_mode == FileDialogMode.SelectFolder ? "FileDlgLastFolder" : _mode == FileDialogMode.Open ? LastOpenKey : LastSaveKey)
-            + (ShowImagePreview ? "Img" : "");
+            (_mode == FileDialogMode.Open ? LastOpenKey : LastSaveKey) + (ShowImagePreview ? "Img" : "");
         private const int    RecentsMax    = 12;
 
         // Guards the fade-then-close re-entry below. Without it OnClosing would cancel forever.
@@ -198,8 +213,7 @@ namespace KillerPDF.Controls
             _mode = mode;
             InitializeComponent();
             Closed += (_, _) => CloseDirectoryListing();
-            TitleIcon.Source = BitmapDecoder.Create(new Uri("pack://application:,,,/Resources/kp-icon.ico"),
-                BitmapCreateOptions.None, BitmapCacheOption.OnLoad).Frames[0];
+            if (!DialogChrome.SetTitleIcon(TitleIcon)) TitleIcon.Visibility = Visibility.Collapsed;
             Loaded += (_, _) => Anim.FadeIn(RootFade);
 
             // Size and placement remembered separately from the folder picker: this dialog is a
@@ -207,17 +221,17 @@ namespace KillerPDF.Controls
             try
             {
                 var ci = System.Globalization.CultureInfo.InvariantCulture;
-                if (double.TryParse(App.GetSetting("FileDlgW"),
+                if (double.TryParse(Services.ThemeManager.GetSetting("FileDlgW"),
                         System.Globalization.NumberStyles.Float, ci, out double w) &&
-                    double.TryParse(App.GetSetting("FileDlgH"),
+                    double.TryParse(Services.ThemeManager.GetSetting("FileDlgH"),
                         System.Globalization.NumberStyles.Float, ci, out double h))
                 {
                     Width  = Math.Max(MinWidth,  Math.Min(w, SystemParameters.WorkArea.Width));
                     Height = Math.Max(MinHeight, Math.Min(h, SystemParameters.WorkArea.Height));
                 }
-                if (double.TryParse(App.GetSetting("FileDlgX"),
+                if (double.TryParse(Services.ThemeManager.GetSetting("FileDlgX"),
                         System.Globalization.NumberStyles.Float, ci, out double x) &&
-                    double.TryParse(App.GetSetting("FileDlgY"),
+                    double.TryParse(Services.ThemeManager.GetSetting("FileDlgY"),
                         System.Globalization.NumberStyles.Float, ci, out double y))
                 {
                     var wa = SystemParameters.WorkArea;
@@ -229,19 +243,19 @@ namespace KillerPDF.Controls
                         Top  = y;
                     }
                 }
-                if (double.TryParse(App.GetSetting(PlacesHKey),
+                if (double.TryParse(Services.ThemeManager.GetSetting(PlacesHKey),
                         System.Globalization.NumberStyles.Float, ci, out double ph) && ph >= 56)
                     PlacesRow.Height = new GridLength(Math.Min(ph, 600));
             }
             catch { /* registry unavailable - defaults are fine */ }
 
-            _showHidden = App.GetSetting(ShowHiddenKey) == "1";
+            _showHidden = Services.ThemeManager.GetSetting(ShowHiddenKey) == "1";
             FolderNode.ShowHidden = _showHidden;
             ApplyShowHiddenButton();
-            if (int.TryParse(App.GetSetting(SortKeyKey), out int savedSortKey)
+            if (int.TryParse(Services.ThemeManager.GetSetting(SortKeyKey), out int savedSortKey)
                 && savedSortKey is >= 0 and <= 2)
                 _sortKey = savedSortKey;
-            _sortAsc = App.GetSetting(SortAscKey) is not string savedSortAsc
+            _sortAsc = Services.ThemeManager.GetSetting(SortAscKey) is not string savedSortAsc
                 || savedSortAsc != "0";
 
             Closing += (_, _) =>
@@ -249,11 +263,11 @@ namespace KillerPDF.Controls
                 try
                 {
                     var ci = System.Globalization.CultureInfo.InvariantCulture;
-                    App.SetSetting("FileDlgW", ActualWidth.ToString(ci));
-                    App.SetSetting("FileDlgH", ActualHeight.ToString(ci));
-                    App.SetSetting("FileDlgX", Left.ToString(ci));
-                    App.SetSetting("FileDlgY", Top.ToString(ci));
-                    App.SetSetting(PlacesHKey, PlacesRow.ActualHeight.ToString(ci));
+                    Services.ThemeManager.SetSetting("FileDlgW", ActualWidth.ToString(ci));
+                    Services.ThemeManager.SetSetting("FileDlgH", ActualHeight.ToString(ci));
+                    Services.ThemeManager.SetSetting("FileDlgX", Left.ToString(ci));
+                    Services.ThemeManager.SetSetting("FileDlgY", Top.ToString(ci));
+                    Services.ThemeManager.SetSetting(PlacesHKey, PlacesRow.ActualHeight.ToString(ci));
                 }
                 catch { /* not worth failing the close */ }
             };
@@ -276,27 +290,17 @@ namespace KillerPDF.Controls
         {
             if (owner != null && owner.IsVisible) Owner = owner;
 
-            // The picker's close follows DialogChrome: the family close (OverlayCloseButton, a bare
-            // X that turns red on hover without filling) on every theme but a classic caption one,
-            // which keeps the square raised caption button. The markup's local MDL2 font and size
-            // are cleared on the family path, or they would outrank the style's own.
-            bool classicCaption = owner?.TryFindResource("UseDialogCaption") is true;
-            if (!classicCaption && owner?.TryFindResource("OverlayCloseButton") is Style overlayClose)
+            AcceptButton.Content = Loc(_mode switch
             {
-                CaptionCloseButton.Style = overlayClose;
-                CaptionCloseButton.ClearValue(Control.FontFamilyProperty);
-                CaptionCloseButton.ClearValue(Control.FontSizeProperty);
-                CaptionCloseButton.SetResourceReference(ContentControl.ContentProperty, "AboutCloseGlyph");
-                CaptionCloseButton.VerticalAlignment = VerticalAlignment.Center;
-            }
-            else if (owner?.TryFindResource("ChromeCloseButton") is Style closeStyle)
+                FileDialogMode.Save   => "Str_Btn_Save",
+                FileDialogMode.Folder => "Str_Btn_Select",
+                _                     => "Str_Btn_Open",
+            });
+            if (_mode == FileDialogMode.Folder)
             {
-                CaptionCloseButton.Style = closeStyle;
+                FileFields.Visibility = Visibility.Collapsed;
+                AcceptButton.IsDefault = AcceptHighlightedFolder;
             }
-            AcceptButton.Content = Loc(_mode == FileDialogMode.SelectFolder ? "Str_Btn_OK"
-                : _mode == FileDialogMode.Save ? "Str_Btn_Save" : "Str_Btn_Open");
-            if (_mode == FileDialogMode.SelectFolder && FileNameBox.Parent is FrameworkElement fields)
-                fields.Visibility = Visibility.Collapsed;
             ConfigureImagePreview();
             // Extended, not Multiple: Extended is the Explorer behavior (plain click replaces the
             // selection, Ctrl adds, Shift ranges). Multiple toggles on every click, which feels
@@ -329,7 +333,7 @@ namespace KillerPDF.Controls
             }
             if (string.IsNullOrWhiteSpace(startDir) || !Directory.Exists(startDir))
             {
-                string? remembered = App.GetSetting(LastDirKey);
+                string? remembered = Services.ThemeManager.GetSetting(LastDirKey);
                 startDir = !string.IsNullOrWhiteSpace(remembered) && Directory.Exists(remembered)
                     ? remembered!
                     : Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
@@ -341,8 +345,8 @@ namespace KillerPDF.Controls
             FileNameBox.IsReadOnly = IsFileNameReadOnly;
 
             // Save: preselect the stem so typing replaces the name but keeps the extension
-            // visible. Open: caret at the end.
-            if (_mode == FileDialogMode.SelectFolder) FileList.Focus();
+            // visible. Open: caret at the end. Folder: there is no name box, so the button.
+            if (_mode == FileDialogMode.Folder) AcceptButton.Focus();
             else FileNameBox.Focus();
             if (_mode == FileDialogMode.Save && seedName.Length > 0)
             {
@@ -442,7 +446,7 @@ namespace KillerPDF.Controls
         private bool PassesFilter(PickerEntry en)
         {
             if (en.IsFolder) return true;
-            if (_mode == FileDialogMode.SelectFolder) return false;
+            if (_mode == FileDialogMode.Folder && HideFilesInFolderMode) return false;
             int i = FilterCombo.SelectedIndex;
             if (i < 0 || i >= _filterPatterns.Count) return true;
             var pats = _filterPatterns[i];
@@ -542,7 +546,7 @@ namespace KillerPDF.Controls
         /// </summary>
         private static List<string> PinnedPaths()
         {
-            string? saved = App.GetSetting(PinnedKey);
+            string? saved = Services.ThemeManager.GetSetting(PinnedKey);
             if (saved != null)
                 return [.. saved.Split('|').Where(s => s.Length > 0)];
 
@@ -586,7 +590,7 @@ namespace KillerPDF.Controls
             if (list.Any(p => p.TrimEnd('\\').Equals(path.TrimEnd('\\'), StringComparison.OrdinalIgnoreCase)))
                 return;
             list.Add(path);
-            App.SetSetting(PinnedKey, string.Join("|", list));
+            Services.ThemeManager.SetSetting(PinnedKey, string.Join("|", list));
             BuildPlaces();
             SyncPlacesSelection();
         }
@@ -606,7 +610,7 @@ namespace KillerPDF.Controls
             var list = PinnedPaths()
                 .Where(p => !p.TrimEnd('\\').Equals(pl.Path.TrimEnd('\\'), StringComparison.OrdinalIgnoreCase))
                 .ToList();
-            App.SetSetting(PinnedKey, string.Join("|", list));
+            Services.ThemeManager.SetSetting(PinnedKey, string.Join("|", list));
             BuildPlaces();
             SyncPlacesSelection();
         }
@@ -673,10 +677,6 @@ namespace KillerPDF.Controls
         private void Places_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (_navigating) return;
-            // While a pinned place is held, the list's own drag-select moves the selection onto
-            // every row the pointer crosses before the reorder drag takes over. Only the pressed
-            // place itself may navigate; EndPinDrag puts the marker back afterward.
-            if (_pinDragPlace != null && !ReferenceEquals(PlacesList.SelectedItem, _pinDragPlace)) return;
             if (PlacesList.SelectedItem is PickerPlace p) NavigateTo(p.Path);
         }
 
@@ -875,7 +875,7 @@ namespace KillerPDF.Controls
         /// own expander is left exactly as the user had it (KillerShell's rule - forcing it
         /// collapsed the branch under the cursor and the whole tree jumped).
         /// </summary>
-        private async Task RevealInTree(string folder)
+        private async Task RevealInTree(string folder, long version)
         {
             if (string.IsNullOrEmpty(folder)) return;
 
@@ -893,6 +893,7 @@ namespace KillerPDF.Controls
             if (segments.Count > 0)
             {
                 await current.LoadChildrenAsync();
+                if (version != _navigationVersion) return;   // a newer folder is being shown
                 current.IsExpanded = true;
             }
 
@@ -906,6 +907,7 @@ namespace KillerPDF.Controls
                 if (i == segments.Count - 1) break;
 
                 await current.LoadChildrenAsync();   // needed to match the NEXT segment
+                if (version != _navigationVersion) return;
                 current.IsExpanded = true;
             }
 
@@ -924,7 +926,7 @@ namespace KillerPDF.Controls
         // ── Recent locations ─────────────────────────────────────────────────────
 
         private static List<string> LoadRecents()
-            => [.. (App.GetSetting(RecentsKey) ?? "")
+            => [.. (Services.ThemeManager.GetSetting(RecentsKey) ?? "")
                .Split('|').Where(s => s.Length > 0)];
 
         private static void RecordRecent(string dir)
@@ -933,7 +935,7 @@ namespace KillerPDF.Controls
             list.RemoveAll(p => p.TrimEnd('\\').Equals(dir.TrimEnd('\\'), StringComparison.OrdinalIgnoreCase));
             list.Insert(0, dir);
             if (list.Count > RecentsMax) list.RemoveRange(RecentsMax, list.Count - RecentsMax);
-            App.SetSetting(RecentsKey, string.Join("|", list));
+            Services.ThemeManager.SetSetting(RecentsKey, string.Join("|", list));
         }
 
         private void RecentsBtn_Click(object sender, RoutedEventArgs e)
@@ -963,7 +965,7 @@ namespace KillerPDF.Controls
         private void ShowHidden_Click(object sender, RoutedEventArgs e)
         {
             _showHidden = !_showHidden;
-            App.SetSetting(ShowHiddenKey, _showHidden ? "1" : "0");
+            Services.ThemeManager.SetSetting(ShowHiddenKey, _showHidden ? "1" : "0");
             FolderNode.ShowHidden = _showHidden;
             ApplyShowHiddenButton();
 
@@ -1221,8 +1223,8 @@ namespace KillerPDF.Controls
         {
             if (_sortKey == key) _sortAsc = !_sortAsc;
             else { _sortKey = key; _sortAsc = key == 0; }
-            App.SetSetting(SortKeyKey, _sortKey.ToString());
-            App.SetSetting(SortAscKey, _sortAsc ? "1" : "0");
+            Services.ThemeManager.SetSetting(SortKeyKey, _sortKey.ToString());
+            Services.ThemeManager.SetSetting(SortAscKey, _sortAsc ? "1" : "0");
             ApplySort();
         }
 
@@ -1270,15 +1272,34 @@ namespace KillerPDF.Controls
         /// </summary>
         private void Accept()
         {
-            if (IsDirectoryListingBusy || !IsDirectoryListingAvailable) return;
-            if (_mode == FileDialogMode.SelectFolder)
+            // Accept stays off while a listing loads or an accept is already running, so a double
+            // press or an Enter during the overwrite prompt cannot run it twice.
+            if (IsDirectoryListingBusy || !IsDirectoryListingAvailable || _accepting) return;
+            _accepting = true;
+            AcceptButton.IsEnabled = false;
+            try { AcceptCore(); }
+            finally
             {
-                string selected = FileList.SelectedItem is PickerEntry { IsFolder: true } folder
-                    ? folder.FullPath : _currentDir;
-                if (!Directory.Exists(selected)) { SelMeta.Text = Loc("Str_Dlg_NoSuchFolder"); return; }
-                FileName = selected; FileNames = [selected];
-                App.SetSetting(LastDirKey, selected);
-                _pendingResult = true; Close(); return;
+                _accepting = false;
+                if (_pendingResult != true) AcceptButton.IsEnabled = IsDirectoryListingAvailable && !IsDirectoryListingBusy;
+            }
+        }
+
+        private bool _accepting;
+
+        private void AcceptCore()
+        {
+            if (_mode == FileDialogMode.Folder)
+            {
+                string folder = AcceptHighlightedFolder && FileList.SelectedItem is PickerEntry { IsFolder: true } selected
+                    ? selected.FullPath : _currentDir;
+                if (!Directory.Exists(folder)) return;
+                FileName  = folder;
+                FileNames = [folder];
+                if (AcceptHighlightedFolder) RememberAcceptedDirectory();
+                _pendingResult = true;   // applied after the fade - see OnClosing
+                Close();
+                return;
             }
             // Multiselect: several files highlighted wins outright. The name box shows a quoted
             // list in that state and is not worth re-parsing - the selection IS the answer. A
@@ -1320,7 +1341,7 @@ namespace KillerPDF.Controls
                 {
                     string? ext = ActiveFilterExt();
                     if (ext == null && !string.IsNullOrEmpty(DefaultExt))
-                        ext = DefaultExt.StartsWith('.') ? DefaultExt : "." + DefaultExt;
+                        ext = DefaultExt.StartsWith(".") ? DefaultExt : "." + DefaultExt;
                     full = SaveFileNamePolicy.ApplyExtension(full, ext, AddExtension, RequireFilterExtension);
                 }
 
@@ -1335,15 +1356,15 @@ namespace KillerPDF.Controls
 
                 if (OverwritePrompt && File.Exists(full))
                 {
-                    // Killendar asks this through its own ConfirmDialog. KillerPDF already has a
-                    // themed confirm (KillerDialog) that every other prompt in the app uses, so
-                    // this goes through that instead of importing a second one - two dialogs that
-                    // ask the same kind of question is exactly how a UI starts to look stitched
-                    // together. Same question, same buttons, one implementation.
-                    var answer = KillerDialog.Show(this,
+                    // The app's own themed ConfirmDialog, the same prompt every other question in
+                    // the app uses, rather than a system MessageBox.
+                    var confirm = new ConfirmDialog(
                         string.Format(Loc("Str_Dlg_OverwriteMsg"), Path.GetFileName(full)),
-                        "KillerPDF", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-                    if (answer != MessageBoxResult.Yes) { FileNameBox.Focus(); return; }
+                        "",
+                        Loc("Str_Btn_Replace"),
+                        Loc("Str_Btn_Cancel")) { Owner = this };
+                    confirm.ShowDialog();
+                    if (!confirm.Confirmed) { FileNameBox.Focus(); return; }
                 }
             }
             else
@@ -1367,7 +1388,7 @@ namespace KillerPDF.Controls
         private void RememberAcceptedDirectory()
         {
             if (_currentDir.Length > 0 && Directory.Exists(_currentDir))
-                App.SetSetting(LastDirKey, _currentDir);
+                Services.ThemeManager.SetSetting(LastDirKey, _currentDir);
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e) => Close();
@@ -1448,7 +1469,7 @@ namespace KillerPDF.Controls
                         WM_NCLBUTTONDOWN, new IntPtr(ht), IntPtr.Zero);
         }
 
-        [System.Runtime.InteropServices.LibraryImport("user32.dll", EntryPoint = "SendMessageW")]
-        private static partial IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
+        [System.Runtime.InteropServices.DllImport("user32.dll", EntryPoint = "SendMessageW")]
+        private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
     }
 }

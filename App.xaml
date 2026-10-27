@@ -10,13 +10,12 @@
             <ResourceDictionary.MergedDictionaries>
                 <!-- [0] Theme (overridden at startup by ThemeManager.Initialize) -->
                 <ResourceDictionary Source="Themes/Dark.xaml"/>
-                <!-- [1] Strings (overridden at startup by LocaleManager.Initialize) -->
+                <!-- [1] The family control styles (KillerUI Controls/Controls.xaml), app-wide -->
+                <ResourceDictionary Source="Controls/Controls.xaml"/>
+                <!-- [2] Strings: the en-US base. LocaleManager finds it by its source and keeps the
+                     chosen locale's overrides directly after it, so nothing here is addressed by
+                     index except the theme at [0]. -->
                 <ResourceDictionary Source="Strings/en-US.xaml"/>
-                <!-- NOTHING GOES HERE. Slot [2] belongs to LocaleManager (the locale override,
-                     removed entirely for English), and [0]/[1] are the theme and the en-US base.
-                     All three are addressed BY INDEX, so an extra dictionary in this collection
-                     is silently overwritten or deleted at startup. Window-scoped resources are
-                     the place for anything else - see Controls/FileDialog.xaml. -->
             </ResourceDictionary.MergedDictionaries>
 
             <!-- Chrome close-button corner. Defined at app scope (not just on MainWindow) so the dialog

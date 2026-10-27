@@ -303,6 +303,7 @@ internal static class Program
             app.Shutdown(1);
         };
         app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/Themes/Dark.xaml") });
+        app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/Controls/Controls.xaml") });
         app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/Strings/en-US.xaml") });
         Type manager = assembly.GetType("KillerPDF.Services.ThemeManager", true)!;
         Type themeType = assembly.GetType("KillerPDF.Services.Theme", true)!;

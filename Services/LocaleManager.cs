@@ -106,10 +106,14 @@ namespace KillerPDF.Services
         {
             var merged = Application.Current.Resources.MergedDictionaries;
 
-            // [0] theme. [1] en-US BASE - always present so any partial locale falls back to English for
-            // keys it doesn't translate. [2] the chosen locale's overrides (absent for English).
-            if (merged.Count > 1)
-                merged[1] = new ResourceDictionary { Source = new Uri("pack://application:,,,/Strings/en-US.xaml") };
+            // [0] theme, [1] the family Controls.xaml, then the en-US BASE - always present so any
+            // partial locale falls back to English for keys it doesn't translate - and directly
+            // after it the chosen locale's overrides (absent for English). The base is found by its
+            // source and the override by reference, the way KillerUI's LocaleManager does it, so a
+            // dictionary merged elsewhere in the list is never overwritten or removed.
+            int baseIndex = StringsBaseIndex(merged);
+            if (merged.Count > baseIndex)
+                merged[baseIndex] = new ResourceDictionary { Source = new Uri("pack://application:,,,/Strings/en-US.xaml") };
 
             // Translator test mode wins over the chosen locale for the override slot.
             if (ExternalFile is not null)
@@ -145,15 +149,38 @@ namespace KillerPDF.Services
                 _           => null,   // English: base only
             };
 
-            if (overrideUri is not null)
+            SetOverride(overrideUri is null ? null : new ResourceDictionary { Source = overrideUri });
+        }
+
+        // The override dictionary this class merged, found again by reference.
+        private static ResourceDictionary? _override;
+
+        /// <summary>Puts the chosen locale's dictionary directly after the English base, replacing
+        /// the one this class merged before, or removes it (null) for English. Never touches a
+        /// dictionary it did not put there.</summary>
+        private static void SetOverride(ResourceDictionary? dictionary)
+        {
+            var merged = Application.Current.Resources.MergedDictionaries;
+            int existing = _override == null ? -1 : merged.IndexOf(_override);
+            if (dictionary == null)
             {
-                var ov = new ResourceDictionary { Source = overrideUri };
-                if (merged.Count > 2) merged[2] = ov; else merged.Add(ov);
+                if (existing >= 0) merged.RemoveAt(existing);
+                _override = null;
+                return;
             }
-            else if (merged.Count > 2)
-            {
-                merged.RemoveAt(2);
-            }
+            if (existing >= 0) merged[existing] = dictionary;
+            else merged.Insert(Math.Min(merged.Count, StringsBaseIndex(merged) + 1), dictionary);
+            _override = dictionary;
+        }
+
+        /// <summary>Where the English string base is merged, found by its source. Slot 2, the
+        /// App.xaml layout, if it cannot be found.</summary>
+        private static int StringsBaseIndex(System.Collections.ObjectModel.Collection<ResourceDictionary> merged)
+        {
+            for (int i = 0; i < merged.Count; i++)
+                if (merged[i].Source?.OriginalString.EndsWith("Strings/en-US.xaml", StringComparison.OrdinalIgnoreCase) == true)
+                    return i;
+            return 2;
         }
 
         /// <summary>Loads <see cref="ExternalFile"/> into the override slot. False on any parse or
@@ -164,14 +191,15 @@ namespace KillerPDF.Services
             try
             {
                 var merged = Application.Current.Resources.MergedDictionaries;
-                if (merged.Count < 2) return false;
+                int baseIndex = StringsBaseIndex(merged);
+                if (merged.Count <= baseIndex) return false;
                 // Parsed as data, never as XAML: XamlReader would instantiate whatever the file names.
                 var known = new System.Collections.Generic.HashSet<string>(StringComparer.Ordinal);
-                foreach (object key in merged[1].Keys) if (key is string name) known.Add(name);
+                foreach (object key in merged[baseIndex].Keys) if (key is string name) known.Add(name);
                 using var fs = new FileStream(ExternalFile!, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
                 var rd = new ResourceDictionary();
                 foreach (var entry in TranslationFileReader.Read(fs, known)) rd[entry.Key] = entry.Value;
-                if (merged.Count > 2) merged[2] = rd; else merged.Add(rd);
+                SetOverride(rd);
                 _externalLoadedOnce = true;
                 return true;
             }

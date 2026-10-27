@@ -13,6 +13,9 @@ namespace KillerPDF.Controls
         private CancellationTokenSource? _listingRows;
         private bool _listingClosed;
         private string? _listingError;
+        // Bumped on every navigation, so a slow tree reveal for an older folder stops instead of
+        // selecting it over the folder now shown.
+        private long _navigationVersion;
         public Func<string, bool, CancellationToken, PickerListingResult> DirectoryListingReader { get; set; } = PickerDirectoryListing.Read;
         public Task DirectoryListingTask { get; private set; } = Task.CompletedTask;
         public bool IsDirectoryListingBusy { get; private set; }
@@ -23,6 +26,7 @@ namespace KillerPDF.Controls
         {
             if (_listingClosed || string.IsNullOrWhiteSpace(directory)) return Task.CompletedTask;
             _listingRows?.Cancel();
+            long version = ++_navigationVersion;
             UpdateImagePreview(null);
             IsDirectoryListingBusy = true;
             IsDirectoryListingAvailable = false;
@@ -40,9 +44,9 @@ namespace KillerPDF.Controls
                 {
                     IsDirectoryListingBusy = false;
                     SelMeta.Text = Loc("Str_Dlg_NoSuchFolder");
-                    // Keep the last successful directory usable after a bad typed path.
-                    if (_currentDir.Length > 0 && !string.Equals(_currentDir, directory, StringComparison.OrdinalIgnoreCase))
-                        NavigateTo(_currentDir);
+                    // A bad typed path goes back to the last folder that listed. _currentDir only
+                    // changes after a listing succeeds, so it is always that folder.
+                    if (_currentDir.Length > 0 && !string.Equals(_currentDir, directory, StringComparison.OrdinalIgnoreCase)) NavigateTo(_currentDir);
                     return;
                 }
                 IsDirectoryListingComplete = result.Complete && result.Entries.Count <= PickerDirectoryListing.MaximumEntries;
@@ -57,12 +61,12 @@ namespace KillerPDF.Controls
                 token.ThrowIfCancellationRequested();
                 IsDirectoryListingBusy = false;
                 IsDirectoryListingAvailable = true;
-                AcceptButton.IsEnabled = true;
+                AcceptButton.IsEnabled = !_accepting;
                 UpButton.IsEnabled = System.IO.Directory.GetParent(directory) != null;
                 UpdateInfoSummary();
                 MutateListingRows(SyncPlacesSelection);
                 RecordRecent(directory);
-                _ = RevealInTree(directory);
+                _ = RevealInTree(directory, version);
             }, error =>
             {
                 IsDirectoryListingBusy = false;

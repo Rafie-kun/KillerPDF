@@ -709,10 +709,6 @@ namespace KillerPDF
                 ShowInTaskbar = owner is null
             };
             DialogFrame.Configure(win, owner, resizable: true, fade: false);
-            win.Resources.MergedDictionaries.Add(new ResourceDictionary
-            {
-                Source = new Uri("pack://application:,,,/Controls/PickerStyles.xaml")
-            });
             // Use the family scroll host, including its transparent scrollbar intersection.
             win.Resources[typeof(ScrollViewer)] = win.FindResource("BareScrollViewer");
 

@@ -887,7 +887,7 @@ namespace KillerPDF.Shell
                     // Real file-type icon (left), filename (fills), X (right).
                     var fileIcon = new Image
                     {
-                        Source              = ShellIcons.GetShellIcon(path),
+                        Source              = ShellIcons.Large(path, isFolder: false),
                         Width               = 18,
                         Height              = 18,
                         VerticalAlignment   = VerticalAlignment.Center,
@@ -1042,7 +1042,7 @@ namespace KillerPDF.Shell
                 // Real Windows file-type icon for this extension (left of the text).
                 var icon = new Image
                 {
-                    Source              = ShellIcons.GetShellIcon(path),
+                    Source              = ShellIcons.Large(path, isFolder: false),
                     Width               = 32,
                     Height              = 32,
                     VerticalAlignment   = VerticalAlignment.Center,

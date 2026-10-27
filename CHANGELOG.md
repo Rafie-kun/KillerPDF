@@ -92,6 +92,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Ctrl+Q quits KillerPDF, as in the other Killer Tools apps, with the usual save and quit prompts. Close All Tabs moves to Ctrl+Shift+Q.
 - The maximize button shows the restore glyph while the window is maximized, as in the other Killer Tools apps.
 - The theme and language menus on the rail are the shared Killer Tools menus: they open in the corner of the document area, and a theme or accent change cross-fades.
+- File dialogs use the shared Killer Tools picker, which shows image thumbnails in the icon view, and dialogs take the shared Killer Tools styles for text fields, drop-down lists, check boxes, sliders and menus.
 - Modern menus and Search Tools results use readable accent-colored hover text; Customize Toolbar button rows have clearer hover contrast. Theme-menu hover fills have equal side insets, and About/Shortcuts edges follow gradient themes.
 - Reduced Black film grain and refined checkbox ticks, radio alignment and file-picker styling. Popup textures cover their padding, sliders have tighter corners without square surrounds, and 98SE keeps classic bevels, compact fields and a gray document workspace.
 - Wordmarks and headings use a subtle bevel in their own color, retaining shadows where enabled. Dark's red accent uses the brand red; the empty drop target uses corner brackets and aiming marks at 80% opacity.
