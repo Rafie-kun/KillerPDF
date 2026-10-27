@@ -28,6 +28,7 @@ namespace KillerPDF
         // exactly ONE sync implementation, shared by all the rail flyouts (Shell/RailFlyouts.cs).
         private void SyncPickerState()
         {
+            SyncPageNavigationButtons();
             var cur = ThemeManager.Current;
             ThemeDarkRadio.IsChecked  = cur == Theme.Dark;
             ThemeLightRadio.IsChecked = cur == Theme.Light;

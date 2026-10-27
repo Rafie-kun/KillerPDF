@@ -136,6 +136,8 @@ namespace KillerPDF.Features
         // These replace the viewer poking at PageList / ZoomBox / PageLabel / StatusText itself.
         /// <summary>This viewer scrolled or paged to a different page.</summary>
         void ViewerPageChanged(PdfViewer viewer, int pageIndex);
+        /// <summary>Navigation boundaries changed after page selection or a view-layout change.</summary>
+        void ViewerNavigationChanged(PdfViewer viewer);
         void EnsureSidebarPageVisible(PdfViewer viewer, int pageIndex);
         void ScrollSidebar(PdfViewer viewer, double delta);
         void ClearSidebarPages(PdfViewer viewer);

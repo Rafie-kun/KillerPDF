@@ -1967,4 +1967,5 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_Dlg_KeepOnePage">Mantieni almeno una pagina nel documento.</sys:String>
     <sys:String x:Key="Str_Dlg_PageRange">Numeri di pagina o intervalli (da 1 a {0})</sys:String>
     <sys:String x:Key="Str_Watch_FailedStep">Passaggio {0}: {1}</sys:String>
+    <sys:String x:Key="Str_NavigationButtons_Show">Mostra i pulsanti di navigazione delle pagine</sys:String>
 </ResourceDictionary>

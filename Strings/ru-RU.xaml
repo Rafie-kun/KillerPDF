@@ -1970,4 +1970,5 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Dlg_KeepOnePage">Оставьте в документе хотя бы одну страницу.</sys:String>
     <sys:String x:Key="Str_Dlg_PageRange">Номера страниц или диапазоны (от 1 до {0})</sys:String>
     <sys:String x:Key="Str_Watch_FailedStep">Шаг {0}: {1}</sys:String>
+    <sys:String x:Key="Str_NavigationButtons_Show">Показывать кнопки перехода между страницами</sys:String>
 </ResourceDictionary>

@@ -1947,4 +1947,5 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Dlg_KeepOnePage">Belgede en az bir sayfa bırakın.</sys:String>
     <sys:String x:Key="Str_Dlg_PageRange">Sayfa numaraları veya aralıkları (1 ile {0} arası)</sys:String>
     <sys:String x:Key="Str_Watch_FailedStep">{0}. adım: {1}</sys:String>
+    <sys:String x:Key="Str_NavigationButtons_Show">Sayfa gezinme düğmelerini göster</sys:String>
 </ResourceDictionary>

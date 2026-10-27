@@ -163,6 +163,7 @@ namespace KillerPDF
         /// further gated by LoadOutlines, which knows whether there is anything to show.</summary>
         private void SyncRailPanelAvailability(bool hasDoc)
         {
+            SyncPageNavigationButtons();
             foreach (var (button, panel) in RailPanelButtons())
                 if (panel != SidebarPanel.Outlines) button.IsEnabled = hasDoc;
             if (!hasDoc) SidebarOutlinesTab.IsEnabled = false;

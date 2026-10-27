@@ -75,6 +75,7 @@ namespace KillerPDF
         private void ShowSystemMenu(Point? screenPoint)
         {
             _sysMenu ??= BuildSystemMenu();
+            SyncPageNavigationButtons();
 
             bool maximized = WindowState == WindowState.Maximized;
             // Windows grays out what does not apply: you cannot Restore a normal window, cannot
@@ -163,6 +164,11 @@ namespace KillerPDF
             Add("Str_Sys_Size",     "Size",     SC_SIZE,     0xE740);
             Add("Str_Sys_Minimize", "Minimize", SC_MINIMIZE, 0xE921);
             Add("Str_Sys_Maximize", "Maximize", SC_MAXIMIZE, 0xE922);
+            menu.Items.Add(new Separator());
+            _pageNavigationMenuItem = new MenuItem { IsCheckable = true, Padding = new Thickness(12, 7, 24, 7) };
+            _pageNavigationMenuItem.SetResourceReference(HeaderedItemsControl.HeaderProperty, "Str_NavigationButtons_Show");
+            _pageNavigationMenuItem.Click += (_, _) => TogglePageNavigationButtons();
+            menu.Items.Add(_pageNavigationMenuItem);
             menu.Items.Add(new Separator());
             Add("Str_Sys_Close",    "Close",    SC_CLOSE,    0xE8BB, danger: true).InputGestureText = "Alt+F4";
             return menu;

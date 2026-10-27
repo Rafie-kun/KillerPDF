@@ -44,6 +44,10 @@ internal static class Program
                 Console.WriteLine("PASS native updater close request");
                 return 0;
             }
+            if (args.Length == 6 && args[0].StartsWith("--verify-page-navigation-", StringComparison.Ordinal)
+                && args[5] == "--session-isolation")
+                return TableExportSmoke.Run(Path.GetFullPath(args[1]), Path.GetFullPath(args[2]), Path.GetFullPath(args[3]),
+                    windowSession: true, windowSessionCase: args[0], updateRestartState: Path.GetFullPath(args[4]));
             if (args.Length == 6 && args[0] is "--verify-update-restart-stage" or "--verify-update-restart-consume" or "--verify-update-restart-early-exit"
                 && args[5] == "--session-isolation")
                 return TableExportSmoke.Run(Path.GetFullPath(args[1]), Path.GetFullPath(args[2]), Path.GetFullPath(args[3]),
@@ -53,6 +57,7 @@ internal static class Program
                 || args[0].StartsWith("--verify-page-straighten-", StringComparison.Ordinal)
                 || args[0].StartsWith("--verify-file-insertion-", StringComparison.Ordinal)
                 || args[0] == "--verify-page-reorder-failure"
+                || args[0] == "--verify-page-navigation"
                 || args[0] is "--verify-watch-job-failure" or "--verify-watch-unsupported-step"
                 || args[0] is "--verify-page-delete-failure" or "--verify-page-transform-failure" or "--verify-page-transform-cancel" or "--verify-page-transform-save-control" or "--verify-page-transform-success" or "--verify-range-extract-pending" or "--verify-page-straighten-failure")
                 && args[4] == "--session-isolation")

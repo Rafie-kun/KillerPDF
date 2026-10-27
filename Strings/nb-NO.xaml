@@ -1967,4 +1967,5 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Dlg_KeepOnePage">Behold minst én side i dokumentet.</sys:String>
     <sys:String x:Key="Str_Dlg_PageRange">Sidetall eller områder (1 til {0})</sys:String>
     <sys:String x:Key="Str_Watch_FailedStep">Trinn {0}: {1}</sys:String>
+    <sys:String x:Key="Str_NavigationButtons_Show">Vis knapper for sidenavigering</sys:String>
 </ResourceDictionary>

@@ -7,6 +7,7 @@ using System.Windows.Automation.Provider;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Interop;
+using System.Windows.Input;
 using static DocumentStateSmoke;
 
 internal static class ShortcutHintsSmoke
@@ -109,7 +110,7 @@ internal static class ShortcutHintsSmoke
         return 0;
     }
 
-    private static void Focus(Window window)
+    internal static void Focus(Window window)
     {
         window.Activate();
         window.Focus();
@@ -119,7 +120,10 @@ internal static class ShortcutHintsSmoke
             + ", target=" + handle.ToInt64() + ", foreground=" + GetForegroundWindow().ToInt64());
         if (GetForegroundWindow() != handle && window.GetType().Name == "MainWindow")
         {
-            Point caption = window.PointToScreen(new Point(Math.Min(220, window.ActualWidth / 2), 12));
+            var filename = (FrameworkElement)window.FindName("FileNameLabel");
+            if (filename.ActualWidth < 32) throw new InvalidOperationException("The owned caption filename region is too narrow for activation.");
+            Point filenameStart = filename.TransformToAncestor(window).Transform(new Point());
+            Point caption = window.PointToScreen(new Point(filenameStart.X + Math.Min(48, filename.ActualWidth / 2), 12));
             var position = new NativePoint { X = (int)caption.X, Y = (int)caption.Y };
             if (!window.IsVisible || window.Opacity < 0.99 || WindowFromPoint(position) != handle)
                 throw new InvalidOperationException("The owned visible caption is not available for safe activation; no pointer input was sent.");
@@ -131,19 +135,77 @@ internal static class ShortcutHintsSmoke
         Wait(() => GetForegroundWindow() == handle, "owned native keyboard target");
     }
 
-    private static void Key(Window window, byte key, byte modifier = 0)
+    internal static void Key(Window window, byte key, params byte[] modifiers)
     {
         Focus(window);
         try
         {
-            if (modifier != 0) KeyEvent(modifier, 0, 0, UIntPtr.Zero);
+            foreach (byte modifier in modifiers.Where(value => value != 0)) KeyEvent(modifier, 0, 0, UIntPtr.Zero);
             KeyEvent(key, 0, 0, UIntPtr.Zero);
         }
         finally
         {
             KeyEvent(key, 0, 2, UIntPtr.Zero);
-            if (modifier != 0) KeyEvent(modifier, 0, 2, UIntPtr.Zero);
+            foreach (byte modifier in modifiers.Reverse().Where(value => value != 0)) KeyEvent(modifier, 0, 2, UIntPtr.Zero);
         }
+    }
+
+    internal static void MovePointer(Window window, Point clientPoint)
+    {
+        Focus(window);
+        Point screen = window.PointToScreen(clientPoint);
+        var target = new NativePoint { X = (int)screen.X, Y = (int)screen.Y };
+        IntPtr handle = new WindowInteropHelper(window).Handle;
+        Console.WriteLine($"READINESS owned pointer target: screen={screen}, expected={handle.ToInt64()}, actual={WindowFromPoint(target).ToInt64()}.");
+        Wait(() => WindowFromPoint(target) == handle, "exact owned pointer target HWND before input");
+        if (!SetCursorPos(target.X, target.Y)) throw new InvalidOperationException("Could not move the owned hover pointer.");
+    }
+
+    internal static void ClickAt(Window window, Point clientPoint, FrameworkElement? expectedPane = null)
+    {
+        MovePointer(window, clientPoint);
+        bool down = false, up = false;
+        int injectedAt = 0;
+        ProcessInputEventHandler observed = (_, input) =>
+        {
+            if (input.StagingItem.Input is not MouseButtonEventArgs mouse || mouse.ChangedButton != MouseButton.Left
+                || !ReferenceEquals(mouse.MouseDevice.ActiveSource?.RootVisual, window)) return;
+            if (expectedPane is not null && (!Within(mouse.OriginalSource as DependencyObject, expectedPane)
+                || unchecked((uint)(mouse.Timestamp - injectedAt)) >= 0x80000000u)) return;
+            bool completePreview = expectedPane is null || mouse.Handled;
+            if (mouse.RoutedEvent == Mouse.MouseDownEvent || mouse.RoutedEvent == Mouse.PreviewMouseDownEvent && completePreview) down = true;
+            if (down && (mouse.RoutedEvent == Mouse.MouseUpEvent || mouse.RoutedEvent == Mouse.PreviewMouseUpEvent && completePreview)) up = true;
+        };
+        InputManager.Current.PostProcessInput += observed;
+        try
+        {
+            injectedAt = Environment.TickCount;
+            try { MouseEvent(0x0002, 0, 0, 0, UIntPtr.Zero); }
+            finally { MouseEvent(0x0004, 0, 0, 0, UIntPtr.Zero); }
+            Wait(() => down && up && (expectedPane is null || Mouse.Captured is null), "owned native click down/up consumed by WPF before the next command");
+            Console.WriteLine("CONTROL owned native click down/up completed in WPF.");
+        }
+        finally
+        {
+            MouseEvent(0x0004, 0, 0, 0, UIntPtr.Zero);
+            InputManager.Current.PostProcessInput -= observed;
+        }
+    }
+
+    private static bool Within(DependencyObject? value, DependencyObject expected)
+    {
+        for (DependencyObject? node = value; node is not null; node = node is System.Windows.Media.Visual
+            ? System.Windows.Media.VisualTreeHelper.GetParent(node) : LogicalTreeHelper.GetParent(node))
+            if (ReferenceEquals(node, expected)) return true;
+        return false;
+    }
+
+    internal static void InjectClickAt(Window window, Point clientPoint, Action beforeButtons)
+    {
+        MovePointer(window, clientPoint);
+        beforeButtons();
+        try { MouseEvent(0x0002, 0, 0, 0, UIntPtr.Zero); }
+        finally { MouseEvent(0x0004, 0, 0, 0, UIntPtr.Zero); }
     }
 
     [DllImport("user32.dll")]

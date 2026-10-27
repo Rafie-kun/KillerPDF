@@ -1988,7 +1988,17 @@ namespace KillerPDF.Controls
 
         internal bool NavigatePageStep(int direction)
         {
-            if (_doc is null) return false;
+            int target = PageStepTarget(direction);
+            if (target < 0) return false;
+            _currentPage = target;
+            return true;
+        }
+
+        internal bool CanNavigatePageStep(int direction) => PageStepTarget(direction) >= 0;
+
+        private int PageStepTarget(int direction)
+        {
+            if (_doc is null) return -1;
             int cur = _currentPage;
             if (_viewMode == ViewMode.TwoPage)
             {
@@ -2000,14 +2010,10 @@ namespace KillerPDF.Controls
                         : (baseIdx <= 1 ? 0 : baseIdx - 2);
                 else
                     target = baseIdx + direction * 2;
-                if (target == baseIdx || target < 0 || target >= _doc.PageCount) return false;
-                _currentPage = target;
-                return true;
+                return target == baseIdx || target < 0 || target >= _doc.PageCount ? -1 : target;
             }
             int t = cur + direction;
-            if (t < 0 || t >= _doc.PageCount) return false;
-            _currentPage = t;
-            return true;
+            return t < 0 || t >= _doc.PageCount ? -1 : t;
         }
 
         private System.Windows.Threading.DispatcherTimer? _resizeRefitTimer;
@@ -2181,6 +2187,7 @@ namespace KillerPDF.Controls
             _primaryRenderSession.Clear();
             _backgroundRenderCache.Clear();
             _viewMode = mode;
+            Host?.ViewerNavigationChanged(this);
             _renderedPrimaryPage = -1;   // spread/layout changes with the mode; force the next render
             _gridScrollToPage = -1;
             App.SetSetting("ViewMode", mode.ToString());

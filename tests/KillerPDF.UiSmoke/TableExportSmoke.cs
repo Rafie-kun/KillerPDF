@@ -20,7 +20,8 @@ internal static class TableExportSmoke
 
     internal static int Run(string appPath, string appXaml, string folder, bool officeExport = false, bool grainThemes = false, bool dialogText = false, bool sidebarActions = false, bool paragraphEdit = false, bool accessibilityReview = false, bool formFieldEditing = false, bool guidedTasks = false, bool signedCopy = false, bool renderRecovery = false, bool toolbarAvailability = false, bool windowLifecycle = false, bool windowSession = false, string windowSessionCase = "--verify-window-session", string? updateRestartState = null, bool referenceRepairNotice = false, bool reductionRepairNotice = false)
     {
-        bool visibleNative = windowSession && windowSessionCase == "--verify-shortcut-hints";
+        bool visibleNative = windowSession && (windowSessionCase == "--verify-shortcut-hints"
+            || windowSessionCase.StartsWith("--verify-page-navigation-", StringComparison.Ordinal));
         if (visibleNative && !new[] { "SN01", "SN02" }.Contains(Environment.MachineName, StringComparer.OrdinalIgnoreCase))
             throw new InvalidOperationException("Visible native hint acceptance may run only on SN01 or SN02.");
         if (!Environment.GetCommandLineArgs().Contains("--startup-smoke")
@@ -172,6 +173,25 @@ internal static class TableExportSmoke
                 return ToolSearchPrerequisitesSmoke.Run(owner, folder, creation: "office");
             if (windowSessionCase == "--verify-shortcut-hints")
                 return ShortcutHintsSmoke.Run(owner, folder);
+            if (windowSessionCase == "--verify-page-navigation")
+                return PageNavigationSmoke.Run(owner, folder);
+            if (windowSessionCase is "--verify-page-navigation-options" or "--verify-page-navigation-restored")
+                return PageNavigationOptionsSmoke.Run(owner, folder, updateRestartState ?? Path.Combine(folder, "data"),
+                    restored: windowSessionCase == "--verify-page-navigation-restored");
+            if (windowSessionCase == "--verify-page-navigation-modes")
+                return PageNavigationModesSmoke.Run(owner, folder);
+            if (windowSessionCase == "--verify-page-navigation-sidebar")
+                return PageNavigationSidebarSmoke.Run(owner, folder);
+            if (windowSessionCase == "--verify-page-navigation-transitions")
+                return PageNavigationTransitionsSmoke.Run(owner, folder);
+            if (windowSessionCase == "--verify-page-navigation-layout")
+                return PageNavigationLayoutSmoke.Run(owner, folder);
+            if (windowSessionCase == "--verify-page-navigation-toolbar")
+                return PageNavigationLayoutSmoke.Run(owner, folder, verifyToolbar: true);
+            if (windowSessionCase == "--verify-page-navigation-toolbar-menus")
+                return PageNavigationLayoutSmoke.Run(owner, folder, verifyToolbar: true, verifyMenus: true);
+            if (windowSessionCase.StartsWith("--verify-page-navigation-focus-", StringComparison.Ordinal))
+                return PageNavigationModesSmoke.Run(owner, folder, focusArm: windowSessionCase["--verify-page-navigation-focus-".Length..]);
             if (windowSessionCase.StartsWith("--verify-page-straighten-", StringComparison.Ordinal))
                 return DocumentStateSmoke.Run(owner, assembly, appPath, folder, windowSessionCase);
             if (windowSessionCase.StartsWith("--verify-file-insertion-", StringComparison.Ordinal))

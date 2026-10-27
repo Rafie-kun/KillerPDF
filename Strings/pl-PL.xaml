@@ -1955,4 +1955,5 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Dlg_KeepOnePage">Pozostaw w dokumencie co najmniej jedną stronę.</sys:String>
     <sys:String x:Key="Str_Dlg_PageRange">Numery stron lub zakresy (od 1 do {0})</sys:String>
     <sys:String x:Key="Str_Watch_FailedStep">Krok {0}: {1}</sys:String>
+    <sys:String x:Key="Str_NavigationButtons_Show">Pokaż przyciski nawigacji po stronach</sys:String>
 </ResourceDictionary>

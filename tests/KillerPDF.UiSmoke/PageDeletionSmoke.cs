@@ -302,12 +302,13 @@ internal static class PageDeletionSmoke
         return (count, string.Join('|', labels));
     }
 
-    internal static byte[] Fixture()
+    internal static byte[] Fixture(int pageCount = 5)
     {
+        if (pageCount is < 1 or > 5) throw new ArgumentOutOfRangeException(nameof(pageCount));
         List<string> objects = ["<< /Type /Catalog /Pages 2 0 R >>",
-            "<< /Type /Pages /Kids [4 0 R 6 0 R 8 0 R 10 0 R 12 0 R] /Count 5 >>",
+            "<< /Type /Pages /Kids [" + string.Join(" ", Enumerable.Range(0, pageCount).Select(page => $"{4 + page * 2} 0 R")) + $"] /Count {pageCount} >>",
             "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>"];
-        for (int page = 0; page < 5; page++)
+        for (int page = 0; page < pageCount; page++)
         {
             string[] colors = ["1 0 0", "0 1 0", "0 0 1", "1 1 0", "1 0 1"];
             string content = $"{colors[page]} rg 0 0 200 200 re f 0 g BT /F1 20 Tf 20 100 Td (PAGE_{page + 1}) Tj ET\n";

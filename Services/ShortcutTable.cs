@@ -265,6 +265,7 @@ namespace KillerPDF
                                                                              Cap("CtrlShift:D0")),
             B("%wheellogo%",   "Str_KS_AppSize",      "View"),
             B("%alt%+%shift%+G", "Str_Theme_FilmGrain", "View", Cap("AltShift:G")),
+            B("%alt%+%shift%+N", "Str_NavigationButtons_Show", "View", Cap("AltShift:N")),
             // The toolbar appearance six, mirroring the bar's right-click menu top to bottom.
             B("%ctrl%+%shift%+1-6", "Str_KS_ToolbarStyle", "View", Cap("CtrlShift:D1", "Str_Toolbar_SmallIcons"),
                                                                 Cap("CtrlShift:D2", "Str_Toolbar_LargeIcons"),

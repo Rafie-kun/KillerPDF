@@ -1966,4 +1966,5 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Dlg_KeepOnePage">Keep at least one page in the document.</sys:String>
     <sys:String x:Key="Str_Dlg_PageRange">Page numbers or ranges (1 to {0})</sys:String>
     <sys:String x:Key="Str_Watch_FailedStep">Step {0}: {1}</sys:String>
+    <sys:String x:Key="Str_NavigationButtons_Show">Show page navigation buttons</sys:String>
 </ResourceDictionary>

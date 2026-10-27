@@ -325,6 +325,13 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="PageNavigationButton" TargetType="Button" BasedOn="{StaticResource ChromeButton}">
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="ToolTipService.ShowOnDisabled" Value="True"/>
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="0.4"/></Trigger>
+            </Style.Triggers>
+        </Style>
         <Style x:Key="ChromeCloseButton" TargetType="Button" BasedOn="{StaticResource ChromeButton}">
             <Setter Property="Foreground" Value="{DynamicResource CaptionCloseBrush}"/>
             <Setter Property="Margin" Value="{DynamicResource CaptionCloseGap}"/>
@@ -1573,6 +1580,7 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
@@ -1610,12 +1618,21 @@
                     </Grid>
                 </StackPanel>
                 </Border>
+                <StackPanel x:Name="PageNavigationHost" Grid.Column="1" Orientation="Horizontal"
+                            VerticalAlignment="Center" Margin="8,0,0,0" Visibility="Collapsed">
+                    <Button x:Name="PreviousPageBtn" Style="{StaticResource PageNavigationButton}"
+                            Content="&#xE76B;" Visibility="Collapsed" Click="PreviousPage_Click"
+                            AutomationProperties.Name="{DynamicResource Str_Kb_PrevPage}"/>
+                    <Button x:Name="NextPageBtn" Style="{StaticResource PageNavigationButton}"
+                            Content="&#xE76C;" Visibility="Collapsed" Click="NextPage_Click"
+                            AutomationProperties.Name="{DynamicResource Str_Kb_NextPage}"/>
+                </StackPanel>
                 <!-- File name: takes the middle space and truncates before the window buttons -->
-                <TextBlock Grid.Column="1" Text="" x:Name="FileNameLabel" VerticalAlignment="Center"
+                <TextBlock Grid.Column="2" Text="" x:Name="FileNameLabel" VerticalAlignment="Center"
                            Margin="16,0,12,0" TextTrimming="CharacterEllipsis"
                            Foreground="{DynamicResource FilenameBrush}" FontFamily="{DynamicResource FileNameFont}" FontSize="{DynamicResource FileNameFontSize}"
                            RenderTransform="{DynamicResource FileNameTransform}" TextOptions.TextFormattingMode="Ideal"/>
-                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="{DynamicResource CaptionButtonsMargin}">
+                <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="{DynamicResource CaptionButtonsMargin}">
                     <!-- Tool search (Ctrl+K): the magnifier and the box it opens, built in Shell/ToolSearch.cs. -->
                     <StackPanel x:Name="ToolSearchHost" Orientation="Horizontal" Margin="0,0,12,0"/>
                     <Button Click="MinimizeBtn_Click" Style="{StaticResource ChromeButton}" ToolTip="{DynamicResource Str_Sys_Minimize}"

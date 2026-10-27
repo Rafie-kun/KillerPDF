@@ -1951,4 +1951,5 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Dlg_KeepOnePage">请在文档中至少保留一页。</sys:String>
     <sys:String x:Key="Str_Dlg_PageRange">页码或范围（1至{0}）</sys:String>
     <sys:String x:Key="Str_Watch_FailedStep">步骤 {0}：{1}</sys:String>
+    <sys:String x:Key="Str_NavigationButtons_Show">显示页面导航按钮</sys:String>
 </ResourceDictionary>

@@ -1947,4 +1947,5 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Dlg_KeepOnePage">নথিতে অন্তত একটি পৃষ্ঠা রাখুন।</sys:String>
     <sys:String x:Key="Str_Dlg_PageRange">পৃষ্ঠা নম্বর বা পরিসর (1 থেকে {0})</sys:String>
     <sys:String x:Key="Str_Watch_FailedStep">ধাপ {0}: {1}</sys:String>
+    <sys:String x:Key="Str_NavigationButtons_Show">পৃষ্ঠা নেভিগেশন বোতাম দেখান</sys:String>
 </ResourceDictionary>

@@ -28,6 +28,7 @@ public partial class MainWindow
                 Key.X => () => Split_Click(this, new RoutedEventArgs()),
                 Key.V => () => ComparePdf_Click(this, new RoutedEventArgs()),
                 Key.W => () => OpenWatchedFolders(this),
+                Key.N => TogglePageNavigationButtons,
                 Key.A => AddBlankPageAtEnd,
                 Key.R => ReversePageOrder,
                 Key.O => FixPageOrientation,
@@ -42,7 +43,7 @@ public partial class MainWindow
                 _ => null,
             };
         if (run is null) return false;
-        if (!repeat && (_doc is not null || key == Key.W && modifiers == (ModifierKeys.Alt | ModifierKeys.Shift)))
+        if (!repeat && (_doc is not null || (key is Key.W or Key.N) && modifiers == (ModifierKeys.Alt | ModifierKeys.Shift)))
             run();
         return true;
     }

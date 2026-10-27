@@ -138,10 +138,16 @@ namespace KillerPDF
         // calls routed through here means that guard lands in three known places instead of being
         // hunted through 84 PageList call sites. (BACKLOG.md, group C.)
 
+        void IViewerHost.ViewerNavigationChanged(PdfViewer viewer)
+        {
+            if (ReferenceEquals(ActiveViewer, viewer)) SyncPageNavigationButtons();
+        }
+
         void IViewerHost.ViewerPageChanged(PdfViewer viewer, int pageIndex)
         {
             ComparisonPageChanged(viewer, pageIndex);
             if (!ReferenceEquals(ActiveViewer, viewer)) return;
+            SyncPageNavigationButtons();
             UpdatePageSizeDisplay();
             RefreshMeasureBar();
             // Direct assignment, because that is what the 84 existing call sites do - there is no
@@ -209,9 +215,9 @@ namespace KillerPDF
         }
 
         string IViewerHost.PageJumpText { get => _pageJumpBox.Text; set => _pageJumpBox.Text = value; }
-        bool IViewerHost.PageJumpEnabled { set => _pageJumpBox.IsEnabled = value; }
+        bool IViewerHost.PageJumpEnabled { set { _pageJumpBox.IsEnabled = value; SyncPageNavigationButtons(); } }
         bool IViewerHost.CloseFileEnabled { set => _closeFileBtnRef.IsEnabled = value; }
-        string IViewerHost.PageTotalText { set => _pageTotalLabel.Text = value; }
+        string IViewerHost.PageTotalText { set { _pageTotalLabel.Text = value; SyncPageNavigationButtons(); } }
         void IViewerHost.SelectAllPageJumpText() => _pageJumpBox.SelectAll();
 
         void IViewerHost.SyncZoomDisplay(string? fitTag, string displayText)

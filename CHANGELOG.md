@@ -48,6 +48,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 ### Added
 
+- Optional title-bar Previous and Next page buttons stay off by default. Toggle them from the title-bar menu or with Alt+Shift+N; the choice is saved and follows the focused document.
 - **Permanent redaction:** Remove content by area, text search or sensitive-data pattern, with verification, batches, optional sanitization and separate output. Content rewriting retains unaffected searchable text and uncovered image pixels; whole-page raster fallback requires approval (#341).
 - **Document protection:** Save AES-256 encrypted copies with passwords, permissions or certificate recipients, and open certificate-encrypted PDFs using a matching Windows certificate.
 - Added recovery snapshots and restart handling for display failures (#456).

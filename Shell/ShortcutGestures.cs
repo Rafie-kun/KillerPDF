@@ -120,6 +120,8 @@ namespace KillerPDF
             Tip(SaveAsBtn, "Str_TT_Save", "Ctrl:S");
             Tip(OcrBtn, "Str_TT_Ocr", "CtrlShift:O");
             Tip(PrintBtn, "Str_TT_Print", "Ctrl:P");
+            SetPageNavigationTip(PreviousPageBtn, "Str_Kb_PrevPage", "PgUp");
+            SetPageNavigationTip(NextPageBtn, "Str_Kb_NextPage", "PgDn");
 
             Tip(ToolSelectBtn, "Str_TT_SelectTool", "V");
             Tip(ToolTextBtn, "Str_TT_TextTool", "T");

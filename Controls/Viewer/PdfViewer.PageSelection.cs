@@ -78,6 +78,7 @@ namespace KillerPDF.Controls
             // going through _currentPage, whose setter would write back into PageList and re-enter
             // this handler.
             State.CurrentPage = (sender as ListBox)?.SelectedIndex ?? -1;
+            Host?.ViewerNavigationChanged(this);
 
             if (_currentPage >= 0)
             {
