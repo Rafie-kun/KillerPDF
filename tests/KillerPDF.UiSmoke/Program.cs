@@ -80,6 +80,7 @@ internal static class Program
                 || args[0].StartsWith("--verify-delete-nearest-case-", StringComparison.Ordinal)
                 || args[0].StartsWith("--verify-page-straighten-", StringComparison.Ordinal)
                 || args[0].StartsWith("--verify-file-insertion-", StringComparison.Ordinal)
+                || args[0] == "--verify-picker-navigation-recovery"
                 || args[0] is "--verify-page-reorder-failure" or "--verify-page-transform-form-failure"
                 || args[0] == "--verify-page-navigation"
                 || args[0] is "--verify-watch-job-failure" or "--verify-watch-unsupported-step"

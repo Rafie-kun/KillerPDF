@@ -334,6 +334,39 @@ Use `--verify-delete-nearest-case-KIND` for `first`, `middle`, `last`, `tail-blo
 `disjoint` or `cancel`. The loop distinguishes independently colored page bitmaps,
 waits for the expected rendered survivor and checks every saved page label.
 Cancel clicks No and requires unchanged content, viewport and clean history.
+Append `:ViewContinuousRadio`, `:ViewTwoPageRadio` or `:ViewGridRadio` to a deletion
+kind to check that view mode with actual viewport pixels and strict saved labels.
+Append `:pane-b` after the mode to run in the second pane, for example
+`--verify-delete-nearest-case-last:ViewSingleRadio:pane-b`. These cases also require
+the first pane's source, visible page, clean state and history to remain unchanged.
+
+`--verify-page-transform-form-failure` combines unsaved text and an independent
+form-value edit before a late Transform metadata refusal. Strict Save, Undo/Save
+and Redo/Save must retain both form fields while reversing only the annotation.
+
+Navigation probes use `MODE APP_DLL APP_XAML OUTPUT_DIRECTORY DATA_DIRECTORY
+--session-isolation` on an owned UI VM. `--verify-page-navigation-document-scrollbar`
+checks a long document's actual hovered thumb, off-center native drag and page77
+entry. The `-variants` suffix adds Light, classic98SE and maximum-scale Dark.
+Classic scrollbar geometry is measured independently of modern hover widening.
+`--verify-page-navigation-tooltip-cursor` compares actual tooltip glyph pixels with
+the current native cursor resource and work area. `--verify-page-navigation-tooltip-matrix`
+adds the More chevron, sidebar help, classic Open and maximum-scale Open, with exact
+pointer-hit and tooltip-owner controls. These probes do not change OS pointer or
+display settings, capture desktop pixels, or certify custom pointer/DPI coverage.
+The `-large-cursor` suffix creates a synthetic cursor owned only by the test window,
+checks its actual painted size, then restores the window's cursor properties.
+The `-placement-controls` suffix checks the public attached behavior with owned
+tooltips: non-hover and explicit placement stay unchanged, and mouse placement
+restores its original rectangle and offsets after close. This checks the non-hover
+guard rather than keyboard tooltip activation.
+
+`--verify-picker-navigation-recovery APP_DLL APP_XAML OUTPUT_DIRECTORY
+--session-isolation` opens the actual file picker through its public owner overload.
+After establishing a synthetic good-directory listing, native Enter submits a
+missing child folder. The picker must restore usable rows and Accept in the last
+good directory. The test closes without accepting, opening or saving a PDF.
+
 `--verify-export-loss-review` checks actual page/content loss details and Cancel.
 `--verify-export-loss-mixed` adds independent vector/image/link controls;
 `--verify-export-loss-continue` checks accepted plain-text output, and

@@ -6,12 +6,69 @@ using System.Windows.Controls;
 using System.Windows.Automation.Peers;
 using System.Windows.Automation.Provider;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using static DocumentStateSmoke;
 
 internal static class TooltipCursorSmoke
 {
+    internal static int RunPlacementControls(Window owner, string folder)
+    {
+        Run(owner, folder);
+        var target = (FrameworkElement)owner.FindName("OpenFileBtn");
+        var pane = (FrameworkElement)owner.FindName("Viewer");
+        Point away = pane.TranslatePoint(new Point(pane.ActualWidth / 2, pane.ActualHeight / 2), owner);
+        Point over = target.TranslatePoint(new Point(target.ActualWidth / 2, target.ActualHeight / 2), owner);
+        Type behavior = owner.GetType().Assembly.GetType("KillerFamily.Layout.CursorTooltipPlacement", true)!;
+        foreach (string control in new[] { "keyboard-placement", "explicit-top", "mouse-restoration" })
+        {
+            ShortcutHintsSmoke.MovePointer(owner, control == "keyboard-placement" ? away : over);
+            Wait(() => target.IsMouseOver == (control != "keyboard-placement"), "placement control pointer ownership");
+            var placement = control == "explicit-top"
+                ? System.Windows.Controls.Primitives.PlacementMode.Top : System.Windows.Controls.Primitives.PlacementMode.Mouse;
+            var rectangle = new Rect(1, 2, 20, 10);
+            var tip = new ToolTip { Content = "Placement control", PlacementTarget = target, Placement = placement,
+                PlacementRectangle = rectangle, VerticalOffset = 7, HorizontalOffset = 3 };
+            behavior.GetMethod("SetEnabled")!.Invoke(null, [tip, true]);
+            try
+            {
+                tip.IsOpen = true;
+                Wait(() => tip.IsVisible && tip.ActualWidth > 20, "owned placement control tooltip");
+                bool adjusted = control == "mouse-restoration";
+                if (adjusted ? tip.Placement != System.Windows.Controls.Primitives.PlacementMode.Bottom
+                    || tip.PlacementRectangle == rectangle || tip.VerticalOffset != 11
+                    : tip.Placement != placement || tip.PlacementRectangle != rectangle || tip.VerticalOffset != 7)
+                    throw new InvalidOperationException("Tooltip placement policy failed for " + control);
+                tip.IsOpen = false;
+                Wait(() => !tip.IsVisible, "placement control tooltip closed");
+                if (tip.Placement != placement || tip.PlacementRectangle != rectangle
+                    || tip.VerticalOffset != 7 || tip.HorizontalOffset != 3)
+                    throw new InvalidOperationException("Tooltip did not restore its original placement for " + control);
+                Console.WriteLine("CONTROL tooltip placement preserved and restored: " + control);
+            }
+            finally { tip.IsOpen = false; behavior.GetMethod("SetEnabled")!.Invoke(null, [tip, false]); }
+        }
+        ShortcutHintsSmoke.MovePointer(owner, away);
+        Console.WriteLine("PASS tooltip placement controls: non-hover and explicit placement remain unchanged; mouse placement restores all original offsets and rectangle after close.");
+        return 0;
+    }
+
+    internal static int RunLargeCursor(Window owner, string folder)
+    {
+        using Cursor cursor = CreateLargeCursor();
+        Cursor? previous = owner.Cursor;
+        bool forced = owner.ForceCursor;
+        try
+        {
+            owner.Cursor = cursor; owner.ForceCursor = true;
+            Run(owner, folder, minimumCursorHeight: 70);
+            Console.WriteLine("PASS large tooltip cursor: actual Open text clears the measured large window-owned cursor without changing OS pointer settings.");
+            return 0;
+        }
+        finally { owner.Cursor = previous; owner.ForceCursor = forced; Mouse.UpdateCursor(); }
+    }
+
     internal static int RunMatrix(Window owner, string folder)
     {
         Run(owner, folder, "OverflowChevron", "ThemeDarkRadio", rightEdge: true);
@@ -23,7 +80,7 @@ internal static class TooltipCursorSmoke
     }
 
     internal static int Run(Window owner, string folder, string targetName = "OpenFileBtn", string? themeRadio = null,
-        bool maximumScale = false, bool rightEdge = false)
+        bool maximumScale = false, bool rightEdge = false, int minimumCursorHeight = 0)
     {
         Rect work = SystemParameters.WorkArea;
         owner.WindowState = WindowState.Normal;
@@ -111,6 +168,8 @@ internal static class TooltipCursorSmoke
                 if (visible.IsEmpty || visible.Width < 2 || visible.Height < 2
                     || !VisibleBounds(RenderCursor(IntPtr.Zero, width, height, 0), RenderCursor(IntPtr.Zero, width, height, 255), width, height).IsEmpty)
                     throw new InvalidOperationException("The cursor-pixel detector failed its presence or blank-resource control.");
+                if (visible.Height < minimumCursorHeight)
+                    throw new InvalidOperationException("The large owned cursor was not active at the actual hover target.");
                 Rect cursorBounds = new(cursor.Position.X - icon.HotX + visible.Left, cursor.Position.Y - icon.HotY + visible.Top, visible.Width, visible.Height);
                 Rect tooltipBounds = ScreenBounds(tip), textBounds = Rect.Empty, inkBounds = Rect.Empty;
                 int textIndex = 0, overlappingGlyphPixels = 0;
@@ -212,6 +271,44 @@ internal static class TooltipCursorSmoke
         }
     }
 
+    private static Cursor CreateLargeCursor()
+    {
+        const int size = 96;
+        var drawing = new DrawingVisual();
+        using (DrawingContext context = drawing.RenderOpen())
+            context.DrawGeometry(Brushes.White, new Pen(Brushes.Black, 3), Geometry.Parse("M2,2 L2,65 L18,51 L31,78 L42,72 L29,46 L54,46 Z"));
+        var bitmap = new RenderTargetBitmap(size, size, 96, 96, PixelFormats.Pbgra32);
+        bitmap.Render(drawing);
+        byte[] pixels = new byte[size * size * 4]; bitmap.CopyPixels(pixels, size * 4, 0);
+        byte[] mask = new byte[size / 8 * size];
+        for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+                if (pixels[(y * size + x) * 4 + 3] == 0) mask[y * (size / 8) + x / 8] |= (byte)(0x80 >> (x % 8));
+        var header = new DibHeader { Size = (uint)Marshal.SizeOf<DibHeader>(), Width = size, Height = -size, Planes = 1, Bits = 32, ImageSize = (uint)pixels.Length };
+        IntPtr color = CreateDIBSection(IntPtr.Zero, ref header, 0, out IntPtr bits, IntPtr.Zero, 0), monochrome = IntPtr.Zero;
+        try
+        {
+            if (color == IntPtr.Zero || bits == IntPtr.Zero) throw new InvalidOperationException("Cannot allocate the owned cursor color bitmap.");
+            Marshal.Copy(pixels, 0, bits, pixels.Length);
+            monochrome = CreateBitmap(size, size, 1, 1, mask);
+            if (monochrome == IntPtr.Zero) throw new InvalidOperationException("Cannot allocate the owned cursor mask.");
+            var info = new IconInfo { HotX = 2, HotY = 2, Color = color, Mask = monochrome };
+            IntPtr native = CreateIconIndirect(ref info);
+            if (native == IntPtr.Zero) throw new InvalidOperationException("Cannot create the owned large cursor.");
+            var handle = new OwnedCursorHandle(native);
+            try { return CursorInteropHelper.Create(handle); }
+            catch { handle.Dispose(); throw; }
+        }
+        finally { if (monochrome != IntPtr.Zero) DeleteObject(monochrome); if (color != IntPtr.Zero) DeleteObject(color); }
+    }
+
+    private sealed class OwnedCursorHandle : SafeHandle
+    {
+        internal OwnedCursorHandle(IntPtr value) : base(IntPtr.Zero, ownsHandle: true) => SetHandle(value);
+        public override bool IsInvalid => handle == IntPtr.Zero || handle == new IntPtr(-1);
+        protected override bool ReleaseHandle() => DestroyCursor(handle);
+    }
+
     private static byte[] RenderCursor(IntPtr cursor, int width, int height, byte background)
     {
         int length = checked(width * height * 4);
@@ -259,6 +356,9 @@ internal static class TooltipCursorSmoke
     [StructLayout(LayoutKind.Sequential)] private struct NativeRect { public int Left, Top, Right, Bottom; }
     [StructLayout(LayoutKind.Sequential)] private struct MonitorInfo { public int Size; public NativeRect Monitor, Work; public uint Flags; }
     [DllImport("user32.dll")] private static extern bool GetCursorInfo(ref CursorState state);
+    [DllImport("user32.dll")] private static extern IntPtr CreateIconIndirect(ref IconInfo info);
+    [DllImport("user32.dll")] private static extern bool DestroyCursor(IntPtr cursor);
+    [DllImport("gdi32.dll")] private static extern IntPtr CreateBitmap(int width, int height, uint planes, uint bits, byte[] pixels);
     [DllImport("user32.dll")] private static extern bool GetIconInfo(IntPtr cursor, out IconInfo info);
     [DllImport("user32.dll")] private static extern bool DrawIconEx(IntPtr dc, int x, int y, IntPtr cursor, int width, int height, uint step, IntPtr brush, uint flags);
     [DllImport("user32.dll")] private static extern IntPtr MonitorFromPoint(NativePoint point, uint flags);

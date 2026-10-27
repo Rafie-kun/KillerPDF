@@ -40,6 +40,9 @@ namespace KillerPDF.Controls
                 {
                     IsDirectoryListingBusy = false;
                     SelMeta.Text = Loc("Str_Dlg_NoSuchFolder");
+                    // Keep the last successful directory usable after a bad typed path.
+                    if (_currentDir.Length > 0 && !string.Equals(_currentDir, directory, StringComparison.OrdinalIgnoreCase))
+                        NavigateTo(_currentDir);
                     return;
                 }
                 IsDirectoryListingComplete = result.Complete && result.Entries.Count <= PickerDirectoryListing.MaximumEntries;
