@@ -1214,6 +1214,12 @@
             </Setter>
         </Style>
 
+        <Style x:Key="FooterOverflowButton" TargetType="Button" BasedOn="{StaticResource FooterNavButton}">
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="0.4"/></Trigger>
+            </Style.Triggers>
+        </Style>
+
         <Style x:Key="FooterModeButton" TargetType="RadioButton">
             <Setter Property="Width" Value="25"/>
             <Setter Property="Height" Value="20"/>
@@ -3049,7 +3055,7 @@
              lifting the content keeps the About overlay - declared later still - on top of both.
              (Family rule; see KillerShell and Killendar.) -->
         <Border Grid.Row="4" x:Name="FooterBorder" Panel.ZIndex="-1"
-                MinHeight="24" Background="{DynamicResource FooterBackgroundBrush}">
+                MinHeight="24" Background="{DynamicResource FooterBackgroundBrush}" SizeChanged="FooterAnchor_SizeChanged">
             <Grid>
             <Grid Margin="{DynamicResource FooterPadding}">
                 <Grid.ColumnDefinitions>
@@ -3097,12 +3103,19 @@
                     </Button>
                 </Grid>
                 <Grid x:Name="FooterDocumentControls" Grid.Column="2"
-                      HorizontalAlignment="Right" Margin="{DynamicResource FooterCellMargin}">
+                      HorizontalAlignment="Right" Margin="{DynamicResource FooterCellMargin}" SizeChanged="FooterAnchor_SizeChanged">
                     <Border IsHitTestVisible="False" BorderBrush="{DynamicResource FooterBevelDarkBrush}"
                             BorderThickness="{DynamicResource FooterCellLightThickness}" Panel.ZIndex="2"/>
                     <Border IsHitTestVisible="False" BorderBrush="{DynamicResource FooterBevelLightBrush}"
                             BorderThickness="{DynamicResource FooterCellDarkThickness}" Panel.ZIndex="2"/>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
+                    <Grid x:Name="FooterToolsViewport">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <Button x:Name="FooterToolsPrevious" Content="&#xE76B;" Style="{StaticResource FooterOverflowButton}"
+                                Visibility="Collapsed" Click="FooterToolsPrevious_Click" ToolTip="{DynamicResource Str_Scroll_Left}"/>
+                        <ScrollViewer x:Name="FooterToolsScroll" Grid.Column="1" HorizontalScrollBarVisibility="Hidden"
+                                      VerticalScrollBarVisibility="Disabled" CanContentScroll="False" Focusable="False"
+                                      Padding="0" BorderThickness="0" ScrollChanged="FooterToolsScroll_ScrollChanged">
+                    <StackPanel x:Name="FooterToolsPanel" Orientation="Horizontal" HorizontalAlignment="Right"
                                 VerticalAlignment="Center" Margin="{DynamicResource FooterCellPadding}">
                     <Button x:Name="PageSizeLabel" Margin="4,0,5,0" MinWidth="90" Width="Auto"
                             ToolTip="{DynamicResource Str_Crop_Size}"
@@ -3194,9 +3207,13 @@
                     <Button x:Name="ZoomInBtn" Content="&#xECC8;" Style="{StaticResource FooterNavButton}"
                             Click="ZoomIn_Click" ToolTip="{DynamicResource Str_TT_ZoomIn}"/>
                     </StackPanel>
+                        </ScrollViewer>
+                        <Button x:Name="FooterToolsNext" Grid.Column="2" Content="&#xE76C;" Style="{StaticResource FooterOverflowButton}"
+                                Visibility="Collapsed" Click="FooterToolsNext_Click" ToolTip="{DynamicResource Str_Scroll_Right}"/>
+                    </Grid>
                 </Grid>
                 <Grid x:Name="FooterVersionCell" Grid.Column="3"
-                      HorizontalAlignment="Right" Margin="{DynamicResource FooterCellMargin}">
+                      HorizontalAlignment="Right" Margin="{DynamicResource FooterCellMargin}" SizeChanged="FooterAnchor_SizeChanged">
                     <Border IsHitTestVisible="False" BorderBrush="{DynamicResource FooterBevelDarkBrush}" BorderThickness="{DynamicResource FooterCellLightThickness}" Panel.ZIndex="2"/>
                     <Border IsHitTestVisible="False" BorderBrush="{DynamicResource FooterBevelLightBrush}" BorderThickness="{DynamicResource FooterCellDarkThickness}" Panel.ZIndex="2"/>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center"

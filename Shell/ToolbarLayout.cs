@@ -40,8 +40,8 @@ namespace KillerPDF
             []);
 
         // Buttons leave the bar for the More menu in this order as the window narrows, a group at a
-        // time: the most occasional first, the text-markup tools last. File basics and Select never
-        // leave on their own; they only lose their captions (LabelStripRank).
+        // time: the most occasional first, the text-markup tools last. File basics lose their
+        // captions before the final fallback; Select stays visible.
         private static readonly string[][] ToolbarShedOrder =
         [
             ["compare"],
@@ -62,6 +62,8 @@ namespace KillerPDF
             ["formfield"],
             ["text"],
         ];
+
+        private static readonly string[] ToolbarLastResortShedOrder = ["flatten", "print", "close", "new", "transform"];
 
         private readonly List<ToolbarUnit> _toolbarUnits = [];
         private ToolbarLayout _toolbarLayout = DefaultToolbarLayout;

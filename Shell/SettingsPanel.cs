@@ -1380,6 +1380,20 @@ namespace KillerPDF
                     }
                 }
 
+                // At large app sizes even the icon-only file controls can exceed the viewport.
+                // Keep their existing commands reachable in More without losing split menus.
+                foreach (string id in ToolbarLastResortShedOrder)
+                {
+                    if (LeftBar.DesiredSize.Width + RightContainer.DesiredSize.Width <= avail) break;
+                    if (chosen.Contains(id) || id == activeTool || !units.TryGetValue(id, out ToolbarUnit? unit)
+                        || unit.Bar.Visibility != Visibility.Visible) continue;
+                    unit.Bar.Visibility = Visibility.Collapsed;
+                    unit.Overflow.Visibility = Visibility.Visible;
+                    OverflowChevron.Visibility = Visibility.Visible;
+                    SyncToolbarSeparators();
+                    MeasureToolbarBars();
+                }
+
                 // Shedding whole groups can leave room for individual tools. Restore every
                 // tool that fits, in priority order, while preserving explicit More choices.
                 foreach (string id in ToolbarShedOrder.Reverse().SelectMany(group => group))
@@ -1408,7 +1422,8 @@ namespace KillerPDF
 
                 // The toolbar does NOT get a say in how narrow the window may be. Deriving a floor
                 // from it produced a minimum unrelated to anything the user can see, and a
-                // different one in each mode. The only floor is the pane minimum (SyncSplitMinWidth).
+                // different one in each mode. Reading panes and the footer viewport determine
+                // the window minimum through SyncSplitMinWidth.
             }
             finally { _reflowingToolbar = false; }
         }

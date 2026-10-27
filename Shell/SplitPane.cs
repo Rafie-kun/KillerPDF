@@ -101,8 +101,8 @@ namespace KillerPDF
             //
             // SyncSplitMinWidth must NOT be called from here. Setting MinWidth can resize the
             // window, which fires this handler again, which sets MinWidth again - an unbounded
-            // layout loop that hard-froze the app. The floor only changes when the split opens or
-            // closes, so that is the only place it is recomputed.
+            // layout loop that hard-froze the app. Recompute after deliberate split or chrome
+            // changes, outside this resize handler.
             //
             // Queued, never run inline. ApplyPaneWidths writes the column widths, which is itself a
             // layout change - assigning straight from the handler re-enters the layout pass it was
@@ -686,11 +686,8 @@ namespace KillerPDF
             return true;
         }
 
-        /// <summary>The window has no minimum of its own. The only floor is the PANE minimum, which
-        /// is the same number in both modes - one pane's worth unsplit, two plus the gutter when
-        /// split. Everything outside the panes (the sidebar, the margins) is MEASURED rather than
-        /// assumed, so collapsing or moving the sidebar lowers the floor by exactly its width
-        /// instead of the pane having to give the space up.</summary>
+        /// <summary>Combines the reading-pane minimum with enough room for one footer tool and its
+        /// overflow arrows. Sidebar and footer geometry are measured in the current layout.</summary>
         private void SyncSplitMinWidth()
         {
             double chrome = Math.Max(0, ActualWidth - SplitHost.ActualWidth);
@@ -701,7 +698,7 @@ namespace KillerPDF
             // anything that re-enters this from a layout event then has a loop to run round.
             // Never above the monitor the window is on, or the floor itself pushes the window
             // off that monitor and then holds it there.
-            floor = Math.Min(floor, CurrentWorkAreaWidth());
+            floor = Math.Min(Math.Max(floor, _footerMinimumWidth), CurrentWorkAreaWidth());
             if (Math.Abs(MinWidth - floor) > 0.5) MinWidth = floor;
         }
 

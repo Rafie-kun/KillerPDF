@@ -292,11 +292,38 @@ namespace KillerPDF
         // Portable follows the document area: centred under the pane in single view, centred on
         // the pane divider in split view. When that spot would run into the page-size readout it
         // anchors immediately left of it instead. The status text trims before the badge.
+        private double _footerMinimumWidth;
+        private bool _footerMinimumWidthQueued;
+
         private void UpdateFooterFade()
         {
             if (StatusText is null || PortableBadge is null || FooterBorder is null
                 || FooterDocumentControls is null || FooterVersionCell is null) return;
             if (Viewer is null || PortableBadge.Parent is not FrameworkElement host || host.ActualWidth <= 0) return;
+
+            double badgeReserve = PortableBadge.Visibility == Visibility.Visible ? PortableBadge.ActualWidth + 16 : 0;
+            double fixedWidth = FooterVersionCell.DesiredSize.Width + badgeReserve + 48;
+            double margins = FooterDocumentControls.Margin.Left + FooterDocumentControls.Margin.Right;
+            double widestTool = Math.Max(PageSizeLabel.DesiredSize.Width, ZoomBox.DesiredSize.Width);
+            double minimumTools = widestTool + 48 + margins;
+            double minimumWindow = ActualWidth - host.ActualWidth + fixedWidth + minimumTools * _appScale;
+            if (Math.Abs(_footerMinimumWidth - minimumWindow) > .5)
+            {
+                _footerMinimumWidth = minimumWindow;
+                if (!_footerMinimumWidthQueued)
+                {
+                    _footerMinimumWidthQueued = true;
+                    Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded, (Action)(() =>
+                    {
+                        _footerMinimumWidthQueued = false;
+                        SyncSplitMinWidth();
+                    }));
+                }
+            }
+            double available = Math.Max(minimumTools, (host.ActualWidth - fixedWidth) / _appScale - margins);
+            if (Math.Abs(FooterDocumentControls.MaxWidth - available) > .5)
+                FooterDocumentControls.MaxWidth = available;
+            UpdateFooterToolsOverflow();
 
             Grid.SetColumn(PortableBadge, 0);
             Grid.SetColumnSpan(PortableBadge, 4);
@@ -326,6 +353,25 @@ namespace KillerPDF
         }
 
         private void FooterAnchor_SizeChanged(object sender, SizeChangedEventArgs e) => UpdateFooterFade();
+
+        private void FooterToolsScroll_ScrollChanged(object sender, ScrollChangedEventArgs e) => UpdateFooterFade();
+
+        private void UpdateFooterToolsOverflow()
+        {
+            if (FooterToolsViewport is null || FooterToolsPanel is null || FooterToolsScroll is null
+                || FooterToolsPrevious is null || FooterToolsNext is null || FooterToolsViewport.ActualWidth <= 0) return;
+            bool overflow = FooterToolsPanel.DesiredSize.Width > FooterToolsViewport.ActualWidth + .5;
+            FooterToolsPrevious.Visibility = FooterToolsNext.Visibility = overflow ? Visibility.Visible : Visibility.Collapsed;
+            FooterToolsPrevious.IsEnabled = FooterToolsScroll.HorizontalOffset > .5;
+            FooterToolsNext.IsEnabled = FooterToolsScroll.HorizontalOffset < FooterToolsScroll.ScrollableWidth - .5;
+            if (!overflow && FooterToolsScroll.HorizontalOffset > 0) FooterToolsScroll.ScrollToLeftEnd();
+        }
+
+        private void FooterToolsPrevious_Click(object sender, RoutedEventArgs e) => ScrollFooterTools(-1);
+        private void FooterToolsNext_Click(object sender, RoutedEventArgs e) => ScrollFooterTools(1);
+
+        private void ScrollFooterTools(int direction) => FooterToolsScroll.ScrollToHorizontalOffset(
+            FooterToolsScroll.HorizontalOffset + direction * Math.Max(24, FooterToolsScroll.ViewportWidth - 24));
 
         // The collapse arrow points toward where the page-list content goes when toggled: toward
         // the sidebar's own edge while open, away from it while collapsed.
