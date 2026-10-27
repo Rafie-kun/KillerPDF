@@ -200,6 +200,14 @@ internal static class TableExportSmoke
                 return ThumbnailBoxGutterSmoke.Run(owner, folder, scroll: true, strip: true, switchDocument: true);
             if (windowSessionCase == "--verify-page-navigation-drag-controls")
                 return ThumbnailDragControlsSmoke.Run(owner, folder);
+            if (windowSessionCase == "--verify-page-navigation-document-scrollbar")
+                return DocumentScrollbarSmoke.Run(owner, folder);
+            if (windowSessionCase == "--verify-page-navigation-document-scrollbar-variants")
+                return DocumentScrollbarSmoke.RunVariants(owner, folder);
+            if (windowSessionCase == "--verify-page-navigation-tooltip-cursor")
+                return TooltipCursorSmoke.Run(owner, folder);
+            if (windowSessionCase == "--verify-page-navigation-tooltip-matrix")
+                return TooltipCursorSmoke.RunMatrix(owner, folder);
             if (windowSessionCase == "--verify-page-navigation-transitions")
                 return PageNavigationTransitionsSmoke.Run(owner, folder);
             if (windowSessionCase == "--verify-page-navigation-layout")
