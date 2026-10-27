@@ -494,7 +494,7 @@ namespace KillerPDF.Shell
                 BuildToolbarMenu();   // right-click appearance picker on the toolbar
                 // Unconditional: the XAML default is small icons / no text, but the family default
                 // is Large/Under, so a first run needs the apply pass too.
-                ApplyToolbarAppearance();
+                ApplyToolbarStyle();
 
                 // The release startup check initializes the real empty window without restoring
                 // documents, accepting handoffs, or starting update UI/network work.

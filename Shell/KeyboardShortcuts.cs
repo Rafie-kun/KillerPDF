@@ -542,12 +542,12 @@ namespace KillerPDF.Shell
             {
                 switch (key)
                 {
-                    case Key.D1: SetToolbarIconSize(ToolbarIconSize.Small);   break;
-                    case Key.D2: SetToolbarIconSize(ToolbarIconSize.Large);   break;
-                    case Key.D3: SetToolbarLabelMode(ToolbarLabelMode.None);  break;
-                    case Key.D4: SetToolbarLabelMode(ToolbarLabelMode.Beside);break;
-                    case Key.D5: SetToolbarLabelMode(ToolbarLabelMode.Under); break;
-                    case Key.D6: SetToolbarLabelMode(ToolbarLabelMode.Only);  break;
+                    case Key.D1: SetIconSize(IconSize.Small);   break;
+                    case Key.D2: SetIconSize(IconSize.Large);   break;
+                    case Key.D3: SetLabelMode(LabelMode.None);  break;
+                    case Key.D4: SetLabelMode(LabelMode.Beside);break;
+                    case Key.D5: SetLabelMode(LabelMode.Under); break;
+                    case Key.D6: SetLabelMode(LabelMode.Only);  break;
                 }
                 e.Handled = true;
             }

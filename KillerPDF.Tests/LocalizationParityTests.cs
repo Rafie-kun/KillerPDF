@@ -14,12 +14,12 @@ public sealed class LocalizationParityTests
     public void ToolbarCaptionsCanWrapAndGrowForLocalizedText()
     {
         string root = Directory.GetParent(StringsDirectory)!.FullName;
-        string source = File.ReadAllText(Path.Combine(root, "Shell", "SettingsPanel.cs"));
+        string source = File.ReadAllText(Path.Combine(root, "Shell", "ToolbarStyle.cs"));
 
         Assert.Contains("btn.Height = double.NaN;", source);
         Assert.Contains("btn.MinHeight = large ? 50 : 46;", source);
-        Assert.Contains("MaxWidth = 96,", source);
-        Assert.Contains("TextWrapping = TextWrapping.Wrap", source);
+        Assert.Contains("CaptionUnderMaxWidth = 96;", source);
+        Assert.Contains("TextWrapping = TextWrapping.Wrap;", source);
     }
 
     [Fact]
