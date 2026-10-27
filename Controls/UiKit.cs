@@ -541,49 +541,63 @@ namespace KillerPDF
         // Dialog/popup buttons. accent==true is the primary: hollow in the accent at rest, filled with the
         // family button gradient on hover, the same as OutlineButton. false is secondary.
         public static Button Make(object content, bool accent)
+            => new ThemedButton(content, accent);
+
+        private sealed class ThemedButton : Button
         {
-            if (KillerPDF.Services.ThemeManager.Current == KillerPDF.Services.Theme.SE98)
-            {
-                var button = Make(content, Brush("ChipFaceBrush"), Brush("ChipFaceBrush"),
-                                  Brush("TextBrush"), Brush("TextBrush"), Brushes.Transparent);
-                // Keep an already-open code-built surface attached to the live palette. The
-                // explicit-color factory below is also used by pre-theme startup dialogs, so the
-                // resource references belong here in the normal themed overload.
-                button.SetResourceReference(Control.BackgroundProperty, "ChipFaceBrush");
-                button.SetResourceReference(Control.ForegroundProperty, "TextBrush");
-                button.Template = BeveledButtonTemplate();
-                return button;
-            }
-            var themed = accent
-                ? Make(content, Brush("OutlineFaceBrush"), Brush("OutlineHoverBrush"), Brush("OutlineTextBrush"), Brush("OutlineHoverTextBrush"), Brush("OutlineRestBrush"))
-                : Make(content, Brush("PaneBrush"), Brush("SurfaceHoverBrush"), Brush("TextBrush"), Brush("TextBrush"), Brush("CardBorderBrush"));
-            // The accent face is transparent, so its edge is a stroke. The inset-fill outline would
-            // show through the hollow face as a solid block.
-            if (accent) themed.Template = ButtonTemplate();
+            private readonly bool _accent;
+            private static readonly DependencyProperty ClassicProperty = DependencyProperty.Register(
+                "Classic", typeof(bool), typeof(ThemedButton), new PropertyMetadata(false, RefreshTheme));
+            private static readonly DependencyProperty RadiusProperty = DependencyProperty.Register(
+                "Radius", typeof(CornerRadius), typeof(ThemedButton), new PropertyMetadata(new CornerRadius(4), RefreshTheme));
+            private bool Classic => (bool)GetValue(ClassicProperty);
 
-            // Make(object,bool) is used by long-lived annotation bars and modeless tool windows.
-            // A local brush value would preserve the palette that happened to be active when the
-            // control was constructed. Re-attach each state to resource keys so theme and accent
-            // changes repaint the existing button instead of leaving an old-colored island.
-            void ApplyRest()
+            internal ThemedButton(object content, bool accent)
             {
-                themed.SetResourceReference(Control.BackgroundProperty, accent ? "OutlineFaceBrush" : "PaneBrush");
-                themed.SetResourceReference(Control.ForegroundProperty, accent ? "OutlineTextBrush" : "TextBrush");
-                themed.SetResourceReference(Control.BorderBrushProperty, accent ? "OutlineRestBrush" : "CardBorderBrush");
-            }
-            void ApplyHover()
-            {
-                themed.SetResourceReference(Control.BackgroundProperty, accent ? "OutlineHoverBrush" : "SurfaceHoverBrush");
-                themed.SetResourceReference(Control.ForegroundProperty, accent ? "OutlineHoverTextBrush" : "TextBrush");
-                themed.SetResourceReference(Control.BorderBrushProperty, accent ? "OutlineHoverBrush" : "CardBorderBrush");
+                _accent = accent;
+                Content = content;
+                Padding = new Thickness(18, 6, 18, 6);
+                BorderThickness = new Thickness(1);
+                Cursor = Cursors.Hand;
+                FontSize = 12;
+                FocusVisualStyle = null;
+                SetResourceReference(FontFamilyProperty, "UiFont");
+                SetResourceReference(ClassicProperty, "UseDialogCaption");
+                SetResourceReference(RadiusProperty, "RadControl");
+                MouseEnter += (_, _) => ApplyBrushes();
+                MouseLeave += (_, _) => ApplyBrushes();
+                Refresh();
             }
 
-            // These handlers are registered after the explicit-color factory's handlers, so the
-            // resource-backed values win and remain live for the current palette.
-            themed.MouseEnter += (_, _) => ApplyHover();
-            themed.MouseLeave += (_, _) => ApplyRest();
-            ApplyRest();
-            return themed;
+            private static void RefreshTheme(DependencyObject target, DependencyPropertyChangedEventArgs _)
+                => ((ThemedButton)target).Refresh();
+
+            private void Refresh()
+            {
+                // Keep the same action control while its decorative template follows live
+                // classic/radius resources. No application-wide theme subscription retains it.
+                Template = Classic ? BeveledButtonTemplate()
+                    : ButtonTemplate(outlined: !_accent, radius: (CornerRadius)GetValue(RadiusProperty));
+                ApplyBrushes();
+            }
+
+            private void ApplyBrushes()
+            {
+                if (Classic)
+                {
+                    SetResourceReference(BackgroundProperty, "ChipFaceBrush");
+                    SetResourceReference(ForegroundProperty, "TextBrush");
+                    BorderBrush = Brushes.Transparent;
+                    return;
+                }
+                bool hover = IsMouseOver;
+                SetResourceReference(BackgroundProperty, _accent
+                    ? hover ? "OutlineHoverBrush" : "OutlineFaceBrush" : hover ? "SurfaceHoverBrush" : "PaneBrush");
+                SetResourceReference(ForegroundProperty, _accent
+                    ? hover ? "OutlineHoverTextBrush" : "OutlineTextBrush" : "TextBrush");
+                SetResourceReference(BorderBrushProperty, _accent
+                    ? hover ? "OutlineHoverBrush" : "OutlineRestBrush" : "CardBorderBrush");
+            }
         }
 
         private static ControlTemplate BeveledButtonTemplate()
@@ -638,7 +652,7 @@ namespace KillerPDF
         // outlined: the edge is drawn as an outer fill with the face inset by BorderThickness, not as a
         // Border stroke. A 1px stroke on a small radius lets the antialiased face show through at
         // each corner, which reads as a nick in the outline.
-        internal static ControlTemplate ButtonTemplate(bool outlined = false)
+        internal static ControlTemplate ButtonTemplate(bool outlined = false, CornerRadius? radius = null)
         {
             var bf = new FrameworkElementFactory(typeof(Border)) { Name = "bd" };
             bf.SetBinding(Border.BackgroundProperty, new Binding("Background") { RelativeSource = new RelativeSource(RelativeSourceMode.TemplatedParent) });
@@ -652,7 +666,7 @@ namespace KillerPDF
             FrameworkElementFactory root = bf;
             if (outlined)
             {
-                CornerRadius r = RadControl;
+                CornerRadius r = radius ?? RadControl;
                 bf.SetValue(Border.CornerRadiusProperty, new CornerRadius(
                     Math.Max(0, r.TopLeft - 1), Math.Max(0, r.TopRight - 1),
                     Math.Max(0, r.BottomRight - 1), Math.Max(0, r.BottomLeft - 1)));
@@ -666,7 +680,7 @@ namespace KillerPDF
             {
                 bf.SetBinding(Border.BorderBrushProperty, new Binding("BorderBrush") { RelativeSource = new RelativeSource(RelativeSourceMode.TemplatedParent) });
                 bf.SetBinding(Border.BorderThicknessProperty, new Binding("BorderThickness") { RelativeSource = new RelativeSource(RelativeSourceMode.TemplatedParent) });
-                bf.SetValue(Border.CornerRadiusProperty, RadControl);
+                bf.SetValue(Border.CornerRadiusProperty, radius ?? RadControl);
             }
 
             // Raised: a soft shadow on item-free siblings under the face (an effect on the face itself
@@ -677,8 +691,8 @@ namespace KillerPDF
             if (raised)
             {
                 var stack = new FrameworkElementFactory(typeof(Grid));
-                stack.AppendChild(LiftLayer("liftRest", ring: !outlined, depth: 1.5, blur: 5, visible: true));
-                stack.AppendChild(LiftLayer("liftHover", ring: false, depth: 3.5, blur: 10, visible: false));
+                stack.AppendChild(LiftLayer("liftRest", ring: !outlined, depth: 1.5, blur: 5, visible: true, radius));
+                stack.AppendChild(LiftLayer("liftHover", ring: false, depth: 3.5, blur: 10, visible: false, radius));
                 stack.AppendChild(root);
                 root = stack;
             }
@@ -708,11 +722,11 @@ namespace KillerPDF
 
         // One shadow layer for ButtonTemplate: the button's shape in black, faded by the theme's
         // BarShadowOpacity, casting a soft drop shadow below it.
-        private static FrameworkElementFactory LiftLayer(string name, bool ring, double depth, double blur, bool visible)
+        private static FrameworkElementFactory LiftLayer(string name, bool ring, double depth, double blur, bool visible, CornerRadius? radius = null)
         {
             var layer = new FrameworkElementFactory(typeof(Border)) { Name = name };
             layer.SetValue(UIElement.IsHitTestVisibleProperty, false);
-            layer.SetValue(Border.CornerRadiusProperty, RadControl);
+            layer.SetValue(Border.CornerRadiusProperty, radius ?? RadControl);
             if (ring)
             {
                 layer.SetValue(Border.BorderBrushProperty, Brushes.Black);

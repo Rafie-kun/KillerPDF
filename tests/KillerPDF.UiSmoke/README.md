@@ -373,6 +373,15 @@ in Dark and 98SE. Native variants require observed input at the owned target and
 released input afterward. Use the existing six-argument page-navigation invocation
 with `--session-isolation`, a fresh output directory and an owned SN01/SN02 session.
 
+`--verify-page-navigation-dialog-buttons-theme` uses the same invocation to compare
+existing secondary and accent button renders with independent fresh classic
+controls, then restore Dark. Painted-pixel and temporary label-removal controls
+must pass first. It uses the public button factory and never invokes an action.
+The `--verify-page-navigation-dialog-button-actions` companion additionally checks
+the original test-owned callbacks once after each transition and verifies that
+disabled buttons reject UI Automation Invoke. It sends no native input or product
+command.
+
 `--verify-picker-navigation-recovery APP_DLL APP_XAML OUTPUT_DIRECTORY
 --session-isolation` opens the actual file picker through its public owner overload.
 After establishing a synthetic good-directory listing, native Enter submits a

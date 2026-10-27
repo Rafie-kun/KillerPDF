@@ -12,6 +12,122 @@ using static DocumentStateSmoke;
 
 internal static class CaptionThemeSmoke
 {
+    internal static int RunButtonTransitions(Window owner, string folder, bool invokeActions = false)
+    {
+        if (invokeActions)
+        {
+            ShortcutHintsSmoke.Focus(owner);
+            ShortcutHintsSmoke.MovePointer(owner, new Point(20, owner.ActualHeight - 30));
+        }
+        Assembly assembly = owner.GetType().Assembly;
+        Type themes = assembly.GetType("KillerPDF.Services.Theme", true)!;
+        MethodInfo apply = assembly.GetType("KillerPDF.Services.ThemeManager", true)!.GetMethod("Apply")!;
+        MethodInfo make = assembly.GetType("KillerPDF.UiKit", true)!.GetMethod("Make", [typeof(object), typeof(bool)])!;
+        MethodInfo build = assembly.GetType("KillerPDF.DialogChrome", true)!.GetMethod("Frame")!;
+        var windows = new List<Window>();
+        var clicks = new Dictionary<Button, int>();
+        void Theme(string name) => apply.Invoke(null, [Enum.Parse(themes, name)]);
+        Button[] Open()
+        {
+            var window = new Window { Owner = owner, Width = 600, Height = 200, WindowStyle = WindowStyle.None,
+                ResizeMode = ResizeMode.NoResize, ShowInTaskbar = false, WindowStartupLocation = WindowStartupLocation.CenterOwner };
+            var body = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Center };
+            Button[] buttons = new[] { false, true }.Select(accent => (Button)make.Invoke(null, ["Continue", accent])!).ToArray();
+            foreach (Button button in buttons)
+            {
+                button.Width = 140; button.Height = 40; button.Margin = new Thickness(12);
+                clicks.Add(button, 0);
+                button.Click += (_, _) => clicks[button]++;
+                body.Children.Add(button);
+            }
+            window.Content = build.Invoke(null, [window, owner, "KillerPDF - Button controls", (Action)window.Close, body, null]);
+            windows.Add(window); window.Show();
+            Wait(() => buttons.All(button => button.IsVisible && button.IsEnabled && button.ActualWidth == 140 && button.ActualHeight == 40), "public factory buttons laid out");
+            return buttons;
+        }
+        byte[] Render(Button button, string name)
+        {
+            button.UpdateLayout();
+            Console.WriteLine($"CONTROL button render {name}: hover={button.IsMouseOver}, pressed={button.IsPressed}, enabled={button.IsEnabled}, keyboardFocus={button.IsKeyboardFocused}, size={button.ActualWidth}x{button.ActualHeight}.");
+            if (invokeActions && (button.IsMouseOver || button.IsPressed || !button.IsEnabled))
+                throw new InvalidOperationException("Button rest-render readiness changed its hover, pressed or enabled state.");
+            var visual = new DrawingVisual();
+            using (DrawingContext drawing = visual.RenderOpen())
+                drawing.DrawRectangle(new VisualBrush(button), null, new Rect(0, 0, 140, 40));
+            var bitmap = new RenderTargetBitmap(140, 40, 96, 96, PixelFormats.Pbgra32);
+            bitmap.Render(visual);
+            byte[] pixels = new byte[140 * 40 * 4]; bitmap.CopyPixels(pixels, 140 * 4, 0);
+            if (!Enumerable.Range(0, pixels.Length / 4).Any(index => pixels[index * 4 + 3] > 0))
+                throw new InvalidOperationException("The owned button render has no painted pixels.");
+            var encoder = new PngBitmapEncoder(); encoder.Frames.Add(BitmapFrame.Create(bitmap));
+            using var stream = new MemoryStream(); encoder.Save(stream);
+            byte[] bytes = stream.ToArray(); File.WriteAllBytes(Path.Combine(folder, name + ".png"), bytes);
+            return bytes;
+        }
+        void LabelControl(Button button, byte[] present, string name)
+        {
+            object label = button.Content;
+            try
+            {
+                button.Content = null;
+                if (Render(button, name + "-label-absent").AsSpan().SequenceEqual(present))
+                    throw new InvalidOperationException("The button label render did not distinguish its presence and absence controls.");
+            }
+            finally { button.Content = label; button.UpdateLayout(); }
+        }
+        void InvokeActions(Button[] buttons, int expected)
+        {
+            foreach (Button button in buttons)
+            {
+                var invoke = (IInvokeProvider)new ButtonAutomationPeer(button).GetPattern(PatternInterface.Invoke)!;
+                invoke.Invoke();
+                Wait(() => clicks[button] == expected, "same factory button action after theme transition");
+                button.IsEnabled = false;
+                try
+                {
+                    try { invoke.Invoke(); throw new InvalidOperationException("Disabled factory button accepted Invoke."); }
+                    catch (System.Windows.Automation.ElementNotEnabledException) { }
+                    if (clicks[button] != expected) throw new InvalidOperationException("Disabled button changed its action count.");
+                }
+                finally { button.IsEnabled = true; }
+            }
+            Console.WriteLine($"CONTROL factory button actions: both callbacks={expected}, disabled Invoke refused.");
+        }
+        try
+        {
+            Theme("Dark"); Button[] original = Open();
+            byte[][] before = original.Select((button, index) => Render(button, "buttons-dark-before-" + index)).ToArray();
+            for (int index = 0; index < 2; index++) LabelControl(original[index], before[index], "buttons-dark-" + index);
+            Theme("SE98"); Button[] fresh = Open();
+            byte[][] expected = fresh.Select((button, index) => Render(button, "buttons-classic-fresh-" + index)).ToArray();
+            for (int index = 0; index < 2; index++) LabelControl(fresh[index], expected[index], "buttons-classic-" + index);
+            for (int index = 0; index < 2; index++)
+                if (before[index].AsSpan().SequenceEqual(expected[index]))
+                    throw new InvalidOperationException("Independent Dark and classic button render controls did not differ.");
+            windows[1].Close();
+            for (int index = 0; index < 2; index++)
+            {
+                byte[] actual = Render(original[index], "buttons-classic-transition-" + index);
+                Console.WriteLine($"CONTROL button transition: accent={index == 1}, matchesFreshClassic={actual.AsSpan().SequenceEqual(expected[index])}.");
+                if (!actual.AsSpan().SequenceEqual(expected[index]))
+                    throw new InvalidOperationException("An open dialog button did not adopt the independent fresh classic appearance.");
+            }
+            if (invokeActions) InvokeActions(original, 1);
+            Theme("Dark");
+            for (int index = 0; index < 2; index++)
+                if (!Render(original[index], "buttons-dark-restored-" + index).AsSpan().SequenceEqual(before[index]))
+                    throw new InvalidOperationException("An open dialog button did not restore its original Dark appearance.");
+            if (invokeActions)
+            {
+                InvokeActions(original, 2);
+                Console.WriteLine("PASS dialog button actions: same secondary and accent controls invoke once after each theme transition and refuse disabled Invoke.");
+            }
+            Console.WriteLine("PASS dialog button transitions: existing secondary and accent buttons match fresh classic controls and restore Dark.");
+            return 0;
+        }
+        finally { foreach (Window window in windows) if (window.IsVisible) window.Close(); Theme("Dark"); }
+    }
+
     internal static int RunCloseControls(Window owner, string folder, bool nativePointer = false, bool nativeKeyboard = false)
     {
         Rect work = SystemParameters.WorkArea;

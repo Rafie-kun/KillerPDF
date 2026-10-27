@@ -214,6 +214,10 @@ internal static class TableExportSmoke
                 return TooltipCursorSmoke.RunPlacementControls(owner, folder);
             if (windowSessionCase == "--verify-page-navigation-caption-theme")
                 return CaptionThemeSmoke.Run(owner, folder);
+            if (windowSessionCase == "--verify-page-navigation-dialog-buttons-theme")
+                return CaptionThemeSmoke.RunButtonTransitions(owner, folder);
+            if (windowSessionCase == "--verify-page-navigation-dialog-button-actions")
+                return CaptionThemeSmoke.RunButtonTransitions(owner, folder, invokeActions: true);
             if (windowSessionCase == "--verify-page-navigation-caption-frame-theme")
                 return CaptionThemeSmoke.Run(owner, folder, frameGeometry: true);
             if (windowSessionCase == "--verify-page-navigation-caption-close")
