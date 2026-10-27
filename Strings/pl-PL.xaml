@@ -1314,9 +1314,16 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_TT_OcrOptions">Opcje OCR</sys:String>
     <sys:String x:Key="Str_RecentHeading">OSTATNIE</sys:String>
     <sys:String x:Key="Str_KS_WindowTitle">KillerPDF - Skróty klawiaturowe</sys:String>
-    <sys:String x:Key="Str_UpdateAvailable">Dostępna aktualizacja: {0}</sys:String>
-    <sys:String x:Key="Str_UpdatePrompt" xml:space="preserve">Pobrać i zainstalować KillerPDF {0}?&#10;&#10;Aplikacja zamknie się i otworzy ponownie automatycznie.</sys:String>
-    <sys:String x:Key="Str_UpdateDownloading">Pobieranie...</sys:String>
+    <sys:String x:Key="Str_About_UpdateAvailable">Dostępna aktualizacja: {0}</sys:String>
+    <sys:String x:Key="Str_About_Unsigned">(not signed or chain failed)</sys:String>
+    <sys:String x:Key="Str_About_Downloading">Pobieranie...</sys:String>
+    <sys:String x:Key="Str_About_UpdateHeading">Pobrać i zainstalować {0} {1}?</sys:String>
+    <sys:String x:Key="Str_About_UpdateDetail">Aplikacja zamknie się i otworzy ponownie automatycznie.</sys:String>
+    <sys:String x:Key="Str_About_StartupUpdateHeading">Dostępny jest {0} {1}</sys:String>
+    <sys:String x:Key="Str_About_StartupUpdateDetail">Czy chcesz go teraz pobrać i zainstalować? Aplikacja zamknie się i otworzy ponownie automatycznie.</sys:String>
+    <sys:String x:Key="Str_About_UpdateNow">Aktualizuj</sys:String>
+    <sys:String x:Key="Str_About_NotNow">Nie teraz</sys:String>
+    <sys:String x:Key="Str_About_AlwaysCheckOnStartup">Zawsze sprawdzaj aktualizacje przy uruchamianiu</sys:String>
     <sys:String x:Key="Str_UpdateRestartPrepareFailed">Nie udało się przygotować aktualizacji. Twoje zapisane pliki PDF pozostają bez zmian. Spróbuj ponownie.</sys:String>
     <sys:String x:Key="Str_UpdateRestartRestoreFailed">KillerPDF nie mógł ponownie otworzyć poprzedniej sesji. Twoje zapisane pliki PDF pozostają bez zmian.</sys:String>
     <sys:String x:Key="Str_ClearAllData">Wyczyść wszystkie dane</sys:String>
@@ -1530,8 +1537,6 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_KS_EnabledStatus">Skróty klawiaturowe włączone</sys:String>
     <sys:String x:Key="Str_KS_DisabledStatus">Skróty klawiaturowe wyłączone. Naciśnij Ctrl+Shift+K, aby je włączyć.</sys:String>
     <sys:String x:Key="Str_StartupUpdateCheck">Sprawdzaj aktualizacje przy uruchamianiu</sys:String>
-    <sys:String x:Key="Str_StartupUpdatePrompt" xml:space="preserve">Dostępny jest KillerPDF {0}. Czy chcesz go teraz pobrać i zainstalować?&#10;&#10;Aplikacja zamknie się i otworzy ponownie automatycznie.</sys:String>
-    <sys:String x:Key="Str_AlwaysCheckOnStartup">Zawsze sprawdzaj aktualizacje przy uruchamianiu</sys:String>
     <sys:String x:Key="Str_PasswordProtected">Plik „{0}” jest chroniony hasłem.</sys:String>
     <sys:String x:Key="Str_About_Aka">Znany także jako</sys:String>
     <sys:String x:Key="Str_Btn_Run">Uruchom</sys:String>

@@ -35,6 +35,17 @@ public sealed class CommandLinePathTests
     }
 
     [Fact]
+    public void RelativeEntriesNeverNameTheInstallFolder()
+    {
+        string folder = Environment.CurrentDirectory;
+        string drive = folder[..2];
+
+        Assert.False(CommandLinePath.SameDirectory(".", folder));
+        Assert.False(CommandLinePath.SameDirectory(drive + Path.GetFileName(folder), folder));
+        Assert.Equal(@".;C:\Tools", CommandLinePath.WithoutEntry(@".;C:\Tools;" + folder, folder));
+    }
+
+    [Fact]
     public void KeepsUnexpandedEntriesAndTheRegistryTypeOfPath()
     {
         string name = @"Software\KillerPDF-PathTest-" + Guid.NewGuid().ToString("N");

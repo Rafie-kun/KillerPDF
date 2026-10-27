@@ -1325,9 +1325,16 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_TT_OcrOptions">Options d'OCR</sys:String>
     <sys:String x:Key="Str_RecentHeading">RÉCENTS</sys:String>
     <sys:String x:Key="Str_KS_WindowTitle">KillerPDF - Raccourcis clavier</sys:String>
-    <sys:String x:Key="Str_UpdateAvailable">Mise à jour disponible : {0}</sys:String>
-    <sys:String x:Key="Str_UpdatePrompt" xml:space="preserve">Télécharger et installer KillerPDF {0} ?&#10;&#10;L'application se fermera et rouvrira automatiquement.</sys:String>
-    <sys:String x:Key="Str_UpdateDownloading">Téléchargement...</sys:String>
+    <sys:String x:Key="Str_About_UpdateAvailable">Mise à jour disponible : {0}</sys:String>
+    <sys:String x:Key="Str_About_Unsigned">(not signed or chain failed)</sys:String>
+    <sys:String x:Key="Str_About_Downloading">Téléchargement...</sys:String>
+    <sys:String x:Key="Str_About_UpdateHeading">Télécharger et installer {0} {1} ?</sys:String>
+    <sys:String x:Key="Str_About_UpdateDetail">L'application se fermera et se rouvrira automatiquement.</sys:String>
+    <sys:String x:Key="Str_About_StartupUpdateHeading">{0} {1} est disponible</sys:String>
+    <sys:String x:Key="Str_About_StartupUpdateDetail">Voulez-vous le télécharger et l'installer maintenant ? L'application se fermera et rouvrira automatiquement.</sys:String>
+    <sys:String x:Key="Str_About_UpdateNow">Mettre à jour</sys:String>
+    <sys:String x:Key="Str_About_NotNow">Pas maintenant</sys:String>
+    <sys:String x:Key="Str_About_AlwaysCheckOnStartup">Toujours rechercher les mises à jour au démarrage</sys:String>
     <sys:String x:Key="Str_UpdateRestartPrepareFailed">La mise à jour n'a pas pu être préparée. Vos fichiers PDF enregistrés sont inchangés. Veuillez réessayer.</sys:String>
     <sys:String x:Key="Str_UpdateRestartRestoreFailed">KillerPDF n'a pas pu rouvrir votre session précédente. Vos fichiers PDF enregistrés sont inchangés.</sys:String>
     <sys:String x:Key="Str_ClearAllData">Effacer toutes les données</sys:String>
@@ -1542,8 +1549,6 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_KS_EnabledStatus">Raccourcis clavier activés</sys:String>
     <sys:String x:Key="Str_KS_DisabledStatus">Raccourcis clavier désactivés. Appuyez sur Ctrl+Maj+K pour les activer.</sys:String>
     <sys:String x:Key="Str_StartupUpdateCheck">Rechercher les mises à jour au démarrage</sys:String>
-    <sys:String x:Key="Str_StartupUpdatePrompt" xml:space="preserve">KillerPDF {0} est disponible. Voulez-vous le télécharger et l'installer maintenant ?&#10;&#10;L'application se fermera et rouvrira automatiquement.</sys:String>
-    <sys:String x:Key="Str_AlwaysCheckOnStartup">Toujours rechercher les mises à jour au démarrage</sys:String>
     <sys:String x:Key="Str_PasswordProtected">« {0} » est protégé par un mot de passe.</sys:String>
     <sys:String x:Key="Str_About_Aka">Aussi connu sous le nom de</sys:String>
     <sys:String x:Key="Str_Btn_Run">Exécuter</sys:String>

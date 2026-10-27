@@ -1226,9 +1226,16 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_TT_OcrOptions">OCR параметрлері</sys:String>
     <sys:String x:Key="Str_RecentHeading">СОҢҒЫ</sys:String>
     <sys:String x:Key="Str_KS_WindowTitle">KillerPDF - Пернелер тіркесімі</sys:String>
-    <sys:String x:Key="Str_UpdateAvailable">Жаңарту бар: {0}</sys:String>
-    <sys:String x:Key="Str_UpdatePrompt" xml:space="preserve">KillerPDF {0} жүктеп орнату керек пе?&#10;&#10;Қолданба автоматты түрде жабылып, қайта ашылады.</sys:String>
-    <sys:String x:Key="Str_UpdateDownloading">Жүктелуде...</sys:String>
+    <sys:String x:Key="Str_About_UpdateAvailable">Жаңарту қолжетімді: {0}</sys:String>
+    <sys:String x:Key="Str_About_Unsigned">(not signed or chain failed)</sys:String>
+    <sys:String x:Key="Str_About_Downloading">Жүктелуде...</sys:String>
+    <sys:String x:Key="Str_About_UpdateHeading">{0} {1} жүктеп орнату керек пе?</sys:String>
+    <sys:String x:Key="Str_About_UpdateDetail">Қолданба жабылып, автоматты түрде қайта ашылады.</sys:String>
+    <sys:String x:Key="Str_About_StartupUpdateHeading">{0} {1} қолжетімді</sys:String>
+    <sys:String x:Key="Str_About_StartupUpdateDetail">Оны қазір жүктеп, орнатқыңыз келе ме? Қолданба автоматты түрде жабылып, қайта ашылады.</sys:String>
+    <sys:String x:Key="Str_About_UpdateNow">Жаңарту</sys:String>
+    <sys:String x:Key="Str_About_NotNow">Қазір емес</sys:String>
+    <sys:String x:Key="Str_About_AlwaysCheckOnStartup">Іске қосылғанда жаңартуларды әрдайым тексеру</sys:String>
     <sys:String x:Key="Str_UpdateRestartPrepareFailed">Жаңартуды дайындау мүмкін болмады. Сақталған PDF файлдарыңыз өзгерген жоқ. Қайталап көріңіз.</sys:String>
     <sys:String x:Key="Str_UpdateRestartRestoreFailed">KillerPDF алдыңғы жұмыс сеансын қайта аша алмады. Сақталған PDF файлдарыңыз өзгерген жоқ.</sys:String>
     <sys:String x:Key="Str_ClearAllData">Барлық деректерді тазалау</sys:String>
@@ -1545,8 +1552,6 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_KS_EnabledStatus">Пернелер тіркесімі қосулы</sys:String>
     <sys:String x:Key="Str_KS_DisabledStatus">Пернелер тіркесімі өшірулі. Қосу үшін Ctrl+Shift+K басыңыз.</sys:String>
     <sys:String x:Key="Str_StartupUpdateCheck">Іске қосылғанда жаңартуларды тексеру</sys:String>
-    <sys:String x:Key="Str_StartupUpdatePrompt" xml:space="preserve">KillerPDF {0} қолжетімді. Оны қазір жүктеп, орнатқыңыз келе ме?&#10;&#10;Қолданба автоматты түрде жабылып, қайта ашылады.</sys:String>
-    <sys:String x:Key="Str_AlwaysCheckOnStartup">Іске қосылғанда жаңартуларды әрдайым тексеру</sys:String>
     <sys:String x:Key="Str_PasswordProtected">«{0}» құпиясөзбен қорғалған.</sys:String>
     <sys:String x:Key="Str_About_Aka">Басқа аты</sys:String>
     <sys:String x:Key="Str_Btn_Run">Іске қосу</sys:String>

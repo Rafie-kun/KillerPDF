@@ -2857,7 +2857,7 @@
                                Foreground="{DynamicResource TextFooter}" FontFamily="{DynamicResource BrandSansFont}"
                                FontSize="16" TextOptions.TextFormattingMode="Ideal" VerticalAlignment="Center" Margin="0,0,12,0"
                                Cursor="Hand" ToolTip="{DynamicResource Str_TT_About}"
-                               MouseLeftButtonDown="VersionLabel_MouseLeftButtonDown"/>
+                               MouseLeftButtonDown="VersionLabel_Click"/>
                     <!-- 20px trailing margin keeps the copyright clear of the corner grip (family standard) -->
                     <TextBlock Opacity="0.75" FontSize="16" TextOptions.TextFormattingMode="Ideal" VerticalAlignment="Center"
                                FontFamily="{DynamicResource BrandSansFont}" Margin="0,0,20,0">
@@ -3079,8 +3079,8 @@
               Panel.ZIndex="10001"
               Visibility="Collapsed"
               Background="#88000000"
-              MouseLeftButtonDown="AboutOverlay_MouseLeftButtonDown"
-              MouseRightButtonDown="AboutOverlay_MouseLeftButtonDown">
+              MouseLeftButtonDown="AboutOverlay_Click"
+              MouseRightButtonDown="AboutOverlay_Click">
             <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
                 <!-- Shadow is cast by a separate element so the card content stays crisp; a
                      DropShadowEffect rasterizes whatever it is applied to, which softens text. -->
@@ -3093,8 +3093,8 @@
                         BorderBrush="{DynamicResource OverlayEdgeBrush}"
                         BorderThickness="1"
                         CornerRadius="{DynamicResource PanelCornerRadius}"
-                        MouseLeftButtonDown="AboutOverlayCard_MouseLeftButtonDown"
-                        MouseRightButtonDown="AboutOverlayCard_MouseLeftButtonDown">
+                        MouseLeftButtonDown="AboutCard_Click"
+                        MouseRightButtonDown="AboutCard_Click">
                 <Grid>
                 <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
                 <Border Grid.RowSpan="2" Panel.ZIndex="1" IsHitTestVisible="False" BorderBrush="{DynamicResource BevelLightBrush}" BorderThickness="{DynamicResource BevelLightThickness}"/>
@@ -3104,7 +3104,7 @@
                     <Grid Margin="5,0,2,0">
                         <TextBlock Text="KillerPDF" VerticalAlignment="Center" FontFamily="{DynamicResource ChromeFontFamily}"
                                    FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ChromeTextBrush}"/>
-                        <Button Click="AboutOverlayClose_Click" HorizontalAlignment="Right" VerticalAlignment="Center"
+                        <Button Click="AboutClose_Click" HorizontalAlignment="Right" VerticalAlignment="Center"
                                 Width="{DynamicResource AboutCloseWidth}" Height="{DynamicResource AboutCloseHeight}"
                                 Content="{DynamicResource AboutCloseGlyph}" Style="{StaticResource OverlayCloseButton}"/>
                     </Grid>
@@ -3186,7 +3186,7 @@
                                                FontFamily="{DynamicResource UiFont}" FontSize="12"
                                                Foreground="{DynamicResource PrimaryBrush}"
                                                HorizontalAlignment="Left" VerticalAlignment="Bottom"
-                                               Cursor="Hand"/>
+                                               Cursor="Hand" MouseLeftButtonDown="AboutVersion_Click"/>
                                     <TextBlock x:Name="AboutReleaseDateBlock"
                                                FontFamily="{DynamicResource UiFont}" FontSize="11"
                                                FontStyle="Italic"
@@ -3202,10 +3202,11 @@
                                            Foreground="{DynamicResource TextBrush}"/>
                                 <!-- Shown only on an exe signed by Steve; the certificate subject is
                                      the legal name, this ties it back to the name people know.
-                                     Inlines are built in About.cs like the tagline and version. -->
+                                     The kit About core fills AboutAkaRun and shows the line. -->
                                 <TextBlock x:Name="AboutAkaBlock" Visibility="Collapsed"
                                            FontFamily="{DynamicResource UiFont}" FontSize="11"
-                                           Foreground="{DynamicResource MutedTextBrush}" Margin="0,3,0,0"/>
+                                           Foreground="{DynamicResource MutedTextBrush}" Margin="0,3,0,0"><Run Text="{DynamicResource Str_About_Aka}"/><Run Text=" "/><Hyperlink NavigateUri="https://thekiller.net" RequestNavigate="AboutLink_Navigate"
+                                               Foreground="{DynamicResource PrimaryBrush}" TextDecorations="{x:Null}" ToolTip="thekiller.net"><Run x:Name="AboutAkaRun"/></Hyperlink></TextBlock>
                             </StackPanel>
                             <StackPanel Margin="0,0,0,10">
                                 <TextBlock Text="{DynamicResource Str_About_Thumbprint}" Foreground="{DynamicResource MutedTextBrush}"
@@ -3247,9 +3248,9 @@
                     <StackPanel Grid.Column="0">
                         <!-- First, like every Killer Tools About card: the way back after the
                              update prompt's "Always check on startup" box was cleared. -->
-                        <CheckBox x:Name="StartupUpdateCheck" Margin="0" Padding="10,0,10,0"
+                        <CheckBox x:Name="AboutStartupUpdateCheck" Margin="0" Padding="10,0,10,0"
                                   Style="{StaticResource ThemeCheck}" FontSize="11"
-                                  Click="StartupUpdateCheck_Click">
+                                  Click="AboutStartupUpdateCheck_Click">
                             <TextBlock Text="{DynamicResource Str_StartupUpdateCheck}" TextWrapping="Wrap"/>
                         </CheckBox>
                         <CheckBox x:Name="AboutCloseToTray" Margin="0,6,0,0" Padding="10,0,10,0"
@@ -3301,7 +3302,7 @@
                 </Grid>
                 <!-- Modern close: anchored to the CARD's corner (root grid), not pushed inward by
                      the content padding - KillerScan's geometry, taken as the reference. -->
-                <Button Grid.RowSpan="2" Click="AboutOverlayClose_Click"
+                <Button Grid.RowSpan="2" Click="AboutClose_Click"
                         HorizontalAlignment="Right" VerticalAlignment="Top" Panel.ZIndex="7"
                         Width="{DynamicResource AboutCloseWidth}" Height="{DynamicResource AboutCloseHeight}"
                         Margin="{DynamicResource AboutCloseMargin}"

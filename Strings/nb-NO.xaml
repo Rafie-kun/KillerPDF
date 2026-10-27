@@ -1325,9 +1325,16 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_TT_OcrOptions">OCR-valg</sys:String>
     <sys:String x:Key="Str_RecentHeading">NYLIG</sys:String>
     <sys:String x:Key="Str_KS_WindowTitle">KillerPDF - Hurtigtaster</sys:String>
-    <sys:String x:Key="Str_UpdateAvailable">Oppdatering tilgjengelig: {0}</sys:String>
-    <sys:String x:Key="Str_UpdatePrompt" xml:space="preserve">Vil du laste ned og installere KillerPDF {0}?&#10;&#10;Appen lukkes og åpnes på nytt automatisk.</sys:String>
-    <sys:String x:Key="Str_UpdateDownloading">Laster ned...</sys:String>
+    <sys:String x:Key="Str_About_UpdateAvailable">Oppdatering tilgjengelig: {0}</sys:String>
+    <sys:String x:Key="Str_About_Unsigned">(not signed or chain failed)</sys:String>
+    <sys:String x:Key="Str_About_Downloading">Laster ned...</sys:String>
+    <sys:String x:Key="Str_About_UpdateHeading">Laste ned og installere {0} {1}?</sys:String>
+    <sys:String x:Key="Str_About_UpdateDetail">Appen lukkes og åpnes automatisk igjen.</sys:String>
+    <sys:String x:Key="Str_About_StartupUpdateHeading">{0} {1} er tilgjengelig</sys:String>
+    <sys:String x:Key="Str_About_StartupUpdateDetail">Vil du laste den ned og installere den nå? Appen lukkes og åpnes på nytt automatisk.</sys:String>
+    <sys:String x:Key="Str_About_UpdateNow">Oppdater</sys:String>
+    <sys:String x:Key="Str_About_NotNow">Ikke nå</sys:String>
+    <sys:String x:Key="Str_About_AlwaysCheckOnStartup">Se alltid etter ved oppstart</sys:String>
     <sys:String x:Key="Str_UpdateRestartPrepareFailed">Oppdateringen kunne ikke klargjøres. De lagrede PDF-filene dine er uendret. Prøv igjen.</sys:String>
     <sys:String x:Key="Str_UpdateRestartRestoreFailed">KillerPDF kunne ikke åpne den forrige økten din på nytt. De lagrede PDF-filene dine er uendret.</sys:String>
     <sys:String x:Key="Str_ClearAllData">Tøm alle data</sys:String>
@@ -1542,8 +1549,6 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_KS_EnabledStatus">Hurtigtaster er slått på</sys:String>
     <sys:String x:Key="Str_KS_DisabledStatus">Hurtigtaster er slått av. Trykk Ctrl+Shift+K for å slå dem på.</sys:String>
     <sys:String x:Key="Str_StartupUpdateCheck">Se etter oppdateringer ved oppstart</sys:String>
-    <sys:String x:Key="Str_StartupUpdatePrompt" xml:space="preserve">KillerPDF {0} er tilgjengelig. Vil du laste den ned og installere den nå?&#10;&#10;Appen lukkes og åpnes på nytt automatisk.</sys:String>
-    <sys:String x:Key="Str_AlwaysCheckOnStartup">Se alltid etter ved oppstart</sys:String>
     <sys:String x:Key="Str_PasswordProtected">«{0}» er passordbeskyttet.</sys:String>
     <sys:String x:Key="Str_About_Aka">AKA</sys:String>
     <sys:String x:Key="Str_Btn_Run">Kjør</sys:String>

@@ -1325,9 +1325,16 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_TT_OcrOptions">Opções de OCR</sys:String>
     <sys:String x:Key="Str_RecentHeading">RECENTES</sys:String>
     <sys:String x:Key="Str_KS_WindowTitle">KillerPDF - Atalhos de teclado</sys:String>
-    <sys:String x:Key="Str_UpdateAvailable">Atualização disponível: {0}</sys:String>
-    <sys:String x:Key="Str_UpdatePrompt" xml:space="preserve">Baixar e instalar o KillerPDF {0}?&#10;&#10;O aplicativo será fechado e reaberto automaticamente.</sys:String>
-    <sys:String x:Key="Str_UpdateDownloading">Baixando...</sys:String>
+    <sys:String x:Key="Str_About_UpdateAvailable">Atualização disponível: {0}</sys:String>
+    <sys:String x:Key="Str_About_Unsigned">(not signed or chain failed)</sys:String>
+    <sys:String x:Key="Str_About_Downloading">Baixando...</sys:String>
+    <sys:String x:Key="Str_About_UpdateHeading">Baixar e instalar {0} {1}?</sys:String>
+    <sys:String x:Key="Str_About_UpdateDetail">O aplicativo será fechado e reaberto automaticamente.</sys:String>
+    <sys:String x:Key="Str_About_StartupUpdateHeading">O {0} {1} está disponível</sys:String>
+    <sys:String x:Key="Str_About_StartupUpdateDetail">Deseja baixá-lo e instalá-lo agora? O aplicativo será fechado e reaberto automaticamente.</sys:String>
+    <sys:String x:Key="Str_About_UpdateNow">Atualizar</sys:String>
+    <sys:String x:Key="Str_About_NotNow">Agora não</sys:String>
+    <sys:String x:Key="Str_About_AlwaysCheckOnStartup">Sempre verificar ao iniciar</sys:String>
     <sys:String x:Key="Str_UpdateRestartPrepareFailed">Não foi possível preparar a atualização. Seus arquivos PDF salvos não foram alterados. Tente novamente.</sys:String>
     <sys:String x:Key="Str_UpdateRestartRestoreFailed">O KillerPDF não conseguiu reabrir sua sessão anterior. Seus arquivos PDF salvos não foram alterados.</sys:String>
     <sys:String x:Key="Str_ClearAllData">Apagar todos os dados</sys:String>
@@ -1542,8 +1549,6 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_KS_EnabledStatus">Atalhos de teclado ativados</sys:String>
     <sys:String x:Key="Str_KS_DisabledStatus">Atalhos de teclado desativados. Pressione Ctrl+Shift+K para ativá-los.</sys:String>
     <sys:String x:Key="Str_StartupUpdateCheck">Verificar atualizações ao iniciar</sys:String>
-    <sys:String x:Key="Str_StartupUpdatePrompt" xml:space="preserve">O KillerPDF {0} está disponível. Deseja baixá-lo e instalá-lo agora?&#10;&#10;O aplicativo será fechado e reaberto automaticamente.</sys:String>
-    <sys:String x:Key="Str_AlwaysCheckOnStartup">Sempre verificar ao iniciar</sys:String>
     <sys:String x:Key="Str_PasswordProtected">“{0}” é protegido por senha.</sys:String>
     <sys:String x:Key="Str_About_Aka">AKA</sys:String>
     <sys:String x:Key="Str_Btn_Run">Executar</sys:String>

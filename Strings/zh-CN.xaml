@@ -1310,9 +1310,16 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_TT_OcrOptions">OCR 选项</sys:String>
     <sys:String x:Key="Str_RecentHeading">最近</sys:String>
     <sys:String x:Key="Str_KS_WindowTitle">KillerPDF - 键盘快捷键</sys:String>
-    <sys:String x:Key="Str_UpdateAvailable">有可用更新: {0}</sys:String>
-    <sys:String x:Key="Str_UpdatePrompt" xml:space="preserve">下载并安装 KillerPDF {0} 吗?&#10;&#10;应用将关闭并自动重新打开。</sys:String>
-    <sys:String x:Key="Str_UpdateDownloading">正在下载...</sys:String>
+    <sys:String x:Key="Str_About_UpdateAvailable">有可用更新: {0}</sys:String>
+    <sys:String x:Key="Str_About_Unsigned">(not signed or chain failed)</sys:String>
+    <sys:String x:Key="Str_About_Downloading">下载中...</sys:String>
+    <sys:String x:Key="Str_About_UpdateHeading">下载并安装 {0} {1}?</sys:String>
+    <sys:String x:Key="Str_About_UpdateDetail">应用会自动关闭并重新打开。</sys:String>
+    <sys:String x:Key="Str_About_StartupUpdateHeading">{0} {1} 已发布</sys:String>
+    <sys:String x:Key="Str_About_StartupUpdateDetail">是否立即下载并安装？应用将关闭并自动重新打开。</sys:String>
+    <sys:String x:Key="Str_About_UpdateNow">更新</sys:String>
+    <sys:String x:Key="Str_About_NotNow">以后再说</sys:String>
+    <sys:String x:Key="Str_About_AlwaysCheckOnStartup">启动时始终检查更新</sys:String>
     <sys:String x:Key="Str_UpdateRestartPrepareFailed">无法准备更新。已保存的 PDF 文件未发生更改。请重试。</sys:String>
     <sys:String x:Key="Str_UpdateRestartRestoreFailed">KillerPDF 无法重新打开上次的工作会话。已保存的 PDF 文件未发生更改。</sys:String>
     <sys:String x:Key="Str_ClearAllData">清除所有数据</sys:String>
@@ -1526,8 +1533,6 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_KS_EnabledStatus">键盘快捷键已启用</sys:String>
     <sys:String x:Key="Str_KS_DisabledStatus">键盘快捷键已禁用。按 Ctrl+Shift+K 可启用。</sys:String>
     <sys:String x:Key="Str_StartupUpdateCheck">启动时检查更新</sys:String>
-    <sys:String x:Key="Str_StartupUpdatePrompt" xml:space="preserve">KillerPDF {0} 已发布。是否立即下载并安装？&#10;&#10;应用将关闭并自动重新打开。</sys:String>
-    <sys:String x:Key="Str_AlwaysCheckOnStartup">启动时始终检查更新</sys:String>
     <sys:String x:Key="Str_PasswordProtected">“{0}”受密码保护。</sys:String>
     <sys:String x:Key="Str_About_Aka">别名</sys:String>
     <sys:String x:Key="Str_Btn_Run">运行</sys:String>

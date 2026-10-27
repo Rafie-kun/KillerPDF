@@ -1325,9 +1325,16 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_TT_OcrOptions">OCR options</sys:String>
     <sys:String x:Key="Str_RecentHeading">RECENT</sys:String>
     <sys:String x:Key="Str_KS_WindowTitle">KillerPDF: Keyboard Shortcuts</sys:String>
-    <sys:String x:Key="Str_UpdateAvailable">Update available: {0}</sys:String>
-    <sys:String x:Key="Str_UpdatePrompt" xml:space="preserve">Download and install KillerPDF {0}?&#10;&#10;The app will close and reopen automatically.</sys:String>
-    <sys:String x:Key="Str_UpdateDownloading">Downloading...</sys:String>
+    <sys:String x:Key="Str_About_UpdateAvailable">Update available: {0}</sys:String>
+    <sys:String x:Key="Str_About_Unsigned">(not signed or chain failed)</sys:String>
+    <sys:String x:Key="Str_About_Downloading">Downloading...</sys:String>
+    <sys:String x:Key="Str_About_UpdateHeading">Download and install {0} {1}?</sys:String>
+    <sys:String x:Key="Str_About_UpdateDetail">The app will close and reopen automatically.</sys:String>
+    <sys:String x:Key="Str_About_StartupUpdateHeading">{0} {1} is available</sys:String>
+    <sys:String x:Key="Str_About_StartupUpdateDetail">Would you like to download and install it now? The app will close and reopen automatically.</sys:String>
+    <sys:String x:Key="Str_About_UpdateNow">Update</sys:String>
+    <sys:String x:Key="Str_About_NotNow">Not now</sys:String>
+    <sys:String x:Key="Str_About_AlwaysCheckOnStartup">Always check on startup</sys:String>
     <sys:String x:Key="Str_UpdateRestartPrepareFailed">The update couldn't be prepared. Your saved PDFs are unchanged. Please try again.</sys:String>
     <sys:String x:Key="Str_UpdateRestartRestoreFailed">KillerPDF couldn't reopen your previous session. Your saved PDF files are unchanged.</sys:String>
     <sys:String x:Key="Str_ClearAllData">Clear all Data</sys:String>
@@ -1542,8 +1549,6 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_KS_EnabledStatus">Keyboard shortcuts enabled</sys:String>
     <sys:String x:Key="Str_KS_DisabledStatus">Keyboard shortcuts disabled. Press Ctrl+Shift+K to enable them.</sys:String>
     <sys:String x:Key="Str_StartupUpdateCheck">Check for updates on startup</sys:String>
-    <sys:String x:Key="Str_StartupUpdatePrompt" xml:space="preserve">KillerPDF {0} is available. Would you like to download and install it now?&#10;&#10;The app will close and reopen automatically.</sys:String>
-    <sys:String x:Key="Str_AlwaysCheckOnStartup">Always check on startup</sys:String>
     <sys:String x:Key="Str_PasswordProtected">“{0}” is password protected.</sys:String>
     <sys:String x:Key="Str_About_Aka">AKA</sys:String>
     <sys:String x:Key="Str_Btn_Run">Run</sys:String>

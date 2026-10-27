@@ -1328,9 +1328,16 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_TT_OcrOptions">Параметры распознавания текста</sys:String>
     <sys:String x:Key="Str_RecentHeading">НЕДАВНЕЕ</sys:String>
     <sys:String x:Key="Str_KS_WindowTitle">KillerPDF - Сочетания клавиш</sys:String>
-    <sys:String x:Key="Str_UpdateAvailable">Доступно обновление: {0}</sys:String>
-    <sys:String x:Key="Str_UpdatePrompt" xml:space="preserve">Скачать и установить KillerPDF {0}?&#10;&#10;Приложение закроется и снова откроется автоматически.</sys:String>
-    <sys:String x:Key="Str_UpdateDownloading">Загрузка...</sys:String>
+    <sys:String x:Key="Str_About_UpdateAvailable">Доступно обновление: {0}</sys:String>
+    <sys:String x:Key="Str_About_Unsigned">(not signed or chain failed)</sys:String>
+    <sys:String x:Key="Str_About_Downloading">Загрузка...</sys:String>
+    <sys:String x:Key="Str_About_UpdateHeading">Загрузить и установить {0} {1}?</sys:String>
+    <sys:String x:Key="Str_About_UpdateDetail">Приложение закроется и откроется снова автоматически.</sys:String>
+    <sys:String x:Key="Str_About_StartupUpdateHeading">Доступен {0} {1}</sys:String>
+    <sys:String x:Key="Str_About_StartupUpdateDetail">Хотите скачать и установить его сейчас? Приложение закроется и снова откроется автоматически.</sys:String>
+    <sys:String x:Key="Str_About_UpdateNow">Обновить</sys:String>
+    <sys:String x:Key="Str_About_NotNow">Не сейчас</sys:String>
+    <sys:String x:Key="Str_About_AlwaysCheckOnStartup">Всегда проверять обновления при запуске</sys:String>
     <sys:String x:Key="Str_UpdateRestartPrepareFailed">Не удалось подготовить обновление. Ваши сохранённые PDF-файлы не изменены. Попробуйте ещё раз.</sys:String>
     <sys:String x:Key="Str_UpdateRestartRestoreFailed">KillerPDF не удалось снова открыть предыдущий сеанс работы. Ваши сохранённые PDF-файлы не изменены.</sys:String>
     <sys:String x:Key="Str_ClearAllData">Очистить все данные</sys:String>
@@ -1545,8 +1552,6 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_KS_EnabledStatus">Сочетания клавиш включены</sys:String>
     <sys:String x:Key="Str_KS_DisabledStatus">Сочетания клавиш отключены. Нажмите Ctrl+Shift+K, чтобы включить их.</sys:String>
     <sys:String x:Key="Str_StartupUpdateCheck">Проверять обновления при запуске</sys:String>
-    <sys:String x:Key="Str_StartupUpdatePrompt" xml:space="preserve">Доступен KillerPDF {0}. Хотите скачать и установить его сейчас?&#10;&#10;Приложение закроется и снова откроется автоматически.</sys:String>
-    <sys:String x:Key="Str_AlwaysCheckOnStartup">Всегда проверять обновления при запуске</sys:String>
     <sys:String x:Key="Str_PasswordProtected">«{0}» защищен паролем.</sys:String>
     <sys:String x:Key="Str_About_Aka">Также известен как</sys:String>
     <sys:String x:Key="Str_Btn_Run">Запустить</sys:String>

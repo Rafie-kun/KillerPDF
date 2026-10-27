@@ -1306,9 +1306,16 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_TT_OcrOptions">OCR বিকল্প</sys:String>
     <sys:String x:Key="Str_RecentHeading">সাম্প্রতিক</sys:String>
     <sys:String x:Key="Str_KS_WindowTitle">KillerPDF - কীবোর্ড শর্টকাট</sys:String>
-    <sys:String x:Key="Str_UpdateAvailable">আপডেট উপলব্ধ: {0}</sys:String>
-    <sys:String x:Key="Str_UpdatePrompt" xml:space="preserve">KillerPDF {0} ডাউনলোড করে ইনস্টল করবেন?&#10;&#10;অ্যাপটি বন্ধ হয়ে স্বয়ংক্রিয়ভাবে আবার খুলবে।</sys:String>
-    <sys:String x:Key="Str_UpdateDownloading">ডাউনলোড হচ্ছে...</sys:String>
+    <sys:String x:Key="Str_About_UpdateAvailable">আপডেট আছে: {0}</sys:String>
+    <sys:String x:Key="Str_About_Unsigned">(not signed or chain failed)</sys:String>
+    <sys:String x:Key="Str_About_Downloading">ডাউনলোড হচ্ছে...</sys:String>
+    <sys:String x:Key="Str_About_UpdateHeading">{0} {1} ডাউনলোড করে ইনস্টল করবেন?</sys:String>
+    <sys:String x:Key="Str_About_UpdateDetail">অ্যাপটি নিজে থেকে বন্ধ হয়ে আবার খুলবে।</sys:String>
+    <sys:String x:Key="Str_About_StartupUpdateHeading">{0} {1} উপলব্ধ</sys:String>
+    <sys:String x:Key="Str_About_StartupUpdateDetail">এখনই এটি ডাউনলোড করে ইনস্টল করবেন? অ্যাপটি বন্ধ হয়ে স্বয়ংক্রিয়ভাবে আবার খুলবে।</sys:String>
+    <sys:String x:Key="Str_About_UpdateNow">আপডেট</sys:String>
+    <sys:String x:Key="Str_About_NotNow">এখন নয়</sys:String>
+    <sys:String x:Key="Str_About_AlwaysCheckOnStartup">অ্যাপ চালু হলে সর্বদা আপডেট পরীক্ষা করুন</sys:String>
     <sys:String x:Key="Str_UpdateRestartPrepareFailed">আপডেটটি প্রস্তুত করা যায়নি। আপনার সংরক্ষিত PDF ফাইলগুলো অপরিবর্তিত আছে। অনুগ্রহ করে আবার চেষ্টা করুন।</sys:String>
     <sys:String x:Key="Str_UpdateRestartRestoreFailed">KillerPDF আপনার আগের কাজের সেশনটি আবার খুলতে পারেনি। আপনার সংরক্ষিত PDF ফাইলগুলো অপরিবর্তিত আছে।</sys:String>
     <sys:String x:Key="Str_ClearAllData">সব ডেটা মুছুন</sys:String>
@@ -1522,8 +1529,6 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_KS_EnabledStatus">কীবোর্ড শর্টকাট চালু আছে</sys:String>
     <sys:String x:Key="Str_KS_DisabledStatus">কীবোর্ড শর্টকাট বন্ধ আছে। চালু করতে Ctrl+Shift+K চাপুন।</sys:String>
     <sys:String x:Key="Str_StartupUpdateCheck">অ্যাপ চালু হলে আপডেট পরীক্ষা করুন</sys:String>
-    <sys:String x:Key="Str_StartupUpdatePrompt" xml:space="preserve">KillerPDF {0} উপলব্ধ। এখনই এটি ডাউনলোড করে ইনস্টল করবেন?&#10;&#10;অ্যাপটি বন্ধ হয়ে স্বয়ংক্রিয়ভাবে আবার খুলবে।</sys:String>
-    <sys:String x:Key="Str_AlwaysCheckOnStartup">অ্যাপ চালু হলে সর্বদা আপডেট পরীক্ষা করুন</sys:String>
     <sys:String x:Key="Str_PasswordProtected">“{0}” পাসওয়ার্ড দিয়ে সুরক্ষিত।</sys:String>
     <sys:String x:Key="Str_About_Aka">অন্য নাম</sys:String>
     <sys:String x:Key="Str_Btn_Run">চালু করুন</sys:String>

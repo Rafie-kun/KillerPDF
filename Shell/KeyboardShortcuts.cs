@@ -716,7 +716,7 @@ namespace KillerPDF.Shell
         {
             if (AboutOverlay.Visibility == Visibility.Visible) FadeOverlayOut(AboutOverlay);
             ApplyPersistedShortcutView();
-            FadeOverlayIn(ShortcutsOverlay);
+            FadePanelIn(ShortcutsOverlay);
         }
 
         // ── Jump history (Alt+Left / Alt+Right / mouse back-forward buttons) ─────────────────────

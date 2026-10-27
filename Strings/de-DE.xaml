@@ -1315,9 +1315,16 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_TT_OcrOptions">OCR-Optionen</sys:String>
     <sys:String x:Key="Str_RecentHeading">ZULETZT</sys:String>
     <sys:String x:Key="Str_KS_WindowTitle">KillerPDF - Tastenkürzel</sys:String>
-    <sys:String x:Key="Str_UpdateAvailable">Update verfügbar: {0}</sys:String>
-    <sys:String x:Key="Str_UpdatePrompt" xml:space="preserve">KillerPDF {0} herunterladen und installieren?&#10;&#10;Die App wird geschlossen und automatisch neu geöffnet.</sys:String>
-    <sys:String x:Key="Str_UpdateDownloading">Wird heruntergeladen...</sys:String>
+    <sys:String x:Key="Str_About_UpdateAvailable">Update verfügbar: {0}</sys:String>
+    <sys:String x:Key="Str_About_Unsigned">(not signed or chain failed)</sys:String>
+    <sys:String x:Key="Str_About_Downloading">Wird heruntergeladen...</sys:String>
+    <sys:String x:Key="Str_About_UpdateHeading">{0} {1} herunterladen und installieren?</sys:String>
+    <sys:String x:Key="Str_About_UpdateDetail">Die App wird automatisch geschlossen und neu geöffnet.</sys:String>
+    <sys:String x:Key="Str_About_StartupUpdateHeading">{0} {1} ist verfügbar</sys:String>
+    <sys:String x:Key="Str_About_StartupUpdateDetail">Möchten Sie diese Version jetzt herunterladen und installieren? Die App wird geschlossen und automatisch neu geöffnet.</sys:String>
+    <sys:String x:Key="Str_About_UpdateNow">Aktualisieren</sys:String>
+    <sys:String x:Key="Str_About_NotNow">Nicht jetzt</sys:String>
+    <sys:String x:Key="Str_About_AlwaysCheckOnStartup">Beim Start immer nach Updates suchen</sys:String>
     <sys:String x:Key="Str_UpdateRestartPrepareFailed">Das Update konnte nicht vorbereitet werden. Ihre gespeicherten PDF-Dateien sind unverändert. Bitte versuchen Sie es erneut.</sys:String>
     <sys:String x:Key="Str_UpdateRestartRestoreFailed">KillerPDF konnte Ihre vorherige Sitzung nicht wieder öffnen. Ihre gespeicherten PDF-Dateien sind unverändert.</sys:String>
     <sys:String x:Key="Str_ClearAllData">Alle Daten löschen</sys:String>
@@ -1531,8 +1538,6 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_KS_EnabledStatus">Tastenkürzel aktiviert</sys:String>
     <sys:String x:Key="Str_KS_DisabledStatus">Tastenkürzel deaktiviert. Zum Aktivieren Strg+Umschalt+K drücken.</sys:String>
     <sys:String x:Key="Str_StartupUpdateCheck">Beim Start nach Updates suchen</sys:String>
-    <sys:String x:Key="Str_StartupUpdatePrompt" xml:space="preserve">KillerPDF {0} ist verfügbar. Möchten Sie diese Version jetzt herunterladen und installieren?&#10;&#10;Die App wird geschlossen und automatisch neu geöffnet.</sys:String>
-    <sys:String x:Key="Str_AlwaysCheckOnStartup">Beim Start immer nach Updates suchen</sys:String>
     <sys:String x:Key="Str_PasswordProtected">„{0}“ ist passwortgeschützt.</sys:String>
     <sys:String x:Key="Str_About_Aka">Auch bekannt als</sys:String>
     <sys:String x:Key="Str_Btn_Run">Starten</sys:String>

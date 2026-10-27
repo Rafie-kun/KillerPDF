@@ -43,7 +43,7 @@ namespace KillerPDF.Shell
         }
 
         // ── Quick fade in/out for the full-window overlay panels (Shortcuts/About) ──
-        private static void FadeOverlayIn(UIElement el)
+        private static void FadePanelIn(UIElement el)
         {
             el.BeginAnimation(UIElement.OpacityProperty, null);
             el.Opacity = 0;
@@ -53,7 +53,7 @@ namespace KillerPDF.Shell
                 { EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut } });
         }
 
-        private static void FadeOverlayOut(UIElement el, Action? done = null)
+        private static void FadePanelOut(UIElement el, Action? done = null)
         {
             if (el.Visibility != Visibility.Visible) { done?.Invoke(); return; }
             var anim = new DoubleAnimation(1, 0, new Duration(TimeSpan.FromMilliseconds(90)))

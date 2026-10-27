@@ -1311,9 +1311,16 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_TT_OcrOptions">Možnosti OCR</sys:String>
     <sys:String x:Key="Str_RecentHeading">NEDÁVNÉ</sys:String>
     <sys:String x:Key="Str_KS_WindowTitle">KillerPDF - Klávesové zkratky</sys:String>
-    <sys:String x:Key="Str_UpdateAvailable">K dispozici je aktualizace: {0}</sys:String>
-    <sys:String x:Key="Str_UpdatePrompt" xml:space="preserve">Stáhnout a nainstalovat KillerPDF {0}?&#10;&#10;Aplikace se zavře a automaticky znovu otevře.</sys:String>
-    <sys:String x:Key="Str_UpdateDownloading">Stahování...</sys:String>
+    <sys:String x:Key="Str_About_UpdateAvailable">Dostupná aktualizace: {0}</sys:String>
+    <sys:String x:Key="Str_About_Unsigned">(not signed or chain failed)</sys:String>
+    <sys:String x:Key="Str_About_Downloading">Stahování...</sys:String>
+    <sys:String x:Key="Str_About_UpdateHeading">Stáhnout a nainstalovat {0} {1}?</sys:String>
+    <sys:String x:Key="Str_About_UpdateDetail">Aplikace se automaticky zavře a znovu otevře.</sys:String>
+    <sys:String x:Key="Str_About_StartupUpdateHeading">Je k dispozici {0} {1}</sys:String>
+    <sys:String x:Key="Str_About_StartupUpdateDetail">Chcete jej nyní stáhnout a nainstalovat? Aplikace se zavře a automaticky znovu otevře.</sys:String>
+    <sys:String x:Key="Str_About_UpdateNow">Aktualizovat</sys:String>
+    <sys:String x:Key="Str_About_NotNow">Teď ne</sys:String>
+    <sys:String x:Key="Str_About_AlwaysCheckOnStartup">Vždy kontrolovat aktualizace při spuštění</sys:String>
     <sys:String x:Key="Str_UpdateRestartPrepareFailed">Aktualizaci se nepodařilo připravit. Vaše uložené soubory PDF zůstaly beze změny. Zkuste to prosím znovu.</sys:String>
     <sys:String x:Key="Str_UpdateRestartRestoreFailed">KillerPDF nemohl znovu otevřít vaši předchozí relaci. Vaše uložené soubory PDF zůstaly beze změny.</sys:String>
     <sys:String x:Key="Str_ClearAllData">Vymazat všechna data</sys:String>
@@ -1527,8 +1534,6 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_KS_EnabledStatus">Klávesové zkratky jsou zapnuté</sys:String>
     <sys:String x:Key="Str_KS_DisabledStatus">Klávesové zkratky jsou vypnuté. Zapnete je stisknutím Ctrl+Shift+K.</sys:String>
     <sys:String x:Key="Str_StartupUpdateCheck">Kontrolovat aktualizace při spuštění</sys:String>
-    <sys:String x:Key="Str_StartupUpdatePrompt" xml:space="preserve">Je k dispozici KillerPDF {0}. Chcete jej nyní stáhnout a nainstalovat?&#10;&#10;Aplikace se zavře a automaticky znovu otevře.</sys:String>
-    <sys:String x:Key="Str_AlwaysCheckOnStartup">Vždy kontrolovat aktualizace při spuštění</sys:String>
     <sys:String x:Key="Str_PasswordProtected">Soubor „{0}“ je chráněn heslem.</sys:String>
     <sys:String x:Key="Str_About_Aka">Také známý jako</sys:String>
     <sys:String x:Key="Str_Btn_Run">Spustit</sys:String>

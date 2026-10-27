@@ -1,341 +1,281 @@
 using System;
-using System.Diagnostics;
-using System.IO;
-using System.Windows;
+using System.Threading.Tasks;
+using KillerPDF.Controls;
+using KillerPDF.Services;
 
-namespace KillerPDF.Features
+namespace KillerPDF.Features.About
 {
     /// <summary>
-    /// Everything the About card does that is not drawing: reading the signature and release date,
-    /// hashing the exe, asking GitHub whether there is a newer release, and performing the
-    /// one-click self-update.
+    /// The About card's content: version and release date, the code-signing publisher and
+    /// thumbprint, the running exe's SHA-256, and a quiet update check with optional one-click
+    /// self-update.
     ///
-    /// Holds no controls. Talks to the window only through <see cref="IAboutHost"/>, so the whole
-    /// of this file is testable against a stub host.
+    /// One controller serves every app. Rows only some cards have arrive as capability interfaces
+    /// on the host (IAboutStartup, IAboutTray, in IAboutHost.cs), and anything a single app adds
+    /// lives in that app's own AboutController.Extras.cs, which implements the partial hooks below.
+    /// A hook nobody implements compiles away.
     /// </summary>
-    internal sealed class AboutController
+    internal sealed partial class AboutController
     {
-        // The certificate subject is the legal name ("Open Source Developer Stephen Riley"), so the
-        // About card ties it back to the name people know. Gated on the subject actually being
-        // Steve's: a fork signed by somebody else must not claim the alias, and an unsigned build
-        // has no subject at all. Family standard, see code/CLAUDE.md.
-        private const string SignerName = "Stephen Riley";
-        private const string AkaName    = "Steve the Killer";
+        /// <summary>App hook: fill the app's own rows; runs as the card is filled, before it shows.</summary>
+        partial void OnShow();
 
-        private const string Repo = "https://github.com/SteveTheKiller/KillerPDF";
+        /// <summary>App hook: adjust the signature the card shows (KillerScan's --demo preview).</summary>
+        partial void AdjustSignature(ref bool valid, ref string subject, ref string thumbprint);
+
+        /// <summary>App hook: replace a raw placeholder value ("(none)", "(unavailable)") with
+        /// localized text.</summary>
+        partial void ShownValue(ref string value);
+
+        /// <summary>App hook: skip the startup update prompt (KillerScan skips it under --demo).</summary>
+        partial void SkipStartupCheck(ref bool skip);
+
+        /// <summary>App hook: hold the update back, checked before the download starts and again
+        /// once it is verified (KillerBench holds it while a repair is running). A held download
+        /// is discarded and the update button comes back.</summary>
+        partial void HoldUpdate(ref bool hold);
+
+        /// <summary>App hook: the last word before the swap helper starts and the app closes,
+        /// after the download, since documents can change while it runs (KillerShell's unsaved
+        /// documents check, KillerNotes saving the open note). Set proceed false to cancel; the
+        /// download is discarded and the update button comes back.</summary>
+        partial void ConfirmUpdateShutdown(ref bool proceed);
+
+        /// <summary>App hook: the helper did not start after ConfirmUpdateShutdown agreed (UAC
+        /// declined), so the app stays open; undo whatever the confirmation set up (KillerShell's
+        /// CancelShutdown).</summary>
+        partial void UpdateShutdownCanceled();
+
+        /// <summary>App hook: close the app once the helper is running. Set handled to shut down
+        /// through the app's own path; otherwise Application.Current.Shutdown() runs.</summary>
+        partial void ShutdownForUpdate(ref bool handled);
+
+        /// <summary>App hook: runs immediately before the verified update is handed off (the swap
+        /// helper or installer starts), after ConfirmUpdateShutdown agreed. Set proceed false to cancel
+        /// without starting anything; the download is discarded and the update button comes back
+        /// (KillerPDF records its open documents here and refuses a session it cannot reopen).</summary>
+        partial void BeforeUpdateHandoff(ref bool proceed);
+
+        /// <summary>App hook: the handoff BeforeUpdateHandoff prepared has ended. Started is true once
+        /// the helper or installer is running and the app is about to close (KillerPDF commits the
+        /// documents to reopen); false when it did not start, so the app stays open and undoes what it
+        /// prepared.</summary>
+        partial void AfterUpdateHandoff(bool started);
 
         private readonly IAboutHost _host;
 
-        /// <summary>"vX.Y.Z" of the available update, set by the update check. Null until one is found.</summary>
+        /// <summary>Tag of the newer release found by the check, null when there is nothing to
+        /// install.</summary>
         private string? _updateTag;
-        private bool _startupCheckStarted;
-        private bool _updateInProgress;
+
+        /// <summary>Setting that turns the startup check off. Anything but "0" leaves it on.</summary>
+        internal const string StartupCheckSetting = "CheckForUpdatesOnStartup";
+
+        // Static: once per process, so an app with several windows (each with its own About
+        // controller) prompts once.
+        private static bool _startupCheckStarted;
+        private bool _updating;
 
         internal AboutController(IAboutHost host) => _host = host;
 
-        /// <summary>The running build's SemVer, including a prerelease label when present.</summary>
-        internal static string Version => AppVersion.Display;
+        internal static bool StartupCheckEnabled => ThemeManager.GetSetting(StartupCheckSetting) != "0";
 
-        /// <summary>Release date baked in from the csproj's ReleaseDate property, so a user can see
-        /// how old their build is. A file timestamp would not survive being copied and the PE linker
-        /// stamp is a build date, not a release date. Empty when the attribute is missing (an older
-        /// build), in which case the version line shows the version alone.</summary>
-        internal static string ReleaseDate
+        /// <summary>Saves the startup check choice from either the About checkbox or the prompt.</summary>
+        internal void SetStartupCheck(bool enabled)
         {
-            get
-            {
-                foreach (var a in System.Reflection.CustomAttributeExtensions.GetCustomAttributes
-                             <System.Reflection.AssemblyMetadataAttribute>(
-                                 System.Reflection.Assembly.GetExecutingAssembly()))
-                    if (a.Key == "ReleaseDate") return a.Value ?? string.Empty;
-                return string.Empty;
-            }
+            ThemeManager.SetSetting(StartupCheckSetting, enabled ? "1" : "0");
+            _host.StartupUpdateCheck = enabled;
         }
 
-        /// <summary>Populates the card and shows it. The SHA-256 is slow, so it lands later.</summary>
+        /// <summary>Adds or removes the app's Run value from the About checkbox, then shows what the
+        /// registry actually holds, so a refused write unchecks the box again.</summary>
+        internal void SetStartWithWindows(bool enabled)
+        {
+            KillerFamily.Deployment.StartupRegistration.Set(AppInfo.DisplayName, enabled);
+            if (_host is IAboutStartup startup)
+                startup.StartWithWindows = KillerFamily.Deployment.StartupRegistration.IsEnabled(AppInfo.DisplayName);
+        }
+
+        /// <summary>Whether closing the main window hides it to the notification area. Read by
+        /// CloseToTray each time the window closes, so the checkbox takes effect at once.</summary>
+        internal static bool CloseToTrayEnabled => ThemeManager.GetSetting(KillerFamily.Shell.CloseToTray.SettingName) == "1";
+
+        /// <summary>Saves the Close to system tray choice from the About checkbox.</summary>
+        internal void SetCloseToTray(bool enabled)
+        {
+            ThemeManager.SetSetting(KillerFamily.Shell.CloseToTray.SettingName, enabled ? "1" : "0");
+            if (_host is IAboutTray tray) tray.CloseToTray = enabled;
+        }
+
+        /// <summary>Once per run, after the main window is showing: when a newer release exists, offers
+        /// it in the same dialog as the About card's update, with an "Always check on startup" box so the
+        /// check can be turned off right there. The About card's checkbox turns it back on.</summary>
+        internal async void CheckOnStartup()
+        {
+            bool skip = false;
+            SkipStartupCheck(ref skip);
+            if (_startupCheckStarted || skip || !StartupCheckEnabled) return;
+            _startupCheckStarted = true;
+            var tag = await UpdateService.CheckAsync(AppInfo.AssemblyVersion);
+            if (tag is null || _updating) return;
+
+            _updateTag          = tag;
+            _host.UpdateText    = string.Format(_host.Loc("Str_About_UpdateAvailable"), tag);
+            _host.UpdateVisible = true;
+
+            // Never stack the prompt on a dialog the user already has open.
+            if (!_host.Window.IsVisible || _host.Window.OwnedWindows.Count > 0) return;
+            var dlg = new ConfirmDialog(
+                string.Format(_host.Loc("Str_About_StartupUpdateHeading"), AppInfo.DisplayName, tag),
+                _host.Loc("Str_About_StartupUpdateDetail"),
+                _host.Loc("Str_About_UpdateNow"), _host.Loc("Str_About_NotNow"),
+                _host.Loc("Str_About_AlwaysCheckOnStartup"), StartupCheckEnabled) { Owner = _host.Window };
+            dlg.ShowDialog();
+            SetStartupCheck(dlg.Check1Checked);
+            if (dlg.Confirmed) await InstallAsync(tag);
+        }
+
+        /// <summary>Fills the card in and shows it, then finishes the two slow parts in the
+        /// background.</summary>
         internal void Show()
         {
-            var (sigValid, sigSubject, sigThumbprint) = App.GetExeSignerInfo();
+            _host.Version     = $"v{AppInfo.Version}";
+            _host.ReleaseDate = AppInfo.ReleaseDate;
 
-            _host.Publisher   = sigValid ? sigSubject : _host.Loc("Str_Margin_None");
-            _host.Thumbprint  = string.IsNullOrEmpty(sigThumbprint) ? _host.Loc("Str_Margin_None") : sigThumbprint;
-            _host.Sha256      = _host.Loc("Str_About_Computing");
-            _host.ReleaseDate = ReleaseDate;
+            var (sigValid, subject, thumb) = CodeSignature.GetSignerInfo();
+            AdjustSignature(ref sigValid, ref subject, ref thumb);
+            _host.Publisher = sigValid ? subject : _host.Loc("Str_About_Unsigned");
 
-            _host.SetVersion(Version);
+            // Shown only when the exe is signed by the expected publisher AND the signature actually
+            // verifies: reading a certificate out of a file does not prove the file is untampered.
+            bool signedByPublisher = sigValid &&
+                subject.IndexOf(AppInfo.SignerName, StringComparison.OrdinalIgnoreCase) >= 0;
 
-            // Signed, verified, AND signed by Steve - all three, not merely "is signed".
-            bool signedByMe = sigValid
-                           && sigSubject.Contains(SignerName, StringComparison.OrdinalIgnoreCase);
-            // 0x201C / 0x201D are the curly quotes, built from codepoints so this file stays ASCII
-            // on disk - the same encoding trap that made release.ps1 PS7-only.
-            _host.SetAlias(signedByMe ? (char)0x201C + AkaName + (char)0x201D : null);
-
+            // Only the quoted alias goes here; the prefix and the surrounding hyperlink live in the
+            // XAML. 0x201C / 0x201D are the curly quotes, built from codepoints so this line adds no
+            // non-ASCII bytes to the source.
+            _host.Alias        = (char)0x201C + AppInfo.AkaName + (char)0x201D;
+            _host.AliasVisible = signedByPublisher;
+            string shownThumb  = thumb;
+            ShownValue(ref shownThumb);
+            _host.Thumbprint   = shownThumb;
+            _host.Sha256       = _host.Loc("Str_About_Computing");
             _host.UpdateVisible = false;
+            _host.StartupUpdateCheck = StartupCheckEnabled;
+            if (_host is IAboutStartup startup)
+                startup.StartWithWindows = KillerFamily.Deployment.StartupRegistration.IsEnabled(AppInfo.DisplayName);
+            if (_host is IAboutTray tray) tray.CloseToTray = CloseToTrayEnabled;
+            OnShow();
+
             _host.ShowCard();
 
-            CheckForUpdateAsync(System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
-            ComputeSha256Async();
-        }
-
-        /// <summary>Opens the GitHub release for the running version.</summary>
-        internal static void OpenReleaseNotes() => OpenUrl($"{Repo}/releases/tag/v{Version}");
-
-        internal static void OpenUrl(string url)
-        {
-            try { Process.Start(new ProcessStartInfo(url) { UseShellExecute = true }); }
-            catch { /* no browser, or the shell refused - nothing useful to say */ }
-        }
-
-        // ---- SHA-256 -------------------------------------------------------------------------
-
-        private async void ComputeSha256Async()
-        {
-            var sha256 = await System.Threading.Tasks.Task.Run(App.GetExeSha256).ConfigureAwait(true);
-            _host.Sha256 = sha256;
-        }
-
-        // ---- Update check --------------------------------------------------------------------
-
-        /// <summary>Checks for stable releases without a background service.</summary>
-        private async void CheckForUpdateAsync(System.Version? current, bool startup = false)
-        {
-            if (current is null || _updateInProgress) return;
-            if (startup && !Services.ReleaseUpdateCheck.IsEnabled(
-                    App.GetSetting(Services.ReleaseUpdateCheck.Setting))) return;
-            try
+            // SHA-256 is slow on a large exe, so it lands after the card is already up.
+            Task.Run(() =>
             {
-                using var http = new System.Net.Http.HttpClient { Timeout = TimeSpan.FromSeconds(4) };
-                string? tag = await Services.ReleaseUpdateCheck.FindNewerReleaseAsync(http, current)
-                    .ConfigureAwait(true);
-                if (tag is null || _updateInProgress) return;
+                var hash = CodeSignature.ExeSha256();
+                _host.Window.Dispatcher.BeginInvoke((Action)(() =>
+                {
+                    string shown = hash;
+                    ShownValue(ref shown);
+                    _host.Sha256 = shown;
+                }));
+            });
 
-                _updateTag = tag;
-                _host.UpdateText = string.Format(_host.Loc("Str_UpdateAvailable"), tag);
-                _host.UpdateVisible = true;
-                if (startup && Services.ReleaseUpdateCheck.IsEnabled(
-                        App.GetSetting(Services.ReleaseUpdateCheck.Setting))
-                    && _host.Window.IsLoaded && _host.Window.IsVisible
-                    && _host.Window.OwnedWindows.Count == 0)
-                    UpdateCore(startup: true);
-            }
-            catch { /* closing, offline, or unavailable UI: leave the next check to About */ }
+            CheckForUpdate();
         }
 
-        internal void CheckOnStartup()
+        /// <summary>Opens the release page for the running version.</summary>
+        internal void OpenReleaseNotes() => WebLink.Open(UpdateService.ReleaseUrl(AppInfo.Version));
+
+        /// <summary>Shows the update button if a newer release exists. Silent when offline.</summary>
+        private async void CheckForUpdate()
         {
-            if (_startupCheckStarted) return;
-            _startupCheckStarted = true;
-            CheckForUpdateAsync(System.Reflection.Assembly.GetExecutingAssembly().GetName().Version,
-                startup: true);
+            var tag = await UpdateService.CheckAsync(AppInfo.AssemblyVersion);
+            if (tag is null || _updating) return;
+
+            _updateTag          = tag;
+            _host.UpdateText    = string.Format(_host.Loc("Str_About_UpdateAvailable"), tag);
+            _host.UpdateVisible = true;
         }
 
-        // ---- Self-update ---------------------------------------------------------------------
-
-        /// <summary>
-        /// One-click self-update: downloads and verifies the public portable/installer. Installed
-        /// copies hand it the same payload-based install command used by a manual upgrade; portable
-        /// copies replace their original launcher after both launcher and inner app have exited.
-        /// </summary>
-        internal void Update() => UpdateCore(startup: false);
-
-        private MessageBoxResult ConfirmUpdate(string tag, bool startup)
-        {
-            var (result, checkOnStartup) = KillerDialog.ShowWithCheckbox(_host.Window,
-                string.Format(_host.Loc(startup ? "Str_StartupUpdatePrompt" : "Str_UpdatePrompt"), tag),
-                _host.Loc("Str_AlwaysCheckOnStartup"),
-                "KillerPDF", startup ? MessageBoxButton.YesNo : MessageBoxButton.OKCancel,
-                checkboxInitial: Services.ReleaseUpdateCheck.IsEnabled(
-                    App.GetSetting(Services.ReleaseUpdateCheck.Setting)));
-            App.SetSetting(Services.ReleaseUpdateCheck.Setting, checkOnStartup ? "1" : "0");
-            if (_host.Window.FindName("StartupUpdateCheck") is System.Windows.Controls.CheckBox aboutCheck)
-                aboutCheck.IsChecked = checkOnStartup;
-            return result;
-        }
-
-        private async void UpdateCore(bool startup)
+        /// <summary>Downloads the newer release, verifies it, and hands off to the helper that swaps
+        /// the exe and relaunches. Download failures open the releases page; the replacement helper
+        /// shows its own error log if it cannot finish after elevation.</summary>
+        internal async void Update()
         {
             var tag = _updateTag;
-            if (string.IsNullOrEmpty(tag) || _updateInProgress) return;
+            if (string.IsNullOrEmpty(tag) || _updating) return;
 
-            _updateInProgress = true;
-            string? newExe = null;
+            var dlg = new ConfirmDialog(
+                string.Format(_host.Loc("Str_About_UpdateHeading"), AppInfo.DisplayName, tag),
+                _host.Loc("Str_About_UpdateDetail"),
+                _host.Loc("Str_About_UpdateNow"),
+                _host.Loc("Str_Btn_Cancel")) { Owner = _host.Window };
+            dlg.ShowDialog();
+            if (!dlg.Confirmed) return;
+            await InstallAsync(tag!);
+        }
+
+        private async Task InstallAsync(string tag)
+        {
+            if (_updating) return;
+            bool hold = false;
+            HoldUpdate(ref hold);
+            if (hold) return;
+            _updating = true;
+            _host.UpdateEnabled = false;
+            _host.UpdateText    = _host.Loc("Str_About_Downloading");
+
+            string? newExe;
             try
             {
-                if (_host.IsDirty)
-                {
-                    if (!startup)
-                        KillerDialog.Show(_host.Window, _host.Loc("Str_Dlg_SaveBeforeUpdate"),
-                            "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-
-                var confirm = ConfirmUpdate(tag, startup);
-                if (confirm != (startup ? MessageBoxResult.Yes : MessageBoxResult.OK)) return;
-
-                _host.UpdateEnabled = false;
-                _host.UpdateText = _host.Loc("Str_UpdateDownloading");
-                newExe = await DownloadVerifiedAsync(tag).ConfigureAwait(true);
-                if (newExe is null)
-                {
-                    OpenUrl($"{Repo}/releases/latest");
-                    return;
-                }
-
-                // Documents can change while the download is in flight.
-                if (!_host.Window.IsLoaded) return;
-                if (_host.IsDirty)
-                {
-                    KillerDialog.Show(_host.Window, _host.Loc("Str_Dlg_SaveBeforeUpdate"),
-                        "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-                if (!LaunchSwapAndExit(newExe))
-                    KillerDialog.Show(_host.Window, _host.Loc("Str_UpdateRestartPrepareFailed"),
-                        "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Warning);
-                newExe = null; // Failed helper startup retains the verified download.
+                newExe = await UpdateService.DownloadAsync(tag!);
             }
-            finally
+            catch
             {
-                if (newExe is not null)
-                    try { File.Delete(newExe); } catch { }
-                _updateInProgress = false;
+                _updating           = false;
                 _host.UpdateEnabled = true;
-                _host.UpdateText = string.Format(_host.Loc("Str_UpdateAvailable"), tag);
+                _host.UpdateText    = string.Format(_host.Loc("Str_About_UpdateAvailable"), tag);
+                WebLink.Open(UpdateService.ReleasesUrl);
+                return;
             }
-        }
 
-        /// <summary>Downloads the release exe and checks it against the published checksum.
-        /// Returns the temp path, or null if anything at all went wrong.</summary>
-        private static async System.Threading.Tasks.Task<string?> DownloadVerifiedAsync(string tag)
-        {
+            bool held = false, proceed = true, handoff = true;
+            HoldUpdate(ref held);
+            if (!held) ConfirmUpdateShutdown(ref proceed);
+            if (!held && proceed)
+            {
+                BeforeUpdateHandoff(ref handoff);
+                if (!handoff) UpdateShutdownCanceled();
+            }
+            if (held || !proceed || !handoff)
+            {
+                UpdateService.DiscardDownload(newExe);
+                _updating           = false;
+                _host.UpdateEnabled = true;
+                _host.UpdateText    = string.Format(_host.Loc("Str_About_UpdateAvailable"), tag);
+                return;
+            }
+
             try
             {
-                using var http = new System.Net.Http.HttpClient { Timeout = TimeSpan.FromSeconds(90) };
-                http.DefaultRequestHeaders.UserAgent.ParseAdd("KillerPDF-UpdateCheck");
-
-                string assetName = App.IsPortable() ? "KillerPDF-Portable.exe" : "KillerPDF.exe";
-                var exeUrl = $"{Repo}/releases/download/{tag}/{assetName}";
-                // Read the checksums from the release ASSET next to the exe, not from
-                // raw.githubusercontent at the tag. Both files are uploaded to the release
-                // together, so the hash can never drift from the exe the way a repo-committed
-                // file does when the tag/commit order gets muddled.
-                var sumsUrl = $"{Repo}/releases/download/{tag}/SHA256SUMS.txt";
-
-                var exeBytes = await http.GetByteArrayAsync(exeUrl).ConfigureAwait(false);
-                var sumsTxt  = await http.GetStringAsync(sumsUrl).ConfigureAwait(false);
-
-                string? expected = null;
-                foreach (var line in sumsTxt.Replace("\r", "").Split('\n'))
-                {
-                    if (line.TrimStart().StartsWith(assetName, StringComparison.OrdinalIgnoreCase))
-                    {
-                        var parts = line.Split([' ', '\t'], StringSplitOptions.RemoveEmptyEntries);
-                        if (parts.Length >= 2) expected = parts[^1];
-                        break;
-                    }
-                }
-                if (string.IsNullOrEmpty(expected)) return null;
-
-                string actual = Convert.ToHexString(
-                    System.Security.Cryptography.SHA256.HashData(exeBytes));
-                if (!actual.Equals(expected, StringComparison.OrdinalIgnoreCase)) return null;
-
-                var path = Path.Combine(Path.GetTempPath(), $"KillerPDF_update_{Guid.NewGuid():N}.exe");
-                File.WriteAllBytes(path, exeBytes);
-                Services.UpdateImagePublication.RememberVerified(path, actual);
-                return path;
+                // Declining UAC throws, so the shutdown only happens once the helper is actually
+                // running - otherwise the app would close without updating.
+                try { UpdateService.StartSwap(newExe, tag!.TrimStart('v', 'V')); }
+                catch { AfterUpdateHandoff(false); throw; }
+                AfterUpdateHandoff(true);
+                bool handled = false;
+                ShutdownForUpdate(ref handled);
+                if (!handled) System.Windows.Application.Current.Shutdown();
             }
-            catch { return null; }
-        }
-
-        /// <summary>Hands the downloaded installer the current installation and shuts the app
-        /// down. An installed copy runs the installer directly, so an elevated step never executes
-        /// a script from the temp folder; a packaged portable copy swaps its launcher with an
-        /// unelevated helper. Returns false if the helper could not be started, in which case
-        /// nothing has been changed.</summary>
-        private bool LaunchSwapAndExit(string newExe)
-        {
-            try
+            catch
             {
-                var curExe = Environment.ProcessPath
-                    ?? throw new InvalidOperationException("The current executable path is unavailable.");
-                var pid    = Environment.ProcessId;
-                bool portable = App.IsPortable();
-                string? portableLauncher = Environment.GetEnvironmentVariable("KILLERPDF_LAUNCHER_PATH");
-                bool packagedPortable = portable && !string.IsNullOrWhiteSpace(portableLauncher) && File.Exists(portableLauncher);
-
-                // Only the publisher of the running application may replace it; the elevated
-                // installer verifies its own signature again before it writes anything.
-                if (!Services.UpdateTrustPolicy.Accepts(App.VerifyAuthenticode(newExe), App.GetExeSignerInfo()))
-                    throw new InvalidDataException("The downloaded update is not signed by this application's publisher.");
-
-                // A machine-wide install (Program Files, from winget, choco or an RMM) is not
-                // writable by a normal user, so the swap has to run elevated. This previously ran
-                // the batch unelevated and sent the copy to >nul with no errorlevel check, so on
-                // those installs it silently failed and then relaunched the OLD exe - the app
-                // appeared to "update" to the same version, with no error.
-                string updateTarget = packagedPortable ? portableLauncher! : curExe;
-                bool needsElevation = !CanWriteTo(Path.GetDirectoryName(updateTarget)!);
-                if (packagedPortable && needsElevation) return false;
-                using var restart = _host.PrepareUpdateRestart();
-                if (restart is null) return false;
-
-                if (!packagedPortable)
-                {
-                    // The installer closes this process itself, installs over the current folder
-                    // and starts the new copy. Elevation, when needed, is requested on the signed
-                    // installer, so the UAC prompt names the publisher and there is no script a
-                    // same-user process could edit before approval.
-                    // A machine-wide copy is one registered under HKLM, not merely one in a folder
-                    // this process happens to be unable to write; an administrator running the
-                    // Program Files copy can write there and must still update it machine-wide.
-                    bool machineInstall = needsElevation
-                        || App.IsRegisteredCopy(Microsoft.Win32.Registry.LocalMachine, curExe);
-                    var installer = new ProcessStartInfo(newExe,
-                        InstalledUpdateCommand.Arguments(curExe, machineInstall, null))
-                    {
-                        UseShellExecute = true,
-                        WorkingDirectory = Path.GetTempPath()
-                    };
-                    if (needsElevation) installer.Verb = "runas";
-                    if (Process.Start(installer) is null)
-                        throw new IOException("The update installer did not start. Download retained at: " + newExe);
-                    restart.Started();
-                    restart.Commit();
-                    Application.Current.Shutdown();
-                    return true;
-                }
-
-                // The whole helper travels in the process command line, so no file the user
-                // account can write is read after it starts.
-                int launcherPid = int.TryParse(Environment.GetEnvironmentVariable("KILLERPDF_LAUNCHER_PID"), out int parsed) ? parsed : 0;
-                string script = Services.UpdateHelperLaunch.WaitFor(pid, launcherPid) +
-                    Services.UpdateImagePublication.Script(newExe, portableLauncher!, false,
-                        $"{Repo}/releases/latest", "KillerPDF", reopen: null);
-                if (Process.Start(Services.UpdateHelperLaunch.StartInfo(script, elevate: false)) is null)
-                    throw new IOException("The update helper did not start. Download retained at: " + newExe);
-                restart.Started();
-                restart.Commit();
-                Application.Current.Shutdown();
-                return true;
+                UpdateShutdownCanceled();
+                // A failed helper launch retains the verified download for recovery.
+                _updating           = false;
+                _host.UpdateEnabled = true;
+                _host.UpdateText    = string.Format(_host.Loc("Str_About_UpdateAvailable"), tag);
             }
-            catch { return false; }
-        }
-
-        /// <summary>True if this process can create a file in <paramref name="dir"/>. Used to decide
-        /// whether the self-update swap needs elevating: Program Files installs are not writable by
-        /// a normal user, per-user installs under LOCALAPPDATA always are.</summary>
-        private static bool CanWriteTo(string dir)
-        {
-            try
-            {
-                var probe = Path.Combine(dir, $".kp_write_{Guid.NewGuid():N}.tmp");
-                using (new FileStream(probe, FileMode.CreateNew, FileAccess.Write, FileShare.None,
-                                      1, FileOptions.DeleteOnClose)) { }
-                return true;
-            }
-            catch { return false; }
         }
     }
 }

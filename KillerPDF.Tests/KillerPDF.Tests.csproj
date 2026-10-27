@@ -128,13 +128,20 @@
     <Compile Include="..\Services\MeasurementGeometry.cs" Link="Services\MeasurementGeometry.cs" />
     <Compile Include="..\Services\EditableTextShortcutPolicy.cs" Link="Services\EditableTextShortcutPolicy.cs" />
     <Compile Include="..\Services\ShortcutTogglePolicy.cs" Link="Services\ShortcutTogglePolicy.cs" />
-    <Compile Include="..\Services\ReleaseUpdateCheck.cs" Link="Services\ReleaseUpdateCheck.cs" />
     <Compile Include="..\Services\UpdateRestartStore.cs" Link="Services\UpdateRestartStore.cs" />
     <Compile Include="..\Services\PayloadIntegrityVerifier.cs" Link="Services\PayloadIntegrityVerifier.cs" />
     <Compile Include="..\Services\InstallPayloadOwnership.cs" Link="Services\InstallPayloadOwnership.cs" />
-    <Compile Include="..\Services\UpdateTrustPolicy.cs" Link="Services\UpdateTrustPolicy.cs" />
-    <Compile Include="..\Services\UpdateHelperLaunch.cs" Link="Services\UpdateHelperLaunch.cs" />
     <Compile Include="..\Services\UpdateImagePublication.cs" Link="Services\UpdateImagePublication.cs" />
+    <Compile Include="..\Services\UpdateService.cs" Link="Services\UpdateService.cs" />
+    <Compile Include="..\Services\UpdateTargetChoice.cs" Link="Services\UpdateTargetChoice.cs" />
+    <Compile Include="..\Services\TrustedUpdate.cs" Link="Services\TrustedUpdate.cs" />
+    <Compile Include="..\Services\ReleaseIdentity.cs" Link="Services\ReleaseIdentity.cs" />
+    <Compile Include="..\Services\CodeSignature.cs" Link="Services\CodeSignature.cs" />
+    <Compile Include="..\Services\ImmutablePowerShell.cs" Link="Services\ImmutablePowerShell.cs" />
+    <Compile Include="..\Services\InstallerExitCodes.cs" Link="Services\InstallerExitCodes.cs" />
+    <Compile Include="..\Services\InstallationFiles.cs" Link="Services\InstallationFiles.cs" />
+    <Compile Include="..\Services\ExecutableDeployment.cs" Link="Services\ExecutableDeployment.cs" />
+    <Compile Include="..\Services\AppInfo.cs" Link="Services\AppInfo.cs" />
     <Compile Include="..\Services\PrintColorConverter.cs" Link="Services\PrintColorConverter.cs" />
     <Compile Include="..\Services\PrintOrientationPolicy.cs" Link="Services\PrintOrientationPolicy.cs" />
     <Compile Include="..\Services\PdfTextEditPlacement.cs" Link="Services\PdfTextEditPlacement.cs" />

@@ -1,58 +1,57 @@
-namespace KillerPDF.Features
+namespace KillerPDF.Features.About
 {
     /// <summary>
     /// What AboutController needs from the window hosting it, beyond the shared shell services.
-    ///
-    /// Every member is a value or a plain string, never a control, so the controller holds no
-    /// reference to a TextBlock or a Button and can be driven by a stub in a test.
-    ///
-    /// KillerPDF differs from Killendar's version in one way worth knowing: several of the About
-    /// card's lines are built as INLINES rather than set as text - the wordmark is two differently
-    /// styled runs, and the tagline, version and alias each carry a hyperlink. Constructing those
-    /// is UI work, so it stays in the shell and the controller hands over only the strings and the
-    /// one boolean the shell needs to decide what to build.
+    /// Every member is a value, not a control, so the controller holds no reference to a TextBlock
+    /// or a Button and can be driven by a stub in a test.
     /// </summary>
     internal interface IAboutHost : IShellServices
     {
+        /// <summary>Version line, clickable through to that release.</summary>
+        string Version { set; }
+
+        /// <summary>Release date, shown muted opposite the version.</summary>
+        string ReleaseDate { set; }
+
         /// <summary>Code-signing subject, or the unsigned message.</summary>
         string Publisher { set; }
 
-        /// <summary>Certificate thumbprint, or "(none)".</summary>
+        /// <summary>The quoted alias line, and whether the signature earned the right to show it.</summary>
+        string Alias { set; }
+        bool AliasVisible { set; }
+
+        /// <summary>Certificate thumbprint.</summary>
         string Thumbprint { set; }
 
-        /// <summary>SHA-256 of the running exe. Set twice: the "computing" placeholder first,
-        /// then the real digest once the background hash finishes.</summary>
+        /// <summary>SHA-256 of the running exe, filled in once it has been computed.</summary>
         string Sha256 { set; }
 
-        /// <summary>Release date baked in from the csproj, shown muted opposite the version.
-        /// Empty on an older build that predates the attribute.</summary>
-        string ReleaseDate { set; }
-
-        /// <summary>Builds the version line as a hyperlink through to that release tag.</summary>
-        void SetVersion(string version);
-
-        /// <summary>The quoted alias line. Null hides it - which is the case unless the exe is
-        /// signed AND the signature verifies AND the subject is Steve's, because a fork signed by
-        /// somebody else must not claim the alias.</summary>
-        void SetAlias(string? alias);
-
-        /// <summary>Whether a newer release exists, and whether the button is live while a
-        /// download is running.</summary>
+        /// <summary>The line above the update button.</summary>
         string UpdateText { set; }
+
+        /// <summary>The update button appears only when a newer release exists, and goes insensitive
+        /// while a download is running.</summary>
         bool UpdateVisible { set; }
         bool UpdateEnabled { set; }
 
-        /// <summary>Blocks a self-update while any document window has unsaved changes.</summary>
-        bool IsDirty { get; }
+        /// <summary>The "Check for updates on startup" checkbox, first of the card's checkboxes.</summary>
+        bool StartupUpdateCheck { set; }
 
-        /// <summary>The document to reopen after the update relaunches, if any.</summary>
-        string? FileToReopen { get; }
-
-        /// <summary>Captures all saved documents for the next normal startup, or refuses an unstable session.</summary>
-        IUpdateRestartHandoff? PrepareUpdateRestart();
-
-        /// <summary>Dismisses any other full-window overlay, then fades the About card in.
-        /// The overlays are mutually exclusive rather than stacking.</summary>
+        /// <summary>Fades the About card in.</summary>
         void ShowCard();
+    }
+
+    /// <summary>A card with the "Start with Windows" checkbox, under the update checkbox. Off until
+    /// the user turns it on.</summary>
+    internal interface IAboutStartup
+    {
+        bool StartWithWindows { set; }
+    }
+
+    /// <summary>A card with the "Close to system tray" checkbox, under Start with Windows. Off until
+    /// the user turns it on (KillerShot, a tray app, defaults to on).</summary>
+    internal interface IAboutTray
+    {
+        bool CloseToTray { set; }
     }
 }

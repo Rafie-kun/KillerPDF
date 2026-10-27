@@ -314,6 +314,7 @@ namespace KillerPDF.Shell
         {
             _startupTearOutSession = startupTearOutSession;
             InitializeComponent();
+            _about = new Features.About.AboutController(this);
             _ownsWindowGeometry = App.RegisterDocumentWindow(this);
             _tray = KillerFamily.Shell.CloseToTray.Attach(this, "KillerPDF", Loc,
                 () => App.GetSetting(KillerFamily.Shell.CloseToTray.SettingName) == "1");
@@ -594,7 +595,7 @@ namespace KillerPDF.Shell
                 // Start with the sidebar collapsed when no PDF is open (nothing to show); a document
                 // opened above will have expanded it via FinishOpenFile.
                 SyncSidebarToDocState(hasDoc: _doc != null, startup: true);
-                Dispatcher.BeginInvoke(new Action(() => About.CheckOnStartup()),
+                Dispatcher.BeginInvoke(new Action(() => _about.CheckOnStartup()),
                     System.Windows.Threading.DispatcherPriority.Background);
             };
         }

@@ -12,7 +12,7 @@ internal static class UpdateWindowSmoke
     internal static int Run(Window first, Assembly assembly, string appPath, string folder)
     {
         var second = (Window)Activator.CreateInstance(first.GetType())!;
-        Type hostContract = assembly.GetType("KillerPDF.Features.IAboutHost", true)!;
+        Type hostContract = assembly.GetType("KillerPDF.Features.IAboutUpdateRestart", true)!;
         PropertyInfo dirty = hostContract.GetProperty("IsDirty")!;
         bool Unsaved(Window window) => (bool)dirty.GetValue(window)!;
         string source = Path.Combine(folder, "update-secondary.pdf");

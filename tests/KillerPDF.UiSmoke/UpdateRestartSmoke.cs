@@ -17,8 +17,8 @@ internal static class UpdateRestartSmoke
             .GetMethod("SetSetting", BindingFlags.Static | BindingFlags.NonPublic)!;
         MethodInfo getSetting = assembly.GetType("KillerPDF.App", true)!
             .GetMethod("GetSetting", BindingFlags.Static | BindingFlags.NonPublic)!;
-        MethodInfo prepare = assembly.GetType("KillerPDF.Features.IAboutHost", true)!
-            .GetMethod("PrepareUpdateRestart")!;
+        MethodInfo prepare = windowType
+            .GetMethod("PrepareUpdateRestart", BindingFlags.Instance | BindingFlags.NonPublic)!;
         MethodInfo open = windowType.GetMethod("OpenFromExternal", BindingFlags.Instance | BindingFlags.Public)!;
         object? handoff = null;
         string fixtures = Path.Combine(sharedState, "fixtures");

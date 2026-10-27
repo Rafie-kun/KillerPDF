@@ -2382,6 +2382,10 @@ namespace KillerPDF
             UnregisterFileHandler(Registry.CurrentUser);
             string installedDirectory = Path.GetDirectoryName(currentExe) ?? AppContext.BaseDirectory;
             Services.CommandLinePath.Unregister(installedDirectory, machine: false);
+            // The kit update stack's staging folders (Services/UpdateService.cs): per-user here,
+            // the elevated one under Program Files with the machine-wide half below.
+            TryDeleteDir(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                AppName, "UpdateStage"));
 
             // Machine-wide half. Only reachable when Add/Remove Programs launched the Program Files
             // copy, which Windows runs elevated from the HKLM uninstall entry - so these writes
@@ -2395,6 +2399,8 @@ namespace KillerPDF
                 Services.ProtocolRegistrar.Unregister(Registry.LocalMachine);   // #183
                 Services.PreviewHandlerRegistration.Unregister(Registry.LocalMachine);
                 Services.CommandLinePath.Unregister(installedDirectory, machine: true);
+                TryDeleteDir(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
+                    AppName + " Update"));
                 try { Registry.LocalMachine.DeleteSubKeyTree(@"Software\KillerPDF"); } catch { }
                 try { Registry.LocalMachine.DeleteSubKeyTree(
                     @"Software\Microsoft\Windows\CurrentVersion\Uninstall\KillerPDF"); } catch { }

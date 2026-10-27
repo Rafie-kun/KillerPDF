@@ -1308,9 +1308,16 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_TT_OcrOptions">OCR 選項</sys:String>
     <sys:String x:Key="Str_RecentHeading">最近</sys:String>
     <sys:String x:Key="Str_KS_WindowTitle">KillerPDF - 鍵盤快速鍵</sys:String>
-    <sys:String x:Key="Str_UpdateAvailable">有可用更新: {0}</sys:String>
-    <sys:String x:Key="Str_UpdatePrompt" xml:space="preserve">要下載並安裝 KillerPDF {0} 嗎?&#10;&#10;應用程式將關閉並自動重新開啟。</sys:String>
-    <sys:String x:Key="Str_UpdateDownloading">正在下載...</sys:String>
+    <sys:String x:Key="Str_About_UpdateAvailable">有可用更新: {0}</sys:String>
+    <sys:String x:Key="Str_About_Unsigned">(not signed or chain failed)</sys:String>
+    <sys:String x:Key="Str_About_Downloading">下載中...</sys:String>
+    <sys:String x:Key="Str_About_UpdateHeading">下載並安裝 {0} {1}?</sys:String>
+    <sys:String x:Key="Str_About_UpdateDetail">應用程式會自動關閉並重新開啟。</sys:String>
+    <sys:String x:Key="Str_About_StartupUpdateHeading">{0} {1} 已推出</sys:String>
+    <sys:String x:Key="Str_About_StartupUpdateDetail">要立即下載並安裝嗎？應用程式將關閉並自動重新開啟。</sys:String>
+    <sys:String x:Key="Str_About_UpdateNow">更新</sys:String>
+    <sys:String x:Key="Str_About_NotNow">稍後再說</sys:String>
+    <sys:String x:Key="Str_About_AlwaysCheckOnStartup">啟動時一律檢查更新</sys:String>
     <sys:String x:Key="Str_UpdateRestartPrepareFailed">無法準備更新。已儲存的 PDF 檔案未變更。請再試一次。</sys:String>
     <sys:String x:Key="Str_UpdateRestartRestoreFailed">KillerPDF 無法重新開啟上次的工作階段。已儲存的 PDF 檔案未變更。</sys:String>
     <sys:String x:Key="Str_ClearAllData">清除所有資料</sys:String>
@@ -1524,8 +1531,6 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_KS_EnabledStatus">鍵盤快速鍵已啟用</sys:String>
     <sys:String x:Key="Str_KS_DisabledStatus">鍵盤快速鍵已停用。按 Ctrl+Shift+K 即可啟用。</sys:String>
     <sys:String x:Key="Str_StartupUpdateCheck">啟動時檢查更新</sys:String>
-    <sys:String x:Key="Str_StartupUpdatePrompt" xml:space="preserve">KillerPDF {0} 已推出。要立即下載並安裝嗎？&#10;&#10;應用程式將關閉並自動重新開啟。</sys:String>
-    <sys:String x:Key="Str_AlwaysCheckOnStartup">啟動時一律檢查更新</sys:String>
     <sys:String x:Key="Str_PasswordProtected">「{0}」受密碼保護。</sys:String>
     <sys:String x:Key="Str_About_Aka">別名</sys:String>
     <sys:String x:Key="Str_Btn_Run">執行</sys:String>
