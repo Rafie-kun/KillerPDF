@@ -150,6 +150,54 @@ public sealed class PdfDuplicatePageOwnershipTests
         Assert.Equal("Grace", Assert.Single(PdfFormWidgetReader.ReadPage(changed, 1)).Value);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void RecoveredCalculationFieldsShareOneLogicalValueAndOrder(bool incremental)
+    {
+        PdfDocument healthy = PdfDocument.Open(Fixture(tagged: true, damage: "calculations", repeated: false));
+        Assert.Single(PdfPageInformation.Read(healthy));
+        Assert.Equal("6", PdfFormCalculation.Evaluate(healthy).Fields.Single(field => field.FieldName == "total").Value);
+
+        PdfDocument source = PdfDocument.OpenWithCompatibilityRecovery(Fixture(tagged: true, damage: "calculations"));
+        byte[] saved;
+        if (incremental)
+        {
+            var update = new PdfIncrementalUpdateBuilder(source);
+            saved = update.SetDocumentInformation(update.AddObject(new PdfDictionary([
+                new(N("Title"), Text("calculation recovery"))]))).Build();
+        }
+        else saved = PdfDocumentWriter.Write(source);
+        PdfDocument document = PdfDocument.Open(saved);
+        Assert.Equal(2, PdfPageInformation.Read(document).Count);
+        PdfDictionary form = Dictionary(document, PdfPageTree.Read(document).Catalog[N("AcroForm")]);
+        PdfArray fields = Assert.IsType<PdfArray>(form[N("Fields")]);
+        Assert.Equal(2, fields.Count);
+        PdfObject total = fields.Single(field => String(Dictionary(document, field)[N("T")]) == "total");
+        Assert.Equal(ObjectNumber(total), ObjectNumber(Assert.Single(Assert.IsType<PdfArray>(form[N("CO")]))));
+        Assert.Equal("total", Assert.Single(PdfFormCalculation.ReadScripts(document)).FieldName);
+        Assert.Equal(4, Enumerable.Range(0, 2).SelectMany(page => PdfFormWidgetReader.ReadPage(document, page))
+            .Select(widget => widget.ObjectNumber).Distinct().Count());
+
+        PdfDocument changed = PdfDocument.Open(new PdfIncrementalPageEditor(document).SetTextFieldValue("quantity", "4").Build());
+        PdfFormCalculationReport report = PdfFormCalculation.Evaluate(changed);
+        Assert.Equal(2, report.Fields.Count);
+        Assert.Equal("8", report.Fields.Single(field => field.FieldName == "total").Value);
+        Assert.Equal(0, report.FailedCount);
+        Assert.Equal(0, report.UnsupportedCount);
+        changed = PdfDocument.Open(new PdfIncrementalPageEditor(changed).SetTextFieldValue("total", "8").Build());
+        for (int page = 0; page < 2; page++)
+        {
+            IReadOnlyList<PdfFormWidgetInfo> widgets = PdfFormWidgetReader.ReadPage(changed, page);
+            Assert.Equal("4", widgets.Single(widget => widget.FieldName == "quantity").Value);
+            Assert.Equal("8", widgets.Single(widget => widget.FieldName == "total").Value);
+        }
+        PdfDocument reset = PdfDocument.Open(new PdfIncrementalPageEditor(changed).ResetFormField("quantity").Build());
+        Assert.Equal("4", PdfFormCalculation.Evaluate(reset).Fields.Single(field => field.FieldName == "total").Value);
+        Assert.All(Enumerable.Range(0, 2), page => Assert.Equal("2",
+            PdfFormWidgetReader.ReadPage(reset, page).Single(widget => widget.FieldName == "quantity").Value));
+    }
+
     [Fact]
     public void PopupsOutsideTheAnnotationArrayKeepTheirOwnPageAndNote()
     {
@@ -297,7 +345,7 @@ public sealed class PdfDuplicatePageOwnershipTests
     private static PdfName N(string value) => new(Encoding.ASCII.GetBytes(value));
     private static PdfString Text(string value) => new(Encoding.ASCII.GetBytes(value), PdfStringForm.Literal);
 
-    private static byte[] Fixture(bool tagged = false, string? damage = null)
+    private static byte[] Fixture(bool tagged = false, string? damage = null, bool repeated = true)
     {
         string content = tagged ? "/P << /MCID 0 >> BDC 1 0 0 rg 5 5 25 30 re f EMC" : "1 0 0 rg 5 5 25 30 re f";
         string[] objects =
@@ -383,6 +431,24 @@ public sealed class PdfDuplicatePageOwnershipTests
                 "<< /Type /Annot /Subtype /Widget /Parent 5 0 R /P 4 0 R /Rect [10 10 30 30] /AP << /N << /Off 8 0 R /On2 8 0 R >> >> /AS /Off >>",
                 "<< /Type /XObject /Subtype /Form /BBox [0 0 20 20] /Resources << >> /Length 0 >>\nstream\n\nendstream"];
         if (damage == "radio-direct-kid") objects[4] = "<< /FT /Btn /Ff 32768 /T (choice) /V /On1 /Kids [6 0 R << /Subtype /Widget /Parent 5 0 R >>] /Opt [(first) (second)] >>";
+        if (damage == "calculations")
+        {
+            objects[0] = "<< /Type /Catalog /Pages 2 0 R /StructTreeRoot 12 0 R /MarkInfo << /Marked true >> /AcroForm << /Fields [11 0 R 20 0 R] /CO [20 0 R] /DR << /Font << /F1 18 0 R >> >> /DA (/F1 12 Tf 0 g) >> >>";
+            objects[2] = "<< /Type /Page /Parent 10 0 R /Contents 4 0 R /StructParents 0 /Annots [5 0 R 6 0 R 7 0 R 8 0 R 9 0 R 11 0 R 20 0 R] >>";
+            objects[10] = "<< /Type /Annot /Subtype /Widget /FT /Tx /T (quantity) /V (3) /DV (2) /Rect [10 10 90 30] /DA (/F1 12 Tf 0 g) /AP << /N 19 0 R >> /P 3 0 R /StructParent 1 >>";
+            objects[11] = "<< /Type /StructTreeRoot /K [13 0 R] /ParentTree 17 0 R /ParentTreeNextKey 4 >>";
+            objects[12] = "<< /Type /StructElem /S /Document /P 12 0 R /K [14 0 R 15 0 R 16 0 R 21 0 R] >>";
+            objects[16] = "<< /Nums [0 [14 0 R] 1 16 0 R 2 15 0 R 3 21 0 R] >>";
+            const string inputAppearance = "BT /F1 12 Tf 0 g 2 6 Td (3) Tj ET";
+            const string totalAppearance = "BT /F1 12 Tf 0 g 2 6 Td (6) Tj ET";
+            string Appearance(string text) => $"<< /Length {text.Length} /Type /XObject /Subtype /Form /BBox [0 0 80 20] /Resources << /Font << /F1 18 0 R >> >> >>\nstream\n{text}\nendstream";
+            objects[18] = Appearance(inputAppearance);
+            objects = [.. objects,
+                "<< /Type /Annot /Subtype /Widget /FT /Tx /T (total) /V (6) /DV (4) /Rect [10 35 90 55] /DA (/F1 12 Tf 0 g) /AP << /N 22 0 R >> /P 3 0 R /StructParent 3 /AA << /C << /S /JavaScript /JS (event.value = this.getField\\(\"quantity\"\\).value * 2;) >> >> >>",
+                "<< /Type /StructElem /S /Form /P 13 0 R /Pg 3 0 R /K << /Type /OBJR /Pg 3 0 R /Obj 20 0 R >> >>",
+                Appearance(totalAppearance)];
+        }
+        if (!repeated) objects[1] = "<< /Type /Pages /Kids [10 0 R] /Count 1 /MediaBox [0 0 100 100] /Resources << >> >>";
         var result = new StringBuilder("%PDF-1.7\n");
         var offsets = new List<int>();
         for (int index = 0; index < objects.Length; index++)
