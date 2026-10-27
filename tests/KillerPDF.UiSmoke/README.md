@@ -361,6 +361,18 @@ tooltips: non-hover and explicit placement stay unchanged, and mouse placement
 restores its original rectangle and offsets after close. This checks the non-hover
 guard rather than keyboard tooltip activation.
 
+The `--verify-page-navigation-caption-theme`, `-caption-frame-theme` and
+`-caption-frame-grain` modes compare an existing public dialog frame after a live
+theme change with an independently constructed classic frame, then restore Dark.
+They retain owned caption and frame renders and check title, geometry and grain
+separately. The `-caption-close`, `-caption-pointer-close` and
+`-caption-keyboard-close` modes exercise the same public caption button through
+UI Automation, a guarded native click and native Space respectively. Each checks
+one close callback, the localized name and preservation of explicit caller margins
+in Dark and 98SE. Native variants require observed input at the owned target and
+released input afterward. Use the existing six-argument page-navigation invocation
+with `--session-isolation`, a fresh output directory and an owned SN01/SN02 session.
+
 `--verify-picker-navigation-recovery APP_DLL APP_XAML OUTPUT_DIRECTORY
 --session-isolation` opens the actual file picker through its public owner overload.
 After establishing a synthetic good-directory listing, native Enter submits a

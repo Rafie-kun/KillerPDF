@@ -212,6 +212,18 @@ internal static class TableExportSmoke
                 return TooltipCursorSmoke.RunMatrix(owner, folder);
             if (windowSessionCase == "--verify-page-navigation-tooltip-placement-controls")
                 return TooltipCursorSmoke.RunPlacementControls(owner, folder);
+            if (windowSessionCase == "--verify-page-navigation-caption-theme")
+                return CaptionThemeSmoke.Run(owner, folder);
+            if (windowSessionCase == "--verify-page-navigation-caption-frame-theme")
+                return CaptionThemeSmoke.Run(owner, folder, frameGeometry: true);
+            if (windowSessionCase == "--verify-page-navigation-caption-close")
+                return CaptionThemeSmoke.RunCloseControls(owner, folder);
+            if (windowSessionCase == "--verify-page-navigation-caption-pointer-close")
+                return CaptionThemeSmoke.RunCloseControls(owner, folder, nativePointer: true);
+            if (windowSessionCase == "--verify-page-navigation-caption-keyboard-close")
+                return CaptionThemeSmoke.RunCloseControls(owner, folder, nativeKeyboard: true);
+            if (windowSessionCase == "--verify-page-navigation-caption-frame-grain")
+                return CaptionThemeSmoke.Run(owner, folder, frameGeometry: true, grainCheck: true);
             if (windowSessionCase == "--verify-page-navigation-tooltip-large-cursor")
                 return TooltipCursorSmoke.RunLargeCursor(owner, folder);
             if (windowSessionCase == "--verify-page-navigation-transitions")

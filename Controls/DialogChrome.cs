@@ -36,6 +36,9 @@ namespace KillerPDF
                 VerticalAlignment = VerticalAlignment.Center,
                 Source = frames[0]
             };
+            icon.SetResourceReference(FrameworkElement.WidthProperty, "TitleIconSize");
+            icon.SetResourceReference(FrameworkElement.HeightProperty, "TitleIconSize");
+            icon.SetResourceReference(FrameworkElement.MarginProperty, "TitleIconMargin");
             RenderOptions.SetBitmapScalingMode(icon, BitmapScalingMode.NearestNeighbor);
             return icon;
         }
@@ -56,16 +59,27 @@ namespace KillerPDF
         //   fullTitle  - the complete title, e.g. "KillerPDF - Transform"; the "KillerPDF" part becomes the
         //                wordmark and the remainder (" - Transform") is rendered in the courier title font
         //   onClose    - invoked when the red close button is clicked (e.g. set a result then Close())
+        private sealed class CaptionBorder : Border
+        {
+            internal Action? Refresh;
+            internal static readonly DependencyProperty ClassicProperty = DependencyProperty.Register(
+                "Classic", typeof(bool), typeof(CaptionBorder),
+                new PropertyMetadata(false, (target, _) => ((CaptionBorder)target).Refresh?.Invoke()));
+            internal bool Classic => (bool)GetValue(ClassicProperty);
+        }
+
         public static Border BuildTitleBar(Window win, Window? owner, string? fullTitle, Action onClose)
         {
             // Transparent (not null) background so the WHOLE bar is hit-testable and acts as a drag handle.
             bool caption = Value(owner, "UseDialogCaption", false);
-            var bar = new Border
+            var bar = new CaptionBorder
             {
                 Background = Brush(owner, "DialogTitleBarBrush", Brushes.Transparent),
                 SnapsToDevicePixels = true,
                 UseLayoutRounding = true
             };
+            bar.SetResourceReference(CaptionBorder.ClassicProperty, "UseDialogCaption");
+            bar.SetResourceReference(Border.BackgroundProperty, "DialogTitleBarBrush");
             bar.MouseLeftButtonDown += (_, e) => { if (e.ButtonState == MouseButtonState.Pressed) win.DragMove(); };
 
             var grid = new Grid
@@ -111,24 +125,36 @@ namespace KillerPDF
                     // A title without the wordmark reads as the qualifier does: Killer Sans at 18.
                     sp.Children.Add(new TextBlock { Text = fullTitle ?? "", FontFamily = UiKit.BrandSansFont, FontSize = 18, Foreground = primary, VerticalAlignment = VerticalAlignment.Center });
                 }
+                foreach (var text in sp.Children.OfType<TextBlock>())
+                {
+                    if (!shadow) text.SetResourceReference(TextBlock.ForegroundProperty, "ChromeTextBrush");
+                    foreach (var run in text.Inlines.OfType<System.Windows.Documents.Run>())
+                    {
+                        run.SetResourceReference(System.Windows.Documents.TextElement.FontSizeProperty,
+                            run.Text == "Killer" ? "TitleWordmarkSize" : run.Text == "PDF" ? "TitleWordmarkBoldSize" : "TitleSubtitleSize");
+                        if (!shadow) run.SetResourceReference(System.Windows.Documents.TextElement.ForegroundProperty,
+                            run.Text == "PDF" ? "AccentLogo" : "ChromeTextBrush");
+                    }
+                }
                 return sp;
             }
 
-            var title = new Grid { Margin = caption ? new Thickness(0) : new Thickness(6, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
-            if (caption)
+            // Keep one caption and close action while its decorative labels follow the live
+            // plain-title/wordmark resources used by the main window and family reference.
+            var plain = new TextBlock
             {
-                title.Children.Add(new TextBlock
-                {
-                    Text = fullTitle ?? "KillerPDF", FontFamily = Value(owner, "ChromeFontFamily", UiKit.UiFont),
-                    FontSize = 11, FontWeight = FontWeights.Bold,
-                    Foreground = Brush(owner, "ChromeTextBrush", Brushes.White), VerticalAlignment = VerticalAlignment.Center
-                });
-            }
-            else
+                Text = fullTitle ?? "KillerPDF", FontSize = 11, FontWeight = FontWeights.Bold,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            plain.SetResourceReference(TextBlock.FontFamilyProperty, "ChromeFontFamily");
+            plain.SetResourceReference(TextBlock.ForegroundProperty, "ChromeTextBrush");
+            plain.SetResourceReference(UIElement.VisibilityProperty, "PlainTitleVisibility");
+            var title = new Grid { Margin = new Thickness(0, -18, 0, -22), VerticalAlignment = VerticalAlignment.Center };
+            title.SetResourceReference(UIElement.VisibilityProperty, "WordmarkVisibility");
             {
                 var shadowLayer = BuildWordmark(true);
                 // The theme's wordmark shadow strength, so a light caption (0) stays clean as the main title bar does.
-                shadowLayer.Opacity = Value(owner, "WordmarkShadowOpacity", 0.5);
+                shadowLayer.SetResourceReference(UIElement.OpacityProperty, "WordmarkShadowOpacity");
                 shadowLayer.Effect = new BlurEffect { Radius = 2 };
                 shadowLayer.RenderTransform = new TranslateTransform(0.7, 1.2);
                 title.Children.Add(shadowLayer);
@@ -136,7 +162,7 @@ namespace KillerPDF
                 foreach (var text in accentShadow.Children.OfType<TextBlock>())
                     foreach (var run in text.Inlines.OfType<System.Windows.Documents.Run>())
                         if (run.Text != "PDF") run.Foreground = Brushes.Transparent;
-                accentShadow.Opacity = Value(owner, "WordmarkAccentShadowOpacity", 0.0);
+                accentShadow.SetResourceReference(UIElement.OpacityProperty, "WordmarkAccentShadowOpacity");
                 accentShadow.IsHitTestVisible = false;
                 accentShadow.Effect = new BlurEffect { Radius = 3 };
                 accentShadow.RenderTransform = new TranslateTransform(1, 2);
@@ -151,14 +177,16 @@ namespace KillerPDF
             {
                 Orientation = Orientation.Horizontal,
                 VerticalAlignment = VerticalAlignment.Center,
-                Margin = title.Margin
+                Margin = caption ? new Thickness(0) : new Thickness(6, 0, 0, 0)
             };
             // Negative margins keep the wordmark's deep Lacquer descent out of the layout so the bar
             // never clips its drips (2px imbalance as in the main title bar); the bar sits above the
             // dialog body so the drips can hang over it.
-            title.Margin = caption ? new Thickness(0) : new Thickness(0, -18, 0, -22);
             titleRow.Children.Add(TitleIcon(owner));
-            titleRow.Children.Add(title);
+            var titleHost = new Grid { VerticalAlignment = VerticalAlignment.Center };
+            titleHost.Children.Add(plain);
+            titleHost.Children.Add(title);
+            titleRow.Children.Add(titleHost);
             Grid.SetColumn(titleRow, 0);
             grid.Children.Add(titleRow);
 
@@ -203,11 +231,15 @@ namespace KillerPDF
             close.SetResourceReference(FrameworkElement.WidthProperty, "DialogCloseWidth");
             close.SetResourceReference(FrameworkElement.HeightProperty, "DialogCloseHeight");
             close.SetResourceReference(FrameworkElement.MarginProperty, "DialogCaptionButtonsMargin");
+            close.SetResourceReference(System.Windows.Automation.AutomationProperties.NameProperty, "Str_Sys_Close");
+            close.SetResourceReference(FrameworkElement.ToolTipProperty, "Str_Sys_Close");
             // Resizable borderless dialogs use WindowChrome. Without this exemption its resize
             // band wins the top-right hit test, turning the close button into a resize handle.
             System.Windows.Shell.WindowChrome.SetIsHitTestVisibleInChrome(close, true);
             // Get the click before the caption's DragMove handler starts its modal mouse loop.
             close.PreviewMouseLeftButtonDown += (_, e) => { e.Handled = true; onClose(); };
+            // Keyboard and automation invoke Click without pointer preview events.
+            close.Click += (_, _) => onClose();
             Grid.SetColumn(close, 1);
             grid.Children.Add(close);
 
@@ -218,6 +250,20 @@ namespace KillerPDF
             captionLayers.Children.Add(titleGrain);
             captionLayers.Children.Add(grid);
             bar.Child = captionLayers;
+            bar.Refresh = () =>
+            {
+                bool classic = bar.Classic;
+                if (classic) grid.SetResourceReference(FrameworkElement.MarginProperty, "TitleBarPadding");
+                else grid.Margin = new Thickness(0);
+                titleRow.Margin = classic ? new Thickness(0) : new Thickness(6, 0, 0, 0);
+                string closeStyle = classic ? "ChromeCloseButton" : "OverlayCloseButton";
+                // An owned Window does not inherit its owner's local style dictionary.
+                if (owner?.TryFindResource(closeStyle) is Style style) close.Style = style;
+                close.VerticalAlignment = classic ? VerticalAlignment.Top : VerticalAlignment.Center;
+                if (classic) close.ClearValue(ContentControl.ContentProperty);
+                else close.SetResourceReference(ContentControl.ContentProperty, "AboutCloseGlyph");
+            };
+            bar.Refresh();
             Panel.SetZIndex(bar, 1);
             return bar;
         }
@@ -258,9 +304,20 @@ namespace KillerPDF
                 BorderBrush = Brush(owner, brushKey, Brushes.Transparent),
                 BorderThickness = Value(owner, thicknessKey, new Thickness(0))
             };
+            ring.SetResourceReference(Border.BorderBrushProperty, brushKey);
+            ring.SetResourceReference(Border.BorderThicknessProperty, thicknessKey);
             if (marginKey != null)
-                ring.Margin = Value(owner, marginKey, new Thickness(0));
+                ring.SetResourceReference(FrameworkElement.MarginProperty, marginKey);
             return ring;
+        }
+
+        private sealed class NegativeStroke : System.Windows.Data.IValueConverter
+        {
+            public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+                => value is Thickness stroke
+                    ? new Thickness(-stroke.Left, -stroke.Top, -stroke.Right, -stroke.Bottom) : new Thickness(0);
+            public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+                => System.Windows.Data.Binding.DoNothing;
         }
 
         private static Grid WindowFrame(Window? owner)
@@ -281,10 +338,11 @@ namespace KillerPDF
             {
                 Margin = haloMargin ?? Value(owner, "DialogHaloMargin", new Thickness(12))
             };
+            if (!haloMargin.HasValue) host.SetResourceReference(FrameworkElement.MarginProperty, "DialogHaloMargin");
             var radius = Value(owner, "WindowCornerRadius", new CornerRadius(7));
             var stroke = Value(owner, "DialogFrameThickness", new Thickness(1));
             var shadowFill = Brush(owner, "WindowFrameBrush", UiKit.Brush("MenuBackgroundBrush"));
-            host.Children.Add(new Border
+            var shadow = new Border
             {
                 Background = shadowFill,
                 BorderBrush = shadowFill,
@@ -292,27 +350,45 @@ namespace KillerPDF
                 CornerRadius = radius,
                 IsHitTestVisible = false,
                 Effect = UiKit.ShadowDialog()
-            });
+            };
+            shadow.SetResourceReference(Border.BackgroundProperty, "WindowFrameBrush");
+            shadow.SetResourceReference(Border.BorderBrushProperty, "WindowFrameBrush");
+            shadow.SetResourceReference(Border.BorderThicknessProperty, "DialogFrameThickness");
+            shadow.SetResourceReference(Border.CornerRadiusProperty, "WindowCornerRadius");
+            shadow.SetResourceReference(FrameworkElement.TagProperty, "FlyoutShadowOpacity");
+            System.Windows.Data.BindingOperations.SetBinding(shadow.Effect, DropShadowEffect.OpacityProperty,
+                new System.Windows.Data.Binding(nameof(FrameworkElement.Tag)) { Source = shadow });
+            host.Children.Add(shadow);
             // Preserve content positions while the frame clips to its inner stroke edge.
             var layers = new Grid
             {
                 Margin = new Thickness(-stroke.Left, -stroke.Top, -stroke.Right, -stroke.Bottom)
             };
-            layers.Children.Add(new Border
+            var contentSurface = new Border
             {
                 Background = Brush(owner, "BackgroundBrush", UiKit.Brush("BackgroundBrush")),
                 Margin = Value(owner, "DialogWindowFramePadding", new Thickness(0)),
                 Child = content
-            });
+            };
+            contentSurface.SetResourceReference(Border.BackgroundProperty, "BackgroundBrush");
+            contentSurface.SetResourceReference(FrameworkElement.MarginProperty, "DialogWindowFramePadding");
+            layers.Children.Add(contentSurface);
             layers.Children.Add(WindowFrame(owner));
-            host.Children.Add(new Controls.PickerBorder
+            var outer = new Controls.PickerBorder
             {
                 Background = Brush(owner, "BackgroundBrush", UiKit.Brush("BackgroundBrush")),
                 BorderBrush = Brush(owner, "DialogFrameBrush", UiKit.Brush("MenuBorderBrush")),
                 BorderThickness = stroke,
                 CornerRadius = radius,
                 Child = layers
-            });
+            };
+            outer.SetResourceReference(Border.BackgroundProperty, "BackgroundBrush");
+            outer.SetResourceReference(Border.BorderBrushProperty, "DialogFrameBrush");
+            outer.SetResourceReference(Border.BorderThicknessProperty, "DialogFrameThickness");
+            outer.SetResourceReference(Border.CornerRadiusProperty, "WindowCornerRadius");
+            layers.SetBinding(FrameworkElement.MarginProperty, new System.Windows.Data.Binding(nameof(Border.BorderThickness))
+                { Source = outer, Converter = new NegativeStroke() });
+            host.Children.Add(outer);
             return host;
         }
 
@@ -335,29 +411,19 @@ namespace KillerPDF
             var root = new DockPanel();
             var titleBar = BuildTitleBar(win, owner, title, onClose);
             titleBar.Height = Value(owner, "DialogTitleBarHeight", 40.0);
+            titleBar.SetResourceReference(FrameworkElement.HeightProperty, "DialogTitleBarHeight");
             DockPanel.SetDock(titleBar, Dock.Top);
             root.Children.Add(titleBar);
             root.Children.Add(body);
 
-            var grain = GrainTexture(owner);
-            if (grain != null)
-            {
-                var grid = new Grid();
-                double op = Application.Current?.Resources["GrainOpacity"] is double go ? go : 0.05;
-                grid.Children.Add(new Border
-                {
-                    CornerRadius = UiKit.RadWindow, IsHitTestVisible = false, Opacity = op,
-                    Background = new ImageBrush(grain) { TileMode = TileMode.Tile, ViewportUnits = BrushMappingMode.Absolute, Viewport = new Rect(0, 0, 256, 256), Stretch = Stretch.None }
-                });
-                grid.Children.Add(root);
-                card.Child = grid;
-            }
-            else
-            {
-                var grid = new Grid();
-                grid.Children.Add(root);
-                card.Child = grid;
-            }
+            var grid = new Grid();
+            var grain = new Border { IsHitTestVisible = false };
+            grain.SetResourceReference(Border.CornerRadiusProperty, "WindowCornerRadius");
+            grain.SetResourceReference(Border.BackgroundProperty, "GrainTileBrush");
+            grain.SetResourceReference(UIElement.OpacityProperty, "GrainOpacity");
+            grid.Children.Add(grain);
+            grid.Children.Add(root);
+            card.Child = grid;
             var framedContent = card.Child!;
             card.Child = null;
             return WrapContent(owner, framedContent, haloMargin);
