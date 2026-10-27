@@ -589,8 +589,7 @@ namespace KillerPDF.Shell
                 if (App.TakeUpdateRestartReadFailure())
                     SetStatus(Loc("Str_UpdateRestartRestoreFailed"));
 
-                if (App.IsPortable())
-                    _portableBadge.Visibility = Visibility.Visible;
+                RefreshPortableBadge();
 
                 // Start with the sidebar collapsed when no PDF is open (nothing to show); a document
                 // opened above will have expanded it via FinishOpenFile.

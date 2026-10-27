@@ -308,13 +308,6 @@ namespace KillerPDF.Shell
             SendMessage(hwnd, WM_NCLBUTTONDOWN, new IntPtr(HTCAPTION), IntPtr.Zero);
         }
 
-        private void Install_Click(object sender, RoutedEventArgs e)
-        {
-            Process.Start(new ProcessStartInfo(
-                "https://github.com/SteveTheKiller/KillerPDF/releases/latest")
-                { UseShellExecute = true });
-        }
-
         // Rounded window corners look right only when floating; a maximized OR snapped window must
         // square off or the rounded corners reveal the desktop / adjacent window behind them.
         // Runs after the kit's own state-change work in Chrome.cs.

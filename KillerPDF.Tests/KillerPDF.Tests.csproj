@@ -134,6 +134,7 @@
     <Compile Include="..\Services\UpdateImagePublication.cs" Link="Services\UpdateImagePublication.cs" />
     <Compile Include="..\Services\UpdateService.cs" Link="Services\UpdateService.cs" />
     <Compile Include="..\Services\UpdateTargetChoice.cs" Link="Services\UpdateTargetChoice.cs" />
+    <Compile Include="..\Shell\PortableInstallPlan.cs" Link="Shell\PortableInstallPlan.cs" />
     <Compile Include="..\Services\TrustedUpdate.cs" Link="Services\TrustedUpdate.cs" />
     <Compile Include="..\Services\ReleaseIdentity.cs" Link="Services\ReleaseIdentity.cs" />
     <Compile Include="..\Services\CodeSignature.cs" Link="Services\CodeSignature.cs" />

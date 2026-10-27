@@ -322,9 +322,10 @@ Lưu ngay bây giờ sẽ ghi đè lên tệp và các thay đổi đó sẽ b�
     <sys:String x:Key="Str_St_SplitOn">Đã bật chia đôi khung - Nhấn F10 để đóng</sys:String>
     <sys:String x:Key="Str_St_SplitOff">Đã tắt chia đôi khung</sys:String>
     <sys:String x:Key="Str_Dlg_InstallTitle">Cài đặt KillerPDF</sys:String>
-    <sys:String x:Key="Str_Dlg_InstallMsg" xml:space="preserve">Cài đặt KillerPDF trên máy tính này?
-
-Việc cài đặt sẽ sao chép ứng dụng vào thư mục Chương trình (Programs) của bạn để khởi động nhanh hơn và thêm lối tắt vào menu Bắt đầu (Start menu). Bạn có thể giữ lại hoặc xóa tệp di động này sau đó.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallMsg">Cài đặt KillerPDF trên máy tính này?</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallBullets">Việc cài đặt sẽ sao chép ứng dụng vào thư mục Chương trình (Programs) của bạn để khởi động nhanh hơn và thêm lối tắt vào menu Bắt đầu (Start menu). Bạn có thể giữ lại hoặc xóa tệp di động này sau đó.</sys:String>
+    <sys:String x:Key="Str_Install_AlreadyAllUsers">KillerPDF đã được cài đặt cho mọi người dùng trên máy tính này, nên bản đó sẽ được cập nhật. Windows sẽ yêu cầu cấp quyền.</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveBeforeInstall">Vui lòng lưu các thay đổi trước khi cài đặt.</sys:String>
     <sys:String x:Key="Str_Dlg_UpdateMachineMsg" xml:space="preserve">Cập nhật bản cài đặt KillerPDF hiện tại cho tất cả người dùng?
 
 Thao tác này sẽ thay thế bản sao trong Program Files bằng phiên bản nhiều tệp nhanh hơn. Mọi bản sao cũ dành cho từng người dùng sẽ bị xóa để KillerPDF chỉ xuất hiện một lần duy nhất. Bạn có thể giữ lại hoặc xóa tệp di động này sau đó.</sys:String>

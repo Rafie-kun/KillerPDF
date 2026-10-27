@@ -1105,16 +1105,18 @@ namespace KillerPDF
         /// Installs KillerPDF, offers to set it as the default PDF handler, then relaunches from
         /// the installed location. Returns false if the install did not happen, so the caller can
         /// put the portable badge back rather than leaving the user with a half-finished state.
+        /// The footer's Install button (Shell/Install.cs) calls it; the command it runs comes from
+        /// Shell/PortableInstallPlan.cs.
         ///
         /// An all-users install re-runs this exe elevated with /silent - the same machine-wide path
         /// winget and choco use - so UAC only appears when the user actually asked for it.
         /// </summary>
-        internal static bool InstallAndRelaunch(string? fileToOpen, bool wantDesktop, bool allUsers)
+        internal static bool InstallAndRelaunch(bool wantDesktop, bool allUsers, string? fileToOpen = null)
         {
-            string targetExe;
-            string? launcher = GetPortableLauncherPath();
+            var plan = Shell.PortableInstallPlan.Choose(allUsers, wantDesktop, MachineInstallExists(),
+                GetPortableLauncherPath(), Environment.ProcessPath, InstallExe, MachineInstallExe);
 
-            if (!allUsers && MachineInstallExists())
+            if (plan.Kind == Shell.PortableInstallKind.RefusedSecondCopy)
             {
                 KillerDialog.Show(Current.MainWindow,
                     Current.TryFindResource("Str_Dlg_OneInstallOnly") as string ??
@@ -1123,31 +1125,22 @@ namespace KillerPDF
                     MessageBoxButton.OK, MessageBoxImage.Information);
                 return false;
             }
+            if (plan.Kind == Shell.PortableInstallKind.Unavailable || plan.TargetExe is null) return false;
 
-            if (allUsers)
+            if (plan.Kind == Shell.PortableInstallKind.InProcess)
             {
-                if (!RunElevatedSilentInstall(launcher, wantDesktop)) return false;
+                // Compatibility for old woven builds and direct developer runs.
+                if (!DoInstall(wantDesktop)) return false;
+            }
+            else if (!RunInstallCommand(plan.Program!, plan.Arguments!, plan.Elevate))
+                return false;
+            if (!File.Exists(plan.TargetExe)) return false;   // trust gate / copy failure already reported
 
-                // Only ever one install: drop the per-user copy so there is a single Start Menu
-                // entry and a single uninstall entry. This also removes per-user file and protocol
-                // handlers that could shadow the machine registration. Settings remain intact.
-                RemovePerUserInstall();
-                targetExe = MachineInstallExe;
-            }
-            else
-            {
-                if (launcher != null)
-                {
-                    if (!RunLauncherUserInstall(launcher, wantDesktop)) return false;
-                }
-                else
-                {
-                    // Compatibility for old woven builds and direct developer runs.
-                    if (!DoInstall(wantDesktop)) return false;
-                }
-                if (!File.Exists(InstallExe)) return false;   // trust gate / copy failure already reported
-                targetExe = InstallExe;
-            }
+            // Only ever one install: drop the per-user copy so there is a single Start Menu
+            // entry and a single uninstall entry. This also removes per-user file and protocol
+            // handlers that could shadow the machine registration. Settings remain intact.
+            if (allUsers) RemovePerUserInstall();
+            string targetExe = plan.TargetExe;
 
             if (!IsDefaultPdfHandler())
             {
@@ -1164,7 +1157,7 @@ namespace KillerPDF
 
             var psi = new ProcessStartInfo(targetExe);
             if (fileToOpen != null)
-                psi.Arguments = $"\"{fileToOpen}\"";
+                psi.ArgumentList.Add(fileToOpen);
             // Free the single-instance mutex first so the launched copy becomes primary (and shows a
             // window) instead of treating itself as a duplicate and exiting.
             (Current as App)?.ReleaseInstanceMutex();
@@ -1173,7 +1166,26 @@ namespace KillerPDF
             return true;
         }
 
-        /// <summary>Re-run this exe elevated with /silent and wait for it to finish.</summary>
+        /// <summary>Runs the plan's install command and waits for it. Elevated runs go through
+        /// "runas"; declining UAC throws Win32Exception 1223 (ERROR_CANCELLED), which is a failure.</summary>
+        private static bool RunInstallCommand(string program, string arguments, bool elevate)
+        {
+            try
+            {
+                var psi = new ProcessStartInfo(program, arguments) { UseShellExecute = elevate };
+                if (elevate) psi.Verb = "runas";
+                using var process = Process.Start(psi);
+                process?.WaitForExit();
+                return process is not null && process.ExitCode == 0;
+            }
+            catch { return false; }
+        }
+
+        /// <summary>The DemoThumbprint idea in the other apps: KillerPDF has no demo build, so the
+        /// footer badge always shows on a portable copy.</summary>
+        internal static bool IsDemo => false;
+
+        /// <summary>The packaged portable launcher that started this copy, when there is one.</summary>
         private static string? GetPortableLauncherPath()
         {
             try
@@ -1182,43 +1194,6 @@ namespace KillerPDF
                 return !string.IsNullOrWhiteSpace(path) && File.Exists(path) ? Path.GetFullPath(path) : null;
             }
             catch { return null; }
-        }
-
-        private static bool RunLauncherUserInstall(string launcher, bool wantDesktop)
-        {
-            try
-            {
-                string arguments = wantDesktop ? "/install-user /desktop" : "/install-user";
-                using var process = Process.Start(new ProcessStartInfo(launcher, arguments)
-                {
-                    UseShellExecute = false,
-                });
-                process?.WaitForExit();
-                return process is not null && process.ExitCode == 0 && File.Exists(InstallExe);
-            }
-            catch { return false; }
-        }
-
-        private static bool RunElevatedSilentInstall(string? launcher = null, bool desktop = false)
-        {
-            try
-            {
-                string installer = launcher ?? Environment.ProcessPath
-                    ?? throw new InvalidOperationException("The current executable path is unavailable.");
-                var psi = new ProcessStartInfo(installer, desktop ? "/silent /desktop" : "/silent")
-                {
-                    UseShellExecute = true,
-                    Verb = "runas",          // triggers the UAC prompt
-                };
-                using var p = Process.Start(psi);
-                p?.WaitForExit();
-                return p is not null && p.ExitCode == 0 && File.Exists(MachineInstallExe);
-            }
-            catch
-            {
-                // Declining the UAC prompt throws Win32Exception 1223 (ERROR_CANCELLED).
-                return false;
-            }
         }
 
         /// <summary>Remove a per-user install: files, shortcuts and its HKCU install markers.
@@ -1257,7 +1232,7 @@ namespace KillerPDF
 
         /// <summary>
         /// Silent install with no UI, so the exit code is the only signal a deployment tool - or
-        /// RunElevatedSilentInstall - gets back. Elevated, it installs machine-wide; without admin
+        /// the footer's all-users install - gets back. Elevated, it installs machine-wide; without admin
         /// rights it installs for the current user.
         ///
         /// A machine-wide install registers file associations in HKLM so every account sees KillerPDF
@@ -1620,9 +1595,10 @@ namespace KillerPDF
 
             content.Children.Add(new TextBlock
             {
-                Text         = Current.TryFindResource(alreadyInstalled
-                    ? "Str_Dlg_UpdateUserMsg"
-                    : "Str_Dlg_InstallMsg") as string ?? string.Empty,
+                Text         = alreadyInstalled
+                    ? Current.TryFindResource("Str_Dlg_UpdateUserMsg") as string ?? string.Empty
+                    : (Current.TryFindResource("Str_Dlg_InstallMsg") as string ?? string.Empty) + "\n\n"
+                        + (Current.TryFindResource("Str_Dlg_InstallBullets") as string ?? string.Empty),
                 Foreground   = Brushes.White,
                 TextWrapping = TextWrapping.Wrap,
                 Margin       = new Thickness(0, 0, 0, 16)
@@ -1776,214 +1752,6 @@ namespace KillerPDF
                 Marshal.FreeHGlobal(fileInfoPtr);
                 Marshal.FreeHGlobal(pathPtr);
             }
-        }
-
-        /// <summary>
-        /// Convenience wrapper: verify the currently running EXE.
-        /// </summary>
-        internal static (bool Valid, string Subject, string Thumbprint) GetExeSignerInfo()
-        {
-            try
-            {
-                return VerifyAuthenticode(Environment.ProcessPath
-                    ?? throw new InvalidOperationException("The current executable path is unavailable."));
-            }
-            catch
-            {
-                return (false, "(not signed)", string.Empty);
-            }
-        }
-
-        /// <summary>SHA256 hex of the currently running EXE (for the About dialog).</summary>
-        internal static string GetExeSha256()
-        {
-            try
-            {
-                var path = Environment.ProcessPath
-                    ?? throw new InvalidOperationException("The current executable path is unavailable.");
-                using var fs  = File.OpenRead(path);
-                return Convert.ToHexString(SHA256.HashData(fs));
-            }
-            catch { return "(unavailable)"; }
-        }
-
-        // ── About dialog ────────────────────────────────────────────────────────
-
-        internal static void ShowAboutDialog(Window owner)
-        {
-            // Gather info on a background thread so the UI isn't blocked by hashing
-            var version    = AppVersion.Display;
-            var (sigValid, sigSubject, sigThumbprint) = GetExeSignerInfo();
-            var sha256 = GetExeSha256();
-
-            // ── Layout ──────────────────────────────────────────────────────
-            var bg     = new SolidColorBrush(Color.FromRgb(0x1e, 0x1e, 0x1e));
-            var bgCard = new SolidColorBrush(Color.FromRgb(0x2a, 0x2a, 0x2a));
-            var fg     = new SolidColorBrush(Color.FromRgb(0xe0, 0xe0, 0xe0));
-            var fgDim  = new SolidColorBrush(Color.FromRgb(0x77, 0x77, 0x77));
-            var accent = new SolidColorBrush(Color.FromRgb(0x1e, 0xa5, 0x4c));
-            var mono   = new FontFamily("Consolas");
-
-            // Title bar
-            var titleBar = new Grid
-            {
-                Background = new SolidColorBrush(Color.FromRgb(0x25, 0x25, 0x25)),
-                Height = 32
-            };
-            titleBar.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            titleBar.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-
-            var titleText = new TextBlock
-            {
-                Text = (Current.TryFindResource("Str_TT_About") as string ?? AppName)
-                    .Replace(" (F12)", string.Empty, StringComparison.Ordinal),
-                Foreground = fg, VerticalAlignment = VerticalAlignment.Center,
-                Margin = new Thickness(12, 0, 0, 0), FontSize = 13, FontWeight = FontWeights.SemiBold
-            };
-            Grid.SetColumn(titleText, 0);
-            titleBar.Children.Add(titleText);
-
-            Window? dlg = null;
-            var closeBtn = MakeTitleBarCloseButton(
-                new SolidColorBrush(Color.FromRgb(0xcc, 0xcc, 0xcc)),
-                new SolidColorBrush(Color.FromRgb(0xc0, 0x3b, 0x3b)));
-            closeBtn.Click += (_, __) => dlg!.Close();
-            Grid.SetColumn(closeBtn, 1);
-            titleBar.Children.Add(closeBtn);
-
-            // Helper: labeled row (onClick makes the value a clickable hyperlink)
-            static StackPanel MakeRow(string label, string value,
-                SolidColorBrush labelBrush, SolidColorBrush valueBrush,
-                FontFamily? valueFont = null, bool wrap = false, Action? onClick = null)
-            {
-                var sp = new StackPanel { Orientation = Orientation.Vertical, Margin = new Thickness(0, 0, 0, 10) };
-                sp.Children.Add(new TextBlock
-                {
-                    Text = label, Foreground = labelBrush,
-                    FontSize = 10, Margin = new Thickness(0, 0, 0, 2)
-                });
-                if (onClick != null)
-                {
-                    var tb = new TextBlock
-                    {
-                        FontFamily = valueFont ?? new FontFamily("Segoe UI"),
-                        FontSize = 12,
-                        Cursor = Cursors.Hand
-                    };
-                    var hl = new Hyperlink(new Run(value))
-                    {
-                        Foreground = valueBrush,
-                        TextDecorations = null
-                    };
-                    hl.Click += (_, _) => onClick();
-                    tb.Inlines.Add(hl);
-                    sp.Children.Add(tb);
-                }
-                else
-                {
-                    sp.Children.Add(new TextBlock
-                    {
-                        Text = value, Foreground = valueBrush,
-                        FontFamily = valueFont ?? new FontFamily("Segoe UI"),
-                        FontSize = 12,
-                        TextWrapping = wrap ? TextWrapping.Wrap : TextWrapping.NoWrap
-                    });
-                }
-                return sp;
-            }
-
-            static void OpenUrl(string url)
-            {
-                try { Process.Start(new ProcessStartInfo(url) { UseShellExecute = true }); } catch { }
-            }
-
-            var none = Current.TryFindResource("Str_Margin_None") as string ?? "None";
-            var sigInfo = sigValid ? $"{sigSubject}" : none;
-
-            var thumbInfo = string.IsNullOrEmpty(sigThumbprint) ? none : sigThumbprint;
-
-            var card = new Border
-            {
-                Background = bgCard,
-                CornerRadius = new CornerRadius(6),
-                Padding = new Thickness(16),
-                Margin = new Thickness(0, 0, 0, 0)
-            };
-            var cardContent = new StackPanel();
-            cardContent.Children.Add(MakeRow(Current.TryFindResource("Str_About_Version") as string ?? string.Empty, $"v{version}", fgDim, accent,
-                onClick: () => OpenUrl($"https://github.com/SteveTheKiller/KillerPDF/releases/tag/v{version}")));
-            cardContent.Children.Add(MakeRow(Current.TryFindResource("Str_About_Publisher") as string ?? string.Empty, sigInfo, fgDim, fg));
-            cardContent.Children.Add(MakeRow(Current.TryFindResource("Str_About_Thumbprint") as string ?? string.Empty, thumbInfo, fgDim, fg, mono, wrap: true));
-            cardContent.Children.Add(MakeRow(Current.TryFindResource("Str_About_ExeSha") as string ?? string.Empty, sha256, fgDim, fg, mono, wrap: true));
-            card.Child = cardContent;
-
-            // Close button
-            var okBtn = UiKit.Make(Current.TryFindResource("Str_Lbl_Close") as string ?? string.Empty,
-                new SolidColorBrush(Color.FromRgb(0x1e, 0xa5, 0x4c)),
-                new SolidColorBrush(Color.FromRgb(0x17, 0x7a, 0x38)),
-                new SolidColorBrush(Colors.White),
-                new SolidColorBrush(Colors.White));
-            okBtn.Width  = 80;
-            okBtn.Height = 28;
-            okBtn.HorizontalAlignment = HorizontalAlignment.Right;
-            okBtn.Margin = new Thickness(0, 12, 0, 0);
-            okBtn.Click += (_, __) => dlg!.Close();
-
-            // KillerPDF logo - clickable link to product site
-            var logo = new TextBlock { FontSize = 22, FontWeight = FontWeights.Bold, Margin = new Thickness(0, 0, 0, 4) };
-            var logoHl = new Hyperlink(new Run("KillerPDF"))
-            {
-                Foreground = accent,
-                TextDecorations = null
-            };
-            logoHl.Click += (_, _) => OpenUrl("https://pdf.killertools.com");
-            logo.Inlines.Add(logoHl);
-
-            // Tagline with Killer Tools link
-            var tagline = new TextBlock { FontSize = 11, Margin = new Thickness(0, 0, 0, 16) };
-            var taglineText = Current.TryFindResource("Str_Tagline") as string ?? string.Empty;
-            int brandPosition = taglineText.IndexOf("{0}", StringComparison.Ordinal);
-            tagline.Inlines.Add(new Run(brandPosition >= 0 ? taglineText[..brandPosition] : taglineText) { Foreground = fgDim });
-            var ktHl = new Hyperlink(new Run("Killer Tools"))
-            {
-                Foreground = accent,
-                TextDecorations = null
-            };
-            ktHl.Click += (_, _) => OpenUrl("https://killertools.net");
-            tagline.Inlines.Add(ktHl);
-            tagline.Inlines.Add(new Run(brandPosition >= 0 ? taglineText[(brandPosition + 3)..] : string.Empty) { Foreground = fgDim });
-
-            var body = new StackPanel { Margin = new Thickness(16, 16, 16, 20) };
-            body.Children.Add(logo);
-            body.Children.Add(tagline);
-            body.Children.Add(card);
-            body.Children.Add(okBtn);
-
-            var root = new DockPanel();
-            DockPanel.SetDock(titleBar, Dock.Top);
-            root.Children.Add(titleBar);
-            root.Children.Add(body);
-            root.Background = bg;
-
-            // Make title bar draggable
-            titleBar.MouseLeftButtonDown += (_, me) =>
-            {
-                if (me.ButtonState == MouseButtonState.Pressed) dlg!.DragMove();
-            };
-
-            dlg = new Window
-            {
-                Content = root,
-                WindowStyle = WindowStyle.None,
-                ResizeMode = ResizeMode.NoResize,
-                SizeToContent = SizeToContent.Height,
-                Width = 540,
-                Owner = owner,
-                WindowStartupLocation = WindowStartupLocation.CenterOwner,
-                Background = bg
-            };
-
-            dlg.ShowDialog();
         }
 
         // ============================================================

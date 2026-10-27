@@ -261,9 +261,10 @@ Beim Speichern wird die Datei überschrieben und diese Änderungen gehen verlore
     <sys:String x:Key="Str_St_SplitOn">Geteilte Ansicht an - F10 zum Schließen</sys:String>
     <sys:String x:Key="Str_St_SplitOff">Geteilte Ansicht aus</sys:String>
     <sys:String x:Key="Str_Dlg_InstallTitle">KillerPDF installieren</sys:String>
-    <sys:String x:Key="Str_Dlg_InstallMsg" xml:space="preserve">KillerPDF auf diesem Computer installieren?
-
-Beim Installieren wird die App für einen schnelleren Start in Ihren Programmordner kopiert und ein Startmenüeintrag hinzugefügt. Diese portable Datei können Sie danach behalten oder löschen.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallMsg">KillerPDF auf diesem Computer installieren?</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallBullets">Beim Installieren wird die App für einen schnelleren Start in Ihren Programmordner kopiert und ein Startmenüeintrag hinzugefügt. Diese portable Datei können Sie danach behalten oder löschen.</sys:String>
+    <sys:String x:Key="Str_Install_AlreadyAllUsers">KillerPDF ist auf diesem Computer bereits für alle Benutzer installiert, daher wird diese Kopie aktualisiert. Windows fragt nach der Berechtigung.</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveBeforeInstall">Bitte speichern Sie Ihre Änderungen vor der Installation.</sys:String>
     <sys:String x:Key="Str_Btn_DoInstall">Installieren</sys:String>
     <sys:String x:Key="Str_Btn_DoUpdate">Aktualisieren</sys:String>
     <sys:String x:Key="Str_Dlg_UpdateUserMsg" xml:space="preserve">Die bestehende KillerPDF-Installation aktualisieren?

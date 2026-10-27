@@ -15,7 +15,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Legacy Office conversion disables VBA macros. Translation test files load as text, unsafe HTML-export links stay inert, and scripts can supply PDF passwords through standard input.
 - Table exports and batch CSV reports prevent document values and filenames from becoming spreadsheet formulas.
 - Forwarded file opens are restricted to the same Windows account and session. Installation rejects folders containing unrelated or unverified files, and portable updates no longer run a helper script from the temp folder.
-- Updates install only a release whose checksum line names exactly the downloaded file, whose version is the offered release and newer than the running copy, and whose signature comes from the installed copy's publisher certificate. The installer is checked again just before it starts, and portable updates roll back when the new launcher cannot be confirmed.
+- Updates install only a release whose checksum line names exactly the downloaded file, whose version is the offered release and newer than the running copy, and whose valid signature names the installed copy's publisher, so updates keep working after the publisher's certificate is renewed. The installer is checked again just before it starts, and portable updates roll back when the new launcher cannot be confirmed.
 
 ### Fixed
 
@@ -73,6 +73,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 ### Changed
 
+- **Install:** The footer's PORTABLE button installs the running portable copy in place, for this account or for everyone, from the same confirm as the other Killer Tools apps, and the installed copy reopens the active document. Unsaved changes hold the install.
 - **Updates:** The About card and the startup update prompt use the same update dialog as the other Killer Tools apps. Portable updates stop waiting for a stuck launcher after five minutes and report the failure instead.
 - **PDF engine:** Replaced PDFium, Docnet.Core and PdfPig with KillerPDF.Engine for rendering, text extraction, search, selection, editing, printing and export, including encrypted documents, forms and common PDF image formats.
 - **Rendering and startup:** Moved rendering off the UI thread with viewport priority, cancellation and zoom refinement. Precompiled the app and engine, cached installed fonts and moved discovery into the background; batch work releases resources sooner and uses lower default rendering concurrency.

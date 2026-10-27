@@ -261,9 +261,10 @@ Al guardar ahora se sobrescribe el archivo y esos cambios se perderán. Guarde p
     <sys:String x:Key="Str_St_SplitOn">Vista dividida activada - F10 para cerrar</sys:String>
     <sys:String x:Key="Str_St_SplitOff">Vista dividida desactivada</sys:String>
     <sys:String x:Key="Str_Dlg_InstallTitle">Instalar KillerPDF</sys:String>
-    <sys:String x:Key="Str_Dlg_InstallMsg" xml:space="preserve">¿Instalar KillerPDF en este equipo?
-
-La instalación copia la aplicación a su carpeta de programas para un inicio más rápido y añade una entrada en el menú Inicio. Después puede conservar o eliminar este archivo portátil.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallMsg">¿Instalar KillerPDF en este equipo?</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallBullets">La instalación copia la aplicación a su carpeta de programas para un inicio más rápido y añade una entrada en el menú Inicio. Después puede conservar o eliminar este archivo portátil.</sys:String>
+    <sys:String x:Key="Str_Install_AlreadyAllUsers">KillerPDF ya está instalado para todos los usuarios de este equipo, así que se actualizará esa copia. Windows pedirá permiso.</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveBeforeInstall">Guarde los cambios antes de instalar.</sys:String>
     <sys:String x:Key="Str_Btn_DoInstall">Instalar</sys:String>
     <sys:String x:Key="Str_Btn_DoUpdate">Actualizar</sys:String>
     <sys:String x:Key="Str_Dlg_UpdateUserMsg" xml:space="preserve">¿Actualizar la instalación existente de KillerPDF?

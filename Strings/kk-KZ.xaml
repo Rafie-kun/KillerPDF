@@ -244,9 +244,10 @@
     <sys:String x:Key="Str_St_SplitOn">Бөлінген панель қосулы - жабу үшін F10</sys:String>
     <sys:String x:Key="Str_St_SplitOff">Бөлінген панель өшірулі</sys:String>
     <sys:String x:Key="Str_Dlg_InstallTitle">KillerPDF орнату</sys:String>
-    <sys:String x:Key="Str_Dlg_InstallMsg" xml:space="preserve">KillerPDF-ті осы компьютерге орнату керек пе?
-
-Орнату қолданбаны Бағдарламалар қалтасына көшіреді (жылдам іске қосу үшін) және Бастау мәзіріне жазба қосады. Осы тасымалды файлды кейін қалдыра немесе жоя аласыз.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallMsg">KillerPDF-ті осы компьютерге орнату керек пе?</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallBullets">Орнату қолданбаны Бағдарламалар қалтасына көшіреді (жылдам іске қосу үшін) және Бастау мәзіріне жазба қосады. Осы тасымалды файлды кейін қалдыра немесе жоя аласыз.</sys:String>
+    <sys:String x:Key="Str_Install_AlreadyAllUsers">KillerPDF осы компьютерде барлық пайдаланушылар үшін орнатылған, сондықтан сол көшірме жаңартылады. Windows рұқсат сұрайды.</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveBeforeInstall">Орнатпас бұрын өзгерістерді сақтаңыз.</sys:String>
     <sys:String x:Key="Str_Dlg_UpdateMachineMsg" xml:space="preserve">KillerPDF-тің барлық пайдаланушыларға арналған орнатылымын жаңарту керек пе?
 
 Бұл Program Files ішіндегі көшірмені жылдамырақ көпфайлды нұсқамен ауыстырады. Ескі пайдаланушылық көшірме жойылады, сондықтан KillerPDF тек бір рет көрінеді. Осы тасымалды файлды кейін қалдыра немесе жоя аласыз.</sys:String>

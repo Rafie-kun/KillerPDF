@@ -322,9 +322,10 @@ Salvar agora sobrescreve o arquivo e essas alterações serão perdidas. Salve o
     <sys:String x:Key="Str_St_SplitOn">Painel dividido ativado - F10 para fechar</sys:String>
     <sys:String x:Key="Str_St_SplitOff">Painel dividido desativado</sys:String>
     <sys:String x:Key="Str_Dlg_InstallTitle">Instalar o KillerPDF</sys:String>
-    <sys:String x:Key="Str_Dlg_InstallMsg" xml:space="preserve">Instalar o KillerPDF neste computador?
-
-A instalação copia o aplicativo para a pasta Programas, para uma inicialização mais rápida, e adiciona uma entrada no menu Iniciar. Depois, você pode manter ou excluir este arquivo portátil.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallMsg">Instalar o KillerPDF neste computador?</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallBullets">A instalação copia o aplicativo para a pasta Programas, para uma inicialização mais rápida, e adiciona uma entrada no menu Iniciar. Depois, você pode manter ou excluir este arquivo portátil.</sys:String>
+    <sys:String x:Key="Str_Install_AlreadyAllUsers">O KillerPDF já está instalado para todos os usuários deste computador, então essa cópia será atualizada. O Windows pedirá permissão.</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveBeforeInstall">Salve suas alterações antes de instalar.</sys:String>
     <sys:String x:Key="Str_Dlg_UpdateMachineMsg" xml:space="preserve">Atualizar a instalação existente do KillerPDF para todos os usuários?
 
 Isso substitui a cópia em Arquivos de Programas pela versão mais rápida de vários arquivos. Qualquer cópia antiga por usuário é removida para que o KillerPDF apareça apenas uma vez. Depois, você pode manter ou excluir este arquivo portátil.</sys:String>

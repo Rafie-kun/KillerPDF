@@ -261,9 +261,10 @@
     <sys:String x:Key="Str_St_SplitOn">分屏已开启 - 按 F10 关闭</sys:String>
     <sys:String x:Key="Str_St_SplitOff">分屏已关闭</sys:String>
     <sys:String x:Key="Str_Dlg_InstallTitle">安装 KillerPDF</sys:String>
-    <sys:String x:Key="Str_Dlg_InstallMsg" xml:space="preserve">要将 KillerPDF 安装到这台电脑吗？
-
-安装会将应用复制到您的程序文件夹以加快启动速度，并添加开始菜单项。之后您可以保留或删除这个便携文件。</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallMsg">要将 KillerPDF 安装到这台电脑吗？</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallBullets">安装会将应用复制到您的程序文件夹以加快启动速度，并添加开始菜单项。之后您可以保留或删除这个便携文件。</sys:String>
+    <sys:String x:Key="Str_Install_AlreadyAllUsers">KillerPDF 已为此计算机上的所有用户安装，因此将更新该副本。Windows 会请求权限。</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveBeforeInstall">请在安装前保存更改。</sys:String>
     <sys:String x:Key="Str_Btn_DoInstall">安装</sys:String>
     <sys:String x:Key="Str_Btn_DoUpdate">更新</sys:String>
     <sys:String x:Key="Str_Dlg_UpdateUserMsg" xml:space="preserve">更新现有的 KillerPDF 安装？

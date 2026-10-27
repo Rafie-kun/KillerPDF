@@ -322,9 +322,10 @@ Zapisanie teraz nadpisze plik, a te zmiany zostaną utracone. Jeśli chcesz je z
     <sys:String x:Key="Str_St_SplitOn">Włączono podział panelu - F10, aby zamknąć</sys:String>
     <sys:String x:Key="Str_St_SplitOff">Wyłączono podział panelu</sys:String>
     <sys:String x:Key="Str_Dlg_InstallTitle">Zainstaluj KillerPDF</sys:String>
-    <sys:String x:Key="Str_Dlg_InstallMsg" xml:space="preserve">Zainstalować program KillerPDF na tym komputerze?
-
-Instalacja kopiuje aplikację do folderu Programs, co przyspiesza uruchamianie, i dodaje pozycję w menu Start. Ten przenośny plik możesz potem zachować lub usunąć.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallMsg">Zainstalować program KillerPDF na tym komputerze?</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallBullets">Instalacja kopiuje aplikację do folderu Programs, co przyspiesza uruchamianie, i dodaje pozycję w menu Start. Ten przenośny plik możesz potem zachować lub usunąć.</sys:String>
+    <sys:String x:Key="Str_Install_AlreadyAllUsers">KillerPDF jest już zainstalowany dla wszystkich użytkowników tego komputera, więc ta kopia zostanie zaktualizowana. System Windows poprosi o zgodę.</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveBeforeInstall">Zapisz zmiany przed instalacją.</sys:String>
     <sys:String x:Key="Str_Btn_DoInstall">Zainstaluj</sys:String>
     <sys:String x:Key="Str_Btn_DoUpdate">Aktualizuj</sys:String>
     <sys:String x:Key="Str_Dlg_UpdateUserMsg" xml:space="preserve">Zaktualizować istniejącą instalację KillerPDF?

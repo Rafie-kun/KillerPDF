@@ -322,9 +322,10 @@
     <sys:String x:Key="Str_St_SplitOn">Розділену панель увімкнено - F10, щоб закрити</sys:String>
     <sys:String x:Key="Str_St_SplitOff">Розділену панель вимкнено</sys:String>
     <sys:String x:Key="Str_Dlg_InstallTitle">Установлення KillerPDF</sys:String>
-    <sys:String x:Key="Str_Dlg_InstallMsg" xml:space="preserve">Установити KillerPDF на цей комп'ютер?
-
-Установлення копіює програму до папки «Програми» для швидшого запуску та додає пункт у меню «Пуск». Після цього цей портативний файл можна залишити або видалити.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallMsg">Установити KillerPDF на цей комп'ютер?</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallBullets">Установлення копіює програму до папки «Програми» для швидшого запуску та додає пункт у меню «Пуск». Після цього цей портативний файл можна залишити або видалити.</sys:String>
+    <sys:String x:Key="Str_Install_AlreadyAllUsers">KillerPDF уже встановлено для всіх користувачів цього комп'ютера, тому буде оновлено цю копію. Windows попросить дозвіл.</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveBeforeInstall">Збережіть зміни перед встановленням.</sys:String>
     <sys:String x:Key="Str_Dlg_UpdateMachineMsg" xml:space="preserve">Оновити наявну установку KillerPDF для всіх користувачів?
 
 Це замінить копію в Program Files швидшою версією з кількох файлів. Будь-яку старішу копію для окремого користувача буде видалено, щоб KillerPDF відображався лише один раз. Після цього цей портативний файл можна залишити або видалити.</sys:String>

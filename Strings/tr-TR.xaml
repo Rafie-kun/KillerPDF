@@ -261,9 +261,10 @@ Kaydetmek dosyayı değiştirir ve imzasını kaldırır. İmzalı dosyayı koru
     <sys:String x:Key="Str_St_SplitOn">Bölünmüş görünüm açık - kapatmak için F10</sys:String>
     <sys:String x:Key="Str_St_SplitOff">Bölünmüş görünüm kapalı</sys:String>
     <sys:String x:Key="Str_Dlg_InstallTitle">KillerPDF'i Yükle</sys:String>
-    <sys:String x:Key="Str_Dlg_InstallMsg" xml:space="preserve">KillerPDF bu bilgisayara yüklensin mi?
-
-Yükleme, daha hızlı başlatma için uygulamayı Programlar klasörünüze kopyalar ve bir Başlat Menüsü girdisi ekler. Bu taşınabilir dosyayı daha sonra saklayabilir veya silebilirsiniz.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallMsg">KillerPDF bu bilgisayara yüklensin mi?</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallBullets">Yükleme, daha hızlı başlatma için uygulamayı Programlar klasörünüze kopyalar ve bir Başlat Menüsü girdisi ekler. Bu taşınabilir dosyayı daha sonra saklayabilir veya silebilirsiniz.</sys:String>
+    <sys:String x:Key="Str_Install_AlreadyAllUsers">KillerPDF bu bilgisayarda tüm kullanıcılar için zaten yüklü, bu nedenle o kopya güncellenecek. Windows izin isteyecek.</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveBeforeInstall">Lütfen yüklemeden önce değişikliklerinizi kaydedin.</sys:String>
     <sys:String x:Key="Str_Btn_DoInstall">Yükle</sys:String>
     <sys:String x:Key="Str_Btn_DoUpdate">Güncelle</sys:String>
     <sys:String x:Key="Str_Dlg_UpdateUserMsg" xml:space="preserve">Mevcut KillerPDF kurulumu güncellensin mi?

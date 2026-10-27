@@ -322,9 +322,10 @@ L'enregistrement va écraser le fichier et ces modifications seront perdues. Enr
     <sys:String x:Key="Str_St_SplitOn">Volet divisé activé - F10 pour fermer</sys:String>
     <sys:String x:Key="Str_St_SplitOff">Volet divisé désactivé</sys:String>
     <sys:String x:Key="Str_Dlg_InstallTitle">Installer KillerPDF</sys:String>
-    <sys:String x:Key="Str_Dlg_InstallMsg" xml:space="preserve">Installer KillerPDF sur cet ordinateur ?
-
-L'installation copie l'application dans votre dossier Programmes pour un démarrage plus rapide et ajoute une entrée dans le menu Démarrer. Vous pouvez conserver ou supprimer ce fichier portable par la suite.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallMsg">Installer KillerPDF sur cet ordinateur ?</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallBullets">L'installation copie l'application dans votre dossier Programmes pour un démarrage plus rapide et ajoute une entrée dans le menu Démarrer. Vous pouvez conserver ou supprimer ce fichier portable par la suite.</sys:String>
+    <sys:String x:Key="Str_Install_AlreadyAllUsers">KillerPDF est déjà installé pour tous les utilisateurs de cet ordinateur ; cette copie sera donc mise à jour. Windows demandera l'autorisation.</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveBeforeInstall">Enregistrez vos modifications avant l'installation.</sys:String>
     <sys:String x:Key="Str_Dlg_UpdateMachineMsg" xml:space="preserve">Mettre à jour l'installation existante de KillerPDF pour tous les utilisateurs ?
 
 Cela remplace la copie située dans Program Files par la version multi-fichier, plus rapide. Toute ancienne copie installée par utilisateur est supprimée afin que KillerPDF n'apparaisse qu'une seule fois. Vous pouvez conserver ou supprimer ce fichier portable par la suite.</sys:String>

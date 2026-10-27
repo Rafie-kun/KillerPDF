@@ -322,9 +322,10 @@ A mentés most felülírja a fájlt, és azok a módosítások elvesznek. Előbb
     <sys:String x:Key="Str_St_SplitOn">Osztott ablaktábla be - F10 a bezáráshoz</sys:String>
     <sys:String x:Key="Str_St_SplitOff">Osztott ablaktábla ki</sys:String>
     <sys:String x:Key="Str_Dlg_InstallTitle">KillerPDF telepítése</sys:String>
-    <sys:String x:Key="Str_Dlg_InstallMsg" xml:space="preserve">Telepíti a KillerPDF-et erre a számítógépre?
-
-A telepítés a gyorsabb indítás érdekében a Programok mappába másolja az alkalmazást, és hozzáad egy Start menü bejegyzést. Ezt a hordozható fájlt utána megtarthatja vagy törölheti.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallMsg">Telepíti a KillerPDF-et erre a számítógépre?</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallBullets">A telepítés a gyorsabb indítás érdekében a Programok mappába másolja az alkalmazást, és hozzáad egy Start menü bejegyzést. Ezt a hordozható fájlt utána megtarthatja vagy törölheti.</sys:String>
+    <sys:String x:Key="Str_Install_AlreadyAllUsers">A KillerPDF már telepítve van ezen a számítógépen minden felhasználó számára, ezért ez a példány frissül. A Windows engedélyt fog kérni.</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveBeforeInstall">Telepítés előtt mentse a módosításokat.</sys:String>
     <sys:String x:Key="Str_Btn_DoInstall">Telepítés</sys:String>
     <sys:String x:Key="Str_Btn_DoUpdate">Frissítés</sys:String>
     <sys:String x:Key="Str_Dlg_UpdateUserMsg" xml:space="preserve">Frissíti a meglévő KillerPDF-telepítést?

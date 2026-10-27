@@ -322,9 +322,10 @@ Hvis du lagrer nå, overskrives filen, og disse endringene går tapt. Lagre det 
     <sys:String x:Key="Str_St_SplitOn">Delt panel er på. Trykk F10 for å lukke</sys:String>
     <sys:String x:Key="Str_St_SplitOff">Delt panel er av</sys:String>
     <sys:String x:Key="Str_Dlg_InstallTitle">Installer KillerPDF</sys:String>
-    <sys:String x:Key="Str_Dlg_InstallMsg" xml:space="preserve">Vil du installere KillerPDF på denne datamaskinen?
-
-Installasjonen kopierer appen til programmappen din for raskere oppstart og legger til en oppføring i Start-menyen. Du kan beholde eller slette denne bærbare filen etterpå.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallMsg">Vil du installere KillerPDF på denne datamaskinen?</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallBullets">Installasjonen kopierer appen til programmappen din for raskere oppstart og legger til en oppføring i Start-menyen. Du kan beholde eller slette denne bærbare filen etterpå.</sys:String>
+    <sys:String x:Key="Str_Install_AlreadyAllUsers">KillerPDF er allerede installert for alle brukere på denne datamaskinen, så denne kopien oppdateres. Windows ber om tillatelse.</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveBeforeInstall">Lagre endringene før du installerer.</sys:String>
     <sys:String x:Key="Str_Dlg_UpdateMachineMsg" xml:space="preserve">Vil du oppdatere den eksisterende installasjonen av KillerPDF for alle brukere?
 
 Dette erstatter kopien i Program Files med den raskere versjonen med flere filer. Eventuelle eldre kopier for enkeltbrukere fjernes slik at KillerPDF bare vises én gang. Du kan beholde eller slette denne bærbare filen etterpå.</sys:String>

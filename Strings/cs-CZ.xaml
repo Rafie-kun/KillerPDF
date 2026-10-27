@@ -322,9 +322,10 @@ Uložením se soubor přepíše a tyto změny budou ztraceny. Pokud si je chcete
     <sys:String x:Key="Str_St_SplitOn">Rozdělené zobrazení zapnuto - F10 zavře</sys:String>
     <sys:String x:Key="Str_St_SplitOff">Rozdělené zobrazení vypnuto</sys:String>
     <sys:String x:Key="Str_Dlg_InstallTitle">Nainstalovat KillerPDF</sys:String>
-    <sys:String x:Key="Str_Dlg_InstallMsg" xml:space="preserve">Nainstalovat KillerPDF do tohoto počítače?
-
-Instalací se aplikace zkopíruje do vaší složky Programs kvůli rychlejšímu spuštění a v nabídce Start se vytvoří zástupce. Tento přenosný soubor si pak můžete ponechat nebo smazat.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallMsg">Nainstalovat KillerPDF do tohoto počítače?</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallBullets">Instalací se aplikace zkopíruje do vaší složky Programs kvůli rychlejšímu spuštění a v nabídce Start se vytvoří zástupce. Tento přenosný soubor si pak můžete ponechat nebo smazat.</sys:String>
+    <sys:String x:Key="Str_Install_AlreadyAllUsers">KillerPDF je v tomto počítači již nainstalován pro všechny uživatele, proto se aktualizuje tato kopie. Windows požádá o oprávnění.</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveBeforeInstall">Před instalací prosím uložte změny.</sys:String>
     <sys:String x:Key="Str_Btn_DoInstall">Nainstalovat</sys:String>
     <sys:String x:Key="Str_Btn_DoUpdate">Aktualizovat</sys:String>
     <sys:String x:Key="Str_Dlg_UpdateUserMsg" xml:space="preserve">Aktualizovat stávající instalaci KillerPDF?

@@ -322,9 +322,8 @@ Saving now overwrites the file and those changes will be lost. Save the other pa
     <sys:String x:Key="Str_St_SplitOn">Split pane on. Press F10 to close it</sys:String>
     <sys:String x:Key="Str_St_SplitOff">Split pane off</sys:String>
     <sys:String x:Key="Str_Dlg_InstallTitle">Install KillerPDF</sys:String>
-    <sys:String x:Key="Str_Dlg_InstallMsg" xml:space="preserve">Install KillerPDF on this computer?
-
-Installing copies the app to your Programs folder for faster startup and adds a Start menu entry. You can keep or delete this portable file afterward.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallMsg">Install KillerPDF on this computer?</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallBullets">Installing copies the app to your Programs folder for faster startup and adds a Start menu entry. You can keep or delete this portable file afterward.</sys:String>
     <sys:String x:Key="Str_Dlg_UpdateMachineMsg" xml:space="preserve">Update the existing all-users installation of KillerPDF?
 
 This replaces the copy in Program Files with the faster multi-file version. Any older per-user copy is removed so KillerPDF appears only once. You can keep or delete this portable file afterward.</sys:String>
@@ -334,6 +333,8 @@ This replaces the installed copy with the faster multi-file version. You can kee
     <sys:String x:Key="Str_Dlg_OneInstallOnly" xml:space="preserve">KillerPDF is already installed for everyone on this computer. Update that installation, or uninstall it before choosing a per-user install.
 
 KillerPDF will not create two installed copies.</sys:String>
+    <sys:String x:Key="Str_Install_AlreadyAllUsers">KillerPDF is already installed for everyone on this computer, so this updates that copy. Windows will ask for permission.</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveBeforeInstall">Please save your changes before installing.</sys:String>
     <sys:String x:Key="Str_Btn_DoInstall">Install</sys:String>
     <sys:String x:Key="Str_Btn_DoUpdate">Update</sys:String>
     <sys:String x:Key="Str_Chk_Desktop">Add a desktop shortcut</sys:String>

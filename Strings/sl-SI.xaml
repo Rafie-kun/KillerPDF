@@ -294,7 +294,10 @@
     <sys:String x:Key="Str_St_SplitOn">Razdeljen pogled je vklopljen. Za zapiranje pritisnite F10</sys:String>
     <sys:String x:Key="Str_St_SplitOff">Razdeljen pogled je izklopljen</sys:String>
     <sys:String x:Key="Str_Dlg_InstallTitle">Namesti KillerPDF</sys:String>
-    <sys:String x:Key="Str_Dlg_InstallMsg">Želite namestiti KillerPDF v ta računalnik?&#10;&#10;Namestitev kopira aplikacijo v mapo Programi za hitrejši zagon in doda vnos v meni Start. To prenosno datoteko lahko nato obdržite ali izbrišete.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallMsg">Želite namestiti KillerPDF v ta računalnik?</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallBullets">Namestitev kopira aplikacijo v mapo Programi za hitrejši zagon in doda vnos v meni Start. To prenosno datoteko lahko nato obdržite ali izbrišete.</sys:String>
+    <sys:String x:Key="Str_Install_AlreadyAllUsers">KillerPDF je v tem računalniku že nameščen za vse uporabnike, zato se bo posodobila ta kopija. Windows bo zahteval dovoljenje.</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveBeforeInstall">Pred namestitvijo shranite spremembe.</sys:String>
     <sys:String x:Key="Str_Dlg_UpdateMachineMsg">Želite posodobiti obstoječo namestitev KillerPDF za vse uporabnike?&#10;&#10;To nadomesti kopijo v mapi Program Files s hitrejšo različico z več datotekami. Starejša kopija za posameznega uporabnika se odstrani, da je KillerPDF nameščen le enkrat. To prenosno datoteko lahko nato obdržite ali izbrišete.</sys:String>
     <sys:String x:Key="Str_Dlg_UpdateUserMsg">Želite posodobiti obstoječo namestitev KillerPDF?&#10;&#10;To nadomesti nameščeno kopijo s hitrejšo različico z več datotekami. To prenosno datoteko lahko nato obdržite ali izbrišete.</sys:String>
     <sys:String x:Key="Str_Dlg_OneInstallOnly">KillerPDF je že nameščen za vse uporabnike tega računalnika. Posodobite to namestitev ali jo odstranite, preden izberete namestitev za posameznega uporabnika.&#10;&#10;KillerPDF ne bo ustvaril dveh nameščenih kopij.</sys:String>

@@ -322,9 +322,10 @@ Il salvataggio sovrascrive il file e quelle modifiche andranno perse. Se desider
     <sys:String x:Key="Str_St_SplitOn">Pannello suddivisione on - F10 per chiudere</sys:String>
     <sys:String x:Key="Str_St_SplitOff">Pannello suddivisione off</sys:String>
     <sys:String x:Key="Str_Dlg_InstallTitle">Installa KillerPDF</sys:String>
-    <sys:String x:Key="Str_Dlg_InstallMsg" xml:space="preserve">Vuoi installare KillerPDF in questo computer?
-
-L'installazione copia l'app nella cartella Programmi per un avvio più rapido e aggiunge una voce al menu Start. Dopo puoi tenere o eliminare questo file portatile.</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallMsg">Vuoi installare KillerPDF in questo computer?</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallBullets">L'installazione copia l'app nella cartella Programmi per un avvio più rapido e aggiunge una voce al menu Start. Dopo puoi tenere o eliminare questo file portatile.</sys:String>
+    <sys:String x:Key="Str_Install_AlreadyAllUsers">KillerPDF è già installato per tutti gli utenti di questo computer, quindi verrà aggiornata quella copia. Windows chiederà l'autorizzazione.</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveBeforeInstall">Salva le modifiche prima di installare.</sys:String>
     <sys:String x:Key="Str_Dlg_UpdateMachineMsg" xml:space="preserve">Vuoi aggiornare l'installazione esistente di KillerPDF per tutti gli utenti?
 
 Verrà sostituita la copia in Programmi con la versione multi-file più veloce.&#10;Qualsiasi copia precedente per utente viene rimossa in modo che KillerPDF venga visualizzato solo una volta. Successivamente potrai conservare o eliminare questo file portatile.</sys:String>

@@ -261,9 +261,10 @@
     <sys:String x:Key="Str_St_SplitOn">স্প্লিট প্যান চালু - বন্ধ করতে F10</sys:String>
     <sys:String x:Key="Str_St_SplitOff">স্প্লিট প্যান বন্ধ</sys:String>
     <sys:String x:Key="Str_Dlg_InstallTitle">KillerPDF ইনস্টল করুন</sys:String>
-    <sys:String x:Key="Str_Dlg_InstallMsg" xml:space="preserve">এই কম্পিউটারে KillerPDF ইনস্টল করবেন?
-
-ইনস্টল করলে দ্রুত চালুর জন্য অ্যাপটি আপনার প্রোগ্রাম ফোল্ডারে কপি করা হবে এবং একটি স্টার্ট মেনু এন্ট্রি যোগ করা হবে। এরপর এই পোর্টেবল ফাইলটি রাখতে বা মুছে ফেলতে পারবেন।</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallMsg">এই কম্পিউটারে KillerPDF ইনস্টল করবেন?</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallBullets">ইনস্টল করলে দ্রুত চালুর জন্য অ্যাপটি আপনার প্রোগ্রাম ফোল্ডারে কপি করা হবে এবং একটি স্টার্ট মেনু এন্ট্রি যোগ করা হবে। এরপর এই পোর্টেবল ফাইলটি রাখতে বা মুছে ফেলতে পারবেন।</sys:String>
+    <sys:String x:Key="Str_Install_AlreadyAllUsers">KillerPDF এই কম্পিউটারে সব ব্যবহারকারীর জন্য আগে থেকেই ইনস্টল করা আছে, তাই এটি সেই কপিটি আপডেট করবে। Windows অনুমতি চাইবে।</sys:String>
+    <sys:String x:Key="Str_Dlg_SaveBeforeInstall">ইনস্টল করার আগে আপনার পরিবর্তনগুলো সংরক্ষণ করুন।</sys:String>
     <sys:String x:Key="Str_Btn_DoInstall">ইনস্টল করুন</sys:String>
     <sys:String x:Key="Str_Btn_DoUpdate">আপডেট</sys:String>
     <sys:String x:Key="Str_Dlg_UpdateUserMsg" xml:space="preserve">বিদ্যমান KillerPDF ইনস্টলেশন আপডেট করবেন?
