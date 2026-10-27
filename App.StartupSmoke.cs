@@ -1,3 +1,4 @@
+using KillerPDF.Shell;
 using System.IO;
 using System.Windows;
 using System.Windows.Threading;

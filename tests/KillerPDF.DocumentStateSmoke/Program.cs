@@ -143,7 +143,7 @@ internal static class Program
         foreach (string service in new[] { "ThemeManager", "LocaleManager", "FilmGrain" })
             assembly.GetType("KillerPDF.Services." + service, true)!
                 .GetMethod("Initialize", Members)!.Invoke(null, null);
-        Owner = (Window)Activator.CreateInstance(assembly.GetType("KillerPDF.MainWindow", true)!)!;
+        Owner = (Window)Activator.CreateInstance(assembly.GetType("KillerPDF.Shell.MainWindow", true)!)!;
         Owner.WindowStartupLocation = WindowStartupLocation.Manual;
         Owner.Left = -10000; Owner.Top = -10000; Owner.ShowInTaskbar = false;
         Owner.ShowActivated = false; Owner.Width = 1200; Owner.Height = 800;

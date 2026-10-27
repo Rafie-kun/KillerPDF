@@ -6,7 +6,7 @@ using KillerPDF.Controls;
 using KillerPDF.Services;
 using KillerPdf.Engine.Documents;
 
-namespace KillerPDF;
+namespace KillerPDF.Shell;
 
 public partial class MainWindow
 {

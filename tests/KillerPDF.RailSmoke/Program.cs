@@ -40,7 +40,7 @@ internal static class Program
                     ["Theme"] = args[6], ["Locale"] = args.Length == 10 ? args[7] : "EnUS" }));
             Application app = Bootstrap(appPath, Path.GetFullPath(args[1]));
             Assembly assembly = Application.ResourceAssembly;
-            var window = (Window)Activator.CreateInstance(assembly.GetType("KillerPDF.MainWindow", true)!)!;
+            var window = (Window)Activator.CreateInstance(assembly.GetType("KillerPDF.Shell.MainWindow", true)!)!;
             window.WindowStartupLocation = WindowStartupLocation.Manual;
             window.Left = -10000; window.Top = -10000; window.ShowInTaskbar = false;
             window.ShowActivated = false; window.Width = double.Parse(args[5], CultureInfo.InvariantCulture);

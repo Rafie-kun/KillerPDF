@@ -18,7 +18,7 @@ namespace KillerPDF.Tests
     /// </summary>
     public sealed class RadioDotCenterTests
     {
-        private const string TemplateFile = @"MainWindow.xaml";
+        private const string TemplateFile = @"Shell\MainWindow.xaml";
 
         [Theory]
         [InlineData(1.0)]

@@ -21,7 +21,7 @@ internal static class WindowLifecycleSmoke
         File.WriteAllBytes(firstSource, firstBytes);
         File.WriteAllBytes(secondSource, secondBytes);
         Console.WriteLine("Lifecycle: construct second document window");
-        var survivor = (Window)Activator.CreateInstance(assembly.GetType("KillerPDF.MainWindow", true)!)!;
+        var survivor = (Window)Activator.CreateInstance(assembly.GetType("KillerPDF.Shell.MainWindow", true)!)!;
         survivor.WindowStartupLocation = WindowStartupLocation.Manual;
         survivor.Left = -10000; survivor.Top = -10000;
         survivor.ShowInTaskbar = false; survivor.ShowActivated = false;

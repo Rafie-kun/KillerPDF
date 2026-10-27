@@ -44,7 +44,7 @@ internal static class Program
         app.Resources=(ResourceDictionary)System.Windows.Markup.XamlReader.Parse(xaml,new System.Windows.Markup.ParserContext{BaseUri=new Uri("pack://application:,,,/KillerPDF;component/")});
         SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext());
         foreach(string service in new[]{"ThemeManager","LocaleManager","FilmGrain"}) asm.GetType("KillerPDF.Services."+service,true)!.GetMethod("Initialize",M)!.Invoke(null,null);
-        var window=(Window)Activator.CreateInstance(asm.GetType("KillerPDF.MainWindow",true)!)!;
+        var window=(Window)Activator.CreateInstance(asm.GetType("KillerPDF.Shell.MainWindow",true)!)!;
         window.WindowStartupLocation=WindowStartupLocation.Manual; window.Left=-10000; window.Top=-10000; window.ShowActivated=false; window.ShowInTaskbar=false; window.Width=1000; window.Height=700; window.Show(); Pump(300);
         if(args.Contains("open")) {
             var toggle=Descendants<Button>((DependencyObject)window.FindName("SidebarToggleStrip")).First(b=>b.Content is string text && text is "\uE70D" or "\uE70E");

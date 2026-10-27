@@ -24,7 +24,7 @@ using KillerFamily.Accessibility;
 // here), the menu comes from MakeThemedMenu() so its TextOptions match the app's other
 // code-built menus, and the kit's Anim.FadeIn is inlined (KillerPDF carries no Anim class).
 // ============================================================
-namespace KillerPDF
+namespace KillerPDF.Shell
 {
     public partial class MainWindow
     {

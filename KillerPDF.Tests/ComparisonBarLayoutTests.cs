@@ -18,7 +18,7 @@ public sealed class ComparisonBarLayoutTests
     public void ComparisonCloseButtonIsClickableAcrossItsWholeBounds()
     {
         string root = FindRepositoryRoot();
-        var document = XDocument.Load(Path.Combine(root, "MainWindow.xaml"));
+        var document = XDocument.Load(Path.Combine(root, "Shell", "MainWindow.xaml"));
         XNamespace x = "http://schemas.microsoft.com/winfx/2006/xaml";
         XElement style = document.Descendants().Single(element =>
             (string?)element.Attribute(x + "Key") == "ComparisonCloseButton");
@@ -71,7 +71,7 @@ public sealed class ComparisonBarLayoutTests
     [InlineData(1000, false)]
     public void ComparisonBarKeepsCloseVisibleAndClickable(int width, bool longFileNames)
     {
-        var document = XDocument.Load(Path.Combine(FindRepositoryRoot(), "MainWindow.xaml"));
+        var document = XDocument.Load(Path.Combine(FindRepositoryRoot(), "Shell", "MainWindow.xaml"));
         Exception? failure = null;
         var thread = new Thread(() =>
         {
@@ -171,7 +171,7 @@ public sealed class ComparisonBarLayoutTests
     public void ComparisonBarUsesReservedBottomRowAndDetailsOpenUpward()
     {
         string root = FindRepositoryRoot();
-        var document = XDocument.Load(Path.Combine(root, "MainWindow.xaml"));
+        var document = XDocument.Load(Path.Combine(root, "Shell", "MainWindow.xaml"));
         XNamespace x = "http://schemas.microsoft.com/winfx/2006/xaml";
 
         XElement splitHost = document.Descendants()

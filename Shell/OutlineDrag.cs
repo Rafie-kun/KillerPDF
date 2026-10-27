@@ -5,7 +5,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using KillerPDF.Services;
 
-namespace KillerPDF
+namespace KillerPDF.Shell
 {
     // Drag and drop in the Outlines panel (#391). Dragging a bookmark moves it with its children:
     // the top or bottom edge of a row drops it above or below that bookmark, the middle of a row

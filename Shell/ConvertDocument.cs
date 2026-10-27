@@ -2,7 +2,7 @@ using System.IO;
 using System.Windows;
 using KillerPDF.Services;
 
-namespace KillerPDF
+namespace KillerPDF.Shell
 {
     // Document to PDF (#74): a Word or Excel file opens as a new, unsaved PDF, the same way
     // Import opens images.

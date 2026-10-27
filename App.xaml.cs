@@ -513,7 +513,7 @@ namespace KillerPDF
         {
             if (System.Threading.Interlocked.Exchange(ref _renderRecoveryStarted, 1) != 0) return;
             string? manifest = null;
-            KillerPDF.MainWindow? window = null;
+            KillerPDF.Shell.MainWindow? window = null;
             try
             {
                 window = MainWindow as MainWindow;

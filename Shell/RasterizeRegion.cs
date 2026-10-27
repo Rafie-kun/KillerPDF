@@ -2,7 +2,7 @@ using System.Windows;
 using KillerPdf.Engine.Documents;
 using KillerPDF.Services;
 
-namespace KillerPDF
+namespace KillerPDF.Shell
 {
     // Rasterize Region (#369): turn one box on a page into an image and leave the rest of the
     // page as it is, for content that prints or displays wrongly. One undo step.

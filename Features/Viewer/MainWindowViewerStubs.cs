@@ -6,7 +6,7 @@ using System.Windows.Media;
 
 using KillerPDF.Services;
 
-namespace KillerPDF
+namespace KillerPDF.Shell
 {
     /// <summary>
     /// Outward stubs: the annotation, text, crop, form and link members under the names the rest of

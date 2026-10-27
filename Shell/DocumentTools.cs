@@ -11,7 +11,7 @@ using KillerPdf.Engine.Parsing;
 using KillerPDF.Services;
 using KillerFamily.Accessibility;
 
-namespace KillerPDF;
+namespace KillerPDF.Shell;
 
 public partial class MainWindow
 {

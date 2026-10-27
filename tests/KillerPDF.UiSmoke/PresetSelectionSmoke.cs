@@ -58,7 +58,7 @@ internal static class PresetSelectionSmoke
             foreach (string service in new[] { "ThemeManager", "LocaleManager", "FilmGrain" })
                 assembly.GetType("KillerPDF.Services." + service, true)!
                     .GetMethod("Initialize", Members)!.Invoke(null, null);
-            owner = (Window)Activator.CreateInstance(assembly.GetType("KillerPDF.MainWindow", true)!)!;
+            owner = (Window)Activator.CreateInstance(assembly.GetType("KillerPDF.Shell.MainWindow", true)!)!;
             owner.WindowStartupLocation = WindowStartupLocation.Manual;
             owner.Left = -10000; owner.Top = -10000; owner.ShowInTaskbar = false;
             owner.ShowActivated = false;

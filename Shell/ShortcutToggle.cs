@@ -1,7 +1,7 @@
 using System.Windows;
 using KillerPDF.Services;
 
-namespace KillerPDF;
+namespace KillerPDF.Shell;
 
 public partial class MainWindow
 {

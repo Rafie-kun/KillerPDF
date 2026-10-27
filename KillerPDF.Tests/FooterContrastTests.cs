@@ -11,7 +11,7 @@ public sealed class FooterContrastTests
     [Fact]
     public void StatusAndControlsUseNormalTextWhileMetadataStaysDim()
     {
-        var document = XDocument.Load(Path.Combine(FindRepositoryRoot(), "MainWindow.xaml"));
+        var document = XDocument.Load(Path.Combine(FindRepositoryRoot(), "Shell", "MainWindow.xaml"));
         XNamespace x = "http://schemas.microsoft.com/winfx/2006/xaml";
 
         foreach (string key in new[] { "FooterNavButton", "FooterModeButton" })

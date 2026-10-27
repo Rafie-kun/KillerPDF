@@ -114,7 +114,7 @@ public sealed class DocumentTabLayoutTests
     public void DragGhostUsesTheActiveTabThemeResources()
     {
         string root = FindRepositoryRoot();
-        var window = XDocument.Load(Path.Combine(root, "MainWindow.xaml"));
+        var window = XDocument.Load(Path.Combine(root, "Shell", "MainWindow.xaml"));
         XNamespace x = "http://schemas.microsoft.com/winfx/2006/xaml";
         XElement ghost = window.Descendants()
             .Single(element => (string?)element.Attribute(x + "Name") == "TabDragGhost");

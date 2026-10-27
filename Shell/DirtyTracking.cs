@@ -15,7 +15,7 @@ using System.Windows.Shapes;
 using Microsoft.Win32;
 using KillerPDF.Services;
 
-namespace KillerPDF
+namespace KillerPDF.Shell
 {
     public partial class MainWindow
     {

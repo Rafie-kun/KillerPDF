@@ -5,7 +5,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Threading;
 
-namespace KillerPDF;
+namespace KillerPDF.Shell;
 
 public partial class MainWindow
 {

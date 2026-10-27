@@ -6,7 +6,7 @@ using System.Text.Json;
 using System.Windows;
 using KillerPDF.Services;
 
-namespace KillerPDF
+namespace KillerPDF.Shell
 {
     // #456: when WPF's render thread fails the window goes black for good. App saves every
     // unsaved tab aside through here, restarts, and the new window reopens them unsaved.

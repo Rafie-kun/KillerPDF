@@ -8,7 +8,7 @@ using KillerPDF.Features;
 using KillerPDF.Services;
 using KillerFamily.Accessibility;
 
-namespace KillerPDF
+namespace KillerPDF.Shell
 {
     public partial class MainWindow : IOcrHost
     {

@@ -109,7 +109,7 @@ internal static class TableExportSmoke
                 setting.Invoke(null, ["CheckForUpdatesOnStartup", "0"]);
                 setting.Invoke(null, ["CloseToTray", "0"]);
             }
-            owner = (Window)Activator.CreateInstance(assembly.GetType("KillerPDF.MainWindow", true)!)!;
+            owner = (Window)Activator.CreateInstance(assembly.GetType("KillerPDF.Shell.MainWindow", true)!)!;
             owner.WindowStartupLocation = WindowStartupLocation.Manual;
             if (visibleNative)
             {

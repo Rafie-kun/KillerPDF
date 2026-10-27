@@ -5,7 +5,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using KillerPDF.Controls;
 
-namespace KillerPDF
+namespace KillerPDF.Shell
 {
     /// <summary>
     /// Two document panes side by side in one window.

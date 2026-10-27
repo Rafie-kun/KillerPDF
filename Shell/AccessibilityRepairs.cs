@@ -4,7 +4,7 @@ using KillerPdf.Engine.Diagnostics;
 using KillerPdf.Engine.Documents;
 using KillerPdf.Engine.Objects;
 
-namespace KillerPDF;
+namespace KillerPDF.Shell;
 
 public partial class MainWindow
 {

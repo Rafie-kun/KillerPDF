@@ -13,7 +13,7 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using KillerFamily.Accessibility;
 
-namespace KillerPDF
+namespace KillerPDF.Shell
 {
     // ============================================================
     // Tool search in the title bar, left of Minimize. The magnifier, or Ctrl+K, opens a box that

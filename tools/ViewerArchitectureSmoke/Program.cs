@@ -64,7 +64,7 @@ internal static class Program
             try
             {
                 File.WriteAllText(Path.Combine(output, "progress.txt"), "constructing viewer");
-                window = (Window)Activator.CreateInstance(assembly.GetType("KillerPDF.MainWindow", true)!)!;
+                window = (Window)Activator.CreateInstance(assembly.GetType("KillerPDF.Shell.MainWindow", true)!)!;
                 var viewer = (FrameworkElement)Get(window, "ActiveViewer");
                 if (viewer.Parent is Panel originalParent) originalParent.Children.Remove(viewer);
                 viewer.Resources.MergedDictionaries.Add(window.Resources);

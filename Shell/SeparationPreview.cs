@@ -1,7 +1,7 @@
 using System.Windows;
 using KillerPDF.Services;
 
-namespace KillerPDF
+namespace KillerPDF.Shell
 {
     // Separations in the Document tools (#264): the page plate by plate, with the earlier text
     // report one click away.

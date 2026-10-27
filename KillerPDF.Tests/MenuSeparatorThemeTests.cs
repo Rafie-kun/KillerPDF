@@ -62,7 +62,7 @@ public sealed class MenuSeparatorThemeTests
         RunSta(() =>
         {
             string root = FindRepositoryRoot();
-            var source = XDocument.Load(Path.Combine(root, "MainWindow.xaml"));
+            var source = XDocument.Load(Path.Combine(root, "Shell", "MainWindow.xaml"));
             var styles = source.Descendants(Presentation + "Style")
                 .Where(element => (string?)element.Attribute("TargetType") == "Separator")
                 .Select(element => new XElement(element)).ToArray();

@@ -12,7 +12,7 @@ public sealed class ToolbarSelectedVisualTests
     public void SelectedEditingToolSuppressesToolbarContentShadow()
     {
         string root = FindRepositoryRoot();
-        var document = XDocument.Load(Path.Combine(root, "MainWindow.xaml"));
+        var document = XDocument.Load(Path.Combine(root, "Shell", "MainWindow.xaml"));
         XNamespace x = "http://schemas.microsoft.com/winfx/2006/xaml";
 
         XElement toolbarStyle = document.Descendants()

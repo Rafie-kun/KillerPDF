@@ -9,7 +9,7 @@ using System.Windows;
 using Microsoft.Win32;
 using KillerPDF.Services;
 
-namespace KillerPDF
+namespace KillerPDF.Shell
 {
     // Import images as a PDF, and compress the current PDF to a .zip. Kept in its own partial-class
     // file rather than the MainWindow monolith. User-facing strings go through Loc() (keys live in

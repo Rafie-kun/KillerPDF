@@ -79,7 +79,7 @@ public sealed class TabPlacementTests
         {
             try
             {
-                var document = XDocument.Load(Path.Combine(Root(), "MainWindow.xaml"));
+                var document = XDocument.Load(Path.Combine(Root(), "Shell", "MainWindow.xaml"));
                 var menuStyle = document.Descendants().Single(element => element.Name.LocalName == "Style"
                     && (string?)element.Attribute("TargetType") == "MenuItem"
                     && element.Attribute(XName.Get("Key", "http://schemas.microsoft.com/winfx/2006/xaml")) == null

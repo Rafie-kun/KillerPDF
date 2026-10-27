@@ -4,7 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using KillerFamily.Layout;
 
-namespace KillerPDF;
+namespace KillerPDF.Shell;
 
 public partial class MainWindow
 {

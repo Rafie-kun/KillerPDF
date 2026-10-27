@@ -3,7 +3,7 @@ using System.Windows.Controls;
 using KillerPdf.Engine.Writing;
 using KillerPDF.Services;
 
-namespace KillerPDF
+namespace KillerPDF.Shell
 {
     // Reduce File Size (#433): saves a smaller copy and leaves the open document as it is.
     public partial class MainWindow

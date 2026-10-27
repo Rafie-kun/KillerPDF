@@ -5,7 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Animation;
 
-namespace KillerPDF
+namespace KillerPDF.Shell
 {
     /// <summary>
     /// The rail's flyout buttons (family order, locked 2026-07-30: app-specific toggles, then

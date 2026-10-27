@@ -11,7 +11,7 @@ using KillerPdf.Engine.Documents;
 using KillerPdf.Engine.Signing;
 using KillerPDF.Services;
 
-namespace KillerPDF
+namespace KillerPDF.Shell
 {
     /// <summary>The panels the sidebar can show, one rail button each.</summary>
     internal enum SidebarPanel { Pages, Outlines, Comments, Attachments, Layers, Signatures }

@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Input;
 using KillerPDF.Controls;
 
-namespace KillerPDF
+namespace KillerPDF.Shell
 {
     public partial class MainWindow
     {

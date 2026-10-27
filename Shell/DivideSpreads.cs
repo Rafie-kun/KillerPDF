@@ -2,7 +2,7 @@ using System.Windows;
 using KillerPdf.Engine.Documents;
 using KillerPDF.Services;
 
-namespace KillerPDF
+namespace KillerPDF.Shell
 {
     // Divide Spreads (#382): split scanned two-page spreads at a line the user places. Each
     // divided page is followed by its second half, and the whole change is one undo step.

@@ -7,7 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 
-namespace KillerPDF
+namespace KillerPDF.Shell
 {
     // Configurable sidebar placement: left, right, top or bottom. MainContentGrid has three
     // columns (a sized sidebar column, an empty zero column, a star document column) and two rows.

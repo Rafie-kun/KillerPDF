@@ -97,7 +97,7 @@ internal static class ViewerParitySmoke
                     if (!Hash(File.ReadAllBytes(source)).Equals(input.Sha256, StringComparison.OrdinalIgnoreCase))
                         throw new InvalidDataException("Parity input hash changed.");
                     Console.WriteLine($"PARITY case {index + 1}: constructing window for {input.Path}");
-                    window = (Window)Activator.CreateInstance(assembly.GetType("KillerPDF.MainWindow", true)!)!;
+                    window = (Window)Activator.CreateInstance(assembly.GetType("KillerPDF.Shell.MainWindow", true)!)!;
                     window.WindowStartupLocation = WindowStartupLocation.Manual;
                     window.Left = -10000; window.Top = -10000;
                     window.ShowInTaskbar = false; window.ShowActivated = false;

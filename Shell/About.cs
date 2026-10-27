@@ -6,7 +6,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using KillerPDF.Features;
 
-namespace KillerPDF
+namespace KillerPDF.Shell
 {
     /// <summary>
     /// The About overlay's window half: the IAboutHost implementation that maps the controller's

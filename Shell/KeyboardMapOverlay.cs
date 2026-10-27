@@ -5,7 +5,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 
-namespace KillerPDF
+namespace KillerPDF.Shell
 {
     // ============================================================
     // Visual keyboard for the shortcuts overlay.

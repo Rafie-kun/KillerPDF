@@ -12,7 +12,7 @@ public sealed class TitleBarLayoutTests
     public void PlainAppTitleUsesThemeAlignmentOffset()
     {
         string root = FindRepositoryRoot();
-        var document = XDocument.Load(Path.Combine(root, "MainWindow.xaml"));
+        var document = XDocument.Load(Path.Combine(root, "Shell", "MainWindow.xaml"));
         var theme = XDocument.Load(Path.Combine(root, "Themes", "98SE.xaml"));
         XNamespace x = "http://schemas.microsoft.com/winfx/2006/xaml";
 

@@ -7,7 +7,7 @@ using System.Windows.Threading;
 using KillerPdf.Engine.Documents;
 using KillerPDF.Services;
 
-namespace KillerPDF
+namespace KillerPDF.Shell
 {
     // One-click page arrangement (#436): reverse the page order, turn every page upright, and
     // straighten tilted scans. Each acts on the selected pages when two or more are selected,

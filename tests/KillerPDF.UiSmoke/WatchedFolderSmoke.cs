@@ -71,7 +71,7 @@ internal static class WatchedFolderSmoke
         {
             foreach (string name in new[] { "ThemeManager", "LocaleManager", "FilmGrain" })
                 assembly.GetType("KillerPDF.Services." + name, true)!.GetMethod("Initialize", Members)!.Invoke(null, null);
-            owner = (Window)Activator.CreateInstance(assembly.GetType("KillerPDF.MainWindow", true)!)!;
+            owner = (Window)Activator.CreateInstance(assembly.GetType("KillerPDF.Shell.MainWindow", true)!)!;
             HideFromDesktop(owner); owner.Show();
             if (navigationOnly)
             {

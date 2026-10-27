@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Interop;
 using KillerPDF.Services;
 
-namespace KillerPDF
+namespace KillerPDF.Shell
 {
     // Scan to PDF (#73): scan through TWAIN and open the pages as a new, unsaved document,
     // the same way Import opens images.

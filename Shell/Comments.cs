@@ -2,7 +2,7 @@ using System.Windows;
 using KillerPdf.Engine.Documents;
 using KillerPDF.Services;
 
-namespace KillerPDF
+namespace KillerPDF.Shell
 {
     // Comments (#288) from the Document tools menu: read, edit, answer and delete the PDF's own
     // review comments, and add notes to the current page.

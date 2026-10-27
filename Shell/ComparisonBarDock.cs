@@ -6,7 +6,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace KillerPDF
+namespace KillerPDF.Shell
 {
     // The comparison bar docks below the documents by default (#427). Dragging it anywhere but
     // its buttons moves it with the pointer, and releasing it in the upper half of the documents

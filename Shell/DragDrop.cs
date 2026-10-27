@@ -15,7 +15,7 @@ using Microsoft.Win32;
 using KillerPDF.Controls;
 using KillerPDF.Services;
 
-namespace KillerPDF
+namespace KillerPDF.Shell
 {
     /// <summary>
     /// In-process page transfer captured before a drag can move focus to another pane.

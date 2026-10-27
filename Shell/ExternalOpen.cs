@@ -6,7 +6,7 @@ using System.Windows;
 using System.Windows.Interop;
 using KillerPDF.Services;
 
-namespace KillerPDF
+namespace KillerPDF.Shell
 {
     /// <summary>
     /// Single-instance entry points: App forwards a second launch's file path here rather than

@@ -17,7 +17,7 @@ using Microsoft.Win32;
 using KillerPDF.Services;
 using KillerFamily.Accessibility;
 
-namespace KillerPDF
+namespace KillerPDF.Shell
 {
     public partial class MainWindow
     {

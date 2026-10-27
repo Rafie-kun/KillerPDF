@@ -60,7 +60,7 @@ internal static class ScrollOverlaySmoke
             foreach (string service in new[] { "ThemeManager", "LocaleManager", "FilmGrain" })
                 assembly.GetType("KillerPDF.Services." + service, true)!
                     .GetMethod("Initialize", Members)!.Invoke(null, null);
-            window = (Window)Activator.CreateInstance(assembly.GetType("KillerPDF.MainWindow", true)!)!;
+            window = (Window)Activator.CreateInstance(assembly.GetType("KillerPDF.Shell.MainWindow", true)!)!;
             var root = (FrameworkElement)window.Content;
             if (toolbar) return VerifyToolbar(window, root, folder);
             var overlay = (FrameworkElement)window.FindName("ShortcutOverlay");

@@ -5,7 +5,7 @@ using System.Windows.Input;
 using System;
 using System.Linq;
 
-namespace KillerPDF
+namespace KillerPDF.Shell
 {
     // MainWindow's half of IViewerHost.
     //

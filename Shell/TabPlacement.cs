@@ -1,7 +1,7 @@
 using KillerPDF.Controls;
 using KillerPDF.Features;
 
-namespace KillerPDF;
+namespace KillerPDF.Shell;
 
 public partial class MainWindow
 {

@@ -7,7 +7,7 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using KillerPDF.Services;
 
-namespace KillerPDF
+namespace KillerPDF.Shell
 {
     // ============================================================
     // Toolbar layout: which buttons sit on the toolbar, in what order, on which side, and which

@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace KillerPDF
+namespace KillerPDF.Shell
 {
     // Custom shortcuts (#190): the user's key choices, the translation the key handler runs every
     // press through, and the Customize button in the shortcuts overlay.

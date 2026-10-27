@@ -5,7 +5,7 @@ using KillerPdf.Engine.Documents;
 using KillerPdf.Engine.Signing;
 using KillerPDF.Services;
 
-namespace KillerPDF;
+namespace KillerPDF.Shell;
 
 public partial class MainWindow
 {

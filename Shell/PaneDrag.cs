@@ -4,7 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using KillerPDF.Controls;
 
-namespace KillerPDF
+namespace KillerPDF.Shell
 {
     /// <summary>
     /// Moving a document tab from one pane to the other. Partial of MainWindow.
