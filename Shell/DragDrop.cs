@@ -491,31 +491,28 @@ namespace KillerPDF
             }
             if (_doc is null || !isTargetCurrent()) return;
             if (imports.Count == 0) { SetStatus(Loc("Str_Drop_NothingOpenable")); return; }
-            UndoEntry? documentUndo = CaptureDocumentUndo();
-            int insertAt = Math.Max(0, Math.Min(insertionIndex ?? _doc.PageCount, _doc.PageCount));
-            int importedCount = imports.Sum(import => import.PageRotations.Count);
-            if (insertAt < _doc.PageCount && importedCount > 0)
+            try
             {
-                var shifted = new Dictionary<int, List<PageAnnotation>>();
-                foreach (var pair in _annotations)
-                {
-                    int page = pair.Key >= insertAt ? pair.Key + importedCount : pair.Key;
-                    foreach (PageAnnotation annotation in pair.Value) annotation.PageIndex = page;
-                    shifted[page] = pair.Value;
-                }
-                _annotations.Clear();
-                foreach (var pair in shifted) _annotations[pair.Key] = pair.Value;
+                UndoEntry? documentUndo = CaptureDocumentUndo();
+                int insertAt = Math.Max(0, Math.Min(insertionIndex ?? _doc.PageCount, _doc.PageCount));
+                int importedCount = imports.Sum(import => import.PageRotations.Count);
+                SaveTempAndReload(
+                    keepAnnotations: true,
+                    preserveZoom: true,
+                    finalizeSavedFile: path => PdfEngineIntegration.InsertDocuments(path, imports, insertAt),
+                    remapAnnotations: annotations => PageAnnotationInsertion.Shift(annotations, insertAt, importedCount),
+                    remapRedactionMarks: true,
+                    remapRotations: rotations =>
+                        PdfEngineIntegration.RemapRotationsAfterDocumentInsertion(rotations, imports, insertAt),
+                    selectedPageAfterReload: insertAt,
+                    documentUndo: documentUndo);
+                SetStatus(string.Format(Loc("Str_Status_Merged"), imports.Count));
             }
-            SaveTempAndReload(
-                keepAnnotations: true,
-                preserveZoom: true,
-                finalizeSavedFile: path => PdfEngineIntegration.InsertDocuments(path, imports, insertAt),
-                remapRedactionMarks: true,
-                remapRotations: rotations =>
-                    PdfEngineIntegration.RemapRotationsAfterDocumentInsertion(rotations, imports, insertAt),
-                selectedPageAfterReload: insertAt,
-                documentUndo: documentUndo);
-            SetStatus(string.Format(Loc("Str_Status_Merged"), imports.Count));
+            catch (Exception ex)
+            {
+                KillerDialog.Show(this, Loc("Str_Err_MergeFailed") + "\n" + ex.Message,
+                    Loc("Str_Dlg_AppTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         /// <summary>

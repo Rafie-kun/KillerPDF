@@ -51,6 +51,7 @@ internal static class Program
             if (args.Length == 5 && (args[0].StartsWith("--verify-validate-profile-case-", StringComparison.Ordinal)
                 || args[0].StartsWith("--verify-delete-nearest-case-", StringComparison.Ordinal)
                 || args[0].StartsWith("--verify-page-straighten-", StringComparison.Ordinal)
+                || args[0].StartsWith("--verify-file-insertion-", StringComparison.Ordinal)
                 || args[0] is "--verify-watch-job-failure" or "--verify-watch-unsupported-step"
                 || args[0] is "--verify-page-delete-failure" or "--verify-page-transform-failure" or "--verify-page-transform-cancel" or "--verify-page-transform-save-control" or "--verify-page-transform-success" or "--verify-range-extract-pending" or "--verify-page-straighten-failure")
                 && args[4] == "--session-isolation")

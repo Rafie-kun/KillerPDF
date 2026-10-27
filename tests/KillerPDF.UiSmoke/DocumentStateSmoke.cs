@@ -94,6 +94,8 @@ internal static class DocumentStateSmoke
                 VerifyPageEditFailure(owner, source, original, editor, folder, delete: true);
             else if (scenario == "--verify-page-transform-failure")
                 VerifyTransformFailure(owner, source, original, editor);
+            else if (scenario is "--verify-file-insertion-failure" or "--verify-file-insertion-success")
+                VerifyFileInsertion(owner, source, original, editor, folder, success: scenario == "--verify-file-insertion-success");
             else if (scenario == "--verify-page-straighten-failure")
                 VerifyTransformFailure(owner, source, original, editor, straighten: true);
             else if (scenario == "--verify-page-straighten-save-control")
@@ -723,6 +725,157 @@ internal static class DocumentStateSmoke
         return System.Text.Encoding.ASCII.GetBytes(pdf.ToString());
     }
 
+    private static void VerifyFileInsertion(Window owner, string source, byte[] original, TextBox editor, string folder, bool success)
+    {
+        string imported = Path.Combine(folder, "imported-page.pdf");
+        byte[] importedBytes = TableExportSmoke.Fixture();
+        File.WriteAllBytes(imported, importedBytes);
+        if (!ReadText(imported).Contains("0012", StringComparison.Ordinal) || ReadText(imported).Contains(Marker, StringComparison.Ordinal))
+            throw new InvalidOperationException("The imported-page positive control is invalid.");
+        Stroke(0x0D, 0x11);
+        Wait(() => !editor.IsVisible && Dirty(owner), "pending text before file insertion");
+        var pages = (ListBox)owner.FindName("PageList");
+        Wait(() => pages.Items.Count == 1 && pages.ItemContainerGenerator.ContainerFromIndex(0) is ListBoxItem { IsVisible: true }, "insertion thumbnail container");
+        var first = (ListBoxItem)pages.ItemContainerGenerator.ContainerFromIndex(0);
+        var marker = (FrameworkElement)owner.FindName("PageDropIndicator");
+        if (marker.IsVisible) throw new InvalidOperationException("The fresh drag fixture already shows an insertion marker.");
+        Point origin = pages.PointToScreen(new Point(pages.ActualWidth * .5, pages.ActualHeight - 12));
+        Point target = first.PointToScreen(new Point(first.ActualWidth * .5, 4));
+        DependencyObject? hit = pages.InputHitTest(new Point(pages.ActualWidth * .5, pages.ActualHeight - 12)) as DependencyObject;
+        for (DependencyObject? item = hit; item is not null && item != pages; item = VisualTreeHelper.GetParent(item))
+            if (item is ListBoxItem or System.Windows.Controls.Primitives.ScrollBar)
+                throw new InvalidOperationException("The drag source must be empty owned sidebar space.");
+        IntPtr handle = new WindowInteropHelper(owner).Handle;
+        foreach (Point point in new[] { origin, target })
+            if (point.X < 0 || point.Y < 0 || point.X >= SystemParameters.PrimaryScreenWidth || point.Y >= SystemParameters.PrimaryScreenHeight
+                || WindowFromPoint(new NativePoint { X = (int)point.X, Y = (int)point.Y }) != handle)
+                throw new InvalidOperationException("File insertion pointer target is not inside the owned window.");
+        bool undo = ((Button)owner.FindName("UndoBtn")).IsEnabled;
+        int writeErrors = 0, unhandled = 0;
+        string tempRoot = Path.GetFullPath(Path.Combine(folder, "data", "Temp"));
+        var directory = new DirectoryInfo(Directory.GetDirectories(tempRoot, "session-*").Single());
+        string originalSddl = directory.GetAccessControl(AccessControlSections.Access)
+            .GetSecurityDescriptorSddlForm(AccessControlSections.Access);
+        File.WriteAllText(Path.Combine(folder, "original-temp-access.txt"), originalSddl);
+        DirectorySecurity denied = directory.GetAccessControl(AccessControlSections.Access);
+        denied.AddAccessRule(new FileSystemAccessRule(WindowsIdentity.GetCurrent().User!,
+            FileSystemRights.CreateFiles, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+        var seen = new HashSet<Window>();
+        var dialogs = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(20) };
+        dialogs.Tick += (_, _) =>
+        {
+            foreach (Window dialog in Application.Current.Windows.Cast<Window>().Where(window => window != owner && window.IsVisible).ToArray())
+            {
+                if (!seen.Add(dialog)) continue;
+                string message = string.Join(" ", Descendants<TextBlock>(dialog).Select(text => text.Text));
+                Button? ok = Descendants<Button>(dialog).FirstOrDefault(button => Equals(button.Content, owner.FindResource("Str_Btn_OK")));
+                if (success || ok is null || !message.Contains("denied", StringComparison.OrdinalIgnoreCase))
+                    throw new InvalidOperationException("Unexpected file insertion dialog: " + message);
+                writeErrors++;
+                Console.WriteLine("CONTROL file insertion reported the expected temporary-write error: " + message);
+                owner.Dispatcher.BeginInvoke(DispatcherPriority.Input, (Action)(() => ok.RaiseEvent(new RoutedEventArgs(Button.ClickEvent))));
+            }
+        };
+        DispatcherUnhandledExceptionEventHandler boundary = (_, error) =>
+        {
+            Exception cause = error.Exception.GetBaseException();
+            if (success || cause is not UnauthorizedAccessException
+                || !cause.Message.Contains(directory.FullName, StringComparison.OrdinalIgnoreCase)) return;
+            // Startup is suppressed in this host. Catch only the expected error at the same
+            // dispatcher boundary so state can be inspected after the failing async command.
+            error.Handled = true;
+            unhandled++; writeErrors++;
+            Console.WriteLine("CONTROL expected temporary-write error escaped the file insertion command to the dispatcher boundary.");
+        };
+        var watch = Stopwatch.StartNew();
+        bool indicatorSeen = false;
+        Exception? nativeFailure = null;
+        Thread? mouseThread = null;
+        DragEventHandler observe = (_, args) =>
+        {
+            if (args.Data.GetDataPresent(DataFormats.FileDrop) && marker.IsVisible) indicatorSeen = true;
+        };
+        pages.AddHandler(DragDrop.DragOverEvent, observe, handledEventsToo: true);
+        Application.Current.DispatcherUnhandledException += boundary;
+        dialogs.Start();
+        try
+        {
+            if (!success)
+            {
+                directory.SetAccessControl(denied);
+                bool blocked = false;
+                try { File.WriteAllBytes(Path.Combine(directory.FullName, "write-denial-control"), [1]); }
+                catch (UnauthorizedAccessException) { blocked = true; }
+                if (!blocked) throw new InvalidOperationException("Synthetic temporary-write denial was not effective.");
+                Console.WriteLine("CONTROL isolated temporary directory independently refuses new files.");
+            }
+            var data = new DataObject();
+            data.SetData(DataFormats.FileDrop, new[] { imported });
+            SetCursorPos((int)origin.X, (int)origin.Y);
+            MouseEvent(2, 0, 0, 0, UIntPtr.Zero);
+            Wait(() => (GetAsyncKeyState(1) & 0x8000) != 0 && Mouse.LeftButton == MouseButtonState.Pressed
+                && GetForegroundWindow() == handle, "owned native drag source has a pressed mouse button");
+            Console.WriteLine("CONTROL native and WPF mouse-button state are pressed in the owned foreground window.");
+            watch.Restart();
+            mouseThread = new Thread(() =>
+            {
+                try
+                {
+                    Thread.Sleep(150);
+                    var point = new NativePoint { X = (int)target.X, Y = (int)target.Y };
+                    if (GetForegroundWindow() != handle || WindowFromPoint(point) != handle)
+                        throw new InvalidOperationException("Native drag target lost its exact owned window.");
+                    if (!SetCursorPos(point.X, point.Y)) throw new InvalidOperationException("Cannot move the native drag pointer.");
+                    Thread.Sleep(250);
+                }
+                catch (Exception error) { nativeFailure = error; }
+                finally { MouseEvent(4, 0, 0, 0, UIntPtr.Zero); }
+            }) { IsBackground = true, Name = "Synthetic file insertion mouse" };
+            mouseThread.Start();
+            DragDropEffects effect = DragDropEffects.None;
+            try { effect = DragDrop.DoDragDrop(pages, data, DragDropEffects.Copy); }
+            finally { MouseEvent(4, 0, 0, 0, UIntPtr.Zero); mouseThread.Join(TimeSpan.FromSeconds(2)); }
+            if (nativeFailure is not null) throw new InvalidOperationException("Native drag input failed.", nativeFailure);
+            Console.WriteLine($"CONTROL native drag returned {effect}; marker={indicatorSeen}; elapsedMs={watch.ElapsedMilliseconds}.");
+            if (!indicatorSeen) throw new InvalidOperationException("No before-first-page insertion marker appeared during the native file drag.");
+            Console.WriteLine("CONTROL public file drag reached the before-first-thumbnail insertion marker.");
+            Wait(() => !marker.IsVisible, "file insertion marker dismissed after Drop");
+            Wait(() => success ? pages.Items.Count == 2 : writeErrors == 1, "file insertion publication or expected write failure");
+            Wait(() => !Application.Current.Windows.Cast<Window>().Any(window => window != owner && window.IsVisible), "file insertion error dismissed");
+        }
+        finally
+        {
+            dialogs.Stop(); MouseEvent(4, 0, 0, 0, UIntPtr.Zero);
+            if (mouseThread?.IsAlive == true) mouseThread.Join(TimeSpan.FromSeconds(2));
+            pages.RemoveHandler(DragDrop.DragOverEvent, observe);
+            Application.Current.DispatcherUnhandledException -= boundary;
+            if (!success)
+            {
+                var restored = new DirectorySecurity();
+                restored.SetSecurityDescriptorSddlForm(originalSddl, AccessControlSections.Access);
+                directory.SetAccessControl(restored);
+            }
+            if (directory.GetAccessControl(AccessControlSections.Access).GetSecurityDescriptorSddlForm(AccessControlSections.Access) != originalSddl)
+                throw new InvalidOperationException("Synthetic insertion temporary-directory permissions were not restored exactly.");
+            Console.WriteLine("CONTROL isolated temporary-directory access descriptor matches its original value.");
+        }
+        if (!File.ReadAllBytes(source).AsSpan().SequenceEqual(original) || !File.ReadAllBytes(imported).AsSpan().SequenceEqual(importedBytes)
+            || !Dirty(owner) || (!success && (pages.Items.Count != 1 || ((Button)owner.FindName("UndoBtn")).IsEnabled != undo)))
+            throw new InvalidOperationException("APP-004: file insertion changed source bytes, page count or dirty/history state before successful publication.");
+        Save(owner);
+        int annotated = success ? 1 : 0;
+        if (!ReadText(source, annotated).Contains(Marker, StringComparison.Ordinal) || (success && ReadText(source).Contains(Marker, StringComparison.Ordinal)))
+            throw new InvalidOperationException("APP-004: file insertion lost or misplaced the pending annotation on subsequent Save.");
+        if (unhandled != 0) throw new InvalidOperationException("APP-004: failed file insertion escaped its command error boundary.");
+        Click(owner, "UndoBtn"); Save(owner);
+        if (ReadText(source).Contains(Marker, StringComparison.Ordinal) != success)
+            throw new InvalidOperationException("File insertion Undo did not restore the expected original text state.");
+        Click(owner, "RedoBtn"); Save(owner);
+        if (!ReadText(source, annotated).Contains(Marker, StringComparison.Ordinal))
+            throw new InvalidOperationException("File insertion Redo did not restore the pending text on its owning page.");
+        Console.WriteLine("CONTROL native file insertion preserved source ownership and strict Save/Undo/Redo annotation content.");
+    }
+
     private static void VerifyTransformFailure(Window owner, string source, byte[] original, TextBox editor, bool cancel = false, bool saveOnly = false, bool success = false, bool straighten = false)
     {
         Assembly engine = Assembly.Load("KillerPdf.Engine");
@@ -1055,8 +1208,8 @@ internal static class DocumentStateSmoke
             {
                 Button? yes = Descendants<Button>(dialog).FirstOrDefault(button =>
                     Equals(button.Content, Application.Current.FindResource("Str_Btn_Yes")));
-                Button? acceptError = expectFailure ? Descendants<Button>(dialog).FirstOrDefault(button =>
-                    Equals(button.Content, Application.Current.FindResource("Str_Btn_OK"))) : null;
+                Button? acceptError = Descendants<Button>(dialog).FirstOrDefault(button =>
+                    Equals(button.Content, Application.Current.FindResource("Str_Btn_OK")));
                 if ((yes is null && acceptError is null) || !seen.Add(dialog)) continue;
                 if (yes is not null)
                 {
@@ -1074,6 +1227,8 @@ internal static class DocumentStateSmoke
         try { Click(owner, "SaveAsBtn"); }
         finally { timer.Stop(); }
         if (confirmations != 1) throw new InvalidOperationException("Expected one overwrite confirmation for the synthetic source.");
+        if (!expectFailure && saveError is not null)
+            throw new InvalidOperationException("Public Save unexpectedly failed: " + saveError);
         if (expectFailure && (saveError is null || !saveError.Contains(
             (string)Application.Current.FindResource("Str_Err_SaveFailed"), StringComparison.Ordinal)))
             throw new InvalidOperationException("The locked destination did not show the expected Save failure.");
@@ -1091,7 +1246,7 @@ internal static class DocumentStateSmoke
         return (string?)widget.GetType().GetProperty("Value")!.GetValue(widget);
     }
 
-    private static string ReadText(string source)
+    private static string ReadText(string source, int page = 0)
     {
         Assembly engine = Assembly.Load("KillerPdf.Engine");
         Type documentType = engine.GetType("KillerPdf.Engine.Documents.PdfDocument", true)!;
@@ -1100,7 +1255,7 @@ internal static class DocumentStateSmoke
         Type readerType = engine.GetType("KillerPdf.Engine.Documents.PdfPageContentReader", true)!;
         object reader = Activator.CreateInstance(readerType, [document])!;
         object content = readerType.GetMethod("Read", [typeof(int), typeof(CancellationToken)])!
-            .Invoke(reader, [0, CancellationToken.None])!;
+            .Invoke(reader, [page, CancellationToken.None])!;
         return (string)content.GetType().GetProperty("Text")!.GetValue(content)!;
     }
 
@@ -1155,6 +1310,14 @@ internal static class DocumentStateSmoke
     }
     [DllImport("user32.dll", SetLastError = true)]
     private static extern bool SetCursorPos(int x, int y);
+    [StructLayout(LayoutKind.Sequential)]
+    private struct NativePoint { public int X; public int Y; }
+    [DllImport("user32.dll")]
+    private static extern IntPtr WindowFromPoint(NativePoint point);
+    [DllImport("user32.dll")]
+    private static extern short GetAsyncKeyState(int key);
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetForegroundWindow();
     [DllImport("user32.dll", EntryPoint = "mouse_event")]
     private static extern void MouseEvent(uint flags, uint dx, uint dy, uint data, UIntPtr extra);
     [DllImport("user32.dll", EntryPoint = "keybd_event")]
