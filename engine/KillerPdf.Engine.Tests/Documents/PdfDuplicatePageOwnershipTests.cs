@@ -304,6 +304,43 @@ public sealed class PdfDuplicatePageOwnershipTests
         Assert.Equal("untouched", String(Annotation(changed, 2, 0)[N("Contents")]));
     }
 
+    [Fact]
+    public void RecoveryKeepsAnIndependentTaggedPageAndIdentityTree()
+    {
+        PdfDocument healthy = PdfDocument.Open(Fixture(tagged: true, damage: "tag-independent-page", repeated: false));
+        Assert.Equal(2, PdfPageInformation.Read(healthy).Count);
+        byte[] expected = new PdfPageRenderer(healthy).Render(1, new PdfRenderOptions(100, 100)).Pixels.ToArray();
+        PdfDocument source = PdfDocument.OpenWithCompatibilityRecovery(Fixture(tagged: true, damage: "tag-independent-page"));
+        PdfDocument saved = PdfDocument.Open(PdfDocumentWriter.Write(source));
+        Assert.Equal(3, PdfPageInformation.Read(saved).Count);
+        Assert.Empty(saved.RecoveryDiagnostics);
+        Assert.Equal(expected, new PdfPageRenderer(saved).Render(2, new PdfRenderOptions(100, 100)).Pixels.ToArray());
+        PdfPageTree tree = PdfPageTree.Read(saved);
+        PdfDictionary structure = Dictionary(saved, tree.Catalog[N("StructTreeRoot")]);
+        var parents = PdfNumberTree.Read(saved, structure[N("ParentTree")]).ToDictionary(entry => entry.Key, entry => entry.Value);
+        Assert.Equal(3, Assert.IsType<PdfInteger>(tree.Pages[2].Dictionary[N("StructParents")]).Value);
+        PdfObject independentTag = Assert.Single(Assert.IsType<PdfArray>(parents[3]));
+        PdfDictionary paragraph = Dictionary(saved, independentTag);
+        Assert.Equal("untouched", String(paragraph[N("ID")]));
+        Assert.Equal(tree.Pages[2].Reference.ObjectNumber, ObjectNumber(paragraph[N("Pg")]));
+        PdfDictionary note = Annotation(saved, 2, 0);
+        Assert.Equal("independent", String(note[N("Contents")]));
+        Assert.Equal(tree.Pages[2].Reference.ObjectNumber, ObjectNumber(note[N("P")]));
+        Assert.Equal(4, Assert.IsType<PdfInteger>(note[N("StructParent")]).Value);
+        PdfDictionary noteTag = Dictionary(saved, parents[4]);
+        Assert.Equal(ObjectNumber(independentTag), ObjectNumber(noteTag[N("P")]));
+        Assert.Equal(ObjectNumber(Assert.Single(Assert.IsType<PdfArray>(tree.Pages[2].Dictionary[N("Annots")]))),
+            ObjectNumber(Dictionary(saved, noteTag[N("K")])[N("Obj")]));
+        PdfArray identities = Assert.IsType<PdfArray>(Dictionary(saved, structure[N("IDTree")])[N("Names")]);
+        Assert.Equal(4, identities.Count);
+        Assert.Equal("document", String(identities[0]));
+        Assert.Equal(ObjectNumber(Assert.Single(Assert.IsType<PdfArray>(structure[N("K")]))), ObjectNumber(identities[1]));
+        Assert.Equal("untouched", String(identities[2]));
+        Assert.Equal(ObjectNumber(independentTag), ObjectNumber(identities[3]));
+        Assert.All(new[] { 0, 1 }, page => Assert.Equal("Ada", Assert.Single(PdfFormWidgetReader.ReadPage(saved, page)).Value));
+        Assert.Empty(PdfFormWidgetReader.ReadPage(saved, 2));
+    }
+
     [Theory]
     [InlineData("cycle")]
     [InlineData("expansion")]
@@ -313,6 +350,8 @@ public sealed class PdfDuplicatePageOwnershipTests
     [InlineData("tag-parent-swap")]
     [InlineData("tag-parent-cycle")]
     [InlineData("tag-merged-extension")]
+    [InlineData("tag-independent-cycle")]
+    [InlineData("tag-independent-foreign-object")]
     [InlineData("radio-direct-kid")]
     public void AmbiguousOrExcessiveRecoveryLeavesTheOriginalObjectModelIntact(string damage)
     {
@@ -377,6 +416,25 @@ public sealed class PdfDuplicatePageOwnershipTests
                 "<< /Nums [0 [14 0 R] 1 16 0 R 2 15 0 R] >>",
                 "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
                 $"<< /Length {appearance.Length} /Type /XObject /Subtype /Form /BBox [0 0 80 20] /Resources << /Font << /F1 18 0 R >> >> >>\nstream\n{appearance}\nendstream"];
+        }
+        if (damage?.StartsWith("tag-independent-", StringComparison.Ordinal) == true)
+        {
+            objects[1] = "<< /Type /Pages /Kids [10 0 R 10 0 R 20 0 R] /Count 3 /MediaBox [0 0 100 100] /Resources << >> >>";
+            objects[11] = "<< /Type /StructTreeRoot /K [13 0 R] /ParentTree 17 0 R /ParentTreeNextKey 5 /IDTree 25 0 R >>";
+            objects[12] = "<< /Type /StructElem /S /Document /P 12 0 R /ID (document) /K [14 0 R 15 0 R 16 0 R 22 0 R] >>";
+            objects[16] = "<< /Nums [0 [14 0 R] 1 16 0 R 2 15 0 R 3 [22 0 R] 4 24 0 R] >>";
+            const string independent = "/P << /MCID 0 >> BDC 0 1 0 rg 5 5 25 30 re f EMC";
+            objects = [.. objects,
+                "<< /Type /Page /Parent 2 0 R /Contents 21 0 R /StructParents 3 /Annots [23 0 R] >>",
+                $"<< /Length {independent.Length} >>\nstream\n{independent}\nendstream",
+                "<< /Type /StructElem /S /P /P 13 0 R /Pg 20 0 R /ID (untouched) /K [0 24 0 R] >>",
+                "<< /Type /Annot /Subtype /Text /Rect [50 50 60 60] /P 20 0 R /NM (independent-note) /Contents (independent) /StructParent 4 >>",
+                "<< /Type /StructElem /S /Note /P 22 0 R /Pg 20 0 R /K << /Type /OBJR /Pg 20 0 R /Obj 23 0 R >> >>",
+                "<< /Names [(document) 13 0 R (untouched) 22 0 R] >>"];
+            if (damage == "tag-independent-cycle")
+                objects[21] = "<< /Type /StructElem /S /P /P 13 0 R /Pg 20 0 R /ID (untouched) /K [0 22 0 R] >>";
+            if (damage == "tag-independent-foreign-object")
+                objects[23] = "<< /Type /StructElem /S /Note /P 22 0 R /Pg 20 0 R /K << /Type /OBJR /Pg 20 0 R /Obj 5 0 R >> >>";
         }
         if (damage == "external-popup") objects[2] = "<< /Type /Page /Parent 10 0 R /Contents 4 0 R /Annots [5 0 R 6 0 R 8 0 R 9 0 R] >>";
         if (damage == "page-aa") objects[2] = objects[2][..^2] + " /AA << /O << /S /GoTo /D [3 0 R /Fit] >> >> >>";
@@ -448,7 +506,9 @@ public sealed class PdfDuplicatePageOwnershipTests
                 "<< /Type /StructElem /S /Form /P 13 0 R /Pg 3 0 R /K << /Type /OBJR /Pg 3 0 R /Obj 20 0 R >> >>",
                 Appearance(totalAppearance)];
         }
-        if (!repeated) objects[1] = "<< /Type /Pages /Kids [10 0 R] /Count 1 /MediaBox [0 0 100 100] /Resources << >> >>";
+        if (!repeated) objects[1] = damage == "tag-independent-page"
+            ? "<< /Type /Pages /Kids [10 0 R 20 0 R] /Count 2 /MediaBox [0 0 100 100] /Resources << >> >>"
+            : "<< /Type /Pages /Kids [10 0 R] /Count 1 /MediaBox [0 0 100 100] /Resources << >> >>";
         var result = new StringBuilder("%PDF-1.7\n");
         var offsets = new List<int>();
         for (int index = 0; index < objects.Length; index++)

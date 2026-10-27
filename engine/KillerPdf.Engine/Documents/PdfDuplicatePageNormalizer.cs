@@ -385,10 +385,10 @@ internal sealed class PdfDuplicatePageNormalizer(PdfDocument document)
         try
         {
             PdfDictionary node = Dictionary(reference);
-            if (Get(node, "Pg") is PdfIndirectReference owner && _groups.TryGetValue(FinalReference(owner).ObjectNumber, out List<Occurrence>? group)
-                && group.Count > 1)
+            if (Get(node, "Pg") is PdfIndirectReference owner && _groups.TryGetValue(FinalReference(owner).ObjectNumber, out List<Occurrence>? group))
             {
                 CopyTag(reference, parent, group[0], false, new HashSet<int>(), depth + 1);
+                if (group.Count == 1) return reference;
                 var copies = new List<PdfObject> { reference };
                 foreach (Occurrence page in group.Skip(1))
                 {
@@ -441,8 +441,15 @@ internal sealed class PdfDuplicatePageNormalizer(PdfDocument document)
             if (Get(node, "Stm") is not null) throw Refuse("A duplicated structure branch owns a tagged content stream.");
             if (Get(node, "Obj") is PdfIndirectReference obj)
             {
-                if (!page.Annotations.TryGetValue(FinalReference(obj).ObjectNumber, out PdfIndirectReference? annotation))
-                    throw Refuse("A structure object reference leaves the page ownership set.");
+                PdfIndirectReference original = FinalReference(obj);
+                if (!page.Annotations.TryGetValue(original.ObjectNumber, out PdfIndirectReference? annotation))
+                {
+                    if (clone || _groups[page.Source.ObjectNumber].Count != 1
+                        || !_annotationOwners.TryGetValue(original.ObjectNumber, out int annotationOwner)
+                        || annotationOwner != page.Source.ObjectNumber)
+                        throw Refuse("A structure object reference leaves the page ownership set.");
+                    annotation = original;
+                }
                 result = Set(result, "Obj", annotation);
             }
             if (Get(node, "K") is PdfObject kids)
