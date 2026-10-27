@@ -167,7 +167,7 @@ internal static class TraySmoke
         Type trayType = assembly.GetType("KillerFamily.Shell.CloseToTray", true)!;
         bool enabled = true, registrationSucceeds = false, closed = false;
         object tray = trayType.GetMethod("Attach", Members)!.Invoke(null,
-            [window, appName, (Func<string, string>)(key => key), (Func<bool>)(() => enabled),
+            [window, appName, (Func<string, string>)(key => key), (Func<bool>)(() => enabled), null, null, null,
                 (Func<uint, bool>)(message => message != 0 || registrationSucceeds)])!;
         MethodInfo hideInstead = trayType.GetMethod("HideInstead", Members)!;
         window.Closing += (_, args) => hideInstead.Invoke(tray, [args]);
@@ -208,7 +208,7 @@ internal static class TraySmoke
         bool enabled = true, closed = false, canceledObserved = false, acceptedObserved = false;
         Exception? failure = null;
         object tray = trayType.GetMethod("Attach", Members)!.Invoke(null,
-            [window, appName, (Func<string, string>)(key => key), (Func<bool>)(() => enabled),
+            [window, appName, (Func<string, string>)(key => key), (Func<bool>)(() => enabled), null, null, null,
                 (Func<uint, bool>)(_ => true)])!;
         MethodInfo hideInstead = trayType.GetMethod("HideInstead", Members)!;
         window.Closing += (_, args) => hideInstead.Invoke(tray, [args]);
