@@ -600,6 +600,73 @@ public sealed class PdfContentRedactionTests
     }
 
     [Theory]
+    [InlineData(false, true)]
+    [InlineData(true, true)]
+    [InlineData(false, false)]
+    [InlineData(true, false)]
+    public void RefusesOriginalImagesRetainedOnlyByAnUnusedSiblingResource(bool partlyCovered, bool inherited)
+    {
+        // Inherited: the Pages node carries the image. Shared: both pages name one indirect XObject dictionary.
+        string pages = inherited
+            ? "<< /Type /Pages /Kids [3 0 R 4 0 R] /Count 2 /Resources << /XObject << /Im1 6 0 R >> >> >>"
+            : "<< /Type /Pages /Kids [3 0 R 4 0 R] /Count 2 >>";
+        string resources = inherited ? string.Empty : "/Resources << /XObject 9 0 R >>";
+        PdfDocument document = PdfDocument.Open(CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            pages,
+            $"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 400 400] {resources} /Contents 5 0 R >>",
+            $"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 400 400] {resources} /Contents 7 0 R >>",
+            Stream(partlyCovered ? "q 300 0 0 300 50 50 cm /Im1 Do Q" : "q 20 0 0 20 100 100 cm /Im1 Do Q"),
+            SecretImage("/SMask 8 0 R"),
+            Stream(""),
+            MaskImage(),
+            "<< /Im1 6 0 R >>"
+        ]));
+        var region = new PdfRedactionRegion(0, partlyCovered
+            ? new PdfContentBounds(60, 210, 120, 300) : new PdfContentBounds(90, 90, 130, 130));
+
+        PdfRedactionVerificationException error = Assert.Throws<PdfRedactionVerificationException>(() =>
+            PdfContentRedaction.Apply(document, [region]));
+
+        Assert.Contains(error.Report.Findings, finding => finding.Code == "RetainedSourceStream");
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void PreservesAnInvokedInheritedImageAndItsMaskOnAnUntouchedSibling(bool partlyCovered)
+    {
+        PdfDocument document = PdfDocument.Open(CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R 4 0 R] /Count 2 /Resources << /XObject << /Im1 6 0 R >> >> >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 400 400] /Contents 5 0 R >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 400 400] /Contents 7 0 R >>",
+            Stream(partlyCovered ? "q 300 0 0 300 50 50 cm /Im1 Do Q" : "q 20 0 0 20 100 100 cm /Im1 Do Q"),
+            SecretImage("/SMask 8 0 R"),
+            Stream("q 300 0 0 300 50 50 cm /Im1 Do Q"),
+            MaskImage()
+        ]));
+        var region = new PdfRedactionRegion(0, partlyCovered
+            ? new PdfContentBounds(60, 210, 120, 300) : new PdfContentBounds(90, 90, 130, 130));
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, [region]);
+
+        Assert.True(result.Verification.Succeeded);
+        PdfDocument output = PdfDocument.Open(result.Document);
+        PdfExtractedImage sibling = Assert.Single(new PdfPageContentReader(output).Read(1).Images);
+        Assert.Equal("Im1", sibling.ResourceName);
+        Assert.Equal(PdfPageInformation.Read(document)[1], PdfPageInformation.Read(output)[1]);
+    }
+
+    private static string SecretImage(string entries) =>
+        $"<< /Type /XObject /Subtype /Image /Width 2 /Height 2 /ColorSpace /DeviceRGB /BitsPerComponent 8 {entries} /Length 12 >>\nstream\n"
+            + Encoding.Latin1.GetString([255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255]) + "\nendstream";
+
+    private static string MaskImage() =>
+        "<< /Type /XObject /Subtype /Image /Width 2 /Height 2 /ColorSpace /DeviceGray /BitsPerComponent 8 /Length 4 >>\nstream\n"
+            + Encoding.Latin1.GetString([255, 255, 255, 255]) + "\nendstream";
+
+    [Theory]
     [InlineData(false)]
     [InlineData(true)]
     public void PreservesAnInvokedInheritedFormOnAnUntouchedSibling(bool softMask)
@@ -784,6 +851,43 @@ public sealed class PdfContentRedactionTests
         Assert.Contains("visible", Letters(output, 0));
         Assert.Single(PdfLinkReader.ReadPage(output, 0));
         Assert.False(output.Trailer.ContainsKey(new PdfName("Info"u8)));
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("/Rect [70 690 160]")]
+    [InlineData("/Rect [70 690 (wide) 715]")]
+    [InlineData("/Rect 9 0 R")]
+    public void RemovesAnnotationsWithoutAUsableRectangleFromARedactedPage(string rect)
+    {
+        // An annotation that cannot be placed cannot be shown to be clear of the area, so it leaves the page.
+        var objects = new List<string>
+        {
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R /Annots [6 0 R 7 0 R] >>",
+            Helvetica,
+            Stream("BT /F1 12 Tf 72 700 Td (SECRETWORD) Tj ( visible) Tj ET"),
+            $"<< /Type /Annot /Subtype /Text {rect} /Contents (SECRETWORD note) /T (SECRETWORD author) >>",
+            "<< /Type /Annot /Subtype /Link /Rect [300 100 350 120] /A << /S /URI /URI (https://kept.example) >> >>",
+            "<< /Title (Plain) >>",
+            "(not a rectangle)"
+        };
+        PdfDocument document = PdfDocument.Open(CreatePdf(objects));
+        PdfRedactionRegion region = Region(document, 0, "SECRETWORD");
+
+        Assert.Contains(PdfContentRedaction.Verify(document.Source, [region], [], expectMetadataCleared: false).Findings,
+            finding => finding.Code == "AnnotationInRegion");
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, [region],
+            new PdfContentRedactionOptions { ProhibitedText = ["SECRETWORD"] });
+
+        Assert.True(result.Verification.Succeeded);
+        Assert.Equal(1, Assert.Single(result.Plan.Pages).RemovedAnnotations);
+        PdfDocument output = PdfDocument.Open(result.Document);
+        Assert.Single(PdfLinkReader.ReadPage(output, 0));
+        PdfObject annots = PdfPageTree.Read(output).Pages[0].Dictionary[new PdfName("Annots"u8)];
+        if (annots is PdfIndirectReference reference) annots = output.Resolve(reference);
+        Assert.Single(Assert.IsType<PdfArray>(annots));
     }
 
     [Fact]

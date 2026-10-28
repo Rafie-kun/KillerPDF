@@ -577,16 +577,34 @@ public static partial class PdfContentRedaction
         foreach (PdfObject item in annotations)
         {
             if (Resolve(document, item) is not PdfDictionary annotation
-                || !annotation.TryGetValue(RectName, out PdfObject? rectValue)
-                || Resolve(document, rectValue) is not PdfArray rect || rect.Count != 4) continue;
-            double x1 = Number(document, rect[0]), y1 = Number(document, rect[1]);
-            double x2 = Number(document, rect[2]), y2 = Number(document, rect[3]);
-            var bounds = new PdfContentBounds(Math.Min(x1, x2) - geometry.CropLeft, Math.Min(y1, y2) - geometry.CropBottom,
-                Math.Max(x1, x2) - geometry.CropLeft, Math.Max(y1, y2) - geometry.CropBottom);
-            if (IsNamed(annotation, SubtypeName, "Popup")) continue;
-            if (regions.Any(region => OverlapsOrTouches(bounds, region))) result.Add(item);
+                || IsNamed(annotation, SubtypeName, "Popup")) continue;
+            // An annotation that cannot be placed cannot be shown to be clear of the area, so it counts as covered.
+            if (!TryAnnotationBounds(document, annotation, geometry, out PdfContentBounds bounds)
+                || regions.Any(region => OverlapsOrTouches(bounds, region))) result.Add(item);
         }
         return result;
+    }
+
+    private static bool TryAnnotationBounds(PdfDocument document, PdfDictionary annotation, PageGeometry geometry,
+        out PdfContentBounds bounds)
+    {
+        bounds = default;
+        if (!annotation.TryGetValue(RectName, out PdfObject? rectValue)
+            || Resolve(document, rectValue) is not PdfArray rect || rect.Count != 4) return false;
+        double[] values = new double[4];
+        for (int index = 0; index < 4; index++)
+        {
+            switch (Resolve(document, rect[index]))
+            {
+                case PdfInteger integer: values[index] = integer.Value; break;
+                case PdfReal real when double.IsFinite(real.Value): values[index] = real.Value; break;
+                default: return false;
+            }
+        }
+        bounds = new PdfContentBounds(Math.Min(values[0], values[2]) - geometry.CropLeft,
+            Math.Min(values[1], values[3]) - geometry.CropBottom,
+            Math.Max(values[0], values[2]) - geometry.CropLeft, Math.Max(values[1], values[3]) - geometry.CropBottom);
+        return true;
     }
 
     // Walks the whole field tree, since a widget dropped from the page can stay reachable through it.
@@ -609,13 +627,9 @@ public static partial class PdfContentRedaction
                 foreach (PdfObject kid in kids) pending.Push(kid);
             if (!field.TryGetValue(Name("P"), out PdfObject? owner)
                 || owner is not PdfIndirectReference { ObjectNumber: var ownerNumber } || ownerNumber != pageNumber
-                || !field.TryGetValue(RectName, out PdfObject? rectValue)
-                || Resolve(document, rectValue) is not PdfArray rect || rect.Count != 4) continue;
-            double x1 = Number(document, rect[0]), y1 = Number(document, rect[1]);
-            double x2 = Number(document, rect[2]), y2 = Number(document, rect[3]);
-            var bounds = new PdfContentBounds(Math.Min(x1, x2) - geometry.CropLeft, Math.Min(y1, y2) - geometry.CropBottom,
-                Math.Max(x1, x2) - geometry.CropLeft, Math.Max(y1, y2) - geometry.CropBottom);
-            if (regions.Any(region => OverlapsOrTouches(bounds, region))) return true;
+                || !(IsNamed(field, SubtypeName, "Widget") || field.ContainsKey(RectName))) continue;
+            if (!TryAnnotationBounds(document, field, geometry, out PdfContentBounds bounds)
+                || regions.Any(region => OverlapsOrTouches(bounds, region))) return true;
         }
         return false;
     }
@@ -1618,7 +1632,14 @@ public static partial class PdfContentRedaction
                 if (IsNamed(xobject.Dictionary, SubtypeName, "Image"))
                 {
                     PdfContentBounds bounds = Visible(Transform(new PdfContentBounds(0, 0, 1, 1), state.Ctm));
-                    if (textOnly) { MarkRemoved(); return; }
+                    // A dropped or repainted image is retired with its masks, so the original samples
+                    // cannot stay behind through a resource dictionary another page shares or inherits.
+                    if (textOnly)
+                    {
+                        MarkRemoved();
+                        if (update is not null) CollectImageStreams(document, value, RetiredSourceStreams);
+                        return;
+                    }
                     if (!glyphsOnly && bounds.Width > 0 && bounds.Height > 0
                         && regions.Any(region => Overlaps(bounds, region)))
                     {
@@ -1626,9 +1647,14 @@ public static partial class PdfContentRedaction
                         {
                             RemovedImages++;
                             MarkRemoved();
+                            if (update is not null) CollectImageStreams(document, value, RetiredSourceStreams);
                             return;
                         }
-                        if (PaintImage(xobject)) return;
+                        if (PaintImage(xobject))
+                        {
+                            if (update is not null) CollectImageStreams(document, value, RetiredSourceStreams);
+                            return;
+                        }
                         Reasons.Add("Image");
                     }
                     scope.Use(XObjectCategory, name);

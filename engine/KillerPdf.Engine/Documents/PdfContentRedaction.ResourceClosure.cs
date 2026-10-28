@@ -23,6 +23,17 @@ public static partial class PdfContentRedaction
             foreach (PdfObject item in array) CollectSourceStreams(document, item, numbers, depth + 1);
     }
 
+    // An image's samples live in its own stream and in its /SMask and /Mask streams, so all three
+    // are retired, and later credited as used, together.
+    private static void CollectImageStreams(PdfDocument document, PdfObject value, HashSet<int> numbers)
+    {
+        CollectSourceStreams(document, value, numbers);
+        if (Resolve(document, value) is not PdfStream image) return;
+        foreach (PdfName key in (PdfName[])[Name("SMask"), Name("Mask")])
+            if (image.Dictionary.TryGetValue(key, out PdfObject? mask) && mask is PdfIndirectReference)
+                CollectSourceStreams(document, mask, numbers);
+    }
+
     private static void VerifyRetiredStreams(PdfDocument document, HashSet<int> retired,
         HashSet<string> retiredDescriptions,
         CancellationToken cancellationToken)
@@ -104,7 +115,8 @@ public static partial class PdfContentRedaction
                     && Resolve(document, maskValue) is PdfDictionary mask
                     && mask.TryGetValue(Name("G"), out PdfObject? groupValue)) value = groupValue;
                 if (value is null || Resolve(document, value) is not PdfStream stream) continue;
-                CollectSourceStreams(document, value, used);
+                if (IsNamed(stream.Dictionary, SubtypeName, "Image")) CollectImageStreams(document, value, used);
+                else CollectSourceStreams(document, value, used);
                 if (!IsNamed(stream.Dictionary, SubtypeName, "Form")) continue;
                 if (!active.Add(stream)) throw new FormatException("Recursive form in redaction verification.");
                 try
