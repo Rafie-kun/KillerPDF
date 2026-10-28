@@ -17,6 +17,14 @@ namespace KillerPDF.Shell
 {
     public partial class MainWindow
     {
+        // A page's annotation space before a turn, for pages drawn since the last reload and for
+        // pages that were not. Called while the reload remaps, before the new rotations apply.
+        private (int Width, int Height) AnnotationSpaceBeforeTurn(int pageIndex)
+        {
+            var (visualWidth, visualHeight) = EnsureEngineDocumentSession().VisualPageSize(pageIndex, _pageRotations);
+            return PdfEngineBurn.AnnotationSpace(_renderDims, pageIndex, visualWidth, visualHeight);
+        }
+
         private void RotatePages_Click(int delta)
         {
             if (_doc is null) return;
@@ -32,16 +40,19 @@ namespace KillerPDF.Shell
                 // keepAnnotations:false cleared them all, losing committed unsaved work on the
                 // second rotation after placing it. Remap each rotated page's annotations through
                 // the turn (render dims are still the pre-turn frame here; the reload clears them)
-                // and keep everything through the reload. A page with no cached render dims keeps
-                // its annotations unmapped - recoverable beats deleted.
+                // and keep everything through the reload. A page not drawn since the last reload has
+                // no cached render dims, so it uses the same canonical annotation space the burn uses.
                 int restoreIdx = PageList.SelectedIndex;
                 SaveTempAndReload(
                     keepAnnotations: true,
                     remapAnnotations: annotations =>
                     {
                         foreach (var idx in indices)
-                            if (annotations.TryGetValue(idx, out var anns) && _renderDims.TryGetValue(idx, out var dims))
-                                Services.AnnotationRotate.Remap(anns, delta, dims.w, dims.h);
+                            if (annotations.TryGetValue(idx, out var anns))
+                            {
+                                var (w, h) = AnnotationSpaceBeforeTurn(idx);
+                                Services.AnnotationRotate.Remap(anns, delta, w, h);
+                            }
                     },
                     remapRotations: rotations =>
                         PdfEngineIntegration.RemapRotationsAfterPageTurns(

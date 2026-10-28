@@ -135,12 +135,20 @@ namespace KillerPDF.Shell
                 }
 
                 UndoEntry? documentUndo = CaptureDocumentUndo();
-                foreach (var (page, turn) in turns)
-                    if (_annotations.TryGetValue(page, out var annotations) && _renderDims.TryGetValue(page, out var dims))
-                        AnnotationRotate.Remap(annotations, turn, dims.w, dims.h);
                 int restore = PageList.SelectedIndex;
+                // The turn is applied to the reload's copy of the annotations, which is published only
+                // after the rotated file reopens, so a failed write leaves pending annotations untouched.
                 SaveTempAndReload(
                     keepAnnotations: true,
+                    remapAnnotations: annotations =>
+                    {
+                        foreach (var (page, turn) in turns)
+                            if (annotations.TryGetValue(page, out var pageAnnotations))
+                            {
+                                var (w, h) = AnnotationSpaceBeforeTurn(page);
+                                AnnotationRotate.Remap(pageAnnotations, turn, w, h);
+                            }
+                    },
                     remapRotations: rotations =>
                     {
                         foreach (var group in turns.GroupBy(pair => pair.Value))

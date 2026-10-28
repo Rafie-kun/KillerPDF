@@ -105,11 +105,24 @@ internal static class OrientationFailureSmoke
             }
             Point ZoomCycle()
             {
-                double Width() => (Marker()?.Parent as Canvas)?.ActualWidth ?? 0;
+                // Zoom is a LayoutTransform above the page canvas, so its own ActualWidth never changes.
+                // The rendered width in window coordinates is what a zoom step actually moves.
+                double Width() => Marker()?.Parent is Canvas page && page.IsVisible
+                    ? page.TransformToAncestor(owner).TransformBounds(new Rect(page.RenderSize)).Width : 0;
                 double before = Width(); Click(owner, "ZoomInBtn");
                 Wait(() => Width() > before + 1, "public zoom-in changed the annotation viewport");
                 double enlarged = Width(); Click(owner, "ZoomOutBtn");
                 Wait(() => Width() > 100 && Width() < enlarged - 1, "public zoom-out repainted the annotation viewport");
+                // A zoom only scales the existing overlay. Switching view modes rebuilds it from the
+                // pending annotation model, which is where a failed operation's damage would be.
+                var single = (RadioButton)owner.FindName("ViewSingleRadio");
+                var continuous = (RadioButton)owner.FindName("ViewContinuousRadio");
+                Border? shown = Marker();
+                single.IsChecked = true; Pump();
+                Wait(() => Marker() is Border rebuilt && !ReferenceEquals(rebuilt, shown), "single-page view rebuilt the annotation");
+                shown = Marker();
+                continuous.IsChecked = true; Pump();
+                Wait(() => Marker() is Border rebuilt && !ReferenceEquals(rebuilt, shown), "continuous view rebuilt the annotation");
                 return StablePosition();
             }
             Point beforePosition = StablePosition();

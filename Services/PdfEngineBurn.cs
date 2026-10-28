@@ -134,9 +134,7 @@ internal static class PdfEngineBurn
                 visualWidth, visualHeight, fonts);
             if (hasAnnotations)
             {
-                var (renderWidth, renderHeight) = renderDims.TryGetValue(pageIndex, out var storedDims)
-                    && storedDims.w > 0 && storedDims.h > 0
-                    ? storedDims : CanonicalRenderDimensions(visualWidth, visualHeight);
+                var (renderWidth, renderHeight) = AnnotationSpace(renderDims, pageIndex, visualWidth, visualHeight);
                 double sx = visualWidth / renderWidth;
                 double sy = visualHeight / renderHeight;
                 foreach (PageAnnotation annotation in pageAnnotations!)
@@ -192,9 +190,7 @@ internal static class PdfEngineBurn
                 ? NormalizeRotation(overrideRotation) : page.Rotation;
             double visualWidth = rotation is 90 or 270 ? page.Height : page.Width;
             double visualHeight = rotation is 90 or 270 ? page.Width : page.Height;
-            var (renderWidth, renderHeight) = renderDims.TryGetValue(pageIndex, out var storedDims)
-                && storedDims.w > 0 && storedDims.h > 0
-                ? storedDims : CanonicalRenderDimensions(visualWidth, visualHeight);
+            var (renderWidth, renderHeight) = AnnotationSpace(renderDims, pageIndex, visualWidth, visualHeight);
             foreach (CoverAnnotation cover in items.OfType<CoverAnnotation>())
             {
                 if (!edits.Contains(cover.PairId) || cover.GetColor().A < 255 || cover.Erases is { Count: > 0 })
@@ -215,7 +211,17 @@ internal static class PdfEngineBurn
         }
     }
 
-    private static (int Width, int Height) CanonicalRenderDimensions(double width, double height)
+    /// <summary>
+    /// The annotation coordinate space of one page: its recorded render size when it has been drawn,
+    /// otherwise the canonical size the viewer lays it out at. Rotation remaps and the burn both use
+    /// this, so annotations on a page that was not drawn since the last reload stay in one frame.
+    /// </summary>
+    internal static (int Width, int Height) AnnotationSpace(
+        IReadOnlyDictionary<int, (int w, int h)> renderDims, int pageIndex, double visualWidth, double visualHeight)
+        => renderDims.TryGetValue(pageIndex, out var stored) && stored.w > 0 && stored.h > 0
+            ? (stored.w, stored.h) : CanonicalRenderDimensions(visualWidth, visualHeight);
+
+    internal static (int Width, int Height) CanonicalRenderDimensions(double width, double height)
     {
         double longest = Math.Max(1, Math.Max(width, height));
         return (Math.Max(1, (int)Math.Round(2048 * width / longest)),
