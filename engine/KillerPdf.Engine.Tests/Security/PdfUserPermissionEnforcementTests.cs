@@ -49,6 +49,57 @@ public sealed class PdfUserPermissionEnforcementTests
         Assert.Equal("allowed note", Assert.Single(PdfCommentReader.Read(annotated)).Contents);
     }
 
+    // Many published forms open without a password, forbid editing, and allow filling. As in Acrobat,
+    // filling them works and keeps their encryption and permissions; ISO 32000-1 lets either the
+    // form-filling or the annotation permission allow it.
+    [Theory]
+    [InlineData(true, false, true)]
+    [InlineData(false, true, true)]
+    [InlineData(false, false, false)]
+    public void FillingAFormNeedsOnlyTheFillOrAnnotationPermission(bool fill, bool annotate, bool allowed)
+    {
+        byte[] form = PdfDocumentEncryptionWriter.EncryptWithPasswords(
+            PdfDocument.Open(new PdfDocumentBuilder().AddBlankPage(200, 300)
+                .AddTextField(0, "name", 20, 20, 160, 24, string.Empty, 11).Build()),
+            new PdfPasswordEncryptionOptions
+            {
+                UserPassword = string.Empty,
+                OwnerPassword = "owner",
+                AllowDocumentModification = false,
+                AllowFormFilling = fill,
+                AllowAnnotationModification = annotate
+            });
+        var editor = new PdfIncrementalPageEditor(PdfDocument.Open(form, string.Empty))
+            .SetTextFieldValue("name", "Filled in");
+
+        if (!allowed)
+        {
+            Assert.Contains("does not permit", Assert.Throws<InvalidOperationException>(() => editor.Build()).Message,
+                StringComparison.Ordinal);
+            return;
+        }
+        PdfDocument filled = PdfDocument.Open(editor.Build(), string.Empty);
+        Assert.True(filled.IsEncrypted);
+        Assert.False(filled.DeclaredPermissions!.AllowDocumentModification);
+        Assert.Equal("Filled in", Assert.Single(PdfFormWidgetReader.ReadPage(filled, 0)).Value);
+    }
+
+    [Fact]
+    public void FillingDoesNotLetStructuralFieldChangesThrough()
+    {
+        byte[] form = PdfDocumentEncryptionWriter.EncryptWithPasswords(
+            PdfDocument.Open(new PdfDocumentBuilder().AddBlankPage(200, 300)
+                .AddTextField(0, "name", 20, 20, 160, 24, string.Empty, 11).Build()),
+            new PdfPasswordEncryptionOptions
+            {
+                UserPassword = string.Empty, OwnerPassword = "owner",
+                AllowDocumentModification = false, AllowFormFilling = true, AllowAnnotationModification = false
+            });
+
+        Assert.Throws<InvalidOperationException>(() =>
+            new PdfIncrementalPageEditor(PdfDocument.Open(form, string.Empty)).RemoveFormField("name").Build());
+    }
+
     private static byte[] Encrypt(bool modify) =>
         PdfDocumentEncryptionWriter.EncryptWithPasswords(
             PdfDocument.Open(new PdfDocumentBuilder().AddBlankPage(200, 300).Build()),

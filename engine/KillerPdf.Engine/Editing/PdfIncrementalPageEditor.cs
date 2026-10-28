@@ -151,6 +151,8 @@ public sealed class PdfIncrementalPageEditor
     private bool _pageGeometryChanged;
     private bool _pagePresentationChanged;
     private bool _catalogPresentationChanged;
+    // Field values alone: filling a form, which the form-filling or annotation permission allows.
+    private bool _formValuesChanged;
     private PdfPageLayout? _pageLayout;
     private PdfPageMode? _pageMode;
     private PdfViewerPreferences? _viewerPreferences;
@@ -246,7 +248,7 @@ public sealed class PdfIncrementalPageEditor
         _choiceFieldValues.Remove(fieldName);
         _resetFieldValues.Remove(fieldName);
         _checkBoxValues[fieldName] = isChecked;
-        _catalogPresentationChanged = true;
+        _formValuesChanged = true;
         return this;
     }
 
@@ -264,7 +266,7 @@ public sealed class PdfIncrementalPageEditor
         _choiceFieldValues.Remove(fieldName);
         _resetFieldValues.Remove(fieldName);
         _radioButtonValues[fieldName] = selectedValue;
-        _catalogPresentationChanged = true;
+        _formValuesChanged = true;
         return this;
     }
 
@@ -284,7 +286,7 @@ public sealed class PdfIncrementalPageEditor
         _resetFieldValues.Remove(fieldName);
         _textFieldValues[fieldName] = new PendingTextFieldValue(
             value, embeddedFont, fontSize, false, null, null);
-        _catalogPresentationChanged = true;
+        _formValuesChanged = true;
         return this;
     }
 
@@ -329,7 +331,7 @@ public sealed class PdfIncrementalPageEditor
         _resetFieldValues.Remove(fieldName);
         _choiceFieldValues[fieldName] = new PendingChoiceFieldValue(
             values, embeddedFont, AllowEmptySingle: false);
-        _catalogPresentationChanged = true;
+        _formValuesChanged = true;
         return this;
     }
 
@@ -345,7 +347,7 @@ public sealed class PdfIncrementalPageEditor
         _choiceFieldValues.Remove(fieldName);
         _textFieldAppearanceChanges.Remove(fieldName);
         _resetFieldValues[fieldName] = embeddedFont;
-        _catalogPresentationChanged = true;
+        _formValuesChanged = true;
         return this;
     }
 
@@ -2171,7 +2173,7 @@ public sealed class PdfIncrementalPageEditor
     {
         FailedImportSource = null;
         if (!_orderChanged && !_rotationChanged && !_pageGeometryChanged
-            && !_pagePresentationChanged && !_catalogPresentationChanged)
+            && !_pagePresentationChanged && !_catalogPresentationChanged && !_formValuesChanged)
             throw new InvalidOperationException("The incremental page update is empty.");
         EnforcePasswordPermissions();
         if (PdfSignatureReader.ReadCertificationPermission(_document).HasValue)
@@ -4474,6 +4476,10 @@ public sealed class PdfIncrementalPageEditor
         if (_catalogPresentationChanged && !permissions.AllowDocumentModification)
             throw new InvalidOperationException(
                 "The PDF user password does not permit catalog-presentation modification.");
+        // ISO 32000-1 Table 22: bit 6 (annotations) permits filling, and bit 9 permits it on its own.
+        if (_formValuesChanged && !permissions.AllowFormFilling && !permissions.AllowAnnotationModification)
+            throw new InvalidOperationException(
+                "The PDF user password does not permit filling in form fields.");
     }
 
     private static void EnforceSourceCopyPermission(PdfDocument source)
