@@ -1323,9 +1323,21 @@ namespace KillerPDF.Shell
             SetStatus(string.Format(Loc("Str_St_Saved"), System.IO.Path.GetFileName(destination)));
         }
 
-        private void SaveInPlace()
+        private void SaveInPlace() => SaveInPlace(otherPaneConfirmed: false);
+
+        // The same file can be open in both panes as two independent copies, so every save path
+        // (Ctrl+S, the menu, tab close, quit and the tools that save first) warns before this copy
+        // overwrites the other pane's unsaved edits. A canceled warning leaves this copy dirty,
+        // which every caller already reads as a canceled save.
+        private void SaveInPlace(bool otherPaneConfirmed)
         {
             if (_doc is null) { KillerDialog.Show(this, Loc("Str_Msg_OpenFirst")); return; }
+            if (!otherPaneConfirmed && !string.IsNullOrEmpty(_originalFile) && OtherPaneHasDirtyCopyOf(_originalFile)
+                && KillerDialog.Show(this,
+                    string.Format(Loc("Str_Dlg_SaveOtherPaneDirty"), System.IO.Path.GetFileName(_originalFile)),
+                    Loc("Str_Dlg_AppTitle"), MessageBoxButton.OKCancel, MessageBoxImage.Warning,
+                    defaultResult: MessageBoxResult.Cancel) != MessageBoxResult.OK)
+                return;
             if (CanSaveRestrictedFormFill() && !string.IsNullOrEmpty(_originalFile))
             {
                 if (Services.FileRevision.ConflictsWith(_loadedRevision, _originalFile!)
@@ -1460,7 +1472,7 @@ namespace KillerPDF.Shell
             }
             var choice = KillerDialog.Show(this, string.Format(Loc("Str_Dlg_OverwriteMsg"), name), Loc("Str_Lbl_Save"),
                                            MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
-            if (choice == MessageBoxResult.Yes)      SaveInPlace();
+            if (choice == MessageBoxResult.Yes)      SaveInPlace(otherPaneConfirmed: true);
             else if (choice == MessageBoxResult.No)  SaveAs_Click(sender, e);
             // Cancel or closed: do nothing.
         }
