@@ -481,8 +481,8 @@ public sealed partial class PdfOcrReview
         return new PdfOcrReview(changed);
     }
 
-    private static string Csv(string value) =>
-        value.IndexOfAny([',', '"', '\r', '\n']) < 0 ? value : $"\"{value.Replace("\"", "\"\"")}\"";
+    // Recognized text comes from the scan, so formula-looking words stay text.
+    private static string Csv(string value) => PdfCsv.Field(value, alwaysQuote: false);
 
     private sealed record PdfOcrReviewFile(int Version, PdfOcrWord[] Words);
 

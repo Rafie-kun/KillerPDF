@@ -62,7 +62,7 @@ public static class PdfTableExport
                     if (column > 0) writer.Write(',');
                     string text = table.GetCell(row, column).Text;
                     writer.Write('"');
-                    if (StartsFormula(text)) writer.Write('\'');
+                    if (PdfCsv.StartsFormula(text)) writer.Write('\'');
                     writer.Write(text.Replace("\"", "\"\"", StringComparison.Ordinal));
                     writer.Write('"');
                 }
@@ -70,17 +70,6 @@ public static class PdfTableExport
             }
         cancellationToken.ThrowIfCancellationRequested();
         return output.ToArray();
-    }
-
-    private static bool StartsFormula(string text)
-    {
-        foreach (Rune rune in text.Normalize(NormalizationForm.FormKC).EnumerateRunes())
-        {
-            UnicodeCategory category = Rune.GetUnicodeCategory(rune);
-            if (Rune.IsWhiteSpace(rune) || category is UnicodeCategory.Control or UnicodeCategory.Format) continue;
-            return rune.Value is '=' or '+' or '-' or '@';
-        }
-        return false;
     }
 
     private static byte[] Xlsx(PdfExtractedTable table, CancellationToken cancellationToken)

@@ -291,10 +291,7 @@ namespace KillerPDF.Features
             return rows;
         }
 
-        private static string Csv(string s)
-        {
-            if (s.IndexOfAny([',', '"', '\r', '\n']) < 0) return s;
-            return "\"" + s.Replace("\"", "\"\"") + "\"";
-        }
+        // File names and renderer details can carry text a spreadsheet would run as a formula.
+        private static string Csv(string s) => KillerPdf.Engine.Documents.PdfCsv.Field(s, alwaysQuote: false);
     }
 }

@@ -490,7 +490,8 @@ public static partial class PdfMeasurementReport
         return values;
     }
 
-    private static string Csv(string value) => '"' + value.Replace("\"", "\"\"") + '"';
+    // Comments and document names come from the PDF and the file system, so formulas stay text.
+    private static string Csv(string value) => PdfCsv.Field(value, alwaysQuote: true);
 
     private static string Quoted(string value) =>
         $"\"{value.Replace("\r", " ", StringComparison.Ordinal).Replace("\n", " ", StringComparison.Ordinal)}\"";

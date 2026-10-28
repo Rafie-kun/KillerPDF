@@ -1,5 +1,4 @@
 using System;
-using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -42,8 +41,6 @@ namespace KillerPDF.Features
     // All static, never touches the window - extracted from MainWindow 2026-07-31.
     internal static partial class BatchRunner
     {
-        private static readonly SearchValues<char> BatchCsvSpecialCharacters =
-            SearchValues.Create([',', '"', '\r', '\n']);
         [LibraryImport("kernel32.dll", EntryPoint = "AttachConsole", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static partial bool BatchAttachConsole(int dwProcessId);
@@ -253,13 +250,12 @@ namespace KillerPDF.Features
 
         private static string BatchCsvField(string s)
         {
-            // CSV quoting preserves syntax but does not prevent spreadsheet formula evaluation.
-            var trimmed = s.AsSpan().TrimStart();
-            if ((!trimmed.IsEmpty && trimmed[0] is '=' or '+' or '-' or '@') ||
-                (!s.AsSpan().IsEmpty && s[0] is '\t' or '\r' or '\n'))
+            // CSV quoting preserves syntax but does not prevent spreadsheet formula evaluation. The
+            // shared guard covers fullwidth signs and invisible prefixes; a leading tab or line break
+            // is neutralized here as well.
+            if (!KillerPdf.Engine.Documents.PdfCsv.StartsFormula(s) && !s.AsSpan().IsEmpty && s[0] is '\t' or '\r' or '\n')
                 s = "'" + s;
-            if (!s.AsSpan().ContainsAny(BatchCsvSpecialCharacters)) return s;
-            return "\"" + s.Replace("\"", "\"\"") + "\"";
+            return KillerPdf.Engine.Documents.PdfCsv.Field(s, alwaysQuote: false);
         }
     }
 }
