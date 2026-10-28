@@ -1,6 +1,7 @@
 using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using KillerPdf.Engine.Documents;
 using KillerPdf.Engine.Fonts;
@@ -114,6 +115,27 @@ public sealed class PdfStructuredExportTests
         Assert.Contains("data-rejected-link=", html, StringComparison.Ordinal);
         Assert.Contains(">Click me</span>", html, StringComparison.Ordinal);
         Assert.Contains("href=\"mailto:help@example.test\">Mail</a>", html, StringComparison.Ordinal);
+    }
+
+    // A font name comes from the PDF. Inside a style attribute an encoded quote decodes back to a quote
+    // before CSS reads it, so a hostile name could close the font-family string and add declarations.
+    [Fact]
+    public void HtmlKeepsAHostileFontNameInsideTheFontFamily()
+    {
+        string hostile = "ABCDEF+Evil#22#3Bbackground#3Aurl#28#2F#2Fexample.test#2Fp#29#3Bposition#3Afixed";
+        PdfDocument document = PdfDocument.Open(DocumentBytes("BT /F1 12 Tf 20 300 Td (Hello) Tj ET", baseFont: hostile));
+
+        string html = PdfStructuredExport.ToHtml(document);
+
+        Assert.Contains(">Hello</span>", html, StringComparison.Ordinal);
+        Assert.DoesNotContain("background:", html, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("url(", html, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("position:fixed", html, StringComparison.OrdinalIgnoreCase);
+        // The family name is one CSS string: nothing in it can end the quoted value.
+        Match family = Regex.Match(html, "font-family:&quot;([^&]*)&quot;;font-size:");
+        Assert.True(family.Success);
+        Assert.StartsWith("ABCDEF+Evil", family.Groups[1].Value, StringComparison.Ordinal);
+        Assert.DoesNotContain(";", family.Groups[1].Value, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -410,13 +432,13 @@ public sealed class PdfStructuredExportTests
     private static PdfDocument Document(string content)
         => PdfDocument.Open(DocumentBytes(content));
 
-    private static byte[] DocumentBytes(string content, string pageEntries = "")
+    private static byte[] DocumentBytes(string content, string pageEntries = "", string baseFont = "Helvetica")
     {
         string stream = $"<< /Length {Encoding.Latin1.GetByteCount(content)} >>\nstream\n{content}\nendstream";
         string[] objects = ["<< /Type /Catalog /Pages 2 0 R >>",
             "<< /Type /Pages /Kids [3 0 R] /Count 1 /MediaBox [0 0 300 400] /Resources << /Font << /F1 4 0 R >> >> >>",
             $"<< /Type /Page /Parent 2 0 R /Contents 5 0 R {pageEntries}>>",
-            "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>", stream];
+            $"<< /Type /Font /Subtype /Type1 /BaseFont /{baseFont} >>", stream];
         var pdf = new StringBuilder("%PDF-1.7\n");
         var offsets = new List<int>();
         for (int index = 0; index < objects.Length; index++)

@@ -537,8 +537,8 @@ public static partial class PdfStructuredExport
         else
             foreach (PdfExtractedTextRun run in line.Runs)
             {
-                string font = fontSubstitutions?.Resolve(run.FontName, "sans-serif")
-                    ?? (string.IsNullOrWhiteSpace(run.FontName) ? "sans-serif" : run.FontName);
+                string font = SafeCssFontName(fontSubstitutions?.Resolve(run.FontName, "sans-serif")
+                    ?? (string.IsNullOrWhiteSpace(run.FontName) ? "sans-serif" : run.FontName));
                 double size = double.IsFinite(run.PointSize) && run.PointSize > 0
                     ? run.PointSize : 12;
                 output.Append("<span style=\"font-family:&quot;")
@@ -550,6 +550,17 @@ public static partial class PdfStructuredExport
                     .Append("</span>");
             }
         output.Append("</p>");
+    }
+
+    // A font name inside a style attribute: an encoded quote decodes back to a quote before CSS reads
+    // it, so only the characters real font names use survive, and nothing can end the CSS string.
+    private static string SafeCssFontName(string font)
+    {
+        var safe = new StringBuilder(font.Length);
+        foreach (char character in font)
+            if (char.IsAsciiLetterOrDigit(character) || character is ' ' or '-' or '_' or '.' or '+')
+                safe.Append(character);
+        return safe.Length == 0 ? "sans-serif" : safe.ToString();
     }
 
     /// <summary>Exports selected pages as editable Markdown with page headings.</summary>
