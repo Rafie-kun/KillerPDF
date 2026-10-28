@@ -3275,7 +3275,7 @@ public sealed class PdfIncrementalPageEditorTests
                     new(Name("BaseFont"), Name("Helvetica")),
                     new(Name("FirstChar"), new PdfInteger(32)),
                     new(Name("LastChar"), new PdfInteger(33)),
-                    new(Name("Widths"), new PdfArray([new PdfInteger(500)]))
+                    new(Name("Widths"), new PdfArray([new PdfInteger(500), Name("Wide")]))
                 ]))
             ]))
         ]);
@@ -3293,6 +3293,70 @@ public sealed class PdfIncrementalPageEditorTests
 
         Assert.Contains("has inconsistent /FirstChar, /LastChar, or /Widths values",
             error.Message, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("short-widths")]
+    [InlineData("long-widths")]
+    [InlineData("descriptor-without-optional-metrics")]
+    [InlineData("dangling-tounicode")]
+    public void Build_AcceptsCommonImportedFontDefectsThatRenderersTolerate(string defect)
+    {
+        // Producers routinely ship these, and every viewer, KillerPDF's included, still shows the page.
+        PdfDocument source = PdfDocument.Open(new PdfDocumentBuilder()
+            .AddBlankPage(200, 300)
+            .Build());
+        (_, PdfIndirectReference[] references, PdfDictionary[] pages) = FlatPages(source);
+        var font = new List<KeyValuePair<PdfName, PdfObject>>
+        {
+            new(Name("Type"), Name("Font")),
+            new(Name("Subtype"), Name("Type1")),
+            new(Name("BaseFont"), Name(defect == "descriptor-without-optional-metrics" ? "Example" : "Helvetica"))
+        };
+        switch (defect)
+        {
+            case "short-widths":
+            case "long-widths":
+                font.Add(new(Name("FirstChar"), new PdfInteger(32)));
+                font.Add(new(Name("LastChar"), new PdfInteger(34)));
+                font.Add(new(Name("Widths"), new PdfArray(defect == "short-widths"
+                    ? [new PdfInteger(278)]
+                    : [new PdfInteger(278), new PdfInteger(278), new PdfInteger(355), new PdfInteger(556)])));
+                break;
+            case "descriptor-without-optional-metrics":
+                // Symbol and dingbat fonts have no Latin capitals, so /CapHeight is legitimately absent.
+                font.Add(new(Name("FontDescriptor"), new PdfDictionary([
+                    new(Name("Type"), Name("FontDescriptor")),
+                    new(Name("FontName"), Name("Example")),
+                    new(Name("Flags"), new PdfInteger(4)),
+                    new(Name("FontBBox"), new PdfArray([new PdfInteger(0), new PdfInteger(-200),
+                        new PdfInteger(1000), new PdfInteger(800)])),
+                    new(Name("ItalicAngle"), new PdfInteger(0)),
+                    new(Name("Ascent"), new PdfInteger(800))
+                ])));
+                break;
+            case "dangling-tounicode":
+                font.Add(new(Name("ToUnicode"), new PdfIndirectReference(9999, 0)));
+                break;
+        }
+        var resources = new PdfDictionary([
+            new(Name("Font"), new PdfDictionary([new(Name("F1"), new PdfDictionary(font))]))
+        ]);
+        PdfDictionary page = new(pages[0]
+            .Where(entry => !entry.Key.Equals(Name("Resources")))
+            .Append(new KeyValuePair<PdfName, PdfObject>(Name("Resources"), resources)));
+        source = PdfDocument.Open(new PdfIncrementalUpdateBuilder(source)
+            .ReplaceObject(references[0].ObjectNumber, page)
+            .Build());
+
+        PdfDocument merged = PdfDocument.Open(
+            new PdfIncrementalPageEditor(PdfDocument.Open(new PdfDocumentBuilder().Build()))
+                .AddImportedPage(source, 0)
+                .Build());
+
+        Assert.Single(PdfPageTree.Read(merged).Pages);
+        new KillerPdf.Engine.Rendering.PdfPageRenderer(merged)
+            .Render(0, new KillerPdf.Engine.Rendering.PdfRenderOptions(100, 150));
     }
 
     [Fact]
@@ -4521,9 +4585,23 @@ public sealed class PdfIncrementalPageEditorTests
         Assert.Contains("page /Metadata value has an invalid /Type value",
             metadataError.Message, StringComparison.Ordinal);
 
+        // ISO 32000-1 12.3.3 does not require /Subtype on a thumbnail, and real files omit it (#423).
+        PdfDocument untypedThumbnail = WithStream("Thumb", new PdfStream(
+            new PdfDictionary([
+                new(Name("Type"), Name("XObject")),
+                new(Name("Width"), new PdfInteger(1)),
+                new(Name("Height"), new PdfInteger(1)),
+                new(Name("ColorSpace"), Name("DeviceGray")),
+                new(Name("BitsPerComponent"), new PdfInteger(8))
+            ]), [0]));
+        Assert.Single(PdfPageTree.Read(PdfDocument.Open(new PdfIncrementalPageEditor(empty)
+            .AddImportedPage(untypedThumbnail, 0)
+            .Build())).Pages);
+
         PdfDocument invalidThumbnail = WithStream("Thumb", new PdfStream(
             new PdfDictionary([
                 new(Name("Type"), Name("XObject")),
+                new(Name("Subtype"), Name("Form")),
                 new(Name("Width"), new PdfInteger(10)),
                 new(Name("Height"), new PdfInteger(10))
             ]), []));

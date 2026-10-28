@@ -14039,8 +14039,10 @@ public sealed class PdfIncrementalPageEditor
         if (font.TryGetValue(Name("Encoding"), out encoding)
             && Resolve(encoding) is PdfDictionary encodingDictionary)
             ValidateFontEncoding(encodingDictionary);
+        // /ToUnicode only helps text extraction. A reference to a missing object reads as null and
+        // copies as null; any other non-stream value is still refused.
         if (font.TryGetValue(Name("ToUnicode"), out PdfObject? toUnicode)
-            && Resolve(toUnicode) is not PdfStream)
+            && Resolve(toUnicode) is not (PdfStream or PdfNull))
             throw new InvalidOperationException(
                 $"{description} /ToUnicode value is not a stream or resolves to null.");
         if (font.TryGetValue(Name("FontDescriptor"), out PdfObject? descriptorValue))
@@ -14147,8 +14149,9 @@ public sealed class PdfIncrementalPageEditor
                 || first.Value is < 0 or > 255
                 || !hasLast || Resolve(lastValue!) is not PdfInteger last
                 || last.Value < first.Value || last.Value > 255
+                // A /Widths array shorter or longer than the code range is a common producer defect
+                // that readers absorb with /MissingWidth, so only its entries are checked.
                 || !hasWidths || Resolve(widthsValue!) is not PdfArray widths
-                || widths.Count != last.Value - first.Value + 1
                 || widths.Any(item => !TryFontNumber(Resolve(item), out double width)
                     || !double.IsFinite(width)))
                 throw new InvalidOperationException(
@@ -14268,11 +14271,12 @@ public sealed class PdfIncrementalPageEditor
                     || !double.IsFinite(coordinate))))
                 throw new InvalidOperationException(
                     $"{descriptorDescription} has no four-number /FontBBox array.");
+            // Symbol, dingbat and barcode fonts omit /CapHeight, which Table 122 requires only for
+            // Latin text, and producers commonly omit /Descent or /StemV. A present value must be finite.
             foreach (string key in new[]
                 { "ItalicAngle", "Ascent", "Descent", "CapHeight", "StemV" })
                 if (descriptor.TryGetValue(Name(key), out PdfObject? metric)
-                    ? !TryFontNumber(Resolve(metric), out double number) || !double.IsFinite(number)
-                    : subtype != "Type3" || key == "ItalicAngle")
+                    && (!TryFontNumber(Resolve(metric), out double number) || !double.IsFinite(number)))
                     throw new InvalidOperationException(
                         $"{descriptorDescription} has no finite /{key} number.");
             foreach (string key in new[]
@@ -17199,11 +17203,17 @@ public sealed class PdfIncrementalPageEditor
         PdfDictionary dictionary = stream.Dictionary;
         PdfObject Resolve(PdfObject item) => ResolveCatalogValue(
             document, item, description);
-        if (!dictionary.TryGetValue(Name("Subtype"), out PdfObject? subtype)
-            || Resolve(subtype) is not PdfName subtypeName
-            || subtypeName.ValueAsLatin1() != "Image")
+        // ISO 32000-1 12.3.3 describes a thumbnail as image samples and does not require /Subtype,
+        // so only a /Subtype that names something other than an image is refused.
+        if (dictionary.TryGetValue(Name("Subtype"), out PdfObject? subtype)
+            && (Resolve(subtype) is not PdfName subtypeName
+                || subtypeName.ValueAsLatin1() != "Image"))
             throw new InvalidOperationException(
                 $"{description} has no valid /Subtype /Image value.");
+        // An untyped thumbnail is checked as the image it is; the copy keeps the source bytes unchanged.
+        if (subtype is null)
+            stream = new PdfStream(new PdfDictionary(dictionary.Append(
+                new KeyValuePair<PdfName, PdfObject>(Name("Subtype"), Name("Image")))), stream.EncodedData.Span);
         ValidatePageXObject(document, stream, description);
     }
 
