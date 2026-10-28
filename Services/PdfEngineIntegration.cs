@@ -125,6 +125,40 @@ internal static class PdfEngineIntegration
         catch (Exception error) when (error is not OutOfMemoryException) { return document; }
     }
 
+    /// <summary>
+    /// Opens a PDF whose pages are copied into another document. The viewer reads files through
+    /// compatibility recovery, so a page source that only the strict parser refuses is retried the
+    /// same way. No password is supplied, so an encrypted source keeps its strict-open permissions.
+    /// The source bytes are never written back.
+    /// </summary>
+    internal static PdfDocument OpenPageSource(ReadOnlyMemory<byte> source)
+    {
+        try { return PdfDocument.Open(source); }
+        catch (Exception strict) when (IsImportFailure(strict))
+        {
+            try { return PdfDocument.OpenWithCompatibilityRecovery(source); }
+            catch (Exception recovery) when (IsImportFailure(recovery))
+            {
+                System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(strict).Throw();
+                throw;
+            }
+        }
+    }
+
+    // An incremental merge appends to its first document's bytes, so that document must open
+    // strictly. When it cannot, the merge starts from an empty document and copies it in instead.
+    private static (PdfIncrementalPageEditor Editor, PdfDocument? CopiedFirst) OpenMergeTarget(byte[] first)
+    {
+        try { return (new PdfIncrementalPageEditor(PdfDocument.Open(first)), null); }
+        catch (Exception strict) when (IsImportFailure(strict))
+        {
+            PdfDocument copied = OpenPageSource(first);
+            var editor = new PdfIncrementalPageEditor(PdfDocument.Open(new PdfDocumentBuilder().Build()))
+                .AddImportedDocument(copied);
+            return (editor, copied);
+        }
+    }
+
     /// <summary>True when the engine can read the file without asking for a password.</summary>
     internal static bool CanReadWithoutPassword(string path)
     {
@@ -1138,11 +1172,14 @@ internal static class PdfEngineIntegration
         if (sources.Count == 0)
             throw new ArgumentException("At least one PDF document is required.", nameof(sources));
 
-        PdfDocument document = PdfDocument.Open(sources[0]);
-        if (sources.Count == 1) return sources[0].ToArray();
-        var editor = new PdfIncrementalPageEditor(document);
+        if (sources.Count == 1)
+        {
+            OpenPageSource(sources[0]);
+            return sources[0].ToArray();
+        }
+        PdfIncrementalPageEditor editor = OpenMergeTarget(sources[0]).Editor;
         for (int index = 1; index < sources.Count; index++)
-            editor.AddImportedDocument(PdfDocument.Open(sources[index]));
+            editor.AddImportedDocument(OpenPageSource(sources[index]));
         return editor.Build();
     }
 
@@ -1153,7 +1190,7 @@ internal static class PdfEngineIntegration
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(sourcePath);
         ArgumentException.ThrowIfNullOrWhiteSpace(destinationPath);
-        PdfDocument source = PdfDocument.Open(File.ReadAllBytes(sourcePath));
+        PdfDocument source = OpenPageSource(File.ReadAllBytes(sourcePath));
         PdfDocument empty = PdfDocument.Open(new PdfDocumentBuilder().Build());
         var editor = new PdfIncrementalPageEditor(empty).AddImportedDocument(source);
         if (!preserveBookmarks)
@@ -1481,18 +1518,20 @@ internal static class PdfEngineIntegration
         bool firstIsPdf = string.Equals(Path.GetExtension(paths[0]), ".pdf",
             StringComparison.OrdinalIgnoreCase);
         PdfIncrementalPageEditor editor;
+        var sourcePaths = new Dictionary<PdfDocument, string>();
         try
         {
-            PdfDocument target = firstIsPdf
-                ? PdfDocument.Open(File.ReadAllBytes(paths[0]))
-                : PdfDocument.Open(new PdfDocumentBuilder().Build());
-            editor = new PdfIncrementalPageEditor(target);
+            if (firstIsPdf)
+            {
+                (editor, PdfDocument? copiedFirst) = OpenMergeTarget(File.ReadAllBytes(paths[0]));
+                if (copiedFirst is not null) sourcePaths.Add(copiedFirst, paths[0]);
+            }
+            else editor = new PdfIncrementalPageEditor(PdfDocument.Open(new PdfDocumentBuilder().Build()));
         }
         catch (Exception ex) when (firstIsPdf && IsImportFailure(ex))
         {
             throw WithImportSource(paths[0], ex);
         }
-        var sourcePaths = new Dictionary<PdfDocument, string>();
         foreach (string path in paths.Skip(firstIsPdf ? 1 : 0))
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(path);
@@ -1501,7 +1540,7 @@ internal static class PdfEngineIntegration
                 if (string.Equals(Path.GetExtension(path), ".pdf",
                         StringComparison.OrdinalIgnoreCase))
                 {
-                    PdfDocument source = PdfDocument.Open(File.ReadAllBytes(path));
+                    PdfDocument source = OpenPageSource(File.ReadAllBytes(path));
                     sourcePaths.Add(source, path);
                     editor.AddImportedDocument(source);
                     continue;
@@ -1558,7 +1597,7 @@ internal static class PdfEngineIntegration
                             StringComparison.OrdinalIgnoreCase))
                     {
                         if (!opened.TryGetValue(path, out PdfDocument? document))
-                            opened[path] = document = PdfDocument.Open(File.ReadAllBytes(path));
+                            opened[path] = document = OpenPageSource(File.ReadAllBytes(path));
                         editor.AddImportedDocument(document);
                         sourcePaths[document] = path;
                     }
@@ -1847,7 +1886,7 @@ internal static class PdfEngineIntegration
         if (pageIndices.Count == 0)
             throw new ArgumentException("At least one page is required.", nameof(pageIndices));
 
-        PdfDocument sourceDocument = PdfDocument.Open(source);
+        PdfDocument sourceDocument = OpenPageSource(source);
         PdfDocument empty = PdfDocument.Open(new PdfDocumentBuilder().Build());
         var editor = new PdfIncrementalPageEditor(empty);
         foreach (int pageIndex in pageIndices)
@@ -1862,7 +1901,7 @@ internal static class PdfEngineIntegration
     internal static IReadOnlyList<byte[]> SplitPages(byte[] source)
     {
         ArgumentNullException.ThrowIfNull(source);
-        PdfDocument sourceDocument = PdfDocument.Open(source);
+        PdfDocument sourceDocument = OpenPageSource(source);
         int pageCount = new PdfIncrementalPageEditor(sourceDocument).PageCount;
         var results = new byte[pageCount][];
         for (int pageIndex = 0; pageIndex < pageCount; pageIndex++)
@@ -2397,7 +2436,7 @@ internal static class PdfEngineIntegration
                 ArgumentException.ThrowIfNullOrWhiteSpace(pair.Value);
                 if (pair.Key < 0 || pair.Key >= editor.PageCount)
                     throw new ArgumentOutOfRangeException(nameof(replacements));
-                PdfDocument replacement = PdfDocument.Open(File.ReadAllBytes(pair.Value));
+                PdfDocument replacement = OpenPageSource(File.ReadAllBytes(pair.Value));
                 if (new PdfIncrementalPageEditor(replacement).PageCount < 1)
                     throw new ArgumentException("A replacement document must contain a page.",
                         nameof(replacements));
@@ -2594,7 +2633,7 @@ internal static class PdfEngineIntegration
             string sourcePath = import.OriginalPath ?? import.Path;
             try
             {
-                PdfDocument source = PdfDocument.Open(File.ReadAllBytes(import.Path));
+                PdfDocument source = OpenPageSource(File.ReadAllBytes(import.Path));
                 sourcePaths.Add(source, sourcePath);
                 int count = new PdfIncrementalPageEditor(source).PageCount;
                 if (import.PageRotations.Count != count)
