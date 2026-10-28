@@ -296,7 +296,7 @@ namespace KillerPDF.Features
                 foreach (string term in redaction.Terms)
                 {
                     token.ThrowIfCancellationRequested();
-                    foreach (var (page, rects) in SearchService.FindExactMatches(path, term))
+                    foreach (var (page, rects) in SearchService.FindRedactionTermAreas(path, term))
                         foreach (var (left, bottom, right, top) in rects)
                             regions.Add(new PdfRedactionRegion(page, new PdfContentBounds(left, bottom, right, top)));
                 }

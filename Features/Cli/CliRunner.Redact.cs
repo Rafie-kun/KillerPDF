@@ -114,17 +114,24 @@ namespace KillerPDF.Features
                 using (PdfContentDocument content = PdfContentDocument.Open(source))
                     pages = [.. Enumerable.Range(1, content.NumberOfPages).Select(content.GetPage)];
                 var found = new Dictionary<string, PdfRedactionMatch>();
+                // Form field values and annotation text are searched too; they are not page content.
+                PdfDocument annotations = PdfEngineIntegration.OpenForReading(File.ReadAllBytes(source));
                 try
                 {
                     foreach (var (kind, query) in searches)
-                        foreach (PdfRedactionMatch match in PdfRedactionSearch.Find(pages, new PdfRedactionSearchOptions
+                    {
+                        var search = new PdfRedactionSearchOptions
                         {
                             Kind = kind,
                             Query = query,
                             MatchCase = options.ContainsKey("--match-case"),
                             Timeout = TimeSpan.FromSeconds(2)
-                        }).Matches)
+                        };
+                        foreach (PdfRedactionMatch match in PdfRedactionSearch.Find(pages, search).Matches)
                             found.TryAdd(match.Id, match);
+                        foreach (PdfRedactionMatch match in PdfRedactionSearch.FindInAnnotations(annotations, search).Matches)
+                            found.TryAdd(match.Id, match);
+                    }
                 }
                 catch (Exception ex) when (ex is ArgumentException or System.Text.RegularExpressions.RegexMatchTimeoutException)
                 {

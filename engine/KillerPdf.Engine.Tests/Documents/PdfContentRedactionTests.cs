@@ -854,6 +854,48 @@ public sealed class PdfContentRedactionTests
     }
 
     [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void SearchFindsAndRemovesTextShownThroughFieldsAndAnnotations(bool cropped)
+    {
+        // Field values and FreeText notes are drawn from their own appearances, not the page content,
+        // so a search of page words alone cannot see them.
+        string crop = cropped ? "/CropBox [50 40 562 752]" : string.Empty;
+        var objects = new List<string>
+        {
+            "<< /Type /Catalog /Pages 2 0 R /AcroForm << /Fields [6 0 R] >> >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            $"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] {crop} /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R /Annots [6 0 R 7 0 R 8 0 R] >>",
+            Helvetica,
+            Stream("BT /F1 12 Tf 72 700 Td (Plain visible text) Tj ET"),
+            "<< /Type /Annot /Subtype /Widget /FT /Tx /T (ssn) /V (123-45-6789) /Rect [100 600 300 620] /P 3 0 R /F 4 >>",
+            "<< /Type /Annot /Subtype /FreeText /Contents (Call SECRETNOTE today) /DA (/F1 10 Tf 0 g) /Rect [100 500 300 540] /F 4 >>",
+            "<< /Type /Annot /Subtype /Text /Contents (Unrelated note) /Rect [400 100 420 120] >>"
+        };
+        PdfDocument document = PdfDocument.Open(CreatePdf(objects));
+        PdfPageContent page = new PdfPageContentReader(document).Read(0);
+        var ssn = new PdfRedactionSearchOptions { Kind = PdfRedactionSearchKind.SocialSecurityNumber };
+        var note = new PdfRedactionSearchOptions { Kind = PdfRedactionSearchKind.ExactText, Query = "SECRETNOTE" };
+        Assert.Empty(PdfRedactionSearch.Find([page], ssn).Matches);
+        Assert.Empty(PdfRedactionSearch.Find([page], note).Matches);
+
+        PdfRedactionMatch field = Assert.Single(PdfRedactionSearch.FindInAnnotations(document, ssn).Matches);
+        PdfRedactionMatch freeText = Assert.Single(PdfRedactionSearch.FindInAnnotations(document, note).Matches);
+        Assert.Equal(PdfRedactionTargetKind.FormField, field.TargetKind);
+        Assert.Equal(PdfRedactionTargetKind.Comment, freeText.TargetKind);
+        PdfRedactionRegion[] regions = [new(field.PageIndex, field.Bounds), new(freeText.PageIndex, freeText.Bounds)];
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, regions,
+            new PdfContentRedactionOptions { ProhibitedText = ["123-45-6789", "SECRETNOTE"] });
+
+        Assert.True(result.Verification.Succeeded);
+        PdfDocument output = PdfDocument.Open(result.Document);
+        Assert.Equal("Unrelated note", Assert.Single(PdfCommentReader.Read(output)).Contents);
+        Assert.Empty(PdfFormWidgetReader.ReadPage(output, 0));
+        Assert.Contains("visible", Letters(output, 0));
+    }
+
+    [Theory]
     [InlineData("")]
     [InlineData("/Rect [70 690 160]")]
     [InlineData("/Rect [70 690 (wide) 715]")]

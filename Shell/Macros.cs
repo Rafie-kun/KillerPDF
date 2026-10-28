@@ -252,7 +252,7 @@ public partial class MainWindow
             foreach (string term in _macroRedaction.Terms)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                foreach (var (page, rects) in SearchService.FindExactMatches(path, term))
+                foreach (var (page, rects) in SearchService.FindRedactionTermAreas(path, term))
                     foreach (var (left, bottom, right, top) in rects)
                         regions.Add(new PdfRedactionRegion(page, new PdfContentBounds(left, bottom, right, top)));
             }

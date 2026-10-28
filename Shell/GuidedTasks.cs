@@ -59,7 +59,7 @@ public partial class MainWindow
                             {
                                 using PdfContentDocument content = PdfContentDocument.Open(snapshot);
                                 return [.. Enumerable.Range(1, content.NumberOfPages).Select(content.GetPage)];
-                            });
+                            }, () => PdfEngineIntegration.OpenForReading(File.ReadAllBytes(snapshot)));
                             if (find.ShowDialog() != true) throw new OperationCanceledException();
                             Current(token);
                             foreach (PdfRedactionMatch match in find.Checked)

@@ -417,7 +417,7 @@ namespace KillerPDF.Controls
             {
                 using PdfContentDocument document = PdfContentDocument.Open(path);
                 return [.. Enumerable.Range(1, document.NumberOfPages).Select(document.GetPage)];
-            });
+            }, () => PdfEngineIntegration.OpenForReading(System.IO.File.ReadAllBytes(path)));
             if (dialog.ShowDialog() != true) return;
             int added = 0;
             foreach (PdfRedactionMatch match in dialog.Checked)

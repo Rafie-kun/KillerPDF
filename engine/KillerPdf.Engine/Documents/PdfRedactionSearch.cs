@@ -52,7 +52,9 @@ public enum PdfRedactionTargetKind
     /// <summary>A review annotation containing comment text.</summary>
     Comment,
     /// <summary>A document-level embedded file.</summary>
-    Attachment
+    Attachment,
+    /// <summary>A form field widget whose value contains the searched text.</summary>
+    FormField
 }
 
 /// <summary>A rectangular page region proposed for redaction.</summary>
@@ -335,6 +337,107 @@ public static class PdfRedactionSearch
         PdfRedactionSearchOptions options, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(pages);
+        Regex expression = Expression(options);
+        var results = new List<PdfRedactionMatch>();
+        int pageIndex = 0;
+        foreach (PdfPageContent page in pages)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var spans = new List<(PdfExtractedWord Word, int Start, int End)>();
+            string text = string.Join(' ', page.Words.Select(word => word.Text));
+            int offset = 0;
+            foreach (PdfExtractedWord word in page.Words)
+            {
+                spans.Add((word, offset, offset + word.Text.Length));
+                offset += word.Text.Length + 1;
+            }
+            foreach (Match match in expression.Matches(text))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                if (!Accepted(options.Kind, match.Value)) continue;
+                var words = spans.Select((span, index) => (span, index))
+                    .Where(item => item.span.End > match.Index && item.span.Start < match.Index + match.Length)
+                    .ToArray();
+                if (words.Length == 0) continue;
+                results.Add(new PdfRedactionMatch($"{pageIndex}:{match.Index}:{match.Length}", pageIndex,
+                    match.Value, PdfContentBounds.Union(words.Select(item => item.span.Word.BoundingBox)),
+                    words[0].index, words.Length, options.ReasonCode, options.OverlayText)
+                {
+                    Areas = MatchAreas(words.Select(item => item.span), match.Index, match.Index + match.Length)
+                });
+            }
+            pageIndex++;
+        }
+        return new PdfRedactionReview(results);
+    }
+
+    /// <summary>
+    /// Searches text that a page shows through its annotations instead of its content: form field
+    /// values and annotation contents such as FreeText notes. Each match proposes the whole annotation,
+    /// which redaction then removes. An annotation without a usable rectangle is proposed through a
+    /// one-point area at the page corner, because redaction removes any unplaceable annotation on a
+    /// page it redacts.
+    /// </summary>
+    public static PdfRedactionReview FindInAnnotations(PdfDocument document,
+        PdfRedactionSearchOptions options, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        Regex expression = Expression(options);
+        IReadOnlyList<PdfPageInformation> pages = PdfPageInformation.Read(document);
+        var results = new List<PdfRedactionMatch>();
+        for (int pageIndex = 0; pageIndex < pages.Count; pageIndex++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            foreach (PdfFormWidgetInfo widget in PdfFormWidgetReader.ReadPage(document, pageIndex))
+            {
+                var bounds = new PdfContentBounds(widget.Left - widget.PageBoxLeft, widget.Bottom - widget.PageBoxBottom,
+                    widget.Right - widget.PageBoxLeft, widget.Top - widget.PageBoxBottom);
+                string[] texts = [widget.Value, widget.DefaultValue, .. widget.Values, .. widget.DefaultValues];
+                AddMatches($"field:{pageIndex}:{widget.AnnotationIndex}", pageIndex, texts.Distinct(),
+                    bounds, PdfRedactionTargetKind.FormField);
+            }
+        }
+        foreach (PdfCommentInfo comment in PdfCommentReader.Read(document))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            PdfPageInformation page = pages[comment.PageIndex];
+            PdfContentBounds bounds = comment.Bounds is { } rectangle
+                ? new PdfContentBounds(rectangle.Left - page.Left, rectangle.Bottom - page.Bottom,
+                    rectangle.Right - page.Left, rectangle.Top - page.Bottom)
+                : new PdfContentBounds(0, 0, 1, 1);
+            AddMatches($"annotation:{comment.PageIndex}:{comment.AnnotationIndex}", comment.PageIndex,
+                [comment.Contents], bounds, PdfRedactionTargetKind.Comment);
+        }
+        return new PdfRedactionReview(results);
+
+        void AddMatches(string id, int pageIndex, IEnumerable<string> texts, PdfContentBounds bounds,
+            PdfRedactionTargetKind kind)
+        {
+            foreach (string text in texts)
+            {
+                if (string.IsNullOrEmpty(text)) continue;
+                foreach (Match match in expression.Matches(text))
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (!Accepted(options.Kind, match.Value)) continue;
+                    results.Add(new PdfRedactionMatch(id, pageIndex, match.Value, bounds, -1, 0,
+                        options.ReasonCode, options.OverlayText, kind));
+                    return;
+                }
+            }
+        }
+    }
+
+    private static bool Accepted(PdfRedactionSearchKind kind, string value) => kind switch
+    {
+        PdfRedactionSearchKind.PaymentCardNumber => HasValidPaymentCardChecksum(value),
+        PdfRedactionSearchKind.SocialSecurityNumber => HasValidSocialSecurityNumber(value),
+        PdfRedactionSearchKind.InternationalBankAccountNumber => HasValidInternationalBankAccountNumber(value),
+        _ => true
+    };
+
+    private static Regex Expression(PdfRedactionSearchOptions options)
+    {
         ArgumentNullException.ThrowIfNull(options);
         if (!Enum.IsDefined(options.Kind)) throw new ArgumentOutOfRangeException(nameof(options));
         if (options.Timeout <= TimeSpan.Zero || options.Timeout > TimeSpan.FromSeconds(10))
@@ -354,43 +457,7 @@ public static class PdfRedactionSearch
         };
         RegexOptions flags = RegexOptions.CultureInvariant;
         if (!options.MatchCase) flags |= RegexOptions.IgnoreCase;
-        var expression = new Regex(pattern, flags, options.Timeout);
-        var results = new List<PdfRedactionMatch>();
-        int pageIndex = 0;
-        foreach (PdfPageContent page in pages)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            var spans = new List<(PdfExtractedWord Word, int Start, int End)>();
-            string text = string.Join(' ', page.Words.Select(word => word.Text));
-            int offset = 0;
-            foreach (PdfExtractedWord word in page.Words)
-            {
-                spans.Add((word, offset, offset + word.Text.Length));
-                offset += word.Text.Length + 1;
-            }
-            foreach (Match match in expression.Matches(text))
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                if (options.Kind == PdfRedactionSearchKind.PaymentCardNumber
-                    && !HasValidPaymentCardChecksum(match.Value)) continue;
-                if (options.Kind == PdfRedactionSearchKind.SocialSecurityNumber
-                    && !HasValidSocialSecurityNumber(match.Value)) continue;
-                if (options.Kind == PdfRedactionSearchKind.InternationalBankAccountNumber
-                    && !HasValidInternationalBankAccountNumber(match.Value)) continue;
-                var words = spans.Select((span, index) => (span, index))
-                    .Where(item => item.span.End > match.Index && item.span.Start < match.Index + match.Length)
-                    .ToArray();
-                if (words.Length == 0) continue;
-                results.Add(new PdfRedactionMatch($"{pageIndex}:{match.Index}:{match.Length}", pageIndex,
-                    match.Value, PdfContentBounds.Union(words.Select(item => item.span.Word.BoundingBox)),
-                    words[0].index, words.Length, options.ReasonCode, options.OverlayText)
-                {
-                    Areas = MatchAreas(words.Select(item => item.span), match.Index, match.Index + match.Length)
-                });
-            }
-            pageIndex++;
-        }
-        return new PdfRedactionReview(results);
+        return new Regex(pattern, flags, options.Timeout);
     }
 
     // The matched letters of each word, merged into one box per text line. A word whose letters

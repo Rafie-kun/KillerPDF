@@ -111,6 +111,32 @@ namespace KillerPDF.Services
             return result;
         }
 
+        /// <summary>
+        /// The areas a redaction of <paramref name="term"/> covers: its page-text matches, plus every form
+        /// field and annotation whose value or text contains it, which the page content does not include.
+        /// Case-insensitive, like <see cref="FindExactMatches"/>.
+        /// </summary>
+        internal static Dictionary<int, List<(double Left, double Bottom, double Right, double Top)>> FindRedactionTermAreas(
+            string filePath, string term)
+        {
+            var result = FindExactMatches(filePath, term);
+            if (string.IsNullOrWhiteSpace(term)) return result;
+            var document = PdfEngineIntegration.OpenForReading(System.IO.File.ReadAllBytes(filePath));
+            var options = new KillerPdf.Engine.Documents.PdfRedactionSearchOptions
+            {
+                Kind = KillerPdf.Engine.Documents.PdfRedactionSearchKind.ExactText,
+                Query = term.Trim(),
+                Timeout = System.TimeSpan.FromSeconds(2)
+            };
+            foreach (var match in KillerPdf.Engine.Documents.PdfRedactionSearch.FindInAnnotations(document, options).Matches)
+            {
+                if (!result.TryGetValue(match.PageIndex, out var areas)) result[match.PageIndex] = areas = [];
+                var area = (match.Bounds.Left, match.Bounds.Bottom, match.Bounds.Right, match.Bounds.Top);
+                if (!areas.Contains(area)) areas.Add(area);
+            }
+            return result;
+        }
+
         internal static List<(double Left, double Bottom, double Right, double Top)> FindExactMatchesOnPage(
             KillerPdf.Engine.Documents.PdfPageContent page, string query)
         {

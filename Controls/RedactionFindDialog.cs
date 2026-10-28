@@ -22,13 +22,19 @@ internal sealed class RedactionFindDialog : Window
     private readonly Button _mark;
     private readonly List<(PdfRedactionMatch Match, CheckBox Include)> _rows = [];
     private IReadOnlyList<PdfPageContent>? _pages;
+    // Form field values and annotation text are shown from their own appearances, not the page content,
+    // so the search also reads them from the document.
+    private readonly Func<PdfDocument>? _loadDocument;
+    private PdfDocument? _document;
 
     /// <summary>The results the user left checked, in page order.</summary>
     internal IReadOnlyList<PdfRedactionMatch> Checked { get; private set; } = [];
 
-    internal RedactionFindDialog(Window owner, Func<IReadOnlyList<PdfPageContent>> loadPages)
+    internal RedactionFindDialog(Window owner, Func<IReadOnlyList<PdfPageContent>> loadPages,
+        Func<PdfDocument>? loadDocument = null)
     {
         _loadPages = loadPages;
+        _loadDocument = loadDocument;
         Title = "KillerPDF - " + L("Str_RedactFind_Title");
         Width = 520;
         SizeToContent = SizeToContent.Height;
@@ -169,6 +175,7 @@ internal sealed class RedactionFindDialog : Window
         {
             Mouse.OverrideCursor = Cursors.Wait;
             _pages ??= _loadPages();
+            if (_loadDocument is not null) _document ??= _loadDocument();
             foreach (string query in queries)
             {
                 var options = new PdfRedactionSearchOptions
@@ -180,6 +187,9 @@ internal sealed class RedactionFindDialog : Window
                 };
                 foreach (PdfRedactionMatch match in PdfRedactionSearch.Find(_pages, options).Matches)
                     found.TryAdd(match.Id, match);
+                if (_document is not null)
+                    foreach (PdfRedactionMatch match in PdfRedactionSearch.FindInAnnotations(_document, options).Matches)
+                        found.TryAdd(match.Id, match);
             }
         }
         catch (Exception ex) when (ex is ArgumentException or RegexMatchTimeoutException
