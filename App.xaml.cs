@@ -1111,9 +1111,20 @@ namespace KillerPDF
         /// An all-users install runs elevated, so UAC only appears when the user actually asked for it.
         /// </summary>
         internal static bool InstallAndRelaunch(bool wantDesktop, bool allUsers, string? fileToOpen = null)
+            => InstallAndRelaunchAsync(wantDesktop, allUsers, fileToOpen, offThread: false).GetAwaiter().GetResult();
+
+        /// <summary>
+        /// The footer's install. The install command runs off the UI thread, so the window keeps
+        /// painting while the launcher extracts, verifies, waits for UAC and closes running copies.
+        /// Dialogs, the relaunch and shutdown stay on the UI thread. With offThread false every step
+        /// completes synchronously, which is what the shared kit's synchronous entry point needs.
+        /// </summary>
+        internal static async System.Threading.Tasks.Task<bool> InstallAndRelaunchAsync(
+            bool wantDesktop, bool allUsers, string? fileToOpen, bool offThread = true)
         {
             var plan = Shell.PortableInstallPlan.Choose(allUsers, wantDesktop, MachineInstallExists(),
-                GetPortableLauncherPath(), Environment.ProcessPath, InstallExe, MachineInstallExe);
+                GetPortableLauncherPath(), Environment.ProcessPath, InstallExe, MachineInstallExe,
+                CurrentExeIsSelfContained());
 
             if (plan.Kind == Shell.PortableInstallKind.RefusedSecondCopy)
             {
@@ -1131,8 +1142,15 @@ namespace KillerPDF
                 // Compatibility for old woven builds and direct developer runs.
                 if (!DoInstall(wantDesktop)) return false;
             }
-            else if (!RunInstallCommand(plan.Program!, plan.Arguments!, plan.Elevate))
-                return false;
+            else
+            {
+                string program = plan.Program!, arguments = plan.Arguments!;
+                bool elevate = plan.Elevate;
+                bool installed = offThread
+                    ? await System.Threading.Tasks.Task.Run(() => RunInstallCommand(program, arguments, elevate))
+                    : RunInstallCommand(program, arguments, elevate);
+                if (!installed) return false;
+            }
             if (!File.Exists(plan.TargetExe)) return false;   // trust gate / copy failure already reported
 
             // Only ever one install: drop the per-user copy so there is a single Start Menu
@@ -1154,9 +1172,7 @@ namespace KillerPDF
                         { UseShellExecute = true });
             }
 
-            var psi = new ProcessStartInfo(targetExe);
-            if (fileToOpen != null)
-                psi.ArgumentList.Add(fileToOpen);
+            ProcessStartInfo psi = Shell.PortableInstallPlan.InstalledRelaunch(targetExe, fileToOpen);
             // Free the single-instance mutex first so the launched copy becomes primary (and shows a
             // window) instead of treating itself as a duplicate and exiting.
             (Current as App)?.ReleaseInstanceMutex();
@@ -1183,6 +1199,19 @@ namespace KillerPDF
         /// <summary>The DemoThumbprint idea in the other apps: KillerPDF has no demo build, so the
         /// footer badge always shows on a portable copy.</summary>
         internal static bool IsDemo => false;
+
+        /// <summary>True when this exe carries the whole app, as old woven single-file builds did.
+        /// The packaged portable's inner app and developer builds keep KillerPDF.dll beside the exe,
+        /// so copying the exe alone would install something that cannot start.</summary>
+        private static bool CurrentExeIsSelfContained()
+        {
+            try
+            {
+                string? exe = Environment.ProcessPath;
+                return !string.IsNullOrEmpty(exe) && !File.Exists(Path.ChangeExtension(exe, ".dll"));
+            }
+            catch { return false; }
+        }
 
         /// <summary>The packaged portable launcher that started this copy, when there is one.</summary>
         private static string? GetPortableLauncherPath()

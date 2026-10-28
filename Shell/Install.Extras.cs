@@ -29,9 +29,11 @@ namespace KillerPDF.Shell
                     MessageBoxButton.OK, MessageBoxImage.Warning);
                 return Task.FromResult(false);
             };
-            options.InstallAsync = (desktop, allUsers) => Task.FromResult(
-                App.InstallAndRelaunch(wantDesktop: desktop, allUsers: allUsers, fileToOpen: _currentFile)
-                    ? InstallOutcome.Installed : InstallOutcome.Failed);
+            // The installed copy reopens the user's file, not this tab's temporary working copy.
+            options.InstallAsync = async (desktop, allUsers) =>
+                await App.InstallAndRelaunchAsync(wantDesktop: desktop, allUsers: allUsers,
+                    fileToOpen: _originalFile ?? _currentFile)
+                    ? InstallOutcome.Installed : InstallOutcome.Failed;
             // SetStatus honors the status hold, so the failure line is not stomped by the next fit.
             options.ShowStatus = SetStatus;
         }

@@ -19,7 +19,8 @@ namespace KillerPDF.Shell
         /// install while an all-users copy exists is refused, so there are never two installed copies.
         /// </summary>
         internal static PortableInstallPlan Choose(bool allUsers, bool desktop, bool machineInstallExists,
-            string? launcher, string? currentExe, string userInstallExe, string machineInstallExe)
+            string? launcher, string? currentExe, string userInstallExe, string machineInstallExe,
+            bool currentExeIsSelfContained)
         {
             if (!allUsers && machineInstallExists)
                 return new(PortableInstallKind.RefusedSecondCopy, null, null, false, null);
@@ -29,6 +30,9 @@ namespace KillerPDF.Shell
                 return new(PortableInstallKind.Process, launcher, arguments, Elevate: allUsers,
                     allUsers ? machineInstallExe : userInstallExe);
             }
+            // The installs below copy or re-run this exe on its own, which needs a self-contained exe.
+            if (!currentExeIsSelfContained)
+                return new(PortableInstallKind.Unavailable, null, null, false, null);
             if (allUsers)
             {
                 string? program = currentExe;
@@ -38,6 +42,24 @@ namespace KillerPDF.Shell
                     Elevate: true, machineInstallExe);
             }
             return new(PortableInstallKind.InProcess, null, null, false, userInstallExe);
+        }
+
+        /// <summary>
+        /// How the installed copy is started once the install finishes. The portable launcher's
+        /// variables would make the installed copy's first session use the portable data folder, and
+        /// the launcher's extraction folder as working directory would stop the launcher removing it.
+        /// </summary>
+        internal static System.Diagnostics.ProcessStartInfo InstalledRelaunch(string targetExe, string? fileToOpen)
+        {
+            var start = new System.Diagnostics.ProcessStartInfo(targetExe)
+            {
+                UseShellExecute = false,
+                WorkingDirectory = System.IO.Path.GetDirectoryName(targetExe) ?? string.Empty,
+            };
+            foreach (string name in new[] { "KILLERPDF_LAUNCHER_PATH", "KILLERPDF_LAUNCHER_PID" })
+                start.Environment.Remove(name);
+            if (fileToOpen != null) start.ArgumentList.Add(fileToOpen);
+            return start;
         }
     }
 
