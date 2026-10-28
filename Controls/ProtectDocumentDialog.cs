@@ -42,7 +42,7 @@ namespace KillerPDF
         private readonly List<X509Certificate2> _storeCerts = [];
         private readonly List<X509Certificate2> _recipients = [];
 
-        private static SolidColorBrush R(string key) => (SolidColorBrush)Application.Current.Resources[key];
+        private static Brush R(string key) => (Brush)Application.Current.Resources[key];
 
         // Localized string from the active locale dictionary (falls back to the key if missing).
         private static string L(string key) => Application.Current.TryFindResource(key) as string ?? key;
