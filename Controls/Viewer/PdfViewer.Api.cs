@@ -329,6 +329,7 @@ namespace KillerPDF.Controls
 
         // ── Save paths ───────────────────────────────────────────────────────────────────────
         internal void WriteFormValuesToDocumentExt(string path) => WriteFormValuesToDocument(path);
+        internal int RedactionMarkCountExt => _redactMarks.Count;
 
         // ── Handlers bound from MainWindow.xaml ──────────────────────────────────────────────
         // WPF resolves Click="X" against the XAML root's code-behind, which is still MainWindow, so

@@ -222,6 +222,8 @@ internal static class TableExportSmoke
                 return OrientationFailureSmoke.Run(owner, folder);
             if (windowSessionCase == "--verify-page-navigation-certificate-restriction")
                 return CertificateRestrictionSmoke.Run(owner, folder);
+            if (windowSessionCase == "--verify-page-navigation-restricted-form-fill")
+                return RestrictedFormFillSmoke.Run(owner, folder);
             if (windowSessionCase == "--verify-page-navigation-dialog-buttons-theme")
                 return CaptionThemeSmoke.RunButtonTransitions(owner, folder);
             if (windowSessionCase == "--verify-page-navigation-dialog-button-actions")

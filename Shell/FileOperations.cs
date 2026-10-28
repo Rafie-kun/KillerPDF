@@ -1287,9 +1287,55 @@ namespace KillerPDF.Shell
                 defaultResult: MessageBoxResult.Cancel) == MessageBoxResult.OK;
         }
 
+        // A form whose author restricts editing but allows filling saves its field values as Acrobat
+        // does: into the protected file itself, which keeps its encryption and permissions. Anything
+        // beyond field values (markup, stamps, redaction marks) still needs the owner password.
+        private bool CanSaveRestrictedFormFill() =>
+            IsOwnerRestricted && !_restrictedByCertificate && !string.IsNullOrEmpty(_currentFile)
+            && !_annotations.Values.Any(list => list.Count > 0) && !HasActiveStamps
+            && ActiveViewer.RedactionMarkCountExt == 0
+            && PdfEngineIntegration.CanFillRestrictedForm(_currentFile);
+
+        private void SaveRestrictedFormFill(string destination)
+        {
+            CommitActiveTextBox();
+            string source = _currentFile!;
+            string filled = App.MakeTempFile("filled");
+            try
+            {
+                PdfEngineIntegration.FillRestrictedForm(source, filled, ActiveViewer.SnapshotFormValuesForPrint());
+                CloseEngineDocumentSession();
+                _doc?.Close();
+                _doc = null;
+                PdfEngineIntegration.ReplaceFileAtomically(filled, destination);
+            }
+            catch (Exception ex) when (ex is not OutOfMemoryException)
+            {
+                KillerDialog.Show(this, Loc("Str_Err_SaveFailed") + "\n" + ex.Message, "KillerPDF",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                // Still read-only on the unchanged original, with the typed values kept.
+                if (_doc is null) RestoreReadOnlyOriginal(source, _originalFile ?? source, () => { });
+                return;
+            }
+            // The saved values now live in the file, so it reopens read-only with nothing pending.
+            RestoreReadOnlyOriginal(destination, destination, () => { });
+            _loadedRevision = Services.FileRevision.Capture(destination);
+            SetStatus(string.Format(Loc("Str_St_Saved"), System.IO.Path.GetFileName(destination)));
+        }
+
         private void SaveInPlace()
         {
             if (_doc is null) { KillerDialog.Show(this, Loc("Str_Msg_OpenFirst")); return; }
+            if (CanSaveRestrictedFormFill() && !string.IsNullOrEmpty(_originalFile))
+            {
+                if (Services.FileRevision.ConflictsWith(_loadedRevision, _originalFile!)
+                    && KillerDialog.AskToSave(this,
+                        string.Format(Loc("Str_Dlg_SaveConflict"), System.IO.Path.GetFileName(_originalFile)),
+                        Loc("Str_Btn_Replace"), Loc("Str_KS_SaveAs"), Loc("Str_Btn_CancelDlg")) != MessageBoxResult.Yes)
+                    return;
+                SaveRestrictedFormFill(_originalFile!);
+                return;
+            }
             if (!EnsureEditable()) return;
             // Save back to the user's real file. After a page edit (crop/rotate) _currentFile is a
             // temp working copy, so the real path is kept in _originalFile. If there is no real path
@@ -1425,7 +1471,8 @@ namespace KillerPDF.Shell
         internal void SaveAsWithName(string? suggestedName, bool openCopy = false)
         {
             if (_doc is null || _currentFile is null) { KillerDialog.Show(this, Loc("Str_Msg_OpenFirst")); return; }
-            if (!EnsureEditable()) return;
+            bool restrictedFill = CanSaveRestrictedFormFill();
+            if (!restrictedFill && !EnsureEditable()) return;
             CommitActiveTextBox();
             var dlg = new Controls.FileDialog(Controls.FileDialogMode.Save)
                           { Filter = Loc("Str_Filter_Pdf") + "|*.pdf", Title = Loc("Str_Dlg_SavePdfAs"),
@@ -1462,6 +1509,11 @@ namespace KillerPDF.Shell
             {
                 KillerDialog.Show(this, Loc("Str_Err_SaveFailed") + "\n" + dlg.FileName, "KillerPDF",
                     MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            if (restrictedFill)
+            {
+                SaveRestrictedFormFill(dlg.FileName);
                 return;
             }
             // A signed document with no changes is copied byte for byte, so the copy keeps valid

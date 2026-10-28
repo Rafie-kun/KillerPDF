@@ -913,11 +913,51 @@ internal static class PdfEngineIntegration
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
         ArgumentNullException.ThrowIfNull(edits);
-        if (edits.TextValues.Count == 0 && edits.ChoiceValues.Count == 0
-            && edits.MultiChoiceValues.Count == 0
-            && edits.CheckBoxValues.Count == 0 && edits.RadioValues.Count == 0)
-            return;
-        PdfDocument document = PdfDocument.Open(File.ReadAllBytes(path));
+        if (!HasFormValues(edits)) return;
+        ReplaceWithBuiltResult(path, BuildFormValues(PdfDocument.Open(File.ReadAllBytes(path)), edits));
+    }
+
+    private static bool HasFormValues(FormEdits edits) =>
+        edits.TextValues.Count != 0 || edits.ChoiceValues.Count != 0 || edits.MultiChoiceValues.Count != 0
+        || edits.CheckBoxValues.Count != 0 || edits.RadioValues.Count != 0;
+
+    /// <summary>
+    /// True for a PDF that opens without a password but whose author restricts editing while allowing
+    /// form filling, either directly or through the annotation permission, as Acrobat reads it.
+    /// </summary>
+    internal static bool CanFillRestrictedForm(string path)
+    {
+        try
+        {
+            PdfDocument document = OpenForReading(File.ReadAllBytes(path));
+            return document.IsDecrypted
+                && document.PasswordAuthenticationRole == KillerPdf.Engine.Security.PdfPasswordAuthenticationRole.User
+                && document.DeclaredPermissions is KillerPdf.Engine.Security.PdfDocumentPermissions permissions
+                && !permissions.AllowDocumentModification
+                && (permissions.AllowFormFilling || permissions.AllowAnnotationModification);
+        }
+        catch (Exception error) when (error is not OutOfMemoryException)
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Saves filled-in values into a restricted form as an incremental update of the encrypted file, so the
+    /// result keeps its encryption and permissions. The engine refuses when the author forbids filling.
+    /// </summary>
+    internal static void FillRestrictedForm(string sourcePath, string destinationPath, FormEdits edits)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(sourcePath);
+        ArgumentException.ThrowIfNullOrWhiteSpace(destinationPath);
+        ArgumentNullException.ThrowIfNull(edits);
+        byte[] source = File.ReadAllBytes(sourcePath);
+        byte[] filled = HasFormValues(edits) ? BuildFormValues(OpenForReading(source), edits) : source;
+        AtomicFileOutput.Write(destinationPath, filled);
+    }
+
+    private static byte[] BuildFormValues(PdfDocument document, FormEdits edits)
+    {
         var fonts = new Dictionary<string, TrueTypeFont>(StringComparer.OrdinalIgnoreCase);
         IReadOnlyList<PdfFormWidgetInfo> widgets =
         [
@@ -955,7 +995,7 @@ internal static class PdfEngineIntegration
             editor.SetCheckBoxValue(name, value);
         foreach ((string name, string value) in edits.RadioValues.OrderBy(item => item.Key))
             editor.SetRadioButtonValue(name, value.TrimStart('/'));
-        ReplaceWithBuiltResult(path, editor.Build());
+        return editor.Build();
     }
 
     private static PdfDocument AttachUnlistedFormFields(
