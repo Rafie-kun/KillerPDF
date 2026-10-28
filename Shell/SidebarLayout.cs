@@ -40,6 +40,9 @@ namespace KillerPDF.Shell
                 FindName("SbContentRow") is not RowDefinition sbContentRow ||
                 FindName("SbToggleRow") is not RowDefinition sbToggleRow)
                 return;
+            // Every rail flyout, the kit's theme and language menus included, opens on the rail's
+            // side from the first open of the session (Shell/FlyoutPlacement.cs wiring).
+            FlyoutPlacement.UsePane(ContentPane, _sidebarSide);
             RowDefinition firstRow = MainContentGrid.RowDefinitions[0];
             RowDefinition secondRow = MainContentGrid.RowDefinitions[1];
 
