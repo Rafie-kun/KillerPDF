@@ -238,6 +238,7 @@
     <sys:String x:Key="Str_Opened">Открыто {0} - {1} страниц(ы)</sys:String>
     <sys:String x:Key="Str_OpenedReadOnly">Открыто {0} (только-для-чтения - ограничено собственником) - {1} страница(ы)</sys:String>
     <sys:String x:Key="Str_Restricted_Notice">Владелец этого PDF ограничил редактирование, поэтому он открыт только для чтения.</sys:String>
+    <sys:String x:Key="Str_Restricted_CertificateNotice">Сертификат, для которого зашифрован этот PDF, не разрешает редактирование, поэтому он открыт только для чтения.</sys:String>
     <sys:String x:Key="Str_Restricted_EnterPassword">Ввести пароль владельца</sys:String>
     <sys:String x:Key="Str_Restricted_Prompt">«{0}» ограничивает редактирование. Введите пароль владельца, чтобы редактировать его.</sys:String>
     <sys:String x:Key="Str_Restricted_Unlock">Разблокировать</sys:String>

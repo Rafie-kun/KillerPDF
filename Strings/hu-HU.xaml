@@ -238,6 +238,7 @@ Az oldal lecserélhető a saját képére, amelyen a megjelölt területek feket
     <sys:String x:Key="Str_Opened">Megnyitva: {0} - {1} oldal</sys:String>
     <sys:String x:Key="Str_OpenedReadOnly">Megnyitva: {0} (csak olvasható - tulajdonosi korlátozások) - {1} oldal</sys:String>
     <sys:String x:Key="Str_Restricted_Notice">A PDF tulajdonosa korlátozza a szerkesztést, ezért csak olvasásra nyílt meg.</sys:String>
+    <sys:String x:Key="Str_Restricted_CertificateNotice">A tanúsítvány, amelyhez ez a PDF titkosítva van, nem engedélyezi a szerkesztést, ezért csak olvasásra nyílt meg.</sys:String>
     <sys:String x:Key="Str_Restricted_EnterPassword">Tulajdonosi jelszó megadása</sys:String>
     <sys:String x:Key="Str_Restricted_Prompt">A(z) „{0}” korlátozza a szerkesztést. A szerkesztéshez adja meg a tulajdonosi jelszót.</sys:String>
     <sys:String x:Key="Str_Restricted_Unlock">Feloldás</sys:String>

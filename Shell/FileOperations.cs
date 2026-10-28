@@ -32,6 +32,7 @@ namespace KillerPDF.Shell
         // Drives the Save menu's Remove Password entry and the saved-without-protection status note.
         // Cleared once a save writes the unprotected file; carried per tab via DocumentSession.
         private bool _openedFromProtected { get => ActiveViewer.OpenedFromProtectedRef; set => ActiveViewer.OpenedFromProtectedRef = value; }
+        private bool _restrictedByCertificate { get => ActiveViewer.RestrictedByCertificateRef; set => ActiveViewer.RestrictedByCertificateRef = value; }
 
         private void OpenFile(string path)
         {
@@ -240,6 +241,7 @@ namespace KillerPDF.Shell
             _gridScrollToPage = -1;
             AcceptSavedCheckpoint();
             _openedFromProtected = false;   // #149: set true by the two protected-open paths after this returns
+            _restrictedByCertificate = false;
             // Restore this file's last page and zoom if we've seen it before. View mode is global:
             // the last mode selected with the footer controls becomes the default for every PDF.
             _viewMode = Enum.TryParse<ViewMode>(App.GetSetting("ViewMode"), out var preferredView)
@@ -409,17 +411,21 @@ namespace KillerPDF.Shell
                 try { certificates = Services.Signing.WindowsCertificateStore.ListEncryptionCertificates(); }
                 catch (System.Security.Cryptography.CryptographicException) { certificates = []; }
                 var tempDec = App.MakeTempFile("dec");
-                if (!PdfEngineIntegration.TryRemoveCertificateEncryption(srcPath, tempDec, certificates))
+                if (!PdfEngineIntegration.TryRemoveCertificateEncryption(srcPath, tempDec, certificates, out bool mayEdit))
                 {
                     KillerDialog.Show(this, Loc("Str_Dlg_NoRecipientCertificate"), Loc("Str_Dlg_AppTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
                 _doc?.Close();
                 _doc = null;
-                _doc = PdfWorkingDocument.Open(tempDec);
+                // A recipient its author did not let edit gets the file read-only, as in Acrobat. There is
+                // no owner password for certificate encryption, so nothing unlocks it here.
+                _doc = PdfWorkingDocument.Open(tempDec, isReadOnly: !mayEdit);
                 _currentFile = tempDec;
                 FinishOpenFile(displayPath, tempDec);
                 _openedFromProtected = true;
+                _restrictedByCertificate = !mayEdit;
+                if (!mayEdit) ActiveViewer.UpdateRestrictionNotice();
             }
             catch (WorkingCopyUnavailableException copy)
             {
@@ -581,6 +587,13 @@ namespace KillerPDF.Shell
         private bool UnlockOwnerRestrictions()
         {
             if (!IsOwnerRestricted) return true;
+            // Certificate encryption has no owner password, so the recipient's permissions stand.
+            if (_restrictedByCertificate)
+            {
+                KillerDialog.Show(this, Loc("Str_Restricted_CertificateNotice"), "KillerPDF",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                return false;
+            }
             if (string.IsNullOrEmpty(_currentFile) || string.IsNullOrEmpty(_originalFile)) return false;
             string sourcePath = _currentFile;
             string displayPath = _originalFile;
@@ -1119,7 +1132,7 @@ namespace KillerPDF.Shell
                 // open file actually had a password/encryption. Saving in place IS the removal - the
                 // working doc is already decrypted - and the SaveInPlace tail reports it and drops the flag.
                 var removePw = MakeMenuItem(Loc("Str_Menu_RemovePassword"), (_, _) => SaveInPlace(), null, "");
-                removePw.IsEnabled = _openedFromProtected;
+                removePw.IsEnabled = _openedFromProtected && !_restrictedByCertificate;
                 menu.Items.Add(removePw);
                 menu.Items.Add(MakeMenuItem(Loc("Str_Menu_ProtectDocument"), (_, _) => OpenProtectDialog(), GestureFor("CtrlShift:P"), ""));
                 menu.Items.Add(new Separator());

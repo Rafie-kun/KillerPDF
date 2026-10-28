@@ -238,6 +238,7 @@ Siden kan erstattes med et bilde av seg selv der de markerte områdene er sverte
     <sys:String x:Key="Str_Opened">Åpnet {0} - {1} side(r)</sys:String>
     <sys:String x:Key="Str_OpenedReadOnly">Åpnet {0} (skrivebeskyttet på grunn av eierbegrensninger) - {1} side(r)</sys:String>
     <sys:String x:Key="Str_Restricted_Notice">Eieren av denne PDF-en begrenser redigering, så den er åpnet skrivebeskyttet.</sys:String>
+    <sys:String x:Key="Str_Restricted_CertificateNotice">Sertifikatet denne PDF-en er kryptert for, tillater ikke redigering, så den er åpnet skrivebeskyttet.</sys:String>
     <sys:String x:Key="Str_Restricted_EnterPassword">Skriv inn eierpassord</sys:String>
     <sys:String x:Key="Str_Restricted_Prompt">«{0}» begrenser redigering. Skriv inn eierpassordet for å redigere den.</sys:String>
     <sys:String x:Key="Str_Restricted_Unlock">Lås opp</sys:String>

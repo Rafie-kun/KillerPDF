@@ -238,6 +238,7 @@ Stronę można zastąpić jej obrazem z zaczernionymi zaznaczonymi obszarami. Te
     <sys:String x:Key="Str_Opened">Otwarto {0} (stron: {1})</sys:String>
     <sys:String x:Key="Str_OpenedReadOnly">Otwarto {0} (tylko do odczytu - ograniczenia właściciela) - stron: {1}</sys:String>
     <sys:String x:Key="Str_Restricted_Notice">Właściciel tego pliku PDF ogranicza edycję, dlatego jest otwarty tylko do odczytu.</sys:String>
+    <sys:String x:Key="Str_Restricted_CertificateNotice">Certyfikat, dla którego zaszyfrowano ten plik PDF, nie zezwala na edycję, dlatego jest otwarty tylko do odczytu.</sys:String>
     <sys:String x:Key="Str_Restricted_EnterPassword">Wprowadź hasło właściciela</sys:String>
     <sys:String x:Key="Str_Restricted_Prompt">Plik „{0}” ogranicza edycję. Wprowadź hasło właściciela, aby go edytować.</sys:String>
     <sys:String x:Key="Str_Restricted_Unlock">Odblokuj</sys:String>

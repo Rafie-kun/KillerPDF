@@ -221,6 +221,7 @@ Die Seite kann durch ein Bild ihrer selbst ersetzt werden, in dem die markierten
     <sys:String x:Key="Str_Opened">Geöffnet: {0} - {1} Seite(n)</sys:String>
     <sys:String x:Key="Str_OpenedReadOnly">Geöffnet: {0} (schreibgeschützt - Eigentümerbeschränkungen) - {1} Seite(n)</sys:String>
     <sys:String x:Key="Str_Restricted_Notice">Der Eigentümer dieses PDFs schränkt die Bearbeitung ein, daher ist es schreibgeschützt geöffnet.</sys:String>
+    <sys:String x:Key="Str_Restricted_CertificateNotice">Das Zertifikat, für das dieses PDF verschlüsselt ist, erlaubt keine Bearbeitung, daher ist es schreibgeschützt geöffnet.</sys:String>
     <sys:String x:Key="Str_Restricted_EnterPassword">Eigentümerpasswort eingeben</sys:String>
     <sys:String x:Key="Str_Restricted_Prompt">„{0}“ schränkt die Bearbeitung ein. Geben Sie das Eigentümerpasswort ein, um es zu bearbeiten.</sys:String>
     <sys:String x:Key="Str_Restricted_Unlock">Entsperren</sys:String>

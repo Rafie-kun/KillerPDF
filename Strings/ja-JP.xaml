@@ -238,6 +238,7 @@
     <sys:String x:Key="Str_Opened">{0} を開きました - {1} ページ</sys:String>
     <sys:String x:Key="Str_OpenedReadOnly">{0} を開きました (読み取り専用 - 所有者制限) - {1} ページ</sys:String>
     <sys:String x:Key="Str_Restricted_Notice">この PDF は所有者が編集を制限しているため、読み取り専用で開いています。</sys:String>
+    <sys:String x:Key="Str_Restricted_CertificateNotice">この PDF の暗号化に使われた証明書では編集が許可されていないため、読み取り専用で開いています。</sys:String>
     <sys:String x:Key="Str_Restricted_EnterPassword">所有者パスワードを入力</sys:String>
     <sys:String x:Key="Str_Restricted_Prompt">「{0}」は編集が制限されています。編集するには所有者パスワードを入力してください。</sys:String>
     <sys:String x:Key="Str_Restricted_Unlock">ロック解除</sys:String>

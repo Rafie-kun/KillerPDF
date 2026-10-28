@@ -1127,8 +1127,10 @@ internal static class PdfEngineIntegration
     /// writes a decrypted working copy. Returns false when none of the certificates can open it.
     /// </summary>
     internal static bool TryRemoveCertificateEncryption(string sourcePath, string destinationPath,
-        IEnumerable<System.Security.Cryptography.X509Certificates.X509Certificate2> certificates)
+        IEnumerable<System.Security.Cryptography.X509Certificates.X509Certificate2> certificates,
+        out bool recipientMayEdit)
     {
+        recipientMayEdit = true;
         ArgumentException.ThrowIfNullOrWhiteSpace(sourcePath);
         ArgumentException.ThrowIfNullOrWhiteSpace(destinationPath);
         ArgumentNullException.ThrowIfNull(certificates);
@@ -1143,6 +1145,9 @@ internal static class PdfEngineIntegration
             {
                 continue;   // not a recipient, or a key that cannot decrypt; try the next one
             }
+            // The working copy is decrypted so it can be shown; the recipient's sealed permissions decide
+            // whether the app lets it be edited.
+            recipientMayEdit = document.DeclaredPermissions?.AllowDocumentModification ?? true;
             ReplaceWithBuiltResult(destinationPath, PdfDocumentWriter.Write(document,
                 new PdfDocumentWriteOptions { RemoveEncryption = true }));
             return true;

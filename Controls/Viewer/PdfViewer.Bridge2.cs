@@ -127,6 +127,8 @@ namespace KillerPDF.Controls
         // ══ What Tabs.cs reaches for, now that it lives here ════════════════════════════════
         private string? _originalFile;
         private bool _openedFromProtected;
+        // Opened read-only because a certificate recipient may not edit it. No password unlocks it.
+        private bool _restrictedByCertificate;
         private Services.PublishedFileStamp? _publishedFile;
         private Services.CompleteDocumentSource? _completeDocumentSource;
         private string? _suggestedName;

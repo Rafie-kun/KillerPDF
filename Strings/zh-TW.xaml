@@ -223,6 +223,7 @@
     <sys:String x:Key="Str_Opened">已開啟 {0} - {1} 頁</sys:String>
     <sys:String x:Key="Str_OpenedReadOnly">已開啟 {0}（唯讀 - 擁有者限制）- {1} 頁</sys:String>
     <sys:String x:Key="Str_Restricted_Notice">此 PDF 的擁有者限制了編輯，因此以唯讀方式開啟。</sys:String>
+    <sys:String x:Key="Str_Restricted_CertificateNotice">此 PDF 加密所用的憑證不允許編輯，因此以唯讀方式開啟。</sys:String>
     <sys:String x:Key="Str_Restricted_EnterPassword">輸入擁有者密碼</sys:String>
     <sys:String x:Key="Str_Restricted_Prompt">「{0}」限制了編輯。輸入擁有者密碼即可編輯。</sys:String>
     <sys:String x:Key="Str_Restricted_Unlock">解除鎖定</sys:String>

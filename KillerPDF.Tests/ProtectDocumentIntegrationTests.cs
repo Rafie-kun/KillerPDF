@@ -62,12 +62,45 @@ public sealed class ProtectDocumentIntegrationTests
                 allowSignatureInvalidation: false);
 
             Assert.True(PdfEngineIntegration.IsCertificateEncrypted(output));
-            Assert.False(PdfEngineIntegration.TryRemoveCertificateEncryption(output, opened, [denied]));
+            Assert.False(PdfEngineIntegration.TryRemoveCertificateEncryption(output, opened, [denied], out _));
             Assert.False(File.Exists(opened) && new FileInfo(opened).Length > 0);
-            Assert.True(PdfEngineIntegration.TryRemoveCertificateEncryption(output, opened, [denied, allowed]));
+            Assert.True(PdfEngineIntegration.TryRemoveCertificateEncryption(output, opened, [denied, allowed], out bool editable));
+            Assert.True(editable);
             PdfDocument decrypted = PdfDocument.Open(File.ReadAllBytes(opened));
             Assert.False(decrypted.IsEncrypted);
             Assert.Equal("recipient copy", new PdfPageContentReader(decrypted).Read(0).Text);
+        }
+        finally
+        {
+            File.Delete(source);
+            File.Delete(output);
+            File.Delete(opened);
+        }
+    }
+
+    // Each recipient carries the permissions its author sealed for it. The copy KillerPDF reads from
+    // is decrypted either way; a recipient that may not edit makes the app open it read-only.
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void ARecipientsSealedPermissionsDecideWhetherItOpensEditable(bool allowModification)
+    {
+        string source = TempPdf("recipient-perm-source");
+        string output = TempPdf("recipient-perm-output");
+        string opened = TempPdf("recipient-perm-opened");
+        using X509Certificate2 recipient = Certificate("CN=KillerPDF restricted recipient");
+        try
+        {
+            File.WriteAllBytes(source, Source("restricted recipient copy"));
+            PdfEngineIntegration.ProtectForRecipients(source, output,
+                new PdfCertificateEncryptionOptions { Recipients = [recipient], AllowDocumentModification = allowModification },
+                allowSignatureInvalidation: false);
+
+            Assert.True(PdfEngineIntegration.TryRemoveCertificateEncryption(output, opened, [recipient], out bool editable));
+
+            Assert.Equal(allowModification, editable);
+            Assert.Equal("restricted recipient copy",
+                new PdfPageContentReader(PdfDocument.Open(File.ReadAllBytes(opened))).Read(0).Text);
         }
         finally
         {

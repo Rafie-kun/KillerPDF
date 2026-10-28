@@ -238,6 +238,7 @@ La page peut être remplacée par une image d'elle-même avec les zones marquée
     <sys:String x:Key="Str_Opened">Ouvert : {0} - {1} page(s)</sys:String>
     <sys:String x:Key="Str_OpenedReadOnly">Ouvert : {0} (lecture seule - restrictions propriétaire) - {1} page(s)</sys:String>
     <sys:String x:Key="Str_Restricted_Notice">Le propriétaire de ce PDF restreint la modification, il est donc ouvert en lecture seule.</sys:String>
+    <sys:String x:Key="Str_Restricted_CertificateNotice">Le certificat pour lequel ce PDF est chiffré n'autorise pas la modification, il est donc ouvert en lecture seule.</sys:String>
     <sys:String x:Key="Str_Restricted_EnterPassword">Saisir le mot de passe propriétaire</sys:String>
     <sys:String x:Key="Str_Restricted_Prompt">« {0} » restreint la modification. Saisissez le mot de passe propriétaire pour le modifier.</sys:String>
     <sys:String x:Key="Str_Restricted_Unlock">Déverrouiller</sys:String>

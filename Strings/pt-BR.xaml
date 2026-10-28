@@ -238,6 +238,7 @@ A página pode ser substituída por uma imagem dela mesma com as áreas marcadas
     <sys:String x:Key="Str_Opened">{0} aberto - {1} página(s)</sys:String>
     <sys:String x:Key="Str_OpenedReadOnly">{0} aberto (somente leitura - restrições do proprietário) - {1} página(s)</sys:String>
     <sys:String x:Key="Str_Restricted_Notice">O proprietário deste PDF restringe a edição, então ele está aberto somente para leitura.</sys:String>
+    <sys:String x:Key="Str_Restricted_CertificateNotice">O certificado para o qual este PDF está criptografado não permite a edição, então ele está aberto somente para leitura.</sys:String>
     <sys:String x:Key="Str_Restricted_EnterPassword">Inserir senha do proprietário</sys:String>
     <sys:String x:Key="Str_Restricted_Prompt">“{0}” restringe a edição. Insira a senha do proprietário para editá-lo.</sys:String>
     <sys:String x:Key="Str_Restricted_Unlock">Desbloquear</sys:String>

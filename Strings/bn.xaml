@@ -221,6 +221,7 @@
     <sys:String x:Key="Str_Opened">{0} খোলা হয়েছে - {1} পৃষ্ঠা</sys:String>
     <sys:String x:Key="Str_OpenedReadOnly">{0} খোলা হয়েছে (শুধুমাত্র পঠনযোগ্য - মালিকের বিধিনিষেধ) - {1} পৃষ্ঠা</sys:String>
     <sys:String x:Key="Str_Restricted_Notice">এই PDF-এর মালিক সম্পাদনা সীমিত করেছেন, তাই এটি শুধুমাত্র পঠনযোগ্য হিসেবে খোলা হয়েছে।</sys:String>
+    <sys:String x:Key="Str_Restricted_CertificateNotice">এই PDF যে সার্টিফিকেটের জন্য এনক্রিপ্ট করা, সেটি সম্পাদনার অনুমতি দেয় না, তাই এটি শুধুমাত্র পঠনযোগ্য হিসেবে খোলা হয়েছে।</sys:String>
     <sys:String x:Key="Str_Restricted_EnterPassword">মালিকের পাসওয়ার্ড দিন</sys:String>
     <sys:String x:Key="Str_Restricted_Prompt">“{0}” সম্পাদনা সীমিত করে। সম্পাদনা করতে মালিকের পাসওয়ার্ড দিন।</sys:String>
     <sys:String x:Key="Str_Restricted_Unlock">আনলক করুন</sys:String>

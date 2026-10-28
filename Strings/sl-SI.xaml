@@ -216,6 +216,7 @@
     <sys:String x:Key="Str_Opened">Odprto: {0} (strani: {1})</sys:String>
     <sys:String x:Key="Str_OpenedReadOnly">Odprto samo za branje zaradi omejitev lastnika: {0} (strani: {1})</sys:String>
     <sys:String x:Key="Str_Restricted_Notice">Lastnik tega dokumenta PDF omejuje urejanje, zato je odprt samo za branje.</sys:String>
+    <sys:String x:Key="Str_Restricted_CertificateNotice">Potrdilo, za katero je ta dokument PDF šifriran, ne dovoljuje urejanja, zato je odprt samo za branje.</sys:String>
     <sys:String x:Key="Str_Restricted_EnterPassword">Vnesi geslo lastnika</sys:String>
     <sys:String x:Key="Str_Restricted_Prompt">Dokument »{0}« omejuje urejanje. Za urejanje vnesite geslo lastnika.</sys:String>
     <sys:String x:Key="Str_Restricted_Unlock">Odkleni</sys:String>

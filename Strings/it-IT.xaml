@@ -238,6 +238,7 @@ La pagina può essere sostituita da un'immagine di sé stessa con le aree contra
     <sys:String x:Key="Str_Opened">Aperto {0} - {1} pagine</sys:String>
     <sys:String x:Key="Str_OpenedReadOnly">Aperto {0} (sola lettura - limitazioni del proprietario) - {1} pagine</sys:String>
     <sys:String x:Key="Str_Restricted_Notice">Il proprietario di questo PDF limita la modifica, quindi è aperto in sola lettura.</sys:String>
+    <sys:String x:Key="Str_Restricted_CertificateNotice">Il certificato per cui questo PDF è cifrato non consente la modifica, quindi è aperto in sola lettura.</sys:String>
     <sys:String x:Key="Str_Restricted_EnterPassword">Inserisci password proprietario</sys:String>
     <sys:String x:Key="Str_Restricted_Prompt">'{0}' limita la modifica. Inserisci la password del proprietario per modificarlo.</sys:String>
     <sys:String x:Key="Str_Restricted_Unlock">Sblocca</sys:String>

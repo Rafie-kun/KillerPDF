@@ -10,6 +10,8 @@ namespace KillerPDF.Controls
     public partial class PdfViewer
     {
         private Border? _restrictionNotice;
+        private TextBlock? _restrictionMessage;
+        private Button? _restrictionUnlock;
 
         /// <summary>True while the active tab is a protected PDF opened read-only because its owner
         /// restricts editing.</summary>
@@ -26,15 +28,20 @@ namespace KillerPDF.Controls
             {
                 // Hosted where the annotation bars live, above the document and below the pane bevel.
                 if (PagePreviewPanel.Parent is not Grid previewArea || Host is null) return;
-                _restrictionNotice = BuildRestrictionNotice(Host);
+                (_restrictionNotice, _restrictionMessage, _restrictionUnlock) = BuildRestrictionNotice(Host);
                 previewArea.Children.Add(_restrictionNotice);
             }
+            // A certificate recipient's permissions have no owner password to lift them.
+            _restrictionMessage?.SetResourceReference(TextBlock.TextProperty,
+                _restrictedByCertificate ? "Str_Restricted_CertificateNotice" : "Str_Restricted_Notice");
+            if (_restrictionUnlock is not null)
+                _restrictionUnlock.Visibility = _restrictedByCertificate ? Visibility.Collapsed : Visibility.Visible;
             _restrictionNotice.Visibility = Visibility.Visible;
         }
 
         // Same surface tokens, grain host and shadow as the floating annotation bars, centered at
         // the top of the pane.
-        private static Border BuildRestrictionNotice(Features.IViewerHost host)
+        private static (Border Bar, TextBlock Message, Button Unlock) BuildRestrictionNotice(Features.IViewerHost host)
         {
             var lockGlyph = new Glyph
             {
@@ -83,7 +90,7 @@ namespace KillerPDF.Controls
             bar.SetResourceReference(Border.BorderThicknessProperty, "BarEdgeThickness");
             bar.SetResourceReference(Border.PaddingProperty, "BarPadding");
             Panel.SetZIndex(bar, 90);
-            return bar;
+            return (bar, message, unlock);
         }
     }
 }

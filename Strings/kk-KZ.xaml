@@ -160,6 +160,7 @@
     <sys:String x:Key="Str_Opened">{0} ашылды - {1} бет</sys:String>
     <sys:String x:Key="Str_OpenedReadOnly">{0} ашылды (тек оқу - иесінің шектеулері) - {1} бет</sys:String>
     <sys:String x:Key="Str_Restricted_Notice">Бұл PDF иесі өңдеуді шектеген, сондықтан ол тек оқу үшін ашылды.</sys:String>
+    <sys:String x:Key="Str_Restricted_CertificateNotice">Бұл PDF шифрланған сертификат өңдеуге рұқсат бермейді, сондықтан ол тек оқу үшін ашылды.</sys:String>
     <sys:String x:Key="Str_Restricted_EnterPassword">Иесінің құпиясөзін енгізу</sys:String>
     <sys:String x:Key="Str_Restricted_Prompt">«{0}» өңдеуді шектейді. Өңдеу үшін иесінің құпиясөзін енгізіңіз.</sys:String>
     <sys:String x:Key="Str_Restricted_Unlock">Құлпын ашу</sys:String>

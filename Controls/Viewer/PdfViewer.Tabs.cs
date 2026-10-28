@@ -53,6 +53,7 @@ namespace KillerPDF.Controls
             public string? SavedStateIdentity;
             public StampSpec? StampSpec;
             public bool ProtectedSource;               // #149: source file had a password/encryption when opened
+            public bool RestrictedByCertificate;       // read-only because its certificate recipient may not edit
             public Services.PublishedFileStamp? PublishedFile; // the bytes the last save wrote, when they differ from CurrentFile
             public Services.CompleteDocumentSource? CompleteDocumentSource;
             public string? SuggestedName;              // file name offered on the first save of an import with no saved home
@@ -208,6 +209,7 @@ namespace KillerPDF.Controls
             s.SavedStateIdentity = _savedStateIdentity;
             s.StampSpec = _docStampSpec;
             s.ProtectedSource = _openedFromProtected;
+            s.RestrictedByCertificate = _restrictedByCertificate;
             s.PublishedFile = _publishedFile;
             s.CompleteDocumentSource = _completeDocumentSource;
             s.SuggestedName = _suggestedName;
@@ -334,6 +336,7 @@ namespace KillerPDF.Controls
             _savedStateIdentity = s.SavedStateIdentity;
             ApplyStampSession(s);
             _openedFromProtected = s.ProtectedSource;
+            _restrictedByCertificate = s.RestrictedByCertificate;
             _publishedFile = s.PublishedFile;
             _completeDocumentSource = s.CompleteDocumentSource;
             _suggestedName = s.SuggestedName;
