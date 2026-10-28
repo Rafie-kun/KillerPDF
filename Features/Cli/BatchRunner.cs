@@ -216,7 +216,7 @@ namespace KillerPDF.Features
             try
             {
                 var repairs = PdfEngineIntegration.ResaveDocument(
-                    document, dst, allowSignatureInvalidation: true);
+                    document, dst, allowSignatureInvalidation: true, bulkOutput: true);
                 if (repairs.Count > 0)
                     detail = "Saved with repairs to broken references. Missing content was not recovered. References: "
                         + string.Join(", ", repairs.Select(repair => FormattableString.Invariant(

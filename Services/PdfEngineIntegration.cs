@@ -1262,7 +1262,8 @@ internal static class PdfEngineIntegration
     internal static IReadOnlyList<PdfReferenceRepair> ResaveDocument(
         PdfDocument source,
         string destinationPath,
-        bool allowSignatureInvalidation = false)
+        bool allowSignatureInvalidation = false,
+        bool bulkOutput = false)
     {
         ArgumentNullException.ThrowIfNull(source);
         ArgumentException.ThrowIfNullOrWhiteSpace(destinationPath);
@@ -1272,7 +1273,8 @@ internal static class PdfEngineIntegration
                 AllowSignatureInvalidation = allowSignatureInvalidation,
                 ReplaceDanglingReferences = true
             });
-        AtomicFileOutput.Write(destinationPath, result.Data);
+        if (bulkOutput) AtomicFileOutput.WriteBulk(destinationPath, result.Data);
+        else AtomicFileOutput.Write(destinationPath, result.Data);
         return result.ReferenceRepairs;
     }
 

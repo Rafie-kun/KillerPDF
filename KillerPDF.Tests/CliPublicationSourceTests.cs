@@ -27,5 +27,19 @@ namespace KillerPDF.Tests
 
             Assert.Empty(offenders);
         }
+
+        // The batch resave writes thousands of new files into an output tree, so it takes the bulk
+        // write that skips the disk flush for files that did not exist before.
+        [Fact]
+        public void BatchResaveWritesAsBulkOutput()
+        {
+            var dir = new DirectoryInfo(AppContext.BaseDirectory);
+            while (dir != null && !File.Exists(Path.Combine(dir.FullName, "Strings", "en-US.xaml")))
+                dir = dir.Parent;
+            Assert.True(dir != null, "could not locate the repo root from the test output folder");
+
+            string source = File.ReadAllText(Path.Combine(dir!.FullName, "Features", "Cli", "BatchRunner.cs"));
+            Assert.Matches(new Regex(@"ResaveDocument\(\s*document,\s*dst,\s*allowSignatureInvalidation:\s*true,\s*bulkOutput:\s*true\)"), source);
+        }
     }
 }

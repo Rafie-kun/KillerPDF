@@ -9,15 +9,26 @@ internal static class AtomicFileOutput
         internal Action<string, string, string?> Replace = (source, destination, backup) => File.Replace(source, destination, backup, ignoreMetadataErrors: true);
         internal Action<string, string> Move = File.Move;
         internal Action<string> Delete = File.Delete;
+        internal Action<FileStream> FlushToDisk = stream => stream.Flush(flushToDisk: true);
     }
 
     internal static void Write(string destination, ReadOnlyMemory<byte> bytes, CancellationToken cancellation = default)
         => Write(destination, stream => stream.Write(bytes.Span), cancellation);
 
+    /// <summary>Writes one of many outputs of a batch. The publish stays atomic, but the disk flush
+    /// is kept only when an existing file is replaced: a file that did not exist before has no
+    /// older copy to protect, and the flush costs about 1.5 ms per file.</summary>
+    internal static void WriteBulk(string destination, ReadOnlyMemory<byte> bytes, FileOperations? files = null)
+        => Write(destination, stream => stream.Write(bytes.Span), default, files ?? new FileOperations(),
+            flushToDisk: File.Exists(destination));
+
     internal static void Write(string destination, Action<Stream> write, CancellationToken cancellation = default)
         => Write(destination, write, cancellation, new FileOperations());
 
     internal static void Write(string destination, Action<Stream> write, CancellationToken cancellation, FileOperations files)
+        => Write(destination, write, cancellation, files, flushToDisk: true);
+
+    private static void Write(string destination, Action<Stream> write, CancellationToken cancellation, FileOperations files, bool flushToDisk)
     {
         cancellation.ThrowIfCancellationRequested();
         string temporary = TemporaryPath(destination);
@@ -27,7 +38,7 @@ internal static class AtomicFileOutput
             using (var stream = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None))
             {
                 write(stream);
-                stream.Flush(flushToDisk: true);
+                if (flushToDisk) files.FlushToDisk(stream);
             }
             Publish(temporary, destination, cancellation, files, ref retainTemporary);
         }

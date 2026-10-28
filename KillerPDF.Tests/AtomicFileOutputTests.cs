@@ -6,6 +6,34 @@ namespace KillerPDF.Tests;
 
 public sealed class AtomicFileOutputTests
 {
+    // A forced disk flush costs about 1.5 ms per file, which made a 15,000-file batch resave
+    // 19% slower than 1.8.91. The flush only protects an older copy of the destination, so a
+    // bulk write skips it for a file that does not exist yet and keeps it for a replacement.
+    [Theory]
+    [InlineData(false, false, 1)]
+    [InlineData(false, true, 1)]
+    [InlineData(true, false, 0)]
+    [InlineData(true, true, 1)]
+    public void DiskFlushProtectsOnlyAnExistingDestination(bool bulk, bool existing, int expectedFlushes)
+    {
+        string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+        Directory.CreateDirectory(directory);
+        string path = Path.Combine(directory, "output.pdf");
+        if (existing) File.WriteAllText(path, "Previous");
+        byte[] replacement = "Complete replacement"u8.ToArray();
+        int flushes = 0;
+        var files = new AtomicFileOutput.FileOperations { FlushToDisk = stream => { flushes++; stream.Flush(flushToDisk: true); } };
+        try
+        {
+            if (bulk) AtomicFileOutput.WriteBulk(path, replacement, files);
+            else AtomicFileOutput.Write(path, stream => stream.Write(replacement), default, files);
+            Assert.Equal(replacement, File.ReadAllBytes(path));
+            Assert.Equal(new[] { path }, Directory.GetFiles(directory));
+            Assert.Equal(expectedFlushes, flushes);
+        }
+        finally { Directory.Delete(directory, true); }
+    }
+
     [Theory]
     [InlineData(false, false)]
     [InlineData(false, true)]
