@@ -23,11 +23,16 @@ internal static class WindowCollectionSmoke
             if (!survivor.IsVisible || !File.ReadAllBytes(source).AsSpan().SequenceEqual(bytes))
                 throw new InvalidOperationException("Window collection changed the survivor or input PDF.");
             if (closed.IsAlive) throw new InvalidOperationException("APP-005: a closed document window remains retained while a sibling stays alive.");
-            var light = (RadioButton)survivor.FindName("ThemeLightRadio");
-            var next = (RadioButton)survivor.FindName(light.IsChecked == true ? "ThemeDarkRadio" : "ThemeLightRadio");
-            next.IsChecked = true;
+            // The kit theme menu builds its rows when it opens, so it is opened the way a click opens it.
+            DocumentStateSmoke.Click(survivor, "ThemeButton");
+            var light = ThemeMenuRadios.Find(survivor, "ThemeLightRadio");
+            var next = ThemeMenuRadios.Find(survivor, light.IsChecked == true ? "ThemeDarkRadio" : "ThemeLightRadio");
+            ((System.Windows.Automation.Provider.ISelectionItemProvider)new System.Windows.Automation.Peers.RadioButtonAutomationPeer(next)
+                .GetPattern(System.Windows.Automation.Peers.PatternInterface.SelectionItem)!).Select();
+            DocumentStateSmoke.Wait(() => next.IsChecked == true, "live sibling theme selection");
+            ((ContextMenu)survivor.FindName("ThemeMenu")).IsOpen = false;
             Pump();
-            if (next.IsChecked != true || !survivor.IsVisible)
+            if (!survivor.IsVisible)
                 throw new InvalidOperationException("The live sibling did not retain its selected theme.");
             Console.WriteLine("CONTROL closed document window collected and live sibling changed theme: " + (index + 1));
         }
