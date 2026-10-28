@@ -69,6 +69,10 @@ jobs:
         run: |
           dotnet run --project tools/KillerPDF.ShortcutSite/KillerPDF.ShortcutSite.csproj --configuration Release -- "$env:GITHUB_WORKSPACE" --check 2>&1 | Tee-Object ci-results/shortcuts.log
           if ($LASTEXITCODE -ne 0) { throw 'Website shortcuts differ from the app. See shortcuts.log.' }
+      - name: Verify WinGet release notes fit the manifest
+        if: matrix.name == 'application'
+        run: |
+          & ./build/Test-WinGetReleaseNotes.ps1 2>&1 | Tee-Object ci-results/winget-release-notes.log
       - name: Verify final release artifact gates offline
         if: matrix.name == 'application'
         run: |

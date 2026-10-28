@@ -7,6 +7,29 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+
+# WinGet caps ReleaseNotes at 10,000 characters. Longer notes keep their opening whole lines
+# and end with a pointer to the full notes on the GitHub release.
+function Get-WinGetReleaseNotes([string]$Body, [string]$ReleaseUrl) {
+    $notes = ([string]$Body).Trim()
+    if ([string]::IsNullOrWhiteSpace($notes)) { throw 'WinGet requires release notes; the GitHub release body is empty.' }
+    $limit = 10000
+    if ($notes.Length -le $limit) { return $notes }
+    $pointer = "The full release notes are at $ReleaseUrl"
+    $budget = $limit - $pointer.Length - 4
+    $kept = New-Object System.Collections.Generic.List[string]
+    $length = 0
+    foreach ($line in ($notes -split '\r?\n')) {
+        $next = $length + $line.Length + $(if ($kept.Count -eq 0) { 0 } else { 2 })
+        if ($next -gt $budget) { break }
+        $kept.Add($line)
+        $length = $next
+    }
+    while ($kept.Count -gt 0 -and [string]::IsNullOrWhiteSpace($kept[$kept.Count - 1])) { $kept.RemoveAt($kept.Count - 1) }
+    if ($kept.Count -eq 0) { return $pointer }
+    return (($kept -join "`r`n") + "`r`n`r`n" + $pointer)
+}
+
 $version = $Tag.Substring(1)
 $headers = @{
     Accept = 'application/vnd.github+json'
@@ -71,10 +94,7 @@ Installers:
 ManifestType: installer
 ManifestVersion: 1.12.0
 "@
-$releaseNotes = ([string]$release.body).Trim()
-if ([string]::IsNullOrWhiteSpace($releaseNotes) -or $releaseNotes.Length -gt 10000) {
-    throw 'WinGet requires release notes between 1 and 10000 characters.'
-}
+$releaseNotes = Get-WinGetReleaseNotes -Body ([string]$release.body) -ReleaseUrl "https://github.com/SteveTheKiller/KillerPDF/releases/tag/$Tag"
 $releaseNotes = (($releaseNotes -split '\r?\n') | ForEach-Object { "  $_" }) -join "`r`n"
 $locale = @"
 # Created by the KillerPDF release workflow
