@@ -642,8 +642,8 @@ namespace KillerPDF.Controls
             }));
         }
 
-        // Visual reset to the no-document drop-zone state. Mirrors CloseFile's teardown but
-        // does not close the document or touch session bookkeeping (callers handle that).
+        // Visual reset to the no-document drop-zone state. It does not close the document or
+        // touch session bookkeeping (callers handle that).
         private void ShowEmptyState()
         {
             CancelRenderWork();

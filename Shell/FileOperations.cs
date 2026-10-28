@@ -721,71 +721,8 @@ namespace KillerPDF.Shell
         // RepairViaRasterizeToFile) live in Services/PdfImport.cs.
 
         // ============================================================
-        // Close file (Ctrl+W) - returns to drop-zone state
+        // Close file (Ctrl+W) closes the tab, which commits the active editor before its prompt
         // ============================================================
-
-        private void CloseFile()
-        {
-            if (_doc is null) return;
-            if (_isDirty)
-            {
-                var res = KillerDialog.AskToSave(this, Loc("Str_Dlg_UnsavedClose"),
-                    Loc("Str_Btn_Save"), Loc("Str_Btn_DontSave"), Loc("Str_Btn_CancelDlg"));
-                if (res == MessageBoxResult.Cancel) return;
-                if (res == MessageBoxResult.Yes)
-                {
-                    SaveInPlace();
-                    if (_isDirty) return;
-                }
-            }
-            _doc.Close();
-            _doc = null;
-            _currentFile = null;
-            _completeDocumentSource = null;
-            CloseEngineDocumentSession();
-            App.RemoveSetting("LastFile");   // don't reopen a manually-closed file on next launch (Issue #75)
-            _activeTextBox = null;   // cancel any in-progress typewriter edit before canvas clear
-            RemoveTextEditHandles();
-            _annotations.Clear();
-            _undoStack.Clear();
-            _redoStack.Clear();
-            _navBack.Clear();
-            _navForward.Clear();
-            _renderDims.Clear();
-            _formTextValues.Clear();
-            _formChoiceValues.Clear();
-            _formCheckValues.Clear();
-            _formFontSizes.Clear();
-            _formRadioValues.Clear();
-            LoadRedactionMarksFromDocument();   // no document: drops the closed file's marks
-            Search.ClearPageResults();
-            _thumbCts?.Cancel();
-            PageList.ItemsSource = null;
-            PageImage.Source = null;
-            _annotationCanvas.Children.Clear();
-            MarqueeLayer.Children.Clear();   // the layer is window-level; drop any orphaned marquee boxes (#121)
-            FileNameLabel.Text = "";
-            DropZone.Visibility = Visibility.Visible;
-            PopulateRecentFilesList();   // refresh the empty-state recent list
-            PagePreviewPanel.Visibility = Visibility.Collapsed;
-            CloseSearchBar();
-            HideDrawSettings();
-            HideTextSettings();
-            HideSignaturePopup();
-            SetTool(EditTool.Select);
-            _closeFileBtnRef?.IsEnabled = false;
-            _pageJumpBox.IsEnabled = false;
-            _continuousRenderCts?.Cancel();
-            _continuousPanel.Children.Clear();
-            _continuousTops.Clear();
-            _pageJumpBox.Text = "";
-            _pageTotalLabel.Text = "/ -";
-            OutlineTree.Items.Clear();
-            SidebarOutlinesTab.IsEnabled = false;
-            if (_sidebarShowingOutlines) SwitchSidebarToPagesTab();
-            MarkDirty(false);
-            SetStatus(Loc("Str_Ready"));
-        }
 
         private void CloseFile_Click(object sender, RoutedEventArgs e) => CloseTab(_active);
 

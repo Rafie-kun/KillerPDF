@@ -47,6 +47,7 @@ public sealed class CommandLineCrashTests
     [InlineData("OnDispatcherException", "RestartAfterRenderFailure")]
     [InlineData("OnDispatcherException", "QueueRecoverableCrashDialog")]
     [InlineData("OnDomainException", "ShowCrashDialog")]
+    [InlineData("OnDomainException", "RestartAfterRenderFailure")]
     public void AppCrashHandlersReportCommandLineRunsBeforeAnyWindow(string handler, string window)
     {
         string source = File.ReadAllText(Path.Combine(Root(), "App.xaml.cs"));

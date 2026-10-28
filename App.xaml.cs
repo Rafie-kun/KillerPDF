@@ -605,6 +605,17 @@ namespace KillerPDF
                 CleanupSessionTemps();
                 Environment.Exit(1);
             }
+            // A render-thread failure can surface on a worker thread too. The window can no longer
+            // draw a crash dialog, so take the same recovery restart the UI-thread handler takes.
+            if (RenderFailureRecovery.IsRenderThreadFailure(ex) && Dispatcher != null && !Dispatcher.HasShutdownStarted)
+            {
+                try
+                {
+                    Dispatcher.Invoke(() => RestartAfterRenderFailure(logPath));
+                    return;
+                }
+                catch { /* fall back to the crash dialog below */ }
+            }
 
             try
             {
