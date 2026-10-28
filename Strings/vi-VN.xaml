@@ -1920,6 +1920,11 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Color_Red">Đỏ</sys:String>
     <sys:String x:Key="Str_Color_Green">Xanh lá</sys:String>
     <sys:String x:Key="Str_Color_Blue">Xanh dương</sys:String>
+    <sys:String x:Key="Str_Color_Purple">Tím</sys:String>
+    <sys:String x:Key="Str_Color_Orange">Cam</sys:String>
+    <sys:String x:Key="Str_Color_Teal">Xanh mòng két</sys:String>
+    <sys:String x:Key="Str_Color_Yellow">Vàng</sys:String>
+    <sys:String x:Key="Str_Color_Magenta">Hồng tím</sys:String>
     <sys:String x:Key="Str_CertCatalog_Title">Chứng chỉ</sys:String>
     <sys:String x:Key="Str_CertCatalog_Hint">Chứng chỉ Windows ở chế độ chỉ đọc. Chứng chỉ được nhập chỉ được lưu trong KillerPDF. Việc nhập không làm cho chứng chỉ trở nên đáng tin cậy.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Search">Tìm kiếm chứng chỉ</sys:String>

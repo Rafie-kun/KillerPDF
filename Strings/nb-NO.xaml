@@ -1920,6 +1920,11 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Color_Red">Rød</sys:String>
     <sys:String x:Key="Str_Color_Green">Grønn</sys:String>
     <sys:String x:Key="Str_Color_Blue">Blå</sys:String>
+    <sys:String x:Key="Str_Color_Purple">Lilla</sys:String>
+    <sys:String x:Key="Str_Color_Orange">Oransje</sys:String>
+    <sys:String x:Key="Str_Color_Teal">Blågrønn</sys:String>
+    <sys:String x:Key="Str_Color_Yellow">Gul</sys:String>
+    <sys:String x:Key="Str_Color_Magenta">Magenta</sys:String>
     <sys:String x:Key="Str_CertCatalog_Title">Sertifikater</sys:String>
     <sys:String x:Key="Str_CertCatalog_Hint">Windows-sertifikater er skrivebeskyttet. Importerte sertifikater lagres bare i KillerPDF. Import gjør ikke et sertifikat klarert.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Search">Søk i sertifikater</sys:String>

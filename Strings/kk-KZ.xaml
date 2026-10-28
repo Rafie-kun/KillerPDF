@@ -1923,6 +1923,11 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_Color_Red">Қызыл</sys:String>
     <sys:String x:Key="Str_Color_Green">Жасыл</sys:String>
     <sys:String x:Key="Str_Color_Blue">Көк</sys:String>
+    <sys:String x:Key="Str_Color_Purple">Күлгін</sys:String>
+    <sys:String x:Key="Str_Color_Orange">Қызғылт сары</sys:String>
+    <sys:String x:Key="Str_Color_Teal">Көкшіл жасыл</sys:String>
+    <sys:String x:Key="Str_Color_Yellow">Сары</sys:String>
+    <sys:String x:Key="Str_Color_Magenta">Күлгін қызыл</sys:String>
     <sys:String x:Key="Str_CertCatalog_Title">Сертификаттар</sys:String>
     <sys:String x:Key="Str_CertCatalog_Hint">Windows сертификаттарын тек оқуға болады. Импортталған сертификаттар тек KillerPDF ішінде сақталады. Импорттау сертификатты сенімді етпейді.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Search">Сертификаттарды іздеу</sys:String>

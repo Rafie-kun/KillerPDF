@@ -34,6 +34,26 @@ public sealed class StringKeyCoverageTests
         Assert.True(missing.Count == 0, "String keys used but not defined in Strings/en-US.xaml:\n" + string.Join("\n", missing));
     }
 
+    // The theme menu names each accent pill for screen readers with "Str_Color_" + the accent, a
+    // prefix-built key the scan above skips, so every accent is checked here.
+    [Fact]
+    public void EveryAccentHasAColorNameInEveryLanguage()
+    {
+        string root = FindRepositoryRoot();
+        Match declaration = Regex.Match(File.ReadAllText(Path.Combine(root, "Services", "ThemeManager.cs")),
+            @"enum Accent\s*\{([^}]*)\}");
+        Assert.True(declaration.Success, "The Accent enum was not found in Services/ThemeManager.cs.");
+        string[] accents = [.. declaration.Groups[1].Value.Split(',').Select(name => name.Trim()).Where(name => name.Length > 0)];
+        Assert.Equal(8, accents.Length);
+        foreach (string locale in Directory.EnumerateFiles(Path.Combine(root, "Strings"), "*.xaml"))
+        {
+            string text = File.ReadAllText(locale);
+            foreach (string accent in accents)
+                Assert.True(text.Contains($"x:Key=\"Str_Color_{accent}\"", StringComparison.Ordinal),
+                    $"{Path.GetFileName(locale)} has no Str_Color_{accent}.");
+        }
+    }
+
     private static IEnumerable<string> AppSources(string root)
     {
         string[] skipped = ["bin", "obj", "engine", "third_party", "tests", "tools", "KillerPDF.Tests", "Strings", "pdf-landing", "validation", "Packaging"];

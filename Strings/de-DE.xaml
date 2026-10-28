@@ -1909,6 +1909,11 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Color_Red">Rot</sys:String>
     <sys:String x:Key="Str_Color_Green">Grün</sys:String>
     <sys:String x:Key="Str_Color_Blue">Blau</sys:String>
+    <sys:String x:Key="Str_Color_Purple">Lila</sys:String>
+    <sys:String x:Key="Str_Color_Orange">Orange</sys:String>
+    <sys:String x:Key="Str_Color_Teal">Petrol</sys:String>
+    <sys:String x:Key="Str_Color_Yellow">Gelb</sys:String>
+    <sys:String x:Key="Str_Color_Magenta">Magenta</sys:String>
     <sys:String x:Key="Str_CertCatalog_Title">Zertifikate</sys:String>
     <sys:String x:Key="Str_CertCatalog_Hint">Windows-Zertifikate sind schreibgeschützt. Importierte Zertifikate werden nur in KillerPDF gespeichert. Durch den Import wird einem Zertifikat kein Vertrauen erteilt.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Search">Zertifikate suchen</sys:String>

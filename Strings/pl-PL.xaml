@@ -1908,6 +1908,11 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Color_Red">Czerwony</sys:String>
     <sys:String x:Key="Str_Color_Green">Zielony</sys:String>
     <sys:String x:Key="Str_Color_Blue">Niebieski</sys:String>
+    <sys:String x:Key="Str_Color_Purple">Fioletowy</sys:String>
+    <sys:String x:Key="Str_Color_Orange">Pomarańczowy</sys:String>
+    <sys:String x:Key="Str_Color_Teal">Morski</sys:String>
+    <sys:String x:Key="Str_Color_Yellow">Żółty</sys:String>
+    <sys:String x:Key="Str_Color_Magenta">Purpurowy</sys:String>
     <sys:String x:Key="Str_CertCatalog_Title">Certyfikaty</sys:String>
     <sys:String x:Key="Str_CertCatalog_Hint">Certyfikaty systemu Windows są tylko do odczytu. Importowane certyfikaty są przechowywane wyłącznie w KillerPDF. Import nie oznacza uznania certyfikatu za zaufany.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Search">Szukaj certyfikatów</sys:String>

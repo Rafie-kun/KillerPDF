@@ -1923,6 +1923,11 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Color_Red">Красный</sys:String>
     <sys:String x:Key="Str_Color_Green">Зелёный</sys:String>
     <sys:String x:Key="Str_Color_Blue">Синий</sys:String>
+    <sys:String x:Key="Str_Color_Purple">Фиолетовый</sys:String>
+    <sys:String x:Key="Str_Color_Orange">Оранжевый</sys:String>
+    <sys:String x:Key="Str_Color_Teal">Бирюзовый</sys:String>
+    <sys:String x:Key="Str_Color_Yellow">Жёлтый</sys:String>
+    <sys:String x:Key="Str_Color_Magenta">Пурпурный</sys:String>
     <sys:String x:Key="Str_CertCatalog_Title">Сертификаты</sys:String>
     <sys:String x:Key="Str_CertCatalog_Hint">Сертификаты Windows доступны только для чтения. Импортированные сертификаты хранятся только в KillerPDF. Импорт не делает сертификат доверенным.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Search">Поиск сертификатов</sys:String>

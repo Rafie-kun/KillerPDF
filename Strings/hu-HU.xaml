@@ -1907,6 +1907,11 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Color_Red">Piros</sys:String>
     <sys:String x:Key="Str_Color_Green">Zöld</sys:String>
     <sys:String x:Key="Str_Color_Blue">Kék</sys:String>
+    <sys:String x:Key="Str_Color_Purple">Lila</sys:String>
+    <sys:String x:Key="Str_Color_Orange">Narancs</sys:String>
+    <sys:String x:Key="Str_Color_Teal">Kékeszöld</sys:String>
+    <sys:String x:Key="Str_Color_Yellow">Sárga</sys:String>
+    <sys:String x:Key="Str_Color_Magenta">Bíborvörös</sys:String>
     <sys:String x:Key="Str_CertCatalog_Title">Tanúsítványok</sys:String>
     <sys:String x:Key="Str_CertCatalog_Hint">A Windows tanúsítványai csak olvashatók. Az importált tanúsítványokat csak a KillerPDF tárolja. Az importálás nem teszi megbízhatóvá a tanúsítványt.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Search">Tanúsítványok keresése</sys:String>

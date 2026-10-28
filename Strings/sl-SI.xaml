@@ -1809,6 +1809,11 @@
     <sys:String x:Key="Str_Color_Red">Rdeča</sys:String>
     <sys:String x:Key="Str_Color_Green">Zelena</sys:String>
     <sys:String x:Key="Str_Color_Blue">Modra</sys:String>
+    <sys:String x:Key="Str_Color_Purple">Vijolična</sys:String>
+    <sys:String x:Key="Str_Color_Orange">Oranžna</sys:String>
+    <sys:String x:Key="Str_Color_Teal">Modrozelena</sys:String>
+    <sys:String x:Key="Str_Color_Yellow">Rumena</sys:String>
+    <sys:String x:Key="Str_Color_Magenta">Magenta</sys:String>
     <sys:String x:Key="Str_CertCatalog_Title">Potrdila</sys:String>
     <sys:String x:Key="Str_CertCatalog_Hint">Potrdila sistema Windows so samo za branje. Uvožena potrdila so shranjena samo v KillerPDF. Uvoz ne pomeni, da je potrdilo zaupanja vredno.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Search">Iskanje potrdil</sys:String>

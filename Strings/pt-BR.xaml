@@ -1920,6 +1920,11 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Color_Red">Vermelho</sys:String>
     <sys:String x:Key="Str_Color_Green">Verde</sys:String>
     <sys:String x:Key="Str_Color_Blue">Azul</sys:String>
+    <sys:String x:Key="Str_Color_Purple">Roxo</sys:String>
+    <sys:String x:Key="Str_Color_Orange">Laranja</sys:String>
+    <sys:String x:Key="Str_Color_Teal">Azul-petróleo</sys:String>
+    <sys:String x:Key="Str_Color_Yellow">Amarelo</sys:String>
+    <sys:String x:Key="Str_Color_Magenta">Magenta</sys:String>
     <sys:String x:Key="Str_CertCatalog_Title">Certificados</sys:String>
     <sys:String x:Key="Str_CertCatalog_Hint">Os certificados do Windows são somente leitura. Os certificados importados são armazenados apenas no KillerPDF. Importar um certificado não o torna confiável.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Search">Pesquisar certificados</sys:String>

@@ -1920,6 +1920,11 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Color_Red">Rouge</sys:String>
     <sys:String x:Key="Str_Color_Green">Vert</sys:String>
     <sys:String x:Key="Str_Color_Blue">Bleu</sys:String>
+    <sys:String x:Key="Str_Color_Purple">Violet</sys:String>
+    <sys:String x:Key="Str_Color_Orange">Orange</sys:String>
+    <sys:String x:Key="Str_Color_Teal">Sarcelle</sys:String>
+    <sys:String x:Key="Str_Color_Yellow">Jaune</sys:String>
+    <sys:String x:Key="Str_Color_Magenta">Magenta</sys:String>
     <sys:String x:Key="Str_CertCatalog_Title">Certificats</sys:String>
     <sys:String x:Key="Str_CertCatalog_Hint">Les certificats Windows sont en lecture seule. Les certificats importés sont stockés uniquement dans KillerPDF. L'importation d'un certificat ne lui accorde aucune confiance.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Search">Rechercher des certificats</sys:String>

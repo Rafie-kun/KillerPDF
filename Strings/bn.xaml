@@ -1900,6 +1900,11 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Color_Red">লাল</sys:String>
     <sys:String x:Key="Str_Color_Green">সবুজ</sys:String>
     <sys:String x:Key="Str_Color_Blue">নীল</sys:String>
+    <sys:String x:Key="Str_Color_Purple">বেগুনি</sys:String>
+    <sys:String x:Key="Str_Color_Orange">কমলা</sys:String>
+    <sys:String x:Key="Str_Color_Teal">টিল</sys:String>
+    <sys:String x:Key="Str_Color_Yellow">হলুদ</sys:String>
+    <sys:String x:Key="Str_Color_Magenta">ম্যাজেন্টা</sys:String>
     <sys:String x:Key="Str_CertCatalog_Title">সার্টিফিকেট</sys:String>
     <sys:String x:Key="Str_CertCatalog_Hint">Windows সার্টিফিকেটগুলো শুধু পড়া যায়। আমদানি করা সার্টিফিকেট শুধু KillerPDF-এ সংরক্ষিত থাকে। আমদানি করলেই কোনো সার্টিফিকেট বিশ্বস্ত হয় না।</sys:String>
     <sys:String x:Key="Str_CertCatalog_Search">সার্টিফিকেট খুঁজুন</sys:String>

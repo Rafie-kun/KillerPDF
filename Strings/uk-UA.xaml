@@ -1920,6 +1920,11 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Color_Red">Червоний</sys:String>
     <sys:String x:Key="Str_Color_Green">Зелений</sys:String>
     <sys:String x:Key="Str_Color_Blue">Синій</sys:String>
+    <sys:String x:Key="Str_Color_Purple">Фіолетовий</sys:String>
+    <sys:String x:Key="Str_Color_Orange">Помаранчевий</sys:String>
+    <sys:String x:Key="Str_Color_Teal">Бірюзовий</sys:String>
+    <sys:String x:Key="Str_Color_Yellow">Жовтий</sys:String>
+    <sys:String x:Key="Str_Color_Magenta">Пурпуровий</sys:String>
     <sys:String x:Key="Str_CertCatalog_Title">Сертифікати</sys:String>
     <sys:String x:Key="Str_CertCatalog_Hint">Сертифікати Windows доступні лише для читання. Імпортовані сертифікати зберігаються лише в KillerPDF. Імпорт не робить сертифікат довіреним.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Search">Пошук сертифікатів</sys:String>

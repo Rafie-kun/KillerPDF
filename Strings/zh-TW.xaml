@@ -1902,6 +1902,11 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_Color_Red">紅色</sys:String>
     <sys:String x:Key="Str_Color_Green">綠色</sys:String>
     <sys:String x:Key="Str_Color_Blue">藍色</sys:String>
+    <sys:String x:Key="Str_Color_Purple">紫色</sys:String>
+    <sys:String x:Key="Str_Color_Orange">橘色</sys:String>
+    <sys:String x:Key="Str_Color_Teal">藍綠色</sys:String>
+    <sys:String x:Key="Str_Color_Yellow">黃色</sys:String>
+    <sys:String x:Key="Str_Color_Magenta">洋紅</sys:String>
     <sys:String x:Key="Str_CertCatalog_Title">憑證</sys:String>
     <sys:String x:Key="Str_CertCatalog_Hint">Windows 憑證為唯讀。匯入的憑證只會儲存在 KillerPDF 中。匯入憑證並不代表信任該憑證。</sys:String>
     <sys:String x:Key="Str_CertCatalog_Search">搜尋憑證</sys:String>

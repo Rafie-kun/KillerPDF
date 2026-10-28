@@ -1904,6 +1904,11 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Color_Red">红色</sys:String>
     <sys:String x:Key="Str_Color_Green">绿色</sys:String>
     <sys:String x:Key="Str_Color_Blue">蓝色</sys:String>
+    <sys:String x:Key="Str_Color_Purple">紫色</sys:String>
+    <sys:String x:Key="Str_Color_Orange">橙色</sys:String>
+    <sys:String x:Key="Str_Color_Teal">青色</sys:String>
+    <sys:String x:Key="Str_Color_Yellow">黄色</sys:String>
+    <sys:String x:Key="Str_Color_Magenta">品红</sys:String>
     <sys:String x:Key="Str_CertCatalog_Title">证书</sys:String>
     <sys:String x:Key="Str_CertCatalog_Hint">Windows 证书为只读。导入的证书仅存储在 KillerPDF 中。导入证书并不代表信任该证书。</sys:String>
     <sys:String x:Key="Str_CertCatalog_Search">搜索证书</sys:String>

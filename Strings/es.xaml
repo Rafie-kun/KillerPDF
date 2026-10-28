@@ -1900,6 +1900,11 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Color_Red">Rojo</sys:String>
     <sys:String x:Key="Str_Color_Green">Verde</sys:String>
     <sys:String x:Key="Str_Color_Blue">Azul</sys:String>
+    <sys:String x:Key="Str_Color_Purple">Morado</sys:String>
+    <sys:String x:Key="Str_Color_Orange">Naranja</sys:String>
+    <sys:String x:Key="Str_Color_Teal">Verde azulado</sys:String>
+    <sys:String x:Key="Str_Color_Yellow">Amarillo</sys:String>
+    <sys:String x:Key="Str_Color_Magenta">Magenta</sys:String>
     <sys:String x:Key="Str_CertCatalog_Title">Certificados</sys:String>
     <sys:String x:Key="Str_CertCatalog_Hint">Los certificados de Windows son de solo lectura. Los certificados importados se guardan solo en KillerPDF. Importar un certificado no lo convierte en un certificado de confianza.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Search">Buscar certificados</sys:String>

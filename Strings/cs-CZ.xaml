@@ -1905,6 +1905,11 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Color_Red">Červená</sys:String>
     <sys:String x:Key="Str_Color_Green">Zelená</sys:String>
     <sys:String x:Key="Str_Color_Blue">Modrá</sys:String>
+    <sys:String x:Key="Str_Color_Purple">Fialová</sys:String>
+    <sys:String x:Key="Str_Color_Orange">Oranžová</sys:String>
+    <sys:String x:Key="Str_Color_Teal">Modrozelená</sys:String>
+    <sys:String x:Key="Str_Color_Yellow">Žlutá</sys:String>
+    <sys:String x:Key="Str_Color_Magenta">Purpurová</sys:String>
     <sys:String x:Key="Str_CertCatalog_Title">Certifikáty</sys:String>
     <sys:String x:Key="Str_CertCatalog_Hint">Certifikáty Windows jsou jen pro čtení. Importované certifikáty se ukládají pouze v KillerPDF. Importem se certifikát nestává důvěryhodným.</sys:String>
     <sys:String x:Key="Str_CertCatalog_Search">Hledat certifikáty</sys:String>

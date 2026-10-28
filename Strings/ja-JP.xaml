@@ -1920,6 +1920,11 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Color_Red">赤</sys:String>
     <sys:String x:Key="Str_Color_Green">緑</sys:String>
     <sys:String x:Key="Str_Color_Blue">青</sys:String>
+    <sys:String x:Key="Str_Color_Purple">紫</sys:String>
+    <sys:String x:Key="Str_Color_Orange">オレンジ</sys:String>
+    <sys:String x:Key="Str_Color_Teal">ティール</sys:String>
+    <sys:String x:Key="Str_Color_Yellow">黄</sys:String>
+    <sys:String x:Key="Str_Color_Magenta">マゼンタ</sys:String>
     <sys:String x:Key="Str_CertCatalog_Title">証明書</sys:String>
     <sys:String x:Key="Str_CertCatalog_Hint">Windows の証明書は読み取り専用です。インポートした証明書は KillerPDF にのみ保存されます。インポートしただけでは証明書は信頼されません。</sys:String>
     <sys:String x:Key="Str_CertCatalog_Search">証明書を検索</sys:String>
