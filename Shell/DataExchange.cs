@@ -140,13 +140,16 @@ public partial class MainWindow
                 {
                     WriteFormValuesToDocument(path);
                     PdfEngineIntegration.ApplyFormData(path, data!, review.Option);
-                    ActiveViewer.FormTextValuesRef.Clear();
-                    ActiveViewer.FormChoiceValuesRef.Clear();
-                    ActiveViewer.FormMultiChoiceValuesRef.Clear();
-                    ActiveViewer.FormCheckValuesRef.Clear();
-                    ActiveViewer.FormRadioValuesRef.Clear();
-                    ActiveViewer.FormFontSizesRef.Clear();
                 }
+            }, onPublished: bookmarks ? null : () =>
+            {
+                // The typed values are now in the imported file, so the overlays go only once it is live.
+                ActiveViewer.FormTextValuesRef.Clear();
+                ActiveViewer.FormChoiceValuesRef.Clear();
+                ActiveViewer.FormMultiChoiceValuesRef.Clear();
+                ActiveViewer.FormCheckValuesRef.Clear();
+                ActiveViewer.FormRadioValuesRef.Clear();
+                ActiveViewer.FormFontSizesRef.Clear();
             });
             MarkDirty();
         }

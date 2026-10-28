@@ -28,7 +28,8 @@ namespace KillerPDF.Shell
             UndoEntry? documentUndo = null,
             bool preserveRenderedPages = false,
             bool remapRedactionMarks = false,
-            Action<Dictionary<int, List<PageAnnotation>>>? remapAnnotations = null)
+            Action<Dictionary<int, List<PageAnnotation>>>? remapAnnotations = null,
+            Action? onPublished = null)
         {
             if (_doc is null || _currentFile is null) return;
             // Every user command asks for the owner password before it gets here. This catches
@@ -129,6 +130,9 @@ namespace KillerPDF.Shell
             if (candidateAnnotations is not null)
                 foreach (var pair in candidateAnnotations) _annotations[pair.Key] = pair.Value;
             if (remappedMarks is not null) ActiveViewer.RestoreRedactionMarksExt(remappedMarks);
+            // Side state that belongs to the published document changes here, never in
+            // finalizeSavedFile, which runs before the reopen that can still fail.
+            onPublished?.Invoke();
             if (!preserveRenderedPages)
             {
                 _renderDims.Clear();
