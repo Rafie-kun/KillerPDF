@@ -74,6 +74,13 @@ namespace KillerLauncher
                 Application.SetCompatibleTextRenderingDefault(false);
                 return InstallerWizard.Run(args);
 #else
+                // The running portable app's footer Install button. The app waits for this exit
+                // code and relaunches the installed copy itself.
+                if (PortableLauncherPolicy.ReadInAppInstall(args) is { } inApp)
+                {
+                    Directory.SetCurrentDirectory(Path.GetTempPath());
+                    return Install(machine: inApp.Machine, desktop: inApp.Desktop);
+                }
                 if (args.Any(PortableLauncherPolicy.IsInstallationArgument))
                     throw new InvalidOperationException(
                         LauncherStrings.Get("PortablePackage"));

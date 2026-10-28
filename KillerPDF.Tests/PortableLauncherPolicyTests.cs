@@ -27,6 +27,31 @@ public sealed class PortableLauncherPolicyTests
         Assert.False(PortableLauncherPolicy.IsInstallationArgument(argument));
     }
 
+    [Theory]
+    [InlineData("/install-from-portable")]
+    [InlineData("/install-from-portable /desktop")]
+    [InlineData("/install-from-portable /all-users /desktop")]
+    public void TheAppsOwnInstallRequestIsNotAnInstallerArgument(string arguments)
+    {
+        string[] args = arguments.Split(' ');
+        Assert.DoesNotContain(args, PortableLauncherPolicy.IsInstallationArgument);
+        Assert.NotNull(PortableLauncherPolicy.ReadInAppInstall(args));
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("document.pdf")]
+    [InlineData("/desktop /install-from-portable")]
+    [InlineData("/install-from-portable document.pdf")]
+    [InlineData("/install-from-portable /install-dir=C:\\Elsewhere")]
+    [InlineData("/install-from-portable /silent")]
+    [InlineData("/install-from-portable /desktop /desktop")]
+    public void AnythingElseIsNotAnInAppInstall(string arguments)
+    {
+        string[] args = arguments.Length == 0 ? [] : arguments.Split(' ');
+        Assert.Null(PortableLauncherPolicy.ReadInAppInstall(args));
+    }
+
     [Fact]
     public void LockedPortableDirectoryIsLeftForTheNextSweep()
     {

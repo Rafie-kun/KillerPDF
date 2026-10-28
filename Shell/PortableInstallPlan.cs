@@ -11,28 +11,32 @@ namespace KillerPDF.Shell
     {
         /// <summary>
         /// Chooses the install for the portable copy at <paramref name="currentExe"/>.
-        /// An all-users install re-runs the packaged launcher (or this exe, for a direct run)
-        /// elevated with /silent, the same machine-wide path winget and choco use. A per-user
-        /// install runs the packaged launcher with /install-user, or copies this exe in process
-        /// when there is no launcher (old woven builds and developer runs). A per-user install
-        /// while an all-users copy exists is refused, so there are never two installed copies.
+        /// A packaged portable asks its launcher for the in-app install
+        /// (KillerLauncher.PortableLauncherPolicy.InAppInstallArgument), elevated for all users.
+        /// The launcher refuses Setup's /install-user and /silent, so those are never sent to it.
+        /// Without a launcher (old woven builds and developer runs), all users re-runs this exe
+        /// elevated with /silent and a per-user install copies this exe in process. A per-user
+        /// install while an all-users copy exists is refused, so there are never two installed copies.
         /// </summary>
         internal static PortableInstallPlan Choose(bool allUsers, bool desktop, bool machineInstallExists,
             string? launcher, string? currentExe, string userInstallExe, string machineInstallExe)
         {
             if (!allUsers && machineInstallExists)
                 return new(PortableInstallKind.RefusedSecondCopy, null, null, false, null);
+            if (launcher != null)
+            {
+                string arguments = "/install-from-portable" + (allUsers ? " /all-users" : "") + (desktop ? " /desktop" : "");
+                return new(PortableInstallKind.Process, launcher, arguments, Elevate: allUsers,
+                    allUsers ? machineInstallExe : userInstallExe);
+            }
             if (allUsers)
             {
-                string? program = launcher ?? currentExe;
+                string? program = currentExe;
                 if (string.IsNullOrEmpty(program))
                     return new(PortableInstallKind.Unavailable, null, null, false, null);
                 return new(PortableInstallKind.Process, program, desktop ? "/silent /desktop" : "/silent",
                     Elevate: true, machineInstallExe);
             }
-            if (launcher != null)
-                return new(PortableInstallKind.Process, launcher, desktop ? "/install-user /desktop" : "/install-user",
-                    Elevate: false, userInstallExe);
             return new(PortableInstallKind.InProcess, null, null, false, userInstallExe);
         }
     }

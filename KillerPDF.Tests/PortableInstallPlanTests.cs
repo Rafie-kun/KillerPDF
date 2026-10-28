@@ -3,8 +3,8 @@ using Xunit;
 
 namespace KillerPDF.Tests;
 
-/// <summary>The footer Install button's command choice for a portable copy: the same launcher and
-/// /silent commands as 1.8.x, so install paths, registry keys and uninstall names do not change.</summary>
+/// <summary>The footer Install button's command choice for a portable copy. The launcher installs
+/// through its own Install, so install paths, registry keys and uninstall names do not change.</summary>
 public sealed class PortableInstallPlanTests
 {
     private const string Current = @"D:\Tools\KillerPDF.exe";
@@ -16,28 +16,24 @@ public sealed class PortableInstallPlanTests
         string? launcher = Launcher, string? current = Current)
         => PortableInstallPlan.Choose(allUsers, desktop, machine, launcher, current, UserExe, MachineExe);
 
-    [Fact]
-    public void PerUserInstallRunsTheLauncherUnelevated()
+    // The portable launcher refuses /install-user, /silent and the register switches (#259), so
+    // the plan must hand it the one request it accepts from the app, or every install fails.
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    public void TheLauncherAcceptsTheInstallThePlanAsksFor(bool allUsers, bool desktop)
     {
-        var plan = Choose(allUsers: false, desktop: true);
+        var plan = Choose(allUsers, desktop);
         Assert.Equal(PortableInstallKind.Process, plan.Kind);
         Assert.Equal(Launcher, plan.Program);
-        Assert.Equal("/install-user /desktop", plan.Arguments);
-        Assert.False(plan.Elevate);
-        Assert.Equal(UserExe, plan.TargetExe);
-        Assert.Equal("/install-user", Choose(allUsers: false).Arguments);
-    }
+        Assert.Equal(allUsers, plan.Elevate);
+        Assert.Equal(allUsers ? MachineExe : UserExe, plan.TargetExe);
 
-    [Fact]
-    public void AllUsersInstallRunsSilentElevatedThroughTheLauncher()
-    {
-        var plan = Choose(allUsers: true);
-        Assert.Equal(PortableInstallKind.Process, plan.Kind);
-        Assert.Equal(Launcher, plan.Program);
-        Assert.Equal("/silent", plan.Arguments);
-        Assert.True(plan.Elevate);
-        Assert.Equal(MachineExe, plan.TargetExe);
-        Assert.Equal("/silent /desktop", Choose(allUsers: true, desktop: true).Arguments);
+        string[] args = plan.Arguments!.Split(' ');
+        Assert.DoesNotContain(args, KillerLauncher.PortableLauncherPolicy.IsInstallationArgument);
+        Assert.Equal((allUsers, desktop), KillerLauncher.PortableLauncherPolicy.ReadInAppInstall(args));
     }
 
     [Fact]

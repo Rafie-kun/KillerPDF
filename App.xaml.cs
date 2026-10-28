@@ -1108,8 +1108,7 @@ namespace KillerPDF
         /// The footer's Install button (Shell/Install.cs) calls it; the command it runs comes from
         /// Shell/PortableInstallPlan.cs.
         ///
-        /// An all-users install re-runs this exe elevated with /silent - the same machine-wide path
-        /// winget and choco use - so UAC only appears when the user actually asked for it.
+        /// An all-users install runs elevated, so UAC only appears when the user actually asked for it.
         /// </summary>
         internal static bool InstallAndRelaunch(bool wantDesktop, bool allUsers, string? fileToOpen = null)
         {
