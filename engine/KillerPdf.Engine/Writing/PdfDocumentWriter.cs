@@ -1268,7 +1268,12 @@ public static class PdfDocumentWriter
                     continue;
                 }
                 PdfObject replacement = replacements?.GetValueOrDefault(entry.ObjectNumber) ?? original;
-                PdfObject normalized = Normalize(replacement, entry.ObjectNumber, generation, "", 0);
+                // Normalize builds a repair path for every key and index it visits. Almost no object
+                // holds a dangling reference, so a cheap scan decides first and the paths are only
+                // built for objects that will record a repair.
+                PdfObject normalized = ContainsNullReference(replacement, 0)
+                    ? Normalize(replacement, entry.ObjectNumber, generation, "", 0)
+                    : replacement;
                 if (!ReferenceEquals(original, normalized)) _containers[original] = normalized;
                 _source.Add((entry.ObjectNumber, generation), normalized);
                 Objects.Add(new WritableObject(entry.ObjectNumber, generation, normalized));
@@ -1332,6 +1337,30 @@ public static class PdfDocumentWriter
                     }
                 }
                 return changed ? Remember(value, new PdfDictionary(entries)) : value;
+            }
+
+            // Visits the same nodes in the same order as Normalize and applies the same depth limit,
+            // so it throws exactly where Normalize would and returns false only when Normalize
+            // would return the object unchanged.
+            bool ContainsNullReference(PdfObject value, int depth)
+            {
+                if (depth > 256)
+                    throw new NotSupportedException("The reference normalization graph is too deeply nested.");
+                if (IsNullReference(value, out _)) return true;
+                if (value is PdfArray array)
+                {
+                    foreach (PdfObject item in array)
+                        if (ContainsNullReference(item, depth + 1)) return true;
+                    return false;
+                }
+                if (value is PdfStream stream) return ContainsNullReference(stream.Dictionary, depth + 1);
+                if (value is not PdfDictionary dictionary) return false;
+                foreach (var entry in dictionary)
+                {
+                    if (IsNullReference(entry.Value, out _)) return true;
+                    if (ContainsNullReference(entry.Value, depth + 1)) return true;
+                }
+                return false;
             }
 
             PdfObject Remember(PdfObject original, PdfObject normalized)
