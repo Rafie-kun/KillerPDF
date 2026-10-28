@@ -340,6 +340,7 @@ KillerPDF oppretter ikke to installerte kopier.</sys:String>
     <sys:String x:Key="Str_Chk_Desktop">Legg til snarvei på skrivebordet</sys:String>
     <sys:String x:Key="Str_Chk_AllUsers">Installer for alle på denne datamaskinen (krever administrator)</sys:String>
     <sys:String x:Key="Str_Status_InstallFailed">Installasjonen ble ikke fullført. KillerPDF kjører fortsatt som bærbar.</sys:String>
+    <sys:String x:Key="Str_Status_RelaunchDeferred">Installasjonen er fullført. KillerPDF forble åpen for å beskytte arbeid som ble endret under installasjonen.</sys:String>
     <sys:String x:Key="Str_Dlg_SetDefaultPdfMsg" xml:space="preserve">Vil du angi KillerPDF som standard PDF-leser?
 
 Åpner Windows-innstillinger, Standardapper.</sys:String>
@@ -1106,6 +1107,7 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Wordmark_A">Killer</sys:String>
     <sys:String x:Key="Str_Wordmark_B">PDF</sys:String>
     <sys:String x:Key="Str_Btn_Open">Åpne</sys:String>
+    <sys:String x:Key="Str_Btn_Select">Velg mappe</sys:String>
     <sys:String x:Key="Str_Btn_Replace">Erstatt</sys:String>
     <sys:String x:Key="Str_Btn_Save">Lagre</sys:String>
     <sys:String x:Key="Str_Btn_DontSave">Ikke lagre</sys:String>
@@ -1122,6 +1124,7 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Dlg_NoSuchFile">Den filen finnes ikke.</sys:String>
     <sys:String x:Key="Str_Dlg_NoSuchFolder">Den mappen finnes ikke.</sys:String>
     <sys:String x:Key="Str_Dlg_OverwriteMsg">Erstatte {0}?</sys:String>
+    <sys:String x:Key="Str_Dlg_Places">Steder</sys:String>
     <sys:String x:Key="Str_Menu_PinPlace">Fest til steder</sys:String>
     <sys:String x:Key="Str_Menu_UnpinPlace">Fjern fra steder</sys:String>
     <sys:String x:Key="Str_QA_Desktop">Skrivebord</sys:String>

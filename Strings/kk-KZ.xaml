@@ -262,6 +262,7 @@ KillerPDF екі орнатылған көшірме жасамайды.</sys:St
     <sys:String x:Key="Str_Chk_Desktop">Жұмыс үстеліндегі төте жолды қосу</sys:String>
     <sys:String x:Key="Str_Chk_AllUsers">Осы компьютердегі барлық пайдаланушылар үшін орнату (әкімші құқығы керек)</sys:String>
     <sys:String x:Key="Str_Status_InstallFailed">Орнату аяқталмады - KillerPDF әлі тасымалды түрде жұмыс істеп тұр.</sys:String>
+    <sys:String x:Key="Str_Status_RelaunchDeferred">Орнату аяқталды. Орнату кезінде өзгертілген жұмысты қорғау үшін KillerPDF ашық қалды.</sys:String>
     <sys:String x:Key="Str_Dlg_SetDefaultPdfMsg" xml:space="preserve">KillerPDF-ті әдепкі PDF қарау құралы етіп орнатқыңыз келе ме?
 
 Windows параметрлері - Әдепкі қолданбалар ашылады.</sys:String>
@@ -1003,6 +1004,7 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Wordmark_A">Killer</sys:String>
     <sys:String x:Key="Str_Wordmark_B">PDF</sys:String>
     <sys:String x:Key="Str_Btn_Open">Ашу</sys:String>
+    <sys:String x:Key="Str_Btn_Select">Қалтаны таңдау</sys:String>
     <sys:String x:Key="Str_Btn_Replace">Ауыстыру</sys:String>
     <sys:String x:Key="Str_Btn_Save">Сақтау</sys:String>
     <sys:String x:Key="Str_Btn_DontSave">Сақтамау</sys:String>
@@ -1019,6 +1021,7 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Dlg_NoSuchFile">Мұндай файл жоқ.</sys:String>
     <sys:String x:Key="Str_Dlg_NoSuchFolder">Мұндай қалта жоқ.</sys:String>
     <sys:String x:Key="Str_Dlg_OverwriteMsg">{0} ауыстырылсын ба?</sys:String>
+    <sys:String x:Key="Str_Dlg_Places">Орындар</sys:String>
     <sys:String x:Key="Str_Menu_PinPlace">Орындарға бекіту</sys:String>
     <sys:String x:Key="Str_Menu_UnpinPlace">Орындардан жою</sys:String>
     <sys:String x:Key="Str_QA_Desktop">Жұмыс үстелі</sys:String>

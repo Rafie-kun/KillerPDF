@@ -340,6 +340,7 @@ KillerPDF がインストール済みコピーを 2 つ作成することはあ�
     <sys:String x:Key="Str_Chk_Desktop">デスクトップにショートカットを追加</sys:String>
     <sys:String x:Key="Str_Chk_AllUsers">このコンピューターのすべてのユーザーにインストール (管理者権限が必要)</sys:String>
     <sys:String x:Key="Str_Status_InstallFailed">インストールは完了しませんでした - KillerPDF はポータブルのまま実行中です。</sys:String>
+    <sys:String x:Key="Str_Status_RelaunchDeferred">インストールが完了しました。インストール中に変更された作業を保護するため、KillerPDF は開いたままになっています。</sys:String>
     <sys:String x:Key="Str_Dlg_SetDefaultPdfMsg" xml:space="preserve">KillerPDF を既定の PDF ビューアーに設定しますか？
 
 Windows の設定 - 既定のアプリ を開きます。</sys:String>
@@ -1106,6 +1107,7 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Wordmark_A">Killer</sys:String>
     <sys:String x:Key="Str_Wordmark_B">PDF</sys:String>
     <sys:String x:Key="Str_Btn_Open">開く</sys:String>
+    <sys:String x:Key="Str_Btn_Select">フォルダーを選択</sys:String>
     <sys:String x:Key="Str_Btn_Replace">置き換え</sys:String>
     <sys:String x:Key="Str_Btn_Save">保存</sys:String>
     <sys:String x:Key="Str_Btn_DontSave">保存しない</sys:String>
@@ -1122,6 +1124,7 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Dlg_NoSuchFile">そのファイルは存在しません。</sys:String>
     <sys:String x:Key="Str_Dlg_NoSuchFolder">そのフォルダーは存在しません。</sys:String>
     <sys:String x:Key="Str_Dlg_OverwriteMsg">{0} を置き換えますか？</sys:String>
+    <sys:String x:Key="Str_Dlg_Places">場所</sys:String>
     <sys:String x:Key="Str_Menu_PinPlace">場所にピン留め</sys:String>
     <sys:String x:Key="Str_Menu_UnpinPlace">場所から削除</sys:String>
     <sys:String x:Key="Str_QA_Desktop">デスクトップ</sys:String>

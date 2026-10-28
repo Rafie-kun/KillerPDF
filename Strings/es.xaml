@@ -279,6 +279,7 @@ KillerPDF no creará dos copias instaladas.</sys:String>
     <sys:String x:Key="Str_Chk_Desktop">Añadir un acceso directo en el escritorio</sys:String>
     <sys:String x:Key="Str_Chk_AllUsers">Instalar para todos los usuarios de este equipo (requiere administrador)</sys:String>
     <sys:String x:Key="Str_Status_InstallFailed">La instalación no se completó - KillerPDF sigue ejecutándose en modo portátil.</sys:String>
+    <sys:String x:Key="Str_Status_RelaunchDeferred">La instalación terminó. KillerPDF permaneció abierto para proteger el trabajo modificado durante la instalación.</sys:String>
     <sys:String x:Key="Str_Dlg_SetDefaultPdfMsg" xml:space="preserve">¿Desea establecer KillerPDF como su visor de PDF predeterminado?
 
 Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
@@ -1074,6 +1075,7 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Wordmark_A">Killer</sys:String>
     <sys:String x:Key="Str_Wordmark_B">PDF</sys:String>
     <sys:String x:Key="Str_Btn_Open">Abrir</sys:String>
+    <sys:String x:Key="Str_Btn_Select">Seleccionar</sys:String>
     <sys:String x:Key="Str_Btn_Replace">Reemplazar</sys:String>
     <sys:String x:Key="Str_Btn_Save">Guardar</sys:String>
     <sys:String x:Key="Str_Btn_DontSave">No guardar</sys:String>
@@ -1090,6 +1092,7 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Dlg_NoSuchFile">Ese archivo no existe.</sys:String>
     <sys:String x:Key="Str_Dlg_NoSuchFolder">Esa carpeta no existe.</sys:String>
     <sys:String x:Key="Str_Dlg_OverwriteMsg">¿Reemplazar {0}?</sys:String>
+    <sys:String x:Key="Str_Dlg_Places">Lugares</sys:String>
     <sys:String x:Key="Str_Menu_PinPlace">Anclar a lugares</sys:String>
     <sys:String x:Key="Str_Menu_UnpinPlace">Quitar de lugares</sys:String>
     <sys:String x:Key="Str_QA_Desktop">Escritorio</sys:String>

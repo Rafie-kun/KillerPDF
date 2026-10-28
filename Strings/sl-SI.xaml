@@ -306,6 +306,7 @@
     <sys:String x:Key="Str_Chk_Desktop">Dodaj bližnjico na namizje</sys:String>
     <sys:String x:Key="Str_Chk_AllUsers">Namesti za vse uporabnike tega računalnika (zahteva skrbniške pravice)</sys:String>
     <sys:String x:Key="Str_Status_InstallFailed">Namestitev ni dokončana. KillerPDF še vedno deluje v prenosnem načinu.</sys:String>
+    <sys:String x:Key="Str_Status_RelaunchDeferred">Namestitev je končana. KillerPDF je ostal odprt, da zaščiti delo, spremenjeno med namestitvijo.</sys:String>
     <sys:String x:Key="Str_Dlg_SetDefaultPdfMsg">Želite nastaviti KillerPDF kot privzeti pregledovalnik PDF?&#10;&#10;Odpre se razdelek Privzete aplikacije v nastavitvah sistema Windows.</sys:String>
     <sys:String x:Key="Str_Dlg_UnsavedClose">Ta datoteka vsebuje neshranjene spremembe. Jih želite shraniti pred zapiranjem?</sys:String>
     <sys:String x:Key="Str_Dlg_UnsavedExit">Imate neshranjene spremembe. Jih želite shraniti pred zapiranjem KillerPDF?</sys:String>
@@ -1014,6 +1015,7 @@
     <sys:String x:Key="Str_Wordmark_A">Killer</sys:String>
     <sys:String x:Key="Str_Wordmark_B">PDF</sys:String>
     <sys:String x:Key="Str_Btn_Open">Odpri</sys:String>
+    <sys:String x:Key="Str_Btn_Select">Izberi mapo</sys:String>
     <sys:String x:Key="Str_Btn_Replace">Zamenjaj</sys:String>
     <sys:String x:Key="Str_Btn_Save">Shrani</sys:String>
     <sys:String x:Key="Str_Btn_DontSave">Ne shrani</sys:String>
@@ -1030,6 +1032,7 @@
     <sys:String x:Key="Str_Dlg_NoSuchFile">Ta datoteka ne obstaja.</sys:String>
     <sys:String x:Key="Str_Dlg_NoSuchFolder">Ta mapa ne obstaja.</sys:String>
     <sys:String x:Key="Str_Dlg_OverwriteMsg">Zamenjam {0}?</sys:String>
+    <sys:String x:Key="Str_Dlg_Places">Mesta</sys:String>
     <sys:String x:Key="Str_Menu_PinPlace">Pripni med mesta</sys:String>
     <sys:String x:Key="Str_Menu_UnpinPlace">Odstrani iz mest</sys:String>
     <sys:String x:Key="Str_QA_Desktop">Namizje</sys:String>

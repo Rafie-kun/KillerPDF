@@ -279,6 +279,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Chk_Desktop">添加桌面快捷方式</sys:String>
     <sys:String x:Key="Str_Chk_AllUsers">为这台电脑上的所有用户安装（需要管理员）</sys:String>
     <sys:String x:Key="Str_Status_InstallFailed">安装未完成 - KillerPDF 仍以便携方式运行。</sys:String>
+    <sys:String x:Key="Str_Status_RelaunchDeferred">安装已完成。为保护安装期间更改的工作，KillerPDF 保持打开。</sys:String>
     <sys:String x:Key="Str_Dlg_SetDefaultPdfMsg" xml:space="preserve">要将 KillerPDF 设为默认 PDF 查看器吗？
 
 将打开 Windows 设置 - 默认应用。</sys:String>
@@ -1078,6 +1079,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Wordmark_A">Killer</sys:String>
     <sys:String x:Key="Str_Wordmark_B">PDF</sys:String>
     <sys:String x:Key="Str_Btn_Open">打开</sys:String>
+    <sys:String x:Key="Str_Btn_Select">选择文件夹</sys:String>
     <sys:String x:Key="Str_Btn_Replace">替换</sys:String>
     <sys:String x:Key="Str_Btn_Save">保存</sys:String>
     <sys:String x:Key="Str_Btn_DontSave">不保存</sys:String>
@@ -1094,6 +1096,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Dlg_NoSuchFile">该文件不存在。</sys:String>
     <sys:String x:Key="Str_Dlg_NoSuchFolder">该文件夹不存在。</sys:String>
     <sys:String x:Key="Str_Dlg_OverwriteMsg">要替换 {0} 吗？</sys:String>
+    <sys:String x:Key="Str_Dlg_Places">位置</sys:String>
     <sys:String x:Key="Str_Menu_PinPlace">固定到位置</sys:String>
     <sys:String x:Key="Str_Menu_UnpinPlace">从位置移除</sys:String>
     <sys:String x:Key="Str_QA_Desktop">桌面</sys:String>

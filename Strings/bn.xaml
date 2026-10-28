@@ -279,6 +279,7 @@ KillerPDF দুটি ইনস্টল করা কপি তৈরি ক�
     <sys:String x:Key="Str_Chk_Desktop">ডেস্কটপ শর্টকাট যোগ করুন</sys:String>
     <sys:String x:Key="Str_Chk_AllUsers">এই কম্পিউটারের সব ব্যবহারকারীর জন্য ইনস্টল করুন (অ্যাডমিন লাগবে)</sys:String>
     <sys:String x:Key="Str_Status_InstallFailed">ইনস্টল সম্পূর্ণ হয়নি - KillerPDF এখনও পোর্টেবল হিসেবে চলছে।</sys:String>
+    <sys:String x:Key="Str_Status_RelaunchDeferred">ইনস্টলেশন শেষ হয়েছে। ইনস্টলেশনের সময় করা কাজের পরিবর্তন সুরক্ষিত রাখতে KillerPDF খোলা রয়েছে।</sys:String>
     <sys:String x:Key="Str_Dlg_SetDefaultPdfMsg" xml:space="preserve">KillerPDF-কে আপনার ডিফল্ট PDF ভিউয়ার হিসেবে সেট করতে চান?
 
 Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে।</sys:String>
@@ -1074,6 +1075,7 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Wordmark_A">Killer</sys:String>
     <sys:String x:Key="Str_Wordmark_B">PDF</sys:String>
     <sys:String x:Key="Str_Btn_Open">খুলুন</sys:String>
+    <sys:String x:Key="Str_Btn_Select">ফোল্ডার নির্বাচন করুন</sys:String>
     <sys:String x:Key="Str_Btn_Replace">পরিবর্তন</sys:String>
     <sys:String x:Key="Str_Btn_Save">সংরক্ষণ</sys:String>
     <sys:String x:Key="Str_Btn_DontSave">সংরক্ষণ করবেন না</sys:String>
@@ -1090,6 +1092,7 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Dlg_NoSuchFile">ওই ফাইলটি নেই।</sys:String>
     <sys:String x:Key="Str_Dlg_NoSuchFolder">ওই ফোল্ডারটি নেই।</sys:String>
     <sys:String x:Key="Str_Dlg_OverwriteMsg">{0} প্রতিস্থাপন করবেন?</sys:String>
+    <sys:String x:Key="Str_Dlg_Places">স্থান</sys:String>
     <sys:String x:Key="Str_Menu_PinPlace">স্থানে পিন করুন</sys:String>
     <sys:String x:Key="Str_Menu_UnpinPlace">স্থান থেকে সরান</sys:String>
     <sys:String x:Key="Str_QA_Desktop">ডেস্কটপ</sys:String>

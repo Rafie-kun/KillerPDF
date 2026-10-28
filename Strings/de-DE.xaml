@@ -279,6 +279,7 @@ KillerPDF legt keine zwei installierten Kopien an.</sys:String>
     <sys:String x:Key="Str_Chk_Desktop">Desktopverknüpfung hinzufügen</sys:String>
     <sys:String x:Key="Str_Chk_AllUsers">Für alle Benutzer dieses Computers installieren (erfordert Administrator)</sys:String>
     <sys:String x:Key="Str_Status_InstallFailed">Installation nicht abgeschlossen - KillerPDF läuft weiterhin portabel.</sys:String>
+    <sys:String x:Key="Str_Status_RelaunchDeferred">Die Installation ist abgeschlossen. KillerPDF blieb geöffnet, um während der Installation geänderte Arbeit zu schützen.</sys:String>
     <sys:String x:Key="Str_Dlg_SetDefaultPdfMsg" xml:space="preserve">Möchten Sie KillerPDF als Standard-PDF-Betrachter festlegen?
 
 Öffnet die Windows-Einstellungen - Standard-Apps.</sys:String>
@@ -1080,6 +1081,7 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Wordmark_A">Killer</sys:String>
     <sys:String x:Key="Str_Wordmark_B">PDF</sys:String>
     <sys:String x:Key="Str_Btn_Open">Öffnen</sys:String>
+    <sys:String x:Key="Str_Btn_Select">Auswählen</sys:String>
     <sys:String x:Key="Str_Btn_Replace">Ersetzen</sys:String>
     <sys:String x:Key="Str_Btn_Save">Speichern</sys:String>
     <sys:String x:Key="Str_Btn_DontSave">Nicht speichern</sys:String>
@@ -1096,6 +1098,7 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Dlg_NoSuchFile">Diese Datei existiert nicht.</sys:String>
     <sys:String x:Key="Str_Dlg_NoSuchFolder">Dieser Ordner existiert nicht.</sys:String>
     <sys:String x:Key="Str_Dlg_OverwriteMsg">{0} ersetzen?</sys:String>
+    <sys:String x:Key="Str_Dlg_Places">Orte</sys:String>
     <sys:String x:Key="Str_Menu_PinPlace">An Orte anheften</sys:String>
     <sys:String x:Key="Str_Menu_UnpinPlace">Aus Orten entfernen</sys:String>
     <sys:String x:Key="Str_QA_Desktop">Desktop</sys:String>

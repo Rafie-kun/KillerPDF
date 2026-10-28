@@ -340,6 +340,7 @@ KillerPDF non creerà due copie installate.</sys:String>
     <sys:String x:Key="Str_Chk_Desktop">Aggiungi un collegamento sul desktop</sys:String>
     <sys:String x:Key="Str_Chk_AllUsers">Installa per tutti gli utenti (necessario amministratore)</sys:String>
     <sys:String x:Key="Str_Status_InstallFailed">L'installazione non è stata completata: KillerPDF è ancora in esecuzione in modo portatile.</sys:String>
+    <sys:String x:Key="Str_Status_RelaunchDeferred">L’installazione è terminata. KillerPDF è rimasto aperto per proteggere il lavoro modificato durante l’installazione.</sys:String>
     <sys:String x:Key="Str_Dlg_SetDefaultPdfMsg" xml:space="preserve">Vuoi impostare KillerPDF come visualizzatore PDF predefinito?
 
 Verrà aperta la sezione App predefinite nelle Impostazioni di Windows.</sys:String>
@@ -1106,6 +1107,7 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_Wordmark_A">Killer</sys:String>
     <sys:String x:Key="Str_Wordmark_B">PDF</sys:String>
     <sys:String x:Key="Str_Btn_Open">Apri</sys:String>
+    <sys:String x:Key="Str_Btn_Select">Seleziona cartella</sys:String>
     <sys:String x:Key="Str_Btn_Replace">Sostituisci</sys:String>
     <sys:String x:Key="Str_Btn_Save">Salva</sys:String>
     <sys:String x:Key="Str_Btn_DontSave">Non salvare</sys:String>
@@ -1122,6 +1124,7 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_Dlg_NoSuchFile">Quel file non esiste.</sys:String>
     <sys:String x:Key="Str_Dlg_NoSuchFolder">Quella cartella non esiste.</sys:String>
     <sys:String x:Key="Str_Dlg_OverwriteMsg">Vuoi sostituire {0}?</sys:String>
+    <sys:String x:Key="Str_Dlg_Places">Posizioni</sys:String>
     <sys:String x:Key="Str_Menu_PinPlace">Aggiungi ai luoghi</sys:String>
     <sys:String x:Key="Str_Menu_UnpinPlace">Rimuovi dai luoghi</sys:String>
     <sys:String x:Key="Str_QA_Desktop">Desktop</sys:String>

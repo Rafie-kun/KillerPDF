@@ -340,6 +340,7 @@ KillerPDF sẽ không tạo ra hai bản sao đã cài đặt.</sys:String>
     <sys:String x:Key="Str_Chk_Desktop">Thêm lối tắt trên màn hình nền</sys:String>
     <sys:String x:Key="Str_Chk_AllUsers">Cài đặt cho mọi người dùng trên máy tính này (cần quyền quản trị viên)</sys:String>
     <sys:String x:Key="Str_Status_InstallFailed">Cài đặt không hoàn tất - KillerPDF vẫn đang chạy ở chế độ di động (portable).</sys:String>
+    <sys:String x:Key="Str_Status_RelaunchDeferred">Đã cài đặt xong. KillerPDF vẫn mở để bảo vệ phần công việc đã thay đổi trong lúc cài đặt.</sys:String>
     <sys:String x:Key="Str_Dlg_SetDefaultPdfMsg" xml:space="preserve">Bạn có muốn đặt KillerPDF làm trình xem PDF mặc định không?
 
 Sẽ mở Cài đặt Windows - Ứng dụng mặc định.</sys:String>
@@ -1106,6 +1107,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Wordmark_A">Killer</sys:String>
     <sys:String x:Key="Str_Wordmark_B">PDF</sys:String>
     <sys:String x:Key="Str_Btn_Open">Mở</sys:String>
+    <sys:String x:Key="Str_Btn_Select">Chọn thư mục</sys:String>
     <sys:String x:Key="Str_Btn_Replace">Thay thế</sys:String>
     <sys:String x:Key="Str_Btn_Save">Lưu</sys:String>
     <sys:String x:Key="Str_Btn_DontSave">Không lưu</sys:String>
@@ -1122,6 +1124,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Dlg_NoSuchFile">Tệp đó không tồn tại.</sys:String>
     <sys:String x:Key="Str_Dlg_NoSuchFolder">Thư mục đó không tồn tại.</sys:String>
     <sys:String x:Key="Str_Dlg_OverwriteMsg">Thay thế {0}?</sys:String>
+    <sys:String x:Key="Str_Dlg_Places">Vị trí</sys:String>
     <sys:String x:Key="Str_Menu_PinPlace">Ghim vào danh mục</sys:String>
     <sys:String x:Key="Str_Menu_UnpinPlace">Xóa khỏi danh mục</sys:String>
     <sys:String x:Key="Str_QA_Desktop">Màn hình nền</sys:String>

@@ -340,6 +340,7 @@ KillerPDF will not create two installed copies.</sys:String>
     <sys:String x:Key="Str_Chk_Desktop">Add a desktop shortcut</sys:String>
     <sys:String x:Key="Str_Chk_AllUsers">Install for everyone on this computer (needs admin)</sys:String>
     <sys:String x:Key="Str_Status_InstallFailed">Install did not complete. KillerPDF is still running portable.</sys:String>
+    <sys:String x:Key="Str_Status_RelaunchDeferred">Installation finished. KillerPDF stayed open to protect work changed during installation.</sys:String>
     <sys:String x:Key="Str_Dlg_SetDefaultPdfMsg" xml:space="preserve">Would you like to set KillerPDF as your default PDF viewer?
 
 This opens Default Apps in Windows Settings.</sys:String>
@@ -1106,6 +1107,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Wordmark_A">Killer</sys:String>
     <sys:String x:Key="Str_Wordmark_B">PDF</sys:String>
     <sys:String x:Key="Str_Btn_Open">Open</sys:String>
+    <sys:String x:Key="Str_Btn_Select">Select folder</sys:String>
     <sys:String x:Key="Str_Btn_Replace">Replace</sys:String>
     <sys:String x:Key="Str_Btn_Save">Save</sys:String>
     <sys:String x:Key="Str_Btn_DontSave">Don't Save</sys:String>
@@ -1122,6 +1124,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Dlg_NoSuchFile">That file does not exist.</sys:String>
     <sys:String x:Key="Str_Dlg_NoSuchFolder">That folder does not exist.</sys:String>
     <sys:String x:Key="Str_Dlg_OverwriteMsg">Replace {0}?</sys:String>
+    <sys:String x:Key="Str_Dlg_Places">Places</sys:String>
     <sys:String x:Key="Str_Menu_PinPlace">Pin to places</sys:String>
     <sys:String x:Key="Str_Menu_UnpinPlace">Remove from places</sys:String>
     <sys:String x:Key="Str_QA_Desktop">Desktop</sys:String>

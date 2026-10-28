@@ -340,6 +340,7 @@ A KillerPDF nem hoz létre két telepített példányt.</sys:String>
     <sys:String x:Key="Str_Chk_Desktop">Asztali parancsikon hozzáadása</sys:String>
     <sys:String x:Key="Str_Chk_AllUsers">Telepítés a számítógép minden felhasználója számára (rendszergazdai jog szükséges)</sys:String>
     <sys:String x:Key="Str_Status_InstallFailed">A telepítés nem fejeződött be - a KillerPDF továbbra is hordozható módban fut.</sys:String>
+    <sys:String x:Key="Str_Status_RelaunchDeferred">A telepítés befejeződött. A KillerPDF nyitva maradt, hogy megőrizze a telepítés közben módosított munkát.</sys:String>
     <sys:String x:Key="Str_Dlg_SetDefaultPdfMsg" xml:space="preserve">Beállítja a KillerPDF-et alapértelmezett PDF-megjelenítőként?
 
 Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:String>
@@ -1104,6 +1105,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Wordmark_A">Killer</sys:String>
     <sys:String x:Key="Str_Wordmark_B">PDF</sys:String>
     <sys:String x:Key="Str_Btn_Open">Megnyitás</sys:String>
+    <sys:String x:Key="Str_Btn_Select">Válasszon mappát</sys:String>
     <sys:String x:Key="Str_Btn_Replace">Csere</sys:String>
     <sys:String x:Key="Str_Btn_Save">Mentés</sys:String>
     <sys:String x:Key="Str_Btn_DontSave">Nincs mentés</sys:String>
@@ -1120,6 +1122,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Dlg_NoSuchFile">Ez a fájl nem létezik.</sys:String>
     <sys:String x:Key="Str_Dlg_NoSuchFolder">Ez a mappa nem létezik.</sys:String>
     <sys:String x:Key="Str_Dlg_OverwriteMsg">Lecseréli a(z) {0} fájlt?</sys:String>
+    <sys:String x:Key="Str_Dlg_Places">Helyek</sys:String>
     <sys:String x:Key="Str_Menu_PinPlace">Rögzítés a helyekhez</sys:String>
     <sys:String x:Key="Str_Menu_UnpinPlace">Eltávolítás a helyekről</sys:String>
     <sys:String x:Key="Str_QA_Desktop">Asztal</sys:String>
