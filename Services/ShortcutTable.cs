@@ -306,6 +306,14 @@ namespace KillerPDF
             ("Docs",   "Str_KS_DocumentTools", true),
         ];
 
+        /// <summary>The section title string key for a binding's category, from KsGroups.</summary>
+        internal static string SectionTitleKey(string cat)
+        {
+            foreach (var group in KsGroups)
+                if (group.Cat == cat) return group.TitleKey;
+            return cat;
+        }
+
         /// <summary>The map's view of the table: layer -> cap id -> (category, label key). A cap's
         /// own LabelKey wins over its row's, which is how one row serves two captions.
         /// <paramref name="place"/> moves a cap to the key the user chose for it (#190).</summary>

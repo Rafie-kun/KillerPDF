@@ -135,6 +135,16 @@ namespace KillerPDF.Tests
                 "these categories have bindings but no section: " + string.Join(", ", orphans));
         }
 
+        /// <summary>The keyboard map's hover caption names a key's section. It once kept its own
+        /// copy of the titles, missed Document tools and called those keys OCR.</summary>
+        [Fact]
+        public void EveryBindingsSectionTitleIsItsOwnSection()
+        {
+            foreach (var (cat, titleKey, _) in ShortcutTable.KsGroups)
+                Assert.Equal(titleKey, ShortcutTable.SectionTitleKey(cat));
+            Assert.Equal("Str_KS_DocumentTools", ShortcutTable.SectionTitleKey("Docs"));
+        }
+
         /// <summary>A section with no bindings would render as a heading over nothing.</summary>
         [Fact]
         public void EverySectionHasAtLeastOneBinding()

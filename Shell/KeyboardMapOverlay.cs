@@ -102,12 +102,7 @@ namespace KillerPDF.Shell
             [KbLayer.AltShift] = ["Alt", "RAlt", "Shift", "RShift"],
         };
 
-        private static string KbSectionKeyFor(string cat) => cat switch
-        {
-            "File" => "Str_KS_File", "Tools" => "Str_KS_Tools", "Edit" => "Str_KS_Editing",
-            "Nav" => "Str_KS_Navigation", "View" => "Str_KS_View", "Search" => "Str_KS_SearchSelect",
-            "Help" => "Str_KS_Help", _ => "Str_KS_Ocr",
-        };
+        private static string KbSectionKeyFor(string cat) => ShortcutTable.SectionTitleKey(cat);
 
         // ── View toggle (LIST / KEYBOARD) ──────────────────────────────────────────────────────
 
