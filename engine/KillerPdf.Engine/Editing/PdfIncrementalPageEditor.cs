@@ -2179,7 +2179,7 @@ public sealed class PdfIncrementalPageEditor
                 "The document certification signature prohibits page-tree changes.");
         ValidateExistingStructureTreePageSet();
         _taggedOverlays.Clear();
-        var update = new PdfIncrementalUpdateBuilder(_document);
+        var update = new PdfIncrementalUpdateBuilder(_document, permissionsCheckedByCaller: true);
         bool mergesFormFields = _authoredForms.Count != 0 || _pages.Any(page =>
             page.ImportedTree?.Catalog.ContainsKey(AcroFormName) == true);
         bool deferFormFieldChanges = mergesFormFields
@@ -2790,7 +2790,7 @@ public sealed class PdfIncrementalPageEditor
         }
         if (widgets.Count == 0) return source;
 
-        var update = new PdfIncrementalUpdateBuilder(document);
+        var update = new PdfIncrementalUpdateBuilder(document, permissionsCheckedByCaller: true);
         var (Value, FinalReference) = ResolveCatalogWithIdentity(
             document, tree.Catalog[StructTreeRootName], "The structure-tree root");
         PdfDictionary root = Value as PdfDictionary
@@ -2951,7 +2951,7 @@ public sealed class PdfIncrementalPageEditor
     {
         PdfDocument document = PdfDocument.Open(source);
         PdfPageTree tree = PdfPageTree.Read(document);
-        var update = new PdfIncrementalUpdateBuilder(document);
+        var update = new PdfIncrementalUpdateBuilder(document, permissionsCheckedByCaller: true);
         var (Value, FinalReference) = ResolveCatalogWithIdentity(
             document, tree.Catalog[StructTreeRootName], "The structure-tree root");
         PdfDictionary root = Value as PdfDictionary
@@ -3445,7 +3445,7 @@ public sealed class PdfIncrementalPageEditor
                 [DefaultValueName] = value
             });
         }
-        var validationUpdate = new PdfIncrementalUpdateBuilder(_document);
+        var validationUpdate = new PdfIncrementalUpdateBuilder(_document, permissionsCheckedByCaller: true);
         ResetField(validationUpdate, fieldReference, changed, form, fieldType,
             fieldName, pending.EmbeddedFont);
         return changed;
@@ -18891,7 +18891,7 @@ public sealed class PdfIncrementalPageEditor
         actionEntries.Add(new(Name("Fields"),
             new PdfArray(fields.Select(TextString))));
         if (flags != 0) actionEntries.Add(new(Name("Flags"), new PdfInteger(flags)));
-        var update = new PdfIncrementalUpdateBuilder(document);
+        var update = new PdfIncrementalUpdateBuilder(document, permissionsCheckedByCaller: true);
         update.ReplaceObject(terminalReference.ObjectNumber,
             new PdfDictionary(terminal.Where(entry => !entry.Key.Equals(Name("A")))
                 .Append(new KeyValuePair<PdfName, PdfObject>(

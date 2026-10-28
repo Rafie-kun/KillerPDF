@@ -142,7 +142,7 @@ public static class PdfDetachedSignatureWriter
         PdfDictionary? fieldMdpParameters = existingField is null
             ? null : ReadFieldMdpParameters(document, existingField);
 
-        var update = new PdfIncrementalUpdateBuilder(document);
+        var update = new PdfIncrementalUpdateBuilder(document, permissionsCheckedByCaller: true);
         if (finalizeAppearances) new PdfPageRenderer(document).PersistRequestedFormAppearances(update);
         PdfIndirectReference? appearanceReference = options.VisibleAppearance is null
             ? null : update.AddObject(BuildVisibleAppearance(options.VisibleAppearance));

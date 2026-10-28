@@ -2,6 +2,7 @@ using System.Globalization;
 using KillerPdf.Engine.CrossReference;
 using KillerPdf.Engine.Documents;
 using KillerPdf.Engine.Objects;
+using KillerPdf.Engine.Security;
 using KillerPdf.Engine.Syntax;
 using System.Security.Cryptography;
 using System.IO.Compression;
@@ -52,13 +53,30 @@ public sealed class PdfIncrementalUpdateBuilder
     private PdfObject? _documentInformation;
     private bool _documentInformationRemovedByFree;
 
-    /// <summary>Creates an incremental update builder for an opened document.</summary>
-    public PdfIncrementalUpdateBuilder(PdfDocument document)
+    /// <summary>
+    /// Creates an incremental update builder for an opened document. A document opened with its user
+    /// password must permit document modification, as its author set it, unless the owner password opened it.
+    /// </summary>
+    public PdfIncrementalUpdateBuilder(PdfDocument document) : this(document, permissionsCheckedByCaller: false)
+    {
+    }
+
+    /// <summary>
+    /// For the editors that check their own, finer permission before writing: page assembly, annotations
+    /// and signatures. Every other caller uses the public constructor, which requires modification.
+    /// </summary>
+    internal PdfIncrementalUpdateBuilder(PdfDocument document, bool permissionsCheckedByCaller)
     {
         _document = document ?? throw new ArgumentNullException(nameof(document));
         if (document.IsEncrypted && !document.IsDecrypted)
             throw new InvalidOperationException(
                 "An encrypted PDF must be opened with a password before it can be updated.");
+        if (!permissionsCheckedByCaller
+            && document.PasswordAuthenticationRole == PdfPasswordAuthenticationRole.User
+            && (document.DeclaredPermissions is not PdfDocumentPermissions permissions
+                || !permissions.AllowDocumentModification))
+            throw new InvalidOperationException(
+                "The PDF user password does not permit document modification.");
         document.PreparePageStructureForWriting();
         _nextObjectNumber = InitialSize(document);
         // Repairs belong to the document model and must survive an incremental save,

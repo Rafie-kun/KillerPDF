@@ -1103,7 +1103,7 @@ public sealed class PdfIncrementalAnnotationEditor
             && certification != PdfSignatureCertificationPermission.FormFillingSignaturesAndAnnotations)
             throw new InvalidOperationException(
                 "The document certification signature prohibits annotation changes.");
-        var update = new PdfIncrementalUpdateBuilder(_document);
+        var update = new PdfIncrementalUpdateBuilder(_document, permissionsCheckedByCaller: true);
         ApplyRequiredVersionUpgrade(update);
         ApplyAnnotationUpdates(update);
         var allocated = _annotations.Select(annotation => new AllocatedAnnotation(

@@ -147,7 +147,13 @@ public static class PdfPadesValidationDataWriter
                     "The PDF trailer /Root value is not indirect.");
         PdfDictionary catalog = Resolve(document, rootReference) as PdfDictionary
             ?? throw new InvalidOperationException("The PDF catalog is not a dictionary.");
-        var update = new PdfIncrementalUpdateBuilder(document);
+        // Validation data belongs to an existing signature, so it needs what signing that field needs.
+        if (document.PasswordAuthenticationRole == KillerPdf.Engine.Security.PdfPasswordAuthenticationRole.User
+            && (document.DeclaredPermissions is not KillerPdf.Engine.Security.PdfDocumentPermissions permissions
+                || !(permissions.AllowFormFilling || permissions.AllowAnnotationModification)))
+            throw new InvalidOperationException(
+                "The PDF user password does not permit adding signature validation data.");
+        var update = new PdfIncrementalUpdateBuilder(document, permissionsCheckedByCaller: true);
         PdfDictionary? existingDss = catalog.TryGetValue(Name("DSS"), out PdfObject? dssValue)
             ? Resolve(document, dssValue) as PdfDictionary
                 ?? throw new InvalidOperationException("The catalog /DSS value is not a dictionary.")
