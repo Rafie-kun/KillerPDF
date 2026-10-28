@@ -152,7 +152,7 @@ internal static class WatchedFolderHostSmoke
             object dispatcher = assembly.GetType("KillerPDF.Services.WatchedFolderHost", true)!
                 .GetMethod("CreateDispatcher", InternalStatic)!.Invoke(null, [storage])!;
             _serviceType = assembly.GetType("KillerPDF.Services.WatchedFolderService", true)!;
-            Service = Activator.CreateInstance(_serviceType, [storage, dispatcher, null])!;
+            Service = Activator.CreateInstance(_serviceType, [storage, dispatcher, null, null])!;
             object options = Activator.CreateInstance(assembly.GetType("KillerPDF.Services.WatchedFolderOptions", true)!,
                 [input, OutputDirectory, "*.pdf", macroJson, true])!;
             try

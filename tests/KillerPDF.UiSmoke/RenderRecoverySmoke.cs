@@ -104,10 +104,14 @@ internal static class RenderRecoverySmoke
         string temp = (string)owner.GetType().Assembly.GetType("KillerPDF.App", true)!
             .GetProperty("TempDir", BindingFlags.Static | BindingFlags.NonPublic)!.GetValue(null)!;
         var directory = new DirectoryInfo(temp);
+        // The app's session folder sits either in a startup-smoke folder under the system temp
+        // folder, or under this run's own output folder when the host isolated the data root there.
+        bool inStartupSmoke = directory.Parent?.Parent?.Name.StartsWith("KillerPDF-startup-smoke-", StringComparison.Ordinal) == true
+            && Path.GetFullPath(temp).StartsWith(Path.GetFullPath(Path.GetTempPath()), StringComparison.OrdinalIgnoreCase);
+        bool inRunFolder = Path.GetFullPath(temp).StartsWith(Path.GetFullPath(folder) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
         if (!directory.Name.StartsWith("session-", StringComparison.Ordinal)
             || directory.Parent?.Name != "Temp"
-            || directory.Parent.Parent?.Name.StartsWith("KillerPDF-startup-smoke-", StringComparison.Ordinal) != true
-            || !Path.GetFullPath(temp).StartsWith(Path.GetFullPath(Path.GetTempPath()), StringComparison.OrdinalIgnoreCase))
+            || !(inStartupSmoke || inRunFolder))
             throw new InvalidOperationException("The failure fixture is outside the isolated smoke directory.");
         // Only the access list changes: rewriting the whole descriptor would also write the audit
         // list, which needs a privilege a standard user does not hold, and an unmodified copy

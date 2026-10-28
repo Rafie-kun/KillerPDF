@@ -73,8 +73,9 @@ internal static class TableExportSmoke
             resources.SetAttributeValue(declaration.Name, declaration.Value);
         string xaml = resources.ToString();
         string assemblyName = assembly.GetName().Name!;
-        foreach (string name in new[] { "KillerPDF", "KillerFamily.Layout" })
-            xaml = xaml.Replace("clr-namespace:" + name, "clr-namespace:" + name + ";assembly=" + assemblyName, StringComparison.Ordinal);
+        // Whole attribute values: "clr-namespace:KillerPDF" is also the start of KillerPDF.Controls.
+        foreach (string name in new[] { "KillerPDF", "KillerPDF.Controls", "KillerFamily.Layout" })
+            xaml = xaml.Replace("\"clr-namespace:" + name + "\"", "\"clr-namespace:" + name + ";assembly=" + assemblyName + "\"", StringComparison.Ordinal);
         app.Resources = (ResourceDictionary)System.Windows.Markup.XamlReader.Parse(xaml,
             new System.Windows.Markup.ParserContext { BaseUri = new Uri("pack://application:,,,/" + assemblyName + ";component/") });
         if (!visibleNative && (accessibilityReview || formFieldEditing || guidedTasks || signedCopy || renderRecovery || toolbarAvailability || windowLifecycle || windowSession))
@@ -89,6 +90,9 @@ internal static class TableExportSmoke
         Window? owner = null;
         try
         {
+            // App startup order: the kit theme hooks (settings, KillerPDF's own keys) before the services.
+            assembly.GetType("KillerPDF.Services.AppTheme", true)!.GetMethod("Configure",
+                System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic)!.Invoke(null, null);
             foreach (string service in new[] { "ThemeManager", "LocaleManager", "FilmGrain" })
                 assembly.GetType("KillerPDF.Services." + service, true)!.GetMethod("Initialize", Members)!.Invoke(null, null);
             if (visibleNative)
@@ -578,8 +582,10 @@ internal static class TableExportSmoke
                     if (message is not null)
                     {
                         if (!handledMessages.Add(message)) return;
+                        // The kit file picker asks "Replace", the app's own prompts "Yes".
                         string yes = (string)Application.Current.FindResource("Str_Btn_Yes");
-                        Button? confirm = Descendants<Button>(message).FirstOrDefault(button => Equals(button.Content, yes));
+                        string replace = (string)Application.Current.FindResource("Str_Btn_Replace");
+                        Button? confirm = Descendants<Button>(message).FirstOrDefault(button => Equals(button.Content, yes) || Equals(button.Content, replace));
                         if (confirm is not null)
                         {
                             if (mode != FlowMode.ProtectSource) throw new InvalidOperationException("Unexpected overwrite confirmation.");

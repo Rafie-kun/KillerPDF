@@ -47,14 +47,18 @@ internal static class PresetSelectionSmoke
         foreach (XAttribute declaration in source.Root!.Attributes().Where(attribute => attribute.IsNamespaceDeclaration))
             resources.SetAttributeValue(declaration.Name, declaration.Value);
         string xaml = resources.ToString();
-        foreach (string name in new[] { "KillerPDF", "KillerFamily.Layout" })
-            xaml = xaml.Replace("clr-namespace:" + name, "clr-namespace:" + name + ";assembly=KillerPDF", StringComparison.Ordinal);
+        // Whole attribute values: "clr-namespace:KillerPDF" is also the start of KillerPDF.Controls.
+        foreach (string name in new[] { "KillerPDF", "KillerPDF.Controls", "KillerFamily.Layout" })
+            xaml = xaml.Replace("\"clr-namespace:" + name + "\"", "\"clr-namespace:" + name + ";assembly=KillerPDF\"", StringComparison.Ordinal);
         app.Resources = (ResourceDictionary)System.Windows.Markup.XamlReader.Parse(xaml,
             new System.Windows.Markup.ParserContext { BaseUri = new Uri("pack://application:,,,/KillerPDF;component/") });
         SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext());
         Window? owner = null;
         try
         {
+            // App startup order: the kit theme hooks (settings, KillerPDF's own keys) before the services.
+            assembly.GetType("KillerPDF.Services.AppTheme", true)!.GetMethod("Configure",
+                System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic)!.Invoke(null, null);
             foreach (string service in new[] { "ThemeManager", "LocaleManager", "FilmGrain" })
                 assembly.GetType("KillerPDF.Services." + service, true)!
                     .GetMethod("Initialize", Members)!.Invoke(null, null);
@@ -92,11 +96,15 @@ internal static class PresetSelectionSmoke
                         foreach (ListBoxItem item in list.Items)
                         {
                             TextBlock[] text = Descendants<TextBlock>(item).ToArray();
-                            Color name = ColorOf(dialog.FindResource(item.IsSelected ? "SelectionFg" : "TextBrush"));
-                            Color detail = ColorOf(dialog.FindResource(item.IsSelected ? "SelectionFg" : "MutedTextBrush"));
+                            // A selected row's name and detail both take the text color the dialog's
+                            // row style sets for its fill (the kit picker row: OnPrimaryBrush).
+                            Color name = ColorOf(dialog.FindResource(item.IsSelected ? "OnPrimaryBrush" : "TextBrush"));
+                            Color detail = item.IsSelected ? name : ColorOf(dialog.FindResource("MutedTextBrush"));
                             if (text.Length != 2 || ColorOf(item.Foreground) != name
                                 || ColorOf(text[0].Foreground) != name || ColorOf(text[1].Foreground) != detail)
-                                throw new InvalidOperationException($"{theme}: preset selection colors are overridden.");
+                                throw new InvalidOperationException($"{theme}: preset selection colors are overridden "
+                                    + $"(selected={item.IsSelected}, expected name {name} detail {detail}; item {ColorOf(item.Foreground)}, "
+                                    + $"texts {string.Join(",", text.Select(t => ColorOf(t.Foreground).ToString()))}).");
                         }
                     }
                     var bitmap = new RenderTargetBitmap((int)Math.Ceiling(dialog.ActualWidth),

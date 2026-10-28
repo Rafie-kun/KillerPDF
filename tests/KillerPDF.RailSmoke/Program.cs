@@ -289,11 +289,15 @@ internal static class Program
         foreach (var declaration in source.Root!.Attributes().Where(attribute => attribute.IsNamespaceDeclaration))
             resources.SetAttributeValue(declaration.Name, declaration.Value);
         string xaml = resources.ToString();
-        foreach (string name in new[] { "KillerPDF", "KillerFamily.Layout" })
-            xaml = xaml.Replace("clr-namespace:" + name, "clr-namespace:" + name + ";assembly=KillerPDF", StringComparison.Ordinal);
+        // Whole attribute values: "clr-namespace:KillerPDF" is also the start of KillerPDF.Controls.
+        foreach (string name in new[] { "KillerPDF", "KillerPDF.Controls", "KillerFamily.Layout" })
+            xaml = xaml.Replace("\"clr-namespace:" + name + "\"", "\"clr-namespace:" + name + ";assembly=KillerPDF\"", StringComparison.Ordinal);
         app.Resources = (ResourceDictionary)System.Windows.Markup.XamlReader.Parse(xaml,
             new System.Windows.Markup.ParserContext { BaseUri = new Uri("pack://application:,,,/KillerPDF;component/") });
         SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext());
+        // App startup order: the kit theme hooks (settings, KillerPDF's own keys) before the services.
+        assembly.GetType("KillerPDF.Services.AppTheme", true)!.GetMethod("Configure",
+            System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic)!.Invoke(null, null);
         foreach (string service in new[] { "ThemeManager", "LocaleManager", "FilmGrain" })
             assembly.GetType("KillerPDF.Services." + service, true)!.GetMethod("Initialize", Members)!.Invoke(null, null);
         string locale = assembly.GetType("KillerPDF.Services.LocaleManager", true)!

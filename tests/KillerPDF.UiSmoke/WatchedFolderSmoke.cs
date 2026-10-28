@@ -59,8 +59,9 @@ internal static class WatchedFolderSmoke
         foreach (XAttribute declaration in source.Root!.Attributes().Where(attribute => attribute.IsNamespaceDeclaration))
             resources.SetAttributeValue(declaration.Name, declaration.Value);
         string xaml = resources.ToString();
-        foreach (string name in new[] { "KillerPDF", "KillerFamily.Layout" })
-            xaml = xaml.Replace("clr-namespace:" + name, "clr-namespace:" + name + ";assembly=KillerPDF", StringComparison.Ordinal);
+        // Whole attribute values: "clr-namespace:KillerPDF" is also the start of KillerPDF.Controls.
+        foreach (string name in new[] { "KillerPDF", "KillerPDF.Controls", "KillerFamily.Layout" })
+            xaml = xaml.Replace("\"clr-namespace:" + name + "\"", "\"clr-namespace:" + name + ";assembly=KillerPDF\"", StringComparison.Ordinal);
         app.Resources = (ResourceDictionary)System.Windows.Markup.XamlReader.Parse(xaml,
             new System.Windows.Markup.ParserContext { BaseUri = new Uri("pack://application:,,,/KillerPDF;component/") });
         SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext());
@@ -69,6 +70,9 @@ internal static class WatchedFolderSmoke
         var report = new List<string>();
         try
         {
+            // App startup order: the kit theme hooks (settings, KillerPDF's own keys) before the services.
+            assembly.GetType("KillerPDF.Services.AppTheme", true)!.GetMethod("Configure",
+                System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic)!.Invoke(null, null);
             foreach (string name in new[] { "ThemeManager", "LocaleManager", "FilmGrain" })
                 assembly.GetType("KillerPDF.Services." + name, true)!.GetMethod("Initialize", Members)!.Invoke(null, null);
             owner = (Window)Activator.CreateInstance(assembly.GetType("KillerPDF.Shell.MainWindow", true)!)!;
@@ -101,7 +105,7 @@ internal static class WatchedFolderSmoke
                 ["{\"version\":1,\"name\":\"Save copy\",\"steps\":[{\"operation\":\"save\"}]}"])!;
             Array macros = Array.CreateInstance(macroType, 2); macros.SetValue(macro, 0); macros.SetValue(alternative, 1);
             service = (IDisposable)Activator.CreateInstance(serviceType,
-                [Path.Combine(folder, "queue"), null, null])!;
+                [Path.Combine(folder, "queue"), null, null, null])!;
             dialog = (Window)Activator.CreateInstance(dialogType, Members, null, [owner, service, macros, 1d], null)!;
             HideFromDesktop(dialog); dialog.Show(); Pump();
             Find<TextBox>(dialog, "WatchInput").Text = folder;
@@ -154,7 +158,7 @@ internal static class WatchedFolderSmoke
             report.Add("PASS output collision is visible, preserves existing bytes, and retries after the collision is resolved");
             dialog.Close(); dialog = null;
             service.Dispose();
-            service = (IDisposable)Activator.CreateInstance(serviceType, [Path.Combine(folder, "queue"), null, null])!;
+            service = (IDisposable)Activator.CreateInstance(serviceType, [Path.Combine(folder, "queue"), null, null, null])!;
             if (!SnapshotPaused(serviceType, service)) throw new InvalidOperationException("Pause was not retained after reopening.");
             report.Add("PASS pause is retained after reopening the queue");
             object hosted = appType.GetMethod("GetFolderAutomation", Members)!.Invoke(null, null)!;

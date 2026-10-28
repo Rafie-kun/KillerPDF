@@ -18,7 +18,7 @@ internal static class TraySmoke
 {
     private const BindingFlags Members = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
 
-    internal static int Run(string appPath, string appXaml, string folder)
+    internal static int Run(string appPath, string appXaml, string folder, bool sessionOnly = false)
     {
         if (!Environment.GetCommandLineArgs().Contains("--startup-smoke"))
             throw new InvalidOperationException("Startup smoke isolation is required.");
@@ -50,8 +50,9 @@ internal static class TraySmoke
         foreach (XAttribute declaration in source.Root!.Attributes().Where(attribute => attribute.IsNamespaceDeclaration))
             resources.SetAttributeValue(declaration.Name, declaration.Value);
         string xaml = resources.ToString();
-        foreach (string name in new[] { "KillerPDF", "KillerFamily.Layout" })
-            xaml = xaml.Replace("clr-namespace:" + name, "clr-namespace:" + name + ";assembly=KillerPDF", StringComparison.Ordinal);
+        // Whole attribute values: "clr-namespace:KillerPDF" is also the start of KillerPDF.Controls.
+        foreach (string name in new[] { "KillerPDF", "KillerPDF.Controls", "KillerFamily.Layout" })
+            xaml = xaml.Replace("\"clr-namespace:" + name + "\"", "\"clr-namespace:" + name + ";assembly=KillerPDF\"", StringComparison.Ordinal);
         app.Resources = (ResourceDictionary)System.Windows.Markup.XamlReader.Parse(xaml,
             new System.Windows.Markup.ParserContext { BaseUri = new Uri("pack://application:,,,/KillerPDF;component/") });
         SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext());
@@ -59,8 +60,18 @@ internal static class TraySmoke
         Window? owner = null;
         try
         {
+            // App startup order: the kit theme hooks (settings, KillerPDF's own keys) before the services.
+            assembly.GetType("KillerPDF.Services.AppTheme", true)!.GetMethod("Configure",
+                System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic)!.Invoke(null, null);
             foreach (string service in new[] { "ThemeManager", "LocaleManager", "FilmGrain" })
                 assembly.GetType("KillerPDF.Services." + service, true)!.GetMethod("Initialize", Members)!.Invoke(null, null);
+            if (sessionOnly)
+            {
+                VerifySessionEnding(assembly, app, report);
+                File.WriteAllLines(Path.Combine(folder, "result.txt"), report);
+                Console.WriteLine(string.Join(Environment.NewLine, report));
+                return 0;
+            }
             owner = (Window)Activator.CreateInstance(assembly.GetType("KillerPDF.Shell.MainWindow", true)!)!;
             owner.WindowStartupLocation = WindowStartupLocation.Manual;
             owner.Left = -10000; owner.Top = -10000; owner.ShowInTaskbar = false; owner.ShowActivated = false;
@@ -100,6 +111,10 @@ internal static class TraySmoke
             owner.Close();
             Wait(() => closed);
             report.Add("PASS disabled close exits the window");
+            // Before the dirty tray Exit below: a confirmed Exit from the last window shuts the app
+            // down (Shell/CloseToTray.cs), and this check needs it running. The session check ends
+            // the app too, so it runs in its own process (--verify-tray-session).
+            VerifyRegistrationFailure(assembly, report);
 
             owner = (Window)Activator.CreateInstance(assembly.GetType("KillerPDF.Shell.MainWindow", true)!)!;
             owner.WindowStartupLocation = WindowStartupLocation.Manual;
@@ -131,6 +146,10 @@ internal static class TraySmoke
             if (!owner.IsVisible || !app.Windows.Cast<Window>().Contains(owner))
                 throw new InvalidOperationException("Canceling tray Exit did not preserve the visible window.");
             report.Add("PASS dirty tray Exit Cancel restores the live window");
+            // The kit tray ends a turned-down Exit at the user's next key or click in the window,
+            // which a real close (clicking X) always sends first (Shell/CloseToTray.cs).
+            owner.RaiseEvent(new KeyEventArgs(Keyboard.PrimaryDevice, PresentationSource.FromVisual(owner), 0, Key.A)
+                { RoutedEvent = Keyboard.PreviewKeyDownEvent });
             owner.Close(); Pump();
             if (owner.IsVisible) throw new InvalidOperationException("Canceled Exit left close-to-tray bypass enabled.");
             closed = false;
@@ -140,8 +159,6 @@ internal static class TraySmoke
             if (!File.ReadAllBytes(fixture).AsSpan().SequenceEqual(original))
                 throw new InvalidOperationException("Tray exit changed the source PDF without saving.");
             report.Add("PASS dirty tray Exit Don't Save closes through the fade and preserves source bytes");
-            VerifyRegistrationFailure(assembly, report);
-            VerifySessionEnding(assembly, app, report);
             report.Add("App SHA256=" + Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(appPath))));
             File.WriteAllLines(Path.Combine(folder, "result.txt"), report);
             Console.WriteLine(string.Join(Environment.NewLine, report));

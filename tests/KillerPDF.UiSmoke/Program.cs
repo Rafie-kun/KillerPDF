@@ -129,6 +129,8 @@ internal static class Program
                 return TableExportSmoke.Run(Path.GetFullPath(args[1]), Path.GetFullPath(args[2]), Path.GetFullPath(args[3]), grainThemes: true);
             if (args.Length == 5 && args[0] == "--verify-tray" && args[4] == "--startup-smoke")
                 return TraySmoke.Run(Path.GetFullPath(args[1]), Path.GetFullPath(args[2]), Path.GetFullPath(args[3]));
+            if (args.Length == 5 && args[0] == "--verify-tray-session" && args[4] == "--startup-smoke")
+                return TraySmoke.Run(Path.GetFullPath(args[1]), Path.GetFullPath(args[2]), Path.GetFullPath(args[3]), sessionOnly: true);
             if (args.Length == 5 && args[0] == "--verify-watched-folder" && args[4] == "--startup-smoke")
                 return WatchedFolderSmoke.Run(Path.GetFullPath(args[1]), Path.GetFullPath(args[2]), Path.GetFullPath(args[3]));
             if (args.Length == 5 && args[0] == "--verify-watched-host" && args[4] == "--startup-smoke")
