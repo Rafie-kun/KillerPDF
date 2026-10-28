@@ -164,8 +164,10 @@ internal sealed class TextFieldPresetsDialog : Window
                 { RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor, typeof(ListBoxItem), 1) },
                 Value = true
             };
+            // The selected row's own text color, which the dialog's row style picks to suit its fill.
             selectedDetail.Setters.Add(new Setter(TextBlock.ForegroundProperty,
-                new DynamicResourceExtension("SelectionFg")));
+                new Binding(nameof(ListBoxItem.Foreground))
+                { RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor, typeof(ListBoxItem), 1) }));
             detailStyle.Triggers.Add(selectedDetail);
             detail.Style = detailStyle;
             var row = new StackPanel();

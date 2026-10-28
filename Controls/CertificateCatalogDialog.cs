@@ -218,7 +218,11 @@ internal sealed class CertificateCatalogDialog : Window
                 },
                 Value = true
             };
-            selectedDetail.Setters.Add(new Setter(TextBlock.ForegroundProperty, new DynamicResourceExtension("SelectionFg")));
+            // The selected row's own text color, which the dialog's row style picks to suit its fill.
+            selectedDetail.Setters.Add(new Setter(TextBlock.ForegroundProperty, new Binding(nameof(ListBoxItem.Foreground))
+            {
+                RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor, typeof(ListBoxItem), 1)
+            }));
             style.Triggers.Add(selectedDetail);
             detail.Style = style;
             var row = new StackPanel();
