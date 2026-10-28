@@ -10,8 +10,8 @@ namespace KillerPDF.Shell
     /// carries the all-users checkbox, locked when a machine-wide copy already exists. Unsaved
     /// documents hold the install, because the installed copy replaces this process. The install
     /// itself is App.InstallAndRelaunch with the command PortableInstallPlan chooses: the packaged
-    /// launcher's /install-user or an elevated /silent, the same commands and registry keys as
-    /// 1.8.x, and the installed copy reopens the active document.
+    /// launcher's in-app install (elevated for all users), the same install paths and registry
+    /// keys as 1.8.x, and the installed copy reopens the active document.
     /// </summary>
     public partial class MainWindow
     {
