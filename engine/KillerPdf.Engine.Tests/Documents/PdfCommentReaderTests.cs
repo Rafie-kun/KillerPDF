@@ -118,6 +118,35 @@ public sealed class PdfCommentReaderTests
     }
 
     [Fact]
+    public void ReadNormalizesAReversedAnnotationRectangle()
+    {
+        // ISO 32000-1 7.9.5: a rectangle may name any two opposite corners.
+        string[] objects =
+        [
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Annots [4 0 R] >>",
+            "<< /Type /Annot /Subtype /Text /Contents (Reversed) /Rect [160 715 70 690] >>"
+        ];
+        var pdf = new System.Text.StringBuilder("%PDF-1.7\n");
+        var offsets = new List<int>();
+        for (int index = 0; index < objects.Length; index++)
+        {
+            offsets.Add(pdf.Length);
+            pdf.Append($"{index + 1} 0 obj\n{objects[index]}\nendobj\n");
+        }
+        int xref = pdf.Length;
+        pdf.Append($"xref\n0 {objects.Length + 1}\n0000000000 65535 f \n");
+        foreach (int offset in offsets) pdf.Append($"{offset:0000000000} 00000 n \n");
+        pdf.Append($"trailer\n<< /Size {objects.Length + 1} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n");
+
+        PdfCommentInfo comment = Assert.Single(PdfCommentReader.Read(
+            PdfDocument.Open(System.Text.Encoding.Latin1.GetBytes(pdf.ToString()))));
+
+        Assert.Equal(new PdfContentBounds(70, 690, 160, 715), comment.Bounds);
+    }
+
+    [Fact]
     public void EmptyCommentReportIsReadable()
     {
         PdfDocument document = PdfDocument.Open(

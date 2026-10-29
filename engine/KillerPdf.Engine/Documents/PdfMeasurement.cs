@@ -470,7 +470,7 @@ public static partial class PdfMeasurementReport
                 .Append(result.Value.ToString("R", CultureInfo.InvariantCulture)).Append(',')
                 .Append(Csv(result.Unit)).Append(',').Append(Csv(result.Profile)).Append(',')
                 .Append(result.UnitsPerPoint?.ToString("R", CultureInfo.InvariantCulture))
-                .Append(',').Append(Csv(string.Join(";", result.Points.Select(point =>
+                .Append(',').Append(Quoted(string.Join(";", result.Points.Select(point =>
                     $"{point.X.ToString("R", CultureInfo.InvariantCulture)} {point.Y.ToString("R", CultureInfo.InvariantCulture)}"))))
                 .Append("\r\n");
         }
@@ -490,7 +490,8 @@ public static partial class PdfMeasurementReport
         return values;
     }
 
-    // Comments and document names come from the PDF and the file system, so formulas stay text.
+    // Comments and document names come from the PDF and the file system, so formulas stay text. The
+    // geometry column is engine-written numbers, so a leading minus sign stays as it is.
     private static string Csv(string value) => PdfCsv.Field(value, alwaysQuote: true);
 
     private static string Quoted(string value) =>

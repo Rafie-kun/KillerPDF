@@ -658,6 +658,55 @@ public sealed class PdfContentRedactionTests
         Assert.Equal(PdfPageInformation.Read(document)[1], PdfPageInformation.Read(output)[1]);
     }
 
+    [Theory]
+    [InlineData("pattern")]
+    [InlineData("type3")]
+    [InlineData("appearance")]
+    public void PreservesARetiredImageStillDrawnBySiblingPatternsGlyphsOrAppearances(string use)
+    {
+        // Page 1 drops the image; page 2 draws the same object through a tiling pattern, a Type 3 glyph or a stamp appearance.
+        (string page, string content, string extra, string extra2) = use switch
+        {
+            "pattern" => ("/Resources << /Pattern << /P1 8 0 R >> >>",
+                "q /Pattern cs /P1 scn 50 50 200 200 re f Q",
+                Stream("q 40 0 0 40 0 0 cm /Im1 Do Q",
+                    "/PatternType 1 /PaintType 1 /TilingType 1 /BBox [0 0 40 40] /XStep 40 /YStep 40 /Resources << /XObject << /Im1 6 0 R >> >>"),
+                "<< >>"),
+            "type3" => ("/Resources << /Font << /T3 8 0 R >> >>",
+                "BT /T3 200 Tf 50 50 Td (a) Tj ET",
+                "<< /Type /Font /Subtype /Type3 /FontBBox [0 0 1000 1000] /FontMatrix [0.001 0 0 0.001 0 0] /CharProcs << /square 9 0 R >> "
+                    + "/Encoding << /Type /Encoding /Differences [97 /square] >> /FirstChar 97 /LastChar 97 /Widths [1000] /Resources << /XObject << /Im1 6 0 R >> >> >>",
+                Stream("1000 0 d0 q 1000 0 0 1000 0 0 cm /Im1 Do Q")),
+            _ => ("/Annots [8 0 R]",
+                "",
+                "<< /Type /Annot /Subtype /Stamp /Rect [50 50 250 250] /F 4 /AP << /N 9 0 R >> >>",
+                Stream("q 200 0 0 200 0 0 cm /Im1 Do Q",
+                    "/Type /XObject /Subtype /Form /BBox [0 0 200 200] /Resources << /XObject << /Im1 6 0 R >> >>"))
+        };
+        PdfDocument document = PdfDocument.Open(CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R 4 0 R] /Count 2 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 400 400] /Resources << /XObject << /Im1 6 0 R >> >> /Contents 5 0 R >>",
+            $"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 400 400] {page} /Contents 7 0 R >>",
+            Stream("q 20 0 0 20 100 100 cm /Im1 Do Q"),
+            SecretImage(""),
+            Stream(content),
+            extra,
+            extra2
+        ]));
+        var region = new PdfRedactionRegion(0, new PdfContentBounds(90, 90, 130, 130));
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, [region]);
+
+        Assert.True(result.Verification.Succeeded);
+        PdfDocument output = PdfDocument.Open(result.Document);
+        Assert.Empty(new PdfPageContentReader(output).Read(0).Images);
+        Assert.True(HasSourceImage(output));
+        PdfRenderedPage rendered = new PdfPageRenderer(output).Render(1, new PdfRenderOptions(400, 400, includeAnnotations: true));
+        (byte red, byte green, byte blue) = Pixel(rendered, 100, 200);
+        Assert.True(red < 250 || green < 250 || blue < 250, "Page 2 no longer draws the shared image.");
+    }
+
     private static string SecretImage(string entries) =>
         $"<< /Type /XObject /Subtype /Image /Width 2 /Height 2 /ColorSpace /DeviceRGB /BitsPerComponent 8 {entries} /Length 12 >>\nstream\n"
             + Encoding.Latin1.GetString([255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255]) + "\nendstream";
@@ -893,6 +942,163 @@ public sealed class PdfContentRedactionTests
         Assert.Equal("Unrelated note", Assert.Single(PdfCommentReader.Read(output)).Contents);
         Assert.Empty(PdfFormWidgetReader.ReadPage(output, 0));
         Assert.Contains("visible", Letters(output, 0));
+    }
+
+    [Fact]
+    public void FieldRedactionDropsTheXfaPacketThatMirrorsTheFieldValue()
+    {
+        // A hybrid form keeps every field value in its XFA datasets as well, so the packet goes with the field.
+        PdfDocument document = PdfDocument.Open(HybridFormPdf());
+        var search = new PdfRedactionSearchOptions { Kind = PdfRedactionSearchKind.ExactText, Query = "SECRETWORD" };
+        PdfRedactionMatch field = Assert.Single(PdfRedactionSearch.FindInAnnotations(document, search).Matches);
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, [new(field.PageIndex, field.Bounds)],
+            new PdfContentRedactionOptions { ProhibitedText = ["SECRETWORD"] });
+
+        Assert.True(result.Verification.Succeeded);
+        Assert.True(result.Plan.RemovesXfaForm);
+        PdfDocument output = PdfDocument.Open(result.Document);
+        Assert.False(AcroForm(output).ContainsKey(new PdfName("XFA"u8)));
+        Assert.DoesNotContain("SECRETWORD", Encoding.Latin1.GetString(PdfDocumentWriterRaw(output)));
+    }
+
+    [Fact]
+    public void VerifierReportsAnXfaPacketLeftInTheOutput()
+    {
+        PdfRedactionVerificationReport report = PdfContentRedaction.Verify(HybridFormPdf(),
+            [new PdfRedactionRegion(0, new PdfContentBounds(100, 600, 300, 620))], [], expectMetadataCleared: false);
+
+        Assert.Contains(report.Findings, finding => finding.Code == "XfaFormData");
+    }
+
+    private static byte[] HybridFormPdf() => CreatePdf([
+        "<< /Type /Catalog /Pages 2 0 R /AcroForm << /Fields [6 0 R] /XFA [(datasets) 7 0 R] >> >>",
+        "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R /Annots [6 0 R] >>",
+        Helvetica,
+        Stream("BT /F1 12 Tf 72 700 Td (Plain visible text) Tj ET"),
+        "<< /Type /Annot /Subtype /Widget /FT /Tx /T (ssn) /V (SECRETWORD) /Rect [100 600 300 620] /P 3 0 R /F 4 >>",
+        Stream("<xfa:datasets xmlns:xfa=\"http://www.xfa.org/schema/xfa-data/1.0/\"><xfa:data><form><ssn>SECRETWORD</ssn></form></xfa:data></xfa:datasets>")
+    ]);
+
+    private static PdfDictionary AcroForm(PdfDocument document)
+    {
+        PdfObject acroForm = PdfPageTree.Read(document).Catalog[new PdfName("AcroForm"u8)];
+        if (acroForm is PdfIndirectReference reference) acroForm = document.Resolve(reference);
+        return Assert.IsType<PdfDictionary>(acroForm);
+    }
+
+    [Fact]
+    public void RemovingOneWidgetOfAMultiWidgetFieldClearsTheValueOnItsParent()
+    {
+        // The value of a field with several widgets lives on the field, not on the widget that is removed.
+        var objects = new List<string>
+        {
+            "<< /Type /Catalog /Pages 2 0 R /AcroForm << /Fields [6 0 R] >> >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R /Annots [7 0 R 8 0 R] >>",
+            Helvetica,
+            Stream("BT /F1 12 Tf 72 700 Td (Patient NAMEHERE) Tj ET"),
+            "<< /FT /Tx /T (ssn) /V (PARENTSECRET) /DV (PARENTSECRET) /Kids [7 0 R 8 0 R] >>",
+            "<< /Type /Annot /Subtype /Widget /Parent 6 0 R /P 3 0 R /Rect [140 690 260 712] >>",
+            "<< /Type /Annot /Subtype /Widget /Parent 6 0 R /P 3 0 R /Rect [300 100 400 120] >>"
+        };
+        PdfDocument document = PdfDocument.Open(CreatePdf(objects));
+        PdfRedactionRegion region = Region(document, 0, "NAMEHERE");
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, [region],
+            new PdfContentRedactionOptions { ProhibitedText = ["PARENTSECRET"] });
+
+        Assert.True(result.Verification.Succeeded);
+        PdfDocument output = PdfDocument.Open(result.Document);
+        PdfFormWidgetInfo remaining = Assert.Single(PdfFormWidgetReader.ReadPage(output, 0));
+        Assert.Equal("ssn", remaining.FieldName);
+        Assert.Equal(string.Empty, remaining.Value);
+        Assert.Equal(string.Empty, remaining.DefaultValue);
+    }
+
+    [Theory]
+    [InlineData("[0 0 0 0]")]
+    [InlineData("[100 100 100 100]")]
+    public void SearchProposesZeroSizeHiddenFieldsThroughAOnePointAreaThatRemovesThem(string rect)
+    {
+        // Hidden and calculated fields often carry an empty rectangle, and they hold values the page never shows.
+        var objects = new List<string>
+        {
+            "<< /Type /Catalog /Pages 2 0 R /AcroForm << /Fields [6 0 R] >> >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R /Annots [6 0 R] >>",
+            Helvetica,
+            Stream("BT /F1 12 Tf 72 700 Td (Plain visible text) Tj ET"),
+            $"<< /Type /Annot /Subtype /Widget /FT /Tx /T (ssn) /V (123-45-6789) /Rect {rect} /P 3 0 R /F 2 >>"
+        };
+        PdfDocument document = PdfDocument.Open(CreatePdf(objects));
+        var ssn = new PdfRedactionSearchOptions { Kind = PdfRedactionSearchKind.SocialSecurityNumber };
+
+        PdfRedactionMatch field = Assert.Single(PdfRedactionSearch.FindInAnnotations(document, ssn).Matches);
+
+        Assert.Equal(PdfRedactionTargetKind.FormField, field.TargetKind);
+        Assert.True(field.Bounds.Width > 0 && field.Bounds.Height > 0, "The proposed area must have a size.");
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, [new(field.PageIndex, field.Bounds)],
+            new PdfContentRedactionOptions { ProhibitedText = ["123-45-6789"] });
+        Assert.True(result.Verification.Succeeded);
+        PdfDocument output = PdfDocument.Open(result.Document);
+        Assert.Empty(PdfFormWidgetReader.ReadPage(output, 0));
+        Assert.DoesNotContain("123-45-6789", Encoding.Latin1.GetString(PdfDocumentWriterRaw(output)));
+    }
+
+    [Fact]
+    public void RemovesAnOrphanWidgetOfTheRedactedPageThatIsMissingFromAnnots()
+    {
+        // A widget that only the field tree knows cannot be placed, so it leaves with its value instead of blocking the page.
+        var objects = new List<string>
+        {
+            "<< /Type /Catalog /Pages 2 0 R /AcroForm << /Fields [6 0 R] >> >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
+            Helvetica,
+            Stream("BT /F1 12 Tf 72 700 Td (Patient NAMEHERE) Tj ET"),
+            "<< /Type /Annot /Subtype /Widget /FT /Tx /T (orphan) /P 3 0 R /V (SECRETWORD) >>"
+        };
+        PdfDocument document = PdfDocument.Open(CreatePdf(objects));
+        PdfRedactionRegion region = Region(document, 0, "NAMEHERE");
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, [region],
+            new PdfContentRedactionOptions { ProhibitedText = ["SECRETWORD"] });
+
+        Assert.True(result.Verification.Succeeded);
+        PdfDocument output = PdfDocument.Open(result.Document);
+        PdfObject fields = AcroForm(output)[new PdfName("Fields"u8)];
+        if (fields is PdfIndirectReference reference) fields = output.Resolve(reference);
+        Assert.Empty(Assert.IsType<PdfArray>(fields));
+        Assert.DoesNotContain(PdfContentRedaction.Verify(result.Document, [region], []).Findings,
+            finding => finding.Code == "FieldInRegion");
+    }
+
+    [Fact]
+    public void SearchSkipsAndReportsAMalformedAnnotationInsteadOfFailing()
+    {
+        // A reversed rectangle names two opposite corners and is normalized; a nonstring /T is skipped and reported.
+        var objects = new List<string>
+        {
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R 8 0 R] /Count 2 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R /Annots [6 0 R 7 0 R] >>",
+            Helvetica,
+            Stream("BT /F1 12 Tf 72 700 Td (Plain visible text) Tj ET"),
+            "<< /Type /Annot /Subtype /FreeText /Contents (Call SECRETNOTE today) /DA (/F1 10 Tf 0 g) /Rect [300 540 100 500] /F 4 >>",
+            "<< /Type /Annot /Subtype /Text /Contents (SECRETNOTE in a broken note) /T 5 /Rect [400 100 420 120] >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R /Annots [9 0 R] >>",
+            "<< /Type /Annot /Subtype /Text /Contents (Second page SECRETNOTE) /Rect [10 10 30 30] >>"
+        };
+        PdfDocument document = PdfDocument.Open(CreatePdf(objects));
+        var note = new PdfRedactionSearchOptions { Kind = PdfRedactionSearchKind.ExactText, Query = "SECRETNOTE" };
+
+        PdfRedactionReview review = PdfRedactionSearch.FindInAnnotations(document, note);
+
+        Assert.Equal(["annotation:0:0", "annotation:1:0"], review.Matches.Select(match => match.Id));
+        Assert.Equal(new PdfContentBounds(100, 500, 300, 540), review.Matches[0].Bounds);
+        Assert.Equal([0], review.UnreadableAnnotationPages);
     }
 
     [Theory]

@@ -110,13 +110,18 @@ public sealed partial class PdfRedactionReview
     public IReadOnlyList<PdfRedactionMatch> Matches { get; }
     /// <summary>Gets matches still selected for later permanent removal.</summary>
     public IReadOnlyList<PdfRedactionMatch> Included { get; }
+    /// <summary>
+    /// Gets the zero-based pages with an annotation that <see cref="PdfRedactionSearch.FindInAnnotations"/>
+    /// could not read and therefore could not search. Empty for reviews built another way.
+    /// </summary>
+    public IReadOnlyList<int> UnreadableAnnotationPages { get; init; } = [];
 
     /// <summary>Returns a new review with one match excluded.</summary>
     public PdfRedactionReview Exclude(string id)
     {
         if (!_matches.Any(match => string.Equals(match.Id, id, StringComparison.Ordinal)))
             throw new KeyNotFoundException($"Redaction match '{id}' was not found.");
-        return new PdfRedactionReview(_matches, _excluded.Append(id));
+        return new PdfRedactionReview(_matches, _excluded.Append(id)) { UnreadableAnnotationPages = UnreadableAnnotationPages };
     }
 
     /// <summary>Returns a new review with an excluded match restored.</summary>
@@ -124,15 +129,18 @@ public sealed partial class PdfRedactionReview
     {
         if (!_matches.Any(match => string.Equals(match.Id, id, StringComparison.Ordinal)))
             throw new KeyNotFoundException($"Redaction match '{id}' was not found.");
-        return new PdfRedactionReview(_matches, _excluded.Where(value => !string.Equals(value, id, StringComparison.Ordinal)));
+        return new PdfRedactionReview(_matches, _excluded.Where(value => !string.Equals(value, id, StringComparison.Ordinal)))
+        {
+            UnreadableAnnotationPages = UnreadableAnnotationPages
+        };
     }
 
     /// <summary>Returns a new review with every match excluded.</summary>
     public PdfRedactionReview ExcludeAll() =>
-        new(_matches, _matches.Select(match => match.Id));
+        new(_matches, _matches.Select(match => match.Id)) { UnreadableAnnotationPages = UnreadableAnnotationPages };
 
     /// <summary>Returns a new review with every match included.</summary>
-    public PdfRedactionReview IncludeAll() => new(_matches);
+    public PdfRedactionReview IncludeAll() => new(_matches) { UnreadableAnnotationPages = UnreadableAnnotationPages };
 
     /// <summary>Builds a review from caller-selected rectangular page regions.</summary>
     public static PdfRedactionReview FromRegions(IEnumerable<PdfRedactionRegion> regions)
@@ -376,7 +384,9 @@ public static class PdfRedactionSearch
     /// values and annotation contents such as FreeText notes. Each match proposes the whole annotation,
     /// which redaction then removes. An annotation without a usable rectangle is proposed through a
     /// one-point area at the page corner, because redaction removes any unplaceable annotation on a
-    /// page it redacts.
+    /// page it redacts, and a widget with an empty rectangle, such as a hidden field, through a one-point
+    /// area at its position. A malformed annotation is skipped and its page listed in
+    /// <see cref="PdfRedactionReview.UnreadableAnnotationPages"/> rather than failing the search.
     /// </summary>
     public static PdfRedactionReview FindInAnnotations(PdfDocument document,
         PdfRedactionSearchOptions options, CancellationToken cancellationToken = default)
@@ -385,19 +395,36 @@ public static class PdfRedactionSearch
         Regex expression = Expression(options);
         IReadOnlyList<PdfPageInformation> pages = PdfPageInformation.Read(document);
         var results = new List<PdfRedactionMatch>();
+        var unreadablePages = new SortedSet<int>();
         for (int pageIndex = 0; pageIndex < pages.Count; pageIndex++)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            foreach (PdfFormWidgetInfo widget in PdfFormWidgetReader.ReadPage(document, pageIndex))
+            IReadOnlyList<PdfFormWidgetInfo> widgets;
+            try { widgets = PdfFormWidgetReader.ReadPage(document, pageIndex); }
+            catch (Exception error) when (error is InvalidOperationException or FormatException)
+            {
+                unreadablePages.Add(pageIndex);
+                continue;
+            }
+            foreach (PdfFormWidgetInfo widget in widgets)
             {
                 var bounds = new PdfContentBounds(widget.Left - widget.PageBoxLeft, widget.Bottom - widget.PageBoxBottom,
                     widget.Right - widget.PageBoxLeft, widget.Top - widget.PageBoxBottom);
+                if (!double.IsFinite(bounds.Left) || !double.IsFinite(bounds.Bottom) || !double.IsFinite(bounds.Right)
+                    || !double.IsFinite(bounds.Top) || bounds.Width <= 0 || bounds.Height <= 0)
+                {
+                    // Redaction removes every widget that touches a region, so one point at the widget's
+                    // position, kept inside the page, is enough to take an empty rectangle with it.
+                    double x = double.IsFinite(bounds.Left) ? Math.Clamp(bounds.Left, 0, Math.Max(0, widget.PageBoxWidth - 1)) : 0;
+                    double y = double.IsFinite(bounds.Bottom) ? Math.Clamp(bounds.Bottom, 0, Math.Max(0, widget.PageBoxHeight - 1)) : 0;
+                    bounds = new PdfContentBounds(x, y, x + 1, y + 1);
+                }
                 string[] texts = [widget.Value, widget.DefaultValue, .. widget.Values, .. widget.DefaultValues];
                 AddMatches($"field:{pageIndex}:{widget.AnnotationIndex}", pageIndex, texts.Distinct(),
                     bounds, PdfRedactionTargetKind.FormField);
             }
         }
-        foreach (PdfCommentInfo comment in PdfCommentReader.Read(document))
+        foreach (PdfCommentInfo comment in PdfCommentReader.Read(document, includeMarkupWithoutText: false, unreadablePages))
         {
             cancellationToken.ThrowIfCancellationRequested();
             PdfPageInformation page = pages[comment.PageIndex];
@@ -408,7 +435,7 @@ public static class PdfRedactionSearch
             AddMatches($"annotation:{comment.PageIndex}:{comment.AnnotationIndex}", comment.PageIndex,
                 [comment.Contents], bounds, PdfRedactionTargetKind.Comment);
         }
-        return new PdfRedactionReview(results);
+        return new PdfRedactionReview(results) { UnreadableAnnotationPages = Array.AsReadOnly(unreadablePages.ToArray()) };
 
         void AddMatches(string id, int pageIndex, IEnumerable<string> texts, PdfContentBounds bounds,
             PdfRedactionTargetKind kind)

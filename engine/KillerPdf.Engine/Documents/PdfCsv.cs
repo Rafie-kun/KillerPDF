@@ -16,12 +16,25 @@ public static class PdfCsv
     public static bool StartsFormula(string text)
     {
         ArgumentNullException.ThrowIfNull(text);
-        foreach (Rune rune in text.Normalize(NormalizationForm.FormKC).EnumerateRunes())
+        // Normalization rejects an unpaired surrogate, which a file name may carry; such text is read as it is.
+        string normalized = HasUnpairedSurrogate(text) ? text : text.Normalize(NormalizationForm.FormKC);
+        foreach (Rune rune in normalized.EnumerateRunes())
         {
             UnicodeCategory category = Rune.GetUnicodeCategory(rune);
             if (Rune.IsWhiteSpace(rune) || category is UnicodeCategory.Control or UnicodeCategory.Format) continue;
             return rune.Value is '=' or '+' or '-' or '@';
         }
+        return false;
+    }
+
+    private static bool HasUnpairedSurrogate(string text)
+    {
+        for (int index = 0; index < text.Length; index++)
+            if (char.IsSurrogate(text[index]))
+            {
+                if (index + 1 >= text.Length || !char.IsSurrogatePair(text[index], text[index + 1])) return true;
+                index++;
+            }
         return false;
     }
 

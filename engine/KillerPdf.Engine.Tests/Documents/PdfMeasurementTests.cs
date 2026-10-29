@@ -84,6 +84,46 @@ public sealed class PdfMeasurementTests
     }
 
     [Fact]
+    public void CsvGeometryStaysNumericWhileTextColumnsKeepTheFormulaGuard()
+    {
+        PdfMeasurementResult[] results = [new()
+        {
+            Document = "plan.pdf",
+            PageIndex = 0,
+            Kind = "Distance",
+            Comment = "=SUM(A1)",
+            Value = 1,
+            Unit = "ft",
+            Profile = "Default",
+            Points = [new(-12.5, 3), new(4, 5)]
+        }];
+
+        string csv = PdfMeasurementReport.ToCsv(results);
+
+        Assert.Contains(",\"'=SUM(A1)\",", csv, StringComparison.Ordinal);
+        Assert.EndsWith(",\"-12.5 3;4 5\"\r\n", csv, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void CsvAcceptsADocumentNameWithALoneSurrogate()
+    {
+        PdfMeasurementResult[] results = [new()
+        {
+            Document = "\uD800name.pdf",
+            PageIndex = 0,
+            Kind = "Distance",
+            Value = 1,
+            Unit = "ft",
+            Profile = "Default",
+            Points = []
+        }];
+
+        string csv = PdfMeasurementReport.ToCsv(results);
+
+        Assert.Contains("\r\n\"\uD800name.pdf\",1,", csv, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void SnapsToFiniteSegmentIntersectionsWithinTolerance()
     {
         PdfMeasurementSegment[] segments = [

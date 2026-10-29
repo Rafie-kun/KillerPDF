@@ -38,6 +38,11 @@ public sealed record PdfRedactionPageAnalysis(
 /// <summary>The per-page redaction analysis for a set of regions.</summary>
 public sealed record PdfContentRedactionPlan(IReadOnlyList<PdfRedactionPageAnalysis> Pages)
 {
+    /// <summary>
+    /// Gets whether the document carries an XFA form packet, which the redaction removes because its
+    /// datasets repeat every field value. The result keeps working as a plain AcroForm.
+    /// </summary>
+    public bool RemovesXfaForm { get; init; }
     /// <summary>Gets the zero-based pages that can only be redacted by replacing them with an image.</summary>
     public IReadOnlyList<int> RasterPages => Array.AsReadOnly(Pages
         .Where(page => page.Method == PdfRedactionPageMethod.Raster)
@@ -102,6 +107,8 @@ public static partial class PdfContentRedaction
     private static readonly PdfName KidsName = Name("Kids");
     private static readonly PdfName FieldsName = Name("Fields");
     private static readonly PdfName AcroFormName = Name("AcroForm");
+    private static readonly PdfName XfaName = Name("XFA");
+    private static readonly PdfName[] FieldValueKeys = [Name("V"), Name("DV"), Name("RV"), Name("I")];
     private static readonly PdfName StructTreeRootName = Name("StructTreeRoot");
     private static readonly PdfName MetadataName = Name("Metadata");
     private static readonly PdfName InfoName = Name("Info");
@@ -134,8 +141,12 @@ public static partial class PdfContentRedaction
                 RedactedImages = rewriter.RedactedImages
             });
         }
-        return new PdfContentRedactionPlan(Array.AsReadOnly(pages.ToArray()));
+        return new PdfContentRedactionPlan(Array.AsReadOnly(pages.ToArray())) { RemovesXfaForm = HasXfaForm(document, tree) };
     }
+
+    private static bool HasXfaForm(PdfDocument document, PdfPageTree tree) =>
+        tree.Catalog.TryGetValue(AcroFormName, out PdfObject? value)
+        && Resolve(document, value) is PdfDictionary acroForm && acroForm.ContainsKey(XfaName);
 
     /// <summary>Applies and verifies the redaction, returning a single-revision document.</summary>
     /// <exception cref="InvalidOperationException">A page needs image replacement that was not approved.</exception>
@@ -314,6 +325,14 @@ public static partial class PdfContentRedaction
             List<PdfObject> removed = IntersectingAnnotations(document, page, geometry, pageRegions);
             PdfArray? annotations = RemainingAnnotations(document, page, removed, removedAnnotations, removedWidgets);
             if (annotations is not null) entries[AnnotsName] = annotations;
+            // A widget the field tree places on this page but the page does not list cannot be shown to be
+            // clear of the areas, so it leaves with its value instead of blocking the page.
+            foreach (PdfObject widget in CoveredFieldWidgets(document, tree, pageIndex, geometry, pageRegions))
+                if (widget is PdfIndirectReference orphan)
+                {
+                    removedWidgets.Add(orphan.ObjectNumber);
+                    removedAnnotations.Add(orphan.ObjectNumber);
+                }
             update.ReplaceObject(page.Reference.ObjectNumber, new PdfDictionary(entries));
             touchedContent[page.Reference.ObjectNumber] = (rewriter.TouchedMcids, raster || rewriter.FormMarkedContentTouched);
         }
@@ -321,7 +340,7 @@ public static partial class PdfContentRedaction
         PdfDictionary catalog = tree.Catalog;
         var catalogEntries = catalog.ToDictionary(entry => entry.Key, entry => entry.Value);
         bool catalogChanged = false;
-        if (removedWidgets.Count != 0 && catalog.TryGetValue(AcroFormName, out PdfObject? acroFormValue))
+        if (catalog.TryGetValue(AcroFormName, out PdfObject? acroFormValue))
             catalogChanged |= PruneFields(document, update, acroFormValue, removedWidgets, catalogEntries);
         if (catalog.TryGetValue(StructTreeRootName, out PdfObject? structureValue))
             catalogChanged |= CleanStructure(document, update, structureValue, touchedContent, removedAnnotations, catalogEntries);
@@ -366,6 +385,8 @@ public static partial class PdfContentRedaction
             findings.Add(new("DocumentInformation", "The output contains a document-information dictionary."));
         if (expectMetadataCleared && tree.Catalog.ContainsKey(MetadataName))
             findings.Add(new("XmpMetadata", "The output contains XMP metadata."));
+        if (HasXfaForm(document, tree))
+            findings.Add(new("XfaFormData", "The output still carries an XFA form packet, whose datasets repeat field values."));
         Dictionary<int, PdfContentBounds[]> byPage = GroupRegions(regionList, tree.Pages.Count);
         Dictionary<int, PdfRedactionRegion[]> covers = GroupCovers(regionList);
         var reader = new PdfPageContentReader(document);
@@ -609,12 +630,17 @@ public static partial class PdfContentRedaction
 
     // Walks the whole field tree, since a widget dropped from the page can stay reachable through it.
     private static bool FieldWidgetRemains(PdfDocument document, PdfPageTree tree, int pageIndex,
+        PageGeometry geometry, PdfContentBounds[] regions) =>
+        CoveredFieldWidgets(document, tree, pageIndex, geometry, regions).Any();
+
+    // Yields every field-tree node that is a widget of the page and overlaps a region or cannot be placed.
+    private static IEnumerable<PdfObject> CoveredFieldWidgets(PdfDocument document, PdfPageTree tree, int pageIndex,
         PageGeometry geometry, PdfContentBounds[] regions)
     {
         if (!tree.Catalog.TryGetValue(AcroFormName, out PdfObject? acroFormValue)
             || Resolve(document, acroFormValue) is not PdfDictionary acroForm
             || !acroForm.TryGetValue(FieldsName, out PdfObject? fieldsValue)
-            || Resolve(document, fieldsValue) is not PdfArray fields) return false;
+            || Resolve(document, fieldsValue) is not PdfArray fields) yield break;
         int pageNumber = tree.Pages[pageIndex].Reference.ObjectNumber;
         var visited = new HashSet<int>();
         var pending = new Stack<PdfObject>(fields);
@@ -629,9 +655,8 @@ public static partial class PdfContentRedaction
                 || owner is not PdfIndirectReference { ObjectNumber: var ownerNumber } || ownerNumber != pageNumber
                 || !(IsNamed(field, SubtypeName, "Widget") || field.ContainsKey(RectName))) continue;
             if (!TryAnnotationBounds(document, field, geometry, out PdfContentBounds bounds)
-                || regions.Any(region => OverlapsOrTouches(bounds, region))) return true;
+                || regions.Any(region => OverlapsOrTouches(bounds, region))) yield return item;
         }
-        return false;
     }
 
     private static PdfArray? RemainingAnnotations(PdfDocument document, PdfPageTreeEntry page,
@@ -672,17 +697,20 @@ public static partial class PdfContentRedaction
         return kept.Count == 0 ? null : new PdfArray(kept);
     }
 
+    // Drops removed widgets from the field tree, clears the value of a field that lost one of its widgets,
+    // and removes the XFA packet, whose datasets repeat every field value. The form keeps working as a
+    // plain AcroForm, which is also what Acrobat requires before it redacts.
     private static bool PruneFields(PdfDocument document, PdfIncrementalUpdateBuilder update,
         PdfObject acroFormValue, HashSet<int> removedWidgets, Dictionary<PdfName, PdfObject> catalogEntries)
     {
-        if (Resolve(document, acroFormValue) is not PdfDictionary acroForm
-            || !acroForm.TryGetValue(FieldsName, out PdfObject? fieldsValue)
-            || Resolve(document, fieldsValue) is not PdfArray fields) return false;
+        if (Resolve(document, acroFormValue) is not PdfDictionary acroForm) return false;
         var removedFields = new HashSet<int>(removedWidgets);
-        PdfArray? pruned = PruneKids(fields, 0);
-        if (pruned is null) return false;
-        var entries = acroForm.ToDictionary(entry => entry.Key, entry => entry.Value);
-        entries[FieldsName] = pruned;
+        PdfArray? pruned = removedWidgets.Count != 0 && acroForm.TryGetValue(FieldsName, out PdfObject? fieldsValue)
+            && Resolve(document, fieldsValue) is PdfArray fields ? PruneKids(fields, 0, out _) : null;
+        if (pruned is null && !acroForm.ContainsKey(XfaName)) return false;
+        var entries = acroForm.Where(entry => !entry.Key.Equals(XfaName))
+            .ToDictionary(entry => entry.Key, entry => entry.Value);
+        if (pruned is not null) entries[FieldsName] = pruned;
         PdfName calculationOrder = Name("CO");
         if (acroForm.TryGetValue(calculationOrder, out PdfObject? orderValue)
             && Resolve(document, orderValue) is PdfArray order)
@@ -697,18 +725,20 @@ public static partial class PdfContentRedaction
         catalogEntries[AcroFormName] = replacement;
         return true;
 
-        PdfArray? PruneKids(PdfArray kids, int depth)
+        PdfArray? PruneKids(PdfArray kids, int depth, out bool removedKid)
         {
             // Stopping early would leave a removed widget, and its value, reachable from the form.
             if (depth > MaximumFieldDepth)
                 throw new NotSupportedException("The form field hierarchy is too deep to redact safely.");
             bool changed = false;
+            removedKid = false;
             var kept = new List<PdfObject>();
             foreach (PdfObject kid in kids)
             {
                 if (kid is PdfIndirectReference reference && removedFields.Contains(reference.ObjectNumber))
                 {
                     changed = true;
+                    removedKid = true;
                     continue;
                 }
                 if (kid is PdfIndirectReference fieldReference
@@ -716,7 +746,7 @@ public static partial class PdfContentRedaction
                     && field.TryGetValue(KidsName, out PdfObject? childrenValue)
                     && Resolve(document, childrenValue) is PdfArray children)
                 {
-                    PdfArray? prunedChildren = PruneKids(children, depth + 1);
+                    PdfArray? prunedChildren = PruneKids(children, depth + 1, out bool removedChild);
                     if (prunedChildren is not null)
                     {
                         changed = true;
@@ -725,7 +755,9 @@ public static partial class PdfContentRedaction
                             removedFields.Add(fieldReference.ObjectNumber);
                             continue;
                         }
-                        var fieldEntries = field.ToDictionary(entry => entry.Key, entry => entry.Value);
+                        // The value of a field with several widgets lives on the field, so it goes with the widget.
+                        var fieldEntries = field.Where(entry => !removedChild || !FieldValueKeys.Contains(entry.Key))
+                            .ToDictionary(entry => entry.Key, entry => entry.Value);
                         fieldEntries[KidsName] = prunedChildren;
                         update.ReplaceObject(fieldReference.ObjectNumber, new PdfDictionary(fieldEntries));
                     }

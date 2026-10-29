@@ -57,15 +57,31 @@ public static partial class PdfContentRedaction
         var used = new HashSet<int>();
         var usedDescriptions = new HashSet<string>(StringComparer.Ordinal);
         var active = new HashSet<PdfStream>(ReferenceEqualityComparer.Instance);
+        var walkedNumbers = new HashSet<int>();
+        var walkedObjects = new HashSet<PdfObject>(ReferenceEqualityComparer.Instance);
         var context = new ContentRewriter(document, null, [], false, [], cancellationToken);
         int instructionCount = 0;
         foreach (PdfPageTreeEntry page in PdfPageTree.Read(document).Pages)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (!page.Dictionary.TryGetValue(ContentsName, out PdfObject? contents)) continue;
-            CollectSourceStreams(document, contents, used);
             PdfDictionary resources = page.InheritedValues.TryGetValue(ResourcesName, out PdfObject? value)
                 && Resolve(document, value) is PdfDictionary dictionary ? dictionary : new PdfDictionary([]);
+            // Annotation appearances draw images and forms of their own, in every appearance state.
+            if (page.Dictionary.TryGetValue(AnnotsName, out PdfObject? annotationsValue)
+                && Resolve(document, annotationsValue) is PdfArray annotations)
+                foreach (PdfObject item in annotations)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (Resolve(document, item) is not PdfDictionary annotation
+                        || !annotation.TryGetValue(Name("AP"), out PdfObject? appearancesValue)
+                        || Resolve(document, appearancesValue) is not PdfDictionary appearances) continue;
+                    foreach (PdfObject appearance in appearances.Values)
+                        if (Resolve(document, appearance) is PdfDictionary states)
+                            foreach (PdfObject state in states.Values) Credit(state, resources, 0, content: true);
+                        else Credit(appearance, resources, 0, content: true);
+                }
+            if (!page.Dictionary.TryGetValue(ContentsName, out PdfObject? contents)) continue;
+            CollectSourceStreams(document, contents, used);
             PdfObject resolved = Resolve(document, contents);
             IEnumerable<PdfObject> items = resolved is PdfArray array ? array : [resolved];
             using var bytes = new MemoryStream();
@@ -105,29 +121,68 @@ public static partial class PdfContentRedaction
                     if (property is not null && Resolve(document, property) is PdfDictionary dictionary)
                         usedDescriptions.Add(DescriptionIdentity(dictionary));
                 }
-                if (instruction.Operands.Count != 1 || instruction.Operands[0] is not PdfName name) continue;
-                PdfObject? value = null;
-                if (instruction.Operator == "Do") value = scope.Lookup(Name("XObject"), name);
-                else if (instruction.Operator == "gs"
-                    && scope.Lookup(Name("ExtGState"), name) is PdfObject gsValue
-                    && Resolve(document, gsValue) is PdfDictionary gs
-                    && gs.TryGetValue(Name("SMask"), out PdfObject? maskValue)
-                    && Resolve(document, maskValue) is PdfDictionary mask
-                    && mask.TryGetValue(Name("G"), out PdfObject? groupValue)) value = groupValue;
-                if (value is null || Resolve(document, value) is not PdfStream stream) continue;
-                if (IsNamed(stream.Dictionary, SubtypeName, "Image")) CollectImageStreams(document, value, used);
-                else CollectSourceStreams(document, value, used);
-                if (!IsNamed(stream.Dictionary, SubtypeName, "Form")) continue;
-                if (!active.Add(stream)) throw new FormatException("Recursive form in redaction verification.");
-                try
+                if (instruction.Operands.Count == 0) continue;
+                PdfName? first = instruction.Operands[0] as PdfName, last = instruction.Operands[^1] as PdfName;
+                switch (instruction.Operator)
                 {
-                    PdfDictionary nested = stream.Dictionary.TryGetValue(ResourcesName, out PdfObject? own)
-                        && Resolve(document, own) is PdfDictionary dictionary ? dictionary : resources;
-                    Visit(document.DecodeStream(stream, PdfContentStreamReader.MaximumSourceBytes), nested, depth + 1);
+                    case "Do" when instruction.Operands.Count == 1 && first is not null:
+                        Credit(scope.Lookup(Name("XObject"), first), resources, depth, content: false);
+                        break;
+                    case "gs" when instruction.Operands.Count == 1 && first is not null:
+                        if (scope.Lookup(Name("ExtGState"), first) is PdfObject gsValue
+                            && Resolve(document, gsValue) is PdfDictionary gs
+                            && gs.TryGetValue(Name("SMask"), out PdfObject? maskValue)
+                            && Resolve(document, maskValue) is PdfDictionary mask
+                            && mask.TryGetValue(Name("G"), out PdfObject? groupValue))
+                            Credit(groupValue, resources, depth, content: false);
+                        break;
+                    case "scn" or "SCN" when last is not null:
+                        // A tiling pattern's cell draws resources of its own; each pattern is walked once.
+                        if (scope.Lookup(Name("Pattern"), last) is PdfObject patternValue
+                            && Resolve(document, patternValue) is PdfStream pattern
+                            && FirstWalk(patternValue, pattern))
+                            Credit(patternValue, resources, depth, content: true);
+                        break;
+                    case "Tf" when first is not null:
+                        // Type 3 glyph procedures draw with the font's resources, or the page's when it has none.
+                        if (scope.Lookup(Name("Font"), first) is not PdfObject fontValue
+                            || Resolve(document, fontValue) is not PdfDictionary font
+                            || !IsNamed(font, SubtypeName, "Type3")
+                            || !font.TryGetValue(Name("CharProcs"), out PdfObject? proceduresValue)
+                            || Resolve(document, proceduresValue) is not PdfDictionary procedures) break;
+                        bool ownResources = font.TryGetValue(ResourcesName, out PdfObject? fontResourcesValue)
+                            && Resolve(document, fontResourcesValue) is PdfDictionary;
+                        if (ownResources && !FirstWalk(fontValue, font)) break;
+                        PdfDictionary glyphResources = ownResources ? (PdfDictionary)Resolve(document, fontResourcesValue!) : resources;
+                        foreach (PdfObject procedure in procedures.Values) Credit(procedure, glyphResources, depth, content: true);
+                        break;
                 }
-                finally { active.Remove(stream); }
             }
         }
+
+        // Credits a drawn stream and, for a form or other content stream, walks what it draws in turn.
+        void Credit(PdfObject? value, PdfDictionary resources, int depth, bool content)
+        {
+            if (value is null || Resolve(document, value) is not PdfStream stream) return;
+            if (IsNamed(stream.Dictionary, SubtypeName, "Image"))
+            {
+                CollectImageStreams(document, value, used);
+                return;
+            }
+            CollectSourceStreams(document, value, used);
+            if (!content && !IsNamed(stream.Dictionary, SubtypeName, "Form")) return;
+            if (!active.Add(stream)) throw new FormatException("Recursive form in redaction verification.");
+            try
+            {
+                PdfDictionary nested = stream.Dictionary.TryGetValue(ResourcesName, out PdfObject? own)
+                    && Resolve(document, own) is PdfDictionary dictionary ? dictionary : resources;
+                Visit(document.DecodeStream(stream, PdfContentStreamReader.MaximumSourceBytes), nested, depth + 1);
+            }
+            finally { active.Remove(stream); }
+        }
+
+        bool FirstWalk(PdfObject value, PdfObject resolved) => value is PdfIndirectReference reference
+            ? walkedNumbers.Add(reference.ObjectNumber) : walkedObjects.Add(resolved);
 
         void InspectDescriptions(PdfObject value, int depth)
         {

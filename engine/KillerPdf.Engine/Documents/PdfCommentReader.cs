@@ -111,7 +111,16 @@ public static partial class PdfCommentReader
     /// is set, text markup, drawings and stamps that carry none (their <see cref="PdfCommentInfo.Contents"/>
     /// is empty). Screen readers announce those too.
     /// </summary>
-    public static IReadOnlyList<PdfCommentInfo> Read(PdfDocument document, bool includeMarkupWithoutText)
+    public static IReadOnlyList<PdfCommentInfo> Read(PdfDocument document, bool includeMarkupWithoutText) =>
+        Read(document, includeMarkupWithoutText, null);
+
+    /// <summary>
+    /// Reads comments as <see cref="Read(PdfDocument, bool)"/> does, except that when
+    /// <paramref name="unreadablePages"/> is given, a malformed annotation is skipped and its page
+    /// recorded there instead of failing the whole read.
+    /// </summary>
+    internal static IReadOnlyList<PdfCommentInfo> Read(PdfDocument document, bool includeMarkupWithoutText,
+        ICollection<int>? unreadablePages)
     {
         ArgumentNullException.ThrowIfNull(document);
         if (!document.IsDecrypted)
@@ -122,45 +131,64 @@ public static partial class PdfCommentReader
         {
             if (!page.Dictionary.TryGetValue(Name("Annots"), out PdfObject? annotationsValue))
                 continue;
-            PdfArray annotations = Resolve(document, annotationsValue) as PdfArray
-                ?? throw new InvalidOperationException(
-                    $"Page {page.Index + 1} /Annots value is not an array.");
+            if (Resolve(document, annotationsValue) is not PdfArray annotations)
+            {
+                if (unreadablePages is null)
+                    throw new InvalidOperationException(
+                        $"Page {page.Index + 1} /Annots value is not an array.");
+                unreadablePages.Add(page.Index);
+                continue;
+            }
             for (int index = 0; index < annotations.Count; index++)
             {
-                PdfIndirectReference? reference = annotations[index] as PdfIndirectReference;
-                PdfDictionary annotation = Resolve(document, annotations[index]) as PdfDictionary
-                    ?? throw new InvalidOperationException(
-                        $"Page {page.Index + 1} annotation {index + 1} is not a dictionary.");
-                string? contents = Text(document, annotation, "Contents");
-                if (string.IsNullOrEmpty(contents))
+                PdfCommentInfo? comment;
+                try { comment = ReadAnnotation(document, page.Index, annotations[index], index, includeMarkupWithoutText); }
+                catch (Exception error) when (unreadablePages is not null
+                    && error is InvalidOperationException or FormatException)
                 {
-                    if (!includeMarkupWithoutText
-                        || !(annotation.TryGetValue(Name("Subtype"), out PdfObject? bareSubtype)
-                            && Resolve(document, bareSubtype) is PdfName bareName
-                            && IsMarkup(bareName.ValueAsLatin1()))) continue;
-                    contents = string.Empty;
+                    unreadablePages.Add(page.Index);
+                    continue;
                 }
-                string subtype = annotation.TryGetValue(Name("Subtype"), out PdfObject? subtypeValue)
-                    && Resolve(document, subtypeValue) is PdfName subtypeName
-                    ? subtypeName.ValueAsLatin1()
-                    : throw new InvalidOperationException(
-                        $"Page {page.Index + 1} annotation {index + 1} has no subtype name.");
-                comments.Add(new PdfCommentInfo
-                {
-                    PageIndex = page.Index,
-                    AnnotationIndex = index,
-                    ObjectNumber = reference?.ObjectNumber,
-                    Subtype = subtype,
-                    Name = Text(document, annotation, "NM"),
-                    Contents = contents,
-                    Author = Text(document, annotation, "T"),
-                    Subject = Text(document, annotation, "Subj"),
-                    Bounds = Bounds(document, annotation, page.Index, index),
-                    ReplyToObjectNumber = ReplyTarget(document, annotation)
-                });
+                if (comment is not null) comments.Add(comment);
             }
         }
         return Array.AsReadOnly(comments.ToArray());
+    }
+
+    private static PdfCommentInfo? ReadAnnotation(PdfDocument document, int pageIndex, PdfObject item,
+        int index, bool includeMarkupWithoutText)
+    {
+        PdfIndirectReference? reference = item as PdfIndirectReference;
+        PdfDictionary annotation = Resolve(document, item) as PdfDictionary
+            ?? throw new InvalidOperationException(
+                $"Page {pageIndex + 1} annotation {index + 1} is not a dictionary.");
+        string? contents = Text(document, annotation, "Contents");
+        if (string.IsNullOrEmpty(contents))
+        {
+            if (!includeMarkupWithoutText
+                || !(annotation.TryGetValue(Name("Subtype"), out PdfObject? bareSubtype)
+                    && Resolve(document, bareSubtype) is PdfName bareName
+                    && IsMarkup(bareName.ValueAsLatin1()))) return null;
+            contents = string.Empty;
+        }
+        string subtype = annotation.TryGetValue(Name("Subtype"), out PdfObject? subtypeValue)
+            && Resolve(document, subtypeValue) is PdfName subtypeName
+            ? subtypeName.ValueAsLatin1()
+            : throw new InvalidOperationException(
+                $"Page {pageIndex + 1} annotation {index + 1} has no subtype name.");
+        return new PdfCommentInfo
+        {
+            PageIndex = pageIndex,
+            AnnotationIndex = index,
+            ObjectNumber = reference?.ObjectNumber,
+            Subtype = subtype,
+            Name = Text(document, annotation, "NM"),
+            Contents = contents,
+            Author = Text(document, annotation, "T"),
+            Subject = Text(document, annotation, "Subj"),
+            Bounds = Bounds(document, annotation, pageIndex, index),
+            ReplyToObjectNumber = ReplyTarget(document, annotation)
+        };
     }
 
     /// <summary>Annotation subtypes that mark up the page itself: text markup, drawings and stamps.</summary>
@@ -181,10 +209,9 @@ public static partial class PdfCommentReader
         double bottom = Number(document, rectangle[1]);
         double right = Number(document, rectangle[2]);
         double top = Number(document, rectangle[3]);
-        if (right < left || top < bottom)
-            throw new InvalidOperationException(
-                $"Page {pageIndex + 1} annotation {annotationIndex + 1} /Rect is invalid.");
-        return new PdfContentBounds(left, bottom, right, top);
+        // ISO 32000-1 7.9.5: a rectangle may name any two opposite corners.
+        return new PdfContentBounds(Math.Min(left, right), Math.Min(bottom, top),
+            Math.Max(left, right), Math.Max(bottom, top));
     }
 
     private static int? ReplyTarget(PdfDocument document, PdfDictionary annotation)

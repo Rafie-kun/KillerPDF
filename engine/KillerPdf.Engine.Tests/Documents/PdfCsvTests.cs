@@ -37,6 +37,17 @@ public sealed class PdfCsvTests
     }
 
     [Fact]
+    public void LoneSurrogatesDoNotBreakTheFormulaCheck()
+    {
+        // A file name may carry an unpaired surrogate, which Unicode normalization rejects. The values are
+        // built here because theory data cannot carry a lone surrogate intact.
+        string lone = ((char)0xD800).ToString();
+
+        Assert.False(PdfCsv.StartsFormula(lone + "=x"));
+        Assert.True(PdfCsv.StartsFormula("=" + lone));
+    }
+
+    [Fact]
     public void MeasurementReportsGuardCommentsAndDocumentNames()
     {
         var result = new PdfMeasurementResult
