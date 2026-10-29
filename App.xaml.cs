@@ -76,6 +76,12 @@ namespace KillerPDF
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            // The elevated machine-update helper (Services/TrustedUpdate.cs) runs headless and exits.
+            if (e.Args.Length > 0 && string.Equals(e.Args[0], Services.TrustedUpdate.HelperArgument, StringComparison.OrdinalIgnoreCase))
+            {
+                Shutdown(Services.TrustedUpdate.Apply(e.Args));
+                return;
+            }
             KillerFamily.Accessibility.AccessibleControls.Initialize();
             KillerFamily.Theming.AccentShadow.Initialize();
             KillerFamily.Layout.ShortcutHints.Initialize(GetSetting, SetSetting);
