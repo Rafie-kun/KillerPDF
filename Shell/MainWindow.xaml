@@ -2713,7 +2713,7 @@
                                ToolTip="{DynamicResource Str_KS_FileSize}"
                                MouseLeftButtonUp="StatusText_Click"
                                HorizontalAlignment="Left" TextTrimming="CharacterEllipsis"
-                               VerticalAlignment="Center" Margin="{DynamicResource FooterCellPadding}"/>
+                               VerticalAlignment="Center" Margin="{DynamicResource FooterStatusInset}"/>
                     <Border IsHitTestVisible="False" BorderBrush="{DynamicResource FooterBevelDarkBrush}" BorderThickness="{DynamicResource FooterCellLightThickness}"/>
                     <Border IsHitTestVisible="False" BorderBrush="{DynamicResource FooterBevelLightBrush}" BorderThickness="{DynamicResource FooterCellDarkThickness}"/>
                 </Grid>

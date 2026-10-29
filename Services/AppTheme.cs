@@ -235,6 +235,9 @@ namespace KillerPDF.Services
                 if (!d.Contains(key)) d[key] = value;
             }
 
+            // The footer's status text. KillerPDF has no status light in the footer corner, and the kit's
+            // FooterPadding is 0, so 16 restores the inset 1.8.91 shipped. 98SE states its cell padding.
+            Default("FooterStatusInset", new Thickness(16, 0, 0, 0));
             // The checked label in the theme menu. Matches RadioAccent unless an accent is too pale to read as text.
             Alias("RadioAccentText", "RadioAccent");
             Alias("BgRecentPanel", "SurfaceBrush");
