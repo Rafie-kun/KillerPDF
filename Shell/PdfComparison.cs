@@ -14,6 +14,8 @@ public partial class MainWindow
     private bool _comparisonSyncing;
     private string? _comparisonLeftPath;
     private string? _comparisonRightPath;
+    private string _comparisonLeftTitle = string.Empty;
+    private string _comparisonRightTitle = string.Empty;
     private CancellationTokenSource? _comparisonCts;
     private CancellationTokenSource? _comparisonReportCts;
     private string? _comparisonReport;
@@ -173,6 +175,8 @@ public partial class MainWindow
         _comparisonActive = false;
         _comparisonLeftPath = source.WorkingPath;
         _comparisonRightPath = comparison.WorkingPath;
+        _comparisonLeftTitle = source.Title;
+        _comparisonRightTitle = comparison.Title;
 
         if (!_isSplit) OpenSplit();
         FocusPane(Viewer);
@@ -277,7 +281,8 @@ public partial class MainWindow
             try
             {
                 _comparisonReport = await BuildComparisonReportAsync(
-                    _comparisonLeftPath, _comparisonRightPath, _comparisonReportCts.Token);
+                    _comparisonLeftPath, _comparisonRightPath, _comparisonLeftTitle, _comparisonRightTitle,
+                    _comparisonReportCts.Token);
             }
             catch (OperationCanceledException) { return; }
             catch (Exception ex)
@@ -434,17 +439,18 @@ public partial class MainWindow
     }
 
     private static async Task<string> BuildComparisonReportAsync(
-        string leftPath, string rightPath, CancellationToken token)
+        string leftPath, string rightPath, string leftTitle, string rightTitle, CancellationToken token)
     {
         var leftInfo = PdfEngineIntegration.ReadPageInformation(leftPath);
         var rightInfo = PdfEngineIntegration.ReadPageInformation(rightPath);
         int pageCount = Math.Max(leftInfo.Count, rightInfo.Count);
         int changed = 0;
         int missing = 0;
+        // Titles, not paths: an open tab is compared through a working copy with a generated name.
         var lines = new List<string>
         {
-            string.Format(Loc("Str_CmpRpt_PageCount"), Path.GetFileName(leftPath), leftInfo.Count),
-            string.Format(Loc("Str_CmpRpt_PageCount"), Path.GetFileName(rightPath), rightInfo.Count),
+            string.Format(Loc("Str_CmpRpt_PageCount"), leftTitle, leftInfo.Count),
+            string.Format(Loc("Str_CmpRpt_PageCount"), rightTitle, rightInfo.Count),
             string.Empty
         };
         for (int page = 0; page < pageCount; page++)
