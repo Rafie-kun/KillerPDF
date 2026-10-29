@@ -258,12 +258,14 @@ namespace KillerPDF
                 { try { LocaleManager.ExternalFile = Path.GetFullPath(e.Args[i + 1]); } catch { /* bad path: normal locale */ } }
             LocaleManager.Initialize();
             StartupTrace.Mark("Locale initialized");
-            OfferInstallConflictRepair();
             LoadPendingUpdateRestart();
             var mainWindow = new MainWindow();
             StartupTrace.Mark("MainWindow constructed");
             mainWindow.Show();
             StartupTrace.Mark("MainWindow.Show returned");
+            // After Show: under OnLastWindowClose, a prompt shown before the main window is the app's
+            // only window, and answering it closed KillerPDF instead of opening it.
+            OfferInstallConflictRepair();
             StartFolderAutomationIfConfigured();
         }
 
