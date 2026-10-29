@@ -1,10 +1,44 @@
 # KillerPDF 1.9.0 corpus benchmark
 
-Test date: 2026-10-13
+Test dates: 2026-10-13, 2026-10-15 and 2026-10-28
+
+The [release candidate run on 2026-10-28](#release-candidate-run-on-2026-10-28) is the current result. Against the released 1.8.91, the frozen 1.9.0 candidate saves 401 more PDFs and loses none, finishes standards and stress about 12% sooner and regression 3.4% sooner, uses 4% to 7% less CPU time, and peaks 37% to 67% lower in memory. The earlier runs below are kept for the record.
 
 In the 2026-10-13 run, KillerPDF 1.9.0 (development build) saved 108 more PDFs than KillerPDF 1.8.90 across the three normal collections: 109 inputs that 1.8.90 skipped or failed now saved, and one stress input that 1.8.90 saved failed. Its regression and standards timings were above the 10% investigation threshold. Both builds received one warmup and five measured passes per collection in alternating order.
 
 A [follow-up run on 2026-10-15](#follow-up-run-on-2026-10-15) with a newer 1.9.0 build resolves both items. That stress input now saves, so 1.9.0 saves 109 more PDFs than 1.8.90 and loses none. Every timed collection is now under the threshold, stress runs 7.62% faster with 6.20% less CPU time, and 1.9.0 used 38% to 57% less peak memory than 1.8.90. The damaged-file gate had zero crashes and zero timeouts in both runs, and its outcomes are identical to 1.8.90.
+
+## Release candidate run on 2026-10-28
+
+The frozen 1.9.0 candidate, source commit `63f0cc8ec132f18768c4c6767b62434961a53f6a`, was measured against the released 1.8.91, tag `v1.8.91` at `4856875`. Both were built on the same machine with the same Release publish flags.
+
+| Collection | Inputs | Saved | Skipped | Save failures | 1.9.0 median seconds |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Public regression | 16,696 | 15,311 | 1,232 | 153 | 230.354 |
+| Standards and color | 649 | 393 | 235 | 21 | 6.318 |
+| Private stress | 29,599 | 25,260 | 2,957 | 1,382 | 573.531 |
+
+Across the three normal collections 1.9.0 saves 40,964 inputs against 40,563 for 1.8.91: 400 inputs that 1.8.91 failed now save, one input that it skipped now saves, and no input that 1.8.91 saved fails. 1.8.91 produces the same outcomes as 1.8.90.
+
+| Collection | Measured passes | Measure | 1.8.91 median | 1.9.0 median | Change |
+| --- | ---: | --- | ---: | ---: | ---: |
+| Public regression | 5 | Seconds | 238.395 | 230.354 | 3.37% shorter |
+| Public regression | 5 | CPU seconds | 135.094 | 129.828 | 3.90% less |
+| Public regression | 5 | Peak working set MB | 2,085.3 | 693.4 | 66.75% less |
+| Standards and color | 5 | Seconds | 7.179 | 6.318 | 11.99% shorter |
+| Standards and color | 5 | CPU seconds | 8.297 | 7.984 | 3.77% less |
+| Standards and color | 5 | Peak working set MB | 1,128.8 | 706.8 | 37.38% less |
+| Private stress | 1 | Seconds | 650.677 | 573.531 | 11.86% shorter |
+| Private stress | 1 | CPU seconds | 293.844 | 274.609 | 6.55% less |
+| Private stress | 1 | Peak working set MB | 1,992.0 | 1,165.0 | 41.52% less |
+
+- Standards and regression received one warmup per build and five measured passes in alternating order. Stress received one measured pass per build, so its timing is a single comparison rather than a median of five.
+- Every measured pass of each build produced an identical per-file outcome hash.
+- Of the 401 newly saved inputs, 284 had a trailer `/Root` or other reference to a freed object, which 1.9.0 repairs while reporting that missing content was not recovered, and 110 had a signature field whose value dictionary omits `/Type /Sig`. The other 7 referenced objects missing from the file (6) or used a Brotli-compressed stream (1).
+- The damaged-file folder was included, but its batch only selects files with a `.pdf` extension, which covered 2 of its 80 inputs; both builds skipped both. The 80-input gate with a per-file timeout last ran on 2026-10-15 and produced no crashes or timeouts.
+- Two earlier series that day, on candidate commits `2a91dae` and `a8b4323`, produced the same per-file outcomes. Their regression timings were slower than this series, before later write-path changes; the committed run data is this final series.
+- Host load was not certified idle, and no cache flushing was performed. Peak working set is sampled every 200 ms.
+- The committed [run data](benchmark-freeze-20261028.csv) holds every pass. Full per-file logs remain outside the application repository at `C:\Users\steve\scratch\kp-bench-render\release-1.8.91-vs-1.9-freeze3-20261028`.
 
 ## Results
 
