@@ -28,6 +28,10 @@
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- Packs the vendored JPEG 2000 codec (IncludeVendoredCodec below). Kept in this one
+         PropertyGroup: release.ps1 reads Project.PropertyGroup.Version under StrictMode, which
+         throws when a second PropertyGroup has no Version. -->
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);IncludeVendoredCodec</TargetsForTfmSpecificBuildOutput>
   </PropertyGroup>
 
   <Target Name="VerifyAppEngineVersion" BeforeTargets="PrepareForBuild;GenerateNuspec">
@@ -46,10 +50,6 @@
     <!-- Vendored JPEG 2000 codec. See third_party/CoreJ2K/VENDORING.md. -->
     <ProjectReference Include="..\..\third_party\CoreJ2K\CoreJ2K\CoreJ2K.csproj" PrivateAssets="all" />
   </ItemGroup>
-
-  <PropertyGroup>
-    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);IncludeVendoredCodec</TargetsForTfmSpecificBuildOutput>
-  </PropertyGroup>
 
   <Target Name="IncludeVendoredCodec" DependsOnTargets="ResolveReferences">
     <ItemGroup>
