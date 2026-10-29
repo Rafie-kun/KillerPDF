@@ -1287,9 +1287,14 @@
                                                       ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
                                                       Margin="6,0,0,0" VerticalAlignment="Center"
                                                       HorizontalAlignment="Left" IsHitTestVisible="False"/>
+                                    <!-- Height, MinHeight and Padding are stated because the kit's implicit TextBox
+                                         style sets Height 28 and Padding 6,3. This box is Hidden, not Collapsed, so it
+                                         still takes layout space: at 28 it outgrew the 20-tall combo and pushed the
+                                         zoom text below the visible area. -->
                                     <TextBox x:Name="PART_EditableTextBox" Grid.Column="0" Margin="5,0,0,0"
                                              AutomationProperties.Name="{DynamicResource Str_TT_ZoomLevel}"
                                              Background="Transparent" BorderThickness="0"
+                                             Height="Auto" MinHeight="0" Padding="0"
                                              Foreground="{DynamicResource TextBrush}" FontFamily="{DynamicResource UiFont}"
                                              FontSize="10" VerticalAlignment="Center"
                                              IsReadOnly="{TemplateBinding IsReadOnly}" Visibility="Hidden"
