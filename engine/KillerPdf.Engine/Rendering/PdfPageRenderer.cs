@@ -2490,7 +2490,8 @@ public sealed partial class PdfPageRenderer
                             hiddenOptionalContentGroups, 0)) continue;
                     bool widget = IsName(annotation, "Subtype", "Widget");
                     if (widget ? !(options.IncludeFormFields
-                            || options.IncludeSignedSignatureFields && IsSignedSignatureWidget(annotation))
+                            || options.IncludeSignedSignatureFields && IsSignedSignatureWidget(annotation)
+                            || options.IncludePushButtonFields && IsPushButtonWidget(annotation))
                         : !options.IncludeAnnotations) continue;
                     if (!options.IncludeRedactionMarks && IsName(annotation, "Subtype", "Redact")) continue;
                     if (!options.IncludeMeasurementAnnotations && IsMeasurementAnnotation(annotation)) continue;

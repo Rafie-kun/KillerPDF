@@ -37,7 +37,7 @@ The 1.9.0 engine adds page-content extraction, complete engine-owned rendering, 
 - Sped up JPEG, JPEG 2000, JBIG2, TIFF predictor, and monochrome-image decoding and reduction while reducing intermediate copies. JPEG transform changes can move a small share of samples by a few levels; other exact-path optimizations preserve decoded values.
 - Reduced font parsing and text-decoding allocations, reused extraction fonts across pages and host font programs across resources, and cached glyph geometry and masks for faster text rendering. Embedded fonts use standard identity encoding where possible for searchable OCR compatibility.
 - Reduced parsing allocations and repeated calculator-function work. Full rewrites and object-stream resolution use less allocation and processing time with unchanged output bytes; damaged cross-reference recovery screens candidates before parsing and caches repeated missing-object lookups.
-- `PdfRenderOptions.IncludeSignedSignatureFields` paints signature fields that already hold a signature while other form fields stay out of the raster, for viewers that draw fields as live controls.
+- `PdfRenderOptions.IncludeSignedSignatureFields` and `IncludePushButtonFields` paint signed signature fields and push buttons while other form fields stay out of the raster, for viewers that draw fields as live controls.
 
 ### Editing, review, and production
 

@@ -58,6 +58,12 @@ public sealed record PdfRenderOptions
     /// turns this on, because nothing else shows a signed field's appearance.
     /// </summary>
     public bool IncludeSignedSignatureFields { get; init; }
+    /// <summary>
+    /// Gets whether push buttons are painted when <see cref="IncludeFormFields"/> is off. A viewer
+    /// that draws the other fields as live controls turns this on, because it has no control for a
+    /// push button.
+    /// </summary>
+    public bool IncludePushButtonFields { get; init; }
     /// <summary>Gets the caller-supplied output pixel-buffer limit.</summary>
     public long PixelByteLimit { get; }
     /// <summary>Gets whether the renderer may reuse and retain this finished bitmap.</summary>

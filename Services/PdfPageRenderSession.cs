@@ -295,9 +295,10 @@ internal sealed class PdfPageRenderSession : IDisposable
             includeAnnotations, includeFormFields)
         {
             ForPrinting = _forPrinting,
-            // The viewer draws other fields as live controls but never a signed signature (#425),
-            // so the signed appearance has to be part of the page raster.
+            // The viewer draws other fields as live controls but never a signed signature (#425) or
+            // a push button, so those appearances have to be part of the page raster.
             IncludeSignedSignatureFields = includeAnnotations,
+            IncludePushButtonFields = includeAnnotations,
             // The viewer draws marks on its overlay; print previews and jobs use engine appearances.
             IncludeRedactionMarks = _forPrinting,
             MaximumParallelism = RenderParallelism(engineWidth, engineHeight),
@@ -319,6 +320,7 @@ internal sealed class PdfPageRenderSession : IDisposable
         new(width, height, transparentBackground, includeAnnotations: true, includeFormFields)
         {
             IncludeSignedSignatureFields = true,
+            IncludePushButtonFields = true,
             IncludeRedactionMarks = false,
             MaximumParallelism = RenderParallelism(width, height),
             Jpeg2000PaintParallelism = Math.Clamp(Environment.ProcessorCount / 2, 1, 4)

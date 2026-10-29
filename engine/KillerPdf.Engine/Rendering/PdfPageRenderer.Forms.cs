@@ -50,20 +50,29 @@ public sealed partial class PdfPageRenderer
     }
 
     // A signature field holds a signature when its inherited /FT is /Sig and its /V is a signature
-    // dictionary. The walk is bounded and cycle-safe like the field inheritance below.
+    // dictionary.
     private bool IsSignedSignatureWidget(PdfDictionary widget)
+        => InheritedField(widget, "FT") is PdfName { } type && type.ToString() == "/Sig"
+            && InheritedField(widget, "V") is PdfDictionary;
+
+    // A push button is a /Btn field with the Pushbutton flag (bit 17) set.
+    private bool IsPushButtonWidget(PdfDictionary widget)
+        => InheritedField(widget, "FT") is PdfName { } type && type.ToString() == "/Btn"
+            && InheritedField(widget, "Ff") is PdfInteger flags && (flags.Value & (1L << 16)) != 0;
+
+    // The nearest value of an inheritable field entry, walking /Parent. The walk is bounded and
+    // cycle-safe like the field inheritance below.
+    private PdfObject? InheritedField(PdfDictionary widget, string key)
     {
-        PdfObject? fieldType = null, value = null;
         var visited = new HashSet<PdfDictionary>(ReferenceEqualityComparer.Instance);
         PdfDictionary? node = widget;
         while (node is not null && visited.Add(node) && visited.Count <= 256)
         {
-            if (fieldType is null && node.TryGetValue(Name("FT"), out PdfObject? type)) fieldType = Resolve(type);
-            if (value is null && node.TryGetValue(Name("V"), out PdfObject? signature)) value = Resolve(signature);
+            if (node.TryGetValue(Name(key), out PdfObject? value)) return Resolve(value);
             node = node.TryGetValue(Name("Parent"), out PdfObject? parent)
                 ? Resolve(parent) as PdfDictionary : null;
         }
-        return fieldType is PdfName name && name.ToString() == "/Sig" && value is PdfDictionary;
+        return null;
     }
 
     private PdfStream? RequestedFieldAppearance(PdfDictionary widget, PdfStream? saved,
