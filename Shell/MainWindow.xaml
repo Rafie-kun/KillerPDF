@@ -3258,15 +3258,20 @@
                                   Click="AboutStartupUpdateCheck_Click">
                             <TextBlock Text="{DynamicResource Str_StartupUpdateCheck}" TextWrapping="Wrap"/>
                         </CheckBox>
-                        <CheckBox Margin="0,6,0,0" Padding="10,0,10,0"
+                        <CheckBox x:Name="AboutCloseToTray" Margin="0,6,0,0" Padding="10,0,10,0"
+                                  Style="{StaticResource ThemeCheck}" FontSize="11"
+                                  ToolTip="{DynamicResource Str_About_CloseToTrayHint}"
+                                  Click="AboutCloseToTray_Click">
+                            <TextBlock Text="{DynamicResource Str_About_CloseToTray}" TextWrapping="Wrap"/>
+                        </CheckBox>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <CheckBox Margin="0" Padding="10,0,10,0"
                                   Style="{StaticResource ThemeCheck}" FontSize="11"
                                   IsChecked="{Binding Source={x:Static kl:ShortcutHints.Current}, Path=Enabled, Mode=TwoWay}">
                             <TextBlock Text="{DynamicResource Str_About_ShowShortcutsInMenus}" TextWrapping="Wrap"/>
                         </CheckBox>
-                    </StackPanel>
-                    <!-- Two rows each: the privacy pair sits with Clear all Data below it. -->
-                    <StackPanel Grid.Column="2">
-                        <CheckBox x:Name="NoRecentCheck" Margin="0" Padding="10,0,10,0"
+                        <CheckBox x:Name="NoRecentCheck" Margin="0,6,0,0" Padding="10,0,10,0"
                                   Style="{StaticResource ThemeCheck}" FontSize="11"
                                   Checked="NoRecentCheck_Toggled" Unchecked="NoRecentCheck_Toggled">
                             <TextBlock Text="{DynamicResource Str_NoRecentSetting}" TextWrapping="Wrap"/>

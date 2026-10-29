@@ -24,6 +24,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - The elevated part of an update compiles its helper code in a folder only administrators can open, so another program running as you cannot slip code into it, and an update that finished is no longer reported as failed when the app cannot be reopened afterward.
 - An all-users installation applies automatic updates again. The elevated update step opened a second copy of the app as administrator instead of installing, and the verified download was thrown away once that copy closed.
 
+- The tray icon's menu opens from the pointer upward, out of the notification area, the same way in every Killer app. A short menu no longer covers the tray icons and a taller one no longer floats about 40 pixels above them.
 - Saving, flattening, extraction, printing, production layouts, Data Merge and current-document macros retain pending edits and page rotations. Incremental saves rebuild damaged cross-reference chains, including compressed and encrypted documents. Protection, batch resaves and optimization report repairs to broken references without claiming missing content was recovered. Failed or canceled document writes preserve existing outputs, with recovery copies retained after failed replacements; Save As and Extract Pages enforce the PDF extension (#433, #450).
 - Close prompts protect active text and keep documents open after cancellation or save failure, including Windows sign-out and shutdown. Saving detects outside changes even when file size and timestamp match; browser downloads ask for a destination, splitting protects the source, and Bates batches reject output collisions. Esc no longer closes the app.
 - Saving a new blank document asks where to save it. It used to write Untitled.pdf into whatever folder KillerPDF was started from, and Compare no longer offers an unsaved new document.
@@ -85,7 +86,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Added vector SVG signatures, a shared image library for images, watermarks and signatures, and adjustable paper-background removal for imported signatures (#326, #398).
 - Added optional File Explorer and Outlook PDF previews to installed copies, with scrolling, zoom and read-only opening (#410).
 - Added Search Tools (Ctrl+K), customizable shortcuts and one-letter tools, with expanded view, page, clipboard and tab actions. Scan, Office conversion, Macros and Certificates are searchable before opening a PDF (#190).
-- Added Windows 11 snap layouts and comparison-bar docking (#374, #427).
+- Added Windows 11 snap layouts, comparison-bar docking and Close to System Tray. Tray Exit retains save prompts (#374, #427).
 - Added Slovenian across the app, installer, previews, OCR language selection, website and engine guides.
 
 ### Changed

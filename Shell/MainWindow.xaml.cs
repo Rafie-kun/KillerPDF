@@ -315,11 +315,8 @@ namespace KillerPDF.Shell
             InitializeComponent();
             _about = new Features.About.AboutController(this);
             _ownsWindowGeometry = App.RegisterDocumentWindow(this);
-            // KillerPDF does not offer Close to System Tray: a window hidden in the tray did not come
-            // back with its documents when KillerPDF was opened again, so closing always closes. The
-            // kit tray stays attached because Exit and Ctrl+Q go through it, and an old saved
-            // "CloseToTray" setting is ignored.
-            _tray = KillerFamily.Shell.CloseToTray.Attach(this, "KillerPDF", Loc, () => false);
+            _tray = KillerFamily.Shell.CloseToTray.Attach(this, "KillerPDF", Loc,
+                () => App.GetSetting(KillerFamily.Shell.CloseToTray.SettingName) == "1");
             // Ctrl+Q quits the app through the tray's Exit, so the save and quit prompts still run.
             KillerFamily.Shell.QuitShortcut.Attach(this, _tray.Exit);
             new KillerFamily.Accessibility.OverlayFocus(this).Track(ShortcutsOverlay, AboutOverlay);

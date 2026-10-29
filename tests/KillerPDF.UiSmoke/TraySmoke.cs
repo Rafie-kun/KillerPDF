@@ -72,26 +72,93 @@ internal static class TraySmoke
                 Console.WriteLine(string.Join(Environment.NewLine, report));
                 return 0;
             }
-            // KillerPDF has no Close to System Tray (Steve, 2026-10-29): About offers no option, and a
-            // "CloseToTray" setting an older build saved no longer hides the window on close.
-            assembly.GetType("KillerPDF.App", true)!.GetMethod("SetSetting", Members)!.Invoke(null, ["CloseToTray", "1"]);
             owner = (Window)Activator.CreateInstance(assembly.GetType("KillerPDF.Shell.MainWindow", true)!)!;
             owner.WindowStartupLocation = WindowStartupLocation.Manual;
             owner.Left = -10000; owner.Top = -10000; owner.ShowInTaskbar = false; owner.ShowActivated = false;
             owner.Show(); Pump();
             OpenAbout(owner);
-            if (Descendants<CheckBox>(owner).Any(box => box.Name == "AboutCloseToTray"))
-                throw new InvalidOperationException("About still offers Close to System Tray.");
-            Capture(owner, Path.Combine(folder, "about.png"));
+            CheckBox option = Find<CheckBox>(owner, "AboutCloseToTray");
+            if (option.IsChecked == true) throw new InvalidOperationException("Close to tray must default off.");
+            Capture(owner, Path.Combine(folder, "about-default.png"));
+            option.IsChecked = true;
+            option.RaiseEvent(new RoutedEventArgs(CheckBox.ClickEvent));
+            CloseAbout(owner);
+            owner.Close(); Pump();
+            if (owner.IsVisible || !app.Windows.Cast<Window>().Contains(owner))
+                throw new InvalidOperationException("Enabled close did not hide the live window.");
+            report.Add("PASS enabled close hides the live window");
+            TrayCallback(0x0202);
+            Wait(() => owner.IsVisible);
+            report.Add("PASS tray click restores the window");
+            OpenAbout(owner);
+            if (option.IsChecked != true) throw new InvalidOperationException("About did not retain the tray setting.");
+            Capture(owner, Path.Combine(folder, "about-enabled.png"));
+            CloseAbout(owner);
+            owner.Close(); Pump();
+            InvokeTrayItem(app, "Str_Tray_Open", "KillerPDF");
+            Wait(() => owner.IsVisible);
+            report.Add("PASS tray Open restores the window");
+            owner.Close(); Pump();
+            owner.GetType().GetMethod("RestoreAndActivate", BindingFlags.Public | BindingFlags.Instance)!.Invoke(owner, null);
+            Wait(() => owner.IsVisible);
+            report.Add("PASS external-launch activation restores the hidden window");
+            OpenAbout(owner);
+            option.IsChecked = false;
+            option.RaiseEvent(new RoutedEventArgs(CheckBox.ClickEvent));
             CloseAbout(owner);
             bool closed = false;
             owner.Closed += (_, _) => closed = true;
             owner.Close();
             Wait(() => closed);
-            report.Add("PASS About offers no tray option and a saved tray setting no longer hides the window");
-            // The kit tray class is still attached (Exit and Ctrl+Q go through it), so its own
-            // registration recovery stays covered.
+            report.Add("PASS disabled close exits the window");
+            // Before the dirty tray Exit below: a confirmed Exit from the last window shuts the app
+            // down (Shell/CloseToTray.cs), and this check needs it running. The session check ends
+            // the app too, so it runs in its own process (--verify-tray-session).
             VerifyRegistrationFailure(assembly, report);
+
+            owner = (Window)Activator.CreateInstance(assembly.GetType("KillerPDF.Shell.MainWindow", true)!)!;
+            owner.WindowStartupLocation = WindowStartupLocation.Manual;
+            owner.Left = -10000; owner.Top = -10000; owner.ShowInTaskbar = false; owner.ShowActivated = false;
+            app.MainWindow = owner;
+            owner.Show(); Pump();
+            OpenAbout(owner);
+            option = Find<CheckBox>(owner, "AboutCloseToTray");
+            option.IsChecked = true;
+            option.RaiseEvent(new RoutedEventArgs(CheckBox.ClickEvent));
+            CloseAbout(owner);
+            string fixture = Path.Combine(folder, "unsaved-source.pdf");
+            byte[] original = Fixture();
+            File.WriteAllBytes(fixture, original);
+            owner.GetType().GetMethod("OpenFromExternal", BindingFlags.Public | BindingFlags.Instance)!.Invoke(owner, [fixture]);
+            ListBox pages = Find<ListBox>(owner, "PageList");
+            Wait(() => pages.Items.Count == 1);
+            pages.SelectedIndex = 0;
+            pages.ScrollIntoView(pages.Items[0]);
+            owner.UpdateLayout();
+            ListBoxItem? page = null;
+            Wait(() => (page = pages.ItemContainerGenerator.ContainerFromIndex(0) as ListBoxItem) is not null);
+            page!.RaiseEvent(new MouseButtonEventArgs(Mouse.PrimaryDevice, Environment.TickCount, MouseButton.Right)
+                { RoutedEvent = Mouse.MouseUpEvent });
+            InvokeMenuItem(app, "Str_Ctx_RotateCWShort");
+            owner.Close(); Pump();
+            if (owner.IsVisible) throw new InvalidOperationException("Closing dirty work did not hide the window.");
+            ChooseExitPrompt(app, owner, folder, "Str_Btn_CancelDlg");
+            if (!owner.IsVisible || !app.Windows.Cast<Window>().Contains(owner))
+                throw new InvalidOperationException("Canceling tray Exit did not preserve the visible window.");
+            report.Add("PASS dirty tray Exit Cancel restores the live window");
+            // The kit tray ends a turned-down Exit at the user's next key or click in the window,
+            // which a real close (clicking X) always sends first (Shell/CloseToTray.cs).
+            owner.RaiseEvent(new KeyEventArgs(Keyboard.PrimaryDevice, PresentationSource.FromVisual(owner), 0, Key.A)
+                { RoutedEvent = Keyboard.PreviewKeyDownEvent });
+            owner.Close(); Pump();
+            if (owner.IsVisible) throw new InvalidOperationException("Canceled Exit left close-to-tray bypass enabled.");
+            closed = false;
+            owner.Closed += (_, _) => closed = true;
+            ChooseExitPrompt(app, owner, folder, "Str_Btn_DontSave");
+            Wait(() => closed);
+            if (!File.ReadAllBytes(fixture).AsSpan().SequenceEqual(original))
+                throw new InvalidOperationException("Tray exit changed the source PDF without saving.");
+            report.Add("PASS dirty tray Exit Don't Save closes through the fade and preserves source bytes");
             report.Add("App SHA256=" + Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(appPath))));
             File.WriteAllLines(Path.Combine(folder, "result.txt"), report);
             Console.WriteLine(string.Join(Environment.NewLine, report));
