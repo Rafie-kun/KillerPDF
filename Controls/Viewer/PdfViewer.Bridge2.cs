@@ -51,7 +51,8 @@ namespace KillerPDF.Controls
         private CoverAnnotation? _pendingCover;
         private bool _pendingEditWasDirty;
         private Border? _textSettingsBar;
-        private const double TextBoxDefaultWidth = 220;
+        // A new text box's width in page points; TextBoxDefaultWidth(page) converts it to canvas units.
+        private const double TextBoxDefaultWidthPoints = 165;
 
         // ── Resize handles ───────────────────────────────────────────────────────────────────
         private bool _isResizingSig;

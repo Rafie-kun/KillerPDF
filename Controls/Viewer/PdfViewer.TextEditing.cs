@@ -108,6 +108,18 @@ namespace KillerPDF.Controls
             return RedactionGeometry.PointsPerCanvasUnit(info.Width, info.Height, renderHeight, EffectiveRotation(pageIndex));
         }
 
+        // Canvas units follow the render resolution, so a fixed canvas width came out narrower the
+        // sharper the page was rendered. Convert the point width the same way as the font size.
+        private double TextBoxDefaultWidth(int pageIndex)
+        {
+            if (_doc is not null && _renderDims.TryGetValue(pageIndex, out var dims) && dims.h > 0)
+            {
+                double sy = PointsPerCanvasUnit(pageIndex, dims.h);
+                if (sy > 0) return TextBoxDefaultWidthPoints / sy;
+            }
+            return TextBoxDefaultWidthPoints;
+        }
+
         private void RemoveReeditCoverOutline()
         {
             if (_reeditCoverOutline is not null)
@@ -189,7 +201,7 @@ namespace KillerPDF.Controls
                         BorderThickness = new Thickness(1),
                         FontFamily = UiKit.UiFont,
                         FontSize = placed.FontSize,
-                        Width = placed.Width > 0 ? placed.Width : TextBoxDefaultWidth,
+                        Width = placed.Width > 0 ? placed.Width : TextBoxDefaultWidth(pageIdx),
                         MinHeight = 24,
                         Padding = new Thickness(2),
                         AcceptsReturn = true,
@@ -853,7 +865,7 @@ namespace KillerPDF.Controls
                 BorderThickness = new Thickness(1),
                 FontFamily = UiKit.UiFont,
                 FontSize = fontCanvas,
-                Width = TextBoxDefaultWidth,
+                Width = TextBoxDefaultWidth(pageIdx),
                 MinHeight = 24,
                 Padding = new Thickness(2),
                 AcceptsReturn = true,
@@ -1079,7 +1091,7 @@ namespace KillerPDF.Controls
         {
             int turn = EditBoxTurn(tb);
             double boxW = (!double.IsNaN(tb.Width) && tb.Width > 0) ? tb.Width
-                        : (tb.ActualWidth > 0 ? tb.ActualWidth : TextBoxDefaultWidth);
+                        : (tb.ActualWidth > 0 ? tb.ActualWidth : TextBoxDefaultWidth(pageIdx));
             var ta = new TextAnnotation
             {
                 PageIndex = pageIdx,
