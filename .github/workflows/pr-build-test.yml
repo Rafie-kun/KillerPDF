@@ -4,7 +4,7 @@ name: PR build and tests
 # No secrets are used; the token can only read the repository.
 on:
   pull_request:
-    branches: [main, dev/1.9-overkill]
+    branches: [main]
   push:
     branches: ['dev/**']
   workflow_dispatch:
