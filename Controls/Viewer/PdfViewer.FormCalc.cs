@@ -69,7 +69,7 @@ namespace KillerPDF.Controls
                     if (box is not null && !box.IsKeyboardFocusWithin)
                     {
                         box.Text = entry.DisplayValue;
-                        box.Foreground = entry.IsRed ? Brushes.Red : Brushes.Black;
+                        SetFormValueForeground(box, entry.IsRed ? Brushes.Red : Brushes.Black);
                     }
                 }
                 if (changed) MarkDirty(true);

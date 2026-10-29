@@ -100,6 +100,14 @@ namespace KillerPDF.Controls
             }
         }
 
+        // A comb editor's own text stays transparent because CombTextBox draws each character in its
+        // cell; painting it would show the raw string over the cells as well.
+        private static void SetFormValueForeground(TextBox box, Brush brush)
+        {
+            if (box.Parent is CombTextBox) return;
+            box.Foreground = brush;
+        }
+
         internal void RefreshFormDesignMode()
         {
             bool designMode = _currentTool == EditTool.FormField;
@@ -473,7 +481,7 @@ namespace KillerPDF.Controls
                             {
                                 tb.Text = _formTextValues.TryGetValue(capturedKey, out string? raw) ? raw : cur;
                                 lastAccepted = tb.Text;
-                                tb.Foreground = Brushes.Black;
+                                SetFormValueForeground(tb, Brushes.Black);
                             }
                             finally { _formRecalculating = wasRecalculating; }
                             _selectedFormFieldName = capturedKey; tb.SetResourceReference(Control.BorderBrushProperty, "HeaderLineBrush"); ShowFormSizeBar(tb, capturedKey, capturedScale);
@@ -550,6 +558,10 @@ namespace KillerPDF.Controls
                         SelectedValuePath = nameof(FormChoiceItem.ExportValue),
                         SelectedValue = cur,
                         IsTextSearchEnabled = true,
+                        // The kit's ComboBox fill is the theme's field color, near black in the dark
+                        // themes; the field sits on the page, so it takes the page field colors.
+                        Background = new SolidColorBrush(f.BackgroundColor ?? fieldBg.Color),
+                        BorderBrush = new SolidColorBrush(f.BorderColor ?? Color.FromRgb(0x88, 0x88, 0x88)),
                         Foreground = Brushes.Black,
                         FontSize  = f.DaFontPt > 0.5 && f.Scale > 0
                             ? f.DaFontPt * f.Scale
