@@ -52,6 +52,12 @@ public sealed record PdfRenderOptions
     /// and edits measurements itself turns this off so they are not shown twice.
     /// </summary>
     public bool IncludeMeasurementAnnotations { get; init; } = true;
+    /// <summary>
+    /// Gets whether signature fields that already hold a signature are painted when
+    /// <see cref="IncludeFormFields"/> is off. A viewer that draws the other fields as live controls
+    /// turns this on, because nothing else shows a signed field's appearance.
+    /// </summary>
+    public bool IncludeSignedSignatureFields { get; init; }
     /// <summary>Gets the caller-supplied output pixel-buffer limit.</summary>
     public long PixelByteLimit { get; }
     /// <summary>Gets whether the renderer may reuse and retain this finished bitmap.</summary>

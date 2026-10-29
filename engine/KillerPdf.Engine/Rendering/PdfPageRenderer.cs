@@ -2489,7 +2489,9 @@ public sealed partial class PdfPageRenderer
                         && !EvaluateOptionalContent(optionalContent,
                             hiddenOptionalContentGroups, 0)) continue;
                     bool widget = IsName(annotation, "Subtype", "Widget");
-                    if (widget ? !options.IncludeFormFields : !options.IncludeAnnotations) continue;
+                    if (widget ? !(options.IncludeFormFields
+                            || options.IncludeSignedSignatureFields && IsSignedSignatureWidget(annotation))
+                        : !options.IncludeAnnotations) continue;
                     if (!options.IncludeRedactionMarks && IsName(annotation, "Subtype", "Redact")) continue;
                     if (!options.IncludeMeasurementAnnotations && IsMeasurementAnnotation(annotation)) continue;
                     // ISO 32000-2 12.5.3: a Hidden annotation is neither displayed nor printed,

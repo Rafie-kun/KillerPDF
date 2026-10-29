@@ -49,6 +49,23 @@ public sealed partial class PdfPageRenderer
         }
     }
 
+    // A signature field holds a signature when its inherited /FT is /Sig and its /V is a signature
+    // dictionary. The walk is bounded and cycle-safe like the field inheritance below.
+    private bool IsSignedSignatureWidget(PdfDictionary widget)
+    {
+        PdfObject? fieldType = null, value = null;
+        var visited = new HashSet<PdfDictionary>(ReferenceEqualityComparer.Instance);
+        PdfDictionary? node = widget;
+        while (node is not null && visited.Add(node) && visited.Count <= 256)
+        {
+            if (fieldType is null && node.TryGetValue(Name("FT"), out PdfObject? type)) fieldType = Resolve(type);
+            if (value is null && node.TryGetValue(Name("V"), out PdfObject? signature)) value = Resolve(signature);
+            node = node.TryGetValue(Name("Parent"), out PdfObject? parent)
+                ? Resolve(parent) as PdfDictionary : null;
+        }
+        return fieldType is PdfName name && name.ToString() == "/Sig" && value is PdfDictionary;
+    }
+
     private PdfStream? RequestedFieldAppearance(PdfDictionary widget, PdfStream? saved,
         PdfDictionary pageResources, HashSet<string> diagnostics, CancellationToken cancellationToken)
     {
