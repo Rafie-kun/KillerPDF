@@ -43,6 +43,16 @@ function Get-Setting([string]$Name) {
     return $value
 }
 
+# release.ps1 runs this under Set-StrictMode -Version Latest, where reading a property the API left
+# out of its JSON throws. The API omits empty fields (a reply without "errors" is normal), so every
+# response field is read through this.
+function Get-Field($Object, [string]$Name) {
+    if ($null -eq $Object) { return $null }
+    $property = $Object.PSObject.Properties[$Name]
+    if ($property) { return $property.Value }
+    return $null
+}
+
 function Invoke-Store([string]$Method, [string]$Path, $Body = $null) {
     $params = @{ Method = $Method; Uri = "$api$Path"; Headers = $script:headers; UseBasicParsing = $true }
     if ($null -ne $Body) { $params.Body = ($Body | ConvertTo-Json -Depth 10 -Compress); $params.ContentType = 'application/json' }
@@ -51,16 +61,17 @@ function Invoke-Store([string]$Method, [string]$Path, $Body = $null) {
             $response = Invoke-WebRequest @params
             $result = $response.Content | ConvertFrom-Json
         } catch {
-            $status = [int]$_.Exception.Response.StatusCode
+            $failedResponse = Get-Field $_.Exception 'Response'
+            $status = [int](Get-Field $failedResponse 'StatusCode')
             $detail = if ($_.ErrorDetails) { $_.ErrorDetails.Message } else { $_.Exception.Message }
             if ($status -eq 429 -and $attempt -lt 5) { Start-Sleep -Seconds (15 * $attempt); continue }
             throw "Store API $Method $Path failed ($status): $detail"
         }
-        foreach ($e in @($result.errors)) {
-            if ($e) { Write-Host "  Store $($e.code): $($e.message) [$($e.target)]" -ForegroundColor Yellow }
+        foreach ($e in @(Get-Field $result 'errors')) {
+            if ($e) { Write-Host "  Store $(Get-Field $e 'code'): $(Get-Field $e 'message') [$(Get-Field $e 'target')]" -ForegroundColor Yellow }
         }
-        if (-not $result.isSuccess) { throw "Store API $Method $Path was not accepted." }
-        return $result.responseData
+        if (-not (Get-Field $result 'isSuccess')) { throw "Store API $Method $Path was not accepted." }
+        return Get-Field $result 'responseData'
     }
 }
 
@@ -86,17 +97,20 @@ if (-not $PreflightOnly) {
 
 Write-Host "==> Reading the current draft"
 $state = Invoke-Store GET '/status'
-if ($state.ongoingSubmissionId -and $PreflightOnly) {
-    Write-Host "WARNING: Store submission $($state.ongoingSubmissionId) is still in certification. The release can go ahead; submit this version to the Store once it finishes." -ForegroundColor Yellow
+$ongoing = Get-Field $state 'ongoingSubmissionId'
+if ($ongoing -and $PreflightOnly) {
+    Write-Host "WARNING: Store submission $ongoing is still in certification. The release can go ahead; submit this version to the Store once it finishes." -ForegroundColor Yellow
     return
 }
-if ($state.ongoingSubmissionId) {
-    throw "Submission $($state.ongoingSubmissionId) is already in progress. Wait for it to finish or cancel it in Partner Center, then run this again."
+if ($ongoing) {
+    throw "Submission $ongoing is already in progress. Wait for it to finish or cancel it in Partner Center, then run this again."
 }
-$packages = @((Invoke-Store GET '/packages').packages)
+$packages = @(Get-Field (Invoke-Store GET '/packages') 'packages' | Where-Object { $null -ne $_ })
 if ($packages.Count -ne 1) { throw "Expected one package in the draft, found $($packages.Count). Update it in Partner Center." }
 $package = $packages[0]
-Write-Host "  Package $($package.packageId): $($package.packageUrl)"
+$packageId = Get-Field $package 'packageId'
+$packageUrl = Get-Field $package 'packageUrl'
+Write-Host "  Package ${packageId}: $packageUrl"
 if ($PreflightOnly) { Write-Host "  Store preflight OK."; return }
 
 # Sync translated listings before submitting the installer, including newly added languages.
@@ -108,14 +122,14 @@ if (-not $DryRun) { $listingArgs += '-DraftOnly' }
 & powershell @listingArgs
 if ($LASTEXITCODE -ne 0) { throw 'Store listing sync failed. The installer was not submitted.' }
 
-if ($package.packageUrl -eq $PackageUrl) {
+if ($packageUrl -eq $PackageUrl) {
     Write-Host "  The draft already points at this installer."
 } elseif ($DryRun) {
     Write-Host "DryRun: would change the package URL to $PackageUrl, commit it and submit." -ForegroundColor Cyan
     return
 } else {
     Write-Host "==> Pointing the package at the new installer"
-    $null = Invoke-Store PATCH "/packages/$($package.packageId)" @{ packageUrl = $PackageUrl }
+    $null = Invoke-Store PATCH "/packages/$packageId" @{ packageUrl = $PackageUrl }
     $null = Invoke-Store POST '/packages/commit'
 }
 if ($DryRun) { Write-Host "DryRun: would submit." -ForegroundColor Cyan; return }
@@ -126,12 +140,13 @@ do {
     Start-Sleep -Seconds 10
     $state = Invoke-Store GET '/status'
     if ((Get-Date) -gt $deadline) { throw "The Store did not finish fetching the installer within $UploadTimeoutMinutes minutes. Run this again to continue." }
-} until ($state.isReady)
+} until (Get-Field $state 'isReady')
 
 Write-Host "==> Submitting for certification"
 $submission = Invoke-Store POST '/submit'
-$id = $submission.submissionId
+$id = Get-Field $submission 'submissionId'
 if (-not $id) { throw "The Store did not return a submission ID." }
 $status = Invoke-Store GET "/submission/$id/status"
-if ($status.hasFailed) { throw "Submission $id failed immediately with status $($status.publishingStatus). See Partner Center." }
-Write-Host "Submitted $id for certification ($($status.publishingStatus)). Certification takes up to three business days." -ForegroundColor Green
+$publishing = Get-Field $status 'publishingStatus'
+if (Get-Field $status 'hasFailed') { throw "Submission $id failed immediately with status $publishing. See Partner Center." }
+Write-Host "Submitted $id for certification ($publishing). Certification takes up to three business days." -ForegroundColor Green
