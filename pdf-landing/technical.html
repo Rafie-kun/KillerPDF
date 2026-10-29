@@ -105,18 +105,18 @@
 <div class="lang-menu" id="langMenu" hidden>
 <button class="lang-item" data-lang="en">English</button>
 <button class="lang-item" data-lang="bn">&#2476;&#2494;&#2434;&#2482;&#2494;</button>
-<button class="lang-item" data-lang="cs">Cestina</button>
+<button class="lang-item" data-lang="cs">Čeština</button>
 <button class="lang-item" data-lang="de">Deutsch</button>
-<button class="lang-item" data-lang="es">Espanol</button>
-<button class="lang-item" data-lang="fr">Francais</button>
+<button class="lang-item" data-lang="es">Español</button>
+<button class="lang-item" data-lang="fr">Français</button>
 <button class="lang-item" data-lang="it">Italiano</button>
 <button class="lang-item" data-lang="ja">&#26085;&#26412;&#35486;</button>
 <button class="lang-item" data-lang="kk">&#1178;&#1072;&#1079;&#1072;&#1179;&#1096;&#1072;</button>
-<button class="lang-item" data-lang="pl">Polski</button>
 <button class="lang-item" data-lang="hu">Magyar</button>
+<button class="lang-item" data-lang="pl">Polski</button>
 <button class="lang-item" data-lang="ru">&#1056;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081;</button>
 <button class="lang-item" data-lang="sl">Slovenščina</button>
-<button class="lang-item" data-lang="tr">Turkce</button>
+<button class="lang-item" data-lang="tr">Türkçe</button>
 <button class="lang-item" data-lang="vi">Tiếng Việt</button>
 <button class="lang-item" data-lang="zh-cn">&#20013;&#25991; (&#31616;&#20307;)</button>
 <button class="lang-item" data-lang="zh">&#20013;&#25991; (&#32321;&#39636;)</button>
@@ -189,7 +189,7 @@
 <div class="tech-sec" id="stack">
 <h2 data-i18n="pt_16">Tech stack</h2>
 <p data-i18n="pt_217">KillerPDF is a native Windows application built on modern .NET. There is no Electron and no browser engine. The installed edition uses the .NET 10 Desktop Runtime; the portable edition carries its own runtime. Each major subsystem has a deliberately narrow job:</p>
-<p data-i18n="tech_19_pipeline">The 1.9 development branch uses The KillerPDF.Engine for rendering and text extraction. Tesseract remains available as an OCR fallback. See the developer guide for current engine APIs.</p>
+<p data-i18n="pt19_engine_pipeline">KillerPDF 1.9 renders pages, extracts text, searches and selects through The KillerPDF.Engine, which replaced PDFium, Docnet.Core and PdfPig. Rendering runs off the UI thread with viewport priority, cancellation and zoom refinement, and Tesseract remains available as an OCR fallback. The <a href="./engine/index.html">developer guide</a> documents the engine APIs.</p>
 <table class="spec-table"><tr><th data-i18n="pt_18">Component</th><th data-i18n="pt_19">Library</th></tr>
 <tr><td>UI</td><td data-i18n="tech_ui_stack">WPF on .NET 10 for Windows, x64, with custom window chrome</td></tr>
 <tr><td data-i18n="pt_22">Rendering</td><td data-i18n="pt_23">The KillerPDF.Engine</td></tr>
@@ -232,6 +232,7 @@
 <p data-i18n="pt_218"><b>MainWindow</b> is a composed application shell rather than one giant code-behind. Its partials under <code>Shell/</code> own the shared toolbar, sidebar, dialogs and application workflows, while each document pane is a reusable <b>PdfViewer</b> with independent tabs, view state, render surfaces, thumbnails and interaction state. Two viewer instances create split pane without opening a second window. Thin host adapters connect the shell and viewers; reusable application policy lives under <code>Services/</code>; focused controllers live under <code>Features/</code>; and all PDF structure and serialization crosses the independent <a href="./engine/index.html">KillerPDF.Engine boundary</a>.</p>
 <h3 id="two-render-pipelines" data-i18n="pt_56">Two render pipelines</h3>
 <p data-i18n="pt_57">KillerPDF has a primary-page renderer (<b>RenderPage</b>) and a multi-page streaming renderer used by Continuous, Grid and Two-Page layouts. Single view uses the primary tile; multi-page layouts create per-page tiles and replace their bitmaps progressively as work completes. RenderPage is deliberately switched off during Continuous so a primary-page repaint cannot clear the live multi-page overlay map.</p>
+<p data-i18n="pt19_render_thread">Since 1.9 the drawing itself happens on a background thread. Pages in the viewport are rendered first, work for pages that have scrolled away is canceled, and a zoomed page shows a scaled image at once and is redrawn sharp when the wheel rests. The app and engine ship precompiled, installed fonts are cached, and font discovery runs in the background, so startup does not wait on it.</p>
 <h3 id="per-tab-sessions-an-lru-cache" data-i18n="pt_58">Per-tab sessions &amp; an LRU cache</h3>
 <p data-i18n="pt_59_172">Each open document is a <b>DocumentSession</b> that remembers its own zoom, fit and view mode, grid columns, current tool, page, and scroll position, along with its per-document data (annotations, page sizes, rotations, form values, and undo history). Switching tabs simply points the app back at that session. Each session also keeps a cache of already-drawn page images, so flipping back to a recent tab is instant and skips the renderer entirely. To keep memory bounded, only the three most recently used tabs retain caches; each tab has an approximately 160 MB budget, keeps at least six useful pages where possible, and has a hard cap of 48 cached entries.</p>
 <h3 id="canvas-overlay-maps" data-i18n="pt_60">Canvas &amp; overlay maps</h3>
@@ -416,6 +417,7 @@
 <h2 data-i18n="pt_104">Saving &amp; the temp-reload dance</h2>
 <p data-i18n="pt_105">Saving never changes the document you are looking at. KillerPDF writes a clean copy with no annotations, then permanently bakes in <b>stamps first, then annotations</b>, and reopens that fresh copy. Starting from a clean base every time means it can never accidentally bake the same thing in twice.</p>
 <h3 id="why-structural-edits-reload" data-i18n="pt_106">Why structural edits reload</h3>
+<p data-i18n="pt19_structural_reload">A structural edit (inserting, deleting or reordering pages, a Transform, a text rewrite) is not applied to the document in memory. KillerPDF writes a temporary PDF through The KillerPDF.Engine, reopens it, and restores page rotations and pending annotations as needed, so what you see is always a file the engine has parsed back rather than an in-memory guess. That working copy lives in <code>%LOCALAPPDATA%\KillerPDF\Temp</code>, and is swept when the app closes. Just before a text rewrite, Undo captures that working copy so <code>Ctrl+Z</code> can restore it in one step. Your original file changes only when you save.</p>
 </div>
 
 <div class="tech-sec" id="robust">
@@ -424,8 +426,9 @@
 <h3 id="the-open-fallback-ladder" data-i18n="pt_110">The open fallback ladder</h3>
 <p data-i18n="pt_111">The open path is a chain of typed exception handlers, each rung catching one class of failure:</p>
 <table class="spec-table"><tr><th data-i18n="pt_112">Failure</th><th data-i18n="pt_113">Recovery</th></tr>
-<tr><td data-i18n="pt_114">Owner / permission lock, no open password</td><td data-i18n="pt_115">Reopen read-only so it can still be viewed and printed</td></tr>
-<tr><td data-i18n="pt_116">Open password</td><td data-i18n="pt_117">The KillerPDF.Engine</td></tr>
+<tr><td data-i18n="pt_114">Owner / permission lock, no open password</td><td data-i18n="pt19_owner_lock_recovery">Open read-only with the original text and bookmarks; <b>Unlock</b> with the owner password enables editing, and a form the author lets you fill can still be filled and saved with its protection kept</td></tr>
+<tr><td data-i18n="pt_116">Open password</td><td data-i18n="pt19_open_password_recovery">Ask for the password, then decrypt the readable content before anything is displayed; the decrypted working copy stays in the session temp folder and the file on disk keeps its encryption</td></tr>
+<tr><td data-i18n="pt19_cert_failure">Encrypted for certificate recipients</td><td data-i18n="pt19_cert_recovery">Open with a matching certificate from the Windows certificate store; a recipient certificate that may not edit opens the file read-only, and with no matching certificate a message says none can open it</td></tr>
 <tr><td data-i18n="pt_118">Malformed xref</td><td data-i18n="pt_119">Drop to read-only with a warning; if that also fails, offer a repair</td></tr>
 </table>
 <h3 id="encryption-is-stripped-at-open" data-i18n="pt_221">Encryption and permissions</h3>
@@ -434,6 +437,7 @@
 <h3 id="network-and-partial-reads" data-i18n="pt_126">Network and partial reads</h3>
 <p data-i18n="pt_127">UNC shares and the WSL <code>\\wsl$</code> 9P filesystem sometimes hand back partial reads, which the parser sees as a truncated file. Before opening anything on a network path, KillerPDF copies it to a local temp with a single read-to-EOF, then opens the complete copy - while keeping your original path for display and Save.</p>
 <h3 id="repair-works-on-a-copy" data-i18n="pt_128">Repair works on a copy</h3>
+<p data-i18n="pt19_repair_copy">When a file cannot be opened even read-only, KillerPDF asks before attempting a repair, and the repair produces a copy: the engine rebuilds the cross-reference table and recovers what it can of the page tree into a fresh file, and the status line says you are looking at a repaired copy that needs Save to keep. The original on disk is never written. The dialog warns beforehand that a repaired copy can lose bookmarks, forms and other interactive features, and a repair that had to rasterize the pages says text is no longer selectable. Merge, Split and Extract read damaged files that open in the viewer, and a save that repaired broken references says so without claiming the missing content was recovered.</p>
 </div>
 
 <div class="tech-sec" id="conformance">
@@ -450,7 +454,7 @@
 <tr><td data-i18n="pt_233">Build quality gate</td><td data-i18n="pt_234">Release build, zero warnings</td></tr>
 </table>
 <h3 id="patching-the-write-engine" data-i18n="pt_236">Owning the document engine</h3>
-<p data-i18n="pt_237">KillerPDF 1.8 replaces its legacy PdfSharpCore document pipeline with The KillerPDF.Engine, built in this repository from PDF syntax upward. Validation is performed at parser, object-graph, writer, application-integration and public-corpus levels. The engine can preserve existing bytes through incremental revisions or produce deterministic full rewrites, and it fails closed when required structure cannot be interpreted safely.</p>
+<p data-i18n="pt19_owning_engine">KillerPDF 1.8 replaced its legacy PdfSharpCore write pipeline with The KillerPDF.Engine, built in this repository from PDF syntax upward, and 1.9 moved rendering, text extraction, search and selection onto the same engine, retiring PDFium, Docnet.Core and PdfPig. Validation is performed at parser, object-graph, writer, application-integration and public-corpus levels. The engine can preserve existing bytes through incremental revisions or produce deterministic full rewrites, and it fails closed when required structure cannot be interpreted safely.</p>
 <ul>
 <li data-i18n="pt_238">PDF 2.0 headers, cross-reference streams, object streams and incremental revisions are native concepts.</li>
 <li data-i18n="pt_239">PDF/A-4, PDF/A-4e, PDF/A-4f and PDF/UA-2 authoring safeguards are coordinated across metadata, fonts, structure, forms, annotations and associated files.</li>
@@ -493,6 +497,7 @@
 <tr><td data-i18n="te19_g_stream">Content stream</td><td data-i18n="te19_g_stream_d">The list of drawing instructions that paints a page: its text, lines and images, and where each one goes. KillerPDF edits a page's own text by rewriting this list instead of drawing over it.</td></tr>
 <tr><td data-i18n="pt_166">Cover / cover-pair</td><td data-i18n="te19_g_cover_d">A Cover is an opaque box that hides the original words on a page. When a line cannot be rewritten in the page itself, such as the recognized text over a scan, KillerPDF lays a Cover over it and a Text box on top holding your replacement; the two are locked together as a cover-pair.</td></tr>
 <tr><td data-i18n="pt_168">Cross-reference table (xref)</td><td data-i18n="pt_169">The index near the end of a PDF that records where every internal object is stored. If it is damaged, many readers fail to open the file, so KillerPDF has recovery paths that rebuild it.</td></tr>
+<tr><td data-i18n="pt19_g_doctools">Document tools</td><td data-i18n="pt19_g_doctools_d">The menu behind <code>Ctrl+Shift+D</code> that holds the reports, audits and editors that work on a whole document: preflight, accessibility, layers, attachments, bookmarks, page labels, macros, data merge and the rest. The letter beside each entry runs it.</td></tr>
 <tr><td data-i18n="pt_174">DPI (dots per inch)</td><td data-i18n="pt_175">How many pixels a screen packs into an inch, i.e. its density. Windows reports it as a scale: 1.0 at 96 DPI (100%), 1.5 at 150%. Higher DPI means more pixels are drawn for the same physical size.</td></tr>
 <tr><td data-i18n="pt_176">Flatten (flattening)</td><td data-i18n="pt_177">Burning annotations permanently into the page when you save, so they become part of the PDF's own content instead of separate, editable marks.</td></tr>
 <tr><td data-i18n="pt_178">Form field</td><td data-i18n="pt_179">An interactive field built into a PDF, such as a text box, checkbox, or dropdown, that a person fills in.</td></tr>
@@ -506,6 +511,7 @@
 <tr><td>The KillerPDF.Engine</td><td data-i18n="tech_engine_glossary">KillerPDF's independent, UI-free .NET document library for reading, validating, authoring, editing, signing, encrypting and writing PDF files.</td></tr>
 <tr><td data-i18n="pt_200">Point</td><td data-i18n="pt_201">The PDF's own unit of length. One point is 1/72 of an inch.</td></tr>
 <tr><td data-i18n="pt_202">Rasterize</td><td data-i18n="pt_203">To convert a page's text and shapes into a grid of pixels (a bitmap) for display.</td></tr>
+<tr><td data-i18n="pt19_g_redaction">Redaction</td><td data-i18n="pt19_g_redaction_d">Removing content from the page itself rather than covering it: the text runs, vector paths and image pixels under a mark leave the content stream, and the result is read back to verify that nothing marked remains. A Cover only hides.</td></tr>
 <tr><td data-i18n="pt_204">Render-dim space</td><td data-i18n="pt_205">KillerPDF's fixed internal coordinate system for a page, sized so the longer side is 2048 units and unrelated to zoom or screen pixels. Annotation positions are stored here so they never drift as you zoom or change view mode.</td></tr>
 <tr><td data-i18n="pt_206">Temp-reload</td><td data-i18n="pt_207">Saving the current state to a temporary copy and reopening it, used for operations like rotation and repair, so your original file is never edited in place.</td></tr>
 <tr><td data-i18n="pt_208">Tesseract</td><td data-i18n="pt_209">The open-source OCR engine embedded in KillerPDF.</td></tr>
