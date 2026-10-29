@@ -38,16 +38,31 @@ namespace KillerPDF.Tests
             // The first pipe exists before the client connects, so a slow start of the server
             // thread on a busy machine cannot time the client out.
             var first = channel.CreateServer();
-            var server = Task.Run(() =>
+            // A dedicated thread, like the app's KillerPDF-IPC thread: under a full parallel test
+            // run a thread-pool task could wait past the sender's whole retry window to start.
+            var server = Task.Factory.StartNew(() =>
             {
-                for (int connection = 0; connection < 2; connection++)
+                using (first)
                 {
-                    using var pipe = connection == 0 ? first : channel.CreateServer();
-                    pipe.WaitForConnection();
-                    string? message = SingleInstanceChannel.ReadMessage(pipe, 1024, TimeSpan.FromMilliseconds(300));
-                    if (connection == 1) second = message;
+                    first.WaitForConnection();
+                    // The silent client must be dropped at its short deadline.
+                    SingleInstanceChannel.ReadMessage(first, 1024, TimeSpan.FromMilliseconds(300));
                 }
-            });
+                // Like App.RunPipeServer: the next instance can fail while the dropped one is
+                // still closing (the pipe allows one instance), so back off and try again rather
+                // than stop serving. The real sender writes at once, but a busy test run can
+                // schedule this thread late, so its read gets a deadline a delay cannot reach.
+                for (int attempt = 0; attempt < 30 && second is null; attempt++)
+                {
+                    try
+                    {
+                        using var pipe = channel.CreateServer();
+                        pipe.WaitForConnection();
+                        second = SingleInstanceChannel.ReadMessage(pipe, 1024, TimeSpan.FromSeconds(5));
+                    }
+                    catch (IOException) { Thread.Sleep(150); }
+                }
+            }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
             using (var silent = new NamedPipeClientStream(".", channel.PipeName, PipeDirection.Out))
             {
