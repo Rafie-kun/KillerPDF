@@ -15,31 +15,35 @@
     <projectSourceUrl>https://github.com/SteveTheKiller/KillerPDF</projectSourceUrl>
     <docsUrl>https://github.com/SteveTheKiller/KillerPDF/blob/main/README.md</docsUrl>
     <bugTrackerUrl>https://github.com/SteveTheKiller/KillerPDF/issues</bugTrackerUrl>
-    <tags>pdf viewer editor annotate merge split sign ocr cli portable</tags>
-    <summary>Open-source PDF editor for Windows with text editing, OCR, annotations, signatures, forms and page organization.</summary>
-    <description>PDF editor for Windows. View, annotate, OCR, merge, split, edit text, draw, sign, fill forms, print, flatten, and open password-protected PDFs without an Adobe subscription or telemetry.
+    <tags>pdf viewer editor annotate merge split sign ocr redact convert cli portable</tags>
+    <summary>Open-source PDF editor for Windows with text editing, OCR, annotations, redaction, signatures, forms, Office export and page organization.</summary>
+    <description>PDF editor for Windows. View, annotate, OCR, merge, split, edit text, draw, sign, fill forms, redact, protect, convert, print, flatten, and open password-protected PDFs without an Adobe subscription or telemetry.
 
 **Features:**
 
-- PDF rendering and text extraction through the KillerPDF.Engine
-- Four view modes (Single, Continuous, Two-Page with a book layout option, Grid) and tabbed documents, each restoring its page, zoom, and view mode; split pane (F10) shows two documents side by side
-- Inline text editing with font matching against the original document
-- Word-wrapping text boxes, freehand drawing, straight lines, highlights, and images, with a full RGB color picker and screen eyedropper
-- Built-in OCR, no cloud: OCR a page or dragged region to the clipboard, make a searchable PDF, or extract all text; extra languages download on demand
-- Full command line: merge, extract, split, decrypt, flatten, render to images, print, and OCR run headlessly with scripting-friendly exit codes
-- PDF form filling: text, checkbox, radio, and comb fields render as live controls
-- Digital signatures with a certificate from Windows or a .pfx file; draw and reuse signatures and initials or import a PNG/JPG/BMP image
-- Merge multiple PDFs and split out selected pages, drag-and-drop page reordering; drop a folder or ZIP to merge its contents
-- Export one page or a multi-page selection as PNG or JPEG from the Pages panel
-- Rotate, scale, flip, straighten a crooked scan, correct the perspective of a photographed page, adjust levels for pale scans, and crop with corner handles
-- Page-number and watermark stamping across a page range
-- PDF outline (bookmark) navigation and full editing: add, rename inline, nest, reorder, retarget, and delete, with undo
-- Full-text search across the entire document with result highlighting, and column-aware text selection that copies multi-column pages in reading order
-- Undo and redo across annotations, page operations, and document edits, plus browser-style jump history (Alt+arrows)
-- Print with a real in-app preview (paper size and source, scale, position, margins, pages-per-sheet, two-sided); Save Flattened to make a page uneditable
-- Opens password-protected PDFs and repairs damaged ones
-- Thirteen themes, live accent colors, and toolbar styles provide 41 looks; localized in twenty languages
-- Keyboard shortcut overlay (F1) with list and keyboard views, plus a shortcut toggle and an always-available Ctrl+Shift+K recovery chord
+- Rendering, text extraction, search, editing and document processing through KillerPDF's own PDF engine
+- Four view modes (Single, Continuous, Two-Page with a book layout option, Grid), tabbed documents that restore their page, zoom and view mode, and a split pane (F10) for two documents side by side
+- Sidebar panels for pages, outline, comments, attachments, layers and signatures, dockable on any side of the window; tabs at the top or the bottom
+- Edit a page's own text line by line or by paragraph, with font matching, or change matching text everywhere with Find and Replace
+- Word-wrapping text boxes, freehand drawing, straight lines, shapes, highlights, strikethrough, underline, stamps and images, with a full RGB color picker and screen eyedropper
+- Calibrated Distance, Perimeter, Area and Angle measurements with units, snapping and a measurement report
+- Built-in OCR, no cloud: OCR a page or dragged region to the clipboard, make a searchable PDF, extract all text, or convert a scan to real text; extra languages download on demand
+- Export to Word, Excel, PowerPoint, HTML, Markdown, text, JSON and page images, with reviewed table export to XLSX or CSV; convert Word and Excel files to PDF; scan pages in through TWAIN
+- Permanent redaction by area, text search or sensitive-data pattern, with verification, batches and optional sanitization
+- Protect copies with passwords, permissions or certificate recipients; open certificate-encrypted PDFs; restricted PDFs open read-only and unlock with the owner password
+- Form filling with live text, checkbox, radio, dropdown and comb fields; recognize fields, flatten forms, exchange FDF and XFDF data and supported calculations
+- Digital signatures with a certificate from Windows or a .pfx file, RFC 3161 timestamps, signature verification with certificate chains and later-change detection; draw and reuse signatures and initials or import an image
+- Compare two documents side by side with the changes marked; merge, split, extract, reorder, rotate, reverse, straighten and divide scanned spreads; drop a folder or ZIP to merge its contents
+- Rotate, scale, flip, straighten a crooked scan, correct the perspective of a photographed page, adjust color and levels, crop with corner handles, and rasterize a region
+- Headers, footers, page numbers, watermarks and Bates batches; N-up, booklet, poster and cut-stack production layouts; preflight, accessibility and print-production reports with guided repairs; Reduce File Size
+- Guided tasks, reusable macros, watched folders and data merge from CSV, JSON or XLSX
+- Full command line with scripting-friendly exit codes: merge, split, extract, render, print, OCR, redact, export, protect, batch render and batch resave
+- Bookmark navigation and editing, table of contents generation, page labels, link and bookmark audits, full-text search with result highlighting, and column-aware text selection
+- Undo and redo across annotations, page operations and document edits, plus browser-style jump history (Alt+arrows)
+- Print with a real in-app preview (paper size and source, scale, position, margins, pages-per-sheet, two-sided)
+- Optional File Explorer and Outlook PDF previews for installed copies
+- Thirteen themes, live accent colors and toolbar styles provide 41 looks; localized in twenty languages; app-wide interface scale and customizable shortcuts
+- Keyboard shortcut overlay (F1) with list and keyboard views, and Search Tools (Ctrl+K) to find any command by name
 - Optional startup update checks, enabled by default, with confirmation before downloading or installing
 - Separate compact installer and self-contained portable downloads; the installer supports per-user or machine-wide installation and uses the .NET 10 Desktop Runtime
 - GPLv3, local-only, no account, no telemetry
