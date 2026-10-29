@@ -4,7 +4,7 @@ All notable changes to The KillerPDF.Engine are documented here. Application cha
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.9.0] - Unreleased
+## [1.9.0] - 2026-10-29
 
 The 1.9.0 engine adds page-content extraction, complete engine-owned rendering, and APIs for editing, protection, review, and production workflows.
 
