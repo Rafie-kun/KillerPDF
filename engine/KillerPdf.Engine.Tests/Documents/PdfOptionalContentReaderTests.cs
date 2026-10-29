@@ -66,7 +66,7 @@ public sealed class PdfOptionalContentReaderTests
 
         Assert.Empty(result.Groups);
         Assert.Empty(result.Configurations);
-        Assert.Equal("Layers: 0\r\nConfigurations: 0", result.ToText());
+        Assert.Equal("Layers: 0" + Environment.NewLine + "Configurations: 0", result.ToText());
     }
 
     [Fact]

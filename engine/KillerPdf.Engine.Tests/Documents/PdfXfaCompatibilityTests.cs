@@ -50,7 +50,7 @@ public sealed class PdfXfaCompatibilityTests
 
         Assert.True(report.IsSupported);
         Assert.Empty(report.Findings);
-        Assert.Equal("XFA compatibility: supported\r\nFindings: 0", report.ToText());
+        Assert.Equal("XFA compatibility: supported" + Environment.NewLine + "Findings: 0", report.ToText());
     }
 
     [Fact]

@@ -176,8 +176,12 @@ public sealed class PdfAttachmentReaderTests
     [Fact]
     public void ExtractionPathRejectsTraversalAndExecutableNamesAreFlagged()
     {
+        // Traversal through the platform's own separator. A backslash is a separator only on
+        // Windows; elsewhere it is an ordinary file-name character and the name stays inside.
         Assert.Throws<ArgumentException>(() =>
-            PdfAttachmentReader.GetSafeExtractionPath(Path.GetTempPath(), "..\\outside.txt"));
+            PdfAttachmentReader.GetSafeExtractionPath(Path.GetTempPath(), ".." + Path.DirectorySeparatorChar + "outside.txt"));
+        Assert.Throws<ArgumentException>(() =>
+            PdfAttachmentReader.GetSafeExtractionPath(Path.GetTempPath(), "../outside.txt"));
         string path = PdfAttachmentReader.GetSafeExtractionPath(Path.GetTempPath(), "inside.txt");
         Assert.Equal(Path.Combine(Path.GetFullPath(Path.GetTempPath()), "inside.txt"), path);
 

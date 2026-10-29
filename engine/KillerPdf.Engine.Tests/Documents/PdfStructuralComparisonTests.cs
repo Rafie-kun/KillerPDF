@@ -94,7 +94,7 @@ public sealed class PdfStructuralComparisonTests
             Document("Same", includePath: true, pages: 1),
             Document("Same", includePath: true, pages: 1));
 
-        Assert.Equal("Structural comparison: no changes\r\nChanges: 0", comparison.ToText());
+        Assert.Equal("Structural comparison: no changes" + Environment.NewLine + "Changes: 0", comparison.ToText());
         using JsonDocument json = JsonDocument.Parse(comparison.ToJson());
         Assert.False(json.RootElement.GetProperty("hasChanges").GetBoolean());
         Assert.Empty(json.RootElement.GetProperty("changes").EnumerateArray());

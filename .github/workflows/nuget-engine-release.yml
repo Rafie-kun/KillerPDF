@@ -52,7 +52,9 @@ jobs:
             if ($source -notmatch '^[a-fA-F0-9]{40}$') { throw 'Metadata repair requires a full commit SHA.' }
             git merge-base --is-ancestor $source origin/main
             if ($LASTEXITCODE -ne 0) { throw 'Repair commit must be on main.' }
-            git diff --exit-code $tag $source -- engine ':!engine/CHANGELOG.md' ':!engine/KillerPdf.Engine/KillerPdf.Engine.csproj'
+            # The tests do not ship in the package, so a repair may fix a test that only failed on
+            # this Linux runner; the packaged engine code must still match the release tag.
+            git diff --exit-code $tag $source -- engine ':!engine/CHANGELOG.md' ':!engine/KillerPdf.Engine/KillerPdf.Engine.csproj' ':!engine/KillerPdf.Engine.Tests'
             if ($LASTEXITCODE -ne 0) { throw 'Engine code differs from the released source.' }
           }
           git checkout --detach $source

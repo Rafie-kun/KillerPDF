@@ -73,7 +73,7 @@ public sealed class PdfStructuredExportTests
         Assert.Equal("A & B", PdfStructuredExport.ToPlainText(document));
         string html = PdfStructuredExport.ToHtml(document);
         Assert.Contains("<p><span style=\"font-family:&quot;Helvetica&quot;;font-size:12pt\">A &amp; B</span></p>", html);
-        Assert.Equal("# Page 1\r\n\r\nA & B", PdfStructuredExport.ToMarkdown(document));
+        Assert.Equal("# Page 1" + Environment.NewLine + Environment.NewLine + "A & B", PdfStructuredExport.ToMarkdown(document));
         using JsonDocument json = JsonDocument.Parse(PdfStructuredExport.ToJson(document));
         JsonElement page = json.RootElement[0];
         Assert.Equal(1, page.GetProperty("page").GetInt32());
@@ -386,7 +386,7 @@ public sealed class PdfStructuredExportTests
     public void BatchExportPlansFormatSpecificNamesAndRejectsCollisions()
     {
         Assert.Equal("report.docx", PdfStructuredExportBatchRunner.OutputName(
-            @"C:\input\report.pdf", PdfStructuredExportFormat.WordDocument));
+            Path.Combine(Path.GetTempPath(), "input", "report.pdf"), PdfStructuredExportFormat.WordDocument));
         Assert.Equal("report.xlsx", PdfStructuredExportBatchRunner.OutputName(
             "report", PdfStructuredExportFormat.Spreadsheet));
 
