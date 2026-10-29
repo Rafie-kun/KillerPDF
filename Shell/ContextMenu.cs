@@ -248,6 +248,8 @@ namespace KillerPDF.Shell
                 OpenTransformWindow(TransformWindowMode.ColorCorrection), gesture: GestureFor("E"), glyph: ""));
             _ctxMenu.Items.Add(MakeRotateMenuItem(Loc("Str_Ctx_RotateCW"), (s, e) => RotatePages_Click(90), clockwise: true));
             _ctxMenu.Items.Add(MakeRotateMenuItem(Loc("Str_Ctx_RotateCCW"), (s, e) => RotatePages_Click(-90), clockwise: false));
+            _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Pages_FixOrientation"), (s, e) => FixPageOrientation(),
+                GestureFor("AltShift:O"), ""));
             _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_Pages_RasterizeRegion"), (s, e) => RasterizeRegion(pageIdx)));
             _ctxMenu.Items.Add(MakeMenuItem(Loc("Str_TableExport_Title"), (_, _) => ExportTable(pageIdx)));
             _ctxMenu.Items.Add(new Separator());
@@ -686,7 +688,8 @@ namespace KillerPDF.Shell
                     OpenTransformWindow(TransformWindowMode.ColorCorrection), gesture: GestureFor("E"), glyph: ""));
                 // #436: with two or more pages selected these act on the selection, otherwise on
                 // the whole document.
-                menu.Items.Add(MakeMenuItem(Loc("Str_Pages_FixOrientation"), (s, ev) => FixPageOrientation(), glyph: "\uE7AD"));
+                menu.Items.Add(MakeMenuItem(Loc("Str_Pages_FixOrientation"), (s, ev) => FixPageOrientation(),
+                    GestureFor("AltShift:O"), "\uE7AD"));
                 menu.Items.Add(MakeMenuItem(Loc("Str_Pages_Straighten"), (s, ev) => StraightenScannedPages()));
                 menu.Items.Add(MakeMenuItem(Loc("Str_Pages_DivideSpreads"), (s, ev) => DivideSpreads()));
                 menu.Items.Add(MakeMenuItem(Loc("Str_Pages_RasterizeRegion"), (s, ev) => RasterizeRegion(clickedPage)));
@@ -814,7 +817,8 @@ namespace KillerPDF.Shell
             AddNavRow(menu);
             menu.Items.Add(MakeMenuItem(Loc("Str_Ctx_AddBlankPage"), (s, e) => AddBlankPageAtEnd(), glyph: ""));
             menu.Items.Add(MakeMenuItem(Loc("Str_Pages_Reverse"), (s, e) => ReversePageOrder(), glyph: "\uE8CB"));
-            menu.Items.Add(MakeMenuItem(Loc("Str_Pages_FixOrientation"), (s, e) => FixPageOrientation(), glyph: "\uE7AD"));
+            menu.Items.Add(MakeMenuItem(Loc("Str_Pages_FixOrientation"), (s, e) => FixPageOrientation(),
+                GestureFor("AltShift:O"), "\uE7AD"));
             menu.Items.Add(MakeMenuItem(Loc("Str_Pages_Straighten"), (s, e) => StraightenScannedPages()));
             menu.Items.Add(MakeMenuItem(Loc("Str_Pages_DivideSpreads"), (s, e) => DivideSpreads()));
             menu.Items.Add(new Separator());

@@ -2928,7 +2928,7 @@
                     BorderBrush="{DynamicResource TabActiveRingBrush}"
                     Effect="{DynamicResource BarShadowEffect}">
                 <Grid>
-                    <TextBlock x:Name="TabDragGhostText" FontFamily="{DynamicResource MonoFont}" FontSize="{DynamicResource TabTitleFontSize}"
+                    <TextBlock x:Name="TabDragGhostText" Margin="{DynamicResource TabLabelInset}" FontFamily="{DynamicResource MonoFont}" FontSize="{DynamicResource TabTitleFontSize}"
                                VerticalAlignment="Center"
                                Foreground="{DynamicResource TextBrush}"/>
                     <Border IsHitTestVisible="False" Panel.ZIndex="3"

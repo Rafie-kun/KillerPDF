@@ -84,6 +84,9 @@ namespace KillerPDF.Services
             var palette = BuildPalette(d, theme, accent);
             foreach (object key in palette.Keys)
                 if (!d.Contains(key)) d[key] = palette[key];
+            // KillerPDF's tabs have no icon, so the kit's 2px tab padding put the title against the
+            // tab's left edge. 98SE already pads its tabs 8px and needs nothing more.
+            d["TabLabelInset"] = theme == Theme.SE98 ? new Thickness(0) : new Thickness(6, 0, 0, 0);
 
             var app = Application.Current;
             if (app == null) return;

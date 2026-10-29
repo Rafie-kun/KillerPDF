@@ -197,7 +197,7 @@
                                                         VerticalAlignment="Center" FocusVisualStyle="{x:Null}"
                                                         ToolTip="{DynamicResource Str_TT_CloseTab}"
                                                         Tag="{Binding}" Click="CloseTab_Click"/>
-                                                <TextBlock x:Name="tabLbl" Text="{Binding TabLabel}"
+                                                <TextBlock x:Name="tabLbl" Text="{Binding TabLabel}" Margin="{DynamicResource TabLabelInset}"
                                                            FontFamily="{DynamicResource MonoFont}" FontSize="{DynamicResource TabTitleFontSize}"
                                                            Foreground="{DynamicResource MutedTextBrush}" VerticalAlignment="Center"
                                                            TextTrimming="CharacterEllipsis"/>
