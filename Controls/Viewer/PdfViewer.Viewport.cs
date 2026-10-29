@@ -1102,11 +1102,18 @@ namespace KillerPDF.Controls
                 _pageContentPanel.Width = double.NaN;
                 return;
             }
+            // Partner tiles take the primary page's width, which RenderPage sets once that page is
+            // on screen. A zoom or fit refresh while a document was still opening reached this with
+            // no width yet (or the previous page's), built every partner at a stand-in width and
+            // cached it: page 2 of the first spread showed at about a third of page 1's size.
+            // RenderPage runs this pass again right after it sets the width, so waiting loses nothing.
+            if (_annotationCanvas.Tag is not int shownPage || shownPage != primaryPageIdx
+                || !(_annotationCanvas.Width > 0)) return;
 
             // Snap the WrapPanel width to a whole number of page-width slots.
             // Grid slots carry a constant GridGapPx on-screen gap (divided by zoom because tile
             // margins scale with the view transform); other tiled modes keep the 12px gap.
-            double primaryPageW = _annotationCanvas.Width > 0 ? _annotationCanvas.Width : 595;
+            double primaryPageW = _annotationCanvas.Width;
             bool bookCover = _viewMode == ViewMode.TwoPage && BookMode && primaryPageIdx == 0;
             double pageSlotW = primaryPageW + (_viewMode == ViewMode.Grid
                 ? GridGapPx / Math.Max(0.01, _zoomLevel) : bookCover ? 0 : 12);
@@ -1183,7 +1190,7 @@ namespace KillerPDF.Controls
 
             // Capture the primary page width and reset the tile map on the UI thread before
             // streaming tiles in from the background render.
-            double primaryDipW = _annotationCanvas.Width > 0 ? _annotationCanvas.Width : 595;
+            double primaryDipW = _annotationCanvas.Width;
 
             // Render pixels on a background thread and attach each page tile to the UI as soon
             // as it is ready, so large documents fill in progressively instead of blocking
@@ -1212,6 +1219,11 @@ namespace KillerPDF.Controls
 
                             // Cache hit: skip pdfium entirely, just attach the cached tile bitmap.
                             var cachedTile = TryGetCachedRender(session, i, tileBucket, rot);
+                            // The cache key has no width: a tile built beside a primary page of
+                            // another width (book layout pairs pages differently, Grid anchors at
+                            // page 0) would show at the wrong size, so render it again instead.
+                            if (cachedTile != null && Math.Abs(cachedTile.Width - Math.Round(primaryDipW)) > 0.5)
+                                cachedTile = null;
                             if (cachedTile != null)
                             {
                                 int pic = i;
