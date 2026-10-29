@@ -923,7 +923,7 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_St_NoTextOnPage">本頁找不到文字</sys:String>
     <sys:String x:Key="Str_St_NoTextSelected">未選取文字-請拖曳以選取文字</sys:String>
     <sys:String x:Key="Str_St_NoTextInSelection">選取範圍中找不到文字</sys:String>
-    <sys:String x:Key="Str_St_NoTextUseShapes">此處沒有文字 - 形狀在 4 鍵</sys:String>
+    <sys:String x:Key="Str_St_NoTextUseShapes">此處沒有文字 - 形狀在 O 鍵</sys:String>
     <sys:String x:Key="Str_St_SignaturePlaced">已放置簽名-拖曳以重新定位，使用角落控點調整大小</sys:String>
     <sys:String x:Key="Str_St_FieldCleared">已清除欄位</sys:String>
     <sys:String x:Key="Str_St_FieldSigned">已簽署欄位</sys:String>

@@ -1005,7 +1005,7 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_St_NoTextOnPage">Fant ingen tekst på denne siden</sys:String>
     <sys:String x:Key="Str_St_NoTextSelected">Ingen tekst er valgt. Dra for å markere tekst</sys:String>
     <sys:String x:Key="Str_St_NoTextInSelection">Fant ingen tekst i markeringen</sys:String>
-    <sys:String x:Key="Str_St_NoTextUseShapes">Ingen tekst her. Former er på 4</sys:String>
+    <sys:String x:Key="Str_St_NoTextUseShapes">Ingen tekst her. Former er på O</sys:String>
     <sys:String x:Key="Str_St_SignaturePlaced">Signaturen er plassert. Dra for å flytte, bruk hjørnehåndtaket for å endre størrelse</sys:String>
     <sys:String x:Key="Str_St_FieldCleared">Feltet er tømt</sys:String>
     <sys:String x:Key="Str_St_FieldSigned">Feltet er signert</sys:String>

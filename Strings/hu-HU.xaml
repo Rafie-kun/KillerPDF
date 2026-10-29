@@ -1005,7 +1005,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_St_NoTextOnPage">Nem található szöveg ezen az oldalon</sys:String>
     <sys:String x:Key="Str_St_NoTextSelected">Nincs kijelölt szöveg - húzással jelöljön ki szöveget</sys:String>
     <sys:String x:Key="Str_St_NoTextInSelection">Nem található szöveg a kijelölésben</sys:String>
-    <sys:String x:Key="Str_St_NoTextUseShapes">Itt nincs szöveg - az Alakzatok a 4-es gombon van</sys:String>
+    <sys:String x:Key="Str_St_NoTextUseShapes">Itt nincs szöveg - az Alakzatok az O gombon van</sys:String>
     <sys:String x:Key="Str_St_SignaturePlaced">Aláírás elhelyezve - húzással áthelyezheti, a sarokfogantyúval átméretezheti</sys:String>
     <sys:String x:Key="Str_St_FieldCleared">Mező törölve</sys:String>
     <sys:String x:Key="Str_St_FieldSigned">Mező aláírva</sys:String>

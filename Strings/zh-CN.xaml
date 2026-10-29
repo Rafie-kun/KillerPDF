@@ -925,7 +925,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_St_NoTextOnPage">本页未找到文本</sys:String>
     <sys:String x:Key="Str_St_NoTextSelected">未选择文本，拖动以选择文本</sys:String>
     <sys:String x:Key="Str_St_NoTextInSelection">所选内容中未找到文本</sys:String>
-    <sys:String x:Key="Str_St_NoTextUseShapes">此处没有文本 - 形状在 4 键</sys:String>
+    <sys:String x:Key="Str_St_NoTextUseShapes">此处没有文本 - 形状在 O 键</sys:String>
     <sys:String x:Key="Str_St_SignaturePlaced">已放置签名，拖动可重新定位，使用角部手柄调整大小</sys:String>
     <sys:String x:Key="Str_St_FieldCleared">已清除字段</sys:String>
     <sys:String x:Key="Str_St_FieldSigned">已签署字段</sys:String>

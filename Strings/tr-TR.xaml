@@ -921,7 +921,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_St_NoTextOnPage">Bu sayfada metin bulunamadı</sys:String>
     <sys:String x:Key="Str_St_NoTextSelected">Metin seçilmedi - metin seçmek için sürükleyin</sys:String>
     <sys:String x:Key="Str_St_NoTextInSelection">Seçimde metin bulunamadı</sys:String>
-    <sys:String x:Key="Str_St_NoTextUseShapes">Burada metin yok - Şekiller 4'te</sys:String>
+    <sys:String x:Key="Str_St_NoTextUseShapes">Burada metin yok - Şekiller O'da</sys:String>
     <sys:String x:Key="Str_St_SignaturePlaced">İmza yerleştirildi - yeniden konumlandırmak için sürükleyin, boyutlandırmak için köşe tutamacını kullanın</sys:String>
     <sys:String x:Key="Str_St_FieldCleared">Alan temizlendi</sys:String>
     <sys:String x:Key="Str_St_FieldSigned">Alan imzalandı</sys:String>

@@ -902,7 +902,7 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_St_NoTextOnPage">Осы бетте мәтін табылмады</sys:String>
     <sys:String x:Key="Str_St_NoTextSelected">Мәтін таңдалмаған - таңдау үшін сүйреңіз</sys:String>
     <sys:String x:Key="Str_St_NoTextInSelection">Таңдауда мәтін табылмады</sys:String>
-    <sys:String x:Key="Str_St_NoTextUseShapes">Мұнда мәтін жоқ - Пішіндер 4 пернесінде</sys:String>
+    <sys:String x:Key="Str_St_NoTextUseShapes">Мұнда мәтін жоқ - Пішіндер O пернесінде</sys:String>
     <sys:String x:Key="Str_St_SignaturePlaced">Қолтаңба қойылды - жылжыту үшін сүйреңіз, өлшемін өзгерту үшін бұрыш тұтқасын пайдаланыңыз</sys:String>
     <sys:String x:Key="Str_St_FieldCleared">Өріс тазаланды</sys:String>
     <sys:String x:Key="Str_St_FieldSigned">Өріске қол қойылды</sys:String>

@@ -925,7 +925,7 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_St_NoTextOnPage">Kein Text auf dieser Seite gefunden</sys:String>
     <sys:String x:Key="Str_St_NoTextSelected">Kein Text ausgewählt - zum Auswählen ziehen</sys:String>
     <sys:String x:Key="Str_St_NoTextInSelection">Kein Text in der Auswahl gefunden</sys:String>
-    <sys:String x:Key="Str_St_NoTextUseShapes">Kein Text hier - Formen liegt auf 4</sys:String>
+    <sys:String x:Key="Str_St_NoTextUseShapes">Kein Text hier - Formen liegt auf O</sys:String>
     <sys:String x:Key="Str_St_SignaturePlaced">Signatur platziert - zum Verschieben ziehen, Größe über den Eckpunkt ändern</sys:String>
     <sys:String x:Key="Str_St_FieldCleared">Feld geleert</sys:String>
     <sys:String x:Key="Str_St_FieldSigned">Feld signiert</sys:String>

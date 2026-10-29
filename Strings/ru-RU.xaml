@@ -1005,7 +1005,7 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_St_NoTextOnPage">Текст на этой странице не найден</sys:String>
     <sys:String x:Key="Str_St_NoTextSelected">Текст не выделен - перетащите курсор, чтобы выделить текст</sys:String>
     <sys:String x:Key="Str_St_NoTextInSelection">В выделенной области текст не найден</sys:String>
-    <sys:String x:Key="Str_St_NoTextUseShapes">Здесь нет текста - Форма находится на 4</sys:String>
+    <sys:String x:Key="Str_St_NoTextUseShapes">Здесь нет текста - Форма находится на O</sys:String>
     <sys:String x:Key="Str_St_SignaturePlaced">Подпись размещена - перетащите для изменения положения, используйте угловой маркер для изменения размера</sys:String>
     <sys:String x:Key="Str_St_FieldCleared">Поле очищено</sys:String>
     <sys:String x:Key="Str_St_FieldSigned">Поле подписано</sys:String>

@@ -1005,7 +1005,7 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_St_NoTextOnPage">このページにテキストが見つかりませんでした</sys:String>
     <sys:String x:Key="Str_St_NoTextSelected">テキストが選択されていません。ドラッグしてテキストを選択してください</sys:String>
     <sys:String x:Key="Str_St_NoTextInSelection">選択範囲にテキストが見つかりませんでした</sys:String>
-    <sys:String x:Key="Str_St_NoTextUseShapes">ここにテキストはありません - 図形は 4 です</sys:String>
+    <sys:String x:Key="Str_St_NoTextUseShapes">ここにテキストはありません - 図形は O です</sys:String>
     <sys:String x:Key="Str_St_SignaturePlaced">署名を配置しました。ドラッグで位置を変更し、角のハンドルでサイズを変更できます</sys:String>
     <sys:String x:Key="Str_St_FieldCleared">フィールドを消去しました</sys:String>
     <sys:String x:Key="Str_St_FieldSigned">フィールドに署名しました</sys:String>

@@ -1005,7 +1005,7 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_St_NoTextOnPage">Nenhum texto encontrado nesta página</sys:String>
     <sys:String x:Key="Str_St_NoTextSelected">Nenhum texto selecionado - arraste para selecionar texto</sys:String>
     <sys:String x:Key="Str_St_NoTextInSelection">Nenhum texto encontrado na seleção</sys:String>
-    <sys:String x:Key="Str_St_NoTextUseShapes">Nenhum texto aqui - Formas está em 4</sys:String>
+    <sys:String x:Key="Str_St_NoTextUseShapes">Nenhum texto aqui - Formas está em O</sys:String>
     <sys:String x:Key="Str_St_SignaturePlaced">Assinatura posicionada - arraste para reposicionar, use a alça do canto para redimensionar</sys:String>
     <sys:String x:Key="Str_St_FieldCleared">Campo limpo</sys:String>
     <sys:String x:Key="Str_St_FieldSigned">Campo assinado</sys:String>

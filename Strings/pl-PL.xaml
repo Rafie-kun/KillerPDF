@@ -976,7 +976,7 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_St_NoTextOnPage">Na tej stronie nie znaleziono tekstu</sys:String>
     <sys:String x:Key="Str_St_NoTextSelected">Nie zaznaczono tekstu - przeciągnij do zaznaczenia tekstu</sys:String>
     <sys:String x:Key="Str_St_NoTextInSelection">Nie znaleziono tekstu w zaznaczeniu</sys:String>
-    <sys:String x:Key="Str_St_NoTextUseShapes">Brak tutaj tekstu - Kształty są na 4</sys:String>
+    <sys:String x:Key="Str_St_NoTextUseShapes">Brak tutaj tekstu - Kształty są na O</sys:String>
     <sys:String x:Key="Str_St_SignaturePlaced">Podpis umieszczony - przeciągnij, aby zmienić położenie, użyj uchwytu narożnego, aby zmienić rozmiar</sys:String>
     <sys:String x:Key="Str_St_FieldCleared">Pole wyczyszczono</sys:String>
     <sys:String x:Key="Str_St_FieldSigned">Pole podpisano</sys:String>

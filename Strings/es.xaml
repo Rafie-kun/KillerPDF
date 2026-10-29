@@ -921,7 +921,7 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_St_NoTextOnPage">No se encontró texto en esta página</sys:String>
     <sys:String x:Key="Str_St_NoTextSelected">No hay texto seleccionado - arrastre para seleccionar texto</sys:String>
     <sys:String x:Key="Str_St_NoTextInSelection">No se encontró texto en la selección</sys:String>
-    <sys:String x:Key="Str_St_NoTextUseShapes">No hay texto aquí - Formas está en 4</sys:String>
+    <sys:String x:Key="Str_St_NoTextUseShapes">No hay texto aquí - Formas está en O</sys:String>
     <sys:String x:Key="Str_St_SignaturePlaced">Firma colocada - arrastre para reposicionarla, use el controlador de esquina para cambiar el tamaño</sys:String>
     <sys:String x:Key="Str_St_FieldCleared">Campo borrado</sys:String>
     <sys:String x:Key="Str_St_FieldSigned">Campo firmado</sys:String>

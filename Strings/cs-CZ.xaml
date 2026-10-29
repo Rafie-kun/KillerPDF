@@ -984,7 +984,7 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_St_NoTextOnPage">Na této stránce nebyl nalezen žádný text</sys:String>
     <sys:String x:Key="Str_St_NoTextSelected">Není vybrán žádný text - text vyberete tažením</sys:String>
     <sys:String x:Key="Str_St_NoTextInSelection">Ve výběru nebyl nalezen žádný text</sys:String>
-    <sys:String x:Key="Str_St_NoTextUseShapes">Zde není žádný text - Tvary jsou na 4</sys:String>
+    <sys:String x:Key="Str_St_NoTextUseShapes">Zde není žádný text - Tvary jsou na O</sys:String>
     <sys:String x:Key="Str_St_SignaturePlaced">Podpis umístěn - tažením jej přemístíte, rohovým úchytem změníte velikost</sys:String>
     <sys:String x:Key="Str_St_FieldCleared">Pole vymazáno</sys:String>
     <sys:String x:Key="Str_St_FieldSigned">Pole podepsáno</sys:String>

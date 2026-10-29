@@ -1005,7 +1005,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_St_NoTextOnPage">Không tìm thấy văn bản trên trang này</sys:String>
     <sys:String x:Key="Str_St_NoTextSelected">Chưa chọn văn bản - kéo để chọn văn bản</sys:String>
     <sys:String x:Key="Str_St_NoTextInSelection">Không tìm thấy văn bản trong phần đã chọn</sys:String>
-    <sys:String x:Key="Str_St_NoTextUseShapes">Không có văn bản ở đây - Công cụ Hình vẽ đang bật 4</sys:String>
+    <sys:String x:Key="Str_St_NoTextUseShapes">Không có văn bản ở đây - Công cụ Hình vẽ ở phím O</sys:String>
     <sys:String x:Key="Str_St_SignaturePlaced">Đã đặt chữ ký - kéo để định vị lại, sử dụng tay nắm góc để thay đổi kích thước</sys:String>
     <sys:String x:Key="Str_St_FieldCleared">Đã xóa trường</sys:String>
     <sys:String x:Key="Str_St_FieldSigned">Đã ký trường</sys:String>

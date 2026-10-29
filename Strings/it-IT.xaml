@@ -1005,7 +1005,7 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_St_NoTextOnPage">Nessun testo trovato in questa pagina</sys:String>
     <sys:String x:Key="Str_St_NoTextSelected">Nessun testo selezionato: trascina per selezionare il testo</sys:String>
     <sys:String x:Key="Str_St_NoTextInSelection">Nessun testo trovato nella selezione</sys:String>
-    <sys:String x:Key="Str_St_NoTextUseShapes">Nessun testo qui: Forme è su 4</sys:String>
+    <sys:String x:Key="Str_St_NoTextUseShapes">Nessun testo qui: Forme è su O</sys:String>
     <sys:String x:Key="Str_St_SignaturePlaced">Firma posizionata: trascina per riposizionare, usa l'angolo della maniglia per ridimensionare</sys:String>
     <sys:String x:Key="Str_St_FieldCleared">Campo azzerato</sys:String>
     <sys:String x:Key="Str_St_FieldSigned">Campo firmato</sys:String>

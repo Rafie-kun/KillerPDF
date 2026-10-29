@@ -1005,7 +1005,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_St_NoTextOnPage">No text found on this page</sys:String>
     <sys:String x:Key="Str_St_NoTextSelected">No text selected. Drag to select text</sys:String>
     <sys:String x:Key="Str_St_NoTextInSelection">No text found in selection</sys:String>
-    <sys:String x:Key="Str_St_NoTextUseShapes">No text here. Shapes is on 4</sys:String>
+    <sys:String x:Key="Str_St_NoTextUseShapes">No text here. Shapes is on O</sys:String>
     <sys:String x:Key="Str_St_SignaturePlaced">Signature placed. Drag to reposition, or use the corner handle to resize</sys:String>
     <sys:String x:Key="Str_St_FieldCleared">Field cleared</sys:String>
     <sys:String x:Key="Str_St_FieldSigned">Field signed</sys:String>

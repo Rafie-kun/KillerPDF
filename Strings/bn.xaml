@@ -921,7 +921,7 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_St_NoTextOnPage">এই পৃষ্ঠায় কোনো টেক্সট পাওয়া যায়নি</sys:String>
     <sys:String x:Key="Str_St_NoTextSelected">কোনো টেক্সট নির্বাচন করা হয়নি - টেক্সট নির্বাচন করতে টেনে আনুন</sys:String>
     <sys:String x:Key="Str_St_NoTextInSelection">নির্বাচনে কোনো টেক্সট পাওয়া যায়নি</sys:String>
-    <sys:String x:Key="Str_St_NoTextUseShapes">এখানে কোনো টেক্সট নেই - আকার ৪-এ আছে</sys:String>
+    <sys:String x:Key="Str_St_NoTextUseShapes">এখানে কোনো টেক্সট নেই - আকার O-এ আছে</sys:String>
     <sys:String x:Key="Str_St_SignaturePlaced">স্বাক্ষর স্থাপন করা হয়েছে - পুনরায় স্থাপন করতে টেনে আনুন, আকার পরিবর্তন করতে কোণার হ্যান্ডেল ব্যবহার করুন</sys:String>
     <sys:String x:Key="Str_St_FieldCleared">ফিল্ড মুছে ফেলা হয়েছে</sys:String>
     <sys:String x:Key="Str_St_FieldSigned">ফিল্ড স্বাক্ষরিত হয়েছে</sys:String>

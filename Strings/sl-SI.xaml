@@ -928,7 +928,7 @@
     <sys:String x:Key="Str_St_NoTextOnPage">Na tej strani ni besedila</sys:String>
     <sys:String x:Key="Str_St_NoTextSelected">Ni izbranega besedila. Povlecite, da ga izberete</sys:String>
     <sys:String x:Key="Str_St_NoTextInSelection">V izboru ni besedila</sys:String>
-    <sys:String x:Key="Str_St_NoTextUseShapes">Tukaj ni besedila. Oblike so na tipki 4</sys:String>
+    <sys:String x:Key="Str_St_NoTextUseShapes">Tukaj ni besedila. Oblike so na tipki O</sys:String>
     <sys:String x:Key="Str_St_SignaturePlaced">Podpis je postavljen. Povlecite za premik ali uporabite vogalni ročaj za spremembo velikosti</sys:String>
     <sys:String x:Key="Str_St_FieldCleared">Polje je počiščeno</sys:String>
     <sys:String x:Key="Str_St_FieldSigned">Polje je podpisano</sys:String>
