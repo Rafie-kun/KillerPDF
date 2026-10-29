@@ -12,16 +12,11 @@ namespace KillerPDF.Shell
     /// <summary>
     /// APP-OWNED: what KillerPDF's About card adds to the shared core (Shell/About.cs): the two-run
     /// wordmark and linked tagline, the card opening above a tool window or dialog the main window
-    /// owns, the Close to system tray row, Clear all Data, and the unsaved-changes gate and document
-    /// reopen the update hooks use (Features/About/AboutController.Extras.cs).
+    /// owns, Clear all Data, and the unsaved-changes gate and document reopen the update hooks use
+    /// (Features/About/AboutController.Extras.cs). KillerPDF has no Close to System Tray row.
     /// </summary>
-    public partial class MainWindow : IAboutTray, IAboutUpdateRestart
+    public partial class MainWindow : IAboutUpdateRestart
     {
-        bool IAboutTray.CloseToTray { set => AboutCloseToTray.IsChecked = value; }
-
-        private void AboutCloseToTray_Click(object sender, RoutedEventArgs e)
-            => _about.SetCloseToTray(AboutCloseToTray.IsChecked == true);
-
         /// <summary>Closes the card, and the window carrying it when it opened above another window.</summary>
         private void CloseAboutOverlay() => FadeOverlayOut(AboutOverlay);
 
