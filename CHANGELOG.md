@@ -19,6 +19,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Updates install only a release whose checksum line names exactly the downloaded file, whose version is the offered release and newer than the running copy, and whose valid signature names the installed copy's publisher, so updates keep working after the publisher's certificate is renewed. The installer is checked again just before it starts, and portable updates roll back when the new launcher cannot be confirmed.
 
 ### Fixed
+- The elevated part of an update compiles its helper code in a folder only administrators can open, so another program running as you cannot slip code into it, and an update that finished is no longer reported as failed when the app cannot be reopened afterward.
 
 - The tray icon's menu opens from the pointer upward, out of the notification area, the same way in every Killer app. A short menu no longer covers the tray icons and a taller one no longer floats about 40 pixels above them.
 - Saving, flattening, extraction, printing, production layouts, Data Merge and current-document macros retain pending edits and page rotations. Incremental saves rebuild damaged cross-reference chains, including compressed and encrypted documents. Protection, batch resaves and optimization report repairs to broken references without claiming missing content was recovered. Failed or canceled document writes preserve existing outputs, with recovery copies retained after failed replacements; Save As and Extract Pages enforce the PDF extension (#433, #450).
