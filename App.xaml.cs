@@ -1482,10 +1482,7 @@ namespace KillerPDF
         {
             if (GetSetting(NoRecentFilesSetting) == "1") return;   // tracking disabled (#146)
             if (string.IsNullOrWhiteSpace(path)) return;
-            var list = GetRecentFiles();
-            list.RemoveAll(p => string.Equals(p, path, StringComparison.OrdinalIgnoreCase));
-            list.Insert(0, path);
-            while (list.Count > RecentFilesMax) list.RemoveAt(list.Count - 1);
+            var list = Services.RecentFilesList.With(GetRecentFiles(), path, RecentFilesMax);
             SetSetting("RecentFiles", string.Join("|", list));   // '|' is illegal in Windows paths
         }
 
