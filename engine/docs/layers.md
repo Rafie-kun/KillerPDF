@@ -1,6 +1,6 @@
 # PDF layers and optional content
 
-This guide covers the 1.9 development API for optional-content groups (OCGs),
+This guide covers the 1.9 API for optional-content groups (OCGs),
 their saved configuration, content assignment, and bounded flattening. Use the
 project reference in the [engine README](../README.md). These APIs require .NET 10
 and do not require the Windows app.
@@ -93,6 +93,12 @@ Use the current reader and raw instruction list to select ranges. Adding a layer
 does not assign existing content to it. Changing display order does not reorder
 the page's painting commands. Review returned output before saving it, especially
 when edits affect signatures, encryption, or tagged-document structure.
+
+## Compare layers and run them in macros
+
+`PdfLayerComparison.Compare(original, changed)` reports differences between the
+layer definitions of two documents. `PdfLayerMacro` creates typed layer steps for
+[macros](macros.md).
 
 ## Flatten supported layer content
 

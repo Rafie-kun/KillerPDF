@@ -2,8 +2,9 @@
 
 The separation APIs inventory process and named spot colorants used by page
 content, then validate a plate and page selection for a host preview workflow.
-They produce reports and selection metadata. They do not render individual
-plates, calculate ink coverage, or simulate a press proof.
+They produce reports and selection metadata. The renderer can draw one plate
+through `PdfRenderOptions.SeparationPlate`, as described below. None of these
+APIs simulate a press proof.
 
 ## Inspect used colorants
 
@@ -63,12 +64,16 @@ zero-based indices and includes a version number. Neither format contains page
 content or ICC profile bytes, but file names and custom plate names can still be
 sensitive in a larger host report.
 
-## Render in the host
+## Render a plate
 
-`PdfSeparationPreview` is a plan, not pixels. The current engine renderer
-produces a composite page through alternate color spaces. It does not expose a
-public API that suppresses all but one process or spot plate. A host must use a
-separation-capable renderer or print pipeline to produce actual plate images.
+`PdfSeparationPreview` is a plan, not pixels. To render one plate, set
+`PdfRenderOptions.SeparationPlate` to `Cyan`, `Magenta`, `Yellow`, `Black`, or a
+spot colorant name. The renderer draws the page in ink and returns that plate's
+coverage as gray, black for full ink and white for none. Plate renders are never
+cached. Without that option the renderer produces a composite page through
+alternate color spaces. Use the plate names from the inspection and render each
+selected page and plate yourself. A host with stricter press requirements can
+still use a separation-capable print pipeline.
 
 Keep the plan tied to the exact source bytes that were inspected. If the
 document changes, inspect it again before rendering or exporting plates. When a

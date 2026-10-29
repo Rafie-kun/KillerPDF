@@ -102,7 +102,7 @@ if (!preflight.Passed || !preflight.Complete)
 ```
 
 Preflight checks page-box relationships, output intents, color usage, font
-embedding, image resolution, transparency, overprint, and related production
+embedding, image resolution, transparency, and related production
 facts according to the profile. A clean built-in report is still not a contract
 proof for a specific printer, substrate, binding, or finishing process. Add host
 policy for the actual job ticket and validate with the receiving print system.

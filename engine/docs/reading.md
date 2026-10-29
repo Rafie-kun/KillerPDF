@@ -1,6 +1,6 @@
 # Opening documents and extracting page content
 
-This guide describes the 1.9 development API. Use the repository project reference
+This guide describes the 1.9 API. Use the repository project reference
 shown in the [engine README](../README.md) when testing this branch. The library
 targets .NET 10 and does not require a UI toolkit for these operations.
 
@@ -197,6 +197,9 @@ if (reader.PageCount > 0)
 | `Instructions` | Interpreted content instructions, including expanded Form XObjects. |
 | `MarkedContent` | Balanced marked-content sequences and available optional-content metadata. |
 | `Diagnostics` | Recovery conditions encountered during extraction. |
+
+Extraction covers nested Form XObjects, inline images, vertical text, and
+`ActualText` replacements. Parsing limits and cancellation bound the work.
 
 `ReadInstructions` instead returns unexpanded instructions from the page's decoded
 content streams. Choose it when the original page-level instruction sequence is

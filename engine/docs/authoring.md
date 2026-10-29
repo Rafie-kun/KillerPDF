@@ -2,7 +2,7 @@
 
 Use `PdfDocumentBuilder` to create a new PDF and `PdfContentStreamBuilder` to
 describe page drawing operations and their resources. These examples target the
-1.9 development API. See the [engine README](../README.md) for the project reference.
+1.9 API. See the [engine README](../README.md) for the project reference.
 
 ## Create a page with text and graphics
 

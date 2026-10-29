@@ -1,6 +1,6 @@
 # Bookmarks, links, and opening destinations
 
-This guide covers the 1.9 development navigation API. The engine reads or writes
+This guide covers the 1.9 navigation API. The engine reads or writes
 PDF navigation data; the host owns bookmark trees, link hit testing, viewport
 changes, and opening external targets. Reading navigation does not activate it.
 
@@ -108,9 +108,25 @@ shared items, with bounds of 256 hierarchy levels and one million items.
 These are parsing bounds, not a recommendation to eagerly create that many UI
 controls. Large trees need appropriate host presentation.
 
-Bookmark exchange and generation, navigation audits, and navigation macros are
-separate APIs. This guide does not imply that all PDF actions are executable or
-that rewriting a document preserves object identities.
+## Edit, generate, audit, and exchange
+
+These APIs build on the readers above:
+
+| Task | API |
+| --- | --- |
+| Rename a bookmark or change its style and color | `PdfBookmarkEditor` |
+| Read and reorganize the whole outline | `PdfBookmarkOutline` |
+| Propose bookmarks from detected headings, then apply the reviewed set | `PdfBookmarkGeneration.DetectHeadings` and `Apply` |
+| Save and restore a bookmark tree as JSON | `PdfBookmarkExchange.ToJson` and `Import` |
+| Find unsafe actions and unresolved or broken link targets, and remove them | `PdfNavigationAudit.Inspect`, `RemoveUnsafeLinks`, `RemoveUnresolvedLinks` |
+| Build a clickable table of contents from the bookmark tree | `PdfTableOfContentsPlanner.Plan` and `PdfTableOfContentsWriter.Write` |
+| Read page labels | `PdfPageLabelReader.Read` |
+| Run these steps in a reviewed macro | `PdfNavigationMacro` |
+
+Generated bookmarks are proposals. Review them before applying. Auditing
+reports findings and does not run any action. This guide does not imply that all
+PDF actions are executable or that rewriting a document preserves object
+identities.
 
 The three functions were compiled and executed against the current engine.
 Checks covered bookmark hierarchy, named and local page resolution, URI values,

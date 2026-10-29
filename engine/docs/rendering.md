@@ -2,8 +2,7 @@
 
 The CPU renderer produces page bitmaps independently of a UI framework. The caller
 owns display, image encoding, scheduling, and the choice of output dimensions.
-The 1.9 implementation is under development. Successful rendering does not establish
-visual parity with another viewer.
+Successful rendering does not establish visual parity with another viewer.
 
 In compatibility recovery, a page `/Resources` value that resolves to something
 other than a dictionary is treated as empty, with a page diagnostic. Drawing that
@@ -166,6 +165,21 @@ the exact pixel width and height, rather than a maximum dimension or DPI.
 The default background is opaque white. With `transparentBackground: true`,
 unpainted pixels retain zero alpha. Annotation and form appearance rendering can
 be selected independently through the options.
+
+Other `PdfRenderOptions` members:
+
+| Option | Effect |
+| --- | --- |
+| `ForPrinting` | Uses print visibility flags for annotations instead of screen visibility. |
+| `IncludeRedactionMarks` | Paints unapplied redaction marks. Turn it off when the viewer draws them itself. |
+| `IncludeMeasurementAnnotations` | Paints measurement annotations. Turn it off when the viewer draws them itself. |
+| `IncludeSignedSignatureFields` | Paints signed signature fields while `IncludeFormFields` is off. |
+| `IncludePushButtonFields` | Paints push buttons while `IncludeFormFields` is off. |
+| `SeparationPlate` | Renders one ink plate as gray instead of the composite page. |
+| `MaximumParallelism` | Allows bounded parallel work on large row-independent operations. The output is identical, and the default of 1 stays single-threaded. |
+
+The last two field options are for viewers that draw other fields as live
+controls but still need signed fields and push buttons in the raster.
 
 ## Masks on non-isolated groups
 

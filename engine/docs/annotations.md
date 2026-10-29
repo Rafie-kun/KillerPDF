@@ -133,7 +133,9 @@ attachments, and links. Quadrilateral markup overloads support nonrectangular
 text regions. See [navigation](navigation.md) for link targets and
 [attachments](attachments.md) for embedded-file relationships.
 
-A redaction mark is proposed markup, not removal of underlying content. Likewise,
+A redaction mark is proposed markup, not removal of underlying content.
+`PdfRedactionMarkReader.Read` lists the marks saved in a document, and the
+[redaction guide](redaction.md) describes how to apply them. Likewise,
 removing an annotation through an incremental revision is not secure erasure:
 the original bytes remain in the file. Use a deliberate content-removal and
 sanitization workflow when data must be removed.

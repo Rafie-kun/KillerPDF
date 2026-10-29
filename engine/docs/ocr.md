@@ -144,6 +144,15 @@ capable; it does not silently fall back. Provider selection itself does not retr
 a failed recognition call. The desktop app's Tesseract fallback is a host policy,
 not an automatic dependency of the engine page recognizer.
 
+## Batches and text exports
+
+`PdfOcrBatchRunner.RunReport` recognizes a batch of pages through a provider and
+reports each page separately, so one failed page does not hide the others. An
+overload bounds provider concurrency. `PdfOcrTextExporter.Format` formats
+recognized pages in document order, and `PdfOcrReview` can produce page-preserving
+text and accuracy exports. Keep failed, canceled, and unprocessed pages distinct
+from successful recognition.
+
 ## Validate and train models
 
 `PdfOcrModelTrainer` creates training samples and models and evaluates labeled

@@ -2,8 +2,8 @@
 
 Data merge maps caller-supplied records into an existing PDF template. It can
 fill AcroForm values, replace supported page-text placeholders, and append
-caller-resolved images. It returns independent results; it does not load a
-spreadsheet, choose a filesystem destination, or save generated files.
+caller-resolved images. It returns independent results; it does not choose a filesystem destination or
+save generated files. `PdfDataRecordReader` supplies the records (see below).
 
 ## Expand one string
 
@@ -28,6 +28,15 @@ ordinary failures. The generator is responsible for creating and validating
 PDF bytes; a non-null byte array alone is not proof of a valid PDF. This basic
 runner has no cancellation parameter or process isolation.
 
+## Read records
+
+`PdfDataRecordReader` turns data files into the record dictionaries that the
+merge APIs take. `FromCsv` and `FromJson` read many records, `FromXlsx` reads a
+selected worksheet of a workbook, and `FromFdf` and `FromXfdf` read one record
+from form data. `Inspect` reports the headers and value types of imported
+records without keeping the values. The readers validate their input and bound
+the size of a workbook. They do not run formulas or scripts.
+
 ## Define a reusable mapping
 
 ```csharp
@@ -45,7 +54,7 @@ This maps the record's `name` value to the template's `recipient` form field.
 `profile.Map(record)` returns form data, text replacements, mapped image
 references, and the expanded output name without changing a PDF.
 
-Mappings can supply default values, per-mapping inclusion conditions, and
+Mappings can supply default values, per-mapping inclusion conditions, formatting, and
 Text, Number, or Date conversion. Number conversion uses decimal parsing;
 date conversion uses `DateTimeOffset` parsing. The default culture is invariant,
 or a mapping can specify a culture and format string. Use explicit input dates

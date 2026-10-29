@@ -1,6 +1,6 @@
 # AcroForm values and interchange
 
-This guide covers the 1.9 development API for reading widgets and exchanging
+This guide covers the 1.9 API for reading widgets and exchanging
 field values. The engine supplies PDF data and editing operations; the host owns
 the form UI, file selection, review, and save destination.
 
@@ -130,6 +130,32 @@ file. After a successful build, reopen the returned bytes and inspect both field
 values and rendered appearances. The original `PdfDocument` still represents
 the original input.
 
+## Detect, lay out, and flatten fields
+
+`PdfFormRecognizer.Recognize` finds conservative rectangular field candidates on
+the pages and returns a `PdfFormRecognitionReview`. It
+does not modify the source. Every proposal stays pending until the host calls
+`Accept` or `Reject`, so no field is created without an explicit decision. `Accept`
+can also adjust the name, kind, bounds, tooltip, options, and value. The review
+also offers `Align`, `Distribute`, and `Duplicate` for proposals, and it exports
+as text or JSON. Proposals respect nonzero page-box origins and skip existing
+widgets.
+
+`PdfTextFieldPresetCollection` keeps named text-field sizes and styles that
+a host can reuse and save as JSON. For fields that already exist,
+`PdfFormLayoutEditor.Align` and `Distribute` move widgets by object number as an
+incremental edit.
+
+`PdfFormFlattener.Flatten` paints each widget's selected normal appearance into
+the page and removes the editable fields. It generates a missing text
+appearance, keeps hidden fields hidden, and retains print-only appearances as
+annotations. It handles checkboxes with an omitted unchecked appearance. A
+flattened form can no longer be edited, so keep the original.
+
+`PdfFormActionInspector.Inspect` lists the actions attached to fields without
+running them, and `PdfFormCalculation.Evaluate` evaluates supported calculation,
+format, and validation scripts in order. Neither runs arbitrary JavaScript.
+
 ## Values and rendered appearances
 
 A field's current value and its saved widget appearance are separate PDF data.
@@ -148,7 +174,6 @@ inherited values and defaults, uses the AcroForm font resource, maps choice
 exports to display labels, and clips text to the field interior. Existing
 appearance geometry and artwork outside the text section remain in place.
 The generated stream is temporary; rendering does not edit the document.
-The corpus case `bug1883609.pdf` now displays Man, 150, and Red.
 
 Comb text fields with a simple font use `/MaxLen` equal-width character cells.
 The inherited alignment selects the starting cell, and each character is centered
@@ -180,9 +205,11 @@ Unsupported cases retain their saved appearances with a diagnostic. Recovery
 mode also retains the saved appearance when regeneration data is malformed;
 strict mode keeps validation failures.
 
-Multiline fields, list-box layout, composite-font encoding, missing
-text sections in existing appearances, beveled and inset borders, legacy border
-array settings, and synthesized combo-box arrows remain work in progress.
+Regenerated appearances cover single-line, multiline, and comb text, combo boxes
+with reserved arrow space, list boxes with their selection, composite fonts that
+map the displayed characters, legacy `/Border` arrays, and beveled and inset
+borders. A multiline comb field, a field with excessive options or selections,
+and an unmapped character keep the saved appearance with a diagnostic.
 Remaining font shape and layout differences need further corpus validation.
 Successful rendering does not establish that every visible
 field matches its value. Check diagnostics and compare reopened values with

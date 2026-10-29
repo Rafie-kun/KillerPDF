@@ -141,8 +141,12 @@ editing. See the [security guide](security.md) for those checks.
 
 ## Export reviewed results
 
-`PdfMeasurementResult` is a host-created record. It is not populated by scanning
-annotations in an arbitrary PDF. Include the profile, source geometry, and any
+`PdfMeasurementResult` is a host-created record. The engine does not build it
+from annotations. To show or edit saved measurements again, call
+`PdfMeasurementAnnotationReader.Read`, which returns every saved dimension line,
+polyline, and polygon with its points, profile, contents, and style.
+
+When you build a result yourself, include the profile, source geometry, and any
 reviewed label or comment needed to audit the calculation.
 
 ```csharp
@@ -166,7 +170,11 @@ string csv = PdfMeasurementReport.ToCsv([result]);
 
 Text and CSV display page numbers as one-based values. JSON retains the
 zero-based `PageIndex`. Numeric output is culture-invariant, and CSV follows RFC
-4180 quoting. Document names, labels, comments, and geometry can be sensitive,
+4180 quoting. The CSV `Geometry` column holds the points as numeric `x y` pairs
+separated by semicolons. A leading minus sign in a coordinate stays as written,
+while document names, labels, and comments are quoted as text so that a
+spreadsheet does not read them as formulas. A document name with an unpaired
+surrogate is accepted. Document names, labels, comments, and geometry can be sensitive,
 so the host controls where reports are stored and logged.
 
 ## Failure and trust boundaries

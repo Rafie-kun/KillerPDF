@@ -3,8 +3,8 @@
 KillerPDF.Engine supports two different timestamp roles:
 
 - A signature timestamp token is an unsigned attribute inside a detached CMS
-  approval or certification signature. The host's CMS callback obtains and
-  embeds that token.
+  approval or certification signature. The engine can request and embed it, or
+  the host's CMS callback can.
 - A document timestamp is a PDF `DocTimeStamp` signature whose contents are an
   RFC 3161 token over the PDF byte ranges. The engine reads and verifies these
   signatures, but does not currently create a document-timestamp revision.
@@ -42,10 +42,57 @@ writer reject a detached CMS result that lacks the RFC 3161 signature-timestamp
 attribute. It also requires `PdfSignatureOptions.TimestampServerUrl` to match
 the seed URL exactly.
 
-A seed value is a signing constraint, not a timestamp client. The engine does
-not send an HTTP request to that URL.
+A seed value is a signing constraint, not a timestamp client. The seed alone
+does not send an HTTP request. Set `PdfSignatureOptions.RequestTimestamp` to
+have the engine request the timestamp, as the next section describes.
+
+## Let the engine request the timestamp
+
+Set `RequestTimestamp = true` and the writer asks the timestamp authority for a
+token over the CMS signature value, verifies the token against that signature,
+and embeds it as the signature-timestamp unsigned attribute. The request goes
+to `TimestampTransport` when set. Otherwise it is posted to `TimestampServerUrl`
+over HTTP or HTTPS through `PdfTimestampAuthority.HttpTransport`.
+
+```csharp
+using KillerPdf.Engine.Documents;
+using KillerPdf.Engine.Signing;
+
+static byte[] SignAndTimestamp(
+    byte[] sourceBytes,
+    string tsaUrl,
+    Func<ReadOnlyMemory<byte>, byte[]> createDetachedCms)
+{
+    PdfDocument document = PdfDocument.Open(sourceBytes);
+    return PdfDetachedSignatureWriter.Sign(
+        document,
+        createDetachedCms,
+        new PdfSignatureOptions
+        {
+            FieldName = "Approval",
+            RequestTimestamp = true,
+            TimestampServerUrl = tsaUrl,
+            ReservedSignatureSize = 65_536
+        });
+}
+```
+
+The callback returns an ordinary detached CMS. `PdfTimestampAuthority.AddTimestamp`
+does the same work on a CMS you already have, and a CMS that already carries a
+signature timestamp is returned unchanged. The HTTP transport accepts only
+absolute HTTP or HTTPS addresses, applies a 30 second default timeout and a 1 MiB
+reply limit, and checks the status and media type. A failure raises
+`PdfTimestampException`. Pass your own `HttpClient`, timeout, or response limit
+to `HttpTransport`, or supply `TimestampTransport` for a caller-managed
+connection or an offline authority.
+
+The engine does not decide whether the authority is trusted. Validate the
+authority with the trust policy described below.
 
 ## Supply timestamped CMS from the host
+
+A host that manages its own timestamp client can instead return a CMS that
+already carries the token.
 
 The detached-signing callback receives the exact PDF byte ranges to sign. The
 host signs those bytes, requests a timestamp for the CMS signature value, embeds
@@ -74,7 +121,7 @@ static byte[] SignApprovalWithTimestamp(
 }
 ```
 
-The callback is responsible for private-key access, certificate selection,
+In this form the callback is responsible for private-key access, certificate selection,
 digest consistency, TSA authentication, request nonce policy, HTTP timeouts,
 response size limits, RFC 3161 status handling, message-imprint matching, and
 the trust policy for the timestamp authority. Do not return a token merely

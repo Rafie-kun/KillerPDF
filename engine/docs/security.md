@@ -3,7 +3,7 @@
 KillerPDF.Engine exposes authentication, encryption, permission, and signature
 APIs independently of the desktop app. The host supplies passwords, certificates,
 signing services, trust policy, and the user's choice of output file.
-These examples describe the current 1.9 development source.
+These examples describe the 1.9 source.
 
 Password-authenticated compatibility recovery treats an AES-256-CBC stream
 containing only its 16-byte initialization vector as empty. This accommodates
@@ -79,6 +79,43 @@ The authoring options create AES-256 certificate-recipient encryption. Permissio
 and metadata options are independent of the password-encryption options.
 One builder cannot configure both password and certificate encryption.
 Open the resulting bytes with `PdfDocument.Open(bytes, recipientWithPrivateKey)`.
+Opening also accepts certificate-protected files that use AES-128, as well as
+AES-256.
+
+## Encrypt an existing document
+
+`PdfDocumentEncryptionWriter` fully rewrites an existing document under new
+protection. `EncryptWithPasswords` applies Standard Security passwords, including
+AES-256 and revision 7 AES-GCM with the same `PdfPasswordEncryptionOptions` as
+authoring. `EncryptForRecipients` applies AES-256 certificate-recipient
+encryption. Any source encryption is replaced, so the output carries only the new
+protection, and the document identifiers are preserved. The `WithReport`
+variants return a `PdfDocumentWriteResult` that lists explicit dangling-reference
+repairs.
+
+```csharp
+using KillerPdf.Engine.Documents;
+using KillerPdf.Engine.Security;
+using KillerPdf.Engine.Writing;
+
+static byte[] Protect(byte[] source, string userPassword, string ownerPassword)
+{
+    PdfDocument document = PdfDocument.Open(source);
+    return PdfDocumentEncryptionWriter.EncryptWithPasswords(
+        document,
+        new PdfPasswordEncryptionOptions
+        {
+            UserPassword = userPassword,
+            OwnerPassword = ownerPassword,
+            AllowContentCopying = false
+        });
+}
+```
+
+The writer refuses a signed document unless `allowSignatureInvalidation` is true,
+because a rewrite clears signature values. It also refuses a user password
+without an owner password. Authenticate an encrypted source first with
+credentials authorized for the change.
 
 ## Rewrite an authenticated document
 
@@ -139,8 +176,11 @@ static PdfSignatureInspectionReport InspectOffline(PdfDocument document)
 Keep the returned validation, trust, revocation, and later-revision results
 distinct. Cryptographic integrity alone does not establish certificate trust.
 Disabled or unavailable revocation checking must not be presented as a successful
-revocation check. Reports expose incomplete and invalid outcomes as well as
-successful checks. `ToText()` and `ToJson(indented: true)` export the report.
+revocation check. Reports give an explicit complete, incomplete, or invalid
+status. They list the signer name, signing time, reason, location, contact, certificate identity and
+fingerprints, permissions, and later-revision analysis, and expose incomplete and
+invalid outcomes as well as successful checks. `ToText()` and
+`ToJson(indented: true)` export the report.
 
 `ExtraCertificates` supplies intermediates; nonempty `CustomTrustRoots` selects
 explicit trust anchors instead of the system store. `VerificationTime` defaults
@@ -157,6 +197,13 @@ the supplied signed bytes. The host owns private-key access and CMS generation.
 size, descriptive values, optional appearance, and certification permission.
 The CMS must fit the reserved space; the default reservation is 32,768 bytes and
 the maximum is 1,048,576 bytes.
+
+Signing preserves the cross-reference format of the source file. A visible
+appearance can be placed on an existing signature widget, which keeps its page
+rectangle. When the engine names a new signature field automatically, it avoids
+names already in the document and keeps an unsigned default field. Set
+`RequestTimestamp` to have the engine add an RFC 3161 signature timestamp. See
+the [timestamp guide](timestamping.md).
 
 An appearance is visual content, not evidence of a valid signature. Inspect the
 saved output after signing. `PdfSignatureReader` exposes fields and signed byte

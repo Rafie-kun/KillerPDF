@@ -1,6 +1,6 @@
 # Attachments and PDF portfolios
 
-This guide covers the 1.9 development API for embedded files, page attachment
+This guide covers the 1.9 API for embedded files, page attachment
 icons, extraction, editing, comparison, and portfolio metadata. Use the project
 reference in the [engine README](../README.md).
 
@@ -130,6 +130,8 @@ actions. Review macro results and reopen outputs before saving.
 
 Incremental edits preserve earlier revisions, which can still contain replaced
 or removed payloads. Removing an attachment registration is not secure erasure.
+For verified removal, use `PdfPermanentRedaction.ApplyReviewedAttachments`
+described in the [redaction guide](redaction.md).
 See the [editing guide](editing.md) for preservation and save boundaries.
 
 ## Portfolio metadata

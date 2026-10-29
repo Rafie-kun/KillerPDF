@@ -5,7 +5,7 @@ revisions while preserving the original byte prefix. Use `PdfDocumentWriter`
 when the intended output is a full rewrite. Both return new bytes; the host owns
 file selection, validation, and replacement of a saved file.
 
-Examples target the current 1.9 source. Authenticate encrypted inputs first and
+Examples target the 1.9 source. Authenticate encrypted inputs first and
 check the operation's permission and signature requirements described in the
 [security guide](security.md).
 
@@ -76,7 +76,9 @@ resources referenced by the supported rewritten instruction sequence.
 
 For tagged PDFs, ordinary content changes retain structure guards.
 `AppendPageArtifact` is an explicit path for decorative content that does not
-belong in the logical reading order. It rejects marked-content identifiers;
+belong in the logical reading order. Tagged PDFs can use it for
+explicit temporary artifact overlays while the structure and the ordinary
+editing guards stay in place. It rejects marked-content identifiers;
 do not use it to bypass structure requirements for meaningful text.
 
 ## Import a page from another document
@@ -133,11 +135,58 @@ Replacement removes the selected source glyphs from the active page content;
 it does not cover them with a drawing. This is an incremental edit, so previous
 revisions still contain superseded text. Use redaction for sensitive content.
 
+## Edit a line of text
+
+`PdfTextLineEditor` rewrites text inside the page content itself. The old glyphs
+leave the content stream and the new text is written in the same text object, so
+it keeps the original font, size, color, clipping, and stacking order unless the
+edit changes them. No cover is drawn over the page. `Inspect` reports, without
+changing the document, how many glyphs lie in an area and whether a
+`PdfTextLineBlocker` prevents the edit, such as invisible text, a zero font
+size, or a font that cannot be decoded.
+
+```csharp
+using KillerPdf.Engine.Documents;
+
+static byte[] ReplaceLine(PdfDocument document, PdfContentBounds region)
+{
+    var edit = new PdfTextLineEdit(0, region, "Revised text");
+    return PdfTextLineEditor.Replace(document, edit).Document;
+}
+```
+
+A `PdfTextLineEdit` can also set a new size, fill color, character spacing,
+underline, or strike-through. When the original font cannot show the new text, or
+when `UseSubstitute` asks for it, the edit writes the text in the embeddable
+`Substitute` font and embeds it. `Replace` throws `NotSupportedException` when the
+line cannot be rewritten or a needed substitute font was not supplied. The
+result reports which font was used and how many old glyphs were removed.
+
+The edit is incremental, so earlier revisions still contain the old text. Use
+redaction for sensitive content.
+
+## Replace a region with raster pixels
+
+`PdfPartialRasterization.Plan` validates a region of a page and lists the text
+runs, images, paths, and shadings it touches, with the exact pixel size needed
+at a chosen resolution. The host renders those pixels and passes them to
+`Apply`, which replaces the visual content of the region as an incremental
+revision. Several non-overlapping regions can be applied together.
+
+## Divide scanned spreads
+
+`PdfSpreadDivider.Divide` splits each selected page at a displayed position from
+the left or top edge, accounting for page rotation. Each selected page is
+followed by its second half, and unselected pages keep their order.
+
 ## Choose the appropriate editor
 
 | Task | API |
 | --- | --- |
 | Preview and replace a simple paragraph | `PdfParagraphEditor` |
+| Rewrite one line of text in place | `PdfTextLineEditor` |
+| Replace a region with raster pixels | `PdfPartialRasterization` |
+| Split scanned two-page spreads | `PdfSpreadDivider` |
 | Pages, boxes, form values, metadata, and typed overlays | `PdfIncrementalPageEditor` |
 | Notes, markup, links, and annotation updates | `PdfIncrementalAnnotationEditor` |
 | Bookmark hierarchy | `PdfBookmarkEditor` |

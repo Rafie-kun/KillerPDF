@@ -98,6 +98,19 @@ share the same authentication, review, or output contract. See
 [exporting](exporting.md), [navigation](navigation.md), [attachments](attachments.md),
 and [layers](layers.md) for those feature boundaries.
 
+## Dispatch steps centrally
+
+`PdfMacroDispatcher` runs steps without a hand-written switch. It executes the
+operations the engine implements, such as optimize, number pages, audit and
+cleanup of navigation and attachments, bookmark and table-of-contents generation,
+layer and portfolio edits, imposition, flatten, validate, and export. Operations
+that need an application, such as OCR, color conversion, resize, redact,
+watermark, data merge, rename, and save, run only when the host registers a
+`PdfMacroOperationRegistration` for them. `BuiltInOperations`, `HostOperations`,
+and `SupportedOperations` list what each instance can run, and `CanExecute` tests
+one operation. The dispatcher offers `Execute`, `RunReport`, and `ResumeReport`
+with the same outcome rules as `PdfMacroRunner`.
+
 ## Interpret outcomes and cancellation
 
 Inputs run sequentially. The runner copies each source before its first step

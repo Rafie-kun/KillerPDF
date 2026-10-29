@@ -1,6 +1,6 @@
 # The KillerPDF.Engine
 
-The KillerPDF.Engine is an independent, UI-free .NET library for reading, validating, authoring, structurally editing, signing, encrypting, and writing PDF files. It gives KillerPDF a modern PDF 2.0, PDF/A, and PDF/UA foundation while exposing a public API designed for use in other applications.
+The KillerPDF.Engine is an independent, UI-free .NET library for reading, rendering, searching, validating, authoring, editing, redacting, signing, encrypting, and writing PDF files. It gives KillerPDF a modern PDF 2.0, PDF/A, and PDF/UA foundation while exposing a public API designed for use in other applications.
 
 “The KillerPDF.Engine” is the formal display name. Ordinary prose may use “KillerPDF.Engine” or “the engine” when it reads more naturally. The assembly, package identifier, and C# namespaces use `KillerPdf.Engine`.
 
@@ -98,7 +98,19 @@ The engine includes PDF/A-4, PDF/A-4e, PDF/A-4f, tagged PDF, and PDF/UA-2 author
 
 ### Protect and sign documents
 
-Password security covers RC4, AES-128, AES-256, crypt filters, permission flags, authenticated imports, incremental updates, and rewrites. Digital-signature support includes detached CMS signing, signature fields, certification permissions, field locks, seed constraints, timestamp attributes, signature discovery, cryptographic verification, and signed-revision analysis.
+Password security covers RC4, AES-128, AES-256, crypt filters, permission flags, authenticated imports, incremental updates, and rewrites. AES-128 and AES-256 certificate-recipient encryption and revision 7 AES-GCM password encryption are also supported, and `PdfDocumentEncryptionWriter` rewrites an existing document with new protection. Digital-signature support includes detached CMS signing, signature fields, certification permissions, field locks, seed constraints, RFC 3161 signature and document timestamps, signature discovery, cryptographic verification, trust, revocation, and PAdES validation evidence, and signed-revision analysis.
+
+### Redact, review, and produce
+
+Redaction removes covered text, images, drawings, annotations, fields, and alternate text at the content level, replaces only approved unsafe pages with images, and verifies the result by reading it back. Sensitive-data searches propose candidates for review. Other review and production workflows cover comments, attachments, layers, bookmarks and links, header and footer and Bates numbering, data merge, imposition, calibrated measurement, structural comparison, and print-production reports.
+
+### Forms, XFA, and export
+
+AcroForm reading, editing, FDF and XFDF interchange, and flattening are joined by safe XFA inspection, data editing, calculation, validation, and conversion to AcroForm. Documents can be exported to plain text, HTML, Markdown, JSON, Word, Excel, and PowerPoint formats with loss reports, and made searchable with the engine's OCR.
+
+### Repair and optimize
+
+Inspectable repair and lossless optimization plans preview exact removals and compression, then verify the saved result. Bounded recovery handles damaged cross-references, page trees, streams, and fonts, and strict parsing remains the default.
 
 ### Validate before trusting output
 
@@ -117,8 +129,15 @@ Structural diagnostics, bounded parsing, explicit implementation limits, round-t
 - AcroForm creation and editing for text fields, checkboxes, radio buttons, choice fields, push buttons, and signature fields
 - Tagged PDF and PDF/UA-2 structure authoring and editing
 - PDF/A-4, PDF/A-4e, and PDF/A-4f authoring safeguards
-- RC4, AES-128, and AES-256 password security, crypt filters, authenticated imports, incremental updates, and rewrites
-- Detached CMS signatures, certification permissions, field locks, seed constraints, signature discovery, cryptographic verification, and signed-revision analysis
+- RC4, AES-128, AES-256, and AES-GCM password security, certificate-recipient encryption, crypt filters, authenticated imports, incremental updates, and rewrites
+- Detached CMS signatures, certification permissions, field locks, seed constraints, RFC 3161 timestamps, signature discovery, cryptographic verification, trust and revocation policy, PAdES validation evidence, and signed-revision analysis
+- Content-level redaction with sensitive-data search, review selections, and read-back verification
+- Text, word, table, and layout extraction, and search across annotations and form values
+- Form interchange (FDF, XFDF), XFA inspection and conversion, field detection, data merge, and flattening
+- Export to plain text, HTML, Markdown, JSON, Word, Excel, and PowerPoint formats with loss reports
+- Inspectable repair and lossless optimization plans, and bounded recovery of damaged files
+- Preflight, accessibility, and print-production reports with previewed corrections
+- Imposition, headers, footers, Bates numbering, calibrated measurement, layers, attachments, bookmarks and links, macros, and structural comparison
 - Structural diagnostics, bounded parsing, implementation limits, round-trip validation, and fail-closed import validation
 
 ## Rendering status
@@ -193,8 +212,8 @@ previews, text and image targets, batch outcomes, and combined output.
 See [structural document comparison](docs/comparison.md) for interpreted page
 differences, report categories, cancellation, and visual-equivalence limits.
 
-See [permanent redaction](docs/redaction.md) for candidate review, host-sanitized
-raster rebuilds, selective comment and attachment removal, and verification limits.
+See [permanent redaction](docs/redaction.md) for candidate review, content-level
+removal, approved image replacement, comment and attachment removal, and verification limits.
 
 See [calibrated measurement](docs/measurement.md) for profiles, geometry,
 snapping, editable dimension annotations, reports, and trust boundaries.
