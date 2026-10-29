@@ -293,13 +293,11 @@ namespace KillerPDF.Features
             {
                 File.WriteAllBytes(path, data.ToArray());
                 List<PdfRedactionRegion> regions = [.. redaction.Marked];
-                foreach (string term in redaction.Terms)
-                {
-                    token.ThrowIfCancellationRequested();
-                    foreach (var (page, rects) in SearchService.FindRedactionTermAreas(path, term))
-                        foreach (var (left, bottom, right, top) in rects)
-                            regions.Add(new PdfRedactionRegion(page, new PdfContentBounds(left, bottom, right, top)));
-                }
+                token.ThrowIfCancellationRequested();
+                // All terms in one pass, so the document is parsed once rather than twice per term.
+                foreach (var (page, rects) in SearchService.FindRedactionTermAreas(path, redaction.Terms))
+                    foreach (var (left, bottom, right, top) in rects)
+                        regions.Add(new PdfRedactionRegion(page, new PdfContentBounds(left, bottom, right, top)));
                 if (regions.Count == 0) return new PdfMacroOperationResult(data);
 
                 PdfContentRedactionPlan plan = PdfEngineIntegration.AnalyzeRedaction(

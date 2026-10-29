@@ -117,24 +117,49 @@ namespace KillerPDF.Services
         /// Case-insensitive, like <see cref="FindExactMatches"/>.
         /// </summary>
         internal static Dictionary<int, List<(double Left, double Bottom, double Right, double Top)>> FindRedactionTermAreas(
-            string filePath, string term)
+            string filePath, string term) => FindRedactionTermAreas(filePath, [term]);
+
+        /// <summary>
+        /// The areas for several terms at once, merged per page. The file is read and parsed once for all
+        /// of them; a macro with many terms on a large scan otherwise parsed it twice per term.
+        /// </summary>
+        internal static Dictionary<int, List<(double Left, double Bottom, double Right, double Top)>> FindRedactionTermAreas(
+            string filePath, IEnumerable<string> terms)
         {
-            var result = FindExactMatches(filePath, term);
-            if (string.IsNullOrWhiteSpace(term)) return result;
-            var document = PdfEngineIntegration.OpenForReading(System.IO.File.ReadAllBytes(filePath));
-            var options = new KillerPdf.Engine.Documents.PdfRedactionSearchOptions
+            var result = new Dictionary<int, List<(double, double, double, double)>>();
+            if (string.IsNullOrWhiteSpace(filePath)) return result;
+            List<string> queries = [.. terms.Where(term => !string.IsNullOrWhiteSpace(term))];
+            if (queries.Count == 0) return result;
+            byte[] bytes = System.IO.File.ReadAllBytes(filePath);
+            using var pages = PdfDocument.Open(bytes);
+            var document = PdfEngineIntegration.OpenForReading(bytes);
+            foreach (string term in queries)
             {
-                Kind = KillerPdf.Engine.Documents.PdfRedactionSearchKind.ExactText,
-                Query = term.Trim(),
-                Timeout = System.TimeSpan.FromSeconds(2)
-            };
-            foreach (var match in KillerPdf.Engine.Documents.PdfRedactionSearch.FindInAnnotations(document, options).Matches)
-            {
-                if (!result.TryGetValue(match.PageIndex, out var areas)) result[match.PageIndex] = areas = [];
-                var area = (match.Bounds.Left, match.Bounds.Bottom, match.Bounds.Right, match.Bounds.Top);
-                if (!areas.Contains(area)) areas.Add(area);
+                for (int pi = 0; pi < pages.NumberOfPages; pi++)
+                {
+                    var hits = FindExactMatchesOnPage(pages.GetPage(pi + 1), term);
+                    if (hits.Count > 0) Areas(pi).AddRange(hits);
+                }
+                var options = new KillerPdf.Engine.Documents.PdfRedactionSearchOptions
+                {
+                    Kind = KillerPdf.Engine.Documents.PdfRedactionSearchKind.ExactText,
+                    Query = term.Trim(),
+                    Timeout = System.TimeSpan.FromSeconds(2)
+                };
+                foreach (var match in KillerPdf.Engine.Documents.PdfRedactionSearch.FindInAnnotations(document, options).Matches)
+                {
+                    var areas = Areas(match.PageIndex);
+                    var area = (match.Bounds.Left, match.Bounds.Bottom, match.Bounds.Right, match.Bounds.Top);
+                    if (!areas.Contains(area)) areas.Add(area);
+                }
             }
             return result;
+
+            List<(double, double, double, double)> Areas(int page)
+            {
+                if (!result.TryGetValue(page, out var areas)) result[page] = areas = [];
+                return areas;
+            }
         }
 
         internal static List<(double Left, double Bottom, double Right, double Top)> FindExactMatchesOnPage(

@@ -29,10 +29,12 @@ namespace KillerPDF.Services
         }
 
         /// <summary>The publication script. With <paramref name="showReport"/> a failure opens the recovery report.
-        /// <paramref name="overrides"/> replaces individual operations and exists for checks only.</summary>
+        /// <paramref name="overrides"/> replaces individual operations and exists for checks only. A caller
+        /// that has already emitted <see cref="Guard"/> ahead of this text passes <paramref name="guardEmitted"/>,
+        /// so the helper stays within the Windows command limit.</summary>
         internal static string Script(string download, string target, bool elevated,
             string releasesUrl, string displayName, string? version = null, string? hive = null,
-            string? reopen = null, bool showReport = false, string? overrides = null)
+            string? reopen = null, bool showReport = false, string? overrides = null, bool guardEmitted = false)
         {
             download = Path.GetFullPath(download);
             target = Path.GetFullPath(target);
@@ -61,7 +63,7 @@ namespace KillerPDF.Services
             Value(script, "Explorer", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "explorer.exe"));
             script.AppendLine("Elevated = " + (elevated ? "$true" : "$false"));
             script.AppendLine("ShowReport = " + (showReport ? "$true" : "$false")).AppendLine("}");
-            script.AppendLine(Guard);
+            if (!guardEmitted) script.AppendLine(Guard);
             script.AppendLine(Operations);
             if (overrides is not null) script.AppendLine(overrides);
             // The elevated helper must not open a window as administrator, so instead of showing the
@@ -348,8 +350,9 @@ $ops.Releases = { param($url)
 }
 """;
 
-        // Compiled by Windows PowerShell 5.1, so it stays within C# 5.
-        private const string Guard = """
+        // Compiled by Windows PowerShell 5.1, so it stays within C# 5. TrustedUpdate.Publication emits
+        // it ahead of its own prologue too; the type check at the top makes a second copy a no-op.
+        internal const string Guard = """
 if (-not ('KillerUpdateGuard' -as [type])) {
 # A helper running as administrator (the trusted machine path, or a per-user copy run as
 # administrator) compiles in a fresh folder only Administrators and SYSTEM can open. Add-Type

@@ -249,13 +249,11 @@ public partial class MainWindow
         {
             File.WriteAllBytes(path, source.ToArray());
             List<PdfRedactionRegion> regions = [.. _macroRedaction.Marked];
-            foreach (string term in _macroRedaction.Terms)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                foreach (var (page, rects) in SearchService.FindRedactionTermAreas(path, term))
-                    foreach (var (left, bottom, right, top) in rects)
-                        regions.Add(new PdfRedactionRegion(page, new PdfContentBounds(left, bottom, right, top)));
-            }
+            cancellationToken.ThrowIfCancellationRequested();
+            // All terms in one pass, so the document is parsed once rather than twice per term.
+            foreach (var (page, rects) in SearchService.FindRedactionTermAreas(path, _macroRedaction.Terms))
+                foreach (var (left, bottom, right, top) in rects)
+                    regions.Add(new PdfRedactionRegion(page, new PdfContentBounds(left, bottom, right, top)));
             if (regions.Count == 0) return new PdfMacroOperationResult(source);
 
             PdfContentRedactionPlan plan = PdfEngineIntegration.AnalyzeRedaction(

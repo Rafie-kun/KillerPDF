@@ -18,6 +18,19 @@ namespace KillerPDF.Shell
         /// elevated with /silent and a per-user install copies this exe in process. A per-user
         /// install while an all-users copy exists is refused, so there are never two installed copies.
         /// </summary>
+        /// <summary>
+        /// The document the installed copy reopens: the user's real file, or the working copy only when
+        /// it outlives this process. A browser download that was never saved lives in a session temp
+        /// file that cleanup deletes on exit, before the installed copy could open it, so that tab hands
+        /// over nothing rather than a path about to vanish.
+        /// </summary>
+        internal static string? ReopenPath(string? originalFile, string? currentFile, Func<string, bool> isCleanupOwned)
+        {
+            if (!string.IsNullOrEmpty(originalFile)) return originalFile;
+            if (string.IsNullOrEmpty(currentFile) || isCleanupOwned(currentFile)) return null;
+            return currentFile;
+        }
+
         internal static PortableInstallPlan Choose(bool allUsers, bool desktop, bool machineInstallExists,
             string? launcher, string? currentExe, string userInstallExe, string machineInstallExe,
             bool currentExeIsSelfContained)

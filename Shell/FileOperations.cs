@@ -33,6 +33,7 @@ namespace KillerPDF.Shell
         // Cleared once a save writes the unprotected file; carried per tab via DocumentSession.
         private bool _openedFromProtected { get => ActiveViewer.OpenedFromProtectedRef; set => ActiveViewer.OpenedFromProtectedRef = value; }
         private bool _restrictedByCertificate { get => ActiveViewer.RestrictedByCertificateRef; set => ActiveViewer.RestrictedByCertificateRef = value; }
+        private bool _restrictedFormFillable { get => ActiveViewer.RestrictedFormFillableRef; set => ActiveViewer.RestrictedFormFillableRef = value; }
 
         private void OpenFile(string path)
         {
@@ -242,6 +243,7 @@ namespace KillerPDF.Shell
             AcceptSavedCheckpoint();
             _openedFromProtected = false;   // #149: set true by the two protected-open paths after this returns
             _restrictedByCertificate = false;
+            _restrictedFormFillable = false;   // read once by TryOpenProtectedReadOnly after this returns
             // Restore this file's last page and zoom if we've seen it before. View mode is global:
             // the last mode selected with the footer controls becomes the default for every PDF.
             _viewMode = Enum.TryParse<ViewMode>(App.GetSetting("ViewMode"), out var preferredView)
@@ -530,6 +532,9 @@ namespace KillerPDF.Shell
                 _currentFile = srcPath;
                 FinishOpenFile(displayPath, srcPath);
                 _openedFromProtected = true;
+                // The fill permission belongs to the file as opened, so it is read once here rather
+                // than parsed again on every save of a fill-allowed restricted form.
+                _restrictedFormFillable = PdfEngineIntegration.CanFillRestrictedForm(srcPath);
                 SetStatus(string.Format(Loc("Str_OpenedReadOnly"),
                     System.IO.Path.GetFileName(displayPath), _doc.PageCount));
                 return true;
@@ -1231,13 +1236,21 @@ namespace KillerPDF.Shell
             IsOwnerRestricted && !_restrictedByCertificate && !string.IsNullOrEmpty(_currentFile)
             && !_annotations.Values.Any(list => list.Count > 0) && !HasActiveStamps
             && ActiveViewer.RedactionMarkCountExt == 0
-            && PdfEngineIntegration.CanFillRestrictedForm(_currentFile);
+            && _restrictedFormFillable;
 
         private void SaveRestrictedFormFill(string destination)
         {
             CommitActiveTextBox();
             string source = _currentFile!;
             string filled = App.MakeTempFile("filled");
+            // Reopening the original after a failed replace clears the form state, so the typed values
+            // are kept aside and put back, as UnlockOwnerRestrictions carries them across its reopen.
+            bool wasDirty = _isDirty;
+            var textValues = new Dictionary<string, string>(_formTextValues);
+            var choiceValues = new Dictionary<string, string>(_formChoiceValues);
+            var checkValues = new Dictionary<string, bool>(_formCheckValues);
+            var radioValues = new Dictionary<string, string>(_formRadioValues);
+            var fontSizes = new Dictionary<string, double>(_formFontSizes);
             try
             {
                 PdfEngineIntegration.FillRestrictedForm(source, filled, ActiveViewer.SnapshotFormValuesForPrint());
@@ -1251,13 +1264,23 @@ namespace KillerPDF.Shell
                 KillerDialog.Show(this, Loc("Str_Err_SaveFailed") + "\n" + ex.Message, "KillerPDF",
                     MessageBoxButton.OK, MessageBoxImage.Error);
                 // Still read-only on the unchanged original, with the typed values kept.
-                if (_doc is null) RestoreReadOnlyOriginal(source, _originalFile ?? source, () => { });
+                if (_doc is null) RestoreReadOnlyOriginal(source, _originalFile ?? source, CarryOverlays);
                 return;
             }
             // The saved values now live in the file, so it reopens read-only with nothing pending.
             RestoreReadOnlyOriginal(destination, destination, () => { });
             _loadedRevision = Services.FileRevision.Capture(destination);
             SetStatus(string.Format(Loc("Str_St_Saved"), System.IO.Path.GetFileName(destination)));
+
+            void CarryOverlays()
+            {
+                foreach (var pair in textValues) _formTextValues[pair.Key] = pair.Value;
+                foreach (var pair in choiceValues) _formChoiceValues[pair.Key] = pair.Value;
+                foreach (var pair in checkValues) _formCheckValues[pair.Key] = pair.Value;
+                foreach (var pair in radioValues) _formRadioValues[pair.Key] = pair.Value;
+                foreach (var pair in fontSizes) _formFontSizes[pair.Key] = pair.Value;
+                if (wasDirty) MarkDirty(true);
+            }
         }
 
         private void SaveInPlace() => SaveInPlace(otherPaneConfirmed: false);
@@ -1277,11 +1300,15 @@ namespace KillerPDF.Shell
                 return;
             if (CanSaveRestrictedFormFill() && !string.IsNullOrEmpty(_originalFile))
             {
-                if (Services.FileRevision.ConflictsWith(_loadedRevision, _originalFile!)
-                    && KillerDialog.AskToSave(this,
+                // The same three answers as the regular save below: Save As opens the dialog.
+                if (Services.FileRevision.ConflictsWith(_loadedRevision, _originalFile!))
+                {
+                    var choice = KillerDialog.AskToSave(this,
                         string.Format(Loc("Str_Dlg_SaveConflict"), System.IO.Path.GetFileName(_originalFile)),
-                        Loc("Str_Btn_Replace"), Loc("Str_KS_SaveAs"), Loc("Str_Btn_CancelDlg")) != MessageBoxResult.Yes)
-                    return;
+                        Loc("Str_Btn_Replace"), Loc("Str_KS_SaveAs"), Loc("Str_Btn_CancelDlg"));
+                    if (choice == MessageBoxResult.No) { SaveAs_Click(this, new RoutedEventArgs()); return; }
+                    if (choice != MessageBoxResult.Yes) return;
+                }
                 SaveRestrictedFormFill(_originalFile!);
                 return;
             }

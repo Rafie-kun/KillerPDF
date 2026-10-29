@@ -130,6 +130,9 @@ namespace KillerPDF.Controls
         private bool _openedFromProtected;
         // Opened read-only because a certificate recipient may not edit it. No password unlocks it.
         private bool _restrictedByCertificate;
+        // A restricted form whose author allows filling. Read once per open, so saving it does not
+        // parse the file again for the permission check.
+        private bool _restrictedFormFillable;
         private Services.PublishedFileStamp? _publishedFile;
         private Services.CompleteDocumentSource? _completeDocumentSource;
         private string? _suggestedName;

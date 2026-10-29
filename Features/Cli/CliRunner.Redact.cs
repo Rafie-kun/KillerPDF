@@ -108,14 +108,15 @@ namespace KillerPDF.Features
             // The areas, exactly as the Redact tool marks them: each match letter by letter on
             // each line it covers, whole pages edge to edge, and the marks saved in the file.
             var areas = new List<(int Page, PdfContentBounds Bounds, string Label)>();
+            // Form field values, annotation text and the saved marks are not page content; they all
+            // come from one engine document, parsed once and only when something asks for it.
+            var document = new Lazy<PdfDocument>(() => PdfEngineIntegration.OpenForReading(File.ReadAllBytes(source)));
             if (searches.Count > 0)
             {
                 IReadOnlyList<PdfPageContent> pages;
                 using (PdfContentDocument content = PdfContentDocument.Open(source))
                     pages = [.. Enumerable.Range(1, content.NumberOfPages).Select(content.GetPage)];
                 var found = new Dictionary<string, PdfRedactionMatch>();
-                // Form field values and annotation text are searched too; they are not page content.
-                PdfDocument annotations = PdfEngineIntegration.OpenForReading(File.ReadAllBytes(source));
                 try
                 {
                     foreach (var (kind, query) in searches)
@@ -129,7 +130,7 @@ namespace KillerPDF.Features
                         };
                         foreach (PdfRedactionMatch match in PdfRedactionSearch.Find(pages, search).Matches)
                             found.TryAdd(match.Id, match);
-                        foreach (PdfRedactionMatch match in PdfRedactionSearch.FindInAnnotations(annotations, search).Matches)
+                        foreach (PdfRedactionMatch match in PdfRedactionSearch.FindInAnnotations(document.Value, search).Matches)
                             found.TryAdd(match.Id, match);
                     }
                 }
@@ -148,8 +149,7 @@ namespace KillerPDF.Features
                 areas.Add((page, new PdfContentBounds(0, 0, geometry[page].Width, geometry[page].Height), "whole page"));
             var regions = new List<PdfRedactionRegion>();
             if (marked)
-                foreach (PdfEngineIntegration.RedactionMarkData mark in PdfEngineIntegration.ReadRedactionMarks(
-                             PdfEngineIntegration.OpenForReading(File.ReadAllBytes(source))))
+                foreach (PdfEngineIntegration.RedactionMarkData mark in PdfEngineIntegration.ReadRedactionMarks(document.Value))
                 {
                     regions.Add(new PdfRedactionRegion(mark.PageIndex,
                         new PdfContentBounds(mark.Left, mark.Bottom, mark.Right, mark.Top), null, mark.OverlayText ?? overlay)

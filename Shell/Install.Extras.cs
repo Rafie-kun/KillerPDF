@@ -29,10 +29,11 @@ namespace KillerPDF.Shell
                     MessageBoxButton.OK, MessageBoxImage.Warning);
                 return Task.FromResult(false);
             };
-            // The installed copy reopens the user's file, not this tab's temporary working copy.
+            // The installed copy reopens the user's file, not this tab's temporary working copy, and
+            // nothing at all for a never-saved browser download, whose temp file is deleted on exit.
             options.InstallAsync = async (desktop, allUsers) =>
                 await App.InstallAndRelaunchAsync(wantDesktop: desktop, allUsers: allUsers,
-                    fileToOpen: _originalFile ?? _currentFile)
+                    fileToOpen: PortableInstallPlan.ReopenPath(_originalFile, _currentFile, App.IsCleanupOwnedPath))
                     ? InstallOutcome.Installed : InstallOutcome.Failed;
             // SetStatus honors the status hold, so the failure line is not stomped by the next fit.
             options.ShowStatus = SetStatus;

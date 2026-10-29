@@ -37,6 +37,50 @@ public sealed class RedactionTermAreasTests : IDisposable
             Assert.Single(SearchService.FindRedactionTermAreas(_path, "page text")).Value);
     }
 
+    // A macro with several terms parses the file once for all of them, and the merged areas are the
+    // union of what each term finds on its own (BF-A008).
+    [Fact]
+    public void SeveralTermsShareOneParseAndMergeTheirAreas()
+    {
+        File.WriteAllBytes(_path, Pdf(
+            "<< /Type /Catalog /Pages 2 0 R /AcroForm << /Fields [6 0 R] >> >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R /Annots [6 0 R 7 0 R] >>",
+            "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+            Stream("BT /F1 12 Tf 72 700 Td (Plain page text about Casey) Tj ET"),
+            "<< /Type /Annot /Subtype /Widget /FT /Tx /T (name) /V (Jordan Q. Private) /Rect [100 600 300 620] /P 3 0 R /F 4 >>",
+            "<< /Type /Annot /Subtype /FreeText /Contents (Ask Jordan first) /DA (/F1 10 Tf 0 g) /Rect [100 500 300 540] /F 4 >>"));
+
+        var merged = SearchService.FindRedactionTermAreas(_path, ["jordan", "casey", "   ", "page text"]);
+
+        var expected = new List<(double, double, double, double)>();
+        foreach (string term in new[] { "jordan", "casey", "page text" })
+            expected.AddRange(SearchService.FindRedactionTermAreas(_path, term)[0]);
+        Assert.Equal(expected.OrderBy(area => area), Assert.Single(merged).Value.OrderBy(area => area));
+        Assert.Empty(SearchService.FindRedactionTermAreas(_path, []));
+    }
+
+    [Fact]
+    public void BothMacroCallersPassAllTermsAtOnce()
+    {
+        string root = FindRepositoryRoot();
+        Assert.Contains("SearchService.FindRedactionTermAreas(path, _macroRedaction.Terms)",
+            File.ReadAllText(Path.Combine(root, "Shell", "Macros.cs")));
+        Assert.Contains("SearchService.FindRedactionTermAreas(path, redaction.Terms)",
+            File.ReadAllText(Path.Combine(root, "Features", "Cli", "CliRunner.Macros.cs")));
+    }
+
+    private static string FindRepositoryRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null)
+        {
+            if (File.Exists(Path.Combine(directory.FullName, "KillerPDF.csproj"))) return directory.FullName;
+            directory = directory.Parent;
+        }
+        throw new InvalidOperationException("KillerPDF.csproj was not found above the test output.");
+    }
+
     private static string Stream(string content) =>
         $"<< /Length {Encoding.Latin1.GetByteCount(content)} >>\nstream\n{content}\nendstream";
 
