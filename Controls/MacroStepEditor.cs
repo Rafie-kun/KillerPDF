@@ -9,7 +9,9 @@ namespace KillerPDF;
 
 internal static class MacroStepEditor
 {
-    internal static string? TitleKey(PdfMacroOperation operation) => operation switch
+    /// <summary>The string key naming a step, for every operation. The macro preview, the macro
+    /// editor and the watched-folder dialog all read it, so no step shows its enum name.</summary>
+    internal static string TitleKey(PdfMacroOperation operation) => operation switch
     {
         PdfMacroOperation.EditLayers => "Str_DocumentTools_EditLayers",
         PdfMacroOperation.EditAttachments => "Str_DocumentTools_EditAttachments",
@@ -21,7 +23,23 @@ internal static class MacroStepEditor
         PdfMacroOperation.Resize => "Str_Tf_ResizePage",
         PdfMacroOperation.ConvertColor => "Str_Tf_ColorMode",
         PdfMacroOperation.Export => "Str_ExportDoc_Suffix",
-        _ => null
+        PdfMacroOperation.Ocr => "Str_Lbl_Ocr",
+        PdfMacroOperation.Optimize => "Str_Reduce_Title",
+        PdfMacroOperation.Redact => "Str_Lbl_Redact",
+        PdfMacroOperation.Save => "Str_Btn_Save",
+        PdfMacroOperation.Flatten => "Str_Lbl_Flatten",
+        PdfMacroOperation.FlattenLayers => "Str_Watch_FlattenLayers",
+        PdfMacroOperation.Validate => "Str_DocumentTools_Preflight",
+        PdfMacroOperation.NumberPages => "Str_Stamp_SecNumbers",
+        PdfMacroOperation.AuditNavigation => "Str_DocumentTools_NavigationAudit",
+        PdfMacroOperation.RemoveUnsafeLinks => "Str_Navigation_RemoveUnsafe",
+        PdfMacroOperation.RemoveUnresolvedLinks => "Str_Navigation_RemoveUnresolved",
+        PdfMacroOperation.GenerateBookmarks => "Str_DocumentTools_AutoBookmarks",
+        PdfMacroOperation.GenerateTableOfContents => "Str_DocumentTools_InsertToc",
+        PdfMacroOperation.AuditAttachments => "Str_Watch_AuditAttachments",
+        PdfMacroOperation.RemoveAttachments => "Str_Watch_RemoveAttachments",
+        // The imposition steps are titled by the production layout dialog that edits them.
+        _ => ProductionLayoutDialog.TitleKey(operation)
     };
 
     internal static PdfMacroStep? Edit(Window owner, PdfMacroStep step)

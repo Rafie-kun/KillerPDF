@@ -142,6 +142,7 @@ The page can be replaced with an image of itself with the marked areas blacked o
     <sys:String x:Key="Str_Outline_ExpandAll">Expand all</sys:String>
     <sys:String x:Key="Str_PageLabel">Page {0}</sys:String>
     <sys:String x:Key="Str_Outline_Untitled">(untitled)</sys:String>
+    <sys:String x:Key="Str_Untitled">Untitled</sys:String>
 
     <!-- ── Settings panel ───────────────────────────────────────────── -->
     <sys:String x:Key="Str_Theme">Theme</sys:String>
@@ -1160,6 +1161,12 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Filter_Pdf">PDF files</sys:String>
     <sys:String x:Key="Str_Filter_Cert">Certificate files</sys:String>
     <sys:String x:Key="Str_Filter_Text">Text file</sys:String>
+    <sys:String x:Key="Str_Filter_Word">Word document</sys:String>
+    <sys:String x:Key="Str_Filter_Excel">Excel workbook</sys:String>
+    <sys:String x:Key="Str_Filter_PowerPoint">PowerPoint presentation</sys:String>
+    <sys:String x:Key="Str_Filter_Html">HTML document</sys:String>
+    <sys:String x:Key="Str_Filter_Markdown">Markdown document</sys:String>
+    <sys:String x:Key="Str_Filter_Json">JSON document</sys:String>
     <sys:String x:Key="Str_Print_Sending">Sending to printer…</sys:String>
     <sys:String x:Key="Str_Forms_FontSize">Font size:</sys:String>
     <sys:String x:Key="Str_Ocr_SaveSearchable">Save Searchable PDF</sys:String>
@@ -1316,6 +1323,8 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Dlg_Repaired" xml:space="preserve">"{0}" was repaired successfully.&#10;&#10;Bookmarks, forms, and other interactive features may have been lost. Use Save As to write the repaired file to a new location.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairedRaster" xml:space="preserve">"{0}" was repaired by rasterizing its pages.&#10;&#10;Text is not selectable in the repaired copy. Use Save As to write it to a new location.</sys:String>
     <sys:String x:Key="Str_Dlg_RepairAsk" xml:space="preserve">"{0}" has a damaged structure and couldn't be added.&#10;&#10;Would you like KillerPDF to attempt a repair? A repaired copy will be created, and the original file will not be changed.&#10;&#10;Note: repaired files may be missing bookmarks, forms, and other interactive features.</sys:String>
+    <sys:String x:Key="Str_Dlg_RepairAskOpen" xml:space="preserve">"{0}" couldn't be opened because its structure may be damaged.&#10;&#10;Would you like KillerPDF to attempt a repair? A repaired copy will be created, and the original file will not be changed.&#10;&#10;Note: repaired files may be missing bookmarks, forms, and other interactive features.</sys:String>
+    <sys:String x:Key="Str_Dlg_OpenedReadOnlyXRef" xml:space="preserve">"{0}" has a non-standard structure and was opened read-only.&#10;&#10;Editing, saving, and some other features may not work correctly.</sys:String>
     <sys:String x:Key="Str_Dlg_LangDownloadAsk" xml:space="preserve">A language model ({0}) will be downloaded now so OCR can run.&#10;&#10;You can add more languages or switch to higher quality models any time from the OCR menu.</sys:String>
     <sys:String x:Key="Str_Bar_More">More settings</sys:String>
     <sys:String x:Key="Str_Bar_TT_Level">Keep the line on the nearest axis (horizontal or vertical)</sys:String>
@@ -1340,6 +1349,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_About_UpdateNow">Update</sys:String>
     <sys:String x:Key="Str_About_NotNow">Not now</sys:String>
     <sys:String x:Key="Str_About_AlwaysCheckOnStartup">Always check on startup</sys:String>
+    <sys:String x:Key="Str_About_UpdateNotVerified">The downloaded update could not be verified and was discarded. Nothing was installed.</sys:String>
     <sys:String x:Key="Str_UpdateRestartPrepareFailed">The update couldn't be prepared. Your saved PDFs are unchanged. Please try again.</sys:String>
     <sys:String x:Key="Str_UpdateRestartRestoreFailed">KillerPDF couldn't reopen your previous session. Your saved PDF files are unchanged.</sys:String>
     <sys:String x:Key="Str_ClearAllData">Clear all Data</sys:String>
@@ -1577,6 +1587,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Macro_Running">Running macro...</sys:String>
     <sys:String x:Key="Str_Macro_Complete">Macro output saved to {0}</sys:String>
     <sys:String x:Key="Str_Macro_Failed">The macro could not complete.</sys:String>
+    <sys:String x:Key="Str_Macro_OutputNameDrift">The macro output name differs from its approved plan.</sys:String>
     <sys:String x:Key="Str_Macro_Canceled">Macro canceled</sys:String>
     <sys:String x:Key="Str_Macro_RedactPrompt">Enter the words or phrases to redact, one per line. Areas you marked with the Redact tool on this document are redacted too.</sys:String>
     <sys:String x:Key="Str_Macro_RedactNothing">Enter at least one word or phrase, or mark areas with the Redact tool first.</sys:String>

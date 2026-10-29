@@ -669,7 +669,13 @@ namespace KillerPDF.Shell
         {
             foreach (var pane in new[] { Viewer, ViewerB })
                 foreach (var session in pane.SessionsRef.Where(s => s.IsDirty).ToList())
+                {
+                    // Closing the split keeps pane B's tabs. Saving one makes that pane active, so
+                    // the split opens first: the document being saved is on screen, and a cancelled
+                    // Save As leaves the window on a visible pane (the ReclaimAsyncOwner guard).
+                    if (ReferenceEquals(pane, ViewerB) && !_isSplit) OpenSplit();
                     if (!pane.SaveSessionForCloseExt(session)) return false;
+                }
             return true;
         }
 

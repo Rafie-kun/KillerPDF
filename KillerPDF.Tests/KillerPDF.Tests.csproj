@@ -133,6 +133,7 @@
     <Compile Include="..\Services\PayloadIntegrityVerifier.cs" Link="Services\PayloadIntegrityVerifier.cs" />
     <Compile Include="..\Services\InstallPayloadOwnership.cs" Link="Services\InstallPayloadOwnership.cs" />
     <Compile Include="..\Services\UpdateImagePublication.cs" Link="Services\UpdateImagePublication.cs" />
+    <Compile Include="..\Services\HttpDownload.cs" Link="Services\HttpDownload.cs" />
     <Compile Include="..\Services\UpdateService.cs" Link="Services\UpdateService.cs" />
     <Compile Include="..\Services\UpdateTargetChoice.cs" Link="Services\UpdateTargetChoice.cs" />
     <Compile Include="..\Shell\PortableInstallPlan.cs" Link="Shell\PortableInstallPlan.cs" />

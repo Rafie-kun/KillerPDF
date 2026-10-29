@@ -353,5 +353,37 @@ namespace KillerPDF.Tests
                 source,
                 StringComparison.Ordinal);
         }
+
+        // Every consumer resolves "KsCat" + group with SetResourceReference, so a group without a
+        // brush gets the default foreground on its header and a null brush on its key caps. The
+        // themes declare seven brushes for nine groups; AppTheme aliases the rest at load time
+        // (BF-S008: Tools and Ocr had no alias). The alias table is read off AppTheme.cs itself.
+        [Fact]
+        public void EveryKsGroupHasABrushInEveryTheme()
+        {
+            XNamespace x = "http://schemas.microsoft.com/winfx/2006/xaml";
+            var aliases = Regex.Matches(File.ReadAllText(Path.Combine(RepoRoot(), "Services", "AppTheme.cs")),
+                    @"if \(!d\.Contains\(""(KsCat\w+)""\) && d\.Contains\(""(KsCat\w+)""\)\) d\[""\1""\] = d\[""\2""\];")
+                .ToDictionary(m => m.Groups[1].Value, m => m.Groups[2].Value, StringComparer.Ordinal);
+
+            string[] themes = Directory.GetFiles(Path.Combine(RepoRoot(), "Themes"), "*.xaml");
+            Assert.Equal(13, themes.Length);
+            var missing = new List<string>();
+            foreach (string theme in themes)
+            {
+                var keys = XDocument.Load(theme).Descendants()
+                    .Select(element => (string?)element.Attribute(x + "Key"))
+                    .Where(key => key is not null)
+                    .ToHashSet(StringComparer.Ordinal);
+                foreach (var (cat, _, _) in ShortcutTable.KsGroups)
+                {
+                    string key = "KsCat" + cat;
+                    bool resolves = keys.Contains(key)
+                        || (aliases.TryGetValue(key, out string? fallback) && keys.Contains(fallback));
+                    if (!resolves) missing.Add($"{Path.GetFileName(theme)}: {key}");
+                }
+            }
+            Assert.True(missing.Count == 0, "shortcut groups without a brush: " + string.Join(" | ", missing));
+        }
     }
 }

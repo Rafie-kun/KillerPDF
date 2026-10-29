@@ -198,7 +198,7 @@ namespace KillerPDF.Features
             string outDir = Path.GetFullPath(pos[1]);
             options.TryGetValue("--password", out string? password);
             var (renderPath, rotations, _) = CliPrepareRenderSource(inPath, password, con);
-            double dpi = CliParseDpi(options, 150);
+            if (!TryReadDpi(options, 150, con, out double dpi)) return 2;
             using var session = PdfPageRenderSession.OpenEngineFirst(renderPath, dpi / 72.0);
             if (!CliPagesOption(options, session.PageCount, out List<int> pages, con)) return 2;
             Directory.CreateDirectory(outDir);

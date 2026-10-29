@@ -1968,4 +1968,21 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Dlg_PageRange">页码或范围（1至{0}）</sys:String>
     <sys:String x:Key="Str_Watch_FailedStep">步骤 {0}：{1}</sys:String>
     <sys:String x:Key="Str_NavigationButtons_Show">显示页面导航按钮</sys:String>
+    <sys:String x:Key="Str_Untitled">无标题</sys:String>
+    <sys:String x:Key="Str_Filter_Word">Word 文档</sys:String>
+    <sys:String x:Key="Str_Filter_Excel">Excel 工作簿</sys:String>
+    <sys:String x:Key="Str_Filter_PowerPoint">PowerPoint 演示文稿</sys:String>
+    <sys:String x:Key="Str_Filter_Html">HTML 文档</sys:String>
+    <sys:String x:Key="Str_Filter_Markdown">Markdown 文档</sys:String>
+    <sys:String x:Key="Str_Filter_Json">JSON 文档</sys:String>
+    <sys:String x:Key="Str_Dlg_RepairAskOpen">无法打开 "{0}"，因为其结构可能已损坏。
+
+要让 KillerPDF 尝试修复吗？将创建一个修复副本，原文件不会被更改。
+
+注意：修复后的文件可能缺少书签、表单和其他交互功能。</sys:String>
+    <sys:String x:Key="Str_Dlg_OpenedReadOnlyXRef">"{0}" 的结构不标准，已以只读方式打开。
+
+编辑、保存及其他某些功能可能无法正常工作。</sys:String>
+    <sys:String x:Key="Str_Macro_OutputNameDrift">宏输出名称与已批准的计划不一致。</sys:String>
+    <sys:String x:Key="Str_About_UpdateNotVerified">无法验证已下载的更新，已将其丢弃。未安装任何内容。</sys:String>
 </ResourceDictionary>

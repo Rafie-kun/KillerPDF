@@ -234,7 +234,7 @@ namespace KillerPDF.Features
                 con.WriteLine("The box must lie on the page and be at least a point wide and tall.");
                 return 2;
             }
-            double dpi = CliParseDpi(options, 300);
+            if (!TryReadDpi(options, 300, con, out double dpi)) return 2;
             CliWriteEditedCopy(source, output, path => PdfEngineIntegration.RasterizeRegion(path, pageNumber - 1, region, dpi));
             con.WriteLine($"Rasterized a {region.Right - region.Left:0.#} by {region.Top - region.Bottom:0.#} point box on page {pageNumber} at {dpi:0} dpi -> {output}");
             return 0;

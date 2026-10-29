@@ -1,3 +1,4 @@
+using System.IO;
 using KillerPdf.Engine.Authoring;
 using KillerPdf.Engine.Documents;
 using KillerPdf.Engine.Editing;
@@ -101,5 +102,37 @@ public sealed class MacroWatermarkTests
         Assert.Throws<OperationCanceledException>(() => dispatcher.Execute(
             PdfEngineBurn.WatermarkStep(new("REVIEW")), source,
             cancellationToken: cancellation.Token));
+    }
+
+    [Fact]
+    public void WatermarkWorkingFileComesFromTheSessionTempSeamAndIsDeleted()
+    {
+        string folder = Path.Combine(Path.GetTempPath(), "killerpdf-watermark-seam-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(folder);
+        var tags = new List<string>();
+        string? used = null;
+        var previous = PdfEngineBurn.MacroTempFile;
+        PdfEngineBurn.MacroTempFile = tag =>
+        {
+            tags.Add(tag);
+            return used = Path.Combine(folder, $"killerpdf_{tag}_seam.pdf");
+        };
+        try
+        {
+            byte[] source = new PdfDocumentBuilder().AddBlankPage(200, 200).Build();
+            var dispatcher = new PdfMacroDispatcher([
+                new(PdfMacroOperation.Watermark, PdfEngineBurn.ExecuteWatermarkMacro)]);
+
+            var result = Assert.Single(dispatcher.RunReport(new("Seam", [PdfEngineBurn.WatermarkStep(new("REVIEW"))]), [source]).Results);
+
+            Assert.True(result.Succeeded);
+            Assert.Equal(["watermark"], tags);
+            Assert.False(File.Exists(used));
+        }
+        finally
+        {
+            PdfEngineBurn.MacroTempFile = previous;
+            Directory.Delete(folder, recursive: true);
+        }
     }
 }

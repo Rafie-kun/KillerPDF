@@ -1971,4 +1971,21 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Dlg_PageRange">Oldalszámok vagy tartományok (1 és {0} között)</sys:String>
     <sys:String x:Key="Str_Watch_FailedStep">{0}. lépés: {1}</sys:String>
     <sys:String x:Key="Str_NavigationButtons_Show">Oldalnavigációs gombok megjelenítése</sys:String>
+    <sys:String x:Key="Str_Untitled">Névtelen</sys:String>
+    <sys:String x:Key="Str_Filter_Word">Word-dokumentum</sys:String>
+    <sys:String x:Key="Str_Filter_Excel">Excel-munkafüzet</sys:String>
+    <sys:String x:Key="Str_Filter_PowerPoint">PowerPoint-bemutató</sys:String>
+    <sys:String x:Key="Str_Filter_Html">HTML-dokumentum</sys:String>
+    <sys:String x:Key="Str_Filter_Markdown">Markdown-dokumentum</sys:String>
+    <sys:String x:Key="Str_Filter_Json">JSON-dokumentum</sys:String>
+    <sys:String x:Key="Str_Dlg_RepairAskOpen">A(z) "{0}" nem nyitható meg, mert a szerkezete sérült lehet.
+
+Megpróbálja a KillerPDF megjavítani? Javított másolat készül. Az eredeti fájl nem változik.
+
+Megjegyzés: a javított fájlokból hiányozhatnak a könyvjelzők, űrlapok és más interaktív funkciók.</sys:String>
+    <sys:String x:Key="Str_Dlg_OpenedReadOnlyXRef">A(z) "{0}" szerkezete nem szabványos, ezért csak olvasható módban nyílt meg.
+
+A szerkesztés, a mentés és néhány más funkció esetleg nem működik megfelelően.</sys:String>
+    <sys:String x:Key="Str_Macro_OutputNameDrift">A makró kimenetének neve eltér a jóváhagyott tervtől.</sys:String>
+    <sys:String x:Key="Str_About_UpdateNotVerified">A letöltött frissítést nem sikerült ellenőrizni, ezért elvetettük. Semmi sem lett telepítve.</sys:String>
 </ResourceDictionary>

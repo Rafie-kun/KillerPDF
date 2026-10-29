@@ -5,6 +5,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -97,10 +98,22 @@ namespace KillerPDF.Services
         /// (KillerBench's release check). Null for anything else.</summary>
         internal static string? NewerReleaseTag(string json, Version current)
         {
-            if (Regex.IsMatch(json, "\"(draft|prerelease)\"\\s*:\\s*true")) return null;
-            var m = Regex.Match(json, "\"tag_name\"\\s*:\\s*\"(v?[0-9]+\\.[0-9]+\\.[0-9]+)\"");
-            if (!m.Success) return null;
-            if (!Version.TryParse(m.Groups[1].Value.TrimStart('v'), out var latest))
+            // The fields are read from the document's top level, not matched in its text: the release
+            // notes in the same JSON can quote any of these names.
+            string tag;
+            try
+            {
+                using var document = JsonDocument.Parse(json);
+                var root = document.RootElement;
+                if (root.ValueKind != JsonValueKind.Object) return null;
+                foreach (string flag in new[] { "draft", "prerelease" })
+                    if (root.TryGetProperty(flag, out var value) && value.ValueKind == JsonValueKind.True) return null;
+                if (!root.TryGetProperty("tag_name", out var name) || name.ValueKind != JsonValueKind.String) return null;
+                tag = name.GetString() ?? string.Empty;
+            }
+            catch (JsonException) { return null; }
+            if (!Regex.IsMatch(tag, "^v?[0-9]+\\.[0-9]+\\.[0-9]+\\z")) return null;
+            if (!Version.TryParse(tag.TrimStart('v'), out var latest))
                 return null;
 
             var cur = new Version(current.Major, current.Minor, current.Build < 0 ? 0 : current.Build);
@@ -123,23 +136,36 @@ namespace KillerPDF.Services
             // tag. Both files are uploaded to the release together, so the hash cannot drift from
             // the exe the way a committed file does when the tag and commit order get muddled.
             var sumsUrl = $"https://github.com/{AppInfo.GitHubRepo}/releases/download/{tag}/SHA256SUMS.txt";
+            return await DownloadVerifiedAsync(http, new Uri(exeUrl), new Uri(sumsUrl), target.Asset, target.IsPackage,
+                tag, Path.GetTempPath(), MaximumDownloadBytes, DownloadDeadline).ConfigureAwait(false);
+        }
 
-            var exeBytes = await http.GetByteArrayAsync(exeUrl).ConfigureAwait(false);
-            var sumsTxt  = await http.GetStringAsync(sumsUrl).ConfigureAwait(false);
+        /// <summary>The largest installer or exe the update will download; the releases are far smaller.</summary>
+        internal const long MaximumDownloadBytes = 400L * 1024 * 1024;
 
-            string? expected = ChecksumFor(sumsTxt, target.Asset);
-            if (string.IsNullOrEmpty(expected)) throw new Exception("checksum entry not found");
+        /// <summary>How long the whole transfer may take. The 90 second client timeout covers only
+        /// the response headers, so a slow link has this long to finish the body.</summary>
+        internal static readonly TimeSpan DownloadDeadline = TimeSpan.FromMinutes(10);
 
-            string actual;
-            using (var sha = SHA256.Create())
-                actual = BitConverter.ToString(sha.ComputeHash(exeBytes)).Replace("-", "");
+        /// <summary>Fetches the checksum list, streams the release into a new file under
+        /// <paramref name="directory"/> and verifies it. The file exists only when every check passed;
+        /// a refused download (<see cref="UpdateVerificationException"/>) is told apart from a
+        /// network failure, which surfaces as the transport's own exception.</summary>
+        internal static async Task<string> DownloadVerifiedAsync(HttpClient http, Uri exeUrl, Uri sumsUrl, string asset,
+            bool isPackage, string tag, string directory, long maximumBytes, TimeSpan deadline)
+        {
+            var sumsTxt = await http.GetStringAsync(sumsUrl).ConfigureAwait(false);
+            string? expected = ChecksumFor(sumsTxt, asset);
+            if (string.IsNullOrEmpty(expected)) throw new UpdateVerificationException("checksum entry not found");
+
+            SweepStaleDownloads(directory, DateTime.UtcNow);
+            var path = Path.Combine(directory, $"{AppInfo.DisplayName}_update_{Guid.NewGuid():N}.exe");
+            string actual = await DownloadToFileAsync(http, exeUrl, path, maximumBytes, deadline).ConfigureAwait(false);
             if (!actual.Equals(expected, StringComparison.OrdinalIgnoreCase))
-                throw new Exception("checksum mismatch");
-
-            SweepStaleDownloads(Path.GetTempPath(), DateTime.UtcNow);
-            var path = Path.Combine(Path.GetTempPath(),
-                                    $"{AppInfo.DisplayName}_update_{Guid.NewGuid():N}.exe");
-            File.WriteAllBytes(path, exeBytes);
+            {
+                DiscardDownload(path);
+                throw new UpdateVerificationException("checksum mismatch");
+            }
             // The checksum file comes from the same release as the exe, so it only proves the
             // download arrived intact. The signature, product and version prove where it came from.
             string signer;
@@ -147,12 +173,33 @@ namespace KillerPDF.Services
             {
                 // An installer or launcher package is not this app's assembly, so it is held to the
                 // publisher's signature alone; the app's own exe also has to be a newer release of it.
-                signer = target.IsPackage ? ReleaseIdentity.VerifyPackage(path, tag)
+                signer = isPackage ? ReleaseIdentity.VerifyPackage(path, tag)
                     : ReleaseIdentity.Verify(path, tag, requireInstalledSignature: false);
+            }
+            catch (System.Security.SecurityException ex)
+            {
+                DiscardDownload(path);
+                throw new UpdateVerificationException(ex.Message, ex);
             }
             catch { DiscardDownload(path); throw; }
             UpdateImagePublication.RememberVerified(path, actual, signer);
             return path;
+        }
+
+        /// <summary>Streams <paramref name="url"/> into a new file at <paramref name="path"/> through
+        /// <see cref="HttpDownload"/>, which enforces the size cap and the whole-transfer deadline, and
+        /// returns the file's SHA-256 as hex. A failed or oversized download leaves no file behind.</summary>
+        internal static async Task<string> DownloadToFileAsync(HttpClient http, Uri url, string path, long maximumBytes, TimeSpan deadline)
+        {
+            try
+            {
+                using (var output = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+                    await HttpDownload.CopyToAsync(http, url, output, deadline, maximumBytes).ConfigureAwait(false);
+                using var written = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+                using var sha = SHA256.Create();
+                return BitConverter.ToString(sha.ComputeHash(written)).Replace("-", "");
+            }
+            catch { DiscardDownload(path); throw; }
         }
 
         /// <summary>The hash SHA256SUMS.txt publishes for <paramref name="asset"/>: the first line that is
@@ -241,8 +288,23 @@ namespace KillerPDF.Services
         {
             string replaced = target.Replace ?? curExe;
             bool elevate = target.Machine || !platform.CanWrite(Path.GetDirectoryName(replaced)!);
+            string script = PackageHelperScript(download, replaced, target, elevate, self.Id, self.StartTime.ToUniversalTime().Ticks);
+            var start = HelperStart(script);
+            if (elevate) start.Verb = "runas";
+            if (platform.Start(start) is null)
+                throw new IOException("The update helper did not start. Download retained at: " + download);
+        }
+
+        /// <summary>The installer and launcher helper's script. An unelevated helper that times out
+        /// waiting for this process writes the reason to the recovery report and opens it, as the
+        /// per-user swap does; the elevated helper keeps the silent exit, since it cannot open
+        /// notepad as the user.</summary>
+        internal static string PackageHelperScript(string download, string replaced, UpdateTarget target, bool elevate,
+            int processId, long processStartTicks)
+        {
             string script = "$ErrorActionPreference = 'Stop'\n"
-                + TrustedUpdate.Wait(self.Id, self.StartTime.ToUniversalTime().Ticks) + "\n";
+                + (elevate ? TrustedUpdate.Wait(processId, processStartTicks)
+                    : TrustedUpdate.Wait(processId, processStartTicks, NotClosed(download + ".recovery.txt"))) + "\n";
             if (target.WaitForProcess > 0)
                 script += LauncherWait(target.WaitForProcess);
             if (target.InstallerArguments is null)
@@ -256,10 +318,7 @@ namespace KillerPDF.Services
                     : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), AppInfo.DisplayName, "UpdateStage");
                 script += UpdateImagePublication.Installer(download, target.InstallerArguments, elevate, replaced, stageRoot, ReleasesUrl);
             }
-            var start = HelperStart(script);
-            if (elevate) start.Verb = "runas";
-            if (platform.Start(start) is null)
-                throw new IOException("The update helper did not start. Download retained at: " + download);
+            return script;
         }
 
         /// <summary>The direct installer mode: the verified installer starts with its arguments, elevated
@@ -373,5 +432,13 @@ namespace KillerPDF.Services
             }
             catch { return false; }
         }
+    }
+
+    /// <summary>A downloaded update was refused: its checksum is missing or wrong, or it is not signed
+    /// by the publisher. Distinct from a network failure so the user is told it was discarded.</summary>
+    internal sealed class UpdateVerificationException : Exception
+    {
+        internal UpdateVerificationException(string message) : base(message) { }
+        internal UpdateVerificationException(string message, Exception inner) : base(message, inner) { }
     }
 }

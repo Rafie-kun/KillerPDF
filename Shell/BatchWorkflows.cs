@@ -12,7 +12,7 @@ public partial class MainWindow
     {
         var picker = new Controls.FileDialog(Controls.FileDialogMode.Open)
         {
-            Title = title, Filter = "PDF|*.pdf", Multiselect = true
+            Title = title, Filter = Loc("Str_Filter_Pdf") + "|*.pdf", Multiselect = true
         };
         if (picker.ShowDialog(this) != true || picker.FileNames.Length == 0) return null;
         var order = new DocumentListDialog(this, title, picker.FileNames, reorder: true);
@@ -26,7 +26,7 @@ public partial class MainWindow
             : Path.GetFileNameWithoutExtension(inputs[0]) + "-" + suffix + ".pdf";
         var picker = new Controls.FileDialog(Controls.FileDialogMode.Save)
         {
-            Title = title, Filter = "PDF|*.pdf", DefaultExt = "pdf",
+            Title = title, Filter = Loc("Str_Filter_Pdf") + "|*.pdf", DefaultExt = "pdf",
             FileName = name,
             InitialDirectory = renames ? Path.GetDirectoryName(inputs[0]) ?? "" : "",
             IsFileNameReadOnly = renames

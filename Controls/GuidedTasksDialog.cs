@@ -82,7 +82,7 @@ internal sealed class GuidedTasksDialog : Window
         {
             var picker = new Controls.FileDialog(Controls.FileDialogMode.Save)
             {
-                Title = L("Str_Guided_Output"), Filter = "PDF|*.pdf", DefaultExt = "pdf", RequireFilterExtension = true,
+                Title = L("Str_Guided_Output"), Filter = L("Str_Filter_Pdf") + "|*.pdf", DefaultExt = "pdf", RequireFilterExtension = true,
                 OverwritePrompt = false,
                 FileName = Path.GetFileNameWithoutExtension(source) + "-" + Kind.ToString().ToLowerInvariant() + ".pdf"
             };

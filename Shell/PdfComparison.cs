@@ -174,7 +174,9 @@ public partial class MainWindow
         }
         _comparisonActive = false;
         _comparisonLeftPath = source.WorkingPath;
-        _comparisonRightPath = comparison.WorkingPath;
+        // Pane B opens the other document from its saved file, so the diff reads that file too; the
+        // tab's working copy may carry unsaved page edits that the right pane would not show.
+        _comparisonRightPath = comparison.OriginalPath;
         _comparisonLeftTitle = source.Title;
         _comparisonRightTitle = comparison.Title;
 

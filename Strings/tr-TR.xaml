@@ -1964,4 +1964,21 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Dlg_PageRange">Sayfa numaraları veya aralıkları (1 ile {0} arası)</sys:String>
     <sys:String x:Key="Str_Watch_FailedStep">{0}. adım: {1}</sys:String>
     <sys:String x:Key="Str_NavigationButtons_Show">Sayfa gezinme düğmelerini göster</sys:String>
+    <sys:String x:Key="Str_Untitled">Adsız</sys:String>
+    <sys:String x:Key="Str_Filter_Word">Word belgesi</sys:String>
+    <sys:String x:Key="Str_Filter_Excel">Excel çalışma kitabı</sys:String>
+    <sys:String x:Key="Str_Filter_PowerPoint">PowerPoint sunusu</sys:String>
+    <sys:String x:Key="Str_Filter_Html">HTML belgesi</sys:String>
+    <sys:String x:Key="Str_Filter_Markdown">Markdown belgesi</sys:String>
+    <sys:String x:Key="Str_Filter_Json">JSON belgesi</sys:String>
+    <sys:String x:Key="Str_Dlg_RepairAskOpen">"{0}" açılamadı çünkü yapısı hasarlı olabilir.
+
+KillerPDF onarmayı denesin mi? Onarılmış bir kopya oluşturulacak. Özgün dosya değiştirilmeyecek.
+
+Not: onarılan dosyalarda yer imleri, formlar ve diğer etkileşimli özellikler eksik olabilir.</sys:String>
+    <sys:String x:Key="Str_Dlg_OpenedReadOnlyXRef">"{0}" standart dışı bir yapıya sahip ve salt okunur olarak açıldı.
+
+Düzenleme, kaydetme ve bazı diğer özellikler doğru çalışmayabilir.</sys:String>
+    <sys:String x:Key="Str_Macro_OutputNameDrift">Makro çıktısının adı onaylanan plandan farklı.</sys:String>
+    <sys:String x:Key="Str_About_UpdateNotVerified">İndirilen güncelleştirme doğrulanamadı ve silindi. Hiçbir şey yüklenmedi.</sys:String>
 </ResourceDictionary>

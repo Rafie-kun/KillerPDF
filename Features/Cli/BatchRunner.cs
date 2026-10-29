@@ -28,7 +28,8 @@ namespace KillerPDF.Features
     // save does not degrade standards conformance".
     //
     // Exit codes: 0 = every file OK or SKIP, 1 = at least one FAIL
-    // (file opened but the save failed), 2 = bad usage or bad paths.
+    // (file opened but the save failed) or the run itself failed, 2 = bad usage or bad
+    // paths, including an output that is also the input.
     //
     // Invoked from App.OnStartup BEFORE the single-instance mutex, so a batch
     // run works even while a GUI instance is open and never forwards to it.
@@ -95,7 +96,7 @@ namespace KillerPDF.Features
             catch (Exception ex)
             {
                 con.WriteLine("Batch mode failed: " + FlattenBatchDetail(ex.Message));
-                exitCode = 2;
+                exitCode = 1;
             }
             return true;
         }
@@ -111,11 +112,21 @@ namespace KillerPDF.Features
                     ? Path.Combine(output, Path.GetFileName(input))
                     : output;
                 work.Add((Path.GetFileName(input), Path.GetFullPath(input), Path.GetFullPath(dst)));
+                if (string.Equals(work[0].Src, work[0].Dst, StringComparison.OrdinalIgnoreCase))
+                {
+                    con.WriteLine("Output file cannot also be the input.");
+                    return 2;
+                }
             }
             else if (Directory.Exists(input))
             {
                 string inRoot  = Path.GetFullPath(input).TrimEnd('\\', '/');
                 string outRoot = Path.GetFullPath(output).TrimEnd('\\', '/');
+                if (string.Equals(inRoot, outRoot, StringComparison.OrdinalIgnoreCase))
+                {
+                    con.WriteLine("Output folder cannot also be the input.");
+                    return 2;
+                }
                 // Snapshot before any output is written, so an output folder nested
                 // under the input tree cannot feed the enumeration.
                 foreach (var f in Directory.GetFiles(inRoot, "*.pdf", SearchOption.AllDirectories))

@@ -51,9 +51,11 @@ namespace KillerPDF.Controls
         private static ComparisonDocument? ComparisonDocumentFromSession(DocumentSession? session)
         {
             string? working = session?.CurrentFile ?? session?.DeferredPath ?? session?.OriginalFile;
-            string? original = session?.OriginalFile ?? session?.DeferredPath ?? working;
+            // Pane B reopens the chosen document from its saved file, so a document with no saved
+            // home (a new blank document, a browser download) cannot be offered.
+            string? original = session?.OriginalFile ?? session?.DeferredPath;
             if (string.IsNullOrWhiteSpace(working) || string.IsNullOrWhiteSpace(original)
-                || !System.IO.File.Exists(working))
+                || !System.IO.File.Exists(working) || !System.IO.File.Exists(original))
                 return null;
             return new ComparisonDocument(working, original, System.IO.Path.GetFileName(original));
         }

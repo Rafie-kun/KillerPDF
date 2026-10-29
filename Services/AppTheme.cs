@@ -268,6 +268,9 @@ namespace KillerPDF.Services
             Default("FooterVersionDividerVisibility", Visibility.Visible);
             // Document tools share the File color until a theme gives them their own.
             if (!d.Contains("KsCatDocs") && d.Contains("KsCatFile")) d["KsCatDocs"] = d["KsCatFile"];
+            // Tools and OCR share the Edit and Search colors for the same reason.
+            if (!d.Contains("KsCatTools") && d.Contains("KsCatEdit")) d["KsCatTools"] = d["KsCatEdit"];
+            if (!d.Contains("KsCatOcr") && d.Contains("KsCatSearch")) d["KsCatOcr"] = d["KsCatSearch"];
             Default("ButtonBevelLightThickness", d.Contains("BevelLightThickness") ? d["BevelLightThickness"] : new Thickness(0));
             Default("ButtonBevelDarkThickness", d.Contains("BevelDarkThickness") ? d["BevelDarkThickness"] : new Thickness(0));
             Default("CheckSunkenDarkThickness", new Thickness(0));

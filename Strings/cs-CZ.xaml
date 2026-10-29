@@ -1969,4 +1969,21 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Dlg_PageRange">Čísla stránek nebo rozsahy (1 až {0})</sys:String>
     <sys:String x:Key="Str_Watch_FailedStep">Krok {0}: {1}</sys:String>
     <sys:String x:Key="Str_NavigationButtons_Show">Zobrazit tlačítka pro přechod mezi stránkami</sys:String>
+    <sys:String x:Key="Str_Untitled">Bez názvu</sys:String>
+    <sys:String x:Key="Str_Filter_Word">Dokument Word</sys:String>
+    <sys:String x:Key="Str_Filter_Excel">Excelový sešit</sys:String>
+    <sys:String x:Key="Str_Filter_PowerPoint">Prezentace PowerPoint</sys:String>
+    <sys:String x:Key="Str_Filter_Html">Dokument HTML</sys:String>
+    <sys:String x:Key="Str_Filter_Markdown">Dokument Markdown</sys:String>
+    <sys:String x:Key="Str_Filter_Json">Dokument JSON</sys:String>
+    <sys:String x:Key="Str_Dlg_RepairAskOpen">„{0}“ se nepodařilo otevřít, protože jeho struktura může být poškozená.
+
+Má se KillerPDF pokusit o opravu? Vytvoří se opravená kopie. Původní soubor se nezmění.
+
+Poznámka: opraveným souborům mohou chybět záložky, formuláře a další interaktivní funkce.</sys:String>
+    <sys:String x:Key="Str_Dlg_OpenedReadOnlyXRef">„{0}“ má nestandardní strukturu a byl otevřen jen pro čtení.
+
+Úpravy, ukládání a některé další funkce nemusí fungovat správně.</sys:String>
+    <sys:String x:Key="Str_Macro_OutputNameDrift">Název výstupu makra se liší od schváleného plánu.</sys:String>
+    <sys:String x:Key="Str_About_UpdateNotVerified">Staženou aktualizaci nebylo možné ověřit, proto byla zahozena. Nic nebylo nainstalováno.</sys:String>
 </ResourceDictionary>

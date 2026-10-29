@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace KillerPDF.Services;
 
@@ -17,6 +18,9 @@ internal static class RecentFilesList
         while (list.Count > max) list.RemoveAt(list.Count - 1);
         return list;
     }
+
+    /// <summary>The date shown next to a recent file, in the current culture's short date order.</summary>
+    internal static string DateLabel(DateTime written) => written.ToString("d", CultureInfo.CurrentCulture);
 
     private static string Normalize(string path)
     {

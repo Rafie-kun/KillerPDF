@@ -1964,4 +1964,21 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Dlg_PageRange">পৃষ্ঠা নম্বর বা পরিসর (1 থেকে {0})</sys:String>
     <sys:String x:Key="Str_Watch_FailedStep">ধাপ {0}: {1}</sys:String>
     <sys:String x:Key="Str_NavigationButtons_Show">পৃষ্ঠা নেভিগেশন বোতাম দেখান</sys:String>
+    <sys:String x:Key="Str_Untitled">শিরোনামহীন</sys:String>
+    <sys:String x:Key="Str_Filter_Word">Word ডকুমেন্ট</sys:String>
+    <sys:String x:Key="Str_Filter_Excel">Excel ওয়ার্কবুক</sys:String>
+    <sys:String x:Key="Str_Filter_PowerPoint">PowerPoint উপস্থাপনা</sys:String>
+    <sys:String x:Key="Str_Filter_Html">HTML ডকুমেন্ট</sys:String>
+    <sys:String x:Key="Str_Filter_Markdown">Markdown ডকুমেন্ট</sys:String>
+    <sys:String x:Key="Str_Filter_Json">JSON ডকুমেন্ট</sys:String>
+    <sys:String x:Key="Str_Dlg_RepairAskOpen">"{0}" খোলা যায়নি, কারণ এর কাঠামো ক্ষতিগ্রস্ত হতে পারে।
+
+KillerPDF কি মেরামতের চেষ্টা করবে? একটি মেরামত করা কপি তৈরি হবে। মূল ফাইল বদলাবে না।
+
+দ্রষ্টব্য: মেরামত করা ফাইলে বুকমার্ক, ফর্ম ও অন্যান্য ইন্টারঅ্যাক্টিভ বৈশিষ্ট্য নাও থাকতে পারে।</sys:String>
+    <sys:String x:Key="Str_Dlg_OpenedReadOnlyXRef">"{0}"-এর কাঠামো অ-মানক, তাই এটি শুধুমাত্র পঠনযোগ্য মোডে খোলা হয়েছে।
+
+সম্পাদনা, সংরক্ষণ এবং আরও কিছু বৈশিষ্ট্য ঠিকমতো কাজ নাও করতে পারে।</sys:String>
+    <sys:String x:Key="Str_Macro_OutputNameDrift">ম্যাক্রোর আউটপুট নাম অনুমোদিত পরিকল্পনা থেকে আলাদা।</sys:String>
+    <sys:String x:Key="Str_About_UpdateNotVerified">ডাউনলোড করা আপডেটটি যাচাই করা যায়নি এবং এটি বাতিল করা হয়েছে। কিছুই ইনস্টল করা হয়নি।</sys:String>
 </ResourceDictionary>

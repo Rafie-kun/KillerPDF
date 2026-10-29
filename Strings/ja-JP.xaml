@@ -1984,4 +1984,21 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Dlg_PageRange">ページ番号または範囲（1から{0}）</sys:String>
     <sys:String x:Key="Str_Watch_FailedStep">手順 {0}: {1}</sys:String>
     <sys:String x:Key="Str_NavigationButtons_Show">ページ移動ボタンを表示</sys:String>
+    <sys:String x:Key="Str_Untitled">無題</sys:String>
+    <sys:String x:Key="Str_Filter_Word">Word 文書</sys:String>
+    <sys:String x:Key="Str_Filter_Excel">Excel ブック</sys:String>
+    <sys:String x:Key="Str_Filter_PowerPoint">PowerPoint プレゼンテーション</sys:String>
+    <sys:String x:Key="Str_Filter_Html">HTML ドキュメント</sys:String>
+    <sys:String x:Key="Str_Filter_Markdown">Markdown ドキュメント</sys:String>
+    <sys:String x:Key="Str_Filter_Json">JSON ドキュメント</sys:String>
+    <sys:String x:Key="Str_Dlg_RepairAskOpen">「{0}」は構造が破損している可能性があるため、開けませんでした。
+
+KillerPDF で修復を試みますか？修復済みコピーが作成されます。元のファイルは変更されません。
+
+注意 : 修復済みファイルでは、しおり、フォーム、その他のインタラクティブ機能が失われる場合があります。</sys:String>
+    <sys:String x:Key="Str_Dlg_OpenedReadOnlyXRef">「{0}」は標準以外の構造のため、読み取り専用で開きました。
+
+編集、保存、その他の一部の機能が正しく動作しない場合があります。</sys:String>
+    <sys:String x:Key="Str_Macro_OutputNameDrift">マクロの出力名が、承認された計画と異なります。</sys:String>
+    <sys:String x:Key="Str_About_UpdateNotVerified">ダウンロードした更新を検証できなかったため、破棄しました。何もインストールされていません。</sys:String>
 </ResourceDictionary>

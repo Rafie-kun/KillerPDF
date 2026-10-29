@@ -102,8 +102,13 @@ namespace KillerPDF.Controls
 
             public string Title =>
                 string.IsNullOrEmpty(OriginalFile)
-                    ? "Untitled"
+                    ? Untitled
                     : System.IO.Path.GetFileNameWithoutExtension(OriginalFile);
+
+            // The title of a document with no saved home. Sessions are also built where no
+            // application is running (tests), so the English word stands in for the resource there.
+            private static string Untitled =>
+                Application.Current?.TryFindResource("Str_Untitled") as string ?? "Untitled";
 
             // ── Tab-strip presentation state ─────────────────────────────────────────────────
             // Everything below is bound by the tab template (PdfViewer.xaml) and nothing else
@@ -111,11 +116,11 @@ namespace KillerPDF.Controls
             // changes, so a property edited in place on a live row would otherwise never repaint.
             // (The same trap as KillerNotes issue #13.)
 
-            private string _tabLabel = "Untitled";
+            private string _tabLabel = Untitled;
             /// <summary>Title with the dirty dot, as the tab shows it.</summary>
             public string TabLabel { get => _tabLabel; private set { if (_tabLabel != value) { _tabLabel = value; Notify(); } } }
 
-            private string _tabTip = "Untitled";
+            private string _tabTip = Untitled;
             /// <summary>The tab's tooltip: the full path this document came from.</summary>
             public string TabTip { get => _tabTip; private set { if (_tabTip != value) { _tabTip = value; Notify(); } } }
 
@@ -125,7 +130,7 @@ namespace KillerPDF.Controls
             internal void RefreshTabLabel()
             {
                 TabLabel = (IsDirty ? "• " : "") + Title;
-                TabTip   = OriginalFile ?? "Untitled";
+                TabTip   = OriginalFile ?? Untitled;
             }
 
             private bool _isActive;

@@ -176,7 +176,7 @@ public partial class MainWindow
         var outputDialog = new Controls.FileDialog(Controls.FileDialogMode.Save)
         {
             Title = Loc("Str_DataMerge_SelectOutput"),
-            Filter = "PDF|*.pdf",
+            Filter = Loc("Str_Filter_Pdf") + "|*.pdf",
             DefaultExt = "pdf",
             FileName = stem
         };

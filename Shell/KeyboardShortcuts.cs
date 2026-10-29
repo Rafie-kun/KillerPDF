@@ -551,7 +551,7 @@ namespace KillerPDF.Shell
                 }
                 e.Handled = true;
             }
-            else if (key == Key.F9 && mods == ModifierKeys.Shift)
+            else if (key == Key.F9 && mods == ModifierKeys.Shift && !_fullScreen)
             {
                 ToggleSidebarSide();   // the next side, pairing with F9's collapse toggle
                 e.Handled = true;
@@ -561,8 +561,10 @@ namespace KillerPDF.Shell
                 NewDocument();
                 e.Handled = true;
             }
-            else if (key == Key.F9 && mods == ModifierKeys.None)
+            else if (key == Key.F9 && mods == ModifierKeys.None && !_fullScreen)
             {
+                // Full screen hides the sidebar and zeroes its column; toggling it there opened a
+                // blank column and left the layout inconsistent on the way back.
                 // The sidebar gets the single key, house style. F9 used to jog the view mode, which
                 // was the one redundant F-key: F5-F8 already jump straight to all four modes and the
                 // wheel over the view still cycles them. There is deliberately no Ctrl+B alias:

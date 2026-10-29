@@ -41,7 +41,7 @@ public partial class MainWindow
             if (new ProductionPreviewDialog(this, title, result).ShowDialog() != true) return;
             var picker = new Controls.FileDialog(Controls.FileDialogMode.Save)
             {
-                Title = title, Filter = "PDF|*.pdf", DefaultExt = "pdf",
+                Title = title, Filter = Loc("Str_Filter_Pdf") + "|*.pdf", DefaultExt = "pdf",
                 FileName = sourceName + "-layout.pdf"
             };
             if (picker.ShowDialog(this) != true) return;

@@ -181,7 +181,16 @@ namespace KillerPDF.Shell
             }
         }
 
-        private int CurrentPageRotation(int page) => _pageRotations.TryGetValue(page, out int rotation) ? rotation : 0;
+        // The rotation the page shows now. Native /Rotate stays on the pages of a freshly opened
+        // document until SaveTempAndReload captures it, so a page missing from the map is read from
+        // the file rather than as 0: the text's upright rotation is absolute, and a page that
+        // already reads upright must not be turned again.
+        private int CurrentPageRotation(int page)
+        {
+            if (_pageRotations.TryGetValue(page, out int rotation)) return rotation;
+            PdfEngineDocumentSession session = EnsureEngineDocumentSession();
+            return page >= 0 && page < session.PageCount ? session.Pages[page].Rotation : 0;
+        }
 
         // ---- Straighten Scanned Pages --------------------------------------------------------
 

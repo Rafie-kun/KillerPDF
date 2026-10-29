@@ -141,7 +141,10 @@ namespace KillerPDF.Shell
             target.AdoptSessionExt(s, insert);
 
             FocusPane(target);               // swaps s into the shared fields and moves the chrome
-            target.RenderActiveSessionExt(); // this pane has never drawn this document
+            // This pane has never drawn this document. A deferred tab (restored, never clicked) has
+            // no document yet, and SwitchToTab will not load the tab that is already active.
+            if (s.Doc == null && s.DeferredPath != null) target.MaterializeDeferredExt(s);
+            else target.RenderActiveSessionExt();
 
             // And the source pane, with its own fields and its own tiles restored for the call.
             source.WithOwnSession(source.RenderActiveSessionExt);

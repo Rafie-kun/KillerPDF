@@ -1973,4 +1973,21 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Dlg_PageRange">Seitenzahlen oder Bereiche (1 bis {0})</sys:String>
     <sys:String x:Key="Str_Watch_FailedStep">Schritt {0}: {1}</sys:String>
     <sys:String x:Key="Str_NavigationButtons_Show">Schaltflächen zur Seitennavigation anzeigen</sys:String>
+    <sys:String x:Key="Str_Untitled">Unbenannt</sys:String>
+    <sys:String x:Key="Str_Filter_Word">Word-Dokument</sys:String>
+    <sys:String x:Key="Str_Filter_Excel">Excel-Arbeitsmappe</sys:String>
+    <sys:String x:Key="Str_Filter_PowerPoint">PowerPoint-Präsentation</sys:String>
+    <sys:String x:Key="Str_Filter_Html">HTML-Dokument</sys:String>
+    <sys:String x:Key="Str_Filter_Markdown">Markdown-Dokument</sys:String>
+    <sys:String x:Key="Str_Filter_Json">JSON-Dokument</sys:String>
+    <sys:String x:Key="Str_Dlg_RepairAskOpen">„{0}“ konnte nicht geöffnet werden, da die Struktur möglicherweise beschädigt ist.
+
+Soll KillerPDF eine Reparatur versuchen? Es wird eine reparierte Kopie erstellt. Die Originaldatei wird nicht verändert.
+
+Hinweis: Reparierten Dateien können Lesezeichen, Formulare und andere interaktive Funktionen fehlen.</sys:String>
+    <sys:String x:Key="Str_Dlg_OpenedReadOnlyXRef">„{0}“ hat eine nicht standardmäßige Struktur und wurde schreibgeschützt geöffnet.
+
+Bearbeiten, Speichern und einige andere Funktionen funktionieren möglicherweise nicht richtig.</sys:String>
+    <sys:String x:Key="Str_Macro_OutputNameDrift">Der Name der Makroausgabe weicht vom genehmigten Plan ab.</sys:String>
+    <sys:String x:Key="Str_About_UpdateNotVerified">Das heruntergeladene Update konnte nicht überprüft werden und wurde verworfen. Es wurde nichts installiert.</sys:String>
 </ResourceDictionary>

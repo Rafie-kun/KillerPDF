@@ -31,7 +31,7 @@ public partial class MainWindow
             var records = PdfDataMergeWorkflow.LoadRecords(dataPicker.FileName);
             var picker = new Controls.FileDialog(Controls.FileDialogMode.Save)
             {
-                Title = Loc("Str_DataMerge_SelectOutput"), Filter = "PDF|*.pdf", DefaultExt = "pdf",
+                Title = Loc("Str_DataMerge_SelectOutput"), Filter = Loc("Str_Filter_Pdf") + "|*.pdf", DefaultExt = "pdf",
                 FileName = Path.GetFileNameWithoutExtension(inputs[0]) + "-" + SafeMacroFileName(macro.Name) + ".pdf"
             };
             if (picker.ShowDialog(this) != true || (!batch && !sourceCurrent())) return;

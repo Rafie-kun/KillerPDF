@@ -412,12 +412,7 @@ internal sealed class MacroDialog : Window
 
     private static string Display<T>(T value) where T : Enum
     {
-        if (value is PdfMacroOperation named && MacroStepEditor.TitleKey(named) is string key)
-            return L(key);
-        if (value is PdfMacroOperation operation && operation is (PdfMacroOperation.ImposeNUp
-            or PdfMacroOperation.ImposeBooklet or PdfMacroOperation.ImposeStepAndRepeat or PdfMacroOperation.ImposeCutStack
-            or PdfMacroOperation.ImposeManualSequence or PdfMacroOperation.ImposePoster))
-            return L(ProductionLayoutDialog.TitleKey(operation));
+        if (value is PdfMacroOperation named) return L(MacroStepEditor.TitleKey(named));
         string text = value.ToString();
         var result = new StringBuilder(text.Length + 8);
         for (int index = 0; index < text.Length; index++)

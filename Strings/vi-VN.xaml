@@ -1984,4 +1984,21 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Dlg_PageRange">Số trang hoặc phạm vi (từ 1 đến {0})</sys:String>
     <sys:String x:Key="Str_Watch_FailedStep">Bước {0}: {1}</sys:String>
     <sys:String x:Key="Str_NavigationButtons_Show">Hiện các nút điều hướng trang</sys:String>
+    <sys:String x:Key="Str_Untitled">Không có tiêu đề</sys:String>
+    <sys:String x:Key="Str_Filter_Word">Tài liệu Word</sys:String>
+    <sys:String x:Key="Str_Filter_Excel">Sổ làm việc Excel</sys:String>
+    <sys:String x:Key="Str_Filter_PowerPoint">Bản trình bày PowerPoint</sys:String>
+    <sys:String x:Key="Str_Filter_Html">Tài liệu HTML</sys:String>
+    <sys:String x:Key="Str_Filter_Markdown">Tài liệu Markdown</sys:String>
+    <sys:String x:Key="Str_Filter_Json">Tài liệu JSON</sys:String>
+    <sys:String x:Key="Str_Dlg_RepairAskOpen">Không thể mở "{0}" vì cấu trúc của tệp có thể bị hỏng.
+
+Bạn có muốn KillerPDF thử sửa chữa không? Một bản sao đã sửa chữa sẽ được tạo. Tệp gốc sẽ không bị thay đổi.
+
+Lưu ý: các tệp được sửa chữa có thể bị mất dấu trang, biểu mẫu và các tính năng tương tác khác.</sys:String>
+    <sys:String x:Key="Str_Dlg_OpenedReadOnlyXRef">"{0}" có cấu trúc không chuẩn và đã được mở ở chế độ chỉ đọc.
+
+Chỉnh sửa, lưu và một số tính năng khác có thể không hoạt động đúng.</sys:String>
+    <sys:String x:Key="Str_Macro_OutputNameDrift">Tên đầu ra của macro khác với kế hoạch đã được phê duyệt.</sys:String>
+    <sys:String x:Key="Str_About_UpdateNotVerified">Không thể xác minh bản cập nhật đã tải xuống nên bản cập nhật đã bị loại bỏ. Chưa có gì được cài đặt.</sys:String>
 </ResourceDictionary>

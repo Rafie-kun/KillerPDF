@@ -1987,4 +1987,21 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Dlg_PageRange">Номера страниц или диапазоны (от 1 до {0})</sys:String>
     <sys:String x:Key="Str_Watch_FailedStep">Шаг {0}: {1}</sys:String>
     <sys:String x:Key="Str_NavigationButtons_Show">Показывать кнопки перехода между страницами</sys:String>
+    <sys:String x:Key="Str_Untitled">Безымянный</sys:String>
+    <sys:String x:Key="Str_Filter_Word">Документ Word</sys:String>
+    <sys:String x:Key="Str_Filter_Excel">Книга Excel</sys:String>
+    <sys:String x:Key="Str_Filter_PowerPoint">Презентация PowerPoint</sys:String>
+    <sys:String x:Key="Str_Filter_Html">Документ HTML</sys:String>
+    <sys:String x:Key="Str_Filter_Markdown">Документ Markdown</sys:String>
+    <sys:String x:Key="Str_Filter_Json">Документ JSON</sys:String>
+    <sys:String x:Key="Str_Dlg_RepairAskOpen">Не удалось открыть "{0}", так как его структура может быть повреждена.
+
+Хотите, чтобы KillerPDF попытался выполнить восстановление? Будет создана восстановленная копия. Исходный файл изменен не будет.
+
+Примечание: в восстановленных файлах могут отсутствовать закладки, формы и другие интерактивные функции.</sys:String>
+    <sys:String x:Key="Str_Dlg_OpenedReadOnlyXRef">"{0}" имеет нестандартную структуру и был открыт только для чтения.
+
+Редактирование, сохранение и некоторые другие функции могут работать неправильно.</sys:String>
+    <sys:String x:Key="Str_Macro_OutputNameDrift">Имя выходного файла макроса отличается от утверждённого плана.</sys:String>
+    <sys:String x:Key="Str_About_UpdateNotVerified">Не удалось проверить загруженное обновление, поэтому оно было удалено. Ничего не установлено.</sys:String>
 </ResourceDictionary>

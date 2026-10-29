@@ -23,7 +23,7 @@ namespace KillerPDF.Features
     // milliseconds per page so two builds can be compared on the same input.
     //
     // Exit codes: 0 = every selected file rendered, 1 = a file could not render
-    // or the input contained no PDFs, 2 = bad usage or bad paths.
+    // or the input contained no PDFs or the run itself failed, 2 = bad usage or bad paths.
     internal static class BatchRenderRunner
     {
         private const int DefaultSize = 1024;
@@ -111,7 +111,7 @@ namespace KillerPDF.Features
             catch (Exception ex)
             {
                 con.WriteLine("Render batch failed: " + BatchRunner.FlattenBatchDetail(ex.Message));
-                exitCode = 2;
+                exitCode = 1;
             }
             return true;
         }

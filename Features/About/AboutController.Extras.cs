@@ -52,6 +52,13 @@ namespace KillerPDF.Features.About
             if (string.IsNullOrEmpty(value)) value = _host.Loc("Str_Margin_None");
         }
 
+        partial void UpdateNotVerified(System.Exception failure)
+        {
+            KillerPDF.CrashReporter.Capture(failure, "Update download refused");
+            KillerDialog.Show(_host.Window, _host.Loc("Str_About_UpdateNotVerified"),
+                "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+
         private void PrepareFailed()
             => KillerDialog.Show(_host.Window, _host.Loc("Str_UpdateRestartPrepareFailed"),
                 "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Warning);

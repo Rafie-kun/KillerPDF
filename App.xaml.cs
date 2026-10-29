@@ -82,6 +82,7 @@ namespace KillerPDF
                 Shutdown(Services.TrustedUpdate.Apply(e.Args));
                 return;
             }
+            Services.PdfEngineBurn.MacroTempFile = MakeTempFile;
             KillerFamily.Accessibility.AccessibleControls.Initialize();
             KillerFamily.Theming.AccentShadow.Initialize();
             KillerFamily.Layout.ShortcutHints.Initialize(GetSetting, SetSetting);
@@ -1292,6 +1293,14 @@ namespace KillerPDF
                 using var installLease = KillerFamily.Deployment.InstallerExitCodes.Acquire(AppName);
                 string src = Environment.ProcessPath
                     ?? throw new InvalidOperationException("The current executable path is unavailable.");
+
+                // Only this exe is copied, so it has to carry the whole app. The installed application's
+                // own KillerPDF.App.exe does not, and registering it would leave a copy that cannot start.
+                if (!CurrentExeIsSelfContained())
+                {
+                    Console.Error.WriteLine("Silent install needs the KillerPDF.exe installer, not the installed application.");
+                    return KillerFamily.Deployment.InstallerExitCodes.Failure;
+                }
 
                 // Same trust gate as the interactive path - an unsigned or wrong-publisher exe must
                 // not be able to write itself into Program Files, least of all while elevated.

@@ -83,7 +83,7 @@ public partial class MainWindow
         var outputDialog = new Controls.FileDialog(Controls.FileDialogMode.Save)
         {
             Title = Loc("Str_Macro_SelectOutput"),
-            Filter = "PDF|*.pdf",
+            Filter = Loc("Str_Filter_Pdf") + "|*.pdf",
             DefaultExt = "pdf",
             FileName = suggested,
             InitialDirectory = renames ? Path.GetDirectoryName(sourcePath) ?? "" : "",
@@ -139,7 +139,7 @@ public partial class MainWindow
             {
                 token.ThrowIfCancellationRequested();
                 if (renames && result.OutputFileName != Path.GetFileName(outputDialog.FileName))
-                    throw new InvalidOperationException("The macro output name differs from its approved plan.");
+                    throw new InvalidOperationException(Loc("Str_Macro_OutputNameDrift"));
                 written = WriteGeneratedMacroOutputs([new(data, Path.GetFileName(outputDialog.FileName))
                     { Exports = result.Exports }], plannedFiles, overwrite, writeReport, token);
             }
@@ -344,21 +344,5 @@ public partial class MainWindow
         return safe.Trim().Length == 0 ? "macro" : safe.Trim();
     }
 
-    private static string MacroOperationName(PdfMacroOperation operation)
-    {
-        if (MacroStepEditor.TitleKey(operation) is string key) return Loc(key);
-        if (operation is PdfMacroOperation.ImposeNUp or PdfMacroOperation.ImposeBooklet
-            or PdfMacroOperation.ImposeStepAndRepeat or PdfMacroOperation.ImposeCutStack
-            or PdfMacroOperation.ImposeManualSequence or PdfMacroOperation.ImposePoster)
-            return Loc(ProductionLayoutDialog.TitleKey(operation));
-        string text = operation.ToString();
-        var result = new StringBuilder(text.Length + 8);
-        for (int index = 0; index < text.Length; index++)
-        {
-            if (index > 0 && char.IsUpper(text[index]) && !char.IsUpper(text[index - 1]))
-                result.Append(' ');
-            result.Append(text[index]);
-        }
-        return result.ToString();
-    }
+    private static string MacroOperationName(PdfMacroOperation operation) => Loc(MacroStepEditor.TitleKey(operation));
 }

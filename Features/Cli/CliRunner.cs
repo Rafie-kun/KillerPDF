@@ -338,6 +338,11 @@ namespace KillerPDF.Features
                         break;
                 }
             }
+            catch (CliUsageException ex)
+            {
+                con.WriteLine(FlattenBatchDetail(ex.Message));
+                exitCode = 2;
+            }
             catch (Exception ex)
             {
                 con.WriteLine("Error: " + FlattenBatchDetail(ex.Message));
@@ -394,7 +399,7 @@ namespace KillerPDF.Features
             "  killerpdf nup <in.pdf> <out.pdf> --grid <cols>x<rows> [--sheet <name|WxH>] [--margin <n>]",
             "                                           [--gutter <n>] [--marks]   place several pages per sheet",
             "  killerpdf auto-bookmarks <in.pdf> <out.pdf> [--min-size <pt>] [--depth <n>] [--pattern <regex>]",
-            "                                           build an outline from detected headings",
+            "                                           build an outline from detected headings; exit 3 when no headings are found",
             "  killerpdf preflight <in.pdf> [--profile general|attachments|print|<profile.json>]",
             "                                           [--json] [--password <p>]   exit 3 when findings",
             "  killerpdf accessibility <in.pdf> [--json]        report accessibility findings; exit 3 when found",
@@ -508,7 +513,7 @@ namespace KillerPDF.Features
             "                                           failing: to-image, flatten and print name it; batch-render",
             "                                           marks it INCOMPLETE and counts it, keeping its log row OK",
             "",
-            "Exit codes: 0 success, 1 operation failed, 2 bad usage.",
+            "Exit codes: 0 success, 1 operation failed, 2 bad usage, 3 findings or nothing to do (where noted).",
             "Runs headless and works while the KillerPDF window is open.",
         ]);
 
@@ -1617,13 +1622,18 @@ namespace KillerPDF.Features
             if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
         }
 
-        private static double CliParseDpi(Dictionary<string, string> options, double fallback)
+        private static bool TryReadDpi(Dictionary<string, string> options, double fallback, TextWriter con, out double dpi)
         {
-            if (options.TryGetValue("--dpi", out var s) &&
-                double.TryParse(s, out double d) && d >= 24 && d <= 1200)
-                return d;
-            return fallback;
+            dpi = fallback;
+            if (!options.TryGetValue("--dpi", out string? raw)) return true;
+            if (double.TryParse(raw, NumberStyles.Float, CultureInfo.InvariantCulture, out dpi)
+                && double.IsFinite(dpi) && dpi >= 24 && dpi <= 1200) return true;
+            con.WriteLine("--dpi must be between 24 and 1200.");
+            return false;
         }
+
+        /// <summary>A command-line option value the user must correct: the run ends with exit code 2.</summary>
+        private sealed class CliUsageException(string message) : ArgumentException(message);
 
         // ============================================================
         // --to-image <in.pdf> <outDir> [--dpi n] [--format png|jpg] [--pages range] [--transparent]
@@ -1651,7 +1661,7 @@ namespace KillerPDF.Features
             }
             string inPath = Path.GetFullPath(pos[0]), outDir = Path.GetFullPath(pos[1]);
             if (!File.Exists(inPath)) { con.WriteLine($"Input not found: {inPath}"); return 2; }
-            double dpi = CliParseDpi(options, 150);
+            if (!TryReadDpi(options, 150, con, out double dpi)) return 2;
             options.TryGetValue("--format", out var fmtRaw);
             string fmt = (fmtRaw ?? "png").ToLowerInvariant();
             if (fmt == "jpeg") fmt = "jpg";
@@ -1716,7 +1726,7 @@ namespace KillerPDF.Features
             }
             string inPath = Path.GetFullPath(pos[0]), outPath = Path.GetFullPath(pos[1]);
             if (!File.Exists(inPath)) { con.WriteLine($"Input not found: {inPath}"); return 2; }
-            double dpi = CliParseDpi(options, 150);
+            if (!TryReadDpi(options, 150, con, out double dpi)) return 2;
             PageColorMode colorMode = PageColorMode.Color;
             if (options.TryGetValue("--color-mode", out string? colorRaw))
             {
@@ -1725,7 +1735,7 @@ namespace KillerPDF.Features
                     "color" => PageColorMode.Color,
                     "grayscale" or "gray" => PageColorMode.Grayscale,
                     "black-white" or "blackandwhite" or "bitonal" => PageColorMode.BlackAndWhite,
-                    _ => throw new ArgumentException(
+                    _ => throw new CliUsageException(
                         "--color-mode must be color, grayscale, or black-white."),
                 };
             }
@@ -1738,11 +1748,11 @@ namespace KillerPDF.Features
                 {
                     "lossless" => false,
                     "jpeg" => true,
-                    _ => throw new ArgumentException("--compression must be lossless or jpeg."),
+                    _ => throw new CliUsageException("--compression must be lossless or jpeg."),
                 };
             }
             if (colorMode == PageColorMode.BlackAndWhite && useJpeg)
-                throw new ArgumentException("Black-and-white flattening requires lossless compression.");
+                throw new CliUsageException("Black-and-white flattening requires lossless compression.");
             ScanLookOptions? look = null;
             if (options.TryGetValue("--scanned-look", out string? lookRaw))
             {
@@ -1751,7 +1761,7 @@ namespace KillerPDF.Features
                 string[] known = ["tilt", "paper", "grain", "soft-focus", "shadow"];
                 if (effects.Length == 1 && effects[0] == "all") effects = known;
                 if (effects.Length == 0 || effects.Any(effect => !known.Contains(effect)))
-                    throw new ArgumentException("--scanned-look takes all, or any of tilt, paper, grain, soft-focus, shadow.");
+                    throw new CliUsageException("--scanned-look takes all, or any of tilt, paper, grain, soft-focus, shadow.");
                 look = new ScanLookOptions(effects.Contains("tilt"), effects.Contains("paper"), effects.Contains("grain"),
                     effects.Contains("soft-focus"), effects.Contains("shadow"));
             }
@@ -1837,8 +1847,9 @@ namespace KillerPDF.Features
             Dictionary<string, string> options, string name, int fallback, int minimum, int maximum)
         {
             if (!options.TryGetValue(name, out string? raw)) return fallback;
-            if (!int.TryParse(raw, out int value) || value < minimum || value > maximum)
-                throw new ArgumentException($"{name} must be between {minimum} and {maximum}.");
+            if (!int.TryParse(raw, NumberStyles.Integer, CultureInfo.InvariantCulture, out int value)
+                || value < minimum || value > maximum)
+                throw new CliUsageException($"{name} must be between {minimum} and {maximum}.");
             return value;
         }
 
@@ -2230,6 +2241,14 @@ namespace KillerPDF.Features
                 return 2;
             }
             string path = Path.GetFullPath(pos[0]);
+            // SearchService.Search reports an unreadable file as no hits, which the viewer relies on.
+            // A script needs to tell "not found" from "could not read".
+            try { using (PdfContentDocument.Open(path)) { } }
+            catch (Exception ex)
+            {
+                con.WriteLine("Could not read the document: " + FlattenBatchDetail(ex.Message));
+                return 1;
+            }
             SearchResult found = SearchService.Search(path, pos[1]);
             con.WriteLine(JsonSerializer.Serialize(new
             {

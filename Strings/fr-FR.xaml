@@ -1984,4 +1984,21 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Dlg_PageRange">Numéros de page ou plages (1 à {0})</sys:String>
     <sys:String x:Key="Str_Watch_FailedStep">Étape {0} : {1}</sys:String>
     <sys:String x:Key="Str_NavigationButtons_Show">Afficher les boutons de navigation des pages</sys:String>
+    <sys:String x:Key="Str_Untitled">Sans titre</sys:String>
+    <sys:String x:Key="Str_Filter_Word">Document Word</sys:String>
+    <sys:String x:Key="Str_Filter_Excel">Classeur Excel</sys:String>
+    <sys:String x:Key="Str_Filter_PowerPoint">Présentation PowerPoint</sys:String>
+    <sys:String x:Key="Str_Filter_Html">Document HTML</sys:String>
+    <sys:String x:Key="Str_Filter_Markdown">Document Markdown</sys:String>
+    <sys:String x:Key="Str_Filter_Json">Document JSON</sys:String>
+    <sys:String x:Key="Str_Dlg_RepairAskOpen">« {0} » n'a pas pu être ouvert, car sa structure est peut-être endommagée.
+
+Voulez-vous que KillerPDF tente une réparation ? Une copie réparée sera créée. Le fichier original ne sera pas modifié.
+
+Remarque : les fichiers réparés peuvent manquer de signets, de formulaires et d'autres fonctions interactives.</sys:String>
+    <sys:String x:Key="Str_Dlg_OpenedReadOnlyXRef">« {0} » a une structure non standard et a été ouvert en lecture seule.
+
+La modification, l'enregistrement et certaines autres fonctions peuvent ne pas fonctionner correctement.</sys:String>
+    <sys:String x:Key="Str_Macro_OutputNameDrift">Le nom de sortie de la macro diffère du plan approuvé.</sys:String>
+    <sys:String x:Key="Str_About_UpdateNotVerified">La mise à jour téléchargée n'a pas pu être vérifiée et a été supprimée. Rien n'a été installé.</sys:String>
 </ResourceDictionary>

@@ -54,6 +54,12 @@ internal static class PdfEngineBurn
         return options;
     }
 
+    /// <summary>Names the working file the watermark macro writes the document to. The app points this at
+    /// its session temp folder, whose files a crash cannot leave behind in the shared temp folder; the
+    /// default serves a host without one.</summary>
+    internal static Func<string, string> MacroTempFile { get; set; } =
+        tag => Path.Combine(Path.GetTempPath(), $"killerpdf_{tag}_{Guid.NewGuid():N}.pdf");
+
     internal static PdfMacroOperationResult ExecuteWatermarkMacro(PdfMacroStep step,
         ReadOnlyMemory<byte> source, IReadOnlyDictionary<string, string> values,
         CancellationToken cancellationToken)
@@ -62,7 +68,7 @@ internal static class PdfEngineBurn
         PdfTextWatermarkOptions options = ReadWatermarkStep(step);
         if (Font(new Dictionary<string, TrueTypeFont>(), "Segoe UI", options.Text, true, false) is null)
             throw new InvalidOperationException("No usable font is available for the watermark text.");
-        string path = Path.Combine(Path.GetTempPath(), $"killerpdf-watermark-{Guid.NewGuid():N}.pdf");
+        string path = MacroTempFile("watermark");
         try
         {
             File.WriteAllBytes(path, source.ToArray());

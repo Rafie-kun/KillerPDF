@@ -91,14 +91,29 @@ namespace KillerLauncher
             catch (Exception ex)
             {
 #if INSTALLER_PACKAGE
-                if (args.Any(a => string.Equals(a, "/silent", StringComparison.OrdinalIgnoreCase)))
+                // The application's own Update button runs a machine install as /silent with /relaunch.
+                // The app has already closed and nobody is watching a console, so that run shows the
+                // failure and brings the old copy back; plain /silent (winget, an RMM) stays quiet.
+                bool updateHandoff = UpdateRelaunchArguments.Requested(args);
+                if (!updateHandoff && args.Any(a => string.Equals(a, "/silent", StringComparison.OrdinalIgnoreCase)))
                 {
                     Console.Error.WriteLine(ProductName + " setup failed: " + ex.Message);
                     return KillerFamily.Deployment.InstallerExitCodes.FromException(ex);
                 }
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
-                return InstallerWizard.ShowFailure(ex.Message, KillerFamily.Deployment.InstallerExitCodes.FromException(ex));
+                try
+                {
+                    return InstallerWizard.ShowFailure(ex.Message, KillerFamily.Deployment.InstallerExitCodes.FromException(ex));
+                }
+                finally
+                {
+                    // Exit code 0 here only lets the relaunch run; the failure code is returned above.
+                    if (updateHandoff)
+                        RelaunchAfterInstall(0, args,
+                            machine: !args.Any(a => string.Equals(a, "/install-user", StringComparison.OrdinalIgnoreCase))
+                                && KillerFamily.Deployment.InstallerExitCodes.IsElevated());
+                }
 #else
                 if (args.Any(a => string.Equals(a, "--startup-smoke", StringComparison.OrdinalIgnoreCase)))
                 {

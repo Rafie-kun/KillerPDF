@@ -1987,4 +1987,21 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_Dlg_PageRange">Бет нөмірлері немесе ауқымдары (1 мен {0} аралығы)</sys:String>
     <sys:String x:Key="Str_Watch_FailedStep">{0}-қадам: {1}</sys:String>
     <sys:String x:Key="Str_NavigationButtons_Show">Беттерді шарлау түймелерін көрсету</sys:String>
+    <sys:String x:Key="Str_Untitled">Атаусыз</sys:String>
+    <sys:String x:Key="Str_Filter_Word">Word құжаты</sys:String>
+    <sys:String x:Key="Str_Filter_Excel">Excel жұмыс кітабы</sys:String>
+    <sys:String x:Key="Str_Filter_PowerPoint">PowerPoint презентациясы</sys:String>
+    <sys:String x:Key="Str_Filter_Html">HTML құжаты</sys:String>
+    <sys:String x:Key="Str_Filter_Markdown">Markdown құжаты</sys:String>
+    <sys:String x:Key="Str_Filter_Json">JSON құжаты</sys:String>
+    <sys:String x:Key="Str_Dlg_RepairAskOpen">"{0}" құрылымы зақымдалған болуы мүмкін болғандықтан, ашылмады.
+
+KillerPDF жөндеуге әрекет жасасын ба? Жөнделген көшірме жасалады. Түпнұсқа файл өзгертілмейді.
+
+Ескерту: жөнделген файлдарда бетбелгілер, пішіндер және басқа интерактивті мүмкіндіктер болмауы мүмкін.</sys:String>
+    <sys:String x:Key="Str_Dlg_OpenedReadOnlyXRef">"{0}" стандартты емес құрылымға ие, сондықтан тек оқу режимінде ашылды.
+
+Түзету, сақтау және кейбір басқа мүмкіндіктер дұрыс жұмыс істемеуі мүмкін.</sys:String>
+    <sys:String x:Key="Str_Macro_OutputNameDrift">Макрос шығысының атауы бекітілген жоспардан өзгеше.</sys:String>
+    <sys:String x:Key="Str_About_UpdateNotVerified">Жүктелген жаңартуды тексеру мүмкін болмады, сондықтан ол жойылды. Ештеңе орнатылған жоқ.</sys:String>
 </ResourceDictionary>

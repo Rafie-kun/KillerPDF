@@ -241,31 +241,7 @@ internal sealed class WatchedFolderDialog : Window
         _ => "Str_Watch_Failure"
     });
 
-    private static string OperationName(PdfMacroOperation operation)
-    {
-        if (operation is PdfMacroOperation.ImposeNUp or PdfMacroOperation.ImposeBooklet
-            or PdfMacroOperation.ImposeStepAndRepeat or PdfMacroOperation.ImposeCutStack
-            or PdfMacroOperation.ImposeManualSequence or PdfMacroOperation.ImposePoster)
-            return L(ProductionLayoutDialog.TitleKey(operation));
-        string? key = MacroStepEditor.TitleKey(operation) ?? operation switch
-        {
-            PdfMacroOperation.Ocr => "Str_Lbl_Ocr", PdfMacroOperation.Optimize => "Str_Reduce_Title",
-            PdfMacroOperation.Redact => "Str_Lbl_Redact",
-            PdfMacroOperation.Save => "Str_Btn_Save", PdfMacroOperation.Flatten => "Str_Lbl_Flatten",
-            PdfMacroOperation.Validate => "Str_DocumentTools_Preflight",
-            PdfMacroOperation.NumberPages => "Str_Stamp_SecNumbers",
-            PdfMacroOperation.AuditNavigation => "Str_DocumentTools_NavigationAudit",
-            PdfMacroOperation.RemoveUnsafeLinks => "Str_Navigation_RemoveUnsafe",
-            PdfMacroOperation.RemoveUnresolvedLinks => "Str_Navigation_RemoveUnresolved",
-            PdfMacroOperation.GenerateBookmarks => "Str_DocumentTools_AutoBookmarks",
-            PdfMacroOperation.GenerateTableOfContents => "Str_DocumentTools_InsertToc",
-            PdfMacroOperation.AuditAttachments => "Str_Watch_AuditAttachments",
-            PdfMacroOperation.RemoveAttachments => "Str_Watch_RemoveAttachments",
-            PdfMacroOperation.FlattenLayers => "Str_Watch_FlattenLayers",
-            _ => null
-        };
-        return key is null ? operation.ToString() : L(key);
-    }
+    private static string OperationName(PdfMacroOperation operation) => L(MacroStepEditor.TitleKey(operation));
     private static Button Button(string key, string id, Action action, bool accent = false)
     {
         Button button = UiKit.Make(new TextBlock { Text = L(key), TextWrapping = TextWrapping.Wrap,

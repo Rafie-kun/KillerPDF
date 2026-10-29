@@ -231,6 +231,15 @@ namespace KillerPDF.Features.About
             {
                 newExe = await UpdateService.DownloadAsync(tag!);
             }
+            catch (UpdateVerificationException ex)
+            {
+                // The download arrived but was refused, so the releases page is no remedy: say so.
+                _updating           = false;
+                _host.UpdateEnabled = true;
+                _host.UpdateText    = string.Format(_host.Loc("Str_About_UpdateAvailable"), tag);
+                UpdateNotVerified(ex);
+                return;
+            }
             catch
             {
                 _updating           = false;
@@ -285,5 +294,9 @@ namespace KillerPDF.Features.About
             }
             catch { /* The helper finishes once the app does close. */ }
         }
+
+        /// <summary>Tells the user a downloaded update was refused by its checksum or signature. Each app
+        /// implements it in its own AboutController.Extras.cs; an app that does not still compiles.</summary>
+        partial void UpdateNotVerified(Exception failure);
     }
 }

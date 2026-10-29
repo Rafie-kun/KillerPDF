@@ -1984,4 +1984,21 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Dlg_PageRange">Sidetall eller områder (1 til {0})</sys:String>
     <sys:String x:Key="Str_Watch_FailedStep">Trinn {0}: {1}</sys:String>
     <sys:String x:Key="Str_NavigationButtons_Show">Vis knapper for sidenavigering</sys:String>
+    <sys:String x:Key="Str_Untitled">Uten navn</sys:String>
+    <sys:String x:Key="Str_Filter_Word">Word-dokument</sys:String>
+    <sys:String x:Key="Str_Filter_Excel">Excel-regneark</sys:String>
+    <sys:String x:Key="Str_Filter_PowerPoint">PowerPoint-presentasjon</sys:String>
+    <sys:String x:Key="Str_Filter_Html">HTML-dokument</sys:String>
+    <sys:String x:Key="Str_Filter_Markdown">Markdown-dokument</sys:String>
+    <sys:String x:Key="Str_Filter_Json">JSON-dokument</sys:String>
+    <sys:String x:Key="Str_Dlg_RepairAskOpen">«{0}» kunne ikke åpnes fordi strukturen kan være skadet.
+
+Vil du at KillerPDF skal prøve å reparere den? Det opprettes en reparert kopi, og originalfilen endres ikke.
+
+Merk: reparerte filer kan mangle bokmerker, skjemaer og andre interaktive funksjoner.</sys:String>
+    <sys:String x:Key="Str_Dlg_OpenedReadOnlyXRef">«{0}» har en ikke-standard struktur og ble åpnet skrivebeskyttet.
+
+Redigering, lagring og enkelte andre funksjoner fungerer kanskje ikke som de skal.</sys:String>
+    <sys:String x:Key="Str_Macro_OutputNameDrift">Utdatanavnet for makroen avviker fra den godkjente planen.</sys:String>
+    <sys:String x:Key="Str_About_UpdateNotVerified">Den nedlastede oppdateringen kunne ikke bekreftes og ble forkastet. Ingenting ble installert.</sys:String>
 </ResourceDictionary>

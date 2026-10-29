@@ -1964,4 +1964,21 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Dlg_PageRange">Números de página o intervalos (1 a {0})</sys:String>
     <sys:String x:Key="Str_Watch_FailedStep">Paso {0}: {1}</sys:String>
     <sys:String x:Key="Str_NavigationButtons_Show">Mostrar botones de navegación de páginas</sys:String>
+    <sys:String x:Key="Str_Untitled">Sin título</sys:String>
+    <sys:String x:Key="Str_Filter_Word">Documento de Word</sys:String>
+    <sys:String x:Key="Str_Filter_Excel">Libro de Excel</sys:String>
+    <sys:String x:Key="Str_Filter_PowerPoint">Presentación de PowerPoint</sys:String>
+    <sys:String x:Key="Str_Filter_Html">Documento HTML</sys:String>
+    <sys:String x:Key="Str_Filter_Markdown">Documento Markdown</sys:String>
+    <sys:String x:Key="Str_Filter_Json">Documento JSON</sys:String>
+    <sys:String x:Key="Str_Dlg_RepairAskOpen">"{0}" no se pudo abrir porque su estructura puede estar dañada.
+
+¿Desea que KillerPDF intente repararlo? Se creará una copia reparada. El archivo original no se modificará.
+
+Nota: los archivos reparados pueden carecer de marcadores, formularios y otras funciones interactivas.</sys:String>
+    <sys:String x:Key="Str_Dlg_OpenedReadOnlyXRef">"{0}" tiene una estructura no estándar y se abrió en modo de solo lectura.
+
+Es posible que la edición, el guardado y algunas otras funciones no funcionen correctamente.</sys:String>
+    <sys:String x:Key="Str_Macro_OutputNameDrift">El nombre de salida de la macro difiere del plan aprobado.</sys:String>
+    <sys:String x:Key="Str_About_UpdateNotVerified">No se pudo verificar la actualización descargada y se ha descartado. No se ha instalado nada.</sys:String>
 </ResourceDictionary>

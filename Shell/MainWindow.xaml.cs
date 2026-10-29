@@ -516,7 +516,10 @@ namespace KillerPDF.Shell
                     SetRestoredSessions([tornOut], tornOut);
                     ApplySessionState(tornOut);
                     RebuildTabStrip();
-                    RenderActiveSession();
+                    // A restored tab that was never clicked arrives deferred, and nothing else
+                    // loads the active tab, so it is materialized here as the update restart does.
+                    if (tornOut.Doc == null && tornOut.DeferredPath != null) MaterializeDeferred(tornOut);
+                    else RenderActiveSession();
                 }
                 else if (App.TakeUpdateRestart() is { } updateRestart)
                 {

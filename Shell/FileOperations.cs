@@ -140,8 +140,8 @@ namespace KillerPDF.Shell
                     FinishOpenFile(path, srcPath);
                     SetStatus(string.Format(Loc("Str_OpenedReadOnlyXRef"), System.IO.Path.GetFileName(path), _doc.PageCount));
                     KillerDialog.Show(this,
-                        $"\"{System.IO.Path.GetFileName(path)}\" has a non-standard structure and was opened read-only.\n\nEditing, saving, and some other features may not work correctly.",
-                        "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        string.Format(Loc("Str_Dlg_OpenedReadOnlyXRef"), System.IO.Path.GetFileName(path)),
+                        Loc("Str_Dlg_AppTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
                 catch (WorkingCopyUnavailableException copy)
                 {
@@ -151,8 +151,8 @@ namespace KillerPDF.Shell
                 {
                     // ReadOnly also failed - offer to repair.
                     var result = KillerDialog.Show(this,
-                        string.Format(Loc("Str_Dlg_RepairAsk"), System.IO.Path.GetFileName(path)),
-                        "KillerPDF", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                        string.Format(Loc("Str_Dlg_RepairAskOpen"), System.IO.Path.GetFileName(path)),
+                        Loc("Str_Dlg_AppTitle"), MessageBoxButton.YesNo, MessageBoxImage.Warning);
                     if (result == MessageBoxResult.Yes)
                         TryRepairAndOpen(srcPath);
                 }
@@ -172,8 +172,8 @@ namespace KillerPDF.Shell
                 // we can't classify the damage, but the PDFium-based repair often recovers it anyway, so
                 // offer the repair rather than just failing outright.
                 var result = KillerDialog.Show(this,
-                    "This PDF couldn't be opened because its structure may be damaged.\n\nWould you like KillerPDF to attempt a repair? A repaired copy will be created, and the original file will not be changed.\n\nNote: repaired files may be missing bookmarks, forms, and other interactive features.",
-                    "KillerPDF", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                    string.Format(Loc("Str_Dlg_RepairAskOpen"), System.IO.Path.GetFileName(path)),
+                    Loc("Str_Dlg_AppTitle"), MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (result == MessageBoxResult.Yes)
                     TryRepairAndOpen(srcPath);   // sets _asyncOpenPending and finalizes the tab itself
             }
@@ -285,8 +285,11 @@ namespace KillerPDF.Shell
                 if (measurements.Count == 0) return measurements;
                 string stripped = App.MakeTempFile("measure");
                 PdfEngineIntegration.RemoveMeasurements(workingPath, stripped);
+                // The stripped copy opens before the live document closes, so a failed reopen keeps
+                // the document usable with its measurements still in the page.
+                var reopened = PdfWorkingDocument.Open(stripped);
                 _doc.Close();
-                _doc = PdfWorkingDocument.Open(stripped);
+                _doc = reopened;
                 workingPath = stripped;
                 return measurements;
             }
@@ -748,7 +751,11 @@ namespace KillerPDF.Shell
                 File.WriteAllBytes(tempPath, PdfEngineIntegration.CreateBlankDocument());
 
                 _doc = PdfWorkingDocument.Open(tempPath);
-                FinishOpenFile("Untitled.pdf", tempPath);
+                // The blank document has no saved home. It opens as a temp-backed import, the way a
+                // browser download does, so FinishOpenFile leaves it without an original file and
+                // the first Save asks where to keep it instead of writing next to the process.
+                App.RememberSuggestedName(tempPath, Loc("Str_Untitled") + ".pdf");
+                FinishOpenFile(tempPath, tempPath);
                 SetStatus(Loc("Str_KS_NewBlank"));
                 CaptureSessionState(_active!);
                 SetTool(_currentTool);   // sync the tool UI to this (new) tab's tool
@@ -920,7 +927,7 @@ namespace KillerPDF.Shell
                 bool exists = System.IO.File.Exists(path);
                 string dir = System.IO.Path.GetDirectoryName(path) ?? "";
                 string dateStr = exists
-                    ? $"{System.IO.File.GetLastWriteTime(path):MMM d, yyyy}"
+                    ? Services.RecentFilesList.DateLabel(System.IO.File.GetLastWriteTime(path))
                     : Loc("Str_RecentMissing");
 
                 var name = new TextBlock
@@ -1357,26 +1364,16 @@ namespace KillerPDF.Shell
                     WriteMeasurementsToDocument(tempEdited);
                     PdfEngineIntegration.ApplyPageRotations(tempEdited, finalRotations);
                     var completeSource = CompleteDocumentSource.Capture(tempEdited);
+                    // The working copy reopens before the destination changes: a failed reopen then
+                    // leaves the file on disk untouched and the tab on its current document.
+                    var reopened = ReopenCleanWorkingCopy(ref tempClean);
                     PdfEngineIntegration.ReplaceFileAtomically(tempEdited, saveTarget);
                     _completeDocumentSource = completeSource;
                     // Signing reads these bytes, since the working copy lacks what the save burned in.
                     _publishedFile = Services.PublishedFileStamp.Capture(saveTarget);
                     _loadedRevision = Services.FileRevision.Capture(saveTarget);
                     _doc.Close();
-                    try
-                    {
-                        _doc = PdfWorkingDocument.Open(tempClean);
-                    }
-                    catch (Exception saveOpenEx) when (PdfImport.IsXRefException(saveOpenEx))
-                    {
-                        var fixedPath = App.MakeTempFile("savefixed");
-                        if (!PdfImport.TryImportRepairToPath(tempClean, fixedPath)
-                            && !PdfEngineIntegration.TryCreateZeroRotationCopy(
-                                tempClean, fixedPath))
-                            throw;
-                        tempClean = fixedPath;
-                        _doc = PdfWorkingDocument.Open(tempClean);
-                    }
+                    _doc = reopened;
                     _currentFile = tempClean;
                 }
                 else
@@ -1413,6 +1410,26 @@ namespace KillerPDF.Shell
             catch (Exception ex)
             {
                 KillerDialog.Show(this, Loc("Str_Err_SaveFailed") + "\n" + ex.Message, "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // The clean working copy a save or export continues from, with the repair fallback the
+        // open path uses. Callers open it before closing the current document, so a failed reopen
+        // leaves the tab on a usable document.
+        private static PdfWorkingDocument ReopenCleanWorkingCopy(ref string tempClean)
+        {
+            try
+            {
+                return PdfWorkingDocument.Open(tempClean);
+            }
+            catch (Exception saveOpenEx) when (PdfImport.IsXRefException(saveOpenEx))
+            {
+                var fixedPath = App.MakeTempFile("savefixed");
+                if (!PdfImport.TryImportRepairToPath(tempClean, fixedPath)
+                    && !PdfEngineIntegration.TryCreateZeroRotationCopy(tempClean, fixedPath))
+                    throw;
+                tempClean = fixedPath;
+                return PdfWorkingDocument.Open(tempClean);
             }
         }
 
@@ -1547,26 +1564,16 @@ namespace KillerPDF.Shell
                     WriteMeasurementsToDocument(tempEdited);
                     PdfEngineIntegration.ApplyPageRotations(tempEdited, finalRotations);
                     var completeSource = CompleteDocumentSource.Capture(tempEdited);
+                    // The working copy reopens before the destination changes: a failed reopen then
+                    // leaves the file on disk untouched and the tab on its current document.
+                    var reopened = ReopenCleanWorkingCopy(ref tempClean);
                     PdfEngineIntegration.ReplaceFileAtomically(tempEdited, dlg.FileName);
                     _completeDocumentSource = completeSource;
                     // Signing reads these bytes, since the working copy lacks what the save burned in.
                     _publishedFile = Services.PublishedFileStamp.Capture(dlg.FileName);
                     _loadedRevision = Services.FileRevision.Capture(dlg.FileName);
                     _doc.Close();
-                    try
-                    {
-                        _doc = PdfWorkingDocument.Open(tempClean);
-                    }
-                    catch (Exception saveOpenEx) when (PdfImport.IsXRefException(saveOpenEx))
-                    {
-                        var fixedPath = App.MakeTempFile("savefixed");
-                        if (!PdfImport.TryImportRepairToPath(tempClean, fixedPath)
-                            && !PdfEngineIntegration.TryCreateZeroRotationCopy(
-                                tempClean, fixedPath))
-                            throw;
-                        tempClean = fixedPath;
-                        _doc = PdfWorkingDocument.Open(tempClean);
-                    }
+                    _doc = reopened;
                     _currentFile = tempClean;
                     _originalFile = dlg.FileName;
                     _suggestedName = null;
@@ -1766,14 +1773,14 @@ namespace KillerPDF.Shell
             extension = System.IO.Path.GetExtension(extension);
             string description = options.Format switch
             {
-                PdfStructuredExportFormat.WordDocument => "Word document",
-                PdfStructuredExportFormat.Spreadsheet => "Excel workbook",
-                PdfStructuredExportFormat.Presentation => "PowerPoint presentation",
-                PdfStructuredExportFormat.Html => "HTML document",
-                PdfStructuredExportFormat.Markdown => "Markdown document",
-                PdfStructuredExportFormat.PlainText => "Text document",
-                PdfStructuredExportFormat.Json => "JSON document",
-                _ => "Document"
+                PdfStructuredExportFormat.WordDocument => Loc("Str_Filter_Word"),
+                PdfStructuredExportFormat.Spreadsheet => Loc("Str_Filter_Excel"),
+                PdfStructuredExportFormat.Presentation => Loc("Str_Filter_PowerPoint"),
+                PdfStructuredExportFormat.Html => Loc("Str_Filter_Html"),
+                PdfStructuredExportFormat.Markdown => Loc("Str_Filter_Markdown"),
+                PdfStructuredExportFormat.PlainText => Loc("Str_Filter_Text"),
+                PdfStructuredExportFormat.Json => Loc("Str_Filter_Json"),
+                _ => Loc("Str_Filter_AllFiles")
             };
             var save = new Controls.FileDialog(Controls.FileDialogMode.Save)
             {
@@ -1862,7 +1869,7 @@ namespace KillerPDF.Shell
             string ext = opts.Jpeg ? "jpg" : "png";
             var dlg = new Controls.FileDialog(Controls.FileDialogMode.Save)
             {
-                Filter = opts.Jpeg ? "JPEG image|*.jpg" : "PNG image|*.png",
+                Filter = Loc("Str_Filter_Images") + (opts.Jpeg ? "|*.jpg" : "|*.png"),
                 Title  = Loc("Str_ExportImg_Suffix"),
                 CheckFileExists = false, CheckPathExists = true,
                 FileName = System.IO.Path.GetFileNameWithoutExtension(_originalFile ?? _currentFile) + "." + ext,
@@ -1878,24 +1885,22 @@ namespace KillerPDF.Shell
             {
                 var tempClean  = App.MakeTempFile("clean");
                 var tempBurned = App.MakeTempFile("burned");
-                _doc.Save(tempClean);
-                System.IO.File.Copy(tempClean, tempBurned, true);
-                PdfEngineBurn.Burn(tempBurned, _annotations, _renderDims,
-                    _docStampSpec, null, _pageRotations);
-                _doc.Close();
                 try
                 {
-                    _doc = PdfWorkingDocument.Open(tempClean);
+                    _doc.Save(tempClean);
+                    System.IO.File.Copy(tempClean, tempBurned, true);
+                    PdfEngineBurn.Burn(tempBurned, _annotations, _renderDims,
+                        _docStampSpec, null, _pageRotations);
+                    // Reopen before closing, so a failed reopen leaves the tab on a usable document.
+                    var reopened = ReopenCleanWorkingCopy(ref tempClean);
+                    _doc.Close();
+                    _doc = reopened;
                 }
-                catch (Exception saveOpenEx) when (PdfImport.IsXRefException(saveOpenEx))
+                catch (Exception ex)
                 {
-                    var fixedPath = App.MakeTempFile("savefixed");
-                    if (!PdfImport.TryImportRepairToPath(tempClean, fixedPath)
-                        && !PdfEngineIntegration.TryCreateZeroRotationCopy(
-                            tempClean, fixedPath))
-                        throw;
-                    tempClean = fixedPath;
-                    _doc = PdfWorkingDocument.Open(tempClean);
+                    KillerDialog.Show(this, Loc("Str_Err_ExportFailed") + "\n" + ex.Message, "KillerPDF",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
                 }
                 _currentFile = tempClean;
                 sourcePath = tempBurned;
