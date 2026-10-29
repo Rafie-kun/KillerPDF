@@ -25,27 +25,25 @@
 - Four view modes (Single, Continuous, Two-Page with a book layout option, Grid), tabbed documents that restore their page, zoom and view mode, and a split pane (F10) for two documents side by side
 - Sidebar panels for pages, outline, comments, attachments, layers and signatures, dockable on any side of the window; tabs at the top or the bottom
 - Edit a page's own text line by line or by paragraph, with font matching, or change matching text everywhere with Find and Replace
-- Word-wrapping text boxes, freehand drawing, straight lines, shapes, highlights, strikethrough, underline, stamps and images, with a full RGB color picker and screen eyedropper
-- Calibrated Distance, Perimeter, Area and Angle measurements with units, snapping and a measurement report
-- Built-in OCR, no cloud: OCR a page or dragged region to the clipboard, make a searchable PDF, extract all text, or convert a scan to real text; extra languages download on demand
-- Export to Word, Excel, PowerPoint, HTML, Markdown, text, JSON and page images, with reviewed table export to XLSX or CSV; convert Word and Excel files to PDF; scan pages in through TWAIN
-- Permanent redaction by area, text search or sensitive-data pattern, with verification, batches and optional sanitization
-- Protect copies with passwords, permissions or certificate recipients; open certificate-encrypted PDFs; restricted PDFs open read-only and unlock with the owner password
-- Form filling with live text, checkbox, radio, dropdown and comb fields; recognize fields, flatten forms, exchange FDF and XFDF data and supported calculations
-- Digital signatures with a certificate from Windows or a .pfx file, RFC 3161 timestamps, signature verification with certificate chains and later-change detection; draw and reuse signatures and initials or import an image
-- Compare two documents side by side with the changes marked; merge, split, extract, reorder, rotate, reverse, straighten and divide scanned spreads; drop a folder or ZIP to merge its contents
-- Rotate, scale, flip, straighten a crooked scan, correct the perspective of a photographed page, adjust color and levels, crop with corner handles, and rasterize a region
-- Headers, footers, page numbers, watermarks and Bates batches; N-up, booklet, poster and cut-stack production layouts; preflight, accessibility and print-production reports with guided repairs; Reduce File Size
+- Text boxes, freehand drawing, lines, shapes, highlights, strikethrough, underline, stamps and images, with an RGB color picker and screen eyedropper
+- Calibrated Distance, Perimeter, Area and Angle measurements with units, snapping and a report
+- Built-in OCR, no cloud: OCR a page or region to the clipboard, make a searchable PDF, or convert a scan to real text; languages download on demand
+- Export to Word, Excel, PowerPoint, HTML, Markdown, text, JSON and page images, with reviewed table export to XLSX or CSV; convert Word and Excel files to PDF; scan through TWAIN
+- Permanent redaction by area, text search or sensitive-data pattern, with verification and optional sanitization
+- Protect copies with passwords, permissions or certificate recipients; restricted PDFs open read-only and unlock with the owner password
+- Form filling with live text, checkbox, radio, dropdown and comb fields; recognize fields, flatten forms, and exchange FDF and XFDF data
+- Digital signatures from a Windows certificate or .pfx file with RFC 3161 timestamps; verify signers, certificate chains and later changes
+- Compare two documents with the changes marked; merge, split, extract, reorder, rotate, reverse, straighten and divide scanned spreads
+- Correct a photographed page's perspective, adjust color and levels, crop with handles, and rasterize a region
+- Headers, footers, page numbers, watermarks and Bates batches; N-up, booklet and poster layouts; preflight, accessibility and print-production reports; Reduce File Size
 - Guided tasks, reusable macros, watched folders and data merge from CSV, JSON or XLSX
-- Full command line with scripting-friendly exit codes: merge, split, extract, render, print, OCR, redact, export, protect, batch render and batch resave
-- Bookmark navigation and editing, table of contents generation, page labels, link and bookmark audits, full-text search with result highlighting, and column-aware text selection
-- Undo and redo across annotations, page operations and document edits, plus browser-style jump history (Alt+arrows)
-- Print with a real in-app preview (paper size and source, scale, position, margins, pages-per-sheet, two-sided)
+- Full command line with scripting-friendly exit codes for merging, splitting, rendering, printing, OCR, redaction, export and batch work
+- Bookmark editing, table of contents generation, page labels, full-text search, and column-aware text selection
+- Undo and redo across annotations, page operations and document edits
+- Print with a real in-app preview (paper, scale, margins, pages per sheet, two-sided)
 - Optional File Explorer and Outlook PDF previews for installed copies
-- Thirteen themes, live accent colors and toolbar styles provide 41 looks; localized in twenty languages; app-wide interface scale and customizable shortcuts
-- Keyboard shortcut overlay (F1) with list and keyboard views, and Search Tools (Ctrl+K) to find any command by name
-- Optional startup update checks, enabled by default, with confirmation before downloading or installing
-- Separate compact installer and self-contained portable downloads; the installer supports per-user or machine-wide installation and uses the .NET 10 Desktop Runtime
+- Thirteen themes and 41 looks, twenty languages, interface scaling, custom shortcuts, and Search Tools (Ctrl+K)
+- Compact installer (per-user or machine-wide, uses the .NET 10 Desktop Runtime) or a self-contained portable download
 - GPLv3, local-only, no account, no telemetry
     </description>
     <releaseNotes>https://github.com/SteveTheKiller/KillerPDF/releases/tag/vREPLACE_VERSION</releaseNotes>

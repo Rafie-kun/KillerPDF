@@ -60,6 +60,9 @@ jobs:
           [xml]$spec = Get-Content $nuspec -Raw
           $meta = $spec.package.metadata
           $problems = @()
+          # The gallery refuses a description over 4,000 characters, and choco reports that as a bare 409.
+          $descriptionLength = ([string]$meta.description).Length
+          if ($descriptionLength -gt 4000) { $problems += "The description is $descriptionLength characters; the Chocolatey gallery accepts at most 4,000." }
           foreach ($field in 'packageSourceUrl','projectUrl','iconUrl','licenseUrl','projectSourceUrl','docsUrl','bugTrackerUrl','releaseNotes') {
               $url = [string]$meta.$field
               if ($url -notmatch '^https?://') { continue }
@@ -75,7 +78,7 @@ jobs:
                   $problems += "$field did not load: $url ($($_.Exception.Message))"
               }
           }
-          if ($problems) { $problems | ForEach-Object { Write-Host "::error::$_" }; throw "The nuspec has links Chocolatey moderation will reject." }
+          if ($problems) { $problems | ForEach-Object { Write-Host "::error::$_" }; throw "The nuspec has problems Chocolatey will reject." }
 
           # Pack and push
           choco pack choco\killerpdf.nuspec --out "$env:RUNNER_TEMP"
