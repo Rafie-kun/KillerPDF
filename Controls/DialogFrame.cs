@@ -245,13 +245,8 @@ namespace KillerPDF
             Grid.SetColumn(close, 1);
             grid.Children.Add(close);
 
-            var captionLayers = new Grid();
-            var titleGrain = new Border { IsHitTestVisible = false };
-            titleGrain.SetResourceReference(Border.BackgroundProperty, "GrainTileBrush");
-            titleGrain.SetResourceReference(UIElement.OpacityProperty, "GrainOpacity");
-            captionLayers.Children.Add(titleGrain);
-            captionLayers.Children.Add(grid);
-            bar.Child = captionLayers;
+            // No grain of its own: the bar is transparent over the card, which already carries it.
+            bar.Child = grid;
             bar.Refresh = () =>
             {
                 bool classic = bar.Classic;
