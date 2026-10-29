@@ -177,6 +177,9 @@ namespace KillerPDF.Controls
         {
             if (_doc is null || pageIndex < 0 || pageIndex >= _doc.PageCount) return;
             _continuousNavigationTarget = pageIndex;
+            // A page the open is still waiting to render scrolls to itself when its slot arrives.
+            // A jump made before that replaces it, or the render would pull the view back.
+            if (_continuousScrollTarget >= 0) _continuousScrollTarget = pageIndex;
             ScrollContinuousToPage(pageIndex);
             Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded, (Action)(() =>
             {

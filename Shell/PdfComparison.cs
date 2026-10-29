@@ -200,6 +200,20 @@ public partial class MainWindow
         int page = Math.Max(0, Viewer.CurrentPageIndex);
         Viewer.EnterComparisonViewExt(page);
         ViewerB.EnterComparisonViewExt(Math.Min(page, Math.Max(0, ViewerB.PageCountExt - 1)));
+        // Opening the right document queued its continuous setup on the page it opened at, which
+        // runs after the jump above. Jump the right pane again once that open work has run.
+        Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.ApplicationIdle,
+            () => AlignComparisonPanes(page));
+        _ = RefreshComparisonAsync(page);
+    }
+
+    private void AlignComparisonPanes(int page)
+    {
+        if (!_comparisonActive || ViewerB.PageCountExt == 0) return;
+        _comparisonSyncing = true;
+        try { ViewerB.NavigateToPageExt(Math.Min(page, ViewerB.PageCountExt - 1)); }
+        finally { _comparisonSyncing = false; }
+        // The first pass drew the right pane's difference marks before that page was laid out.
         _ = RefreshComparisonAsync(page);
     }
 
