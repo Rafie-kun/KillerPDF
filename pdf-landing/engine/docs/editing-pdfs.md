@@ -94,6 +94,20 @@ byte[] updated = editor
 
 The annotation editor supports text notes, text markup, free text, lines, shapes, ink, image stamps, redaction marks, file attachments, and links.
 
+## Remove, rewrite, and optimize
+
+Some edits change content rather than add a revision on top of it:
+
+| Task | Start with |
+| --- | --- |
+| Permanently remove text, images, annotations, and fields under reviewed areas, then verify the result | `PdfRedactionSearch` and `PdfContentRedaction` |
+| Rewrite a line of page text in place | `PdfTextLineEditor` |
+| Preview and apply lossless optimization or selective removal | `PdfOptimizer` |
+| Flatten form fields | `PdfFormFlattener` |
+| Export to HTML, Markdown, JSON, Word, Excel, or PowerPoint formats | `PdfStructuredExport` |
+
+Redaction and optimization write a new full rewrite, so they invalidate existing signatures unless you plan for that. Incremental edits keep earlier revisions in the file, so they are not a way to erase data.
+
 ## Import safely
 
 Page imports copy the complete dependent object graph with collision handling. The editor refuses imports that depend on unsupported global state rather than producing a document with silently damaged forms, navigation, optional content, or accessibility structure.

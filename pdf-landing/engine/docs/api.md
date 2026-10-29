@@ -6,7 +6,7 @@ The public API is organized by PDF responsibility. Start with high-level documen
 
 | Namespace | Use it for |
 | --- | --- |
-| `KillerPdf.Engine.Documents` | Open files and read document, page, bookmark, link, form, and tree information |
+| `KillerPdf.Engine.Documents` | Open files, read document, page, text, bookmark, link, form, and tree information, and run redaction, export, OCR, comparison, and other document workflows |
 | `KillerPdf.Engine.Authoring` | Create documents, page content, resources, annotations, forms, navigation, and conformance structures |
 | `KillerPdf.Engine.Editing` | Append byte-preserving revisions to existing documents |
 | `KillerPdf.Engine.Writing` | Deterministic rewrites, incremental update options, and output sanitization |
@@ -14,6 +14,8 @@ The public API is organized by PDF responsibility. Start with high-level documen
 | `KillerPdf.Engine.Validation` | Deterministic reopen and round-trip verification |
 | `KillerPdf.Engine.Security` | Password authentication, permissions, encryption options, and security handlers |
 | `KillerPdf.Engine.Signing` | Signature creation, discovery, verification, certification, and revision analysis |
+| `KillerPdf.Engine.Rendering` | Render pages to BGRA32 pixel buffers |
+| `KillerPdf.Engine.Fonts` | Font loading, text codes, glyph outlines, and host font resolvers |
 | `KillerPdf.Engine.Objects` | Typed PDF objects for lower-level work |
 | `KillerPdf.Engine.Syntax` | Headers, tokens, tokenizer behavior, and PDF versions |
 
@@ -28,13 +30,19 @@ The public API is organized by PDF responsibility. Start with high-level documen
 | Read bookmarks | `PdfBookmarkReader` |
 | Read links | `PdfLinkReader` |
 | Read forms | `PdfFormWidgetReader` |
+| Extract text and geometry | `PdfPageContentReader` |
+| Render a page | `PdfPageRenderer` |
+| Redact content | `PdfRedactionSearch` and `PdfContentRedaction` |
+| Optimize a file | `PdfOptimizer` |
+| Export to Office, HTML, Markdown, or JSON | `PdfStructuredExport` |
+| Run preflight | `PdfPreflightRunner` |
 | Create a PDF | `PdfDocumentBuilder` |
 | Build page content | `PdfContentStreamBuilder` |
 | Change pages and forms | `PdfIncrementalPageEditor` |
 | Change annotations and links | `PdfIncrementalAnnotationEditor` |
 | Rewrite deterministically | `PdfDocumentWriter.Write` |
 | Validate a rewrite | `PdfRoundTripValidator.Validate` |
-| Read and verify signatures | `PdfSignatureReader` and `PdfSignatureVerifier` |
+| Read and verify signatures | `PdfSignatureReader`, `PdfSignatureVerifier`, and `PdfSignatureInspection` |
 
 ## High-level before low-level
 

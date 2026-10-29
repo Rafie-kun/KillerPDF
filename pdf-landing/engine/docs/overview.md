@@ -1,6 +1,6 @@
 # The KillerPDF.Engine
 
-The KillerPDF.Engine is an independent, UI-free .NET 10 library for reading, validating, authoring, structurally editing, signing, encrypting, and writing PDF files. It gives applications a modern PDF 2.0, PDF/A, and PDF/UA foundation without tying them to the KillerPDF desktop interface.
+The KillerPDF.Engine is an independent, UI-free .NET 10 library for reading, extracting text, rendering, searching, validating, authoring, editing, redacting, signing, encrypting, and writing PDF files. It gives applications a modern PDF 2.0, PDF/A, and PDF/UA foundation without tying them to the KillerPDF desktop interface.
 
 ## Start building
 
@@ -21,8 +21,15 @@ Use the task guides in the sidebar when you already know what you need to do.
 - PDF 2.0 authoring with pages, content streams, fonts, images, color spaces, patterns, transparency, and resources
 - Bookmarks, named destinations, page labels, links, attachments, annotations, optional content, and AcroForm fields
 - Tagged PDF, PDF/UA-2, PDF/A-4, PDF/A-4e, and PDF/A-4f authoring safeguards
-- RC4, AES-128, and AES-256 password security
-- Detached CMS signatures, certification permissions, field locks, verification, and signed revision analysis
+- RC4, AES-128, AES-256, and AES-GCM password security, and certificate-recipient encryption
+- Detached CMS signatures, certification permissions, field locks, RFC 3161 timestamps, verification with trust and revocation policy, PAdES validation evidence, and signed revision analysis
+- Page text, word, and table extraction, and bounded BGRA32 page rendering without a native renderer
+- OCR with local models, searchable text layers, and reviewed corrections
+- Content-level redaction with sensitive-data search and read-back verification
+- AcroForm editing, FDF and XFDF interchange, XFA inspection and conversion, and data merge
+- Export to plain text, HTML, Markdown, JSON, Word, Excel, and PowerPoint formats
+- Repair and lossless optimization plans, preflight, accessibility, and print-production reports
+- Imposition, headers, footers, Bates numbering, calibrated measurement, layers, attachments, and structural comparison
 - Structural diagnostics, bounded parsing, implementation limits, and round-trip validation
 
 ## Project scale
@@ -36,7 +43,7 @@ Use the task guides in the sidebar when you already know what you need to do.
 
 ## A real library boundary
 
-The 1.9 development branch uses The KillerPDF.Engine for rendering and text extraction. Tesseract remains available as an OCR fallback. See the developer guide for current engine APIs.
+KillerPDF 1.9 uses The KillerPDF.Engine for rendering, text extraction, and OCR. Tesseract remains available in the desktop app as a fallback OCR provider. See the developer guide for current engine APIs.
 
 The monorepo keeps the engine, application integration, tests, and corpus gates in one reviewable change. The project boundary still enforces a reusable library that other .NET applications can reference through NuGet.
 

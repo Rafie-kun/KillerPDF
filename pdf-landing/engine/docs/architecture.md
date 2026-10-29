@@ -4,7 +4,7 @@ The KillerPDF.Engine is a reusable document library inside the KillerPDF monorep
 
 ## Library boundary
 
-The 1.9 development branch uses The KillerPDF.Engine for rendering and text extraction. Tesseract remains available as an OCR fallback. See the developer guide for current engine APIs.
+KillerPDF 1.9 uses The KillerPDF.Engine for rendering, text extraction, and OCR. Tesseract remains available in the desktop app as a fallback OCR provider. See the developer guide for current engine APIs.
 
 ## Internal layers
 
@@ -15,7 +15,8 @@ The 1.9 development branch uses The KillerPDF.Engine for rendering and text extr
 | `Authoring` | Typed construction of pages, content, resources, metadata, interactive features, and standards structures |
 | `Editing` | High-level byte-preserving changes and safe cross-document graph imports |
 | `Writing` | Incremental revisions, deterministic rewrites, metadata policy, and output sanitization |
-| `Security` and `Signing` | Authentication, permissions, encryption, signatures, and revision verification |
+| `Security` and `Signing` | Authentication, permissions, password and certificate encryption, signatures, timestamps, and revision verification |
+| `Rendering` and `Fonts` | BGRA32 page rendering, color management, image decoding, font decoding, and glyph outlines |
 | `Diagnostics` and `Validation` | Bounded inspection, implementation limits, structural reports, and round-trip checks |
 
 ## Read flow

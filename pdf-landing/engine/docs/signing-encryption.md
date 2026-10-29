@@ -1,6 +1,6 @@
 # Signing and encryption
 
-The engine supports password security, detached CMS signatures, certification policies, field locks, signature discovery, cryptographic verification, and signed revision analysis.
+The engine supports password and certificate-recipient security, detached CMS signatures, RFC 3161 timestamps, certification policies, field locks, signature discovery, cryptographic verification, trust and revocation policy, and signed revision analysis.
 
 ## Create a password-protected document
 
@@ -23,7 +23,25 @@ byte[] protectedPdf = new PdfDocumentBuilder()
     .Build();
 ```
 
-New documents use PDF 2.0 AES-256 protection. The engine can also read supported RC4 and AES-128 documents and preserve authenticated security during incremental updates and rewrites.
+New documents use PDF 2.0 AES-256 protection, and `Aes256Gcm` selects revision 7. The engine can also read supported RC4 and AES-128 documents and preserve authenticated security during incremental updates and rewrites.
+
+## Protect for certificate recipients
+
+```csharp
+using System.Security.Cryptography.X509Certificates;
+using KillerPdf.Engine.Authoring;
+using KillerPdf.Engine.Security;
+
+byte[] protectedPdf = new PdfDocumentBuilder()
+    .SetCertificateEncryption(new PdfCertificateEncryptionOptions
+    {
+        Recipients = [recipientCertificate]
+    })
+    .AddBlankPage()
+    .Build();
+```
+
+A recipient opens the file with `PdfDocument.Open(bytes, certificateWithPrivateKey)`. To protect an existing document, use `PdfDocumentEncryptionWriter`, which rewrites it with AES-256 passwords or certificate encryption, replaces any source encryption, and refuses a signed document unless you allow signature invalidation.
 
 ## Open encrypted input
 
@@ -39,7 +57,7 @@ Honor the authenticated permission set in your application workflow. An owner pa
 
 ## Sign with detached CMS
 
-`PdfDetachedSignatureWriter` prepares the PDF signature revision and calls your application back to produce the detached CMS value. Your application owns certificate selection, private-key access, timestamp service policy, and trust configuration.
+`PdfDetachedSignatureWriter` prepares the PDF signature revision and calls your application back to produce the detached CMS value. Your application owns certificate selection, private-key access, and trust configuration. Set `RequestTimestamp` on `PdfSignatureOptions` to have the engine request an RFC 3161 timestamp from `TimestampServerUrl`, or from a caller-supplied `TimestampTransport`, and verify the token before embedding it. Signing keeps the source cross-reference format and can place a visible appearance on an existing signature widget.
 
 ```csharp
 using KillerPdf.Engine.Signing;
@@ -69,6 +87,8 @@ foreach (PdfSignatureInfo signature in signatures)
 ```
 
 Integrity verification answers whether the signed bytes match the signature. Trust verification additionally evaluates the certificate chain under the trust policy supplied by your application.
+
+`PdfSignatureInspection.Inspect` combines these results in one report. It gives an explicit complete, incomplete, or invalid status, the signer name, signing time, reason, location, and contact, certificate identity and fingerprints, permissions, later-revision analysis, and PAdES validation evidence. Pass `PdfSignatureTrustOptions` to control trust anchors, revocation checking, verification time, and offline policy. Document timestamps are verified for integrity but not created by the engine.
 
 ## Analyze later revisions
 

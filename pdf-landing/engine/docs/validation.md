@@ -32,6 +32,20 @@ File.WriteAllBytes("validated.pdf", result.RewrittenBytes!);
 
 The round-trip validator inspects the source, rewrites it, reopens the result, writes it a second time, and compares the two outputs. Use `ValidateAuthenticated` for password-protected input.
 
+## Run preflight and report checks
+
+```csharp
+using KillerPdf.Engine.Diagnostics;
+
+PdfPreflightReport report = PdfPreflightRunner.Run(
+    source, PdfPreflightProfile.PrintProduction);
+
+if (!report.Passed || !report.Complete)
+    Console.WriteLine(report.ToText());
+```
+
+A preflight profile selects checks for structure, metadata, language, tagging, forms, links, page boxes, output intents, images, fonts, transparency, color and ink limits, layers, and declared PDF/A, PDF/UA, and PDF/X boundaries. Reports identify source objects and checks that could not run. `PdfAccessibilityInspector` and `PdfPrintProductionReport` produce focused reports, and correction plans preview a change before you apply it. A clean report is not certification.
+
 ## Understand what this proves
 
 | Check | What it establishes |
