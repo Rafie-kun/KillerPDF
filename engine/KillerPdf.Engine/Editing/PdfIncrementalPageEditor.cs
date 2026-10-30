@@ -1279,6 +1279,14 @@ public sealed class PdfIncrementalPageEditor
     /// <summary>Removes an embedded file and its catalog association by file name.</summary>
     public PdfIncrementalPageEditor RemoveAttachment(string fileName)
     {
+        RemoveAttachmentByName(fileName);
+        return this;
+    }
+
+    // Returns the name-tree key the removal is recorded under. Callers pass either the key or the
+    // /UF or /F name the reader lists, and the two differ in files written by PDFBox and LaTeX.
+    private string RemoveAttachmentByName(string fileName)
+    {
         if (string.IsNullOrWhiteSpace(fileName))
             throw new ArgumentException(
                 "An attachment file name is required.", nameof(fileName));
@@ -1287,31 +1295,37 @@ public sealed class PdfIncrementalPageEditor
         if (pending > 0)
         {
             _catalogPresentationChanged = true;
-            return this;
+            return fileName;
         }
-        if (_removedAttachments.Contains(fileName))
-            throw new ArgumentException(
-                $"Attachment '{fileName}' is already scheduled for removal.",
-                nameof(fileName));
-        bool exists = false;
+        string? treeKey = null;
         if (_tree.Catalog.TryGetValue(NamesName, out PdfObject? namesValue))
         {
             PdfDictionary names = ResolveDictionary(
                 _document, namesValue, "The catalog /Names value");
             if (names.TryGetValue(EmbeddedFilesName,
                     out PdfObject? embeddedFiles))
-                exists = PdfNameTree.Read(_document, embeddedFiles).Any(entry =>
-                    string.Equals(PdfUnicodeEncoding.DecodeTextString(
-                            entry.Key.Bytes.Span, "An embedded-file name"),
-                        fileName, StringComparison.OrdinalIgnoreCase));
+            {
+                string[] keys = [.. PdfNameTree.Read(_document, embeddedFiles).Select(entry =>
+                    PdfUnicodeEncoding.DecodeTextString(
+                        entry.Key.Bytes.Span, "An embedded-file name"))];
+                treeKey = keys.FirstOrDefault(key => string.Equals(
+                    key, fileName, StringComparison.OrdinalIgnoreCase))
+                    ?? PdfAttachmentReader.Read(_document).FirstOrDefault(item =>
+                        string.Equals(item.FileName, fileName,
+                            StringComparison.OrdinalIgnoreCase))?.NameTreeKey;
+            }
         }
-        if (!exists)
+        if (treeKey is not null && _removedAttachments.Contains(treeKey))
+            throw new ArgumentException(
+                $"Attachment '{fileName}' is already scheduled for removal.",
+                nameof(fileName));
+        if (treeKey is null)
             throw new ArgumentException(
                 $"The document has no attachment named '{fileName}'.",
                 nameof(fileName));
-        _removedAttachments.Add(fileName);
+        _removedAttachments.Add(treeKey);
         _catalogPresentationChanged = true;
-        return this;
+        return treeKey;
     }
 
     /// <summary>Sets only the catalog's primary language without replacing other metadata.</summary>
@@ -1351,11 +1365,11 @@ public sealed class PdfIncrementalPageEditor
             throw new ArgumentException(
                 $"The document already has an attachment named '{newFileName}'.",
                 nameof(newFileName));
-        RemoveAttachment(fileName);
+        string treeKey = RemoveAttachmentByName(fileName);
         AddAttachment(newFileName, attachment.Data, attachment.MimeType,
             attachment.Description, attachment.Relationship,
             attachment.ModificationDate, attachment.CreationDate);
-        _attachments[^1] = _attachments[^1] with { OriginalFileName = fileName };
+        _attachments[^1] = _attachments[^1] with { OriginalFileName = treeKey };
         return this;
     }
 
@@ -1372,11 +1386,11 @@ public sealed class PdfIncrementalPageEditor
             ?? throw new ArgumentException(
                 $"The document has no attachment named '{fileName}'.", nameof(fileName));
 
-        RemoveAttachment(fileName);
+        string treeKey = RemoveAttachmentByName(fileName);
         AddAttachment(attachment.FileName, data, attachment.MimeType,
             attachment.Description, attachment.Relationship,
             modificationDate ?? attachment.ModificationDate, attachment.CreationDate);
-        _attachments[^1] = _attachments[^1] with { OriginalFileName = fileName };
+        _attachments[^1] = _attachments[^1] with { OriginalFileName = treeKey };
         return this;
     }
 
@@ -1392,11 +1406,11 @@ public sealed class PdfIncrementalPageEditor
             ?? throw new ArgumentException(
                 $"The document has no attachment named '{fileName}'.", nameof(fileName));
 
-        RemoveAttachment(fileName);
+        string treeKey = RemoveAttachmentByName(fileName);
         AddAttachment(attachment.FileName, attachment.Data, attachment.MimeType,
             description, attachment.Relationship,
             attachment.ModificationDate, attachment.CreationDate);
-        _attachments[^1] = _attachments[^1] with { OriginalFileName = fileName };
+        _attachments[^1] = _attachments[^1] with { OriginalFileName = treeKey };
         return this;
     }
 
@@ -1413,11 +1427,11 @@ public sealed class PdfIncrementalPageEditor
                 $"The document has no attachment named '{fileName}'.", nameof(fileName));
 
         PdfAttachmentFactory.Validate(attachment.FileName, mimeType, relationship);
-        RemoveAttachment(fileName);
+        string treeKey = RemoveAttachmentByName(fileName);
         AddAttachment(attachment.FileName, attachment.Data, mimeType,
             attachment.Description, relationship,
             attachment.ModificationDate, attachment.CreationDate);
-        _attachments[^1] = _attachments[^1] with { OriginalFileName = fileName };
+        _attachments[^1] = _attachments[^1] with { OriginalFileName = treeKey };
         return this;
     }
 
@@ -1484,7 +1498,8 @@ public sealed class PdfIncrementalPageEditor
     private (bool PdfA4, string? PdfA4Conformance, bool PdfUa2)
         ReadDocumentConformance()
     {
-        if (!_tree.Catalog.TryGetValue(
+        // The packet of an unauthenticated file is ciphertext, and the edit is refused later anyway.
+        if (!_document.IsDecrypted || !_tree.Catalog.TryGetValue(
             MetadataName, out PdfObject? metadataValue))
             return (false, null, false);
         ValidateMetadataStream(
@@ -1504,9 +1519,8 @@ public sealed class PdfIncrementalPageEditor
         catch (Exception error) when (
             error is XmlException or DecoderFallbackException)
         {
-            throw new InvalidOperationException(
-                "The existing XMP metadata packet is not well-formed UTF-8 XML.",
-                error);
+            // Metadata that cannot be read does not declare PDF/A-4 or PDF/UA-2.
+            return (false, null, false);
         }
         XNamespace pdfa = "http://www.aiim.org/pdfa/ns/id/";
         XNamespace pdfua = "http://www.aiim.org/pdfua/ns/id/";
@@ -1908,11 +1922,11 @@ public sealed class PdfIncrementalPageEditor
         ArgumentNullException.ThrowIfNull(source);
         EnforceSourceCopyPermission(source);
         PdfPageTree sourceTree = PdfPageTree.Read(source);
-        bool hasAcroForm = sourceTree.Catalog.ContainsKey(AcroFormName);
         bool hasStructureTree = sourceTree.Catalog.ContainsKey(StructTreeRootName);
+        // Every page comes along, so widgets are kept whether or not the source declares an /AcroForm.
         foreach (PdfPageTreeEntry page in sourceTree.Pages)
             ValidateImportablePage(source, page,
-                allowFormWidgets: hasAcroForm, allowTaggedPage: hasStructureTree);
+                allowFormWidgets: true, allowTaggedPage: hasStructureTree);
         if (sourceTree.Pages.Count == 0) return this;
         EnsurePageCapacity(sourceTree.Pages.Count);
         int batchId = _nextImportBatchId++;
@@ -8891,9 +8905,13 @@ public sealed class PdfIncrementalPageEditor
         }
         else
             update.SetDocumentInformation(null);
+        // The name trees are not copied here. The name-tree merges below rebuild every category from
+        // the source, and they read the current /Names back as destination objects, which imported
+        // references are not.
         foreach (var entry in tree.Catalog.Where(entry =>
                      !entry.Key.Equals(TypeName)
                      && !entry.Key.Equals(PagesName)
+                     && !entry.Key.Equals(NamesName)
                      && !entry.Key.Equals(PermissionsName)))
             catalogReplacements[entry.Key] = importer.Import(
                 ValidateCatalogProperty(entry.Key, entry.Value));
@@ -9548,6 +9566,13 @@ public sealed class PdfIncrementalPageEditor
             retainedParentEntries, retainedStructureObjects);
     }
 
+    private static PdfObject RequireOptionalContentGroups(
+        PdfDictionary properties, string description) =>
+        properties.TryGetValue(Name("OCGs"), out PdfObject? groups)
+            ? groups
+            : throw new InvalidOperationException(
+                $"{description} is missing, so the optional-content properties cannot be merged.");
+
     private void AddImportedOptionalContent(
         PdfIncrementalUpdateBuilder update,
         IReadOnlyList<PageState[]> importedGroups,
@@ -9594,7 +9619,8 @@ public sealed class PdfIncrementalPageEditor
             ValidateOptionalContentGroups(source, sourceProperties,
                 "A source /OCProperties /OCGs");
             HashSet<(int ObjectNumber, int Generation)> registeredGroups = [.. ResolveArray(
-                    source, sourceProperties[Name("OCGs")],
+                    source, RequireOptionalContentGroups(sourceProperties,
+                        "A source /OCProperties /OCGs"),
                     "A source /OCProperties /OCGs")
                 .Select(item => ResolvedReferenceIdentity(source, item,
                     "A source /OCProperties /OCGs entry"))];
@@ -9632,7 +9658,8 @@ public sealed class PdfIncrementalPageEditor
             ? ResolveDictionary(_document, targetPropertiesValue!, "The destination /OCProperties")
             : new PdfDictionary([]);
         var groups = targetHasProperties
-            ? ResolveArray(_document, targetProperties[Name("OCGs")],
+            ? ResolveArray(_document, RequireOptionalContentGroups(targetProperties,
+                    "The destination /OCProperties /OCGs"),
                 "The destination /OCProperties /OCGs").ToList()
             : [];
         if (targetHasProperties)
@@ -9689,7 +9716,8 @@ public sealed class PdfIncrementalPageEditor
             PdfDictionary sourceProperties = ResolveDictionary(source,
                 group[0].ImportedTree!.Catalog[OptionalContentPropertiesName],
                 "A source /OCProperties");
-            PdfArray allSourceGroups = ResolveArray(source, sourceProperties[Name("OCGs")],
+            PdfArray allSourceGroups = ResolveArray(source,
+                RequireOptionalContentGroups(sourceProperties, "A source /OCProperties /OCGs"),
                 "A source /OCProperties /OCGs");
             ValidateOptionalContentGroups(source, sourceProperties,
                 "A source /OCProperties /OCGs");
@@ -9883,7 +9911,7 @@ public sealed class PdfIncrementalPageEditor
             PdfDocument document, PdfDictionary properties, string description)
         {
             PdfArray registeredGroups = ResolveArray(
-                document, properties[Name("OCGs")], description);
+                document, RequireOptionalContentGroups(properties, description), description);
             foreach (PdfObject value in registeredGroups)
             {
                 PdfIndirectReference reference = AssertReference(value, $"{description} entry");
@@ -15653,7 +15681,10 @@ public sealed class PdfIncrementalPageEditor
                 string freeTextIntentName = (Resolve(freeTextIntent) as PdfName)?.ValueAsLatin1()
                     ?? throw new InvalidOperationException(
                         $"{description} free-text /IT value is not a name.");
-                if (freeTextIntentName is not ("FreeText" or "FreeTextCallout" or "FreeTextTypeWriter"))
+                // The standard spells the typewriter intent with a capital W, and files in the wild lowercase it.
+                if (freeTextIntentName is not ("FreeText" or "FreeTextCallout")
+                    && !string.Equals(freeTextIntentName, "FreeTextTypeWriter",
+                        StringComparison.OrdinalIgnoreCase))
                     throw new InvalidOperationException(
                         $"{description} free-text /IT /{freeTextIntentName} is not defined.");
                 if (freeTextIntentName == "FreeTextCallout" && !annotation.ContainsKey(Name("CL")))

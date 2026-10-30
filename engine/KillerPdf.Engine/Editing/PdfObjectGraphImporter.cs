@@ -92,9 +92,20 @@ internal sealed class PdfObjectGraphImporter
             throw new InvalidOperationException("Page references must be seeded before graph import.");
         PdfIndirectReference destination = _update.ReserveObject();
         _references.Add(key, destination);
-        _sourcesByDestination.Add(
-            new SourceReference(destination.ObjectNumber, destination.Generation), key);
+        RegisterDestination(destination, key);
         return destination;
+    }
+
+    // A freshly reserved number that is already mapped means the document being edited holds objects its
+    // cross-reference data does not list, which only happens in a file that was repaired on opening.
+    private void RegisterDestination(PdfIndirectReference destination, SourceReference source)
+    {
+        if (!_sourcesByDestination.TryAdd(
+                new SourceReference(destination.ObjectNumber, destination.Generation), source))
+            throw new InvalidOperationException(
+                "This document had to be repaired when it was opened, and its object numbering is not "
+                + "consistent, so it cannot be edited in place. Resave the document to repair it, "
+                + "then edit the saved copy.");
     }
 
     internal PdfObject Import(PdfObject value) => Import(value, 0, null);
@@ -165,9 +176,7 @@ internal sealed class PdfObjectGraphImporter
         _importedObjectCount++;
         PdfIndirectReference destinationReference = _update.ReserveObject();
         _references.Add(key, destinationReference);
-        _sourcesByDestination.Add(
-            new SourceReference(destinationReference.ObjectNumber,
-                destinationReference.Generation), key);
+        RegisterDestination(destinationReference, key);
         PopulateReference(key, sourceReference, destinationReference, depth);
         return destinationReference;
     }

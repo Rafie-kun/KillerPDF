@@ -193,7 +193,7 @@ public static partial class PdfAttachmentReader
         {
             string treeName = PdfUnicodeEncoding.DecodeTextString(entry.Key.Bytes.Span,
                 "An embedded-file name");
-            result.Add(ReadFileSpecification(document, entry.Value, treeName));
+            result.Add(ReadFileSpecification(document, entry.Value, treeName) with { NameTreeKey = treeName });
         }
         return Array.AsReadOnly(result.ToArray());
     }
@@ -560,6 +560,8 @@ public sealed record PdfAttachmentInfo
 {
     /// <summary>Gets the embedded file name.</summary>
     public required string FileName { get; init; }
+    /// <summary>Gets the embedded-files name-tree key, which can differ from the file-specification name; null when the file is not listed in the name tree.</summary>
+    public string? NameTreeKey { get; init; }
     /// <summary>Gets the optional description.</summary>
     public string? Description { get; init; }
     /// <summary>Gets the declared MIME type.</summary>
