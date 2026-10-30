@@ -2241,8 +2241,7 @@ namespace KillerPDF.Features
                 return 2;
             }
             string path = Path.GetFullPath(pos[0]);
-            // SearchService.Search reports an unreadable file as no hits, which the viewer relies on.
-            // A script needs to tell "not found" from "could not read".
+            // A script needs to tell "not found" from "could not read", so that gets its own exit code.
             try { using (PdfContentDocument.Open(path)) { } }
             catch (Exception ex)
             {

@@ -209,35 +209,64 @@ public static class PdfDocumentSplitter
         int pageCount = PdfPageInformation.Read(document).Count;
         if (pageCount == 0)
             throw new InvalidOperationException("The document has no pages to divide.");
+        // Every extraction walks the whole document, so growing a part one page at a time and
+        // extracting after each page is quadratic. Each part instead aims at the page count its
+        // measured size predicts. The part it keeps was extracted and confirmed within the budget.
         var groups = new List<(List<int> Pages, string? Title)>();
-        var current = new List<int>();
-        for (int index = 0; index < pageCount; index++)
+        var built = new List<byte[]>();
+        long averagePage = Math.Max(1, document.Source.Length / pageCount);
+        int guess = (int)Math.Clamp(options.MaximumBytes / averagePage, 1, pageCount);
+        for (int start = 0; start < pageCount;)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            current.Add(index);
-            // A single page that already exceeds the budget still becomes its own part.
-            if (current.Count == 1
-                || Extract(document, current, options.CompactParts).LongLength
-                    <= options.MaximumBytes) continue;
-            current.RemoveAt(current.Count - 1);
-            groups.Add(([.. current], null));
+            (int count, byte[] data) = FitPart(document, start, pageCount - start, guess, options, cancellationToken);
+            groups.Add(([.. Enumerable.Range(start, count)], null));
+            built.Add(data);
             Guard(groups.Count);
-            current = [index];
+            start += count;
+            guess = count;
         }
-        if (current.Count > 0) groups.Add(([.. current], null));
         PdfSplitPlan plan = Build(groups, options.NameTemplate, baseName);
         var outputs = new List<PdfSplitOutput>(plan.Parts.Count);
-        foreach (PdfSplitPart part in plan.Parts)
+        for (int index = 0; index < plan.Parts.Count; index++)
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            PdfSplitPart part = plan.Parts[index];
             outputs.Add(new PdfSplitOutput
             {
                 Name = part.Name,
                 SourcePageIndices = part.SourcePageIndices,
-                Document = Extract(document, part.SourcePageIndices, options.CompactParts)
+                Document = built[index]
             });
         }
         return Array.AsReadOnly(outputs.ToArray());
+    }
+
+    // Finds how many pages from start fit the budget, extracting only the sizes it needs to confirm.
+    // A single page that already exceeds the budget still becomes its own part.
+    private static (int Count, byte[] Data) FitPart(PdfDocument document, int start, int remaining,
+        int guess, PdfSplitOptions options, CancellationToken cancellationToken)
+    {
+        int fits = 1, over = remaining + 1, count = Math.Clamp(guess, 1, remaining);
+        byte[]? fitData = null;
+        for (int attempt = 0; ; attempt++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            byte[] data = Extract(document, [.. Enumerable.Range(start, count)], options.CompactParts);
+            if (count == 1 || data.LongLength <= options.MaximumBytes)
+            {
+                fits = count;
+                fitData = data;
+            }
+            else over = count;
+            if (fits + 1 >= over) break;
+            // The size so far predicts the count; alternate with bisection so a poor prediction
+            // still narrows the range, and double the step while no page count has been refused.
+            int predicted = (int)Math.Clamp((long)count * options.MaximumBytes / Math.Max(1, data.LongLength),
+                fits + 1, over - 1);
+            count = over > remaining
+                ? Math.Min(remaining, Math.Max(predicted, fits + (1 << Math.Min(attempt, 20))))
+                : attempt % 2 == 0 ? predicted : fits + (over - fits) / 2;
+        }
+        return (fits, fitData ?? Extract(document, [.. Enumerable.Range(start, fits)], options.CompactParts));
     }
 
     private static List<(List<int> Pages, string? Title)> ByPageCount(int pageCount, int pagesPerPart)

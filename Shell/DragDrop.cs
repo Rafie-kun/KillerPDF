@@ -600,19 +600,28 @@ namespace KillerPDF.Shell
                 PageList.Items.Count, fromIndices, insertionIndex);
             if (order.SequenceEqual(Enumerable.Range(0, PageList.Items.Count))) return;
             IReadOnlyList<int> selectedAfter = [];
-            ReloadWithRemappedAnnotations(
-                annotations => PageAnnotationInsertion.Reorder(annotations, order),
-                documentUndo => SaveTempAndReload(
-                    keepAnnotations: true,
-                    finalizeSavedFile: path =>
-                        selectedAfter = PdfEngineIntegration.MovePages(path, fromIndices, insertionIndex),
-                    remapRedactionMarks: true,
-                    remapRotations: rotations =>
-                        PdfEngineIntegration.RemapRotationsAfterPageMoves(
-                            rotations, fromIndices, insertionIndex),
-                    selectedPageAfterReload: Enumerable.Range(0, order.Count)
-                        .First(index => order[index] == fromIndices[0]),
-                    documentUndo: documentUndo));
+            try
+            {
+                ReloadWithRemappedAnnotations(
+                    annotations => PageAnnotationInsertion.Reorder(annotations, order),
+                    documentUndo => SaveTempAndReload(
+                        keepAnnotations: true,
+                        finalizeSavedFile: path =>
+                            selectedAfter = PdfEngineIntegration.MovePages(path, fromIndices, insertionIndex),
+                        remapRedactionMarks: true,
+                        remapRotations: rotations =>
+                            PdfEngineIntegration.RemapRotationsAfterPageMoves(
+                                rotations, fromIndices, insertionIndex),
+                        selectedPageAfterReload: Enumerable.Range(0, order.Count)
+                            .First(index => order[index] == fromIndices[0]),
+                        documentUndo: documentUndo));
+            }
+            catch (Exception ex) when (ex is not OutOfMemoryException)
+            {
+                KillerDialog.Show(this, string.Format(Loc("Str_Pages_Failed"), ex.Message),
+                    Loc("Str_Dlg_AppTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
             Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded, (Action)(() =>
             {
                 PageList.SelectedItems.Clear();

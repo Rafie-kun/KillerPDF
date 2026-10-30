@@ -227,6 +227,94 @@ public sealed class PdfDocumentInformationTests
         Assert.Equal([12d, 34d, 1.5d], saved.Destination?.Values);
     }
 
+    [Theory]
+    [InlineData("/OpenAction [3 0 R /XYZ 4 0 R 0 0]")]
+    [InlineData("/OpenAction [3 0 R 4 0 R]")]
+    [InlineData("/OpenAction <FEFFD800>")]
+    [InlineData("/ViewerPreferences null")]
+    [InlineData("/ViewerPreferences 99 0 R")]
+    [InlineData("/ViewerPreferences 4 0 R")]
+    [InlineData("/ViewerPreferences 5")]
+    [InlineData("/ViewerPreferences << /HideToolbar 4 0 R /Direction 4 0 R >>")]
+    [InlineData("/Lang null")]
+    [InlineData("/Lang 99 0 R")]
+    [InlineData("/Lang 4 0 R")]
+    [InlineData("/Lang 5")]
+    [InlineData("/Lang <FEFFD800>")]
+    public void AMalformedOpeningViewOrLanguageDoesNotStopTheDocumentBeingRead(string entry)
+    {
+        // Object 4 refers to itself, so every reference to it is a cycle.
+        PdfDocument document = Build($"/Pages 2 0 R {entry}", null, ["4 0 R"]);
+
+        PdfDocumentInformation information = PdfDocumentInformation.Read(document);
+
+        Assert.Equal(1, information.PageCount);
+        Assert.Null(information.Language);
+        Assert.NotNull(information.InitialView);
+        Assert.False(information.InitialView.ViewerPreferences.HideToolbar);
+    }
+
+    [Theory]
+    [InlineData("/CreationDate (not a date)")]
+    [InlineData("/CreationDate (D:20231345)")]
+    [InlineData("/CreationDate 5")]
+    [InlineData("/CreationDate 4 0 R")]
+    [InlineData("/Title 5")]
+    [InlineData("/Title <FEFFD800>")]
+    [InlineData("/Title 4 0 R")]
+    [InlineData("/Trapped /Maybe")]
+    public void ABadInformationValueReadsAsBlankAndKeepsTheOtherFields(string entry)
+    {
+        PdfDocument document = Build("/Pages 2 0 R", $"<< /Author (Ada) /Subject (Notes) {entry} >>", ["4 0 R"]);
+
+        PdfDocumentInformation information = PdfDocumentInformation.Read(document);
+
+        Assert.Equal("Ada", information.Author);
+        Assert.Equal("Notes", information.Subject);
+        Assert.Null(information.CreationDate);
+        Assert.Null(information.Trapped);
+        Assert.Equal(1, information.PageCount);
+        Assert.Null(information.Title);
+    }
+
+    [Fact]
+    public void AnInformationEntryThatIsNotADictionaryReadsAsAbsent()
+    {
+        PdfDocument document = Build("/Pages 2 0 R", "(not a dictionary)", []);
+
+        PdfDocumentInformation information = PdfDocumentInformation.Read(document);
+
+        Assert.Null(information.Title);
+        Assert.Equal(1, information.PageCount);
+    }
+
+    // Builds a one-page file whose catalog and /Info carry the given raw entries. Objects 1 to 3 are
+    // the catalog, page tree and page; the extras follow from 4 and /Info is the object after them.
+    private static PdfDocument Build(string catalogEntries, string? info, string[] extras)
+    {
+        List<string> objects =
+        [
+            $"<< /Type /Catalog {catalogEntries} >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 10 10] >>",
+            .. extras
+        ];
+        if (info is not null) objects.Add(info);
+        var pdf = new System.Text.StringBuilder("%PDF-1.7\n");
+        var offsets = new List<int>();
+        for (int index = 0; index < objects.Count; index++)
+        {
+            offsets.Add(System.Text.Encoding.Latin1.GetByteCount(pdf.ToString()));
+            pdf.Append($"{index + 1} 0 obj\n{objects[index]}\nendobj\n");
+        }
+        int xref = System.Text.Encoding.Latin1.GetByteCount(pdf.ToString());
+        pdf.Append($"xref\n0 {objects.Count + 1}\n0000000000 65535 f \n");
+        foreach (int offset in offsets) pdf.Append($"{offset:0000000000} 00000 n \n");
+        string infoEntry = info is null ? "" : $" /Info {objects.Count} 0 R";
+        pdf.Append($"trailer << /Size {objects.Count + 1} /Root 1 0 R{infoEntry} >>\nstartxref\n{xref}\n%%EOF\n");
+        return PdfDocument.Open(System.Text.Encoding.Latin1.GetBytes(pdf.ToString()));
+    }
+
     [Fact]
     public void InitialView_RejectsAmbiguousOpeningDestinations()
     {

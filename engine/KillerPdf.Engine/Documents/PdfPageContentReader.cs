@@ -190,9 +190,12 @@ public sealed class PdfPageContentReader
     {
         if (pageIndex < 0 || pageIndex >= PageCount) throw new ArgumentOutOfRangeException(nameof(pageIndex));
         var page = _tree.Pages[pageIndex];
-        PdfObject boxValue = page.InheritedValues.TryGetValue(Name("CropBox"), out var crop) ? crop
-            : page.InheritedValues[Name("MediaBox")];
-        var box = Box(boxValue);
+        PdfContentBounds box;
+        if (page.InheritedValues.TryGetValue(Name("CropBox"), out var crop)) box = Box(crop);
+        else if (page.InheritedValues.TryGetValue(Name("MediaBox"), out var media)) box = Box(media);
+        // PdfPageInformation lists such a page as US Letter under recovery, so its text reads on that box.
+        else if (_document.UsesCompatibilityRecovery) box = new(0, 0, 612, 792);
+        else throw new InvalidOperationException($"Page {pageIndex + 1} has no effective media box.");
         var resources = page.InheritedValues.TryGetValue(Name("Resources"), out var inherited)
             ? Resolve(inherited) as PdfDictionary ?? Empty : Empty;
         var instructions = new List<PdfContentInstruction>();

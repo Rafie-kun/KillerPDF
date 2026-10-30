@@ -14,7 +14,8 @@ namespace KillerPDF.Services
         /// <summary>
         /// Scans every page of <paramref name="filePath"/> for <paramref name="query"/>, ignoring case
         /// unless <paramref name="matchCase"/> is set; <paramref name="wholeWord"/> skips matches inside
-        /// longer words. Returns an empty result when query is blank or the file cannot be opened.
+        /// longer words. Returns an empty result when query is blank. A file whose text cannot be read throws,
+        /// because an empty result would tell the user the term is absent.
         /// </summary>
         public static SearchResult Search(string filePath, string query, bool matchCase = false, bool wholeWord = false)
         {
@@ -22,22 +23,18 @@ namespace KillerPDF.Services
             if (string.IsNullOrWhiteSpace(query) || string.IsNullOrWhiteSpace(filePath))
                 return result;
 
-            try
+            using var doc = PdfDocument.Open(filePath);
+            for (int pi = 0; pi < doc.NumberOfPages; pi++)
             {
-                using var doc = PdfDocument.Open(filePath);
-                for (int pi = 0; pi < doc.NumberOfPages; pi++)
+                var page = doc.GetPage(pi + 1);
+                var hits = FindMatchesOnPage(page, query, matchCase, wholeWord);
+                if (hits.Count > 0)
                 {
-                    var page = doc.GetPage(pi + 1);
-                    var hits = FindMatchesOnPage(page, query, matchCase, wholeWord);
-                    if (hits.Count > 0)
-                    {
-                        result.PageRects[pi] = hits;
-                        result.ResultPages.Add(pi);
-                        result.TotalHits += hits.Count;
-                    }
+                    result.PageRects[pi] = hits;
+                    result.ResultPages.Add(pi);
+                    result.TotalHits += hits.Count;
                 }
             }
-            catch { /* return whatever was collected so far */ }
 
             return result;
         }

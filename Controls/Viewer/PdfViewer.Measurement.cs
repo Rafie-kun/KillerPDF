@@ -524,6 +524,7 @@ public partial class PdfViewer
     {
         if (_doc is null || _currentFile is null || pages.Count == 0) return;
         UndoEntry? undo = CaptureSerializedDocumentUndoExt(_currentFile);
+        var previousScales = new List<(MeasurementAnnotation Measurement, string Unit, double UnitsPerPoint, string ScaleName, int Precision)>();
         if (updateExisting)
         {
             foreach (int page in pages)
@@ -532,6 +533,8 @@ public partial class PdfViewer
                 foreach (MeasurementAnnotation measurement in list.OfType<MeasurementAnnotation>())
                 {
                     if (measurement.Kind == MeasurementKind.Angle) continue;
+                    previousScales.Add((measurement, measurement.Unit, measurement.UnitsPerPoint,
+                        measurement.ScaleName, measurement.Precision));
                     if (profile is null)
                     {
                         measurement.UnitsPerPoint = MeasurementUnits.ActualSizeUnitsPerPoint(measurement.Unit);
@@ -552,9 +555,24 @@ public partial class PdfViewer
             }
         }
         int[] pageList = [.. pages];
-        SaveTempAndReload(keepAnnotations: true, preserveZoom: true,
-            finalizeSavedFile: path => PdfEngineIntegration.SetPageScales(path, pageList, profile),
-            documentUndo: undo);
+        try
+        {
+            SaveTempAndReload(keepAnnotations: true, preserveZoom: true,
+                finalizeSavedFile: path => PdfEngineIntegration.SetPageScales(path, pageList, profile),
+                documentUndo: undo);
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException)
+        {
+            foreach (var previous in previousScales)
+            {
+                previous.Measurement.Unit = previous.Unit;
+                previous.Measurement.UnitsPerPoint = previous.UnitsPerPoint;
+                previous.Measurement.ScaleName = previous.ScaleName;
+                previous.Measurement.Precision = previous.Precision;
+            }
+            ReportEditFailure(ex);
+            return;
+        }
         _pageScales = null;
         RenderAnnotationsOnAllVisiblePages();
     }

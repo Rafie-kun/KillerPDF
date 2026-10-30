@@ -255,6 +255,16 @@ public static class PdfContentStreamReader
                 }
                 continue;
             }
+            // Bytes such as 0x85 and 0xA0 are whitespace to .NET but not to PDF, so image data read
+            // as content (after a damaged inline image) forms keywords that are blank as strings.
+            if (string.IsNullOrWhiteSpace(operation))
+            {
+                if (!compatibilityRecovery)
+                    throw new PdfSyntaxException("Content operator is blank", token.Offset);
+                operands.Clear();
+                numericOperands.Clear();
+                continue;
+            }
             if (operation is "R" or "obj" or "endobj" or "stream" or "endstream" or "ID" or "EI")
             {
                 if (!compatibilityRecovery)

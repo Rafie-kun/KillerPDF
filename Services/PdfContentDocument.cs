@@ -10,7 +10,8 @@ internal sealed class PdfContentDocument : IDisposable
     private readonly Dictionary<int, PdfPageContent> _pages = [];
     private PdfContentDocument(byte[] source)
     {
-        _reader = new PdfPageContentReader(PdfDocument.Open(source, string.Empty));
+        // The page renders through compatibility recovery, so its text layer reads the same way.
+        _reader = new PdfPageContentReader(PdfEngineIntegration.OpenForReading(source));
     }
     internal static PdfContentDocument Open(string path) => new(File.ReadAllBytes(path));
     internal static PdfContentDocument Open(byte[] source) => new(source);

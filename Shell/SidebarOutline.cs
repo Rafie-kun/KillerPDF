@@ -367,12 +367,21 @@ namespace KillerPDF.Shell
         {
             ArgumentNullException.ThrowIfNull(edit);
             IReadOnlyList<KillerPdf.Engine.Documents.PdfBookmarkInfo>? replacement = null;
-            SaveTempAndReload(keepAnnotations: true, preserveZoom: true,
-                finalizeSavedFile: path =>
-                {
-                    replacement = edit(PdfEngineIntegration.ReadBookmarks(File.ReadAllBytes(path)));
-                    PdfEngineIntegration.ReplaceBookmarks(path, replacement);
-                });
+            try
+            {
+                SaveTempAndReload(keepAnnotations: true, preserveZoom: true,
+                    finalizeSavedFile: path =>
+                    {
+                        replacement = edit(PdfEngineIntegration.ReadBookmarks(File.ReadAllBytes(path)));
+                        PdfEngineIntegration.ReplaceBookmarks(path, replacement);
+                    });
+            }
+            catch (Exception ex) when (ex is not OutOfMemoryException)
+            {
+                KillerDialog.Show(this, string.Format(Loc("Str_Pages_Failed"), ex.Message),
+                    Loc("Str_Dlg_AppTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
             LoadOutlines();
             MarkDirty(true);
         }

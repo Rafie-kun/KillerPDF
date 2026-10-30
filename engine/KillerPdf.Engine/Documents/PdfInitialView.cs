@@ -76,8 +76,8 @@ public sealed record PdfInitialView
     private static PdfViewerPreferences ReadPreferences(PdfDocument document, PdfDictionary catalog)
     {
         if (!TryValue(document, catalog, "ViewerPreferences", out PdfObject? value)) return new();
-        PdfDictionary dictionary = value as PdfDictionary
-            ?? throw new InvalidOperationException("The catalog /ViewerPreferences value is not a dictionary.");
+        // Null and a dangling reference mean the same as an absent entry, and the preferences are advisory.
+        if (value is not PdfDictionary dictionary) return new();
         return new PdfViewerPreferences
         {
             HideToolbar = Boolean(document, dictionary, "HideToolbar"),
@@ -105,7 +105,17 @@ public sealed record PdfInitialView
     {
         if (!TryValue(document, tree.Catalog, "OpenAction", out PdfObject? value)) return (null, null, null);
         if (value is PdfString text)
-            return (null, null, PdfUnicodeEncoding.DecodeTextString(text.Bytes.Span, "The catalog /OpenAction value"));
+        {
+            try
+            {
+                return (null, null, PdfUnicodeEncoding.DecodeTextString(text.Bytes.Span, "The catalog /OpenAction value"));
+            }
+            catch (InvalidOperationException)
+            {
+                // A name that cannot be decoded is advisory too.
+                return (null, null, null);
+            }
+        }
         if (value is PdfName name) return (null, null, name.ValueAsLatin1());
         if (value is not PdfArray array || array.Count < 2) return (null, null, null);
         if (array[0] is not PdfIndirectReference pageReference || Resolve(document, array[1]) is not PdfName kindName) return (null, null, null);
@@ -167,8 +177,8 @@ public sealed record PdfInitialView
         var visited = new HashSet<(int, int)>();
         while (value is PdfIndirectReference reference)
         {
-            if (!visited.Add((reference.ObjectNumber, reference.Generation)))
-                throw new InvalidOperationException("An initial-view reference contains a cycle.");
+            // The opening view is advisory, so a reference cycle reads as an absent value.
+            if (!visited.Add((reference.ObjectNumber, reference.Generation))) return PdfNull.Instance;
             value = document.Resolve(reference);
         }
         return value;

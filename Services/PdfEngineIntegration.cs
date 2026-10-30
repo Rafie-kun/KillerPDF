@@ -1222,9 +1222,23 @@ internal static class PdfEngineIntegration
             OpenPageSource(sources[0]);
             return sources[0].ToArray();
         }
+        try
+        {
+            return MergeDocuments(sources, clearBookmarks: false);
+        }
+        catch (Exception ex) when (IsBookmarkGraphFailure(ex))
+        {
+            // The pages are fine; a damaged outline in any source must not fail the merge.
+            return MergeDocuments(sources, clearBookmarks: true);
+        }
+    }
+
+    private static byte[] MergeDocuments(IReadOnlyList<byte[]> sources, bool clearBookmarks)
+    {
         PdfIncrementalPageEditor editor = OpenMergeTarget(sources[0]).Editor;
         for (int index = 1; index < sources.Count; index++)
             editor.AddImportedDocument(OpenPageSource(sources[index]));
+        if (clearBookmarks) editor.ClearBookmarks();
         return editor.Build();
     }
 
@@ -1598,6 +1612,19 @@ internal static class PdfEngineIntegration
         if (paths.Count == 0)
             throw new ArgumentException("At least one input file is required.", nameof(paths));
 
+        try
+        {
+            return MergeFiles(paths, clearBookmarks: false);
+        }
+        catch (Exception ex) when (IsBookmarkGraphFailure(ex))
+        {
+            // The pages are fine; a damaged outline in any source must not fail the merge.
+            return MergeFiles(paths, clearBookmarks: true);
+        }
+    }
+
+    private static byte[] MergeFiles(IReadOnlyList<string> paths, bool clearBookmarks)
+    {
         bool firstIsPdf = string.Equals(Path.GetExtension(paths[0]), ".pdf",
             StringComparison.OrdinalIgnoreCase);
         PdfIncrementalPageEditor editor;
@@ -1635,6 +1662,7 @@ internal static class PdfEngineIntegration
                 throw WithImportSource(path, ex);
             }
         }
+        if (clearBookmarks) editor.ClearBookmarks();
         return BuildImportedDocuments(editor, sourcePaths);
     }
 
@@ -1954,7 +1982,8 @@ internal static class PdfEngineIntegration
     internal static IReadOnlyList<PdfPageInformation> ReadPageInformation(string path)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
-        return PdfPageInformation.Read(PdfDocument.Open(File.ReadAllBytes(path)));
+        // The viewer shows the file through compatibility recovery, so its page geometry reads that way too.
+        return PdfPageInformation.Read(OpenForReading(File.ReadAllBytes(path)));
     }
 
     /// <summary>Authors a new one-page blank document.</summary>
@@ -2008,8 +2037,8 @@ internal static class PdfEngineIntegration
     internal static void ValidateDocument(string path)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
-        _ = new PdfIncrementalPageEditor(
-            PdfDocument.Open(File.ReadAllBytes(path))).PageCount;
+        // Page-copy operations read their source through OpenPageSource, so this checks the same way.
+        _ = new PdfIncrementalPageEditor(OpenPageSource(File.ReadAllBytes(path))).PageCount;
     }
 
     /// <summary>

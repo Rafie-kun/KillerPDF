@@ -87,6 +87,27 @@ public sealed class PdfBookmarkReaderTests
         Assert.Equal([70, 781, null], bookmark.Destination.Values);
     }
 
+    [Theory]
+    [InlineData("/FitR 640")]
+    [InlineData("/FitH /Nm")]
+    [InlineData("/Bogus 64")]
+    public void Read_KeepsTheOutlineWhenOneBookmarkHasAMalformedView(string malformed)
+    {
+        byte[] source = new PdfDocumentBuilder()
+            .AddBlankPage()
+            .AddBookmark("Broken", 0, options: new PdfBookmarkOptions { Destination = PdfDestination.FitWidth(640) })
+            .AddBookmark("Fine", 0, options: new PdfBookmarkOptions { Destination = PdfDestination.At(72, 700, 1.25) })
+            .Build();
+        source = ReplaceAscii(source, "/FitH 640", malformed);
+
+        IReadOnlyList<PdfBookmarkInfo> bookmarks = PdfBookmarkReader.Read(PdfDocument.Open(source));
+
+        Assert.Equal(["Broken", "Fine"], bookmarks.Select(item => item.Title));
+        Assert.Null(bookmarks[0].Destination);
+        Assert.Equal(0, bookmarks[0].DestinationPageIndex);
+        Assert.Equal(PdfDestinationKind.Xyz, bookmarks[1].Destination!.Kind);
+    }
+
     [Fact]
     public void Read_ReturnsEmptyListWhenDocumentHasNoBookmarks()
     {

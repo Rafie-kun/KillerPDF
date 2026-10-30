@@ -41,13 +41,10 @@ public sealed record PdfDocumentInformation
     public static PdfDocumentInformation Read(PdfDocument document)
     {
         ArgumentNullException.ThrowIfNull(document);
-        PdfDictionary? info = null;
-        if (document.Trailer.TryGetValue(new PdfName("Info"u8), out PdfObject? value))
-        {
-            value = Resolve(document, value);
-            info = value as PdfDictionary
-                ?? throw new InvalidOperationException("The trailer /Info value is not a dictionary.");
-        }
+        // Each descriptive value is read on its own, so one bad value shows as blank without
+        // hiding the rest. An /Info that is not a dictionary carries no values at all.
+        PdfDictionary? info = document.Trailer.TryGetValue(new PdfName("Info"u8), out PdfObject? value)
+            ? Resolve(document, value) as PdfDictionary : null;
 
         PdfPageTree pageTree = PdfPageTree.Read(document);
         // PDF 2.0 deprecates /Info, so a field missing there is read from the XMP packet.
@@ -63,36 +60,44 @@ public sealed record PdfDocumentInformation
         }
         return new PdfDocumentInformation
         {
-            Title = Text(info, "Title") ?? xmp?.Title,
-            Author = Text(info, "Author") ?? xmp?.Author,
-            Subject = Text(info, "Subject") ?? xmp?.Subject,
-            Keywords = Text(info, "Keywords") ?? xmp?.Keywords,
-            Creator = Text(info, "Creator") ?? xmp?.Creator,
-            Producer = Text(info, "Producer") ?? xmp?.Producer,
-            Language = CatalogText(document, "Lang"),
-            CreationDate = Date(info, "CreationDate") ?? xmp?.CreationDate,
-            ModificationDate = Date(info, "ModDate") ?? xmp?.ModificationDate,
-            Trapped = ReadTrapped(info) ?? xmp?.Trapped,
+            Title = Text(document, info, "Title") ?? xmp?.Title,
+            Author = Text(document, info, "Author") ?? xmp?.Author,
+            Subject = Text(document, info, "Subject") ?? xmp?.Subject,
+            Keywords = Text(document, info, "Keywords") ?? xmp?.Keywords,
+            Creator = Text(document, info, "Creator") ?? xmp?.Creator,
+            Producer = Text(document, info, "Producer") ?? xmp?.Producer,
+            Language = CatalogText(document, pageTree.Catalog, "Lang"),
+            CreationDate = Date(document, info, "CreationDate") ?? xmp?.CreationDate,
+            ModificationDate = Date(document, info, "ModDate") ?? xmp?.ModificationDate,
+            Trapped = ReadTrapped(document, info) ?? xmp?.Trapped,
             Version = document.Header.Version,
             PageCount = pageTree.Pages.Count,
             InitialView = PdfInitialView.Read(document, pageTree)
         };
     }
 
-    private static string? CatalogText(PdfDocument document, string key)
+    // Null, a dangling reference and a non-string all mean the same as an absent entry.
+    private static string? CatalogText(PdfDocument document, PdfDictionary catalog, string key) =>
+        catalog.TryGetValue(new PdfName(Encoding.ASCII.GetBytes(key)), out PdfObject? value)
+            ? DecodedText(Resolve(document, value)) : null;
+
+    private static string? DecodedText(PdfObject value)
     {
-        PdfDictionary catalog = PdfPageTree.Read(document).Catalog;
-        if (!catalog.TryGetValue(new PdfName(Encoding.ASCII.GetBytes(key)), out PdfObject? value))
+        if (value is not PdfString text) return null;
+        try
+        {
+            return PdfUnicodeEncoding.DecodeTextString(text.Bytes.Span, "A document text value");
+        }
+        catch (InvalidOperationException)
+        {
+            // Bad UTF-16 reads as blank rather than stopping the whole read.
             return null;
-        value = Resolve(document, value);
-        return value is PdfString text
-            ? PdfUnicodeEncoding.DecodeTextString(text.Bytes.Span, $"The catalog /{key} value")
-            : throw new InvalidOperationException($"The catalog /{key} value is not a string.");
+        }
     }
 
-    private static DateTimeOffset? Date(PdfDictionary? info, string key)
+    private static DateTimeOffset? Date(PdfDocument document, PdfDictionary? info, string key)
     {
-        string? value = Text(info, key);
+        string? value = Text(document, info, key);
         if (value is null) return null;
         try
         {
@@ -121,18 +126,16 @@ public sealed record PdfDocumentInformation
         }
         catch (Exception error) when (error is FormatException or ArgumentOutOfRangeException)
         {
-            throw new InvalidOperationException($"The /{key} document information value is not a valid PDF date.", error);
+            return null;
         }
     }
 
-    private static PdfTrappedStatus? ReadTrapped(PdfDictionary? info)
+    private static PdfTrappedStatus? ReadTrapped(PdfDocument document, PdfDictionary? info)
     {
         if (info is null || !info.TryGetValue(new PdfName("Trapped"u8), out PdfObject? value)) return null;
-        // A null entry carries no value and means the same as an absent entry.
-        if (value is PdfNull) return null;
-        return value is PdfName name && Enum.TryParse(name.ValueAsLatin1(), out PdfTrappedStatus result)
-            ? result
-            : throw new InvalidOperationException("The /Trapped document information value is not defined.");
+        // A null entry carries no value and means the same as an absent entry, as does an undefined one.
+        return Resolve(document, value) is PdfName name && Enum.TryParse(name.ValueAsLatin1(), out PdfTrappedStatus result)
+            ? result : null;
     }
 
     private static PdfObject Resolve(PdfDocument document, PdfObject value)
@@ -140,19 +143,13 @@ public sealed record PdfDocumentInformation
         var visited = new HashSet<(int, int)>();
         while (value is PdfIndirectReference reference)
         {
-            if (!visited.Add((reference.ObjectNumber, reference.Generation)))
-                throw new InvalidOperationException("The document information reference contains a cycle.");
+            if (!visited.Add((reference.ObjectNumber, reference.Generation))) return PdfNull.Instance;
             value = document.Resolve(reference);
         }
         return value;
     }
 
-    private static string? Text(PdfDictionary? info, string key)
-    {
-        if (info is null || !info.TryGetValue(new PdfName(System.Text.Encoding.ASCII.GetBytes(key)), out PdfObject? value))
-            return null;
-        return value is PdfString text
-            ? PdfUnicodeEncoding.DecodeTextString(text.Bytes.Span, $"The /{key} document information value")
-            : throw new InvalidOperationException($"The /{key} document information value is not a string.");
-    }
+    private static string? Text(PdfDocument document, PdfDictionary? info, string key) =>
+        info is not null && info.TryGetValue(new PdfName(System.Text.Encoding.ASCII.GetBytes(key)), out PdfObject? value)
+            ? DecodedText(Resolve(document, value)) : null;
 }

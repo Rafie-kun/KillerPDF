@@ -46,30 +46,43 @@ namespace KillerPDF.Controls
             if (_currentFile is null || _activeCanvas is null)
                 return;
 
-            IReadOnlyList<KillerPdf.Engine.Documents.PdfPageInformation> pages =
-                PdfEngineIntegration.ReadPageInformation(_currentFile);
-            if ((uint)pageIndex >= (uint)pages.Count)
-                return;
-            KillerPdf.Engine.Documents.PdfPageInformation page = pages[pageIndex];
-            int rotation = _pageRotations.TryGetValue(pageIndex, out int storedRotation)
-                ? ((storedRotation % 360) + 360) % 360
-                : page.Rotation;
-            double canvasWidth = Math.Max(1, _activeCanvas.ActualWidth);
-            double canvasHeight = Math.Max(1, _activeCanvas.ActualHeight);
-            (double x1, double y1, double x2, double y2) = CanvasToPdfRect(
-                canvasRect, page.Width, page.Height, canvasWidth, canvasHeight, rotation);
-
             string? fieldName = null;
-            SaveTempAndReload(
-                keepAnnotations: true,
-                preserveZoom: true,
-                finalizeSavedFile: path => fieldName = PdfEngineIntegration.AddTextField(
-                    path, pageIndex, x1, y1, x2 - x1, y2 - y1),
-                selectedPageAfterReload: pageIndex,
-                preserveRenderedPages: true);
+            try
+            {
+                IReadOnlyList<KillerPdf.Engine.Documents.PdfPageInformation> pages =
+                    PdfEngineIntegration.ReadPageInformation(_currentFile);
+                if ((uint)pageIndex >= (uint)pages.Count)
+                    return;
+                KillerPdf.Engine.Documents.PdfPageInformation page = pages[pageIndex];
+                int rotation = _pageRotations.TryGetValue(pageIndex, out int storedRotation)
+                    ? ((storedRotation % 360) + 360) % 360
+                    : page.Rotation;
+                double canvasWidth = Math.Max(1, _activeCanvas.ActualWidth);
+                double canvasHeight = Math.Max(1, _activeCanvas.ActualHeight);
+                (double x1, double y1, double x2, double y2) = CanvasToPdfRect(
+                    canvasRect, page.Width, page.Height, canvasWidth, canvasHeight, rotation);
+
+                SaveTempAndReload(
+                    keepAnnotations: true,
+                    preserveZoom: true,
+                    finalizeSavedFile: path => fieldName = PdfEngineIntegration.AddTextField(
+                        path, pageIndex, x1, y1, x2 - x1, y2 - y1),
+                    selectedPageAfterReload: pageIndex,
+                    preserveRenderedPages: true);
+            }
+            catch (Exception ex) when (ex is not OutOfMemoryException)
+            {
+                ReportEditFailure(ex);
+                return;
+            }
             SetStatus(fieldName is null
                 ? Loc("Str_St_FormFieldCreateFailed")
                 : string.Format(Loc("Str_St_FormFieldCreated"), fieldName));
         }
+
+        // An edit of a damaged file that cannot be saved shows a normal error, not the crash dialog.
+        private void ReportEditFailure(Exception error) =>
+            KillerDialog.Show(Window.GetWindow(this), string.Format(Loc("Str_Pages_Failed"), error.Message),
+                "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
     }
 }

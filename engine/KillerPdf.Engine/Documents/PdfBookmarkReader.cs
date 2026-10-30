@@ -147,27 +147,38 @@ public static class PdfBookmarkReader
         int? pageIndex = array[0] is PdfIndirectReference pageReference
             && pages.TryGetValue((pageReference.ObjectNumber, pageReference.Generation), out int found)
                 ? found : null;
-        PdfName kind = Resolve(document, array[1], "A destination view type") as PdfName
-            ?? throw new InvalidOperationException("A destination view type is not a name.");
-        double?[] values = [.. array.Skip(2).Select(value => OptionalNumber(document, value))];
-        PdfDestination destination = kind.ValueAsLatin1() switch
+        // A malformed view loses only the view: the item keeps its page and the rest of the outline stays readable.
+        return (pageIndex, named, ReadView(document, array));
+    }
+
+    private static PdfDestination? ReadView(PdfDocument document, PdfArray array)
+    {
+        try
         {
-            // ISO 32000 defines an /XYZ zoom of zero the same way as null: retain the
-            // viewer's current zoom. Typst emits the explicit zero form. Normalize it
-            // before constructing the authoring model, whose non-null zoom is positive.
-            "XYZ" when values.Length == 3 => PdfDestination.At(
-                values[0], values[1], values[2] > 0 ? values[2] : null),
-            "Fit" when values.Length == 0 => PdfDestination.FitPage(),
-            "FitH" when values.Length == 1 => PdfDestination.FitWidth(values[0]),
-            "FitV" when values.Length == 1 => PdfDestination.FitHeight(values[0]),
-            "FitR" when values is [double left, double bottom, double right, double top]
-                && right > left && top > bottom => PdfDestination.FitRectangle(left, bottom, right, top),
-            "FitB" when values.Length == 0 => PdfDestination.FitBoundingBox(),
-            "FitBH" when values.Length == 1 => PdfDestination.FitBoundingBoxWidth(values[0]),
-            "FitBV" when values.Length == 1 => PdfDestination.FitBoundingBoxHeight(values[0]),
-            _ => throw new InvalidOperationException("A bookmark destination has an invalid view array.")
-        };
-        return (pageIndex, named, destination);
+            if (Resolve(document, array[1], "A destination view type") is not PdfName kind) return null;
+            double?[] values = [.. array.Skip(2).Select(value => OptionalNumber(document, value))];
+            return kind.ValueAsLatin1() switch
+            {
+                // ISO 32000 defines an /XYZ zoom of zero the same way as null: retain the
+                // viewer's current zoom. Typst emits the explicit zero form. Normalize it
+                // before constructing the authoring model, whose non-null zoom is positive.
+                "XYZ" when values.Length == 3 => PdfDestination.At(
+                    values[0], values[1], values[2] > 0 ? values[2] : null),
+                "Fit" when values.Length == 0 => PdfDestination.FitPage(),
+                "FitH" when values.Length == 1 => PdfDestination.FitWidth(values[0]),
+                "FitV" when values.Length == 1 => PdfDestination.FitHeight(values[0]),
+                "FitR" when values is [double left, double bottom, double right, double top]
+                    && right > left && top > bottom => PdfDestination.FitRectangle(left, bottom, right, top),
+                "FitB" when values.Length == 0 => PdfDestination.FitBoundingBox(),
+                "FitBH" when values.Length == 1 => PdfDestination.FitBoundingBoxWidth(values[0]),
+                "FitBV" when values.Length == 1 => PdfDestination.FitBoundingBoxHeight(values[0]),
+                _ => null
+            };
+        }
+        catch (Exception error) when (error is InvalidOperationException or ArgumentException)
+        {
+            return null;
+        }
     }
 
     private static PdfRgbColor? ReadColor(PdfDocument document, PdfDictionary item)

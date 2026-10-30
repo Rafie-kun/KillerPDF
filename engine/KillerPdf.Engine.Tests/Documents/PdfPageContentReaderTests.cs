@@ -318,6 +318,32 @@ public sealed class PdfPageContentReaderTests
         Assert.Throws<OperationCanceledException>(() => new PdfPageContentReader(document).Read(0, new CancellationToken(true)));
     }
 
+    [Theory]
+    [InlineData(0x85)]
+    [InlineData(0xA0)]
+    public void ABlankOperatorFromBinaryJunkIsSkippedUnderRecoveryAndRefusedOtherwise(int junk)
+    {
+        // Latin-1 0x85 and 0xA0 are whitespace to .NET but ordinary bytes to the PDF tokenizer, so
+        // they form a keyword that is blank as a string. Image data read as content produces them.
+        string content = "q 1 0 0 1 0 0 cm " + (char)junk + " Q";
+        PdfDocument strict = Document(content, "", "", []);
+        PdfDocument recovery = PdfDocument.OpenWithCompatibilityRecovery(strict.Source);
+
+        IReadOnlyList<KillerPdf.Engine.Parsing.PdfContentInstruction> instructions =
+            new PdfPageContentReader(recovery).ReadInstructions(0);
+
+        Assert.Equal(["q", "cm", "Q"], instructions.Select(item => item.Operator));
+        Assert.Throws<KillerPdf.Engine.Syntax.PdfSyntaxException>(() =>
+            new PdfPageContentReader(strict).ReadInstructions(0));
+        Assert.Throws<KillerPdf.Engine.Syntax.PdfSyntaxException>(() =>
+            KillerPdf.Engine.Parsing.PdfContentStreamReader.Read(Encoding.Latin1.GetBytes(content)));
+        Assert.Equal(3, KillerPdf.Engine.Parsing.PdfContentStreamReader.Read(
+            Encoding.Latin1.GetBytes(content), compatibilityRecovery: true).Count);
+        var rendered = new KillerPdf.Engine.Rendering.PdfPageRenderer(recovery)
+            .Render(0, new KillerPdf.Engine.Rendering.PdfRenderOptions(30, 40));
+        Assert.NotNull(rendered);
+    }
+
     [Fact]
     public void RawInstructionsRoundTripUnknownOperatorsAndInlineImages()
     {
@@ -350,6 +376,21 @@ public sealed class PdfPageContentReaderTests
         Assert.Equal("Shade", shading.ResourceName);
         Assert.Equal(2, shading.ShadingType);
         Assert.Equal(new PdfContentBounds(10, 20, 40, 60), shading.BoundingBox);
+    }
+
+    [Fact]
+    public void ReadsAPageWithNoMediaBoxAsUsLetterUnderRecovery()
+    {
+        // Same-length rename keeps the cross-reference offsets valid while the page loses its box.
+        byte[] bytes = Document("BT /F1 12 Tf 10 20 Td (Hello) Tj ET", "", "", []).Source.ToArray();
+        byte[] source = Encoding.Latin1.GetBytes(Encoding.Latin1.GetString(bytes).Replace("/MediaBox", "/MediaBoy"));
+
+        PdfPageContent page = new PdfPageContentReader(PdfDocument.OpenWithCompatibilityRecovery(source)).Read(0);
+
+        Assert.Contains("Hello", page.Text);
+        Assert.Equal(612, page.Width, 3);
+        Assert.Equal(792, page.Height, 3);
+        Assert.Throws<InvalidOperationException>(() => new PdfPageContentReader(PdfDocument.Open(source)).Read(0));
     }
 
     private static PdfPageContent Read(string content, string crop = "", string extraResources = "", string[]? extras = null) =>

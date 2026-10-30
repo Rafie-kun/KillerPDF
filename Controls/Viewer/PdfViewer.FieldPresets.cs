@@ -89,34 +89,42 @@ namespace KillerPDF.Controls
         {
             if (_currentFile is null) return;
             Canvas canvas = CanvasForPage(pageIndex);
-            IReadOnlyList<KillerPdf.Engine.Documents.PdfPageInformation> pages =
-                PdfEngineIntegration.ReadPageInformation(_currentFile);
-            if ((uint)pageIndex >= (uint)pages.Count) return;
-            KillerPdf.Engine.Documents.PdfPageInformation page = pages[pageIndex];
-            int rotation = _pageRotations.TryGetValue(pageIndex, out int storedRotation)
-                ? ((storedRotation % 360) + 360) % 360
-                : page.Rotation;
-            double canvasWidth = Math.Max(1, canvas.ActualWidth);
-            double canvasHeight = Math.Max(1, canvas.ActualHeight);
-            double visualWidth = rotation is 90 or 270 ? page.Height : page.Width;
-            double scale = canvasWidth / Math.Max(1, visualWidth);
-            double width = Math.Min(preset.Width * scale, canvasWidth);
-            double height = Math.Min(preset.Height * scale, canvasHeight);
-            var canvasRect = new Rect(
-                Math.Clamp(position.X, 0, canvasWidth - width),
-                Math.Clamp(position.Y, 0, canvasHeight - height),
-                width, height);
-            (double x1, double y1, double x2, double y2) = CanvasToPdfRect(
-                canvasRect, page.Width, page.Height, canvasWidth, canvasHeight, rotation);
-
             string? fieldName = null;
-            SaveTempAndReload(
-                keepAnnotations: true,
-                preserveZoom: true,
-                finalizeSavedFile: path => fieldName = PdfEngineIntegration.AddTextField(
-                    path, pageIndex, x1, y1, x2 - x1, y2 - y1, preset),
-                selectedPageAfterReload: pageIndex,
-                preserveRenderedPages: true);
+            try
+            {
+                IReadOnlyList<KillerPdf.Engine.Documents.PdfPageInformation> pages =
+                    PdfEngineIntegration.ReadPageInformation(_currentFile);
+                if ((uint)pageIndex >= (uint)pages.Count) return;
+                KillerPdf.Engine.Documents.PdfPageInformation page = pages[pageIndex];
+                int rotation = _pageRotations.TryGetValue(pageIndex, out int storedRotation)
+                    ? ((storedRotation % 360) + 360) % 360
+                    : page.Rotation;
+                double canvasWidth = Math.Max(1, canvas.ActualWidth);
+                double canvasHeight = Math.Max(1, canvas.ActualHeight);
+                double visualWidth = rotation is 90 or 270 ? page.Height : page.Width;
+                double scale = canvasWidth / Math.Max(1, visualWidth);
+                double width = Math.Min(preset.Width * scale, canvasWidth);
+                double height = Math.Min(preset.Height * scale, canvasHeight);
+                var canvasRect = new Rect(
+                    Math.Clamp(position.X, 0, canvasWidth - width),
+                    Math.Clamp(position.Y, 0, canvasHeight - height),
+                    width, height);
+                (double x1, double y1, double x2, double y2) = CanvasToPdfRect(
+                    canvasRect, page.Width, page.Height, canvasWidth, canvasHeight, rotation);
+
+                SaveTempAndReload(
+                    keepAnnotations: true,
+                    preserveZoom: true,
+                    finalizeSavedFile: path => fieldName = PdfEngineIntegration.AddTextField(
+                        path, pageIndex, x1, y1, x2 - x1, y2 - y1, preset),
+                    selectedPageAfterReload: pageIndex,
+                    preserveRenderedPages: true);
+            }
+            catch (Exception ex) when (ex is not OutOfMemoryException)
+            {
+                ReportEditFailure(ex);
+                return;
+            }
             SetStatus(fieldName is null
                 ? Loc("Str_St_FormFieldCreateFailed")
                 : string.Format(Loc("Str_St_FormFieldCreated"), fieldName));

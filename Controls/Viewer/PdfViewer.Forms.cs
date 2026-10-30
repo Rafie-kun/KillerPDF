@@ -239,14 +239,23 @@ namespace KillerPDF.Controls
         {
             if (_currentFile is null || string.IsNullOrEmpty(_selectedFormFieldName)) return;
             string fieldName = _selectedFormFieldName;
-            _selectedFormFieldName = null;
             int pageIndex = _currentPage;
-            SaveTempAndReload(
-                keepAnnotations: true,
-                preserveZoom: true,
-                finalizeSavedFile: path => PdfEngineIntegration.RemoveFormField(path, fieldName),
-                selectedPageAfterReload: pageIndex,
-                preserveRenderedPages: true);
+            try
+            {
+                SaveTempAndReload(
+                    keepAnnotations: true,
+                    preserveZoom: true,
+                    finalizeSavedFile: path => PdfEngineIntegration.RemoveFormField(path, fieldName),
+                    selectedPageAfterReload: pageIndex,
+                    preserveRenderedPages: true);
+            }
+            catch (Exception ex) when (ex is not OutOfMemoryException)
+            {
+                // The field is still in the document, so it stays selected.
+                ReportEditFailure(ex);
+                return;
+            }
+            _selectedFormFieldName = null;
             SetStatus(string.Format(Loc("Str_St_FormFieldDeleted"), fieldName));
         }
 
@@ -261,13 +270,21 @@ namespace KillerPDF.Controls
             double? fontSize = _formFontSizes.TryGetValue(field.FieldName, out double size)
                 ? size : null;
             Color selected = dialog.SelectedColor;
-            SaveTempAndReload(
-                keepAnnotations: true,
-                preserveZoom: true,
-                finalizeSavedFile: path => PdfEngineIntegration.SetTextFieldBackground(
-                    path, field.FieldName, value, selected, fontSize),
-                selectedPageAfterReload: pageIndex,
-                preserveRenderedPages: true);
+            try
+            {
+                SaveTempAndReload(
+                    keepAnnotations: true,
+                    preserveZoom: true,
+                    finalizeSavedFile: path => PdfEngineIntegration.SetTextFieldBackground(
+                        path, field.FieldName, value, selected, fontSize),
+                    selectedPageAfterReload: pageIndex,
+                    preserveRenderedPages: true);
+            }
+            catch (Exception ex) when (ex is not OutOfMemoryException)
+            {
+                ReportEditFailure(ex);
+                return;
+            }
             _selectedFormFieldName = field.FieldName;
             SetStatus(string.Format(Loc("Str_St_FormFieldFillChanged"), field.FieldName));
         }
@@ -279,23 +296,31 @@ namespace KillerPDF.Controls
             Rect canvasRectangle = new(
                 Canvas.GetLeft(element), Canvas.GetTop(element),
                 element.ActualWidth, element.ActualHeight);
-            IReadOnlyList<KillerPdf.Engine.Documents.PdfPageInformation> pages =
-                PdfEngineIntegration.ReadPageInformation(_currentFile);
-            if ((uint)pageIndex >= (uint)pages.Count) return;
-            KillerPdf.Engine.Documents.PdfPageInformation page = pages[pageIndex];
-            int rotation = _pageRotations.TryGetValue(pageIndex, out int storedRotation)
-                ? ((storedRotation % 360) + 360) % 360
-                : page.Rotation;
-            (double left, double bottom, double right, double top) = CanvasToPdfRect(
-                canvasRectangle, page.Width, page.Height,
-                Math.Max(1, canvas.ActualWidth), Math.Max(1, canvas.ActualHeight), rotation);
-            SaveTempAndReload(
-                keepAnnotations: true,
-                preserveZoom: true,
-                finalizeSavedFile: path => PdfEngineIntegration.MoveFormWidget(
-                    path, field.ObjNum, field.Generation, left, bottom, right, top),
-                selectedPageAfterReload: pageIndex,
-                preserveRenderedPages: true);
+            try
+            {
+                IReadOnlyList<KillerPdf.Engine.Documents.PdfPageInformation> pages =
+                    PdfEngineIntegration.ReadPageInformation(_currentFile);
+                if ((uint)pageIndex >= (uint)pages.Count) return;
+                KillerPdf.Engine.Documents.PdfPageInformation page = pages[pageIndex];
+                int rotation = _pageRotations.TryGetValue(pageIndex, out int storedRotation)
+                    ? ((storedRotation % 360) + 360) % 360
+                    : page.Rotation;
+                (double left, double bottom, double right, double top) = CanvasToPdfRect(
+                    canvasRectangle, page.Width, page.Height,
+                    Math.Max(1, canvas.ActualWidth), Math.Max(1, canvas.ActualHeight), rotation);
+                SaveTempAndReload(
+                    keepAnnotations: true,
+                    preserveZoom: true,
+                    finalizeSavedFile: path => PdfEngineIntegration.MoveFormWidget(
+                        path, field.ObjNum, field.Generation, left, bottom, right, top),
+                    selectedPageAfterReload: pageIndex,
+                    preserveRenderedPages: true);
+            }
+            catch (Exception ex) when (ex is not OutOfMemoryException)
+            {
+                ReportEditFailure(ex);
+                return;
+            }
             SetStatus(resized
                 ? string.Format(Loc("Str_St_FormFieldResized"), field.FieldName)
                 : string.Format(Loc("Str_St_FormFieldMoved"), field.FieldName));

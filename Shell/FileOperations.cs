@@ -155,6 +155,8 @@ namespace KillerPDF.Shell
                         Loc("Str_Dlg_AppTitle"), MessageBoxButton.YesNo, MessageBoxImage.Warning);
                     if (result == MessageBoxResult.Yes)
                         TryRepairAndOpen(srcPath);
+                    else
+                        AbandonFailedOpen();
                 }
             }
             catch (Exception ex) when (PdfImport.IsEofParseException(ex))
@@ -176,7 +178,18 @@ namespace KillerPDF.Shell
                     Loc("Str_Dlg_AppTitle"), MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (result == MessageBoxResult.Yes)
                     TryRepairAndOpen(srcPath);   // sets _asyncOpenPending and finalizes the tab itself
+                else
+                    AbandonFailedOpen();
             }
+        }
+
+        // A file that opened but could not be finished (for example one that recovers to no pages) leaves
+        // a working document behind. When the user declines the repair, nothing may count as opened.
+        private void AbandonFailedOpen()
+        {
+            _doc?.Close();
+            _doc = null;
+            CloseEngineDocumentSession();
         }
 
         // The open-failure classifiers (IsEofParseException, IsXRefException, IsNetworkPath,
@@ -206,6 +219,13 @@ namespace KillerPDF.Shell
             workingPath = _completeDocumentSource.Path;
             List<PdfEngineIntegration.MeasurementData> openedMeasurements = TakeMeasurementsFromWorkingCopy(ref workingPath);
             _currentFile = workingPath;
+            // A document with no pages is refused before any of the previous document's session state
+            // (annotations, labels, undo history) is replaced, so a declined repair leaves nothing half-open.
+            CloseEngineDocumentSession();
+            PdfEngineDocumentSession engineSession = EnsureEngineDocumentSession();
+            int pageCount = engineSession.Pages.Count;
+            if (pageCount == 0)
+                throw new InvalidOperationException("The PDF contains no pages.");
             _publishedFile = null;
             // A temp-backed import (a browser download) has no saved home: cleanup deletes the
             // temp file, so the first Save must ask where to keep it.
@@ -218,11 +238,6 @@ namespace KillerPDF.Shell
             _docStampSpec = null;
             _annotations.Clear();
             _continuousLinks.Clear();   // drop the previous document's cached link rects
-            CloseEngineDocumentSession();
-            PdfEngineDocumentSession engineSession = EnsureEngineDocumentSession();
-            int pageCount = engineSession.Pages.Count;
-            if (pageCount == 0)
-                throw new InvalidOperationException("The PDF contains no pages.");
             _undoStack.Clear();
             _redoStack.Clear();
             // The map belongs to the previous document. Native rotations in a newly opened PDF
@@ -1122,10 +1137,19 @@ namespace KillerPDF.Shell
                     ModificationDate = info.ModificationDate,
                     Trapped = info.Trapped
                 };
-                SaveTempAndReload(
-                    keepAnnotations: true,
-                    finalizeSavedFile: target =>
-                        PdfEngineIntegration.ApplyDocumentMetadata(target, completeMetadata));
+                try
+                {
+                    SaveTempAndReload(
+                        keepAnnotations: true,
+                        finalizeSavedFile: target =>
+                            PdfEngineIntegration.ApplyDocumentMetadata(target, completeMetadata));
+                }
+                catch (Exception ex) when (ex is not OutOfMemoryException)
+                {
+                    KillerDialog.Show(this, Loc("Str_Err_SaveFailed") + "\n" + ex.Message,
+                        "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
                 SetStatus(Loc("Str_St_DocInfoUpdated"));
             }
         }
@@ -1155,7 +1179,11 @@ namespace KillerPDF.Shell
                         catch
                         {
                             string? repaired = await RepairPdfForImportAsync(file);
-                            if (repaired is null) return;
+                            if (repaired is null)
+                            {
+                                SetStatus(Loc("Str_Drop_MergeCanceled"));
+                                return;
+                            }
                             importPath = repaired;
                             PdfEngineIntegration.ValidateDocument(importPath);
                         }
@@ -1215,9 +1243,18 @@ namespace KillerPDF.Shell
             var res = KillerDialog.Show(this, string.Format(Loc("Str_Dlg_PageOutOfRange"), pages.Count),
                 "KillerPDF", MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (res != MessageBoxResult.Yes) return;
-            SaveTempAndReload(keepAnnotations: true, preserveZoom: true,
-                finalizeSavedFile: path => PdfEngineIntegration.NormalizePageDimensions(
-                    path, pages, PdfImport.MinAdobePageDim, PdfImport.MaxAdobePageDim));
+            // Every save calls this before its own try block, so a failed rescale must not escape it.
+            try
+            {
+                SaveTempAndReload(keepAnnotations: true, preserveZoom: true,
+                    finalizeSavedFile: path => PdfEngineIntegration.NormalizePageDimensions(
+                        path, pages, PdfImport.MinAdobePageDim, PdfImport.MaxAdobePageDim));
+            }
+            catch (Exception ex) when (ex is not OutOfMemoryException)
+            {
+                KillerDialog.Show(this, string.Format(Loc("Str_Pages_Failed"), ex.Message),
+                    "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         // A save rewrites the file, which invalidates any digital signature it carries, so the
