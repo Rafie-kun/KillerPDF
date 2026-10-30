@@ -1406,8 +1406,11 @@ public sealed partial class PdfPageRenderer
                 double lastCellX = Math.Ceiling((patternBounds.Max(point => point.X) - left) / stepX);
                 double firstCellY = Math.Floor((patternBounds.Min(point => point.Y) - top) / stepY);
                 double lastCellY = Math.Ceiling((patternBounds.Max(point => point.Y) - bottom) / stepY);
-                if (!((lastCellX - firstCellX + 1) * (lastCellY - firstCellY + 1) <= 100_000)
-                    || Math.Abs(firstCellX) > int.MaxValue / 2 || Math.Abs(firstCellY) > int.MaxValue / 2)
+                double cellsX = lastCellX - firstCellX + 1, cellsY = lastCellY - firstCellY + 1;
+                if (cellsX <= 0 || cellsY <= 0) return;
+                if (!(cellsX * cellsY <= 100_000) || Math.Abs(firstCellX) > int.MaxValue / 2
+                    || Math.Abs(firstCellY) > int.MaxValue / 2 || Math.Abs(lastCellX) > int.MaxValue / 2
+                    || Math.Abs(lastCellY) > int.MaxValue / 2)
                     throw new FormatException("A tiling pattern requires too many cells.");
                 int firstX = (int)firstCellX, lastX = (int)lastCellX;
                 int firstY = (int)firstCellY, lastY = (int)lastCellY;

@@ -113,7 +113,8 @@ public static partial class PdfContentRedaction
     private static readonly PdfName MetadataName = Name("Metadata");
     private static readonly PdfName InfoName = Name("Info");
     private static readonly PdfName[] RemovedPageKeys = [Name("Thumb"), Name("PieceInfo"), Name("Metadata")];
-    private static readonly PdfName[] ReplacementTextKeys = [Name("ActualText"), Name("Alt"), Name("E")];
+    // /Contents is the form Acrobat's Header & Footer tool writes, and it repeats the page text.
+    private static readonly PdfName[] ReplacementTextKeys = [Name("ActualText"), Name("Alt"), Name("E"), Name("Contents")];
     private static readonly PdfName[] PrunedCategories =
         [Name("Font"), Name("XObject"), Name("ExtGState"), Name("ColorSpace"), Name("Pattern"), Name("Shading"), Name("Properties")];
 

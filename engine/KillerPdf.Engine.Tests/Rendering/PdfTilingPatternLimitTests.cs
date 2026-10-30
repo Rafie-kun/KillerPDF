@@ -18,7 +18,16 @@ public sealed class PdfTilingPatternLimitTests
         Assert.Contains("too many cells", error.Message, StringComparison.Ordinal);
     }
 
-    private static byte[] Pdf(string xStep, string yStep)
+    // An empty axis used to slip past the product check and leave a loop that never ended.
+    [Fact]
+    public async Task AnInvertedBoxWithAHugeCellRangeFinishes()
+    {
+        PdfDocument document = PdfDocument.Open(Pdf("1", "0.000000000001", "100 0 0 0"));
+        await Task.Run(() => new PdfPageRenderer(document).Render(0, new PdfRenderOptions(10, 10)))
+            .WaitAsync(TimeSpan.FromSeconds(10));
+    }
+
+    private static byte[] Pdf(string xStep, string yStep, string box = "0 0 1 1")
     {
         const string content = "/Pattern cs /P1 scn 0 0 10 10 re f";
         const string cell = "1 0 0 rg 0 0 1 1 re f";
@@ -28,7 +37,7 @@ public sealed class PdfTilingPatternLimitTests
             "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
             "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 10 10] /Contents 4 0 R /Resources << /Pattern << /P1 5 0 R >> >> >>",
             $"<< /Length {content.Length} >>\nstream\n{content}\nendstream",
-            $"<< /Type /Pattern /PatternType 1 /PaintType 1 /TilingType 1 /BBox [0 0 1 1] /XStep {xStep} /YStep {yStep} " +
+            $"<< /Type /Pattern /PatternType 1 /PaintType 1 /TilingType 1 /BBox [{box}] /XStep {xStep} /YStep {yStep} " +
                 $"/Resources << >> /Length {cell.Length} >>\nstream\n{cell}\nendstream"
         ];
         var pdf = new StringBuilder("%PDF-1.7\n");

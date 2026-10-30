@@ -21,6 +21,8 @@ public sealed class PdfContentRedactionTests
     [InlineData("ActualText", true)]
     [InlineData("Alt", true)]
     [InlineData("E", true)]
+    [InlineData("Contents", false)]
+    [InlineData("Contents", true)]
     public void RedactionRemovesAffectedNamedPropertyDescriptions(string key, bool direct)
     {
         string property = $"<< /{key} (NAMEDPROPERTYSECRET) /MCID 0 >>";
@@ -66,6 +68,8 @@ public sealed class PdfContentRedactionTests
     [InlineData("ActualText", true)]
     [InlineData("Alt", true)]
     [InlineData("E", true)]
+    [InlineData("Contents", false)]
+    [InlineData("Contents", true)]
     public void RedactionRemovesDescriptionsOfRemovedVectors(string key, bool raster)
     {
         PdfDocument document = PdfDocument.Open(SinglePage(
