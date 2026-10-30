@@ -1840,6 +1840,8 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Paragraph_Overflow">El texto no cabe. Amplía el cuadro o reduce el tamaño de fuente o el interlineado.</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">Vista previa lista. Aplicar reemplaza el texto del párrafo original.</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">No se encontró ningún párrafo compatible. Esta primera versión admite texto horizontal con un solo estilo.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Refused">Este párrafo no se puede editar: {0}</sys:String>
+    <sys:String x:Key="Str_Paragraph_MixedStyles">Este párrafo combina fuentes o tamaños distintos. El texto nuevo usa un solo estilo, por lo que ese formato no se conservará.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Fuente de la vista previa: {0}. Esta fuente se incrustará en el PDF editado.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Preparando vista previa...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">El documento ha cambiado. Vuelve a abrir la edición de párrafos para continuar.</sys:String>

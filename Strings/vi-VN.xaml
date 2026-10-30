@@ -1860,6 +1860,8 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Paragraph_Overflow">Văn bản không vừa khung. Hãy mở rộng khung hoặc giảm cỡ chữ hay khoảng cách dòng.</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">Bản xem trước đã sẵn sàng. Thao tác áp dụng sẽ thay thế văn bản của đoạn gốc.</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">Không tìm thấy đoạn văn được hỗ trợ. Phiên bản đầu tiên này hỗ trợ văn bản nằm ngang với một kiểu định dạng duy nhất.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Refused">Không thể chỉnh sửa đoạn văn này: {0}</sys:String>
+    <sys:String x:Key="Str_Paragraph_MixedStyles">Đoạn văn này dùng nhiều phông chữ hoặc cỡ chữ khác nhau. Văn bản mới chỉ dùng một kiểu, nên định dạng này sẽ không được giữ lại.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Phông chữ xem trước: {0}. Phông chữ này sẽ được nhúng vào PDF đã chỉnh sửa.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Đang chuẩn bị bản xem trước...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">Tài liệu đã thay đổi. Hãy mở lại công cụ chỉnh sửa đoạn văn để tiếp tục.</sys:String>

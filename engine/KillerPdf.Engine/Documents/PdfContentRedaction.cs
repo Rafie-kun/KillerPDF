@@ -349,7 +349,7 @@ public static partial class PdfContentRedaction
             update.ReplaceObject(tree.CatalogReference.ObjectNumber, new PdfDictionary(catalogEntries));
 
         PdfDocument edited = PdfDocument.Open(update.Build());
-        PdfDocumentWriteResult output = PdfDocumentWriter.WriteWithReport(edited, new PdfDocumentWriteOptions
+        var writeOptions = new PdfDocumentWriteOptions
         {
             PruneUnreachableObjects = true,
             ReplaceDanglingReferences = true,
@@ -359,8 +359,18 @@ public static partial class PdfContentRedaction
                 ? PdfMetadataPolicy.RemoveDocumentInformationAndXmp : PdfMetadataPolicy.Preserve,
             PreserveDocumentIdentifiers = !options.ClearDocumentMetadata,
             CompressUnfilteredStreams = true
-        });
-        VerifyRetiredStreams(PdfDocument.Open(output.Data), retiredStreams, retiredDescriptions, cancellationToken);
+        };
+        PdfDocumentWriteResult output = PdfDocumentWriter.WriteWithReport(edited, writeOptions);
+        try { VerifyRetiredStreams(PdfDocument.Open(output.Data), retiredStreams, retiredDescriptions, cancellationToken); }
+        catch (PdfRedactionVerificationException error)
+            when (error.Report.Findings.All(finding => finding.Code == "RetainedSourceStream"))
+        {
+            // The original may only be listed in a resource dictionary that unredacted pages share.
+            PdfDocument? cleaned = DropUndrawnRetiredResources(edited, retiredStreams, cancellationToken);
+            if (cleaned is null) throw;
+            output = PdfDocumentWriter.WriteWithReport(cleaned, writeOptions);
+            VerifyRetiredStreams(PdfDocument.Open(output.Data), retiredStreams, retiredDescriptions, cancellationToken);
+        }
         return output;
     }
 
@@ -1138,8 +1148,12 @@ public static partial class PdfContentRedaction
         internal PdfName? FontResource { get; init; }
         // The operators that set the current nonstroking color, replayed to restore it.
         internal PdfContentInstruction[] Fill { get; init; } = [];
-        // The graphics states applied so far, so paints can be compared without reading each one.
-        internal string ExtGStates { get; init; } = "";
+        // The graphics states applied so far, as an id the rewriter hands out for each distinct
+        // sequence, so paints can be compared without reading each one.
+        internal int ExtGStates { get; init; }
+        // False once the clip comes from anything but one axis-aligned rectangle, since the
+        // clip bounds then say less than the real clip does.
+        internal bool ClipIsRectangle { get; init; } = true;
         internal bool SoftMasked { get; init; }
         internal int RenderMode { get; init; }
         internal double LineWidth { get; init; } = 1;
@@ -1165,6 +1179,8 @@ public static partial class PdfContentRedaction
         private static readonly PdfName PropertiesCategory = Name("Properties");
         private readonly HashSet<PdfStream> _activeForms = new(ReferenceEqualityComparer.Instance);
         private int _instructions;
+        private readonly Dictionary<(int Previous, string Name), int> _graphicsStateIds = [];
+        private readonly List<string> _graphicsStateNames = [""];
 
         internal HashSet<string> Reasons { get; } = new(StringComparer.Ordinal);
         internal HashSet<int> RetiredSourceStreams { get; } = [];
@@ -1287,7 +1303,13 @@ public static partial class PdfContentRedaction
                         if (textOnly) { output.Add(Op("Tr", 3)); localChanged = true; }
                         else
                         {
-                            if (args.Count == 1) state = state with { RenderMode = (int)N(args[0]) };
+                            // Modes 4 to 7 add the text to the clip, which is never a rectangle.
+                            if (args.Count == 1)
+                                state = state with
+                                {
+                                    RenderMode = (int)N(args[0]),
+                                    ClipIsRectangle = state.ClipIsRectangle && N(args[0]) is < 4 or > 7
+                                };
                             Emit(instruction);
                         }
                         break;
@@ -1335,6 +1357,7 @@ public static partial class PdfContentRedaction
                         if (args.Count == 1 && args[0] is PdfName shadingName)
                         {
                             if (textOnly) { MarkRemoved(); break; }
+                            insertion?.Paint(state.Clip);
                             if (!glyphsOnly && regions.Any(region => Overlaps(state.Clip, region)))
                             {
                                 if (regions.Any(region => Inside(state.Clip, region))) { MarkRemoved(); RemovedPaths++; break; }
@@ -1620,8 +1643,16 @@ public static partial class PdfContentRedaction
                     if (gs.TryGetValue(Name("SMask"), out PdfObject? softMask))
                         state = state with { SoftMasked = Resolve(document, softMask) is PdfDictionary };
                     string applied = "/" + name.ValueAsLatin1();
-                    if (!state.ExtGStates.EndsWith(applied, StringComparison.Ordinal))
-                        state = state with { ExtGStates = state.ExtGStates + applied };
+                    if (_graphicsStateNames[state.ExtGStates] != applied)
+                    {
+                        if (!_graphicsStateIds.TryGetValue((state.ExtGStates, applied), out int id))
+                        {
+                            id = _graphicsStateNames.Count;
+                            _graphicsStateNames.Add(applied);
+                            _graphicsStateIds[(state.ExtGStates, applied)] = id;
+                        }
+                        state = state with { ExtGStates = id };
+                    }
                 }
                 PdfObject? fontValue = null;
                 if (gs is not null && gs.TryGetValue(Name("Font"), out PdfObject? fontEntry)
@@ -1677,6 +1708,7 @@ public static partial class PdfContentRedaction
                 if (IsNamed(xobject.Dictionary, SubtypeName, "Image"))
                 {
                     PdfContentBounds bounds = Visible(Transform(new PdfContentBounds(0, 0, 1, 1), state.Ctm));
+                    insertion?.Paint(bounds);
                     // A dropped or repainted image is retired with its masks, so the original samples
                     // cannot stay behind through a resource dictionary another page shares or inherits.
                     if (textOnly)
@@ -1793,6 +1825,7 @@ public static partial class PdfContentRedaction
             {
                 if (textOnly) { MarkRemoved(); return; }
                 PdfContentBounds bounds = Visible(Transform(new PdfContentBounds(0, 0, 1, 1), state.Ctm));
+                insertion?.Paint(bounds);
                 if (!glyphsOnly && bounds.Width > 0 && bounds.Height > 0
                     && regions.Any(region => Overlaps(bounds, region)))
                 {
@@ -1837,6 +1870,8 @@ public static partial class PdfContentRedaction
                 PdfContentBounds paintedBounds = !textOnly && !glyphsOnly && pathPoints.Count > 0
                     && paint.Operator is "S" or "s" or "B" or "B*" or "b" or "b*"
                     ? StrokeBounds(bounds, state) : bounds;
+                if (pathPoints.Count > 0 && paint.Operator is "f" or "F" or "f*" or "B" or "B*" or "b" or "b*")
+                    insertion?.Paint(Visible(bounds));
                 if (textOnly)
                 {
                     if (paint.Operator != "n" || pendingPath.Count > 0) MarkRemoved();
@@ -1863,13 +1898,45 @@ public static partial class PdfContentRedaction
                     output.AddRange(pendingPath);
                     output.Add(paint);
                 }
-                if (pendingClip && pathPoints.Count > 0) state = state with { Clip = Intersect(state.Clip, bounds) };
+                if (pendingClip && pathPoints.Count > 0)
+                    state = state with
+                    {
+                        Clip = Intersect(state.Clip, bounds),
+                        ClipIsRectangle = state.ClipIsRectangle && IsAxisAlignedRectangle(pendingPath, pathPoints)
+                    };
                 pendingPath.Clear();
                 pathPoints.Clear();
                 pendingClip = false;
             }
 
             PdfContentBounds Visible(PdfContentBounds bounds) => Intersect(bounds, state.Clip);
+        }
+
+        // A path is one axis-aligned rectangle when it is a single re, or four straight sides that close
+        // up, and every side runs along the page's horizontal or vertical.
+        private static bool IsAxisAlignedRectangle(List<PdfContentInstruction> path, List<PdfPoint> points)
+        {
+            PdfContentInstruction[] shape = [.. path.Where(item => item.Operator is not ("W" or "W*" or "h"))];
+            PdfPoint[] corners = [.. points];
+            if (shape.Length == 1 && shape[0].Operator == "re") { }
+            else if (shape.Length is 4 or 5 && shape[0].Operator == "m" && shape.Skip(1).All(item => item.Operator == "l"))
+            {
+                if (corners.Length == 5)
+                {
+                    if (Math.Abs(corners[0].X - corners[4].X) > 1e-6 || Math.Abs(corners[0].Y - corners[4].Y) > 1e-6) return false;
+                    corners = corners[..4];
+                }
+            }
+            else return false;
+            if (corners.Length != 4) return false;
+            bool horizontalFirst = Math.Abs(corners[0].Y - corners[1].Y) <= 1e-6;
+            for (int index = 0; index < 4; index++)
+            {
+                PdfPoint from = corners[index], to = corners[(index + 1) % 4];
+                bool horizontal = Math.Abs(from.Y - to.Y) <= 1e-6, vertical = Math.Abs(from.X - to.X) <= 1e-6;
+                if (!(index % 2 == 0 == horizontalFirst ? horizontal : vertical)) return false;
+            }
+            return true;
         }
 
         private static PdfContentBounds StrokeBounds(PdfContentBounds bounds, TextState state)

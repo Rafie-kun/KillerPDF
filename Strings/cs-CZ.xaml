@@ -1845,6 +1845,8 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Paragraph_Overflow">Text se nevejde. Zvětšete rámeček nebo zmenšete velikost písma či řádkování.</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">Náhled je připraven. Použitím změn nahradíte původní text odstavce.</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">Nebyl nalezen žádný podporovaný odstavec. Tato první verze podporuje vodorovný text v jednom stylu.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Refused">Tento odstavec nelze upravit: {0}</sys:String>
+    <sys:String x:Key="Str_Paragraph_MixedStyles">Tento odstavec kombinuje různá písma nebo velikosti. Nový text používá jeden styl, takže se toto formátování nepřenese.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Písmo náhledu: {0}. Toto písmo bude vloženo do upraveného PDF.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Příprava náhledu...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">Dokument se změnil. Pokračujte opětovným otevřením úprav odstavce.</sys:String>

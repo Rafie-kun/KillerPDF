@@ -1863,6 +1863,7 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_Paragraph_Overflow">Мәтін сыймайды. Жақтауды үлкейтіңіз немесе қаріп өлшемін не жоларалық интервалды кішірейтіңіз.</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">Алдын ала қарау дайын. Өзгерістерді қолдану бастапқы абзац мәтінін ауыстырады.</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">Қолдау көрсетілетін абзац табылмады. Бұл алғашқы нұсқа бір стильдегі көлденең мәтінді қолдайды.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Refused">Бұл абзацты өңдеу мүмкін емес: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Алдын ала қарау қарпі: {0}. Бұл қаріп өңделген PDF файлына ендіріледі.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Алдын ала қарау дайындалуда...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">Құжат өзгерді. Жалғастыру үшін абзацты өңдеуді қайта ашыңыз.</sys:String>

@@ -22,11 +22,30 @@ public enum PdfParagraphAlignment
 
 /// <summary>A supported source paragraph in unrotated, crop-relative page points.</summary>
 public sealed record PdfParagraphCandidate(int PageIndex, PdfContentBounds SourceRegion, string Text,
-    string FontName, double FontSize, double Leading, PdfRgbColor Color);
+    string FontName, double FontSize, double Leading, PdfRgbColor Color)
+{
+    /// <summary>Gets the rectangle that clips the paragraph's text, in the same points as
+    /// <see cref="SourceRegion"/>, or null when it is not known.</summary>
+    public PdfContentBounds? Clip { get; init; }
+
+    /// <summary>Gets whether the source mixes fonts or sizes. <see cref="FontName"/> and
+    /// <see cref="FontSize"/> are then its dominant style, which the replacement takes.</summary>
+    public bool MixedStyles { get; init; }
+
+    /// <summary>Returns the part of a replacement box that lies inside <see cref="Clip"/>, since
+    /// the replacement is painted under the same clip and anything outside it would vanish.</summary>
+    public PdfContentBounds FitToClip(PdfContentBounds box) => Clip is { } clip
+        ? new PdfContentBounds(Math.Max(box.Left, clip.Left), Math.Max(box.Bottom, clip.Bottom),
+            Math.Min(box.Right, clip.Right), Math.Min(box.Top, clip.Top)) : box;
+}
 
 /// <summary>The eligibility of the complete source lines inside a selected area.</summary>
 public sealed record PdfParagraphInspection(bool CanEdit, string Reason, PdfParagraphCandidate? Candidate)
 {
+    /// <summary>Gets where the refused source lines are, when the refusal is about one paragraph
+    /// and not the whole page.</summary>
+    public PdfContentBounds? Region { get; init; }
+
     /// <summary>Gets a stable refusal code, or null for an eligible paragraph.</summary>
     public PdfParagraphRefusalCode? RefusalCode { get; init; } = CanEdit ? null : PdfParagraphRefusalCode.Unsupported;
 }
@@ -126,23 +145,20 @@ public static class PdfParagraphEditor
         PdfPageContent page = context.Content;
         var result = new List<PdfParagraphCandidate>();
         var refusals = new List<PdfParagraphInspection>();
-        var group = new List<PdfExtractedLine>();
+        var group = new List<ParagraphRow>();
         bool tagged = IsTagged(context.Tree);
-        foreach (PdfExtractedLine line in page.Lines)
+        foreach (ParagraphRow row in Rows(page.Lines))
         {
-            if (line.Runs.Count == 0 || line.Runs.Any(run => run.Letters.Count == 0)) { Flush(); continue; }
             if (group.Count > 0)
             {
-                PdfExtractedLine previous = group[^1];
-                double size = previous.Runs[0].PointSize;
-                double gap = previous.Runs[0].Letters[0].StartBaseLine.Y - line.Runs[0].Letters[0].StartBaseLine.Y;
-                if (Math.Abs(previous.BoundingBox.Left - line.BoundingBox.Left) > 1
-                    || gap < size * 0.8 || gap > size * 1.8
-                    || previous.Runs[0].FontName != line.Runs[0].FontName
-                    || Math.Abs(size - line.Runs[0].PointSize) > 0.01
-                    || tagged && previous.Runs[0].Letters[0].MarkedContentId != line.Runs[0].Letters[0].MarkedContentId) Flush();
+                ParagraphRow previous = group[^1];
+                double size = previous.Style.Size;
+                double gap = previous.Baseline - row.Baseline;
+                if (Math.Abs(previous.Left - row.Left) > 1 || gap < size * 0.8 || gap > size * 1.8
+                    || previous.Style.Font != row.Style.Font || Math.Abs(size - row.Style.Size) > 0.01
+                    || tagged && previous.Letters[0].MarkedContentId != row.Letters[0].MarkedContentId) Flush();
             }
-            group.Add(line);
+            group.Add(row);
         }
         Flush();
         if (result.Count == 0 && refusals.Count == 0)
@@ -155,12 +171,14 @@ public static class PdfParagraphEditor
         void Flush()
         {
             if (group.Count == 0) return;
-            var bounds = new PdfContentBounds(group.Min(line => line.BoundingBox.Left),
-                group.Min(line => line.BoundingBox.Bottom), group.Max(line => line.BoundingBox.Right),
-                group.Max(line => line.BoundingBox.Top));
+            PdfExtractedLine[] lines = [.. group.SelectMany(row => row.Lines)];
+            var bounds = new PdfContentBounds(lines.Min(line => line.BoundingBox.Left),
+                lines.Min(line => line.BoundingBox.Bottom), lines.Max(line => line.BoundingBox.Right),
+                lines.Max(line => line.BoundingBox.Top));
             PdfParagraphInspection inspection;
             try { inspection = InspectRegion(document, pageIndex, bounds, context); }
-            catch (Exception error) when (IsRefusal(error)) { inspection = new PdfParagraphInspection(false, error.Message, null); }
+            catch (Exception error) when (IsRefusal(error))
+            { inspection = new PdfParagraphInspection(false, error.Message, null) { Region = bounds }; }
             if (inspection.Candidate is { } candidate) result.Add(candidate);
             else refusals.Add(inspection);
             group.Clear();
@@ -219,6 +237,54 @@ public static class PdfParagraphEditor
         }
     }
 
+    // One visual line. Extraction ends a line at a superscript or a font change, so a sentence with
+    // a citation arrives in pieces that have to be put back before paragraphs can be found.
+    private sealed class ParagraphRow
+    {
+        internal List<PdfExtractedLine> Lines { get; } = [];
+        internal PdfExtractedLetter[] Letters { get; private set; } = [];
+        internal (string Font, double Size) Style { get; private set; }
+        internal double Baseline { get; private set; }
+        internal double Left => Lines[0].BoundingBox.Left;
+        internal double Right => Lines.Max(line => line.BoundingBox.Right);
+        internal string Text => string.Concat(Lines.Select(line => line.Text)).Trim();
+
+        internal void Add(PdfExtractedLine line)
+        {
+            Lines.Add(line);
+            Lines.Sort((a, b) => a.BoundingBox.Left.CompareTo(b.BoundingBox.Left));
+            Letters = [.. Lines.SelectMany(item => item.Runs).SelectMany(run => run.Letters)];
+            Style = DominantStyle(Letters);
+            (string font, double size) = Style;
+            Baseline = Letters.First(letter => letter.FontName == font
+                && Math.Round(letter.PointSize, 2) == size).StartBaseLine.Y;
+        }
+    }
+
+    private static List<ParagraphRow> Rows(IEnumerable<PdfExtractedLine> lines)
+    {
+        var rows = new List<ParagraphRow>();
+        foreach (PdfExtractedLine line in lines)
+        {
+            if (line.Runs.Count == 0 || line.Runs.Any(run => run.Letters.Count == 0)) continue;
+            double baseline = line.Runs[0].Letters[0].StartBaseLine.Y;
+            ParagraphRow? row = rows.TakeLast(4).FirstOrDefault(candidate =>
+            {
+                double size = Math.Max(candidate.Style.Size, line.Runs[0].PointSize);
+                double before = candidate.Left - line.BoundingBox.Right, after = line.BoundingBox.Left - candidate.Right;
+                return Math.Abs(candidate.Baseline - baseline) < size * 0.6 && Math.Max(before, after) is > -1 and var gap
+                    && gap < size * 1.5;
+            });
+            if (row is null) rows.Add(row = new ParagraphRow());
+            row.Add(line);
+        }
+        return rows;
+    }
+
+    private static (string Font, double Size) DominantStyle(IEnumerable<PdfExtractedLetter> letters) =>
+        letters.GroupBy(letter => (letter.FontName, Size: Math.Round(letter.PointSize, 2)))
+            .OrderByDescending(style => style.Count()).Select(style => style.Key).First();
+
     private static bool IsRefusal(Exception error) =>
         error is NotSupportedException or FormatException or InvalidOperationException or ArgumentException;
 
@@ -267,23 +333,21 @@ public static class PdfParagraphEditor
             .Any(selectedSet.Contains))];
         if (lines.SelectMany(line => line.Runs).SelectMany(run => run.Letters).Any(letter => !selectedSet.Contains(letter)))
             throw new NotSupportedException("The selection cuts a source line. Select complete lines.");
-        PdfExtractedLetter first = selected[0];
         if (selected.Any(letter => letter.WritingDirection != PdfWritingDirection.LeftToRight
-            || Math.Abs(letter.EndBaseLine.Y - letter.StartBaseLine.Y) > 0.001
-            || letter.FontName != first.FontName || Math.Abs(letter.PointSize - first.PointSize) > 0.001))
-            throw new NotSupportedException("Only horizontal paragraphs with one font and size are supported.");
-        foreach (PdfExtractedLine line in lines)
-        {
-            PdfExtractedLetter[] letters = [.. line.Runs.SelectMany(run => run.Letters)];
-            for (int index = 1; index < letters.Length; index++)
-                if (letters[index].StartBaseLine.X - letters[index - 1].EndBaseLine.X > first.PointSize * 1.5)
+            || Math.Abs(letter.EndBaseLine.Y - letter.StartBaseLine.Y) > 0.001))
+            throw new NotSupportedException("Only horizontal paragraphs are supported.");
+        // One box holds one style. Citations and bold words do not stop an edit: the replacement
+        // takes the dominant style, and the candidate says the rest will not carry over.
+        var first = DominantStyle(selected);
+        List<ParagraphRow> rows = Rows(lines);
+        foreach (ParagraphRow row in rows)
+            for (int index = 1; index < row.Letters.Length; index++)
+                if (row.Letters[index].StartBaseLine.X - row.Letters[index - 1].EndBaseLine.X > first.Size * 1.5)
                     throw new NotSupportedException("The source line has separated columns or uncertain spacing.");
-        }
-        for (int index = 1; index < lines.Length; index++)
+        for (int index = 1; index < rows.Count; index++)
         {
-            double gap = lines[index - 1].Runs[0].Letters[0].StartBaseLine.Y - lines[index].Runs[0].Letters[0].StartBaseLine.Y;
-            if (Math.Abs(lines[index].BoundingBox.Left - lines[0].BoundingBox.Left) > 1
-                || gap < first.PointSize * 0.8 || gap > first.PointSize * 1.8)
+            double gap = rows[index - 1].Baseline - rows[index].Baseline;
+            if (Math.Abs(rows[index].Left - rows[0].Left) > 1 || gap < first.Size * 0.8 || gap > first.Size * 1.8)
                 throw new NotSupportedException("The selection is not one simple aligned paragraph.");
         }
         var bounds = new PdfContentBounds(selected.Min(letter => letter.BoundingBox.Left),
@@ -293,11 +357,13 @@ public static class PdfParagraphEditor
         if (!PdfContentRedaction.ClipHolds(clip, bounds)) throw new NotSupportedException("The paragraph is clipped.");
         if (page.Letters.Any(letter => CenterInside(letter.BoundingBox, bounds) && !selectedSet.Contains(letter)))
             throw new NotSupportedException("The source bounds overlap other text and cannot identify one paragraph safely.");
-        double leading = lines.Length > 1
-            ? lines[0].Runs[0].Letters[0].StartBaseLine.Y - lines[1].Runs[0].Letters[0].StartBaseLine.Y
-            : first.PointSize * 1.2;
-        string text = string.Join(" ", lines.Select(line => line.Text.Trim()));
-        var candidate = new PdfParagraphCandidate(pageIndex, bounds, text, first.FontName, first.PointSize, leading, color);
+        double leading = rows.Count > 1 ? rows[0].Baseline - rows[1].Baseline : first.Size * 1.2;
+        string text = string.Join(" ", rows.Select(row => row.Text));
+        var candidate = new PdfParagraphCandidate(pageIndex, bounds, text, first.Font, first.Size, leading, color)
+        {
+            Clip = clip,
+            MixedStyles = selected.Select(letter => (letter.FontName, Math.Round(letter.PointSize, 2))).Distinct().Skip(1).Any()
+        };
         return new PdfParagraphInspection(true, string.Empty, candidate);
     }
 
@@ -373,7 +439,8 @@ public static class PdfParagraphEditor
             var edit = new PdfTextLineEdit(pageIndex, source.SourceRegion, string.Join("\n", lines.Select(line => line.Text)))
             {
                 Substitute = font, UseSubstitute = true, FontSize = fontSize,
-                ParagraphLines = Array.AsReadOnly(lines)
+                ParagraphLines = Array.AsReadOnly(lines),
+                ParagraphBox = lines.Any(line => line.Text.Length != 0) ? targetBounds : null
             };
             preview = PdfTextLineEditor.Replace(document, edit).Document;
         }
@@ -432,6 +499,8 @@ public static partial class PdfContentRedaction
 
     private static (PdfRgbColor Color, PdfContentBounds Clip) ParagraphPaint(PdfDocument document, LineProbe probe)
     {
+        if (probe.Inspection.CanEdit && probe.Insertion.ClipUnsafe)
+            throw new NotSupportedException("The paragraph is clipped by a shape that is not a single rectangle.");
         if (!probe.Inspection.CanEdit || probe.Insertion.ParagraphUnsafe)
             throw new NotSupportedException("The paragraph has unsupported transformations, rendering, or mixed styles.");
         TextState state = probe.Insertion.State!;

@@ -1774,7 +1774,7 @@ namespace KillerPDF
             }
             catch { /* unsigned or unreadable */ }
 
-            // Full chain + revocation check via WinVerifyTrust
+            // Full chain check via WinVerifyTrust. Revocation uses what Windows has cached, with no online lookup.
             var pathPtr      = Marshal.StringToHGlobalUni(filePath);
             var fileInfoPtr  = Marshal.AllocHGlobal(Marshal.SizeOf<WINTRUST_FILE_INFO>());
             var dataPtr      = Marshal.AllocHGlobal(Marshal.SizeOf<WINTRUST_DATA>());

@@ -54,14 +54,50 @@ public static partial class PdfContentRedaction
                     InspectDescriptions(document.Resolve(entry.ObjectNumber), 0);
             }
         if (retained.Count == 0 && descriptions.Count == 0) return;
-        var used = new HashSet<int>();
-        var usedDescriptions = new HashSet<string>(StringComparer.Ordinal);
-        var active = new HashSet<PdfStream>(ReferenceEqualityComparer.Instance);
-        var walkedNumbers = new HashSet<int>();
-        var walkedObjects = new HashSet<PdfObject>(ReferenceEqualityComparer.Instance);
-        var context = new ContentRewriter(document, null, [], false, [], cancellationToken);
-        int instructionCount = 0;
-        foreach (PdfPageTreeEntry page in PdfPageTree.Read(document).Pages)
+        var walker = new RetiredUseWalker(document, cancellationToken);
+        foreach (PdfPageTreeEntry page in PdfPageTree.Read(document).Pages) walker.WalkPage(page);
+        var findings = retained.Except(walker.Used).Select(number => new PdfRedactionVerificationFinding(
+            "RetainedSourceStream", "An original redacted stream remains without a verified unredacted use.",
+            ObjectNumber: number)).Concat(descriptions.Except(walker.UsedDescriptions).Select(identity =>
+                new PdfRedactionVerificationFinding("RetainedDescription",
+                    "An affected description remains without a verified unaffected content use."))).ToArray();
+        if (findings.Length != 0)
+            throw new PdfRedactionVerificationException(new PdfRedactionVerificationReport(Array.AsReadOnly(findings)));
+
+        void InspectDescriptions(PdfObject value, int depth)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (depth > PdfObjectWriter.MaximumNestingDepth)
+                throw new FormatException("Description inspection nesting limit exceeded.");
+            if (value is PdfStream stream) value = stream.Dictionary;
+            if (value is PdfDictionary dictionary)
+            {
+                if (ReplacementTextKeys.Any(dictionary.ContainsKey))
+                {
+                    string identity = DescriptionIdentity(dictionary);
+                    if (retiredDescriptions.Contains(identity)) descriptions.Add(identity);
+                }
+                foreach (PdfObject child in dictionary.Values) InspectDescriptions(child, depth + 1);
+            }
+            else if (value is PdfArray array)
+                foreach (PdfObject child in array) InspectDescriptions(child, depth + 1);
+        }
+    }
+
+    // Walks what a page draws, through forms, patterns, soft masks, Type 3 glyphs and annotation
+    // appearances, and records the streams and descriptions that are really used.
+    private sealed class RetiredUseWalker(PdfDocument document, CancellationToken cancellationToken)
+    {
+        private readonly HashSet<PdfStream> active = new(ReferenceEqualityComparer.Instance);
+        private readonly HashSet<int> walkedNumbers = [];
+        private readonly HashSet<PdfObject> walkedObjects = new(ReferenceEqualityComparer.Instance);
+        private readonly ContentRewriter context = new(document, null, [], false, [], cancellationToken);
+        private int instructionCount;
+
+        internal HashSet<int> Used { get; } = [];
+        internal HashSet<string> UsedDescriptions { get; } = new(StringComparer.Ordinal);
+
+        internal void WalkPage(PdfPageTreeEntry page)
         {
             cancellationToken.ThrowIfCancellationRequested();
             PdfDictionary resources = page.InheritedValues.TryGetValue(ResourcesName, out PdfObject? value)
@@ -80,8 +116,8 @@ public static partial class PdfContentRedaction
                             foreach (PdfObject state in states.Values) Credit(state, resources, 0, content: true);
                         else Credit(appearance, resources, 0, content: true);
                 }
-            if (!page.Dictionary.TryGetValue(ContentsName, out PdfObject? contents)) continue;
-            CollectSourceStreams(document, contents, used);
+            if (!page.Dictionary.TryGetValue(ContentsName, out PdfObject? contents)) return;
+            CollectSourceStreams(document, contents, Used);
             PdfObject resolved = Resolve(document, contents);
             IEnumerable<PdfObject> items = resolved is PdfArray array ? array : [resolved];
             using var bytes = new MemoryStream();
@@ -95,15 +131,8 @@ public static partial class PdfContentRedaction
             }
             Visit(bytes.ToArray(), resources, 0);
         }
-        var findings = retained.Except(used).Select(number => new PdfRedactionVerificationFinding(
-            "RetainedSourceStream", "An original redacted stream remains without a verified unredacted use.",
-            ObjectNumber: number)).Concat(descriptions.Except(usedDescriptions).Select(identity =>
-                new PdfRedactionVerificationFinding("RetainedDescription",
-                    "An affected description remains without a verified unaffected content use."))).ToArray();
-        if (findings.Length != 0)
-            throw new PdfRedactionVerificationException(new PdfRedactionVerificationReport(Array.AsReadOnly(findings)));
 
-        void Visit(byte[] bytes, PdfDictionary resources, int depth)
+        private void Visit(byte[] bytes, PdfDictionary resources, int depth)
         {
             if (depth > 32) throw new FormatException("Form nesting exceeds the redaction verification limit.");
             var scope = new ResourceScope(document, resources);
@@ -119,7 +148,7 @@ public static partial class PdfContentRedaction
                     PdfObject? property = instruction.Operands[1] is PdfName propertyName
                         ? scope.Lookup(Name("Properties"), propertyName) : instruction.Operands[1];
                     if (property is not null && Resolve(document, property) is PdfDictionary dictionary)
-                        usedDescriptions.Add(DescriptionIdentity(dictionary));
+                        UsedDescriptions.Add(DescriptionIdentity(dictionary));
                 }
                 if (instruction.Operands.Count == 0) continue;
                 PdfName? first = instruction.Operands[0] as PdfName, last = instruction.Operands[^1] as PdfName;
@@ -161,15 +190,15 @@ public static partial class PdfContentRedaction
         }
 
         // Credits a drawn stream and, for a form or other content stream, walks what it draws in turn.
-        void Credit(PdfObject? value, PdfDictionary resources, int depth, bool content)
+        private void Credit(PdfObject? value, PdfDictionary resources, int depth, bool content)
         {
             if (value is null || Resolve(document, value) is not PdfStream stream) return;
             if (IsNamed(stream.Dictionary, SubtypeName, "Image"))
             {
-                CollectImageStreams(document, value, used);
+                CollectImageStreams(document, value, Used);
                 return;
             }
-            CollectSourceStreams(document, value, used);
+            CollectSourceStreams(document, value, Used);
             if (!content && !IsNamed(stream.Dictionary, SubtypeName, "Form")) return;
             if (!active.Add(stream)) throw new FormatException("Recursive form in redaction verification.");
             try
@@ -181,26 +210,119 @@ public static partial class PdfContentRedaction
             finally { active.Remove(stream); }
         }
 
-        bool FirstWalk(PdfObject value, PdfObject resolved) => value is PdfIndirectReference reference
+        private bool FirstWalk(PdfObject value, PdfObject resolved) => value is PdfIndirectReference reference
             ? walkedNumbers.Add(reference.ObjectNumber) : walkedObjects.Add(resolved);
+    }
 
-        void InspectDescriptions(PdfObject value, int depth)
+    // Pages, form appearances and the AcroForm defaults can share one resource dictionary with a redacted
+    // page, as LibreOffice exports do, and so still list an original image or form that nothing draws.
+    // Those entries leave every XObject dictionary, so only what some page really draws stays reachable.
+    // The caller verifies the result as strictly as any other, and gets null back when nothing was listed.
+    private static PdfDocument? DropUndrawnRetiredResources(PdfDocument document, HashSet<int> retired,
+        CancellationToken cancellationToken)
+    {
+        PdfName xObjectName = Name("XObject");
+        int[] numbers = [.. document.CrossReferences.Values.Where(entry => entry.Type is
+            CrossReference.PdfCrossReferenceEntryType.InUse or CrossReference.PdfCrossReferenceEntryType.Compressed)
+            .Select(entry => entry.ObjectNumber)];
+        var sharedDictionaries = new HashSet<int>();
+        var listed = new HashSet<int>();
+        foreach (int number in numbers)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            Scan(document.Resolve(number), 0);
+        }
+        if (listed.Count == 0) return null;
+
+        var walker = new RetiredUseWalker(document, cancellationToken);
+        foreach (PdfPageTreeEntry page in PdfPageTree.Read(document).Pages) walker.WalkPage(page);
+        HashSet<int> undrawn = [.. listed.Except(walker.Used)];
+        if (undrawn.Count == 0) return null;
+
+        var update = new PdfIncrementalUpdateBuilder(document);
+        bool replaced = false;
+        foreach (int number in numbers)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            PdfObject value = document.Resolve(number);
+            // A stream with resources of its own is left alone, so that case still fails verification.
+            PdfObject? changed = value is PdfStream ? null
+                : sharedDictionaries.Contains(number) && value is PdfDictionary shared ? WithoutUndrawn(shared)
+                : Strip(value, 0);
+            if (changed is null) continue;
+            update.ReplaceObject(number, changed);
+            replaced = true;
+        }
+        return replaced ? PdfDocument.Open(update.Build()) : null;
+
+        void Scan(PdfObject value, int depth)
+        {
             if (depth > PdfObjectWriter.MaximumNestingDepth)
-                throw new FormatException("Description inspection nesting limit exceeded.");
+                throw new FormatException("Resource inspection nesting limit exceeded.");
             if (value is PdfStream stream) value = stream.Dictionary;
             if (value is PdfDictionary dictionary)
-            {
-                if (ReplacementTextKeys.Any(dictionary.ContainsKey))
+                foreach (KeyValuePair<PdfName, PdfObject> entry in dictionary)
                 {
-                    string identity = DescriptionIdentity(dictionary);
-                    if (retiredDescriptions.Contains(identity)) descriptions.Add(identity);
+                    if (entry.Key.Equals(xObjectName))
+                    {
+                        if (entry.Value is PdfIndirectReference reference && document.Resolve(reference) is PdfDictionary indirect)
+                        {
+                            sharedDictionaries.Add(reference.ObjectNumber);
+                            List(indirect);
+                        }
+                        else if (entry.Value is PdfDictionary direct) List(direct);
+                    }
+                    Scan(entry.Value, depth + 1);
                 }
-                foreach (PdfObject child in dictionary.Values) InspectDescriptions(child, depth + 1);
-            }
             else if (value is PdfArray array)
-                foreach (PdfObject child in array) InspectDescriptions(child, depth + 1);
+                foreach (PdfObject item in array) Scan(item, depth + 1);
+        }
+
+        void List(PdfDictionary xObjects)
+        {
+            foreach (PdfObject entry in xObjects.Values)
+            {
+                var targets = new HashSet<int>();
+                CollectImageStreams(document, entry, targets);
+                listed.UnionWith(targets.Where(retired.Contains));
+            }
+        }
+
+        PdfDictionary? WithoutUndrawn(PdfDictionary xObjects)
+        {
+            var kept = new Dictionary<PdfName, PdfObject>();
+            foreach (KeyValuePair<PdfName, PdfObject> entry in xObjects)
+            {
+                var targets = new HashSet<int>();
+                CollectImageStreams(document, entry.Value, targets);
+                if (!targets.Overlaps(undrawn)) kept[entry.Key] = entry.Value;
+            }
+            return kept.Count == xObjects.Count ? null : new PdfDictionary(kept);
+        }
+
+        PdfObject? Strip(PdfObject value, int depth)
+        {
+            if (depth > PdfObjectWriter.MaximumNestingDepth)
+                throw new FormatException("Resource inspection nesting limit exceeded.");
+            if (value is PdfDictionary dictionary)
+            {
+                Dictionary<PdfName, PdfObject>? entries = null;
+                foreach (KeyValuePair<PdfName, PdfObject> entry in dictionary)
+                {
+                    PdfObject? stripped = entry.Key.Equals(xObjectName) && entry.Value is PdfDictionary xObjects
+                        ? WithoutUndrawn(xObjects) : Strip(entry.Value, depth + 1);
+                    if (stripped is not null) (entries ??= dictionary.ToDictionary(item => item.Key, item => item.Value))[entry.Key] = stripped;
+                }
+                return entries is null ? null : new PdfDictionary(entries);
+            }
+            if (value is PdfArray array)
+            {
+                List<PdfObject>? items = null;
+                for (int index = 0; index < array.Count; index++)
+                    if (Strip(array[index], depth + 1) is { } stripped) (items ??= [.. array])[index] = stripped;
+                return items is null ? null : new PdfArray(items);
+            }
+            return null;
         }
     }
 

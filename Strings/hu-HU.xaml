@@ -1847,6 +1847,8 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Paragraph_Overflow">A szöveg nem fér el. Növelje a keret méretét, vagy csökkentse a betűméretet vagy a sortávolságot.</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">Az előnézet kész. Az alkalmazás lecseréli az eredeti bekezdés szövegét.</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">Nem található támogatott bekezdés. Ez az első verzió egyetlen stílusú, vízszintes szöveget támogat.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Refused">Ez a bekezdés nem szerkeszthető: {0}</sys:String>
+    <sys:String x:Key="Str_Paragraph_MixedStyles">Ez a bekezdés többféle betűtípust vagy betűméretet tartalmaz. Az új szöveg egyetlen stílust használ, ezért ez a formázás nem marad meg.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Előnézeti betűtípus: {0}. Ez a betűtípus be lesz ágyazva a szerkesztett PDF-be.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Előnézet előkészítése...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">A dokumentum megváltozott. A folytatáshoz nyissa meg újra a bekezdésszerkesztést.</sys:String>

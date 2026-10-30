@@ -582,7 +582,7 @@ public sealed class PdfContentRedactionTests
     }
 
     [Fact]
-    public void RefusesOriginalFormsRetainedOnlyByAnUnusedSiblingResource()
+    public void DropsOriginalFormsFromAnUnusedSiblingResource()
     {
         PdfDocument document = PdfDocument.Open(CreatePdf([
             "<< /Type /Catalog /Pages 2 0 R >>",
@@ -597,10 +597,14 @@ public sealed class PdfContentRedactionTests
         ]));
         PdfRedactionRegion region = Region(document, 0, "FORMSECRET");
 
-        PdfRedactionVerificationException error = Assert.Throws<PdfRedactionVerificationException>(() =>
-            PdfContentRedaction.Apply(document, [region]));
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, [region]);
 
-        Assert.Contains(error.Report.Findings, finding => finding.Code == "RetainedSourceStream");
+        Assert.True(result.Verification.Succeeded);
+        PdfDocument output = PdfDocument.Open(result.Document);
+        Assert.DoesNotContain(output.CrossReferences.Values.Where(entry => entry.Type is
+                PdfCrossReferenceEntryType.InUse or PdfCrossReferenceEntryType.Compressed)
+            .Select(entry => output.Resolve(entry.ObjectNumber)).OfType<PdfStream>(),
+            stream => Encoding.Latin1.GetString(output.DecodeStream(stream, 1_000_000)).Contains("FORMSECRET"));
     }
 
     [Theory]
@@ -608,7 +612,7 @@ public sealed class PdfContentRedactionTests
     [InlineData(true, true)]
     [InlineData(false, false)]
     [InlineData(true, false)]
-    public void RefusesOriginalImagesRetainedOnlyByAnUnusedSiblingResource(bool partlyCovered, bool inherited)
+    public void DropsOriginalImagesFromAnUnusedSiblingResource(bool partlyCovered, bool inherited)
     {
         // Inherited: the Pages node carries the image. Shared: both pages name one indirect XObject dictionary.
         string pages = inherited
@@ -629,10 +633,135 @@ public sealed class PdfContentRedactionTests
         var region = new PdfRedactionRegion(0, partlyCovered
             ? new PdfContentBounds(60, 210, 120, 300) : new PdfContentBounds(90, 90, 130, 130));
 
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, [region]);
+
+        Assert.True(result.Verification.Succeeded);
+        PdfDocument output = PdfDocument.Open(result.Document);
+        Assert.True(!output.CrossReferences.TryGetValue(6, out PdfCrossReferenceEntry original)
+            || original.Type is not (PdfCrossReferenceEntryType.InUse or PdfCrossReferenceEntryType.Compressed),
+            "The original image is still in the document.");
+    }
+
+    // LibreOffice exports give every page one indirect /Resources dictionary. Page 2 draws only /B,
+    // directly or through a form without resources of its own, so /A must leave its resources and /B stay.
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void DropsAnImageFromPagesSharingOneResourceDictionaryAndKeepsWhatTheyDraw(bool throughForm)
+    {
+        PdfDocument document = PdfDocument.Open(CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R 4 0 R] /Count 2 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 400 400] /Resources 8 0 R /Contents 5 0 R >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 400 400] /Resources 8 0 R /Contents 7 0 R >>",
+            Stream("q 20 0 0 20 100 100 cm /A Do Q"),
+            SecretImage(""),
+            Stream(throughForm ? "/Fm Do" : "q 400 0 0 400 0 0 cm /B Do Q"),
+            "<< /XObject << /A 6 0 R /B 9 0 R /Fm 10 0 R >> >>",
+            "<< /Type /XObject /Subtype /Image /Width 1 /Height 1 /ColorSpace /DeviceRGB /BitsPerComponent 8 /Length 3 >>\nstream\n"
+                + Encoding.Latin1.GetString([0, 0, 255]) + "\nendstream",
+            Stream("q 400 0 0 400 0 0 cm /B Do Q", "/Type /XObject /Subtype /Form /BBox [0 0 400 400]")
+        ]));
+        var region = new PdfRedactionRegion(0, new PdfContentBounds(90, 90, 130, 130));
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, [region]);
+
+        Assert.True(result.Verification.Succeeded);
+        PdfDocument output = PdfDocument.Open(result.Document);
+        Assert.False(HasSourceImage(output));
+        PdfRenderedPage rendered = new PdfPageRenderer(output).Render(1, new PdfRenderOptions(400, 400));
+        (byte red, byte green, byte blue) = Pixel(rendered, 200, 200);
+        Assert.True(blue > 200 && red < 50 && green < 50, "Page 2 no longer draws its own image.");
+    }
+
+    // The AcroForm defaults and form appearances often name the page's own resource dictionary.
+    [Fact]
+    public void DropsAnImageFromAnAcroFormDefaultResourceDictionaryThePageShares()
+    {
+        PdfDocument document = PdfDocument.Open(CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R /AcroForm << /Fields [] /DR 7 0 R >> >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 400 400] /Resources 7 0 R /Contents 5 0 R >>",
+            Helvetica,
+            Stream("q 20 0 0 20 100 100 cm /A Do Q"),
+            SecretImage(""),
+            "<< /XObject << /A 6 0 R >> >>"
+        ]));
+        var region = new PdfRedactionRegion(0, new PdfContentBounds(90, 90, 130, 130));
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, [region]);
+
+        Assert.True(result.Verification.Succeeded);
+        Assert.False(HasSourceImage(PdfDocument.Open(result.Document)));
+    }
+
+    // Only entries of dictionaries the rewrite can replace are dropped, so a form with resources of its
+    // own that lists the original still leaves it in the file, and the check still refuses.
+    [Fact]
+    public void StillRefusesWhenAFormWithResourcesOfItsOwnListsTheOriginal()
+    {
+        PdfDocument document = PdfDocument.Open(CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 400 400] /Resources << /XObject << /A 6 0 R >> >> /Contents 5 0 R /Annots [7 0 R] >>",
+            Helvetica,
+            Stream("q 20 0 0 20 100 100 cm /A Do Q"),
+            SecretImage(""),
+            "<< /Type /Annot /Subtype /Stamp /Rect [200 200 300 300] /F 4 /AP << /N 8 0 R >> >>",
+            Stream("", "/Type /XObject /Subtype /Form /BBox [0 0 100 100] /Resources << /XObject << /A 6 0 R >> >>")
+        ]));
+        var region = new PdfRedactionRegion(0, new PdfContentBounds(90, 90, 130, 130));
+
         PdfRedactionVerificationException error = Assert.Throws<PdfRedactionVerificationException>(() =>
             PdfContentRedaction.Apply(document, [region]));
 
         Assert.Contains(error.Report.Findings, finding => finding.Code == "RetainedSourceStream");
+    }
+
+    [Fact]
+    public void KeepsAnImageAnUntouchedPageSharingTheResourceDictionaryStillDraws()
+    {
+        PdfDocument document = PdfDocument.Open(CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R 4 0 R] /Count 2 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 400 400] /Resources 8 0 R /Contents 5 0 R >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 400 400] /Resources 8 0 R /Contents 7 0 R >>",
+            Stream("q 20 0 0 20 100 100 cm /A Do Q"),
+            SecretImage(""),
+            Stream("q 300 0 0 300 50 50 cm /A Do Q"),
+            "<< /XObject << /A 6 0 R >> >>"
+        ]));
+        var region = new PdfRedactionRegion(0, new PdfContentBounds(90, 90, 130, 130));
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, [region]);
+
+        Assert.True(result.Verification.Succeeded);
+        PdfDocument output = PdfDocument.Open(result.Document);
+        Assert.Equal("A", Assert.Single(new PdfPageContentReader(output).Read(1).Images).ResourceName);
+        Assert.Empty(new PdfPageContentReader(output).Read(0).Images);
+    }
+
+    // Alternating graphics states without q and Q used to rebuild a growing string for every one of them.
+    [Fact]
+    public void RedactsAPageThatAlternatesGraphicsStatesWithoutSlowingDown()
+    {
+        string states = string.Concat(Enumerable.Repeat("/G0 gs /G1 gs ", 50_000));
+        PdfDocument document = PdfDocument.Open(CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 200] /Resources << /Font << /F1 4 0 R >> /ExtGState << /G0 << /ca 1 >> /G1 << /ca 0.5 >> >> >> /Contents 5 0 R >>",
+            Helvetica,
+            Stream(states + "BT /F1 12 Tf 20 100 Td (LATESECRET) Tj ET")
+        ]));
+        PdfRedactionRegion region = Region(document, 0, "LATESECRET");
+
+        var clock = System.Diagnostics.Stopwatch.StartNew();
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, [region]);
+        clock.Stop();
+
+        Assert.True(result.Verification.Succeeded);
+        Assert.DoesNotContain("LATESECRET", Letters(PdfDocument.Open(result.Document), 0));
+        Assert.True(clock.Elapsed < TimeSpan.FromSeconds(6), $"Redaction took {clock.Elapsed.TotalSeconds:0.0} seconds.");
     }
 
     [Theory]
@@ -1193,11 +1322,23 @@ public sealed class PdfContentRedactionTests
     [Fact]
     public void RefusesFieldHierarchiesTooDeepToPrune()
     {
+        PdfDocument document = PdfDocument.Open(DeepFieldPdf(300));
+        PdfRedactionRegion region = Region(document, 0, "NAMEHERE");
+
+        var error = Assert.Throws<InvalidOperationException>(() => PdfContentRedaction.Apply(document, [region]));
+        Assert.Contains("too deep", error.Message);
+    }
+
+    [Fact]
+    public void RedactsAFieldUnderADeepButAllowedHierarchy()
+    {
         PdfDocument document = PdfDocument.Open(DeepFieldPdf(200));
         PdfRedactionRegion region = Region(document, 0, "NAMEHERE");
 
-        var error = Assert.Throws<NotSupportedException>(() => PdfContentRedaction.Apply(document, [region]));
-        Assert.Contains("too deep", error.Message);
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, [region]);
+
+        Assert.True(result.Verification.Succeeded);
+        AssertDescriptionAbsent(PdfDocument.Open(result.Document), "NAMEHERE");
     }
 
     [Fact]

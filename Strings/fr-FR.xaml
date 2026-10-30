@@ -1860,6 +1860,8 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Paragraph_Overflow">Le texte ne tient pas dans le cadre. Agrandissez-le ou réduisez la taille de police ou l’interligne.</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">Aperçu prêt. Appliquer remplace le texte du paragraphe d’origine.</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">Aucun paragraphe compatible trouvé. Cette première version prend en charge le texte horizontal dans un seul style.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Refused">Ce paragraphe ne peut pas être modifié : {0}</sys:String>
+    <sys:String x:Key="Str_Paragraph_MixedStyles">Ce paragraphe mélange plusieurs polices ou tailles. Le nouveau texte utilise un seul style, cette mise en forme ne sera donc pas conservée.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Police de l’aperçu : {0}. Cette police sera incorporée au PDF modifié.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Préparation de l’aperçu...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">Le document a changé. Rouvrez la modification de paragraphe pour continuer.</sys:String>

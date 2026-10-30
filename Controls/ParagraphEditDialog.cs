@@ -19,6 +19,7 @@ internal sealed class ParagraphEditDialog : Window
     private readonly int _pageIndex;
     private readonly PdfPageInformation _page;
     private readonly IReadOnlyList<PdfParagraphCandidate> _candidates;
+    private readonly IReadOnlyList<PdfParagraphInspection> _refusals;
     private readonly ComboBox _candidateBox;
     private readonly TextBox _text;
     private readonly TextBox[] _numbers = new TextBox[6];
@@ -52,6 +53,7 @@ internal sealed class ParagraphEditDialog : Window
         _page = PdfPageInformation.Read(document)[pageIndex];
         _pixelsPerPoint = Math.Min(1000 / _page.Width, 1000 / _page.Height);
         _candidates = inspection.Candidates;
+        _refusals = inspection.Refusals;
         Title = "KillerPDF: " + L("Str_Paragraph_Title");
         scale = Math.Clamp(scale, .7, 2.5);
         Width = Math.Min(760 * scale, SystemParameters.WorkArea.Width - 40);
@@ -158,9 +160,9 @@ internal sealed class ParagraphEditDialog : Window
         _text.TextChanged += (_, _) => { if (!_setting) Invalidate(); };
         _alignment.SelectionChanged += (_, _) => { if (!_setting) Invalidate(); };
         _candidateBox.SelectedIndex = _candidates.Count > 0 ? 0 : -1;
-        if (pagePoint is Point pointOnPage) SelectAt(pointOnPage);
         _status.Text = _candidates.Count == 0 ? string.Join("\n", inspection.Refusals.Select(item =>
             RefusalText(item.RefusalCode)).Distinct()) : "";
+        if (pagePoint is Point pointOnPage) SelectAt(pointOnPage);
         _preview.IsEnabled = _candidates.Count > 0;
         _text.IsEnabled = _candidates.Count > 0;
         Loaded += async (_, _) =>
@@ -178,7 +180,12 @@ internal sealed class ParagraphEditDialog : Window
         int index = _candidates.ToList().FindIndex(candidate => point.X >= candidate.SourceRegion.Left
             && point.X <= candidate.SourceRegion.Right && point.Y >= candidate.SourceRegion.Bottom
             && point.Y <= candidate.SourceRegion.Top);
-        if (index >= 0) _candidateBox.SelectedIndex = index;
+        if (index >= 0) { _candidateBox.SelectedIndex = index; return; }
+        // A click on a paragraph the page refused would otherwise leave another paragraph selected with no word about it.
+        PdfParagraphInspection? refused = _refusals.FirstOrDefault(item => item.Region is { } area
+            && point.X >= area.Left && point.X <= area.Right && point.Y >= area.Bottom && point.Y <= area.Top);
+        if (refused is not null && _candidates.Count > 0)
+            _status.Text = string.Format(L("Str_Paragraph_Refused"), refused.Reason);
     }
 
     private void SelectCandidate()
@@ -191,7 +198,12 @@ internal sealed class ParagraphEditDialog : Window
         double top = Math.Max(0, _page.Height - bounds.Top - candidate.FontSize * .2);
         double height = Math.Min(_page.Height - top, Math.Max(bounds.Top - bounds.Bottom + candidate.FontSize * .4,
             candidate.FontSize * 1.5 + (candidate.Text.Split('\n').Length - 1) * candidate.Leading));
-        SetNumbers([bounds.Left, top, bounds.Right - bounds.Left, height, candidate.FontSize, candidate.Leading]);
+        // The replacement paints under the source's clip, so the padding stops where a tight clip does.
+        PdfContentBounds fitted = candidate.FitToClip(new PdfContentBounds(bounds.Left, _page.Height - top - height,
+            bounds.Right, _page.Height - top));
+        if (fitted.Right <= fitted.Left || fitted.Top <= fitted.Bottom) fitted = bounds;
+        SetNumbers([fitted.Left, _page.Height - fitted.Top, fitted.Right - fitted.Left, fitted.Top - fitted.Bottom,
+            candidate.FontSize, candidate.Leading]);
         Invalidate();
     }
 
@@ -255,11 +267,13 @@ internal sealed class ParagraphEditDialog : Window
             if (result.Plan.HasOverflow) { _status.Text = L("Str_Paragraph_Overflow"); return; }
             _plan = result.Plan; _editedImage = result.Image;
             _original.IsChecked = false; _image.Source = _editedImage;
-            _status.Text = L("Str_Paragraph_Ready");
+            _status.Text = L("Str_Paragraph_Ready") + (candidate.MixedStyles ? "\n" + L("Str_Paragraph_MixedStyles") : "");
             _fontLabel.Text = string.Format(L("Str_Paragraph_Font"), font.Value.Family);
             _apply.IsEnabled = true;
         }
         catch (OperationCanceledException) { }
+        catch (Exception error) when (error is NotSupportedException or InvalidOperationException)
+        { if (!_closed) _status.Text = string.Format(L("Str_Paragraph_Refused"), error.Message); }
         catch (Exception error) when (error is not OutOfMemoryException)
         { if (!_closed) _status.Text = L("Str_Paragraph_Unsupported"); }
         finally { _operation = null; cts.Dispose(); if (!_closed) _preview.IsEnabled = true; }

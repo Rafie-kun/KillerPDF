@@ -1860,6 +1860,8 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Paragraph_Overflow">Teksten får ikke plass. Utvid rammen eller reduser skriftstørrelsen eller linjeavstanden.</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">Forhåndsvisningen er klar. Bruk erstatter den opprinnelige avsnittsteksten.</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">Fant ingen støttede avsnitt. Denne første versjonen støtter vannrett tekst med én stil.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Refused">Dette avsnittet kan ikke redigeres: {0}</sys:String>
+    <sys:String x:Key="Str_Paragraph_MixedStyles">Dette avsnittet blander skrifttyper eller størrelser. Den nye teksten bruker én stil, så denne formateringen blir ikke med videre.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Skrift i forhåndsvisningen: {0}. Denne skriften bygges inn i den redigerte PDF-filen.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Forbereder forhåndsvisning...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">Dokumentet er endret. Åpne avsnittsredigeringen på nytt for å fortsette.</sys:String>
