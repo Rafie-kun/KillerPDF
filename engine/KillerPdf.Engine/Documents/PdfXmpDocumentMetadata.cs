@@ -150,11 +150,13 @@ internal sealed record PdfXmpDocumentMetadata(
 
     private static void AddSimple(XElement description, XName name, string? value)
     {
+        value = PdfDocumentBuilder.XmlSafe(value);
         if (!string.IsNullOrEmpty(value)) description.Add(new XElement(name, value));
     }
 
     private static void AddAlternative(XElement description, XName name, string? value)
     {
+        value = PdfDocumentBuilder.XmlSafe(value);
         if (string.IsNullOrEmpty(value)) return;
         description.Add(new XElement(name, new XElement(Rdf + "Alt",
             new XElement(Rdf + "li", new XAttribute(XNamespace.Xml + "lang", "x-default"), value))));
@@ -162,6 +164,7 @@ internal sealed record PdfXmpDocumentMetadata(
 
     private static void AddSequence(XElement description, XName name, string? value)
     {
+        value = PdfDocumentBuilder.XmlSafe(value);
         if (string.IsNullOrEmpty(value)) return;
         description.Add(new XElement(name, new XElement(Rdf + "Seq", new XElement(Rdf + "li", value))));
     }

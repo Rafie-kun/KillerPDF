@@ -11,6 +11,20 @@ namespace KillerPdf.Engine.Tests.Writing;
 
 public sealed class PdfVersion2UpgradeTests
 {
+    // ImageMagick ends /Title with U+0000, which a PDF string can hold and an XMP packet cannot.
+    [Fact]
+    public void Apply_ATitleThatXmlCannotCarryStillUpgrades()
+    {
+        const string packet =
+            "<x:xmpmeta xmlns:x=\"adobe:ns:meta/\"><rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">" +
+            "<rdf:Description rdf:about=\"\"/></rdf:RDF></x:xmpmeta>";
+        byte[] source = RawPdf("1.7", "/Title <FEFF0041000000420000>", packet);
+
+        PdfDocument upgraded = PdfDocument.Open(PdfVersion2Upgrade.Apply(PdfDocument.Open(source)));
+
+        Assert.Equal("AB", PdfDocumentInformation.Read(upgraded).Title?.Replace("\0", string.Empty, StringComparison.Ordinal));
+    }
+
     [Theory]
     [InlineData(PdfTrappedStatus.True, false)]
     [InlineData(PdfTrappedStatus.False, false)]
