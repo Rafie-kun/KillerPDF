@@ -40,6 +40,9 @@ public sealed class PdfExtractionFont
     /// <summary>Gets whether the font uses vertical writing.</summary>
     public bool IsVertical { get; internal init; }
 
+    /// <summary>Gets whether the font draws its own glyphs as Type 3 content.</summary>
+    public bool IsType3 { get; internal init; }
+
     internal Func<uint, uint>? CidSelector { get; init; }
     internal Func<uint, PdfGlyphBounds?>? BoundsReader { get; init; }
     internal Func<uint, PdfGlyphOutline?>? OutlineReader { get; init; }

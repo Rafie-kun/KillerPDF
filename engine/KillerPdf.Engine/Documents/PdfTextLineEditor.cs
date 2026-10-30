@@ -57,8 +57,10 @@ public sealed record PdfTextLineEdit(int PageIndex, PdfContentBounds Region, str
     /// <summary>Draws a line through the new text.</summary>
     public bool Strike { get; init; }
     internal IReadOnlyList<PdfParagraphLine>? ParagraphLines { get; init; }
-    // The box a paragraph replacement fills, which later page content must not cover.
+    // The ink of a paragraph replacement, which later page content must not cover.
     internal PdfContentBounds? ParagraphBox { get; init; }
+    // The source lines of a paragraph, whose underlines leave with them.
+    internal IReadOnlyList<PdfParagraphRowSpan>? ParagraphRows { get; init; }
 }
 
 /// <summary>Which font the new text was written in.</summary>
@@ -155,8 +157,16 @@ public static partial class PdfContentRedaction
                 {
                     if (index == edit.PageIndex) continue;
                     PdfPageTreeEntry other = probe.Tree.Pages[index];
-                    new ContentRewriter(document, null, [], false, fonts, cancellationToken, glyphsOnly: true,
-                        usedCodes: used).RewritePage(other, Geometry(document, other));
+                    // This only looks for more glyphs, so a page that cannot be read is one with none to offer.
+                    try
+                    {
+                        new ContentRewriter(document, null, [], false, fonts, cancellationToken, glyphsOnly: true,
+                            usedCodes: used).RewritePage(other, Geometry(document, other));
+                    }
+                    catch (Exception error) when (error is FormatException or InvalidOperationException
+                        or NotSupportedException or ArgumentException or Filters.PdfFilterException)
+                    {
+                    }
                 }
                 encoded = EncodeOriginal(font, composite, embedded, Used(key), lines);
             }
@@ -195,12 +205,14 @@ public static partial class PdfContentRedaction
             ? tracking / (horizontal * first.Scale) : null;
 
         var writer = new LineWriter(encoded, substituteReference, sizeFactor, edit.FillColor, characterSpacing,
-            edit.Underline, edit.Strike, edit.ParagraphLines);
+            edit.Underline, edit.Strike, edit.ParagraphLines,
+            edit.ParagraphLines is null ? null : probe.Insertion.DominantFill);
         var insertion = new LineInsertion
         {
             Writer = writer,
             WriteAtGlyph = edit.ParagraphLines is null ? 0 : probe.Insertion.Glyphs,
-            ProtectedBox = edit.ParagraphBox
+            ProtectedBox = edit.ParagraphBox,
+            SourceRows = edit.ParagraphRows
         };
         PdfPageTreeEntry page = probe.Tree.Pages[edit.PageIndex];
         var rewriter = new ContentRewriter(document, update, [edit.Region], false,
@@ -212,6 +224,7 @@ public static partial class PdfContentRedaction
         if (insertion.Covered)
             throw new NotSupportedException("Content painted after the paragraph would cover the new box. Make the box smaller or move it clear of that content.");
         if (insertion.AfterText is { } rules) content.AddRange(rules);
+        if (edit.ParagraphRows is { } sourceRows) content = WithoutUnderlines(content, sourceRows, probe.Geometry);
 
         var instructions = new List<PdfContentInstruction>(content.Count + 2) { Op("q") };
         instructions.AddRange(content);
@@ -230,6 +243,58 @@ public static partial class PdfContentRedaction
 
         Dictionary<uint, PdfDecodedCharacter> Used(object? key) =>
             key is not null && used.TryGetValue(key, out Dictionary<uint, PdfDecodedCharacter>? codes) ? codes : [];
+    }
+
+    // An underline drawn as a thin filled box sits in the band just below a line's baseline, no wider
+    // than the line. It belongs to that line, so it neither covers the replacement nor outlives the text.
+    private static bool IsUnderline(PdfContentBounds area, IReadOnlyList<PdfParagraphRowSpan> rows) => rows.Any(row =>
+        area.Height < row.Size * 0.15 && area.Top <= row.Baseline + row.Size * 0.02 && area.Top >= row.Baseline - row.Size * 0.35
+        && area.Left >= row.Left - 1 && area.Right <= row.Right + 1);
+
+    private static List<PdfContentInstruction> WithoutUnderlines(List<PdfContentInstruction> content,
+        IReadOnlyList<PdfParagraphRowSpan> rows, PageGeometry geometry)
+    {
+        var result = new List<PdfContentInstruction>(content.Count);
+        var saved = new Stack<Matrix>();
+        var ctm = new Matrix(1, 0, 0, 1, -geometry.CropLeft, -geometry.CropBottom);
+        for (int index = 0; index < content.Count; index++)
+        {
+            PdfContentInstruction instruction = content[index];
+            switch (instruction.Operator)
+            {
+                case "q": saved.Push(ctm); break;
+                case "Q": if (saved.TryPop(out Matrix restored)) ctm = restored; break;
+                case "cm" when Numbers(instruction, 6) is { } values:
+                    ctm = new Matrix(values[0], values[1], values[2], values[3], values[4], values[5]).Then(ctm);
+                    break;
+                case "re" when index + 1 < content.Count && content[index + 1].Operator is "f" or "F" or "f*"
+                    && (index == 0 || content[index - 1].Operator is not ("m" or "l" or "c" or "v" or "y" or "re" or "h"))
+                    && Numbers(instruction, 4) is { } box && ctm.B == 0 && ctm.C == 0:
+                    PdfPoint start = ctm.Point(box[0], box[1]), end = ctm.Point(box[0] + box[2], box[1] + box[3]);
+                    if (IsUnderline(new PdfContentBounds(Math.Min(start.X, end.X), Math.Min(start.Y, end.Y),
+                        Math.Max(start.X, end.X), Math.Max(start.Y, end.Y)), rows))
+                    {
+                        index++;
+                        continue;
+                    }
+                    break;
+            }
+            result.Add(instruction);
+        }
+        return result;
+
+        static double[]? Numbers(PdfContentInstruction instruction, int count)
+        {
+            if (instruction.Operands.Count != count) return null;
+            var values = new double[count];
+            for (int index = 0; index < count; index++)
+            {
+                if (instruction.Operands[index] is PdfInteger integer) values[index] = integer.Value;
+                else if (instruction.Operands[index] is PdfReal real) values[index] = real.Value;
+                else return null;
+            }
+            return values;
+        }
     }
 
     private sealed record LineProbe(PdfTextLineInspection Inspection, LineInsertion Insertion,
@@ -301,7 +366,7 @@ public static partial class PdfContentRedaction
             _unreadable = Unreadable(rewriter);
         }
 
-        internal (PdfRgbColor Color, PdfContentBounds Clip) Inspect(PdfContentBounds region)
+        internal (PdfRgbColor Color, PdfContentBounds Clip, bool MixedFills) Inspect(PdfContentBounds region)
         {
             var insertion = new LineInsertion { InspectParagraph = true };
             foreach (ParagraphGlyph glyph in _glyphs)
@@ -473,7 +538,7 @@ public static partial class PdfContentRedaction
 
     private sealed record LineWriter(IReadOnlyList<EncodedLine> Lines, PdfIndirectReference? Substitute,
         double? SizeFactor, PdfRgbColor? Fill, double? CharacterSpacing, bool Underline, bool Strike,
-        IReadOnlyList<PdfParagraphLine>? ParagraphLines);
+        IReadOnlyList<PdfParagraphLine>? ParagraphLines, PdfContentInstruction[]? ParagraphFill);
 
     /// <summary>
     /// Follows the glyphs of an edited line through the content. The first one marks where the new
@@ -484,6 +549,9 @@ public static partial class PdfContentRedaction
     private sealed class LineInsertion
     {
         private static readonly PdfName FontCategory = Name("Font");
+        private readonly Dictionary<string, (int Glyphs, PdfContentInstruction[] Fill)> _fills = new(StringComparer.Ordinal);
+        private PdfContentInstruction[]? _lastFill;
+        private string _lastFillKey = string.Empty;
         private bool _pending;
 
         internal bool InspectParagraph { get; init; }
@@ -497,22 +565,32 @@ public static partial class PdfContentRedaction
         internal bool ZeroSize { get; private set; }
         internal bool ParagraphUnsafe { get; private set; }
         internal bool ClipUnsafe { get; private set; }
+        internal bool HasType3 { get; private set; }
+        internal PdfContentInstruction[]? DominantFill => _fills.Count == 0 ? null
+            : _fills.Values.MaxBy(item => item.Glyphs).Fill;
+        internal bool MixedFills => _fills.Count > 1;
         internal PdfContentBounds? ProtectedBox { get; init; }
+        internal IReadOnlyList<PdfParagraphRowSpan>? SourceRows { get; init; }
         internal bool Covered { get; private set; }
         internal bool Written { get; private set; }
         internal List<PdfContentInstruction>? AfterText { get; set; }
         internal int AfterTextDepth { get; private set; }
 
         // Producers rarely write a plain identity. Ghostscript scales by 0.12 then 8.333 with a 0.999
-        // text matrix, and browsers flip the page and the text back. Text that lands upright and
-        // nearly uniform can be replaced through the same transform; anything else cannot.
+        // text matrix, and browsers flip the page and the text back. pdfTeX's font expansion stretches
+        // each line by up to 2 percent. Text that lands upright and that close to uniform can be
+        // replaced through the same transform; anything else cannot.
         private static bool IsUprightText(Matrix glyph, Matrix ctm)
         {
             Matrix device = glyph.Then(ctm);
             return Math.Abs(glyph.B) < 1e-8 && Math.Abs(glyph.C) < 1e-8 && Math.Abs(ctm.B) < 1e-8
                 && Math.Abs(ctm.C) < 1e-8 && ctm.A != 0 && ctm.D != 0 && device.A > 0 && device.D > 0
-                && Math.Abs(device.A / device.D - 1) < 0.005;
+                && Math.Abs(device.A / device.D - 1) < 0.03;
         }
+
+        // The same color written twice is the same fill, and no operators at all mean black.
+        private static string FillKey(PdfContentInstruction[] fill) =>
+            Convert.ToHexString(PdfContentStreamWriter.Write(fill.Length > 0 ? fill : [new PdfContentInstruction("g", 0, [new PdfInteger(0)])]));
 
         internal void Observe(TextState state, Matrix glyph, bool barredFromParagraphs, PdfContentBounds bounds)
         {
@@ -524,16 +602,21 @@ public static partial class PdfContentRedaction
             Glyphs++;
             if (state.RenderMode is 3 or 7) Invisible = true;
             if (state.Size == 0) ZeroSize = true;
+            if (state.Font?.IsType3 == true) HasType3 = true;
+            if (!ReferenceEquals(state.Fill, _lastFill))
+            {
+                _lastFill = state.Fill;
+                _lastFillKey = FillKey(state.Fill);
+            }
+            _fills[_lastFillKey] = (_fills.GetValueOrDefault(_lastFillKey).Glyphs + 1, state.Fill);
             if (InspectParagraph)
             {
                 if (!state.ClipIsRectangle) ClipUnsafe = true;
                 if (barredFromParagraphs || state.SoftMasked || state.Size <= 0 || state.RenderMode != 0
-                    || state.Scale != 1 || state.Font?.IsVertical == true
-                    || !IsUprightText(glyph, state.Ctm) || (State is not null
-                        && (Math.Abs(Glyph.A - glyph.A) > 1e-6 || Math.Abs(Glyph.D - glyph.D) > 1e-6)))
+                    || state.Scale != 1 || state.Font?.IsVertical == true || !IsUprightText(glyph, state.Ctm)
+                    || (State is not null && Math.Abs(Glyph.D - glyph.D) > 1e-6))
                     ParagraphUnsafe = true;
-                if (State is { } first && (first.Ctm != state.Ctm || first.Clip != state.Clip || first.ExtGStates != state.ExtGStates
-                    || !PdfContentStreamWriter.Write(first.Fill).AsSpan().SequenceEqual(PdfContentStreamWriter.Write(state.Fill))))
+                if (State is { } first && (first.Ctm != state.Ctm || first.Clip != state.Clip || first.ExtGStates != state.ExtGStates))
                     ParagraphUnsafe = true;
             }
             // A paragraph can span text objects with other content painted between them, so its
@@ -549,7 +632,8 @@ public static partial class PdfContentRedaction
         // its box paints on top of it, and the page would show that content instead of the new text.
         internal void Paint(PdfContentBounds area)
         {
-            if (Written && ProtectedBox is { } box && Overlaps(area, box)) Covered = true;
+            if (Written && ProtectedBox is { } box && Overlaps(area, box)
+                && !(SourceRows is { } rows && IsUnderline(area, rows))) Covered = true;
         }
 
         internal void WritePending(List<PdfContentInstruction> output, TextState state, Matrix text, Matrix line,
@@ -573,6 +657,9 @@ public static partial class PdfContentRedaction
             else if (writer.SizeFactor is not null)
                 output.Add(new PdfContentInstruction("Tf", 0, [original!, new PdfReal(size)]));
             if (writer.Fill is PdfRgbColor fill) output.Add(Op("rg", fill.Red, fill.Green, fill.Blue));
+            // A paragraph writes at its last glyph, which can be a closing link in another color.
+            bool dominantFill = writer.ParagraphFill is { } dominant && FillKey(dominant) != FillKey(state.Fill);
+            if (dominantFill) output.AddRange(writer.ParagraphFill!.Length > 0 ? writer.ParagraphFill : [Op("g", 0)]);
             if (writer.CharacterSpacing is double spacing) output.Add(Op("Tc", spacing));
             // Justified source lines carry their own spacing, which must not stretch the replacement.
             bool clearSpacing = writer.ParagraphLines is not null;
@@ -581,8 +668,9 @@ public static partial class PdfContentRedaction
             double leading = state.Leading > 0 ? state.Leading * factor : Math.Abs(size) * 1.2;
             for (int index = 0; index < writer.Lines.Count; index++)
             {
+                // Font expansion is typesetting, so the plan measures and this writes at unit aspect.
                 if (writer.ParagraphLines is { } positions && index < positions.Count)
-                    output.Add(Op("Tm", Glyph.A, 0, 0, Glyph.D, (positions[index].X - state.Ctm.E) / state.Ctm.A,
+                    output.Add(Op("Tm", Glyph.D * state.Ctm.D / state.Ctm.A, 0, 0, Glyph.D, (positions[index].X - state.Ctm.E) / state.Ctm.A,
                         (positions[index].Baseline - state.Ctm.F) / state.Ctm.D));
                 else if (index > 0) output.Add(Op("Td", 0, -leading));
                 if (writer.Lines[index].Items.Count > 0)
@@ -590,7 +678,7 @@ public static partial class PdfContentRedaction
             }
 
             if (fontChange) output.Add(new PdfContentInstruction("Tf", 0, [original!, new PdfReal(size0)]));
-            if (writer.Fill is not null) output.AddRange(state.Fill.Length > 0 ? state.Fill : [Op("g", 0)]);
+            if (writer.Fill is not null || dominantFill) output.AddRange(state.Fill.Length > 0 ? state.Fill : [Op("g", 0)]);
             if (writer.CharacterSpacing is not null || clearSpacing) output.Add(Op("Tc", state.CharacterSpacing));
             if (clearSpacing) { output.Add(Op("Tw", state.WordSpacing)); output.Add(Op("Ts", state.Rise)); }
             output.Add(Op("Tm", line.A, line.B, line.C, line.D, line.E, line.F));

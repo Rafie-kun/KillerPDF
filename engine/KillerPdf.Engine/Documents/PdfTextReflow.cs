@@ -16,7 +16,13 @@ public static class PdfTextReflow
 
     /// <summary>Wraps text to a maximum width while retaining explicit paragraph breaks.</summary>
     public static IReadOnlyList<PdfReflowLine> Wrap(
-        string text, TrueTypeFont font, double fontSize, double maximumWidth)
+        string text, TrueTypeFont font, double fontSize, double maximumWidth) =>
+        Wrap(text, font, fontSize, maximumWidth, 0);
+
+    /// <summary>Wraps text as <see cref="Wrap(string, TrueTypeFont, double, double)"/> does, with the
+    /// first line shortened by an indent.</summary>
+    public static IReadOnlyList<PdfReflowLine> Wrap(
+        string text, TrueTypeFont font, double fontSize, double maximumWidth, double firstLineIndent)
     {
         ArgumentNullException.ThrowIfNull(text);
         ArgumentNullException.ThrowIfNull(font);
@@ -26,16 +32,20 @@ public static class PdfTextReflow
             throw new ArgumentOutOfRangeException(nameof(fontSize));
         if (!double.IsFinite(maximumWidth) || maximumWidth <= 0)
             throw new ArgumentOutOfRangeException(nameof(maximumWidth));
+        if (!double.IsFinite(firstLineIndent) || firstLineIndent < 0 || firstLineIndent >= maximumWidth)
+            throw new ArgumentOutOfRangeException(nameof(firstLineIndent));
 
         var lines = new List<PdfReflowLine>();
         string normalized = text.Replace("\r\n", "\n", StringComparison.Ordinal)
             .Replace('\r', '\n');
+        double available = maximumWidth - firstLineIndent;
         foreach (string paragraph in normalized.Split('\n'))
         {
             string[] words = Words(paragraph);
             if (words.Length == 0)
             {
                 lines.Add(new PdfReflowLine(string.Empty, 0));
+                available = maximumWidth;
                 continue;
             }
 
@@ -45,15 +55,18 @@ public static class PdfTextReflow
             foreach (string word in words)
             {
                 double wordWidth = Width(word, font, fontSize);
-                if (current.Length > 0 && currentWidth + spaceWidth + wordWidth <= maximumWidth)
+                if (current.Length > 0 && currentWidth + spaceWidth + wordWidth <= available)
                 {
                     current += " " + word;
                     currentWidth += spaceWidth + wordWidth;
                     continue;
                 }
                 if (current.Length > 0)
+                {
                     lines.Add(new PdfReflowLine(current, currentWidth));
-                if (wordWidth <= maximumWidth)
+                    available = maximumWidth;
+                }
+                if (wordWidth <= available)
                 {
                     current = word;
                     currentWidth = wordWidth;
@@ -61,17 +74,21 @@ public static class PdfTextReflow
                 }
 
                 var fragments = BreakWord(
-                    word, font, fontSize, maximumWidth);
+                    word, font, fontSize, available, maximumWidth);
                 for (int index = 0; index + 1 < fragments.Count; index++)
                     lines.Add(fragments[index]);
                 PdfReflowLine last = fragments[^1];
                 current = last.Text;
                 currentWidth = last.Width;
+                if (fragments.Count > 1) available = maximumWidth;
             }
             lines.Add(new PdfReflowLine(current, currentWidth));
+            available = maximumWidth;
         }
         return Array.AsReadOnly(lines.ToArray());
     }
+
+    internal static double MeasureLine(string text, TrueTypeFont font, double fontSize) => Width(text, font, fontSize);
 
     /// <summary>Creates positioned, wrapped Unicode content with a safely embedded font.</summary>
     public static PdfContentStreamBuilder CreateUnicodeContent(
@@ -116,21 +133,23 @@ public static class PdfTextReflow
     }
 
     private static System.Collections.ObjectModel.ReadOnlyCollection<PdfReflowLine> BreakWord(
-        string word, TrueTypeFont font, double fontSize, double maximumWidth)
+        string word, TrueTypeFont font, double fontSize, double firstWidth, double maximumWidth)
     {
         var result = new List<PdfReflowLine>();
         var current = new System.Text.StringBuilder();
         double currentWidth = 0;
+        double available = firstWidth;
         TextElementEnumerator elements = StringInfo.GetTextElementEnumerator(word);
         while (elements.MoveNext())
         {
             string element = elements.GetTextElement();
             double elementWidth = Width(element, font, fontSize);
-            if (current.Length > 0 && currentWidth + elementWidth > maximumWidth)
+            if (current.Length > 0 && currentWidth + elementWidth > available)
             {
                 result.Add(new PdfReflowLine(current.ToString(), currentWidth));
                 current.Clear();
                 currentWidth = 0;
+                available = maximumWidth;
             }
             current.Append(element);
             currentWidth += elementWidth;

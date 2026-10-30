@@ -1042,6 +1042,10 @@ public sealed class PdfContentRedactionTests
     [InlineData("0 w 1 0 0 RG 40 240 m 180 240 l S", true)]
     [InlineData("0 w 1 0 0 RG 40 100 m 180 100 l S", false)]
     [InlineData("1 w 1 0 0 RG 40 100 m 180 100 l S", false)]
+    // Some producers draw a vertical table rule as a very wide, very short line. Only the band it
+    // really paints counts, not the square around the path and its width.
+    [InlineData("500 w 1 0 0 RG 260 100 m 260.5 100 l S", false)]
+    [InlineData("500 w 1 0 0 RG 60 100 m 60.5 100 l S", true)]
     public void AStrokeOverTheNewParagraphIsRefusedAndOneClearOfItIsNot(string after, bool refused)
     {
         PdfDocument source = PdfDocument.Open(SinglePage(

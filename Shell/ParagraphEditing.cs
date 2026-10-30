@@ -37,8 +37,7 @@ public partial class MainWindow
             PdfParagraphCandidateInspection inspection = PdfParagraphEditor.InspectCandidates(document, pageIndex);
             if (inspection.Candidates.Count == 0)
             {
-                KillerDialog.Show(this, string.Join("\n", inspection.Refusals.Select(item =>
-                    ParagraphEditDialog.RefusalText(item.RefusalCode)).Distinct())); return;
+                KillerDialog.Show(this, ParagraphEditDialog.RefusalMessage(inspection)); return;
             }
             Point? point = null;
             if (canvasPoint is Point position && _renderDims.TryGetValue(pageIndex, out var dimensions))

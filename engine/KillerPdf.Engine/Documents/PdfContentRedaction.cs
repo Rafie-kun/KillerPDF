@@ -2121,6 +2121,46 @@ public static partial class PdfContentRedaction
                 pendingPath.Add(instruction);
             }
 
+            // What a stroke really paints, edge by edge. Some producers draw a table rule as a very wide,
+            // very short line, so the box around the path and its width says little about where it paints.
+            IEnumerable<PdfContentBounds> StrokeEdges(PdfContentBounds whole)
+            {
+                double half = Math.Abs(state.LineWidth) * 0.5;
+                double reachX = half * (Math.Abs(state.Ctm.A) + Math.Abs(state.Ctm.C));
+                double reachY = half * (Math.Abs(state.Ctm.B) + Math.Abs(state.Ctm.D));
+                var edges = new List<PdfContentBounds>();
+                PdfPoint? current = null, start = null;
+                void Edge(PdfPoint from, PdfPoint to)
+                {
+                    bool level = Math.Abs(from.Y - to.Y) < 1e-6, upright = Math.Abs(from.X - to.X) < 1e-6;
+                    double x = level && !upright ? 0 : reachX, y = upright && !level ? 0 : reachY;
+                    if (level && !upright && state.LineCap != 0) x = reachX;
+                    if (upright && !level && state.LineCap != 0) y = reachY;
+                    edges.Add(new PdfContentBounds(Math.Min(from.X, to.X) - x, Math.Min(from.Y, to.Y) - y,
+                        Math.Max(from.X, to.X) + x, Math.Max(from.Y, to.Y) + y));
+                }
+                foreach (PdfContentInstruction segment in pendingPath)
+                {
+                    IReadOnlyList<PdfObject> values = segment.Operands;
+                    switch (segment.Operator)
+                    {
+                        case "m" when values.Count == 2: current = start = state.Ctm.Point(N(values[0]), N(values[1])); break;
+                        case "l" when values.Count == 2 && current is { } from:
+                            PdfPoint to = state.Ctm.Point(N(values[0]), N(values[1]));
+                            Edge(from, to); current = to; break;
+                        case "h" when current is { } last && start is { } first: Edge(last, first); current = first; break;
+                        case "re" when values.Count == 4:
+                            double left = N(values[0]), bottom = N(values[1]), right = left + N(values[2]), top = bottom + N(values[3]);
+                            PdfPoint a = state.Ctm.Point(left, bottom), b = state.Ctm.Point(right, bottom),
+                                c = state.Ctm.Point(right, top), d = state.Ctm.Point(left, top);
+                            Edge(a, b); Edge(b, c); Edge(c, d); Edge(d, a); break;
+                        case "W": case "W*": break;
+                        default: return [state.LineWidth == 0 ? whole : StrokeBounds(whole, state with { MiterLimit = 1 })];
+                    }
+                }
+                return edges;
+            }
+
             void PaintPath(PdfContentInstruction paint)
             {
                 PdfContentBounds bounds = pathPoints.Count == 0 ? default : new PdfContentBounds(
@@ -2134,7 +2174,7 @@ public static partial class PdfContentRedaction
                 // The stroke's own width, without the most a miter corner could reach: a rule beside the
                 // text is not over it. A hairline has no width in page units, so its path stands for it.
                 if (insertion is not null && pathPoints.Count > 0 && paint.Operator is "S" or "s" or "B" or "B*" or "b" or "b*")
-                    insertion.Paint(Visible(state.LineWidth == 0 ? bounds : StrokeBounds(bounds, state with { MiterLimit = 1 })));
+                    foreach (PdfContentBounds edge in StrokeEdges(bounds)) insertion.Paint(Visible(edge));
                 if (textOnly)
                 {
                     if (paint.Operator != "n" || pendingPath.Count > 0) MarkRemoved();

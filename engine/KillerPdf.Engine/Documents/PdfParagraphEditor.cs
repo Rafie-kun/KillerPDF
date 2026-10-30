@@ -28,9 +28,29 @@ public sealed record PdfParagraphCandidate(int PageIndex, PdfContentBounds Sourc
     /// <see cref="SourceRegion"/>, or null when it is not known.</summary>
     public PdfContentBounds? Clip { get; init; }
 
-    /// <summary>Gets whether the source mixes fonts or sizes. <see cref="FontName"/> and
-    /// <see cref="FontSize"/> are then its dominant style, which the replacement takes.</summary>
+    /// <summary>Gets whether the source mixes fonts, sizes or colors. <see cref="FontName"/>,
+    /// <see cref="FontSize"/> and <see cref="Color"/> are then its dominant style, which the
+    /// replacement takes.</summary>
     public bool MixedStyles { get; init; }
+
+    /// <summary>Gets where the glyph origins of the paragraph's body lines start, which ink bounds
+    /// do not show because side bearings move them.</summary>
+    public double TextLeft { get; init; }
+
+    /// <summary>Gets the baseline of the first line.</summary>
+    public double FirstBaseline { get; init; }
+
+    /// <summary>Gets where the last glyph advance ends on the longest line.</summary>
+    public double TextRight { get; init; }
+
+    /// <summary>Gets how far the first line starts to the right of <see cref="TextLeft"/>.</summary>
+    public double FirstLineIndent { get; init; }
+
+    /// <summary>Gets the text of each source line, in reading order.</summary>
+    public IReadOnlyList<string> RowTexts { get; init; } = [];
+
+    // Where each source line sits, so an underline drawn beneath it can leave with it.
+    internal IReadOnlyList<PdfParagraphRowSpan> RowSpans { get; init; } = [];
 
     /// <summary>Returns the part of a replacement box that lies inside <see cref="Clip"/>, since
     /// the replacement is painted under the same clip and anything outside it would vanish.</summary>
@@ -38,6 +58,8 @@ public sealed record PdfParagraphCandidate(int PageIndex, PdfContentBounds Sourc
         ? new PdfContentBounds(Math.Max(box.Left, clip.Left), Math.Max(box.Bottom, clip.Bottom),
             Math.Min(box.Right, clip.Right), Math.Min(box.Top, clip.Top)) : box;
 }
+
+internal readonly record struct PdfParagraphRowSpan(double Left, double Right, double Baseline, double Size);
 
 /// <summary>The eligibility of the complete source lines inside a selected area.</summary>
 public sealed record PdfParagraphInspection(bool CanEdit, string Reason, PdfParagraphCandidate? Candidate)
@@ -118,14 +140,24 @@ public sealed class PdfParagraphPlan
 }
 
 /// <summary>Plans and replaces simple horizontal paragraphs without moving other page content.</summary>
-/// <remarks>The initial slice accepts uniform left-to-right source lines painted in one graphics
-/// state, across any number of top-level text objects; in a tagged document they must share one
-/// element. Encrypted, signed and rotated pages are refused, as are paragraphs that are clipped,
-/// transformed, soft masked, on an optional content layer, carrying replacement text, or inside
-/// reusable form content; the rest of the page does not matter. Replacement text uses one explicitly supplied embeddable font, Latin glyphs, and a
-/// small explicit set of ordinary typographic punctuation and symbols.</remarks>
+/// <remarks>A paragraph is a run of complete left-to-right lines, across any number of top-level
+/// text objects, painted upright under one transformation, one rectangular clip and one graphics
+/// state; in a tagged document they must share one block element. A first-line indent is kept.
+/// Mixed fonts, sizes and colors are accepted, and the replacement takes the dominant style.
+/// Encrypted, signed and rotated pages are refused, as are tables, Type 3 fonts, and paragraphs that
+/// are soft masked, on an optional content layer, carrying replacement text, or inside reusable
+/// form content; the rest of the page does not matter. Replacement text uses one explicitly
+/// supplied embeddable font, Latin glyphs, and a small explicit set of ordinary typographic
+/// punctuation and symbols.</remarks>
 public static class PdfParagraphEditor
 {
+    private const double WordGapEm = 0.15;
+    // A line takes one em whatever the font, so a baseline does not depend on the font's metrics.
+    private const double LineAscent = 0.8, LineDescent = 0.2;
+
+    private static readonly HashSet<string> InlineElements = new(StringComparer.Ordinal)
+        { "Span", "Link", "Em", "Strong", "Quote", "Code", "Reference", "Sub" };
+
     /// <summary>Finds conservative groups of complete, aligned source lines.</summary>
     public static IReadOnlyList<PdfParagraphCandidate> FindParagraphs(PdfDocument document, int pageIndex)
         => InspectCandidates(document, pageIndex).Candidates;
@@ -139,7 +171,7 @@ public static class PdfParagraphEditor
         ParagraphPage? context = null;
         PdfParagraphInspection? blocked;
         try { context = ReadParagraphPage(document, pageIndex, out blocked); }
-        catch (Exception error) when (IsRefusal(error)) { blocked = new PdfParagraphInspection(false, error.Message, null); }
+        catch (Exception error) when (IsRefusal(error)) { blocked = new PdfParagraphInspection(false, RefusalReason(error), null); }
         if (blocked is not null || context is null)
             return new([], Array.AsReadOnly(new[] { blocked! }));
         PdfPageContent page = context.Content;
@@ -147,17 +179,14 @@ public static class PdfParagraphEditor
         var refusals = new List<PdfParagraphInspection>();
         var group = new List<ParagraphRow>();
         bool tagged = IsTagged(context.Tree);
-        foreach (ParagraphRow row in Rows(page.Lines))
+        List<ParagraphRow> rows = Rows(page.Lines);
+        for (int index = 0; index < rows.Count; index++)
         {
-            if (group.Count > 0)
-            {
-                ParagraphRow previous = group[^1];
-                double size = previous.Style.Size;
-                double gap = previous.Baseline - row.Baseline;
-                if (Math.Abs(previous.Left - row.Left) > 1 || gap < size * 0.8 || gap > size * 1.8
-                    || previous.Style.Font != row.Style.Font || Math.Abs(size - row.Style.Size) > 0.01
-                    || tagged && previous.Letters[0].MarkedContentId != row.Letters[0].MarkedContentId) Flush();
-            }
+            ParagraphRow row = rows[index];
+            if (group.Count > 0 && (!Continues(group, group.Count, row, group[^1].Style.Size)
+                || !SharesStyle(group, row, index + 1 < rows.Count ? rows[index + 1] : null)
+                || tagged && context.Structure.ElementOf(group[^1].Letters[0].MarkedContentId)
+                    != context.Structure.ElementOf(row.Letters[0].MarkedContentId))) Flush();
             group.Add(row);
         }
         Flush();
@@ -178,7 +207,7 @@ public static class PdfParagraphEditor
             PdfParagraphInspection inspection;
             try { inspection = InspectRegion(document, pageIndex, bounds, context); }
             catch (Exception error) when (IsRefusal(error))
-            { inspection = new PdfParagraphInspection(false, error.Message, null) { Region = bounds }; }
+            { inspection = new PdfParagraphInspection(false, RefusalReason(error), null) { Region = bounds }; }
             if (inspection.Candidate is { } candidate) result.Add(candidate);
             else refusals.Add(inspection);
             group.Clear();
@@ -195,43 +224,62 @@ public static class PdfParagraphEditor
             return blocked ?? InspectRegion(document, pageIndex, sourceRegion, page);
         }
         catch (Exception error) when (IsRefusal(error))
-        { return new PdfParagraphInspection(false, error.Message, null); }
+        { return new PdfParagraphInspection(false, RefusalReason(error), null); }
     }
 
     private sealed record ParagraphPage(PdfPageTree Tree, PdfPageContent Content, PdfContentRedaction.ParagraphPaintMap Paint,
-        IReadOnlySet<int> DescribedElements);
+        ParagraphStructure Structure);
 
-    // Marked content ids on this page whose structure element, or an ancestor, carries replacement
-    // text. Assistive technology reads that in place of the page text, so an edit would leave it stale.
-    private static HashSet<int> DescribedElements(PdfDocument document, PdfPageTree tree, int pageIndex)
+    // What the structure tree says about this page's marked content.
+    private sealed class ParagraphStructure
     {
-        var described = new HashSet<int>();
-        if (!IsTagged(tree)) return described;
-        int page = tree.Pages[pageIndex].Reference.ObjectNumber;
-        var visited = new HashSet<int>();
-        Visit(tree.Catalog[Name("StructTreeRoot")], false, true, 0);
-        return described;
+        // Ids whose element, or an ancestor, carries replacement text. Assistive technology reads
+        // that in place of the page text, so an edit would leave it stale.
+        internal HashSet<int> Described { get; } = [];
+        // The block element holding each id, since one paragraph can own several ids and inline
+        // elements such as links sit inside it.
+        internal Dictionary<int, int> Elements { get; } = [];
 
-        void Visit(PdfObject value, bool covered, bool onPage, int depth)
+        internal int? ElementOf(int? id) => id is int known && Elements.TryGetValue(known, out int element) ? element
+            : id is null ? null : -1 - id;
+    }
+
+    private static ParagraphStructure ReadStructure(PdfDocument document, PdfPageTree tree, int pageIndex)
+    {
+        var structure = new ParagraphStructure();
+        if (!IsTagged(tree)) return structure;
+        int page = tree.Pages[pageIndex].Reference.ObjectNumber, elements = 0;
+        var visited = new HashSet<(int Object, bool Covered, bool OnPage)>();
+        Visit(tree.Catalog[Name("StructTreeRoot")], false, true, 0, 0);
+        return structure;
+
+        void Visit(PdfObject value, bool covered, bool onPage, int block, int depth)
         {
             if (depth > 256) throw new NotSupportedException("The document structure is too deeply nested to edit a paragraph.");
-            if (value is PdfIndirectReference reference && !visited.Add(reference.ObjectNumber)) return;
+            // A shared element can gain replacement text or its page on a later path, so the state counts too.
+            if (value is PdfIndirectReference reference && !visited.Add((reference.ObjectNumber, covered, onPage))) return;
             switch (Resolve(document, value))
             {
-                case PdfInteger id when covered && onPage:
-                    described.Add((int)id.Value);
+                case PdfInteger id when onPage:
+                    if (covered) structure.Described.Add((int)id.Value);
+                    structure.Elements.TryAdd((int)id.Value, block);
                     break;
                 case PdfArray array:
-                    foreach (PdfObject item in array) Visit(item, covered, onPage, depth + 1);
+                    foreach (PdfObject item in array) Visit(item, covered, onPage, block, depth + 1);
                     break;
                 case PdfDictionary element:
+                    // An MCR with /Stm counts inside that form, in numbering the page does not share.
+                    if (element.ContainsKey(Name("Stm"))) return;
                     bool here = onPage;
                     if (element.TryGetValue(Name("Pg"), out PdfObject? pageValue))
                         here = pageValue is PdfIndirectReference pageReference && pageReference.ObjectNumber == page;
                     bool carries = covered || element.ContainsKey(Name("ActualText")) || element.ContainsKey(Name("Alt"))
                         || element.ContainsKey(Name("E"));
-                    if (element.TryGetValue(Name("MCID"), out PdfObject? content)) Visit(content, carries, here, depth + 1);
-                    if (element.TryGetValue(Name("K"), out PdfObject? kids)) Visit(kids, carries, here, depth + 1);
+                    if (element.TryGetValue(Name("S"), out PdfObject? type)
+                        && !(Resolve(document, type) is PdfName name && InlineElements.Contains(name.ValueAsLatin1())))
+                        block = ++elements;
+                    if (element.TryGetValue(Name("MCID"), out PdfObject? content)) Visit(content, carries, here, block, depth + 1);
+                    if (element.TryGetValue(Name("K"), out PdfObject? kids)) Visit(kids, carries, here, block, depth + 1);
                     break;
             }
         }
@@ -245,9 +293,36 @@ public static class PdfParagraphEditor
         internal PdfExtractedLetter[] Letters { get; private set; } = [];
         internal (string Font, double Size) Style { get; private set; }
         internal double Baseline { get; private set; }
-        internal double Left => Lines[0].BoundingBox.Left;
+        // Where the glyph origins start. Ink starts elsewhere, by each glyph's side bearing.
+        internal double Left { get; private set; }
         internal double Right => Lines.Max(line => line.BoundingBox.Right);
-        internal string Text => string.Concat(Lines.Select(line => line.Text)).Trim();
+        internal double End => Letters.Max(letter => letter.EndBaseLine.X);
+
+        // Only explicit spaces and gaps between glyphs separate words here, so gaps count as spaces.
+        // The threshold sits below the one word search uses, because a tight typeset line keeps its
+        // word gaps close to 0.15 em and a kern stays well under it.
+        internal string Text
+        {
+            get
+            {
+                var text = new StringBuilder();
+                PdfExtractedLetter? previous = null;
+                foreach (PdfExtractedLetter letter in Letters)
+                {
+                    if (string.IsNullOrWhiteSpace(letter.Value))
+                    {
+                        if (letter.Value.Length != 0 && text.Length > 0 && text[^1] != ' ') text.Append(' ');
+                        previous = null;
+                        continue;
+                    }
+                    if (previous is not null && letter.StartBaseLine.X - previous.EndBaseLine.X
+                        > Math.Max(1, Math.Min(previous.PointSize, letter.PointSize)) * WordGapEm) text.Append(' ');
+                    text.Append(letter.Value);
+                    previous = letter;
+                }
+                return ExpandLigatures(text.ToString().Trim());
+            }
+        }
 
         internal void Add(PdfExtractedLine line)
         {
@@ -258,8 +333,90 @@ public static class PdfParagraphEditor
             (string font, double size) = Style;
             Baseline = Letters.First(letter => letter.FontName == font
                 && Math.Round(letter.PointSize, 2) == size).StartBaseLine.Y;
+            IEnumerable<PdfExtractedLetter> shown = Letters.Where(letter => !string.IsNullOrWhiteSpace(letter.Value));
+            Left = (shown.Any() ? shown : Letters).Min(letter => letter.StartBaseLine.X);
         }
     }
+
+    // Only the first row may be indented, and only rightward, so a row that starts to the right of
+    // the one above opens a new paragraph. Every later row lines up with the second.
+    private static bool Continues(IReadOnlyList<ParagraphRow> rows, int count, ParagraphRow row, double size)
+    {
+        double gap = rows[count - 1].Baseline - row.Baseline;
+        if (gap < size * 0.8 || gap > size * 1.8) return false;
+        if (count >= 2) return Math.Abs(rows[1].Left - row.Left) <= 1;
+        double indent = rows[0].Left - row.Left;
+        return Math.Abs(indent) <= 1 || indent > 1 && indent <= size * 5;
+    }
+
+    // A whole line in another font, such as one italic line, stays when the next row returns to
+    // the paragraph's font. That is what tells it from a bold heading above its body text.
+    private static bool SharesStyle(List<ParagraphRow> group, ParagraphRow row, ParagraphRow? next)
+    {
+        (string font, double size) = group[0].Style;
+        if (Math.Abs(size - row.Style.Size) > 0.01) return false;
+        return row.Style.Font == font || next is not null && next.Style.Font == font
+            && Math.Abs(size - next.Style.Size) <= 0.01 && Math.Abs(next.Left - row.Left) <= 1;
+    }
+
+    // Table columns line up from row to row, and the wide gaps of justified or typewritten text only
+    // do by chance, so every wide gap of a row must find one in the next row. A wide gap that sits
+    // where all the other rows leave any gap is a column too, since cells can nearly touch.
+    private static bool LooksLikeTable(IReadOnlyList<ParagraphRow> rows, double size)
+    {
+        // A monospaced word space is 0.6 em.
+        const double ColumnGapEm = 0.65;
+        (double X, double Gap)[][] starts = [.. rows.Select(row => PieceStarts(row, size))];
+        double[][] wide = [.. starts.Select(row => row.Where(piece => piece.Gap > size * ColumnGapEm).Select(piece => piece.X).ToArray())];
+        for (int index = 1; index < wide.Length; index++)
+            if (wide[index].Length > 0 && wide[index - 1].Length > 0
+                && (AllFound(wide[index], wide[index - 1]) || AllFound(wide[index - 1], wide[index]))) return true;
+        return rows.Count > 1 && wide.SelectMany(row => row).Any(x => starts.All(row => AllFound([x], [.. row.Select(piece => piece.X)])));
+
+        static bool AllFound(double[] some, double[] others) =>
+            some.All(x => others.Any(other => Math.Abs(other - x) <= 1));
+    }
+
+    private static (double X, double Gap)[] PieceStarts(ParagraphRow row, double size)
+    {
+        var starts = new List<(double X, double Gap)>();
+        for (int index = 1; index < row.Letters.Length; index++)
+        {
+            double gap = row.Letters[index].StartBaseLine.X - row.Letters[index - 1].EndBaseLine.X;
+            if (gap >= size * 0.1) starts.Add((row.Letters[index].StartBaseLine.X, gap));
+        }
+        return [.. starts];
+    }
+
+    // A word broken across two rows is one word again. A compound keeps its hyphen, which the page
+    // shows by writing it whole somewhere else.
+    private static string JoinRows(IReadOnlyList<string> rows, string pageText)
+    {
+        var text = new StringBuilder();
+        for (int index = 0; index < rows.Count; index++)
+        {
+            string row = rows[index];
+            string previous = index > 0 ? rows[index - 1] : string.Empty;
+            bool broken = previous.Length >= 2 && previous[^1] is '-' or '‐' && char.IsLower(previous[^2])
+                && row.Length > 0 && char.IsLower(row[0]);
+            if (!broken)
+            {
+                if (index > 0) text.Append(' ');
+            }
+            else
+            {
+                string whole = previous[(previous.LastIndexOf(' ') + 1)..] + string.Concat(row.TakeWhile(char.IsLetter));
+                if (!pageText.Contains(whole, StringComparison.Ordinal)) text.Length--;
+            }
+            text.Append(row);
+        }
+        return text.ToString();
+    }
+
+    private static string ExpandLigatures(string text) => text.Replace("ﬀ", "ff", StringComparison.Ordinal)
+        .Replace("ﬁ", "fi", StringComparison.Ordinal).Replace("ﬂ", "fl", StringComparison.Ordinal)
+        .Replace("ﬃ", "ffi", StringComparison.Ordinal).Replace("ﬄ", "ffl", StringComparison.Ordinal)
+        .Replace("ﬅ", "st", StringComparison.Ordinal).Replace("ﬆ", "st", StringComparison.Ordinal);
 
     private static List<ParagraphRow> Rows(IEnumerable<PdfExtractedLine> lines)
     {
@@ -267,6 +424,8 @@ public static class PdfParagraphEditor
         foreach (PdfExtractedLine line in lines)
         {
             if (line.Runs.Count == 0 || line.Runs.Any(run => run.Letters.Count == 0)) continue;
+            // A line of spaces is not a row of the paragraph, and it would stand in for the first baseline.
+            if (string.IsNullOrWhiteSpace(line.Text)) continue;
             double baseline = line.Runs[0].Letters[0].StartBaseLine.Y;
             ParagraphRow? row = rows.TakeLast(4).FirstOrDefault(candidate =>
             {
@@ -286,7 +445,12 @@ public static class PdfParagraphEditor
             .OrderByDescending(style => style.Count()).Select(style => style.Key).First();
 
     private static bool IsRefusal(Exception error) =>
-        error is NotSupportedException or FormatException or InvalidOperationException or ArgumentException;
+        error is NotSupportedException or FormatException or InvalidOperationException or ArgumentException
+            or ArithmeticException;
+
+    // A damaged font length surfaces as an arithmetic error, and its text would mean nothing to a reader.
+    private static string RefusalReason(Exception error) => error is ArithmeticException
+        ? "The page uses a font or other data that is damaged." : error.Message;
 
     // Checks everything that holds for the whole page, so each region only pays for its own.
     private static ParagraphPage ReadParagraphPage(PdfDocument document, int pageIndex, out PdfParagraphInspection? blocked)
@@ -312,7 +476,7 @@ public static class PdfParagraphEditor
         if (content.Diagnostics.Count != 0)
             throw new NotSupportedException("The page has extraction diagnostics and cannot be edited as a paragraph.");
         return new ParagraphPage(tree, content, new PdfContentRedaction.ParagraphPaintMap(document, pageIndex),
-            DescribedElements(document, tree, pageIndex));
+            ReadStructure(document, tree, pageIndex));
     }
 
     private static PdfParagraphInspection InspectRegion(PdfDocument document, int pageIndex, PdfContentBounds region,
@@ -323,10 +487,10 @@ public static class PdfParagraphEditor
         var selected = page.Letters.Where(letter => CenterInside(letter.BoundingBox, region)).ToArray();
         if (selected.Length == 0) throw new NotSupportedException("Select a complete paragraph of readable text.");
         if (selected.Length > 100_000) throw new NotSupportedException("The source paragraph exceeds the size limit.");
-        // The replacement goes into the first glyph's element, so one element keeps the structure true.
-        if (IsTagged(tree) && selected.Select(letter => letter.MarkedContentId).Distinct().Skip(1).Any())
+        // The replacement goes into the last glyph's sequence, so one element keeps the structure true.
+        if (IsTagged(tree) && selected.Select(letter => context.Structure.ElementOf(letter.MarkedContentId)).Distinct().Skip(1).Any())
             throw new NotSupportedException("The selection spans several tagged elements.");
-        if (selected[0].MarkedContentId is int element && context.DescribedElements.Contains(element))
+        if (selected.Any(letter => letter.MarkedContentId is int element && context.Structure.Described.Contains(element)))
             throw new NotSupportedException("The tagged element carries its own replacement text.");
         var selectedSet = new HashSet<PdfExtractedLetter>(selected, ReferenceEqualityComparer.Instance);
         PdfExtractedLine[] lines = [.. page.Lines.Where(line => line.Runs.SelectMany(run => run.Letters)
@@ -340,32 +504,85 @@ public static class PdfParagraphEditor
         // takes the dominant style, and the candidate says the rest will not carry over.
         var first = DominantStyle(selected);
         List<ParagraphRow> rows = Rows(lines);
+        if (rows.Count == 0) throw new NotSupportedException("Select a complete paragraph of readable text.");
         foreach (ParagraphRow row in rows)
             for (int index = 1; index < row.Letters.Length; index++)
                 if (row.Letters[index].StartBaseLine.X - row.Letters[index - 1].EndBaseLine.X > first.Size * 1.5)
                     throw new NotSupportedException("The source line has separated columns or uncertain spacing.");
         for (int index = 1; index < rows.Count; index++)
-        {
-            double gap = rows[index - 1].Baseline - rows[index].Baseline;
-            if (Math.Abs(rows[index].Left - rows[0].Left) > 1 || gap < first.Size * 0.8 || gap > first.Size * 1.8)
+            if (!Continues(rows, index, rows[index], first.Size))
                 throw new NotSupportedException("The selection is not one simple aligned paragraph.");
-        }
+        if (LooksLikeTable(rows, first.Size))
+            throw new NotSupportedException("This looks like a table, which paragraph editing does not support.");
         var bounds = new PdfContentBounds(selected.Min(letter => letter.BoundingBox.Left),
             selected.Min(letter => letter.BoundingBox.Bottom), selected.Max(letter => letter.BoundingBox.Right),
             selected.Max(letter => letter.BoundingBox.Top));
-        var (color, clip) = context.Paint.Inspect(region);
+        (PdfRgbColor color, PdfContentBounds clip, bool mixedFills) = context.Paint.Inspect(region);
         if (!PdfContentRedaction.ClipHolds(clip, bounds)) throw new NotSupportedException("The paragraph is clipped.");
         if (page.Letters.Any(letter => CenterInside(letter.BoundingBox, bounds) && !selectedSet.Contains(letter)))
             throw new NotSupportedException("The source bounds overlap other text and cannot identify one paragraph safely.");
         double leading = rows.Count > 1 ? rows[0].Baseline - rows[1].Baseline : first.Size * 1.2;
-        string text = string.Join(" ", rows.Select(row => row.Text));
-        var candidate = new PdfParagraphCandidate(pageIndex, bounds, text, first.Font, first.Size, leading, color)
+        string[] rowTexts = [.. rows.Select(row => row.Text)];
+        double indent = rows.Count > 1 && rows[0].Left - rows[1].Left > 1 ? rows[0].Left - rows[1].Left : 0;
+        var candidate = new PdfParagraphCandidate(pageIndex, bounds, JoinRows(rowTexts, page.Text), first.Font, first.Size, leading, color)
         {
             Clip = clip,
-            MixedStyles = selected.Select(letter => (letter.FontName, Math.Round(letter.PointSize, 2))).Distinct().Skip(1).Any()
+            MixedStyles = mixedFills || selected.Select(letter => (letter.FontName, Math.Round(letter.PointSize, 2))).Distinct().Skip(1).Any(),
+            TextLeft = rows[0].Left - indent,
+            FirstBaseline = rows[0].Baseline,
+            TextRight = selected.Max(letter => letter.EndBaseLine.X),
+            FirstLineIndent = indent,
+            RowTexts = Array.AsReadOnly(rowTexts),
+            RowSpans = Array.AsReadOnly(rows.Select(row => new PdfParagraphRowSpan(row.Left, row.End, row.Baseline, row.Style.Size)).ToArray())
         };
         return new PdfParagraphInspection(true, string.Empty, candidate);
     }
+
+    /// <summary>Returns the box that holds a paragraph's text in place in the replacement font.</summary>
+    /// <param name="candidate">The source paragraph.</param>
+    /// <param name="pageWidth">The page width in points.</param>
+    /// <param name="pageHeight">The page height in points.</param>
+    /// <param name="text">The replacement text, or null for the source text.</param>
+    /// <param name="font">The replacement font, or null to measure the source geometry alone.</param>
+    /// <param name="fontSize">The replacement size, or null for the source size.</param>
+    /// <param name="leading">The distance between baselines, or null for the source's.</param>
+    public static PdfContentBounds DefaultBox(PdfParagraphCandidate candidate, double pageWidth, double pageHeight,
+        string? text = null, TrueTypeFont? font = null, double? fontSize = null, double? leading = null)
+    {
+        ArgumentNullException.ThrowIfNull(candidate);
+        double size = fontSize ?? candidate.FontSize;
+        double left = Math.Max(0, candidate.TextLeft), right = candidate.TextRight;
+        // The replacement paints under the source's clip, so more width than that would only vanish.
+        double limit = Math.Min(pageWidth, candidate.Clip?.Right ?? pageWidth);
+        int lines = Math.Max(1, candidate.RowTexts.Count);
+        if (font is not null)
+        {
+            // Measured at the source size, so a larger size wraps within the column instead of widening it.
+            for (int index = 0; index < candidate.RowTexts.Count; index++)
+                right = Math.Max(right, left + (index == 0 ? candidate.FirstLineIndent : 0)
+                    + PdfTextReflow.MeasureLine(candidate.RowTexts[index], font, candidate.FontSize));
+            right = Math.Min(right + 0.01, limit);
+            string wrapped = Normalized(text ?? candidate.Text);
+            int LinesWithin(double edge) => PdfTextReflow.Wrap(wrapped, font, size, edge - left, candidate.FirstLineIndent).Count;
+            lines = LinesWithin(right);
+            // A rejoined hyphenated word can push the source's own text one row further. A little
+            // more width costs less than a new row over whatever sits below.
+            if (wrapped == candidate.Text && size == candidate.FontSize)
+                for (int step = 1; step <= 8 && lines > candidate.RowTexts.Count; step++)
+                {
+                    double wider = Math.Min(right + step * size * 0.25, limit);
+                    if (LinesWithin(wider) > candidate.RowTexts.Count) continue;
+                    right = wider;
+                    lines = candidate.RowTexts.Count;
+                }
+        }
+        double top = Math.Min(pageHeight, candidate.FirstBaseline + size * LineAscent);
+        return new PdfContentBounds(left, Math.Max(0, top - size - (lines - 1) * (leading ?? candidate.Leading)),
+            Math.Min(right, limit), top);
+    }
+
+    private static string Normalized(string text) =>
+        ExpandLigatures(text.Replace("\r\n", "\n", StringComparison.Ordinal).Replace('\r', '\n'));
 
     /// <summary>Creates a source-bound layout and an exact, unapplied preview when it fits.</summary>
     public static PdfParagraphPlan Plan(PdfDocument document, int pageIndex, PdfContentBounds sourceRegion,
@@ -386,17 +603,13 @@ public static class PdfParagraphEditor
             throw new ArgumentOutOfRangeException(nameof(leading));
         if (!Enum.IsDefined(alignment)) throw new ArgumentOutOfRangeException(nameof(alignment));
         if (!font.EmbeddingAllowed) throw new NotSupportedException("The replacement font does not permit embedding.");
-        string normalized = text.Replace("\r\n", "\n", StringComparison.Ordinal).Replace('\r', '\n');
-        // The replacement paints under the source's clip, so a box outside it would vanish.
-        if (normalized.Length != 0 && !PdfContentRedaction.ClipHolds(
-            PdfContentRedaction.InspectParagraphPaint(document, pageIndex, source.SourceRegion).Clip, targetBounds))
-            throw new NotSupportedException("The paragraph box extends past the clipped area of the source text.");
+        string normalized = Normalized(text);
         foreach (Rune rune in normalized.EnumerateRunes())
         {
             if (rune.Value == '\n') continue;
             // This slice has no shaping engine. Combining marks, bidi text, and contextual scripts need one.
             bool ordinaryPunctuation = rune.Value is 0x2018 or 0x2019 or 0x201C or 0x201D
-                or 0x2022 or 0x2026 or 0x20AC or 0x2122;
+                or 0x2022 or 0x2026 or 0x20AC or 0x2122 or >= 0x2010 and <= 0x2015 or 0x2212;
             if ((rune.Value > 0x024F && !ordinaryPunctuation) || Rune.GetUnicodeCategory(rune) is UnicodeCategory.Control
                 or UnicodeCategory.NonSpacingMark or UnicodeCategory.SpacingCombiningMark or UnicodeCategory.EnclosingMark)
                 throw new NotSupportedException("This text needs shaping that paragraph editing does not yet support.");
@@ -406,32 +619,35 @@ public static class PdfParagraphEditor
         // Reflow and authoring must use the same space glyph. Missing spaces must not silently become .notdef.
         if (normalized.Contains(' ') && font.GetGlyphId(' ') == 0)
             throw new NotSupportedException("The replacement font has no space glyph.");
+        // A box too narrow for the indent has no first line to shorten.
+        double indent = alignment == PdfParagraphAlignment.Left && source.FirstLineIndent < targetBounds.Width
+            ? source.FirstLineIndent : 0;
         IReadOnlyList<PdfReflowLine> wrapped = normalized.Length == 0 ? []
-            : PdfTextReflow.Wrap(normalized, font, fontSize, targetBounds.Width);
-        double ascent = Math.Max(font.Ascender, font.Bounds.YMax) * fontSize / font.UnitsPerEm;
-        double descent = Math.Min(font.Descender, font.Bounds.YMin) * fontSize / font.UnitsPerEm;
+            : PdfTextReflow.Wrap(normalized, font, fontSize, targetBounds.Width, indent);
         var lines = wrapped.Select((line, index) => new PdfParagraphLine(line.Text,
             targetBounds.Left + (alignment == PdfParagraphAlignment.Center ? (targetBounds.Width - line.Width) / 2
-                : alignment == PdfParagraphAlignment.Right ? targetBounds.Width - line.Width : 0),
-            targetBounds.Top - ascent - index * leading, line.Width)).ToArray();
-        string overflow = lines.Any(line => line.Width > targetBounds.Width + 0.0001
-            || line.Baseline + descent < targetBounds.Bottom - 0.0001)
+                : alignment == PdfParagraphAlignment.Right ? targetBounds.Width - line.Width : index == 0 ? indent : 0),
+            targetBounds.Top - fontSize * LineAscent - index * leading, line.Width)).ToArray();
+        string overflow = lines.Any(line => line.X + line.Width > targetBounds.Right + 0.0001
+            || line.Baseline - fontSize * LineDescent < targetBounds.Bottom - 0.0001)
             ? "The text overflows the paragraph box. Resize the box or adjust the font size or line spacing." : string.Empty;
+        PdfContentBounds? ink = null;
         if (overflow.Length == 0 && lines.Any(line => line.Text.Length != 0))
         {
-            // Check actual glyph ink as well as advances, since italic overhangs can cross a box edge.
+            // The box lays out advances and baselines, and glyphs may overhang it. Only ink that
+            // leaves the page or the source's clip is lost, since the replacement paints under that clip.
             var content = new PdfContentStreamBuilder().BeginText().SetFont(font, fontSize);
             foreach (PdfParagraphLine line in lines)
                 if (line.Text.Length != 0)
                     content.SetTextMatrix(1, 0, 0, 1, line.X, line.Baseline).ShowUnicodeText(line.Text);
             content.EndText();
             PdfDocument layout = PdfDocument.Open(new PdfDocumentBuilder().AddPage(page.Width, page.Height, content).Build());
-            if (new PdfPageContentReader(layout).Read(0).Letters.Any(letter =>
-                    letter.BoundingBox.Left < targetBounds.Left - 0.0001
-                    || letter.BoundingBox.Right > targetBounds.Right + 0.0001
-                    || letter.BoundingBox.Bottom < targetBounds.Bottom - 0.0001
-                    || letter.BoundingBox.Top > targetBounds.Top + 0.0001))
-                overflow = "The glyphs extend outside the paragraph box. Resize the box or adjust the text.";
+            PdfContentBounds laid = PdfContentBounds.Union(new PdfPageContentReader(layout).Read(0).Letters.Select(letter => letter.BoundingBox));
+            ink = laid;
+            if (laid.Left < 0 || laid.Bottom < 0 || laid.Right > page.Width || laid.Top > page.Height)
+                overflow = "The glyphs extend outside the page. Move the box or adjust the text.";
+            else if (source.Clip is { } clip && !PdfContentRedaction.ClipHolds(clip, laid))
+                throw new NotSupportedException("The new text extends past the clipped area of the source text. Move the box or adjust the text.");
         }
         byte[]? preview = null;
         if (overflow.Length == 0)
@@ -440,7 +656,8 @@ public static class PdfParagraphEditor
             {
                 Substitute = font, UseSubstitute = true, FontSize = fontSize,
                 ParagraphLines = Array.AsReadOnly(lines),
-                ParagraphBox = lines.Any(line => line.Text.Length != 0) ? targetBounds : null
+                ParagraphBox = ink,
+                ParagraphRows = source.RowSpans
             };
             preview = PdfTextLineEditor.Replace(document, edit).Document;
         }
@@ -494,29 +711,26 @@ public static partial class PdfContentRedaction
         area.Left >= clip.Left - 0.01 && area.Bottom >= clip.Bottom - 0.01
         && area.Right <= clip.Right + 0.01 && area.Top <= clip.Top + 0.01;
 
-    internal static (PdfRgbColor Color, PdfContentBounds Clip) InspectParagraphPaint(PdfDocument document, int pageIndex,
-        PdfContentBounds region) => ParagraphPaint(document, Probe(document, pageIndex, region, null, default, paragraph: true));
-
-    private static (PdfRgbColor Color, PdfContentBounds Clip) ParagraphPaint(PdfDocument document, LineProbe probe)
+    private static (PdfRgbColor Color, PdfContentBounds Clip, bool MixedFills) ParagraphPaint(PdfDocument document, LineProbe probe)
     {
         if (probe.Inspection.CanEdit && probe.Insertion.ClipUnsafe)
             throw new NotSupportedException("The paragraph is clipped by a shape that is not a single rectangle.");
         if (!probe.Inspection.CanEdit || probe.Insertion.ParagraphUnsafe)
-            throw new NotSupportedException("The paragraph has unsupported transformations, rendering, or mixed styles.");
+            throw new NotSupportedException("The paragraph has unsupported transformations or rendering.");
         TextState state = probe.Insertion.State!;
-        if (state.FontObject is null || Resolve(document, state.FontObject) is not PdfDictionary sourceFont
-            || IsNamed(sourceFont, SubtypeName, "Type3"))
+        if (probe.Insertion.HasType3 || state.FontObject is null || Resolve(document, state.FontObject) is not PdfDictionary)
             throw new NotSupportedException("The paragraph uses a font whose painted appearance cannot be preserved.");
-        PdfContentInstruction[] fill = state.Fill;
-        if (fill.Length == 0) return (new PdfRgbColor(0, 0, 0), state.Clip);
+        // The replacement replays the source's own fill operators, so this value only describes it.
+        PdfContentInstruction[] fill = probe.Insertion.DominantFill!;
+        PdfRgbColor color = new(0, 0, 0);
         if (fill.Length == 1 && fill[0].Operator == "rg" && fill[0].Operands.Count == 3)
-            return (new PdfRgbColor(Number(document, fill[0].Operands[0]), Number(document, fill[0].Operands[1]),
-                Number(document, fill[0].Operands[2])), state.Clip);
-        if (fill.Length == 1 && fill[0].Operator == "g" && fill[0].Operands.Count == 1)
+            color = new PdfRgbColor(Number(document, fill[0].Operands[0]), Number(document, fill[0].Operands[1]),
+                Number(document, fill[0].Operands[2]));
+        else if (fill.Length == 1 && fill[0].Operator == "g" && fill[0].Operands.Count == 1)
         {
             double gray = Number(document, fill[0].Operands[0]);
-            return (new PdfRgbColor(gray, gray, gray), state.Clip);
+            color = new PdfRgbColor(gray, gray, gray);
         }
-        throw new NotSupportedException("The paragraph uses a color space that is not supported for paragraph editing.");
+        return (color, state.Clip, probe.Insertion.MixedFills);
     }
 }

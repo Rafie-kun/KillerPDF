@@ -468,6 +468,14 @@ public static class PdfFontResourceReader
                         && CharacterText(code) is null
                         && PdfStandardGlyphBounds.Width(standardMetricsName, "space") is not null)
                     ? new PdfGlyphOutline([]) : null;
+            // Type 3 widths are in glyph space, which its own /FontMatrix defines.
+            if (subtype == "Type3" && Get(font, "FontMatrix") is PdfArray { Count: 6 } fontMatrix
+                && Resolve(fontMatrix[0]) is PdfInteger or PdfReal)
+            {
+                double scale = Number(Resolve(fontMatrix[0]), 0.001) * 1000;
+                foreach (uint code in widths.Keys.ToArray()) widths[code] *= scale;
+                defaultWidth *= scale;
+            }
             return new PdfExtractionFont(unicode, widths,
                 defaultWidth)
             {
@@ -476,6 +484,7 @@ public static class PdfFontResourceReader
                 Ascent = ascent,
                 Descent = descent,
                 IsVertical = vertical,
+                IsType3 = subtype == "Type3",
                 CidSelector = cidSelector,
                 UnicodeFallback = Fallback,
                 CharacterDecoder = predefined is not null

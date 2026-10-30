@@ -26,6 +26,40 @@ public sealed class PdfTextReflowTests
     }
 
     [Fact]
+    public void AFirstLineIndentShortensOnlyTheFirstLine()
+    {
+        TrueTypeFont font = TrueTypeFont.Load(TrueTypeFontTests.BuildTestFont(format12: false));
+        double width = Assert.Single(PdfTextReflow.Wrap("A", font, 10, 100)).Width;
+        double space = Assert.Single(PdfTextReflow.Wrap("A A", font, 10, 100)).Width - width * 2;
+
+        IReadOnlyList<PdfReflowLine> lines = PdfTextReflow.Wrap("A A A A A", font, 10,
+            width * 3 + space * 2, width + space);
+
+        Assert.Equal(["A A", "A A A"], lines.Select(line => line.Text));
+    }
+
+    [Fact]
+    public void AFirstLineIndentOnlyAppliesOnceAndBreaksALongFirstWordFromTheShorterWidth()
+    {
+        TrueTypeFont font = TrueTypeFont.Load(TrueTypeFontTests.BuildTestFont(format12: false));
+        double width = Assert.Single(PdfTextReflow.Wrap("A", font, 10, 100)).Width;
+
+        IReadOnlyList<PdfReflowLine> lines = PdfTextReflow.Wrap("AAAAA\nAAA", font, 10, width * 3.1, width);
+
+        Assert.Equal(["AA", "AAA", "AAA"], lines.Select(line => line.Text));
+    }
+
+    [Fact]
+    public void AFirstLineIndentMustLeaveRoomOnTheLine()
+    {
+        TrueTypeFont font = TrueTypeFont.Load(TrueTypeFontTests.BuildTestFont(format12: false));
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => PdfTextReflow.Wrap("A", font, 10, 10, 10));
+        Assert.Throws<ArgumentOutOfRangeException>(() => PdfTextReflow.Wrap("A", font, 10, 10, -1));
+        Assert.Throws<ArgumentOutOfRangeException>(() => PdfTextReflow.Wrap("A", font, 10, 10, double.NaN));
+    }
+
+    [Fact]
     public void CreateUnicodeContentEmbedsFontAndWritesWrappedLines()
     {
         TrueTypeFont font = TrueTypeFont.Load(TrueTypeFontTests.BuildTestFont(format12: false));

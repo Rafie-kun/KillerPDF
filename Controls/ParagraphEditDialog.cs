@@ -39,6 +39,8 @@ internal sealed class ParagraphEditDialog : Window
     private PdfParagraphPlan? _plan;
     private CancellationTokenSource? _operation;
     private bool _setting;
+    // The box follows the text and the font until someone resizes it.
+    private bool _boxEdited;
     private bool _closed;
 
     internal PdfParagraphPlan? Result { get; private set; }
@@ -115,7 +117,7 @@ internal sealed class ParagraphEditDialog : Window
             double availableHeight = Math.Max(0, _page.Height - values[1]);
             values[2] = Math.Clamp(values[2] + e.HorizontalChange / _pixelsPerPoint, Math.Min(1, availableWidth), availableWidth);
             values[3] = Math.Clamp(values[3] + e.VerticalChange / _pixelsPerPoint, Math.Min(1, availableHeight), availableHeight);
-            SetNumbers(values); Invalidate();
+            _boxEdited = true; SetNumbers(values); Invalidate();
         };
         _original = UiKit.CheckBox(L("Str_Paragraph_Original"));
         _original.IsChecked = true; _original.Margin = new Thickness(0, 0, 0, 6);
@@ -137,7 +139,8 @@ internal sealed class ParagraphEditDialog : Window
             field.Children.Add(UiKit.GroupLabel(L(labels[i])));
             TextBox input = UiKit.Field(); _numbers[i] = input;
             Id(input, "Paragraph" + names[i], labels[i]);
-            input.TextChanged += (_, _) => { if (!_setting) Invalidate(); };
+            bool boxField = i < 4;
+            input.TextChanged += (_, _) => { if (!_setting) { _boxEdited |= boxField; Invalidate(); } };
             field.Children.Add(input); fields.Children.Add(field);
         }
         var alignmentField = new StackPanel { Width = 120, Margin = new Thickness(0, 2, 0, 4) };
@@ -160,8 +163,7 @@ internal sealed class ParagraphEditDialog : Window
         _text.TextChanged += (_, _) => { if (!_setting) Invalidate(); };
         _alignment.SelectionChanged += (_, _) => { if (!_setting) Invalidate(); };
         _candidateBox.SelectedIndex = _candidates.Count > 0 ? 0 : -1;
-        _status.Text = _candidates.Count == 0 ? string.Join("\n", inspection.Refusals.Select(item =>
-            RefusalText(item.RefusalCode)).Distinct()) : "";
+        _status.Text = _candidates.Count == 0 ? RefusalMessage(inspection) : "";
         if (pagePoint is Point pointOnPage) SelectAt(pointOnPage);
         _preview.IsEnabled = _candidates.Count > 0;
         _text.IsEnabled = _candidates.Count > 0;
@@ -184,7 +186,7 @@ internal sealed class ParagraphEditDialog : Window
         // A click on a paragraph the page refused would otherwise leave another paragraph selected with no word about it.
         PdfParagraphInspection? refused = _refusals.FirstOrDefault(item => item.Region is { } area
             && point.X >= area.Left && point.X <= area.Right && point.Y >= area.Bottom && point.Y <= area.Top);
-        if (refused is not null && _candidates.Count > 0)
+        if (refused is not null)
             _status.Text = string.Format(L("Str_Paragraph_Refused"), refused.Reason);
     }
 
@@ -193,25 +195,27 @@ internal sealed class ParagraphEditDialog : Window
         int index = _candidateBox.SelectedIndex;
         if (index < 0 || index >= _candidates.Count) return;
         PdfParagraphCandidate candidate = _candidates[index];
-        PdfContentBounds bounds = candidate.SourceRegion;
         _setting = true; _text.Text = candidate.Text; _alignment.SelectedIndex = 0; _setting = false;
-        double top = Math.Max(0, _page.Height - bounds.Top - candidate.FontSize * .2);
-        double height = Math.Min(_page.Height - top, Math.Max(bounds.Top - bounds.Bottom + candidate.FontSize * .4,
-            candidate.FontSize * 1.5 + (candidate.Text.Split('\n').Length - 1) * candidate.Leading));
-        // The replacement paints under the source's clip, so the padding stops where a tight clip does.
-        PdfContentBounds fitted = candidate.FitToClip(new PdfContentBounds(bounds.Left, _page.Height - top - height,
-            bounds.Right, _page.Height - top));
-        if (fitted.Right <= fitted.Left || fitted.Top <= fitted.Bottom) fitted = bounds;
-        SetNumbers([fitted.Left, _page.Height - fitted.Top, fitted.Right - fitted.Left, fitted.Top - fitted.Bottom,
-            candidate.FontSize, candidate.Leading]);
+        _boxEdited = false;
+        ShowBox(PdfParagraphEditor.DefaultBox(candidate, _page.Width, _page.Height), candidate.FontSize, candidate.Leading);
         Invalidate();
     }
+
+    private void ShowBox(PdfContentBounds box, double fontSize, double leading) =>
+        SetNumbers([box.Left, _page.Height - box.Top, box.Right - box.Left, box.Top - box.Bottom, fontSize, leading]);
 
     private void SetNumbers(double[] values)
     {
         _setting = true;
         for (int i = 0; i < values.Length; i++) _numbers[i].Text = values[i].ToString("0.###", CultureInfo.CurrentCulture);
         _setting = false;
+    }
+
+    // A field shows three decimals, so a value left alone means the source's exact number.
+    private double Unrounded(int field, double source)
+    {
+        string shown = source.ToString("0.###", CultureInfo.CurrentCulture);
+        return _numbers[field].Text == shown ? source : double.Parse(_numbers[field].Text, NumberStyles.Float, CultureInfo.CurrentCulture);
     }
 
     private bool TryNumbers(out double[] values)
@@ -228,6 +232,11 @@ internal sealed class ParagraphEditDialog : Window
         _operation?.Cancel(); _plan = null; _apply.IsEnabled = false; _editedImage = null;
         _image.Source = _originalImage; _original.IsChecked = true; _fontLabel.Text = "";
         _status.Text = "";
+        PlaceBox();
+    }
+
+    private void PlaceBox()
+    {
         bool valid = TryNumbers(out double[] values);
         _box.Visibility = _resize.Visibility = valid ? Visibility.Visible : Visibility.Collapsed;
         if (!valid) return;
@@ -242,6 +251,7 @@ internal sealed class ParagraphEditDialog : Window
         if (_operation is not null || _candidateBox.SelectedIndex < 0) return;
         if (!TryNumbers(out double[] values)) { _status.Text = L("Str_Paragraph_Overflow"); return; }
         PdfParagraphCandidate candidate = _candidates[_candidateBox.SelectedIndex];
+        values[4] = Unrounded(4, candidate.FontSize); values[5] = Unrounded(5, candidate.Leading);
         var bounds = new PdfContentBounds(values[0], _page.Height - values[1] - values[3],
             values[0] + values[2], _page.Height - values[1]);
         string text = _text.Text;
@@ -254,6 +264,12 @@ internal sealed class ParagraphEditDialog : Window
             var style = PdfFontStyle.FromPdfName(candidate.FontName);
             var font = PdfEngineIntegration.LoadTextFont(style.Family, text, style.Bold, style.Italic);
             if (font is null) { _status.Text = L("Str_Paragraph_Unsupported"); return; }
+            if (!_boxEdited)
+            {
+                // Rounded fields would move the text a little, so the box itself goes to the plan.
+                bounds = PdfParagraphEditor.DefaultBox(candidate, _page.Width, _page.Height, text, font.Value.Font, values[4], values[5]);
+                ShowBox(bounds, values[4], values[5]); PlaceBox();
+            }
             var result = await Task.Run(() =>
             {
                 token.ThrowIfCancellationRequested();
@@ -309,5 +325,9 @@ internal sealed class ParagraphEditDialog : Window
         PdfParagraphRefusalCode.RotatedPage => "Str_Paragraph_Rotated",
         _ => "Str_Paragraph_Unsupported"
     });
+    // The engine has already said why, so a page with no candidates reports that and not a general note.
+    internal static string RefusalMessage(PdfParagraphCandidateInspection inspection) => string.Join("\n", inspection.Refusals.Select(item =>
+        item.RefusalCode == PdfParagraphRefusalCode.RotatedPage || item.Reason.Length == 0 ? RefusalText(item.RefusalCode)
+            : string.Format(L("Str_Paragraph_Refused"), item.Reason)).Distinct());
     private static string L(string key) => Application.Current.TryFindResource(key) as string ?? key;
 }

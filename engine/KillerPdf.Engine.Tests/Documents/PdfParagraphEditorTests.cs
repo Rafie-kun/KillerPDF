@@ -196,8 +196,6 @@ public sealed class PdfParagraphEditorTests
     [Theory]
     [InlineData("BT /F1 10 Tf 3 Tr 30 250 Td (OLD) Tj ET", "", "")]
     [InlineData("BT /F1 10 Tf 1 0.1 0 1 30 250 Tm (OLD) Tj ET", "", "")]
-    [InlineData("BT /F1 10 Tf 30 250 Td (OLD) Tj 1 0 0 rg 0 -12 Td (OLD) Tj ET", "", "")]
-    [InlineData("BT /F1 10 Tf 30 250 Td (OLD) Tj ET 1 0 0 rg BT /F1 10 Tf 30 238 Td (OLD) Tj ET", "", "")]
     [InlineData("BT /F1 10 Tf 30 250 Td (OLD) Tj ET", "/Rotate 90", "")]
     [InlineData("BT /F1 10 Tf 30 250 Td (OLD) Tj ET", "", "/Perms << >>")]
     [InlineData("BT /F1 10 Tf 30 250 Td (OLD) Tj ET", "", "/AcroForm << /Fields [<< /FT /Sig /T (Signed) /V << /Type /Sig /ByteRange [0 1 2 3] /Contents <010203> >> >>] >>")]
@@ -292,7 +290,7 @@ public sealed class PdfParagraphEditorTests
             resources: resources, extraObject: LogoForm);
         PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
         NotSupportedException refusal = Assert.Throws<NotSupportedException>(() => PdfParagraphEditor.Plan(source, 0,
-            candidate.SourceRegion, new PdfContentBounds(30, 200, 200, 262), "AAAA AAAA", Font(), 10, 12,
+            candidate.SourceRegion, new PdfContentBounds(30, 200, 200, 262), "AAAA AAAA\nAAAA\nAAAA", Font(), 10, 12,
             PdfParagraphAlignment.Left));
         Assert.Contains("painted after", refusal.Message, StringComparison.Ordinal);
     }
@@ -337,21 +335,20 @@ public sealed class PdfParagraphEditorTests
         Assert.NotNull(candidate.Clip);
     }
 
-    // The dialog's default box adds room above and below the ink, which a tight clip does not hold.
+    // Only ink that leaves a tight clip is lost, so a default box wider than the clip is fine.
     [Fact]
-    public void ACandidateKnowsItsClipSoADefaultBoxCanStayInsideIt()
+    public void ACandidateKnowsItsClipAndABoxMayCrossItWhileTheGlyphsStayInside()
     {
         PdfDocument source = Raw("q 20 246 200 15 re W n BT /F1 10 Tf 30 250 Td (OLD text) Tj ET Q");
         PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
-        var padded = new PdfContentBounds(candidate.SourceRegion.Left, candidate.SourceRegion.Bottom - 2,
-            candidate.SourceRegion.Right, candidate.SourceRegion.Top + 2);
-        Assert.Throws<NotSupportedException>(() => PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion, padded,
-            "AAAA", Font(), 10, 12, PdfParagraphAlignment.Left));
+        var padded = new PdfContentBounds(candidate.SourceRegion.Left, 240, 280, 262);
         PdfContentBounds fitted = candidate.FitToClip(padded);
         Assert.True(fitted.Bottom >= 246 - 0.01 && fitted.Top <= 261 + 0.01);
-        PdfParagraphPlan plan = PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion, fitted, "AAAA", Font(), 10, 12,
+        PdfParagraphPlan plan = PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion, padded, "AAAA", Font(), 10, 12,
             PdfParagraphAlignment.Left);
-        Assert.False(plan.HasOverflow);
+        Assert.False(plan.HasOverflow, plan.OverflowReason);
+        Assert.Throws<NotSupportedException>(() => PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion,
+            padded with { Bottom = 200 }, "AAAA", Font(), 30, 32, PdfParagraphAlignment.Left));
     }
 
     // The dialog needs to tell a refused paragraph from empty page area when someone clicks on it.
@@ -493,19 +490,530 @@ public sealed class PdfParagraphEditorTests
         Assert.Single(after.Instructions, instruction => instruction.Operator == "rg");
     }
 
+    // pdfTeX places words with gaps instead of space glyphs, so the gaps have to come back as spaces.
+    [Theory]
+    [InlineData("[(Word) -300 (gaps) -300 (here)] TJ", "Word gaps here")]
+    [InlineData("[(Ke) -100 (rned) 60 (word)] TJ", "Kernedword")]
+    [InlineData("(Alpha) Tj 30 0 Td /F2 10 Tf (beta) Tj", "Alpha beta")]
+    [InlineData("(Two  spaces) Tj", "Two spaces")]
+    public void TheCandidateTextKeepsItsWordSpaces(string shown, string expected)
+    {
+        PdfDocument source = Raw($"BT /F1 10 Tf 30 250 Td {shown} ET");
+        Assert.Equal(expected, Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0)).Text);
+    }
+
+    // A box's left edge is where glyph origins start, and some glyphs reach past their origin.
+    [Theory]
+    [InlineData("jump")]
+    [InlineData("Every line here fits and the next one starts with an overhanging glyph jump")]
+    public void AGlyphOverhangingTheBoxEdgeStillFits(string text)
+    {
+        TrueTypeFont italic = PdfStandardFontSubstitutes.OcrTrainingFonts()[6];
+        PdfDocument source = Document();
+        PdfParagraphCandidate candidate = PdfParagraphEditor.FindParagraphs(source, 0).First();
+        PdfParagraphPlan plan = PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion,
+            new PdfContentBounds(30, 100, 110, 260), text, italic, 10, 12, PdfParagraphAlignment.Left);
+        Assert.False(plan.HasOverflow, plan.OverflowReason);
+        Assert.All(plan.Lines, line => Assert.Equal(30, line.X, 6));
+    }
+
+    [Fact]
+    public void GlyphsThatWouldLeaveThePageDoNotFit()
+    {
+        TrueTypeFont italic = PdfStandardFontSubstitutes.OcrTrainingFonts()[6];
+        PdfDocument source = Document();
+        PdfParagraphCandidate candidate = PdfParagraphEditor.FindParagraphs(source, 0).First();
+        PdfParagraphPlan plan = PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion,
+            new PdfContentBounds(0, 100, 110, 260), "jump", italic, 10, 12, PdfParagraphAlignment.Left);
+        Assert.True(plan.HasOverflow);
+    }
+
+    // The default box comes from glyph origins, so opening a paragraph and pressing Preview must not move it.
+    [Theory]
+    [InlineData(0)]
+    [InlineData(4)]
+    [InlineData(6)]
+    [InlineData(8)]
+    public void UnchangedTextPreviewsInPlaceFromTheDefaultBox(int font)
+    {
+        TrueTypeFont replacement = PdfStandardFontSubstitutes.OcrTrainingFonts()[font];
+        PdfDocument source = Raw("BT /F1 10 Tf 30 250 Td (A short plain line of text here) Tj ET " +
+            "BT /F1 10 Tf 30 200 Td (The first line of a short paragraph) Tj 0 -12 Td (continues here on the second line) Tj " +
+            "0 -12 Td (and jumps on this third line) Tj ET");
+        IReadOnlyList<PdfParagraphCandidate> candidates = PdfParagraphEditor.FindParagraphs(source, 0);
+        Assert.Equal(2, candidates.Count);
+        foreach (PdfParagraphCandidate candidate in candidates)
+        {
+            PdfParagraphPlan plan = Unchanged(source, candidate, replacement);
+            Assert.False(plan.HasOverflow, plan.OverflowReason);
+            Assert.Equal(30, plan.Lines[0].X, 6);
+            Assert.Equal(candidate.FirstBaseline, plan.Lines[0].Baseline, 6);
+            Assert.True(plan.Lines.Count <= candidate.RowTexts.Count);
+            Assert.All(plan.Lines.Select((line, index) => (line, index)), item =>
+                Assert.Equal(candidate.FirstBaseline - item.index * candidate.Leading, item.line.Baseline, 6));
+        }
+    }
+
+    [Fact]
+    public void TheDefaultBoxIsBuiltFromGlyphOriginsAndTheSourceRows()
+    {
+        PdfDocument source = Raw("BT /F1 10 Tf 30 250 Td (Old line) Tj 0 -12 Td (Old next line) Tj ET");
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+        Assert.Equal(30, candidate.TextLeft, 6);
+        Assert.Equal(250, candidate.FirstBaseline, 6);
+        Assert.Equal(["Old line", "Old next line"], candidate.RowTexts);
+        PdfContentBounds box = PdfParagraphEditor.DefaultBox(candidate, 300, 300);
+        Assert.Equal(30, box.Left, 6);
+        Assert.Equal(258, box.Top, 6);
+        Assert.Equal(candidate.TextRight, box.Right, 6);
+        Assert.Equal(258 - 10 - 12, box.Bottom, 6);
+    }
+
+    // The box follows the text until someone resizes it, so a longer text or a larger size still fits.
+    [Fact]
+    public void TheDefaultBoxGrowsWithTheTextAndTheChosenSize()
+    {
+        PdfDocument source = Raw("BT /F1 10 Tf 30 250 Td (A short plain line of text here) Tj ET");
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+        string longer = candidate.Text + " and then another whole sentence is added by hand.";
+        PdfContentBounds box = PdfParagraphEditor.DefaultBox(candidate, 300, 300, longer, Font());
+        PdfParagraphPlan plan = PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion, box, longer, Font(),
+            candidate.FontSize, candidate.Leading, PdfParagraphAlignment.Left);
+        Assert.False(plan.HasOverflow, plan.OverflowReason);
+        Assert.True(plan.Lines.Count > 1);
+        PdfContentBounds larger = PdfParagraphEditor.DefaultBox(candidate, 300, 300, candidate.Text, Font(), 14, 20);
+        PdfParagraphPlan big = PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion, larger, candidate.Text, Font(),
+            14, 20, PdfParagraphAlignment.Left);
+        Assert.False(big.HasOverflow, big.OverflowReason);
+        Assert.Equal(250, big.Lines[0].Baseline, 6);
+    }
+
+    [Fact]
+    public void TheDefaultBoxStopsAtTheSourceClipAndWrapsInstead()
+    {
+        TrueTypeFont wide = PdfStandardFontSubstitutes.OcrTrainingFonts()[8];
+        PdfDocument source = Raw("q 0 0 170 300 re W n BT /F1 10 Tf 30 250 Td (Old line of text near the edge) Tj ET Q");
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+        PdfParagraphPlan plan = Unchanged(source, candidate, wide);
+        Assert.False(plan.HasOverflow, plan.OverflowReason);
+        Assert.True(plan.TargetBounds.Right <= 170);
+        Assert.Equal(2, plan.Lines.Count);
+    }
+
+    [Fact]
+    public void TheCoverCheckIsAboutTheNewGlyphsNotTheEmptyPartOfTheBox()
+    {
+        PdfDocument source = Raw("BT /F1 10 Tf 30 250 Td (Old line) Tj ET q 1 1 0 rg 20 100 200 13 re f Q");
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+        PdfParagraphPlan plan = PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion,
+            new PdfContentBounds(30, 90, 200, 258), "AAAA", Font(), 10, 12, PdfParagraphAlignment.Left);
+        Assert.False(plan.HasOverflow, plan.OverflowReason);
+    }
+
+    // None of these need shaping, and extraction returns them, so a paragraph's own text has to pass.
+    [Fact]
+    public void DashesTheMinusSignAndLatinLigaturesAreOrdinaryText()
+    {
+        string dashes = $"a{(char)0x2013}b c{(char)0x2014}d {(char)0x2212}e {(char)0x2010}f";
+        PdfDocument source = Document();
+        PdfParagraphCandidate candidate = PdfParagraphEditor.FindParagraphs(source, 0).First();
+        PdfParagraphPlan plan = PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion,
+            new PdfContentBounds(20, 100, 280, 262), dashes + " ﬁne ﬂy", Font(), 10, 12,
+            PdfParagraphAlignment.Left);
+        Assert.False(plan.HasOverflow, plan.OverflowReason);
+        Assert.Equal(dashes + " fine fly", plan.Lines[0].Text);
+    }
+
+    [Fact]
+    public void AParagraphsOwnDashesPassPreview()
+    {
+        PdfDocument source = Raw("BT /F1 10 Tf 30 250 Td (Old line \\226 with dash \\227 and more) Tj ET");
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+        Assert.False(Unchanged(source, candidate, Font()).HasOverflow);
+    }
+
+    [Fact]
+    public void ALigatureComesIntoTheDialogAsItsLetters()
+    {
+        PdfDocument source = Raw("BT /F3 10 Tf 30 250 Td (aline a) Tj ET", fonts:
+            "/F3 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding << /Type /Encoding /Differences [97 /fi] >> >>");
+        Assert.Equal("filine fi", Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0)).Text);
+    }
+
+    // microtype stretches each line by up to 2 percent, which is typesetting and not a style.
+    [Fact]
+    public void FontExpansionThatChangesFromLineToLineIsEditable()
+    {
+        PdfDocument source = Raw("BT /F1 10 Tf 1.02 0 0 1 30 250 Tm (Old line one) Tj 0.98 0 0 1 30 238 Tm (Old line two) Tj " +
+            "1.012 0 0 1 30 226 Tm (Old three) Tj ET");
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+        Assert.Equal("Old line one Old line two Old three", candidate.Text);
+        PdfParagraphPlan plan = Unchanged(source, candidate, Font());
+        Assert.False(plan.HasOverflow, plan.OverflowReason);
+        Assert.Contains(candidate.Text, new PdfPageContentReader(PdfDocument.Open(plan.GetPreviewDocument())).Read(0).Text,
+            StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData(0.98)]
+    [InlineData(1.004)]
+    [InlineData(1.02)]
+    public void TheReplacementIsWrittenAtTheWidthThePlanMeasured(double scale)
+    {
+        PdfDocument source = Raw(FormattableString.Invariant($"BT /F1 10 Tf {scale} 0 0 1 30 250 Tm (Old line of text) Tj ET"));
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+        PdfParagraphPlan plan = PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion,
+            new PdfContentBounds(30, 200, 280, 262), "A much longer line of replacement text here", Font(), 10, 12,
+            PdfParagraphAlignment.Right);
+        PdfExtractedLetter last = new PdfPageContentReader(PdfDocument.Open(plan.GetPreviewDocument())).Read(0).Letters[^1];
+        Assert.Equal(280, last.EndBaseLine.X, 2);
+    }
+
+    // The replacement inherits the color of the graphics state, so any color space works.
+    [Theory]
+    [InlineData("0 0 0 1 k", "k")]
+    [InlineData("/DeviceRGB cs 0 0 0 sc", "sc")]
+    [InlineData("/DeviceGray cs 0.2 scn", "scn")]
+    public void AParagraphInAnyColorSpaceIsEditable(string color, string op)
+    {
+        PdfDocument source = Raw($"{color} BT /F1 10 Tf 30 250 Td (Old line) Tj ET");
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+        Assert.False(candidate.MixedStyles);
+        PdfParagraphPlan plan = Unchanged(source, candidate, Font());
+        PdfPageContent page = new PdfPageContentReader(PdfDocument.Open(plan.GetPreviewDocument())).Read(0);
+        Assert.Contains("Old line", page.Text, StringComparison.Ordinal);
+        Assert.Contains(page.Instructions, instruction => instruction.Operator == op);
+    }
+
+    // The replacement paints at the last source glyph, so a closing link must not color all of it,
+    // and whatever is drawn after it must keep the color it had.
+    [Theory]
+    [InlineData("0 g", "0 0 1 rg")]
+    [InlineData("0 0 0 1 k", "1 0 0 0 k")]
+    [InlineData("/DeviceGray cs 0 sc", "/DeviceRGB cs 0 0 1 sc")]
+    public void AWordInAnotherColorTakesTheDominantColor(string body, string link)
+    {
+        PdfDocument source = Raw($"{body} BT /F1 10 Tf 30 250 Td (Old body text with its ) Tj {link} (link) Tj ET " +
+            "BT /F1 10 Tf 30 100 Td (HHHHHHHH) Tj ET");
+        PdfParagraphCandidate candidate = PdfParagraphEditor.FindParagraphs(source, 0).First();
+        Assert.Equal("Old body text with its link", candidate.Text);
+        Assert.True(candidate.MixedStyles);
+        Assert.Equal(new PdfRgbColor(0, 0, 0), candidate.Color);
+        PdfParagraphPlan plan = PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion,
+            new PdfContentBounds(30, 200, 280, 258), "HHHHHHHHHHHH", Font(), 10, 12, PdfParagraphAlignment.Left);
+        var page = new PdfPageRenderer(PdfDocument.Open(PdfParagraphEditor.Apply(source, plan))).Render(0, new PdfRenderOptions(300, 300));
+        Assert.True(Colorfulness(page, 30, 240, 100, 260) < 40, "The replacement took the link's color.");
+        Assert.True(Colorfulness(page, 30, 95, 100, 112) > 120, "Text drawn after the paragraph lost its color.");
+    }
+
+    [Theory]
+    [InlineData("BT /F1 10 Tf 30 250 Td (OLD) Tj 1 0 0 rg 0 -12 Td (OLD) Tj ET")]
+    [InlineData("BT /F1 10 Tf 30 250 Td (OLD) Tj ET 1 0 0 rg BT /F1 10 Tf 30 238 Td (OLD) Tj ET")]
+    public void ALineInAnotherColorStaysInItsParagraph(string content) =>
+        Assert.True(Assert.Single(PdfParagraphEditor.FindParagraphs(Raw(content), 0)).MixedStyles);
+
+    [Fact]
+    public void TheSameColorWrittenAgainIsNotAMixedStyle()
+    {
+        PdfDocument source = Raw("BT /F1 10 Tf 30 250 Td (Old line) Tj 0 g ( more) Tj ET");
+        Assert.False(Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0)).MixedStyles);
+    }
+
+    [Fact]
+    public void AFirstLineIndentStaysInItsParagraphAndIsKept()
+    {
+        PdfDocument source = Raw("BT /F1 10 Tf 42 250 Td (Old first line indented) Tj -12 -12 Td (Old body line two) Tj " +
+            "0 -12 Td (Old body line three) Tj ET");
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+        Assert.Equal("Old first line indented Old body line two Old body line three", candidate.Text);
+        Assert.Equal(30, candidate.TextLeft, 6);
+        Assert.Equal(12, candidate.FirstLineIndent, 6);
+        PdfParagraphPlan plan = Unchanged(source, candidate, Font());
+        Assert.False(plan.HasOverflow, plan.OverflowReason);
+        Assert.Equal(42, plan.Lines[0].X, 6);
+        Assert.All(plan.Lines.Skip(1), line => Assert.Equal(30, line.X, 6));
+        PdfPageContent page = new PdfPageContentReader(PdfDocument.Open(plan.GetPreviewDocument())).Read(0);
+        Assert.Equal(42, page.Letters[0].StartBaseLine.X, 2);
+        Assert.Equal(250, page.Letters[0].StartBaseLine.Y, 2);
+    }
+
+    [Fact]
+    public void AFirstLineIndentAppliesOnlyToLeftAlignedText()
+    {
+        PdfDocument source = Raw("BT /F1 10 Tf 42 250 Td (Old first line) Tj -12 -12 Td (Old body line) Tj ET");
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+        var target = new PdfContentBounds(30, 200, 200, 258);
+        PdfParagraphPlan plan = PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion, target, "AAAA", Font(), 10, 12,
+            PdfParagraphAlignment.Right);
+        Assert.Equal(target.Right, plan.Lines[0].X + plan.Lines[0].Width, 6);
+    }
+
+    [Fact]
+    public void ABoxNarrowerThanTheIndentDropsTheIndent()
+    {
+        PdfDocument source = Raw("BT /F1 10 Tf 42 250 Td (Old first line) Tj -12 -12 Td (Old body line) Tj ET");
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+        PdfParagraphPlan plan = PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion,
+            new PdfContentBounds(30, 100, 40, 258), "AA", Font(), 10, 12, PdfParagraphAlignment.Left);
+        Assert.Equal(30, plan.Lines[0].X, 6);
+    }
+
+    [Fact]
+    public void TwoIndentedParagraphsStaySeparate()
+    {
+        PdfDocument source = Raw("BT /F1 10 Tf 42 250 Td (First para opening) Tj -12 -12 Td (First para ends) Tj " +
+            "12 -12 Td (Second para opening) Tj -12 -12 Td (Second para ends) Tj ET");
+        Assert.Equal(["First para opening First para ends", "Second para opening Second para ends"],
+            PdfParagraphEditor.FindParagraphs(source, 0).Select(item => item.Text));
+    }
+
+    [Fact]
+    public void AWholeLineInAnotherFontStaysInItsParagraph()
+    {
+        PdfDocument source = Raw("BT /F1 10 Tf 30 250 Td (Old line one is plain) Tj 0 -12 Td /F2 10 Tf (This whole line is bold) Tj " +
+            "0 -12 Td /F1 10 Tf (Old line three plain) Tj ET");
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+        Assert.Equal("Old line one is plain This whole line is bold Old line three plain", candidate.Text);
+        Assert.True(candidate.MixedStyles);
+    }
+
+    [Fact]
+    public void ABoldHeadingAboveItsBodyStaysItsOwnParagraph()
+    {
+        PdfDocument source = Raw("BT /F2 10 Tf 30 250 Td (Bold heading line) Tj /F1 10 Tf 0 -12 Td (Body line one) Tj 0 -12 Td (Body line two) Tj ET");
+        Assert.Equal(["Bold heading line", "Body line one Body line two"],
+            PdfParagraphEditor.FindParagraphs(source, 0).Select(item => item.Text));
+    }
+
+    [Theory]
+    [InlineData("BT /F1 10 Tf 30 250 Td (Name) Tj 28 0 Td (Value) Tj -28 -12 Td (Alpha) Tj 28 0 Td (10) Tj -28 -12 Td (Beta) Tj 28 0 Td (20) Tj ET")]
+    [InlineData("BT /F1 10 Tf 30 250 Td (Name) Tj 0 -12 Td (Alpha) Tj 0 -12 Td (Beta) Tj 28 24 Td (Value) Tj 0 -12 Td (10) Tj 0 -12 Td (20) Tj ET")]
+    [InlineData("BT /F1 10 Tf 30 250 Td (Cat) Tj 28 0 Td (one) Tj -28 -12 Td (Dog) Tj 28 0 Td (two) Tj ET")]
+    public void ASmallTableIsNotOfferedAsOneParagraph(string content)
+    {
+        PdfDocument source = Raw(content);
+        Assert.DoesNotContain(PdfParagraphEditor.FindParagraphs(source, 0), item => item.Text.Contains("10", StringComparison.Ordinal)
+            || item.Text.Contains("two", StringComparison.Ordinal));
+        Assert.Contains(PdfParagraphEditor.InspectCandidates(source, 0).Refusals, item =>
+            item.Reason.Contains("table", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void WordsThatLineUpByChanceAreNotATable()
+    {
+        PdfDocument source = Raw("BT /F1 10 Tf 30 250 Td (Old line ends here) Tj 0 -12 Td (Old line goes on) Tj 0 -12 Td (Old line stops) Tj ET");
+        Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+    }
+
+    // Each path to an element can add replacement text, so the first path must not settle it.
+    [Theory]
+    [InlineData("[7 0 R 8 0 R]", "<< /S /P /K 0 >>", "<< /S /Figure /Alt (desc) /K 7 0 R >>", "null")]
+    [InlineData("[8 0 R 9 0 R]", "0", "<< /S /P /K 7 0 R >>", "<< /S /P /K 7 0 R /ActualText (x) >>")]
+    [InlineData("[8 0 R 9 0 R]", "<< /Type /MCR /MCID 0 >>", "<< /S /P /Pg 6 0 R /K 7 0 R >>", "<< /S /P /Pg 3 0 R /K 7 0 R /ActualText (x) >>")]
+    public void ReplacementTextOnASecondPathToAnElementIsRespected(string kids, string first, string second, string third)
+    {
+        PdfDocument source = Raw("/P <</MCID 0>> BDC BT /F1 10 Tf 1 0 0 1 30 250 Tm (OLD line) Tj ET EMC",
+            catalogExtra: $"/StructTreeRoot << /Type /StructTreeRoot /K {kids} >>", extraObjects: [first, second, third]);
+        Assert.Empty(PdfParagraphEditor.FindParagraphs(source, 0));
+    }
+
+    // One structure element can hold several marked content sequences, and inline elements sit inside a paragraph.
+    [Theory]
+    [InlineData("<< /S /P /K [0 1] >>")]
+    [InlineData("<< /S /P /K [<< /Type /MCR /MCID 0 >> << /Type /MCR /MCID 1 >>] >>")]
+    [InlineData("<< /S /P /K [0 << /S /Span /K 1 >>] >>")]
+    [InlineData("<< /S /P /K [<< /S /Link /K 0 >> << /S /Em /K [<< /S /Strong /K 1 >>] >>] >>")]
+    public void ThePartsOfOneTaggedParagraphAreOneParagraph(string element)
+    {
+        PdfDocument source = Raw("/P <</MCID 0>> BDC BT /F1 10 Tf 1 0 0 1 30 250 Tm (Word one) Tj ET EMC " +
+            "/P <</MCID 1>> BDC BT /F1 10 Tf 1 0 0 1 30 238 Tm (Word two) Tj ET EMC",
+            catalogExtra: $"/StructTreeRoot << /Type /StructTreeRoot /K {element} >>");
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+        Assert.Equal("Word one Word two", candidate.Text);
+        PdfParagraphPlan plan = Unchanged(source, candidate, Font());
+        Assert.False(plan.HasOverflow, plan.OverflowReason);
+        Assert.Contains("Word one Word two", new PdfPageContentReader(PdfDocument.Open(plan.GetPreviewDocument())).Read(0).Text,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void AnInlineElementsReplacementTextStillRefusesTheParagraph()
+    {
+        PdfDocument source = Raw("/P <</MCID 0>> BDC BT /F1 10 Tf 1 0 0 1 30 250 Tm (Word one) Tj ET EMC " +
+            "/P <</MCID 1>> BDC BT /F1 10 Tf 1 0 0 1 30 238 Tm (Word two) Tj ET EMC",
+            catalogExtra: "/StructTreeRoot << /Type /StructTreeRoot /K << /S /P /K [0 << /S /Span /K 1 /ActualText (x) >>] >> >>");
+        Assert.DoesNotContain(PdfParagraphEditor.FindParagraphs(source, 0), item => item.Text.Contains("Word two", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void DifferentTaggedElementsStaySeparateWhenTheTreeNamesThem()
+    {
+        PdfDocument source = Raw("/P <</MCID 0>> BDC BT /F1 10 Tf 1 0 0 1 30 250 Tm (Word one) Tj ET EMC " +
+            "/P <</MCID 1>> BDC BT /F1 10 Tf 1 0 0 1 30 238 Tm (Word two) Tj ET EMC",
+            catalogExtra: "/StructTreeRoot << /Type /StructTreeRoot /K << /S /Div /K [<< /S /P /K 0 >> << /S /P /K 1 >>] >> >>");
+        Assert.Equal(["Word one", "Word two"], PdfParagraphEditor.FindParagraphs(source, 0).Select(item => item.Text));
+    }
+
+    // An MCR with /Stm names a sequence in that form's own numbering, not the page's.
+    [Fact]
+    public void AFormsMarkedContentNumberIsNotThePages()
+    {
+        PdfDocument source = Raw("/P <</MCID 0>> BDC BT /F1 10 Tf 1 0 0 1 30 250 Tm (OLD line) Tj ET EMC",
+            catalogExtra: "/StructTreeRoot << /Type /StructTreeRoot /K << /S /P /ActualText (x) /Pg 3 0 R /K [<< /Type /MCR /MCID 0 /Stm 7 0 R >>] >> >>",
+            extraObjects: [LogoForm]);
+        Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+    }
+
+    private const string Type3Font = "<< /Type /Font /Subtype /Type3 /FontBBox [0 0 100 100] /FontMatrix [0.01 0 0 0.01 0 0] " +
+        "/CharProcs << /a 8 0 R >> /Encoding << /Type /Encoding /Differences [97 /a] >> /FirstChar 97 /LastChar 97 /Widths [60] >>";
+    private const string Type3Glyph = "<< /Length 21 >>\nstream\n60 0 d0 0 0 50 50 re f\nendstream";
+
+    // Type 3 glyphs are drawn by the font itself, wherever they fall in the paragraph.
+    [Fact]
+    public void AType3GlyphAnywhereInTheParagraphRefusesIt()
+    {
+        PdfDocument source = Raw("BT /F1 10 Tf 30 250 Td (O) Tj /F3 10 Tf (aaaaaaaaaaaaaaaaaaaa) Tj ET", fonts: "/F3 7 0 R",
+            extraObjects: [Type3Font, Type3Glyph]);
+        Assert.Empty(PdfParagraphEditor.FindParagraphs(source, 0));
+    }
+
+    [Fact]
+    public void Type3WidthsGoThroughTheFontMatrix()
+    {
+        PdfDocument source = Raw("BT /F3 10 Tf 30 250 Td (aa) Tj ET", fonts: "/F3 7 0 R", extraObjects: [Type3Font, Type3Glyph]);
+        PdfExtractedLetter[] letters = [.. new PdfPageContentReader(source).Read(0).Letters];
+        Assert.Equal(36, letters[1].StartBaseLine.X, 6);
+        Assert.Equal(42, letters[1].EndBaseLine.X, 6);
+    }
+
+    // An underline drawn as a thin filled box belongs to its line.
+    [Theory]
+    [InlineData("BT /F1 10 Tf 1 0 0 1 30 250 Tm (Old line) Tj ET 30 247 33 .5 re f BT /F1 10 Tf 1 0 0 1 30 238 Tm (Old more) Tj ET")]
+    [InlineData("BT /F1 10 Tf 1 0 0 1 30 250 Tm (Old line) Tj ET BT /F1 10 Tf 1 0 0 1 30 238 Tm (Old more) Tj ET 30 235 33 .5 re f")]
+    [InlineData("BT /F1 10 Tf 1 0 0 1 30 250 Tm (Old line) Tj ET q 1 0 0 1 30 247 cm 0 0 33 .5 re f Q BT /F1 10 Tf 1 0 0 1 30 238 Tm (Old more) Tj ET")]
+    public void AnUnderlineLeavesWithItsLine(string content)
+    {
+        PdfDocument source = Raw(content);
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+        PdfParagraphPlan plan = Unchanged(source, candidate, Font());
+        Assert.False(plan.HasOverflow, plan.OverflowReason);
+        Assert.DoesNotContain(new PdfPageContentReader(PdfDocument.Open(plan.GetPreviewDocument())).Read(0).Paths,
+            path => !path.IsClippingPath);
+    }
+
+    [Theory]
+    // Wider than the line, so it is a page rule.
+    [InlineData("q 20 247 200 .5 re f Q")]
+    // Well below the baseline.
+    [InlineData("q 30 243 35 .5 re f Q")]
+    // Too thick for an underline.
+    [InlineData("q 30 244 35 3 re f Q")]
+    public void AThinRuleThatIsNotAnUnderlineStays(string rule)
+    {
+        PdfDocument source = Raw($"BT /F1 10 Tf 1 0 0 1 30 250 Tm (Old line) Tj ET {rule} BT /F1 10 Tf 1 0 0 1 30 230 Tm (Other) Tj ET");
+        PdfParagraphCandidate candidate = PdfParagraphEditor.FindParagraphs(source, 0).First();
+        PdfParagraphPlan plan = PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion,
+            new PdfContentBounds(30, 248, 200, 258), "New line", Font(), 10, 12, PdfParagraphAlignment.Left);
+        Assert.Single(new PdfPageContentReader(PdfDocument.Open(plan.GetPreviewDocument())).Read(0).Paths);
+    }
+
+    [Fact]
+    public void ARuleInsideALongerPathOrUnderARotationIsLeftAlone()
+    {
+        PdfDocument source = Raw("BT /F1 10 Tf 1 0 0 1 30 250 Tm (Old line) Tj ET 30 247 m 40 247 l 30 247 35 .5 re f " +
+            "q 0 1 -1 0 300 0 cm 30 247 35 .5 re f Q");
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+        PdfParagraphPlan plan = PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion,
+            new PdfContentBounds(30, 248, 200, 258), "New line", Font(), 10, 12, PdfParagraphAlignment.Left);
+        Assert.Equal(2, new PdfPageContentReader(PdfDocument.Open(plan.GetPreviewDocument())).Read(0).Paths.Count);
+    }
+
+    // A damaged font must come back as a refusal rather than an arithmetic error.
+    [Fact]
+    public void AnImpossibleFontLengthIsARefusal()
+    {
+        PdfDocument source = Raw("BT /F3 10 Tf 30 250 Td (OLD) Tj ET", fonts: "/F3 7 0 R", extraObjects:
+        [
+            "<< /Type /Font /Subtype /Type1 /BaseFont /Bad /FontDescriptor 8 0 R /FirstChar 65 /LastChar 65 /Widths [500] >>",
+            "<< /Type /FontDescriptor /FontName /Bad /Flags 32 /FontFile 9 0 R >>",
+            "<< /Length1 99999999999 /Length2 0 /Length3 0 /Length 5 >>\nstream\nhello\nendstream"
+        ]);
+        PdfParagraphCandidateInspection inspection = PdfParagraphEditor.InspectCandidates(source, 0);
+        Assert.Empty(inspection.Candidates);
+        Assert.Contains("damaged", Assert.Single(inspection.Refusals).Reason, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("(The word is sim-)", "(ilar to most)", "The word is similar to most")]
+    [InlineData("(See Smith-)", "(Jones here)", "See Smith- Jones here")]
+    [InlineData("(Now 3-)", "(way talks)", "Now 3- way talks")]
+    public void ALineEndHyphenIsDroppedFromABrokenWord(string first, string second, string expected)
+    {
+        PdfDocument source = Raw($"BT /F1 10 Tf 30 250 Td {first} Tj 0 -12 Td {second} Tj ET");
+        Assert.Equal(expected, Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0)).Text);
+    }
+
+    [Fact]
+    public void ARejoinedWordDoesNotPushUnchangedTextOntoAnotherRow()
+    {
+        PdfDocument source = Raw("BT /F1 10 Tf 30 250 Td (aaaa bbbb cccc dd-) Tj 0 -12 Td (eeee ffff gggg hhh) Tj ET");
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+        Assert.Equal("aaaa bbbb cccc ddeeee ffff gggg hhh", candidate.Text);
+        PdfParagraphPlan plan = Unchanged(source, candidate, Font());
+        Assert.False(plan.HasOverflow, plan.OverflowReason);
+        Assert.Equal(2, plan.Lines.Count);
+    }
+
+    [Fact]
+    public void AHyphenStaysWhenThePageShowsTheCompoundWhole()
+    {
+        PdfDocument source = Raw("BT /F1 10 Tf 30 250 Td (It is well-) Tj 0 -12 Td (known, to all) Tj ET " +
+            "BT /F1 10 Tf 30 100 Td (a well-known thing) Tj ET");
+        Assert.Equal("It is well-known, to all", PdfParagraphEditor.FindParagraphs(source, 0).First().Text);
+    }
+
+    [Fact]
+    public void TheRefusalOfATransformDoesNotBlameMixedStyles()
+    {
+        PdfParagraphInspection inspection = PdfParagraphEditor.Inspect(Raw("q 0.5 0 0 1 0 0 cm BT /F1 10 Tf 60 250 Td (OLD) Tj ET Q"),
+            0, new PdfContentBounds(20, 220, 100, 280));
+        Assert.False(inspection.CanEdit);
+        Assert.DoesNotContain("mixed", inspection.Reason, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static PdfParagraphPlan Unchanged(PdfDocument source, PdfParagraphCandidate candidate, TrueTypeFont font) =>
+        PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion,
+            PdfParagraphEditor.DefaultBox(candidate, 300, 300, candidate.Text, font), candidate.Text, font,
+            candidate.FontSize, candidate.Leading, PdfParagraphAlignment.Left);
+
+    // How far the strongest ink in an area is from gray, whichever order the channels come in.
+    private static int Colorfulness(PdfRenderedPage page, int left, int bottom, int right, int top)
+    {
+        byte[] pixels = page.Pixels.ToArray();
+        int result = 0;
+        for (int y = page.Height - top; y < page.Height - bottom; y++)
+            for (int x = left; x < right; x++)
+            {
+                int index = (y * page.Width + x) * 4;
+                int[] channels = [pixels[index], pixels[index + 1], pixels[index + 2]];
+                result = Math.Max(result, channels.Max() - channels.Min());
+            }
+        return result;
+    }
+
     private const string LogoForm = "<< /Type /XObject /Subtype /Form /BBox [0 0 1 1] /Length 12 >>\nstream\n0 0 1 1 re f\nendstream";
     private const string FormWithOldText = "<< /Type /XObject /Subtype /Form /BBox [0 0 300 300] /Resources << /Font << /F1 4 0 R >> >> " +
         "/Length 39 >>\nstream\nBT /F1 10 Tf 30 250 Td (OLD) Tj ET     \nendstream";
 
     private static PdfDocument Raw(string content, string pageExtra = "", string catalogExtra = "", bool shared = false,
-        string resources = "", string? extraObject = null)
+        string resources = "", string? extraObject = null, string fonts = "", string[]? extraObjects = null)
     {
-        string page = $"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 300 300] {pageExtra} /Resources << /Font << /F1 4 0 R /F2 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >> >> {resources} >> /Contents 5 0 R >>";
+        string page = $"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 300 300] {pageExtra} /Resources << /Font << /F1 4 0 R /F2 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >> {fonts} >> {resources} >> /Contents 5 0 R >>";
         string[] objects = [$"<< /Type /Catalog /Pages 2 0 R {catalogExtra} >>",
             $"<< /Type /Pages /Kids [3 0 R{(shared ? " 6 0 R" : "")}] /Count {(shared ? 2 : 1)} >>", page,
             "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>",
             $"<< /Length {Encoding.Latin1.GetByteCount(content)} >>\nstream\n{content}\nendstream", page,
-            .. extraObject is null ? Array.Empty<string>() : [extraObject]];
+            .. extraObject is null ? Array.Empty<string>() : [extraObject], .. extraObjects ?? []];
         var pdf = new StringBuilder("%PDF-1.7\n");
         var offsets = new List<int>();
         for (int index = 0; index < objects.Length; index++)
