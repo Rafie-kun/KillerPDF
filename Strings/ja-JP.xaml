@@ -1376,7 +1376,7 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Search_NoMatches">一致なし</sys:String>
     <sys:String x:Key="Str_Search_Error">検索エラー</sys:String>
     <sys:String x:Key="Str_Search_Summary">{1} ページに {0} 件の一致</sys:String>
-    <sys:String x:Key="Str_Search_PagesSkipped">次のページは読み取れなかったため、検索されませんでした：{0}</sys:String>
+    <sys:String x:Key="Str_Search_PagesSkipped">読み取れないページ（検索対象外）：{0}</sys:String>
     <sys:String x:Key="Str_Search_NoMatchesPartial">読み取れたページに一致はありません。{0} ページは読み取れませんでした。</sys:String>
     <sys:String x:Key="Str_Search_PreviousTT">前の一致 (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">次の一致 (Enter)</sys:String>

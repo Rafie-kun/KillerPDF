@@ -178,13 +178,13 @@ namespace KillerPDF.Tests
         }
 
         [Fact]
-        public void Search_ArxivPaperWithABadTransformationMatrix_KeepsItsReadablePages()
+        public void Search_ArxivPaperWithAStrayMinusInANumber_ReadsEveryPage()
         {
             string path = CorpusFile("arxiv-cc-2025-01-batch2", "2411.07303v2.pdf");
             if (!System.IO.File.Exists(path)) return;
             var result = SearchService.Search(path, "the");
-            Assert.Equal(854, result.TotalHits);
-            Assert.Equal([2], result.UnreadablePages);
+            Assert.Equal(900, result.TotalHits);
+            Assert.Empty(result.UnreadablePages);
         }
 
         [Fact]

@@ -296,6 +296,10 @@ public sealed class PdfTokenizer
     /// </summary>
     internal bool CompatibilityRecovery { get; set; }
 
+    // Plotting tools write numbers such as 0.00-96880406 in page content, and other readers skip the
+    // stray sign. The file structure stays strict: only content streams turn this on.
+    internal bool ContentNumbers { get; set; }
+
     private PdfToken ReadRegular(int start)
     {
         ReadOnlySpan<byte> source = _source.Span;
@@ -311,18 +315,19 @@ public sealed class PdfTokenizer
 
         if (IsNumberCandidate(raw[0]))
         {
-            PdfTokenKind kind = ClassifyNumber(raw, start);
+            PdfTokenKind kind = ClassifyNumber(raw, start, ContentNumbers);
             return Token(kind, start, length, _source.Slice(start, length));
         }
 
         return Token(PdfTokenKind.Keyword, start, length, _source.Slice(start, length));
     }
 
-    private static PdfTokenKind ClassifyNumber(ReadOnlySpan<byte> raw, int offset)
+    private static PdfTokenKind ClassifyNumber(ReadOnlySpan<byte> raw, int offset, bool contentNumbers)
     {
         int position = raw[0] is (byte)'+' or (byte)'-' ? 1 : 0;
         bool hasDigit = false;
         bool hasDecimalPoint = false;
+        bool hasStrayMinus = false;
 
         for (; position < raw.Length; position++)
         {
@@ -339,13 +344,19 @@ public sealed class PdfTokenizer
                 continue;
             }
 
+            if (current == (byte)'-' && contentNumbers && hasDigit)
+            {
+                hasStrayMinus = true;
+                continue;
+            }
+
             throw new PdfSyntaxException("Malformed numeric token", offset);
         }
 
         if (!hasDigit)
             throw new PdfSyntaxException("Malformed numeric token", offset);
 
-        return hasDecimalPoint ? PdfTokenKind.Real : PdfTokenKind.Integer;
+        return hasDecimalPoint || hasStrayMinus ? PdfTokenKind.Real : PdfTokenKind.Integer;
     }
 
     private void SkipTrivia()

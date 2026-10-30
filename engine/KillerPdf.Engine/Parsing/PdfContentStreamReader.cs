@@ -321,7 +321,7 @@ public static class PdfContentStreamReader
 
     private static PdfContentNumber ParseNumber(PdfToken token)
     {
-        ReadOnlySpan<byte> value = token.Value.Span;
+        ReadOnlySpan<byte> value = PdfObjectParser.WithoutStrayMinus(token.Value.Span);
         if (token.Kind == PdfTokenKind.Integer
             && ((Utf8Parser.TryParse(value, out long integer, out int consumed)
                     && consumed == value.Length)

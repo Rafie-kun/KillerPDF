@@ -1376,7 +1376,7 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Search_NoMatches">Збігів немає</sys:String>
     <sys:String x:Key="Str_Search_Error">Помилка пошуку</sys:String>
     <sys:String x:Key="Str_Search_Summary">Збігів: {0} на сторінках: {1}</sys:String>
-    <sys:String x:Key="Str_Search_PagesSkipped">Ці сторінки не вдалося прочитати, тому пошук у них не виконувався: {0}</sys:String>
+    <sys:String x:Key="Str_Search_PagesSkipped">Нечитабельні сторінки, без пошуку: {0}</sys:String>
     <sys:String x:Key="Str_Search_NoMatchesPartial">Збігів на читабельних сторінках немає. Не вдалося прочитати сторінок: {0}.</sys:String>
     <sys:String x:Key="Str_Search_PreviousTT">Попередній збіг (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Наступний збіг (Enter)</sys:String>

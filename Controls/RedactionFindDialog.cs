@@ -241,7 +241,7 @@ internal sealed class RedactionFindDialog : Window
         foreach (PdfRedactionMatch match in matches)
         {
             var row = new Grid { Margin = new Thickness(0, 2, 0, 2) };
-            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(70) });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(96) });
             row.ColumnDefinitions.Add(new ColumnDefinition());
             CheckBox include = UiKit.CheckBox(string.Format(L("Str_RedactFind_Page"), match.PageIndex + 1));
             include.IsChecked = true;

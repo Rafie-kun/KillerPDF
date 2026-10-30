@@ -1365,7 +1365,7 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Search_NoMatches">Keine Treffer</sys:String>
     <sys:String x:Key="Str_Search_Error">Suchfehler</sys:String>
     <sys:String x:Key="Str_Search_Summary">{0} Treffer auf {1} Seiten</sys:String>
-    <sys:String x:Key="Str_Search_PagesSkipped">Diese Seiten konnten nicht gelesen werden und wurden daher nicht durchsucht: {0}</sys:String>
+    <sys:String x:Key="Str_Search_PagesSkipped">Unlesbare Seiten, nicht durchsucht: {0}</sys:String>
     <sys:String x:Key="Str_Search_NoMatchesPartial">Keine Treffer auf den lesbaren Seiten. {0} Seiten konnten nicht gelesen werden.</sys:String>
     <sys:String x:Key="Str_Search_PreviousTT">Vorheriger Treffer (Umschalt+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Nächster Treffer (Enter)</sys:String>

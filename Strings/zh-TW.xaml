@@ -1358,7 +1358,7 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_Search_NoMatches">無相符項目</sys:String>
     <sys:String x:Key="Str_Search_Error">搜尋錯誤</sys:String>
     <sys:String x:Key="Str_Search_Summary">在 {1} 頁中找到 {0} 個相符項目</sys:String>
-    <sys:String x:Key="Str_Search_PagesSkipped">這些頁面無法讀取，因此未被搜尋：{0}</sys:String>
+    <sys:String x:Key="Str_Search_PagesSkipped">無法讀取的頁面，未搜尋：{0}</sys:String>
     <sys:String x:Key="Str_Search_NoMatchesPartial">可讀取的頁面中沒有相符項目。有 {0} 頁無法讀取。</sys:String>
     <sys:String x:Key="Str_Search_PreviousTT">上一個相符項目 (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">下一個相符項目 (Enter)</sys:String>

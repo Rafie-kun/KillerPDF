@@ -1376,7 +1376,7 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Search_NoMatches">Nenhuma correspondência</sys:String>
     <sys:String x:Key="Str_Search_Error">Erro na pesquisa</sys:String>
     <sys:String x:Key="Str_Search_Summary">{0} correspondências em {1} páginas</sys:String>
-    <sys:String x:Key="Str_Search_PagesSkipped">Estas páginas não puderam ser lidas, então não foram pesquisadas: {0}</sys:String>
+    <sys:String x:Key="Str_Search_PagesSkipped">Páginas ilegíveis, sem busca: {0}</sys:String>
     <sys:String x:Key="Str_Search_NoMatchesPartial">Nenhuma correspondência nas páginas legíveis. {0} páginas não puderam ser lidas.</sys:String>
     <sys:String x:Key="Str_Search_PreviousTT">Correspondência anterior (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Próxima correspondência (Enter)</sys:String>

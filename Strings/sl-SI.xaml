@@ -1272,7 +1272,7 @@
     <sys:String x:Key="Str_Search_NoMatches">Ni ujemanj</sys:String>
     <sys:String x:Key="Str_Search_Error">Napaka pri iskanju</sys:String>
     <sys:String x:Key="Str_Search_Summary">Ujemanja: {0}, na straneh: {1}</sys:String>
-    <sys:String x:Key="Str_Search_PagesSkipped">Teh strani ni bilo mogoče prebrati, zato niso bile preiskane: {0}</sys:String>
+    <sys:String x:Key="Str_Search_PagesSkipped">Neberljive strani, niso preiskane: {0}</sys:String>
     <sys:String x:Key="Str_Search_NoMatchesPartial">Ni ujemanj na berljivih straneh. Število strani, ki jih ni bilo mogoče prebrati: {0}.</sys:String>
     <sys:String x:Key="Str_Search_PreviousTT">Prejšnje ujemanje (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Naslednje ujemanje (Enter)</sys:String>

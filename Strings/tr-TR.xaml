@@ -1356,7 +1356,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Search_NoMatches">Eşleşme yok</sys:String>
     <sys:String x:Key="Str_Search_Error">Arama hatası</sys:String>
     <sys:String x:Key="Str_Search_Summary">{0} eşleşme, {1} sayfa</sys:String>
-    <sys:String x:Key="Str_Search_PagesSkipped">Bu sayfalar okunamadığı için aranmadı: {0}</sys:String>
+    <sys:String x:Key="Str_Search_PagesSkipped">Okunamayan sayfalar, aranmadı: {0}</sys:String>
     <sys:String x:Key="Str_Search_NoMatchesPartial">Okunabilir sayfalarda eşleşme yok. {0} sayfa okunamadı.</sys:String>
     <sys:String x:Key="Str_Search_PreviousTT">Önceki eşleşme (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Sonraki eşleşme (Enter)</sys:String>

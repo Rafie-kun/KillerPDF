@@ -1361,7 +1361,7 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Search_NoMatches">Žádné shody</sys:String>
     <sys:String x:Key="Str_Search_Error">Chyba hledání</sys:String>
     <sys:String x:Key="Str_Search_Summary">{0} shod na {1} stránkách</sys:String>
-    <sys:String x:Key="Str_Search_PagesSkipped">Tyto stránky se nepodařilo přečíst, proto v nich nebylo hledáno: {0}</sys:String>
+    <sys:String x:Key="Str_Search_PagesSkipped">Nečitelné stránky, nehledáno: {0}</sys:String>
     <sys:String x:Key="Str_Search_NoMatchesPartial">Na čitelných stránkách nejsou žádné shody. Počet stránek, které se nepodařilo přečíst: {0}.</sys:String>
     <sys:String x:Key="Str_Search_PreviousTT">Předchozí shoda (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Další shoda (Enter)</sys:String>

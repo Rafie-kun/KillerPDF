@@ -1376,7 +1376,7 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Search_NoMatches">Ingen treff</sys:String>
     <sys:String x:Key="Str_Search_Error">Søkefeil</sys:String>
     <sys:String x:Key="Str_Search_Summary">{0} treff på {1} sider</sys:String>
-    <sys:String x:Key="Str_Search_PagesSkipped">Disse sidene kunne ikke leses, så de ble ikke søkt gjennom: {0}</sys:String>
+    <sys:String x:Key="Str_Search_PagesSkipped">Uleselige sider, ikke søkt: {0}</sys:String>
     <sys:String x:Key="Str_Search_NoMatchesPartial">Ingen treff på de lesbare sidene. {0} sider kunne ikke leses.</sys:String>
     <sys:String x:Key="Str_Search_PreviousTT">Forrige treff (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Neste treff (Enter)</sys:String>

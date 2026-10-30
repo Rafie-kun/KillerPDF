@@ -1376,7 +1376,7 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_Search_NoMatches">Nessuna corrispondenza</sys:String>
     <sys:String x:Key="Str_Search_Error">Errore ricerca</sys:String>
     <sys:String x:Key="Str_Search_Summary">{0} corrispondenze in {1} pagine</sys:String>
-    <sys:String x:Key="Str_Search_PagesSkipped">Non è stato possibile leggere queste pagine, quindi la ricerca le ha escluse: {0}</sys:String>
+    <sys:String x:Key="Str_Search_PagesSkipped">Pagine illeggibili, non cercate: {0}</sys:String>
     <sys:String x:Key="Str_Search_NoMatchesPartial">Nessuna corrispondenza nelle pagine leggibili. Non è stato possibile leggere {0} pagine.</sys:String>
     <sys:String x:Key="Str_Search_PreviousTT">Corrispondenza precedente (Maiusc+Invio)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Corrispondenza successiva (Invio)</sys:String>

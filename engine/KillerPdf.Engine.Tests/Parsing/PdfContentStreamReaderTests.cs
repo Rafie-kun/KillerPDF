@@ -23,6 +23,26 @@ public sealed class PdfContentStreamReaderTests
         Assert.Empty(instructions[4].Operands);
     }
 
+    // Plotting tools write numbers such as 0.00-96880406, and the other readers skip the stray sign.
+    [Theory]
+    [InlineData("0.00-96880406", 0.0096880406)]
+    [InlineData("-0.00-5", -0.005)]
+    [InlineData("12-34", 1234)]
+    public void ReadsANumberWithAStrayMinusInside(string number, double expected)
+    {
+        var instructions = Read($"1 0 {number} 1 0 0 cm");
+
+        PdfContentInstruction transform = Assert.Single(instructions);
+        Assert.Equal(expected, Assert.IsType<PdfReal>(transform.Operands[2]).Value, 12);
+    }
+
+    [Fact]
+    public void AStrayMinusIsToleratedOnlyInsideContentStreams()
+    {
+        Assert.Throws<PdfSyntaxException>(() =>
+            new PdfObjectParser(Encoding.ASCII.GetBytes("0.00-5")).ParseObject());
+    }
+
     [Fact]
     public void PreservesStringBytesAndTextSpacingArrays()
     {

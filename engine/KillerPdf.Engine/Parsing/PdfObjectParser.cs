@@ -31,8 +31,12 @@ public sealed class PdfObjectParser(
     internal bool ShareOwnedStreamData { get; init; }
 
     internal static PdfObjectParser ForContent(ReadOnlyMemory<byte> source,
-        bool compatibilityRecovery = false) =>
-        new(source, null, compatibilityRecovery) { _allowIndirectReferences = false };
+        bool compatibilityRecovery = false)
+    {
+        var parser = new PdfObjectParser(source, null, compatibilityRecovery) { _allowIndirectReferences = false };
+        parser._tokenizer.ContentNumbers = true;
+        return parser;
+    }
 
     internal PdfToken PeekContentToken() => Peek();
     internal PdfToken TakeContentToken() => Take();
@@ -222,13 +226,20 @@ public sealed class PdfObjectParser(
 
     private static PdfReal ParseReal(PdfToken token)
     {
-        if (!double.TryParse(token.Value.Span, NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint,
+        if (!double.TryParse(WithoutStrayMinus(token.Value.Span),
+                             NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint,
                              CultureInfo.InvariantCulture, out double value)
             || !double.IsFinite(value))
             throw Error("The real number is outside the supported finite range", token.Offset);
 
         return new PdfReal(value);
     }
+
+    // The tokenizer lets a stray minus through in content streams only, and it is skipped.
+    internal static ReadOnlySpan<byte> WithoutStrayMinus(ReadOnlySpan<byte> number) =>
+        number.Length > 1 && number[1..].Contains((byte)'-')
+            ? (byte[])[number[0], .. number[1..].ToArray().Where(character => character != (byte)'-')]
+            : number;
 
     private PdfArray ParseArray(int depth, int start)
     {

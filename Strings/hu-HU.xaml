@@ -1363,7 +1363,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Search_NoMatches">Nincs találat</sys:String>
     <sys:String x:Key="Str_Search_Error">Keresési hiba</sys:String>
     <sys:String x:Key="Str_Search_Summary">{0} találat {1} oldalon</sys:String>
-    <sys:String x:Key="Str_Search_PagesSkipped">Ezeket az oldalakat nem sikerült beolvasni, ezért nem lettek átkeresve: {0}</sys:String>
+    <sys:String x:Key="Str_Search_PagesSkipped">Olvashatatlan oldalak, nem keresve: {0}</sys:String>
     <sys:String x:Key="Str_Search_NoMatchesPartial">Nincs találat az olvasható oldalakon. {0} oldalt nem sikerült beolvasni.</sys:String>
     <sys:String x:Key="Str_Search_PreviousTT">Előző találat (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Következő találat (Enter)</sys:String>
