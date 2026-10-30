@@ -85,6 +85,7 @@
     <Compile Include="..\Features\Cli\BatchRenderTally.cs" Link="Features\Cli\BatchRenderTally.cs" />
     <Compile Include="..\Services\PdfFonts.cs" Link="Services\PdfFonts.cs" />
     <Compile Include="..\Services\PdfEngineIntegration.cs" Link="Services\PdfEngineIntegration.cs" />
+    <Compile Include="..\Services\PdfEngineIntegration.DamagedSave.cs" Link="Services\PdfEngineIntegration.DamagedSave.cs" />
     <Compile Include="..\Services\PrintJobTicket.cs" Link="Services\PrintJobTicket.cs" />
     <Compile Include="..\Services\PrinterDriverProperties.cs" Link="Services\PrinterDriverProperties.cs" />
     <Compile Include="..\Services\RedactionGeometry.cs" Link="Services\RedactionGeometry.cs" />
