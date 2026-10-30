@@ -98,9 +98,11 @@ public sealed class PdfParagraphPlan
 }
 
 /// <summary>Plans and replaces simple horizontal paragraphs without moving other page content.</summary>
-/// <remarks>The initial slice accepts uniform left-to-right source lines within one top-level text
-/// object. Tagged, encrypted, signed, rotated, clipped, transformed, and reusable form content is
-/// refused. Replacement text uses one explicitly supplied embeddable font, Latin glyphs, and a
+/// <remarks>The initial slice accepts uniform left-to-right source lines painted in one graphics
+/// state, across any number of top-level text objects. Tagged, encrypted, signed and rotated pages
+/// are refused, as are paragraphs that are clipped, transformed, soft masked, on an optional content
+/// layer, carrying replacement text, or inside reusable form content; the rest of the page does not
+/// matter. Replacement text uses one explicitly supplied embeddable font, Latin glyphs, and a
 /// small explicit set of ordinary typographic punctuation and symbols.</remarks>
 public static class PdfParagraphEditor
 {
@@ -184,19 +186,6 @@ public static class PdfParagraphEditor
         ValidateBounds(region, page.Width, page.Height);
         if (page.Diagnostics.Count != 0)
             throw new NotSupportedException("The page has extraction diagnostics and cannot be edited as a paragraph.");
-        if (page.MarkedContent.Count != 0)
-            throw new NotSupportedException("Marked page content is not supported for paragraph editing.");
-        IReadOnlyList<PdfContentInstruction> instructions = new PdfPageContentReader(document).ReadInstructions(pageIndex);
-        if (instructions.Any(instruction => instruction.Operator is "gs" or "W" or "W*"))
-            throw new NotSupportedException("Pages with special graphics states or clipping are not supported for paragraph editing.");
-        if (entry.InheritedValues.TryGetValue(Name("Resources"), out PdfObject? resources)
-            && Resolve(document, resources) is PdfDictionary resourceDictionary
-            && resourceDictionary.TryGetValue(Name("XObject"), out PdfObject? objects)
-            && Resolve(document, objects) is PdfDictionary xobjects
-            && xobjects.Any(pair => Resolve(document, pair.Value) is PdfStream stream
-                && stream.Dictionary.TryGetValue(Name("Subtype"), out PdfObject? subtype)
-                && Resolve(document, subtype) is PdfName subtypeName && subtypeName.ValueAsLatin1() == "Form"))
-            throw new NotSupportedException("Pages with reusable form content are not supported for paragraph editing.");
         var selected = page.Letters.Where(letter => CenterInside(letter.BoundingBox, region)).ToArray();
         if (selected.Length == 0) throw new NotSupportedException("Select a complete paragraph of readable text.");
         if (selected.Length > 100_000) throw new NotSupportedException("The source paragraph exceeds the size limit.");
@@ -224,10 +213,11 @@ public static class PdfParagraphEditor
                 || gap < first.PointSize * 0.8 || gap > first.PointSize * 1.8)
                 throw new NotSupportedException("The selection is not one simple aligned paragraph.");
         }
-        PdfRgbColor color = PdfContentRedaction.InspectParagraphPaint(document, pageIndex, region);
         var bounds = new PdfContentBounds(selected.Min(letter => letter.BoundingBox.Left),
             selected.Min(letter => letter.BoundingBox.Bottom), selected.Max(letter => letter.BoundingBox.Right),
             selected.Max(letter => letter.BoundingBox.Top));
+        var (color, clip) = PdfContentRedaction.InspectParagraphPaint(document, pageIndex, region);
+        if (!PdfContentRedaction.ClipHolds(clip, bounds)) throw new NotSupportedException("The paragraph is clipped.");
         if (page.Letters.Any(letter => CenterInside(letter.BoundingBox, bounds) && !selectedSet.Contains(letter)))
             throw new NotSupportedException("The source bounds overlap other text and cannot identify one paragraph safely.");
         double leading = lines.Length > 1
@@ -258,6 +248,10 @@ public static class PdfParagraphEditor
         if (!Enum.IsDefined(alignment)) throw new ArgumentOutOfRangeException(nameof(alignment));
         if (!font.EmbeddingAllowed) throw new NotSupportedException("The replacement font does not permit embedding.");
         string normalized = text.Replace("\r\n", "\n", StringComparison.Ordinal).Replace('\r', '\n');
+        // The replacement paints under the source's clip, so a box outside it would vanish.
+        if (normalized.Length != 0 && !PdfContentRedaction.ClipHolds(
+            PdfContentRedaction.InspectParagraphPaint(document, pageIndex, source.SourceRegion).Clip, targetBounds))
+            throw new NotSupportedException("The paragraph box extends past the clipped area of the source text.");
         foreach (Rune rune in normalized.EnumerateRunes())
         {
             if (rune.Value == '\n') continue;
@@ -355,7 +349,12 @@ public static class PdfParagraphEditor
 
 public static partial class PdfContentRedaction
 {
-    internal static PdfRgbColor InspectParagraphPaint(PdfDocument document, int pageIndex, PdfContentBounds region)
+    internal static bool ClipHolds(PdfContentBounds clip, PdfContentBounds area) =>
+        area.Left >= clip.Left - 0.01 && area.Bottom >= clip.Bottom - 0.01
+        && area.Right <= clip.Right + 0.01 && area.Top <= clip.Top + 0.01;
+
+    internal static (PdfRgbColor Color, PdfContentBounds Clip) InspectParagraphPaint(PdfDocument document, int pageIndex,
+        PdfContentBounds region)
     {
         LineProbe probe = Probe(document, pageIndex, region, null, default, paragraph: true);
         if (!probe.Inspection.CanEdit || probe.Insertion.ParagraphUnsafe)
@@ -364,17 +363,15 @@ public static partial class PdfContentRedaction
         if (state.FontObject is null || Resolve(document, state.FontObject) is not PdfDictionary sourceFont
             || IsNamed(sourceFont, SubtypeName, "Type3"))
             throw new NotSupportedException("The paragraph uses a font whose painted appearance cannot be preserved.");
-        if (state.Clip != new PdfContentBounds(0, 0, probe.Geometry.Width, probe.Geometry.Height))
-            throw new NotSupportedException("The paragraph is clipped.");
         PdfContentInstruction[] fill = state.Fill;
-        if (fill.Length == 0) return new PdfRgbColor(0, 0, 0);
+        if (fill.Length == 0) return (new PdfRgbColor(0, 0, 0), state.Clip);
         if (fill.Length == 1 && fill[0].Operator == "rg" && fill[0].Operands.Count == 3)
-            return new PdfRgbColor(Number(document, fill[0].Operands[0]), Number(document, fill[0].Operands[1]),
-                Number(document, fill[0].Operands[2]));
+            return (new PdfRgbColor(Number(document, fill[0].Operands[0]), Number(document, fill[0].Operands[1]),
+                Number(document, fill[0].Operands[2])), state.Clip);
         if (fill.Length == 1 && fill[0].Operator == "g" && fill[0].Operands.Count == 1)
         {
             double gray = Number(document, fill[0].Operands[0]);
-            return new PdfRgbColor(gray, gray, gray);
+            return (new PdfRgbColor(gray, gray, gray), state.Clip);
         }
         throw new NotSupportedException("The paragraph uses a color space that is not supported for paragraph editing.");
     }

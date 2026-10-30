@@ -432,8 +432,6 @@ public static partial class PdfContentRedaction
     {
         private static readonly PdfName FontCategory = Name("Font");
         private bool _pending;
-        private int _textObject;
-        private int? _selectedObject;
 
         internal bool InspectParagraph { get; init; }
         internal LineWriter? Writer { get; init; }
@@ -447,17 +445,14 @@ public static partial class PdfContentRedaction
         internal List<PdfContentInstruction>? AfterText { get; set; }
         internal int AfterTextDepth { get; private set; }
 
-        internal void BeginTextObject() => _textObject++;
-
-        internal void Observe(TextState state, Matrix glyph)
+        internal void Observe(TextState state, Matrix glyph, bool barredFromParagraphs)
         {
             Glyphs++;
             if (state.RenderMode is 3 or 7) Invisible = true;
             if (state.Size == 0) ZeroSize = true;
             if (InspectParagraph)
             {
-                _selectedObject ??= _textObject;
-                if (_selectedObject != _textObject || state.Size <= 0 || state.RenderMode != 0
+                if (barredFromParagraphs || state.SoftMasked || state.Size <= 0 || state.RenderMode != 0
                     || state.CharacterSpacing != 0 || state.WordSpacing != 0
                     || state.Scale != 1 || state.Rise != 0 || state.Font?.IsVertical == true
                     || Math.Abs(glyph.A - 1) > 1e-8 || Math.Abs(glyph.B) > 1e-8 || Math.Abs(glyph.C) > 1e-8
@@ -465,7 +460,7 @@ public static partial class PdfContentRedaction
                     || Math.Abs(state.Ctm.B) > 1e-8 || Math.Abs(state.Ctm.C) > 1e-8 || Math.Abs(state.Ctm.D - 1) > 1e-8)
                     ParagraphUnsafe = true;
                 if (State is { } first && (first.FontObject != state.FontObject || first.Size != state.Size
-                    || first.Ctm != state.Ctm || first.Clip != state.Clip
+                    || first.Ctm != state.Ctm || first.Clip != state.Clip || first.ExtGStates != state.ExtGStates
                     || !PdfContentStreamWriter.Write(first.Fill).AsSpan().SequenceEqual(PdfContentStreamWriter.Write(state.Fill))))
                     ParagraphUnsafe = true;
             }

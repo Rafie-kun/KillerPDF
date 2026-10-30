@@ -1137,6 +1137,9 @@ public static partial class PdfContentRedaction
         internal PdfName? FontResource { get; init; }
         // The operators that set the current nonstroking color, replayed to restore it.
         internal PdfContentInstruction[] Fill { get; init; } = [];
+        // The graphics states applied so far, so paints can be compared without reading each one.
+        internal string ExtGStates { get; init; } = "";
+        internal bool SoftMasked { get; init; }
         internal int RenderMode { get; init; }
         internal double LineWidth { get; init; } = 1;
         internal double MiterLimit { get; init; } = 10;
@@ -1250,7 +1253,6 @@ public static partial class PdfContentRedaction
                             state = state with { Ctm = new Matrix(N(args[0]), N(args[1]), N(args[2]), N(args[3]), N(args[4]), N(args[5])).Then(state.Ctm) };
                         Emit(instruction); break;
                     case "BT":
-                        insertion?.BeginTextObject();
                         insideText = true; text = line = Matrix.Identity; Emit(instruction);
                         if (textOnly) { output.Add(Op("Tr", 3)); localChanged = true; }
                         break;
@@ -1430,6 +1432,11 @@ public static partial class PdfContentRedaction
                 if (depth > 0 && frames.Length == 0) FormMarkedContentTouched = true;
             }
 
+            // Forms are reusable, a layer can hide the text, and replacement text would go stale.
+            bool BarredFromParagraphs() => depth > 0 || marked.Any(frame => frame.Properties is { } properties
+                && (ReplacementTextKeys.Any(properties.ContainsKey)
+                    || IsNamed(properties, Name("Type"), "OCG") || IsNamed(properties, Name("Type"), "OCMD")));
+
             void MarkedContent(PdfContentInstruction instruction)
             {
                 IReadOnlyList<PdfObject> args = instruction.Operands;
@@ -1568,7 +1575,7 @@ public static partial class PdfContentRedaction
                     if (covered)
                     {
                         if (state.Size == 0) Reasons.Add("ZeroSizeText");
-                        insertion?.Observe(state, text);
+                        insertion?.Observe(state, text, BarredFromParagraphs());
                         Flush();
                         double displacement = font.IsVertical
                             ? vertical.Advance + (state.Size == 0 ? 0 : spacing * 1000 / state.Size)
@@ -1609,6 +1616,11 @@ public static partial class PdfContentRedaction
                         state = state with { LineJoin = Number(document, join) };
                     if (gs.TryGetValue(Name("LC"), out PdfObject? cap))
                         state = state with { LineCap = Number(document, cap) };
+                    if (gs.TryGetValue(Name("SMask"), out PdfObject? softMask))
+                        state = state with { SoftMasked = Resolve(document, softMask) is PdfDictionary };
+                    string applied = "/" + name.ValueAsLatin1();
+                    if (!state.ExtGStates.EndsWith(applied, StringComparison.Ordinal))
+                        state = state with { ExtGStates = state.ExtGStates + applied };
                 }
                 PdfObject? fontValue = null;
                 if (gs is not null && gs.TryGetValue(Name("Font"), out PdfObject? fontEntry)

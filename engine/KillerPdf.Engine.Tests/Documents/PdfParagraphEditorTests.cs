@@ -155,7 +155,7 @@ public sealed class PdfParagraphEditorTests
     [InlineData("BT /F1 10 Tf 3 Tr 30 250 Td (OLD) Tj ET", "", "")]
     [InlineData("BT /F1 10 Tf 1 0.1 0 1 30 250 Tm (OLD) Tj ET", "", "")]
     [InlineData("BT /F1 10 Tf 30 250 Td (OLD) Tj 1 0 0 rg 0 -12 Td (OLD) Tj ET", "", "")]
-    [InlineData("BT /F1 10 Tf 30 250 Td (OLD) Tj ET BT /F1 10 Tf 30 238 Td (OLD) Tj ET", "", "")]
+    [InlineData("BT /F1 10 Tf 30 250 Td (OLD) Tj ET 1 0 0 rg BT /F1 10 Tf 30 238 Td (OLD) Tj ET", "", "")]
     [InlineData("BT /F1 10 Tf 30 250 Td (OLD) Tj ET", "/Rotate 90", "")]
     [InlineData("BT /F1 10 Tf 30 250 Td (OLD) Tj ET", "", "/StructTreeRoot << /Type /StructTreeRoot /K [] >>")]
     [InlineData("BT /F1 10 Tf 30 250 Td (OLD) Tj ET", "", "/Perms << >>")]
@@ -194,6 +194,64 @@ public sealed class PdfParagraphEditorTests
         Assert.Equal(plan.Lines[0].Baseline, first.StartBaseLine.Y, 5);
     }
 
+    // Word writes every run as q, a page-sized clip and its own text object, under pagination artifacts.
+    private const string WordShapedLines =
+        "/Artifact <</Type /Pagination>> BDC EMC " +
+        "q 0 0 300 300 re W* n BT /F1 10 Tf 1 0 0 1 30 250 Tm (OLD line) Tj ET Q " +
+        "q 0 0 300 300 re W* n BT /F1 10 Tf 1 0 0 1 30 238 Tm (OLD next) Tj ET Q " +
+        "q 0 0 300 300 re W* n BT /F1 10 Tf 1 0 0 1 200 30 Tm (Footer) Tj ET Q";
+
+    [Fact]
+    public void EditsAParagraphWrittenLineByLineTheWayWordExportsIt()
+    {
+        PdfDocument source = Raw(WordShapedLines);
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0),
+            item => item.Text.Contains("OLD", StringComparison.Ordinal));
+        Assert.Equal("OLD line OLD next", candidate.Text);
+        var plan = PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion,
+            new PdfContentBounds(30, 200, 200, 262), "AAAA AAAA", Font(), 10, 12, PdfParagraphAlignment.Left);
+        PdfPageContent page = new PdfPageContentReader(PdfDocument.Open(PdfParagraphEditor.Apply(source, plan))).Read(0);
+        Assert.DoesNotContain("OLD", page.Text, StringComparison.Ordinal);
+        Assert.Contains("AAAA AAAA", page.Text, StringComparison.Ordinal);
+        Assert.Contains("Footer", page.Text, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void PageGraphicsStatesAndFormsElsewhereDoNotBlockTheParagraph()
+    {
+        PdfDocument source = Raw("/GS1 gs q 20 0 0 20 5 5 cm /Fm1 Do Q BT /F1 10 Tf 30 250 Td (OLD) Tj ET",
+            resources: "/ExtGState << /GS1 << /ca 1 /BM /Normal >> >> /XObject << /Fm1 7 0 R >>", extraObject: LogoForm);
+        Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+    }
+
+    [Theory]
+    // Text inside a reusable form.
+    [InlineData("/Fm1 Do", "/XObject << /Fm1 7 0 R >>")]
+    // A soft mask would cut the replacement differently than the source.
+    [InlineData("/GS1 gs BT /F1 10 Tf 30 250 Td (OLD) Tj ET", "/ExtGState << /GS1 << /SMask << /Type /Mask /S /Luminosity /G 7 0 R >> >> >>")]
+    // Lines painted under different graphics states.
+    [InlineData("/GS1 gs BT /F1 10 Tf 30 250 Td (OLD) Tj ET /GS2 gs BT /F1 10 Tf 30 238 Td (OLD) Tj ET", "/ExtGState << /GS1 << /ca 1 >> /GS2 << /ca 0.5 >> >>")]
+    // A clip that cuts the source text.
+    [InlineData("q 30 240 5 30 re W n BT /F1 10 Tf 30 250 Td (OLD) Tj ET Q", "")]
+    // Text on an optional content layer.
+    [InlineData("/OC /MC0 BDC BT /F1 10 Tf 30 250 Td (OLD) Tj ET EMC", "/Properties << /MC0 << /Type /OCG /Name (Layer) >> >>")]
+    // Marked content that overrides the extracted text.
+    [InlineData("/Span << /ActualText (NEW) >> BDC BT /F1 10 Tf 30 250 Td (OLD) Tj ET EMC", "")]
+    public void RefusesWhenTheParagraphItselfCannotBeReplacedFaithfully(string content, string resources)
+    {
+        PdfDocument source = Raw(content, resources: resources, extraObject: FormWithOldText);
+        Assert.False(PdfParagraphEditor.Inspect(source, 0, new PdfContentBounds(20, 220, 100, 280)).CanEdit);
+    }
+
+    [Fact]
+    public void RefusesAReplacementBoxOutsideTheClipThatPaintsIt()
+    {
+        PdfDocument source = Raw("q 20 230 100 40 re W n BT /F1 10 Tf 30 250 Td (OLD) Tj ET Q");
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+        Assert.Throws<NotSupportedException>(() => PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion,
+            new PdfContentBounds(30, 100, 200, 200), "AAAA", Font(), 10, 12, PdfParagraphAlignment.Left));
+    }
+
     [Fact]
     public void PreservesSourceColorAndPageDrawings()
     {
@@ -209,13 +267,19 @@ public sealed class PdfParagraphEditorTests
         Assert.Single(after.Instructions, instruction => instruction.Operator == "rg");
     }
 
-    private static PdfDocument Raw(string content, string pageExtra = "", string catalogExtra = "", bool shared = false)
+    private const string LogoForm = "<< /Type /XObject /Subtype /Form /BBox [0 0 1 1] /Length 12 >>\nstream\n0 0 1 1 re f\nendstream";
+    private const string FormWithOldText = "<< /Type /XObject /Subtype /Form /BBox [0 0 300 300] /Resources << /Font << /F1 4 0 R >> >> " +
+        "/Length 39 >>\nstream\nBT /F1 10 Tf 30 250 Td (OLD) Tj ET     \nendstream";
+
+    private static PdfDocument Raw(string content, string pageExtra = "", string catalogExtra = "", bool shared = false,
+        string resources = "", string? extraObject = null)
     {
-        string page = $"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 300 300] {pageExtra} /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>";
+        string page = $"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 300 300] {pageExtra} /Resources << /Font << /F1 4 0 R >> {resources} >> /Contents 5 0 R >>";
         string[] objects = [$"<< /Type /Catalog /Pages 2 0 R {catalogExtra} >>",
             $"<< /Type /Pages /Kids [3 0 R{(shared ? " 6 0 R" : "")}] /Count {(shared ? 2 : 1)} >>", page,
             "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>",
-            $"<< /Length {Encoding.Latin1.GetByteCount(content)} >>\nstream\n{content}\nendstream", page];
+            $"<< /Length {Encoding.Latin1.GetByteCount(content)} >>\nstream\n{content}\nendstream", page,
+            .. extraObject is null ? Array.Empty<string>() : [extraObject]];
         var pdf = new StringBuilder("%PDF-1.7\n");
         var offsets = new List<int>();
         for (int index = 0; index < objects.Length; index++)
