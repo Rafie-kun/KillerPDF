@@ -127,7 +127,7 @@ public sealed class PdfIncrementalUpdateBuilder
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(objectNumber);
         if (!_document.CrossReferences.TryGetValue(objectNumber, out PdfCrossReferenceEntry entry)
             || entry.Type is not (PdfCrossReferenceEntryType.InUse or PdfCrossReferenceEntryType.Compressed))
-            throw new ArgumentException($"Object {objectNumber} is not currently in use.", nameof(objectNumber));
+            throw NotInUse(objectNumber);
         int generation = entry.Type == PdfCrossReferenceEntryType.InUse ? entry.Field2 : 0;
         if (_documentInformationRemovedByFree
             && IsInheritedActiveTrailerChainReference(InfoName, objectNumber))
@@ -146,7 +146,7 @@ public sealed class PdfIncrementalUpdateBuilder
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(objectNumber);
         if (!_document.CrossReferences.TryGetValue(objectNumber, out PdfCrossReferenceEntry entry)
             || entry.Type is not (PdfCrossReferenceEntryType.InUse or PdfCrossReferenceEntryType.Compressed))
-            throw new ArgumentException($"Object {objectNumber} is not currently in use.", nameof(objectNumber));
+            throw NotInUse(objectNumber);
         if (IsInheritedActiveTrailerChainReference(InfoName, objectNumber)
             && !_documentInformationSpecified)
         {
@@ -918,6 +918,15 @@ public sealed class PdfIncrementalUpdateBuilder
             throw new InvalidOperationException(
                 $"Trailer /Info /Trapped value /{state} is not defined.");
     }
+
+    // A document opened by scanning for objects can resolve one that its cross-reference data does not
+    // list. That is a damaged file, not a caller mistake, so it gets a refusal the user can act on.
+    private Exception NotInUse(int objectNumber) => _document.UsesCompatibilityRecovery
+        ? new InvalidOperationException(
+            "This document had to be repaired when it was opened, and its cross-reference data does not "
+            + "cover every object, so it cannot be edited in place. Resave the document to repair it, "
+            + "then edit the saved copy.")
+        : new ArgumentException($"Object {objectNumber} is not currently in use.", nameof(objectNumber));
 
     private static int InitialSize(PdfDocument document)
     {
