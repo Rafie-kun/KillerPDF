@@ -22,7 +22,8 @@ namespace KillerPDF.Features
             + "  starter:scanning or starter:privacy. --list shows the saved macros and the starters.\n"
             + "  OCR steps read in --lang (default eng). Redact steps remove --text, each line of --terms and the\n"
             + "  marks saved in the file. If any page requires rasterization, the macro fails without saving\n"
-            + "  output unless --rasterize is given.\n"
+            + "  output unless --rasterize is given. If a page's text, form fields or comments could not be read,\n"
+            + "  the Redact step fails naming those pages and no output is saved.\n"
             + "  Rename steps use the out.pdf folder and the macro's file name template.\n"
             + "  Data Merge steps require --data and write one editable PDF per included record into that folder.\n"
             + "  Export steps save an extra file alongside the editable PDF; multiple exports use numbered suffixes.";
@@ -294,7 +295,8 @@ namespace KillerPDF.Features
                 File.WriteAllBytes(path, data.ToArray());
                 List<PdfRedactionRegion> regions = [.. redaction.Marked];
                 token.ThrowIfCancellationRequested();
-                // All terms in one pass, so the document is parsed once rather than twice per term.
+                // All terms in one pass, so the document is parsed once rather than twice per term. A page
+                // it could not search throws, which fails this step with the pages named in the report.
                 foreach (var (page, rects) in SearchService.FindRedactionTermAreas(path, redaction.Terms))
                     foreach (var (left, bottom, right, top) in rects)
                         regions.Add(new PdfRedactionRegion(page, new PdfContentBounds(left, bottom, right, top)));

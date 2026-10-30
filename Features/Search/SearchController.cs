@@ -15,6 +15,11 @@ namespace KillerPDF.Features
         private readonly ISearchHost _host;
         private readonly SearchService _searchService = new();
 
+        // The search runs on a worker, so a long document no longer holds the window. Only this
+        // controller's UI-thread code starts or cancels it, and results land back on the UI thread.
+        private readonly LatestSearchRunner _runner = new();
+        private string? _searchedFile;
+
         internal SearchController(ISearchHost host) => _host = host;
 
         // Whole-document search results (PDF-space rects per page). Settable references on
@@ -45,6 +50,14 @@ namespace KillerPDF.Features
         /// <summary>The text of the most recent search, for features that act on its exact matches.</summary>
         internal string LastQuery { get; private set; } = string.Empty;
 
+        /// <summary>Match case and Whole word as that search ran. The bar's toggles can differ by now,
+        /// after a tab switch or while a newer search runs.</summary>
+        internal bool LastMatchCase { get; private set; }
+        internal bool LastWholeWord { get; private set; }
+
+        /// <summary>True while a search is on the worker. The results showing are still the older ones.</summary>
+        internal bool IsSearching => _runner.IsRunning;
+
         /// <summary>The emphasized match, or null when the cursor is not on one.</summary>
         internal (int page, double left, double bottom, double right, double top)? CurrentMatch =>
             _matchCursor >= 0 && _matchCursor < _matches.Count ? _matches[_matchCursor] : null;
@@ -55,9 +68,36 @@ namespace KillerPDF.Features
 
         internal IEnumerable<int> PagesWithResults => AllSearchRects.Keys;
 
+        /// <summary>The part of a search a tab parks through <see cref="Capture"/>. Its rects, pages
+        /// and page cursor already park as fields of their own on the tab's session.</summary>
+        internal sealed record ParkedSearch(string Query, bool MatchCase, bool WholeWord,
+            IReadOnlyList<(int page, double left, double bottom, double right, double top)> Matches, int MatchCursor);
+
+        internal ParkedSearch Capture() =>
+            new(LastQuery, LastMatchCase, LastWholeWord, [.. _matches], _matchCursor);
+
+        /// <summary>Puts back what <see cref="Capture"/> parked for the tab coming in, or a blank
+        /// state for a tab that has never searched.</summary>
+        internal void Restore(ParkedSearch? parked)
+        {
+            // Another document coming in ends a search for the one going out. A pane that only
+            // re-applies its own session keeps its search running.
+            if (_host.CurrentFile != _searchedFile) CancelPending();
+            LastQuery = parked?.Query ?? string.Empty;
+            LastMatchCase = parked?.MatchCase ?? false;
+            LastWholeWord = parked?.WholeWord ?? false;
+            _matches.Clear();
+            if (parked is not null) _matches.AddRange(parked.Matches);
+            _matchCursor = parked?.MatchCursor ?? -1;
+        }
+
+        /// <summary>Stops a running search and leaves the results on show as they are.</summary>
+        internal void CancelPending() => _runner.Cancel();
+
         /// <summary>The query-too-short reset (search box text dropped under 2 chars).</summary>
         internal void ClearMatches()
         {
+            CancelPending();
             AllSearchRects.Clear();
             ResultPages.Clear();
             _matches.Clear();
@@ -66,19 +106,66 @@ namespace KillerPDF.Features
             UnreadablePages = [];
         }
 
-        /// <summary>The new/closed-document reset - exactly the three things FileOperations
-        /// cleared when these were fields (the match list is rebuilt by the next Run).</summary>
+        /// <summary>The new/closed-document reset. Nothing here describes the next document, so the
+        /// query and the match list go with the rects.</summary>
         internal void ClearPageResults()
         {
-            AllSearchRects.Clear();
-            ResultPages.Clear();
-            PageCursor = -1;
-            UnreadablePages = [];
+            ClearMatches();
+            LastQuery = string.Empty;
         }
 
-        internal void Run(string query)
+        /// <summary>
+        /// Searches the working file on a worker. What is showing stays until the result arrives, and a
+        /// search stopped by <see cref="CancelPending"/>, overtaken by a newer one or outlived by its
+        /// document leaves it there untouched.
+        /// </summary>
+        internal void Run(string query) => _ = RunAsync(query);
+
+        // Finishes once the result has landed or been dropped. It handles its own failures.
+        private async Task RunAsync(string query)
         {
-            LastQuery = query ?? string.Empty;
+            CancelPending();
+            if (string.IsNullOrWhiteSpace(query) || _host.CurrentFile is not { } file)
+            {
+                ClearResults(query ?? string.Empty, MatchCase, WholeWord);
+                _host.SetResultText("");
+                return;
+            }
+
+            (bool matchCase, bool wholeWord) = (MatchCase, WholeWord);
+            try
+            {
+                // Read here rather than on the worker, so nothing holds the working file open while an
+                // edit rewrites it and the worker searches one version from start to end.
+                FileRevision? revision = Revision(file);
+                byte[] source = System.IO.File.ReadAllBytes(file);
+                _searchedFile = file;
+                SearchResult? found = await _runner.RunAsync(
+                    token => SearchService.Search(source, query, matchCase, wholeWord, token),
+                    () => _host.CurrentFile == file && Revision(file) == revision);
+                if (found is null) return;
+                ShowResults(query, matchCase, wholeWord, found);
+            }
+            catch
+            {
+                ClearResults(query, matchCase, wholeWord);
+                _host.SetResultText(_host.Loc("Str_Search_Error"));
+            }
+        }
+
+        // Which version of the file a search read. Length and write time, not the full hash a save
+        // checks, because the UI thread reads this after every search.
+        private static FileRevision? Revision(string file)
+        {
+            var info = new System.IO.FileInfo(file);
+            return info.Exists ? new FileRevision(info.Length, info.LastWriteTimeUtc) : null;
+        }
+
+        private void ClearResults(string query, bool matchCase, bool wholeWord)
+        {
+            LastQuery = query;
+            LastMatchCase = matchCase;
+            LastWholeWord = wholeWord;
             _host.ClearHighlights();
             AllSearchRects.Clear();
             ResultPages.Clear();
@@ -86,61 +173,51 @@ namespace KillerPDF.Features
             _matchCursor = -1;
             PageCursor = -1;
             UnreadablePages = [];
+        }
 
-            if (string.IsNullOrWhiteSpace(query) || _host.CurrentFile is null)
+        private void ShowResults(string query, bool matchCase, bool wholeWord, SearchResult sr)
+        {
+            ClearResults(query, matchCase, wholeWord);
+            UnreadablePages = [.. sr.UnreadablePages];
+
+            // Text hidden under an edit, such as a replaced line, no longer counts as a match.
+            foreach (var kvp in sr.PageRects)
             {
-                _host.SetResultText("");
+                var visible = kvp.Value.Where(r => !_host.IsCovered(kvp.Key, r.Left, r.Bottom, r.Right, r.Top)).ToList();
+                if (visible.Count == 0) continue;
+                AllSearchRects[kvp.Key] = visible;
+                ResultPages.Add(kvp.Key);
+            }
+            ResultPages.Sort();
+
+            // Flatten every match into one reading-ordered list (page asc, then top-to-bottom,
+            // then left-to-right) so navigation steps word-by-word across the whole document.
+            foreach (var page in ResultPages)
+                foreach (var (left, bottom, right, top) in AllSearchRects[page].OrderByDescending(r => r.top).ThenBy(r => r.left))
+                    _matches.Add((page, left, bottom, right, top));
+
+            if (_matches.Count == 0)
+            {
+                // Pages that could not be read were not searched, so this is not a plain "No matches".
+                if (UnreadablePages.Count == 0)
+                {
+                    _host.SetResultText(_host.Loc("Str_Search_NoMatches"));
+                    return;
+                }
+                _host.SetResultText(string.Format(_host.Loc("Str_Search_NoMatchesPartial"), UnreadablePages.Count));
+                _host.SetStatus(SkippedPagesText());
                 return;
             }
 
-            try
-            {
-                var sr = SearchService.Search(_host.CurrentFile, query, MatchCase, WholeWord);
-                UnreadablePages = [.. sr.UnreadablePages];
+            _totalHits = _matches.Count;
 
-                // Text hidden under an edit, such as a replaced line, no longer counts as a match.
-                foreach (var kvp in sr.PageRects)
-                {
-                    var visible = kvp.Value.Where(r => !_host.IsCovered(kvp.Key, r.Left, r.Bottom, r.Right, r.Top)).ToList();
-                    if (visible.Count == 0) continue;
-                    AllSearchRects[kvp.Key] = visible;
-                    ResultPages.Add(kvp.Key);
-                }
-                ResultPages.Sort();
+            // Start at the first match on or after the current page.
+            int startPage = _host.CurrentPageIndex;
+            _matchCursor = _matches.FindIndex(m => m.page >= startPage);
+            if (_matchCursor < 0) _matchCursor = 0;
 
-                // Flatten every match into one reading-ordered list (page asc, then top-to-bottom,
-                // then left-to-right) so navigation steps word-by-word across the whole document.
-                foreach (var page in ResultPages)
-                    foreach (var (left, bottom, right, top) in AllSearchRects[page].OrderByDescending(r => r.top).ThenBy(r => r.left))
-                        _matches.Add((page, left, bottom, right, top));
-
-                if (_matches.Count == 0)
-                {
-                    // Pages that could not be read were not searched, so this is not a plain "No matches".
-                    if (UnreadablePages.Count == 0)
-                    {
-                        _host.SetResultText(_host.Loc("Str_Search_NoMatches"));
-                        return;
-                    }
-                    _host.SetResultText(string.Format(_host.Loc("Str_Search_NoMatchesPartial"), UnreadablePages.Count));
-                    _host.SetStatus(SkippedPagesText());
-                    return;
-                }
-
-                _totalHits = _matches.Count;
-
-                // Start at the first match on or after the current page.
-                int startPage = _host.CurrentPageIndex;
-                _matchCursor = _matches.FindIndex(m => m.page >= startPage);
-                if (_matchCursor < 0) _matchCursor = 0;
-
-                GoToCurrentMatch();
-                if (UnreadablePages.Count > 0) _host.SetStatus(SkippedPagesText());
-            }
-            catch
-            {
-                _host.SetResultText(_host.Loc("Str_Search_Error"));
-            }
+            GoToCurrentMatch();
+            if (UnreadablePages.Count > 0) _host.SetStatus(SkippedPagesText());
         }
 
         internal void Next()

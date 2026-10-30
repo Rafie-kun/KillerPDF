@@ -251,9 +251,19 @@ public partial class MainWindow
             List<PdfRedactionRegion> regions = [.. _macroRedaction.Marked];
             cancellationToken.ThrowIfCancellationRequested();
             // All terms in one pass, so the document is parsed once rather than twice per term.
-            foreach (var (page, rects) in SearchService.FindRedactionTermAreas(path, _macroRedaction.Terms))
-                foreach (var (left, bottom, right, top) in rects)
-                    regions.Add(new PdfRedactionRegion(page, new PdfContentBounds(left, bottom, right, top)));
+            try
+            {
+                foreach (var (page, rects) in SearchService.FindRedactionTermAreas(path, _macroRedaction.Terms))
+                    foreach (var (left, bottom, right, top) in rects)
+                        regions.Add(new PdfRedactionRegion(page, new PdfContentBounds(left, bottom, right, top)));
+            }
+            catch (RedactionPagesSkippedException unsearched)
+            {
+                // Failing the step writes nothing, and the run report names the pages. This runs on
+                // the macro's worker, and the translated text is the window's to read.
+                throw new InvalidOperationException(Dispatcher.Invoke(() => unsearched.Localized(
+                    Loc("Str_Macro_RedactSkippedPages"), Loc("Str_Search_PagesSkipped"))));
+            }
             if (regions.Count == 0) return new PdfMacroOperationResult(source);
 
             PdfContentRedactionPlan plan = PdfEngineIntegration.AnalyzeRedaction(

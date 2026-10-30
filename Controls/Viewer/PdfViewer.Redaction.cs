@@ -383,10 +383,12 @@ namespace KillerPDF.Controls
                 return;
             }
             // Mark only the matched characters, not the whole words the search highlights.
+            // The options are the ones these results were found with, so Match case and Whole word keep
+            // the marks to what was highlighted and off the same letters inside other words.
             // A page that cannot be read is not searched, and a redaction that skips it must say so.
             Dictionary<int, List<(double Left, double Bottom, double Right, double Top)>> matches;
             List<int> unreadable;
-            try { matches = SearchService.FindExactMatches(_currentFile!, Search.LastQuery, out unreadable); }
+            try { matches = SearchService.FindExactMatches(_currentFile!, Search.LastQuery, Search.LastMatchCase, Search.LastWholeWord, out unreadable); }
             catch (Exception) { matches = []; unreadable = [.. Search.UnreadablePages]; }
             if (matches.Count == 0)
                 matches = Search.PagesWithResults.ToDictionary(page => page,

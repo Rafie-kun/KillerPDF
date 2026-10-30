@@ -349,6 +349,8 @@ namespace KillerPDF.Shell
                 };
                 bar.BeginAnimation(UIElement.OpacityProperty, fade);
             }
+            _searchDebounce?.Stop();
+            Search.CancelPending();
             ClearSearchHighlights();
         }
 
@@ -374,6 +376,8 @@ namespace KillerPDF.Shell
 
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
+            // The text moved on, so a search still running is for something no longer asked.
+            Search.CancelPending();
             var text = _searchBox?.Text ?? "";
             if (text.Length < 2)
             {
@@ -384,7 +388,7 @@ namespace KillerPDF.Shell
                 return;
             }
             // Debounce: wait for a brief pause in typing before searching, so the first keystrokes
-            // on a large document don't lock the UI while it searches partial queries.
+            // on a large document don't start a whole-document read for each partial query.
             if (_searchDebounce is null)
             {
                 _searchDebounce = new System.Windows.Threading.DispatcherTimer
@@ -483,6 +487,8 @@ namespace KillerPDF.Shell
             string find = _searchBox?.Text ?? "";
             if (find.Length == 0 || _doc is null) return;
             if (!EnsureEditable()) return;
+            // The match on show belongs to the older results until the running search lands.
+            if (Search.IsSearching) return;
             if (Search.LastQuery != find || Search.CurrentMatch is null)
             {
                 _searchDebounce?.Stop();

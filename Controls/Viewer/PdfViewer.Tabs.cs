@@ -92,6 +92,7 @@ namespace KillerPDF.Controls
             public Dictionary<int, List<(double left, double bottom, double right, double top)>> AllSearchRects = [];
             public List<int> SearchResultPages = [];
             public IReadOnlyList<int> SearchUnreadablePages = [];
+            public Features.SearchController.ParkedSearch? SearchMatches;
 
             // Sidebar decoding belongs to the document tab, not merely the pane. A pane can host
             // several documents, and sharing one cache/token let a newly opened tab replace or
@@ -222,7 +223,6 @@ namespace KillerPDF.Controls
             s.CompleteDocumentSource = _completeDocumentSource;
             s.SuggestedName = _suggestedName;
             s.LoadedRevision = _loadedRevision;
-            s.SearchPageCursor = Search.PageCursor;
             // State.CurrentPage, not PageList.SelectedIndex: the sidebar is a window singleton
             // that follows the FOCUSED pane, so an unfocused pane capturing (the close path, the
             // save path's dirty check) was parking the OTHER pane's page number into its session.
@@ -243,9 +243,16 @@ namespace KillerPDF.Controls
             s.FormFontSizes    = _formFontSizes;
             s.UndoStack        = _undoStack;
             s.RedoStack        = _redoStack;
-            s.AllSearchRects   = Search.AllSearchRects;
-            s.SearchResultPages = Search.ResultPages;
-            s.SearchUnreadablePages = Search.UnreadablePages;
+            // The search controller is the window's and holds the focused pane's results, so an
+            // unfocused pane capturing (the close path, the save path's dirty check) leaves them.
+            if (Host!.IsViewerFocused(this))
+            {
+                s.SearchPageCursor = Search.PageCursor;
+                s.AllSearchRects   = Search.AllSearchRects;
+                s.SearchResultPages = Search.ResultPages;
+                s.SearchUnreadablePages = Search.UnreadablePages;
+                s.SearchMatches = Search.Capture();
+            }
             // Persist this document's fit/zoom/view/page so reopening it (even after a restart) restores it.
             // Two-pane guard: DocStates is keyed by file path, so the SAME file open in BOTH panes
             // (two independent copies) is two writers on one entry - whichever pane captured last
@@ -370,6 +377,7 @@ namespace KillerPDF.Controls
             Search.AllSearchRects = s.AllSearchRects;
             Search.ResultPages    = s.SearchResultPages;
             Search.UnreadablePages = s.SearchUnreadablePages;
+            Search.Restore(s.SearchMatches);
             TouchRenderLru(s);   // this tab is now active: keep its render cache, evict tabs beyond the window
         }
 

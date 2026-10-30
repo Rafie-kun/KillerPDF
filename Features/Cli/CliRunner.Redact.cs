@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Windows.Media;
 using KillerPdf.Engine.Authoring;
 using KillerPdf.Engine.Documents;
@@ -23,6 +24,8 @@ namespace KillerPDF.Features
             + "        [--sanitize all|comments,attachments,forms,layers,scripts,links,bookmarks]\n"
             + "  --rasterize lets pages whose marked content cannot be removed on its own become images;\n"
             + "  without it the command fails without saving output and lists the affected pages.\n"
+            + "  A search that could not read a page's text, form fields or comments exits 3 without saving\n"
+            + "  output and lists those pages, because a term there might be missed.\n"
             + "  --dry-run lists what would be redacted.";
 
         // ============================================================
@@ -111,11 +114,11 @@ namespace KillerPDF.Features
             // Form field values, annotation text and the saved marks are not page content; they all
             // come from one engine document, parsed once and only when something asks for it.
             var document = new Lazy<PdfDocument>(() => PdfEngineIntegration.OpenForReading(File.ReadAllBytes(source)));
+            var unreadable = new SortedSet<int>();
             if (searches.Count > 0)
             {
-                IReadOnlyList<PdfPageContent> pages;
-                using (PdfContentDocument content = PdfContentDocument.Open(source))
-                    pages = [.. Enumerable.Range(1, content.NumberOfPages).Select(content.GetPage)];
+                (IReadOnlyList<PdfPageContent?> pages, IReadOnlyList<int> unreadablePages) = SearchService.LoadPagesForReview(source);
+                unreadable.UnionWith(unreadablePages);
                 var found = new Dictionary<string, PdfRedactionMatch>();
                 try
                 {
@@ -130,8 +133,10 @@ namespace KillerPDF.Features
                         };
                         foreach (PdfRedactionMatch match in PdfRedactionSearch.Find(pages, search).Matches)
                             found.TryAdd(match.Id, match);
-                        foreach (PdfRedactionMatch match in PdfRedactionSearch.FindInAnnotations(document.Value, search).Matches)
+                        PdfRedactionReview annotations = PdfRedactionSearch.FindInAnnotations(document.Value, search);
+                        foreach (PdfRedactionMatch match in annotations.Matches)
                             found.TryAdd(match.Id, match);
+                        unreadable.UnionWith(annotations.UnreadableAnnotationPages);
                     }
                 }
                 catch (Exception ex) when (ex is ArgumentException or System.Text.RegularExpressions.RegexMatchTimeoutException)
@@ -143,6 +148,19 @@ namespace KillerPDF.Features
                     .ThenByDescending(match => match.Bounds.Top).ThenBy(match => match.Bounds.Left))
                     foreach (PdfContentBounds area in match.Areas.Count > 0 ? match.Areas : [match.Bounds])
                         areas.Add((match.PageIndex, area, match.Text));
+            }
+            // A page the search could not finish might hold a term, so this is never "nothing matched".
+            // Nothing is saved, and a script reads 3 as partial, the same as --search-text.
+            if (unreadable.Count > 0)
+            {
+                con.WriteLine("Redaction was not saved because the text, form fields or comments on some pages "
+                    + "could not be read, so a term there might be missed.");
+                con.WriteLine(JsonSerializer.Serialize(new
+                {
+                    path = source,
+                    unreadablePages = unreadable.Select(page => page + 1).ToArray()
+                }));
+                return 3;
             }
             IReadOnlyList<PdfPageInformation> geometry = PdfEngineIntegration.ReadPageInformation(source);
             foreach (int page in wholePages)
