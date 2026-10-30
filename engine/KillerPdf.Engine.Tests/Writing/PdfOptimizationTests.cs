@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using KillerPdf.Engine.Authoring;
 using KillerPdf.Engine.Documents;
 using KillerPdf.Engine.Editing;
@@ -442,6 +443,60 @@ public sealed class PdfOptimizationTests
                 Assert.Equal(new PdfName("F1"u8), instruction.Operands[0]));
     }
 
+    // Images that differ only in which copy of a color space they name become identical once the
+    // copies merge, which is what stopped Reduce on REDHAT-1717752-0.pdf.
+    [Fact]
+    public void PlanFinishesTheMergesThatEarlierMergesMakePossible()
+    {
+        PdfDocument document = DocumentWithImagesOverDuplicateColorSpaces();
+
+        PdfOptimizationResult result = PdfOptimizer.CreatePlan(document,
+            new PdfOptimizationOptions
+            {
+                PruneUnusedPageResources = true,
+                PackObjects = false,
+                CompressStructure = false
+            }).Apply();
+
+        Assert.Contains(PdfOptimizationChangeKind.PruneUnusedPageResources, result.VerifiedRemovals);
+        Assert.Single(Regex.Matches(Encoding.Latin1.GetString(result.Data.Span), @"/Subtype\s*/Image"));
+        Assert.Equal(3, PdfPageTree.Read(PdfDocument.Open(result.Data)).Pages.Count);
+    }
+
+    // An indirect /Length is written out as a number, so two identical images must not look different
+    // because each keeps its length in its own object.
+    [Fact]
+    public void PlanMergesIdenticalStreamsWhoseLengthsAreIndirect()
+    {
+        const string content = "/Im1 Do";
+        static string Image(int lengthObject) =>
+            $"<< /Type /XObject /Subtype /Image /Width 1 /Height 1 /BitsPerComponent 8 /ColorSpace /DeviceGray /Length {lengthObject} 0 R >>\nstream\nA\nendstream";
+        PdfDocument document = Assemble(
+        [
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R 4 0 R] /Count 2 /MediaBox [0 0 100 100] >>",
+            "<< /Type /Page /Parent 2 0 R /Contents 5 0 R /Resources << /XObject << /Im1 7 0 R >> >> >>",
+            "<< /Type /Page /Parent 2 0 R /Contents 6 0 R /Resources << /XObject << /Im1 8 0 R >> >> >>",
+            $"<< /Length {content.Length} >>\nstream\n{content}\nendstream",
+            $"<< /Length {content.Length} >>\nstream\n{content}\nendstream",
+            Image(9),
+            Image(10),
+            "1",
+            "1"
+        ]);
+
+        PdfOptimizationResult result = PdfOptimizer.CreatePlan(document,
+            new PdfOptimizationOptions
+            {
+                PruneUnusedPageResources = true,
+                PackObjects = false,
+                CompressStructure = false
+            }).Apply();
+
+        Assert.Contains(PdfOptimizationChangeKind.PruneUnusedPageResources, result.VerifiedRemovals);
+        Assert.Single(Regex.Matches(Encoding.Latin1.GetString(result.Data.Span), @"/Subtype\s*/Image"));
+    }
+
     [Fact]
     public void PlanConsolidatesEquivalentResourcesStoredAsSeparateObjects()
     {
@@ -638,6 +693,38 @@ public sealed class PdfOptimizationTests
                 ? ["<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>"]
                 : Array.Empty<string>()
         ];
+        return Assemble(objects);
+    }
+
+    // Pages 1 and 2 each hold their own copy of one color space and an image that names it. Page 3
+    // draws both images, so it ends with two names for one object when they merge.
+    private static PdfDocument DocumentWithImagesOverDuplicateColorSpaces()
+    {
+        const string colorSpace = "[/Indexed /DeviceRGB 0 <000000>]";
+        const string oneImage = "/Im1 Do";
+        const string bothImages = "/Im1 Do /Im2 Do";
+        static string Image(int colorSpaceObject) =>
+            $"<< /Type /XObject /Subtype /Image /Width 1 /Height 1 /BitsPerComponent 8 /ColorSpace {colorSpaceObject} 0 R /Length 1 >>\nstream\nA\nendstream";
+        static string Content(string text) => $"<< /Length {text.Length} >>\nstream\n{text}\nendstream";
+        return Assemble(
+        [
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R 4 0 R 5 0 R] /Count 3 /MediaBox [0 0 100 100] >>",
+            "<< /Type /Page /Parent 2 0 R /Contents 6 0 R /Resources << /ColorSpace << /CS1 9 0 R >> /XObject << /Im1 11 0 R >> >> >>",
+            "<< /Type /Page /Parent 2 0 R /Contents 7 0 R /Resources << /ColorSpace << /CS1 10 0 R >> /XObject << /Im1 12 0 R >> >> >>",
+            "<< /Type /Page /Parent 2 0 R /Contents 8 0 R /Resources << /XObject << /Im1 11 0 R /Im2 12 0 R >> >> >>",
+            Content("/CS1 cs " + oneImage),
+            Content("/CS1 cs " + oneImage),
+            Content(bothImages),
+            colorSpace,
+            colorSpace,
+            Image(9),
+            Image(10)
+        ]);
+    }
+
+    private static PdfDocument Assemble(string[] objects)
+    {
         var pdf = new StringBuilder("%PDF-1.7\n");
         var offsets = new List<int>();
         for (int index = 0; index < objects.Length; index++)

@@ -586,8 +586,20 @@ public static class PdfDocumentWriter
         return originalCount - objects.Count;
     }
 
+    // Merging two resources can make the resources that name them identical in turn, such as images
+    // that differ only in which copy of a color space they use, so this repeats until a pass finds
+    // nothing. Each pass removes at least one object, so it ends.
     private static void DeduplicatePageResources(
         PdfDocument document, List<WritableObject> objects, RewriteContext? context = null)
+    {
+        var merged = new Dictionary<(int ObjectNumber, int Generation),
+            (int ObjectNumber, int Generation)>();
+        while (DeduplicatePageResourcesOnce(document, objects, context, merged)) { }
+    }
+
+    private static bool DeduplicatePageResourcesOnce(
+        PdfDocument document, List<WritableObject> objects, RewriteContext? context,
+        Dictionary<(int ObjectNumber, int Generation), (int ObjectNumber, int Generation)> merged)
     {
         string[] categories =
         [
@@ -597,6 +609,11 @@ public static class PdfDocumentWriter
             StringComparer.Ordinal);
         var replacements = new Dictionary<(int ObjectNumber, int Generation),
             (int ObjectNumber, int Generation)>();
+        // Fingerprints read the objects as earlier passes rewrote them, because the page entries
+        // below still name the objects as the source document does.
+        var current = new Dictionary<(int ObjectNumber, int Generation), PdfObject>();
+        foreach (WritableObject item in objects)
+            current[(item.ObjectNumber, item.Generation)] = item.Value;
         foreach (PdfPageTreeEntry page in PdfPageTree.Read(document).Pages)
         {
             if (!page.InheritedValues.TryGetValue(new PdfName("Resources"u8),
@@ -615,9 +632,11 @@ public static class PdfDocumentWriter
                 {
                     if (value is not PdfIndirectReference reference) continue;
                     var identity = (reference.ObjectNumber, reference.Generation);
+                    while (merged.TryGetValue(identity, out var survivor)) identity = survivor;
                     if (replacements.ContainsKey(identity)) continue;
                     string key = category + ":" + ResourceFingerprint(
-                        context?.Resolve(reference) ?? document.Resolve(reference));
+                        current.TryGetValue(identity, out PdfObject? rewritten) ? rewritten
+                            : context?.Resolve(reference) ?? document.Resolve(reference));
                     if (canonical.TryGetValue(key, out var retained)
                         && retained != identity)
                         replacements[identity] = retained;
@@ -630,7 +649,7 @@ public static class PdfDocumentWriter
                      (context?.Trailer ?? document.CrossReferences.MergedTrailer).Any(entry =>
                          ReferencesObject(entry.Value, identity))).ToArray())
             replacements.Remove(identity);
-        if (replacements.Count == 0) return;
+        if (replacements.Count == 0) return false;
         for (int index = 0; index < objects.Count; index++)
             objects[index] = objects[index] with
             {
@@ -638,13 +657,18 @@ public static class PdfDocumentWriter
             };
         objects.RemoveAll(item => replacements.ContainsKey(
             (item.ObjectNumber, item.Generation)));
+        foreach (var (identity, survivor) in replacements) merged[identity] = survivor;
+        return true;
     }
 
     // A resource entry can be a stream, such as an image XObject or a shading pattern.
     // A stream has no direct serialization, so its identity comes from its dictionary
     // together with a digest of the payload rather than from writing the object itself.
-    private static string ResourceFingerprint(PdfObject value) => value is PdfStream stream
-        ? Convert.ToHexString(PdfObjectWriter.Write(stream.Dictionary)) + ":"
+    // /Length is left out: the digest covers it, and an indirect one names a different object
+    // in each copy of a stream that is written with the same number.
+    internal static string ResourceFingerprint(PdfObject value) => value is PdfStream stream
+        ? Convert.ToHexString(PdfObjectWriter.Write(new PdfDictionary(stream.Dictionary
+                .Where(entry => !entry.Key.Equals(new PdfName("Length"u8)))))) + ":"
             + Convert.ToHexString(SHA256.HashData(stream.EncodedData.Span))
         : Convert.ToHexString(PdfObjectWriter.Write(value));
 

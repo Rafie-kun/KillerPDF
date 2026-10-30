@@ -444,8 +444,10 @@ public sealed partial class PdfOptimizationPlan
             tree.Pages.All(page => !page.Dictionary.ContainsKey(new PdfName("Thumb"u8))));
         Verify(PdfOptimizationChangeKind.FlattenOptionalContent,
             PdfOptionalContentReader.Read(document).Groups.Count == 0);
+        // Writing merges identical objects after their names were consolidated, so a page can end
+        // with two names for one object, which costs nothing and is not content that was left behind.
         Verify(PdfOptimizationChangeKind.PruneUnusedPageResources,
-            PdfOptimizer.UnusedResourcePages(document).Count == 0
+            PdfOptimizer.UnusedResourcePages(document, includeAliases: false).Count == 0
             && PdfDocumentWriter.CountDuplicatePageResourceObjects(document) == 0);
         Verify(PdfOptimizationChangeKind.PruneUnreachableObjects,
             PdfDocumentWriter.CountUnreachableObjects(document) == 0);
@@ -658,7 +660,7 @@ public static class PdfOptimizer
             compressedStreamObjectNumbers, original, referenceRepairs, attachmentKeys);
     }
 
-    internal static IReadOnlyList<int> UnusedResourcePages(PdfDocument document)
+    internal static IReadOnlyList<int> UnusedResourcePages(PdfDocument document, bool includeAliases = true)
     {
         PdfPageTree tree = PdfPageTree.Read(document);
         var reader = new PdfPageContentReader(document);
@@ -701,7 +703,7 @@ public static class PdfOptimizer
                 resources.TryGetValue(Name(category), out PdfObject? categoryValue)
                 && Resolve(document, categoryValue) is PdfDictionary dictionary
                 && (dictionary.Keys.Any(key => !used.Contains(key))
-                    || DuplicateAliases(document, dictionary).Count > 0);
+                    || includeAliases && DuplicateAliases(document, dictionary).Count > 0);
         }
         return Array.AsReadOnly(result.ToArray());
     }
@@ -924,7 +926,7 @@ public static class PdfOptimizer
         var aliases = new Dictionary<PdfName, PdfName>();
         foreach ((PdfName name, PdfObject value) in dictionary)
         {
-            string identity = ResourceFingerprint(Resolve(document, value));
+            string identity = PdfDocumentWriter.ResourceFingerprint(Resolve(document, value));
             if (canonical.TryGetValue(identity, out PdfName? first))
                 aliases[name] = first;
             else
@@ -932,15 +934,6 @@ public static class PdfOptimizer
         }
         return aliases;
     }
-
-    // A resource entry can be a stream, such as an image XObject. A stream has no direct
-    // serialization, so its identity comes from its dictionary together with a digest of
-    // the payload rather than from writing the object itself.
-    private static string ResourceFingerprint(PdfObject value) => value is PdfStream stream
-        ? Convert.ToHexString(PdfObjectWriter.Write(stream.Dictionary)) + ":"
-            + Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(
-                stream.EncodedData.Span))
-        : Convert.ToHexString(PdfObjectWriter.Write(value));
 
     private static PdfName Name(string value) => new(System.Text.Encoding.ASCII.GetBytes(value));
 
