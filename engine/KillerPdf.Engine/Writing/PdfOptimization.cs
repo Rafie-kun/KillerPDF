@@ -733,25 +733,33 @@ public static class PdfOptimizer
 
     internal static bool HasJavaScriptActions(PdfDocument document)
     {
+        // An explicit stack keeps a long /Next chain from becoming a deep call chain.
         var visited = new HashSet<(int ObjectNumber, int Generation)>();
-        return Visit(document.Trailer[new PdfName("Root"u8)]);
-
-        bool Visit(PdfObject value)
+        var pending = new Stack<PdfObject>();
+        pending.Push(document.Trailer[new PdfName("Root"u8)]);
+        while (pending.Count > 0)
         {
+            PdfObject value = pending.Pop();
             if (value is PdfIndirectReference reference)
             {
-                if (!visited.Add((reference.ObjectNumber, reference.Generation))) return false;
+                if (!visited.Add((reference.ObjectNumber, reference.Generation))) continue;
                 value = document.Resolve(reference);
             }
             if (IsJavaScriptAction(document, value)) return true;
-            return value switch
+            switch (value)
             {
-                PdfDictionary dictionary => dictionary.Values.Any(Visit),
-                PdfArray array => array.Any(Visit),
-                PdfStream stream => Visit(stream.Dictionary),
-                _ => false
-            };
+                case PdfDictionary dictionary:
+                    foreach (PdfObject item in dictionary.Values) pending.Push(item);
+                    break;
+                case PdfArray array:
+                    foreach (PdfObject item in array) pending.Push(item);
+                    break;
+                case PdfStream stream:
+                    foreach (PdfObject item in stream.Dictionary.Values) pending.Push(item);
+                    break;
+            }
         }
+        return false;
     }
 
     internal static PdfDocument RemoveJavaScriptActions(PdfDocument document)
@@ -759,21 +767,29 @@ public static class PdfOptimizer
         var update = new PdfIncrementalUpdateBuilder(document);
         var visited = new HashSet<(int ObjectNumber, int Generation)>();
         bool changed = false;
+        // Each indirect object is sanitized on its own, so they are queued instead of
+        // recursed into and a long /Next chain stays off the call stack.
+        var pending = new Stack<PdfIndirectReference>();
         Visit(document.Trailer[new PdfName("Root"u8)]);
+        while (pending.Count > 0)
+        {
+            PdfIndirectReference reference = pending.Pop();
+            PdfObject resolved = document.Resolve(reference);
+            PdfObject sanitized = VisitDirect(resolved);
+            if (!ReferenceEquals(resolved, sanitized))
+            {
+                update.ReplaceObject(reference.ObjectNumber, sanitized);
+                changed = true;
+            }
+        }
         return changed ? PdfDocument.Open(update.Build()) : document;
 
         PdfObject Visit(PdfObject value)
         {
             if (value is PdfIndirectReference reference)
             {
-                if (!visited.Add((reference.ObjectNumber, reference.Generation))) return reference;
-                PdfObject resolved = document.Resolve(reference);
-                PdfObject sanitized = VisitDirect(resolved);
-                if (!ReferenceEquals(resolved, sanitized))
-                {
-                    update.ReplaceObject(reference.ObjectNumber, sanitized);
-                    changed = true;
-                }
+                if (visited.Add((reference.ObjectNumber, reference.Generation)))
+                    pending.Push(reference);
                 return reference;
             }
             return VisitDirect(value);

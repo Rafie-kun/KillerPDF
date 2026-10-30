@@ -727,39 +727,64 @@ public static class PdfDocumentWriter
                 item => (item.ObjectNumber, item.Generation), item => item.Value);
         var reachable = new HashSet<(int ObjectNumber, int Generation)>();
         PdfDictionary trailer = BuildTrailer(document, 1, root, options, context);
-        Visit(trailer, 0);
+        // The object writer replaces every stream /Length with the direct byte count, so an
+        // indirect length integer is not reachable from the output and must not be kept.
+        WalkGraph(trailer, reference =>
+        {
+            var identity = (reference.ObjectNumber, reference.Generation);
+            if (!reachable.Add(identity)) return null;
+            return currentObjects.TryGetValue(identity, out PdfObject? referenced)
+                ? referenced
+                : throw new InvalidOperationException(
+                    "The output object graph contains a stale indirect reference.");
+        }, 256, "The output object graph is too deeply nested to prune safely.",
+            skipStreamLength: true);
         objects.RemoveAll(item => !reachable.Contains(
             (item.ObjectNumber, item.Generation)));
+    }
 
-        void Visit(PdfObject value, int depth)
+    // Walks a graph with an explicit stack so the length of a /Next or /Parent chain costs
+    // heap, not call depth. The follow callback returns the object to descend into, or null
+    // for a reference already seen, which keeps a cyclic or huge graph finite. Only direct
+    // nesting inside one object is bounded by maximumDirectDepth.
+    private static void WalkGraph(
+        PdfObject start, Func<PdfIndirectReference, PdfObject?> follow,
+        int maximumDirectDepth, string tooDeepMessage, bool skipStreamLength = false)
+    {
+        var pending = new Stack<(PdfObject Value, int Depth)>();
+        pending.Push((start, 0));
+        var children = new List<PdfObject>();
+        while (pending.Count > 0)
         {
-            if (depth > 256)
-                throw new NotSupportedException(
-                    "The output object graph is too deeply nested to prune safely.");
+            (PdfObject value, int depth) = pending.Pop();
+            if (depth > maximumDirectDepth)
+                throw new NotSupportedException(tooDeepMessage);
             if (value is PdfIndirectReference reference)
             {
-                var identity = (reference.ObjectNumber, reference.Generation);
-                if (!reachable.Add(identity)) return;
-                if (!currentObjects.TryGetValue(identity, out PdfObject? referenced))
-                    throw new InvalidOperationException(
-                        "The output object graph contains a stale indirect reference.");
-                Visit(referenced, depth + 1);
-                return;
+                PdfObject? referenced = follow(reference);
+                if (referenced is not null) pending.Push((referenced, 0));
+                continue;
             }
+            children.Clear();
             if (value is PdfArray array)
+                children.AddRange(array);
+            else
             {
-                foreach (PdfObject item in array) Visit(item, depth + 1);
-                return;
+                PdfDictionary? dictionary = value switch
+                {
+                    PdfDictionary directDictionary => directDictionary,
+                    PdfStream stream => stream.Dictionary,
+                    _ => null
+                };
+                if (dictionary is null) continue;
+                bool isStream = value is PdfStream;
+                foreach (KeyValuePair<PdfName, PdfObject> entry in dictionary)
+                    if (!(skipStreamLength && isStream && entry.Key.Equals(LengthName)))
+                        children.Add(entry.Value);
             }
-            PdfDictionary? dictionary = value switch
-            {
-                PdfDictionary directDictionary => directDictionary,
-                PdfStream stream => stream.Dictionary,
-                _ => null
-            };
-            if (dictionary is null) return;
-            foreach (KeyValuePair<PdfName, PdfObject> entry in dictionary)
-                Visit(entry.Value, depth + 1);
+            // Pushed in reverse so entries are visited in document order.
+            for (int index = children.Count - 1; index >= 0; index--)
+                pending.Push((children[index], depth + 1));
         }
     }
 
@@ -971,37 +996,15 @@ public static class PdfDocumentWriter
                     maximumDepth: 64);
 
         void Validate(
-            PdfObject value, string description, int depth, int maximumDepth)
-        {
-            if (depth > maximumDepth)
-                throw new NotSupportedException(
-                    "A preserved trailer graph is too deeply nested.");
-            if (value is PdfIndirectReference reference)
+            PdfObject value, string description, int _, int maximumDepth)
+            => WalkGraph(value, reference =>
             {
                 if (!IsLive(reference))
                     throw new InvalidOperationException(
                         $"{description} contains a stale indirect reference.");
-                if (!visited.Add((reference.ObjectNumber, reference.Generation))) return;
-                Validate(context?.Resolve(reference) ?? document.Resolve(reference), description, depth + 1,
-                    maximumDepth);
-                return;
-            }
-            if (value is PdfArray array)
-            {
-                foreach (PdfObject item in array)
-                    Validate(item, description, depth + 1, maximumDepth);
-                return;
-            }
-            PdfDictionary? dictionary = value switch
-            {
-                PdfDictionary directDictionary => directDictionary,
-                PdfStream stream => stream.Dictionary,
-                _ => null
-            };
-            if (dictionary is null) return;
-            foreach (var entry in dictionary)
-                Validate(entry.Value, description, depth + 1, maximumDepth);
-        }
+                return visited.Add((reference.ObjectNumber, reference.Generation))
+                    ? context?.Resolve(reference) ?? document.Resolve(reference) : null;
+            }, maximumDepth, "A preserved trailer graph is too deeply nested.");
 
         bool IsLive(PdfIndirectReference reference)
         {
@@ -1024,39 +1027,14 @@ public static class PdfDocumentWriter
         Dictionary<(int ObjectNumber, int Generation), PdfObject> currentObjects =
             objects.ToDictionary(
                 item => (item.ObjectNumber, item.Generation), item => item.Value);
-        Validate(root, 0);
-
-        void Validate(PdfObject value, int depth)
+        WalkGraph(root, reference =>
         {
-            if (depth > 256)
-                throw new NotSupportedException(
-                    "The preserved catalog graph is too deeply nested.");
-            if (value is PdfIndirectReference reference)
-            {
-                if (!IsLive(reference))
-                    throw new InvalidOperationException(
-                        "Trailer /Root value contains a stale indirect reference.");
-                if (!visited.Add((reference.ObjectNumber, reference.Generation))) return;
-                Validate(currentObjects[(reference.ObjectNumber, reference.Generation)],
-                    depth + 1);
-                return;
-            }
-            if (value is PdfArray array)
-            {
-                foreach (PdfObject item in array)
-                    Validate(item, depth + 1);
-                return;
-            }
-            PdfDictionary? dictionary = value switch
-            {
-                PdfDictionary directDictionary => directDictionary,
-                PdfStream stream => stream.Dictionary,
-                _ => null
-            };
-            if (dictionary is null) return;
-            foreach (KeyValuePair<PdfName, PdfObject> entry in dictionary)
-                Validate(entry.Value, depth + 1);
-        }
+            if (!IsLive(reference))
+                throw new InvalidOperationException(
+                    "Trailer /Root value contains a stale indirect reference.");
+            return visited.Add((reference.ObjectNumber, reference.Generation))
+                ? currentObjects[(reference.ObjectNumber, reference.Generation)] : null;
+        }, 256, "The preserved catalog graph is too deeply nested.");
 
         bool IsLive(PdfIndirectReference reference)
             => currentObjects.ContainsKey(
@@ -1090,37 +1068,15 @@ public static class PdfDocumentWriter
                 EncryptName, out PdfObject encryption))
             Validate(encryption, "Trailer /Encrypt value", 0);
 
-        void Validate(PdfObject value, string description, int depth)
-        {
-            if (depth > 64)
-                throw new NotSupportedException(
-                    "A preserved trailer graph is too deeply nested.");
-            if (value is PdfIndirectReference reference)
+        void Validate(PdfObject value, string description, int _)
+            => WalkGraph(value, reference =>
             {
                 var identity = (reference.ObjectNumber, reference.Generation);
                 if (!currentObjects.TryGetValue(identity, out PdfObject? resolved))
                     throw new InvalidOperationException(
                         $"{description} contains a reference to an object omitted from the full rewrite.");
-                if (!visited.Add(identity)) return;
-                Validate(resolved, description, depth + 1);
-                return;
-            }
-            if (value is PdfArray array)
-            {
-                foreach (PdfObject item in array)
-                    Validate(item, description, depth + 1);
-                return;
-            }
-            PdfDictionary? dictionary = value switch
-            {
-                PdfDictionary directDictionary => directDictionary,
-                PdfStream stream => stream.Dictionary,
-                _ => null
-            };
-            if (dictionary is null) return;
-            foreach (var entry in dictionary)
-                Validate(entry.Value, description, depth + 1);
-        }
+                return visited.Add(identity) ? resolved : null;
+            }, 64, "A preserved trailer graph is too deeply nested.");
     }
 
     private static void ValidateWritableObjectGraphs(
@@ -1134,37 +1090,15 @@ public static class PdfDocumentWriter
             Validate(item.Value,
                 $"Object {item.ObjectNumber} {item.Generation}", 0);
 
-        void Validate(PdfObject value, string description, int depth)
-        {
-            if (depth > 256)
-                throw new NotSupportedException(
-                    "A writable object graph is too deeply nested.");
-            if (value is PdfIndirectReference reference)
+        void Validate(PdfObject value, string description, int _)
+            => WalkGraph(value, reference =>
             {
                 var identity = (reference.ObjectNumber, reference.Generation);
                 if (!currentObjects.TryGetValue(identity, out PdfObject? resolved))
                     throw new InvalidOperationException(
                         $"{description} contains a reference to an object omitted from the full rewrite.");
-                if (!visited.Add(identity)) return;
-                Validate(resolved, description, depth + 1);
-                return;
-            }
-            if (value is PdfArray array)
-            {
-                foreach (PdfObject item in array)
-                    Validate(item, description, depth + 1);
-                return;
-            }
-            PdfDictionary? dictionary = value switch
-            {
-                PdfDictionary directDictionary => directDictionary,
-                PdfStream stream => stream.Dictionary,
-                _ => null
-            };
-            if (dictionary is null) return;
-            foreach (var entry in dictionary)
-                Validate(entry.Value, description, depth + 1);
-        }
+                return visited.Add(identity) ? resolved : null;
+            }, 256, "A writable object graph is too deeply nested.");
     }
 
     private static void ValidateDocumentInformation(
@@ -1200,43 +1134,21 @@ public static class PdfDocumentWriter
         PdfDocument document, PdfDictionary information, RewriteContext? context = null)
     {
         var visited = new HashSet<(int ObjectNumber, int Generation)>();
-        Validate(information, 0);
-
-        void Validate(PdfObject value, int depth)
+        WalkGraph(information, reference =>
         {
-            if (depth > 64)
-                throw new NotSupportedException(
-                    "The preserved document-information graph is too deeply nested.");
-            if (value is PdfIndirectReference reference)
-            {
-                if (!document.CrossReferences.TryGetValue(reference.ObjectNumber,
-                        out PdfCrossReferenceEntry entry)
-                    || entry.Type == PdfCrossReferenceEntryType.InUse
-                        && entry.Field2 != reference.Generation
-                    || entry.Type == PdfCrossReferenceEntryType.Compressed
-                        && reference.Generation != 0
-                    || entry.Type is not (PdfCrossReferenceEntryType.InUse
-                        or PdfCrossReferenceEntryType.Compressed))
-                    throw new InvalidOperationException(
-                        "Trailer /Info value contains a stale indirect reference.");
-                if (!visited.Add((reference.ObjectNumber, reference.Generation))) return;
-                Validate(context?.Resolve(reference) ?? document.Resolve(reference), depth + 1);
-                return;
-            }
-            if (value is PdfArray array)
-            {
-                foreach (PdfObject item in array) Validate(item, depth + 1);
-                return;
-            }
-            PdfDictionary? dictionary = value switch
-            {
-                PdfDictionary directDictionary => directDictionary,
-                PdfStream stream => stream.Dictionary,
-                _ => null
-            };
-            if (dictionary is null) return;
-            foreach (var entry in dictionary) Validate(entry.Value, depth + 1);
-        }
+            if (!document.CrossReferences.TryGetValue(reference.ObjectNumber,
+                    out PdfCrossReferenceEntry entry)
+                || entry.Type == PdfCrossReferenceEntryType.InUse
+                    && entry.Field2 != reference.Generation
+                || entry.Type == PdfCrossReferenceEntryType.Compressed
+                    && reference.Generation != 0
+                || entry.Type is not (PdfCrossReferenceEntryType.InUse
+                    or PdfCrossReferenceEntryType.Compressed))
+                throw new InvalidOperationException(
+                    "Trailer /Info value contains a stale indirect reference.");
+            return visited.Add((reference.ObjectNumber, reference.Generation))
+                ? context?.Resolve(reference) ?? document.Resolve(reference) : null;
+        }, 64, "The preserved document-information graph is too deeply nested.");
     }
 
     private static void WriteAscii(Stream output, string value)
