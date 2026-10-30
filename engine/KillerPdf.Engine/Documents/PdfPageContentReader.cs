@@ -16,6 +16,8 @@ public sealed class PdfPageContentReader
     internal const int MaximumRecoveredFormExpansions = 64;
     internal const string TruncatedStreamDiagnostic =
         "Page content was truncated because a stream could not be decoded.";
+    internal const string UndecodableStreamDiagnostic =
+        "Page content is missing because a stream could not be decoded.";
     private readonly PdfDocument _document;
     private readonly PdfPageTree _tree;
     private readonly Dictionary<PdfDictionary, PdfExtractionFont> _fontCache = [];
@@ -190,12 +192,7 @@ public sealed class PdfPageContentReader
     {
         if (pageIndex < 0 || pageIndex >= PageCount) throw new ArgumentOutOfRangeException(nameof(pageIndex));
         var page = _tree.Pages[pageIndex];
-        PdfContentBounds box;
-        if (page.InheritedValues.TryGetValue(Name("CropBox"), out var crop)) box = Box(crop);
-        else if (page.InheritedValues.TryGetValue(Name("MediaBox"), out var media)) box = Box(media);
-        // PdfPageInformation lists such a page as US Letter under recovery, so its text reads on that box.
-        else if (_document.UsesCompatibilityRecovery) box = new(0, 0, 612, 792);
-        else throw new InvalidOperationException($"Page {pageIndex + 1} has no effective media box.");
+        PdfContentBounds box = PdfPageInformation.EffectiveBox(_document, page);
         var resources = page.InheritedValues.TryGetValue(Name("Resources"), out var inherited)
             ? Resolve(inherited) as PdfDictionary ?? Empty : Empty;
         var instructions = new List<PdfContentInstruction>();
@@ -259,8 +256,9 @@ public sealed class PdfPageContentReader
                 if (Resolve(item) is PdfNull) continue;
                 if (Resolve(item) is not PdfStream stream)
                 {
-                    if (_document.UsesCompatibilityRecovery) continue;
-                    throw new FormatException("Page content is not a stream.");
+                    if (!_document.UsesCompatibilityRecovery) throw new FormatException("Page content is not a stream.");
+                    diagnostics.Add(UndecodableStreamDiagnostic);
+                    continue;
                 }
                 byte[] bytes;
                 try
@@ -285,6 +283,13 @@ public sealed class PdfPageContentReader
                 stream, PdfContentStreamReader.MaximumSourceBytes);
             decodedBytes += bytes.Length;
             if (decodedBytes > PdfContentStreamReader.MaximumSourceBytes) throw new FormatException("Expanded page content exceeds the extraction limit.");
+            // Recovery turns a stream it cannot inflate into an empty one, and a compressed empty
+            // stream is valid, so only a strict read can tell the two apart.
+            if (bytes.Length == 0 && _document.UsesCompatibilityRecovery && !stream.EncodedData.IsEmpty)
+            {
+                try { PdfStreamDecoder.Decode(stream, _document.Resolve, PdfContentStreamReader.MaximumSourceBytes); }
+                catch (PdfFilterException) { diagnostics.Add(UndecodableStreamDiagnostic); }
+            }
             return bytes;
         }
         PdfObject Resource(PdfDictionary current, string category, PdfName key)

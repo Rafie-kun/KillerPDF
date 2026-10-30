@@ -29,63 +29,7 @@ public sealed record PdfPageInformation
         for (int index = 0; index < tree.Pages.Count; index++)
         {
             PdfPageTreeEntry page = tree.Pages[index];
-            PdfObject pageBox =
-                page.InheritedValues.TryGetValue(Name("CropBox"), out PdfObject? crop)
-                    ? crop
-                    : page.InheritedValues.TryGetValue(Name("MediaBox"), out PdfObject? media)
-                        ? media
-                        : document.UsesCompatibilityRecovery
-                            ? CompatibilityDefaultMediaBox
-                            : throw new InvalidOperationException(
-                                $"Page {index + 1} has no effective media box.");
-            double x1, y1, x2, y2, width, height;
-            try
-            {
-                PdfArray box = ResolveArray(document, pageBox,
-                    $"Page {index + 1} effective page box");
-                if (box.Count != 4)
-                    throw new InvalidOperationException(
-                        $"Page {index + 1} effective page box does not contain four numbers.");
-                x1 = Number(document, box[0], index);
-                y1 = Number(document, box[1], index);
-                x2 = Number(document, box[2], index);
-                y2 = Number(document, box[3], index);
-                if (crop is not null && page.InheritedValues.TryGetValue(Name("MediaBox"), out PdfObject? physicalBox))
-                {
-                    PdfArray physical = ResolveArray(document, physicalBox, $"Page {index + 1} media box");
-                    if (physical.Count != 4)
-                        throw new InvalidOperationException($"Page {index + 1} media box does not contain four numbers.");
-                    double mx1 = Number(document, physical[0], index), my1 = Number(document, physical[1], index);
-                    double mx2 = Number(document, physical[2], index), my2 = Number(document, physical[3], index);
-                    double left = Math.Max(Math.Min(x1, x2), Math.Min(mx1, mx2));
-                    double bottom = Math.Max(Math.Min(y1, y2), Math.Min(my1, my2));
-                    double right = Math.Min(Math.Max(x1, x2), Math.Max(mx1, mx2));
-                    double top = Math.Min(Math.Max(y1, y2), Math.Max(my1, my2));
-                    if (right > left && top > bottom)
-                        (x1, y1, x2, y2) = (left, bottom, right, top);
-                }
-                width = Math.Abs(x2 - x1);
-                height = Math.Abs(y2 - y1);
-                if (!double.IsFinite(width) || !double.IsFinite(height) || width <= 0 || height <= 0)
-                    throw new InvalidOperationException(
-                        $"Page {index + 1} effective page box is degenerate.");
-            }
-            catch (InvalidOperationException) when (document.UsesCompatibilityRecovery)
-            {
-                // An unusable crop box does not invalidate a usable media box.
-                if (crop is null || !TryReadCompatibilityMediaBox(
-                    document, page, index, out x1, out y1, out x2, out y2,
-                    out width, out height))
-                {
-                    // Mainstream viewers fall back to US Letter when no usable box remains.
-                    x1 = 0;
-                    y1 = 0;
-                    x2 = 612;
-                    y2 = 792;
-                    width = 612;
-                    height = 792;
-                }
-            }
+            PdfContentBounds box = EffectiveBox(document, page);
             int rotation = 0;
             if (page.InheritedValues.TryGetValue(Name("Rotate"), out PdfObject? rotationValue))
             {
@@ -106,14 +50,80 @@ public sealed record PdfPageInformation
             }
             result[index] = new PdfPageInformation
             {
-                Left = Math.Min(x1, x2),
-                Bottom = Math.Min(y1, y2),
-                Width = width,
-                Height = height,
+                Left = box.Left,
+                Bottom = box.Bottom,
+                Width = box.Width,
+                Height = box.Height,
                 Rotation = rotation
             };
         }
         return result;
+    }
+
+    /// <summary>
+    /// Reads the box a page is shown in: its crop box cut to its media box, or the crop box alone
+    /// when the two do not meet. The viewer, the renderer, the page content reader and the
+    /// redaction rewriter all place content in this frame.
+    /// </summary>
+    internal static PdfContentBounds EffectiveBox(PdfDocument document, PdfPageTreeEntry page)
+    {
+        int index = page.Index;
+        PdfObject pageBox =
+            page.InheritedValues.TryGetValue(Name("CropBox"), out PdfObject? crop)
+                ? crop
+                : page.InheritedValues.TryGetValue(Name("MediaBox"), out PdfObject? media)
+                    ? media
+                    : document.UsesCompatibilityRecovery
+                        ? CompatibilityDefaultMediaBox
+                        : throw new InvalidOperationException(
+                            $"Page {index + 1} has no effective media box.");
+        double x1, y1, x2, y2, width, height;
+        try
+        {
+            PdfArray box = ResolveArray(document, pageBox,
+                $"Page {index + 1} effective page box");
+            if (box.Count != 4)
+                throw new InvalidOperationException(
+                    $"Page {index + 1} effective page box does not contain four numbers.");
+            x1 = Number(document, box[0], index);
+            y1 = Number(document, box[1], index);
+            x2 = Number(document, box[2], index);
+            y2 = Number(document, box[3], index);
+            if (crop is not null && page.InheritedValues.TryGetValue(Name("MediaBox"), out PdfObject? physicalBox))
+            {
+                PdfArray physical = ResolveArray(document, physicalBox, $"Page {index + 1} media box");
+                if (physical.Count != 4)
+                    throw new InvalidOperationException($"Page {index + 1} media box does not contain four numbers.");
+                double mx1 = Number(document, physical[0], index), my1 = Number(document, physical[1], index);
+                double mx2 = Number(document, physical[2], index), my2 = Number(document, physical[3], index);
+                double left = Math.Max(Math.Min(x1, x2), Math.Min(mx1, mx2));
+                double bottom = Math.Max(Math.Min(y1, y2), Math.Min(my1, my2));
+                double right = Math.Min(Math.Max(x1, x2), Math.Max(mx1, mx2));
+                double top = Math.Min(Math.Max(y1, y2), Math.Max(my1, my2));
+                if (right > left && top > bottom)
+                    (x1, y1, x2, y2) = (left, bottom, right, top);
+            }
+            width = Math.Abs(x2 - x1);
+            height = Math.Abs(y2 - y1);
+            if (!double.IsFinite(width) || !double.IsFinite(height) || width <= 0 || height <= 0)
+                throw new InvalidOperationException(
+                    $"Page {index + 1} effective page box is degenerate.");
+        }
+        catch (InvalidOperationException) when (document.UsesCompatibilityRecovery)
+        {
+            // An unusable crop box does not invalidate a usable media box.
+            if (crop is null || !TryReadCompatibilityMediaBox(
+                document, page, index, out x1, out y1, out x2, out y2,
+                out width, out height))
+            {
+                // Mainstream viewers fall back to US Letter when no usable box remains.
+                x1 = 0;
+                y1 = 0;
+                x2 = 612;
+                y2 = 792;
+            }
+        }
+        return new PdfContentBounds(Math.Min(x1, x2), Math.Min(y1, y2), Math.Max(x1, x2), Math.Max(y1, y2));
     }
 
     private static bool TryReadCompatibilityMediaBox(

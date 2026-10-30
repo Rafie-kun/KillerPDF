@@ -137,8 +137,8 @@ public static partial class PdfPageFurnitureMacro
             throw new ArgumentException("A Bates source PDF is empty.", nameof(sources));
         cancellationToken.ThrowIfCancellationRequested();
         PdfDocument[] documents = [.. inputs.Select(PdfDocument.Open)];
-        PdfPageBoxInformation[][] boxes = [.. documents.Select(document =>
-            PdfPageBoxInformation.Read(document).ToArray())];
+        PdfPageInformation[][] boxes = [.. documents.Select(document =>
+            PdfPageInformation.Read(document).ToArray())];
         IReadOnlyList<PdfBatesNumber> numbers = PdfBatesNumbering.Plan(
             boxes.Select(documentBoxes => documentBoxes.Length),
             new PdfBatesNumberingOptions
@@ -195,7 +195,7 @@ public static partial class PdfPageFurnitureMacro
 
         cancellationToken.ThrowIfCancellationRequested();
         PdfDocument document = PdfDocument.Open(source);
-        IReadOnlyList<PdfPageBoxInformation> boxes = PdfPageBoxInformation.Read(document);
+        IReadOnlyList<PdfPageInformation> boxes = PdfPageInformation.Read(document);
         PdfDocumentInformation information = PdfDocumentInformation.Read(document);
         IReadOnlyList<PdfPageFurnitureContext> contexts =
             PdfPageFurnitureFormatter.CreateContexts(document, options.Date, options.FileName,
@@ -274,14 +274,14 @@ public static partial class PdfPageFurnitureMacro
     }
 
     private static PdfPageFurnitureMark PlaceMark(
-        IReadOnlyList<PdfPageBoxInformation> boxes, PdfPageContentReader content,
+        IReadOnlyList<PdfPageInformation> boxes, PdfPageContentReader content,
         int pageIndex, string text, PdfPageFurnitureEdge edge,
         PdfPageFurnitureAlignment alignment, double fontSize,
         double horizontalMargin, double verticalMargin, PdfRgbColor? color,
         double opacity, double rotationDegrees, bool allowCollisions,
         PdfStandardFont font)
     {
-        PdfPageBoxBounds crop = boxes[pageIndex].CropBox;
+        PdfPageInformation crop = boxes[pageIndex];
         PdfPageContent pageContent = content.Read(pageIndex);
         PdfContentBounds[] occupied = [.. pageContent.Lines.Select(line => line.BoundingBox)
             .Concat(pageContent.Images.Select(image => image.BoundingBox))

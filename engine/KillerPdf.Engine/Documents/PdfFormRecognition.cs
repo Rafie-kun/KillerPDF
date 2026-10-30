@@ -169,12 +169,12 @@ public static class PdfFormRecognizer
             throw new ArgumentOutOfRangeException(nameof(options));
         var reader = new PdfPageContentReader(document);
         var proposals = new List<PdfFormFieldProposal>();
-        IReadOnlyList<PdfPageBoxInformation> pages = PdfPageBoxInformation.Read(document);
+        IReadOnlyList<PdfPageInformation> pages = PdfPageInformation.Read(document);
         for (int pageIndex = 0; pageIndex < pages.Count; pageIndex++)
         {
             cancellationToken.ThrowIfCancellationRequested();
             PdfPageContent content = reader.Read(pageIndex, cancellationToken);
-            PdfPageBoxBounds crop = pages[pageIndex].CropBox;
+            PdfPageInformation crop = pages[pageIndex];
             PdfContentBounds[] widgets = [.. PdfFormWidgetReader.ReadPage(document, pageIndex)
                 .Select(widget => new PdfContentBounds(
                     widget.Left, widget.Bottom, widget.Right, widget.Top))];

@@ -23,7 +23,12 @@ internal static class PdfImageRedaction
     internal const string ResourcePrefix = "KPRI";
 
     private static readonly PdfName[] MaskKeys = [Name("ImageMask"), Name("Mask"), Name("SMaskInData")];
-    private static readonly PdfName[] DroppedKeys = [Name("Filter"), Name("DecodeParms"), Name("Length"), Name("DL")];
+    /// <summary>
+    /// Entries of an image or form that point at other copies of what it shows, such as an alternate
+    /// image or a producer's private editable data. A rewritten copy leaves them behind.
+    /// </summary>
+    internal static readonly PdfName[] CopyKeys = [Name("Alternates"), Name("OPI"), Name("PieceInfo"), Name("Metadata")];
+    private static readonly PdfName[] DroppedKeys = [Name("Filter"), Name("DecodeParms"), Name("Length"), Name("DL"), .. CopyKeys];
 
     /// <summary>Decoded image samples, one row after another from the top.</summary>
     internal sealed class Samples(PdfStream source, int width, int height, int components, int bits, bool inverted, byte[] data)

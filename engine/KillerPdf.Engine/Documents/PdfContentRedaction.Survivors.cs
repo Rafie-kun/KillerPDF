@@ -11,6 +11,13 @@ public static partial class PdfContentRedaction
     private const string RetainedHiddenContentCode = "RetainedHiddenContent";
     private const int MaximumAreas = 32;
 
+    // Whole lies past the clip, Crossing shows in part, and Unclear lies in the bounds of a clip
+    // that is not a rectangle, which say less than the real clip does.
+    private enum HiddenOverlap { None, Whole, Crossing, Unclear }
+
+    /// <summary>A retired area of the page, and the clip of the draw that may or may not show it.</summary>
+    internal readonly record struct HiddenArea(PdfContentBounds Area, PdfContentBounds Clip, bool ClipIsRectangle);
+
     /// <summary>
     /// What a redaction covers, kept per piece of content rather than per object, so that any other
     /// draw of the same image, form or page content can be held to it, even from a byte-identical copy

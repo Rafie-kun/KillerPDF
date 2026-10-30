@@ -468,7 +468,7 @@ public sealed class PdfContentRedactionTests
     [Fact]
     public void PartialVectorRedactionCannotPublishRecoverableGeometryWithoutRasterApproval()
     {
-        PdfDocument document = PdfDocument.Open(SinglePage("1 0 0 rg 0 0 100 100 re f",
+        PdfDocument document = PdfDocument.Open(SinglePage("1 0 0 rg 0 0 50 100 re f",
             "/MediaBox [0 0 100 100]"));
         var region = new PdfRedactionRegion(0, new PdfContentBounds(25, 25, 75, 75));
         PdfContentRedactionResult? result = null;
@@ -479,7 +479,7 @@ public sealed class PdfContentRedactionTests
         {
             // Inspect original geometry independently of whether an opaque cover hides it.
             PdfPageContent output = new PdfPageContentReader(PdfDocument.Open(result.Document)).Read(0);
-            Assert.DoesNotContain(output.Paths, path => path.BoundingBox == new PdfContentBounds(0, 0, 100, 100));
+            Assert.DoesNotContain(output.Paths, path => path.BoundingBox == new PdfContentBounds(0, 0, 50, 100));
         }
         Assert.IsType<InvalidOperationException>(error);
         Assert.Contains("without replacing them with an image", error.Message);
@@ -524,7 +524,7 @@ public sealed class PdfContentRedactionTests
     public void VerifierRejectsVectorGeometryHiddenByAnOtherwiseValidCover()
     {
         PdfDocument document = PdfDocument.Open(SinglePage(
-            "1 0 0 rg 0 0 100 100 re f q 0 0 0 rg 25 25 50 50 re f Q",
+            "1 0 0 rg 0 0 50 100 re f q 0 0 0 rg 25 25 50 50 re f Q",
             "/MediaBox [0 0 100 100]"));
         var region = new PdfRedactionRegion(0, new PdfContentBounds(25, 25, 75, 75));
 
@@ -549,15 +549,15 @@ public sealed class PdfContentRedactionTests
     }
 
     [Theory]
-    [InlineData("0 0 100 100 re f")]
+    [InlineData("0 0 50 100 re f")]
     [InlineData("0 50 m 25 100 75 0 100 50 c f")]
     [InlineData("0 0 100 100 re 40 40 20 20 re f*")]
     [InlineData("0 0 100 100 re W n 0 50 m 100 50 l S")]
     [InlineData("20 w 0 20 m 100 20 l S")]
     [InlineData("2 0 0 2 0 0 cm 10 w 0 10 m 50 10 l S")]
-    [InlineData("0 0 100 100 re f", 90)]
-    [InlineData("0 0 100 100 re f", 180)]
-    [InlineData("0 0 100 100 re f", 270)]
+    [InlineData("0 0 50 100 re f", 90)]
+    [InlineData("0 0 50 100 re f", 180)]
+    [InlineData("0 0 50 100 re f", 270)]
     [InlineData("0 0 m 100 0 l 100 100 l 0 100 l h 20 20 m 20 80 l 80 80 l 80 20 l h f")]
     [InlineData("0 50 m 10 100 20 0 30 50 c 40 100 50 0 60 50 c 70 100 80 0 90 50 c 100 100 100 0 100 50 c 90 0 80 100 70 50 c 60 0 50 100 40 50 c 30 0 20 100 10 50 c 0 0 0 100 0 50 c h f")]
     public void ApprovedVectorFallbackRemovesOriginalPaths(string content, int rotation = 0)
@@ -1777,6 +1777,370 @@ public sealed class PdfContentRedactionTests
         Assert.Contains(report.Findings, finding => finding.Code == "TextInRegion");
         Assert.True(PdfContentRedaction.SupportsOverlayText("Caf\u00e9 (b)(6)"));
         Assert.False(PdfContentRedaction.SupportsOverlayText("\u79d8\u5bc6"));
+    }
+
+    private static string GrayImage(string entries = "") => Stream(new string('\u00c8', 100 * 100),
+        $"/Type /XObject /Subtype /Image /Width 100 /Height 100 /BitsPerComponent 8 /ColorSpace /DeviceGray {entries}");
+
+    private static bool AnyStreamHasKey(PdfDocument document, string key)
+    {
+        foreach (var entry in document.CrossReferences.Values)
+            if (entry.Type is PdfCrossReferenceEntryType.InUse or PdfCrossReferenceEntryType.Compressed
+                && document.Resolve(entry.ObjectNumber) is PdfStream stream
+                && stream.Dictionary.ContainsKey(new PdfName(Encoding.ASCII.GetBytes(key)))) return true;
+        return false;
+    }
+
+    [Theory]
+    [InlineData("/Alternates [<< /Image 6 0 R /DefaultForPrinting true >>]")]
+    [InlineData("/OPI << /2.0 << /Type /OPI /Version 2.0 /F 6 0 R >> >>")]
+    [InlineData("/PieceInfo << /Illustrator << /Private 6 0 R >> >>")]
+    [InlineData("/Metadata 6 0 R")]
+    public void ARepaintedImageLeavesItsOriginalCopiesBehind(string entry)
+    {
+        PdfDocument document = PdfDocument.Open(CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /XObject << /Im 5 0 R >> >> /Contents 4 0 R >>",
+            Stream("q 200 0 0 200 100 500 cm /Im Do Q"),
+            GrayImage(entry + " /OC 7 0 R"),
+            GrayImage("/OriginalCopy true"),
+            "<< /Type /OCG /Name (Layer) >>"
+        ]));
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document,
+            [new PdfRedactionRegion(0, new PdfContentBounds(120, 520, 180, 580))]);
+
+        PdfDocument output = PdfDocument.Open(result.Document);
+        Assert.True(result.Verification.Succeeded);
+        Assert.Equal(1, Assert.Single(result.Plan.Pages).RedactedImages);
+        Assert.False(AnyStreamHasKey(output, "OriginalCopy"), "A copy of the original image is still in the file.");
+        Assert.True(AnyStreamHasKey(output, "OC"), "The image left its optional content group.");
+    }
+
+    [Theory]
+    [InlineData("/PieceInfo << /Illustrator << /Private 7 0 R >> >>")]
+    [InlineData("/Metadata 7 0 R")]
+    [InlineData("/OPI << /2.0 << /Type /OPI /Version 2.0 /F 7 0 R >> >>")]
+    public void ARewrittenFormLeavesItsPrivateDataBehind(string entry)
+    {
+        PdfDocument document = PdfDocument.Open(CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /XObject << /Fm 5 0 R >> >> /Contents 4 0 R >>",
+            Stream("/Fm Do"),
+            Stream("BT /F1 12 Tf 100 600 Td (SECRETTEXT) Tj ET\nBT /F1 12 Tf 100 300 Td (PUBLICTEXT) Tj ET",
+                $"/Type /XObject /Subtype /Form /BBox [0 0 612 792] /Resources << /Font << /F1 6 0 R >> >> {entry} /StructParent 4"),
+            Helvetica,
+            Stream("SECRETTEXT in the private editable copy")
+        ]));
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document,
+            [new PdfRedactionRegion(0, new PdfContentBounds(90, 590, 300, 620))]);
+
+        PdfDocument output = PdfDocument.Open(result.Document);
+        Assert.True(result.Verification.Succeeded);
+        AssertDescriptionAbsent(output, "SECRETTEXT");
+        Assert.True(AnyStreamHasKey(output, "StructParent"), "The form left the structure tree.");
+    }
+
+    [Fact]
+    public void ARedactedWidgetTakesAValueInheritedFromAGrandparent()
+    {
+        PdfDocument document = PdfDocument.Open(CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R /AcroForm << /Fields [6 0 R] >> >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Annots [8 0 R 9 0 R] /Contents 4 0 R >>",
+            Stream("0 0 m"),
+            Helvetica,
+            "<< /T (a) /FT /Tx /V (SECRETVALUE) /DV (SECRETDEFAULT) /RV (SECRETRICH) /Kids [7 0 R] >>",
+            "<< /T (b) /Parent 6 0 R /Kids [8 0 R 9 0 R] >>",
+            "<< /Type /Annot /Subtype /Widget /Parent 7 0 R /Rect [100 600 200 620] >>",
+            "<< /Type /Annot /Subtype /Widget /Parent 7 0 R /Rect [100 300 200 320] >>"
+        ]));
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document,
+            [new PdfRedactionRegion(0, new PdfContentBounds(90, 590, 300, 630))]);
+
+        PdfDocument output = PdfDocument.Open(result.Document);
+        Assert.True(result.Verification.Succeeded);
+        AssertDescriptionAbsent(output, "SECRETVALUE");
+        AssertDescriptionAbsent(output, "SECRETDEFAULT");
+        AssertDescriptionAbsent(output, "SECRETRICH");
+    }
+
+    [Fact]
+    public void AFieldEmptiedOfItsWidgetsTakesAValueInheritedFromItsParent()
+    {
+        PdfDocument document = PdfDocument.Open(CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R /AcroForm << /Fields [6 0 R] >> >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Annots [8 0 R 10 0 R] /Contents 4 0 R >>",
+            Stream("0 0 m"),
+            Helvetica,
+            "<< /T (a) /FT /Tx /V (SECRETVALUE) /Kids [7 0 R 9 0 R] >>",
+            "<< /T (b) /Parent 6 0 R /Kids [8 0 R] >>",
+            "<< /Type /Annot /Subtype /Widget /Parent 7 0 R /Rect [100 600 200 620] >>",
+            "<< /T (c) /Parent 6 0 R /Kids [10 0 R] >>",
+            "<< /Type /Annot /Subtype /Widget /Parent 9 0 R /Rect [100 300 200 320] >>"
+        ]));
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document,
+            [new PdfRedactionRegion(0, new PdfContentBounds(90, 590, 300, 630))]);
+
+        Assert.True(result.Verification.Succeeded);
+        AssertDescriptionAbsent(PdfDocument.Open(result.Document), "SECRETVALUE");
+    }
+
+    private static byte[] DescribedElement(string entries, string extraObject = "null") => CreatePdf([
+        "<< /Type /Catalog /Pages 2 0 R /StructTreeRoot 6 0 R /MarkInfo << /Marked true >> >>",
+        "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>",
+        Stream("/P << /MCID 0 >> BDC BT /F1 12 Tf 100 600 Td (SECRETTEXT) Tj ET EMC\n/P << /MCID 1 >> BDC BT /F1 12 Tf 100 300 Td (PUBLICTEXT) Tj ET EMC"),
+        Helvetica,
+        "<< /Type /StructTreeRoot /K [7 0 R 8 0 R] >>",
+        $"<< /Type /StructElem /S /Table /P 6 0 R /Pg 3 0 R /K 0 {entries} >>",
+        "<< /Type /StructElem /S /P /P 6 0 R /Pg 3 0 R /K 1 /T (KEPTTITLE) /A << /O /Table /Summary (KEPTSUMMARY) >> >>",
+        extraObject
+    ]);
+
+    [Theory]
+    [InlineData("/T (SECRETTITLE) /A << /O /Table /Summary (SECRETSUMMARY) >>", "null")]
+    [InlineData("/T (SECRETTITLE) /A [<< /O /Layout /Placement /Block >> 0 << /O /Table /Summary (SECRETSUMMARY) >> 1]", "null")]
+    [InlineData("/T (SECRETTITLE) /A 9 0 R", "<< /O /Table /Summary (SECRETSUMMARY) >>")]
+    [InlineData("/T (SECRETTITLE) /A [9 0 R]", "<< /O /Table /Summary (SECRETSUMMARY) >>")]
+    [InlineData("/T (SECRETTITLE) /A << /O /UserProperties /P [<< /N (Owner) /V (SECRETSUMMARY) >>] >>", "null")]
+    [InlineData("/T (SECRETTITLE) /A [<< /O /UserProperties /P [<< /N (Owner) /V (SECRETSUMMARY) >>] >> 0]", "null")]
+    public void AnElementWithRedactedContentLosesItsTitleAndAttributeText(string entries, string extraObject)
+    {
+        PdfDocument document = PdfDocument.Open(DescribedElement(entries, extraObject));
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document,
+            [new PdfRedactionRegion(0, new PdfContentBounds(90, 590, 300, 620))]);
+
+        PdfDocument output = PdfDocument.Open(result.Document);
+        Assert.True(result.Verification.Succeeded);
+        AssertDescriptionAbsent(output, "SECRETTITLE");
+        AssertDescriptionAbsent(output, "SECRETSUMMARY");
+        string kept = string.Concat(output.CrossReferences.Values.Where(entry => entry.Type is PdfCrossReferenceEntryType.InUse
+            or PdfCrossReferenceEntryType.Compressed).Select(entry => output.Resolve(entry.ObjectNumber))
+            .OfType<PdfDictionary>().Select(item => Encoding.Latin1.GetString(PdfObjectWriter.Write(item))));
+        Assert.Contains("KEPTTITLE", kept, StringComparison.Ordinal);
+        Assert.Contains("KEPTSUMMARY", kept, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void VerificationRejectsAnEmptyStructureElementThatKeepsItsTitle()
+    {
+        byte[] output = CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R /StructTreeRoot 5 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 200] /Contents 4 0 R >>",
+            Stream("0 0 m"),
+            "<< /Type /StructTreeRoot /K [6 0 R] >>",
+            "<< /Type /StructElem /S /Table /P 5 0 R /Pg 3 0 R /T (LEFTOVER) /K [] >>"
+        ]);
+
+        PdfRedactionVerificationReport report = PdfContentRedaction.Verify(output,
+            [new PdfRedactionRegion(0, new PdfContentBounds(10, 10, 50, 50))], [], expectMetadataCleared: false);
+
+        Assert.Contains(report.Findings, finding => finding.Code == "StructureDescription");
+    }
+
+    // A marked-content reference into a form names the form's stream, as forRemovePage.pdf does.
+    private static byte[] TaggedForm(string kids) => CreatePdf([
+        "<< /Type /Catalog /Pages 2 0 R /StructTreeRoot 7 0 R /MarkInfo << /Marked true >> >>",
+        "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /XObject << /Fm 5 0 R >> >> /Contents 4 0 R >>",
+        Stream("/Fm Do"),
+        Stream("/P << /MCID 0 >> BDC BT /F1 12 Tf 100 600 Td (SECRETTEXT) Tj ET EMC\nBT /F1 12 Tf 100 300 Td (PUBLICTEXT) Tj ET",
+            "/Type /XObject /Subtype /Form /BBox [0 0 612 792] /Resources << /Font << /F1 6 0 R >> >>"),
+        Helvetica,
+        "<< /Type /StructTreeRoot /K [8 0 R] >>",
+        $"<< /Type /StructElem /S /P /P 7 0 R /Pg 3 0 R /Alt (SECRETALT) /K {kids} >>",
+        "<< /MCID 0 /Pg 3 0 R /Stm 5 0 R /Type /MCR >>"
+    ]);
+
+    [Theory]
+    [InlineData("<< /MCID 0 /Pg 3 0 R /Stm 5 0 R /Type /MCR >>")]
+    [InlineData("[<< /MCID 0 /Pg 3 0 R /Stm 5 0 R /Type /MCR >>]")]
+    [InlineData("[9 0 R]")]
+    [InlineData("9 0 R")]
+    public void ARedactionInATaggedFormFinishesWithTheReferenceDropped(string kids)
+    {
+        PdfDocument document = PdfDocument.Open(TaggedForm(kids));
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document,
+            [new PdfRedactionRegion(0, new PdfContentBounds(90, 590, 300, 620))]);
+
+        PdfDocument output = PdfDocument.Open(result.Document);
+        Assert.True(result.Verification.Succeeded);
+        Assert.Contains("PUBLICTEXT", new PdfPageContentReader(output).Read(0).Text, StringComparison.Ordinal);
+        AssertDescriptionAbsent(output, "SECRETTEXT");
+        AssertDescriptionAbsent(output, "SECRETALT");
+        Assert.False(output.CrossReferences.Values.Any(entry => entry.Type is PdfCrossReferenceEntryType.InUse
+            or PdfCrossReferenceEntryType.Compressed && output.Resolve(entry.ObjectNumber) is PdfDictionary item
+            && item.ContainsKey(new PdfName("Stm"u8))), "A reference to the original form is still in the file.");
+    }
+
+    [Fact]
+    public void AnyOtherReferenceToARetiredFormStaysRefused()
+    {
+        // The open action names the form's stream, and nothing the redaction knows can vouch for that.
+        byte[] source = Encoding.Latin1.GetBytes(Encoding.Latin1.GetString(TaggedForm("[]"))
+            .Replace("/StructTreeRoot 7 0 R", "/OpenAction 5 0 R /StructTreeRoot 7 0 R"));
+        PdfDocument document = PdfDocument.OpenWithCompatibilityRecovery(source);
+
+        var error = Assert.Throws<PdfRedactionVerificationException>(() => PdfContentRedaction.Apply(document,
+            [new PdfRedactionRegion(0, new PdfContentBounds(90, 590, 300, 620))]));
+
+        Assert.Contains(error.Report.Findings, finding => finding.Code == "RetainedSourceStream");
+    }
+
+    private const string WordInRegion = "\nBT /F1 12 Tf 300 400 Td (SECRETTEXT) Tj ET";
+    private static readonly PdfRedactionRegion WordRegion = new(0, new PdfContentBounds(290, 390, 400, 420));
+
+    // A page with a word in the region, a pattern, a soft mask with nothing near the region, and a form.
+    private static byte[] PathPage(string content) => CreatePdf([
+        "<< /Type /Catalog /Pages 2 0 R >>",
+        "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> /Pattern << /P 6 0 R >> " +
+            "/ExtGState << /M << /SMask << /Type /Mask /S /Luminosity /G 7 0 R >> >> >> /XObject << /Fm 8 0 R >> >> /Contents 5 0 R >>",
+        Helvetica,
+        Stream(content + WordInRegion),
+        Stream("0 0 1 rg 0 0 5 5 re f", "/Type /Pattern /PatternType 1 /PaintType 1 /TilingType 1 /BBox [0 0 10 10] /XStep 10 /YStep 10 /Resources << >>"),
+        Stream("1 g 0 0 10 10 re f", "/Type /XObject /Subtype /Form /BBox [0 0 10 10] /Group << /S /Transparency /CS /DeviceGray >> /Resources << >>"),
+        Stream("0 0 612 792 re f", "/Type /XObject /Subtype /Form /BBox [0 0 612 792] /Resources << >>")
+    ]);
+
+    private static string[] Reasons(string content)
+    {
+        PdfContentRedactionPlan plan = PdfContentRedaction.Analyze(PdfDocument.Open(PathPage(content)), [WordRegion]);
+        return [.. Assert.Single(plan.Pages).RasterReasons];
+    }
+
+    [Theory]
+    [InlineData("0 w 10 10 m 100 10 l S")]
+    [InlineData("0 w 10 10 m 100 10 l 100 100 l s")]
+    [InlineData("0 G 0 w 0 0 1 rg 10 10 50 50 re B")]
+    [InlineData("0 0 m 0 w 10 10 m 100 10 l 50 50 l h S")]
+    [InlineData("10 10 50 50 re 500 700 50 50 re f")]
+    [InlineData("10 10 m 60 10 l 60 60 l h 500 700 m 550 700 l 550 750 l h f")]
+    [InlineData("1 w 10 10 50 50 re 500 700 50 50 re S")]
+    [InlineData("q 0 700 612 92 re W n 0.9 g 0 0 612 792 re f Q")]
+    [InlineData("q 0 700 612 92 re W n 1 w 300 300 m 300 500 l S Q")]
+    [InlineData("q 0 700 612 92 re W n /Fm Do Q")]
+    [InlineData("q 0 700 612 92 re W n 10 10 m 600 10 l 600 780 l h f Q")]
+    public void APathThatPaintsNothingInTheRegionNeedsNoPageImage(string content)
+    {
+        byte[] source = PathPage(content);
+        Assert.Empty(Reasons(content));
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(PdfDocument.Open(source), [WordRegion]);
+
+        Assert.True(result.Verification.Succeeded);
+        Assert.DoesNotContain("SECRETTEXT", new PdfPageContentReader(PdfDocument.Open(result.Document)).Read(0).Text, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("0 w 280 400 m 410 400 l S")]
+    [InlineData("0 w 280 395 m 410 395 l 410 500 l S")]
+    [InlineData("0 w 280 200 m 350 400 l 500 200 l S")]
+    [InlineData("10 10 50 50 re 280 395 200 10 re f")]
+    [InlineData("500 700 50 50 re 350 380 20 30 re f")]
+    [InlineData("10 10 m 60 10 l 60 60 l h 280 395 m 480 395 l 480 405 l h f")]
+    [InlineData("1 w 10 10 50 50 re 280 395 100 10 re S")]
+    [InlineData("q 0 300 612 150 re W n 0.9 g 350 380 20 30 re f Q")]
+    public void APathThatReallyCrossesTheRegionStillAsks(string content) =>
+        Assert.Equal(["Vector"], Reasons(content));
+
+    [Fact]
+    public void AHairlineInsideTheRegionIsRemovedLikeAnyOtherPath()
+    {
+        PdfContentRedactionPlan plan = PdfContentRedaction.Analyze(PdfDocument.Open(PathPage("0 w 300 395 m 380 395 l S")), [WordRegion]);
+
+        PdfRedactionPageAnalysis page = Assert.Single(plan.Pages);
+        Assert.Equal(PdfRedactionPageMethod.Content, page.Method);
+        Assert.Equal(1, page.RemovedPaths);
+    }
+
+    [Fact]
+    public void APathClippedAwayButWhollyInTheRegionStillLeaves()
+    {
+        const string content = "q 0 700 612 92 re W n 300 395 50 10 re f Q";
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(PdfDocument.Open(PathPage(content)), [WordRegion]);
+
+        Assert.Equal(1, Assert.Single(result.Plan.Pages).RemovedPaths);
+        Assert.DoesNotContain(new PdfPageContentReader(PdfDocument.Open(result.Document)).Read(0).Paths,
+            path => path.BoundingBox == new PdfContentBounds(300, 395, 350, 405));
+    }
+
+    [Theory]
+    [InlineData("0.9 g 0 0 612 792 re f")]
+    [InlineData("0.9 g 0 0 612 792 re F")]
+    [InlineData("0.9 g 0 0 612 792 re f*")]
+    [InlineData("0.9 g 0 0 m 612 0 l 612 792 l 0 792 l h f")]
+    [InlineData("0.9 g 0 0 m 612 0 l 612 792 l 0 792 l f")]
+    [InlineData("0.9 g 0 0 m 612 0 l 612 792 l 0 792 l 0 0 l f")]
+    [InlineData("q 0.5 0 0 0.5 0 0 cm 0.9 g 0 0 1224 1584 re f Q")]
+    [InlineData("q 0 1 -1 0 612 0 cm 0.9 g 0 0 792 612 re f Q")]
+    [InlineData("/DeviceCMYK cs 0 0 0 0.1 sc 0 0 612 792 re f")]
+    [InlineData("0.9 g q 100 100 412 592 re W n 0 0 612 792 re f Q")]
+    [InlineData("0.9 g /Fm Do")]
+    public void APlainBackgroundRectangleNeedsNoPageImage(string content)
+    {
+        byte[] source = PathPage(content);
+        Assert.Empty(Reasons(content));
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(PdfDocument.Open(source), [WordRegion]);
+
+        PdfDocument output = PdfDocument.Open(result.Document);
+        Assert.True(result.Verification.Succeeded);
+        Assert.DoesNotContain("SECRETTEXT", new PdfPageContentReader(output).Read(0).Text, StringComparison.Ordinal);
+        Assert.Equal(0, Assert.Single(result.Plan.Pages).RemovedPaths);
+        PdfRenderedPage rendered = new PdfPageRenderer(output).Render(0, new PdfRenderOptions(612, 792));
+        Assert.True(IsBlack(rendered, 340, 792 - 405), "The cover is missing.");
+        Assert.False(IsBlack(rendered, 150, 792 - 150), "The background is gone.");
+    }
+
+    [Theory]
+    [InlineData("/Pattern cs /P scn 0 0 612 792 re f")]
+    [InlineData("/Pattern cs /P scn /Fm Do")]
+    [InlineData("/M gs 0.9 g 0 0 612 792 re f")]
+    [InlineData("/M gs 0.9 g /Fm Do")]
+    [InlineData("2 w 0 0 612 792 re S")]
+    [InlineData("2 w 0 0 612 792 re s")]
+    [InlineData("0.9 g 2 w 0 0 612 792 re B")]
+    [InlineData("0.9 g 2 w 0 0 612 792 re b*")]
+    [InlineData("0 w 0 0 612 792 re S")]
+    public void DetailInTheFillOrAtAnEdgeStillAsks(string content) =>
+        Assert.Equal(["Vector"], Reasons(content));
+
+    [Theory]
+    [InlineData("0.9 g 0 0 350 792 re f")]
+    [InlineData("0.9 g 350 0 262 792 re f")]
+    [InlineData("0.9 g 0 0 612 400 re f")]
+    [InlineData("0.9 g 295 395 50 500 re f")]
+    [InlineData("0.9 g q 1 1 -1 1 306 -100 cm 0 0 500 500 re f Q")]
+    [InlineData("0.9 g 0 0 612 792 re 10 10 20 20 re f")]
+    [InlineData("0.9 g 0 0 m 612 0 l 612 792 l 0 792 l 306 400 l f")]
+    [InlineData("0.9 g q 0 0 350 792 re W n 0 0 612 792 re f Q")]
+    [InlineData("0.9 g q 0 0 m 612 0 l 306 792 l h W n 0 0 612 792 re f Q")]
+    [InlineData("0.9 g q BT 7 Tr /F1 12 Tf 300 400 Td (X) Tj ET 0 0 612 792 re f Q")]
+    [InlineData("0.9 g 0 0 612 792 re W f")]
+    public void ARectangleThatDoesNotHoldTheRegionStillAsks(string content) =>
+        Assert.Contains("Vector", Reasons(content));
+
+    [Fact]
+    public void ARectangleHoldingOneRegionAndCrossingAnotherStillAsks()
+    {
+        PdfDocument document = PdfDocument.Open(PathPage("0.9 g 0 300 612 200 re f"));
+
+        PdfContentRedactionPlan plan = PdfContentRedaction.Analyze(document,
+            [WordRegion, new PdfRedactionRegion(0, new PdfContentBounds(100, 490, 200, 510))]);
+
+        Assert.Equal(["Vector"], Assert.Single(plan.Pages).RasterReasons);
     }
 
     private static void AssertKeptLettersUnmoved(PdfDocument before, PdfDocument after, int pageIndex,

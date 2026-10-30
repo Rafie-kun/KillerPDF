@@ -129,7 +129,6 @@ internal sealed class FormRecognitionReviewDialog : Window
     private void RenderProposal(PdfFormFieldProposal proposal)
     {
         PdfPageInformation page = PdfPageInformation.Read(_document)[proposal.PageIndex];
-        PdfPageBoxBounds crop = PdfPageBoxInformation.Read(_document)[proposal.PageIndex].CropBox;
         if (!_pages.TryGetValue(proposal.PageIndex, out BitmapSource? bitmap))
         {
             bool sideways = page.Rotation % 180 != 0;
@@ -147,8 +146,8 @@ internal sealed class FormRecognitionReviewDialog : Window
         _preview.Children.Clear();
         _preview.Children.Add(new Image { Source = bitmap, Width = bitmap.PixelWidth, Height = bitmap.PixelHeight });
         PdfContentBounds box = proposal.Bounds;
-        Rect rect = RedactionGeometry.PageToCanvas(box.Left - crop.Left, box.Bottom - crop.Bottom,
-            box.Right - crop.Left, box.Top - crop.Bottom, page.Width, page.Height,
+        Rect rect = RedactionGeometry.PageToCanvas(box.Left - page.Left, box.Bottom - page.Bottom,
+            box.Right - page.Left, box.Top - page.Bottom, page.Width, page.Height,
             bitmap.PixelWidth, bitmap.PixelHeight, page.Rotation);
         var outline = new System.Windows.Shapes.Rectangle
         {

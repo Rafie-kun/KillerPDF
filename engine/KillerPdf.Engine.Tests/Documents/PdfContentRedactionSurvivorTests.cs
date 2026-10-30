@@ -303,6 +303,97 @@ public sealed class PdfContentRedactionSurvivorTests
         Assert.Equal(0, finding.PageIndex);
     }
 
+    // The form's covered line lies in the bounds of the triangle on page 2 but outside its area.
+    private static byte[] FormDrawnUnderATriangleClip() => CreatePdf([
+        "<< /Type /Catalog /Pages 2 0 R >>",
+        "<< /Type /Pages /Kids [3 0 R 4 0 R] /Count 2 >>",
+        "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /XObject << /Fm 6 0 R >> >> /Contents 5 0 R >>",
+        "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /XObject << /Fm 6 0 R >> >> /Contents 8 0 R >>",
+        Stream("/Fm Do"),
+        Stream("BT /F1 12 Tf 100 600 Td (SECRETTEXT) Tj ET\nBT /F1 12 Tf 100 300 Td (PUBLICTEXT) Tj ET",
+            "/Type /XObject /Subtype /Form /BBox [0 0 612 792] /Resources << /Font << /F1 7 0 R >> >>"),
+        Helvetica,
+        Stream("q 50 200 m 400 200 l 50 650 l h W n /Fm Do Q")
+    ]);
+
+    [Fact]
+    public void APageImageLeavesNoCoveredTextInItsInvisibleLayer()
+    {
+        PdfDocument document = PdfDocument.Open(FormDrawnUnderATriangleClip());
+        var region = new PdfRedactionRegion(0, new PdfContentBounds(90, 590, 300, 620));
+
+        PdfContentRedactionPlan plan = PdfContentRedaction.Analyze(document, [region]);
+        Assert.Equal([1], plan.RasterPages);
+        Assert.Equal([PdfContentRedaction.SharedContentReason], plan.Pages.Single(page => page.PageIndex == 1).RasterReasons);
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, [region],
+            new PdfContentRedactionOptions { ApprovedRasterPages = [1], RasterDpi = 72 });
+
+        PdfDocument output = PdfDocument.Open(result.Document);
+        Assert.True(result.Verification.Succeeded);
+        Assert.DoesNotContain("SECRETTEXT", Letters(output, 1), StringComparison.Ordinal);
+        Assert.Contains("PUBLICTEXT", Letters(output, 1), StringComparison.Ordinal);
+        Assert.DoesNotContain("SECRETTEXT", AllStreamText(output), StringComparison.Ordinal);
+        Assert.DoesNotContain("SECRETTEXT", Encoding.Latin1.GetString(result.Document.Span), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void APageImageDropsALetterTheClipCutsOverACoveredArea()
+    {
+        // Page 2 shows the form up to x=140, which cuts through the covered word.
+        PdfDocument document = PdfDocument.Open(CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R 4 0 R] /Count 2 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /XObject << /Fm 6 0 R >> >> /Contents 5 0 R >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /XObject << /Fm 6 0 R >> >> /Contents 8 0 R >>",
+            Stream("/Fm Do"),
+            Stream("BT /F1 12 Tf 100 600 Td (SECRETTEXT) Tj ET\nBT /F1 12 Tf 100 300 Td (PUBLICTEXT) Tj ET",
+                "/Type /XObject /Subtype /Form /BBox [0 0 612 792] /Resources << /Font << /F1 7 0 R >> >>"),
+            Helvetica,
+            Stream("q 0 0 139 792 re W n /Fm Do Q")
+        ]));
+        PdfRedactionRegion[] regions =
+        [
+            new PdfRedactionRegion(0, new PdfContentBounds(90, 590, 300, 620)),
+            new PdfRedactionRegion(1, new PdfContentBounds(10, 10, 20, 20))
+        ];
+        PdfContentBounds[] before = [.. new PdfPageContentReader(document).Read(1).Letters
+            .Where(letter => letter.BoundingBox.Bottom > 500 && letter.BoundingBox.Left < 139 && letter.BoundingBox.Right > 139)
+            .Select(letter => letter.BoundingBox)];
+        Assert.Single(before);
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, regions,
+            new PdfContentRedactionOptions { ApprovedRasterPages = [1], RasterDpi = 72 });
+
+        Assert.True(result.Verification.Succeeded);
+        Assert.DoesNotContain(new PdfPageContentReader(PdfDocument.Open(result.Document)).Read(1).Letters,
+            letter => letter.BoundingBox.Bottom > 500 && letter.BoundingBox.Right > 139);
+    }
+
+    private static byte[] RasterPageWithText(string text) => CreatePdf([
+        "<< /Type /Catalog /Pages 2 0 R >>",
+        "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 5 0 R >> /XObject << /KPRedactImage 6 0 R >> >> /Contents 4 0 R >>",
+        Stream($"BT 3 Tr /F1 12 Tf 100 600 Td ({text}) Tj ET q 612 0 0 792 0 0 cm /KPRedactImage Do Q"),
+        Helvetica,
+        ImageObject(new byte[3], 1, 1)
+    ]);
+
+    [Theory]
+    [InlineData(false, true)]
+    [InlineData(true, true)]
+    [InlineData(true, false)]
+    public void VerificationRefusesAnInvisibleLayerThatKeepsWhatAPageHid(bool rectangleClip, bool clipCutsLetters)
+    {
+        // A letter a draw shows whole is the user's own copy; the rest of the area it hid must be gone.
+        var hidden = new PdfContentRedaction.HiddenArea(new PdfContentBounds(90, 590, 300, 620),
+            new PdfContentBounds(0, 0, clipCutsLetters ? 130 : 612, 792), rectangleClip);
+
+        PdfRedactionVerificationReport report = PdfContentRedaction.Verify(RasterPageWithText("SECRETTEXT"), [], [0], null, false,
+            new Dictionary<int, PdfContentRedaction.HiddenArea[]> { [0] = [hidden] });
+
+        Assert.Equal(!rectangleClip || clipCutsLetters, report.Findings.Any(finding => finding.Code == "TextInRegion"));
+    }
+
     [Fact]
     public void ASoftMaskIsPaintedWithTheHiddenSamples()
     {
