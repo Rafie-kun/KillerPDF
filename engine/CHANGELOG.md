@@ -4,6 +4,31 @@ All notable changes to The KillerPDF.Engine are documented here. Application cha
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.1] - Unreleased
+
+The 1.9.1 engine clears redacted content from every copy that hides it, edits attachments by key, keeps document details it cannot read, and widens paragraph editing.
+
+### Added
+
+- Added `RemoveAttachmentByKey`, `RenameAttachmentByKey`, `ReplaceAttachmentByKey`, `SetAttachmentDescriptionByKey` and `SetAttachmentClassificationByKey` to `PdfIncrementalPageEditor`. Keys match exactly, and the name-based methods now refuse a name that several files share.
+- Added `includeBookmarks` overloads of `AddImportedDocument` and `InsertImportedDocument`, plus `DropTargetBookmarks` and `FailedBookmarksInTarget`, so a damaged outline costs only the document it belongs to.
+- Added `PdfDocumentInformation.UnreadableKeys` and `PdfDocumentMetadata.PreservedInfoKeys`, so a save keeps entries it could not read.
+- Added `PdfParagraphEditor.DefaultBox`, the `PdfParagraphCandidate` members `TextLeft`, `FirstBaseline`, `TextRight`, `FirstLineIndent` and `RowTexts`, a `PdfTextReflow.Wrap` overload with a first-line indent, and `PdfExtractionFont.IsType3`.
+
+### Changed
+
+- `PdfRedactionSearch.Find` accepts null pages: a page that could not be read keeps its number and has no matches.
+- A rewrite that merges page resources repeats until nothing more merges, and stream identity ignores `/Length`.
+
+### Fixed
+
+- Redaction clears covered pixels, glyphs and paths from other draws of a form or image and from byte-identical copies, including Divide Spreads output, and verifies the written file for them. Annotation structure descriptions leave with the annotation, and a structure tree too deep to clean is refused.
+- Content streams accept a number with a stray minus inside it, as other readers do. The file structure stays strict.
+- Recovery keeps the trailer's `/Root`, `/Info`, `/ID` and `/Encrypt` when the `trailer` keyword is damaged, and a recovered encrypted file reports `IsEncrypted`.
+- Importing queues references instead of recursing, so a very long `/Next` chain no longer fails on depth. An `/OCProperties` with no `/OCGs` declares no layers and no longer stops an import.
+- A malformed bookmark destination or named-destination tree costs only those names, in both the bookmark and link readers.
+- Reading an hours-only date offset such as `+01` works, an unreadable XMP packet is replaced on save, and Type 3 widths go through the font's `/FontMatrix`.
+
 ## [1.9.0] - 2026-10-29
 
 The 1.9.0 engine adds page-content extraction, complete engine-owned rendering, and APIs for editing, protection, review, and production workflows.

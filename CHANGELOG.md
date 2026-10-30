@@ -6,34 +6,43 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 ## [1.9.1] - Unreleased
 
-1.9.1 fixes the Text tool outside Continuous view, closes a redaction leak, lets damaged PDFs be saved and searched, and opens Edit paragraph to most everyday PDFs.
+1.9.1 fixes the Text tool outside Continuous view, closes redaction leaks, lets damaged PDFs be saved and searched without breaking their protections, and opens Edit paragraph to most everyday PDFs.
 
 ### Fixed
 
 - The Text tool keeps working in Single, Two-Page and Grid views. After a page turn, a tab switch or closing the last tab, clicking the page showed no edit box and typing did nothing, in new and existing documents alike.
+- Redacting an image or text also clears the covered content from every other draw of it and every byte-identical copy that hides it, including the other half of a Divide Spreads page, where the redacted pixels and glyphs stayed in the file behind the page edge. A page that cannot give them up asks to become an image.
 - Redaction removes the marked-content descriptions Acrobat's Header & Footer tool writes. The redacted wording stayed in the file while verification reported success.
-- A damaged PDF that opens in the viewer can be saved, printed, extracted and reduced. These stopped with a parser error, so edits made to such a file could not be kept. A signed or encrypted damaged file still reports the error rather than being rewritten.
+- Removing an annotation also removes the description its structure element held for it. A structure tree nested too deeply to clean is refused, and deep trees up to that limit are cleaned at every level.
+- Redaction no longer deletes an image another page still draws through a Type 3 font selected by a graphics state or a pattern with no resources of its own.
+- A damaged PDF that opens in the viewer can be saved, printed, extracted and reduced. These stopped with a parser error, so edits made to such a file could not be kept. Saving a damaged PDF that carries Reader usage rights, a certification, a digital signature or a password stops with a clear message and leaves your tab, your edits and the original file untouched, instead of rewriting the file and breaking them.
+- A damaged PDF whose trailer keyword is broken keeps its document information, file identifier and password protection when it is recovered, so a protected file asks for its password instead of opening as unreadable pages. One that cannot be unlocked is no longer opened as a blank or garbled document that could be saved over the original.
 - Redacting an image in a PDF whose pages share one resource list, as LibreOffice exports do, finishes and removes the original image. It used to fail verification every time.
-- Searching a damaged PDF that the viewer shows finds its visible words, and a search that cannot read a file says so instead of reporting zero matches.
-- Edit paragraph no longer refuses a whole page because of a clip, graphics state, marked content or form somewhere on it. It edits justified text, paragraphs written one line at a time as Word exports them, PDFs processed by Ghostscript or printed from a browser, and tagged documents, with the new text kept in the paragraph's own element. A paragraph that mixes fonts or sizes takes its main style, and the dialog says so. It still refuses a paragraph clipped by anything but a rectangle, soft masked, on a layer, inside a form, tagged with its own replacement text, or covered by content painted after it, and says why when you right-click it.
-- Saving, protecting, reducing or redacting no longer fails with "too deeply nested" on PDFs with a long run of bookmarks or linked objects, and removing JavaScript from a very long bookmark list cannot crash the program.
-- Reduce File Size and Sanitize no longer fail on files, such as many LibreOffice exports, that store stream lengths as separate objects and also hold unused objects.
-- Attachments can be removed, renamed, replaced and stripped by Sanitize when the PDF stores them under a different internal name than the one listed.
-- Merge and Rebuild keep working on PDFs with a separately stored name dictionary, form widgets but no AcroForm entry, unreadable metadata, or the FreeTextTypewriter spelling. Damaged PDFs the viewer shows can be merged, a file with damaged bookmarks merges without them, and declining a repair says the merge was canceled.
-- Editing a badly damaged PDF that had to be repaired on opening says to resave it first, and a layers section with no group list is refused in plain words.
-- One malformed bookmark destination no longer disables the whole outline.
-- Document Info opens on files with a bad date, title, language or opening view and shows those values as blank. Initial View, Page Labels and metadata repair no longer fail on a zero zoom, which the PDF standard allows, or another malformed opening view.
+- Searching a damaged PDF that the viewer shows finds matches on every readable page and names the pages it could not read, so a skipped page never reads as one without the term. Find and Redact searches the readable pages and names the skipped ones the same way, and the search-text command exits with 3 and lists them as unreadablePages.
+- Edit paragraph no longer refuses a whole page because of a clip, graphics state, marked content or form somewhere on it. It edits justified text, paragraphs written one line at a time as Word exports them, PDFs processed by Ghostscript or printed from a browser, pdfTeX paragraphs with font expansion, text in any color space, and tagged documents with links or inline elements, with the new text kept in the paragraph's own element.
+- Edit paragraph brings in the real text, with its word spaces, ligatures as their letters and words broken by a line-end hyphen made whole. Previewing unchanged text keeps it where it was, a first-line indent stays with its paragraph and is kept, and an underline drawn as a thin box leaves with its line. A paragraph that mixes fonts, sizes or colors takes its main style, and the dialog says so.
+- Edit paragraph refuses a small table, Type 3 text, a paragraph clipped by anything but a rectangle, soft masked, on a layer, inside a form, tagged with its own replacement text, or covered by content painted after it. A page with nothing editable says exactly why, and a damaged font gives a plain refusal.
+- Type 3 text is measured correctly for selection and search.
+- Saving, protecting, reducing, redacting, merging or combining no longer fails with "too deeply nested" on PDFs with a long run of bookmarks or linked objects, and removing JavaScript from a very long bookmark list cannot crash the program.
+- Reduce File Size and Sanitize no longer fail on files, such as many LibreOffice exports, that store stream lengths as separate objects and also hold unused objects. Reduce also finishes on files whose duplicate images only become identical once their shared parts merge, which used to stop it with a "still contains content" error.
+- Attachments can be removed, renamed, replaced and stripped by Sanitize when the PDF stores them under a different internal name than the one listed, when two files share a name, when one file's internal name matches another's listed name, or when names differ only in letter case. Each edit touches exactly the file you chose.
+- Merge and Rebuild keep working on PDFs with a separately stored name dictionary, form widgets but no AcroForm entry, unreadable metadata, a layers section with no group list, or the FreeTextTypewriter spelling. A damaged PDF that cannot be merged as it is offers the repair prompt instead of failing with "Merge failed", and the check runs in the background so a large damaged file does not freeze the window.
+- Merging from the command line and combining a folder keep every healthy file's bookmarks when one file's are damaged, and the command line names the file that lost them. Declining a repair says the merge was canceled, and dropping several files says how many were left out.
+- A page with a number such as 0.00-96880406 in its content, which plotting tools sometimes write, reads like any other page. The stray sign is skipped, so the page's text can be searched, extracted and edited, and one unreadable page no longer stops a line being edited on another.
+- The Attachments panel updates as soon as its edits are saved, and the Find and Redact results no longer run the page number into the text on two-digit pages.
+- Editing a badly damaged PDF that had to be repaired on opening says to resave it first.
+- One malformed bookmark destination no longer disables the whole outline, and a damaged named-destination tree costs only its names, not the outline or the links on the page.
+- Document Info opens on files with a bad date, title, language or opening view and shows those values as blank. Saving it keeps what it could not read unless you type a replacement, and the dialog tells you so. It also saves over a file whose XMP metadata is damaged, and it reads a date whose time zone gives hours only. Initial View, Page Labels and metadata repair no longer fail on a zero zoom, which the PDF standard allows, or another malformed opening view.
 - Moving form fields, placing field presets, setting page scales, reordering pages by drag, editing bookmarks and the rescale on save show an error message instead of a crash dialog when the file cannot be saved.
-- Declining the repair of a PDF with no pages leaves nothing half-open.
+- Declining the repair of a PDF with no pages leaves nothing half-open, and a password-protected PDF with no pages that fails to open no longer leaves a half-open tab.
 - Splitting by maximum size is much faster on large files, and each part still stays within the limit.
 - A page whose tiling pattern needs an impossibly large number of cells reports that instead of failing with an arithmetic error, and a damaged inline image no longer stops a page rendering.
-- Redaction no longer slows down on pages that change graphics states many thousands of times.
 - Importing or drawing a signature closes the picker, so the next click on the page places it. The picker used to reopen over the page with the signature already waiting, and a signature added while filling a form field no longer stamps again on the next click.
 - Escape cancels a text edit instead of committing it, and AltGr+Z and AltGr+Enter type their characters instead of closing the edit box.
 
 ### Changed
 
-- Editing a line of the page no longer changes the Text tool's own color, font and size. The bar shows the line's look during the edit, and your settings return when it ends, so white heading text cannot become the invisible default for new text.
+- Editing a line of the page or selecting its replacement no longer changes the Text tool's own color, fill, font and size. The bar shows the line's look during the edit, and your settings return when it ends, so white heading text cannot become the invisible default for new text.
 - The text bar takes less room: Edit paragraph is a normal-sized button under the color swatches, and the opacity sliders fold into one row in a narrow window.
 
 ## [1.9.0] - 2026-10-29
