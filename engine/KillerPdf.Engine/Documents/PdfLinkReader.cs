@@ -152,9 +152,7 @@ public sealed class PdfLinkReader
         if (catalog.TryGetValue(NamesName, out PdfObject? namesValue)
             && Resolve(document, namesValue, "The catalog /Names value") is PdfDictionary names
             && names.TryGetValue(DestsName, out PdfObject? tree))
-            foreach (PdfNameTreeEntry entry in PdfNameTree.Read(document, tree))
-                result.Add(PdfUnicodeEncoding.DecodeTextString(
-                    entry.Key.Bytes.Span, "A named destination key"), entry.Value);
+            PdfNameTree.ReadDestinations(document, tree, result);
         if (catalog.TryGetValue(DestsName, out PdfObject? legacyValue)
             && Resolve(document, legacyValue, "The catalog /Dests value") is PdfDictionary legacy)
             foreach ((PdfName key, PdfObject destination) in legacy)

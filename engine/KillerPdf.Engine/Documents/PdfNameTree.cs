@@ -11,6 +11,35 @@ internal static class PdfNameTree
     private const int MaximumDepth = 256;
     internal const int MaximumEntryCount = 1_000_000;
 
+    // Named destinations are a lookup, so damage costs the names and never the outline or the links
+    // that ask for them. A key that cannot be decoded names nothing anything could ask for, and when
+    // two keys decode to the same text the first one wins.
+    internal static void ReadDestinations(PdfDocument document, PdfObject root,
+        Dictionary<string, PdfObject> destinations)
+    {
+        IReadOnlyList<PdfNameTreeEntry> entries;
+        try
+        {
+            entries = Read(document, root);
+        }
+        catch (Exception error) when (error is InvalidOperationException or ArgumentException
+            or NotSupportedException or FormatException)
+        {
+            return;
+        }
+        foreach (PdfNameTreeEntry entry in entries)
+        {
+            try
+            {
+                destinations.TryAdd(PdfUnicodeEncoding.DecodeTextString(
+                    entry.Key.Bytes.Span, "A named destination key"), entry.Value);
+            }
+            catch (Exception error) when (error is InvalidOperationException or ArgumentException)
+            {
+            }
+        }
+    }
+
     internal static IReadOnlyList<PdfNameTreeEntry> Read(PdfDocument document, PdfObject root)
     {
         ArgumentNullException.ThrowIfNull(document);

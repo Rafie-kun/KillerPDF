@@ -122,19 +122,7 @@ public static class PdfBookmarkReader
         if (catalog.TryGetValue(NamesName, out PdfObject? namesValue)
             && Resolve(document, namesValue, "The catalog /Names value") is PdfDictionary names
             && names.TryGetValue(DestsName, out PdfObject? destinationTree))
-            foreach (PdfNameTreeEntry entry in PdfNameTree.Read(document, destinationTree))
-            {
-                // A key that cannot be decoded names nothing a bookmark could ask for, and when two keys
-                // decode to the same text the first one wins.
-                try
-                {
-                    result.TryAdd(PdfUnicodeEncoding.DecodeTextString(
-                        entry.Key.Bytes.Span, "A named destination key"), entry.Value);
-                }
-                catch (Exception error) when (error is InvalidOperationException or ArgumentException)
-                {
-                }
-            }
+            PdfNameTree.ReadDestinations(document, destinationTree, result);
         if (catalog.TryGetValue(DestsName, out PdfObject? legacyValue)
             && Resolve(document, legacyValue, "The catalog /Dests value") is PdfDictionary legacy)
             foreach ((PdfName key, PdfObject value) in legacy)

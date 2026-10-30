@@ -309,6 +309,18 @@ public sealed class PdfBookmarkReaderTests
             """{"schemaVersion":2,"bookmarks":[]}"""));
     }
 
+    [Fact]
+    public void AMalformedNamedDestinationTreeCostsItsNamesNotTheOutline()
+    {
+        PdfDocument document = PdfDocument.Open(WithNamedDestinationTree(TwoNamedBookmarks(),
+            page => [(Literal("good"), Destination(page)), (Literal("good"), Destination(page))]));
+
+        IReadOnlyList<PdfBookmarkInfo> bookmarks = PdfBookmarkReader.Read(document);
+
+        Assert.Equal(["Good", "Other"], bookmarks.Select(bookmark => bookmark.Title));
+        Assert.All(bookmarks, AssertNoDestination);
+    }
+
     private static byte[] TwoBookmarks() => new PdfDocumentBuilder()
         .AddBlankPage()
         .AddBookmark("Broken", 0)

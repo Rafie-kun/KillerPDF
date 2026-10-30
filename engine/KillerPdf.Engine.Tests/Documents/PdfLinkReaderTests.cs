@@ -1,6 +1,7 @@
 using KillerPdf.Engine.Authoring;
 using KillerPdf.Engine.CrossReference;
 using KillerPdf.Engine.Documents;
+using KillerPdf.Engine.Objects;
 using KillerPdf.Engine.Writing;
 using Xunit;
 
@@ -29,6 +30,33 @@ public sealed class PdfLinkReaderTests
         Assert.Equal("résumé", links[2].NamedDestination);
         Assert.Equal(1, links[2].DestinationPageIndex);
         Assert.Equal([0, 1, 2], links.Select(link => link.AnnotationIndex));
+    }
+
+    [Fact]
+    public void ReadPage_AMalformedNamedDestinationTreeKeepsTheLinks()
+    {
+        PdfDocument source = PdfDocument.Open(new PdfDocumentBuilder()
+            .AddBlankPage(300, 400)
+            .AddNamedDestination("start", 0)
+            .AddUriLink(0, 10, 20, 80, 15, "https://example.com/")
+            .AddNamedDestinationLink(0, 30, 90, 60, 25, "start")
+            .Build());
+        PdfIndirectReference root = Assert.IsType<PdfIndirectReference>(source.Trailer[new PdfName("Root"u8)]);
+        PdfDictionary catalog = Assert.IsType<PdfDictionary>(source.Resolve(root));
+        var key = new PdfString("start"u8.ToArray(), PdfStringForm.Literal);
+        var update = new PdfIncrementalUpdateBuilder(source);
+        PdfIndirectReference tree = update.AddObject(new PdfDictionary(
+            [new(new PdfName("Names"u8), new PdfArray([key, PdfNull.Instance, key, PdfNull.Instance]))]));
+        PdfIndirectReference names = update.AddObject(new PdfDictionary([new(new PdfName("Dests"u8), tree)]));
+        update.ReplaceObject(root.ObjectNumber, new PdfDictionary(catalog
+            .Where(entry => !entry.Key.Equals(new PdfName("Names"u8)))
+            .Append(new KeyValuePair<PdfName, PdfObject>(new PdfName("Names"u8), names))));
+
+        IReadOnlyList<PdfLinkInfo> links = PdfLinkReader.ReadPage(PdfDocument.Open(update.Build()), 0);
+
+        Assert.Equal(2, links.Count);
+        Assert.Equal("https://example.com/", links[0].Uri);
+        Assert.Null(links[1].DestinationPageIndex);
     }
 
     [Fact]
