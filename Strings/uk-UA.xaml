@@ -1861,6 +1861,7 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Paragraph_Ready">Попередній перегляд готовий. Застосування замінить початковий текст абзацу.</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">Підтримуваний абзац не знайдено. Ця перша версія підтримує горизонтальний текст в одному стилі.</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Цей абзац не можна редагувати: {0}</sys:String>
+    <sys:String x:Key="Str_Paragraph_MixedStyles">Цей абзац поєднує різні шрифти або розміри. Новий текст використовує один стиль, тому це форматування не збережеться.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Шрифт попереднього перегляду: {0}. Цей шрифт буде вбудовано у відредагований PDF.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Підготовка попереднього перегляду...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">Документ змінився. Знову відкрийте редагування абзацу, щоб продовжити.</sys:String>
